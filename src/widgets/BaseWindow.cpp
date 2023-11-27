@@ -106,7 +106,7 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
         this->setWindowFlags(Qt::ToolTip);
 #else
         this->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint |
-                             Qt::X11BypassWindowManagerHint |
+                             Qt::WindowDoesNotAcceptFocus |
                              Qt::BypassWindowManagerHint);
 #endif
     }
@@ -428,7 +428,7 @@ void BaseWindow::mousePressEvent(QMouseEvent *event)
         {
             std::function<bool(QWidget *)> recursiveCheckMouseTracking;
             recursiveCheckMouseTracking = [&](QWidget *widget) {
-                if (widget == nullptr)
+                if (widget == nullptr || widget->isHidden())
                 {
                     return false;
                 }
@@ -552,9 +552,9 @@ void BaseWindow::leaveEvent(QEvent *)
     TooltipWidget::instance()->hide();
 }
 
-void BaseWindow::moveTo(QPoint point, BoundsChecking mode)
+void BaseWindow::moveTo(QPoint point, widgets::BoundsChecking mode)
 {
-    moveWindowTo(this, point, mode);
+    widgets::moveWindowTo(this, point, mode);
 }
 
 void BaseWindow::resizeEvent(QResizeEvent *)
@@ -610,7 +610,7 @@ void BaseWindow::showEvent(QShowEvent *)
 {
     if (this->flags_.has(BoundsCheckOnShow))
     {
-        this->moveTo(this->pos(), BoundsChecking::CursorPosition);
+        this->moveTo(this->pos(), widgets::BoundsChecking::CursorPosition);
     }
 }
 
@@ -693,7 +693,7 @@ void BaseWindow::updateScale()
     auto scale =
         this->nativeScale_ * (this->flags_.has(DisableCustomScaling)
                                   ? 1
-                                  : getABSettings()->getClampedUiScale());
+                                  : getSettings()->getClampedUiScale());
 
     this->setScale(scale);
 
@@ -781,7 +781,7 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
 
     if (auto dpi = getWindowDpi(msg->hwnd))
     {
-        float currentScale = (float)dpi.get() / 96.F;
+        float currentScale = (float)dpi.value() / 96.F;
         if (currentScale != this->nativeScale_)
         {
             this->nativeScale_ = currentScale;
@@ -987,17 +987,23 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
         {
             bool client = false;
 
-            for (QWidget *widget : this->ui_.buttons)
-            {
-                if (widget->geometry().contains(point))
-                {
-                    client = true;
-                }
-            }
-
+            // Check the main layout first, as it's the largest area
             if (this->ui_.layoutBase->geometry().contains(point))
             {
                 client = true;
+            }
+
+            // Check the titlebar buttons
+            if (!client && this->ui_.titlebarBox->geometry().contains(point))
+            {
+                for (QWidget *widget : this->ui_.buttons)
+                {
+                    if (widget->isVisible() &&
+                        widget->geometry().contains(point))
+                    {
+                        client = true;
+                    }
+                }
             }
 
             if (client)
@@ -1012,16 +1018,17 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
 
         return true;
     }
-    else if (this->flags_.has(FramelessDraggable))
+
+    if (this->flags_.has(FramelessDraggable))
     {
         *result = 0;
         bool client = false;
 
-        if (auto widget = this->childAt(point))
+        if (auto *widget = this->childAt(point))
         {
             std::function<bool(QWidget *)> recursiveCheckMouseTracking;
             recursiveCheckMouseTracking = [&](QWidget *widget) {
-                if (widget == nullptr)
+                if (widget == nullptr || widget->isHidden())
                 {
                     return false;
                 }
@@ -1051,6 +1058,8 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
 
         return true;
     }
+
+    // don't handle the message
     return false;
 #else
     return false;

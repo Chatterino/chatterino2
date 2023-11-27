@@ -1,8 +1,9 @@
 #pragma once
 
-#include "common/Singleton.hpp"
+#include "controllers/sound/ISoundController.hpp"
 #include "util/ThreadGuard.hpp"
 
+#include <boost/asio.hpp>
 #include <QByteArray>
 #include <QString>
 #include <QUrl>
@@ -19,33 +20,25 @@ struct ma_decoder;
 
 namespace chatterino {
 
-class Settings;
-class Paths;
-
 /**
  * @brief Handles sound loading & playback
  **/
-class SoundController : public Singleton
+class MiniaudioBackend : public ISoundController
 {
-    SoundController();
-
     void initialize(Settings &settings, Paths &paths) override;
 
 public:
-    ~SoundController() override;
+    MiniaudioBackend();
+    ~MiniaudioBackend() override;
 
     // Play a sound from the given url
     // If the url points to something that isn't a local file, it will play
     // the default sound initialized in the initialize method
-    void play(const QUrl &sound);
+    void play(const QUrl &sound) final;
 
 private:
     // Used for selecting & initializing an appropriate sound backend
     std::unique_ptr<ma_context> context;
-    // Used for storing & reusing sounds to be played
-    std::unique_ptr<ma_resource_manager> resourceManager;
-    // The sound device we're playing sound into
-    std::unique_ptr<ma_device> device{nullptr};
     // The engine is a high-level API for playing sounds from paths in a simple & efficient-enough manner
     std::unique_ptr<ma_engine> engine;
 
@@ -62,14 +55,15 @@ private:
     // Ensures play is only ever called from the same thread
     ThreadGuard tgPlay;
 
-    bool initialized{false};
+    std::chrono::system_clock::time_point lastSoundPlay;
 
-    // Recreates the sound device
-    // This is used during initialization, and can also be used if the device
-    // needs to be recreated during playback
-    //
-    // Returns false on failure
-    bool recreateDevice();
+    boost::asio::io_context ioContext{1};
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
+        workGuard;
+    std::unique_ptr<std::thread> audioThread;
+    boost::asio::steady_timer sleepTimer;
+
+    bool initialized{false};
 
     friend class Application;
 };

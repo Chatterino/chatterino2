@@ -30,8 +30,8 @@ public:
                  const ChannelPtr &openingChannel);
 
 protected:
-    virtual void themeChangedEvent() override;
-    virtual void scaleChangedEvent(float scale) override;
+    void themeChangedEvent() override;
+    void scaleChangedEvent(float scale) override;
 
 private:
     void installEvents();
@@ -39,8 +39,8 @@ private:
     void updateLatestMessages();
 
     void loadAvatar(const QUrl &url);
-    bool isMod_;
-    bool isBroadcaster_;
+    bool isMod_{};
+    bool isBroadcaster_{};
 
     Split *split_;
 

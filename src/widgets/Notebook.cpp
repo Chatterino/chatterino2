@@ -101,34 +101,46 @@ void Notebook::removePage(QWidget *page)
     // Queue up save because: Tab removed
     getApp()->windows->queueSave();
 
-    for (int i = 0; i < this->items_.count(); i++)
+    int removingIndex = this->indexOf(page);
+    assert(removingIndex != -1);
+
+    if (this->selectedPage_ == page)
     {
-        if (this->items_[i].page == page)
+        // The page that we are removing is currently selected. We need to determine
+        // the best tab to select before we remove this one. We follow a strategy used
+        // by many web browsers: select the next tab. If there is no next tab, select
+        // the previous tab.
+        int countVisible = this->getVisibleTabCount();
+        int visibleIndex = this->visibleIndexOf(page);
+        assert(visibleIndex != -1);  // A selected page should always be visible
+
+        if (this->items_.count() == 1)
         {
-            if (this->items_.count() == 1)
-            {
-                this->select(nullptr);
-            }
-            else if (i == this->items_.count() - 1)
-            {
-                this->select(this->items_[i - 1].page);
-            }
-            else
-            {
-                this->select(this->items_[i + 1].page);
-            }
-
-            this->items_[i].page->deleteLater();
-            this->items_[i].tab->deleteLater();
-
-            //    if (this->items.empty()) {
-            //        this->addNewPage();
-            //    }
-
-            this->items_.removeAt(i);
-            break;
+            // Deleting only tab, select nothing
+            this->select(nullptr);
+        }
+        else if (countVisible == 1)
+        {
+            // Closing the only visible tab, try to select any tab (even if not visible)
+            int nextIndex = (removingIndex + 1) % this->items_.count();
+            this->select(this->items_[nextIndex].page);
+        }
+        else if (visibleIndex == countVisible - 1)
+        {
+            // Closing last visible tab, select the previous visible tab
+            this->selectPreviousTab();
+        }
+        else
+        {
+            // Otherwise, select the next visible tab
+            this->selectNextTab();
         }
     }
+
+    // Remove page and delete resources
+    this->items_[removingIndex].page->deleteLater();
+    this->items_[removingIndex].tab->deleteLater();
+    this->items_.removeAt(removingIndex);
 
     this->performLayout(true);
 }
@@ -152,6 +164,48 @@ int Notebook::indexOf(QWidget *page) const
     }
 
     return -1;
+}
+
+int Notebook::visibleIndexOf(QWidget *page) const
+{
+    if (!this->tabVisibilityFilter_)
+    {
+        return this->indexOf(page);
+    }
+
+    int i = 0;
+    for (const auto &item : this->items_)
+    {
+        if (item.page == page)
+        {
+            assert(this->tabVisibilityFilter_(item.tab));
+            return i;
+        }
+        if (this->tabVisibilityFilter_(item.tab))
+        {
+            ++i;
+        }
+    }
+
+    return -1;
+}
+
+int Notebook::getVisibleTabCount() const
+{
+    if (!this->tabVisibilityFilter_)
+    {
+        return this->items_.count();
+    }
+
+    int i = 0;
+    for (const auto &item : this->items_)
+    {
+        if (this->tabVisibilityFilter_(item.tab))
+        {
+            ++i;
+        }
+    }
+    return i;
 }
 
 void Notebook::select(QWidget *page, bool focusPage)
@@ -1063,7 +1117,6 @@ void Notebook::setTabLocation(NotebookTabLocation location)
 
 void Notebook::paintEvent(QPaintEvent *event)
 {
-    BaseWidget::paintEvent(event);
     auto scale = this->scale();
 
     QPainter painter(this);
@@ -1162,6 +1215,15 @@ size_t Notebook::visibleButtonCount() const
 
 void Notebook::setTabVisibilityFilter(TabVisibilityFilter filter)
 {
+    if (filter)
+    {
+        // Wrap tab filter to always accept selected tabs. This prevents confusion
+        // when jumping to hidden tabs with the quick switcher, for example.
+        filter = [originalFilter = std::move(filter)](const NotebookTab *tab) {
+            return tab->isSelected() || originalFilter(tab);
+        };
+    }
+
     this->tabVisibilityFilter_ = std::move(filter);
     this->performLayout();
     this->updateTabVisibility();
@@ -1200,11 +1262,15 @@ SplitNotebook::SplitNotebook(Window *parent)
     getSettings()->tabVisibility.connect(
         [this](int val, auto) {
             auto visibility = NotebookTabVisibility(val);
+            // Set the correct TabVisibilityFilter for the given visiblity setting.
+            // Note that selected tabs are always shown regardless of what the tab
+            // filter returns, so no need to include `tab->isSelected()` in the
+            // predicate. See Notebook::setTabVisibilityFilter.
             switch (visibility)
             {
                 case NotebookTabVisibility::LiveOnly:
                     this->setTabVisibilityFilter([](const NotebookTab *tab) {
-                        return tab->isLive() || tab->isSelected();
+                        return tab->isLive();
                     });
                     break;
                 case NotebookTabVisibility::AllTabs:
@@ -1371,6 +1437,11 @@ SplitContainer *SplitNotebook::getOrAddSelectedPage()
     }
 
     return this->addPage();
+}
+
+SplitContainer *SplitNotebook::getSelectedPage()
+{
+    return dynamic_cast<SplitContainer *>(Notebook::getSelectedPage());
 }
 
 void SplitNotebook::select(QWidget *page, bool focusPage)

@@ -1,12 +1,11 @@
 #include "Toasts.hpp"
 
 #include "Application.hpp"
-#include "common/DownloadManager.hpp"
-#include "common/NetworkRequest.hpp"
+#include "common/Literals.hpp"
+#include "common/QLogging.hpp"
+#include "common/Version.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "providers/twitch/api/Helix.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
@@ -14,32 +13,64 @@
 #include "widgets/helper/CommonTexts.hpp"
 
 #ifdef Q_OS_WIN
-
 #    include <wintoastlib.h>
-
 #endif
 
 #include <QDesktopServices>
 #include <QFileInfo>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QStringBuilder>
 #include <QUrl>
 
-#include <cstdlib>
+#include <utility>
+
+namespace {
+
+using namespace chatterino;
+using namespace literals;
+
+QString avatarFilePath(const QString &channelName)
+{
+    // TODO: cleanup channel (to be used as a file) and use combinePath
+    return getPaths()->twitchProfileAvatars % '/' % channelName % u".png";
+}
+
+bool hasAvatarForChannel(const QString &channelName)
+{
+    QFileInfo avatarFile(avatarFilePath(channelName));
+    return avatarFile.exists() && avatarFile.isFile();
+}
+
+/// A job that downlaods a twitch avatar and saves it to a file
+class AvatarDownloader : public QObject
+{
+    Q_OBJECT
+public:
+    AvatarDownloader(const QString &avatarURL, const QString &channelName);
+
+private:
+    QNetworkAccessManager manager_;
+    QFile file_;
+    QNetworkReply *reply_{};
+
+signals:
+    void downloadComplete();
+};
+
+}  // namespace
 
 namespace chatterino {
 
-std::map<ToastReaction, QString> Toasts::reactionToString = {
-    {ToastReaction::OpenInBrowser, OPEN_IN_BROWSER},
-    {ToastReaction::OpenInPlayer, OPEN_PLAYER_IN_BROWSER},
-    {ToastReaction::OpenInStreamlink, OPEN_IN_STREAMLINK},
-    {ToastReaction::DontOpen, DONT_OPEN}};
+#ifdef Q_OS_WIN
+using WinToastLib::WinToast;
+using WinToastLib::WinToastTemplate;
+#endif
 
 bool Toasts::isEnabled()
 {
 #ifdef Q_OS_WIN
-    return WinToastLib::WinToast::isCompatible() &&
-           getSettings()->notificationToast &&
+    return WinToast::isCompatible() && getSettings()->notificationToast &&
            !(isInStreamerMode() &&
              getSettings()->streamerModeSuppressLiveNotifications);
 #else
@@ -49,24 +80,31 @@ bool Toasts::isEnabled()
 
 QString Toasts::findStringFromReaction(const ToastReaction &reaction)
 {
-    auto iterator = Toasts::reactionToString.find(reaction);
-    if (iterator != Toasts::reactionToString.end())
+    // The constants are macros right now, but we want to avoid ASCII casts,
+    // so we're concatenating them with a QString literal - effectively making them part of it.
+    switch (reaction)
     {
-        return iterator->second;
-    }
-    else
-    {
-        return DONT_OPEN;
+        case ToastReaction::OpenInBrowser:
+            return OPEN_IN_BROWSER u""_s;
+        case ToastReaction::OpenInPlayer:
+            return OPEN_PLAYER_IN_BROWSER u""_s;
+        case ToastReaction::OpenInStreamlink:
+            return OPEN_IN_STREAMLINK u""_s;
+        case ToastReaction::DontOpen:
+        default:
+            return DONT_OPEN u""_s;
     }
 }
 
 QString Toasts::findStringFromReaction(
-    const pajlada::Settings::Setting<int> &value)
+    const pajlada::Settings::Setting<int> &reaction)
 {
-    int i = static_cast<int>(value);
-    return Toasts::findStringFromReaction(static_cast<ToastReaction>(i));
+    static_assert(std::is_same_v<std::underlying_type_t<ToastReaction>, int>);
+    int value = reaction;
+    return Toasts::findStringFromReaction(static_cast<ToastReaction>(value));
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Toasts::sendChannelNotification(const QString &channelName,
                                      const QString &channelTitle, Platform p)
 {
@@ -75,6 +113,7 @@ void Toasts::sendChannelNotification(const QString &channelName,
         this->sendWindowsNotification(channelName, channelTitle, p);
     };
 #else
+    (void)channelTitle;
     auto sendChannelNotification = [] {
         // Unimplemented for macOS and Linux
     };
@@ -82,9 +121,7 @@ void Toasts::sendChannelNotification(const QString &channelName,
     // Fetch user profile avatar
     if (p == Platform::Twitch)
     {
-        QFileInfo check_file(getPaths()->twitchProfileAvatars + "/twitch/" +
-                             channelName + ".png");
-        if (check_file.exists() && check_file.isFile())
+        if (hasAvatarForChannel(channelName))
         {
             sendChannelNotification();
         }
@@ -93,10 +130,11 @@ void Toasts::sendChannelNotification(const QString &channelName,
             getHelix()->getUserByName(
                 channelName,
                 [channelName, sendChannelNotification](const auto &user) {
-                    DownloadManager *manager = new DownloadManager();
-                    manager->setFile(user.profileImageUrl, channelName);
-                    manager->connect(manager,
-                                     &DownloadManager::downloadComplete,
+                    // gets deleted when finished
+                    auto *downloader =
+                        new AvatarDownloader(user.profileImageUrl, channelName);
+                    QObject::connect(downloader,
+                                     &AvatarDownloader::downloadComplete,
                                      sendChannelNotification);
                 },
                 [] {
@@ -116,13 +154,12 @@ private:
 
 public:
     CustomHandler(QString channelName, Platform p)
-        : channelName_(channelName)
+        : channelName_(std::move(channelName))
         , platform_(p)
     {
     }
-    void toastActivated() const
+    void toastActivated() const override
     {
-        QString link;
         auto toastReaction =
             static_cast<ToastReaction>(getSettings()->openFromToast.getValue());
 
@@ -131,51 +168,74 @@ public:
             case ToastReaction::OpenInBrowser:
                 if (platform_ == Platform::Twitch)
                 {
-                    link = "https://www.twitch.tv/" + channelName_;
+                    QDesktopServices::openUrl(
+                        QUrl(u"https://www.twitch.tv/" % channelName_));
                 }
-                QDesktopServices::openUrl(QUrl(link));
                 break;
             case ToastReaction::OpenInPlayer:
                 if (platform_ == Platform::Twitch)
                 {
-                    link =
-                        "https://player.twitch.tv/?parent=twitch.tv&channel=" +
-                        channelName_;
+                    QDesktopServices::openUrl(QUrl(
+                        u"https://player.twitch.tv/?parent=twitch.tv&channel=" %
+                        channelName_));
                 }
-                QDesktopServices::openUrl(QUrl(link));
                 break;
             case ToastReaction::OpenInStreamlink: {
                 openStreamlinkForChannel(channelName_);
                 break;
             }
-                // the fourth and last option is "don't open"
-                // in this case obviously nothing should happen
+            case ToastReaction::DontOpen:
+                // nothing should happen
+                break;
         }
     }
 
-    void toastActivated(int actionIndex) const
+    void toastActivated(int actionIndex) const override
     {
     }
 
-    void toastFailed() const
+    void toastFailed() const override
     {
     }
 
-    void toastDismissed(WinToastDismissalReason state) const
+    void toastDismissed(WinToastDismissalReason state) const override
     {
     }
 };
 
+void Toasts::ensureInitialized()
+{
+    if (this->initialized_)
+    {
+        return;
+    }
+    this->initialized_ = true;
+
+    auto *instance = WinToast::instance();
+    instance->setAppName(L"Chatterino2");
+    instance->setAppUserModelId(
+        WinToast::configureAUMI(L"", L"Chatterino 2", L"",
+                                Version::instance().version().toStdWString()));
+    instance->setShortcutPolicy(WinToast::SHORTCUT_POLICY_IGNORE);
+    WinToast::WinToastError error{};
+    instance->initialize(&error);
+
+    if (error != WinToast::NoError)
+    {
+        qCDebug(chatterinoNotification)
+            << "Failed to initialize WinToast - error:" << error;
+    }
+}
+
 void Toasts::sendWindowsNotification(const QString &channelName,
                                      const QString &channelTitle, Platform p)
 {
-    WinToastLib::WinToastTemplate templ = WinToastLib::WinToastTemplate(
-        WinToastLib::WinToastTemplate::ImageAndText03);
-    QString str = channelName + " is live!";
-    std::string utf8_text = str.toUtf8().constData();
-    std::wstring widestr = std::wstring(utf8_text.begin(), utf8_text.end());
+    this->ensureInitialized();
 
-    templ.setTextField(widestr, WinToastLib::WinToastTemplate::FirstLine);
+    WinToastTemplate templ(WinToastTemplate::ImageAndText03);
+    QString str = channelName % u" is live!";
+
+    templ.setTextField(str.toStdWString(), WinToastTemplate::FirstLine);
     if (static_cast<ToastReaction>(getSettings()->openFromToast.getValue()) !=
         ToastReaction::DontOpen)
     {
@@ -183,43 +243,68 @@ void Toasts::sendWindowsNotification(const QString &channelName,
             Toasts::findStringFromReaction(getSettings()->openFromToast);
         mode = mode.toLower();
 
-        templ.setTextField(QString("%1 \nClick to %2")
-                               .arg(channelTitle)
-                               .arg(mode)
-                               .toStdWString(),
-                           WinToastLib::WinToastTemplate::SecondLine);
+        templ.setTextField(
+            u"%1 \nClick to %2"_s.arg(channelTitle).arg(mode).toStdWString(),
+            WinToastTemplate::SecondLine);
     }
 
-    QString Path;
+    QString avatarPath;
     if (p == Platform::Twitch)
     {
-        Path = getPaths()->twitchProfileAvatars + "/twitch/" + channelName +
-               ".png";
+        avatarPath = avatarFilePath(channelName);
     }
-    std::string temp_Utf8 = Path.toUtf8().constData();
-    std::wstring imagePath = std::wstring(temp_Utf8.begin(), temp_Utf8.end());
-    templ.setImagePath(imagePath);
+    templ.setImagePath(avatarPath.toStdWString());
     if (getSettings()->notificationPlaySound)
     {
-        templ.setAudioOption(
-            WinToastLib::WinToastTemplate::AudioOption::Silent);
+        templ.setAudioOption(WinToastTemplate::AudioOption::Silent);
     }
-    WinToastLib::WinToast::instance()->setAppName(L"Chatterino2");
-    int mbstowcs(wchar_t * aumi_version, const char *CHATTERINO_VERSION,
-                 size_t size);
-    std::string(CHATTERINO_VERSION);
-    std::wstring aumi_version =
-        std::wstring(CHATTERINO_VERSION.begin(), CHATTERINO_VERSION.end());
-    WinToastLib::WinToast::instance()->setAppUserModelId(
-        WinToastLib::WinToast::configureAUMI(L"", L"Chatterino 2", L"",
-                                             aumi_version));
-    WinToastLib::WinToast::instance()->setShortcutPolicy(
-        WinToastLib::WinToast::SHORTCUT_POLICY_IGNORE);
-    WinToastLib::WinToast::instance()->initialize();
-    WinToastLib::WinToast::instance()->showToast(
-        templ, new CustomHandler(channelName, p));
+
+    WinToast::WinToastError error = WinToast::NoError;
+    WinToast::instance()->showToast(templ, new CustomHandler(channelName, p),
+                                    &error);
+    if (error != WinToast::NoError)
+    {
+        qCWarning(chatterinoNotification) << "Failed to show toast:" << error;
+    }
 }
 
 #endif
 
 }  // namespace chatterino
+
+namespace {
+
+AvatarDownloader::AvatarDownloader(const QString &avatarURL,
+                                   const QString &channelName)
+    : file_(avatarFilePath(channelName))
+{
+    if (!this->file_.open(QFile::WriteOnly | QFile::Truncate))
+    {
+        qCWarning(chatterinoNotification)
+            << "Failed to open avatar file" << this->file_.errorString();
+    }
+
+    this->reply_ = this->manager_.get(QNetworkRequest(avatarURL));
+
+    connect(this->reply_, &QNetworkReply::readyRead, this, [this] {
+        this->file_.write(this->reply_->readAll());
+    });
+    connect(this->reply_, &QNetworkReply::finished, this, [this] {
+        if (this->reply_->error() != QNetworkReply::NoError)
+        {
+            qCWarning(chatterinoNotification)
+                << "Failed to download avatar" << this->reply_->errorString();
+        }
+
+        if (this->file_.isOpen())
+        {
+            this->file_.close();
+        }
+        emit downloadComplete();
+        this->deleteLater();
+    });
+}
+
+#include "Toasts.moc"
+
+}  // namespace

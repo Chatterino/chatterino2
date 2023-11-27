@@ -3,7 +3,6 @@
 #include "common/ChatterinoSetting.hpp"
 #include "common/Singleton.hpp"
 
-#include <boost/noncopyable.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QFont>
 #include <QFontDatabase>
@@ -44,7 +43,7 @@ class Fonts final : public Singleton
 public:
     Fonts();
 
-    virtual void initialize(Settings &settings, Paths &paths) override;
+    void initialize(Settings &settings, Paths &paths) override;
 
     // font data gets set in createFontData(...)
 

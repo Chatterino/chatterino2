@@ -45,22 +45,30 @@ void PubSubClient::stop()
 void PubSubClient::close(const std::string &reason,
                          websocketpp::close::status::value code)
 {
-    WebsocketErrorCode ec;
+    boost::asio::post(
+        this->websocketClient_.get_io_service().get_executor(),
+        [this, reason, code] {
+            // We need to post this request to the io service executor
+            // to ensure the weak pointer used in get_con_from_hdl is used in a safe way
+            WebsocketErrorCode ec;
 
-    auto conn = this->websocketClient_.get_con_from_hdl(this->handle_, ec);
-    if (ec)
-    {
-        qCDebug(chatterinoPubSub)
-            << "Error getting con:" << ec.message().c_str();
-        return;
-    }
+            auto conn =
+                this->websocketClient_.get_con_from_hdl(this->handle_, ec);
+            if (ec)
+            {
+                qCDebug(chatterinoPubSub)
+                    << "Error getting con:" << ec.message().c_str();
+                return;
+            }
 
-    conn->close(code, reason, ec);
-    if (ec)
-    {
-        qCDebug(chatterinoPubSub) << "Error closing:" << ec.message().c_str();
-        return;
-    }
+            conn->close(code, reason, ec);
+            if (ec)
+            {
+                qCDebug(chatterinoPubSub)
+                    << "Error closing:" << ec.message().c_str();
+                return;
+            }
+        });
 }
 
 bool PubSubClient::listen(PubSubListenMessage msg)

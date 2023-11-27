@@ -75,17 +75,16 @@ namespace {
 
     QProcess *createStreamlinkProcess()
     {
-        auto p = new QProcess;
+        auto *p = new QProcess;
 
-        const QString path = [] {
+        const QString path = []() -> QString {
             if (getSettings()->streamlinkUseCustomPath)
             {
-                return getSettings()->streamlinkPath + "/" + getBinaryName();
+                const QString path = getSettings()->streamlinkPath;
+                return path.trimmed() + "/" + getBinaryName();
             }
-            else
-            {
-                return QString{getBinaryName()};
-            }
+
+            return {getBinaryName()};
         }();
 
         if (Version::instance().isFlatpak())

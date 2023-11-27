@@ -169,7 +169,8 @@ ModerationPage::ModerationPage()
         view->getTableView()->horizontalHeader()->setSectionResizeMode(
             0, QHeaderView::Stretch);
 
-        view->addButtonPressed.connect([] {
+        // We can safely ignore this signal connection since we own the view
+        std::ignore = view->addButtonPressed.connect([] {
             getSettings()->loggedChannels.append(ChannelLog("channel"));
         });
 
@@ -209,7 +210,8 @@ ModerationPage::ModerationPage()
         view->getTableView()->horizontalHeader()->setSectionResizeMode(
             0, QHeaderView::Stretch);
 
-        view->addButtonPressed.connect([] {
+        // We can safely ignore this signal connection since we own the view
+        std::ignore = view->addButtonPressed.connect([] {
             getSettings()->moderationActions.append(
                 ModerationAction("/timeout {user.name} 300"));
         });

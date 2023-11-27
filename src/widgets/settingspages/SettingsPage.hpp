@@ -85,7 +85,7 @@ public:
     }
 
 protected:
-    SettingsDialogTab *tab_;
+    SettingsDialogTab *tab_{};
     pajlada::Signals::NoArgSignal onCancel_;
     pajlada::Signals::SignalHolder managedConnections_;
 };

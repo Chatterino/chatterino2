@@ -6,7 +6,7 @@
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/nicknames/Nickname.hpp"
-#include "controllers/sound/SoundController.hpp"
+#include "controllers/sound/ISoundController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
@@ -147,7 +147,7 @@ void SharedMessageBuilder::parseUsername()
 
 void SharedMessageBuilder::parseHighlights()
 {
-    if (getCSettings().isBlacklistedUser(this->ircMessage->nick()))
+    if (getSettings()->isBlacklistedUser(this->ircMessage->nick()))
     {
         // Do nothing. We ignore highlights from this user.
         return;
@@ -175,7 +175,7 @@ void SharedMessageBuilder::parseHighlights()
 
     if (highlightResult.customSoundUrl)
     {
-        this->highlightSoundUrl_ = highlightResult.customSoundUrl.get();
+        this->highlightSoundUrl_ = *highlightResult.customSoundUrl;
     }
     else
     {
@@ -206,7 +206,7 @@ void SharedMessageBuilder::triggerHighlights()
         return;
     }
 
-    if (getCSettings().isMutedChannel(this->channel->getName()))
+    if (getSettings()->isMutedChannel(this->channel->getName()))
     {
         // Do nothing. Pings are muted in this channel.
         return;
@@ -217,7 +217,7 @@ void SharedMessageBuilder::triggerHighlights()
 
     if (this->highlightSound_ && resolveFocus)
     {
-        getApp()->sound->play(this->highlightSoundUrl_);
+        getIApp()->getSound()->play(this->highlightSoundUrl_);
     }
 
     if (this->highlightAlert_)
@@ -229,8 +229,6 @@ void SharedMessageBuilder::triggerHighlights()
 QString SharedMessageBuilder::stylizeUsername(const QString &username,
                                               const Message &message)
 {
-    auto app = getApp();
-
     const QString &localizedName = message.localizedName;
     bool hasLocalizedName = !localizedName.isEmpty();
 
@@ -270,11 +268,12 @@ QString SharedMessageBuilder::stylizeUsername(const QString &username,
         break;
     }
 
-    if (auto nicknameText = getCSettings().matchNickname(usernameText))
+    if (auto nicknameText = getSettings()->matchNickname(usernameText))
     {
         usernameText = *nicknameText;
     }
 
     return usernameText;
 }
+
 }  // namespace chatterino

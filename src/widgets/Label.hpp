@@ -28,11 +28,11 @@ public:
     void setHasOffset(bool hasOffset);
 
 protected:
-    virtual void scaleChangedEvent(float scale_) override;
-    virtual void paintEvent(QPaintEvent *) override;
+    void scaleChangedEvent(float scale_) override;
+    void paintEvent(QPaintEvent *) override;
 
-    virtual QSize sizeHint() const override;
-    virtual QSize minimumSizeHint() const override;
+    QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
 
 private:
     void updateSize();

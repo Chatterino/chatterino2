@@ -2,7 +2,6 @@
 
 #include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
@@ -119,10 +118,10 @@ namespace {
         return emotes;
     }
 
-    boost::optional<EmotePtr> parseAuthorityBadge(const QJsonObject &badgeUrls,
-                                                  const QString &tooltip)
+    std::optional<EmotePtr> parseAuthorityBadge(const QJsonObject &badgeUrls,
+                                                const QString &tooltip)
     {
-        boost::optional<EmotePtr> authorityBadge;
+        std::optional<EmotePtr> authorityBadge;
 
         if (!badgeUrls.isEmpty())
         {
@@ -173,7 +172,7 @@ std::shared_ptr<const EmoteMap> FfzEmotes::emotes() const
     return this->global_.get();
 }
 
-boost::optional<EmotePtr> FfzEmotes::emote(const EmoteName &name) const
+std::optional<EmotePtr> FfzEmotes::emote(const EmoteName &name) const
 {
     auto emotes = this->global_.get();
     auto it = emotes->find(name);
@@ -181,7 +180,7 @@ boost::optional<EmotePtr> FfzEmotes::emote(const EmoteName &name) const
     {
         return it->second;
     }
-    return boost::none;
+    return std::nullopt;
 }
 
 void FfzEmotes::loadEmotes()
@@ -197,11 +196,9 @@ void FfzEmotes::loadEmotes()
     NetworkRequest(url)
 
         .timeout(30000)
-        .onSuccess([this](auto result) -> Outcome {
+        .onSuccess([this](auto result) {
             auto parsedSet = parseGlobalEmotes(result.parseJson());
             this->setEmotes(std::make_shared<EmoteMap>(std::move(parsedSet)));
-
-            return Success;
         })
         .execute();
 }
@@ -214,8 +211,8 @@ void FfzEmotes::setEmotes(std::shared_ptr<const EmoteMap> emotes)
 void FfzEmotes::loadChannel(
     std::weak_ptr<Channel> channel, const QString &channelID,
     std::function<void(EmoteMap &&)> emoteCallback,
-    std::function<void(boost::optional<EmotePtr>)> modBadgeCallback,
-    std::function<void(boost::optional<EmotePtr>)> vipBadgeCallback,
+    std::function<void(std::optional<EmotePtr>)> modBadgeCallback,
+    std::function<void(std::optional<EmotePtr>)> vipBadgeCallback,
     bool manualRefresh)
 {
     qCDebug(chatterinoFfzemotes)
@@ -227,7 +224,7 @@ void FfzEmotes::loadChannel(
         .onSuccess([emoteCallback = std::move(emoteCallback),
                     modBadgeCallback = std::move(modBadgeCallback),
                     vipBadgeCallback = std::move(vipBadgeCallback), channel,
-                    manualRefresh](const auto &result) -> Outcome {
+                    manualRefresh](const auto &result) {
             const auto json = result.parseJson();
 
             auto emoteMap = parseChannelEmotes(json);
@@ -254,8 +251,6 @@ void FfzEmotes::loadChannel(
                         makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
                 }
             }
-
-            return Success;
         })
         .onError([channelID, channel, manualRefresh](const auto &result) {
             auto shared = channel.lock();

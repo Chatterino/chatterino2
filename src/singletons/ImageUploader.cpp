@@ -1,9 +1,10 @@
-#include "NuulsUploader.hpp"
+#include "singletons/ImageUploader.hpp"
 
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/QLogging.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
@@ -16,6 +17,7 @@
 #include <QJsonDocument>
 #include <QMimeDatabase>
 #include <QMutex>
+#include <QPointer>
 #include <QSaveFile>
 
 #define UPLOAD_DELAY 2000
@@ -23,7 +25,7 @@
 
 namespace {
 
-boost::optional<QByteArray> convertToPng(QImage image)
+std::optional<QByteArray> convertToPng(const QImage &image)
 {
     QByteArray imageData;
     QBuffer buf(&imageData);
@@ -31,23 +33,20 @@ boost::optional<QByteArray> convertToPng(QImage image)
     bool success = image.save(&buf, "png");
     if (success)
     {
-        return boost::optional<QByteArray>(imageData);
+        return imageData;
     }
-    else
-    {
-        return boost::optional<QByteArray>(boost::none);
-    }
+
+    return std::nullopt;
 }
+
 }  // namespace
 
 namespace chatterino {
-// These variables are only used from the main thread.
-static auto uploadMutex = QMutex();
-static std::queue<RawImageData> uploadQueue;
 
 // logging information on successful uploads to a json file
-void logToFile(const QString originalFilePath, QString imageLink,
-               QString deletionLink, ChannelPtr channel)
+void ImageUploader::logToFile(const QString &originalFilePath,
+                              const QString &imageLink,
+                              const QString &deletionLink, ChannelPtr channel)
 {
     const QString logFileName =
         combinePath((getSettings()->logPath.getValue().isEmpty()
@@ -120,8 +119,13 @@ QString getLinkFromResponse(NetworkResult response, QString pattern)
     return pattern;
 }
 
-void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
-                        ResizingTextEdit &textEdit)
+void ImageUploader::save()
+{
+}
+
+void ImageUploader::sendImageUploadRequest(RawImageData imageData,
+                                           ChannelPtr channel,
+                                           QPointer<ResizingTextEdit> textEdit)
 {
     const static char *const boundary = "thisistheboudaryasd";
     const static QString contentType =
@@ -155,93 +159,103 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
         .header("Content-Type", contentType)
         .headerList(extraHeaders)
         .multiPart(payload)
-        .onSuccess([&textEdit, channel,
-                    originalFilePath](NetworkResult result) -> Outcome {
-            QString link = getSettings()->imageUploaderLink.getValue().isEmpty()
-                               ? result.getData()
-                               : getLinkFromResponse(
-                                     result, getSettings()->imageUploaderLink);
-            QString deletionLink =
-                getSettings()->imageUploaderDeletionLink.getValue().isEmpty()
-                    ? ""
-                    : getLinkFromResponse(
-                          result, getSettings()->imageUploaderDeletionLink);
-            qCDebug(chatterinoNuulsuploader) << link << deletionLink;
-            textEdit.insertPlainText(link + " ");
-            if (uploadQueue.empty())
-            {
-                channel->addMessage(makeSystemMessage(
-                    QString("Your image has been uploaded to %1 %2.")
-                        .arg(link)
-                        .arg(deletionLink.isEmpty()
-                                 ? ""
-                                 : QString("(Deletion link: %1 )")
-                                       .arg(deletionLink))));
-                uploadMutex.unlock();
-            }
-            else
-            {
-                channel->addMessage(makeSystemMessage(
-                    QString("Your image has been uploaded to %1 %2. %3 left. "
-                            "Please wait until all of them are uploaded. "
-                            "About %4 seconds left.")
-                        .arg(link)
-                        .arg(deletionLink.isEmpty()
-                                 ? ""
-                                 : QString("(Deletion link: %1 )")
-                                       .arg(deletionLink))
-                        .arg(uploadQueue.size())
-                        .arg(uploadQueue.size() * (UPLOAD_DELAY / 1000 + 1))));
-                // 2 seconds for the timer that's there not to spam the remote server
-                // and 1 second of actual uploading.
-
-                QTimer::singleShot(UPLOAD_DELAY, [channel, &textEdit]() {
-                    uploadImageToNuuls(uploadQueue.front(), channel, textEdit);
-                    uploadQueue.pop();
-                });
-            }
-
-            logToFile(originalFilePath, link, deletionLink, channel);
-
-            return Success;
-        })
-        .onError([channel](NetworkResult result) -> bool {
-            auto errorMessage =
-                QString("An error happened while uploading your image: %1")
-                    .arg(result.formatError());
-
-            // Try to read more information from the result body
-            auto obj = result.parseJson();
-            if (!obj.isEmpty())
-            {
-                auto apiCode = obj.value("code");
-                if (!apiCode.isUndefined())
-                {
-                    auto codeString = apiCode.toVariant().toString();
-                    codeString.truncate(20);
-                    errorMessage += QString(" - code: %1").arg(codeString);
-                }
-
-                auto apiError = obj.value("error").toString();
-                if (!apiError.isEmpty())
-                {
-                    apiError.truncate(300);
-                    errorMessage +=
-                        QString(" - error: %1").arg(apiError.trimmed());
-                }
-            }
-
-            channel->addMessage(makeSystemMessage(errorMessage));
-            uploadMutex.unlock();
+        .onSuccess(
+            [textEdit, channel, originalFilePath, this](NetworkResult result) {
+                this->handleSuccessfulUpload(result, originalFilePath, channel,
+                                             textEdit);
+            })
+        .onError([channel, this](NetworkResult result) -> bool {
+            this->handleFailedUpload(result, channel);
             return true;
         })
         .execute();
 }
 
-void upload(const QMimeData *source, ChannelPtr channel,
-            ResizingTextEdit &outputTextEdit)
+void ImageUploader::handleFailedUpload(const NetworkResult &result,
+                                       ChannelPtr channel)
 {
-    if (!uploadMutex.tryLock())
+    auto errorMessage =
+        QString("An error happened while uploading your image: %1")
+            .arg(result.formatError());
+
+    // Try to read more information from the result body
+    auto obj = result.parseJson();
+    if (!obj.isEmpty())
+    {
+        auto apiCode = obj.value("code");
+        if (!apiCode.isUndefined())
+        {
+            auto codeString = apiCode.toVariant().toString();
+            codeString.truncate(20);
+            errorMessage += QString(" - code: %1").arg(codeString);
+        }
+
+        auto apiError = obj.value("error").toString();
+        if (!apiError.isEmpty())
+        {
+            apiError.truncate(300);
+            errorMessage += QString(" - error: %1").arg(apiError.trimmed());
+        }
+    }
+
+    channel->addMessage(makeSystemMessage(errorMessage));
+    this->uploadMutex_.unlock();
+}
+
+void ImageUploader::handleSuccessfulUpload(const NetworkResult &result,
+                                           QString originalFilePath,
+                                           ChannelPtr channel,
+                                           QPointer<ResizingTextEdit> textEdit)
+{
+    if (textEdit == nullptr)
+    {
+        // Split was destroyed abort further uploads
+
+        while (!this->uploadQueue_.empty())
+        {
+            this->uploadQueue_.pop();
+        }
+        this->uploadMutex_.unlock();
+        return;
+    }
+    QString link =
+        getSettings()->imageUploaderLink.getValue().isEmpty()
+            ? result.getData()
+            : getLinkFromResponse(result, getSettings()->imageUploaderLink);
+    QString deletionLink =
+        getSettings()->imageUploaderDeletionLink.getValue().isEmpty()
+            ? ""
+            : getLinkFromResponse(result,
+                                  getSettings()->imageUploaderDeletionLink);
+    qCDebug(chatterinoImageuploader) << link << deletionLink;
+    textEdit->insertPlainText(link + " ");
+
+    // 2 seconds for the timer that's there not to spam the remote server
+    // and 1 second of actual uploading.
+    auto timeToUpload = this->uploadQueue_.size() * (UPLOAD_DELAY / 1000 + 1);
+    MessageBuilder builder(imageUploaderResultMessage, link, deletionLink,
+                           this->uploadQueue_.size(), timeToUpload);
+    channel->addMessage(builder.release());
+    if (this->uploadQueue_.empty())
+    {
+        this->uploadMutex_.unlock();
+    }
+    else
+    {
+        QTimer::singleShot(UPLOAD_DELAY, [channel, &textEdit, this]() {
+            this->sendImageUploadRequest(this->uploadQueue_.front(), channel,
+                                         textEdit);
+            this->uploadQueue_.pop();
+        });
+    }
+
+    this->logToFile(originalFilePath, link, deletionLink, channel);
+}
+
+void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,
+                           QPointer<ResizingTextEdit> outputTextEdit)
+{
+    if (!this->uploadMutex_.tryLock())
     {
         channel->addMessage(makeSystemMessage(
             QString("Please wait until the upload finishes.")));
@@ -267,15 +281,15 @@ void upload(const QMimeData *source, ChannelPtr channel,
                 {
                     channel->addMessage(
                         makeSystemMessage(QString("Couldn't load image :(")));
-                    uploadMutex.unlock();
+                    this->uploadMutex_.unlock();
                     return;
                 }
 
-                boost::optional<QByteArray> imageData = convertToPng(img);
+                auto imageData = convertToPng(img);
                 if (imageData)
                 {
-                    RawImageData data = {imageData.get(), "png", localPath};
-                    uploadQueue.push(data);
+                    RawImageData data = {*imageData, "png", localPath};
+                    this->uploadQueue_.push(data);
                 }
                 else
                 {
@@ -283,7 +297,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
                         QString("Cannot upload file: %1. Couldn't convert "
                                 "image to png.")
                             .arg(localPath)));
-                    uploadMutex.unlock();
+                    this->uploadMutex_.unlock();
                     return;
                 }
             }
@@ -297,11 +311,11 @@ void upload(const QMimeData *source, ChannelPtr channel,
                 {
                     channel->addMessage(
                         makeSystemMessage(QString("Failed to open file. :(")));
-                    uploadMutex.unlock();
+                    this->uploadMutex_.unlock();
                     return;
                 }
                 RawImageData data = {file.readAll(), "gif", localPath};
-                uploadQueue.push(data);
+                this->uploadQueue_.push(data);
                 file.close();
                 // file.readAll() => might be a bit big but it /should/ work
             }
@@ -310,47 +324,48 @@ void upload(const QMimeData *source, ChannelPtr channel,
                 channel->addMessage(makeSystemMessage(
                     QString("Cannot upload file: %1. Not an image.")
                         .arg(localPath)));
-                uploadMutex.unlock();
+                this->uploadMutex_.unlock();
                 return;
             }
         }
-        if (!uploadQueue.empty())
+        if (!this->uploadQueue_.empty())
         {
-            uploadImageToNuuls(uploadQueue.front(), channel, outputTextEdit);
-            uploadQueue.pop();
+            this->sendImageUploadRequest(this->uploadQueue_.front(), channel,
+                                         outputTextEdit);
+            this->uploadQueue_.pop();
         }
     }
     else if (source->hasFormat("image/png"))
     {
         // the path to file is not present every time, thus the filePath is empty
-        uploadImageToNuuls({source->data("image/png"), "png", ""}, channel,
-                           outputTextEdit);
+        this->sendImageUploadRequest({source->data("image/png"), "png", ""},
+                                     channel, outputTextEdit);
     }
     else if (source->hasFormat("image/jpeg"))
     {
-        uploadImageToNuuls({source->data("image/jpeg"), "jpeg", ""}, channel,
-                           outputTextEdit);
+        this->sendImageUploadRequest({source->data("image/jpeg"), "jpeg", ""},
+                                     channel, outputTextEdit);
     }
     else if (source->hasFormat("image/gif"))
     {
-        uploadImageToNuuls({source->data("image/gif"), "gif", ""}, channel,
-                           outputTextEdit);
+        this->sendImageUploadRequest({source->data("image/gif"), "gif", ""},
+                                     channel, outputTextEdit);
     }
 
     else
     {  // not PNG, try loading it into QImage and save it to a PNG.
-        QImage image = qvariant_cast<QImage>(source->imageData());
-        boost::optional<QByteArray> imageData = convertToPng(image);
+        auto image = qvariant_cast<QImage>(source->imageData());
+        auto imageData = convertToPng(image);
         if (imageData)
         {
-            uploadImageToNuuls({imageData.get(), "png", ""}, channel,
-                               outputTextEdit);
+            sendImageUploadRequest({*imageData, "png", ""}, channel,
+                                   outputTextEdit);
         }
         else
         {
             channel->addMessage(makeSystemMessage(
                 QString("Cannot upload file, failed to convert to png.")));
-            uploadMutex.unlock();
+            this->uploadMutex_.unlock();
         }
     }
 }

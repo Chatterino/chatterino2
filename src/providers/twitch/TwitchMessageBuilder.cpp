@@ -39,7 +39,6 @@
 #include <boost/variant.hpp>
 #include <QColor>
 #include <QDebug>
-#include <QStringRef>
 
 #include <chrono>
 #include <unordered_set>
@@ -205,6 +204,9 @@ void TwitchMessageBuilder::triggerHighlights()
 
 MessagePtr TwitchMessageBuilder::build()
 {
+    assert(this->ircMessage != nullptr);
+    assert(this->channel != nullptr);
+
     // PARSE
     this->userId_ = this->ircMessage->tag("user-id").toString();
 
@@ -228,8 +230,8 @@ MessagePtr TwitchMessageBuilder::build()
             this->args.channelPointRewardId);
         if (reward)
         {
-            this->appendChannelPointRewardMessage(
-                reward.get(), this, this->channel->isMod(),
+            TwitchMessageBuilder::appendChannelPointRewardMessage(
+                *reward, this, this->channel->isMod(),
                 this->channel->isBroadcaster());
         }
     }
@@ -433,7 +435,8 @@ void TwitchMessageBuilder::addWords(
 
             // 1. Add text before the emote
             QString preText = word.left(currentTwitchEmote.start - cursor);
-            for (auto &variant : getApp()->emotes->emojis.parse(preText))
+            for (auto &variant :
+                 getIApp()->getEmotes()->getEmojis()->parse(preText))
             {
                 boost::apply_visitor(
                     [&](auto &&arg) {
@@ -453,7 +456,7 @@ void TwitchMessageBuilder::addWords(
         }
 
         // split words
-        for (auto &variant : getApp()->emotes->emojis.parse(word))
+        for (auto &variant : getIApp()->getEmotes()->getEmojis()->parse(word))
         {
             boost::apply_visitor(
                 [&](auto &&arg) {
@@ -620,15 +623,24 @@ void TwitchMessageBuilder::parseThread()
     {
         // set references
         this->message().replyThread = this->thread_;
+        this->message().replyParent = this->parent_;
         this->thread_->addToThread(this->weakOf());
 
         // enable reply flag
         this->message().flags.set(MessageFlag::ReplyMessage);
 
-        const auto &threadRoot = this->thread_->root();
+        MessagePtr threadRoot;
+        if (!this->parent_)
+        {
+            threadRoot = this->thread_->root();
+        }
+        else
+        {
+            threadRoot = this->parent_;
+        }
 
         QString usernameText = SharedMessageBuilder::stylizeUsername(
-            threadRoot->loginName, *threadRoot.get());
+            threadRoot->loginName, *threadRoot);
 
         this->emplace<ReplyCurveElement>();
 
@@ -748,7 +760,7 @@ void TwitchMessageBuilder::parseUsername()
     }
 
     // Update current user color if this is our message
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (this->ircMessage->nick() == currentUser->getUserName())
     {
         currentUser->setColor(this->usernameColor_);
@@ -757,7 +769,7 @@ void TwitchMessageBuilder::parseUsername()
 
 void TwitchMessageBuilder::appendUsername()
 {
-    auto app = getApp();
+    auto *app = getIApp();
 
     QString username = this->userName;
     this->message().loginName = username;
@@ -802,7 +814,7 @@ void TwitchMessageBuilder::appendUsername()
                                    FontStyle::ChatMediumBold)
             ->setLink({Link::UserWhisper, this->message().displayName});
 
-        auto currentUser = app->accounts->twitch.getCurrent();
+        auto currentUser = app->getAccounts()->twitch.getCurrent();
 
         // Separator
         this->emplace<TextElement>("->", MessageElementFlag::Username,
@@ -834,28 +846,25 @@ void TwitchMessageBuilder::appendUsername()
 void TwitchMessageBuilder::runIgnoreReplaces(
     std::vector<TwitchEmoteOccurrence> &twitchEmotes)
 {
-    auto phrases = getCSettings().ignoredMessages.readOnly();
-    auto removeEmotesInRange = [](int pos, int len,
-                                  auto &twitchEmotes) mutable {
+    using SizeType = QString::size_type;
+
+    auto phrases = getSettings()->ignoredMessages.readOnly();
+    auto removeEmotesInRange = [&twitchEmotes](SizeType pos, SizeType len) {
+        // all emotes outside the range come before `it`
+        // all emotes in the range start at `it`
         auto it = std::partition(
             twitchEmotes.begin(), twitchEmotes.end(),
             [pos, len](const auto &item) {
+                // returns true for emotes outside the range
                 return !((item.start >= pos) && item.start < (pos + len));
             });
-        for (auto copy = it; copy != twitchEmotes.end(); ++copy)
-        {
-            if ((*copy).ptr == nullptr)
-            {
-                qCDebug(chatterinoTwitch)
-                    << "remem nullptr" << (*copy).name.string;
-            }
-        }
-        std::vector<TwitchEmoteOccurrence> v(it, twitchEmotes.end());
+        std::vector<TwitchEmoteOccurrence> emotesInRange(it,
+                                                         twitchEmotes.end());
         twitchEmotes.erase(it, twitchEmotes.end());
-        return v;
+        return emotesInRange;
     };
 
-    auto shiftIndicesAfter = [&twitchEmotes](int pos, int by) mutable {
+    auto shiftIndicesAfter = [&twitchEmotes](int pos, int by) {
         for (auto &item : twitchEmotes)
         {
             auto &index = item.start;
@@ -869,14 +878,18 @@ void TwitchMessageBuilder::runIgnoreReplaces(
 
     auto addReplEmotes = [&twitchEmotes](const IgnorePhrase &phrase,
                                          const auto &midrepl,
-                                         int startIndex) mutable {
+                                         SizeType startIndex) {
         if (!phrase.containsEmote())
         {
             return;
         }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        auto words = midrepl.tokenize(u' ');
+#else
         auto words = midrepl.split(' ');
-        int pos = 0;
+#endif
+        SizeType pos = 0;
         for (const auto &word : words)
         {
             for (const auto &emote : phrase.getEmotes())
@@ -889,8 +902,9 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                             << "emote null" << emote.first.string;
                     }
                     twitchEmotes.push_back(TwitchEmoteOccurrence{
-                        startIndex + pos,
-                        startIndex + pos + (int)emote.first.string.length(),
+                        static_cast<int>(startIndex + pos),
+                        static_cast<int>(startIndex + pos +
+                                         emote.first.string.length()),
                         emote.second,
                         emote.first,
                     });
@@ -898,6 +912,63 @@ void TwitchMessageBuilder::runIgnoreReplaces(
             }
             pos += word.length() + 1;
         }
+    };
+
+    auto replaceMessageAt = [&](const IgnorePhrase &phrase, SizeType from,
+                                SizeType length, const QString &replacement) {
+        auto removedEmotes = removeEmotesInRange(from, length);
+        this->originalMessage_.replace(from, length, replacement);
+        auto wordStart = from;
+        while (wordStart > 0)
+        {
+            if (this->originalMessage_[wordStart - 1] == ' ')
+            {
+                break;
+            }
+            --wordStart;
+        }
+        auto wordEnd = from + replacement.length();
+        while (wordEnd < this->originalMessage_.length())
+        {
+            if (this->originalMessage_[wordEnd] == ' ')
+            {
+                break;
+            }
+            ++wordEnd;
+        }
+
+        shiftIndicesAfter(static_cast<int>(from + length),
+                          static_cast<int>(replacement.length() - length));
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+        auto midExtendedRef = QStringView{this->originalMessage_}.mid(
+            wordStart, wordEnd - wordStart);
+#else
+        auto midExtendedRef =
+            this->originalMessage_.midRef(wordStart, wordEnd - wordStart);
+#endif
+
+        for (auto &emote : removedEmotes)
+        {
+            if (emote.ptr == nullptr)
+            {
+                qCDebug(chatterinoTwitch)
+                    << "Invalid emote occurrence" << emote.name.string;
+                continue;
+            }
+            QRegularExpression emoteregex(
+                "\\b" + emote.name.string + "\\b",
+                QRegularExpression::UseUnicodePropertiesOption);
+            auto match = emoteregex.match(midExtendedRef);
+            if (match.hasMatch())
+            {
+                emote.start = static_cast<int>(from + match.capturedStart());
+                emote.end = static_cast<int>(from + match.capturedEnd());
+                twitchEmotes.push_back(std::move(emote));
+            }
+        }
+
+        addReplEmotes(phrase, midExtendedRef, wordStart);
     };
 
     for (const auto &phrase : *phrases)
@@ -918,158 +989,49 @@ void TwitchMessageBuilder::runIgnoreReplaces(
             {
                 continue;
             }
+
             QRegularExpressionMatch match;
-            int from = 0;
+            size_t iterations = 0;
+            SizeType from = 0;
             while ((from = this->originalMessage_.indexOf(regex, from,
                                                           &match)) != -1)
             {
-                int len = match.capturedLength();
-                auto vret = removeEmotesInRange(from, len, twitchEmotes);
-                auto mid = this->originalMessage_.mid(from, len);
-                mid.replace(regex, phrase.getReplace());
-
-                int midsize = mid.size();
-                this->originalMessage_.replace(from, len, mid);
-                int pos1 = from;
-                while (pos1 > 0)
+                replaceMessageAt(phrase, from, match.capturedLength(),
+                                 phrase.getReplace());
+                from += phrase.getReplace().length();
+                iterations++;
+                if (iterations >= 128)
                 {
-                    if (this->originalMessage_[pos1 - 1] == ' ')
-                    {
-                        break;
-                    }
-                    --pos1;
+                    this->originalMessage_ =
+                        u"Too many replacements - check your ignores!"_s;
+                    return;
                 }
-                int pos2 = from + midsize;
-                while (pos2 < this->originalMessage_.length())
-                {
-                    if (this->originalMessage_[pos2] == ' ')
-                    {
-                        break;
-                    }
-                    ++pos2;
-                }
-
-                shiftIndicesAfter(from + len, midsize - len);
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-                auto midExtendedRef =
-                    QStringView{this->originalMessage_}.mid(pos1, pos2 - pos1);
-#else
-                auto midExtendedRef =
-                    this->originalMessage_.midRef(pos1, pos2 - pos1);
-#endif
-
-                for (auto &tup : vret)
-                {
-                    if (tup.ptr == nullptr)
-                    {
-                        qCDebug(chatterinoTwitch)
-                            << "v nullptr" << tup.name.string;
-                        continue;
-                    }
-                    QRegularExpression emoteregex(
-                        "\\b" + tup.name.string + "\\b",
-                        QRegularExpression::UseUnicodePropertiesOption);
-                    auto _match = emoteregex.match(midExtendedRef);
-                    if (_match.hasMatch())
-                    {
-                        int last = _match.lastCapturedIndex();
-                        for (int i = 0; i <= last; ++i)
-                        {
-                            tup.start = from + _match.capturedStart();
-                            twitchEmotes.push_back(std::move(tup));
-                        }
-                    }
-                }
-
-                addReplEmotes(phrase, midExtendedRef, pos1);
-
-                from += midsize;
             }
+
+            continue;
         }
-        else
+
+        SizeType from = 0;
+        while ((from = this->originalMessage_.indexOf(
+                    pattern, from, phrase.caseSensitivity())) != -1)
         {
-            int from = 0;
-            while ((from = this->originalMessage_.indexOf(
-                        pattern, from, phrase.caseSensitivity())) != -1)
-            {
-                int len = pattern.size();
-                auto vret = removeEmotesInRange(from, len, twitchEmotes);
-                auto replace = phrase.getReplace();
-
-                int replacesize = replace.size();
-                this->originalMessage_.replace(from, len, replace);
-
-                int pos1 = from;
-                while (pos1 > 0)
-                {
-                    if (this->originalMessage_[pos1 - 1] == ' ')
-                    {
-                        break;
-                    }
-                    --pos1;
-                }
-                int pos2 = from + replacesize;
-                while (pos2 < this->originalMessage_.length())
-                {
-                    if (this->originalMessage_[pos2] == ' ')
-                    {
-                        break;
-                    }
-                    ++pos2;
-                }
-
-                shiftIndicesAfter(from + len, replacesize - len);
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-                auto midExtendedRef =
-                    QStringView{this->originalMessage_}.mid(pos1, pos2 - pos1);
-#else
-                auto midExtendedRef =
-                    this->originalMessage_.midRef(pos1, pos2 - pos1);
-#endif
-
-                for (auto &tup : vret)
-                {
-                    if (tup.ptr == nullptr)
-                    {
-                        qCDebug(chatterinoTwitch)
-                            << "v nullptr" << tup.name.string;
-                        continue;
-                    }
-                    QRegularExpression emoteregex(
-                        "\\b" + tup.name.string + "\\b",
-                        QRegularExpression::UseUnicodePropertiesOption);
-                    auto match = emoteregex.match(midExtendedRef);
-                    if (match.hasMatch())
-                    {
-                        int last = match.lastCapturedIndex();
-                        for (int i = 0; i <= last; ++i)
-                        {
-                            tup.start = from + match.capturedStart();
-                            twitchEmotes.push_back(std::move(tup));
-                        }
-                    }
-                }
-
-                addReplEmotes(phrase, midExtendedRef, pos1);
-
-                from += replacesize;
-            }
+            replaceMessageAt(phrase, from, pattern.length(),
+                             phrase.getReplace());
+            from += phrase.getReplace().length();
         }
     }
 }
 
 Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 {
-    auto *app = getApp();
+    auto *app = getIApp();
 
-    const auto &globalBttvEmotes = app->twitch->getBttvEmotes();
-    const auto &globalFfzEmotes = app->twitch->getFfzEmotes();
-    const auto &globalSeventvEmotes = app->twitch->getSeventvEmotes();
+    const auto &globalBttvEmotes = app->getTwitch()->getBttvEmotes();
+    const auto &globalFfzEmotes = app->getTwitch()->getFfzEmotes();
+    const auto &globalSeventvEmotes = app->getTwitch()->getSeventvEmotes();
 
     auto flags = MessageElementFlags();
-    auto emote = boost::optional<EmotePtr>{};
+    auto emote = std::optional<EmotePtr>{};
     bool zeroWidth = false;
 
     // Emote order:
@@ -1115,7 +1077,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
             !this->isEmpty())
         {
             // Attempt to merge current zero-width emote into any previous emotes
-            auto asEmote = dynamic_cast<EmoteElement *>(&this->back());
+            auto *asEmote = dynamic_cast<EmoteElement *>(&this->back());
             if (asEmote)
             {
                 // Make sure to access asEmote before taking ownership when releasing
@@ -1124,18 +1086,18 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
                 auto baseEmoteElement = this->releaseBack();
 
                 std::vector<LayeredEmoteElement::Emote> layers = {
-                    {baseEmote, baseEmoteElement->getFlags()},
-                    {emote.get(), flags}};
+                    {baseEmote, baseEmoteElement->getFlags()}, {*emote, flags}};
                 this->emplace<LayeredEmoteElement>(
                     std::move(layers), baseEmoteElement->getFlags() | flags,
                     this->textColor_);
                 return Success;
             }
 
-            auto asLayered = dynamic_cast<LayeredEmoteElement *>(&this->back());
+            auto *asLayered =
+                dynamic_cast<LayeredEmoteElement *>(&this->back());
             if (asLayered)
             {
-                asLayered->addEmoteLayer({emote.get(), flags});
+                asLayered->addEmoteLayer({*emote, flags});
                 asLayered->addFlags(flags);
                 return Success;
             }
@@ -1143,15 +1105,15 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
             // No emote to merge with, just show as regular emote
         }
 
-        this->emplace<EmoteElement>(emote.get(), flags, this->textColor_);
+        this->emplace<EmoteElement>(*emote, flags, this->textColor_);
         return Success;
     }
 
     return Failure;
 }
 
-boost::optional<EmotePtr> TwitchMessageBuilder::getTwitchBadge(
-    const Badge &badge)
+std::optional<EmotePtr> TwitchMessageBuilder::getTwitchBadge(
+    const Badge &badge) const
 {
     if (auto channelBadge =
             this->twitchChannel->twitchBadge(badge.key_, badge.value_))
@@ -1165,7 +1127,7 @@ boost::optional<EmotePtr> TwitchMessageBuilder::getTwitchBadge(
         return globalBadge;
     }
 
-    return boost::none;
+    return std::nullopt;
 }
 
 std::unordered_map<QString, QString> TwitchMessageBuilder::parseBadgeInfoTag(
@@ -1248,7 +1210,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             if (auto customModBadge = this->twitchChannel->ffzCustomModBadge())
             {
                 this->emplace<ModBadgeElement>(
-                        customModBadge.get(),
+                        *customModBadge,
                         MessageElementFlag::BadgeChannelAuthority)
                     ->setTooltip((*customModBadge)->tooltip.string);
                 // early out, since we have to add a custom badge element here
@@ -1260,7 +1222,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             if (auto customVipBadge = this->twitchChannel->ffzCustomVipBadge())
             {
                 this->emplace<VipBadgeElement>(
-                        customVipBadge.get(),
+                        *customVipBadge,
                         MessageElementFlag::BadgeChannelAuthority)
                     ->setTooltip((*customVipBadge)->tooltip.string);
                 // early out, since we have to add a custom badge element here
@@ -1302,7 +1264,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             }
         }
 
-        this->emplace<BadgeElement>(badgeEmote.get(), badge.flag_)
+        this->emplace<BadgeElement>(*badgeEmote, badge.flag_)
             ->setTooltip(tooltip);
     }
 
@@ -1312,7 +1274,8 @@ void TwitchMessageBuilder::appendTwitchBadges()
 
 void TwitchMessageBuilder::appendChatterinoBadges()
 {
-    if (auto badge = getApp()->chatterinoBadges->getBadge({this->userId_}))
+    if (auto badge =
+            getIApp()->getChatterinoBadges()->getBadge({this->userId_}))
     {
         this->emplace<BadgeElement>(*badge,
                                     MessageElementFlag::BadgeChatterino);
@@ -1322,7 +1285,7 @@ void TwitchMessageBuilder::appendChatterinoBadges()
 void TwitchMessageBuilder::appendFfzBadges()
 {
     for (const auto &badge :
-         getApp()->ffzBadges->getUserBadges({this->userId_}))
+         getIApp()->getFfzBadges()->getUserBadges({this->userId_}))
     {
         this->emplace<FfzBadgeElement>(
             badge.emote, MessageElementFlag::BadgeFfz, badge.color);
@@ -1331,7 +1294,7 @@ void TwitchMessageBuilder::appendFfzBadges()
 
 void TwitchMessageBuilder::appendSeventvBadges()
 {
-    if (auto badge = getApp()->seventvBadges->getBadge({this->userId_}))
+    if (auto badge = getIApp()->getSeventvBadges()->getBadge({this->userId_}))
     {
         this->emplace<BadgeElement>(*badge, MessageElementFlag::BadgeSevenTV);
     }
@@ -1805,6 +1768,11 @@ MessagePtr TwitchMessageBuilder::buildHypeChatMessage(
 void TwitchMessageBuilder::setThread(std::shared_ptr<MessageThread> thread)
 {
     this->thread_ = std::move(thread);
+}
+
+void TwitchMessageBuilder::setParent(MessagePtr parent)
+{
+    this->parent_ = std::move(parent);
 }
 
 void TwitchMessageBuilder::setMessageOffset(int offset)

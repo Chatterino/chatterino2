@@ -2,7 +2,6 @@
 
 #include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
@@ -149,8 +148,8 @@ void TwitchBadges::loaded()
     }
 }
 
-boost::optional<EmotePtr> TwitchBadges::badge(const QString &set,
-                                              const QString &version) const
+std::optional<EmotePtr> TwitchBadges::badge(const QString &set,
+                                            const QString &version) const
 {
     auto badgeSets = this->badgeSets_.access();
     auto it = badgeSets->find(set);
@@ -162,10 +161,10 @@ boost::optional<EmotePtr> TwitchBadges::badge(const QString &set,
             return it2->second;
         }
     }
-    return boost::none;
+    return std::nullopt;
 }
 
-boost::optional<EmotePtr> TwitchBadges::badge(const QString &set) const
+std::optional<EmotePtr> TwitchBadges::badge(const QString &set) const
 {
     auto badgeSets = this->badgeSets_.access();
     auto it = badgeSets->find(set);
@@ -176,7 +175,7 @@ boost::optional<EmotePtr> TwitchBadges::badge(const QString &set) const
             return it->second.begin()->second;
         }
     }
-    return boost::none;
+    return std::nullopt;
 }
 
 void TwitchBadges::getBadgeIcon(const QString &name, BadgeIconCallback callback)
@@ -238,7 +237,7 @@ void TwitchBadges::loadEmoteImage(const QString &name, ImagePtr image,
     NetworkRequest(image->url().string)
         .concurrent()
         .cache()
-        .onSuccess([this, name, callback](auto result) -> Outcome {
+        .onSuccess([this, name, callback](auto result) {
             auto data = result.getData();
 
             // const cast since we are only reading from it
@@ -248,18 +247,18 @@ void TwitchBadges::loadEmoteImage(const QString &name, ImagePtr image,
 
             if (!reader.canRead() || reader.size().isEmpty())
             {
-                return Failure;
+                return;
             }
 
             QImage image = reader.read();
             if (image.isNull())
             {
-                return Failure;
+                return;
             }
 
             if (reader.imageCount() <= 0)
             {
-                return Failure;
+                return;
             }
 
             auto icon = std::make_shared<QIcon>(QPixmap::fromImage(image));
@@ -270,8 +269,6 @@ void TwitchBadges::loadEmoteImage(const QString &name, ImagePtr image,
             }
 
             callback(name, icon);
-
-            return Success;
         })
         .execute();
 }

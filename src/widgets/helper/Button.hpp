@@ -2,13 +2,14 @@
 
 #include "widgets/BaseWidget.hpp"
 
-#include <boost/optional.hpp>
 #include <QMenu>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPoint>
 #include <QTimer>
 #include <QWidget>
+
+#include <optional>
 
 namespace chatterino {
 
@@ -31,7 +32,7 @@ public:
 
     Button(BaseWidget *parent = nullptr);
 
-    void setMouseEffectColor(boost::optional<QColor> color);
+    void setMouseEffectColor(std::optional<QColor> color);
     void setPixmap(const QPixmap &pixmap_);
     const QPixmap &getPixmap() const;
 
@@ -56,16 +57,22 @@ signals:
     void leftMousePress();
 
 protected:
-    virtual void paintEvent(QPaintEvent *) override;
+    void paintEvent(QPaintEvent * /*event*/) override;
+
+    /// Paint this button.
+    /// This is intended for child classes that may want to paint the overlay.
+    /// This function should be used after rendering the custom button,
+    /// because the painter's state will be modified by this function.
+    void paintButton(QPainter &painter);
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     void enterEvent(QEnterEvent * /*event*/) override;
 #else
     void enterEvent(QEvent * /*event*/) override;
 #endif
-    virtual void leaveEvent(QEvent *) override;
-    virtual void mousePressEvent(QMouseEvent *event) override;
-    virtual void mouseReleaseEvent(QMouseEvent *event) override;
-    virtual void mouseMoveEvent(QMouseEvent *event) override;
+    void leaveEvent(QEvent *) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
 
     void fancyPaint(QPainter &painter);
 
@@ -88,7 +95,7 @@ private:
     double hoverMultiplier_{0.0};
     QTimer effectTimer_{};
     std::vector<ClickEffect> clickEffects_{};
-    boost::optional<QColor> mouseEffectColor_{};
+    std::optional<QColor> mouseEffectColor_{};
     std::unique_ptr<QMenu> menu_{};
 };
 

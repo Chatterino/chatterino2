@@ -1,7 +1,8 @@
 #pragma once
 
-#include <boost/optional.hpp>
 #include <QString>
+
+#include <optional>
 
 namespace chatterino {
 
@@ -31,7 +32,7 @@ public:
     // Hash of QCoreApplication::applicationFilePath()
     QString applicationFilePathHash;
 
-    // Profile avatars for Twitch <appDataDirectory>/cache/twitch
+    // Profile avatars for Twitch <appDataDirectory>/ProfileAvatars/twitch
     QString twitchProfileAvatars;
 
     // Plugin files live here. <appDataDirectory>/Plugins
@@ -51,7 +52,7 @@ private:
     void initRootDirectory();
     void initSubDirectories();
 
-    boost::optional<bool> portable_;
+    std::optional<bool> portable_;
 
     // Directory for cache files. Same as <appDataDirectory>/Misc
     QString cacheDirectory_;

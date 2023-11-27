@@ -2,7 +2,6 @@
 
 #include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
 #include "messages/Emote.hpp"
 #include "providers/ffz/FfzUtil.hpp"
 
@@ -43,7 +42,7 @@ std::vector<FfzBadges::Badge> FfzBadges::getUserBadges(const UserId &id)
     return badges;
 }
 
-boost::optional<FfzBadges::Badge> FfzBadges::getBadge(const int badgeID)
+std::optional<FfzBadges::Badge> FfzBadges::getBadge(const int badgeID)
 {
     auto it = this->badges.find(badgeID);
     if (it != this->badges.end())
@@ -51,7 +50,7 @@ boost::optional<FfzBadges::Badge> FfzBadges::getBadge(const int badgeID)
         return it->second;
     }
 
-    return boost::none;
+    return std::nullopt;
 }
 
 void FfzBadges::load()
@@ -59,7 +58,7 @@ void FfzBadges::load()
     static QUrl url("https://api.frankerfacez.com/v1/badges/ids");
 
     NetworkRequest(url)
-        .onSuccess([this](auto result) -> Outcome {
+        .onSuccess([this](auto result) {
             std::unique_lock lock(this->mutex_);
 
             auto jsonRoot = result.parseJson();
@@ -103,8 +102,6 @@ void FfzBadges::load()
                     }
                 }
             }
-
-            return Success;
         })
         .execute();
 }

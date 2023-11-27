@@ -15,7 +15,6 @@
 namespace chatterino {
 
 class ChannelView;
-class MessageThread;
 class SplitHeader;
 class SplitInput;
 class SplitContainer;
@@ -75,7 +74,7 @@ public:
 
     void setContainer(SplitContainer *container);
 
-    void setInputReply(const std::shared_ptr<MessageThread> &reply);
+    void setInputReply(const MessagePtr &reply);
 
     static pajlada::Signals::Signal<Qt::KeyboardModifiers>
         modifierStatusChanged;
@@ -186,7 +185,7 @@ public slots:
     void openWithCustomScheme();
     void setFiltersDialog();
     void showSearch(bool singleChannel);
-    void showViewerList();
+    void showChatterList();
     void openSubPage();
     void reloadChannelAndSubscriberEmotes();
     void reconnect();

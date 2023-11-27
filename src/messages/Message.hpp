@@ -3,7 +3,6 @@
 #include "common/FlagsEnum.hpp"
 #include "util/QStringHash.hpp"
 
-#include <boost/noncopyable.hpp>
 #include <QColor>
 #include <QTime>
 
@@ -54,9 +53,17 @@ enum class MessageFlag : int64_t {
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 
-struct Message : boost::noncopyable {
+struct Message;
+using MessagePtr = std::shared_ptr<const Message>;
+struct Message {
     Message();
     ~Message();
+
+    Message(const Message &) = delete;
+    Message &operator=(const Message &) = delete;
+
+    Message(Message &&) = delete;
+    Message &operator=(Message &&) = delete;
 
     // Making this a mutable means that we can update a messages flags,
     // while still keeping Message constant. This means that a message's flag
@@ -83,12 +90,11 @@ struct Message : boost::noncopyable {
     // the reply thread will be cleaned up by the TwitchChannel.
     // The root of the thread does not have replyThread set.
     std::shared_ptr<MessageThread> replyThread;
+    MessagePtr replyParent;
     uint32_t count = 1;
     std::vector<std::unique_ptr<MessageElement>> elements;
 
     ScrollbarHighlight getScrollBarHighlight() const;
 };
-
-using MessagePtr = std::shared_ptr<const Message>;
 
 }  // namespace chatterino

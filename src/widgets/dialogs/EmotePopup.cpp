@@ -1,7 +1,6 @@
 #include "EmotePopup.hpp"
 
 #include "Application.hpp"
-#include "common/CompletionModel.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
@@ -16,6 +15,7 @@
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Helpers.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/TrimRegExpValidator.hpp"
 #include "widgets/Notebook.hpp"
@@ -58,8 +58,7 @@ auto makeEmoteMessage(const EmoteMap &map, const MessageElementFlag &emoteFlag)
     std::sort(vec.begin(), vec.end(),
               [](const std::pair<EmoteName, EmotePtr> &l,
                  const std::pair<EmoteName, EmotePtr> &r) {
-                  return CompletionModel::compareStrings(l.first.string,
-                                                         r.first.string);
+                  return compareEmoteStrings(l.first.string, r.first.string);
               });
     for (const auto &emote : vec)
     {
@@ -73,15 +72,14 @@ auto makeEmoteMessage(const EmoteMap &map, const MessageElementFlag &emoteFlag)
     return builder.release();
 }
 
-auto makeEmojiMessage(EmojiMap &emojiMap)
+auto makeEmojiMessage(const std::vector<EmojiPtr> &emojiMap)
 {
     MessageBuilder builder;
     builder->flags.set(MessageFlag::Centered);
     builder->flags.set(MessageFlag::DisableCompactEmotes);
 
-    emojiMap.each([&builder](const auto &key, const auto &value) {
-        (void)key;  // unused
-
+    for (const auto &value : emojiMap)
+    {
         builder
             .emplace<EmoteElement>(
                 value->emote,
@@ -89,7 +87,7 @@ auto makeEmojiMessage(EmojiMap &emojiMap)
                                     MessageElementFlag::EmojiAll})
             ->setLink(
                 Link(Link::Type::InsertText, ":" + value->shortCodes[0] + ":"));
-    });
+    }
 
     return builder.release();
 }
@@ -166,7 +164,7 @@ void addEmotes(Channel &channel, const EmoteMap &map, const QString &title,
     channel.addMessage(makeEmoteMessage(map, emoteFlag));
 }
 
-void loadEmojis(ChannelView &view, EmojiMap &emojiMap)
+void loadEmojis(ChannelView &view, const std::vector<EmojiPtr> &emojiMap)
 {
     ChannelPtr emojiChannel(new Channel("", Channel::Type::None));
     emojiChannel->addMessage(makeEmojiMessage(emojiMap));
@@ -174,7 +172,8 @@ void loadEmojis(ChannelView &view, EmojiMap &emojiMap)
     view.setChannel(emojiChannel);
 }
 
-void loadEmojis(Channel &channel, EmojiMap &emojiMap, const QString &title)
+void loadEmojis(Channel &channel, const std::vector<EmojiPtr> &emojiMap,
+                const QString &title)
 {
     channel.addMessage(makeTitleMessage(title));
     channel.addMessage(makeEmojiMessage(emojiMap));
@@ -208,7 +207,7 @@ EmotePopup::EmotePopup(QWidget *parent)
 {
     // this->setStayInScreenRect(true);
     this->moveTo(getApp()->windows->emotePopupPos(),
-                 BoundsChecking::DesiredPosition);
+                 widgets::BoundsChecking::DesiredPosition);
 
     auto *layout = new QVBoxLayout();
     this->getLayoutContainer()->setLayout(layout);
@@ -246,7 +245,9 @@ EmotePopup::EmotePopup(QWidget *parent)
             MessageElementFlag::Default, MessageElementFlag::AlwaysShow,
             MessageElementFlag::EmoteImages});
         view->setEnableScrollingToBottom(false);
-        view->linkClicked.connect(clicked);
+        // We can safely ignore this signal connection since the ChannelView is deleted
+        // either when the notebook is deleted, or when our main layout is deleted.
+        std::ignore = view->linkClicked.connect(clicked);
 
         if (addToNotebook)
         {
@@ -268,7 +269,8 @@ EmotePopup::EmotePopup(QWidget *parent)
     this->globalEmotesView_ = makeView("Global");
     this->viewEmojis_ = makeView("Emojis");
 
-    loadEmojis(*this->viewEmojis_, getApp()->emotes->emojis.emojis);
+    loadEmojis(*this->viewEmojis_,
+               getApp()->getEmotes()->getEmojis()->getEmojis());
     this->addShortcuts();
     this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
                                        [this]() {
@@ -545,17 +547,18 @@ void EmotePopup::filterEmotes(const QString &searchText)
         this->filterTwitchEmotes(searchChannel, searchText);
     }
 
-    EmojiMap filteredEmojis{};
+    std::vector<EmojiPtr> filteredEmojis{};
     int emojiCount = 0;
 
-    getApp()->emotes->emojis.emojis.each(
-        [&, searchText](const auto &name, std::shared_ptr<EmojiData> &emoji) {
-            if (emoji->shortCodes[0].contains(searchText, Qt::CaseInsensitive))
-            {
-                filteredEmojis.insert(name, emoji);
-                emojiCount++;
-            }
-        });
+    const auto &emojis = getIApp()->getEmotes()->getEmojis()->getEmojis();
+    for (const auto &emoji : emojis)
+    {
+        if (emoji->shortCodes[0].contains(searchText, Qt::CaseInsensitive))
+        {
+            filteredEmojis.push_back(emoji);
+            emojiCount++;
+        }
+    }
     // emojis
     if (emojiCount > 0)
     {

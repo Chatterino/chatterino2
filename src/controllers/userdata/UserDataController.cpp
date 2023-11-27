@@ -2,6 +2,7 @@
 
 #include "singletons/Paths.hpp"
 #include "util/CombinePath.hpp"
+#include "util/Helpers.hpp"
 
 namespace {
 
@@ -42,15 +43,14 @@ void UserDataController::save()
     this->sm->save();
 }
 
-boost::optional<UserData> UserDataController::getUser(
-    const QString &userID) const
+std::optional<UserData> UserDataController::getUser(const QString &userID) const
 {
     std::shared_lock lock(this->usersMutex);
     auto it = this->users.find(userID);
 
     if (it == this->users.end())
     {
-        return boost::none;
+        return std::nullopt;
     }
 
     return it->second;
@@ -67,8 +67,8 @@ void UserDataController::setUserColor(const QString &userID,
 {
     auto c = this->getUsers();
     auto it = c.find(userID);
-    boost::optional<QColor> finalColor =
-        boost::make_optional(!colorString.isEmpty(), QColor(colorString));
+    std::optional<QColor> finalColor =
+        makeConditionedOptional(!colorString.isEmpty(), QColor(colorString));
     if (it == c.end())
     {
         if (!finalColor)

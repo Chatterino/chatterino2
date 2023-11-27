@@ -4,7 +4,6 @@
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "debug/Benchmark.hpp"
@@ -72,7 +71,8 @@ namespace detail {
         else
         {
             this->durationOffset_ = std::min<int>(
-                int(getApp()->emotes->gifTimer.position() % totalLength),
+                int(getIApp()->getEmotes()->getGIFTimer().position() %
+                    totalLength),
                 60000);
         }
         this->processOffset();
@@ -107,7 +107,7 @@ namespace detail {
         {
             auto sz = frame.image.size();
             auto area = sz.width() * sz.height();
-            auto memory = area * frame.image.depth();
+            auto memory = area * frame.image.depth() / 8;
 
             usage += memory;
         }
@@ -170,17 +170,23 @@ namespace detail {
         return this->items_.size() > 1;
     }
 
-    boost::optional<QPixmap> Frames::current() const
+    std::optional<QPixmap> Frames::current() const
     {
-        if (this->items_.size() == 0)
-            return boost::none;
+        if (this->items_.empty())
+        {
+            return std::nullopt;
+        }
+
         return this->items_[this->index_].image;
     }
 
-    boost::optional<QPixmap> Frames::first() const
+    std::optional<QPixmap> Frames::first() const
     {
-        if (this->items_.size() == 0)
-            return boost::none;
+        if (this->items_.empty())
+        {
+            return std::nullopt;
+        }
+
         return this->items_.front().image;
     }
 
@@ -208,7 +214,7 @@ namespace detail {
             }
         }
 
-        if (frames.size() == 0)
+        if (frames.empty())
         {
             qCDebug(chatterinoImage)
                 << "Error while reading image" << url.string << ": '"
@@ -344,10 +350,8 @@ ImagePtr Image::fromResourcePixmap(const QPixmap &pixmap, qreal scale)
         {
             return shared;
         }
-        else
-        {
-            cache.erase(it);
-        }
+
+        cache.erase(it);
     }
 
     auto newImage = ImagePtr(new Image(scale));
@@ -416,10 +420,10 @@ bool Image::loaded() const
 {
     assertInGuiThread();
 
-    return bool(this->frames_->current());
+    return this->frames_->current().has_value();
 }
 
-boost::optional<QPixmap> Image::pixmapOrLoad() const
+std::optional<QPixmap> Image::pixmapOrLoad() const
 {
     assertInGuiThread();
 
@@ -470,9 +474,12 @@ int Image::width() const
     assertInGuiThread();
 
     if (auto pixmap = this->frames_->first())
+    {
         return int(pixmap->width() * this->scale_);
-    else
-        return 16;
+    }
+
+    // No frames loaded, use our default magic width 16
+    return 16;
 }
 
 int Image::height() const
@@ -480,20 +487,26 @@ int Image::height() const
     assertInGuiThread();
 
     if (auto pixmap = this->frames_->first())
+    {
         return int(pixmap->height() * this->scale_);
-    else
-        return 16;
+    }
+
+    // No frames loaded, use our default magic height 16
+    return 16;
 }
 
 void Image::actuallyLoad()
 {
+    auto weak = weakOf(this);
     NetworkRequest(this->url().string)
         .concurrent()
         .cache()
-        .onSuccess([weak = weakOf(this)](auto result) -> Outcome {
+        .onSuccess([weak](auto result) {
             auto shared = weak.lock();
             if (!shared)
-                return Failure;
+            {
+                return;
+            }
 
             auto data = result.getData();
 
@@ -507,14 +520,14 @@ void Image::actuallyLoad()
                 qCDebug(chatterinoImage)
                     << "Error: image cant be read " << shared->url().string;
                 shared->empty_ = true;
-                return Failure;
+                return;
             }
 
             const auto size = reader.size();
             if (size.isEmpty())
             {
                 shared->empty_ = true;
-                return Failure;
+                return;
             }
 
             // returns 1 for non-animated formats
@@ -524,7 +537,7 @@ void Image::actuallyLoad()
                     << "Error: image has less than 1 frame "
                     << shared->url().string << ": " << reader.errorString();
                 shared->empty_ = true;
-                return Failure;
+                return;
             }
 
             // use "double" to prevent int overflows
@@ -535,25 +548,26 @@ void Image::actuallyLoad()
                 qCDebug(chatterinoImage) << "image too large in RAM";
 
                 shared->empty_ = true;
-                return Failure;
+                return;
             }
 
             auto parsed = detail::readFrames(reader, shared->url());
 
-            postToThread(makeConvertCallback(parsed, [weak](auto &&frames) {
-                if (auto shared = weak.lock())
-                {
-                    shared->frames_ =
-                        std::make_unique<detail::Frames>(std::move(frames));
-                }
-            }));
-
-            return Success;
+            postToThread(makeConvertCallback(
+                parsed, [weak = std::weak_ptr<Image>(shared)](auto &&frames) {
+                    if (auto shared = weak.lock())
+                    {
+                        shared->frames_ = std::make_unique<detail::Frames>(
+                            std::forward<decltype(frames)>(frames));
+                    }
+                }));
         })
-        .onError([weak = weakOf(this)](auto /*result*/) {
+        .onError([weak](auto /*result*/) {
             auto shared = weak.lock();
             if (!shared)
+            {
                 return false;
+            }
 
             // fourtf: is this the right thing to do?
             shared->empty_ = true;
@@ -591,6 +605,13 @@ ImageExpirationPool::ImageExpirationPool()
     this->freeTimer_->start(
         std::chrono::duration_cast<std::chrono::milliseconds>(
             IMAGE_POOL_CLEANUP_INTERVAL));
+
+    // configure all debug counts used by images
+    DebugCount::configure("image bytes", DebugCount::Flag::DataSize);
+    DebugCount::configure("image bytes (ever loaded)",
+                          DebugCount::Flag::DataSize);
+    DebugCount::configure("image bytes (ever unloaded)",
+                          DebugCount::Flag::DataSize);
 }
 
 ImageExpirationPool &ImageExpirationPool::instance()

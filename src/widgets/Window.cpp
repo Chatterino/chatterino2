@@ -103,11 +103,13 @@ bool Window::event(QEvent *event)
 {
     switch (event->type())
     {
-        case QEvent::WindowActivate:
+        case QEvent::WindowActivate: {
+            getApp()->windows->selectedWindow_ = this;
             break;
+        }
 
         case QEvent::WindowDeactivate: {
-            auto page = this->notebook_->getOrAddSelectedPage();
+            auto *page = this->notebook_->getSelectedPage();
 
             if (page != nullptr)
             {
@@ -117,12 +119,8 @@ bool Window::event(QEvent *event)
                 {
                     split->updateLastReadMessage();
                 }
-            }
 
-            if (SplitContainer *container =
-                    dynamic_cast<SplitContainer *>(page))
-            {
-                container->hideResizeHandles();
+                page->hideResizeHandles();
             }
         }
         break;
@@ -141,6 +139,11 @@ void Window::closeEvent(QCloseEvent *)
         app->windows->save();
         app->windows->closeAll();
     }
+
+    // Ensure selectedWindow_ is never an invalid pointer.
+    // WindowManager will return the main window if no window is pointed to by
+    // `selectedWindow_`.
+    getApp()->windows->selectedWindow_ = nullptr;
 
     this->closed.invoke();
 
@@ -485,9 +488,8 @@ void Window::addShortcuts()
              return "";
          }},
         {"openQuickSwitcher",
-         [](std::vector<QString>) -> QString {
-             auto quickSwitcher =
-                 new QuickSwitcherPopup(&getApp()->windows->getMainWindow());
+         [this](std::vector<QString>) -> QString {
+             auto *quickSwitcher = new QuickSwitcherPopup(this);
              quickSwitcher->show();
              return "";
          }},
