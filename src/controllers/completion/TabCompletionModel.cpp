@@ -5,9 +5,9 @@
 #include "controllers/completion/sources/EmoteSource.hpp"
 #include "controllers/completion/sources/UnifiedSource.hpp"
 #include "controllers/completion/sources/UserSource.hpp"
-#include "controllers/completion/strategies/ClassicEmoteStrategy.hpp"
 #include "controllers/completion/strategies/ClassicUserStrategy.hpp"
 #include "controllers/completion/strategies/CommandStrategy.hpp"
+#include "controllers/completion/strategies/SmartEmoteStrategy.hpp"
 #include "singletons/Settings.hpp"
 
 namespace chatterino {
@@ -124,8 +124,7 @@ std::unique_ptr<completion::Source> TabCompletionModel::buildSource(
 std::unique_ptr<completion::Source> TabCompletionModel::buildEmoteSource() const
 {
     return std::make_unique<completion::EmoteSource>(
-        &this->channel_,
-        std::make_unique<completion::ClassicTabEmoteStrategy>());
+        &this->channel_, std::make_unique<completion::SmartTabEmoteStrategy>());
 }
 
 std::unique_ptr<completion::Source> TabCompletionModel::buildUserSource(

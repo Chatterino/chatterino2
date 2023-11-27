@@ -5,14 +5,14 @@
 
 namespace chatterino::completion {
 
-class ClassicEmoteStrategy : public Strategy<EmoteItem>
+class SmartEmoteStrategy : public Strategy<EmoteItem>
 {
     void apply(const std::vector<EmoteItem> &items,
                std::vector<EmoteItem> &output,
                const QString &query) const override;
 };
 
-class ClassicTabEmoteStrategy : public Strategy<EmoteItem>
+class SmartTabEmoteStrategy : public Strategy<EmoteItem>
 {
     void apply(const std::vector<EmoteItem> &items,
                std::vector<EmoteItem> &output,

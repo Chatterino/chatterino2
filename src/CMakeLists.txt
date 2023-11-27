@@ -124,8 +124,8 @@ set(SOURCE_FILES
         controllers/completion/sources/UserSource.cpp
         controllers/completion/sources/UserSource.hpp
         controllers/completion/strategies/Strategy.hpp
-        controllers/completion/strategies/ClassicEmoteStrategy.cpp
-        controllers/completion/strategies/ClassicEmoteStrategy.hpp
+        controllers/completion/strategies/SmartEmoteStrategy.cpp
+        controllers/completion/strategies/SmartEmoteStrategy.hpp
         controllers/completion/strategies/ClassicUserStrategy.cpp
         controllers/completion/strategies/ClassicUserStrategy.hpp
         controllers/completion/strategies/CommandStrategy.cpp

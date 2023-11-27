@@ -1,4 +1,4 @@
-#include "controllers/completion/strategies/ClassicEmoteStrategy.hpp"
+#include "controllers/completion/strategies/SmartEmoteStrategy.hpp"
 
 #include "common/QLogging.hpp"
 #include "controllers/completion/sources/EmoteSource.hpp"
@@ -148,9 +148,9 @@ namespace {
     }
 }  // namespace
 
-void ClassicEmoteStrategy::apply(const std::vector<EmoteItem> &items,
-                                 std::vector<EmoteItem> &output,
-                                 const QString &query) const
+void SmartEmoteStrategy::apply(const std::vector<EmoteItem> &items,
+                               std::vector<EmoteItem> &output,
+                               const QString &query) const
 {
     QString normalizedQuery = query;
     if (normalizedQuery.startsWith(':'))
@@ -164,9 +164,9 @@ void ClassicEmoteStrategy::apply(const std::vector<EmoteItem> &items,
                    });
 }
 
-void ClassicTabEmoteStrategy::apply(const std::vector<EmoteItem> &items,
-                                    std::vector<EmoteItem> &output,
-                                    const QString &query) const
+void SmartTabEmoteStrategy::apply(const std::vector<EmoteItem> &items,
+                                  std::vector<EmoteItem> &output,
+                                  const QString &query) const
 {
     bool emojiOnly = false;
     QString normalizedQuery = query;
