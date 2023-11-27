@@ -141,7 +141,7 @@ MessagePtr makeAutomodInfoMessage(const AutomodInfoAction &action)
 }
 
 std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
-    const AutomodAction &action)
+    const AutomodAction &action, const QString &channelName)
 {
     MessageBuilder builder, builder2;
 
@@ -193,6 +193,12 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
 
     //
     // Builder for offender's message
+    builder2.message().channelName = channelName;
+    builder2
+        .emplace<TextElement>("#" + channelName,
+                              MessageElementFlag::ChannelName,
+                              MessageColor::System)
+        ->setLink({Link::JumpToChannel, channelName});
     builder2.emplace<TimestampElement>();
     builder2.emplace<TwitchModerationElement>();
     builder2.message().loginName = action.target.login;
