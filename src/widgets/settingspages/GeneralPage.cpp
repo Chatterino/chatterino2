@@ -484,6 +484,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "cvMask and 7TV's RainTime, will appear as normal emotes.");
     layout.addCheckbox("Enable emote auto-completion by typing :",
                        s.emoteCompletionWithColon);
+    layout.addCheckbox("Use experimental smarter emote completion.",
+                       s.useSmartEmoteCompletion);
     layout.addDropdown<float>(
         "Size", {"0.5x", "0.75x", "Default", "1.25x", "1.5x", "2x"},
         s.emoteScale,
