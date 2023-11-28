@@ -68,7 +68,7 @@ namespace {
     // matchingFunction is used for testing if the emote should be included in the search.
     void completeEmotes(
         const std::vector<EmoteItem> &items, std::vector<EmoteItem> &output,
-        const QString &query,
+        const QString &query, bool ignoreColonForCost,
         const std::function<bool(EmoteItem, QString, Qt::CaseSensitivity)>
             &matchingFunction)
     {
@@ -130,21 +130,31 @@ namespace {
             }
         }
 
-        std::sort(
-            output.begin(), output.end(),
-            [query, prioritizeUpper](const EmoteItem &a,
-                                     const EmoteItem &b) -> bool {
-                auto costA = costOfEmote(query, a.searchName, prioritizeUpper);
-                auto costB = costOfEmote(query, b.searchName, prioritizeUpper);
-                if (costA == costB)
-                {
-                    // Case difference and length came up tied for (a, b), break the tie
-                    return QString::compare(a.searchName, b.searchName,
-                                            Qt::CaseInsensitive) < 0;
-                }
+        std::sort(output.begin(), output.end(),
+                  [query, prioritizeUpper, ignoreColonForCost](
+                      const EmoteItem &a, const EmoteItem &b) -> bool {
+                      auto tempA = a.searchName;
+                      auto tempB = b.searchName;
+                      if (ignoreColonForCost && tempA.startsWith(":"))
+                      {
+                          tempA = tempA.mid(1);
+                      }
+                      if (ignoreColonForCost && tempB.startsWith(":"))
+                      {
+                          tempB = tempB.mid(1);
+                      }
 
-                return costA < costB;
-            });
+                      auto costA = costOfEmote(query, tempA, prioritizeUpper);
+                      auto costB = costOfEmote(query, tempB, prioritizeUpper);
+                      if (costA == costB)
+                      {
+                          // Case difference and length came up tied for (a, b), break the tie
+                          return QString::compare(tempA, tempB,
+                                                  Qt::CaseInsensitive) < 0;
+                      }
+
+                      return costA < costB;
+                  });
     }
 }  // namespace
 
@@ -153,11 +163,13 @@ void SmartEmoteStrategy::apply(const std::vector<EmoteItem> &items,
                                const QString &query) const
 {
     QString normalizedQuery = query;
+    bool ignoreColonForCost = false;
     if (normalizedQuery.startsWith(':'))
     {
         normalizedQuery = normalizedQuery.mid(1);
+        ignoreColonForCost = true;
     }
-    completeEmotes(items, output, normalizedQuery,
+    completeEmotes(items, output, normalizedQuery, ignoreColonForCost,
                    [](const EmoteItem &left, const QString &right,
                       Qt::CaseSensitivity caseHandling) {
                        return left.searchName.contains(right, caseHandling);
@@ -176,7 +188,7 @@ void SmartTabEmoteStrategy::apply(const std::vector<EmoteItem> &items,
         // tab completion with : prefix should do emojis only
         emojiOnly = true;
     }
-    completeEmotes(items, output, normalizedQuery,
+    completeEmotes(items, output, normalizedQuery, false,
                    [emojiOnly](const EmoteItem &left, const QString &right,
                                Qt::CaseSensitivity caseHandling) -> bool {
                        if (emojiOnly ^ left.isEmoji)
