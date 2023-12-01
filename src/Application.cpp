@@ -12,7 +12,7 @@
 #include "controllers/notifications/NotificationController.hpp"
 #include "controllers/sound/ISoundController.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
-#include "singletons/ImageUploader.hpp"
+#include "singletons/imageuploader/ImageUploader.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/PluginController.hpp"
 #endif

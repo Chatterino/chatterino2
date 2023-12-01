@@ -429,8 +429,9 @@ set(SOURCE_FILES
         singletons/Emotes.hpp
         singletons/Fonts.cpp
         singletons/Fonts.hpp
-        singletons/ImageUploader.cpp
-        singletons/ImageUploader.hpp
+        singletons/imageuploader/ImageUploader.cpp
+        singletons/imageuploader/ImageUploader.hpp
+        singletons/imageuploader/UploadedImage.hpp
         singletons/Logging.cpp
         singletons/Logging.hpp
         singletons/NativeMessaging.cpp

@@ -1,4 +1,4 @@
-#include "singletons/ImageUploader.hpp"
+#include "singletons/imageuploader/ImageUploader.hpp"
 
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
@@ -6,6 +6,7 @@
 #include "common/QLogging.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
+#include "singletons/imageuploader/UploadedImageModel.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
@@ -16,9 +17,10 @@
 #include <QHttpMultiPart>
 #include <QJsonArray>
 #include <QJsonDocument>
-#include <qloggingcategory.h>
+#include <QLoggingCategory>
 #include <QMimeDatabase>
 #include <QMutex>
+#include <QObject>
 #include <QPointer>
 #include <QSaveFile>
 #include <rapidjson/document.h>
@@ -53,7 +55,7 @@ void ImageUploader::logToFile(const QString &originalFilePath,
                               const QString &imageLink,
                               const QString &deletionLink, ChannelPtr channel)
 {
-    this->imageLogSetting_->push_back(UploadedImage{
+    this->images_.append(UploadedImage{
         .channelName = channel->getName(),
         .deletionLink = deletionLink,
         .imageLink = imageLink,
@@ -91,7 +93,15 @@ QString getLinkFromResponse(NetworkResult response, QString pattern)
 
 void ImageUploader::save()
 {
+    this->uploadedImagesSetting_->setValue(this->images_.raw());
     this->sm_->save();
+}
+
+UploadedImageModel *ImageUploader::createModel(QObject *parent)
+{
+    auto *model = new UploadedImageModel(parent);
+    model->initialize(&this->images_);
+    return model;
 }
 
 void ImageUploader::initialize(Settings &settings, Paths &paths)
@@ -108,9 +118,18 @@ void ImageUploader::initialize(Settings &settings, Paths &paths)
     this->sm_->setBackupEnabled(true);
     this->sm_->setBackupSlots(9);
 
-    this->imageLogSetting_ = std::make_unique<
+    this->uploadedImagesSetting_ = std::make_unique<
         pajlada::Settings::Setting<std::vector<UploadedImage>>>(
         "/uploadedImages", this->sm_);
+
+    for (const auto &item : this->uploadedImagesSetting_->getValue())
+    {
+        this->images_.append(item);
+    }
+    this->signals_.addConnection(
+        this->images_.delayedItemsChanged.connect([this]() {
+            this->uploadedImagesSetting_->setValue(this->images_.raw());
+        }));
 
     // try to read old log
     QFile oldLogFile(oldLogName);
@@ -139,7 +158,10 @@ void ImageUploader::initialize(Settings &settings, Paths &paths)
                 << "Unable to parse ImageUploader.json: getSafe failed";
             return;
         }
-        this->imageLogSetting_->setValue(temporary);
+        for (const auto &t : temporary)
+        {
+            this->images_.append(t);
+        }
         oldLogFile.close();
         oldLogFile.rename(combinePath(logPath, "ImageUploader.old.json"));
         this->sm_->save();
