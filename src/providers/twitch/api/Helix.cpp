@@ -6,7 +6,7 @@
 #include "common/QLogging.hpp"
 #include "util/CancellationToken.hpp"
 
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 #include <QJsonDocument>
 
 namespace {
