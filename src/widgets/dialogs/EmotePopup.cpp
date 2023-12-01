@@ -201,7 +201,7 @@ EmoteMap filterEmoteMap(const QString &text,
 namespace chatterino {
 
 EmotePopup::EmotePopup(QWidget *parent)
-    : BasePopup(BaseWindow::EnableCustomFrame, parent)
+    : BasePopup({}, parent, false)
     , search_(new QLineEdit())
     , notebook_(new Notebook(this))
 {

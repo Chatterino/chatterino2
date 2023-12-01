@@ -13,8 +13,7 @@
 namespace chatterino {
 
 ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
-    : BasePopup({BaseWindow::EnableCustomFrame, BaseWindow::DisableLayoutSave},
-                parent)
+    : BasePopup({BaseWindow::DisableLayoutSave}, parent)
     , color_()
     , dialogConfirmed_(false)
 {

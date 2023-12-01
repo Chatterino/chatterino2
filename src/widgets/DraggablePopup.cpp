@@ -15,18 +15,13 @@ namespace {
 #ifdef Q_OS_LINUX
     FlagsEnum<BaseWindow::Flags> popupFlags{
         BaseWindow::Dialog,
-        BaseWindow::EnableCustomFrame,
     };
     FlagsEnum<BaseWindow::Flags> popupFlagsCloseAutomatically{
         BaseWindow::Dialog,
-        BaseWindow::EnableCustomFrame,
     };
 #else
-    FlagsEnum<BaseWindow::Flags> popupFlags{
-        BaseWindow::EnableCustomFrame,
-    };
+    FlagsEnum<BaseWindow::Flags> popupFlags{};
     FlagsEnum<BaseWindow::Flags> popupFlagsCloseAutomatically{
-        BaseWindow::EnableCustomFrame,
         BaseWindow::Frameless,
         BaseWindow::FramelessDraggable,
     };
