@@ -20,6 +20,7 @@
 #include <QtConcurrent>
 
 #include <csignal>
+#include <thread>
 #include <tuple>
 
 #ifdef USEWINSDK
@@ -244,7 +245,8 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
         restartOnSignal = value;
     });
 
-    auto thread = std::thread([dir = paths.miscDirectory] {
+    auto thread = std::jthread([dir = paths.miscDirectory] {
+#ifdef Q_OS_WIN32
         {
             auto path = combinePath(dir, "Update.exe");
             if (QFile::exists(path))
@@ -259,6 +261,7 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
                 QFile::remove(path);
             }
         }
+#endif
     });
 
     // Clear the cache 1 minute after start.
@@ -314,7 +317,5 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
     // flushing windows clipboard to keep copied messages
     flushClipboard();
 #endif
-
-    _exit(0);
 }
 }  // namespace chatterino
