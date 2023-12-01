@@ -276,9 +276,14 @@ void Button::mouseReleaseEvent(QMouseEvent *event)
 
 void Button::mouseMoveEvent(QMouseEvent *event)
 {
+    this->mouseMoveEvent(event->pos());
+}
+
+void Button::mouseMoveEvent(QPoint pos)
+{
     if (this->enabled_)
     {
-        this->mousePos_ = event->pos();
+        this->mousePos_ = pos;
 
         this->update();
     }

@@ -18,6 +18,7 @@ namespace chatterino {
 class Button;
 class EffectLabel;
 class TitleBarButton;
+class TitleBarButtons;
 enum class TitleBarButtonStyle;
 
 class BaseWindow : public BaseWidget
@@ -128,9 +129,7 @@ private:
         QLayout *windowLayout = nullptr;
         QHBoxLayout *titlebarBox = nullptr;
         QWidget *titleLabel = nullptr;
-        TitleBarButton *minButton = nullptr;
-        TitleBarButton *maxButton = nullptr;
-        TitleBarButton *exitButton = nullptr;
+        TitleBarButtons *titlebarButtons = nullptr;
         QWidget *layoutBase = nullptr;
         std::vector<Button *> buttons;
     } ui_;

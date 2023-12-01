@@ -124,4 +124,37 @@ void TitleBarButton::paintEvent(QPaintEvent *event)
     this->paintButton(painter);
 }
 
+void TitleBarButton::ncEnter()
+{
+    this->enterEvent(nullptr);
+    this->update();
+}
+
+void TitleBarButton::ncLeave()
+{
+    this->leaveEvent(nullptr);
+    this->update();
+}
+
+void TitleBarButton::ncMove(QPoint at)
+{
+    this->mouseMoveEvent(at);
+}
+
+void TitleBarButton::ncMouseDown(QPoint at)
+{
+    QMouseEvent evt(QMouseEvent::MouseButtonPress, at,
+                    Qt::MouseButton::LeftButton, Qt::NoButton, Qt::NoModifier);
+    this->mousePressEvent(&evt);
+    this->update();
+}
+
+void TitleBarButton::ncMouseUp(QPoint at)
+{
+    QMouseEvent evt(QMouseEvent::MouseButtonRelease, at,
+                    Qt::MouseButton::LeftButton, Qt::NoButton, Qt::NoModifier);
+    this->mouseReleaseEvent(&evt);
+    this->update();
+}
+
 }  // namespace chatterino

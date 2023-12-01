@@ -23,6 +23,12 @@ public:
     TitleBarButtonStyle getButtonStyle() const;
     void setButtonStyle(TitleBarButtonStyle style_);
 
+    void ncEnter();
+    void ncLeave();
+    void ncMove(QPoint at);
+    void ncMouseDown(QPoint at);
+    void ncMouseUp(QPoint at);
+
 protected:
     void paintEvent(QPaintEvent *) override;
 

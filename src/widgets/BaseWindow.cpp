@@ -8,6 +8,7 @@
 #include "util/PostToThread.hpp"
 #include "util/WindowsHelper.hpp"
 #include "widgets/helper/EffectLabel.hpp"
+#include "widgets/helper/TitlebarButtons.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
 #include "widgets/Window.hpp"
@@ -180,9 +181,8 @@ void BaseWindow::init()
                                      this->close();
                                  });
 
-                this->ui_.minButton = _minButton;
-                this->ui_.maxButton = _maxButton;
-                this->ui_.exitButton = _exitButton;
+                this->ui_.titlebarButtons = new TitleBarButtons(
+                    this, _minButton, _maxButton, _exitButton);
 
                 this->ui_.buttons.push_back(_minButton);
                 this->ui_.buttons.push_back(_maxButton);
@@ -474,12 +474,9 @@ void BaseWindow::changeEvent(QEvent *)
     }
 
 #ifdef USEWINSDK
-    if (this->ui_.maxButton)
+    if (this->ui_.titlebarButtons)
     {
-        this->ui_.maxButton->setButtonStyle(
-            this->windowState() & Qt::WindowMaximized
-                ? TitleBarButtonStyle::Unmaximize
-                : TitleBarButtonStyle::Maximize);
+        this->ui_.titlebarButtons->updateMaxButton();
     }
 
     if (this->isVisible() && this->hasCustomWindowFrame())
@@ -574,6 +571,11 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
 
     bool returnValue = false;
 
+    auto overButton = [&]() {
+        auto ht = msg->wParam;
+        return ht == HTMAXBUTTON || ht == HTMINBUTTON || ht == HTCLOSE;
+    };
+
     switch (msg->message)
     {
         case WM_DPICHANGED:
@@ -596,6 +598,57 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
             returnValue = this->handleMOVE(msg);
             *result = 0;
             break;
+
+        case WM_NCMOUSEMOVE: {
+            if (overButton())
+            {
+                *result = 0;
+                long x = GET_X_LPARAM(msg->lParam);
+                long y = GET_Y_LPARAM(msg->lParam);
+
+                RECT winrect;
+                GetWindowRect(HWND(winId()), &winrect);
+                QPoint globalPos(x, y);
+                this->ui_.titlebarButtons->hover(msg->wParam, globalPos);
+            }
+            else
+            {
+                this->ui_.titlebarButtons->leave();
+            }
+        }
+        break;
+
+        case WM_NCMOUSELEAVE: {
+            this->ui_.titlebarButtons->leave();
+        }
+        break;
+
+        case WM_NCLBUTTONDOWN:
+        case WM_NCLBUTTONUP: {
+            if (!overButton())
+            {
+                break;
+            }
+            returnValue = true;
+            *result = 0;
+
+            auto ht = msg->wParam;
+            long x = GET_X_LPARAM(msg->lParam);
+            long y = GET_Y_LPARAM(msg->lParam);
+
+            RECT winrect;
+            GetWindowRect(HWND(winId()), &winrect);
+            QPoint globalPos(x, y);
+            if (msg->message == WM_NCLBUTTONDOWN)
+            {
+                this->ui_.titlebarButtons->mouseDown(ht, globalPos);
+            }
+            else
+            {
+                this->ui_.titlebarButtons->mouseUp(ht, globalPos);
+            }
+        }
+        break;
 
         case WM_NCHITTEST:
             returnValue = this->handleNCHITTEST(msg, result);
@@ -657,28 +710,18 @@ void BaseWindow::calcButtonsSizes()
         return;
     }
 
-    if (this->frameless_)
+    if (this->frameless_ || !this->ui_.titlebarButtons)
     {
         return;
     }
 
-    if ((this->width() / this->scale()) < 300)
+    if ((static_cast<float>(this->width()) / this->scale()) < 300)
     {
-        if (this->ui_.minButton)
-            this->ui_.minButton->setScaleIndependantSize(30, 30);
-        if (this->ui_.maxButton)
-            this->ui_.maxButton->setScaleIndependantSize(30, 30);
-        if (this->ui_.exitButton)
-            this->ui_.exitButton->setScaleIndependantSize(30, 30);
+        this->ui_.titlebarButtons->setSmallSize();
     }
     else
     {
-        if (this->ui_.minButton)
-            this->ui_.minButton->setScaleIndependantSize(46, 30);
-        if (this->ui_.maxButton)
-            this->ui_.maxButton->setScaleIndependantSize(46, 30);
-        if (this->ui_.exitButton)
-            this->ui_.exitButton->setScaleIndependantSize(46, 30);
+        this->ui_.titlebarButtons->setRegularSize();
     }
 }
 
@@ -932,32 +975,55 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
 
         if (*result == 0)
         {
-            bool client = false;
-
             // Check the main layout first, as it's the largest area
             if (this->ui_.layoutBase->geometry().contains(point))
             {
-                client = true;
+                *result = HTCLIENT;
             }
 
             // Check the titlebar buttons
-            if (!client && this->ui_.titlebarBox->geometry().contains(point))
+            if (*result == 0 &&
+                this->ui_.titlebarBox->geometry().contains(point))
             {
-                for (QWidget *widget : this->ui_.buttons)
+                for (const auto *widget : this->ui_.buttons)
                 {
-                    if (widget->isVisible() &&
-                        widget->geometry().contains(point))
+                    if (!widget->isVisible() ||
+                        !widget->geometry().contains(point))
                     {
-                        client = true;
+                        continue;
                     }
+
+                    if (const auto *btn =
+                            dynamic_cast<const TitleBarButton *>(widget))
+                    {
+                        switch (btn->getButtonStyle())
+                        {
+                            case TitleBarButtonStyle::Minimize: {
+                                *result = HTMINBUTTON;
+                                break;
+                            }
+                            case TitleBarButtonStyle::Unmaximize:
+                            case TitleBarButtonStyle::Maximize: {
+                                *result = HTMAXBUTTON;
+                                break;
+                            }
+                            case TitleBarButtonStyle::Close: {
+                                *result = HTCLOSE;
+                                break;
+                            }
+                            default: {
+                                *result = HTCLIENT;
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                    *result = HTCLIENT;
+                    break;
                 }
             }
 
-            if (client)
-            {
-                *result = HTCLIENT;
-            }
-            else
+            if (*result == 0)
             {
                 *result = HTCAPTION;
             }
