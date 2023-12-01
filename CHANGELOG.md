@@ -75,6 +75,7 @@
 - Dev: Added Tests for Windows and MacOS in CI. (#4970)
 - Dev: Refactored the Image Uploader feature. (#4971)
 - Dev: Fixed deadlock and use-after-free in tests. (#4981)
+- Dev: Cleanly exit Chatterino instead of force exiting. (#4993)
 
 ## 2.4.6
 
