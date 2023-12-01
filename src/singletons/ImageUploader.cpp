@@ -9,16 +9,21 @@
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
+#include "util/RapidjsonHelpers.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
 
 #include <QBuffer>
 #include <QHttpMultiPart>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <qloggingcategory.h>
 #include <QMimeDatabase>
 #include <QMutex>
 #include <QPointer>
 #include <QSaveFile>
+#include <rapidjson/document.h>
+
+#include <memory>
 
 #define UPLOAD_DELAY 2000
 // Delay between uploads in milliseconds
@@ -48,50 +53,15 @@ void ImageUploader::logToFile(const QString &originalFilePath,
                               const QString &imageLink,
                               const QString &deletionLink, ChannelPtr channel)
 {
-    const QString logFileName =
-        combinePath((getSettings()->logPath.getValue().isEmpty()
-                         ? getPaths()->messageLogDirectory
-                         : getSettings()->logPath),
-                    "ImageUploader.json");
-
-    //reading existing logs
-    QFile logReadFile(logFileName);
-    bool isLogFileOkay =
-        logReadFile.open(QIODevice::ReadWrite | QIODevice::Text);
-    if (!isLogFileOkay)
-    {
-        channel->addMessage(makeSystemMessage(
-            QString("Failed to open log file with links at ") + logFileName));
-        return;
-    }
-    auto logs = logReadFile.readAll();
-    if (logs.isEmpty())
-    {
-        logs = QJsonDocument(QJsonArray()).toJson();
-    }
-    logReadFile.close();
-
-    //writing new data to logs
-    QJsonObject newLogEntry;
-    newLogEntry["channelName"] = channel->getName();
-    newLogEntry["deletionLink"] =
-        deletionLink.isEmpty() ? QJsonValue(QJsonValue::Null) : deletionLink;
-    newLogEntry["imageLink"] = imageLink;
-    newLogEntry["localPath"] = originalFilePath.isEmpty()
-                                   ? QJsonValue(QJsonValue::Null)
-                                   : originalFilePath;
-    newLogEntry["timestamp"] = QDateTime::currentSecsSinceEpoch();
-    // channel name
-    // deletion link (can be empty)
-    // image link
-    // local path to an image (can be empty)
-    // timestamp
-    QSaveFile logSaveFile(logFileName);
-    logSaveFile.open(QIODevice::WriteOnly | QIODevice::Text);
-    QJsonArray entries = QJsonDocument::fromJson(logs).array();
-    entries.push_back(newLogEntry);
-    logSaveFile.write(QJsonDocument(entries).toJson());
-    logSaveFile.commit();
+    this->imageLogSetting_->push_back(UploadedImage{
+        .channelName = channel->getName(),
+        .deletionLink = deletionLink,
+        .imageLink = imageLink,
+        .localPath = originalFilePath,
+        .timestamp = QDateTime::currentSecsSinceEpoch(),
+    });
+    qCDebug(chatterinoCommon) << "Saving ImageUploader.json";
+    this->sm_->save();
 }
 
 // extracting link to either image or its deletion from response body
@@ -121,6 +91,59 @@ QString getLinkFromResponse(NetworkResult response, QString pattern)
 
 void ImageUploader::save()
 {
+    this->sm_->save();
+}
+
+void ImageUploader::initialize(Settings &settings, Paths &paths)
+{
+    auto logPath = (getSettings()->logPath.getValue().isEmpty()
+                        ? getPaths()->messageLogDirectory
+                        : getSettings()->logPath);
+    const QString oldLogName = combinePath(logPath, "ImageUploader.json");
+
+    // read/write new one
+    const QString path = combinePath(logPath, "ImageUploader2.json");
+    this->sm_ = std::make_shared<pajlada::Settings::SettingManager>();
+    this->sm_->setPath(qPrintable(path));
+    this->sm_->setBackupEnabled(true);
+    this->sm_->setBackupSlots(9);
+
+    this->imageLogSetting_ = std::make_unique<
+        pajlada::Settings::Setting<std::vector<UploadedImage>>>(
+        "/uploadedImages", this->sm_);
+
+    // try to read old log
+    QFile oldLogFile(oldLogName);
+    bool isOldLogFileOkay =
+        oldLogFile.open(QIODevice::ReadOnly | QIODevice::Text);
+    if (isOldLogFileOkay)
+    {
+        auto data = oldLogFile.readAll();
+        rapidjson::Document doc;
+        doc.Parse(data.data(), data.size());
+        if (doc.HasParseError())
+        {
+            qCWarning(chatterinoCommon) << "Unable to read ImageUploader.json";
+            return;
+        }
+        std::vector<UploadedImage> temporary;
+        if (!doc.IsArray())
+        {
+            qCWarning(chatterinoCommon)
+                << "Unable to parse ImageUploader.json: not an array";
+            return;
+        }
+        if (!rj::getSafe(doc, temporary))
+        {
+            qCWarning(chatterinoCommon)
+                << "Unable to parse ImageUploader.json: getSafe failed";
+            return;
+        }
+        this->imageLogSetting_->setValue(temporary);
+        oldLogFile.close();
+        oldLogFile.rename(combinePath(logPath, "ImageUploader.old.json"));
+        this->sm_->save();
+    }
 }
 
 void ImageUploader::sendImageUploadRequest(RawImageData imageData,
