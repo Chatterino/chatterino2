@@ -600,6 +600,11 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
             break;
 
         case WM_NCMOUSEMOVE: {
+            if (!this->ui_.titlebarButtons)
+            {
+                break;
+            }
+
             if (overButton())
             {
                 *result = 0;
@@ -619,13 +624,16 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
         break;
 
         case WM_NCMOUSELEAVE: {
-            this->ui_.titlebarButtons->leave();
+            if (this->ui_.titlebarButtons)
+            {
+                this->ui_.titlebarButtons->leave();
+            }
         }
         break;
 
         case WM_NCLBUTTONDOWN:
         case WM_NCLBUTTONUP: {
-            if (!overButton())
+            if (!this->ui_.titlebarButtons || !overButton())
             {
                 break;
             }
@@ -715,6 +723,7 @@ void BaseWindow::calcButtonsSizes()
         return;
     }
 
+#ifdef USEWINSDK
     if ((static_cast<float>(this->width()) / this->scale()) < 300)
     {
         this->ui_.titlebarButtons->setSmallSize();
@@ -723,6 +732,7 @@ void BaseWindow::calcButtonsSizes()
     {
         this->ui_.titlebarButtons->setRegularSize();
     }
+#endif
 }
 
 void BaseWindow::drawCustomWindowFrame(QPainter &painter)

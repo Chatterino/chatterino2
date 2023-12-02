@@ -20,13 +20,34 @@ TitleBarButtons::TitleBarButtons(QWidget *window, TitleBarButton *minButton,
 
 void TitleBarButtons::hover(size_t ht, QPoint at)
 {
-    auto [button, others] = this->buttonForHt(ht);
-    button->ncEnter();
-    button->ncMove(button->mapFromGlobal(at));
-    for (auto *other : others)
+    TitleBarButton *hovered{};
+    TitleBarButton *other1{};
+    TitleBarButton *other2{};
+    switch (ht)
     {
-        other->ncLeave();
+        case HTMAXBUTTON:
+            hovered = this->maxButton_;
+            other1 = this->minButton_;
+            other2 = this->closeButton_;
+            break;
+        case HTMINBUTTON:
+            hovered = this->minButton_;
+            other1 = this->maxButton_;
+            other2 = this->closeButton_;
+            break;
+        case HTCLOSE:
+            hovered = this->closeButton_;
+            other1 = this->minButton_;
+            other2 = this->maxButton_;
+            break;
+        default:
+            Q_ASSERT_X(false, Q_FUNC_INFO, "Precondition violated");
+            return;
     }
+    hovered->ncEnter();
+    hovered->ncMove(hovered->mapFromGlobal(at));
+    other1->ncLeave();
+    other2->ncLeave();
 }
 
 void TitleBarButtons::leave()
@@ -38,13 +59,13 @@ void TitleBarButtons::leave()
 
 void TitleBarButtons::mouseDown(size_t ht, QPoint at)
 {
-    auto [button, others] = this->buttonForHt(ht);
+    auto *button = this->buttonForHt(ht);
     button->ncMouseDown(button->mapFromGlobal(at));
 }
 
 void TitleBarButtons::mouseUp(size_t ht, QPoint at)
 {
-    auto [button, others] = this->buttonForHt(ht);
+    auto *button = this->buttonForHt(ht);
     button->ncMouseUp(button->mapFromGlobal(at));
 }
 
@@ -70,21 +91,19 @@ void TitleBarButtons::setRegularSize()
     this->closeButton_->setScaleIndependantSize(46, 30);
 }
 
-std::pair<TitleBarButton *, std::array<TitleBarButton *, 2>>
-    TitleBarButtons::buttonForHt(size_t ht) const
+TitleBarButton *TitleBarButtons::buttonForHt(size_t ht) const
 {
     switch (ht)
     {
         case HTMAXBUTTON:
-            return {this->maxButton_, {this->minButton_, this->closeButton_}};
+            return this->maxButton_;
         case HTMINBUTTON:
-            return {this->minButton_, {this->maxButton_, this->closeButton_}};
+            return this->minButton_;
         case HTCLOSE:
-            return {this->closeButton_, {this->minButton_, this->maxButton_}};
+            return this->closeButton_;
         default:
-            Q_ASSERT_X(false, Q_FUNC_INFO, "No button for hittest value found");
-            return {this->closeButton_,
-                    {this->minButton_, this->maxButton_}};  // fallback
+            Q_ASSERT_X(false, Q_FUNC_INFO, "Precondition violated");
+            return nullptr;
     }
 }
 

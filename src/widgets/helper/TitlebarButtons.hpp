@@ -5,8 +5,6 @@ class QWidget;
 
 #include <QtGlobal>
 
-#include <tuple>
-
 namespace chatterino {
 
 #ifdef USEWINSDK
@@ -18,9 +16,18 @@ public:
     TitleBarButtons(QWidget *window, TitleBarButton *minButton,
                     TitleBarButton *maxButton, TitleBarButton *closeButton);
 
+    /// @pre ht must be one of { HTMAXBUTTON, HTMINBUTTON, HTCLOSE }.
+    /// @param at The global position of the event
     void hover(size_t ht, QPoint at);
+
     void leave();
+
+    /// @pre ht must be one of { HTMAXBUTTON, HTMINBUTTON, HTCLOSE }.
+    /// @param at The global position of the event
     void mouseDown(size_t ht, QPoint at);
+
+    /// @pre ht must be one of { HTMAXBUTTON, HTMINBUTTON, HTCLOSE }.
+    /// @param at The global position of the event
     void mouseUp(size_t ht, QPoint at);
 
     void updateMaxButton();
@@ -29,8 +36,8 @@ public:
     void setRegularSize();
 
 private:
-    std::pair<TitleBarButton *, std::array<TitleBarButton *, 2>> buttonForHt(
-        size_t ht) const;
+    /// @pre ht must be one of { HTMAXBUTTON, HTMINBUTTON, HTCLOSE }.
+    TitleBarButton *buttonForHt(size_t ht) const;
 
     QWidget *window_ = nullptr;
     TitleBarButton *minButton_ = nullptr;
