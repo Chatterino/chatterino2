@@ -93,7 +93,6 @@ QString getLinkFromResponse(NetworkResult response, QString pattern)
 
 void ImageUploader::save()
 {
-    this->uploadedImagesSetting_->setValue(this->images_.raw());
     this->sm_->save();
 }
 
