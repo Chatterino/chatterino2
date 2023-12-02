@@ -743,8 +743,10 @@ void UserInfoPopup::setData(const QString &name,
     }
     // If we're opening by ID, this will be called as soon as we get the information from twitch
 
-    if (auto *tc = dynamic_cast<TwitchChannel *>(this->channel_.get());
-        tc == nullptr)
+    auto type = this->channel_->getType();
+    if (type == Channel::Type::TwitchLive ||
+        type == Channel::Type::TwitchWhispers || type == Channel::Type::Irc ||
+        type == Channel::Type::Misc)
     {
         // not a normal twitch channel, the url opened by the button will be invalid, so hide the button
         this->ui_.usercardLabel->hide();
