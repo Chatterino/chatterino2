@@ -35,6 +35,7 @@ ImageUploaderPage::ImageUploaderPage()
         container->setContentsMargins(0, 0, 0, 0);
 
         auto buttons = container.emplace<QHBoxLayout>();
+        buttons->setContentsMargins(0, 0, 0, 0);
         auto *forget = buttons.emplace<QPushButton>().getElement();
         forget->setText("Remove image from log");
         buttons->addStretch();
