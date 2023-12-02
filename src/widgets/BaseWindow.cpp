@@ -614,6 +614,7 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
             if (isHoveringTitlebarButton())
             {
                 *result = 0;
+                returnValue = true;
                 long x = GET_X_LPARAM(msg->lParam);
                 long y = GET_Y_LPARAM(msg->lParam);
 
@@ -621,6 +622,7 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
                 GetWindowRect(HWND(winId()), &winrect);
                 QPoint globalPos(x, y);
                 this->ui_.titlebarButtons->hover(msg->wParam, globalPos);
+                this->lastEventWasNcMouseMove_ = true;
             }
             else
             {
@@ -629,6 +631,16 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
         }
         break;
 
+        case WM_MOUSEMOVE: {
+            if (!this->lastEventWasNcMouseMove_)
+            {
+                break;
+            }
+            this->lastEventWasNcMouseMove_ = false;
+            // Windows doesn't send WM_NCMOUSELEAVE in some cases,
+            // so the buttons show as hovered even though they're not hovered.
+            [[fallthrough]];
+        }
         case WM_NCMOUSELEAVE: {
             // WM_NCMOUSELEAVE gets sent when the mouse leaves any
             // non-client area. In case we have titlebar buttons,

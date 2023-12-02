@@ -140,6 +140,7 @@ private:
     QRect nextBounds_;
     QTimer useNextBounds_;
     bool isNotMinimizedOrMaximized_{};
+    bool lastEventWasNcMouseMove_ = false;
 #endif
 
     pajlada::Signals::SignalHolder connections_;
