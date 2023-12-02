@@ -1397,11 +1397,10 @@ void Split::showChatterList()
     multiWidget->setLayout(dockVbox);
     chatterDock->setWidget(multiWidget);
     chatterDock->setFloating(true);
-    chatterDock->show();
+    widgets::showAndMoveWindowTo(
+        chatterDock, this->mapToGlobal(QPoint{0, this->header_->height()}),
+        widgets::BoundsChecking::CursorPosition);
     chatterDock->activateWindow();
-    widgets::moveWindowTo(chatterDock,
-                          this->mapToGlobal(QPoint{0, this->header_->height()}),
-                          widgets::BoundsChecking::CursorPosition);
 }
 
 void Split::openSubPage()
