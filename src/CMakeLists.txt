@@ -636,6 +636,7 @@ set(SOURCE_FILES
         widgets/listview/GenericListModel.hpp
         widgets/listview/GenericListView.cpp
         widgets/listview/GenericListView.hpp
+        widgets/listview/ImagePtrItemDelegate.hpp
 
         widgets/settingspages/AboutPage.cpp
         widgets/settingspages/AboutPage.hpp
