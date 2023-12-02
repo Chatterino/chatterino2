@@ -1,18 +1,20 @@
 #pragma once
 
+#include "common/SignalVector.hpp"
 #include "common/Singleton.hpp"
 #include "pajlada/settings/setting.hpp"
 #include "pajlada/settings/settingmanager.hpp"
-#include "util/RapidjsonHelpers.hpp"
+#include "singletons/imageuploader/UploadedImage.hpp"
 
+#include <pajlada/signals/signalholder.hpp>
 #include <QMimeData>
 #include <QMutex>
+#include <qobject.h>
 #include <QString>
-#include <Qt>
 
-#include <cstdint>
 #include <memory>
 #include <queue>
+#include <vector>
 
 namespace chatterino {
 
@@ -26,15 +28,7 @@ struct RawImageData {
     QString format;
     QString filePath;
 };
-
-struct UploadedImage {
-    QString channelName;
-    QString deletionLink;
-    QString imageLink;
-    QString localPath;
-    int64_t timestamp{};
-};
-
+class UploadedImageModel;
 class ImageUploader final : public Singleton
 {
 public:
@@ -42,6 +36,7 @@ public:
     void upload(const QMimeData *source, ChannelPtr channel,
                 QPointer<ResizingTextEdit> outputTextEdit);
     void initialize(Settings &settings, Paths &paths) override;
+    UploadedImageModel *createModel(QObject *parent);
 
 private:
     void sendImageUploadRequest(RawImageData imageData, ChannelPtr channel,
@@ -61,78 +56,9 @@ private:
     std::queue<RawImageData> uploadQueue_;
 
     std::shared_ptr<pajlada::Settings::SettingManager> sm_;
+    SignalVector<UploadedImage> images_;
     std::unique_ptr<pajlada::Settings::Setting<std::vector<UploadedImage>>>
-        imageLogSetting_;
+        uploadedImagesSetting_;
+    pajlada::Signals::SignalHolder signals_;
 };
 }  // namespace chatterino
-   //
-namespace pajlada {
-template <>
-struct Serialize<chatterino::UploadedImage> {
-    static rapidjson::Value get(const chatterino::UploadedImage &value,
-                                rapidjson::Document::AllocatorType &a)
-    {
-        rapidjson::Value ret(rapidjson::kObjectType);
-
-        chatterino::rj::set(ret, "channelName", value.channelName, a);
-        chatterino::rj::set(ret, "imageLink", value.imageLink, a);
-        chatterino::rj::set(ret, "timestamp", value.timestamp, a);
-        chatterino::rj::set(ret, "localPath", value.localPath, a);
-        chatterino::rj::set(ret, "deletionLink", value.deletionLink, a);
-
-        return ret;
-    }
-};
-
-template <>
-struct Deserialize<chatterino::UploadedImage> {
-    static chatterino::UploadedImage get(const rapidjson::Value &value,
-                                         bool *error = nullptr)
-    {
-        chatterino::UploadedImage img;
-
-        if (!value.IsObject())
-        {
-            PAJLADA_REPORT_ERROR(error);
-            return img;
-        }
-
-        if (value["localPath"].IsNull())
-        {
-            img.localPath = QString();
-        }
-        else if (!chatterino::rj::getSafe(value, "localPath", img.localPath))
-        {
-            PAJLADA_REPORT_ERROR(error);
-            return img;
-        }
-        if (!chatterino::rj::getSafe(value, "imageLink", img.imageLink))
-        {
-            PAJLADA_REPORT_ERROR(error);
-            return img;
-        }
-        if (value["deletionLink"].IsNull())
-        {
-            img.deletionLink = QString();
-        }
-        else if (!chatterino::rj::getSafe(value, "deletionLink",
-                                          img.deletionLink))
-        {
-            PAJLADA_REPORT_ERROR(error);
-            return img;
-        }
-        if (!chatterino::rj::getSafe(value, "channelName", img.channelName))
-        {
-            PAJLADA_REPORT_ERROR(error);
-            return img;
-        }
-        if (!chatterino::rj::getSafe(value, "timestamp", img.timestamp))
-        {
-            PAJLADA_REPORT_ERROR(error);
-            return img;
-        }
-
-        return img;
-    }
-};
-}  // namespace pajlada
