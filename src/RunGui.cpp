@@ -311,7 +311,8 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
         pajlada::Settings::SettingManager::gSave();
     }
 
-    if (thread.joinable()) {
+    if (thread.joinable())
+    {
         thread.join();
     }
     chatterino::NetworkManager::deinit();
