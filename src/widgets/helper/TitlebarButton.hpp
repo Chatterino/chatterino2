@@ -23,7 +23,6 @@ public:
     TitleBarButtonStyle getButtonStyle() const;
     void setButtonStyle(TitleBarButtonStyle style_);
 
-#ifdef USEWINSDK
     /// Simulate a `mouseEnter` event.
     void ncEnter();
 
@@ -41,7 +40,6 @@ public:
     /// Simulate a `mouseRelease` event with the left mouse button.
     /// @param at a local position relative to this widget
     void ncMouseRelease(QPoint at);
-#endif
 
 protected:
     void paintEvent(QPaintEvent *) override;

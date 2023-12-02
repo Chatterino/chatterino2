@@ -599,10 +599,15 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
             *result = 0;
             break;
 
+        case WM_NCHITTEST:
+            returnValue = this->handleNCHITTEST(msg, result);
+            break;
+
         case WM_NCMOUSEHOVER:
         case WM_NCMOUSEMOVE: {
-            // WM_NCMOUSEMOVE gets sent when the mouse is moving in
-            // the non-client area - (mostly) the edges and the titlebar.
+            // WM_NCMOUSEMOVE/WM_NCMOUSEHOVER gets sent when the mouse is
+            // moving/hovering in the non-client area
+            // - (mostly) the edges and the titlebar.
             // We only need to handle the event for the titlebar buttons,
             // as Qt doesn't create mouse events for these events.
             if (!this->ui_.titlebarButtons)
@@ -682,10 +687,6 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
             }
         }
         break;
-
-        case WM_NCHITTEST:
-            returnValue = this->handleNCHITTEST(msg, result);
-            break;
 
         default:
             return QWidget::nativeEvent(eventType, message, result);
