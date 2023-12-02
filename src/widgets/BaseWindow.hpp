@@ -58,6 +58,12 @@ public:
 
     void moveTo(QPoint point, widgets::BoundsChecking mode);
 
+    /**
+     * Moves the window to the given point and does bounds checking according to `mode`
+     * Depending on the platform, either the move or the show will take place first
+     **/
+    void showAndMoveTo(QPoint point, widgets::BoundsChecking mode);
+
     float scale() const override;
     float qtFontScale() const;
 

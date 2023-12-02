@@ -508,6 +508,17 @@ void BaseWindow::moveTo(QPoint point, widgets::BoundsChecking mode)
     widgets::moveWindowTo(this, point, mode);
 }
 
+void BaseWindow::showAndMoveTo(QPoint point, widgets::BoundsChecking mode)
+{
+#ifdef Q_OS_WIN
+    this->show();
+    this->moveTo(point, mode);
+#else
+    this->moveTo(point, mode);
+    this->show();
+#endif
+}
+
 void BaseWindow::resizeEvent(QResizeEvent *)
 {
     // Queue up save because: Window resized
