@@ -508,6 +508,11 @@ void BaseWindow::moveTo(QPoint point, widgets::BoundsChecking mode)
     widgets::moveWindowTo(this, point, mode);
 }
 
+void BaseWindow::showAndMoveTo(QPoint point, widgets::BoundsChecking mode)
+{
+    widgets::showAndMoveWindowTo(this, point, mode);
+}
+
 void BaseWindow::resizeEvent(QResizeEvent *)
 {
     // Queue up save because: Window resized
@@ -559,6 +564,12 @@ void BaseWindow::closeEvent(QCloseEvent *)
 
 void BaseWindow::showEvent(QShowEvent *)
 {
+#ifdef Q_OS_WIN
+    if (this->flags_.has(BoundsCheckOnShow))
+    {
+        this->moveTo(this->pos(), widgets::BoundsChecking::CursorPosition);
+    }
+#endif
 }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
