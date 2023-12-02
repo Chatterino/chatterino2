@@ -388,7 +388,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
         // visibility of this is updated in setData
 
         auto usercard =
-            user.emplace<EffectLabel2>(this).assign(&this->ui_.usercard);
+            user.emplace<EffectLabel2>(this).assign(&this->ui_.usercardLabel);
         usercard->getLabel().setText("Usercard");
         auto mod = user.emplace<Button>(this);
         mod->setPixmap(getResources().buttons.mod);
@@ -747,7 +747,7 @@ void UserInfoPopup::setData(const QString &name,
         tc == nullptr)
     {
         // not a normal twitch channel, the url opened by the button will be invalid, so hide the button
-        this->ui_.usercard->hide();
+        this->ui_.usercardLabel->hide();
     }
 }
 

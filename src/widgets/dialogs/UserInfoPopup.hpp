@@ -82,7 +82,7 @@ private:
         Label *noMessagesLabel = nullptr;
         ChannelView *latestMessages = nullptr;
 
-        EffectLabel2 *usercard = nullptr;
+        EffectLabel2 *usercardLabel = nullptr;
     } ui_;
 
     class TimeoutWidget : public BaseWidget
