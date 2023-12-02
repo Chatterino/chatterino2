@@ -14,7 +14,7 @@ class TitleBarButtons : QObject
 {
 public:
     /// The parent of this object is set to `window`.
-    /// 
+    ///
     /// All parameters must have a parent;
     /// they're not deleted in the destructor.
     TitleBarButtons(QWidget *window, TitleBarButton *minButton,
