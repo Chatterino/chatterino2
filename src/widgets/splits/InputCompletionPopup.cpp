@@ -3,6 +3,8 @@
 #include "controllers/completion/sources/UserSource.hpp"
 #include "controllers/completion/strategies/ClassicEmoteStrategy.hpp"
 #include "controllers/completion/strategies/ClassicUserStrategy.hpp"
+#include "controllers/completion/strategies/SmartEmoteStrategy.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/splits/InputCompletionItem.hpp"
@@ -60,6 +62,13 @@ std::unique_ptr<completion::Source> InputCompletionPopup::getSource() const
     switch (*this->currentKind_)
     {
         case CompletionKind::Emote:
+            if (getSettings()->useSmartEmoteCompletion)
+            {
+                return std::make_unique<completion::EmoteSource>(
+                    this->currentChannel_.get(),
+                    std::make_unique<completion::SmartEmoteStrategy>(),
+                    this->callback_);
+            }
             return std::make_unique<completion::EmoteSource>(
                 this->currentChannel_.get(),
                 std::make_unique<completion::ClassicEmoteStrategy>(),
