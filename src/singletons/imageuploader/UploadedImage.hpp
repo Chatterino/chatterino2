@@ -13,7 +13,6 @@ struct UploadedImage {
     QString imageLink;
     QString localPath;
     int64_t timestamp{};
-    bool deleted = false;
 };
 }  // namespace chatterino
 
@@ -30,10 +29,6 @@ struct Serialize<chatterino::UploadedImage> {
         chatterino::rj::set(ret, "timestamp", value.timestamp, a);
         chatterino::rj::set(ret, "localPath", value.localPath, a);
         chatterino::rj::set(ret, "deletionLink", value.deletionLink, a);
-        if (value.deleted)
-        {
-            chatterino::rj::set(ret, "deleted", value.deleted, a);
-        }
 
         return ret;
     }
@@ -84,11 +79,6 @@ struct Deserialize<chatterino::UploadedImage> {
         if (!chatterino::rj::getSafe(value, "timestamp", img.timestamp))
         {
             PAJLADA_REPORT_ERROR(error);
-            return img;
-        }
-        if (!chatterino::rj::getSafe(value, "deleted", img.deleted))
-        {
-            img.deleted = false;
             return img;
         }
 
