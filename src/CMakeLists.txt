@@ -123,13 +123,15 @@ set(SOURCE_FILES
         controllers/completion/sources/UnifiedSource.hpp
         controllers/completion/sources/UserSource.cpp
         controllers/completion/sources/UserSource.hpp
-        controllers/completion/strategies/Strategy.hpp
         controllers/completion/strategies/ClassicEmoteStrategy.cpp
         controllers/completion/strategies/ClassicEmoteStrategy.hpp
         controllers/completion/strategies/ClassicUserStrategy.cpp
         controllers/completion/strategies/ClassicUserStrategy.hpp
         controllers/completion/strategies/CommandStrategy.cpp
         controllers/completion/strategies/CommandStrategy.hpp
+        controllers/completion/strategies/SmartEmoteStrategy.cpp
+        controllers/completion/strategies/SmartEmoteStrategy.cpp
+        controllers/completion/strategies/Strategy.hpp
         controllers/completion/TabCompletionModel.cpp
         controllers/completion/TabCompletionModel.hpp
 
