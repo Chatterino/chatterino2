@@ -571,7 +571,7 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
 
     bool returnValue = false;
 
-    auto overButton = [&]() {
+    auto isHoveringTitlebarButton = [&]() {
         auto ht = msg->wParam;
         return ht == HTMAXBUTTON || ht == HTMINBUTTON || ht == HTCLOSE;
     };
@@ -599,13 +599,19 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
             *result = 0;
             break;
 
+        case WM_NCMOUSEHOVER:
         case WM_NCMOUSEMOVE: {
+            // WM_NCMOUSEMOVE gets sent when the mouse is moving in
+            // the non-client area - (mostly) the edges and the titlebar.
+            // We only need to handle the event for the titlebar buttons,
+            // as Qt doesn't create mouse events for these events.
             if (!this->ui_.titlebarButtons)
             {
+                // we don't consume the event if we don't have custom buttons
                 break;
             }
 
-            if (overButton())
+            if (isHoveringTitlebarButton())
             {
                 *result = 0;
                 long x = GET_X_LPARAM(msg->lParam);
@@ -624,6 +630,9 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
         break;
 
         case WM_NCMOUSELEAVE: {
+            // WM_NCMOUSELEAVE gets sent when the mouse leaves any
+            // non-client area. In case we have titlebar buttons,
+            // we want to ensure they're deselected.
             if (this->ui_.titlebarButtons)
             {
                 this->ui_.titlebarButtons->leave();
@@ -633,7 +642,11 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
 
         case WM_NCLBUTTONDOWN:
         case WM_NCLBUTTONUP: {
-            if (!this->ui_.titlebarButtons || !overButton())
+            // WM_NCLBUTTON{DOWN, UP} gets called when the left mouse button
+            // was pressed in a non-client area.
+            // We simulate a mouse down/up event for the titlebar buttons
+            // as Qt doesn't create an event in that case.
+            if (!this->ui_.titlebarButtons || !isHoveringTitlebarButton())
             {
                 break;
             }
@@ -649,11 +662,11 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
             QPoint globalPos(x, y);
             if (msg->message == WM_NCLBUTTONDOWN)
             {
-                this->ui_.titlebarButtons->mouseDown(ht, globalPos);
+                this->ui_.titlebarButtons->mousePress(ht, globalPos);
             }
             else
             {
-                this->ui_.titlebarButtons->mouseUp(ht, globalPos);
+                this->ui_.titlebarButtons->mouseRelease(ht, globalPos);
             }
         }
         break;

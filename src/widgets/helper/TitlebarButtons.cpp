@@ -11,7 +11,8 @@ namespace chatterino {
 TitleBarButtons::TitleBarButtons(QWidget *window, TitleBarButton *minButton,
                                  TitleBarButton *maxButton,
                                  TitleBarButton *closeButton)
-    : window_(window)
+    : QObject(window)
+    , window_(window)
     , minButton_(minButton)
     , maxButton_(maxButton)
     , closeButton_(closeButton)
@@ -57,16 +58,16 @@ void TitleBarButtons::leave()
     this->closeButton_->ncLeave();
 }
 
-void TitleBarButtons::mouseDown(size_t ht, QPoint at)
+void TitleBarButtons::mousePress(size_t ht, QPoint at)
 {
     auto *button = this->buttonForHt(ht);
-    button->ncMouseDown(button->mapFromGlobal(at));
+    button->ncMousePress(button->mapFromGlobal(at));
 }
 
-void TitleBarButtons::mouseUp(size_t ht, QPoint at)
+void TitleBarButtons::mouseRelease(size_t ht, QPoint at)
 {
     auto *button = this->buttonForHt(ht);
-    button->ncMouseUp(button->mapFromGlobal(at));
+    button->ncMouseRelease(button->mapFromGlobal(at));
 }
 
 void TitleBarButtons::updateMaxButton()
