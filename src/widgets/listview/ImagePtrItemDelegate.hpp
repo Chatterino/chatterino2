@@ -1,19 +1,26 @@
 #pragma once
 
+#include "common/QLogging.hpp"
 #include "messages/Image.hpp"
 #include "messages/ImageSet.hpp"
 
 #include <QModelIndex>
-#include <qnamespace.h>
 #include <QPainter>
 #include <QStyledItemDelegate>
+#include <Qt>
+#include <QTableView>
 
 namespace chatterino {
 class ImagePtrItemDelegate : public QStyledItemDelegate
 {
     std::map<QString, ImagePtr> ownedImages_;
+    QTableView *view_;
 
 public:
+    ImagePtrItemDelegate(QTableView *view)
+        : view_(view)
+    {
+    }
     static constexpr auto IMAGE_URL_ROLE = Qt::UserRole + 1;
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
@@ -27,6 +34,14 @@ public:
             auto opt = img->pixmapOrLoad();
             if (!opt)  // wait for next time
             {
+                if (img->isEmpty())
+                {
+                    painter->drawText(option.rect, "[Error]");
+                }
+                else
+                {
+                    painter->drawText(option.rect, "Loading");
+                }
                 return;
             }
             auto pixmap = *opt;
@@ -56,7 +71,14 @@ public:
         }
         auto img = Image::fromUrl(Url{url});
 
-        img->pixmapOrLoad();
+        img->pixmapOrLoad([this, index]() {
+            // wait for it to parse
+            QTimer::singleShot(100, [this, index]() {
+                this->view_->repaint();
+                this->view_->update(index);
+            });
+        });
+
         // You cannot stop me, clang-tidy
         auto *bleh = const_cast<ImagePtrItemDelegate *>(this);
         bleh->ownedImages_[url] = img;

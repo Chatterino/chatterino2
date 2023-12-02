@@ -21,7 +21,6 @@
 namespace chatterino {
 
 ImageUploaderPage::ImageUploaderPage()
-    : imgDelegate_(new ImagePtrItemDelegate())
 {
     LayoutCreator<ImageUploaderPage> layoutCreator(this);
     auto tabs = layoutCreator.emplace<QTabWidget>();
@@ -42,6 +41,7 @@ ImageUploaderPage::ImageUploaderPage()
 
         auto *view = layout.emplace<QTableView>().getElement();
         view->setModel(model);
+        this->imgDelegate_ = new ImagePtrItemDelegate(view);
 
         view->setItemDelegateForColumn(0, this->imgDelegate_);
         view->setSelectionMode(QAbstractItemView::SingleSelection);

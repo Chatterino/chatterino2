@@ -2,6 +2,7 @@
 
 #include "common/Aliases.hpp"
 #include "common/Common.hpp"
+#include "common/NetworkResult.hpp"
 
 #include <boost/variant.hpp>
 #include <pajlada/signals/signal.hpp>
@@ -13,6 +14,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <functional>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -80,7 +82,7 @@ public:
     const Url &url() const;
     bool loaded() const;
     // either returns the current pixmap, or triggers loading it (lazy loading)
-    std::optional<QPixmap> pixmapOrLoad() const;
+    std::optional<QPixmap> pixmapOrLoad(std::function<void()> cb = nullptr);
     void load() const;
     qreal scale() const;
     bool isEmpty() const;
@@ -110,6 +112,8 @@ private:
 
     // gui thread only
     std::unique_ptr<detail::Frames> frames_{};
+
+    std::function<void()> finishedLoadingCb_;
 
     friend class ImageExpirationPool;
 };

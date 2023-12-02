@@ -24,6 +24,7 @@
 #include <functional>
 #include <queue>
 #include <thread>
+#include <utility>
 
 // Duration between each check of every Image instance
 const auto IMAGE_POOL_CLEANUP_INTERVAL = std::chrono::minutes(1);
@@ -423,7 +424,7 @@ bool Image::loaded() const
     return this->frames_->current().has_value();
 }
 
-std::optional<QPixmap> Image::pixmapOrLoad() const
+std::optional<QPixmap> Image::pixmapOrLoad(std::function<void()> cb)
 {
     assertInGuiThread();
 
@@ -432,6 +433,10 @@ std::optional<QPixmap> Image::pixmapOrLoad() const
     // See src/messages/layouts/MessageLayoutElement.cpp ImageLayoutElement::paint, for example.
     this->lastUsed_ = std::chrono::steady_clock::now();
 
+    if (cb != nullptr)
+    {
+        this->finishedLoadingCb_ = std::move(cb);
+    }
     this->load();
 
     return this->frames_->current();
@@ -573,6 +578,20 @@ void Image::actuallyLoad()
             shared->empty_ = true;
 
             return true;
+        })
+        .finally([weak]() {
+            postToThread([weak]() {
+                auto shared = weak.lock();
+                if (!shared)
+                {
+                    return;
+                }
+
+                if (shared->finishedLoadingCb_ != nullptr)
+                {
+                    shared->finishedLoadingCb_();
+                }
+            });
         })
         .execute();
 }
