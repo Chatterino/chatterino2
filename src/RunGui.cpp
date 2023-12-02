@@ -245,7 +245,7 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
         restartOnSignal = value;
     });
 
-    auto thread = std::jthread([dir = paths.miscDirectory] {
+    auto thread = std::thread([dir = paths.miscDirectory] {
 #ifdef Q_OS_WIN32
         {
             auto path = combinePath(dir, "Update.exe");
@@ -311,6 +311,7 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
         pajlada::Settings::SettingManager::gSave();
     }
 
+    thread.join();
     chatterino::NetworkManager::deinit();
 
 #ifdef USEWINSDK
