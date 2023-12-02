@@ -100,51 +100,6 @@ ExternalToolsPage::ExternalToolsPage()
         lineEdit->setPlaceholderText("custom-player-scheme://");
         groupLayout->addRow("Custom stream player URI Scheme:", lineEdit);
     }
-    layout->addSpacing(16);
-
-    {
-        auto group = layout.emplace<QGroupBox>("Image Uploader");
-        auto groupLayout = group.setLayoutType<QFormLayout>();
-
-        const auto description = new QLabel(
-            "You can set custom host for uploading images, like "
-            "imgur.com or s-ul.eu.<br>Check " +
-            formatRichNamedLink("https://chatterino.com/help/image-uploader",
-                                "this guide") +
-            " for help.");
-        description->setWordWrap(true);
-        description->setStyleSheet("color: #bbb");
-        description->setTextFormat(Qt::RichText);
-        description->setTextInteractionFlags(Qt::TextBrowserInteraction |
-                                             Qt::LinksAccessibleByKeyboard |
-                                             Qt::LinksAccessibleByMouse);
-        description->setOpenExternalLinks(true);
-
-        groupLayout->setWidget(0, QFormLayout::SpanningRole, description);
-
-        groupLayout->addRow(this->createCheckBox(
-            "Enable image uploader", getSettings()->imageUploaderEnabled));
-        groupLayout->addRow(
-            this->createCheckBox("Ask for confirmation when uploading an image",
-                                 getSettings()->askOnImageUpload));
-
-        groupLayout->addRow(
-            "Request URL: ",
-            this->createLineEdit(getSettings()->imageUploaderUrl));
-        groupLayout->addRow(
-            "Form field: ",
-            this->createLineEdit(getSettings()->imageUploaderFormField));
-        groupLayout->addRow(
-            "Extra Headers: ",
-            this->createLineEdit(getSettings()->imageUploaderHeaders));
-        groupLayout->addRow(
-            "Image link: ",
-            this->createLineEdit(getSettings()->imageUploaderLink));
-        groupLayout->addRow(
-            "Deletion link: ",
-            this->createLineEdit(getSettings()->imageUploaderDeletionLink));
-    }
-
     layout->addStretch(1);
 }
 
