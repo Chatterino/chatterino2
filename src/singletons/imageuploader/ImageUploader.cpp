@@ -121,15 +121,7 @@ void ImageUploader::initialize(Settings &settings, Paths &paths)
     this->uploadedImagesSetting_ = std::make_unique<
         pajlada::Settings::Setting<std::vector<UploadedImage>>>(
         "/uploadedImages", this->sm_);
-
-    for (const auto &item : this->uploadedImagesSetting_->getValue())
-    {
-        this->images_.append(item);
-    }
-    this->signals_.addConnection(
-        this->images_.delayedItemsChanged.connect([this]() {
-            this->uploadedImagesSetting_->setValue(this->images_.raw());
-        }));
+    this->sm_->load();
 
     // try to read old log
     QFile oldLogFile(oldLogName);
@@ -164,6 +156,20 @@ void ImageUploader::initialize(Settings &settings, Paths &paths)
         }
         oldLogFile.close();
         oldLogFile.rename(combinePath(logPath, "ImageUploader.old.json"));
+    }
+
+    for (const auto &item : this->uploadedImagesSetting_->getValue())
+    {
+        this->images_.append(item);
+    }
+    this->signals_.addConnection(
+        this->images_.delayedItemsChanged.connect([this]() {
+            this->uploadedImagesSetting_->setValue(this->images_.raw());
+        }));
+
+    if (isOldLogFileOkay)
+    {
+        this->uploadedImagesSetting_->setValue(this->images_.raw());
         this->sm_->save();
     }
 }
