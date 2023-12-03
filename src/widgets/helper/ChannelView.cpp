@@ -1291,7 +1291,7 @@ MessageElementFlags ChannelView::getFlags() const
     }
 
     if (this->sourceChannel_ == app->twitch->mentionsChannel ||
-        this->underlyingChannel_ == app->twitch->automodChannel)
+        this->sourceChannel_ == app->twitch->automodChannel)
     {
         flags.set(MessageElementFlag::ChannelName);
     }
