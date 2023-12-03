@@ -18,6 +18,7 @@
 
 #    include <memory>
 #    include <utility>
+#    include <variant>
 
 namespace chatterino {
 
@@ -300,6 +301,39 @@ const std::map<QString, std::unique_ptr<Plugin>> &PluginController::plugins()
     const
 {
     return this->plugins_;
+}
+std::pair<bool, QStringList> PluginController::updateCustomCompletions(
+    const QString &query, const QString &fullTextContent, int cursorPosition,
+    bool isFirstWord)
+{
+    QStringList results;
+    for (const auto &[name, pl] : getApp()->plugins->plugins())
+    {
+        auto opt = pl->getCompletionCallback();
+        if (opt)
+        {
+            auto cb = *opt;
+            auto errOrList =
+                cb(query, fullTextContent, cursorPosition, isFirstWord);
+            if (std::holds_alternative<int>(errOrList))
+            {
+                int err = std::get<int>(errOrList);
+                qCDebug(chatterinoLua)
+                    << "Got error from plugin " << pl->meta.name
+                    << " while refreshing tab completion: "
+                    << lua::humanErrorText(pl->state_, err);
+                continue;
+            }
+            auto list = std::get<lua::api::CompletionList>(errOrList);
+            if (list.hideOthers)
+            {
+                results = QStringList(list.values.begin(), list.values.end());
+                return {true, results};
+            }
+            results += QStringList(list.values.begin(), list.values.end());
+        }
+    }
+    return {false, results};
 }
 
 };  // namespace chatterino

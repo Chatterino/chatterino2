@@ -52,6 +52,10 @@ public:
      */
     static bool isPluginEnabled(const QString &id);
 
+    std::pair<bool, QStringList> updateCustomCompletions(
+        const QString &query, const QString &fullTextContent,
+        int cursorPosition, bool isFirstWord);
+
 private:
     void loadPlugins();
     void load(const QFileInfo &index, const QDir &pluginDir,

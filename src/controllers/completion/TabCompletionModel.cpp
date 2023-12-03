@@ -1,5 +1,6 @@
 #include "controllers/completion/TabCompletionModel.hpp"
 
+#include "Application.hpp"
 #include "common/Channel.hpp"
 #include "controllers/completion/sources/CommandSource.hpp"
 #include "controllers/completion/sources/EmoteSource.hpp"
@@ -9,6 +10,9 @@
 #include "controllers/completion/strategies/ClassicUserStrategy.hpp"
 #include "controllers/completion/strategies/CommandStrategy.hpp"
 #include "controllers/completion/strategies/SmartEmoteStrategy.hpp"
+#include "controllers/plugins/LuaUtilities.hpp"
+#include "controllers/plugins/Plugin.hpp"
+#include "controllers/plugins/PluginController.hpp"
 #include "singletons/Settings.hpp"
 
 namespace chatterino {
@@ -19,7 +23,9 @@ TabCompletionModel::TabCompletionModel(Channel &channel, QObject *parent)
 {
 }
 
-void TabCompletionModel::updateResults(const QString &query, bool isFirstWord)
+void TabCompletionModel::updateResults(const QString &query,
+                                       const QString &fullTextContent,
+                                       int cursorPosition, bool isFirstWord)
 {
     this->updateSourceFromQuery(query);
 
@@ -29,6 +35,17 @@ void TabCompletionModel::updateResults(const QString &query, bool isFirstWord)
 
         // Copy results to this model
         QStringList results;
+#ifdef CHATTERINO_HAVE_PLUGINS
+        // Try plugins first
+        bool done{};
+        std::tie(done, results) = getApp()->plugins->updateCustomCompletions(
+            query, fullTextContent, cursorPosition, isFirstWord);
+        if (done)
+        {
+            this->setStringList(results);
+            return;
+        }
+#endif
         this->source_->addToStringList(results, 0, isFirstWord);
         this->setStringList(results);
     }
