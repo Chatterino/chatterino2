@@ -127,7 +127,16 @@ WindowManager::WindowManager()
     });
 }
 
-WindowManager::~WindowManager() = default;
+WindowManager::~WindowManager()
+{
+    for (const auto &window : this->windows_)
+    {
+        // We would prefer to use window->deleteLater() here, but the timings are too tight
+        // Channel's completion model gets destroyed before the deleteLater call actually deletes the
+        // UI objects that rely on the completion model
+        delete window;
+    }
+}
 
 MessageElementFlags WindowManager::getWordFlags()
 {

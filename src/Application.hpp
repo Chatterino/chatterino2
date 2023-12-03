@@ -98,6 +98,7 @@ public:
     Emotes *const emotes{};
     AccountController *const accounts{};
     HotkeyController *const hotkeys{};
+    TwitchIrcServer *const twitch{};
     WindowManager *const windows{};
     Toasts *const toasts{};
     ImageUploader *const imageUploader{};
@@ -106,7 +107,6 @@ public:
     CommandController *const commands{};
     NotificationController *const notifications{};
     HighlightController *const highlights{};
-    TwitchIrcServer *const twitch{};
     ChatterinoBadges *const chatterinoBadges{};
     FfzBadges *const ffzBadges{};
     SeventvBadges *const seventvBadges{};
