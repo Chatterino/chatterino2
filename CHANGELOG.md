@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Major: Allow use of Twitch follower emotes in other channels if subscribed. (#4922)
+- Major: Add `/automod` split to track automod caught messages across all open channels the user moderates. (#4986)
 - Minor: Migrate to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
 - Minor: The account switcher is now styled to match your theme. (#4817)
 - Minor: Add an invisible resize handle to the bottom of frameless user info popups and reply thread popups. (#4795)
@@ -12,7 +13,6 @@
 - Minor: Add menu actions to reply directly to a message or the original thread root. (#4923)
 - Minor: The `/reply` command now replies to the latest message of the user. (#4919)
 - Minor: All sound capabilities can now be disabled by setting your "Sound backend" setting to "Null" and restarting Chatterino. (#4978)
-- Minor: Add `/automod` split to track automod caught messages across all open channels the user moderates. (#4986)
 - Minor: Add an option to use new experimental smarter emote completion. (#4987)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
