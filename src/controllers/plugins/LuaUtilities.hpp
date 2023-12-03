@@ -23,6 +23,10 @@ struct CommandContext;
 
 namespace chatterino::lua {
 
+namespace api {
+    struct CompletionList;
+}  // namespace api
+
 constexpr int ERROR_BAD_PEEK = LUA_OK - 1;
 
 /**
@@ -65,6 +69,7 @@ bool peek(lua_State *L, double *out, StackIdx idx = -1);
 bool peek(lua_State *L, QString *out, StackIdx idx = -1);
 bool peek(lua_State *L, QByteArray *out, StackIdx idx = -1);
 bool peek(lua_State *L, std::string *out, StackIdx idx = -1);
+bool peek(lua_State *L, api::CompletionList *out, StackIdx idx = -1);
 
 /**
  * @brief Converts Lua object at stack index idx to a string.

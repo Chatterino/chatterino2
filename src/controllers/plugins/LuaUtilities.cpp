@@ -4,6 +4,7 @@
 #    include "common/Channel.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandContext.hpp"
+#    include "controllers/plugins/LuaAPI.hpp"
 
 #    include <lauxlib.h>
 #    include <lua.h>
@@ -197,6 +198,27 @@ bool peek(lua_State *L, std::string *out, StackIdx idx)
         assert(false && "string longer than INT_MAX, shit's fucked, yo");
     }
     *out = std::string(str, len);
+    return true;
+}
+
+bool peek(lua_State *L, api::CompletionList *out, StackIdx idx)
+{
+    int typ = lua_getfield(L, idx, "values");
+    if (typ != LUA_TTABLE)
+    {
+        lua_pop(L, 1);
+        return false;
+    }
+    if (!lua::pop(L, &out->values, -1))
+    {
+        return false;
+    }
+    lua_getfield(L, idx, "hide_others");
+    if (!lua::pop(L, &out->hideOthers))
+    {
+        return false;
+    }
+    lua_pop(L, 1);
     return true;
 }
 
