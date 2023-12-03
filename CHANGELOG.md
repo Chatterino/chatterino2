@@ -43,6 +43,7 @@
 - Bugfix: Fixed lookahead/-behind not working in _Ignores_. (#4965)
 - Bugfix: Fixed Image Uploader accidentally deleting images with some hosts when link resolver was enabled. (#4971)
 - Bugfix: Fixed rare crash with Image Uploader when closing a split right after starting an upload. (#4971)
+- Bugfix: Fixed support for Windows 11 Snap layouts. (#4994)
 - Bugfix: Fixed some windows appearing between screens. (#4797)
 - Dev: Run miniaudio in a separate thread, and simplify it to not manage the device ourselves. There's a chance the simplification is a bad idea. (#4978)
 - Dev: Change clang-format from v14 to v16. (#4929)
