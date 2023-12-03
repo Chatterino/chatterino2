@@ -196,17 +196,19 @@ template <typename ReturnType, typename... Args>
 class CallbackFunction
 {
     StackIdx stackidx;
+    lua_State *L;
 
 public:
-    CallbackFunction(StackIdx stackid)
+    CallbackFunction(lua_State *L, StackIdx stackid)
         : stackidx(stackid)
+        , L(L)
     {
     }
-    std::variant<int, ReturnType> operator()(lua_State *L, Args... arguments)
+    std::variant<int, ReturnType> operator()(Args... arguments)
     {
         (  // apparently this calls lua::push() for every Arg
-            [&L, &arguments] {
-                lua::push(L, arguments);
+            [this, &arguments] {
+                lua::push(this->L, arguments);
             }(),
             ...);
 

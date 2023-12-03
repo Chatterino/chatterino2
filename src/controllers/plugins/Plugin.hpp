@@ -1,5 +1,7 @@
 #pragma once
 
+#include "controllers/plugins/LuaAPI.hpp"
+#include "controllers/plugins/LuaUtilities.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "Application.hpp"
 
@@ -83,6 +85,32 @@ public:
     const QDir &loadDirectory() const
     {
         return this->loadDirectory_;
+    }
+
+    std::optional<lua::CallbackFunction<lua::api::CompletionList, QString,
+                                        QString, int, bool>>
+        getCompletionCallback()
+    {
+        if (this->state_ == nullptr)
+        {
+            return {};
+        }
+        // this uses magic enum to help automatic tooling find usages
+        auto typ =
+            lua_getfield(this->state_, LUA_REGISTRYINDEX,
+                         QString("c2cb-%1")
+                             .arg(magic_enum::enum_name<lua::api::EventType>(
+                                      lua::api::EventType::CompletionRequested)
+                                      .data())
+                             .toStdString()
+                             .c_str());
+        if (typ != LUA_TFUNCTION)
+        {
+            return {};
+        }
+        return {lua::CallbackFunction<lua::api::CompletionList, QString,
+                                      QString, int, bool>(
+            this->state_, lua_gettop(this->state_))};
     }
 
 private:
