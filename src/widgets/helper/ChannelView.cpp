@@ -1282,14 +1282,16 @@ MessageElementFlags ChannelView::getFlags() const
             flags.set(MessageElementFlag::ModeratorTools);
         }
         if (this->underlyingChannel_ == app->twitch->mentionsChannel ||
-            this->underlyingChannel_ == app->twitch->liveChannel)
+            this->underlyingChannel_ == app->twitch->liveChannel ||
+            this->underlyingChannel_ == app->twitch->automodChannel)
         {
             flags.set(MessageElementFlag::ChannelName);
             flags.unset(MessageElementFlag::ChannelPointReward);
         }
     }
 
-    if (this->sourceChannel_ == app->twitch->mentionsChannel)
+    if (this->sourceChannel_ == app->twitch->mentionsChannel ||
+        this->sourceChannel_ == app->twitch->automodChannel)
     {
         flags.set(MessageElementFlag::ChannelName);
     }
@@ -2347,11 +2349,13 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
                              this->split_;
     bool isMentions =
         this->channel()->getType() == Channel::Type::TwitchMentions;
-    if (isSearch || isMentions || isReplyOrUserCard)
+    bool isAutomod = this->channel()->getType() == Channel::Type::TwitchAutomod;
+    if (isSearch || isMentions || isReplyOrUserCard || isAutomod)
     {
         const auto &messagePtr = layout->getMessagePtr();
         menu->addAction("&Go to message", [this, &messagePtr, isSearch,
-                                           isMentions, isReplyOrUserCard] {
+                                           isMentions, isReplyOrUserCard,
+                                           isAutomod] {
             if (isSearch)
             {
                 if (const auto &search =
@@ -2360,16 +2364,17 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
                     search->goToMessage(messagePtr);
                 }
             }
-            else if (isMentions)
+            else if (isMentions || isAutomod)
             {
                 getApp()->windows->scrollToMessage(messagePtr);
             }
             else if (isReplyOrUserCard)
             {
-                // If the thread is in the mentions channel,
+                // If the thread is in the mentions or automod channel,
                 // we need to find the original split.
-                if (this->split_->getChannel()->getType() ==
-                    Channel::Type::TwitchMentions)
+                const auto type = this->split_->getChannel()->getType();
+                if (type == Channel::Type::TwitchMentions ||
+                    type == Channel::Type::TwitchAutomod)
                 {
                     getApp()->windows->scrollToMessage(messagePtr);
                 }
@@ -2606,6 +2611,8 @@ bool ChannelView::mayContainMessage(const MessagePtr &message)
             return message->flags.has(MessageFlag::Highlighted);
         case Channel::Type::TwitchLive:
             return message->flags.has(MessageFlag::System);
+        case Channel::Type::TwitchAutomod:
+            return message->flags.has(MessageFlag::AutoMod);
         case Channel::Type::TwitchEnd:  // TODO: not used?
         case Channel::Type::None:       // Unspecific
         case Channel::Type::Misc:       // Unspecific

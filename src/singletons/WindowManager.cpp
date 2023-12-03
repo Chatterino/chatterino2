@@ -603,6 +603,10 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
             obj.insert("name", channel.get()->getName());
         }
         break;
+        case Channel::Type::TwitchAutomod: {
+            obj.insert("type", "automod");
+        }
+        break;
         case Channel::Type::TwitchMentions: {
             obj.insert("type", "mentions");
         }
@@ -675,6 +679,10 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
     else if (descriptor.type_ == "live")
     {
         return app->twitch->liveChannel;
+    }
+    else if (descriptor.type_ == "automod")
+    {
+        return app->twitch->automodChannel;
     }
     else if (descriptor.type_ == "irc")
     {
