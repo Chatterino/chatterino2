@@ -44,6 +44,7 @@
 - Bugfix: Fixed lookahead/-behind not working in _Ignores_. (#4965)
 - Bugfix: Fixed Image Uploader accidentally deleting images with some hosts when link resolver was enabled. (#4971)
 - Bugfix: Fixed rare crash with Image Uploader when closing a split right after starting an upload. (#4971)
+- Bugfix: Fixed some windows appearing between screens. (#4797)
 - Dev: Run miniaudio in a separate thread, and simplify it to not manage the device ourselves. There's a chance the simplification is a bad idea. (#4978)
 - Dev: Change clang-format from v14 to v16. (#4929)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
@@ -75,6 +76,7 @@
 - Dev: `Details` file properties tab is now populated on Windows. (#4912)
 - Dev: Removed `Outcome` from network requests. (#4959)
 - Dev: Added Tests for Windows and MacOS in CI. (#4970)
+- Dev: Move `clang-tidy` checker to its own CI job. (#4996)
 - Dev: Refactored the Image Uploader feature. (#4971)
 - Dev: Fixed deadlock and use-after-free in tests. (#4981)
 

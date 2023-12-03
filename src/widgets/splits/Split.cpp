@@ -192,8 +192,12 @@ namespace {
     void showTutorialVideo(QWidget *parent, const QString &source,
                            const QString &title, const QString &description)
     {
-        auto window =
-            new BasePopup(BaseWindow::Flags::EnableCustomFrame, parent);
+        auto *window = new BasePopup(
+            {
+                BaseWindow::EnableCustomFrame,
+                BaseWindow::BoundsCheckOnShow,
+            },
+            parent);
         window->setWindowTitle("Chatterino - " + title);
         window->setAttribute(Qt::WA_DeleteOnClose);
         auto layout = new QVBoxLayout();
@@ -1393,7 +1397,9 @@ void Split::showChatterList()
     multiWidget->setLayout(dockVbox);
     chatterDock->setWidget(multiWidget);
     chatterDock->setFloating(true);
-    chatterDock->show();
+    widgets::showAndMoveWindowTo(
+        chatterDock, this->mapToGlobal(QPoint{0, this->header_->height()}),
+        widgets::BoundsChecking::CursorPosition);
     chatterDock->activateWindow();
 }
 
