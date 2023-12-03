@@ -1853,7 +1853,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                         std::move(thumb),
                         element->getTooltip(),
                         thumbnailSize,
-                        thumbnailSize
+                        thumbnailSize,
                     });
                 }
                 else

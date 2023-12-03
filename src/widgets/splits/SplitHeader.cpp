@@ -952,10 +952,12 @@ void SplitHeader::enterEvent(QEvent *event)
         this->tooltipWidget_->setOne({nullptr, this->tooltipText_});
         this->tooltipWidget_->setWordWrap(true);
         this->tooltipWidget_->adjustSize();
-        auto pos = this->mapToGlobal(this->rect().bottomLeft()) +
-                   QPoint((this->width() - this->tooltipWidget_->width()) / 2, 1);
+        auto pos =
+            this->mapToGlobal(this->rect().bottomLeft()) +
+            QPoint((this->width() - this->tooltipWidget_->width()) / 2, 1);
 
-        this->tooltipWidget_->moveTo(pos, widgets::BoundsChecking::CursorPosition);
+        this->tooltipWidget_->moveTo(pos,
+                                     widgets::BoundsChecking::CursorPosition);
         this->tooltipWidget_->show();
     }
 
