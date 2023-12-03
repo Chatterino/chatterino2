@@ -37,7 +37,6 @@ jobs:
             plugins: false
             skip-artifact: false
             skip-crashpad: false
-            clang-tidy-review: false
           # Ubuntu 22.04, Qt 5.15
           - os: ubuntu-22.04
             qt-version: 5.15.2
@@ -45,7 +44,6 @@ jobs:
             plugins: false
             skip-artifact: false
             skip-crashpad: false
-            clang-tidy-review: true
           # Ubuntu 22.04, Qt 6.2.4 - tests LTO & plugins
           - os: ubuntu-22.04
             qt-version: 6.2.4
@@ -53,7 +51,6 @@ jobs:
             plugins: true
             skip-artifact: false
             skip-crashpad: false
-            clang-tidy-review: false
           # macOS
           - os: macos-latest
             qt-version: 5.15.2
@@ -61,7 +58,6 @@ jobs:
             plugins: false
             skip-artifact: false
             skip-crashpad: false
-            clang-tidy-review: false
           # Windows
           - os: windows-latest
             qt-version: 6.5.0
@@ -69,7 +65,6 @@ jobs:
             plugins: false
             skip-artifact: false
             skip-crashpad: false
-            clang-tidy-review: false
           # Windows 7/8
           - os: windows-latest
             qt-version: 5.15.2
@@ -77,7 +72,6 @@ jobs:
             plugins: false
             skip-artifact: false
             skip-crashpad: true
-            clang-tidy-review: false
 
       fail-fast: false
 
@@ -328,38 +322,6 @@ jobs:
             ..
           make -j"$(nproc)"
         shell: bash
-
-      - name: clang-tidy review
-        if: matrix.clang-tidy-review && github.event_name == 'pull_request'
-        timeout-minutes: 10
-        uses: ZedThree/clang-tidy-review@v0.14.0
-        with:
-          build_dir: build-clang-tidy
-          config_file: ".clang-tidy"
-          split_workflow: true
-          exclude: "lib/*"
-          cmake_command: >-
-            cmake -S. -Bbuild-clang-tidy 
-            -DCMAKE_BUILD_TYPE=Release 
-            -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On 
-            -DUSE_PRECOMPILED_HEADERS=OFF 
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=On 
-            -DCHATTERINO_LTO=Off 
-            -DCHATTERINO_PLUGINS=On 
-            -DBUILD_WITH_QT6=Off
-            -DBUILD_TESTS=On
-            -DBUILD_BENCHMARKS=On
-          apt_packages: >-
-            qttools5-dev, qt5-image-formats-plugins, libqt5svg5-dev, 
-            libsecret-1-dev,
-            libboost-dev, libboost-system-dev, libboost-filesystem-dev,
-            libssl-dev,
-            rapidjson-dev,
-            libbenchmark-dev
-
-      - name: clang-tidy-review upload
-        if: matrix.clang-tidy-review && github.event_name == 'pull_request'
-        uses: ZedThree/clang-tidy-review/upload@v0.14.0
 
       - name: Package - AppImage (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu-20.04') && !matrix.skip-artifact

@@ -63,7 +63,12 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
 }
 
 SearchPopup::SearchPopup(QWidget *parent, Split *split)
-    : BasePopup({BaseWindow::DisableLayoutSave}, parent)
+    : BasePopup(
+          {
+              BaseWindow::DisableLayoutSave,
+              BaseWindow::BoundsCheckOnShow,
+          },
+          parent)
     , split_(split)
 {
     this->initLayout();
@@ -180,9 +185,10 @@ void SearchPopup::updateWindowTitle()
     this->setWindowTitle("Searching in " + historyName + " history");
 }
 
-void SearchPopup::showEvent(QShowEvent *)
+void SearchPopup::showEvent(QShowEvent *e)
 {
     this->search();
+    BaseWindow::showEvent(e);
 }
 
 bool SearchPopup::eventFilter(QObject *object, QEvent *event)

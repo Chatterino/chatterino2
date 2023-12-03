@@ -2,7 +2,7 @@
 
 #include "providers/seventv/eventapi/Subscription.hpp"
 
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QString>

@@ -4,7 +4,7 @@
 #    include "controllers/commands/CommandController.hpp"
 
 #    include <lua.h>
-#    include <magic_enum.hpp>
+#    include <magic_enum/magic_enum.hpp>
 #    include <QJsonArray>
 #    include <QJsonObject>
 
