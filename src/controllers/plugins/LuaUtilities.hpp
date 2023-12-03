@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #ifdef CHATTERINO_HAVE_PLUGINS
 
 #    include "common/QLogging.hpp"
@@ -70,6 +71,60 @@ bool peek(lua_State *L, std::string *out, StackIdx idx = -1);
 QString toString(lua_State *L, StackIdx idx = -1);
 
 /// TEMPLATES
+
+template <typename T>
+bool peek(lua_State *L, std::optional<T> *out, StackIdx idx = -1)
+{
+    if (lua_isnil(L, idx))
+    {
+        *out = std::nullopt;
+        return true;
+    }
+
+    *out = T();
+    return peek(L, out->operator->(), idx);
+}
+
+template <typename T>
+bool peek(lua_State *L, std::vector<T> *vec, StackIdx idx = -1)
+{
+    if (!lua_istable(L, idx))
+    {
+        lua::stackDump(L, "!table");
+        qCDebug(chatterinoLua)
+            << "value is not a table, type is" << lua_type(L, idx);
+        return false;
+    }
+    auto len = lua_rawlen(L, idx);
+    if (len == 0)
+    {
+        qCDebug(chatterinoLua) << "value has 0 length";
+        return true;
+    }
+    if (len > 1'000'000)
+    {
+        qCDebug(chatterinoLua) << "value is too long";
+        return false;
+    }
+    // count like lua
+    for (int i = 1; i <= len; i++)
+    {
+        lua_geti(L, idx, i);
+        std::optional<T> obj;
+        if (!lua::peek(L, &obj))
+        {
+            //lua_seti(L, LUA_REGISTRYINDEX, 1);  // lazy
+            qCDebug(chatterinoLua)
+                << "Failed to convert lua object into c++: at array index " << i
+                << ":";
+            stackDump(L, "bad conversion into string");
+            return false;
+        }
+        lua_pop(L, 1);
+        vec->push_back(obj.value());
+    }
+    return true;
+}
 
 /**
  * @brief Converts object at stack index idx to enum given by template parameter T
