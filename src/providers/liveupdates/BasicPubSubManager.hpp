@@ -8,6 +8,7 @@
 #include "providers/twitch/PubSubHelpers.hpp"
 #include "util/DebugCount.hpp"
 #include "util/ExponentialBackoff.hpp"
+#include "util/RenameThread.hpp"
 
 #include <pajlada/signals/signal.hpp>
 #include <QJsonObject>
@@ -118,6 +119,8 @@ public:
         this->mainThread_.reset(new std::thread([this] {
             runThread();
         }));
+
+        renameThread(*this->mainThread_.get(), "BPSM");
     }
 
     void stop()
