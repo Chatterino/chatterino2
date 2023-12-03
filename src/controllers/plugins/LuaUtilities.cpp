@@ -130,6 +130,17 @@ StackIdx push(lua_State *L, const bool &b)
     return lua_gettop(L);
 }
 
+bool peek(lua_State *L, bool *out, StackIdx idx)
+{
+    if (!lua_isboolean(L, idx))
+    {
+        return false;
+    }
+
+    *out = bool(lua_toboolean(L, idx));
+    return true;
+}
+
 bool peek(lua_State *L, double *out, StackIdx idx)
 {
     int ok{0};
