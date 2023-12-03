@@ -7,6 +7,7 @@
 #include "messages/Selection.hpp"
 #include "util/ThreadGuard.hpp"
 #include "widgets/BaseWidget.hpp"
+#include "widgets/TooltipWidget.hpp"
 
 #include <pajlada/signals/signal.hpp>
 #include <QMenu>
@@ -333,6 +334,8 @@ private:
     MessagePreferences messagePreferences_;
 
     void scrollUpdateRequested();
+
+    TooltipWidget *const tooltipWidget_{};
 };
 
 }  // namespace chatterino
