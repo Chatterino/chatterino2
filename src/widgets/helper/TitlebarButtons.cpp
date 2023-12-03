@@ -6,6 +6,8 @@
 
 #    include <Windows.h>
 
+#    include <cassert>
+
 namespace chatterino {
 
 TitleBarButtons::TitleBarButtons(QWidget *window, TitleBarButton *minButton,
@@ -42,7 +44,7 @@ void TitleBarButtons::hover(size_t ht, QPoint at)
             other2 = this->maxButton_;
             break;
         default:
-            Q_ASSERT_X(false, Q_FUNC_INFO, "Precondition violated");
+            assert(false && "TitleBarButtons::hover precondition violated");
             return;
     }
     hovered->ncEnter();
@@ -103,7 +105,8 @@ TitleBarButton *TitleBarButtons::buttonForHt(size_t ht) const
         case HTCLOSE:
             return this->closeButton_;
         default:
-            Q_ASSERT_X(false, Q_FUNC_INFO, "Precondition violated");
+            assert(false &&
+                   "TitleBarButtons::buttonForHt precondition violated");
             return nullptr;
     }
 }
