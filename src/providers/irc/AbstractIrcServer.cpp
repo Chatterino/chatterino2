@@ -5,6 +5,7 @@
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 
 #include <QCoreApplication>
 
@@ -345,6 +346,10 @@ void AbstractIrcServer::onWriteConnected(IrcConnection *connection)
 
 void AbstractIrcServer::onDisconnected()
 {
+    const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+                         std::chrono::system_clock::now().time_since_epoch())
+                         .count();
+
     std::lock_guard<std::mutex> lock(this->channelMutex);
 
     MessageBuilder b(systemMessage, "disconnected");
@@ -360,6 +365,11 @@ void AbstractIrcServer::onDisconnected()
         }
 
         chan->addMessage(disconnectedMsg);
+
+        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+        {
+            channel->setDisconnectedAt(now);
+        }
     }
 }
 

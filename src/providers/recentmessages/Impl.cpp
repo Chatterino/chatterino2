@@ -94,14 +94,16 @@ std::vector<MessagePtr> buildRecentMessages(
 
 // Returns the URL to be used for querying the Recent Messages API for the
 // given channel.
-QUrl constructRecentMessagesUrl(const QString &name)
+QUrl constructRecentMessagesUrl(const QString &name, const int limit)
 {
     QUrl url(Env::get().recentMessagesApiUrl.arg(name));
     QUrlQuery urlQuery(url);
     if (!urlQuery.hasQueryItem("limit"))
     {
         urlQuery.addQueryItem(
-            "limit", QString::number(getSettings()->twitchMessageHistoryLimit));
+            "limit",
+            QString::number(
+                limit > 0 ? limit : getSettings()->twitchMessageHistoryLimit));
     }
     url.setQuery(urlQuery);
     return url;

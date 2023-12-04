@@ -19,11 +19,11 @@ namespace chatterino::recentmessages {
 using namespace recentmessages::detail;
 
 void load(const QString &channelName, std::weak_ptr<Channel> channelPtr,
-          ResultCallback onLoaded, ErrorCallback onError)
+          ResultCallback onLoaded, ErrorCallback onError, const int limit)
 {
     qCDebug(LOG) << "Loading recent messages for" << channelName;
 
-    const auto url = constructRecentMessagesUrl(channelName);
+    const auto url = constructRecentMessagesUrl(channelName, limit);
 
     NetworkRequest(url)
         .onSuccess([channelPtr, onLoaded](const auto &result) {

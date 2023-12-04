@@ -28,8 +28,9 @@ using ErrorCallback = std::function<void()>;
  * @param channelPtr Weak pointer to Channel to use to build messages
  * @param onLoaded Callback taking the built messages as a const std::vector<MessagePtr> &
  * @param onError Callback called when the network request fails
+ * @param limit Maximum number of messages to query, `-1` uses twitchMessageHistoryLimit setting
  */
 void load(const QString &channelName, std::weak_ptr<Channel> channelPtr,
-          ResultCallback onLoaded, ErrorCallback onError);
+          ResultCallback onLoaded, ErrorCallback onError, int limit = -1);
 
 }  // namespace chatterino::recentmessages
