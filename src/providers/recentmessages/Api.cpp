@@ -20,15 +20,15 @@ using namespace recentmessages::detail;
 
 void load(const QString &channelName, std::weak_ptr<Channel> channelPtr,
           ResultCallback onLoaded, ErrorCallback onError, const int limit,
-          const long after, const long before, const bool jitter)
+          const int64_t after, const int64_t before, const bool jitter)
 {
     qCDebug(LOG) << "Loading recent messages for" << channelName;
 
     const auto url =
         constructRecentMessagesUrl(channelName, limit, after, before);
 
-    const long delay = jitter ? std::rand() % 100 : 0;
-    QTimer::singleShot(delay, [=] {
+    const long delayMs = jitter ? std::rand() % 100 : 0;
+    QTimer::singleShot(delayMs, [=] {
         NetworkRequest(url)
             .onSuccess([channelPtr, onLoaded](const auto &result) {
                 auto shared = channelPtr.lock();

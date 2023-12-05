@@ -35,6 +35,6 @@ using ErrorCallback = std::function<void()>;
  */
 void load(const QString &channelName, std::weak_ptr<Channel> channelPtr,
           ResultCallback onLoaded, ErrorCallback onError, int limit = -1,
-          long after = -1, long before = -1, bool jitter = false);
+          int64_t after = -1, int64_t before = -1, bool jitter = false);
 
 }  // namespace chatterino::recentmessages

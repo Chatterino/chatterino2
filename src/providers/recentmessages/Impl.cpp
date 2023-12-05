@@ -95,7 +95,7 @@ std::vector<MessagePtr> buildRecentMessages(
 // Returns the URL to be used for querying the Recent Messages API for the
 // given channel.
 QUrl constructRecentMessagesUrl(const QString &name, const int limit,
-                                const long after, const long before)
+                                const int64_t after, const int64_t before)
 {
     QUrl url(Env::get().recentMessagesApiUrl.arg(name));
     QUrlQuery urlQuery(url);

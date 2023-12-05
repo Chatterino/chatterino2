@@ -1112,7 +1112,7 @@ bool TwitchChannel::setLive(bool newLiveStatus)
     return true;
 }
 
-void TwitchChannel::setDisconnectedAt(const long ts)
+void TwitchChannel::setDisconnectedAt(const int64_t ts)
 {
     if (ts > 0 && this->disconnectedAt_ > 0)
     {
@@ -1191,9 +1191,9 @@ void TwitchChannel::loadRecentMessagesReconnect()
         return;  // already loading
     }
 
-    const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
-                         std::chrono::system_clock::now().time_since_epoch())
-                         .count();
+    const int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(
+                            std::chrono::system_clock::now().time_since_epoch())
+                            .count();
     int limit = -1;
     if (this->disconnectedAt_ > 0)
     {
