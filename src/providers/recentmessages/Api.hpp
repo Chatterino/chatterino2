@@ -29,8 +29,8 @@ using ErrorCallback = std::function<void()>;
  * @param onLoaded Callback taking the built messages as a const std::vector<MessagePtr> &
  * @param onError Callback called when the network request fails
  * @param limit Maximum number of messages to query, `-1` uses twitchMessageHistoryLimit setting
- * @param after Only return messages that were received after this timestamp
- * @param before Only return messages that were received before this timestamp
+ * @param after Only return messages that were received after this timestamp; ignored if not positive
+ * @param before Only return messages that were received before this timestamp; ignored if not positive
  * @param jitter Whether to delay the request by a small random duration
  */
 void load(const QString &channelName, std::weak_ptr<Channel> channelPtr,
