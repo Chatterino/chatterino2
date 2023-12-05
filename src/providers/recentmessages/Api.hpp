@@ -31,9 +31,10 @@ using ErrorCallback = std::function<void()>;
  * @param limit Maximum number of messages to query, `-1` uses twitchMessageHistoryLimit setting
  * @param after Only return messages that were received after this timestamp
  * @param before Only return messages that were received before this timestamp
+ * @param jitter Whether to delay the request by a small random duration
  */
 void load(const QString &channelName, std::weak_ptr<Channel> channelPtr,
           ResultCallback onLoaded, ErrorCallback onError, int limit = -1,
-          long after = -1, long before = -1);
+          long after = -1, long before = -1, bool jitter = false);
 
 }  // namespace chatterino::recentmessages

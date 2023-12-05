@@ -1231,7 +1231,7 @@ void TwitchChannel::loadRecentMessagesReconnect()
 
             tc->loadingRecentMessages_.clear();
         },
-        limit, this->disconnectedAt_, now);
+        limit, this->disconnectedAt_, now, true);
 }
 
 void TwitchChannel::refreshPubSub()
