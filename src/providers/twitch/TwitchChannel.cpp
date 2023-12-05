@@ -1191,16 +1191,15 @@ void TwitchChannel::loadRecentMessagesReconnect()
         return;  // already loading
     }
 
+    const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+                         std::chrono::system_clock::now().time_since_epoch())
+                         .count();
     int limit = -1;
     if (this->disconnectedAt_ > 0)
     {
         // calculate how many messages could have occured
         // while we were not connected to the channel
         // assuming a maximum of 10 messages per second
-        const auto now =
-            std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::system_clock::now().time_since_epoch())
-                .count();
         const auto duration = std::ceil((now - this->disconnectedAt_) / 1000.0);
         limit = std::min(static_cast<int>(duration) * 10,
                          getSettings()->twitchMessageHistoryLimit.getValue());
@@ -1232,7 +1231,7 @@ void TwitchChannel::loadRecentMessagesReconnect()
 
             tc->loadingRecentMessages_.clear();
         },
-        limit);
+        limit, this->disconnectedAt_, now);
 }
 
 void TwitchChannel::refreshPubSub()
