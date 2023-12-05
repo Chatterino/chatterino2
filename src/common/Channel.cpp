@@ -295,7 +295,8 @@ bool Channel::isWritable() const
 {
     using Type = Channel::Type;
     auto type = this->getType();
-    return type != Type::TwitchMentions && type != Type::TwitchLive;
+    return type != Type::TwitchMentions && type != Type::TwitchLive &&
+           type != Type::TwitchAutomod;
 }
 
 void Channel::sendMessage(const QString &message)
@@ -330,7 +331,8 @@ bool Channel::isLive() const
 
 bool Channel::shouldIgnoreHighlights() const
 {
-    return this->type_ == Type::TwitchMentions ||
+    return this->type_ == Type::TwitchAutomod ||
+           this->type_ == Type::TwitchMentions ||
            this->type_ == Type::TwitchWhispers;
 }
 

@@ -79,4 +79,17 @@ void moveWindowTo(QWidget *window, QPoint position, BoundsChecking mode)
     }
 }
 
+void showAndMoveWindowTo(QWidget *window, QPoint position, BoundsChecking mode)
+{
+#ifdef Q_OS_WINDOWS
+    window->show();
+
+    moveWindowTo(window, position, mode);
+#else
+    moveWindowTo(window, position, mode);
+
+    window->show();
+#endif
+}
+
 }  // namespace chatterino::widgets

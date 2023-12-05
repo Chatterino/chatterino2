@@ -37,9 +37,14 @@ QList<SplitContainer *> openPages(Window *window)
 namespace chatterino {
 
 QuickSwitcherPopup::QuickSwitcherPopup(Window *parent)
-    : BasePopup({BaseWindow::Flags::Frameless, BaseWindow::Flags::TopMost,
-                 BaseWindow::DisableLayoutSave},
-                parent)
+    : BasePopup(
+          {
+              BaseWindow::Flags::Frameless,
+              BaseWindow::Flags::TopMost,
+              BaseWindow::DisableLayoutSave,
+              BaseWindow::BoundsCheckOnShow,
+          },
+          parent)
     , switcherModel_(this)
     , window(parent)
 {

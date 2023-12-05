@@ -56,7 +56,7 @@ std::vector<QShortcut *> HotkeyController::shortcutsForCategory(
         {
             qCDebug(chatterinoHotkeys)
                 << qPrintable(parent->objectName())
-                << "Unimplemeneted hotkey action:" << hotkey->action() << "in "
+                << "Unimplemented hotkey action:" << hotkey->action() << "in"
                 << hotkey->getCategory();
             continue;
         }

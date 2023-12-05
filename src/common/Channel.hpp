@@ -38,6 +38,7 @@ public:
         TwitchWatching,
         TwitchMentions,
         TwitchLive,
+        TwitchAutomod,
         TwitchEnd,
         Irc,
         Misc

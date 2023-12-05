@@ -1314,8 +1314,9 @@ SplitNotebook::SplitNotebook(Window *parent)
                 {
                     for (auto *split : sc->getSplits())
                     {
-                        if (split->getChannel()->getType() !=
-                            Channel::Type::TwitchMentions)
+                        auto type = split->getChannel()->getType();
+                        if (type != Channel::Type::TwitchMentions &&
+                            type != Channel::Type::TwitchAutomod)
                         {
                             if (split->getChannelView().scrollToMessage(
                                     message))

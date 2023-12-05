@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Major: Allow use of Twitch follower emotes in other channels if subscribed. (#4922)
+- Major: Add `/automod` split to track automod caught messages across all open channels the user moderates. (#4986)
 - Minor: Migrate to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
 - Minor: The account switcher is now styled to match your theme. (#4817)
 - Minor: Add an invisible resize handle to the bottom of frameless user info popups and reply thread popups. (#4795)
@@ -12,6 +13,7 @@
 - Minor: Add menu actions to reply directly to a message or the original thread root. (#4923)
 - Minor: The `/reply` command now replies to the latest message of the user. (#4919)
 - Minor: All sound capabilities can now be disabled by setting your "Sound backend" setting to "Null" and restarting Chatterino. (#4978)
+- Minor: Add an option to use new experimental smarter emote completion. (#4987)
 - Minor: Add `--safe-mode` command line option that can be used for troubleshooting when Chatterino is misbehaving or is misconfigured. It disables hiding the settings button & prevents plugins from loading. (#4985)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
@@ -43,6 +45,8 @@
 - Bugfix: Fixed lookahead/-behind not working in _Ignores_. (#4965)
 - Bugfix: Fixed Image Uploader accidentally deleting images with some hosts when link resolver was enabled. (#4971)
 - Bugfix: Fixed rare crash with Image Uploader when closing a split right after starting an upload. (#4971)
+- Bugfix: Fixed support for Windows 11 Snap layouts. (#4994)
+- Bugfix: Fixed some windows appearing between screens. (#4797)
 - Dev: Run miniaudio in a separate thread, and simplify it to not manage the device ourselves. There's a chance the simplification is a bad idea. (#4978)
 - Dev: Change clang-format from v14 to v16. (#4929)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
@@ -61,6 +65,7 @@
 - Dev: Add a compile-time flag `CHATTERINO_UPDATER` which can be turned off to disable update checks. (#4854)
 - Dev: Add a compile-time flag `USE_SYSTEM_MINIAUDIO` which can be turned on to use the system miniaudio. (#4867)
 - Dev: Update vcpkg to use Qt6. (#4872)
+- Dev: Update `magic_enum` to v0.9.5. (#4992)
 - Dev: Replace `boost::optional` with `std::optional`. (#4877)
 - Dev: Improve performance of selecting text. (#4889, #4911)
 - Dev: Removed direct dependency on Qt 5 compatibility module. (#4906)
@@ -73,6 +78,7 @@
 - Dev: `Details` file properties tab is now populated on Windows. (#4912)
 - Dev: Removed `Outcome` from network requests. (#4959)
 - Dev: Added Tests for Windows and MacOS in CI. (#4970)
+- Dev: Move `clang-tidy` checker to its own CI job. (#4996)
 - Dev: Refactored the Image Uploader feature. (#4971)
 - Dev: Fixed deadlock and use-after-free in tests. (#4981)
 
