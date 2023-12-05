@@ -2,6 +2,7 @@
 #    include "controllers/plugins/PluginController.hpp"
 
 #    include "Application.hpp"
+#    include "common/Args.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/commands/CommandController.hpp"
@@ -194,12 +195,20 @@ void PluginController::openLibrariesFor(lua_State *L,
 void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
                             const PluginMeta &meta)
 {
-    lua_State *l = luaL_newstate();
-    PluginController::openLibrariesFor(l, meta);
-
     auto pluginName = pluginDir.dirName();
+    lua_State *l = luaL_newstate();
     auto plugin = std::make_unique<Plugin>(pluginName, l, meta, pluginDir);
     this->plugins_.insert({pluginName, std::move(plugin)});
+
+    if (getArgs().safeMode)
+    {
+        // This isn't done earlier to ensure the user can disable a misbehaving plugin
+        qCWarning(chatterinoLua) << "Skipping loading plugin " << meta.name
+                                 << " because safe mode is enabled.";
+        return;
+    }
+    PluginController::openLibrariesFor(l, meta);
+
     if (!PluginController::isPluginEnabled(pluginName) ||
         !getSettings()->pluginsEnabled)
     {

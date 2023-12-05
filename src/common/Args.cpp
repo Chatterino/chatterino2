@@ -38,6 +38,9 @@ Args::Args(const QApplication &app)
                                       "Attaches to the Console on windows, "
                                       "allowing you to see debug output."});
     crashRecoveryOption.setFlags(QCommandLineOption::HiddenFromHelp);
+    QCommandLineOption safeModeOption(
+        "safe-mode", "Starts Chatterino without loading Plugins and always "
+                     "show the settings button.");
 
     parser.addOptions({
         {{"V", "version"}, "Displays version information."},
@@ -45,6 +48,7 @@ Args::Args(const QApplication &app)
         parentWindowOption,
         parentWindowIdOption,
         verboseOption,
+        safeModeOption,
     });
     parser.addOption(QCommandLineOption(
         {"c", "channels"},
@@ -88,6 +92,10 @@ Args::Args(const QApplication &app)
         this->dontLoadMainWindow = true;
 
         this->parentWindowId = parser.value(parentWindowIdOption).toULongLong();
+    }
+    if (parser.isSet(safeModeOption))
+    {
+        this->safeMode = true;
     }
 }
 

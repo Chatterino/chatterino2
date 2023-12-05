@@ -26,6 +26,7 @@ public:
     bool dontLoadMainWindow{};
     std::optional<WindowLayout> customChannelLayout;
     bool verbose{};
+    bool safeMode{};
 
 private:
     void applyCustomChannelLayout(const QString &argValue);
