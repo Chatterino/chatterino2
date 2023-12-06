@@ -103,18 +103,12 @@ TwitchChannel::TwitchChannel(const QString &name)
 
     // We can safely ignore this signal connection this has no external dependencies - once the signal
     // is destroyed, it will no longer be able to fire
-    std::ignore = this->connected.connect([this]() {
-        if (this->roomId().isEmpty())
+    std::ignore = this->joined.connect([this]() {
+        if (this.disconnectedAt_.has_value())
         {
-            // If we get a reconnected event when the room id is not set, we
-            // just connected for the first time. After receiving the first
-            // message from a channel, setRoomId is called and further
-            // invocations of this event will load recent messages.
-            return;
+            this->loadRecentMessagesReconnect();
+            this->disconnectedAt_ = std::nullopt;
         }
-
-        this->loadRecentMessagesReconnect();
-        this->disconnectedAt_ = std::nullopt;
     });
 
     // timers

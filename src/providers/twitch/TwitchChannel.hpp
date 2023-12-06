@@ -201,6 +201,11 @@ public:
      */
     std::shared_ptr<MessageThread> getOrCreateThread(const MessagePtr &message);
 
+    /**
+     * This signal fires when the local user has joined the channel
+     **/
+    pajlada::Signals::NoArgSignal joined;
+
     // Only TwitchChannel may invoke this signal
     pajlada::Signals::NoArgSignal userStateChanged;
 
