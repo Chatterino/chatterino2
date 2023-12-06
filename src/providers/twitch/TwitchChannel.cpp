@@ -104,7 +104,7 @@ TwitchChannel::TwitchChannel(const QString &name)
     // We can safely ignore this signal connection this has no external dependencies - once the signal
     // is destroyed, it will no longer be able to fire
     std::ignore = this->joined.connect([this]() {
-        if (this.disconnectedAt_.has_value())
+        if (this->disconnectedAt_.has_value())
         {
             this->loadRecentMessagesReconnect();
             this->disconnectedAt_ = std::nullopt;
