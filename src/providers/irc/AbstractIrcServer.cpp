@@ -346,10 +346,6 @@ void AbstractIrcServer::onWriteConnected(IrcConnection *connection)
 
 void AbstractIrcServer::onDisconnected()
 {
-    const int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(
-                            std::chrono::system_clock::now().time_since_epoch())
-                            .count();
-
     std::lock_guard<std::mutex> lock(this->channelMutex);
 
     MessageBuilder b(systemMessage, "disconnected");
@@ -368,7 +364,7 @@ void AbstractIrcServer::onDisconnected()
 
         if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
         {
-            channel->setDisconnectedAt(now);
+            channel->markDisconnectedNow();
         }
     }
 }

@@ -94,8 +94,12 @@ std::vector<MessagePtr> buildRecentMessages(
 
 // Returns the URL to be used for querying the Recent Messages API for the
 // given channel.
-QUrl constructRecentMessagesUrl(const QString &name, const int limit,
-                                const int64_t after, const int64_t before)
+QUrl constructRecentMessagesUrl(
+    const QString &name, const int limit,
+    const std::optional<std::chrono::time_point<std::chrono::system_clock>>
+        after,
+    const std::optional<std::chrono::time_point<std::chrono::system_clock>>
+        before)
 {
     QUrl url(Env::get().recentMessagesApiUrl.arg(name));
     QUrlQuery urlQuery(url);
@@ -106,13 +110,21 @@ QUrl constructRecentMessagesUrl(const QString &name, const int limit,
             QString::number(
                 limit > 0 ? limit : getSettings()->twitchMessageHistoryLimit));
     }
-    if (after > 0 && !urlQuery.hasQueryItem("after"))
+    if (after.has_value() && !urlQuery.hasQueryItem("after"))
     {
-        urlQuery.addQueryItem("after", QString::number(after));
+        urlQuery.addQueryItem(
+            "after", QString::number(
+                         std::chrono::duration_cast<std::chrono::milliseconds>(
+                             after->time_since_epoch())
+                             .count()));
     }
-    if (before > 0 && !urlQuery.hasQueryItem("before"))
+    if (before.has_value() && !urlQuery.hasQueryItem("before"))
     {
-        urlQuery.addQueryItem("before", QString::number(before));
+        urlQuery.addQueryItem(
+            "before", QString::number(
+                          std::chrono::duration_cast<std::chrono::milliseconds>(
+                              before->time_since_epoch())
+                              .count()));
     }
     url.setQuery(urlQuery);
     return url;

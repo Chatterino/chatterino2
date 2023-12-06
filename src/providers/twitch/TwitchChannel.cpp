@@ -114,7 +114,7 @@ TwitchChannel::TwitchChannel(const QString &name)
         }
 
         this->loadRecentMessagesReconnect();
-        this->disconnectedAt_ = 0;
+        this->disconnectedAt_ = std::nullopt;
     });
 
     // timers
@@ -1112,16 +1112,16 @@ bool TwitchChannel::setLive(bool newLiveStatus)
     return true;
 }
 
-void TwitchChannel::setDisconnectedAt(const int64_t ts)
+void TwitchChannel::markDisconnectedNow()
 {
-    if (ts > 0 && this->disconnectedAt_ > 0)
+    if (this->disconnectedAt_.has_value())
     {
         // don't overwrite prior timestamp since
         // a reconnection hasn't happened yet
         return;
     }
 
-    this->disconnectedAt_ = ts;
+    this->disconnectedAt_ = std::chrono::system_clock::now();
 }
 
 void TwitchChannel::loadRecentMessages()
@@ -1191,17 +1191,17 @@ void TwitchChannel::loadRecentMessagesReconnect()
         return;  // already loading
     }
 
-    const int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(
-                            std::chrono::system_clock::now().time_since_epoch())
-                            .count();
+    const auto now = std::chrono::system_clock::now();
     int limit = -1;
-    if (this->disconnectedAt_ > 0)
+    if (this->disconnectedAt_.has_value())
     {
         // calculate how many messages could have occured
         // while we were not connected to the channel
         // assuming a maximum of 10 messages per second
-        const auto duration = std::ceil((now - this->disconnectedAt_) / 1000.0);
-        limit = std::min(static_cast<int>(duration) * 10,
+        const auto duration = std::chrono::duration_cast<std::chrono::seconds>(
+                                  now - this->disconnectedAt_.value())
+                                  .count();
+        limit = std::min(static_cast<int>(duration + 1) * 10,
                          getSettings()->twitchMessageHistoryLimit.getValue());
     }
 

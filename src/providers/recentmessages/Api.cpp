@@ -18,9 +18,14 @@ namespace chatterino::recentmessages {
 
 using namespace recentmessages::detail;
 
-void load(const QString &channelName, std::weak_ptr<Channel> channelPtr,
-          ResultCallback onLoaded, ErrorCallback onError, const int limit,
-          const int64_t after, const int64_t before, const bool jitter)
+void load(
+    const QString &channelName, std::weak_ptr<Channel> channelPtr,
+    ResultCallback onLoaded, ErrorCallback onError, const int limit,
+    const std::optional<std::chrono::time_point<std::chrono::system_clock>>
+        after,
+    const std::optional<std::chrono::time_point<std::chrono::system_clock>>
+        before,
+    const bool jitter)
 {
     qCDebug(LOG) << "Loading recent messages for" << channelName;
 

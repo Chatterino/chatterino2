@@ -33,8 +33,13 @@ using ErrorCallback = std::function<void()>;
  * @param before Only return messages that were received before this timestamp; ignored if not positive
  * @param jitter Whether to delay the request by a small random duration
  */
-void load(const QString &channelName, std::weak_ptr<Channel> channelPtr,
-          ResultCallback onLoaded, ErrorCallback onError, int limit = -1,
-          int64_t after = -1, int64_t before = -1, bool jitter = false);
+void load(
+    const QString &channelName, std::weak_ptr<Channel> channelPtr,
+    ResultCallback onLoaded, ErrorCallback onError, int limit = -1,
+    std::optional<std::chrono::time_point<std::chrono::system_clock>> after =
+        std::nullopt,
+    std::optional<std::chrono::time_point<std::chrono::system_clock>> before =
+        std::nullopt,
+    bool jitter = false);
 
 }  // namespace chatterino::recentmessages
