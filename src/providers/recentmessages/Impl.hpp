@@ -10,6 +10,7 @@
 
 #include <chrono>
 #include <memory>
+#include <optional>
 #include <vector>
 
 namespace chatterino::recentmessages::detail {
