@@ -8,6 +8,7 @@
 #include <QString>
 #include <QUrl>
 
+#include <chrono>
 #include <memory>
 #include <vector>
 
