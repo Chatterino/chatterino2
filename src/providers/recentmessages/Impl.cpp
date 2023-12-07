@@ -105,10 +105,7 @@ QUrl constructRecentMessagesUrl(
     QUrlQuery urlQuery(url);
     if (!urlQuery.hasQueryItem("limit"))
     {
-        urlQuery.addQueryItem(
-            "limit",
-            QString::number(
-                limit
+        urlQuery.addQueryItem("limit", QString::number(limit));
     }
     if (after.has_value() && !urlQuery.hasQueryItem("after"))
     {

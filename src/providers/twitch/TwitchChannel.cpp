@@ -1170,7 +1170,8 @@ void TwitchChannel::loadRecentMessages()
                 return;
 
             tc->loadingRecentMessages_.clear();
-        });
+        },
+        getSettings()->twitchMessageHistoryLimit.getValue());
 }
 
 void TwitchChannel::loadRecentMessagesReconnect()
@@ -1195,8 +1196,7 @@ void TwitchChannel::loadRecentMessagesReconnect()
         const auto duration = std::chrono::duration_cast<std::chrono::seconds>(
                                   now - this->disconnectedAt_.value())
                                   .count();
-        limit = std::min(static_cast<int>(duration + 1) * 10,
-                         getSettings()->twitchMessageHistoryLimit.getValue());
+        limit = std::min(static_cast<int>(duration + 1) * 10, limit);
     }
 
     auto weak = weakOf<Channel>(this);
