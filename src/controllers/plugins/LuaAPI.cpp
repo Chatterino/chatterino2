@@ -82,8 +82,6 @@ int c2_register_command(lua_State *L)
                       "\"pointer\"");
         return 0;
     }
-    // args already taken
-    BalanceKepper _(L, 1);
 
     auto callbackSavedName = QString("c2commandcb-%1").arg(name);
     lua_setfield(L, LUA_REGISTRYINDEX, callbackSavedName.toStdString().c_str());
@@ -117,8 +115,6 @@ int c2_register_callback(lua_State *L)
                       "\"pointer\"");
         return 0;
     }
-    // args already taken
-    BalanceKepper _(L);
 
     auto callbackSavedName = QString("c2cb-%1").arg(
         magic_enum::enum_name<EventType>(evtType).data());
@@ -154,8 +150,6 @@ int c2_send_msg(lua_State *L)
         lua::push(L, false);
         return 1;
     }
-    // args already taken
-    BalanceKepper _(L, 1);
 
     const auto chn = getApp()->twitch->getChannelOrEmpty(channel);
     if (chn->isEmpty())
@@ -204,8 +198,6 @@ int c2_system_msg(lua_State *L)
         lua::push(L, false);
         return 1;
     }
-    // args already taken
-    BalanceKepper _(L, 1);
 
     const auto chn = getApp()->twitch->getChannelOrEmpty(channel);
     if (chn->isEmpty())
@@ -239,7 +231,6 @@ int c2_log(lua_State *L)
         luaL_error(L, "Invalid log level, use one from c2.LogLevel.");
         return 0;
     }
-    BalanceKepper _(L, 1);
     QDebug stream = qdebugStreamForLogLevel(lvl);
     logHelper(L, pl, stream, logc);
     return 0;
