@@ -1108,6 +1108,12 @@ bool TwitchChannel::setLive(bool newLiveStatus)
 
 void TwitchChannel::markDisconnectedNow()
 {
+    if (this->roomId().isEmpty())
+    {
+        // we were never joined in the first place
+        return;
+    }
+
     if (this->disconnectedAt_.has_value())
     {
         // don't overwrite prior timestamp since
