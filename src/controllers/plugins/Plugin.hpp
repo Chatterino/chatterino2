@@ -87,6 +87,7 @@ public:
         return this->loadDirectory_;
     }
 
+    // Note: The CallbackFunction object's destructor will remove the function from the lua stack
     std::optional<lua::CallbackFunction<lua::api::CompletionList, QString,
                                         QString, int, bool>>
         getCompletionCallback()
@@ -106,11 +107,14 @@ public:
                              .c_str());
         if (typ != LUA_TFUNCTION)
         {
+            lua_pop(this->state_, 1);
             return {};
         }
-        return {lua::CallbackFunction<lua::api::CompletionList, QString,
-                                      QString, int, bool>(
-            this->state_, lua_gettop(this->state_))};
+
+        // move
+        return std::make_optional<lua::CallbackFunction<
+            lua::api::CompletionList, QString, QString, int, bool>>(
+            this->state_, lua_gettop(this->state_));
     }
 
 private:

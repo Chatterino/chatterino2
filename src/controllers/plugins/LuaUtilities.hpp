@@ -265,6 +265,17 @@ public:
         , L(L)
     {
     }
+
+    // this type owns the stackidx, it must not be trivially copiable
+    CallbackFunction operator=(CallbackFunction &) = delete;
+
+    CallbackFunction &operator=(CallbackFunction &&) = default;
+
+    ~CallbackFunction()
+    {
+        lua_remove(L, this->stackidx);
+    }
+
     std::variant<int, ReturnType> operator()(Args... arguments)
     {
         (  // apparently this calls lua::push() for every Arg

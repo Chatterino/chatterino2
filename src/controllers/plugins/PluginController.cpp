@@ -309,10 +309,12 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
     QStringList results;
     for (const auto &[name, pl] : getApp()->plugins->plugins())
     {
+        qCDebug(chatterinoLua)
+            << "Processing custom completions from plugin" << name;
         auto opt = pl->getCompletionCallback();
         if (opt)
         {
-            auto cb = *opt;
+            auto &cb = *opt;
             auto errOrList =
                 cb(query, fullTextContent, cursorPosition, isFirstWord);
             if (std::holds_alternative<int>(errOrList))
