@@ -317,6 +317,7 @@ public:
 
     std::variant<int, ReturnType> operator()(Args... arguments)
     {
+        lua_pushvalue(this->L, this->stackidx);
         (  // apparently this calls lua::push() for every Arg
             [this, &arguments] {
                 lua::push(this->L, arguments);
