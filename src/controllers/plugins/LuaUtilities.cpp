@@ -221,12 +221,7 @@ bool peek(lua_State *L, api::CompletionList *out, StackIdx idx)
         return false;
     }
     lua_getfield(L, idx, "hide_others");
-    if (!lua::pop(L, &out->hideOthers))
-    {
-        return false;
-    }
-    lua_pop(L, 1);
-    return true;
+    return lua::pop(L, &out->hideOthers);
 }
 
 QString toString(lua_State *L, StackIdx idx)
