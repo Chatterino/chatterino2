@@ -108,7 +108,7 @@ QUrl constructRecentMessagesUrl(
         urlQuery.addQueryItem(
             "limit",
             QString::number(
-                limit > 0 ? limit : getSettings()->twitchMessageHistoryLimit));
+                limit
     }
     if (after.has_value() && !urlQuery.hasQueryItem("after"))
     {

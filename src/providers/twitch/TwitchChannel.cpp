@@ -1186,7 +1186,7 @@ void TwitchChannel::loadRecentMessagesReconnect()
     }
 
     const auto now = std::chrono::system_clock::now();
-    int limit = -1;
+    int limit = getSettings()->twitchMessageHistoryLimit.getValue();
     if (this->disconnectedAt_.has_value())
     {
         // calculate how many messages could have occured
