@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <optional>
 #ifdef CHATTERINO_HAVE_PLUGINS
 
@@ -75,6 +76,41 @@ bool peek(lua_State *L, api::CompletionList *out, StackIdx idx = -1);
  * @brief Converts Lua object at stack index idx to a string.
  */
 QString toString(lua_State *L, StackIdx idx = -1);
+
+// Special
+class BalanceKepper
+{
+    int expected;
+    lua_State *L;
+
+public:
+    BalanceKepper(lua_State *L)
+        : expected(lua_gettop(L))
+        , L(L)
+    {
+    }
+
+    BalanceKepper(lua_State *L, int diff)
+        : expected(lua_gettop(L) + diff)
+        , L(L)
+    {
+    }
+
+    ~BalanceKepper()
+    {
+        int after = lua_gettop(this->L);
+        if (this->expected != after)
+        {
+            stackDump(this->L, "BalanceKepper check tripped");
+            // clang-format off
+            // clang format likes to insert a new line which means that some builds won't show this message fully
+            assert(false && "internal error: lua stack was not in an expected state");
+            // clang-format on
+        }
+    }
+    BalanceKepper operator=(BalanceKepper &) = delete;
+    BalanceKepper &operator=(BalanceKepper &&) = delete;
+};
 
 /// TEMPLATES
 
