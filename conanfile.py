@@ -24,7 +24,7 @@ class Chatterino(ConanFile):
             self.requires("benchmark/1.7.1")
 
         if self.options.get_safe("with_openssl3", False):
-            self.requires("openssl/3.1.0")
+            self.requires("openssl/3.2.0")
         else:
             self.requires("openssl/1.1.1t")
 
