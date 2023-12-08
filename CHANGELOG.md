@@ -53,6 +53,7 @@
 - Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
 - Dev: Tests now run on Ubuntu 22.04 instead of 20.04 to loosen C++ restrictions in tests. (#4774)
 - Dev: Do a pretty major refactor of the Settings classes. List settings (e.g. highlights) are most heavily modified, and should have an extra eye kept on them. (#4775)
+- Dev: conan: Update Boost to 1.83 & OpenSSL to 3.2.0. (#5007)
 - Dev: Remove `boost::noncopyable` use & `boost_random` dependency. (#4776)
 - Dev: Fix clang-tidy `cppcoreguidelines-pro-type-member-init` warnings. (#4426)
 - Dev: Immediate layout for invisible `ChannelView`s is skipped. (#4811)
