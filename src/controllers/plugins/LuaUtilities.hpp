@@ -8,7 +8,7 @@
 
 #    include <lua.h>
 #    include <lualib.h>
-#    include <magic_enum.hpp>
+#    include <magic_enum/magic_enum.hpp>
 #    include <QList>
 
 #    include <string>
