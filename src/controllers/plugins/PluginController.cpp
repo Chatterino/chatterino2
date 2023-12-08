@@ -204,6 +204,7 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
 
     auto pluginName = pluginDir.dirName();
     auto plugin = std::make_unique<Plugin>(pluginName, l, meta, pluginDir);
+    auto *temp = plugin.get();
     this->plugins_.insert({pluginName, std::move(plugin)});
     if (!PluginController::isPluginEnabled(pluginName) ||
         !getSettings()->pluginsEnabled)
@@ -216,9 +217,10 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     int err = luaL_dofile(l, index.absoluteFilePath().toStdString().c_str());
     if (err != 0)
     {
+        temp->error_ = lua::humanErrorText(l, err);
         qCWarning(chatterinoLua)
             << "Failed to load" << pluginName << "plugin from" << index << ": "
-            << lua::humanErrorText(l, err);
+            << temp->error_;
         return;
     }
     qCInfo(chatterinoLua) << "Loaded" << pluginName << "plugin from" << index;
@@ -309,6 +311,11 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
     QStringList results;
     for (const auto &[name, pl] : getApp()->plugins->plugins())
     {
+        if (!pl->error().isNull())
+        {
+            continue;
+        }
+        lua::BalanceKepper _(pl->state_);
         qCDebug(chatterinoLua)
             << "Processing custom completions from plugin" << name;
         auto opt = pl->getCompletionCallback();

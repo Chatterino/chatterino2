@@ -92,7 +92,7 @@ public:
                                         QString, int, bool>>
         getCompletionCallback()
     {
-        if (this->state_ == nullptr)
+        if (this->state_ == nullptr || !this->error_.isNull())
         {
             return {};
         }
@@ -117,9 +117,19 @@ public:
             this->state_, lua_gettop(this->state_));
     }
 
+    /**
+     * If the plugin crashes while evaluating the main file, this function will return the error
+     */
+    QString error()
+    {
+        return this->error_;
+    }
+
 private:
     QDir loadDirectory_;
     lua_State *state_;
+
+    QString error_;
 
     // maps command name -> function name
     std::unordered_map<QString, QString> ownedCommands;
