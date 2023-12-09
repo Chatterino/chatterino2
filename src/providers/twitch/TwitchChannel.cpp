@@ -1177,7 +1177,8 @@ void TwitchChannel::loadRecentMessages()
 
             tc->loadingRecentMessages_.clear();
         },
-        getSettings()->twitchMessageHistoryLimit.getValue());
+        getSettings()->twitchMessageHistoryLimit.getValue(), std::nullopt,
+        std::nullopt, false);
 }
 
 void TwitchChannel::loadRecentMessagesReconnect()

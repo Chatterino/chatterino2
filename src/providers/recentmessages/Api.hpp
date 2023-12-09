@@ -38,10 +38,8 @@ using ErrorCallback = std::function<void()>;
 void load(
     const QString &channelName, std::weak_ptr<Channel> channelPtr,
     ResultCallback onLoaded, ErrorCallback onError, int limit,
-    std::optional<std::chrono::time_point<std::chrono::system_clock>> after =
-        std::nullopt,
-    std::optional<std::chrono::time_point<std::chrono::system_clock>> before =
-        std::nullopt,
-    bool jitter = false);
+    std::optional<std::chrono::time_point<std::chrono::system_clock>> after,
+    std::optional<std::chrono::time_point<std::chrono::system_clock>> before,
+    bool jitter);
 
 }  // namespace chatterino::recentmessages
