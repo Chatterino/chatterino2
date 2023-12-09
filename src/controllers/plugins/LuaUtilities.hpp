@@ -63,6 +63,7 @@ StackIdx push(lua_State *L, const CommandContext &ctx);
 StackIdx push(lua_State *L, const QString &str);
 StackIdx push(lua_State *L, const std::string &str);
 StackIdx push(lua_State *L, const bool &b);
+StackIdx push(lua_State *L, const int &b);
 
 // returns OK?
 bool peek(lua_State *L, bool *out, StackIdx idx = -1);

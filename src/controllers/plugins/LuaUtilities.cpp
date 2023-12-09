@@ -132,6 +132,12 @@ StackIdx push(lua_State *L, const bool &b)
     return lua_gettop(L);
 }
 
+StackIdx push(lua_State *L, const int &b)
+{
+    lua_pushinteger(L, b);
+    return lua_gettop(L);
+}
+
 bool peek(lua_State *L, bool *out, StackIdx idx)
 {
     BalanceKepper _(L);
