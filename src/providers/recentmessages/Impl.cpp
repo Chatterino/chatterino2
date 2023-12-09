@@ -106,7 +106,7 @@ QUrl constructRecentMessagesUrl(
     {
         urlQuery.addQueryItem("limit", QString::number(limit));
     }
-    if (after.has_value() && !urlQuery.hasQueryItem("after"))
+    if (after.has_value())
     {
         urlQuery.addQueryItem(
             "after", QString::number(
@@ -114,7 +114,7 @@ QUrl constructRecentMessagesUrl(
                              after->time_since_epoch())
                              .count()));
     }
-    if (before.has_value() && !urlQuery.hasQueryItem("before"))
+    if (before.has_value())
     {
         urlQuery.addQueryItem(
             "before", QString::number(
