@@ -1,6 +1,7 @@
 #pragma once
 
 #include "widgets/BaseWidget.hpp"
+#include "widgets/TooltipWidget.hpp"
 
 #include <boost/signals2.hpp>
 #include <pajlada/settings/setting.hpp>
@@ -68,6 +69,7 @@ private:
 
     Split *const split_{};
     QString tooltipText_{};
+    TooltipWidget *const tooltipWidget_{};
     bool isLive_{false};
     QString thumbnail_;
     QElapsedTimer lastThumbnail_;
