@@ -308,7 +308,11 @@ public:
 
     // this type owns the stackidx, it must not be trivially copiable
     CallbackFunction operator=(CallbackFunction &) = delete;
+    CallbackFunction(CallbackFunction &) = delete;
+
+    // Permit only move
     CallbackFunction &operator=(CallbackFunction &&) = default;
+    CallbackFunction(CallbackFunction &&) = default;
 
     ~CallbackFunction()
     {
