@@ -135,6 +135,11 @@ public:
     QString roomId() const;
     SharedAccessGuard<const RoomModes> accessRoomModes() const;
     SharedAccessGuard<const StreamStatus> accessStreamStatus() const;
+
+    /**
+     * Records the current timestamp the channel was disconnected.
+     * This can be used to calculate the time spent disconnected after a successfull reconnect
+     */
     void markDisconnectedNow();
 
     // Emotes
