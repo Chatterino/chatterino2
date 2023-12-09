@@ -5,7 +5,6 @@
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
-#include "singletons/Settings.hpp"
 #include "util/FormatTime.hpp"
 
 #include <QJsonArray>
