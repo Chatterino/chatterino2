@@ -1,9 +1,9 @@
 #pragma once
 
-#include "controllers/plugins/LuaAPI.hpp"
-#include "controllers/plugins/LuaUtilities.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "Application.hpp"
+#    include "controllers/plugins/LuaAPI.hpp"
+#    include "controllers/plugins/LuaUtilities.hpp"
 
 #    include <QDir>
 #    include <QString>

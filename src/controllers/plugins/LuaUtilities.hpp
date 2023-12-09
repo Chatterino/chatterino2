@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cassert>
-#include <optional>
 #ifdef CHATTERINO_HAVE_PLUGINS
 
 #    include "common/QLogging.hpp"
@@ -11,6 +9,8 @@
 #    include <magic_enum/magic_enum.hpp>
 #    include <QList>
 
+#    include <cassert>
+#    include <optional>
 #    include <string>
 #    include <string_view>
 #    include <type_traits>
