@@ -36,6 +36,7 @@ public:
     // This is required to be public because of c functions
     Plugin *getPluginByStatePtr(lua_State *L);
 
+    // TODO: make a function that iterates plugins that aren't errored/enabled
     const std::map<QString, std::unique_ptr<Plugin>> &plugins() const;
 
     /**
