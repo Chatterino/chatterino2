@@ -138,7 +138,7 @@ public:
 
     /**
      * Records the current timestamp the channel was disconnected.
-     * This can be used to calculate the time spent disconnected after a successfull reconnect
+     * This can be used to calculate the time spent disconnected after a successful reconnect
      */
     void markDisconnectedNow();
 
