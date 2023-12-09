@@ -123,13 +123,15 @@ set(SOURCE_FILES
         controllers/completion/sources/UnifiedSource.hpp
         controllers/completion/sources/UserSource.cpp
         controllers/completion/sources/UserSource.hpp
-        controllers/completion/strategies/Strategy.hpp
         controllers/completion/strategies/ClassicEmoteStrategy.cpp
         controllers/completion/strategies/ClassicEmoteStrategy.hpp
         controllers/completion/strategies/ClassicUserStrategy.cpp
         controllers/completion/strategies/ClassicUserStrategy.hpp
         controllers/completion/strategies/CommandStrategy.cpp
         controllers/completion/strategies/CommandStrategy.hpp
+        controllers/completion/strategies/SmartEmoteStrategy.cpp
+        controllers/completion/strategies/SmartEmoteStrategy.cpp
+        controllers/completion/strategies/Strategy.hpp
         controllers/completion/TabCompletionModel.cpp
         controllers/completion/TabCompletionModel.hpp
 
@@ -224,8 +226,11 @@ set(SOURCE_FILES
         controllers/plugins/LuaUtilities.cpp
         controllers/plugins/LuaUtilities.hpp
 
-        controllers/sound/SoundController.cpp
-        controllers/sound/SoundController.hpp
+        controllers/sound/ISoundController.hpp
+        controllers/sound/MiniaudioBackend.cpp
+        controllers/sound/MiniaudioBackend.hpp
+        controllers/sound/NullBackend.cpp
+        controllers/sound/NullBackend.hpp
 
         controllers/twitch/LiveController.cpp
         controllers/twitch/LiveController.hpp
@@ -621,6 +626,8 @@ set(SOURCE_FILES
         widgets/helper/SignalLabel.hpp
         widgets/helper/TitlebarButton.cpp
         widgets/helper/TitlebarButton.hpp
+        widgets/helper/TitlebarButtons.cpp
+        widgets/helper/TitlebarButtons.hpp
 
         widgets/listview/GenericItemDelegate.cpp
         widgets/listview/GenericItemDelegate.hpp
@@ -929,7 +936,7 @@ if (CHATTERINO_DEBUG_NATIVE_MESSAGES)
 endif ()
 
 if (MSVC)
-    target_compile_options(${LIBRARY_PROJECT} PUBLIC /EHsc /bigobj)
+    target_compile_options(${LIBRARY_PROJECT} PUBLIC /EHsc /bigobj /utf-8)
 endif ()
 
 if (APPLE AND BUILD_APP)

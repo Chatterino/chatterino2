@@ -78,11 +78,5 @@ void SeventvAPI::updatePresence(const QString &twitchChannelID,
         .execute();
 }
 
-SeventvAPI &getSeventvAPI()
-{
-    static SeventvAPI instance;
-    return instance;
-}
-
 }  // namespace chatterino
 // NOLINTEND(readability-convert-member-functions-to-static)

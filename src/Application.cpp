@@ -10,11 +10,14 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "controllers/sound/ISoundController.hpp"
+#include "providers/seventv/SeventvAPI.hpp"
 #include "singletons/ImageUploader.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/PluginController.hpp"
 #endif
-#include "controllers/sound/SoundController.hpp"
+#include "controllers/sound/MiniaudioBackend.hpp"
+#include "controllers/sound/NullBackend.hpp"
 #include "controllers/twitch/LiveController.hpp"
 #include "controllers/userdata/UserDataController.hpp"
 #include "debug/AssertInGuiThread.hpp"
@@ -56,6 +59,34 @@
 
 #include <atomic>
 
+namespace {
+
+using namespace chatterino;
+
+ISoundController *makeSoundController(Settings &settings)
+{
+    SoundBackend soundBackend = settings.soundBackend;
+    switch (soundBackend)
+    {
+        case SoundBackend::Miniaudio: {
+            return new MiniaudioBackend();
+        }
+        break;
+
+        case SoundBackend::Null: {
+            return new NullBackend();
+        }
+        break;
+
+        default: {
+            return new MiniaudioBackend();
+        }
+        break;
+    }
+}
+
+}  // namespace
+
 namespace chatterino {
 
 static std::atomic<bool> isAppInitialized{false};
@@ -81,6 +112,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , windows(&this->emplace<WindowManager>())
     , toasts(&this->emplace<Toasts>())
     , imageUploader(&this->emplace<ImageUploader>())
+    , seventvAPI(&this->emplace<SeventvAPI>())
 
     , commands(&this->emplace<CommandController>())
     , notifications(&this->emplace<NotificationController>())
@@ -90,7 +122,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , ffzBadges(&this->emplace<FfzBadges>())
     , seventvBadges(&this->emplace<SeventvBadges>())
     , userData(&this->emplace<UserDataController>())
-    , sound(&this->emplace<SoundController>())
+    , sound(&this->emplace<ISoundController>(makeSoundController(_settings)))
     , twitchLiveController(&this->emplace<TwitchLiveController>())
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(&this->emplace<PluginController>())
@@ -256,6 +288,11 @@ IEmotes *Application::getEmotes()
 IUserDataController *Application::getUserData()
 {
     return this->userData;
+}
+
+ISoundController *Application::getSound()
+{
+    return this->sound;
 }
 
 ITwitchLiveController *Application::getTwitchLiveController()
@@ -509,9 +546,15 @@ void Application::initPubSub()
                                 msg.senderUserID, msg.senderUserLogin,
                                 senderDisplayName, senderColor};
                             postToThread([chan, action] {
-                                const auto p = makeAutomodMessage(action);
+                                const auto p =
+                                    makeAutomodMessage(action, chan->getName());
                                 chan->addMessage(p.first);
                                 chan->addMessage(p.second);
+
+                                getApp()->twitch->automodChannel->addMessage(
+                                    p.first);
+                                getApp()->twitch->automodChannel->addMessage(
+                                    p.second);
                             });
                         }
                         // "ALLOWED" and "DENIED" statuses remain unimplemented
@@ -536,7 +579,7 @@ void Application::initPubSub()
                 }
 
                 postToThread([chan, action] {
-                    const auto p = makeAutomodMessage(action);
+                    const auto p = makeAutomodMessage(action, chan->getName());
                     chan->addMessage(p.first);
                     chan->addMessage(p.second);
                 });

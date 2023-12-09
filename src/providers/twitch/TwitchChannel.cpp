@@ -1646,7 +1646,7 @@ void TwitchChannel::updateSevenTVActivity()
 
     qCDebug(chatterinoSeventv) << "Sending activity in" << this->getName();
 
-    getSeventvAPI().updatePresence(
+    getIApp()->getSeventvAPI()->updatePresence(
         this->roomId(), currentSeventvUserID,
         [chan = weakOf<Channel>(this)]() {
             const auto self =

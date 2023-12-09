@@ -2,6 +2,7 @@
 #    include "widgets/settingspages/PluginsPage.hpp"
 
 #    include "Application.hpp"
+#    include "common/Args.hpp"
 #    include "controllers/plugins/PluginController.hpp"
 #    include "singletons/Paths.hpp"
 #    include "singletons/Settings.hpp"
@@ -52,6 +53,15 @@ PluginsPage::PluginsPage()
             this->rebuildContent();
         });
         groupLayout->addRow(box);
+        if (getArgs().safeMode)
+        {
+            box->setEnabled(false);
+            auto *disabledLabel = new QLabel(this);
+            disabledLabel->setText("Plugins will not be fully loaded because "
+                                   "Chatterino is in safe mode. You can still "
+                                   "enable and disable them.");
+            groupLayout->addRow(disabledLabel);
+        }
     }
 
     this->rebuildContent();
@@ -177,6 +187,10 @@ void PluginsPage::rebuildContent()
                              this->rebuildContent();
                          });
         pluginEntry->addRow(reloadButton);
+        if (getArgs().safeMode)
+        {
+            reloadButton->setEnabled(false);
+        }
     }
 }
 

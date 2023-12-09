@@ -12,12 +12,6 @@
 
 namespace chatterino {
 
-TooltipWidget *TooltipWidget::instance()
-{
-    static TooltipWidget *tooltipWidget = new TooltipWidget();
-    return tooltipWidget;
-}
-
 TooltipWidget::TooltipWidget(BaseWidget *parent)
     : BaseWindow({BaseWindow::TopMost, BaseWindow::DontFocus,
                   BaseWindow::DisableLayoutSave},

@@ -22,6 +22,7 @@ class HighlightController;
 class HotkeyController;
 class IUserDataController;
 class UserDataController;
+class ISoundController;
 class SoundController;
 class ITwitchLiveController;
 class TwitchLiveController;
@@ -42,6 +43,7 @@ class ChatterinoBadges;
 class FfzBadges;
 class SeventvBadges;
 class ImageUploader;
+class SeventvAPI;
 
 class IApplication
 {
@@ -66,8 +68,10 @@ public:
     virtual FfzBadges *getFfzBadges() = 0;
     virtual SeventvBadges *getSeventvBadges() = 0;
     virtual IUserDataController *getUserData() = 0;
+    virtual ISoundController *getSound() = 0;
     virtual ITwitchLiveController *getTwitchLiveController() = 0;
     virtual ImageUploader *getImageUploader() = 0;
+    virtual SeventvAPI *getSeventvAPI() = 0;
 };
 
 class Application : public IApplication
@@ -97,6 +101,7 @@ public:
     WindowManager *const windows{};
     Toasts *const toasts{};
     ImageUploader *const imageUploader{};
+    SeventvAPI *const seventvAPI{};
 
     CommandController *const commands{};
     NotificationController *const notifications{};
@@ -106,7 +111,7 @@ public:
     FfzBadges *const ffzBadges{};
     SeventvBadges *const seventvBadges{};
     UserDataController *const userData{};
-    SoundController *const sound{};
+    ISoundController *const sound{};
 
 private:
     TwitchLiveController *const twitchLiveController{};
@@ -169,10 +174,15 @@ public:
         return this->seventvBadges;
     }
     IUserDataController *getUserData() override;
+    ISoundController *getSound() override;
     ITwitchLiveController *getTwitchLiveController() override;
     ImageUploader *getImageUploader() override
     {
         return this->imageUploader;
+    }
+    SeventvAPI *getSeventvAPI() override
+    {
+        return this->seventvAPI;
     }
 
     pajlada::Signals::NoArgSignal streamerModeChanged;
@@ -189,6 +199,14 @@ private:
     T &emplace()
     {
         auto t = new T;
+        this->singletons_.push_back(std::unique_ptr<T>(t));
+        return *t;
+    }
+
+    template <typename T,
+              typename = std::enable_if_t<std::is_base_of<Singleton, T>::value>>
+    T &emplace(T *t)
+    {
         this->singletons_.push_back(std::unique_ptr<T>(t));
         return *t;
     }

@@ -2,14 +2,11 @@
 
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
-#include "providers/seventv/SeventvAPI.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
 
 #include <QJsonArray>
 #include <QUrl>
 #include <QUrlQuery>
-
-#include <map>
 
 namespace chatterino {
 

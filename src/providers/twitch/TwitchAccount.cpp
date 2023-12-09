@@ -491,7 +491,15 @@ void TwitchAccount::loadSeventvUserID()
         return;
     }
 
-    getSeventvAPI().getUserByTwitchID(
+    auto *seventv = getIApp()->getSeventvAPI();
+    if (!seventv)
+    {
+        qCWarning(chatterinoSeventv)
+            << "Not loading 7TV User ID because the 7TV API is not initialized";
+        return;
+    }
+
+    seventv->getUserByTwitchID(
         this->getUserId(),
         [this](const auto &json) {
             const auto id = json["user"]["id"].toString();

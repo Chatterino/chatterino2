@@ -3,13 +3,15 @@ name: Post clang-tidy review comments
 
 on:
   workflow_run:
-    workflows: ["Build"]
+    workflows: ["clang-tidy"]
     types:
       - completed
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Only when a build succeeds
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - uses: ZedThree/clang-tidy-review/post@v0.14.0
