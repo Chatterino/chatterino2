@@ -107,10 +107,14 @@ public:
 
     ~StackGuard()
     {
+        if (expected < 0)
+        {
+            return;
+        }
         int after = lua_gettop(this->L);
         if (this->expected != after)
         {
-            stackDump(this->L, "BalanceKepper check tripped");
+            stackDump(this->L, "StackGuard check tripped");
             // clang-format off
             // clang format likes to insert a new line which means that some builds won't show this message fully
             assert(false && "internal error: lua stack was not in an expected state");
@@ -123,6 +127,12 @@ public:
     StackGuard &operator=(StackGuard &&) = delete;
     StackGuard(StackGuard &) = delete;
     StackGuard(StackGuard &&) = delete;
+
+    // This function tells the StackGuard that the stack isn't in an expected state but it was handled
+    void handled()
+    {
+        this->expected = -1;
+    }
 };
 
 /// TEMPLATES
