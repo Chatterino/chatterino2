@@ -143,7 +143,7 @@ bool peek(lua_State *L, std::optional<T> *out, StackIdx idx = -1)
 template <typename T>
 bool peek(lua_State *L, std::vector<T> *vec, StackIdx idx = -1)
 {
-    StackGuard _(L);
+    StackGuard guard(L);
 
     if (!lua_istable(L, idx))
     {
@@ -267,7 +267,7 @@ StackIdx push(lua_State *L, T inp)
 template <typename T>
 bool pop(lua_State *L, T *out, StackIdx idx = -1)
 {
-    StackGuard _(L, -1);
+    StackGuard guard(L, -1);
     auto ok = peek(L, out, idx);
     if (ok)
     {
