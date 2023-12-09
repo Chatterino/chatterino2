@@ -1451,7 +1451,10 @@ void Split::showSearch(bool singleChannel)
         auto container = dynamic_cast<SplitContainer *>(notebook.getPageAt(i));
         for (auto split : container->getSplits())
         {
-            popup->addChannel(split->getChannelView());
+            if (split->channel_.getType() != Channel::Type::TwitchAutomod)
+            {
+                popup->addChannel(split->getChannelView());
+            }
         }
     }
 

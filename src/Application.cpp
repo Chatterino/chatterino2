@@ -546,9 +546,15 @@ void Application::initPubSub()
                                 msg.senderUserID, msg.senderUserLogin,
                                 senderDisplayName, senderColor};
                             postToThread([chan, action] {
-                                const auto p = makeAutomodMessage(action);
+                                const auto p =
+                                    makeAutomodMessage(action, chan->getName());
                                 chan->addMessage(p.first);
                                 chan->addMessage(p.second);
+
+                                getApp()->twitch->automodChannel->addMessage(
+                                    p.first);
+                                getApp()->twitch->automodChannel->addMessage(
+                                    p.second);
                             });
                         }
                         // "ALLOWED" and "DENIED" statuses remain unimplemented
@@ -573,7 +579,7 @@ void Application::initPubSub()
                 }
 
                 postToThread([chan, action] {
-                    const auto p = makeAutomodMessage(action);
+                    const auto p = makeAutomodMessage(action, chan->getName());
                     chan->addMessage(p.first);
                     chan->addMessage(p.second);
                 });

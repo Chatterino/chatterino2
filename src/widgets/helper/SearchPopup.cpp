@@ -134,7 +134,9 @@ void SearchPopup::goToMessage(const MessagePtr &message)
 {
     for (const auto &view : this->searchChannels_)
     {
-        if (view.get().channel()->getType() == Channel::Type::TwitchMentions)
+        const auto type = view.get().channel()->getType();
+        if (type == Channel::Type::TwitchMentions ||
+            type == Channel::Type::TwitchAutomod)
         {
             getApp()->windows->scrollToMessage(message);
             return;
@@ -165,6 +167,10 @@ void SearchPopup::updateWindowTitle()
     if (this->searchChannels_.size() > 1)
     {
         historyName = "multiple channels'";
+    }
+    else if (this->channelName_ == "/automod")
+    {
+        historyName = "automod";
     }
     else if (this->channelName_ == "/mentions")
     {

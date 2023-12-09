@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Major: Allow use of Twitch follower emotes in other channels if subscribed. (#4922)
+- Major: Add `/automod` split to track automod caught messages across all open channels the user moderates. (#4986)
 - Minor: Migrate to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
 - Minor: The account switcher is now styled to match your theme. (#4817)
 - Minor: Add an invisible resize handle to the bottom of frameless user info popups and reply thread popups. (#4795)
@@ -13,6 +14,8 @@
 - Minor: The `/reply` command now replies to the latest message of the user. (#4919)
 - Minor: All sound capabilities can now be disabled by setting your "Sound backend" setting to "Null" and restarting Chatterino. (#4978)
 - Minor: Add an option to use new experimental smarter emote completion. (#4987)
+- Minor: Add `--safe-mode` command line option that can be used for troubleshooting when Chatterino is misbehaving or is misconfigured. It disables hiding the settings button & prevents plugins from loading. (#4985)
+- Minor: Updated the flatpakref link included with nightly builds to point to up-to-date flathub-beta builds. (#5008)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
 - Bugfix: Trimmed custom streamlink paths on all platforms making sure you don't accidentally add spaces at the beginning or end of its path. (#4834)
@@ -52,6 +55,7 @@
 - Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
 - Dev: Tests now run on Ubuntu 22.04 instead of 20.04 to loosen C++ restrictions in tests. (#4774)
 - Dev: Do a pretty major refactor of the Settings classes. List settings (e.g. highlights) are most heavily modified, and should have an extra eye kept on them. (#4775)
+- Dev: conan: Update Boost to 1.83 & OpenSSL to 3.2.0. (#5007)
 - Dev: Remove `boost::noncopyable` use & `boost_random` dependency. (#4776)
 - Dev: Fix clang-tidy `cppcoreguidelines-pro-type-member-init` warnings. (#4426)
 - Dev: Immediate layout for invisible `ChannelView`s is skipped. (#4811)

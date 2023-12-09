@@ -29,6 +29,10 @@ LoggingChannel::LoggingChannel(const QString &_channelName,
     {
         this->subDirectory = "Live";
     }
+    else if (channelName.startsWith("/automod"))
+    {
+        this->subDirectory = "AutoMod";
+    }
     else
     {
         this->subDirectory =
@@ -96,7 +100,8 @@ void LoggingChannel::addMessage(MessagePtr message)
     }
 
     QString str;
-    if (channelName.startsWith("/mentions"))
+    if (channelName.startsWith("/mentions") ||
+        channelName.startsWith("/automod"))
     {
         str.append("#" + message->channelName + " ");
     }
