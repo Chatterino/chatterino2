@@ -39,7 +39,6 @@
 #include "widgets/splits/SplitHeader.hpp"
 #include "widgets/splits/SplitInput.hpp"
 #include "widgets/splits/SplitOverlay.hpp"
-#include "widgets/TooltipWidget.hpp"
 #include "widgets/Window.hpp"
 
 #include <QApplication>
@@ -992,8 +991,6 @@ void Split::leaveEvent(QEvent *event)
     this->isMouseOver_ = false;
 
     this->overlay_->hide();
-
-    TooltipWidget::instance()->hide();
 
     this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 }
