@@ -296,29 +296,28 @@ StackIdx pushEnumTable(lua_State *L)
 template <typename ReturnType, typename... Args>
 class CallbackFunction
 {
-    StackIdx stackidx;
+    StackIdx stackIdx_;
     lua_State *L;
 
 public:
-    CallbackFunction(lua_State *L, StackIdx stackid)
-        : stackidx(stackid)
+    CallbackFunction(lua_State *L, StackIdx stackIdx)
+        : stackIdx_(stackIdx)
         , L(L)
     {
     }
 
     // this type owns the stackidx, it must not be trivially copiable
     CallbackFunction operator=(CallbackFunction &) = delete;
-
     CallbackFunction &operator=(CallbackFunction &&) = default;
 
     ~CallbackFunction()
     {
-        lua_remove(L, this->stackidx);
+        lua_remove(L, this->stackIdx_);
     }
 
     std::variant<int, ReturnType> operator()(Args... arguments)
     {
-        lua_pushvalue(this->L, this->stackidx);
+        lua_pushvalue(this->L, this->stackIdx_);
         (  // apparently this calls lua::push() for every Arg
             [this, &arguments] {
                 lua::push(this->L, arguments);
