@@ -103,17 +103,12 @@ TwitchChannel::TwitchChannel(const QString &name)
 
     // We can safely ignore this signal connection this has no external dependencies - once the signal
     // is destroyed, it will no longer be able to fire
-    std::ignore = this->connected.connect([this]() {
-        if (this->roomId().isEmpty())
+    std::ignore = this->joined.connect([this]() {
+        if (this->disconnectedAt_.has_value())
         {
-            // If we get a reconnected event when the room id is not set, we
-            // just connected for the first time. After receiving the first
-            // message from a channel, setRoomId is called and further
-            // invocations of this event will load recent messages.
-            return;
+            this->loadRecentMessagesReconnect();
+            this->disconnectedAt_ = std::nullopt;
         }
-
-        this->loadRecentMessagesReconnect();
     });
 
     // timers
@@ -1111,6 +1106,24 @@ bool TwitchChannel::setLive(bool newLiveStatus)
     return true;
 }
 
+void TwitchChannel::markDisconnectedNow()
+{
+    if (this->roomId().isEmpty())
+    {
+        // we were never joined in the first place
+        return;
+    }
+
+    if (this->disconnectedAt_.has_value())
+    {
+        // don't overwrite prior timestamp since
+        // a reconnection hasn't happened yet
+        return;
+    }
+
+    this->disconnectedAt_ = std::chrono::system_clock::now();
+}
+
 void TwitchChannel::loadRecentMessages()
 {
     if (!getSettings()->loadTwitchMessageHistoryOnConnect)
@@ -1163,7 +1176,9 @@ void TwitchChannel::loadRecentMessages()
                 return;
 
             tc->loadingRecentMessages_.clear();
-        });
+        },
+        getSettings()->twitchMessageHistoryLimit.getValue(), std::nullopt,
+        std::nullopt, false);
 }
 
 void TwitchChannel::loadRecentMessagesReconnect()
@@ -1176,6 +1191,21 @@ void TwitchChannel::loadRecentMessagesReconnect()
     if (this->loadingRecentMessages_.test_and_set())
     {
         return;  // already loading
+    }
+
+    const auto now = std::chrono::system_clock::now();
+    int limit = getSettings()->twitchMessageHistoryLimit.getValue();
+    if (this->disconnectedAt_.has_value())
+    {
+        // calculate how many messages could have occured
+        // while we were not connected to the channel
+        // assuming a maximum of 10 messages per second
+        const auto secondsSinceDisconnect =
+            std::chrono::duration_cast<std::chrono::seconds>(
+                now - this->disconnectedAt_.value())
+                .count();
+        limit =
+            std::min(static_cast<int>(secondsSinceDisconnect + 1) * 10, limit);
     }
 
     auto weak = weakOf<Channel>(this);
@@ -1203,7 +1233,8 @@ void TwitchChannel::loadRecentMessagesReconnect()
                 return;
 
             tc->loadingRecentMessages_.clear();
-        });
+        },
+        limit, this->disconnectedAt_, now, true);
 }
 
 void TwitchChannel::refreshPubSub()

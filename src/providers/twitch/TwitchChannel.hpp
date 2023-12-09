@@ -136,6 +136,12 @@ public:
     SharedAccessGuard<const RoomModes> accessRoomModes() const;
     SharedAccessGuard<const StreamStatus> accessStreamStatus() const;
 
+    /**
+     * Records the current timestamp the channel was disconnected.
+     * This can be used to calculate the time spent disconnected after a successful reconnect
+     */
+    void markDisconnectedNow();
+
     // Emotes
     std::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
     std::optional<EmotePtr> ffzEmote(const EmoteName &name) const;
@@ -199,6 +205,11 @@ public:
      * If no thread can be found for the message, create one
      */
     std::shared_ptr<MessageThread> getOrCreateThread(const MessagePtr &message);
+
+    /**
+     * This signal fires when the local user has joined the channel
+     **/
+    pajlada::Signals::NoArgSignal joined;
 
     // Only TwitchChannel may invoke this signal
     pajlada::Signals::NoArgSignal userStateChanged;
@@ -353,6 +364,8 @@ private:
     int chatterCount_{};
     UniqueAccess<StreamStatus> streamStatus_;
     UniqueAccess<RoomModes> roomModes_;
+    std::optional<std::chrono::time_point<std::chrono::system_clock>>
+        disconnectedAt_{};
     std::atomic_flag loadingRecentMessages_ = ATOMIC_FLAG_INIT;
     std::unordered_map<QString, std::weak_ptr<MessageThread>> threads_;
 
