@@ -335,6 +335,7 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
                 cb(query, fullTextContent, cursorPosition, isFirstWord);
             if (std::holds_alternative<int>(errOrList))
             {
+                guard.handled();
                 int err = std::get<int>(errOrList);
                 qCDebug(chatterinoLua)
                     << "Got error from plugin " << pl->meta.name
