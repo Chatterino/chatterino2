@@ -28,9 +28,7 @@ std::vector<MessagePtr> buildRecentMessages(
 // given channel.
 QUrl constructRecentMessagesUrl(
     const QString &name, int limit,
-    std::optional<std::chrono::time_point<std::chrono::system_clock>> after =
-        std::nullopt,
-    std::optional<std::chrono::time_point<std::chrono::system_clock>> before =
-        std::nullopt);
+    std::optional<std::chrono::time_point<std::chrono::system_clock>> after,
+    std::optional<std::chrono::time_point<std::chrono::system_clock>> before);
 
 }  // namespace chatterino::recentmessages::detail
