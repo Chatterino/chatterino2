@@ -78,26 +78,34 @@ bool peek(lua_State *L, api::CompletionList *out, StackIdx idx = -1);
  */
 QString toString(lua_State *L, StackIdx idx = -1);
 
-// Special
-class BalanceKepper
+// This object ensures that the stack is of expected size when it is destroyed
+class StackGuard
 {
     int expected;
     lua_State *L;
 
 public:
-    BalanceKepper(lua_State *L)
+    /**
+     * Use this constructor if you expect the stack size to be the same on the
+     * destruction of the object as its creation
+     */
+    StackGuard(lua_State *L)
         : expected(lua_gettop(L))
         , L(L)
     {
     }
 
-    BalanceKepper(lua_State *L, int diff)
+    /**
+     * Use this if you expect the stack size changing, diff is the expected difference
+     * Ex: diff=3 means three elements added to the stack
+     */
+    StackGuard(lua_State *L, int diff)
         : expected(lua_gettop(L) + diff)
         , L(L)
     {
     }
 
-    ~BalanceKepper()
+    ~StackGuard()
     {
         int after = lua_gettop(this->L);
         if (this->expected != after)
@@ -109,8 +117,12 @@ public:
             // clang-format on
         }
     }
-    BalanceKepper operator=(BalanceKepper &) = delete;
-    BalanceKepper &operator=(BalanceKepper &&) = delete;
+
+    // This object isn't meant to be passed around
+    StackGuard operator=(StackGuard &) = delete;
+    StackGuard &operator=(StackGuard &&) = delete;
+    StackGuard(StackGuard &) = delete;
+    StackGuard(StackGuard &&) = delete;
 };
 
 /// TEMPLATES
@@ -131,7 +143,7 @@ bool peek(lua_State *L, std::optional<T> *out, StackIdx idx = -1)
 template <typename T>
 bool peek(lua_State *L, std::vector<T> *vec, StackIdx idx = -1)
 {
-    BalanceKepper _(L);
+    StackGuard _(L);
 
     if (!lua_istable(L, idx))
     {
@@ -255,7 +267,7 @@ StackIdx push(lua_State *L, T inp)
 template <typename T>
 bool pop(lua_State *L, T *out, StackIdx idx = -1)
 {
-    BalanceKepper _(L, -1);
+    StackGuard _(L, -1);
     auto ok = peek(L, out, idx);
     if (ok)
     {

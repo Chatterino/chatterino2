@@ -324,7 +324,7 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
         {
             continue;
         }
-        lua::BalanceKepper _(pl->state_);
+        lua::StackGuard _(pl->state_);
         auto opt = pl->getCompletionCallback();
         if (opt)
         {

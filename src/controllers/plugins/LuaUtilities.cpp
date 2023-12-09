@@ -115,7 +115,7 @@ StackIdx push(lua_State *L, const std::string &str)
 
 StackIdx push(lua_State *L, const CommandContext &ctx)
 {
-    BalanceKepper _(L, 1);
+    StackGuard _(L, 1);
     auto outIdx = pushEmptyTable(L, 2);
 
     push(L, ctx.words);
@@ -140,7 +140,7 @@ StackIdx push(lua_State *L, const int &b)
 
 bool peek(lua_State *L, bool *out, StackIdx idx)
 {
-    BalanceKepper _(L);
+    StackGuard _(L);
     if (!lua_isboolean(L, idx))
     {
         return false;
@@ -152,7 +152,7 @@ bool peek(lua_State *L, bool *out, StackIdx idx)
 
 bool peek(lua_State *L, double *out, StackIdx idx)
 {
-    BalanceKepper _(L);
+    StackGuard _(L);
     int ok{0};
     auto v = lua_tonumberx(L, idx, &ok);
     if (ok != 0)
@@ -164,7 +164,7 @@ bool peek(lua_State *L, double *out, StackIdx idx)
 
 bool peek(lua_State *L, QString *out, StackIdx idx)
 {
-    BalanceKepper _(L);
+    StackGuard _(L);
     size_t len{0};
     const char *str = lua_tolstring(L, idx, &len);
     if (str == nullptr)
@@ -181,7 +181,7 @@ bool peek(lua_State *L, QString *out, StackIdx idx)
 
 bool peek(lua_State *L, QByteArray *out, StackIdx idx)
 {
-    BalanceKepper _(L);
+    StackGuard _(L);
     size_t len{0};
     const char *str = lua_tolstring(L, idx, &len);
     if (str == nullptr)
@@ -198,7 +198,7 @@ bool peek(lua_State *L, QByteArray *out, StackIdx idx)
 
 bool peek(lua_State *L, std::string *out, StackIdx idx)
 {
-    BalanceKepper _(L);
+    StackGuard _(L);
     size_t len{0};
     const char *str = lua_tolstring(L, idx, &len);
     if (str == nullptr)
@@ -215,7 +215,7 @@ bool peek(lua_State *L, std::string *out, StackIdx idx)
 
 bool peek(lua_State *L, api::CompletionList *out, StackIdx idx)
 {
-    BalanceKepper _(L);
+    StackGuard _(L);
     int typ = lua_getfield(L, idx, "values");
     if (typ != LUA_TTABLE)
     {
