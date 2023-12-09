@@ -285,6 +285,7 @@ ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context,
     , highlightAnimation_(this)
     , context_(context)
     , messages_(messagesLimit)
+    , tooltipWidget_(new TooltipWidget(this))
 {
     this->setMouseTracking(true);
 
@@ -1632,7 +1633,7 @@ void ChannelView::enterEvent(QEvent * /*event*/)
 
 void ChannelView::leaveEvent(QEvent * /*event*/)
 {
-    TooltipWidget::instance()->hide();
+    this->tooltipWidget_->hide();
 
     this->unpause(PauseReason::Mouse);
 
@@ -1653,7 +1654,6 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         this->pause(PauseReason::Mouse);
     }
 
-    auto *tooltipWidget = TooltipWidget::instance();
     std::shared_ptr<MessageLayout> layout;
     QPoint relativePos;
     int messageIndex;
@@ -1662,7 +1662,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
     {
         this->setCursor(Qt::ArrowCursor);
-        tooltipWidget->hide();
+        this->tooltipWidget_->hide();
         return;
     }
 
@@ -1700,14 +1700,14 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     if (layout->flags.has(MessageLayoutFlag::Collapsed))
     {
         this->setCursor(Qt::PointingHandCursor);
-        tooltipWidget->hide();
+        this->tooltipWidget_->hide();
         return;
     }
 
     if (hoverLayoutElement == nullptr)
     {
         this->setCursor(Qt::ArrowCursor);
-        tooltipWidget->hide();
+        this->tooltipWidget_->hide();
         return;
     }
 
@@ -1721,7 +1721,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     if (element->getTooltip().isEmpty() ||
         (isLinkValid && isNotEmote && !getSettings()->linkInfoTooltip))
     {
-        tooltipWidget->hide();
+        this->tooltipWidget_->hide();
     }
     else
     {
@@ -1739,7 +1739,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 
             if (emoteElement)
             {
-                tooltipWidget->setOne({
+                this->tooltipWidget_->setOne({
                     showThumbnail
                         ? emoteElement->getEmote()->images.getImage(3.0)
                         : nullptr,
@@ -1798,12 +1798,12 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                     auto style = layeredEmotes.size() > 2
                                      ? TooltipStyle::Grid
                                      : TooltipStyle::Vertical;
-                    tooltipWidget->set(entries, style);
+                    this->tooltipWidget_->set(entries, style);
                 }
             }
             else if (badgeElement)
             {
-                tooltipWidget->setOne({
+                this->tooltipWidget_->setOne({
                     showThumbnail
                         ? badgeElement->getEmote()->images.getImage(3.0)
                         : nullptr,
@@ -1834,7 +1834,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             if (thumbnailSize == 0)
             {
                 // "Show thumbnails" is set to "Off", show text only
-                tooltipWidget->setOne({nullptr, element->getTooltip()});
+                this->tooltipWidget_->setOne({nullptr, element->getTooltip()});
             }
             else
             {
@@ -1851,21 +1851,24 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                 if (element->getThumbnailType() ==
                     MessageElement::ThumbnailType::Link_Thumbnail)
                 {
-                    tooltipWidget->setOne({std::move(thumb),
-                                           element->getTooltip(), thumbnailSize,
-                                           thumbnailSize});
+                    this->tooltipWidget_->setOne({
+                        std::move(thumb),
+                        element->getTooltip(),
+                        thumbnailSize,
+                        thumbnailSize,
+                    });
                 }
                 else
                 {
-                    tooltipWidget->setOne({std::move(thumb), ""});
+                    this->tooltipWidget_->setOne({std::move(thumb), ""});
                 }
             }
         }
 
-        tooltipWidget->moveTo(event->globalPos() + QPoint(16, 16),
-                              widgets::BoundsChecking::CursorPosition);
-        tooltipWidget->setWordWrap(isLinkValid);
-        tooltipWidget->show();
+        this->tooltipWidget_->moveTo(event->globalPos() + QPoint(16, 16),
+                                     widgets::BoundsChecking::CursorPosition);
+        this->tooltipWidget_->setWordWrap(isLinkValid);
+        this->tooltipWidget_->show();
     }
 
     // check if word has a link

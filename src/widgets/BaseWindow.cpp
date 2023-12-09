@@ -10,7 +10,6 @@
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/TitlebarButtons.hpp"
 #include "widgets/Label.hpp"
-#include "widgets/TooltipWidget.hpp"
 #include "widgets/Window.hpp"
 
 #include <QApplication>
@@ -468,11 +467,6 @@ EffectLabel *BaseWindow::addTitleBarLabel(std::function<void()> onClicked)
 
 void BaseWindow::changeEvent(QEvent *)
 {
-    if (this->isVisible())
-    {
-        TooltipWidget::instance()->hide();
-    }
-
 #ifdef USEWINSDK
     if (this->ui_.titlebarButtons)
     {
@@ -497,7 +491,6 @@ void BaseWindow::changeEvent(QEvent *)
 
 void BaseWindow::leaveEvent(QEvent *)
 {
-    TooltipWidget::instance()->hide();
 }
 
 void BaseWindow::moveTo(QPoint point, widgets::BoundsChecking mode)
