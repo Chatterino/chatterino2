@@ -1200,10 +1200,12 @@ void TwitchChannel::loadRecentMessagesReconnect()
         // calculate how many messages could have occured
         // while we were not connected to the channel
         // assuming a maximum of 10 messages per second
-        const auto duration = std::chrono::duration_cast<std::chrono::seconds>(
-                                  now - this->disconnectedAt_.value())
-                                  .count();
-        limit = std::min(static_cast<int>(duration + 1) * 10, limit);
+        const auto secondsSinceDisconnect =
+            std::chrono::duration_cast<std::chrono::seconds>(
+                now - this->disconnectedAt_.value())
+                .count();
+        limit =
+            std::min(static_cast<int>(secondsSinceDisconnect + 1) * 10, limit);
     }
 
     auto weak = weakOf<Channel>(this);
