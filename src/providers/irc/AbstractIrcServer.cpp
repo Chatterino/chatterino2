@@ -332,8 +332,6 @@ void AbstractIrcServer::onReadConnected(IrcConnection *connection)
         {
             chan->addMessage(connectedMsg);
         }
-
-        chan->connected.invoke();
     }
 
     this->falloffCounter_ = 1;
