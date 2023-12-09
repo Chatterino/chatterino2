@@ -325,11 +325,11 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
             continue;
         }
         lua::BalanceKepper _(pl->state_);
-        qCDebug(chatterinoLua)
-            << "Processing custom completions from plugin" << name;
         auto opt = pl->getCompletionCallback();
         if (opt)
         {
+            qCDebug(chatterinoLua)
+                << "Processing custom completions from plugin" << name;
             auto &cb = *opt;
             auto errOrList =
                 cb(query, fullTextContent, cursorPosition, isFirstWord);
