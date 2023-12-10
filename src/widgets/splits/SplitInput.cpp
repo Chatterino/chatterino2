@@ -7,7 +7,6 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Link.hpp"
 #include "messages/Message.hpp"
-#include "messages/MessageThread.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -19,6 +18,7 @@
 #include "widgets/dialogs/EmotePopup.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
+#include "widgets/helper/MessageView.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
@@ -84,14 +84,25 @@ void SplitInput::initLayout()
     auto layout =
         layoutCreator.setLayoutType<QVBoxLayout>().withoutMargin().assign(
             &this->ui_.vbox);
+    layout->setSpacing(0);
+    auto marginPx = this->marginForTheme();
+    layout->setContentsMargins(marginPx, marginPx, marginPx, marginPx);
 
     // reply label stuff
     auto replyWrapper =
         layout.emplace<QWidget>().assign(&this->ui_.replyWrapper);
-    this->ui_.replyWrapper->setContentsMargins(0, 0, 0, 0);
+    replyWrapper->setContentsMargins(0, 0, 0, 0);
 
-    auto replyHbox = replyWrapper.emplace<QHBoxLayout>().withoutMargin().assign(
-        &this->ui_.replyHbox);
+    auto replyVbox =
+        replyWrapper.setLayoutType<QVBoxLayout>().withoutMargin().assign(
+            &this->ui_.replyVbox);
+    replyVbox->setSpacing(0);
+
+    auto replyHbox =
+        replyVbox.emplace<QHBoxLayout>().assign(&this->ui_.replyHbox);
+
+    this->ui_.replyMessage = new MessageView();
+    replyVbox->addWidget(this->ui_.replyMessage);
 
     auto replyLabel = replyHbox.emplace<QLabel>().assign(&this->ui_.replyLabel);
     replyLabel->setAlignment(Qt::AlignLeft);
@@ -107,9 +118,14 @@ void SplitInput::initLayout()
     replyCancelButton->hide();
     replyLabel->hide();
 
+    auto inputWrapper =
+        layout.emplace<QWidget>().assign(&this->ui_.inputWrapper);
+    inputWrapper->setContentsMargins(0, 0, 0, 0);
+
     // hbox for input, right box
     auto hboxLayout =
-        layout.emplace<QHBoxLayout>().withoutMargin().assign(&this->ui_.hbox);
+        inputWrapper.setLayoutType<QHBoxLayout>().withoutMargin().assign(
+            &this->ui_.inputHbox);
 
     // input
     auto textEdit =
@@ -176,7 +192,7 @@ void SplitInput::initLayout()
         this->openEmotePopup();
     });
 
-    // clear input and remove reply thread
+    // clear input and remove reply target
     QObject::connect(this->ui_.cancelReplyButton, &EffectLabel::leftClicked,
                      [this] {
                          this->clearInput();
@@ -211,6 +227,10 @@ void SplitInput::scaleChangedEvent(float scale)
     if (!this->hidden)
     {
         this->setMaximumHeight(this->scaledMaxHeight());
+        if (this->replyTarget_ != nullptr)
+        {
+            this->ui_.vbox->setSpacing(this->marginForTheme() * 2);
+        }
     }
     this->ui_.textEdit->setFont(
         app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
@@ -239,8 +259,6 @@ void SplitInput::themeChangedEvent()
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
     this->ui_.textEdit->setPalette(placeholderPalette);
 #endif
-    auto marginPx = (this->theme->isLightTheme() ? 4 : 2) * this->scale();
-    this->ui_.vbox->setContentsMargins(marginPx, marginPx, marginPx, marginPx);
 
     this->ui_.emoteButton->getLabel().setStyleSheet("color: #000");
 
@@ -251,6 +269,14 @@ void SplitInput::themeChangedEvent()
     else
     {
         this->ui_.replyLabel->setStyleSheet("color: #ccc");
+    }
+
+    // update vbox
+    auto marginPx = this->marginForTheme();
+    this->ui_.vbox->setContentsMargins(marginPx, marginPx, marginPx, marginPx);
+    if (this->replyTarget_ != nullptr)
+    {
+        this->ui_.vbox->setSpacing(this->marginForTheme() * 2);
     }
 }
 
@@ -330,7 +356,7 @@ QString SplitInput::handleSendMessage(std::vector<QString> &arguments)
     if (c == nullptr)
         return "";
 
-    if (!c->isTwitchChannel() || this->replyThread_ == nullptr)
+    if (!c->isTwitchChannel() || this->replyTarget_ == nullptr)
     {
         // standard message send behavior
         QString message = ui_.textEdit->toPlainText();
@@ -359,7 +385,7 @@ QString SplitInput::handleSendMessage(std::vector<QString> &arguments)
         if (this->enableInlineReplying_)
         {
             // Remove @username prefix that is inserted when doing inline replies
-            message.remove(0, this->replyThread_->displayName.length() +
+            message.remove(0, this->replyTarget_->displayName.length() +
                                   1);  // remove "@username"
 
             if (!message.isEmpty() && message.at(0) == ' ')
@@ -373,7 +399,7 @@ QString SplitInput::handleSendMessage(std::vector<QString> &arguments)
             getApp()->commands->execCommand(message, c, false);
 
         // Reply within TwitchChannel
-        tc->sendReply(sendMessage, this->replyThread_->id);
+        tc->sendReply(sendMessage, this->replyTarget_->id);
 
         this->postMessageSend(message, arguments);
         return "";
@@ -399,7 +425,15 @@ void SplitInput::postMessageSend(const QString &message,
 
 int SplitInput::scaledMaxHeight() const
 {
-    return int(150 * this->scale());
+    if (this->replyTarget_ != nullptr)
+    {
+        // give more space for showing the message being replied to
+        return int(250 * this->scale());
+    }
+    else
+    {
+        return int(150 * this->scale());
+    }
 }
 
 void SplitInput::addShortcuts()
@@ -987,24 +1021,24 @@ void SplitInput::editTextChanged()
     bool hasReply = false;
     if (this->enableInlineReplying_)
     {
-        if (this->replyThread_ != nullptr)
+        if (this->replyTarget_ != nullptr)
         {
             // Check if the input still starts with @username. If not, don't reply.
             //
             // We need to verify that
             // 1. the @username prefix exists and
             // 2. if a character exists after the @username, it is a space
-            QString replyPrefix = "@" + this->replyThread_->displayName;
+            QString replyPrefix = "@" + this->replyTarget_->displayName;
             if (!text.startsWith(replyPrefix) ||
                 (text.length() > replyPrefix.length() &&
                  text.at(replyPrefix.length()) != ' '))
             {
-                this->replyThread_ = nullptr;
+                this->clearReplyTarget();
             }
         }
 
         // Show/hide reply label if inline replies are possible
-        hasReply = this->replyThread_ != nullptr;
+        hasReply = this->replyTarget_ != nullptr;
     }
 
     this->ui_.replyWrapper->setVisible(hasReply);
@@ -1016,37 +1050,35 @@ void SplitInput::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
 
-    int s;
-    QColor borderColor;
+    int s = this->marginForTheme();
+    QColor borderColor =
+        this->theme->isLightTheme() ? QColor("#ccc") : QColor("#333");
 
-    if (this->theme->isLightTheme())
-    {
-        s = int(3 * this->scale());
-        borderColor = QColor("#ccc");
-    }
-    else
-    {
-        s = int(1 * this->scale());
-        borderColor = QColor("#333");
-    }
-
-    QMargins removeMargins(s - 1, s - 1, s, s);
     QRect baseRect = this->rect();
+    QRect inputBoxRect = this->ui_.inputWrapper->geometry();
+    inputBoxRect.setX(baseRect.x());
+    inputBoxRect.setWidth(baseRect.width());
 
-    // completeAreaRect includes the reply label
-    QRect completeAreaRect = baseRect.marginsRemoved(removeMargins);
-    painter.fillRect(completeAreaRect, this->theme->splits.input.background);
+    painter.fillRect(inputBoxRect, this->theme->splits.input.background);
     painter.setPen(borderColor);
-    painter.drawRect(completeAreaRect);
+    painter.drawRect(inputBoxRect);
 
-    if (this->enableInlineReplying_ && this->replyThread_ != nullptr)
+    if (this->enableInlineReplying_ && this->replyTarget_ != nullptr)
     {
-        // Move top of rect down to not include reply label
-        baseRect.setTop(baseRect.top() + this->ui_.replyWrapper->height());
+        QRect replyRect = this->ui_.replyWrapper->geometry();
+        replyRect.setX(baseRect.x());
+        replyRect.setWidth(baseRect.width());
 
-        QRect onlyInputRect = baseRect.marginsRemoved(removeMargins);
+        painter.fillRect(replyRect, this->theme->splits.input.background);
         painter.setPen(borderColor);
-        painter.drawRect(onlyInputRect);
+        painter.drawRect(replyRect);
+
+        QPoint replyLabelBorderStart(
+            replyRect.x(),
+            replyRect.y() + this->ui_.replyHbox->geometry().height());
+        QPoint replyLabelBorderEnd(replyRect.right(),
+                                   replyLabelBorderStart.y());
+        painter.drawLine(replyLabelBorderStart, replyLabelBorderEnd);
     }
 }
 
@@ -1060,6 +1092,8 @@ void SplitInput::resizeEvent(QResizeEvent *)
     {
         this->ui_.textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     }
+
+    this->ui_.replyMessage->setWidth(this->width());
 }
 
 void SplitInput::giveFocus(Qt::FocusReason reason)
@@ -1067,9 +1101,9 @@ void SplitInput::giveFocus(Qt::FocusReason reason)
     this->ui_.textEdit->setFocus(reason);
 }
 
-void SplitInput::setReply(MessagePtr reply, bool showReplyingLabel)
+void SplitInput::setReply(MessagePtr target)
 {
-    auto oldParent = this->replyThread_;
+    auto oldParent = this->replyTarget_;
     if (this->enableInlineReplying_ && oldParent)
     {
         // Remove old reply prefix
@@ -1084,12 +1118,24 @@ void SplitInput::setReply(MessagePtr reply, bool showReplyingLabel)
         this->ui_.textEdit->resetCompletion();
     }
 
-    this->replyThread_ = std::move(reply);
+    assert(target != nullptr);
+    this->replyTarget_ = std::move(target);
 
     if (this->enableInlineReplying_)
     {
+        this->ui_.replyMessage->setMessage(this->replyTarget_);
+        this->ui_.replyMessage->setWidth(this->width());
+
+        // add spacing between reply box and input box
+        this->ui_.vbox->setSpacing(this->marginForTheme() * 2);
+        if (!this->isHidden())
+        {
+            // update maximum height to give space for message
+            this->setMaximumHeight(this->scaledMaxHeight());
+        }
+
         // Only enable reply label if inline replying
-        auto replyPrefix = "@" + this->replyThread_->displayName;
+        auto replyPrefix = "@" + this->replyTarget_->displayName;
         auto plainText = this->ui_.textEdit->toPlainText().trimmed();
         if (!plainText.startsWith(replyPrefix))
         {
@@ -1102,7 +1148,7 @@ void SplitInput::setReply(MessagePtr reply, bool showReplyingLabel)
             this->ui_.textEdit->resetCompletion();
         }
         this->ui_.replyLabel->setText("Replying to @" +
-                                      this->replyThread_->displayName);
+                                      this->replyTarget_->displayName);
     }
 }
 
@@ -1116,9 +1162,17 @@ void SplitInput::clearInput()
     this->currMsg_ = "";
     this->ui_.textEdit->setText("");
     this->ui_.textEdit->moveCursor(QTextCursor::Start);
-    if (this->enableInlineReplying_)
+    this->clearReplyTarget();
+}
+
+void SplitInput::clearReplyTarget()
+{
+    this->replyTarget_.reset();
+    this->ui_.replyMessage->clearMessage();
+    this->ui_.vbox->setSpacing(0);
+    if (!this->isHidden())
     {
-        this->replyThread_ = nullptr;
+        this->setMaximumHeight(this->scaledMaxHeight());
     }
 }
 
@@ -1143,6 +1197,18 @@ bool SplitInput::shouldPreventInput(const QString &text) const
     }
 
     return text.length() > TWITCH_MESSAGE_LIMIT;
+}
+
+int SplitInput::marginForTheme() const
+{
+    if (this->theme->isLightTheme())
+    {
+        return int(3 * this->scale());
+    }
+    else
+    {
+        return int(1 * this->scale());
+    }
 }
 
 }  // namespace chatterino

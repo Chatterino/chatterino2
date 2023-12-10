@@ -604,6 +604,8 @@ set(SOURCE_FILES
         widgets/helper/EffectLabel.hpp
         widgets/helper/InvisibleSizeGrip.cpp
         widgets/helper/InvisibleSizeGrip.hpp
+        widgets/helper/MessageView.cpp
+        widgets/helper/MessageView.hpp
         widgets/helper/NotebookButton.cpp
         widgets/helper/NotebookButton.hpp
         widgets/helper/NotebookTab.cpp
