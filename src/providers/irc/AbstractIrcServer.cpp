@@ -5,6 +5,7 @@
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 
 #include <QCoreApplication>
 
@@ -331,8 +332,6 @@ void AbstractIrcServer::onReadConnected(IrcConnection *connection)
         {
             chan->addMessage(connectedMsg);
         }
-
-        chan->connected.invoke();
     }
 
     this->falloffCounter_ = 1;
@@ -360,6 +359,11 @@ void AbstractIrcServer::onDisconnected()
         }
 
         chan->addMessage(disconnectedMsg);
+
+        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+        {
+            channel->markDisconnectedNow();
+        }
     }
 }
 

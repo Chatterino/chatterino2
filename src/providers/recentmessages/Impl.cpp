@@ -5,7 +5,6 @@
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
-#include "singletons/Settings.hpp"
 #include "util/FormatTime.hpp"
 
 #include <QJsonArray>
@@ -94,14 +93,34 @@ std::vector<MessagePtr> buildRecentMessages(
 
 // Returns the URL to be used for querying the Recent Messages API for the
 // given channel.
-QUrl constructRecentMessagesUrl(const QString &name)
+QUrl constructRecentMessagesUrl(
+    const QString &name, const int limit,
+    const std::optional<std::chrono::time_point<std::chrono::system_clock>>
+        after,
+    const std::optional<std::chrono::time_point<std::chrono::system_clock>>
+        before)
 {
     QUrl url(Env::get().recentMessagesApiUrl.arg(name));
     QUrlQuery urlQuery(url);
     if (!urlQuery.hasQueryItem("limit"))
     {
+        urlQuery.addQueryItem("limit", QString::number(limit));
+    }
+    if (after.has_value())
+    {
         urlQuery.addQueryItem(
-            "limit", QString::number(getSettings()->twitchMessageHistoryLimit));
+            "after", QString::number(
+                         std::chrono::duration_cast<std::chrono::milliseconds>(
+                             after->time_since_epoch())
+                             .count()));
+    }
+    if (before.has_value())
+    {
+        urlQuery.addQueryItem(
+            "before", QString::number(
+                          std::chrono::duration_cast<std::chrono::milliseconds>(
+                              before->time_since_epoch())
+                              .count()));
     }
     url.setQuery(urlQuery);
     return url;
