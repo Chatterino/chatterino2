@@ -15,6 +15,7 @@
 #    include <QFileInfo>
 #    include <QLoggingCategory>
 #    include <QTextCodec>
+#    include <QUrl>
 
 namespace {
 using namespace chatterino;
@@ -282,18 +283,32 @@ int g_load(lua_State *L)
 #    endif
 }
 
-int safeluasearcher(lua_State *L)
+int loadfile(lua_State *L, const QString &str)
 {
-    const char *name = luaL_checkstring(L, 1);
-    QString str;
-    lua::peek(L, &str, lua_upvalueindex(1));
-    str += QDir::separator();
-    str += name;
-    str += ".lua";
+    auto *pl = getApp()->plugins->getPluginByStatePtr(L);
+    if (pl == nullptr)
+    {
+        return luaL_error(L, "loadfile: internal error: no plugin?");
+    }
+    auto dir = QUrl(pl->loadDirectory().canonicalPath() + "/");
+
+    if (!dir.isParentOf(str))
+    {
+        // XXX: This intentionally hides the resolved path to not leak it
+        lua::push(
+            L, QString("requested module is outside of the plugin directory"));
+        return 1;
+    }
+    QFileInfo info(str);
+    if (!info.exists())
+    {
+        lua::push(L, QString("no file '%1'").arg(str));
+        return 1;
+    }
 
     auto temp = str.toStdString();
-
     const auto *filename = temp.c_str();
+
     auto res = luaL_loadfilex(L, filename, "t");
     // Yoinked from checkload lib/lua/src/loadlib.c
     if (res == LUA_OK)
@@ -304,6 +319,51 @@ int safeluasearcher(lua_State *L)
 
     return luaL_error(L, "error loading module '%s' from file '%s':\n\t%s",
                       lua_tostring(L, 1), filename, lua_tostring(L, -1));
+}
+
+int searcherAbsolute(lua_State *L)
+{
+    auto name = QString::fromUtf8(luaL_checkstring(L, 1));
+    name = name.replace('.', QDir::separator());
+
+    QString filename;
+    auto *pl = getApp()->plugins->getPluginByStatePtr(L);
+    if (pl == nullptr)
+    {
+        return luaL_error(L, "searcherAbsolute: internal error: no plugin?");
+    }
+
+    QFileInfo file = pl->loadDirectory().filePath(name + ".lua");
+    return loadfile(L, file.canonicalFilePath());
+}
+
+int searcherRelative(lua_State *L)
+{
+    lua_Debug dbg;
+    lua_getstack(L, 1, &dbg);
+    lua_getinfo(L, "S", &dbg);
+    auto currentFile = QString::fromUtf8(dbg.source, dbg.srclen);
+    if (currentFile.startsWith("@"))
+    {
+        currentFile = currentFile.mid(1);
+    }
+    if (currentFile == "=[C]" || currentFile == "")
+    {
+        lua::push(
+            L,
+            QString(
+                "Unable to load relative to file:caller has no source file"));
+        return 1;
+    }
+
+    auto parent = QFileInfo(currentFile).dir();
+
+    auto name = QString::fromUtf8(luaL_checkstring(L, 1));
+    name = name.replace('.', QDir::separator());
+    QString filename =
+        parent.canonicalPath() + QDir::separator() + name + ".lua";
+
+    return loadfile(L, filename);
 }
 
 int g_print(lua_State *L)

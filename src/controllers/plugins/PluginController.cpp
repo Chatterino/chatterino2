@@ -214,12 +214,13 @@ void PluginController::openLibrariesFor(lua_State *L, const PluginMeta &meta,
     lua_pop(L, 1);  // get rid of remove
 
     lua_getfield(L, package, "searchers");
-
-    // this includes trailing `/` or `\`
-    lua::push(L, QString(pluginDir.absolutePath()));
-    lua_pushcclosure(L, lua::api::safeluasearcher, 1);
-
+    lua_pushcclosure(L, lua::api::searcherRelative, 0);
     lua_seti(L, -2, 2);
+
+    lua::push(L, QString(pluginDir.absolutePath()));
+    lua_pushcclosure(L, lua::api::searcherAbsolute, 1);
+    lua_seti(L, -2, 3);
+
     lua_pop(L, 3);  // remove gtable, package, package.searchers
 }
 

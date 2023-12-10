@@ -23,7 +23,8 @@ int g_print(lua_State *L);
 // NOLINTEND(readability-identifier-naming)
 
 // This is for require() exposed as an element of package.searchers
-int safeluasearcher(lua_State *L);
+int searcherAbsolute(lua_State *L);
+int searcherRelative(lua_State *L);
 
 // Exposed as c2.LogLevel
 // Represents "calls" to qCDebug, qCInfo ...
