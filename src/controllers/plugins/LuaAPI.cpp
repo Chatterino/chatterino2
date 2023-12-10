@@ -282,69 +282,28 @@ int g_load(lua_State *L)
 #    endif
 }
 
-int g_import(lua_State *L)
+int safeluasearcher(lua_State *L)
 {
-    auto countArgs = lua_gettop(L);
-    // Lua allows dofile() which loads from stdin, but this is very useless in our case
-    if (countArgs == 0)
+    const char *name = luaL_checkstring(L, 1);
+    QString str;
+    lua::peek(L, &str, lua_upvalueindex(1));
+    str += QDir::separator();
+    str += name;
+    str += ".lua";
+
+    auto temp = str.toStdString();
+
+    const auto *filename = temp.c_str();
+    auto res = luaL_loadfilex(L, filename, "t");
+    // Yoinked from checkload lib/lua/src/loadlib.c
+    if (res == LUA_OK)
     {
-        lua_pushnil(L);
-        luaL_error(L, "it is not allowed to call import() without arguments");
-        return 1;
+        lua_pushstring(L, filename);
+        return 2;
     }
 
-    auto *pl = getApp()->plugins->getPluginByStatePtr(L);
-    QString fname;
-    if (!lua::pop(L, &fname))
-    {
-        lua_pushnil(L);
-        luaL_error(L, "chatterino g_import: expected a string for a filename");
-        return 1;
-    }
-    auto dir = QUrl(pl->loadDirectory().canonicalPath() + "/");
-    auto file = dir.resolved(fname);
-
-    qCDebug(chatterinoLua) << "plugin" << pl->id << "is trying to load" << file
-                           << "(its dir is" << dir << ")";
-    if (!dir.isParentOf(file))
-    {
-        lua_pushnil(L);
-        luaL_error(L, "chatterino g_import: filename must be inside of the "
-                      "plugin directory");
-        return 1;
-    }
-
-    auto path = file.path(QUrl::FullyDecoded);
-    QFile qf(path);
-    qf.open(QIODevice::ReadOnly);
-    if (qf.size() > 10'000'000)
-    {
-        lua_pushnil(L);
-        luaL_error(L, "chatterino g_import: size limit of 10MB exceeded, what "
-                      "the hell are you doing");
-        return 1;
-    }
-
-    // validate utf-8 to block bytecode exploits
-    auto data = qf.readAll();
-    auto *utf8 = QTextCodec::codecForName("UTF-8");
-    QTextCodec::ConverterState state;
-    utf8->toUnicode(data.constData(), data.size(), &state);
-    if (state.invalidChars != 0)
-    {
-        lua_pushnil(L);
-        luaL_error(L, "invalid utf-8 in import() target (%s) is not allowed",
-                   fname.toStdString().c_str());
-        return 1;
-    }
-
-    // fetch dofile and call it
-    lua_getfield(L, LUA_REGISTRYINDEX, "real_dofile");
-    // maybe data race here if symlink was swapped?
-    lua::push(L, path);
-    lua_call(L, 1, LUA_MULTRET);
-
-    return lua_gettop(L);
+    return luaL_error(L, "error loading module '%s' from file '%s':\n\t%s",
+                      lua_tostring(L, 1), filename, lua_tostring(L, -1));
 }
 
 int g_print(lua_State *L)
