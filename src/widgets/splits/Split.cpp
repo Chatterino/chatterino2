@@ -381,7 +381,9 @@ Split::Split(QWidget *parent)
     std::ignore = this->input_->ui_.textEdit->imagePasted.connect(
         [this](const QMimeData *source) {
             if (!getSettings()->imageUploaderEnabled)
+            {
                 return;
+            }
 
             if (getSettings()->askOnImageUpload.getValue())
             {
@@ -392,20 +394,36 @@ Split::Split(QWidget *parent)
                     "You are uploading an image to a 3rd party service not in "
                     "control of the Chatterino team. You may not be able to "
                     "remove the image from the site. Are you okay with this?");
-                msgBox.addButton(QMessageBox::Cancel);
-                msgBox.addButton(QMessageBox::Yes);
-                msgBox.addButton("Yes, don't ask again", QMessageBox::YesRole);
+                auto *cancel = msgBox.addButton(QMessageBox::Cancel);
+                auto *yes = msgBox.addButton(QMessageBox::Yes);
+                auto *yesDontAskAgain = msgBox.addButton("Yes, don't ask again",
+                                                         QMessageBox::YesRole);
 
                 msgBox.setDefaultButton(QMessageBox::Yes);
 
-                auto picked = msgBox.exec();
-                if (picked == QMessageBox::Cancel)
-                {
-                    return;
-                }
-                else if (picked == 0)  // don't ask again button
+                msgBox.exec();
+
+                auto *clickedButton = msgBox.clickedButton();
+                if (clickedButton == yesDontAskAgain)
                 {
                     getSettings()->askOnImageUpload.setValue(false);
+                }
+                else if (clickedButton == yes)
+                {
+                    // Continue with image upload
+                }
+                else if (clickedButton == cancel)
+                {
+                    // Not continuing with image upload
+                    return;
+                }
+                else
+                {
+                    // An unknown "button" was pressed - handle it as if cancel was pressed
+                    // cancel is already handled as the "escape" option, so this should never happen
+                    qCWarning(chatterinoImageuploader)
+                        << "Unhandled button pressed:" << clickedButton;
+                    return;
                 }
             }
             QPointer<ResizingTextEdit> edit = this->input_->ui_.textEdit;
