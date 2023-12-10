@@ -113,6 +113,7 @@ void SettingsDialog::initUi()
     edit->setClearButtonEnabled(true);
     edit->findChild<QAbstractButton *>()->setIcon(
         QPixmap(":/buttons/clearSearch.png"));
+    this->ui_.search->installEventFilter(this);
 
     QObject::connect(edit.getElement(), &QLineEdit::textChanged, this,
                      &SettingsDialog::filterElements);
@@ -205,6 +206,23 @@ void SettingsDialog::setElementFilter(const QString &query)
 {
     this->ui_.search->setText(query);
 }
+
+bool SettingsDialog::eventFilter(QObject *object, QEvent *event)
+{
+    if (object == this->ui_.search && event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        if (keyEvent->key() == Qt::Key_Backspace &&
+            keyEvent->modifiers() == Qt::ControlModifier &&
+            this->ui_.search->selectionLength() > 0)
+        {
+            this->ui_.search->backspace();
+            return true;
+        }
+    }
+    return false;
+}
+
 
 void SettingsDialog::addTabs()
 {
