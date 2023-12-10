@@ -55,7 +55,7 @@ public:
 
     std::pair<bool, QStringList> updateCustomCompletions(
         const QString &query, const QString &fullTextContent,
-        int cursorPosition, bool isFirstWord);
+        int cursorPosition, bool isFirstWord) const;
 
 private:
     void loadPlugins();
@@ -69,5 +69,5 @@ private:
     std::map<QString, std::unique_ptr<Plugin>> plugins_;
 };
 
-};  // namespace chatterino
+}  // namespace chatterino
 #endif

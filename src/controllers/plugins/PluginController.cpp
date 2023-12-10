@@ -313,18 +313,22 @@ const std::map<QString, std::unique_ptr<Plugin>> &PluginController::plugins()
 {
     return this->plugins_;
 }
+
 std::pair<bool, QStringList> PluginController::updateCustomCompletions(
     const QString &query, const QString &fullTextContent, int cursorPosition,
-    bool isFirstWord)
+    bool isFirstWord) const
 {
     QStringList results;
-    for (const auto &[name, pl] : getApp()->plugins->plugins())
+
+    for (const auto &[name, pl] : this->plugins())
     {
         if (!pl->error().isNull())
         {
             continue;
         }
+
         lua::StackGuard guard(pl->state_);
+
         auto opt = pl->getCompletionCallback();
         if (opt)
         {
@@ -343,6 +347,7 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
                     << lua::humanErrorText(pl->state_, err);
                 continue;
             }
+
             auto list = std::get<lua::api::CompletionList>(errOrList);
             if (list.hideOthers)
             {
@@ -352,8 +357,9 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
             results += QStringList(list.values.begin(), list.values.end());
         }
     }
+
     return {false, results};
 }
 
-};  // namespace chatterino
+}  // namespace chatterino
 #endif
