@@ -1101,7 +1101,7 @@ void SplitInput::giveFocus(Qt::FocusReason reason)
     this->ui_.textEdit->setFocus(reason);
 }
 
-void SplitInput::setReply(MessagePtr target, bool showReplyingLabel)
+void SplitInput::setReply(MessagePtr target)
 {
     auto oldParent = this->replyTarget_;
     if (this->enableInlineReplying_ && oldParent)

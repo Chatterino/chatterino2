@@ -41,7 +41,7 @@ public:
     QString getInputText() const;
     void insertText(const QString &text);
 
-    void setReply(MessagePtr target, bool showInlineReplying = true);
+    void setReply(MessagePtr target);
     void setPlaceholderText(const QString &text);
 
     /**
