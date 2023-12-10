@@ -47,15 +47,13 @@ void PluginController::loadPlugins()
     auto dir = QDir(getPaths()->pluginsDirectory);
     qCDebug(chatterinoLua) << "Loading plugins in" << dir.path();
     for (const auto &info :
-         dir.entryInfoList(QDir::NoFilter | QDir::NoDotAndDotDot))
+         dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot))
     {
-        if (info.isDir())
-        {
-            auto pluginDir = QDir(info.absoluteFilePath());
-            this->tryLoadFromDir(pluginDir);
-        }
+        auto pluginDir = QDir(info.absoluteFilePath());
+        this->tryLoadFromDir(pluginDir);
     }
 }
+
 bool PluginController::tryLoadFromDir(const QDir &pluginDir)
 {
     // look for init.lua
