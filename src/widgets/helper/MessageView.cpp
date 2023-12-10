@@ -14,8 +14,8 @@
 namespace chatterino {
 
 namespace {
-    static const Selection emptySelection;
-}
+    const Selection EMPTY_SELECTION;
+}  // namespace
 
 MessageView::MessageView()
     : MessageView(nullptr)
@@ -91,7 +91,7 @@ void MessageView::paintEvent(QPaintEvent * /*event*/)
 
     auto ctx = MessagePaintContext{
         .painter = painter,
-        .selection = emptySelection,
+        .selection = EMPTY_SELECTION,
         .colorProvider = ColorProvider::instance(),
         .messageColors = this->messageColors_,
         .preferences = this->messagePreferences_,

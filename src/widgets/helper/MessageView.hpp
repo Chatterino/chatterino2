@@ -40,7 +40,6 @@ private:
 
     MessageElementFlags getFlags() const;
 
-private:
     MessagePtr message_;
     std::unique_ptr<MessageLayout> messageLayout_;
 
