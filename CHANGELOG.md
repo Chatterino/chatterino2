@@ -47,6 +47,7 @@
 - Bugfix: Fixed lookahead/-behind not working in _Ignores_. (#4965)
 - Bugfix: Fixed Image Uploader accidentally deleting images with some hosts when link resolver was enabled. (#4971)
 - Bugfix: Fixed rare crash with Image Uploader when closing a split right after starting an upload. (#4971)
+- Bugfix: Fixed an issue on macOS where the image uploader would keep prompting the user even after they clicked "Yes, don't ask again". (#5011)
 - Bugfix: Hide the Usercard button in the User Info Popup when in special channels. (#4972)
 - Bugfix: Fixed support for Windows 11 Snap layouts. (#4994)
 - Bugfix: Fixed some windows appearing between screens. (#4797)
