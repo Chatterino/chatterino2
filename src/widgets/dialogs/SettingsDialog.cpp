@@ -223,7 +223,6 @@ bool SettingsDialog::eventFilter(QObject *object, QEvent *event)
     return false;
 }
 
-
 void SettingsDialog::addTabs()
 {
     this->ui_.tabContainer->setSpacing(0);
