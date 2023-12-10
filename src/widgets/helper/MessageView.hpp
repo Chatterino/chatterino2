@@ -21,7 +21,7 @@ public:
     MessageView();
     MessageView(MessagePtr message);
 
-    ~MessageView();
+    ~MessageView() override;
 
     void setMessage(MessagePtr message);
     void clearMessage();
