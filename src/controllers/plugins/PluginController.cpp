@@ -19,6 +19,7 @@
 
 #    include <memory>
 #    include <utility>
+#    include <variant>
 
 namespace chatterino {
 
@@ -46,15 +47,13 @@ void PluginController::loadPlugins()
     auto dir = QDir(getPaths()->pluginsDirectory);
     qCDebug(chatterinoLua) << "Loading plugins in" << dir.path();
     for (const auto &info :
-         dir.entryInfoList(QDir::NoFilter | QDir::NoDotAndDotDot))
+         dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot))
     {
-        if (info.isDir())
-        {
-            auto pluginDir = QDir(info.absoluteFilePath());
-            this->tryLoadFromDir(pluginDir);
-        }
+        auto pluginDir = QDir(info.absoluteFilePath());
+        this->tryLoadFromDir(pluginDir);
     }
 }
+
 bool PluginController::tryLoadFromDir(const QDir &pluginDir)
 {
     // look for init.lua
@@ -139,6 +138,7 @@ void PluginController::openLibrariesFor(lua_State *L,
     static const luaL_Reg c2Lib[] = {
         {"system_msg", lua::api::c2_system_msg},
         {"register_command", lua::api::c2_register_command},
+        {"register_callback", lua::api::c2_register_callback},
         {"send_msg", lua::api::c2_send_msg},
         {"log", lua::api::c2_log},
         {nullptr, nullptr},
@@ -146,13 +146,16 @@ void PluginController::openLibrariesFor(lua_State *L,
     lua_pushglobaltable(L);
     auto global = lua_gettop(L);
 
-    // count of elements in C2LIB + LogLevel
-    auto c2libIdx = lua::pushEmptyTable(L, 5);
+    // count of elements in C2LIB + LogLevel + EventType
+    auto c2libIdx = lua::pushEmptyTable(L, 8);
 
     luaL_setfuncs(L, c2Lib, 0);
 
     lua::pushEnumTable<lua::api::LogLevel>(L);
     lua_setfield(L, c2libIdx, "LogLevel");
+
+    lua::pushEnumTable<lua::api::EventType>(L);
+    lua_setfield(L, c2libIdx, "EventType");
 
     lua_setfield(L, global, "c2");
 
@@ -198,6 +201,7 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     auto pluginName = pluginDir.dirName();
     lua_State *l = luaL_newstate();
     auto plugin = std::make_unique<Plugin>(pluginName, l, meta, pluginDir);
+    auto *temp = plugin.get();
     this->plugins_.insert({pluginName, std::move(plugin)});
 
     if (getArgs().safeMode)
@@ -220,9 +224,10 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     int err = luaL_dofile(l, index.absoluteFilePath().toStdString().c_str());
     if (err != 0)
     {
+        temp->error_ = lua::humanErrorText(l, err);
         qCWarning(chatterinoLua)
             << "Failed to load" << pluginName << "plugin from" << index << ": "
-            << lua::humanErrorText(l, err);
+            << temp->error_;
         return;
     }
     qCInfo(chatterinoLua) << "Loaded" << pluginName << "plugin from" << index;
@@ -307,5 +312,52 @@ const std::map<QString, std::unique_ptr<Plugin>> &PluginController::plugins()
     return this->plugins_;
 }
 
-};  // namespace chatterino
+std::pair<bool, QStringList> PluginController::updateCustomCompletions(
+    const QString &query, const QString &fullTextContent, int cursorPosition,
+    bool isFirstWord) const
+{
+    QStringList results;
+
+    for (const auto &[name, pl] : this->plugins())
+    {
+        if (!pl->error().isNull())
+        {
+            continue;
+        }
+
+        lua::StackGuard guard(pl->state_);
+
+        auto opt = pl->getCompletionCallback();
+        if (opt)
+        {
+            qCDebug(chatterinoLua)
+                << "Processing custom completions from plugin" << name;
+            auto &cb = *opt;
+            auto errOrList =
+                cb(query, fullTextContent, cursorPosition, isFirstWord);
+            if (std::holds_alternative<int>(errOrList))
+            {
+                guard.handled();
+                int err = std::get<int>(errOrList);
+                qCDebug(chatterinoLua)
+                    << "Got error from plugin " << pl->meta.name
+                    << " while refreshing tab completion: "
+                    << lua::humanErrorText(pl->state_, err);
+                continue;
+            }
+
+            auto list = std::get<lua::api::CompletionList>(errOrList);
+            if (list.hideOthers)
+            {
+                results = QStringList(list.values.begin(), list.values.end());
+                return {true, results};
+            }
+            results += QStringList(list.values.begin(), list.values.end());
+        }
+    }
+
+    return {false, results};
+}
+
+}  // namespace chatterino
 #endif

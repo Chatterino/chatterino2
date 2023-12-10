@@ -19,4 +19,25 @@ declare module c2 {
   ): boolean;
   function send_msg(channel: String, text: String): boolean;
   function system_msg(channel: String, text: String): boolean;
+
+  class CompletionList {
+    values: String[];
+    hide_others: boolean;
+  }
+
+  enum EventType {
+    RegisterCompletions = "RegisterCompletions",
+  }
+
+  type CbFuncCompletionsRequested = (
+    query: string,
+    full_text_content: string,
+    cursor_position: number,
+    is_first_word: boolean
+  ) => CompletionList;
+  type CbFunc<T> = T extends EventType.RegisterCompletions
+    ? CbFuncCompletionsRequested
+    : never;
+
+  function register_callback<T>(type: T, func: CbFunc<T>): void;
 }

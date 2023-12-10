@@ -108,6 +108,16 @@ void PluginsPage::rebuildContent()
             warningLabel->setStyleSheet("color: #f00");
             pluginEntry->addRow(warningLabel);
         }
+        if (!plugin->error().isNull())
+        {
+            auto *errorLabel =
+                new QLabel("There was an error while loading this plugin: " +
+                               plugin->error(),
+                           this->dataFrame_);
+            errorLabel->setStyleSheet("color: #f00");
+            errorLabel->setWordWrap(true);
+            pluginEntry->addRow(errorLabel);
+        }
 
         auto *description =
             new QLabel(plugin->meta.description, this->dataFrame_);
