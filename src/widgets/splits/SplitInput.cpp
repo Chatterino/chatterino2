@@ -228,7 +228,7 @@ void SplitInput::scaleChangedEvent(float scale)
     if (!this->hidden)
     {
         this->setMaximumHeight(this->scaledMaxHeight());
-        if (this->replyThread_ != nullptr)
+        if (this->replyTarget_ != nullptr)
         {
             this->ui_.vbox->setSpacing(this->marginForTheme() * 2);
         }
@@ -275,7 +275,7 @@ void SplitInput::themeChangedEvent()
     // update vbox
     auto marginPx = this->marginForTheme();
     this->ui_.vbox->setContentsMargins(marginPx, marginPx, marginPx, marginPx);
-    if (this->replyThread_ != nullptr)
+    if (this->replyTarget_ != nullptr)
     {
         this->ui_.vbox->setSpacing(this->marginForTheme() * 2);
     }
@@ -357,7 +357,7 @@ QString SplitInput::handleSendMessage(std::vector<QString> &arguments)
     if (c == nullptr)
         return "";
 
-    if (!c->isTwitchChannel() || this->replyThread_ == nullptr)
+    if (!c->isTwitchChannel() || this->replyTarget_ == nullptr)
     {
         // standard message send behavior
         QString message = ui_.textEdit->toPlainText();
@@ -386,7 +386,7 @@ QString SplitInput::handleSendMessage(std::vector<QString> &arguments)
         if (this->enableInlineReplying_)
         {
             // Remove @username prefix that is inserted when doing inline replies
-            message.remove(0, this->replyThread_->root()->displayName.length() +
+            message.remove(0, this->replyTarget_->displayName.length() +
                                   1);  // remove "@username"
 
             if (!message.isEmpty() && message.at(0) == ' ')
@@ -400,7 +400,7 @@ QString SplitInput::handleSendMessage(std::vector<QString> &arguments)
             getApp()->commands->execCommand(message, c, false);
 
         // Reply within TwitchChannel
-        tc->sendReply(sendMessage, this->replyThread_->root()->id);
+        tc->sendReply(sendMessage, this->replyTarget_->id);
 
         this->postMessageSend(message, arguments);
         return "";
@@ -426,7 +426,7 @@ void SplitInput::postMessageSend(const QString &message,
 
 int SplitInput::scaledMaxHeight() const
 {
-    if (this->replyThread_ != nullptr)
+    if (this->replyTarget_ != nullptr)
     {
         // give more space for showing the message being replied to
         return int(250 * this->scale());
@@ -1022,14 +1022,14 @@ void SplitInput::editTextChanged()
     bool hasReply = false;
     if (this->enableInlineReplying_)
     {
-        if (this->replyThread_ != nullptr)
+        if (this->replyTarget_ != nullptr)
         {
             // Check if the input still starts with @username. If not, don't reply.
             //
             // We need to verify that
             // 1. the @username prefix exists and
             // 2. if a character exists after the @username, it is a space
-            QString replyPrefix = "@" + this->replyThread_->root()->displayName;
+            QString replyPrefix = "@" + this->replyTarget_->displayName;
             if (!text.startsWith(replyPrefix) ||
                 (text.length() > replyPrefix.length() &&
                  text.at(replyPrefix.length()) != ' '))
@@ -1039,7 +1039,7 @@ void SplitInput::editTextChanged()
         }
 
         // Show/hide reply label if inline replies are possible
-        hasReply = this->replyThread_ != nullptr;
+        hasReply = this->replyTarget_ != nullptr;
     }
 
     this->ui_.replyWrapper->setVisible(hasReply);
@@ -1064,7 +1064,7 @@ void SplitInput::paintEvent(QPaintEvent * /*event*/)
     painter.setPen(borderColor);
     painter.drawRect(inputBoxRect);
 
-    if (this->enableInlineReplying_ && this->replyThread_ != nullptr)
+    if (this->enableInlineReplying_ && this->replyTarget_ != nullptr)
     {
         QRect replyRect = this->ui_.replyWrapper->geometry();
         replyRect.setX(baseRect.x());
@@ -1102,13 +1102,13 @@ void SplitInput::giveFocus(Qt::FocusReason reason)
     this->ui_.textEdit->setFocus(reason);
 }
 
-void SplitInput::setReply(MessagePtr reply, bool showReplyingLabel)
+void SplitInput::setReply(MessagePtr target, bool showReplyingLabel)
 {
-    auto oldParent = this->replyThread_;
+    auto oldParent = this->replyTarget_;
     if (this->enableInlineReplying_ && oldParent)
     {
         // Remove old reply prefix
-        auto replyPrefix = "@" + oldParent->root()->displayName;
+        auto replyPrefix = "@" + oldParent->displayName;
         auto plainText = this->ui_.textEdit->toPlainText().trimmed();
         if (plainText.startsWith(replyPrefix))
         {
@@ -1119,20 +1119,19 @@ void SplitInput::setReply(MessagePtr reply, bool showReplyingLabel)
         this->ui_.textEdit->resetCompletion();
     }
 
-    assert(reply != nullptr);
-    this->replyThread_ = std::move(reply);
+    assert(target != nullptr);
+    this->replyTarget_ = std::move(target);
 
     if (this->enableInlineReplying_)
     {
-        auto &replyRoot = this->replyThread_->root();
-        this->ui_.replyMessage->setMessage(replyRoot);
+        this->ui_.replyMessage->setMessage(this->replyTarget_);
         this->ui_.replyMessage->setWidth(this->width());
 
         // add spacing between reply box and input box
         this->ui_.vbox->setSpacing(this->marginForTheme() * 2);
 
         // Only enable reply label if inline replying
-        auto replyPrefix = "@" + this->replyThread_->root()->displayName;
+        auto replyPrefix = "@" + this->replyTarget_->displayName;
         auto plainText = this->ui_.textEdit->toPlainText().trimmed();
         if (!plainText.startsWith(replyPrefix))
         {
@@ -1145,7 +1144,7 @@ void SplitInput::setReply(MessagePtr reply, bool showReplyingLabel)
             this->ui_.textEdit->resetCompletion();
         }
         this->ui_.replyLabel->setText("Replying to @" +
-                                      this->replyThread_->root()->displayName);
+                                      this->replyTarget_->displayName);
     }
 }
 
@@ -1164,7 +1163,7 @@ void SplitInput::clearInput()
 
 void SplitInput::clearReplyThread()
 {
-    this->replyThread_.reset();
+    this->replyTarget_.reset();
     this->ui_.replyMessage->clearMessage();
     this->ui_.vbox->setSpacing(0);
 }

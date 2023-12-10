@@ -42,7 +42,7 @@ public:
     QString getInputText() const;
     void insertText(const QString &text);
 
-    void setReply(MessagePtr reply, bool showInlineReplying = true);
+    void setReply(MessagePtr target, bool showInlineReplying = true);
     void setPlaceholderText(const QString &text);
 
     /**
@@ -145,7 +145,7 @@ private:
         EffectLabel *emoteButton;
     } ui_;
 
-    std::shared_ptr<MessageThread> replyThread_ = nullptr;
+    MessagePtr replyTarget_ = nullptr;
     bool enableInlineReplying_;
 
     pajlada::Signals::SignalHolder managedConnections_;

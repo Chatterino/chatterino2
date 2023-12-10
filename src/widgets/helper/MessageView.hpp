@@ -1,6 +1,8 @@
 #pragma once
 
+#include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageElement.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <QWidget>
@@ -36,9 +38,14 @@ private:
     void maybeUpdate();
     void layoutMessage();
 
+    MessageElementFlags getFlags() const;
+
 private:
     MessagePtr message_;
     std::unique_ptr<MessageLayout> messageLayout_;
+
+    MessageColors messageColors_;
+    MessagePreferences messagePreferences_;
 
     int width_;
 };
