@@ -7,7 +7,6 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Link.hpp"
 #include "messages/Message.hpp"
-#include "messages/MessageThread.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -193,7 +192,7 @@ void SplitInput::initLayout()
         this->openEmotePopup();
     });
 
-    // clear input and remove reply thread
+    // clear input and remove reply target
     QObject::connect(this->ui_.cancelReplyButton, &EffectLabel::leftClicked,
                      [this] {
                          this->clearInput();
@@ -1034,7 +1033,7 @@ void SplitInput::editTextChanged()
                 (text.length() > replyPrefix.length() &&
                  text.at(replyPrefix.length()) != ' '))
             {
-                this->clearReplyThread();
+                this->clearReplyTarget();
             }
         }
 
@@ -1163,10 +1162,10 @@ void SplitInput::clearInput()
     this->currMsg_ = "";
     this->ui_.textEdit->setText("");
     this->ui_.textEdit->moveCursor(QTextCursor::Start);
-    this->clearReplyThread();
+    this->clearReplyTarget();
 }
 
-void SplitInput::clearReplyThread()
+void SplitInput::clearReplyTarget()
 {
     this->replyTarget_.reset();
     this->ui_.replyMessage->clearMessage();

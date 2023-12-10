@@ -20,7 +20,6 @@ class Split;
 class EmotePopup;
 class InputCompletionPopup;
 class EffectLabel;
-class MessageThread;
 class MessageView;
 class ResizingTextEdit;
 class ChannelView;
@@ -86,7 +85,7 @@ protected:
     void postMessageSend(const QString &message,
                          const std::vector<QString> &arguments);
 
-    /// Clears the input box, clears reply thread if inline replies are enabled
+    /// Clears the input box, clears reply target if inline replies are enabled
     void clearInput();
 
 private:
@@ -105,7 +104,7 @@ private:
     void hideCompletionPopup();
     void insertCompletionText(const QString &input_) const;
     void openEmotePopup();
-    void clearReplyThread();
+    void clearReplyTarget();
 
     void updateCancelReplyButton();
 
