@@ -1129,6 +1129,11 @@ void SplitInput::setReply(MessagePtr target, bool showReplyingLabel)
 
         // add spacing between reply box and input box
         this->ui_.vbox->setSpacing(this->marginForTheme() * 2);
+        if (!this->isHidden())
+        {
+            // update maximum height to give space for message
+            this->setMaximumHeight(this->scaledMaxHeight());
+        }
 
         // Only enable reply label if inline replying
         auto replyPrefix = "@" + this->replyTarget_->displayName;
@@ -1166,6 +1171,10 @@ void SplitInput::clearReplyThread()
     this->replyTarget_.reset();
     this->ui_.replyMessage->clearMessage();
     this->ui_.vbox->setSpacing(0);
+    if (!this->isHidden())
+    {
+        this->setMaximumHeight(this->scaledMaxHeight());
+    }
 }
 
 bool SplitInput::shouldPreventInput(const QString &text) const
