@@ -14,7 +14,7 @@
 namespace chatterino {
 
 namespace {
-    Selection emptySelection;
+    static const Selection emptySelection;
 }
 
 MessageView::MessageView()
