@@ -453,7 +453,7 @@ bool EmotePopup::eventFilter(QObject *object, QEvent *event)
 {
     if (object == this->search_ && event->type() == QEvent::KeyPress)
     {
-        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        auto *keyEvent = dynamic_cast<QKeyEvent *>(event);
         if (keyEvent == QKeySequence::DeleteStartOfWord &&
             this->search_->selectionLength() > 0)
         {
