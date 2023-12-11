@@ -202,8 +202,7 @@ bool SearchPopup::eventFilter(QObject *object, QEvent *event)
     if (object == this->searchInput_ && event->type() == QEvent::KeyPress)
     {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-        if (keyEvent->key() == Qt::Key_Backspace &&
-            keyEvent->modifiers() == Qt::ControlModifier &&
+        if (keyEvent == QKeySequence::DeleteStartOfWord &&
             this->searchInput_->selectionLength() > 0)
         {
             this->searchInput_->backspace();

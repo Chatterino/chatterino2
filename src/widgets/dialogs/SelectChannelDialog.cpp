@@ -497,8 +497,7 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
             widget->previousInFocusChain()->setFocus();
             return true;
         }
-        else if (event_key->key() == Qt::Key_Backspace &&
-                 event_key->modifiers() == Qt::ControlModifier &&
+        else if (event_key == QKeySequence::DeleteStartOfWord &&
                  this->dialog->ui_.twitch.channelName->selectionLength() > 0)
         {
             this->dialog->ui_.twitch.channelName->backspace();

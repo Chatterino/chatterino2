@@ -454,8 +454,7 @@ bool EmotePopup::eventFilter(QObject *object, QEvent *event)
     if (object == this->search_ && event->type() == QEvent::KeyPress)
     {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-        if (keyEvent->key() == Qt::Key_Backspace &&
-            keyEvent->modifiers() == Qt::ControlModifier &&
+        if (keyEvent == QKeySequence::DeleteStartOfWord &&
             this->search_->selectionLength() > 0)
         {
             this->search_->backspace();

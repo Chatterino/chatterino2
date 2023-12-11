@@ -212,8 +212,7 @@ bool SettingsDialog::eventFilter(QObject *object, QEvent *event)
     if (object == this->ui_.search && event->type() == QEvent::KeyPress)
     {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-        if (keyEvent->key() == Qt::Key_Backspace &&
-            keyEvent->modifiers() == Qt::ControlModifier &&
+        if (keyEvent == QKeySequence::DeleteStartOfWord &&
             this->ui_.search->selectionLength() > 0)
         {
             this->ui_.search->backspace();
