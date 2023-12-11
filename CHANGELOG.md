@@ -52,6 +52,7 @@
 - Bugfix: Fixed support for Windows 11 Snap layouts. (#4994)
 - Bugfix: Fixed some windows appearing between screens. (#4797)
 - Bugfix: Fixed a bug on Wayland where tooltips would spawn as separate windows instead of behaving like tooltips. (#4998)
+- Bugfix: Fixes to ctrl+backspace behavior in text input fields
 - Dev: Run miniaudio in a separate thread, and simplify it to not manage the device ourselves. There's a chance the simplification is a bad idea. (#4978)
 - Dev: Change clang-format from v14 to v16. (#4929)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
@@ -93,7 +94,6 @@
 
 - Minor: Migrate to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
 - Bugfix: Update Qt version, fixing a security issue with webp loading (see https://www.qt.io/blog/two-qt-security-advisorys-gdi-font-engine-webp-image-format) (#4843)
-- Bugfix: Fixes to ctrl+backspace behavior in text input fields
 - Dev: Temporarily disable High DPI scaling on Qt6 builds on Windows. (#4767)
 
 ## 2.4.5
