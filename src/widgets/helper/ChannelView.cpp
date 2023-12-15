@@ -1076,12 +1076,14 @@ void ChannelView::messageAppended(MessagePtr &message,
 
     if (!messageFlags->has(MessageFlag::DoNotTriggerNotification))
     {
-        if (messageFlags->has(MessageFlag::Highlighted) &&
-            messageFlags->has(MessageFlag::ShowInMentions) &&
-            !messageFlags->has(MessageFlag::Subscription) &&
-            (getSettings()->highlightMentions ||
-             this->channel_->getType() != Channel::Type::TwitchMentions))
-
+        if ((messageFlags->has(MessageFlag::Highlighted) &&
+             messageFlags->has(MessageFlag::ShowInMentions) &&
+             !messageFlags->has(MessageFlag::Subscription) &&
+             (getSettings()->highlightMentions ||
+              this->channel_->getType() != Channel::Type::TwitchMentions)) ||
+            (this->channel_->getType() == Channel::Type::TwitchAutomod &&
+             (getSettings()->automodPlaySound ||
+              getSettings()->automodFlashTaskbar)))
         {
             this->tabHighlightRequested.invoke(HighlightState::Highlighted);
         }

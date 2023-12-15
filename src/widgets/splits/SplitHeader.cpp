@@ -509,6 +509,41 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         moreMenu->addAction(action);
     }
 
+    if (this->split_->getChannel()->getType() == Channel::Type::TwitchAutomod)
+    {
+        {
+            auto *action = new QAction(this);
+            action->setText("Play sound on caught messages");
+            action->setCheckable(true);
+
+            QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action] {
+                action->setChecked(getSettings()->automodPlaySound);
+            });
+            QObject::connect(action, &QAction::triggered, this, [] {
+                getSettings()->automodPlaySound =
+                    !getSettings()->automodPlaySound;
+            });
+
+            moreMenu->addAction(action);
+        }
+
+        {
+            auto *action = new QAction(this);
+            action->setText("Flash taskbar on caught messages");
+            action->setCheckable(true);
+
+            QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action] {
+                action->setChecked(getSettings()->automodFlashTaskbar);
+            });
+            QObject::connect(action, &QAction::triggered, this, [] {
+                getSettings()->automodFlashTaskbar =
+                    !getSettings()->automodFlashTaskbar;
+            });
+
+            moreMenu->addAction(action);
+        }
+    }
+
     if (twitchChannel)
     {
         moreMenu->addAction(

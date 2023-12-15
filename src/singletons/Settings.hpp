@@ -431,6 +431,11 @@ public:
     IntSetting openFromToast = {"/notifications/openFromToast",
                                 static_cast<int>(ToastReaction::OpenInBrowser)};
 
+    BoolSetting automodPlaySound = {"/notifications/automod/enableSound",
+                                    false};
+    BoolSetting automodFlashTaskbar = {
+        "/notifications/automod/enableTaskbarFlashing", true};
+
     /// External tools
     // Streamlink
     BoolSetting streamlinkUseCustomPath = {"/external/streamlink/useCustomPath",
