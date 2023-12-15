@@ -947,8 +947,6 @@ void SplitHeader::enterEvent(QEvent *event)
 {
     if (!this->tooltipText_.isEmpty())
     {
-        auto *channel = this->split_->getChannel().get();
-
         this->tooltipWidget_->setOne({nullptr, this->tooltipText_});
         this->tooltipWidget_->setWordWrap(true);
         this->tooltipWidget_->adjustSize();

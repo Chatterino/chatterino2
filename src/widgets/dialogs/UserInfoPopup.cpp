@@ -997,7 +997,6 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
 
     int buttonWidth = 40;
     // int buttonWidth = 24;
-    int buttonWidth2 = 32;
     int buttonHeight = 32;
 
     layout->setSpacing(16);
