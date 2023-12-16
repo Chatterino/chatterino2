@@ -392,7 +392,10 @@ void ChannelView::initializeSignals()
 
     this->signalHolder_.managedConnect(getApp()->windows->gifRepaintRequested,
                                        [&] {
-                                           this->queueUpdate();
+                                           if (this->isVisible())
+                                           {
+                                               this->queueUpdate();
+                                           }
                                        });
 
     this->signalHolder_.managedConnect(
