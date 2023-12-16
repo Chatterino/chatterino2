@@ -103,9 +103,10 @@ bool PluginController::tryLoadFromDir(const QDir &pluginDir)
     return true;
 }
 
-void PluginController::openLibrariesFor(lua_State *L,
-                                        const PluginMeta & /*meta*/)
+void PluginController::openLibrariesFor(lua_State *L, const PluginMeta &meta,
+                                        const QDir &pluginDir)
 {
+    lua::StackGuard guard(L);
     // Stuff to change, remove or hide behind a permission system:
     static const std::vector<luaL_Reg> loadedlibs = {
         luaL_Reg{LUA_GNAME, luaopen_base},
@@ -123,6 +124,7 @@ void PluginController::openLibrariesFor(lua_State *L,
         luaL_Reg{LUA_STRLIBNAME, luaopen_string},
         luaL_Reg{LUA_MATHLIBNAME, luaopen_math},
         luaL_Reg{LUA_UTF8LIBNAME, luaopen_utf8},
+        luaL_Reg{LUA_LOADLIBNAME, luaopen_package},
     };
     // Warning: Do not add debug library to this, it would make the security of
     // this a living nightmare due to stuff like registry access
@@ -144,7 +146,7 @@ void PluginController::openLibrariesFor(lua_State *L,
         {nullptr, nullptr},
     };
     lua_pushglobaltable(L);
-    auto global = lua_gettop(L);
+    auto gtable = lua_gettop(L);
 
     // count of elements in C2LIB + LogLevel + EventType
     auto c2libIdx = lua::pushEmptyTable(L, 8);
@@ -157,13 +159,10 @@ void PluginController::openLibrariesFor(lua_State *L,
     lua::pushEnumTable<lua::api::EventType>(L);
     lua_setfield(L, c2libIdx, "EventType");
 
-    lua_setfield(L, global, "c2");
+    lua_setfield(L, gtable, "c2");
 
     // ban functions
     // Note: this might not be fully secure? some kind of metatable fuckery might come up?
-
-    lua_pushglobaltable(L);
-    auto gtable = lua_gettop(L);
 
     // possibly randomize this name at runtime to prevent some attacks?
 
@@ -172,16 +171,10 @@ void PluginController::openLibrariesFor(lua_State *L,
     lua_setfield(L, LUA_REGISTRYINDEX, "real_load");
 #    endif
 
-    lua_getfield(L, gtable, "dofile");
-    lua_setfield(L, LUA_REGISTRYINDEX, "real_dofile");
-
     // NOLINTNEXTLINE(*-avoid-c-arrays)
     static const luaL_Reg replacementFuncs[] = {
         {"load", lua::api::g_load},
         {"print", lua::api::g_print},
-
-        // This function replaces both `dofile` and `require`, see docs/wip-plugins.md for more info
-        {"import", lua::api::g_import},
         {nullptr, nullptr},
     };
     luaL_setfuncs(L, replacementFuncs, 0);
@@ -192,7 +185,43 @@ void PluginController::openLibrariesFor(lua_State *L,
     lua_pushnil(L);
     lua_setfield(L, gtable, "dofile");
 
-    lua_pop(L, 1);
+    // set up package lib
+    lua_getfield(L, gtable, "package");
+
+    auto package = lua_gettop(L);
+    lua_pushstring(L, "");
+    lua_setfield(L, package, "cpath");
+
+    // we don't use path
+    lua_pushstring(L, "");
+    lua_setfield(L, package, "path");
+
+    {
+        lua_getfield(L, gtable, "table");
+        auto table = lua_gettop(L);
+        lua_getfield(L, -1, "remove");
+        lua_remove(L, table);
+    }
+    auto remove = lua_gettop(L);
+
+    // remove searcher_Croot, searcher_C and searcher_Lua leaving only searcher_preload
+    for (int i = 0; i < 3; i++)
+    {
+        lua_pushvalue(L, remove);
+        lua_getfield(L, package, "searchers");
+        lua_pcall(L, 1, 0, 0);
+    }
+    lua_pop(L, 1);  // get rid of remove
+
+    lua_getfield(L, package, "searchers");
+    lua_pushcclosure(L, lua::api::searcherRelative, 0);
+    lua_seti(L, -2, 2);
+
+    lua::push(L, QString(pluginDir.absolutePath()));
+    lua_pushcclosure(L, lua::api::searcherAbsolute, 1);
+    lua_seti(L, -2, 3);
+
+    lua_pop(L, 3);  // remove gtable, package, package.searchers
 }
 
 void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
@@ -211,7 +240,7 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
                                  << " because safe mode is enabled.";
         return;
     }
-    PluginController::openLibrariesFor(l, meta);
+    PluginController::openLibrariesFor(l, meta, pluginDir);
 
     if (!PluginController::isPluginEnabled(pluginName) ||
         !getSettings()->pluginsEnabled)
