@@ -54,7 +54,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install boost openssl rapidjson p7zip create-dmg cmake tree
+          brew install boost openssl rapidjson p7zip create-dmg cmake
 
       - name: Build
         run: |
@@ -77,10 +77,10 @@ jobs:
           tar -xzf pubsub-server.tar.gz -C pubsub-server-test
           rm pubsub-server.tar.gz
           cd pubsub-server-test
+          ls -la
           curl -o server.crt "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.crt"
           curl -o server.key "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.key"
           cd ..
-          tree
 
       - name: Cargo Install httpbox
         run: |
