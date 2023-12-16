@@ -47,7 +47,7 @@ QString sendShoutout(const CommandContext &ctx)
 
     getHelix()->getUserByName(
         target,
-        [twitchChannel, channel, currentUser, &target](const auto targetUser) {
+        [twitchChannel, channel, currentUser](const auto targetUser) {
             getHelix()->sendShoutout(
                 twitchChannel->roomId(), targetUser.id,
                 currentUser->getUserId(),

@@ -89,6 +89,7 @@
 - Dev: Refactored the Image Uploader feature. (#4971)
 - Dev: Fixed deadlock and use-after-free in tests. (#4981)
 - Dev: Load less message history upon reconnects. (#5001)
+- Dev: Fixed most compiler warnings. (#5028)
 
 ## 2.4.6
 
