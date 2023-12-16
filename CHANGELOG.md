@@ -93,6 +93,7 @@
 - Dev: Load less message history upon reconnects. (#5001)
 - Dev: BREAKING: Replace custom `import()` with normal Lua `require()`. (#5014)
 - Dev: Fixed most compiler warnings. (#5028)
+- Dev: Only update visible ChannelViews for GIF repaints. (#5033)
 
 ## 2.4.6
 
