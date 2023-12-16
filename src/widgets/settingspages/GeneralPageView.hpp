@@ -256,9 +256,9 @@ public:
     {
         auto *combo = this->addDropdown(text, {}, std::move(toolTipText));
 
-        for (const auto &text : items)
+        for (const auto &item : items)
         {
-            combo->addItem(QString::fromStdString(std::string(text)));
+            combo->addItem(QString::fromStdString(std::string(item)));
         }
 
         if (!defaultValueText.isEmpty())

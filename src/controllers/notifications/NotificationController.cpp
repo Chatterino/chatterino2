@@ -208,11 +208,11 @@ void NotificationController::checkStream(bool live, QString channelName)
 
 void NotificationController::removeFakeChannel(const QString channelName)
 {
-    auto i = std::find(fakeTwitchChannels.begin(), fakeTwitchChannels.end(),
-                       channelName);
-    if (i != fakeTwitchChannels.end())
+    auto it = std::find(fakeTwitchChannels.begin(), fakeTwitchChannels.end(),
+                        channelName);
+    if (it != fakeTwitchChannels.end())
     {
-        fakeTwitchChannels.erase(i);
+        fakeTwitchChannels.erase(it);
         // "delete" old 'CHANNEL is live' message
         LimitedQueueSnapshot<MessagePtr> snapshot =
             getApp()->twitch->liveChannel->getMessageSnapshot();

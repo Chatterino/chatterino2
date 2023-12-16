@@ -34,8 +34,7 @@ void tableCellClicked(const QModelIndex &clicked, EditableModelView *view,
     if (wasAccepted)
     {
         auto newHotkey = dialog.data();
-        auto vectorIndex =
-            getApp()->hotkeys->replaceHotkey(hotkey->name(), newHotkey);
+        getApp()->hotkeys->replaceHotkey(hotkey->name(), newHotkey);
         getApp()->hotkeys->save();
     }
 }
@@ -69,7 +68,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
         if (wasAccepted)
         {
             auto newHotkey = dialog.data();
-            int vectorIndex = getApp()->hotkeys->hotkeys_.append(newHotkey);
+            getApp()->hotkeys->hotkeys_.append(newHotkey);
             getApp()->hotkeys->save();
         }
     });
