@@ -73,8 +73,7 @@ jobs:
       - name: Download and extract Twitch PubSub Server Test
         run: |
           mkdir pubsub-server-test
-          # curl -o pubsub-server.tar.gz "https://github.com/Chatterino/twitch-pubsub-server-test/releases/download/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/server-${{ env.TWITCH_PUBSUB_SERVER_TAG }}-darwin-amd64.tar.gz"
-          gh release download ${{ env.TWITCH_PUBSUB_SERVER_TAG }} -R Chatterino/twitch-pubsub-server-test -o pubsub-server.tar.gz -p server-${{ env.TWITCH_PUBSUB_SERVER_TAG }}-darwin-amd64.tar.gz
+          curl -fsSL -o pubsub-server.tar.gz "https://github.com/Chatterino/twitch-pubsub-server-test/releases/download/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/server-${{ env.TWITCH_PUBSUB_SERVER_TAG }}-darwin-amd64.tar.gz"
           ls -la
           tar -xzf pubsub-server.tar.gz -C pubsub-server-test
           rm pubsub-server.tar.gz
