@@ -162,11 +162,12 @@ See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-load
 
 This is Lua's [`require()`](https://www.lua.org/manual/5.3/manual.html#pdf-require) function.
 However the searcher and load configuration is notably different than default:
- - Lua's built-in dynamic library searcher is removed,
- - `package.path` is not used, in its place are two searchers,
- - when `require()` is used, first a file relative to the currently executing
-   file will be checked, then a file relative to the plugin directory,
- - binary chunks are never loaded
+
+- Lua's built-in dynamic library searcher is removed,
+- `package.path` is not used, in its place are two searchers,
+- when `require()` is used, first a file relative to the currently executing
+  file will be checked, then a file relative to the plugin directory,
+- binary chunks are never loaded
 
 As in normal Lua, dots are converted to the path separators (`'/'` on Linux and Mac, `'\'` on Windows).
 
