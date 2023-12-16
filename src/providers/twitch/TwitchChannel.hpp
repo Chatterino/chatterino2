@@ -137,10 +137,14 @@ public:
     SharedAccessGuard<const StreamStatus> accessStreamStatus() const;
 
     /**
-     * Records the current timestamp the channel was disconnected.
-     * This can be used to calculate the time spent disconnected after a successful reconnect
+     * Records that the channel is no longer joined.
      */
-    void markDisconnectedNow();
+    void markDisconnected();
+
+    /**
+     * Records that the channel's read connection is healthy.
+     */
+    void markConnected();
 
     // Emotes
     std::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
@@ -364,8 +368,9 @@ private:
     int chatterCount_{};
     UniqueAccess<StreamStatus> streamStatus_;
     UniqueAccess<RoomModes> roomModes_;
+    bool disconnected_{};
     std::optional<std::chrono::time_point<std::chrono::system_clock>>
-        disconnectedAt_{};
+        lastConnectedAt_{};
     std::atomic_flag loadingRecentMessages_ = ATOMIC_FLAG_INIT;
     std::unordered_map<QString, std::weak_ptr<MessageThread>> threads_;
 

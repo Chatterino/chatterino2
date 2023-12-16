@@ -1729,7 +1729,7 @@ void TwitchMessageBuilder::listOfUsersSystemMessage(
 MessagePtr TwitchMessageBuilder::buildHypeChatMessage(
     Communi::IrcPrivateMessage *message)
 {
-    auto level = message->tag(u"pinned-chat-paid-level"_s).toString();
+    auto levelID = message->tag(u"pinned-chat-paid-level"_s).toString();
     auto currency = message->tag(u"pinned-chat-paid-currency"_s).toString();
     bool okAmount = false;
     auto amount = message->tag(u"pinned-chat-paid-amount"_s).toInt(&okAmount);
@@ -1743,7 +1743,7 @@ MessagePtr TwitchMessageBuilder::buildHypeChatMessage(
     // additionally, there's `pinned-chat-paid-is-system-message` which isn't used by Chatterino.
 
     QString subtitle;
-    auto levelIt = HYPE_CHAT_PAID_LEVEL.find(level);
+    auto levelIt = HYPE_CHAT_PAID_LEVEL.find(levelID);
     if (levelIt != HYPE_CHAT_PAID_LEVEL.end())
     {
         const auto &level = levelIt->second;

@@ -56,7 +56,6 @@ namespace {
 #else
     const QString MAGIC_MESSAGE_SUFFIX = QString::fromUtf8(u8" \U000E0000");
 #endif
-    constexpr int TITLE_REFRESH_PERIOD = 10000;
     constexpr int CLIP_CREATION_COOLDOWN = 5000;
     const QString CLIPS_LINK("https://clips.twitch.tv/%1");
     const QString CLIPS_FAILURE_CLIPS_DISABLED_TEXT(
@@ -104,10 +103,11 @@ TwitchChannel::TwitchChannel(const QString &name)
     // We can safely ignore this signal connection this has no external dependencies - once the signal
     // is destroyed, it will no longer be able to fire
     std::ignore = this->joined.connect([this]() {
-        if (this->disconnectedAt_.has_value())
+        if (this->disconnected_)
         {
             this->loadRecentMessagesReconnect();
-            this->disconnectedAt_ = std::nullopt;
+            this->lastConnectedAt_ = std::chrono::system_clock::now();
+            this->disconnected_ = false;
         }
     });
 
@@ -732,6 +732,8 @@ void TwitchChannel::setRoomId(const QString &id)
         *this->roomID_.access() = id;
         this->roomIdChanged();
         this->loadRecentMessages();
+        this->disconnected_ = false;
+        this->lastConnectedAt_ = std::chrono::system_clock::now();
     }
 }
 
@@ -1106,7 +1108,15 @@ bool TwitchChannel::setLive(bool newLiveStatus)
     return true;
 }
 
-void TwitchChannel::markDisconnectedNow()
+void TwitchChannel::markConnected()
+{
+    if (this->lastConnectedAt_.has_value() && !this->disconnected_)
+    {
+        this->lastConnectedAt_ = std::chrono::system_clock::now();
+    }
+}
+
+void TwitchChannel::markDisconnected()
 {
     if (this->roomId().isEmpty())
     {
@@ -1114,14 +1124,7 @@ void TwitchChannel::markDisconnectedNow()
         return;
     }
 
-    if (this->disconnectedAt_.has_value())
-    {
-        // don't overwrite prior timestamp since
-        // a reconnection hasn't happened yet
-        return;
-    }
-
-    this->disconnectedAt_ = std::chrono::system_clock::now();
+    this->disconnected_ = true;
 }
 
 void TwitchChannel::loadRecentMessages()
@@ -1195,14 +1198,14 @@ void TwitchChannel::loadRecentMessagesReconnect()
 
     const auto now = std::chrono::system_clock::now();
     int limit = getSettings()->twitchMessageHistoryLimit.getValue();
-    if (this->disconnectedAt_.has_value())
+    if (this->lastConnectedAt_.has_value())
     {
         // calculate how many messages could have occured
         // while we were not connected to the channel
         // assuming a maximum of 10 messages per second
         const auto secondsSinceDisconnect =
             std::chrono::duration_cast<std::chrono::seconds>(
-                now - this->disconnectedAt_.value())
+                now - this->lastConnectedAt_.value())
                 .count();
         limit =
             std::min(static_cast<int>(secondsSinceDisconnect + 1) * 10, limit);
@@ -1234,7 +1237,7 @@ void TwitchChannel::loadRecentMessagesReconnect()
 
             tc->loadingRecentMessages_.clear();
         },
-        limit, this->disconnectedAt_, now, true);
+        limit, this->lastConnectedAt_, now, true);
 }
 
 void TwitchChannel::refreshPubSub()

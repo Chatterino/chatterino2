@@ -161,7 +161,6 @@ void GenericListView::refreshTheme(const Theme &theme)
 bool GenericListView::acceptCompletion()
 {
     const QModelIndex &curIdx = this->currentIndex();
-    const int curRow = curIdx.row();
     const int count = this->model_->rowCount(curIdx);
     if (count <= 0)
     {

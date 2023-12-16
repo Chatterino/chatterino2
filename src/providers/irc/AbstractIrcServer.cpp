@@ -11,10 +11,6 @@
 
 namespace chatterino {
 
-const int RECONNECT_BASE_INTERVAL = 2000;
-// 60 falloff counter means it will try to reconnect at most every 60*2 seconds
-const int MAX_FALLOFF_COUNTER = 60;
-
 // Ratelimits for joinBucket_
 const int JOIN_RATELIMIT_BUDGET = 18;
 const int JOIN_RATELIMIT_COOLDOWN = 12500;
@@ -89,6 +85,9 @@ AbstractIrcServer::AbstractIrcServer()
             }
             this->readConnection_->smartReconnect();
         });
+    this->connections_.managedConnect(this->readConnection_->heartbeat, [this] {
+        this->markChannelsConnected();
+    });
 }
 
 void AbstractIrcServer::initializeIrc()
@@ -362,9 +361,19 @@ void AbstractIrcServer::onDisconnected()
 
         if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
         {
-            channel->markDisconnectedNow();
+            channel->markDisconnected();
         }
     }
+}
+
+void AbstractIrcServer::markChannelsConnected()
+{
+    this->forEachChannel([](const ChannelPtr &chan) {
+        if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
+        {
+            channel->markConnected();
+        }
+    });
 }
 
 std::shared_ptr<Channel> AbstractIrcServer::getCustomChannel(

@@ -27,7 +27,7 @@
             {                                          \
                 QPainter painter(this);                \
                 QColor color = QColor("#222222");      \
-                color.setAlphaF(0.7);                  \
+                color.setAlphaF(0.7F);                 \
                 painter.fillRect(this->rect(), color); \
             }                                          \
         }                                              \
