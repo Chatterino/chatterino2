@@ -19,6 +19,9 @@ public:
     // receiver to trigger a reconnect, if desired
     pajlada::Signals::Signal<bool> connectionLost;
 
+    // Signal to indicate the connection is still healthy
+    pajlada::Signals::NoArgSignal heartbeat;
+
     // Request a reconnect with a minimum interval between attempts.
     // This won't violate RECONNECT_MIN_INTERVAL
     void smartReconnect();

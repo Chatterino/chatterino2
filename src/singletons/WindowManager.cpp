@@ -750,7 +750,7 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
             // out of bounds windows
             auto screens = qApp->screens();
             bool outOfBounds =
-                !getenv("I3SOCK") &&
+                !qEnvironmentVariableIsSet("I3SOCK") &&
                 std::none_of(screens.begin(), screens.end(),
                              [&](QScreen *screen) {
                                  return screen->availableGeometry().intersects(
