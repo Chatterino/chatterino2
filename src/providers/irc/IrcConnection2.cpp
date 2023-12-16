@@ -64,6 +64,7 @@ IrcConnection::IrcConnection(QObject *parent)
                 // If we're still receiving messages, all is well
                 this->recentlyReceivedMessage_ = false;
                 this->waitingForPong_ = false;
+                this->heartbeat.invoke();
                 return;
             }
 
