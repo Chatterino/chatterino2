@@ -333,7 +333,7 @@ int searcherAbsolute(lua_State *L)
         return luaL_error(L, "searcherAbsolute: internal error: no plugin?");
     }
 
-    QFileInfo file = pl->loadDirectory().filePath(name + ".lua");
+    QFileInfo file(pl->loadDirectory().filePath(name + ".lua"));
     return loadfile(L, file.canonicalFilePath());
 }
 
