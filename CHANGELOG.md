@@ -88,6 +88,7 @@
 - Dev: Move `clang-tidy` checker to its own CI job. (#4996)
 - Dev: Refactored the Image Uploader feature. (#4971)
 - Dev: Fixed deadlock and use-after-free in tests. (#4981)
+- Dev: Load less message history upon reconnects. (#5001, #5018)
 - Dev: Load less message history upon reconnects. (#5001)
 - Dev: BREAKING: Replace custom `import()` with normal Lua `require()`. (#5014)
 - Dev: Fixed most compiler warnings. (#5028)
