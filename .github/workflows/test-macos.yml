@@ -74,6 +74,7 @@ jobs:
         run: |
           mkdir pubsub-server-test
           curl -o pubsub-server.tar.gz "https://github.com/Chatterino/twitch-pubsub-server-test/releases/download/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/server-${{ env.TWITCH_PUBSUB_SERVER_TAG }}-darwin-amd64.tar.gz"
+          ls -la
           tar -xzf pubsub-server.tar.gz -C pubsub-server-test
           rm pubsub-server.tar.gz
           cd pubsub-server-test
