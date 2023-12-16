@@ -63,7 +63,8 @@ private:
               const PluginMeta &meta);
 
     // This function adds lua standard libraries into the state
-    static void openLibrariesFor(lua_State *L, const PluginMeta & /*meta*/);
+    static void openLibrariesFor(lua_State *L, const PluginMeta & /*meta*/,
+                                 const QDir &pluginDir);
     static void loadChatterinoLib(lua_State *l);
     bool tryLoadFromDir(const QDir &pluginDir);
     std::map<QString, std::unique_ptr<Plugin>> plugins_;
