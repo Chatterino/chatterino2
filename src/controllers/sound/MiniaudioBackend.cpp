@@ -256,8 +256,8 @@ void MiniaudioBackend::play(const QUrl &sound)
         if (sound.isLocalFile())
         {
             auto soundPath = sound.toLocalFile();
-            auto result = ma_engine_play_sound(this->engine.get(),
-                                               qPrintable(soundPath), nullptr);
+            result = ma_engine_play_sound(this->engine.get(),
+                                          qPrintable(soundPath), nullptr);
             if (result != MA_SUCCESS)
             {
                 qCWarning(chatterinoSound) << "Failed to play sound" << sound
