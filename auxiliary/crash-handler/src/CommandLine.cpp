@@ -1,4 +1,4 @@
-#include "commandline.hpp"
+#include "CommandLine.hpp"
 
 std::vector<std::wstring> splitChatterinoArgs(const std::wstring &args)
 {

@@ -1,4 +1,4 @@
-#include "recovery.hpp"
+#include "Recovery.hpp"
 
 #include <handler/handler_main.h>
 #include <tools/tool_support.h>
@@ -39,7 +39,7 @@ int actualMain(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-    return actualMain(argc, argv);
+    static_assert(false, "Posix is not supported by the handler");
 }
 
 #elif BUILDFLAG(IS_WIN)

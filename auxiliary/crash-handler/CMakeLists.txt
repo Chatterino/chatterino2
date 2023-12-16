@@ -5,20 +5,20 @@ project(chatterino-crash-handler
 set(PROJECT_LIB "${PROJECT_NAME}-lib")
 
 set(LIB_SOURCE_FILES
-    commandline.hpp
-    commandline.cpp
-    recovery.hpp
-    recovery.cpp
+    src/CommandLine.hpp
+    src/CommandLine.cpp
+    src/Recovery.hpp
+    src/Recovery.cpp
 )
 
 set(EXE_SOURCE_FILES
-    main.cpp
+    src/main.cpp
 )
 
 if(WIN32)
     list(APPEND LIB_SOURCE_FILES
-        win_support.hpp
-        win_support.cpp
+        src/WinSupport.hpp
+        src/WinSupport.cpp
     )
 endif()
 
@@ -29,11 +29,7 @@ target_link_libraries(${PROJECT_LIB}
         crashpad_tools
         MagicEnum
 )
-set_target_properties(${PROJECT_LIB}
-    PROPERTIES
-        CXX_STANDARD 23
-        CXX_STANDARD_REQUIRED On
-)
+target_include_directories(${PROJECT_LIB} PUBLIC "${CMAKE_CURRENT_LIST_DIR}/src")
 
 add_executable(${PROJECT_NAME} WIN32 ${EXE_SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_LIB})
@@ -41,8 +37,6 @@ set_target_properties(${PROJECT_NAME}
     PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/crashpad"
         OUTPUT_NAME "crashpad_handler"
-        CXX_STANDARD 23
-        CXX_STANDARD_REQUIRED On
 )
 
 if(WIN32)
@@ -74,12 +68,12 @@ if(TARGET gtest)
 
     set(PROJECT_TESTS "${PROJECT_NAME}-test")
     set(TEST_FILES 
-        commandline_test.cpp
-        recovery_test.cpp
+        tests/CommandLineTest.cpp
+        tests/RecoveryTest.cpp
     )
     if(WIN32)
         list(APPEND TEST_FILES
-            win_support_test.cpp
+            tests/WinSupportTest.cpp
         )
     endif()
 
@@ -88,8 +82,6 @@ if(TARGET gtest)
     set_target_properties(${PROJECT_TESTS}
         PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-            CXX_STANDARD 23
-            CXX_STANDARD_REQUIRED On
     )
     gtest_discover_tests(${PROJECT_TESTS})
 endif()

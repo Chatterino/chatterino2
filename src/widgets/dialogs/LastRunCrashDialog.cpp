@@ -21,34 +21,20 @@ namespace {
 
 using namespace chatterino::literals;
 
-const std::vector<QString> MESSAGES = {
-    u"Oops..."_s,
-    u"NotLikeThis"_s,
-    u"NOOOOOO"_s,
-    u"I'm sorry"_s,
-    u"We're sorry"_s,
-    u"My bad"_s,
-    u"FailFish"_s,
-    u"O_o"_s,
-    uR"("%/§*'"$)%=})"_s,
-    u"Sorry :("_s,
-    u"I blame cosmic rays"_s,
-    u"I blame TMI"_s,
-    u"I blame Helix"_s,
-    // "Wtf is Utf16?" (but with swapped endian)
-    u"圀琀昀\u2000椀猀\u2000唀琀昀㄀㘀㼀"_s,
+const std::initializer_list<QString> MESSAGES = {
+    u"Oops..."_s,        u"NotLikeThis"_s,
+    u"NOOOOOO"_s,        u"I'm sorry"_s,
+    u"We're sorry"_s,    u"My bad"_s,
+    u"FailFish"_s,       u"O_o"_s,
+    u"Sorry :("_s,       u"I blame cosmic rays"_s,
+    u"I blame TMI"_s,    u"I blame Helix"_s,
     u"Oopsie woopsie"_s,
 };
 
 QString randomMessage()
 {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    using Ty = quint32;
-#else
-    using Ty = quint64;
-#endif
-    return MESSAGES[static_cast<size_t>(
-        QRandomGenerator::global()->bounded(static_cast<Ty>(MESSAGES.size())))];
+    return *(MESSAGES.begin() +
+             (QRandomGenerator::global()->generate64() % MESSAGES.size()));
 }
 
 }  // namespace
@@ -103,7 +89,10 @@ LastRunCrashDialog::LastRunCrashDialog()
 
     text +=
         "Crash reports are <b>only stored locally</b> and never uploaded.<br>"
-        u"<br>Please report the crash so it can be prevented in the future."_s;
+        "<br>Please <a "
+        "href=\"https://github.com/Chatterino/chatterino2/issues/new\">report "
+        "the crash</a> "
+        u"so it can be prevented in the future."_s;
 
     if (Modes::instance().isNightly)
     {
@@ -127,36 +116,6 @@ LastRunCrashDialog::LastRunCrashDialog()
     QObject::connect(okButton, &QPushButton::clicked, [this] {
         this->accept();
     });
-
-    if (!getArgs().safeMode)
-    {
-        auto *safeModeButton = buttons->addButton(u"Restart in safe mode"_s,
-                                                  QDialogButtonBox::NoRole);
-        safeModeButton->setToolTipDuration(0);
-        safeModeButton->setToolTip(
-            u"In safe mode, the settings button is always shown"_s
-#ifdef CHATTERINO_HAVE_PLUGINS
-            " and plugins are disabled"
-#endif
-            ".\nSame as starting with --safe-mode.");
-
-        QObject::connect(safeModeButton, &QPushButton::clicked, [this] {
-            auto args = getArgs().currentArguments();
-            args += u"--safe-mode"_s;
-            if (QProcess::startDetached(qApp->applicationFilePath(), args))
-            {
-                // We have to do this as we show this dialog with exec()
-                _Exit(0);
-                return;
-            }
-
-            QMessageBox::critical(
-                this, u"Error"_s,
-                u"Failed to start the app with --safe-mode. Please restart the app manually."_s,
-                QMessageBox::Close);
-            QApplication::exit(0);
-        });
-    }
 }
 
 }  // namespace chatterino

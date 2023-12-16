@@ -1,11 +1,11 @@
-#include "recovery.hpp"
+#include "Recovery.hpp"
 
-#include "commandline.hpp"
+#include "CommandLine.hpp"
 
 #include <build/build_config.h>
 
 #if BUILDFLAG(IS_WIN)
-#    include "win_support.hpp"
+#    include "WinSupport.hpp"
 
 #    include <util/win/command_line.h>
 #endif
@@ -16,13 +16,10 @@
 
 #include <chrono>
 #include <format>
-#include <ranges>
 
 #include <mini_chromium/base/strings/utf_string_conversions.h>
 
 using namespace std::literals;
-namespace ranges = std::ranges;
-namespace views = std::views;
 namespace chrono = std::chrono;
 
 namespace {
@@ -38,18 +35,6 @@ std::optional<V> tryGet(const std::map<K, V> &map, const K &key)
     }
     return it->second;
 }
-
-/// Try to get a value with the key `name` out of a map (`annotations`).
-/// If it doesn't exist, bail out,
-/// otherwise, put the value in the variable `name`.
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define getOrBail(annotations, name)                 \
-    auto name##Opt = tryGet(annotations, #name ""s); \
-    if (!(name##Opt))                                \
-    {                                                \
-        return {};                                   \
-    }                                                \
-    auto(name) = *(name##Opt);
 
 chrono::utc_time<chrono::seconds> parseTime(const std::string &source)
 {
@@ -69,9 +54,18 @@ std::unique_ptr<crashpad::MinidumpUserExtensionStreamDataSource>
     }
 
     const auto &annotations = snapshot->AnnotationsSimpleMap();
-    getOrBail(annotations, exePath);
-    getOrBail(annotations, canRestart);
-    getOrBail(annotations, startedAt);
+    auto exePathOpt = tryGet(annotations, "exePath"s);
+    auto canRestartOpt = tryGet(annotations, "canRestart"s);
+    auto startedAtOpt = tryGet(annotations, "startedAt"s);
+
+    if (!exePathOpt || !canRestartOpt || !startedAtOpt)
+    {
+        return {};
+    }
+    const auto &exePath = *exePathOpt;
+    const auto &canRestart = *canRestartOpt;
+    const auto &startedAt = *startedAtOpt;
+
     auto exeArguments = tryGet(annotations, "exeArguments"s);
 
     if (canRestart != "true"s)
@@ -112,11 +106,12 @@ std::unique_ptr<crashpad::MinidumpUserExtensionStreamDataSource>
 
         // The amount of extra memory captured.
         // This is almost always 0.
-        auto extraMemory = ranges::fold_left(
-            exception->ExtraMemory() | views::transform([](const auto *mem) {
-                return mem->Size();
-            }),
-            0, std::plus<>{});
+        size_t extraMemory = 0;
+        for (const auto *mem : exception->ExtraMemory())
+        {
+            extraMemory += mem->Size();
+        }
+
         if (extraMemory > 0)
         {
             arguments.emplace_back(L"--cr-extra-memory"s);
