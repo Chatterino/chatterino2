@@ -11,10 +11,6 @@
 
 namespace chatterino {
 
-const int RECONNECT_BASE_INTERVAL = 2000;
-// 60 falloff counter means it will try to reconnect at most every 60*2 seconds
-const int MAX_FALLOFF_COUNTER = 60;
-
 // Ratelimits for joinBucket_
 const int JOIN_RATELIMIT_BUDGET = 18;
 const int JOIN_RATELIMIT_COOLDOWN = 12500;

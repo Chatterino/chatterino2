@@ -238,11 +238,11 @@ void ReplyThreadPopup::addMessagesFromThread()
     this->ui_.threadView->setChannel(this->virtualChannel_);
     this->ui_.threadView->setSourceChannel(sourceChannel);
 
-    auto overrideFlags =
+    auto rootOverrideFlags =
         std::optional<MessageFlags>(this->thread_->root()->flags);
-    overrideFlags->set(MessageFlag::DoNotLog);
+    rootOverrideFlags->set(MessageFlag::DoNotLog);
 
-    this->virtualChannel_->addMessage(this->thread_->root(), overrideFlags);
+    this->virtualChannel_->addMessage(this->thread_->root(), rootOverrideFlags);
     for (const auto &msgRef : this->thread_->replies())
     {
         if (auto msg = msgRef.lock())

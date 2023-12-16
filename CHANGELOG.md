@@ -52,6 +52,7 @@
 - Bugfix: Fixed support for Windows 11 Snap layouts. (#4994)
 - Bugfix: Fixed some windows appearing between screens. (#4797)
 - Bugfix: Fixed a bug on Wayland where tooltips would spawn as separate windows instead of behaving like tooltips. (#4998)
+- Bugfix: Show user text input within watch streak notices. (#5029)
 - Dev: Run miniaudio in a separate thread, and simplify it to not manage the device ourselves. There's a chance the simplification is a bad idea. (#4978)
 - Dev: Change clang-format from v14 to v16. (#4929)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
@@ -88,6 +89,9 @@
 - Dev: Refactored the Image Uploader feature. (#4971)
 - Dev: Fixed deadlock and use-after-free in tests. (#4981)
 - Dev: Load less message history upon reconnects. (#5001, #5018)
+- Dev: Load less message history upon reconnects. (#5001)
+- Dev: BREAKING: Replace custom `import()` with normal Lua `require()`. (#5014)
+- Dev: Fixed most compiler warnings. (#5028)
 
 ## 2.4.6
 

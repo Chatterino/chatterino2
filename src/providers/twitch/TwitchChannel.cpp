@@ -56,7 +56,6 @@ namespace {
 #else
     const QString MAGIC_MESSAGE_SUFFIX = QString::fromUtf8(u8" \U000E0000");
 #endif
-    constexpr int TITLE_REFRESH_PERIOD = 10000;
     constexpr int CLIP_CREATION_COOLDOWN = 5000;
     const QString CLIPS_LINK("https://clips.twitch.tv/%1");
     const QString CLIPS_FAILURE_CLIPS_DISABLED_TEXT(

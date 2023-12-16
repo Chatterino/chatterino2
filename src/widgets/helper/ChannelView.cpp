@@ -2888,12 +2888,14 @@ void ChannelView::setInputReply(const MessagePtr &message)
     if (!message->replyThread)
     {
         // Message did not already have a thread attached, try to find or create one
-        if (auto *tc =
-                dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get()))
+        auto *tc =
+            dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get());
+        if (!tc)
         {
-            tc->getOrCreateThread(message);
+            tc = dynamic_cast<TwitchChannel *>(this->channel_.get());
         }
-        else if (auto *tc = dynamic_cast<TwitchChannel *>(this->channel_.get()))
+
+        if (tc)
         {
             tc->getOrCreateThread(message);
         }

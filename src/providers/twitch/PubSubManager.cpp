@@ -210,7 +210,6 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         }
 
         action.target.login = args[0].toString();
-        bool ok;
         action.messageText = args[1].toString();
         action.messageId = args[2].toString();
 

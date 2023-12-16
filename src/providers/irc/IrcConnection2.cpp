@@ -16,7 +16,7 @@ IrcConnection::IrcConnection(QObject *parent)
 {
     // Log connection errors for ease-of-debugging
     QObject::connect(this, &Communi::IrcConnection::socketError, this,
-                     [this](QAbstractSocket::SocketError error) {
+                     [](QAbstractSocket::SocketError error) {
                          qCDebug(chatterinoIrc) << "Connection error:" << error;
                      });
 

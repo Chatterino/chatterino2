@@ -118,7 +118,7 @@ float BaseWindow::scale() const
 
 float BaseWindow::qtFontScale() const
 {
-    return this->scale() / std::max<float>(0.01, this->nativeScale_);
+    return this->scale() / std::max<float>(0.01F, this->nativeScale_);
 }
 
 void BaseWindow::init()
