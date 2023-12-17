@@ -44,7 +44,7 @@ public:
         return nullptr;
     }
 
-    CrashRecovery *getCrashRecovery() override
+    CrashHandler *getCrashHandler() override
     {
         return nullptr;
     }
