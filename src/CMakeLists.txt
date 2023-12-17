@@ -698,12 +698,12 @@ set(SOURCE_FILES
         ${CMAKE_SOURCE_DIR}/resources/resources.qrc
         )
 
-if (WIN32)
+if(WIN32)
     # Platform specific implementations
     list(APPEND SOURCE_FILES
         platform/windows/GlobalShortcutPrivate.cpp
     )
-endif ()
+endif()
 
 if (APPLE)
     set(MACOS_BUNDLE_ICON_FILE "${CMAKE_SOURCE_DIR}/resources/chatterino.icns")
