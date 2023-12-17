@@ -2606,7 +2606,7 @@ void ChannelView::showUserInfoPopup(const QString &userName,
 {
     if (!this->split_)
     {
-        qCWarning(chatterinoApp)
+        qCWarning(chatterinoCommon)
             << "Tried to show user info for" << userName
             << "but the channel view doesn't belong to a split.";
         return;
@@ -2952,8 +2952,9 @@ void ChannelView::showReplyThreadPopup(const MessagePtr &message)
 
     if (!this->split_)
     {
-        qCWarning(chatterinoApp) << "Tried to show reply thread popup but the "
-                                    "channel view doesn't belong to a split.";
+        qCWarning(chatterinoCommon)
+            << "Tried to show reply thread popup but the "
+               "channel view doesn't belong to a split.";
         return;
     }
 
