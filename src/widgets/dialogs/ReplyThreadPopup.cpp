@@ -24,11 +24,12 @@ const QString TEXT_TITLE("Reply Thread - @%1 in #%2");
 
 namespace chatterino {
 
-ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
-                                   Split *split)
-    : DraggablePopup(closeAutomatically, parent)
+ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, Split *split)
+    : DraggablePopup(closeAutomatically, split)
     , split_(split)
 {
+    assert(split != nullptr);
+
     this->setWindowTitle(QStringLiteral("Reply Thread"));
 
     HotkeyController::HotkeyMap actions{
