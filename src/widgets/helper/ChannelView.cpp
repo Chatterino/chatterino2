@@ -2586,7 +2586,14 @@ void ChannelView::hideEvent(QHideEvent * /*event*/)
 void ChannelView::showUserInfoPopup(const QString &userName,
                                     QString alternativePopoutChannel)
 {
-    assert(this->split_ != nullptr);
+    if (!this->split_)
+    {
+        qCWarning(chatterinoApp)
+            << "Tried to show user info for" << userName
+            << "but the channel view doesn't belong to a split.";
+        return;
+    }
+
     auto *userPopup =
         new UserInfoPopup(getSettings()->autoCloseUserPopup, this->split_);
 
