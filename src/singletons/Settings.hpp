@@ -12,6 +12,7 @@
 #include "controllers/logging/ChannelLog.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "controllers/nicknames/Nickname.hpp"
+#include "controllers/sound/ISoundController.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 #include "util/StreamerMode.hpp"
@@ -66,6 +67,7 @@ enum UsernameRightClickBehavior : int {
 class Settings
 {
     static Settings *instance_;
+    Settings *prevInstance_ = nullptr;
 
 public:
     Settings(const QString &settingsDirectory);
@@ -216,6 +218,10 @@ public:
         "/behaviour/autocompletion/emoteCompletionWithColon", true};
     BoolSetting showUsernameCompletionMenu = {
         "/behaviour/autocompletion/showUsernameCompletionMenu", true};
+    BoolSetting useSmartEmoteCompletion = {
+        "/experiments/useSmartEmoteCompletion",
+        false,
+    };
 
     FloatSetting pauseOnHoverDuration = {"/behaviour/pauseOnHoverDuration", 0};
     EnumSetting<Qt::KeyboardModifier> pauseChatModifier = {
@@ -555,6 +561,12 @@ public:
     BoolSetting pluginsEnabled = {"/plugins/supportEnabled", false};
     ChatterinoSetting<std::vector<QString>> enabledPlugins = {
         "/plugins/enabledPlugins", {}};
+
+    // Advanced
+    EnumStringSetting<SoundBackend> soundBackend = {
+        "/sound/backend",
+        SoundBackend::Miniaudio,
+    };
 
 private:
     ChatterinoSetting<std::vector<HighlightPhrase>> highlightedMessagesSetting =

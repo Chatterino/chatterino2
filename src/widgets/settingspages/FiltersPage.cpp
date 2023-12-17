@@ -45,9 +45,8 @@ FiltersPage::FiltersPage()
     });
 
     // We can safely ignore this signal connection since we own the view
-    std::ignore = view->addButtonPressed.connect([] {
-        ChannelFilterEditorDialog d(
-            static_cast<QWidget *>(&(getApp()->windows->getMainWindow())));
+    std::ignore = view->addButtonPressed.connect([this] {
+        ChannelFilterEditorDialog d(this->window());
         if (d.exec() == QDialog::Accepted)
         {
             getSettings()->filterRecords.append(

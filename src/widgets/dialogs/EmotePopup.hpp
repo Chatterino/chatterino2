@@ -46,6 +46,7 @@ private:
                             const QString &searchText);
     void filterEmotes(const QString &text);
     void addShortcuts() override;
+    bool eventFilter(QObject *object, QEvent *event) override;
 };
 
 }  // namespace chatterino

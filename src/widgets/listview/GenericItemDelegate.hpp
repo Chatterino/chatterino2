@@ -10,7 +10,7 @@ class SwitcherItemDelegate : public QStyledItemDelegate
 
 public:
     SwitcherItemDelegate(QObject *parent = nullptr);
-    ~SwitcherItemDelegate();
+    ~SwitcherItemDelegate() override;
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
                const QModelIndex &index) const override;

@@ -19,7 +19,7 @@ public:
     void erase(const QString &provider, const QString &name);
 
 private:
-    Credentials();
+    Credentials() = default;
 };
 
 }  // namespace chatterino

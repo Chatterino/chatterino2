@@ -23,10 +23,14 @@ jobs:
         run: sudo apt-get update
 
       - name: Install clang-format
-        run: sudo apt-get -y install clang-format dos2unix
+        run: sudo apt-get -y install dos2unix
 
       - name: Check formatting
-        run: ./tools/check-format.sh
+        uses: DoozyX/clang-format-lint-action@v0.16.2
+        with:
+          source: "./src ./tests/src ./benchmarks/src ./mocks/include"
+          extensions: "hpp,cpp"
+          clangFormatVersion: 16
 
       - name: Check line-endings
         run: ./tools/check-line-endings.sh

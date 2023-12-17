@@ -32,8 +32,8 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     , channel_(std::move(channel))
     , split_(std::move(split))
 {
-    Q_ASSERT_X(this->channel_ != nullptr, "ReplyThreadPopup",
-               "A reply thread popup must have a source channel");
+    assert(this->channel_ != nullptr &&
+           "A reply thread popup must have a source channel");
 
     this->setWindowTitle(QStringLiteral("Reply Thread"));
 
@@ -211,7 +211,7 @@ void ReplyThreadPopup::setThread(std::shared_ptr<MessageThread> thread)
     this->thread_ = std::move(thread);
     if (this->ui_.replyInput != nullptr)
     {
-        this->ui_.replyInput->setReply(this->thread_);
+        this->ui_.replyInput->setReply(this->thread_->root());
     }
     this->addMessagesFromThread();
     this->updateInputUI();
@@ -260,11 +260,11 @@ void ReplyThreadPopup::addMessagesFromThread()
     this->ui_.threadView->setChannel(this->virtualChannel_);
     this->ui_.threadView->setSourceChannel(this->channel_);
 
-    auto overrideFlags =
+    auto rootOverrideFlags =
         std::optional<MessageFlags>(this->thread_->root()->flags);
-    overrideFlags->set(MessageFlag::DoNotLog);
+    rootOverrideFlags->set(MessageFlag::DoNotLog);
 
-    this->virtualChannel_->addMessage(this->thread_->root(), overrideFlags);
+    this->virtualChannel_->addMessage(this->thread_->root(), rootOverrideFlags);
     for (const auto &msgRef : this->thread_->replies())
     {
         if (auto msg = msgRef.lock())

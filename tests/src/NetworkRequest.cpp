@@ -2,7 +2,6 @@
 
 #include "common/NetworkManager.hpp"
 #include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
 
 #include <gtest/gtest.h>
 #include <QCoreApplication>
@@ -83,12 +82,10 @@ TEST(NetworkRequest, Success)
         RequestWaiter waiter;
 
         NetworkRequest(url)
-            .onSuccess(
-                [code, &waiter, url](const NetworkResult &result) -> Outcome {
-                    EXPECT_EQ(result.status(), code);
-                    waiter.requestDone();
-                    return Success;
-                })
+            .onSuccess([code, &waiter, url](const NetworkResult &result) {
+                EXPECT_EQ(result.status(), code);
+                waiter.requestDone();
+            })
             .onError([&](const NetworkResult & /*result*/) {
                 // The codes should *not* throw an error
                 EXPECT_TRUE(false);
@@ -143,13 +140,11 @@ TEST(NetworkRequest, Error)
         RequestWaiter waiter;
 
         NetworkRequest(url)
-            .onSuccess(
-                [&waiter, url](const NetworkResult & /*result*/) -> Outcome {
-                    // The codes should throw an error
-                    EXPECT_TRUE(false);
-                    waiter.requestDone();
-                    return Success;
-                })
+            .onSuccess([&waiter, url](const NetworkResult & /*result*/) {
+                // The codes should throw an error
+                EXPECT_TRUE(false);
+                waiter.requestDone();
+            })
             .onError([code, &waiter, url](const NetworkResult &result) {
                 EXPECT_EQ(result.status(), code);
 
@@ -201,11 +196,10 @@ TEST(NetworkRequest, TimeoutTimingOut)
 
     NetworkRequest(url)
         .timeout(1000)
-        .onSuccess([&waiter](const NetworkResult & /*result*/) -> Outcome {
+        .onSuccess([&waiter](const NetworkResult & /*result*/) {
             // The timeout should throw an error
             EXPECT_TRUE(false);
             waiter.requestDone();
-            return Success;
         })
         .onError([&waiter, url](const NetworkResult &result) {
             qDebug() << QTime::currentTime().toString()
@@ -232,11 +226,10 @@ TEST(NetworkRequest, TimeoutNotTimingOut)
 
     NetworkRequest(url)
         .timeout(3000)
-        .onSuccess([&waiter, url](const NetworkResult &result) -> Outcome {
+        .onSuccess([&waiter, url](const NetworkResult &result) {
             EXPECT_EQ(result.status(), 200);
 
             waiter.requestDone();
-            return Success;
         })
         .onError([&waiter, url](const NetworkResult & /*result*/) {
             // The timeout should *not* throw an error
@@ -263,9 +256,8 @@ TEST(NetworkRequest, FinallyCallbackOnTimeout)
 
     NetworkRequest(url)
         .timeout(1000)
-        .onSuccess([&](const NetworkResult & /*result*/) -> Outcome {
+        .onSuccess([&](const NetworkResult & /*result*/) {
             onSuccessCalled = true;
-            return Success;
         })
         .onError([&](const NetworkResult &result) {
             onErrorCalled = true;

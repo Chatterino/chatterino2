@@ -2,6 +2,7 @@
 #    include "controllers/plugins/PluginController.hpp"
 
 #    include "Application.hpp"
+#    include "common/Args.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/commands/CommandController.hpp"
@@ -18,6 +19,7 @@
 
 #    include <memory>
 #    include <utility>
+#    include <variant>
 
 namespace chatterino {
 
@@ -45,15 +47,13 @@ void PluginController::loadPlugins()
     auto dir = QDir(getPaths()->pluginsDirectory);
     qCDebug(chatterinoLua) << "Loading plugins in" << dir.path();
     for (const auto &info :
-         dir.entryInfoList(QDir::NoFilter | QDir::NoDotAndDotDot))
+         dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot))
     {
-        if (info.isDir())
-        {
-            auto pluginDir = QDir(info.absoluteFilePath());
-            this->tryLoadFromDir(pluginDir);
-        }
+        auto pluginDir = QDir(info.absoluteFilePath());
+        this->tryLoadFromDir(pluginDir);
     }
 }
+
 bool PluginController::tryLoadFromDir(const QDir &pluginDir)
 {
     // look for init.lua
@@ -103,9 +103,10 @@ bool PluginController::tryLoadFromDir(const QDir &pluginDir)
     return true;
 }
 
-void PluginController::openLibrariesFor(lua_State *L,
-                                        const PluginMeta & /*meta*/)
+void PluginController::openLibrariesFor(lua_State *L, const PluginMeta &meta,
+                                        const QDir &pluginDir)
 {
+    lua::StackGuard guard(L);
     // Stuff to change, remove or hide behind a permission system:
     static const std::vector<luaL_Reg> loadedlibs = {
         luaL_Reg{LUA_GNAME, luaopen_base},
@@ -123,6 +124,7 @@ void PluginController::openLibrariesFor(lua_State *L,
         luaL_Reg{LUA_STRLIBNAME, luaopen_string},
         luaL_Reg{LUA_MATHLIBNAME, luaopen_math},
         luaL_Reg{LUA_UTF8LIBNAME, luaopen_utf8},
+        luaL_Reg{LUA_LOADLIBNAME, luaopen_package},
     };
     // Warning: Do not add debug library to this, it would make the security of
     // this a living nightmare due to stuff like registry access
@@ -138,28 +140,29 @@ void PluginController::openLibrariesFor(lua_State *L,
     static const luaL_Reg c2Lib[] = {
         {"system_msg", lua::api::c2_system_msg},
         {"register_command", lua::api::c2_register_command},
+        {"register_callback", lua::api::c2_register_callback},
         {"send_msg", lua::api::c2_send_msg},
         {"log", lua::api::c2_log},
         {nullptr, nullptr},
     };
     lua_pushglobaltable(L);
-    auto global = lua_gettop(L);
+    auto gtable = lua_gettop(L);
 
-    // count of elements in C2LIB + LogLevel
-    auto c2libIdx = lua::pushEmptyTable(L, 5);
+    // count of elements in C2LIB + LogLevel + EventType
+    auto c2libIdx = lua::pushEmptyTable(L, 8);
 
     luaL_setfuncs(L, c2Lib, 0);
 
     lua::pushEnumTable<lua::api::LogLevel>(L);
     lua_setfield(L, c2libIdx, "LogLevel");
 
-    lua_setfield(L, global, "c2");
+    lua::pushEnumTable<lua::api::EventType>(L);
+    lua_setfield(L, c2libIdx, "EventType");
+
+    lua_setfield(L, gtable, "c2");
 
     // ban functions
     // Note: this might not be fully secure? some kind of metatable fuckery might come up?
-
-    lua_pushglobaltable(L);
-    auto gtable = lua_gettop(L);
 
     // possibly randomize this name at runtime to prevent some attacks?
 
@@ -168,16 +171,10 @@ void PluginController::openLibrariesFor(lua_State *L,
     lua_setfield(L, LUA_REGISTRYINDEX, "real_load");
 #    endif
 
-    lua_getfield(L, gtable, "dofile");
-    lua_setfield(L, LUA_REGISTRYINDEX, "real_dofile");
-
     // NOLINTNEXTLINE(*-avoid-c-arrays)
     static const luaL_Reg replacementFuncs[] = {
         {"load", lua::api::g_load},
         {"print", lua::api::g_print},
-
-        // This function replaces both `dofile` and `require`, see docs/wip-plugins.md for more info
-        {"import", lua::api::g_import},
         {nullptr, nullptr},
     };
     luaL_setfuncs(L, replacementFuncs, 0);
@@ -188,18 +185,63 @@ void PluginController::openLibrariesFor(lua_State *L,
     lua_pushnil(L);
     lua_setfield(L, gtable, "dofile");
 
-    lua_pop(L, 1);
+    // set up package lib
+    lua_getfield(L, gtable, "package");
+
+    auto package = lua_gettop(L);
+    lua_pushstring(L, "");
+    lua_setfield(L, package, "cpath");
+
+    // we don't use path
+    lua_pushstring(L, "");
+    lua_setfield(L, package, "path");
+
+    {
+        lua_getfield(L, gtable, "table");
+        auto table = lua_gettop(L);
+        lua_getfield(L, -1, "remove");
+        lua_remove(L, table);
+    }
+    auto remove = lua_gettop(L);
+
+    // remove searcher_Croot, searcher_C and searcher_Lua leaving only searcher_preload
+    for (int i = 0; i < 3; i++)
+    {
+        lua_pushvalue(L, remove);
+        lua_getfield(L, package, "searchers");
+        lua_pcall(L, 1, 0, 0);
+    }
+    lua_pop(L, 1);  // get rid of remove
+
+    lua_getfield(L, package, "searchers");
+    lua_pushcclosure(L, lua::api::searcherRelative, 0);
+    lua_seti(L, -2, 2);
+
+    lua::push(L, QString(pluginDir.absolutePath()));
+    lua_pushcclosure(L, lua::api::searcherAbsolute, 1);
+    lua_seti(L, -2, 3);
+
+    lua_pop(L, 3);  // remove gtable, package, package.searchers
 }
 
 void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
                             const PluginMeta &meta)
 {
-    lua_State *l = luaL_newstate();
-    PluginController::openLibrariesFor(l, meta);
-
     auto pluginName = pluginDir.dirName();
+    lua_State *l = luaL_newstate();
     auto plugin = std::make_unique<Plugin>(pluginName, l, meta, pluginDir);
+    auto *temp = plugin.get();
     this->plugins_.insert({pluginName, std::move(plugin)});
+
+    if (getArgs().safeMode)
+    {
+        // This isn't done earlier to ensure the user can disable a misbehaving plugin
+        qCWarning(chatterinoLua) << "Skipping loading plugin " << meta.name
+                                 << " because safe mode is enabled.";
+        return;
+    }
+    PluginController::openLibrariesFor(l, meta, pluginDir);
+
     if (!PluginController::isPluginEnabled(pluginName) ||
         !getSettings()->pluginsEnabled)
     {
@@ -211,9 +253,10 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     int err = luaL_dofile(l, index.absoluteFilePath().toStdString().c_str());
     if (err != 0)
     {
+        temp->error_ = lua::humanErrorText(l, err);
         qCWarning(chatterinoLua)
             << "Failed to load" << pluginName << "plugin from" << index << ": "
-            << lua::humanErrorText(l, err);
+            << temp->error_;
         return;
     }
     qCInfo(chatterinoLua) << "Loaded" << pluginName << "plugin from" << index;
@@ -298,5 +341,52 @@ const std::map<QString, std::unique_ptr<Plugin>> &PluginController::plugins()
     return this->plugins_;
 }
 
-};  // namespace chatterino
+std::pair<bool, QStringList> PluginController::updateCustomCompletions(
+    const QString &query, const QString &fullTextContent, int cursorPosition,
+    bool isFirstWord) const
+{
+    QStringList results;
+
+    for (const auto &[name, pl] : this->plugins())
+    {
+        if (!pl->error().isNull())
+        {
+            continue;
+        }
+
+        lua::StackGuard guard(pl->state_);
+
+        auto opt = pl->getCompletionCallback();
+        if (opt)
+        {
+            qCDebug(chatterinoLua)
+                << "Processing custom completions from plugin" << name;
+            auto &cb = *opt;
+            auto errOrList =
+                cb(query, fullTextContent, cursorPosition, isFirstWord);
+            if (std::holds_alternative<int>(errOrList))
+            {
+                guard.handled();
+                int err = std::get<int>(errOrList);
+                qCDebug(chatterinoLua)
+                    << "Got error from plugin " << pl->meta.name
+                    << " while refreshing tab completion: "
+                    << lua::humanErrorText(pl->state_, err);
+                continue;
+            }
+
+            auto list = std::get<lua::api::CompletionList>(errOrList);
+            if (list.hideOthers)
+            {
+                results = QStringList(list.values.begin(), list.values.end());
+                return {true, results};
+            }
+            results += QStringList(list.values.begin(), list.values.end());
+        }
+    }
+
+    return {false, results};
+}
+
+}  // namespace chatterino
 #endif

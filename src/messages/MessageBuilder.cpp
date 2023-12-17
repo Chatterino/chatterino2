@@ -6,6 +6,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/Image.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/LinkResolver.hpp"
 #include "providers/twitch/PubSubActions.hpp"
@@ -140,13 +141,14 @@ MessagePtr makeAutomodInfoMessage(const AutomodInfoAction &action)
 }
 
 std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
-    const AutomodAction &action)
+    const AutomodAction &action, const QString &channelName)
 {
     MessageBuilder builder, builder2;
 
     //
     // Builder for AutoMod message with explanation
     builder.message().loginName = "automod";
+    builder.message().channelName = channelName;
     builder.message().flags.set(MessageFlag::PubSub);
     builder.message().flags.set(MessageFlag::Timeout);
     builder.message().flags.set(MessageFlag::AutoMod);
@@ -192,6 +194,12 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
 
     //
     // Builder for offender's message
+    builder2.message().channelName = channelName;
+    builder2
+        .emplace<TextElement>("#" + channelName,
+                              MessageElementFlag::ChannelName,
+                              MessageColor::System)
+        ->setLink({Link::JumpToChannel, channelName});
     builder2.emplace<TimestampElement>();
     builder2.emplace<TwitchModerationElement>();
     builder2.message().loginName = action.target.login;
@@ -658,6 +666,58 @@ MessageBuilder::MessageBuilder(LiveUpdatesUpdateEmoteSetMessageTag /*unused*/,
     this->message().flags.set(MessageFlag::System);
     this->message().flags.set(MessageFlag::LiveUpdatesUpdate);
     this->message().flags.set(MessageFlag::DoNotTriggerNotification);
+}
+
+MessageBuilder::MessageBuilder(ImageUploaderResultTag /*unused*/,
+                               const QString &imageLink,
+                               const QString &deletionLink,
+                               size_t imagesStillQueued, size_t secondsLeft)
+    : MessageBuilder()
+{
+    this->message().flags.set(MessageFlag::System);
+    this->message().flags.set(MessageFlag::DoNotTriggerNotification);
+
+    this->emplace<TimestampElement>();
+
+    using MEF = MessageElementFlag;
+    auto addText = [this](QString text, MessageElementFlags mefs = MEF::Text,
+                          MessageColor color =
+                              MessageColor::System) -> TextElement * {
+        this->message().searchText += text;
+        this->message().messageText += text;
+        return this->emplace<TextElement>(text, mefs, color);
+    };
+
+    addText("Your image has been uploaded to");
+
+    // ASSUMPTION: the user gave this uploader configuration to the program
+    // therefore they trust that the host is not wrong/malicious. This doesn't obey getSettings()->lowercaseDomains.
+    // This also ensures that the LinkResolver doesn't get these links.
+    addText(imageLink, {MEF::OriginalLink, MEF::LowercaseLink},
+            MessageColor::Link)
+        ->setLink({Link::Url, imageLink})
+        ->setTrailingSpace(false);
+
+    if (!deletionLink.isEmpty())
+    {
+        addText("(Deletion link:");
+        addText(deletionLink, {MEF::OriginalLink, MEF::LowercaseLink},
+                MessageColor::Link)
+            ->setLink({Link::Url, deletionLink})
+            ->setTrailingSpace(false);
+        addText(")")->setTrailingSpace(false);
+    }
+    addText(".");
+
+    if (imagesStillQueued == 0)
+    {
+        return;
+    }
+
+    addText(QString("%1 left. Please wait until all of them are uploaded. "
+                    "About %2 seconds left.")
+                .arg(imagesStillQueued)
+                .arg(secondsLeft));
 }
 
 Message *MessageBuilder::operator->()

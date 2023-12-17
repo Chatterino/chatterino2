@@ -424,7 +424,6 @@ void NotebookTab::paintEvent(QPaintEvent *)
 
     // select the right tab colors
     Theme::TabColors colors;
-    Theme::TabColors regular = this->theme->tabs.regular;
 
     if (this->selected_)
         colors = this->theme->tabs.selected;

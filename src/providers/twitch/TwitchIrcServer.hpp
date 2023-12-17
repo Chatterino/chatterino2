@@ -42,9 +42,9 @@ class TwitchIrcServer final : public AbstractIrcServer,
 {
 public:
     TwitchIrcServer();
-    virtual ~TwitchIrcServer() override = default;
+    ~TwitchIrcServer() override = default;
 
-    virtual void initialize(Settings &settings, Paths &paths) override;
+    void initialize(Settings &settings, Paths &paths) override;
 
     void forEachChannelAndSpecialChannels(std::function<void(ChannelPtr)> func);
 
@@ -77,6 +77,7 @@ public:
     const ChannelPtr whispersChannel;
     const ChannelPtr mentionsChannel;
     const ChannelPtr liveChannel;
+    const ChannelPtr automodChannel;
     IndirectChannel watchingChannel;
 
     PubSub *pubsub;
@@ -89,23 +90,19 @@ public:
     const IndirectChannel &getWatchingChannel() const override;
 
 protected:
-    virtual void initializeConnection(IrcConnection *connection,
-                                      ConnectionType type) override;
-    virtual std::shared_ptr<Channel> createChannel(
-        const QString &channelName) override;
+    void initializeConnection(IrcConnection *connection,
+                              ConnectionType type) override;
+    std::shared_ptr<Channel> createChannel(const QString &channelName) override;
 
-    virtual void privateMessageReceived(
-        Communi::IrcPrivateMessage *message) override;
-    virtual void readConnectionMessageReceived(
-        Communi::IrcMessage *message) override;
-    virtual void writeConnectionMessageReceived(
-        Communi::IrcMessage *message) override;
+    void privateMessageReceived(Communi::IrcPrivateMessage *message) override;
+    void readConnectionMessageReceived(Communi::IrcMessage *message) override;
+    void writeConnectionMessageReceived(Communi::IrcMessage *message) override;
 
-    virtual std::shared_ptr<Channel> getCustomChannel(
+    std::shared_ptr<Channel> getCustomChannel(
         const QString &channelname) override;
 
-    virtual QString cleanChannelName(const QString &dirtyChannelName) override;
-    virtual bool hasSeparateWriteConnection() const override;
+    QString cleanChannelName(const QString &dirtyChannelName) override;
+    bool hasSeparateWriteConnection() const override;
 
 private:
     void onMessageSendRequested(TwitchChannel *channel, const QString &message,

@@ -56,6 +56,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get -y install \
+              libbenchmark-dev \
               cmake \
               rapidjson-dev \
               libssl-dev \
@@ -84,6 +85,7 @@ jobs:
         run: |
           cmake \
             -DBUILD_TESTS=On \
+            -DBUILD_BENCHMARKS=On \
             -DBUILD_APP=OFF \
             -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
             ..
@@ -99,6 +101,6 @@ jobs:
           docker pull ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
           docker run --network=host --detach ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
           docker run -p 9051:80 --detach kennethreitz/httpbin
-          ctest --repeat until-pass:4
+          ctest --repeat until-pass:4 --output-on-failure
         working-directory: build-test
         shell: bash

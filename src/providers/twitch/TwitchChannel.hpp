@@ -4,12 +4,14 @@
 #include "common/Atomic.hpp"
 #include "common/Channel.hpp"
 #include "common/ChannelChatters.hpp"
-#include "common/Outcome.hpp"
+#include "common/Common.hpp"
 #include "common/UniqueAccess.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/QStringHash.hpp"
 
+#include <boost/circular_buffer/space_optimized.hpp>
 #include <boost/signals2.hpp>
+#include <IrcMessage>
 #include <pajlada/signals/signalholder.hpp>
 #include <QColor>
 #include <QElapsedTimer>
@@ -67,7 +69,9 @@ struct HelixStream;
 
 class TwitchIrcServer;
 
-class TwitchChannel : public Channel, public ChannelChatters
+const int MAX_QUEUED_REDEMPTIONS = 16;
+
+class TwitchChannel final : public Channel, public ChannelChatters
 {
 public:
     struct StreamStatus {
@@ -109,17 +113,17 @@ public:
     void initialize();
 
     // Channel methods
-    virtual bool isEmpty() const override;
-    virtual bool canSendMessage() const override;
-    virtual void sendMessage(const QString &message) override;
-    virtual void sendReply(const QString &message, const QString &replyId);
-    virtual bool isMod() const override;
+    bool isEmpty() const override;
+    bool canSendMessage() const override;
+    void sendMessage(const QString &message) override;
+    void sendReply(const QString &message, const QString &replyId);
+    bool isMod() const override;
     bool isVip() const;
     bool isStaff() const;
-    virtual bool isBroadcaster() const override;
-    virtual bool hasHighRateLimit() const override;
-    virtual bool canReconnect() const override;
-    virtual void reconnect() override;
+    bool isBroadcaster() const override;
+    bool hasHighRateLimit() const override;
+    bool canReconnect() const override;
+    void reconnect() override;
     void createClip();
 
     // Data
@@ -127,10 +131,20 @@ public:
     const QString &channelUrl();
     const QString &popoutPlayerUrl();
     int chatterCount();
-    virtual bool isLive() const override;
+    bool isLive() const override;
     QString roomId() const;
     SharedAccessGuard<const RoomModes> accessRoomModes() const;
     SharedAccessGuard<const StreamStatus> accessStreamStatus() const;
+
+    /**
+     * Records that the channel is no longer joined.
+     */
+    void markDisconnected();
+
+    /**
+     * Records that the channel's read connection is healthy.
+     */
+    void markConnected();
 
     // Emotes
     std::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
@@ -140,9 +154,9 @@ public:
     std::shared_ptr<const EmoteMap> ffzEmotes() const;
     std::shared_ptr<const EmoteMap> seventvEmotes() const;
 
-    virtual void refreshBTTVChannelEmotes(bool manualRefresh);
-    virtual void refreshFFZChannelEmotes(bool manualRefresh);
-    virtual void refreshSevenTVChannelEmotes(bool manualRefresh);
+    void refreshBTTVChannelEmotes(bool manualRefresh);
+    void refreshFFZChannelEmotes(bool manualRefresh);
+    void refreshSevenTVChannelEmotes(bool manualRefresh);
 
     const QString &seventvUserID() const;
     const QString &seventvEmoteSetID() const;
@@ -190,6 +204,17 @@ public:
     const std::unordered_map<QString, std::weak_ptr<MessageThread>> &threads()
         const;
 
+    /**
+     * Get the thread for the given message
+     * If no thread can be found for the message, create one
+     */
+    std::shared_ptr<MessageThread> getOrCreateThread(const MessagePtr &message);
+
+    /**
+     * This signal fires when the local user has joined the channel
+     **/
+    pajlada::Signals::NoArgSignal joined;
+
     // Only TwitchChannel may invoke this signal
     pajlada::Signals::NoArgSignal userStateChanged;
 
@@ -212,8 +237,13 @@ public:
     pajlada::Signals::NoArgSignal roomModesChanged;
 
     // Channel point rewards
-    pajlada::Signals::SelfDisconnectingSignal<ChannelPointReward>
-        channelPointRewardAdded;
+    void addQueuedRedemption(const QString &rewardId,
+                             const QString &originalContent,
+                             Communi::IrcMessage *message);
+    /**
+     * A rich & hydrated redemption from PubSub has arrived, add it to the channel.
+     * This will look at queued up partial messages, and if one is found it will add the queued up partial messages fully hydrated.
+     **/
     void addChannelPointReward(const ChannelPointReward &reward);
     bool isChannelPointRewardKnown(const QString &rewardId);
     std::optional<ChannelPointReward> channelPointReward(
@@ -239,6 +269,12 @@ private:
         // actualDisplayName is the raw display name string received from Twitch
         QString actualDisplayName;
     } nameOptions;
+
+    struct QueuedRedemption {
+        QString rewardID;
+        QString originalContent;
+        QObjectPtr<Communi::IrcMessage> message;
+    };
 
     void refreshPubSub();
     void refreshChatters();
@@ -332,6 +368,9 @@ private:
     int chatterCount_{};
     UniqueAccess<StreamStatus> streamStatus_;
     UniqueAccess<RoomModes> roomModes_;
+    bool disconnected_{};
+    std::optional<std::chrono::time_point<std::chrono::system_clock>>
+        lastConnectedAt_{};
     std::atomic_flag loadingRecentMessages_ = ATOMIC_FLAG_INIT;
     std::unordered_map<QString, std::weak_ptr<MessageThread>> threads_;
 
@@ -350,6 +389,8 @@ private:
         badgeSets_;  // "subscribers": { "0": ... "3": ... "6": ...
     UniqueAccess<std::vector<CheerEmoteSet>> cheerEmoteSets_;
     UniqueAccess<std::map<QString, ChannelPointReward>> channelPointRewards_;
+    boost::circular_buffer_space_optimized<QueuedRedemption>
+        waitingRedemptions_{MAX_QUEUED_REDEMPTIONS};
 
     bool mod_ = false;
     bool vip_ = false;

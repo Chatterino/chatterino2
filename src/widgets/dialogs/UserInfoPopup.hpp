@@ -1,6 +1,7 @@
 #pragma once
 
 #include "widgets/DraggablePopup.hpp"
+#include "widgets/helper/EffectLabel.hpp"
 
 #include <pajlada/signals/scoped-connection.hpp>
 #include <pajlada/signals/signal.hpp>
@@ -31,8 +32,8 @@ public:
                  const ChannelPtr &openingChannel);
 
 protected:
-    virtual void themeChangedEvent() override;
-    virtual void scaleChangedEvent(float scale) override;
+    void themeChangedEvent() override;
+    void scaleChangedEvent(float scale) override;
 
 private:
     void installEvents();
@@ -81,6 +82,8 @@ private:
 
         Label *noMessagesLabel = nullptr;
         ChannelView *latestMessages = nullptr;
+
+        EffectLabel2 *usercardLabel = nullptr;
     } ui_;
 
     class TimeoutWidget : public BaseWidget

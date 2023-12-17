@@ -276,15 +276,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
                             return;
                         }
 
-                        static QMenu *previousMenu = nullptr;
-                        if (previousMenu != nullptr)
-                        {
-                            previousMenu->deleteLater();
-                            previousMenu = nullptr;
-                        }
-
-                        auto menu = new QMenu;
-                        previousMenu = menu;
+                        auto *menu = new QMenu(this);
+                        menu->setAttribute(Qt::WA_DeleteOnClose);
 
                         auto avatarUrl = this->avatarUrl_;
 
@@ -390,7 +383,10 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
         user.emplace<QCheckBox>("Block").assign(&this->ui_.block);
         user.emplace<QCheckBox>("Ignore highlights")
             .assign(&this->ui_.ignoreHighlights);
-        auto usercard = user.emplace<EffectLabel2>(this);
+        // visibility of this is updated in setData
+
+        auto usercard =
+            user.emplace<EffectLabel2>(this).assign(&this->ui_.usercardLabel);
         usercard->getLabel().setText("Usercard");
         auto mod = user.emplace<Button>(this);
         mod->setPixmap(getResources().buttons.mod);
@@ -706,7 +702,18 @@ void UserInfoPopup::setData(const QString &name,
                             const ChannelPtr &contextChannel,
                             const ChannelPtr &openingChannel)
 {
-    this->userName_ = name;
+    const QStringView idPrefix = u"id:";
+    bool isId = name.startsWith(idPrefix);
+    if (isId)
+    {
+        this->userId_ = name.mid(idPrefix.size());
+        this->userName_ = "";
+    }
+    else
+    {
+        this->userName_ = name;
+    }
+
     this->channel_ = openingChannel;
 
     if (!contextChannel->isEmpty())
@@ -728,7 +735,20 @@ void UserInfoPopup::setData(const QString &name,
 
     this->userStateChanged_.invoke();
 
-    this->updateLatestMessages();
+    if (!isId)
+    {
+        this->updateLatestMessages();
+    }
+    // If we're opening by ID, this will be called as soon as we get the information from twitch
+
+    auto type = this->channel_->getType();
+    if (type == Channel::Type::TwitchLive ||
+        type == Channel::Type::TwitchWhispers || type == Channel::Type::Irc ||
+        type == Channel::Type::Misc)
+    {
+        // not a normal twitch channel, the url opened by the button will be invalid, so hide the button
+        this->ui_.usercardLabel->hide();
+    }
 }
 
 void UserInfoPopup::updateLatestMessages()
@@ -795,6 +815,14 @@ void UserInfoPopup::updateUserData()
         if (!hack.lock())
         {
             return;
+        }
+
+        // Correct for when being opened with ID
+        if (this->userName_.isEmpty())
+        {
+            this->userName_ = user.login;
+            // Ensure recent messages are shown
+            this->updateLatestMessages();
         }
 
         this->userId_ = user.id;
@@ -914,8 +942,16 @@ void UserInfoPopup::updateUserData()
             [] {});
     };
 
-    getHelix()->getUserByName(this->userName_, onUserFetched,
-                              onUserFetchFailed);
+    if (!this->userId_.isEmpty())
+    {
+        getHelix()->getUserById(this->userId_, onUserFetched,
+                                onUserFetchFailed);
+    }
+    else
+    {
+        getHelix()->getUserByName(this->userName_, onUserFetched,
+                                  onUserFetchFailed);
+    }
 
     this->ui_.block->setEnabled(false);
     this->ui_.ignoreHighlights->setEnabled(false);
@@ -954,42 +990,10 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
                       .setLayoutType<QHBoxLayout>()
                       .withoutMargin();
 
-    QColor color1(255, 255, 255, 80);
-    QColor color2(255, 255, 255, 0);
-
     int buttonWidth = 40;
-    // int buttonWidth = 24;
-    int buttonWidth2 = 32;
     int buttonHeight = 32;
 
     layout->setSpacing(16);
-
-    //auto addButton = [&](Action action, const QString &text,
-    //                     const QPixmap &pixmap) {
-    //    auto vbox = layout.emplace<QVBoxLayout>().withoutMargin();
-    //    {
-    //        auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
-    //        title->addStretch(1);
-    //        auto label = title.emplace<Label>(text);
-    //        label->setHasOffset(false);
-    //        label->setStyleSheet("color: #BBB");
-    //        title->addStretch(1);
-
-    //        auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
-    //        hbox->setSpacing(0);
-    //        {
-    //            auto button = hbox.emplace<Button>(nullptr);
-    //            button->setPixmap(pixmap);
-    //            button->setScaleIndependantSize(buttonHeight, buttonHeight);
-    //            button->setBorderColor(QColor(255, 255, 255, 127));
-
-    //            QObject::connect(
-    //                button.getElement(), &Button::leftClicked, [this, action] {
-    //                    this->buttonClicked.invoke(std::make_pair(action, -1));
-    //                });
-    //        }
-    //    }
-    //};
 
     const auto addLayout = [&](const QString &text) {
         auto vbox = layout.emplace<QVBoxLayout>().withoutMargin();

@@ -6,7 +6,7 @@
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/nicknames/Nickname.hpp"
-#include "controllers/sound/SoundController.hpp"
+#include "controllers/sound/ISoundController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
@@ -217,7 +217,7 @@ void SharedMessageBuilder::triggerHighlights()
 
     if (this->highlightSound_ && resolveFocus)
     {
-        getApp()->sound->play(this->highlightSoundUrl_);
+        getIApp()->getSound()->play(this->highlightSoundUrl_);
     }
 
     if (this->highlightAlert_)

@@ -56,7 +56,6 @@ namespace {
 #else
     const QString MAGIC_MESSAGE_SUFFIX = QString::fromUtf8(u8" \U000E0000");
 #endif
-    constexpr int TITLE_REFRESH_PERIOD = 10000;
     constexpr int CLIP_CREATION_COOLDOWN = 5000;
     const QString CLIPS_LINK("https://clips.twitch.tv/%1");
     const QString CLIPS_FAILURE_CLIPS_DISABLED_TEXT(
@@ -103,17 +102,13 @@ TwitchChannel::TwitchChannel(const QString &name)
 
     // We can safely ignore this signal connection this has no external dependencies - once the signal
     // is destroyed, it will no longer be able to fire
-    std::ignore = this->connected.connect([this]() {
-        if (this->roomId().isEmpty())
+    std::ignore = this->joined.connect([this]() {
+        if (this->disconnected_)
         {
-            // If we get a reconnected event when the room id is not set, we
-            // just connected for the first time. After receiving the first
-            // message from a channel, setRoomId is called and further
-            // invocations of this event will load recent messages.
-            return;
+            this->loadRecentMessagesReconnect();
+            this->lastConnectedAt_ = std::chrono::system_clock::now();
+            this->disconnected_ = false;
         }
-
-        this->loadRecentMessagesReconnect();
     });
 
     // timers
@@ -348,6 +343,17 @@ void TwitchChannel::refreshSevenTVChannelEmotes(bool manualRefresh)
         manualRefresh);
 }
 
+void TwitchChannel::addQueuedRedemption(const QString &rewardId,
+                                        const QString &originalContent,
+                                        Communi::IrcMessage *message)
+{
+    this->waitingRedemptions_.push_back({
+        rewardId,
+        originalContent,
+        {message->clone(), {}},
+    });
+}
+
 void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
 {
     assertInGuiThread();
@@ -368,25 +374,26 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
     }
     if (result)
     {
+        const auto &channelName = this->getName();
         qCDebug(chatterinoTwitch)
-            << "[TwitchChannel" << this->getName()
+            << "[TwitchChannel" << channelName
             << "] Channel point reward added:" << reward.id << ","
             << reward.title << "," << reward.isUserInputRequired;
 
-        // TODO: There's an underlying bug here. This bug should be fixed.
-        // This only attempts to prevent a crash when invoking the signal.
-        try
-        {
-            this->channelPointRewardAdded.invoke(reward);
-        }
-        catch (const std::bad_function_call &)
-        {
-            qCWarning(chatterinoTwitch).nospace()
-                << "[TwitchChannel " << this->getName()
-                << "] Caught std::bad_function_call when adding channel point "
-                   "reward ChannelPointReward{ id: "
-                << reward.id << ", title: " << reward.title << " }.";
-        }
+        auto *server = getApp()->twitch;
+        auto it = std::remove_if(
+            this->waitingRedemptions_.begin(), this->waitingRedemptions_.end(),
+            [&](const QueuedRedemption &msg) {
+                if (reward.id == msg.rewardID)
+                {
+                    IrcMessageHandler::instance().addMessage(
+                        msg.message.get(), shared_from_this(),
+                        msg.originalContent, *server, false, false);
+                    return true;
+                }
+                return false;
+            });
+        this->waitingRedemptions_.erase(it, this->waitingRedemptions_.end());
     }
 }
 
@@ -725,6 +732,8 @@ void TwitchChannel::setRoomId(const QString &id)
         *this->roomID_.access() = id;
         this->roomIdChanged();
         this->loadRecentMessages();
+        this->disconnected_ = false;
+        this->lastConnectedAt_ = std::chrono::system_clock::now();
     }
 }
 
@@ -1099,6 +1108,25 @@ bool TwitchChannel::setLive(bool newLiveStatus)
     return true;
 }
 
+void TwitchChannel::markConnected()
+{
+    if (this->lastConnectedAt_.has_value() && !this->disconnected_)
+    {
+        this->lastConnectedAt_ = std::chrono::system_clock::now();
+    }
+}
+
+void TwitchChannel::markDisconnected()
+{
+    if (this->roomId().isEmpty())
+    {
+        // we were never joined in the first place
+        return;
+    }
+
+    this->disconnected_ = true;
+}
+
 void TwitchChannel::loadRecentMessages()
 {
     if (!getSettings()->loadTwitchMessageHistoryOnConnect)
@@ -1151,7 +1179,9 @@ void TwitchChannel::loadRecentMessages()
                 return;
 
             tc->loadingRecentMessages_.clear();
-        });
+        },
+        getSettings()->twitchMessageHistoryLimit.getValue(), std::nullopt,
+        std::nullopt, false);
 }
 
 void TwitchChannel::loadRecentMessagesReconnect()
@@ -1164,6 +1194,21 @@ void TwitchChannel::loadRecentMessagesReconnect()
     if (this->loadingRecentMessages_.test_and_set())
     {
         return;  // already loading
+    }
+
+    const auto now = std::chrono::system_clock::now();
+    int limit = getSettings()->twitchMessageHistoryLimit.getValue();
+    if (this->lastConnectedAt_.has_value())
+    {
+        // calculate how many messages could have occured
+        // while we were not connected to the channel
+        // assuming a maximum of 10 messages per second
+        const auto secondsSinceDisconnect =
+            std::chrono::duration_cast<std::chrono::seconds>(
+                now - this->lastConnectedAt_.value())
+                .count();
+        limit =
+            std::min(static_cast<int>(secondsSinceDisconnect + 1) * 10, limit);
     }
 
     auto weak = weakOf<Channel>(this);
@@ -1191,7 +1236,8 @@ void TwitchChannel::loadRecentMessagesReconnect()
                 return;
 
             tc->loadingRecentMessages_.clear();
-        });
+        },
+        limit, this->lastConnectedAt_, now, true);
 }
 
 void TwitchChannel::refreshPubSub()
@@ -1251,10 +1297,26 @@ void TwitchChannel::addReplyThread(const std::shared_ptr<MessageThread> &thread)
     this->threads_[thread->rootId()] = thread;
 }
 
-const std::unordered_map<QString, std::weak_ptr<MessageThread>>
-    &TwitchChannel::threads() const
+const std::unordered_map<QString, std::weak_ptr<MessageThread>> &
+    TwitchChannel::threads() const
 {
     return this->threads_;
+}
+
+std::shared_ptr<MessageThread> TwitchChannel::getOrCreateThread(
+    const MessagePtr &message)
+{
+    assert(message != nullptr);
+
+    auto threadIt = this->threads_.find(message->id);
+    if (threadIt != this->threads_.end() && !threadIt->second.expired())
+    {
+        return threadIt->second.lock();
+    }
+
+    auto thread = std::make_shared<MessageThread>(message);
+    this->addReplyThread(thread);
+    return thread;
 }
 
 void TwitchChannel::cleanUpReplyThreads()
@@ -1353,11 +1415,11 @@ void TwitchChannel::refreshCheerEmotes()
     getHelix()->getCheermotes(
         this->roomId(),
         [this, weak = weakOf<Channel>(this)](
-            const std::vector<HelixCheermoteSet> &cheermoteSets) -> Outcome {
+            const std::vector<HelixCheermoteSet> &cheermoteSets) {
             auto shared = weak.lock();
             if (!shared)
             {
-                return Failure;
+                return;
             }
 
             std::vector<CheerEmoteSet> emoteSets;
@@ -1416,12 +1478,9 @@ void TwitchChannel::refreshCheerEmotes()
             }
 
             *this->cheerEmoteSets_.access() = std::move(emoteSets);
-
-            return Success;
         },
         [] {
             // Failure
-            return Failure;
         });
 }
 
@@ -1621,18 +1680,17 @@ void TwitchChannel::updateSevenTVActivity()
 
     qCDebug(chatterinoSeventv) << "Sending activity in" << this->getName();
 
-    getSeventvAPI().updatePresence(
+    getIApp()->getSeventvAPI()->updatePresence(
         this->roomId(), currentSeventvUserID,
         [chan = weakOf<Channel>(this)]() {
             const auto self =
                 std::dynamic_pointer_cast<TwitchChannel>(chan.lock());
             if (!self)
             {
-                return Success;
+                return;
             }
             self->nextSeventvActivity_ =
                 QDateTime::currentDateTimeUtc().addSecs(60);
-            return Success;
         },
         [](const auto &result) {
             qCDebug(chatterinoSeventv)

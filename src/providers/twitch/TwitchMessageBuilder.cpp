@@ -39,7 +39,6 @@
 #include <boost/variant.hpp>
 #include <QColor>
 #include <QDebug>
-#include <QStringRef>
 
 #include <chrono>
 #include <unordered_set>
@@ -624,15 +623,24 @@ void TwitchMessageBuilder::parseThread()
     {
         // set references
         this->message().replyThread = this->thread_;
+        this->message().replyParent = this->parent_;
         this->thread_->addToThread(this->weakOf());
 
         // enable reply flag
         this->message().flags.set(MessageFlag::ReplyMessage);
 
-        const auto &threadRoot = this->thread_->root();
+        MessagePtr threadRoot;
+        if (!this->parent_)
+        {
+            threadRoot = this->thread_->root();
+        }
+        else
+        {
+            threadRoot = this->parent_;
+        }
 
         QString usernameText = SharedMessageBuilder::stylizeUsername(
-            threadRoot->loginName, *threadRoot.get());
+            threadRoot->loginName, *threadRoot);
 
         this->emplace<ReplyCurveElement>();
 
@@ -838,28 +846,25 @@ void TwitchMessageBuilder::appendUsername()
 void TwitchMessageBuilder::runIgnoreReplaces(
     std::vector<TwitchEmoteOccurrence> &twitchEmotes)
 {
+    using SizeType = QString::size_type;
+
     auto phrases = getSettings()->ignoredMessages.readOnly();
-    auto removeEmotesInRange = [](int pos, int len,
-                                  auto &twitchEmotes) mutable {
+    auto removeEmotesInRange = [&twitchEmotes](SizeType pos, SizeType len) {
+        // all emotes outside the range come before `it`
+        // all emotes in the range start at `it`
         auto it = std::partition(
             twitchEmotes.begin(), twitchEmotes.end(),
             [pos, len](const auto &item) {
+                // returns true for emotes outside the range
                 return !((item.start >= pos) && item.start < (pos + len));
             });
-        for (auto copy = it; copy != twitchEmotes.end(); ++copy)
-        {
-            if ((*copy).ptr == nullptr)
-            {
-                qCDebug(chatterinoTwitch)
-                    << "remem nullptr" << (*copy).name.string;
-            }
-        }
-        std::vector<TwitchEmoteOccurrence> v(it, twitchEmotes.end());
+        std::vector<TwitchEmoteOccurrence> emotesInRange(it,
+                                                         twitchEmotes.end());
         twitchEmotes.erase(it, twitchEmotes.end());
-        return v;
+        return emotesInRange;
     };
 
-    auto shiftIndicesAfter = [&twitchEmotes](int pos, int by) mutable {
+    auto shiftIndicesAfter = [&twitchEmotes](int pos, int by) {
         for (auto &item : twitchEmotes)
         {
             auto &index = item.start;
@@ -873,14 +878,18 @@ void TwitchMessageBuilder::runIgnoreReplaces(
 
     auto addReplEmotes = [&twitchEmotes](const IgnorePhrase &phrase,
                                          const auto &midrepl,
-                                         int startIndex) mutable {
+                                         SizeType startIndex) {
         if (!phrase.containsEmote())
         {
             return;
         }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        auto words = midrepl.tokenize(u' ');
+#else
         auto words = midrepl.split(' ');
-        int pos = 0;
+#endif
+        SizeType pos = 0;
         for (const auto &word : words)
         {
             for (const auto &emote : phrase.getEmotes())
@@ -893,8 +902,9 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                             << "emote null" << emote.first.string;
                     }
                     twitchEmotes.push_back(TwitchEmoteOccurrence{
-                        startIndex + pos,
-                        startIndex + pos + (int)emote.first.string.length(),
+                        static_cast<int>(startIndex + pos),
+                        static_cast<int>(startIndex + pos +
+                                         emote.first.string.length()),
                         emote.second,
                         emote.first,
                     });
@@ -902,6 +912,63 @@ void TwitchMessageBuilder::runIgnoreReplaces(
             }
             pos += word.length() + 1;
         }
+    };
+
+    auto replaceMessageAt = [&](const IgnorePhrase &phrase, SizeType from,
+                                SizeType length, const QString &replacement) {
+        auto removedEmotes = removeEmotesInRange(from, length);
+        this->originalMessage_.replace(from, length, replacement);
+        auto wordStart = from;
+        while (wordStart > 0)
+        {
+            if (this->originalMessage_[wordStart - 1] == ' ')
+            {
+                break;
+            }
+            --wordStart;
+        }
+        auto wordEnd = from + replacement.length();
+        while (wordEnd < this->originalMessage_.length())
+        {
+            if (this->originalMessage_[wordEnd] == ' ')
+            {
+                break;
+            }
+            ++wordEnd;
+        }
+
+        shiftIndicesAfter(static_cast<int>(from + length),
+                          static_cast<int>(replacement.length() - length));
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+        auto midExtendedRef = QStringView{this->originalMessage_}.mid(
+            wordStart, wordEnd - wordStart);
+#else
+        auto midExtendedRef =
+            this->originalMessage_.midRef(wordStart, wordEnd - wordStart);
+#endif
+
+        for (auto &emote : removedEmotes)
+        {
+            if (emote.ptr == nullptr)
+            {
+                qCDebug(chatterinoTwitch)
+                    << "Invalid emote occurrence" << emote.name.string;
+                continue;
+            }
+            QRegularExpression emoteregex(
+                "\\b" + emote.name.string + "\\b",
+                QRegularExpression::UseUnicodePropertiesOption);
+            auto match = emoteregex.match(midExtendedRef);
+            if (match.hasMatch())
+            {
+                emote.start = static_cast<int>(from + match.capturedStart());
+                emote.end = static_cast<int>(from + match.capturedEnd());
+                twitchEmotes.push_back(std::move(emote));
+            }
+        }
+
+        addReplEmotes(phrase, midExtendedRef, wordStart);
     };
 
     for (const auto &phrase : *phrases)
@@ -922,144 +989,35 @@ void TwitchMessageBuilder::runIgnoreReplaces(
             {
                 continue;
             }
+
             QRegularExpressionMatch match;
-            int from = 0;
+            size_t iterations = 0;
+            SizeType from = 0;
             while ((from = this->originalMessage_.indexOf(regex, from,
                                                           &match)) != -1)
             {
-                int len = match.capturedLength();
-                auto vret = removeEmotesInRange(from, len, twitchEmotes);
-                auto mid = this->originalMessage_.mid(from, len);
-                mid.replace(regex, phrase.getReplace());
-
-                int midsize = mid.size();
-                this->originalMessage_.replace(from, len, mid);
-                int pos1 = from;
-                while (pos1 > 0)
+                replaceMessageAt(phrase, from, match.capturedLength(),
+                                 phrase.getReplace());
+                from += phrase.getReplace().length();
+                iterations++;
+                if (iterations >= 128)
                 {
-                    if (this->originalMessage_[pos1 - 1] == ' ')
-                    {
-                        break;
-                    }
-                    --pos1;
+                    this->originalMessage_ =
+                        u"Too many replacements - check your ignores!"_s;
+                    return;
                 }
-                int pos2 = from + midsize;
-                while (pos2 < this->originalMessage_.length())
-                {
-                    if (this->originalMessage_[pos2] == ' ')
-                    {
-                        break;
-                    }
-                    ++pos2;
-                }
-
-                shiftIndicesAfter(from + len, midsize - len);
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-                auto midExtendedRef =
-                    QStringView{this->originalMessage_}.mid(pos1, pos2 - pos1);
-#else
-                auto midExtendedRef =
-                    this->originalMessage_.midRef(pos1, pos2 - pos1);
-#endif
-
-                for (auto &tup : vret)
-                {
-                    if (tup.ptr == nullptr)
-                    {
-                        qCDebug(chatterinoTwitch)
-                            << "v nullptr" << tup.name.string;
-                        continue;
-                    }
-                    QRegularExpression emoteregex(
-                        "\\b" + tup.name.string + "\\b",
-                        QRegularExpression::UseUnicodePropertiesOption);
-                    auto _match = emoteregex.match(midExtendedRef);
-                    if (_match.hasMatch())
-                    {
-                        int last = _match.lastCapturedIndex();
-                        for (int i = 0; i <= last; ++i)
-                        {
-                            tup.start = from + _match.capturedStart();
-                            twitchEmotes.push_back(std::move(tup));
-                        }
-                    }
-                }
-
-                addReplEmotes(phrase, midExtendedRef, pos1);
-
-                from += midsize;
             }
+
+            continue;
         }
-        else
+
+        SizeType from = 0;
+        while ((from = this->originalMessage_.indexOf(
+                    pattern, from, phrase.caseSensitivity())) != -1)
         {
-            int from = 0;
-            while ((from = this->originalMessage_.indexOf(
-                        pattern, from, phrase.caseSensitivity())) != -1)
-            {
-                int len = pattern.size();
-                auto vret = removeEmotesInRange(from, len, twitchEmotes);
-                auto replace = phrase.getReplace();
-
-                int replacesize = replace.size();
-                this->originalMessage_.replace(from, len, replace);
-
-                int pos1 = from;
-                while (pos1 > 0)
-                {
-                    if (this->originalMessage_[pos1 - 1] == ' ')
-                    {
-                        break;
-                    }
-                    --pos1;
-                }
-                int pos2 = from + replacesize;
-                while (pos2 < this->originalMessage_.length())
-                {
-                    if (this->originalMessage_[pos2] == ' ')
-                    {
-                        break;
-                    }
-                    ++pos2;
-                }
-
-                shiftIndicesAfter(from + len, replacesize - len);
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-                auto midExtendedRef =
-                    QStringView{this->originalMessage_}.mid(pos1, pos2 - pos1);
-#else
-                auto midExtendedRef =
-                    this->originalMessage_.midRef(pos1, pos2 - pos1);
-#endif
-
-                for (auto &tup : vret)
-                {
-                    if (tup.ptr == nullptr)
-                    {
-                        qCDebug(chatterinoTwitch)
-                            << "v nullptr" << tup.name.string;
-                        continue;
-                    }
-                    QRegularExpression emoteregex(
-                        "\\b" + tup.name.string + "\\b",
-                        QRegularExpression::UseUnicodePropertiesOption);
-                    auto match = emoteregex.match(midExtendedRef);
-                    if (match.hasMatch())
-                    {
-                        int last = match.lastCapturedIndex();
-                        for (int i = 0; i <= last; ++i)
-                        {
-                            tup.start = from + match.capturedStart();
-                            twitchEmotes.push_back(std::move(tup));
-                        }
-                    }
-                }
-
-                addReplEmotes(phrase, midExtendedRef, pos1);
-
-                from += replacesize;
-            }
+            replaceMessageAt(phrase, from, pattern.length(),
+                             phrase.getReplace());
+            from += phrase.getReplace().length();
         }
     }
 }
@@ -1771,7 +1729,7 @@ void TwitchMessageBuilder::listOfUsersSystemMessage(
 MessagePtr TwitchMessageBuilder::buildHypeChatMessage(
     Communi::IrcPrivateMessage *message)
 {
-    auto level = message->tag(u"pinned-chat-paid-level"_s).toString();
+    auto levelID = message->tag(u"pinned-chat-paid-level"_s).toString();
     auto currency = message->tag(u"pinned-chat-paid-currency"_s).toString();
     bool okAmount = false;
     auto amount = message->tag(u"pinned-chat-paid-amount"_s).toInt(&okAmount);
@@ -1785,7 +1743,7 @@ MessagePtr TwitchMessageBuilder::buildHypeChatMessage(
     // additionally, there's `pinned-chat-paid-is-system-message` which isn't used by Chatterino.
 
     QString subtitle;
-    auto levelIt = HYPE_CHAT_PAID_LEVEL.find(level);
+    auto levelIt = HYPE_CHAT_PAID_LEVEL.find(levelID);
     if (levelIt != HYPE_CHAT_PAID_LEVEL.end())
     {
         const auto &level = levelIt->second;
@@ -1810,6 +1768,11 @@ MessagePtr TwitchMessageBuilder::buildHypeChatMessage(
 void TwitchMessageBuilder::setThread(std::shared_ptr<MessageThread> thread)
 {
     this->thread_ = std::move(thread);
+}
+
+void TwitchMessageBuilder::setParent(MessagePtr parent)
+{
+    this->parent_ = std::move(parent);
 }
 
 void TwitchMessageBuilder::setMessageOffset(int offset)

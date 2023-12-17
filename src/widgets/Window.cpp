@@ -1,6 +1,7 @@
 #include "widgets/Window.hpp"
 
 #include "Application.hpp"
+#include "common/Args.hpp"
 #include "common/Credentials.hpp"
 #include "common/Modes.hpp"
 #include "common/QLogging.hpp"
@@ -735,6 +736,11 @@ void Window::onAccountSelected()
         windowTitle += " - " + user->getUserName();
     }
 #endif
+
+    if (getArgs().safeMode)
+    {
+        windowTitle += " (safe mode)";
+    }
 
     this->setWindowTitle(windowTitle);
 

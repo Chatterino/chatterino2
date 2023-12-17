@@ -842,12 +842,12 @@ void SplitContainer::applyFromDescriptorRecursively(
         {
             if (std::holds_alternative<SplitNodeDescriptor>(item))
             {
-                const auto *n = std::get_if<SplitNodeDescriptor>(&item);
-                if (!n)
+                const auto *inner = std::get_if<SplitNodeDescriptor>(&item);
+                if (!inner)
                 {
                     return;
                 }
-                const auto &splitNode = *n;
+                const auto &splitNode = *inner;
                 auto *split = new Split(this);
                 split->setChannel(WindowManager::decodeChannel(splitNode));
                 split->setModerationMode(splitNode.moderationMode_);
@@ -973,8 +973,8 @@ qreal SplitContainer::Node::getVerticalFlex() const
     return this->flexV_;
 }
 
-const std::vector<std::unique_ptr<SplitContainer::Node>>
-    &SplitContainer::Node::getChildren()
+const std::vector<std::unique_ptr<SplitContainer::Node>> &
+    SplitContainer::Node::getChildren()
 {
     return this->children_;
 }

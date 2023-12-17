@@ -9,7 +9,9 @@
 #include "controllers/filters/lang/Filter.hpp"
 #include "controllers/filters/lang/Types.hpp"
 
-namespace chatterino::filters {
+namespace {
+
+using namespace chatterino::filters;
 
 QString explainIllType(const IllTyped &ill)
 {
@@ -17,6 +19,10 @@ QString explainIllType(const IllTyped &ill)
         .arg(ill.message)
         .arg(ill.expr->filterString());
 }
+
+}  // namespace
+
+namespace chatterino::filters {
 
 FilterParser::FilterParser(const QString &text)
     : text_(text)
