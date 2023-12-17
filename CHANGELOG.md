@@ -97,6 +97,7 @@
 - Dev: Load less message history upon reconnects. (#5001)
 - Dev: BREAKING: Replace custom `import()` with normal Lua `require()`. (#5014)
 - Dev: Fixed most compiler warnings. (#5028)
+- Dev: Added the ability to show `ChannelView`s without a `Split`. (#4747)
 
 ## 2.4.6
 

@@ -277,8 +277,22 @@ std::pair<int, int> getWordBounds(MessageLayout *layout,
 
 namespace chatterino {
 
-ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context,
+ChannelView::ChannelView(QWidget *parent, Context context, size_t messagesLimit)
+    : ChannelView(InternalCtor{}, parent, nullptr, context, messagesLimit)
+{
+}
+
+ChannelView::ChannelView(QWidget *parent, Split *split, Context context,
                          size_t messagesLimit)
+    : ChannelView(InternalCtor{}, parent, split, context, messagesLimit)
+{
+    assert(parent != nullptr && split != nullptr &&
+           "This constructor should only be used with non-null values (see "
+           "documentation)");
+}
+
+ChannelView::ChannelView(InternalCtor /*tag*/, QWidget *parent, Split *split,
+                         Context context, size_t messagesLimit)
     : BaseWidget(parent)
     , split_(split)
     , scrollBar_(new Scrollbar(messagesLimit, this))
@@ -1347,7 +1361,10 @@ bool ChannelView::scrollToMessage(const MessagePtr &message)
     }
 
     this->scrollToMessageLayout(messagesSnapshot[messageIdx].get(), messageIdx);
-    getApp()->windows->select(this->split_);
+    if (this->split_)
+    {
+        getApp()->windows->select(this->split_);
+    }
     return true;
 }
 
@@ -1376,7 +1393,10 @@ bool ChannelView::scrollToMessageId(const QString &messageId)
     }
 
     this->scrollToMessageLayout(messagesSnapshot[messageIdx].get(), messageIdx);
-    getApp()->windows->select(this->split_);
+    if (this->split_)
+    {
+        getApp()->windows->select(this->split_);
+    }
     return true;
 }
 
@@ -2349,7 +2369,7 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
     bool isSearch = this->context_ == Context::Search;
     bool isReplyOrUserCard = (this->context_ == Context::ReplyThread ||
                               this->context_ == Context::UserCard) &&
-                             this->split_;
+                             this->split_ != nullptr;
     bool isMentions =
         this->channel()->getType() == Channel::Type::TwitchMentions;
     bool isAutomod = this->channel()->getType() == Channel::Type::TwitchAutomod;
@@ -2580,7 +2600,14 @@ void ChannelView::hideEvent(QHideEvent * /*event*/)
 void ChannelView::showUserInfoPopup(const QString &userName,
                                     QString alternativePopoutChannel)
 {
-    assert(this->split_ != nullptr);
+    if (!this->split_)
+    {
+        qCWarning(chatterinoCommon)
+            << "Tried to show user info for" << userName
+            << "but the channel view doesn't belong to a split.";
+        return;
+    }
+
     auto *userPopup =
         new UserInfoPopup(getSettings()->autoCloseUserPopup, this->split_);
 
@@ -2879,7 +2906,9 @@ void ChannelView::scrollUpdateRequested()
 
 void ChannelView::setInputReply(const MessagePtr &message)
 {
-    if (message == nullptr)
+    assertInGuiThread();
+
+    if (message == nullptr || this->split_ == nullptr)
     {
         return;
     }
@@ -2914,6 +2943,14 @@ void ChannelView::showReplyThreadPopup(const MessagePtr &message)
 {
     if (message == nullptr || message->replyThread == nullptr)
     {
+        return;
+    }
+
+    if (!this->split_)
+    {
+        qCWarning(chatterinoCommon)
+            << "Tried to show reply thread popup but the "
+               "channel view doesn't belong to a split.";
         return;
     }
 
