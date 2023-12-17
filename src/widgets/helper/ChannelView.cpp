@@ -2945,8 +2945,15 @@ void ChannelView::setInputReply(const MessagePtr &message)
 
 void ChannelView::showReplyThreadPopup(const MessagePtr &message)
 {
-    if (message == nullptr || message->replyThread == nullptr || this->split_ == nullptr)
+    if (message == nullptr || message->replyThread == nullptr)
     {
+        return;
+    }
+
+    if (!this->split_)
+    {
+        qCWarning(chatterinoApp) << "Tried to show reply thread popup but the "
+                                    "channel view doesn't belong to a split.";
         return;
     }
 
