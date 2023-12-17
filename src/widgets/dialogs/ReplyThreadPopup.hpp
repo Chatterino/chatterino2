@@ -6,7 +6,6 @@
 #include <boost/signals2.hpp>
 #include <pajlada/signals/scoped-connection.hpp>
 #include <pajlada/signals/signal.hpp>
-#include <QPointer>
 
 class QCheckBox;
 
@@ -47,8 +46,6 @@ private:
 
     struct {
         ChannelView *threadView = nullptr;
-        /// Input for the thread.
-        /// This might be nullptr if no split is associated with this reply.
         SplitInput *replyInput = nullptr;
 
         QCheckBox *notificationCheckbox = nullptr;
