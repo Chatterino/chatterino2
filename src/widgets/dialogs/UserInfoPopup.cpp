@@ -1,4 +1,4 @@
-#include "UserInfoPopup.hpp"
+#include "widgets/dialogs/UserInfoPopup.hpp"
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
@@ -134,10 +134,9 @@ namespace {
 
 }  // namespace
 
-UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
-                             QPointer<Split> split)
-    : DraggablePopup(closeAutomatically, parent)
-    , split_(std::move(split))
+UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
+    : DraggablePopup(closeAutomatically, split)
+    , split_(split)
     , closeAutomatically_(closeAutomatically)
 {
     this->setWindowTitle("Usercard");
