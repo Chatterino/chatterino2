@@ -36,7 +36,6 @@
 - Bugfix: Fixed the input completion popup from disappearing when clicking on it on Windows and macOS. (#4876)
 - Bugfix: Fixed double-click text selection moving its position with each new message. (#4898)
 - Bugfix: Fixed an issue where notifications on Windows would contain no or an old avatar. (#4899)
-- Bugfix: Fixed crashes when interacting with dialogs originating from splits that were deleted in the meantime. (#4747)
 - Bugfix: Fixed headers of tables in the settings switching to bold text when selected. (#4913)
 - Bugfix: Fixed tooltips appearing too large and/or away from the cursor. (#4920)
 - Bugfix: Fixed a crash when clicking `More messages below` button in a usercard and closing it quickly. (#4933)
@@ -98,6 +97,7 @@
 - Dev: Load less message history upon reconnects. (#5001)
 - Dev: BREAKING: Replace custom `import()` with normal Lua `require()`. (#5014)
 - Dev: Fixed most compiler warnings. (#5028)
+- Dev: Added the ability to show `ChannelView`s without a `Split`. (#4747)
 
 ## 2.4.6
 
