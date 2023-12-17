@@ -240,7 +240,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     };
 
     auto makeView = [&](QString tabTitle, bool addToNotebook = true) {
-        auto *view = new ChannelView();
+        auto *view = new ChannelView(nullptr);
 
         view->setOverrideFlags(MessageElementFlags{
             MessageElementFlag::Default, MessageElementFlag::AlwaysShow,

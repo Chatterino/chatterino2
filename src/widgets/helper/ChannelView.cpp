@@ -273,14 +273,32 @@ std::pair<int, int> getWordBounds(MessageLayout *layout,
     return {wordStart, wordStart + length};
 }
 
+auto *requireNotNull(auto *ptr)
+{
+    assert(ptr != nullptr && "Pointer must not be nullptr");
+    return ptr;
+}
+
 }  // namespace
 
 namespace chatterino {
 
-ChannelView::ChannelView(BaseWidget *parent, QPointer<Split> split,
+ChannelView::ChannelView(QWidget *parent, Context context, size_t messagesLimit)
+    : ChannelView(InternalCtor{}, parent, nullptr, context, messagesLimit)
+{
+}
+
+ChannelView::ChannelView(QWidget *parent, Split *split, Context context,
+                         size_t messagesLimit)
+    : ChannelView(InternalCtor{}, requireNotNull(parent), requireNotNull(split),
+                  context, messagesLimit)
+{
+}
+
+ChannelView::ChannelView(InternalCtor /*tag*/, QWidget *parent, Split *split,
                          Context context, size_t messagesLimit)
     : BaseWidget(parent)
-    , split_(std::move(split))
+    , split_(split)
     , scrollBar_(new Scrollbar(messagesLimit, this))
     , highlightAnimation_(this)
     , context_(context)
@@ -1347,7 +1365,7 @@ bool ChannelView::scrollToMessage(const MessagePtr &message)
     }
 
     this->scrollToMessageLayout(messagesSnapshot[messageIdx].get(), messageIdx);
-    if (!this->split_.isNull())
+    if (this->split_)
     {
         getApp()->windows->select(this->split_);
     }
@@ -1379,7 +1397,7 @@ bool ChannelView::scrollToMessageId(const QString &messageId)
     }
 
     this->scrollToMessageLayout(messagesSnapshot[messageIdx].get(), messageIdx);
-    if (!this->split_.isNull())
+    if (this->split_)
     {
         getApp()->windows->select(this->split_);
     }
@@ -2355,7 +2373,7 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
     bool isSearch = this->context_ == Context::Search;
     bool isReplyOrUserCard = (this->context_ == Context::ReplyThread ||
                               this->context_ == Context::UserCard) &&
-                             !this->split_.isNull();
+                             this->split_ != nullptr;
     bool isMentions =
         this->channel()->getType() == Channel::Type::TwitchMentions;
     bool isAutomod = this->channel()->getType() == Channel::Type::TwitchAutomod;
@@ -2894,7 +2912,7 @@ void ChannelView::setInputReply(const MessagePtr &message)
 {
     assertInGuiThread();
 
-    if (message == nullptr || this->split_.isNull())
+    if (message == nullptr || this->split_ == nullptr)
     {
         return;
     }
