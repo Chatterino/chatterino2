@@ -1,4 +1,4 @@
-#include "singletons/Crashpad.hpp"
+#include "singletons/Crashhandler.hpp"
 
 #include "common/Args.hpp"
 #include "common/Literals.hpp"
@@ -7,6 +7,9 @@
 
 #include <QDir>
 #include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
 #include <QString>
 
 #ifdef CHATTERINO_WITH_CRASHPAD
@@ -46,34 +49,37 @@ std::wstring nativeString(const QString &s)
 #    error Unsupported platform
 #endif
 
-const QString RECOVERY_FILE = u"chatterino-recovery.bin"_s;
+const QString RECOVERY_FILE = u"chatterino-recovery.json"_s;
 
 /// The recovery options are saved outside the settings
 /// to be able to read them without loading the settings.
 ///
-/// The flags are saved in the `RECOVERY_FILE` in their binary representation.
-std::optional<CrashRecovery::Flags> readFlags(const Paths &paths)
+/// The flags are saved in the `RECOVERY_FILE` as JSON.
+std::optional<bool> readRecoverySettings(const Paths &paths)
 {
-    using Flag = CrashRecovery::Flag;
-
     QFile file(QDir(paths.crashdumpDirectory).filePath(RECOVERY_FILE));
     if (!file.open(QFile::ReadOnly))
     {
         return std::nullopt;
     }
 
-    auto line = file.readLine(64);
+    QJsonParseError error;
+    auto doc = QJsonDocument::fromJson(file.readAll(), &error);
+    if (error.error != QJsonParseError::NoError)
+    {
+        qCWarning(chatterinoCrashhandler)
+            << "Failed to parse recovery settings" << error.errorString();
+        return std::nullopt;
+    }
 
-    static_assert(std::is_same_v<std::underlying_type_t<Flag>, qulonglong>);
-
-    bool ok = false;
-    auto value = static_cast<Flag>(line.toULongLong(&ok));
-    if (!ok)
+    const auto obj = doc.object();
+    auto shouldRecover = obj["shouldRecover"_L1];
+    if (!shouldRecover.isBool())
     {
         return std::nullopt;
     }
 
-    return value;
+    return shouldRecover.toBool();
 }
 
 bool canRestart(const Paths &paths)
@@ -112,39 +118,35 @@ namespace chatterino {
 
 using namespace std::string_literals;
 
-void CrashRecovery::initialize(Settings & /*settings*/, Paths &paths)
+void CrashHandler::initialize(Settings & /*settings*/, Paths &paths)
 {
-    auto flags = readFlags(paths);
-    if (flags)
+    auto optSettings = readRecoverySettings(paths);
+    if (optSettings)
     {
-        this->currentFlags_ = *flags;
+        this->shouldRecover_ = *optSettings;
     }
     else
     {
         // By default, we don't restart after a crash.
-        this->updateFlags(Flag::None);
+        this->setShouldRecover(false);
     }
 }
 
-CrashRecovery::Flags CrashRecovery::recoveryFlags() const
+void CrashHandler::setShouldRecover(bool value)
 {
-    return this->currentFlags_;
-}
-
-void CrashRecovery::updateFlags(CrashRecovery::Flags flags)
-{
-    this->currentFlags_ = flags;
+    this->shouldRecover_ = value;
 
     QFile file(QDir(getPaths()->crashdumpDirectory).filePath(RECOVERY_FILE));
     if (!file.open(QFile::WriteOnly | QFile::Truncate))
     {
-        qCWarning(chatterinoApp) << "Failed to open" << file.fileName();
+        qCWarning(chatterinoCrashhandler)
+            << "Failed to open" << file.fileName();
         return;
     }
-
-    static_assert(std::is_same_v<std::underlying_type_t<Flag>, qulonglong>);
-    file.write(QByteArray::number(
-        static_cast<qulonglong>(this->currentFlags_.value())));
+    file.write(QJsonDocument(QJsonObject{
+                                 {"shouldRecover"_L1, value},
+                             })
+                   .toJson(QJsonDocument::Compact));
 }
 
 #ifdef CHATTERINO_WITH_CRASHPAD
@@ -160,12 +162,13 @@ std::unique_ptr<crashpad::CrashpadClient> installCrashHandler()
 
     if (!crashpadBinDir.cd("crashpad"))
     {
-        qCDebug(chatterinoApp) << "Cannot find crashpad directory";
+        qCDebug(chatterinoCrashhandler) << "Cannot find crashpad directory";
         return nullptr;
     }
     if (!crashpadBinDir.exists(CRASHPAD_EXECUTABLE_NAME))
     {
-        qCDebug(chatterinoApp) << "Cannot find crashpad handler executable";
+        qCDebug(chatterinoCrashhandler)
+            << "Cannot find crashpad handler executable";
         return nullptr;
     }
 
@@ -204,11 +207,11 @@ std::unique_ptr<crashpad::CrashpadClient> installCrashHandler()
     if (!client->StartHandler(handlerPath, databaseDir, {}, {}, {}, annotations,
                               {}, true, false))
     {
-        qCDebug(chatterinoApp) << "Failed to start crashpad handler";
+        qCDebug(chatterinoCrashhandler) << "Failed to start crashpad handler";
         return nullptr;
     }
 
-    qCDebug(chatterinoApp) << "Started crashpad handler";
+    qCDebug(chatterinoCrashhandler) << "Started crashpad handler";
     return client;
 }
 #endif

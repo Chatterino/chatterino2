@@ -44,7 +44,7 @@ class FfzBadges;
 class SeventvBadges;
 class ImageUploader;
 class SeventvAPI;
-class CrashRecovery;
+class CrashHandler;
 
 class IApplication
 {
@@ -61,7 +61,7 @@ public:
     virtual HotkeyController *getHotkeys() = 0;
     virtual WindowManager *getWindows() = 0;
     virtual Toasts *getToasts() = 0;
-    virtual CrashRecovery *getCrashRecovery() = 0;
+    virtual CrashHandler *getCrashHandler() = 0;
     virtual CommandController *getCommands() = 0;
     virtual HighlightController *getHighlights() = 0;
     virtual NotificationController *getNotifications() = 0;
@@ -104,7 +104,7 @@ public:
     Toasts *const toasts{};
     ImageUploader *const imageUploader{};
     SeventvAPI *const seventvAPI{};
-    CrashRecovery *const crashRecovery{};
+    CrashHandler *const crashHandler{};
 
     CommandController *const commands{};
     NotificationController *const notifications{};
@@ -151,9 +151,9 @@ public:
     {
         return this->toasts;
     }
-    CrashRecovery *getCrashRecovery() override
+    CrashHandler *getCrashHandler() override
     {
-        return this->crashRecovery;
+        return this->crashHandler;
     }
     CommandController *getCommands() override
     {

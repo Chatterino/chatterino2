@@ -8,7 +8,7 @@
 #include "controllers/sound/ISoundController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "singletons/Crashpad.hpp"
+#include "singletons/CrashHandler.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/NativeMessaging.hpp"
 #include "singletons/Paths.hpp"
@@ -879,13 +879,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCustomCheckbox(
         "Restart on crash (requires restart)",
         [] {
-            return getApp()->crashRecovery->recoveryFlags().has(
-                CrashRecovery::Flag::DoCrashRecovery);
+            return getApp()->crashHandler->shouldRecover();
         },
         [](bool on) {
-            return getApp()->crashRecovery->updateFlags(
-                on ? CrashRecovery::Flag::DoCrashRecovery
-                   : CrashRecovery::Flag::None);
+            return getApp()->crashHandler->setShouldRecover(on);
         },
         "When possible, restart Chatterino if the program crashes");
 

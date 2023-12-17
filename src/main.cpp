@@ -8,7 +8,7 @@
 #include "providers/NetworkConfigurationProvider.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "RunGui.hpp"
-#include "singletons/Crashpad.hpp"
+#include "singletons/CrashHandler.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/AttachToConsole.hpp"

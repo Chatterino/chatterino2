@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/FlagsEnum.hpp"
 #include "common/Singleton.hpp"
 
 #include <QtGlobal>
@@ -13,23 +12,19 @@
 
 namespace chatterino {
 
-class CrashRecovery : public Singleton
+class CrashHandler : public Singleton
 {
 public:
-    enum class Flag : qulonglong {
-        None,
-        DoCrashRecovery = 1 << 0,
-    };
-
-    using Flags = FlagsEnum<Flag>;
-
-    Flags recoveryFlags() const;
-    void updateFlags(Flags flags);
+    bool shouldRecover() const
+    {
+        return this->shouldRecover_;
+    }
+    void setShouldRecover(bool value);
 
     void initialize(Settings &settings, Paths &paths) override;
 
 private:
-    Flags currentFlags_ = Flag::None;
+    bool shouldRecover_ = false;
 };
 
 #ifdef CHATTERINO_WITH_CRASHPAD

@@ -38,7 +38,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
-#include "singletons/Crashpad.hpp"
+#include "singletons/CrashHandler.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/helper/LoggingChannel.hpp"
@@ -114,7 +114,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , toasts(&this->emplace<Toasts>())
     , imageUploader(&this->emplace<ImageUploader>())
     , seventvAPI(&this->emplace<SeventvAPI>())
-    , crashRecovery(&this->emplace<CrashRecovery>())
+    , crashHandler(&this->emplace<CrashHandler>())
 
     , commands(&this->emplace<CommandController>())
     , notifications(&this->emplace<NotificationController>())

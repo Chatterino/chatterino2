@@ -5,7 +5,7 @@
 #include "common/Modes.hpp"
 #include "common/NetworkManager.hpp"
 #include "common/QLogging.hpp"
-#include "singletons/Crashpad.hpp"
+#include "singletons/CrashHandler.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
@@ -127,8 +127,7 @@ namespace {
         using namespace std::chrono_literals;
 
         if (std::chrono::steady_clock::now() - signalsInitTime > 30s &&
-            getApp()->crashRecovery->recoveryFlags().has(
-                CrashRecovery::Flag::DoCrashRecovery))
+            getApp()->crashHandler->shouldRecover())
         {
             QProcess proc;
 

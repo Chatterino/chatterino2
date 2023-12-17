@@ -423,8 +423,8 @@ set(SOURCE_FILES
 
         singletons/Badges.cpp
         singletons/Badges.hpp
-        singletons/Crashpad.cpp
-        singletons/Crashpad.hpp
+        singletons/CrashHandler.cpp
+        singletons/CrashHandler.hpp
         singletons/Emotes.cpp
         singletons/Emotes.hpp
         singletons/Fonts.cpp
