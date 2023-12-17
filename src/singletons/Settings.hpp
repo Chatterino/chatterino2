@@ -23,7 +23,6 @@
 #include <pajlada/settings/settinglistener.hpp>
 #include <pajlada/signals/signalholder.hpp>
 
-
 using TimeoutButton = std::pair<QString, int>;
 
 namespace chatterino {
