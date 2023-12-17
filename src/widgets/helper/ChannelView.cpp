@@ -2580,10 +2580,9 @@ void ChannelView::hideEvent(QHideEvent * /*event*/)
 void ChannelView::showUserInfoPopup(const QString &userName,
                                     QString alternativePopoutChannel)
 {
-    auto *userCardParent =
-        static_cast<QWidget *>(&(getApp()->windows->getMainWindow()));
-    auto *userPopup = new UserInfoPopup(getSettings()->autoCloseUserPopup,
-                                        userCardParent, this->split_);
+    assert(this->split_ != nullptr);
+    auto *userPopup =
+        new UserInfoPopup(getSettings()->autoCloseUserPopup, this->split_);
 
     auto contextChannel =
         getApp()->twitch->getChannelOrEmpty(alternativePopoutChannel);
