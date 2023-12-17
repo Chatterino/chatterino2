@@ -18,7 +18,6 @@
 
 #include <array>
 
-
 namespace {
 
 using namespace chatterino;
@@ -243,10 +242,12 @@ void OverlayWindow::keyReleaseEvent(QKeyEvent *event)
 
 void OverlayWindow::paintEvent(QPaintEvent * /*event*/)
 {
+#ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
     if (this->inert_)
     {
         return;
     }
+#endif
 
     QPainter painter(this);
     QColor highlightColor(
@@ -289,7 +290,14 @@ void OverlayWindow::setInteractionProgress(double progress)
 
 void OverlayWindow::startInteraction()
 {
-    if (this->inert_ || this->interacting_)
+#ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
+    if (this->inert_)
+    {
+        return;
+    }
+#endif
+
+    if (this->interacting_)
     {
         return;
     }
