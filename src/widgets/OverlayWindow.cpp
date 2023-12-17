@@ -1,6 +1,5 @@
 #include "widgets/OverlayWindow.hpp"
 
-#include "BaseSettings.hpp"
 #include "common/Literals.hpp"
 #include "controllers/hotkeys/GlobalShortcut.hpp"
 #include "singletons/Settings.hpp"
@@ -18,6 +17,7 @@
 #include <QSizeGrip>
 
 #include <array>
+
 
 namespace {
 
