@@ -36,10 +36,14 @@ if ($null -eq $Env:VCToolsRedistDir) {
 }
 Copy-Item "$Env:VCToolsRedistDir\vc_redist.x64.exe" .;
 
+$VCRTVersion = (Get-Item "$Env:VCToolsRedistDir\vc_redist.x64.exe").VersionInfo;
+
 # Build the installer
 ISCC `
     /DWORKING_DIR="$($pwd.Path)\" `
     /DINSTALLER_BASE_NAME="$installerBaseName" `
+    /DSHIPPED_VCRT_BUILD="$($VCRTVersion.FileBuildPart)" `
+    /DSHIPPED_VCRT_VERSION="$($VCRTVersion.FileDescription)" `
     $defines `
     /O. `
     "$PSScriptRoot\chatterino-installer.iss";

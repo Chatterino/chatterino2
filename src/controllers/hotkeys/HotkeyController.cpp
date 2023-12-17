@@ -56,7 +56,7 @@ std::vector<QShortcut *> HotkeyController::shortcutsForCategory(
         {
             qCDebug(chatterinoHotkeys)
                 << qPrintable(parent->objectName())
-                << "Unimplemeneted hotkey action:" << hotkey->action() << "in "
+                << "Unimplemented hotkey action:" << hotkey->action() << "in"
                 << hotkey->getCategory();
             continue;
         }
@@ -127,7 +127,7 @@ int HotkeyController::replaceHotkey(QString oldName,
     return this->hotkeys_.append(newHotkey);
 }
 
-boost::optional<HotkeyCategory> HotkeyController::hotkeyCategoryFromName(
+std::optional<HotkeyCategory> HotkeyController::hotkeyCategoryFromName(
     QString categoryName)
 {
     for (const auto &[category, data] : this->categories())
@@ -189,8 +189,8 @@ QString HotkeyController::categoryName(HotkeyCategory category) const
     return categoryData.name;
 }
 
-const std::map<HotkeyCategory, HotkeyCategoryData>
-    &HotkeyController::categories() const
+const std::map<HotkeyCategory, HotkeyCategoryData> &
+    HotkeyController::categories() const
 {
     return this->hotkeyCategories_;
 }

@@ -1,6 +1,7 @@
 #include "TwitchIrcServer.hpp"
 
 #include "Application.hpp"
+#include "common/Channel.hpp"
 #include "common/Env.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -42,6 +43,7 @@ TwitchIrcServer::TwitchIrcServer()
     : whispersChannel(new Channel("/whispers", Channel::Type::TwitchWhispers))
     , mentionsChannel(new Channel("/mentions", Channel::Type::TwitchMentions))
     , liveChannel(new Channel("/live", Channel::Type::TwitchLive))
+    , automodChannel(new Channel("/automod", Channel::Type::TwitchAutomod))
     , watchingChannel(Channel::getEmpty(), Channel::Type::TwitchWatching)
 {
     this->initializeIrc();
@@ -133,21 +135,24 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
 std::shared_ptr<Channel> TwitchIrcServer::createChannel(
     const QString &channelName)
 {
-    auto channel =
-        std::shared_ptr<TwitchChannel>(new TwitchChannel(channelName));
+    auto channel = std::make_shared<TwitchChannel>(channelName);
     channel->initialize();
 
-    channel->sendMessageSignal.connect(
+    // We can safely ignore these signal connections since the TwitchIrcServer is only
+    // ever destroyed when the full Application state is about to be destroyed, at which point
+    // no Channel's should live
+    // NOTE: CHANNEL_LIFETIME
+    std::ignore = channel->sendMessageSignal.connect(
         [this, channel = channel.get()](auto &chan, auto &msg, bool &sent) {
             this->onMessageSendRequested(channel, msg, sent);
         });
-    channel->sendReplySignal.connect(
+    std::ignore = channel->sendReplySignal.connect(
         [this, channel = channel.get()](auto &chan, auto &msg, auto &replyId,
                                         bool &sent) {
             this->onReplySendRequested(channel, msg, replyId, sent);
         });
 
-    return std::shared_ptr<Channel>(channel);
+    return channel;
 }
 
 void TwitchIrcServer::privateMessageReceived(
@@ -215,6 +220,7 @@ void TwitchIrcServer::readConnectionMessageReceived(
     {
         this->addGlobalSystemMessage(
             "Twitch Servers requested us to reconnect, reconnecting");
+        this->markChannelsConnected();
         this->connect();
     }
     else if (command == "GLOBALUSERSTATE")
@@ -266,6 +272,11 @@ std::shared_ptr<Channel> TwitchIrcServer::getCustomChannel(
     if (channelName == "/live")
     {
         return this->liveChannel;
+    }
+
+    if (channelName == "/automod")
+    {
+        return this->automodChannel;
     }
 
     static auto getTimer = [](ChannelPtr channel, int msBetweenMessages,
@@ -379,6 +390,7 @@ void TwitchIrcServer::forEachChannelAndSpecialChannels(
     func(this->whispersChannel);
     func(this->mentionsChannel);
     func(this->liveChannel);
+    func(this->automodChannel);
 }
 
 std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
@@ -515,6 +527,11 @@ const FfzEmotes &TwitchIrcServer::getFfzEmotes() const
 const SeventvEmotes &TwitchIrcServer::getSeventvEmotes() const
 {
     return this->seventv_;
+}
+
+const IndirectChannel &TwitchIrcServer::getWatchingChannel() const
+{
+    return this->watchingChannel;
 }
 
 void TwitchIrcServer::reloadBTTVGlobalEmotes()

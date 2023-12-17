@@ -1,10 +1,10 @@
 #pragma once
 
 #include "widgets/DraggablePopup.hpp"
+#include "widgets/helper/EffectLabel.hpp"
 
 #include <pajlada/signals/scoped-connection.hpp>
 #include <pajlada/signals/signal.hpp>
-#include <QPointer>
 
 #include <chrono>
 
@@ -23,16 +23,19 @@ class UserInfoPopup final : public DraggablePopup
     Q_OBJECT
 
 public:
-    UserInfoPopup(bool closeAutomatically, QWidget *parent,
-                  QPointer<Split> split = {});
+    /**
+     * @param closeAutomatically Decides whether the popup should close when it loses focus
+     * @param split Will be used as the popup's parent. Must not be null
+     */
+    UserInfoPopup(bool closeAutomatically, Split *split);
 
     void setData(const QString &name, const ChannelPtr &channel);
     void setData(const QString &name, const ChannelPtr &contextChannel,
                  const ChannelPtr &openingChannel);
 
 protected:
-    virtual void themeChangedEvent() override;
-    virtual void scaleChangedEvent(float scale) override;
+    void themeChangedEvent() override;
+    void scaleChangedEvent(float scale) override;
 
 private:
     void installEvents();
@@ -40,10 +43,10 @@ private:
     void updateLatestMessages();
 
     void loadAvatar(const QUrl &url);
-    bool isMod_;
-    bool isBroadcaster_;
+    bool isMod_{};
+    bool isBroadcaster_{};
 
-    QPointer<Split> split_;
+    Split *split_;
 
     QString userName_;
     QString userId_;
@@ -81,6 +84,8 @@ private:
 
         Label *noMessagesLabel = nullptr;
         ChannelView *latestMessages = nullptr;
+
+        EffectLabel2 *usercardLabel = nullptr;
     } ui_;
 
     class TimeoutWidget : public BaseWidget

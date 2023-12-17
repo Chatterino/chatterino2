@@ -24,7 +24,6 @@
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/Window.hpp"
 
-#include <boost/optional.hpp>
 #include <QDebug>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -34,13 +33,14 @@
 #include <QScreen>
 
 #include <chrono>
+#include <optional>
 
 namespace chatterino {
 namespace {
 
-    boost::optional<bool> &shouldMoveOutOfBoundsWindow()
+    std::optional<bool> &shouldMoveOutOfBoundsWindow()
     {
-        static boost::optional<bool> x;
+        static std::optional<bool> x;
         return x;
     }
 
@@ -87,8 +87,7 @@ void WindowManager::showAccountSelectPopup(QPoint point)
 
     w->refresh();
 
-    QPoint buttonPos = point;
-    w->move(buttonPos.x() - 30, buttonPos.y());
+    w->moveTo(point - QPoint(30, 0), widgets::BoundsChecking::CursorPosition);
     w->show();
     w->setFocus();
 }
@@ -124,12 +123,6 @@ WindowManager::WindowManager()
 
     QObject::connect(this->saveTimer, &QTimer::timeout, [] {
         getApp()->windows->save();
-    });
-
-    this->miscUpdateTimer_.start(100);
-
-    QObject::connect(&this->miscUpdateTimer_, &QTimer::timeout, [this] {
-        this->miscUpdate.invoke();
     });
 }
 
@@ -243,11 +236,15 @@ Window &WindowManager::getMainWindow()
     return *this->mainWindow_;
 }
 
-Window &WindowManager::getSelectedWindow()
+Window *WindowManager::getLastSelectedWindow() const
 {
     assertInGuiThread();
+    if (this->selectedWindow_ == nullptr)
+    {
+        return this->mainWindow_;
+    }
 
-    return *this->selectedWindow_;
+    return this->selectedWindow_;
 }
 
 Window &WindowManager::createWindow(WindowType type, bool show, QWidget *parent)
@@ -344,9 +341,13 @@ void WindowManager::setEmotePopupPos(QPoint pos)
 
 void WindowManager::initialize(Settings &settings, Paths &paths)
 {
+    (void)paths;
     assertInGuiThread();
 
-    getApp()->themes->repaintVisibleChatWidgets_.connect([this] {
+    // We can safely ignore this signal connection since both Themes and WindowManager
+    // share the Application state lifetime
+    // NOTE: APPLICATION_LIFETIME
+    std::ignore = getApp()->themes->repaintVisibleChatWidgets_.connect([this] {
         this->repaintVisibleChatWidgets();
     });
 
@@ -602,6 +603,10 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
             obj.insert("name", channel.get()->getName());
         }
         break;
+        case Channel::Type::TwitchAutomod: {
+            obj.insert("type", "automod");
+        }
+        break;
         case Channel::Type::TwitchMentions: {
             obj.insert("type", "mentions");
         }
@@ -675,6 +680,10 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
     {
         return app->twitch->liveChannel;
     }
+    else if (descriptor.type_ == "automod")
+    {
+        return app->twitch->automodChannel;
+    }
     else if (descriptor.type_ == "irc")
     {
         return Irc::instance().getOrAddChannel(descriptor.server_,
@@ -741,7 +750,7 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
             // out of bounds windows
             auto screens = qApp->screens();
             bool outOfBounds =
-                !getenv("I3SOCK") &&
+                !qEnvironmentVariableIsSet("I3SOCK") &&
                 std::none_of(screens.begin(), screens.end(),
                              [&](QScreen *screen) {
                                  return screen->availableGeometry().intersects(

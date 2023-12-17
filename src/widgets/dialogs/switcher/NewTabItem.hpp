@@ -4,6 +4,8 @@
 
 namespace chatterino {
 
+class Window;
+
 class NewTabItem : public AbstractSwitcherItem
 {
 public:
@@ -13,20 +15,21 @@ public:
      *
      * @param   channelName name of channel to open
      */
-    NewTabItem(const QString &channelName);
+    NewTabItem(Window *window_, const QString &channelName);
 
     /**
      * @brief   Open the channel passed in the constructor in a new tab.
      */
-    virtual void action() override;
+    void action() override;
 
-    virtual void paint(QPainter *painter, const QRect &rect) const override;
-    virtual QSize sizeHint(const QRect &rect) const override;
+    void paint(QPainter *painter, const QRect &rect) const override;
+    QSize sizeHint(const QRect &rect) const override;
 
 private:
     static constexpr const char *TEXT_FORMAT = "Open channel \"%1\" in new tab";
     QString channelName_;
     QString text_;
+    Window *window{};
 };
 
 }  // namespace chatterino

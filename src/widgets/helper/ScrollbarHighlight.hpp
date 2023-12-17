@@ -35,9 +35,9 @@ public:
 private:
     std::shared_ptr<QColor> color_;
     Style style_;
-    bool isRedeemedHighlight_;
-    bool isFirstMessageHighlight_;
-    bool isElevatedMessageHighlight_;
+    bool isRedeemedHighlight_{};
+    bool isFirstMessageHighlight_{};
+    bool isElevatedMessageHighlight_{};
 };
 
 }  // namespace chatterino

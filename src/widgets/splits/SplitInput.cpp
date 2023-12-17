@@ -51,7 +51,7 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
     this->initLayout();
 
     auto completer =
-        new QCompleter(&this->split_->getChannel().get()->completionModel);
+        new QCompleter(&this->split_->getChannel()->completionModel);
     this->ui_.textEdit->setCompleter(completer);
 
     this->signalHolder_.managedConnect(this->split_->channelChanged, [this] {
@@ -63,7 +63,9 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
     // misc
     this->installKeyPressedEvent();
     this->addShortcuts();
-    this->ui_.textEdit->focusLost.connect([this] {
+    // The textEdit's signal will be destroyed before this SplitInput is
+    // destroyed, so we can safely ignore this signal's connection.
+    std::ignore = this->ui_.textEdit->focusLost.connect([this] {
         this->hideCompletionPopup();
     });
     this->scaleChangedEvent(this->scale());
@@ -293,23 +295,25 @@ void SplitInput::openEmotePopup()
         this->emotePopup_ = new EmotePopup(this);
         this->emotePopup_->setAttribute(Qt::WA_DeleteOnClose);
 
-        this->emotePopup_->linkClicked.connect([this](const Link &link) {
-            if (link.type == Link::InsertText)
-            {
-                QTextCursor cursor = this->ui_.textEdit->textCursor();
-                QString textToInsert(link.value + " ");
-
-                // If symbol before cursor isn't space or empty
-                // Then insert space before emote.
-                if (cursor.position() > 0 &&
-                    !this->getInputText()[cursor.position() - 1].isSpace())
+        // The EmotePopup is closed & destroyed when this is destroyed, meaning it's safe to ignore this connection
+        std::ignore =
+            this->emotePopup_->linkClicked.connect([this](const Link &link) {
+                if (link.type == Link::InsertText)
                 {
-                    textToInsert = " " + textToInsert;
+                    QTextCursor cursor = this->ui_.textEdit->textCursor();
+                    QString textToInsert(link.value + " ");
+
+                    // If symbol before cursor isn't space or empty
+                    // Then insert space before emote.
+                    if (cursor.position() > 0 &&
+                        !this->getInputText()[cursor.position() - 1].isSpace())
+                    {
+                        textToInsert = " " + textToInsert;
+                    }
+                    this->insertText(textToInsert);
+                    this->ui_.textEdit->activateWindow();
                 }
-                this->insertText(textToInsert);
-                this->ui_.textEdit->activateWindow();
-            }
-        });
+            });
     }
 
     this->emotePopup_->resize(int(300 * this->emotePopup_->scale()),
@@ -355,7 +359,7 @@ QString SplitInput::handleSendMessage(std::vector<QString> &arguments)
         if (this->enableInlineReplying_)
         {
             // Remove @username prefix that is inserted when doing inline replies
-            message.remove(0, this->replyThread_->root()->displayName.length() +
+            message.remove(0, this->replyThread_->displayName.length() +
                                   1);  // remove "@username"
 
             if (!message.isEmpty() && message.at(0) == ' ')
@@ -369,7 +373,7 @@ QString SplitInput::handleSendMessage(std::vector<QString> &arguments)
             getApp()->commands->execCommand(message, c, false);
 
         // Reply within TwitchChannel
-        tc->sendReply(sendMessage, this->replyThread_->rootId());
+        tc->sendReply(sendMessage, this->replyThread_->id);
 
         this->postMessageSend(message, arguments);
         return "";
@@ -649,37 +653,46 @@ bool SplitInput::eventFilter(QObject *obj, QEvent *event)
 
 void SplitInput::installKeyPressedEvent()
 {
-    this->ui_.textEdit->keyPressed.disconnectAll();
-    this->ui_.textEdit->keyPressed.connect([this](QKeyEvent *event) {
-        if (auto *popup = this->inputCompletionPopup_.data())
-        {
-            if (popup->isVisible())
+    // We can safely ignore this signal's connection because SplitInput owns
+    // the textEdit object, so it will always be deleted before SplitInput
+    std::ignore =
+        this->ui_.textEdit->keyPressed.connect([this](QKeyEvent *event) {
+            if (auto *popup = this->inputCompletionPopup_.data())
             {
-                if (popup->eventFilter(nullptr, event))
+                if (popup->isVisible())
                 {
-                    event->accept();
-                    return;
+                    if (popup->eventFilter(nullptr, event))
+                    {
+                        event->accept();
+                        return;
+                    }
                 }
             }
-        }
 
-        // One of the last remaining of it's kind, the copy shortcut.
-        // For some bizarre reason Qt doesn't want this key be rebound.
-        // TODO(Mm2PL): Revisit in Qt6, maybe something changed?
-        if ((event->key() == Qt::Key_C || event->key() == Qt::Key_Insert) &&
-            event->modifiers() == Qt::ControlModifier)
-        {
-            if (this->channelView_->hasSelection())
+            // One of the last remaining of it's kind, the copy shortcut.
+            // For some bizarre reason Qt doesn't want this key be rebound.
+            // TODO(Mm2PL): Revisit in Qt6, maybe something changed?
+            if ((event->key() == Qt::Key_C || event->key() == Qt::Key_Insert) &&
+                event->modifiers() == Qt::ControlModifier)
             {
-                this->channelView_->copySelectedText();
-                event->accept();
+                if (this->channelView_->hasSelection())
+                {
+                    this->channelView_->copySelectedText();
+                    event->accept();
+                }
             }
-        }
-    });
+        });
+
+#ifdef DEBUG
+    assert(this->keyPressedEventInstalled == false);
+    this->keyPressedEventInstalled = true;
+#endif
 }
 
 void SplitInput::mousePressEvent(QMouseEvent *event)
 {
+    this->giveFocus(Qt::MouseFocusReason);
+
     if (this->hidden)
     {
         BaseWidget::mousePressEvent(event);
@@ -735,8 +748,8 @@ void SplitInput::updateCompletionPopup()
         {
             if (i == 0 || text[i - 1].isSpace())
             {
-                this->showCompletionPopup(text.mid(i, position - i + 1).mid(1),
-                                          true);
+                this->showCompletionPopup(text.mid(i, position - i + 1),
+                                          CompletionKind::Emote);
             }
             else
             {
@@ -749,8 +762,8 @@ void SplitInput::updateCompletionPopup()
         {
             if (i == 0 || text[i - 1].isSpace())
             {
-                this->showCompletionPopup(text.mid(i, position - i + 1).mid(1),
-                                          false);
+                this->showCompletionPopup(text.mid(i, position - i + 1),
+                                          CompletionKind::User);
             }
             else
             {
@@ -763,7 +776,7 @@ void SplitInput::updateCompletionPopup()
     this->hideCompletionPopup();
 }
 
-void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
+void SplitInput::showCompletionPopup(const QString &text, CompletionKind kind)
 {
     if (this->inputCompletionPopup_.isNull())
     {
@@ -781,14 +794,7 @@ void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
     auto *popup = this->inputCompletionPopup_.data();
     assert(popup);
 
-    if (emoteCompletion)
-    {
-        popup->updateEmotes(text, this->split_->getChannel());
-    }
-    else
-    {
-        popup->updateUsers(text, this->split_->getChannel());
-    }
+    popup->updateCompletion(text, kind, this->split_->getChannel());
 
     auto pos = this->mapToGlobal(QPoint{0, 0}) - QPoint(0, popup->height()) +
                QPoint((this->width() - popup->width()) / 2, 0);
@@ -988,7 +994,7 @@ void SplitInput::editTextChanged()
             // We need to verify that
             // 1. the @username prefix exists and
             // 2. if a character exists after the @username, it is a space
-            QString replyPrefix = "@" + this->replyThread_->root()->displayName;
+            QString replyPrefix = "@" + this->replyThread_->displayName;
             if (!text.startsWith(replyPrefix) ||
                 (text.length() > replyPrefix.length() &&
                  text.at(replyPrefix.length()) != ' '))
@@ -1061,15 +1067,29 @@ void SplitInput::giveFocus(Qt::FocusReason reason)
     this->ui_.textEdit->setFocus(reason);
 }
 
-void SplitInput::setReply(std::shared_ptr<MessageThread> reply,
-                          bool showReplyingLabel)
+void SplitInput::setReply(MessagePtr reply, bool showReplyingLabel)
 {
+    auto oldParent = this->replyThread_;
+    if (this->enableInlineReplying_ && oldParent)
+    {
+        // Remove old reply prefix
+        auto replyPrefix = "@" + oldParent->displayName;
+        auto plainText = this->ui_.textEdit->toPlainText().trimmed();
+        if (plainText.startsWith(replyPrefix))
+        {
+            plainText.remove(0, replyPrefix.length());
+        }
+        this->ui_.textEdit->setPlainText(plainText.trimmed());
+        this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+        this->ui_.textEdit->resetCompletion();
+    }
+
     this->replyThread_ = std::move(reply);
 
     if (this->enableInlineReplying_)
     {
         // Only enable reply label if inline replying
-        auto replyPrefix = "@" + this->replyThread_->root()->displayName;
+        auto replyPrefix = "@" + this->replyThread_->displayName;
         auto plainText = this->ui_.textEdit->toPlainText().trimmed();
         if (!plainText.startsWith(replyPrefix))
         {
@@ -1082,7 +1102,7 @@ void SplitInput::setReply(std::shared_ptr<MessageThread> reply,
             this->ui_.textEdit->resetCompletion();
         }
         this->ui_.replyLabel->setText("Replying to @" +
-                                      this->replyThread_->root()->displayName);
+                                      this->replyThread_->displayName);
     }
 }
 

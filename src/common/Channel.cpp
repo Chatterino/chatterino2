@@ -26,7 +26,7 @@ namespace chatterino {
 // Channel
 //
 Channel::Channel(const QString &name, Type type)
-    : completionModel(*this)
+    : completionModel(*this, nullptr)
     , lastDate_(QDate::currentDate())
     , name_(name)
     , messages_(getSettings()->scrollbackSplitLimit)
@@ -80,7 +80,7 @@ LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot()
 }
 
 void Channel::addMessage(MessagePtr message,
-                         boost::optional<MessageFlags> overridingFlags)
+                         std::optional<MessageFlags> overridingFlags)
 {
     auto app = getApp();
     MessagePtr deleted;
@@ -106,7 +106,7 @@ void Channel::addMessage(MessagePtr message,
 
     if (this->messages_.pushBack(message, deleted))
     {
-        this->messageRemovedFromStart.invoke(deleted);
+        this->messageRemovedFromStart(deleted);
     }
 
     this->messageAppended.invoke(message, overridingFlags);
@@ -295,7 +295,8 @@ bool Channel::isWritable() const
 {
     using Type = Channel::Type;
     auto type = this->getType();
-    return type != Type::TwitchMentions && type != Type::TwitchLive;
+    return type != Type::TwitchMentions && type != Type::TwitchLive &&
+           type != Type::TwitchAutomod;
 }
 
 void Channel::sendMessage(const QString &message)
@@ -330,7 +331,8 @@ bool Channel::isLive() const
 
 bool Channel::shouldIgnoreHighlights() const
 {
-    return this->type_ == Type::TwitchMentions ||
+    return this->type_ == Type::TwitchAutomod ||
+           this->type_ == Type::TwitchMentions ||
            this->type_ == Type::TwitchWhispers;
 }
 
@@ -350,6 +352,10 @@ std::shared_ptr<Channel> Channel::getEmpty()
 }
 
 void Channel::onConnected()
+{
+}
+
+void Channel::messageRemovedFromStart(const MessagePtr &msg)
 {
 }
 

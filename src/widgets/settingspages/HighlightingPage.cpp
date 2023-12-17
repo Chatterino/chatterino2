@@ -90,7 +90,8 @@ HighlightingPage::HighlightingPage()
                     view->getTableView()->setColumnWidth(0, 400);
                 });
 
-                view->addButtonPressed.connect([] {
+                // We can safely ignore this signal connection since we own the view
+                std::ignore = view->addButtonPressed.connect([] {
                     getSettings()->highlightedMessages.append(HighlightPhrase{
                         "my phrase", true, true, false, false, false, "",
                         *ColorProvider::instance().color(
@@ -141,7 +142,8 @@ HighlightingPage::HighlightingPage()
                     view->getTableView()->setColumnWidth(0, 200);
                 });
 
-                view->addButtonPressed.connect([] {
+                // We can safely ignore this signal connection since we own the view
+                std::ignore = view->addButtonPressed.connect([] {
                     getSettings()->highlightedUsers.append(HighlightPhrase{
                         "highlighted user", true, true, false, false, false, "",
                         *ColorProvider::instance().color(
@@ -182,7 +184,8 @@ HighlightingPage::HighlightingPage()
                     view->getTableView()->setColumnWidth(0, 200);
                 });
 
-                view->addButtonPressed.connect([this] {
+                // We can safely ignore this signal connection since we own the view
+                std::ignore = view->addButtonPressed.connect([this] {
                     auto d = std::make_shared<BadgePickerDialog>(
                         availableBadges, this);
 
@@ -236,7 +239,8 @@ HighlightingPage::HighlightingPage()
                     view->getTableView()->setColumnWidth(0, 200);
                 });
 
-                view->addButtonPressed.connect([] {
+                // We can safely ignore this signal connection since we own the view
+                std::ignore = view->addButtonPressed.connect([] {
                     getSettings()->blacklistedUsers.append(
                         HighlightBlacklistUser{"blacklisted user", false});
                 });
@@ -329,7 +333,10 @@ void HighlightingPage::openColorDialog(const QModelIndex &clicked,
     auto dialog = new ColorPickerDialog(initial, this);
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->show();
-    dialog->closed.connect([=](auto selected) {
+    // We can safely ignore this signal connection since the view and tab are never deleted
+    // TODO: The QModelIndex clicked is technically not safe to persist here since the model
+    // can be changed between the color dialog being created & the color dialog being closed
+    std::ignore = dialog->closed.connect([=](auto selected) {
         if (selected.isValid())
         {
             view->getModel()->setData(clicked, selected, Qt::DecorationRole);

@@ -31,9 +31,14 @@
 namespace chatterino {
 
 SelectChannelDialog::SelectChannelDialog(QWidget *parent)
-    : BaseWindow({BaseWindow::Flags::EnableCustomFrame,
-                  BaseWindow::Flags::Dialog, BaseWindow::DisableLayoutSave},
-                 parent)
+    : BaseWindow(
+          {
+              BaseWindow::Flags::EnableCustomFrame,
+              BaseWindow::Flags::Dialog,
+              BaseWindow::DisableLayoutSave,
+              BaseWindow::BoundsCheckOnShow,
+          },
+          parent)
     , selectedChannel_(Channel::getEmpty())
 {
     this->setWindowTitle("Select a channel to join");
@@ -135,10 +140,27 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                              live_lbl->setVisible(enabled);
                          });
 
+        // automod_btn
+        auto automod_btn = vbox.emplace<QRadioButton>("AutoMod").assign(
+            &this->ui_.twitch.automod);
+        auto automod_lbl =
+            vbox.emplace<QLabel>("Shows when AutoMod catches a message in any "
+                                 "channel you moderate.")
+                .hidden();
+
+        automod_lbl->setWordWrap(true);
+        automod_btn->installEventFilter(&this->tabFilter_);
+
+        QObject::connect(automod_btn.getElement(), &QRadioButton::toggled,
+                         [=](bool enabled) mutable {
+                             automod_lbl->setVisible(enabled);
+                         });
+
         vbox->addStretch(1);
 
         // tabbing order
-        QWidget::setTabOrder(live_btn.getElement(), channel_btn.getElement());
+        QWidget::setTabOrder(automod_btn.getElement(),
+                             channel_btn.getElement());
         QWidget::setTabOrder(channel_btn.getElement(),
                              whispers_btn.getElement());
         QWidget::setTabOrder(whispers_btn.getElement(),
@@ -146,6 +168,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         QWidget::setTabOrder(mentions_btn.getElement(),
                              watching_btn.getElement());
         QWidget::setTabOrder(watching_btn.getElement(), live_btn.getElement());
+        QWidget::setTabOrder(live_btn.getElement(), automod_btn.getElement());
 
         // tab
         auto tab = notebook->addPage(obj.getElement());
@@ -170,7 +193,9 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
             view->getTableView()->horizontalHeader()->setSectionHidden(4, true);
             view->getTableView()->horizontalHeader()->setSectionHidden(5, true);
 
-            view->addButtonPressed.connect([] {
+            // We can safely ignore this signal's connection since the button won't be
+            // accessible after this dialog is closed
+            std::ignore = view->addButtonPressed.connect([] {
                 auto unique = IrcServerData{};
                 unique.id = Irc::instance().uniqueId();
 
@@ -304,6 +329,11 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
             this->ui_.twitch.live->setFocus();
         }
         break;
+        case Channel::Type::TwitchAutomod: {
+            this->ui_.notebook->selectIndex(TAB_TWITCH);
+            this->ui_.twitch.automod->setFocus();
+        }
+        break;
         case Channel::Type::Irc: {
             this->ui_.notebook->selectIndex(TAB_IRC);
             this->ui_.irc.channel->setText(_channel.get()->getName());
@@ -371,6 +401,10 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
             {
                 return app->twitch->liveChannel;
             }
+            else if (this->ui_.twitch.automod->isChecked())
+            {
+                return app->twitch->automodChannel;
+            }
         }
         break;
         case TAB_IRC: {
@@ -435,9 +469,9 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
                 this->dialog->ui_.twitch.whispers->setFocus();
                 return true;
             }
-            else if (widget == this->dialog->ui_.twitch.live)
+            else if (widget == this->dialog->ui_.twitch.automod)
             {
-                // Special case for when current selection is "Live" (the last entry in the list), next wrap is Channel, but we need to select its edit box
+                // Special case for when current selection is "AutoMod" (the last entry in the list), next wrap is Channel, but we need to select its edit box
                 this->dialog->ui_.twitch.channel->setFocus();
                 return true;
             }
@@ -456,11 +490,17 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
             if (widget == this->dialog->ui_.twitch.channelName)
             {
                 // Special case for when current selection is the "Channel" entry's edit box since the Edit box actually has the focus
-                this->dialog->ui_.twitch.live->setFocus();
+                this->dialog->ui_.twitch.automod->setFocus();
                 return true;
             }
 
             widget->previousInFocusChain()->setFocus();
+            return true;
+        }
+        else if (event_key == QKeySequence::DeleteStartOfWord &&
+                 this->dialog->ui_.twitch.channelName->selectionLength() > 0)
+        {
+            this->dialog->ui_.twitch.channelName->backspace();
             return true;
         }
         else

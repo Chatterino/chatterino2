@@ -8,7 +8,9 @@
 #include <QString>
 #include <QUrl>
 
+#include <chrono>
 #include <memory>
+#include <optional>
 #include <vector>
 
 namespace chatterino::recentmessages::detail {
@@ -24,6 +26,9 @@ std::vector<MessagePtr> buildRecentMessages(
 
 // Returns the URL to be used for querying the Recent Messages API for the
 // given channel.
-QUrl constructRecentMessagesUrl(const QString &name);
+QUrl constructRecentMessagesUrl(
+    const QString &name, int limit,
+    std::optional<std::chrono::time_point<std::chrono::system_clock>> after,
+    std::optional<std::chrono::time_point<std::chrono::system_clock>> before);
 
 }  // namespace chatterino::recentmessages::detail

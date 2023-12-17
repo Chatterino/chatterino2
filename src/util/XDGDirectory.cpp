@@ -3,6 +3,8 @@
 #include "util/CombinePath.hpp"
 #include "util/Qt.hpp"
 
+#include <unordered_map>
+
 namespace chatterino {
 
 #if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)

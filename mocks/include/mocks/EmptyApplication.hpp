@@ -74,12 +74,34 @@ public:
         return nullptr;
     }
 
+    SeventvBadges *getSeventvBadges() override
+    {
+        assert(!"getSeventvBadges was called without being initialized");
+        return nullptr;
+    }
+
     IUserDataController *getUserData() override
     {
         return nullptr;
     }
 
+    ISoundController *getSound() override
+    {
+        assert(!"getSound was called without being initialized");
+        return nullptr;
+    }
+
     ITwitchLiveController *getTwitchLiveController() override
+    {
+        return nullptr;
+    }
+
+    ImageUploader *getImageUploader() override
+    {
+        return nullptr;
+    }
+
+    SeventvAPI *getSeventvAPI() override
     {
         return nullptr;
     }

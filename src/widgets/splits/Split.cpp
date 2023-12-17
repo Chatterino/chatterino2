@@ -16,12 +16,12 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Fonts.hpp"
+#include "singletons/ImageUploader.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
-#include "util/NuulsUploader.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
 #include "widgets/dialogs/SelectChannelDialog.hpp"
@@ -39,7 +39,6 @@
 #include "widgets/splits/SplitHeader.hpp"
 #include "widgets/splits/SplitInput.hpp"
 #include "widgets/splits/SplitOverlay.hpp"
-#include "widgets/TooltipWidget.hpp"
 #include "widgets/Window.hpp"
 
 #include <QApplication>
@@ -192,8 +191,12 @@ namespace {
     void showTutorialVideo(QWidget *parent, const QString &source,
                            const QString &title, const QString &description)
     {
-        auto window =
-            new BasePopup(BaseWindow::Flags::EnableCustomFrame, parent);
+        auto *window = new BasePopup(
+            {
+                BaseWindow::EnableCustomFrame,
+                BaseWindow::BoundsCheckOnShow,
+            },
+            parent);
         window->setWindowTitle("Chatterino - " + title);
         window->setAttribute(Qt::WA_DeleteOnClose);
         auto layout = new QVBoxLayout();
@@ -247,7 +250,8 @@ Split::Split(QWidget *parent)
     this->updateInputPlaceholder();
 
     // clear SplitInput selection when selecting in ChannelView
-    this->view_->selectionChanged.connect([this]() {
+    // this connection can be ignored since the ChannelView is owned by this Split
+    std::ignore = this->view_->selectionChanged.connect([this]() {
         if (this->input_->hasSelection())
         {
             this->input_->clearSelection();
@@ -255,55 +259,60 @@ Split::Split(QWidget *parent)
     });
 
     // clear ChannelView selection when selecting in SplitInput
-    this->input_->selectionChanged.connect([this]() {
+    // this connection can be ignored since the SplitInput is owned by this Split
+    std::ignore = this->input_->selectionChanged.connect([this]() {
         if (this->view_->hasSelection())
         {
             this->view_->clearSelection();
         }
     });
 
-    this->view_->openChannelIn.connect([this](
-                                           QString twitchChannel,
-                                           FromTwitchLinkOpenChannelIn openIn) {
-        ChannelPtr channel = getApp()->twitch->getOrAddChannel(twitchChannel);
-        switch (openIn)
-        {
-            case FromTwitchLinkOpenChannelIn::Split:
-                this->openSplitRequested.invoke(channel);
-                break;
-            case FromTwitchLinkOpenChannelIn::Tab:
-                this->joinChannelInNewTab(channel);
-                break;
-            case FromTwitchLinkOpenChannelIn::BrowserPlayer:
-                this->openChannelInBrowserPlayer(channel);
-                break;
-            case FromTwitchLinkOpenChannelIn::Streamlink:
-                this->openChannelInStreamlink(twitchChannel);
-                break;
-            default:
-                qCWarning(chatterinoWidget)
-                    << "Unhandled \"FromTwitchLinkOpenChannelIn\" enum value: "
-                    << static_cast<int>(openIn);
-        }
-    });
+    // this connection can be ignored since the ChannelView is owned by this Split
+    std::ignore = this->view_->openChannelIn.connect(
+        [this](QString twitchChannel, FromTwitchLinkOpenChannelIn openIn) {
+            ChannelPtr channel =
+                getApp()->twitch->getOrAddChannel(twitchChannel);
+            switch (openIn)
+            {
+                case FromTwitchLinkOpenChannelIn::Split:
+                    this->openSplitRequested.invoke(channel);
+                    break;
+                case FromTwitchLinkOpenChannelIn::Tab:
+                    this->joinChannelInNewTab(channel);
+                    break;
+                case FromTwitchLinkOpenChannelIn::BrowserPlayer:
+                    this->openChannelInBrowserPlayer(channel);
+                    break;
+                case FromTwitchLinkOpenChannelIn::Streamlink:
+                    this->openChannelInStreamlink(twitchChannel);
+                    break;
+                default:
+                    qCWarning(chatterinoWidget)
+                        << "Unhandled \"FromTwitchLinkOpenChannelIn\" enum "
+                           "value: "
+                        << static_cast<int>(openIn);
+            }
+        });
 
-    this->input_->textChanged.connect([this](const QString &newText) {
-        if (getSettings()->showEmptyInput)
-        {
-            // We always show the input regardless of the text, so we can early out here
-            return;
-        }
+    // this connection can be ignored since the SplitInput is owned by this Split
+    std::ignore =
+        this->input_->textChanged.connect([this](const QString &newText) {
+            if (getSettings()->showEmptyInput)
+            {
+                // We always show the input regardless of the text, so we can early out here
+                return;
+            }
 
-        if (newText.isEmpty())
-        {
-            this->input_->hide();
-        }
-        else if (this->input_->isHidden())
-        {
-            // Text updated and the input was previously hidden, show it
-            this->input_->show();
-        }
-    });
+            if (newText.isEmpty())
+            {
+                this->input_->hide();
+            }
+            else if (this->input_->isHidden())
+            {
+                // Text updated and the input was previously hidden, show it
+                this->input_->show();
+            }
+        });
 
     getSettings()->showEmptyInput.connect(
         [this](const bool &showEmptyInput, auto) {
@@ -367,10 +376,14 @@ Split::Split(QWidget *parent)
                                            // Forward textEdit's focusLost event
                                            this->focusLost.invoke();
                                        });
-    this->input_->ui_.textEdit->imagePasted.connect(
+
+    // this connection can be ignored since the SplitInput is owned by this Split
+    std::ignore = this->input_->ui_.textEdit->imagePasted.connect(
         [this](const QMimeData *source) {
             if (!getSettings()->imageUploaderEnabled)
+            {
                 return;
+            }
 
             if (getSettings()->askOnImageUpload.getValue())
             {
@@ -381,23 +394,40 @@ Split::Split(QWidget *parent)
                     "You are uploading an image to a 3rd party service not in "
                     "control of the Chatterino team. You may not be able to "
                     "remove the image from the site. Are you okay with this?");
-                msgBox.addButton(QMessageBox::Cancel);
-                msgBox.addButton(QMessageBox::Yes);
-                msgBox.addButton("Yes, don't ask again", QMessageBox::YesRole);
+                auto *cancel = msgBox.addButton(QMessageBox::Cancel);
+                auto *yes = msgBox.addButton(QMessageBox::Yes);
+                auto *yesDontAskAgain = msgBox.addButton("Yes, don't ask again",
+                                                         QMessageBox::YesRole);
 
                 msgBox.setDefaultButton(QMessageBox::Yes);
 
-                auto picked = msgBox.exec();
-                if (picked == QMessageBox::Cancel)
-                {
-                    return;
-                }
-                else if (picked == 0)  // don't ask again button
+                msgBox.exec();
+
+                auto *clickedButton = msgBox.clickedButton();
+                if (clickedButton == yesDontAskAgain)
                 {
                     getSettings()->askOnImageUpload.setValue(false);
                 }
+                else if (clickedButton == yes)
+                {
+                    // Continue with image upload
+                }
+                else if (clickedButton == cancel)
+                {
+                    // Not continuing with image upload
+                    return;
+                }
+                else
+                {
+                    // An unknown "button" was pressed - handle it as if cancel was pressed
+                    // cancel is already handled as the "escape" option, so this should never happen
+                    qCWarning(chatterinoImageuploader)
+                        << "Unhandled button pressed:" << clickedButton;
+                    return;
+                }
             }
-            upload(source, this->getChannel(), *this->input_->ui_.textEdit);
+            QPointer<ResizingTextEdit> edit = this->input_->ui_.textEdit;
+            getApp()->imageUploader->upload(source, this->getChannel(), edit);
         });
 
     getSettings()->imageUploaderEnabled.connect(
@@ -643,7 +673,7 @@ void Split::addShortcuts()
          }},
         {"openViewerList",
          [this](std::vector<QString>) -> QString {
-             this->showViewerList();
+             this->showChatterList();
              return "";
          }},
         {"clearMessages",
@@ -843,11 +873,11 @@ void Split::setChannel(IndirectChannel newChannel)
 
     if (newChannel.getType() == Channel::Type::Twitch)
     {
-        this->header_->setViewersButtonVisible(true);
+        this->header_->setChattersButtonVisible(true);
     }
     else
     {
-        this->header_->setViewersButtonVisible(false);
+        this->header_->setChattersButtonVisible(false);
     }
 
     this->channelSignalHolder_.managedConnect(
@@ -896,7 +926,9 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->setWindowTitle(dialogTitle);
     dialog->show();
-    dialog->closed.connect([=, this] {
+    // We can safely ignore this signal connection since the dialog will be closed before
+    // this Split is closed
+    std::ignore = dialog->closed.connect([=, this] {
         if (dialog->hasSeletedChannel())
         {
             this->setChannel(dialog->getSelectedChannel());
@@ -978,8 +1010,6 @@ void Split::leaveEvent(QEvent *event)
 
     this->overlay_->hide();
 
-    TooltipWidget::instance()->hide();
-
     this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 }
 
@@ -1017,7 +1047,7 @@ void Split::changeChannel()
     if (popup.size() && popup.at(0)->isVisible() && !popup.at(0)->isFloating())
     {
         popup.at(0)->hide();
-        showViewerList();
+        showChatterList();
     }
 }
 
@@ -1111,31 +1141,31 @@ void Split::openWithCustomScheme()
     }
 }
 
-void Split::showViewerList()
+void Split::showChatterList()
 {
-    auto viewerDock =
-        new QDockWidget("Viewer List - " + this->getChannel()->getName(), this);
-    viewerDock->setAllowedAreas(Qt::LeftDockWidgetArea);
-    viewerDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar |
-                            QDockWidget::DockWidgetClosable |
-                            QDockWidget::DockWidgetFloatable);
-    viewerDock->resize(
+    auto *chatterDock = new QDockWidget(
+        "Chatter List - " + this->getChannel()->getName(), this);
+    chatterDock->setAllowedAreas(Qt::LeftDockWidgetArea);
+    chatterDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar |
+                             QDockWidget::DockWidgetClosable |
+                             QDockWidget::DockWidgetFloatable);
+    chatterDock->resize(
         0.5 * this->width(),
         this->height() - this->header_->height() - this->input_->height());
-    viewerDock->move(0, this->header_->height());
+    chatterDock->move(0, this->header_->height());
 
-    auto multiWidget = new QWidget(viewerDock);
+    auto *multiWidget = new QWidget(chatterDock);
     auto *dockVbox = new QVBoxLayout();
-    auto searchBar = new QLineEdit(viewerDock);
+    auto *searchBar = new QLineEdit(chatterDock);
 
-    auto chattersList = new QListWidget();
-    auto resultList = new QListWidget();
+    auto *chattersList = new QListWidget();
+    auto *resultList = new QListWidget();
 
     auto channel = this->getChannel();
     if (!channel)
     {
         qCWarning(chatterinoWidget)
-            << "Viewer list opened when no channel was defined";
+            << "Chatter list opened when no channel was defined";
         return;
     }
 
@@ -1144,7 +1174,7 @@ void Split::showViewerList()
     if (twitchChannel == nullptr)
     {
         qCWarning(chatterinoWidget)
-            << "Viewer list opened in a non-Twitch channel";
+            << "Chatter list opened in a non-Twitch channel";
         return;
     }
 
@@ -1152,14 +1182,14 @@ void Split::showViewerList()
     searchBar->setPlaceholderText("Search User...");
 
     auto formatListItemText = [](QString text) {
-        auto item = new QListWidgetItem();
+        auto *item = new QListWidgetItem();
         item->setText(text);
         item->setFont(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.0));
         return item;
     };
 
     auto addLabel = [this, formatListItemText, chattersList](QString label) {
-        auto formattedLabel = formatListItemText(label);
+        auto *formattedLabel = formatListItemText(label);
         formattedLabel->setForeground(this->theme->accent);
         chattersList->addItem(formattedLabel);
     };
@@ -1325,13 +1355,13 @@ void Split::showViewerList()
             formatListItemText("Due to Twitch restrictions, this feature is "
                                "only \navailable for moderators."));
         chattersList->addItem(
-            formatListItemText("If you would like to see the Viewer list, you "
+            formatListItemText("If you would like to see the Chatter list, you "
                                "must \nuse the Twitch website."));
         loadingLabel->hide();
     }
 
-    QObject::connect(viewerDock, &QDockWidget::topLevelChanged, this, [=]() {
-        viewerDock->setMinimumWidth(300);
+    QObject::connect(chatterDock, &QDockWidget::topLevelChanged, this, [=]() {
+        chatterDock->setMinimumWidth(300);
     });
 
     auto listDoubleClick = [this](const QModelIndex &index) {
@@ -1353,8 +1383,8 @@ void Split::showViewerList()
 
     HotkeyController::HotkeyMap actions{
         {"delete",
-         [viewerDock](std::vector<QString>) -> QString {
-             viewerDock->close();
+         [chatterDock](std::vector<QString>) -> QString {
+             chatterDock->close();
              return "";
          }},
         {"accept", nullptr},
@@ -1370,7 +1400,7 @@ void Split::showViewerList()
     };
 
     getApp()->hotkeys->shortcutsForCategory(HotkeyCategory::PopupWindow,
-                                            actions, viewerDock);
+                                            actions, chatterDock);
 
     dockVbox->addWidget(searchBar);
     dockVbox->addWidget(loadingLabel);
@@ -1380,10 +1410,12 @@ void Split::showViewerList()
 
     multiWidget->setStyleSheet(this->theme->splits.input.styleSheet);
     multiWidget->setLayout(dockVbox);
-    viewerDock->setWidget(multiWidget);
-    viewerDock->setFloating(true);
-    viewerDock->show();
-    viewerDock->activateWindow();
+    chatterDock->setWidget(multiWidget);
+    chatterDock->setFloating(true);
+    widgets::showAndMoveWindowTo(
+        chatterDock, this->mapToGlobal(QPoint{0, this->header_->height()}),
+        widgets::BoundsChecking::CursorPosition);
+    chatterDock->activateWindow();
 }
 
 void Split::openSubPage()
@@ -1437,7 +1469,10 @@ void Split::showSearch(bool singleChannel)
         auto container = dynamic_cast<SplitContainer *>(notebook.getPageAt(i));
         for (auto split : container->getSplits())
         {
-            popup->addChannel(split->getChannelView());
+            if (split->channel_.getType() != Channel::Type::TwitchAutomod)
+            {
+                popup->addChannel(split->getChannelView());
+            }
         }
     }
 
@@ -1532,7 +1567,7 @@ void Split::drag()
     stopDraggingSplit();
 }
 
-void Split::setInputReply(const std::shared_ptr<MessageThread> &reply)
+void Split::setInputReply(const MessagePtr &reply)
 {
     this->input_->setReply(reply);
 }

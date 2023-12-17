@@ -1,0 +1,96 @@
+---
+name: Test MacOS
+
+on:
+  pull_request:
+  workflow_dispatch:
+  merge_group:
+
+env:
+  TWITCH_PUBSUB_SERVER_TAG: v1.0.7
+  QT_QPA_PLATFORM: minimal
+
+concurrency:
+  group: test-macos-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-macos:
+    name: "Test ${{ matrix.os }}, Qt ${{ matrix.qt-version }}"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-13]
+        qt-version: [5.15.2, 6.5.0]
+        plugins: [false]
+      fail-fast: false
+    env:
+      C2_BUILD_WITH_QT6: ${{ startsWith(matrix.qt-version, '6.') && 'ON' || 'OFF' }}
+      QT_MODULES: ${{ startsWith(matrix.qt-version, '6.') && 'qt5compat qtimageformats' || '' }}
+
+    steps:
+      - name: Enable plugin support
+        if: matrix.plugins
+        run: |
+          echo "C2_PLUGINS=ON" >> "$GITHUB_ENV"
+
+      - name: Set BUILD_WITH_QT6
+        if: startsWith(matrix.qt-version, '6.')
+        run: |
+          echo "C2_BUILD_WITH_QT6=ON" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0 # allows for tags access
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3.3.0
+        with:
+          cache: true
+          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
+          modules: ${{ env.QT_MODULES }}
+          version: ${{ matrix.qt-version }}
+
+      - name: Install dependencies
+        run: |
+          brew install boost openssl rapidjson p7zip create-dmg cmake
+
+      - name: Build
+        run: |
+          mkdir build-test
+          cd build-test
+          cmake \
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+              -DBUILD_TESTS=On \
+              -DBUILD_APP=OFF \
+              -DUSE_PRECOMPILED_HEADERS=OFF \
+              -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
+              -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
+              ..
+          make -j"$(sysctl -n hw.logicalcpu)"
+
+      - name: Download and extract Twitch PubSub Server Test
+        run: |
+          mkdir pubsub-server-test
+          curl -L -o pubsub-server.tar.gz "https://github.com/Chatterino/twitch-pubsub-server-test/releases/download/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/server-${{ env.TWITCH_PUBSUB_SERVER_TAG }}-darwin-amd64.tar.gz"
+          tar -xzf pubsub-server.tar.gz -C pubsub-server-test
+          rm pubsub-server.tar.gz
+          cd pubsub-server-test
+          curl -L -o server.crt "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.crt"
+          curl -L -o server.key "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.key"
+          cd ..
+
+      - name: Cargo Install httpbox
+        run: |
+          cargo install --git https://github.com/kevinastone/httpbox --rev 89b971f
+
+      - name: Test
+        timeout-minutes: 30
+        run: |
+          httpbox --port 9051 &
+          cd ../pubsub-server-test
+          ./server 127.0.0.1:9050 &
+          cd ../build-test
+          ctest --repeat until-pass:4 --output-on-failure --exclude-regex ClassicEmoteNameFiltering
+        working-directory: build-test

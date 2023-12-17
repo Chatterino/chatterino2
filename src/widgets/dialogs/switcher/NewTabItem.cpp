@@ -12,16 +12,17 @@
 
 namespace chatterino {
 
-NewTabItem::NewTabItem(const QString &channelName)
+NewTabItem::NewTabItem(Window *window_, const QString &channelName)
     : AbstractSwitcherItem(QIcon(":/switcher/plus.svg"))
     , channelName_(channelName)
     , text_(QString(TEXT_FORMAT).arg(channelName))
+    , window(window_)
 {
 }
 
 void NewTabItem::action()
 {
-    auto &nb = getApp()->windows->getMainWindow().getNotebook();
+    auto &nb = this->window->getNotebook();
     SplitContainer *container = nb.addPage(true);
 
     Split *split = new Split(container);

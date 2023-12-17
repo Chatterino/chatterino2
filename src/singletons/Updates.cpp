@@ -3,7 +3,6 @@
 #include "common/Modes.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "Settings.hpp"
@@ -122,7 +121,7 @@ void Updates::installUpdates()
                     box->raise();
                 });
             })
-            .onSuccess([this](auto result) -> Outcome {
+            .onSuccess([this](auto result) {
                 if (result.status() != 200)
                 {
                     auto *box = new QMessageBox(
@@ -132,7 +131,7 @@ void Updates::installUpdates()
                             .arg(result.formatError()));
                     box->setAttribute(Qt::WA_DeleteOnClose);
                     box->exec();
-                    return Failure;
+                    return;
                 }
 
                 QByteArray object = result.getData();
@@ -145,7 +144,7 @@ void Updates::installUpdates()
                 if (file.write(object) == -1)
                 {
                     this->setStatus_(WriteFileFailed);
-                    return Failure;
+                    return;
                 }
                 file.flush();
                 file.close();
@@ -156,7 +155,6 @@ void Updates::installUpdates()
                     {filename, "restart"});
 
                 QApplication::exit(0);
-                return Success;
             })
             .execute();
         this->setStatus_(Downloading);
@@ -183,7 +181,7 @@ void Updates::installUpdates()
                 box->setAttribute(Qt::WA_DeleteOnClose);
                 box->exec();
             })
-            .onSuccess([this](auto result) -> Outcome {
+            .onSuccess([this](auto result) {
                 if (result.status() != 200)
                 {
                     auto *box = new QMessageBox(
@@ -193,7 +191,7 @@ void Updates::installUpdates()
                             .arg(result.formatError()));
                     box->setAttribute(Qt::WA_DeleteOnClose);
                     box->exec();
-                    return Failure;
+                    return;
                 }
 
                 QByteArray object = result.getData();
@@ -216,7 +214,7 @@ void Updates::installUpdates()
                     box->exec();
 
                     QDesktopServices::openUrl(this->updateExe_);
-                    return Failure;
+                    return;
                 }
                 file.flush();
                 file.close();
@@ -239,8 +237,6 @@ void Updates::installUpdates()
 
                     QDesktopServices::openUrl(this->updateExe_);
                 }
-
-                return Success;
             })
             .execute();
         this->setStatus_(Downloading);
@@ -250,6 +246,7 @@ void Updates::installUpdates()
 
 void Updates::checkForUpdates()
 {
+#ifndef CHATTERINO_DISABLE_UPDATER
     auto version = Version::instance();
 
     if (!version.isSupportedOS())
@@ -278,7 +275,7 @@ void Updates::checkForUpdates()
 
     NetworkRequest(url)
         .timeout(60000)
-        .onSuccess([this](auto result) -> Outcome {
+        .onSuccess([this](auto result) {
             const auto object = result.parseJson();
             /// Version available on every platform
             auto version = object["version"];
@@ -288,10 +285,10 @@ void Updates::checkForUpdates()
                 this->setStatus_(SearchFailed);
                 qCDebug(chatterinoUpdate)
                     << "error checking version - missing 'version'" << object;
-                return Failure;
+                return;
             }
 
-#if defined Q_OS_WIN || defined Q_OS_MACOS
+#    if defined Q_OS_WIN || defined Q_OS_MACOS
             /// Downloads an installer for the new version
             auto updateExeUrl = object["updateexe"];
             if (!updateExeUrl.isString())
@@ -299,11 +296,11 @@ void Updates::checkForUpdates()
                 this->setStatus_(SearchFailed);
                 qCDebug(chatterinoUpdate)
                     << "error checking version - missing 'updateexe'" << object;
-                return Failure;
+                return;
             }
             this->updateExe_ = updateExeUrl.toString();
 
-#    ifdef Q_OS_WIN
+#        ifdef Q_OS_WIN
             /// Windows portable
             auto portableUrl = object["portable_download"];
             if (!portableUrl.isString())
@@ -312,20 +309,20 @@ void Updates::checkForUpdates()
                 qCDebug(chatterinoUpdate)
                     << "error checking version - missing 'portable_download'"
                     << object;
-                return Failure;
+                return;
             }
             this->updatePortable_ = portableUrl.toString();
-#    endif
+#        endif
 
-#elif defined Q_OS_LINUX
+#    elif defined Q_OS_LINUX
             QJsonValue updateGuide = object.value("updateguide");
             if (updateGuide.isString())
             {
                 this->updateGuideLink_ = updateGuide.toString();
             }
-#else
-            return Failure;
-#endif
+#    else
+            return;
+#    endif
 
             /// Current version
             this->onlineVersion_ = version.toString();
@@ -341,10 +338,10 @@ void Updates::checkForUpdates()
             {
                 this->setStatus_(NoUpdateAvailable);
             }
-            return Failure;
         })
         .execute();
     this->setStatus_(Searching);
+#endif
 }
 
 Updates::Status Updates::getStatus() const

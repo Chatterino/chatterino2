@@ -210,7 +210,6 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         }
 
         action.target.login = args[0].toString();
-        bool ok;
         action.messageText = args[1].toString();
         action.messageId = args[2].toString();
 
@@ -727,14 +726,14 @@ void PubSub::registerNonce(QString nonce, NonceInfo info)
     this->nonces_[nonce] = std::move(info);
 }
 
-boost::optional<PubSub::NonceInfo> PubSub::findNonceInfo(QString nonce)
+std::optional<PubSub::NonceInfo> PubSub::findNonceInfo(QString nonce)
 {
     // TODO: This should also DELETE the nonceinfo from the map
     auto it = this->nonces_.find(nonce);
 
     if (it == this->nonces_.end())
     {
-        return boost::none;
+        return std::nullopt;
     }
 
     return it->second;

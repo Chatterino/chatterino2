@@ -1,4 +1,4 @@
-#include "ReplyThreadPopup.hpp"
+#include "widgets/dialogs/ReplyThreadPopup.hpp"
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
@@ -13,6 +13,7 @@
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/Button.hpp"
 #include "widgets/helper/ChannelView.hpp"
+#include "widgets/helper/InvisibleSizeGrip.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitInput.hpp"
@@ -25,14 +26,11 @@ const QString TEXT_TITLE("Reply Thread - @%1 in #%2");
 
 namespace chatterino {
 
-ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
-                                   ChannelPtr channel, QPointer<Split> split)
-    : DraggablePopup(closeAutomatically, parent)
-    , channel_(std::move(channel))
-    , split_(std::move(split))
+ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, Split *split)
+    : DraggablePopup(closeAutomatically, split)
+    , split_(split)
 {
-    Q_ASSERT_X(this->channel_ != nullptr, "ReplyThreadPopup",
-               "A reply thread popup must have a source channel");
+    assert(split != nullptr);
 
     this->setWindowTitle(QStringLiteral("Reply Thread"));
 
@@ -90,9 +88,12 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     this->ui_.threadView->setMinimumSize(400, 100);
     this->ui_.threadView->setSizePolicy(QSizePolicy::Expanding,
                                         QSizePolicy::Expanding);
-    this->ui_.threadView->mouseDown.connect([this](QMouseEvent *) {
-        this->giveFocus(Qt::MouseFocusReason);
-    });
+    // We can safely ignore this signal's connection since threadView will always be deleted before
+    // the ReplyThreadPopup
+    std::ignore =
+        this->ui_.threadView->mouseDown.connect([this](QMouseEvent *) {
+            this->giveFocus(Qt::MouseFocusReason);
+        });
 
     // Create SplitInput with inline replying disabled
     if (this->split_)
@@ -121,16 +122,30 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
             this->updateInputUI();
         }));
 
-    // clear SplitInput selection when selecting in ChannelView
-    this->ui_.threadView->selectionChanged.connect([this]() {
-        if (this->ui_.replyInput && this->ui_.replyInput->hasSelection())
+    // We can safely ignore this signal's connection since threadView will always be deleted before
+    // the ReplyThreadPopup
+    std::ignore = this->ui_.threadView->selectionChanged.connect([this]() {
+        // clear SplitInput selection when selecting in ChannelView
+        if (this->ui_.replyInput->hasSelection())
         {
             this->ui_.replyInput->clearSelection();
         }
     });
 
-    auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
-                      .setLayoutType<QVBoxLayout>();
+    // clear ChannelView selection when selecting in SplitInput
+    // We can safely ignore this signal's connection since replyInput will always be deleted before
+    // the ReplyThreadPopup
+    std::ignore = this->ui_.replyInput->selectionChanged.connect([this]() {
+        if (this->ui_.threadView->hasSelection())
+        {
+            this->ui_.threadView->clearSelection();
+        }
+    });
+
+    auto layers = LayoutCreator<QWidget>(this->getLayoutContainer())
+                      .setLayoutType<QGridLayout>()
+                      .withoutMargin();
+    auto layout = layers.emplace<QVBoxLayout>();
 
     layout->setSpacing(0);
     // provide draggable margin if frameless
@@ -165,7 +180,7 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
                                  }
                              });
             hbox->addWidget(this->ui_.notificationCheckbox, 1);
-            this->ui_.notificationCheckbox->setFocusPolicy(Qt::ClickFocus);
+            this->ui_.notificationCheckbox->setFocusPolicy(Qt::NoFocus);
         }
 
         if (closeAutomatically)
@@ -182,19 +197,20 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
     }
 
     layout->addWidget(this->ui_.threadView, 1);
-    if (this->ui_.replyInput)
+    layout->addWidget(this->ui_.replyInput);
+
+    // size grip
+    if (closeAutomatically)
     {
-        layout->addWidget(this->ui_.replyInput);
+        layers->addWidget(new InvisibleSizeGrip(this), 0, 0,
+                          Qt::AlignRight | Qt::AlignBottom);
     }
 }
 
 void ReplyThreadPopup::setThread(std::shared_ptr<MessageThread> thread)
 {
     this->thread_ = std::move(thread);
-    if (this->ui_.replyInput)
-    {
-        this->ui_.replyInput->setReply(this->thread_);
-    }
+    this->ui_.replyInput->setReply(this->thread_->root());
     this->addMessagesFromThread();
     this->updateInputUI();
 
@@ -242,16 +258,16 @@ void ReplyThreadPopup::addMessagesFromThread()
     this->ui_.threadView->setChannel(this->virtualChannel_);
     this->ui_.threadView->setSourceChannel(this->channel_);
 
-    auto overrideFlags =
-        boost::optional<MessageFlags>(this->thread_->root()->flags);
-    overrideFlags->set(MessageFlag::DoNotLog);
+    auto rootOverrideFlags =
+        std::optional<MessageFlags>(this->thread_->root()->flags);
+    rootOverrideFlags->set(MessageFlag::DoNotLog);
 
-    this->virtualChannel_->addMessage(this->thread_->root(), overrideFlags);
+    this->virtualChannel_->addMessage(this->thread_->root(), rootOverrideFlags);
     for (const auto &msgRef : this->thread_->replies())
     {
         if (auto msg = msgRef.lock())
         {
-            auto overrideFlags = boost::optional<MessageFlags>(msg->flags);
+            auto overrideFlags = std::optional<MessageFlags>(msg->flags);
             overrideFlags->set(MessageFlag::DoNotLog);
 
             this->virtualChannel_->addMessage(msg, overrideFlags);
@@ -265,7 +281,7 @@ void ReplyThreadPopup::addMessagesFromThread()
                 if (message->replyThread == this->thread_)
                 {
                     auto overrideFlags =
-                        boost::optional<MessageFlags>(message->flags);
+                        std::optional<MessageFlags>(message->flags);
                     overrideFlags->set(MessageFlag::DoNotLog);
 
                     // same reply thread, add message

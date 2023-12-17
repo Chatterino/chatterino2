@@ -1,6 +1,7 @@
 #pragma once
 
 #include "widgets/BaseWidget.hpp"
+#include "widgets/TooltipWidget.hpp"
 
 #include <boost/signals2.hpp>
 #include <pajlada/settings/setting.hpp>
@@ -28,10 +29,12 @@ public:
     explicit SplitHeader(Split *split);
 
     void setAddButtonVisible(bool value);
-    void setViewersButtonVisible(bool value);
+    void setChattersButtonVisible(bool value);
 
     void updateChannelText();
     void updateModerationModeIcon();
+    // Invoked when SplitHeader should update anything refering to a TwitchChannel's mode
+    // has changed (e.g. sub mode toggled)
     void updateRoomModes();
 
 protected:
@@ -66,6 +69,7 @@ private:
 
     Split *const split_{};
     QString tooltipText_{};
+    TooltipWidget *const tooltipWidget_{};
     bool isLive_{false};
     QString thumbnail_;
     QElapsedTimer lastThumbnail_;
@@ -75,9 +79,16 @@ private:
     // ui
     Button *dropdownButton_{};
     Label *titleLabel_{};
+
     EffectLabel *modeButton_{};
+    QAction *modeActionSetEmote{};
+    QAction *modeActionSetSub{};
+    QAction *modeActionSetSlow{};
+    QAction *modeActionSetR9k{};
+    QAction *modeActionSetFollowers{};
+
     Button *moderationButton_{};
-    Button *viewersButton_{};
+    Button *chattersButton_{};
     Button *addButton_{};
 
     // states
@@ -86,8 +97,8 @@ private:
     bool doubleClicked_{false};
     bool menuVisible_{false};
 
-    // signals
-    pajlada::Signals::NoArgSignal modeUpdateRequested_;
+    // managedConnections_ contains connections for signals that are not managed by us
+    // and don't change when the parent Split changes its underlying channel
     pajlada::Signals::SignalHolder managedConnections_;
     pajlada::Signals::SignalHolder channelConnections_;
     std::vector<boost::signals2::scoped_connection> bSignals_;

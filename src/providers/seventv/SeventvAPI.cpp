@@ -3,7 +3,6 @@
 #include "common/Literals.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
 
 namespace {
 
@@ -24,12 +23,11 @@ void SeventvAPI::getUserByTwitchID(
 {
     NetworkRequest(API_URL_USER.arg(twitchID), NetworkRequestType::Get)
         .timeout(20000)
-        .onSuccess([callback = std::move(onSuccess)](
-                       const NetworkResult &result) -> Outcome {
-            auto json = result.parseJson();
-            callback(json);
-            return Success;
-        })
+        .onSuccess(
+            [callback = std::move(onSuccess)](const NetworkResult &result) {
+                auto json = result.parseJson();
+                callback(json);
+            })
         .onError([callback = std::move(onError)](const NetworkResult &result) {
             callback(result);
         })
@@ -42,12 +40,11 @@ void SeventvAPI::getEmoteSet(const QString &emoteSet,
 {
     NetworkRequest(API_URL_EMOTE_SET.arg(emoteSet), NetworkRequestType::Get)
         .timeout(25000)
-        .onSuccess([callback = std::move(onSuccess)](
-                       const NetworkResult &result) -> Outcome {
-            auto json = result.parseJson();
-            callback(json);
-            return Success;
-        })
+        .onSuccess(
+            [callback = std::move(onSuccess)](const NetworkResult &result) {
+                auto json = result.parseJson();
+                callback(json);
+            })
         .onError([callback = std::move(onError)](const NetworkResult &result) {
             callback(result);
         })
@@ -72,20 +69,13 @@ void SeventvAPI::updatePresence(const QString &twitchChannelID,
                    NetworkRequestType::Post)
         .json(payload)
         .timeout(10000)
-        .onSuccess([callback = std::move(onSuccess)](const auto &) -> Outcome {
+        .onSuccess([callback = std::move(onSuccess)](const auto &) {
             callback();
-            return Success;
         })
         .onError([callback = std::move(onError)](const NetworkResult &result) {
             callback(result);
         })
         .execute();
-}
-
-SeventvAPI &getSeventvAPI()
-{
-    static SeventvAPI instance;
-    return instance;
 }
 
 }  // namespace chatterino

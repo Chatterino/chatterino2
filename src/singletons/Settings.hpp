@@ -1,11 +1,19 @@
 #pragma once
 
-#include "BaseSettings.hpp"
 #include "common/Channel.hpp"
+#include "common/ChatterinoSetting.hpp"
 #include "common/enums/MessageOverflow.hpp"
 #include "common/SignalVector.hpp"
+#include "controllers/filters/FilterRecord.hpp"
+#include "controllers/highlights/HighlightBadge.hpp"
+#include "controllers/highlights/HighlightBlacklistUser.hpp"
+#include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/hotkeys/GlobalShortcutFwd.hpp"
+#include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/logging/ChannelLog.hpp"
+#include "controllers/moderationactions/ModerationAction.hpp"
+#include "controllers/nicknames/Nickname.hpp"
+#include "controllers/sound/ISoundController.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 #include "util/StreamerMode.hpp"
@@ -13,49 +21,15 @@
 
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/settings/settinglistener.hpp>
+#include <pajlada/signals/signalholder.hpp>
+
 
 using TimeoutButton = std::pair<QString, int>;
 
 namespace chatterino {
 
-class HighlightPhrase;
-class HighlightBlacklistUser;
-class IgnorePhrase;
-class FilterRecord;
-using FilterRecordPtr = std::shared_ptr<FilterRecord>;
-class Nickname;
-class HighlightBadge;
-class ModerationAction;
-
-/// Settings which are available for reading on all threads.
-class ConcurrentSettings
-{
-public:
-    ConcurrentSettings();
-
-    SignalVector<HighlightPhrase> &highlightedMessages;
-    SignalVector<HighlightPhrase> &highlightedUsers;
-    SignalVector<HighlightBadge> &highlightedBadges;
-    SignalVector<HighlightBlacklistUser> &blacklistedUsers;
-    SignalVector<IgnorePhrase> &ignoredMessages;
-    SignalVector<QString> &mutedChannels;
-    SignalVector<FilterRecordPtr> &filterRecords;
-    SignalVector<Nickname> &nicknames;
-    SignalVector<ModerationAction> &moderationActions;
-    SignalVector<ChannelLog> &loggedChannels;
-
-    bool isHighlightedUser(const QString &username);
-    bool isBlacklistedUser(const QString &username);
-    bool isMutedChannel(const QString &channelName);
-    bool toggleMutedChannel(const QString &channelName);
-    boost::optional<QString> matchNickname(const QString &username);
-
-private:
-    void mute(const QString &channelName);
-    void unmute(const QString &channelName);
-};
-
-ConcurrentSettings &getCSettings();
+void _actuallyRegisterSetting(
+    std::weak_ptr<pajlada::Settings::SettingData> setting);
 
 enum UsernameDisplayMode : int {
     Username = 1,                  // Username
@@ -92,14 +66,25 @@ enum UsernameRightClickBehavior : int {
 
 /// Settings which are availlable for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
-class Settings : public ABSettings, public ConcurrentSettings
+class Settings
 {
     static Settings *instance_;
+    Settings *prevInstance_ = nullptr;
 
 public:
     Settings(const QString &settingsDirectory);
+    ~Settings();
 
     static Settings &instance();
+
+    void saveSnapshot();
+    void restoreSnapshot();
+
+    FloatSetting uiScale = {"/appearance/uiScale2", 1};
+    BoolSetting windowTopMost = {"/appearance/windowAlwaysOnTop", false};
+
+    float getClampedUiScale() const;
+    void setClampedUiScale(float value);
 
     /// Appearance
     BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", true};
@@ -216,7 +201,7 @@ public:
         {
             "/behaviour/usernameRightClickBehaviorWithModifier",
             UsernameRightClickBehavior::Reply,
-        };
+    };
     EnumSetting<Qt::KeyboardModifier> usernameRightClickModifier = {
         "/behaviour/usernameRightClickModifier",
         Qt::KeyboardModifier::ShiftModifier};
@@ -241,6 +226,10 @@ public:
         "/behaviour/autocompletion/emoteCompletionWithColon", true};
     BoolSetting showUsernameCompletionMenu = {
         "/behaviour/autocompletion/showUsernameCompletionMenu", true};
+    BoolSetting useSmartEmoteCompletion = {
+        "/experiments/useSmartEmoteCompletion",
+        false,
+    };
 
     FloatSetting pauseOnHoverDuration = {"/behaviour/pauseOnHoverDuration", 0};
     EnumSetting<Qt::KeyboardModifier> pauseChatModifier = {
@@ -582,8 +571,62 @@ public:
     ChatterinoSetting<std::vector<QString>> enabledPlugins = {
         "/plugins/enabledPlugins", {}};
 
+    // Advanced
+    EnumStringSetting<SoundBackend> soundBackend = {
+        "/sound/backend",
+        SoundBackend::Miniaudio,
+    };
+
 private:
+    ChatterinoSetting<std::vector<HighlightPhrase>> highlightedMessagesSetting =
+        {"/highlighting/highlights"};
+    ChatterinoSetting<std::vector<HighlightPhrase>> highlightedUsersSetting = {
+        "/highlighting/users"};
+    ChatterinoSetting<std::vector<HighlightBadge>> highlightedBadgesSetting = {
+        "/highlighting/badges"};
+    ChatterinoSetting<std::vector<HighlightBlacklistUser>>
+        blacklistedUsersSetting = {"/highlighting/blacklist"};
+    ChatterinoSetting<std::vector<IgnorePhrase>> ignoredMessagesSetting = {
+        "/ignore/phrases"};
+    ChatterinoSetting<std::vector<QString>> mutedChannelsSetting = {
+        "/pings/muted"};
+    ChatterinoSetting<std::vector<FilterRecordPtr>> filterRecordsSetting = {
+        "/filtering/filters"};
+    ChatterinoSetting<std::vector<Nickname>> nicknamesSetting = {"/nicknames"};
+    ChatterinoSetting<std::vector<ModerationAction>> moderationActionsSetting =
+        {"/moderation/actions"};
+    ChatterinoSetting<std::vector<ChannelLog>> loggedChannelsSetting = {
+        "/logging/channels"};
+
+public:
+    SignalVector<HighlightPhrase> highlightedMessages;
+    SignalVector<HighlightPhrase> highlightedUsers;
+    SignalVector<HighlightBadge> highlightedBadges;
+    SignalVector<HighlightBlacklistUser> blacklistedUsers;
+    SignalVector<IgnorePhrase> ignoredMessages;
+    SignalVector<QString> mutedChannels;
+    SignalVector<FilterRecordPtr> filterRecords;
+    SignalVector<Nickname> nicknames;
+    SignalVector<ModerationAction> moderationActions;
+    SignalVector<ChannelLog> loggedChannels;
+
+    bool isHighlightedUser(const QString &username);
+    bool isBlacklistedUser(const QString &username);
+    bool isMutedChannel(const QString &channelName);
+    bool toggleMutedChannel(const QString &channelName);
+    std::optional<QString> matchNickname(const QString &username);
+
+private:
+    void mute(const QString &channelName);
+    void unmute(const QString &channelName);
+
     void updateModerationActions();
+
+    std::unique_ptr<rapidjson::Document> snapshot_;
+
+    pajlada::Signals::SignalHolder signalHolder;
 };
+
+Settings *getSettings();
 
 }  // namespace chatterino

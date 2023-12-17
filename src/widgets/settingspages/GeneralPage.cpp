@@ -5,6 +5,7 @@
 #include "common/Version.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "controllers/sound/ISoundController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Fonts.hpp"
@@ -20,6 +21,7 @@
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/splits/SplitInput.hpp"
 
+#include <magic_enum/magic_enum.hpp>
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QFontDialog>
@@ -482,6 +484,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "cvMask and 7TV's RainTime, will appear as normal emotes.");
     layout.addCheckbox("Enable emote auto-completion by typing :",
                        s.emoteCompletionWithColon);
+    layout.addCheckbox("Use experimental smarter emote completion.",
+                       s.useSmartEmoteCompletion);
     layout.addDropdown<float>(
         "Size", {"0.5x", "0.75x", "Default", "1.25x", "1.5x", "2x"},
         s.emoteScale,
@@ -1142,6 +1146,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Show send message button", s.showSendButton, false,
         "Show a Send button next to each split input that can be "
         "clicked to send the message");
+
+    auto *soundBackend = layout.addDropdownEnumClass<SoundBackend>(
+        "Sound backend (requires restart)",
+        magic_enum::enum_names<SoundBackend>(), s.soundBackend,
+        "Change this only if you're noticing issues with sound playback on "
+        "your system",
+        {});
+    soundBackend->setMinimumWidth(soundBackend->minimumSizeHint().width());
 
     layout.addStretch();
 

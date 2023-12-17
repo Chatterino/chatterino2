@@ -5,7 +5,10 @@ on:
     workflows: ["Build"]
     types: [completed]
     # make sure this only runs on the default branch
-    branches: [master]
+    branches:
+      - master
+      - "bugfix-release/*"
+      - "release/*"
   workflow_dispatch:
 
 jobs:
@@ -15,19 +18,18 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     strategy:
       matrix:
-        qt-version: [5.15.2, 6.5.0]
-    env:
-      VARIANT_SUFFIX: ${{ startsWith(matrix.qt-version, '6.') && '.EXPERIMENTAL-Qt6' || '' }}
+        qt-version: ["6.5.0"]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # allows for tags access
 
       - name: Download artifact
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v3
         with:
           workflow: build.yml
           name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
+          commit: ${{ github.sha }}
           path: build/
 
       - name: Unzip
@@ -50,7 +52,7 @@ jobs:
         shell: powershell
 
       - name: Upload installer
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          path: build/${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}${{ env.VARIANT_SUFFIX }}.exe
-          name: ${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}${{ env.VARIANT_SUFFIX }}.exe
+          path: build/${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}.exe
+          name: ${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}.exe

@@ -7,6 +7,7 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "util/Twitch.hpp"
 
 namespace chatterino::commands {
 
@@ -39,13 +40,14 @@ QString sendShoutout(const CommandContext &ctx)
         return "";
     }
 
-    const auto target = words->at(1);
+    auto target = words->at(1);
+    stripChannelName(target);
 
     using Error = HelixSendShoutoutError;
 
     getHelix()->getUserByName(
         target,
-        [twitchChannel, channel, currentUser, &target](const auto targetUser) {
+        [twitchChannel, channel, currentUser](const auto targetUser) {
             getHelix()->sendShoutout(
                 twitchChannel->roomId(), targetUser.id,
                 currentUser->getUserId(),

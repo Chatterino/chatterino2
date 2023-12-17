@@ -1,11 +1,9 @@
 #include "controllers/notifications/NotificationController.hpp"
 
 #include "Application.hpp"
-#include "common/NetworkRequest.hpp"
-#include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/notifications/NotificationModel.hpp"
-#include "controllers/sound/SoundController.hpp"
+#include "controllers/sound/ISoundController.hpp"
 #include "messages/Message.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -36,9 +34,13 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
         this->channelMap[Platform::Twitch].append(channelName);
     }
 
-    this->channelMap[Platform::Twitch].delayedItemsChanged.connect([this] {
-        this->twitchSetting_.setValue(this->channelMap[Platform::Twitch].raw());
-    });
+    // We can safely ignore this signal connection since channelMap will always be destroyed
+    // before the NotificationController
+    std::ignore =
+        this->channelMap[Platform::Twitch].delayedItemsChanged.connect([this] {
+            this->twitchSetting_.setValue(
+                this->channelMap[Platform::Twitch].raw());
+        });
 
     liveStatusTimer_ = new QTimer();
 
@@ -103,7 +105,7 @@ void NotificationController::playSound()
                   getSettings()->notificationPathSound.getValue())
             : QUrl("qrc:/sounds/ping2.wav");
 
-    getApp()->sound->play(highlightSoundUrl);
+    getIApp()->getSound()->play(highlightSoundUrl);
 }
 
 NotificationModel *NotificationController::createModel(QObject *parent,
@@ -206,11 +208,11 @@ void NotificationController::checkStream(bool live, QString channelName)
 
 void NotificationController::removeFakeChannel(const QString channelName)
 {
-    auto i = std::find(fakeTwitchChannels.begin(), fakeTwitchChannels.end(),
-                       channelName);
-    if (i != fakeTwitchChannels.end())
+    auto it = std::find(fakeTwitchChannels.begin(), fakeTwitchChannels.end(),
+                        channelName);
+    if (it != fakeTwitchChannels.end())
     {
-        fakeTwitchChannels.erase(i);
+        fakeTwitchChannels.erase(it);
         // "delete" old 'CHANNEL is live' message
         LimitedQueueSnapshot<MessagePtr> snapshot =
             getApp()->twitch->liveChannel->getMessageSnapshot();

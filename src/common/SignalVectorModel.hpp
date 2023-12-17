@@ -2,11 +2,12 @@
 
 #include "common/SignalVector.hpp"
 
-#include <boost/optional.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QAbstractTableModel>
 #include <QMimeData>
 #include <QStandardItem>
+
+#include <optional>
 
 namespace chatterino {
 
@@ -100,7 +101,7 @@ public:
         return this;
     }
 
-    virtual ~SignalVectorModel()
+    ~SignalVectorModel() override
     {
         for (Row &row : this->rows_)
         {
@@ -127,7 +128,8 @@ public:
 
     QVariant data(const QModelIndex &index, int role) const override
     {
-        int row = index.row(), column = index.column();
+        int row = index.row();
+        int column = index.column();
         if (row < 0 || column < 0 || row >= this->rows_.size() ||
             column >= this->columnCount_)
         {
@@ -140,7 +142,8 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value,
                  int role) override
     {
-        int row = index.row(), column = index.column();
+        int row = index.row();
+        int column = index.column();
         if (row < 0 || column < 0 || row >= this->rows_.size() ||
             column >= this->columnCount_)
         {
@@ -166,7 +169,7 @@ public:
 
             assert(this->rows_[row].original);
             TVectorItem item = this->getItemFromRow(
-                this->rows_[row].items, this->rows_[row].original.get());
+                this->rows_[row].items, this->rows_[row].original.value());
             this->vector_->insert(item, vecRow, this);
         }
 
@@ -262,7 +265,7 @@ public:
 
         TVectorItem item =
             this->getItemFromRow(this->rows_[sourceRow].items,
-                                 this->rows_[sourceRow].original.get());
+                                 this->rows_[sourceRow].original.value());
         this->vector_->removeAt(signalVectorRow);
         this->vector_->insert(
             item, this->getVectorIndexFromModelIndex(destinationChild));
@@ -417,7 +420,7 @@ protected:
 
     struct Row {
         std::vector<QStandardItem *> items;
-        boost::optional<TVectorItem> original;
+        std::optional<TVectorItem> original;
         bool isCustomRow;
 
         Row(std::vector<QStandardItem *> _items, bool _isCustomRow = false)

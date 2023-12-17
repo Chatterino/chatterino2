@@ -22,7 +22,7 @@ class AbstractIrcServer : public QObject
 public:
     enum ConnectionType { Read = 1, Write = 2, Both = 3 };
 
-    virtual ~AbstractIrcServer() = default;
+    ~AbstractIrcServer() override = default;
 
     // initializeIrc must be called from the derived class
     // this allows us to initialize the abstract IRC server based on the derived class's parameters
@@ -73,6 +73,7 @@ protected:
     virtual void onReadConnected(IrcConnection *connection);
     virtual void onWriteConnected(IrcConnection *connection);
     virtual void onDisconnected();
+    void markChannelsConnected();
 
     virtual std::shared_ptr<Channel> getCustomChannel(
         const QString &channelName);

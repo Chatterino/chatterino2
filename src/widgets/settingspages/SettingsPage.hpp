@@ -27,7 +27,7 @@
             {                                          \
                 QPainter painter(this);                \
                 QColor color = QColor("#222222");      \
-                color.setAlphaF(0.7);                  \
+                color.setAlphaF(0.7F);                 \
                 painter.fillRect(this->rect(), color); \
             }                                          \
         }                                              \
@@ -85,7 +85,7 @@ public:
     }
 
 protected:
-    SettingsDialogTab *tab_;
+    SettingsDialogTab *tab_{};
     pajlada::Signals::NoArgSignal onCancel_;
     pajlada::Signals::SignalHolder managedConnections_;
 };
