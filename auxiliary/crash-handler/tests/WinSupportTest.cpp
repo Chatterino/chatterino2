@@ -1,4 +1,4 @@
-#include "win_support.hpp"
+#include "WinSupport.hpp"
 
 #include <gtest/gtest.h>
 #include <util/win/exception_codes.h>
