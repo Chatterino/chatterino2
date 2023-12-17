@@ -26,14 +26,11 @@ const QString TEXT_TITLE("Reply Thread - @%1 in #%2");
 
 namespace chatterino {
 
-ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
-                                   ChannelPtr channel, QPointer<Split> split)
-    : DraggablePopup(closeAutomatically, parent)
-    , channel_(std::move(channel))
-    , split_(std::move(split))
+ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, Split *split)
+    : DraggablePopup(closeAutomatically, split)
+    , split_(split)
 {
-    assert(this->channel_ != nullptr &&
-           "A reply thread popup must have a source channel");
+    assert(split != nullptr);
 
     this->setWindowTitle(QStringLiteral("Reply Thread"));
 

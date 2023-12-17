@@ -2945,16 +2945,13 @@ void ChannelView::setInputReply(const MessagePtr &message)
 
 void ChannelView::showReplyThreadPopup(const MessagePtr &message)
 {
-    if (message == nullptr || message->replyThread == nullptr)
+    if (message == nullptr || message->replyThread == nullptr || this->split_ == nullptr)
     {
         return;
     }
 
-    auto *popupParent =
-        static_cast<QWidget *>(&(getApp()->windows->getMainWindow()));
     auto *popup =
-        new ReplyThreadPopup(getSettings()->autoCloseThreadPopup, popupParent,
-                             this->underlyingChannel_, this->split_);
+        new ReplyThreadPopup(getSettings()->autoCloseThreadPopup, this->split_);
 
     popup->setThread(message->replyThread);
 

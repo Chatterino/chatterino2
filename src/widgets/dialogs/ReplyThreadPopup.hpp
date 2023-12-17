@@ -21,8 +21,11 @@ class ReplyThreadPopup final : public DraggablePopup
     Q_OBJECT
 
 public:
-    ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
-                     ChannelPtr channel_, QPointer<Split> split);
+    /**
+     * @param closeAutomatically Decides whether the popup should close when it loses focus
+     * @param split Will be used as the popup's parent. Must not be null
+     */
+    explicit ReplyThreadPopup(bool closeAutomatically, Split *split);
 
     void setThread(std::shared_ptr<MessageThread> thread);
     void giveFocus(Qt::FocusReason reason);
@@ -40,7 +43,7 @@ private:
     ChannelPtr channel_;
     // The channel for the `threadView`
     ChannelPtr virtualChannel_;
-    QPointer<Split> split_;
+    Split *split_;
 
     struct {
         ChannelView *threadView = nullptr;
