@@ -294,7 +294,7 @@ ChannelView::ChannelView(QWidget *parent, Split *split, Context context,
 ChannelView::ChannelView(InternalCtor /*tag*/, QWidget *parent, Split *split,
                          Context context, size_t messagesLimit)
     : BaseWidget(parent)
-    , split_(std::move(split))
+    , split_(split)
     , scrollBar_(new Scrollbar(messagesLimit, this))
     , highlightAnimation_(this)
     , context_(context)

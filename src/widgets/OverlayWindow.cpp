@@ -88,13 +88,14 @@ void triggerFirstActivation(QWidget *parent)
 
 namespace chatterino {
 
-OverlayWindow::OverlayWindow(IndirectChannel channel, Split *split)
+OverlayWindow::OverlayWindow(IndirectChannel channel)
     : QWidget(nullptr,
               Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)
     , channel_(std::move(channel))
-    , channelView_(nullptr, split)
+    , channelView_(nullptr)
     , interactAnimation_(this, "interactionProgress"_ba)
 {
+    this->setAttribute(Qt::WA_DeleteOnClose);
     this->setWindowTitle(u"Chatterino - Overlay"_s);
 
     auto *grid = new QGridLayout(this);

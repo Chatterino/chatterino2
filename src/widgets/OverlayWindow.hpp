@@ -18,7 +18,7 @@ class OverlayWindow : public QWidget
 {
     Q_OBJECT
 public:
-    OverlayWindow(IndirectChannel channel, Split *split);
+    OverlayWindow(IndirectChannel channel);
     ~OverlayWindow() override;
 
 protected:

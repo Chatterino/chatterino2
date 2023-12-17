@@ -416,8 +416,7 @@ void Window::addShortcuts()
              {
                  if (auto *split = page->getSelectedSplit())
                  {
-                     (new OverlayWindow(split->getIndirectChannel(), split))
-                         ->show();
+                     (new OverlayWindow(split->getIndirectChannel()))->show();
                  }
              }
              return {};
