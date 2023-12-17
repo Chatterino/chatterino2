@@ -12,7 +12,6 @@
 #include <pajlada/signals/signal.hpp>
 #include <QMenu>
 #include <QPaintEvent>
-#include <QPointer>
 #include <QScroller>
 #include <QTimer>
 #include <QVariantAnimation>
@@ -77,7 +76,7 @@ public:
     };
 
     /// Creates a channel view without a split.
-    /// In such a channel, usercards and reply-threads can't be opened.
+    /// In such a view, usercards and reply-threads can't be opened.
     ///
     /// @param parent The parent of this widget. Can be `nullptr`.
     /// @param context The context in which this view is shown (e.g. as a usercard).
@@ -88,7 +87,7 @@ public:
     /// Creates a channel view in a split.
     ///
     /// @param parent The parent of this widget.
-    /// @param split The split contianing this widget.
+    /// @param split The split containing this widget.
     ///              @a split must be in the widget tree of @a parent.
     /// @param context The context in which this view is shown (e.g. as a usercard).
     /// @param messagesLimit The maximum amount of messages this view will display.
@@ -213,7 +212,7 @@ private:
     };
 
     ChannelView(InternalCtor tag, QWidget *parent, Split *split,
-                Context context = Context::None, size_t messagesLimit = 1000);
+                Context context, size_t messagesLimit);
 
     void initializeLayout();
     void initializeScrollbar();

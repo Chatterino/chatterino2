@@ -273,12 +273,6 @@ std::pair<int, int> getWordBounds(MessageLayout *layout,
     return {wordStart, wordStart + length};
 }
 
-auto *requireNotNull(auto *ptr)
-{
-    assert(ptr != nullptr && "Pointer must not be nullptr");
-    return ptr;
-}
-
 }  // namespace
 
 namespace chatterino {
@@ -290,9 +284,11 @@ ChannelView::ChannelView(QWidget *parent, Context context, size_t messagesLimit)
 
 ChannelView::ChannelView(QWidget *parent, Split *split, Context context,
                          size_t messagesLimit)
-    : ChannelView(InternalCtor{}, requireNotNull(parent), requireNotNull(split),
-                  context, messagesLimit)
+    : ChannelView(InternalCtor{}, parent, split, context, messagesLimit)
 {
+    assert(parent != nullptr && split != nullptr &&
+           "This constructor should only be used with non-null values (see "
+           "documentation)");
 }
 
 ChannelView::ChannelView(InternalCtor /*tag*/, QWidget *parent, Split *split,

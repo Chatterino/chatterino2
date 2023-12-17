@@ -32,7 +32,6 @@ public:
     SplitInput(Split *_chatWidget, bool enableInlineReplying = true);
     SplitInput(QWidget *parent, Split *_chatWidget, ChannelView *_channelView,
                bool enableInlineReplying = true);
-    ~SplitInput() override;
 
     bool hasSelection() const;
     void clearSelection() const;
