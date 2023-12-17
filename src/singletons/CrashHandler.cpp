@@ -89,9 +89,7 @@ bool canRestart(const Paths &paths)
     bool noBadArgs =
         !args.isFramelessEmbed && !args.shouldRunBrowserExtensionHost;
 
-    return noBadArgs && readFlags(paths)
-                            .value_or(CrashRecovery::Flag::None)
-                            .has(CrashRecovery::Flag::DoCrashRecovery);
+    return noBadArgs && readRecoverySettings(paths).value_or(false);
 #else
     (void)paths;
     return false;
