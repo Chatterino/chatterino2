@@ -63,7 +63,7 @@ std::optional<bool> readRecoverySettings(const Paths &paths)
         return std::nullopt;
     }
 
-    QJsonParseError error;
+    QJsonParseError error{};
     auto doc = QJsonDocument::fromJson(file.readAll(), &error);
     if (error.error != QJsonParseError::NoError)
     {
