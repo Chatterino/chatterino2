@@ -1,4 +1,4 @@
-#include "singletons/Crashhandler.hpp"
+#include "singletons/CrashHandler.hpp"
 
 #include "common/Args.hpp"
 #include "common/Literals.hpp"
