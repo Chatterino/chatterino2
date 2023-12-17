@@ -360,16 +360,6 @@ private:
 
     std::function<void(MessageColors &, Theme *)> colorVisitor_;
 
-    static constexpr int leftPadding = 8;
-    static constexpr int scrollbarPadding = 8;
-
-private slots:
-    void wordFlagsChanged()
-    {
-        queueLayout();
-        update();
-    }
-
     void scrollUpdateRequested();
 
     TooltipWidget *const tooltipWidget_{};

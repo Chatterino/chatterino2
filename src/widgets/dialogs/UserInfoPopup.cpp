@@ -139,6 +139,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
     , split_(split)
     , closeAutomatically_(closeAutomatically)
 {
+    assert(split != nullptr &&
+           "split being nullptr causes lots of bugs down the road");
     this->setWindowTitle("Usercard");
 
     HotkeyController::HotkeyMap actions{

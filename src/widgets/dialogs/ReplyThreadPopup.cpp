@@ -20,8 +20,6 @@
 
 #include <QCheckBox>
 
-#include <utility>
-
 const QString TEXT_TITLE("Reply Thread - @%1 in #%2");
 
 namespace chatterino {
@@ -96,26 +94,8 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, Split *split)
         });
 
     // Create SplitInput with inline replying disabled
-    if (this->split_)
-    {
-        this->ui_.replyInput =
-            new SplitInput(this, this->split_, this->ui_.threadView, false);
-        // remove the input when the split is removed
-        connect(this->split_, &QObject::destroyed, this, [this]() {
-            if (this->ui_.replyInput)
-            {
-                this->ui_.replyInput->deleteLater();
-                this->ui_.replyInput = nullptr;
-            }
-        });
-        // clear ChannelView selection when selecting in SplitInput
-        this->ui_.replyInput->selectionChanged.connect([this]() {
-            if (this->ui_.replyInput && this->ui_.threadView->hasSelection())
-            {
-                this->ui_.threadView->clearSelection();
-            }
-        });
-    }
+    this->ui_.replyInput =
+        new SplitInput(this, this->split_, this->ui_.threadView, false);
 
     this->bSignals_.emplace_back(
         getApp()->accounts->twitch.currentUserChanged.connect([this] {
@@ -241,22 +221,23 @@ void ReplyThreadPopup::addMessagesFromThread()
         return;
     }
 
+    const auto &sourceChannel = this->split_->getChannel();
     this->setWindowTitle(TEXT_TITLE.arg(this->thread_->root()->loginName,
-                                        this->channel_->getName()));
+                                        sourceChannel->getName()));
 
-    if (this->channel_->isTwitchChannel())
+    if (sourceChannel->isTwitchChannel())
     {
         this->virtualChannel_ =
-            std::make_shared<TwitchChannel>(this->channel_->getName());
+            std::make_shared<TwitchChannel>(sourceChannel->getName());
     }
     else
     {
         this->virtualChannel_ = std::make_shared<Channel>(
-            this->channel_->getName(), Channel::Type::None);
+            sourceChannel->getName(), Channel::Type::None);
     }
 
     this->ui_.threadView->setChannel(this->virtualChannel_);
-    this->ui_.threadView->setSourceChannel(this->channel_);
+    this->ui_.threadView->setSourceChannel(sourceChannel);
 
     auto rootOverrideFlags =
         std::optional<MessageFlags>(this->thread_->root()->flags);
@@ -276,8 +257,8 @@ void ReplyThreadPopup::addMessagesFromThread()
 
     this->messageConnection_ =
         std::make_unique<pajlada::Signals::ScopedConnection>(
-            this->channel_->messageAppended.connect([this](MessagePtr &message,
-                                                           auto) {
+            sourceChannel->messageAppended.connect([this](MessagePtr &message,
+                                                          auto) {
                 if (message->replyThread == this->thread_)
                 {
                     auto overrideFlags =
@@ -292,14 +273,15 @@ void ReplyThreadPopup::addMessagesFromThread()
 
 void ReplyThreadPopup::updateInputUI()
 {
+    auto channel = this->split_->getChannel();
     // Bail out if not a twitch channel.
     // Special twitch channels will hide their reply input box.
-    if (!this->channel_->isTwitchChannel() || !this->ui_.replyInput)
+    if (!channel || !channel->isTwitchChannel())
     {
         return;
     }
 
-    this->ui_.replyInput->setVisible(this->channel_->isWritable());
+    this->ui_.replyInput->setVisible(channel->isWritable());
 
     auto user = getApp()->accounts->twitch.getCurrent();
     QString placeholderText;
@@ -320,10 +302,7 @@ void ReplyThreadPopup::updateInputUI()
 
 void ReplyThreadPopup::giveFocus(Qt::FocusReason reason)
 {
-    if (this->ui_.replyInput)
-    {
-        this->ui_.replyInput->giveFocus(reason);
-    }
+    this->ui_.replyInput->giveFocus(reason);
 }
 
 void ReplyThreadPopup::focusInEvent(QFocusEvent *event)
