@@ -2886,6 +2886,8 @@ void ChannelView::scrollUpdateRequested()
 
 void ChannelView::setInputReply(const MessagePtr &message)
 {
+    assertInGuiThread();
+
     if (message == nullptr || this->split_.isNull())
     {
         return;
