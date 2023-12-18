@@ -45,14 +45,14 @@ protected:
 
 bool hasKnowledge(Knowledge knowledge)
 {
-    QFlags current(std::bit_cast<Knowledge>(
+    QFlags current(static_cast<Knowledge>(
         getSettings()->overlayKnowledgeLevel.getValue()));
     return current.testFlag(knowledge);
 }
 
 void acquireKnowledge(Knowledge knowledge)
 {
-    QFlags current(std::bit_cast<Knowledge>(
+    QFlags current(static_cast<Knowledge>(
         getSettings()->overlayKnowledgeLevel.getValue()));
     current.setFlag(knowledge);
     getSettings()->overlayKnowledgeLevel = current;
