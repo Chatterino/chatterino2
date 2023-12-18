@@ -1,6 +1,6 @@
-#include "platform/GlobalShortcutPrivate.hpp"
+#include "controllers/hotkeys/GlobalShortcutPrivate.hpp"
 
-#include "Windows.h"
+#include <Windows.h>
 
 #include <bit>
 
@@ -22,9 +22,9 @@ GlobalShortcutResult wrapWinError(BOOL success)
 
 namespace chatterino {
 
-bool GlobalShortcutPrivate::nativeEventFilter(const QByteArray & /*eventType*/,
-                                              void *message,
-                                              NativeEventResult * /*result*/)
+bool GlobalShortcutPrivate::EventFilter::nativeEventFilter(
+    const QByteArray & /*eventType*/, void *message,
+    NativeEventResult * /*result*/)
 {
     MSG *msg = static_cast<MSG *>(message);
     if (msg->message == WM_HOTKEY)

@@ -6,7 +6,6 @@
 #include <QObject>
 
 #include <memory>
-#include <type_traits>
 
 namespace chatterino {
 
@@ -32,6 +31,10 @@ public:
     explicit GlobalShortcut(const QKeySequence &shortcut,
                             QObject *parent = nullptr);
     ~GlobalShortcut() override;
+    GlobalShortcut(const GlobalShortcut &) = delete;
+    GlobalShortcut(GlobalShortcut &&) = delete;
+    GlobalShortcut &operator=(const GlobalShortcut &) = delete;
+    GlobalShortcut &operator=(GlobalShortcut &&) = delete;
 
     QKeySequence shortcut() const;
     bool setShortcut(const QKeySequence &shortcut);

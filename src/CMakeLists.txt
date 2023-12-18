@@ -181,6 +181,8 @@ set(SOURCE_FILES
         controllers/hotkeys/GlobalShortcut.cpp
         controllers/hotkeys/GlobalShortcut.hpp
         controllers/hotkeys/GlobalShortcutFwd.hpp
+        controllers/hotkeys/GlobalShortcutPrivate.cpp
+        controllers/hotkeys/GlobalShortcutPrivate.hpp
         controllers/hotkeys/Hotkey.cpp
         controllers/hotkeys/Hotkey.hpp
         controllers/hotkeys/HotkeyCategory.hpp
@@ -291,8 +293,6 @@ set(SOURCE_FILES
         messages/search/SubstringPredicate.hpp
         messages/search/SubtierPredicate.cpp
         messages/search/SubtierPredicate.hpp
-
-        platform/GlobalShortcutPrivate.hpp
 
         providers/Crashpad.cpp
         providers/Crashpad.hpp
@@ -701,7 +701,7 @@ set(SOURCE_FILES
 if(WIN32)
     # Platform specific implementations
     list(APPEND SOURCE_FILES
-        platform/windows/GlobalShortcutPrivate.cpp
+        platform/windows/GlobalShortcutPrivateWin.cpp
     )
 endif()
 
