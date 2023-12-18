@@ -37,6 +37,8 @@ private:
     void startInteraction();
     void endInteraction();
 
+    void setOverrideCursor(const QCursor &cursor);
+
     IndirectChannel channel_;
     pajlada::Signals::SignalHolder holder_;
     ChannelView channelView_;

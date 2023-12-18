@@ -110,6 +110,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel)
     connect(&this->closeButton_, &TitleBarButton::leftClicked, [this]() {
         this->close();
     });
+    this->closeButton_.setCursor(Qt::PointingHandCursor);
 
     this->channelView_.installEventFilter(this);
     this->channelView_.setChannel(this->channel_.get());
@@ -210,11 +211,28 @@ bool OverlayWindow::eventFilter(QObject * /*object*/, QEvent *event)
         break;
         case QEvent::MouseMove: {
             auto *evt = dynamic_cast<QMouseEvent *>(event);
+            auto shiftPressed = evt->modifiers().testFlag(Qt::ShiftModifier);
+            if (!this->interacting_ && shiftPressed)
+            {
+                this->startInteraction();
+                return true;
+            }
+            if (this->interacting_ && !shiftPressed)
+            {
+                this->endInteraction();
+                return true;
+            }
+
             if (this->moving_)
             {
                 auto newPos = evt->globalPos() - this->moveOrigin_;
                 this->move(newPos + this->pos());
                 this->moveOrigin_ = evt->globalPos();
+                return true;
+            }
+            if (this->interacting_)
+            {
+                this->setOverrideCursor(Qt::SizeAllCursor);
                 return true;
             }
             return false;
@@ -223,6 +241,12 @@ bool OverlayWindow::eventFilter(QObject * /*object*/, QEvent *event)
         default:
             return false;
     }
+}
+
+void OverlayWindow::setOverrideCursor(const QCursor &cursor)
+{
+    this->channelView_.setCursor(cursor);
+    this->setCursor(cursor);
 }
 
 void OverlayWindow::keyPressEvent(QKeyEvent *event)
@@ -310,7 +334,7 @@ void OverlayWindow::startInteraction()
     }
     this->interactAnimation_.setDirection(QPropertyAnimation::Forward);
     this->interactAnimation_.start();
-    this->setCursor(Qt::DragMoveCursor);
+    this->setOverrideCursor(Qt::SizeAllCursor);
     this->closeButton_.show();
 }
 
@@ -328,7 +352,7 @@ void OverlayWindow::endInteraction()
     }
     this->interactAnimation_.setDirection(QPropertyAnimation::Backward);
     this->interactAnimation_.start();
-    this->setCursor(Qt::ArrowCursor);
+    this->setOverrideCursor(Qt::ArrowCursor);
     this->closeButton_.hide();
 }
 

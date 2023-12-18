@@ -557,6 +557,7 @@ void ChannelView::setColorVisitor(
     Q_ASSERT_X(this->colorVisitor_ == nullptr, "ChannelView::setColorVisitor",
                "The color visitor should only be set once.");
     this->colorVisitor_ = visitor;
+    this->themeChangedEvent();
 }
 
 void ChannelView::setupHighlightAnimationColors()
