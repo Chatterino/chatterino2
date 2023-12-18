@@ -20,6 +20,10 @@ class OverlayWindow : public QWidget
 public:
     OverlayWindow(IndirectChannel channel);
     ~OverlayWindow() override;
+    OverlayWindow(const OverlayWindow &) = delete;
+    OverlayWindow(OverlayWindow &&) = delete;
+    OverlayWindow &operator=(const OverlayWindow &) = delete;
+    OverlayWindow &operator=(OverlayWindow &&) = delete;
 
 protected:
     bool eventFilter(QObject *object, QEvent *event) override;

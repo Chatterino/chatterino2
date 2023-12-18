@@ -6,6 +6,7 @@
 #include "singletons/Theme.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/helper/ChannelView.hpp"
+#include "widgets/helper/InvisibleSizeGrip.hpp"
 #include "widgets/helper/TitlebarButton.hpp"
 #include "widgets/splits/Split.hpp"
 
@@ -27,20 +28,6 @@ enum class Knowledge : std::int32_t {
     None = 0,
     // User opened the overlay at least once
     Activation = 1 << 0,
-};
-
-class Grippy : public QSizeGrip
-{
-public:
-    Grippy(QWidget *parent)
-        : QSizeGrip(parent)
-    {
-    }
-
-protected:
-    void paintEvent(QPaintEvent *event) override
-    {
-    }
 };
 
 bool hasKnowledge(Knowledge knowledge)
@@ -100,7 +87,8 @@ OverlayWindow::OverlayWindow(IndirectChannel channel)
 
     auto *grid = new QGridLayout(this);
     grid->addWidget(&this->channelView_, 0, 0);
-    grid->addWidget(new Grippy(this), 0, 0, Qt::AlignBottom | Qt::AlignRight);
+    grid->addWidget(new InvisibleSizeGrip(this), 0, 0,
+                    Qt::AlignBottom | Qt::AlignRight);
     grid->addWidget(&this->closeButton_, 0, 0, Qt::AlignTop | Qt::AlignRight);
     grid->setContentsMargins(0, 0, 0, 0);
 

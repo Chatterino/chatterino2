@@ -1,6 +1,5 @@
 #pragma once
 
-#include <type_traits>
 #ifndef Q_OS_MAC
 #    include <QAbstractNativeEventFilter>
 #endif
@@ -9,7 +8,6 @@
 #include <QKeySequence>
 
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 namespace chatterino {
@@ -39,6 +37,10 @@ public:
 
     GlobalShortcutPrivate(GlobalShortcut *owner);
     ~GlobalShortcutPrivate() override;
+    GlobalShortcutPrivate(const GlobalShortcutPrivate &) = delete;
+    GlobalShortcutPrivate(GlobalShortcutPrivate &&) = delete;
+    GlobalShortcutPrivate &operator=(const GlobalShortcutPrivate &) = delete;
+    GlobalShortcutPrivate &operator=(GlobalShortcutPrivate &&) = delete;
 
     Qt::Key key;
     Qt::KeyboardModifiers mods;
