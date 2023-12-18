@@ -60,7 +60,8 @@ quint32 GlobalShortcutPrivate::nativeModifiers(Qt::KeyboardModifiers modifiers)
     }
 
     Q_ASSERT_X(
-        !modifiers.testAnyFlags({Qt::KeypadModifier, Qt::GroupSwitchModifier}),
+        !modifiers.testFlag(Qt::KeypadModifier) &&
+            !modifiers.testFlag(Qt::GroupSwitchModifier),
         "GlobalShortcutPrivate::nativeModifiers",
         "KeypadModifier and GroupSwitchModifier can't be expressed on Windows");
 
