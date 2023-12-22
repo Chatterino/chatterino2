@@ -7,4 +7,4 @@ docker run --network=host --detach ghcr.io/chatterino/twitch-pubsub-server-test:
 docker run -p 9051:80 --detach kennethreitz/httpbin
 ```
 
-Alternatively, you can use [httpbox](github.com/kevinastone/httpbox) (`httpbox --port 9051`).
+If you're unable to use docker, you can use [httpbox](github.com/kevinastone/httpbox) (`httpbox --port 9051`) and [Chatterino/twitch-pubsub-server-test](https://github.com/Chatterino/twitch-pubsub-server-test/releases/latest) manually.
