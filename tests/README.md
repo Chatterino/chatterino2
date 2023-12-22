@@ -1,4 +1,4 @@
-To run tests all tests you will need to run the `kennethreitz/httpbin` and `ghcr.io/chatterino/twitch-pubsub-server-test:latest` docker images.
+To run all tests you will need to run the `kennethreitz/httpbin` and `ghcr.io/chatterino/twitch-pubsub-server-test:latest` docker images.
 
 For example:
 
