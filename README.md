@@ -53,7 +53,7 @@ file](./.git-blame-ignore-revs). GitHub does this by default.
 
 ## Code style
 
-The code is formatted using [ClangFormat](https://clang.llvm.org/docs/ClangFormat.html) in Qt Creator. [.clang-format](.clang-format) contains the style file for ClangFormat.
+The code is formatted using [clang-format](https://clang.llvm.org/docs/ClangFormat.html). Our configuration is found in the [.clang-format](.clang-format) file in the repository root directory.
 
 For more contribution guidelines, take a look at [the wiki](https://wiki.chatterino.com/Contributing%20for%20Developers/).
 
