@@ -35,7 +35,7 @@ This will require more than 30GB of free space on your hard drive.
 ## Building
 
 1. Clone
-   ```powershell
+   ```shell
    git clone --recurse-submodules https://github.com/Chatterino/chatterino2.git
    ```
 1. Install dependencies

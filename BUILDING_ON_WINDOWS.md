@@ -132,7 +132,7 @@ nmake
 
 To build a debug build, you'll also need to add the `-s compiler.runtime_type=Debug` flag to the `conan install` invocation. See [this StackOverflow post](https://stackoverflow.com/questions/59828611/windeployqt-doesnt-deploy-qwindowsd-dll-for-a-debug-application/75607313#75607313)
 
-#### Deploying Qt Libraries
+#### Deploying Qt libraries
 
 Once Chatterino has finished building, to ensure all .dll's are available you can run this from the build directory:  
 `windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir bin/`
@@ -146,7 +146,7 @@ Can't find windeployqt? You forgot to add your Qt bin directory (e.g. `C:\Qt\6.5
    ![Qt Create Configure Project screenshot](https://user-images.githubusercontent.com/69117321/169887645-2ae0871a-fe8a-4eb9-98db-7b996dea3a54.png)
 3. Select the profile(s) you want to build with and click "Configure Project".
 
-#### Building and Running
+#### Building and running
 
 - In the main screen, click the green "play symbol" on the bottom left to run the project directly.
 - Click the hammer on the bottom left to generate a build (does not run the build though).
@@ -156,7 +156,7 @@ Build results will be placed in a folder at the same level as the "chatterino2" 
 - Note that if you are building Chatterino purely for usage, not for development, it is recommended that you click the "PC" icon above the play icon and select "Release" instead of "Debug".
 - Output and error messages produced by the compiler can be seen under the "4 Compile Output" tab in Qt Creator.
 
-#### Producing Standalone Builds
+#### Producing standalone builds
 
 If you build Chatterino, the result directories will contain a `chatterino.exe` file in the `$OUTPUTDIR\release\` directory. This `.exe` file will not directly run on any given target system, because it will be lacking various Qt runtimes.
 
