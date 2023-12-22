@@ -45,7 +45,7 @@ An example plugin is available at [https://github.com/Mm2PL/Chatterino-test-plug
 
 If you prefer, you may use [TypescriptToLua](https://typescripttolua.github.io)
 to typecheck your plugins. There is a `chatterino.d.ts` file describing the API
-in this directory. However this has several drawbacks like harder debugging at
+in this directory. However, this has several drawbacks like harder debugging at
 runtime.
 
 ## API
@@ -161,7 +161,7 @@ See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-load
 #### `require(modname)`
 
 This is Lua's [`require()`](https://www.lua.org/manual/5.3/manual.html#pdf-require) function.
-However the searcher and load configuration is notably different than default:
+However, the searcher and load configuration is notably different from the default:
 
 - Lua's built-in dynamic library searcher is removed,
 - `package.path` is not used, in its place are two searchers,
