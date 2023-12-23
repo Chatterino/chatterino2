@@ -76,6 +76,7 @@ std::unique_ptr<crashpad::MinidumpUserExtensionStreamDataSource>
     auto startTime = parseTime(startedAt);
     auto now = std::chrono::time_point_cast<std::chrono::seconds>(
         std::chrono::utc_clock::now());
+    // we don't try to restart if Chatterino has been running for less than 1 minute
     if (now - startTime < 1min)
     {
         return {};
