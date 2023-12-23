@@ -96,6 +96,12 @@ bool canRestart(const Paths &paths)
 #endif
 }
 
+/// This encodes the arguments into a single string.
+///
+/// The command line arguments are joined by '+'. A plus is escaped by an
+/// additional plus ('++' -> '+').
+///
+/// The decoding happens in crash-handler/src/CommandLine.cpp
 std::string encodeArguments()
 {
     std::string args;
@@ -126,11 +132,11 @@ void CrashHandler::initialize(Settings & /*settings*/, Paths &paths)
     else
     {
         // By default, we don't restart after a crash.
-        this->setShouldRecover(false);
+        this->saveShouldRecover(false);
     }
 }
 
-void CrashHandler::setShouldRecover(bool value)
+void CrashHandler::saveShouldRecover(bool value)
 {
     this->shouldRecover_ = value;
 
