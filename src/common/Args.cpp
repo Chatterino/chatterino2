@@ -77,7 +77,6 @@ Args::Args(const QApplication &app)
     auto exceptionCodeOption = hiddenOption("cr-exception-code", "", "code");
     auto exceptionMessageOption =
         hiddenOption("cr-exception-message", "", "message");
-    auto extraMemoryOption = hiddenOption("cr-extra-memory", "", "bytes");
 
     // Added to ignore the parent-window option passed during native messaging
     auto parentWindowOption = hiddenOption("parent-window");
@@ -85,9 +84,9 @@ Args::Args(const QApplication &app)
         hiddenOption("x-attach-split-to-window", "", "window-id");
 
     // Verbose
-    auto verboseOption = hiddenOption(QStringList{"v", "verbose"},
-                                      "Attaches to the Console on windows, "
-                                      "allowing you to see debug output.");
+    auto verboseOption = QCommandLineOption(
+        QStringList{"v", "verbose"}, "Attaches to the Console on windows, "
+                                     "allowing you to see debug output.");
     // Safe mode
     QCommandLineOption safeModeOption(
         "safe-mode", "Starts Chatterino without loading Plugins and always "
@@ -106,7 +105,6 @@ Args::Args(const QApplication &app)
         crashRecoveryOption,
         exceptionCodeOption,
         exceptionMessageOption,
-        extraMemoryOption,
         parentWindowOption,
         parentWindowIdOption,
         verboseOption,
@@ -150,10 +148,6 @@ Args::Args(const QApplication &app)
     if (parser.isSet(exceptionMessageOption))
     {
         this->exceptionMessage = parser.value(exceptionMessageOption);
-    }
-    if (parser.isSet(extraMemoryOption))
-    {
-        this->extraMemory = parser.value(extraMemoryOption).toULongLong();
     }
 
     if (parser.isSet(parentWindowIdOption))

@@ -75,18 +75,6 @@ LastRunCrashDialog::LastRunCrashDialog()
         text += u".<br>"_s;
     }
 
-    if (getArgs().extraMemory && *getArgs().extraMemory > 0)
-    {
-        text += QLocale::system().formattedDataSize(
-                    static_cast<qint64>(*getArgs().extraMemory)) %
-                " have been included in the report.<br>";
-    }
-    else
-    {
-        text +=
-            u"No extra memory snapshot was saved with the crash report.<br>"_s;
-    }
-
     text +=
         "Crash reports are <b>only stored locally</b> and never uploaded.<br>"
         "<br>Please <a "

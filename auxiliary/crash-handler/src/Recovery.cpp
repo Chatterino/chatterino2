@@ -103,20 +103,6 @@ std::unique_ptr<crashpad::MinidumpUserExtensionStreamDataSource>
             arguments.emplace_back(*message);
         }
 #endif
-
-        // The amount of extra memory captured.
-        // This is almost always 0.
-        size_t extraMemory = 0;
-        for (const auto *mem : exception->ExtraMemory())
-        {
-            extraMemory += mem->Size();
-        }
-
-        if (extraMemory > 0)
-        {
-            arguments.emplace_back(L"--cr-extra-memory"s);
-            arguments.emplace_back(std::format(L"{}", extraMemory));
-        }
     }
 
     this->restartInfo_ = RestartInfo{

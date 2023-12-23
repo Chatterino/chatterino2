@@ -9,16 +9,12 @@
 #include <util/win/exception_codes.h>
 
 #include <chrono>
-#include <ranges>
-#include <utility>
 
 using namespace std::string_literals;
 using namespace std::chrono_literals;
 using namespace testing;
 
 namespace chrono = std::chrono;
-namespace ranges = std::ranges;
-namespace views = std::ranges::views;
 
 namespace {
 
@@ -54,44 +50,11 @@ public:
     MOCK_METHOD(const crashpad::ProcessMemory *, Memory, (), (const, override));
 };
 
-class MyMemorySnapshot : public crashpad::MemorySnapshot
-{
-public:
-    MyMemorySnapshot(size_t size)
-        : size_(size)
-    {
-    }
-
-    size_t Size() const override
-    {
-        return this->size_;
-    }
-
-    uint64_t Address() const override
-    {
-        return 0;
-    }
-    bool Read(Delegate * /*unused*/) const override
-    {
-        return false;
-    }
-    const MemorySnapshot *MergeWithOtherSnapshot(
-        const MemorySnapshot * /*unused*/) const override
-    {
-        return nullptr;
-    }
-
-private:
-    size_t size_;
-};
-
 class MyExceptionSnapshot : public crashpad::ExceptionSnapshot
 {
 public:
-    MyExceptionSnapshot(uint32_t exception,
-                        std::vector<MyMemorySnapshot> extraMemory = {})
+    MyExceptionSnapshot(uint32_t exception)
         : exception_(exception)
-        , extraMemory_(std::move(extraMemory))
     {
     }
 
@@ -100,26 +63,16 @@ public:
         return this->exception_;
     }
 
-    std::vector<const crashpad::MemorySnapshot *> ExtraMemory() const override
-    {
-        std::vector<const crashpad::MemorySnapshot *> v;
-        v.reserve(this->extraMemory_.size());
-        ranges::copy(this->extraMemory_ | views::transform([&](const auto &it) {
-                         return &it;
-                     }),
-                     std::back_inserter(v));
-        return v;
-    }
-
     MOCK_METHOD(const crashpad::CPUContext *, Context, (), (const, override));
     MOCK_METHOD(uint64_t, ThreadID, (), (const, override));
     MOCK_METHOD(uint32_t, ExceptionInfo, (), (const, override));
     MOCK_METHOD(uint64_t, ExceptionAddress, (), (const, override));
+    MOCK_METHOD(std::vector<const crashpad::MemorySnapshot *>, ExtraMemory, (),
+                (const, override));
     MOCK_METHOD(const std::vector<uint64_t> &, Codes, (), (const, override));
 
 private:
     uint32_t exception_;
-    std::vector<MyMemorySnapshot> extraMemory_;
 };
 
 std::string formatTs(chrono::utc_time<chrono::seconds> ts)
@@ -160,7 +113,7 @@ TEST(CrashRecoverer, ProduceStreamData)
             },
         },
         {
-            "Restart + Exception(access violation, 0b)",
+            "Restart + Exception(access violation)",
             {
                 {"exePath"s, "foobar"s},
                 {"canRestart"s, "true"s},
@@ -178,51 +131,7 @@ TEST(CrashRecoverer, ProduceStreamData)
             },
         },
         {
-            "Restart + Exception(access violation, 42b)",
-            {
-                {"exePath"s, "foobar"s},
-                {"canRestart"s, "true"s},
-                {"startedAt"s, formatFromNow(-2min)},
-            },
-            std::make_optional<MyExceptionSnapshot>(
-                EXCEPTION_ACCESS_VIOLATION,
-                std::vector<MyMemorySnapshot>{{42}}),
-            RestartInfo{
-                L"foobar"s,
-                {
-                    L"--cr-exception-code"s,
-                    std::format(L"{}", EXCEPTION_ACCESS_VIOLATION),
-                    L"--cr-exception-message"s,
-                    L"ExceptionAccessViolation"s,
-                    L"--cr-extra-memory"s,
-                    L"42"s,
-                },
-            },
-        },
-        {
-            "Restart + Exception(access violation, 21b + 21b)",
-            {
-                {"exePath"s, "foobar"s},
-                {"canRestart"s, "true"s},
-                {"startedAt"s, formatFromNow(-2min)},
-            },
-            std::make_optional<MyExceptionSnapshot>(
-                EXCEPTION_ACCESS_VIOLATION,
-                std::vector<MyMemorySnapshot>{{21}, {21}}),
-            RestartInfo{
-                L"foobar"s,
-                {
-                    L"--cr-exception-code"s,
-                    std::format(L"{}", EXCEPTION_ACCESS_VIOLATION),
-                    L"--cr-exception-message"s,
-                    L"ExceptionAccessViolation"s,
-                    L"--cr-extra-memory"s,
-                    L"42"s,
-                },
-            },
-        },
-        {
-            "Restart + Exception(user triggered, 0b) + Args",
+            "Restart + Exception(user triggered) + Args",
             {
                 {"exePath"s, "foobar"s},
                 {"canRestart"s, "true"s},
@@ -247,15 +156,13 @@ TEST(CrashRecoverer, ProduceStreamData)
             },
         },
         {
-            "No Restart + Exception(access violation, 0b)",
+            "No Restart + Exception(access violation)",
             {
                 {"exePath"s, "foobar"s},
                 {"canRestart"s, "false"s},
                 {"startedAt"s, formatFromNow(-2min)},
             },
-            std::make_optional<MyExceptionSnapshot>(
-                EXCEPTION_ACCESS_VIOLATION,
-                std::vector<MyMemorySnapshot>{{21}, {21}}),
+            {EXCEPTION_ACCESS_VIOLATION},
             std::nullopt,
         },
         {

@@ -16,7 +16,6 @@ namespace chatterino {
 ///   --crash-recovery
 ///   --cr-exception-code code
 ///   --cr-exception-message message
-///   --cr-extra-memory=bytes
 ///
 /// Native messaging:
 ///   --parent-window
@@ -38,7 +37,6 @@ public:
     bool crashRecovery{};
     std::optional<uint32_t> exceptionCode{};
     std::optional<QString> exceptionMessage{};
-    std::optional<size_t> extraMemory{};
 
     bool shouldRunBrowserExtensionHost{};
     // Shows a single chat. Used on windows to embed in another application.
