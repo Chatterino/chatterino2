@@ -597,7 +597,8 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element,
         yOffset -= (MARGIN.top() * this->scale_);
     }
 
-    if (getSettings()->removeSpacesBetweenEmotes &&
+    if ((getSettings()->removeSpacesBetweenEmotes ||
+         element->getFlags().has(MessageElementFlag::BttvModifierZeroSpace)) &&
         element->getFlags().hasAny({MessageElementFlag::EmoteImages}) &&
         shouldRemoveSpaceBetweenEmotes())
     {

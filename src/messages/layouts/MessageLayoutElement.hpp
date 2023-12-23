@@ -8,9 +8,11 @@
 #include <QPoint>
 #include <QRect>
 #include <QString>
+#include <QTransform>
 
 #include <climits>
 #include <cstdint>
+#include <memory>
 
 class QPainter;
 
