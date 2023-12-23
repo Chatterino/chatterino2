@@ -35,7 +35,9 @@ public:
     bool printVersion{};
 
     bool crashRecovery{};
+    /// Native, platform-specific exception code from crashpad
     std::optional<uint32_t> exceptionCode{};
+    /// Text version of the exeption code. Potentially contains more context.
     std::optional<QString> exceptionMessage{};
 
     bool shouldRunBrowserExtensionHost{};
