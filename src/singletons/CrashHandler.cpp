@@ -86,10 +86,17 @@ bool canRestart(const Paths &paths)
 {
 #ifdef NDEBUG
     const auto &args = chatterino::getArgs();
-    bool noBadArgs =
-        !args.isFramelessEmbed && !args.shouldRunBrowserExtensionHost;
+    if (args.isFramelessEmbed || args.shouldRunBrowserExtensionHost)
+    {
+        return false;
+    }
 
-    return noBadArgs && readRecoverySettings(paths).value_or(false);
+    auto settings = readRecoverySettings(paths);
+    if (!settings)
+    {
+        return false; // default, no settings found
+    }
+    return *settings;
 #else
     (void)paths;
     return false;
