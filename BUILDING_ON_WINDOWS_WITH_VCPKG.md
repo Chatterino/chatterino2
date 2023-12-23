@@ -8,12 +8,16 @@ This will require more than 30GB of free space on your hard drive.
 1. Install [CMake](https://cmake.org/)
 1. Install [git](https://git-scm.com/)
 1. Install [vcpkg](https://vcpkg.io/)
-   - `git clone https://github.com/Microsoft/vcpkg.git`
-   - `cd .\vcpkg\`
-   - `.\bootstrap-vcpkg.bat`
-   - `.\vcpkg integrate install`
-   - `.\vcpkg integrate powershell`
-   - `cd ..`
+
+   ```shell
+   git clone https://github.com/Microsoft/vcpkg.git
+   cd vcpkg
+   .\bootstrap-vcpkg.bat
+   .\vcpkg integrate install
+   .\vcpkg integrate powershell
+   cd ..
+   ```
+
 1. Configure the environment variables for vcpkg.  
     Check [this document](https://gist.github.com/mitchmindtree/92c8e37fa80c8dddee5b94fc88d1288b#setting-an-environment-variable-on-windows) for more information for how to set environment variables on Windows.
    - Ensure your dependencies are built as 64-bit  
@@ -31,15 +35,19 @@ This will require more than 30GB of free space on your hard drive.
 ## Building
 
 1. Clone
-   - `git clone --recurse-submodules https://github.com/Chatterino/chatterino2.git`
+   ```shell
+   git clone --recurse-submodules https://github.com/Chatterino/chatterino2.git
+   ```
 1. Install dependencies
-   - `cd .\chatterino2\`
-   - `vcpkg install`
+   ```powershell
+   cd .\chatterino2\
+   vcpkg install
+   ```
 1. Build
-   - `mkdir .\build\`
-   - `cd .\build\`
-   - (cmd) `cmake .. -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake`
-   - (ps1) `cmake .. -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"`
-   - `cmake --build . --parallel <threads> --config Release`
-1. Run
-   - `.\bin\chatterino2.exe`
+   ```powershell
+   cmake -B build -DCMAKE_TOOLCHAIN_FILE="$Env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+   cd build
+   cmake --build . --parallel <threads> --config Release
+   ```
+   When using CMD, use `-DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake` to specify the toolchain.
+1. Run `.\bin\chatterino2.exe`

@@ -36,7 +36,7 @@ NOTE: The AppImage from Ubuntu 22.04 is broken. Approach with caution
 
 #### Testing
 
-1. Build a docker image builds the chatterino tests  
+1. Build a docker image builds the Chatterino tests  
    `docker buildx build -t chatterino-ubuntu-22.04-test -f .docker/Dockerfile-ubuntu-22.04-test .`
 1. Run the tests  
    `docker run --rm --network=host chatterino-ubuntu-22.04-test`

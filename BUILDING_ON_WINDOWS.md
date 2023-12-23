@@ -1,18 +1,18 @@
 # Building on Windows
 
-**Note that installing all of the development prerequisites and libraries will require about 40 GB of free disk space. Please ensure this space is available on your `C:` drive before proceeding.**
+**Note that installing all the development prerequisites and libraries will require about 12 GB of free disk space. Please ensure this space is available on your `C:` drive before proceeding.**
 
 This guide assumes you are on a 64-bit system. You might need to manually search out alternate download links should you desire to build Chatterino on a 32-bit system.
 
-## Installing prerequisites
+## Prerequisites
 
 ### Visual Studio
 
-Download and install [Visual Studio 2022 Community](https://visualstudio.microsoft.com/downloads/). In the installer, select "Desktop development with C++" and "Universal Windows Platform development".
+Download and install [Visual Studio 2022 Community](https://visualstudio.microsoft.com/downloads/). In the installer, select "Desktop development with C++".
 
 Notes:
 
-- This installation will take about 21 GB of disk space
+- This installation will take about 8 GB of disk space
 - You do not need to sign in with a Microsoft account after setup completes. You may simply exit the login dialog.
 
 ### Qt
@@ -26,7 +26,9 @@ Notes:
 
 - Installing the latest **stable** Qt version is advised for new installations, but if you want to use your existing installation please ensure you are running **Qt 5.12 or later**.
 
-#### When prompted which components to install:
+#### Components
+
+When prompted which components to install, do the following:
 
 1. Unfold the tree element that says "Qt"
 2. Unfold the top most tree element (latest stable Qt version, e.g. `Qt 6.5.3`)
@@ -43,7 +45,7 @@ Once Qt is done installing, make sure you add its bin directory to your `PATH` (
 
 <details>
    <summary>How to add Qt to PATH</summary>
-   
+
 1. Type "path" in the Windows start menu and click `Edit the system environment variables`.
 2. Click the `Environment Variables...` button bottom right.
 3. In the `User variables` (scoped to the current user) or `System variables` (system-wide) section, scroll down until you find `Path` and double click it.
@@ -78,7 +80,7 @@ Note: This installation will take about 2.1 GB of disk space.
 <details>
 <summary>OpenSSL</summary>
 
-### For our websocket library, we need OpenSSL 1.1
+For our websocket library, we need OpenSSL 1.1.
 
 1. Download OpenSSL for windows, version `1.1.1s`: **[Download](https://web.archive.org/web/20221101204129/https://slproweb.com/download/Win64OpenSSL-1_1_1s.exe)**
 2. When prompted, install OpenSSL to `C:\local\openssl`
@@ -120,57 +122,69 @@ Then in a terminal, configure conan to use `NMake Makefiles` as its generator:
 
 Open up your terminal with the Visual Studio environment variables (e.g. `x64 Native Tools Command Prompt for VS 2022`), cd to the cloned chatterino2 directory and run the following commands:
 
-1. `mkdir build`
-1. `cd build`
-1. `conan install .. -s build_type=Release -c tools.cmake.cmaketoolchain:generator="NMake Makefiles" --build=missing --output-folder=.`
-1. `cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DCMAKE_PREFIX_PATH="C:\Qt\6.5.3\msvc2019_64" ..`
-1. `nmake`
+```cmd
+mkdir build
+cd build
+conan install .. -s build_type=Release -c tools.cmake.cmaketoolchain:generator="NMake Makefiles" --build=missing --output-folder=.
+cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DCMAKE_PREFIX_PATH="C:\Qt\6.5.3\msvc2019_64" ..
+nmake
+```
 
 To build a debug build, you'll also need to add the `-s compiler.runtime_type=Debug` flag to the `conan install` invocation. See [this StackOverflow post](https://stackoverflow.com/questions/59828611/windeployqt-doesnt-deploy-qwindowsd-dll-for-a-debug-application/75607313#75607313)
 
-#### Ensure DLLs are available
+#### Deploying Qt libraries
 
 Once Chatterino has finished building, to ensure all .dll's are available you can run this from the build directory:  
 `windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir bin/`
 
 Can't find windeployqt? You forgot to add your Qt bin directory (e.g. `C:\Qt\6.5.3\msvc2019_64\bin`) to your `PATH`
 
-### Run the build in Qt Creator
+### Developing in Qt Creator
 
 1. Open the `CMakeLists.txt` file by double-clicking it, or by opening it via Qt Creator.
 2. You will be presented with a screen that is titled "Configure Project". In this screen, you should have at least one option present ready to be configured, like this:
    ![Qt Create Configure Project screenshot](https://user-images.githubusercontent.com/69117321/169887645-2ae0871a-fe8a-4eb9-98db-7b996dea3a54.png)
 3. Select the profile(s) you want to build with and click "Configure Project".
 
-#### How to run and produce builds
+#### Building and running
 
 - In the main screen, click the green "play symbol" on the bottom left to run the project directly.
 - Click the hammer on the bottom left to generate a build (does not run the build though).
 
 Build results will be placed in a folder at the same level as the "chatterino2" project folder (e.g. if your sources are at `C:\Users\example\src\chatterino2`, then the build will be placed in an automatically generated folder under `C:\Users\example\src`, e.g. `C:\Users\example\src\build-chatterino-Desktop_Qt_6.5.3_MSVC2019_64bit-Release`.)
 
-- Note that if you are building chatterino purely for usage, not for development, it is recommended that you click the "PC" icon above the play icon and select "Release" instead of "Debug".
+- Note that if you are building Chatterino purely for usage, not for development, it is recommended that you click the "PC" icon above the play icon and select "Release" instead of "Debug".
 - Output and error messages produced by the compiler can be seen under the "4 Compile Output" tab in Qt Creator.
 
 #### Producing standalone builds
 
-If you build chatterino, the result directories will contain a `chatterino.exe` file in the `$OUTPUTDIR\release\` directory. This `.exe` file will not directly run on any given target system, because it will be lacking various Qt runtimes.
+If you build Chatterino, the result directories will contain a `chatterino.exe` file in the `$OUTPUTDIR\release\` directory. This `.exe` file will not directly run on any given target system, because it will be lacking various Qt runtimes.
 
 To produce a standalone package, you need to generate all required files using the tool `windeployqt`. This tool can be found in the `bin` directory of your Qt installation, e.g. at `C:\Qt\6.5.3\msvc2019_64\bin\windeployqt.exe`.
 
 To produce all supplement files for a standalone build, follow these steps (adjust paths as required):
 
-1.  Navigate to your build output directory with Windows Explorer, e.g. `C:\Users\example\src\build-chatterino-Desktop_Qt_6.5.3_MSVC2019_64bit-Release`
-2.  Enter the `release` directory
-3.  Delete all files except the `chatterino.exe` file. You should be left with a directory only containing `chatterino.exe`.
-4.  Open a command prompt and execute:
+1. Navigate to your build output directory with Windows Explorer, e.g. `C:\Users\example\src\build-chatterino-Desktop_Qt_6.5.3_MSVC2019_64bit-Release`
+2. Enter the `release` directory
+3. Delete all files except the `chatterino.exe` file. You should be left with a directory only containing `chatterino.exe`.
+4. Open a command prompt and execute:
+   ```cmd
+   cd C:\Users\example\src\build-chatterino-Desktop_Qt_6.5.3_MSVC2019_64bit-Release\release
+   windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir bin/
+   ```
+5. The `releases` directory will now be populated with all the required files to make the Chatterino build standalone.
 
-        cd C:\Users\example\src\build-chatterino-Desktop_Qt_6.5.3_MSVC2019_64bit-Release\release
-        C:\Qt\6.5.3\msvc2019_64\bin\windeployqt.exe chatterino.exe
+You can now create a zip archive of all the contents in `releases` and distribute the program as is, without requiring any development tools to be present on the target system. (However, the CRT must be present, as usual - see the [README](README.md)).
 
-5.  The `releases` directory will now be populated with all the required files to make the chatterino build standalone.
+#### Formatting
 
-You can now create a zip archive of all the contents in `releases` and distribute the program as is, without requiring any development tools to be present on the target system. (However, the vcredist package must be present, as usual - see the [README](README.md)).
+To automatically format your code, do the following:
+
+1. Download [LLVM 16.0.6](https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/LLVM-16.0.6-win64.exe)
+2. During the installation, make sure to add it to your path
+3. In Qt Creator, Select `Tools` > `Options` > `Beautifier`
+4. Under `General` select `Tool: ClangFormat` and enable `Automatic Formatting on File Save`
+5. Under `Clang Format` select `Use predefined style: File` and `Fallback style: None`
 
 ### Building on MSVC with AddressSanitizer
 
@@ -183,7 +197,7 @@ copy the file found in `<VisualStudio-installation-path>\VC\Tools\MSVC\<version>
 
 To learn more about AddressSanitizer and MSVC, visit the [Microsoft Docs](https://learn.microsoft.com/en-us/cpp/sanitizers/asan).
 
-### Building/Running in CLion
+### Developing in CLion
 
 _Note:_ We're using `build` instead of the CLion default `cmake-build-debug` folder.
 
@@ -196,7 +210,7 @@ Clone the repository as described in the readme. Open a terminal in the cloned f
 
 Now open the project in CLion. You will be greeted with the _Open Project Wizard_. Set the _CMake Options_ to
 
-```
+```text
 -DCMAKE_PREFIX_PATH=C:\Qt\6.5.3\msvc2019_64\lib\cmake\Qt6
 -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake"
 ```
@@ -227,9 +241,9 @@ Select the `CMake Applications > chatterino` configuration and add a new _Run Ex
 </details>
 
 <details>
-<summary>Screenshot of chatterino configuration</summary>
+<summary>Screenshot of Chatterino configuration</summary>
 
-![Screenshot of chatterino configuration](https://user-images.githubusercontent.com/41973452/160240843-dc0c603c-227f-4f56-98ca-57f03989dfb4.png)
+![Screenshot of Chatterino configuration](https://user-images.githubusercontent.com/41973452/160240843-dc0c603c-227f-4f56-98ca-57f03989dfb4.png)
 
 </details>
 
@@ -240,26 +254,24 @@ write `portable` into it.
 
 #### Debugging
 
-To visualize QT types like `QString`, you need to inform CLion and LLDB
+To visualize Qt types like `QString`, you need to inform CLion and LLDB
 about these types.
 
 1. Set `Enable NatVis renderers for LLDB option`
    in `Settings | Build, Execution, Deployment | Debugger | Data Views | C/C++` (should be enabled by default).
-2. Use the official NatVis file for QT from [`qt-labs/vstools`](https://github.com/qt-labs/vstools) by saving them to
+2. Use the official NatVis file for Qt from [`qt-labs/vstools`](https://github.com/qt-labs/vstools) by saving them to
    the project root using PowerShell:
 
 <!--
-When switching to QT6 these need to be updated to qt6.natvis.xml.
-We need to do the replacement as the QT tools:
-https://github.com/qt-labs/vstools/blob/0769d945f8d0040917d654d9731e6b65951e102c/QtVsTools.Package/QtVsToolsPackage.cs#L390-L393
+We can't use Invoke-RestMethod here, because it will automatically convert the body to an xml document.
 -->
 
 ```powershell
-(irm "https://github.com/qt-labs/vstools/raw/dev/QtVsTools.Package/qt5.natvis.xml").Replace('##NAMESPACE##::', '') | Out-File qt5.natvis
+(iwr "https://github.com/qt-labs/vstools/raw/dev/QtVsTools.Package/qt6.natvis.xml").Content.Replace('##NAMESPACE##::', '') | Out-File qt6.natvis
 # [OR] using the permalink
-(irm "https://github.com/qt-labs/vstools/raw/0769d945f8d0040917d654d9731e6b65951e102c/QtVsTools.Package/qt5.natvis.xml").Replace('##NAMESPACE##::', '') | Out-File qt5.natvis
+(iwr "https://github.com/qt-labs/vstools/raw/1c8ba533bd88d935be3724667e0087fd0796102c/QtVsTools.Package/qt6.natvis.xml").Content.Replace('##NAMESPACE##::', '') | Out-File qt6.natvis
 ```
 
-Now you can debug the application and see QT types rendered correctly.
+Now you can debug the application and see Qt types rendered correctly.
 If this didn't work for you, try following
 the [tutorial from JetBrains](https://www.jetbrains.com/help/clion/qt-tutorial.html#debug-renderers).
