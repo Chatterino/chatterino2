@@ -1,10 +1,11 @@
 #include "CommandLine.hpp"
 
-std::vector<std::wstring> splitChatterinoArgs(const std::wstring &args)
+std::vector<std::wstring> splitEncodedChatterinoArgs(
+    const std::wstring &encodedArgs)
 {
     std::vector<std::wstring> parts;
 
-    std::wstring_view view(args);
+    std::wstring_view view(encodedArgs);
     std::wstring_view::size_type pos{};
     std::wstring part;
 

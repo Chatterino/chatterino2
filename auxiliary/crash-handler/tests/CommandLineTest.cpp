@@ -4,7 +4,7 @@
 
 using namespace std::string_literals;
 
-TEST(CommandLineTest, splitChatterinoArgs)
+TEST(CommandLineTest, splitEncodedChatterinoArgs)
 {
     struct TestCase {
         std::wstring input;
@@ -36,6 +36,6 @@ TEST(CommandLineTest, splitChatterinoArgs)
 
     for (const auto &testCase : testCases)
     {
-        EXPECT_EQ(splitChatterinoArgs(testCase.input), testCase.output);
+        EXPECT_EQ(splitEncodedChatterinoArgs(testCase.input), testCase.output);
     }
 }

@@ -87,7 +87,7 @@ std::unique_ptr<crashpad::MinidumpUserExtensionStreamDataSource>
     std::vector<std::wstring> arguments;
     if (exeArguments)
     {
-        arguments = splitChatterinoArgs(base::UTF8ToWide(*exeArguments));
+        arguments = splitEncodedChatterinoArgs(base::UTF8ToWide(*exeArguments));
     }
 
     const auto *exception = snapshot->Exception();
