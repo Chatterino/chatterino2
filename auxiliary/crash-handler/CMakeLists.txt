@@ -36,7 +36,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_LIB})
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/crashpad"
-        OUTPUT_NAME "crashpad_handler"
+        OUTPUT_NAME "crashpad-handler"
 )
 
 if(WIN32)

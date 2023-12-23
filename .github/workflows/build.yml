@@ -232,7 +232,7 @@ jobs:
           set cl=/MP
           nmake /S /NOLOGO chatterino-crash-handler
           mkdir Chatterino2/crashpad
-          cp bin/crashpad/crashpad_handler.exe Chatterino2/crashpad/crashpad_handler.exe
+          cp bin/crashpad/crashpad-handler.exe Chatterino2/crashpad/crashpad-handler.exe
           7z a bin/chatterino-Qt-${{ matrix.qt-version }}.pdb.7z bin/chatterino.pdb
 
       - name: Prepare build dir (windows)

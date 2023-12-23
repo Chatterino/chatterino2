@@ -27,9 +27,9 @@ using namespace literals;
 /// The name of the crashpad handler executable.
 /// This varies across platforms
 #if defined(Q_OS_UNIX)
-const QString CRASHPAD_EXECUTABLE_NAME = QStringLiteral("crashpad_handler");
+const QString CRASHPAD_EXECUTABLE_NAME = QStringLiteral("crashpad-handler");
 #elif defined(Q_OS_WINDOWS)
-const QString CRASHPAD_EXECUTABLE_NAME = QStringLiteral("crashpad_handler.exe");
+const QString CRASHPAD_EXECUTABLE_NAME = QStringLiteral("crashpad-handler.exe");
 #else
 #    error Unsupported platform
 #endif
@@ -94,7 +94,7 @@ bool canRestart(const Paths &paths)
     auto settings = readRecoverySettings(paths);
     if (!settings)
     {
-        return false; // default, no settings found
+        return false;  // default, no settings found
     }
     return *settings;
 #else
@@ -167,7 +167,7 @@ std::unique_ptr<crashpad::CrashpadClient> installCrashHandler()
     // [applicationDirPath]
     //  ├─chatterino(.exe)
     //  ╰─[crashpad]
-    //     ╰─crashpad_handler(.exe)
+    //     ╰─crashpad-handler(.exe)
     // TODO: The location of the binary might vary across platforms
     auto crashpadBinDir = QDir(QApplication::applicationDirPath());
 
