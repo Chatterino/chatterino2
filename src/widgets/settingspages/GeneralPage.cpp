@@ -882,7 +882,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             return getApp()->crashHandler->shouldRecover();
         },
         [](bool on) {
-            return getApp()->crashHandler->setShouldRecover(on);
+            return getApp()->crashHandler->saveShouldRecover(on);
         },
         "When possible, restart Chatterino if the program crashes");
 
