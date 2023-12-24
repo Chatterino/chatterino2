@@ -1,4 +1,4 @@
-#include "UserInfoPopup.hpp"
+#include "widgets/dialogs/UserInfoPopup.hpp"
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
@@ -134,9 +134,8 @@ namespace {
 
 }  // namespace
 
-UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
-                             Split *split)
-    : DraggablePopup(closeAutomatically, parent)
+UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
+    : DraggablePopup(closeAutomatically, split)
     , split_(split)
     , closeAutomatically_(closeAutomatically)
 {
