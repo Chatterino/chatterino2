@@ -124,7 +124,6 @@ jobs:
               ..
           set cl=/MP
           nmake /S /NOLOGO
-          nmake /S /NOLOGO chatterino-crash-handler-test
         working-directory: build-test
 
       - name: Download and extract Twitch PubSub Server Test
