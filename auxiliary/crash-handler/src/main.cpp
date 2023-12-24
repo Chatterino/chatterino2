@@ -51,4 +51,4 @@ int APIENTRY wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/,
     return crashpad::ToolSupport::Wmain(__argc, __wargv, actualMain);
 }
 
-#endif  // BUILDFLAG(IS_POSIX)
+#endif
