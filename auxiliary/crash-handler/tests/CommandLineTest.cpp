@@ -1,4 +1,4 @@
-#include "commandline.hpp"
+#include "CommandLine.hpp"
 
 #include <gtest/gtest.h>
 
