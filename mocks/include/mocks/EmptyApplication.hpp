@@ -44,6 +44,11 @@ public:
         return nullptr;
     }
 
+    CrashHandler *getCrashHandler() override
+    {
+        return nullptr;
+    }
+
     CommandController *getCommands() override
     {
         return nullptr;

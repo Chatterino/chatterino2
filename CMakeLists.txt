@@ -210,7 +210,7 @@ if (CHATTERINO_PLUGINS)
 endif()
 
 if (BUILD_WITH_CRASHPAD)
-    add_subdirectory("${CMAKE_SOURCE_DIR}/lib/crashpad" EXCLUDE_FROM_ALL)
+    add_subdirectory("${CMAKE_SOURCE_DIR}/tools/crash-handler")
 endif()
 
 # Used to provide a date of build in the About page (for nightly builds). Getting the actual time of

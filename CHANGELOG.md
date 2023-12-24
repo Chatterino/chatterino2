@@ -17,6 +17,7 @@
 - Minor: Add `--safe-mode` command line option that can be used for troubleshooting when Chatterino is misbehaving or is misconfigured. It disables hiding the settings button & prevents plugins from loading. (#4985)
 - Minor: Updated the flatpakref link included with nightly builds to point to up-to-date flathub-beta builds. (#5008)
 - Minor: Add a new completion API for experimental plugins feature. (#5000)
+- Minor: Re-enabled _Restart on crash_ option on Windows. (#5012)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
 - Bugfix: Trimmed custom streamlink paths on all platforms making sure you don't accidentally add spaces at the beginning or end of its path. (#4834)

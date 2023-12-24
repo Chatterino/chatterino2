@@ -510,7 +510,6 @@ public:
         ThumbnailPreviewMode::AlwaysShow,
     };
     QStringSetting cachePath = {"/cache/path", ""};
-    BoolSetting restartOnCrash = {"/misc/restartOnCrash", false};
     BoolSetting attachExtensionToAnyProcess = {
         "/misc/attachExtensionToAnyProcess", false};
     BoolSetting askOnImageUpload = {"/misc/askOnImageUpload", true};

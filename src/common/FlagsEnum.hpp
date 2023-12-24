@@ -97,6 +97,11 @@ public:
         return !this->hasAny(flags);
     }
 
+    T value() const
+    {
+        return this->value_;
+    }
+
 private:
     T value_{};
 };

@@ -8,6 +8,7 @@
 #include "controllers/sound/ISoundController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "singletons/CrashHandler.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/NativeMessaging.hpp"
 #include "singletons/Paths.hpp"
@@ -875,8 +876,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                            s.openLinksIncognito);
     }
 
-    layout.addCheckbox(
-        "Restart on crash", s.restartOnCrash, false,
+    layout.addCustomCheckbox(
+        "Restart on crash (requires restart)",
+        [] {
+            return getApp()->crashHandler->shouldRecover();
+        },
+        [](bool on) {
+            return getApp()->crashHandler->saveShouldRecover(on);
+        },
         "When possible, restart Chatterino if the program crashes");
 
 #if defined(Q_OS_LINUX) && !defined(NO_QTKEYCHAIN)
