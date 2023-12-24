@@ -811,7 +811,8 @@ ChannelPtr ChannelView::channel()
 
 bool ChannelView::showScrollbarHighlights() const
 {
-    return this->channel_->getType() != Channel::Type::TwitchMentions;
+    return this->channel_->getType() != Channel::Type::TwitchMentions &&
+        this->channel_->getType() != Channel::Type::TwitchAutomod;
 }
 
 void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
@@ -1082,8 +1083,7 @@ void ChannelView::messageAppended(MessagePtr &message,
              (getSettings()->highlightMentions ||
               this->channel_->getType() != Channel::Type::TwitchMentions)) ||
             (this->channel_->getType() == Channel::Type::TwitchAutomod &&
-             (getSettings()->automodPlaySound ||
-              getSettings()->automodFlashTaskbar)))
+             getSettings()->enableAutomodHighlight))
         {
             this->tabHighlightRequested.invoke(HighlightState::Highlighted);
         }

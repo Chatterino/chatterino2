@@ -234,6 +234,32 @@ void HighlightModel::afterInit()
 
     this->insertCustomRow(threadMessageRow,
                           HighlightRowIndexes::ThreadMessageRow);
+
+    // Highlight settings for automod caught messages
+    const std::vector<QStandardItem *> automodRow = this->createRow();
+    setBoolItem(automodRow[Column::Pattern],
+                getSettings()->enableAutomodHighlight.getValue(), true, false);
+    automodRow[Column::Pattern]->setData("AutoMod Caught Messages",
+                                         Qt::DisplayRole);
+    automodRow[Column::ShowInMentions]->setFlags({});
+    setBoolItem(automodRow[Column::FlashTaskbar],
+                getSettings()->enableAutomodHighlightTaskbar.getValue(), true,
+                false);
+    setBoolItem(automodRow[Column::PlaySound],
+                getSettings()->enableAutomodHighlightSound.getValue(), true,
+                false);
+    automodRow[Column::UseRegex]->setFlags({});
+    automodRow[Column::CaseSensitive]->setFlags({});
+
+    const auto automodSound =
+        QUrl(getSettings()->automodHighlightSoundUrl.getValue());
+    setFilePathItem(automodRow[Column::SoundPath], automodSound, false);
+
+    const auto automodMessageColor =
+        ColorProvider::instance().color(ColorType::AutomodHighlight);
+    setColorItem(automodRow[Column::Color], *automodMessageColor, false);
+
+    this->insertCustomRow(automodRow, HighlightRowIndexes::AutomodRow);
 }
 
 void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
@@ -276,6 +302,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 else if (rowIndex == HighlightRowIndexes::ThreadMessageRow)
                 {
                     getSettings()->enableThreadHighlight.setValue(
+                        value.toBool());
+                }
+                else if (rowIndex == HighlightRowIndexes::AutomodRow)
+                {
+                    getSettings()->enableAutomodHighlight.setValue(
                         value.toBool());
                 }
             }
@@ -336,6 +367,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     getSettings()->enableThreadHighlightTaskbar.setValue(
                         value.toBool());
                 }
+                else if (rowIndex == HighlightRowIndexes::AutomodRow)
+                {
+                    getSettings()->enableAutomodHighlightTaskbar.setValue(
+                        value.toBool());
+                }
             }
         }
         break;
@@ -377,6 +413,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     getSettings()->enableThreadHighlightSound.setValue(
                         value.toBool());
                 }
+                else if (rowIndex == HighlightRowIndexes::AutomodRow)
+                {
+                    getSettings()->enableAutomodHighlightSound.setValue(
+                        value.toBool());
+                }
             }
         }
         break;
@@ -410,6 +451,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 else if (rowIndex == HighlightRowIndexes::ThreadMessageRow)
                 {
                     getSettings()->threadHighlightSoundUrl.setValue(
+                        value.toString());
+                }
+                else if (rowIndex == HighlightRowIndexes::AutomodRow)
+                {
+                    getSettings()->automodHighlightSoundUrl.setValue(
                         value.toString());
                 }
             }
@@ -460,6 +506,13 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     getSettings()->threadHighlightColor.setValue(colorName);
                     const_cast<ColorProvider &>(ColorProvider::instance())
                         .updateColor(ColorType::ThreadMessageHighlight,
+                                     QColor(colorName));
+                }
+                else if (rowIndex == HighlightRowIndexes::AutomodRow)
+                {
+                    getSettings()->automodHighlightColor.setValue(colorName);
+                    const_cast<ColorProvider &>(ColorProvider::instance())
+                        .updateColor(ColorType::AutomodHighlight,
                                      QColor(colorName));
                 }
             }

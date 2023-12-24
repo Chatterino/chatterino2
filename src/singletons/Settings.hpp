@@ -375,6 +375,17 @@ public:
                                            ""};
     QStringSetting subHighlightColor = {"/highlighting/subHighlightColor", ""};
 
+    BoolSetting enableAutomodHighlight = {
+        "/highlighting/automodHighlight/automodHighlighted", true};
+    BoolSetting enableAutomodHighlightSound = {
+        "/highlighting/automodHighlight/enableSound", false};
+    BoolSetting enableAutomodHighlightTaskbar = {
+        "/highlighting/automodHighlight/enableTaskbarFlashing", false};
+    QStringSetting automodHighlightSoundUrl = {
+        "/highlighting/automodHighlightSoundUrl", ""};
+    QStringSetting automodHighlightColor = {
+        "/highlighting/automodHighlightColor", ""};
+
     BoolSetting enableThreadHighlight = {
         "/highlighting/thread/nameIsHighlightKeyword", true};
     BoolSetting showThreadHighlightInMentions = {
@@ -430,11 +441,6 @@ public:
     BoolSetting notificationToast = {"/notifications/enableToast", false};
     IntSetting openFromToast = {"/notifications/openFromToast",
                                 static_cast<int>(ToastReaction::OpenInBrowser)};
-
-    BoolSetting automodPlaySound = {"/notifications/automod/enableSound",
-                                    false};
-    BoolSetting automodFlashTaskbar = {
-        "/notifications/automod/enableTaskbarFlashing", true};
 
     /// External tools
     // Streamlink

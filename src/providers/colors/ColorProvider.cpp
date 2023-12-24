@@ -51,6 +51,7 @@ QSet<QColor> ColorProvider::recentColors() const
     }
 
     // Insert preset highlight colors
+    retVal.insert(*this->color(ColorType::AutomodHighlight));
     retVal.insert(*this->color(ColorType::SelfHighlight));
     retVal.insert(*this->color(ColorType::Subscription));
     retVal.insert(*this->color(ColorType::Whisper));
@@ -178,6 +179,20 @@ void ColorProvider::initTypeColorMap()
              std::make_shared<QColor>(
                  HighlightPhrase::FALLBACK_THREAD_HIGHLIGHT_COLOR)});
     }
+
+    customColor = getSettings()->automodHighlightColor;
+    if (QColor(customColor).isValid())
+    {
+        this->typeColorMap_.insert({ColorType::AutomodHighlight,
+                                    std::make_shared<QColor>(customColor)});
+    }
+    else
+    {
+        this->typeColorMap_.insert(
+            {ColorType::AutomodHighlight,
+             std::make_shared<QColor>(
+                 HighlightPhrase::FALLBACK_AUTOMOD_HIGHLIGHT_COLOR)});
+    }
 }
 
 void ColorProvider::initDefaultColors()
@@ -196,6 +211,8 @@ void ColorProvider::initDefaultColors()
 
     this->defaultColors_.push_back(HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
     this->defaultColors_.push_back(HighlightPhrase::FALLBACK_SUB_COLOR);
+    this->defaultColors_.push_back(
+        HighlightPhrase::FALLBACK_AUTOMOD_HIGHLIGHT_COLOR);
 }
 
 }  // namespace chatterino

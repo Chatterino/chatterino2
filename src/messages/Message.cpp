@@ -69,6 +69,14 @@ ScrollbarHighlight Message::getScrollBarHighlight() const
         };
     }
 
+    if (this->flags.has(MessageFlag::AutoMod) &&
+        getSettings()->enableAutomodHighlight)
+    {
+        return {
+            ColorProvider::instance().color(ColorType::AutomodHighlight),
+        };
+    }
+
     return {};
 }
 

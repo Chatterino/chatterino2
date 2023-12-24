@@ -34,6 +34,7 @@ public:
         FirstMessageRow = 4,
         ElevatedMessageRow = 5,
         ThreadMessageRow = 6,
+        AutomodRow = 7,
     };
 
     enum UserHighlightRowIndexes {

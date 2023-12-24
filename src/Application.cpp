@@ -555,17 +555,6 @@ void Application::initPubSub()
                                     p.first);
                                 getApp()->twitch->automodChannel->addMessage(
                                     p.second);
-
-                                if (getSettings()->automodPlaySound &&
-                                    !isInStreamerMode())
-                                {
-                                    getApp()->notifications->playSound();
-                                }
-                                if (getSettings()->automodFlashTaskbar &&
-                                    !isInStreamerMode())
-                                {
-                                    getApp()->windows->sendAlert();
-                                }
                             });
                         }
                         // "ALLOWED" and "DENIED" statuses remain unimplemented
