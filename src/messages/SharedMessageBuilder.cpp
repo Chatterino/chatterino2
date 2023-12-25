@@ -18,6 +18,8 @@
 
 #include <QFileInfo>
 
+#include <optional>
+
 namespace {
 
 using namespace chatterino;
