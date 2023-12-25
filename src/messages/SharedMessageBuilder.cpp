@@ -194,8 +194,9 @@ void SharedMessageBuilder::appendChannelName()
 
 void SharedMessageBuilder::triggerHighlights()
 {
-    triggerHighlights(this->channel->getName(), this->highlightSound_,
-                      this->highlightSoundCustomUrl_, this->highlightAlert_);
+    SharedMessageBuilder::triggerHighlights(
+        this->channel->getName(), this->highlightSound_,
+        this->highlightSoundCustomUrl_, this->highlightAlert_);
 }
 
 void SharedMessageBuilder::triggerHighlights(
