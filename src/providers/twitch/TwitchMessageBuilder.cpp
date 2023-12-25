@@ -5,6 +5,7 @@
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/userdata/UserDataController.hpp"
@@ -1763,6 +1764,173 @@ MessagePtr TwitchMessageBuilder::buildHypeChatMessage(
                            calculateMessageTime(message).time());
     builder->flags.set(MessageFlag::ElevatedMessage);
     return builder.release();
+}
+
+EmotePtr makeAutoModBadge()
+{
+    return std::make_shared<Emote>(Emote{
+        EmoteName{},
+        ImageSet{Image::fromResourcePixmap(getResources().twitch.automod)},
+        Tooltip{"AutoMod"},
+        Url{"https://dashboard.twitch.tv/settings/moderation/automod"}});
+}
+
+MessagePtr TwitchMessageBuilder::makeAutomodInfoMessage(
+    const AutomodInfoAction &action)
+{
+    auto builder = MessageBuilder();
+    QString text("AutoMod: ");
+
+    builder.emplace<TimestampElement>();
+    builder.message().flags.set(MessageFlag::PubSub);
+
+    // AutoMod shield badge
+    builder.emplace<BadgeElement>(makeAutoModBadge(),
+                                  MessageElementFlag::BadgeChannelAuthority);
+    // AutoMod "username"
+    builder.emplace<TextElement>("AutoMod:", MessageElementFlag::BoldUsername,
+                                 MessageColor(QColor("blue")),
+                                 FontStyle::ChatMediumBold);
+    builder.emplace<TextElement>(
+        "AutoMod:", MessageElementFlag::NonBoldUsername,
+        MessageColor(QColor("blue")));
+    switch (action.type)
+    {
+        case AutomodInfoAction::OnHold: {
+            QString info("Hey! Your message is being checked "
+                         "by mods and has not been sent.");
+            text += info;
+            builder.emplace<TextElement>(info, MessageElementFlag::Text,
+                                         MessageColor::Text);
+        }
+        break;
+        case AutomodInfoAction::Denied: {
+            QString info("Mods have removed your message.");
+            text += info;
+            builder.emplace<TextElement>(info, MessageElementFlag::Text,
+                                         MessageColor::Text);
+        }
+        break;
+        case AutomodInfoAction::Approved: {
+            QString info("Mods have accepted your message.");
+            text += info;
+            builder.emplace<TextElement>(info, MessageElementFlag::Text,
+                                         MessageColor::Text);
+        }
+        break;
+    }
+
+    builder.message().flags.set(MessageFlag::AutoMod);
+    builder.message().messageText = text;
+    builder.message().searchText = text;
+
+    auto message = builder.release();
+
+    return message;
+}
+
+std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeAutomodMessage(
+    const AutomodAction &action, const QString &channelName)
+{
+    MessageBuilder builder, builder2;
+
+    //
+    // Builder for AutoMod message with explanation
+    builder.message().loginName = "automod";
+    builder.message().channelName = channelName;
+    builder.message().flags.set(MessageFlag::PubSub);
+    builder.message().flags.set(MessageFlag::Timeout);
+    builder.message().flags.set(MessageFlag::AutoMod);
+
+    // AutoMod shield badge
+    builder.emplace<BadgeElement>(makeAutoModBadge(),
+                                  MessageElementFlag::BadgeChannelAuthority);
+    // AutoMod "username"
+    builder.emplace<TextElement>("AutoMod:", MessageElementFlag::BoldUsername,
+                                 MessageColor(QColor("blue")),
+                                 FontStyle::ChatMediumBold);
+    builder.emplace<TextElement>(
+        "AutoMod:", MessageElementFlag::NonBoldUsername,
+        MessageColor(QColor("blue")));
+    // AutoMod header message
+    builder.emplace<TextElement>(
+        ("Held a message for reason: " + action.reason +
+         ". Allow will post it in chat. "),
+        MessageElementFlag::Text, MessageColor::Text);
+    // Allow link button
+    builder
+        .emplace<TextElement>("Allow", MessageElementFlag::Text,
+                              MessageColor(QColor("green")),
+                              FontStyle::ChatMediumBold)
+        ->setLink({Link::AutoModAllow, action.msgID});
+    // Deny link button
+    builder
+        .emplace<TextElement>(" Deny", MessageElementFlag::Text,
+                              MessageColor(QColor("red")),
+                              FontStyle::ChatMediumBold)
+        ->setLink({Link::AutoModDeny, action.msgID});
+    // ID of message caught by AutoMod
+    //    builder.emplace<TextElement>(action.msgID, MessageElementFlag::Text,
+    //                                 MessageColor::Text);
+    auto text1 =
+        QString("AutoMod: Held a message for reason: %1. Allow will post "
+                "it in chat. Allow Deny")
+            .arg(action.reason);
+    builder.message().messageText = text1;
+    builder.message().searchText = text1;
+
+    auto message1 = builder.release();
+
+    //
+    // Builder for offender's message
+    builder2.message().channelName = channelName;
+    builder2
+        .emplace<TextElement>("#" + channelName,
+                              MessageElementFlag::ChannelName,
+                              MessageColor::System)
+        ->setLink({Link::JumpToChannel, channelName});
+    builder2.emplace<TimestampElement>();
+    builder2.emplace<TwitchModerationElement>();
+    builder2.message().loginName = action.target.login;
+    builder2.message().flags.set(MessageFlag::PubSub);
+    builder2.message().flags.set(MessageFlag::Timeout);
+    builder2.message().flags.set(MessageFlag::AutoMod);
+    builder2.message().flags.set(MessageFlag::AutoModOffendingMessage);
+
+    // sender username
+    builder2
+        .emplace<TextElement>(
+            action.target.displayName + ":", MessageElementFlag::BoldUsername,
+            MessageColor(action.target.color), FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, action.target.login});
+    builder2
+        .emplace<TextElement>(action.target.displayName + ":",
+                              MessageElementFlag::NonBoldUsername,
+                              MessageColor(action.target.color))
+        ->setLink({Link::UserInfo, action.target.login});
+    // sender's message caught by AutoMod
+    builder2.emplace<TextElement>(action.message, MessageElementFlag::Text,
+                                  MessageColor::Text);
+    auto text2 =
+        QString("%1: %2").arg(action.target.displayName, action.message);
+    builder2.message().messageText = text2;
+    builder2.message().searchText = text2;
+
+    auto message2 = builder2.release();
+
+    // Normally highlights would be checked & triggered during the builder parse steps
+    // and when the message is added to the channel
+    // We do this a bit weird since the message comes in from PubSub and not the normal message route
+    auto [highlighted, highlightResult] = getIApp()->getHighlights()->check(
+        {}, {}, action.target.login, action.message, message2->flags);
+    if (highlighted)
+    {
+        SharedMessageBuilder::triggerHighlights(
+            channelName, highlightResult.playSound,
+            highlightResult.customSoundUrl, highlightResult.alert);
+    }
+
+    return std::make_pair(message1, message2);
 }
 
 void TwitchMessageBuilder::setThread(std::shared_ptr<MessageThread> thread)

@@ -47,6 +47,12 @@ void MessagePreferences::connectSettings(Settings *settings,
         },
         holder);
 
+    settings->enableAutomodHighlight.connect(
+        [this](const auto &newValue) {
+            this->enableAutomodHighlight = newValue;
+        },
+        holder);
+
     settings->alternateMessages.connect(
         [this](const auto &newValue) {
             this->alternateMessages = newValue;

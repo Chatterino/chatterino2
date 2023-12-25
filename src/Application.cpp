@@ -553,7 +553,8 @@ void Application::initPubSub()
                                 senderDisplayName, senderColor};
                             postToThread([chan, action] {
                                 const auto p =
-                                    makeAutomodMessage(action, chan->getName());
+                                    TwitchMessageBuilder::makeAutomodMessage(
+                                        action, chan->getName());
                                 chan->addMessage(p.first);
                                 chan->addMessage(p.second);
 
@@ -585,7 +586,8 @@ void Application::initPubSub()
                 }
 
                 postToThread([chan, action] {
-                    const auto p = makeAutomodMessage(action, chan->getName());
+                    const auto p = TwitchMessageBuilder::makeAutomodMessage(
+                        action, chan->getName());
                     chan->addMessage(p.first);
                     chan->addMessage(p.second);
                 });
@@ -627,7 +629,8 @@ void Application::initPubSub()
                 }
 
                 postToThread([chan, action] {
-                    const auto p = makeAutomodInfoMessage(action);
+                    const auto p =
+                        TwitchMessageBuilder::makeAutomodInfoMessage(action);
                     chan->addMessage(p);
                 });
             });
