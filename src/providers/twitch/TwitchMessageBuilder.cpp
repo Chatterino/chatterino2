@@ -1918,6 +1918,9 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeAutomodMessage(
 
     auto message2 = builder2.release();
 
+    // Normally highlights would be checked & triggered during the builder parse steps
+    // and when the message is added to the channel
+    // We do this a bit weird since the message comes in from PubSub and not the normal message route
     auto [highlighted, highlightResult] = getIApp()->getHighlights()->check(
         {}, {}, action.target.login, action.message, message2->flags);
     if (highlighted)
