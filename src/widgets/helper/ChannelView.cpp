@@ -825,8 +825,7 @@ ChannelPtr ChannelView::channel()
 
 bool ChannelView::showScrollbarHighlights() const
 {
-    return this->channel_->getType() != Channel::Type::TwitchMentions &&
-           this->channel_->getType() != Channel::Type::TwitchAutomod;
+    return this->channel_->getType() != Channel::Type::TwitchMentions;
 }
 
 void ChannelView::setChannel(const ChannelPtr &underlyingChannel)

@@ -391,10 +391,6 @@ public:
         "/highlighting/automod/soundUrl",
         "",
     };
-    QStringSetting automodHighlightColor = {
-        "/highlighting/automod/color",
-        "",
-    };
 
     BoolSetting enableThreadHighlight = {
         "/highlighting/thread/nameIsHighlightKeyword", true};

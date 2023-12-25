@@ -255,9 +255,7 @@ void HighlightModel::afterInit()
         QUrl(getSettings()->automodHighlightSoundUrl.getValue());
     setFilePathItem(automodRow[Column::SoundPath], automodSound, false);
 
-    const auto automodMessageColor =
-        ColorProvider::instance().color(ColorType::AutomodHighlight);
-    setColorItem(automodRow[Column::Color], *automodMessageColor, false);
+    automodRow[Column::Color]->setFlags(Qt::ItemFlag::NoItemFlags);
 
     this->insertCustomRow(automodRow, HighlightRowIndexes::AutomodRow);
 }
@@ -506,13 +504,6 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     getSettings()->threadHighlightColor.setValue(colorName);
                     const_cast<ColorProvider &>(ColorProvider::instance())
                         .updateColor(ColorType::ThreadMessageHighlight,
-                                     QColor(colorName));
-                }
-                else if (rowIndex == HighlightRowIndexes::AutomodRow)
-                {
-                    getSettings()->automodHighlightColor.setValue(colorName);
-                    const_cast<ColorProvider &>(ColorProvider::instance())
-                        .updateColor(ColorType::AutomodHighlight,
                                      QColor(colorName));
                 }
             }

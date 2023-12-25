@@ -230,14 +230,11 @@ void rebuildMessageHighlights(Settings &settings,
                     highlightSoundUrl = highlightSoundUrlValue;
                 }
 
-                const auto highlightColor = ColorProvider::instance().color(
-                    ColorType::AutomodHighlight);
-
                 return HighlightResult{
                     highlightAlert,     // alert
                     highlightSound,     // playSound
                     highlightSoundUrl,  // customSoundUrl
-                    highlightColor,     // color
+                    nullptr,            // color
                     false,              // showInMentions
                 };
             }});
