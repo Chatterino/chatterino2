@@ -64,8 +64,9 @@ struct MessageLayoutContainer {
 
     /**
      * Paint the animated elements in this message
+     * @returns true if this container contains at least one animated element
      */
-    void paintAnimatedElements(QPainter &painter, int yOffset) const;
+    bool paintAnimatedElements(QPainter &painter, int yOffset) const;
 
     /**
      * Paint the selection for this container

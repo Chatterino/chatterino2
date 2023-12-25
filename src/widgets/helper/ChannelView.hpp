@@ -273,6 +273,9 @@ private:
     bool lastMessageHasAlternateBackground_ = false;
     bool lastMessageHasAlternateBackgroundReverse_ = true;
 
+    /// Tracks if this view has painted any animated element in the last #paintEvent().
+    bool anyAnimationShown_ = false;
+
     bool pausable_ = false;
     QTimer pauseTimer_;
     std::unordered_map<PauseReason, std::optional<SteadyClock::time_point>>
