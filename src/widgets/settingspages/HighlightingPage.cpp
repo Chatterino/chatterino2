@@ -370,21 +370,22 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
                                         EditableModelView *view,
                                         HighlightTab tab)
 {
+    if (!clicked.flags().testFlag(Qt::ItemIsEnabled))
+    {
+        return;
+    }
+
     switch (tab)
     {
         case HighlightTab::Messages:
         case HighlightTab::Users: {
             using Column = HighlightModel::Column;
-            bool restrictColorRow =
-                (tab == HighlightTab::Messages &&
-                 clicked.row() ==
-                     HighlightModel::HighlightRowIndexes::WhisperRow);
-            if (clicked.column() == Column::SoundPath &&
-                clicked.flags().testFlag(Qt::ItemIsEnabled))
+
+            if (clicked.column() == Column::SoundPath)
             {
                 this->openSoundDialog(clicked, view, Column::SoundPath);
             }
-            else if (clicked.column() == Column::Color && !restrictColorRow)
+            else if (clicked.column() == Column::Color)
             {
                 this->openColorDialog(clicked, view, tab);
             }
