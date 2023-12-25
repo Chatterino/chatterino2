@@ -54,7 +54,7 @@
 - Bugfix: Fixed some windows appearing between screens. (#4797)
 - Bugfix: Fixed a crash that could occur when using certain features in a Usercard after closing the split from which it was created. (#5034)
 - Bugfix: Fixed a crash that could occur when using certain features in a Reply popup after closing the split from which it was created. (#5036)
-- Bugfix: Fixed a bug on Wayland where tooltips would spawn as separate windows instead of behaving like tooltips. (#4998)
+- Bugfix: Fixed a bug on Wayland where tooltips would spawn as separate windows instead of behaving like tooltips. (#4998, #5040)
 - Bugfix: Fixes to section deletion in text input fields. (#5013)
 - Bugfix: Show user text input within watch streak notices. (#5029)
 - Dev: Run miniaudio in a separate thread, and simplify it to not manage the device ourselves. There's a chance the simplification is a bad idea. (#4978)
