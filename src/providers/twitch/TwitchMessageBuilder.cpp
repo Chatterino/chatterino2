@@ -1895,6 +1895,7 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeAutomodMessage(
     builder2.message().flags.set(MessageFlag::PubSub);
     builder2.message().flags.set(MessageFlag::Timeout);
     builder2.message().flags.set(MessageFlag::AutoMod);
+    builder2.message().flags.set(MessageFlag::AutoModOffendingMessage);
 
     // sender username
     builder2

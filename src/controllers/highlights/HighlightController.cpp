@@ -215,19 +215,17 @@ void rebuildMessageHighlights(Settings &settings,
             settings.automodHighlightSoundUrl.getValue();
 
         checks.emplace_back(HighlightCheck{
-            [=](const auto & /*args*/, const auto &badges,
+            [=](const auto & /*args*/, const auto & /*badges*/,
                 const auto & /*senderName*/, const auto & /*originalMessage*/,
                 const auto &flags,
                 const auto /*self*/) -> std::optional<HighlightResult> {
-                if (!flags.has(MessageFlag::AutoMod))
+                if (!flags.has(MessageFlag::AutoModOffendingMessage))
                 {
                     return std::nullopt;
                 }
 
-                const auto offender = badges.empty();
-
                 std::optional<QUrl> highlightSoundUrl;
-                if (offender && !highlightSoundUrlValue.isEmpty())
+                if (!highlightSoundUrlValue.isEmpty())
                 {
                     highlightSoundUrl = highlightSoundUrlValue;
                 }
@@ -236,11 +234,11 @@ void rebuildMessageHighlights(Settings &settings,
                     ColorType::AutomodHighlight);
 
                 return HighlightResult{
-                    highlightAlert && offender,  // alert
-                    highlightSound && offender,  // playSound
-                    highlightSoundUrl,           // customSoundUrl
-                    highlightColor,              // color
-                    false,                       // showInMentions
+                    highlightAlert,     // alert
+                    highlightSound,     // playSound
+                    highlightSoundUrl,  // customSoundUrl
+                    highlightColor,     // color
+                    false,              // showInMentions
                 };
             }});
     }
