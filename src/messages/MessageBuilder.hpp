@@ -53,9 +53,6 @@ const ImageUploaderResultTag imageUploaderResultMessage{};
 
 MessagePtr makeSystemMessage(const QString &text);
 MessagePtr makeSystemMessage(const QString &text, const QTime &time);
-std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
-    const AutomodAction &action, const QString &channelName);
-MessagePtr makeAutomodInfoMessage(const AutomodInfoAction &action);
 
 struct MessageParseArgs {
     bool disablePingSounds = false;

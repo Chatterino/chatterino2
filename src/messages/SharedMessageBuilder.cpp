@@ -200,27 +200,45 @@ void SharedMessageBuilder::appendChannelName()
 
 void SharedMessageBuilder::triggerHighlights()
 {
+    triggerHighlights(this->channel->getName(), this->highlightSound_,
+                      this->highlightSoundUrl_, this->highlightAlert_);
+}
+
+void SharedMessageBuilder::triggerHighlights(
+    const QString &channelName, bool playSound,
+    const std::optional<QUrl> &customSoundUrl, bool windowAlert)
+{
     if (isInStreamerMode() && getSettings()->streamerModeMuteMentions)
     {
         // We are in streamer mode with muting mention sounds enabled. Do nothing.
         return;
     }
 
-    if (getSettings()->isMutedChannel(this->channel->getName()))
+    if (getSettings()->isMutedChannel(channelName))
     {
         // Do nothing. Pings are muted in this channel.
         return;
     }
 
-    bool hasFocus = (QApplication::focusWidget() != nullptr);
-    bool resolveFocus = !hasFocus || getSettings()->highlightAlwaysPlaySound;
+    const bool hasFocus = (QApplication::focusWidget() != nullptr);
+    const bool resolveFocus =
+        !hasFocus || getSettings()->highlightAlwaysPlaySound;
 
-    if (this->highlightSound_ && resolveFocus)
+    if (playSound && resolveFocus)
     {
-        getIApp()->getSound()->play(this->highlightSoundUrl_);
+        QUrl soundUrl;
+        if (customSoundUrl)
+        {
+            soundUrl = *customSoundUrl;
+        }
+        else
+        {
+            soundUrl = getFallbackHighlightSound();
+        }
+        getIApp()->getSound()->play(soundUrl);
     }
 
-    if (this->highlightAlert_)
+    if (windowAlert)
     {
         getApp()->windows->sendAlert();
     }
