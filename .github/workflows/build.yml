@@ -460,7 +460,7 @@ jobs:
           name: Chatterino-x86_64-5.15.2.AppImage
           path: release-artifacts/
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         name: Linux Qt6.2.4 AppImage
         with:
           name: Chatterino-x86_64-6.2.4.AppImage
