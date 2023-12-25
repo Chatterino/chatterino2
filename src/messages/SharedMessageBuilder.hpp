@@ -8,6 +8,8 @@
 #include <QColor>
 #include <QUrl>
 
+#include <optional>
+
 namespace chatterino {
 
 class Badge;
