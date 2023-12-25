@@ -376,15 +376,25 @@ public:
     QStringSetting subHighlightColor = {"/highlighting/subHighlightColor", ""};
 
     BoolSetting enableAutomodHighlight = {
-        "/highlighting/automodHighlight/automodHighlighted", true};
+        "/highlighting/automodHighlight/automodHighlighted",
+        true,
+    };
     BoolSetting enableAutomodHighlightSound = {
-        "/highlighting/automodHighlight/enableSound", false};
+        "/highlighting/automodHighlight/enableSound",
+        false,
+    };
     BoolSetting enableAutomodHighlightTaskbar = {
-        "/highlighting/automodHighlight/enableTaskbarFlashing", false};
+        "/highlighting/automodHighlight/enableTaskbarFlashing",
+        false,
+    };
     QStringSetting automodHighlightSoundUrl = {
-        "/highlighting/automodHighlightSoundUrl", ""};
+        "/highlighting/automodHighlightSoundUrl",
+        "",
+    };
     QStringSetting automodHighlightColor = {
-        "/highlighting/automodHighlightColor", ""};
+        "/highlighting/automodHighlightColor",
+        "",
+    };
 
     BoolSetting enableThreadHighlight = {
         "/highlighting/thread/nameIsHighlightKeyword", true};
