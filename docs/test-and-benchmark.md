@@ -1,6 +1,6 @@
 # Test and Benchmark
 
-Chatterino includes a set of unit tests and benchmarks. These can be built using cmake by adding the `-DBUILD_TESTS=On` and `-DBUILD_BENCHMARKS=On` flags respectively.
+Chatterino includes a set of unit tests and benchmarks. These can be built using CMake by adding the `-DBUILD_TESTS=On` and `-DBUILD_BENCHMARKS=On` flags respectively.
 
 ## Adding your own test
 

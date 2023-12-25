@@ -33,4 +33,4 @@ jobs:
           clangFormatVersion: 16
 
       - name: Check line-endings
-        run: ./tools/check-line-endings.sh
+        run: ./scripts/check-line-endings.sh

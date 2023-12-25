@@ -22,6 +22,7 @@ class HighlightController;
 class HotkeyController;
 class IUserDataController;
 class UserDataController;
+class ISoundController;
 class SoundController;
 class ITwitchLiveController;
 class TwitchLiveController;
@@ -46,6 +47,7 @@ class SeventvBadges;
 class SeventvPersonalEmotes;
 class ImageUploader;
 class SeventvAPI;
+class CrashHandler;
 
 class IApplication
 {
@@ -62,6 +64,7 @@ public:
     virtual HotkeyController *getHotkeys() = 0;
     virtual WindowManager *getWindows() = 0;
     virtual Toasts *getToasts() = 0;
+    virtual CrashHandler *getCrashHandler() = 0;
     virtual CommandController *getCommands() = 0;
     virtual HighlightController *getHighlights() = 0;
     virtual NotificationController *getNotifications() = 0;
@@ -70,6 +73,7 @@ public:
     virtual FfzBadges *getFfzBadges() = 0;
     virtual SeventvBadges *getSeventvBadges() = 0;
     virtual IUserDataController *getUserData() = 0;
+    virtual ISoundController *getSound() = 0;
     virtual ITwitchLiveController *getTwitchLiveController() = 0;
 
     virtual SeventvPersonalEmotes *getSeventvPersonalEmotes() = 0;
@@ -105,6 +109,7 @@ public:
     Toasts *const toasts{};
     ImageUploader *const imageUploader{};
     SeventvAPI *const seventvAPI{};
+    CrashHandler *const crashHandler{};
 
     CommandController *const commands{};
     NotificationController *const notifications{};
@@ -116,7 +121,7 @@ public:
     SeventvPaints *const seventvPaints{};
     SeventvPersonalEmotes *const seventvPersonalEmotes{};
     UserDataController *const userData{};
-    SoundController *const sound{};
+    ISoundController *const sound{};
 
 private:
     TwitchLiveController *const twitchLiveController{};
@@ -153,6 +158,10 @@ public:
     {
         return this->toasts;
     }
+    CrashHandler *getCrashHandler() override
+    {
+        return this->crashHandler;
+    }
     CommandController *getCommands() override
     {
         return this->commands;
@@ -179,6 +188,7 @@ public:
         return this->seventvBadges;
     }
     IUserDataController *getUserData() override;
+    ISoundController *getSound() override;
     ITwitchLiveController *getTwitchLiveController() override;
     ImageUploader *getImageUploader() override
     {
@@ -208,6 +218,14 @@ private:
     T &emplace()
     {
         auto t = new T;
+        this->singletons_.push_back(std::unique_ptr<T>(t));
+        return *t;
+    }
+
+    template <typename T,
+              typename = std::enable_if_t<std::is_base_of<Singleton, T>::value>>
+    T &emplace(T *t)
+    {
         this->singletons_.push_back(std::unique_ptr<T>(t));
         return *t;
     }

@@ -44,6 +44,11 @@ public:
         return nullptr;
     }
 
+    CrashHandler *getCrashHandler() override
+    {
+        return nullptr;
+    }
+
     CommandController *getCommands() override
     {
         return nullptr;
@@ -82,6 +87,12 @@ public:
 
     IUserDataController *getUserData() override
     {
+        return nullptr;
+    }
+
+    ISoundController *getSound() override
+    {
+        assert(!"getSound was called without being initialized");
         return nullptr;
     }
 

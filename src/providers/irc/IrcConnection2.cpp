@@ -16,7 +16,7 @@ IrcConnection::IrcConnection(QObject *parent)
 {
     // Log connection errors for ease-of-debugging
     QObject::connect(this, &Communi::IrcConnection::socketError, this,
-                     [this](QAbstractSocket::SocketError error) {
+                     [](QAbstractSocket::SocketError error) {
                          qCDebug(chatterinoIrc) << "Connection error:" << error;
                      });
 
@@ -64,6 +64,7 @@ IrcConnection::IrcConnection(QObject *parent)
                 // If we're still receiving messages, all is well
                 this->recentlyReceivedMessage_ = false;
                 this->waitingForPong_ = false;
+                this->heartbeat.invoke();
                 return;
             }
 

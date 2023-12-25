@@ -1,6 +1,7 @@
 #include "Args.hpp"
 
 #include "common/QLogging.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/AttachToConsole.hpp"
@@ -14,6 +15,55 @@
 #include <QStringList>
 #include <QUuid>
 
+namespace {
+
+template <class... Args>
+QCommandLineOption hiddenOption(Args... args)
+{
+    QCommandLineOption opt(args...);
+    opt.setFlags(QCommandLineOption::HiddenFromHelp);
+    return opt;
+}
+
+QStringList extractCommandLine(
+    const QCommandLineParser &parser,
+    std::initializer_list<QCommandLineOption> options)
+{
+    QStringList args;
+    for (const auto &option : options)
+    {
+        if (parser.isSet(option))
+        {
+            auto optionName = option.names().first();
+            if (optionName.length() == 1)
+            {
+                optionName.prepend(u'-');
+            }
+            else
+            {
+                optionName.prepend("--");
+            }
+
+            auto values = parser.values(option);
+            if (values.empty())
+            {
+                args += optionName;
+            }
+            else
+            {
+                for (const auto &value : values)
+                {
+                    args += optionName;
+                    args += value;
+                }
+            }
+        }
+    }
+    return args;
+}
+
+}  // namespace
+
 namespace chatterino {
 
 Args::Args(const QApplication &app)
@@ -23,35 +73,44 @@ Args::Args(const QApplication &app)
     parser.addHelpOption();
 
     // Used internally by app to restart after unexpected crashes
-    QCommandLineOption crashRecoveryOption("crash-recovery");
-    crashRecoveryOption.setFlags(QCommandLineOption::HiddenFromHelp);
+    auto crashRecoveryOption = hiddenOption("crash-recovery");
+    auto exceptionCodeOption = hiddenOption("cr-exception-code", "", "code");
+    auto exceptionMessageOption =
+        hiddenOption("cr-exception-message", "", "message");
 
     // Added to ignore the parent-window option passed during native messaging
-    QCommandLineOption parentWindowOption("parent-window");
-    parentWindowOption.setFlags(QCommandLineOption::HiddenFromHelp);
-    QCommandLineOption parentWindowIdOption("x-attach-split-to-window", "",
-                                            "window-id");
-    parentWindowIdOption.setFlags(QCommandLineOption::HiddenFromHelp);
+    auto parentWindowOption = hiddenOption("parent-window");
+    auto parentWindowIdOption =
+        hiddenOption("x-attach-split-to-window", "", "window-id");
 
     // Verbose
-    QCommandLineOption verboseOption({{"v", "verbose"},
-                                      "Attaches to the Console on windows, "
-                                      "allowing you to see debug output."});
-    crashRecoveryOption.setFlags(QCommandLineOption::HiddenFromHelp);
+    auto verboseOption = QCommandLineOption(
+        QStringList{"v", "verbose"}, "Attaches to the Console on windows, "
+                                     "allowing you to see debug output.");
+    // Safe mode
+    QCommandLineOption safeModeOption(
+        "safe-mode", "Starts Chatterino without loading Plugins and always "
+                     "show the settings button.");
 
-    parser.addOptions({
-        {{"V", "version"}, "Displays version information."},
-        crashRecoveryOption,
-        parentWindowOption,
-        parentWindowIdOption,
-        verboseOption,
-    });
-    parser.addOption(QCommandLineOption(
+    // Channel layout
+    auto channelLayout = QCommandLineOption(
         {"c", "channels"},
         "Joins only supplied channels on startup. Use letters with colons to "
         "specify platform. Only Twitch channels are supported at the moment.\n"
         "If platform isn't specified, default is Twitch.",
-        "t:channel1;t:channel2;..."));
+        "t:channel1;t:channel2;...");
+
+    parser.addOptions({
+        {{"V", "version"}, "Displays version information."},
+        crashRecoveryOption,
+        exceptionCodeOption,
+        exceptionMessageOption,
+        parentWindowOption,
+        parentWindowIdOption,
+        verboseOption,
+        safeModeOption,
+        channelLayout,
+    });
 
     if (!parser.parse(app.arguments()))
     {
@@ -71,15 +130,25 @@ Args::Args(const QApplication &app)
         (args.size() > 0 && (args[0].startsWith("chrome-extension://") ||
                              args[0].endsWith(".json")));
 
-    if (parser.isSet("c"))
+    if (parser.isSet(channelLayout))
     {
-        this->applyCustomChannelLayout(parser.value("c"));
+        this->applyCustomChannelLayout(parser.value(channelLayout));
     }
 
     this->verbose = parser.isSet(verboseOption);
 
     this->printVersion = parser.isSet("V");
-    this->crashRecovery = parser.isSet("crash-recovery");
+
+    this->crashRecovery = parser.isSet(crashRecoveryOption);
+    if (parser.isSet(exceptionCodeOption))
+    {
+        this->exceptionCode =
+            static_cast<uint32_t>(parser.value(exceptionCodeOption).toULong());
+    }
+    if (parser.isSet(exceptionMessageOption))
+    {
+        this->exceptionMessage = parser.value(exceptionMessageOption);
+    }
 
     if (parser.isSet(parentWindowIdOption))
     {
@@ -89,6 +158,21 @@ Args::Args(const QApplication &app)
 
         this->parentWindowId = parser.value(parentWindowIdOption).toULongLong();
     }
+    if (parser.isSet(safeModeOption))
+    {
+        this->safeMode = true;
+    }
+
+    this->currentArguments_ = extractCommandLine(parser, {
+                                                             verboseOption,
+                                                             safeModeOption,
+                                                             channelLayout,
+                                                         });
+}
+
+QStringList Args::currentArguments() const
+{
+    return this->currentArguments_;
 }
 
 void Args::applyCustomChannelLayout(const QString &argValue)

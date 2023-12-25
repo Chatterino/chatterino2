@@ -39,7 +39,6 @@
 #include "widgets/splits/SplitHeader.hpp"
 #include "widgets/splits/SplitInput.hpp"
 #include "widgets/splits/SplitOverlay.hpp"
-#include "widgets/TooltipWidget.hpp"
 #include "widgets/Window.hpp"
 
 #include <QApplication>
@@ -192,8 +191,12 @@ namespace {
     void showTutorialVideo(QWidget *parent, const QString &source,
                            const QString &title, const QString &description)
     {
-        auto window =
-            new BasePopup(BaseWindow::Flags::EnableCustomFrame, parent);
+        auto *window = new BasePopup(
+            {
+                BaseWindow::EnableCustomFrame,
+                BaseWindow::BoundsCheckOnShow,
+            },
+            parent);
         window->setWindowTitle("Chatterino - " + title);
         window->setAttribute(Qt::WA_DeleteOnClose);
         auto layout = new QVBoxLayout();
@@ -378,7 +381,9 @@ Split::Split(QWidget *parent)
     std::ignore = this->input_->ui_.textEdit->imagePasted.connect(
         [this](const QMimeData *source) {
             if (!getSettings()->imageUploaderEnabled)
+            {
                 return;
+            }
 
             if (getSettings()->askOnImageUpload.getValue())
             {
@@ -389,20 +394,36 @@ Split::Split(QWidget *parent)
                     "You are uploading an image to a 3rd party service not in "
                     "control of the Chatterino team. You may not be able to "
                     "remove the image from the site. Are you okay with this?");
-                msgBox.addButton(QMessageBox::Cancel);
-                msgBox.addButton(QMessageBox::Yes);
-                msgBox.addButton("Yes, don't ask again", QMessageBox::YesRole);
+                auto *cancel = msgBox.addButton(QMessageBox::Cancel);
+                auto *yes = msgBox.addButton(QMessageBox::Yes);
+                auto *yesDontAskAgain = msgBox.addButton("Yes, don't ask again",
+                                                         QMessageBox::YesRole);
 
                 msgBox.setDefaultButton(QMessageBox::Yes);
 
-                auto picked = msgBox.exec();
-                if (picked == QMessageBox::Cancel)
-                {
-                    return;
-                }
-                else if (picked == 0)  // don't ask again button
+                msgBox.exec();
+
+                auto *clickedButton = msgBox.clickedButton();
+                if (clickedButton == yesDontAskAgain)
                 {
                     getSettings()->askOnImageUpload.setValue(false);
+                }
+                else if (clickedButton == yes)
+                {
+                    // Continue with image upload
+                }
+                else if (clickedButton == cancel)
+                {
+                    // Not continuing with image upload
+                    return;
+                }
+                else
+                {
+                    // An unknown "button" was pressed - handle it as if cancel was pressed
+                    // cancel is already handled as the "escape" option, so this should never happen
+                    qCWarning(chatterinoImageuploader)
+                        << "Unhandled button pressed:" << clickedButton;
+                    return;
                 }
             }
             QPointer<ResizingTextEdit> edit = this->input_->ui_.textEdit;
@@ -989,8 +1010,6 @@ void Split::leaveEvent(QEvent *event)
 
     this->overlay_->hide();
 
-    TooltipWidget::instance()->hide();
-
     this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 }
 
@@ -1393,7 +1412,9 @@ void Split::showChatterList()
     multiWidget->setLayout(dockVbox);
     chatterDock->setWidget(multiWidget);
     chatterDock->setFloating(true);
-    chatterDock->show();
+    widgets::showAndMoveWindowTo(
+        chatterDock, this->mapToGlobal(QPoint{0, this->header_->height()}),
+        widgets::BoundsChecking::CursorPosition);
     chatterDock->activateWindow();
 }
 
@@ -1448,7 +1469,10 @@ void Split::showSearch(bool singleChannel)
         auto container = dynamic_cast<SplitContainer *>(notebook.getPageAt(i));
         for (auto split : container->getSplits())
         {
-            popup->addChannel(split->getChannelView());
+            if (split->channel_.getType() != Channel::Type::TwitchAutomod)
+            {
+                popup->addChannel(split->getChannelView());
+            }
         }
     }
 

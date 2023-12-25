@@ -10,12 +10,14 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "controllers/sound/ISoundController.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
 #include "singletons/ImageUploader.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/PluginController.hpp"
 #endif
-#include "controllers/sound/SoundController.hpp"
+#include "controllers/sound/MiniaudioBackend.hpp"
+#include "controllers/sound/NullBackend.hpp"
 #include "controllers/twitch/LiveController.hpp"
 #include "controllers/userdata/UserDataController.hpp"
 #include "debug/AssertInGuiThread.hpp"
@@ -38,6 +40,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
+#include "singletons/CrashHandler.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/helper/LoggingChannel.hpp"
@@ -58,6 +61,34 @@
 #include <QDesktopServices>
 
 #include <atomic>
+
+namespace {
+
+using namespace chatterino;
+
+ISoundController *makeSoundController(Settings &settings)
+{
+    SoundBackend soundBackend = settings.soundBackend;
+    switch (soundBackend)
+    {
+        case SoundBackend::Miniaudio: {
+            return new MiniaudioBackend();
+        }
+        break;
+
+        case SoundBackend::Null: {
+            return new NullBackend();
+        }
+        break;
+
+        default: {
+            return new MiniaudioBackend();
+        }
+        break;
+    }
+}
+
+}  // namespace
 
 namespace chatterino {
 
@@ -85,6 +116,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , toasts(&this->emplace<Toasts>())
     , imageUploader(&this->emplace<ImageUploader>())
     , seventvAPI(&this->emplace<SeventvAPI>())
+    , crashHandler(&this->emplace<CrashHandler>())
 
     , commands(&this->emplace<CommandController>())
     , notifications(&this->emplace<NotificationController>())
@@ -96,7 +128,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , seventvPaints(&this->emplace<SeventvPaints>())
     , seventvPersonalEmotes(&this->emplace<SeventvPersonalEmotes>())
     , userData(&this->emplace<UserDataController>())
-    , sound(&this->emplace<SoundController>())
+    , sound(&this->emplace<ISoundController>(makeSoundController(_settings)))
     , twitchLiveController(&this->emplace<TwitchLiveController>())
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(&this->emplace<PluginController>())
@@ -148,7 +180,9 @@ void Application::initialize(Settings &settings, Paths &paths)
         singleton->initialize(settings, paths);
     }
 
-    // add crash message
+    // Show crash message.
+    // On Windows, the crash message was already shown.
+#ifndef Q_OS_WIN
     if (!getArgs().isFramelessEmbed && getArgs().crashRecovery)
     {
         if (auto selected =
@@ -169,6 +203,7 @@ void Application::initialize(Settings &settings, Paths &paths)
             }
         }
     }
+#endif
 
     this->windows->updateWordTypeMask();
 
@@ -262,6 +297,11 @@ IEmotes *Application::getEmotes()
 IUserDataController *Application::getUserData()
 {
     return this->userData;
+}
+
+ISoundController *Application::getSound()
+{
+    return this->sound;
 }
 
 ITwitchLiveController *Application::getTwitchLiveController()
@@ -515,9 +555,15 @@ void Application::initPubSub()
                                 msg.senderUserID, msg.senderUserLogin,
                                 senderDisplayName, senderColor};
                             postToThread([chan, action] {
-                                const auto p = makeAutomodMessage(action);
+                                const auto p =
+                                    makeAutomodMessage(action, chan->getName());
                                 chan->addMessage(p.first);
                                 chan->addMessage(p.second);
+
+                                getApp()->twitch->automodChannel->addMessage(
+                                    p.first);
+                                getApp()->twitch->automodChannel->addMessage(
+                                    p.second);
                             });
                         }
                         // "ALLOWED" and "DENIED" statuses remain unimplemented
@@ -542,7 +588,7 @@ void Application::initPubSub()
                 }
 
                 postToThread([chan, action] {
-                    const auto p = makeAutomodMessage(action);
+                    const auto p = makeAutomodMessage(action, chan->getName());
                     chan->addMessage(p.first);
                     chan->addMessage(p.second);
                 });

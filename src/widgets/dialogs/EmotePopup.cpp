@@ -228,6 +228,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     this->search_->setClearButtonEnabled(true);
     this->search_->findChild<QAbstractButton *>()->setIcon(
         QPixmap(":/buttons/clearSearch.png"));
+    this->search_->installEventFilter(this);
     layout2->addWidget(this->search_);
 
     layout->addLayout(layout2);
@@ -240,7 +241,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     };
 
     auto makeView = [&](QString tabTitle, bool addToNotebook = true) {
-        auto *view = new ChannelView();
+        auto *view = new ChannelView(nullptr);
 
         view->setOverrideFlags(MessageElementFlags{
             MessageElementFlag::Default, MessageElementFlag::AlwaysShow,
@@ -454,6 +455,21 @@ void EmotePopup::loadChannel(ChannelPtr channel)
                                      MessageColor::System);
         subChannel->addMessage(builder.release());
     }
+}
+
+bool EmotePopup::eventFilter(QObject *object, QEvent *event)
+{
+    if (object == this->search_ && event->type() == QEvent::KeyPress)
+    {
+        auto *keyEvent = dynamic_cast<QKeyEvent *>(event);
+        if (keyEvent == QKeySequence::DeleteStartOfWord &&
+            this->search_->selectionLength() > 0)
+        {
+            this->search_->backspace();
+            return true;
+        }
+    }
+    return false;
 }
 
 void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,

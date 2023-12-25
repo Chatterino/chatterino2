@@ -38,9 +38,9 @@
 [submodule "lib/lua/src"]
 	path = lib/lua/src
 	url = https://github.com/lua/lua
-[submodule "lib/crashpad"]
-	path = lib/crashpad
-	url = https://github.com/getsentry/crashpad
 [submodule "lib/kimageformats"]
 	path = lib/kimageformats
 	url = https://github.com/KDE/kimageformats
+[submodule "tools/crash-handler"]
+	path = tools/crash-handler
+	url = https://github.com/Chatterino/crash-handler

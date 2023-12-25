@@ -87,8 +87,7 @@ void WindowManager::showAccountSelectPopup(QPoint point)
 
     w->refresh();
 
-    QPoint buttonPos = point;
-    w->move(buttonPos.x() - 30, buttonPos.y());
+    w->moveTo(point - QPoint(30, 0), widgets::BoundsChecking::CursorPosition);
     w->show();
     w->setFocus();
 }
@@ -604,6 +603,10 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
             obj.insert("name", channel.get()->getName());
         }
         break;
+        case Channel::Type::TwitchAutomod: {
+            obj.insert("type", "automod");
+        }
+        break;
         case Channel::Type::TwitchMentions: {
             obj.insert("type", "mentions");
         }
@@ -677,6 +680,10 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
     {
         return app->twitch->liveChannel;
     }
+    else if (descriptor.type_ == "automod")
+    {
+        return app->twitch->automodChannel;
+    }
     else if (descriptor.type_ == "irc")
     {
         return Irc::instance().getOrAddChannel(descriptor.server_,
@@ -743,7 +750,7 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
             // out of bounds windows
             auto screens = qApp->screens();
             bool outOfBounds =
-                !getenv("I3SOCK") &&
+                !qEnvironmentVariableIsSet("I3SOCK") &&
                 std::none_of(screens.begin(), screens.end(),
                              [&](QScreen *screen) {
                                  return screen->availableGeometry().intersects(

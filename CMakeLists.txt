@@ -214,7 +214,7 @@ if (CHATTERINO_PLUGINS)
 endif()
 
 if (BUILD_WITH_CRASHPAD)
-    add_subdirectory("${CMAKE_SOURCE_DIR}/lib/crashpad" EXCLUDE_FROM_ALL)
+    add_subdirectory("${CMAKE_SOURCE_DIR}/tools/crash-handler")
 endif()
 
 if (NOT CHATTERINO_NO_AVIF_PLUGIN)

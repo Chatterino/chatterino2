@@ -61,34 +61,29 @@ If you still receive an error about `MSVCR120.dll missing`, then you should inst
 
 To get source code with required submodules run:
 
-```
+```shell
 git clone --recurse-submodules https://github.com/Chatterino/chatterino2.git
 ```
 
 or
 
-```
+```shell
 git clone https://github.com/Chatterino/chatterino2.git
 cd chatterino2
 git submodule update --init --recursive
 ```
 
-[Building on Windows](../master/BUILDING_ON_WINDOWS.md)
-
-[Building on Windows with vcpkg](../master/BUILDING_ON_WINDOWS_WITH_VCPKG.md)
-
-[Building on Linux](../master/BUILDING_ON_LINUX.md)
-
-[Building on Mac](../master/BUILDING_ON_MAC.md)
-
-[Building on FreeBSD](../master/BUILDING_ON_FREEBSD.md)
+- [Building on Windows](../master/BUILDING_ON_WINDOWS.md)
+- [Building on Windows with vcpkg](../master/BUILDING_ON_WINDOWS_WITH_VCPKG.md)
+- [Building on Linux](../master/BUILDING_ON_LINUX.md)
+- [Building on macOS](../master/BUILDING_ON_MAC.md)
+- [Building on FreeBSD](../master/BUILDING_ON_FREEBSD.md)
 
 ## Git blame
 
-This project has big commits in the history which for example update all line
-endings. To improve the output of git-blame, consider setting:
+This project has big commits in the history which touch most files while only doing stylistic changes. To improve the output of git-blame, consider setting:
 
-```
+```shell
 git config blame.ignoreRevsFile .git-blame-ignore-revs
 ```
 
@@ -97,19 +92,9 @@ file](./.git-blame-ignore-revs). GitHub does this by default.
 
 ## Code style
 
-The code is formatted using clang format in Qt Creator. [.clang-format](src/.clang-format) contains the style file for clang format.
+The code is formatted using [clang-format](https://clang.llvm.org/docs/ClangFormat.html). Our configuration is found in the [.clang-format](.clang-format) file in the repository root directory.
 
-### Get it automated with QT Creator + Beautifier + Clang Format
-
-1. Download LLVM: https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/LLVM-16.0.6-win64.exe
-2. During the installation, make sure to add it to your path
-3. In QT Creator, select `Help` > `About Plugins` > `C++` > `Beautifier` to enable the plugin
-4. Restart QT Creator
-5. Select `Tools` > `Options` > `Beautifier`
-6. Under `General` select `Tool: ClangFormat` and enable `Automatic Formatting on File Save`
-7. Under `Clang Format` select `Use predefined style: File` and `Fallback style: None`
-
-Qt creator should now format the documents when saving it.
+For more contribution guidelines, take a look at [the wiki](https://wiki.chatterino.com/Contributing%20for%20Developers/).
 
 ## Doxygen
 

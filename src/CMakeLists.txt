@@ -123,13 +123,15 @@ set(SOURCE_FILES
         controllers/completion/sources/UnifiedSource.hpp
         controllers/completion/sources/UserSource.cpp
         controllers/completion/sources/UserSource.hpp
-        controllers/completion/strategies/Strategy.hpp
         controllers/completion/strategies/ClassicEmoteStrategy.cpp
         controllers/completion/strategies/ClassicEmoteStrategy.hpp
         controllers/completion/strategies/ClassicUserStrategy.cpp
         controllers/completion/strategies/ClassicUserStrategy.hpp
         controllers/completion/strategies/CommandStrategy.cpp
         controllers/completion/strategies/CommandStrategy.hpp
+        controllers/completion/strategies/SmartEmoteStrategy.cpp
+        controllers/completion/strategies/SmartEmoteStrategy.cpp
+        controllers/completion/strategies/Strategy.hpp
         controllers/completion/TabCompletionModel.cpp
         controllers/completion/TabCompletionModel.hpp
 
@@ -224,8 +226,11 @@ set(SOURCE_FILES
         controllers/plugins/LuaUtilities.cpp
         controllers/plugins/LuaUtilities.hpp
 
-        controllers/sound/SoundController.cpp
-        controllers/sound/SoundController.hpp
+        controllers/sound/ISoundController.hpp
+        controllers/sound/MiniaudioBackend.cpp
+        controllers/sound/MiniaudioBackend.hpp
+        controllers/sound/NullBackend.cpp
+        controllers/sound/NullBackend.hpp
 
         controllers/twitch/LiveController.cpp
         controllers/twitch/LiveController.hpp
@@ -284,8 +289,6 @@ set(SOURCE_FILES
         messages/search/SubtierPredicate.cpp
         messages/search/SubtierPredicate.hpp
 
-        providers/Crashpad.cpp
-        providers/Crashpad.hpp
         providers/IvrApi.cpp
         providers/IvrApi.hpp
         providers/LinkResolver.cpp
@@ -439,6 +442,8 @@ set(SOURCE_FILES
 
         singletons/Badges.cpp
         singletons/Badges.hpp
+        singletons/CrashHandler.cpp
+        singletons/CrashHandler.hpp
         singletons/Emotes.cpp
         singletons/Emotes.hpp
         singletons/Fonts.cpp
@@ -640,6 +645,8 @@ set(SOURCE_FILES
         widgets/helper/SignalLabel.hpp
         widgets/helper/TitlebarButton.cpp
         widgets/helper/TitlebarButton.hpp
+        widgets/helper/TitlebarButtons.cpp
+        widgets/helper/TitlebarButtons.hpp
 
         widgets/listview/GenericItemDelegate.cpp
         widgets/listview/GenericItemDelegate.hpp
@@ -1024,7 +1031,6 @@ endif ()
 if (BUILD_WITH_CRASHPAD)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_WITH_CRASHPAD)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC crashpad::client)
-    set_target_directory_hierarchy(crashpad_handler crashpad)
 endif()
 
 # Configure compiler warnings
@@ -1084,7 +1090,6 @@ else ()
         -Wno-switch
         -Wno-deprecated-declarations
         -Wno-sign-compare
-        -Wno-unused-variable
 
         # Disabling strict-aliasing warnings for now, although we probably want to re-enable this in the future
         -Wno-strict-aliasing

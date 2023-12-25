@@ -10,19 +10,34 @@
 // number of columns in grid mode
 #define GRID_NUM_COLS 3
 
-namespace chatterino {
+namespace {
 
-TooltipWidget *TooltipWidget::instance()
+#ifdef Q_OS_WIN
+template <typename T>
+inline constexpr T *tooltipParentFor(T * /*desiredParent*/)
 {
-    static TooltipWidget *tooltipWidget = new TooltipWidget();
-    return tooltipWidget;
+    return nullptr;
 }
+#else
+template <typename T>
+inline constexpr T *tooltipParentFor(T *desiredParent)
+{
+    return desiredParent;
+}
+#endif
+
+}  // namespace
+
+namespace chatterino {
 
 TooltipWidget::TooltipWidget(BaseWidget *parent)
     : BaseWindow({BaseWindow::TopMost, BaseWindow::DontFocus,
                   BaseWindow::DisableLayoutSave},
-                 parent)
+                 tooltipParentFor(parent))
 {
+    assert(parent != nullptr);
+    QObject::connect(parent, &QObject::destroyed, this, &QObject::deleteLater);
+
     this->setStyleSheet("color: #fff; background: rgba(11, 11, 11, 0.8)");
     this->setAttribute(Qt::WA_TranslucentBackground);
     this->setWindowFlag(Qt::WindowStaysOnTopHint, true);

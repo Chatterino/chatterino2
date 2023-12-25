@@ -24,11 +24,12 @@ const QString TEXT_TITLE("Reply Thread - @%1 in #%2");
 
 namespace chatterino {
 
-ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
-                                   Split *split)
-    : DraggablePopup(closeAutomatically, parent)
+ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, Split *split)
+    : DraggablePopup(closeAutomatically, split)
     , split_(split)
 {
+    assert(split != nullptr);
+
     this->setWindowTitle(QStringLiteral("Reply Thread"));
 
     HotkeyController::HotkeyMap actions{
@@ -238,11 +239,11 @@ void ReplyThreadPopup::addMessagesFromThread()
     this->ui_.threadView->setChannel(this->virtualChannel_);
     this->ui_.threadView->setSourceChannel(sourceChannel);
 
-    auto overrideFlags =
+    auto rootOverrideFlags =
         std::optional<MessageFlags>(this->thread_->root()->flags);
-    overrideFlags->set(MessageFlag::DoNotLog);
+    rootOverrideFlags->set(MessageFlag::DoNotLog);
 
-    this->virtualChannel_->addMessage(this->thread_->root(), overrideFlags);
+    this->virtualChannel_->addMessage(this->thread_->root(), rootOverrideFlags);
     for (const auto &msgRef : this->thread_->replies())
     {
         if (auto msg = msgRef.lock())

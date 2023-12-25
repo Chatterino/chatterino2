@@ -26,8 +26,12 @@ public:
 
     /// @brief Updates the model based on the completion query
     /// @param query Completion query
+    /// @param fullTextContent Full text of the input, used by plugins for contextual completion
+    /// @param cursorPosition Number of characters behind the cursor from the
+    /// beginning of fullTextContent, also used by plugins
     /// @param isFirstWord Whether the completion is the first word in the input
-    void updateResults(const QString &query, bool isFirstWord = false);
+    void updateResults(const QString &query, const QString &fullTextContent,
+                       int cursorPosition, bool isFirstWord = false);
 
 private:
     enum class SourceKind {
