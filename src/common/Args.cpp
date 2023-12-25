@@ -1,4 +1,4 @@
-#include "Args.hpp"
+#include "common/Args.hpp"
 
 #include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
@@ -246,20 +246,6 @@ void Args::applyCustomChannelLayout(const QString &argValue)
         layout.windows_.emplace_back(std::move(window));
         this->customChannelLayout = std::move(layout);
     }
-}
-
-static Args *instance = nullptr;
-
-void initArgs(const QApplication &app)
-{
-    instance = new Args(app);
-}
-
-const Args &getArgs()
-{
-    assert(instance);
-
-    return *instance;
 }
 
 }  // namespace chatterino

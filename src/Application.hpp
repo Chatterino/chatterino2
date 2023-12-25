@@ -11,6 +11,7 @@
 
 namespace chatterino {
 
+class Args;
 class TwitchIrcServer;
 class ITwitchIrcServer;
 class PubSub;
@@ -54,6 +55,7 @@ public:
 
     static IApplication *instance;
 
+    virtual const Args &getArgs() = 0;
     virtual Theme *getThemes() = 0;
     virtual Fonts *getFonts() = 0;
     virtual IEmotes *getEmotes() = 0;
@@ -78,6 +80,7 @@ public:
 
 class Application : public IApplication
 {
+    const Args &args_;
     std::vector<std::unique_ptr<Singleton>> singletons_;
     int argc_{};
     char **argv_{};
@@ -85,7 +88,7 @@ class Application : public IApplication
 public:
     static Application *instance;
 
-    Application(Settings &settings, Paths &paths);
+    Application(Settings &_settings, Paths &_paths, const Args &_args);
 
     void initialize(Settings &settings, Paths &paths);
     void load();
@@ -126,6 +129,10 @@ public:
 
     /*[[deprecated]]*/ Logging *const logging{};
 
+    const Args &getArgs() override
+    {
+        return this->args_;
+    }
     Theme *getThemes() override
     {
         return this->themes;

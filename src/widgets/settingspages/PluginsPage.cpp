@@ -53,7 +53,7 @@ PluginsPage::PluginsPage()
             this->rebuildContent();
         });
         groupLayout->addRow(box);
-        if (getArgs().safeMode)
+        if (getApp()->getArgs().safeMode)
         {
             box->setEnabled(false);
             auto *disabledLabel = new QLabel(this);
@@ -197,7 +197,7 @@ void PluginsPage::rebuildContent()
                              this->rebuildContent();
                          });
         pluginEntry->addRow(reloadButton);
-        if (getArgs().safeMode)
+        if (getApp()->getArgs().safeMode)
         {
             reloadButton->setEnabled(false);
         }

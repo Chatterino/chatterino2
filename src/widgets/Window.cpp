@@ -737,7 +737,7 @@ void Window::onAccountSelected()
     }
 #endif
 
-    if (getArgs().safeMode)
+    if (getApp()->getArgs().safeMode)
     {
         windowTitle += " (safe mode)";
     }

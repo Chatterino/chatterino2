@@ -104,8 +104,9 @@ IApplication::IApplication()
 // It will create the instances of the major classes, and connect their signals
 // to each other
 
-Application::Application(Settings &_settings, Paths &_paths)
-    : themes(&this->emplace<Theme>())
+Application::Application(Settings &_settings, Paths &_paths, const Args &_args)
+    : args_(_args)
+    , themes(&this->emplace<Theme>())
     , fonts(&this->emplace<Fonts>())
     , emotes(&this->emplace<Emotes>())
     , accounts(&this->emplace<AccountController>())
@@ -146,7 +147,7 @@ void Application::initialize(Settings &settings, Paths &paths)
     isAppInitialized = true;
 
     // Show changelog
-    if (!getArgs().isFramelessEmbed &&
+    if (!this->args_.isFramelessEmbed &&
         getSettings()->currentVersion.getValue() != "" &&
         getSettings()->currentVersion.getValue() != CHATTERINO_VERSION)
     {
@@ -161,7 +162,7 @@ void Application::initialize(Settings &settings, Paths &paths)
         }
     }
 
-    if (!getArgs().isFramelessEmbed)
+    if (!this->args_.isFramelessEmbed)
     {
         getSettings()->currentVersion.setValue(CHATTERINO_VERSION);
 
@@ -179,7 +180,7 @@ void Application::initialize(Settings &settings, Paths &paths)
     // Show crash message.
     // On Windows, the crash message was already shown.
 #ifndef Q_OS_WIN
-    if (!getArgs().isFramelessEmbed && getArgs().crashRecovery)
+    if (!this->args_.isFramelessEmbed && this->args_.crashRecovery)
     {
         if (auto selected =
                 this->windows->getMainWindow().getNotebook().getSelectedPage())
@@ -203,7 +204,7 @@ void Application::initialize(Settings &settings, Paths &paths)
 
     this->windows->updateWordTypeMask();
 
-    if (!getArgs().isFramelessEmbed)
+    if (!this->args_.isFramelessEmbed)
     {
         this->initNm(paths);
     }
@@ -219,7 +220,7 @@ int Application::run(QApplication &qtApp)
 
     this->twitch->connect();
 
-    if (!getArgs().isFramelessEmbed)
+    if (!this->args_.isFramelessEmbed)
     {
         this->windows->getMainWindow().show();
     }

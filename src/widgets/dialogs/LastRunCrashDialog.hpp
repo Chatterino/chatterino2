@@ -4,10 +4,12 @@
 
 namespace chatterino {
 
+class Args;
+
 class LastRunCrashDialog : public QDialog
 {
 public:
-    LastRunCrashDialog();
+    explicit LastRunCrashDialog(const Args &args);
 };
 
 }  // namespace chatterino
