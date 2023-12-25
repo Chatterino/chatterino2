@@ -204,6 +204,41 @@ void rebuildMessageHighlights(Settings &settings,
     {
         checks.emplace_back(highlightPhraseCheck(highlight));
     }
+
+    if (settings.enableAutomodHighlight)
+    {
+        const auto highlightSound =
+            settings.enableAutomodHighlightSound.getValue();
+        const auto highlightAlert =
+            settings.enableAutomodHighlightTaskbar.getValue();
+        const auto highlightSoundUrlValue =
+            settings.automodHighlightSoundUrl.getValue();
+
+        checks.emplace_back(HighlightCheck{
+            [=](const auto & /*args*/, const auto & /*badges*/,
+                const auto & /*senderName*/, const auto & /*originalMessage*/,
+                const auto &flags,
+                const auto /*self*/) -> std::optional<HighlightResult> {
+                if (!flags.has(MessageFlag::AutoModOffendingMessage))
+                {
+                    return std::nullopt;
+                }
+
+                std::optional<QUrl> highlightSoundUrl;
+                if (!highlightSoundUrlValue.isEmpty())
+                {
+                    highlightSoundUrl = highlightSoundUrlValue;
+                }
+
+                return HighlightResult{
+                    highlightAlert,     // alert
+                    highlightSound,     // playSound
+                    highlightSoundUrl,  // customSoundUrl
+                    nullptr,            // color
+                    false,              // showInMentions
+                };
+            }});
+    }
 }
 
 void rebuildUserHighlights(Settings &settings,
@@ -433,6 +468,11 @@ void HighlightController::initialize(Settings &settings, Paths & /*paths*/)
     this->rebuildListener_.addSetting(settings.enableThreadHighlightTaskbar);
     this->rebuildListener_.addSetting(settings.threadHighlightSoundUrl);
     this->rebuildListener_.addSetting(settings.showThreadHighlightInMentions);
+
+    this->rebuildListener_.addSetting(settings.enableAutomodHighlight);
+    this->rebuildListener_.addSetting(settings.enableAutomodHighlightSound);
+    this->rebuildListener_.addSetting(settings.enableAutomodHighlightTaskbar);
+    this->rebuildListener_.addSetting(settings.automodHighlightSoundUrl);
 
     this->rebuildListener_.setCB([this, &settings] {
         qCDebug(chatterinoHighlights)

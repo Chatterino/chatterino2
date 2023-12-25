@@ -89,6 +89,10 @@ public:
 
     static MessagePtr buildHypeChatMessage(Communi::IrcPrivateMessage *message);
 
+    static std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
+        const AutomodAction &action, const QString &channelName);
+    static MessagePtr makeAutomodInfoMessage(const AutomodInfoAction &action);
+
     // Shares some common logic from SharedMessageBuilder::parseBadgeTag
     static std::unordered_map<QString, QString> parseBadgeInfoTag(
         const QVariantMap &tags);
