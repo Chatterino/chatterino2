@@ -235,13 +235,15 @@ void MessageLayoutContainer::paintElements(QPainter &painter,
     }
 }
 
-void MessageLayoutContainer::paintAnimatedElements(QPainter &painter,
+bool MessageLayoutContainer::paintAnimatedElements(QPainter &painter,
                                                    int yOffset) const
 {
+    bool anyAnimatedElement = false;
     for (const auto &element : this->elements_)
     {
-        element->paintAnimated(painter, yOffset);
+        anyAnimatedElement |= element->paintAnimated(painter, yOffset);
     }
+    return anyAnimatedElement;
 }
 
 void MessageLayoutContainer::paintSelection(QPainter &painter,

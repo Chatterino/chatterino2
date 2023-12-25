@@ -160,11 +160,11 @@ void ImageLayoutElement::paint(QPainter &painter,
     }
 }
 
-void ImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
+bool ImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
 {
     if (this->image_ == nullptr)
     {
-        return;
+        return false;
     }
 
     if (this->image_->animated())
@@ -174,8 +174,10 @@ void ImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
             auto rect = this->getRect();
             rect.moveTop(rect.y() + yOffset);
             painter.drawPixmap(QRectF(rect), *pixmap, QRectF());
+            return true;
         }
     }
+    return false;
 }
 
 int ImageLayoutElement::getMouseOverIndex(const QPoint &abs) const
@@ -272,7 +274,7 @@ void LayeredImageLayoutElement::paint(QPainter &painter,
     }
 }
 
-void LayeredImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
+bool LayeredImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
 {
     auto fullRect = QRectF(this->getRect());
     fullRect.moveTop(fullRect.y() + yOffset);
@@ -304,6 +306,7 @@ void LayeredImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
             }
         }
     }
+    return animatedFlag;
 }
 
 int LayeredImageLayoutElement::getMouseOverIndex(const QPoint &abs) const
@@ -479,10 +482,12 @@ void TextLayoutElement::paint(QPainter &painter,
     }
 }
 
-void TextLayoutElement::paintAnimated(QPainter &painter, const int yOffset)
+bool TextLayoutElement::paintAnimated(QPainter &painter, const int yOffset)
 {
     if (this->getRect().isEmpty())
-        return;
+    {
+        return false;
+    }
 
     const auto font = getApp()->getFonts()->getFont(this->style_, this->scale_);
 
@@ -505,7 +510,10 @@ void TextLayoutElement::paintAnimated(QPainter &painter, const int yOffset)
         auto rect = this->getRect();
         rect.moveTop(rect.y() + yOffset);
         painter.drawPixmap(rect, paintPixmap, QRectF());
+        return true;
     }
+
+    return false;
 }
 
 int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
@@ -625,8 +633,10 @@ void TextIconLayoutElement::paint(QPainter &painter,
     }
 }
 
-void TextIconLayoutElement::paintAnimated(QPainter &painter, int yOffset)
+bool TextIconLayoutElement::paintAnimated(QPainter & /*painter*/,
+                                          int /*yOffset*/)
 {
+    return false;
 }
 
 int TextIconLayoutElement::getMouseOverIndex(const QPoint &abs) const
@@ -698,8 +708,10 @@ void ReplyCurveLayoutElement::paint(QPainter &painter,
     painter.drawPath(path);
 }
 
-void ReplyCurveLayoutElement::paintAnimated(QPainter &painter, int yOffset)
+bool ReplyCurveLayoutElement::paintAnimated(QPainter & /*painter*/,
+                                            int /*yOffset*/)
 {
+    return false;
 }
 
 int ReplyCurveLayoutElement::getMouseOverIndex(const QPoint &abs) const
