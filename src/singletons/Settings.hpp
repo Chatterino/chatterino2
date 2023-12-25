@@ -388,11 +388,11 @@ public:
         false,
     };
     QStringSetting automodHighlightSoundUrl = {
-        "/highlighting/automodHighlightSoundUrl",
+        "/highlighting/automodHighlight/soundUrl",
         "",
     };
     QStringSetting automodHighlightColor = {
-        "/highlighting/automodHighlightColor",
+        "/highlighting/automodHighlight/color",
         "",
     };
 
