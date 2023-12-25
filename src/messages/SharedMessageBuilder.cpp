@@ -172,17 +172,9 @@ void SharedMessageBuilder::parseHighlights()
     this->highlightAlert_ = highlightResult.alert;
 
     this->highlightSound_ = highlightResult.playSound;
+    this->highlightSoundCustomUrl_ = highlightResult.customSoundUrl;
 
     this->message().highlightColor = highlightResult.color;
-
-    if (highlightResult.customSoundUrl)
-    {
-        this->highlightSoundUrl_ = *highlightResult.customSoundUrl;
-    }
-    else
-    {
-        this->highlightSoundUrl_ = getFallbackHighlightSound();
-    }
 
     if (highlightResult.showInMentions)
     {
@@ -203,7 +195,7 @@ void SharedMessageBuilder::appendChannelName()
 void SharedMessageBuilder::triggerHighlights()
 {
     triggerHighlights(this->channel->getName(), this->highlightSound_,
-                      this->highlightSoundUrl_, this->highlightAlert_);
+                      this->highlightSoundCustomUrl_, this->highlightAlert_);
 }
 
 void SharedMessageBuilder::triggerHighlights(
@@ -228,6 +220,7 @@ void SharedMessageBuilder::triggerHighlights(
 
     if (playSound && resolveFocus)
     {
+        // TODO(C++23): optional or_else
         QUrl soundUrl;
         if (customSoundUrl)
         {

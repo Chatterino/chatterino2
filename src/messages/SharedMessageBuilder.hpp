@@ -77,8 +77,7 @@ protected:
 
     bool highlightAlert_ = false;
     bool highlightSound_ = false;
-
-    QUrl highlightSoundUrl_;
+    std::optional<QUrl> highlightSoundCustomUrl_{};
 };
 
 }  // namespace chatterino
