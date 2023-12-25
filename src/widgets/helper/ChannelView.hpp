@@ -95,6 +95,13 @@ public:
                          Context context = Context::None,
                          size_t messagesLimit = 1000);
 
+    ~ChannelView() override;
+
+    ChannelView(const ChannelView &) = delete;
+    ChannelView(ChannelView &&) = delete;
+    ChannelView &operator=(const ChannelView &) = delete;
+    ChannelView &operator=(ChannelView &&) = delete;
+
     void queueUpdate();
     Scrollbar &getScrollBar();
 

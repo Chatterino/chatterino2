@@ -299,7 +299,7 @@ ChannelView::ChannelView(InternalCtor /*tag*/, QWidget *parent, Split *split,
     , highlightAnimation_(this)
     , context_(context)
     , messages_(messagesLimit)
-    , tooltipWidget_(new TooltipWidget(this))
+    , tooltipWidget_(new TooltipWidget(tooltipParentFor(this)))
 {
     this->setMouseTracking(true);
 
@@ -354,6 +354,11 @@ ChannelView::ChannelView(InternalCtor /*tag*/, QWidget *parent, Split *split,
     this->messageColors_.applyTheme(getTheme());
     this->messagePreferences_.connectSettings(getSettings(),
                                               this->signalHolder_);
+}
+
+ChannelView::~ChannelView()
+{
+    this->tooltipWidget_->deleteLater();
 }
 
 void ChannelView::initializeLayout()

@@ -27,6 +27,12 @@ class SplitHeader final : public BaseWidget
 
 public:
     explicit SplitHeader(Split *split);
+    ~SplitHeader() override;
+
+    SplitHeader(const SplitHeader &) = delete;
+    SplitHeader(SplitHeader &&) = delete;
+    SplitHeader &operator=(const SplitHeader &) = delete;
+    SplitHeader &operator=(SplitHeader &&) = delete;
 
     void setAddButtonVisible(bool value);
     void setChattersButtonVisible(bool value);

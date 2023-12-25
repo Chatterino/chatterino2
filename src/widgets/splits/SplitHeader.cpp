@@ -223,7 +223,7 @@ namespace chatterino {
 SplitHeader::SplitHeader(Split *split)
     : BaseWidget(split)
     , split_(split)
-    , tooltipWidget_(new TooltipWidget(this))
+    , tooltipWidget_(new TooltipWidget(tooltipParentFor(this)))
 {
     this->initializeLayout();
 
@@ -257,6 +257,11 @@ SplitHeader::SplitHeader(Split *split)
     getSettings()->headerStreamTitle.connect(_, this->managedConnections_);
     getSettings()->headerGame.connect(_, this->managedConnections_);
     getSettings()->headerUptime.connect(_, this->managedConnections_);
+}
+
+SplitHeader::~SplitHeader()
+{
+    this->tooltipWidget_->deleteLater();
 }
 
 void SplitHeader::initializeLayout()
