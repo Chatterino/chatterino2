@@ -406,7 +406,10 @@ void ChannelView::initializeSignals()
 
     this->signalHolder_.managedConnect(getApp()->windows->gifRepaintRequested,
                                        [&] {
-                                           this->queueUpdate();
+                                           if (this->anyAnimationShown_)
+                                           {
+                                               this->queueUpdate();
+                                           }
                                        });
 
     this->signalHolder_.managedConnect(
@@ -1470,6 +1473,8 @@ void ChannelView::drawMessages(QPainter &painter)
     };
     bool showLastMessageIndicator = getSettings()->showLastMessageIndicator;
 
+    bool anyAnimation = false;
+
     for (; ctx.messageIndex < messagesSnapshot.size(); ++ctx.messageIndex)
     {
         MessageLayout *layout = messagesSnapshot[ctx.messageIndex].get();
@@ -1483,7 +1488,7 @@ void ChannelView::drawMessages(QPainter &painter)
             ctx.isLastReadMessage = false;
         }
 
-        layout->paint(ctx);
+        anyAnimation |= layout->paint(ctx).hasAnimatedElements;
 
         if (this->highlightedMessage_ == layout)
         {
@@ -1504,6 +1509,7 @@ void ChannelView::drawMessages(QPainter &painter)
             break;
         }
     }
+    this->anyAnimationShown_ = anyAnimation;
 
     if (end == nullptr)
     {
