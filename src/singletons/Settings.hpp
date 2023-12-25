@@ -376,7 +376,7 @@ public:
     QStringSetting subHighlightColor = {"/highlighting/subHighlightColor", ""};
 
     BoolSetting enableAutomodHighlight = {
-        "/highlighting/automodHighlight/automodHighlighted",
+        "/highlighting/automodHighlight/enabled",
         true,
     };
     BoolSetting enableAutomodHighlightSound = {
