@@ -36,7 +36,7 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
                  tooltipParentFor(parent))
 {
     assert(parent != nullptr);
-    connect(parent, &QObject::destroyed, this, &QObject::deleteLater);
+    QObject::connect(parent, &QObject::destroyed, this, &QObject::deleteLater);
 
     this->setStyleSheet("color: #fff; background: rgba(11, 11, 11, 0.8)");
     this->setAttribute(Qt::WA_TranslucentBackground);
