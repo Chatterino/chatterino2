@@ -342,9 +342,13 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
               this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
              !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
     {
-        // Blend highlight color with usual background color
-        backgroundColor =
-            blendColors(backgroundColor, *this->message_->highlightColor);
+        assert(this->message_->highlightColor);
+        if (this->message_->highlightColor)
+        {
+            // Blend highlight color with usual background color
+            backgroundColor =
+                blendColors(backgroundColor, *this->message_->highlightColor);
+        }
     }
     else if (this->message_->flags.has(MessageFlag::Subscription) &&
              ctx.preferences.enableSubHighlight)
