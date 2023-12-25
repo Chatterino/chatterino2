@@ -60,14 +60,6 @@ jobs:
             plugins: false
             skip-artifact: false
             skip-crashpad: false
-          # Windows
-          - os: windows-latest
-            qt-version: 6.5.0
-            force-lto: false
-            plugins: false
-            skip-artifact: false
-            skip-crashpad: false
-            clang-tidy-review: false
 
       fail-fast: false
 
