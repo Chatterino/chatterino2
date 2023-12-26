@@ -275,7 +275,7 @@ private:
     bool lastMessageHasAlternateBackgroundReverse_ = true;
 
     /// Tracks the area of animated elements in the last full repaint.
-    /// If this is empty (QRect::isEmpty()), at least one animated element is shown.
+    /// If this is empty (QRect::isEmpty()), no animated element is shown.
     QRect animationArea_;
 
     bool pausable_ = false;
