@@ -350,6 +350,10 @@ ChannelView::ChannelView(InternalCtor /*tag*/, QWidget *parent, Split *split,
     auto curve = QEasingCurve();
     curve.setCustomType(highlightEasingFunction);
     this->highlightAnimation_.setEasingCurve(curve);
+    QObject::connect(&this->highlightAnimation_,
+                     &QVariantAnimation::valueChanged, this, [this] {
+                         this->queueUpdate();
+                     });
 
     this->messageColors_.applyTheme(getTheme());
     this->messagePreferences_.connectSettings(getSettings(),
