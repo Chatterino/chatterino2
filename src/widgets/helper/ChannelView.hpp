@@ -96,6 +96,7 @@ public:
                          size_t messagesLimit = 1000);
 
     void queueUpdate();
+    void queueUpdate(const QRect &area);
     Scrollbar &getScrollBar();
 
     QString getSelectedText();
@@ -232,7 +233,7 @@ private:
     void updateScrollbar(const LimitedQueueSnapshot<MessageLayoutPtr> &messages,
                          bool causedByScrollbar, bool causedByShow);
 
-    void drawMessages(QPainter &painter);
+    void drawMessages(QPainter &painter, const QRect &area);
     void setSelection(const SelectionItem &start, const SelectionItem &end);
     void setSelection(const Selection &newSelection);
     void selectWholeMessage(MessageLayout *layout, int &messageIndex);
@@ -273,8 +274,9 @@ private:
     bool lastMessageHasAlternateBackground_ = false;
     bool lastMessageHasAlternateBackgroundReverse_ = true;
 
-    /// Tracks if this view has painted any animated element in the last #paintEvent().
-    bool anyAnimationShown_ = false;
+    /// Tracks the area of animated elements in the last full repaint.
+    /// If this is empty (QRect::isEmpty()), no animated element is shown.
+    QRect animationArea_;
 
     bool pausable_ = false;
     QTimer pauseTimer_;
