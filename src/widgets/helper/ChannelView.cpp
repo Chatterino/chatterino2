@@ -1501,7 +1501,9 @@ void ChannelView::drawMessages(QPainter &painter, const QRect &area)
             ctx.isLastReadMessage = false;
         }
 
-        if (areaContainsY(ctx.y) || areaContainsY(ctx.y + layout->getHeight()))
+        if (areaContainsY(ctx.y) ||
+            areaContainsY(ctx.y + layout->getHeight()) ||
+            (ctx.y < area.y() && layout->getHeight() > area.height()))
         {
             auto paintResult = layout->paint(ctx);
             if (paintResult.hasAnimatedElements)
