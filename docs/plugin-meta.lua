@@ -3,7 +3,11 @@
 -- This file is intended to be used with LuaLS (https://luals.github.io/).
 -- Add the folder this file is in to "Lua.workspace.library".
 
+c2 = {}
+
 ---@alias LogLevel integer
+---@type { Debug: LogLevel, Info: LogLevel, Warning: LogLevel, Critical: LogLevel }
+c2.LogLevel = {}
 
 ---@class CommandContext
 ---@field words string[] The words typed when executing the command. For example `/foo bar baz` will result in `{"/foo", "bar", "baz"}`.
@@ -13,21 +17,17 @@
 ---@field values string[] The completions
 ---@field hide_others boolean Whether other completions from Chatterino should be hidden/ignored.
 
-c2 = {}
-
----@type { Debug: LogLevel, Info: LogLevel, Warning: LogLevel, Critical: LogLevel }
-c2.LogLevel = {}
-
---- Writes a message to the Chatterino log.
----@param level LogLevel The desired level.
----@param ... any Values to log. Should be convertible to a string with `tostring()`.
-function c2.log(level, ...) end
-
 --- Registers a new command called `name` which when executed will call `handler`.
 ---@param name string The name of the command.
 ---@param handler fun(ctx: CommandContext) The handler to be invoked when the command gets executed.
 ---@return boolean ok  Returns `true` if everything went ok, `false` if a command with this name exists.
 function c2.register_command(name, handler) end
+
+--- Registers a callback to be invoked when completions for a term are requested.
+---
+---@param type "CompletionRequested"
+---@param func fun(query: string, full_text_content: string, cursor_position: integer, is_first_word: boolean): CompletionList The callback to be invoked.
+function c2.register_callback(type, func) end
 
 --- Sends a message to `channel` with the specified text. Also executes commands.
 ---
@@ -44,7 +44,8 @@ function c2.send_msg(channel, text) end
 ---@return boolean ok
 function c2.system_msg(channel, text) end
 
---- Registers a callback to be invoked when completions for a term are requested.
----@param type "CompletionRequested"
----@param func fun(query: string, full_text_content: string, cursor_position: integer, is_first_word: boolean): CompletionList The callback to be invoked.
-function c2.register_callback(type, func) end
+--- Writes a message to the Chatterino log.
+---@param level LogLevel The desired level.
+---@param ... any Values to log. Should be convertible to a string with `tostring()`.
+function c2.log(level, ...) end
+
