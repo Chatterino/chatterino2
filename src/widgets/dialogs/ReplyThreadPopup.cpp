@@ -159,8 +159,8 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, Split *split)
                                      this->thread_->markUnsubscribed();
                                  }
                              });
-            hbox->addWidget(this->ui_.notificationCheckbox, 0);
-            hbox->addWidget(new QWidget, 1);
+            hbox->addWidget(this->ui_.notificationCheckbox);
+            hbox->addStretch(1);
             this->ui_.notificationCheckbox->setFocusPolicy(Qt::NoFocus);
         }
 
