@@ -38,11 +38,7 @@ BOILERPLATE = """
 -- Add the folder this file is in to "Lua.workspace.library".
 
 c2 = {}
-
-"""[
-    1:
-]
-
+"""
 
 repo_root = Path(__file__).parent.parent
 lua_api_file = repo_root / "src" / "controllers" / "plugins" / "LuaAPI.hpp"
@@ -67,7 +63,7 @@ expose_next_enum_as: str | None = None
 current_enum_name: str | None = None
 
 with lua_meta.open("w") as out:
-    out.write(BOILERPLATE)
+    out.write(BOILERPLATE[1:])  # skip the newline after triple quote
 
     for line in lines:
         line = line.strip()
@@ -97,7 +93,7 @@ with lua_meta.open("w") as out:
                 if i != 0:
                     out.write(", ")
                 out.write(entry + ": " + current_enum_name)
-            out.write(" }\n" f"{expose_next_enum_as} = {{}}\n\n")
+            out.write(" }\n" f"{expose_next_enum_as} = {{}}\n")
             print(f"Wrote enum {expose_next_enum_as} => {current_enum_name}")
             current_enum_name = None
             expose_next_enum_as = None
