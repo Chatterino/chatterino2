@@ -340,28 +340,6 @@ void HighlightingPage::openColorDialog(const QModelIndex &clicked,
         if (selected.isValid())
         {
             view->getModel()->setData(clicked, selected, Qt::DecorationRole);
-
-            if (tab == HighlightTab::Messages)
-            {
-                /*
-                 * For preset highlights in the "Messages" tab, we need to
-                 * manually update the color map.
-                 */
-                auto instance = ColorProvider::instance();
-                switch (clicked.row())
-                {
-                    case 0:
-                        instance.updateColor(ColorType::SelfHighlight,
-                                             selected);
-                        break;
-                    case 1:
-                        instance.updateColor(ColorType::Whisper, selected);
-                        break;
-                    case 2:
-                        instance.updateColor(ColorType::Subscription, selected);
-                        break;
-                }
-            }
         }
     });
 }
