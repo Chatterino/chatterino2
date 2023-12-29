@@ -55,7 +55,7 @@ using SplitDirection = SplitContainer::Direction;
 void WindowManager::showSettingsDialog(QWidget *parent,
                                        SettingsDialogPreference preference)
 {
-    if (getArgs().dontSaveSettings)
+    if (getApp()->getArgs().dontSaveSettings)
     {
         QMessageBox::critical(parent, "Chatterino - Editing Settings Forbidden",
                               "Settings cannot be edited when running with\n"
@@ -356,9 +356,9 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
     {
         WindowLayout windowLayout;
 
-        if (getArgs().customChannelLayout)
+        if (getApp()->getArgs().customChannelLayout)
         {
-            windowLayout = getArgs().customChannelLayout.value();
+            windowLayout = getApp()->getArgs().customChannelLayout.value();
         }
         else
         {
@@ -370,7 +370,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
         this->applyWindowLayout(windowLayout);
     }
 
-    if (getArgs().isFramelessEmbed)
+    if (getApp()->getArgs().isFramelessEmbed)
     {
         this->framelessEmbedWindow_.reset(new FramelessEmbedWindow);
         this->framelessEmbedWindow_->show();
@@ -383,7 +383,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
         this->mainWindow_->getNotebook().addPage(true);
 
         // TODO: don't create main window if it's a frameless embed
-        if (getArgs().isFramelessEmbed)
+        if (getApp()->getArgs().isFramelessEmbed)
         {
             this->mainWindow_->hide();
         }
@@ -418,7 +418,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
 void WindowManager::save()
 {
-    if (getArgs().dontSaveSettings)
+    if (getApp()->getArgs().dontSaveSettings)
     {
         return;
     }
@@ -724,7 +724,7 @@ WindowLayout WindowManager::loadWindowLayoutFromFile() const
 
 void WindowManager::applyWindowLayout(const WindowLayout &layout)
 {
-    if (getArgs().dontLoadMainWindow)
+    if (getApp()->getArgs().dontLoadMainWindow)
     {
         return;
     }

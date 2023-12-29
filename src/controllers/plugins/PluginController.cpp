@@ -233,7 +233,7 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     auto *temp = plugin.get();
     this->plugins_.insert({pluginName, std::move(plugin)});
 
-    if (getArgs().safeMode)
+    if (getApp()->getArgs().safeMode)
     {
         // This isn't done earlier to ensure the user can disable a misbehaving plugin
         qCWarning(chatterinoLua) << "Skipping loading plugin " << meta.name

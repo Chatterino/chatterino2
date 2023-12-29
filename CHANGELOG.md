@@ -100,6 +100,7 @@
 - Dev: BREAKING: Replace custom `import()` with normal Lua `require()`. (#5014)
 - Dev: Fixed most compiler warnings. (#5028)
 - Dev: Added the ability to show `ChannelView`s without a `Split`. (#4747)
+- Dev: Refactor Args to be less of a singleton. (#5041)
 - Dev: Channels without any animated elements on screen will skip updates from the GIF timer. (#5042, #5043, #5045)
 
 ## 2.4.6

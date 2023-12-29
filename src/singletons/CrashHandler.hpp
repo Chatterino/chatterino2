@@ -12,6 +12,8 @@
 
 namespace chatterino {
 
+class Args;
+
 class CrashHandler : public Singleton
 {
 public:
@@ -30,7 +32,7 @@ private:
 };
 
 #ifdef CHATTERINO_WITH_CRASHPAD
-std::unique_ptr<crashpad::CrashpadClient> installCrashHandler();
+std::unique_ptr<crashpad::CrashpadClient> installCrashHandler(const Args &args);
 #endif
 
 }  // namespace chatterino

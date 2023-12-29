@@ -82,10 +82,9 @@ std::optional<bool> readRecoverySettings(const Paths &paths)
     return shouldRecover.toBool();
 }
 
-bool canRestart(const Paths &paths)
+bool canRestart(const Paths &paths, const Args &args)
 {
 #ifdef NDEBUG
-    const auto &args = chatterino::getArgs();
     if (args.isFramelessEmbed || args.shouldRunBrowserExtensionHost)
     {
         return false;
@@ -109,10 +108,10 @@ bool canRestart(const Paths &paths)
 /// additional plus ('++' -> '+').
 ///
 /// The decoding happens in crash-handler/src/CommandLine.cpp
-std::string encodeArguments()
+std::string encodeArguments(const Args &appArgs)
 {
     std::string args;
-    for (auto arg : getArgs().currentArguments())
+    for (auto arg : appArgs.currentArguments())
     {
         if (!args.empty())
         {
@@ -161,7 +160,7 @@ void CrashHandler::saveShouldRecover(bool value)
 }
 
 #ifdef CHATTERINO_WITH_CRASHPAD
-std::unique_ptr<crashpad::CrashpadClient> installCrashHandler()
+std::unique_ptr<crashpad::CrashpadClient> installCrashHandler(const Args &args)
 {
     // Currently, the following directory layout is assumed:
     // [applicationDirPath]
@@ -197,7 +196,7 @@ std::unique_ptr<crashpad::CrashpadClient> installCrashHandler()
     std::map<std::string, std::string> annotations{
         {
             "canRestart"s,
-            canRestart(*getPaths()) ? "true"s : "false"s,
+            canRestart(*getPaths(), args) ? "true"s : "false"s,
         },
         {
             "exePath"s,
@@ -209,7 +208,7 @@ std::unique_ptr<crashpad::CrashpadClient> installCrashHandler()
         },
         {
             "exeArguments"s,
-            encodeArguments(),
+            encodeArguments(args),
         },
     };
 
