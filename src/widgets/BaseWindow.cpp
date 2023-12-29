@@ -1091,6 +1091,11 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
                     return true;
                 }
 
+                if (widget == this)
+                {
+                    return false;
+                }
+
                 return recursiveCheckMouseTracking(widget->parentWidget());
             };
 
