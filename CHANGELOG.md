@@ -57,6 +57,7 @@
 - Bugfix: Fixed a bug on Wayland where tooltips would spawn as separate windows instead of behaving like tooltips. (#4998, #5040)
 - Bugfix: Fixes to section deletion in text input fields. (#5013)
 - Bugfix: Show user text input within watch streak notices. (#5029)
+- Bugfix: Fixed draggable popups falling back to a non-native drag implementation on Windows. (#5051)
 - Dev: Run miniaudio in a separate thread, and simplify it to not manage the device ourselves. There's a chance the simplification is a bad idea. (#4978)
 - Dev: Change clang-format from v14 to v16. (#4929)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
