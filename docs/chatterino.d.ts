@@ -26,7 +26,7 @@ declare module c2 {
   }
 
   enum EventType {
-    RegisterCompletions = "RegisterCompletions",
+    CompletionRequested = "CompletionRequested",
   }
 
   type CbFuncCompletionsRequested = (
@@ -35,7 +35,7 @@ declare module c2 {
     cursor_position: number,
     is_first_word: boolean
   ) => CompletionList;
-  type CbFunc<T> = T extends EventType.RegisterCompletions
+  type CbFunc<T> = T extends EventType.CompletionRequested
     ? CbFuncCompletionsRequested
     : never;
 
