@@ -113,6 +113,42 @@ Limitations/known issues:
   rebuilding the window content caused by reloading another plugin will solve this.
 - Spaces in command names aren't handled very well (https://github.com/Chatterino/chatterino2/issues/1517).
 
+#### `register_callback("CompletionRequested", handler)`
+
+Registers a callback (`handler`) to process completions. The callback gets the following parameters:
+
+- `query`: The queried word.
+- `full_text_content`: The whole input.
+- `cursor_position`: The position of the cursor in the input.
+- `is_first_word`: Flag whether `query` is the first word in the input.
+
+Example:
+
+| Input      | `query` | `full_text_content` | `cursor_position` | `is_first_word` |
+| ---------- | ------- | ------------------- | ----------------- | --------------- |
+| `foo│`     | `foo`   | `foo`               | 3                 | `true`          |
+| `fo│o`     | `fo`    | `foo`               | 2                 | `true`          |
+| `foo bar│` | `bar`   | `foo bar`           | 7                 | `false`         |
+| `foo │bar` | `foo`   | `foo bar`           | 4                 | `false`         |
+
+```lua
+function string.startswith(s, other)
+    return string.sub(s, 1, string.len(other)) == other
+end
+
+c2.register_callback(
+    "CompletionRequested",
+    function(query, full_text_content, cursor_position, is_first_word)
+        if ("!join"):startswith(query) then
+            ---@type CompletionList
+            return { hide_others = true, values = { "!join" } }
+        end
+        ---@type CompletionList
+        return { hide_others = false, values = {} }
+    end
+)
+```
+
 #### `send_msg(channel, text)`
 
 Sends a message to `channel` with the specified text. Also executes commands.
