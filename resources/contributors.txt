@@ -66,6 +66,7 @@ olafyang | https://github.com/olafyang | | Contributor
 chrrs | https://github.com/chrrs | | Contributor
 4rneee | https://github.com/4rneee | | Contributor
 crazysmc | https://github.com/crazysmc | :/avatars/crazysmc.png | Contributor
+SputNikPlop | https://github.com/SputNikPlop | | Contributor
 
 # If you are a contributor add yourself above this line
 

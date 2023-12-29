@@ -52,11 +52,12 @@
 - Bugfix: Hide the Usercard button in the User Info Popup when in special channels. (#4972)
 - Bugfix: Fixed support for Windows 11 Snap layouts. (#4994)
 - Bugfix: Fixed some windows appearing between screens. (#4797)
-- Bugfix: Fixed a crash that could occur when using certain features in a Usercard after closing the split from which it was created. (#5034)
-- Bugfix: Fixed a crash that could occur when using certain features in a Reply popup after closing the split from which it was created. (#5036)
+- Bugfix: Fixed a crash that could occur when using certain features in a Usercard after closing the split from which it was created. (#5034, #5051)
+- Bugfix: Fixed a crash that could occur when using certain features in a Reply popup after closing the split from which it was created. (#5036, #5051)
 - Bugfix: Fixed a bug on Wayland where tooltips would spawn as separate windows instead of behaving like tooltips. (#4998, #5040)
 - Bugfix: Fixes to section deletion in text input fields. (#5013)
 - Bugfix: Show user text input within watch streak notices. (#5029)
+- Bugfix: Fixed avatar in usercard and moderation button triggering when releasing the mouse outside their area. (#5052)
 - Dev: Run miniaudio in a separate thread, and simplify it to not manage the device ourselves. There's a chance the simplification is a bad idea. (#4978)
 - Dev: Change clang-format from v14 to v16. (#4929)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
@@ -100,7 +101,7 @@
 - Dev: Fixed most compiler warnings. (#5028)
 - Dev: Added the ability to show `ChannelView`s without a `Split`. (#4747)
 - Dev: Refactor Args to be less of a singleton. (#5041)
-- Dev: Channels without any animated elements on screen will skip updates from the GIF timer. (#5042)
+- Dev: Channels without any animated elements on screen will skip updates from the GIF timer. (#5042, #5043, #5045)
 
 ## 2.4.6
 
