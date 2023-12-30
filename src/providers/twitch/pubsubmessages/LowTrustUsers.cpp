@@ -58,15 +58,13 @@ PubSubLowTrustUsersMessage::PubSubLowTrustUsersMessage(const QJsonObject &root)
     }
 
     this->channelID = data.value("channel_id").toString();
-    this->updatedAt = data.value("updated_at").toString();
-    this->formattedUpdatedAt =
-        QDateTime::fromString(this->updatedAt, Qt::ISODate)
-            .toLocalTime()
-            .toString("MMM d yyyy, h:mm ap");
-    this->evaluatedAt = data.value("evaluated_at").toString();
+    this->updatedAtString = data.value("updated_at").toString();
+    this->updatedAt = QDateTime::fromString(this->updatedAtString, Qt::ISODate)
+                          .toLocalTime()
+                          .toString("MMM d yyyy, h:mm ap");
 
     const auto updatedBy = data.value("updated_by").toObject();
-    this->updatedByUserId = updatedBy.value("id").toString();
+    this->updatedByUserID = updatedBy.value("id").toString();
     this->updatedByUserLogin = updatedBy.value("login").toString();
     this->updatedByUserDisplayName = updatedBy.value("display_name").toString();
 
@@ -78,9 +76,10 @@ PubSubLowTrustUsersMessage::PubSubLowTrustUsersMessage(const QJsonObject &root)
         this->treatment = oTreatment.value();
     }
 
-    this->evasionString = data.value("ban_evasion_evaluation").toString();
+    this->evasionEvaluationString =
+        data.value("ban_evasion_evaluation").toString();
     if (const auto oEvaluation = magic_enum::enum_cast<EvasionEvaluation>(
-            this->evasionString.toStdString());
+            this->evasionEvaluationString.toStdString());
         oEvaluation.has_value())
     {
         this->evasionEvaluation = oEvaluation.value();

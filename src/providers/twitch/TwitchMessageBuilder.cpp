@@ -2041,7 +2041,7 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeLowTrustUserMessage(
         headerMessage += " by " + action.updatedByUserLogin;
     }
 
-    headerMessage += " at " + action.formattedUpdatedAt;
+    headerMessage += " at " + action.updatedAt;
 
     if (action.restrictionTypes.has(
             PubSubLowTrustUsersMessage::RestrictionType::DetectedBanEvader))
@@ -2061,8 +2061,7 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeLowTrustUserMessage(
     }
 
     if (action.restrictionTypes.has(
-            PubSubLowTrustUsersMessage::RestrictionType::
-                BannedInSharedChannel))
+            PubSubLowTrustUsersMessage::RestrictionType::BannedInSharedChannel))
     {
         headerMessage += ". Banned in " +
                          QString::number(action.sharedBanChannelIDs.size()) +

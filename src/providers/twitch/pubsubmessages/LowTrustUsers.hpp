@@ -23,7 +23,7 @@ struct LowTrustUserChatBadge {
 
 struct PubSubLowTrustUsersMessage {
     /**
-     * The type of this message
+     * The type of low trust message update
      */
     enum class Type {
         /**
@@ -39,6 +39,9 @@ struct PubSubLowTrustUsersMessage {
         INVALID,
     };
 
+    /**
+     * The treatment set for the suspicious user
+     */
     enum class Treatment {
         NoTreatment,
         ActiveMonitoring,
@@ -47,6 +50,10 @@ struct PubSubLowTrustUsersMessage {
         INVALID,
     };
 
+    /**
+     * A ban evasion likelihood value (if any) that has been applied to the user
+     * automatically by Twitch
+     */
     enum class EvasionEvaluation {
         UnknownEvader,
         UnlikelyEvader,
@@ -56,6 +63,9 @@ struct PubSubLowTrustUsersMessage {
         INVALID,
     };
 
+    /**
+     * Restriction type (if any) that apply to the suspicious user
+     */
     enum class RestrictionType : uint8_t {
         UnknownType = 1 << 0,
         ManuallyAdded = 1 << 1,
@@ -65,39 +75,88 @@ struct PubSubLowTrustUsersMessage {
         INVALID = 1 << 4,
     };
 
-    QString typeString;
     Type type = Type::INVALID;
 
-    QString treatmentString;
     Treatment treatment = Treatment::INVALID;
 
-    QString evasionString;
     EvasionEvaluation evasionEvaluation = EvasionEvaluation::INVALID;
 
     FlagsEnum<RestrictionType> restrictionTypes;
 
-    // QString lowTrustID; // unused, more relevant for first-party
     QString channelID;
+
     QString suspiciousUserID;
     QString suspiciousUserLogin;
     QString suspiciousUserDisplayName;
-    QString updatedByUserId;
+
+    QString updatedByUserID;
     QString updatedByUserLogin;
     QString updatedByUserDisplayName;
-    QString evaluatedAt;
-    QString updatedAt;
-    QString formattedUpdatedAt;
 
-    /*
-     * Fields that are only populated on new message.
-     * i.e., not the treatment update event type.
-    */
+    /**
+     * Formatted timestamp of when the treatment was last updated for the suspicious user
+     */
+    QString updatedAt;
+
+    /**
+     * Plain text of the message sent.
+     * Only used for the UserMessage type.
+     */
     QString text;
+
+    /**
+     * ID of the message.
+     * Only used for the UserMessage type.
+     */
     QString msgID;
+
+    /**
+     * RFC3339 timestamp of when the message was sent.
+     * Only used for the UserMessage type.
+     */
     QString sentAt;
-    QColor suspiciousUserColor;  // undocumented
+
+    /**
+     * Color of the user who sent the message.
+     * Only used for the UserMessage type.
+     */
+    QColor suspiciousUserColor;
+
+    /**
+     * A list of channel IDs where the suspicious user is also banned.
+     * Only used for the UserMessage type.
+     */
     std::vector<QString> sharedBanChannelIDs;
-    std::vector<LowTrustUserChatBadge> senderBadges;  // undocumented
+
+    /**
+     * A list of badges of the user who sent the message.
+     * Only used for the UserMessage type.
+     */
+    std::vector<LowTrustUserChatBadge> senderBadges;
+
+    /**
+     * Stores the string value of `type`
+     * Useful in case type shows up as invalid after being parsed
+     */
+    QString typeString;
+
+    /**
+     * Stores the string value of `treatment`
+     * Useful in case treatment shows up as invalid after being parsed
+     */
+    QString treatmentString;
+
+    /**
+     * Stores the string value of `ban_evasion_evaluation`
+     * Useful in case evasionEvaluation shows up as invalid after being parsed
+     */
+    QString evasionEvaluationString;
+
+    /**
+     * Stores the string value of `updated_at`
+     * Useful in case formattedUpdatedAt doesn't parse correctly
+     */
+    QString updatedAtString;
 
     PubSubLowTrustUsersMessage() = default;
     explicit PubSubLowTrustUsersMessage(const QJsonObject &root);
