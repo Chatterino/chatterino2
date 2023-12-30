@@ -133,11 +133,47 @@ public:
     void unlistenLowTrustUsers();
     void unlistenWhispers();
 
+    /**
+     * Listen to incoming whispers for the currently logged in user.
+     * This topic is relevant for everyone.
+     *
+     * PubSub topic: whispers.{currentUserID}
+     */
     bool listenToWhispers();
+
+    /**
+     * Listen to moderation actions in the given channel.
+     * This topic is relevant for everyone.
+     * TODO: Briefly explain what's relevant for moderators & normal users.
+     *
+     * PubSub topic: chat_moderator_actions.{currentUserID}.{channelID}
+     */
     void listenToChannelModerationActions(const QString &channelID);
+
+    /**
+     * Listen to Automod events in the given channel.
+     * This topic is only relevant for moderators.
+     * This will send events about incoming messages that
+     * are caught by Automod.
+     *
+     * PubSub topic: automod-queue.{channelID}.{currentUserID}
+     */
     void listenToAutomod(const QString &channelID);
+
+    /**
+     * Listen to Low Trust events in the given channel.
+     * This topic is only relevant for moderators.
+     *
+     * PubSub topic: low-trust-users.{channelID}.{currentUserID}
+     */
     void listenToLowTrustUsers(const QString &channelID);
 
+    /**
+     * Listen to incoming channel point redemptions in the given channel.
+     * This topic is relevant for everyone.
+     *
+     * PubSub topic: community-points-channel-v1.{channelID}
+     */
     void listenToChannelPointRewards(const QString &channelID);
 
     std::vector<QString> requests;
