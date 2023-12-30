@@ -3,6 +3,8 @@
 #include <common/FlagsEnum.hpp>
 #include <magic_enum/magic_enum.hpp>
 #include <QColor>
+#include <QDateTime>
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QString>
 
