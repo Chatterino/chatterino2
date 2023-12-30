@@ -477,6 +477,16 @@ void Application::initPubSub()
     std::ignore =
         this->twitch->pubsub->signals_.moderation.suspiciousMessageReceived
             .connect([&](const auto &action) {
+                if (action.treatment ==
+                    PubSubLowTrustUsersMessage::Treatment::INVALID)
+                {
+                    qCWarning(chatterinoTwitch)
+                        << "Received message with unknown suspicion: "
+                        << action.treatmentString;
+                    return;
+                }
+
+                // monitored chats are received over irc; in the future, we will use pubsub instead
                 if (action.treatment !=
                     PubSubLowTrustUsersMessage::Treatment::Restricted)
                 {
@@ -509,9 +519,16 @@ void Application::initPubSub()
     std::ignore =
         this->twitch->pubsub->signals_.moderation.suspiciousTreatmentUpdated
             .connect([&](const auto &action) {
-                if (action.updatedByUserLogin.isEmpty() ||
-                    action.treatment ==
-                        PubSubLowTrustUsersMessage::Treatment::INVALID)
+                if (action.treatment ==
+                    PubSubLowTrustUsersMessage::Treatment::INVALID)
+                {
+                    qCWarning(chatterinoTwitch)
+                        << "Suspicious user has unknown new treatment: "
+                        << action.treatmentString;
+                    return;
+                }
+
+                if (action.updatedByUserLogin.isEmpty())
                 {
                     return;
                 }
@@ -529,9 +546,9 @@ void Application::initPubSub()
                     return;
                 }
 
-                auto msg =
-                    TwitchMessageBuilder::makeLowTrustUpdateMessage(action);
-                postToThread([chan, msg] {
+                postToThread([chan, action] {
+                    auto msg =
+                        TwitchMessageBuilder::makeLowTrustUpdateMessage(action);
                     chan->addMessage(msg);
                 });
             });

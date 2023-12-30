@@ -141,7 +141,11 @@ public:
     /**
      * Listen to moderation actions in the given channel.
      * This topic is relevant for everyone.
-     * TODO: Briefly explain what's relevant for moderators & normal users.
+     * For moderators, this topic includes blocked/permitted terms updates,
+     * roomstate changes, general mod/vip updates, all bans/timeouts/deletions.
+     * For normal users, this topic includes moderation actions that are targetted at the local user:
+     * automod catching a user's sent message, a moderator approving or denying their caught messages,
+     * the user gaining/losing mod/vip, the user receiving a ban/timeout/deletion.
      *
      * PubSub topic: chat_moderator_actions.{currentUserID}.{channelID}
      */
@@ -153,15 +157,17 @@ public:
      * This will send events about incoming messages that
      * are caught by Automod.
      *
-     * PubSub topic: automod-queue.{channelID}.{currentUserID}
+     * PubSub topic: automod-queue.{currentUserID}.{channelID}
      */
     void listenToAutomod(const QString &channelID);
 
     /**
      * Listen to Low Trust events in the given channel.
      * This topic is only relevant for moderators.
+     * This will fire events about suspicious treatment updates
+     * and messages sent by restricted/monitored users.
      *
-     * PubSub topic: low-trust-users.{channelID}.{currentUserID}
+     * PubSub topic: low-trust-users.{currentUserID}.{channelID}
      */
     void listenToLowTrustUsers(const QString &channelID);
 

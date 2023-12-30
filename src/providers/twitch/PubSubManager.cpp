@@ -1238,7 +1238,7 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
             break;
 
             case PubSubLowTrustUsersMessage::Type::INVALID: {
-                qCDebug(chatterinoPubSub)
+                qCWarning(chatterinoPubSub)
                     << "Invalid low trust users event type:"
                     << innerMessage.typeString;
             }
