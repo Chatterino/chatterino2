@@ -1,5 +1,8 @@
 #include "providers/twitch/pubsubmessages/LowTrustUsers.hpp"
 
+#include <QDateTime>
+#include <QJsonArray>
+
 namespace chatterino {
 
 PubSubLowTrustUsersMessage::PubSubLowTrustUsersMessage(const QJsonObject &root)
