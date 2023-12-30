@@ -60,7 +60,8 @@ ColorDetails::ColorDetails(QColor color, QWidget *parent)
                                    auto updateColor) {
         component.lbl.setText(label);
         component.box.setRange(0, 255);
-        QObject::connect(&component.box, &QSpinBox::valueChanged, this,
+        QObject::connect(&component.box,
+                         qOverload<int>(&QSpinBox::valueChanged), this,
                          [this, &component, updateColor](int value) {
                              if (component.value == value)
                              {
