@@ -98,9 +98,8 @@ void HighlightModel::afterInit()
         QUrl(getSettings()->whisperHighlightSoundUrl.getValue());
     setFilePathItem(whisperRow[Column::SoundPath], whisperSound, false);
 
-    //    auto whisperColor = ColorProvider::instance().color(ColorType::Whisper);
-    //    setColorItem(whisperRow[Column::Color], *whisperColor, false);
-    whisperRow[Column::Color]->setFlags(Qt::ItemFlag::NoItemFlags);
+    auto whisperColor = ColorProvider::instance().color(ColorType::Whisper);
+    setColorItem(whisperRow[Column::Color], *whisperColor, false);
 
     this->insertCustomRow(whisperRow, HighlightRowIndexes::WhisperRow);
 
@@ -463,48 +462,47 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
             // Custom color
             if (role == Qt::DecorationRole)
             {
-                auto colorName = value.value<QColor>().name(QColor::HexArgb);
+                const auto setColor = [&](auto &setting, ColorType ty) {
+                    auto color = value.value<QColor>();
+                    setting.setValue(color.name(QColor::HexArgb));
+                    const_cast<ColorProvider &>(ColorProvider::instance())
+                        .updateColor(ty, color);
+                };
+
                 if (rowIndex == HighlightRowIndexes::SelfHighlightRow)
                 {
-                    getSettings()->selfHighlightColor.setValue(colorName);
+                    setColor(getSettings()->selfHighlightColor,
+                             ColorType::SelfHighlight);
                 }
-                //                else if (rowIndex == HighlightRowIndexes::WhisperRow)
-                //                {
-                //                    getSettings()->whisperHighlightColor.setValue(colorName);
-                //                }
+                else if (rowIndex == HighlightRowIndexes::WhisperRow)
+                {
+                    setColor(getSettings()->whisperHighlightColor,
+                             ColorType::Whisper);
+                }
                 else if (rowIndex == HighlightRowIndexes::SubRow)
                 {
-                    getSettings()->subHighlightColor.setValue(colorName);
+                    setColor(getSettings()->subHighlightColor,
+                             ColorType::Subscription);
                 }
                 else if (rowIndex == HighlightRowIndexes::RedeemedRow)
                 {
-                    getSettings()->redeemedHighlightColor.setValue(colorName);
-                    const_cast<ColorProvider &>(ColorProvider::instance())
-                        .updateColor(ColorType::RedeemedHighlight,
-                                     QColor(colorName));
+                    setColor(getSettings()->redeemedHighlightColor,
+                             ColorType::RedeemedHighlight);
                 }
                 else if (rowIndex == HighlightRowIndexes::FirstMessageRow)
                 {
-                    getSettings()->firstMessageHighlightColor.setValue(
-                        colorName);
-                    const_cast<ColorProvider &>(ColorProvider::instance())
-                        .updateColor(ColorType::FirstMessageHighlight,
-                                     QColor(colorName));
+                    setColor(getSettings()->firstMessageHighlightColor,
+                             ColorType::FirstMessageHighlight);
                 }
                 else if (rowIndex == HighlightRowIndexes::ElevatedMessageRow)
                 {
-                    getSettings()->elevatedMessageHighlightColor.setValue(
-                        colorName);
-                    const_cast<ColorProvider &>(ColorProvider::instance())
-                        .updateColor(ColorType::ElevatedMessageHighlight,
-                                     QColor(colorName));
+                    setColor(getSettings()->elevatedMessageHighlightColor,
+                             ColorType::ElevatedMessageHighlight);
                 }
                 else if (rowIndex == HighlightRowIndexes::ThreadMessageRow)
                 {
-                    getSettings()->threadHighlightColor.setValue(colorName);
-                    const_cast<ColorProvider &>(ColorProvider::instance())
-                        .updateColor(ColorType::ThreadMessageHighlight,
-                                     QColor(colorName));
+                    setColor(getSettings()->threadHighlightColor,
+                             ColorType::ThreadMessageHighlight);
                 }
             }
         }
