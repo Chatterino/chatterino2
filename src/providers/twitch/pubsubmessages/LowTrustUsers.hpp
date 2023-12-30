@@ -48,10 +48,10 @@ struct PubSubLowTrustUsersMessage {
     };
 
     enum class EvasionEvaluation {
-        UNKNOWN_EVADER,
-        UNLIKELY_EVADER,
-        LIKELY_EVADER,
-        POSSIBLE_EVADER,
+        UnknownEvader,
+        UnlikelyEvader,
+        LikelyEvader,
+        PossibleEvader,
 
         INVALID,
     };
@@ -139,6 +139,32 @@ constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<
 
         case Treatment::Restricted:
             return "RESTRICTED";
+
+        default:
+            return default_tag;
+    }
+}
+
+template <>
+constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<
+    chatterino::PubSubLowTrustUsersMessage::EvasionEvaluation>(
+    chatterino::PubSubLowTrustUsersMessage::EvasionEvaluation value) noexcept
+{
+    using EvasionEvaluation =
+        chatterino::PubSubLowTrustUsersMessage::EvasionEvaluation;
+    switch (value)
+    {
+        case EvasionEvaluation::UnknownEvader:
+            return "UNKNOWN_EVADER";
+
+        case EvasionEvaluation::UnlikelyEvader:
+            return "UNLIKELY_EVADER";
+
+        case EvasionEvaluation::LikelyEvader:
+            return "LIKELY_EVADER";
+
+        case EvasionEvaluation::PossibleEvader:
+            return "POSSIBLE_EVADER";
 
         default:
             return default_tag;

@@ -2048,7 +2048,7 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeLowTrustUserMessage(
     {
         QString evader;
         if (action.evasionEvaluation ==
-            PubSubLowTrustUsersMessage::EvasionEvaluation::LIKELY_EVADER)
+            PubSubLowTrustUsersMessage::EvasionEvaluation::LikelyEvader)
         {
             evader = "likely";
         }
