@@ -68,9 +68,6 @@ class PubSub
     QString userID_;
 
 public:
-    // The max amount of connections we may open
-    static constexpr int maxConnections = 10;
-
     PubSub(const QString &host,
            std::chrono::seconds pingInterval = std::chrono::seconds(15));
 
