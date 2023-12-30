@@ -103,6 +103,7 @@
 - Dev: Added the ability to show `ChannelView`s without a `Split`. (#4747)
 - Dev: Refactor Args to be less of a singleton. (#5041)
 - Dev: Channels without any animated elements on screen will skip updates from the GIF timer. (#5042, #5043, #5045)
+- Dev: Autogenerate docs/plugin-meta.lua. (#5055)
 
 ## 2.4.6
 
