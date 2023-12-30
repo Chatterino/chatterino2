@@ -1,5 +1,8 @@
 #include "widgets/helper/color/HueSlider.hpp"
 
+#include <QMouseEvent>
+#include <QPainter>
+
 namespace {
 
 constexpr int SLIDER_WIDTH = 256;

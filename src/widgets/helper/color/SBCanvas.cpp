@@ -1,5 +1,8 @@
 #include "widgets/helper/color/SBCanvas.hpp"
 
+#include <QMouseEvent>
+#include <QPainter>
+
 namespace {
 
 constexpr int PICKER_WIDTH = 256;
