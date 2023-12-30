@@ -22,14 +22,22 @@ struct LowTrustUserChatBadge {
 };
 
 struct PubSubLowTrustUsersMessage {
+    /**
+     * The type of this message
+     */
     enum class Type {
+        /**
+         * An incoming message from someone marked as low trust
+         */
         UserMessage,
+
+        /**
+         * An incoming update about a user's low trust status
+         */
         TreatmentUpdate,
 
         INVALID,
     };
-    QString typeString;
-    Type type = Type::INVALID;
 
     enum class Treatment {
         NO_TREATMENT,
@@ -38,8 +46,6 @@ struct PubSubLowTrustUsersMessage {
 
         INVALID,
     };
-    QString treatmentString;
-    Treatment treatment = Treatment::INVALID;
 
     enum class EvasionEvaluation {
         UNKNOWN_EVADER,
@@ -49,8 +55,6 @@ struct PubSubLowTrustUsersMessage {
 
         INVALID,
     };
-    QString evasionString;
-    EvasionEvaluation evasionEvaluation = EvasionEvaluation::INVALID;
 
     enum class RestrictionType : uint8_t {
         UNKNOWN_TYPE = 1 << 0,
@@ -60,6 +64,16 @@ struct PubSubLowTrustUsersMessage {
 
         INVALID = 1 << 4,
     };
+
+    QString typeString;
+    Type type = Type::INVALID;
+
+    QString treatmentString;
+    Treatment treatment = Treatment::INVALID;
+
+    QString evasionString;
+    EvasionEvaluation evasionEvaluation = EvasionEvaluation::INVALID;
+
     FlagsEnum<RestrictionType> restrictionTypes;
 
     // QString lowTrustID; // unused, more relevant for first-party
