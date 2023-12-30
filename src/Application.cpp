@@ -35,6 +35,7 @@
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/PubSubMessages.hpp"
+#include "providers/twitch/pubsubmessages/LowTrustUsers.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -474,6 +475,68 @@ void Application::initPubSub()
             });
 
     std::ignore =
+        this->twitch->pubsub->signals_.moderation.suspiciousMessageReceived
+            .connect([&](const auto &action) {
+                if (action.treatment !=
+                    PubSubLowTrustUsersMessage::Treatment::RESTRICTED)
+                {
+                    return;
+                }
+
+                if (getSettings()->streamerModeHideModActions &&
+                    isInStreamerMode())
+                {
+                    return;
+                }
+
+                auto chan =
+                    this->twitch->getChannelOrEmptyByID(action.channelID);
+
+                if (chan->isEmpty())
+                {
+                    return;
+                }
+
+                postToThread([chan, action] {
+                    const auto p =
+                        TwitchMessageBuilder::makeLowTrustUserMessage(
+                            action, chan->getName());
+                    chan->addMessage(p.first);
+                    chan->addMessage(p.second);
+                });
+            });
+
+    std::ignore =
+        this->twitch->pubsub->signals_.moderation.suspiciousTreatmentUpdated
+            .connect([&](const auto &action) {
+                if (action.updatedByUserLogin.isEmpty() ||
+                    action.treatment ==
+                        PubSubLowTrustUsersMessage::Treatment::INVALID)
+                {
+                    return;
+                }
+
+                if (getSettings()->streamerModeHideModActions &&
+                    isInStreamerMode())
+                {
+                    return;
+                }
+
+                auto chan =
+                    this->twitch->getChannelOrEmptyByID(action.channelID);
+                if (chan->isEmpty())
+                {
+                    return;
+                }
+
+                auto msg =
+                    TwitchMessageBuilder::makeLowTrustUpdateMessage(action);
+                postToThread([chan, msg] {
+                    chan->addMessage(msg);
+                });
+            });
+
+    std::ignore =
         this->twitch->pubsub->signals_.moderation.autoModMessageCaught.connect(
             [&](const auto &msg, const QString &channelID) {
                 auto chan = this->twitch->getChannelOrEmptyByID(channelID);
@@ -672,6 +735,7 @@ void Application::initPubSub()
         [this] {
             this->twitch->pubsub->unlistenAllModerationActions();
             this->twitch->pubsub->unlistenAutomod();
+            this->twitch->pubsub->unlistenLowTrustUsers();
             this->twitch->pubsub->unlistenWhispers();
         },
         boost::signals2::at_front);

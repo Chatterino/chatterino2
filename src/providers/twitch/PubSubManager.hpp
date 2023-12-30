@@ -34,6 +34,7 @@ struct PubSubAutoModQueueMessage;
 struct AutomodAction;
 struct AutomodUserAction;
 struct AutomodInfoAction;
+struct PubSubLowTrustUsersMessage;
 struct PubSubWhisperMessage;
 
 struct PubSubListenMessage;
@@ -100,6 +101,9 @@ public:
             Signal<BanAction> userBanned;
             Signal<UnbanAction> userUnbanned;
 
+            Signal<PubSubLowTrustUsersMessage> suspiciousMessageReceived;
+            Signal<PubSubLowTrustUsersMessage> suspiciousTreatmentUpdated;
+
             // Message caught by automod
             //                                channelID
             pajlada::Signals::Signal<PubSubAutoModQueueMessage, QString>
@@ -126,11 +130,13 @@ public:
 
     void unlistenAllModerationActions();
     void unlistenAutomod();
+    void unlistenLowTrustUsers();
     void unlistenWhispers();
 
     bool listenToWhispers();
     void listenToChannelModerationActions(const QString &channelID);
     void listenToAutomod(const QString &channelID);
+    void listenToLowTrustUsers(const QString &channelID);
 
     void listenToChannelPointRewards(const QString &channelID);
 

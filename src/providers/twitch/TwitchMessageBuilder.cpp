@@ -1933,6 +1933,189 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeAutomodMessage(
     return std::make_pair(message1, message2);
 }
 
+MessagePtr TwitchMessageBuilder::makeLowTrustUpdateMessage(
+    const PubSubLowTrustUsersMessage &action)
+{
+    MessageBuilder builder;
+    builder.emplace<TimestampElement>();
+    builder.message().flags.set(MessageFlag::System);
+    builder.message().flags.set(MessageFlag::PubSub);
+    builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
+
+    builder
+        .emplace<TextElement>(action.updatedByUserDisplayName,
+                              MessageElementFlag::Username,
+                              MessageColor::System, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, action.updatedByUserLogin});
+
+    assert(action.treatment != PubSubLowTrustUsersMessage::Treatment::INVALID);
+    switch (action.treatment)
+    {
+        case PubSubLowTrustUsersMessage::Treatment::NO_TREATMENT: {
+            builder.emplace<TextElement>("removed", MessageElementFlag::Text,
+                                         MessageColor::System);
+            builder
+                .emplace<TextElement>(action.suspiciousUserDisplayName,
+                                      MessageElementFlag::Username,
+                                      MessageColor::System,
+                                      FontStyle::ChatMediumBold)
+                ->setLink({Link::UserInfo, action.suspiciousUserLogin});
+            builder.emplace<TextElement>("from the suspicious user list.",
+                                         MessageElementFlag::Text,
+                                         MessageColor::System);
+        }
+        break;
+
+        case PubSubLowTrustUsersMessage::Treatment::ACTIVE_MONITORING: {
+            builder.emplace<TextElement>("added", MessageElementFlag::Text,
+                                         MessageColor::System);
+            builder
+                .emplace<TextElement>(action.suspiciousUserDisplayName,
+                                      MessageElementFlag::Username,
+                                      MessageColor::System,
+                                      FontStyle::ChatMediumBold)
+                ->setLink({Link::UserInfo, action.suspiciousUserLogin});
+            builder.emplace<TextElement>("as a monitored suspicious chatter.",
+                                         MessageElementFlag::Text,
+                                         MessageColor::System);
+        }
+        break;
+
+        case PubSubLowTrustUsersMessage::Treatment::RESTRICTED: {
+            builder.emplace<TextElement>("added", MessageElementFlag::Text,
+                                         MessageColor::System);
+            builder
+                .emplace<TextElement>(action.suspiciousUserDisplayName,
+                                      MessageElementFlag::Username,
+                                      MessageColor::System,
+                                      FontStyle::ChatMediumBold)
+                ->setLink({Link::UserInfo, action.suspiciousUserLogin});
+            builder.emplace<TextElement>("as a restricted suspicious chatter.",
+                                         MessageElementFlag::Text,
+                                         MessageColor::System);
+        }
+        break;
+
+        default:
+            qCDebug(chatterinoTwitch) << "Unexpected suspicious treatment: "
+                                      << action.treatmentString;
+            break;
+    }
+
+    return builder.release();
+}
+
+std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeLowTrustUserMessage(
+    const PubSubLowTrustUsersMessage &action, const QString &channelName)
+{
+    MessageBuilder builder, builder2;
+
+    // Builder for low trust user message with explanation
+    builder.message().channelName = channelName;
+    builder.message().flags.set(MessageFlag::PubSub);
+    builder.message().flags.set(MessageFlag::LowTrustUsers);
+
+    // AutoMod shield badge
+    builder.emplace<BadgeElement>(makeAutoModBadge(),
+                                  MessageElementFlag::BadgeChannelAuthority);
+
+    // Suspicious user header message
+    QString prefix = "Suspicious User:";
+    builder.emplace<TextElement>(prefix, MessageElementFlag::Text,
+                                 MessageColor(QColor("blue")),
+                                 FontStyle::ChatMediumBold);
+
+    QString headerMessage;
+    if (action.treatment == PubSubLowTrustUsersMessage::Treatment::RESTRICTED)
+    {
+        headerMessage = "Restricted";
+    }
+    else
+    {
+        headerMessage = "Monitored";
+    }
+
+    if (action.restrictionTypes.has(
+            PubSubLowTrustUsersMessage::RestrictionType::MANUALLY_ADDED))
+    {
+        headerMessage += " by " + action.updatedByUserLogin;
+    }
+
+    headerMessage += " at " + action.formattedUpdatedAt;
+
+    if (action.restrictionTypes.has(
+            PubSubLowTrustUsersMessage::RestrictionType::DETECTED_BAN_EVADER))
+    {
+        QString evader;
+        if (action.evasionEvaluation ==
+            PubSubLowTrustUsersMessage::EvasionEvaluation::LIKELY_EVADER)
+        {
+            evader = "likely";
+        }
+        else
+        {
+            evader = "possible";
+        }
+
+        headerMessage += ". Detected as " + evader + " ban evader";
+    }
+
+    if (action.restrictionTypes.has(
+            PubSubLowTrustUsersMessage::RestrictionType::
+                BANNED_IN_SHARED_CHANNEL))
+    {
+        headerMessage += ". Banned in " +
+                         QString::number(action.sharedBanChannelIDs.size()) +
+                         " shared channels";
+    }
+
+    builder.emplace<TextElement>(headerMessage, MessageElementFlag::Text,
+                                 MessageColor::Text);
+    builder.message().messageText = prefix + " " + headerMessage;
+    builder.message().searchText = prefix + " " + headerMessage;
+
+    auto message1 = builder.release();
+
+    //
+    // Builder for offender's message
+    builder2.message().channelName = channelName;
+    builder2
+        .emplace<TextElement>("#" + channelName,
+                              MessageElementFlag::ChannelName,
+                              MessageColor::System)
+        ->setLink({Link::JumpToChannel, channelName});
+    builder2.emplace<TimestampElement>();
+    builder2.emplace<TwitchModerationElement>();
+    builder2.message().loginName = action.suspiciousUserLogin;
+    builder2.message().flags.set(MessageFlag::PubSub);
+    builder2.message().flags.set(MessageFlag::LowTrustUsers);
+
+    // sender username
+    builder2
+        .emplace<TextElement>(action.suspiciousUserDisplayName + ":",
+                              MessageElementFlag::BoldUsername,
+                              MessageColor(action.suspiciousUserColor),
+                              FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, action.suspiciousUserLogin});
+    builder2
+        .emplace<TextElement>(action.suspiciousUserDisplayName + ":",
+                              MessageElementFlag::NonBoldUsername,
+                              MessageColor(action.suspiciousUserColor))
+        ->setLink({Link::UserInfo, action.suspiciousUserLogin});
+
+    // sender's message caught by AutoMod
+    builder2.emplace<TextElement>(action.text, MessageElementFlag::Text,
+                                  MessageColor::Text);
+    auto text =
+        QString("%1: %2").arg(action.suspiciousUserDisplayName, action.text);
+    builder2.message().messageText = text;
+    builder2.message().searchText = text;
+
+    auto message2 = builder2.release();
+
+    return std::make_pair(message1, message2);
+}
+
 void TwitchMessageBuilder::setThread(std::shared_ptr<MessageThread> thread)
 {
     this->thread_ = std::move(thread);

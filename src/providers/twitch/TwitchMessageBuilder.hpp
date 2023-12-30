@@ -3,6 +3,7 @@
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
 #include "messages/SharedMessageBuilder.hpp"
+#include "pubsubmessages/LowTrustUsers.hpp"
 
 #include <IrcMessage>
 #include <QString>
@@ -92,6 +93,11 @@ public:
     static std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
         const AutomodAction &action, const QString &channelName);
     static MessagePtr makeAutomodInfoMessage(const AutomodInfoAction &action);
+
+    static std::pair<MessagePtr, MessagePtr> makeLowTrustUserMessage(
+        const PubSubLowTrustUsersMessage &action, const QString &channelName);
+    static MessagePtr makeLowTrustUpdateMessage(
+        const PubSubLowTrustUsersMessage &action);
 
     // Shares some common logic from SharedMessageBuilder::parseBadgeTag
     static std::unordered_map<QString, QString> parseBadgeInfoTag(
