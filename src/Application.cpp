@@ -478,7 +478,7 @@ void Application::initPubSub()
         this->twitch->pubsub->signals_.moderation.suspiciousMessageReceived
             .connect([&](const auto &action) {
                 if (action.treatment !=
-                    PubSubLowTrustUsersMessage::Treatment::RESTRICTED)
+                    PubSubLowTrustUsersMessage::Treatment::Restricted)
                 {
                     return;
                 }

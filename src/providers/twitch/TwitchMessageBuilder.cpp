@@ -1951,7 +1951,7 @@ MessagePtr TwitchMessageBuilder::makeLowTrustUpdateMessage(
     assert(action.treatment != PubSubLowTrustUsersMessage::Treatment::INVALID);
     switch (action.treatment)
     {
-        case PubSubLowTrustUsersMessage::Treatment::NO_TREATMENT: {
+        case PubSubLowTrustUsersMessage::Treatment::NoTreatment: {
             builder.emplace<TextElement>("removed", MessageElementFlag::Text,
                                          MessageColor::System);
             builder
@@ -1966,7 +1966,7 @@ MessagePtr TwitchMessageBuilder::makeLowTrustUpdateMessage(
         }
         break;
 
-        case PubSubLowTrustUsersMessage::Treatment::ACTIVE_MONITORING: {
+        case PubSubLowTrustUsersMessage::Treatment::ActiveMonitoring: {
             builder.emplace<TextElement>("added", MessageElementFlag::Text,
                                          MessageColor::System);
             builder
@@ -1981,7 +1981,7 @@ MessagePtr TwitchMessageBuilder::makeLowTrustUpdateMessage(
         }
         break;
 
-        case PubSubLowTrustUsersMessage::Treatment::RESTRICTED: {
+        case PubSubLowTrustUsersMessage::Treatment::Restricted: {
             builder.emplace<TextElement>("added", MessageElementFlag::Text,
                                          MessageColor::System);
             builder
@@ -2026,7 +2026,7 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeLowTrustUserMessage(
                                  FontStyle::ChatMediumBold);
 
     QString headerMessage;
-    if (action.treatment == PubSubLowTrustUsersMessage::Treatment::RESTRICTED)
+    if (action.treatment == PubSubLowTrustUsersMessage::Treatment::Restricted)
     {
         headerMessage = "Restricted";
     }

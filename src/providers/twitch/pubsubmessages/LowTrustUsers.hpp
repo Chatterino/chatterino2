@@ -40,9 +40,9 @@ struct PubSubLowTrustUsersMessage {
     };
 
     enum class Treatment {
-        NO_TREATMENT,
-        ACTIVE_MONITORING,
-        RESTRICTED,
+        NoTreatment,
+        ActiveMonitoring,
+        Restricted,
 
         INVALID,
     };
@@ -117,6 +117,28 @@ constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<
 
         case chatterino::PubSubLowTrustUsersMessage::Type::TreatmentUpdate:
             return "low_trust_user_treatment_update";
+
+        default:
+            return default_tag;
+    }
+}
+
+template <>
+constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<
+    chatterino::PubSubLowTrustUsersMessage::Treatment>(
+    chatterino::PubSubLowTrustUsersMessage::Treatment value) noexcept
+{
+    using Treatment = chatterino::PubSubLowTrustUsersMessage::Treatment;
+    switch (value)
+    {
+        case Treatment::NoTreatment:
+            return "NO_TREATMENT";
+
+        case Treatment::ActiveMonitoring:
+            return "ACTIVE_MONITORING";
+
+        case Treatment::Restricted:
+            return "RESTRICTED";
 
         default:
             return default_tag;
