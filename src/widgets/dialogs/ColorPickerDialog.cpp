@@ -6,6 +6,8 @@
 #include "widgets/helper/color/ColorDetails.hpp"
 #include "widgets/helper/color/ColorSelect.hpp"
 
+#include <QDialogButtonBox>
+
 namespace {
 
 using namespace chatterino;
