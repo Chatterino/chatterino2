@@ -7,10 +7,6 @@
 #include <QBoxLayout>
 #include <QWidget>
 
-class SBCanvas;
-class HueSlider;
-class AlphaSlider;
-
 namespace chatterino {
 
 class ColorSelect : public QWidget

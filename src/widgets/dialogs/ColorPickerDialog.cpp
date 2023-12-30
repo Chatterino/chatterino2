@@ -7,6 +7,7 @@
 #include "widgets/helper/color/ColorSelect.hpp"
 
 #include <QDialogButtonBox>
+#include <QSet>
 
 namespace {
 

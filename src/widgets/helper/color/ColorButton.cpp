@@ -2,6 +2,8 @@
 
 #include "widgets/helper/color/Checkerboard.hpp"
 
+#include <QPainterPath>
+
 namespace chatterino {
 
 ColorButton::ColorButton(QColor color, QWidget *parent)

@@ -2,6 +2,9 @@
 
 #include "widgets/helper/color/Checkerboard.hpp"
 
+#include <QMouseEvent>
+#include <QPainterPath>
+
 namespace {
 
 constexpr int SLIDER_WIDTH = 256;
