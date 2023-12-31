@@ -63,7 +63,7 @@ class PubSub
     std::unique_ptr<std::thread> mainThread;
 
     // Account credentials
-    // Set from setAccount or setAccountData
+    // Set from setAccount
     QString token_;
     QString userID_;
 
@@ -72,8 +72,6 @@ public:
            std::chrono::seconds pingInterval = std::chrono::seconds(15));
 
     void setAccount(std::shared_ptr<TwitchAccount> account);
-
-    void setAccountData(QString token, QString userID);
 
     enum class State {
         Connected,

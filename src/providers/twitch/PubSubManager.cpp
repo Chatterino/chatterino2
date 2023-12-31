@@ -488,12 +488,6 @@ void PubSub::setAccount(std::shared_ptr<TwitchAccount> account)
     this->userID_ = account->getUserId();
 }
 
-void PubSub::setAccountData(QString token, QString userID)
-{
-    this->token_ = token;
-    this->userID_ = userID;
-}
-
 void PubSub::addClient()
 {
     if (this->addingClient)
