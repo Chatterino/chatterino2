@@ -25,13 +25,11 @@
 
 #include <cassert>
 
-// using namespace Communi;
 using namespace std::chrono_literals;
-
-#define TWITCH_PUBSUB_URL "wss://pubsub-edge.twitch.tv"
 
 namespace {
 
+const QString TWITCH_PUBSUB_URL = "wss://pubsub-edge.twitch.tv";
 const QString BTTV_LIVE_UPDATES_URL = "wss://sockets.betterttv.net/ws";
 const QString SEVENTV_EVENTAPI_URL = "wss://events.7tv.io/v3";
 
@@ -45,10 +43,9 @@ TwitchIrcServer::TwitchIrcServer()
     , liveChannel(new Channel("/live", Channel::Type::TwitchLive))
     , automodChannel(new Channel("/automod", Channel::Type::TwitchAutomod))
     , watchingChannel(Channel::getEmpty(), Channel::Type::TwitchWatching)
+    , pubsub(new PubSub(TWITCH_PUBSUB_URL))
 {
     this->initializeIrc();
-
-    this->pubsub = new PubSub(TWITCH_PUBSUB_URL);
 
     if (getSettings()->enableBTTVLiveUpdates &&
         getSettings()->enableBTTVChannelEmotes)

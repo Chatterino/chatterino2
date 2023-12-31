@@ -315,7 +315,6 @@ bool Channel::isBroadcaster() const
 
 bool Channel::hasModRights() const
 {
-    // fourtf: check if staff
     return this->isMod() || this->isBroadcaster();
 }
 

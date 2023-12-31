@@ -367,7 +367,8 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
             blendColors(backgroundColor,
                         *ctx.colorProvider.color(ColorType::RedeemedHighlight));
     }
-    else if (this->message_->flags.has(MessageFlag::AutoMod))
+    else if (this->message_->flags.has(MessageFlag::AutoMod) ||
+             this->message_->flags.has(MessageFlag::LowTrustUsers))
     {
         backgroundColor = QColor("#404040");
     }

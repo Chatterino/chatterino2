@@ -52,6 +52,7 @@ enum class MessageFlag : int64_t {
     LiveUpdatesUpdate = (1LL << 30),
     /// The message caught by AutoMod containing the user who sent the message & its contents
     AutoModOffendingMessage = (1LL << 31),
+    LowTrustUsers = (1LL << 32),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 

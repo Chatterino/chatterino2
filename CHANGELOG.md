@@ -4,6 +4,7 @@
 
 - Major: Allow use of Twitch follower emotes in other channels if subscribed. (#4922)
 - Major: Add `/automod` split to track automod caught messages across all open channels the user moderates. (#4986, #5026)
+- Major: Show restricted chat messages and suspicious treatment updates. (#5056)
 - Minor: Migrate to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
 - Minor: The account switcher is now styled to match your theme. (#4817)
 - Minor: Add an invisible resize handle to the bottom of frameless user info popups and reply thread popups. (#4795)
@@ -59,6 +60,7 @@
 - Bugfix: Fixes to section deletion in text input fields. (#5013)
 - Bugfix: Show user text input within watch streak notices. (#5029)
 - Bugfix: Fixed avatar in usercard and moderation button triggering when releasing the mouse outside their area. (#5052)
+- Bugfix: Fixed moderator-only topics being subscribed to for non-moderators. (#5056)
 - Dev: Run miniaudio in a separate thread, and simplify it to not manage the device ourselves. There's a chance the simplification is a bad idea. (#4978)
 - Dev: Change clang-format from v14 to v16. (#4929)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)

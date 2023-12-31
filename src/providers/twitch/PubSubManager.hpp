@@ -34,6 +34,7 @@ struct PubSubAutoModQueueMessage;
 struct AutomodAction;
 struct AutomodUserAction;
 struct AutomodInfoAction;
+struct PubSubLowTrustUsersMessage;
 struct PubSubWhisperMessage;
 
 struct PubSubListenMessage;
@@ -67,9 +68,6 @@ class PubSub
     QString userID_;
 
 public:
-    // The max amount of connections we may open
-    static constexpr int maxConnections = 10;
-
     PubSub(const QString &host,
            std::chrono::seconds pingInterval = std::chrono::seconds(15));
 
@@ -100,6 +98,9 @@ public:
             Signal<BanAction> userBanned;
             Signal<UnbanAction> userUnbanned;
 
+            Signal<PubSubLowTrustUsersMessage> suspiciousMessageReceived;
+            Signal<PubSubLowTrustUsersMessage> suspiciousTreatmentUpdated;
+
             // Message caught by automod
             //                                channelID
             pajlada::Signals::Signal<PubSubAutoModQueueMessage, QString>
@@ -126,12 +127,56 @@ public:
 
     void unlistenAllModerationActions();
     void unlistenAutomod();
+    void unlistenLowTrustUsers();
     void unlistenWhispers();
 
+    /**
+     * Listen to incoming whispers for the currently logged in user.
+     * This topic is relevant for everyone.
+     *
+     * PubSub topic: whispers.{currentUserID}
+     */
     bool listenToWhispers();
+
+    /**
+     * Listen to moderation actions in the given channel.
+     * This topic is relevant for everyone.
+     * For moderators, this topic includes blocked/permitted terms updates,
+     * roomstate changes, general mod/vip updates, all bans/timeouts/deletions.
+     * For normal users, this topic includes moderation actions that are targetted at the local user:
+     * automod catching a user's sent message, a moderator approving or denying their caught messages,
+     * the user gaining/losing mod/vip, the user receiving a ban/timeout/deletion.
+     *
+     * PubSub topic: chat_moderator_actions.{currentUserID}.{channelID}
+     */
     void listenToChannelModerationActions(const QString &channelID);
+
+    /**
+     * Listen to Automod events in the given channel.
+     * This topic is only relevant for moderators.
+     * This will send events about incoming messages that
+     * are caught by Automod.
+     *
+     * PubSub topic: automod-queue.{currentUserID}.{channelID}
+     */
     void listenToAutomod(const QString &channelID);
 
+    /**
+     * Listen to Low Trust events in the given channel.
+     * This topic is only relevant for moderators.
+     * This will fire events about suspicious treatment updates
+     * and messages sent by restricted/monitored users.
+     *
+     * PubSub topic: low-trust-users.{currentUserID}.{channelID}
+     */
+    void listenToLowTrustUsers(const QString &channelID);
+
+    /**
+     * Listen to incoming channel point redemptions in the given channel.
+     * This topic is relevant for everyone.
+     *
+     * PubSub topic: community-points-channel-v1.{channelID}
+     */
     void listenToChannelPointRewards(const QString &channelID);
 
     std::vector<QString> requests;

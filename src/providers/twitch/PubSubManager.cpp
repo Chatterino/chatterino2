@@ -7,6 +7,7 @@
 #include "providers/twitch/PubSubHelpers.hpp"
 #include "providers/twitch/PubSubMessages.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
+#include "pubsubmessages/LowTrustUsers.hpp"
 #include "util/DebugCount.hpp"
 #include "util/Helpers.hpp"
 #include "util/RapidjsonHelpers.hpp"
@@ -585,6 +586,25 @@ void PubSub::unlistenAutomod()
     }
 }
 
+void PubSub::unlistenLowTrustUsers()
+{
+    for (const auto &p : this->clients)
+    {
+        const auto &client = p.second;
+        if (const auto &[topics, nonce] =
+                client->unlistenPrefix("low-trust-users.");
+            !topics.empty())
+        {
+            this->registerNonce(nonce, {
+                                           client,
+                                           "UNLISTEN",
+                                           topics,
+                                           topics.size(),
+                                       });
+        }
+    }
+}
+
 void PubSub::unlistenWhispers()
 {
     for (const auto &p : this->clients)
@@ -656,6 +676,30 @@ void PubSub::listenToAutomod(const QString &channelID)
     }
 
     static const QString topicFormat("automod-queue.%1.%2");
+    assert(!channelID.isEmpty());
+
+    auto topic = topicFormat.arg(this->userID_, channelID);
+
+    if (this->isListeningToTopic(topic))
+    {
+        return;
+    }
+
+    qCDebug(chatterinoPubSub) << "Listen to topic" << topic;
+
+    this->listenToTopic(topic);
+}
+
+void PubSub::listenToLowTrustUsers(const QString &channelID)
+{
+    if (this->userID_.isEmpty())
+    {
+        qCDebug(chatterinoPubSub)
+            << "Unable to listen to low trust users topic, no user logged in";
+        return;
+    }
+
+    static const QString topicFormat("low-trust-users.%1.%2");
     assert(!channelID.isEmpty());
 
     auto topic = topicFormat.arg(this->userID_, channelID);
@@ -1168,6 +1212,38 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
 
         this->signals_.moderation.autoModMessageCaught.invoke(innerMessage,
                                                               channelID);
+    }
+    else if (topic.startsWith("low-trust-users."))
+    {
+        auto oInnerMessage = message.toInner<PubSubLowTrustUsersMessage>();
+        if (!oInnerMessage)
+        {
+            return;
+        }
+
+        auto innerMessage = *oInnerMessage;
+
+        switch (innerMessage.type)
+        {
+            case PubSubLowTrustUsersMessage::Type::UserMessage: {
+                this->signals_.moderation.suspiciousMessageReceived.invoke(
+                    innerMessage);
+            }
+            break;
+
+            case PubSubLowTrustUsersMessage::Type::TreatmentUpdate: {
+                this->signals_.moderation.suspiciousTreatmentUpdated.invoke(
+                    innerMessage);
+            }
+            break;
+
+            case PubSubLowTrustUsersMessage::Type::INVALID: {
+                qCWarning(chatterinoPubSub)
+                    << "Invalid low trust users event type:"
+                    << innerMessage.typeString;
+            }
+            break;
+        }
     }
     else
     {
