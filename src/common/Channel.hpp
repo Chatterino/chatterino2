@@ -38,6 +38,7 @@ public:
         TwitchWatching,
         TwitchMentions,
         TwitchLive,
+        TwitchAutomod,
         TwitchEnd,
         Irc,
         Misc
@@ -60,8 +61,6 @@ public:
     pajlada::Signals::Signal<const std::vector<MessagePtr> &> filledInMessages;
     pajlada::Signals::NoArgSignal destroyed;
     pajlada::Signals::NoArgSignal displayNameChanged;
-    /// Invoked when AbstractIrcServer::onReadConnected occurs
-    pajlada::Signals::NoArgSignal connected;
 
     Type getType() const;
     const QString &getName() const;

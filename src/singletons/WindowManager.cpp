@@ -55,7 +55,7 @@ using SplitDirection = SplitContainer::Direction;
 void WindowManager::showSettingsDialog(QWidget *parent,
                                        SettingsDialogPreference preference)
 {
-    if (getArgs().dontSaveSettings)
+    if (getApp()->getArgs().dontSaveSettings)
     {
         QMessageBox::critical(parent, "Chatterino - Editing Settings Forbidden",
                               "Settings cannot be edited when running with\n"
@@ -365,9 +365,9 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
     {
         WindowLayout windowLayout;
 
-        if (getArgs().customChannelLayout)
+        if (getApp()->getArgs().customChannelLayout)
         {
-            windowLayout = getArgs().customChannelLayout.value();
+            windowLayout = getApp()->getArgs().customChannelLayout.value();
         }
         else
         {
@@ -379,7 +379,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
         this->applyWindowLayout(windowLayout);
     }
 
-    if (getArgs().isFramelessEmbed)
+    if (getApp()->getArgs().isFramelessEmbed)
     {
         this->framelessEmbedWindow_.reset(new FramelessEmbedWindow);
         this->framelessEmbedWindow_->show();
@@ -392,7 +392,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
         this->mainWindow_->getNotebook().addPage(true);
 
         // TODO: don't create main window if it's a frameless embed
-        if (getArgs().isFramelessEmbed)
+        if (getApp()->getArgs().isFramelessEmbed)
         {
             this->mainWindow_->hide();
         }
@@ -427,7 +427,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
 void WindowManager::save()
 {
-    if (getArgs().dontSaveSettings)
+    if (getApp()->getArgs().dontSaveSettings)
     {
         return;
     }
@@ -612,6 +612,10 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
             obj.insert("name", channel.get()->getName());
         }
         break;
+        case Channel::Type::TwitchAutomod: {
+            obj.insert("type", "automod");
+        }
+        break;
         case Channel::Type::TwitchMentions: {
             obj.insert("type", "mentions");
         }
@@ -685,6 +689,10 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
     {
         return app->twitch->liveChannel;
     }
+    else if (descriptor.type_ == "automod")
+    {
+        return app->twitch->automodChannel;
+    }
     else if (descriptor.type_ == "irc")
     {
         return Irc::instance().getOrAddChannel(descriptor.server_,
@@ -725,7 +733,7 @@ WindowLayout WindowManager::loadWindowLayoutFromFile() const
 
 void WindowManager::applyWindowLayout(const WindowLayout &layout)
 {
-    if (getArgs().dontLoadMainWindow)
+    if (getApp()->getArgs().dontLoadMainWindow)
     {
         return;
     }
@@ -751,7 +759,7 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
             // out of bounds windows
             auto screens = qApp->screens();
             bool outOfBounds =
-                !getenv("I3SOCK") &&
+                !qEnvironmentVariableIsSet("I3SOCK") &&
                 std::none_of(screens.begin(), screens.end(),
                              [&](QScreen *screen) {
                                  return screen->availableGeometry().intersects(

@@ -223,6 +223,7 @@ namespace chatterino {
 SplitHeader::SplitHeader(Split *split)
     : BaseWidget(split)
     , split_(split)
+    , tooltipWidget_(new TooltipWidget(this))
 {
     this->initializeLayout();
 
@@ -946,17 +947,16 @@ void SplitHeader::enterEvent(QEvent *event)
 {
     if (!this->tooltipText_.isEmpty())
     {
-        auto *channel = this->split_->getChannel().get();
+        this->tooltipWidget_->setOne({nullptr, this->tooltipText_});
+        this->tooltipWidget_->setWordWrap(true);
+        this->tooltipWidget_->adjustSize();
+        auto pos =
+            this->mapToGlobal(this->rect().bottomLeft()) +
+            QPoint((this->width() - this->tooltipWidget_->width()) / 2, 1);
 
-        auto *tooltip = TooltipWidget::instance();
-        tooltip->setOne({nullptr, this->tooltipText_});
-        tooltip->setWordWrap(true);
-        tooltip->adjustSize();
-        auto pos = this->mapToGlobal(this->rect().bottomLeft()) +
-                   QPoint((this->width() - tooltip->width()) / 2, 1);
-
-        tooltip->moveTo(pos, widgets::BoundsChecking::CursorPosition);
-        tooltip->show();
+        this->tooltipWidget_->moveTo(pos,
+                                     widgets::BoundsChecking::CursorPosition);
+        this->tooltipWidget_->show();
     }
 
     BaseWidget::enterEvent(event);
@@ -964,7 +964,7 @@ void SplitHeader::enterEvent(QEvent *event)
 
 void SplitHeader::leaveEvent(QEvent *event)
 {
-    TooltipWidget::instance()->hide();
+    this->tooltipWidget_->hide();
 
     BaseWidget::leaveEvent(event);
 }

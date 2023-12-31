@@ -59,6 +59,7 @@ private:
     void selectTab(SettingsTabId id);
     void filterElements(const QString &query);
     void setElementFilter(const QString &query);
+    bool eventFilter(QObject *object, QEvent *event) override;
 
     void onOkClicked();
     void onCancelClicked();

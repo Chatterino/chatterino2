@@ -32,6 +32,10 @@ enum class MessageLayoutFlag : uint8_t {
 };
 using MessageLayoutFlags = FlagsEnum<MessageLayoutFlag>;
 
+struct MessagePaintResult {
+    bool hasAnimatedElements = false;
+};
+
 class MessageLayout
 {
 public:
@@ -55,7 +59,7 @@ public:
     bool layout(int width, float scale_, MessageElementFlags flags);
 
     // Painting
-    void paint(const MessagePaintContext &ctx);
+    MessagePaintResult paint(const MessagePaintContext &ctx);
     void invalidateBuffer();
     void deleteBuffer();
     void deleteCache();

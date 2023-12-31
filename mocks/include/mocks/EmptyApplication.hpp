@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Application.hpp"
+#include "common/Args.hpp"
 
 namespace chatterino::mock {
 
@@ -8,6 +9,11 @@ class EmptyApplication : public IApplication
 {
 public:
     virtual ~EmptyApplication() = default;
+
+    const Args &getArgs() override
+    {
+        return this->args_;
+    }
 
     Theme *getThemes() override
     {
@@ -44,6 +50,11 @@ public:
         return nullptr;
     }
 
+    CrashHandler *getCrashHandler() override
+    {
+        return nullptr;
+    }
+
     CommandController *getCommands() override
     {
         return nullptr;
@@ -61,6 +72,12 @@ public:
 
     ITwitchIrcServer *getTwitch() override
     {
+        return nullptr;
+    }
+
+    Logging *getChatLogger() override
+    {
+        assert(!"getChatLogger was called without being initialized");
         return nullptr;
     }
 
@@ -105,6 +122,9 @@ public:
     {
         return nullptr;
     }
+
+private:
+    Args args_;
 };
 
 }  // namespace chatterino::mock

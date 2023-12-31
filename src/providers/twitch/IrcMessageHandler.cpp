@@ -44,12 +44,13 @@ using namespace chatterino;
 
 // Message types below are the ones that might contain special user's message on USERNOTICE
 const QSet<QString> SPECIAL_MESSAGE_TYPES{
-    "sub",            //
-    "subgift",        //
-    "resub",          // resub messages
-    "bitsbadgetier",  // bits badge upgrade
-    "ritual",         // new viewer ritual
-    "announcement",   // new mod announcement thing
+    "sub",              //
+    "subgift",          //
+    "resub",            // resub messages
+    "bitsbadgetier",    // bits badge upgrade
+    "ritual",           // new viewer ritual
+    "announcement",     // new mod announcement thing
+    "viewermilestone",  // watch streak, but other categories possible in future
 };
 
 MessagePtr generateBannedMessage(bool confirmedBan)
@@ -1136,6 +1137,7 @@ void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
         getApp()->accounts->twitch.getCurrent()->getUserName())
     {
         twitchChannel->addMessage(makeSystemMessage("joined channel"));
+        twitchChannel->joined.invoke();
     }
     else if (getSettings()->showJoins.getValue())
     {

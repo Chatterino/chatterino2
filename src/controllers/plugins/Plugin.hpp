@@ -2,6 +2,8 @@
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "Application.hpp"
+#    include "controllers/plugins/LuaAPI.hpp"
+#    include "controllers/plugins/LuaUtilities.hpp"
 
 #    include <QDir>
 #    include <QString>
@@ -85,9 +87,50 @@ public:
         return this->loadDirectory_;
     }
 
+    // Note: The CallbackFunction object's destructor will remove the function from the lua stack
+    using LuaCompletionCallback =
+        lua::CallbackFunction<lua::api::CompletionList, QString, QString, int,
+                              bool>;
+    std::optional<LuaCompletionCallback> getCompletionCallback()
+    {
+        if (this->state_ == nullptr || !this->error_.isNull())
+        {
+            return {};
+        }
+        // this uses magic enum to help automatic tooling find usages
+        auto typ =
+            lua_getfield(this->state_, LUA_REGISTRYINDEX,
+                         QString("c2cb-%1")
+                             .arg(magic_enum::enum_name<lua::api::EventType>(
+                                      lua::api::EventType::CompletionRequested)
+                                      .data())
+                             .toStdString()
+                             .c_str());
+        if (typ != LUA_TFUNCTION)
+        {
+            lua_pop(this->state_, 1);
+            return {};
+        }
+
+        // move
+        return std::make_optional<lua::CallbackFunction<
+            lua::api::CompletionList, QString, QString, int, bool>>(
+            this->state_, lua_gettop(this->state_));
+    }
+
+    /**
+     * If the plugin crashes while evaluating the main file, this function will return the error
+     */
+    QString error()
+    {
+        return this->error_;
+    }
+
 private:
     QDir loadDirectory_;
     lua_State *state_;
+
+    QString error_;
 
     // maps command name -> function name
     std::unordered_map<QString, QString> ownedCommands;

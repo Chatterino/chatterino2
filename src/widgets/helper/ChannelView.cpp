@@ -277,14 +277,29 @@ std::pair<int, int> getWordBounds(MessageLayout *layout,
 
 namespace chatterino {
 
-ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context,
+ChannelView::ChannelView(QWidget *parent, Context context, size_t messagesLimit)
+    : ChannelView(InternalCtor{}, parent, nullptr, context, messagesLimit)
+{
+}
+
+ChannelView::ChannelView(QWidget *parent, Split *split, Context context,
                          size_t messagesLimit)
+    : ChannelView(InternalCtor{}, parent, split, context, messagesLimit)
+{
+    assert(parent != nullptr && split != nullptr &&
+           "This constructor should only be used with non-null values (see "
+           "documentation)");
+}
+
+ChannelView::ChannelView(InternalCtor /*tag*/, QWidget *parent, Split *split,
+                         Context context, size_t messagesLimit)
     : BaseWidget(parent)
     , split_(split)
     , scrollBar_(new Scrollbar(messagesLimit, this))
     , highlightAnimation_(this)
     , context_(context)
     , messages_(messagesLimit)
+    , tooltipWidget_(new TooltipWidget(this))
 {
     this->setMouseTracking(true);
 
@@ -335,6 +350,10 @@ ChannelView::ChannelView(BaseWidget *parent, Split *split, Context context,
     auto curve = QEasingCurve();
     curve.setCustomType(highlightEasingFunction);
     this->highlightAnimation_.setEasingCurve(curve);
+    QObject::connect(&this->highlightAnimation_,
+                     &QVariantAnimation::valueChanged, this, [this] {
+                         this->queueUpdate();
+                     });
 
     this->messageColors_.applyTheme(getTheme());
     this->messagePreferences_.connectSettings(getSettings(),
@@ -389,10 +408,13 @@ void ChannelView::initializeSignals()
         },
         this->signalHolder_);
 
-    this->signalHolder_.managedConnect(getApp()->windows->gifRepaintRequested,
-                                       [&] {
-                                           this->queueUpdate();
-                                       });
+    this->signalHolder_.managedConnect(
+        getApp()->windows->gifRepaintRequested, [&] {
+            if (!this->animationArea_.isEmpty())
+            {
+                this->queueUpdate(this->animationArea_);
+            }
+        });
 
     this->signalHolder_.managedConnect(
         getApp()->windows->layoutRequested, [&](Channel *channel) {
@@ -560,6 +582,11 @@ void ChannelView::scaleChangedEvent(float scale)
 void ChannelView::queueUpdate()
 {
     this->update();
+}
+
+void ChannelView::queueUpdate(const QRect &area)
+{
+    this->update(area);
 }
 
 void ChannelView::queueLayout()
@@ -1075,12 +1102,13 @@ void ChannelView::messageAppended(MessagePtr &message,
 
     if (!messageFlags->has(MessageFlag::DoNotTriggerNotification))
     {
-        if (messageFlags->has(MessageFlag::Highlighted) &&
-            messageFlags->has(MessageFlag::ShowInMentions) &&
-            !messageFlags->has(MessageFlag::Subscription) &&
-            (getSettings()->highlightMentions ||
-             this->channel_->getType() != Channel::Type::TwitchMentions))
-
+        if ((messageFlags->has(MessageFlag::Highlighted) &&
+             messageFlags->has(MessageFlag::ShowInMentions) &&
+             !messageFlags->has(MessageFlag::Subscription) &&
+             (getSettings()->highlightMentions ||
+              this->channel_->getType() != Channel::Type::TwitchMentions)) ||
+            (this->channel_->getType() == Channel::Type::TwitchAutomod &&
+             getSettings()->enableAutomodHighlight))
         {
             this->tabHighlightRequested.invoke(HighlightState::Highlighted);
         }
@@ -1282,14 +1310,16 @@ MessageElementFlags ChannelView::getFlags() const
             flags.set(MessageElementFlag::ModeratorTools);
         }
         if (this->underlyingChannel_ == app->twitch->mentionsChannel ||
-            this->underlyingChannel_ == app->twitch->liveChannel)
+            this->underlyingChannel_ == app->twitch->liveChannel ||
+            this->underlyingChannel_ == app->twitch->automodChannel)
         {
             flags.set(MessageElementFlag::ChannelName);
             flags.unset(MessageElementFlag::ChannelPointReward);
         }
     }
 
-    if (this->sourceChannel_ == app->twitch->mentionsChannel)
+    if (this->sourceChannel_ == app->twitch->mentionsChannel ||
+        this->sourceChannel_ == app->twitch->automodChannel)
     {
         flags.set(MessageElementFlag::ChannelName);
     }
@@ -1344,7 +1374,10 @@ bool ChannelView::scrollToMessage(const MessagePtr &message)
     }
 
     this->scrollToMessageLayout(messagesSnapshot[messageIdx].get(), messageIdx);
-    getApp()->windows->select(this->split_);
+    if (this->split_)
+    {
+        getApp()->windows->select(this->split_);
+    }
     return true;
 }
 
@@ -1373,7 +1406,10 @@ bool ChannelView::scrollToMessageId(const QString &messageId)
     }
 
     this->scrollToMessageLayout(messagesSnapshot[messageIdx].get(), messageIdx);
-    getApp()->windows->select(this->split_);
+    if (this->split_)
+    {
+        getApp()->windows->select(this->split_);
+    }
     return true;
 }
 
@@ -1391,7 +1427,7 @@ void ChannelView::scrollToMessageLayout(MessageLayout *layout,
     }
 }
 
-void ChannelView::paintEvent(QPaintEvent * /*event*/)
+void ChannelView::paintEvent(QPaintEvent *event)
 {
     //    BenchmarkGuard benchmark("paint");
 
@@ -1400,7 +1436,7 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
     painter.fillRect(rect(), this->theme->splits.background);
 
     // draw messages
-    this->drawMessages(painter);
+    this->drawMessages(painter, event->rect());
 
     // draw paused sign
     if (this->paused())
@@ -1414,7 +1450,7 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
 
 // if overlays is false then it draws the message, if true then it draws things
 // such as the grey overlay when a message is disabled
-void ChannelView::drawMessages(QPainter &painter)
+void ChannelView::drawMessages(QPainter &painter, const QRect &area)
 {
     auto &messagesSnapshot = this->getMessagesSnapshot();
 
@@ -1447,6 +1483,11 @@ void ChannelView::drawMessages(QPainter &painter)
     };
     bool showLastMessageIndicator = getSettings()->showLastMessageIndicator;
 
+    QRect animationArea;
+    auto areaContainsY = [&area](auto y) {
+        return y >= area.y() && y < area.y() + area.height();
+    };
+
     for (; ctx.messageIndex < messagesSnapshot.size(); ++ctx.messageIndex)
     {
         MessageLayout *layout = messagesSnapshot[ctx.messageIndex].get();
@@ -1460,16 +1501,36 @@ void ChannelView::drawMessages(QPainter &painter)
             ctx.isLastReadMessage = false;
         }
 
-        layout->paint(ctx);
-
-        if (this->highlightedMessage_ == layout)
+        if (areaContainsY(ctx.y) ||
+            areaContainsY(ctx.y + layout->getHeight()) ||
+            (ctx.y < area.y() && layout->getHeight() > area.height()))
         {
-            painter.fillRect(
-                0, ctx.y, layout->getWidth(), layout->getHeight(),
-                this->highlightAnimation_.currentValue().value<QColor>());
-            if (this->highlightAnimation_.state() == QVariantAnimation::Stopped)
+            auto paintResult = layout->paint(ctx);
+            if (paintResult.hasAnimatedElements)
             {
-                this->highlightedMessage_ = nullptr;
+                if (animationArea.isNull())
+                {
+                    animationArea = QRect{0, ctx.y, layout->getWidth(),
+                                          layout->getHeight()};
+                }
+                else
+                {
+                    animationArea.setBottom(ctx.y + layout->getHeight());
+                    animationArea.setWidth(
+                        std::max(layout->getWidth(), animationArea.width()));
+                }
+            }
+
+            if (this->highlightedMessage_ == layout)
+            {
+                painter.fillRect(
+                    0, ctx.y, layout->getWidth(), layout->getHeight(),
+                    this->highlightAnimation_.currentValue().value<QColor>());
+                if (this->highlightAnimation_.state() ==
+                    QVariantAnimation::Stopped)
+                {
+                    this->highlightedMessage_ = nullptr;
+                }
             }
         }
 
@@ -1481,6 +1542,23 @@ void ChannelView::drawMessages(QPainter &painter)
             break;
         }
     }
+
+    // Only update on a full repaint as some messages with animated elements
+    // might get left out in partial repaints.
+    // This happens for example when hovering over the go-to-bottom button.
+    if (this->height() <= area.height())
+    {
+        this->animationArea_ = animationArea;
+    }
+#ifdef FOURTF
+    else
+    {
+        // shows the updated area on partial repaints
+        painter.setPen(Qt::red);
+        painter.drawRect(area.x(), area.y(), area.width() - 1,
+                         area.height() - 1);
+    }
+#endif
 
     if (end == nullptr)
     {
@@ -1630,7 +1708,7 @@ void ChannelView::enterEvent(QEvent * /*event*/)
 
 void ChannelView::leaveEvent(QEvent * /*event*/)
 {
-    TooltipWidget::instance()->hide();
+    this->tooltipWidget_->hide();
 
     this->unpause(PauseReason::Mouse);
 
@@ -1651,7 +1729,6 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         this->pause(PauseReason::Mouse);
     }
 
-    auto *tooltipWidget = TooltipWidget::instance();
     std::shared_ptr<MessageLayout> layout;
     QPoint relativePos;
     int messageIndex;
@@ -1660,7 +1737,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
     {
         this->setCursor(Qt::ArrowCursor);
-        tooltipWidget->hide();
+        this->tooltipWidget_->hide();
         return;
     }
 
@@ -1698,14 +1775,14 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     if (layout->flags.has(MessageLayoutFlag::Collapsed))
     {
         this->setCursor(Qt::PointingHandCursor);
-        tooltipWidget->hide();
+        this->tooltipWidget_->hide();
         return;
     }
 
     if (hoverLayoutElement == nullptr)
     {
         this->setCursor(Qt::ArrowCursor);
-        tooltipWidget->hide();
+        this->tooltipWidget_->hide();
         return;
     }
 
@@ -1719,7 +1796,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     if (element->getTooltip().isEmpty() ||
         (isLinkValid && isNotEmote && !getSettings()->linkInfoTooltip))
     {
-        tooltipWidget->hide();
+        this->tooltipWidget_->hide();
     }
     else
     {
@@ -1737,7 +1814,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 
             if (emoteElement)
             {
-                tooltipWidget->setOne({
+                this->tooltipWidget_->setOne({
                     showThumbnail
                         ? emoteElement->getEmote()->images.getImage(3.0)
                         : nullptr,
@@ -1796,12 +1873,12 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                     auto style = layeredEmotes.size() > 2
                                      ? TooltipStyle::Grid
                                      : TooltipStyle::Vertical;
-                    tooltipWidget->set(entries, style);
+                    this->tooltipWidget_->set(entries, style);
                 }
             }
             else if (badgeElement)
             {
-                tooltipWidget->setOne({
+                this->tooltipWidget_->setOne({
                     showThumbnail
                         ? badgeElement->getEmote()->images.getImage(3.0)
                         : nullptr,
@@ -1832,7 +1909,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             if (thumbnailSize == 0)
             {
                 // "Show thumbnails" is set to "Off", show text only
-                tooltipWidget->setOne({nullptr, element->getTooltip()});
+                this->tooltipWidget_->setOne({nullptr, element->getTooltip()});
             }
             else
             {
@@ -1849,21 +1926,24 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                 if (element->getThumbnailType() ==
                     MessageElement::ThumbnailType::Link_Thumbnail)
                 {
-                    tooltipWidget->setOne({std::move(thumb),
-                                           element->getTooltip(), thumbnailSize,
-                                           thumbnailSize});
+                    this->tooltipWidget_->setOne({
+                        std::move(thumb),
+                        element->getTooltip(),
+                        thumbnailSize,
+                        thumbnailSize,
+                    });
                 }
                 else
                 {
-                    tooltipWidget->setOne({std::move(thumb), ""});
+                    this->tooltipWidget_->setOne({std::move(thumb), ""});
                 }
             }
         }
 
-        tooltipWidget->moveTo(event->globalPos() + QPoint(16, 16),
-                              widgets::BoundsChecking::CursorPosition);
-        tooltipWidget->setWordWrap(isLinkValid);
-        tooltipWidget->show();
+        this->tooltipWidget_->moveTo(event->globalPos() + QPoint(16, 16),
+                                     widgets::BoundsChecking::CursorPosition);
+        this->tooltipWidget_->setWordWrap(isLinkValid);
+        this->tooltipWidget_->show();
     }
 
     // check if word has a link
@@ -2344,14 +2424,16 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
     bool isSearch = this->context_ == Context::Search;
     bool isReplyOrUserCard = (this->context_ == Context::ReplyThread ||
                               this->context_ == Context::UserCard) &&
-                             this->split_;
+                             this->split_ != nullptr;
     bool isMentions =
         this->channel()->getType() == Channel::Type::TwitchMentions;
-    if (isSearch || isMentions || isReplyOrUserCard)
+    bool isAutomod = this->channel()->getType() == Channel::Type::TwitchAutomod;
+    if (isSearch || isMentions || isReplyOrUserCard || isAutomod)
     {
         const auto &messagePtr = layout->getMessagePtr();
         menu->addAction("&Go to message", [this, &messagePtr, isSearch,
-                                           isMentions, isReplyOrUserCard] {
+                                           isMentions, isReplyOrUserCard,
+                                           isAutomod] {
             if (isSearch)
             {
                 if (const auto &search =
@@ -2360,16 +2442,17 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
                     search->goToMessage(messagePtr);
                 }
             }
-            else if (isMentions)
+            else if (isMentions || isAutomod)
             {
                 getApp()->windows->scrollToMessage(messagePtr);
             }
             else if (isReplyOrUserCard)
             {
-                // If the thread is in the mentions channel,
+                // If the thread is in the mentions or automod channel,
                 // we need to find the original split.
-                if (this->split_->getChannel()->getType() ==
-                    Channel::Type::TwitchMentions)
+                const auto type = this->split_->getChannel()->getType();
+                if (type == Channel::Type::TwitchMentions ||
+                    type == Channel::Type::TwitchAutomod)
                 {
                     getApp()->windows->scrollToMessage(messagePtr);
                 }
@@ -2572,10 +2655,16 @@ void ChannelView::hideEvent(QHideEvent * /*event*/)
 void ChannelView::showUserInfoPopup(const QString &userName,
                                     QString alternativePopoutChannel)
 {
-    auto *userCardParent =
-        static_cast<QWidget *>(&(getApp()->windows->getMainWindow()));
-    auto *userPopup = new UserInfoPopup(getSettings()->autoCloseUserPopup,
-                                        userCardParent, this->split_);
+    if (!this->split_)
+    {
+        qCWarning(chatterinoCommon)
+            << "Tried to show user info for" << userName
+            << "but the channel view doesn't belong to a split.";
+        return;
+    }
+
+    auto *userPopup =
+        new UserInfoPopup(getSettings()->autoCloseUserPopup, this->split_);
 
     auto contextChannel =
         getApp()->twitch->getChannelOrEmpty(alternativePopoutChannel);
@@ -2606,6 +2695,8 @@ bool ChannelView::mayContainMessage(const MessagePtr &message)
             return message->flags.has(MessageFlag::Highlighted);
         case Channel::Type::TwitchLive:
             return message->flags.has(MessageFlag::System);
+        case Channel::Type::TwitchAutomod:
+            return message->flags.has(MessageFlag::AutoMod);
         case Channel::Type::TwitchEnd:  // TODO: not used?
         case Channel::Type::None:       // Unspecific
         case Channel::Type::Misc:       // Unspecific
@@ -2870,7 +2961,9 @@ void ChannelView::scrollUpdateRequested()
 
 void ChannelView::setInputReply(const MessagePtr &message)
 {
-    if (message == nullptr)
+    assertInGuiThread();
+
+    if (message == nullptr || this->split_ == nullptr)
     {
         return;
     }
@@ -2878,12 +2971,14 @@ void ChannelView::setInputReply(const MessagePtr &message)
     if (!message->replyThread)
     {
         // Message did not already have a thread attached, try to find or create one
-        if (auto *tc =
-                dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get()))
+        auto *tc =
+            dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get());
+        if (!tc)
         {
-            tc->getOrCreateThread(message);
+            tc = dynamic_cast<TwitchChannel *>(this->channel_.get());
         }
-        else if (auto *tc = dynamic_cast<TwitchChannel *>(this->channel_.get()))
+
+        if (tc)
         {
             tc->getOrCreateThread(message);
         }
@@ -2906,10 +3001,16 @@ void ChannelView::showReplyThreadPopup(const MessagePtr &message)
         return;
     }
 
-    auto *popupParent =
-        static_cast<QWidget *>(&(getApp()->windows->getMainWindow()));
-    auto *popup = new ReplyThreadPopup(getSettings()->autoCloseThreadPopup,
-                                       popupParent, this->split_);
+    if (!this->split_)
+    {
+        qCWarning(chatterinoCommon)
+            << "Tried to show reply thread popup but the "
+               "channel view doesn't belong to a split.";
+        return;
+    }
+
+    auto *popup =
+        new ReplyThreadPopup(getSettings()->autoCloseThreadPopup, this->split_);
 
     popup->setThread(message->replyThread);
 

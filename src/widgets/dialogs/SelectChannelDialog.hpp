@@ -49,6 +49,7 @@ private:
             QRadioButton *mentions;
             QRadioButton *watching;
             QRadioButton *live;
+            QRadioButton *automod;
         } twitch;
         struct {
             QLineEdit *channel;

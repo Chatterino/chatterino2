@@ -45,7 +45,7 @@ An example plugin is available at [https://github.com/Mm2PL/Chatterino-test-plug
 
 If you prefer, you may use [TypescriptToLua](https://typescripttolua.github.io)
 to typecheck your plugins. There is a `chatterino.d.ts` file describing the API
-in this directory. However this has several drawbacks like harder debugging at
+in this directory. However, this has several drawbacks like harder debugging at
 runtime.
 
 ## API
@@ -113,6 +113,42 @@ Limitations/known issues:
   rebuilding the window content caused by reloading another plugin will solve this.
 - Spaces in command names aren't handled very well (https://github.com/Chatterino/chatterino2/issues/1517).
 
+#### `register_callback("CompletionRequested", handler)`
+
+Registers a callback (`handler`) to process completions. The callback gets the following parameters:
+
+- `query`: The queried word.
+- `full_text_content`: The whole input.
+- `cursor_position`: The position of the cursor in the input.
+- `is_first_word`: Flag whether `query` is the first word in the input.
+
+Example:
+
+| Input      | `query` | `full_text_content` | `cursor_position` | `is_first_word` |
+| ---------- | ------- | ------------------- | ----------------- | --------------- |
+| `foo│`     | `foo`   | `foo`               | 3                 | `true`          |
+| `fo│o`     | `fo`    | `foo`               | 2                 | `true`          |
+| `foo bar│` | `bar`   | `foo bar`           | 7                 | `false`         |
+| `foo │bar` | `foo`   | `foo bar`           | 4                 | `false`         |
+
+```lua
+function string.startswith(s, other)
+    return string.sub(s, 1, string.len(other)) == other
+end
+
+c2.register_callback(
+    "CompletionRequested",
+    function(query, full_text_content, cursor_position, is_first_word)
+        if ("!join"):startswith(query) then
+            ---@type CompletionList
+            return { hide_others = true, values = { "!join" } }
+        end
+        ---@type CompletionList
+        return { hide_others = false, values = {} }
+    end
+)
+```
+
 #### `send_msg(channel, text)`
 
 Sends a message to `channel` with the specified text. Also executes commands.
@@ -158,18 +194,25 @@ It achieves this by forcing all inputs to be encoded with `UTF-8`.
 
 See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-load)
 
-#### `import(filename)`
+#### `require(modname)`
 
-This function mimics Lua's `dofile` however relative paths are relative to your plugin's directory.
-You are restricted to loading files in your plugin's directory. You cannot load files with bytecode inside.
+This is Lua's [`require()`](https://www.lua.org/manual/5.3/manual.html#pdf-require) function.
+However, the searcher and load configuration is notably different from the default:
+
+- Lua's built-in dynamic library searcher is removed,
+- `package.path` is not used, in its place are two searchers,
+- when `require()` is used, first a file relative to the currently executing
+  file will be checked, then a file relative to the plugin directory,
+- binary chunks are never loaded
+
+As in normal Lua, dots are converted to the path separators (`'/'` on Linux and Mac, `'\'` on Windows).
 
 Example:
 
 ```lua
-import("stuff.lua") -- executes Plugins/name/stuff.lua
-import("./stuff.lua") -- executes Plugins/name/stuff.lua
-import("../stuff.lua") -- tries to load Plugins/stuff.lua and errors
-import("luac.out") -- tried to load Plugins/name/luac.out and errors because it contains non-utf8 data
+require("stuff") -- executes Plugins/name/stuff.lua or $(dirname $CURR_FILE)/stuff.lua
+require("dir.name") -- executes Plugins/name/dir/name.lua or $(dirname $CURR_FILE)/dir/name.lua
+require("binary") -- tried to load Plugins/name/binary.lua and errors because binary is not a text file
 ```
 
 #### `print(Args...)`

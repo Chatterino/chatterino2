@@ -124,7 +124,7 @@ jobs:
           build_dir: build-clang-tidy
           config_file: ".clang-tidy"
           split_workflow: true
-          exclude: "lib/*"
+          exclude: "lib/*,tools/crash-handler/*"
           cmake_command: >-
             cmake -S. -Bbuild-clang-tidy 
             -DCMAKE_BUILD_TYPE=Release 

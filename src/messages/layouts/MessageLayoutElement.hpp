@@ -52,7 +52,8 @@ public:
     virtual size_t getSelectionIndexCount() const = 0;
     virtual void paint(QPainter &painter,
                        const MessageColors &messageColors) = 0;
-    virtual void paintAnimated(QPainter &painter, int yOffset) = 0;
+    /// @returns true if anything was painted
+    virtual bool paintAnimated(QPainter &painter, int yOffset) = 0;
     virtual int getMouseOverIndex(const QPoint &abs) const = 0;
     virtual int getXFromIndex(size_t index) = 0;
 
@@ -86,7 +87,7 @@ protected:
                              uint32_t to = UINT32_MAX) const override;
     size_t getSelectionIndexCount() const override;
     void paint(QPainter &painter, const MessageColors &messageColors) override;
-    void paintAnimated(QPainter &painter, int yOffset) override;
+    bool paintAnimated(QPainter &painter, int yOffset) override;
     int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(size_t index) override;
 
@@ -105,7 +106,7 @@ protected:
                              uint32_t to = UINT32_MAX) const override;
     size_t getSelectionIndexCount() const override;
     void paint(QPainter &painter, const MessageColors &messageColors) override;
-    void paintAnimated(QPainter &painter, int yOffset) override;
+    bool paintAnimated(QPainter &painter, int yOffset) override;
     int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(size_t index) override;
 
@@ -158,7 +159,7 @@ protected:
                              uint32_t to = UINT32_MAX) const override;
     size_t getSelectionIndexCount() const override;
     void paint(QPainter &painter, const MessageColors &messageColors) override;
-    void paintAnimated(QPainter &painter, int yOffset) override;
+    bool paintAnimated(QPainter &painter, int yOffset) override;
     int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(size_t index) override;
 
@@ -182,7 +183,7 @@ protected:
                              uint32_t to = UINT32_MAX) const override;
     size_t getSelectionIndexCount() const override;
     void paint(QPainter &painter, const MessageColors &messageColors) override;
-    void paintAnimated(QPainter &painter, int yOffset) override;
+    bool paintAnimated(QPainter &painter, int yOffset) override;
     int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(size_t index) override;
 
@@ -200,7 +201,7 @@ public:
 
 protected:
     void paint(QPainter &painter, const MessageColors &messageColors) override;
-    void paintAnimated(QPainter &painter, int yOffset) override;
+    bool paintAnimated(QPainter &painter, int yOffset) override;
     int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(size_t index) override;
     void addCopyTextToString(QString &str, uint32_t from = 0,

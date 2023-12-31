@@ -101,7 +101,8 @@ void Channel::addMessage(MessagePtr message,
         {
             channelPlatform = "twitch";
         }
-        app->logging->addMessage(this->name_, message, channelPlatform);
+        getIApp()->getChatLogger()->addMessage(this->name_, message,
+                                               channelPlatform);
     }
 
     if (this->messages_.pushBack(message, deleted))
@@ -295,7 +296,8 @@ bool Channel::isWritable() const
 {
     using Type = Channel::Type;
     auto type = this->getType();
-    return type != Type::TwitchMentions && type != Type::TwitchLive;
+    return type != Type::TwitchMentions && type != Type::TwitchLive &&
+           type != Type::TwitchAutomod;
 }
 
 void Channel::sendMessage(const QString &message)
@@ -314,7 +316,6 @@ bool Channel::isBroadcaster() const
 
 bool Channel::hasModRights() const
 {
-    // fourtf: check if staff
     return this->isMod() || this->isBroadcaster();
 }
 
@@ -330,7 +331,8 @@ bool Channel::isLive() const
 
 bool Channel::shouldIgnoreHighlights() const
 {
-    return this->type_ == Type::TwitchMentions ||
+    return this->type_ == Type::TwitchAutomod ||
+           this->type_ == Type::TwitchMentions ||
            this->type_ == Type::TwitchWhispers;
 }
 

@@ -1,93 +1,109 @@
-#include "LastRunCrashDialog.hpp"
+#include "widgets/dialogs/LastRunCrashDialog.hpp"
 
-#include "singletons/Updates.hpp"
+#include "common/Args.hpp"
+#include "common/Literals.hpp"
+#include "common/Modes.hpp"
+#include "singletons/Paths.hpp"
 #include "util/LayoutCreator.hpp"
-#include "util/PostToThread.hpp"
 
+#include <QDesktopServices>
 #include <QDialogButtonBox>
+#include <QDir>
 #include <QLabel>
+#include <QMessageBox>
+#include <QProcess>
 #include <QPushButton>
+#include <QRandomGenerator>
+#include <QStringBuilder>
 #include <QVBoxLayout>
+
+namespace {
+
+using namespace chatterino::literals;
+
+const std::initializer_list<QString> MESSAGES = {
+    u"Oops..."_s,        u"NotLikeThis"_s,
+    u"NOOOOOO"_s,        u"I'm sorry"_s,
+    u"We're sorry"_s,    u"My bad"_s,
+    u"FailFish"_s,       u"O_o"_s,
+    u"Sorry :("_s,       u"I blame cosmic rays"_s,
+    u"I blame TMI"_s,    u"I blame Helix"_s,
+    u"Oopsie woopsie"_s,
+};
+
+QString randomMessage()
+{
+    return *(MESSAGES.begin() +
+             (QRandomGenerator::global()->generate64() % MESSAGES.size()));
+}
+
+}  // namespace
 
 namespace chatterino {
 
-LastRunCrashDialog::LastRunCrashDialog()
+using namespace literals;
+
+LastRunCrashDialog::LastRunCrashDialog(const Args &args)
 {
     this->setWindowFlag(Qt::WindowContextHelpButtonHint, false);
-    this->setWindowTitle("Chatterino");
+    this->setWindowTitle(u"Chatterino - " % randomMessage());
 
     auto layout =
         LayoutCreator<LastRunCrashDialog>(this).setLayoutType<QVBoxLayout>();
 
-    layout.emplace<QLabel>("The application wasn't terminated properly the "
-                           "last time it was executed.");
+    QString text =
+        u"Chatterino unexpectedly crashed and restarted. "_s
+        "<i>You can disable automatic restarts in the settings.</i><br><br>";
+
+#ifdef CHATTERINO_WITH_CRASHPAD
+    auto reportsDir =
+        QDir(getPaths()->crashdumpDirectory).filePath(u"reports"_s);
+    text += u"A <b>crash report</b> has been saved to "
+            "<a href=\"file:///" %
+            reportsDir % u"\">" % reportsDir % u"</a>.<br>";
+
+    if (args.exceptionCode)
+    {
+        text += u"The last run crashed with code <code>0x" %
+                QString::number(*args.exceptionCode, 16) % u"</code>";
+
+        if (args.exceptionMessage)
+        {
+            text += u" (" % *args.exceptionMessage % u")";
+        }
+
+        text += u".<br>"_s;
+    }
+
+    text +=
+        "Crash reports are <b>only stored locally</b> and never uploaded.<br>"
+        "<br>Please <a "
+        "href=\"https://github.com/Chatterino/chatterino2/issues/new\">report "
+        "the crash</a> "
+        u"so it can be prevented in the future."_s;
+
+    if (Modes::instance().isNightly)
+    {
+        text += u" Make sure you're using the latest nightly version!"_s;
+    }
+
+    text +=
+        u"<br>For more information, <a href=\"https://wiki.chatterino.com/Crash%20Analysis/\">consult the wiki</a>."_s;
+#endif
+
+    auto label = layout.emplace<QLabel>(text);
+    label->setTextInteractionFlags(Qt::TextBrowserInteraction);
+    label->setOpenExternalLinks(true);
+    label->setWordWrap(true);
 
     layout->addSpacing(16);
 
-    //    auto update = layout.emplace<QLabel>();
     auto buttons = layout.emplace<QDialogButtonBox>();
 
-    //    auto *installUpdateButton = buttons->addButton("Install Update",
-    //    QDialogButtonBox::NoRole); installUpdateButton->setEnabled(false);
-    //    QObject::connect(installUpdateButton, &QPushButton::clicked, [this,
-    //    update]() mutable {
-    //        auto &updateManager = UpdateManager::instance();
-
-    //        updateManager.installUpdates();
-    //        this->setEnabled(false);
-    //        update->setText("Downloading updates...");
-    //    });
-
-    auto *okButton =
-        buttons->addButton("Ignore", QDialogButtonBox::ButtonRole::NoRole);
+    auto *okButton = buttons->addButton(u"Ok"_s, QDialogButtonBox::AcceptRole);
     QObject::connect(okButton, &QPushButton::clicked, [this] {
         this->accept();
     });
-
-    // Updates
-    //    auto updateUpdateLabel = [update]() mutable {
-    //        auto &updateManager = UpdateManager::instance();
-
-    //        switch (updateManager.getStatus()) {
-    //            case UpdateManager::None: {
-    //                update->setText("Not checking for updates.");
-    //            } break;
-    //            case UpdateManager::Searching: {
-    //                update->setText("Checking for updates...");
-    //            } break;
-    //            case UpdateManager::UpdateAvailable: {
-    //                update->setText("Update available.");
-    //            } break;
-    //            case UpdateManager::NoUpdateAvailable: {
-    //                update->setText("No update abailable.");
-    //            } break;
-    //            case UpdateManager::SearchFailed: {
-    //                update->setText("Error while searching for update.\nEither
-    //                the update service is "
-    //                                "temporarily down or there is an issue
-    //                                with your installation.");
-    //            } break;
-    //            case UpdateManager::Downloading: {
-    //                update->setText(
-    //                    "Downloading the update. Chatterino will close once
-    //                    the download is done.");
-    //            } break;
-    //            case UpdateManager::DownloadFailed: {
-    //                update->setText("Download failed.");
-    //            } break;
-    //            case UpdateManager::WriteFileFailed: {
-    //                update->setText("Writing the update file to the hard drive
-    //                failed.");
-    //            } break;
-    //        }
-    //    };
-
-    //    updateUpdateLabel();
-    //    this->signalHolder_.managedConnect(updateManager.statusUpdated,
-    //    [updateUpdateLabel](auto) mutable {
-    //        postToThread([updateUpdateLabel]() mutable { updateUpdateLabel();
-    //        });
-    //    });
 }
 
 }  // namespace chatterino
