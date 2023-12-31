@@ -118,7 +118,6 @@ public:
         Signal<const QJsonObject &> redeemed;
     } pointReward;
 
-private:
     /**
      * Listen to incoming whispers for the currently logged in user.
      * This topic is relevant for everyone.
@@ -128,7 +127,6 @@ private:
     bool listenToWhispers();
     void unlistenWhispers();
 
-public:
     /**
      * Listen to moderation actions in the given channel.
      * This topic is relevant for everyone.
