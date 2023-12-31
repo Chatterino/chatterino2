@@ -69,6 +69,7 @@ ColorPickerDialog::ColorPickerDialog(QColor color, QWidget *parent)
             makeColorGrid(ColorProvider::instance().defaultColors(), this));
 
         buttons->addStretch(1);
+        buttons->addWidget(new QLabel(u"Selected"_s));
         auto *display = new ColorButton(this->color());
         QObject::connect(this, &ColorPickerDialog::colorChanged, display,
                          &ColorButton::setColor);
