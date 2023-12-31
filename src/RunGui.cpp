@@ -288,6 +288,8 @@ void runGui(QApplication &a, Paths &paths, Settings &settings, const Args &args)
     flushClipboard();
 #endif
 
+    app.fakeDtor();
+
     _exit(0);
 }
 }  // namespace chatterino

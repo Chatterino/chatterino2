@@ -22,6 +22,8 @@ PubSubClient::PubSubClient(WebsocketClient &websocketClient,
                            const PubSubClientOptions &clientOptions)
     : websocketClient_(websocketClient)
     , handle_(handle)
+    , heartbeatTimer_(std::make_shared<boost::asio::steady_timer>(
+          this->websocketClient_.get_io_service()))
     , clientOptions_(clientOptions)
 {
 }
@@ -40,6 +42,7 @@ void PubSubClient::stop()
     assert(this->started_);
 
     this->started_ = false;
+    this->heartbeatTimer_->cancel();
 }
 
 void PubSubClient::close(const std::string &reason,
@@ -187,8 +190,8 @@ void PubSubClient::ping()
 
     auto self = this->shared_from_this();
 
-    runAfter(this->websocketClient_.get_io_service(),
-             this->clientOptions_.pingInterval_, [self](auto timer) {
+    runAfter(this->heartbeatTimer_, this->clientOptions_.pingInterval_,
+             [self](auto timer) {
                  if (!self->started_)
                  {
                      return;

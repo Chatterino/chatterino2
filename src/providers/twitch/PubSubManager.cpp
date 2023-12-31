@@ -470,6 +470,11 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         bind(&PubSub::onConnectionFail, this, ::_1));
 }
 
+PubSub::~PubSub()
+{
+    this->stop();
+}
+
 void PubSub::setAccount(std::shared_ptr<TwitchAccount> account)
 {
     this->token_ = account->getOAuthToken();
@@ -515,9 +520,12 @@ void PubSub::stop()
 {
     this->stopping_ = true;
 
-    for (const auto &client : this->clients)
+    for (const auto &[hdl, client] : this->clients)
     {
-        client.second->close("Shutting down");
+        (void)hdl;
+
+        client->stop();
+        client->close("Shutting down");
     }
 
     this->work.reset();

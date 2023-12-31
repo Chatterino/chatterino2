@@ -70,6 +70,7 @@ private:
     std::atomic<bool> awaitingPong_{false};
     std::atomic<bool> started_{false};
 
+    std::shared_ptr<boost::asio::steady_timer> heartbeatTimer_;
     const PubSubClientOptions &clientOptions_;
 };
 

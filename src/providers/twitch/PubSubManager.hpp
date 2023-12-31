@@ -77,6 +77,12 @@ class PubSub
 public:
     PubSub(const QString &host,
            std::chrono::seconds pingInterval = std::chrono::seconds(15));
+    ~PubSub();
+
+    PubSub(const PubSub &) = delete;
+    PubSub(PubSub &&) = delete;
+    PubSub &operator=(const PubSub &) = delete;
+    PubSub &operator=(PubSub &&) = delete;
 
     void setAccount(std::shared_ptr<TwitchAccount> account);
 
