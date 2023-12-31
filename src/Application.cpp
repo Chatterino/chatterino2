@@ -128,12 +128,12 @@ Application::Application(Settings &_settings, Paths &_paths, const Args &_args)
     , userData(&this->emplace<UserDataController>())
     , sound(&this->emplace<ISoundController>(makeSoundController(_settings)))
     , twitchLiveController(&this->emplace<TwitchLiveController>())
+    , logging(new Logging(_settings))
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(&this->emplace<PluginController>())
 #endif
-    , logging(&this->emplace<Logging>())
 {
-    this->instance = this;
+    Application::instance = this;
 
     // We can safely ignore this signal's connection since the Application will always
     // be destroyed after fonts
@@ -141,6 +141,8 @@ Application::Application(Settings &_settings, Paths &_paths, const Args &_args)
         this->windows->layoutChannelViews();
     });
 }
+
+Application::~Application() = default;
 
 void Application::initialize(Settings &settings, Paths &paths)
 {
@@ -310,6 +312,11 @@ ITwitchLiveController *Application::getTwitchLiveController()
 ITwitchIrcServer *Application::getTwitch()
 {
     return this->twitch;
+}
+
+Logging *Application::getChatLogger()
+{
+    return this->logging.get();
 }
 
 void Application::save()

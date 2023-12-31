@@ -68,6 +68,7 @@ public:
     virtual HighlightController *getHighlights() = 0;
     virtual NotificationController *getNotifications() = 0;
     virtual ITwitchIrcServer *getTwitch() = 0;
+    virtual Logging *getChatLogger() = 0;
     virtual ChatterinoBadges *getChatterinoBadges() = 0;
     virtual FfzBadges *getFfzBadges() = 0;
     virtual SeventvBadges *getSeventvBadges() = 0;
@@ -89,6 +90,12 @@ public:
     static Application *instance;
 
     Application(Settings &_settings, Paths &_paths, const Args &_args);
+    ~Application() override;
+
+    Application(const Application &) = delete;
+    Application(Application &&) = delete;
+    Application &operator=(const Application &) = delete;
+    Application &operator=(Application &&) = delete;
 
     void initialize(Settings &settings, Paths &paths);
     void load();
@@ -121,13 +128,12 @@ public:
 
 private:
     TwitchLiveController *const twitchLiveController{};
+    const std::unique_ptr<Logging> logging;
 
 public:
 #ifdef CHATTERINO_HAVE_PLUGINS
     PluginController *const plugins{};
 #endif
-
-    /*[[deprecated]]*/ Logging *const logging{};
 
     const Args &getArgs() override
     {
@@ -175,6 +181,7 @@ public:
         return this->highlights;
     }
     ITwitchIrcServer *getTwitch() override;
+    Logging *getChatLogger() override;
     ChatterinoBadges *getChatterinoBadges() override
     {
         return this->chatterinoBadges;
