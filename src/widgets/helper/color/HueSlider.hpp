@@ -7,18 +7,19 @@ namespace chatterino {
 class HueSlider : public QWidget
 {
     Q_OBJECT
-    Q_PROPERTY(int hue READ hue NOTIFY hueChanged)
 
 public:
     HueSlider(QColor color = {}, QWidget *parent = nullptr);
 
-    void updateColor(const QColor &color);
     QSize sizeHint() const override;
 
     int hue() const;
 
 signals:
-    void hueChanged(int hue) const;
+    void colorChanged(QColor color) const;
+
+public slots:
+    void setColor(QColor color);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -30,6 +31,7 @@ protected:
 
 private:
     int hue_ = 0;
+    QColor color_;
 
     QPixmap gradientPixmap_;
 

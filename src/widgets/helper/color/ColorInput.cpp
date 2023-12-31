@@ -1,4 +1,4 @@
-#include "widgets/helper/color/ColorDetails.hpp"
+#include "widgets/helper/color/ColorInput.hpp"
 
 namespace {
 
@@ -21,7 +21,7 @@ int fromHex(char c) noexcept
     return -1;
 }
 
-QColor parseCssColor(const QString &text)
+QColor parseHexColor(const QString &text)
 {
     if (text.length() == 5)  // #rgba
     {
@@ -48,29 +48,28 @@ QColor parseCssColor(const QString &text)
 
 namespace chatterino {
 
-ColorDetails::ColorDetails(QColor color, QWidget *parent)
+ColorInput::ColorInput(QColor color, QWidget *parent)
     : QWidget(parent)
     , currentColor_(color)
-    , cssValidator_(QRegularExpression(
+    , hexValidator_(QRegularExpression(
           R"(^#([A-Fa-f\d]{3,4}|[A-Fa-f\d]{6}|[A-Fa-f\d]{8})$)"))
     , layout_(this)
 {
     int row = 0;
     const auto initComponent = [&](Component &component, auto label,
-                                   auto updateColor) {
+                                   auto applyToColor) {
         component.lbl.setText(label);
         component.box.setRange(0, 255);
         QObject::connect(&component.box,
                          qOverload<int>(&QSpinBox::valueChanged), this,
-                         [this, &component, updateColor](int value) {
+                         [this, &component, applyToColor](int value) {
                              if (component.value == value)
                              {
                                  return;
                              }
-                             component.value = value;
-                             updateColor(this->currentColor_, value);
-                             this->updateCss();
-                             emit colorChanged(this->currentColor_);
+                             applyToColor(this->currentColor_, value);
+
+                             this->emitUpdate();
                          });
         this->layout_.addWidget(&component.lbl, row, 0);
         this->layout_.addWidget(&component.box, row, 1);
@@ -90,23 +89,24 @@ ColorDetails::ColorDetails(QColor color, QWidget *parent)
         color.setAlpha(value);
     });
 
-    this->cssLabel_.setText("CSS:");
-    this->cssInput_.setValidator(&this->cssValidator_);
-    QObject::connect(&this->cssInput_, &QLineEdit::editingFinished, [this]() {
-        auto css = parseCssColor(this->cssInput_.text());
+    this->hexLabel_.setText("Hex:");
+    this->hexInput_.setValidator(&this->hexValidator_);
+    QObject::connect(&this->hexInput_, &QLineEdit::editingFinished, [this]() {
+        auto css = parseHexColor(this->hexInput_.text());
         if (!css.isValid() || this->currentColor_ == css)
         {
             return;
         }
-        this->setColor(css);
+        this->currentColor_ = css;
+        this->emitUpdate();
     });
-    this->layout_.addWidget(&this->cssLabel_, row, 0);
-    this->layout_.addWidget(&this->cssInput_, row, 1);
+    this->layout_.addWidget(&this->hexLabel_, row, 0);
+    this->layout_.addWidget(&this->hexInput_, row, 1);
 
     this->updateComponents();
 }
 
-void ColorDetails::updateComponents()
+void ColorInput::updateComponents()
 {
     auto color = this->currentColor_.toRgb();
     const auto updateComponent = [](Component &component, auto getValue) {
@@ -130,31 +130,39 @@ void ColorDetails::updateComponents()
         return color.alpha();
     });
 
-    this->updateCss();
+    this->updateHex();
 }
 
-void ColorDetails::updateCss()
+void ColorInput::updateHex()
 {
     auto rgb = this->currentColor_.rgb();
     rgb <<= 8;
     rgb |= this->currentColor_.alpha();
     // we always need to update the CSS color
-    this->cssInput_.setText(QStringLiteral("#%1").arg(rgb, 8, 16, QChar(u'0')));
+    this->hexInput_.setText(QStringLiteral("#%1").arg(rgb, 8, 16, QChar(u'0')));
 }
 
-QColor ColorDetails::color() const
+QColor ColorInput::color() const
 {
     return this->currentColor_;
 }
 
-void ColorDetails::setColor(const QColor &color)
+void ColorInput::setColor(QColor color)
 {
-    if (this->currentColor_ != color)
+    if (this->currentColor_ == color)
     {
-        this->currentColor_ = color;
-        this->updateComponents();
-        emit colorChanged(color);
+        return;
     }
+    this->currentColor_ = color;
+    this->updateComponents();
+    // no emit, as we just got the updated color
+}
+
+void ColorInput::emitUpdate()
+{
+    this->updateComponents();
+    // our components triggered this update, emit the new color
+    emit this->colorChanged(this->currentColor_);
 }
 
 }  // namespace chatterino

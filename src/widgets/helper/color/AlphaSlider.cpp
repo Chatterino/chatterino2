@@ -17,21 +17,21 @@ namespace chatterino {
 AlphaSlider::AlphaSlider(QColor color, QWidget *parent)
     : QWidget(parent)
     , alpha_(color.alpha())
-    , baseColor_(color)
+    , color_(color)
 {
     this->setSizePolicy({QSizePolicy::Expanding, QSizePolicy::Fixed});
 }
 
-void AlphaSlider::updateColor(const QColor &color)
+void AlphaSlider::setColor(QColor color)
 {
-    if (this->baseColor_ == color)
+    if (this->color_ == color)
     {
         return;
     }
     this->alpha_ = color.alpha();
-    this->baseColor_ = color;
-    this->updatePixmap();
-    this->repaint();
+    this->color_ = color;
+    this->cachedPixmap_ = {};
+    this->update();
 }
 
 int AlphaSlider::alpha() const
@@ -109,8 +109,8 @@ void AlphaSlider::updatePixmap()
 
     QLinearGradient gradient(cornerRadius, 0.0,
                              (qreal)this->width() - cornerRadius, 0.0);
-    QColor start = this->baseColor_;
-    QColor end = this->baseColor_;
+    QColor start = this->color_;
+    QColor end = this->color_;
     start.setAlpha(0);
     end.setAlpha(255);
 
@@ -141,7 +141,7 @@ void AlphaSlider::paintEvent(QPaintEvent * /*event*/)
         cornerRadius};
     auto circleColor = 0;
     painter.setPen({QColor(circleColor, circleColor, circleColor), 2});
-    auto opaqueBase = this->baseColor_;
+    auto opaqueBase = this->color_;
     opaqueBase.setAlpha(255);
     painter.setBrush(opaqueBase);
     painter.drawEllipse(circ, cornerRadius - 1, cornerRadius - 1);
@@ -154,8 +154,10 @@ void AlphaSlider::setAlpha(int alpha)
         return;
     }
     this->alpha_ = alpha;
+    this->color_.setAlpha(alpha);
+
+    emit this->colorChanged(this->color_);
     this->update();
-    emit alphaChanged(alpha);
 }
 
 }  // namespace chatterino

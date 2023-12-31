@@ -596,12 +596,10 @@ set(SOURCE_FILES
         widgets/helper/color/Checkerboard.hpp
         widgets/helper/color/ColorButton.cpp
         widgets/helper/color/ColorButton.hpp
-        widgets/helper/color/ColorDetails.cpp
-        widgets/helper/color/ColorDetails.hpp
+        widgets/helper/color/ColorInput.cpp
+        widgets/helper/color/ColorInput.hpp
         widgets/helper/color/ColorItemDelegate.cpp
         widgets/helper/color/ColorItemDelegate.hpp
-        widgets/helper/color/ColorSelect.cpp
-        widgets/helper/color/ColorSelect.hpp
         widgets/helper/color/HueSlider.cpp
         widgets/helper/color/HueSlider.hpp
         widgets/helper/color/SBCanvas.cpp

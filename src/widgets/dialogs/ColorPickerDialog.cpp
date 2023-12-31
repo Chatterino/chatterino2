@@ -2,9 +2,11 @@
 
 #include "common/Literals.hpp"
 #include "providers/colors/ColorProvider.hpp"
+#include "widgets/helper/color/AlphaSlider.hpp"
 #include "widgets/helper/color/ColorButton.hpp"
-#include "widgets/helper/color/ColorDetails.hpp"
-#include "widgets/helper/color/ColorSelect.hpp"
+#include "widgets/helper/color/ColorInput.hpp"
+#include "widgets/helper/color/HueSlider.hpp"
+#include "widgets/helper/color/SBCanvas.hpp"
 
 #include <QDialogButtonBox>
 #include <QSet>
@@ -33,6 +35,16 @@ QGridLayout *makeColorGrid(const auto &items, auto *self)
         i++;
     }
     return layout;
+}
+
+/// All color inputs have the same two signals and slots:
+/// `colorChanged` and `setColor`.
+/// `colorChanged` is emitted when the user changed the color (not after calling `setColor`).
+template <typename D, typename W>
+void connectSignals(D *dialog, W *widget)
+{
+    QObject::connect(widget, &W::colorChanged, dialog, &D::setColor);
+    QObject::connect(dialog, &D::colorChanged, widget, &W::setColor);
 }
 
 }  // namespace
@@ -82,20 +94,28 @@ ColorPickerDialog::ColorPickerDialog(QColor color, QWidget *parent)
     {
         auto *controls = new QVBoxLayout;
 
-        auto *colorSelect = new ColorSelect(this->color());
-        auto *colorDetails = new ColorDetails(this->color());
+        {
+            auto *select = new QVBoxLayout;
 
-        QObject::connect(colorSelect, &ColorSelect::colorChanged, this,
-                         &ColorPickerDialog::setColor);
-        QObject::connect(colorDetails, &ColorDetails::colorChanged, this,
-                         &ColorPickerDialog::setColor);
-        QObject::connect(this, &ColorPickerDialog::colorChanged, colorSelect,
-                         &ColorSelect::setColor);
-        QObject::connect(this, &ColorPickerDialog::colorChanged, colorDetails,
-                         &ColorDetails::setColor);
+            auto *sbCanvas = new SBCanvas(this->color());
+            auto *hueSlider = new HueSlider(this->color());
+            auto *alphaSlider = new AlphaSlider(this->color());
 
-        controls->addWidget(colorSelect);
-        controls->addWidget(colorDetails);
+            connectSignals(this, sbCanvas);
+            connectSignals(this, hueSlider);
+            connectSignals(this, alphaSlider);
+
+            select->addWidget(sbCanvas, 0, Qt::AlignHCenter);
+            select->addWidget(hueSlider);
+            select->addWidget(alphaSlider);
+
+            controls->addLayout(select);
+        }
+        {
+            auto *input = new ColorInput(this->color());
+            connectSignals(this, input);
+            controls->addWidget(input);
+        }
 
         dialogContents->addLayout(controls);
     }
@@ -112,7 +132,7 @@ ColorPickerDialog::ColorPickerDialog(QColor color, QWidget *parent)
         this->close();
     });
     QObject::connect(buttonBox, &QDialogButtonBox::rejected, this,
-                     &ColorSelect::close);
+                     &ColorPickerDialog::close);
     dialogLayout->addWidget(buttonBox, 0, Qt::AlignRight);
 }
 

@@ -7,18 +7,19 @@ namespace chatterino {
 class AlphaSlider : public QWidget
 {
     Q_OBJECT
-    Q_PROPERTY(int alpha READ alpha NOTIFY alphaChanged)
 
 public:
     AlphaSlider(QColor color = {}, QWidget *parent = nullptr);
 
-    void updateColor(const QColor &color);
     QSize sizeHint() const override;
 
     int alpha() const;
 
 signals:
-    void alphaChanged(int hue) const;
+    void colorChanged(QColor color) const;
+
+public slots:
+    void setColor(QColor color);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -30,7 +31,7 @@ protected:
 
 private:
     int alpha_ = 255;
-    QColor baseColor_;
+    QColor color_;
 
     QPixmap cachedPixmap_;
 

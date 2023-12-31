@@ -4,26 +4,24 @@
 
 namespace chatterino {
 
+/// 2D canvas for saturation (x-axis) and brightness (y-axis)
 class SBCanvas : public QWidget
 {
     Q_OBJECT
-    Q_PROPERTY(int saturation READ saturation NOTIFY saturationChanged)
-    Q_PROPERTY(int brightness READ brightness NOTIFY brightnessChanged)
 
 public:
     SBCanvas(QColor color = {}, QWidget *parent = nullptr);
 
-    void updateColor(const QColor &color);
-    void setHue(int hue);
     QSize sizeHint() const override;
 
-signals:
-    void saturationChanged(int saturation) const;
-    void brightnessChanged(int brightness) const;
-
-public slots:
     int saturation() const;
     int brightness() const;
+
+signals:
+    void colorChanged(QColor color) const;
+
+public slots:
+    void setColor(QColor color);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -37,6 +35,7 @@ private:
     int hue_ = 0;
     int saturation_ = 0;
     int brightness_ = 0;
+    QColor color_;
 
     QPixmap gradientPixmap_;
 
@@ -48,8 +47,10 @@ private:
 
     void updateFromEvent(QMouseEvent *event);
 
-    void setSaturation(int saturation);
-    void setBrightness(int brightness);
+    [[nodiscard]] bool setSaturation(int saturation);
+    [[nodiscard]] bool setBrightness(int brightness);
+
+    void emitUpdatedColor();
 };
 
 }  // namespace chatterino

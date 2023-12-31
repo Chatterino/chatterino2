@@ -15,17 +15,25 @@ namespace chatterino {
 HueSlider::HueSlider(QColor color, QWidget *parent)
     : QWidget(parent)
 {
-    this->updateColor(color);
+    this->setColor(color);
     this->setSizePolicy({QSizePolicy::Expanding, QSizePolicy::Fixed});
 }
 
-void HueSlider::updateColor(const QColor &color)
+void HueSlider::setColor(QColor color)
 {
-    this->hue_ = color.hue();
-    if (this->hue_ < 0)
+    if (this->color_ == color)
     {
-        this->hue_ = 0;
+        return;
     }
+    this->color_ = color.toHsv();
+
+    auto hue = std::max(this->color_.hue(), 0);
+    if (this->hue_ == hue)
+    {
+        return;
+    }
+
+    this->hue_ = hue;
     this->update();
 }
 
@@ -142,8 +150,16 @@ void HueSlider::setHue(int hue)
         return;
     }
     this->hue_ = hue;
+    // ugh
+    int h{};
+    int s{};
+    int v{};
+    int a{};
+    this->color_.getHsv(&h, &s, &v, &a);
+    this->color_.setHsv(this->hue_, s, v, a);
+
+    emit this->colorChanged(this->color_);
     this->update();
-    emit hueChanged(hue);
 }
 
 }  // namespace chatterino

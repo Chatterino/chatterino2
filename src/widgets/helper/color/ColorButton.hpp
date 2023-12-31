@@ -7,7 +7,6 @@ namespace chatterino {
 class ColorButton : public QAbstractButton
 {
     Q_OBJECT
-    Q_PROPERTY(QColor color READ color WRITE setColor)
 
 public:
     ColorButton(QColor color = {}, QWidget *parent = nullptr);

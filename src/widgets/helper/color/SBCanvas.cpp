@@ -15,25 +15,35 @@ namespace chatterino {
 SBCanvas::SBCanvas(QColor color, QWidget *parent)
     : QWidget(parent)
 {
-    this->updateColor(color);
+    this->setColor(color);
     this->setSizePolicy({QSizePolicy::Fixed, QSizePolicy::Fixed});
 }
 
-void SBCanvas::updateColor(const QColor &color)
+void SBCanvas::setColor(QColor color)
 {
-    color.getHsv(&this->hue_, &this->saturation_, &this->brightness_);
-    if (this->hue_ < 0)
+    color = color.toHsv();
+    if (this->color_ == color)
     {
-        this->hue_ = 0;
+        return;
     }
-    this->update();
-}
+    this->color_ = color;
 
-void SBCanvas::setHue(int hue)
-{
-    this->hue_ = hue;
-    this->updatePixmap();
-    this->repaint();
+    int h{};
+    int s{};
+    int v{};
+    color.getHsv(&h, &s, &v);
+    h = std::max(h, 0);
+
+    if (this->hue_ == h && this->saturation_ == s && this->brightness_ == v)
+    {
+        return;  // alpha changed
+    }
+    this->hue_ = h;
+    this->saturation_ = s;
+    this->brightness_ = v;
+
+    this->gradientPixmap_ = {};
+    this->update();
 }
 
 int SBCanvas::saturation() const
@@ -100,8 +110,15 @@ void SBCanvas::updateFromEvent(QMouseEvent *event)
 {
     auto clampedX = std::clamp(event->pos().x(), 0, this->width());
     auto clampedY = std::clamp(event->pos().y(), 0, this->height());
-    this->setSaturation(this->xPosToSaturation(clampedX));
-    this->setBrightness(this->yPosToBrightness(clampedY));
+
+    bool updated = this->setSaturation(this->xPosToSaturation(clampedX));
+    updated |= this->setBrightness(this->yPosToBrightness(clampedY));
+
+    if (updated)
+    {
+        this->emitUpdatedColor();
+        this->update();
+    }
 }
 
 void SBCanvas::updatePixmap()
@@ -143,26 +160,33 @@ void SBCanvas::paintEvent(QPaintEvent * /*event*/)
     painter.drawEllipse(circ, 5, 5);
 }
 
-void SBCanvas::setSaturation(int saturation)
+bool SBCanvas::setSaturation(int saturation)
 {
     if (this->saturation_ == saturation)
     {
-        return;
+        return false;
     }
+
     this->saturation_ = saturation;
-    this->update();
-    emit saturationChanged(saturation);
+    return true;
 }
 
-void SBCanvas::setBrightness(int brightness)
+bool SBCanvas::setBrightness(int brightness)
 {
     if (this->brightness_ == brightness)
     {
-        return;
+        return false;
     }
+
     this->brightness_ = brightness;
-    this->update();
-    emit brightnessChanged(brightness);
+    return true;
+}
+
+void SBCanvas::emitUpdatedColor()
+{
+    this->color_.setHsv(this->hue_, this->saturation_, this->brightness_,
+                        this->color_.alpha());
+    emit this->colorChanged(this->color_);
 }
 
 }  // namespace chatterino
