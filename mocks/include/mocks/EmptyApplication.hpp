@@ -77,7 +77,7 @@ public:
 
     PubSub *getTwitchPubSub() override
     {
-        assert(!"getTwitchPubSub was called without being initialized");
+        assert(false && "getTwitchPubSub was called without being initialized");
         return nullptr;
     }
 
