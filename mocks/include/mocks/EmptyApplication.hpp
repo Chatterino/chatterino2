@@ -75,6 +75,12 @@ public:
         return nullptr;
     }
 
+    PubSub *getTwitchPubSub() override
+    {
+        assert(!"getTwitchPubSub was called without being initialized");
+        return nullptr;
+    }
+
     Logging *getChatLogger() override
     {
         assert(!"getChatLogger was called without being initialized");

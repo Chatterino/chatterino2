@@ -36,7 +36,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
                                                      const auto &roomID) {
         ClearChatAction action(data, roomID);
 
-        this->signals_.moderation.chatCleared.invoke(action);
+        this->moderation.chatCleared.invoke(action);
     };
 
     this->moderationActionHandlers["slowoff"] = [this](const auto &data,
@@ -46,7 +46,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         action.mode = ModeChangedAction::Mode::Slow;
         action.state = ModeChangedAction::State::Off;
 
-        this->signals_.moderation.modeChanged.invoke(action);
+        this->moderation.modeChanged.invoke(action);
     };
 
     this->moderationActionHandlers["slow"] = [this](const auto &data,
@@ -69,7 +69,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
 
         action.duration = args.at(0).toString().toUInt(&ok, 10);
 
-        this->signals_.moderation.modeChanged.invoke(action);
+        this->moderation.modeChanged.invoke(action);
     };
 
     this->moderationActionHandlers["r9kbetaoff"] = [this](const auto &data,
@@ -79,7 +79,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         action.mode = ModeChangedAction::Mode::R9K;
         action.state = ModeChangedAction::State::Off;
 
-        this->signals_.moderation.modeChanged.invoke(action);
+        this->moderation.modeChanged.invoke(action);
     };
 
     this->moderationActionHandlers["r9kbeta"] = [this](const auto &data,
@@ -89,7 +89,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         action.mode = ModeChangedAction::Mode::R9K;
         action.state = ModeChangedAction::State::On;
 
-        this->signals_.moderation.modeChanged.invoke(action);
+        this->moderation.modeChanged.invoke(action);
     };
 
     this->moderationActionHandlers["subscribersoff"] =
@@ -99,7 +99,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
             action.mode = ModeChangedAction::Mode::SubscribersOnly;
             action.state = ModeChangedAction::State::Off;
 
-            this->signals_.moderation.modeChanged.invoke(action);
+            this->moderation.modeChanged.invoke(action);
         };
 
     this->moderationActionHandlers["subscribers"] = [this](const auto &data,
@@ -109,7 +109,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         action.mode = ModeChangedAction::Mode::SubscribersOnly;
         action.state = ModeChangedAction::State::On;
 
-        this->signals_.moderation.modeChanged.invoke(action);
+        this->moderation.modeChanged.invoke(action);
     };
 
     this->moderationActionHandlers["emoteonlyoff"] =
@@ -119,7 +119,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
             action.mode = ModeChangedAction::Mode::EmoteOnly;
             action.state = ModeChangedAction::State::Off;
 
-            this->signals_.moderation.modeChanged.invoke(action);
+            this->moderation.modeChanged.invoke(action);
         };
 
     this->moderationActionHandlers["emoteonly"] = [this](const auto &data,
@@ -129,7 +129,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         action.mode = ModeChangedAction::Mode::EmoteOnly;
         action.state = ModeChangedAction::State::On;
 
-        this->signals_.moderation.modeChanged.invoke(action);
+        this->moderation.modeChanged.invoke(action);
     };
 
     this->moderationActionHandlers["unmod"] = [this](const auto &data,
@@ -149,7 +149,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
 
         action.modded = false;
 
-        this->signals_.moderation.moderationStateChanged.invoke(action);
+        this->moderation.moderationStateChanged.invoke(action);
     };
 
     this->moderationActionHandlers["mod"] = [this](const auto &data,
@@ -167,7 +167,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         action.target.id = data.value("target_user_id").toString();
         action.target.login = data.value("target_user_login").toString();
 
-        this->signals_.moderation.moderationStateChanged.invoke(action);
+        this->moderation.moderationStateChanged.invoke(action);
     };
 
     this->moderationActionHandlers["timeout"] = [this](const auto &data,
@@ -191,7 +191,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         action.duration = args[1].toString().toUInt(&ok, 10);
         action.reason = args[2].toString();  // May be omitted
 
-        this->signals_.moderation.userBanned.invoke(action);
+        this->moderation.userBanned.invoke(action);
     };
 
     this->moderationActionHandlers["delete"] = [this](const auto &data,
@@ -214,7 +214,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         action.messageText = args[1].toString();
         action.messageId = args[2].toString();
 
-        this->signals_.moderation.messageDeleted.invoke(action);
+        this->moderation.messageDeleted.invoke(action);
     };
 
     this->moderationActionHandlers["ban"] = [this](const auto &data,
@@ -236,7 +236,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         action.target.login = args[0].toString();
         action.reason = args[1].toString();  // May be omitted
 
-        this->signals_.moderation.userBanned.invoke(action);
+        this->moderation.userBanned.invoke(action);
     };
 
     this->moderationActionHandlers["unban"] = [this](const auto &data,
@@ -259,7 +259,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
 
         action.target.login = args[0].toString();
 
-        this->signals_.moderation.userUnbanned.invoke(action);
+        this->moderation.userUnbanned.invoke(action);
     };
 
     this->moderationActionHandlers["untimeout"] = [this](const auto &data,
@@ -282,7 +282,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
 
         action.target.login = args[0].toString();
 
-        this->signals_.moderation.userUnbanned.invoke(action);
+        this->moderation.userUnbanned.invoke(action);
     };
 
     /*
@@ -315,7 +315,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
             action.message = args[1].toString();  // May be omitted
             action.reason = args[2].toString();   // May be omitted
 
-            this->signals_.moderation.autoModMessageBlocked.invoke(action);
+            this->moderation.autoModMessageBlocked.invoke(action);
         };
     */
 
@@ -323,21 +323,21 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         [this](const auto &data, const auto &roomID) {
             AutomodInfoAction action(data, roomID);
             action.type = AutomodInfoAction::OnHold;
-            this->signals_.moderation.automodInfoMessage.invoke(action);
+            this->moderation.automodInfoMessage.invoke(action);
         };
 
     this->moderationActionHandlers["automod_message_denied"] =
         [this](const auto &data, const auto &roomID) {
             AutomodInfoAction action(data, roomID);
             action.type = AutomodInfoAction::Denied;
-            this->signals_.moderation.automodInfoMessage.invoke(action);
+            this->moderation.automodInfoMessage.invoke(action);
         };
 
     this->moderationActionHandlers["automod_message_approved"] =
         [this](const auto &data, const auto &roomID) {
             AutomodInfoAction action(data, roomID);
             action.type = AutomodInfoAction::Approved;
-            this->signals_.moderation.automodInfoMessage.invoke(action);
+            this->moderation.automodInfoMessage.invoke(action);
         };
 
     this->channelTermsActionHandlers["add_permitted_term"] =
@@ -351,7 +351,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
             action.message = data.value("text").toString();
             action.source.login = data.value("requester_login").toString();
 
-            this->signals_.moderation.automodUserMessage.invoke(action);
+            this->moderation.automodUserMessage.invoke(action);
         };
 
     this->channelTermsActionHandlers["add_blocked_term"] =
@@ -365,7 +365,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
             action.message = data.value("text").toString();
             action.source.login = data.value("requester_login").toString();
 
-            this->signals_.moderation.automodUserMessage.invoke(action);
+            this->moderation.automodUserMessage.invoke(action);
         };
 
     this->moderationActionHandlers["delete_permitted_term"] =
@@ -385,7 +385,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
 
             action.message = args[0].toString();
 
-            this->signals_.moderation.automodUserMessage.invoke(action);
+            this->moderation.automodUserMessage.invoke(action);
         };
 
     this->channelTermsActionHandlers["delete_permitted_term"] =
@@ -399,7 +399,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
             action.message = data.value("text").toString();
             action.source.login = data.value("requester_login").toString();
 
-            this->signals_.moderation.automodUserMessage.invoke(action);
+            this->moderation.automodUserMessage.invoke(action);
         };
 
     this->moderationActionHandlers["delete_blocked_term"] =
@@ -420,7 +420,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
 
             action.message = args[0].toString();
 
-            this->signals_.moderation.automodUserMessage.invoke(action);
+            this->moderation.automodUserMessage.invoke(action);
         };
     this->channelTermsActionHandlers["delete_blocked_term"] =
         [this](const auto &data, const auto &roomID) {
@@ -434,20 +434,8 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
             action.message = data.value("text").toString();
             action.source.login = data.value("requester_login").toString();
 
-            this->signals_.moderation.automodUserMessage.invoke(action);
+            this->moderation.automodUserMessage.invoke(action);
         };
-
-    // We don't get this one anymore or anything similiar
-    // We need some new topic so we can listen
-    //
-    //this->moderationActionHandlers["modified_automod_properties"] =
-    //    [this](const auto &data, const auto &roomID) {
-    //        // The automod settings got modified
-    //        AutomodUserAction action(data, roomID);
-    //        getCreatedByUser(data, action.source);
-    //        action.type = AutomodUserAction::Properties;
-    //        this->signals_.moderation.automodUserMessage.invoke(action);
-    //    };
 
     this->moderationActionHandlers["denied_automod_message"] =
         [](const auto &data, const auto &roomID) {
@@ -542,61 +530,23 @@ void PubSub::stop()
     assert(this->clients.empty());
 }
 
-void PubSub::unlistenAllModerationActions()
+bool PubSub::listenToWhispers()
 {
-    for (const auto &p : this->clients)
+    if (this->userID_.isEmpty())
     {
-        const auto &client = p.second;
-        if (const auto &[topics, nonce] =
-                client->unlistenPrefix("chat_moderator_actions.");
-            !topics.empty())
-        {
-            this->registerNonce(nonce, {
-                                           client,
-                                           "UNLISTEN",
-                                           topics,
-                                           topics.size(),
-                                       });
-        }
+        qCDebug(chatterinoPubSub)
+            << "Unable to listen to whispers topic, no user logged in";
+        return false;
     }
-}
 
-void PubSub::unlistenAutomod()
-{
-    for (const auto &p : this->clients)
-    {
-        const auto &client = p.second;
-        if (const auto &[topics, nonce] =
-                client->unlistenPrefix("automod-queue.");
-            !topics.empty())
-        {
-            this->registerNonce(nonce, {
-                                           client,
-                                           "UNLISTEN",
-                                           topics,
-                                           topics.size(),
-                                       });
-        }
-    }
-}
+    static const QString topicFormat("whispers.%1");
+    auto topic = topicFormat.arg(this->userID_);
 
-void PubSub::unlistenLowTrustUsers()
-{
-    for (const auto &p : this->clients)
-    {
-        const auto &client = p.second;
-        if (const auto &[topics, nonce] =
-                client->unlistenPrefix("low-trust-users.");
-            !topics.empty())
-        {
-            this->registerNonce(nonce, {
-                                           client,
-                                           "UNLISTEN",
-                                           topics,
-                                           topics.size(),
-                                       });
-        }
-    }
+    qCDebug(chatterinoPubSub) << "Listen to whispers" << topic;
+
+    this->listenToTopic(topic);
+
+    return true;
 }
 
 void PubSub::unlistenWhispers()
@@ -615,25 +565,6 @@ void PubSub::unlistenWhispers()
                                        });
         }
     }
-}
-
-bool PubSub::listenToWhispers()
-{
-    if (this->userID_.isEmpty())
-    {
-        qCDebug(chatterinoPubSub)
-            << "Unable to listen to whispers topic, no user logged in";
-        return false;
-    }
-
-    static const QString topicFormat("whispers.%1");
-    auto topic = topicFormat.arg(this->userID_);
-
-    qCDebug(chatterinoPubSub) << "Listen to whispers" << topic;
-
-    this->listenToTopic(topic);
-
-    return true;
 }
 
 void PubSub::listenToChannelModerationActions(const QString &channelID)
@@ -660,6 +591,25 @@ void PubSub::listenToChannelModerationActions(const QString &channelID)
     this->listenToTopic(topic);
 }
 
+void PubSub::unlistenChannelModerationActions()
+{
+    for (const auto &p : this->clients)
+    {
+        const auto &client = p.second;
+        if (const auto &[topics, nonce] =
+                client->unlistenPrefix("chat_moderator_actions.");
+            !topics.empty())
+        {
+            this->registerNonce(nonce, {
+                                           client,
+                                           "UNLISTEN",
+                                           topics,
+                                           topics.size(),
+                                       });
+        }
+    }
+}
+
 void PubSub::listenToAutomod(const QString &channelID)
 {
     if (this->userID_.isEmpty())
@@ -682,6 +632,25 @@ void PubSub::listenToAutomod(const QString &channelID)
     qCDebug(chatterinoPubSub) << "Listen to topic" << topic;
 
     this->listenToTopic(topic);
+}
+
+void PubSub::unlistenAutomod()
+{
+    for (const auto &p : this->clients)
+    {
+        const auto &client = p.second;
+        if (const auto &[topics, nonce] =
+                client->unlistenPrefix("automod-queue.");
+            !topics.empty())
+        {
+            this->registerNonce(nonce, {
+                                           client,
+                                           "UNLISTEN",
+                                           topics,
+                                           topics.size(),
+                                       });
+        }
+    }
 }
 
 void PubSub::listenToLowTrustUsers(const QString &channelID)
@@ -708,6 +677,25 @@ void PubSub::listenToLowTrustUsers(const QString &channelID)
     this->listenToTopic(topic);
 }
 
+void PubSub::unlistenLowTrustUsers()
+{
+    for (const auto &p : this->clients)
+    {
+        const auto &client = p.second;
+        if (const auto &[topics, nonce] =
+                client->unlistenPrefix("low-trust-users.");
+            !topics.empty())
+        {
+            this->registerNonce(nonce, {
+                                           client,
+                                           "UNLISTEN",
+                                           topics,
+                                           topics.size(),
+                                       });
+        }
+    }
+}
+
 void PubSub::listenToChannelPointRewards(const QString &channelID)
 {
     static const QString topicFormat("community-points-channel-v1.%1");
@@ -722,6 +710,25 @@ void PubSub::listenToChannelPointRewards(const QString &channelID)
     qCDebug(chatterinoPubSub) << "Listen to topic" << topic;
 
     this->listenToTopic(topic);
+}
+
+void PubSub::unlistenChannelPointRewards()
+{
+    for (const auto &p : this->clients)
+    {
+        const auto &client = p.second;
+        if (const auto &[topics, nonce] =
+                client->unlistenPrefix("community-points-channel-v1.");
+            !topics.empty())
+        {
+            this->registerNonce(nonce, {
+                                           client,
+                                           "UNLISTEN",
+                                           topics,
+                                           topics.size(),
+                                       });
+        }
+    }
 }
 
 void PubSub::listen(PubSubListenMessage msg)
@@ -1077,11 +1084,11 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
         switch (whisperMessage.type)
         {
             case PubSubWhisperMessage::Type::WhisperReceived: {
-                this->signals_.whisper.received.invoke(whisperMessage);
+                this->whisper.received.invoke(whisperMessage);
             }
             break;
             case PubSubWhisperMessage::Type::WhisperSent: {
-                this->signals_.whisper.sent.invoke(whisperMessage);
+                this->whisper.sent.invoke(whisperMessage);
             }
             break;
             case PubSubWhisperMessage::Type::Thread: {
@@ -1176,7 +1183,7 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
             case PubSubCommunityPointsChannelV1Message::Type::RewardRedeemed: {
                 auto redemption =
                     innerMessage.data.value("redemption").toObject();
-                this->signals_.pointReward.redeemed.invoke(redemption);
+                this->pointReward.redeemed.invoke(redemption);
             }
             break;
 
@@ -1204,8 +1211,7 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
         // Channel ID where the moderator actions are coming from
         auto channelID = topicParts[2];
 
-        this->signals_.moderation.autoModMessageCaught.invoke(innerMessage,
-                                                              channelID);
+        this->moderation.autoModMessageCaught.invoke(innerMessage, channelID);
     }
     else if (topic.startsWith("low-trust-users."))
     {
@@ -1220,13 +1226,12 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
         switch (innerMessage.type)
         {
             case PubSubLowTrustUsersMessage::Type::UserMessage: {
-                this->signals_.moderation.suspiciousMessageReceived.invoke(
-                    innerMessage);
+                this->moderation.suspiciousMessageReceived.invoke(innerMessage);
             }
             break;
 
             case PubSubLowTrustUsersMessage::Type::TreatmentUpdate: {
-                this->signals_.moderation.suspiciousTreatmentUpdated.invoke(
+                this->moderation.suspiciousTreatmentUpdated.invoke(
                     innerMessage);
             }
             break;

@@ -68,6 +68,7 @@ public:
     virtual HighlightController *getHighlights() = 0;
     virtual NotificationController *getNotifications() = 0;
     virtual ITwitchIrcServer *getTwitch() = 0;
+    virtual PubSub *getTwitchPubSub() = 0;
     virtual Logging *getChatLogger() = 0;
     virtual ChatterinoBadges *getChatterinoBadges() = 0;
     virtual FfzBadges *getFfzBadges() = 0;
@@ -128,6 +129,7 @@ public:
 
 private:
     TwitchLiveController *const twitchLiveController{};
+    const std::unique_ptr<PubSub> twitchPubSub;
     const std::unique_ptr<Logging> logging;
 
 public:
@@ -181,6 +183,7 @@ public:
         return this->highlights;
     }
     ITwitchIrcServer *getTwitch() override;
+    PubSub *getTwitchPubSub() override;
     Logging *getChatLogger() override;
     ChatterinoBadges *getChatterinoBadges() override
     {
