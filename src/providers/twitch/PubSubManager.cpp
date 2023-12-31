@@ -551,20 +551,7 @@ bool PubSub::listenToWhispers()
 
 void PubSub::unlistenWhispers()
 {
-    for (const auto &p : this->clients)
-    {
-        const auto &client = p.second;
-        if (const auto &[topics, nonce] = client->unlistenPrefix("whispers.");
-            !topics.empty())
-        {
-            this->registerNonce(nonce, {
-                                           client,
-                                           "UNLISTEN",
-                                           topics,
-                                           topics.size(),
-                                       });
-        }
-    }
+    this->unlistenPrefix("whispers.");
 }
 
 void PubSub::listenToChannelModerationActions(const QString &channelID)
@@ -593,21 +580,7 @@ void PubSub::listenToChannelModerationActions(const QString &channelID)
 
 void PubSub::unlistenChannelModerationActions()
 {
-    for (const auto &p : this->clients)
-    {
-        const auto &client = p.second;
-        if (const auto &[topics, nonce] =
-                client->unlistenPrefix("chat_moderator_actions.");
-            !topics.empty())
-        {
-            this->registerNonce(nonce, {
-                                           client,
-                                           "UNLISTEN",
-                                           topics,
-                                           topics.size(),
-                                       });
-        }
-    }
+    this->unlistenPrefix("chat_moderator_actions.");
 }
 
 void PubSub::listenToAutomod(const QString &channelID)
@@ -636,21 +609,7 @@ void PubSub::listenToAutomod(const QString &channelID)
 
 void PubSub::unlistenAutomod()
 {
-    for (const auto &p : this->clients)
-    {
-        const auto &client = p.second;
-        if (const auto &[topics, nonce] =
-                client->unlistenPrefix("automod-queue.");
-            !topics.empty())
-        {
-            this->registerNonce(nonce, {
-                                           client,
-                                           "UNLISTEN",
-                                           topics,
-                                           topics.size(),
-                                       });
-        }
-    }
+    this->unlistenPrefix("automod-queue.");
 }
 
 void PubSub::listenToLowTrustUsers(const QString &channelID)
@@ -679,21 +638,7 @@ void PubSub::listenToLowTrustUsers(const QString &channelID)
 
 void PubSub::unlistenLowTrustUsers()
 {
-    for (const auto &p : this->clients)
-    {
-        const auto &client = p.second;
-        if (const auto &[topics, nonce] =
-                client->unlistenPrefix("low-trust-users.");
-            !topics.empty())
-        {
-            this->registerNonce(nonce, {
-                                           client,
-                                           "UNLISTEN",
-                                           topics,
-                                           topics.size(),
-                                       });
-        }
-    }
+    this->unlistenPrefix("low-trust-users.");
 }
 
 void PubSub::listenToChannelPointRewards(const QString &channelID)
@@ -714,19 +659,24 @@ void PubSub::listenToChannelPointRewards(const QString &channelID)
 
 void PubSub::unlistenChannelPointRewards()
 {
+    this->unlistenPrefix("community-points-channel-v1.");
+}
+
+void PubSub::unlistenPrefix(const QString &prefix)
+{
     for (const auto &p : this->clients)
     {
         const auto &client = p.second;
-        if (const auto &[topics, nonce] =
-                client->unlistenPrefix("community-points-channel-v1.");
+        if (const auto &[topics, nonce] = client->unlistenPrefix(prefix);
             !topics.empty())
         {
-            this->registerNonce(nonce, {
-                                           client,
-                                           "UNLISTEN",
-                                           topics,
-                                           topics.size(),
-                                       });
+            NonceInfo nonceInfo{
+                client,
+                "UNLISTEN",
+                topics,
+                topics.size(),
+            };
+            this->registerNonce(nonce, nonceInfo);
         }
     }
 }

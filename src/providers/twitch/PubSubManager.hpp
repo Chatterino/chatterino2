@@ -186,6 +186,11 @@ public:
     } diag;
 
 private:
+    /**
+     * Unlistens to all topics matching the prefix in all clients
+     */
+    void unlistenPrefix(const QString &prefix);
+
     void listenToTopic(const QString &topic);
 
     void listen(PubSubListenMessage msg);
