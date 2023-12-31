@@ -128,10 +128,10 @@ Application::Application(Settings &_settings, Paths &_paths, const Args &_args)
     , userData(&this->emplace<UserDataController>())
     , sound(&this->emplace<ISoundController>(makeSoundController(_settings)))
     , twitchLiveController(&this->emplace<TwitchLiveController>())
+    , logging(new Logging(_settings))
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(&this->emplace<PluginController>())
 #endif
-    , logging(new Logging(_settings))
 {
     Application::instance = this;
 
