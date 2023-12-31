@@ -12,7 +12,7 @@
 
 namespace chatterino {
 
-void Logging::initialize(Settings &settings, Paths & /*paths*/)
+Logging::Logging(Settings &settings)
 {
     // We can safely ignore this signal connection since settings are only-ever destroyed
     // on application exit

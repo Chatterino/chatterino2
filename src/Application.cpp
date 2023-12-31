@@ -131,7 +131,7 @@ Application::Application(Settings &_settings, Paths &_paths, const Args &_args)
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(&this->emplace<PluginController>())
 #endif
-    , logging(&this->emplace<Logging>())
+    , logging(new Logging(_settings))
 {
     this->instance = this;
 
@@ -141,6 +141,8 @@ Application::Application(Settings &_settings, Paths &_paths, const Args &_args)
         this->windows->layoutChannelViews();
     });
 }
+
+Application::~Application() = default;
 
 void Application::initialize(Settings &settings, Paths &paths)
 {
@@ -310,6 +312,11 @@ ITwitchLiveController *Application::getTwitchLiveController()
 ITwitchIrcServer *Application::getTwitch()
 {
     return this->twitch;
+}
+
+Logging *Application::getChatLogger()
+{
+    return this->logging.get();
 }
 
 void Application::save()
