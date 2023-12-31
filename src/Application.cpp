@@ -481,7 +481,8 @@ void Application::initPubSub()
                     PubSubLowTrustUsersMessage::Treatment::INVALID)
                 {
                     qCWarning(chatterinoTwitch)
-                        << "Received message with unknown suspicion: "
+                        << "Received suspicious message with unknown "
+                           "treatment:"
                         << action.treatmentString;
                     return;
                 }
@@ -523,7 +524,8 @@ void Application::initPubSub()
                     PubSubLowTrustUsersMessage::Treatment::INVALID)
                 {
                     qCWarning(chatterinoTwitch)
-                        << "Suspicious user has unknown new treatment: "
+                        << "Received suspicious user update with unknown "
+                           "treatment:"
                         << action.treatmentString;
                     return;
                 }
