@@ -133,7 +133,7 @@ Application::Application(Settings &_settings, Paths &_paths, const Args &_args)
 #endif
     , logging(new Logging(_settings))
 {
-    this->instance = this;
+    Application::instance = this;
 
     // We can safely ignore this signal's connection since the Application will always
     // be destroyed after fonts
