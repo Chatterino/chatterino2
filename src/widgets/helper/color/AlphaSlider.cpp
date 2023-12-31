@@ -141,7 +141,9 @@ void AlphaSlider::paintEvent(QPaintEvent * /*event*/)
         cornerRadius};
     auto circleColor = 0;
     painter.setPen({QColor(circleColor, circleColor, circleColor), 2});
-    painter.setBrush(Qt::transparent);
+    auto opaqueBase = this->baseColor_;
+    opaqueBase.setAlpha(255);
+    painter.setBrush(opaqueBase);
     painter.drawEllipse(circ, cornerRadius - 1, cornerRadius - 1);
 }
 

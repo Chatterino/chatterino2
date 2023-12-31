@@ -131,7 +131,7 @@ void HueSlider::paintEvent(QPaintEvent * /*event*/)
         cornerRadius};
     auto circleColor = 0;
     painter.setPen({QColor(circleColor, circleColor, circleColor), 2});
-    painter.setBrush(Qt::transparent);
+    painter.setBrush(QColor::fromHsv(this->hue(), 255, 255));
     painter.drawEllipse(circ, cornerRadius - 1, cornerRadius - 1);
 }
 

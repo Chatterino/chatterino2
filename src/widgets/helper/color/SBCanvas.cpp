@@ -138,7 +138,8 @@ void SBCanvas::paintEvent(QPaintEvent * /*event*/)
                    ((255 - this->brightness()) * this->height()) / 256};
     auto circleColor = this->brightness() >= 128 ? 50 : 200;
     painter.setPen({QColor(circleColor, circleColor, circleColor), 2});
-    painter.setBrush(Qt::transparent);
+    painter.setBrush(
+        QColor::fromHsv(this->hue_, this->saturation_, this->brightness_));
     painter.drawEllipse(circ, 5, 5);
 }
 
