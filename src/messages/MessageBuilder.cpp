@@ -83,15 +83,24 @@ MessageBuilder::MessageBuilder()
 {
 }
 
+QString MessageProcessor::processMessage(const QString &text)
+{
+    QString processedText = text;
+
+    if (!processedText.isEmpty() && processedText.right(1) != "." &&
+        processedText.right(1) != ")")
+    {
+        processedText += ".";
+    }
+
+    return processedText;
+}
+
 MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
                                const QTime &time)
     : MessageBuilder()
 {
-    QString Text = text;
-    if (!Text.isEmpty() && Text.right(1) != "." && Text.right(1) != ")")
-    {
-        Text += ".";
-    }
+    QString Text = MessageProcessor::processMessage(text);
     this->emplace<TimestampElement>(time);
 
     // check system message for links
