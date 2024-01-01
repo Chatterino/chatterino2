@@ -37,6 +37,7 @@
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/PubSubMessages.hpp"
+#include "providers/twitch/pubsubmessages/LowTrustUsers.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -106,8 +107,9 @@ IApplication::IApplication()
 // It will create the instances of the major classes, and connect their signals
 // to each other
 
-Application::Application(Settings &_settings, Paths &_paths)
-    : themes(&this->emplace<Theme>())
+Application::Application(Settings &_settings, Paths &_paths, const Args &_args)
+    : args_(_args)
+    , themes(&this->emplace<Theme>())
     , fonts(&this->emplace<Fonts>())
     , emotes(&this->emplace<Emotes>())
     , accounts(&this->emplace<AccountController>())
@@ -130,12 +132,12 @@ Application::Application(Settings &_settings, Paths &_paths)
     , userData(&this->emplace<UserDataController>())
     , sound(&this->emplace<ISoundController>(makeSoundController(_settings)))
     , twitchLiveController(&this->emplace<TwitchLiveController>())
+    , logging(new Logging(_settings))
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(&this->emplace<PluginController>())
 #endif
-    , logging(&this->emplace<Logging>())
 {
-    this->instance = this;
+    Application::instance = this;
 
     // We can safely ignore this signal's connection since the Application will always
     // be destroyed after fonts
@@ -144,13 +146,15 @@ Application::Application(Settings &_settings, Paths &_paths)
     });
 }
 
+Application::~Application() = default;
+
 void Application::initialize(Settings &settings, Paths &paths)
 {
     assert(isAppInitialized == false);
     isAppInitialized = true;
 
     // Show changelog
-    if (!getArgs().isFramelessEmbed &&
+    if (!this->args_.isFramelessEmbed &&
         getSettings()->currentVersion.getValue() != "" &&
         getSettings()->currentVersion.getValue() != CHATTERINO_VERSION)
     {
@@ -165,7 +169,7 @@ void Application::initialize(Settings &settings, Paths &paths)
         }
     }
 
-    if (!getArgs().isFramelessEmbed)
+    if (!this->args_.isFramelessEmbed)
     {
         getSettings()->currentVersion.setValue(CHATTERINO_VERSION);
 
@@ -183,7 +187,7 @@ void Application::initialize(Settings &settings, Paths &paths)
     // Show crash message.
     // On Windows, the crash message was already shown.
 #ifndef Q_OS_WIN
-    if (!getArgs().isFramelessEmbed && getArgs().crashRecovery)
+    if (!this->args_.isFramelessEmbed && this->args_.crashRecovery)
     {
         if (auto selected =
                 this->windows->getMainWindow().getNotebook().getSelectedPage())
@@ -207,7 +211,7 @@ void Application::initialize(Settings &settings, Paths &paths)
 
     this->windows->updateWordTypeMask();
 
-    if (!getArgs().isFramelessEmbed)
+    if (!this->args_.isFramelessEmbed)
     {
         this->initNm(paths);
     }
@@ -223,7 +227,7 @@ int Application::run(QApplication &qtApp)
 
     this->twitch->connect();
 
-    if (!getArgs().isFramelessEmbed)
+    if (!this->args_.isFramelessEmbed)
     {
         this->windows->getMainWindow().show();
     }
@@ -312,6 +316,11 @@ ITwitchLiveController *Application::getTwitchLiveController()
 ITwitchIrcServer *Application::getTwitch()
 {
     return this->twitch;
+}
+
+Logging *Application::getChatLogger()
+{
+    return this->logging.get();
 }
 
 void Application::save()
@@ -477,6 +486,87 @@ void Application::initPubSub()
             });
 
     std::ignore =
+        this->twitch->pubsub->signals_.moderation.suspiciousMessageReceived
+            .connect([&](const auto &action) {
+                if (action.treatment ==
+                    PubSubLowTrustUsersMessage::Treatment::INVALID)
+                {
+                    qCWarning(chatterinoTwitch)
+                        << "Received suspicious message with unknown "
+                           "treatment:"
+                        << action.treatmentString;
+                    return;
+                }
+
+                // monitored chats are received over irc; in the future, we will use pubsub instead
+                if (action.treatment !=
+                    PubSubLowTrustUsersMessage::Treatment::Restricted)
+                {
+                    return;
+                }
+
+                if (getSettings()->streamerModeHideModActions &&
+                    isInStreamerMode())
+                {
+                    return;
+                }
+
+                auto chan =
+                    this->twitch->getChannelOrEmptyByID(action.channelID);
+
+                if (chan->isEmpty())
+                {
+                    return;
+                }
+
+                postToThread([chan, action] {
+                    const auto p =
+                        TwitchMessageBuilder::makeLowTrustUserMessage(
+                            action, chan->getName());
+                    chan->addMessage(p.first);
+                    chan->addMessage(p.second);
+                });
+            });
+
+    std::ignore =
+        this->twitch->pubsub->signals_.moderation.suspiciousTreatmentUpdated
+            .connect([&](const auto &action) {
+                if (action.treatment ==
+                    PubSubLowTrustUsersMessage::Treatment::INVALID)
+                {
+                    qCWarning(chatterinoTwitch)
+                        << "Received suspicious user update with unknown "
+                           "treatment:"
+                        << action.treatmentString;
+                    return;
+                }
+
+                if (action.updatedByUserLogin.isEmpty())
+                {
+                    return;
+                }
+
+                if (getSettings()->streamerModeHideModActions &&
+                    isInStreamerMode())
+                {
+                    return;
+                }
+
+                auto chan =
+                    this->twitch->getChannelOrEmptyByID(action.channelID);
+                if (chan->isEmpty())
+                {
+                    return;
+                }
+
+                postToThread([chan, action] {
+                    auto msg =
+                        TwitchMessageBuilder::makeLowTrustUpdateMessage(action);
+                    chan->addMessage(msg);
+                });
+            });
+
+    std::ignore =
         this->twitch->pubsub->signals_.moderation.autoModMessageCaught.connect(
             [&](const auto &msg, const QString &channelID) {
                 auto chan = this->twitch->getChannelOrEmptyByID(channelID);
@@ -556,7 +646,8 @@ void Application::initPubSub()
                                 senderDisplayName, senderColor};
                             postToThread([chan, action] {
                                 const auto p =
-                                    makeAutomodMessage(action, chan->getName());
+                                    TwitchMessageBuilder::makeAutomodMessage(
+                                        action, chan->getName());
                                 chan->addMessage(p.first);
                                 chan->addMessage(p.second);
 
@@ -588,7 +679,8 @@ void Application::initPubSub()
                 }
 
                 postToThread([chan, action] {
-                    const auto p = makeAutomodMessage(action, chan->getName());
+                    const auto p = TwitchMessageBuilder::makeAutomodMessage(
+                        action, chan->getName());
                     chan->addMessage(p.first);
                     chan->addMessage(p.second);
                 });
@@ -630,7 +722,8 @@ void Application::initPubSub()
                 }
 
                 postToThread([chan, action] {
-                    const auto p = makeAutomodInfoMessage(action);
+                    const auto p =
+                        TwitchMessageBuilder::makeAutomodInfoMessage(action);
                     chan->addMessage(p);
                 });
             });
@@ -672,6 +765,7 @@ void Application::initPubSub()
         [this] {
             this->twitch->pubsub->unlistenAllModerationActions();
             this->twitch->pubsub->unlistenAutomod();
+            this->twitch->pubsub->unlistenLowTrustUsers();
             this->twitch->pubsub->unlistenWhispers();
         },
         boost::signals2::at_front);

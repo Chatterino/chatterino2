@@ -30,6 +30,7 @@ namespace chatterino {
 class Args
 {
 public:
+    Args() = default;
     Args(const QApplication &app);
 
     bool printVersion{};
@@ -59,8 +60,5 @@ private:
 
     QStringList currentArguments_;
 };
-
-void initArgs(const QApplication &app);
-const Args &getArgs();
 
 }  // namespace chatterino

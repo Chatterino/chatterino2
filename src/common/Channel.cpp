@@ -101,7 +101,8 @@ void Channel::addMessage(MessagePtr message,
         {
             channelPlatform = "twitch";
         }
-        app->logging->addMessage(this->name_, message, channelPlatform);
+        getIApp()->getChatLogger()->addMessage(this->name_, message,
+                                               channelPlatform);
     }
 
     if (this->messages_.pushBack(message, deleted))
@@ -315,7 +316,6 @@ bool Channel::isBroadcaster() const
 
 bool Channel::hasModRights() const
 {
-    // fourtf: check if staff
     return this->isMod() || this->isBroadcaster();
 }
 

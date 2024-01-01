@@ -340,28 +340,6 @@ void HighlightingPage::openColorDialog(const QModelIndex &clicked,
         if (selected.isValid())
         {
             view->getModel()->setData(clicked, selected, Qt::DecorationRole);
-
-            if (tab == HighlightTab::Messages)
-            {
-                /*
-                 * For preset highlights in the "Messages" tab, we need to
-                 * manually update the color map.
-                 */
-                auto instance = ColorProvider::instance();
-                switch (clicked.row())
-                {
-                    case 0:
-                        instance.updateColor(ColorType::SelfHighlight,
-                                             selected);
-                        break;
-                    case 1:
-                        instance.updateColor(ColorType::Whisper, selected);
-                        break;
-                    case 2:
-                        instance.updateColor(ColorType::Subscription, selected);
-                        break;
-                }
-            }
         }
     });
 }
@@ -370,21 +348,22 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
                                         EditableModelView *view,
                                         HighlightTab tab)
 {
+    if (!clicked.flags().testFlag(Qt::ItemIsEnabled))
+    {
+        return;
+    }
+
     switch (tab)
     {
         case HighlightTab::Messages:
         case HighlightTab::Users: {
             using Column = HighlightModel::Column;
-            bool restrictColorRow =
-                (tab == HighlightTab::Messages &&
-                 clicked.row() ==
-                     HighlightModel::HighlightRowIndexes::WhisperRow);
-            if (clicked.column() == Column::SoundPath &&
-                clicked.flags().testFlag(Qt::ItemIsEnabled))
+
+            if (clicked.column() == Column::SoundPath)
             {
                 this->openSoundDialog(clicked, view, Column::SoundPath);
             }
-            else if (clicked.column() == Column::Color && !restrictColorRow)
+            else if (clicked.column() == Column::Color)
             {
                 this->openColorDialog(clicked, view, tab);
             }

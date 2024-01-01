@@ -11,6 +11,7 @@
 
 namespace chatterino {
 
+class Args;
 class TwitchIrcServer;
 class ITwitchIrcServer;
 class PubSub;
@@ -57,6 +58,7 @@ public:
 
     static IApplication *instance;
 
+    virtual const Args &getArgs() = 0;
     virtual Theme *getThemes() = 0;
     virtual Fonts *getFonts() = 0;
     virtual IEmotes *getEmotes() = 0;
@@ -69,6 +71,7 @@ public:
     virtual HighlightController *getHighlights() = 0;
     virtual NotificationController *getNotifications() = 0;
     virtual ITwitchIrcServer *getTwitch() = 0;
+    virtual Logging *getChatLogger() = 0;
     virtual ChatterinoBadges *getChatterinoBadges() = 0;
     virtual FfzBadges *getFfzBadges() = 0;
     virtual SeventvBadges *getSeventvBadges() = 0;
@@ -83,6 +86,7 @@ public:
 
 class Application : public IApplication
 {
+    const Args &args_;
     std::vector<std::unique_ptr<Singleton>> singletons_;
     int argc_{};
     char **argv_{};
@@ -90,7 +94,13 @@ class Application : public IApplication
 public:
     static Application *instance;
 
-    Application(Settings &settings, Paths &paths);
+    Application(Settings &_settings, Paths &_paths, const Args &_args);
+    ~Application() override;
+
+    Application(const Application &) = delete;
+    Application(Application &&) = delete;
+    Application &operator=(const Application &) = delete;
+    Application &operator=(Application &&) = delete;
 
     void initialize(Settings &settings, Paths &paths);
     void load();
@@ -125,14 +135,17 @@ public:
 
 private:
     TwitchLiveController *const twitchLiveController{};
+    const std::unique_ptr<Logging> logging;
 
 public:
 #ifdef CHATTERINO_HAVE_PLUGINS
     PluginController *const plugins{};
 #endif
 
-    /*[[deprecated]]*/ Logging *const logging{};
-
+    const Args &getArgs() override
+    {
+        return this->args_;
+    }
     Theme *getThemes() override
     {
         return this->themes;
@@ -175,6 +188,7 @@ public:
         return this->highlights;
     }
     ITwitchIrcServer *getTwitch() override;
+    Logging *getChatLogger() override;
     ChatterinoBadges *getChatterinoBadges() override
     {
         return this->chatterinoBadges;

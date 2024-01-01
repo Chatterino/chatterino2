@@ -1256,7 +1256,11 @@ void TwitchChannel::refreshPubSub()
     getApp()->twitch->pubsub->setAccount(currentAccount);
 
     getApp()->twitch->pubsub->listenToChannelModerationActions(roomId);
-    getApp()->twitch->pubsub->listenToAutomod(roomId);
+    if (this->hasModRights())
+    {
+        getApp()->twitch->pubsub->listenToAutomod(roomId);
+        getApp()->twitch->pubsub->listenToLowTrustUsers(roomId);
+    }
     getApp()->twitch->pubsub->listenToChannelPointRewards(roomId);
 }
 
