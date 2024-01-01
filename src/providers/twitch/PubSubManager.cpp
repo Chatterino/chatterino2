@@ -524,7 +524,6 @@ void PubSub::stop()
     {
         (void)hdl;
 
-        client->stop();
         client->close("Shutting down");
     }
 
