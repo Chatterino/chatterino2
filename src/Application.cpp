@@ -507,10 +507,16 @@ void Application::initPubSub()
                     return;
                 }
 
-                auto chan =
+                auto channel =
                     this->twitch->getChannelOrEmptyByID(action.channelID);
 
-                if (chan->isEmpty())
+                if (channel->isEmpty())
+                {
+                    return;
+                }
+
+                auto *chan = dynamic_cast<TwitchChannel *>(channel.get());
+                if (!chan)
                 {
                     return;
                 }
@@ -518,7 +524,7 @@ void Application::initPubSub()
                 postToThread([chan, action] {
                     const auto p =
                         TwitchMessageBuilder::makeLowTrustUserMessage(
-                            action, chan->getName());
+                            action, chan->getName(), chan);
                     chan->addMessage(p.first);
                     chan->addMessage(p.second);
                 });

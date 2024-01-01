@@ -35,10 +35,12 @@ PubSubLowTrustUsersMessage::PubSubLowTrustUsersMessage(const QJsonObject &root)
         this->suspiciousUserColor =
             QColor(sender.value("chat_color").toString());
 
-        std::vector<LowTrustUserChatBadge> badges;
+        std::vector<Badge> badges;
         for (const auto &badge : sender.value("badges").toArray())
         {
-            badges.emplace_back(badge.toObject());
+            const auto badgeObj = badge.toObject();
+            badges.emplace_back(Badge{badgeObj.value("id").toString(),
+                                      badgeObj.value("version").toString()});
         }
         this->senderBadges = badges;
 

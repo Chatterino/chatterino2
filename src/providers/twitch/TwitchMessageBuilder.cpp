@@ -1114,10 +1114,9 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 }
 
 std::optional<EmotePtr> TwitchMessageBuilder::getTwitchBadge(
-    const Badge &badge) const
+    const Badge &badge, const TwitchChannel *chan)
 {
-    if (auto channelBadge =
-            this->twitchChannel->twitchBadge(badge.key_, badge.value_))
+    if (auto channelBadge = chan->twitchBadge(badge.key_, badge.value_))
     {
         return channelBadge;
     }
@@ -1190,10 +1189,23 @@ void TwitchMessageBuilder::appendTwitchBadges()
 
     auto badgeInfos = TwitchMessageBuilder::parseBadgeInfoTag(this->tags);
     auto badges = this->parseBadgeTag(this->tags);
+    TwitchMessageBuilder::appendTwitchBadges(this, badges, badgeInfos,
+                                             this->twitchChannel);
+}
+
+void TwitchMessageBuilder::appendTwitchBadges(
+    MessageBuilder *builder, const std::vector<Badge> &badges,
+    const std::unordered_map<QString, QString> &badgeInfos,
+    const TwitchChannel *chan)
+{
+    if (chan == nullptr)
+    {
+        return;
+    }
 
     for (const auto &badge : badges)
     {
-        auto badgeEmote = this->getTwitchBadge(badge);
+        auto badgeEmote = getTwitchBadge(badge, chan);
         if (!badgeEmote)
         {
             continue;
@@ -1208,9 +1220,10 @@ void TwitchMessageBuilder::appendTwitchBadges()
         else if (badge.key_ == "moderator" &&
                  getSettings()->useCustomFfzModeratorBadges)
         {
-            if (auto customModBadge = this->twitchChannel->ffzCustomModBadge())
+            if (auto customModBadge = chan->ffzCustomModBadge())
             {
-                this->emplace<ModBadgeElement>(
+                builder
+                    ->emplace<ModBadgeElement>(
                         *customModBadge,
                         MessageElementFlag::BadgeChannelAuthority)
                     ->setTooltip((*customModBadge)->tooltip.string);
@@ -1220,9 +1233,10 @@ void TwitchMessageBuilder::appendTwitchBadges()
         }
         else if (badge.key_ == "vip" && getSettings()->useCustomFfzVipBadges)
         {
-            if (auto customVipBadge = this->twitchChannel->ffzCustomVipBadge())
+            if (auto customVipBadge = chan->ffzCustomVipBadge())
             {
-                this->emplace<VipBadgeElement>(
+                builder
+                    ->emplace<VipBadgeElement>(
                         *customVipBadge,
                         MessageElementFlag::BadgeChannelAuthority)
                     ->setTooltip((*customVipBadge)->tooltip.string);
@@ -1253,8 +1267,9 @@ void TwitchMessageBuilder::appendTwitchBadges()
             auto badgeInfoIt = badgeInfos.find(badge.key_);
             if (badgeInfoIt != badgeInfos.end())
             {
+                auto infoValue = badgeInfoIt->second;
                 auto predictionText =
-                    badgeInfoIt->second
+                    infoValue
                         .replace(R"(\s)", " ")  // standard IRC escapes
                         .replace(R"(\:)", ";")
                         .replace(R"(\\)", R"(\)")
@@ -1265,12 +1280,12 @@ void TwitchMessageBuilder::appendTwitchBadges()
             }
         }
 
-        this->emplace<BadgeElement>(*badgeEmote, badge.flag_)
+        builder->emplace<BadgeElement>(*badgeEmote, badge.flag_)
             ->setTooltip(tooltip);
     }
 
-    this->message().badges = badges;
-    this->message().badgeInfos = badgeInfos;
+    builder->message().badges = badges;
+    builder->message().badgeInfos = badgeInfos;
 }
 
 void TwitchMessageBuilder::appendChatterinoBadges()
@@ -2006,7 +2021,8 @@ MessagePtr TwitchMessageBuilder::makeLowTrustUpdateMessage(
 }
 
 std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeLowTrustUserMessage(
-    const PubSubLowTrustUsersMessage &action, const QString &channelName)
+    const PubSubLowTrustUsersMessage &action, const QString &channelName,
+    const TwitchChannel *chan)
 {
     MessageBuilder builder, builder2;
 
@@ -2088,6 +2104,10 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeLowTrustUserMessage(
     builder2.message().loginName = action.suspiciousUserLogin;
     builder2.message().flags.set(MessageFlag::PubSub);
     builder2.message().flags.set(MessageFlag::LowTrustUsers);
+
+    // sender badges
+    TwitchMessageBuilder::appendTwitchBadges(&builder2, action.senderBadges, {},
+                                             chan);
 
     // sender username
     builder2
