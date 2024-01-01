@@ -11,6 +11,20 @@
 namespace chatterino {
 
 struct PubSubLowTrustUsersMessage {
+    struct Fragment {
+        QString text;
+        QString emoteID;
+
+        explicit Fragment(const QJsonObject &obj)
+            : text(obj.value("text").toString())
+            , emoteID(obj.value("emoticon")
+                          .toObject()
+                          .value("emoticonID")
+                          .toString())
+        {
+        }
+    };
+
     /**
      * The type of low trust message update
      */
@@ -92,6 +106,12 @@ struct PubSubLowTrustUsersMessage {
      * Only used for the UserMessage type.
      */
     QString text;
+
+    /**
+     * Pre-parsed components of the message.
+     * Only used for the UserMessage type.
+     */
+    std::vector<Fragment> fragments;
 
     /**
      * ID of the message.

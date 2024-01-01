@@ -2123,8 +2123,23 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeLowTrustUserMessage(
         ->setLink({Link::UserInfo, action.suspiciousUserLogin});
 
     // sender's message caught by AutoMod
-    builder2.emplace<TextElement>(action.text, MessageElementFlag::Text,
-                                  MessageColor::Text);
+    for (const auto &fragment : action.fragments)
+    {
+        if (fragment.emoteID.isEmpty())
+        {
+            builder2.emplace<TextElement>(
+                fragment.text, MessageElementFlag::Text, MessageColor::Text);
+        }
+        else
+        {
+            const auto emotePtr =
+                getIApp()->getEmotes()->getTwitchEmotes()->getOrCreateEmote(
+                    EmoteId{fragment.emoteID}, EmoteName{fragment.text});
+            builder2.emplace<EmoteElement>(
+                emotePtr, MessageElementFlag::TwitchEmote, MessageColor::Text);
+        }
+    }
+
     auto text =
         QString("%1: %2").arg(action.suspiciousUserDisplayName, action.text);
     builder2.message().messageText = text;

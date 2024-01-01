@@ -21,8 +21,14 @@ PubSubLowTrustUsersMessage::PubSubLowTrustUsersMessage(const QJsonObject &root)
     {
         this->msgID = data.value("message_id").toString();
         this->sentAt = data.value("sent_at").toString();
-        this->text =
-            data.value("message_content").toObject().value("text").toString();
+        const auto content = data.value("message_content").toObject();
+        this->text = content.value("text").toString();
+        std::vector<Fragment> parts;
+        for (const auto &part : content.value("fragments").toArray())
+        {
+            parts.emplace_back(part.toObject());
+        }
+        this->fragments = parts;
 
         // the rest of the data is within a nested object
         data = data.value("low_trust_user").toObject();
