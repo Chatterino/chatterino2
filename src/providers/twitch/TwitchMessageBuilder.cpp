@@ -2045,10 +2045,12 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeLowTrustUserMessage(
     if (action.treatment == PubSubLowTrustUsersMessage::Treatment::Restricted)
     {
         headerMessage = "Restricted";
+        builder2.message().flags.set(MessageFlag::RestrictedMessage);
     }
     else
     {
         headerMessage = "Monitored";
+        builder2.message().flags.set(MessageFlag::MonitoredMessage);
     }
 
     if (action.restrictionTypes.has(

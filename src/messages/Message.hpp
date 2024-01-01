@@ -53,6 +53,8 @@ enum class MessageFlag : int64_t {
     /// The message caught by AutoMod containing the user who sent the message & its contents
     AutoModOffendingMessage = (1LL << 31),
     LowTrustUsers = (1LL << 32),
+    RestrictedMessage = (1LL << 33),
+    MonitoredMessage = (1LL << 34),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 
