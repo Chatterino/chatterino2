@@ -87,12 +87,17 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
                                const QTime &time)
     : MessageBuilder()
 {
+    QString Text = text;
+    if (!Text.isEmpty() && Text.right(1) != "." && Text.right(1) != ")")
+    {
+        Text += ".";
+    }
     this->emplace<TimestampElement>(time);
 
     // check system message for links
     // (e.g. needed for sub ticket message in sub only mode)
     const QStringList textFragments =
-        text.split(QRegularExpression("\\s"), Qt::SkipEmptyParts);
+        Text.split(QRegularExpression("\\s"), Qt::SkipEmptyParts);
     for (const auto &word : textFragments)
     {
         LinkParser parser(word);
@@ -107,8 +112,8 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
     }
     this->message().flags.set(MessageFlag::System);
     this->message().flags.set(MessageFlag::DoNotTriggerNotification);
-    this->message().messageText = text;
-    this->message().searchText = text;
+    this->message().messageText = Text;
+    this->message().searchText = Text;
 }
 
 MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
