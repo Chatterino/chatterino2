@@ -44,6 +44,8 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
      * flags.whisper
      * flags.reply
      * flags.automod
+     * flags.restricted
+     * flags.monitored
      *
      * message.content
      * message.length
