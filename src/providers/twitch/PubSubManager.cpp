@@ -512,7 +512,7 @@ void PubSub::start()
 {
     this->work = std::make_shared<boost::asio::io_service::work>(
         this->websocketClient.get_io_service());
-    this->mainThread.reset(
+    this->thread.reset(
         new std::thread(std::bind(&PubSub::runThread, this)));
 }
 
@@ -529,9 +529,9 @@ void PubSub::stop()
 
     this->work.reset();
 
-    if (this->mainThread->joinable())
+    if (this->thread->joinable())
     {
-        this->mainThread->join();
+        this->thread->join();
     }
 
     assert(this->clients.empty());

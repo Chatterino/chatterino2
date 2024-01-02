@@ -67,7 +67,7 @@ class PubSub
     };
 
     WebsocketClient websocketClient;
-    std::unique_ptr<std::thread> mainThread;
+    std::unique_ptr<std::thread> thread;
 
     // Account credentials
     // Set from setAccount
