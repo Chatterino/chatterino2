@@ -288,7 +288,7 @@ void NetworkData::emitFinally()
 QLatin1String NetworkData::typeString() const
 {
     auto view = magic_enum::enum_name<NetworkRequestType>(this->requestType_);
-    return {view.data(), static_cast<qsizetype>(view.size())};
+    return QLatin1String{view.data(), static_cast<qsizetype>(view.size())};
 }
 
 }  // namespace chatterino
