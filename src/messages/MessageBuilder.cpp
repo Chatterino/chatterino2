@@ -83,30 +83,16 @@ MessageBuilder::MessageBuilder()
 {
 }
 
-QString MessageProcessor::processMessage(const QString &text)
-{
-    QString processedText = text;
-
-    if (!processedText.isEmpty() && processedText.right(1) != "." &&
-        processedText.right(1) != ")")
-    {
-        processedText += ".";
-    }
-
-    return processedText;
-}
-
 MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
                                const QTime &time)
     : MessageBuilder()
 {
-    QString Text = MessageProcessor::processMessage(text);
     this->emplace<TimestampElement>(time);
 
     // check system message for links
     // (e.g. needed for sub ticket message in sub only mode)
     const QStringList textFragments =
-        Text.split(QRegularExpression("\\s"), Qt::SkipEmptyParts);
+        text.split(QRegularExpression("\\s"), Qt::SkipEmptyParts);
     for (const auto &word : textFragments)
     {
         LinkParser parser(word);
@@ -121,8 +107,8 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
     }
     this->message().flags.set(MessageFlag::System);
     this->message().flags.set(MessageFlag::DoNotTriggerNotification);
-    this->message().messageText = Text;
-    this->message().searchText = Text;
+    this->message().messageText = text;
+    this->message().searchText = text;
 }
 
 MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
@@ -269,8 +255,7 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
             this->emplaceSystemTextAndUpdate("banned", text);
             if (action.reason.isEmpty())
             {
-                this->emplaceSystemTextAndUpdate(action.target.login + ".",
-                                                 text)
+                this->emplaceSystemTextAndUpdate(action.target.login, text)
                     ->setLink({Link::UserInfo, action.target.login});
             }
             else
@@ -330,7 +315,7 @@ MessageBuilder::MessageBuilder(const UnbanAction &action)
         ->setLink({Link::UserInfo, action.source.login});
     this->emplaceSystemTextAndUpdate(
         action.wasBan() ? "unbanned" : "untimedout", text);
-    this->emplaceSystemTextAndUpdate(action.target.login + ".", text)
+    this->emplaceSystemTextAndUpdate(action.target.login, text)
         ->setLink({Link::UserInfo, action.target.login});
 
     this->message().messageText = text;

@@ -304,9 +304,9 @@ void AbstractIrcServer::onReadConnected(IrcConnection *connection)
     }
 
     // connected/disconnected message
-    auto connectedMsg = makeSystemMessage("connected");
+    auto connectedMsg = makeSystemMessage("connected.");
     connectedMsg->flags.set(MessageFlag::ConnectedMessage);
-    auto reconnected = makeSystemMessage("reconnected");
+    auto reconnected = makeSystemMessage("reconnected.");
     reconnected->flags.set(MessageFlag::ConnectedMessage);
 
     for (std::weak_ptr<Channel> &weak : this->channels.values())

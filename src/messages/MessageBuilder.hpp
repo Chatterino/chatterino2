@@ -64,12 +64,6 @@ struct MessageParseArgs {
     QString channelPointRewardId = "";
 };
 
-class MessageProcessor
-{
-public:
-    static QString processMessage(const QString &text);
-};
-
 class MessageBuilder
 {
 public:

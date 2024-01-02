@@ -270,7 +270,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
                 {
                     if (message->nick() == this->data_->nick)
                     {
-                        shared->addMessage(makeSystemMessage("joined"));
+                        shared->addMessage(makeSystemMessage("joined."));
                     }
                     else
                     {
@@ -293,7 +293,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
                 {
                     if (message->nick() == this->data_->nick)
                     {
-                        shared->addMessage(makeSystemMessage("parted"));
+                        shared->addMessage(makeSystemMessage("parted."));
                     }
                     else
                     {
