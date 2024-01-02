@@ -5,6 +5,7 @@ add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
 # registers the native messageing host
 option(CHATTERINO_DEBUG_NATIVE_MESSAGES "Debug native messages" OFF)
+option(CHATTERINO_WARN_SLOW_HTTP "Warn about slow HTTP success handlers even in non-debug builds" OFF)
 
 set(SOURCE_FILES
         Application.cpp
@@ -920,6 +921,10 @@ target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     IRC_STATIC
     IRC_NAMESPACE=Communi
     )
+target_compile_definitions(${LIBRARY_PROJECT} PRIVATE
+    $<$<BOOL:${CHATTERINO_WARN_SLOW_HTTP}>:CHATTERINO_WARN_SLOW_HTTP>
+)
+
 if (USE_SYSTEM_QTKEYCHAIN)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
         CMAKE_BUILD

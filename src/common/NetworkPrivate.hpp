@@ -24,14 +24,6 @@ signals:
     void requestUrl();
 };
 
-class NetworkWorker : public QObject
-{
-    Q_OBJECT
-
-signals:
-    void doneUrl();
-};
-
 struct NetworkData {
     NetworkData();
     ~NetworkData();
@@ -42,7 +34,6 @@ struct NetworkData {
     bool cache_{};
     bool executeConcurrently_{};
 
-    NetworkReplyCreatedCallback onReplyCreated_;
     NetworkErrorCallback onError_;
     NetworkSuccessCallback onSuccess_;
     NetworkFinallyCallback finally_;
@@ -59,10 +50,15 @@ struct NetworkData {
     // execute is called
     bool hasTimeout_{};
     int timeoutMS_{};
-    QTimer *timer_ = nullptr;
     QObject *lifetimeManager_;
 
     QString getHash();
+
+    void emitError(NetworkResult &&result);
+    void emitSuccess(NetworkResult &&result);
+    void emitFinally();
+
+    QLatin1String typeString() const;
 
 private:
     QString hash_;

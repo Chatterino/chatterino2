@@ -67,6 +67,7 @@ jobs:
               -DUSE_PRECOMPILED_HEADERS=OFF \
               -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
               -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
+              -DCHATTERINO_WARN_SLOW_HTTP=On \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
 

@@ -3,15 +3,114 @@
 #include "common/NetworkManager.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/QLogging.hpp"
-#include "debug/AssertInGuiThread.hpp"
 #include "singletons/Paths.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
 
+#include <magic_enum/magic_enum.hpp>
 #include <QCryptographicHash>
 #include <QFile>
 #include <QNetworkReply>
 #include <QtConcurrent>
+
+#ifndef NDEBUG
+#    define CHATTERINO_WARN_SLOW_HTTP
+#endif
+
+#ifdef CHATTERINO_WARN_SLOW_HTTP
+#    include <QElapsedTimer>
+
+#    ifdef NDEBUG
+constexpr qsizetype SLOW_HTTP_THRESHOLD = 30;
+#    else
+constexpr qsizetype SLOW_HTTP_THRESHOLD = 90;
+#    endif
+#endif
+
+namespace {
+
+using namespace chatterino;
+
+/// Guard to call `deleteLater` on a QObject when destroyed.
+class AbandonObject
+{
+public:
+    AbandonObject(QObject *obj)
+        : obj_(obj)
+    {
+    }
+
+    ~AbandonObject()
+    {
+        if (this->obj_)
+        {
+            this->obj_->deleteLater();
+        }
+    }
+
+    AbandonObject(const AbandonObject &) = delete;
+    AbandonObject(AbandonObject &&) = delete;
+    AbandonObject &operator=(const AbandonObject &) = delete;
+    AbandonObject &operator=(AbandonObject &&) = delete;
+
+private:
+    QObject *obj_;
+};
+
+class NetworkTask : public QObject
+{
+    Q_OBJECT
+
+public:
+    NetworkTask(std::shared_ptr<NetworkData> &&data)
+        : data_(std::move(data))
+    {
+    }
+    ~NetworkTask() override
+    {
+        if (this->reply_)
+        {
+            this->reply_->deleteLater();
+        }
+    }
+    NetworkTask(const NetworkTask &) = delete;
+    NetworkTask(NetworkTask &&) = delete;
+    NetworkTask &operator=(const NetworkTask &) = delete;
+    NetworkTask &operator=(NetworkTask &&) = delete;
+
+    // NOLINTNEXTLINE(readability-redundant-access-specifiers)
+public slots:
+    void run();
+
+private:
+    QNetworkReply *createReply();
+
+    void logReply();
+    void writeToCache(const QByteArray &bytes) const;
+
+    std::shared_ptr<NetworkData> data_;
+    QNetworkReply *reply_{};  // parent: default (accessManager)
+    QTimer *timer_{};         // parent: this
+
+    // NOLINTNEXTLINE(readability-redundant-access-specifiers)
+private slots:
+    void timeout();
+    void finished();
+};
+
+void runCallback(bool concurrent, auto &&fn)
+{
+    if (concurrent)
+    {
+        std::ignore = QtConcurrent::run(std::forward<decltype(fn)>(fn));
+    }
+    else
+    {
+        runInGuiThread(std::forward<decltype(fn)>(fn));
+    }
+}
+
+}  // namespace
 
 namespace chatterino {
 
@@ -30,10 +129,6 @@ NetworkData::~NetworkData()
 
 QString NetworkData::getHash()
 {
-    static std::mutex mu;
-
-    std::lock_guard lock(mu);
-
     if (this->hash_.isEmpty())
     {
         QByteArray bytes;
@@ -54,272 +149,17 @@ QString NetworkData::getHash()
     return this->hash_;
 }
 
-void writeToCache(const std::shared_ptr<NetworkData> &data,
-                  const QByteArray &bytes)
-{
-    if (data->cache_)
-    {
-        QtConcurrent::run([data, bytes] {
-            QFile cachedFile(getPaths()->cacheDirectory() + "/" +
-                             data->getHash());
-
-            if (cachedFile.open(QIODevice::WriteOnly))
-            {
-                cachedFile.write(bytes);
-            }
-        });
-    }
-}
-
 void loadUncached(std::shared_ptr<NetworkData> &&data)
 {
     DebugCount::increase("http request started");
 
     NetworkRequester requester;
-    auto *worker = new NetworkWorker;
+    auto *worker = new NetworkTask(std::move(data));
 
     worker->moveToThread(&NetworkManager::workerThread);
 
-    auto onUrlRequested = [data, worker]() mutable {
-        if (data->hasTimeout_)
-        {
-            data->timer_ = new QTimer();
-            data->timer_->setSingleShot(true);
-            data->timer_->start(data->timeoutMS_);
-        }
-
-        auto *reply = [&]() -> QNetworkReply * {
-            switch (data->requestType_)
-            {
-                case NetworkRequestType::Get:
-                    return NetworkManager::accessManager.get(data->request_);
-
-                case NetworkRequestType::Put:
-                    return NetworkManager::accessManager.put(data->request_,
-                                                             data->payload_);
-
-                case NetworkRequestType::Delete:
-                    return NetworkManager::accessManager.deleteResource(
-                        data->request_);
-
-                case NetworkRequestType::Post:
-                    if (data->multiPartPayload_)
-                    {
-                        assert(data->payload_.isNull());
-
-                        return NetworkManager::accessManager.post(
-                            data->request_, data->multiPartPayload_);
-                    }
-                    else
-                    {
-                        return NetworkManager::accessManager.post(
-                            data->request_, data->payload_);
-                    }
-                case NetworkRequestType::Patch:
-                    if (data->multiPartPayload_)
-                    {
-                        assert(data->payload_.isNull());
-
-                        return NetworkManager::accessManager.sendCustomRequest(
-                            data->request_, "PATCH", data->multiPartPayload_);
-                    }
-                    else
-                    {
-                        return NetworkManager::accessManager.sendCustomRequest(
-                            data->request_, "PATCH", data->payload_);
-                    }
-            }
-            return nullptr;
-        }();
-
-        if (reply == nullptr)
-        {
-            qCDebug(chatterinoCommon) << "Unhandled request type";
-            return;
-        }
-
-        if (data->timer_ != nullptr && data->timer_->isActive())
-        {
-            QObject::connect(
-                data->timer_, &QTimer::timeout, worker, [reply, data]() {
-                    qCDebug(chatterinoCommon) << "Aborted!";
-                    reply->abort();
-                    qCDebug(chatterinoHTTP)
-                        << QString("%1 [timed out] %2")
-                               .arg(networkRequestTypes.at(
-                                        int(data->requestType_)),
-                                    data->request_.url().toString());
-
-                    if (data->onError_)
-                    {
-                        postToThread([data] {
-                            data->onError_(NetworkResult(
-                                NetworkResult::NetworkError::TimeoutError, {},
-                                {}));
-                        });
-                    }
-
-                    if (data->finally_)
-                    {
-                        postToThread([data] {
-                            data->finally_();
-                        });
-                    }
-                });
-        }
-
-        if (data->onReplyCreated_)
-        {
-            data->onReplyCreated_(reply);
-        }
-
-        auto handleReply = [data, reply]() mutable {
-            if (data->hasCaller_ && data->caller_.isNull())
-            {
-                return;
-            }
-
-            // TODO(pajlada): A reply was received, kill the timeout timer
-            if (reply->error() != QNetworkReply::NetworkError::NoError)
-            {
-                if (reply->error() ==
-                    QNetworkReply::NetworkError::OperationCanceledError)
-                {
-                    // Operation cancelled, most likely timed out
-                    qCDebug(chatterinoHTTP)
-                        << QString("%1 [cancelled] %2")
-                               .arg(networkRequestTypes.at(
-                                        int(data->requestType_)),
-                                    data->request_.url().toString());
-                    return;
-                }
-
-                if (data->onError_)
-                {
-                    auto status = reply->attribute(
-                        QNetworkRequest::HttpStatusCodeAttribute);
-                    if (data->requestType_ == NetworkRequestType::Get)
-                    {
-                        qCDebug(chatterinoHTTP)
-                            << QString("%1 %2 %3")
-                                   .arg(networkRequestTypes.at(
-                                            int(data->requestType_)),
-                                        QString::number(status.toInt()),
-                                        data->request_.url().toString());
-                    }
-                    else
-                    {
-                        qCDebug(chatterinoHTTP)
-                            << QString("%1 %2 %3 %4")
-                                   .arg(networkRequestTypes.at(
-                                            int(data->requestType_)),
-                                        QString::number(status.toInt()),
-                                        data->request_.url().toString(),
-                                        QString(data->payload_));
-                    }
-                    // TODO: Should this always be run on the GUI thread?
-                    postToThread([data, status, reply] {
-                        data->onError_(NetworkResult(reply->error(), status,
-                                                     reply->readAll()));
-                    });
-                }
-
-                if (data->finally_)
-                {
-                    postToThread([data] {
-                        data->finally_();
-                    });
-                }
-                return;
-            }
-
-            QByteArray bytes = reply->readAll();
-            writeToCache(data, bytes);
-
-            auto status =
-                reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
-
-            NetworkResult result(reply->error(), status, bytes);
-
-            DebugCount::increase("http request success");
-            // log("starting {}", data->request_.url().toString());
-            if (data->onSuccess_)
-            {
-                if (data->executeConcurrently_)
-                {
-                    QtConcurrent::run([onSuccess = std::move(data->onSuccess_),
-                                       result = std::move(result)] {
-                        onSuccess(result);
-                    });
-                }
-                else
-                {
-                    data->onSuccess_(result);
-                }
-            }
-            // log("finished {}", data->request_.url().toString());
-
-            reply->deleteLater();
-
-            if (data->requestType_ == NetworkRequestType::Get)
-            {
-                qCDebug(chatterinoHTTP)
-                    << QString("%1 %2 %3")
-                           .arg(networkRequestTypes.at(int(data->requestType_)),
-                                QString::number(status.toInt()),
-                                data->request_.url().toString());
-            }
-            else
-            {
-                qCDebug(chatterinoHTTP)
-                    << QString("%1 %3 %2 %4")
-                           .arg(networkRequestTypes.at(int(data->requestType_)),
-                                data->request_.url().toString(),
-                                QString::number(status.toInt()),
-                                QString(data->payload_));
-            }
-            if (data->finally_)
-            {
-                if (data->executeConcurrently_)
-                {
-                    QtConcurrent::run([finally = std::move(data->finally_)] {
-                        finally();
-                    });
-                }
-                else
-                {
-                    data->finally_();
-                }
-            }
-        };
-
-        if (data->timer_ != nullptr)
-        {
-            QObject::connect(reply, &QNetworkReply::finished, data->timer_,
-                             &QObject::deleteLater);
-        }
-
-        QObject::connect(
-            reply, &QNetworkReply::finished, worker,
-            [data, handleReply, worker]() mutable {
-                if (data->executeConcurrently_ || isGuiThread())
-                {
-                    handleReply();
-                    delete worker;
-                }
-                else
-                {
-                    postToThread(
-                        [worker, cb = std::move(handleReply)]() mutable {
-                            cb();
-                            delete worker;
-                        });
-                }
-            });
-    };
-
     QObject::connect(&requester, &NetworkRequester::requestUrl, worker,
-                     onUrlRequested);
+                     &NetworkTask::run);
 
     emit requester.requestUrl();
 }
@@ -338,69 +178,20 @@ void loadCached(std::shared_ptr<NetworkData> &&data)
 
     // XXX: check if bytes is empty?
     QByteArray bytes = cachedFile.readAll();
-    NetworkResult result(NetworkResult::NetworkError::NoError, QVariant(200),
-                         bytes);
 
-    qCDebug(chatterinoHTTP)
-        << QString("%1 [CACHED] 200 %2")
-               .arg(networkRequestTypes.at(int(data->requestType_)),
-                    data->request_.url().toString());
-    if (data->onSuccess_)
-    {
-        if (data->executeConcurrently_ || isGuiThread())
-        {
-            // XXX: If outcome is Failure, we should invalidate the cache file
-            // somehow/somewhere
-            /*auto outcome =*/
-            if (data->hasCaller_ && data->caller_.isNull())
-            {
-                return;
-            }
-            data->onSuccess_(result);
-        }
-        else
-        {
-            postToThread([data, result]() {
-                if (data->hasCaller_ && data->caller_.isNull())
-                {
-                    return;
-                }
+    qCDebug(chatterinoHTTP).noquote() << data->typeString() << "[CACHED] 200"
+                                      << data->request_.url().toString();
 
-                data->onSuccess_(result);
-            });
-        }
-    }
-
-    if (data->finally_)
-    {
-        if (data->executeConcurrently_ || isGuiThread())
-        {
-            if (data->hasCaller_ && data->caller_.isNull())
-            {
-                return;
-            }
-
-            data->finally_();
-        }
-        else
-        {
-            postToThread([data]() {
-                if (data->hasCaller_ && data->caller_.isNull())
-                {
-                    return;
-                }
-
-                data->finally_();
-            });
-        }
-    }
+    data->emitSuccess(
+        {NetworkResult::NetworkError::NoError, QVariant(200), bytes});
+    data->emitFinally();
 }
 
 void load(std::shared_ptr<NetworkData> &&data)
 {
     if (data->cache_)
     {
-        QtConcurrent::run([data = std::move(data)]() mutable {
+        std::ignore = QtConcurrent::run([data = std::move(data)]() mutable {
             loadCached(std::move(data));
         });
     }
@@ -410,4 +201,258 @@ void load(std::shared_ptr<NetworkData> &&data)
     }
 }
 
+void NetworkData::emitSuccess(NetworkResult &&result)
+{
+    if (!this->onSuccess_)
+    {
+        return;
+    }
+
+#ifdef CHATTERINO_WARN_SLOW_HTTP
+    if (!this->executeConcurrently_)
+    {
+        runCallback(
+            false, [cb = std::move(this->onSuccess_),
+                    result = std::move(result), url = this->request_.url(),
+                    hasCaller = this->hasCaller_, caller = this->caller_]() {
+                if (hasCaller && caller.isNull())
+                {
+                    return;
+                }
+
+                QElapsedTimer timer;
+                timer.start();
+                cb(result);
+                if (timer.elapsed() > SLOW_HTTP_THRESHOLD)
+                {
+                    qCWarning(chatterinoHTTP)
+                        << "Slow HTTP success handler for" << url.toString()
+                        << timer.elapsed()
+                        << "ms (threshold:" << SLOW_HTTP_THRESHOLD << "ms)";
+                }
+            });
+        return;
+    }
+#endif
+
+    runCallback(this->executeConcurrently_,
+                [cb = std::move(this->onSuccess_), result = std::move(result),
+                 hasCaller = this->hasCaller_, caller = this->caller_]() {
+                    if (hasCaller && caller.isNull())
+                    {
+                        return;
+                    }
+
+                    cb(result);
+                });
+}
+
+void NetworkData::emitError(NetworkResult &&result)
+{
+    if (!this->onError_)
+    {
+        return;
+    }
+
+    runCallback(this->executeConcurrently_,
+                [cb = std::move(this->onError_), result = std::move(result),
+                 hasCaller = this->hasCaller_, caller = this->caller_]() {
+                    if (hasCaller && caller.isNull())
+                    {
+                        return;
+                    }
+
+                    cb(result);
+                });
+}
+
+void NetworkData::emitFinally()
+{
+    if (!this->finally_)
+    {
+        return;
+    }
+
+    runCallback(this->executeConcurrently_,
+                [cb = std::move(this->finally_), hasCaller = this->hasCaller_,
+                 caller = this->caller_]() {
+                    if (hasCaller && caller.isNull())
+                    {
+                        return;
+                    }
+
+                    cb();
+                });
+}
+
+QLatin1String NetworkData::typeString() const
+{
+    auto view = magic_enum::enum_name<NetworkRequestType>(this->requestType_);
+    return {view.data(), static_cast<qsizetype>(view.size())};
+}
+
 }  // namespace chatterino
+
+namespace {
+
+void NetworkTask::run()
+{
+    if (this->data_->hasTimeout_)
+    {
+        this->timer_ = new QTimer(this);
+        this->timer_->setSingleShot(true);
+        this->timer_->start(this->data_->timeoutMS_);
+        QObject::connect(this->timer_, &QTimer::timeout, this,
+                         &NetworkTask::timeout);
+    }
+
+    this->reply_ = this->createReply();
+    if (!this->reply_)
+    {
+        this->deleteLater();
+        return;
+    }
+    QObject::connect(this->reply_, &QNetworkReply::finished, this,
+                     &NetworkTask::finished);
+}
+
+QNetworkReply *NetworkTask::createReply()
+{
+    const auto &data = this->data_;
+    const auto &request = this->data_->request_;
+    auto &accessManager = NetworkManager::accessManager;
+    switch (this->data_->requestType_)
+    {
+        case NetworkRequestType::Get:
+            return accessManager.get(request);
+
+        case NetworkRequestType::Put:
+            return accessManager.put(request, data->payload_);
+
+        case NetworkRequestType::Delete:
+            return accessManager.deleteResource(data->request_);
+
+        case NetworkRequestType::Post:
+            if (data->multiPartPayload_)
+            {
+                assert(data->payload_.isNull());
+
+                return accessManager.post(request, data->multiPartPayload_);
+            }
+            else
+            {
+                return accessManager.post(request, data->payload_);
+            }
+        case NetworkRequestType::Patch:
+            if (data->multiPartPayload_)
+            {
+                assert(data->payload_.isNull());
+
+                return accessManager.sendCustomRequest(request, "PATCH",
+                                                       data->multiPartPayload_);
+            }
+            else
+            {
+                return NetworkManager::accessManager.sendCustomRequest(
+                    request, "PATCH", data->payload_);
+            }
+    }
+    return nullptr;
+}
+
+void NetworkTask::timeout()
+{
+    AbandonObject guard(this);
+
+    // prevent abort() from calling finished()
+    QObject::disconnect(this->reply_, &QNetworkReply::finished, this,
+                        &NetworkTask::finished);
+    this->reply_->abort();
+
+    qCDebug(chatterinoHTTP).noquote()
+        << this->data_->typeString() << "[timed out]"
+        << this->data_->request_.url().toString();
+
+    this->data_->emitError({NetworkResult::NetworkError::TimeoutError, {}, {}});
+    this->data_->emitFinally();
+}
+
+void NetworkTask::finished()
+{
+    AbandonObject guard(this);
+
+    if (this->timer_)
+    {
+        this->timer_->stop();
+    }
+
+    auto *reply = this->reply_;
+    auto status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
+    if (reply->error() != QNetworkReply::NetworkError::NoError)
+    {
+        if (reply->error() ==
+            QNetworkReply::NetworkError::OperationCanceledError)
+        {
+            // Operation cancelled, most likely timed out
+            qCDebug(chatterinoHTTP).noquote()
+                << this->data_->typeString() << "[cancelled]"
+                << this->data_->request_.url().toString();
+            return;
+        }
+
+        this->logReply();
+        this->data_->emitError({reply->error(), status, reply->readAll()});
+        this->data_->emitFinally();
+
+        return;
+    }
+
+    QByteArray bytes = reply->readAll();
+
+    if (this->data_->cache_)
+    {
+        this->writeToCache(bytes);
+    }
+
+    DebugCount::increase("http request success");
+    this->logReply();
+    this->data_->emitSuccess({reply->error(), status, bytes});
+    this->data_->emitFinally();
+}
+
+void NetworkTask::logReply()
+{
+    auto status =
+        this->reply_->attribute(QNetworkRequest::HttpStatusCodeAttribute)
+            .toInt();
+    if (this->data_->requestType_ == NetworkRequestType::Get)
+    {
+        qCDebug(chatterinoHTTP).noquote()
+            << this->data_->typeString() << status
+            << this->data_->request_.url().toString();
+    }
+    else
+    {
+        qCDebug(chatterinoHTTP).noquote()
+            << this->data_->typeString()
+            << this->data_->request_.url().toString() << status
+            << QString(this->data_->payload_);
+    }
+}
+
+void NetworkTask::writeToCache(const QByteArray &bytes) const
+{
+    std::ignore = QtConcurrent::run([data = this->data_, bytes] {
+        QFile cachedFile(getPaths()->cacheDirectory() + "/" + data->getHash());
+
+        if (cachedFile.open(QIODevice::WriteOnly))
+        {
+            cachedFile.write(bytes);
+        }
+    });
+}
+
+}  // namespace
+
+#include "NetworkPrivate.moc"

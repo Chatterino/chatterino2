@@ -43,7 +43,6 @@ public:
 
     NetworkRequest type(NetworkRequestType newRequestType) &&;
 
-    NetworkRequest onReplyCreated(NetworkReplyCreatedCallback cb) &&;
     NetworkRequest onError(NetworkErrorCallback cb) &&;
     NetworkRequest onSuccess(NetworkSuccessCallback cb) &&;
     NetworkRequest finally(NetworkFinallyCallback cb) &&;
