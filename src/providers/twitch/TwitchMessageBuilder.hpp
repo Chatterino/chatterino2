@@ -96,7 +96,7 @@ public:
 
     static std::pair<MessagePtr, MessagePtr> makeLowTrustUserMessage(
         const PubSubLowTrustUsersMessage &action, const QString &channelName,
-        const TwitchChannel *chan);
+        const TwitchChannel *twitchChannel);
     static MessagePtr makeLowTrustUpdateMessage(
         const PubSubLowTrustUsersMessage &action);
 
@@ -120,8 +120,6 @@ private:
 
     void runIgnoreReplaces(std::vector<TwitchEmoteOccurrence> &twitchEmotes);
 
-    static std::optional<EmotePtr> getTwitchBadge(const Badge &badge,
-                                                  const TwitchChannel *chan);
     Outcome tryAppendEmote(const EmoteName &name) override;
 
     void addWords(const QStringList &words,
@@ -130,10 +128,6 @@ private:
     void addTextOrEmoji(const QString &value) override;
 
     void appendTwitchBadges();
-    static void appendTwitchBadges(
-        MessageBuilder *builder, const std::vector<Badge> &badges,
-        const std::unordered_map<QString, QString> &badgeInfos,
-        const TwitchChannel *chan);
     void appendChatterinoBadges();
     void appendFfzBadges();
     void appendSeventvBadges();

@@ -507,26 +507,26 @@ void Application::initPubSub()
                     return;
                 }
 
-                auto channel =
+                auto chan =
                     this->twitch->getChannelOrEmptyByID(action.channelID);
 
-                if (channel->isEmpty())
+                if (chan->isEmpty())
                 {
                     return;
                 }
 
-                auto *chan = dynamic_cast<TwitchChannel *>(channel.get());
-                if (!chan)
+                auto *twitchChannel = dynamic_cast<TwitchChannel *>(chan.get());
+                if (!twitchChannel)
                 {
                     return;
                 }
 
-                postToThread([chan, action] {
+                postToThread([twitchChannel, action] {
                     const auto p =
                         TwitchMessageBuilder::makeLowTrustUserMessage(
-                            action, chan->getName(), chan);
-                    chan->addMessage(p.first);
-                    chan->addMessage(p.second);
+                            action, twitchChannel->getName(), twitchChannel);
+                    twitchChannel->addMessage(p.first);
+                    twitchChannel->addMessage(p.second);
                 });
             });
 
