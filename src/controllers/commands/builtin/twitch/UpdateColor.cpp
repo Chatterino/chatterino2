@@ -31,7 +31,7 @@ QString updateUserColor(const CommandContext &ctx)
     if (user->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "You must be logged in to use the /color command!"));
+            "You must be logged in to use the /color command."));
         return "";
     }
 
