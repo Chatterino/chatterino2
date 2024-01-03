@@ -255,7 +255,8 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
             this->emplaceSystemTextAndUpdate("banned", text);
             if (action.reason.isEmpty())
             {
-                this->emplaceSystemTextAndUpdate(action.target.login, text)
+                this->emplaceSystemTextAndUpdate(action.target.login + ".",
+                                                 text)
                     ->setLink({Link::UserInfo, action.target.login});
             }
             else
