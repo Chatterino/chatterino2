@@ -23,7 +23,7 @@ QString addVIP(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /vip command only works in Twitch channels"));
+            "The /vip command only works in Twitch channels."));
         return "";
     }
     if (ctx.words.size() < 2)

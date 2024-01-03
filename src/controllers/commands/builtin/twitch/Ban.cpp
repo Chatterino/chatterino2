@@ -133,7 +133,7 @@ QString sendBan(const CommandContext &ctx)
     if (twitchChannel == nullptr)
     {
         channel->addMessage(makeSystemMessage(
-            QString("The /ban command only works in Twitch channels")));
+            QString("The /ban command only works in Twitch channels.")));
         return "";
     }
 
@@ -196,7 +196,7 @@ QString sendBanById(const CommandContext &ctx)
     if (twitchChannel == nullptr)
     {
         channel->addMessage(makeSystemMessage(
-            QString("The /banid command only works in Twitch channels")));
+            QString("The /banid command only works in Twitch channels.")));
         return "";
     }
 
@@ -241,7 +241,7 @@ QString sendTimeout(const CommandContext &ctx)
     if (twitchChannel == nullptr)
     {
         channel->addMessage(makeSystemMessage(
-            QString("The /timeout command only works in Twitch channels")));
+            QString("The /timeout command only works in Twitch channels.")));
         return "";
     }
     const auto *usageStr =
