@@ -29,7 +29,7 @@ QString toggleShieldMode(const CommandContext &ctx, bool isActivating)
     if (user->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(
-            QStringLiteral("You must be logged in to use the %1 command!")
+            QStringLiteral("You must be logged in to use the %1 command.")
                 .arg(command)));
         return {};
     }

@@ -27,7 +27,7 @@ QString deleteMessages(TwitchChannel *twitchChannel, const QString &messageID)
     if (user->isAnon())
     {
         twitchChannel->addMessage(makeSystemMessage(
-            QString("You must be logged in to use the %1 command!")
+            QString("You must be logged in to use the %1 command.")
                 .arg(commandName)));
         return "";
     }

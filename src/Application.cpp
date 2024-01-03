@@ -397,10 +397,10 @@ void Application::initPubSub()
 
                 QString text;
 
-                text = QString("%1 %2 %3")
+                text = QString("%1 %2 %3.")
                            .arg(action.source.login,
                                 (action.modded ? "modded" : "unmodded"),
-                                action.target.login + ".");
+                                action.target.login);
 
                 auto msg = makeSystemMessage(text);
                 postToThread([chan, msg] {

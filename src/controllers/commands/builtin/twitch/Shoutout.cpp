@@ -28,7 +28,7 @@ QString sendShoutout(const CommandContext &ctx)
     if (currentUser->isAnon())
     {
         channel->addMessage(
-            makeSystemMessage("You must be logged in to send shoutout!"));
+            makeSystemMessage("You must be logged in to send shoutout."));
         return "";
     }
 
