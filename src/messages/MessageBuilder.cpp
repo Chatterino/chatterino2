@@ -317,7 +317,7 @@ MessageBuilder::MessageBuilder(const UnbanAction &action)
     this->emplaceSystemTextAndUpdate(
         action.wasBan() ? "unbanned" : "untimedout", text);
     this->emplaceSystemTextAndUpdate(action.target.login + ".", text)
-        ->setLink({Link::UserInfo, action.source.login});
+        ->setLink({Link::UserInfo, action.target.login});
 
     this->message().messageText = text;
     this->message().searchText = text;
