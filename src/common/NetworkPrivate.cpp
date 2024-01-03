@@ -4,58 +4,26 @@
 #include "common/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "singletons/Paths.hpp"
+#include "util/AbandonObject.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
 
 #include <magic_enum/magic_enum.hpp>
 #include <QCryptographicHash>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QNetworkReply>
 #include <QtConcurrent>
 
-#ifndef NDEBUG
-#    define CHATTERINO_WARN_SLOW_HTTP
-#endif
-
-#ifdef CHATTERINO_WARN_SLOW_HTTP
-#    include <QElapsedTimer>
-
-#    ifdef NDEBUG
+#ifdef NDEBUG
 constexpr qsizetype SLOW_HTTP_THRESHOLD = 30;
-#    else
+#else
 constexpr qsizetype SLOW_HTTP_THRESHOLD = 90;
-#    endif
 #endif
 
 namespace {
 
 using namespace chatterino;
-
-/// Guard to call `deleteLater` on a QObject when destroyed.
-class AbandonObject
-{
-public:
-    AbandonObject(QObject *obj)
-        : obj_(obj)
-    {
-    }
-
-    ~AbandonObject()
-    {
-        if (this->obj_)
-        {
-            this->obj_->deleteLater();
-        }
-    }
-
-    AbandonObject(const AbandonObject &) = delete;
-    AbandonObject(AbandonObject &&) = delete;
-    AbandonObject &operator=(const AbandonObject &) = delete;
-    AbandonObject &operator=(AbandonObject &&) = delete;
-
-private:
-    QObject *obj_;
-};
 
 class NetworkTask : public QObject
 {
@@ -164,14 +132,12 @@ void loadUncached(std::shared_ptr<NetworkData> &&data)
     emit requester.requestUrl();
 }
 
-// First tried to load cached, then uncached.
 void loadCached(std::shared_ptr<NetworkData> &&data)
 {
     QFile cachedFile(getPaths()->cacheDirectory() + "/" + data->getHash());
 
     if (!cachedFile.exists() || !cachedFile.open(QIODevice::ReadOnly))
     {
-        // File didn't exist OR File could not be opened
         loadUncached(std::move(data));
         return;
     }
@@ -208,42 +174,25 @@ void NetworkData::emitSuccess(NetworkResult &&result)
         return;
     }
 
-#ifdef CHATTERINO_WARN_SLOW_HTTP
-    if (!this->executeConcurrently_)
-    {
-        runCallback(
-            false, [cb = std::move(this->onSuccess_),
-                    result = std::move(result), url = this->request_.url(),
-                    hasCaller = this->hasCaller_, caller = this->caller_]() {
-                if (hasCaller && caller.isNull())
-                {
-                    return;
-                }
-
-                QElapsedTimer timer;
-                timer.start();
-                cb(result);
-                if (timer.elapsed() > SLOW_HTTP_THRESHOLD)
-                {
-                    qCWarning(chatterinoHTTP)
-                        << "Slow HTTP success handler for" << url.toString()
-                        << timer.elapsed()
-                        << "ms (threshold:" << SLOW_HTTP_THRESHOLD << "ms)";
-                }
-            });
-        return;
-    }
-#endif
-
     runCallback(this->executeConcurrently_,
                 [cb = std::move(this->onSuccess_), result = std::move(result),
-                 hasCaller = this->hasCaller_, caller = this->caller_]() {
+                 url = this->request_.url(), hasCaller = this->hasCaller_,
+                 caller = this->caller_]() {
                     if (hasCaller && caller.isNull())
                     {
                         return;
                     }
 
+                    QElapsedTimer timer;
+                    timer.start();
                     cb(result);
+                    if (timer.elapsed() > SLOW_HTTP_THRESHOLD)
+                    {
+                        qCWarning(chatterinoHTTP)
+                            << "Slow HTTP success handler for" << url.toString()
+                            << timer.elapsed()
+                            << "ms (threshold:" << SLOW_HTTP_THRESHOLD << "ms)";
+                    }
                 });
 }
 
@@ -390,18 +339,17 @@ void NetworkTask::finished()
     auto *reply = this->reply_;
     auto status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
 
-    if (reply->error() != QNetworkReply::NetworkError::NoError)
+    if (reply->error() == QNetworkReply::OperationCanceledError)
     {
-        if (reply->error() ==
-            QNetworkReply::NetworkError::OperationCanceledError)
-        {
-            // Operation cancelled, most likely timed out
-            qCDebug(chatterinoHTTP).noquote()
-                << this->data_->typeString() << "[cancelled]"
-                << this->data_->request_.url().toString();
-            return;
-        }
+        // Operation cancelled, most likely timed out
+        qCDebug(chatterinoHTTP).noquote()
+            << this->data_->typeString() << "[cancelled]"
+            << this->data_->request_.url().toString();
+        return;
+    }
 
+    if (reply->error() != QNetworkReply::NoError)
+    {
         this->logReply();
         this->data_->emitError({reply->error(), status, reply->readAll()});
         this->data_->emitFinally();
