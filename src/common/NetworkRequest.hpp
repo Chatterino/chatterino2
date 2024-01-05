@@ -12,7 +12,7 @@ class QJsonDocument;
 
 namespace chatterino {
 
-struct NetworkData;
+class NetworkData;
 
 class NetworkRequest final
 {
