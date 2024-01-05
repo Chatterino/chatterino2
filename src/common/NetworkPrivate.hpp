@@ -25,7 +25,9 @@ signals:
     void requestUrl();
 };
 
-struct NetworkData {
+class NetworkData
+{
+public:
     NetworkData();
     ~NetworkData();
     NetworkData(const NetworkData &) = delete;
