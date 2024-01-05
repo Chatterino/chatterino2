@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/Common.hpp"
 #include "common/NetworkCommon.hpp"
 
 #include <QHttpMultiPart>
@@ -9,6 +10,7 @@
 
 #include <functional>
 #include <memory>
+
 
 class QNetworkReply;
 
@@ -27,6 +29,10 @@ signals:
 struct NetworkData {
     NetworkData();
     ~NetworkData();
+    NetworkData(const NetworkData &) = delete;
+    NetworkData(NetworkData &&) = delete;
+    NetworkData &operator=(const NetworkData &) = delete;
+    NetworkData &operator=(NetworkData &&) = delete;
 
     QNetworkRequest request_;
     bool hasCaller_{};
@@ -49,7 +55,6 @@ struct NetworkData {
     // execute is called
     bool hasTimeout_{};
     int timeoutMS_{};
-    QObject *lifetimeManager_;
 
     QString getHash();
 
