@@ -169,7 +169,7 @@ void NetworkRequest::execute()
     }
 
     // Can not have a caller and be concurrent at the same time.
-    assert(!(this->data->caller_ && this->data->executeConcurrently_));
+    assert(!(this->data->caller && this->data->executeConcurrently));
 
     load(std::move(this->data));
 }
