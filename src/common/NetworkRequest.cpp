@@ -123,8 +123,7 @@ NetworkRequest NetworkRequest::concurrent() &&
 
 NetworkRequest NetworkRequest::multiPart(QHttpMultiPart *payload) &&
 {
-    payload->setParent(this->data->lifetimeManager_);
-    this->data->multiPartPayload_ = payload;
+    this->data->multiPartPayload_ = {payload, {}};
     return std::move(*this);
 }
 

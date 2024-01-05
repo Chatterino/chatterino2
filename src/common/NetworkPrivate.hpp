@@ -41,8 +41,7 @@ struct NetworkData {
     NetworkRequestType requestType_ = NetworkRequestType::Get;
 
     QByteArray payload_;
-    // lifetime secured by lifetimeManager_
-    QHttpMultiPart *multiPartPayload_{};
+    std::unique_ptr<QHttpMultiPart, DeleteLater> multiPartPayload_;
 
     // Timer that tracks the timeout
     // By default, there's no explicit timeout for the request

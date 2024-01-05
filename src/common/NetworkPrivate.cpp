@@ -83,15 +83,12 @@ void runCallback(bool concurrent, auto &&fn)
 namespace chatterino {
 
 NetworkData::NetworkData()
-    : lifetimeManager_(new QObject)
 {
     DebugCount::increase("NetworkData");
 }
 
 NetworkData::~NetworkData()
 {
-    this->lifetimeManager_->deleteLater();
-
     DebugCount::decrease("NetworkData");
 }
 
@@ -287,7 +284,7 @@ QNetworkReply *NetworkTask::createReply()
             {
                 assert(data->payload_.isNull());
 
-                return accessManager.post(request, data->multiPartPayload_);
+                return accessManager.post(request, data->multiPartPayload_.get());
             }
             else
             {
@@ -299,7 +296,7 @@ QNetworkReply *NetworkTask::createReply()
                 assert(data->payload_.isNull());
 
                 return accessManager.sendCustomRequest(request, "PATCH",
-                                                       data->multiPartPayload_);
+                                                       data->multiPartPayload_.get());
             }
             else
             {
