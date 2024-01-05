@@ -359,6 +359,11 @@ void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
     }
 }
 
+HighlightState NotebookTab::highlightState() const
+{
+    return this->highlightState_;
+}
+
 void NotebookTab::setHighlightsEnabled(const bool &newVal)
 {
     this->highlightNewMessagesAction_->setChecked(newVal);
@@ -781,6 +786,11 @@ void NotebookTab::wheelEvent(QWheelEvent *event)
     {
         selectTab(verticalDelta);
     }
+}
+
+void NotebookTab::update()
+{
+    Button::update();
 }
 
 QRect NotebookTab::getXRect()
