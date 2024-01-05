@@ -346,17 +346,25 @@ bool NotebookTab::isLive() const
 
 void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
 {
-    if (this->isSelected() || (!this->highlightEnabled_ &&
-                               newHighlightStyle == HighlightState::NewMessage))
+    if (this->isSelected())
     {
         return;
     }
-    if (this->highlightState_ != HighlightState::Highlighted)
-    {
-        this->highlightState_ = newHighlightStyle;
 
-        this->update();
+    if (!this->highlightEnabled_ &&
+        newHighlightStyle == HighlightState::NewMessage)
+    {
+        return;
     }
+
+    if (this->highlightState_ == newHighlightStyle ||
+        this->highlightState_ == HighlightState::Highlighted)
+    {
+        return;
+    }
+
+    this->highlightState_ = newHighlightStyle;
+    this->update();
 }
 
 void NotebookTab::setHighlightsEnabled(const bool &newVal)
