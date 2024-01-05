@@ -8,7 +8,6 @@
 #include <QPointer>
 #include <QTimer>
 
-#include <functional>
 #include <memory>
 
 class QNetworkReply;
