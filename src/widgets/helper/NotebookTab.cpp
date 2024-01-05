@@ -93,8 +93,8 @@ NotebookTab::NotebookTab(Notebook *notebook)
         [this]() {
             this->notebook_->removePage(this->page);
         },
-        getApp()->hotkeys->getDisplaySequence(HotkeyCategory::Window,
-                                              "removeTab"));
+        getIApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Window,
+                                                    "removeTab"));
 
     this->menu_.addAction(
         "Popup Tab",
@@ -104,8 +104,8 @@ NotebookTab::NotebookTab(Notebook *notebook)
                 container->popup();
             }
         },
-        getApp()->hotkeys->getDisplaySequence(HotkeyCategory::Window, "popup",
-                                              {{"window"}}));
+        getIApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Window,
+                                                    "popup", {{"window"}}));
 
     highlightNewMessagesAction_ =
         new QAction("Mark Tab as Unread on New Messages", &this->menu_);
@@ -196,7 +196,7 @@ int NotebookTab::normalTabWidth()
     float scale = this->scale();
     int width;
 
-    QFontMetrics metrics = getApp()->fonts->getFontMetrics(
+    auto metrics = getIApp()->getFonts()->getFontMetrics(
         FontStyle::UiTabs, float(qreal(this->scale()) * deviceDpi(this)));
 
     if (this->hasXButton())
