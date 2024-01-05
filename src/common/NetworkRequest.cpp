@@ -16,8 +16,8 @@ NetworkRequest::NetworkRequest(const std::string &url,
                                NetworkRequestType requestType)
     : data(new NetworkData)
 {
-    this->data->request_.setUrl(QUrl(QString::fromStdString(url)));
-    this->data->requestType_ = requestType;
+    this->data->request.setUrl(QUrl(QString::fromStdString(url)));
+    this->data->requestType = requestType;
 
     this->initializeDefaultValues();
 }
@@ -25,8 +25,8 @@ NetworkRequest::NetworkRequest(const std::string &url,
 NetworkRequest::NetworkRequest(const QUrl &url, NetworkRequestType requestType)
     : data(new NetworkData)
 {
-    this->data->request_.setUrl(url);
-    this->data->requestType_ = requestType;
+    this->data->request.setUrl(url);
+    this->data->requestType = requestType;
 
     this->initializeDefaultValues();
 }
@@ -35,7 +35,7 @@ NetworkRequest::~NetworkRequest() = default;
 
 NetworkRequest NetworkRequest::type(NetworkRequestType newRequestType) &&
 {
-    this->data->requestType_ = newRequestType;
+    this->data->requestType = newRequestType;
     return std::move(*this);
 }
 
@@ -46,55 +46,55 @@ NetworkRequest NetworkRequest::caller(const QObject *caller) &&
         // Caller must be in gui thread
         assert(caller->thread() == qApp->thread());
 
-        this->data->caller_ = const_cast<QObject *>(caller);
-        this->data->hasCaller_ = true;
+        this->data->caller = const_cast<QObject *>(caller);
+        this->data->hasCaller = true;
     }
     return std::move(*this);
 }
 
 NetworkRequest NetworkRequest::onError(NetworkErrorCallback cb) &&
 {
-    this->data->onError_ = std::move(cb);
+    this->data->onError = std::move(cb);
     return std::move(*this);
 }
 
 NetworkRequest NetworkRequest::onSuccess(NetworkSuccessCallback cb) &&
 {
-    this->data->onSuccess_ = std::move(cb);
+    this->data->onSuccess = std::move(cb);
     return std::move(*this);
 }
 
 NetworkRequest NetworkRequest::finally(NetworkFinallyCallback cb) &&
 {
-    this->data->finally_ = std::move(cb);
+    this->data->finally = std::move(cb);
     return std::move(*this);
 }
 
 NetworkRequest NetworkRequest::header(const char *headerName,
                                       const char *value) &&
 {
-    this->data->request_.setRawHeader(headerName, value);
+    this->data->request.setRawHeader(headerName, value);
     return std::move(*this);
 }
 
 NetworkRequest NetworkRequest::header(const char *headerName,
                                       const QByteArray &value) &&
 {
-    this->data->request_.setRawHeader(headerName, value);
+    this->data->request.setRawHeader(headerName, value);
     return std::move(*this);
 }
 
 NetworkRequest NetworkRequest::header(const char *headerName,
                                       const QString &value) &&
 {
-    this->data->request_.setRawHeader(headerName, value.toUtf8());
+    this->data->request.setRawHeader(headerName, value.toUtf8());
     return std::move(*this);
 }
 
 NetworkRequest NetworkRequest::header(QNetworkRequest::KnownHeaders header,
                                       const QVariant &value) &&
 {
-    this->data->request_.setHeader(header, value);
+    this->data->request.setHeader(header, value);
     return std::move(*this);
 }
 
@@ -103,27 +103,27 @@ NetworkRequest NetworkRequest::headerList(
 {
     for (const auto &[headerName, headerValue] : headers)
     {
-        this->data->request_.setRawHeader(headerName, headerValue);
+        this->data->request.setRawHeader(headerName, headerValue);
     }
     return std::move(*this);
 }
 
 NetworkRequest NetworkRequest::timeout(int ms) &&
 {
-    this->data->hasTimeout_ = true;
-    this->data->timeoutMS_ = ms;
+    this->data->hasTimeout = true;
+    this->data->timeoutMs = ms;
     return std::move(*this);
 }
 
 NetworkRequest NetworkRequest::concurrent() &&
 {
-    this->data->executeConcurrently_ = true;
+    this->data->executeConcurrently = true;
     return std::move(*this);
 }
 
 NetworkRequest NetworkRequest::multiPart(QHttpMultiPart *payload) &&
 {
-    this->data->multiPartPayload_ = {payload, {}};
+    this->data->multiPartPayload = {payload, {}};
     return std::move(*this);
 }
 
@@ -131,13 +131,13 @@ NetworkRequest NetworkRequest::followRedirects(bool on) &&
 {
     if (on)
     {
-        this->data->request_.setAttribute(
+        this->data->request.setAttribute(
             QNetworkRequest::RedirectPolicyAttribute,
             QNetworkRequest::NoLessSafeRedirectPolicy);
     }
     else
     {
-        this->data->request_.setAttribute(
+        this->data->request.setAttribute(
             QNetworkRequest::RedirectPolicyAttribute,
             QNetworkRequest::ManualRedirectPolicy);
     }
@@ -147,13 +147,13 @@ NetworkRequest NetworkRequest::followRedirects(bool on) &&
 
 NetworkRequest NetworkRequest::payload(const QByteArray &payload) &&
 {
-    this->data->payload_ = payload;
+    this->data->payload = payload;
     return std::move(*this);
 }
 
 NetworkRequest NetworkRequest::cache() &&
 {
-    this->data->cache_ = true;
+    this->data->cache = true;
     return std::move(*this);
 }
 
@@ -162,11 +162,10 @@ void NetworkRequest::execute()
     this->executed_ = true;
 
     // Only allow caching for GET request
-    if (this->data->cache_ &&
-        this->data->requestType_ != NetworkRequestType::Get)
+    if (this->data->cache && this->data->requestType != NetworkRequestType::Get)
     {
         qCDebug(chatterinoCommon) << "Can only cache GET requests!";
-        this->data->cache_ = false;
+        this->data->cache = false;
     }
 
     // Can not have a caller and be concurrent at the same time.
@@ -182,7 +181,7 @@ void NetworkRequest::initializeDefaultValues()
                                     Version::instance().commitHash())
                                .toUtf8();
 
-    this->data->request_.setRawHeader("User-Agent", userAgent);
+    this->data->request.setRawHeader("User-Agent", userAgent);
 }
 
 NetworkRequest NetworkRequest::json(const QJsonArray &root) &&

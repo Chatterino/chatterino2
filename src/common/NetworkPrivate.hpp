@@ -11,7 +11,6 @@
 #include <functional>
 #include <memory>
 
-
 class QNetworkReply;
 
 namespace chatterino {
@@ -34,27 +33,27 @@ struct NetworkData {
     NetworkData &operator=(const NetworkData &) = delete;
     NetworkData &operator=(NetworkData &&) = delete;
 
-    QNetworkRequest request_;
-    bool hasCaller_{};
-    QPointer<QObject> caller_;
-    bool cache_{};
-    bool executeConcurrently_{};
+    QNetworkRequest request;
+    bool hasCaller{};
+    QPointer<QObject> caller;
+    bool cache{};
+    bool executeConcurrently{};
 
-    NetworkErrorCallback onError_;
-    NetworkSuccessCallback onSuccess_;
-    NetworkFinallyCallback finally_;
+    NetworkErrorCallback onError;
+    NetworkSuccessCallback onSuccess;
+    NetworkFinallyCallback finally;
 
-    NetworkRequestType requestType_ = NetworkRequestType::Get;
+    NetworkRequestType requestType = NetworkRequestType::Get;
 
-    QByteArray payload_;
-    std::unique_ptr<QHttpMultiPart, DeleteLater> multiPartPayload_;
+    QByteArray payload;
+    std::unique_ptr<QHttpMultiPart, DeleteLater> multiPartPayload;
 
     // Timer that tracks the timeout
     // By default, there's no explicit timeout for the request
     // to enable the timer, the "setTimeout" function needs to be called before
     // execute is called
-    bool hasTimeout_{};
-    int timeoutMS_{};
+    bool hasTimeout{};
+    int timeoutMs{};
 
     QString getHash();
 

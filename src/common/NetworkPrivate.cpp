@@ -98,9 +98,9 @@ QString NetworkData::getHash()
     {
         QByteArray bytes;
 
-        bytes.append(this->request_.url().toString().toUtf8());
+        bytes.append(this->request.url().toString().toUtf8());
 
-        for (const auto &header : this->request_.rawHeaderList())
+        for (const auto &header : this->request.rawHeaderList())
         {
             bytes.append(header);
         }
@@ -143,7 +143,7 @@ void loadCached(std::shared_ptr<NetworkData> &&data)
     QByteArray bytes = cachedFile.readAll();
 
     qCDebug(chatterinoHTTP).noquote() << data->typeString() << "[CACHED] 200"
-                                      << data->request_.url().toString();
+                                      << data->request.url().toString();
 
     data->emitSuccess(
         {NetworkResult::NetworkError::NoError, QVariant(200), bytes});
@@ -152,7 +152,7 @@ void loadCached(std::shared_ptr<NetworkData> &&data)
 
 void load(std::shared_ptr<NetworkData> &&data)
 {
-    if (data->cache_)
+    if (data->cache)
     {
         std::ignore = QtConcurrent::run([data = std::move(data)]() mutable {
             loadCached(std::move(data));
@@ -166,15 +166,15 @@ void load(std::shared_ptr<NetworkData> &&data)
 
 void NetworkData::emitSuccess(NetworkResult &&result)
 {
-    if (!this->onSuccess_)
+    if (!this->onSuccess)
     {
         return;
     }
 
-    runCallback(this->executeConcurrently_,
-                [cb = std::move(this->onSuccess_), result = std::move(result),
-                 url = this->request_.url(), hasCaller = this->hasCaller_,
-                 caller = this->caller_]() {
+    runCallback(this->executeConcurrently,
+                [cb = std::move(this->onSuccess), result = std::move(result),
+                 url = this->request.url(), hasCaller = this->hasCaller,
+                 caller = this->caller]() {
                     if (hasCaller && caller.isNull())
                     {
                         return;
@@ -195,14 +195,14 @@ void NetworkData::emitSuccess(NetworkResult &&result)
 
 void NetworkData::emitError(NetworkResult &&result)
 {
-    if (!this->onError_)
+    if (!this->onError)
     {
         return;
     }
 
-    runCallback(this->executeConcurrently_,
-                [cb = std::move(this->onError_), result = std::move(result),
-                 hasCaller = this->hasCaller_, caller = this->caller_]() {
+    runCallback(this->executeConcurrently,
+                [cb = std::move(this->onError), result = std::move(result),
+                 hasCaller = this->hasCaller, caller = this->caller]() {
                     if (hasCaller && caller.isNull())
                     {
                         return;
@@ -214,14 +214,14 @@ void NetworkData::emitError(NetworkResult &&result)
 
 void NetworkData::emitFinally()
 {
-    if (!this->finally_)
+    if (!this->finally)
     {
         return;
     }
 
-    runCallback(this->executeConcurrently_,
-                [cb = std::move(this->finally_), hasCaller = this->hasCaller_,
-                 caller = this->caller_]() {
+    runCallback(this->executeConcurrently,
+                [cb = std::move(this->finally), hasCaller = this->hasCaller,
+                 caller = this->caller]() {
                     if (hasCaller && caller.isNull())
                     {
                         return;
@@ -233,7 +233,7 @@ void NetworkData::emitFinally()
 
 QLatin1String NetworkData::typeString() const
 {
-    auto view = magic_enum::enum_name<NetworkRequestType>(this->requestType_);
+    auto view = magic_enum::enum_name<NetworkRequestType>(this->requestType);
     return QLatin1String{view.data(),
                          static_cast<QLatin1String::size_type>(view.size())};
 }
@@ -244,11 +244,11 @@ namespace {
 
 void NetworkTask::run()
 {
-    if (this->data_->hasTimeout_)
+    if (this->data_->hasTimeout)
     {
         this->timer_ = new QTimer(this);
         this->timer_->setSingleShot(true);
-        this->timer_->start(this->data_->timeoutMS_);
+        this->timer_->start(this->data_->timeoutMs);
         QObject::connect(this->timer_, &QTimer::timeout, this,
                          &NetworkTask::timeout);
     }
@@ -266,42 +266,43 @@ void NetworkTask::run()
 QNetworkReply *NetworkTask::createReply()
 {
     const auto &data = this->data_;
-    const auto &request = this->data_->request_;
+    const auto &request = this->data_->request;
     auto &accessManager = NetworkManager::accessManager;
-    switch (this->data_->requestType_)
+    switch (this->data_->requestType)
     {
         case NetworkRequestType::Get:
             return accessManager.get(request);
 
         case NetworkRequestType::Put:
-            return accessManager.put(request, data->payload_);
+            return accessManager.put(request, data->payload);
 
         case NetworkRequestType::Delete:
-            return accessManager.deleteResource(data->request_);
+            return accessManager.deleteResource(data->request);
 
         case NetworkRequestType::Post:
-            if (data->multiPartPayload_)
+            if (data->multiPartPayload)
             {
-                assert(data->payload_.isNull());
+                assert(data->payload.isNull());
 
-                return accessManager.post(request, data->multiPartPayload_.get());
+                return accessManager.post(request,
+                                          data->multiPartPayload.get());
             }
             else
             {
-                return accessManager.post(request, data->payload_);
+                return accessManager.post(request, data->payload);
             }
         case NetworkRequestType::Patch:
-            if (data->multiPartPayload_)
+            if (data->multiPartPayload)
             {
-                assert(data->payload_.isNull());
+                assert(data->payload.isNull());
 
-                return accessManager.sendCustomRequest(request, "PATCH",
-                                                       data->multiPartPayload_.get());
+                return accessManager.sendCustomRequest(
+                    request, "PATCH", data->multiPartPayload.get());
             }
             else
             {
                 return NetworkManager::accessManager.sendCustomRequest(
-                    request, "PATCH", data->payload_);
+                    request, "PATCH", data->payload);
             }
     }
     return nullptr;
@@ -318,7 +319,7 @@ void NetworkTask::timeout()
 
     qCDebug(chatterinoHTTP).noquote()
         << this->data_->typeString() << "[timed out]"
-        << this->data_->request_.url().toString();
+        << this->data_->request.url().toString();
 
     this->data_->emitError({NetworkResult::NetworkError::TimeoutError, {}, {}});
     this->data_->emitFinally();
@@ -341,7 +342,7 @@ void NetworkTask::finished()
         // Operation cancelled, most likely timed out
         qCDebug(chatterinoHTTP).noquote()
             << this->data_->typeString() << "[cancelled]"
-            << this->data_->request_.url().toString();
+            << this->data_->request.url().toString();
         return;
     }
 
@@ -356,7 +357,7 @@ void NetworkTask::finished()
 
     QByteArray bytes = reply->readAll();
 
-    if (this->data_->cache_)
+    if (this->data_->cache)
     {
         this->writeToCache(bytes);
     }
@@ -372,18 +373,18 @@ void NetworkTask::logReply()
     auto status =
         this->reply_->attribute(QNetworkRequest::HttpStatusCodeAttribute)
             .toInt();
-    if (this->data_->requestType_ == NetworkRequestType::Get)
+    if (this->data_->requestType == NetworkRequestType::Get)
     {
         qCDebug(chatterinoHTTP).noquote()
             << this->data_->typeString() << status
-            << this->data_->request_.url().toString();
+            << this->data_->request.url().toString();
     }
     else
     {
         qCDebug(chatterinoHTTP).noquote()
             << this->data_->typeString()
-            << this->data_->request_.url().toString() << status
-            << QString(this->data_->payload_);
+            << this->data_->request.url().toString() << status
+            << QString(this->data_->payload);
     }
 }
 
