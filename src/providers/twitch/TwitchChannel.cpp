@@ -87,6 +87,11 @@ TwitchChannel::TwitchChannel(const QString &name)
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
+    if (!getIApp()->getTwitch())
+    {
+        return;
+    }
+
     this->bSignals_.emplace_back(
         getApp()->accounts->twitch.currentUserChanged.connect([this] {
             this->setMod(false);
@@ -219,6 +224,11 @@ TwitchChannel::TwitchChannel(const QString &name)
 
 TwitchChannel::~TwitchChannel()
 {
+    if (!getIApp()->getTwitch())
+    {
+        return;
+    }
+
     getApp()->twitch->dropSeventvChannel(this->seventvUserID_,
                                          this->seventvEmoteSetID_);
 
@@ -341,6 +351,21 @@ void TwitchChannel::refreshSevenTVChannelEmotes(bool manualRefresh)
             }
         },
         manualRefresh);
+}
+
+void TwitchChannel::setBttvEmotes(std::shared_ptr<const EmoteMap> &&map)
+{
+    this->bttvEmotes_.set(std::move(map));
+}
+
+void TwitchChannel::setFfzEmotes(std::shared_ptr<const EmoteMap> &&map)
+{
+    this->ffzEmotes_.set(std::move(map));
+}
+
+void TwitchChannel::setSeventvEmotes(std::shared_ptr<const EmoteMap> &&map)
+{
+    this->seventvEmotes_.set(std::move(map));
 }
 
 void TwitchChannel::addQueuedRedemption(const QString &rewardId,
@@ -700,9 +725,10 @@ void TwitchChannel::setStaff(bool value)
 
 bool TwitchChannel::isBroadcaster() const
 {
-    auto app = getApp();
+    auto app = getIApp();
 
-    return this->getName() == app->accounts->twitch.getCurrent()->getUserName();
+    return this->getName() ==
+           app->getAccounts()->twitch.getCurrent()->getUserName();
 }
 
 bool TwitchChannel::hasHighRateLimit() const
@@ -730,8 +756,11 @@ void TwitchChannel::setRoomId(const QString &id)
     if (*this->roomID_.accessConst() != id)
     {
         *this->roomID_.access() = id;
-        this->roomIdChanged();
-        this->loadRecentMessages();
+        if (getApp())
+        {
+            this->roomIdChanged();
+            this->loadRecentMessages();
+        }
         this->disconnected_ = false;
         this->lastConnectedAt_ = std::chrono::system_clock::now();
     }

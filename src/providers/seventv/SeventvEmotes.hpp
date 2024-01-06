@@ -77,6 +77,12 @@ enum class SeventvEmoteSetFlag : uint32_t {
 };
 using SeventvEmoteSetFlags = FlagsEnum<SeventvEmoteSetFlag>;
 
+namespace seventv::detail {
+
+    EmoteMap parseEmotes(const QJsonArray &emoteSetEmotes, bool isGlobal);
+
+}  // namespace seventv::detail
+
 class SeventvEmotes final
 {
 public:

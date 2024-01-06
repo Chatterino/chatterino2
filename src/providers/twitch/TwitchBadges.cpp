@@ -29,6 +29,11 @@ void TwitchBadges::loadTwitchBadges()
 {
     assert(this->loaded_ == false);
 
+    if (!getHelix())
+    {
+        return;
+    }
+
     getHelix()->getGlobalBadges(
         [this](auto globalBadges) {
             auto badgeSets = this->badgeSets_.access();
