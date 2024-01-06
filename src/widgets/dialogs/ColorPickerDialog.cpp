@@ -15,8 +15,11 @@ namespace {
 using namespace chatterino;
 
 constexpr size_t COLORS_PER_ROW = 5;
+constexpr size_t MAX_RECENT_COLORS = 15;
+constexpr size_t MAX_DEFAULT_COLORS = 15;
 
-QGridLayout *makeColorGrid(const auto &items, auto *self)
+QGridLayout *makeColorGrid(const auto &items, auto *self,
+                           std::size_t maxButtons)
 {
     auto *layout = new QGridLayout;
 
@@ -32,6 +35,10 @@ QGridLayout *makeColorGrid(const auto &items, auto *self)
         layout->addWidget(button, static_cast<int>(i / COLORS_PER_ROW),
                           static_cast<int>(i % COLORS_PER_ROW));
         i++;
+        if (i >= maxButtons)
+        {
+            break;
+        }
     }
     return layout;
 }
@@ -70,14 +77,15 @@ ColorPickerDialog::ColorPickerDialog(QColor color, QWidget *parent)
     {
         auto *buttons = new QVBoxLayout;
         buttons->addWidget(new QLabel(u"Recently used"_s));
-        buttons->addLayout(
-            makeColorGrid(ColorProvider::instance().recentColors(), this));
+        buttons->addLayout(makeColorGrid(
+            ColorProvider::instance().recentColors(), this, MAX_RECENT_COLORS));
 
         buttons->addSpacing(10);
 
         buttons->addWidget(new QLabel(u"Default colors"_s));
         buttons->addLayout(
-            makeColorGrid(ColorProvider::instance().defaultColors(), this));
+            makeColorGrid(ColorProvider::instance().defaultColors(), this,
+                          MAX_DEFAULT_COLORS));
 
         buttons->addStretch(1);
         buttons->addWidget(new QLabel(u"Selected"_s));
