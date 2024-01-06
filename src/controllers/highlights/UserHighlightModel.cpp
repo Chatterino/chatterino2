@@ -1,7 +1,6 @@
-#include "UserHighlightModel.hpp"
+#include "controllers/highlights/UserHighlightModel.hpp"
 
 #include "Application.hpp"
-#include "controllers/highlights/HighlightModel.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "providers/colors/ColorProvider.hpp"
 #include "singletons/Settings.hpp"
@@ -9,8 +8,6 @@
 #include "util/StandardItemHelper.hpp"
 
 namespace chatterino {
-
-using Column = HighlightModel::Column;
 
 // commandmodel
 UserHighlightModel::UserHighlightModel(QObject *parent)
