@@ -108,6 +108,7 @@
 - Dev: Refactor Args to be less of a singleton. (#5041)
 - Dev: Channels without any animated elements on screen will skip updates from the GIF timer. (#5042, #5043, #5045)
 - Dev: Autogenerate docs/plugin-meta.lua. (#5055)
+- Dev: Removed duplicate scale in settings dialog. (#5069)
 - Dev: Fix `NotebookTab` emitting updates for every message. (#5068)
 
 ## 2.4.6
