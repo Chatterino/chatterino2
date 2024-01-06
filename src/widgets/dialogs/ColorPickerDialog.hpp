@@ -7,7 +7,6 @@ namespace chatterino {
 class ColorPickerDialog : public BasePopup
 {
     Q_OBJECT
-    Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged)
 
 public:
     ColorPickerDialog(QColor color = {}, QWidget *parent = nullptr);
