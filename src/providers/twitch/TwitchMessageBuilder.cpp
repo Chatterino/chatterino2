@@ -1951,6 +1951,12 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeAutomodMessage(
 MessagePtr TwitchMessageBuilder::makeLowTrustUpdateMessage(
     const PubSubLowTrustUsersMessage &action)
 {
+    /**
+     * Known issues:
+     *  - Non-Twitch badges are not shown
+     *  - Non-Twitch emotes are not shown
+     */
+
     MessageBuilder builder;
     builder.emplace<TimestampElement>();
     builder.message().flags.set(MessageFlag::System);
