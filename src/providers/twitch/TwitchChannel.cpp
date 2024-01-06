@@ -87,7 +87,7 @@ TwitchChannel::TwitchChannel(const QString &name)
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
-    if (!getIApp()->getTwitch())
+    if (!getApp())
     {
         return;
     }
@@ -224,7 +224,7 @@ TwitchChannel::TwitchChannel(const QString &name)
 
 TwitchChannel::~TwitchChannel()
 {
-    if (!getIApp()->getTwitch())
+    if (!getApp())
     {
         return;
     }
