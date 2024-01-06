@@ -21,6 +21,11 @@ QSize ColorButton::sizeHint() const
 
 void ColorButton::setColor(const QColor &color)
 {
+    if (this->currentColor_ == color)
+    {
+        return;
+    }
+
     this->currentColor_ = color;
     this->update();
 }
