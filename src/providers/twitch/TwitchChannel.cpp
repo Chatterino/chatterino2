@@ -89,6 +89,8 @@ TwitchChannel::TwitchChannel(const QString &name)
 
     if (!getApp())
     {
+        // This is intended for tests and benchmarks.
+        // Irc, Pubsub, live-updates, and live-notifications aren't mocked there.
         return;
     }
 
@@ -226,6 +228,8 @@ TwitchChannel::~TwitchChannel()
 {
     if (!getApp())
     {
+        // This is for tests and benchmarks, where live-updates aren't mocked
+        // see comment in constructor.
         return;
     }
 
@@ -756,6 +760,7 @@ void TwitchChannel::setRoomId(const QString &id)
     if (*this->roomID_.accessConst() != id)
     {
         *this->roomID_.access() = id;
+        // This is inteded for tests and benchmarks. See comment in constructor.
         if (getApp())
         {
             this->roomIdChanged();

@@ -68,6 +68,8 @@ CheckOptions:
   # Benchmarks
   - key: readability-identifier-naming.FunctionIgnoredRegexp
     value: ^BM_[^_]+$
+  - key: readability-identifier-naming.ClassIgnoredRegexp
+    value: ^BM_[^_]+$
 
   - key: misc-const-correctness.AnalyzeValues
     value: false

@@ -31,6 +31,7 @@ void TwitchBadges::loadTwitchBadges()
 
     if (!getHelix())
     {
+        // This is intended for tests and benchmarks.
         return;
     }
 

@@ -82,18 +82,22 @@ public:
     HighlightController highlights;
 };
 
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-std::unique_ptr<MockApplication> APP;
-
-void doSetup(const benchmark::State & /*state*/)
+class BM_RecentMessages : public benchmark::Fixture
 {
-    APP = std::make_unique<MockApplication>();
-}
+public:
+    void SetUp(benchmark::State & /*state*/) override
+    {
+        this->app_ = std::make_unique<MockApplication>();
+    }
 
-void doTeardown(const benchmark::State & /*state*/)
-{
-    APP = {};
-}
+    void TearDown(benchmark::State & /*state*/) override
+    {
+        this->app_ = {};
+    }
+
+private:
+    std::unique_ptr<MockApplication> app_;
+};
 
 std::optional<QJsonDocument> tryReadJsonFile(const QString &path)
 {
@@ -123,10 +127,10 @@ QJsonDocument readJsonFile(const QString &path)
     return *opt;
 }
 
-void BM_RecentMessages(benchmark::State &state, const QString &name)
+void runBenchmark(benchmark::State &state, const QString &name)
 {
     initResources();
-    TwitchChannel chan("nymn");
+    TwitchChannel chan(name);
 
     const auto seventvEmotes =
         tryReadJsonFile(u":/bench/seventvemotes-%1.json"_s.arg(name));
@@ -137,10 +141,11 @@ void BM_RecentMessages(benchmark::State &state, const QString &name)
 
     if (seventvEmotes)
     {
-        chan.setSeventvEmotes(
-            std::make_shared<const EmoteMap>(seventv::detail::parseEmotes(
-                seventvEmotes->object()["emote_set"_L1]["emotes"_L1].toArray(),
-                false)));
+        chan.setSeventvEmotes(std::make_shared<const EmoteMap>(
+            seventv::detail::parseEmotes(seventvEmotes->object()["emote_set"_L1]
+                                             .toObject()["emotes"_L1]
+                                             .toArray(),
+                                         false)));
     }
 
     if (bttvEmotes)
@@ -168,6 +173,7 @@ void BM_RecentMessages(benchmark::State &state, const QString &name)
 
 }  // namespace
 
-BENCHMARK_CAPTURE(BM_RecentMessages, nymn, u"nymn"_s)
-    ->Setup(doSetup)
-    ->Teardown(doTeardown);
+BENCHMARK_F(BM_RecentMessages, nymn)(benchmark::State &state)
+{
+    runBenchmark(state, u"nymn"_s);
+}

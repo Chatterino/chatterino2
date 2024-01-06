@@ -234,9 +234,7 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                     manualRefresh](auto result) {
             auto emotes =
                 parseChannelEmotes(result.parseJson(), channelDisplayName);
-            bool hasEmotes = false;
-
-            hasEmotes = !emotes.empty();
+            bool hasEmotes = !emotes.empty();
             callback(std::move(emotes));
 
             if (auto shared = channel.lock(); manualRefresh)

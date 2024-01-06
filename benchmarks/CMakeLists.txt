@@ -14,8 +14,6 @@ set(benchmark_SOURCES
     # Add your new file above this line!
     )
 
-list(TRANSFORM benchmark_SOURCES PREPEND "${CMAKE_CURRENT_LIST_DIR}/")
-
 add_executable(${PROJECT_NAME} ${benchmark_SOURCES})
 add_sanitizers(${PROJECT_NAME})
 
