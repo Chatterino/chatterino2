@@ -525,7 +525,8 @@ void Application::initPubSub()
                     return;
                 }
 
-                auto twitchChannel = dynamic_pointer_cast<TwitchChannel>(chan);
+                auto twitchChannel =
+                    std::dynamic_pointer_cast<TwitchChannel>(chan);
                 if (!twitchChannel)
                 {
                     return;
