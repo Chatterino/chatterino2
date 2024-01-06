@@ -41,6 +41,13 @@ struct PubSubListenMessage;
 struct PubSubMessage;
 struct PubSubMessageMessage;
 
+/**
+ * This handles the Twitch PubSub connection
+ *
+ * Known issues:
+ *  - Upon closing a channel, we don't unsubscribe to its pubsub connections
+ *  - Stop is never called, meaning we never do a clean shutdown
+ */
 class PubSub
 {
     using WebsocketMessagePtr =
@@ -60,75 +67,62 @@ class PubSub
     };
 
     WebsocketClient websocketClient;
-    std::unique_ptr<std::thread> mainThread;
+    std::unique_ptr<std::thread> thread;
 
     // Account credentials
-    // Set from setAccount or setAccountData
+    // Set from setAccount
     QString token_;
     QString userID_;
 
 public:
     PubSub(const QString &host,
            std::chrono::seconds pingInterval = std::chrono::seconds(15));
+    ~PubSub();
+
+    PubSub(const PubSub &) = delete;
+    PubSub(PubSub &&) = delete;
+    PubSub &operator=(const PubSub &) = delete;
+    PubSub &operator=(PubSub &&) = delete;
 
     void setAccount(std::shared_ptr<TwitchAccount> account);
-
-    void setAccountData(QString token, QString userID);
-
-    enum class State {
-        Connected,
-        Disconnected,
-    };
 
     void start();
     void stop();
 
-    bool isConnected() const
-    {
-        return this->state == State::Connected;
-    }
+    struct {
+        Signal<ClearChatAction> chatCleared;
+        Signal<DeleteAction> messageDeleted;
+        Signal<ModeChangedAction> modeChanged;
+        Signal<ModerationStateAction> moderationStateChanged;
+
+        Signal<BanAction> userBanned;
+        Signal<UnbanAction> userUnbanned;
+
+        Signal<PubSubLowTrustUsersMessage> suspiciousMessageReceived;
+        Signal<PubSubLowTrustUsersMessage> suspiciousTreatmentUpdated;
+
+        // Message caught by automod
+        //                                channelID
+        pajlada::Signals::Signal<PubSubAutoModQueueMessage, QString>
+            autoModMessageCaught;
+
+        // Message blocked by moderator
+        Signal<AutomodAction> autoModMessageBlocked;
+
+        Signal<AutomodUserAction> automodUserMessage;
+        Signal<AutomodInfoAction> automodInfoMessage;
+    } moderation;
 
     struct {
-        struct {
-            Signal<ClearChatAction> chatCleared;
-            Signal<DeleteAction> messageDeleted;
-            Signal<ModeChangedAction> modeChanged;
-            Signal<ModerationStateAction> moderationStateChanged;
+        // Parsing should be done in PubSubManager as well,
+        // but for now we just send the raw data
+        Signal<const PubSubWhisperMessage &> received;
+        Signal<const PubSubWhisperMessage &> sent;
+    } whisper;
 
-            Signal<BanAction> userBanned;
-            Signal<UnbanAction> userUnbanned;
-
-            Signal<PubSubLowTrustUsersMessage> suspiciousMessageReceived;
-            Signal<PubSubLowTrustUsersMessage> suspiciousTreatmentUpdated;
-
-            // Message caught by automod
-            //                                channelID
-            pajlada::Signals::Signal<PubSubAutoModQueueMessage, QString>
-                autoModMessageCaught;
-
-            // Message blocked by moderator
-            Signal<AutomodAction> autoModMessageBlocked;
-
-            Signal<AutomodUserAction> automodUserMessage;
-            Signal<AutomodInfoAction> automodInfoMessage;
-        } moderation;
-
-        struct {
-            // Parsing should be done in PubSubManager as well,
-            // but for now we just send the raw data
-            Signal<const PubSubWhisperMessage &> received;
-            Signal<const PubSubWhisperMessage &> sent;
-        } whisper;
-
-        struct {
-            Signal<const QJsonObject &> redeemed;
-        } pointReward;
-    } signals_;
-
-    void unlistenAllModerationActions();
-    void unlistenAutomod();
-    void unlistenLowTrustUsers();
-    void unlistenWhispers();
+    struct {
+        Signal<const QJsonObject &> redeemed;
+    } pointReward;
 
     /**
      * Listen to incoming whispers for the currently logged in user.
@@ -137,6 +131,7 @@ public:
      * PubSub topic: whispers.{currentUserID}
      */
     bool listenToWhispers();
+    void unlistenWhispers();
 
     /**
      * Listen to moderation actions in the given channel.
@@ -150,6 +145,7 @@ public:
      * PubSub topic: chat_moderator_actions.{currentUserID}.{channelID}
      */
     void listenToChannelModerationActions(const QString &channelID);
+    void unlistenChannelModerationActions();
 
     /**
      * Listen to Automod events in the given channel.
@@ -160,6 +156,7 @@ public:
      * PubSub topic: automod-queue.{currentUserID}.{channelID}
      */
     void listenToAutomod(const QString &channelID);
+    void unlistenAutomod();
 
     /**
      * Listen to Low Trust events in the given channel.
@@ -170,6 +167,7 @@ public:
      * PubSub topic: low-trust-users.{currentUserID}.{channelID}
      */
     void listenToLowTrustUsers(const QString &channelID);
+    void unlistenLowTrustUsers();
 
     /**
      * Listen to incoming channel point redemptions in the given channel.
@@ -178,8 +176,7 @@ public:
      * PubSub topic: community-points-channel-v1.{channelID}
      */
     void listenToChannelPointRewards(const QString &channelID);
-
-    std::vector<QString> requests;
+    void unlistenChannelPointRewards();
 
     struct {
         std::atomic<uint32_t> connectionsClosed{0};
@@ -192,19 +189,25 @@ public:
         std::atomic<uint32_t> unlistenResponses{0};
     } diag;
 
+private:
+    /**
+     * Unlistens to all topics matching the prefix in all clients
+     */
+    void unlistenPrefix(const QString &prefix);
+
     void listenToTopic(const QString &topic);
 
-private:
     void listen(PubSubListenMessage msg);
     bool tryListen(PubSubListenMessage msg);
 
     bool isListeningToTopic(const QString &topic);
 
     void addClient();
+
+    std::vector<QString> requests;
+
     std::atomic<bool> addingClient{false};
     ExponentialBackoff<5> connectBackoff{std::chrono::milliseconds(1000)};
-
-    State state = State::Connected;
 
     std::map<WebsocketHandle, std::shared_ptr<PubSubClient>,
              std::owner_less<WebsocketHandle>>

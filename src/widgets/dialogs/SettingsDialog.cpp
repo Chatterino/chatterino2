@@ -52,7 +52,6 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     this->initUi();
     this->addTabs();
     this->overrideBackgroundColor_ = QColor("#111111");
-    this->scaleChangedEvent(this->scale());  // execute twice to width of item
 
     this->addShortcuts();
     this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
@@ -128,6 +127,8 @@ void SettingsDialog::initUi()
         .setLayoutType<QVBoxLayout>()
         .withoutMargin()
         .assign(&this->ui_.tabContainer);
+    this->ui_.tabContainerContainer->setFixedWidth(
+        static_cast<int>(150 * this->dpi_));
 
     // right side (pages)
     centerBox.emplace<QStackedLayout>()
@@ -257,6 +258,7 @@ void SettingsDialog::addTab(std::function<SettingsPage *()> page,
                             SettingsTabId id, Qt::Alignment alignment)
 {
     auto tab = new SettingsDialogTab(this, std::move(page), name, iconPath, id);
+    tab->setFixedHeight(static_cast<int>(30 * this->dpi_));
 
     this->ui_.tabContainer->addWidget(tab, 0, alignment);
     this->tabs_.push_back(tab);
@@ -390,7 +392,11 @@ void SettingsDialog::scaleChangedEvent(float newDpi)
     this->setStyleSheet(styleSheet);
 
     if (this->ui_.tabContainerContainer)
+    {
         this->ui_.tabContainerContainer->setFixedWidth(int(150 * newDpi));
+    }
+
+    this->dpi_ = newDpi;
 }
 
 void SettingsDialog::themeChangedEvent()

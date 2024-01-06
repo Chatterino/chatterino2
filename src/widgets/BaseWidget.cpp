@@ -1,5 +1,6 @@
 #include "widgets/BaseWidget.hpp"
 
+#include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "singletons/Theme.hpp"
@@ -17,10 +18,8 @@ namespace chatterino {
 
 BaseWidget::BaseWidget(QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
+    , theme(getIApp()->getThemes())
 {
-    // REMOVED
-    this->theme = getTheme();
-
     this->signalHolder_.managedConnect(this->theme->updated, [this]() {
         this->themeChangedEvent();
 
