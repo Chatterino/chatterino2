@@ -1250,15 +1250,15 @@ void TwitchChannel::refreshPubSub()
 
     auto currentAccount = getApp()->accounts->twitch.getCurrent();
 
-    getApp()->twitch->pubsub->setAccount(currentAccount);
+    getIApp()->getTwitchPubSub()->setAccount(currentAccount);
 
-    getApp()->twitch->pubsub->listenToChannelModerationActions(roomId);
+    getIApp()->getTwitchPubSub()->listenToChannelModerationActions(roomId);
     if (this->hasModRights())
     {
-        getApp()->twitch->pubsub->listenToAutomod(roomId);
-        getApp()->twitch->pubsub->listenToLowTrustUsers(roomId);
+        getIApp()->getTwitchPubSub()->listenToAutomod(roomId);
+        getIApp()->getTwitchPubSub()->listenToLowTrustUsers(roomId);
     }
-    getApp()->twitch->pubsub->listenToChannelPointRewards(roomId);
+    getIApp()->getTwitchPubSub()->listenToChannelPointRewards(roomId);
 }
 
 void TwitchChannel::refreshChatters()
