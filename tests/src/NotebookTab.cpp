@@ -91,8 +91,7 @@ TEST_F(NotebookTabFixture, UpgradeHighlightState)
 /// The highlight state must stay as NewMessage when called twice
 TEST_F(NotebookTabFixture, SameHighlightStateNewMessage)
 {
-    // XXX: This only updates the state once, so it should only update once
-    EXPECT_CALL(this->tab, update).Times(Exactly(2));
+    EXPECT_CALL(this->tab, update).Times(Exactly(1));
     EXPECT_EQ(this->tab.highlightState(), HighlightState::None);
     this->tab.setHighlightState(HighlightState::NewMessage);
     EXPECT_EQ(this->tab.highlightState(), HighlightState::NewMessage);
