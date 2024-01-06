@@ -4,7 +4,7 @@
 #include "util/LayoutHelper.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 #include "widgets/dialogs/ColorPickerDialog.hpp"
-#include "widgets/helper/ColorButton.hpp"
+#include "widgets/helper/color/ColorButton.hpp"
 #include "widgets/helper/Line.hpp"
 
 #include <QRegularExpression>
@@ -214,20 +214,18 @@ ColorButton *GeneralPageView::addColorButton(
 
     QObject::connect(
         colorButton, &ColorButton::clicked, [this, &setting, colorButton]() {
-            auto dialog = new ColorPickerDialog(QColor(setting), this);
-            dialog->setAttribute(Qt::WA_DeleteOnClose);
-            dialog->show();
-            // We can safely ignore this signal connection, for now, since the
+            auto *dialog = new ColorPickerDialog(QColor(setting), this);
             // colorButton & setting are never deleted and the signal is deleted
             // once the dialog is closed
-            std::ignore = dialog->closed.connect(
-                [&setting, colorButton](QColor selected) {
-                    if (selected.isValid())
-                    {
-                        setting = selected.name(QColor::HexArgb);
-                        colorButton->setColor(selected);
-                    }
-                });
+            QObject::connect(dialog, &ColorPickerDialog::colorConfirmed, this,
+                             [&setting, colorButton](auto selected) {
+                                 if (selected.isValid())
+                                 {
+                                     setting = selected.name(QColor::HexArgb);
+                                     colorButton->setColor(selected);
+                                 }
+                             });
+            dialog->show();
         });
 
     this->groups_.back().widgets.push_back({label, {text}});

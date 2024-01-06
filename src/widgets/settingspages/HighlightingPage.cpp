@@ -15,6 +15,7 @@
 #include "util/LayoutCreator.hpp"
 #include "widgets/dialogs/BadgePickerDialog.hpp"
 #include "widgets/dialogs/ColorPickerDialog.hpp"
+#include "widgets/helper/color/ColorItemDelegate.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
 #include <QFileDialog>
@@ -82,6 +83,8 @@ HighlightingPage::HighlightingPage()
                     QHeaderView::Fixed);
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     0, QHeaderView::Stretch);
+                view->getTableView()->setItemDelegateForColumn(
+                    HighlightModel::Column::Color, new ColorItemDelegate(view));
 
                 // fourtf: make class extrend BaseWidget and add this to
                 // dpiChanged
@@ -134,6 +137,9 @@ HighlightingPage::HighlightingPage()
                     QHeaderView::Fixed);
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     0, QHeaderView::Stretch);
+                view->getTableView()->setItemDelegateForColumn(
+                    UserHighlightModel::Column::Color,
+                    new ColorItemDelegate(view));
 
                 // fourtf: make class extrend BaseWidget and add this to
                 // dpiChanged
@@ -176,6 +182,9 @@ HighlightingPage::HighlightingPage()
                     QHeaderView::Fixed);
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     0, QHeaderView::Stretch);
+                view->getTableView()->setItemDelegateForColumn(
+                    BadgeHighlightModel::Column::Color,
+                    new ColorItemDelegate(view));
 
                 // fourtf: make class extrend BaseWidget and add this to
                 // dpiChanged
@@ -330,18 +339,18 @@ void HighlightingPage::openColorDialog(const QModelIndex &clicked,
     auto initial =
         view->getModel()->data(clicked, Qt::DecorationRole).value<QColor>();
 
-    auto dialog = new ColorPickerDialog(initial, this);
-    dialog->setAttribute(Qt::WA_DeleteOnClose);
-    dialog->show();
-    // We can safely ignore this signal connection since the view and tab are never deleted
+    auto *dialog = new ColorPickerDialog(initial, this);
     // TODO: The QModelIndex clicked is technically not safe to persist here since the model
     // can be changed between the color dialog being created & the color dialog being closed
-    std::ignore = dialog->closed.connect([=](auto selected) {
-        if (selected.isValid())
-        {
-            view->getModel()->setData(clicked, selected, Qt::DecorationRole);
-        }
-    });
+    QObject::connect(dialog, &ColorPickerDialog::colorConfirmed, this,
+                     [=](auto selected) {
+                         if (selected.isValid())
+                         {
+                             view->getModel()->setData(clicked, selected,
+                                                       Qt::DecorationRole);
+                         }
+                     });
+    dialog->show();
 }
 
 void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
