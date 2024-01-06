@@ -3,6 +3,8 @@
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
 
+#include <QJsonObject>
+
 #include <memory>
 #include <optional>
 

@@ -5,6 +5,7 @@
 #include "common/FlagsEnum.hpp"
 
 #include <QJsonObject>
+#include <QJsonArray>
 
 #include <memory>
 #include <optional>
