@@ -515,7 +515,7 @@ void Application::initPubSub()
                     return;
                 }
 
-                auto *twitchChannel = dynamic_cast<TwitchChannel *>(chan.get());
+                auto twitchChannel = dynamic_pointer_cast<TwitchChannel>(chan);
                 if (!twitchChannel)
                 {
                     return;
@@ -524,7 +524,8 @@ void Application::initPubSub()
                 postToThread([twitchChannel, action] {
                     const auto p =
                         TwitchMessageBuilder::makeLowTrustUserMessage(
-                            action, twitchChannel->getName(), twitchChannel);
+                            action, twitchChannel->getName(),
+                            twitchChannel.get());
                     twitchChannel->addMessage(p.first);
                     twitchChannel->addMessage(p.second);
                 });
