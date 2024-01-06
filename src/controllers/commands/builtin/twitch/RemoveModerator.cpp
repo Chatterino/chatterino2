@@ -23,7 +23,7 @@ QString removeModerator(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /unmod command only works in Twitch channels"));
+            "The /unmod command only works in Twitch channels."));
         return "";
     }
     if (ctx.words.size() < 2)

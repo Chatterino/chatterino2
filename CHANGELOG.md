@@ -20,6 +20,7 @@
 - Minor: Add a new completion API for experimental plugins feature. (#5000, #5047)
 - Minor: Re-enabled _Restart on crash_ option on Windows. (#5012)
 - Minor: The whisper highlight color can now be configured through the settings. (#5053)
+- Minor: Added missing periods at various moderator messages and commands. (#5061)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
 - Bugfix: Trimmed custom streamlink paths on all platforms making sure you don't accidentally add spaces at the beginning or end of its path. (#4834)
@@ -108,6 +109,7 @@
 - Dev: Refactor Args to be less of a singleton. (#5041)
 - Dev: Channels without any animated elements on screen will skip updates from the GIF timer. (#5042, #5043, #5045)
 - Dev: Autogenerate docs/plugin-meta.lua. (#5055)
+- Dev: Fix `NotebookTab` emitting updates for every message. (#5068)
 
 ## 2.4.6
 

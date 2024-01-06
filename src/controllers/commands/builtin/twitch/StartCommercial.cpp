@@ -84,7 +84,7 @@ QString startCommercial(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /commercial command only works in Twitch channels"));
+            "The /commercial command only works in Twitch channels."));
         return "";
     }
 
@@ -106,7 +106,7 @@ QString startCommercial(const CommandContext &ctx)
     if (user->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "You must be logged in to use the /commercial command"));
+            "You must be logged in to use the /commercial command."));
         return "";
     }
 

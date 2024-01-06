@@ -94,7 +94,7 @@ QString unbanUser(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            QString("The %1 command only works in Twitch channels")
+            QString("The %1 command only works in Twitch channels.")
                 .arg(commandName)));
         return "";
     }

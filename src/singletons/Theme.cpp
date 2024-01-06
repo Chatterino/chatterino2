@@ -476,7 +476,7 @@ void Theme::normalizeColor(QColor &color) const
 
 Theme *getTheme()
 {
-    return getApp()->themes;
+    return getIApp()->getThemes();
 }
 
 }  // namespace chatterino
