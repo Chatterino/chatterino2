@@ -725,7 +725,7 @@ void TwitchChannel::setStaff(bool value)
 
 bool TwitchChannel::isBroadcaster() const
 {
-    auto app = getIApp();
+    auto *app = getIApp();
 
     return this->getName() ==
            app->getAccounts()->twitch.getCurrent()->getUserName();
