@@ -17,12 +17,14 @@
 
 #include <algorithm>
 #include <exception>
+#include <future>
 #include <iostream>
 #include <thread>
 
 using websocketpp::lib::bind;
 using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
+using namespace std::chrono_literals;
 
 namespace chatterino {
 
@@ -512,8 +514,7 @@ void PubSub::start()
 {
     this->work = std::make_shared<boost::asio::io_service::work>(
         this->websocketClient.get_io_service());
-    this->thread.reset(
-        new std::thread(std::bind(&PubSub::runThread, this)));
+    this->thread.reset(new std::thread(std::bind(&PubSub::runThread, this)));
 }
 
 void PubSub::stop()
@@ -531,7 +532,20 @@ void PubSub::stop()
 
     if (this->thread->joinable())
     {
-        this->thread->join();
+        // NOTE: We spawn a new thread to join the websocket thread.
+        // There is a case where a new client was initiated but not added to the clients list.
+        // We just don't join the thread & let the operating system nuke the thread if joining fails
+        // within 1s.
+        // We could fix the underlying bug, but this is easier & we realistically won't use this exact code
+        // for super much longer.
+        auto joiner = std::async(std::launch::async, &std::thread::join,
+                                 this->thread.get());
+        if (joiner.wait_for(1s) == std::future_status::timeout)
+        {
+            qCWarning(chatterinoPubSub)
+                << "Thread didn't join within 1 second, rip it out";
+            this->websocketClient.stop();
+        }
     }
 
     assert(this->clients.empty());
