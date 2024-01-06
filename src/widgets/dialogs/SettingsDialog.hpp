@@ -77,6 +77,7 @@ private:
     std::vector<SettingsDialogTab *> tabs_;
     SettingsDialogTab *selectedTab_{};
     SettingsDialogTab *lastSelectedByUser_{};
+    float dpi_ = 1.0F;
 
     friend class SettingsDialogTab;
 };

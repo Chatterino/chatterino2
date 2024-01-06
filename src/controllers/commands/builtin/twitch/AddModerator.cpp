@@ -23,7 +23,7 @@ QString addModerator(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /mod command only works in Twitch channels"));
+            "The /mod command only works in Twitch channels."));
         return "";
     }
     if (ctx.words.size() < 2)

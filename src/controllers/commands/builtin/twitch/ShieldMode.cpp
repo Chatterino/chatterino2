@@ -18,7 +18,7 @@ QString toggleShieldMode(const CommandContext &ctx, bool isActivating)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            QStringLiteral("The %1 command only works in Twitch channels")
+            QStringLiteral("The %1 command only works in Twitch channels.")
                 .arg(command)));
         return {};
     }
@@ -29,7 +29,7 @@ QString toggleShieldMode(const CommandContext &ctx, bool isActivating)
     if (user->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(
-            QStringLiteral("You must be logged in to use the %1 command")
+            QStringLiteral("You must be logged in to use the %1 command.")
                 .arg(command)));
         return {};
     }
