@@ -9,7 +9,7 @@ class AlphaSlider : public QWidget
     Q_OBJECT
 
 public:
-    AlphaSlider(QColor color = {}, QWidget *parent = nullptr);
+    AlphaSlider(QColor color, QWidget *parent = nullptr);
 
     QSize sizeHint() const override;
 

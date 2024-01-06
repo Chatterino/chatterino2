@@ -9,7 +9,7 @@ class ColorButton : public QAbstractButton
     Q_OBJECT
 
 public:
-    ColorButton(QColor color = {}, QWidget *parent = nullptr);
+    ColorButton(QColor color, QWidget *parent = nullptr);
 
     QSize sizeHint() const override;
 

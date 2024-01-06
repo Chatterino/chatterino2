@@ -9,7 +9,7 @@ class HueSlider : public QWidget
     Q_OBJECT
 
 public:
-    HueSlider(QColor color = {}, QWidget *parent = nullptr);
+    HueSlider(QColor color, QWidget *parent = nullptr);
 
     QSize sizeHint() const override;
 

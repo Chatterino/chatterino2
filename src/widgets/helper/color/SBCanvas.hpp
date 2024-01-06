@@ -10,7 +10,7 @@ class SBCanvas : public QWidget
     Q_OBJECT
 
 public:
-    SBCanvas(QColor color = {}, QWidget *parent = nullptr);
+    SBCanvas(QColor color, QWidget *parent = nullptr);
 
     QSize sizeHint() const override;
 

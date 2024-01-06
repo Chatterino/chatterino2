@@ -9,7 +9,7 @@ class ColorPickerDialog : public BasePopup
     Q_OBJECT
 
 public:
-    ColorPickerDialog(QColor color = {}, QWidget *parent = nullptr);
+    ColorPickerDialog(QColor color, QWidget *parent);
 
     QColor color() const;
 

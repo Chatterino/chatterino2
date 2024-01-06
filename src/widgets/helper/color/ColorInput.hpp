@@ -13,7 +13,7 @@ class ColorInput : public QWidget
     Q_OBJECT
 
 public:
-    ColorInput(QColor color = {}, QWidget *parent = nullptr);
+    ColorInput(QColor color, QWidget *parent = nullptr);
 
     QColor color() const;
 
