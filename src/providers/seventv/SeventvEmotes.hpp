@@ -4,8 +4,8 @@
 #include "common/Atomic.hpp"
 #include "common/FlagsEnum.hpp"
 
-#include <QJsonObject>
 #include <QJsonArray>
+#include <QJsonObject>
 
 #include <memory>
 #include <optional>
