@@ -4,7 +4,7 @@
 
 - Major: Allow use of Twitch follower emotes in other channels if subscribed. (#4922)
 - Major: Add `/automod` split to track automod caught messages across all open channels the user moderates. (#4986, #5026)
-- Major: Show restricted chat messages and suspicious treatment updates. (#5056)
+- Major: Show restricted chat messages and suspicious treatment updates. (#5056, #5060)
 - Minor: Migrate to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
 - Minor: The account switcher is now styled to match your theme. (#4817)
 - Minor: Add an invisible resize handle to the bottom of frameless user info popups and reply thread popups. (#4795)

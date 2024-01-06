@@ -525,12 +525,20 @@ void Application::initPubSub()
                     return;
                 }
 
-                postToThread([chan, action] {
+                auto twitchChannel =
+                    std::dynamic_pointer_cast<TwitchChannel>(chan);
+                if (!twitchChannel)
+                {
+                    return;
+                }
+
+                postToThread([twitchChannel, action] {
                     const auto p =
                         TwitchMessageBuilder::makeLowTrustUserMessage(
-                            action, chan->getName());
-                    chan->addMessage(p.first);
-                    chan->addMessage(p.second);
+                            action, twitchChannel->getName(),
+                            twitchChannel.get());
+                    twitchChannel->addMessage(p.first);
+                    twitchChannel->addMessage(p.second);
                 });
             });
 
