@@ -9,7 +9,6 @@
 #include "widgets/helper/color/SBCanvas.hpp"
 
 #include <QDialogButtonBox>
-#include <QSet>
 
 namespace {
 
