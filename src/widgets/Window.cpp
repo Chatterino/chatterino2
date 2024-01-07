@@ -281,7 +281,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
                     ->toInner<PubSubCommunityPointsChannelV1Message>();
 
             app->twitch->addFakeMessage(getSampleChannelRewardIRCMessage());
-            app->twitch->pubsub->signals_.pointReward.redeemed.invoke(
+            getIApp()->getTwitchPubSub()->pointReward.redeemed.invoke(
                 oInnerMessage->data.value("redemption").toObject());
             alt = !alt;
         }
@@ -292,7 +292,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
             auto oInnerMessage =
                 oMessage->toInner<PubSubMessageMessage>()
                     ->toInner<PubSubCommunityPointsChannelV1Message>();
-            app->twitch->pubsub->signals_.pointReward.redeemed.invoke(
+            getIApp()->getTwitchPubSub()->pointReward.redeemed.invoke(
                 oInnerMessage->data.value("redemption").toObject());
             alt = !alt;
         }
