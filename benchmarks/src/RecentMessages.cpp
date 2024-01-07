@@ -82,23 +82,6 @@ public:
     HighlightController highlights;
 };
 
-class BM_RecentMessages : public benchmark::Fixture
-{
-public:
-    void SetUp(benchmark::State & /*state*/) override
-    {
-        this->app_ = std::make_unique<MockApplication>();
-    }
-
-    void TearDown(benchmark::State & /*state*/) override
-    {
-        this->app_ = {};
-    }
-
-private:
-    std::unique_ptr<MockApplication> app_;
-};
-
 std::optional<QJsonDocument> tryReadJsonFile(const QString &path)
 {
     QFile file(path);
@@ -127,53 +110,72 @@ QJsonDocument readJsonFile(const QString &path)
     return *opt;
 }
 
-void runBenchmark(benchmark::State &state, const QString &name)
+class BM_RecentMessages
 {
-    initResources();
-    TwitchChannel chan(name);
-
-    const auto seventvEmotes =
-        tryReadJsonFile(u":/bench/seventvemotes-%1.json"_s.arg(name));
-    const auto bttvEmotes =
-        tryReadJsonFile(u":/bench/bttvemotes-%1.json"_s.arg(name));
-    const auto ffzEmotes =
-        tryReadJsonFile(u":/bench/ffzemotes-%1.json"_s.arg(name));
-
-    if (seventvEmotes)
+public:
+    explicit BM_RecentMessages(const QString &name_)
+        : name(name_)
+        , chan(this->name)
     {
-        chan.setSeventvEmotes(std::make_shared<const EmoteMap>(
-            seventv::detail::parseEmotes(seventvEmotes->object()["emote_set"_L1]
-                                             .toObject()["emotes"_L1]
-                                             .toArray(),
-                                         false)));
+        const auto seventvEmotes =
+            tryReadJsonFile(u":/bench/seventvemotes-%1.json"_s.arg(this->name));
+        const auto bttvEmotes =
+            tryReadJsonFile(u":/bench/bttvemotes-%1.json"_s.arg(this->name));
+        const auto ffzEmotes =
+            tryReadJsonFile(u":/bench/ffzemotes-%1.json"_s.arg(this->name));
+
+        if (seventvEmotes)
+        {
+            this->chan.setSeventvEmotes(
+                std::make_shared<const EmoteMap>(seventv::detail::parseEmotes(
+                    seventvEmotes->object()["emote_set"_L1]
+                        .toObject()["emotes"_L1]
+                        .toArray(),
+                    false)));
+        }
+
+        if (bttvEmotes)
+        {
+            this->chan.setBttvEmotes(std::make_shared<const EmoteMap>(
+                bttv::detail::parseChannelEmotes(bttvEmotes->object(),
+                                                 this->name)));
+        }
+
+        if (ffzEmotes)
+        {
+            this->chan.setFfzEmotes(std::make_shared<const EmoteMap>(
+                ffz::detail::parseChannelEmotes(ffzEmotes->object())));
+        }
+
+        this->messages =
+            readJsonFile(u":/bench/recentmessages-%1.json"_s.arg(this->name));
     }
 
-    if (bttvEmotes)
+    void run(benchmark::State &state)
     {
-        chan.setBttvEmotes(std::make_shared<const EmoteMap>(
-            bttv::detail::parseChannelEmotes(bttvEmotes->object(), name)));
+        for (auto _ : state)
+        {
+            auto parsed = recentmessages::detail::parseRecentMessages(
+                this->messages.object());
+            auto built = recentmessages::detail::buildRecentMessages(
+                parsed, &this->chan);
+            benchmark::DoNotOptimize(built);
+        }
     }
 
-    if (ffzEmotes)
-    {
-        chan.setFfzEmotes(std::make_shared<const EmoteMap>(
-            ffz::detail::parseChannelEmotes(ffzEmotes->object())));
-    }
+protected:
+    QString name;
+    MockApplication app;
+    TwitchChannel chan;
+    QJsonDocument messages;
+};
 
-    auto messages = readJsonFile(u":/bench/recentmessages-%1.json"_s.arg(name));
-
-    for (auto _ : state)
-    {
-        auto parsed =
-            recentmessages::detail::parseRecentMessages(messages.object());
-        auto built = recentmessages::detail::buildRecentMessages(parsed, &chan);
-        benchmark::DoNotOptimize(built);
-    }
+void BM_BuildRecentMessages(benchmark::State &state, const QString &name)
+{
+    BM_RecentMessages bench(name);
+    bench.run(state);
 }
 
 }  // namespace
 
-BENCHMARK_F(BM_RecentMessages, nymn)(benchmark::State &state)
-{
-    runBenchmark(state, u"nymn"_s);
-}
+BENCHMARK_CAPTURE(BM_BuildRecentMessages, nymn, u"nymn"_s);
