@@ -98,12 +98,6 @@ public:
     Application &operator=(const Application &) = delete;
     Application &operator=(Application &&) = delete;
 
-    /**
-     * In the interim, before we remove _exit(0); from RunGui.cpp,
-     * this will destroy things we know can be destroyed
-     */
-    void fakeDtor();
-
     void initialize(Settings &settings, Paths &paths);
     void load();
     void save();

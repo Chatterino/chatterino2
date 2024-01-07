@@ -147,11 +147,6 @@ Application::Application(Settings &_settings, Paths &_paths, const Args &_args)
 
 Application::~Application() = default;
 
-void Application::fakeDtor()
-{
-    this->twitchPubSub.reset();
-}
-
 void Application::initialize(Settings &settings, Paths &paths)
 {
     assert(isAppInitialized == false);
