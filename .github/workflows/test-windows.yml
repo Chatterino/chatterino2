@@ -121,7 +121,6 @@ jobs:
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_PLUGINS="$Env:C2_PLUGINS" `
               -DBUILD_WITH_QT6="$Env:C2_BUILD_WITH_QT6" `
-              -DCHATTERINO_WARN_SLOW_HTTP=On `
               ..
           set cl=/MP
           nmake /S /NOLOGO
