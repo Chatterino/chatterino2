@@ -9,6 +9,7 @@
 #include <QTimer>
 
 #include <memory>
+#include <optional>
 
 class QNetworkReply;
 
@@ -49,12 +50,9 @@ public:
     QByteArray payload;
     std::unique_ptr<QHttpMultiPart, DeleteLater> multiPartPayload;
 
-    // Timer that tracks the timeout
-    // By default, there's no explicit timeout for the request
-    // to enable the timer, the "setTimeout" function needs to be called before
-    // execute is called
-    bool hasTimeout{};
-    int timeoutMs{};
+    /// By default, there's no explicit timeout for the request.
+    /// To set a timeout, use NetworkRequest's timeout method
+    std::optional<std::chrono::milliseconds> timeout{};
 
     QString getHash();
 

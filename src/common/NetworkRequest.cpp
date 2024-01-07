@@ -110,8 +110,7 @@ NetworkRequest NetworkRequest::headerList(
 
 NetworkRequest NetworkRequest::timeout(int ms) &&
 {
-    this->data->hasTimeout = true;
-    this->data->timeoutMs = ms;
+    this->data->timeout = std::chrono::milliseconds(ms);
     return std::move(*this);
 }
 

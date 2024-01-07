@@ -29,11 +29,12 @@ NetworkTask::~NetworkTask()
 
 void NetworkTask::run()
 {
-    if (this->data_->hasTimeout)
+    const auto &timeout = this->data_->timeout;
+    if (timeout.has_value())
     {
         this->timer_ = new QTimer(this);
         this->timer_->setSingleShot(true);
-        this->timer_->start(this->data_->timeoutMs);
+        this->timer_->start(timeout.value());
         QObject::connect(this->timer_, &QTimer::timeout, this,
                          &NetworkTask::timeout);
     }
