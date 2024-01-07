@@ -762,7 +762,7 @@ void TwitchChannel::setRoomId(const QString &id)
     if (*this->roomID_.accessConst() != id)
     {
         *this->roomID_.access() = id;
-        // This is inteded for tests and benchmarks. See comment in constructor.
+        // This is intended for tests and benchmarks. See comment in constructor.
         if (getApp())
         {
             this->roomIdChanged();
