@@ -158,6 +158,10 @@ public:
     void refreshFFZChannelEmotes(bool manualRefresh);
     void refreshSevenTVChannelEmotes(bool manualRefresh);
 
+    void setBttvEmotes(std::shared_ptr<const EmoteMap> &&map);
+    void setFfzEmotes(std::shared_ptr<const EmoteMap> &&map);
+    void setSeventvEmotes(std::shared_ptr<const EmoteMap> &&map);
+
     const QString &seventvUserID() const;
     const QString &seventvEmoteSetID() const;
 

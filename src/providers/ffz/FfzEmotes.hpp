@@ -3,6 +3,8 @@
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
 
+#include <QJsonObject>
+
 #include <memory>
 #include <optional>
 
@@ -12,6 +14,12 @@ struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 class EmoteMap;
 class Channel;
+
+namespace ffz::detail {
+
+    EmoteMap parseChannelEmotes(const QJsonObject &jsonRoot);
+
+}  // namespace ffz::detail
 
 class FfzEmotes final
 {
