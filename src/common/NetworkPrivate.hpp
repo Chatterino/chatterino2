@@ -40,8 +40,8 @@ public:
     bool cache{};
     bool executeConcurrently{};
 
-    NetworkErrorCallback onError;
     NetworkSuccessCallback onSuccess;
+    NetworkErrorCallback onError;
     NetworkFinallyCallback finally;
 
     NetworkRequestType requestType = NetworkRequestType::Get;
@@ -58,8 +58,8 @@ public:
 
     QString getHash();
 
-    void emitError(NetworkResult &&result);
     void emitSuccess(NetworkResult &&result);
+    void emitError(NetworkResult &&result);
     void emitFinally();
 
     QLatin1String typeString() const;

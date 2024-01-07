@@ -50,6 +50,9 @@ set(SOURCE_FILES
 
         common/enums/MessageOverflow.hpp
 
+        common/network/NetworkTask.hpp
+        common/network/NetworkTask.cpp
+
         controllers/accounts/Account.cpp
         controllers/accounts/Account.hpp
         controllers/accounts/AccountController.cpp
