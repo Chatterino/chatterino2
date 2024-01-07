@@ -110,10 +110,10 @@ QJsonDocument readJsonFile(const QString &path)
     return *opt;
 }
 
-class BM_RecentMessages
+class RecentMessages
 {
 public:
-    explicit BM_RecentMessages(const QString &name_)
+    explicit RecentMessages(const QString &name_)
         : name(name_)
         , chan(this->name)
     {
@@ -151,17 +151,12 @@ public:
             readJsonFile(u":/bench/recentmessages-%1.json"_s.arg(this->name));
     }
 
-    void run(benchmark::State &state)
+    ~RecentMessages()
     {
-        for (auto _ : state)
-        {
-            auto parsed = recentmessages::detail::parseRecentMessages(
-                this->messages.object());
-            auto built = recentmessages::detail::buildRecentMessages(
-                parsed, &this->chan);
-            benchmark::DoNotOptimize(built);
-        }
+        QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
     }
+
+    virtual void run(benchmark::State &state) = 0;
 
 protected:
     QString name;
@@ -170,12 +165,59 @@ protected:
     QJsonDocument messages;
 };
 
+class ParseRecentMessages : public RecentMessages
+{
+public:
+    explicit ParseRecentMessages(const QString &name_)
+        : RecentMessages(name_)
+    {
+    }
+
+    void run(benchmark::State &state)
+    {
+        for (auto _ : state)
+        {
+            auto parsed = recentmessages::detail::parseRecentMessages(
+                this->messages.object());
+            benchmark::DoNotOptimize(parsed);
+        }
+    }
+};
+
+class BuildRecentMessages : public RecentMessages
+{
+public:
+    explicit BuildRecentMessages(const QString &name_)
+        : RecentMessages(name_)
+    {
+    }
+
+    void run(benchmark::State &state)
+    {
+        auto parsed = recentmessages::detail::parseRecentMessages(
+            this->messages.object());
+        for (auto _ : state)
+        {
+            auto built = recentmessages::detail::buildRecentMessages(
+                parsed, &this->chan);
+            benchmark::DoNotOptimize(built);
+        }
+    }
+};
+
+void BM_ParseRecentMessages(benchmark::State &state, const QString &name)
+{
+    ParseRecentMessages bench(name);
+    bench.run(state);
+}
+
 void BM_BuildRecentMessages(benchmark::State &state, const QString &name)
 {
-    BM_RecentMessages bench(name);
+    BuildRecentMessages bench(name);
     bench.run(state);
 }
 
 }  // namespace
 
+BENCHMARK_CAPTURE(BM_ParseRecentMessages, nymn, u"nymn"_s);
 BENCHMARK_CAPTURE(BM_BuildRecentMessages, nymn, u"nymn"_s);
