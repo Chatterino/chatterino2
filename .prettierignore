@@ -1,5 +1,7 @@
 # JSON resources should not be prettified...
 resources/*.json
+benchmarks/resources/*.json
+tests/resources/*.json
 # ...themes should be prettified for readability.
 !resources/themes/*.json
 
@@ -7,6 +9,7 @@ resources/*.json
 lib/*/
 conan-pkgs/*/
 cmake/sanitizers-cmake/
+tools/crash-handler
 
 # Build folders
 *build-*/

@@ -27,7 +27,7 @@ QString blockUser(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /block command only works in Twitch channels"));
+            "The /block command only works in Twitch channels."));
         return "";
     }
 
@@ -101,7 +101,7 @@ QString unblockUser(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /unblock command only works in Twitch channels"));
+            "The /unblock command only works in Twitch channels."));
         return "";
     }
 

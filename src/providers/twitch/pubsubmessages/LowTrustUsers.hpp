@@ -1,5 +1,7 @@
 #pragma once
 
+#include "providers/twitch/TwitchBadge.hpp"
+
 #include <common/FlagsEnum.hpp>
 #include <magic_enum/magic_enum.hpp>
 #include <QColor>
@@ -8,18 +10,21 @@
 
 namespace chatterino {
 
-struct LowTrustUserChatBadge {
-    QString id;
-    QString version;
-
-    explicit LowTrustUserChatBadge(const QJsonObject &obj)
-        : id(obj.value("id").toString())
-        , version(obj.value("version").toString())
-    {
-    }
-};
-
 struct PubSubLowTrustUsersMessage {
+    struct Fragment {
+        QString text;
+        QString emoteID;
+
+        explicit Fragment(const QJsonObject &obj)
+            : text(obj.value("text").toString())
+            , emoteID(obj.value("emoticon")
+                          .toObject()
+                          .value("emoticonID")
+                          .toString())
+        {
+        }
+    };
+
     /**
      * The type of low trust message update
      */
@@ -103,6 +108,12 @@ struct PubSubLowTrustUsersMessage {
     QString text;
 
     /**
+     * Pre-parsed components of the message.
+     * Only used for the UserMessage type.
+     */
+    std::vector<Fragment> fragments;
+
+    /**
      * ID of the message.
      * Only used for the UserMessage type.
      */
@@ -130,7 +141,7 @@ struct PubSubLowTrustUsersMessage {
      * A list of badges of the user who sent the message.
      * Only used for the UserMessage type.
      */
-    std::vector<LowTrustUserChatBadge> senderBadges;
+    std::vector<Badge> senderBadges;
 
     /**
      * Stores the string value of `type`

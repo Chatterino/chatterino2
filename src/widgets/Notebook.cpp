@@ -588,11 +588,13 @@ void Notebook::updateTabVisibility()
 
 void Notebook::updateTabVisibilityMenuAction()
 {
-    auto toggleSeq = getApp()->hotkeys->getDisplaySequence(
+    const auto *hotkeys = getIApp()->getHotkeys();
+
+    auto toggleSeq = hotkeys->getDisplaySequence(
         HotkeyCategory::Window, "setTabVisibility", {std::vector<QString>()});
     if (toggleSeq.isEmpty())
     {
-        toggleSeq = getApp()->hotkeys->getDisplaySequence(
+        toggleSeq = hotkeys->getDisplaySequence(
             HotkeyCategory::Window, "setTabVisibility", {{"toggle"}});
     }
 
@@ -601,12 +603,12 @@ void Notebook::updateTabVisibilityMenuAction()
         // show contextual shortcuts
         if (this->getShowTabs())
         {
-            toggleSeq = getApp()->hotkeys->getDisplaySequence(
+            toggleSeq = hotkeys->getDisplaySequence(
                 HotkeyCategory::Window, "setTabVisibility", {{"off"}});
         }
         else if (!this->getShowTabs())
         {
-            toggleSeq = getApp()->hotkeys->getDisplaySequence(
+            toggleSeq = hotkeys->getDisplaySequence(
                 HotkeyCategory::Window, "setTabVisibility", {{"on"}});
         }
     }

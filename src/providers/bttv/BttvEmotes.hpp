@@ -3,6 +3,8 @@
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
 
+#include <QJsonObject>
+
 #include <memory>
 #include <optional>
 
@@ -14,6 +16,13 @@ class EmoteMap;
 class Channel;
 struct BttvLiveUpdateEmoteUpdateAddMessage;
 struct BttvLiveUpdateEmoteRemoveMessage;
+
+namespace bttv::detail {
+
+    EmoteMap parseChannelEmotes(const QJsonObject &jsonRoot,
+                                const QString &channelDisplayName);
+
+}  // namespace bttv::detail
 
 class BttvEmotes final
 {
