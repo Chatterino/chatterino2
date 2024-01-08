@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/Common.hpp"
 #include "common/NetworkCommon.hpp"
 
 #include <QHttpMultiPart>
@@ -7,8 +8,8 @@
 #include <QPointer>
 #include <QTimer>
 
-#include <functional>
 #include <memory>
+#include <optional>
 
 class QNetworkReply;
 
@@ -24,45 +25,42 @@ signals:
     void requestUrl();
 };
 
-class NetworkWorker : public QObject
+class NetworkData
 {
-    Q_OBJECT
-
-signals:
-    void doneUrl();
-};
-
-struct NetworkData {
+public:
     NetworkData();
     ~NetworkData();
+    NetworkData(const NetworkData &) = delete;
+    NetworkData(NetworkData &&) = delete;
+    NetworkData &operator=(const NetworkData &) = delete;
+    NetworkData &operator=(NetworkData &&) = delete;
 
-    QNetworkRequest request_;
-    bool hasCaller_{};
-    QPointer<QObject> caller_;
-    bool cache_{};
-    bool executeConcurrently_{};
+    QNetworkRequest request;
+    bool hasCaller{};
+    QPointer<QObject> caller;
+    bool cache{};
+    bool executeConcurrently{};
 
-    NetworkReplyCreatedCallback onReplyCreated_;
-    NetworkErrorCallback onError_;
-    NetworkSuccessCallback onSuccess_;
-    NetworkFinallyCallback finally_;
+    NetworkSuccessCallback onSuccess;
+    NetworkErrorCallback onError;
+    NetworkFinallyCallback finally;
 
-    NetworkRequestType requestType_ = NetworkRequestType::Get;
+    NetworkRequestType requestType = NetworkRequestType::Get;
 
-    QByteArray payload_;
-    // lifetime secured by lifetimeManager_
-    QHttpMultiPart *multiPartPayload_{};
+    QByteArray payload;
+    std::unique_ptr<QHttpMultiPart, DeleteLater> multiPartPayload;
 
-    // Timer that tracks the timeout
-    // By default, there's no explicit timeout for the request
-    // to enable the timer, the "setTimeout" function needs to be called before
-    // execute is called
-    bool hasTimeout_{};
-    int timeoutMS_{};
-    QTimer *timer_ = nullptr;
-    QObject *lifetimeManager_;
+    /// By default, there's no explicit timeout for the request.
+    /// To set a timeout, use NetworkRequest's timeout method
+    std::optional<std::chrono::milliseconds> timeout{};
 
     QString getHash();
+
+    void emitSuccess(NetworkResult &&result);
+    void emitError(NetworkResult &&result);
+    void emitFinally();
+
+    QLatin1String typeString() const;
 
 private:
     QString hash_;

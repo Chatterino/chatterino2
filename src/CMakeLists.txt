@@ -50,6 +50,9 @@ set(SOURCE_FILES
 
         common/enums/MessageOverflow.hpp
 
+        common/network/NetworkTask.hpp
+        common/network/NetworkTask.cpp
+
         controllers/accounts/Account.cpp
         controllers/accounts/Account.hpp
         controllers/accounts/AccountController.cpp
@@ -457,6 +460,7 @@ set(SOURCE_FILES
         singletons/helper/LoggingChannel.cpp
         singletons/helper/LoggingChannel.hpp
 
+        util/AbandonObject.hpp
         util/AttachToConsole.cpp
         util/AttachToConsole.hpp
         util/CancellationToken.hpp
@@ -931,6 +935,7 @@ target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     IRC_STATIC
     IRC_NAMESPACE=Communi
     )
+
 if (USE_SYSTEM_QTKEYCHAIN)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
         CMAKE_BUILD
