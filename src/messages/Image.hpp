@@ -89,7 +89,6 @@ public:
     bool animated() const;
 
     bool operator==(const Image &image) = delete;
-    bool operator!=(const Image &image) = delete;
 
 private:
     Image();

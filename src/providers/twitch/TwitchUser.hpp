@@ -37,11 +37,6 @@ struct TwitchUser {
     {
         return this->id == rhs.id;
     }
-
-    bool operator!=(const TwitchUser &rhs) const
-    {
-        return !(*this == rhs);
-    }
 };
 
 }  // namespace chatterino

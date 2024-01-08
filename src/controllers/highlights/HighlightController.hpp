@@ -59,7 +59,6 @@ struct HighlightResult {
     bool showInMentions{false};
 
     bool operator==(const HighlightResult &other) const;
-    bool operator!=(const HighlightResult &other) const;
 
     /**
      * @brief Returns true if no side-effect has been enabled

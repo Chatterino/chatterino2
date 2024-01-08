@@ -38,11 +38,6 @@ bool Subscription::operator==(const Subscription &rhs) const
            std::tie(rhs.condition, rhs.type);
 }
 
-bool Subscription::operator!=(const Subscription &rhs) const
-{
-    return !(rhs == *this);
-}
-
 QByteArray Subscription::encodeSubscribe() const
 {
     const auto *typeName = typeToString(this->type);
@@ -91,11 +86,6 @@ bool ObjectIDCondition::operator==(const ObjectIDCondition &rhs) const
     return this->objectID == rhs.objectID;
 }
 
-bool ObjectIDCondition::operator!=(const ObjectIDCondition &rhs) const
-{
-    return !(*this == rhs);
-}
-
 QDebug &operator<<(QDebug &dbg, const ObjectIDCondition &condition)
 {
     dbg << "{ objectID:" << condition.objectID << "}";
@@ -125,11 +115,6 @@ QDebug &operator<<(QDebug &dbg, const ChannelCondition &condition)
 bool ChannelCondition::operator==(const ChannelCondition &rhs) const
 {
     return this->twitchID == rhs.twitchID;
-}
-
-bool ChannelCondition::operator!=(const ChannelCondition &rhs) const
-{
-    return !(*this == rhs);
 }
 
 }  // namespace chatterino::seventv::eventapi

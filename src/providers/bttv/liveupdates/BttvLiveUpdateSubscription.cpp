@@ -60,12 +60,6 @@ bool BttvLiveUpdateSubscriptionChannel::operator==(
     return this->twitchID == rhs.twitchID;
 }
 
-bool BttvLiveUpdateSubscriptionChannel::operator!=(
-    const BttvLiveUpdateSubscriptionChannel &rhs) const
-{
-    return !(*this == rhs);
-}
-
 QDebug &operator<<(QDebug &dbg, const BttvLiveUpdateSubscriptionChannel &data)
 {
     dbg << "BttvLiveUpdateSubscriptionChannel{ twitchID:" << data.twitchID
@@ -90,12 +84,6 @@ bool BttvLiveUpdateBroadcastMe::operator==(
     const BttvLiveUpdateBroadcastMe &rhs) const
 {
     return this->twitchID == rhs.twitchID && this->userName == rhs.userName;
-}
-
-bool BttvLiveUpdateBroadcastMe::operator!=(
-    const BttvLiveUpdateBroadcastMe &rhs) const
-{
-    return !(*this == rhs);
 }
 
 QDebug &operator<<(QDebug &dbg, const BttvLiveUpdateBroadcastMe &data)

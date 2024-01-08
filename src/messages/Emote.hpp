@@ -33,7 +33,6 @@ struct Emote {
 };
 
 bool operator==(const Emote &a, const Emote &b);
-bool operator!=(const Emote &a, const Emote &b);
 
 using EmotePtr = std::shared_ptr<const Emote>;
 

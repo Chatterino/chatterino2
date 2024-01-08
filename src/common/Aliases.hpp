@@ -13,10 +13,6 @@
         {                                                  \
             return this->string == other.string;           \
         }                                                  \
-        bool operator!=(const name &other) const           \
-        {                                                  \
-            return this->string != other.string;           \
-        }                                                  \
     };                                                     \
     } /* namespace chatterino */                           \
     namespace std {                                        \

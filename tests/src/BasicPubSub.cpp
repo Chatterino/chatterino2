@@ -23,10 +23,6 @@ struct DummySubscription {
         return std::tie(this->condition, this->type) ==
                std::tie(rhs.condition, rhs.type);
     }
-    bool operator!=(const DummySubscription &rhs) const
-    {
-        return !(rhs == *this);
-    }
 
     QByteArray encodeSubscribe() const
     {

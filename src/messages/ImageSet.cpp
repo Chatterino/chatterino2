@@ -116,9 +116,4 @@ bool ImageSet::operator==(const ImageSet &other) const
            std::tie(other.imageX1_, other.imageX2_, other.imageX3_);
 }
 
-bool ImageSet::operator!=(const ImageSet &other) const
-{
-    return !this->operator==(other);
-}
-
 }  // namespace chatterino
