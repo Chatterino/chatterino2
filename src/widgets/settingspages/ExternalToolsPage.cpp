@@ -60,6 +60,12 @@ ExternalToolsPage::ExternalToolsPage()
                                  getSettings()->streamlinkUseCustomPath);
         groupLayout->setWidget(2, QFormLayout::SpanningRole, customPathCb);
 
+        auto note =
+            new QLabel("The custom path may not need the file extension.");
+        note->setWordWrap(true);
+        note->setStyleSheet("color: #bbb");
+        groupLayout->setWidget(3, QFormLayout::SpanningRole, note);
+
         auto customPath = this->createLineEdit(getSettings()->streamlinkPath);
         customPath->setPlaceholderText(
             "Path to folder where Streamlink executable can be found");
