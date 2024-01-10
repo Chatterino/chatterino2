@@ -114,6 +114,7 @@
 - Dev: Removed duplicate scale in settings dialog. (#5069)
 - Dev: Fix `NotebookTab` emitting updates for every message. (#5068)
 - Dev: Added benchmark for parsing and building recent messages. (#5071)
+- Dev: Added a note in Extarnal Tools page, Streamlink. (#5076)
 
 ## 2.4.6
 
