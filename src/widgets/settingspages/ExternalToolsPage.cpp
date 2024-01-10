@@ -14,6 +14,15 @@
 
 namespace chatterino {
 
+const char *getBinaryName()
+{
+#ifdef _WIN32
+    return "streamlink.exe";
+#else
+    return "streamlink";
+#endif
+}
+
 ExternalToolsPage::ExternalToolsPage()
 {
     LayoutCreator<ExternalToolsPage> layoutCreator(this);
@@ -60,8 +69,8 @@ ExternalToolsPage::ExternalToolsPage()
                                  getSettings()->streamlinkUseCustomPath);
         groupLayout->setWidget(2, QFormLayout::SpanningRole, customPathCb);
 
-        auto note =
-            new QLabel("The custom path may not need the file extension.");
+        auto note = new QLabel("Chatterino expects the binary to be called ");
+        note->setText(note->text().append(getBinaryName()));
         note->setWordWrap(true);
         note->setStyleSheet("color: #bbb");
         groupLayout->setWidget(3, QFormLayout::SpanningRole, note);
