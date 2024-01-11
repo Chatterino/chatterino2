@@ -222,12 +222,20 @@ void Button::enterEvent(QEnterEvent * /*event*/)
 void Button::enterEvent(QEvent * /*event*/)
 #endif
 {
-    this->mouseOver_ = true;
+    if (!this->mouseOver_)
+    {
+        this->mouseOver_ = true;
+        this->update();
+    }
 }
 
-void Button::leaveEvent(QEvent *)
+void Button::leaveEvent(QEvent * /*event*/)
 {
-    this->mouseOver_ = false;
+    if (this->mouseOver_)
+    {
+        this->mouseOver_ = false;
+        this->update();
+    }
 }
 
 void Button::mousePressEvent(QMouseEvent *event)
