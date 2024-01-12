@@ -15,21 +15,30 @@
 #include <QErrorMessage>
 #include <QFileInfo>
 #include <QProcess>
+#include <QStringBuilder>
 
 #include <functional>
+
+namespace {
+
+using namespace chatterino;
+
+QString getStreamlinkPath()
+{
+    if (getSettings()->streamlinkUseCustomPath)
+    {
+        const QString path = getSettings()->streamlinkPath;
+        return path.trimmed() % "/" % STREAMLINK_BINARY_NAME;
+    }
+
+    return STREAMLINK_BINARY_NAME.toString();
+}
+
+}  // namespace
 
 namespace chatterino {
 
 namespace {
-
-    const char *getBinaryName()
-    {
-#ifdef _WIN32
-        return "streamlink.exe";
-#else
-        return "streamlink";
-#endif
-    }
 
     bool checkStreamlinkPath(const QString &path)
     {
@@ -68,15 +77,7 @@ namespace {
     {
         auto *p = new QProcess;
 
-        const QString path = []() -> QString {
-            if (getSettings()->streamlinkUseCustomPath)
-            {
-                const QString path = getSettings()->streamlinkPath;
-                return path.trimmed() + "/" + getBinaryName();
-            }
-
-            return {getBinaryName()};
-        }();
+        const auto path = getStreamlinkPath();
 
         if (Version::instance().isFlatpak())
         {

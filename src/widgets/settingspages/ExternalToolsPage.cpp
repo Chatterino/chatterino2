@@ -4,6 +4,7 @@
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
+#include "util/StreamLink.hpp"
 
 #include <QFormLayout>
 #include <QGroupBox>
@@ -11,15 +12,6 @@
 
 #define STREAMLINK_QUALITY \
     "Choose", "Source", "High", "Medium", "Low", "Audio only"
-
-constexpr QStringView getBinaryName()
-{
-#ifdef Q_OS_WIN
-    return u"streamlink.exe";
-#else
-    return u"streamlink";
-#endif
-}
 
 namespace chatterino {
 
@@ -72,7 +64,7 @@ ExternalToolsPage::ExternalToolsPage()
         auto note = new QLabel(
             QStringLiteral(
                 "Chatterino expects the executable to be called \"%1\".")
-                .arg(getBinaryName()));
+                .arg(STREAMLINK_BINARY_NAME));
         note->setWordWrap(true);
         note->setStyleSheet("color: #bbb");
         groupLayout->setWidget(3, QFormLayout::SpanningRole, note);
