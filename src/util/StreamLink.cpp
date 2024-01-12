@@ -34,72 +34,68 @@ QString getStreamlinkPath()
     return STREAMLINK_BINARY_NAME.toString();
 }
 
-}  // namespace
+void showStreamlinkNotFoundError()
+{
+    static auto *msg = new QErrorMessage;
+    msg->setWindowTitle("Chatterino - streamlink not found");
 
-namespace chatterino {
-
-namespace {
-
-    void showStreamlinkNotFoundError()
+    if (getSettings()->streamlinkUseCustomPath)
     {
-        static QErrorMessage *msg = new QErrorMessage;
-        msg->setWindowTitle("Chatterino - streamlink not found");
+        msg->showMessage("Unable to find Streamlink executable\nMake sure "
+                         "your custom path is pointing to the DIRECTORY "
+                         "where the streamlink executable is located");
+    }
+    else
+    {
+        msg->showMessage(
+            "Unable to find Streamlink executable.\nIf you have Streamlink "
+            "installed, you might need to enable the custom path option");
+    }
+}
 
-        if (getSettings()->streamlinkUseCustomPath)
-        {
-            msg->showMessage("Unable to find Streamlink executable\nMake sure "
-                             "your custom path is pointing to the DIRECTORY "
-                             "where the streamlink executable is located");
-        }
-        else
-        {
-            msg->showMessage(
-                "Unable to find Streamlink executable.\nIf you have Streamlink "
-                "installed, you might need to enable the custom path option");
-        }
+QProcess *createStreamlinkProcess()
+{
+    auto *p = new QProcess;
+
+    const auto path = getStreamlinkPath();
+
+    if (Version::instance().isFlatpak())
+    {
+        p->setProgram("flatpak-spawn");
+        p->setArguments({"--host", path});
+    }
+    else
+    {
+        p->setProgram(path);
     }
 
-    QProcess *createStreamlinkProcess()
-    {
-        auto *p = new QProcess;
-
-        const auto path = getStreamlinkPath();
-
-        if (Version::instance().isFlatpak())
+    QObject::connect(p, &QProcess::errorOccurred, [=](auto err) {
+        if (err == QProcess::FailedToStart)
         {
-            p->setProgram("flatpak-spawn");
-            p->setArguments({"--host", path});
+            showStreamlinkNotFoundError();
         }
         else
         {
-            p->setProgram(path);
+            qCWarning(chatterinoStreamlink) << "Error occurred" << err;
         }
 
-        QObject::connect(p, &QProcess::errorOccurred, [=](auto err) {
-            if (err == QProcess::FailedToStart)
-            {
-                showStreamlinkNotFoundError();
-            }
-            else
-            {
-                qCWarning(chatterinoStreamlink) << "Error occurred" << err;
-            }
+        p->deleteLater();
+    });
 
+    QObject::connect(
+        p,
+        static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
+            &QProcess::finished),
+        [=](int /*exitCode*/, QProcess::ExitStatus /*exitStatus*/) {
             p->deleteLater();
         });
 
-        QObject::connect(
-            p,
-            static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
-                &QProcess::finished),
-            [=](int /*exitCode*/, QProcess::ExitStatus /*exitStatus*/) {
-                p->deleteLater();
-            });
-
-        return p;
-    }
+    return p;
+}
 
 }  // namespace
+
+namespace chatterino {
 
 void getStreamQualities(const QString &channelURL,
                         std::function<void(QStringList)> cb)
