@@ -40,20 +40,6 @@ namespace chatterino {
 
 namespace {
 
-    bool checkStreamlinkPath(const QString &path)
-    {
-        QFileInfo fileinfo(path);
-
-        if (!fileinfo.exists())
-        {
-            return false;
-            // throw Exception(fS("Streamlink path ({}) is invalid, file does
-            // not exist", path));
-        }
-
-        return fileinfo.isExecutable();
-    }
-
     void showStreamlinkNotFoundError()
     {
         static QErrorMessage *msg = new QErrorMessage;
