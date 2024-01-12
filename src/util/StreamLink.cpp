@@ -31,15 +31,6 @@ namespace {
 #endif
     }
 
-    const char *getDefaultBinaryPath()
-    {
-#ifdef _WIN32
-        return "C:\\Program Files (x86)\\Streamlink\\bin\\streamlink.exe";
-#else
-        return "/usr/bin/streamlink";
-#endif
-    }
-
     bool checkStreamlinkPath(const QString &path)
     {
         QFileInfo fileinfo(path);
