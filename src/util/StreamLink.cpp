@@ -120,7 +120,7 @@ void getStreamQualities(const QString &channelURL,
                 QStringList split =
                     lastLine.right(lastLine.length() - 19).split(", ");
 
-                for (int i = split.length() - 1; i >= 0; i--)
+                for (auto i = split.length() - 1; i >= 0; i--)
                 {
                     QString option = split.at(i);
                     if (option == "best)")
