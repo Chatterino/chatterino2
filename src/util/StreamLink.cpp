@@ -100,7 +100,7 @@ namespace chatterino {
 void getStreamQualities(const QString &channelURL,
                         std::function<void(QStringList)> cb)
 {
-    auto p = createStreamlinkProcess();
+    auto *p = createStreamlinkProcess();
 
     QObject::connect(
         p,
@@ -160,7 +160,7 @@ void getStreamQualities(const QString &channelURL,
 void openStreamlink(const QString &channelURL, const QString &quality,
                     QStringList extraArguments)
 {
-    auto proc = createStreamlinkProcess();
+    auto *proc = createStreamlinkProcess();
     auto arguments = proc->arguments()
                      << extraArguments << channelURL << quality;
 
@@ -188,8 +188,8 @@ void openStreamlinkForChannel(const QString &channel)
         getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
     if (currentPage != nullptr)
     {
-        if (auto currentSplit = currentPage->getSelectedSplit();
-            currentSplit != nullptr)
+        auto *currentSplit = currentPage->getSelectedSplit();
+        if (currentSplit != nullptr)
         {
             currentSplit->getChannel()->addMessage(
                 makeSystemMessage(INFO_TEMPLATE.arg(channel)));
