@@ -1,4 +1,4 @@
-#include "ExternalToolsPage.hpp"
+#include "widgets/settingspages/ExternalToolsPage.hpp"
 
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
