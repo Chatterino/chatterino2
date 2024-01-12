@@ -90,6 +90,13 @@ TwitchChannel::TwitchChannel(const QString &name)
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
+    if (!getApp())
+    {
+        // This is intended for tests and benchmarks.
+        // Irc, Pubsub, live-updates, and live-notifications aren't mocked there.
+        return;
+    }
+
     this->bSignals_.emplace_back(
         getApp()->accounts->twitch.currentUserChanged.connect([this] {
             this->setMod(false);
@@ -222,6 +229,13 @@ TwitchChannel::TwitchChannel(const QString &name)
 
 TwitchChannel::~TwitchChannel()
 {
+    if (!getApp())
+    {
+        // This is for tests and benchmarks, where live-updates aren't mocked
+        // see comment in constructor.
+        return;
+    }
+
     getApp()->twitch->dropSeventvChannel(this->seventvUserID_,
                                          this->seventvEmoteSetID_);
 
@@ -285,8 +299,9 @@ void TwitchChannel::refreshBTTVChannelEmotes(bool manualRefresh)
         weakOf<Channel>(this), this->roomId(), this->getLocalizedName(),
         [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
             if (auto shared = weak.lock())
-                this->bttvEmotes_.set(
-                    std::make_shared<EmoteMap>(std::move(emoteMap)));
+            {
+                this->setBttvEmotes(std::make_shared<const EmoteMap>(emoteMap));
+            }
         },
         manualRefresh);
 }
@@ -303,8 +318,9 @@ void TwitchChannel::refreshFFZChannelEmotes(bool manualRefresh)
         weakOf<Channel>(this), this->roomId(),
         [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
             if (auto shared = weak.lock())
-                this->ffzEmotes_.set(
-                    std::make_shared<EmoteMap>(std::move(emoteMap)));
+            {
+                this->setFfzEmotes(std::make_shared<const EmoteMap>(emoteMap));
+            }
         },
         [this, weak = weakOf<Channel>(this)](auto &&modBadge) {
             if (auto shared = weak.lock())
@@ -335,8 +351,8 @@ void TwitchChannel::refreshSevenTVChannelEmotes(bool manualRefresh)
                                              auto channelInfo) {
             if (auto shared = weak.lock())
             {
-                this->seventvEmotes_.set(std::make_shared<EmoteMap>(
-                    std::forward<decltype(emoteMap)>(emoteMap)));
+                this->setSeventvEmotes(
+                    std::make_shared<const EmoteMap>(emoteMap));
                 this->updateSeventvData(channelInfo.userID,
                                         channelInfo.emoteSetID);
                 this->seventvUserTwitchConnectionIndex_ =
@@ -344,6 +360,21 @@ void TwitchChannel::refreshSevenTVChannelEmotes(bool manualRefresh)
             }
         },
         manualRefresh);
+}
+
+void TwitchChannel::setBttvEmotes(std::shared_ptr<const EmoteMap> &&map)
+{
+    this->bttvEmotes_.set(std::move(map));
+}
+
+void TwitchChannel::setFfzEmotes(std::shared_ptr<const EmoteMap> &&map)
+{
+    this->ffzEmotes_.set(std::move(map));
+}
+
+void TwitchChannel::setSeventvEmotes(std::shared_ptr<const EmoteMap> &&map)
+{
+    this->seventvEmotes_.set(std::move(map));
 }
 
 void TwitchChannel::addQueuedRedemption(const QString &rewardId,
@@ -703,9 +734,10 @@ void TwitchChannel::setStaff(bool value)
 
 bool TwitchChannel::isBroadcaster() const
 {
-    auto app = getApp();
+    auto *app = getIApp();
 
-    return this->getName() == app->accounts->twitch.getCurrent()->getUserName();
+    return this->getName() ==
+           app->getAccounts()->twitch.getCurrent()->getUserName();
 }
 
 bool TwitchChannel::hasHighRateLimit() const
@@ -733,8 +765,12 @@ void TwitchChannel::setRoomId(const QString &id)
     if (*this->roomID_.accessConst() != id)
     {
         *this->roomID_.access() = id;
-        this->roomIdChanged();
-        this->loadRecentMessages();
+        // This is intended for tests and benchmarks. See comment in constructor.
+        if (getApp())
+        {
+            this->roomIdChanged();
+            this->loadRecentMessages();
+        }
         this->disconnected_ = false;
         this->lastConnectedAt_ = std::chrono::system_clock::now();
     }
@@ -1253,15 +1289,15 @@ void TwitchChannel::refreshPubSub()
 
     auto currentAccount = getApp()->accounts->twitch.getCurrent();
 
-    getApp()->twitch->pubsub->setAccount(currentAccount);
+    getIApp()->getTwitchPubSub()->setAccount(currentAccount);
 
-    getApp()->twitch->pubsub->listenToChannelModerationActions(roomId);
+    getIApp()->getTwitchPubSub()->listenToChannelModerationActions(roomId);
     if (this->hasModRights())
     {
-        getApp()->twitch->pubsub->listenToAutomod(roomId);
-        getApp()->twitch->pubsub->listenToLowTrustUsers(roomId);
+        getIApp()->getTwitchPubSub()->listenToAutomod(roomId);
+        getIApp()->getTwitchPubSub()->listenToLowTrustUsers(roomId);
     }
-    getApp()->twitch->pubsub->listenToChannelPointRewards(roomId);
+    getIApp()->getTwitchPubSub()->listenToChannelPointRewards(roomId);
 }
 
 void TwitchChannel::refreshChatters()

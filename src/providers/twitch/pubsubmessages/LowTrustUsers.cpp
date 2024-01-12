@@ -21,8 +21,12 @@ PubSubLowTrustUsersMessage::PubSubLowTrustUsersMessage(const QJsonObject &root)
     {
         this->msgID = data.value("message_id").toString();
         this->sentAt = data.value("sent_at").toString();
-        this->text =
-            data.value("message_content").toObject().value("text").toString();
+        const auto content = data.value("message_content").toObject();
+        this->text = content.value("text").toString();
+        for (const auto &part : content.value("fragments").toArray())
+        {
+            this->fragments.emplace_back(part.toObject());
+        }
 
         // the rest of the data is within a nested object
         data = data.value("low_trust_user").toObject();
@@ -35,23 +39,22 @@ PubSubLowTrustUsersMessage::PubSubLowTrustUsersMessage(const QJsonObject &root)
         this->suspiciousUserColor =
             QColor(sender.value("chat_color").toString());
 
-        std::vector<LowTrustUserChatBadge> badges;
         for (const auto &badge : sender.value("badges").toArray())
         {
-            badges.emplace_back(badge.toObject());
+            const auto badgeObj = badge.toObject();
+            const auto badgeID = badgeObj.value("id").toString();
+            const auto badgeVersion = badgeObj.value("version").toString();
+            this->senderBadges.emplace_back(Badge{badgeID, badgeVersion});
         }
-        this->senderBadges = badges;
 
         const auto sharedValue = data.value("shared_ban_channel_ids");
-        std::vector<QString> sharedIDs;
         if (!sharedValue.isNull())
         {
             for (const auto &id : sharedValue.toArray())
             {
-                sharedIDs.emplace_back(id.toString());
+                this->sharedBanChannelIDs.emplace_back(id.toString());
             }
         }
-        this->sharedBanChannelIDs = sharedIDs;
     }
     else
     {
@@ -88,17 +91,15 @@ PubSubLowTrustUsersMessage::PubSubLowTrustUsersMessage(const QJsonObject &root)
         this->evasionEvaluation = oEvaluation.value();
     }
 
-    FlagsEnum<RestrictionType> restrictions;
     for (const auto &rType : data.value("types").toArray())
     {
         if (const auto oRestriction = magic_enum::enum_cast<RestrictionType>(
                 rType.toString().toStdString());
             oRestriction.has_value())
         {
-            restrictions.set(oRestriction.value());
+            this->restrictionTypes.set(oRestriction.value());
         }
     }
-    this->restrictionTypes = restrictions;
 }
 
 }  // namespace chatterino

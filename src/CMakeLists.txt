@@ -50,6 +50,9 @@ set(SOURCE_FILES
 
         common/enums/MessageOverflow.hpp
 
+        common/network/NetworkTask.hpp
+        common/network/NetworkTask.cpp
+
         controllers/accounts/Account.cpp
         controllers/accounts/Account.hpp
         controllers/accounts/AccountController.cpp
@@ -476,6 +479,7 @@ set(SOURCE_FILES
         singletons/helper/LoggingChannel.cpp
         singletons/helper/LoggingChannel.hpp
 
+        util/AbandonObject.hpp
         util/AttachToConsole.cpp
         util/AttachToConsole.hpp
         util/CancellationToken.hpp
@@ -609,12 +613,25 @@ set(SOURCE_FILES
         widgets/dialogs/switcher/SwitchSplitItem.cpp
         widgets/dialogs/switcher/SwitchSplitItem.hpp
 
+        widgets/helper/color/AlphaSlider.cpp
+        widgets/helper/color/AlphaSlider.hpp
+        widgets/helper/color/Checkerboard.cpp
+        widgets/helper/color/Checkerboard.hpp
+        widgets/helper/color/ColorButton.cpp
+        widgets/helper/color/ColorButton.hpp
+        widgets/helper/color/ColorInput.cpp
+        widgets/helper/color/ColorInput.hpp
+        widgets/helper/color/ColorItemDelegate.cpp
+        widgets/helper/color/ColorItemDelegate.hpp
+        widgets/helper/color/HueSlider.cpp
+        widgets/helper/color/HueSlider.hpp
+        widgets/helper/color/SBCanvas.cpp
+        widgets/helper/color/SBCanvas.hpp
+
         widgets/helper/Button.cpp
         widgets/helper/Button.hpp
         widgets/helper/ChannelView.cpp
         widgets/helper/ChannelView.hpp
-        widgets/helper/ColorButton.cpp
-        widgets/helper/ColorButton.hpp
         widgets/helper/ComboBoxItemDelegate.cpp
         widgets/helper/ComboBoxItemDelegate.hpp
         widgets/helper/DebugPopup.cpp
@@ -629,8 +646,6 @@ set(SOURCE_FILES
         widgets/helper/NotebookButton.hpp
         widgets/helper/NotebookTab.cpp
         widgets/helper/NotebookTab.hpp
-        widgets/helper/QColorPicker.cpp
-        widgets/helper/QColorPicker.hpp
         widgets/helper/RegExpItemDelegate.cpp
         widgets/helper/RegExpItemDelegate.hpp
         widgets/helper/TrimRegExpValidator.cpp
@@ -944,6 +959,7 @@ target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     IRC_STATIC
     IRC_NAMESPACE=Communi
     )
+
 if (USE_SYSTEM_QTKEYCHAIN)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
         CMAKE_BUILD

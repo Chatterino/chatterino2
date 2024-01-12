@@ -128,7 +128,7 @@ void updateReplyParticipatedStatus(const QVariantMap &tags,
                                    bool isNew)
 {
     const auto &currentLogin =
-        getApp()->accounts->twitch.getCurrent()->getUserName();
+        getIApp()->getAccounts()->twitch.getCurrent()->getUserName();
 
     if (thread->subscribed())
     {

@@ -173,7 +173,35 @@ bool checkEmoteVisibility(const QJsonObject &emoteData,
     return !flags.has(SeventvEmoteFlag::ContentTwitchDisallowed);
 }
 
-EmoteMap parseEmotes(const QJsonArray &emoteSetEmotes, SeventvEmoteSetKind kind)
+EmotePtr createUpdatedEmote(const EmotePtr &oldEmote,
+                            const EmoteUpdateDispatch &dispatch,
+                            SeventvEmoteSetKind kind)
+{
+    bool toNonAliased = oldEmote->baseName.has_value() &&
+                        dispatch.emoteName == oldEmote->baseName->string;
+
+    auto baseName = oldEmote->baseName.value_or(oldEmote->name);
+    auto emote = std::make_shared<const Emote>(Emote(
+        {EmoteName{dispatch.emoteName}, oldEmote->images,
+         toNonAliased
+             ? createTooltip(dispatch.emoteName, oldEmote->author.string, kind)
+             : createAliasedTooltip(dispatch.emoteName, baseName.string,
+                                    oldEmote->author.string, kind),
+         oldEmote->homePage, oldEmote->zeroWidth, oldEmote->id,
+         oldEmote->author, makeConditionedOptional(!toNonAliased, baseName)}));
+    return emote;
+}
+
+}  // namespace
+
+namespace chatterino {
+
+using namespace seventv::eventapi;
+using namespace seventv::detail;
+using namespace literals;
+
+EmoteMap seventv::detail::parseEmotes(const QJsonArray &emoteSetEmotes,
+                                      SeventvEmoteSetKind kind)
 {
     auto emotes = EmoteMap();
 
@@ -202,32 +230,6 @@ EmoteMap parseEmotes(const QJsonArray &emoteSetEmotes, SeventvEmoteSetKind kind)
 
     return emotes;
 }
-
-EmotePtr createUpdatedEmote(const EmotePtr &oldEmote,
-                            const EmoteUpdateDispatch &dispatch,
-                            SeventvEmoteSetKind kind)
-{
-    bool toNonAliased = oldEmote->baseName.has_value() &&
-                        dispatch.emoteName == oldEmote->baseName->string;
-
-    auto baseName = oldEmote->baseName.value_or(oldEmote->name);
-    auto emote = std::make_shared<const Emote>(Emote(
-        {EmoteName{dispatch.emoteName}, oldEmote->images,
-         toNonAliased
-             ? createTooltip(dispatch.emoteName, oldEmote->author.string, kind)
-             : createAliasedTooltip(dispatch.emoteName, baseName.string,
-                                    oldEmote->author.string, kind),
-         oldEmote->homePage, oldEmote->zeroWidth, oldEmote->id,
-         oldEmote->author, makeConditionedOptional(!toNonAliased, baseName)}));
-    return emote;
-}
-
-}  // namespace
-
-namespace chatterino {
-
-using namespace seventv::eventapi;
-using namespace literals;
 
 SeventvEmotes::SeventvEmotes()
     : global_(std::make_shared<EmoteMap>())

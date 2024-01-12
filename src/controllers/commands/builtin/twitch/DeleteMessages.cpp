@@ -102,7 +102,7 @@ QString deleteAllMessages(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /clear command only works in Twitch channels"));
+            "The /clear command only works in Twitch channels."));
         return "";
     }
 
@@ -121,7 +121,7 @@ QString deleteOneMessage(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /delete command only works in Twitch channels"));
+            "The /delete command only works in Twitch channels."));
         return "";
     }
 

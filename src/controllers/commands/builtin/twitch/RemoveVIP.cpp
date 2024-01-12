@@ -23,7 +23,7 @@ QString removeVIP(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /unvip command only works in Twitch channels"));
+            "The /unvip command only works in Twitch channels."));
         return "";
     }
     if (ctx.words.size() < 2)

@@ -71,6 +71,7 @@ public:
     virtual HighlightController *getHighlights() = 0;
     virtual NotificationController *getNotifications() = 0;
     virtual ITwitchIrcServer *getTwitch() = 0;
+    virtual PubSub *getTwitchPubSub() = 0;
     virtual Logging *getChatLogger() = 0;
     virtual ChatterinoBadges *getChatterinoBadges() = 0;
     virtual FfzBadges *getFfzBadges() = 0;
@@ -101,6 +102,12 @@ public:
     Application(Application &&) = delete;
     Application &operator=(const Application &) = delete;
     Application &operator=(Application &&) = delete;
+
+    /**
+     * In the interim, before we remove _exit(0); from RunGui.cpp,
+     * this will destroy things we know can be destroyed
+     */
+    void fakeDtor();
 
     void initialize(Settings &settings, Paths &paths);
     void load();
@@ -135,6 +142,7 @@ public:
 
 private:
     TwitchLiveController *const twitchLiveController{};
+    std::unique_ptr<PubSub> twitchPubSub;
     const std::unique_ptr<Logging> logging;
 
 public:
@@ -188,6 +196,7 @@ public:
         return this->highlights;
     }
     ITwitchIrcServer *getTwitch() override;
+    PubSub *getTwitchPubSub() override;
     Logging *getChatLogger() override;
     ChatterinoBadges *getChatterinoBadges() override
     {

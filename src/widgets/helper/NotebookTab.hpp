@@ -53,6 +53,8 @@ public:
     bool isLive() const;
 
     void setHighlightState(HighlightState style);
+    HighlightState highlightState() const;
+
     void setHighlightsEnabled(const bool &newVal);
     bool hasHighlightsEnabled() const;
 
@@ -83,6 +85,10 @@ protected:
 
     void mouseMoveEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
+
+    /// This exists as an alias to its base classes update, and is virtual
+    /// to allow for mocking
+    virtual void update();
 
 private:
     void showRenameDialog();

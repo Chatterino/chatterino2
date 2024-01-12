@@ -32,6 +32,8 @@ static const QMap<QString, QString> validIdentifiersMap = {
     {"flags.whisper", "whisper message?"},
     {"flags.reply", "reply message?"},
     {"flags.automod", "automod message?"},
+    {"flags.restricted", "restricted message?"},
+    {"flags.monitored", "monitored message?"},
     {"message.content", "message text"},
     {"message.length", "message length"}};
 

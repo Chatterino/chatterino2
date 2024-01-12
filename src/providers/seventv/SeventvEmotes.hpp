@@ -4,6 +4,7 @@
 #include "common/Atomic.hpp"
 #include "common/FlagsEnum.hpp"
 
+#include <QJsonArray>
 #include <QJsonObject>
 
 #include <memory>
@@ -76,6 +77,13 @@ enum class SeventvEmoteSetFlag : uint32_t {
     Commercial = (1 << 3),
 };
 using SeventvEmoteSetFlags = FlagsEnum<SeventvEmoteSetFlag>;
+
+namespace seventv::detail {
+
+    EmoteMap parseEmotes(const QJsonArray &emoteSetEmotes,
+                         SeventvEmoteSetKind kind);
+
+}  // namespace seventv::detail
 
 class SeventvEmotes final
 {

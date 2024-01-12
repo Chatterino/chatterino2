@@ -95,7 +95,8 @@ public:
     static MessagePtr makeAutomodInfoMessage(const AutomodInfoAction &action);
 
     static std::pair<MessagePtr, MessagePtr> makeLowTrustUserMessage(
-        const PubSubLowTrustUsersMessage &action, const QString &channelName);
+        const PubSubLowTrustUsersMessage &action, const QString &channelName,
+        const TwitchChannel *twitchChannel);
     static MessagePtr makeLowTrustUpdateMessage(
         const PubSubLowTrustUsersMessage &action);
 
@@ -119,7 +120,6 @@ private:
 
     void runIgnoreReplaces(std::vector<TwitchEmoteOccurrence> &twitchEmotes);
 
-    std::optional<EmotePtr> getTwitchBadge(const Badge &badge) const;
     Outcome tryAppendEmote(const EmoteName &name) override;
 
     void addWords(const QStringList &words,

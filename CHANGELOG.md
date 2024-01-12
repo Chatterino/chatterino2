@@ -4,7 +4,7 @@
 
 - Major: Allow use of Twitch follower emotes in other channels if subscribed. (#4922)
 - Major: Add `/automod` split to track automod caught messages across all open channels the user moderates. (#4986, #5026)
-- Major: Show restricted chat messages and suspicious treatment updates. (#5056)
+- Major: Show restricted chat messages and suspicious treatment updates. (#5056, #5060)
 - Minor: Migrate to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
 - Minor: The account switcher is now styled to match your theme. (#4817)
 - Minor: Add an invisible resize handle to the bottom of frameless user info popups and reply thread popups. (#4795)
@@ -20,6 +20,8 @@
 - Minor: Add a new completion API for experimental plugins feature. (#5000, #5047)
 - Minor: Re-enabled _Restart on crash_ option on Windows. (#5012)
 - Minor: The whisper highlight color can now be configured through the settings. (#5053)
+- Minor: Added missing periods at various moderator messages and commands. (#5061)
+- Minor: Improved color selection and display. (#5057)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
 - Bugfix: Trimmed custom streamlink paths on all platforms making sure you don't accidentally add spaces at the beginning or end of its path. (#4834)
@@ -61,6 +63,7 @@
 - Bugfix: Show user text input within watch streak notices. (#5029)
 - Bugfix: Fixed avatar in usercard and moderation button triggering when releasing the mouse outside their area. (#5052)
 - Bugfix: Fixed moderator-only topics being subscribed to for non-moderators. (#5056)
+- Bugfix: Fixed a bug where buttons would remain in a hovered state after leaving them. (#5077)
 - Dev: Run miniaudio in a separate thread, and simplify it to not manage the device ourselves. There's a chance the simplification is a bad idea. (#4978)
 - Dev: Change clang-format from v14 to v16. (#4929)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
@@ -88,6 +91,7 @@
 - Dev: Refactor `DebugCount` and add copy button to debug popup. (#4921)
 - Dev: Refactor `common/Credentials`. (#4979)
 - Dev: Refactor chat logger. (#5058)
+- Dev: Refactor Twitch PubSub client. (#5059)
 - Dev: Changed lifetime of context menus. (#4924)
 - Dev: Renamed `tools` directory to `scripts`. (#5035)
 - Dev: Refactor `ChannelView`, removing a bunch of clang-tidy warnings. (#4926)
@@ -107,6 +111,10 @@
 - Dev: Refactor Args to be less of a singleton. (#5041)
 - Dev: Channels without any animated elements on screen will skip updates from the GIF timer. (#5042, #5043, #5045)
 - Dev: Autogenerate docs/plugin-meta.lua. (#5055)
+- Dev: Refactor `NetworkPrivate`. (#5063)
+- Dev: Removed duplicate scale in settings dialog. (#5069)
+- Dev: Fix `NotebookTab` emitting updates for every message. (#5068)
+- Dev: Added benchmark for parsing and building recent messages. (#5071)
 
 ## 2.4.6
 
