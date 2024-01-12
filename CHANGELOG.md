@@ -64,6 +64,7 @@
 - Bugfix: Show user text input within watch streak notices. (#5029)
 - Bugfix: Fixed avatar in usercard and moderation button triggering when releasing the mouse outside their area. (#5052)
 - Bugfix: Fixed moderator-only topics being subscribed to for non-moderators. (#5056)
+- Bugfix: Fixed a bug where buttons would remain in a hovered state after leaving them. (#5077)
 - Dev: Run miniaudio in a separate thread, and simplify it to not manage the device ourselves. There's a chance the simplification is a bad idea. (#4978)
 - Dev: Change clang-format from v14 to v16. (#4929)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
