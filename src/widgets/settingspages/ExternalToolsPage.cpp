@@ -12,16 +12,16 @@
 #define STREAMLINK_QUALITY \
     "Choose", "Source", "High", "Medium", "Low", "Audio only"
 
-namespace chatterino {
-
-const char *getBinaryName()
+constexpr QStringView getBinaryName()
 {
-#ifdef _WIN32
-    return "streamlink.exe";
+#ifdef Q_OS_WIN
+    return u"streamlink.exe";
 #else
-    return "streamlink";
+    return u"streamlink";
 #endif
 }
+
+namespace chatterino {
 
 ExternalToolsPage::ExternalToolsPage()
 {
@@ -69,8 +69,10 @@ ExternalToolsPage::ExternalToolsPage()
                                  getSettings()->streamlinkUseCustomPath);
         groupLayout->setWidget(2, QFormLayout::SpanningRole, customPathCb);
 
-        auto note = new QLabel("Chatterino expects the binary to be called ");
-        note->setText(note->text().append(getBinaryName()));
+        auto note = new QLabel(
+            QStringLiteral(
+                "Chatterino expects the executable to be called \"%1\".")
+                .arg(getBinaryName()));
         note->setWordWrap(true);
         note->setStyleSheet("color: #bbb");
         groupLayout->setWidget(3, QFormLayout::SpanningRole, note);
