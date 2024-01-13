@@ -304,12 +304,13 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get -y install \
-              gcc-10 \
-              g++-10
+              clang-12
 
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-12 60
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-12 60
           # Prioritize GCC/G++ 10 over default-installed GCC/G++ 9
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 60
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 60
+          sudo update-alternatives --install /usr/bin/cc cc /usr/bin/clang 60
+          sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 60
 
       - name: Apply Qt patches (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.qt-version, '5.')
@@ -327,7 +328,6 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
             -DUSE_PRECOMPILED_HEADERS=OFF \
-            -DUSE_SUBMODULE_BOOST=ON \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
             -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
             -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
