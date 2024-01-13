@@ -422,7 +422,14 @@ void WindowManager::save()
     {
         return;
     }
-    qCDebug(chatterinoWindowmanager) << "[WindowManager] Saving";
+
+    if (this->shuttingDown_)
+    {
+        qCDebug(chatterinoWindowmanager) << "Skipping save (shutting down)";
+        return;
+    }
+
+    qCDebug(chatterinoWindowmanager) << "Saving";
     assertInGuiThread();
     QJsonDocument document;
 
@@ -700,6 +707,9 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
 void WindowManager::closeAll()
 {
     assertInGuiThread();
+
+    qCDebug(chatterinoWindowmanager) << "Shutting down (closing windows)";
+    this->shuttingDown_ = true;
 
     for (Window *window : windows_)
     {

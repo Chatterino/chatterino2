@@ -140,6 +140,7 @@ private:
     const QString windowLayoutFilePath;
 
     bool initialized_ = false;
+    bool shuttingDown_ = false;
 
     QPoint emotePopupPos_;
 
