@@ -145,14 +145,15 @@ jobs:
         run: |
           ls -l
           mv Chatterino-ubuntu-22.04-Qt-5.15.2.deb Chatterino-Ubuntu-22.04.deb
-          mv Chatterino-ubuntu-22.04-Qt-6.2.4.deb EXPERIMENTAL-Chatterino-Ubuntu-22.04-Qt6.deb
+          mv Chatterino-ubuntu-22.04-Qt-6.2.4.deb Chatterino-Ubuntu-22.04-Qt6.deb
 
           mv Chatterino-x86_64-5.15.2.AppImage Chatterino-x86_64.AppImage
-          mv Chatterino-x86_64-6.2.4.AppImage EXPERIMENTAL-Chatterino-x86_64-Qt6.AppImage
+          mv Chatterino-x86_64-6.2.4.AppImage Chatterino-x86_64-Qt6.AppImage
 
           mv chatterino-windows-x86-64-Qt-6.5.0-symbols.pdb.7z Chatterino-Windows-debug-symbols.pdb.7z
 
-          mv chatterino-macos-Qt-5.15.2.dmg Chatterino.dmg
+          mv chatterino-macos-Qt-6.5.0-x86_64.dmg Chatterino-x86_64.dmg
+          mv chatterino-macos-Qt-6.5.0-arm64.dmg Chatterino-arm64.dmg
 
       - name: Hash files
         working-directory: build

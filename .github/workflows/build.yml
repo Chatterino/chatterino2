@@ -28,7 +28,7 @@ env:
 
 jobs:
   build:
-    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (LTO:${{ matrix.force-lto }}, crashpad:${{ matrix.skip-crashpad && 'off' || 'on' }})"
+    name: "Build ${{ matrix.os }}${{ matrix.arch && format(' ({0})', matrix.arch) || ''}}, Qt ${{ matrix.qt-version }} (LTO:${{ matrix.force-lto }}, crashpad:${{ matrix.skip-crashpad && 'off' || 'on' }})"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -53,9 +53,18 @@ jobs:
             plugins: true
             skip-artifact: false
             skip-crashpad: false
-          # macOS
-          - os: macos-latest
-            qt-version: 5.15.2
+          # macOS (ARM)
+          - os: macos-12
+            qt-version: 6.5.0
+            arch: arm64
+            force-lto: false
+            plugins: false
+            skip-artifact: false
+            skip-crashpad: false
+          # macOS (x86)
+          - os: macos-12
+            qt-version: 6.5.0
+            arch: x86_64
             force-lto: false
             plugins: false
             skip-artifact: false
@@ -392,7 +401,18 @@ jobs:
       - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-          brew install boost openssl rapidjson p7zip create-dmg cmake tree libavif
+          LIBS=(boost openssl rapidjson)
+          for package in "${LIBS[@]}"
+          do
+            brew fetch --force --bottle-tag=${{ matrix.arch }}_monterey $package
+            formula=$(brew --cache --bottle-tag=${{ matrix.arch }}_monterey $package)
+            if [[ $package == "openssl" ]]; then
+              brew reinstall $formula
+            else
+              brew install $formula
+            fi
+          done
+          brew install p7zip create-dmg cmake tree
         shell: bash
 
       - name: Build (MacOS)
@@ -409,6 +429,7 @@ jobs:
               -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
               -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
               -DCHATTERINO_NO_AVIF_PLUGIN=On \
+              -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
         shell: bash
@@ -416,12 +437,20 @@ jobs:
       - name: Package (MacOS)
         if: startsWith(matrix.os, 'macos')
         env:
-          OUTPUT_DMG_PATH: chatterino-macos-Qt-${{ matrix.qt-version}}.dmg
+          OUTPUT_DMG_PATH: chatterino-macos-Qt-${{ matrix.qt-version}}-${{ matrix.arch }}.dmg
         run: |
           ls -la
           pwd
           ls -la build || true
           cd build
+          export MACOS_CODESIGN_CERTIFICATE="-"
+          echo "-> $MACOS_CODESIGN_CERTIFICATE"
+
+          brew reinstall openssl
+          echo "Downloading kimageformats plugins"
+          curl -SsfLo kimg.zip "https://github.com/nerixyz/kimageformats-binaries/releases/download/cont/kimageformats-macos-latest-${{ matrix.qt-version}}.zip"
+          ${{matrix.arch == 'arm64' && 'brew reinstall $(brew --cache --bottle-tag=arm64_monterey openssl)' || ''}}
+
           ./../.CI/MacDeploy.sh
           ./../.CI/CreateDMG.sh
         shell: bash
@@ -430,8 +459,8 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         uses: actions/upload-artifact@v4
         with:
-          name: chatterino-macos-Qt-${{ matrix.qt-version }}.dmg
-          path: build/chatterino-macos-Qt-${{ matrix.qt-version }}.dmg
+          name: chatterino-macos-Qt-${{ matrix.qt-version }}-${{ matrix.arch }}.dmg
+          path: build/chatterino-macos-Qt-${{ matrix.qt-version }}-${{ matrix.arch }}.dmg
   create-release:
     needs: build
     runs-on: ubuntu-latest
@@ -479,16 +508,23 @@ jobs:
           path: release-artifacts/
 
       - uses: actions/download-artifact@v4
-        name: macOS x86_64 Qt5.15.2 dmg
+        name: macOS x86_64 Qt6.5.0 x86 dmg
         with:
-          name: chatterino-macos-Qt-5.15.2.dmg
+          name: chatterino-macos-Qt-6.5.0-x86_64.dmg
+          path: release-artifacts/
+
+      - uses: actions/download-artifact@v4
+        name: macOS x86_64 Qt6.5.0 ARM dmg
+        with:
+          name: chatterino-macos-Qt-6.5.0-arm64.dmg
           path: release-artifacts/
 
       - name: Rename artifacts
         run: |
           ls -l
-          # Rename the macos build to indicate that it's for macOS 10.15 users
-          mv chatterino-macos-Qt-5.15.2.dmg Chatterino-macOS-12.0.dmg
+          # Rename the macos build to indicate that it's for macOS 12.0 users
+          mv chatterino-macos-Qt-6.5.0-x86_64.dmg Chatterino-macOS-12.0-x86_64.dmg
+          mv chatterino-macos-Qt-6.5.0-arm64.dmg Chatterino-macOS-12.0-arm64.dmg
         working-directory: release-artifacts
         shell: bash
 
