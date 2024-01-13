@@ -299,6 +299,13 @@ jobs:
               libxcb-render-util0 \
               libxcb-xinerama0
 
+      - name: Install dependencies (Ubuntu 20.04)
+        if: startsWith(matrix.os, 'ubuntu-20.04')
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install \
+              gcc-10
+
       - name: Apply Qt patches (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.qt-version, '5.')
         run: |
