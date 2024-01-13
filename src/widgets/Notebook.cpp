@@ -19,7 +19,6 @@
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/Window.hpp"
 
-#include <boost/foreach.hpp>
 #include <QDebug>
 #include <QFile>
 #include <QFormLayout>
