@@ -1002,10 +1002,20 @@ if (WIN32)
         WinToast)
 endif ()
 
-target_link_libraries(${LIBRARY_PROJECT}
-        PUBLIC
-        ${Boost_LIBRARIES}
-        )
+if (USE_SUBMODULE_BOOST)
+    target_link_libraries(${LIBRARY_PROJECT}
+            PUBLIC
+            Boost::asio
+            Boost::circular_buffer
+            Boost::signals2
+            Boost::interprocess
+            )
+else ()
+    target_link_libraries(${LIBRARY_PROJECT}
+            PUBLIC
+            ${Boost_LIBRARIES}
+            )
+endif ()
 
 target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC

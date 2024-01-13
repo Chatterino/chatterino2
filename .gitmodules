@@ -41,3 +41,6 @@
 [submodule "tools/crash-handler"]
 	path = tools/crash-handler
 	url = https://github.com/Chatterino/crash-handler
+[submodule "lib/boost"]
+	path = lib/boost
+	url = https://github.com/boostorg/boost

@@ -14,6 +14,7 @@ option(BUILD_BENCHMARKS "Build the benchmarks for Chatterino" OFF)
 option(USE_SYSTEM_PAJLADA_SETTINGS "Use system pajlada settings library" OFF)
 option(USE_SYSTEM_LIBCOMMUNI "Use system communi library" OFF)
 option(USE_SYSTEM_QTKEYCHAIN "Use system QtKeychain library" OFF)
+option(USE_SUBMODULE_BOOST "Use boost from submodules" OFF)
 option(BUILD_WITH_QTKEYCHAIN "Build Chatterino with support for your system key chain" ON)
 option(USE_SYSTEM_MINIAUDIO "Build Chatterino with your system miniaudio" OFF)
 option(BUILD_WITH_CRASHPAD "Build chatterino with crashpad" OFF)
@@ -122,8 +123,11 @@ endif ()
 
 find_package(Sanitizers QUIET)
 
-# Find boost on the system
-find_package(Boost REQUIRED OPTIONAL_COMPONENTS headers)
+if (USE_SUBMODULE_BOOST)
+    add_subdirectory(lib/boost EXCLUDE_FROM_ALL)
+else ()
+    find_package(Boost REQUIRED OPTIONAL_COMPONENTS headers)
+endif ()
 
 # Find OpenSSL on the system
 find_package(OpenSSL REQUIRED)
