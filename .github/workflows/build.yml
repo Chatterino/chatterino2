@@ -306,11 +306,8 @@ jobs:
           sudo apt-get -y install \
               clang-12
 
-          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-12 60
-          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-12 60
-          # Prioritize GCC/G++ 10 over default-installed GCC/G++ 9
-          sudo update-alternatives --install /usr/bin/cc cc /usr/bin/clang 60
-          sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 60
+          echo "CC=clang-12" >> "$GITHUB_ENV"
+          echo "CXX=clang++-12" >> "$GITHUB_ENV"
 
       - name: Apply Qt patches (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.qt-version, '5.')
