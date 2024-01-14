@@ -1332,13 +1332,19 @@ SplitNotebook::SplitNotebook(Window *parent)
         });
 }
 
-void SplitNotebook::showEvent(QShowEvent *)
+void SplitNotebook::showEvent(QShowEvent * /*event*/)
 {
-    if (auto page = this->getSelectedPage())
+    if (auto *page = this->getSelectedPage())
     {
-        if (auto split = page->findChild<Split *>())
+        auto *split = page->getSelectedSplit();
+        if (!split)
         {
-            split->setFocus(Qt::FocusReason::OtherFocusReason);
+            split = page->findChild<Split *>();
+        }
+
+        if (split)
+        {
+            split->setFocus(Qt::OtherFocusReason);
         }
     }
 }
