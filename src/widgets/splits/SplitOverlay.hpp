@@ -48,8 +48,6 @@ private:
     QPushButton *up_;
     QPushButton *right_;
     QPushButton *down_;
-
-    friend class ButtonEventFilter;
 };
 
 }  // namespace chatterino
