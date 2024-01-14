@@ -78,7 +78,7 @@ bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
 {
     //    BenchmarkGuard benchmark("MessageLayout::layout()");
 
-    auto app = getApp();
+    auto *app = getApp();
 
     bool layoutRequired = false;
 

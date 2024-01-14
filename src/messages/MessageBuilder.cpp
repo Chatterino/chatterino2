@@ -637,11 +637,11 @@ void MessageBuilder::addLink(const ParsedLink &parsedLink)
     auto linkElement = Link(Link::Url, matchedLink);
 
     auto textColor = MessageColor(MessageColor::Link);
-    auto linkMELowercase =
+    auto *linkMELowercase =
         this->emplace<TextElement>(lowercaseLinkString,
                                    MessageElementFlag::LowercaseLink, textColor)
             ->setLink(linkElement);
-    auto linkMEOriginal =
+    auto *linkMEOriginal =
         this->emplace<TextElement>(origLink, MessageElementFlag::OriginalLink,
                                    textColor)
             ->setLink(linkElement);

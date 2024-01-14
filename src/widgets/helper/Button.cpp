@@ -16,10 +16,14 @@ namespace {
                       const QSize &size) -> QPixmap
     {
         if (resized.size() == size)
+        {
             return resized;
+        }
         else
+        {
             return current.scaled(size, Qt::IgnoreAspectRatio,
                                   Qt::SmoothTransformation);
+        }
     }
 
 }  // namespace
@@ -92,11 +96,17 @@ bool Button::getEnableMargin() const
 qreal Button::getCurrentDimAmount() const
 {
     if (this->dimPixmap_ == Dim::None || this->mouseOver_)
+    {
         return 1;
+    }
     else if (this->dimPixmap_ == Dim::Some)
+    {
         return 0.7;
+    }
     else
+    {
         return 0.15;
+    }
 }
 
 void Button::setBorderColor(const QColor &color)
@@ -114,7 +124,9 @@ const QColor &Button::getBorderColor() const
 void Button::setMenu(std::unique_ptr<QMenu> menu)
 {
     if (this->menu_)
+    {
         this->menu_.release()->deleteLater();
+    }
 
     this->menu_ = std::move(menu);
 
@@ -362,7 +374,9 @@ void Button::onMouseEffectTimeout()
 void Button::showMenu()
 {
     if (!this->menu_)
+    {
         return;
+    }
 
     auto menuSizeHint = this->menu_->sizeHint();
     auto point = this->mapToGlobal(

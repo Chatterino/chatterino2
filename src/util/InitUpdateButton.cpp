@@ -12,7 +12,7 @@ void initUpdateButton(Button &button,
 
     // show update prompt when clicking the button
     QObject::connect(&button, &Button::leftClicked, [&button] {
-        auto dialog = new UpdateDialog();
+        auto *dialog = new UpdateDialog();
         dialog->setActionOnFocusLoss(BaseWindow::Delete);
 
         auto globalPoint = button.mapToGlobal(
@@ -54,9 +54,9 @@ void initUpdateButton(Button &button,
     auto updateChange = [&button](auto) {
         button.setVisible(Updates::instance().shouldShowUpdateButton());
 
-        auto imageUrl = Updates::instance().isError()
-                            ? ":/buttons/updateError.png"
-                            : ":/buttons/update.png";
+        const auto *imageUrl = Updates::instance().isError()
+                                   ? ":/buttons/updateError.png"
+                                   : ":/buttons/update.png";
         button.setPixmap(QPixmap(imageUrl));
     };
 

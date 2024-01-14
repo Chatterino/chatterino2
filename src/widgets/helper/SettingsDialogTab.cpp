@@ -42,7 +42,9 @@ void SettingsDialogTab::setSelected(bool _selected)
 SettingsPage *SettingsDialogTab::page()
 {
     if (this->page_)
+    {
         return this->page_;
+    }
 
     this->page_ = this->lazyPage_();
     this->page_->setTab(this);

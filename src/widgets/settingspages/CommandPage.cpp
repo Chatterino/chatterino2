@@ -33,7 +33,7 @@ namespace {
 
 CommandPage::CommandPage()
 {
-    auto app = getApp();
+    auto *app = getApp();
 
     LayoutCreator<CommandPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
@@ -54,7 +54,7 @@ CommandPage::CommandPage()
     // TODO: asyncronously check path
     if (QFile(c1settingsPath()).exists())
     {
-        auto button = new QPushButton("Import commands from Chatterino 1");
+        auto *button = new QPushButton("Import commands from Chatterino 1");
         view->addCustomButton(button);
 
         QObject::connect(button, &QPushButton::clicked, this, [] {

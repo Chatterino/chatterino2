@@ -208,7 +208,9 @@ namespace detail {
                 // https://github.com/SevenTV/chatterino7/issues/46#issuecomment-1010595231
                 int duration = reader.nextImageDelay();
                 if (duration <= 10)
+                {
                     duration = 100;
+                }
                 duration = std::max(20, duration);
                 frames.push_back(Frame<QImage>{std::move(image), duration});
             }

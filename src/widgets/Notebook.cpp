@@ -785,7 +785,9 @@ void Notebook::performLayout(bool animated)
         }
 
         if (this->visibleButtonCount() > 0)
+        {
             y = tabHeight + lineThickness;  // account for divider line
+        }
 
         int totalButtonWidths = x;
         const int top = y + tabSpacer;  // add margin
@@ -829,7 +831,9 @@ void Notebook::performLayout(bool animated)
                 }
 
                 if (isLastColumn && largestWidth + x < totalButtonWidths)
+                {
                     largestWidth = totalButtonWidths - x;
+                }
 
                 for (int i = tabStart; i < tabEnd; i++)
                 {
@@ -877,7 +881,7 @@ void Notebook::performLayout(bool animated)
         for (auto btnIt = this->customButtons_.rbegin();
              btnIt != this->customButtons_.rend(); ++btnIt)
         {
-            auto btn = *btnIt;
+            auto *btn = *btnIt;
             if (!btn->isVisible())
             {
                 continue;
@@ -889,7 +893,9 @@ void Notebook::performLayout(bool animated)
         }
 
         if (this->visibleButtonCount() > 0)
+        {
             y = tabHeight + lineThickness;  // account for divider line
+        }
 
         int consumedButtonWidths = right - x;
         const int top = y + tabSpacer;  // add margin
@@ -936,7 +942,9 @@ void Notebook::performLayout(bool animated)
 
                 if (isLastColumn &&
                     largestWidth + distanceFromRight < consumedButtonWidths)
+                {
                     largestWidth = consumedButtonWidths - distanceFromRight;
+                }
 
                 x -= largestWidth + lineThickness;
 
@@ -1288,7 +1296,7 @@ SplitNotebook::SplitNotebook(Window *parent)
         getApp()->windows->selectSplit, [this](Split *split) {
             for (auto &&item : this->items())
             {
-                if (auto sc = dynamic_cast<SplitContainer *>(item.page))
+                if (auto *sc = dynamic_cast<SplitContainer *>(item.page))
                 {
                     auto &&splits = sc->getSplits();
                     if (std::find(splits.begin(), splits.end(), split) !=
@@ -1312,7 +1320,7 @@ SplitNotebook::SplitNotebook(Window *parent)
         [this](const MessagePtr &message) {
             for (auto &&item : this->items())
             {
-                if (auto sc = dynamic_cast<SplitContainer *>(item.page))
+                if (auto *sc = dynamic_cast<SplitContainer *>(item.page))
                 {
                     for (auto *split : sc->getSplits())
                     {
@@ -1352,7 +1360,7 @@ void SplitNotebook::showEvent(QShowEvent * /*event*/)
 void SplitNotebook::addCustomButtons()
 {
     // settings
-    auto settingsBtn = this->addCustomButton();
+    auto *settingsBtn = this->addCustomButton();
 
     // This is to ensure you can't lock yourself out of the settings
     if (getApp()->getArgs().safeMode)
@@ -1378,7 +1386,7 @@ void SplitNotebook::addCustomButtons()
     });
 
     // account
-    auto userBtn = this->addCustomButton();
+    auto *userBtn = this->addCustomButton();
     userBtn->setVisible(!getSettings()->hideUserButton.getValue());
     getSettings()->hideUserButton.connect(
         [userBtn](bool hide, auto) {
@@ -1393,7 +1401,7 @@ void SplitNotebook::addCustomButtons()
     });
 
     // updates
-    auto updateBtn = this->addCustomButton();
+    auto *updateBtn = this->addCustomButton();
 
     initUpdateButton(*updateBtn, this->signalHolder_);
 
@@ -1439,8 +1447,8 @@ void SplitNotebook::themeChangedEvent()
 
 SplitContainer *SplitNotebook::addPage(bool select)
 {
-    auto container = new SplitContainer(this);
-    auto tab = Notebook::addPage(container, QString(), select);
+    auto *container = new SplitContainer(this);
+    auto *tab = Notebook::addPage(container, QString(), select);
     container->setTab(tab);
     tab->setParent(this);
     return container;

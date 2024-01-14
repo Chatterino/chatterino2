@@ -52,7 +52,7 @@ void Logging::addMessage(const QString &channelName, MessagePtr message,
     auto platIt = this->loggingChannels_.find(platformName);
     if (platIt == this->loggingChannels_.end())
     {
-        auto channel = new LoggingChannel(channelName, platformName);
+        auto *channel = new LoggingChannel(channelName, platformName);
         channel->addMessage(message);
         auto map = std::map<QString, std::unique_ptr<LoggingChannel>>();
         this->loggingChannels_[platformName] = std::move(map);
@@ -63,7 +63,7 @@ void Logging::addMessage(const QString &channelName, MessagePtr message,
     auto chanIt = platIt->second.find(channelName);
     if (chanIt == platIt->second.end())
     {
-        auto channel = new LoggingChannel(channelName, platformName);
+        auto *channel = new LoggingChannel(channelName, platformName);
         channel->addMessage(message);
         platIt->second.emplace(channelName, std::move(channel));
     }

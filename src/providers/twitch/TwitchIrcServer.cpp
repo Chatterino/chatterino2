@@ -395,11 +395,15 @@ std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
     {
         auto channel = weakChannel.lock();
         if (!channel)
+        {
             continue;
+        }
 
         auto twitchChannel = std::dynamic_pointer_cast<TwitchChannel>(channel);
         if (!twitchChannel)
+        {
             continue;
+        }
 
         if (twitchChannel->roomId() == channelId &&
             twitchChannel->getName().count(':') < 2)
@@ -414,9 +418,13 @@ std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
 QString TwitchIrcServer::cleanChannelName(const QString &dirtyChannelName)
 {
     if (dirtyChannelName.startsWith('#'))
+    {
         return dirtyChannelName.mid(1).toLower();
+    }
     else
+    {
         return dirtyChannelName.toLower();
+    }
 }
 
 bool TwitchIrcServer::hasSeparateWriteConnection() const

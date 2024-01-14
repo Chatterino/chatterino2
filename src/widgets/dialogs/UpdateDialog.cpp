@@ -21,9 +21,9 @@ UpdateDialog::UpdateDialog()
         .assign(&this->ui_.label);
 
     auto buttons = layout.emplace<QDialogButtonBox>();
-    auto install = buttons->addButton("Install", QDialogButtonBox::AcceptRole);
+    auto *install = buttons->addButton("Install", QDialogButtonBox::AcceptRole);
     this->ui_.installButton = install;
-    auto dismiss = buttons->addButton("Dismiss", QDialogButtonBox::RejectRole);
+    auto *dismiss = buttons->addButton("Dismiss", QDialogButtonBox::RejectRole);
 
     QObject::connect(install, &QPushButton::clicked, this, [this] {
         Updates::instance().installUpdates();

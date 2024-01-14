@@ -123,7 +123,7 @@ public:
     template <typename OnClick>
     QPushButton *makeButton(const QString &text, OnClick onClick)
     {
-        auto button = new QPushButton(text);
+        auto *button = new QPushButton(text);
         this->groups_.back().widgets.push_back({button, {text}});
         QObject::connect(button, &QPushButton::clicked, onClick);
         return button;
@@ -133,7 +133,7 @@ public:
     QPushButton *addButton(const QString &text, OnClick onClick)
     {
         auto button = makeButton(text, onClick);
-        auto layout = new QHBoxLayout();
+        auto *layout = new QHBoxLayout();
         layout->addWidget(button);
         layout->addStretch(1);
         this->addLayout(layout);
@@ -155,19 +155,25 @@ public:
         {
             // QString
             if (!editable && !items2.contains(boost::get<QString>(selected)))
+            {
                 items2.insert(0, boost::get<QString>(selected));
+            }
         }
 
-        auto combo = this->addDropdown(text, items2, toolTipText);
+        auto *combo = this->addDropdown(text, items2, toolTipText);
         if (editable)
+        {
             combo->setEditable(true);
+        }
 
         if (selected.which() == 0)
         {
             // int
             auto value = boost::get<int>(selected);
             if (value >= 0 && value < items2.size())
+            {
                 combo->setCurrentIndex(value);
+            }
         }
         else if (selected.which() == 1)
         {
@@ -179,7 +185,9 @@ public:
             [getValue = std::move(getValue), combo](const T &value, auto) {
                 auto var = getValue(value);
                 if (var.which() == 0)
+                {
                     combo->setCurrentIndex(boost::get<int>(var));
+                }
                 else
                 {
                     combo->setCurrentText(boost::get<QString>(var));

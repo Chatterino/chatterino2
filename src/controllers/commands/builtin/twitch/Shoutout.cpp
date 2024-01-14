@@ -15,7 +15,7 @@ QString sendShoutout(const CommandContext &ctx)
 {
     auto *twitchChannel = ctx.twitchChannel;
     auto channel = ctx.channel;
-    auto words = &ctx.words;
+    const auto *words = &ctx.words;
 
     if (twitchChannel == nullptr)
     {

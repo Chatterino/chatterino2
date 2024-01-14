@@ -212,7 +212,9 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
             auto image =
                 this->emote_->images.getImageOrLoaded(container.getScale());
             if (image->isEmpty())
+            {
                 return;
+            }
 
             auto emoteScale = getSettings()->emoteScale.getValue();
 
@@ -420,7 +422,9 @@ void BadgeElement::addToContainer(MessageLayoutContainer &container,
         auto image =
             this->emote_->images.getImageOrLoaded(container.getScale());
         if (image->isEmpty())
+        {
             return;
+        }
 
         auto size = QSize(int(container.getScale() * image->width()),
                           int(container.getScale() * image->height()));
@@ -437,7 +441,7 @@ EmotePtr BadgeElement::getEmote() const
 MessageLayoutElement *BadgeElement::makeImageLayoutElement(
     const ImagePtr &image, const QSize &size)
 {
-    auto element =
+    auto *element =
         (new ImageLayoutElement(*this, image, size))->setLink(this->getLink());
 
     return element;
@@ -455,9 +459,9 @@ MessageLayoutElement *ModBadgeElement::makeImageLayoutElement(
 {
     static const QColor modBadgeBackgroundColor("#34AE0A");
 
-    auto element = (new ImageWithBackgroundLayoutElement(
-                        *this, image, size, modBadgeBackgroundColor))
-                       ->setLink(this->getLink());
+    auto *element = (new ImageWithBackgroundLayoutElement(
+                         *this, image, size, modBadgeBackgroundColor))
+                        ->setLink(this->getLink());
 
     return element;
 }
@@ -472,7 +476,7 @@ VipBadgeElement::VipBadgeElement(const EmotePtr &data,
 MessageLayoutElement *VipBadgeElement::makeImageLayoutElement(
     const ImagePtr &image, const QSize &size)
 {
-    auto element =
+    auto *element =
         (new ImageLayoutElement(*this, image, size))->setLink(this->getLink());
 
     return element;
@@ -489,7 +493,7 @@ FfzBadgeElement::FfzBadgeElement(const EmotePtr &data,
 MessageLayoutElement *FfzBadgeElement::makeImageLayoutElement(
     const ImagePtr &image, const QSize &size)
 {
-    auto element =
+    auto *element =
         (new ImageWithBackgroundLayoutElement(*this, image, size, this->color))
             ->setLink(this->getLink());
 
@@ -513,7 +517,7 @@ TextElement::TextElement(const QString &text, MessageElementFlags flags,
 void TextElement::addToContainer(MessageLayoutContainer &container,
                                  MessageElementFlags flags)
 {
-    auto app = getApp();
+    auto *app = getApp();
 
     if (flags.hasAny(this->getFlags()))
     {
@@ -527,10 +531,10 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                 auto color = this->color_.getColor(*app->themes);
                 app->themes->normalizeColor(color);
 
-                auto e = (new TextLayoutElement(
-                              *this, text, QSize(width, metrics.height()),
-                              color, this->style_, container.getScale()))
-                             ->setLink(this->getLink());
+                auto *e = (new TextLayoutElement(
+                               *this, text, QSize(width, metrics.height()),
+                               color, this->style_, container.getScale()))
+                              ->setLink(this->getLink());
                 e->setTrailingSpace(hasTrailingSpace);
                 e->setText(text);
 
@@ -596,14 +600,18 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                     width = charWidth;
 
                     if (isSurrogate)
+                    {
                         i++;
+                    }
                     continue;
                 }
 
                 width += charWidth;
 
                 if (isSurrogate)
+                {
                     i++;
+                }
             }
             //add the final piece of wrapped text
             container.addElementNoLineBreak(getTextLayoutElement(
@@ -629,7 +637,7 @@ SingleLineTextElement::SingleLineTextElement(const QString &text,
 void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                                            MessageElementFlags flags)
 {
-    auto app = getApp();
+    auto *app = getApp();
 
     if (flags.hasAny(this->getFlags()))
     {
@@ -641,10 +649,10 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
             auto color = this->color_.getColor(*app->themes);
             app->themes->normalizeColor(color);
 
-            auto e = (new TextLayoutElement(
-                          *this, text, QSize(width, metrics.height()), color,
-                          this->style_, container.getScale()))
-                         ->setLink(this->getLink());
+            auto *e = (new TextLayoutElement(
+                           *this, text, QSize(width, metrics.height()), color,
+                           this->style_, container.getScale()))
+                          ->setLink(this->getLink());
             e->setTrailingSpace(hasTrailingSpace);
             e->setText(text);
 
@@ -837,7 +845,9 @@ void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
         const auto &image =
             this->images_.getImageOrLoaded(container.getScale());
         if (image->isEmpty())
+        {
             return;
+        }
 
         auto size = QSize(image->width() * container.getScale(),
                           image->height() * container.getScale());

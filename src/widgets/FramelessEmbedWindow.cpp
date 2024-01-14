@@ -19,7 +19,7 @@ FramelessEmbedWindow::FramelessEmbedWindow()
     : BaseWindow({BaseWindow::Frameless, BaseWindow::DisableLayoutSave})
 {
     this->split_ = new Split((QWidget *)nullptr);
-    auto layout = new QHBoxLayout;
+    auto *layout = new QHBoxLayout;
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(this->split_);
 

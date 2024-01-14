@@ -1233,7 +1233,9 @@ std::unordered_map<QString, QString> TwitchMessageBuilder::parseBadgeInfoTag(
 
     auto infoIt = tags.constFind("badge-info");
     if (infoIt == tags.end())
+    {
         return infoMap;
+    }
 
     auto info = infoIt.value().toString().split(',', Qt::SkipEmptyParts);
 
@@ -1651,7 +1653,7 @@ void TwitchMessageBuilder::listOfUsersSystemMessage(QString prefix,
     builder->emplace<TextElement>(prefix, MessageElementFlag::Text,
                                   MessageColor::System);
     bool isFirst = true;
-    auto tc = dynamic_cast<TwitchChannel *>(channel);
+    auto *tc = dynamic_cast<TwitchChannel *>(channel);
     for (const QString &username : users)
     {
         if (!isFirst)
