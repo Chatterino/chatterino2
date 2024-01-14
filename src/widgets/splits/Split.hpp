@@ -4,6 +4,7 @@
 #include "common/Channel.hpp"
 #include "common/NullablePtr.hpp"
 #include "widgets/BaseWidget.hpp"
+#include "widgets/splits/SplitCommon.hpp"
 
 #include <boost/signals2.hpp>
 #include <pajlada/signals/signalholder.hpp>
@@ -95,8 +96,7 @@ public:
     pajlada::Signals::Signal<Action> actionRequested;
     pajlada::Signals::Signal<ChannelPtr> openSplitRequested;
 
-    // args: (SplitContainer::Direction dir, Split* parent)
-    pajlada::Signals::Signal<int, Split *> insertSplitRequested;
+    pajlada::Signals::Signal<SplitDirection, Split *> insertSplitRequested;
 
 protected:
     void paintEvent(QPaintEvent *event) override;

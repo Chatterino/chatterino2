@@ -159,7 +159,7 @@ void SplitContainer::insertSplit(Split *split, InsertOptions &&options)
     }
 
     auto *relativeTo = options.relativeNode;
-    const auto direction = options.direction.value_or(Direction::Right);
+    const auto direction = options.direction.value_or(SplitDirection::Right);
 
     if (relativeTo == nullptr)
     {
@@ -260,27 +260,26 @@ void SplitContainer::addSplit(Split *split)
                 break;
 
                 case Split::Action::SelectSplitLeft:
-                    this->selectNextSplit(SplitContainer::Left);
+                    this->selectNextSplit(SplitDirection::Left);
                     break;
                 case Split::Action::SelectSplitRight:
-                    this->selectNextSplit(SplitContainer::Right);
+                    this->selectNextSplit(SplitDirection::Right);
                     break;
                 case Split::Action::SelectSplitAbove:
-                    this->selectNextSplit(SplitContainer::Above);
+                    this->selectNextSplit(SplitDirection::Above);
                     break;
                 case Split::Action::SelectSplitBelow:
-                    this->selectNextSplit(SplitContainer::Below);
+                    this->selectNextSplit(SplitDirection::Below);
                     break;
             }
         });
 
     conns.managedConnect(
-        split->insertSplitRequested, [this](int dir, Split *parent) {
-            this->insertSplit(new Split(this),
-                              {
-                                  .relativeSplit = parent,
-                                  .direction = static_cast<Direction>(dir),
-                              });
+        split->insertSplitRequested, [this](SplitDirection dir, Split *parent) {
+            this->insertSplit(new Split(this), {
+                                                   .relativeSplit = parent,
+                                                   .direction = dir,
+                                               });
         });
 
     this->layout();
@@ -355,7 +354,7 @@ SplitContainer::Position SplitContainer::deleteSplit(Split *split)
     return releaseSplit(split);
 }
 
-void SplitContainer::selectNextSplit(Direction direction)
+void SplitContainer::selectNextSplit(SplitDirection direction)
 {
     assertInGuiThread();
 
@@ -365,7 +364,7 @@ void SplitContainer::selectNextSplit(Direction direction)
     }
 }
 
-void SplitContainer::selectSplitRecursive(Node *node, Direction direction)
+void SplitContainer::selectSplitRecursive(Node *node, SplitDirection direction)
 {
     if (node->parent_ != nullptr)
     {
@@ -379,7 +378,8 @@ void SplitContainer::selectSplitRecursive(Node *node, Direction direction)
                                    });
             assert(it != siblings.end());
 
-            if (direction == Direction::Left || direction == Direction::Above)
+            if (direction == SplitDirection::Left ||
+                direction == SplitDirection::Above)
             {
                 if (it == siblings.begin())
                 {
@@ -507,20 +507,20 @@ void SplitContainer::layout()
         // left
         dropRects.emplace_back(
             QRect(g.left(), g.top(), g.width() / 3, g.height()),
-            Position(node, Direction::Left));
+            Position(node, SplitDirection::Left));
         // right
         dropRects.emplace_back(QRect(g.right() - g.width() / 3, g.top(),
                                      g.width() / 3, g.height()),
-                               Position(node, Direction::Right));
+                               Position(node, SplitDirection::Right));
 
         // top
         dropRects.emplace_back(
             QRect(g.left(), g.top(), g.width(), g.height() / 2),
-            Position(node, Direction::Above));
+            Position(node, SplitDirection::Above));
         // bottom
         dropRects.emplace_back(QRect(g.left(), g.bottom() - g.height() / 2,
                                      g.width(), g.height() / 2),
-                               Position(node, Direction::Below));
+                               Position(node, SplitDirection::Below));
     }
 
     if (this->splits_.empty())
@@ -528,7 +528,7 @@ void SplitContainer::layout()
         QRect g = this->rect();
         dropRects.emplace_back(
             QRect(g.left(), g.top(), g.width() - 1, g.height() - 1),
-            Position(nullptr, Direction::Below));
+            Position(nullptr, SplitDirection::Below));
     }
 
     this->overlay_.setRects(std::move(dropRects));
@@ -1027,7 +1027,7 @@ SplitContainer::Node *SplitContainer::Node::findNodeContainingSplit(
 }
 
 void SplitContainer::Node::insertSplitRelative(Split *_split,
-                                               Direction _direction)
+                                               SplitDirection _direction)
 {
     if (this->parent_ == nullptr)
     {
@@ -1066,7 +1066,7 @@ void SplitContainer::Node::insertSplitRelative(Split *_split,
 }
 
 void SplitContainer::Node::nestSplitIntoCollection(Split *_split,
-                                                   Direction _direction)
+                                                   SplitDirection _direction)
 {
     if (toContainerType(_direction) == this->type_)
     {
@@ -1095,7 +1095,8 @@ void SplitContainer::Node::nestSplitIntoCollection(Split *_split,
     }
 }
 
-void SplitContainer::Node::insertNextToThis(Split *_split, Direction _direction)
+void SplitContainer::Node::insertNextToThis(Split *_split,
+                                            SplitDirection _direction)
 {
     auto &siblings = this->parent_->children_;
 
@@ -1115,7 +1116,8 @@ void SplitContainer::Node::insertNextToThis(Split *_split, Direction _direction)
         });
 
     assert(it != siblings.end());
-    if (_direction == Direction::Right || _direction == Direction::Below)
+    if (_direction == SplitDirection::Right ||
+        _direction == SplitDirection::Below)
     {
         it++;
     }
@@ -1145,7 +1147,7 @@ SplitContainer::Position SplitContainer::Node::releaseSplit()
 
         Position pos;
         pos.relativeNode_ = nullptr;
-        pos.direction_ = Direction::Right;
+        pos.direction_ = SplitDirection::Right;
         return pos;
     }
 
@@ -1163,13 +1165,15 @@ SplitContainer::Position SplitContainer::Node::releaseSplit()
         position.relativeNode_ = this->parent_;
         if (this->parent_->type_ == Type::VerticalContainer)
         {
-            position.direction_ =
-                siblings.begin() == it ? Direction::Above : Direction::Below;
+            position.direction_ = siblings.begin() == it
+                                      ? SplitDirection::Above
+                                      : SplitDirection::Below;
         }
         else
         {
-            position.direction_ =
-                siblings.begin() == it ? Direction::Left : Direction::Right;
+            position.direction_ = siblings.begin() == it
+                                      ? SplitDirection::Left
+                                      : SplitDirection::Right;
         }
 
         auto *parent = this->parent_;
@@ -1191,8 +1195,8 @@ SplitContainer::Position SplitContainer::Node::releaseSplit()
         {
             position.direction_ =
                 this->parent_->type_ == Type::VerticalContainer
-                    ? Direction::Below
-                    : Direction::Right;
+                    ? SplitDirection::Below
+                    : SplitDirection::Right;
             siblings.erase(it);
             position.relativeNode_ = siblings.back().get();
         }
@@ -1201,8 +1205,8 @@ SplitContainer::Position SplitContainer::Node::releaseSplit()
             position.relativeNode_ = (it + 1)->get();
             position.direction_ =
                 this->parent_->type_ == Type::VerticalContainer
-                    ? Direction::Above
-                    : Direction::Left;
+                    ? SplitDirection::Above
+                    : SplitDirection::Left;
             siblings.erase(it);
         }
     }
@@ -1282,8 +1286,8 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale,
                            isVertical ? offset : this->geometry_.width(),
                            isVertical ? this->geometry_.height() : offset)
                         .toRect(),
-                    Position(this,
-                             isVertical ? Direction::Left : Direction::Above));
+                    Position(this, isVertical ? SplitDirection::Left
+                                              : SplitDirection::Above));
 
                 // droprect right / below
                 if (isVertical)
@@ -1293,7 +1297,7 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale,
                                this->geometry_.top(), offset,
                                this->geometry_.height())
                             .toRect(),
-                        Position(this, Direction::Right));
+                        Position(this, SplitDirection::Right));
                 }
                 else
                 {
@@ -1302,7 +1306,7 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale,
                                this->geometry_.bottom() - offset,
                                this->geometry_.width(), offset)
                             .toRect(),
-                        Position(this, Direction::Below));
+                        Position(this, SplitDirection::Below));
                 }
 
                 // shrink childRect
@@ -1391,9 +1395,10 @@ void SplitContainer::Node::clamp()
     this->flexV_ = std::max(0.0, this->flexV_);
 }
 
-SplitContainer::Node::Type SplitContainer::Node::toContainerType(Direction _dir)
+SplitContainer::Node::Type SplitContainer::Node::toContainerType(
+    SplitDirection _dir)
 {
-    return _dir == Direction::Left || _dir == Direction::Right
+    return _dir == SplitDirection::Left || _dir == SplitDirection::Right
                ? Type::HorizontalContainer
                : Type::VerticalContainer;
 }
