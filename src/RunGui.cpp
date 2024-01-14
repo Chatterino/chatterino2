@@ -21,6 +21,7 @@
 #include <QtConcurrent>
 
 #include <csignal>
+#include <thread>
 #include <tuple>
 
 #ifdef USEWINSDK
@@ -237,6 +238,7 @@ void runGui(QApplication &a, Paths &paths, Settings &settings, const Args &args)
 #endif
 
     auto thread = std::thread([dir = paths.miscDirectory] {
+#ifdef Q_OS_WIN32
         {
             auto path = combinePath(dir, "Update.exe");
             if (QFile::exists(path))
@@ -251,6 +253,7 @@ void runGui(QApplication &a, Paths &paths, Settings &settings, const Args &args)
                 QFile::remove(path);
             }
         }
+#endif
     });
 
     // Clear the cache 1 minute after start.
@@ -281,15 +284,16 @@ void runGui(QApplication &a, Paths &paths, Settings &settings, const Args &args)
         pajlada::Settings::SettingManager::gSave();
     }
 
+    if (thread.joinable())
+    {
+        thread.join();
+    }
     chatterino::NetworkManager::deinit();
 
 #ifdef USEWINSDK
     // flushing windows clipboard to keep copied messages
     flushClipboard();
 #endif
-
-    app.fakeDtor();
-
-    _exit(0);
 }
+
 }  // namespace chatterino

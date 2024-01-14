@@ -8,6 +8,7 @@
 #include "providers/twitch/PubSubHelpers.hpp"
 #include "util/DebugCount.hpp"
 #include "util/ExponentialBackoff.hpp"
+#include "util/RenameThread.hpp"
 
 #include <pajlada/signals/signal.hpp>
 #include <QJsonObject>
@@ -94,7 +95,10 @@ public:
                 .toStdString());
     }
 
-    virtual ~BasicPubSubManager() = default;
+    virtual ~BasicPubSubManager()
+    {
+        this->stop();
+    };
 
     BasicPubSubManager(const BasicPubSubManager &) = delete;
     BasicPubSubManager(const BasicPubSubManager &&) = delete;
@@ -115,6 +119,8 @@ public:
         this->mainThread_.reset(new std::thread([this] {
             runThread();
         }));
+
+        renameThread(*this->mainThread_.get(), "BPSM");
     }
 
     void stop()

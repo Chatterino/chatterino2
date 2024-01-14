@@ -13,6 +13,8 @@ Client::Client(liveupdates::WebsocketClient &websocketClient,
     : BasicPubSubClient<Subscription>(websocketClient, std::move(handle))
     , lastHeartbeat_(std::chrono::steady_clock::now())
     , heartbeatInterval_(heartbeatInterval)
+    , heartbeatTimer_(std::make_shared<boost::asio::steady_timer>(
+          this->websocketClient_.get_io_service()))
 {
 }
 
@@ -21,6 +23,11 @@ void Client::onConnectionEstablished()
     this->lastHeartbeat_.store(std::chrono::steady_clock::now(),
                                std::memory_order_release);
     this->checkHeartbeat();
+}
+
+void Client::stopImpl()
+{
+    this->heartbeatTimer_->cancel();
 }
 
 void Client::setHeartbeatInterval(int intervalMs)
@@ -54,14 +61,13 @@ void Client::checkHeartbeat()
 
     auto self = std::dynamic_pointer_cast<Client>(this->shared_from_this());
 
-    runAfter(this->websocketClient_.get_io_service(), this->heartbeatInterval_,
-             [self](auto) {
-                 if (!self->isStarted())
-                 {
-                     return;
-                 }
-                 self->checkHeartbeat();
-             });
+    runAfter(this->heartbeatTimer_, this->heartbeatInterval_, [self](auto) {
+        if (!self->isStarted())
+        {
+            return;
+        }
+        self->checkHeartbeat();
+    });
 }
 
 }  // namespace chatterino::seventv::eventapi

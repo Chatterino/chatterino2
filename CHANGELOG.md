@@ -106,6 +106,7 @@
 - Dev: Refactored the Image Uploader feature. (#4971)
 - Dev: Refactored the SplitOverlay code. (#5082)
 - Dev: Fixed deadlock and use-after-free in tests. (#4981)
+- Dev: Cleanly exit Chatterino instead of force exiting. (#4993)
 - Dev: Moved all `.clang-format` files to the root directory. (#5037)
 - Dev: Load less message history upon reconnects. (#5001, #5018)
 - Dev: Load less message history upon reconnects. (#5001)

@@ -50,13 +50,13 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
     this->installEventFilter(this);
     this->initLayout();
 
-    auto completer =
-        new QCompleter(&this->split_->getChannel()->completionModel);
+    auto *completer =
+        new QCompleter(&this->split_->getChannel()->completionModel, this);
     this->ui_.textEdit->setCompleter(completer);
 
     this->signalHolder_.managedConnect(this->split_->channelChanged, [this] {
         auto channel = this->split_->getChannel();
-        auto completer = new QCompleter(&channel->completionModel);
+        auto *completer = new QCompleter(&channel->completionModel, this);
         this->ui_.textEdit->setCompleter(completer);
     });
 
@@ -75,6 +75,8 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
                                            this->addShortcuts();
                                        });
 }
+
+SplitInput::~SplitInput() = default;
 
 void SplitInput::initLayout()
 {

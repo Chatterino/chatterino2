@@ -114,6 +114,7 @@ Application::Application(Settings &_settings, Paths &_paths, const Args &_args)
     , emotes(&this->emplace<Emotes>())
     , accounts(&this->emplace<AccountController>())
     , hotkeys(&this->emplace<HotkeyController>())
+    , twitch(&this->emplace<TwitchIrcServer>())
     , windows(&this->emplace<WindowManager>())
     , toasts(&this->emplace<Toasts>())
     , imageUploader(&this->emplace<ImageUploader>())
@@ -123,7 +124,6 @@ Application::Application(Settings &_settings, Paths &_paths, const Args &_args)
     , commands(&this->emplace<CommandController>())
     , notifications(&this->emplace<NotificationController>())
     , highlights(&this->emplace<HighlightController>())
-    , twitch(&this->emplace<TwitchIrcServer>())
     , chatterinoBadges(&this->emplace<ChatterinoBadges>())
     , ffzBadges(&this->emplace<FfzBadges>())
     , seventvBadges(&this->emplace<SeventvBadges>())
@@ -146,11 +146,6 @@ Application::Application(Settings &_settings, Paths &_paths, const Args &_args)
 }
 
 Application::~Application() = default;
-
-void Application::fakeDtor()
-{
-    this->twitchPubSub.reset();
-}
 
 void Application::initialize(Settings &settings, Paths &paths)
 {

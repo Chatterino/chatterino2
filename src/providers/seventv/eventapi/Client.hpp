@@ -24,6 +24,7 @@ public:
 
 protected:
     void onConnectionEstablished() override;
+    void stopImpl() override;
 
 private:
     void checkHeartbeat();
@@ -32,6 +33,7 @@ private:
         lastHeartbeat_;
     // This will be set once on the welcome message.
     std::chrono::milliseconds heartbeatInterval_;
+    std::shared_ptr<boost::asio::steady_timer> heartbeatTimer_;
 
     friend SeventvEventAPI;
 };
