@@ -11,7 +11,7 @@ namespace chatterino {
 AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
     : QListWidget(parent)
 {
-    auto app = getApp();
+    auto *app = getApp();
 
     this->addItem(ANONYMOUS_USERNAME_LABEL);
 
@@ -69,7 +69,7 @@ void AccountSwitchWidget::refreshSelection()
     // Select the currently logged in user
     if (this->count() > 0)
     {
-        auto app = getApp();
+        auto *app = getApp();
 
         auto currentUser = app->accounts->twitch.getCurrent();
 

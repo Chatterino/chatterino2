@@ -50,13 +50,13 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
     this->installEventFilter(this);
     this->initLayout();
 
-    auto completer =
+    auto *completer =
         new QCompleter(&this->split_->getChannel()->completionModel);
     this->ui_.textEdit->setCompleter(completer);
 
     this->signalHolder_.managedConnect(this->split_->channelChanged, [this] {
         auto channel = this->split_->getChannel();
-        auto completer = new QCompleter(&channel->completionModel);
+        auto *completer = new QCompleter(&channel->completionModel);
         this->ui_.textEdit->setCompleter(completer);
     });
 
@@ -78,7 +78,7 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
 
 void SplitInput::initLayout()
 {
-    auto app = getApp();
+    auto *app = getApp();
     LayoutCreator<SplitInput> layoutCreator(this);
 
     auto layout =
@@ -202,7 +202,7 @@ void SplitInput::initLayout()
 
 void SplitInput::scaleChangedEvent(float scale)
 {
-    auto app = getApp();
+    auto *app = getApp();
     // update the icon size of the buttons
     this->updateEmoteButton();
     this->updateCancelReplyButton();
@@ -328,7 +328,9 @@ QString SplitInput::handleSendMessage(std::vector<QString> &arguments)
 {
     auto c = this->split_->getChannel();
     if (c == nullptr)
+    {
         return "";
+    }
 
     if (!c->isTwitchChannel() || this->replyThread_ == nullptr)
     {
@@ -347,7 +349,7 @@ QString SplitInput::handleSendMessage(std::vector<QString> &arguments)
     else
     {
         // Reply to message
-        auto tc = dynamic_cast<TwitchChannel *>(c.get());
+        auto *tc = dynamic_cast<TwitchChannel *>(c.get());
         if (!tc)
         {
             // this should not fail
@@ -635,7 +637,7 @@ bool SplitInput::eventFilter(QObject *obj, QEvent *event)
     if (event->type() == QEvent::ShortcutOverride ||
         event->type() == QEvent::Shortcut)
     {
-        if (auto popup = this->inputCompletionPopup_.data())
+        if (auto *popup = this->inputCompletionPopup_.data())
         {
             if (popup->isVisible())
             {
@@ -906,7 +908,7 @@ bool SplitInput::isHidden() const
 
 void SplitInput::editTextChanged()
 {
-    auto app = getApp();
+    auto *app = getApp();
 
     // set textLengthLabel value
     QString text = this->ui_.textEdit->toPlainText();

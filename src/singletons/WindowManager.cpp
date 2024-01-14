@@ -97,7 +97,7 @@ WindowManager::WindowManager()
 {
     qCDebug(chatterinoWindowmanager) << "init WindowManager";
 
-    auto settings = getSettings();
+    auto *settings = getSettings();
 
     this->wordFlagsListener_.addSetting(settings->showTimestamps);
     this->wordFlagsListener_.addSetting(settings->showBadgesGlobalAuthority);
@@ -135,7 +135,7 @@ MessageElementFlags WindowManager::getWordFlags()
 void WindowManager::updateWordTypeMask()
 {
     using MEF = MessageElementFlag;
-    auto settings = getSettings();
+    auto *settings = getSettings();
 
     // text
     auto flags = MessageElementFlags(MEF::Text);
@@ -630,7 +630,7 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
         }
         break;
         case Channel::Type::Irc: {
-            if (auto ircChannel =
+            if (auto *ircChannel =
                     dynamic_cast<IrcChannel *>(channel.get().get()))
             {
                 obj.insert("type", "irc");
@@ -664,7 +664,7 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
 {
     assertInGuiThread();
 
-    auto app = getApp();
+    auto *app = getApp();
 
     if (descriptor.type_ == "twitch")
     {

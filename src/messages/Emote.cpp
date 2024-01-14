@@ -20,7 +20,9 @@ EmotePtr cachedOrMakeEmotePtr(Emote &&emote, const EmoteMap &cache)
     // reuse old shared_ptr if nothing changed
     auto it = cache.find(emote.name);
     if (it != cache.end() && *it->second == emote)
+    {
         return it->second;
+    }
 
     return std::make_shared<Emote>(std::move(emote));
 }

@@ -261,7 +261,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
     switch (message->type())
     {
         case Communi::IrcMessage::Join: {
-            auto x = static_cast<Communi::IrcJoinMessage *>(message);
+            auto *x = static_cast<Communi::IrcJoinMessage *>(message);
 
             if (auto it = this->channels.find(x->channel());
                 it != this->channels.end())
@@ -274,9 +274,11 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
                     }
                     else
                     {
-                        if (auto c =
+                        if (auto *c =
                                 dynamic_cast<ChannelChatters *>(shared.get()))
+                        {
                             c->addJoinedUser(x->nick());
+                        }
                     }
                 }
             }
@@ -284,7 +286,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
         }
 
         case Communi::IrcMessage::Part: {
-            auto x = static_cast<Communi::IrcPartMessage *>(message);
+            auto *x = static_cast<Communi::IrcPartMessage *>(message);
 
             if (auto it = this->channels.find(x->channel());
                 it != this->channels.end())
@@ -297,9 +299,11 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
                     }
                     else
                     {
-                        if (auto c =
+                        if (auto *c =
                                 dynamic_cast<ChannelChatters *>(shared.get()))
+                        {
                             c->addPartedUser(x->nick());
+                        }
                     }
                 }
             }
@@ -327,7 +331,9 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
                 for (auto &&weak : this->channels)
                 {
                     if (auto shared = weak.lock())
+                    {
                         shared->addMessage(msg);
+                    }
                 }
             };
     }

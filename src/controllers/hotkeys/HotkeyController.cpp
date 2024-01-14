@@ -66,7 +66,7 @@ std::vector<QShortcut *> HotkeyController::shortcutsForCategory(
             continue;
         }
         auto createShortcutFromKeySeq = [&](QKeySequence qs) {
-            auto s = new QShortcut(qs, parent);
+            auto *s = new QShortcut(qs, parent);
             s->setContext(hotkey->getContext());
             auto functionPointer = target->second;
             QObject::connect(s, &QShortcut::activated, parent,
@@ -101,7 +101,7 @@ void HotkeyController::save()
 
 std::shared_ptr<Hotkey> HotkeyController::getHotkeyByName(QString name)
 {
-    for (auto &hotkey : this->hotkeys_)
+    for (const auto &hotkey : this->hotkeys_)
     {
         if (hotkey->name() == name)
         {
@@ -115,7 +115,7 @@ int HotkeyController::replaceHotkey(QString oldName,
                                     std::shared_ptr<Hotkey> newHotkey)
 {
     int i = 0;
-    for (auto &hotkey : this->hotkeys_)
+    for (const auto &hotkey : this->hotkeys_)
     {
         if (hotkey->name() == oldName)
         {
@@ -544,7 +544,7 @@ void HotkeyController::tryAddDefault(std::set<QString> &addedHotkeys,
 void HotkeyController::showHotkeyError(const std::shared_ptr<Hotkey> &hotkey,
                                        QString warning)
 {
-    auto msgBox = new QMessageBox(
+    auto *msgBox = new QMessageBox(
         QMessageBox::Icon::Warning, "Hotkey error",
         QString(
             "There was an error while executing your hotkey named \"%1\": \n%2")

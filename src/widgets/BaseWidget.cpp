@@ -28,7 +28,7 @@ BaseWidget::BaseWidget(QWidget *parent, Qt::WindowFlags f)
 }
 void BaseWidget::clearShortcuts()
 {
-    for (auto shortcut : this->shortcuts_)
+    for (auto *shortcut : this->shortcuts_)
     {
         shortcut->setKey(QKeySequence());
         shortcut->removeEventFilter(this);
@@ -122,7 +122,7 @@ void BaseWidget::setScaleIndependantHeight(int value)
 
 float BaseWidget::qtFontScale() const
 {
-    if (auto window = dynamic_cast<BaseWindow *>(this->window()))
+    if (auto *window = dynamic_cast<BaseWindow *>(this->window()))
     {
         // ensure no div by 0
         return this->scale() / std::max<float>(0.01f, window->nativeScale_);
@@ -138,7 +138,7 @@ void BaseWidget::childEvent(QChildEvent *event)
     if (event->added())
     {
         // add element if it's a basewidget
-        if (auto widget = dynamic_cast<BaseWidget *>(event->child()))
+        if (auto *widget = dynamic_cast<BaseWidget *>(event->child()))
         {
             this->widgets_.push_back(widget);
         }

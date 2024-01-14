@@ -198,7 +198,9 @@ void Args::applyCustomChannelLayout(const QString &argValue)
         for (const WindowDescriptor &window : configLayout.windows_)
         {
             if (window.type_ != WindowType::Main)
+            {
                 continue;
+            }
 
             return window.geometry_;
         }
@@ -212,7 +214,9 @@ void Args::applyCustomChannelLayout(const QString &argValue)
     for (const QString &channelArg : channelArgList)
     {
         if (channelArg.isEmpty())
+        {
             continue;
+        }
 
         // Twitch is default platform
         QString platform = "t";

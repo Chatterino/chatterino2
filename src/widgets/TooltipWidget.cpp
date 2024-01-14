@@ -119,9 +119,9 @@ void TooltipWidget::set(const std::vector<TooltipEntry> &entries,
 
     for (int i = 0; i < entries.size(); ++i)
     {
-        if (auto entryWidget = this->entryAt(i))
+        if (auto *entryWidget = this->entryAt(i))
         {
-            auto &entry = entries[i];
+            const auto &entry = entries[i];
             entryWidget->setImage(entry.image);
             entryWidget->setText(entry.text);
             entryWidget->setImageScale(entry.customWidth, entry.customHeight);
@@ -306,7 +306,7 @@ void TooltipWidget::setWordWrap(bool wrap)
 {
     for (int i = 0; i < this->visibleEntries_; ++i)
     {
-        auto entry = this->entryAt(i);
+        auto *entry = this->entryAt(i);
         if (entry)
         {
             entry->setWordWrap(wrap);

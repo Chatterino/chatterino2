@@ -100,7 +100,9 @@ bool IrcChannel::canReconnect() const
 void IrcChannel::reconnect()
 {
     if (this->server())
+    {
         this->server()->connect();
+    }
 }
 
 }  // namespace chatterino

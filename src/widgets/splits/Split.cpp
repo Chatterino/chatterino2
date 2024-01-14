@@ -199,11 +199,11 @@ namespace {
             parent);
         window->setWindowTitle("Chatterino - " + title);
         window->setAttribute(Qt::WA_DeleteOnClose);
-        auto layout = new QVBoxLayout();
+        auto *layout = new QVBoxLayout();
         layout->addWidget(new QLabel(description));
-        auto label = new QLabel(window);
+        auto *label = new QLabel(window);
         layout->addWidget(label);
-        auto movie = new QMovie(label);
+        auto *movie = new QMovie(label);
         movie->setFileName(source);
         label->setMovie(movie);
         movie->start();
@@ -805,7 +805,7 @@ void Split::refreshModerationMode()
 
 void Split::openChannelInBrowserPlayer(ChannelPtr channel)
 {
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         QDesktopServices::openUrl(
             "https://player.twitch.tv/?parent=twitch.tv&channel=" +
@@ -918,7 +918,7 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
         return;
     }
 
-    auto dialog = new SelectChannelDialog(this);
+    auto *dialog = new SelectChannelDialog(this);
     if (!empty)
     {
         dialog->setSelectedChannel(this->getIndirectChannel());
@@ -1065,7 +1065,7 @@ void Split::explainSplitting()
 
 void Split::popup()
 {
-    auto app = getApp();
+    auto *app = getApp();
     Window &window = app->windows->createWindow(WindowType::Popup);
 
     Split *split = new Split(static_cast<SplitContainer *>(
@@ -1088,7 +1088,7 @@ void Split::openInBrowser()
 {
     auto channel = this->getChannel();
 
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         QDesktopServices::openUrl("https://twitch.tv/" +
                                   twitchChannel->getName());
@@ -1111,7 +1111,7 @@ void Split::openModViewInBrowser()
 {
     auto channel = this->getChannel();
 
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         QDesktopServices::openUrl("https://twitch.tv/moderator/" +
                                   twitchChannel->getName());
@@ -1131,9 +1131,9 @@ void Split::openWithCustomScheme()
         return;
     }
 
-    const auto channel = this->getChannel().get();
+    auto *const channel = this->getChannel().get();
 
-    if (const auto twitchChannel = dynamic_cast<TwitchChannel *>(channel))
+    if (auto *const twitchChannel = dynamic_cast<TwitchChannel *>(channel))
     {
         QDesktopServices::openUrl(QString("%1https://twitch.tv/%2")
                                       .arg(scheme)
@@ -1422,7 +1422,7 @@ void Split::openSubPage()
 {
     ChannelPtr channel = this->getChannel();
 
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         QDesktopServices::openUrl(twitchChannel->subscriptionUrl());
     }
@@ -1466,8 +1466,8 @@ void Split::showSearch(bool singleChannel)
     auto &notebook = getApp()->windows->getMainWindow().getNotebook();
     for (int i = 0; i < notebook.getPageCount(); ++i)
     {
-        auto container = dynamic_cast<SplitContainer *>(notebook.getPageAt(i));
-        for (auto split : container->getSplits())
+        auto *container = dynamic_cast<SplitContainer *>(notebook.getPageAt(i));
+        for (auto *split : container->getSplits())
         {
             if (split->channel_.getType() != Channel::Type::TwitchAutomod)
             {
@@ -1484,7 +1484,7 @@ void Split::reloadChannelAndSubscriberEmotes()
     auto channel = this->getChannel();
     getApp()->accounts->twitch.getCurrent()->loadEmotes(channel);
 
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         twitchChannel->refreshBTTVChannelEmotes(true);
         twitchChannel->refreshFFZChannelEmotes(true);
@@ -1551,8 +1551,8 @@ void Split::drag()
     startDraggingSplit();
 
     auto originalLocation = container->releaseSplit(this);
-    auto drag = new QDrag(this);
-    auto mimeData = new QMimeData;
+    auto *drag = new QDrag(this);
+    auto *mimeData = new QMimeData;
 
     mimeData->setData("chatterino/split", "xD");
     drag->setMimeData(mimeData);

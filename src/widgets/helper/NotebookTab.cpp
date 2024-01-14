@@ -99,7 +99,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
     this->menu_.addAction(
         "Popup Tab",
         [this]() {
-            if (auto container = dynamic_cast<SplitContainer *>(this->page))
+            if (auto *container = dynamic_cast<SplitContainer *>(this->page))
             {
                 container->popup();
             }
@@ -124,11 +124,11 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
 void NotebookTab::showRenameDialog()
 {
-    auto dialog = new QDialog(this);
+    auto *dialog = new QDialog(this);
 
-    auto vbox = new QVBoxLayout;
+    auto *vbox = new QVBoxLayout;
 
-    auto lineEdit = new QLineEdit;
+    auto *lineEdit = new QLineEdit;
     lineEdit->setText(this->getCustomTitle());
     lineEdit->setPlaceholderText(this->getDefaultTitle());
     lineEdit->selectAll();
@@ -137,7 +137,7 @@ void NotebookTab::showRenameDialog()
     vbox->addWidget(lineEdit);
     vbox->addStretch(1);
 
-    auto buttonBox =
+    auto *buttonBox =
         new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
     vbox->addWidget(buttonBox);
@@ -423,7 +423,7 @@ void NotebookTab::moveAnimated(QPoint pos, bool animated)
 
 void NotebookTab::paintEvent(QPaintEvent *)
 {
-    auto app = getApp();
+    auto *app = getApp();
     QPainter painter(this);
     float scale = this->scale();
 
@@ -439,13 +439,21 @@ void NotebookTab::paintEvent(QPaintEvent *)
     Theme::TabColors colors;
 
     if (this->selected_)
+    {
         colors = this->theme->tabs.selected;
+    }
     else if (this->highlightState_ == HighlightState::Highlighted)
+    {
         colors = this->theme->tabs.highlighted;
+    }
     else if (this->highlightState_ == HighlightState::NewMessage)
+    {
         colors = this->theme->tabs.newMessage;
+    }
     else
+    {
         colors = this->theme->tabs.regular;
+    }
 
     bool windowFocused = this->window() == QApplication::activeWindow();
 

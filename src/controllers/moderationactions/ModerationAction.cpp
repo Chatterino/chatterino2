@@ -143,11 +143,15 @@ const std::optional<ImagePtr> &ModerationAction::getImage() const
     if (this->imageToLoad_ != 0)
     {
         if (this->imageToLoad_ == 1)
+        {
             this->image_ =
                 Image::fromResourcePixmap(getResources().buttons.ban);
+        }
         else if (this->imageToLoad_ == 2)
+        {
             this->image_ =
                 Image::fromResourcePixmap(getResources().buttons.trashCan);
+        }
     }
 
     return this->image_;

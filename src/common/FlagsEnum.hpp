@@ -56,9 +56,13 @@ public:
     void set(T flag, bool value)
     {
         if (value)
+        {
             this->set(flag);
+        }
         else
+        {
             this->unset(flag);
+        }
     }
 
     bool has(T flag) const

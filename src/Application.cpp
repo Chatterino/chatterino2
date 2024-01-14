@@ -162,9 +162,9 @@ void Application::initialize(Settings &settings, Paths &paths)
         getSettings()->currentVersion.getValue() != "" &&
         getSettings()->currentVersion.getValue() != CHATTERINO_VERSION)
     {
-        auto box = new QMessageBox(QMessageBox::Information, "Chatterino 2",
-                                   "Show changelog?",
-                                   QMessageBox::Yes | QMessageBox::No);
+        auto *box = new QMessageBox(QMessageBox::Information, "Chatterino 2",
+                                    "Show changelog?",
+                                    QMessageBox::Yes | QMessageBox::No);
         box->setAttribute(Qt::WA_DeleteOnClose);
         if (box->exec() == QMessageBox::Yes)
         {
@@ -193,10 +193,10 @@ void Application::initialize(Settings &settings, Paths &paths)
 #ifndef Q_OS_WIN
     if (!this->args_.isFramelessEmbed && this->args_.crashRecovery)
     {
-        if (auto selected =
+        if (auto *selected =
                 this->windows->getMainWindow().getNotebook().getSelectedPage())
         {
-            if (auto container = dynamic_cast<SplitContainer *>(selected))
+            if (auto *container = dynamic_cast<SplitContainer *>(selected))
             {
                 for (auto &&split : container->getSplits())
                 {
@@ -459,7 +459,7 @@ void Application::initPubSub()
 
                 for (int i = snapshotLength - 1; i >= end; --i)
                 {
-                    auto &s = snapshot[i];
+                    const auto &s = snapshot[i];
                     if (!s->flags.has(MessageFlag::PubSub) &&
                         s->timeoutUser == msg->timeoutUser)
                     {
@@ -749,7 +749,7 @@ void Application::initPubSub()
             auto reward = ChannelPointReward(data);
 
             postToThread([chan, reward] {
-                if (auto channel = dynamic_cast<TwitchChannel *>(chan.get()))
+                if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
                 {
                     channel->addChannelPointReward(reward);
                 }
