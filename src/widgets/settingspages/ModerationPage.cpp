@@ -54,7 +54,7 @@ QString formatSize(qint64 size)
 QString fetchLogDirectorySize()
 {
     QString logsDirectoryPath = getSettings()->logPath.getValue().isEmpty()
-                                    ? getPaths()->messageLogDirectory
+                                    ? getIApp()->getPaths().messageLogDirectory
                                     : getSettings()->logPath;
 
     auto logsSize = dirSize(logsDirectoryPath);
@@ -82,7 +82,8 @@ ModerationPage::ModerationPage()
         getSettings()->logPath.connect([logsPathLabel](const QString &logPath,
                                                        auto) mutable {
             QString pathOriginal =
-                logPath.isEmpty() ? getPaths()->messageLogDirectory : logPath;
+                logPath.isEmpty() ? getIApp()->getPaths().messageLogDirectory
+                                  : logPath;
 
             QString pathShortened =
                 "Logs are saved at <a href=\"file:///" + pathOriginal +
