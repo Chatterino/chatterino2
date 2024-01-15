@@ -15,12 +15,8 @@ using namespace std::literals;
 
 namespace chatterino {
 
-Paths *Paths::instance = nullptr;
-
 Paths::Paths()
 {
-    this->instance = this;
-
     this->initAppFilePathHash();
 
     this->initCheckPortable();
@@ -144,11 +140,6 @@ void Paths::initSubDirectories()
     this->pluginsDirectory = makePath("Plugins");
     this->themesDirectory = makePath("Themes");
     this->crashdumpDirectory = makePath("Crashes");
-}
-
-Paths *getPaths()
-{
-    return Paths::instance;
 }
 
 }  // namespace chatterino

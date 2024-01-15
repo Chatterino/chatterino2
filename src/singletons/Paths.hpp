@@ -9,8 +9,6 @@ namespace chatterino {
 class Paths
 {
 public:
-    static Paths *instance;
-
     Paths();
 
     // Root directory for the configuration files. %APPDATA%/chatterino or
@@ -58,7 +56,5 @@ private:
     // Directory for cache files. Same as <appDataDirectory>/Misc
     QString cacheDirectory_;
 };
-
-Paths *getPaths();
 
 }  // namespace chatterino
