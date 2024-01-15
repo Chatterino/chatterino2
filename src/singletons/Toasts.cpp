@@ -33,7 +33,8 @@ using namespace literals;
 QString avatarFilePath(const QString &channelName)
 {
     // TODO: cleanup channel (to be used as a file) and use combinePath
-    return getPaths()->twitchProfileAvatars % '/' % channelName % u".png";
+    return getIApp()->getPaths().twitchProfileAvatars % '/' % channelName %
+           u".png";
 }
 
 bool hasAvatarForChannel(const QString &channelName)
