@@ -33,7 +33,7 @@ bool Paths::createFolder(const QString &folderPath)
     return QDir().mkpath(folderPath);
 }
 
-bool Paths::isPortable()
+bool Paths::isPortable() const
 {
     return Modes::instance().isPortable;
 }

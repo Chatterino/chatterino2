@@ -42,7 +42,7 @@ public:
     QString themesDirectory;
 
     bool createFolder(const QString &folderPath);
-    bool isPortable();
+    bool isPortable() const;
 
     QString cacheDirectory() const;
 
