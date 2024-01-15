@@ -135,7 +135,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , twitchPubSub(new PubSub(TWITCH_PUBSUB_URL))
     , logging(new Logging(_settings))
 #ifdef CHATTERINO_HAVE_PLUGINS
-    , plugins(&this->emplace<PluginController>())
+    , plugins(&this->emplace(new PluginController(paths)))
 #endif
 {
     Application::instance = this;

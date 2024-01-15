@@ -23,6 +23,11 @@
 
 namespace chatterino {
 
+PluginController::PluginController(const Paths &paths_)
+    : paths(paths_)
+{
+}
+
 void PluginController::initialize(Settings &settings, Paths &paths)
 {
     (void)paths;
@@ -44,7 +49,7 @@ void PluginController::initialize(Settings &settings, Paths &paths)
 void PluginController::loadPlugins()
 {
     this->plugins_.clear();
-    auto dir = QDir(getPaths()->pluginsDirectory);
+    auto dir = QDir(this->paths->pluginsDirectory);
     qCDebug(chatterinoLua) << "Loading plugins in" << dir.path();
     for (const auto &info :
          dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot))
