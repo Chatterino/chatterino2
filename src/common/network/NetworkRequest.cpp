@@ -1,6 +1,6 @@
-#include "common/NetworkRequest.hpp"
+#include "common/network/NetworkRequest.hpp"
 
-#include "common/NetworkPrivate.hpp"
+#include "common/network/NetworkPrivate.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
 

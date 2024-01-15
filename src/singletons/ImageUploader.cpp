@@ -1,8 +1,8 @@
 #include "singletons/ImageUploader.hpp"
 
 #include "common/Env.hpp"
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"

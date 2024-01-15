@@ -2,7 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
-#include "common/NetworkRequest.hpp"
+#include "common/network/NetworkRequest.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
