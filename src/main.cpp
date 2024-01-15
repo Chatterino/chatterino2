@@ -65,7 +65,7 @@ int main(int argc, char **argv)
     const Args args(a, *paths);
 
 #ifdef CHATTERINO_WITH_CRASHPAD
-    const auto crashpadHandler = installCrashHandler(args);
+    const auto crashpadHandler = installCrashHandler(args, *paths);
 #endif
 
     // run in gui mode or browser extension host mode

@@ -13,10 +13,15 @@
 namespace chatterino {
 
 class Args;
+class Paths;
 
 class CrashHandler : public Singleton
 {
+    const Paths &paths;
+
 public:
+    explicit CrashHandler(const Paths &paths_);
+
     bool shouldRecover() const
     {
         return this->shouldRecover_;
@@ -32,7 +37,8 @@ private:
 };
 
 #ifdef CHATTERINO_WITH_CRASHPAD
-std::unique_ptr<crashpad::CrashpadClient> installCrashHandler(const Args &args);
+std::unique_ptr<crashpad::CrashpadClient> installCrashHandler(
+    const Args &args, const Paths &paths);
 #endif
 
 }  // namespace chatterino
