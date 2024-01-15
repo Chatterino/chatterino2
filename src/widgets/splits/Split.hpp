@@ -2,13 +2,13 @@
 
 #include "common/Aliases.hpp"
 #include "common/Channel.hpp"
-#include "common/NullablePtr.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/splits/SplitCommon.hpp"
 
 #include <boost/signals2.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QFont>
+#include <QPointer>
 #include <QShortcut>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -155,7 +155,7 @@ private:
     SplitInput *const input_;
     SplitOverlay *const overlay_;
 
-    NullablePtr<SelectChannelDialog> selectChannelDialog_;
+    QPointer<SelectChannelDialog> selectChannelDialog_;
 
     pajlada::Signals::Connection channelIDChangedConnection_;
     pajlada::Signals::Connection usermodeChangedConnection_;
