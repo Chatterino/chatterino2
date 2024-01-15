@@ -98,9 +98,9 @@ namespace {
         installCustomPalette();
     }
 
-    void showLastCrashDialog(const Args &args)
+    void showLastCrashDialog(const Args &args, const Paths &paths)
     {
-        auto *dialog = new LastRunCrashDialog(args);
+        auto *dialog = new LastRunCrashDialog(args, paths);
         // Use exec() over open() to block the app from being loaded
         // and to be able to set the safe mode.
         dialog->exec();
@@ -233,7 +233,7 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
 #ifdef Q_OS_WIN
     if (args.crashRecovery)
     {
-        showLastCrashDialog(args);
+        showLastCrashDialog(args, paths);
     }
 #endif
 
