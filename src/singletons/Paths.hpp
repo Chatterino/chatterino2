@@ -42,7 +42,8 @@ public:
     QString themesDirectory;
 
     bool createFolder(const QString &folderPath);
-    bool isPortable() const;
+    [[deprecated("use Modes::instance().portable instead")]] bool isPortable()
+        const;
 
     QString cacheDirectory() const;
 
