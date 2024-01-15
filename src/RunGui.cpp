@@ -224,7 +224,7 @@ namespace {
 }  // namespace
 
 void runGui(QApplication &a, const Paths &paths, Settings &settings,
-            const Args &args)
+            const Args &args, Updates &updates)
 {
     initQt();
     initResources();
@@ -270,9 +270,9 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
     });
 
     chatterino::NetworkManager::init();
-    chatterino::Updates::instance().checkForUpdates();
+    updates.checkForUpdates();
 
-    Application app(settings, paths, args);
+    Application app(settings, paths, args, updates);
     app.initialize(settings, paths);
     app.run(a);
     app.save();

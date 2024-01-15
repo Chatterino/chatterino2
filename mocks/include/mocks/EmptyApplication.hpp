@@ -3,12 +3,18 @@
 #include "Application.hpp"
 #include "common/Args.hpp"
 #include "singletons/Paths.hpp"
+#include "singletons/Updates.hpp"
 
 namespace chatterino::mock {
 
 class EmptyApplication : public IApplication
 {
 public:
+    EmptyApplication()
+        : updates_(this->paths_)
+    {
+    }
+
     virtual ~EmptyApplication() = default;
 
     const Paths &getPaths() override
@@ -174,9 +180,15 @@ public:
         return nullptr;
     }
 
+    Updates &getUpdates() override
+    {
+        return this->updates_;
+    }
+
 private:
     Paths paths_;
     Args args_;
+    Updates updates_;
 };
 
 }  // namespace chatterino::mock

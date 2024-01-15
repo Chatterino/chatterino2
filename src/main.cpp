@@ -11,6 +11,7 @@
 #include "singletons/CrashHandler.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/Updates.hpp"
 #include "util/AttachToConsole.hpp"
 
 #include <QApplication>
@@ -92,6 +93,8 @@ int main(int argc, char **argv)
             attachToConsole();
         }
 
+        Updates updates(*paths);
+
         NetworkConfigurationProvider::applyFromEnv(Env::get());
 
         IvrApi::initialize();
@@ -99,7 +102,7 @@ int main(int argc, char **argv)
 
         Settings settings(paths->settingsDirectory);
 
-        runGui(a, *paths, settings, args);
+        runGui(a, *paths, settings, args, updates);
     }
     return 0;
 }

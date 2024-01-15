@@ -108,7 +108,7 @@ IApplication::IApplication()
 // to each other
 
 Application::Application(Settings &_settings, const Paths &paths,
-                         const Args &_args)
+                         const Args &_args, Updates &_updates)
     : paths_(paths)
     , args_(_args)
     , themes(&this->emplace<Theme>())
@@ -137,6 +137,7 @@ Application::Application(Settings &_settings, const Paths &paths,
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(&this->emplace(new PluginController(paths)))
 #endif
+    , updates(_updates)
 {
     Application::instance = this;
 
@@ -239,8 +240,8 @@ int Application::run(QApplication &qtApp)
     }
 
     getSettings()->betaUpdates.connect(
-        [] {
-            Updates::instance().checkForUpdates();
+        [this] {
+            this->updates.checkForUpdates();
         },
         false);
 

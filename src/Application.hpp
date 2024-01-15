@@ -15,6 +15,7 @@ class Args;
 class TwitchIrcServer;
 class ITwitchIrcServer;
 class PubSub;
+class Updates;
 
 class CommandController;
 class AccountController;
@@ -79,6 +80,7 @@ public:
     virtual ITwitchLiveController *getTwitchLiveController() = 0;
     virtual ImageUploader *getImageUploader() = 0;
     virtual SeventvAPI *getSeventvAPI() = 0;
+    virtual Updates &getUpdates() = 0;
 };
 
 class Application : public IApplication
@@ -92,7 +94,8 @@ class Application : public IApplication
 public:
     static Application *instance;
 
-    Application(Settings &_settings, const Paths &paths, const Args &_args);
+    Application(Settings &_settings, const Paths &paths, const Args &_args,
+                Updates &_updates);
     ~Application() override;
 
     Application(const Application &) = delete;
@@ -220,6 +223,10 @@ public:
     {
         return this->seventvAPI;
     }
+    Updates &getUpdates() override
+    {
+        return this->updates;
+    }
 
     pajlada::Signals::NoArgSignal streamerModeChanged;
 
@@ -248,6 +255,7 @@ private:
     }
 
     NativeMessagingServer nmServer{};
+    Updates &updates;
 };
 
 Application *getApp();
