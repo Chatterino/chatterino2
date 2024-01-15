@@ -223,7 +223,8 @@ namespace {
     }
 }  // namespace
 
-void runGui(QApplication &a, Paths &paths, Settings &settings, const Args &args)
+void runGui(QApplication &a, const Paths &paths, Settings &settings,
+            const Args &args)
 {
     initQt();
     initResources();

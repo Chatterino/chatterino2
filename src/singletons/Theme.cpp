@@ -219,7 +219,7 @@ bool Theme::isLightTheme() const
     return this->isLight_;
 }
 
-void Theme::initialize(Settings &settings, Paths &paths)
+void Theme::initialize(Settings &settings, const Paths &paths)
 {
     this->themeName.connect(
         [this](auto themeName) {

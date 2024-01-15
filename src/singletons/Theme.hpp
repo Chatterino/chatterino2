@@ -43,7 +43,7 @@ public:
 
     static const int AUTO_RELOAD_INTERVAL_MS = 500;
 
-    void initialize(Settings &settings, Paths &paths) final;
+    void initialize(Settings &settings, const Paths &paths) final;
 
     bool isLightTheme() const;
 

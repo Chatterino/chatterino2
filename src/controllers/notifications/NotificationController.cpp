@@ -26,7 +26,7 @@
 
 namespace chatterino {
 
-void NotificationController::initialize(Settings &settings, Paths &paths)
+void NotificationController::initialize(Settings &settings, const Paths &paths)
 {
     this->initialized_ = true;
     for (const QString &channelName : this->twitchSetting_.getValue())

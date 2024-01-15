@@ -38,7 +38,7 @@ bool Paths::isPortable()
     return Modes::instance().isPortable;
 }
 
-QString Paths::cacheDirectory()
+QString Paths::cacheDirectory() const
 {
     static const auto pathSetting = [] {
         QStringSetting cachePathSetting("/cache/path");

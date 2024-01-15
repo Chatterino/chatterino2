@@ -128,7 +128,7 @@ namespace chatterino {
 
 using namespace std::string_literals;
 
-void CrashHandler::initialize(Settings & /*settings*/, Paths &paths)
+void CrashHandler::initialize(Settings & /*settings*/, const Paths &paths)
 {
     auto optSettings = readRecoverySettings(paths);
     if (optSettings)

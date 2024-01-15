@@ -25,7 +25,7 @@ public:
     /// Sets and saves whether Chatterino should restart on a crash
     void saveShouldRecover(bool value);
 
-    void initialize(Settings &settings, Paths &paths) override;
+    void initialize(Settings &settings, const Paths &paths) override;
 
 private:
     bool shouldRecover_ = false;

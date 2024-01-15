@@ -90,7 +90,7 @@ class Application : public IApplication
 public:
     static Application *instance;
 
-    Application(Settings &_settings, Paths &_paths, const Args &_args);
+    Application(Settings &_settings, const Paths &_paths, const Args &_args);
     ~Application() override;
 
     Application(const Application &) = delete;
@@ -104,7 +104,7 @@ public:
      */
     void fakeDtor();
 
-    void initialize(Settings &settings, Paths &paths);
+    void initialize(Settings &settings, const Paths &paths);
     void load();
     void save();
 
@@ -222,7 +222,7 @@ private:
     void initPubSub();
     void initBttvLiveUpdates();
     void initSeventvEventAPI();
-    void initNm(Paths &paths);
+    void initNm(const Paths &paths);
 
     template <typename T,
               typename = std::enable_if_t<std::is_base_of<Singleton, T>::value>>

@@ -44,7 +44,7 @@ public:
     bool createFolder(const QString &folderPath);
     bool isPortable();
 
-    QString cacheDirectory();
+    QString cacheDirectory() const;
 
 private:
     void initAppFilePathHash();

@@ -43,7 +43,7 @@ public:
     TwitchIrcServer();
     ~TwitchIrcServer() override = default;
 
-    void initialize(Settings &settings, Paths &paths) override;
+    void initialize(Settings &settings, const Paths &paths) override;
 
     void forEachChannelAndSpecialChannels(std::function<void(ChannelPtr)> func);
 

@@ -93,7 +93,7 @@ public:
     QPoint emotePopupPos();
     void setEmotePopupPos(QPoint pos);
 
-    void initialize(Settings &settings, Paths &paths) override;
+    void initialize(Settings &settings, const Paths &paths) override;
     void save() override;
     void closeAll();
 

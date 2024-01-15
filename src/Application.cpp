@@ -107,7 +107,8 @@ IApplication::IApplication()
 // It will create the instances of the major classes, and connect their signals
 // to each other
 
-Application::Application(Settings &_settings, Paths &_paths, const Args &_args)
+Application::Application(Settings &_settings, const Paths &_paths,
+                         const Args &_args)
     : args_(_args)
     , themes(&this->emplace<Theme>())
     , fonts(&this->emplace<Fonts>())
@@ -152,7 +153,7 @@ void Application::fakeDtor()
     this->twitchPubSub.reset();
 }
 
-void Application::initialize(Settings &settings, Paths &paths)
+void Application::initialize(Settings &settings, const Paths &paths)
 {
     assert(isAppInitialized == false);
     isAppInitialized = true;
@@ -340,7 +341,7 @@ void Application::save()
     }
 }
 
-void Application::initNm(Paths &paths)
+void Application::initNm(const Paths &paths)
 {
     (void)paths;
 
