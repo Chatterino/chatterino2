@@ -28,7 +28,7 @@ PluginController::PluginController(const Paths &paths_)
 {
 }
 
-void PluginController::initialize(Settings &settings, Paths &paths)
+void PluginController::initialize(Settings &settings, const Paths &paths)
 {
     (void)paths;
 

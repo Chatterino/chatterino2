@@ -31,7 +31,7 @@ class PluginController : public Singleton
 public:
     explicit PluginController(const Paths &paths_);
 
-    void initialize(Settings &settings, Paths &paths) override;
+    void initialize(Settings &settings, const Paths &paths) override;
 
     QString tryExecPluginCommand(const QString &commandName,
                                  const CommandContext &ctx);
