@@ -116,7 +116,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , emotes(&this->emplace<Emotes>())
     , accounts(&this->emplace<AccountController>())
     , hotkeys(&this->emplace<HotkeyController>())
-    , windows(&this->emplace<WindowManager>())
+    , windows(&this->emplace(new WindowManager(paths)))
     , toasts(&this->emplace<Toasts>())
     , imageUploader(&this->emplace<ImageUploader>())
     , seventvAPI(&this->emplace<SeventvAPI>())

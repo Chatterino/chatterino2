@@ -37,8 +37,13 @@ class WindowManager final : public Singleton
 public:
     static const QString WINDOW_LAYOUT_FILENAME;
 
-    WindowManager();
+    explicit WindowManager(const Paths &paths);
     ~WindowManager() override;
+
+    WindowManager(const WindowManager &) = delete;
+    WindowManager(WindowManager &&) = delete;
+    WindowManager &operator=(const WindowManager &) = delete;
+    WindowManager &operator=(WindowManager &&) = delete;
 
     static void encodeTab(SplitContainer *tab, bool isSelected,
                           QJsonObject &obj);
