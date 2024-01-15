@@ -62,7 +62,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    const Args args(a);
+    const Args args(a, *paths);
 
 #ifdef CHATTERINO_WITH_CRASHPAD
     const auto crashpadHandler = installCrashHandler(args);
