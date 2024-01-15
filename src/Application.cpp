@@ -129,7 +129,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , chatterinoBadges(&this->emplace<ChatterinoBadges>())
     , ffzBadges(&this->emplace<FfzBadges>())
     , seventvBadges(&this->emplace<SeventvBadges>())
-    , userData(&this->emplace<UserDataController>())
+    , userData(&this->emplace(new UserDataController(paths)))
     , sound(&this->emplace<ISoundController>(makeSoundController(_settings)))
     , twitchLiveController(&this->emplace<TwitchLiveController>())
     , twitchPubSub(new PubSub(TWITCH_PUBSUB_URL))
