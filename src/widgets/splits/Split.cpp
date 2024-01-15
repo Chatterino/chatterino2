@@ -911,7 +911,7 @@ void Split::insertTextToInput(const QString &text)
 void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
                                    std::function<void(bool)> callback)
 {
-    if (this->selectChannelDialog_.hasElement())
+    if (!this->selectChannelDialog_.isNull())
     {
         this->selectChannelDialog_->raise();
 
@@ -935,7 +935,6 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
         }
 
         callback(dialog->hasSeletedChannel());
-        this->selectChannelDialog_ = nullptr;
     });
     this->selectChannelDialog_ = dialog;
 }
