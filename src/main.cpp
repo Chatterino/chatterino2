@@ -35,11 +35,11 @@ int main(int argc, char **argv)
     QCoreApplication::setApplicationVersion(CHATTERINO_VERSION);
     QCoreApplication::setOrganizationDomain("chatterino.com");
 
-    Paths *paths{};
+    std::unique_ptr<Paths> paths;
 
     try
     {
-        paths = new Paths;
+        paths = std::make_unique<Paths>();
     }
     catch (std::runtime_error &error)
     {
