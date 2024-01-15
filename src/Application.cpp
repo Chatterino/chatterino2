@@ -107,9 +107,10 @@ IApplication::IApplication()
 // It will create the instances of the major classes, and connect their signals
 // to each other
 
-Application::Application(Settings &_settings, const Paths &_paths,
+Application::Application(Settings &_settings, const Paths &paths,
                          const Args &_args)
-    : args_(_args)
+    : paths_(paths)
+    , args_(_args)
     , themes(&this->emplace<Theme>())
     , fonts(&this->emplace<Fonts>())
     , emotes(&this->emplace<Emotes>())

@@ -10,6 +10,11 @@ class EmptyApplication : public IApplication
 public:
     virtual ~EmptyApplication() = default;
 
+    const Paths &getPaths() override
+    {
+        return this->paths_;
+    }
+
     const Args &getArgs() override
     {
         return this->args_;
@@ -169,6 +174,7 @@ public:
     }
 
 private:
+    Paths paths_;
     Args args_;
 };
 
