@@ -332,7 +332,7 @@ void Theme::loadAvailableThemes()
 {
     this->availableThemes_ = Theme::builtInThemes;
 
-    auto dir = QDir(getPaths()->themesDirectory);
+    auto dir = QDir(getIApp()->getPaths().themesDirectory);
     for (const auto &info :
          dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot, QDir::Name))
     {
