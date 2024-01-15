@@ -3,7 +3,7 @@
 #include "Application.hpp"
 #include "common/Args.hpp"
 #include "common/Modes.hpp"
-#include "common/NetworkManager.hpp"
+#include "common/network/NetworkManager.hpp"
 #include "common/QLogging.hpp"
 #include "singletons/CrashHandler.hpp"
 #include "singletons/Paths.hpp"

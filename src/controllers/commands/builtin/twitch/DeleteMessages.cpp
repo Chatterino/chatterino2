@@ -2,7 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "messages/Message.hpp"

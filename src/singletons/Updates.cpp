@@ -1,8 +1,8 @@
 #include "Updates.hpp"
 
 #include "common/Modes.hpp"
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "Settings.hpp"

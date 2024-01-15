@@ -2,7 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Literals.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
