@@ -74,7 +74,7 @@ void PubSubClient::close(const std::string &reason,
         });
 }
 
-bool PubSubClient::listen(PubSubListenMessage msg)
+bool PubSubClient::listen(const PubSubListenMessage &msg)
 {
     int numRequestedListens = msg.topics.size();
 
