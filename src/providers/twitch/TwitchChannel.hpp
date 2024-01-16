@@ -135,7 +135,7 @@ public:
     const QString &subscriptionUrl();
     const QString &channelUrl();
     const QString &popoutPlayerUrl();
-    int chatterCount();
+    int chatterCount() const;
     bool isLive() const override;
     QString roomId() const;
     SharedAccessGuard<const RoomModes> accessRoomModes() const;

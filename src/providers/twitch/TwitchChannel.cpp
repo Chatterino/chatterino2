@@ -1134,7 +1134,7 @@ const QString &TwitchChannel::popoutPlayerUrl()
     return this->popoutPlayerUrl_;
 }
 
-int TwitchChannel::chatterCount()
+int TwitchChannel::chatterCount() const
 {
     return this->chatterCount_;
 }
