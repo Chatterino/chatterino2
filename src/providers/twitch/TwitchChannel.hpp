@@ -110,6 +110,11 @@ public:
     explicit TwitchChannel(const QString &channelName);
     ~TwitchChannel() override;
 
+    TwitchChannel(const TwitchChannel &) = delete;
+    TwitchChannel(TwitchChannel &&) = delete;
+    TwitchChannel &operator=(const TwitchChannel &) = delete;
+    TwitchChannel &operator=(TwitchChannel &&) = delete;
+
     void initialize();
 
     // Channel methods
