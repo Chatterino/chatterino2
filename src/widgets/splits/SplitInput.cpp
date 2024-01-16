@@ -410,7 +410,7 @@ void SplitInput::addShortcuts()
              QTextCursor cursor = this->ui_.textEdit->textCursor();
              auto place = QTextCursor::Start;
              auto stringTakeSelection = arguments.at(0);
-             bool select;
+             bool select{};
              if (stringTakeSelection == "withSelection")
              {
                  select = true;
@@ -445,7 +445,7 @@ void SplitInput::addShortcuts()
              QTextCursor cursor = this->ui_.textEdit->textCursor();
              auto place = QTextCursor::End;
              auto stringTakeSelection = arguments.at(0);
-             bool select;
+             bool select{};
              if (stringTakeSelection == "withSelection")
              {
                  select = true;
@@ -1008,7 +1008,7 @@ void SplitInput::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
 
-    int s;
+    int s{};
     QColor borderColor;
 
     if (this->theme->isLightTheme())
