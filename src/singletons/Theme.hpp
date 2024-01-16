@@ -169,7 +169,7 @@ private:
      *
      * NOTE: This is currently not built to be reloadable
      **/
-    void loadAvailableThemes();
+    void loadAvailableThemes(const Paths &paths);
 
     std::optional<ThemeDescriptor> findThemeByKey(const QString &key);
 
