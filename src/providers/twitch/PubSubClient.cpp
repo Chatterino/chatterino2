@@ -88,7 +88,14 @@ bool PubSubClient::listen(PubSubListenMessage msg)
 
     for (const auto &topic : msg.topics)
     {
-        this->listeners_.emplace_back(Listener{topic, false, false, false});
+        this->listeners_.emplace_back(Listener{
+            TopicData{
+                topic,
+                false,
+                false,
+            },
+            false,
+        });
     }
 
     qCDebug(chatterinoPubSub)
