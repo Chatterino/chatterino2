@@ -1202,7 +1202,7 @@ void TwitchChannel::loadRecentMessages()
             tc->loadingRecentMessages_.clear();
 
             std::vector<MessagePtr> msgs;
-            for (MessagePtr msg : messages)
+            for (const auto &msg : messages)
             {
                 const auto highlighted =
                     msg->flags.has(MessageFlag::Highlighted);
