@@ -222,7 +222,8 @@ void SplitInput::scaleChangedEvent(float scale)
 
 void SplitInput::themeChangedEvent()
 {
-    QPalette palette, placeholderPalette;
+    QPalette palette;
+    QPalette placeholderPalette;
 
     palette.setColor(QPalette::WindowText, this->theme->splits.input.text);
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
