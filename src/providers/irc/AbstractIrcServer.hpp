@@ -57,7 +57,11 @@ protected:
     // initializeConnectionSignals is called on a connection once in its lifetime.
     // it can be used to connect signals to your class
     virtual void initializeConnectionSignals(IrcConnection *connection,
-                                             ConnectionType type){};
+                                             ConnectionType type)
+    {
+        (void)connection;
+        (void)type;
+    }
 
     // initializeConnection is called every time before we try to connect to the IRC server
     virtual void initializeConnection(IrcConnection *connection,
