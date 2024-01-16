@@ -40,7 +40,7 @@ PluginsPage::PluginsPage()
         auto *description =
             new QLabel("You can load plugins by putting them into " +
                        formatRichNamedLink(
-                           "file:///" + getIApp()->getPaths()->pluginsDirectory,
+                           "file:///" + getIApp()->getPaths().pluginsDirectory,
                            "the Plugins directory") +
                        ". Each one is a new directory.");
         description->setOpenExternalLinks(true);
