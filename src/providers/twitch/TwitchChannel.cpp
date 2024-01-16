@@ -1430,14 +1430,15 @@ void TwitchChannel::refreshBadges()
                 for (const auto &version : badgeSet.versions)
                 {
                     auto emote = Emote{
-                        EmoteName{},
-                        ImageSet{
-                            Image::fromUrl(version.imageURL1x, 1),
-                            Image::fromUrl(version.imageURL2x, .5),
-                            Image::fromUrl(version.imageURL4x, .25),
-                        },
-                        Tooltip{version.title},
-                        version.clickURL,
+                        .name = EmoteName{},
+                        .images =
+                            ImageSet{
+                                Image::fromUrl(version.imageURL1x, 1),
+                                Image::fromUrl(version.imageURL2x, .5),
+                                Image::fromUrl(version.imageURL4x, .25),
+                            },
+                        .tooltip = Tooltip{version.title},
+                        .homePage = version.clickURL,
                     };
                     (*badgeSets)[setID][version.id] =
                         std::make_shared<Emote>(emote);
