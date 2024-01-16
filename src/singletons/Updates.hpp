@@ -7,6 +7,10 @@ namespace chatterino {
 
 class Paths;
 
+/**
+ * To check for updates, use the `checkForUpdates` method.
+ * The class by itself does not start any automatic updates.
+ */
 class Updates
 {
     const Paths &paths;
