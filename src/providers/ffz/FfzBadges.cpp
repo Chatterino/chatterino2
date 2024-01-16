@@ -16,7 +16,7 @@
 
 namespace chatterino {
 
-void FfzBadges::initialize(Settings &settings, Paths &paths)
+void FfzBadges::initialize(Settings &settings, const Paths &paths)
 {
     this->load();
 }

@@ -11,7 +11,7 @@
 #include <QUrl>
 
 namespace chatterino {
-void ChatterinoBadges::initialize(Settings &settings, Paths &paths)
+void ChatterinoBadges::initialize(Settings &settings, const Paths &paths)
 {
     this->loadChatterinoBadges();
 }

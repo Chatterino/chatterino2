@@ -8,6 +8,8 @@
 
 namespace chatterino {
 
+class Paths;
+
 /// Command line arguments passed to Chatterino.
 ///
 /// All accepted arguments:
@@ -31,7 +33,7 @@ class Args
 {
 public:
     Args() = default;
-    Args(const QApplication &app);
+    Args(const QApplication &app, const Paths &paths);
 
     bool printVersion{};
 
@@ -56,7 +58,7 @@ public:
     QStringList currentArguments() const;
 
 private:
-    void applyCustomChannelLayout(const QString &argValue);
+    void applyCustomChannelLayout(const QString &argValue, const Paths &paths);
 
     QStringList currentArguments_;
 };

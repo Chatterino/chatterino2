@@ -107,18 +107,20 @@ IApplication::IApplication()
 // It will create the instances of the major classes, and connect their signals
 // to each other
 
-Application::Application(Settings &_settings, Paths &_paths, const Args &_args)
-    : args_(_args)
+Application::Application(Settings &_settings, const Paths &paths,
+                         const Args &_args, Updates &_updates)
+    : paths_(paths)
+    , args_(_args)
     , themes(&this->emplace<Theme>())
     , fonts(&this->emplace<Fonts>())
     , emotes(&this->emplace<Emotes>())
     , accounts(&this->emplace<AccountController>())
     , hotkeys(&this->emplace<HotkeyController>())
-    , windows(&this->emplace<WindowManager>())
+    , windows(&this->emplace(new WindowManager(paths)))
     , toasts(&this->emplace<Toasts>())
     , imageUploader(&this->emplace<ImageUploader>())
     , seventvAPI(&this->emplace<SeventvAPI>())
-    , crashHandler(&this->emplace<CrashHandler>())
+    , crashHandler(&this->emplace(new CrashHandler(paths)))
 
     , commands(&this->emplace<CommandController>())
     , notifications(&this->emplace<NotificationController>())
@@ -127,14 +129,15 @@ Application::Application(Settings &_settings, Paths &_paths, const Args &_args)
     , chatterinoBadges(&this->emplace<ChatterinoBadges>())
     , ffzBadges(&this->emplace<FfzBadges>())
     , seventvBadges(&this->emplace<SeventvBadges>())
-    , userData(&this->emplace<UserDataController>())
+    , userData(&this->emplace(new UserDataController(paths)))
     , sound(&this->emplace<ISoundController>(makeSoundController(_settings)))
     , twitchLiveController(&this->emplace<TwitchLiveController>())
     , twitchPubSub(new PubSub(TWITCH_PUBSUB_URL))
     , logging(new Logging(_settings))
 #ifdef CHATTERINO_HAVE_PLUGINS
-    , plugins(&this->emplace<PluginController>())
+    , plugins(&this->emplace(new PluginController(paths)))
 #endif
+    , updates(_updates)
 {
     Application::instance = this;
 
@@ -152,7 +155,7 @@ void Application::fakeDtor()
     this->twitchPubSub.reset();
 }
 
-void Application::initialize(Settings &settings, Paths &paths)
+void Application::initialize(Settings &settings, const Paths &paths)
 {
     assert(isAppInitialized == false);
     isAppInitialized = true;
@@ -237,8 +240,8 @@ int Application::run(QApplication &qtApp)
     }
 
     getSettings()->betaUpdates.connect(
-        [] {
-            Updates::instance().checkForUpdates();
+        [this] {
+            this->updates.checkForUpdates();
         },
         false);
 
@@ -340,7 +343,7 @@ void Application::save()
     }
 }
 
-void Application::initNm(Paths &paths)
+void Application::initNm(const Paths &paths)
 {
     (void)paths;
 

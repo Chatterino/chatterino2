@@ -15,6 +15,7 @@ class Args;
 class TwitchIrcServer;
 class ITwitchIrcServer;
 class PubSub;
+class Updates;
 
 class CommandController;
 class AccountController;
@@ -55,6 +56,7 @@ public:
 
     static IApplication *instance;
 
+    virtual const Paths &getPaths() = 0;
     virtual const Args &getArgs() = 0;
     virtual Theme *getThemes() = 0;
     virtual Fonts *getFonts() = 0;
@@ -78,10 +80,12 @@ public:
     virtual ITwitchLiveController *getTwitchLiveController() = 0;
     virtual ImageUploader *getImageUploader() = 0;
     virtual SeventvAPI *getSeventvAPI() = 0;
+    virtual Updates &getUpdates() = 0;
 };
 
 class Application : public IApplication
 {
+    const Paths &paths_;
     const Args &args_;
     std::vector<std::unique_ptr<Singleton>> singletons_;
     int argc_{};
@@ -90,7 +94,8 @@ class Application : public IApplication
 public:
     static Application *instance;
 
-    Application(Settings &_settings, Paths &_paths, const Args &_args);
+    Application(Settings &_settings, const Paths &paths, const Args &_args,
+                Updates &_updates);
     ~Application() override;
 
     Application(const Application &) = delete;
@@ -104,7 +109,7 @@ public:
      */
     void fakeDtor();
 
-    void initialize(Settings &settings, Paths &paths);
+    void initialize(Settings &settings, const Paths &paths);
     void load();
     void save();
 
@@ -143,6 +148,10 @@ public:
     PluginController *const plugins{};
 #endif
 
+    const Paths &getPaths() override
+    {
+        return this->paths_;
+    }
     const Args &getArgs() override
     {
         return this->args_;
@@ -214,6 +223,10 @@ public:
     {
         return this->seventvAPI;
     }
+    Updates &getUpdates() override
+    {
+        return this->updates;
+    }
 
     pajlada::Signals::NoArgSignal streamerModeChanged;
 
@@ -222,7 +235,7 @@ private:
     void initPubSub();
     void initBttvLiveUpdates();
     void initSeventvEventAPI();
-    void initNm(Paths &paths);
+    void initNm(const Paths &paths);
 
     template <typename T,
               typename = std::enable_if_t<std::is_base_of<Singleton, T>::value>>
@@ -242,6 +255,7 @@ private:
     }
 
     NativeMessagingServer nmServer{};
+    Updates &updates;
 };
 
 Application *getApp();

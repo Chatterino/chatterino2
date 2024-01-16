@@ -91,8 +91,8 @@ void WindowManager::showAccountSelectPopup(QPoint point)
     w->setFocus();
 }
 
-WindowManager::WindowManager()
-    : windowLayoutFilePath(combinePath(getPaths()->settingsDirectory,
+WindowManager::WindowManager(const Paths &paths)
+    : windowLayoutFilePath(combinePath(paths.settingsDirectory,
                                        WindowManager::WINDOW_LAYOUT_FILENAME))
 {
     qCDebug(chatterinoWindowmanager) << "init WindowManager";
@@ -338,7 +338,7 @@ void WindowManager::setEmotePopupPos(QPoint pos)
     this->emotePopupPos_ = pos;
 }
 
-void WindowManager::initialize(Settings &settings, Paths &paths)
+void WindowManager::initialize(Settings &settings, const Paths &paths)
 {
     (void)paths;
     assertInGuiThread();

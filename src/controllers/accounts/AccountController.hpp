@@ -21,7 +21,7 @@ public:
 
     AccountModel *createModel(QObject *parent);
 
-    void initialize(Settings &settings, Paths &paths) override;
+    void initialize(Settings &settings, const Paths &paths) override;
 
     TwitchAccountManager twitch;
 

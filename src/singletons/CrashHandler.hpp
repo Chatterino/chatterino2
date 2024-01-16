@@ -13,10 +13,15 @@
 namespace chatterino {
 
 class Args;
+class Paths;
 
 class CrashHandler : public Singleton
 {
+    const Paths &paths;
+
 public:
+    explicit CrashHandler(const Paths &paths_);
+
     bool shouldRecover() const
     {
         return this->shouldRecover_;
@@ -25,14 +30,15 @@ public:
     /// Sets and saves whether Chatterino should restart on a crash
     void saveShouldRecover(bool value);
 
-    void initialize(Settings &settings, Paths &paths) override;
+    void initialize(Settings &settings, const Paths &paths) override;
 
 private:
     bool shouldRecover_ = false;
 };
 
 #ifdef CHATTERINO_WITH_CRASHPAD
-std::unique_ptr<crashpad::CrashpadClient> installCrashHandler(const Args &args);
+std::unique_ptr<crashpad::CrashpadClient> installCrashHandler(
+    const Args &args, const Paths &paths);
 #endif
 
 }  // namespace chatterino

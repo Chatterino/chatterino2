@@ -86,7 +86,7 @@ struct HighlightCheck {
 class HighlightController final : public Singleton
 {
 public:
-    void initialize(Settings &settings, Paths &paths) override;
+    void initialize(Settings &settings, const Paths &paths) override;
 
     /**
      * @brief Checks the given message parameters if it matches our internal checks, and returns a result

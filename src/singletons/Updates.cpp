@@ -26,19 +26,12 @@ namespace {
 
 }  // namespace
 
-Updates::Updates()
-    : currentVersion_(CHATTERINO_VERSION)
+Updates::Updates(const Paths &paths_)
+    : paths(paths_)
+    , currentVersion_(CHATTERINO_VERSION)
     , updateGuideLink_("https://chatterino.com")
 {
     qCDebug(chatterinoUpdate) << "init UpdateManager";
-}
-
-Updates &Updates::instance()
-{
-    // fourtf: don't add this class to the application class
-    static Updates instance;
-
-    return instance;
 }
 
 /// Checks if the online version is newer or older than the current version.
@@ -97,7 +90,7 @@ void Updates::installUpdates()
     box->exec();
     QDesktopServices::openUrl(this->updateGuideLink_);
 #elif defined Q_OS_WIN
-    if (getPaths()->isPortable())
+    if (this->paths.isPortable())
     {
         QMessageBox *box =
             new QMessageBox(QMessageBox::Information, "Chatterino Update",
@@ -136,7 +129,7 @@ void Updates::installUpdates()
 
                 QByteArray object = result.getData();
                 auto filename =
-                    combinePath(getPaths()->miscDirectory, "update.zip");
+                    combinePath(this->paths.miscDirectory, "update.zip");
 
                 QFile file(filename);
                 file.open(QIODevice::Truncate | QIODevice::WriteOnly);
@@ -196,7 +189,7 @@ void Updates::installUpdates()
 
                 QByteArray object = result.getData();
                 auto filePath =
-                    combinePath(getPaths()->miscDirectory, "Update.exe");
+                    combinePath(this->paths.miscDirectory, "Update.exe");
 
                 QFile file(filePath);
                 file.open(QIODevice::Truncate | QIODevice::WriteOnly);
