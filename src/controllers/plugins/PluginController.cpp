@@ -49,7 +49,7 @@ void PluginController::initialize(Settings &settings, const Paths &paths)
 void PluginController::loadPlugins()
 {
     this->plugins_.clear();
-    auto dir = QDir(this->paths->pluginsDirectory);
+    auto dir = QDir(this->paths.pluginsDirectory);
     qCDebug(chatterinoLua) << "Loading plugins in" << dir.path();
     for (const auto &info :
          dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot))
