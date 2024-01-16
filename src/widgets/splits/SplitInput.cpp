@@ -317,7 +317,7 @@ void SplitInput::openEmotePopup()
     this->emotePopup_->activateWindow();
 }
 
-QString SplitInput::handleSendMessage(std::vector<QString> &arguments)
+QString SplitInput::handleSendMessage(const std::vector<QString> &arguments)
 {
     auto c = this->split_->getChannel();
     if (c == nullptr)
