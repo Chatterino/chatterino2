@@ -87,7 +87,6 @@ protected:
     /// Clears the input box, clears reply thread if inline replies are enabled
     void clearInput();
 
-protected:
     void addShortcuts() override;
     void initLayout();
     bool eventFilter(QObject *obj, QEvent *event) override;
