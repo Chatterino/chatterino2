@@ -120,7 +120,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , toasts(&this->emplace<Toasts>())
     , imageUploader(&this->emplace<ImageUploader>())
     , seventvAPI(&this->emplace<SeventvAPI>())
-    , crashHandler(&this->emplace<CrashHandler>(new CrashHandler(paths)))
+    , crashHandler(&this->emplace(new CrashHandler(paths)))
 
     , commands(&this->emplace<CommandController>())
     , notifications(&this->emplace<NotificationController>())
