@@ -16,8 +16,8 @@ class Channel;
 
 using ChannelPtr = std::shared_ptr<Channel>;
 
-void registerNmHost(Paths &paths);
-std::string &getNmQueueName(Paths &paths);
+void registerNmHost(const Paths &paths);
+std::string &getNmQueueName(const Paths &paths);
 
 Atomic<std::optional<QString>> &nmIpcError();
 
