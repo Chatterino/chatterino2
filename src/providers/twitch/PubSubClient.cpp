@@ -76,7 +76,7 @@ void PubSubClient::close(const std::string &reason,
 
 bool PubSubClient::listen(const PubSubListenMessage &msg)
 {
-    int numRequestedListens = msg.topics.size();
+    auto numRequestedListens = msg.topics.size();
 
     if (this->numListens_ + numRequestedListens > PubSubClient::MAX_LISTENS)
     {
@@ -84,7 +84,8 @@ bool PubSubClient::listen(const PubSubListenMessage &msg)
         return false;
     }
     this->numListens_ += numRequestedListens;
-    DebugCount::increase("PubSub topic pending listens", numRequestedListens);
+    DebugCount::increase("PubSub topic pending listens",
+                         static_cast<int64_t>(numRequestedListens));
 
     for (const auto &topic : msg.topics)
     {
@@ -134,7 +135,7 @@ PubSubClient::UnlistenPrefixResponse PubSubClient::unlistenPrefix(
 
     this->numListens_ -= numRequestedUnlistens;
     DebugCount::increase("PubSub topic pending unlistens",
-                         numRequestedUnlistens);
+                         static_cast<int64_t>(numRequestedUnlistens));
 
     PubSubUnlistenMessage message(topics);
 
