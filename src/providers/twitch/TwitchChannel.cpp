@@ -1508,22 +1508,28 @@ void TwitchChannel::refreshCheerEmotes()
                     // Combine the prefix (e.g. BibleThump) with the tier (1, 100 etc.)
                     auto emoteTooltip =
                         set.prefix + tier.id + "<br>Twitch Cheer Emote";
-                    cheerEmote.animatedEmote = std::make_shared<Emote>(
-                        Emote{EmoteName{"cheer emote"},
-                              ImageSet{
-                                  tier.darkAnimated.imageURL1x,
-                                  tier.darkAnimated.imageURL2x,
-                                  tier.darkAnimated.imageURL4x,
-                              },
-                              Tooltip{emoteTooltip}, Url{}});
-                    cheerEmote.staticEmote = std::make_shared<Emote>(
-                        Emote{EmoteName{"cheer emote"},
-                              ImageSet{
-                                  tier.darkStatic.imageURL1x,
-                                  tier.darkStatic.imageURL2x,
-                                  tier.darkStatic.imageURL4x,
-                              },
-                              Tooltip{emoteTooltip}, Url{}});
+                    cheerEmote.animatedEmote = std::make_shared<Emote>(Emote{
+                        .name = EmoteName{"cheer emote"},
+                        .images =
+                            ImageSet{
+                                tier.darkAnimated.imageURL1x,
+                                tier.darkAnimated.imageURL2x,
+                                tier.darkAnimated.imageURL4x,
+                            },
+                        .tooltip = Tooltip{emoteTooltip},
+                        .homePage = Url{},
+                    });
+                    cheerEmote.staticEmote = std::make_shared<Emote>(Emote{
+                        .name = EmoteName{"cheer emote"},
+                        .images =
+                            ImageSet{
+                                tier.darkStatic.imageURL1x,
+                                tier.darkStatic.imageURL2x,
+                                tier.darkStatic.imageURL4x,
+                            },
+                        .tooltip = Tooltip{emoteTooltip},
+                        .homePage = Url{},
+                    });
 
                     cheerEmoteSet.cheerEmotes.emplace_back(
                         std::move(cheerEmote));
