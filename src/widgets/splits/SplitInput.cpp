@@ -477,23 +477,28 @@ void SplitInput::addShortcuts()
              return this->handleSendMessage(arguments);
          }},
         {"previousMessage",
-         [this](std::vector<QString>) -> QString {
-             if (this->prevMsg_.size() && this->prevIndex_)
+         [this](const std::vector<QString> &arguments) -> QString {
+             (void)arguments;
+
+             if (this->prevMsg_.isEmpty() || this->prevIndex_ == 0)
              {
-                 if (this->prevIndex_ == (this->prevMsg_.size()))
-                 {
-                     this->currMsg_ = ui_.textEdit->toPlainText();
-                 }
-
-                 this->prevIndex_--;
-                 this->ui_.textEdit->setPlainText(
-                     this->prevMsg_.at(this->prevIndex_));
-                 this->ui_.textEdit->resetCompletion();
-
-                 QTextCursor cursor = this->ui_.textEdit->textCursor();
-                 cursor.movePosition(QTextCursor::End);
-                 this->ui_.textEdit->setTextCursor(cursor);
+                 return "";
              }
+
+             if (this->prevIndex_ == (this->prevMsg_.size()))
+             {
+                 this->currMsg_ = ui_.textEdit->toPlainText();
+             }
+
+             this->prevIndex_--;
+             this->ui_.textEdit->setPlainText(
+                 this->prevMsg_.at(this->prevIndex_));
+             this->ui_.textEdit->resetCompletion();
+
+             QTextCursor cursor = this->ui_.textEdit->textCursor();
+             cursor.movePosition(QTextCursor::End);
+             this->ui_.textEdit->setTextCursor(cursor);
+
              return "";
          }},
         {"nextMessage",
