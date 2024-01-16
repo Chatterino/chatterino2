@@ -339,40 +339,37 @@ QString SplitInput::handleSendMessage(std::vector<QString> &arguments)
         this->postMessageSend(message, arguments);
         return "";
     }
-    else
+
+    // Reply to message
+    auto *tc = dynamic_cast<TwitchChannel *>(c.get());
+    if (!tc)
     {
-        // Reply to message
-        auto *tc = dynamic_cast<TwitchChannel *>(c.get());
-        if (!tc)
-        {
-            // this should not fail
-            return "";
-        }
-
-        QString message = this->ui_.textEdit->toPlainText();
-
-        if (this->enableInlineReplying_)
-        {
-            // Remove @username prefix that is inserted when doing inline replies
-            message.remove(0, this->replyThread_->displayName.length() +
-                                  1);  // remove "@username"
-
-            if (!message.isEmpty() && message.at(0) == ' ')
-            {
-                message.remove(0, 1);  // remove possible space
-            }
-        }
-
-        message = message.replace('\n', ' ');
-        QString sendMessage =
-            getApp()->commands->execCommand(message, c, false);
-
-        // Reply within TwitchChannel
-        tc->sendReply(sendMessage, this->replyThread_->id);
-
-        this->postMessageSend(message, arguments);
+        // this should not fail
         return "";
     }
+
+    QString message = this->ui_.textEdit->toPlainText();
+
+    if (this->enableInlineReplying_)
+    {
+        // Remove @username prefix that is inserted when doing inline replies
+        message.remove(0, this->replyThread_->displayName.length() +
+                              1);  // remove "@username"
+
+        if (!message.isEmpty() && message.at(0) == ' ')
+        {
+            message.remove(0, 1);  // remove possible space
+        }
+    }
+
+    message = message.replace('\n', ' ');
+    QString sendMessage = getApp()->commands->execCommand(message, c, false);
+
+    // Reply within TwitchChannel
+    tc->sendReply(sendMessage, this->replyThread_->id);
+
+    this->postMessageSend(message, arguments);
+    return "";
 }
 
 void SplitInput::postMessageSend(const QString &message,
