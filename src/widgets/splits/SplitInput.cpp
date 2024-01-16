@@ -398,7 +398,7 @@ void SplitInput::addShortcuts()
 {
     HotkeyController::HotkeyMap actions{
         {"cursorToStart",
-         [this](std::vector<QString> arguments) -> QString {
+         [this](const std::vector<QString> &arguments) -> QString {
              if (arguments.size() != 1)
              {
                  qCWarning(chatterinoHotkeys)
@@ -409,7 +409,7 @@ void SplitInput::addShortcuts()
              }
              QTextCursor cursor = this->ui_.textEdit->textCursor();
              auto place = QTextCursor::Start;
-             auto stringTakeSelection = arguments.at(0);
+             const auto &stringTakeSelection = arguments.at(0);
              bool select{};
              if (stringTakeSelection == "withSelection")
              {
@@ -433,7 +433,7 @@ void SplitInput::addShortcuts()
              return "";
          }},
         {"cursorToEnd",
-         [this](std::vector<QString> arguments) -> QString {
+         [this](const std::vector<QString> &arguments) -> QString {
              if (arguments.size() != 1)
              {
                  qCWarning(chatterinoHotkeys)
@@ -444,7 +444,7 @@ void SplitInput::addShortcuts()
              }
              QTextCursor cursor = this->ui_.textEdit->textCursor();
              auto place = QTextCursor::End;
-             auto stringTakeSelection = arguments.at(0);
+             const auto &stringTakeSelection = arguments.at(0);
              bool select{};
              if (stringTakeSelection == "withSelection")
              {
@@ -468,12 +468,14 @@ void SplitInput::addShortcuts()
              return "";
          }},
         {"openEmotesPopup",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &arguments) -> QString {
+             (void)arguments;
+
              this->openEmotePopup();
              return "";
          }},
         {"sendMessage",
-         [this](std::vector<QString> arguments) -> QString {
+         [this](const std::vector<QString> &arguments) -> QString {
              return this->handleSendMessage(arguments);
          }},
         {"previousMessage",
@@ -502,7 +504,9 @@ void SplitInput::addShortcuts()
              return "";
          }},
         {"nextMessage",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &arguments) -> QString {
+             (void)arguments;
+
              // If user did not write anything before then just do nothing.
              if (this->prevMsg_.isEmpty())
              {
@@ -551,17 +555,21 @@ void SplitInput::addShortcuts()
              return "";
          }},
         {"undo",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &arguments) -> QString {
+             (void)arguments;
+
              this->ui_.textEdit->undo();
              return "";
          }},
         {"redo",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &arguments) -> QString {
+             (void)arguments;
+
              this->ui_.textEdit->redo();
              return "";
          }},
         {"copy",
-         [this](std::vector<QString> arguments) -> QString {
+         [this](const std::vector<QString> &arguments) -> QString {
              // XXX: this action is unused at the moment, a qt standard shortcut is used instead
              if (arguments.size() == 0)
              {
@@ -573,8 +581,9 @@ void SplitInput::addShortcuts()
                         "copied. Automatic will pick whichever has a "
                         "selection";
              }
+
              bool copyFromSplit = false;
-             auto mode = arguments.at(0);
+             const auto &mode = arguments.at(0);
              if (mode == "split")
              {
                  copyFromSplit = true;
@@ -600,22 +609,30 @@ void SplitInput::addShortcuts()
              return "";
          }},
         {"paste",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &arguments) -> QString {
+             (void)arguments;
+
              this->ui_.textEdit->paste();
              return "";
          }},
         {"clear",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &arguments) -> QString {
+             (void)arguments;
+
              this->clearInput();
              return "";
          }},
         {"selectAll",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &arguments) -> QString {
+             (void)arguments;
+
              this->ui_.textEdit->selectAll();
              return "";
          }},
         {"selectWord",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &arguments) -> QString {
+             (void)arguments;
+
              auto cursor = this->ui_.textEdit->textCursor();
              cursor.select(QTextCursor::WordUnderCursor);
              this->ui_.textEdit->setTextCursor(cursor);
