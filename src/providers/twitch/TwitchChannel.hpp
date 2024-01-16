@@ -317,7 +317,7 @@ private:
     void setVIP(bool value);
     void setStaff(bool value);
     void setRoomId(const QString &id);
-    void setRoomModes(const RoomModes &roomModes_);
+    void setRoomModes(const RoomModes &newRoomModes);
     void setDisplayName(const QString &name);
     void setLocalizedName(const QString &name);
 
@@ -376,7 +376,7 @@ private:
     const QString popoutPlayerUrl_;
     int chatterCount_{};
     UniqueAccess<StreamStatus> streamStatus_;
-    UniqueAccess<RoomModes> roomModes_;
+    UniqueAccess<RoomModes> roomModes;
     bool disconnected_{};
     std::optional<std::chrono::time_point<std::chrono::system_clock>>
         lastConnectedAt_{};
