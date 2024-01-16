@@ -1064,8 +1064,10 @@ void SplitInput::paintEvent(QPaintEvent * /*event*/)
     }
 }
 
-void SplitInput::resizeEvent(QResizeEvent *)
+void SplitInput::resizeEvent(QResizeEvent *event)
 {
+    (void)event;
+
     if (this->height() == this->maximumHeight())
     {
         this->ui_.textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
