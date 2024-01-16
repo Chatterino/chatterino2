@@ -305,7 +305,7 @@ private:
      * This is done at most once every 60s.
      */
     void updateSevenTVActivity();
-    void listenSevenTVCosmetics();
+    void listenSevenTVCosmetics() const;
 
     /**
      * @brief Sets the live status of this Twitch channel

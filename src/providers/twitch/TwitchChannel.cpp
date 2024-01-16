@@ -1760,7 +1760,7 @@ void TwitchChannel::updateSevenTVActivity()
         });
 }
 
-void TwitchChannel::listenSevenTVCosmetics()
+void TwitchChannel::listenSevenTVCosmetics() const
 {
     if (getApp()->twitch->seventvEventAPI)
     {
