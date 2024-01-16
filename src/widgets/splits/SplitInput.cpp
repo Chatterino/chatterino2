@@ -239,7 +239,7 @@ void SplitInput::themeChangedEvent()
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
     this->ui_.textEdit->setPalette(placeholderPalette);
 #endif
-    auto marginPx = (this->theme->isLightTheme() ? 4 : 2) * this->scale();
+    auto marginPx = static_cast<int>(2.F * this->scale());
     this->ui_.vbox->setContentsMargins(marginPx, marginPx, marginPx, marginPx);
 
     this->ui_.emoteButton->getLabel().setStyleSheet("color: #000");
