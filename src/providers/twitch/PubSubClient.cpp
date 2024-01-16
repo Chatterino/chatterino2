@@ -200,6 +200,7 @@ void PubSubClient::ping()
 
     runAfter(this->heartbeatTimer_, this->clientOptions_.pingInterval_,
              [self](auto timer) {
+                 (void)timer;
                  if (!self->started_)
                  {
                      return;
