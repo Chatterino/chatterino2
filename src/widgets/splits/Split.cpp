@@ -959,17 +959,23 @@ void Split::paintEvent(QPaintEvent *)
 
 void Split::mouseMoveEvent(QMouseEvent *event)
 {
+    (void)event;
+
     this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 }
 
 void Split::keyPressEvent(QKeyEvent *event)
 {
+    (void)event;
+
     this->view_->unsetCursor();
     this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 }
 
 void Split::keyReleaseEvent(QKeyEvent *event)
 {
+    (void)event;
+
     this->view_->unsetCursor();
     this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 }
@@ -1005,6 +1011,8 @@ void Split::enterEvent(QEvent * /*event*/)
 
 void Split::leaveEvent(QEvent *event)
 {
+    (void)event;
+
     this->isMouseOver_ = false;
 
     this->overlay_->hide();
