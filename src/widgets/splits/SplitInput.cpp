@@ -257,15 +257,12 @@ void SplitInput::themeChangedEvent()
 
 void SplitInput::updateEmoteButton()
 {
-    float scale = this->scale();
+    auto scale = this->scale();
 
-    QString text = "<img src=':/buttons/emote.svg' width='xD' height='xD' />";
-    text.replace("xD", QString::number(int(12 * scale)));
-
-    if (this->theme->isLightTheme())
-    {
-        text.replace("emote", "emoteDark");
-    }
+    auto text =
+        QStringLiteral("<img src=':/buttons/%1.svg' width='%2' height='%2' />")
+            .arg(this->theme->isLightTheme() ? "emoteDark" : "emote")
+            .arg(int(12 * scale));
 
     this->ui_.emoteButton->getLabel().setText(text);
     this->ui_.emoteButton->setFixedHeight(int(18 * scale));
