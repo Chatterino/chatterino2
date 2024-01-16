@@ -213,11 +213,11 @@ void SplitInput::scaleChangedEvent(float scale)
         this->setMaximumHeight(this->scaledMaxHeight());
     }
     this->ui_.textEdit->setFont(
-        app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
+        app->fonts->getFont(FontStyle::ChatMedium, scale));
     this->ui_.textEditLength->setFont(
-        app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
+        app->fonts->getFont(FontStyle::ChatMedium, scale));
     this->ui_.replyLabel->setFont(
-        app->fonts->getFont(FontStyle::ChatMediumBold, this->scale()));
+        app->fonts->getFont(FontStyle::ChatMediumBold, scale));
 }
 
 void SplitInput::themeChangedEvent()
