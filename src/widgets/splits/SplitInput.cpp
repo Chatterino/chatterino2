@@ -571,7 +571,7 @@ void SplitInput::addShortcuts()
         {"copy",
          [this](const std::vector<QString> &arguments) -> QString {
              // XXX: this action is unused at the moment, a qt standard shortcut is used instead
-             if (arguments.size() == 0)
+             if (arguments.empty())
              {
                  return "copy action takes only one argument: the source "
                         "of the copy \"split\", \"input\" or "
