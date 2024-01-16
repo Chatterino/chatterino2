@@ -78,6 +78,7 @@ class ComboBox : public QComboBox
 
     void wheelEvent(QWheelEvent *event) override
     {
+        (void)event;
     }
 };
 
@@ -311,8 +312,9 @@ public:
     bool filterElements(const QString &query);
 
 protected:
-    void resizeEvent(QResizeEvent *ev) override
+    void resizeEvent(QResizeEvent *event) override
     {
+        (void)event;
     }
 
 private:
