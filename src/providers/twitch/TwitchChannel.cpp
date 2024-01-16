@@ -1352,7 +1352,10 @@ void TwitchChannel::refreshChatters()
             }
         },
         // Refresh chatters should only be used when failing silently is an option
-        [](auto error, auto message) {});
+        [](auto error, auto message) {
+            (void)error;
+            (void)message;
+        });
 }
 
 void TwitchChannel::addReplyThread(const std::shared_ptr<MessageThread> &thread)
