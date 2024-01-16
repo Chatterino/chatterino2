@@ -23,6 +23,10 @@ public:
     enum ConnectionType { Read = 1, Write = 2, Both = 3 };
 
     ~AbstractIrcServer() override = default;
+    AbstractIrcServer(const AbstractIrcServer &) = delete;
+    AbstractIrcServer(AbstractIrcServer &&) = delete;
+    AbstractIrcServer &operator=(const AbstractIrcServer &) = delete;
+    AbstractIrcServer &operator=(AbstractIrcServer &&) = delete;
 
     // initializeIrc must be called from the derived class
     // this allows us to initialize the abstract IRC server based on the derived class's parameters
