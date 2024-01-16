@@ -272,15 +272,10 @@ void SplitInput::updateCancelReplyButton()
 {
     float scale = this->scale();
 
-    QString text =
-        QStringLiteral(
-            "<img src=':/buttons/cancel.svg' width='%1' height='%1' />")
+    auto text =
+        QStringLiteral("<img src=':/buttons/%1.svg' width='%2' height='%2' />")
+            .arg(this->theme->isLightTheme() ? "cancelDark" : "cancel")
             .arg(QString::number(int(12 * scale)));
-
-    if (this->theme->isLightTheme())
-    {
-        text.replace("cancel", "cancelDark");
-    }
 
     this->ui_.cancelReplyButton->getLabel().setText(text);
     this->ui_.cancelReplyButton->setFixedHeight(int(12 * scale));
