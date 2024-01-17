@@ -176,9 +176,10 @@ std::optional<EmotePtr> TwitchBadges::badge(const QString &set) const
     auto it = badgeSets->find(set);
     if (it != badgeSets->end())
     {
-        if (it->second.size() > 0)
+        const auto &badges = it->second;
+        if (!badges.empty())
         {
-            return it->second.begin()->second;
+            return badges.begin()->second;
         }
     }
     return std::nullopt;
