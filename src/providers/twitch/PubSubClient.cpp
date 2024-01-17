@@ -74,9 +74,9 @@ void PubSubClient::close(const std::string &reason,
         });
 }
 
-bool PubSubClient::listen(PubSubListenMessage msg)
+bool PubSubClient::listen(const PubSubListenMessage &msg)
 {
-    int numRequestedListens = msg.topics.size();
+    auto numRequestedListens = msg.topics.size();
 
     if (this->numListens_ + numRequestedListens > PubSubClient::MAX_LISTENS)
     {
@@ -84,11 +84,19 @@ bool PubSubClient::listen(PubSubListenMessage msg)
         return false;
     }
     this->numListens_ += numRequestedListens;
-    DebugCount::increase("PubSub topic pending listens", numRequestedListens);
+    DebugCount::increase("PubSub topic pending listens",
+                         static_cast<int64_t>(numRequestedListens));
 
     for (const auto &topic : msg.topics)
     {
-        this->listeners_.emplace_back(Listener{topic, false, false, false});
+        this->listeners_.emplace_back(Listener{
+            TopicData{
+                topic,
+                false,
+                false,
+            },
+            false,
+        });
     }
 
     qCDebug(chatterinoPubSub)
@@ -127,7 +135,7 @@ PubSubClient::UnlistenPrefixResponse PubSubClient::unlistenPrefix(
 
     this->numListens_ -= numRequestedUnlistens;
     DebugCount::increase("PubSub topic pending unlistens",
-                         numRequestedUnlistens);
+                         static_cast<int64_t>(numRequestedUnlistens));
 
     PubSubUnlistenMessage message(topics);
 
@@ -192,6 +200,7 @@ void PubSubClient::ping()
 
     runAfter(this->heartbeatTimer_, this->clientOptions_.pingInterval_,
              [self](auto timer) {
+                 (void)timer;
                  if (!self->started_)
                  {
                      return;

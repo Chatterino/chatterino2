@@ -45,7 +45,7 @@ public:
                websocketpp::close::status::value code =
                    websocketpp::close::status::normal);
 
-    bool listen(PubSubListenMessage msg);
+    bool listen(const PubSubListenMessage &msg);
     UnlistenPrefixResponse unlistenPrefix(const QString &prefix);
 
     void handleListenResponse(const PubSubMessage &message);
