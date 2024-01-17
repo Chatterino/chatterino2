@@ -1,5 +1,6 @@
 #include "BadgePickerDialog.hpp"
 
+#include "Application.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "singletons/Resources.hpp"
 
@@ -57,7 +58,7 @@ BadgePickerDialog::BadgePickerDialog(QList<DisplayBadge> badges,
     updateBadge(0);
 
     // Set icons.
-    TwitchBadges::instance()->getBadgeIcons(
+    getIApp()->getTwitchBadges()->getBadgeIcons(
         badges,
         [&dropdown = this->dropdown_](QString identifier, const QIconPtr icon) {
             if (!dropdown)
