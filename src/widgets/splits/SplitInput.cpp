@@ -275,7 +275,7 @@ void SplitInput::updateCancelReplyButton()
     auto text =
         QStringLiteral("<img src=':/buttons/%1.svg' width='%2' height='%2' />")
             .arg(this->theme->isLightTheme() ? "cancelDark" : "cancel")
-            .arg(QString::number(int(12 * scale)));
+            .arg(int(12 * scale));
 
     this->ui_.cancelReplyButton->getLabel().setText(text);
     this->ui_.cancelReplyButton->setFixedHeight(int(12 * scale));
