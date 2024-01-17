@@ -1,4 +1,4 @@
-#include "ChatterinoBadges.hpp"
+#include "providers/chatterino/ChatterinoBadges.hpp"
 
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
@@ -11,13 +11,10 @@
 #include <QUrl>
 
 namespace chatterino {
-void ChatterinoBadges::initialize(Settings &settings, const Paths &paths)
-{
-    this->loadChatterinoBadges();
-}
 
 ChatterinoBadges::ChatterinoBadges()
 {
+    this->loadChatterinoBadges();
 }
 
 std::optional<EmotePtr> ChatterinoBadges::getBadge(const UserId &id)

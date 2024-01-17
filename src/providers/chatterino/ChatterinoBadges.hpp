@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/Aliases.hpp"
-#include "common/Singleton.hpp"
 #include "util/QStringHash.hpp"
 
 #include <memory>
@@ -15,10 +14,9 @@ namespace chatterino {
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 
-class ChatterinoBadges : public Singleton
+class ChatterinoBadges
 {
 public:
-    void initialize(Settings &settings, const Paths &paths) override;
     ChatterinoBadges();
 
     std::optional<EmotePtr> getBadge(const UserId &id);
