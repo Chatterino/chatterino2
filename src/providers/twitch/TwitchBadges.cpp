@@ -45,14 +45,15 @@ void TwitchBadges::loadTwitchBadges()
                 for (const auto &version : badgeSet.versions)
                 {
                     const auto &emote = Emote{
-                        EmoteName{},
-                        ImageSet{
-                            Image::fromUrl(version.imageURL1x, 1),
-                            Image::fromUrl(version.imageURL2x, .5),
-                            Image::fromUrl(version.imageURL4x, .25),
-                        },
-                        Tooltip{version.title},
-                        version.clickURL,
+                        .name = EmoteName{},
+                        .images =
+                            ImageSet{
+                                Image::fromUrl(version.imageURL1x, 1),
+                                Image::fromUrl(version.imageURL2x, .5),
+                                Image::fromUrl(version.imageURL4x, .25),
+                            },
+                        .tooltip = Tooltip{version.title},
+                        .homePage = version.clickURL,
                     };
                     (*badgeSets)[setID][version.id] =
                         std::make_shared<Emote>(emote);
@@ -112,20 +113,19 @@ void TwitchBadges::parseTwitchBadges(QJsonObject root)
             auto versionObj = vIt.value().toObject();
 
             auto emote = Emote{
-                {""},
-                ImageSet{
-                    Image::fromUrl(
-                        {versionObj.value("image_url_1x").toString()}, 1),
-                    Image::fromUrl(
-                        {versionObj.value("image_url_2x").toString()}, .5),
-                    Image::fromUrl(
-                        {versionObj.value("image_url_4x").toString()}, .25),
-                },
-                Tooltip{versionObj.value("title").toString()},
-                Url{versionObj.value("click_url").toString()},
+                .name = {""},
+                .images =
+                    ImageSet{
+                        Image::fromUrl(
+                            {versionObj.value("image_url_1x").toString()}, 1),
+                        Image::fromUrl(
+                            {versionObj.value("image_url_2x").toString()}, .5),
+                        Image::fromUrl(
+                            {versionObj.value("image_url_4x").toString()}, .25),
+                    },
+                .tooltip = Tooltip{versionObj.value("title").toString()},
+                .homePage = Url{versionObj.value("click_url").toString()},
             };
-            // "title"
-            // "clickAction"
 
             (*badgeSets)[key][vIt.key()] = std::make_shared<Emote>(emote);
         }
