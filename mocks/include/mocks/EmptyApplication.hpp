@@ -122,6 +122,12 @@ public:
         return nullptr;
     }
 
+    TwitchBadges *getTwitchBadges() override
+    {
+        assert(false && "getTwitchBadges was called without being initialized");
+        return nullptr;
+    }
+
     Logging *getChatLogger() override
     {
         assert(!"getChatLogger was called without being initialized");

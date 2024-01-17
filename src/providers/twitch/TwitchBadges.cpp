@@ -1,4 +1,4 @@
-#include "TwitchBadges.hpp"
+#include "providers/twitch/TwitchBadges.hpp"
 
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
@@ -277,18 +277,6 @@ void TwitchBadges::loadEmoteImage(const QString &name, ImagePtr image,
             callback(name, icon);
         })
         .execute();
-}
-
-TwitchBadges *TwitchBadges::instance_;
-
-TwitchBadges *TwitchBadges::instance()
-{
-    if (TwitchBadges::instance_ == nullptr)
-    {
-        TwitchBadges::instance_ = new TwitchBadges();
-    }
-
-    return TwitchBadges::instance_;
 }
 
 }  // namespace chatterino

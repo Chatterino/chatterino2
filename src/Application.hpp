@@ -28,6 +28,7 @@ class ISoundController;
 class SoundController;
 class ITwitchLiveController;
 class TwitchLiveController;
+class TwitchBadges;
 #ifdef CHATTERINO_HAVE_PLUGINS
 class PluginController;
 #endif
@@ -78,6 +79,7 @@ public:
     virtual IUserDataController *getUserData() = 0;
     virtual ISoundController *getSound() = 0;
     virtual ITwitchLiveController *getTwitchLiveController() = 0;
+    virtual TwitchBadges *getTwitchBadges() = 0;
     virtual ImageUploader *getImageUploader() = 0;
     virtual SeventvAPI *getSeventvAPI() = 0;
     virtual Updates &getUpdates() = 0;
@@ -141,6 +143,7 @@ public:
 private:
     TwitchLiveController *const twitchLiveController{};
     std::unique_ptr<PubSub> twitchPubSub;
+    std::unique_ptr<TwitchBadges> twitchBadges;
     const std::unique_ptr<Logging> logging;
 
 public:
@@ -215,6 +218,7 @@ public:
     IUserDataController *getUserData() override;
     ISoundController *getSound() override;
     ITwitchLiveController *getTwitchLiveController() override;
+    TwitchBadges *getTwitchBadges() override;
     ImageUploader *getImageUploader() override
     {
         return this->imageUploader;

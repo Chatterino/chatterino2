@@ -163,7 +163,7 @@ namespace {
         }
 
         if (auto globalBadge =
-                TwitchBadges::instance()->badge(badge.key_, badge.value_))
+                getIApp()->getTwitchBadges()->badge(badge.key_, badge.value_))
         {
             return globalBadge;
         }
