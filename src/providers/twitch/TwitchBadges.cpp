@@ -194,7 +194,7 @@ void TwitchBadges::getBadgeIcon(const QString &name, BadgeIconCallback callback)
         {
             // Badges have not been loaded yet, store callback in a queue
             std::unique_lock queueLock(this->queueMutex_);
-            this->callbackQueue_.push({name, std::move(callback)});
+            this->callbackQueue_.emplace(name, std::move(callback));
             return;
         }
     }
