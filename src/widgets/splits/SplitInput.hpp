@@ -80,14 +80,13 @@ protected:
 
     virtual void giveFocus(Qt::FocusReason reason);
 
-    QString handleSendMessage(std::vector<QString> &arguments);
+    QString handleSendMessage(const std::vector<QString> &arguments);
     void postMessageSend(const QString &message,
                          const std::vector<QString> &arguments);
 
     /// Clears the input box, clears reply thread if inline replies are enabled
     void clearInput();
 
-protected:
     void addShortcuts() override;
     void initLayout();
     bool eventFilter(QObject *obj, QEvent *event) override;

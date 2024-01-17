@@ -83,7 +83,6 @@ TwitchChannel::TwitchChannel(const QString &name)
     , bttvEmotes_(std::make_shared<EmoteMap>())
     , ffzEmotes_(std::make_shared<EmoteMap>())
     , seventvEmotes_(std::make_shared<EmoteMap>())
-    , mod_(false)
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
@@ -322,13 +321,15 @@ void TwitchChannel::refreshFFZChannelEmotes(bool manualRefresh)
         [this, weak = weakOf<Channel>(this)](auto &&modBadge) {
             if (auto shared = weak.lock())
             {
-                this->ffzCustomModBadge_.set(std::move(modBadge));
+                this->ffzCustomModBadge_.set(
+                    std::forward<decltype(modBadge)>(modBadge));
             }
         },
         [this, weak = weakOf<Channel>(this)](auto &&vipBadge) {
             if (auto shared = weak.lock())
             {
-                this->ffzCustomVipBadge_.set(std::move(vipBadge));
+                this->ffzCustomVipBadge_.set(
+                    std::forward<decltype(vipBadge)>(vipBadge));
             }
         },
         manualRefresh);
@@ -778,12 +779,12 @@ void TwitchChannel::setRoomId(const QString &id)
 SharedAccessGuard<const TwitchChannel::RoomModes>
     TwitchChannel::accessRoomModes() const
 {
-    return this->roomModes_.accessConst();
+    return this->roomModes.accessConst();
 }
 
-void TwitchChannel::setRoomModes(const RoomModes &_roomModes)
+void TwitchChannel::setRoomModes(const RoomModes &newRoomModes)
 {
-    this->roomModes_ = _roomModes;
+    this->roomModes = newRoomModes;
 
     this->roomModesChanged.invoke();
 }
@@ -1133,7 +1134,7 @@ const QString &TwitchChannel::popoutPlayerUrl()
     return this->popoutPlayerUrl_;
 }
 
-int TwitchChannel::chatterCount()
+int TwitchChannel::chatterCount() const
 {
     return this->chatterCount_;
 }
@@ -1201,7 +1202,7 @@ void TwitchChannel::loadRecentMessages()
             tc->loadingRecentMessages_.clear();
 
             std::vector<MessagePtr> msgs;
-            for (MessagePtr msg : messages)
+            for (const auto &msg : messages)
             {
                 const auto highlighted =
                     msg->flags.has(MessageFlag::Highlighted);
@@ -1351,7 +1352,10 @@ void TwitchChannel::refreshChatters()
             }
         },
         // Refresh chatters should only be used when failing silently is an option
-        [](auto error, auto message) {});
+        [](auto error, auto message) {
+            (void)error;
+            (void)message;
+        });
 }
 
 void TwitchChannel::addReplyThread(const std::shared_ptr<MessageThread> &thread)
@@ -1429,14 +1433,15 @@ void TwitchChannel::refreshBadges()
                 for (const auto &version : badgeSet.versions)
                 {
                     auto emote = Emote{
-                        EmoteName{},
-                        ImageSet{
-                            Image::fromUrl(version.imageURL1x, 1),
-                            Image::fromUrl(version.imageURL2x, .5),
-                            Image::fromUrl(version.imageURL4x, .25),
-                        },
-                        Tooltip{version.title},
-                        version.clickURL,
+                        .name = EmoteName{},
+                        .images =
+                            ImageSet{
+                                Image::fromUrl(version.imageURL1x, 1),
+                                Image::fromUrl(version.imageURL2x, .5),
+                                Image::fromUrl(version.imageURL4x, .25),
+                            },
+                        .tooltip = Tooltip{version.title},
+                        .homePage = version.clickURL,
                     };
                     (*badgeSets)[setID][version.id] =
                         std::make_shared<Emote>(emote);
@@ -1508,22 +1513,28 @@ void TwitchChannel::refreshCheerEmotes()
                     // Combine the prefix (e.g. BibleThump) with the tier (1, 100 etc.)
                     auto emoteTooltip =
                         set.prefix + tier.id + "<br>Twitch Cheer Emote";
-                    cheerEmote.animatedEmote = std::make_shared<Emote>(
-                        Emote{EmoteName{"cheer emote"},
-                              ImageSet{
-                                  tier.darkAnimated.imageURL1x,
-                                  tier.darkAnimated.imageURL2x,
-                                  tier.darkAnimated.imageURL4x,
-                              },
-                              Tooltip{emoteTooltip}, Url{}});
-                    cheerEmote.staticEmote = std::make_shared<Emote>(
-                        Emote{EmoteName{"cheer emote"},
-                              ImageSet{
-                                  tier.darkStatic.imageURL1x,
-                                  tier.darkStatic.imageURL2x,
-                                  tier.darkStatic.imageURL4x,
-                              },
-                              Tooltip{emoteTooltip}, Url{}});
+                    cheerEmote.animatedEmote = std::make_shared<Emote>(Emote{
+                        .name = EmoteName{"cheer emote"},
+                        .images =
+                            ImageSet{
+                                tier.darkAnimated.imageURL1x,
+                                tier.darkAnimated.imageURL2x,
+                                tier.darkAnimated.imageURL4x,
+                            },
+                        .tooltip = Tooltip{emoteTooltip},
+                        .homePage = Url{},
+                    });
+                    cheerEmote.staticEmote = std::make_shared<Emote>(Emote{
+                        .name = EmoteName{"cheer emote"},
+                        .images =
+                            ImageSet{
+                                tier.darkStatic.imageURL1x,
+                                tier.darkStatic.imageURL2x,
+                                tier.darkStatic.imageURL4x,
+                            },
+                        .tooltip = Tooltip{emoteTooltip},
+                        .homePage = Url{},
+                    });
 
                     cheerEmoteSet.cheerEmotes.emplace_back(
                         std::move(cheerEmote));
@@ -1760,7 +1771,7 @@ void TwitchChannel::updateSevenTVActivity()
         });
 }
 
-void TwitchChannel::listenSevenTVCosmetics()
+void TwitchChannel::listenSevenTVCosmetics() const
 {
     if (getApp()->twitch->seventvEventAPI)
     {
