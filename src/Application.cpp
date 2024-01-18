@@ -412,6 +412,13 @@ ImageUploader *Application::getImageUploader()
     return this->imageUploader;
 }
 
+SeventvAPI *Application::getSeventvAPI()
+{
+    assertInGuiThread();
+
+    return this->seventvAPI;
+}
+
 ITwitchIrcServer *Application::getTwitch()
 {
     assertInGuiThread();

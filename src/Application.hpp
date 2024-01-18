@@ -135,9 +135,9 @@ private:
     WindowManager *const windows{};
     Toasts *const toasts{};
     ImageUploader *const imageUploader{};
+    SeventvAPI *const seventvAPI{};
 
 public:
-    SeventvAPI *const seventvAPI{};
     CrashHandler *const crashHandler{};
 
     CommandController *const commands{};
@@ -211,12 +211,7 @@ public:
     TwitchBadges *getTwitchBadges() override;
     IChatterinoBadges *getChatterinoBadges() override;
     ImageUploader *getImageUploader() override;
-    SeventvAPI *getSeventvAPI() override
-    {
-        assertInGuiThread();
-
-        return this->seventvAPI;
-    }
+    SeventvAPI *getSeventvAPI() override;
     Updates &getUpdates() override
     {
         assertInGuiThread();
