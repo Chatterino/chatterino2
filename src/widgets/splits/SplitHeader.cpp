@@ -533,11 +533,11 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         action->setShortcut(notifySeq);
 
         QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
-            action->setChecked(getApp()->notifications->isChannelNotified(
+            action->setChecked(getIApp()->getNotifications()->isChannelNotified(
                 this->split_->getChannel()->getName(), Platform::Twitch));
         });
         QObject::connect(action, &QAction::triggered, this, [this]() {
-            getApp()->notifications->updateChannelNotification(
+            getIApp()->getNotifications()->updateChannelNotification(
                 this->split_->getChannel()->getName(), Platform::Twitch);
         });
 

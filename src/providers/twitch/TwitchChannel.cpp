@@ -141,8 +141,8 @@ TwitchChannel::TwitchChannel(const QString &name)
         {
             qCDebug(chatterinoTwitch)
                 << "[TwitchChannel" << this->getName() << "] Online";
-            if (getApp()->notifications->isChannelNotified(this->getName(),
-                                                           Platform::Twitch))
+            if (getIApp()->getNotifications()->isChannelNotified(
+                    this->getName(), Platform::Twitch))
             {
                 if (Toasts::isEnabled())
                 {
@@ -152,7 +152,7 @@ TwitchChannel::TwitchChannel(const QString &name)
                 }
                 if (getSettings()->notificationPlaySound)
                 {
-                    getApp()->notifications->playSound();
+                    getIApp()->getNotifications()->playSound();
                 }
                 if (getSettings()->notificationFlashTaskbar)
                 {
@@ -176,7 +176,7 @@ TwitchChannel::TwitchChannel(const QString &name)
                 !(isInStreamerMode() &&
                   getSettings()->streamerModeSuppressLiveNotifications))
             {
-                getApp()->notifications->playSound();
+                getIApp()->getNotifications()->playSound();
             }
         }
         else

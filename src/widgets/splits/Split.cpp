@@ -725,17 +725,17 @@ void Split::addShortcuts()
 
              if (mode == 0)
              {
-                 getApp()->notifications->removeChannelNotification(
+                 getIApp()->getNotifications()->removeChannelNotification(
                      this->getChannel()->getName(), Platform::Twitch);
              }
              else if (mode == 1)
              {
-                 getApp()->notifications->addChannelNotification(
+                 getIApp()->getNotifications()->addChannelNotification(
                      this->getChannel()->getName(), Platform::Twitch);
              }
              else
              {
-                 getApp()->notifications->updateChannelNotification(
+                 getIApp()->getNotifications()->updateChannelNotification(
                      this->getChannel()->getName(), Platform::Twitch);
              }
              return "";

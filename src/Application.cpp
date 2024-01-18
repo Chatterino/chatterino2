@@ -368,6 +368,13 @@ CommandController *Application::getCommands()
     return this->commands;
 }
 
+NotificationController *Application::getNotifications()
+{
+    assertInGuiThread();
+
+    return this->notifications;
+}
+
 FfzBadges *Application::getFfzBadges()
 {
     assertInGuiThread();

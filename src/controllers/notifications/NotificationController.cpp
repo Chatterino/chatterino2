@@ -190,7 +190,7 @@ void NotificationController::checkStream(bool live, QString channelName)
         !(isInStreamerMode() &&
           getSettings()->streamerModeSuppressLiveNotifications))
     {
-        getApp()->notifications->playSound();
+        getIApp()->getNotifications()->playSound();
     }
     if (getSettings()->notificationFlashTaskbar &&
         !(isInStreamerMode() &&
