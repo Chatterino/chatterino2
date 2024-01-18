@@ -7,7 +7,6 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
-#include <QThread>
 #include <QUrl>
 
 namespace chatterino {
