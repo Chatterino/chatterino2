@@ -137,9 +137,9 @@ private:
     ImageUploader *const imageUploader{};
     SeventvAPI *const seventvAPI{};
     CrashHandler *const crashHandler{};
+    CommandController *const commands{};
 
 public:
-    CommandController *const commands{};
     NotificationController *const notifications{};
     HighlightController *const highlights{};
     TwitchIrcServer *const twitch{};
@@ -176,12 +176,7 @@ public:
     WindowManager *getWindows() override;
     Toasts *getToasts() override;
     CrashHandler *getCrashHandler() override;
-    CommandController *getCommands() override
-    {
-        assertInGuiThread();
-
-        return this->commands;
-    }
+    CommandController *getCommands() override;
     NotificationController *getNotifications() override
     {
         assertInGuiThread();

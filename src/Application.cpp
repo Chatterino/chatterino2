@@ -361,6 +361,13 @@ CrashHandler *Application::getCrashHandler()
     return this->crashHandler;
 }
 
+CommandController *Application::getCommands()
+{
+    assertInGuiThread();
+
+    return this->commands;
+}
+
 FfzBadges *Application::getFfzBadges()
 {
     assertInGuiThread();

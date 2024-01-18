@@ -690,7 +690,7 @@ void Split::addShortcuts()
                      << "runCommand hotkey called without arguments!";
                  return "runCommand hotkey called without arguments!";
              }
-             QString command = getApp()->commands->execCommand(
+             QString command = getIApp()->getCommands()->execCommand(
                  arguments.at(0).replace('\n', ' '), this->getChannel(), false);
              this->getChannel()->sendMessage(command);
              return "";

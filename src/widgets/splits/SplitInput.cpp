@@ -332,7 +332,7 @@ QString SplitInput::handleSendMessage(const std::vector<QString> &arguments)
 
         message = message.replace('\n', ' ');
         QString sendMessage =
-            getApp()->commands->execCommand(message, c, false);
+            getIApp()->getCommands()->execCommand(message, c, false);
 
         c->sendMessage(sendMessage);
 
@@ -363,7 +363,8 @@ QString SplitInput::handleSendMessage(const std::vector<QString> &arguments)
     }
 
     message = message.replace('\n', ' ');
-    QString sendMessage = getApp()->commands->execCommand(message, c, false);
+    QString sendMessage =
+        getIApp()->getCommands()->execCommand(message, c, false);
 
     // Reply within TwitchChannel
     tc->sendReply(sendMessage, this->replyThread_->id);
@@ -947,8 +948,8 @@ void SplitInput::editTextChanged()
         this->textChanged.invoke(text);
 
         text = text.trimmed();
-        text =
-            app->commands->execCommand(text, this->split_->getChannel(), true);
+        text = app->getCommands()->execCommand(text, this->split_->getChannel(),
+                                               true);
     }
 
     if (text.length() > 0 &&

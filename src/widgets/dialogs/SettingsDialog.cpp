@@ -432,7 +432,7 @@ void SettingsDialog::onOkClicked()
 {
     if (!getApp()->getArgs().dontSaveSettings)
     {
-        getApp()->commands->save();
+        getIApp()->getCommands()->save();
         pajlada::Settings::SettingManager::gSave();
     }
     this->close();

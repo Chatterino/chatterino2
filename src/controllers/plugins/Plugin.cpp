@@ -146,7 +146,7 @@ bool Plugin::registerCommand(const QString &name, const QString &functionName)
         return false;
     }
 
-    auto ok = getApp()->commands->registerPluginCommand(name);
+    auto ok = getIApp()->getCommands()->registerPluginCommand(name);
     if (!ok)
     {
         return false;

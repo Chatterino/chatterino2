@@ -2539,7 +2539,7 @@ void ChannelView::addCommandExecutionContextMenuItems(
     /* Get commands to be displayed in context menu; 
      * only those that had the showInMsgContextMenu check box marked in the Commands page */
     std::vector<Command> cmds;
-    for (const auto &cmd : getApp()->commands->items)
+    for (const auto &cmd : getIApp()->getCommands()->items)
     {
         if (cmd.showInMsgContextMenu)
         {
@@ -2586,13 +2586,14 @@ void ChannelView::addCommandExecutionContextMenuItems(
             }
 
             // Execute command through right-clicking a message -> Execute command
-            QString value = getApp()->commands->execCustomCommand(
+            QString value = getIApp()->getCommands()->execCustomCommand(
                 inputText.split(' '), cmd, true, channel, layout->getMessage(),
                 {
                     {"input.text", userText},
                 });
 
-            value = getApp()->commands->execCommand(value, channel, false);
+            value =
+                getIApp()->getCommands()->execCommand(value, channel, false);
 
             channel->sendMessage(value);
         });
@@ -2757,11 +2758,12 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
             }
 
             // Execute command clicking a moderator button
-            value = getApp()->commands->execCustomCommand(
+            value = getIApp()->getCommands()->execCustomCommand(
                 QStringList(), Command{"(modaction)", value}, true, channel,
                 layout->getMessage());
 
-            value = getApp()->commands->execCommand(value, channel, false);
+            value =
+                getIApp()->getCommands()->execCommand(value, channel, false);
 
             channel->sendMessage(value);
         }

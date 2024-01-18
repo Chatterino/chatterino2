@@ -166,7 +166,8 @@ int c2_send_msg(lua_State *L)
     }
     QString message = text;
     message = message.replace('\n', ' ');
-    QString outText = getApp()->commands->execCommand(message, chn, false);
+    QString outText =
+        getIApp()->getCommands()->execCommand(message, chn, false);
     chn->sendMessage(outText);
     lua::push(L, true);
     return 1;
