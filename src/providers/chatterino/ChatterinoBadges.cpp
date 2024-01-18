@@ -40,9 +40,10 @@ void ChatterinoBadges::loadChatterinoBadges()
             std::unique_lock lock(this->mutex_);
 
             int index = 0;
-            for (const auto &jsonBadge_ : jsonRoot.value("badges").toArray())
+            for (const auto &jsonBadgeValue :
+                 jsonRoot.value("badges").toArray())
             {
-                auto jsonBadge = jsonBadge_.toObject();
+                auto jsonBadge = jsonBadgeValue.toObject();
                 auto emote = Emote{
                     EmoteName{},
                     ImageSet{Url{jsonBadge.value("image1").toString()},
