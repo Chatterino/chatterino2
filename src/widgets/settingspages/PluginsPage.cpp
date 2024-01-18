@@ -40,7 +40,7 @@ PluginsPage::PluginsPage()
         auto *description =
             new QLabel("You can load plugins by putting them into " +
                        formatRichNamedLink(
-                           "file:///" + getCApp()->getPaths().pluginsDirectory,
+                           "file:///" + getIApp()->getPaths().pluginsDirectory,
                            "the Plugins directory") +
                        ". Each one is a new directory.");
         description->setOpenExternalLinks(true);
@@ -54,7 +54,7 @@ PluginsPage::PluginsPage()
             this->rebuildContent();
         });
         groupLayout->addRow(box);
-        if (getCApp()->getArgs().safeMode)
+        if (getApp()->getArgs().safeMode)
         {
             box->setEnabled(false);
             auto *disabledLabel = new QLabel(this);
@@ -198,7 +198,7 @@ void PluginsPage::rebuildContent()
                              this->rebuildContent();
                          });
         pluginEntry->addRow(reloadButton);
-        if (getCApp()->getArgs().safeMode)
+        if (getApp()->getArgs().safeMode)
         {
             reloadButton->setEnabled(false);
         }

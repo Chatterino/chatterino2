@@ -311,26 +311,35 @@ int Application::run(QApplication &qtApp)
 
 IEmotes *Application::getEmotes()
 {
+    assertInGuiThread();
+
     return this->emotes;
 }
 
 IUserDataController *Application::getUserData()
 {
+    assertInGuiThread();
+
     return this->userData;
 }
 
 ISoundController *Application::getSound()
 {
+    assertInGuiThread();
+
     return this->sound;
 }
 
 ITwitchLiveController *Application::getTwitchLiveController()
 {
+    assertInGuiThread();
+
     return this->twitchLiveController;
 }
 
 TwitchBadges *Application::getTwitchBadges()
 {
+    assertInGuiThread();
     assert(this->twitchBadges);
 
     return this->twitchBadges.get();
@@ -338,16 +347,22 @@ TwitchBadges *Application::getTwitchBadges()
 
 ITwitchIrcServer *Application::getTwitch()
 {
+    assertInGuiThread();
+
     return this->twitch;
 }
 
 PubSub *Application::getTwitchPubSub()
 {
+    assertInGuiThread();
+
     return this->twitchPubSub.get();
 }
 
 Logging *Application::getChatLogger()
 {
+    assertInGuiThread();
+
     return this->logging.get();
 }
 
@@ -890,16 +905,12 @@ Application *getApp()
 {
     assert(Application::instance != nullptr);
 
-    assertInGuiThread();
-
     return Application::instance;
 }
 
 IApplication *getIApp()
 {
     assert(IApplication::instance != nullptr);
-
-    assertInGuiThread();
 
     return IApplication::instance;
 }

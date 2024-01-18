@@ -64,13 +64,13 @@ bool FramelessEmbedWindow::nativeEvent(const QByteArray &eventType,
 
 void FramelessEmbedWindow::showEvent(QShowEvent *)
 {
-    if (!getCApp()->getArgs().parentWindowId)
+    if (!getApp()->getArgs().parentWindowId)
     {
         return;
     }
 
     if (auto parentHwnd =
-            reinterpret_cast<HWND>(getCApp()->getArgs().parentWindowId.value()))
+            reinterpret_cast<HWND>(getApp()->getArgs().parentWindowId.value()))
     {
         auto handle = reinterpret_cast<HWND>(this->winId());
         if (!::SetParent(handle, parentHwnd))

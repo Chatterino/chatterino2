@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/Singleton.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "singletons/NativeMessaging.hpp"
 
 #include <pajlada/signals.hpp>
@@ -50,23 +51,7 @@ class ImageUploader;
 class SeventvAPI;
 class CrashHandler;
 
-class CApplication
-{
-public:
-    CApplication();
-    virtual ~CApplication() = default;
-    CApplication(const CApplication &) = delete;
-    CApplication(CApplication &&) = delete;
-    CApplication &operator=(const CApplication &) = delete;
-    CApplication &operator=(CApplication &&) = delete;
-
-    static CApplication *instance;
-
-    virtual const Paths &getPaths() = 0;
-    virtual const Args &getArgs() = 0;
-};
-
-class IApplication : public CApplication
+class IApplication
 {
 public:
     IApplication();
@@ -74,6 +59,8 @@ public:
 
     static IApplication *instance;
 
+    virtual const Paths &getPaths() = 0;
+    virtual const Args &getArgs() = 0;
     virtual Theme *getThemes() = 0;
     virtual Fonts *getFonts() = 0;
     virtual IEmotes *getEmotes() = 0;
@@ -176,43 +163,63 @@ public:
     }
     Theme *getThemes() override
     {
+        assertInGuiThread();
+
         return this->themes;
     }
     Fonts *getFonts() override
     {
+        assertInGuiThread();
+
         return this->fonts;
     }
     IEmotes *getEmotes() override;
     AccountController *getAccounts() override
     {
+        assertInGuiThread();
+
         return this->accounts;
     }
     HotkeyController *getHotkeys() override
     {
+        assertInGuiThread();
+
         return this->hotkeys;
     }
     WindowManager *getWindows() override
     {
+        assertInGuiThread();
+
         return this->windows;
     }
     Toasts *getToasts() override
     {
+        assertInGuiThread();
+
         return this->toasts;
     }
     CrashHandler *getCrashHandler() override
     {
+        assertInGuiThread();
+
         return this->crashHandler;
     }
     CommandController *getCommands() override
     {
+        assertInGuiThread();
+
         return this->commands;
     }
     NotificationController *getNotifications() override
     {
+        assertInGuiThread();
+
         return this->notifications;
     }
     HighlightController *getHighlights() override
     {
+        assertInGuiThread();
+
         return this->highlights;
     }
     ITwitchIrcServer *getTwitch() override;
@@ -220,14 +227,20 @@ public:
     Logging *getChatLogger() override;
     ChatterinoBadges *getChatterinoBadges() override
     {
+        assertInGuiThread();
+
         return this->chatterinoBadges;
     }
     FfzBadges *getFfzBadges() override
     {
+        assertInGuiThread();
+
         return this->ffzBadges;
     }
     SeventvBadges *getSeventvBadges() override
     {
+        assertInGuiThread();
+
         return this->seventvBadges;
     }
     IUserDataController *getUserData() override;
@@ -236,14 +249,20 @@ public:
     TwitchBadges *getTwitchBadges() override;
     ImageUploader *getImageUploader() override
     {
+        assertInGuiThread();
+
         return this->imageUploader;
     }
     SeventvAPI *getSeventvAPI() override
     {
+        assertInGuiThread();
+
         return this->seventvAPI;
     }
     Updates &getUpdates() override
     {
+        assertInGuiThread();
+
         return this->updates;
     }
 
@@ -281,13 +300,5 @@ Application *getApp();
 
 // Get an interface version of the Application class - should be preferred when possible for new code
 IApplication *getIApp();
-
-/// Gets a subset of the Application class that is safe to use outside of the GUI thread.
-inline CApplication *getCApp()
-{
-    assert(CApplication::instance != nullptr);
-
-    return CApplication::instance;
-}
 
 }  // namespace chatterino

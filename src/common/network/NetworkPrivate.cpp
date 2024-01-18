@@ -58,7 +58,7 @@ void loadUncached(std::shared_ptr<NetworkData> &&data)
 
 void loadCached(std::shared_ptr<NetworkData> &&data)
 {
-    QFile cachedFile(getCApp()->getPaths().cacheDirectory() + "/" +
+    QFile cachedFile(getIApp()->getPaths().cacheDirectory() + "/" +
                      data->getHash());
 
     if (!cachedFile.exists() || !cachedFile.open(QIODevice::ReadOnly))
