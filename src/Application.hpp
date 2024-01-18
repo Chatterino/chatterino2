@@ -1,12 +1,14 @@
 #pragma once
 
 #include "common/Singleton.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "singletons/NativeMessaging.hpp"
 
 #include <pajlada/signals.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QApplication>
 
+#include <cassert>
 #include <memory>
 
 namespace chatterino {
@@ -161,43 +163,63 @@ public:
     }
     Theme *getThemes() override
     {
+        assertInGuiThread();
+
         return this->themes;
     }
     Fonts *getFonts() override
     {
+        assertInGuiThread();
+
         return this->fonts;
     }
     IEmotes *getEmotes() override;
     AccountController *getAccounts() override
     {
+        assertInGuiThread();
+
         return this->accounts;
     }
     HotkeyController *getHotkeys() override
     {
+        assertInGuiThread();
+
         return this->hotkeys;
     }
     WindowManager *getWindows() override
     {
+        assertInGuiThread();
+
         return this->windows;
     }
     Toasts *getToasts() override
     {
+        assertInGuiThread();
+
         return this->toasts;
     }
     CrashHandler *getCrashHandler() override
     {
+        assertInGuiThread();
+
         return this->crashHandler;
     }
     CommandController *getCommands() override
     {
+        assertInGuiThread();
+
         return this->commands;
     }
     NotificationController *getNotifications() override
     {
+        assertInGuiThread();
+
         return this->notifications;
     }
     HighlightController *getHighlights() override
     {
+        assertInGuiThread();
+
         return this->highlights;
     }
     ITwitchIrcServer *getTwitch() override;
@@ -205,14 +227,20 @@ public:
     Logging *getChatLogger() override;
     ChatterinoBadges *getChatterinoBadges() override
     {
+        assertInGuiThread();
+
         return this->chatterinoBadges;
     }
     FfzBadges *getFfzBadges() override
     {
+        assertInGuiThread();
+
         return this->ffzBadges;
     }
     SeventvBadges *getSeventvBadges() override
     {
+        assertInGuiThread();
+
         return this->seventvBadges;
     }
     IUserDataController *getUserData() override;
@@ -221,14 +249,20 @@ public:
     TwitchBadges *getTwitchBadges() override;
     ImageUploader *getImageUploader() override
     {
+        assertInGuiThread();
+
         return this->imageUploader;
     }
     SeventvAPI *getSeventvAPI() override
     {
+        assertInGuiThread();
+
         return this->seventvAPI;
     }
     Updates &getUpdates() override
     {
+        assertInGuiThread();
+
         return this->updates;
     }
 
