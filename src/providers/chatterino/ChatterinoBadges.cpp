@@ -45,11 +45,14 @@ void ChatterinoBadges::loadChatterinoBadges()
             {
                 auto jsonBadge = jsonBadgeValue.toObject();
                 auto emote = Emote{
-                    EmoteName{},
-                    ImageSet{Url{jsonBadge.value("image1").toString()},
-                             Url{jsonBadge.value("image2").toString()},
-                             Url{jsonBadge.value("image3").toString()}},
-                    Tooltip{jsonBadge.value("tooltip").toString()}, Url{}};
+                    .name = EmoteName{},
+                    .images =
+                        ImageSet{Url{jsonBadge.value("image1").toString()},
+                                 Url{jsonBadge.value("image2").toString()},
+                                 Url{jsonBadge.value("image3").toString()}},
+                    .tooltip = Tooltip{jsonBadge.value("tooltip").toString()},
+                    .homePage = Url{},
+                };
 
                 emotes.push_back(
                     std::make_shared<const Emote>(std::move(emote)));
