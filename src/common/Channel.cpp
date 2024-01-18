@@ -82,7 +82,7 @@ LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot()
 void Channel::addMessage(MessagePtr message,
                          std::optional<MessageFlags> overridingFlags)
 {
-    auto app = getApp();
+    auto *app = getApp();
     MessagePtr deleted;
 
     if (!overridingFlags || !overridingFlags->has(MessageFlag::DoNotLog))
@@ -101,7 +101,8 @@ void Channel::addMessage(MessagePtr message,
         {
             channelPlatform = "twitch";
         }
-        app->logging->addMessage(this->name_, message, channelPlatform);
+        getIApp()->getChatLogger()->addMessage(this->name_, message,
+                                               channelPlatform);
     }
 
     if (this->messages_.pushBack(message, deleted))
@@ -134,7 +135,7 @@ void Channel::disableAllMessages()
     int snapshotLength = snapshot.size();
     for (int i = 0; i < snapshotLength; i++)
     {
-        auto &message = snapshot[i];
+        const auto &message = snapshot[i];
         if (message->flags.hasAny({MessageFlag::System, MessageFlag::Timeout,
                                    MessageFlag::Whisper}))
         {
@@ -178,7 +179,7 @@ void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
     existingMessageIds.reserve(snapshot.size());
 
     // First, collect the ids of every message already present in the channel
-    for (auto &msg : snapshot)
+    for (const auto &msg : snapshot)
     {
         if (msg->flags.has(MessageFlag::System) || msg->id.isEmpty())
         {
@@ -195,7 +196,7 @@ void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
     // being able to insert just-loaded historical messages at the end
     // in the correct place.
     auto lastMsg = snapshot[snapshot.size() - 1];
-    for (auto &msg : messages)
+    for (const auto &msg : messages)
     {
         // check if message already exists
         if (existingMessageIds.count(msg->id) != 0)
@@ -207,7 +208,7 @@ void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
         anyInserted = true;
 
         bool insertedFlag = false;
-        for (auto &snapshotMsg : snapshot)
+        for (const auto &snapshotMsg : snapshot)
         {
             if (snapshotMsg->flags.has(MessageFlag::System))
             {
@@ -315,7 +316,6 @@ bool Channel::isBroadcaster() const
 
 bool Channel::hasModRights() const
 {
-    // fourtf: check if staff
     return this->isMod() || this->isBroadcaster();
 }
 

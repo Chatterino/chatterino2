@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/NetworkCommon.hpp"
+#include "common/network/NetworkCommon.hpp"
 
 #include <QHttpMultiPart>
 
@@ -12,7 +12,7 @@ class QJsonDocument;
 
 namespace chatterino {
 
-struct NetworkData;
+class NetworkData;
 
 class NetworkRequest final
 {
@@ -43,7 +43,6 @@ public:
 
     NetworkRequest type(NetworkRequestType newRequestType) &&;
 
-    NetworkRequest onReplyCreated(NetworkReplyCreatedCallback cb) &&;
     NetworkRequest onError(NetworkErrorCallback cb) &&;
     NetworkRequest onSuccess(NetworkSuccessCallback cb) &&;
     NetworkRequest finally(NetworkFinallyCallback cb) &&;

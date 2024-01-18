@@ -3,6 +3,7 @@
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
 #include "messages/SharedMessageBuilder.hpp"
+#include "pubsubmessages/LowTrustUsers.hpp"
 
 #include <IrcMessage>
 #include <QString>
@@ -89,6 +90,16 @@ public:
 
     static MessagePtr buildHypeChatMessage(Communi::IrcPrivateMessage *message);
 
+    static std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
+        const AutomodAction &action, const QString &channelName);
+    static MessagePtr makeAutomodInfoMessage(const AutomodInfoAction &action);
+
+    static std::pair<MessagePtr, MessagePtr> makeLowTrustUserMessage(
+        const PubSubLowTrustUsersMessage &action, const QString &channelName,
+        const TwitchChannel *twitchChannel);
+    static MessagePtr makeLowTrustUpdateMessage(
+        const PubSubLowTrustUsersMessage &action);
+
     // Shares some common logic from SharedMessageBuilder::parseBadgeTag
     static std::unordered_map<QString, QString> parseBadgeInfoTag(
         const QVariantMap &tags);
@@ -109,7 +120,6 @@ private:
 
     void runIgnoreReplaces(std::vector<TwitchEmoteOccurrence> &twitchEmotes);
 
-    std::optional<EmotePtr> getTwitchBadge(const Badge &badge) const;
     Outcome tryAppendEmote(const EmoteName &name) override;
 
     void addWords(const QStringList &words,

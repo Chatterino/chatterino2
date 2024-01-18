@@ -1,4 +1,4 @@
-#include "TwitchIrcServer.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
@@ -13,7 +13,6 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
-#include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
@@ -25,10 +24,7 @@
 
 #include <cassert>
 
-// using namespace Communi;
 using namespace std::chrono_literals;
-
-#define TWITCH_PUBSUB_URL "wss://pubsub-edge.twitch.tv"
 
 namespace {
 
@@ -47,8 +43,6 @@ TwitchIrcServer::TwitchIrcServer()
     , watchingChannel(Channel::getEmpty(), Channel::Type::TwitchWatching)
 {
     this->initializeIrc();
-
-    this->pubsub = new PubSub(TWITCH_PUBSUB_URL);
 
     if (getSettings()->enableBTTVLiveUpdates &&
         getSettings()->enableBTTVChannelEmotes)
@@ -70,12 +64,11 @@ TwitchIrcServer::TwitchIrcServer()
     //                                                     false);
 }
 
-void TwitchIrcServer::initialize(Settings &settings, Paths &paths)
+void TwitchIrcServer::initialize(Settings &settings, const Paths &paths)
 {
     getApp()->accounts->twitch.currentUserChanged.connect([this]() {
         postToThread([this] {
             this->connect();
-            this->pubsub->setAccount(getApp()->accounts->twitch.getCurrent());
         });
     });
 
@@ -402,11 +395,15 @@ std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
     {
         auto channel = weakChannel.lock();
         if (!channel)
+        {
             continue;
+        }
 
         auto twitchChannel = std::dynamic_pointer_cast<TwitchChannel>(channel);
         if (!twitchChannel)
+        {
             continue;
+        }
 
         if (twitchChannel->roomId() == channelId &&
             twitchChannel->getName().count(':') < 2)
@@ -421,9 +418,13 @@ std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
 QString TwitchIrcServer::cleanChannelName(const QString &dirtyChannelName)
 {
     if (dirtyChannelName.startsWith('#'))
+    {
         return dirtyChannelName.mid(1).toLower();
+    }
     else
+    {
         return dirtyChannelName.toLower();
+    }
 }
 
 bool TwitchIrcServer::hasSeparateWriteConnection() const

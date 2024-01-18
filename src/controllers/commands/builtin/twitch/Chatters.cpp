@@ -70,7 +70,7 @@ QString chatters(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /chatters command only works in Twitch Channels"));
+            "The /chatters command only works in Twitch Channels."));
         return "";
     }
 
@@ -80,7 +80,7 @@ QString chatters(const CommandContext &ctx)
         getApp()->accounts->twitch.getCurrent()->getUserId(), 1,
         [channel{ctx.channel}](auto result) {
             channel->addMessage(
-                makeSystemMessage(QString("Chatter count: %1")
+                makeSystemMessage(QString("Chatter count: %1.")
                                       .arg(localizeNumbers(result.total))));
         },
         [channel{ctx.channel}](auto error, auto message) {
@@ -101,7 +101,7 @@ QString testChatters(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /test-chatters command only works in Twitch Channels"));
+            "The /test-chatters command only works in Twitch Channels."));
         return "";
     }
 

@@ -15,12 +15,12 @@ QString sendShoutout(const CommandContext &ctx)
 {
     auto *twitchChannel = ctx.twitchChannel;
     auto channel = ctx.channel;
-    auto words = &ctx.words;
+    const auto *words = &ctx.words;
 
     if (twitchChannel == nullptr)
     {
         channel->addMessage(makeSystemMessage(
-            "The /shoutout command only works in Twitch channels"));
+            "The /shoutout command only works in Twitch channels."));
         return "";
     }
 
@@ -28,7 +28,7 @@ QString sendShoutout(const CommandContext &ctx)
     if (currentUser->isAnon())
     {
         channel->addMessage(
-            makeSystemMessage("You must be logged in to send shoutout"));
+            makeSystemMessage("You must be logged in to send shoutout."));
         return "";
     }
 

@@ -23,7 +23,12 @@
 
 namespace chatterino {
 
-void PluginController::initialize(Settings &settings, Paths &paths)
+PluginController::PluginController(const Paths &paths_)
+    : paths(paths_)
+{
+}
+
+void PluginController::initialize(Settings &settings, const Paths &paths)
 {
     (void)paths;
 
@@ -44,7 +49,7 @@ void PluginController::initialize(Settings &settings, Paths &paths)
 void PluginController::loadPlugins()
 {
     this->plugins_.clear();
-    auto dir = QDir(getPaths()->pluginsDirectory);
+    auto dir = QDir(this->paths.pluginsDirectory);
     qCDebug(chatterinoLua) << "Loading plugins in" << dir.path();
     for (const auto &info :
          dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot))
@@ -233,7 +238,7 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     auto *temp = plugin.get();
     this->plugins_.insert({pluginName, std::move(plugin)});
 
-    if (getArgs().safeMode)
+    if (getApp()->getArgs().safeMode)
     {
         // This isn't done earlier to ensure the user can disable a misbehaving plugin
         qCWarning(chatterinoLua) << "Skipping loading plugin " << meta.name

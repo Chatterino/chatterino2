@@ -1,9 +1,9 @@
 #include "widgets/splits/SplitHeader.hpp"
 
 #include "Application.hpp"
-#include "common/NetworkCommon.hpp"
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkCommon.hpp"
+#include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/Hotkey.hpp"

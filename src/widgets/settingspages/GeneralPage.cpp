@@ -89,12 +89,12 @@ namespace {
 
 GeneralPage::GeneralPage()
 {
-    auto y = new QVBoxLayout;
-    auto x = new QHBoxLayout;
-    auto view = new GeneralPageView;
+    auto *y = new QVBoxLayout;
+    auto *x = new QHBoxLayout;
+    auto *view = new GeneralPageView;
     this->view_ = view;
     x->addWidget(view);
-    auto z = new QFrame;
+    auto *z = new QFrame;
     z->setLayout(x);
     y->addWidget(z);
     this->setLayout(y);
@@ -107,9 +107,13 @@ GeneralPage::GeneralPage()
 bool GeneralPage::filterElements(const QString &query)
 {
     if (this->view_)
+    {
         return this->view_->filterElements(query) || query.isEmpty();
+    }
     else
+    {
         return false;
+    }
 }
 
 void GeneralPage::initLayout(GeneralPageView &layout)
@@ -154,9 +158,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.uiScale,
         [](auto val) {
             if (val == 1)
+            {
                 return QString("Default");
+            }
             else
+            {
                 return QString::number(val) + "x";
+            }
         },
         [](auto args) {
             return fuzzyToFloat(args.value, 1.f);
@@ -280,20 +288,32 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.pauseOnHoverDuration,
         [](auto val) {
             if (val < -0.5f)
+            {
                 return QString("Indefinite");
+            }
             else if (val < 0.001f)
+            {
                 return QString("Disabled");
+            }
             else
+            {
                 return QString::number(val) + "s";
+            }
         },
         [](auto args) {
             if (args.index == 0)
+            {
                 return 0.0f;
+            }
             else if (args.value == "Indefinite")
+            {
                 return -1.0f;
+            }
             else
+            {
                 return fuzzyToFloat(args.value,
                                     std::numeric_limits<float>::infinity());
+            }
         });
     addKeyboardModifierSetting(layout, "Pause while holding a key",
                                s.pauseChatModifier);
@@ -302,9 +322,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.mouseScrollMultiplier,
         [](auto val) {
             if (val == 1)
+            {
                 return QString("Default");
+            }
             else
+            {
                 return QString::number(val) + "x";
+            }
         },
         [](auto args) {
             return fuzzyToFloat(args.value, 1.f);
@@ -492,9 +516,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.emoteScale,
         [](auto val) {
             if (val == 1)
+            {
                 return QString("Default");
+            }
             else
+            {
                 return QString::number(val) + "x";
+            }
         },
         [](auto args) {
             return fuzzyToFloat(args.value, 1.f);
@@ -631,23 +659,39 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         {"Off", "Small", "Medium", "Large"}, s.thumbnailSize,
         [](auto val) {
             if (val == 0)
+            {
                 return QString("Off");
+            }
             else if (val == 100)
+            {
                 return QString("Small");
+            }
             else if (val == 200)
+            {
                 return QString("Medium");
+            }
             else if (val == 300)
+            {
                 return QString("Large");
+            }
             else
+            {
                 return QString::number(val);
+            }
         },
         [](auto args) {
             if (args.value == "Small")
+            {
                 return 100;
+            }
             else if (args.value == "Medium")
+            {
                 return 200;
+            }
             else if (args.value == "Large")
+            {
                 return 300;
+            }
 
             return fuzzyToInt(args.value, 0);
         });
@@ -656,23 +700,39 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.thumbnailSizeStream,
         [](auto val) {
             if (val == 0)
+            {
                 return QString("Off");
+            }
             else if (val == 1)
+            {
                 return QString("Small");
+            }
             else if (val == 2)
+            {
                 return QString("Medium");
+            }
             else if (val == 3)
+            {
                 return QString("Large");
+            }
             else
+            {
                 return QString::number(val);
+            }
         },
         [](auto args) {
             if (args.value == "Small")
+            {
                 return 1;
+            }
             else if (args.value == "Medium")
+            {
                 return 2;
+            }
             else if (args.value == "Large")
+            {
                 return 3;
+            }
 
             return fuzzyToInt(args.value, 0);
         });
@@ -731,9 +791,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                           "store in this directory.");
     layout.addButton("Open AppData directory", [] {
 #ifdef Q_OS_DARWIN
-        QDesktopServices::openUrl("file://" + getPaths()->rootAppDataDirectory);
+        QDesktopServices::openUrl("file://" +
+                                  getIApp()->getPaths().rootAppDataDirectory);
 #else
-        QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
+        QDesktopServices::openUrl(getIApp()->getPaths().rootAppDataDirectory);
 #endif
     });
 
@@ -742,10 +803,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Files that are used often (such as emotes) are saved to disk to "
         "reduce bandwidth usage and to speed up loading.");
 
-    auto cachePathLabel = layout.addDescription("placeholder :D");
+    auto *cachePathLabel = layout.addDescription("placeholder :D");
     getSettings()->cachePath.connect([cachePathLabel](const auto &,
                                                       auto) mutable {
-        QString newPath = getPaths()->cacheDirectory();
+        QString newPath = getIApp()->getPaths().cacheDirectory();
 
         QString pathShortened = "Cache saved at <a href=\"file:///" + newPath +
                                 "\"><span style=\"color: white;\">" +
@@ -756,7 +817,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     // Choose and reset buttons
     {
-        auto box = new QHBoxLayout;
+        auto *box = new QHBoxLayout;
 
         box->addWidget(layout.makeButton("Choose cache path", [this]() {
             getSettings()->cachePath = QFileDialog::getExistingDirectory(this);
@@ -773,9 +834,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
             if (reply == QMessageBox::Yes)
             {
-                auto cacheDir = QDir(getPaths()->cacheDirectory());
+                auto cacheDir = QDir(getIApp()->getPaths().cacheDirectory());
                 cacheDir.removeRecursively();
-                cacheDir.mkdir(getPaths()->cacheDirectory());
+                cacheDir.mkdir(getIApp()->getPaths().cacheDirectory());
             }
         }));
         box->addStretch(1);
@@ -887,7 +948,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "When possible, restart Chatterino if the program crashes");
 
 #if defined(Q_OS_LINUX) && !defined(NO_QTKEYCHAIN)
-    if (!getPaths()->isPortable())
+    if (!getIApp()->getPaths().isPortable())
     {
         layout.addCheckbox(
             "Use libsecret/KWallet/Gnome keychain to secure passwords",
@@ -964,9 +1025,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Username font weight", {"50", "Default", "75", "100"}, s.boldScale,
         [](auto val) {
             if (val == 63)
+            {
                 return QString("Default");
+            }
             else
+            {
                 return QString::number(val);
+            }
         },
         [](auto args) {
             return fuzzyToFloat(args.value, 63.f);
@@ -1156,7 +1221,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addStretch();
 
     // invisible element for width
-    auto inv = new BaseWidget(this);
+    auto *inv = new BaseWidget(this);
     //    inv->setScaleIndependantWidth(600);
     layout.addWidget(inv);
 }
@@ -1168,7 +1233,7 @@ void GeneralPage::initExtra()
     {
         getSettings()->cachePath.connect(
             [cachePath = this->cachePath_](const auto &, auto) mutable {
-                QString newPath = getPaths()->cacheDirectory();
+                QString newPath = getIApp()->getPaths().cacheDirectory();
 
                 QString pathShortened = "Current location: <a href=\"file:///" +
                                         newPath + "\">" +
@@ -1192,9 +1257,13 @@ QString GeneralPage::getFont(const DropdownArgs &args) const
         auto font = dialog.getFont(&ok, this->window());
 
         if (ok)
+        {
             return font.family();
+        }
         else
+        {
             return args.combobox->itemText(0);
+        }
     }
     return args.value;
 }

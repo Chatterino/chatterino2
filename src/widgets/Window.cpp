@@ -136,7 +136,7 @@ void Window::closeEvent(QCloseEvent *)
 {
     if (this->type_ == WindowType::Main)
     {
-        auto app = getApp();
+        auto *app = getApp();
         app->windows->save();
         app->windows->closeAll();
     }
@@ -171,9 +171,13 @@ void Window::addLayout()
 void Window::addCustomTitlebarButtons()
 {
     if (!this->hasCustomWindowFrame())
+    {
         return;
+    }
     if (this->type_ != WindowType::Main)
+    {
         return;
+    }
 
     // settings
     this->addTitleBarButton(TitleBarButtonStyle::Settings, [this] {
@@ -181,7 +185,7 @@ void Window::addCustomTitlebarButtons()
     });
 
     // updates
-    auto update = this->addTitleBarButton(TitleBarButtonStyle::None, [] {});
+    auto *update = this->addTitleBarButton(TitleBarButtonStyle::None, [] {});
 
     initUpdateButton(*update, this->signalHolder_);
 
@@ -281,7 +285,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
                     ->toInner<PubSubCommunityPointsChannelV1Message>();
 
             app->twitch->addFakeMessage(getSampleChannelRewardIRCMessage());
-            app->twitch->pubsub->signals_.pointReward.redeemed.invoke(
+            getIApp()->getTwitchPubSub()->pointReward.redeemed.invoke(
                 oInnerMessage->data.value("redemption").toObject());
             alt = !alt;
         }
@@ -292,7 +296,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
             auto oInnerMessage =
                 oMessage->toInner<PubSubMessageMessage>()
                     ->toInner<PubSubCommunityPointsChannelV1Message>();
-            app->twitch->pubsub->signals_.pointReward.redeemed.invoke(
+            getIApp()->getTwitchPubSub()->pointReward.redeemed.invoke(
                 oInnerMessage->data.value("redemption").toObject());
             alt = !alt;
         }
@@ -384,10 +388,10 @@ void Window::addShortcuts()
              }
              if (arguments.at(0) == "split")
              {
-                 if (auto page = dynamic_cast<SplitContainer *>(
+                 if (auto *page = dynamic_cast<SplitContainer *>(
                          this->notebook_->getSelectedPage()))
                  {
-                     if (auto split = page->getSelectedSplit())
+                     if (auto *split = page->getSelectedSplit())
                      {
                          split->popup();
                      }
@@ -395,7 +399,7 @@ void Window::addShortcuts()
              }
              else if (arguments.at(0) == "window")
              {
-                 if (auto page = dynamic_cast<SplitContainer *>(
+                 if (auto *page = dynamic_cast<SplitContainer *>(
                          this->notebook_->getSelectedPage()))
                  {
                      page->popup();
@@ -737,7 +741,7 @@ void Window::onAccountSelected()
     }
 #endif
 
-    if (getArgs().safeMode)
+    if (getApp()->getArgs().safeMode)
     {
         windowTitle += " (safe mode)";
     }

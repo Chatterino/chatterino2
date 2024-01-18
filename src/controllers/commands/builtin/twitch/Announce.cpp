@@ -37,7 +37,7 @@ QString sendAnnouncement(const CommandContext &ctx)
     if (user->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "You must be logged in to use the /announce command"));
+            "You must be logged in to use the /announce command."));
         return "";
     }
 

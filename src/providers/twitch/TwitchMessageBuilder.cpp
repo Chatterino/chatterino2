@@ -5,6 +5,7 @@
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/userdata/UserDataController.hpp"
@@ -150,6 +151,119 @@ namespace {
             }
             vec.push_back(std::move(emoteOccurrence));
         }
+    }
+
+    std::optional<EmotePtr> getTwitchBadge(const Badge &badge,
+                                           const TwitchChannel *twitchChannel)
+    {
+        if (auto channelBadge =
+                twitchChannel->twitchBadge(badge.key_, badge.value_))
+        {
+            return channelBadge;
+        }
+
+        if (auto globalBadge =
+                getIApp()->getTwitchBadges()->badge(badge.key_, badge.value_))
+        {
+            return globalBadge;
+        }
+
+        return std::nullopt;
+    }
+
+    void appendBadges(MessageBuilder *builder, const std::vector<Badge> &badges,
+                      const std::unordered_map<QString, QString> &badgeInfos,
+                      const TwitchChannel *twitchChannel)
+    {
+        if (twitchChannel == nullptr)
+        {
+            return;
+        }
+
+        for (const auto &badge : badges)
+        {
+            auto badgeEmote = getTwitchBadge(badge, twitchChannel);
+            if (!badgeEmote)
+            {
+                continue;
+            }
+            auto tooltip = (*badgeEmote)->tooltip.string;
+
+            if (badge.key_ == "bits")
+            {
+                const auto &cheerAmount = badge.value_;
+                tooltip = QString("Twitch cheer %0").arg(cheerAmount);
+            }
+            else if (badge.key_ == "moderator" &&
+                     getSettings()->useCustomFfzModeratorBadges)
+            {
+                if (auto customModBadge = twitchChannel->ffzCustomModBadge())
+                {
+                    builder
+                        ->emplace<ModBadgeElement>(
+                            *customModBadge,
+                            MessageElementFlag::BadgeChannelAuthority)
+                        ->setTooltip((*customModBadge)->tooltip.string);
+                    // early out, since we have to add a custom badge element here
+                    continue;
+                }
+            }
+            else if (badge.key_ == "vip" &&
+                     getSettings()->useCustomFfzVipBadges)
+            {
+                if (auto customVipBadge = twitchChannel->ffzCustomVipBadge())
+                {
+                    builder
+                        ->emplace<VipBadgeElement>(
+                            *customVipBadge,
+                            MessageElementFlag::BadgeChannelAuthority)
+                        ->setTooltip((*customVipBadge)->tooltip.string);
+                    // early out, since we have to add a custom badge element here
+                    continue;
+                }
+            }
+            else if (badge.flag_ == MessageElementFlag::BadgeSubscription)
+            {
+                auto badgeInfoIt = badgeInfos.find(badge.key_);
+                if (badgeInfoIt != badgeInfos.end())
+                {
+                    // badge.value_ is 4 chars long if user is subbed on higher tier
+                    // (tier + amount of months with leading zero if less than 100)
+                    // e.g. 3054 - tier 3 4,5-year sub. 2108 - tier 2 9-year sub
+                    const auto &subTier =
+                        badge.value_.length() > 3 ? badge.value_.at(0) : '1';
+                    const auto &subMonths = badgeInfoIt->second;
+                    tooltip += QString(" (%1%2 months)")
+                                   .arg(subTier != '1'
+                                            ? QString("Tier %1, ").arg(subTier)
+                                            : "")
+                                   .arg(subMonths);
+                }
+            }
+            else if (badge.flag_ == MessageElementFlag::BadgePredictions)
+            {
+                auto badgeInfoIt = badgeInfos.find(badge.key_);
+                if (badgeInfoIt != badgeInfos.end())
+                {
+                    auto infoValue = badgeInfoIt->second;
+                    auto predictionText =
+                        infoValue
+                            .replace(R"(\s)", " ")  // standard IRC escapes
+                            .replace(R"(\:)", ";")
+                            .replace(R"(\\)", R"(\)")
+                            .replace("⸝", ",");  // twitch's comma escape
+                    // Careful, the first character is RIGHT LOW PARAPHRASE BRACKET or U+2E1D, which just looks like a comma
+
+                    tooltip = QString("Predicted %1").arg(predictionText);
+                }
+            }
+
+            builder->emplace<BadgeElement>(*badgeEmote, badge.flag_)
+                ->setTooltip(tooltip);
+        }
+
+        builder->message().badges = badges;
+        builder->message().badgeInfos = badgeInfos;
     }
 
 }  // namespace
@@ -1112,24 +1226,6 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
     return Failure;
 }
 
-std::optional<EmotePtr> TwitchMessageBuilder::getTwitchBadge(
-    const Badge &badge) const
-{
-    if (auto channelBadge =
-            this->twitchChannel->twitchBadge(badge.key_, badge.value_))
-    {
-        return channelBadge;
-    }
-
-    if (auto globalBadge =
-            TwitchBadges::instance()->badge(badge.key_, badge.value_))
-    {
-        return globalBadge;
-    }
-
-    return std::nullopt;
-}
-
 std::unordered_map<QString, QString> TwitchMessageBuilder::parseBadgeInfoTag(
     const QVariantMap &tags)
 {
@@ -1137,7 +1233,9 @@ std::unordered_map<QString, QString> TwitchMessageBuilder::parseBadgeInfoTag(
 
     auto infoIt = tags.constFind("badge-info");
     if (infoIt == tags.end())
+    {
         return infoMap;
+    }
 
     auto info = infoIt.value().toString().split(',', Qt::SkipEmptyParts);
 
@@ -1188,88 +1286,8 @@ void TwitchMessageBuilder::appendTwitchBadges()
     }
 
     auto badgeInfos = TwitchMessageBuilder::parseBadgeInfoTag(this->tags);
-    auto badges = this->parseBadgeTag(this->tags);
-
-    for (const auto &badge : badges)
-    {
-        auto badgeEmote = this->getTwitchBadge(badge);
-        if (!badgeEmote)
-        {
-            continue;
-        }
-        auto tooltip = (*badgeEmote)->tooltip.string;
-
-        if (badge.key_ == "bits")
-        {
-            const auto &cheerAmount = badge.value_;
-            tooltip = QString("Twitch cheer %0").arg(cheerAmount);
-        }
-        else if (badge.key_ == "moderator" &&
-                 getSettings()->useCustomFfzModeratorBadges)
-        {
-            if (auto customModBadge = this->twitchChannel->ffzCustomModBadge())
-            {
-                this->emplace<ModBadgeElement>(
-                        *customModBadge,
-                        MessageElementFlag::BadgeChannelAuthority)
-                    ->setTooltip((*customModBadge)->tooltip.string);
-                // early out, since we have to add a custom badge element here
-                continue;
-            }
-        }
-        else if (badge.key_ == "vip" && getSettings()->useCustomFfzVipBadges)
-        {
-            if (auto customVipBadge = this->twitchChannel->ffzCustomVipBadge())
-            {
-                this->emplace<VipBadgeElement>(
-                        *customVipBadge,
-                        MessageElementFlag::BadgeChannelAuthority)
-                    ->setTooltip((*customVipBadge)->tooltip.string);
-                // early out, since we have to add a custom badge element here
-                continue;
-            }
-        }
-        else if (badge.flag_ == MessageElementFlag::BadgeSubscription)
-        {
-            auto badgeInfoIt = badgeInfos.find(badge.key_);
-            if (badgeInfoIt != badgeInfos.end())
-            {
-                // badge.value_ is 4 chars long if user is subbed on higher tier
-                // (tier + amount of months with leading zero if less than 100)
-                // e.g. 3054 - tier 3 4,5-year sub. 2108 - tier 2 9-year sub
-                const auto &subTier =
-                    badge.value_.length() > 3 ? badge.value_.at(0) : '1';
-                const auto &subMonths = badgeInfoIt->second;
-                tooltip +=
-                    QString(" (%1%2 months)")
-                        .arg(subTier != '1' ? QString("Tier %1, ").arg(subTier)
-                                            : "")
-                        .arg(subMonths);
-            }
-        }
-        else if (badge.flag_ == MessageElementFlag::BadgePredictions)
-        {
-            auto badgeInfoIt = badgeInfos.find(badge.key_);
-            if (badgeInfoIt != badgeInfos.end())
-            {
-                auto predictionText =
-                    badgeInfoIt->second
-                        .replace(R"(\s)", " ")  // standard IRC escapes
-                        .replace(R"(\:)", ";")
-                        .replace(R"(\\)", R"(\)")
-                        .replace("⸝", ",");  // twitch's comma escape
-                // Careful, the first character is RIGHT LOW PARAPHRASE BRACKET or U+2E1D, which just looks like a comma
-
-                tooltip = QString("Predicted %1").arg(predictionText);
-            }
-        }
-
-        this->emplace<BadgeElement>(*badgeEmote, badge.flag_)
-            ->setTooltip(tooltip);
-    }
-
-    this->message().badges = badges;
-    this->message().badgeInfos = badgeInfos;
+    auto badges = TwitchMessageBuilder::parseBadgeTag(this->tags);
+    appendBadges(this, badges, badgeInfos, this->twitchChannel);
 }
 
 void TwitchMessageBuilder::appendChatterinoBadges()
@@ -1635,7 +1653,7 @@ void TwitchMessageBuilder::listOfUsersSystemMessage(QString prefix,
     builder->emplace<TextElement>(prefix, MessageElementFlag::Text,
                                   MessageColor::System);
     bool isFirst = true;
-    auto tc = dynamic_cast<TwitchChannel *>(channel);
+    auto *tc = dynamic_cast<TwitchChannel *>(channel);
     for (const QString &username : users)
     {
         if (!isFirst)
@@ -1763,6 +1781,382 @@ MessagePtr TwitchMessageBuilder::buildHypeChatMessage(
                            calculateMessageTime(message).time());
     builder->flags.set(MessageFlag::ElevatedMessage);
     return builder.release();
+}
+
+EmotePtr makeAutoModBadge()
+{
+    return std::make_shared<Emote>(Emote{
+        EmoteName{},
+        ImageSet{Image::fromResourcePixmap(getResources().twitch.automod)},
+        Tooltip{"AutoMod"},
+        Url{"https://dashboard.twitch.tv/settings/moderation/automod"}});
+}
+
+MessagePtr TwitchMessageBuilder::makeAutomodInfoMessage(
+    const AutomodInfoAction &action)
+{
+    auto builder = MessageBuilder();
+    QString text("AutoMod: ");
+
+    builder.emplace<TimestampElement>();
+    builder.message().flags.set(MessageFlag::PubSub);
+
+    // AutoMod shield badge
+    builder.emplace<BadgeElement>(makeAutoModBadge(),
+                                  MessageElementFlag::BadgeChannelAuthority);
+    // AutoMod "username"
+    builder.emplace<TextElement>("AutoMod:", MessageElementFlag::BoldUsername,
+                                 MessageColor(QColor("blue")),
+                                 FontStyle::ChatMediumBold);
+    builder.emplace<TextElement>(
+        "AutoMod:", MessageElementFlag::NonBoldUsername,
+        MessageColor(QColor("blue")));
+    switch (action.type)
+    {
+        case AutomodInfoAction::OnHold: {
+            QString info("Hey! Your message is being checked "
+                         "by mods and has not been sent.");
+            text += info;
+            builder.emplace<TextElement>(info, MessageElementFlag::Text,
+                                         MessageColor::Text);
+        }
+        break;
+        case AutomodInfoAction::Denied: {
+            QString info("Mods have removed your message.");
+            text += info;
+            builder.emplace<TextElement>(info, MessageElementFlag::Text,
+                                         MessageColor::Text);
+        }
+        break;
+        case AutomodInfoAction::Approved: {
+            QString info("Mods have accepted your message.");
+            text += info;
+            builder.emplace<TextElement>(info, MessageElementFlag::Text,
+                                         MessageColor::Text);
+        }
+        break;
+    }
+
+    builder.message().flags.set(MessageFlag::AutoMod);
+    builder.message().messageText = text;
+    builder.message().searchText = text;
+
+    auto message = builder.release();
+
+    return message;
+}
+
+std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeAutomodMessage(
+    const AutomodAction &action, const QString &channelName)
+{
+    MessageBuilder builder, builder2;
+
+    //
+    // Builder for AutoMod message with explanation
+    builder.message().loginName = "automod";
+    builder.message().channelName = channelName;
+    builder.message().flags.set(MessageFlag::PubSub);
+    builder.message().flags.set(MessageFlag::Timeout);
+    builder.message().flags.set(MessageFlag::AutoMod);
+
+    // AutoMod shield badge
+    builder.emplace<BadgeElement>(makeAutoModBadge(),
+                                  MessageElementFlag::BadgeChannelAuthority);
+    // AutoMod "username"
+    builder.emplace<TextElement>("AutoMod:", MessageElementFlag::BoldUsername,
+                                 MessageColor(QColor("blue")),
+                                 FontStyle::ChatMediumBold);
+    builder.emplace<TextElement>(
+        "AutoMod:", MessageElementFlag::NonBoldUsername,
+        MessageColor(QColor("blue")));
+    // AutoMod header message
+    builder.emplace<TextElement>(
+        ("Held a message for reason: " + action.reason +
+         ". Allow will post it in chat. "),
+        MessageElementFlag::Text, MessageColor::Text);
+    // Allow link button
+    builder
+        .emplace<TextElement>("Allow", MessageElementFlag::Text,
+                              MessageColor(QColor("green")),
+                              FontStyle::ChatMediumBold)
+        ->setLink({Link::AutoModAllow, action.msgID});
+    // Deny link button
+    builder
+        .emplace<TextElement>(" Deny", MessageElementFlag::Text,
+                              MessageColor(QColor("red")),
+                              FontStyle::ChatMediumBold)
+        ->setLink({Link::AutoModDeny, action.msgID});
+    // ID of message caught by AutoMod
+    //    builder.emplace<TextElement>(action.msgID, MessageElementFlag::Text,
+    //                                 MessageColor::Text);
+    auto text1 =
+        QString("AutoMod: Held a message for reason: %1. Allow will post "
+                "it in chat. Allow Deny")
+            .arg(action.reason);
+    builder.message().messageText = text1;
+    builder.message().searchText = text1;
+
+    auto message1 = builder.release();
+
+    //
+    // Builder for offender's message
+    builder2.message().channelName = channelName;
+    builder2
+        .emplace<TextElement>("#" + channelName,
+                              MessageElementFlag::ChannelName,
+                              MessageColor::System)
+        ->setLink({Link::JumpToChannel, channelName});
+    builder2.emplace<TimestampElement>();
+    builder2.emplace<TwitchModerationElement>();
+    builder2.message().loginName = action.target.login;
+    builder2.message().flags.set(MessageFlag::PubSub);
+    builder2.message().flags.set(MessageFlag::Timeout);
+    builder2.message().flags.set(MessageFlag::AutoMod);
+    builder2.message().flags.set(MessageFlag::AutoModOffendingMessage);
+
+    // sender username
+    builder2
+        .emplace<TextElement>(
+            action.target.displayName + ":", MessageElementFlag::BoldUsername,
+            MessageColor(action.target.color), FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, action.target.login});
+    builder2
+        .emplace<TextElement>(action.target.displayName + ":",
+                              MessageElementFlag::NonBoldUsername,
+                              MessageColor(action.target.color))
+        ->setLink({Link::UserInfo, action.target.login});
+    // sender's message caught by AutoMod
+    builder2.emplace<TextElement>(action.message, MessageElementFlag::Text,
+                                  MessageColor::Text);
+    auto text2 =
+        QString("%1: %2").arg(action.target.displayName, action.message);
+    builder2.message().messageText = text2;
+    builder2.message().searchText = text2;
+
+    auto message2 = builder2.release();
+
+    // Normally highlights would be checked & triggered during the builder parse steps
+    // and when the message is added to the channel
+    // We do this a bit weird since the message comes in from PubSub and not the normal message route
+    auto [highlighted, highlightResult] = getIApp()->getHighlights()->check(
+        {}, {}, action.target.login, action.message, message2->flags);
+    if (highlighted)
+    {
+        SharedMessageBuilder::triggerHighlights(
+            channelName, highlightResult.playSound,
+            highlightResult.customSoundUrl, highlightResult.alert);
+    }
+
+    return std::make_pair(message1, message2);
+}
+
+MessagePtr TwitchMessageBuilder::makeLowTrustUpdateMessage(
+    const PubSubLowTrustUsersMessage &action)
+{
+    /**
+     * Known issues:
+     *  - Non-Twitch badges are not shown
+     *  - Non-Twitch emotes are not shown
+     */
+
+    MessageBuilder builder;
+    builder.emplace<TimestampElement>();
+    builder.message().flags.set(MessageFlag::System);
+    builder.message().flags.set(MessageFlag::PubSub);
+    builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
+
+    builder
+        .emplace<TextElement>(action.updatedByUserDisplayName,
+                              MessageElementFlag::Username,
+                              MessageColor::System, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, action.updatedByUserLogin});
+
+    assert(action.treatment != PubSubLowTrustUsersMessage::Treatment::INVALID);
+    switch (action.treatment)
+    {
+        case PubSubLowTrustUsersMessage::Treatment::NoTreatment: {
+            builder.emplace<TextElement>("removed", MessageElementFlag::Text,
+                                         MessageColor::System);
+            builder
+                .emplace<TextElement>(action.suspiciousUserDisplayName,
+                                      MessageElementFlag::Username,
+                                      MessageColor::System,
+                                      FontStyle::ChatMediumBold)
+                ->setLink({Link::UserInfo, action.suspiciousUserLogin});
+            builder.emplace<TextElement>("from the suspicious user list.",
+                                         MessageElementFlag::Text,
+                                         MessageColor::System);
+        }
+        break;
+
+        case PubSubLowTrustUsersMessage::Treatment::ActiveMonitoring: {
+            builder.emplace<TextElement>("added", MessageElementFlag::Text,
+                                         MessageColor::System);
+            builder
+                .emplace<TextElement>(action.suspiciousUserDisplayName,
+                                      MessageElementFlag::Username,
+                                      MessageColor::System,
+                                      FontStyle::ChatMediumBold)
+                ->setLink({Link::UserInfo, action.suspiciousUserLogin});
+            builder.emplace<TextElement>("as a monitored suspicious chatter.",
+                                         MessageElementFlag::Text,
+                                         MessageColor::System);
+        }
+        break;
+
+        case PubSubLowTrustUsersMessage::Treatment::Restricted: {
+            builder.emplace<TextElement>("added", MessageElementFlag::Text,
+                                         MessageColor::System);
+            builder
+                .emplace<TextElement>(action.suspiciousUserDisplayName,
+                                      MessageElementFlag::Username,
+                                      MessageColor::System,
+                                      FontStyle::ChatMediumBold)
+                ->setLink({Link::UserInfo, action.suspiciousUserLogin});
+            builder.emplace<TextElement>("as a restricted suspicious chatter.",
+                                         MessageElementFlag::Text,
+                                         MessageColor::System);
+        }
+        break;
+
+        default:
+            qCDebug(chatterinoTwitch) << "Unexpected suspicious treatment: "
+                                      << action.treatmentString;
+            break;
+    }
+
+    return builder.release();
+}
+
+std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeLowTrustUserMessage(
+    const PubSubLowTrustUsersMessage &action, const QString &channelName,
+    const TwitchChannel *twitchChannel)
+{
+    MessageBuilder builder, builder2;
+
+    // Builder for low trust user message with explanation
+    builder.message().channelName = channelName;
+    builder.message().flags.set(MessageFlag::PubSub);
+    builder.message().flags.set(MessageFlag::LowTrustUsers);
+
+    // AutoMod shield badge
+    builder.emplace<BadgeElement>(makeAutoModBadge(),
+                                  MessageElementFlag::BadgeChannelAuthority);
+
+    // Suspicious user header message
+    QString prefix = "Suspicious User:";
+    builder.emplace<TextElement>(prefix, MessageElementFlag::Text,
+                                 MessageColor(QColor("blue")),
+                                 FontStyle::ChatMediumBold);
+
+    QString headerMessage;
+    if (action.treatment == PubSubLowTrustUsersMessage::Treatment::Restricted)
+    {
+        headerMessage = "Restricted";
+        builder2.message().flags.set(MessageFlag::RestrictedMessage);
+    }
+    else
+    {
+        headerMessage = "Monitored";
+        builder2.message().flags.set(MessageFlag::MonitoredMessage);
+    }
+
+    if (action.restrictionTypes.has(
+            PubSubLowTrustUsersMessage::RestrictionType::ManuallyAdded))
+    {
+        headerMessage += " by " + action.updatedByUserLogin;
+    }
+
+    headerMessage += " at " + action.updatedAt;
+
+    if (action.restrictionTypes.has(
+            PubSubLowTrustUsersMessage::RestrictionType::DetectedBanEvader))
+    {
+        QString evader;
+        if (action.evasionEvaluation ==
+            PubSubLowTrustUsersMessage::EvasionEvaluation::LikelyEvader)
+        {
+            evader = "likely";
+        }
+        else
+        {
+            evader = "possible";
+        }
+
+        headerMessage += ". Detected as " + evader + " ban evader";
+    }
+
+    if (action.restrictionTypes.has(
+            PubSubLowTrustUsersMessage::RestrictionType::BannedInSharedChannel))
+    {
+        headerMessage += ". Banned in " +
+                         QString::number(action.sharedBanChannelIDs.size()) +
+                         " shared channels";
+    }
+
+    builder.emplace<TextElement>(headerMessage, MessageElementFlag::Text,
+                                 MessageColor::Text);
+    builder.message().messageText = prefix + " " + headerMessage;
+    builder.message().searchText = prefix + " " + headerMessage;
+
+    auto message1 = builder.release();
+
+    //
+    // Builder for offender's message
+    builder2.message().channelName = channelName;
+    builder2
+        .emplace<TextElement>("#" + channelName,
+                              MessageElementFlag::ChannelName,
+                              MessageColor::System)
+        ->setLink({Link::JumpToChannel, channelName});
+    builder2.emplace<TimestampElement>();
+    builder2.emplace<TwitchModerationElement>();
+    builder2.message().loginName = action.suspiciousUserLogin;
+    builder2.message().flags.set(MessageFlag::PubSub);
+    builder2.message().flags.set(MessageFlag::LowTrustUsers);
+
+    // sender badges
+    appendBadges(&builder2, action.senderBadges, {}, twitchChannel);
+
+    // sender username
+    builder2
+        .emplace<TextElement>(action.suspiciousUserDisplayName + ":",
+                              MessageElementFlag::BoldUsername,
+                              MessageColor(action.suspiciousUserColor),
+                              FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, action.suspiciousUserLogin});
+    builder2
+        .emplace<TextElement>(action.suspiciousUserDisplayName + ":",
+                              MessageElementFlag::NonBoldUsername,
+                              MessageColor(action.suspiciousUserColor))
+        ->setLink({Link::UserInfo, action.suspiciousUserLogin});
+
+    // sender's message caught by AutoMod
+    for (const auto &fragment : action.fragments)
+    {
+        if (fragment.emoteID.isEmpty())
+        {
+            builder2.emplace<TextElement>(
+                fragment.text, MessageElementFlag::Text, MessageColor::Text);
+        }
+        else
+        {
+            const auto emotePtr =
+                getIApp()->getEmotes()->getTwitchEmotes()->getOrCreateEmote(
+                    EmoteId{fragment.emoteID}, EmoteName{fragment.text});
+            builder2.emplace<EmoteElement>(
+                emotePtr, MessageElementFlag::TwitchEmote, MessageColor::Text);
+        }
+    }
+
+    auto text =
+        QString("%1: %2").arg(action.suspiciousUserDisplayName, action.text);
+    builder2.message().messageText = text;
+    builder2.message().searchText = text;
+
+    auto message2 = builder2.release();
+
+    return std::make_pair(message1, message2);
 }
 
 void TwitchMessageBuilder::setThread(std::shared_ptr<MessageThread> thread)

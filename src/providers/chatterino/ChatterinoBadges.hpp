@@ -18,7 +18,7 @@ using EmotePtr = std::shared_ptr<const Emote>;
 class ChatterinoBadges : public Singleton
 {
 public:
-    void initialize(Settings &settings, Paths &paths) override;
+    void initialize(Settings &settings, const Paths &paths) override;
     ChatterinoBadges();
 
     std::optional<EmotePtr> getBadge(const UserId &id);

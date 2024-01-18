@@ -63,7 +63,7 @@ jobs:
           version: ${{ matrix.qt-version }}
 
       - name: Enable Developer Command Prompt
-        uses: ilammy/msvc-dev-cmd@v1.12.1
+        uses: ilammy/msvc-dev-cmd@v1.13.0
 
       - name: Setup conan variables
         if: startsWith(matrix.os, 'windows')
@@ -83,7 +83,7 @@ jobs:
             sccache-test-${{ matrix.os }}-${{ matrix.qt-version }}
 
       - name: Cache conan packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.py') }}${{ env.C2_CONAN_CACHE_SUFFIX }}
           path: ~/.conan2/

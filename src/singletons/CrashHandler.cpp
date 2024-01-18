@@ -82,10 +82,9 @@ std::optional<bool> readRecoverySettings(const Paths &paths)
     return shouldRecover.toBool();
 }
 
-bool canRestart(const Paths &paths)
+bool canRestart(const Paths &paths, const Args &args)
 {
 #ifdef NDEBUG
-    const auto &args = chatterino::getArgs();
     if (args.isFramelessEmbed || args.shouldRunBrowserExtensionHost)
     {
         return false;
@@ -109,10 +108,10 @@ bool canRestart(const Paths &paths)
 /// additional plus ('++' -> '+').
 ///
 /// The decoding happens in crash-handler/src/CommandLine.cpp
-std::string encodeArguments()
+std::string encodeArguments(const Args &appArgs)
 {
     std::string args;
-    for (auto arg : getArgs().currentArguments())
+    for (auto arg : appArgs.currentArguments())
     {
         if (!args.empty())
         {
@@ -129,7 +128,12 @@ namespace chatterino {
 
 using namespace std::string_literals;
 
-void CrashHandler::initialize(Settings & /*settings*/, Paths &paths)
+CrashHandler::CrashHandler(const Paths &paths_)
+    : paths(paths_)
+{
+}
+
+void CrashHandler::initialize(Settings & /*settings*/, const Paths &paths_)
 {
     auto optSettings = readRecoverySettings(paths);
     if (optSettings)
@@ -147,7 +151,7 @@ void CrashHandler::saveShouldRecover(bool value)
 {
     this->shouldRecover_ = value;
 
-    QFile file(QDir(getPaths()->crashdumpDirectory).filePath(RECOVERY_FILE));
+    QFile file(QDir(this->paths.crashdumpDirectory).filePath(RECOVERY_FILE));
     if (!file.open(QFile::WriteOnly | QFile::Truncate))
     {
         qCWarning(chatterinoCrashhandler)
@@ -161,7 +165,8 @@ void CrashHandler::saveShouldRecover(bool value)
 }
 
 #ifdef CHATTERINO_WITH_CRASHPAD
-std::unique_ptr<crashpad::CrashpadClient> installCrashHandler()
+std::unique_ptr<crashpad::CrashpadClient> installCrashHandler(
+    const Args &args, const Paths &paths)
 {
     // Currently, the following directory layout is assumed:
     // [applicationDirPath]
@@ -189,15 +194,14 @@ std::unique_ptr<crashpad::CrashpadClient> installCrashHandler()
     // Argument passed in --database
     // > Crash reports are written to this database, and if uploads are enabled,
     //   uploaded from this database to a crash report collection server.
-    auto databaseDir =
-        base::FilePath(nativeString(getPaths()->crashdumpDirectory));
+    auto databaseDir = base::FilePath(nativeString(paths.crashdumpDirectory));
 
     auto client = std::make_unique<crashpad::CrashpadClient>();
 
     std::map<std::string, std::string> annotations{
         {
             "canRestart"s,
-            canRestart(*getPaths()) ? "true"s : "false"s,
+            canRestart(paths, args) ? "true"s : "false"s,
         },
         {
             "exePath"s,
@@ -209,7 +213,7 @@ std::unique_ptr<crashpad::CrashpadClient> installCrashHandler()
         },
         {
             "exeArguments"s,
-            encodeArguments(),
+            encodeArguments(args),
         },
     };
 

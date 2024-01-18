@@ -26,7 +26,7 @@
 
 namespace chatterino {
 
-void NotificationController::initialize(Settings &settings, Paths &paths)
+void NotificationController::initialize(Settings &settings, const Paths &paths)
 {
     this->initialized_ = true;
     for (const QString &channelName : this->twitchSetting_.getValue())
@@ -225,7 +225,7 @@ void NotificationController::removeFakeChannel(const QString channelName)
 
         for (int i = snapshotLength - 1; i >= end; --i)
         {
-            auto &s = snapshot[i];
+            const auto &s = snapshot[i];
 
             if (s->messageText == liveMessageSearchText)
             {

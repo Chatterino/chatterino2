@@ -124,7 +124,7 @@ bool ResizingTextEdit::eventFilter(QObject *obj, QEvent *event)
     {
         return false;
     }
-    auto ev = static_cast<QKeyEvent *>(event);
+    auto *ev = static_cast<QKeyEvent *>(event);
     ev->ignore();
     if ((ev->key() == Qt::Key_C || ev->key() == Qt::Key_Insert) &&
         ev->modifiers() == Qt::ControlModifier)

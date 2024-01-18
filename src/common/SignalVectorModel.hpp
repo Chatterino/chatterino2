@@ -308,10 +308,12 @@ public:
         for (auto &&x : list)
         {
             if (x.row() != list.first().row())
+            {
                 return nullptr;
+            }
         }
 
-        auto data = new QMimeData;
+        auto *data = new QMimeData;
         data->setData("chatterino_row_id", QByteArray::number(list[0].row()));
         return data;
     }

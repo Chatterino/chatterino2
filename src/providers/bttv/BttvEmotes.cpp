@@ -1,7 +1,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
@@ -142,30 +142,32 @@ namespace {
         return anyModifications;
     }
 
-    std::pair<Outcome, EmoteMap> parseChannelEmotes(
-        const QJsonObject &jsonRoot, const QString &channelDisplayName)
-    {
-        auto emotes = EmoteMap();
-
-        auto innerParse = [&jsonRoot, &emotes,
-                           &channelDisplayName](const char *key) {
-            auto jsonEmotes = jsonRoot.value(key).toArray();
-            for (auto jsonEmote_ : jsonEmotes)
-            {
-                auto emote = createChannelEmote(channelDisplayName,
-                                                jsonEmote_.toObject());
-
-                emotes[emote.name] =
-                    cachedOrMake(std::move(emote.emote), emote.id);
-            }
-        };
-
-        innerParse("channelEmotes");
-        innerParse("sharedEmotes");
-
-        return {Success, std::move(emotes)};
-    }
 }  // namespace
+
+using namespace bttv::detail;
+
+EmoteMap bttv::detail::parseChannelEmotes(const QJsonObject &jsonRoot,
+                                          const QString &channelDisplayName)
+{
+    auto emotes = EmoteMap();
+
+    auto innerParse = [&jsonRoot, &emotes,
+                       &channelDisplayName](const char *key) {
+        auto jsonEmotes = jsonRoot.value(key).toArray();
+        for (auto jsonEmote_ : jsonEmotes)
+        {
+            auto emote =
+                createChannelEmote(channelDisplayName, jsonEmote_.toObject());
+
+            emotes[emote.name] = cachedOrMake(std::move(emote.emote), emote.id);
+        }
+    };
+
+    innerParse("channelEmotes");
+    innerParse("sharedEmotes");
+
+    return emotes;
+}
 
 //
 // BttvEmotes
@@ -230,14 +232,11 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
         .timeout(20000)
         .onSuccess([callback = std::move(callback), channel, channelDisplayName,
                     manualRefresh](auto result) {
-            auto pair =
+            auto emotes =
                 parseChannelEmotes(result.parseJson(), channelDisplayName);
-            bool hasEmotes = false;
-            if (pair.first)
-            {
-                hasEmotes = !pair.second.empty();
-                callback(std::move(pair.second));
-            }
+            bool hasEmotes = !emotes.empty();
+            callback(std::move(emotes));
+
             if (auto shared = channel.lock(); manualRefresh)
             {
                 if (hasEmotes)

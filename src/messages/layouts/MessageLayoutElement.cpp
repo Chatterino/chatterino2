@@ -153,11 +153,11 @@ void ImageLayoutElement::paint(QPainter &painter,
     }
 }
 
-void ImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
+bool ImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
 {
     if (this->image_ == nullptr)
     {
-        return;
+        return false;
     }
 
     if (this->image_->animated())
@@ -167,8 +167,10 @@ void ImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
             auto rect = this->getRect();
             rect.moveTop(rect.y() + yOffset);
             painter.drawPixmap(QRectF(rect), *pixmap, QRectF());
+            return true;
         }
     }
+    return false;
 }
 
 int ImageLayoutElement::getMouseOverIndex(const QPoint &abs) const
@@ -265,7 +267,7 @@ void LayeredImageLayoutElement::paint(QPainter &painter,
     }
 }
 
-void LayeredImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
+bool LayeredImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
 {
     auto fullRect = QRectF(this->getRect());
     fullRect.moveTop(fullRect.y() + yOffset);
@@ -297,6 +299,7 @@ void LayeredImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
             }
         }
     }
+    return animatedFlag;
 }
 
 int LayeredImageLayoutElement::getMouseOverIndex(const QPoint &abs) const
@@ -430,7 +433,7 @@ size_t TextLayoutElement::getSelectionIndexCount() const
 void TextLayoutElement::paint(QPainter &painter,
                               const MessageColors & /*messageColors*/)
 {
-    auto app = getApp();
+    auto *app = getApp();
     QString text = this->getText();
     if (text.isRightToLeft() || this->reversedNeutral)
     {
@@ -446,8 +449,9 @@ void TextLayoutElement::paint(QPainter &painter,
         QTextOption(Qt::AlignLeft | Qt::AlignTop));
 }
 
-void TextLayoutElement::paintAnimated(QPainter &, int)
+bool TextLayoutElement::paintAnimated(QPainter & /*painter*/, int /*yOffset*/)
 {
+    return false;
 }
 
 int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
@@ -457,7 +461,7 @@ int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
         return 0;
     }
 
-    auto app = getApp();
+    auto *app = getApp();
 
     auto metrics = app->fonts->getFontMetrics(this->style_, this->scale_);
     auto x = this->getRect().left();
@@ -491,7 +495,7 @@ int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
 
 int TextLayoutElement::getXFromIndex(size_t index)
 {
-    auto app = getApp();
+    auto *app = getApp();
 
     QFontMetrics metrics =
         app->fonts->getFontMetrics(this->style_, this->scale_);
@@ -567,8 +571,10 @@ void TextIconLayoutElement::paint(QPainter &painter,
     }
 }
 
-void TextIconLayoutElement::paintAnimated(QPainter &painter, int yOffset)
+bool TextIconLayoutElement::paintAnimated(QPainter & /*painter*/,
+                                          int /*yOffset*/)
 {
+    return false;
 }
 
 int TextIconLayoutElement::getMouseOverIndex(const QPoint &abs) const
@@ -640,8 +646,10 @@ void ReplyCurveLayoutElement::paint(QPainter &painter,
     painter.drawPath(path);
 }
 
-void ReplyCurveLayoutElement::paintAnimated(QPainter &painter, int yOffset)
+bool ReplyCurveLayoutElement::paintAnimated(QPainter & /*painter*/,
+                                            int /*yOffset*/)
 {
+    return false;
 }
 
 int ReplyCurveLayoutElement::getMouseOverIndex(const QPoint &abs) const

@@ -78,7 +78,7 @@ bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
 {
     //    BenchmarkGuard benchmark("MessageLayout::layout()");
 
-    auto app = getApp();
+    auto *app = getApp();
 
     bool layoutRequired = false;
 
@@ -196,8 +196,10 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
 }
 
 // Painting
-void MessageLayout::paint(const MessagePaintContext &ctx)
+MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
 {
+    MessagePaintResult result;
+
     QPixmap *pixmap = this->ensureBuffer(ctx.painter, ctx.canvasWidth);
 
     if (!this->bufferValid_)
@@ -209,7 +211,8 @@ void MessageLayout::paint(const MessagePaintContext &ctx)
     ctx.painter.drawPixmap(0, ctx.y, *pixmap);
 
     // draw gif emotes
-    this->container_.paintAnimatedElements(ctx.painter, ctx.y);
+    result.hasAnimatedElements =
+        this->container_.paintAnimatedElements(ctx.painter, ctx.y);
 
     // draw disabled
     if (this->message_->flags.has(MessageFlag::Disabled))
@@ -270,6 +273,8 @@ void MessageLayout::paint(const MessagePaintContext &ctx)
     }
 
     this->bufferValid_ = true;
+
+    return result;
 }
 
 QPixmap *MessageLayout::ensureBuffer(QPainter &painter, int width)
@@ -337,9 +342,13 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
               this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
              !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
     {
-        // Blend highlight color with usual background color
-        backgroundColor =
-            blendColors(backgroundColor, *this->message_->highlightColor);
+        assert(this->message_->highlightColor);
+        if (this->message_->highlightColor)
+        {
+            // Blend highlight color with usual background color
+            backgroundColor =
+                blendColors(backgroundColor, *this->message_->highlightColor);
+        }
     }
     else if (this->message_->flags.has(MessageFlag::Subscription) &&
              ctx.preferences.enableSubHighlight)
@@ -358,7 +367,8 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
             blendColors(backgroundColor,
                         *ctx.colorProvider.color(ColorType::RedeemedHighlight));
     }
-    else if (this->message_->flags.has(MessageFlag::AutoMod))
+    else if (this->message_->flags.has(MessageFlag::AutoMod) ||
+             this->message_->flags.has(MessageFlag::LowTrustUsers))
     {
         backgroundColor = QColor("#404040");
     }

@@ -29,8 +29,8 @@ AccountSwitchPopup::AccountSwitchPopup(QWidget *parent)
     this->ui_.accountSwitchWidget->setFocusPolicy(Qt::NoFocus);
     vbox->addWidget(this->ui_.accountSwitchWidget);
 
-    auto hbox = new QHBoxLayout();
-    auto manageAccountsButton = new QPushButton(this);
+    auto *hbox = new QHBoxLayout();
+    auto *manageAccountsButton = new QPushButton(this);
     manageAccountsButton->setText("Manage Accounts");
     manageAccountsButton->setFocusPolicy(Qt::NoFocus);
     hbox->addWidget(manageAccountsButton);

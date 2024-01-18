@@ -79,7 +79,7 @@ Fonts::Fonts()
     this->fontsByType_.resize(size_t(FontStyle::EndType));
 }
 
-void Fonts::initialize(Settings &, Paths &)
+void Fonts::initialize(Settings &, const Paths &)
 {
     this->chatFontFamily.connect(
         [this]() {

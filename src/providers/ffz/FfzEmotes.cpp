@@ -1,7 +1,7 @@
 #include "providers/ffz/FfzEmotes.hpp"
 
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
@@ -149,18 +149,21 @@ namespace {
         return authorityBadge;
     }
 
-    EmoteMap parseChannelEmotes(const QJsonObject &jsonRoot)
-    {
-        auto emotes = EmoteMap();
-
-        for (const auto emoteSetRef : jsonRoot["sets"].toObject())
-        {
-            parseEmoteSetInto(emoteSetRef.toObject(), "Channel", emotes);
-        }
-
-        return emotes;
-    }
 }  // namespace
+
+using namespace ffz::detail;
+
+EmoteMap ffz::detail::parseChannelEmotes(const QJsonObject &jsonRoot)
+{
+    auto emotes = EmoteMap();
+
+    for (const auto emoteSetRef : jsonRoot["sets"].toObject())
+    {
+        parseEmoteSetInto(emoteSetRef.toObject(), "Channel", emotes);
+    }
+
+    return emotes;
+}
 
 FfzEmotes::FfzEmotes()
     : global_(std::make_shared<EmoteMap>())

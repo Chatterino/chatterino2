@@ -11,9 +11,11 @@
 
 namespace chatterino {
 
+class Args;
 class TwitchIrcServer;
 class ITwitchIrcServer;
 class PubSub;
+class Updates;
 
 class CommandController;
 class AccountController;
@@ -26,6 +28,7 @@ class ISoundController;
 class SoundController;
 class ITwitchLiveController;
 class TwitchLiveController;
+class TwitchBadges;
 #ifdef CHATTERINO_HAVE_PLUGINS
 class PluginController;
 #endif
@@ -54,6 +57,8 @@ public:
 
     static IApplication *instance;
 
+    virtual const Paths &getPaths() = 0;
+    virtual const Args &getArgs() = 0;
     virtual Theme *getThemes() = 0;
     virtual Fonts *getFonts() = 0;
     virtual IEmotes *getEmotes() = 0;
@@ -66,18 +71,24 @@ public:
     virtual HighlightController *getHighlights() = 0;
     virtual NotificationController *getNotifications() = 0;
     virtual ITwitchIrcServer *getTwitch() = 0;
+    virtual PubSub *getTwitchPubSub() = 0;
+    virtual Logging *getChatLogger() = 0;
     virtual ChatterinoBadges *getChatterinoBadges() = 0;
     virtual FfzBadges *getFfzBadges() = 0;
     virtual SeventvBadges *getSeventvBadges() = 0;
     virtual IUserDataController *getUserData() = 0;
     virtual ISoundController *getSound() = 0;
     virtual ITwitchLiveController *getTwitchLiveController() = 0;
+    virtual TwitchBadges *getTwitchBadges() = 0;
     virtual ImageUploader *getImageUploader() = 0;
     virtual SeventvAPI *getSeventvAPI() = 0;
+    virtual Updates &getUpdates() = 0;
 };
 
 class Application : public IApplication
 {
+    const Paths &paths_;
+    const Args &args_;
     std::vector<std::unique_ptr<Singleton>> singletons_;
     int argc_{};
     char **argv_{};
@@ -85,9 +96,22 @@ class Application : public IApplication
 public:
     static Application *instance;
 
-    Application(Settings &settings, Paths &paths);
+    Application(Settings &_settings, const Paths &paths, const Args &_args,
+                Updates &_updates);
+    ~Application() override;
 
-    void initialize(Settings &settings, Paths &paths);
+    Application(const Application &) = delete;
+    Application(Application &&) = delete;
+    Application &operator=(const Application &) = delete;
+    Application &operator=(Application &&) = delete;
+
+    /**
+     * In the interim, before we remove _exit(0); from RunGui.cpp,
+     * this will destroy things we know can be destroyed
+     */
+    void fakeDtor();
+
+    void initialize(Settings &settings, const Paths &paths);
     void load();
     void save();
 
@@ -118,14 +142,23 @@ public:
 
 private:
     TwitchLiveController *const twitchLiveController{};
+    std::unique_ptr<PubSub> twitchPubSub;
+    std::unique_ptr<TwitchBadges> twitchBadges;
+    const std::unique_ptr<Logging> logging;
 
 public:
 #ifdef CHATTERINO_HAVE_PLUGINS
     PluginController *const plugins{};
 #endif
 
-    /*[[deprecated]]*/ Logging *const logging{};
-
+    const Paths &getPaths() override
+    {
+        return this->paths_;
+    }
+    const Args &getArgs() override
+    {
+        return this->args_;
+    }
     Theme *getThemes() override
     {
         return this->themes;
@@ -168,6 +201,8 @@ public:
         return this->highlights;
     }
     ITwitchIrcServer *getTwitch() override;
+    PubSub *getTwitchPubSub() override;
+    Logging *getChatLogger() override;
     ChatterinoBadges *getChatterinoBadges() override
     {
         return this->chatterinoBadges;
@@ -183,6 +218,7 @@ public:
     IUserDataController *getUserData() override;
     ISoundController *getSound() override;
     ITwitchLiveController *getTwitchLiveController() override;
+    TwitchBadges *getTwitchBadges() override;
     ImageUploader *getImageUploader() override
     {
         return this->imageUploader;
@@ -190,6 +226,10 @@ public:
     SeventvAPI *getSeventvAPI() override
     {
         return this->seventvAPI;
+    }
+    Updates &getUpdates() override
+    {
+        return this->updates;
     }
 
     pajlada::Signals::NoArgSignal streamerModeChanged;
@@ -199,7 +239,7 @@ private:
     void initPubSub();
     void initBttvLiveUpdates();
     void initSeventvEventAPI();
-    void initNm(Paths &paths);
+    void initNm(const Paths &paths);
 
     template <typename T,
               typename = std::enable_if_t<std::is_base_of<Singleton, T>::value>>
@@ -219,6 +259,7 @@ private:
     }
 
     NativeMessagingServer nmServer{};
+    Updates &updates;
 };
 
 Application *getApp();

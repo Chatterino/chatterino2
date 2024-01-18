@@ -373,7 +373,7 @@ void BaseWindow::mousePressEvent(QMouseEvent *event)
     if (this->flags_.has(FramelessDraggable))
     {
         this->movingRelativePos = event->localPos();
-        if (auto widget =
+        if (auto *widget =
                 this->childAt(event->localPos().x(), event->localPos().y()))
         {
             std::function<bool(QWidget *)> recursiveCheckMouseTracking;
@@ -735,7 +735,7 @@ void BaseWindow::updateScale()
 
     this->setScale(scale);
 
-    for (auto child : this->findChildren<BaseWidget *>())
+    for (auto *child : this->findChildren<BaseWidget *>())
     {
         child->setScale(scale);
     }
@@ -1089,6 +1089,11 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
                 if (widget->hasMouseTracking())
                 {
                     return true;
+                }
+
+                if (widget == this)
+                {
+                    return false;
                 }
 
                 return recursiveCheckMouseTracking(widget->parentWidget());

@@ -1,5 +1,6 @@
-#include "UpdateDialog.hpp"
+#include "widgets/dialogs/UpdateDialog.hpp"
 
+#include "Application.hpp"
 #include "singletons/Updates.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/Label.hpp"
@@ -21,12 +22,12 @@ UpdateDialog::UpdateDialog()
         .assign(&this->ui_.label);
 
     auto buttons = layout.emplace<QDialogButtonBox>();
-    auto install = buttons->addButton("Install", QDialogButtonBox::AcceptRole);
+    auto *install = buttons->addButton("Install", QDialogButtonBox::AcceptRole);
     this->ui_.installButton = install;
-    auto dismiss = buttons->addButton("Dismiss", QDialogButtonBox::RejectRole);
+    auto *dismiss = buttons->addButton("Dismiss", QDialogButtonBox::RejectRole);
 
     QObject::connect(install, &QPushButton::clicked, this, [this] {
-        Updates::instance().installUpdates();
+        getIApp()->getUpdates().installUpdates();
         this->close();
     });
     QObject::connect(dismiss, &QPushButton::clicked, this, [this] {
@@ -34,8 +35,8 @@ UpdateDialog::UpdateDialog()
         this->close();
     });
 
-    this->updateStatusChanged(Updates::instance().getStatus());
-    this->connections_.managedConnect(Updates::instance().statusUpdated,
+    this->updateStatusChanged(getIApp()->getUpdates().getStatus());
+    this->connections_.managedConnect(getIApp()->getUpdates().statusUpdated,
                                       [this](auto status) {
                                           this->updateStatusChanged(status);
                                       });
@@ -52,17 +53,17 @@ void UpdateDialog::updateStatusChanged(Updates::Status status)
     {
         case Updates::UpdateAvailable: {
             this->ui_.label->setText((
-                Updates::instance().isDowngrade()
+                getIApp()->getUpdates().isDowngrade()
                     ? QString(
                           "The version online (%1) seems to be\nlower than the "
                           "current (%2).\nEither a version was reverted or "
                           "you are\nrunning a newer build.\n\nDo you want to "
                           "download and install it?")
-                          .arg(Updates::instance().getOnlineVersion(),
-                               Updates::instance().getCurrentVersion())
+                          .arg(getIApp()->getUpdates().getOnlineVersion(),
+                               getIApp()->getUpdates().getCurrentVersion())
                     : QString("An update (%1) is available.\n\nDo you want to "
                               "download and install it?")
-                          .arg(Updates::instance().getOnlineVersion())));
+                          .arg(getIApp()->getUpdates().getOnlineVersion())));
             this->updateGeometry();
         }
         break;
