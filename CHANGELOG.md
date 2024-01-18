@@ -108,6 +108,7 @@
 - Dev: Refactored the Image Uploader feature. (#4971)
 - Dev: Refactored the SplitOverlay code. (#5082)
 - Dev: Refactored the TwitchBadges structure, making it less of a singleton. (#5096)
+- Dev: Refactored the ChatterinoBadges structure, making it less of a singleton. (#5103)
 - Dev: Moved the Network files to their own folder. (#5089)
 - Dev: Fixed deadlock and use-after-free in tests. (#4981)
 - Dev: Moved all `.clang-format` files to the root directory. (#5037)
