@@ -204,7 +204,7 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
 MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
     : MessageBuilder()
 {
-    auto current = getApp()->accounts->twitch.getCurrent();
+    auto current = getIApp()->getAccounts()->twitch.getCurrent();
 
     this->emplace<TimestampElement>();
     this->message().flags.set(MessageFlag::System);

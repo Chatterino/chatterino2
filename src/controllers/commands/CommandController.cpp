@@ -120,7 +120,8 @@ const std::unordered_map<QString, VariableReplacer> COMMAND_VARS{
         [](const auto &altText, const auto &channel, const auto *message) {
             (void)(channel);  //unused
             (void)(message);  //unused
-            auto uid = getApp()->accounts->twitch.getCurrent()->getUserId();
+            auto uid =
+                getIApp()->getAccounts()->twitch.getCurrent()->getUserId();
             return uid.isEmpty() ? altText : uid;
         },
     },
@@ -129,7 +130,8 @@ const std::unordered_map<QString, VariableReplacer> COMMAND_VARS{
         [](const auto &altText, const auto &channel, const auto *message) {
             (void)(channel);  //unused
             (void)(message);  //unused
-            auto name = getApp()->accounts->twitch.getCurrent()->getUserName();
+            auto name =
+                getIApp()->getAccounts()->twitch.getCurrent()->getUserName();
             return name.isEmpty() ? altText : name;
         },
     },

@@ -451,9 +451,11 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
             if (twitchChannel)
             {
                 bool isMyself =
-                    QString::compare(
-                        getApp()->accounts->twitch.getCurrent()->getUserName(),
-                        this->userName_, Qt::CaseInsensitive) == 0;
+                    QString::compare(getIApp()
+                                         ->getAccounts()
+                                         ->twitch.getCurrent()
+                                         ->getUserName(),
+                                     this->userName_, Qt::CaseInsensitive) == 0;
 
                 visibilityModButtons =
                     twitchChannel->isBroadcaster() && !isMyself;
@@ -595,7 +597,7 @@ void UserInfoPopup::installEvents()
     QObject::connect(
         this->ui_.block, &QCheckBox::stateChanged,
         [this](int newState) mutable {
-            auto currentUser = getApp()->accounts->twitch.getCurrent();
+            auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
 
             const auto reenableBlockCheckbox = [this] {
                 this->ui_.block->setEnabled(true);
@@ -612,7 +614,7 @@ void UserInfoPopup::installEvents()
                 case Qt::CheckState::Unchecked: {
                     this->ui_.block->setEnabled(false);
 
-                    getApp()->accounts->twitch.getCurrent()->unblockUser(
+                    getIApp()->getAccounts()->twitch.getCurrent()->unblockUser(
                         this->userId_, this,
                         [this, reenableBlockCheckbox, currentUser] {
                             this->channel_->addMessage(makeSystemMessage(
@@ -639,7 +641,7 @@ void UserInfoPopup::installEvents()
                 case Qt::CheckState::Checked: {
                     this->ui_.block->setEnabled(false);
 
-                    getApp()->accounts->twitch.getCurrent()->blockUser(
+                    getIApp()->getAccounts()->twitch.getCurrent()->blockUser(
                         this->userId_, this,
                         [this, reenableBlockCheckbox, currentUser] {
                             this->channel_->addMessage(makeSystemMessage(
@@ -796,7 +798,7 @@ void UserInfoPopup::updateLatestMessages()
 void UserInfoPopup::updateUserData()
 {
     std::weak_ptr<bool> hack = this->lifetimeHack_;
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
 
     const auto onUserFetchFailed = [this, hack] {
         if (!hack.lock())

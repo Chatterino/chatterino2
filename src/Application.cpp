@@ -311,6 +311,13 @@ IEmotes *Application::getEmotes()
     return this->emotes;
 }
 
+AccountController *Application::getAccounts()
+{
+    assertInGuiThread();
+
+    return this->accounts;
+}
+
 HotkeyController *Application::getHotkeys()
 {
     assertInGuiThread();

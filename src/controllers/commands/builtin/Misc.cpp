@@ -219,7 +219,7 @@ QString marker(const CommandContext &ctx)
     }
 
     // Avoid Helix calls without Client ID and/or OAuth Token
-    if (getApp()->accounts->twitch.getCurrent()->isAnon())
+    if (getIApp()->getAccounts()->twitch.getCurrent()->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(
             "You need to be logged in to create stream markers!"));

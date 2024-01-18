@@ -1023,8 +1023,11 @@ bool ChannelView::shouldIncludeMessage(const MessagePtr &m) const
     if (this->channelFilters_)
     {
         if (getSettings()->excludeUserMessagesFromFilter &&
-            getApp()->accounts->twitch.getCurrent()->getUserName().compare(
-                m->loginName, Qt::CaseInsensitive) == 0)
+            getIApp()
+                    ->getAccounts()
+                    ->twitch.getCurrent()
+                    ->getUserName()
+                    .compare(m->loginName, Qt::CaseInsensitive) == 0)
         {
             return true;
         }
@@ -2764,13 +2767,13 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         break;
 
         case Link::AutoModAllow: {
-            getApp()->accounts->twitch.getCurrent()->autoModAllow(
+            getIApp()->getAccounts()->twitch.getCurrent()->autoModAllow(
                 link.value, this->channel());
         }
         break;
 
         case Link::AutoModDeny: {
-            getApp()->accounts->twitch.getCurrent()->autoModDeny(
+            getIApp()->getAccounts()->twitch.getCurrent()->autoModDeny(
                 link.value, this->channel());
         }
         break;

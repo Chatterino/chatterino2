@@ -125,9 +125,9 @@ public:
     Theme *const themes{};
     Fonts *const fonts{};
     Emotes *const emotes{};
-    AccountController *const accounts{};
 
 private:
+    AccountController *const accounts{};
     HotkeyController *const hotkeys{};
     WindowManager *const windows{};
 
@@ -179,12 +179,7 @@ public:
         return this->fonts;
     }
     IEmotes *getEmotes() override;
-    AccountController *getAccounts() override
-    {
-        assertInGuiThread();
-
-        return this->accounts;
-    }
+    AccountController *getAccounts() override;
     HotkeyController *getHotkeys() override;
     WindowManager *getWindows() override;
     Toasts *getToasts() override

@@ -241,7 +241,7 @@ Split::Split(QWidget *parent)
 
     // update placeholder text on Twitch account change and channel change
     this->bSignals_.emplace_back(
-        getApp()->accounts->twitch.currentUserChanged.connect([this] {
+        getIApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
             this->updateInputPlaceholder();
         }));
     this->signalHolder_.managedConnect(channelChanged, [this] {
@@ -770,7 +770,7 @@ void Split::updateInputPlaceholder()
         return;
     }
 
-    auto user = getApp()->accounts->twitch.getCurrent();
+    auto user = getIApp()->getAccounts()->twitch.getCurrent();
     QString placeholderText;
 
     if (user->isAnon())
@@ -779,9 +779,11 @@ void Split::updateInputPlaceholder()
     }
     else
     {
-        placeholderText =
-            QString("Send message as %1...")
-                .arg(getApp()->accounts->twitch.getCurrent()->getUserName());
+        placeholderText = QString("Send message as %1...")
+                              .arg(getIApp()
+                                       ->getAccounts()
+                                       ->twitch.getCurrent()
+                                       ->getUserName());
     }
 
     this->input_->ui_.textEdit->setPlaceholderText(placeholderText);
@@ -1104,7 +1106,8 @@ void Split::openInBrowser()
 
 void Split::openWhispersInBrowser()
 {
-    auto userName = getApp()->accounts->twitch.getCurrent()->getUserName();
+    auto userName =
+        getIApp()->getAccounts()->twitch.getCurrent()->getUserName();
     QDesktopServices::openUrl("https://twitch.tv/popout/moderator/" + userName +
                               "/whispers");
 }
@@ -1241,7 +1244,7 @@ void Split::showChatterList()
     auto loadChatters = [=](auto modList, auto vipList, bool isBroadcaster) {
         getHelix()->getChatters(
             twitchChannel->roomId(),
-            getApp()->accounts->twitch.getCurrent()->getUserId(), 50000,
+            getIApp()->getAccounts()->twitch.getCurrent()->getUserId(), 50000,
             [=](auto chatters) {
                 auto broadcaster = channel->getName().toLower();
                 QStringList chatterList;
@@ -1489,7 +1492,7 @@ void Split::showSearch(bool singleChannel)
 void Split::reloadChannelAndSubscriberEmotes()
 {
     auto channel = this->getChannel();
-    getApp()->accounts->twitch.getCurrent()->loadEmotes(channel);
+    getIApp()->getAccounts()->twitch.getCurrent()->loadEmotes(channel);
 
     if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {

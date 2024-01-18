@@ -246,7 +246,7 @@ SplitHeader::SplitHeader(Split *split)
     });
 
     this->bSignals_.emplace_back(
-        getApp()->accounts->twitch.currentUserChanged.connect([this] {
+        getIApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
             this->updateModerationModeIcon();
         }));
 
@@ -1034,7 +1034,7 @@ void SplitHeader::reloadSubscriberEmotes()
     this->lastReloadedSubEmotes_ = now;
 
     auto channel = this->split_->getChannel();
-    getApp()->accounts->twitch.getCurrent()->loadEmotes(channel);
+    getIApp()->getAccounts()->twitch.getCurrent()->loadEmotes(channel);
 }
 
 void SplitHeader::reconnect()

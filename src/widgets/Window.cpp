@@ -61,7 +61,7 @@ Window::Window(WindowType type, QWidget *parent)
 #endif
 
     this->bSignals_.emplace_back(
-        getApp()->accounts->twitch.currentUserChanged.connect([this] {
+        getIApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
             this->onAccountSelected();
         }));
     this->onAccountSelected();
@@ -725,7 +725,7 @@ void Window::addMenuBar()
 
 void Window::onAccountSelected()
 {
-    auto user = getApp()->accounts->twitch.getCurrent();
+    auto user = getIApp()->getAccounts()->twitch.getCurrent();
 
     // update title (also append username on Linux and MacOS)
     QString windowTitle = Version::instance().fullVersion();

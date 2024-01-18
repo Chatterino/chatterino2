@@ -394,9 +394,12 @@ void EmotePopup::loadChannel(ChannelPtr channel)
     auto channelChannel = std::make_shared<Channel>("", Channel::Type::None);
 
     // twitch
-    addTwitchEmoteSets(
-        getApp()->accounts->twitch.getCurrent()->accessEmotes()->emoteSets,
-        *globalChannel, *subChannel, this->channel_->getName());
+    addTwitchEmoteSets(getIApp()
+                           ->getAccounts()
+                           ->twitch.getCurrent()
+                           ->accessEmotes()
+                           ->emoteSets,
+                       *globalChannel, *subChannel, this->channel_->getName());
 
     // global
     if (Settings::instance().enableBTTVGlobalEmotes)
@@ -467,8 +470,11 @@ bool EmotePopup::eventFilter(QObject *object, QEvent *event)
 void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
                                     const QString &searchText)
 {
-    auto twitchEmoteSets =
-        getApp()->accounts->twitch.getCurrent()->accessEmotes()->emoteSets;
+    auto twitchEmoteSets = getIApp()
+                               ->getAccounts()
+                               ->twitch.getCurrent()
+                               ->accessEmotes()
+                               ->emoteSets;
     std::vector<std::shared_ptr<TwitchAccount::EmoteSet>> twitchGlobalEmotes{};
 
     for (const auto &set : twitchEmoteSets)
