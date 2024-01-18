@@ -41,7 +41,7 @@ bool useKeyring()
 #ifdef NO_QTKEYCHAIN
     return false;
 #endif
-    if (getCApp()->getPaths().isPortable())
+    if (getIApp()->getPaths().isPortable())
     {
         return false;
     }
