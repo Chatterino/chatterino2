@@ -54,7 +54,7 @@ using SplitNode = SplitContainer::Node;
 void WindowManager::showSettingsDialog(QWidget *parent,
                                        SettingsDialogPreference preference)
 {
-    if (getApp()->getArgs().dontSaveSettings)
+    if (getCApp()->getArgs().dontSaveSettings)
     {
         QMessageBox::critical(parent, "Chatterino - Editing Settings Forbidden",
                               "Settings cannot be edited when running with\n"
@@ -355,9 +355,9 @@ void WindowManager::initialize(Settings &settings, const Paths &paths)
     {
         WindowLayout windowLayout;
 
-        if (getApp()->getArgs().customChannelLayout)
+        if (getCApp()->getArgs().customChannelLayout)
         {
-            windowLayout = getApp()->getArgs().customChannelLayout.value();
+            windowLayout = getCApp()->getArgs().customChannelLayout.value();
         }
         else
         {
@@ -369,7 +369,7 @@ void WindowManager::initialize(Settings &settings, const Paths &paths)
         this->applyWindowLayout(windowLayout);
     }
 
-    if (getApp()->getArgs().isFramelessEmbed)
+    if (getCApp()->getArgs().isFramelessEmbed)
     {
         this->framelessEmbedWindow_.reset(new FramelessEmbedWindow);
         this->framelessEmbedWindow_->show();
@@ -382,7 +382,7 @@ void WindowManager::initialize(Settings &settings, const Paths &paths)
         this->mainWindow_->getNotebook().addPage(true);
 
         // TODO: don't create main window if it's a frameless embed
-        if (getApp()->getArgs().isFramelessEmbed)
+        if (getCApp()->getArgs().isFramelessEmbed)
         {
             this->mainWindow_->hide();
         }
@@ -417,7 +417,7 @@ void WindowManager::initialize(Settings &settings, const Paths &paths)
 
 void WindowManager::save()
 {
-    if (getApp()->getArgs().dontSaveSettings)
+    if (getCApp()->getArgs().dontSaveSettings)
     {
         return;
     }
@@ -733,7 +733,7 @@ WindowLayout WindowManager::loadWindowLayoutFromFile() const
 
 void WindowManager::applyWindowLayout(const WindowLayout &layout)
 {
-    if (getApp()->getArgs().dontLoadMainWindow)
+    if (getCApp()->getArgs().dontLoadMainWindow)
     {
         return;
     }

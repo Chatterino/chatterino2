@@ -1363,7 +1363,7 @@ void SplitNotebook::addCustomButtons()
     auto *settingsBtn = this->addCustomButton();
 
     // This is to ensure you can't lock yourself out of the settings
-    if (getApp()->getArgs().safeMode)
+    if (getCApp()->getArgs().safeMode)
     {
         settingsBtn->setVisible(true);
     }

@@ -54,7 +54,7 @@ QString formatSize(qint64 size)
 QString fetchLogDirectorySize()
 {
     QString logsDirectoryPath = getSettings()->logPath.getValue().isEmpty()
-                                    ? getIApp()->getPaths().messageLogDirectory
+                                    ? getCApp()->getPaths().messageLogDirectory
                                     : getSettings()->logPath;
 
     auto logsSize = dirSize(logsDirectoryPath);
@@ -82,7 +82,7 @@ ModerationPage::ModerationPage()
         getSettings()->logPath.connect([logsPathLabel](const QString &logPath,
                                                        auto) mutable {
             QString pathOriginal =
-                logPath.isEmpty() ? getIApp()->getPaths().messageLogDirectory
+                logPath.isEmpty() ? getCApp()->getPaths().messageLogDirectory
                                   : logPath;
 
             QString pathShortened =

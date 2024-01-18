@@ -430,7 +430,7 @@ void SettingsDialog::showEvent(QShowEvent *e)
 ///// Widget creation helpers
 void SettingsDialog::onOkClicked()
 {
-    if (!getApp()->getArgs().dontSaveSettings)
+    if (!getCApp()->getArgs().dontSaveSettings)
     {
         getApp()->commands->save();
         pajlada::Settings::SettingManager::gSave();

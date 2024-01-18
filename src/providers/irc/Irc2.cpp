@@ -22,7 +22,7 @@ namespace {
 
     QString configPath()
     {
-        return combinePath(getIApp()->getPaths().settingsDirectory, "irc.json");
+        return combinePath(getCApp()->getPaths().settingsDirectory, "irc.json");
     }
 
     class Model : public SignalVectorModel<IrcServerData>

@@ -51,7 +51,7 @@ void ImageUploader::logToFile(const QString &originalFilePath,
 {
     const QString logFileName =
         combinePath((getSettings()->logPath.getValue().isEmpty()
-                         ? getIApp()->getPaths().messageLogDirectory
+                         ? getCApp()->getPaths().messageLogDirectory
                          : getSettings()->logPath),
                     "ImageUploader.json");
 

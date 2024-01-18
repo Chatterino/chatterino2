@@ -792,9 +792,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addButton("Open AppData directory", [] {
 #ifdef Q_OS_DARWIN
         QDesktopServices::openUrl("file://" +
-                                  getIApp()->getPaths().rootAppDataDirectory);
+                                  getCApp()->getPaths().rootAppDataDirectory);
 #else
-        QDesktopServices::openUrl(getIApp()->getPaths().rootAppDataDirectory);
+        QDesktopServices::openUrl(getCApp()->getPaths().rootAppDataDirectory);
 #endif
     });
 
@@ -806,7 +806,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     auto *cachePathLabel = layout.addDescription("placeholder :D");
     getSettings()->cachePath.connect([cachePathLabel](const auto &,
                                                       auto) mutable {
-        QString newPath = getIApp()->getPaths().cacheDirectory();
+        QString newPath = getCApp()->getPaths().cacheDirectory();
 
         QString pathShortened = "Cache saved at <a href=\"file:///" + newPath +
                                 "\"><span style=\"color: white;\">" +
@@ -834,9 +834,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
             if (reply == QMessageBox::Yes)
             {
-                auto cacheDir = QDir(getIApp()->getPaths().cacheDirectory());
+                auto cacheDir = QDir(getCApp()->getPaths().cacheDirectory());
                 cacheDir.removeRecursively();
-                cacheDir.mkdir(getIApp()->getPaths().cacheDirectory());
+                cacheDir.mkdir(getCApp()->getPaths().cacheDirectory());
             }
         }));
         box->addStretch(1);
@@ -948,7 +948,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "When possible, restart Chatterino if the program crashes");
 
 #if defined(Q_OS_LINUX) && !defined(NO_QTKEYCHAIN)
-    if (!getIApp()->getPaths().isPortable())
+    if (!getCApp()->getPaths().isPortable())
     {
         layout.addCheckbox(
             "Use libsecret/KWallet/Gnome keychain to secure passwords",
@@ -1233,7 +1233,7 @@ void GeneralPage::initExtra()
     {
         getSettings()->cachePath.connect(
             [cachePath = this->cachePath_](const auto &, auto) mutable {
-                QString newPath = getIApp()->getPaths().cacheDirectory();
+                QString newPath = getCApp()->getPaths().cacheDirectory();
 
                 QString pathShortened = "Current location: <a href=\"file:///" +
                                         newPath + "\">" +

@@ -49,7 +49,23 @@ class ImageUploader;
 class SeventvAPI;
 class CrashHandler;
 
-class IApplication
+class CApplication
+{
+public:
+    CApplication();
+    virtual ~CApplication() = default;
+    CApplication(const CApplication &) = delete;
+    CApplication(CApplication &&) = delete;
+    CApplication &operator=(const CApplication &) = delete;
+    CApplication &operator=(CApplication &&) = delete;
+
+    static CApplication *instance;
+
+    virtual const Paths &getPaths() = 0;
+    virtual const Args &getArgs() = 0;
+};
+
+class IApplication : public CApplication
 {
 public:
     IApplication();
@@ -57,8 +73,6 @@ public:
 
     static IApplication *instance;
 
-    virtual const Paths &getPaths() = 0;
-    virtual const Args &getArgs() = 0;
     virtual Theme *getThemes() = 0;
     virtual Fonts *getFonts() = 0;
     virtual IEmotes *getEmotes() = 0;
@@ -266,5 +280,11 @@ Application *getApp();
 
 // Get an interface version of the Application class - should be preferred when possible for new code
 IApplication *getIApp();
+
+/// Gets a subset of the Application class that is safe to use outside of the GUI thread.
+inline CApplication *getCApp()
+{
+    return CApplication::instance;
+}
 
 }  // namespace chatterino
