@@ -940,10 +940,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCustomCheckbox(
         "Restart on crash (requires restart)",
         [] {
-            return getApp()->crashHandler->shouldRecover();
+            return getIApp()->getCrashHandler()->shouldRecover();
         },
         [](bool on) {
-            return getApp()->crashHandler->saveShouldRecover(on);
+            return getIApp()->getCrashHandler()->saveShouldRecover(on);
         },
         "When possible, restart Chatterino if the program crashes");
 

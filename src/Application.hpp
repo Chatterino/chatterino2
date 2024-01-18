@@ -136,10 +136,9 @@ private:
     Toasts *const toasts{};
     ImageUploader *const imageUploader{};
     SeventvAPI *const seventvAPI{};
-
-public:
     CrashHandler *const crashHandler{};
 
+public:
     CommandController *const commands{};
     NotificationController *const notifications{};
     HighlightController *const highlights{};
@@ -176,12 +175,7 @@ public:
     HotkeyController *getHotkeys() override;
     WindowManager *getWindows() override;
     Toasts *getToasts() override;
-    CrashHandler *getCrashHandler() override
-    {
-        assertInGuiThread();
-
-        return this->crashHandler;
-    }
+    CrashHandler *getCrashHandler() override;
     CommandController *getCommands() override
     {
         assertInGuiThread();

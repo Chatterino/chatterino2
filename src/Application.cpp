@@ -354,6 +354,13 @@ Toasts *Application::getToasts()
     return this->toasts;
 }
 
+CrashHandler *Application::getCrashHandler()
+{
+    assertInGuiThread();
+
+    return this->crashHandler;
+}
+
 FfzBadges *Application::getFfzBadges()
 {
     assertInGuiThread();
