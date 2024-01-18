@@ -101,6 +101,7 @@
 - Dev: Renamed `tools` directory to `scripts`. (#5035)
 - Dev: Refactor `ChannelView`, removing a bunch of clang-tidy warnings. (#4926)
 - Dev: Refactor `IrcMessageHandler`, removing a bunch of clang-tidy warnings & changing its public API. (#4927)
+- Dev: Removed almost all raw accesses into Application. (#5104)
 - Dev: `Details` file properties tab is now populated on Windows. (#4912)
 - Dev: Removed `Outcome` from network requests. (#4959)
 - Dev: Added Tests for Windows and MacOS in CI. (#4970, #5032)
