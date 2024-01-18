@@ -405,6 +405,13 @@ IChatterinoBadges *Application::getChatterinoBadges()
     return this->chatterinoBadges.get();
 }
 
+ImageUploader *Application::getImageUploader()
+{
+    assertInGuiThread();
+
+    return this->imageUploader;
+}
+
 ITwitchIrcServer *Application::getTwitch()
 {
     assertInGuiThread();

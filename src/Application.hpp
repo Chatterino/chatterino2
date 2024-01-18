@@ -134,9 +134,9 @@ private:
     HotkeyController *const hotkeys{};
     WindowManager *const windows{};
     Toasts *const toasts{};
+    ImageUploader *const imageUploader{};
 
 public:
-    ImageUploader *const imageUploader{};
     SeventvAPI *const seventvAPI{};
     CrashHandler *const crashHandler{};
 
@@ -210,12 +210,7 @@ public:
     ITwitchLiveController *getTwitchLiveController() override;
     TwitchBadges *getTwitchBadges() override;
     IChatterinoBadges *getChatterinoBadges() override;
-    ImageUploader *getImageUploader() override
-    {
-        assertInGuiThread();
-
-        return this->imageUploader;
-    }
+    ImageUploader *getImageUploader() override;
     SeventvAPI *getSeventvAPI() override
     {
         assertInGuiThread();
