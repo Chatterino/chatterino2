@@ -98,12 +98,6 @@ static std::atomic<bool> isAppInitialized{false};
 
 Application *Application::instance = nullptr;
 IApplication *IApplication::instance = nullptr;
-CApplication *CApplication::instance = nullptr;
-
-CApplication::CApplication()
-{
-    CApplication::instance = this;
-}
 
 IApplication::IApplication()
 {
