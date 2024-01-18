@@ -33,7 +33,8 @@ void NewPopupItem::paint(QPainter *painter, const QRect &rect) const
 
     painter->setPen(getApp()->themes->splits.header.text);
     painter->setBrush(Qt::SolidPattern);
-    painter->setFont(getApp()->fonts->getFont(FontStyle::UiMediumBold, 1.0));
+    painter->setFont(
+        getIApp()->getFonts()->getFont(FontStyle::UiMediumBold, 1.0));
 
     QRect iconRect(rect.topLeft(), ICON_SIZE);
     this->icon_.paint(painter, iconRect, Qt::AlignLeft | Qt::AlignVCenter);

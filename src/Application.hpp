@@ -123,7 +123,11 @@ public:
     friend void test();
 
     Theme *const themes{};
+
+private:
     Fonts *const fonts{};
+
+public:
     Emotes *const emotes{};
 
 private:
@@ -172,12 +176,7 @@ public:
 
         return this->themes;
     }
-    Fonts *getFonts() override
-    {
-        assertInGuiThread();
-
-        return this->fonts;
-    }
+    Fonts *getFonts() override;
     IEmotes *getEmotes() override;
     AccountController *getAccounts() override;
     HotkeyController *getHotkeys() override;

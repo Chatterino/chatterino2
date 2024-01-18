@@ -96,7 +96,7 @@ void SplitInput::initLayout()
     auto replyLabel = replyHbox.emplace<QLabel>().assign(&this->ui_.replyLabel);
     replyLabel->setAlignment(Qt::AlignLeft);
     replyLabel->setFont(
-        app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
+        app->getFonts()->getFont(FontStyle::ChatMedium, this->scale()));
 
     replyHbox->addStretch(1);
 
@@ -157,18 +157,18 @@ void SplitInput::initLayout()
 
     // set edit font
     this->ui_.textEdit->setFont(
-        app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
+        app->getFonts()->getFont(FontStyle::ChatMedium, this->scale()));
     QObject::connect(this->ui_.textEdit, &QTextEdit::cursorPositionChanged,
                      this, &SplitInput::onCursorPositionChanged);
     QObject::connect(this->ui_.textEdit, &QTextEdit::textChanged, this,
                      &SplitInput::onTextChanged);
 
     this->managedConnections_.managedConnect(
-        app->fonts->fontChanged, [=, this]() {
+        app->getFonts()->fontChanged, [=, this]() {
             this->ui_.textEdit->setFont(
-                app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
-            this->ui_.replyLabel->setFont(
-                app->fonts->getFont(FontStyle::ChatMediumBold, this->scale()));
+                app->getFonts()->getFont(FontStyle::ChatMedium, this->scale()));
+            this->ui_.replyLabel->setFont(app->getFonts()->getFont(
+                FontStyle::ChatMediumBold, this->scale()));
         });
 
     // open emote popup
@@ -213,11 +213,11 @@ void SplitInput::scaleChangedEvent(float scale)
         this->setMaximumHeight(this->scaledMaxHeight());
     }
     this->ui_.textEdit->setFont(
-        app->fonts->getFont(FontStyle::ChatMedium, scale));
+        app->getFonts()->getFont(FontStyle::ChatMedium, scale));
     this->ui_.textEditLength->setFont(
-        app->fonts->getFont(FontStyle::ChatMedium, scale));
+        app->getFonts()->getFont(FontStyle::ChatMedium, scale));
     this->ui_.replyLabel->setFont(
-        app->fonts->getFont(FontStyle::ChatMediumBold, scale));
+        app->getFonts()->getFont(FontStyle::ChatMediumBold, scale));
 }
 
 void SplitInput::themeChangedEvent()

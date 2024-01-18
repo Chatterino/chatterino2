@@ -1194,7 +1194,8 @@ void Split::showChatterList()
     auto formatListItemText = [](QString text) {
         auto *item = new QListWidgetItem();
         item->setText(text);
-        item->setFont(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.0));
+        item->setFont(
+            getIApp()->getFonts()->getFont(FontStyle::ChatMedium, 1.0));
         return item;
     };
 

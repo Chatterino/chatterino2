@@ -425,9 +425,10 @@ void ChannelView::initializeSignals()
             }
         });
 
-    this->signalHolder_.managedConnect(getApp()->fonts->fontChanged, [this] {
-        this->queueLayout();
-    });
+    this->signalHolder_.managedConnect(getIApp()->getFonts()->fontChanged,
+                                       [this] {
+                                           this->queueLayout();
+                                       });
 }
 
 bool ChannelView::pausable() const

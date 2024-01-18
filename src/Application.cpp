@@ -304,6 +304,13 @@ int Application::run(QApplication &qtApp)
     return qtApp.exec();
 }
 
+Fonts *Application::getFonts()
+{
+    assertInGuiThread();
+
+    return this->fonts;
+}
+
 IEmotes *Application::getEmotes()
 {
     assertInGuiThread();

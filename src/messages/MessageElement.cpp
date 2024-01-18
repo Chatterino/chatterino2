@@ -522,7 +522,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
     if (flags.hasAny(this->getFlags()))
     {
         QFontMetrics metrics =
-            app->fonts->getFontMetrics(this->style_, container.getScale());
+            app->getFonts()->getFontMetrics(this->style_, container.getScale());
 
         for (Word &word : this->words_)
         {
@@ -642,7 +642,7 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
     if (flags.hasAny(this->getFlags()))
     {
         QFontMetrics metrics =
-            app->fonts->getFontMetrics(this->style_, container.getScale());
+            app->getFonts()->getFontMetrics(this->style_, container.getScale());
 
         auto getTextLayoutElement = [&](QString text, int width,
                                         bool hasTrailingSpace) {

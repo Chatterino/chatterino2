@@ -135,7 +135,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addDropdown<QString>(
         "Font", {"Segoe UI", "Arial", "Choose..."},
-        getApp()->fonts->chatFontFamily,
+        getIApp()->getFonts()->chatFontFamily,
         [](auto val) {
             return val;
         },
@@ -144,7 +144,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         });
     layout.addDropdown<int>(
         "Font size", {"9pt", "10pt", "12pt", "14pt", "16pt", "20pt"},
-        getApp()->fonts->chatFontSize,
+        getIApp()->getFonts()->chatFontSize,
         [](auto val) {
             return QString::number(val) + "pt";
         },
@@ -1251,7 +1251,8 @@ QString GeneralPage::getFont(const DropdownArgs &args) const
     {
         args.combobox->setCurrentIndex(0);
         args.combobox->setEditText("Choosing...");
-        QFontDialog dialog(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.));
+        QFontDialog dialog(
+            getIApp()->getFonts()->getFont(FontStyle::ChatMedium, 1.));
 
         auto ok = bool();
         auto font = dialog.getFont(&ok, this->window());

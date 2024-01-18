@@ -429,9 +429,9 @@ void NotebookTab::paintEvent(QPaintEvent *)
 
     auto div = std::max<float>(0.01f, this->logicalDpiX() * deviceDpi(this));
     painter.setFont(
-        getApp()->fonts->getFont(FontStyle::UiTabs, scale * 96.f / div));
+        getIApp()->getFonts()->getFont(FontStyle::UiTabs, scale * 96.f / div));
     QFontMetrics metrics =
-        app->fonts->getFontMetrics(FontStyle::UiTabs, scale * 96.f / div);
+        app->getFonts()->getFontMetrics(FontStyle::UiTabs, scale * 96.f / div);
 
     int height = int(scale * NOTEBOOK_TAB_HEIGHT);
 
