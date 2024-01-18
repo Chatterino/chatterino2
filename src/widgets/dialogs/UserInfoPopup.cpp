@@ -56,7 +56,7 @@ namespace {
         {
             button.assign(copyButton);
         }
-        button->setPixmap(getApp()->themes->buttons.copy);
+        button->setPixmap(getIApp()->getThemes()->buttons.copy);
         button->setScaleIndependantSize(18, 18);
         button->setDim(Button::Dim::Lots);
         button->setToolTip(tooltip);

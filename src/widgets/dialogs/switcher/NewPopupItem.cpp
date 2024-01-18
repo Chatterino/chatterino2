@@ -31,7 +31,7 @@ void NewPopupItem::paint(QPainter *painter, const QRect &rect) const
 
     painter->setRenderHint(QPainter::Antialiasing, true);
 
-    painter->setPen(getApp()->themes->splits.header.text);
+    painter->setPen(getIApp()->getThemes()->splits.header.text);
     painter->setBrush(Qt::SolidPattern);
     painter->setFont(
         getIApp()->getFonts()->getFont(FontStyle::UiMediumBold, 1.0));

@@ -99,7 +99,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
         MessageElementFlag::Text, MessageColor::Text,
         FontStyle::ChatMediumBold);
     b.emplace<TextElement>("->", MessageElementFlag::Text,
-                           getApp()->themes->messages.textColors.system);
+                           getIApp()->getThemes()->messages.textColors.system);
     b.emplace<TextElement>(words[1] + ":", MessageElementFlag::Text,
                            MessageColor::Text, FontStyle::ChatMediumBold);
 

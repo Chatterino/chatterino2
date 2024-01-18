@@ -528,8 +528,8 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
         {
             auto getTextLayoutElement = [&](QString text, int width,
                                             bool hasTrailingSpace) {
-                auto color = this->color_.getColor(*app->themes);
-                app->themes->normalizeColor(color);
+                auto color = this->color_.getColor(*app->getThemes());
+                app->getThemes()->normalizeColor(color);
 
                 auto *e = (new TextLayoutElement(
                                *this, text, QSize(width, metrics.height()),
@@ -646,8 +646,8 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
 
         auto getTextLayoutElement = [&](QString text, int width,
                                         bool hasTrailingSpace) {
-            auto color = this->color_.getColor(*app->themes);
-            app->themes->normalizeColor(color);
+            auto color = this->color_.getColor(*app->getThemes());
+            app->getThemes()->normalizeColor(color);
 
             auto *e = (new TextLayoutElement(
                            *this, text, QSize(width, metrics.height()), color,

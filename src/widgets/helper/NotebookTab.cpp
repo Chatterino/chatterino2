@@ -613,7 +613,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
                 borderRect = QRect(0, 0, this->width(), 1);
                 break;
         }
-        painter.fillRect(borderRect, app->themes->window.background);
+        painter.fillRect(borderRect, app->getThemes()->window.background);
     }
 }
 

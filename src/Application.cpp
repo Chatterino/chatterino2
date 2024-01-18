@@ -304,6 +304,13 @@ int Application::run(QApplication &qtApp)
     return qtApp.exec();
 }
 
+Theme *Application::getThemes()
+{
+    assertInGuiThread();
+
+    return this->themes;
+}
+
 Fonts *Application::getFonts()
 {
     assertInGuiThread();

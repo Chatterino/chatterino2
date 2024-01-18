@@ -634,7 +634,7 @@ void SplitContainer::paintEvent(QPaintEvent * /*event*/)
     }
     else
     {
-        if (getApp()->themes->isLightTheme())
+        if (getIApp()->getThemes()->isLightTheme())
         {
             painter.fillRect(rect(), QColor("#999"));
         }
@@ -646,8 +646,8 @@ void SplitContainer::paintEvent(QPaintEvent * /*event*/)
 
     for (DropRect &dropRect : this->dropRects_)
     {
-        QColor border = getApp()->themes->splits.dropTargetRectBorder;
-        QColor background = getApp()->themes->splits.dropTargetRect;
+        QColor border = getIApp()->getThemes()->splits.dropTargetRectBorder;
+        QColor background = getIApp()->getThemes()->splits.dropTargetRect;
 
         if (!dropRect.rect.contains(this->mouseOverPoint_))
         {
@@ -1436,15 +1436,15 @@ void SplitContainer::DropOverlay::paintEvent(QPaintEvent * /*event*/)
     {
         if (!foundMover && rect.rect.contains(this->mouseOverPoint_))
         {
-            painter.setBrush(getApp()->themes->splits.dropPreview);
-            painter.setPen(getApp()->themes->splits.dropPreviewBorder);
+            painter.setBrush(getIApp()->getThemes()->splits.dropPreview);
+            painter.setPen(getIApp()->getThemes()->splits.dropPreviewBorder);
             foundMover = true;
         }
         else
         {
             painter.setBrush(QColor(0, 0, 0, 0));
             painter.setPen(QColor(0, 0, 0, 0));
-            // painter.setPen(getApp()->themes->splits.dropPreviewBorder);
+            // painter.setPen(getIApp()->getThemes()->splits.dropPreviewBorder);
         }
 
         painter.drawRect(rect.rect);
@@ -1526,10 +1526,10 @@ SplitContainer::ResizeHandle::ResizeHandle(SplitContainer *_parent)
 void SplitContainer::ResizeHandle::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
-    painter.setPen(QPen(getApp()->themes->splits.resizeHandle, 2));
+    painter.setPen(QPen(getIApp()->getThemes()->splits.resizeHandle, 2));
 
     painter.fillRect(this->rect(),
-                     getApp()->themes->splits.resizeHandleBackground);
+                     getIApp()->getThemes()->splits.resizeHandleBackground);
 
     if (this->vertical_)
     {

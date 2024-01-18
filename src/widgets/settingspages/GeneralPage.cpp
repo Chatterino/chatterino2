@@ -123,8 +123,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addTitle("Interface");
 
     layout.addDropdown<QString>(
-        "Theme", getApp()->themes->availableThemes(),
-        getApp()->themes->themeName,
+        "Theme", getIApp()->getThemes()->availableThemes(),
+        getIApp()->getThemes()->themeName,
         [](const auto *combo, const auto &themeKey) {
             return combo->findData(themeKey, Qt::UserRole);
         },

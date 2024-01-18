@@ -122,9 +122,8 @@ public:
 
     friend void test();
 
-    Theme *const themes{};
-
 private:
+    Theme *const themes{};
     Fonts *const fonts{};
 
 public:
@@ -170,12 +169,7 @@ public:
     {
         return this->args_;
     }
-    Theme *getThemes() override
-    {
-        assertInGuiThread();
-
-        return this->themes;
-    }
+    Theme *getThemes() override;
     Fonts *getFonts() override;
     IEmotes *getEmotes() override;
     AccountController *getAccounts() override;
