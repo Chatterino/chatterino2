@@ -143,9 +143,9 @@ public:
     TwitchIrcServer *const twitch{};
     FfzBadges *const ffzBadges{};
     SeventvBadges *const seventvBadges{};
-    UserDataController *const userData{};
 
 private:
+    UserDataController *const userData{};
     ISoundController *const sound{};
     TwitchLiveController *const twitchLiveController{};
     std::unique_ptr<PubSub> twitchPubSub;
