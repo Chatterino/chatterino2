@@ -363,7 +363,7 @@ void SplitHeader::initializeLayout()
 std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 {
     // top level menu
-    const auto &h = getApp()->hotkeys;
+    const auto &h = getIApp()->getHotkeys();
     auto menu = std::make_unique<QMenu>();
     menu->addAction(
         "Change channel", this->split_, &Split::changeChannel,

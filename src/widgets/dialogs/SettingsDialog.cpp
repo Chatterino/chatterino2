@@ -54,7 +54,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     this->overrideBackgroundColor_ = QColor("#111111");
 
     this->addShortcuts();
-    this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
+    this->signalHolder_.managedConnect(getIApp()->getHotkeys()->onItemsUpdated,
                                        [this]() {
                                            this->clearShortcuts();
                                            this->addShortcuts();
@@ -78,13 +78,13 @@ void SettingsDialog::addShortcuts()
         {"openTab", nullptr},
     };
 
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 }
 void SettingsDialog::setSearchPlaceholderText()
 {
     QString searchHotkey;
-    auto searchSeq = getApp()->hotkeys->getDisplaySequence(
+    auto searchSeq = getIApp()->getHotkeys()->getDisplaySequence(
         HotkeyCategory::PopupWindow, "search");
     if (!searchSeq.isEmpty())
     {

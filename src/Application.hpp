@@ -126,9 +126,9 @@ public:
     Fonts *const fonts{};
     Emotes *const emotes{};
     AccountController *const accounts{};
-    HotkeyController *const hotkeys{};
 
 private:
+    HotkeyController *const hotkeys{};
     WindowManager *const windows{};
 
 public:
@@ -185,12 +185,7 @@ public:
 
         return this->accounts;
     }
-    HotkeyController *getHotkeys() override
-    {
-        assertInGuiThread();
-
-        return this->hotkeys;
-    }
+    HotkeyController *getHotkeys() override;
     WindowManager *getWindows() override;
     Toasts *getToasts() override
     {

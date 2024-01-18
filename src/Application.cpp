@@ -311,6 +311,13 @@ IEmotes *Application::getEmotes()
     return this->emotes;
 }
 
+HotkeyController *Application::getHotkeys()
+{
+    assertInGuiThread();
+
+    return this->hotkeys;
+}
+
 WindowManager *Application::getWindows()
 {
     assertInGuiThread();
