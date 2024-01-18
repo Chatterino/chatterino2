@@ -347,6 +347,13 @@ WindowManager *Application::getWindows()
     return this->windows;
 }
 
+Toasts *Application::getToasts()
+{
+    assertInGuiThread();
+
+    return this->toasts;
+}
+
 FfzBadges *Application::getFfzBadges()
 {
     assertInGuiThread();

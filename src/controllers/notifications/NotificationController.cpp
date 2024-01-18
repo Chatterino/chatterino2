@@ -183,8 +183,8 @@ void NotificationController::checkStream(bool live, QString channelName)
 
     if (Toasts::isEnabled())
     {
-        getApp()->toasts->sendChannelNotification(channelName, QString(),
-                                                  Platform::Twitch);
+        getIApp()->getToasts()->sendChannelNotification(channelName, QString(),
+                                                        Platform::Twitch);
     }
     if (getSettings()->notificationPlaySound &&
         !(isInStreamerMode() &&

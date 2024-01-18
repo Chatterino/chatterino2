@@ -146,7 +146,7 @@ TwitchChannel::TwitchChannel(const QString &name)
             {
                 if (Toasts::isEnabled())
                 {
-                    getApp()->toasts->sendChannelNotification(
+                    getIApp()->getToasts()->sendChannelNotification(
                         this->getName(), this->accessStreamStatus()->title,
                         Platform::Twitch);
                 }

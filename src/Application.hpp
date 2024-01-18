@@ -133,9 +133,9 @@ private:
     AccountController *const accounts{};
     HotkeyController *const hotkeys{};
     WindowManager *const windows{};
+    Toasts *const toasts{};
 
 public:
-    Toasts *const toasts{};
     ImageUploader *const imageUploader{};
     SeventvAPI *const seventvAPI{};
     CrashHandler *const crashHandler{};
@@ -175,12 +175,7 @@ public:
     AccountController *getAccounts() override;
     HotkeyController *getHotkeys() override;
     WindowManager *getWindows() override;
-    Toasts *getToasts() override
-    {
-        assertInGuiThread();
-
-        return this->toasts;
-    }
+    Toasts *getToasts() override;
     CrashHandler *getCrashHandler() override
     {
         assertInGuiThread();
