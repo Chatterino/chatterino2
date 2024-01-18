@@ -120,6 +120,7 @@
 - Dev: Autogenerate docs/plugin-meta.lua. (#5055)
 - Dev: Refactor `NetworkPrivate`. (#5063)
 - Dev: Refactor `Paths` & `Updates`, focusing on reducing their singletoniability. (#5092)
+- Dev: Added `CApplication` and `getCApp` as a subset of `IApplication` that's safe to use outside the GUI thread. (#5102)
 - Dev: Removed duplicate scale in settings dialog. (#5069)
 - Dev: Fix `NotebookTab` emitting updates for every message. (#5068)
 - Dev: Added benchmark for parsing and building recent messages. (#5071)
