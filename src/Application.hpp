@@ -141,9 +141,9 @@ public:
     NotificationController *const notifications{};
     HighlightController *const highlights{};
     TwitchIrcServer *const twitch{};
-    FfzBadges *const ffzBadges{};
 
 private:
+    FfzBadges *const ffzBadges{};
     SeventvBadges *const seventvBadges{};
     UserDataController *const userData{};
     ISoundController *const sound{};
@@ -225,12 +225,7 @@ public:
     ITwitchIrcServer *getTwitch() override;
     PubSub *getTwitchPubSub() override;
     Logging *getChatLogger() override;
-    FfzBadges *getFfzBadges() override
-    {
-        assertInGuiThread();
-
-        return this->ffzBadges;
-    }
+    FfzBadges *getFfzBadges() override;
     SeventvBadges *getSeventvBadges() override;
     IUserDataController *getUserData() override;
     ISoundController *getSound() override;
