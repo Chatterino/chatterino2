@@ -127,7 +127,11 @@ public:
     Emotes *const emotes{};
     AccountController *const accounts{};
     HotkeyController *const hotkeys{};
+
+private:
     WindowManager *const windows{};
+
+public:
     Toasts *const toasts{};
     ImageUploader *const imageUploader{};
     SeventvAPI *const seventvAPI{};
@@ -187,12 +191,7 @@ public:
 
         return this->hotkeys;
     }
-    WindowManager *getWindows() override
-    {
-        assertInGuiThread();
-
-        return this->windows;
-    }
+    WindowManager *getWindows() override;
     Toasts *getToasts() override
     {
         assertInGuiThread();

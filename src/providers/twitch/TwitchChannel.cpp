@@ -156,7 +156,7 @@ TwitchChannel::TwitchChannel(const QString &name)
                 }
                 if (getSettings()->notificationFlashTaskbar)
                 {
-                    getApp()->windows->sendAlert();
+                    getIApp()->getWindows()->sendAlert();
                 }
             }
             // Channel live message

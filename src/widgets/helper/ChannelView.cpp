@@ -396,11 +396,11 @@ void ChannelView::initializeScrollbar()
 
 void ChannelView::initializeSignals()
 {
-    this->signalHolder_.managedConnect(getApp()->windows->wordFlagsChanged,
-                                       [this] {
-                                           this->queueLayout();
-                                           this->update();
-                                       });
+    this->signalHolder_.managedConnect(
+        getIApp()->getWindows()->wordFlagsChanged, [this] {
+            this->queueLayout();
+            this->update();
+        });
 
     getSettings()->showLastMessageIndicator.connect(
         [this](auto, auto) {
@@ -409,7 +409,7 @@ void ChannelView::initializeSignals()
         this->signalHolder_);
 
     this->signalHolder_.managedConnect(
-        getApp()->windows->gifRepaintRequested, [&] {
+        getIApp()->getWindows()->gifRepaintRequested, [&] {
             if (!this->animationArea_.isEmpty())
             {
                 this->queueUpdate(this->animationArea_);
@@ -417,7 +417,7 @@ void ChannelView::initializeSignals()
         });
 
     this->signalHolder_.managedConnect(
-        getApp()->windows->layoutRequested, [&](Channel *channel) {
+        getIApp()->getWindows()->layoutRequested, [&](Channel *channel) {
             if (this->isVisible() &&
                 (channel == nullptr || this->channel_.get() == channel))
             {
@@ -1290,7 +1290,7 @@ MessageElementFlags ChannelView::getFlags() const
         return *this->overrideFlags_;
     }
 
-    MessageElementFlags flags = app->windows->getWordFlags();
+    MessageElementFlags flags = app->getWindows()->getWordFlags();
 
     auto *split = dynamic_cast<Split *>(this->parentWidget());
 
@@ -1376,7 +1376,7 @@ bool ChannelView::scrollToMessage(const MessagePtr &message)
     this->scrollToMessageLayout(messagesSnapshot[messageIdx].get(), messageIdx);
     if (this->split_)
     {
-        getApp()->windows->select(this->split_);
+        getIApp()->getWindows()->select(this->split_);
     }
     return true;
 }
@@ -1408,7 +1408,7 @@ bool ChannelView::scrollToMessageId(const QString &messageId)
     this->scrollToMessageLayout(messagesSnapshot[messageIdx].get(), messageIdx);
     if (this->split_)
     {
-        getApp()->windows->select(this->split_);
+        getIApp()->getWindows()->select(this->split_);
     }
     return true;
 }
@@ -2444,7 +2444,7 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
             }
             else if (isMentions || isAutomod)
             {
-                getApp()->windows->scrollToMessage(messagePtr);
+                getIApp()->getWindows()->scrollToMessage(messagePtr);
             }
             else if (isReplyOrUserCard)
             {
@@ -2454,7 +2454,7 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
                 if (type == Channel::Type::TwitchMentions ||
                     type == Channel::Type::TwitchAutomod)
                 {
-                    getApp()->windows->scrollToMessage(messagePtr);
+                    getIApp()->getWindows()->scrollToMessage(messagePtr);
                 }
                 else
                 {
@@ -2784,7 +2784,7 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
             // Get all currently open pages
             QList<SplitContainer *> openPages;
 
-            auto &nb = getApp()->windows->getMainWindow().getNotebook();
+            auto &nb = getIApp()->getWindows()->getMainWindow().getNotebook();
             for (int i = 0; i < nb.getPageCount(); ++i)
             {
                 openPages.push_back(

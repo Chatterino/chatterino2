@@ -196,7 +196,7 @@ void NotificationController::checkStream(bool live, QString channelName)
         !(isInStreamerMode() &&
           getSettings()->streamerModeSuppressLiveNotifications))
     {
-        getApp()->windows->sendAlert();
+        getIApp()->getWindows()->sendAlert();
     }
     MessageBuilder builder;
     TwitchMessageBuilder::liveMessage(channelName, &builder);

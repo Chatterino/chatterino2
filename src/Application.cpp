@@ -311,6 +311,14 @@ IEmotes *Application::getEmotes()
     return this->emotes;
 }
 
+WindowManager *Application::getWindows()
+{
+    assertInGuiThread();
+    assert(this->windows);
+
+    return this->windows;
+}
+
 IUserDataController *Application::getUserData()
 {
     assertInGuiThread();

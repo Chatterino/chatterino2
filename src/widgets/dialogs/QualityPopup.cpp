@@ -14,7 +14,7 @@ QualityPopup::QualityPopup(const QString &channelURL, QStringList options)
               BaseWindow::DisableLayoutSave,
               BaseWindow::BoundsCheckOnShow,
           },
-          static_cast<QWidget *>(&(getApp()->windows->getMainWindow())))
+          static_cast<QWidget *>(&(getIApp()->getWindows()->getMainWindow())))
     , channelURL_(channelURL)
 {
     this->ui_.selector = new QComboBox(this);

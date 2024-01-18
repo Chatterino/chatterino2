@@ -206,7 +206,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     , notebook_(new Notebook(this))
 {
     // this->setStayInScreenRect(true);
-    this->moveTo(getApp()->windows->emotePopupPos(),
+    this->moveTo(getIApp()->getWindows()->emotePopupPos(),
                  widgets::BoundsChecking::DesiredPosition);
 
     auto *layout = new QVBoxLayout();
@@ -589,7 +589,7 @@ void EmotePopup::filterEmotes(const QString &searchText)
 
 void EmotePopup::closeEvent(QCloseEvent *event)
 {
-    getApp()->windows->setEmotePopupPos(this->pos());
+    getIApp()->getWindows()->setEmotePopupPos(this->pos());
     BaseWindow::closeEvent(event);
 }
 

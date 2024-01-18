@@ -299,7 +299,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                             "Open channel in a new popup window", this,
                             [loginName] {
                                 auto *app = getApp();
-                                auto &window = app->windows->createWindow(
+                                auto &window = app->getWindows()->createWindow(
                                     WindowType::Popup, true);
                                 auto *split = window.getNotebook()
                                                   .getOrAddSelectedPage()
@@ -314,7 +314,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                                     getApp()->twitch->getOrAddChannel(
                                         loginName);
                                 auto &nb = getApp()
-                                               ->windows->getMainWindow()
+                                               ->getWindows()
+                                               ->getMainWindow()
                                                .getNotebook();
                                 SplitContainer *container = nb.addPage(true);
                                 Split *split = new Split(container);

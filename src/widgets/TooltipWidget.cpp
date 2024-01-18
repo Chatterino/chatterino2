@@ -52,7 +52,7 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     });
     this->updateFont();
 
-    auto *windows = getApp()->windows;
+    auto *windows = getIApp()->getWindows();
     this->connections_.managedConnect(windows->gifRepaintRequested, [this] {
         if (!this->isVisible())
         {

@@ -508,7 +508,7 @@ void BaseWindow::resizeEvent(QResizeEvent *)
     // Queue up save because: Window resized
     if (!flags_.has(DisableLayoutSave))
     {
-        getApp()->windows->queueSave();
+        getIApp()->getWindows()->queueSave();
     }
 
 #ifdef USEWINSDK
@@ -540,7 +540,7 @@ void BaseWindow::moveEvent(QMoveEvent *event)
 #ifdef CHATTERINO
     if (!flags_.has(DisableLayoutSave))
     {
-        getApp()->windows->queueSave();
+        getIApp()->getWindows()->queueSave();
     }
 #endif
 

@@ -21,11 +21,11 @@ void SwitchSplitItem::action()
 {
     if (this->split_)
     {
-        getApp()->windows->select(this->split_);
+        getIApp()->getWindows()->select(this->split_);
     }
     else if (this->container_)
     {
-        getApp()->windows->select(this->container_);
+        getIApp()->getWindows()->select(this->container_);
     }
 }
 

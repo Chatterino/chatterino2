@@ -289,7 +289,7 @@ const QString &NotebookTab::getTitle() const
 void NotebookTab::titleUpdated()
 {
     // Queue up save because: Tab title changed
-    getApp()->windows->queueSave();
+    getIApp()->getWindows()->queueSave();
     this->notebook_->refresh();
     this->updateSize();
     this->update();

@@ -789,7 +789,7 @@ void Split::updateInputPlaceholder()
 
 void Split::joinChannelInNewTab(ChannelPtr channel)
 {
-    auto &nb = getApp()->windows->getMainWindow().getNotebook();
+    auto &nb = getIApp()->getWindows()->getMainWindow().getNotebook();
     SplitContainer *container = nb.addPage(true);
 
     Split *split = new Split(container);
@@ -889,7 +889,7 @@ void Split::setChannel(IndirectChannel newChannel)
     this->actionRequested.invoke(Action::RefreshTab);
 
     // Queue up save because: Split channel changed
-    getApp()->windows->queueSave();
+    getIApp()->getWindows()->queueSave();
 }
 
 void Split::setModerationMode(bool value)
@@ -983,7 +983,7 @@ void Split::keyReleaseEvent(QKeyEvent *event)
 void Split::resizeEvent(QResizeEvent *event)
 {
     // Queue up save because: Split resized
-    getApp()->windows->queueSave();
+    getIApp()->getWindows()->queueSave();
 
     BaseWidget::resizeEvent(event);
 
@@ -1073,7 +1073,7 @@ void Split::explainSplitting()
 void Split::popup()
 {
     auto *app = getApp();
-    Window &window = app->windows->createWindow(WindowType::Popup);
+    Window &window = app->getWindows()->createWindow(WindowType::Popup);
 
     Split *split = new Split(static_cast<SplitContainer *>(
         window.getNotebook().getOrAddSelectedPage()));
@@ -1470,7 +1470,7 @@ void Split::showSearch(bool singleChannel)
     }
 
     // Pass every ChannelView for every Split across the app to the search popup
-    auto &notebook = getApp()->windows->getMainWindow().getNotebook();
+    auto &notebook = getIApp()->getWindows()->getMainWindow().getNotebook();
     for (int i = 0; i < notebook.getPageCount(); ++i)
     {
         auto *container = dynamic_cast<SplitContainer *>(notebook.getPageAt(i));

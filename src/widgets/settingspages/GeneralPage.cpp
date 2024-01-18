@@ -878,7 +878,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.shownSimilarTriggerHighlights);
     s.hideSimilar.connect(
         []() {
-            getApp()->windows->forceLayoutChannelViews();
+            getIApp()->getWindows()->forceLayoutChannelViews();
         },
         false);
     layout.addDropdown<float>(

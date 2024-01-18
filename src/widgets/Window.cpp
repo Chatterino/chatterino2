@@ -105,7 +105,7 @@ bool Window::event(QEvent *event)
     switch (event->type())
     {
         case QEvent::WindowActivate: {
-            getApp()->windows->selectedWindow_ = this;
+            getIApp()->getWindows()->selectedWindow_ = this;
             break;
         }
 
@@ -136,15 +136,14 @@ void Window::closeEvent(QCloseEvent *)
 {
     if (this->type_ == WindowType::Main)
     {
-        auto *app = getApp();
-        app->windows->save();
-        app->windows->closeAll();
+        getIApp()->getWindows()->save();
+        getIApp()->getWindows()->closeAll();
     }
 
     // Ensure selectedWindow_ is never an invalid pointer.
     // WindowManager will return the main window if no window is pointed to by
     // `selectedWindow_`.
-    getApp()->windows->selectedWindow_ = nullptr;
+    getIApp()->getWindows()->selectedWindow_ = nullptr;
 
     this->closed.invoke();
 
@@ -181,7 +180,7 @@ void Window::addCustomTitlebarButtons()
 
     // settings
     this->addTitleBarButton(TitleBarButtonStyle::Settings, [this] {
-        getApp()->windows->showSettingsDialog(this);
+        getIApp()->getWindows()->showSettingsDialog(this);
     });
 
     // updates
@@ -191,15 +190,16 @@ void Window::addCustomTitlebarButtons()
 
     // account
     this->userLabel_ = this->addTitleBarLabel([this] {
-        getApp()->windows->showAccountSelectPopup(this->userLabel_->mapToGlobal(
-            this->userLabel_->rect().bottomLeft()));
+        getIApp()->getWindows()->showAccountSelectPopup(
+            this->userLabel_->mapToGlobal(
+                this->userLabel_->rect().bottomLeft()));
     });
     this->userLabel_->setMinimumWidth(20 * scale());
 
     // streamer mode
     this->streamerModeTitlebarIcon_ =
         this->addTitleBarButton(TitleBarButtonStyle::StreamerMode, [this] {
-            getApp()->windows->showSettingsDialog(
+            getIApp()->getWindows()->showSettingsDialog(
                 this, SettingsDialogPreference::StreamerMode);
         });
     this->signalHolder_.managedConnect(getApp()->streamerModeChanged, [this]() {
@@ -489,7 +489,7 @@ void Window::addShortcuts()
         {"toggleLocalR9K",
          [](std::vector<QString>) -> QString {
              getSettings()->hideSimilar.setValue(!getSettings()->hideSimilar);
-             getApp()->windows->forceLayoutChannelViews();
+             getIApp()->getWindows()->forceLayoutChannelViews();
              return "";
          }},
         {"openQuickSwitcher",
