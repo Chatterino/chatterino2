@@ -7,6 +7,7 @@
 #include <pajlada/signals/signal.hpp>
 #include <QApplication>
 
+#include <cassert>
 #include <memory>
 
 namespace chatterino {
@@ -284,6 +285,8 @@ IApplication *getIApp();
 /// Gets a subset of the Application class that is safe to use outside of the GUI thread.
 inline CApplication *getCApp()
 {
+    assert(CApplication::instance != nullptr);
+
     return CApplication::instance;
 }
 
