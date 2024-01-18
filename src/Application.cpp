@@ -319,6 +319,13 @@ WindowManager *Application::getWindows()
     return this->windows;
 }
 
+SeventvBadges *Application::getSeventvBadges()
+{
+    // SeventvBadges handles its own locks, so we don't need to assert that this is called in the GUI thread
+
+    return this->seventvBadges;
+}
+
 IUserDataController *Application::getUserData()
 {
     assertInGuiThread();
