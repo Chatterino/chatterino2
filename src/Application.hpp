@@ -144,9 +144,9 @@ public:
     FfzBadges *const ffzBadges{};
     SeventvBadges *const seventvBadges{};
     UserDataController *const userData{};
-    ISoundController *const sound{};
 
 private:
+    ISoundController *const sound{};
     TwitchLiveController *const twitchLiveController{};
     std::unique_ptr<PubSub> twitchPubSub;
     std::unique_ptr<TwitchBadges> twitchBadges;
