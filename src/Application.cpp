@@ -447,6 +447,15 @@ SeventvAPI *Application::getSeventvAPI()
     return this->seventvAPI;
 }
 
+#ifdef CHATTERINO_HAVE_PLUGINS
+PluginController *Application::getPlugins()
+{
+    assertInGuiThread();
+
+    return this->plugins;
+}
+#endif
+
 ITwitchIrcServer *Application::getTwitch()
 {
     assertInGuiThread();

@@ -38,8 +38,9 @@ void TabCompletionModel::updateResults(const QString &query,
 #ifdef CHATTERINO_HAVE_PLUGINS
         // Try plugins first
         bool done{};
-        std::tie(done, results) = getApp()->plugins->updateCustomCompletions(
-            query, fullTextContent, cursorPosition, isFirstWord);
+        std::tie(done, results) =
+            getIApp()->getPlugins()->updateCustomCompletions(
+                query, fullTextContent, cursorPosition, isFirstWord);
         if (done)
         {
             this->setStringList(results);

@@ -562,7 +562,7 @@ bool CommandController::registerPluginCommand(const QString &commandName)
     }
 
     this->commands_[commandName] = [commandName](const CommandContext &ctx) {
-        return getApp()->plugins->tryExecPluginCommand(commandName, ctx);
+        return getIApp()->getPlugins()->tryExecPluginCommand(commandName, ctx);
     };
     this->pluginCommands_.append(commandName);
     return true;

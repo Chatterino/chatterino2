@@ -85,6 +85,9 @@ public:
     virtual TwitchBadges *getTwitchBadges() = 0;
     virtual ImageUploader *getImageUploader() = 0;
     virtual SeventvAPI *getSeventvAPI() = 0;
+#ifdef CHATTERINO_HAVE_PLUGINS
+    virtual PluginController *getPlugins() = 0;
+#endif
     virtual Updates &getUpdates() = 0;
 };
 
@@ -154,12 +157,11 @@ private:
     std::unique_ptr<TwitchBadges> twitchBadges;
     std::unique_ptr<ChatterinoBadges> chatterinoBadges;
     const std::unique_ptr<Logging> logging;
-
-public:
 #ifdef CHATTERINO_HAVE_PLUGINS
     PluginController *const plugins{};
 #endif
 
+public:
     const Paths &getPaths() override
     {
         return this->paths_;
@@ -191,6 +193,9 @@ public:
     IChatterinoBadges *getChatterinoBadges() override;
     ImageUploader *getImageUploader() override;
     SeventvAPI *getSeventvAPI() override;
+#ifdef CHATTERINO_HAVE_PLUGINS
+    PluginController *getPlugins() override;
+#endif
     Updates &getUpdates() override
     {
         assertInGuiThread();
