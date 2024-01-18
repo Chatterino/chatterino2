@@ -375,6 +375,13 @@ NotificationController *Application::getNotifications()
     return this->notifications;
 }
 
+HighlightController *Application::getHighlights()
+{
+    assertInGuiThread();
+
+    return this->highlights;
+}
+
 FfzBadges *Application::getFfzBadges()
 {
     assertInGuiThread();

@@ -139,9 +139,9 @@ private:
     CrashHandler *const crashHandler{};
     CommandController *const commands{};
     NotificationController *const notifications{};
+    HighlightController *const highlights{};
 
 public:
-    HighlightController *const highlights{};
     TwitchIrcServer *const twitch{};
 
 private:
@@ -178,12 +178,7 @@ public:
     CrashHandler *getCrashHandler() override;
     CommandController *getCommands() override;
     NotificationController *getNotifications() override;
-    HighlightController *getHighlights() override
-    {
-        assertInGuiThread();
-
-        return this->highlights;
-    }
+    HighlightController *getHighlights() override;
     ITwitchIrcServer *getTwitch() override;
     PubSub *getTwitchPubSub() override;
     Logging *getChatLogger() override;
