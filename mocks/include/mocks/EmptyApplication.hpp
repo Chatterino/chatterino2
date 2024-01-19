@@ -134,7 +134,7 @@ public:
         return nullptr;
     }
 
-    ChatterinoBadges *getChatterinoBadges() override
+    IChatterinoBadges *getChatterinoBadges() override
     {
         assert(false && "EmptyApplication::getChatterinoBadges was called "
                         "without being initialized");

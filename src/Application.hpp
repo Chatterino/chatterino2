@@ -44,6 +44,7 @@ class IEmotes;
 class Settings;
 class Fonts;
 class Toasts;
+class IChatterinoBadges;
 class ChatterinoBadges;
 class FfzBadges;
 class SeventvBadges;
@@ -75,7 +76,7 @@ public:
     virtual ITwitchIrcServer *getTwitch() = 0;
     virtual PubSub *getTwitchPubSub() = 0;
     virtual Logging *getChatLogger() = 0;
-    virtual ChatterinoBadges *getChatterinoBadges() = 0;
+    virtual IChatterinoBadges *getChatterinoBadges() = 0;
     virtual FfzBadges *getFfzBadges() = 0;
     virtual SeventvBadges *getSeventvBadges() = 0;
     virtual IUserDataController *getUserData() = 0;
@@ -241,7 +242,7 @@ public:
     ISoundController *getSound() override;
     ITwitchLiveController *getTwitchLiveController() override;
     TwitchBadges *getTwitchBadges() override;
-    ChatterinoBadges *getChatterinoBadges() override;
+    IChatterinoBadges *getChatterinoBadges() override;
     ImageUploader *getImageUploader() override
     {
         assertInGuiThread();

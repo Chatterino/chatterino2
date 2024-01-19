@@ -14,7 +14,21 @@ namespace chatterino {
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 
-class ChatterinoBadges
+class IChatterinoBadges
+{
+public:
+    IChatterinoBadges() = default;
+    virtual ~IChatterinoBadges() = default;
+
+    IChatterinoBadges(const IChatterinoBadges &) = delete;
+    IChatterinoBadges(IChatterinoBadges &&) = delete;
+    IChatterinoBadges &operator=(const IChatterinoBadges &) = delete;
+    IChatterinoBadges &operator=(IChatterinoBadges &&) = delete;
+
+    virtual std::optional<EmotePtr> getBadge(const UserId &id) = 0;
+};
+
+class ChatterinoBadges : public IChatterinoBadges
 {
 public:
     /**
@@ -25,7 +39,7 @@ public:
     /**
      * Returns the Chatterino badge for the given user
      */
-    std::optional<EmotePtr> getBadge(const UserId &id);
+    std::optional<EmotePtr> getBadge(const UserId &id) override;
 
 private:
     void loadChatterinoBadges();

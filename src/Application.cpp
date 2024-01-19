@@ -340,7 +340,7 @@ TwitchBadges *Application::getTwitchBadges()
     return this->twitchBadges.get();
 }
 
-ChatterinoBadges *Application::getChatterinoBadges()
+IChatterinoBadges *Application::getChatterinoBadges()
 {
     assertInGuiThread();
     assert(this->chatterinoBadges);
