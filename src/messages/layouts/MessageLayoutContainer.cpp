@@ -318,9 +318,12 @@ void MessageLayoutContainer::addSelectionText(QString &str, uint32_t from,
 
         if (copymode == CopyMode::OnlyTextAndEmotes)
         {
-            if (element->getCreator().getFlags().hasAny(
-                    {MessageElementFlag::Timestamp,
-                     MessageElementFlag::Username, MessageElementFlag::Badges}))
+            if (element->getCreator().getFlags().hasAny({
+                    MessageElementFlag::Timestamp,
+                    MessageElementFlag::Username,
+                    MessageElementFlag::Badges,
+                    MessageElementFlag::ChannelName,
+                }))
             {
                 continue;
             }
