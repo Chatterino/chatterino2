@@ -21,7 +21,7 @@ QString deleteMessages(TwitchChannel *twitchChannel, const QString &messageID)
 {
     const auto *commandName = messageID.isEmpty() ? "/clear" : "/delete";
 
-    auto user = getApp()->accounts->twitch.getCurrent();
+    auto user = getIApp()->getAccounts()->twitch.getCurrent();
 
     // Avoid Helix calls without Client ID and/or OAuth Token
     if (user->isAnon())

@@ -131,7 +131,7 @@ Split *SplitContainer::appendNewSplit(bool openChannelNameDialog)
 void SplitContainer::insertSplit(Split *split, InsertOptions &&options)
 {
     // Queue up save because: Split added
-    getApp()->windows->queueSave();
+    getIApp()->getWindows()->queueSave();
 
     assertInGuiThread();
 
@@ -345,7 +345,7 @@ SplitContainer::Position SplitContainer::releaseSplit(Split *split)
 SplitContainer::Position SplitContainer::deleteSplit(Split *split)
 {
     // Queue up save because: Split removed
-    getApp()->windows->queueSave();
+    getIApp()->getWindows()->queueSave();
 
     assertInGuiThread();
     assert(split != nullptr);
@@ -614,8 +614,8 @@ void SplitContainer::paintEvent(QPaintEvent * /*event*/)
 
         painter.setPen(this->theme->splits.header.text);
 
-        const auto font =
-            getApp()->fonts->getFont(FontStyle::ChatMedium, this->scale());
+        const auto font = getIApp()->getFonts()->getFont(FontStyle::ChatMedium,
+                                                         this->scale());
         painter.setFont(font);
 
         QString text = "Click to add a split";
@@ -634,7 +634,7 @@ void SplitContainer::paintEvent(QPaintEvent * /*event*/)
     }
     else
     {
-        if (getApp()->themes->isLightTheme())
+        if (getIApp()->getThemes()->isLightTheme())
         {
             painter.fillRect(rect(), QColor("#999"));
         }
@@ -646,8 +646,8 @@ void SplitContainer::paintEvent(QPaintEvent * /*event*/)
 
     for (DropRect &dropRect : this->dropRects_)
     {
-        QColor border = getApp()->themes->splits.dropTargetRectBorder;
-        QColor background = getApp()->themes->splits.dropTargetRect;
+        QColor border = getIApp()->getThemes()->splits.dropTargetRectBorder;
+        QColor background = getIApp()->getThemes()->splits.dropTargetRect;
 
         if (!dropRect.rect.contains(this->mouseOverPoint_))
         {
@@ -774,7 +774,7 @@ void SplitContainer::applyFromDescriptor(const NodeDescriptor &rootNode)
 
 void SplitContainer::popup()
 {
-    Window &window = getApp()->windows->createWindow(WindowType::Popup);
+    Window &window = getIApp()->getWindows()->createWindow(WindowType::Popup);
     auto *popupContainer = window.getNotebook().getOrAddSelectedPage();
 
     QJsonObject encodedTab;
@@ -1436,15 +1436,15 @@ void SplitContainer::DropOverlay::paintEvent(QPaintEvent * /*event*/)
     {
         if (!foundMover && rect.rect.contains(this->mouseOverPoint_))
         {
-            painter.setBrush(getApp()->themes->splits.dropPreview);
-            painter.setPen(getApp()->themes->splits.dropPreviewBorder);
+            painter.setBrush(getIApp()->getThemes()->splits.dropPreview);
+            painter.setPen(getIApp()->getThemes()->splits.dropPreviewBorder);
             foundMover = true;
         }
         else
         {
             painter.setBrush(QColor(0, 0, 0, 0));
             painter.setPen(QColor(0, 0, 0, 0));
-            // painter.setPen(getApp()->themes->splits.dropPreviewBorder);
+            // painter.setPen(getIApp()->getThemes()->splits.dropPreviewBorder);
         }
 
         painter.drawRect(rect.rect);
@@ -1526,10 +1526,10 @@ SplitContainer::ResizeHandle::ResizeHandle(SplitContainer *_parent)
 void SplitContainer::ResizeHandle::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
-    painter.setPen(QPen(getApp()->themes->splits.resizeHandle, 2));
+    painter.setPen(QPen(getIApp()->getThemes()->splits.resizeHandle, 2));
 
     painter.fillRect(this->rect(),
-                     getApp()->themes->splits.resizeHandleBackground);
+                     getIApp()->getThemes()->splits.resizeHandleBackground);
 
     if (this->vertical_)
     {

@@ -120,7 +120,7 @@ void IgnoresPage::onShow()
 {
     auto *app = getApp();
 
-    auto user = app->accounts->twitch.getCurrent();
+    auto user = app->getAccounts()->twitch.getCurrent();
 
     if (user->isAnon())
     {

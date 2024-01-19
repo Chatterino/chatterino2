@@ -203,7 +203,7 @@ public:
              setValue = std::move(setValue)](const int newIndex) {
                 setting = setValue(DropdownArgs{combo->itemText(newIndex),
                                                 combo->currentIndex(), combo});
-                getApp()->windows->forceLayoutChannelViews();
+                getIApp()->getWindows()->forceLayoutChannelViews();
             });
 
         return combo;
@@ -255,7 +255,7 @@ public:
              setValue = std::move(setValue)](const int newIndex) {
                 setting = setValue(DropdownArgs{combo->itemText(newIndex),
                                                 combo->currentIndex(), combo});
-                getApp()->windows->forceLayoutChannelViews();
+                getIApp()->getWindows()->forceLayoutChannelViews();
             });
 
         return combo;
@@ -300,7 +300,7 @@ public:
                 // Instead, it's up to the getters to make sure that the setting is legic - see the enum_cast above
                 // You could also use the settings `getEnum` function
                 setting = newText;
-                getApp()->windows->forceLayoutChannelViews();
+                getIApp()->getWindows()->forceLayoutChannelViews();
             });
 
         return combo;

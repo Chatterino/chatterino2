@@ -63,7 +63,7 @@ namespace chatterino::lua::api {
 
 int c2_register_command(lua_State *L)
 {
-    auto *pl = getApp()->plugins->getPluginByStatePtr(L);
+    auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
     if (pl == nullptr)
     {
         luaL_error(L, "internal error: no plugin");
@@ -97,7 +97,7 @@ int c2_register_command(lua_State *L)
 
 int c2_register_callback(lua_State *L)
 {
-    auto *pl = getApp()->plugins->getPluginByStatePtr(L);
+    auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
     if (pl == nullptr)
     {
         luaL_error(L, "internal error: no plugin");
@@ -155,7 +155,7 @@ int c2_send_msg(lua_State *L)
     const auto chn = getApp()->twitch->getChannelOrEmpty(channel);
     if (chn->isEmpty())
     {
-        auto *pl = getApp()->plugins->getPluginByStatePtr(L);
+        auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
 
         qCWarning(chatterinoLua)
             << "Plugin" << pl->id
@@ -166,7 +166,8 @@ int c2_send_msg(lua_State *L)
     }
     QString message = text;
     message = message.replace('\n', ' ');
-    QString outText = getApp()->commands->execCommand(message, chn, false);
+    QString outText =
+        getIApp()->getCommands()->execCommand(message, chn, false);
     chn->sendMessage(outText);
     lua::push(L, true);
     return 1;
@@ -203,7 +204,7 @@ int c2_system_msg(lua_State *L)
     const auto chn = getApp()->twitch->getChannelOrEmpty(channel);
     if (chn->isEmpty())
     {
-        auto *pl = getApp()->plugins->getPluginByStatePtr(L);
+        auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
         qCWarning(chatterinoLua)
             << "Plugin" << pl->id
             << "tried to show a system message (using system_msg) in channel"
@@ -218,7 +219,7 @@ int c2_system_msg(lua_State *L)
 
 int c2_log(lua_State *L)
 {
-    auto *pl = getApp()->plugins->getPluginByStatePtr(L);
+    auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
     if (pl == nullptr)
     {
         luaL_error(L, "c2_log: internal error: no plugin?");
@@ -285,7 +286,7 @@ int g_load(lua_State *L)
 
 int loadfile(lua_State *L, const QString &str)
 {
-    auto *pl = getApp()->plugins->getPluginByStatePtr(L);
+    auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
     if (pl == nullptr)
     {
         return luaL_error(L, "loadfile: internal error: no plugin?");
@@ -327,7 +328,7 @@ int searcherAbsolute(lua_State *L)
     name = name.replace('.', QDir::separator());
 
     QString filename;
-    auto *pl = getApp()->plugins->getPluginByStatePtr(L);
+    auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
     if (pl == nullptr)
     {
         return luaL_error(L, "searcherAbsolute: internal error: no plugin?");
@@ -368,7 +369,7 @@ int searcherRelative(lua_State *L)
 
 int g_print(lua_State *L)
 {
-    auto *pl = getApp()->plugins->getPluginByStatePtr(L);
+    auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
     if (pl == nullptr)
     {
         luaL_error(L, "c2_print: internal error: no plugin?");

@@ -94,15 +94,16 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     MessageBuilder b;
 
     b.emplace<TimestampElement>();
-    b.emplace<TextElement>(app->accounts->twitch.getCurrent()->getUserName(),
-                           MessageElementFlag::Text, MessageColor::Text,
-                           FontStyle::ChatMediumBold);
+    b.emplace<TextElement>(
+        app->getAccounts()->twitch.getCurrent()->getUserName(),
+        MessageElementFlag::Text, MessageColor::Text,
+        FontStyle::ChatMediumBold);
     b.emplace<TextElement>("->", MessageElementFlag::Text,
-                           getApp()->themes->messages.textColors.system);
+                           getIApp()->getThemes()->messages.textColors.system);
     b.emplace<TextElement>(words[1] + ":", MessageElementFlag::Text,
                            MessageColor::Text, FontStyle::ChatMediumBold);
 
-    const auto &acc = app->accounts->twitch.getCurrent();
+    const auto &acc = app->getAccounts()->twitch.getCurrent();
     const auto &accemotes = *acc->accessEmotes();
     const auto &bttvemotes = app->twitch->getBttvEmotes();
     const auto &ffzemotes = app->twitch->getFfzEmotes();
@@ -208,7 +209,7 @@ QString sendWhisper(const CommandContext &ctx)
         return "";
     }
 
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(

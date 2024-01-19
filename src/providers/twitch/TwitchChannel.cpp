@@ -94,7 +94,7 @@ TwitchChannel::TwitchChannel(const QString &name)
     }
 
     this->bSignals_.emplace_back(
-        getApp()->accounts->twitch.currentUserChanged.connect([this] {
+        getIApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
             this->setMod(false);
             this->refreshPubSub();
         }));
@@ -141,22 +141,22 @@ TwitchChannel::TwitchChannel(const QString &name)
         {
             qCDebug(chatterinoTwitch)
                 << "[TwitchChannel" << this->getName() << "] Online";
-            if (getApp()->notifications->isChannelNotified(this->getName(),
-                                                           Platform::Twitch))
+            if (getIApp()->getNotifications()->isChannelNotified(
+                    this->getName(), Platform::Twitch))
             {
                 if (Toasts::isEnabled())
                 {
-                    getApp()->toasts->sendChannelNotification(
+                    getIApp()->getToasts()->sendChannelNotification(
                         this->getName(), this->accessStreamStatus()->title,
                         Platform::Twitch);
                 }
                 if (getSettings()->notificationPlaySound)
                 {
-                    getApp()->notifications->playSound();
+                    getIApp()->getNotifications()->playSound();
                 }
                 if (getSettings()->notificationFlashTaskbar)
                 {
-                    getApp()->windows->sendAlert();
+                    getIApp()->getWindows()->sendAlert();
                 }
             }
             // Channel live message
@@ -176,7 +176,7 @@ TwitchChannel::TwitchChannel(const QString &name)
                 !(isInStreamerMode() &&
                   getSettings()->streamerModeSuppressLiveNotifications))
             {
-                getApp()->notifications->playSound();
+                getIApp()->getNotifications()->playSound();
             }
         }
         else
@@ -538,7 +538,7 @@ void TwitchChannel::showLoginMessage()
 {
     const auto linkColor = MessageColor(MessageColor::Link);
     const auto accountsLink = Link(Link::OpenAccountsPage, QString());
-    const auto currentUser = getApp()->accounts->twitch.getCurrent();
+    const auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     const auto expirationText =
         QStringLiteral("You need to log in to send messages. You can link your "
                        "Twitch account");
@@ -622,7 +622,7 @@ QString TwitchChannel::prepareMessage(const QString &message) const
 void TwitchChannel::sendMessage(const QString &message)
 {
     auto *app = getApp();
-    if (!app->accounts->twitch.isLoggedIn())
+    if (!app->getAccounts()->twitch.isLoggedIn())
     {
         if (!message.isEmpty())
         {
@@ -656,7 +656,7 @@ void TwitchChannel::sendMessage(const QString &message)
 void TwitchChannel::sendReply(const QString &message, const QString &replyId)
 {
     auto *app = getApp();
-    if (!app->accounts->twitch.isLoggedIn())
+    if (!app->getAccounts()->twitch.isLoggedIn())
     {
         if (!message.isEmpty())
         {
@@ -864,7 +864,8 @@ void TwitchChannel::joinBttvChannel() const
 {
     if (getApp()->twitch->bttvLiveUpdates)
     {
-        const auto currentAccount = getApp()->accounts->twitch.getCurrent();
+        const auto currentAccount =
+            getIApp()->getAccounts()->twitch.getCurrent();
         QString userName;
         if (currentAccount && !currentAccount->isAnon())
         {
@@ -1307,7 +1308,7 @@ void TwitchChannel::refreshPubSub()
         return;
     }
 
-    auto currentAccount = getApp()->accounts->twitch.getCurrent();
+    auto currentAccount = getIApp()->getAccounts()->twitch.getCurrent();
 
     getIApp()->getTwitchPubSub()->setAccount(currentAccount);
 
@@ -1342,7 +1343,8 @@ void TwitchChannel::refreshChatters()
 
     // Get chatter list via helix api
     getHelix()->getChatters(
-        this->roomId(), getApp()->accounts->twitch.getCurrent()->getUserId(),
+        this->roomId(),
+        getIApp()->getAccounts()->twitch.getCurrent()->getUserId(),
         MAX_CHATTERS_TO_FETCH,
         [this, weak = weakOf<Channel>(this)](auto result) {
             if (auto shared = weak.lock())
@@ -1731,7 +1733,7 @@ void TwitchChannel::updateSevenTVActivity()
         QStringLiteral("https://7tv.io/v3/users/%1/presences");
 
     const auto currentSeventvUserID =
-        getApp()->accounts->twitch.getCurrent()->getSeventvUserID();
+        getIApp()->getAccounts()->twitch.getCurrent()->getSeventvUserID();
     if (currentSeventvUserID.isEmpty())
     {
         return;

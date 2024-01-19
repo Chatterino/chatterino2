@@ -111,7 +111,7 @@ void Fonts::initialize(Settings &, const Paths &)
             assertInGuiThread();
 
             // REMOVED
-            getApp()->windows->incGeneration();
+            getIApp()->getWindows()->incGeneration();
 
             for (auto &map : this->fontsByType_)
             {

@@ -289,7 +289,7 @@ const QString &NotebookTab::getTitle() const
 void NotebookTab::titleUpdated()
 {
     // Queue up save because: Tab title changed
-    getApp()->windows->queueSave();
+    getIApp()->getWindows()->queueSave();
     this->notebook_->refresh();
     this->updateSize();
     this->update();
@@ -429,9 +429,9 @@ void NotebookTab::paintEvent(QPaintEvent *)
 
     auto div = std::max<float>(0.01f, this->logicalDpiX() * deviceDpi(this));
     painter.setFont(
-        getApp()->fonts->getFont(FontStyle::UiTabs, scale * 96.f / div));
+        getIApp()->getFonts()->getFont(FontStyle::UiTabs, scale * 96.f / div));
     QFontMetrics metrics =
-        app->fonts->getFontMetrics(FontStyle::UiTabs, scale * 96.f / div);
+        app->getFonts()->getFontMetrics(FontStyle::UiTabs, scale * 96.f / div);
 
     int height = int(scale * NOTEBOOK_TAB_HEIGHT);
 
@@ -613,7 +613,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
                 borderRect = QRect(0, 0, this->width(), 1);
                 break;
         }
-        painter.fillRect(borderRect, app->themes->window.background);
+        painter.fillRect(borderRect, app->getThemes()->window.background);
     }
 }
 

@@ -69,7 +69,7 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
         this->hideCompletionPopup();
     });
     this->scaleChangedEvent(this->scale());
-    this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
+    this->signalHolder_.managedConnect(getIApp()->getHotkeys()->onItemsUpdated,
                                        [this]() {
                                            this->clearShortcuts();
                                            this->addShortcuts();
@@ -96,7 +96,7 @@ void SplitInput::initLayout()
     auto replyLabel = replyHbox.emplace<QLabel>().assign(&this->ui_.replyLabel);
     replyLabel->setAlignment(Qt::AlignLeft);
     replyLabel->setFont(
-        app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
+        app->getFonts()->getFont(FontStyle::ChatMedium, this->scale()));
 
     replyHbox->addStretch(1);
 
@@ -157,18 +157,18 @@ void SplitInput::initLayout()
 
     // set edit font
     this->ui_.textEdit->setFont(
-        app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
+        app->getFonts()->getFont(FontStyle::ChatMedium, this->scale()));
     QObject::connect(this->ui_.textEdit, &QTextEdit::cursorPositionChanged,
                      this, &SplitInput::onCursorPositionChanged);
     QObject::connect(this->ui_.textEdit, &QTextEdit::textChanged, this,
                      &SplitInput::onTextChanged);
 
     this->managedConnections_.managedConnect(
-        app->fonts->fontChanged, [=, this]() {
+        app->getFonts()->fontChanged, [=, this]() {
             this->ui_.textEdit->setFont(
-                app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
-            this->ui_.replyLabel->setFont(
-                app->fonts->getFont(FontStyle::ChatMediumBold, this->scale()));
+                app->getFonts()->getFont(FontStyle::ChatMedium, this->scale()));
+            this->ui_.replyLabel->setFont(app->getFonts()->getFont(
+                FontStyle::ChatMediumBold, this->scale()));
         });
 
     // open emote popup
@@ -213,11 +213,11 @@ void SplitInput::scaleChangedEvent(float scale)
         this->setMaximumHeight(this->scaledMaxHeight());
     }
     this->ui_.textEdit->setFont(
-        app->fonts->getFont(FontStyle::ChatMedium, scale));
+        app->getFonts()->getFont(FontStyle::ChatMedium, scale));
     this->ui_.textEditLength->setFont(
-        app->fonts->getFont(FontStyle::ChatMedium, scale));
+        app->getFonts()->getFont(FontStyle::ChatMedium, scale));
     this->ui_.replyLabel->setFont(
-        app->fonts->getFont(FontStyle::ChatMediumBold, scale));
+        app->getFonts()->getFont(FontStyle::ChatMediumBold, scale));
 }
 
 void SplitInput::themeChangedEvent()
@@ -332,7 +332,7 @@ QString SplitInput::handleSendMessage(const std::vector<QString> &arguments)
 
         message = message.replace('\n', ' ');
         QString sendMessage =
-            getApp()->commands->execCommand(message, c, false);
+            getIApp()->getCommands()->execCommand(message, c, false);
 
         c->sendMessage(sendMessage);
 
@@ -363,7 +363,8 @@ QString SplitInput::handleSendMessage(const std::vector<QString> &arguments)
     }
 
     message = message.replace('\n', ' ');
-    QString sendMessage = getApp()->commands->execCommand(message, c, false);
+    QString sendMessage =
+        getIApp()->getCommands()->execCommand(message, c, false);
 
     // Reply within TwitchChannel
     tc->sendReply(sendMessage, this->replyThread_->id);
@@ -640,7 +641,7 @@ void SplitInput::addShortcuts()
          }},
     };
 
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::SplitInput, actions, this->parentWidget());
 }
 
@@ -947,8 +948,8 @@ void SplitInput::editTextChanged()
         this->textChanged.invoke(text);
 
         text = text.trimmed();
-        text =
-            app->commands->execCommand(text, this->split_->getChannel(), true);
+        text = app->getCommands()->execCommand(text, this->split_->getChannel(),
+                                               true);
     }
 
     if (text.length() > 0 &&

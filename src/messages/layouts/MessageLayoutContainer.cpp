@@ -47,7 +47,7 @@ void MessageLayoutContainer::beginLayout(int width, float scale,
     this->scale_ = scale;
     this->flags_ = flags;
     auto mediumFontMetrics =
-        getApp()->fonts->getFontMetrics(FontStyle::ChatMedium, scale);
+        getIApp()->getFonts()->getFontMetrics(FontStyle::ChatMedium, scale);
     this->textLineHeight_ = mediumFontMetrics.height();
     this->spaceWidth_ = mediumFontMetrics.horizontalAdvance(' ');
     this->dotdotdotWidth_ = mediumFontMetrics.horizontalAdvance("...");

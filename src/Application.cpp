@@ -304,11 +304,96 @@ int Application::run(QApplication &qtApp)
     return qtApp.exec();
 }
 
+Theme *Application::getThemes()
+{
+    assertInGuiThread();
+
+    return this->themes;
+}
+
+Fonts *Application::getFonts()
+{
+    assertInGuiThread();
+
+    return this->fonts;
+}
+
 IEmotes *Application::getEmotes()
 {
     assertInGuiThread();
 
     return this->emotes;
+}
+
+AccountController *Application::getAccounts()
+{
+    assertInGuiThread();
+
+    return this->accounts;
+}
+
+HotkeyController *Application::getHotkeys()
+{
+    assertInGuiThread();
+
+    return this->hotkeys;
+}
+
+WindowManager *Application::getWindows()
+{
+    assertInGuiThread();
+    assert(this->windows);
+
+    return this->windows;
+}
+
+Toasts *Application::getToasts()
+{
+    assertInGuiThread();
+
+    return this->toasts;
+}
+
+CrashHandler *Application::getCrashHandler()
+{
+    assertInGuiThread();
+
+    return this->crashHandler;
+}
+
+CommandController *Application::getCommands()
+{
+    assertInGuiThread();
+
+    return this->commands;
+}
+
+NotificationController *Application::getNotifications()
+{
+    assertInGuiThread();
+
+    return this->notifications;
+}
+
+HighlightController *Application::getHighlights()
+{
+    assertInGuiThread();
+
+    return this->highlights;
+}
+
+FfzBadges *Application::getFfzBadges()
+{
+    assertInGuiThread();
+
+    return this->ffzBadges;
+}
+
+SeventvBadges *Application::getSeventvBadges()
+{
+    // SeventvBadges handles its own locks, so we don't need to assert that this is called in the GUI thread
+
+    return this->seventvBadges;
 }
 
 IUserDataController *Application::getUserData()
@@ -347,6 +432,29 @@ IChatterinoBadges *Application::getChatterinoBadges()
 
     return this->chatterinoBadges.get();
 }
+
+ImageUploader *Application::getImageUploader()
+{
+    assertInGuiThread();
+
+    return this->imageUploader;
+}
+
+SeventvAPI *Application::getSeventvAPI()
+{
+    assertInGuiThread();
+
+    return this->seventvAPI;
+}
+
+#ifdef CHATTERINO_HAVE_PLUGINS
+PluginController *Application::getPlugins()
+{
+    assertInGuiThread();
+
+    return this->plugins;
+}
+#endif
 
 ITwitchIrcServer *Application::getTwitch()
 {
