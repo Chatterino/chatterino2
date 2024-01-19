@@ -2,13 +2,25 @@
 
 #include "Application.hpp"
 #include "common/Args.hpp"
+#include "singletons/Paths.hpp"
+#include "singletons/Updates.hpp"
 
 namespace chatterino::mock {
 
 class EmptyApplication : public IApplication
 {
 public:
+    EmptyApplication()
+        : updates_(this->paths_)
+    {
+    }
+
     virtual ~EmptyApplication() = default;
+
+    const Paths &getPaths() override
+    {
+        return this->paths_;
+    }
 
     const Args &getArgs() override
     {
@@ -110,13 +122,19 @@ public:
         return nullptr;
     }
 
+    TwitchBadges *getTwitchBadges() override
+    {
+        assert(false && "getTwitchBadges was called without being initialized");
+        return nullptr;
+    }
+
     Logging *getChatLogger() override
     {
         assert(!"getChatLogger was called without being initialized");
         return nullptr;
     }
 
-    ChatterinoBadges *getChatterinoBadges() override
+    IChatterinoBadges *getChatterinoBadges() override
     {
         assert(false && "EmptyApplication::getChatterinoBadges was called "
                         "without being initialized");
@@ -168,8 +186,15 @@ public:
         return nullptr;
     }
 
+    Updates &getUpdates() override
+    {
+        return this->updates_;
+    }
+
 private:
+    Paths paths_;
     Args args_;
+    Updates updates_;
 };
 
 }  // namespace chatterino::mock

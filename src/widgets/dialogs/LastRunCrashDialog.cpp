@@ -43,7 +43,7 @@ namespace chatterino {
 
 using namespace literals;
 
-LastRunCrashDialog::LastRunCrashDialog(const Args &args)
+LastRunCrashDialog::LastRunCrashDialog(const Args &args, const Paths &paths)
 {
     this->setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     this->setWindowTitle(u"Chatterino - " % randomMessage());
@@ -56,8 +56,7 @@ LastRunCrashDialog::LastRunCrashDialog(const Args &args)
         "<i>You can disable automatic restarts in the settings.</i><br><br>";
 
 #ifdef CHATTERINO_WITH_CRASHPAD
-    auto reportsDir =
-        QDir(getPaths()->crashdumpDirectory).filePath(u"reports"_s);
+    auto reportsDir = QDir(paths.crashdumpDirectory).filePath(u"reports"_s);
     text += u"A <b>crash report</b> has been saved to "
             "<a href=\"file:///" %
             reportsDir % u"\">" % reportsDir % u"</a>.<br>";

@@ -108,7 +108,7 @@ QCheckBox *SettingsPage::createCheckBox(
     QObject::connect(checkbox, &QCheckBox::toggled, this,
                      [&setting](bool state) {
                          setting = state;
-                         getApp()->windows->forceLayoutChannelViews();
+                         getIApp()->getWindows()->forceLayoutChannelViews();
                      });
 
     return checkbox;

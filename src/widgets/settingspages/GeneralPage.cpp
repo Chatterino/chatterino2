@@ -123,8 +123,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addTitle("Interface");
 
     layout.addDropdown<QString>(
-        "Theme", getApp()->themes->availableThemes(),
-        getApp()->themes->themeName,
+        "Theme", getIApp()->getThemes()->availableThemes(),
+        getIApp()->getThemes()->themeName,
         [](const auto *combo, const auto &themeKey) {
             return combo->findData(themeKey, Qt::UserRole);
         },
@@ -135,7 +135,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addDropdown<QString>(
         "Font", {"Segoe UI", "Arial", "Choose..."},
-        getApp()->fonts->chatFontFamily,
+        getIApp()->getFonts()->chatFontFamily,
         [](auto val) {
             return val;
         },
@@ -144,7 +144,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         });
     layout.addDropdown<int>(
         "Font size", {"9pt", "10pt", "12pt", "14pt", "16pt", "20pt"},
-        getApp()->fonts->chatFontSize,
+        getIApp()->getFonts()->chatFontSize,
         [](auto val) {
             return QString::number(val) + "pt";
         },
@@ -241,7 +241,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Show message reply button", s.showReplyButton, false,
                        "Show a reply button next to every chat message");
 
-    auto removeTabSeq = getApp()->hotkeys->getDisplaySequence(
+    auto removeTabSeq = getIApp()->getHotkeys()->getDisplaySequence(
         HotkeyCategory::Window, "removeTab");
     QString removeTabShortcut = "an assigned hotkey (Window -> remove tab)";
     if (!removeTabSeq.isEmpty())
@@ -262,7 +262,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 #endif
     if (!BaseWindow::supportsCustomWindowFrame())
     {
-        auto settingsSeq = getApp()->hotkeys->getDisplaySequence(
+        auto settingsSeq = getIApp()->getHotkeys()->getDisplaySequence(
             HotkeyCategory::Window, "openSettings");
         QString shortcut = " (no key bound to open them otherwise)";
         // TODO: maybe prevent the user from locking themselves out of the settings?
@@ -791,9 +791,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                           "store in this directory.");
     layout.addButton("Open AppData directory", [] {
 #ifdef Q_OS_DARWIN
-        QDesktopServices::openUrl("file://" + getPaths()->rootAppDataDirectory);
+        QDesktopServices::openUrl("file://" +
+                                  getIApp()->getPaths().rootAppDataDirectory);
 #else
-        QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
+        QDesktopServices::openUrl(getIApp()->getPaths().rootAppDataDirectory);
 #endif
     });
 
@@ -805,7 +806,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     auto *cachePathLabel = layout.addDescription("placeholder :D");
     getSettings()->cachePath.connect([cachePathLabel](const auto &,
                                                       auto) mutable {
-        QString newPath = getPaths()->cacheDirectory();
+        QString newPath = getIApp()->getPaths().cacheDirectory();
 
         QString pathShortened = "Cache saved at <a href=\"file:///" + newPath +
                                 "\"><span style=\"color: white;\">" +
@@ -833,9 +834,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
             if (reply == QMessageBox::Yes)
             {
-                auto cacheDir = QDir(getPaths()->cacheDirectory());
+                auto cacheDir = QDir(getIApp()->getPaths().cacheDirectory());
                 cacheDir.removeRecursively();
-                cacheDir.mkdir(getPaths()->cacheDirectory());
+                cacheDir.mkdir(getIApp()->getPaths().cacheDirectory());
             }
         }));
         box->addStretch(1);
@@ -857,7 +858,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        "Show the stream title");
 
     layout.addSubtitle("R9K");
-    auto toggleLocalr9kSeq = getApp()->hotkeys->getDisplaySequence(
+    auto toggleLocalr9kSeq = getIApp()->getHotkeys()->getDisplaySequence(
         HotkeyCategory::Window, "toggleLocalR9K");
     QString toggleLocalr9kShortcut =
         "an assigned hotkey (Window -> Toggle local R9K)";
@@ -877,7 +878,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.shownSimilarTriggerHighlights);
     s.hideSimilar.connect(
         []() {
-            getApp()->windows->forceLayoutChannelViews();
+            getIApp()->getWindows()->forceLayoutChannelViews();
         },
         false);
     layout.addDropdown<float>(
@@ -939,15 +940,15 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCustomCheckbox(
         "Restart on crash (requires restart)",
         [] {
-            return getApp()->crashHandler->shouldRecover();
+            return getIApp()->getCrashHandler()->shouldRecover();
         },
         [](bool on) {
-            return getApp()->crashHandler->saveShouldRecover(on);
+            return getIApp()->getCrashHandler()->saveShouldRecover(on);
         },
         "When possible, restart Chatterino if the program crashes");
 
 #if defined(Q_OS_LINUX) && !defined(NO_QTKEYCHAIN)
-    if (!getPaths()->isPortable())
+    if (!getIApp()->getPaths().isPortable())
     {
         layout.addCheckbox(
             "Use libsecret/KWallet/Gnome keychain to secure passwords",
@@ -1232,7 +1233,7 @@ void GeneralPage::initExtra()
     {
         getSettings()->cachePath.connect(
             [cachePath = this->cachePath_](const auto &, auto) mutable {
-                QString newPath = getPaths()->cacheDirectory();
+                QString newPath = getIApp()->getPaths().cacheDirectory();
 
                 QString pathShortened = "Current location: <a href=\"file:///" +
                                         newPath + "\">" +
@@ -1250,7 +1251,8 @@ QString GeneralPage::getFont(const DropdownArgs &args) const
     {
         args.combobox->setCurrentIndex(0);
         args.combobox->setEditText("Choosing...");
-        QFontDialog dialog(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.));
+        QFontDialog dialog(
+            getIApp()->getFonts()->getFont(FontStyle::ChatMedium, 1.));
 
         auto ok = bool();
         auto font = dialog.getFont(&ok, this->window());

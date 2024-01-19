@@ -66,8 +66,8 @@ namespace {
         pajlada::Settings::Setting<QString>::set(basePath + "/oauthToken",
                                                  oauthToken);
 
-        getApp()->accounts->twitch.reloadUsers();
-        getApp()->accounts->twitch.currentUsername = username;
+        getIApp()->getAccounts()->twitch.reloadUsers();
+        getIApp()->getAccounts()->twitch.currentUsername = username;
         return true;
     }
 

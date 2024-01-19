@@ -204,7 +204,7 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
 MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
     : MessageBuilder()
 {
-    auto current = getApp()->accounts->twitch.getCurrent();
+    auto current = getIApp()->getAccounts()->twitch.getCurrent();
 
     this->emplace<TimestampElement>();
     this->message().flags.set(MessageFlag::System);
@@ -682,7 +682,8 @@ void MessageBuilder::addIrcMessageText(const QString &text)
 
     auto words = text.split(' ');
     MessageColor defaultColorType = MessageColor::Text;
-    const auto &defaultColor = defaultColorType.getColor(*getApp()->themes);
+    const auto &defaultColor =
+        defaultColorType.getColor(*getIApp()->getThemes());
     QColor textColor = defaultColor;
     int fg = -1;
     int bg = -1;
@@ -726,7 +727,7 @@ void MessageBuilder::addIrcMessageText(const QString &text)
                 if (fg >= 0 && fg <= 98)
                 {
                     textColor = IRC_COLORS[fg];
-                    getApp()->themes->normalizeColor(textColor);
+                    getIApp()->getThemes()->normalizeColor(textColor);
                 }
                 else
                 {
@@ -766,7 +767,7 @@ void MessageBuilder::addIrcMessageText(const QString &text)
         if (fg >= 0 && fg <= 98)
         {
             textColor = IRC_COLORS[fg];
-            getApp()->themes->normalizeColor(textColor);
+            getIApp()->getThemes()->normalizeColor(textColor);
         }
         else
         {

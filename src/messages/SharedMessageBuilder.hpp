@@ -54,6 +54,7 @@ protected:
 
     virtual Outcome tryAppendEmote(const EmoteName &name)
     {
+        (void)name;
         return Failure;
     }
 

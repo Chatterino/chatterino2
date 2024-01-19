@@ -252,7 +252,7 @@ namespace detail {
             }
         }
 
-        getApp()->windows->forceLayoutChannelViews();
+        getIApp()->getWindows()->forceLayoutChannelViews();
 
         loadedEventQueued = false;
     }

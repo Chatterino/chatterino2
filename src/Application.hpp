@@ -1,12 +1,14 @@
 #pragma once
 
 #include "common/Singleton.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "singletons/NativeMessaging.hpp"
 
 #include <pajlada/signals.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QApplication>
 
+#include <cassert>
 #include <memory>
 
 namespace chatterino {
@@ -15,6 +17,7 @@ class Args;
 class TwitchIrcServer;
 class ITwitchIrcServer;
 class PubSub;
+class Updates;
 
 class CommandController;
 class AccountController;
@@ -27,6 +30,7 @@ class ISoundController;
 class SoundController;
 class ITwitchLiveController;
 class TwitchLiveController;
+class TwitchBadges;
 #ifdef CHATTERINO_HAVE_PLUGINS
 class PluginController;
 #endif
@@ -40,6 +44,7 @@ class IEmotes;
 class Settings;
 class Fonts;
 class Toasts;
+class IChatterinoBadges;
 class ChatterinoBadges;
 class FfzBadges;
 class SeventvBadges;
@@ -55,6 +60,7 @@ public:
 
     static IApplication *instance;
 
+    virtual const Paths &getPaths() = 0;
     virtual const Args &getArgs() = 0;
     virtual Theme *getThemes() = 0;
     virtual Fonts *getFonts() = 0;
@@ -70,18 +76,24 @@ public:
     virtual ITwitchIrcServer *getTwitch() = 0;
     virtual PubSub *getTwitchPubSub() = 0;
     virtual Logging *getChatLogger() = 0;
-    virtual ChatterinoBadges *getChatterinoBadges() = 0;
+    virtual IChatterinoBadges *getChatterinoBadges() = 0;
     virtual FfzBadges *getFfzBadges() = 0;
     virtual SeventvBadges *getSeventvBadges() = 0;
     virtual IUserDataController *getUserData() = 0;
     virtual ISoundController *getSound() = 0;
     virtual ITwitchLiveController *getTwitchLiveController() = 0;
+    virtual TwitchBadges *getTwitchBadges() = 0;
     virtual ImageUploader *getImageUploader() = 0;
     virtual SeventvAPI *getSeventvAPI() = 0;
+#ifdef CHATTERINO_HAVE_PLUGINS
+    virtual PluginController *getPlugins() = 0;
+#endif
+    virtual Updates &getUpdates() = 0;
 };
 
 class Application : public IApplication
 {
+    const Paths &paths_;
     const Args &args_;
     std::vector<std::unique_ptr<Singleton>> singletons_;
     int argc_{};
@@ -90,7 +102,8 @@ class Application : public IApplication
 public:
     static Application *instance;
 
-    Application(Settings &_settings, Paths &_paths, const Args &_args);
+    Application(Settings &_settings, const Paths &paths, const Args &_args,
+                Updates &_updates);
     ~Application() override;
 
     Application(const Application &) = delete;
@@ -104,7 +117,7 @@ public:
      */
     void fakeDtor();
 
-    void initialize(Settings &settings, Paths &paths);
+    void initialize(Settings &settings, const Paths &paths);
     void load();
     void save();
 
@@ -112,9 +125,14 @@ public:
 
     friend void test();
 
+private:
     Theme *const themes{};
     Fonts *const fonts{};
+
+public:
     Emotes *const emotes{};
+
+private:
     AccountController *const accounts{};
     HotkeyController *const hotkeys{};
     WindowManager *const windows{};
@@ -122,97 +140,67 @@ public:
     ImageUploader *const imageUploader{};
     SeventvAPI *const seventvAPI{};
     CrashHandler *const crashHandler{};
-
     CommandController *const commands{};
     NotificationController *const notifications{};
     HighlightController *const highlights{};
+
+public:
     TwitchIrcServer *const twitch{};
-    ChatterinoBadges *const chatterinoBadges{};
+
+private:
     FfzBadges *const ffzBadges{};
     SeventvBadges *const seventvBadges{};
     UserDataController *const userData{};
     ISoundController *const sound{};
-
-private:
     TwitchLiveController *const twitchLiveController{};
     std::unique_ptr<PubSub> twitchPubSub;
+    std::unique_ptr<TwitchBadges> twitchBadges;
+    std::unique_ptr<ChatterinoBadges> chatterinoBadges;
     const std::unique_ptr<Logging> logging;
-
-public:
 #ifdef CHATTERINO_HAVE_PLUGINS
     PluginController *const plugins{};
 #endif
 
+public:
+    const Paths &getPaths() override
+    {
+        return this->paths_;
+    }
     const Args &getArgs() override
     {
         return this->args_;
     }
-    Theme *getThemes() override
-    {
-        return this->themes;
-    }
-    Fonts *getFonts() override
-    {
-        return this->fonts;
-    }
+    Theme *getThemes() override;
+    Fonts *getFonts() override;
     IEmotes *getEmotes() override;
-    AccountController *getAccounts() override
-    {
-        return this->accounts;
-    }
-    HotkeyController *getHotkeys() override
-    {
-        return this->hotkeys;
-    }
-    WindowManager *getWindows() override
-    {
-        return this->windows;
-    }
-    Toasts *getToasts() override
-    {
-        return this->toasts;
-    }
-    CrashHandler *getCrashHandler() override
-    {
-        return this->crashHandler;
-    }
-    CommandController *getCommands() override
-    {
-        return this->commands;
-    }
-    NotificationController *getNotifications() override
-    {
-        return this->notifications;
-    }
-    HighlightController *getHighlights() override
-    {
-        return this->highlights;
-    }
+    AccountController *getAccounts() override;
+    HotkeyController *getHotkeys() override;
+    WindowManager *getWindows() override;
+    Toasts *getToasts() override;
+    CrashHandler *getCrashHandler() override;
+    CommandController *getCommands() override;
+    NotificationController *getNotifications() override;
+    HighlightController *getHighlights() override;
     ITwitchIrcServer *getTwitch() override;
     PubSub *getTwitchPubSub() override;
     Logging *getChatLogger() override;
-    ChatterinoBadges *getChatterinoBadges() override
-    {
-        return this->chatterinoBadges;
-    }
-    FfzBadges *getFfzBadges() override
-    {
-        return this->ffzBadges;
-    }
-    SeventvBadges *getSeventvBadges() override
-    {
-        return this->seventvBadges;
-    }
+    FfzBadges *getFfzBadges() override;
+    SeventvBadges *getSeventvBadges() override;
     IUserDataController *getUserData() override;
     ISoundController *getSound() override;
     ITwitchLiveController *getTwitchLiveController() override;
-    ImageUploader *getImageUploader() override
+    TwitchBadges *getTwitchBadges() override;
+    IChatterinoBadges *getChatterinoBadges() override;
+    ImageUploader *getImageUploader() override;
+    SeventvAPI *getSeventvAPI() override;
+#ifdef CHATTERINO_HAVE_PLUGINS
+    PluginController *getPlugins() override;
+#endif
+    Updates &getUpdates() override
     {
-        return this->imageUploader;
-    }
-    SeventvAPI *getSeventvAPI() override
-    {
-        return this->seventvAPI;
+        assertInGuiThread();
+
+        return this->updates;
     }
 
     pajlada::Signals::NoArgSignal streamerModeChanged;
@@ -222,7 +210,7 @@ private:
     void initPubSub();
     void initBttvLiveUpdates();
     void initSeventvEventAPI();
-    void initNm(Paths &paths);
+    void initNm(const Paths &paths);
 
     template <typename T,
               typename = std::enable_if_t<std::is_base_of<Singleton, T>::value>>
@@ -242,6 +230,7 @@ private:
     }
 
     NativeMessagingServer nmServer{};
+    Updates &updates;
 };
 
 Application *getApp();

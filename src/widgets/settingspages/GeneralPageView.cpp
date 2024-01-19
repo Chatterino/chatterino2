@@ -197,7 +197,7 @@ ComboBox *GeneralPageView::addDropdown(
     QObject::connect(combo, &QComboBox::currentTextChanged,
                      [&setting](const QString &newValue) {
                          setting = newValue;
-                         getApp()->windows->forceLayoutChannelViews();
+                         getIApp()->getWindows()->forceLayoutChannelViews();
                      });
 
     return combo;

@@ -66,7 +66,7 @@ QStringList extractCommandLine(
 
 namespace chatterino {
 
-Args::Args(const QApplication &app)
+Args::Args(const QApplication &app, const Paths &paths)
 {
     QCommandLineParser parser;
     parser.setApplicationDescription("Chatterino 2 Client for Twitch Chat");
@@ -132,7 +132,7 @@ Args::Args(const QApplication &app)
 
     if (parser.isSet(channelLayout))
     {
-        this->applyCustomChannelLayout(parser.value(channelLayout));
+        this->applyCustomChannelLayout(parser.value(channelLayout), paths);
     }
 
     this->verbose = parser.isSet(verboseOption);
@@ -175,7 +175,7 @@ QStringList Args::currentArguments() const
     return this->currentArguments_;
 }
 
-void Args::applyCustomChannelLayout(const QString &argValue)
+void Args::applyCustomChannelLayout(const QString &argValue, const Paths &paths)
 {
     WindowLayout layout;
     WindowDescriptor window;
@@ -187,10 +187,9 @@ void Args::applyCustomChannelLayout(const QString &argValue)
     window.type_ = WindowType::Main;
 
     // Load main window layout from config file so we can use the same geometry
-    const QRect configMainLayout = [] {
-        const QString windowLayoutFile =
-            combinePath(getPaths()->settingsDirectory,
-                        WindowManager::WINDOW_LAYOUT_FILENAME);
+    const QRect configMainLayout = [paths] {
+        const QString windowLayoutFile = combinePath(
+            paths.settingsDirectory, WindowManager::WINDOW_LAYOUT_FILENAME);
 
         const WindowLayout configLayout =
             WindowLayout::loadFromFile(windowLayoutFile);

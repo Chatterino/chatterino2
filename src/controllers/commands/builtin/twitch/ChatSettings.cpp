@@ -101,7 +101,7 @@ namespace chatterino::commands {
 
 QString emoteOnly(const CommandContext &ctx)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
@@ -131,7 +131,7 @@ QString emoteOnly(const CommandContext &ctx)
 
 QString emoteOnlyOff(const CommandContext &ctx)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
@@ -160,7 +160,7 @@ QString emoteOnlyOff(const CommandContext &ctx)
 
 QString subscribers(const CommandContext &ctx)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
@@ -190,7 +190,7 @@ QString subscribers(const CommandContext &ctx)
 
 QString subscribersOff(const CommandContext &ctx)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
@@ -220,7 +220,7 @@ QString subscribersOff(const CommandContext &ctx)
 
 QString slow(const CommandContext &ctx)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
@@ -267,7 +267,7 @@ QString slow(const CommandContext &ctx)
 
 QString slowOff(const CommandContext &ctx)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
@@ -297,7 +297,7 @@ QString slowOff(const CommandContext &ctx)
 
 QString followers(const CommandContext &ctx)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
@@ -345,7 +345,7 @@ QString followers(const CommandContext &ctx)
 
 QString followersOff(const CommandContext &ctx)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
@@ -375,7 +375,7 @@ QString followersOff(const CommandContext &ctx)
 
 QString uniqueChat(const CommandContext &ctx)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
@@ -405,7 +405,7 @@ QString uniqueChat(const CommandContext &ctx)
 
 QString uniqueChatOff(const CommandContext &ctx)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));

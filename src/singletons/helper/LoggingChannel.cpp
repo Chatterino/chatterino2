@@ -1,5 +1,6 @@
 #include "LoggingChannel.hpp"
 
+#include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageThread.hpp"
@@ -44,8 +45,9 @@ LoggingChannel::LoggingChannel(const QString &_channelName,
                          QDir::separator() + this->subDirectory;
 
     getSettings()->logPath.connect([this](const QString &logPath, auto) {
-        this->baseDirectory =
-            logPath.isEmpty() ? getPaths()->messageLogDirectory : logPath;
+        this->baseDirectory = logPath.isEmpty()
+                                  ? getIApp()->getPaths().messageLogDirectory
+                                  : logPath;
         this->openLogFile();
     });
 }

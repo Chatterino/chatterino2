@@ -70,7 +70,7 @@ Notebook::Notebook(QWidget *parent)
 NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
 {
     // Queue up save because: Tab added
-    getApp()->windows->queueSave();
+    getIApp()->getWindows()->queueSave();
 
     auto *tab = new NotebookTab(this);
     tab->page = page;
@@ -100,7 +100,7 @@ NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
 void Notebook::removePage(QWidget *page)
 {
     // Queue up save because: Tab removed
-    getApp()->windows->queueSave();
+    getIApp()->getWindows()->queueSave();
 
     int removingIndex = this->indexOf(page);
     assert(removingIndex != -1);
@@ -491,7 +491,7 @@ void Notebook::rearrangePage(QWidget *page, int index)
     }
 
     // Queue up save because: Tab rearranged
-    getApp()->windows->queueSave();
+    getIApp()->getWindows()->queueSave();
 
     this->items_.move(this->indexOf(page), index);
 
@@ -532,16 +532,16 @@ void Notebook::setShowTabs(bool value)
 
 void Notebook::showTabVisibilityInfoPopup()
 {
-    auto unhideSeq = getApp()->hotkeys->getDisplaySequence(
+    auto unhideSeq = getIApp()->getHotkeys()->getDisplaySequence(
         HotkeyCategory::Window, "setTabVisibility", {std::vector<QString>()});
     if (unhideSeq.isEmpty())
     {
-        unhideSeq = getApp()->hotkeys->getDisplaySequence(
+        unhideSeq = getIApp()->getHotkeys()->getDisplaySequence(
             HotkeyCategory::Window, "setTabVisibility", {{"toggle"}});
     }
     if (unhideSeq.isEmpty())
     {
-        unhideSeq = getApp()->hotkeys->getDisplaySequence(
+        unhideSeq = getIApp()->getHotkeys()->getDisplaySequence(
             HotkeyCategory::Window, "setTabVisibility", {{"on"}});
     }
     QString hotkeyInfo = "(currently unbound)";
@@ -1293,7 +1293,7 @@ SplitNotebook::SplitNotebook(Window *parent)
         this->signalHolder_, true);
 
     this->signalHolder_.managedConnect(
-        getApp()->windows->selectSplit, [this](Split *split) {
+        getIApp()->getWindows()->selectSplit, [this](Split *split) {
             for (auto &&item : this->items())
             {
                 if (auto *sc = dynamic_cast<SplitContainer *>(item.page))
@@ -1310,13 +1310,14 @@ SplitNotebook::SplitNotebook(Window *parent)
             }
         });
 
-    this->signalHolder_.managedConnect(getApp()->windows->selectSplitContainer,
-                                       [this](SplitContainer *sc) {
-                                           this->select(sc);
-                                       });
+    this->signalHolder_.managedConnect(
+        getIApp()->getWindows()->selectSplitContainer,
+        [this](SplitContainer *sc) {
+            this->select(sc);
+        });
 
     this->signalHolder_.managedConnect(
-        getApp()->windows->scrollToMessageSignal,
+        getIApp()->getWindows()->scrollToMessageSignal,
         [this](const MessagePtr &message) {
             for (auto &&item : this->items())
             {
@@ -1382,7 +1383,7 @@ void SplitNotebook::addCustomButtons()
     settingsBtn->setIcon(NotebookButton::Settings);
 
     QObject::connect(settingsBtn, &NotebookButton::leftClicked, [this] {
-        getApp()->windows->showSettingsDialog(this);
+        getIApp()->getWindows()->showSettingsDialog(this);
     });
 
     // account
@@ -1396,7 +1397,7 @@ void SplitNotebook::addCustomButtons()
 
     userBtn->setIcon(NotebookButton::User);
     QObject::connect(userBtn, &NotebookButton::leftClicked, [this, userBtn] {
-        getApp()->windows->showAccountSelectPopup(
+        getIApp()->getWindows()->showAccountSelectPopup(
             this->mapToGlobal(userBtn->rect().bottomRight()));
     });
 
@@ -1409,7 +1410,7 @@ void SplitNotebook::addCustomButtons()
     this->streamerModeIcon_ = this->addCustomButton();
     QObject::connect(this->streamerModeIcon_, &NotebookButton::leftClicked,
                      [this] {
-                         getApp()->windows->showSettingsDialog(
+                         getIApp()->getWindows()->showSettingsDialog(
                              this, SettingsDialogPreference::StreamerMode);
                      });
     this->signalHolder_.managedConnect(getApp()->streamerModeChanged, [this]() {

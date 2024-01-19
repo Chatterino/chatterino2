@@ -219,7 +219,7 @@ QString marker(const CommandContext &ctx)
     }
 
     // Avoid Helix calls without Client ID and/or OAuth Token
-    if (getApp()->accounts->twitch.getCurrent()->isAnon())
+    if (getIApp()->getAccounts()->twitch.getCurrent()->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(
             "You need to be logged in to create stream markers!"));
@@ -365,8 +365,12 @@ QString popup(const CommandContext &ctx)
     // Popup the current split
     if (target.isEmpty())
     {
-        auto *currentPage = dynamic_cast<SplitContainer *>(
-            getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
+        auto *currentPage =
+            dynamic_cast<SplitContainer *>(getIApp()
+                                               ->getWindows()
+                                               ->getMainWindow()
+                                               .getNotebook()
+                                               .getSelectedPage());
         if (currentPage != nullptr)
         {
             auto *currentSplit = currentPage->getSelectedSplit();
@@ -385,7 +389,7 @@ QString popup(const CommandContext &ctx)
     // Open channel passed as argument in a popup
     auto *app = getApp();
     auto targetChannel = app->twitch->getOrAddChannel(target);
-    app->windows->openInPopup(targetChannel);
+    app->getWindows()->openInPopup(targetChannel);
 
     return "";
 }
@@ -394,8 +398,11 @@ QString clearmessages(const CommandContext &ctx)
 {
     (void)ctx;
 
-    auto *currentPage = dynamic_cast<SplitContainer *>(
-        getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
+    auto *currentPage = dynamic_cast<SplitContainer *>(getIApp()
+                                                           ->getWindows()
+                                                           ->getMainWindow()
+                                                           .getNotebook()
+                                                           .getSelectedPage());
 
     if (auto *split = currentPage->getSelectedSplit())
     {
@@ -580,8 +587,11 @@ QString openUsercard(const CommandContext &ctx)
 
     // try to link to current split if possible
     Split *currentSplit = nullptr;
-    auto *currentPage = dynamic_cast<SplitContainer *>(
-        getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
+    auto *currentPage = dynamic_cast<SplitContainer *>(getIApp()
+                                                           ->getWindows()
+                                                           ->getMainWindow()
+                                                           .getNotebook()
+                                                           .getSelectedPage());
     if (currentPage != nullptr)
     {
         currentSplit = currentPage->getSelectedSplit();
@@ -592,7 +602,8 @@ QString openUsercard(const CommandContext &ctx)
     if (differentChannel || currentSplit == nullptr)
     {
         // not possible to use current split, try searching for one
-        const auto &notebook = getApp()->windows->getMainWindow().getNotebook();
+        const auto &notebook =
+            getIApp()->getWindows()->getMainWindow().getNotebook();
         auto count = notebook.getPageCount();
         for (int i = 0; i < count; i++)
         {

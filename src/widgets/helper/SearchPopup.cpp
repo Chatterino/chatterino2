@@ -103,7 +103,7 @@ void SearchPopup::addShortcuts()
         {"scrollPage", nullptr},
     };
 
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 }
 
@@ -138,7 +138,7 @@ void SearchPopup::goToMessage(const MessagePtr &message)
         if (type == Channel::Type::TwitchMentions ||
             type == Channel::Type::TwitchAutomod)
         {
-            getApp()->windows->scrollToMessage(message);
+            getIApp()->getWindows()->scrollToMessage(message);
             return;
         }
 

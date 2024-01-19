@@ -23,7 +23,12 @@
 
 namespace chatterino {
 
-void PluginController::initialize(Settings &settings, Paths &paths)
+PluginController::PluginController(const Paths &paths_)
+    : paths(paths_)
+{
+}
+
+void PluginController::initialize(Settings &settings, const Paths &paths)
 {
     (void)paths;
 
@@ -44,7 +49,7 @@ void PluginController::initialize(Settings &settings, Paths &paths)
 void PluginController::loadPlugins()
 {
     this->plugins_.clear();
-    auto dir = QDir(getPaths()->pluginsDirectory);
+    auto dir = QDir(this->paths.pluginsDirectory);
     qCDebug(chatterinoLua) << "Loading plugins in" << dir.path();
     for (const auto &info :
          dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot))
@@ -276,7 +281,7 @@ bool PluginController::reload(const QString &id)
     }
     for (const auto &[cmd, _] : it->second->ownedCommands)
     {
-        getApp()->commands->unregisterPluginCommand(cmd);
+        getIApp()->getCommands()->unregisterPluginCommand(cmd);
     }
     it->second->ownedCommands.clear();
     QDir loadDir = it->second->loadDirectory_;

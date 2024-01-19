@@ -37,8 +37,13 @@ class WindowManager final : public Singleton
 public:
     static const QString WINDOW_LAYOUT_FILENAME;
 
-    WindowManager();
+    explicit WindowManager(const Paths &paths);
     ~WindowManager() override;
+
+    WindowManager(const WindowManager &) = delete;
+    WindowManager(WindowManager &&) = delete;
+    WindowManager &operator=(const WindowManager &) = delete;
+    WindowManager &operator=(WindowManager &&) = delete;
 
     static void encodeTab(SplitContainer *tab, bool isSelected,
                           QJsonObject &obj);
@@ -93,7 +98,7 @@ public:
     QPoint emotePopupPos();
     void setEmotePopupPos(QPoint pos);
 
-    void initialize(Settings &settings, Paths &paths) override;
+    void initialize(Settings &settings, const Paths &paths) override;
     void save() override;
     void closeAll();
 
