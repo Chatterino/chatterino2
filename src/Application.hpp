@@ -44,6 +44,7 @@ class IEmotes;
 class Settings;
 class Fonts;
 class Toasts;
+class IChatterinoBadges;
 class ChatterinoBadges;
 class FfzBadges;
 class SeventvBadges;
@@ -75,7 +76,7 @@ public:
     virtual ITwitchIrcServer *getTwitch() = 0;
     virtual PubSub *getTwitchPubSub() = 0;
     virtual Logging *getChatLogger() = 0;
-    virtual ChatterinoBadges *getChatterinoBadges() = 0;
+    virtual IChatterinoBadges *getChatterinoBadges() = 0;
     virtual FfzBadges *getFfzBadges() = 0;
     virtual SeventvBadges *getSeventvBadges() = 0;
     virtual IUserDataController *getUserData() = 0;
@@ -136,7 +137,6 @@ public:
     NotificationController *const notifications{};
     HighlightController *const highlights{};
     TwitchIrcServer *const twitch{};
-    ChatterinoBadges *const chatterinoBadges{};
     FfzBadges *const ffzBadges{};
     SeventvBadges *const seventvBadges{};
     UserDataController *const userData{};
@@ -146,6 +146,7 @@ private:
     TwitchLiveController *const twitchLiveController{};
     std::unique_ptr<PubSub> twitchPubSub;
     std::unique_ptr<TwitchBadges> twitchBadges;
+    std::unique_ptr<ChatterinoBadges> chatterinoBadges;
     const std::unique_ptr<Logging> logging;
 
 public:
@@ -225,12 +226,6 @@ public:
     ITwitchIrcServer *getTwitch() override;
     PubSub *getTwitchPubSub() override;
     Logging *getChatLogger() override;
-    ChatterinoBadges *getChatterinoBadges() override
-    {
-        assertInGuiThread();
-
-        return this->chatterinoBadges;
-    }
     FfzBadges *getFfzBadges() override
     {
         assertInGuiThread();
@@ -247,6 +242,7 @@ public:
     ISoundController *getSound() override;
     ITwitchLiveController *getTwitchLiveController() override;
     TwitchBadges *getTwitchBadges() override;
+    IChatterinoBadges *getChatterinoBadges() override;
     ImageUploader *getImageUploader() override
     {
         assertInGuiThread();

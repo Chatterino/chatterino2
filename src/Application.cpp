@@ -127,7 +127,6 @@ Application::Application(Settings &_settings, const Paths &paths,
     , notifications(&this->emplace<NotificationController>())
     , highlights(&this->emplace<HighlightController>())
     , twitch(&this->emplace<TwitchIrcServer>())
-    , chatterinoBadges(&this->emplace<ChatterinoBadges>())
     , ffzBadges(&this->emplace<FfzBadges>())
     , seventvBadges(&this->emplace<SeventvBadges>())
     , userData(&this->emplace(new UserDataController(paths)))
@@ -135,6 +134,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , twitchLiveController(&this->emplace<TwitchLiveController>())
     , twitchPubSub(new PubSub(TWITCH_PUBSUB_URL))
     , twitchBadges(new TwitchBadges)
+    , chatterinoBadges(new ChatterinoBadges)
     , logging(new Logging(_settings))
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(&this->emplace(new PluginController(paths)))
@@ -156,6 +156,7 @@ void Application::fakeDtor()
 {
     this->twitchPubSub.reset();
     this->twitchBadges.reset();
+    this->chatterinoBadges.reset();
 }
 
 void Application::initialize(Settings &settings, const Paths &paths)
@@ -337,6 +338,14 @@ TwitchBadges *Application::getTwitchBadges()
     assert(this->twitchBadges);
 
     return this->twitchBadges.get();
+}
+
+IChatterinoBadges *Application::getChatterinoBadges()
+{
+    assertInGuiThread();
+    assert(this->chatterinoBadges);
+
+    return this->chatterinoBadges.get();
 }
 
 ITwitchIrcServer *Application::getTwitch()
