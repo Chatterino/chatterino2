@@ -365,6 +365,12 @@ void WindowManager::initialize(Settings &settings, const Paths &paths)
             windowLayout = this->loadWindowLayoutFromFile();
         }
 
+        auto desired = getIApp()->getArgs().activateChannel;
+        if (desired)
+        {
+            windowLayout.activateOrAddChannel(desired->provider, desired->spec);
+        }
+
         this->emotePopupPos_ = windowLayout.emotePopupPos_;
 
         this->applyWindowLayout(windowLayout);
