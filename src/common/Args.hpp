@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/ProviderId.hpp"
 #include "common/WindowDescriptors.hpp"
 
 #include <QApplication>
@@ -26,12 +27,18 @@ class Paths;
 /// -v, --verbose
 /// -V, --version
 /// -c, --channels=t:channel1;t:channel2;...
+/// -a, --activate=t:channel
 ///     --safe-mode
 ///
 /// See documentation on `QGuiApplication` for documentation on Qt arguments like -platform.
 class Args
 {
 public:
+    struct Channel {
+        ProviderId provider;
+        QString name;
+    };
+
     Args() = default;
     Args(const QApplication &app, const Paths &paths);
 
@@ -52,6 +59,7 @@ public:
     bool dontSaveSettings{};
     bool dontLoadMainWindow{};
     std::optional<WindowLayout> customChannelLayout;
+    std::optional<Channel> activateChannel;
     bool verbose{};
     bool safeMode{};
 
