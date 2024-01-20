@@ -265,6 +265,10 @@ int Application::run(QApplication &qtApp)
         getSettings()->highlightedUsers.delayedItemsChanged.connect([this] {
             this->windows->forceLayoutChannelViews();
         });
+    std::ignore =
+        getSettings()->highlightedBadges.delayedItemsChanged.connect([this] {
+            this->windows->forceLayoutChannelViews();
+        });
 
     getSettings()->removeSpacesBetweenEmotes.connect([this] {
         this->windows->forceLayoutChannelViews();
