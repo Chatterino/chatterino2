@@ -128,11 +128,7 @@ public:
 private:
     Theme *const themes{};
     Fonts *const fonts{};
-
-public:
     Emotes *const emotes{};
-
-private:
     AccountController *const accounts{};
     HotkeyController *const hotkeys{};
     WindowManager *const windows{};

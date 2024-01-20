@@ -127,8 +127,8 @@ void addTwitchEmoteSets(
         {
             builder
                 .emplace<EmoteElement>(
-                    getApp()->emotes->twitch.getOrCreateEmote(emote.id,
-                                                              emote.name),
+                    getIApp()->getEmotes()->getTwitchEmotes()->getOrCreateEmote(
+                        emote.id, emote.name),
                     MessageElementFlags{MessageElementFlag::AlwaysShow,
                                         MessageElementFlag::TwitchEmote})
                 ->setLink(Link(Link::InsertText, emote.name.string));

@@ -685,7 +685,8 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                 currentText += ' ';
             }
 
-            for (const auto &parsedWord : app->emotes->emojis.parse(word.text))
+            for (const auto &parsedWord :
+                 app->getEmotes()->getEmojis()->parse(word.text))
             {
                 if (parsedWord.type() == typeid(QString))
                 {

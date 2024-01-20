@@ -576,7 +576,8 @@ void TwitchChannel::roomIdChanged()
 QString TwitchChannel::prepareMessage(const QString &message) const
 {
     auto *app = getApp();
-    QString parsedMessage = app->emotes->emojis.replaceShortCodes(message);
+    QString parsedMessage =
+        app->getEmotes()->getEmojis()->replaceShortCodes(message);
 
     parsedMessage = parsedMessage.simplified();
 

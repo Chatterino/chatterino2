@@ -814,7 +814,7 @@ void MessageBuilder::addIrcWord(const QString &text, const QColor &color,
                                 bool addSpace)
 {
     this->textColor_ = color;
-    for (auto &variant : getApp()->emotes->emojis.parse(text))
+    for (auto &variant : getIApp()->getEmotes()->getEmojis()->parse(text))
     {
         boost::apply_visitor(
             [&](auto &&arg) {
