@@ -24,6 +24,7 @@
 - Minor: Improved color selection and display. (#5057)
 - Minor: Improved Streamlink documentation in the settings dialog. (#5076)
 - Minor: Normalized the input padding between light & dark themes. (#5095)
+- Minor: Add `--activate <channel>` (or `-a`) command line option to activate or add a Twitch channel. (#5111)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
 - Bugfix: Trimmed custom streamlink paths on all platforms making sure you don't accidentally add spaces at the beginning or end of its path. (#4834)
