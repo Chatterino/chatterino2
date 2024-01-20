@@ -130,6 +130,7 @@
 - Dev: Fix `NotebookTab` emitting updates for every message. (#5068)
 - Dev: Added benchmark for parsing and building recent messages. (#5071)
 - Dev: Boost is depended on as a header-only library when using conan. (#5107)
+- Dev: Qt 5.15.2 is now a minimum requirement. (#5113)
 
 ## 2.4.6
 
