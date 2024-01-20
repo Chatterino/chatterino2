@@ -103,10 +103,6 @@ void UserHighlightModel::customRowSetData(
                     // Update the setting with the new value
                     getSettings()->selfMessageHighlightColor.setValue(
                         colorName);
-                    // Update the color provider with the new color to be used for future
-                    const_cast<ColorProvider &>(ColorProvider::instance())
-                        .updateColor(ColorType::SelfMessageHighlight,
-                                     QColor(colorName));
                 }
             }
         }
