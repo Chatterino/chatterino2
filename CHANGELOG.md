@@ -50,6 +50,7 @@
 - Bugfix: Fixed an occasional crash for channel point redemptions with text input. (#4949)
 - Bugfix: Fixed triple click on message also selecting moderation buttons. (#4961)
 - Bugfix: Fixed a freeze from a bad regex in _Ignores_. (#4965)
+- Bugfix: Fixed badge highlight changes not immediately being reflected. (#5110)
 - Bugfix: Fixed some emotes not appearing when using _Ignores_. (#4965)
 - Bugfix: Fixed lookahead/-behind not working in _Ignores_. (#4965)
 - Bugfix: Fixed Image Uploader accidentally deleting images with some hosts when link resolver was enabled. (#4971)
