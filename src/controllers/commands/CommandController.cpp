@@ -476,7 +476,8 @@ CommandModel *CommandController::createModel(QObject *parent)
 QString CommandController::execCommand(const QString &textNoEmoji,
                                        ChannelPtr channel, bool dryRun)
 {
-    QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
+    QString text =
+        getIApp()->getEmotes()->getEmojis()->replaceShortCodes(textNoEmoji);
     QStringList words = text.split(' ', Qt::SkipEmptyParts);
 
     if (words.length() == 0)
@@ -491,7 +492,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         const auto it = this->userCommands_.find(commandName);
         if (it != this->userCommands_.end())
         {
-            text = getApp()->emotes->emojis.replaceShortCodes(
+            text = getIApp()->getEmotes()->getEmojis()->replaceShortCodes(
                 this->execCustomCommand(words, it.value(), dryRun, channel));
 
             words = text.split(' ', Qt::SkipEmptyParts);

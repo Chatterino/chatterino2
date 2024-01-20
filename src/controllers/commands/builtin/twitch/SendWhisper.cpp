@@ -137,7 +137,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
             }
         }  // bttv/ffz emote
         {  // emoji/text
-            for (auto &variant : app->emotes->emojis.parse(words[i]))
+            for (auto &variant : app->getEmotes()->getEmojis()->parse(words[i]))
             {
                 constexpr const static struct {
                     void operator()(EmotePtr emote, MessageBuilder &b) const
