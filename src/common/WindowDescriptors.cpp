@@ -230,10 +230,10 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
 }
 
 void WindowLayout::activateOrAddChannel(ProviderId provider,
-                                        const QString &spec)
+                                        const QString &name)
 {
-    if (provider != ProviderId::Twitch || spec.startsWith(u'/') ||
-        spec.startsWith(u'$'))
+    if (provider != ProviderId::Twitch || name.startsWith(u'/') ||
+        name.startsWith(u'$'))
     {
         qCWarning(chatterinoWindowmanager)
             << "Only twitch channels can be set as active";
@@ -256,7 +256,7 @@ void WindowLayout::activateOrAddChannel(ProviderId provider,
                         .selected_ = true,
                         .rootNode_ = SplitNodeDescriptor{{
                             .type_ = "twitch",
-                            .channelName_ = spec,
+                            .channelName_ = name,
                         }},
                     },
                 },
@@ -265,9 +265,8 @@ void WindowLayout::activateOrAddChannel(ProviderId provider,
     }
 
     TabDescriptor *bestTab = nullptr;
-    // The tab score is calculted as follows:
-    // +4 for every split
-    // +2 for the desired channel
+    // The tab score is calculated as follows:
+    // +2 for every split
     // +1 if the desired split has filters
     // Thus lower is better and having one split of a channel is preferred over multiple
     size_t bestTabScore = std::numeric_limits<size_t>::max();
@@ -289,11 +288,10 @@ void WindowLayout::activateOrAddChannel(ProviderId provider,
 
             void operator()(const SplitNodeDescriptor &split)
             {
-                this->score += 4;
+                this->score += 2;
                 if (split.channelName_ == this->spec)
                 {
                     hasChannel = true;
-                    this->score += 2;
                     if (!split.filters_.empty())
                     {
                         this->score += 1;
@@ -308,7 +306,7 @@ void WindowLayout::activateOrAddChannel(ProviderId provider,
                     std::visit(*this, item);
                 }
             }
-        } visitor{spec};
+        } visitor{name};
 
         std::visit(visitor, *tab.rootNode_);
 
@@ -329,7 +327,7 @@ void WindowLayout::activateOrAddChannel(ProviderId provider,
         .selected_ = true,
         .rootNode_ = SplitNodeDescriptor{{
             .type_ = "twitch",
-            .channelName_ = spec,
+            .channelName_ = name,
         }},
     };
     mainWindow->tabs_.emplace_back(tab);

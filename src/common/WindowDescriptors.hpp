@@ -102,7 +102,7 @@ public:
 
     std::vector<WindowDescriptor> windows_;
 
-    /// Selects the split containing the channel specified by @a spec for the specified
+    /// Selects the split containing the channel specified by @a name for the specified
     /// @a provider. Currently, only Twitch is supported as the provider
     /// and special channels (such as /mentions) are ignored.
     ///
@@ -111,7 +111,7 @@ public:
     ///
     /// If no split with the channel exists, a new one is added.
     /// If no window exists, a new one is added.
-    void activateOrAddChannel(ProviderId provider, const QString &spec);
+    void activateOrAddChannel(ProviderId provider, const QString &name);
     static WindowLayout loadFromFile(const QString &path);
 };
 

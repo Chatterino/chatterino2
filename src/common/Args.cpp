@@ -83,7 +83,7 @@ std::optional<Args::Channel> parseActivateOption(QString input)
 
     return Args::Channel{
         .provider = ProviderId::Twitch,
-        .spec = input,
+        .name = input,
     };
 }
 

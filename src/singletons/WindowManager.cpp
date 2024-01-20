@@ -368,7 +368,7 @@ void WindowManager::initialize(Settings &settings, const Paths &paths)
         auto desired = getIApp()->getArgs().activateChannel;
         if (desired)
         {
-            windowLayout.activateOrAddChannel(desired->provider, desired->spec);
+            windowLayout.activateOrAddChannel(desired->provider, desired->name);
         }
 
         this->emotePopupPos_ = windowLayout.emotePopupPos_;

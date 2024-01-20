@@ -36,7 +36,7 @@ class Args
 public:
     struct Channel {
         ProviderId provider;
-        QString spec;
+        QString name;
     };
 
     Args() = default;
