@@ -112,6 +112,7 @@
 - Dev: Refactored the Image Uploader feature. (#4971)
 - Dev: Refactored the SplitOverlay code. (#5082)
 - Dev: Refactored the TwitchBadges structure, making it less of a singleton. (#5096)
+- Dev: Refactored emotes out of TwitchIrcServer. (#5120)
 - Dev: Refactored the ChatterinoBadges structure, making it less of a singleton. (#5103)
 - Dev: Refactored the ColorProvider class a bit. (#5112)
 - Dev: Moved the Network files to their own folder. (#5089)
