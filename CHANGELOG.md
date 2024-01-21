@@ -71,6 +71,7 @@
 - Bugfix: Fixed popup windows not persisting between restarts. (#5081)
 - Bugfix: Fixed splits not retaining their focus after minimizing. (#5080)
 - Bugfix: Fixed _Copy message_ copying the channel name in global search. (#5106)
+- Bugfix: Chatters from recent-messages are now added to autocompletion. (#5116)
 - Dev: Run miniaudio in a separate thread, and simplify it to not manage the device ourselves. There's a chance the simplification is a bad idea. (#4978)
 - Dev: Change clang-format from v14 to v16. (#4929)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
