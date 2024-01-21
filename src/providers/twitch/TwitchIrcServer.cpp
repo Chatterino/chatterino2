@@ -7,8 +7,11 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/BttvLiveUpdates.hpp"
+#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/seventv/eventapi/Subscription.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
@@ -519,15 +522,15 @@ void TwitchIrcServer::onReplySendRequested(TwitchChannel *channel,
 
 const BttvEmotes &TwitchIrcServer::getBttvEmotes() const
 {
-    return this->bttv;
+    return *getIApp()->getBttvEmotes();
 }
 const FfzEmotes &TwitchIrcServer::getFfzEmotes() const
 {
-    return this->ffz;
+    return *getIApp()->getFfzEmotes();
 }
 const SeventvEmotes &TwitchIrcServer::getSeventvEmotes() const
 {
-    return this->seventv_;
+    return *getIApp()->getSeventvEmotes();
 }
 
 const IndirectChannel &TwitchIrcServer::getWatchingChannel() const
@@ -537,7 +540,7 @@ const IndirectChannel &TwitchIrcServer::getWatchingChannel() const
 
 void TwitchIrcServer::reloadBTTVGlobalEmotes()
 {
-    this->bttv.loadEmotes();
+    getIApp()->getBttvEmotes()->loadEmotes();
 }
 
 void TwitchIrcServer::reloadAllBTTVChannelEmotes()
@@ -552,7 +555,7 @@ void TwitchIrcServer::reloadAllBTTVChannelEmotes()
 
 void TwitchIrcServer::reloadFFZGlobalEmotes()
 {
-    this->ffz.loadEmotes();
+    getIApp()->getFfzEmotes()->loadEmotes();
 }
 
 void TwitchIrcServer::reloadAllFFZChannelEmotes()
@@ -567,7 +570,7 @@ void TwitchIrcServer::reloadAllFFZChannelEmotes()
 
 void TwitchIrcServer::reloadSevenTVGlobalEmotes()
 {
-    this->seventv_.loadGlobalEmotes();
+    getIApp()->getSeventvEmotes()->loadGlobalEmotes();
 }
 
 void TwitchIrcServer::reloadAllSevenTVChannelEmotes()

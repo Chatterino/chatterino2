@@ -1,6 +1,9 @@
 #pragma once
 
 #include "mocks/Channel.hpp"
+#include "providers/bttv/BttvEmotes.hpp"
+#include "providers/ffz/FfzEmotes.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 
 namespace chatterino::mock {

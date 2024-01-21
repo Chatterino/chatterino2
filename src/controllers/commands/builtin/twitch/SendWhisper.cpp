@@ -7,6 +7,8 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
+#include "providers/bttv/BttvEmotes.hpp"
+#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/IrcChannel2.hpp"
 #include "providers/irc/IrcServer.hpp"
 #include "providers/twitch/api/Helix.hpp"

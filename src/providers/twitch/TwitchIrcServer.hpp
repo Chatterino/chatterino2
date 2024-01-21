@@ -3,10 +3,7 @@
 #include "common/Atomic.hpp"
 #include "common/Channel.hpp"
 #include "common/Singleton.hpp"
-#include "providers/bttv/BttvEmotes.hpp"
-#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/AbstractIrcServer.hpp"
-#include "providers/seventv/SeventvEmotes.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
 
@@ -21,6 +18,9 @@ class Paths;
 class TwitchChannel;
 class BttvLiveUpdates;
 class SeventvEventAPI;
+class BttvEmotes;
+class FfzEmotes;
+class SeventvEmotes;
 
 class ITwitchIrcServer
 {
@@ -115,10 +115,6 @@ private:
     std::queue<std::chrono::steady_clock::time_point> lastMessageMod_;
     std::chrono::steady_clock::time_point lastErrorTimeSpeed_;
     std::chrono::steady_clock::time_point lastErrorTimeAmount_;
-
-    BttvEmotes bttv;
-    FfzEmotes ffz;
-    SeventvEmotes seventv_;
 
     pajlada::Signals::SignalHolder signalHolder_;
 };
