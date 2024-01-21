@@ -30,10 +30,9 @@ public:
     };
 
     std::vector<Badge> getUserBadges(const UserId &id);
+    std::optional<Badge> getBadge(int badgeID) const;
 
 private:
-    std::optional<Badge> getBadge(int badgeID);
-
     void load();
 
     std::shared_mutex mutex_;
