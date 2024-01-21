@@ -6,6 +6,7 @@
 #include "common/QLogging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Resources.hpp"
+#include "singletons/WindowManager.hpp"
 
 #include <QColor>
 #include <QDir>
@@ -13,6 +14,9 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <QSet>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+#    include <QStyleHints>
+#endif
 
 #include <cmath>
 
@@ -208,7 +212,15 @@ const std::vector<ThemeDescriptor> Theme::builtInThemes{
         .key = "Black",
         .path = ":/themes/Black.json",
         .name = "Black",
+    }
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    ,
+    {
+        .key = "System",
+        .path = ":/themes/Dark.json",
+        .name = "System",
     },
+#endif
 };
 
 // Dark is our default & fallback theme
@@ -217,6 +229,11 @@ const ThemeDescriptor Theme::fallbackTheme = Theme::builtInThemes.at(2);
 bool Theme::isLightTheme() const
 {
     return this->isLight_;
+}
+
+bool Theme::isSystemTheme() const
+{
+    return this->themeName == u"System";
 }
 
 void Theme::initialize(Settings &settings, const Paths &paths)
@@ -230,12 +247,40 @@ void Theme::initialize(Settings &settings, const Paths &paths)
 
     this->loadAvailableThemes(paths);
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    QObject::connect(qApp->styleHints(), &QStyleHints::colorSchemeChanged,
+                     &this->lifetime_, [this] {
+                         if (this->isSystemTheme())
+                         {
+                             this->update();
+                             getIApp()->getWindows()->forceLayoutChannelViews();
+                         }
+                     });
+#endif
+
     this->update();
 }
 
 void Theme::update()
 {
-    auto oTheme = this->findThemeByKey(this->themeName);
+    auto currentTheme = [&]() -> QString {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        if (this->isSystemTheme())
+        {
+            switch (qApp->styleHints()->colorScheme())
+            {
+                case Qt::ColorScheme::Light:
+                    return u"Light"_s;
+                case Qt::ColorScheme::Unknown:
+                case Qt::ColorScheme::Dark:
+                    return u"Dark"_s;
+            }
+        }
+#endif
+        return this->themeName;
+    };
+
+    auto oTheme = this->findThemeByKey(currentTheme());
 
     constexpr const double nsToMs = 1.0 / 1000000.0;
     QElapsedTimer timer;
