@@ -130,15 +130,15 @@ void EmoteSource::initializeFromChannel(const Channel *channel)
             }
         }
 
-        if (auto bttvG = app->getTwitch()->getBttvEmotes().emotes())
+        if (auto bttvG = app->getBttvEmotes()->emotes())
         {
             addEmotes(emotes, *bttvG, "Global BetterTTV");
         }
-        if (auto ffzG = app->getTwitch()->getFfzEmotes().emotes())
+        if (auto ffzG = app->getFfzEmotes()->emotes())
         {
             addEmotes(emotes, *ffzG, "Global FrankerFaceZ");
         }
-        if (auto seventvG = app->getTwitch()->getSeventvEmotes().globalEmotes())
+        if (auto seventvG = app->getSeventvEmotes()->globalEmotes())
         {
             addEmotes(emotes, *seventvG, "Global 7TV");
         }

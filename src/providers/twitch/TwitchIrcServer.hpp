@@ -27,9 +27,6 @@ class ITwitchIrcServer
 public:
     virtual ~ITwitchIrcServer() = default;
 
-    virtual const BttvEmotes &getBttvEmotes() const = 0;
-    virtual const FfzEmotes &getFfzEmotes() const = 0;
-    virtual const SeventvEmotes &getSeventvEmotes() const = 0;
     virtual const IndirectChannel &getWatchingChannel() const = 0;
 
     // Update this interface with TwitchIrcServer methods as needed
@@ -82,9 +79,6 @@ public:
     std::unique_ptr<BttvLiveUpdates> bttvLiveUpdates;
     std::unique_ptr<SeventvEventAPI> seventvEventAPI;
 
-    const BttvEmotes &getBttvEmotes() const override;
-    const FfzEmotes &getFfzEmotes() const override;
-    const SeventvEmotes &getSeventvEmotes() const override;
     const IndirectChannel &getWatchingChannel() const override;
 
 protected:

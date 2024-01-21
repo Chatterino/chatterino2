@@ -19,29 +19,11 @@ public:
     {
     }
 
-    const BttvEmotes &getBttvEmotes() const override
-    {
-        return this->bttv;
-    }
-
-    const FfzEmotes &getFfzEmotes() const override
-    {
-        return this->ffz;
-    }
-
-    const SeventvEmotes &getSeventvEmotes() const override
-    {
-        return this->seventv;
-    }
-
     const IndirectChannel &getWatchingChannel() const override
     {
         return this->watchingChannel;
     }
 
-    BttvEmotes bttv;
-    FfzEmotes ffz;
-    SeventvEmotes seventv;
     ChannelPtr watchingChannelInner;
     IndirectChannel watchingChannel;
 };

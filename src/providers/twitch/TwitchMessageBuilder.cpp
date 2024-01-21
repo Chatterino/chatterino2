@@ -1143,9 +1143,9 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 {
     auto *app = getIApp();
 
-    const auto &globalBttvEmotes = app->getTwitch()->getBttvEmotes();
-    const auto &globalFfzEmotes = app->getTwitch()->getFfzEmotes();
-    const auto &globalSeventvEmotes = app->getTwitch()->getSeventvEmotes();
+    const auto *globalBttvEmotes = app->getBttvEmotes();
+    const auto *globalFfzEmotes = app->getFfzEmotes();
+    const auto *globalSeventvEmotes = app->getSeventvEmotes();
 
     auto flags = MessageElementFlags();
     auto emote = std::optional<EmotePtr>{};
@@ -1173,16 +1173,16 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
         flags = MessageElementFlag::SevenTVEmote;
         zeroWidth = emote.value()->zeroWidth;
     }
-    else if ((emote = globalFfzEmotes.emote(name)))
+    else if ((emote = globalFfzEmotes->emote(name)))
     {
         flags = MessageElementFlag::FfzEmote;
     }
-    else if ((emote = globalBttvEmotes.emote(name)))
+    else if ((emote = globalBttvEmotes->emote(name)))
     {
         flags = MessageElementFlag::BttvEmote;
         zeroWidth = zeroWidthEmotes.contains(name.string);
     }
-    else if ((emote = globalSeventvEmotes.globalEmote(name)))
+    else if ((emote = globalSeventvEmotes->globalEmote(name)))
     {
         flags = MessageElementFlag::SevenTVEmote;
         zeroWidth = emote.value()->zeroWidth;

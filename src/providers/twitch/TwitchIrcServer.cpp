@@ -520,19 +520,6 @@ void TwitchIrcServer::onReplySendRequested(TwitchChannel *channel,
     sent = true;
 }
 
-const BttvEmotes &TwitchIrcServer::getBttvEmotes() const
-{
-    return *getIApp()->getBttvEmotes();
-}
-const FfzEmotes &TwitchIrcServer::getFfzEmotes() const
-{
-    return *getIApp()->getFfzEmotes();
-}
-const SeventvEmotes &TwitchIrcServer::getSeventvEmotes() const
-{
-    return *getIApp()->getSeventvEmotes();
-}
-
 const IndirectChannel &TwitchIrcServer::getWatchingChannel() const
 {
     return this->watchingChannel;

@@ -14,7 +14,6 @@
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
@@ -407,19 +406,18 @@ void EmotePopup::loadChannel(ChannelPtr channel)
     // global
     if (Settings::instance().enableBTTVGlobalEmotes)
     {
-        addEmotes(*globalChannel, *getApp()->twitch->getBttvEmotes().emotes(),
+        addEmotes(*globalChannel, *getApp()->getBttvEmotes()->emotes(),
                   "BetterTTV", MessageElementFlag::BttvEmote);
     }
     if (Settings::instance().enableFFZGlobalEmotes)
     {
-        addEmotes(*globalChannel, *getApp()->twitch->getFfzEmotes().emotes(),
+        addEmotes(*globalChannel, *getApp()->getFfzEmotes()->emotes(),
                   "FrankerFaceZ", MessageElementFlag::FfzEmote);
     }
     if (Settings::instance().enableSevenTVGlobalEmotes)
     {
-        addEmotes(*globalChannel,
-                  *getApp()->twitch->getSeventvEmotes().globalEmotes(), "7TV",
-                  MessageElementFlag::SevenTVEmote);
+        addEmotes(*globalChannel, *getApp()->getSeventvEmotes()->globalEmotes(),
+                  "7TV", MessageElementFlag::SevenTVEmote);
     }
 
     // channel
@@ -498,11 +496,11 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     }
 
     auto bttvGlobalEmotes =
-        filterEmoteMap(searchText, getApp()->twitch->getBttvEmotes().emotes());
+        filterEmoteMap(searchText, getIApp()->getBttvEmotes()->emotes());
     auto ffzGlobalEmotes =
-        filterEmoteMap(searchText, getApp()->twitch->getFfzEmotes().emotes());
+        filterEmoteMap(searchText, getIApp()->getFfzEmotes()->emotes());
     auto seventvGlobalEmotes = filterEmoteMap(
-        searchText, getApp()->twitch->getSeventvEmotes().globalEmotes());
+        searchText, getIApp()->getSeventvEmotes()->globalEmotes());
 
     // twitch
     addTwitchEmoteSets(twitchGlobalEmotes, *searchChannel, *searchChannel,
