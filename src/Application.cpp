@@ -11,7 +11,10 @@
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "controllers/sound/ISoundController.hpp"
+#include "providers/bttv/BttvEmotes.hpp"
+#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "singletons/ImageUploader.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
@@ -135,6 +138,9 @@ Application::Application(Settings &_settings, const Paths &paths,
     , twitchPubSub(new PubSub(TWITCH_PUBSUB_URL))
     , twitchBadges(new TwitchBadges)
     , chatterinoBadges(new ChatterinoBadges)
+    , bttvEmotes(new BttvEmotes)
+    , ffzEmotes(new FfzEmotes)
+    , seventvEmotes(new SeventvEmotes)
     , logging(new Logging(_settings))
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(&this->emplace(new PluginController(paths)))
@@ -157,6 +163,9 @@ void Application::fakeDtor()
     this->twitchPubSub.reset();
     this->twitchBadges.reset();
     this->chatterinoBadges.reset();
+    this->bttvEmotes.reset();
+    this->ffzEmotes.reset();
+    this->seventvEmotes.reset();
 }
 
 void Application::initialize(Settings &settings, const Paths &paths)
@@ -479,6 +488,30 @@ Logging *Application::getChatLogger()
     assertInGuiThread();
 
     return this->logging.get();
+}
+
+BttvEmotes *Application::getBttvEmotes()
+{
+    assertInGuiThread();
+    assert(this->bttvEmotes);
+
+    return this->bttvEmotes.get();
+}
+
+FfzEmotes *Application::getFfzEmotes()
+{
+    assertInGuiThread();
+    assert(this->ffzEmotes);
+
+    return this->ffzEmotes.get();
+}
+
+SeventvEmotes *Application::getSeventvEmotes()
+{
+    assertInGuiThread();
+    assert(this->seventvEmotes);
+
+    return this->seventvEmotes.get();
 }
 
 void Application::save()

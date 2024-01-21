@@ -1,6 +1,9 @@
 #pragma once
 
 #include "mocks/Channel.hpp"
+#include "providers/bttv/BttvEmotes.hpp"
+#include "providers/ffz/FfzEmotes.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 
 namespace chatterino::mock {
@@ -16,29 +19,11 @@ public:
     {
     }
 
-    const BttvEmotes &getBttvEmotes() const override
-    {
-        return this->bttv;
-    }
-
-    const FfzEmotes &getFfzEmotes() const override
-    {
-        return this->ffz;
-    }
-
-    const SeventvEmotes &getSeventvEmotes() const override
-    {
-        return this->seventv;
-    }
-
     const IndirectChannel &getWatchingChannel() const override
     {
         return this->watchingChannel;
     }
 
-    BttvEmotes bttv;
-    FfzEmotes ffz;
-    SeventvEmotes seventv;
     ChannelPtr watchingChannelInner;
     IndirectChannel watchingChannel;
 };

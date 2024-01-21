@@ -191,6 +191,27 @@ public:
         return this->updates_;
     }
 
+    BttvEmotes *getBttvEmotes() override
+    {
+        assert(false && "EmptyApplication::getBttvEmotes was called without "
+                        "being initialized");
+        return nullptr;
+    }
+
+    FfzEmotes *getFfzEmotes() override
+    {
+        assert(false && "EmptyApplication::getFfzEmotes was called without "
+                        "being initialized");
+        return nullptr;
+    }
+
+    SeventvEmotes *getSeventvEmotes() override
+    {
+        assert(false && "EmptyApplication::getSeventvEmotes was called without "
+                        "being initialized");
+        return nullptr;
+    }
+
 private:
     Paths paths_;
     Args args_;

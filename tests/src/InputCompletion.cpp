@@ -49,9 +49,27 @@ public:
         return &this->emotes;
     }
 
+    BttvEmotes *getBttvEmotes() override
+    {
+        return &this->bttvEmotes;
+    }
+
+    FfzEmotes *getFfzEmotes() override
+    {
+        return &this->ffzEmotes;
+    }
+
+    SeventvEmotes *getSeventvEmotes() override
+    {
+        return &this->seventvEmotes;
+    }
+
     AccountController accounts;
     mock::MockTwitchIrcServer twitch;
     Emotes emotes;
+    BttvEmotes bttvEmotes;
+    FfzEmotes ffzEmotes;
+    SeventvEmotes seventvEmotes;
 };
 
 }  // namespace
@@ -154,18 +172,18 @@ private:
         addEmote(*bttvEmotes, ":-)");
         addEmote(*bttvEmotes, "B-)");
         addEmote(*bttvEmotes, "Clap");
-        this->mockApplication->twitch.bttv.setEmotes(std::move(bttvEmotes));
+        this->mockApplication->bttvEmotes.setEmotes(std::move(bttvEmotes));
 
         auto ffzEmotes = std::make_shared<EmoteMap>();
         addEmote(*ffzEmotes, "LilZ");
         addEmote(*ffzEmotes, "ManChicken");
         addEmote(*ffzEmotes, "CatBag");
-        this->mockApplication->twitch.ffz.setEmotes(std::move(ffzEmotes));
+        this->mockApplication->ffzEmotes.setEmotes(std::move(ffzEmotes));
 
         auto seventvEmotes = std::make_shared<EmoteMap>();
         addEmote(*seventvEmotes, "Clap");
         addEmote(*seventvEmotes, "Clap2");
-        this->mockApplication->twitch.seventv.setGlobalEmotes(
+        this->mockApplication->seventvEmotes.setGlobalEmotes(
             std::move(seventvEmotes));
     }
 

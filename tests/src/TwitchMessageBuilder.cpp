@@ -70,6 +70,21 @@ public:
         return &this->highlights;
     }
 
+    BttvEmotes *getBttvEmotes() override
+    {
+        return &this->bttvEmotes;
+    }
+
+    FfzEmotes *getFfzEmotes() override
+    {
+        return &this->ffzEmotes;
+    }
+
+    SeventvEmotes *getSeventvEmotes() override
+    {
+        return &this->seventvEmotes;
+    }
+
     AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;
@@ -78,6 +93,9 @@ public:
     FfzBadges ffzBadges;
     SeventvBadges seventvBadges;
     HighlightController highlights;
+    BttvEmotes bttvEmotes;
+    FfzEmotes ffzEmotes;
+    SeventvEmotes seventvEmotes;
 };
 
 }  // namespace
