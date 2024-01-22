@@ -154,6 +154,9 @@ public:
     pajlada::Signals::NoArgSignal updated;
 
     QStringSetting themeName{"/appearance/theme/name", "Dark"};
+    QStringSetting lightSystemThemeName{"/appearance/theme/lightSystem",
+                                        "Light"};
+    QStringSetting darkSystemThemeName{"/appearance/theme/darkSystem", "Dark"};
 
 private:
     bool isLight_ = false;

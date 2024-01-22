@@ -212,15 +212,7 @@ const std::vector<ThemeDescriptor> Theme::builtInThemes{
         .key = "Black",
         .path = ":/themes/Black.json",
         .name = "Black",
-    }
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-    ,
-    {
-        .key = "System",
-        .path = ":/themes/Dark.json",
-        .name = "System",
     },
-#endif
 };
 
 // Dark is our default & fallback theme
@@ -244,6 +236,14 @@ void Theme::initialize(Settings &settings, const Paths &paths)
             this->update();
         },
         false);
+    auto updateIfSystem = [this](const auto &) {
+        if (this->isSystemTheme())
+        {
+            this->update();
+        }
+    };
+    this->darkSystemThemeName.connect(updateIfSystem, false);
+    this->lightSystemThemeName.connect(updateIfSystem, false);
 
     this->loadAvailableThemes(paths);
 
@@ -270,10 +270,10 @@ void Theme::update()
             switch (qApp->styleHints()->colorScheme())
             {
                 case Qt::ColorScheme::Light:
-                    return u"Light"_s;
+                    return this->lightSystemThemeName;
                 case Qt::ColorScheme::Unknown:
                 case Qt::ColorScheme::Dark:
-                    return u"Dark"_s;
+                    return this->darkSystemThemeName;
             }
         }
 #endif
