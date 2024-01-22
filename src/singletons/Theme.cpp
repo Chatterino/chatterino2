@@ -225,7 +225,7 @@ bool Theme::isLightTheme() const
 
 bool Theme::isSystemTheme() const
 {
-    return this->themeName == u"System";
+    return this->themeName == u"System"_s;
 }
 
 void Theme::initialize(Settings &settings, const Paths &paths)
