@@ -1,6 +1,7 @@
 #include "providers/seventv/SeventvPaints.hpp"
 
 #include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "messages/Image.hpp"
 #include "providers/seventv/paints/LinearGradientPaint.hpp"

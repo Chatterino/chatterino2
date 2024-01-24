@@ -501,10 +501,9 @@ void TwitchAccount::loadSeventvUserID()
             emoteSetID,
             [twitchUserID, emoteSetID](auto &&emoteMap,
                                        const auto & /*emoteSetName*/) {
-                Application::instance->seventvPersonalEmotes
-                    ->addEmoteSetForUser(
-                        emoteSetID, std::forward<decltype(emoteMap)>(emoteMap),
-                        twitchUserID);
+                getIApp()->getSeventvPersonalEmotes()->addEmoteSetForUser(
+                    emoteSetID, std::forward<decltype(emoteMap)>(emoteMap),
+                    twitchUserID);
             },
             [twitchUserID, emoteSetID](const auto &error) {
                 qCDebug(chatterinoSeventv)
