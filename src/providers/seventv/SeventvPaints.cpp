@@ -1,5 +1,6 @@
 #include "providers/seventv/SeventvPaints.hpp"
 
+#include "Application.hpp"
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
 #include "common/Outcome.hpp"
@@ -8,6 +9,8 @@
 #include "providers/seventv/paints/PaintDropShadow.hpp"
 #include "providers/seventv/paints/RadialGradientPaint.hpp"
 #include "providers/seventv/paints/UrlPaint.hpp"
+#include "singletons/WindowManager.hpp"
+#include "util/PostToThread.hpp"
 
 #include <QUrlQuery>
 
@@ -174,7 +177,25 @@ void SeventvPaints::assignPaintToUser(const QString &paintID,
     const auto paintIt = this->knownPaints_.find(paintID);
     if (paintIt != this->knownPaints_.end())
     {
-        this->paintMap_[userName.string] = paintIt->second;
+        auto it = this->paintMap_.find(userName.string);
+        bool changed = false;
+        if (it == this->paintMap_.end())
+        {
+            this->paintMap_.emplace(userName.string, paintIt->second);
+            changed = true;
+        }
+        else if (it->second != paintIt->second)
+        {
+            it->second = paintIt->second;
+            changed = true;
+        }
+
+        if (changed)
+        {
+            postToThread([] {
+                getIApp()->getWindows()->invalidateChannelViewBuffers();
+            });
+        }
     }
 }
 
