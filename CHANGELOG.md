@@ -132,6 +132,7 @@
 - Dev: Fix `NotebookTab` emitting updates for every message. (#5068)
 - Dev: Added benchmark for parsing and building recent messages. (#5071)
 - Dev: Boost is depended on as a header-only library when using conan. (#5107)
+- Dev: Added signal to invalidate paint buffers of channel views without forcing a relayout. (#5123)
 
 ## 2.4.6
 

@@ -148,7 +148,9 @@ public:
     bool hasSourceChannel() const;
 
     LimitedQueueSnapshot<MessageLayoutPtr> &getMessagesSnapshot();
+
     void queueLayout();
+    void invalidateBuffers();
 
     void clearMessages();
 
@@ -270,6 +272,7 @@ private:
     bool canReplyToMessages() const;
 
     bool layoutQueued_ = false;
+    bool bufferInvalidationQueued_ = false;
 
     bool lastMessageHasAlternateBackground_ = false;
     bool lastMessageHasAlternateBackgroundReverse_ = true;
