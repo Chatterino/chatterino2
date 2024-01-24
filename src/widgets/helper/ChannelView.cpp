@@ -425,6 +425,16 @@ void ChannelView::initializeSignals()
             }
         });
 
+    this->signalHolder_.managedConnect(
+        getIApp()->getWindows()->invalidateBuffersRequested,
+        [this](Channel *channel) {
+            if (this->isVisible() &&
+                (channel == nullptr || this->channel_.get() == channel))
+            {
+                this->invalidateBuffers();
+            }
+        });
+
     this->signalHolder_.managedConnect(getIApp()->getFonts()->fontChanged,
                                        [this] {
                                            this->queueLayout();
@@ -590,6 +600,12 @@ void ChannelView::queueUpdate(const QRect &area)
     this->update(area);
 }
 
+void ChannelView::invalidateBuffers()
+{
+    this->bufferInvalidationQueued_ = true;
+    this->queueLayout();
+}
+
 void ChannelView::queueLayout()
 {
     if (this->isVisible())
@@ -651,12 +667,13 @@ void ChannelView::layoutVisibleMessages(
         {
             const auto &message = messages[i];
 
-            redrawRequired |=
-                message->layout(layoutWidth, this->scale(), flags);
+            redrawRequired |= message->layout(layoutWidth, this->scale(), flags,
+                                              this->bufferInvalidationQueued_);
 
             y += message->getHeight();
         }
     }
+    this->bufferInvalidationQueued_ = false;
 
     if (redrawRequired)
     {
@@ -685,7 +702,7 @@ void ChannelView::updateScrollbar(
     {
         auto *message = messages[i].get();
 
-        message->layout(layoutWidth, this->scale(), flags);
+        message->layout(layoutWidth, this->scale(), flags, false);
 
         h -= message->getHeight();
 
@@ -1656,7 +1673,8 @@ void ChannelView::wheelEvent(QWheelEvent *event)
                 else
                 {
                     snapshot[i - 1]->layout(this->getLayoutWidth(),
-                                            this->scale(), this->getFlags());
+                                            this->scale(), this->getFlags(),
+                                            false);
                     scrollFactor = 1;
                     currentScrollLeft = snapshot[i - 1]->getHeight();
                 }
@@ -1690,7 +1708,8 @@ void ChannelView::wheelEvent(QWheelEvent *event)
                 else
                 {
                     snapshot[i + 1]->layout(this->getLayoutWidth(),
-                                            this->scale(), this->getFlags());
+                                            this->scale(), this->getFlags(),
+                                            false);
 
                     scrollFactor = 1;
                     currentScrollLeft = snapshot[i + 1]->getHeight();
