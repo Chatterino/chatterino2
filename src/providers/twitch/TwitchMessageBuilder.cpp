@@ -269,6 +269,123 @@ namespace {
         builder->message().badgeInfos = badgeInfos;
     }
 
+    /**
+     * Computes (only) the replacement of @a match in @a source.
+     * The parts before and after the match in @a source are ignored.
+     *
+     * Occurrences of \b{\\1}, \b{\\2}, ..., in @a replacement are replaced
+     * with the string captured by the corresponding capturing group.
+     * This function should only be used if the regex contains capturing groups.
+     * 
+     * Since Qt doesn't provide a way of replacing a single match with some replacement
+     * while supporting both capturing groups and lookahead/-behind in the regex,
+     * this is included here. It's essentially the implementation of 
+     * QString::replace(const QRegularExpression &, const QString &).
+     * @see https://github.com/qt/qtbase/blob/97bb0ecfe628b5bb78e798563212adf02129c6f6/src/corelib/text/qstring.cpp#L4594-L4703
+     */
+    QString makeRegexReplacement(QStringView source,
+                                 const QRegularExpression &regex,
+                                 const QRegularExpressionMatch &match,
+                                 const QString &replacement)
+    {
+        using SizeType = QString::size_type;
+        struct QStringCapture {
+            SizeType pos;
+            SizeType len;
+            int captureNumber;
+        };
+
+        qsizetype numCaptures = regex.captureCount();
+
+        // 1. build the backreferences list, holding where the backreferences
+        //    are in the replacement string
+        QVarLengthArray<QStringCapture> backReferences;
+        SizeType replacementLength = replacement.size();
+        const QChar *replacementBuf = replacement.unicode();
+
+        for (SizeType i = 0; i < replacementLength - 1; i++)
+        {
+            if (replacementBuf[i] != u'\\')
+            {
+                continue;
+            }
+
+            int no = replacementBuf[i + 1].digitValue();
+            if (no <= 0 || no > numCaptures)
+            {
+                continue;
+            }
+
+            QStringCapture backReference{.pos = i, .len = 2};
+
+            if (i < replacementLength - 2)
+            {
+                int secondDigit = replacementBuf[i + 2].digitValue();
+                if (secondDigit != -1 &&
+                    ((no * 10) + secondDigit) <= numCaptures)
+                {
+                    no = (no * 10) + secondDigit;
+                    ++backReference.len;
+                }
+            }
+
+            backReference.captureNumber = no;
+            backReferences.append(backReference);
+        }
+
+        // 2. iterate on the matches.
+        //    For every match, copy the replacement string in chunks
+        //    with the proper replacements for the backreferences
+
+        // length of the new string, with all the replacements
+        SizeType newLength = 0;
+        QVarLengthArray<QStringView> chunks;
+        QStringView replacementView{replacement};
+
+        // Initially: empty, as we only care about the replacement
+        SizeType len = 0;
+        SizeType lastEnd = 0;
+        for (const QStringCapture &backReference :
+             std::as_const(backReferences))
+        {
+            // part of "replacement" before the backreference
+            len = backReference.pos - lastEnd;
+            if (len > 0)
+            {
+                chunks << replacementView.mid(lastEnd, len);
+                newLength += len;
+            }
+
+            // backreference itself
+            len = match.capturedLength(backReference.captureNumber);
+            if (len > 0)
+            {
+                chunks << source.mid(
+                    match.capturedStart(backReference.captureNumber), len);
+                newLength += len;
+            }
+
+            lastEnd = backReference.pos + backReference.len;
+        }
+
+        // add the last part of the replacement string
+        len = replacementView.size() - lastEnd;
+        if (len > 0)
+        {
+            chunks << replacementView.mid(lastEnd, len);
+            newLength += len;
+        }
+
+        // 3. assemble the chunks together
+        QString dst;
+        dst.reserve(newLength);
+        for (const QStringView &chunk : std::as_const(chunks))
+        {
+            dst += chunk;
+        }
+        return dst;
+    }
+
 }  // namespace
 
 TwitchMessageBuilder::TwitchMessageBuilder(
@@ -1113,8 +1230,15 @@ void TwitchMessageBuilder::runIgnoreReplaces(
             while ((from = this->originalMessage_.indexOf(regex, from,
                                                           &match)) != -1)
             {
+                auto replacement = phrase.getReplace();
+                if (regex.captureCount() > 0)
+                {
+                    replacement = makeRegexReplacement(
+                        this->originalMessage_, regex, match, replacement);
+                }
+
                 replaceMessageAt(phrase, from, match.capturedLength(),
-                                 phrase.getReplace());
+                                 replacement);
                 from += phrase.getReplace().length();
                 iterations++;
                 if (iterations >= 128)
