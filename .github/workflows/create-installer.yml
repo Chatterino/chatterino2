@@ -66,7 +66,7 @@ jobs:
           name: ${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}.exe
 
       - name: Upload portable
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: build/${{ steps.bundle-portable.outputs.C2_PORTABLE_BASE_NAME }}.zip
           name: ${{ steps.bundle-portable.outputs.C2_PORTABLE_BASE_NAME }}.zip
@@ -113,11 +113,11 @@ jobs:
         with:
           fetch-depth: 0 # allows for tags access
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: Chatterino7.Installer.exe
           path: build/
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: Chatterino7.Portable.zip
           path: build/
