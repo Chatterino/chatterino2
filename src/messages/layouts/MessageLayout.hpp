@@ -57,7 +57,7 @@ public:
     MessageLayoutFlags flags;
 
     bool layout(int width, float scale_, MessageElementFlags flags,
-                bool deleteBuffer);
+                bool shouldInvalidateBuffer);
 
     // Painting
     MessagePaintResult paint(const MessagePaintContext &ctx);

@@ -426,7 +426,8 @@ void ChannelView::initializeSignals()
         });
 
     this->signalHolder_.managedConnect(
-        getIApp()->getWindows()->deleteBuffersRequested, [&](Channel *channel) {
+        getIApp()->getWindows()->invalidateBuffersRequested,
+        [this](Channel *channel) {
             if (this->isVisible() &&
                 (channel == nullptr || this->channel_.get() == channel))
             {

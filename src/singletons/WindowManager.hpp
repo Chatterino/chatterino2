@@ -67,8 +67,8 @@ public:
     // changed
     void forceLayoutChannelViews();
 
-    // Tell a channel (or all channels if channel is nullptr) to delete all paint buffers
-    void deleteChannelViewBuffers(Channel *channel = nullptr);
+    // Tell a channel (or all channels if channel is nullptr) to invalidate all paint buffers
+    void invalidateChannelViewBuffers(Channel *channel = nullptr);
 
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
     void repaintGifEmotes();
@@ -129,8 +129,8 @@ public:
     // channel is a nullptr, need to redo their layout
     pajlada::Signals::Signal<Channel *> layoutRequested;
     // This signal fires whenever views rendering a channel, or all views if the
-    // channel is a nullptr, need to delete their paint buffers
-    pajlada::Signals::Signal<Channel *> deleteBuffersRequested;
+    // channel is a nullptr, need to invalidate their paint buffers
+    pajlada::Signals::Signal<Channel *> invalidateBuffersRequested;
 
     pajlada::Signals::NoArgSignal wordFlagsChanged;
 

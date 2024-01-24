@@ -211,9 +211,9 @@ void WindowManager::forceLayoutChannelViews()
     this->layoutChannelViews(nullptr);
 }
 
-void WindowManager::deleteChannelViewBuffers(Channel *channel)
+void WindowManager::invalidateChannelViewBuffers(Channel *channel)
 {
-    this->deleteBuffersRequested.invoke(channel);
+    this->invalidateBuffersRequested.invoke(channel);
 }
 
 void WindowManager::repaintVisibleChatWidgets(Channel *channel)
@@ -412,10 +412,10 @@ void WindowManager::initialize(Settings &settings, const Paths &paths)
         this->forceLayoutChannelViews();
     });
     settings.alternateMessages.connect([this](auto, auto) {
-        this->deleteChannelViewBuffers();
+        this->invalidateChannelViewBuffers();
     });
     settings.separateMessages.connect([this](auto, auto) {
-        this->deleteChannelViewBuffers();
+        this->invalidateChannelViewBuffers();
     });
     settings.collpseMessagesMinLines.connect([this](auto, auto) {
         this->forceLayoutChannelViews();

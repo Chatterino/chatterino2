@@ -75,7 +75,7 @@ int MessageLayout::getWidth() const
 // Layout
 // return true if redraw is required
 bool MessageLayout::layout(int width, float scale, MessageElementFlags flags,
-                           bool deleteBuffer)
+                           bool shouldInvalidateBuffer)
 {
     //    BenchmarkGuard benchmark("MessageLayout::layout()");
 
@@ -109,9 +109,9 @@ bool MessageLayout::layout(int width, float scale, MessageElementFlags flags,
 
     if (!layoutRequired)
     {
-        if (deleteBuffer)
+        if (shouldInvalidateBuffer)
         {
-            this->deleteBuffer();
+            this->invalidateBuffer();
             return true;
         }
         return false;
