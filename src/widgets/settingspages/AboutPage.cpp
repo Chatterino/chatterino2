@@ -206,7 +206,7 @@ AboutPage::AboutPage()
 
                 const auto addLabels = [&contributorBox2, &usernameLabel,
                                         &roleLabel] {
-                    auto labelBox = new QVBoxLayout();
+                    auto *labelBox = new QVBoxLayout();
                     contributorBox2->addLayout(labelBox);
 
                     labelBox->addWidget(usernameLabel);
@@ -239,7 +239,7 @@ void AboutPage::addLicense(QFormLayout *form, const QString &name,
                 parent);
             window->setWindowTitle("Chatterino - License for " + name);
             window->setAttribute(Qt::WA_DeleteOnClose);
-            auto layout = new QVBoxLayout();
+            auto *layout = new QVBoxLayout();
             auto *edit = new QTextEdit;
 
             QFile file(licenseLink);

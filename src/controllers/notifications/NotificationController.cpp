@@ -26,7 +26,7 @@
 
 namespace chatterino {
 
-void NotificationController::initialize(Settings &settings, Paths &paths)
+void NotificationController::initialize(Settings &settings, const Paths &paths)
 {
     this->initialized_ = true;
     for (const QString &channelName : this->twitchSetting_.getValue())
@@ -183,20 +183,20 @@ void NotificationController::checkStream(bool live, QString channelName)
 
     if (Toasts::isEnabled())
     {
-        getApp()->toasts->sendChannelNotification(channelName, QString(),
-                                                  Platform::Twitch);
+        getIApp()->getToasts()->sendChannelNotification(channelName, QString(),
+                                                        Platform::Twitch);
     }
     if (getSettings()->notificationPlaySound &&
         !(isInStreamerMode() &&
           getSettings()->streamerModeSuppressLiveNotifications))
     {
-        getApp()->notifications->playSound();
+        getIApp()->getNotifications()->playSound();
     }
     if (getSettings()->notificationFlashTaskbar &&
         !(isInStreamerMode() &&
           getSettings()->streamerModeSuppressLiveNotifications))
     {
-        getApp()->windows->sendAlert();
+        getIApp()->getWindows()->sendAlert();
     }
     MessageBuilder builder;
     TwitchMessageBuilder::liveMessage(channelName, &builder);
@@ -225,7 +225,7 @@ void NotificationController::removeFakeChannel(const QString channelName)
 
         for (int i = snapshotLength - 1; i >= end; --i)
         {
-            auto &s = snapshot[i];
+            const auto &s = snapshot[i];
 
             if (s->messageText == liveMessageSearchText)
             {

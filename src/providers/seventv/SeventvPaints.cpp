@@ -1,7 +1,6 @@
-#include "SeventvPaints.hpp"
+#include "providers/seventv/SeventvPaints.hpp"
 
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
 #include "messages/Image.hpp"
 #include "providers/seventv/paints/LinearGradientPaint.hpp"
@@ -128,7 +127,7 @@ std::optional<std::shared_ptr<Paint>> parsePaint(const QJsonObject &paintJson)
 
 namespace chatterino {
 
-void SeventvPaints::initialize(Settings & /*settings*/, Paths & /*paths*/)
+void SeventvPaints::initialize(Settings & /*settings*/, const Paths & /*paths*/)
 {
     this->loadSeventvPaints();
 }

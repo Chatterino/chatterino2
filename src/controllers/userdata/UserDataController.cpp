@@ -8,13 +8,12 @@ namespace {
 
 using namespace chatterino;
 
-std::shared_ptr<pajlada::Settings::SettingManager> initSettingsInstance()
+std::shared_ptr<pajlada::Settings::SettingManager> initSettingsInstance(
+    const Paths &paths)
 {
     auto sm = std::make_shared<pajlada::Settings::SettingManager>();
 
-    auto *paths = getPaths();
-
-    auto path = combinePath(paths->settingsDirectory, "user-data.json");
+    auto path = combinePath(paths.settingsDirectory, "user-data.json");
 
     sm->setPath(path.toUtf8().toStdString());
 
@@ -30,8 +29,8 @@ std::shared_ptr<pajlada::Settings::SettingManager> initSettingsInstance()
 
 namespace chatterino {
 
-UserDataController::UserDataController()
-    : sm(initSettingsInstance())
+UserDataController::UserDataController(const Paths &paths)
+    : sm(initSettingsInstance(paths))
     , setting("/users", this->sm)
 {
     this->sm->load();

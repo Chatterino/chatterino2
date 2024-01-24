@@ -32,7 +32,7 @@ class TwitchBadges
     using BadgeIconCallback = std::function<void(QString, const QIconPtr)>;
 
 public:
-    static TwitchBadges *instance();
+    TwitchBadges();
 
     // Get badge from name and version
     std::optional<EmotePtr> badge(const QString &set,
@@ -46,9 +46,6 @@ public:
                        BadgeIconCallback callback);
 
 private:
-    static TwitchBadges *instance_;
-
-    TwitchBadges();
     void loadTwitchBadges();
     void parseTwitchBadges(QJsonObject root);
     void loaded();

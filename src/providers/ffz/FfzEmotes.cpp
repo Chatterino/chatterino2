@@ -1,7 +1,7 @@
 #include "providers/ffz/FfzEmotes.hpp"
 
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
@@ -10,146 +10,150 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
 
-namespace chatterino {
 namespace {
 
-    const QString CHANNEL_HAS_NO_EMOTES(
-        "This channel has no FrankerFaceZ channel emotes.");
+using namespace chatterino;
 
-    Url getEmoteLink(const QJsonObject &urls, const QString &emoteScale)
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+const auto &LOG = chatterinoFfzemotes;
+
+const QString CHANNEL_HAS_NO_EMOTES(
+    "This channel has no FrankerFaceZ channel emotes.");
+
+Url getEmoteLink(const QJsonObject &urls, const QString &emoteScale)
+{
+    auto emote = urls[emoteScale];
+    if (emote.isUndefined() || emote.isNull())
     {
-        auto emote = urls[emoteScale];
-        if (emote.isUndefined() || emote.isNull())
+        return {""};
+    }
+
+    assert(emote.isString());
+
+    return parseFfzUrl(emote.toString());
+}
+
+void fillInEmoteData(const QJsonObject &urls, const EmoteName &name,
+                     const QString &tooltip, Emote &emoteData)
+{
+    auto url1x = getEmoteLink(urls, "1");
+    auto url2x = getEmoteLink(urls, "2");
+    auto url4x = getEmoteLink(urls, "4");
+
+    //, code, tooltip
+    emoteData.name = name;
+    emoteData.images = ImageSet{
+        Image::fromUrl(url1x, 1),
+        url2x.string.isEmpty() ? Image::getEmpty() : Image::fromUrl(url2x, 0.5),
+        url4x.string.isEmpty() ? Image::getEmpty()
+                               : Image::fromUrl(url4x, 0.250)};
+    emoteData.tooltip = {tooltip};
+}
+
+EmotePtr cachedOrMake(Emote &&emote, const EmoteId &id)
+{
+    static std::unordered_map<EmoteId, std::weak_ptr<const Emote>> cache;
+    static std::mutex mutex;
+
+    return cachedOrMakeEmotePtr(std::move(emote), cache, mutex, id);
+}
+
+void parseEmoteSetInto(const QJsonObject &emoteSet, const QString &kind,
+                       EmoteMap &map)
+{
+    for (const auto emoteRef : emoteSet["emoticons"].toArray())
+    {
+        const auto emoteJson = emoteRef.toObject();
+
+        // margins
+        auto id = EmoteId{QString::number(emoteJson["id"].toInt())};
+        auto name = EmoteName{emoteJson["name"].toString()};
+        auto author =
+            EmoteAuthor{emoteJson["owner"]["display_name"].toString()};
+        auto urls = emoteJson["urls"].toObject();
+        if (emoteJson["animated"].isObject())
         {
-            return {""};
+            // prefer animated images if available
+            urls = emoteJson["animated"].toObject();
         }
 
-        assert(emote.isString());
+        Emote emote;
+        fillInEmoteData(urls, name,
+                        QString("%1<br>%2 FFZ Emote<br>By: %3")
+                            .arg(name.string, kind, author.string),
+                        emote);
+        emote.homePage =
+            Url{QString("https://www.frankerfacez.com/emoticon/%1-%2")
+                    .arg(id.string)
+                    .arg(name.string)};
 
-        return parseFfzUrl(emote.toString());
+        map[name] = cachedOrMake(std::move(emote), id);
+    }
+}
+
+EmoteMap parseGlobalEmotes(const QJsonObject &jsonRoot)
+{
+    // Load default sets from the `default_sets` object
+    std::unordered_set<int> defaultSets{};
+    auto jsonDefaultSets = jsonRoot["default_sets"].toArray();
+    for (auto jsonDefaultSet : jsonDefaultSets)
+    {
+        defaultSets.insert(jsonDefaultSet.toInt());
     }
 
-    void fillInEmoteData(const QJsonObject &urls, const EmoteName &name,
-                         const QString &tooltip, Emote &emoteData)
+    auto emotes = EmoteMap();
+
+    for (const auto emoteSetRef : jsonRoot["sets"].toObject())
     {
-        auto url1x = getEmoteLink(urls, "1");
-        auto url2x = getEmoteLink(urls, "2");
-        auto url4x = getEmoteLink(urls, "4");
-
-        //, code, tooltip
-        emoteData.name = name;
-        emoteData.images =
-            ImageSet{Image::fromUrl(url1x, 1),
-                     url2x.string.isEmpty() ? Image::getEmpty()
-                                            : Image::fromUrl(url2x, 0.5),
-                     url4x.string.isEmpty() ? Image::getEmpty()
-                                            : Image::fromUrl(url4x, 0.250)};
-        emoteData.tooltip = {tooltip};
-    }
-
-    EmotePtr cachedOrMake(Emote &&emote, const EmoteId &id)
-    {
-        static std::unordered_map<EmoteId, std::weak_ptr<const Emote>> cache;
-        static std::mutex mutex;
-
-        return cachedOrMakeEmotePtr(std::move(emote), cache, mutex, id);
-    }
-
-    void parseEmoteSetInto(const QJsonObject &emoteSet, const QString &kind,
-                           EmoteMap &map)
-    {
-        for (const auto emoteRef : emoteSet["emoticons"].toArray())
+        const auto emoteSet = emoteSetRef.toObject();
+        auto emoteSetID = emoteSet["id"].toInt();
+        if (!defaultSets.contains(emoteSetID))
         {
-            const auto emoteJson = emoteRef.toObject();
-
-            // margins
-            auto id = EmoteId{QString::number(emoteJson["id"].toInt())};
-            auto name = EmoteName{emoteJson["name"].toString()};
-            auto author =
-                EmoteAuthor{emoteJson["owner"]["display_name"].toString()};
-            auto urls = emoteJson["urls"].toObject();
-            if (emoteJson["animated"].isObject())
-            {
-                // prefer animated images if available
-                urls = emoteJson["animated"].toObject();
-            }
-
-            Emote emote;
-            fillInEmoteData(urls, name,
-                            QString("%1<br>%2 FFZ Emote<br>By: %3")
-                                .arg(name.string, kind, author.string),
-                            emote);
-            emote.homePage =
-                Url{QString("https://www.frankerfacez.com/emoticon/%1-%2")
-                        .arg(id.string)
-                        .arg(name.string)};
-
-            map[name] = cachedOrMake(std::move(emote), id);
-        }
-    }
-
-    EmoteMap parseGlobalEmotes(const QJsonObject &jsonRoot)
-    {
-        // Load default sets from the `default_sets` object
-        std::unordered_set<int> defaultSets{};
-        auto jsonDefaultSets = jsonRoot["default_sets"].toArray();
-        for (auto jsonDefaultSet : jsonDefaultSets)
-        {
-            defaultSets.insert(jsonDefaultSet.toInt());
+            qCDebug(LOG) << "Skipping global emote set" << emoteSetID
+                         << "as it's not part of the default sets";
+            continue;
         }
 
-        auto emotes = EmoteMap();
-
-        for (const auto emoteSetRef : jsonRoot["sets"].toObject())
-        {
-            const auto emoteSet = emoteSetRef.toObject();
-            auto emoteSetID = emoteSet["id"].toInt();
-            if (!defaultSets.contains(emoteSetID))
-            {
-                qCDebug(chatterinoFfzemotes)
-                    << "Skipping global emote set" << emoteSetID
-                    << "as it's not part of the default sets";
-                continue;
-            }
-
-            parseEmoteSetInto(emoteSet, "Global", emotes);
-        }
-
-        return emotes;
+        parseEmoteSetInto(emoteSet, "Global", emotes);
     }
 
-    std::optional<EmotePtr> parseAuthorityBadge(const QJsonObject &badgeUrls,
-                                                const QString &tooltip)
+    return emotes;
+}
+
+std::optional<EmotePtr> parseAuthorityBadge(const QJsonObject &badgeUrls,
+                                            const QString &tooltip)
+{
+    std::optional<EmotePtr> authorityBadge;
+
+    if (!badgeUrls.isEmpty())
     {
-        std::optional<EmotePtr> authorityBadge;
+        auto authorityBadge1x = getEmoteLink(badgeUrls, "1");
+        auto authorityBadge2x = getEmoteLink(badgeUrls, "2");
+        auto authorityBadge3x = getEmoteLink(badgeUrls, "4");
 
-        if (!badgeUrls.isEmpty())
-        {
-            auto authorityBadge1x = getEmoteLink(badgeUrls, "1");
-            auto authorityBadge2x = getEmoteLink(badgeUrls, "2");
-            auto authorityBadge3x = getEmoteLink(badgeUrls, "4");
+        auto authorityBadgeImageSet = ImageSet{
+            Image::fromUrl(authorityBadge1x, 1),
+            authorityBadge2x.string.isEmpty()
+                ? Image::getEmpty()
+                : Image::fromUrl(authorityBadge2x, 0.5),
+            authorityBadge3x.string.isEmpty()
+                ? Image::getEmpty()
+                : Image::fromUrl(authorityBadge3x, 0.25),
+        };
 
-            auto authorityBadgeImageSet = ImageSet{
-                Image::fromUrl(authorityBadge1x, 1),
-                authorityBadge2x.string.isEmpty()
-                    ? Image::getEmpty()
-                    : Image::fromUrl(authorityBadge2x, 0.5),
-                authorityBadge3x.string.isEmpty()
-                    ? Image::getEmpty()
-                    : Image::fromUrl(authorityBadge3x, 0.25),
-            };
-
-            authorityBadge = std::make_shared<Emote>(Emote{
-                {""},
-                authorityBadgeImageSet,
-                Tooltip{tooltip},
-                authorityBadge1x,
-            });
-        }
-        return authorityBadge;
+        authorityBadge = std::make_shared<Emote>(Emote{
+            .name = {""},
+            .images = authorityBadgeImageSet,
+            .tooltip = Tooltip{tooltip},
+            .homePage = authorityBadge1x,
+        });
     }
+    return authorityBadge;
+}
 
 }  // namespace
+
+namespace chatterino {
 
 using namespace ffz::detail;
 
@@ -218,8 +222,7 @@ void FfzEmotes::loadChannel(
     std::function<void(std::optional<EmotePtr>)> vipBadgeCallback,
     bool manualRefresh)
 {
-    qCDebug(chatterinoFfzemotes)
-        << "[FFZEmotes] Reload FFZ Channel Emotes for channel" << channelID;
+    qCDebug(LOG) << "Reload FFZ Channel Emotes for channel" << channelID;
 
     NetworkRequest("https://api.frankerfacez.com/v1/room/id/" + channelID)
 
@@ -275,9 +278,8 @@ void FfzEmotes::loadChannel(
             {
                 // TODO: Auto retry in case of a timeout, with a delay
                 auto errorString = result.formatError();
-                qCWarning(chatterinoFfzemotes)
-                    << "Error fetching FFZ emotes for channel" << channelID
-                    << ", error" << errorString;
+                qCWarning(LOG) << "Error fetching FFZ emotes for channel"
+                               << channelID << ", error" << errorString;
                 shared->addMessage(makeSystemMessage(
                     QStringLiteral("Failed to fetch FrankerFaceZ channel "
                                    "emotes. (Error: %1)")

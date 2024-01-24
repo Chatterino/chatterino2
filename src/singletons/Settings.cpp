@@ -54,7 +54,9 @@ bool Settings::isHighlightedUser(const QString &username)
     for (const auto &highlightedUser : *items)
     {
         if (highlightedUser.isMatch(username))
+        {
             return true;
+        }
     }
 
     return false;
@@ -67,7 +69,9 @@ bool Settings::isBlacklistedUser(const QString &username)
     for (const auto &blacklistedUser : *items)
     {
         if (blacklistedUser.isMatch(username))
+        {
             return true;
+        }
     }
 
     return false;
@@ -216,7 +220,7 @@ void Settings::saveSnapshot()
         }
 
         rapidjson::Value key(setting->getPath().c_str(), a);
-        auto curVal = setting->unmarshalJSON();
+        auto *curVal = setting->unmarshalJSON();
         if (curVal == nullptr)
         {
             continue;

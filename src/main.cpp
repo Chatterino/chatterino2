@@ -11,6 +11,7 @@
 #include "singletons/CrashHandler.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/Updates.hpp"
 #include "util/AttachToConsole.hpp"
 
 #include <QApplication>
@@ -40,11 +41,11 @@ int main(int argc, char **argv)
     QCoreApplication::setApplicationVersion(CHATTERINO_VERSION);
     QCoreApplication::setOrganizationDomain("chatterino.com");
 
-    Paths *paths{};
+    std::unique_ptr<Paths> paths;
 
     try
     {
-        paths = new Paths;
+        paths = std::make_unique<Paths>();
     }
     catch (std::runtime_error &error)
     {
@@ -67,10 +68,10 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    const Args args(a);
+    const Args args(a, *paths);
 
 #ifdef CHATTERINO_WITH_CRASHPAD
-    const auto crashpadHandler = installCrashHandler(args);
+    const auto crashpadHandler = installCrashHandler(args, *paths);
 #endif
 
     // run in gui mode or browser extension host mode
@@ -97,6 +98,8 @@ int main(int argc, char **argv)
             attachToConsole();
         }
 
+        Updates updates(*paths);
+
         NetworkConfigurationProvider::applyFromEnv(Env::get());
 
         IvrApi::initialize();
@@ -104,7 +107,7 @@ int main(int argc, char **argv)
 
         Settings settings(paths->settingsDirectory);
 
-        runGui(a, *paths, settings, args);
+        runGui(a, *paths, settings, args, updates);
     }
     return 0;
 }

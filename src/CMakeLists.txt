@@ -33,16 +33,6 @@ set(SOURCE_FILES
         common/Literals.hpp
         common/Modes.cpp
         common/Modes.hpp
-        common/NetworkCommon.cpp
-        common/NetworkCommon.hpp
-        common/NetworkManager.cpp
-        common/NetworkManager.hpp
-        common/NetworkPrivate.cpp
-        common/NetworkPrivate.hpp
-        common/NetworkRequest.cpp
-        common/NetworkRequest.hpp
-        common/NetworkResult.cpp
-        common/NetworkResult.hpp
         common/QLogging.cpp
         common/QLogging.hpp
         common/WindowDescriptors.cpp
@@ -50,8 +40,18 @@ set(SOURCE_FILES
 
         common/enums/MessageOverflow.hpp
 
-        common/network/NetworkTask.hpp
+        common/network/NetworkCommon.cpp
+        common/network/NetworkCommon.hpp
+        common/network/NetworkManager.cpp
+        common/network/NetworkManager.hpp
+        common/network/NetworkPrivate.cpp
+        common/network/NetworkPrivate.hpp
+        common/network/NetworkRequest.cpp
+        common/network/NetworkRequest.hpp
+        common/network/NetworkResult.cpp
+        common/network/NetworkResult.hpp
         common/network/NetworkTask.cpp
+        common/network/NetworkTask.hpp
 
         controllers/accounts/Account.cpp
         controllers/accounts/Account.hpp
@@ -715,6 +715,7 @@ set(SOURCE_FILES
         widgets/splits/InputCompletionPopup.hpp
         widgets/splits/Split.cpp
         widgets/splits/Split.hpp
+        widgets/splits/SplitCommon.hpp
         widgets/splits/SplitContainer.cpp
         widgets/splits/SplitContainer.hpp
         widgets/splits/SplitHeader.cpp

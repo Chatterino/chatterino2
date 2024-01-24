@@ -236,7 +236,7 @@ void SharedMessageBuilder::triggerHighlights(
 
     if (windowAlert)
     {
-        getApp()->windows->sendAlert();
+        getIApp()->getWindows()->sendAlert();
     }
 }
 

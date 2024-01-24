@@ -81,11 +81,17 @@ const std::shared_ptr<Image> &getImagePriv(const ImageSet &set, float scale)
     int quality = 1;
 
     if (scale > 3.001f)
+    {
         quality = 4;
+    }
     else if (scale > 2.001f)
+    {
         quality = 3;
+    }
     else if (scale > 1.001f)
+    {
         quality = 2;
+    }
 
     // if (!set.getImage4()->isEmpty() && quality == 4)
     // {
@@ -114,20 +120,32 @@ const ImagePtr &ImageSet::getImageOrLoaded(float scale) const
 
     // prefer other image if selected image is not loaded yet
     if (result->loaded())
+    {
         return result;
+    }
     else if (this->imageX4_ && !this->imageX4_->isEmpty() &&
              this->imageX4_->loaded())
+    {
         return this->imageX4_;
+    }
     else if (this->imageX3_ && !this->imageX3_->isEmpty() &&
              this->imageX3_->loaded())
+    {
         return this->imageX3_;
+    }
     else if (this->imageX2_ && !this->imageX2_->isEmpty() &&
              this->imageX2_->loaded())
+    {
         return this->imageX2_;
+    }
     else if (this->imageX1_->loaded())
+    {
         return this->imageX1_;
+    }
     else
+    {
         return result;
+    }
 }
 
 const ImagePtr &ImageSet::getImage(float scale) const

@@ -1,7 +1,7 @@
 #include "controllers/commands/builtin/twitch/UpdateChannel.hpp"
 
 #include "common/Channel.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"

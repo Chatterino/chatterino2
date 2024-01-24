@@ -1,8 +1,9 @@
 #include "common/network/NetworkTask.hpp"
 
-#include "common/NetworkManager.hpp"
-#include "common/NetworkPrivate.hpp"
-#include "common/NetworkResult.hpp"
+#include "Application.hpp"
+#include "common/network/NetworkManager.hpp"
+#include "common/network/NetworkPrivate.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "singletons/Paths.hpp"
 #include "util/AbandonObject.hpp"
@@ -117,7 +118,8 @@ void NetworkTask::logReply()
 void NetworkTask::writeToCache(const QByteArray &bytes) const
 {
     std::ignore = QtConcurrent::run([data = this->data_, bytes] {
-        QFile cachedFile(getPaths()->cacheDirectory() + "/" + data->getHash());
+        QFile cachedFile(getIApp()->getPaths().cacheDirectory() + "/" +
+                         data->getHash());
 
         if (cachedFile.open(QIODevice::WriteOnly))
         {

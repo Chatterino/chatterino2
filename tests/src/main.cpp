@@ -1,4 +1,4 @@
-#include "common/NetworkManager.hpp"
+#include "common/network/NetworkManager.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 

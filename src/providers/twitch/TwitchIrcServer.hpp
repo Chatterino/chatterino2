@@ -3,10 +3,7 @@
 #include "common/Atomic.hpp"
 #include "common/Channel.hpp"
 #include "common/Singleton.hpp"
-#include "providers/bttv/BttvEmotes.hpp"
-#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/AbstractIrcServer.hpp"
-#include "providers/seventv/SeventvEmotes.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
 
@@ -21,15 +18,15 @@ class Paths;
 class TwitchChannel;
 class BttvLiveUpdates;
 class SeventvEventAPI;
+class BttvEmotes;
+class FfzEmotes;
+class SeventvEmotes;
 
 class ITwitchIrcServer
 {
 public:
     virtual ~ITwitchIrcServer() = default;
 
-    virtual const BttvEmotes &getBttvEmotes() const = 0;
-    virtual const FfzEmotes &getFfzEmotes() const = 0;
-    virtual const SeventvEmotes &getSeventvEmotes() const = 0;
     virtual const IndirectChannel &getWatchingChannel() const = 0;
 
     // Update this interface with TwitchIrcServer methods as needed
@@ -43,7 +40,7 @@ public:
     TwitchIrcServer();
     ~TwitchIrcServer() override = default;
 
-    void initialize(Settings &settings, Paths &paths) override;
+    void initialize(Settings &settings, const Paths &paths) override;
 
     void forEachChannelAndSpecialChannels(std::function<void(ChannelPtr)> func);
 
@@ -82,9 +79,6 @@ public:
     std::unique_ptr<BttvLiveUpdates> bttvLiveUpdates;
     std::unique_ptr<SeventvEventAPI> seventvEventAPI;
 
-    const BttvEmotes &getBttvEmotes() const override;
-    const FfzEmotes &getFfzEmotes() const override;
-    const SeventvEmotes &getSeventvEmotes() const override;
     const IndirectChannel &getWatchingChannel() const override;
 
 protected:
@@ -115,10 +109,6 @@ private:
     std::queue<std::chrono::steady_clock::time_point> lastMessageMod_;
     std::chrono::steady_clock::time_point lastErrorTimeSpeed_;
     std::chrono::steady_clock::time_point lastErrorTimeAmount_;
-
-    BttvEmotes bttv;
-    FfzEmotes ffz;
-    SeventvEmotes seventv_;
 
     pajlada::Signals::SignalHolder signalHolder_;
 };

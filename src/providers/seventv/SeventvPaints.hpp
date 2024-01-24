@@ -1,10 +1,8 @@
 #pragma once
 
 #include "common/Aliases.hpp"
-#include "common/NetworkRequest.hpp"
 #include "common/Singleton.hpp"
 #include "providers/seventv/paints/Paint.hpp"
-#include "providers/seventv/paints/PaintDropShadow.hpp"
 
 #include <QJsonArray>
 #include <QString>
@@ -18,7 +16,7 @@ namespace chatterino {
 class SeventvPaints : public Singleton
 {
 public:
-    virtual void initialize(Settings &settings, Paths &paths) override;
+    void initialize(Settings &settings, const Paths &paths) override;
 
     void addPaint(const QJsonObject &paintJson);
     void assignPaintToUser(const QString &paintID, const UserName &userName);

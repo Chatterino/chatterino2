@@ -54,7 +54,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     this->overrideBackgroundColor_ = QColor("#111111");
 
     this->addShortcuts();
-    this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
+    this->signalHolder_.managedConnect(getIApp()->getHotkeys()->onItemsUpdated,
                                        [this]() {
                                            this->clearShortcuts();
                                            this->addShortcuts();
@@ -78,13 +78,13 @@ void SettingsDialog::addShortcuts()
         {"openTab", nullptr},
     };
 
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 }
 void SettingsDialog::setSearchPlaceholderText()
 {
     QString searchHotkey;
-    auto searchSeq = getApp()->hotkeys->getDisplaySequence(
+    auto searchSeq = getIApp()->getHotkeys()->getDisplaySequence(
         HotkeyCategory::PopupWindow, "search");
     if (!searchSeq.isEmpty())
     {
@@ -190,8 +190,8 @@ void SettingsDialog::filterElements(const QString &text)
 
     for (int i = 0; i < this->ui_.tabContainer->count(); i++)
     {
-        auto item = this->ui_.tabContainer->itemAt(i);
-        if (auto x = dynamic_cast<QSpacerItem *>(item); x)
+        auto *item = this->ui_.tabContainer->itemAt(i);
+        if (auto *x = dynamic_cast<QSpacerItem *>(item); x)
         {
             x->changeSize(10, shouldShowSpace ? int(16 * this->scale()) : 0);
             shouldShowSpace = false;
@@ -257,7 +257,8 @@ void SettingsDialog::addTab(std::function<SettingsPage *()> page,
                             const QString &name, const QString &iconPath,
                             SettingsTabId id, Qt::Alignment alignment)
 {
-    auto tab = new SettingsDialogTab(this, std::move(page), name, iconPath, id);
+    auto *tab =
+        new SettingsDialogTab(this, std::move(page), name, iconPath, id);
     tab->setFixedHeight(static_cast<int>(30 * this->dpi_));
 
     this->ui_.tabContainer->addWidget(tab, 0, alignment);
@@ -274,8 +275,12 @@ void SettingsDialog::selectTab(SettingsDialogTab *tab, bool byUser)
     // add page if it's not been added yet
     [&] {
         for (int i = 0; i < this->ui_.pageStack->count(); i++)
+        {
             if (this->ui_.pageStack->itemAt(i)->widget() == tab->page())
+            {
                 return;
+            }
+        }
 
         this->ui_.pageStack->addWidget(tab->page());
     }();
@@ -301,10 +306,12 @@ void SettingsDialog::selectTab(SettingsDialogTab *tab, bool byUser)
 
 void SettingsDialog::selectTab(SettingsTabId id)
 {
-    auto t = this->tab(id);
+    auto *t = this->tab(id);
     assert(t);
     if (!t)
+    {
         return;
+    }
 
     this->selectTab(t);
 }
@@ -312,8 +319,12 @@ void SettingsDialog::selectTab(SettingsTabId id)
 SettingsDialogTab *SettingsDialog::tab(SettingsTabId id)
 {
     for (auto &&tab : this->tabs_)
+    {
         if (tab->id() == id)
+        {
             return tab;
+        }
+    }
 
     assert(false);
     return nullptr;
@@ -325,7 +336,9 @@ void SettingsDialog::showDialog(QWidget *parent,
     static SettingsDialog *instance = new SettingsDialog(parent);
     static bool hasShownBefore = false;
     if (hasShownBefore)
+    {
         instance->refresh();
+    }
     hasShownBefore = true;
 
     switch (preferredTab)
@@ -335,10 +348,10 @@ void SettingsDialog::showDialog(QWidget *parent,
             break;
 
         case SettingsDialogPreference::ModerationActions:
-            if (auto tab = instance->tab(SettingsTabId::Moderation))
+            if (auto *tab = instance->tab(SettingsTabId::Moderation))
             {
                 instance->selectTab(tab);
-                if (auto page = dynamic_cast<ModerationPage *>(tab->page()))
+                if (auto *page = dynamic_cast<ModerationPage *>(tab->page()))
                 {
                     page->selectModerationActions();
                 }
@@ -419,7 +432,7 @@ void SettingsDialog::onOkClicked()
 {
     if (!getApp()->getArgs().dontSaveSettings)
     {
-        getApp()->commands->save();
+        getIApp()->getCommands()->save();
         pajlada::Settings::SettingManager::gSave();
     }
     this->close();

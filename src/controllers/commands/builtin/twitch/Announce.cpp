@@ -33,7 +33,7 @@ QString sendAnnouncement(const CommandContext &ctx)
         return "";
     }
 
-    auto user = getApp()->accounts->twitch.getCurrent();
+    auto user = getIApp()->getAccounts()->twitch.getCurrent();
     if (user->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(

@@ -68,7 +68,7 @@ namespace chatterino {
 // NUM_SOUNDS specifies how many simultaneous default ping sounds & decoders to create
 constexpr const auto NUM_SOUNDS = 4;
 
-void MiniaudioBackend::initialize(Settings &settings, Paths &paths)
+void MiniaudioBackend::initialize(Settings &settings, const Paths &paths)
 {
     (void)(settings);
     (void)(paths);

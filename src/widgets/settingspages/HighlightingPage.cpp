@@ -67,7 +67,7 @@ HighlightingPage::HighlightingPage()
                     "Message highlights are prioritized over badge highlights "
                     "and user highlights.");
 
-                auto view =
+                auto *view =
                     highlights
                         .emplace<EditableModelView>(
                             (new HighlightModel(nullptr))
@@ -170,12 +170,12 @@ HighlightingPage::HighlightingPage()
                     "user badges.\n"
                     "Badge highlights are prioritzed under user and message "
                     "highlights.");
-                auto view = badgeHighlights
-                                .emplace<EditableModelView>(
-                                    (new BadgeHighlightModel(nullptr))
-                                        ->initialized(
-                                            &getSettings()->highlightedBadges))
-                                .getElement();
+                auto *view = badgeHighlights
+                                 .emplace<EditableModelView>(
+                                     (new BadgeHighlightModel(nullptr))
+                                         ->initialized(
+                                             &getSettings()->highlightedBadges))
+                                 .getElement();
                 view->setTitles({"Name", "Show In\nMentions", "Flash\ntaskbar",
                                  "Play\nsound", "Custom\nsound", "Color"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(

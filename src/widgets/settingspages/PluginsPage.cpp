@@ -37,11 +37,12 @@ PluginsPage::PluginsPage()
         auto group = layout.emplace<QGroupBox>("General plugin settings");
         this->generalGroup = group.getElement();
         auto groupLayout = group.setLayoutType<QFormLayout>();
-        auto *description = new QLabel(
-            "You can load plugins by putting them into " +
-            formatRichNamedLink("file:///" + getPaths()->pluginsDirectory,
-                                "the Plugins directory") +
-            ". Each one is a new directory.");
+        auto *description =
+            new QLabel("You can load plugins by putting them into " +
+                       formatRichNamedLink(
+                           "file:///" + getIApp()->getPaths().pluginsDirectory,
+                           "the Plugins directory") +
+                       ". Each one is a new directory.");
         description->setOpenExternalLinks(true);
         description->setWordWrap(true);
         description->setStyleSheet("color: #bbb");
@@ -79,7 +80,7 @@ void PluginsPage::rebuildContent()
     this->scrollAreaWidget_.append(this->dataFrame_);
     auto layout = frame.setLayoutType<QVBoxLayout>();
     layout->setParent(this->dataFrame_);
-    for (const auto &[id, plugin] : getApp()->plugins->plugins())
+    for (const auto &[id, plugin] : getIApp()->getPlugins()->plugins())
     {
         auto groupHeaderText =
             QString("%1 (%2, from %3)")
@@ -184,7 +185,7 @@ void PluginsPage::rebuildContent()
                         val.push_back(name);
                     }
                     getSettings()->enabledPlugins.setValue(val);
-                    getApp()->plugins->reload(name);
+                    getIApp()->getPlugins()->reload(name);
                     this->rebuildContent();
                 });
             pluginEntry->addRow(toggleButton);
@@ -193,7 +194,7 @@ void PluginsPage::rebuildContent()
         auto *reloadButton = new QPushButton("Reload", this->dataFrame_);
         QObject::connect(reloadButton, &QPushButton::pressed,
                          [name = id, this]() {
-                             getApp()->plugins->reload(name);
+                             getIApp()->getPlugins()->reload(name);
                              this->rebuildContent();
                          });
         pluginEntry->addRow(reloadButton);

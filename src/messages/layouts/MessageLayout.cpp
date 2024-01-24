@@ -74,11 +74,10 @@ int MessageLayout::getWidth() const
 
 // Layout
 // return true if redraw is required
-bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
+bool MessageLayout::layout(int width, float scale, MessageElementFlags flags,
+                           bool shouldInvalidateBuffer)
 {
     //    BenchmarkGuard benchmark("MessageLayout::layout()");
-
-    auto app = getApp();
 
     bool layoutRequired = false;
 
@@ -88,11 +87,12 @@ bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
     this->currentLayoutWidth_ = width;
 
     // check if layout state changed
-    if (this->layoutState_ != app->windows->getGeneration())
+    const auto layoutGeneration = getIApp()->getWindows()->getGeneration();
+    if (this->layoutState_ != layoutGeneration)
     {
         layoutRequired = true;
         this->flags.set(MessageLayoutFlag::RequiresBufferUpdate);
-        this->layoutState_ = app->windows->getGeneration();
+        this->layoutState_ = layoutGeneration;
     }
 
     // check if work mask changed
@@ -109,6 +109,11 @@ bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
 
     if (!layoutRequired)
     {
+        if (shouldInvalidateBuffer)
+        {
+            this->invalidateBuffer();
+            return true;
+        }
         return false;
     }
 

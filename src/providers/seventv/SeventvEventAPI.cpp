@@ -360,16 +360,15 @@ void SeventvEventAPI::onUserUpdate(const Dispatch &dispatch)
 // NOLINTBEGIN(readability-convert-member-functions-to-static)
 void SeventvEventAPI::onCosmeticCreate(const CosmeticCreateDispatch &cosmetic)
 {
-    // We're using `Application::instance` instead of getApp(), because we're not in the GUI thread.
-    // `seventvBadges` and `seventvPaints` do their own locking.
+    auto *badges = getIApp()->getSeventvBadges();
     switch (cosmetic.kind)
     {
         case CosmeticKind::Badge: {
-            Application::instance->seventvBadges->registerBadge(cosmetic.data);
+            badges->registerBadge(cosmetic.data);
         }
         break;
         case CosmeticKind::Paint: {
-            Application::instance->seventvPaints->addPaint(cosmetic.data);
+            getIApp()->getSeventvPaints()->addPaint(cosmetic.data);
         }
         break;
         default:
@@ -380,24 +379,23 @@ void SeventvEventAPI::onCosmeticCreate(const CosmeticCreateDispatch &cosmetic)
 void SeventvEventAPI::onEntitlementCreate(
     const EntitlementCreateDeleteDispatch &entitlement)
 {
-    // We're using `Application::instance` instead of getApp(), because we're not in the GUI thread.
-    // `seventvBadges` and `seventvPaints` do their own locking.
+    auto *badges = getIApp()->getSeventvBadges();
     switch (entitlement.kind)
     {
         case CosmeticKind::Badge: {
-            Application::instance->seventvBadges->assignBadgeToUser(
-                entitlement.refID, UserId{entitlement.userID});
+            badges->assignBadgeToUser(entitlement.refID,
+                                      UserId{entitlement.userID});
         }
         break;
         case CosmeticKind::Paint: {
-            Application::instance->seventvPaints->assignPaintToUser(
+            getIApp()->getSeventvPaints()->assignPaintToUser(
                 entitlement.refID, UserName{entitlement.userName});
         }
         break;
         case CosmeticKind::EmoteSet: {
-            if (auto set = Application::instance->seventvPersonalEmotes
-                               ->assignUserToEmoteSet(entitlement.refID,
-                                                      entitlement.userID))
+            if (auto set =
+                    getIApp()->getSeventvPersonalEmotes()->assignUserToEmoteSet(
+                        entitlement.refID, entitlement.userID))
             {
                 this->signals_.personalEmoteSetAdded.invoke(
                     {entitlement.userName, *set});
@@ -412,17 +410,16 @@ void SeventvEventAPI::onEntitlementCreate(
 void SeventvEventAPI::onEntitlementDelete(
     const EntitlementCreateDeleteDispatch &entitlement)
 {
-    // We're using `Application::instance` instead of getApp(), because we're not in the GUI thread.
-    // `seventvBadges` and `seventvPaints` do their own locking.
+    auto *badges = getIApp()->getSeventvBadges();
     switch (entitlement.kind)
     {
         case CosmeticKind::Badge: {
-            Application::instance->seventvBadges->clearBadgeFromUser(
-                entitlement.refID, UserId{entitlement.userID});
+            badges->clearBadgeFromUser(entitlement.refID,
+                                       UserId{entitlement.userID});
         }
         break;
         case CosmeticKind::Paint: {
-            Application::instance->seventvPaints->clearPaintFromUser(
+            getIApp()->getSeventvPaints()->clearPaintFromUser(
                 entitlement.refID, UserName{entitlement.userName});
         }
         break;
@@ -445,7 +442,7 @@ void SeventvEventAPI::onEmoteSetCreate(const Dispatch &dispatch)
 
     if (createDispatch.isPersonal)
     {
-        Application::instance->seventvPersonalEmotes->createEmoteSet(
+        getIApp()->getSeventvPersonalEmotes()->createEmoteSet(
             createDispatch.emoteSetID);
     }
 }

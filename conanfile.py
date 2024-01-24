@@ -11,6 +11,7 @@ class Chatterino(ConanFile):
         "with_benchmark": False,
         "with_openssl3": False,
         "openssl*:shared": True,
+        "boost*:header_only": True,
     }
     options = {
         "with_benchmark": [True, False],
@@ -33,13 +34,15 @@ class Chatterino(ConanFile):
             self.requires("openssl/1.1.1t")
 
     def generate(self):
-        copy_bin = lambda dep, selector, subdir: copy(
-            self,
-            selector,
-            dep.cpp_info.bindirs[0],
-            path.join(self.build_folder, subdir),
-            keep_path=False,
-        )
+        def copy_bin(dep, selector, subdir):
+            src = path.realpath(dep.cpp_info.bindirs[0])
+            dst = path.realpath(path.join(self.build_folder, subdir))
+
+            if src == dst:
+                return
+
+            copy(self, selector, src, dst, keep_path=False)
+
         for dep in self.dependencies.values():
             # macOS
             copy_bin(dep, "*.dylib", "bin")

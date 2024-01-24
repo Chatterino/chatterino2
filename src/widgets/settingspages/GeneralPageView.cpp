@@ -25,11 +25,11 @@ namespace chatterino {
 GeneralPageView::GeneralPageView(QWidget *parent)
     : QWidget(parent)
 {
-    auto scrollArea = this->contentScrollArea_ =
+    auto *scrollArea = this->contentScrollArea_ =
         makeScrollArea(this->contentLayout_ = new QVBoxLayout);
     scrollArea->setObjectName("generalSettingsScrollContent");
 
-    auto navigation =
+    auto *navigation =
         wrapLayout(this->navigationLayout_ = makeLayout<QVBoxLayout>({}));
     navigation->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Minimum);
     this->navigationLayout_->setAlignment(Qt::AlignTop);
@@ -63,14 +63,16 @@ TitleLabel *GeneralPageView::addTitle(const QString &title)
 {
     // space
     if (!this->groups_.empty())
+    {
         this->addWidget(this->groups_.back().space = new Space);
+    }
 
     // title
-    auto label = new TitleLabel(title + ":");
+    auto *label = new TitleLabel(title + ":");
     this->addWidget(label);
 
     // navigation item
-    auto navLabel = new NavigationLabel(title);
+    auto *navLabel = new NavigationLabel(title);
     navLabel->setCursor(Qt::PointingHandCursor);
     this->navigationLayout_->addWidget(navLabel);
 
@@ -82,14 +84,16 @@ TitleLabel *GeneralPageView::addTitle(const QString &title)
     this->groups_.push_back(Group{title, label, navLabel, nullptr, {}});
 
     if (this->groups_.size() == 1)
+    {
         this->updateNavigationHighlighting();
+    }
 
     return label;
 }
 
 SubtitleLabel *GeneralPageView::addSubtitle(const QString &title)
 {
-    auto label = new SubtitleLabel(title + ":");
+    auto *label = new SubtitleLabel(title + ":");
     this->addWidget(label);
 
     this->groups_.back().widgets.push_back({label, {title}});
@@ -101,7 +105,7 @@ QCheckBox *GeneralPageView::addCheckbox(const QString &text,
                                         BoolSetting &setting, bool inverse,
                                         QString toolTipText)
 {
-    auto check = new QCheckBox(text);
+    auto *check = new QCheckBox(text);
     this->addToolTip(*check, toolTipText);
 
     // update when setting changes
@@ -151,12 +155,12 @@ ComboBox *GeneralPageView::addDropdown(const QString &text,
                                        const QStringList &list,
                                        QString toolTipText)
 {
-    auto layout = new QHBoxLayout;
-    auto combo = new ComboBox;
+    auto *layout = new QHBoxLayout;
+    auto *combo = new ComboBox;
     combo->setFocusPolicy(Qt::StrongFocus);
     combo->addItems(list);
 
-    auto label = new QLabel(text + ":");
+    auto *label = new QLabel(text + ":");
     layout->addWidget(label);
     layout->addStretch(1);
     layout->addWidget(combo);
@@ -176,10 +180,12 @@ ComboBox *GeneralPageView::addDropdown(
     pajlada::Settings::Setting<QString> &setting, bool editable,
     QString toolTipText)
 {
-    auto combo = this->addDropdown(text, items, toolTipText);
+    auto *combo = this->addDropdown(text, items, toolTipText);
 
     if (editable)
+    {
         combo->setEditable(true);
+    }
 
     // update when setting changes
     setting.connect(
@@ -191,7 +197,7 @@ ComboBox *GeneralPageView::addDropdown(
     QObject::connect(combo, &QComboBox::currentTextChanged,
                      [&setting](const QString &newValue) {
                          setting = newValue;
-                         getApp()->windows->forceLayoutChannelViews();
+                         getIApp()->getWindows()->forceLayoutChannelViews();
                      });
 
     return combo;
@@ -201,9 +207,9 @@ ColorButton *GeneralPageView::addColorButton(
     const QString &text, const QColor &color,
     pajlada::Settings::Setting<QString> &setting, QString toolTipText)
 {
-    auto colorButton = new ColorButton(color);
-    auto layout = new QHBoxLayout();
-    auto label = new QLabel(text + ":");
+    auto *colorButton = new ColorButton(color);
+    auto *layout = new QHBoxLayout();
+    auto *label = new QLabel(text + ":");
 
     layout->addWidget(label);
     layout->addStretch(1);
@@ -238,12 +244,12 @@ QSpinBox *GeneralPageView::addIntInput(const QString &text, IntSetting &setting,
                                        int min, int max, int step,
                                        QString toolTipText)
 {
-    auto layout = new QHBoxLayout;
+    auto *layout = new QHBoxLayout;
 
-    auto label = new QLabel(text + ":");
+    auto *label = new QLabel(text + ":");
     this->addToolTip(*label, toolTipText);
 
-    auto input = new QSpinBox;
+    auto *input = new QSpinBox;
     input->setMinimum(min);
     input->setMaximum(max);
 
@@ -280,7 +286,7 @@ void GeneralPageView::addNavigationSpacing()
 
 DescriptionLabel *GeneralPageView::addDescription(const QString &text)
 {
-    auto label = new DescriptionLabel(text);
+    auto *label = new DescriptionLabel(text);
 
     label->setTextInteractionFlags(Qt::TextBrowserInteraction |
                                    Qt::LinksAccessibleByKeyboard);
@@ -310,7 +316,7 @@ bool GeneralPageView::filterElements(const QString &query)
         bool descriptionMatches{};
         for (auto &&widget : group.widgets)
         {
-            if (auto x = dynamic_cast<DescriptionLabel *>(widget.element); x)
+            if (auto *x = dynamic_cast<DescriptionLabel *>(widget.element); x)
             {
                 if (x->text().contains(query, Qt::CaseInsensitive))
                 {
@@ -325,7 +331,9 @@ bool GeneralPageView::filterElements(const QString &query)
             descriptionMatches)
         {
             for (auto &&widget : group.widgets)
+            {
                 widget.element->show();
+            }
 
             group.title->show();
             group.navigationLink->show();
@@ -342,11 +350,13 @@ bool GeneralPageView::filterElements(const QString &query)
 
             for (auto &&widget : group.widgets)
             {
-                if (auto x = dynamic_cast<SubtitleLabel *>(widget.element))
+                if (auto *x = dynamic_cast<SubtitleLabel *>(widget.element))
                 {
                     currentSubtitleSearched = false;
                     if (currentSubtitle)
+                    {
                         currentSubtitle->setVisible(currentSubtitleVisible);
+                    }
 
                     currentSubtitleVisible = false;
                     currentSubtitle = widget.element;
@@ -375,10 +385,14 @@ bool GeneralPageView::filterElements(const QString &query)
             }
 
             if (currentSubtitle)
+            {
                 currentSubtitle->setVisible(currentSubtitleVisible);
+            }
 
             if (group.space)
+            {
                 group.space->setVisible(groupAny);
+            }
 
             group.title->setVisible(groupAny);
             group.navigationLink->setVisible(groupAny);

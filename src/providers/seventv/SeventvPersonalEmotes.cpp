@@ -9,7 +9,8 @@
 
 namespace chatterino {
 
-void SeventvPersonalEmotes::initialize(Settings &settings, Paths & /*paths*/)
+void SeventvPersonalEmotes::initialize(Settings &settings,
+                                       const Paths & /*paths*/)
 {
     settings.enableSevenTVPersonalEmotes.connect(
         [this]() {

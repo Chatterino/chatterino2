@@ -440,20 +440,20 @@ size_t TextLayoutElement::getSelectionIndexCount() const
 void TextLayoutElement::paint(QPainter &painter,
                               const MessageColors & /*messageColors*/)
 {
-    auto app = getApp();
+    auto *app = getApp();
     QString text = this->getText();
     if (text.isRightToLeft() || this->reversedNeutral)
     {
         text.prepend(RTL_EMBED);
     }
 
-    auto font = getApp()->getFonts()->getFont(this->style_, this->scale_);
+    auto font = app->getFonts()->getFont(this->style_, this->scale_);
 
     bool isNametag = this->getLink().type == chatterino::Link::UserInfo ||
                      this->getLink().type == chatterino::Link::UserWhisper;
     bool drawPaint = isNametag && getSettings()->displaySevenTVPaints;
     auto seventvPaint =
-        getApp()->seventvPaints->getPaint(this->getLink().value.toLower());
+        app->getSeventvPaints()->getPaint(this->getLink().value.toLower());
     if (drawPaint && seventvPaint.has_value())
     {
         if (seventvPaint.value()->animated())
@@ -496,7 +496,7 @@ bool TextLayoutElement::paintAnimated(QPainter &painter, const int yOffset)
         this->getLink().type == chatterino::Link::UserWhisper;
     const bool drawPaint = isNametag && getSettings()->displaySevenTVPaints;
     const auto seventvPaint =
-        getApp()->seventvPaints->getPaint(this->getLink().value.toLower());
+        getApp()->getSeventvPaints()->getPaint(this->getLink().value.toLower());
 
     if (drawPaint && seventvPaint.has_value() &&
         seventvPaint.value()->animated())
@@ -523,9 +523,9 @@ int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
         return 0;
     }
 
-    auto app = getApp();
+    auto *app = getApp();
 
-    auto metrics = app->fonts->getFontMetrics(this->style_, this->scale_);
+    auto metrics = app->getFonts()->getFontMetrics(this->style_, this->scale_);
     auto x = this->getRect().left();
 
     for (auto i = 0; i < this->getText().size(); i++)
@@ -557,10 +557,10 @@ int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
 
 int TextLayoutElement::getXFromIndex(size_t index)
 {
-    auto app = getApp();
+    auto *app = getApp();
 
     QFontMetrics metrics =
-        app->fonts->getFontMetrics(this->style_, this->scale_);
+        app->getFonts()->getFontMetrics(this->style_, this->scale_);
 
     if (index <= 0)
     {
@@ -608,7 +608,7 @@ void TextIconLayoutElement::paint(QPainter &painter,
 {
     auto *app = getApp();
 
-    QFont font = app->fonts->getFont(FontStyle::Tiny, this->scale);
+    QFont font = app->getFonts()->getFont(FontStyle::Tiny, this->scale);
 
     painter.setPen(messageColors.system);
     painter.setFont(font);

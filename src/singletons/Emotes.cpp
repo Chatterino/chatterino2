@@ -6,7 +6,7 @@ Emotes::Emotes()
 {
 }
 
-void Emotes::initialize(Settings &settings, Paths &paths)
+void Emotes::initialize(Settings &settings, const Paths &paths)
 {
     this->emojis.load();
 

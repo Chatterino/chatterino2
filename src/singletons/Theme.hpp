@@ -43,7 +43,7 @@ public:
 
     static const int AUTO_RELOAD_INTERVAL_MS = 500;
 
-    void initialize(Settings &settings, Paths &paths) final;
+    void initialize(Settings &settings, const Paths &paths) final;
 
     bool isLightTheme() const;
 
@@ -169,7 +169,7 @@ private:
      *
      * NOTE: This is currently not built to be reloadable
      **/
-    void loadAvailableThemes();
+    void loadAvailableThemes(const Paths &paths);
 
     std::optional<ThemeDescriptor> findThemeByKey(const QString &key);
 

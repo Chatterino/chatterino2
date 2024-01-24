@@ -11,7 +11,11 @@
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "controllers/sound/ISoundController.hpp"
+#include "providers/bttv/BttvEmotes.hpp"
+#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
+#include "providers/twitch/TwitchBadges.hpp"
 #include "singletons/ImageUploader.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/PluginController.hpp"
@@ -109,36 +113,43 @@ IApplication::IApplication()
 // It will create the instances of the major classes, and connect their signals
 // to each other
 
-Application::Application(Settings &_settings, Paths &_paths, const Args &_args)
-    : args_(_args)
+Application::Application(Settings &_settings, const Paths &paths,
+                         const Args &_args, Updates &_updates)
+    : paths_(paths)
+    , args_(_args)
     , themes(&this->emplace<Theme>())
     , fonts(&this->emplace<Fonts>())
     , emotes(&this->emplace<Emotes>())
     , accounts(&this->emplace<AccountController>())
     , hotkeys(&this->emplace<HotkeyController>())
-    , windows(&this->emplace<WindowManager>())
+    , windows(&this->emplace(new WindowManager(paths)))
     , toasts(&this->emplace<Toasts>())
     , imageUploader(&this->emplace<ImageUploader>())
     , seventvAPI(&this->emplace<SeventvAPI>())
-    , crashHandler(&this->emplace<CrashHandler>())
+    , crashHandler(&this->emplace(new CrashHandler(paths)))
 
     , commands(&this->emplace<CommandController>())
     , notifications(&this->emplace<NotificationController>())
     , highlights(&this->emplace<HighlightController>())
     , twitch(&this->emplace<TwitchIrcServer>())
-    , chatterinoBadges(&this->emplace<ChatterinoBadges>())
     , ffzBadges(&this->emplace<FfzBadges>())
     , seventvBadges(&this->emplace<SeventvBadges>())
     , seventvPaints(&this->emplace<SeventvPaints>())
     , seventvPersonalEmotes(&this->emplace<SeventvPersonalEmotes>())
-    , userData(&this->emplace<UserDataController>())
+    , userData(&this->emplace(new UserDataController(paths)))
     , sound(&this->emplace<ISoundController>(makeSoundController(_settings)))
     , twitchLiveController(&this->emplace<TwitchLiveController>())
     , twitchPubSub(new PubSub(TWITCH_PUBSUB_URL))
+    , twitchBadges(new TwitchBadges)
+    , chatterinoBadges(new ChatterinoBadges)
+    , bttvEmotes(new BttvEmotes)
+    , ffzEmotes(new FfzEmotes)
+    , seventvEmotes(new SeventvEmotes)
     , logging(new Logging(_settings))
 #ifdef CHATTERINO_HAVE_PLUGINS
-    , plugins(&this->emplace<PluginController>())
+    , plugins(&this->emplace(new PluginController(paths)))
 #endif
+    , updates(_updates)
 {
     Application::instance = this;
 
@@ -154,9 +165,14 @@ Application::~Application() = default;
 void Application::fakeDtor()
 {
     this->twitchPubSub.reset();
+    this->twitchBadges.reset();
+    this->chatterinoBadges.reset();
+    this->bttvEmotes.reset();
+    this->ffzEmotes.reset();
+    this->seventvEmotes.reset();
 }
 
-void Application::initialize(Settings &settings, Paths &paths)
+void Application::initialize(Settings &settings, const Paths &paths)
 {
     assert(isAppInitialized == false);
     isAppInitialized = true;
@@ -166,9 +182,9 @@ void Application::initialize(Settings &settings, Paths &paths)
         getSettings()->currentVersion.getValue() != "" &&
         getSettings()->currentVersion.getValue() != CHATTERINO_VERSION)
     {
-        auto box = new QMessageBox(QMessageBox::Information, "Chatterino 2",
-                                   "Show changelog?",
-                                   QMessageBox::Yes | QMessageBox::No);
+        auto *box = new QMessageBox(QMessageBox::Information, "Chatterino 2",
+                                    "Show changelog?",
+                                    QMessageBox::Yes | QMessageBox::No);
         box->setAttribute(Qt::WA_DeleteOnClose);
         if (box->exec() == QMessageBox::Yes)
         {
@@ -197,10 +213,10 @@ void Application::initialize(Settings &settings, Paths &paths)
 #ifndef Q_OS_WIN
     if (!this->args_.isFramelessEmbed && this->args_.crashRecovery)
     {
-        if (auto selected =
+        if (auto *selected =
                 this->windows->getMainWindow().getNotebook().getSelectedPage())
         {
-            if (auto container = dynamic_cast<SplitContainer *>(selected))
+            if (auto *container = dynamic_cast<SplitContainer *>(selected))
             {
                 for (auto &&split : container->getSplits())
                 {
@@ -241,8 +257,8 @@ int Application::run(QApplication &qtApp)
     }
 
     getSettings()->betaUpdates.connect(
-        [] {
-            Updates::instance().checkForUpdates();
+        [this] {
+            this->updates.checkForUpdates();
         },
         false);
 
@@ -260,6 +276,10 @@ int Application::run(QApplication &qtApp)
         });
     std::ignore =
         getSettings()->highlightedUsers.delayedItemsChanged.connect([this] {
+            this->windows->forceLayoutChannelViews();
+        });
+    std::ignore =
+        getSettings()->highlightedBadges.delayedItemsChanged.connect([this] {
             this->windows->forceLayoutChannelViews();
         });
 
@@ -301,39 +321,201 @@ int Application::run(QApplication &qtApp)
     return qtApp.exec();
 }
 
+Theme *Application::getThemes()
+{
+    assertInGuiThread();
+
+    return this->themes;
+}
+
+Fonts *Application::getFonts()
+{
+    assertInGuiThread();
+
+    return this->fonts;
+}
+
 IEmotes *Application::getEmotes()
 {
+    assertInGuiThread();
+
     return this->emotes;
+}
+
+AccountController *Application::getAccounts()
+{
+    assertInGuiThread();
+
+    return this->accounts;
+}
+
+HotkeyController *Application::getHotkeys()
+{
+    assertInGuiThread();
+
+    return this->hotkeys;
+}
+
+WindowManager *Application::getWindows()
+{
+    assertInGuiThread();
+    assert(this->windows);
+
+    return this->windows;
+}
+
+Toasts *Application::getToasts()
+{
+    assertInGuiThread();
+
+    return this->toasts;
+}
+
+CrashHandler *Application::getCrashHandler()
+{
+    assertInGuiThread();
+
+    return this->crashHandler;
+}
+
+CommandController *Application::getCommands()
+{
+    assertInGuiThread();
+
+    return this->commands;
+}
+
+NotificationController *Application::getNotifications()
+{
+    assertInGuiThread();
+
+    return this->notifications;
+}
+
+HighlightController *Application::getHighlights()
+{
+    assertInGuiThread();
+
+    return this->highlights;
+}
+
+FfzBadges *Application::getFfzBadges()
+{
+    assertInGuiThread();
+
+    return this->ffzBadges;
+}
+
+SeventvBadges *Application::getSeventvBadges()
+{
+    // SeventvBadges handles its own locks, so we don't need to assert that this is called in the GUI thread
+
+    return this->seventvBadges;
 }
 
 IUserDataController *Application::getUserData()
 {
+    assertInGuiThread();
+
     return this->userData;
 }
 
 ISoundController *Application::getSound()
 {
+    assertInGuiThread();
+
     return this->sound;
 }
 
 ITwitchLiveController *Application::getTwitchLiveController()
 {
+    assertInGuiThread();
+
     return this->twitchLiveController;
 }
 
+TwitchBadges *Application::getTwitchBadges()
+{
+    assertInGuiThread();
+    assert(this->twitchBadges);
+
+    return this->twitchBadges.get();
+}
+
+IChatterinoBadges *Application::getChatterinoBadges()
+{
+    assertInGuiThread();
+    assert(this->chatterinoBadges);
+
+    return this->chatterinoBadges.get();
+}
+
+ImageUploader *Application::getImageUploader()
+{
+    assertInGuiThread();
+
+    return this->imageUploader;
+}
+
+SeventvAPI *Application::getSeventvAPI()
+{
+    assertInGuiThread();
+
+    return this->seventvAPI;
+}
+
+#ifdef CHATTERINO_HAVE_PLUGINS
+PluginController *Application::getPlugins()
+{
+    assertInGuiThread();
+
+    return this->plugins;
+}
+#endif
+
 ITwitchIrcServer *Application::getTwitch()
 {
+    assertInGuiThread();
+
     return this->twitch;
 }
 
 PubSub *Application::getTwitchPubSub()
 {
+    assertInGuiThread();
+
     return this->twitchPubSub.get();
 }
 
 Logging *Application::getChatLogger()
 {
+    assertInGuiThread();
+
     return this->logging.get();
+}
+
+BttvEmotes *Application::getBttvEmotes()
+{
+    assertInGuiThread();
+    assert(this->bttvEmotes);
+
+    return this->bttvEmotes.get();
+}
+
+FfzEmotes *Application::getFfzEmotes()
+{
+    assertInGuiThread();
+    assert(this->ffzEmotes);
+
+    return this->ffzEmotes.get();
+}
+
+SeventvEmotes *Application::getSeventvEmotes()
+{
+    assertInGuiThread();
+    assert(this->seventvEmotes);
+
+    return this->seventvEmotes.get();
 }
 
 void Application::save()
@@ -344,7 +526,7 @@ void Application::save()
     }
 }
 
-void Application::initNm(Paths &paths)
+void Application::initNm(const Paths &paths)
 {
     (void)paths;
 
@@ -463,7 +645,7 @@ void Application::initPubSub()
 
                 for (int i = snapshotLength - 1; i >= end; --i)
                 {
-                    auto &s = snapshot[i];
+                    const auto &s = snapshot[i];
                     if (!s->flags.has(MessageFlag::PubSub) &&
                         s->timeoutUser == msg->timeoutUser)
                     {
@@ -753,7 +935,7 @@ void Application::initPubSub()
             auto reward = ChannelPointReward(data);
 
             postToThread([chan, reward] {
-                if (auto channel = dynamic_cast<TwitchChannel *>(chan.get()))
+                if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
                 {
                     channel->addChannelPointReward(reward);
                 }
@@ -914,16 +1096,12 @@ Application *getApp()
 {
     assert(Application::instance != nullptr);
 
-    assertInGuiThread();
-
     return Application::instance;
 }
 
 IApplication *getIApp()
 {
     assert(IApplication::instance != nullptr);
-
-    assertInGuiThread();
 
     return IApplication::instance;
 }

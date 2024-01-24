@@ -2,8 +2,8 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "debug/Benchmark.hpp"
@@ -53,7 +53,7 @@ namespace detail {
             DebugCount::increase("animated images");
 
             this->gifTimerConnection_ =
-                getApp()->emotes->gifTimer.signal.connect([this] {
+                getIApp()->getEmotes()->getGIFTimer().signal.connect([this] {
                     this->advance();
                 });
         }
@@ -208,7 +208,9 @@ namespace detail {
                 // https://github.com/SevenTV/chatterino7/issues/46#issuecomment-1010595231
                 int duration = reader.nextImageDelay();
                 if (duration <= 10)
+                {
                     duration = 100;
+                }
                 duration = std::max(20, duration);
                 frames.push_back(Frame<QImage>{std::move(image), duration});
             }
@@ -250,7 +252,7 @@ namespace detail {
             }
         }
 
-        getApp()->windows->forceLayoutChannelViews();
+        getIApp()->getWindows()->forceLayoutChannelViews();
 
         loadedEventQueued = false;
     }

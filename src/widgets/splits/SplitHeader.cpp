@@ -1,9 +1,9 @@
 #include "widgets/splits/SplitHeader.hpp"
 
 #include "Application.hpp"
-#include "common/NetworkCommon.hpp"
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkCommon.hpp"
+#include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/Hotkey.hpp"
@@ -246,7 +246,7 @@ SplitHeader::SplitHeader(Split *split)
     });
 
     this->bSignals_.emplace_back(
-        getApp()->accounts->twitch.currentUserChanged.connect([this] {
+        getIApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
             this->updateModerationModeIcon();
         }));
 
@@ -295,7 +295,7 @@ void SplitHeader::initializeLayout()
                         case Qt::LeftButton:
                             if (getSettings()->moderationActions.empty())
                             {
-                                getApp()->windows->showSettingsDialog(
+                                getIApp()->getWindows()->showSettingsDialog(
                                     this, SettingsDialogPreference::
                                               ModerationActions);
                                 this->split_->setModerationMode(true);
@@ -313,7 +313,7 @@ void SplitHeader::initializeLayout()
 
                         case Qt::RightButton:
                         case Qt::MiddleButton:
-                            getApp()->windows->showSettingsDialog(
+                            getIApp()->getWindows()->showSettingsDialog(
                                 this,
                                 SettingsDialogPreference::ModerationActions);
                             break;
@@ -363,7 +363,7 @@ void SplitHeader::initializeLayout()
 std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 {
     // top level menu
-    const auto &h = getApp()->hotkeys;
+    const auto &h = getIApp()->getHotkeys();
     auto menu = std::make_unique<QMenu>();
     menu->addAction(
         "Change channel", this->split_, &Split::changeChannel,
@@ -533,11 +533,11 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         action->setShortcut(notifySeq);
 
         QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
-            action->setChecked(getApp()->notifications->isChannelNotified(
+            action->setChecked(getIApp()->getNotifications()->isChannelNotified(
                 this->split_->getChannel()->getName(), Platform::Twitch));
         });
         QObject::connect(action, &QAction::triggered, this, [this]() {
-            getApp()->notifications->updateChannelNotification(
+            getIApp()->getNotifications()->updateChannelNotification(
                 this->split_->getChannel()->getName(), Platform::Twitch);
         });
 
@@ -1034,7 +1034,7 @@ void SplitHeader::reloadSubscriberEmotes()
     this->lastReloadedSubEmotes_ = now;
 
     auto channel = this->split_->getChannel();
-    getApp()->accounts->twitch.getCurrent()->loadEmotes(channel);
+    getIApp()->getAccounts()->twitch.getCurrent()->loadEmotes(channel);
 }
 
 void SplitHeader::reconnect()

@@ -3,7 +3,10 @@
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/completion/sources/Helpers.hpp"
+#include "providers/bttv/BttvEmotes.hpp"
 #include "providers/emoji/Emojis.hpp"
+#include "providers/ffz/FfzEmotes.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/seventv/SeventvPersonalEmotes.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -114,8 +117,8 @@ void EmoteSource::initializeFromChannel(const Channel *channel)
         if (tc)
         {
             for (const auto &map :
-                 getApp()->seventvPersonalEmotes->getEmoteSetsForUser(
-                     getApp()->accounts->twitch.getCurrent()->getUserId()))
+                 app->getSeventvPersonalEmotes()->getEmoteSetsForUser(
+                     app->getAccounts()->twitch.getCurrent()->getUserId()))
             {
                 addEmotes(emotes, *map, "Personal 7TV");
             }
@@ -135,15 +138,15 @@ void EmoteSource::initializeFromChannel(const Channel *channel)
             }
         }
 
-        if (auto bttvG = app->getTwitch()->getBttvEmotes().emotes())
+        if (auto bttvG = app->getBttvEmotes()->emotes())
         {
             addEmotes(emotes, *bttvG, "Global BetterTTV");
         }
-        if (auto ffzG = app->getTwitch()->getFfzEmotes().emotes())
+        if (auto ffzG = app->getFfzEmotes()->emotes())
         {
             addEmotes(emotes, *ffzG, "Global FrankerFaceZ");
         }
-        if (auto seventvG = app->getTwitch()->getSeventvEmotes().globalEmotes())
+        if (auto seventvG = app->getSeventvEmotes()->globalEmotes())
         {
             addEmotes(emotes, *seventvG, "Global 7TV");
         }

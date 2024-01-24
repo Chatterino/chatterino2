@@ -440,7 +440,8 @@ std::ostream &operator<<(std::ostream &os, const HighlightResult &result)
     return os;
 }
 
-void HighlightController::initialize(Settings &settings, Paths & /*paths*/)
+void HighlightController::initialize(Settings &settings,
+                                     const Paths & /*paths*/)
 {
     this->rebuildListener_.addSetting(settings.enableSelfHighlight);
     this->rebuildListener_.addSetting(settings.enableSelfHighlightSound);

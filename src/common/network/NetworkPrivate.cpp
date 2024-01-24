@@ -1,8 +1,9 @@
-#include "common/NetworkPrivate.hpp"
+#include "common/network/NetworkPrivate.hpp"
 
+#include "Application.hpp"
+#include "common/network/NetworkManager.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/network/NetworkTask.hpp"
-#include "common/NetworkManager.hpp"
-#include "common/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "singletons/Paths.hpp"
 #include "util/AbandonObject.hpp"
@@ -57,7 +58,8 @@ void loadUncached(std::shared_ptr<NetworkData> &&data)
 
 void loadCached(std::shared_ptr<NetworkData> &&data)
 {
-    QFile cachedFile(getPaths()->cacheDirectory() + "/" + data->getHash());
+    QFile cachedFile(getIApp()->getPaths().cacheDirectory() + "/" +
+                     data->getHash());
 
     if (!cachedFile.exists() || !cachedFile.open(QIODevice::ReadOnly))
     {

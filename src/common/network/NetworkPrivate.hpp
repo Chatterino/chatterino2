@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/Common.hpp"
-#include "common/NetworkCommon.hpp"
+#include "common/network/NetworkCommon.hpp"
 
 #include <QHttpMultiPart>
 #include <QNetworkRequest>

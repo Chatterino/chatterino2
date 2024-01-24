@@ -120,7 +120,8 @@ const std::unordered_map<QString, VariableReplacer> COMMAND_VARS{
         [](const auto &altText, const auto &channel, const auto *message) {
             (void)(channel);  //unused
             (void)(message);  //unused
-            auto uid = getApp()->accounts->twitch.getCurrent()->getUserId();
+            auto uid =
+                getIApp()->getAccounts()->twitch.getCurrent()->getUserId();
             return uid.isEmpty() ? altText : uid;
         },
     },
@@ -129,7 +130,8 @@ const std::unordered_map<QString, VariableReplacer> COMMAND_VARS{
         [](const auto &altText, const auto &channel, const auto *message) {
             (void)(channel);  //unused
             (void)(message);  //unused
-            auto name = getApp()->accounts->twitch.getCurrent()->getUserName();
+            auto name =
+                getIApp()->getAccounts()->twitch.getCurrent()->getUserName();
             return name.isEmpty() ? altText : name;
         },
     },
@@ -261,7 +263,7 @@ const std::unordered_map<QString, VariableReplacer> COMMAND_VARS{
 
 namespace chatterino {
 
-void CommandController::initialize(Settings &, Paths &paths)
+void CommandController::initialize(Settings &, const Paths &paths)
 {
     // Update commands map when the vector of commands has been updated
     auto addFirstMatchToMap = [this](auto args) {
@@ -474,7 +476,8 @@ CommandModel *CommandController::createModel(QObject *parent)
 QString CommandController::execCommand(const QString &textNoEmoji,
                                        ChannelPtr channel, bool dryRun)
 {
-    QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
+    QString text =
+        getIApp()->getEmotes()->getEmojis()->replaceShortCodes(textNoEmoji);
     QStringList words = text.split(' ', Qt::SkipEmptyParts);
 
     if (words.length() == 0)
@@ -489,7 +492,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         const auto it = this->userCommands_.find(commandName);
         if (it != this->userCommands_.end())
         {
-            text = getApp()->emotes->emojis.replaceShortCodes(
+            text = getIApp()->getEmotes()->getEmojis()->replaceShortCodes(
                 this->execCustomCommand(words, it.value(), dryRun, channel));
 
             words = text.split(' ', Qt::SkipEmptyParts);
@@ -560,7 +563,7 @@ bool CommandController::registerPluginCommand(const QString &commandName)
     }
 
     this->commands_[commandName] = [commandName](const CommandContext &ctx) {
-        return getApp()->plugins->tryExecPluginCommand(commandName, ctx);
+        return getIApp()->getPlugins()->tryExecPluginCommand(commandName, ctx);
     };
     this->pluginCommands_.append(commandName);
     return true;

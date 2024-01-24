@@ -17,6 +17,8 @@
 
 namespace {
 
+using namespace chatterino;
+
 template <class... Args>
 QCommandLineOption hiddenOption(Args... args)
 {
@@ -62,11 +64,34 @@ QStringList extractCommandLine(
     return args;
 }
 
+std::optional<Args::Channel> parseActivateOption(QString input)
+{
+    auto colon = input.indexOf(u':');
+    if (colon >= 0)
+    {
+        auto ty = input.left(colon);
+        if (ty != u"t")
+        {
+            qCWarning(chatterinoApp).nospace()
+                << "Failed to parse active channel (unknown type: " << ty
+                << ")";
+            return std::nullopt;
+        }
+
+        input = input.mid(colon + 1);
+    }
+
+    return Args::Channel{
+        .provider = ProviderId::Twitch,
+        .name = input,
+    };
+}
+
 }  // namespace
 
 namespace chatterino {
 
-Args::Args(const QApplication &app)
+Args::Args(const QApplication &app, const Paths &paths)
 {
     QCommandLineParser parser;
     parser.setApplicationDescription("Chatterino 2 Client for Twitch Chat");
@@ -100,6 +125,14 @@ Args::Args(const QApplication &app)
         "If platform isn't specified, default is Twitch.",
         "t:channel1;t:channel2;...");
 
+    QCommandLineOption activateOption(
+        {"a", "activate"},
+        "Activate the tab with this channel or add one in the main "
+        "window.\nOnly Twitch is "
+        "supported at the moment (prefix: 't:').\nIf the platform isn't "
+        "specified, Twitch is assumed.",
+        "t:channel");
+
     parser.addOptions({
         {{"V", "version"}, "Displays version information."},
         crashRecoveryOption,
@@ -110,6 +143,7 @@ Args::Args(const QApplication &app)
         verboseOption,
         safeModeOption,
         channelLayout,
+        activateOption,
     });
 
     if (!parser.parse(app.arguments()))
@@ -132,7 +166,7 @@ Args::Args(const QApplication &app)
 
     if (parser.isSet(channelLayout))
     {
-        this->applyCustomChannelLayout(parser.value(channelLayout));
+        this->applyCustomChannelLayout(parser.value(channelLayout), paths);
     }
 
     this->verbose = parser.isSet(verboseOption);
@@ -163,10 +197,17 @@ Args::Args(const QApplication &app)
         this->safeMode = true;
     }
 
+    if (parser.isSet(activateOption))
+    {
+        this->activateChannel =
+            parseActivateOption(parser.value(activateOption));
+    }
+
     this->currentArguments_ = extractCommandLine(parser, {
                                                              verboseOption,
                                                              safeModeOption,
                                                              channelLayout,
+                                                             activateOption,
                                                          });
 }
 
@@ -175,7 +216,7 @@ QStringList Args::currentArguments() const
     return this->currentArguments_;
 }
 
-void Args::applyCustomChannelLayout(const QString &argValue)
+void Args::applyCustomChannelLayout(const QString &argValue, const Paths &paths)
 {
     WindowLayout layout;
     WindowDescriptor window;
@@ -187,10 +228,9 @@ void Args::applyCustomChannelLayout(const QString &argValue)
     window.type_ = WindowType::Main;
 
     // Load main window layout from config file so we can use the same geometry
-    const QRect configMainLayout = [] {
-        const QString windowLayoutFile =
-            combinePath(getPaths()->settingsDirectory,
-                        WindowManager::WINDOW_LAYOUT_FILENAME);
+    const QRect configMainLayout = [paths] {
+        const QString windowLayoutFile = combinePath(
+            paths.settingsDirectory, WindowManager::WINDOW_LAYOUT_FILENAME);
 
         const WindowLayout configLayout =
             WindowLayout::loadFromFile(windowLayoutFile);
@@ -198,7 +238,9 @@ void Args::applyCustomChannelLayout(const QString &argValue)
         for (const WindowDescriptor &window : configLayout.windows_)
         {
             if (window.type_ != WindowType::Main)
+            {
                 continue;
+            }
 
             return window.geometry_;
         }
@@ -212,7 +254,9 @@ void Args::applyCustomChannelLayout(const QString &argValue)
     for (const QString &channelArg : channelArgList)
     {
         if (channelArg.isEmpty())
+        {
             continue;
+        }
 
         // Twitch is default platform
         QString platform = "t";

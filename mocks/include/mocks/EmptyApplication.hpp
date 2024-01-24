@@ -2,13 +2,25 @@
 
 #include "Application.hpp"
 #include "common/Args.hpp"
+#include "singletons/Paths.hpp"
+#include "singletons/Updates.hpp"
 
 namespace chatterino::mock {
 
 class EmptyApplication : public IApplication
 {
 public:
+    EmptyApplication()
+        : updates_(this->paths_)
+    {
+    }
+
     virtual ~EmptyApplication() = default;
+
+    const Paths &getPaths() override
+    {
+        return this->paths_;
+    }
 
     const Args &getArgs() override
     {
@@ -110,13 +122,19 @@ public:
         return nullptr;
     }
 
+    TwitchBadges *getTwitchBadges() override
+    {
+        assert(false && "getTwitchBadges was called without being initialized");
+        return nullptr;
+    }
+
     Logging *getChatLogger() override
     {
         assert(!"getChatLogger was called without being initialized");
         return nullptr;
     }
 
-    ChatterinoBadges *getChatterinoBadges() override
+    IChatterinoBadges *getChatterinoBadges() override
     {
         assert(false && "EmptyApplication::getChatterinoBadges was called "
                         "without being initialized");
@@ -158,6 +176,15 @@ public:
 
     SeventvPersonalEmotes *getSeventvPersonalEmotes() override
     {
+        assert(false && "EmptyApplication::getSeventvPersonalEmotes was called "
+                        "without being initialized");
+        return nullptr;
+    }
+
+    SeventvPaints *getSeventvPaints() override
+    {
+        assert(false && "EmptyApplication::getSeventvPaints was called "
+                        "without being initialized");
         return nullptr;
     }
 
@@ -173,8 +200,36 @@ public:
         return nullptr;
     }
 
+    Updates &getUpdates() override
+    {
+        return this->updates_;
+    }
+
+    BttvEmotes *getBttvEmotes() override
+    {
+        assert(false && "EmptyApplication::getBttvEmotes was called without "
+                        "being initialized");
+        return nullptr;
+    }
+
+    FfzEmotes *getFfzEmotes() override
+    {
+        assert(false && "EmptyApplication::getFfzEmotes was called without "
+                        "being initialized");
+        return nullptr;
+    }
+
+    SeventvEmotes *getSeventvEmotes() override
+    {
+        assert(false && "EmptyApplication::getSeventvEmotes was called without "
+                        "being initialized");
+        return nullptr;
+    }
+
 private:
+    Paths paths_;
     Args args_;
+    Updates updates_;
 };
 
 }  // namespace chatterino::mock

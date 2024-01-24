@@ -219,7 +219,7 @@ bool Theme::isLightTheme() const
     return this->isLight_;
 }
 
-void Theme::initialize(Settings &settings, Paths &paths)
+void Theme::initialize(Settings &settings, const Paths &paths)
 {
     this->themeName.connect(
         [this](auto themeName) {
@@ -228,7 +228,7 @@ void Theme::initialize(Settings &settings, Paths &paths)
         },
         false);
 
-    this->loadAvailableThemes();
+    this->loadAvailableThemes(paths);
 
     this->update();
 }
@@ -328,11 +328,11 @@ std::vector<std::pair<QString, QVariant>> Theme::availableThemes() const
     return packagedThemes;
 }
 
-void Theme::loadAvailableThemes()
+void Theme::loadAvailableThemes(const Paths &paths)
 {
     this->availableThemes_ = Theme::builtInThemes;
 
-    auto dir = QDir(getPaths()->themesDirectory);
+    auto dir = QDir(paths.themesDirectory);
     for (const auto &info :
          dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot, QDir::Name))
     {

@@ -47,7 +47,7 @@ void MessageLayoutContainer::beginLayout(int width, float scale,
     this->scale_ = scale;
     this->flags_ = flags;
     auto mediumFontMetrics =
-        getApp()->fonts->getFontMetrics(FontStyle::ChatMedium, scale);
+        getIApp()->getFonts()->getFontMetrics(FontStyle::ChatMedium, scale);
     this->textLineHeight_ = mediumFontMetrics.height();
     this->spaceWidth_ = mediumFontMetrics.horizontalAdvance(' ');
     this->dotdotdotWidth_ = mediumFontMetrics.horizontalAdvance("...");
@@ -318,9 +318,12 @@ void MessageLayoutContainer::addSelectionText(QString &str, uint32_t from,
 
         if (copymode == CopyMode::OnlyTextAndEmotes)
         {
-            if (element->getCreator().getFlags().hasAny(
-                    {MessageElementFlag::Timestamp,
-                     MessageElementFlag::Username, MessageElementFlag::Badges}))
+            if (element->getCreator().getFlags().hasAny({
+                    MessageElementFlag::Timestamp,
+                    MessageElementFlag::Username,
+                    MessageElementFlag::Badges,
+                    MessageElementFlag::ChannelName,
+                }))
             {
                 continue;
             }

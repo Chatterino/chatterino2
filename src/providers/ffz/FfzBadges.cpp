@@ -1,7 +1,7 @@
 #include "FfzBadges.hpp"
 
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "messages/Emote.hpp"
 #include "providers/ffz/FfzUtil.hpp"
 
@@ -16,7 +16,7 @@
 
 namespace chatterino {
 
-void FfzBadges::initialize(Settings &settings, Paths &paths)
+void FfzBadges::initialize(Settings &settings, const Paths &paths)
 {
     this->load();
 }

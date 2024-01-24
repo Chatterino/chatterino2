@@ -373,7 +373,7 @@ void BaseWindow::mousePressEvent(QMouseEvent *event)
     if (this->flags_.has(FramelessDraggable))
     {
         this->movingRelativePos = event->localPos();
-        if (auto widget =
+        if (auto *widget =
                 this->childAt(event->localPos().x(), event->localPos().y()))
         {
             std::function<bool(QWidget *)> recursiveCheckMouseTracking;
@@ -508,7 +508,7 @@ void BaseWindow::resizeEvent(QResizeEvent *)
     // Queue up save because: Window resized
     if (!flags_.has(DisableLayoutSave))
     {
-        getApp()->windows->queueSave();
+        getIApp()->getWindows()->queueSave();
     }
 
 #ifdef USEWINSDK
@@ -540,7 +540,7 @@ void BaseWindow::moveEvent(QMoveEvent *event)
 #ifdef CHATTERINO
     if (!flags_.has(DisableLayoutSave))
     {
-        getApp()->windows->queueSave();
+        getIApp()->getWindows()->queueSave();
     }
 #endif
 
@@ -735,7 +735,7 @@ void BaseWindow::updateScale()
 
     this->setScale(scale);
 
-    for (auto child : this->findChildren<BaseWidget *>())
+    for (auto *child : this->findChildren<BaseWidget *>())
     {
         child->setScale(scale);
     }

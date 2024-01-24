@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/ProviderId.hpp"
 #include "common/WindowDescriptors.hpp"
 
 #include <QApplication>
@@ -7,6 +8,8 @@
 #include <optional>
 
 namespace chatterino {
+
+class Paths;
 
 /// Command line arguments passed to Chatterino.
 ///
@@ -24,14 +27,20 @@ namespace chatterino {
 /// -v, --verbose
 /// -V, --version
 /// -c, --channels=t:channel1;t:channel2;...
+/// -a, --activate=t:channel
 ///     --safe-mode
 ///
 /// See documentation on `QGuiApplication` for documentation on Qt arguments like -platform.
 class Args
 {
 public:
+    struct Channel {
+        ProviderId provider;
+        QString name;
+    };
+
     Args() = default;
-    Args(const QApplication &app);
+    Args(const QApplication &app, const Paths &paths);
 
     bool printVersion{};
 
@@ -50,13 +59,14 @@ public:
     bool dontSaveSettings{};
     bool dontLoadMainWindow{};
     std::optional<WindowLayout> customChannelLayout;
+    std::optional<Channel> activateChannel;
     bool verbose{};
     bool safeMode{};
 
     QStringList currentArguments() const;
 
 private:
-    void applyCustomChannelLayout(const QString &argValue);
+    void applyCustomChannelLayout(const QString &argValue, const Paths &paths);
 
     QStringList currentArguments_;
 };

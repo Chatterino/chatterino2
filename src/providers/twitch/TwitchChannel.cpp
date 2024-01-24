@@ -3,8 +3,8 @@
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/Env.hpp"
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
@@ -19,6 +19,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/BttvLiveUpdates.hpp"
 #include "providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp"
+#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/recentmessages/Api.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
@@ -86,7 +87,6 @@ TwitchChannel::TwitchChannel(const QString &name)
     , bttvEmotes_(std::make_shared<EmoteMap>())
     , ffzEmotes_(std::make_shared<EmoteMap>())
     , seventvEmotes_(std::make_shared<EmoteMap>())
-    , mod_(false)
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
@@ -98,7 +98,7 @@ TwitchChannel::TwitchChannel(const QString &name)
     }
 
     this->bSignals_.emplace_back(
-        getApp()->accounts->twitch.currentUserChanged.connect([this] {
+        getIApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
             this->setMod(false);
             this->refreshPubSub();
         }));
@@ -145,22 +145,22 @@ TwitchChannel::TwitchChannel(const QString &name)
         {
             qCDebug(chatterinoTwitch)
                 << "[TwitchChannel" << this->getName() << "] Online";
-            if (getApp()->notifications->isChannelNotified(this->getName(),
-                                                           Platform::Twitch))
+            if (getIApp()->getNotifications()->isChannelNotified(
+                    this->getName(), Platform::Twitch))
             {
                 if (Toasts::isEnabled())
                 {
-                    getApp()->toasts->sendChannelNotification(
+                    getIApp()->getToasts()->sendChannelNotification(
                         this->getName(), this->accessStreamStatus()->title,
                         Platform::Twitch);
                 }
                 if (getSettings()->notificationPlaySound)
                 {
-                    getApp()->notifications->playSound();
+                    getIApp()->getNotifications()->playSound();
                 }
                 if (getSettings()->notificationFlashTaskbar)
                 {
-                    getApp()->windows->sendAlert();
+                    getIApp()->getWindows()->sendAlert();
                 }
             }
             // Channel live message
@@ -180,7 +180,7 @@ TwitchChannel::TwitchChannel(const QString &name)
                 !(isInStreamerMode() &&
                   getSettings()->streamerModeSuppressLiveNotifications))
             {
-                getApp()->notifications->playSound();
+                getIApp()->getNotifications()->playSound();
             }
         }
         else
@@ -325,13 +325,15 @@ void TwitchChannel::refreshFFZChannelEmotes(bool manualRefresh)
         [this, weak = weakOf<Channel>(this)](auto &&modBadge) {
             if (auto shared = weak.lock())
             {
-                this->ffzCustomModBadge_.set(std::move(modBadge));
+                this->ffzCustomModBadge_.set(
+                    std::forward<decltype(modBadge)>(modBadge));
             }
         },
         [this, weak = weakOf<Channel>(this)](auto &&vipBadge) {
             if (auto shared = weak.lock())
             {
-                this->ffzCustomVipBadge_.set(std::move(vipBadge));
+                this->ffzCustomVipBadge_.set(
+                    std::forward<decltype(vipBadge)>(vipBadge));
             }
         },
         manualRefresh);
@@ -445,7 +447,9 @@ std::optional<ChannelPointReward> TwitchChannel::channelPointReward(
     auto it = rewards->find(rewardId);
 
     if (it == rewards->end())
+    {
         return std::nullopt;
+    }
     return it->second;
 }
 
@@ -538,7 +542,7 @@ void TwitchChannel::showLoginMessage()
 {
     const auto linkColor = MessageColor(MessageColor::Link);
     const auto accountsLink = Link(Link::OpenAccountsPage, QString());
-    const auto currentUser = getApp()->accounts->twitch.getCurrent();
+    const auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     const auto expirationText =
         QStringLiteral("You need to log in to send messages. You can link your "
                        "Twitch account");
@@ -575,8 +579,9 @@ void TwitchChannel::roomIdChanged()
 
 QString TwitchChannel::prepareMessage(const QString &message) const
 {
-    auto app = getApp();
-    QString parsedMessage = app->emotes->emojis.replaceShortCodes(message);
+    auto *app = getApp();
+    QString parsedMessage =
+        app->getEmotes()->getEmojis()->replaceShortCodes(message);
 
     parsedMessage = parsedMessage.simplified();
 
@@ -621,8 +626,8 @@ QString TwitchChannel::prepareMessage(const QString &message) const
 
 void TwitchChannel::sendMessage(const QString &message)
 {
-    auto app = getApp();
-    if (!app->accounts->twitch.isLoggedIn())
+    auto *app = getApp();
+    if (!app->getAccounts()->twitch.isLoggedIn())
     {
         if (!message.isEmpty())
         {
@@ -655,8 +660,8 @@ void TwitchChannel::sendMessage(const QString &message)
 
 void TwitchChannel::sendReply(const QString &message, const QString &replyId)
 {
-    auto app = getApp();
-    if (!app->accounts->twitch.isLoggedIn())
+    auto *app = getApp();
+    if (!app->getAccounts()->twitch.isLoggedIn())
     {
         if (!message.isEmpty())
         {
@@ -779,12 +784,12 @@ void TwitchChannel::setRoomId(const QString &id)
 SharedAccessGuard<const TwitchChannel::RoomModes>
     TwitchChannel::accessRoomModes() const
 {
-    return this->roomModes_.accessConst();
+    return this->roomModes.accessConst();
 }
 
-void TwitchChannel::setRoomModes(const RoomModes &_roomModes)
+void TwitchChannel::setRoomModes(const RoomModes &newRoomModes)
 {
-    this->roomModes_ = _roomModes;
+    this->roomModes = newRoomModes;
 
     this->roomModesChanged.invoke();
 }
@@ -806,7 +811,9 @@ std::optional<EmotePtr> TwitchChannel::bttvEmote(const EmoteName &name) const
     auto it = emotes->find(name);
 
     if (it == emotes->end())
+    {
         return std::nullopt;
+    }
     return it->second;
 }
 
@@ -816,7 +823,9 @@ std::optional<EmotePtr> TwitchChannel::ffzEmote(const EmoteName &name) const
     auto it = emotes->find(name);
 
     if (it == emotes->end())
+    {
         return std::nullopt;
+    }
     return it->second;
 }
 
@@ -860,7 +869,8 @@ void TwitchChannel::joinBttvChannel() const
 {
     if (getApp()->twitch->bttvLiveUpdates)
     {
-        const auto currentAccount = getApp()->accounts->twitch.getCurrent();
+        const auto currentAccount =
+            getIApp()->getAccounts()->twitch.getCurrent();
         QString userName;
         if (currentAccount && !currentAccount->isAnon())
         {
@@ -1130,7 +1140,7 @@ const QString &TwitchChannel::popoutPlayerUrl()
     return this->popoutPlayerUrl_;
 }
 
-int TwitchChannel::chatterCount()
+int TwitchChannel::chatterCount() const
 {
     return this->chatterCount_;
 }
@@ -1184,17 +1194,21 @@ void TwitchChannel::loadRecentMessages()
         [weak](const auto &messages) {
             auto shared = weak.lock();
             if (!shared)
+            {
                 return;
+            }
 
-            auto tc = dynamic_cast<TwitchChannel *>(shared.get());
+            auto *tc = dynamic_cast<TwitchChannel *>(shared.get());
             if (!tc)
+            {
                 return;
+            }
 
             tc->addMessagesAtStart(messages);
             tc->loadingRecentMessages_.clear();
 
             std::vector<MessagePtr> msgs;
-            for (MessagePtr msg : messages)
+            for (const auto &msg : messages)
             {
                 const auto highlighted =
                     msg->flags.has(MessageFlag::Highlighted);
@@ -1204,6 +1218,8 @@ void TwitchChannel::loadRecentMessages()
                 {
                     msgs.push_back(msg);
                 }
+
+                tc->addRecentChatter(msg->displayName);
             }
 
             getApp()->twitch->mentionsChannel->fillInMissingMessages(msgs);
@@ -1211,11 +1227,15 @@ void TwitchChannel::loadRecentMessages()
         [weak]() {
             auto shared = weak.lock();
             if (!shared)
+            {
                 return;
+            }
 
-            auto tc = dynamic_cast<TwitchChannel *>(shared.get());
+            auto *tc = dynamic_cast<TwitchChannel *>(shared.get());
             if (!tc)
+            {
                 return;
+            }
 
             tc->loadingRecentMessages_.clear();
         },
@@ -1256,11 +1276,15 @@ void TwitchChannel::loadRecentMessagesReconnect()
         [weak](const auto &messages) {
             auto shared = weak.lock();
             if (!shared)
+            {
                 return;
+            }
 
-            auto tc = dynamic_cast<TwitchChannel *>(shared.get());
+            auto *tc = dynamic_cast<TwitchChannel *>(shared.get());
             if (!tc)
+            {
                 return;
+            }
 
             tc->fillInMissingMessages(messages);
             tc->loadingRecentMessages_.clear();
@@ -1268,11 +1292,15 @@ void TwitchChannel::loadRecentMessagesReconnect()
         [weak]() {
             auto shared = weak.lock();
             if (!shared)
+            {
                 return;
+            }
 
-            auto tc = dynamic_cast<TwitchChannel *>(shared.get());
+            auto *tc = dynamic_cast<TwitchChannel *>(shared.get());
             if (!tc)
+            {
                 return;
+            }
 
             tc->loadingRecentMessages_.clear();
         },
@@ -1287,7 +1315,7 @@ void TwitchChannel::refreshPubSub()
         return;
     }
 
-    auto currentAccount = getApp()->accounts->twitch.getCurrent();
+    auto currentAccount = getIApp()->getAccounts()->twitch.getCurrent();
 
     getIApp()->getTwitchPubSub()->setAccount(currentAccount);
 
@@ -1322,7 +1350,8 @@ void TwitchChannel::refreshChatters()
 
     // Get chatter list via helix api
     getHelix()->getChatters(
-        this->roomId(), getApp()->accounts->twitch.getCurrent()->getUserId(),
+        this->roomId(),
+        getIApp()->getAccounts()->twitch.getCurrent()->getUserId(),
         MAX_CHATTERS_TO_FETCH,
         [this, weak = weakOf<Channel>(this)](auto result) {
             if (auto shared = weak.lock())
@@ -1332,7 +1361,10 @@ void TwitchChannel::refreshChatters()
             }
         },
         // Refresh chatters should only be used when failing silently is an option
-        [](auto error, auto message) {});
+        [](auto error, auto message) {
+            (void)error;
+            (void)message;
+        });
 }
 
 void TwitchChannel::addReplyThread(const std::shared_ptr<MessageThread> &thread)
@@ -1410,14 +1442,15 @@ void TwitchChannel::refreshBadges()
                 for (const auto &version : badgeSet.versions)
                 {
                     auto emote = Emote{
-                        EmoteName{},
-                        ImageSet{
-                            Image::fromUrl(version.imageURL1x, 1),
-                            Image::fromUrl(version.imageURL2x, .5),
-                            Image::fromUrl(version.imageURL4x, .25),
-                        },
-                        Tooltip{version.title},
-                        version.clickURL,
+                        .name = EmoteName{},
+                        .images =
+                            ImageSet{
+                                Image::fromUrl(version.imageURL1x, 1),
+                                Image::fromUrl(version.imageURL2x, .5),
+                                Image::fromUrl(version.imageURL4x, .25),
+                            },
+                        .tooltip = Tooltip{version.title},
+                        .homePage = version.clickURL,
                     };
                     (*badgeSets)[setID][version.id] =
                         std::make_shared<Emote>(emote);
@@ -1489,22 +1522,28 @@ void TwitchChannel::refreshCheerEmotes()
                     // Combine the prefix (e.g. BibleThump) with the tier (1, 100 etc.)
                     auto emoteTooltip =
                         set.prefix + tier.id + "<br>Twitch Cheer Emote";
-                    cheerEmote.animatedEmote = std::make_shared<Emote>(
-                        Emote{EmoteName{"cheer emote"},
-                              ImageSet{
-                                  tier.darkAnimated.imageURL1x,
-                                  tier.darkAnimated.imageURL2x,
-                                  tier.darkAnimated.imageURL4x,
-                              },
-                              Tooltip{emoteTooltip}, Url{}});
-                    cheerEmote.staticEmote = std::make_shared<Emote>(
-                        Emote{EmoteName{"cheer emote"},
-                              ImageSet{
-                                  tier.darkStatic.imageURL1x,
-                                  tier.darkStatic.imageURL2x,
-                                  tier.darkStatic.imageURL4x,
-                              },
-                              Tooltip{emoteTooltip}, Url{}});
+                    cheerEmote.animatedEmote = std::make_shared<Emote>(Emote{
+                        .name = EmoteName{"cheer emote"},
+                        .images =
+                            ImageSet{
+                                tier.darkAnimated.imageURL1x,
+                                tier.darkAnimated.imageURL2x,
+                                tier.darkAnimated.imageURL4x,
+                            },
+                        .tooltip = Tooltip{emoteTooltip},
+                        .homePage = Url{},
+                    });
+                    cheerEmote.staticEmote = std::make_shared<Emote>(Emote{
+                        .name = EmoteName{"cheer emote"},
+                        .images =
+                            ImageSet{
+                                tier.darkStatic.imageURL1x,
+                                tier.darkStatic.imageURL2x,
+                                tier.darkStatic.imageURL4x,
+                            },
+                        .tooltip = Tooltip{emoteTooltip},
+                        .homePage = Url{},
+                    });
 
                     cheerEmoteSet.cheerEmotes.emplace_back(
                         std::move(cheerEmote));
@@ -1701,7 +1740,7 @@ void TwitchChannel::updateSevenTVActivity()
         QStringLiteral("https://7tv.io/v3/users/%1/presences");
 
     const auto currentSeventvUserID =
-        getApp()->accounts->twitch.getCurrent()->getSeventvUserID();
+        getIApp()->getAccounts()->twitch.getCurrent()->getSeventvUserID();
     if (currentSeventvUserID.isEmpty())
     {
         return;
@@ -1741,7 +1780,7 @@ void TwitchChannel::updateSevenTVActivity()
         });
 }
 
-void TwitchChannel::listenSevenTVCosmetics()
+void TwitchChannel::listenSevenTVCosmetics() const
 {
     if (getApp()->twitch->seventvEventAPI)
     {

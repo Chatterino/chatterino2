@@ -7,14 +7,14 @@ namespace chatterino {
 
 QWidget *wrapLayout(QLayout *layout)
 {
-    auto widget = new QWidget;
+    auto *widget = new QWidget;
     widget->setLayout(layout);
     return widget;
 }
 
 QScrollArea *makeScrollArea(WidgetOrLayout item)
 {
-    auto area = new QScrollArea();
+    auto *area = new QScrollArea();
 
     switch (item.which())
     {

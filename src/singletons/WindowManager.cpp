@@ -50,7 +50,6 @@ const QString WindowManager::WINDOW_LAYOUT_FILENAME(
     QStringLiteral("window-layout.json"));
 
 using SplitNode = SplitContainer::Node;
-using SplitDirection = SplitContainer::Direction;
 
 void WindowManager::showSettingsDialog(QWidget *parent,
                                        SettingsDialogPreference preference)
@@ -92,13 +91,13 @@ void WindowManager::showAccountSelectPopup(QPoint point)
     w->setFocus();
 }
 
-WindowManager::WindowManager()
-    : windowLayoutFilePath(combinePath(getPaths()->settingsDirectory,
+WindowManager::WindowManager(const Paths &paths)
+    : windowLayoutFilePath(combinePath(paths.settingsDirectory,
                                        WindowManager::WINDOW_LAYOUT_FILENAME))
 {
     qCDebug(chatterinoWindowmanager) << "init WindowManager";
 
-    auto settings = getSettings();
+    auto *settings = getSettings();
 
     this->wordFlagsListener_.addSetting(settings->showTimestamps);
     this->wordFlagsListener_.addSetting(settings->showBadgesGlobalAuthority);
@@ -122,7 +121,7 @@ WindowManager::WindowManager()
     this->saveTimer->setSingleShot(true);
 
     QObject::connect(this->saveTimer, &QTimer::timeout, [] {
-        getApp()->windows->save();
+        getIApp()->getWindows()->save();
     });
 }
 
@@ -136,7 +135,7 @@ MessageElementFlags WindowManager::getWordFlags()
 void WindowManager::updateWordTypeMask()
 {
     using MEF = MessageElementFlag;
-    auto settings = getSettings();
+    auto *settings = getSettings();
 
     // text
     auto flags = MessageElementFlags(MEF::Text);
@@ -210,6 +209,11 @@ void WindowManager::forceLayoutChannelViews()
 {
     this->incGeneration();
     this->layoutChannelViews(nullptr);
+}
+
+void WindowManager::invalidateChannelViewBuffers(Channel *channel)
+{
+    this->invalidateBuffersRequested.invoke(channel);
 }
 
 void WindowManager::repaintVisibleChatWidgets(Channel *channel)
@@ -339,7 +343,7 @@ void WindowManager::setEmotePopupPos(QPoint pos)
     this->emotePopupPos_ = pos;
 }
 
-void WindowManager::initialize(Settings &settings, Paths &paths)
+void WindowManager::initialize(Settings &settings, const Paths &paths)
 {
     (void)paths;
     assertInGuiThread();
@@ -347,9 +351,10 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
     // We can safely ignore this signal connection since both Themes and WindowManager
     // share the Application state lifetime
     // NOTE: APPLICATION_LIFETIME
-    std::ignore = getApp()->themes->repaintVisibleChatWidgets_.connect([this] {
-        this->repaintVisibleChatWidgets();
-    });
+    std::ignore =
+        getIApp()->getThemes()->repaintVisibleChatWidgets_.connect([this] {
+            this->repaintVisibleChatWidgets();
+        });
 
     assert(!this->initialized_);
 
@@ -363,6 +368,12 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
         else
         {
             windowLayout = this->loadWindowLayoutFromFile();
+        }
+
+        auto desired = getIApp()->getArgs().activateChannel;
+        if (desired)
+        {
+            windowLayout.activateOrAddChannel(desired->provider, desired->name);
         }
 
         this->emotePopupPos_ = windowLayout.emotePopupPos_;
@@ -401,10 +412,10 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
         this->forceLayoutChannelViews();
     });
     settings.alternateMessages.connect([this](auto, auto) {
-        this->forceLayoutChannelViews();
+        this->invalidateChannelViewBuffers();
     });
     settings.separateMessages.connect([this](auto, auto) {
-        this->forceLayoutChannelViews();
+        this->invalidateChannelViewBuffers();
     });
     settings.collpseMessagesMinLines.connect([this](auto, auto) {
         this->forceLayoutChannelViews();
@@ -422,7 +433,14 @@ void WindowManager::save()
     {
         return;
     }
-    qCDebug(chatterinoWindowmanager) << "[WindowManager] Saving";
+
+    if (this->shuttingDown_)
+    {
+        qCDebug(chatterinoWindowmanager) << "Skipping save (shutting down)";
+        return;
+    }
+
+    qCDebug(chatterinoWindowmanager) << "Saving";
     assertInGuiThread();
     QJsonDocument document;
 
@@ -624,7 +642,7 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
         }
         break;
         case Channel::Type::Irc: {
-            if (auto ircChannel =
+            if (auto *ircChannel =
                     dynamic_cast<IrcChannel *>(channel.get().get()))
             {
                 obj.insert("type", "irc");
@@ -658,7 +676,7 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
 {
     assertInGuiThread();
 
-    auto app = getApp();
+    auto *app = getApp();
 
     if (descriptor.type_ == "twitch")
     {
@@ -700,6 +718,9 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
 void WindowManager::closeAll()
 {
     assertInGuiThread();
+
+    qCDebug(chatterinoWindowmanager) << "Shutting down (closing windows)";
+    this->shuttingDown_ = true;
 
     for (Window *window : windows_)
     {

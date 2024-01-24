@@ -3,7 +3,7 @@
 #include "Application.hpp"
 #include "common/Args.hpp"
 #include "common/Modes.hpp"
-#include "common/NetworkManager.hpp"
+#include "common/network/NetworkManager.hpp"
 #include "common/QLogging.hpp"
 #include "singletons/CrashHandler.hpp"
 #include "singletons/Paths.hpp"
@@ -98,9 +98,9 @@ namespace {
         installCustomPalette();
     }
 
-    void showLastCrashDialog(const Args &args)
+    void showLastCrashDialog(const Args &args, const Paths &paths)
     {
-        auto *dialog = new LastRunCrashDialog(args);
+        auto *dialog = new LastRunCrashDialog(args, paths);
         // Use exec() over open() to block the app from being loaded
         // and to be able to set the safe mode.
         dialog->exec();
@@ -223,7 +223,8 @@ namespace {
     }
 }  // namespace
 
-void runGui(QApplication &a, Paths &paths, Settings &settings, const Args &args)
+void runGui(QApplication &a, const Paths &paths, Settings &settings,
+            const Args &args, Updates &updates)
 {
     initQt();
     initResources();
@@ -232,7 +233,7 @@ void runGui(QApplication &a, Paths &paths, Settings &settings, const Args &args)
 #ifdef Q_OS_WIN
     if (args.crashRecovery)
     {
-        showLastCrashDialog(args);
+        showLastCrashDialog(args, paths);
     }
 #endif
 
@@ -269,9 +270,9 @@ void runGui(QApplication &a, Paths &paths, Settings &settings, const Args &args)
     });
 
     chatterino::NetworkManager::init();
-    chatterino::Updates::instance().checkForUpdates();
+    updates.checkForUpdates();
 
-    Application app(settings, paths, args);
+    Application app(settings, paths, args, updates);
     app.initialize(settings, paths);
     app.run(a);
     app.save();

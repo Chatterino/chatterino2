@@ -465,8 +465,6 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 const auto setColor = [&](auto &setting, ColorType ty) {
                     auto color = value.value<QColor>();
                     setting.setValue(color.name(QColor::HexArgb));
-                    const_cast<ColorProvider &>(ColorProvider::instance())
-                        .updateColor(ty, color);
                 };
 
                 if (rowIndex == HighlightRowIndexes::SelfHighlightRow)
@@ -509,7 +507,7 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
         break;
     }
 
-    getApp()->windows->forceLayoutChannelViews();
+    getIApp()->getWindows()->forceLayoutChannelViews();
 }
 
 }  // namespace chatterino

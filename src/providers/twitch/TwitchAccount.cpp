@@ -3,7 +3,7 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/Env.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "debug/AssertInGuiThread.hpp"
@@ -327,8 +327,10 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
 
                         emoteSet->emotes.push_back(TwitchEmote{id, code});
 
-                        auto emote =
-                            getApp()->emotes->twitch.getOrCreateEmote(id, code);
+                        auto emote = getIApp()
+                                         ->getEmotes()
+                                         ->getTwitchEmotes()
+                                         ->getOrCreateEmote(id, code);
 
                         // Follower emotes can be only used in their origin channel
                         // unless the user is subscribed, then they can be used anywhere.

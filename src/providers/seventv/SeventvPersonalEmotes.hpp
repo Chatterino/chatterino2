@@ -18,7 +18,7 @@ namespace chatterino {
 class SeventvPersonalEmotes : public Singleton
 {
 public:
-    void initialize(Settings &settings, Paths &paths) override;
+    void initialize(Settings &settings, const Paths &paths) override;
 
     void createEmoteSet(const QString &id);
 

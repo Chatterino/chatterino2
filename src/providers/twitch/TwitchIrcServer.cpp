@@ -7,8 +7,11 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/BttvLiveUpdates.hpp"
+#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/seventv/eventapi/Subscription.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
@@ -64,9 +67,9 @@ TwitchIrcServer::TwitchIrcServer()
     //                                                     false);
 }
 
-void TwitchIrcServer::initialize(Settings &settings, Paths &paths)
+void TwitchIrcServer::initialize(Settings &settings, const Paths &paths)
 {
-    getApp()->accounts->twitch.currentUserChanged.connect([this]() {
+    getIApp()->getAccounts()->twitch.currentUserChanged.connect([this]() {
         postToThread([this] {
             this->connect();
         });
@@ -81,7 +84,7 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
                                            ConnectionType type)
 {
     std::shared_ptr<TwitchAccount> account =
-        getApp()->accounts->twitch.getCurrent();
+        getIApp()->getAccounts()->twitch.getCurrent();
 
     qCDebug(chatterinoTwitch) << "logging in as" << account->getUserName();
 
@@ -395,11 +398,15 @@ std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
     {
         auto channel = weakChannel.lock();
         if (!channel)
+        {
             continue;
+        }
 
         auto twitchChannel = std::dynamic_pointer_cast<TwitchChannel>(channel);
         if (!twitchChannel)
+        {
             continue;
+        }
 
         if (twitchChannel->roomId() == channelId &&
             twitchChannel->getName().count(':') < 2)
@@ -414,9 +421,13 @@ std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
 QString TwitchIrcServer::cleanChannelName(const QString &dirtyChannelName)
 {
     if (dirtyChannelName.startsWith('#'))
+    {
         return dirtyChannelName.mid(1).toLower();
+    }
     else
+    {
         return dirtyChannelName.toLower();
+    }
 }
 
 bool TwitchIrcServer::hasSeparateWriteConnection() const
@@ -509,19 +520,6 @@ void TwitchIrcServer::onReplySendRequested(TwitchChannel *channel,
     sent = true;
 }
 
-const BttvEmotes &TwitchIrcServer::getBttvEmotes() const
-{
-    return this->bttv;
-}
-const FfzEmotes &TwitchIrcServer::getFfzEmotes() const
-{
-    return this->ffz;
-}
-const SeventvEmotes &TwitchIrcServer::getSeventvEmotes() const
-{
-    return this->seventv_;
-}
-
 const IndirectChannel &TwitchIrcServer::getWatchingChannel() const
 {
     return this->watchingChannel;
@@ -529,7 +527,7 @@ const IndirectChannel &TwitchIrcServer::getWatchingChannel() const
 
 void TwitchIrcServer::reloadBTTVGlobalEmotes()
 {
-    this->bttv.loadEmotes();
+    getIApp()->getBttvEmotes()->loadEmotes();
 }
 
 void TwitchIrcServer::reloadAllBTTVChannelEmotes()
@@ -544,7 +542,7 @@ void TwitchIrcServer::reloadAllBTTVChannelEmotes()
 
 void TwitchIrcServer::reloadFFZGlobalEmotes()
 {
-    this->ffz.loadEmotes();
+    getIApp()->getFfzEmotes()->loadEmotes();
 }
 
 void TwitchIrcServer::reloadAllFFZChannelEmotes()
@@ -559,7 +557,7 @@ void TwitchIrcServer::reloadAllFFZChannelEmotes()
 
 void TwitchIrcServer::reloadSevenTVGlobalEmotes()
 {
-    this->seventv_.loadGlobalEmotes();
+    getIApp()->getSeventvEmotes()->loadGlobalEmotes();
 }
 
 void TwitchIrcServer::reloadAllSevenTVChannelEmotes()

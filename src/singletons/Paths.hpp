@@ -9,8 +9,6 @@ namespace chatterino {
 class Paths
 {
 public:
-    static Paths *instance;
-
     Paths();
 
     // Root directory for the configuration files. %APPDATA%/chatterino or
@@ -42,9 +40,10 @@ public:
     QString themesDirectory;
 
     bool createFolder(const QString &folderPath);
-    bool isPortable();
+    [[deprecated("use Modes::instance().portable instead")]] bool isPortable()
+        const;
 
-    QString cacheDirectory();
+    QString cacheDirectory() const;
 
 private:
     void initAppFilePathHash();
@@ -57,7 +56,5 @@ private:
     // Directory for cache files. Same as <appDataDirectory>/Misc
     QString cacheDirectory_;
 };
-
-Paths *getPaths();
 
 }  // namespace chatterino

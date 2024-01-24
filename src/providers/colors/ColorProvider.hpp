@@ -36,9 +36,7 @@ public:
      * of already parsed predefined (self highlights, subscriptions,
      * and whispers) highlights.
      */
-    const std::shared_ptr<QColor> color(ColorType type) const;
-
-    void updateColor(ColorType type, QColor color);
+    std::shared_ptr<QColor> color(ColorType type) const;
 
     /**
      * @brief Return a set of recently used colors used anywhere in Chatterino.

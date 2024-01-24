@@ -99,7 +99,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
     this->menu_.addAction(
         "Popup Tab",
         [this]() {
-            if (auto container = dynamic_cast<SplitContainer *>(this->page))
+            if (auto *container = dynamic_cast<SplitContainer *>(this->page))
             {
                 container->popup();
             }
@@ -124,11 +124,11 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
 void NotebookTab::showRenameDialog()
 {
-    auto dialog = new QDialog(this);
+    auto *dialog = new QDialog(this);
 
-    auto vbox = new QVBoxLayout;
+    auto *vbox = new QVBoxLayout;
 
-    auto lineEdit = new QLineEdit;
+    auto *lineEdit = new QLineEdit;
     lineEdit->setText(this->getCustomTitle());
     lineEdit->setPlaceholderText(this->getDefaultTitle());
     lineEdit->selectAll();
@@ -137,7 +137,7 @@ void NotebookTab::showRenameDialog()
     vbox->addWidget(lineEdit);
     vbox->addStretch(1);
 
-    auto buttonBox =
+    auto *buttonBox =
         new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
     vbox->addWidget(buttonBox);
@@ -289,7 +289,7 @@ const QString &NotebookTab::getTitle() const
 void NotebookTab::titleUpdated()
 {
     // Queue up save because: Tab title changed
-    getApp()->windows->queueSave();
+    getIApp()->getWindows()->queueSave();
     this->notebook_->refresh();
     this->updateSize();
     this->update();
@@ -423,15 +423,15 @@ void NotebookTab::moveAnimated(QPoint pos, bool animated)
 
 void NotebookTab::paintEvent(QPaintEvent *)
 {
-    auto app = getApp();
+    auto *app = getApp();
     QPainter painter(this);
     float scale = this->scale();
 
     auto div = std::max<float>(0.01f, this->logicalDpiX() * deviceDpi(this));
     painter.setFont(
-        getApp()->fonts->getFont(FontStyle::UiTabs, scale * 96.f / div));
+        getIApp()->getFonts()->getFont(FontStyle::UiTabs, scale * 96.f / div));
     QFontMetrics metrics =
-        app->fonts->getFontMetrics(FontStyle::UiTabs, scale * 96.f / div);
+        app->getFonts()->getFontMetrics(FontStyle::UiTabs, scale * 96.f / div);
 
     int height = int(scale * NOTEBOOK_TAB_HEIGHT);
 
@@ -439,13 +439,21 @@ void NotebookTab::paintEvent(QPaintEvent *)
     Theme::TabColors colors;
 
     if (this->selected_)
+    {
         colors = this->theme->tabs.selected;
+    }
     else if (this->highlightState_ == HighlightState::Highlighted)
+    {
         colors = this->theme->tabs.highlighted;
+    }
     else if (this->highlightState_ == HighlightState::NewMessage)
+    {
         colors = this->theme->tabs.newMessage;
+    }
     else
+    {
         colors = this->theme->tabs.regular;
+    }
 
     bool windowFocused = this->window() == QApplication::activeWindow();
 
@@ -605,7 +613,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
                 borderRect = QRect(0, 0, this->width(), 1);
                 break;
         }
-        painter.fillRect(borderRect, app->themes->window.background);
+        painter.fillRect(borderRect, app->getThemes()->window.background);
     }
 }
 
