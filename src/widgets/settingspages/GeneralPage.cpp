@@ -1243,6 +1243,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     helixTimegateModerators->setMinimumWidth(
         helixTimegateModerators->minimumSizeHint().width());
 
+    layout.addCheckbox("Send messages use Twitch's Helix API",
+                       s.enableHelixChatSend, false,
+                       "When enabled, sends messages using the Helix API. When "
+                       "disabled, messages are sent over IRC.");
+
     layout.addCheckbox(
         "Show send message button", s.showSendButton, false,
         "Show a Send button next to each split input that can be "

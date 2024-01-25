@@ -524,6 +524,8 @@ public:
         HelixTimegateOverride::Timegate,
     };
 
+    BoolSetting enableHelixChatSend = {"/misc/helixChatSend", true};
+
     BoolSetting openLinksIncognito = {"/misc/openLinksIncognito", 0};
 
     EnumSetting<ThumbnailPreviewMode> emotesTooltipPreview = {

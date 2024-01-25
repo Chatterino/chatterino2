@@ -31,8 +31,77 @@ using namespace std::chrono_literals;
 
 namespace {
 
+using namespace chatterino;
+
 const QString BTTV_LIVE_UPDATES_URL = "wss://sockets.betterttv.net/ws";
 const QString SEVENTV_EVENTAPI_URL = "wss://events.7tv.io/v3";
+
+void sendHelixMessage(const std::shared_ptr<TwitchChannel> &channel,
+                      const QString &message, const QString &replyParentId = {})
+{
+    getHelix()->sendChatMessage(
+        {
+            .broadcasterID = channel->roomId(),
+            .senderID =
+                getIApp()->getAccounts()->twitch.getCurrent()->getUserId(),
+            .message = message,
+            .replyParentMessageID = replyParentId,
+        },
+        [weak = std::weak_ptr(channel)](const auto &res) {
+            auto chan = weak.lock();
+            if (!chan)
+            {
+                return;
+            }
+
+            if (res.isSent)
+            {
+                return;
+            }
+
+            auto errorMessage = [&] {
+                if (res.dropReason)
+                {
+                    return makeSystemMessage(res.dropReason->message);
+                }
+                return makeSystemMessage("Your message was not sent.");
+            }();
+            chan->addMessage(errorMessage);
+        },
+        [weak = std::weak_ptr(channel)](auto error, const auto &message) {
+            auto chan = weak.lock();
+            if (!chan)
+            {
+                return;
+            }
+
+            using Error = decltype(error);
+
+            auto errorMessage = [&]() -> QString {
+                switch (error)
+                {
+                    case Error::MissingText:
+                        return "You can't send an empty message.";
+                    case Error::BadRequest:
+                        return "Failed to send message: " + message;
+                    case Error::Forbidden:
+                        return "You are not allowed to send messages in this "
+                               "channel.";
+                    case Error::MessageTooLarge:
+                        return "Your message was too long.";
+                    case Error::UserMissingScope:
+                        return "Missing required scope. Re-login with your "
+                               "account and try again.";
+                    case Error::Forwarded:
+                        return message;
+                    case Error::Unknown:
+                    default:
+                        return "Unknown error: " + message;
+                }
+            }();
+            chan->addMessage(makeSystemMessage(errorMessage));
+        });
+}
 
 }  // namespace
 
@@ -139,13 +208,24 @@ std::shared_ptr<Channel> TwitchIrcServer::createChannel(
     // no Channel's should live
     // NOTE: CHANNEL_LIFETIME
     std::ignore = channel->sendMessageSignal.connect(
-        [this, channel = channel.get()](auto &chan, auto &msg, bool &sent) {
-            this->onMessageSendRequested(channel, msg, sent);
+        [this, channel = std::weak_ptr(channel)](auto &chan, auto &msg,
+                                                 bool &sent) {
+            auto c = channel.lock();
+            if (!c)
+            {
+                return;
+            }
+            this->onMessageSendRequested(c, msg, sent);
         });
     std::ignore = channel->sendReplySignal.connect(
-        [this, channel = channel.get()](auto &chan, auto &msg, auto &replyId,
-                                        bool &sent) {
-            this->onReplySendRequested(channel, msg, replyId, sent);
+        [this, channel = std::weak_ptr(channel)](auto &chan, auto &msg,
+                                                 auto &replyId, bool &sent) {
+            auto c = channel.lock();
+            if (!c)
+            {
+                return;
+            }
+            this->onReplySendRequested(c, msg, replyId, sent);
         });
 
     return channel;
@@ -436,7 +516,8 @@ bool TwitchIrcServer::hasSeparateWriteConnection() const
     // return getSettings()->twitchSeperateWriteConnection;
 }
 
-bool TwitchIrcServer::prepareToSend(TwitchChannel *channel)
+bool TwitchIrcServer::prepareToSend(
+    const std::shared_ptr<TwitchChannel> &channel)
 {
     std::lock_guard<std::mutex> guard(this->lastMessageMutex_);
 
@@ -487,8 +568,9 @@ bool TwitchIrcServer::prepareToSend(TwitchChannel *channel)
     return true;
 }
 
-void TwitchIrcServer::onMessageSendRequested(TwitchChannel *channel,
-                                             const QString &message, bool &sent)
+void TwitchIrcServer::onMessageSendRequested(
+    const std::shared_ptr<TwitchChannel> &channel, const QString &message,
+    bool &sent)
 {
     sent = false;
 
@@ -498,13 +580,21 @@ void TwitchIrcServer::onMessageSendRequested(TwitchChannel *channel,
         return;
     }
 
-    this->sendMessage(channel->getName(), message);
+    if (getSettings()->enableHelixChatSend)
+    {
+        sendHelixMessage(channel, message);
+    }
+    else
+    {
+        this->sendMessage(channel->getName(), message);
+    }
+
     sent = true;
 }
 
-void TwitchIrcServer::onReplySendRequested(TwitchChannel *channel,
-                                           const QString &message,
-                                           const QString &replyId, bool &sent)
+void TwitchIrcServer::onReplySendRequested(
+    const std::shared_ptr<TwitchChannel> &channel, const QString &message,
+    const QString &replyId, bool &sent)
 {
     sent = false;
 
@@ -514,9 +604,15 @@ void TwitchIrcServer::onReplySendRequested(TwitchChannel *channel,
         return;
     }
 
-    this->sendRawMessage("@reply-parent-msg-id=" + replyId + " PRIVMSG #" +
-                         channel->getName() + " :" + message);
-
+    if (getSettings()->enableHelixChatSend)
+    {
+        sendHelixMessage(channel, message, replyId);
+    }
+    else
+    {
+        this->sendRawMessage("@reply-parent-msg-id=" + replyId + " PRIVMSG #" +
+                             channel->getName() + " :" + message);
+    }
     sent = true;
 }
 
