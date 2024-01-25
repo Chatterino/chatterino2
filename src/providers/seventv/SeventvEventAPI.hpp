@@ -96,6 +96,17 @@ private:
     /** Twitch channel ids */
     std::unordered_set<QString> subscribedTwitchChannels_;
     std::chrono::milliseconds heartbeatInterval_;
+
+    struct LastPersonalEmoteAssignment {
+        QString userName;
+        QString emoteSetID;
+        std::shared_ptr<const EmoteMap> emoteSet;
+    };
+
+    /// This is a workaround for 7TV sending `CreateEntitlement` before
+    /// `UpdateEmoteSet`. We only upsert emotes when a user gets assigned a
+    /// new emote set, but in this case, we're upserting after updating as well.
+    std::optional<LastPersonalEmoteAssignment> lastPersonalEmoteAssignment_;
 };
 
 }  // namespace chatterino

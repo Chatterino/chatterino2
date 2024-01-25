@@ -87,7 +87,6 @@ std::vector<PaintDropShadow> parseDropShadows(const QJsonArray &dropShadows)
 
 std::optional<std::shared_ptr<Paint>> parsePaint(const QJsonObject &paintJson)
 {
-    qDebug() << paintJson;
     const QString name = paintJson["name"].toString();
     const QString id = paintJson["id"].toString();
 

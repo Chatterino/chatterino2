@@ -171,4 +171,21 @@ std::optional<EmotePtr> SeventvPersonalEmotes::getEmoteForUser(
     return std::nullopt;
 }
 
+std::optional<std::shared_ptr<const EmoteMap>>
+    SeventvPersonalEmotes::getEmoteSetByID(const QString &emoteSetID) const
+{
+    std::shared_lock<std::shared_mutex> lock(this->mutex_);
+    if (!this->enabled_)
+    {
+        return std::nullopt;
+    }
+
+    auto id = this->emoteSets_.find(emoteSetID);
+    if (id == this->emoteSets_.end())
+    {
+        return std::nullopt;
+    }
+    return id->second.get();
+}
+
 }  // namespace chatterino

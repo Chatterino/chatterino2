@@ -256,7 +256,16 @@ void SeventvEventAPI::onEmoteSetUpdate(const Dispatch &dispatch)
     //   pulled:  Array<{ key,        old_value }>,
     //   updated: Array<{ key, value, old_value }>,
     // }
-    for (const auto pushedRef : dispatch.body["pushed"].toArray())
+    auto pushedArray = dispatch.body["pushed"].toArray();
+    auto pulledArray = dispatch.body["pulled"].toArray();
+    auto updatedArray = dispatch.body["updated"].toArray();
+    qCDebug(chatterinoSeventvEventAPI).nospace()
+        << "Update emote set " << dispatch.id
+        << " added: " << pushedArray.count()
+        << ", removed: " << pulledArray.count()
+        << ", updated: " << updatedArray.count();
+
+    for (const auto pushedRef : pushedArray)
     {
         auto pushed = pushedRef.toObject();
         if (pushed["key"].toString() != "emotes")
@@ -276,7 +285,7 @@ void SeventvEventAPI::onEmoteSetUpdate(const Dispatch &dispatch)
                 << "Invalid dispatch" << dispatch.body;
         }
     }
-    for (const auto updatedRef : dispatch.body["updated"].toArray())
+    for (const auto updatedRef : updatedArray)
     {
         auto updated = updatedRef.toObject();
         if (updated["key"].toString() != "emotes")
@@ -298,7 +307,7 @@ void SeventvEventAPI::onEmoteSetUpdate(const Dispatch &dispatch)
                 << "Invalid dispatch" << dispatch.body;
         }
     }
-    for (const auto pulledRef : dispatch.body["pulled"].toArray())
+    for (const auto pulledRef : pulledArray)
     {
         auto pulled = pulledRef.toObject();
         if (pulled["key"].toString() != "emotes")
@@ -319,6 +328,26 @@ void SeventvEventAPI::onEmoteSetUpdate(const Dispatch &dispatch)
                 << "Invalid dispatch" << dispatch.body;
         }
     }
+
+    if (!this->lastPersonalEmoteAssignment_)
+    {
+        return;
+    }
+
+    if (this->lastPersonalEmoteAssignment_->emoteSetID == dispatch.id)
+    {
+        auto emoteSet =
+            getIApp()->getSeventvPersonalEmotes()->getEmoteSetByID(dispatch.id);
+        if (emoteSet)
+        {
+            qCDebug(chatterinoSeventvEventAPI) << "Flushed last emote set";
+            this->signals_.personalEmoteSetAdded.invoke({
+                this->lastPersonalEmoteAssignment_->userName,
+                *emoteSet,
+            });
+        }
+    }
+    this->lastPersonalEmoteAssignment_ = std::nullopt;
 }
 
 void SeventvEventAPI::onUserUpdate(const Dispatch &dispatch)
@@ -393,12 +422,30 @@ void SeventvEventAPI::onEntitlementCreate(
         }
         break;
         case CosmeticKind::EmoteSet: {
+            qCDebug(chatterinoSeventvEventAPI)
+                << "Assign user" << entitlement.userID << "to emote set"
+                << entitlement.refID;
             if (auto set =
                     getIApp()->getSeventvPersonalEmotes()->assignUserToEmoteSet(
                         entitlement.refID, entitlement.userID))
             {
-                this->signals_.personalEmoteSetAdded.invoke(
-                    {entitlement.userName, *set});
+                if ((*set)->empty())
+                {
+                    qCDebug(chatterinoSeventvEventAPI)
+                        << "Saving emote set as it's empty to wait for further "
+                           "updates";
+                    this->lastPersonalEmoteAssignment_ =
+                        LastPersonalEmoteAssignment{
+                            .userName = entitlement.userName,
+                            .emoteSetID = entitlement.refID,
+                        };
+                }
+                else
+                {
+                    this->lastPersonalEmoteAssignment_ = std::nullopt;
+                    this->signals_.personalEmoteSetAdded.invoke(
+                        {entitlement.userName, *set});
+                }
             }
         }
         break;
@@ -442,6 +489,8 @@ void SeventvEventAPI::onEmoteSetCreate(const Dispatch &dispatch)
 
     if (createDispatch.isPersonal)
     {
+        qCDebug(chatterinoSeventvEventAPI)
+            << "Create emote set" << createDispatch.emoteSetID;
         getIApp()->getSeventvPersonalEmotes()->createEmoteSet(
             createDispatch.emoteSetID);
     }

@@ -44,6 +44,9 @@ public:
     std::optional<EmotePtr> getEmoteForUser(const QString &userID,
                                             const EmoteName &emoteName) const;
 
+    std::optional<std::shared_ptr<const EmoteMap>> getEmoteSetByID(
+        const QString &emoteSetID) const;
+
 private:
     // emoteSetID => emoteSet
     std::unordered_map<QString, Atomic<std::shared_ptr<const EmoteMap>>>

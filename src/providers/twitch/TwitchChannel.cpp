@@ -1792,6 +1792,10 @@ void TwitchChannel::listenSevenTVCosmetics() const
 void TwitchChannel::upsertPersonalSeventvEmotes(
     const QString &userLogin, const std::shared_ptr<const EmoteMap> &emoteMap)
 {
+    // This is attempting a (kind-of) surgical replacement of the users' last
+    // sent message. The the last message is essentially re-parsed and newly
+    // added emotes are inserted where appropriate.
+
     assertInGuiThread();
     auto snapshot = this->getMessageSnapshot();
     if (snapshot.size() == 0)
@@ -1799,11 +1803,14 @@ void TwitchChannel::upsertPersonalSeventvEmotes(
         return;
     }
 
+    /// Finds the last message of the user (searches the last five messages).
+    /// If no message is found, `std::nullopt` is returned.
     const auto findMessage = [&]() -> std::optional<MessagePtr> {
-        auto end = std::max<ptrdiff_t>(0, (ptrdiff_t)snapshot.size() - 5);
+        auto size = static_cast<qsizetype>(snapshot.size());
+        auto end = std::max<qsizetype>(0, size - 5);
 
         // explicitly using signed integers here to represent '-1'
-        for (ptrdiff_t i = (ptrdiff_t)snapshot.size() - 1; i >= end; i--)
+        for (qsizetype i = size - 1; i >= end; i--)
         {
             const auto &message = snapshot[i];
             if (message->loginName == userLogin)
@@ -1821,11 +1828,105 @@ void TwitchChannel::upsertPersonalSeventvEmotes(
         return;
     }
 
+    using MessageElementVec = std::vector<std::unique_ptr<MessageElement>>;
+
+    /// Tries to find words in the @a textElement that are emotes in the @a emoteMap
+    /// (i.e. newly added emotes) and converts these to an emote element
+    /// or, if they're zero-width, to a layered emote element.
+    const auto upsertWords = [&](MessageElementVec &elements,
+                                 TextElement *textElement) {
+        std::vector<TextElement::Word> words;
+
+        /// Appends a text element with the pending @a words
+        /// and clears the vector.
+        ///
+        /// @pre @a words must not be empty
+        const auto flush = [&]() {
+            elements.emplace_back(std::make_unique<TextElement>(
+                std::move(words), textElement->getFlags(), textElement->color(),
+                textElement->style()));
+            words.clear();
+        };
+
+        /// Attempts to insert the emote as a zero-width emote.
+        /// If there are pending words to be inserted (i.e. @a words is not empty
+        /// and thus there's no previous emote to merge the @a emote with),
+        /// or there are no elements in the message yet, the insertion fails.
+        ///
+        /// @returns `true` iff the insertion succeeded.
+        const auto tryInsertZeroWidth = [&](const EmotePtr &emote) -> bool {
+            if (!words.empty() || elements.empty())
+            {
+                // either the last element will be a TextElement _or_
+                // there are no elements.
+                return false;
+            }
+            // [THIS IS LARGELY THE SAME AS IN TwitchMessageBuilder::tryAppendEmote]
+            // Attempt to merge current zero-width emote into any previous emotes
+            auto *asEmote = dynamic_cast<EmoteElement *>(elements.back().get());
+            if (asEmote)
+            {
+                // Make sure to access asEmote before taking ownership when releasing
+                auto baseEmote = asEmote->getEmote();
+                // Need to remove EmoteElement and replace with LayeredEmoteElement
+                auto baseEmoteElement = std::move(elements.back());
+                elements.pop_back();
+
+                std::vector<LayeredEmoteElement::Emote> layers{
+                    {baseEmote, baseEmoteElement->getFlags()},
+                    {emote, MessageElementFlag::SevenTVEmote},
+                };
+                elements.emplace_back(std::make_unique<LayeredEmoteElement>(
+                    std::move(layers),
+                    baseEmoteElement->getFlags() |
+                        MessageElementFlag::SevenTVEmote,
+                    textElement->color()));
+                return true;
+            }
+
+            auto *asLayered =
+                dynamic_cast<LayeredEmoteElement *>(elements.back().get());
+            if (asLayered)
+            {
+                asLayered->addEmoteLayer(
+                    {emote, MessageElementFlag::SevenTVEmote});
+                asLayered->addFlags(MessageElementFlag::SevenTVEmote);
+                return true;
+            }
+            return false;
+        };
+
+        // Find all words that match a personal emote and replace them with emotes
+        for (const auto &word : textElement->words())
+        {
+            auto emoteIt = emoteMap->find(EmoteName{word.text});
+            if (emoteIt == emoteMap->end())
+            {
+                words.emplace_back(word);
+                continue;
+            }
+
+            if (emoteIt->second->zeroWidth)
+            {
+                if (tryInsertZeroWidth(emoteIt->second))
+                {
+                    continue;
+                }
+            }
+
+            flush();
+
+            elements.emplace_back(std::make_unique<EmoteElement>(
+                emoteIt->second, MessageElementFlag::SevenTVEmote));
+        }
+        flush();
+    };
+
     auto cloned = message.value()->cloneWith([&](Message &message) {
         // We create a new vector of elements,
         // if we encounter a `TextElement` that contains any emote,
-        // we insert an `EmoteElement` at the position.
-        std::vector<std::unique_ptr<MessageElement>> elements;
+        // we insert an `EmoteElement` (or `LayeredEmoteElement`) at the position.
+        MessageElementVec elements;
         elements.reserve(message.elements.size());
 
         std::for_each(
@@ -1839,39 +1940,7 @@ void TwitchChannel::upsertPersonalSeventvEmotes(
                 if (textElement != nullptr &&
                     textElement->getFlags().has(MessageElementFlag::Text))
                 {
-                    std::vector<TextElement::Word> words;
-                    // Append the text element and clear the vector.
-                    const auto flush = [&]() {
-                        elements.emplace_back(std::make_unique<TextElement>(
-                            std::move(words), textElement->getFlags(),
-                            textElement->color(), textElement->style()));
-                        words.clear();
-                    };
-
-                    // Search for a word that matches any emote.
-                    for (const auto &word : textElement->words())
-                    {
-                        auto emoteIt = emoteMap->find(EmoteName{word.text});
-                        if (emoteIt != emoteMap->cend())
-                        {
-                            MessageElementFlags emoteFlags(
-                                MessageElementFlag::SevenTVEmote);
-                            // TODO: This doesn't support zero-width emotes.
-                            // To support these emotes, we'd now need to look back at the added elements
-                            // and insert/update a LayeredEmoteElement.
-                            // As of now, this requires too much effort.
-
-                            flush();
-                            elements.emplace_back(
-                                std::make_unique<EmoteElement>(emoteIt->second,
-                                                               emoteFlags));
-                        }
-                        else
-                        {
-                            words.emplace_back(word);
-                        }
-                    }
-                    flush();
+                    upsertWords(elements, textElement);
                 }
                 else
                 {
