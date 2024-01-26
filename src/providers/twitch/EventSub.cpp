@@ -111,7 +111,7 @@ public:
                         condition.insert("user_id", sourceUserID);
 
                         getHelix()->createEventSubSubscription(
-                            "channel.chat.message", "v1", sessionID, condition,
+                            "channel.chat.message", "1", sessionID, condition,
                             [roomID](const auto &response) {
                                 qDebug() << "Successfully subscribed to "
                                             "channel.chat.message in "
