@@ -45,7 +45,7 @@ public:
 
         auto sessionID = QString::fromStdString(payload.id);
 
-        const auto currentUser = getApp()->accounts->twitch.getCurrent();
+        const auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
 
         if (currentUser->isAnon())
         {
