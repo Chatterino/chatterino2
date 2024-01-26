@@ -451,6 +451,7 @@ private:
 
     friend class TwitchIrcServer;
     friend class TwitchMessageBuilder;
+    friend class EventSubMessageBuilder;  // TODO: Remove this
     friend class IrcMessageHandler;
 };
 

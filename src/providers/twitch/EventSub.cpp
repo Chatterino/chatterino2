@@ -7,6 +7,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/EventSubMessageBuilder.hpp"
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -16,8 +17,8 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/json.hpp>
-#include <eventsub/listener.hpp>
-#include <eventsub/session.hpp>
+#include <twitch-eventsub-ws/listener.hpp>
+#include <twitch-eventsub-ws/session.hpp>
 
 #include <chrono>
 #include <memory>
@@ -100,6 +101,26 @@ public:
                                 (void)error;
                                 qDebug() << "Failed subscription to "
                                             "channel.chat.notification in"
+                                         << roomID << ":" << message;
+                            });
+                    }
+
+                    {
+                        QJsonObject condition;
+                        condition.insert("broadcaster_user_id", roomID);
+                        condition.insert("user_id", sourceUserID);
+
+                        getHelix()->createEventSubSubscription(
+                            "channel.chat.message", "v1", sessionID, condition,
+                            [roomID](const auto &response) {
+                                qDebug() << "Successfully subscribed to "
+                                            "channel.chat.message in "
+                                         << roomID << ":" << response;
+                            },
+                            [roomID](auto error, const auto &message) {
+                                (void)error;
+                                qDebug() << "Failed subscription to "
+                                            "channel.chat.message in"
                                          << roomID << ":" << message;
                             });
                     }
@@ -197,6 +218,27 @@ public:
         (void)metadata;
         qCDebug(LOG) << "On channel update for"
                      << payload.event.broadcasterUserLogin.c_str();
+    }
+
+    void onChannelChatMessage(
+        eventsub::messages::Metadata metadata,
+        eventsub::payload::channel_chat_message::v1::Payload payload) override
+    {
+        (void)metadata;
+
+        std::cout << "Channel chat message event!\n";
+
+        runInGuiThread([payload{std::move(payload)}]() {
+            MessageParseArgs args;
+            EventSubMessageBuilder builder(payload, args);
+
+            auto message = builder.build();
+
+            auto channel = getApp()->twitch->getChannelOrEmptyByID(
+                QString::fromStdString(payload.event.broadcasterUserID));
+
+            channel->addMessage(message);
+        });
     }
 };
 

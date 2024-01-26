@@ -41,3 +41,6 @@
 [submodule "tools/crash-handler"]
 	path = tools/crash-handler
 	url = https://github.com/Chatterino/crash-handler
+[submodule "lib/twitch-eventsub-ws"]
+	path = lib/twitch-eventsub-ws
+	url = https://github.com/Chatterino/twitch-eventsub-ws

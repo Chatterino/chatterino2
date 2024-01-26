@@ -374,6 +374,8 @@ set(SOURCE_FILES
         providers/twitch/ChannelPointReward.hpp
         providers/twitch/EventSub.cpp
         providers/twitch/EventSub.hpp
+        providers/twitch/EventSubMessageBuilder.cpp
+        providers/twitch/EventSubMessageBuilder.hpp
         providers/twitch/IrcMessageHandler.cpp
         providers/twitch/IrcMessageHandler.hpp
         providers/twitch/PubSubActions.cpp
@@ -766,11 +768,7 @@ target_link_libraries(${LIBRARY_PROJECT}
         RapidJSON::RapidJSON
         LRUCache
         MagicEnum
-        )
-
-target_link_libraries(${LIBRARY_PROJECT}
-        PUBLIC
-        eventsub
+        twitch-eventsub-ws
         )
 
 if (CHATTERINO_PLUGINS)
@@ -824,7 +822,7 @@ if (BUILD_APP)
 
     target_link_libraries(${EXECUTABLE_PROJECT}
         PUBLIC
-        eventsub
+        twitch-eventsub-ws
         )
 
     set_target_directory_hierarchy(${EXECUTABLE_PROJECT})

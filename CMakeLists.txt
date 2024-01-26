@@ -204,6 +204,8 @@ else()
     add_subdirectory("${CMAKE_SOURCE_DIR}/lib/settings" EXCLUDE_FROM_ALL)
 endif()
 
+add_subdirectory("${CMAKE_SOURCE_DIR}/lib/twitch-eventsub-ws" EXCLUDE_FROM_ALL)
+
 if (CHATTERINO_PLUGINS)
     set(LUA_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lib/lua/src")
     add_subdirectory(lib/lua)
@@ -212,8 +214,6 @@ endif()
 if (BUILD_WITH_CRASHPAD)
     add_subdirectory("${CMAKE_SOURCE_DIR}/tools/crash-handler")
 endif()
-
-add_subdirectory("${CMAKE_SOURCE_DIR}/../beast-websocket-client" eventsub EXCLUDE_FROM_ALL)
 
 # Used to provide a date of build in the About page (for nightly builds). Getting the actual time of
 # compilation in CMake is a more involved, as documented in https://stackoverflow.com/q/24292898.
