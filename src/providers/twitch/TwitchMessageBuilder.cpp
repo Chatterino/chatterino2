@@ -300,17 +300,16 @@ namespace {
         // 1. build the backreferences list, holding where the backreferences
         //    are in the replacement string
         QVarLengthArray<QStringCapture> backReferences;
-        SizeType replacementLength = replacement.size();
-        const QChar *replacementBuf = replacement.unicode();
 
+        SizeType replacementLength = replacement.size();
         for (SizeType i = 0; i < replacementLength - 1; i++)
         {
-            if (replacementBuf[i] != u'\\')
+            if (replacement[i] != u'\\')
             {
                 continue;
             }
 
-            int no = replacementBuf[i + 1].digitValue();
+            int no = replacement[i + 1].digitValue();
             if (no <= 0 || no > numCaptures)
             {
                 continue;
@@ -320,7 +319,7 @@ namespace {
 
             if (i < replacementLength - 2)
             {
-                int secondDigit = replacementBuf[i + 2].digitValue();
+                int secondDigit = replacement[i + 2].digitValue();
                 if (secondDigit != -1 &&
                     ((no * 10) + secondDigit) <= numCaptures)
                 {
