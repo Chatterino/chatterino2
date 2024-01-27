@@ -6,6 +6,7 @@
 #include "common/QLogging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Resources.hpp"
+#include "singletons/WindowManager.hpp"
 
 #include <QColor>
 #include <QDir>
@@ -13,6 +14,9 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <QSet>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+#    include <QStyleHints>
+#endif
 
 #include <cmath>
 
@@ -219,6 +223,11 @@ bool Theme::isLightTheme() const
     return this->isLight_;
 }
 
+bool Theme::isSystemTheme() const
+{
+    return this->themeName == u"System"_s;
+}
+
 void Theme::initialize(Settings &settings, const Paths &paths)
 {
     this->themeName.connect(
@@ -227,15 +236,51 @@ void Theme::initialize(Settings &settings, const Paths &paths)
             this->update();
         },
         false);
+    auto updateIfSystem = [this](const auto &) {
+        if (this->isSystemTheme())
+        {
+            this->update();
+        }
+    };
+    this->darkSystemThemeName.connect(updateIfSystem, false);
+    this->lightSystemThemeName.connect(updateIfSystem, false);
 
     this->loadAvailableThemes(paths);
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    QObject::connect(qApp->styleHints(), &QStyleHints::colorSchemeChanged,
+                     &this->lifetime_, [this] {
+                         if (this->isSystemTheme())
+                         {
+                             this->update();
+                             getIApp()->getWindows()->forceLayoutChannelViews();
+                         }
+                     });
+#endif
 
     this->update();
 }
 
 void Theme::update()
 {
-    auto oTheme = this->findThemeByKey(this->themeName);
+    auto currentTheme = [&]() -> QString {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        if (this->isSystemTheme())
+        {
+            switch (qApp->styleHints()->colorScheme())
+            {
+                case Qt::ColorScheme::Light:
+                    return this->lightSystemThemeName;
+                case Qt::ColorScheme::Unknown:
+                case Qt::ColorScheme::Dark:
+                    return this->darkSystemThemeName;
+            }
+        }
+#endif
+        return this->themeName;
+    };
+
+    auto oTheme = this->findThemeByKey(currentTheme());
 
     constexpr const double nsToMs = 1.0 / 1000000.0;
     QElapsedTimer timer;
