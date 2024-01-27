@@ -180,7 +180,7 @@ FfzChannelBadgeMap ffz::detail::parseChannelBadges(const QJsonObject &badgeRoot)
         for (const auto &jsonUserID : jsonUserIDs)
         {
             // NOTE: The Twitch User IDs come through as ints right now, the code below
-            // tries to parse the mas strings first since that's how we treat them anyway.
+            // tries to parse them as strings first since that's how we treat them anyway.
             if (jsonUserID.isString())
             {
                 channelBadges[jsonUserID.toString()].emplace_back(badgeID);
