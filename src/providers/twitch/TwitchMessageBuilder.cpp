@@ -541,7 +541,9 @@ MessagePtr TwitchMessageBuilder::build()
         this->tags, this->originalMessage_, this->messageOffset_);
 
     // This runs through all ignored phrases and runs its replacements on this->originalMessage_
-    this->runIgnoreReplaces(twitchEmotes);
+    TwitchMessageBuilder::processIgnorePhrases(
+        *getSettings()->ignoredMessages.readOnly(), this->originalMessage_,
+        twitchEmotes);
 
     std::sort(twitchEmotes.begin(), twitchEmotes.end(),
               [](const auto &a, const auto &b) {
@@ -1082,12 +1084,12 @@ void TwitchMessageBuilder::appendUsername()
     }
 }
 
-void TwitchMessageBuilder::runIgnoreReplaces(
+void TwitchMessageBuilder::processIgnorePhrases(
+    const std::vector<IgnorePhrase> &phrases, QString &originalMessage,
     std::vector<TwitchEmoteOccurrence> &twitchEmotes)
 {
     using SizeType = QString::size_type;
 
-    auto phrases = getSettings()->ignoredMessages.readOnly();
     auto removeEmotesInRange = [&twitchEmotes](SizeType pos, SizeType len) {
         // all emotes outside the range come before `it`
         // all emotes in the range start at `it`
@@ -1156,20 +1158,20 @@ void TwitchMessageBuilder::runIgnoreReplaces(
     auto replaceMessageAt = [&](const IgnorePhrase &phrase, SizeType from,
                                 SizeType length, const QString &replacement) {
         auto removedEmotes = removeEmotesInRange(from, length);
-        this->originalMessage_.replace(from, length, replacement);
+        originalMessage.replace(from, length, replacement);
         auto wordStart = from;
         while (wordStart > 0)
         {
-            if (this->originalMessage_[wordStart - 1] == ' ')
+            if (originalMessage[wordStart - 1] == ' ')
             {
                 break;
             }
             --wordStart;
         }
         auto wordEnd = from + replacement.length();
-        while (wordEnd < this->originalMessage_.length())
+        while (wordEnd < originalMessage.length())
         {
-            if (this->originalMessage_[wordEnd] == ' ')
+            if (originalMessage[wordEnd] == ' ')
             {
                 break;
             }
@@ -1180,11 +1182,11 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                           static_cast<int>(replacement.length() - length));
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-        auto midExtendedRef = QStringView{this->originalMessage_}.mid(
-            wordStart, wordEnd - wordStart);
+        auto midExtendedRef =
+            QStringView{originalMessage}.mid(wordStart, wordEnd - wordStart);
 #else
         auto midExtendedRef =
-            this->originalMessage_.midRef(wordStart, wordEnd - wordStart);
+            originalMessage.midRef(wordStart, wordEnd - wordStart);
 #endif
 
         for (auto &emote : removedEmotes)
@@ -1210,7 +1212,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
         addReplEmotes(phrase, midExtendedRef, wordStart);
     };
 
-    for (const auto &phrase : *phrases)
+    for (const auto &phrase : phrases)
     {
         if (phrase.isBlock())
         {
@@ -1232,14 +1234,13 @@ void TwitchMessageBuilder::runIgnoreReplaces(
             QRegularExpressionMatch match;
             size_t iterations = 0;
             SizeType from = 0;
-            while ((from = this->originalMessage_.indexOf(regex, from,
-                                                          &match)) != -1)
+            while ((from = originalMessage.indexOf(regex, from, &match)) != -1)
             {
                 auto replacement = phrase.getReplace();
                 if (regex.captureCount() > 0)
                 {
-                    replacement = makeRegexReplacement(
-                        this->originalMessage_, regex, match, replacement);
+                    replacement = makeRegexReplacement(originalMessage, regex,
+                                                       match, replacement);
                 }
 
                 replaceMessageAt(phrase, from, match.capturedLength(),
@@ -1248,7 +1249,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                 iterations++;
                 if (iterations >= 128)
                 {
-                    this->originalMessage_ =
+                    originalMessage =
                         u"Too many replacements - check your ignores!"_s;
                     return;
                 }
@@ -1258,8 +1259,8 @@ void TwitchMessageBuilder::runIgnoreReplaces(
         }
 
         SizeType from = 0;
-        while ((from = this->originalMessage_.indexOf(
-                    pattern, from, phrase.caseSensitivity())) != -1)
+        while ((from = originalMessage.indexOf(pattern, from,
+                                               phrase.caseSensitivity())) != -1)
         {
             replaceMessageAt(phrase, from, pattern.length(),
                              phrase.getReplace());
