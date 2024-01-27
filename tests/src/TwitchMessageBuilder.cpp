@@ -3,6 +3,7 @@
 #include "common/Channel.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
+#include "controllers/ignores/IgnorePhrase.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "mocks/Channel.hpp"
 #include "mocks/ChatterinoBadges.hpp"
@@ -531,6 +532,14 @@ TEST_F(TestTwitchMessageBuilder, IgnoresReplace)
             {emoteAt(4, "Kappa")},
             "baz1[oo] Kappa",
             {emoteAt(8, "Kappa")},
+        },
+
+        {
+            {regexReplace("f(o+)1", R"(baz1[\0][\1][\2])")},
+            "foo1 Kappa",
+            {emoteAt(4, "Kappa")},
+            "baz1[\\0][oo][\\2] Kappa",
+            {emoteAt(16, "Kappa")},
         },
         {
             {regexReplace("f(o+)(\\d+)", "baz1[\\1+\\2]")},
