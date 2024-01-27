@@ -20,6 +20,7 @@ using EmotePtr = std::shared_ptr<const Emote>;
 class Channel;
 class TwitchChannel;
 class MessageThread;
+class IgnorePhrase;
 struct HelixVip;
 using HelixModerator = HelixVip;
 struct ChannelPointReward;
@@ -108,6 +109,10 @@ public:
         const QVariantMap &tags, const QString &originalMessage,
         int messageOffset);
 
+    static void processIgnorePhrases(
+        const std::vector<IgnorePhrase> &phrases, QString &originalMessage,
+        std::vector<TwitchEmoteOccurrence> &twitchEmotes);
+
 private:
     void parseUsernameColor() override;
     void parseUsername() override;
@@ -117,8 +122,6 @@ private:
     // Will read information from thread_ or from IRC tags
     void parseThread();
     void appendUsername();
-
-    void runIgnoreReplaces(std::vector<TwitchEmoteOccurrence> &twitchEmotes);
 
     Outcome tryAppendEmote(const EmoteName &name) override;
 
