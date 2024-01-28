@@ -36,7 +36,7 @@ bool BadgePredicate::appliesToImpl(const Message &message)
 {
     for (const Badge &badge : message.badges)
     {
-        if (badges_.contains(badge.key_, Qt::CaseInsensitive))
+        if (badges_.contains(badge.key, Qt::CaseInsensitive))
         {
             return true;
         }

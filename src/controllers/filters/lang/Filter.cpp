@@ -24,6 +24,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
      * List of identifiers:
      *
      * author.badges
+     * author.badge_texts
      * author.color
      * author.name
      * author.no_color
@@ -56,10 +57,15 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
 
     QStringList badges;
     badges.reserve(m->badges.size());
+    QStringList badgeTexts;
+    badgeTexts.reserve(m->badges.size());
     for (const auto &e : m->badges)
     {
-        badges << e.key_;
+        badges << e.key;
+        badgeTexts << e.text;
     }
+
+    qDebug() << "XXX: Badges:" << badges << badgeTexts;
 
     bool watching = !watchingChannel->getName().isEmpty() &&
                     watchingChannel->getName().compare(
@@ -81,6 +87,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
     }
     ContextMap vars = {
         {"author.badges", std::move(badges)},
+        {"author.badge_texts", std::move(badgeTexts)},
         {"author.color", m->usernameColor},
         {"author.name", m->displayName},
         {"author.no_color", !m->usernameColor.isValid()},

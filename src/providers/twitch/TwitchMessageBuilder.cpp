@@ -157,13 +157,13 @@ namespace {
                                            const TwitchChannel *twitchChannel)
     {
         if (auto channelBadge =
-                twitchChannel->twitchBadge(badge.key_, badge.value_))
+                twitchChannel->twitchBadge(badge.key, badge.value_))
         {
             return channelBadge;
         }
 
         if (auto globalBadge =
-                TwitchBadges::instance()->badge(badge.key_, badge.value_))
+                TwitchBadges::instance()->badge(badge.key, badge.value_))
         {
             return globalBadge;
         }
@@ -182,20 +182,13 @@ namespace {
 
         for (const auto &badge : badges)
         {
-            auto badgeEmote = getTwitchBadge(badge, twitchChannel);
-            if (!badgeEmote)
+            if (!badge.image)
             {
                 continue;
             }
-            auto tooltip = (*badgeEmote)->tooltip.string;
 
-            if (badge.key_ == "bits")
-            {
-                const auto &cheerAmount = badge.value_;
-                tooltip = QString("Twitch cheer %0").arg(cheerAmount);
-            }
-            else if (badge.key_ == "moderator" &&
-                     getSettings()->useCustomFfzModeratorBadges)
+            if (badge.key == "moderator" &&
+                getSettings()->useCustomFfzModeratorBadges)
             {
                 if (auto customModBadge = twitchChannel->ffzCustomModBadge())
                 {
@@ -203,13 +196,12 @@ namespace {
                         ->emplace<ModBadgeElement>(
                             *customModBadge,
                             MessageElementFlag::BadgeChannelAuthority)
-                        ->setTooltip((*customModBadge)->tooltip.string);
+                        ->setTooltip(badge.text);
                     // early out, since we have to add a custom badge element here
                     continue;
                 }
             }
-            else if (badge.key_ == "vip" &&
-                     getSettings()->useCustomFfzVipBadges)
+            else if (badge.key == "vip" && getSettings()->useCustomFfzVipBadges)
             {
                 if (auto customVipBadge = twitchChannel->ffzCustomVipBadge())
                 {
@@ -217,49 +209,14 @@ namespace {
                         ->emplace<VipBadgeElement>(
                             *customVipBadge,
                             MessageElementFlag::BadgeChannelAuthority)
-                        ->setTooltip((*customVipBadge)->tooltip.string);
+                        ->setTooltip(badge.text);
                     // early out, since we have to add a custom badge element here
                     continue;
                 }
             }
-            else if (badge.flag_ == MessageElementFlag::BadgeSubscription)
-            {
-                auto badgeInfoIt = badgeInfos.find(badge.key_);
-                if (badgeInfoIt != badgeInfos.end())
-                {
-                    // badge.value_ is 4 chars long if user is subbed on higher tier
-                    // (tier + amount of months with leading zero if less than 100)
-                    // e.g. 3054 - tier 3 4,5-year sub. 2108 - tier 2 9-year sub
-                    const auto &subTier =
-                        badge.value_.length() > 3 ? badge.value_.at(0) : '1';
-                    const auto &subMonths = badgeInfoIt->second;
-                    tooltip += QString(" (%1%2 months)")
-                                   .arg(subTier != '1'
-                                            ? QString("Tier %1, ").arg(subTier)
-                                            : "")
-                                   .arg(subMonths);
-                }
-            }
-            else if (badge.flag_ == MessageElementFlag::BadgePredictions)
-            {
-                auto badgeInfoIt = badgeInfos.find(badge.key_);
-                if (badgeInfoIt != badgeInfos.end())
-                {
-                    auto infoValue = badgeInfoIt->second;
-                    auto predictionText =
-                        infoValue
-                            .replace(R"(\s)", " ")  // standard IRC escapes
-                            .replace(R"(\:)", ";")
-                            .replace(R"(\\)", R"(\)")
-                            .replace("⸝", ",");  // twitch's comma escape
-                    // Careful, the first character is RIGHT LOW PARAPHRASE BRACKET or U+2E1D, which just looks like a comma
 
-                    tooltip = QString("Predicted %1").arg(predictionText);
-                }
-            }
-
-            builder->emplace<BadgeElement>(*badgeEmote, badge.flag_)
-                ->setTooltip(tooltip);
+            builder->emplace<BadgeElement>(*badge.image, badge.flag)
+                ->setTooltip(badge.text);
         }
 
         builder->message().badges = badges;
@@ -1285,6 +1242,62 @@ void TwitchMessageBuilder::appendTwitchBadges()
 
     auto badgeInfos = TwitchMessageBuilder::parseBadgeInfoTag(this->tags);
     auto badges = TwitchMessageBuilder::parseBadgeTag(this->tags);
+    for (auto &badge : badges)
+    {
+        auto oBadgeEmote = getTwitchBadge(badge, this->twitchChannel);
+        if (!oBadgeEmote.has_value())
+        {
+            continue;
+        }
+        const auto &badgeEmote = oBadgeEmote.value();
+        badge.image = badgeEmote;
+
+        if (badge.key == "bits")
+        {
+            const auto &cheerAmount = badge.value;
+            badge.text = QString("Twitch cheer %0").arg(cheerAmount);
+        }
+        else if (badge.flag == MessageElementFlag::BadgeSubscription)
+        {
+            auto badgeInfoIt = badgeInfos.find(badge.key);
+            if (badgeInfoIt != badgeInfos.end())
+            {
+                // badge.value_ is 4 chars long if user is subbed on higher tier
+                // (tier + amount of months with leading zero if less than 100)
+                // e.g. 3054 - tier 3 4,5-year sub. 2108 - tier 2 9-year sub
+                const auto &subTier =
+                    badge.value.length() > 3 ? badge.value.at(0) : '1';
+                const auto &subMonths = badgeInfoIt->second;
+                badge.text =
+                    QString("%0 (%1%2 months)")
+                        .arg(badgeEmote->tooltip.string)
+                        .arg(subTier != '1' ? QString("Tier %1, ").arg(subTier)
+                                            : "")
+                        .arg(subMonths);
+            }
+        }
+        else if (badge.flag == MessageElementFlag::BadgePredictions)
+        {
+            auto badgeInfoIt = badgeInfos.find(badge.key);
+            if (badgeInfoIt != badgeInfos.end())
+            {
+                auto infoValue = badgeInfoIt->second;
+                auto predictionText =
+                    infoValue
+                        .replace(R"(\s)", " ")  // standard IRC escapes
+                        .replace(R"(\:)", ";")
+                        .replace(R"(\\)", R"(\)")
+                        .replace("⸝", ",");  // twitch's comma escape
+                // Careful, the first character is RIGHT LOW PARAPHRASE BRACKET or U+2E1D, which just looks like a comma
+
+                badge.text = QString("Predicted %1").arg(predictionText);
+            }
+        }
+        else
+        {
+            badge.text = badgeEmote->tooltip.string;
+        }
+    }
     appendBadges(this, badges, badgeInfos, this->twitchChannel);
 }
 

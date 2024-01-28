@@ -24,6 +24,7 @@ namespace chatterino::filters {
 // i.e. if all the variables and operators being used have compatible types.
 static const QMap<QString, Type> MESSAGE_TYPING_CONTEXT = {
     {"author.badges", Type::StringList},
+    {"author.badge_texts", Type::StringList},
     {"author.color", Type::Color},
     {"author.name", Type::String},
     {"author.no_color", Type::Bool},

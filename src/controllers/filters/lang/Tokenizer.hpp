@@ -10,6 +10,7 @@ namespace chatterino::filters {
 
 static const QMap<QString, QString> validIdentifiersMap = {
     {"author.badges", "author badges"},
+    {"author.badge_texts", "author badge texts"},
     {"author.color", "author color"},
     {"author.name", "author name"},
     {"author.no_color", "author has no color?"},
@@ -35,7 +36,8 @@ static const QMap<QString, QString> validIdentifiersMap = {
     {"flags.restricted", "restricted message?"},
     {"flags.monitored", "monitored message?"},
     {"message.content", "message text"},
-    {"message.length", "message length"}};
+    {"message.length", "message length"},
+};
 
 // clang-format off
 static const QRegularExpression tokenRegex(

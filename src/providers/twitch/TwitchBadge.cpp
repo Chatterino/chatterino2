@@ -12,30 +12,30 @@ const QSet<QString> channelAuthority{"moderator", "vip", "broadcaster"};
 const QSet<QString> subBadges{"subscriber", "founder"};
 
 Badge::Badge(QString key, QString value)
-    : key_(std::move(key))
-    , value_(std::move(value))
+    : key(std::move(key))
+    , value(std::move(value))
 {
-    if (globalAuthority.contains(this->key_))
+    if (globalAuthority.contains(this->key))
     {
-        this->flag_ = MessageElementFlag::BadgeGlobalAuthority;
+        this->flag = MessageElementFlag::BadgeGlobalAuthority;
     }
-    else if (predictions.contains(this->key_))
+    else if (predictions.contains(this->key))
     {
-        this->flag_ = MessageElementFlag::BadgePredictions;
+        this->flag = MessageElementFlag::BadgePredictions;
     }
-    else if (channelAuthority.contains(this->key_))
+    else if (channelAuthority.contains(this->key))
     {
-        this->flag_ = MessageElementFlag::BadgeChannelAuthority;
+        this->flag = MessageElementFlag::BadgeChannelAuthority;
     }
-    else if (subBadges.contains(this->key_))
+    else if (subBadges.contains(this->key))
     {
-        this->flag_ = MessageElementFlag::BadgeSubscription;
+        this->flag = MessageElementFlag::BadgeSubscription;
     }
 }
 
 bool Badge::operator==(const Badge &other) const
 {
-    return this->key_ == other.key_ && this->value_ == other.value_;
+    return this->key == other.key && this->value == other.value;
 }
 
 }  // namespace chatterino

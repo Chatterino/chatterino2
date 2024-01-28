@@ -20,10 +20,10 @@ bool SubtierPredicate::appliesToImpl(const Message &message)
 {
     for (const Badge &badge : message.badges)
     {
-        if (badge.key_ == "subscriber")
+        if (badge.key == "subscriber")
         {
             const auto &subTier =
-                badge.value_.length() > 3 ? badge.value_.at(0) : '1';
+                badge.value.length() > 3 ? badge.value.at(0) : '1';
 
             return subtiers_.contains(subTier);
         }

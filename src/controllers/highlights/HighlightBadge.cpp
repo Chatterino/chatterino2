@@ -98,11 +98,11 @@ bool HighlightBadge::compare(const QString &id, const Badge &badge) const
     if (this->hasVersions_)
     {
         auto parts = SharedMessageBuilder::slashKeyValue(id);
-        return parts.first.compare(badge.key_, Qt::CaseInsensitive) == 0 &&
-               parts.second.compare(badge.value_, Qt::CaseInsensitive) == 0;
+        return parts.first.compare(badge.key, Qt::CaseInsensitive) == 0 &&
+               parts.second.compare(badge.value, Qt::CaseInsensitive) == 0;
     }
 
-    return id.compare(badge.key_, Qt::CaseInsensitive) == 0;
+    return id.compare(badge.key, Qt::CaseInsensitive) == 0;
 }
 
 bool HighlightBadge::hasCustomSound() const
