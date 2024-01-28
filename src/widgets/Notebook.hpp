@@ -196,6 +196,7 @@ private:
     NotebookTabLocation tabLocation_ = NotebookTabLocation::Top;
     QAction *lockNotebookLayoutAction_;
     QAction *showTabsAction_;
+    QAction *toggleTopMostAction_;
 
     // This filter, if set, is used to figure out the visibility of
     // the tabs in this notebook.
@@ -224,7 +225,6 @@ private:
 
     // Main window on Windows has basically a duplicate of this in Window
     NotebookButton *streamerModeIcon_{};
-
     void updateStreamerModeIcon();
 };
 

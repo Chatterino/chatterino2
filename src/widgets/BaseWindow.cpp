@@ -1,6 +1,7 @@
 #include "widgets/BaseWindow.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
@@ -207,37 +208,52 @@ void BaseWindow::init()
 //    }
 #endif
 
-#ifdef USEWINSDK
-    // fourtf: don't ask me why we need to delay this
-    if (!this->flags_.has(TopMost))
-    {
-        QTimer::singleShot(1, this, [this] {
-            getSettings()->windowTopMost.connect(
-                [this](bool topMost, auto) {
-                    ::SetWindowPos(HWND(this->winId()),
-                                   topMost ? HWND_TOPMOST : HWND_NOTOPMOST, 0,
-                                   0, 0, 0,
-                                   SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-                },
-                this->connections_);
-        });
-    }
-#else
     // TopMost flag overrides setting
     if (!this->flags_.has(TopMost))
     {
         getSettings()->windowTopMost.connect(
-            [this](bool topMost, auto) {
-                auto isVisible = this->isVisible();
-                this->setWindowFlag(Qt::WindowStaysOnTopHint, topMost);
-                if (isVisible)
-                {
-                    this->show();
-                }
+            [this](bool topMost) {
+                this->setTopMost(topMost);
             },
             this->connections_);
     }
+}
+
+void BaseWindow::setTopMost(bool topMost)
+{
+    if (this->flags_.has(TopMost))
+    {
+        qCWarning(chatterinoWidget)
+            << "Called setTopMost on a window with the `TopMost` flag set.";
+        return;
+    }
+
+    if (this->isTopMost_ == topMost)
+    {
+        return;
+    }
+
+#ifdef USEWINSDK
+    ::SetWindowPos(reinterpret_cast<HWND>(this->winId()),
+                   topMost ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0,
+                   SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+
+#else
+    auto isVisible = this->isVisible();
+    this->setWindowFlag(Qt::WindowStaysOnTopHint, topMost);
+    if (isVisible)
+    {
+        this->show();
+    }
 #endif
+
+    this->isTopMost_ = topMost;
+    this->topMostChanged(this->isTopMost_);
+}
+
+bool BaseWindow::isTopMost() const
+{
+    return this->isTopMost_ || this->flags_.has(TopMost);
 }
 
 void BaseWindow::setActionOnFocusLoss(ActionOnFocusLoss value)
@@ -558,6 +574,15 @@ void BaseWindow::showEvent(QShowEvent *)
     if (this->flags_.has(BoundsCheckOnShow))
     {
         this->moveTo(this->pos(), widgets::BoundsChecking::CursorPosition);
+    }
+
+    if (!this->flags_.has(TopMost))
+    {
+        QTimer::singleShot(1, this, [this] {
+            ::SetWindowPos(reinterpret_cast<HWND>(this->winId()),
+                           this->isTopMost_ ? HWND_TOPMOST : HWND_NOTOPMOST, 0,
+                           0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+        });
     }
 #endif
 }
