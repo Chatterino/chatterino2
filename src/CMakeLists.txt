@@ -1059,6 +1059,11 @@ if (MSVC)
     #        These are implicit conversions from size_t to int/qsizetype.
     #        We don't use size_t in a lot of cases, since
     #        Qt doesn't use it - it uses int (or qsizetype in Qt6).
+    #
+    # 4458 - "declaration of 'identifier' hides class member"
+    #        We have a rule of exclusively using `this->`
+    #        to access class members, thus it's fine to reclare a variable
+    #        with the same name as a class member.
     target_compile_options(${LIBRARY_PROJECT} PUBLIC
         /W4
         # 5038 - warnings about initialization order
@@ -1068,6 +1073,7 @@ if (MSVC)
         # Disable the following warnings (see reasoning above)
         /wd4100
         /wd4267
+        /wd4458
         # Enable updated '__cplusplus' macro - workaround for CMake#18837
         /Zc:__cplusplus
     )
