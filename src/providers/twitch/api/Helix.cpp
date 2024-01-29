@@ -2704,6 +2704,7 @@ void Helix::updateShieldMode(
                     {
                         failureCallback(Error::UserMissingScope, message);
                     }
+                    [[fallthrough]];
                 }
                 case 401: {
                     failureCallback(Error::Forwarded, message);
