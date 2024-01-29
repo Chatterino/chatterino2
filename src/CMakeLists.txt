@@ -935,6 +935,7 @@ target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     AB_CUSTOM_SETTINGS
     IRC_STATIC
     IRC_NAMESPACE=Communi
+    $<$<BOOL:${WIN32}>:_WIN32_WINNT=0x0A00> # Windows 10
     )
 
 if (USE_SYSTEM_QTKEYCHAIN)
