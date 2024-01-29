@@ -86,7 +86,7 @@ void Paths::initRootDirectory()
 
     this->rootAppDataDirectory = [&]() -> QString {
         // portable
-        if (this->isPortable())
+        if (Modes::instance().isPortable)
         {
             return QCoreApplication::applicationDirPath();
         }

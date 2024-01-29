@@ -90,7 +90,7 @@ void Updates::installUpdates()
     box->exec();
     QDesktopServices::openUrl(this->updateGuideLink_);
 #elif defined Q_OS_WIN
-    if (this->paths.isPortable())
+    if (Modes::instance().isPortable)
     {
         QMessageBox *box =
             new QMessageBox(QMessageBox::Information, "Chatterino Update",
