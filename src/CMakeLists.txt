@@ -1049,10 +1049,6 @@ if (MSVC)
     # Someone adds /W3 before we add /W4.
     # This makes sure, only /W4 is specified.
     string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    # 4505 - "unreferenced local version has been removed"
-    #        Although this might give hints on dead code,
-    #        there are some cases where it's distracting.
-    #
     # 4100 - "unreferenced formal parameter"
     #        There are a lot of functions and methods where
     #        an argument was given a name but never used.
@@ -1070,7 +1066,6 @@ if (MSVC)
         # 4855 - implicit capture of 'this' via '[=]' is deprecated
         /w14855
         # Disable the following warnings (see reasoning above)
-        /wd4505
         /wd4100
         /wd4267
         # Enable updated '__cplusplus' macro - workaround for CMake#18837
