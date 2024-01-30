@@ -5,7 +5,7 @@
 
 namespace chatterino {
 
-static auto defaultItemFlags(bool selectable)
+inline auto defaultItemFlags(bool selectable)
 {
     return Qt::ItemIsEnabled |
            (selectable ? Qt::ItemIsSelectable | Qt::ItemIsDragEnabled |
@@ -13,7 +13,7 @@ static auto defaultItemFlags(bool selectable)
                        : Qt::ItemFlag());
 }
 
-static void setBoolItem(QStandardItem *item, bool value,
+inline void setBoolItem(QStandardItem *item, bool value,
                         bool userCheckable = true, bool selectable = true)
 {
     item->setFlags(
@@ -22,7 +22,7 @@ static void setBoolItem(QStandardItem *item, bool value,
     item->setCheckState(value ? Qt::Checked : Qt::Unchecked);
 }
 
-static void setStringItem(QStandardItem *item, const QString &value,
+inline void setStringItem(QStandardItem *item, const QString &value,
                           bool editable = true, bool selectable = true)
 {
     item->setData(value, Qt::EditRole);
@@ -30,7 +30,7 @@ static void setStringItem(QStandardItem *item, const QString &value,
                                  (editable ? (Qt::ItemIsEditable) : 0)));
 }
 
-static void setFilePathItem(QStandardItem *item, const QUrl &value,
+inline void setFilePathItem(QStandardItem *item, const QUrl &value,
                             bool selectable = true)
 {
     item->setData(value, Qt::UserRole);
@@ -40,7 +40,7 @@ static void setFilePathItem(QStandardItem *item, const QUrl &value,
                       (selectable ? Qt::ItemIsSelectable : Qt::NoItemFlags)));
 }
 
-static void setColorItem(QStandardItem *item, const QColor &value,
+inline void setColorItem(QStandardItem *item, const QColor &value,
                          bool selectable = true)
 {
     item->setData(value, Qt::DecorationRole);
@@ -49,7 +49,7 @@ static void setColorItem(QStandardItem *item, const QColor &value,
                       (selectable ? Qt::ItemIsSelectable : Qt::NoItemFlags)));
 }
 
-static QStandardItem *emptyItem()
+inline QStandardItem *emptyItem()
 {
     auto *item = new QStandardItem();
     item->setFlags(Qt::ItemFlags());

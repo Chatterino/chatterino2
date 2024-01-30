@@ -122,16 +122,49 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addTitle("Interface");
 
-    layout.addDropdown<QString>(
-        "Theme", getIApp()->getThemes()->availableThemes(),
-        getIApp()->getThemes()->themeName,
-        [](const auto *combo, const auto &themeKey) {
-            return combo->findData(themeKey, Qt::UserRole);
-        },
-        [](const auto &args) {
-            return args.combobox->itemData(args.index, Qt::UserRole).toString();
-        },
-        {}, Theme::fallbackTheme.name);
+    {
+        auto *themes = getIApp()->getThemes();
+        auto available = themes->availableThemes();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        available.emplace_back("System", "System");
+#endif
+
+        auto addThemeDropdown = [&](auto name, auto &setting,
+                                    const auto &options,
+                                    const QString &tooltip = {}) {
+            return layout.addDropdown<QString>(
+                name, options, setting,
+                [](const auto *combo, const auto &themeKey) {
+                    return combo->findData(themeKey, Qt::UserRole);
+                },
+                [](const auto &args) {
+                    return args.combobox->itemData(args.index, Qt::UserRole)
+                        .toString();
+                },
+                tooltip, Theme::fallbackTheme.name);
+        };
+
+        addThemeDropdown("Theme", themes->themeName, available);
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        auto *darkDropdown = addThemeDropdown(
+            "Dark system theme", themes->darkSystemThemeName,
+            themes->availableThemes(),
+            "This theme is selected if your system is in a dark theme and you "
+            "enabled the adaptive 'System' theme.");
+        auto *lightDropdown = addThemeDropdown(
+            "Light system theme", themes->lightSystemThemeName,
+            themes->availableThemes(),
+            "This theme is selected if your system is in a light theme and you "
+            "enabled the adaptive 'System' theme.");
+
+        auto isSystem = [](const auto &s) {
+            return s == "System";
+        };
+        layout.enableIf(darkDropdown, themes->themeName, isSystem);
+        layout.enableIf(lightDropdown, themes->themeName, isSystem);
+#endif
+    }
 
     layout.addDropdown<QString>(
         "Font", {"Segoe UI", "Arial", "Choose..."},

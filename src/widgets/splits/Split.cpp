@@ -6,6 +6,7 @@
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
@@ -684,15 +685,25 @@ void Split::addShortcuts()
          }},
         {"runCommand",
          [this](std::vector<QString> arguments) -> QString {
-             if (arguments.size() == 0)
+             if (arguments.empty())
              {
                  qCWarning(chatterinoHotkeys)
                      << "runCommand hotkey called without arguments!";
                  return "runCommand hotkey called without arguments!";
              }
-             QString command = getIApp()->getCommands()->execCommand(
-                 arguments.at(0).replace('\n', ' '), this->getChannel(), false);
-             this->getChannel()->sendMessage(command);
+             QString requestedText = arguments.at(0).replace('\n', ' ');
+
+             QString inputText = this->getInput().getInputText();
+             QString message = getIApp()->getCommands()->execCustomCommand(
+                 requestedText.split(' '), Command{"(hotkey)", requestedText},
+                 true, this->getChannel(), nullptr,
+                 {
+                     {"input.text", inputText},
+                 });
+
+             message = getIApp()->getCommands()->execCommand(
+                 message, this->getChannel(), false);
+             this->getChannel()->sendMessage(message);
              return "";
          }},
         {"setChannelNotification",

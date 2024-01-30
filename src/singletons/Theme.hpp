@@ -46,6 +46,7 @@ public:
     void initialize(Settings &settings, const Paths &paths) final;
 
     bool isLightTheme() const;
+    bool isSystemTheme() const;
 
     struct TabColors {
         QColor text;
@@ -153,6 +154,9 @@ public:
     pajlada::Signals::NoArgSignal updated;
 
     QStringSetting themeName{"/appearance/theme/name", "Dark"};
+    QStringSetting lightSystemThemeName{"/appearance/theme/lightSystem",
+                                        "Light"};
+    QStringSetting darkSystemThemeName{"/appearance/theme/darkSystem", "Dark"};
 
 private:
     bool isLight_ = false;
@@ -163,6 +167,8 @@ private:
     std::unique_ptr<QTimer> themeReloadTimer_;
     // This will only be populated when auto-reloading themes
     QJsonObject currentThemeJson_;
+
+    QObject lifetime_;
 
     /**
      * Figure out which themes are available in the Themes directory

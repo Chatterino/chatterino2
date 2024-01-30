@@ -45,17 +45,7 @@ std::optional<InnerClass> PubSubMessage::toInner()
     return InnerClass{this->nonce, data};
 }
 
-static std::optional<PubSubMessage> parsePubSubBaseMessage(const QString &blob)
-{
-    QJsonDocument jsonDoc(QJsonDocument::fromJson(blob.toUtf8()));
-
-    if (jsonDoc.isNull())
-    {
-        return std::nullopt;
-    }
-
-    return PubSubMessage(jsonDoc.object());
-}
+std::optional<PubSubMessage> parsePubSubBaseMessage(const QString &blob);
 
 }  // namespace chatterino
 
