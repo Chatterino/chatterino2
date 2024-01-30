@@ -8,6 +8,7 @@
         <content_attribute id="social-chat">intense</content_attribute>
     </content_rating>
     <name>Chatterino</name>
+    <developer_name>Chatterino Developers</developer_name>
     <summary>
         Chat client for twitch.tv
     </summary>

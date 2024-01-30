@@ -136,6 +136,7 @@
 - Dev: Boost is depended on as a header-only library when using conan. (#5107)
 - Dev: Added signal to invalidate paint buffers of channel views without forcing a relayout. (#5123)
 - Dev: Specialize `Atomic<std::shared_ptr<T>>` if underlying standard library supports it. (#5133)
+- Dev: Added the `developer_name` field to the Linux AppData specification. (#5138)
 
 ## 2.4.6
 
