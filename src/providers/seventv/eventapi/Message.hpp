@@ -28,16 +28,6 @@ std::optional<InnerClass> Message::toInner()
     return InnerClass{this->data};
 }
 
-static std::optional<Message> parseBaseMessage(const QString &blob)
-{
-    QJsonDocument jsonDoc(QJsonDocument::fromJson(blob.toUtf8()));
-
-    if (jsonDoc.isNull())
-    {
-        return std::nullopt;
-    }
-
-    return Message(jsonDoc.object());
-}
+std::optional<Message> parseBaseMessage(const QString &blob);
 
 }  // namespace chatterino::seventv::eventapi

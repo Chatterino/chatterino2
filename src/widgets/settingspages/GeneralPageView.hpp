@@ -220,9 +220,9 @@ public:
     {
         auto *combo = this->addDropdown(text, {}, std::move(toolTipText));
 
-        for (const auto &[text, userData] : items)
+        for (const auto &[itemText, userData] : items)
         {
-            combo->addItem(text, userData);
+            combo->addItem(itemText, userData);
         }
 
         if (!defaultValueText.isEmpty())

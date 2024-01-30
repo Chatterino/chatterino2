@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Literals.hpp"
+#include "common/Modes.hpp"
 #include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -40,7 +41,7 @@ void registerNmManifest(const Paths &paths, const QString &manifestFilename,
 
 void registerNmHost(const Paths &paths)
 {
-    if (paths.isPortable())
+    if (Modes::instance().isPortable)
     {
         return;
     }
