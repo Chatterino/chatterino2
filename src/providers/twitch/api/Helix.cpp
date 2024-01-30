@@ -2703,9 +2703,12 @@ void Helix::updateShieldMode(
                                            Qt::CaseInsensitive))
                     {
                         failureCallback(Error::UserMissingScope, message);
+                        break;
                     }
-                    [[fallthrough]];
+
+                    failureCallback(Error::Forwarded, message);
                 }
+                break;
                 case 401: {
                     failureCallback(Error::Forwarded, message);
                 }
