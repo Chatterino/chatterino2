@@ -14,7 +14,7 @@ declare module c2 {
 
   enum Platform {
     Twitch,
-    IRC
+    IRC,
   }
   enum ChannelType {
     None,
@@ -26,7 +26,7 @@ declare module c2 {
     TwitchLive,
     TwitchAutomod,
     Irc,
-    Misc
+    Misc,
   }
 
   interface IWeakResource {
@@ -40,10 +40,9 @@ declare module c2 {
     get_display_name(): string;
     is_twitch_channel(): boolean;
 
-    static by_name(name: string, platform: Platform): null|Channel;
-    static by_twitch_id(id: string): null|Channel;
+    static by_name(name: string, platform: Platform): null | Channel;
+    static by_twitch_id(id: string): null | Channel;
   }
-
 
   function log(level: LogLevel, ...data: any[]): void;
   function register_command(
