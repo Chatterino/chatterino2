@@ -1,8 +1,11 @@
 #pragma once
 
 #ifdef CHATTERINO_HAVE_PLUGINS
+
+#    include <lua.h>
 #    include <QString>
 
+#    include <memory>
 #    include <vector>
 
 struct lua_State;
@@ -106,6 +109,89 @@ int g_print(lua_State *L);
 // This is for require() exposed as an element of package.searchers
 int searcherAbsolute(lua_State *L);
 int searcherRelative(lua_State *L);
+
+// This is a fat pointer that allows us to type check values given to functions needing a userdata.
+// Ensure ALL userdata given to Lua are a subclass of this! Otherwise we garbage as a pointer!
+struct UserData {
+    enum class Type { Channel };
+    Type type;
+    bool isWeak;
+};
+
+template <UserData::Type T, typename U>
+struct WeakPtrUserData : public UserData {
+    std::weak_ptr<U> target;
+
+    WeakPtrUserData(std::weak_ptr<U> t)
+        : UserData()
+        , target(t)
+    {
+        this->type = T;
+        this->isWeak = true;
+    }
+
+    static WeakPtrUserData<T, U> *create(lua_State *L, std::weak_ptr<U> target)
+    {
+        void *ptr = lua_newuserdata(L, sizeof(WeakPtrUserData<T, U>));
+        return new (ptr) WeakPtrUserData<T, U>(target);
+    }
+
+    static WeakPtrUserData<T, U> *from(UserData *target)
+    {
+        if (!target->isWeak)
+        {
+            return nullptr;
+        }
+        if (target->type != T)
+        {
+            return nullptr;
+        }
+        return reinterpret_cast<WeakPtrUserData<T, U> *>(target);
+    }
+
+    static WeakPtrUserData<T, U> *from(void *target)
+    {
+        return from(reinterpret_cast<UserData *>(target));
+    }
+};
+
+template <UserData::Type T, typename U>
+struct SharedPtrUserData : public UserData {
+    std::shared_ptr<U> target;
+
+    SharedPtrUserData(std::shared_ptr<U> t)
+        : UserData()
+        , target(t)
+    {
+        this->type = T;
+        this->isWeak = false;
+    }
+
+    static SharedPtrUserData<T, U> *create(lua_State *L,
+                                           std::shared_ptr<U> target)
+    {
+        void *ptr = lua_newuserdata(L, sizeof(SharedPtrUserData<T, U>));
+        return new (ptr) SharedPtrUserData<T, U>(target);
+    }
+
+    static SharedPtrUserData<T, U> *from(UserData *target)
+    {
+        if (target->isWeak)
+        {
+            return nullptr;
+        }
+        if (target->type != T)
+        {
+            return nullptr;
+        }
+        return reinterpret_cast<SharedPtrUserData<T, U> *>(target);
+    }
+
+    static SharedPtrUserData<T, U> *from(void *target)
+    {
+        return from(reinterpret_cast<UserData *>(target));
+    }
+};
 
 }  // namespace chatterino::lua::api
 
