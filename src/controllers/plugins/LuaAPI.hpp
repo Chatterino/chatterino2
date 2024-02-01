@@ -53,6 +53,11 @@ struct CompletionList {
 };
 
 /**
+ * @includefile common/Channel.hpp
+ * @includefile controllers/plugins/api/ChannelRef.hpp
+ */
+
+/**
  * Registers a new command called `name` which when executed will call `handler`.
  *
  * @lua@param name string The name of the command.
