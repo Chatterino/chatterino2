@@ -14,6 +14,7 @@ c2 = {}
 ---@return boolean
 function IWeakResource:is_valid() end
 
+
 ---@alias LogLevel integer
 ---@type { Debug: LogLevel, Info: LogLevel, Warning: LogLevel, Critical: LogLevel }
 c2.LogLevel = {}
@@ -41,6 +42,13 @@ ChannelType = {}
 ---@type { Twitch: Platform }
 Platform = {}
 ---@class Channel: IWeakResource
+
+--- Get the content of the top object on Lua stack, usually first argument
+--- to function as a ChannelPtr.
+--- If the object given is not a userdatum or the pointer inside that
+--- userdatum doesn't point to a Channel, a lua error is thrown.
+---
+--- @param expiredOk Should an expired return nullptr instead of erroring
 
 --- Returns true if the channel this object points to is valid.
 --- If the object expired, returns false
@@ -70,6 +78,18 @@ function Channel:get_display_name() end
 ---
 ---@return bool
 function Channel:is_twitch_channel() end
+
+--- Sends a message to the target channel.
+--- Note that this does not execute client-commands.
+---
+---@param message string
+---@param execute_commands boolean Should commands be run on the text?
+function Channel:send_message(message, execute_commands) end
+
+--- Adds a system message client-side
+---
+---@param message string
+function Channel:add_system_message(message) end
 
 --- Finds a channel by name.
 ---
