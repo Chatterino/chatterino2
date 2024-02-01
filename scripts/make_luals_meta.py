@@ -44,27 +44,26 @@ repo_root = Path(__file__).parent.parent
 lua_api_file = repo_root / "src" / "controllers" / "plugins" / "LuaAPI.hpp"
 lua_meta = repo_root / "docs" / "plugin-meta.lua"
 
-print("Reading from", lua_api_file.relative_to(repo_root))
 print("Writing to", lua_meta.relative_to(repo_root))
-with lua_api_file.open("r") as f:
-    lines = f.read().splitlines()
 
-# Are we in a doc comment?
-comment: bool = False
 
-# Last `@lua@param`s seen - for @exposed generation
-last_params_names: list[str] = []
-# Are we in a `@lua@class` definition? - makes newlines around @lua@class and @lua@field prettier
-is_class = False
+def process_file(target, out):
+    print("Reading from", target.relative_to(repo_root))
+    with target.open("r") as f:
+        lines = f.read().splitlines()
 
-# The name of the next enum in lua world
-expose_next_enum_as: str | None = None
-# Name of the current enum in c++ world, used to generate internal typenames for
-current_enum_name: str | None = None
+    # Are we in a doc comment?
+    comment: bool = False
 
-with lua_meta.open("w") as out:
-    out.write(BOILERPLATE[1:])  # skip the newline after triple quote
+    # Last `@lua@param`s seen - for @exposed generation
+    last_params_names: list[str] = []
+    # Are we in a `@lua@class` definition? - makes newlines around @lua@class and @lua@field prettier
+    is_class = False
 
+    # The name of the next enum in lua world
+    expose_next_enum_as: str | None = None
+    # Name of the current enum in c++ world, used to generate internal typenames for
+    current_enum_name: str | None = None
     for line in lines:
         line = line.strip()
         if line.startswith("enum class "):
@@ -140,3 +139,8 @@ with lua_meta.open("w") as out:
 
             # note the space difference from the branch above
             out.write("--- " + line + "\n")
+
+
+with lua_meta.open("w") as output:
+    output.write(BOILERPLATE[1:])  # skip the newline after triple quote
+    process_file(lua_api_file, output)
