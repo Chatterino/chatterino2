@@ -262,7 +262,8 @@ StackIdx push(lua_State *L, QList<T> vec)
  *
  * @return Stack index of newly created string.
  */
-template <typename T, std::enable_if<std::is_enum_v<T>>>
+template <typename T,
+          typename std::enable_if<std::is_enum_v<T>, bool>::type = true>
 StackIdx push(lua_State *L, T inp)
 {
     std::string_view name = magic_enum::enum_name<T>(inp);
