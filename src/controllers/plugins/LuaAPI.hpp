@@ -77,27 +77,6 @@ int c2_register_command(lua_State *L);
 int c2_register_callback(lua_State *L);
 
 /**
- * Sends a message to `channel` with the specified text. Also executes commands.
- *
- * **Warning**: It is possible to trigger your own Lua command with this causing a potentially infinite loop.
- *
- * @lua@param channel string The name of the Twitch channel
- * @lua@param text string The text to be sent
- * @lua@return boolean ok
- * @exposed c2.send_msg
- */
-int c2_send_msg(lua_State *L);
-/**
- * Creates a system message (gray message) and adds it to the Twitch channel specified by `channel`.
- *
- * @lua@param channel string
- * @lua@param text string
- * @lua@return boolean ok
- * @exposed c2.system_msg
- */
-int c2_system_msg(lua_State *L);
-
-/**
  * Writes a message to the Chatterino log.
  *
  * @lua@param level LogLevel The desired level.

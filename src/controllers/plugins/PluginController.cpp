@@ -144,10 +144,8 @@ void PluginController::openLibrariesFor(lua_State *L, const PluginMeta &meta,
 
     // NOLINTNEXTLINE(*-avoid-c-arrays)
     static const luaL_Reg c2Lib[] = {
-        {"system_msg", lua::api::c2_system_msg},
         {"register_command", lua::api::c2_register_command},
         {"register_callback", lua::api::c2_register_callback},
-        {"send_msg", lua::api::c2_send_msg},
         {"log", lua::api::c2_log},
         {nullptr, nullptr},
     };

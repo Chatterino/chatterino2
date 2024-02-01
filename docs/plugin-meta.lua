@@ -109,22 +109,6 @@ function c2.register_command(name, handler) end
 ---@param func fun(query: string, full_text_content: string, cursor_position: integer, is_first_word: boolean): CompletionList The callback to be invoked.
 function c2.register_callback(type, func) end
 
---- Sends a message to `channel` with the specified text. Also executes commands.
----
---- **Warning**: It is possible to trigger your own Lua command with this causing a potentially infinite loop.
----
----@param channel string The name of the Twitch channel
----@param text string The text to be sent
----@return boolean ok
-function c2.send_msg(channel, text) end
-
---- Creates a system message (gray message) and adds it to the Twitch channel specified by `channel`.
----
----@param channel string
----@param text string
----@return boolean ok
-function c2.system_msg(channel, text) end
-
 --- Writes a message to the Chatterino log.
 ---
 ---@param level LogLevel The desired level.

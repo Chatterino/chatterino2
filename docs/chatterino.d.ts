@@ -50,8 +50,6 @@ declare module c2 {
     name: String,
     handler: (ctx: CommandContext) => void
   ): boolean;
-  function send_msg(channel: String, text: String): boolean;
-  function system_msg(channel: String, text: String): boolean;
 
   class CompletionList {
     values: String[];
