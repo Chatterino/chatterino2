@@ -12,9 +12,38 @@ declare module c2 {
     channel_name: String;
   }
 
+  enum Platform {
+    Twitch,
+    IRC
+  }
+  enum ChannelType {
+    None,
+    Direct,
+    Twitch,
+    TwitchWhispers,
+    TwitchWatching,
+    TwitchMentions,
+    TwitchLive,
+    TwitchAutomod,
+    Irc,
+    Misc
+  }
+
   interface IWeakResource {
     is_valid(): boolean;
   }
+
+  class Channel implements IWeakResource {
+    is_valid(): boolean;
+    get_name(): string;
+    get_type(): ChannelType;
+    get_display_name(): string;
+    is_twitch_channel(): boolean;
+
+    static by_name(name: string, platform: Platform): null|Channel;
+    static by_twitch_id(id: string): null|Channel;
+  }
+
 
   function log(level: LogLevel, ...data: any[]): void;
   function register_command(

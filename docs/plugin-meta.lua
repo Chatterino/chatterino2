@@ -28,6 +28,73 @@ c2.EventType = {}
 ---@class CompletionList
 ---@field values string[] The completions
 ---@field hide_others boolean Whether other completions from Chatterino should be hidden/ignored.
+-- Now including data from src/common/Channel.hpp.
+
+---@alias ChannelType integer
+---@type { None: ChannelType }
+ChannelType = {}
+-- Back to src/controllers/plugins/LuaAPI.hpp.
+-- Now including data from src/controllers/plugins/api/ChannelRef.hpp.
+--- This enum describes a platform for the purpose of searching for a channel.
+
+---@alias Platform integer
+---@type { Twitch: Platform }
+Platform = {}
+---@class Channel: IWeakResource
+
+--- Returns true if the channel this object points to is valid.
+--- If the object expired, returns false
+--- If given a non-Channel object, it errors.
+---
+---@return boolean success
+function Channel:is_valid() end
+
+--- Gets the channel's name. This is the lowercase login name.
+---
+---@return string name
+function Channel:get_name() end
+
+--- Gets the channel's type
+---
+---@return ChannelType
+function Channel:get_type() end
+
+--- Get the channel owner's display name. This may contain non-lowercase ascii characters.
+---
+---@return string name
+function Channel:get_display_name() end
+
+--- Returns true for twitch channels.
+--- Compares the channel Type. Note that enum values aren't guaranteed, just
+--- that they are equal to the exposed enum.
+---
+---@return bool
+function Channel:is_twitch_channel() end
+
+--- Finds a channel by name.
+---
+--- Misc channels are marked as Twitch:
+--- - /whispers
+--- - /mentions
+--- - /watching
+--- - /live
+--- - /automod
+---
+---@param name string Which channel are you looking for?
+---@param platform Platform Where to search for the channel?
+---@return Channel?
+function Channel.by_name(name, platform) end
+
+--- Finds a channel by the Twitch user ID of its owner.
+---
+---@param string id ID of the owner of the channel.
+---@return Channel?
+function Channel.by_twitch_id(string) end
+
+---@return string
+function Channel:__tostring() end
+
+-- Back to src/controllers/plugins/LuaAPI.hpp.
 
 --- Registers a new command called `name` which when executed will call `handler`.
 ---
