@@ -12,6 +12,10 @@ declare module c2 {
     channel_name: String;
   }
 
+  interface IWeakResource {
+    is_valid(): boolean;
+  }
+
   function log(level: LogLevel, ...data: any[]): void;
   function register_command(
     name: String,

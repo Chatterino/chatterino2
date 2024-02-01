@@ -38,6 +38,15 @@ BOILERPLATE = """
 -- Add the folder this file is in to "Lua.workspace.library".
 
 c2 = {}
+
+---@class IWeakResource
+
+--- Returns true if the channel this object points to is valid.
+--- If the object expired, returns false
+--- If given a non-Channel object, it errors.
+---@return boolean
+function IWeakResource:is_valid() end
+
 """
 
 repo_root = Path(__file__).parent.parent

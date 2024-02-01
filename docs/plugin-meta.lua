@@ -6,6 +6,14 @@
 
 c2 = {}
 
+---@class IWeakResource
+
+--- Returns true if the channel this object points to is valid.
+--- If the object expired, returns false
+--- If given a non-Channel object, it errors.
+---@return boolean
+function IWeakResource:is_valid() end
+
 ---@alias LogLevel integer
 ---@type { Debug: LogLevel, Info: LogLevel, Warning: LogLevel, Critical: LogLevel }
 c2.LogLevel = {}
