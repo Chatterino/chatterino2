@@ -64,15 +64,16 @@ def process_file(target, out):
     expose_next_enum_as: str | None = None
     # Name of the current enum in c++ world, used to generate internal typenames for
     current_enum_name: str | None = None
-    for line in lines:
+    for line_num, line in enumerate(lines):
         line = line.strip()
+        loc = f'{target.relative_to(repo_root)}:{line_num}'
         if line.startswith("enum class "):
             line = line.removeprefix("enum class ")
             temp = line.split(" ", 2)
             current_enum_name = temp[0]
             if not expose_next_enum_as:
                 print(
-                    f"Skipping enum {current_enum_name}, there wasn't a @exposeenum command"
+                    f"{loc} Skipping enum {current_enum_name}, there wasn't a @exposeenum command"
                 )
                 current_enum_name = None
                 continue
@@ -93,7 +94,7 @@ def process_file(target, out):
                     out.write(", ")
                 out.write(entry + ": " + current_enum_name)
             out.write(" }\n" f"{expose_next_enum_as} = {{}}\n")
-            print(f"Wrote enum {expose_next_enum_as} => {current_enum_name}")
+            print(f"{loc} Wrote enum {expose_next_enum_as} => {current_enum_name}")
             current_enum_name = None
             expose_next_enum_as = None
             continue
@@ -117,14 +118,19 @@ def process_file(target, out):
             exp = line.replace("@exposed ", "", 1)
             params = ", ".join(last_params_names)
             out.write(f"function {exp}({params}) end\n")
-            print(f"Wrote function {exp}(...)")
+            print(f"{loc} Wrote function {exp}(...)")
             last_params_names = []
+        elif line.startswith("@includefile "):
+            filename = line.replace("@includefile ", "", 1)
+            output.write(f"-- Now including data from src/{filename}.\n")
+            process_file(repo_root / 'src' / filename, output)
+            output.write(f'-- Back to {target.relative_to(repo_root)}.\n')
         elif line.startswith("@lua"):
             command = line.replace("@lua", "", 1)
             if command.startswith("@param"):
                 last_params_names.append(command.split(" ", 2)[1])
             elif command.startswith("@class"):
-                print(f"Writing {command}")
+                print(f"{loc} Writing {command}")
                 if is_class:
                     out.write("\n")
                 is_class = True
