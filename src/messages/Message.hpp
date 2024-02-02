@@ -3,6 +3,7 @@
 #include "common/FlagsEnum.hpp"
 #include "util/QStringHash.hpp"
 
+#include <magic_enum/magic_enum.hpp>
 #include <QColor>
 #include <QTime>
 
@@ -107,3 +108,8 @@ struct Message {
 };
 
 }  // namespace chatterino
+
+template <>
+struct magic_enum::customize::enum_range<chatterino::MessageFlag> {
+    static constexpr bool is_flags = true;
+};
