@@ -43,13 +43,6 @@ ChannelType = {}
 Platform = {}
 ---@class Channel: IWeakResource
 
---- Get the content of the top object on Lua stack, usually first argument
---- to function as a ChannelPtr.
---- If the object given is not a userdatum or the pointer inside that
---- userdatum doesn't point to a Channel, a lua error is thrown.
----
---- @param expiredOk Should an expired return nullptr instead of erroring
-
 --- Returns true if the channel this object points to is valid.
 --- If the object expired, returns false
 --- If given a non-Channel object, it errors.
@@ -72,13 +65,6 @@ function Channel:get_type() end
 ---@return string name
 function Channel:get_display_name() end
 
---- Returns true for twitch channels.
---- Compares the channel Type. Note that enum values aren't guaranteed, just
---- that they are equal to the exposed enum.
----
----@return bool
-function Channel:is_twitch_channel() end
-
 --- Sends a message to the target channel.
 --- Note that this does not execute client-commands.
 ---
@@ -90,6 +76,54 @@ function Channel:send_message(message, execute_commands) end
 ---
 ---@param message string
 function Channel:add_system_message(message) end
+
+--- Returns true for twitch channels.
+--- Compares the channel Type. Note that enum values aren't guaranteed, just
+--- that they are equal to the exposed enum.
+---
+---@return bool
+function Channel:is_twitch_channel() end
+
+--- Twitch Channel specific functions
+
+--- Returns a copy of the channel mode settings (subscriber only, r9k etc.)
+---
+---@return RoomModes
+function Channel:get_room_modes() end
+
+--- Returns a copy of the stream status.
+---
+---@return StreamStatus
+function Channel:get_stream_status() end
+
+--- Returns the Twitch user ID of the owner of the channel.
+---
+---@return string
+function Channel:get_twitch_id() end
+
+--- Returns true if the channel is a Twitch channel and the user owns it
+---
+---@return boolean
+function Channel:is_broadcaster() end
+
+--- Returns true if the channel is a Twitch channel and the user is a moderator in the channel
+--- Returns false for broadcaster.
+---
+---@return boolean
+function Channel:is_mod() end
+
+--- Returns true if the channel is a Twitch channel and the user is a VIP in the channel
+--- Returns false for broadcaster.
+---
+---@return boolean
+function Channel:is_vip() end
+
+--- Misc
+
+---@return string
+function Channel:__tostring() end
+
+--- Static functions
 
 --- Finds a channel by name.
 ---
@@ -111,9 +145,24 @@ function Channel.by_name(name, platform) end
 ---@return Channel?
 function Channel.by_twitch_id(string) end
 
----@return string
-function Channel:__tostring() end
+---@class RoomModes
+---@field unique_chat boolean You might know this as r9kbeta or robot9000.
+---@field subscriber_only boolean
+---@field emotes_only boolean Whether or not text is allowed in messages.
 
+--- Note that "emotes" here only means Twitch emotes, not Unicode emoji, nor 3rd party text-based emotes
+
+---@field unique_chat number? Time in minutes you need to follow to chat or nil.
+
+---@field slow_mode number? Time in seconds you need to wait before sending messages or nil.
+
+---@class StreamStatus
+---@field live boolean
+---@field viewer_count number
+---@field uptime number Seconds since the stream started.
+---@field title string Stream title or last stream title
+---@field game_name string
+---@field game_id string
 -- Back to src/controllers/plugins/LuaAPI.hpp.
 
 --- Registers a new command called `name` which when executed will call `handler`.
