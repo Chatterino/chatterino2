@@ -57,6 +57,8 @@ enum class MessageFlag : int64_t {
     RestrictedMessage = (1LL << 33),
     /// The message is sent by a user marked as monitor with Twitch's "Low Trust"/"Suspicious User" feature
     MonitoredMessage = (1LL << 34),
+    /// The message is an ACTION message (/me)
+    Action = (1LL << 35),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 
