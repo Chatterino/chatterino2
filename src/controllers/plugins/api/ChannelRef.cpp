@@ -6,10 +6,15 @@
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "messages/MessageBuilder.hpp"
+#    include "providers/twitch/TwitchChannel.hpp"
 #    include "providers/twitch/TwitchIrcServer.hpp"
 
 #    include <lauxlib.h>
 #    include <lua.h>
+
+#    include <cassert>
+#    include <memory>
+#    include <optional>
 
 namespace chatterino::lua::api {
 // NOLINTBEGIN(*vararg)
@@ -20,14 +25,24 @@ static const luaL_Reg CHANNEL_REF_METHODS[] = {
     {"get_name", &ChannelRef::get_name},
     {"get_type", &ChannelRef::get_type},
     {"get_display_name", &ChannelRef::get_display_name},
-    {"is_twitch_channel", &ChannelRef::is_twitch_channel},
     {"send_message", &ChannelRef::send_message},
     {"add_system_message", &ChannelRef::add_system_message},
+    {"is_twitch_channel", &ChannelRef::is_twitch_channel},
 
+    // Twitch
+    {"get_room_modes", &ChannelRef::get_room_modes},
+    {"get_stream_status", &ChannelRef::get_stream_status},
+    {"get_twitch_id", &ChannelRef::get_twitch_id},
+    {"is_broadcaster", &ChannelRef::is_broadcaster},
+    {"is_mod", &ChannelRef::is_mod},
+    {"is_vip", &ChannelRef::is_vip},
+
+    // misc
     {"__tostring", &ChannelRef::to_string},
 
     // static
     {"by_name", &ChannelRef::get_by_name},
+    {"by_twitch_id", &ChannelRef::get_by_twitch_id},
     {nullptr, nullptr},
 };
 
@@ -78,6 +93,18 @@ ChannelPtr ChannelRef::getOrError(lua_State *L, bool expiredOk)
     return data->target.lock();
 }
 
+std::shared_ptr<TwitchChannel> ChannelRef::getTwitchOrError(lua_State *L)
+{
+    auto ref = ChannelRef::getOrError(L);
+    auto ptr = dynamic_pointer_cast<TwitchChannel>(ref);
+    if (ptr == nullptr)
+    {
+        luaL_error(L,
+                   "c2.Channel Twitch-only operation on non-Twitch channel.");
+    }
+    return ptr;
+}
+
 int ChannelRef::is_valid(lua_State *L)
 {
     ChannelPtr that = ChannelRef::getOrError(L, true);
@@ -103,13 +130,6 @@ int ChannelRef::get_display_name(lua_State *L)
 {
     ChannelPtr that = ChannelRef::getOrError(L);
     lua::push(L, that->getDisplayName());
-    return 1;
-}
-
-int ChannelRef::is_twitch_channel(lua_State *L)
-{
-    ChannelPtr that = ChannelRef::getOrError(L);
-    lua::push(L, that->isTwitchChannel());
     return 1;
 }
 
@@ -172,6 +192,76 @@ int ChannelRef::add_system_message(lua_State *L)
     text = text.replace('\n', ' ');
     that->addMessage(makeSystemMessage(text));
     return 0;
+}
+
+int ChannelRef::is_twitch_channel(lua_State *L)
+{
+    ChannelPtr that = ChannelRef::getOrError(L);
+    lua::push(L, that->isTwitchChannel());
+    return 1;
+}
+
+int ChannelRef::get_room_modes(lua_State *L)
+{
+    auto tc = ChannelRef::getTwitchOrError(L);
+    const auto m = tc->accessRoomModes();
+    const auto modes = LuaRoomModes{
+        .unique_chat = m->r9k,
+        .subscriber_only = m->submode,
+        .emotes_only = m->emoteOnly,
+        .follower_only = (m->followerOnly == -1)
+                             ? std::nullopt
+                             : std::optional(m->followerOnly),
+        .slow_mode =
+            (m->slowMode == 0) ? std::nullopt : std::optional(m->slowMode),
+
+    };
+    lua::push(L, modes);
+    return 1;
+}
+
+int ChannelRef::get_stream_status(lua_State *L)
+{
+    auto tc = ChannelRef::getTwitchOrError(L);
+    const auto s = tc->accessStreamStatus();
+    const auto status = LuaStreamStatus{
+        .live = s->live,
+        .viewer_count = static_cast<int>(s->viewerCount),
+        .uptime = s->uptimeSeconds,
+        .title = s->title,
+        .game_name = s->game,
+        .game_id = s->gameId,
+    };
+    lua::push(L, status);
+    return 1;
+}
+
+int ChannelRef::get_twitch_id(lua_State *L)
+{
+    auto tc = ChannelRef::getTwitchOrError(L);
+    lua::push(L, tc->roomId());
+    return 1;
+}
+
+int ChannelRef::is_broadcaster(lua_State *L)
+{
+    auto tc = ChannelRef::getTwitchOrError(L);
+    lua::push(L, tc->isBroadcaster());
+    return 1;
+}
+
+int ChannelRef::is_mod(lua_State *L)
+{
+    auto tc = ChannelRef::getTwitchOrError(L);
+    lua::push(L, tc->isMod());
+    return 1;
+}
+
+int ChannelRef::is_vip(lua_State *L)
+{
+    auto tc = ChannelRef::getTwitchOrError(L);
+    lua::push(L, tc->isVip());
+    return 1;
 }
 
 int ChannelRef::get_by_name(lua_State *L)
@@ -259,7 +349,40 @@ int ChannelRef::to_string(lua_State *L)
     lua::push(L, formated);
     return 1;
 }
-
-// NOLINTEND(*vararg)
 }  // namespace chatterino::lua::api
+// NOLINTEND(*vararg)
+//
+namespace chatterino::lua {
+StackIdx push(lua_State *L, const api::LuaRoomModes &modes)
+{
+    auto out = lua::pushEmptyTable(L, 6);
+#    define PUSH(field)            \
+        lua::push(L, modes.field); \
+        lua_setfield(L, out, #field)
+    PUSH(unique_chat);
+    PUSH(subscriber_only);
+    PUSH(emotes_only);
+    PUSH(follower_only);
+    PUSH(slow_mode);
+#    undef PUSH
+    return out;
+}
+
+StackIdx push(lua_State *L, const api::LuaStreamStatus &status)
+{
+    auto out = lua::pushEmptyTable(L, 6);
+#    define PUSH(field)             \
+        lua::push(L, status.field); \
+        lua_setfield(L, out, #field)
+    PUSH(live);
+    PUSH(viewer_count);
+    PUSH(uptime);
+    PUSH(title);
+    PUSH(game_name);
+    PUSH(game_id);
+#    undef PUSH
+    return out;
+}
+
+}  // namespace chatterino::lua
 #endif
