@@ -20,11 +20,6 @@
 
 namespace chatterino {
 
-TwitchBadges::TwitchBadges()
-{
-    this->loadTwitchBadges();
-}
-
 void TwitchBadges::loadTwitchBadges()
 {
     assert(this->loaded_ == false);
