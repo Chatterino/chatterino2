@@ -138,6 +138,17 @@ public:
 /// TEMPLATES
 
 template <typename T>
+StackIdx push(lua_State *L, std::optional<T> val)
+{
+    if (val.has_value())
+    {
+        return lua::push(L, *val);
+    }
+    lua_pushnil(L);
+    return lua_gettop(L);
+}
+
+template <typename T>
 bool peek(lua_State *L, std::optional<T> *out, StackIdx idx = -1)
 {
     if (lua_isnil(L, idx))
