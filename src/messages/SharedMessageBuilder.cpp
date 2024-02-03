@@ -77,6 +77,7 @@ void SharedMessageBuilder::parse()
     if (this->action_)
     {
         this->textColor_ = this->usernameColor_;
+        this->message().flags.set(MessageFlag::Action);
     }
 
     this->parseUsername();
