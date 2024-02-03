@@ -37,6 +37,7 @@ ChannelType = {}
 -- Back to src/controllers/plugins/LuaAPI.hpp.
 -- Now including data from src/controllers/plugins/api/ChannelRef.hpp.
 --- This enum describes a platform for the purpose of searching for a channel.
+--- Currently only Twitch is supported because identifying IRC channels is tricky.
 
 ---@alias Platform integer
 ---@type { Twitch: Platform }
