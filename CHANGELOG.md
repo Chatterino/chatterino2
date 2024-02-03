@@ -113,6 +113,7 @@
 - Dev: `Details` file properties tab is now populated on Windows. (#4912)
 - Dev: Removed `Outcome` from network requests. (#4959)
 - Dev: Added Tests for Windows and MacOS in CI. (#4970, #5032)
+- Dev: Added "Copy message as JSON" option when shift-right-clicking a message. (#5150)
 - Dev: Move `clang-tidy` checker to its own CI job. (#4996)
 - Dev: Refactored the Image Uploader feature. (#4971)
 - Dev: Refactored the SplitOverlay code. (#5082)
