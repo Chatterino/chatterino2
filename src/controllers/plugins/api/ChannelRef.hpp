@@ -28,8 +28,7 @@ struct ChannelRef {
     friend class chatterino::PluginController;
 
     /**
-     * Get the content of the top object on Lua stack, usually first argument
-     * to function as a ChannelPtr.
+     * @brief Get the content of the top object on Lua stack, usually first argument to function as a ChannelPtr.
      * If the object given is not a userdatum or the pointer inside that
      * userdatum doesn't point to a Channel, a lua error is thrown.
      *

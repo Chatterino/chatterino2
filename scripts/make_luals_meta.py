@@ -12,6 +12,8 @@ It assumes comments look like:
 - Do not have any useful info on '/**' and '*/' lines.
 - Class members are not allowed to have non-@command lines and commands different from @lua@field
 
+When this scripts sees "@brief", any further lines of the comment will be ignored
+
 Valid commands are:
 1. @exposeenum [dotted.name.in_lua.last_part]
     Define a table with keys of the enum. Values behind those keys aren't
@@ -63,6 +65,9 @@ def process_file(target, out):
 
     # Are we in a doc comment?
     comment: bool = False
+    # This is set when @brief is encountered, making the rest of the comment be
+    # ignored
+    ignore_this_comment: bool = False
 
     # Last `@lua@param`s seen - for @exposed generation
     last_params_names: list[str] = []
@@ -113,14 +118,21 @@ def process_file(target, out):
             continue
         elif "*/" in line:
             comment = False
+            ignore_this_comment = False
+
             if not is_class:
                 out.write("\n")
             continue
         if not comment:
             continue
+        if ignore_this_comment:
+            continue
         line = line.replace("*", "", 1).lstrip()
         if line == "":
             out.write("---\n")
+        elif line.startswith('@brief '):
+            # Doxygen comment, on a C++ only method
+            ignore_this_comment = True
         elif line.startswith("@exposeenum "):
             expose_next_enum_as = line.split(" ", 1)[1]
         elif line.startswith("@exposed "):
