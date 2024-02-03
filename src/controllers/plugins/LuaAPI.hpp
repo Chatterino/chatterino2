@@ -5,6 +5,7 @@
 #    include <lua.h>
 #    include <QString>
 
+#    include <cassert>
 #    include <memory>
 #    include <vector>
 
@@ -137,6 +138,19 @@ struct WeakPtrUserData : public UserData {
     {
         return from(reinterpret_cast<UserData *>(target));
     }
+
+    static int destroy(lua_State *L)
+    {
+        auto self = WeakPtrUserData<T, U>::from(lua_touserdata(L, -1));
+        // Note it is safe to only check the weakness of the pointer, as
+        // std::weak_ptr seems to have identical representation regardless of
+        // what it points to
+        assert(self->isWeak);
+
+        self->target.reset();
+        lua_pop(L, 1);  // Lua deallocates the memory for full user data
+        return 0;
+    }
 };
 
 template <UserData::Type T, typename U>
@@ -174,6 +188,19 @@ struct SharedPtrUserData : public UserData {
     static SharedPtrUserData<T, U> *from(void *target)
     {
         return from(reinterpret_cast<UserData *>(target));
+    }
+
+    static int destroy(lua_State *L)
+    {
+        auto self = SharedPtrUserData<T, U>::from(lua_touserdata(L, -1));
+        // Note it is safe to only check the weakness of the pointer, as
+        // std::shared_ptr seems to have identical representation regardless of
+        // what it points to
+        assert(!self->isWeak);
+
+        self->target.reset();
+        lua_pop(L, 1);  // Lua deallocates the memory for full user data
+        return 0;
     }
 };
 

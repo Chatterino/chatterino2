@@ -55,6 +55,12 @@ void ChannelRef::createMetatable(lua_State *L)
     lua_pushvalue(L, -2);  // clone metatable
     lua_settable(L, -3);   // metatable.__index = metatable
 
+    // Generic IWeakResource stuff
+    lua_pushstring(L, "__gc");
+    lua_pushcfunction(
+        L, (&WeakPtrUserData<UserData::Type::Channel, ChannelRef>::destroy));
+    lua_settable(L, -3);  // metatable.__gc = WeakPtrUserData<...>::destroy
+
     luaL_setfuncs(L, CHANNEL_REF_METHODS, 0);
 }
 
