@@ -28,6 +28,7 @@
 - Minor: Chatters from recent-messages are now added to autocompletion. (#5116)
 - Minor: Added a _System_ theme that updates according to the system's color scheme (requires Qt 6.5). (#5118)
 - Minor: Added icons for newer versions of macOS. (#5148)
+- Minor: Added the `--incognito/--no-incognito` options to the `/openurl` command, allowing you to override the "Open links in incognito/private mode" setting. (#5149)
 - Minor: Added support for the `{input.text}` placeholder in the **Split** -> **Run a command** hotkey. (#5130)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
