@@ -112,7 +112,7 @@ public:
     /**
      * Returns a copy of the channel mode settings (subscriber only, r9k etc.)
      *
-     * @lua@return ChannelModes
+     * @lua@return RoomModes
      * @exposed Channel:get_room_modes
      */
     static int get_room_modes(lua_State *L);
