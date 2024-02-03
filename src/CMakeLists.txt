@@ -5,6 +5,7 @@ add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
 # registers the native messageing host
 option(CHATTERINO_DEBUG_NATIVE_MESSAGES "Debug native messages" OFF)
+option(CHATTERINO_STATIC_QT_BUILD "Static link Qt" OFF)
 
 set(SOURCE_FILES
         Application.cpp
@@ -811,6 +812,10 @@ if (BUILD_APP)
     else()
         message(WARNING "Sanitizers support is disabled")
     endif()
+
+    if (CHATTERINO_STATIC_QT_BUILD)
+        qt_import_plugins(${EXECUTABLE_PROJECT} INCLUDE_BY_TYPE platforms Qt::QXcbIntegrationPlugin)
+    endif ()
 
     target_include_directories(${EXECUTABLE_PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR}/autogen/)
 

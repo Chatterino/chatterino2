@@ -24,26 +24,93 @@ env:
   CONAN_VERSION: 2.0.2
 
 jobs:
+  build-ubuntu-docker:
+    name: "Build Ubuntu in Docker"
+    runs-on: ubuntu-latest
+    container: ${{ matrix.container }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-20.04
+            container: ghcr.io/chatterino/chatterino2-build-ubuntu-20.04:latest
+            qt-version: 6.6.1
+            force-lto: false
+            plugins: false
+            skip-artifact: false
+            skip-crashpad: false
+            build-appimage: false # temporary xd
+            build-deb: true
+          - os: ubuntu-22.04
+            container: ghcr.io/chatterino/chatterino2-build-ubuntu-22.04:latest
+            qt-version: 6.6.1
+            force-lto: false
+            plugins: false
+            skip-artifact: false
+            skip-crashpad: false
+            build-appimage: true
+            build-deb: true
+    env:
+      C2_ENABLE_LTO: ${{ matrix.force-lto }}
+      C2_PLUGINS: ${{ matrix.plugins }}
+      C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
+      C2_BUILD_WITH_QT6: ${{ startsWith(matrix.qt-version, '6.') }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0 # allows for tags access
+
+      - name: Build
+        run: |
+          mkdir build
+          cd build
+          CXXFLAGS=-fno-sized-deallocation cmake \
+            -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
+            -DUSE_PRECOMPILED_HEADERS=OFF \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
+            -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
+            -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
+            -DCMAKE_PREFIX_PATH="$Qt6_DIR/lib/cmake" \
+            -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
+            -DCHATTERINO_STATIC_QT_BUILD=On \
+            ..
+          make -j"$(nproc)"
+
+      - name: Package - AppImage (Ubuntu)
+        if: matrix.build-appimage
+        run: |
+          cd build
+          sh ./../.CI/CreateAppImage.sh
+
+      - name: Upload artifact - AppImage (Ubuntu)
+        if: matrix.build-appimage
+        uses: actions/upload-artifact@v4
+        with:
+          name: Chatterino-x86_64-${{ matrix.qt-version }}.AppImage
+          path: build/Chatterino-x86_64.AppImage
+
+      - name: Package - .deb (Ubuntu)
+        if: matrix.build-deb
+        run: |
+          cd build
+          sh ./../.CI/CreateUbuntuDeb.sh
+
+      - name: Upload artifact - .deb (Ubuntu)
+        if: matrix.build-deb
+        uses: actions/upload-artifact@v4
+        with:
+          name: Chatterino-${{ matrix.os }}-Qt-${{ matrix.qt-version }}.deb
+          path: build/Chatterino-${{ matrix.os }}-x86_64.deb
+
   build:
     name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (LTO:${{ matrix.force-lto }}, crashpad:${{ matrix.skip-crashpad && 'off' || 'on' }})"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
-          # Ubuntu 20.04, Qt 5.12
-          - os: ubuntu-20.04
-            qt-version: 5.12.12
-            force-lto: false
-            plugins: false
-            skip-artifact: false
-            skip-crashpad: false
-          # Ubuntu 22.04, Qt 5.15
-          - os: ubuntu-22.04
-            qt-version: 5.15.2
-            force-lto: false
-            plugins: false
-            skip-artifact: false
-            skip-crashpad: false
           # Ubuntu 22.04, Qt 6.2.4 - tests LTO & plugins
           - os: ubuntu-22.04
             qt-version: 6.2.4
@@ -74,44 +141,13 @@ jobs:
             skip-crashpad: true
 
       fail-fast: false
+    env:
+      C2_ENABLE_LTO: ${{ matrix.force-lto }}
+      C2_PLUGINS: ${{ matrix.plugins }}
+      C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
+      C2_BUILD_WITH_QT6: ${{ startsWith(matrix.qt-version, '6.') }}
 
     steps:
-      - name: Force LTO
-        if: matrix.force-lto
-        run: |
-          echo "C2_ENABLE_LTO=ON" >> "$GITHUB_ENV"
-        shell: bash
-
-      - name: Enable plugin support
-        if: matrix.plugins
-        run: |
-          echo "C2_PLUGINS=ON" >> "$GITHUB_ENV"
-        shell: bash
-
-      - name: Set Crashpad
-        if: matrix.skip-crashpad == false
-        run: |
-          echo "C2_ENABLE_CRASHPAD=ON" >> "$GITHUB_ENV"
-        shell: bash
-
-      - name: Set environment variables for windows-latest
-        if: matrix.os == 'windows-latest'
-        run: |
-          echo "vs_version=2022" >> "$GITHUB_ENV"
-        shell: bash
-
-      - name: Set BUILD_WITH_QT6
-        if: startsWith(matrix.qt-version, '6.')
-        run: |
-          echo "C2_BUILD_WITH_QT6=ON" >> "$GITHUB_ENV"
-        shell: bash
-
-      - name: Disable BUILD_WITH_QT6
-        if: startsWith(matrix.qt-version, '5.')
-        run: |
-          echo "C2_BUILD_WITH_QT6=OFF" >> "$GITHUB_ENV"
-        shell: bash
-
       - uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -400,8 +436,9 @@ jobs:
         with:
           name: chatterino-macos-Qt-${{ matrix.qt-version }}.dmg
           path: build/chatterino-macos-Qt-${{ matrix.qt-version }}.dmg
+
   create-release:
-    needs: build
+    needs: [build-ubuntu-docker, build]
     runs-on: ubuntu-latest
     if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
 
