@@ -14,7 +14,6 @@ declare module c2 {
 
   enum Platform {
     Twitch,
-    IRC,
   }
   enum ChannelType {
     None,
