@@ -6,6 +6,7 @@
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/commands/CommandController.hpp"
+#    include "controllers/plugins/api/ChannelRef.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "messages/MessageBuilder.hpp"
@@ -143,10 +144,8 @@ void PluginController::openLibrariesFor(lua_State *L, const PluginMeta &meta,
 
     // NOLINTNEXTLINE(*-avoid-c-arrays)
     static const luaL_Reg c2Lib[] = {
-        {"system_msg", lua::api::c2_system_msg},
         {"register_command", lua::api::c2_register_command},
         {"register_callback", lua::api::c2_register_callback},
-        {"send_msg", lua::api::c2_send_msg},
         {"log", lua::api::c2_log},
         {nullptr, nullptr},
     };
@@ -163,6 +162,13 @@ void PluginController::openLibrariesFor(lua_State *L, const PluginMeta &meta,
 
     lua::pushEnumTable<lua::api::EventType>(L);
     lua_setfield(L, c2libIdx, "EventType");
+
+    lua::pushEnumTable<lua::api::LPlatform>(L);
+    lua_setfield(L, c2libIdx, "Platform");
+
+    // Initialize metatables for objects
+    lua::api::ChannelRef::createMetatable(L);
+    lua_setfield(L, c2libIdx, "Channel");
 
     lua_setfield(L, gtable, "c2");
 
