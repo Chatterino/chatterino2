@@ -896,11 +896,16 @@ void TwitchMessageBuilder::parseThread()
                 threadRoot->usernameColor, FontStyle::ChatMediumSmall)
             ->setLink({Link::UserInfo, threadRoot->displayName});
 
+        MessageColor color = MessageColor::Text;
+        if (threadRoot->flags.has(MessageFlag::Action))
+        {
+            color = threadRoot->usernameColor;
+        }
         this->emplace<SingleLineTextElement>(
                 threadRoot->messageText,
                 MessageElementFlags({MessageElementFlag::RepliedMessage,
                                      MessageElementFlag::Text}),
-                this->textColor_, FontStyle::ChatMediumSmall)
+                color, FontStyle::ChatMediumSmall)
             ->setLink({Link::ViewThread, this->thread_->rootId()});
     }
     else if (this->tags.find("reply-parent-msg-id") != this->tags.end())
