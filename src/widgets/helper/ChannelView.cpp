@@ -241,7 +241,6 @@ void addHiddenContextMenuItems(QMenu *menu,
 
     if (!layout->getMessage()->id.isEmpty())
     {
-        qDebug() << "XXX: ADD COPY MESSAGE HANDLER";
         menu->addAction("Copy message &ID",
                         [messageID = layout->getMessage()->id] {
                             crossPlatformCopy(messageID);
