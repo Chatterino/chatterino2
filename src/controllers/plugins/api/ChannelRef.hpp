@@ -12,11 +12,12 @@ namespace chatterino::lua::api {
 
 /**
  * This enum describes a platform for the purpose of searching for a channel.
+ * Currently only Twitch is supported because identifying IRC channels is tricky.
  * @exposeenum Platform
  */
 enum class LPlatform {
     Twitch,
-    IRC,
+    //IRC,
 };
 
 /**
