@@ -68,9 +68,19 @@ public:
     float scale() const override;
     float qtFontScale() const;
 
+    /// @returns true if the window is the top-most window.
+    ///          Either #setTopMost was called or the `TopMost` flag is set which overrides this
+    bool isTopMost() const;
+    /// Updates the window's top-most status
+    /// If the `TopMost` flag is set, this is a no-op
+    void setTopMost(bool topMost);
+
     pajlada::Signals::NoArgSignal closing;
 
     static bool supportsCustomWindowFrame();
+
+signals:
+    void topMostChanged(bool topMost);
 
 protected:
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -131,6 +141,7 @@ private:
     FlagsEnum<Flags> flags_;
     float nativeScale_ = 1;
     bool isResizeFixing_ = false;
+    bool isTopMost_ = false;
 
     struct {
         QLayout *windowLayout = nullptr;
