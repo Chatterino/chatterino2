@@ -9,6 +9,8 @@
 
 namespace chatterino {
 
+class PixmapButton;
+class LabelButton;
 class Theme;
 class UpdateDialog;
 class SplitNotebook;
@@ -46,14 +48,14 @@ private:
     WindowType type_;
 
     SplitNotebook *notebook_;
-    EffectLabel *userLabel_ = nullptr;
+    LabelButton *userLabel_ = nullptr;
     std::shared_ptr<UpdateDialog> updateDialogHandle_;
 
     pajlada::Signals::SignalHolder signalHolder_;
     std::vector<boost::signals2::scoped_connection> bSignals_;
 
     // this is only used on Windows and only on the main window, for the one used otherwise, see SplitNotebook in Notebook.hpp
-    TitleBarButton *streamerModeTitlebarIcon_ = nullptr;
+    PixmapButton *streamerModeTitlebarIcon_ = nullptr;
     void updateStreamerModeIcon();
 
     friend class Notebook;

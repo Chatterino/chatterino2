@@ -86,6 +86,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
     , notebook_(notebook)
     , menu_(this)
 {
+    this->setContentCacheEnabled(false);
     this->setAcceptDrops(true);
 
     this->positionChangedAnimation_.setEasingCurve(

@@ -1,8 +1,8 @@
-#include "widgets/helper/TitlebarButtons.hpp"
+#include "widgets/buttons/TitlebarButtons.hpp"
 
 #ifdef USEWINSDK
 
-#    include "widgets/helper/TitlebarButton.hpp"
+#    include "widgets/buttons/TitlebarButton.hpp"
 
 #    include <Windows.h>
 
