@@ -30,6 +30,7 @@
 - Minor: Added icons for newer versions of macOS. (#5148)
 - Minor: Added the `--incognito/--no-incognito` options to the `/openurl` command, allowing you to override the "Open links in incognito/private mode" setting. (#5149)
 - Minor: Added support for the `{input.text}` placeholder in the **Split** -> **Run a command** hotkey. (#5130)
+- Minor: Add a new Channel API for experimental plugins feature. (#5141)
 - Minor: Added the ability to change the top-most status of a window regardless of the _Always on top_ setting (right click the notebook). (#5135)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
