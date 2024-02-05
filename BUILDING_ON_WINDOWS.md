@@ -92,9 +92,6 @@ Note: This installation will take about 200 MB of disk space.
 
 ## Building
 
-Regardless of which build method you're using, there are certain flags you need to add to the CMake configure portion.
-To ensure Chatterino is built with Qt6, you need to set the `BUILD_WITH_QT6` option to `ON`.
-
 ### Using CMake
 
 #### Install conan 2
