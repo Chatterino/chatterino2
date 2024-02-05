@@ -106,6 +106,12 @@ jobs:
           echo "C2_BUILD_WITH_QT6=ON" >> "$GITHUB_ENV"
         shell: bash
 
+      - name: Disable BUILD_WITH_QT6
+        if: startsWith(matrix.qt-version, '5.')
+        run: |
+          echo "C2_BUILD_WITH_QT6=OFF" >> "$GITHUB_ENV"
+        shell: bash
+
       - uses: actions/checkout@v4
         with:
           submodules: recursive
