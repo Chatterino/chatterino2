@@ -336,6 +336,11 @@ bool PluginController::isPluginEnabled(const QString &id)
 
 Plugin *PluginController::getPluginByStatePtr(lua_State *L)
 {
+    lua_geti(L, LUA_REGISTRYINDEX, LUA_RIDX_MAINTHREAD);
+    // Use the main thread for identification, not a coroutine instance
+    auto *mainL = lua_tothread(L, -1);
+    lua_pop(L, 1);
+    L = mainL;
     for (auto &[name, plugin] : this->plugins_)
     {
         if (plugin->state_ == L)
