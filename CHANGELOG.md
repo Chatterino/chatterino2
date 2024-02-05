@@ -116,7 +116,7 @@
 - Dev: Removed `Outcome` from network requests. (#4959)
 - Dev: Added Tests for Windows and MacOS in CI. (#4970, #5032)
 - Dev: Added "Copy message as JSON" option when shift-right-clicking a message. (#5150)
-- Dev: Windows build now build with Qt6 by default. (#5155)
+- Dev: Windows now builds with Qt6 by default. (#5155)
 - Dev: Move `clang-tidy` checker to its own CI job. (#4996)
 - Dev: Refactored the Image Uploader feature. (#4971)
 - Dev: Refactored the SplitOverlay code. (#5082)
