@@ -14,6 +14,7 @@
 #    include <vector>
 
 struct lua_State;
+class QTimer;
 
 namespace chatterino {
 
@@ -126,6 +127,9 @@ public:
         return this->error_;
     }
 
+    int addTimeout(QTimer *timer);
+    void removeTimeout(QTimer *timer);
+
 private:
     QDir loadDirectory_;
     lua_State *state_;
@@ -134,6 +138,8 @@ private:
 
     // maps command name -> function name
     std::unordered_map<QString, QString> ownedCommands;
+    std::vector<QTimer *> activeTimeouts;
+    int lastTimerId = 0;
 
     friend class PluginController;
 };
