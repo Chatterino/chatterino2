@@ -126,7 +126,7 @@ Open up your terminal with the Visual Studio environment variables (e.g. `x64 Na
 mkdir build
 cd build
 conan install .. -s build_type=Release -c tools.cmake.cmaketoolchain:generator="NMake Makefiles" --build=missing --output-folder=.
-cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DCMAKE_PREFIX_PATH="C:\Qt\6.5.3\msvc2019_64" ..
+cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DCMAKE_PREFIX_PATH="C:\Qt\6.5.3\msvc2019_64" -DBUILD_WITH_QT6=On ..
 nmake
 ```
 
