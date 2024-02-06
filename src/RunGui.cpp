@@ -78,6 +78,14 @@ namespace {
     {
         // set up the QApplication flags
         QApplication::setAttribute(Qt::AA_Use96Dpi, true);
+
+#ifdef Q_OS_WIN32
+        // Avoid promoting child widgets to child windows
+        // This causes bugs with frameless windows as not all child events
+        // get sent to the parent - effectively making the window immovable.
+        QApplication::setAttribute(Qt::AA_DontCreateNativeWidgetSiblings);
+#endif
+
 #if defined(Q_OS_WIN32) && QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         QApplication::setAttribute(Qt::AA_DisableHighDpiScaling, true);
 #endif
