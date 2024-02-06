@@ -1174,6 +1174,7 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
 #endif
 }
 
+#ifdef USEWINSDK
 std::optional<HWND> BaseWindow::safeHWND() const
 {
     if (!this->testAttribute(Qt::WA_WState_Created))
@@ -1182,5 +1183,6 @@ std::optional<HWND> BaseWindow::safeHWND() const
     }
     return reinterpret_cast<HWND>(this->winId());
 }
+#endif
 
 }  // namespace chatterino

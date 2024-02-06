@@ -156,8 +156,8 @@ private:
     /// @brief Returns the HWND of this window if it has one
     ///
     /// A QWidget only has an HWND if it has been created. Before that,
-    /// accessing `winID()` will result in bugs, because child windows will be
-    /// created as native windows, which breaks the frameless window.
+    /// accessing `winID()` will create the window which can lead to unintended
+    /// bugs.
     std::optional<HWND> safeHWND() const;
 
     /// @brief Tries to apply the `isTopMost_` setting
