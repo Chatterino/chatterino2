@@ -232,6 +232,7 @@ void BaseWindow::setTopMost(bool topMost)
     {
         return;
     }
+    this->isTopMost_ = topMost;
 
 #ifdef USEWINSDK
     if (!this->waitingForTopMost_)
@@ -247,7 +248,6 @@ void BaseWindow::setTopMost(bool topMost)
     }
 #endif
 
-    this->isTopMost_ = topMost;
     this->topMostChanged(this->isTopMost_);
 }
 
@@ -913,8 +913,8 @@ bool BaseWindow::handleNCCALCSIZE(MSG *msg, long *result)
             auto *ncp = reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam);
             if (ncp)
             {
-                ncp->lppos->flags |= SWP_NOREDRAW;
-                ncp->rgrc[0].top -= 1;
+                // ncp->lppos->flags |= SWP_NOREDRAW;
+                // ncp->rgrc[0].top -= 1;
             }
         }
 
