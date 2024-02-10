@@ -153,6 +153,25 @@ private:
     } ui_;
 
 #ifdef USEWINSDK
+    /// @brief Returns the HWND of this window if it has one
+    ///
+    /// A QWidget only has an HWND if it has been created. Before that,
+    /// accessing `winID()` will create the window which can lead to unintended
+    /// bugs.
+    std::optional<HWND> safeHWND() const;
+
+    /// @brief Tries to apply the `isTopMost_` setting
+    ///
+    /// If the setting couldn't be applied (because the window wasn't created
+    /// yet), the operation is repeated after a short delay.
+    ///
+    /// @pre When calling from outside this method, `waitingForTopMost_` must
+    ///      be `false` to avoid too many pending calls.
+    /// @post If an operation was queued to be executed after some delay,
+    ///       `waitingForTopMost_` will be set to `true`.
+    void tryApplyTopMost();
+    bool waitingForTopMost_ = false;
+
     QRect initalBounds_;
     QRect currentBounds_;
     QRect nextBounds_;
