@@ -238,7 +238,7 @@ void ImageUploader::handleSuccessfulUpload(const NetworkResult &result,
     }
     else
     {
-        QTimer::singleShot(UPLOAD_DELAY, [channel, &textEdit, this]() {
+        QTimer::singleShot(UPLOAD_DELAY, [channel, textEdit, this]() {
             this->sendImageUploadRequest(this->uploadQueue_.front(), channel,
                                          textEdit);
             this->uploadQueue_.pop();
