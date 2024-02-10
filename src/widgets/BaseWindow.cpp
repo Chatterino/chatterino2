@@ -913,8 +913,8 @@ bool BaseWindow::handleNCCALCSIZE(MSG *msg, long *result)
             auto *ncp = reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam);
             if (ncp)
             {
-                // ncp->lppos->flags |= SWP_NOREDRAW;
-                // ncp->rgrc[0].top -= 1;
+                ncp->lppos->flags |= SWP_NOREDRAW;
+                ncp->rgrc[0].top -= 1;
             }
         }
 
