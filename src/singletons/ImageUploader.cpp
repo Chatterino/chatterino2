@@ -260,68 +260,68 @@ void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,
 
     channel->addMessage(makeSystemMessage(QString("Started upload...")));
     auto tryUploadFromUrls = [&]() -> bool {
-        if (source->hasUrls())
+        if (!source->hasUrls())
         {
-            auto mimeDb = QMimeDatabase();
-            // This path gets chosen when files are copied from a file manager, like explorer.exe, caja.
-            // Each entry in source->urls() is a QUrl pointing to a file that was copied.
-            for (const QUrl &path : source->urls())
+            return false;
+        }
+        auto mimeDb = QMimeDatabase();
+        // This path gets chosen when files are copied from a file manager, like explorer.exe, caja.
+        // Each entry in source->urls() is a QUrl pointing to a file that was copied.
+        for (const QUrl &path : source->urls())
+        {
+            QString localPath = path.toLocalFile();
+            QMimeType mime = mimeDb.mimeTypeForUrl(path);
+            if (mime.name().startsWith("image") && !mime.inherits("image/gif"))
             {
-                QString localPath = path.toLocalFile();
-                QMimeType mime = mimeDb.mimeTypeForUrl(path);
-                if (mime.name().startsWith("image") &&
-                    !mime.inherits("image/gif"))
+                channel->addMessage(makeSystemMessage(
+                    QString("Uploading image: %1").arg(localPath)));
+                QImage img = QImage(localPath);
+                if (img.isNull())
                 {
-                    channel->addMessage(makeSystemMessage(
-                        QString("Uploading image: %1").arg(localPath)));
-                    QImage img = QImage(localPath);
-                    if (img.isNull())
-                    {
-                        channel->addMessage(makeSystemMessage(
-                            QString("Couldn't load image :(")));
-                        return false;
-                    }
+                    channel->addMessage(
+                        makeSystemMessage(QString("Couldn't load image :(")));
+                    return false;
+                }
 
-                    auto imageData = convertToPng(img);
-                    if (imageData)
-                    {
-                        RawImageData data = {*imageData, "png", localPath};
-                        this->uploadQueue_.push(data);
-                    }
-                    else
-                    {
-                        channel->addMessage(makeSystemMessage(
-                            QString("Cannot upload file: %1. Couldn't convert "
-                                    "image to png.")
-                                .arg(localPath)));
-                        return false;
-                    }
+                auto imageData = convertToPng(img);
+                if (imageData)
+                {
+                    RawImageData data = {*imageData, "png", localPath};
+                    this->uploadQueue_.push(data);
                 }
-                else if (mime.inherits("image/gif"))
+                else
                 {
                     channel->addMessage(makeSystemMessage(
-                        QString("Uploading GIF: %1").arg(localPath)));
-                    QFile file(localPath);
-                    bool isOkay = file.open(QIODevice::ReadOnly);
-                    if (!isOkay)
-                    {
-                        channel->addMessage(makeSystemMessage(
-                            QString("Failed to open file. :(")));
-                        return false;
-                    }
-                    RawImageData data = {file.readAll(), "gif", localPath};
-                    this->uploadQueue_.push(data);
-                    file.close();
-                    // file.readAll() => might be a bit big but it /should/ work
+                        QString("Cannot upload file: %1. Couldn't convert "
+                                "image to png.")
+                            .arg(localPath)));
+                    return false;
                 }
             }
-            if (!this->uploadQueue_.empty())
+            else if (mime.inherits("image/gif"))
             {
-                this->sendImageUploadRequest(this->uploadQueue_.front(),
-                                             channel, outputTextEdit);
-                this->uploadQueue_.pop();
-                return true;
+                channel->addMessage(makeSystemMessage(
+                    QString("Uploading GIF: %1").arg(localPath)));
+                QFile file(localPath);
+                bool isOkay = file.open(QIODevice::ReadOnly);
+                if (!isOkay)
+                {
+                    channel->addMessage(
+                        makeSystemMessage(QString("Failed to open file. :(")));
+                    return false;
+                }
+                // file.readAll() => might be a bit big but it /should/ work
+                RawImageData data = {file.readAll(), "gif", localPath};
+                this->uploadQueue_.push(data);
+                file.close();
             }
+        }
+        if (!this->uploadQueue_.empty())
+        {
+            this->sendImageUploadRequest(this->uploadQueue_.front(), channel,
+                                         outputTextEdit);
+            this->uploadQueue_.pop();
+            return true;
         }
         return false;
     };
@@ -334,36 +334,32 @@ void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,
                                          channel, outputTextEdit);
             return true;
         }
-        else if (source->hasFormat("image/jpeg"))
+        if (source->hasFormat("image/jpeg"))
         {
             this->sendImageUploadRequest(
                 {source->data("image/jpeg"), "jpeg", ""}, channel,
                 outputTextEdit);
             return true;
         }
-        else if (source->hasFormat("image/gif"))
+        if (source->hasFormat("image/gif"))
         {
             this->sendImageUploadRequest({source->data("image/gif"), "gif", ""},
                                          channel, outputTextEdit);
             return true;
         }
-        else
-        {  // not PNG, try loading it into QImage and save it to a PNG.
-            auto image = qvariant_cast<QImage>(source->imageData());
-            auto imageData = convertToPng(image);
-            if (imageData)
-            {
-                sendImageUploadRequest({*imageData, "png", ""}, channel,
-                                       outputTextEdit);
-                return true;
-            }
-            else
-            {
-                channel->addMessage(makeSystemMessage(
-                    QString("Cannot upload file, failed to convert to png.")));
-                return false;
-            }
+        // not PNG, try loading it into QImage and save it to a PNG.
+        auto image = qvariant_cast<QImage>(source->imageData());
+        auto imageData = convertToPng(image);
+        if (imageData)
+        {
+            sendImageUploadRequest({*imageData, "png", ""}, channel,
+                                   outputTextEdit);
+            return true;
         }
+        // No direct upload happenned
+        channel->addMessage(makeSystemMessage(
+            QString("Cannot upload file, failed to convert to png.")));
+        return false;
     };
 
     if (!tryUploadFromUrls() && !tryUploadDirectly())
