@@ -3,6 +3,7 @@
 #include "common/FlagsEnum.hpp"
 #include "util/QStringHash.hpp"
 
+#include <magic_enum/magic_enum.hpp>
 #include <QColor>
 #include <QTime>
 
@@ -58,6 +59,8 @@ enum class MessageFlag : int64_t {
     RestrictedMessage = (1LL << 33),
     /// The message is sent by a user marked as monitor with Twitch's "Low Trust"/"Suspicious User" feature
     MonitoredMessage = (1LL << 34),
+    /// The message is an ACTION message (/me)
+    Action = (1LL << 35),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 
@@ -116,3 +119,8 @@ struct Message {
 };
 
 }  // namespace chatterino
+
+template <>
+struct magic_enum::customize::enum_range<chatterino::MessageFlag> {
+    static constexpr bool is_flags = true;
+};

@@ -82,7 +82,6 @@ LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot()
 void Channel::addMessage(MessagePtr message,
                          std::optional<MessageFlags> overridingFlags)
 {
-    auto *app = getApp();
     MessagePtr deleted;
 
     if (!overridingFlags || !overridingFlags->has(MessageFlag::DoNotLog))

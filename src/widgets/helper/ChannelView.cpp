@@ -45,6 +45,7 @@
 #include "widgets/TooltipWidget.hpp"
 #include "widgets/Window.hpp"
 
+#include <magic_enum/magic_enum_flags.hpp>
 #include <QClipboard>
 #include <QColor>
 #include <QDate>
@@ -52,6 +53,7 @@
 #include <QDesktopServices>
 #include <QEasingCurve>
 #include <QGraphicsBlurEffect>
+#include <QJsonDocument>
 #include <QMessageBox>
 #include <QPainter>
 #include <QScreen>
@@ -244,6 +246,30 @@ void addHiddenContextMenuItems(QMenu *menu,
                         [messageID = layout->getMessage()->id] {
                             crossPlatformCopy(messageID);
                         });
+    }
+
+    const auto *message = layout->getMessage();
+
+    if (message != nullptr)
+    {
+        QJsonDocument jsonDocument;
+
+        QJsonObject jsonObject;
+
+        jsonObject["id"] = message->id;
+        jsonObject["searchText"] = message->searchText;
+        jsonObject["messageText"] = message->messageText;
+        jsonObject["flags"] = QString::fromStdString(
+            magic_enum::enum_flags_name(message->flags.value()));
+
+        jsonDocument.setObject(jsonObject);
+
+        auto jsonString =
+            jsonDocument.toJson(QJsonDocument::JsonFormat::Indented);
+
+        menu->addAction("Copy message &JSON", [jsonString] {
+            crossPlatformCopy(jsonString);
+        });
     }
 }
 

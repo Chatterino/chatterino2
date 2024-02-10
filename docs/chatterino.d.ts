@@ -12,13 +12,68 @@ declare module c2 {
     channel_name: String;
   }
 
+  enum Platform {
+    Twitch,
+  }
+  enum ChannelType {
+    None,
+    Direct,
+    Twitch,
+    TwitchWhispers,
+    TwitchWatching,
+    TwitchMentions,
+    TwitchLive,
+    TwitchAutomod,
+    Irc,
+    Misc,
+  }
+
+  interface IWeakResource {
+    is_valid(): boolean;
+  }
+
+  class RoomModes {
+    unique_chat: boolean;
+    subscriber_only: boolean;
+    emotes_only: boolean;
+    follower_only: null | number;
+    slow_mode: null | number;
+  }
+  class StreamStatus {
+    live: boolean;
+    viewer_count: number;
+    uptime: number;
+    title: string;
+    game_name: string;
+    game_id: string;
+  }
+
+  class Channel implements IWeakResource {
+    is_valid(): boolean;
+    get_name(): string;
+    get_type(): ChannelType;
+    get_display_name(): string;
+    send_message(message: string, execute_commands: boolean): void;
+    add_system_message(message: string): void;
+
+    is_twitch_channel(): boolean;
+
+    get_room_modes(): RoomModes;
+    get_stream_status(): StreamStatus;
+    get_twitch_id(): string;
+    is_broadcaster(): boolean;
+    is_mod(): boolean;
+    is_vip(): boolean;
+
+    static by_name(name: string, platform: Platform): null | Channel;
+    static by_twitch_id(id: string): null | Channel;
+  }
+
   function log(level: LogLevel, ...data: any[]): void;
   function register_command(
     name: String,
     handler: (ctx: CommandContext) => void
   ): boolean;
-  function send_msg(channel: String, text: String): boolean;
-  function system_msg(channel: String, text: String): boolean;
 
   class CompletionList {
     values: String[];

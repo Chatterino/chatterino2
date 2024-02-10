@@ -82,6 +82,7 @@ public:
         QString game;
         QString gameId;
         QString uptime;
+        int uptimeSeconds = 0;
         QString streamType;
     };
 

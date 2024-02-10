@@ -68,9 +68,19 @@ public:
     float scale() const override;
     float qtFontScale() const;
 
+    /// @returns true if the window is the top-most window.
+    ///          Either #setTopMost was called or the `TopMost` flag is set which overrides this
+    bool isTopMost() const;
+    /// Updates the window's top-most status
+    /// If the `TopMost` flag is set, this is a no-op
+    void setTopMost(bool topMost);
+
     pajlada::Signals::NoArgSignal closing;
 
     static bool supportsCustomWindowFrame();
+
+signals:
+    void topMostChanged(bool topMost);
 
 protected:
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -131,6 +141,7 @@ private:
     FlagsEnum<Flags> flags_;
     float nativeScale_ = 1;
     bool isResizeFixing_ = false;
+    bool isTopMost_ = false;
 
     struct {
         QLayout *windowLayout = nullptr;
@@ -142,6 +153,25 @@ private:
     } ui_;
 
 #ifdef USEWINSDK
+    /// @brief Returns the HWND of this window if it has one
+    ///
+    /// A QWidget only has an HWND if it has been created. Before that,
+    /// accessing `winID()` will create the window which can lead to unintended
+    /// bugs.
+    std::optional<HWND> safeHWND() const;
+
+    /// @brief Tries to apply the `isTopMost_` setting
+    ///
+    /// If the setting couldn't be applied (because the window wasn't created
+    /// yet), the operation is repeated after a short delay.
+    ///
+    /// @pre When calling from outside this method, `waitingForTopMost_` must
+    ///      be `false` to avoid too many pending calls.
+    /// @post If an operation was queued to be executed after some delay,
+    ///       `waitingForTopMost_` will be set to `true`.
+    void tryApplyTopMost();
+    bool waitingForTopMost_ = false;
+
     QRect initalBounds_;
     QRect currentBounds_;
     QRect nextBounds_;

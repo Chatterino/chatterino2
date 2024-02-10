@@ -270,6 +270,128 @@ namespace {
         builder->message().badgeInfos = badgeInfos;
     }
 
+    /**
+     * Computes (only) the replacement of @a match in @a source.
+     * The parts before and after the match in @a source are ignored.
+     *
+     * Occurrences of \b{\\1}, \b{\\2}, ..., in @a replacement are replaced
+     * with the string captured by the corresponding capturing group.
+     * This function should only be used if the regex contains capturing groups.
+     * 
+     * Since Qt doesn't provide a way of replacing a single match with some replacement
+     * while supporting both capturing groups and lookahead/-behind in the regex,
+     * this is included here. It's essentially the implementation of 
+     * QString::replace(const QRegularExpression &, const QString &).
+     * @see https://github.com/qt/qtbase/blob/97bb0ecfe628b5bb78e798563212adf02129c6f6/src/corelib/text/qstring.cpp#L4594-L4703
+     */
+    QString makeRegexReplacement(QStringView source,
+                                 const QRegularExpression &regex,
+                                 const QRegularExpressionMatch &match,
+                                 const QString &replacement)
+    {
+        using SizeType = QString::size_type;
+        struct QStringCapture {
+            SizeType pos;
+            SizeType len;
+            int captureNumber;
+        };
+
+        qsizetype numCaptures = regex.captureCount();
+
+        // 1. build the backreferences list, holding where the backreferences
+        //    are in the replacement string
+        QVarLengthArray<QStringCapture> backReferences;
+
+        SizeType replacementLength = replacement.size();
+        for (SizeType i = 0; i < replacementLength - 1; i++)
+        {
+            if (replacement[i] != u'\\')
+            {
+                continue;
+            }
+
+            int no = replacement[i + 1].digitValue();
+            if (no <= 0 || no > numCaptures)
+            {
+                continue;
+            }
+
+            QStringCapture backReference{.pos = i, .len = 2};
+
+            if (i < replacementLength - 2)
+            {
+                int secondDigit = replacement[i + 2].digitValue();
+                if (secondDigit != -1 &&
+                    ((no * 10) + secondDigit) <= numCaptures)
+                {
+                    no = (no * 10) + secondDigit;
+                    ++backReference.len;
+                }
+            }
+
+            backReference.captureNumber = no;
+            backReferences.append(backReference);
+        }
+
+        // 2. iterate on the matches.
+        //    For every match, copy the replacement string in chunks
+        //    with the proper replacements for the backreferences
+
+        // length of the new string, with all the replacements
+        SizeType newLength = 0;
+        QVarLengthArray<QStringView> chunks;
+        QStringView replacementView{replacement};
+
+        // Initially: empty, as we only care about the replacement
+        SizeType len = 0;
+        SizeType lastEnd = 0;
+        for (const QStringCapture &backReference :
+             std::as_const(backReferences))
+        {
+            // part of "replacement" before the backreference
+            len = backReference.pos - lastEnd;
+            if (len > 0)
+            {
+                chunks << replacementView.mid(lastEnd, len);
+                newLength += len;
+            }
+
+            // backreference itself
+            len = match.capturedLength(backReference.captureNumber);
+            if (len > 0)
+            {
+                chunks << source.mid(
+                    match.capturedStart(backReference.captureNumber), len);
+                newLength += len;
+            }
+
+            lastEnd = backReference.pos + backReference.len;
+        }
+
+        // add the last part of the replacement string
+        len = replacementView.size() - lastEnd;
+        if (len > 0)
+        {
+            chunks << replacementView.mid(lastEnd, len);
+            newLength += len;
+        }
+
+        // 3. assemble the chunks together
+        QString dst;
+        dst.reserve(newLength);
+        for (const QStringView &chunk : std::as_const(chunks))
+        {
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 2)
+            static_assert(sizeof(QChar) == sizeof(decltype(*chunk.utf16())));
+            dst.append(reinterpret_cast<const QChar *>(chunk.utf16()),
+                       chunk.length());
+#else
+            dst += chunk;
+#endif
+        }
+        return dst;
+    }
+
 }  // namespace
 
 TwitchMessageBuilder::TwitchMessageBuilder(
@@ -420,7 +542,9 @@ MessagePtr TwitchMessageBuilder::build()
         this->tags, this->originalMessage_, this->messageOffset_);
 
     // This runs through all ignored phrases and runs its replacements on this->originalMessage_
-    this->runIgnoreReplaces(twitchEmotes);
+    TwitchMessageBuilder::processIgnorePhrases(
+        *getSettings()->ignoredMessages.readOnly(), this->originalMessage_,
+        twitchEmotes);
 
     std::sort(twitchEmotes.begin(), twitchEmotes.end(),
               [](const auto &a, const auto &b) {
@@ -773,11 +897,16 @@ void TwitchMessageBuilder::parseThread()
                 threadRoot->usernameColor, FontStyle::ChatMediumSmall)
             ->setLink({Link::UserInfo, threadRoot->displayName});
 
+        MessageColor color = MessageColor::Text;
+        if (threadRoot->flags.has(MessageFlag::Action))
+        {
+            color = threadRoot->usernameColor;
+        }
         this->emplace<SingleLineTextElement>(
                 threadRoot->messageText,
                 MessageElementFlags({MessageElementFlag::RepliedMessage,
                                      MessageElementFlag::Text}),
-                this->textColor_, FontStyle::ChatMediumSmall)
+                color, FontStyle::ChatMediumSmall)
             ->setLink({Link::ViewThread, this->thread_->rootId()});
     }
     else if (this->tags.find("reply-parent-msg-id") != this->tags.end())
@@ -961,12 +1090,12 @@ void TwitchMessageBuilder::appendUsername()
     }
 }
 
-void TwitchMessageBuilder::runIgnoreReplaces(
+void TwitchMessageBuilder::processIgnorePhrases(
+    const std::vector<IgnorePhrase> &phrases, QString &originalMessage,
     std::vector<TwitchEmoteOccurrence> &twitchEmotes)
 {
     using SizeType = QString::size_type;
 
-    auto phrases = getSettings()->ignoredMessages.readOnly();
     auto removeEmotesInRange = [&twitchEmotes](SizeType pos, SizeType len) {
         // all emotes outside the range come before `it`
         // all emotes in the range start at `it`
@@ -1035,20 +1164,20 @@ void TwitchMessageBuilder::runIgnoreReplaces(
     auto replaceMessageAt = [&](const IgnorePhrase &phrase, SizeType from,
                                 SizeType length, const QString &replacement) {
         auto removedEmotes = removeEmotesInRange(from, length);
-        this->originalMessage_.replace(from, length, replacement);
+        originalMessage.replace(from, length, replacement);
         auto wordStart = from;
         while (wordStart > 0)
         {
-            if (this->originalMessage_[wordStart - 1] == ' ')
+            if (originalMessage[wordStart - 1] == ' ')
             {
                 break;
             }
             --wordStart;
         }
         auto wordEnd = from + replacement.length();
-        while (wordEnd < this->originalMessage_.length())
+        while (wordEnd < originalMessage.length())
         {
-            if (this->originalMessage_[wordEnd] == ' ')
+            if (originalMessage[wordEnd] == ' ')
             {
                 break;
             }
@@ -1059,11 +1188,11 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                           static_cast<int>(replacement.length() - length));
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-        auto midExtendedRef = QStringView{this->originalMessage_}.mid(
-            wordStart, wordEnd - wordStart);
+        auto midExtendedRef =
+            QStringView{originalMessage}.mid(wordStart, wordEnd - wordStart);
 #else
         auto midExtendedRef =
-            this->originalMessage_.midRef(wordStart, wordEnd - wordStart);
+            originalMessage.midRef(wordStart, wordEnd - wordStart);
 #endif
 
         for (auto &emote : removedEmotes)
@@ -1089,7 +1218,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
         addReplEmotes(phrase, midExtendedRef, wordStart);
     };
 
-    for (const auto &phrase : *phrases)
+    for (const auto &phrase : phrases)
     {
         if (phrase.isBlock())
         {
@@ -1111,16 +1240,22 @@ void TwitchMessageBuilder::runIgnoreReplaces(
             QRegularExpressionMatch match;
             size_t iterations = 0;
             SizeType from = 0;
-            while ((from = this->originalMessage_.indexOf(regex, from,
-                                                          &match)) != -1)
+            while ((from = originalMessage.indexOf(regex, from, &match)) != -1)
             {
+                auto replacement = phrase.getReplace();
+                if (regex.captureCount() > 0)
+                {
+                    replacement = makeRegexReplacement(originalMessage, regex,
+                                                       match, replacement);
+                }
+
                 replaceMessageAt(phrase, from, match.capturedLength(),
-                                 phrase.getReplace());
+                                 replacement);
                 from += phrase.getReplace().length();
                 iterations++;
                 if (iterations >= 128)
                 {
-                    this->originalMessage_ =
+                    originalMessage =
                         u"Too many replacements - check your ignores!"_s;
                     return;
                 }
@@ -1130,8 +1265,8 @@ void TwitchMessageBuilder::runIgnoreReplaces(
         }
 
         SizeType from = 0;
-        while ((from = this->originalMessage_.indexOf(
-                    pattern, from, phrase.caseSensitivity())) != -1)
+        while ((from = originalMessage.indexOf(pattern, from,
+                                               phrase.caseSensitivity())) != -1)
         {
             replaceMessageAt(phrase, from, pattern.length(),
                              phrase.getReplace());

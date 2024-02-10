@@ -470,6 +470,7 @@ void TwitchChannel::updateStreamStatus(
             auto diff = since.secsTo(QDateTime::currentDateTime());
             status->uptime = QString::number(diff / 3600) + "h " +
                              QString::number(diff % 3600 / 60) + "m";
+            status->uptimeSeconds = diff;
 
             status->rerun = false;
             status->streamType = stream.type;

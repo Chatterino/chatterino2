@@ -12,6 +12,7 @@
 #include "providers/recentmessages/Impl.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
+#include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
@@ -72,6 +73,26 @@ public:
         return &this->highlights;
     }
 
+    TwitchBadges *getTwitchBadges() override
+    {
+        return &this->twitchBadges;
+    }
+
+    BttvEmotes *getBttvEmotes() override
+    {
+        return &this->bttvEmotes;
+    }
+
+    FfzEmotes *getFfzEmotes() override
+    {
+        return &this->ffzEmotes;
+    }
+
+    SeventvEmotes *getSeventvEmotes() override
+    {
+        return &this->seventvEmotes;
+    }
+
     AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;
@@ -80,6 +101,10 @@ public:
     FfzBadges ffzBadges;
     SeventvBadges seventvBadges;
     HighlightController highlights;
+    TwitchBadges twitchBadges;
+    BttvEmotes bttvEmotes;
+    FfzEmotes ffzEmotes;
+    SeventvEmotes seventvEmotes;
 };
 
 std::optional<QJsonDocument> tryReadJsonFile(const QString &path)

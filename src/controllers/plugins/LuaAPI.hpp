@@ -1,8 +1,12 @@
 #pragma once
 
 #ifdef CHATTERINO_HAVE_PLUGINS
+
+#    include <lua.h>
 #    include <QString>
 
+#    include <cassert>
+#    include <memory>
 #    include <vector>
 
 struct lua_State;
@@ -50,6 +54,11 @@ struct CompletionList {
 };
 
 /**
+ * @includefile common/Channel.hpp
+ * @includefile controllers/plugins/api/ChannelRef.hpp
+ */
+
+/**
  * Registers a new command called `name` which when executed will call `handler`.
  *
  * @lua@param name string The name of the command.
@@ -69,27 +78,6 @@ int c2_register_command(lua_State *L);
 int c2_register_callback(lua_State *L);
 
 /**
- * Sends a message to `channel` with the specified text. Also executes commands.
- *
- * **Warning**: It is possible to trigger your own Lua command with this causing a potentially infinite loop.
- *
- * @lua@param channel string The name of the Twitch channel
- * @lua@param text string The text to be sent
- * @lua@return boolean ok
- * @exposed c2.send_msg
- */
-int c2_send_msg(lua_State *L);
-/**
- * Creates a system message (gray message) and adds it to the Twitch channel specified by `channel`.
- *
- * @lua@param channel string
- * @lua@param text string
- * @lua@return boolean ok
- * @exposed c2.system_msg
- */
-int c2_system_msg(lua_State *L);
-
-/**
  * Writes a message to the Chatterino log.
  *
  * @lua@param level LogLevel The desired level.
@@ -106,6 +94,115 @@ int g_print(lua_State *L);
 // This is for require() exposed as an element of package.searchers
 int searcherAbsolute(lua_State *L);
 int searcherRelative(lua_State *L);
+
+// This is a fat pointer that allows us to type check values given to functions needing a userdata.
+// Ensure ALL userdata given to Lua are a subclass of this! Otherwise we garbage as a pointer!
+struct UserData {
+    enum class Type { Channel };
+    Type type;
+    bool isWeak;
+};
+
+template <UserData::Type T, typename U>
+struct WeakPtrUserData : public UserData {
+    std::weak_ptr<U> target;
+
+    WeakPtrUserData(std::weak_ptr<U> t)
+        : UserData()
+        , target(t)
+    {
+        this->type = T;
+        this->isWeak = true;
+    }
+
+    static WeakPtrUserData<T, U> *create(lua_State *L, std::weak_ptr<U> target)
+    {
+        void *ptr = lua_newuserdata(L, sizeof(WeakPtrUserData<T, U>));
+        return new (ptr) WeakPtrUserData<T, U>(target);
+    }
+
+    static WeakPtrUserData<T, U> *from(UserData *target)
+    {
+        if (!target->isWeak)
+        {
+            return nullptr;
+        }
+        if (target->type != T)
+        {
+            return nullptr;
+        }
+        return reinterpret_cast<WeakPtrUserData<T, U> *>(target);
+    }
+
+    static WeakPtrUserData<T, U> *from(void *target)
+    {
+        return from(reinterpret_cast<UserData *>(target));
+    }
+
+    static int destroy(lua_State *L)
+    {
+        auto self = WeakPtrUserData<T, U>::from(lua_touserdata(L, -1));
+        // Note it is safe to only check the weakness of the pointer, as
+        // std::weak_ptr seems to have identical representation regardless of
+        // what it points to
+        assert(self->isWeak);
+
+        self->target.reset();
+        lua_pop(L, 1);  // Lua deallocates the memory for full user data
+        return 0;
+    }
+};
+
+template <UserData::Type T, typename U>
+struct SharedPtrUserData : public UserData {
+    std::shared_ptr<U> target;
+
+    SharedPtrUserData(std::shared_ptr<U> t)
+        : UserData()
+        , target(t)
+    {
+        this->type = T;
+        this->isWeak = false;
+    }
+
+    static SharedPtrUserData<T, U> *create(lua_State *L,
+                                           std::shared_ptr<U> target)
+    {
+        void *ptr = lua_newuserdata(L, sizeof(SharedPtrUserData<T, U>));
+        return new (ptr) SharedPtrUserData<T, U>(target);
+    }
+
+    static SharedPtrUserData<T, U> *from(UserData *target)
+    {
+        if (target->isWeak)
+        {
+            return nullptr;
+        }
+        if (target->type != T)
+        {
+            return nullptr;
+        }
+        return reinterpret_cast<SharedPtrUserData<T, U> *>(target);
+    }
+
+    static SharedPtrUserData<T, U> *from(void *target)
+    {
+        return from(reinterpret_cast<UserData *>(target));
+    }
+
+    static int destroy(lua_State *L)
+    {
+        auto self = SharedPtrUserData<T, U>::from(lua_touserdata(L, -1));
+        // Note it is safe to only check the weakness of the pointer, as
+        // std::shared_ptr seems to have identical representation regardless of
+        // what it points to
+        assert(!self->isWeak);
+
+        self->target.reset();
+        lua_pop(L, 1);  // Lua deallocates the memory for full user data
+        return 0;
+    }
+};
 
 }  // namespace chatterino::lua::api
 

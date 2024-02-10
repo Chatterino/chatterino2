@@ -5,6 +5,7 @@ add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
 # registers the native messageing host
 option(CHATTERINO_DEBUG_NATIVE_MESSAGES "Debug native messages" OFF)
+option(CHATTERINO_STATIC_QT_BUILD "Static link Qt" OFF)
 
 set(SOURCE_FILES
         Application.cpp
@@ -220,6 +221,8 @@ set(SOURCE_FILES
         controllers/pings/MutedChannelModel.cpp
         controllers/pings/MutedChannelModel.hpp
 
+        controllers/plugins/api/ChannelRef.cpp
+        controllers/plugins/api/ChannelRef.hpp
         controllers/plugins/LuaAPI.cpp
         controllers/plugins/LuaAPI.hpp
         controllers/plugins/Plugin.cpp
@@ -834,6 +837,10 @@ if (BUILD_APP)
         message(WARNING "Sanitizers support is disabled")
     endif()
 
+    if (CHATTERINO_STATIC_QT_BUILD)
+        qt_import_plugins(${EXECUTABLE_PROJECT} INCLUDE_BY_TYPE platforms Qt::QXcbIntegrationPlugin)
+    endif ()
+
     target_include_directories(${EXECUTABLE_PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR}/autogen/)
 
     target_link_libraries(${EXECUTABLE_PROJECT} PUBLIC ${LIBRARY_PROJECT})
@@ -959,6 +966,7 @@ target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     AB_CUSTOM_SETTINGS
     IRC_STATIC
     IRC_NAMESPACE=Communi
+    $<$<BOOL:${WIN32}>:_WIN32_WINNT=0x0A00> # Windows 10
     )
 
 if (USE_SYSTEM_QTKEYCHAIN)
@@ -1072,10 +1080,6 @@ if (MSVC)
     # Someone adds /W3 before we add /W4.
     # This makes sure, only /W4 is specified.
     string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    # 4505 - "unreferenced local version has been removed"
-    #        Although this might give hints on dead code,
-    #        there are some cases where it's distracting.
-    #
     # 4100 - "unreferenced formal parameter"
     #        There are a lot of functions and methods where
     #        an argument was given a name but never used.
@@ -1086,6 +1090,11 @@ if (MSVC)
     #        These are implicit conversions from size_t to int/qsizetype.
     #        We don't use size_t in a lot of cases, since
     #        Qt doesn't use it - it uses int (or qsizetype in Qt6).
+    #
+    # 4458 - "declaration of 'identifier' hides class member"
+    #        We have a rule of exclusively using `this->`
+    #        to access class members, thus it's fine to reclare a variable
+    #        with the same name as a class member.
     target_compile_options(${LIBRARY_PROJECT} PUBLIC
         /W4
         # 5038 - warnings about initialization order
@@ -1093,9 +1102,9 @@ if (MSVC)
         # 4855 - implicit capture of 'this' via '[=]' is deprecated
         /w14855
         # Disable the following warnings (see reasoning above)
-        /wd4505
         /wd4100
         /wd4267
+        /wd4458
         # Enable updated '__cplusplus' macro - workaround for CMake#18837
         /Zc:__cplusplus
     )

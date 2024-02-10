@@ -208,6 +208,10 @@ void Application::initialize(Settings &settings, const Paths &paths)
         singleton->initialize(settings, paths);
     }
 
+    // XXX: Loading Twitch badges after Helix has been initialized, which only happens after
+    // the AccountController initialize has been called
+    this->twitchBadges->loadTwitchBadges();
+
     // Show crash message.
     // On Windows, the crash message was already shown.
 #ifndef Q_OS_WIN

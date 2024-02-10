@@ -566,7 +566,7 @@ int TextLayoutElement::getXFromIndex(size_t index)
     {
         return this->getRect().left();
     }
-    else if (index < this->getText().size())
+    else if (index < static_cast<size_t>(this->getText().size()))
     {
         int x = 0;
         for (int i = 0; i < index; i++)

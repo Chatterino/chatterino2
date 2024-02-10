@@ -9,7 +9,7 @@ class Chatterino(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     default_options = {
         "with_benchmark": False,
-        "with_openssl3": False,
+        "with_openssl3": True,
         "openssl*:shared": True,
         "boost*:header_only": True,
     }
