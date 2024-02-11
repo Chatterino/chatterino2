@@ -1,5 +1,5 @@
 ---
-name: Test
+name: Test Ubuntu
 
 on:
   pull_request:
@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   test:
+    name: "${{ matrix.os }}"
     runs-on: ubuntu-latest
     container: ${{ matrix.container }}
     strategy:
