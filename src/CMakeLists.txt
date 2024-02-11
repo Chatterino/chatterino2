@@ -728,7 +728,7 @@ add_library(${LIBRARY_PROJECT} OBJECT ${SOURCE_FILES})
 
 if(CHATTERINO_PLUGINS)
     target_compile_definitions(${LIBRARY_PROJECT}
-        PRIVATE
+        PUBLIC
         CHATTERINO_HAVE_PLUGINS
     )
     message(STATUS "Building Chatterino with lua plugin support enabled.")
@@ -814,7 +814,10 @@ if (BUILD_APP)
     endif()
 
     if (CHATTERINO_STATIC_QT_BUILD)
-        qt_import_plugins(${EXECUTABLE_PROJECT} INCLUDE_BY_TYPE platforms Qt::QXcbIntegrationPlugin)
+        qt_import_plugins(${EXECUTABLE_PROJECT} INCLUDE_BY_TYPE
+            platforms Qt::QXcbIntegrationPlugin
+            Qt::QMinimalIntegrationPlugin
+        )
     endif ()
 
     target_include_directories(${EXECUTABLE_PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR}/autogen/)

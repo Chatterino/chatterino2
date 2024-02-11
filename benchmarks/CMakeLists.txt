@@ -32,3 +32,10 @@ set_target_properties(${PROJECT_NAME}
     RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/bin"
     AUTORCC ON
     )
+
+if (CHATTERINO_STATIC_QT_BUILD)
+    qt_import_plugins(${PROJECT_NAME} INCLUDE_BY_TYPE
+        platforms Qt::QXcbIntegrationPlugin
+        Qt::QMinimalIntegrationPlugin
+    )
+endif ()
