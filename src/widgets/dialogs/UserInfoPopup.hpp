@@ -23,7 +23,7 @@ using ChannelPtr = std::shared_ptr<Channel>;
 class Label;
 class ChannelView;
 class Split;
-class HelixUser;
+struct HelixUser;
 
 class UserInfoPopup final : public DraggablePopup
 {
