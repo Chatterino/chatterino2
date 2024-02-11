@@ -186,6 +186,15 @@ public:
         return nullptr;
     }
 
+#ifdef CHATTERINO_HAVE_PLUGINS
+    PluginController *getPlugins() override
+    {
+        assert(false && "EmptyApplication::getPlugins was called without "
+                        "being initialized");
+        return nullptr;
+    }
+#endif
+
     Updates &getUpdates() override
     {
         return this->updates_;

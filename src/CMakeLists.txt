@@ -728,7 +728,7 @@ add_library(${LIBRARY_PROJECT} OBJECT ${SOURCE_FILES})
 
 if(CHATTERINO_PLUGINS)
     target_compile_definitions(${LIBRARY_PROJECT}
-        PRIVATE
+        PUBLIC
         CHATTERINO_HAVE_PLUGINS
     )
     message(STATUS "Building Chatterino with lua plugin support enabled.")
