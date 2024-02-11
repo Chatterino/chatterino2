@@ -72,8 +72,8 @@ jobs:
 
       - name: Cargo Install httpbox
         run: |
-          curl https://sh.rustup.rs -sSf | sh
-          cargo install -y --git https://github.com/kevinastone/httpbox --rev 89b971f
+          curl https://sh.rustup.rs -sSf | sh -s -- -y
+          cargo install --git https://github.com/kevinastone/httpbox --rev 89b971f
 
       - name: Test
         timeout-minutes: 30
