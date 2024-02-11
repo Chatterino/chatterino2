@@ -70,10 +70,9 @@ jobs:
           curl -L -o server.key "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.key"
           cd ..
 
+      - uses: dtolnay/rust-toolchain@stable
       - name: Cargo Install httpbox
         run: |
-          curl https://sh.rustup.rs -sSf | sh -s -- -y
-          source "$HOME/.cargo/env"
           cargo install --git https://github.com/kevinastone/httpbox --rev 89b971f
 
       - name: Test
