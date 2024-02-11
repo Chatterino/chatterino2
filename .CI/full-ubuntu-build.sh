@@ -21,6 +21,7 @@ cmake \
     -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
     -DCMAKE_PREFIX_PATH="$Qt6_DIR/lib/cmake" \
     -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
+    -DCHATTERINO_STATIC_QT_BUILD=On \
     -DCMAKE_CXX_FLAGS="-fno-sized-deallocation" \
     .
 cmake --build build
