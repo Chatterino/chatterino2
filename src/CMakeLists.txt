@@ -815,6 +815,7 @@ if (BUILD_APP)
 
     if (CHATTERINO_STATIC_QT_BUILD)
         qt_import_plugins(${EXECUTABLE_PROJECT} INCLUDE_BY_TYPE platforms Qt::QXcbIntegrationPlugin)
+        qt_import_plugins(${EXECUTABLE_PROJECT} INCLUDE_BY_TYPE platforms Qt::QMinimalIntegrationPlugin)
     endif ()
 
     target_include_directories(${EXECUTABLE_PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR}/autogen/)
