@@ -7,7 +7,7 @@ on:
   merge_group:
 
 env:
-  TWITCH_PUBSUB_SERVER_IMAGE: ghcr.io/chatterino/twitch-pubsub-server-test:v1.0.6
+  TWITCH_PUBSUB_SERVER_TAG: v1.0.7
   QT_QPA_PLATFORM: minimal
 
 concurrency:
