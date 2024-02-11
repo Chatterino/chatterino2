@@ -73,6 +73,7 @@ jobs:
       - name: Cargo Install httpbox
         run: |
           curl https://sh.rustup.rs -sSf | sh -s -- -y
+          source "$HOME/.cargo/env"
           cargo install --git https://github.com/kevinastone/httpbox --rev 89b971f
 
       - name: Test
