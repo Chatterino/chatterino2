@@ -73,4 +73,11 @@ set_target_properties(${PROJECT_NAME}
     AUTORCC ON
     )
 
+if (CHATTERINO_STATIC_QT_BUILD)
+    qt_import_plugins(${PROJECT_NAME} INCLUDE_BY_TYPE
+        platforms Qt::QXcbIntegrationPlugin
+        Qt::QMinimalIntegrationPlugin
+    )
+endif ()
+
 gtest_discover_tests(${PROJECT_NAME})
