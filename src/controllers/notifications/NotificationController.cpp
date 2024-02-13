@@ -227,7 +227,8 @@ void NotificationController::removeFakeChannel(const QString channelName)
         {
             const auto &s = snapshot[i];
 
-            if (QString::compare(s->messageText, liveMessageSearchText, Qt::CaseInsensitive))
+            if (QString::compare(s->messageText, liveMessageSearchText,
+                                 Qt::CaseInsensitive))
             {
                 s->flags.set(MessageFlag::Disabled);
                 break;
