@@ -164,13 +164,13 @@ int c2_later(lua_State *L)
     int time{};
     if (!lua::pop(L, &time))
     {
-        return luaL_error(L, "cannot get time (1st arg of c2.later, "
+        return luaL_error(L, "cannot get time (2nd arg of c2.later, "
                              "expected a number)");
     }
 
     if (!lua_isfunction(L, lua_gettop(L)))
     {
-        return luaL_error(L, "cannot get callback (2nd arg of c2.later, "
+        return luaL_error(L, "cannot get callback (1st arg of c2.later, "
                              "expected a function)");
     }
 
