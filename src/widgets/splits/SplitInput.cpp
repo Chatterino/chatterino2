@@ -1108,16 +1108,32 @@ void SplitInput::setReply(MessagePtr reply, bool showReplyingLabel)
         // Only enable reply label if inline replying
         auto replyPrefix = "@" + this->replyThread_->displayName;
         auto plainText = this->ui_.textEdit->toPlainText().trimmed();
-        if (!plainText.startsWith(replyPrefix))
+
+        // This makes it so if plainText contains "@StreamerFan" and
+        // we are replying to "@Streamer" we don't just leave "Fan"
+        // in the text box
+        if (plainText.startsWith(replyPrefix))
         {
-            if (!plainText.isEmpty())
+            if (plainText.length() > replyPrefix.length())
             {
-                replyPrefix.append(' ');
+                if (plainText.at(replyPrefix.length()) == ',' ||
+                    plainText.at(replyPrefix.length()) == ' ')
+                {
+                    plainText.remove(0, replyPrefix.length() + 1);
+                }
             }
-            this->ui_.textEdit->setPlainText(replyPrefix + plainText + " ");
-            this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
-            this->ui_.textEdit->resetCompletion();
+            else
+            {
+                plainText.remove(0, replyPrefix.length());
+            }
         }
+        if (!plainText.isEmpty() && !plainText.startsWith(' '))
+        {
+            replyPrefix.append(' ');
+        }
+        this->ui_.textEdit->setPlainText(replyPrefix + plainText + " ");
+        this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+        this->ui_.textEdit->resetCompletion();
         this->ui_.replyLabel->setText("Replying to @" +
                                       this->replyThread_->displayName);
     }
