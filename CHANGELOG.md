@@ -47,7 +47,7 @@
 - Bugfix: Fixed an issue where the setting `Only search for emote autocompletion at the start of emote names` wouldn't disable if it was enabled when the client started. (#4855)
 - Bugfix: Fixed empty page being added when showing out of bounds dialog. (#4849)
 - Bugfix: Fixed issue on Windows preventing the title bar from being dragged in the top left corner. (#4873)
-- Bugfix: Fixed an issue where reply context didn't render correctly if an emoji was touching text. (#4875, #4977)
+- Bugfix: Fixed an issue where reply context didn't render correctly if an emoji was touching text. (#4875, #4977, #5174)
 - Bugfix: Fixed the input completion popup from disappearing when clicking on it on Windows and macOS. (#4876)
 - Bugfix: Fixed double-click text selection moving its position with each new message. (#4898)
 - Bugfix: Fixed an issue where notifications on Windows would contain no or an old avatar. (#4899)
