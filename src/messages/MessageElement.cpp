@@ -665,7 +665,7 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
             return e;
         };
 
-        static const auto ellipsis = QStringLiteral("...");
+        static const auto ellipsis = QStringLiteral("…");
 
         // String to continuously append words onto until we place it in the container
         // once we encounter an emote or reach the end of the message text. */
