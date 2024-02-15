@@ -145,7 +145,7 @@ void TooltipWidget::clearLinkInfo()
 {
     if (this->linkInfo_)
     {
-        QObject::disconnect(this->linkInfo_.get(), &LinkInfo::lifecycleChanged,
+        QObject::disconnect(this->linkInfo_.data(), &LinkInfo::lifecycleChanged,
                             this, nullptr);
     }
     this->linkInfo_ = {};
