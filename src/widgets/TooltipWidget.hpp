@@ -8,6 +8,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QLayout>
+#include <QPointer>
 #include <QVBoxLayout>
 #include <QWidget>
 
