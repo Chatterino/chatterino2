@@ -1,5 +1,6 @@
 #pragma once
 
+#include "providers/links/LinkInfo.hpp"
 #include "widgets/BaseWindow.hpp"
 #include "widgets/TooltipEntryWidget.hpp"
 
@@ -36,6 +37,7 @@ public:
                 TooltipStyle style = TooltipStyle::Vertical);
     void set(const std::vector<TooltipEntry> &entries,
              TooltipStyle style = TooltipStyle::Vertical);
+    void set(LinkInfo *info, QSize customSize);
 
     void setWordWrap(bool wrap);
     void clearEntries();
@@ -50,6 +52,10 @@ protected:
     void paintEvent(QPaintEvent *) override;
 
 private:
+    void setEntries(const std::vector<TooltipEntry> &entries,
+                    TooltipStyle style);
+    void clearLinkInfo();
+
     void updateFont();
 
     QLayout *currentLayout() const;
@@ -65,6 +71,8 @@ private:
     void initializeGLayout();
 
     int visibleEntries_ = 0;
+
+    QPointer<LinkInfo> linkInfo_;
 
     TooltipStyle currentStyle_;
     QVBoxLayout *vLayout_;

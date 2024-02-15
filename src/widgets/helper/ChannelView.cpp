@@ -19,7 +19,6 @@
 #include "messages/MessageElement.hpp"
 #include "messages/MessageThread.hpp"
 #include "providers/colors/ColorProvider.hpp"
-#include "providers/LinkResolver.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -1937,55 +1936,13 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         }
         else
         {
-            if (element->getTooltip() == "No link info loaded")
-            {
-                std::weak_ptr<MessageLayout> weakLayout = layout;
-                LinkResolver::getLinkInfo(
-                    element->getLink().value, nullptr,
-                    [weakLayout, element](QString tooltipText,
-                                          Link originalLink,
-                                          ImagePtr thumbnail) {
-                        auto shared = weakLayout.lock();
-                        if (!shared)
-                        {
-                            return;
-                        }
-                        element->setTooltip(tooltipText);
-                        element->setThumbnail(thumbnail);
-                    });
-            }
             auto thumbnailSize = getSettings()->thumbnailSize;
-            if (thumbnailSize == 0)
+            auto *linkElement = dynamic_cast<LinkElement *>(element);
+            if (linkElement)
             {
-                // "Show thumbnails" is set to "Off", show text only
-                this->tooltipWidget_->setOne({nullptr, element->getTooltip()});
-            }
-            else
-            {
-                const auto shouldHideThumbnail =
-                    isInStreamerMode() &&
-                    getSettings()->streamerModeHideLinkThumbnails &&
-                    element->getThumbnail() != nullptr &&
-                    !element->getThumbnail()->url().string.isEmpty();
-                auto thumb =
-                    shouldHideThumbnail
-                        ? Image::fromResourcePixmap(getResources().streamerMode)
-                        : element->getThumbnail();
-
-                if (element->getThumbnailType() ==
-                    MessageElement::ThumbnailType::Link_Thumbnail)
-                {
-                    this->tooltipWidget_->setOne({
-                        std::move(thumb),
-                        element->getTooltip(),
-                        thumbnailSize,
-                        thumbnailSize,
-                    });
-                }
-                else
-                {
-                    this->tooltipWidget_->setOne({std::move(thumb), ""});
-                }
+                linkElement->linkInfo().ensureLoadingStarted();
+                this->tooltipWidget_->set(&linkElement->linkInfo(),
+                                          {thumbnailSize, thumbnailSize});
             }
         }
 
