@@ -566,7 +566,7 @@ MessagePtr TwitchMessageBuilder::build()
     this->message().messageText = this->originalMessage_;
     this->message().searchText =
         stylizedUsername + " " + this->message().localizedName + " " +
-        this->userName + ": " + this->originalMessage_ +
+        this->userName + ": " + this->originalMessage_ + " " +
         this->message().searchText;
 
     // highlights
