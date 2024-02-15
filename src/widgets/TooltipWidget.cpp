@@ -188,7 +188,7 @@ void TooltipWidget::set(LinkInfo *info, QSize customSize)
                          TooltipStyle::Vertical);
     };
 
-    if (info != this->linkInfo_.get())
+    if (info != this->linkInfo_.data())
     {
         this->clearLinkInfo();
         this->linkInfo_ = info;
