@@ -471,6 +471,15 @@ void TwitchChannel::updateStreamStatus(
 
             status->rerun = false;
             status->streamType = stream.type;
+            for (const auto &tag : stream.tags)
+            {
+                if (QString::compare(tag, "Rerun", Qt::CaseInsensitive) == 0)
+                {
+                    status->rerun = true;
+                    status->streamType = "rerun";
+                    break;
+                }
+            }
         }
         if (this->setLive(true))
         {
@@ -795,6 +804,11 @@ void TwitchChannel::setRoomModes(const RoomModes &newRoomModes)
 bool TwitchChannel::isLive() const
 {
     return this->streamStatus_.accessConst()->live;
+}
+
+bool TwitchChannel::isRerun() const
+{
+    return this->streamStatus_.accessConst()->rerun;
 }
 
 SharedAccessGuard<const TwitchChannel::StreamStatus>
