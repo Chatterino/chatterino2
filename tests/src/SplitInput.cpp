@@ -76,10 +76,11 @@ public:
     Emotes emotes;
 };
 
-class SplitInputFixture : public ::testing::Test
+class SplitInputTest
+    : public ::testing::TestWithParam<std::tuple<QString, QString>>
 {
-protected:
-    SplitInputFixture()
+public:
+    SplitInputTest()
         : split(new Split(nullptr))
         , input(this->split)
     {
@@ -92,18 +93,79 @@ protected:
 
 }  // namespace
 
-TEST_F(SplitInputFixture, Reply)
+TEST_P(SplitInputTest, Reply)
 {
+    std::tuple<QString, QString> params = this->GetParam();
+    auto [inputText, expected] = params;
     ASSERT_EQ("", this->input.getInputText());
-    this->input.setInputText("forsen");
-    ASSERT_EQ("forsen", this->input.getInputText());
+    this->input.setInputText(inputText);
+    ASSERT_EQ(inputText, this->input.getInputText());
+
     auto *message = new Message();
-    message->displayName = "xd";
+    message->displayName = "forsen";
     auto reply = MessagePtr(message);
     this->input.setReply(reply);
-    QString expected("@xd forsen ");
     QString actual = this->input.getInputText();
     ASSERT_EQ(expected, actual)
         << "Input text after setReply should be '" << qUtf8Printable(expected)
         << "', but got '" << qUtf8Printable(actual) << "'";
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    SplitInput, SplitInputTest,
+    testing::Values(
+        // Ensure message is retained
+        std::make_tuple<QString, QString>(
+            // Pre-existing text in the input
+            "Test message",
+            // Expected text after replying to forsen
+            "@forsen Test message "),
+
+        // Ensure mention is stripped, no message
+        std::make_tuple<QString, QString>(
+            // Pre-existing text in the input
+            "@forsen",
+            // Expected text after replying to forsen
+            "@forsen "),
+
+        // Ensure mention with space is stripped, no message
+        std::make_tuple<QString, QString>(
+            // Pre-existing text in the input
+            "@forsen ",
+            // Expected text after replying to forsen
+            "@forsen "),
+
+        // Ensure mention is stripped, retain message
+        std::make_tuple<QString, QString>(
+            // Pre-existing text in the input
+            "@forsen Test message",
+            // Expected text after replying to forsen
+            "@forsen Test message "),
+
+        // Ensure mention with comma is stripped, no message
+        std::make_tuple<QString, QString>(
+            // Pre-existing text in the input
+            "@forsen,",
+            // Expected text after replying to forsen
+            "@forsen "),
+
+        // Ensure mention with comma is stripped, retain message
+        std::make_tuple<QString, QString>(
+            // Pre-existing text in the input
+            "@forsen Test message",
+            // Expected text after replying to forsen
+            "@forsen Test message "),
+
+        // Ensure mention with comma and space is stripped, no message
+        std::make_tuple<QString, QString>(
+            // Pre-existing text in the input
+            "@forsen, ",
+            // Expected text after replying to forsen
+            "@forsen "),
+
+        // Ensure it works with no message
+        std::make_tuple<QString, QString>(
+            // Pre-existing text in the input
+            "",
+            // Expected text after replying to forsen
+            "@forsen ")));
