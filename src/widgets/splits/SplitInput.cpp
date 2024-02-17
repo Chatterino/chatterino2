@@ -919,6 +919,11 @@ bool SplitInput::isHidden() const
     return this->hidden;
 }
 
+void SplitInput::setInputText(const QString &newInputText)
+{
+    this->ui_.textEdit->setPlainText(newInputText);
+}
+
 void SplitInput::editTextChanged()
 {
     auto *app = getIApp();
