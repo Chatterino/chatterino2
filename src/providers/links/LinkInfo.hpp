@@ -6,13 +6,8 @@ namespace chatterino {
 
 /// @brief Rich info about a URL with tooltip and thumbnail
 ///
-/// Represents info about a URL that gets resolved through the currently set
-/// link resolver (Env::linkResolverUrl). Info is loaded upon first calling
-/// #ensureLoadingStarted() which sets off the request. Loading can be blocked
-/// by disabling the "linkInfoTooltip" setting. URLs will be unshortened if the
-/// "unshortLinks" setting is enabled.
-///
-/// This class can only be used from the GUI thread.
+/// This is only a data class - it doesn't do the resolving.
+/// It can only be used from the GUI thread.
 class LinkInfo : public QObject
 {
     Q_OBJECT
