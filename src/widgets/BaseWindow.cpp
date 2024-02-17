@@ -962,6 +962,13 @@ bool BaseWindow::handleSIZE(MSG *msg)
                           QPoint(rect.right - 1, rect.bottom - 1));
             }
             this->useNextBounds_.stop();
+
+            if (msg->wParam == SIZE_MINIMIZED && this->ui_.titlebarButtons)
+            {
+                // Windows doesn't send a WM_NCMOUSELEAVE event when clicking
+                // the minimize button, so we have to emulate it.
+                this->ui_.titlebarButtons->leave();
+            }
         }
     }
     return false;
