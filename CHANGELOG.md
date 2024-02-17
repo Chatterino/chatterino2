@@ -52,6 +52,7 @@
 - Bugfix: Fixed double-click text selection moving its position with each new message. (#4898)
 - Bugfix: Fixed an issue where notifications on Windows would contain no or an old avatar. (#4899)
 - Bugfix: Fixed headers of tables in the settings switching to bold text when selected. (#4913)
+- Bugfix: Fixed an issue in the `/live` split that caused some channels to not get grayed-out when they went offline. (#5172)
 - Bugfix: Fixed tooltips appearing too large and/or away from the cursor. (#4920)
 - Bugfix: Fixed a crash when clicking `More messages below` button in a usercard and closing it quickly. (#4933)
 - Bugfix: Fixed thread popup window missing messages for nested threads. (#4923)
