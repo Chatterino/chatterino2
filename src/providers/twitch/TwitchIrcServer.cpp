@@ -525,6 +525,11 @@ const IndirectChannel &TwitchIrcServer::getWatchingChannel() const
     return this->watchingChannel;
 }
 
+QString TwitchIrcServer::getLastUserThatWhisperedMe() const
+{
+    return this->lastUserThatWhisperedMe.get();
+}
+
 void TwitchIrcServer::reloadBTTVGlobalEmotes()
 {
     getIApp()->getBttvEmotes()->loadEmotes();
