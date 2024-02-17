@@ -78,7 +78,7 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
 
 void SplitInput::initLayout()
 {
-    auto *app = getApp();
+    auto *app = getIApp();
     LayoutCreator<SplitInput> layoutCreator(this);
 
     auto layout =
@@ -202,7 +202,7 @@ void SplitInput::initLayout()
 
 void SplitInput::scaleChangedEvent(float scale)
 {
-    auto *app = getApp();
+    auto *app = getIApp();
     // update the icon size of the buttons
     this->updateEmoteButton();
     this->updateCancelReplyButton();
@@ -921,7 +921,7 @@ bool SplitInput::isHidden() const
 
 void SplitInput::editTextChanged()
 {
-    auto *app = getApp();
+    auto *app = getIApp();
 
     // set textLengthLabel value
     QString text = this->ui_.textEdit->toPlainText();
@@ -936,7 +936,7 @@ void SplitInput::editTextChanged()
     if (text.startsWith("/r ", Qt::CaseInsensitive) &&
         this->split_->getChannel()->isTwitchChannel())
     {
-        QString lastUser = app->twitch->lastUserThatWhisperedMe.get();
+        auto lastUser = app->getTwitch()->getLastUserThatWhisperedMe();
         if (!lastUser.isEmpty())
         {
             this->ui_.textEdit->setPlainText("/w " + lastUser + text.mid(2));
