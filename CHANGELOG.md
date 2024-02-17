@@ -77,6 +77,7 @@
 - Bugfix: Fixed avatar in usercard and moderation button triggering when releasing the mouse outside their area. (#5052)
 - Bugfix: Fixed moderator-only topics being subscribed to for non-moderators. (#5056)
 - Bugfix: Fixed a bug where buttons would remain in a hovered state after leaving them. (#5077)
+- Bugfix: Fixed an issue where you had to click the `reply` button twice if you already had that users @ in your input box. (#5173)
 - Bugfix: Fixed popup windows not persisting between restarts. (#5081)
 - Bugfix: Fixed splits not retaining their focus after minimizing. (#5080)
 - Bugfix: Fixed _Copy message_ copying the channel name in global search. (#5106)
