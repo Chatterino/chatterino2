@@ -164,12 +164,14 @@ TwitchChannel::TwitchChannel(const QString &name)
             MessageBuilder builder;
             TwitchMessageBuilder::liveSystemMessage(this->getDisplayName(),
                                                     &builder);
+            builder.message().id = this->roomId();
             this->addMessage(builder.release());
 
             // Message in /live channel
             MessageBuilder builder2;
             TwitchMessageBuilder::liveMessage(this->getDisplayName(),
                                               &builder2);
+            builder2.message().id = this->roomId();
             getApp()->twitch->liveChannel->addMessage(builder2.release());
 
             // Notify on all channels with a ping sound
@@ -197,14 +199,12 @@ TwitchChannel::TwitchChannel(const QString &name)
 
             // MSVC hates this code if the parens are not there
             int end = (std::max)(0, snapshotLength - 200);
-            auto liveMessageSearchText =
-                QString("%1 is live!").arg(this->getDisplayName());
 
             for (int i = snapshotLength - 1; i >= end; --i)
             {
                 const auto &s = snapshot[i];
 
-                if (s->messageText == liveMessageSearchText)
+                if (s->id == this->roomId())
                 {
                     s->flags.set(MessageFlag::Disabled);
                     break;
