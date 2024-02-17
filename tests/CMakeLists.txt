@@ -37,6 +37,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/XDGHelper.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Selection.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NotebookTab.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/SplitInput.cpp
     # Add your new file above this line!
     )
 
