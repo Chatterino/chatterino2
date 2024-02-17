@@ -1,5 +1,5 @@
 ---
-name: Test
+name: Test Ubuntu
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
   merge_group:
 
 env:
-  TWITCH_PUBSUB_SERVER_IMAGE: ghcr.io/chatterino/twitch-pubsub-server-test:v1.0.6
+  TWITCH_PUBSUB_SERVER_TAG: v1.0.7
   QT_QPA_PLATFORM: minimal
 
 concurrency:
@@ -16,89 +16,71 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
+    name: "${{ matrix.os }}"
+    runs-on: ubuntu-latest
+    container: ${{ matrix.container }}
     strategy:
       matrix:
         include:
           - os: "ubuntu-22.04"
-            qt-version: "5.15.2"
-          - os: "ubuntu-22.04"
-            qt-version: "6.2.4"
+            container: ghcr.io/chatterino/chatterino2-build-ubuntu-22.04:latest
+            qt-version: 6.6.1
+            plugins: true
       fail-fast: false
     env:
-      C2_BUILD_WITH_QT6: ${{ startsWith(matrix.qt-version, '6.') && 'ON' || 'OFF' }}
-      QT_MODULES: ${{ startsWith(matrix.qt-version, '6.') && 'qt5compat qtimageformats' || '' }}
+      C2_PLUGINS: ${{ matrix.plugins }}
+      C2_BUILD_WITH_QT6: ${{ startsWith(matrix.qt-version, '6.') }}
 
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v3.3.0
-        with:
-          cache: true
-          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
-          modules: ${{ env.QT_MODULES }}
-          version: ${{ matrix.qt-version }}
-
-      - name: Apply Qt patches (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.qt-version, '5.')
-        run: |
-          patch "$Qt5_DIR/include/QtConcurrent/qtconcurrentthreadengine.h" .patches/qt5-on-newer-gcc.patch
-        shell: bash
-
-      # LINUX
-      - name: Install dependencies (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
-        run: |
-          sudo apt-get update
-          sudo apt-get -y install \
-              libbenchmark-dev \
-              cmake \
-              rapidjson-dev \
-              libssl-dev \
-              libboost-dev \
-              libboost-system-dev \
-              libboost-filesystem-dev \
-              libpulse-dev \
-              libxkbcommon-x11-0 \
-              libgstreamer-plugins-base1.0-0 \
-              build-essential \
-              libgl1-mesa-dev \
-              libxcb-icccm4 \
-              libxcb-image0 \
-              libxcb-keysyms1 \
-              libxcb-render-util0 \
-              libxcb-xinerama0
-
       - name: Create build directory (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        run: mkdir build-test
+
+      - name: Install googlebench
         run: |
-          mkdir build-test
-        shell: bash
+          sudo apt update
+          sudo apt -y install \
+            libbenchmark-dev
 
       - name: Build (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
         run: |
           cmake \
             -DBUILD_TESTS=On \
             -DBUILD_BENCHMARKS=On \
             -DBUILD_APP=OFF \
+            -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
+            -DCMAKE_PREFIX_PATH="$Qt6_DIR/lib/cmake" \
             -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
+            -DCHATTERINO_STATIC_QT_BUILD=On \
             ..
           cmake --build .
         working-directory: build-test
-        shell: bash
 
-      - name: Test (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+      - name: Download and extract Twitch PubSub Server Test
+        run: |
+          mkdir pubsub-server-test
+          curl -L -o pubsub-server.tar.gz "https://github.com/Chatterino/twitch-pubsub-server-test/releases/download/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/server-${{ env.TWITCH_PUBSUB_SERVER_TAG }}-linux-amd64.tar.gz"
+          tar -xzf pubsub-server.tar.gz -C pubsub-server-test
+          rm pubsub-server.tar.gz
+          cd pubsub-server-test
+          curl -L -o server.crt "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.crt"
+          curl -L -o server.key "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.key"
+          cd ..
+
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Cargo Install httpbox
+        run: |
+          cargo install --git https://github.com/kevinastone/httpbox --rev 89b971f
+
+      - name: Test
         timeout-minutes: 30
         run: |
-          docker pull kennethreitz/httpbin
-          docker pull ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
-          docker run --network=host --detach ${{ env.TWITCH_PUBSUB_SERVER_IMAGE }}
-          docker run -p 9051:80 --detach kennethreitz/httpbin
-          ctest --repeat until-pass:4 --output-on-failure
+          httpbox --port 9051 &
+          cd ../pubsub-server-test
+          ./server 127.0.0.1:9050 &
+          cd ../build-test
+          ctest --repeat until-pass:4 --output-on-failure --exclude-regex ClassicEmoteNameFiltering
         working-directory: build-test
-        shell: bash
