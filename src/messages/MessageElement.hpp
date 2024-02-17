@@ -310,14 +310,9 @@ public:
 
     Link getLink() const override;
 
-    [[nodiscard]] const LinkInfo &linkInfo() const
+    [[nodiscard]] LinkInfo *linkInfo()
     {
-        return this->linkInfo_;
-    }
-
-    [[nodiscard]] LinkInfo &linkInfo()
-    {
-        return this->linkInfo_;
+        return &this->linkInfo_;
     }
 
 private:

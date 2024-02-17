@@ -345,6 +345,8 @@ set(SOURCE_FILES
 
         providers/links/LinkInfo.cpp
         providers/links/LinkInfo.hpp
+        providers/links/LinkResolver.cpp
+        providers/links/LinkResolver.hpp
 
         providers/liveupdates/BasicPubSubClient.hpp
         providers/liveupdates/BasicPubSubManager.hpp

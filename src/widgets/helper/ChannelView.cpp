@@ -19,6 +19,8 @@
 #include "messages/MessageElement.hpp"
 #include "messages/MessageThread.hpp"
 #include "providers/colors/ColorProvider.hpp"
+#include "providers/links/LinkInfo.hpp"
+#include "providers/links/LinkResolver.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -1940,9 +1942,12 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             auto *linkElement = dynamic_cast<LinkElement *>(element);
             if (linkElement)
             {
-                linkElement->linkInfo().ensureLoadingStarted();
-                this->tooltipWidget_->set(&linkElement->linkInfo(),
-                                          {thumbnailSize, thumbnailSize});
+                if (linkElement->linkInfo()->isPending())
+                {
+                    getIApp()->getLinkResolver()->resolve(
+                        linkElement->linkInfo());
+                }
+                this->setLinkInfoTooltip(linkElement->linkInfo());
             }
         }
 
@@ -3058,6 +3063,64 @@ bool ChannelView::canReplyToMessages() const
     }
 
     return true;
+}
+
+void ChannelView::setLinkInfoTooltip(LinkInfo *info)
+{
+    assert(info);
+
+    auto thumbnailSize = getSettings()->thumbnailSize;
+
+    ImagePtr thumbnail;
+    if (info->hasThumbnail() && thumbnailSize > 0)
+    {
+        if (isInStreamerMode() && getSettings()->streamerModeHideLinkThumbnails)
+        {
+            thumbnail = Image::fromResourcePixmap(getResources().streamerMode);
+        }
+        else
+        {
+            thumbnail = info->thumbnail();
+        }
+    }
+
+    this->tooltipWidget_->setOne({
+        .image = thumbnail,
+        .text = info->tooltip(),
+        .customWidth = thumbnailSize,
+        .customHeight = thumbnailSize,
+    });
+
+    if (info->isLoaded())
+    {
+        this->pendingLinkInfo_.clear();
+        return;  // Either resolved or errored (can't change anymore)
+    }
+
+    // listen to changes
+
+    if (this->pendingLinkInfo_.data() == info)
+    {
+        return;  // same info - already registered
+    }
+
+    if (this->pendingLinkInfo_)
+    {
+        QObject::disconnect(this->pendingLinkInfo_.data(),
+                            &LinkInfo::stateChanged, this, nullptr);
+    }
+    QObject::connect(info, &LinkInfo::stateChanged, this,
+                     &ChannelView::pendingLinkInfoStateChanged);
+    this->pendingLinkInfo_ = info;
+}
+
+void ChannelView::pendingLinkInfoStateChanged()
+{
+    if (!this->pendingLinkInfo_)
+    {
+        return;
+    }
+    this->setLinkInfoTooltip(this->pendingLinkInfo_.data());
 }
 
 }  // namespace chatterino

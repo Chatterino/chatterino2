@@ -18,6 +18,23 @@ class LinkInfo : public QObject
     Q_OBJECT
 
 public:
+    /// @brief the state of a link info
+    ///
+    /// The state of a link can only increase. For example, it's not possible
+    /// for the link to change from "Resolved" to "Loading".
+    enum class State {
+        /// @brief The object was created, no info is resolved
+        ///
+        /// This is the initial state
+        Created,
+        /// Info is currently loading
+        Loading,
+        /// Info has been resolved and the properties have been updated
+        Resolved,
+        /// There has been an error resolving the link info (e.g. timeout)
+        Errored,
+    };
+
     /// @brief Constructs a new link info for a URL
     ///
     /// This doesn't load any link info.
@@ -37,13 +54,27 @@ public:
     /// link is resolved.
     [[nodiscard]] QString url() const;
 
-    /// Returns true if this link has been resolved
-    [[nodiscard]] bool isResolved() const;
+    /// @brief The URL of this link as seen in the message
+    ///
+    /// If the "unshortLinks" setting doesn't affect this URL.
+    [[nodiscard]] QString originalUrl() const;
+
+    /// Returns the current state
+    [[nodiscard]] State state() const;
+
+    /// Returns true if this link has not yet been resolved (it's "Created")
+    [[nodiscard]] bool isPending() const;
 
     /// Returns true if the info is loading
     [[nodiscard]] bool isLoading() const;
 
-    /// Returns true if the info failed to load
+    /// Returns true if the info is loaded (resolved or errored)
+    [[nodiscard]] bool isLoaded() const;
+
+    /// Returns true if this link has been resolved
+    [[nodiscard]] bool isResolved() const;
+
+    /// Returns true if the info failed to resolve
     [[nodiscard]] bool hasError() const;
 
     /// Returns true if this link has a thumbnail
@@ -63,43 +94,47 @@ public:
     /// @pre The caller must check #hasThumbnail() before calling this method
     [[nodiscard]] ImagePtr thumbnail() const;
 
-    /// @brief Starts to resolve the link if it hasn't been resolved yet
-    ///
-    /// It is safe to call this more than once and during loading.
-    /// The "linkInfoTooltip" setting is checked before any request is made.
-    ///
-    /// #lifecycleChanged() is emitted after the link updates its state.
-    void ensureLoadingStarted();
-
-signals:
-    /// Emitted when this link's lifecycle changes
-    void lifecycleChanged();
-
-private:
-    enum class Lifecycle {
-        /// @brief The object was created, no info is resolved
-        ///
-        /// This is the initial state
-        Created,
-        /// Info is currently loading
-        Loading,
-        /// Info has been resolved and the properties have been updated
-        Resolved,
-        /// There has been an error loading the link info (e.g. timeout)
-        Errored,
-    };
-
-    /// @brief Updates the lifecycle and emits #lifecycleChanged accordingly
+    /// @brief Updates the state and emits #stateChanged accordingly
     ///
     /// @pre The caller must be in the GUI thread.
-    void setLifecycle(Lifecycle lifecycle);
+    /// @pre @a state must be greater or equal to the current state.
+    /// @see #state(), #stateChanged
+    void setState(State state);
 
+    /// @brief Updates the resolved url of this link
+    ///
+    /// @pre The caller must be in the GUI thread.
+    /// @see #url()
+    void setResolvedUrl(QString resolvedUrl);
+
+    /// @brief Updates the tooltip of this link
+    ///
+    /// @pre The caller must be in the GUI thread.
+    /// @see #tooltip()
+    void setTooltip(QString tooltip);
+
+    /// @brief Updates the thumbnail of this link
+    ///
+    /// The thumbnail is allowed to be empty or nullptr.
+    ///
+    /// @pre The caller must be in the GUI thread.
+    /// @see #hasThumbnail(), #thumbnail()
+    void setThumbnail(ImagePtr thumbnail);
+
+signals:
+    /// @brief Emitted when this link's state changes
+    ///
+    /// @param state The new state
+    void stateChanged(State state);
+
+private:
+    const QString originalUrl_;
     QString url_;
 
     QString tooltip_;
     ImagePtr thumbnail_;
 
-    Lifecycle lifecycle_ = Lifecycle::Created;
+    State state_ = State::Created;
 };
 
 }  // namespace chatterino

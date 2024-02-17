@@ -99,19 +99,11 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
 
 void TooltipWidget::setOne(const TooltipEntry &entry, TooltipStyle style)
 {
-    this->clearLinkInfo();
-    this->setEntries({entry}, style);
+    this->set({entry}, style);
 }
 
 void TooltipWidget::set(const std::vector<TooltipEntry> &entries,
                         TooltipStyle style)
-{
-    this->clearLinkInfo();
-    this->setEntries(entries, style);
-}
-
-void TooltipWidget::setEntries(const std::vector<TooltipEntry> &entries,
-                               TooltipStyle style)
 {
     this->setCurrentStyle(style);
 
@@ -139,64 +131,6 @@ void TooltipWidget::setEntries(const std::vector<TooltipEntry> &entries,
         }
     }
     this->adjustSize();
-}
-
-void TooltipWidget::clearLinkInfo()
-{
-    if (this->linkInfo_)
-    {
-        QObject::disconnect(this->linkInfo_.data(), &LinkInfo::lifecycleChanged,
-                            this, nullptr);
-    }
-    this->linkInfo_ = {};
-}
-
-void TooltipWidget::set(LinkInfo *info, QSize customSize)
-{
-    if (!info)
-    {
-        return;
-    }
-
-    auto apply = [this, customSize] {
-        if (!this->linkInfo_)
-        {
-            return;
-        }
-
-        ImagePtr thumbnail;
-        if (this->linkInfo_->hasThumbnail() && !customSize.isNull())
-        {
-            if (isInStreamerMode() &&
-                getSettings()->streamerModeHideLinkThumbnails)
-            {
-                thumbnail =
-                    Image::fromResourcePixmap(getResources().streamerMode);
-            }
-            else
-            {
-                thumbnail = linkInfo_->thumbnail();
-            }
-        }
-
-        this->setEntries({{
-                             .image = thumbnail,
-                             .text = this->linkInfo_->tooltip(),
-                             .customWidth = customSize.width(),
-                             .customHeight = customSize.height(),
-                         }},
-                         TooltipStyle::Vertical);
-    };
-
-    if (info != this->linkInfo_.data())
-    {
-        this->clearLinkInfo();
-        this->linkInfo_ = info;
-        QObject::connect(info, &LinkInfo::lifecycleChanged, this, [apply] {
-            apply();
-        });
-    }
-    apply();
 }
 
 void TooltipWidget::setVisibleEntries(int n)

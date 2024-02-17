@@ -8,6 +8,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
+#include "providers/links/LinkResolver.hpp"
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "singletons/Emotes.hpp"
@@ -637,7 +638,7 @@ void MessageBuilder::addLink(const ParsedLink &parsedLink)
                             .original = matchedLink},
         MessageElementFlag::Text, textColor);
     el->setLink({Link::Url, matchedLink});
-    el->linkInfo().ensureLoadingStarted();
+    getIApp()->getLinkResolver()->resolve(el->linkInfo());
 }
 
 void MessageBuilder::addIrcMessageText(const QString &text)
