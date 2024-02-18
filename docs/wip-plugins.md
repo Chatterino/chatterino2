@@ -48,6 +48,13 @@ to typecheck your plugins. There is a `chatterino.d.ts` file describing the API
 in this directory. However, this has several drawbacks like harder debugging at
 runtime.
 
+## LuaLS type definitions
+
+Type definitions for LuaLS are available in
+[the `/plugin-meta.lua` file](./plugin-meta.lua). These are generated from [the C++
+headers](../src/controllers/plugins/LuaAPI.hpp) of Chatterino using [a
+script](../scripts/make_luals_meta.py).
+
 ## API
 
 The following parts of the Lua standard library are loaded:
