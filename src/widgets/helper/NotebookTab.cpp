@@ -529,18 +529,19 @@ void NotebookTab::paintEvent(QPaintEvent *)
     if ((this->isLive_ || this->isRerun_) && getSettings()->showTabLive)
     {
         // Live overrides rerun
+        QBrush b;
         if (this->isLive_)
         {
             painter.setPen(QColor(Qt::GlobalColor::red));
+            b.setColor(QColor(Qt::GlobalColor::red));
         }
         else
         {
             painter.setPen(QColor(Qt::GlobalColor::yellow));
+            b.setColor(QColor(Qt::GlobalColor::yellow));
         }
 
         painter.setRenderHint(QPainter::Antialiasing);
-        QBrush b;
-        b.setColor(QColor(Qt::GlobalColor::red));
         b.setStyle(Qt::SolidPattern);
         painter.setBrush(b);
 
