@@ -48,6 +48,13 @@ to typecheck your plugins. There is a `chatterino.d.ts` file describing the API
 in this directory. However, this has several drawbacks like harder debugging at
 runtime.
 
+## LuaLS type definitions
+
+Type definitions for LuaLS are available in
+[the `/plugin-meta.lua` file](./plugin-meta.lua). These are generated from [the C++
+headers](../src/controllers/plugins/LuaAPI.hpp) of Chatterino using [a
+script](../scripts/make_luals_meta.py).
+
 ## API
 
 The following parts of the Lua standard library are loaded:
@@ -97,14 +104,14 @@ command with this name.
 Example:
 
 ```lua
-function cmdWords(ctx)
+function cmd_words(ctx)
     -- ctx contains:
     -- words - table of words supplied to the command including the trigger
-    -- channel_name - name of the channel the command is being run in
-    c2.system_msg(ctx.channel_name, "Words are: " .. table.concat(ctx.words, " "))
+    -- channel - the channel the command is being run in
+    channel:add_system_message("Words are: " .. table.concat(ctx.words, " "))
 end
 
-c2.register_command("/words", cmdWords)
+c2.register_command("/words", cmd_words)
 ```
 
 Limitations/known issues:
@@ -149,40 +156,174 @@ c2.register_callback(
 )
 ```
 
-#### `send_msg(channel, text)`
+#### `Platform` enum
 
-Sends a message to `channel` with the specified text. Also executes commands.
+This table describes platforms that can be accessed. Chatterino supports IRC
+however plugins do not yet have explicit access to get IRC channels objects.
+The values behind the names may change, do not count on them. It has the
+following keys:
+
+- `Twitch`
+
+#### `ChannelType` enum
+
+This table describes channel types Chatterino supports. The values behind the
+names may change, do not count on them. It has the following keys:
+
+- `None`
+- `Direct`
+- `Twitch`
+- `TwitchWhispers`
+- `TwitchWatching`
+- `TwitchMentions`
+- `TwitchLive`
+- `TwitchAutomod`
+- `TwitchEnd`
+- `Irc`
+- `Misc`
+
+#### `Channel`
+
+This is a type that represents a channel. Existence of this object doesn't
+force Chatterino to hold the channel open. Should the user close the last split
+holding this channel open, your Channel object will expire. You can check for
+this using the `Channel:is_valid()` function. Using any other function on an
+expired Channel yields an error. Using any `Channel` member function on a
+non-`Channel` table also yields an error.
+
+Some functions make sense only for Twitch channel, these yield an error when
+used on non-Twitch channels. Special channels while marked as
+`is_twitch_channel() = true` do not have these functions. To check if a channel
+is an actual Twitch chatroom use `Channel:get_type()` instead of
+`Channel:is_twitch_channel()`.
+
+##### `Channel:by_name(name, platform)`
+
+Finds a channel given by `name` on `platform` (see [`Platform` enum](#Platform-enum)). Returns the channel or `nil` if not open.
+
+Some miscellaneous channels are marked as if they are specifically Twitch channels:
+
+- `/whispers`
+- `/mentions`
+- `/watching`
+- `/live`
+- `/automod`
 
 Example:
 
 ```lua
-function cmdShout(ctx)
+local pajladas = c2.Channel.by_name("pajlada", c2.Platform.Twitch)
+```
+
+##### `Channel:by_twitch_id(id)`
+
+Finds a channel given by the string representation of the owner's Twitch user ID. Returns the channel or `nil` if not open.
+
+Example:
+
+```lua
+local pajladas = c2.Channel.by_twitch_id("11148817")
+```
+
+##### `Channel:get_name()`
+
+On Twitch returns the lowercase login name of the channel owner. On IRC returns the normalized channel name.
+
+Example:
+
+```lua
+-- Note: if the channel is not open this errors
+pajladas:get_name()  -- "pajlada"
+```
+
+##### `Channel:get_type()`
+
+Returns the channel's type. See [`ChannelType` enum](#ChannelType-enum).
+
+##### `Channel:get_display_name()`
+
+Returns the channel owner's display name. This can contain characters that are not lowercase and even non-ASCII.
+
+Example:
+
+```lua
+local saddummys = c2.Channel.by_name("saddummy")
+saddummys:get_display_name() -- "서새봄냥"
+```
+
+<!-- F Korean Twitch, apparently you were not profitable enough -->
+
+##### `Channel:send_message(message[, execute_commands])`
+
+Sends a message to the channel with the given text. If `execute_commands` is
+not present or `false` commands will not be executed client-side, this affects
+all user commands and all Twitch commands except `/me`.
+
+Examples:
+
+```lua
+-- times out @Mm2PL
+pajladas:send_message("/timeout mm2pl 1s test", true)
+
+-- results in a "Unknown command" error from Twitch
+pajladas:send_message("/timeout mm2pl 1s test")
+
+-- Given a user command "hello":
+-- this will execute it
+pajladas:send_message("hello", true)
+-- this will send "hello" literally, bypassing commands
+pajladas:send_message("hello")
+
+function cmd_shout(ctx)
     table.remove(ctx.words, 1)
     local output = table.concat(ctx.words, " ")
-    c2.send_msg(ctx.channel_name, string.upper(output))
+    ctx.channel:send_message(string.upper(output))
 end
-c2.register_command("/shout", cmdShout)
+c2.register_command("/shout", cmd_shout)
 ```
 
 Limitations/Known issues:
 
 - It is possible to trigger your own Lua command with this causing a potentially infinite loop.
 
-#### `system_msg(channel, text)`
+##### `Channel:add_system_message(message)`
 
-Creates a system message and adds it to the twitch channel specified by
-`channel`. Returns `true` if everything went ok, `false` otherwise. It will
-throw an error if the number of arguments received doesn't match what it
-expects.
+Shows a system message in the channel with the given text.
 
 Example:
 
 ```lua
-local ok = c2.system_msg("pajlada", "test")
-if (not ok)
-    -- channel not found
-end
+pajladas:add_system_message("Hello, world!")
 ```
+
+##### `Channel:is_twitch_channel()`
+
+Returns `true` if the channel is a Twitch channel, that is its type name has
+the `Twitch` prefix. This returns `true` for special channels like Mentions.
+You might want `Channel:get_type() == "Twitch"` if you want to use
+Twitch-specific functions.
+
+##### `Channel:get_twitch_id()`
+
+Returns the string form of the channel owner's Twitch user ID.
+
+Example:
+
+```lua
+pajladas:get_twitch_id() -- "11148817"
+```
+
+##### `Channel:is_broadcaster()`
+
+Returns `true` if the channel is owned by the current user.
+
+##### `Channel:is_mod()`
+
+Returns `true` if the channel can be moderated by the current user.
+
+##### `Channel:is_vip()`
+
+Returns `true` if the current user is a VIP in the channel.
 
 ### Changed globals
 
