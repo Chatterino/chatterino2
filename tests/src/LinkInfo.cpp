@@ -1,7 +1,7 @@
 #include "providers/links/LinkInfo.hpp"
 
 #include "common/Literals.hpp"
-#include "SignalSply.hpp"
+#include "SignalSpy.hpp"
 
 #include <gtest/gtest.h>
 

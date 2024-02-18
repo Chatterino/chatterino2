@@ -9,9 +9,9 @@ class ILinkResolver
 public:
     ILinkResolver() = default;
     virtual ~ILinkResolver() = default;
-    ILinkResolver(const ILinkResolver &) = default;
+    ILinkResolver(const ILinkResolver &) = delete;
     ILinkResolver(ILinkResolver &&) = delete;
-    ILinkResolver &operator=(const ILinkResolver &) = default;
+    ILinkResolver &operator=(const ILinkResolver &) = delete;
     ILinkResolver &operator=(ILinkResolver &&) = delete;
 
     virtual void resolve(LinkInfo *info) = 0;

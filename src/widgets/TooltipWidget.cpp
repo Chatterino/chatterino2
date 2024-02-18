@@ -3,10 +3,7 @@
 #include "Application.hpp"
 #include "messages/Image.hpp"
 #include "singletons/Fonts.hpp"
-#include "singletons/Resources.hpp"
-#include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/StreamerMode.hpp"
 
 #include <QPainter>
 
