@@ -160,7 +160,7 @@ c2.register_callback(
 
 This table describes platforms that can be accessed. Chatterino supports IRC
 however plugins do not yet have explicit access to get IRC channels objects.
-The values behind the names may change, do not count on them.  It has the
+The values behind the names may change, do not count on them. It has the
 following keys:
 
 - `Twitch`
@@ -168,7 +168,7 @@ following keys:
 #### `ChannelType` enum
 
 This table describes channel types Chatterino supports. The values behind the
-names may change, do not count on them.  It has the following keys:
+names may change, do not count on them. It has the following keys:
 
 - `None`
 - `Direct`
@@ -202,6 +202,7 @@ is an actual Twitch chatroom use `Channel:get_type()` instead of
 Finds a channel given by `name` on `platform` (see [`Platform` enum](#Platform-enum)). Returns the channel or `nil` if not open.
 
 Some miscellaneous channels are marked as if they are specifically Twitch channels:
+
 - `/whispers`
 - `/mentions`
 - `/watching`
@@ -209,6 +210,7 @@ Some miscellaneous channels are marked as if they are specifically Twitch channe
 - `/automod`
 
 Example:
+
 ```lua
 local pajladas = c2.Channel.by_name("pajlada", c2.Platform.Twitch)
 ```
@@ -218,6 +220,7 @@ local pajladas = c2.Channel.by_name("pajlada", c2.Platform.Twitch)
 Finds a channel given by the string representation of the owner's Twitch user ID. Returns the channel or `nil` if not open.
 
 Example:
+
 ```lua
 local pajladas = c2.Channel.by_twitch_id("11148817")
 ```
@@ -227,6 +230,7 @@ local pajladas = c2.Channel.by_twitch_id("11148817")
 On Twitch returns the lowercase login name of the channel owner. On IRC returns the normalized channel name.
 
 Example:
+
 ```lua
 -- Note: if the channel is not open this errors
 pajladas:get_name()  -- "pajlada"
@@ -241,6 +245,7 @@ Returns the channel's type. See [`ChannelType` enum](#ChannelType-enum).
 Returns the channel owner's display name. This can contain characters that are not lowercase and even non-ASCII.
 
 Example:
+
 ```lua
 local saddummys = c2.Channel.by_name("saddummy")
 saddummys:get_display_name() -- "서새봄냥"
@@ -255,6 +260,7 @@ not present or `false` commands will not be executed client-side, this affects
 all user commands and all Twitch commands except `/me`.
 
 Examples:
+
 ```lua
 -- times out @Mm2PL
 pajladas:send_message("/timeout mm2pl 1s test")
@@ -280,12 +286,12 @@ Limitations/Known issues:
 
 - It is possible to trigger your own Lua command with this causing a potentially infinite loop.
 
-
 ##### `Channel:add_system_message(message)`
 
 Shows a system message in the channel with the given text.
 
 Example:
+
 ```lua
 pajladas:add_system_message("Hello, world!")
 ```
@@ -302,6 +308,7 @@ Twitch-specific functions.
 Returns the string form of the channel owner's Twitch user ID.
 
 Example:
+
 ```lua
 pajladas:get_twitch_id() -- "11148817"
 ```
