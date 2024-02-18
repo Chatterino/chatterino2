@@ -1836,7 +1836,7 @@ void TwitchChannel::upsertPersonalSeventvEmotes(
     /// or, if they're zero-width, to a layered emote element.
     const auto upsertWords = [&](MessageElementVec &elements,
                                  TextElement *textElement) {
-        std::vector<TextElement::Word> words;
+        QStringList words;
 
         /// Appends a text element with the pending @a words
         /// and clears the vector.
@@ -1900,7 +1900,7 @@ void TwitchChannel::upsertPersonalSeventvEmotes(
         // Find all words that match a personal emote and replace them with emotes
         for (const auto &word : textElement->words())
         {
-            auto emoteIt = emoteMap->find(EmoteName{word.text});
+            auto emoteIt = emoteMap->find(EmoteName{word});
             if (emoteIt == emoteMap->end())
             {
                 words.emplace_back(word);
