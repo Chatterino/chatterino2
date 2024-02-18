@@ -84,9 +84,9 @@ MessageLayoutElement *MessageLayoutElement::setTrailingSpace(bool value)
     return this;
 }
 
-MessageLayoutElement *MessageLayoutElement::setLink(const Link &_link)
+MessageLayoutElement *MessageLayoutElement::setLink(const Link &link)
 {
-    this->link_ = _link;
+    this->link_ = link;
     return this;
 }
 
@@ -96,9 +96,13 @@ MessageLayoutElement *MessageLayoutElement::setText(const QString &_text)
     return this;
 }
 
-const Link &MessageLayoutElement::getLink() const
+Link MessageLayoutElement::getLink() const
 {
-    return this->link_;
+    if (this->link_)
+    {
+        return *this->link_;
+    }
+    return this->creator_.getLink();
 }
 
 const QString &MessageLayoutElement::getText() const
@@ -411,14 +415,6 @@ TextLayoutElement::TextLayoutElement(MessageElement &_creator, QString &_text,
     , scale_(_scale)
 {
     this->setText(_text);
-}
-
-void TextLayoutElement::listenToLinkChanges()
-{
-    this->managedConnections_.managedConnect(
-        static_cast<TextElement &>(this->getCreator()).linkChanged, [this]() {
-            this->setLink(this->getCreator().getLink());
-        });
 }
 
 void TextLayoutElement::addCopyTextToString(QString &str, uint32_t from,

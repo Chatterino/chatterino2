@@ -57,6 +57,7 @@ class CrashHandler;
 class BttvEmotes;
 class FfzEmotes;
 class SeventvEmotes;
+class ILinkResolver;
 
 class IApplication
 {
@@ -101,6 +102,7 @@ public:
     virtual BttvEmotes *getBttvEmotes() = 0;
     virtual FfzEmotes *getFfzEmotes() = 0;
     virtual SeventvEmotes *getSeventvEmotes() = 0;
+    virtual ILinkResolver *getLinkResolver() = 0;
 };
 
 class Application : public IApplication
@@ -170,6 +172,7 @@ private:
     std::unique_ptr<FfzEmotes> ffzEmotes;
     std::unique_ptr<SeventvEmotes> seventvEmotes;
     const std::unique_ptr<Logging> logging;
+    std::unique_ptr<ILinkResolver> linkResolver;
 #ifdef CHATTERINO_HAVE_PLUGINS
     PluginController *const plugins{};
 #endif
@@ -229,6 +232,8 @@ public:
     BttvEmotes *getBttvEmotes() override;
     FfzEmotes *getFfzEmotes() override;
     SeventvEmotes *getSeventvEmotes() override;
+
+    ILinkResolver *getLinkResolver() override;
 
     pajlada::Signals::NoArgSignal streamerModeChanged;
 
