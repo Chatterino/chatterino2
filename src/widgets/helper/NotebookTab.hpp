@@ -48,6 +48,13 @@ public:
     bool setLive(bool isLive);
 
     /**
+     * @brief Sets the rerun status of this tab
+     *
+     * Returns true if the rerun status was changed, false if nothing changed.
+     **/
+    bool setRerun(bool isRerun);
+
+    /**
      * @brief Returns true if any split in this tab is live
      **/
     bool isLive() const;
@@ -121,6 +128,7 @@ private:
     QAction *highlightNewMessagesAction_;
 
     bool isLive_{};
+    bool isRerun_{};
 
     int growWidth_ = 0;
 
