@@ -138,6 +138,7 @@ public:
     const QString &popoutPlayerUrl();
     int chatterCount() const;
     bool isLive() const override;
+    bool isRerun() const override;
     QString roomId() const;
     SharedAccessGuard<const RoomModes> accessRoomModes() const;
     SharedAccessGuard<const StreamStatus> accessStreamStatus() const;
