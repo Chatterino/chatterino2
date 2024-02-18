@@ -263,16 +263,16 @@ Examples:
 
 ```lua
 -- times out @Mm2PL
-pajladas:send_message("/timeout mm2pl 1s test")
+pajladas:send_message("/timeout mm2pl 1s test", true)
 
 -- results in a "Unknown command" error from Twitch
-pajladas:send_message("/timeout mm2pl 1s test", false)
+pajladas:send_message("/timeout mm2pl 1s test")
 
 -- Given a user command "hello":
 -- this will execute it
-pajladas:send_message("hello")
+pajladas:send_message("hello", true)
 -- this will send "hello" literally, bypassing commands
-pajladas:send_message("hello", false)
+pajladas:send_message("hello")
 
 function cmd_shout(ctx)
     table.remove(ctx.words, 1)
