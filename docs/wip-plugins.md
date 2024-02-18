@@ -104,14 +104,14 @@ command with this name.
 Example:
 
 ```lua
-function cmdWords(ctx)
+function cmd_words(ctx)
     -- ctx contains:
     -- words - table of words supplied to the command including the trigger
-    -- channel_name - name of the channel the command is being run in
-    c2.system_msg(ctx.channel_name, "Words are: " .. table.concat(ctx.words, " "))
+    -- channel - the channel the command is being run in
+    channel:add_system_message("Words are: " .. table.concat(ctx.words, " "))
 end
 
-c2.register_command("/words", cmdWords)
+c2.register_command("/words", cmd_words)
 ```
 
 Limitations/known issues:
