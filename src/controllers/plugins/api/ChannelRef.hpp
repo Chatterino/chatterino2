@@ -271,5 +271,6 @@ struct LuaStreamStatus {
 namespace chatterino::lua {
 StackIdx push(lua_State *L, const api::LuaRoomModes &modes);
 StackIdx push(lua_State *L, const api::LuaStreamStatus &status);
+StackIdx push(lua_State *L, ChannelPtr chn);
 }  // namespace chatterino::lua
 #endif
