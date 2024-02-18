@@ -221,6 +221,13 @@ public:
         return nullptr;
     }
 
+    ILinkResolver *getLinkResolver() override
+    {
+        assert(false && "EmptyApplication::getLinkResolver was called without "
+                        "being initialized");
+        return nullptr;
+    }
+
 private:
     Paths paths_;
     Args args_;
