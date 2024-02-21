@@ -20,6 +20,10 @@ const auto &LOG = chatterinoFfzemotes;
 const QString CHANNEL_HAS_NO_EMOTES(
     "This channel has no FrankerFaceZ channel emotes.");
 
+// FFZ doesn't provide any data on the size for room badges,
+// so we assume 18x18 (same as a Twitch badge)
+constexpr QSize BASE_BADGE_SIZE(18, 18);
+
 Url getEmoteLink(const QJsonObject &urls, const QString &emoteScale)
 {
     auto emote = urls[emoteScale];
@@ -33,20 +37,23 @@ Url getEmoteLink(const QJsonObject &urls, const QString &emoteScale)
     return parseFfzUrl(emote.toString());
 }
 
-void fillInEmoteData(const QJsonObject &urls, const EmoteName &name,
-                     const QString &tooltip, Emote &emoteData)
+void fillInEmoteData(const QJsonObject &emote, const QJsonObject &urls,
+                     const EmoteName &name, const QString &tooltip,
+                     Emote &emoteData)
 {
     auto url1x = getEmoteLink(urls, "1");
     auto url2x = getEmoteLink(urls, "2");
     auto url3x = getEmoteLink(urls, "4");
+    QSize baseSize(emote["width"].toInt(28), emote["height"].toInt(28));
 
     //, code, tooltip
     emoteData.name = name;
     emoteData.images = ImageSet{
-        Image::fromUrl(url1x, 1),
-        url2x.string.isEmpty() ? Image::getEmpty() : Image::fromUrl(url2x, 0.5),
+        Image::fromUrl(url1x, 1, baseSize),
+        url2x.string.isEmpty() ? Image::getEmpty()
+                               : Image::fromUrl(url2x, 0.5, baseSize * 2),
         url3x.string.isEmpty() ? Image::getEmpty()
-                               : Image::fromUrl(url3x, 0.25)};
+                               : Image::fromUrl(url3x, 0.25, baseSize * 4)};
     emoteData.tooltip = {tooltip};
 }
 
@@ -78,7 +85,7 @@ void parseEmoteSetInto(const QJsonObject &emoteSet, const QString &kind,
         }
 
         Emote emote;
-        fillInEmoteData(urls, name,
+        fillInEmoteData(emoteJson, urls, name,
                         QString("%1<br>%2 FFZ Emote<br>By: %3")
                             .arg(name.string, kind, author.string),
                         emote);
@@ -132,13 +139,13 @@ std::optional<EmotePtr> parseAuthorityBadge(const QJsonObject &badgeUrls,
         auto authorityBadge3x = getEmoteLink(badgeUrls, "4");
 
         auto authorityBadgeImageSet = ImageSet{
-            Image::fromUrl(authorityBadge1x, 1),
+            Image::fromUrl(authorityBadge1x, 1, BASE_BADGE_SIZE),
             authorityBadge2x.string.isEmpty()
                 ? Image::getEmpty()
-                : Image::fromUrl(authorityBadge2x, 0.5),
+                : Image::fromUrl(authorityBadge2x, 0.5, BASE_BADGE_SIZE * 2),
             authorityBadge3x.string.isEmpty()
                 ? Image::getEmpty()
-                : Image::fromUrl(authorityBadge3x, 0.25),
+                : Image::fromUrl(authorityBadge3x, 0.25, BASE_BADGE_SIZE * 4),
         };
 
         authorityBadge = std::make_shared<Emote>(Emote{

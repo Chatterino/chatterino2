@@ -3,6 +3,7 @@
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
 #include "messages/Emote.hpp"
+#include "messages/Image.hpp"
 
 #include <QJsonArray>
 #include <QJsonObject>
@@ -44,12 +45,23 @@ void ChatterinoBadges::loadChatterinoBadges()
                  jsonRoot.value("badges").toArray())
             {
                 auto jsonBadge = jsonBadgeValue.toObject();
+                // The sizes for the images are only an estimation, there might
+                // be badges with different sizes.
+                constexpr QSize baseSize(18, 18);
                 auto emote = Emote{
                     .name = EmoteName{},
                     .images =
-                        ImageSet{Url{jsonBadge.value("image1").toString()},
-                                 Url{jsonBadge.value("image2").toString()},
-                                 Url{jsonBadge.value("image3").toString()}},
+                        ImageSet{
+                            Image::fromUrl(
+                                Url{jsonBadge.value("image1").toString()}, 1.0,
+                                baseSize),
+                            Image::fromUrl(
+                                Url{jsonBadge.value("image2").toString()}, 0.5,
+                                baseSize * 2),
+                            Image::fromUrl(
+                                Url{jsonBadge.value("image3").toString()}, 0.25,
+                                baseSize * 4),
+                        },
                     .tooltip = Tooltip{jsonBadge.value("tooltip").toString()},
                     .homePage = Url{},
                 };
