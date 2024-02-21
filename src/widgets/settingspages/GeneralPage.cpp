@@ -1032,6 +1032,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        "Find mentions of users in chat without the @ prefix.");
     layout.addCheckbox("Show username autocompletion popup menu",
                        s.showUsernameCompletionMenu);
+    layout.addCheckbox(
+        "Always show the broadcaster first on the autocompletion popup menu",
+        s.showBroadcasterUsernameFirst);
     const QStringList usernameDisplayModes = {"Username", "Localized name",
                                               "Username and localized name"};
 

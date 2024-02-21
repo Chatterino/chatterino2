@@ -58,7 +58,16 @@ void UserSource::initializeFromChannel(const Channel *channel)
         return;
     }
 
-    this->items_ = tc->accessChatters()->all();
+    if (getSettings()->showBroadcasterUsernameFirst)
+    {
+        this->items_ = tc->accessChatters()->allExcept(tc->getName());
+        this->items_.insert(this->items_.begin(),
+                            {tc->getName(), tc->getDisplayName()});
+    }
+    else
+    {
+        this->items_ = tc->accessChatters()->all();
+    }
 }
 
 const std::vector<UserItem> &UserSource::output() const
