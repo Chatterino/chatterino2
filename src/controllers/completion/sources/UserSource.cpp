@@ -58,7 +58,7 @@ void UserSource::initializeFromChannel(const Channel *channel)
         return;
     }
 
-    if (getSettings()->showBroadcasterUsernameFirst)
+    if (getSettings()->alwaysIncludeBroadcasterInMentions)
     {
         this->items_ = tc->accessChatters()->allExcept(tc->getName());
         this->items_.insert(this->items_.begin(),

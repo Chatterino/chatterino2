@@ -1033,8 +1033,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Show username autocompletion popup menu",
                        s.showUsernameCompletionMenu);
     layout.addCheckbox(
-        "Always show the broadcaster first on the autocompletion popup menu",
-        s.showBroadcasterUsernameFirst);
+        "Always include broadcaster in user completions",
+        s.alwaysIncludeBroadcasterInMentions);
     const QStringList usernameDisplayModes = {"Username", "Localized name",
                                               "Username and localized name"};
 
