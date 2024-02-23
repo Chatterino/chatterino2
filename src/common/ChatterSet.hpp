@@ -39,12 +39,6 @@ public:
     /// are in mixed case if available.
     std::vector<QString> filterByPrefix(const QString &prefix) const;
 
-    /// Get all recent chatters, except the one with the matched username.
-    /// The first pair element contains the username in lowercase,
-    /// while the second pair element is the original case.
-    std::vector<std::pair<QString, QString>> allExcept(
-        const QString &userName) const;
-
     /// Get all recent chatters. The first pair element contains the username
     /// in lowercase, while the second pair element is the original case.
     std::vector<std::pair<QString, QString>> all() const;

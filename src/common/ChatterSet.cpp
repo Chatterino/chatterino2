@@ -62,22 +62,6 @@ std::vector<QString> ChatterSet::filterByPrefix(const QString &prefix) const
     return result;
 }
 
-std::vector<std::pair<QString, QString>> ChatterSet::allExcept(
-    const QString &userName) const
-{
-    std::vector<std::pair<QString, QString>> result;
-
-    for (auto &&item : this->items)
-    {
-        if (item.first != userName)
-        {
-            result.push_back(item);
-        }
-    }
-
-    return result;
-}
-
 std::vector<std::pair<QString, QString>> ChatterSet::all() const
 {
     return {this->items.begin(), this->items.end()};
