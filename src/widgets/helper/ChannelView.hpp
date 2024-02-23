@@ -12,6 +12,7 @@
 #include <pajlada/signals/signal.hpp>
 #include <QMenu>
 #include <QPaintEvent>
+#include <QPointer>
 #include <QScroller>
 #include <QTimer>
 #include <QVariantAnimation>
@@ -46,6 +47,8 @@ class MessageLayoutElement;
 class Split;
 class FilterSet;
 using FilterSetPtr = std::shared_ptr<FilterSet>;
+
+class LinkInfo;
 
 enum class PauseReason {
     Mouse,
@@ -366,6 +369,17 @@ private:
     void scrollUpdateRequested();
 
     TooltipWidget *const tooltipWidget_{};
+
+    /// Pointer to a link info that hasn't loaded yet
+    QPointer<LinkInfo> pendingLinkInfo_;
+
+    /// @brief Sets the tooltip to contain the link info
+    ///
+    /// If the info isn't loaded yet, it's tracked until it's resolved or errored.
+    void setLinkInfoTooltip(LinkInfo *info);
+
+    /// Slot for the LinkInfo::stateChanged signal.
+    void pendingLinkInfoStateChanged();
 };
 
 }  // namespace chatterino

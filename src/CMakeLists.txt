@@ -297,8 +297,6 @@ set(SOURCE_FILES
 
         providers/IvrApi.cpp
         providers/IvrApi.hpp
-        providers/LinkResolver.cpp
-        providers/LinkResolver.hpp
         providers/NetworkConfigurationProvider.cpp
         providers/NetworkConfigurationProvider.hpp
 
@@ -344,6 +342,11 @@ set(SOURCE_FILES
         providers/irc/IrcMessageBuilder.hpp
         providers/irc/IrcServer.cpp
         providers/irc/IrcServer.hpp
+
+        providers/links/LinkInfo.cpp
+        providers/links/LinkInfo.hpp
+        providers/links/LinkResolver.cpp
+        providers/links/LinkResolver.hpp
 
         providers/liveupdates/BasicPubSubClient.hpp
         providers/liveupdates/BasicPubSubManager.hpp

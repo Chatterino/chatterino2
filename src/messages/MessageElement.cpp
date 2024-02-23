@@ -63,18 +63,6 @@ MessageElement *MessageElement::setTooltip(const QString &tooltip)
     return this;
 }
 
-MessageElement *MessageElement::setThumbnail(const ImagePtr &thumbnail)
-{
-    this->thumbnail_ = thumbnail;
-    return this;
-}
-
-MessageElement *MessageElement::setThumbnailType(const ThumbnailType type)
-{
-    this->thumbnailType_ = type;
-    return this;
-}
-
 MessageElement *MessageElement::setTrailingSpace(bool value)
 {
     this->trailingSpace = value;
@@ -86,17 +74,7 @@ const QString &MessageElement::getTooltip() const
     return this->tooltip_;
 }
 
-const ImagePtr &MessageElement::getThumbnail() const
-{
-    return this->thumbnail_;
-}
-
-const MessageElement::ThumbnailType &MessageElement::getThumbnailType() const
-{
-    return this->thumbnailType_;
-}
-
-const Link &MessageElement::getLink() const
+Link MessageElement::getLink() const
 {
     return this->link_;
 }
@@ -114,12 +92,6 @@ MessageElementFlags MessageElement::getFlags() const
 void MessageElement::addFlags(MessageElementFlags flags)
 {
     this->flags_.set(flags);
-}
-
-MessageElement *MessageElement::updateLink()
-{
-    this->linkChanged.invoke();
-    return this;
 }
 
 // Empty
@@ -155,8 +127,8 @@ void ImageElement::addToContainer(MessageLayoutContainer &container,
         auto size = QSize(this->image_->width() * container.getScale(),
                           this->image_->height() * container.getScale());
 
-        container.addElement((new ImageLayoutElement(*this, this->image_, size))
-                                 ->setLink(this->getLink()));
+        container.addElement(
+            (new ImageLayoutElement(*this, this->image_, size)));
     }
 }
 
@@ -178,10 +150,8 @@ void CircularImageElement::addToContainer(MessageLayoutContainer &container,
         auto imgSize = QSize(this->image_->width(), this->image_->height()) *
                        container.getScale();
 
-        container.addElement((new ImageWithCircleBackgroundLayoutElement(
-                                  *this, this->image_, imgSize,
-                                  this->background_, this->padding_))
-                                 ->setLink(this->getLink()));
+        container.addElement(new ImageWithCircleBackgroundLayoutElement(
+            *this, this->image_, imgSize, this->background_, this->padding_));
     }
 }
 
@@ -222,8 +192,7 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
                 QSize(int(container.getScale() * image->width() * emoteScale),
                       int(container.getScale() * image->height() * emoteScale));
 
-            container.addElement(this->makeImageLayoutElement(image, size)
-                                     ->setLink(this->getLink()));
+            container.addElement(this->makeImageLayoutElement(image, size));
         }
         else
         {
@@ -284,8 +253,7 @@ void LayeredEmoteElement::addToContainer(MessageLayoutContainer &container,
             }
 
             container.addElement(this->makeImageLayoutElement(
-                                         images, individualSizes, largestSize)
-                                     ->setLink(this->getLink()));
+                images, individualSizes, largestSize));
         }
         else
         {
@@ -441,8 +409,7 @@ EmotePtr BadgeElement::getEmote() const
 MessageLayoutElement *BadgeElement::makeImageLayoutElement(
     const ImagePtr &image, const QSize &size)
 {
-    auto *element =
-        (new ImageLayoutElement(*this, image, size))->setLink(this->getLink());
+    auto *element = new ImageLayoutElement(*this, image, size);
 
     return element;
 }
@@ -459,9 +426,8 @@ MessageLayoutElement *ModBadgeElement::makeImageLayoutElement(
 {
     static const QColor modBadgeBackgroundColor("#34AE0A");
 
-    auto *element = (new ImageWithBackgroundLayoutElement(
-                         *this, image, size, modBadgeBackgroundColor))
-                        ->setLink(this->getLink());
+    auto *element = new ImageWithBackgroundLayoutElement(
+        *this, image, size, modBadgeBackgroundColor);
 
     return element;
 }
@@ -476,8 +442,7 @@ VipBadgeElement::VipBadgeElement(const EmotePtr &data,
 MessageLayoutElement *VipBadgeElement::makeImageLayoutElement(
     const ImagePtr &image, const QSize &size)
 {
-    auto *element =
-        (new ImageLayoutElement(*this, image, size))->setLink(this->getLink());
+    auto *element = new ImageLayoutElement(*this, image, size);
 
     return element;
 }
@@ -494,8 +459,7 @@ MessageLayoutElement *FfzBadgeElement::makeImageLayoutElement(
     const ImagePtr &image, const QSize &size)
 {
     auto *element =
-        (new ImageWithBackgroundLayoutElement(*this, image, size, this->color))
-            ->setLink(this->getLink());
+        new ImageWithBackgroundLayoutElement(*this, image, size, this->color);
 
     return element;
 }
@@ -507,11 +471,8 @@ TextElement::TextElement(const QString &text, MessageElementFlags flags,
     , color_(color)
     , style_(style)
 {
-    for (const auto &word : text.split(' '))
-    {
-        this->words_.push_back({word, -1});
-        // fourtf: add logic to store multiple spaces after message
-    }
+    this->words_ = text.split(' ');
+    // fourtf: add logic to store multiple spaces after message
 }
 
 void TextElement::addToContainer(MessageLayoutContainer &container,
@@ -524,39 +485,29 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
         QFontMetrics metrics =
             app->getFonts()->getFontMetrics(this->style_, container.getScale());
 
-        for (Word &word : this->words_)
+        for (const auto &word : this->words_)
         {
             auto getTextLayoutElement = [&](QString text, int width,
                                             bool hasTrailingSpace) {
                 auto color = this->color_.getColor(*app->getThemes());
                 app->getThemes()->normalizeColor(color);
 
-                auto *e = (new TextLayoutElement(
-                               *this, text, QSize(width, metrics.height()),
-                               color, this->style_, container.getScale()))
-                              ->setLink(this->getLink());
+                auto *e = new TextLayoutElement(
+                    *this, text, QSize(width, metrics.height()), color,
+                    this->style_, container.getScale());
                 e->setTrailingSpace(hasTrailingSpace);
                 e->setText(text);
 
-                // If URL link was changed,
-                // Should update it in MessageLayoutElement too!
-                if (this->getLink().type == Link::Url)
-                {
-                    static_cast<TextLayoutElement *>(e)->listenToLinkChanges();
-                }
                 return e;
             };
 
-            // fourtf: add again
-            //            if (word.width == -1) {
-            word.width = metrics.horizontalAdvance(word.text);
-            //            }
+            auto width = metrics.horizontalAdvance(word);
 
             // see if the text fits in the current line
-            if (container.fitsInLine(word.width))
+            if (container.fitsInLine(width))
             {
                 container.addElementNoLineBreak(getTextLayoutElement(
-                    word.text, word.width, this->hasTrailingSpace()));
+                    word, width, this->hasTrailingSpace()));
                 continue;
             }
 
@@ -565,35 +516,34 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
             {
                 container.breakLine();
 
-                if (container.fitsInLine(word.width))
+                if (container.fitsInLine(width))
                 {
                     container.addElementNoLineBreak(getTextLayoutElement(
-                        word.text, word.width, this->hasTrailingSpace()));
+                        word, width, this->hasTrailingSpace()));
                     continue;
                 }
             }
 
             // we done goofed, we need to wrap the text
-            QString text = word.text;
-            int textLength = text.length();
+            auto textLength = word.length();
             int wordStart = 0;
-            int width = 0;
+            width = 0;
 
             // QChar::isHighSurrogate(text[0].unicode()) ? 2 : 1
 
             for (int i = 0; i < textLength; i++)
             {
-                auto isSurrogate = text.size() > i + 1 &&
-                                   QChar::isHighSurrogate(text[i].unicode());
+                auto isSurrogate = word.size() > i + 1 &&
+                                   QChar::isHighSurrogate(word[i].unicode());
 
                 auto charWidth = isSurrogate
-                                     ? metrics.horizontalAdvance(text.mid(i, 2))
-                                     : metrics.horizontalAdvance(text[i]);
+                                     ? metrics.horizontalAdvance(word.mid(i, 2))
+                                     : metrics.horizontalAdvance(word[i]);
 
                 if (!container.fitsInLine(width + charWidth))
                 {
                     container.addElementNoLineBreak(getTextLayoutElement(
-                        text.mid(wordStart, i - wordStart), width, false));
+                        word.mid(wordStart, i - wordStart), width, false));
                     container.breakLine();
 
                     wordStart = i;
@@ -615,7 +565,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
             }
             //add the final piece of wrapped text
             container.addElementNoLineBreak(getTextLayoutElement(
-                text.mid(wordStart), width, this->hasTrailingSpace()));
+                word.mid(wordStart), width, this->hasTrailingSpace()));
         }
     }
 }
@@ -649,23 +599,16 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
             auto color = this->color_.getColor(*app->getThemes());
             app->getThemes()->normalizeColor(color);
 
-            auto *e = (new TextLayoutElement(
-                           *this, text, QSize(width, metrics.height()), color,
-                           this->style_, container.getScale()))
-                          ->setLink(this->getLink());
+            auto *e = new TextLayoutElement(
+                *this, text, QSize(width, metrics.height()), color,
+                this->style_, container.getScale());
             e->setTrailingSpace(hasTrailingSpace);
             e->setText(text);
 
-            // If URL link was changed,
-            // Should update it in MessageLayoutElement too!
-            if (this->getLink().type == Link::Url)
-            {
-                static_cast<TextLayoutElement *>(e)->listenToLinkChanges();
-            }
             return e;
         };
 
-        static const auto ellipsis = QStringLiteral("...");
+        static const auto ellipsis = QStringLiteral("…");
 
         // String to continuously append words onto until we place it in the container
         // once we encounter an emote or reach the end of the message text. */
@@ -685,6 +628,7 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                 currentText += ' ';
             }
 
+            bool done = false;
             for (const auto &parsedWord :
                  app->getEmotes()->getEmojis()->parse(word.text))
             {
@@ -698,6 +642,7 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                                            container.remainingWidth());
                     if (currentText != prev)
                     {
+                        done = true;
                         break;
                     }
                 }
@@ -720,6 +665,7 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                                                   emoteSize.width()))
                         {
                             currentText += ellipsis;
+                            done = true;
                             break;
                         }
 
@@ -735,6 +681,11 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                     }
                 }
             }
+
+            if (done)
+            {
+                break;
+            }
         }
 
         // Add the last of the pending message text to the container.
@@ -747,6 +698,29 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
 
         container.breakLine();
     }
+}
+
+LinkElement::LinkElement(const Parsed &parsed, MessageElementFlags flags,
+                         const MessageColor &color, FontStyle style)
+    : TextElement({}, flags, color, style)
+    , linkInfo_(parsed.original)
+    , lowercase_({parsed.lowercase})
+    , original_({parsed.original})
+{
+    this->setTooltip(parsed.original);
+}
+
+void LinkElement::addToContainer(MessageLayoutContainer &container,
+                                 MessageElementFlags flags)
+{
+    this->words_ =
+        getSettings()->lowercaseDomains ? this->lowercase_ : this->original_;
+    TextElement::addToContainer(container, flags);
+}
+
+Link LinkElement::getLink() const
+{
+    return {Link::Url, this->linkInfo_.url()};
 }
 
 // TIMESTAMP
@@ -853,8 +827,7 @@ void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
         auto size = QSize(image->width() * container.getScale(),
                           image->height() * container.getScale());
 
-        container.addElement((new ImageLayoutElement(*this, image, size))
-                                 ->setLink(this->getLink()));
+        container.addElement(new ImageLayoutElement(*this, image, size));
     }
 }
 

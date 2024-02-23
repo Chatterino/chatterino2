@@ -104,6 +104,7 @@ public:
     virtual bool hasModRights() const;
     virtual bool hasHighRateLimit() const;
     virtual bool isLive() const;
+    virtual bool isRerun() const;
     virtual bool shouldIgnoreHighlights() const;
     virtual bool canReconnect() const;
     virtual void reconnect();
