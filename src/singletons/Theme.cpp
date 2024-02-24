@@ -489,7 +489,8 @@ void Theme::parseFrom(const QJsonObject &root, bool isCustomTheme)
     {
         // Only attempt to load a fallback theme if the theme we're loading is a custom theme
         auto fallbackThemeName =
-            root["metadata"_L1]["fallbackTheme"_L1].toString("Dark");
+            root["metadata"_L1]["fallbackTheme"_L1].toString(
+                this->isLightTheme() ? "Light" : "Dark");
         for (const auto &theme : Theme::builtInThemes)
         {
             if (fallbackThemeName.compare(theme.key, Qt::CaseInsensitive) == 0)
