@@ -36,6 +36,7 @@
 - Minor: Live streams that are marked as reruns now mark a tab as yellow instead of red. (#5176)
 - Minor: Updated to Emoji v15.1. Google emojis are now used as the fallback instead of Twitter emojis. (#5182)
 - Minor: Allow theming of tab live and rerun indicators. (#5188)
+- Minor: Added a fallback theme field to custom themes that will be used in case the custom theme does not contain a color Chatterino needs. If no fallback theme is specified, we'll pull the color from the included Dark or Light theme. (#5198)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
 - Bugfix: Trimmed custom streamlink paths on all platforms making sure you don't accidentally add spaces at the beginning or end of its path. (#4834)
