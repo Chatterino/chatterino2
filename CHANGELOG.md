@@ -28,7 +28,7 @@
 - Minor: Chatters from recent-messages are now added to autocompletion. (#5116)
 - Minor: Added a _System_ theme that updates according to the system's color scheme (requires Qt 6.5). (#5118)
 - Minor: Added icons for newer versions of macOS. (#5148)
-- Minor: Added the `--incognito/--no-incognito` options to the `/openurl` command, allowing you to override the "Open links in incognito/private mode" setting. (#5149)
+- Minor: Added the `--incognito/--no-incognito` options to the `/openurl` command, allowing you to override the "Open links in incognito/private mode" setting. (#5149, #5197)
 - Minor: Added support for the `{input.text}` placeholder in the **Split** -> **Run a command** hotkey. (#5130)
 - Minor: Add a new Channel API for experimental plugins feature. (#5141, #5184, #5187)
 - Minor: Added the ability to change the top-most status of a window regardless of the _Always on top_ setting (right click the notebook). (#5135)
