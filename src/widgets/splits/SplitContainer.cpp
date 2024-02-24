@@ -926,9 +926,15 @@ void SplitContainer::refreshTabLiveStatus()
     }
 
     bool liveStatus = false;
+    bool rerunStatus = false;
     for (const auto &s : this->splits_)
     {
         auto c = s->getChannel();
+        if (c->isRerun())
+        {
+            rerunStatus = true;
+            continue;  // reruns are also marked as live, SKIP
+        }
         if (c->isLive())
         {
             liveStatus = true;
@@ -936,7 +942,7 @@ void SplitContainer::refreshTabLiveStatus()
         }
     }
 
-    if (this->tab_->setLive(liveStatus))
+    if (this->tab_->setLive(liveStatus) || this->tab_->setRerun(rerunStatus))
     {
         auto *notebook = dynamic_cast<Notebook *>(this->parentWidget());
         if (notebook)
