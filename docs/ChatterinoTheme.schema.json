@@ -392,7 +392,7 @@
           "default": "light"
         },
         "fallbackTheme": {
-          "$comment": "Determined which built-in Chatterino theme to use as a fallback in case a color isn't configured.",
+          "$comment": "Determines which built-in Chatterino theme to use as a fallback in case a color isn't configured.",
           "enum": ["White", "Light", "Dark", "Black"],
           "default": "Dark"
         }
