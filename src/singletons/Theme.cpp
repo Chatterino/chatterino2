@@ -28,28 +28,44 @@ using namespace literals;
 void parseInto(const QJsonObject &obj, const QJsonObject &fallbackObj,
                QLatin1String key, QColor &color)
 {
-    auto jsonValue = obj[key];
-    if (!jsonValue.isString()) [[unlikely]]
-    {
-        jsonValue = fallbackObj[key];
+    auto parseColorFrom = [](const auto &obj,
+                             QLatin1String key) -> std::optional<QColor> {
+        auto jsonValue = obj[key];
         if (!jsonValue.isString()) [[unlikely]]
         {
-            qCWarning(chatterinoTheme)
-                << key
-                << "was expected but not found in the "
-                   "current theme, and no fallback value found.";
+            return std::nullopt;
+        }
+        QColor parsed = {jsonValue.toString()};
+        if (!parsed.isValid()) [[unlikely]]
+        {
+            qCWarning(chatterinoTheme).nospace()
+                << "While parsing " << key << ": '" << jsonValue.toString()
+                << "' isn't a valid color.";
+            return std::nullopt;
+        }
+        return parsed;
+    };
+
+    auto firstColor = parseColorFrom(obj, key);
+    if (firstColor.has_value())
+    {
+        color = firstColor.value();
+        return;
+    }
+
+    if (!fallbackObj.isEmpty())
+    {
+        auto fallbackColor = parseColorFrom(fallbackObj, key);
+        if (fallbackColor.has_value())
+        {
+            color = fallbackColor.value();
             return;
         }
     }
-    QColor parsed = {jsonValue.toString()};
-    if (!parsed.isValid()) [[unlikely]]
-    {
-        qCWarning(chatterinoTheme).nospace()
-            << "While parsing " << key << ": '" << jsonValue.toString()
-            << "' isn't a valid color.";
-        return;
-    }
-    color = parsed;
+
+    qCWarning(chatterinoTheme) << key
+                               << "was expected but not found in the "
+                                  "current theme, and no fallback value found.";
 }
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
