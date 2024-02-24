@@ -65,6 +65,15 @@ public:
      **/
     void showAndMoveTo(QPoint point, widgets::BoundsChecking mode);
 
+    /// @brief Applies the last moveTo operation if that one was bounds-checked
+    ///
+    /// If there was a previous moveTo or showAndMoveTo operation with a mode
+    /// other than `Off`, a moveTo is repeated with the last supplied @a point
+    /// and @a mode. Note that in the case of showAndMoveTo, moveTo is run.
+    ///
+    /// @returns true if there was a previous bounds-checked moveTo operation
+    bool applyLastBoundsCheck();
+
     float scale() const override;
     float qtFontScale() const;
 
@@ -151,6 +160,11 @@ private:
         QWidget *layoutBase = nullptr;
         std::vector<Button *> buttons;
     } ui_;
+
+    /// The last @a pos from moveTo and showAndMoveTo
+    QPoint lastBoundsCheckPosition_;
+    /// The last @a mode from moveTo and showAndMoveTo
+    widgets::BoundsChecking lastBoundsCheckMode_ = widgets::BoundsChecking::Off;
 
 #ifdef USEWINSDK
     /// @brief Returns the HWND of this window if it has one

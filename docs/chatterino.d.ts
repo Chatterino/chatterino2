@@ -9,7 +9,7 @@ declare module c2 {
   }
   class CommandContext {
     words: String[];
-    channel_name: String;
+    channel: Channel;
   }
 
   enum Platform {
