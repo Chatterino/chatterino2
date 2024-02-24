@@ -60,7 +60,7 @@ void UserSource::initializeFromChannel(const Channel *channel)
 
     this->items_ = tc->accessChatters()->all();
 
-    if (getSettings()->alwaysIncludeBroadcasterInMentions)
+    if (getSettings()->alwaysIncludeBroadcasterInUserCompletions)
     {
         auto it = std::find_if(this->items_.begin(), this->items_.end(),
                                [tc](const UserItem &user) {
