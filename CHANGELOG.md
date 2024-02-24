@@ -34,6 +34,7 @@
 - Minor: Added the ability to change the top-most status of a window regardless of the _Always on top_ setting (right click the notebook). (#5135)
 - Minor: Live streams that are marked as reruns now mark a tab as yellow instead of red. (#5176)
 - Minor: Updated to Emoji v15.1. Google emojis are now used as the fallback instead of Twitter emojis. (#5182)
+- Minor: Allow theming of tab live and rerun indicators. (#5188)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
 - Bugfix: Trimmed custom streamlink paths on all platforms making sure you don't accidentally add spaces at the beginning or end of its path. (#4834)
