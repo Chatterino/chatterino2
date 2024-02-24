@@ -182,7 +182,7 @@ private:
 
     std::optional<ThemeDescriptor> findThemeByKey(const QString &key);
 
-    void parseFrom(const QJsonObject &root);
+    void parseFrom(const QJsonObject &root, bool isCustomTheme);
 
     pajlada::Signals::NoArgSignal repaintVisibleChatWidgets_;
 
