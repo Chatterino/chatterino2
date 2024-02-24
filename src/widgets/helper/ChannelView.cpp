@@ -3121,6 +3121,7 @@ void ChannelView::pendingLinkInfoStateChanged()
         return;
     }
     this->setLinkInfoTooltip(this->pendingLinkInfo_.data());
+    this->tooltipWidget_->applyLastBoundsCheck();
 }
 
 }  // namespace chatterino

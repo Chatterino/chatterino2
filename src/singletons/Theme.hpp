@@ -77,6 +77,9 @@ public:
         TabColors highlighted;
         TabColors selected;
         QColor dividerLine;
+
+        QColor liveIndicator;
+        QColor rerunIndicator;
     } tabs;
 
     /// MESSAGES

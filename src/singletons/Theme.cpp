@@ -76,6 +76,8 @@ void parseTabs(const QJsonObject &tabs, chatterino::Theme &theme)
         }
     };
     parseColor(theme, tabs, dividerLine);
+    parseColor(theme, tabs, liveIndicator);
+    parseColor(theme, tabs, rerunIndicator);
     parseTabColors(tabs["regular"_L1].toObject(), theme.tabs.regular);
     parseTabColors(tabs["newMessage"_L1].toObject(), theme.tabs.newMessage);
     parseTabColors(tabs["highlighted"_L1].toObject(), theme.tabs.highlighted);

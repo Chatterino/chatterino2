@@ -532,13 +532,13 @@ void NotebookTab::paintEvent(QPaintEvent *)
         QBrush b;
         if (this->isLive_)
         {
-            painter.setPen(QColor(Qt::GlobalColor::red));
-            b.setColor(QColor(Qt::GlobalColor::red));
+            painter.setPen(this->theme->tabs.liveIndicator);
+            b.setColor(this->theme->tabs.liveIndicator);
         }
         else
         {
-            painter.setPen(QColor(Qt::GlobalColor::yellow));
-            b.setColor(QColor(Qt::GlobalColor::yellow));
+            painter.setPen(this->theme->tabs.rerunIndicator);
+            b.setColor(this->theme->tabs.rerunIndicator);
         }
 
         painter.setRenderHint(QPainter::Antialiasing);
