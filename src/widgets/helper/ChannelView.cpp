@@ -87,24 +87,31 @@ void addEmoteContextMenuItems(QMenu *menu, const Emote &emote,
     auto *copyMenu = new QMenu(menu);
     copyAction->setMenu(copyMenu);
 
-    // Add copy and open links for 1x, 2x, 3x
-    auto addImageLink = [&](const ImagePtr &image, char scale) {
+    // Scale of the smallest image
+    std::optional<qreal> baseScale;
+    // Add copy and open links for images
+    auto addImageLink = [&](const ImagePtr &image) {
         if (!image->isEmpty())
         {
-            copyMenu->addAction("&" + QString(scale) + "x link",
-                                [url = image->url()] {
-                                    crossPlatformCopy(url.string);
-                                });
-            openMenu->addAction("&" + QString(scale) + "x link",
-                                [url = image->url()] {
-                                    QDesktopServices::openUrl(QUrl(url.string));
-                                });
+            if (!baseScale)
+            {
+                baseScale = image->scale();
+            }
+
+            auto factor =
+                QString::number(static_cast<int>(*baseScale / image->scale()));
+            copyMenu->addAction("&" + factor + "x link", [url = image->url()] {
+                crossPlatformCopy(url.string);
+            });
+            openMenu->addAction("&" + factor + "x link", [url = image->url()] {
+                QDesktopServices::openUrl(QUrl(url.string));
+            });
         }
     };
 
-    addImageLink(emote.images.getImage1(), '1');
-    addImageLink(emote.images.getImage2(), '2');
-    addImageLink(emote.images.getImage3(), '3');
+    addImageLink(emote.images.getImage1());
+    addImageLink(emote.images.getImage2());
+    addImageLink(emote.images.getImage3());
 
     // Copy and open emote page link
     auto addPageLink = [&](const QString &name) {
