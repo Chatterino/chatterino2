@@ -3,7 +3,7 @@
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
 #include "messages/SharedMessageBuilder.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"  // TODO: REMOVE
+#include "providers/twitch/TwitchCommon.hpp"
 
 #include <QString>
 #include <QVariant>
@@ -38,6 +38,11 @@ class EventSubMessageBuilder : MessageBuilder
 public:
     EventSubMessageBuilder() = delete;
 
+    EventSubMessageBuilder(const EventSubMessageBuilder &) = delete;
+    EventSubMessageBuilder &operator=(const EventSubMessageBuilder &) = delete;
+
+    EventSubMessageBuilder(EventSubMessageBuilder &&) = delete;
+    EventSubMessageBuilder &operator=(EventSubMessageBuilder &&) = delete;
     /**
      * NOTE: The builder MUST NOT survive longer than the payload
      **/

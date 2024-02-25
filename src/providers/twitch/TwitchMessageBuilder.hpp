@@ -3,6 +3,7 @@
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
 #include "messages/SharedMessageBuilder.hpp"
+#include "providers/twitch/TwitchCommon.hpp"
 #include "pubsubmessages/LowTrustUsers.hpp"
 
 #include <IrcMessage>
@@ -25,19 +26,6 @@ struct HelixVip;
 using HelixModerator = HelixVip;
 struct ChannelPointReward;
 struct DeleteAction;
-
-struct TwitchEmoteOccurrence {
-    int start;
-    int end;
-    EmotePtr ptr;
-    EmoteName name;
-
-    bool operator==(const TwitchEmoteOccurrence &other) const
-    {
-        return std::tie(this->start, this->end, this->ptr, this->name) ==
-               std::tie(other.start, other.end, other.ptr, other.name);
-    }
-};
 
 class TwitchMessageBuilder : public SharedMessageBuilder
 {
