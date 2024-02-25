@@ -19,9 +19,13 @@ void InputCompletionItem::action()
     if (this->action_)
     {
         if (this->emote_)
+        {
             this->action_(this->emote_->name.string);
+        }
         else
+        {
             this->action_(this->text_);
+        }
     }
 }
 

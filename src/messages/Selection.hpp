@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <tuple>
@@ -38,7 +39,7 @@ struct SelectionItem {
 
     bool operator!=(const SelectionItem &b) const
     {
-        return this->operator==(b);
+        return !this->operator==(b);
     }
 };
 
@@ -60,6 +61,23 @@ struct Selection {
         {
             std::swap(this->selectionMin, this->selectionMax);
         }
+    }
+
+    bool operator==(const Selection &b) const
+    {
+        return this->start == b.start && this->end == b.end;
+    }
+
+    bool operator!=(const Selection &b) const
+    {
+        return !this->operator==(b);
+    }
+
+    //union of both selections
+    Selection operator|(const Selection &b) const
+    {
+        return {std::min(this->selectionMin, b.selectionMin),
+                std::max(this->selectionMax, b.selectionMax)};
     }
 
     bool isEmpty() const
@@ -117,15 +135,4 @@ struct Selection {
         }
     }
 };
-
-struct DoubleClickSelection {
-    uint32_t originalStart{0};
-    uint32_t originalEnd{0};
-    uint32_t origMessageIndex{0};
-    bool selectingLeft{false};
-    bool selectingRight{false};
-    SelectionItem origStartItem;
-    SelectionItem origEndItem;
-};
-
 }  // namespace chatterino

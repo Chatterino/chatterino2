@@ -16,7 +16,7 @@ struct Emote {
     ImageSet images;
     Tooltip tooltip;
     Url homePage;
-    bool zeroWidth;
+    bool zeroWidth{};
     EmoteId id;
     EmoteAuthor author;
     /**

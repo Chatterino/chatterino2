@@ -1,5 +1,6 @@
 #pragma once
 
+#include <magic_enum/magic_enum.hpp>
 #include <pajlada/settings.hpp>
 #include <QString>
 
@@ -83,6 +84,60 @@ public:
     {
         return Enum(this->getValue());
     }
+};
+
+/**
+ * Setters in this class allow for bad values, it's only the enum-specific getters that are protected.
+ * If you get a QString from this setting, it will be the raw value from the settings file.
+ * Use the explicit Enum conversions or getEnum to get a typed check with a default
+ **/
+template <typename Enum>
+class EnumStringSetting : public pajlada::Settings::Setting<QString>
+{
+public:
+    EnumStringSetting(const std::string &path, const Enum &defaultValue_)
+        : pajlada::Settings::Setting<QString>(path)
+        , defaultValue(defaultValue_)
+    {
+        _registerSetting(this->getData());
+    }
+
+    template <typename T2>
+    EnumStringSetting<Enum> &operator=(Enum newValue)
+    {
+        std::string enumName(magic_enum::enum_name(newValue));
+        auto qEnumName = QString::fromStdString(enumName);
+
+        this->setValue(qEnumName.toLower());
+
+        return *this;
+    }
+
+    EnumStringSetting<Enum> &operator=(QString newValue)
+    {
+        this->setValue(newValue.toLower());
+
+        return *this;
+    }
+
+    operator Enum()
+    {
+        return this->getEnum();
+    }
+
+    Enum getEnum()
+    {
+        return magic_enum::enum_cast<Enum>(this->getValue().toStdString(),
+                                           magic_enum::case_insensitive)
+            .value_or(this->defaultValue);
+    }
+
+    Enum defaultValue;
+
+    using pajlada::Settings::Setting<QString>::operator==;
+    using pajlada::Settings::Setting<QString>::operator!=;
+
+    using pajlada::Settings::Setting<QString>::operator QString;
 };
 
 }  // namespace chatterino

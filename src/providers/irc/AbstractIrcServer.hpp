@@ -22,7 +22,11 @@ class AbstractIrcServer : public QObject
 public:
     enum ConnectionType { Read = 1, Write = 2, Both = 3 };
 
-    virtual ~AbstractIrcServer() = default;
+    ~AbstractIrcServer() override = default;
+    AbstractIrcServer(const AbstractIrcServer &) = delete;
+    AbstractIrcServer(AbstractIrcServer &&) = delete;
+    AbstractIrcServer &operator=(const AbstractIrcServer &) = delete;
+    AbstractIrcServer &operator=(AbstractIrcServer &&) = delete;
 
     // initializeIrc must be called from the derived class
     // this allows us to initialize the abstract IRC server based on the derived class's parameters
@@ -57,7 +61,11 @@ protected:
     // initializeConnectionSignals is called on a connection once in its lifetime.
     // it can be used to connect signals to your class
     virtual void initializeConnectionSignals(IrcConnection *connection,
-                                             ConnectionType type){};
+                                             ConnectionType type)
+    {
+        (void)connection;
+        (void)type;
+    }
 
     // initializeConnection is called every time before we try to connect to the IRC server
     virtual void initializeConnection(IrcConnection *connection,
@@ -73,6 +81,7 @@ protected:
     virtual void onReadConnected(IrcConnection *connection);
     virtual void onWriteConnected(IrcConnection *connection);
     virtual void onDisconnected();
+    void markChannelsConnected();
 
     virtual std::shared_ptr<Channel> getCustomChannel(
         const QString &channelName);

@@ -11,24 +11,25 @@ namespace chatterino {
 AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
     : QListWidget(parent)
 {
-    auto app = getApp();
+    auto *app = getApp();
 
     this->addItem(ANONYMOUS_USERNAME_LABEL);
 
-    for (const auto &userName : app->accounts->twitch.getUsernames())
+    for (const auto &userName : app->getAccounts()->twitch.getUsernames())
     {
         this->addItem(userName);
     }
 
     this->managedConnections_.managedConnect(
-        app->accounts->twitch.userListUpdated, [=, this]() {
+        app->getAccounts()->twitch.userListUpdated, [=, this]() {
             this->blockSignals(true);
 
             this->clear();
 
             this->addItem(ANONYMOUS_USERNAME_LABEL);
 
-            for (const auto &userName : app->accounts->twitch.getUsernames())
+            for (const auto &userName :
+                 app->getAccounts()->twitch.getUsernames())
             {
                 this->addItem(userName);
             }
@@ -47,11 +48,11 @@ AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
             if (newUsername.compare(ANONYMOUS_USERNAME_LABEL,
                                     Qt::CaseInsensitive) == 0)
             {
-                app->accounts->twitch.currentUsername = "";
+                app->getAccounts()->twitch.currentUsername = "";
             }
             else
             {
-                app->accounts->twitch.currentUsername = newUsername;
+                app->getAccounts()->twitch.currentUsername = newUsername;
             }
         }
     });
@@ -69,9 +70,9 @@ void AccountSwitchWidget::refreshSelection()
     // Select the currently logged in user
     if (this->count() > 0)
     {
-        auto app = getApp();
+        auto *app = getApp();
 
-        auto currentUser = app->accounts->twitch.getCurrent();
+        auto currentUser = app->getAccounts()->twitch.getCurrent();
 
         if (currentUser->isAnon())
         {

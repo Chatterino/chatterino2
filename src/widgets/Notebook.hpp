@@ -124,10 +124,10 @@ public:
     void refresh();
 
 protected:
-    virtual void scaleChangedEvent(float scale_) override;
-    virtual void resizeEvent(QResizeEvent *) override;
-    virtual void mousePressEvent(QMouseEvent *event) override;
-    virtual void paintEvent(QPaintEvent *) override;
+    void scaleChangedEvent(float scale_) override;
+    void resizeEvent(QResizeEvent *) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void paintEvent(QPaintEvent *) override;
 
     NotebookButton *getAddButton();
     NotebookButton *addCustomButton();
@@ -196,6 +196,7 @@ private:
     NotebookTabLocation tabLocation_ = NotebookTabLocation::Top;
     QAction *lockNotebookLayoutAction_;
     QAction *showTabsAction_;
+    QAction *toggleTopMostAction_;
 
     // This filter, if set, is used to figure out the visibility of
     // the tabs in this notebook.
@@ -224,7 +225,6 @@ private:
 
     // Main window on Windows has basically a duplicate of this in Window
     NotebookButton *streamerModeIcon_{};
-
     void updateStreamerModeIcon();
 };
 

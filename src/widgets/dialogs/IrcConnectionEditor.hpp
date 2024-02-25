@@ -5,11 +5,11 @@
 
 #include <QDialog>
 
-#include <optional>
-
 namespace Ui {
+
 class IrcConnectionEditor;
-}
+
+}  // namespace Ui
 
 namespace chatterino {
 
@@ -22,7 +22,11 @@ class IrcConnectionEditor : public QDialog
 public:
     explicit IrcConnectionEditor(const IrcServerData &data, bool isAdd = false,
                                  QWidget *parent = nullptr);
-    ~IrcConnectionEditor();
+    IrcConnectionEditor(const IrcConnectionEditor &) = delete;
+    IrcConnectionEditor(IrcConnectionEditor &&) = delete;
+    IrcConnectionEditor &operator=(const IrcConnectionEditor &) = delete;
+    IrcConnectionEditor &operator=(IrcConnectionEditor &&) = delete;
+    ~IrcConnectionEditor() override;
 
     IrcServerData data();
 

@@ -32,6 +32,10 @@ enum class MessageLayoutFlag : uint8_t {
 };
 using MessageLayoutFlags = FlagsEnum<MessageLayoutFlag>;
 
+struct MessagePaintResult {
+    bool hasAnimatedElements = false;
+};
+
 class MessageLayout
 {
 public:
@@ -52,15 +56,20 @@ public:
 
     MessageLayoutFlags flags;
 
-    bool layout(int width, float scale_, MessageElementFlags flags);
+    bool layout(int width, float scale_, MessageElementFlags flags,
+                bool shouldInvalidateBuffer);
 
     // Painting
-    void paint(const MessagePaintContext &ctx);
+    MessagePaintResult paint(const MessagePaintContext &ctx);
     void invalidateBuffer();
     void deleteBuffer();
     void deleteCache();
 
-    // Elements
+    /**
+     * Returns a raw pointer to the element at the given point
+     *
+     * If no element is found at the given point, this returns a null pointer
+     */
     const MessageLayoutElement *getElementAt(QPoint point);
 
     /**

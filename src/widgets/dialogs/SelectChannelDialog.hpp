@@ -27,8 +27,8 @@ public:
     pajlada::Signals::NoArgSignal closed;
 
 protected:
-    virtual void closeEvent(QCloseEvent *) override;
-    virtual void themeChangedEvent() override;
+    void closeEvent(QCloseEvent *) override;
+    void themeChangedEvent() override;
 
 private:
     class EventFilter : public QObject
@@ -37,7 +37,7 @@ private:
         SelectChannelDialog *dialog;
 
     protected:
-        virtual bool eventFilter(QObject *watched, QEvent *event) override;
+        bool eventFilter(QObject *watched, QEvent *event) override;
     };
 
     struct {
@@ -49,6 +49,7 @@ private:
             QRadioButton *mentions;
             QRadioButton *watching;
             QRadioButton *live;
+            QRadioButton *automod;
         } twitch;
         struct {
             QLineEdit *channel;

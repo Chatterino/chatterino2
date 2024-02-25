@@ -5,8 +5,10 @@
 #include "common/Version.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "controllers/sound/ISoundController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "singletons/CrashHandler.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/NativeMessaging.hpp"
 #include "singletons/Paths.hpp"
@@ -20,6 +22,7 @@
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/splits/SplitInput.hpp"
 
+#include <magic_enum/magic_enum.hpp>
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QFontDialog>
@@ -86,12 +89,12 @@ namespace {
 
 GeneralPage::GeneralPage()
 {
-    auto y = new QVBoxLayout;
-    auto x = new QHBoxLayout;
-    auto view = new GeneralPageView;
+    auto *y = new QVBoxLayout;
+    auto *x = new QHBoxLayout;
+    auto *view = new GeneralPageView;
     this->view_ = view;
     x->addWidget(view);
-    auto z = new QFrame;
+    auto *z = new QFrame;
     z->setLayout(x);
     y->addWidget(z);
     this->setLayout(y);
@@ -104,9 +107,13 @@ GeneralPage::GeneralPage()
 bool GeneralPage::filterElements(const QString &query)
 {
     if (this->view_)
+    {
         return this->view_->filterElements(query) || query.isEmpty();
+    }
     else
+    {
         return false;
+    }
 }
 
 void GeneralPage::initLayout(GeneralPageView &layout)
@@ -115,20 +122,53 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addTitle("Interface");
 
-    layout.addDropdown<QString>(
-        "Theme", getApp()->themes->availableThemes(),
-        getApp()->themes->themeName,
-        [](const auto *combo, const auto &themeKey) {
-            return combo->findData(themeKey, Qt::UserRole);
-        },
-        [](const auto &args) {
-            return args.combobox->itemData(args.index, Qt::UserRole).toString();
-        },
-        {}, Theme::fallbackTheme.name);
+    {
+        auto *themes = getIApp()->getThemes();
+        auto available = themes->availableThemes();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        available.emplace_back("System", "System");
+#endif
+
+        auto addThemeDropdown = [&](auto name, auto &setting,
+                                    const auto &options,
+                                    const QString &tooltip = {}) {
+            return layout.addDropdown<QString>(
+                name, options, setting,
+                [](const auto *combo, const auto &themeKey) {
+                    return combo->findData(themeKey, Qt::UserRole);
+                },
+                [](const auto &args) {
+                    return args.combobox->itemData(args.index, Qt::UserRole)
+                        .toString();
+                },
+                tooltip, Theme::fallbackTheme.name);
+        };
+
+        addThemeDropdown("Theme", themes->themeName, available);
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        auto *darkDropdown = addThemeDropdown(
+            "Dark system theme", themes->darkSystemThemeName,
+            themes->availableThemes(),
+            "This theme is selected if your system is in a dark theme and you "
+            "enabled the adaptive 'System' theme.");
+        auto *lightDropdown = addThemeDropdown(
+            "Light system theme", themes->lightSystemThemeName,
+            themes->availableThemes(),
+            "This theme is selected if your system is in a light theme and you "
+            "enabled the adaptive 'System' theme.");
+
+        auto isSystem = [](const auto &s) {
+            return s == "System";
+        };
+        layout.enableIf(darkDropdown, themes->themeName, isSystem);
+        layout.enableIf(lightDropdown, themes->themeName, isSystem);
+#endif
+    }
 
     layout.addDropdown<QString>(
         "Font", {"Segoe UI", "Arial", "Choose..."},
-        getApp()->fonts->chatFontFamily,
+        getIApp()->getFonts()->chatFontFamily,
         [](auto val) {
             return val;
         },
@@ -137,7 +177,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         });
     layout.addDropdown<int>(
         "Font size", {"9pt", "10pt", "12pt", "14pt", "16pt", "20pt"},
-        getApp()->fonts->chatFontSize,
+        getIApp()->getFonts()->chatFontSize,
         [](auto val) {
             return QString::number(val) + "pt";
         },
@@ -151,9 +191,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.uiScale,
         [](auto val) {
             if (val == 1)
+            {
                 return QString("Default");
+            }
             else
+            {
                 return QString::number(val) + "x";
+            }
         },
         [](auto args) {
             return fuzzyToFloat(args.value, 1.f);
@@ -230,7 +274,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Show message reply button", s.showReplyButton, false,
                        "Show a reply button next to every chat message");
 
-    auto removeTabSeq = getApp()->hotkeys->getDisplaySequence(
+    auto removeTabSeq = getIApp()->getHotkeys()->getDisplaySequence(
         HotkeyCategory::Window, "removeTab");
     QString removeTabShortcut = "an assigned hotkey (Window -> remove tab)";
     if (!removeTabSeq.isEmpty())
@@ -251,7 +295,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 #endif
     if (!BaseWindow::supportsCustomWindowFrame())
     {
-        auto settingsSeq = getApp()->hotkeys->getDisplaySequence(
+        auto settingsSeq = getIApp()->getHotkeys()->getDisplaySequence(
             HotkeyCategory::Window, "openSettings");
         QString shortcut = " (no key bound to open them otherwise)";
         // TODO: maybe prevent the user from locking themselves out of the settings?
@@ -277,20 +321,32 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.pauseOnHoverDuration,
         [](auto val) {
             if (val < -0.5f)
+            {
                 return QString("Indefinite");
+            }
             else if (val < 0.001f)
+            {
                 return QString("Disabled");
+            }
             else
+            {
                 return QString::number(val) + "s";
+            }
         },
         [](auto args) {
             if (args.index == 0)
+            {
                 return 0.0f;
+            }
             else if (args.value == "Indefinite")
+            {
                 return -1.0f;
+            }
             else
+            {
                 return fuzzyToFloat(args.value,
                                     std::numeric_limits<float>::infinity());
+            }
         });
     addKeyboardModifierSetting(layout, "Pause while holding a key",
                                s.pauseChatModifier);
@@ -299,9 +355,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.mouseScrollMultiplier,
         [](auto val) {
             if (val == 1)
+            {
                 return QString("Default");
+            }
             else
+            {
                 return QString::number(val) + "x";
+            }
         },
         [](auto args) {
             return fuzzyToFloat(args.value, 1.f);
@@ -482,14 +542,20 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "cvMask and 7TV's RainTime, will appear as normal emotes.");
     layout.addCheckbox("Enable emote auto-completion by typing :",
                        s.emoteCompletionWithColon);
+    layout.addCheckbox("Use experimental smarter emote completion.",
+                       s.useSmartEmoteCompletion);
     layout.addDropdown<float>(
         "Size", {"0.5x", "0.75x", "Default", "1.25x", "1.5x", "2x"},
         s.emoteScale,
         [](auto val) {
             if (val == 1)
+            {
                 return QString("Default");
+            }
             else
+            {
                 return QString::number(val) + "x";
+            }
         },
         [](auto args) {
             return fuzzyToFloat(args.value, 1.f);
@@ -626,23 +692,39 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         {"Off", "Small", "Medium", "Large"}, s.thumbnailSize,
         [](auto val) {
             if (val == 0)
+            {
                 return QString("Off");
+            }
             else if (val == 100)
+            {
                 return QString("Small");
+            }
             else if (val == 200)
+            {
                 return QString("Medium");
+            }
             else if (val == 300)
+            {
                 return QString("Large");
+            }
             else
+            {
                 return QString::number(val);
+            }
         },
         [](auto args) {
             if (args.value == "Small")
+            {
                 return 100;
+            }
             else if (args.value == "Medium")
+            {
                 return 200;
+            }
             else if (args.value == "Large")
+            {
                 return 300;
+            }
 
             return fuzzyToInt(args.value, 0);
         });
@@ -651,23 +733,39 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.thumbnailSizeStream,
         [](auto val) {
             if (val == 0)
+            {
                 return QString("Off");
+            }
             else if (val == 1)
+            {
                 return QString("Small");
+            }
             else if (val == 2)
+            {
                 return QString("Medium");
+            }
             else if (val == 3)
+            {
                 return QString("Large");
+            }
             else
+            {
                 return QString::number(val);
+            }
         },
         [](auto args) {
             if (args.value == "Small")
+            {
                 return 1;
+            }
             else if (args.value == "Medium")
+            {
                 return 2;
+            }
             else if (args.value == "Large")
+            {
                 return 3;
+            }
 
             return fuzzyToInt(args.value, 0);
         });
@@ -726,9 +824,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                           "store in this directory.");
     layout.addButton("Open AppData directory", [] {
 #ifdef Q_OS_DARWIN
-        QDesktopServices::openUrl("file://" + getPaths()->rootAppDataDirectory);
+        QDesktopServices::openUrl("file://" +
+                                  getIApp()->getPaths().rootAppDataDirectory);
 #else
-        QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
+        QDesktopServices::openUrl(getIApp()->getPaths().rootAppDataDirectory);
 #endif
     });
 
@@ -737,10 +836,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Files that are used often (such as emotes) are saved to disk to "
         "reduce bandwidth usage and to speed up loading.");
 
-    auto cachePathLabel = layout.addDescription("placeholder :D");
+    auto *cachePathLabel = layout.addDescription("placeholder :D");
     getSettings()->cachePath.connect([cachePathLabel](const auto &,
                                                       auto) mutable {
-        QString newPath = getPaths()->cacheDirectory();
+        QString newPath = getIApp()->getPaths().cacheDirectory();
 
         QString pathShortened = "Cache saved at <a href=\"file:///" + newPath +
                                 "\"><span style=\"color: white;\">" +
@@ -751,7 +850,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     // Choose and reset buttons
     {
-        auto box = new QHBoxLayout;
+        auto *box = new QHBoxLayout;
 
         box->addWidget(layout.makeButton("Choose cache path", [this]() {
             getSettings()->cachePath = QFileDialog::getExistingDirectory(this);
@@ -768,9 +867,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
             if (reply == QMessageBox::Yes)
             {
-                auto cacheDir = QDir(getPaths()->cacheDirectory());
+                auto cacheDir = QDir(getIApp()->getPaths().cacheDirectory());
                 cacheDir.removeRecursively();
-                cacheDir.mkdir(getPaths()->cacheDirectory());
+                cacheDir.mkdir(getIApp()->getPaths().cacheDirectory());
             }
         }));
         box->addStretch(1);
@@ -792,7 +891,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        "Show the stream title");
 
     layout.addSubtitle("R9K");
-    auto toggleLocalr9kSeq = getApp()->hotkeys->getDisplaySequence(
+    auto toggleLocalr9kSeq = getIApp()->getHotkeys()->getDisplaySequence(
         HotkeyCategory::Window, "toggleLocalR9K");
     QString toggleLocalr9kShortcut =
         "an assigned hotkey (Window -> Toggle local R9K)";
@@ -812,7 +911,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.shownSimilarTriggerHighlights);
     s.hideSimilar.connect(
         []() {
-            getApp()->windows->forceLayoutChannelViews();
+            getIApp()->getWindows()->forceLayoutChannelViews();
         },
         false);
     layout.addDropdown<float>(
@@ -871,12 +970,18 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                            s.openLinksIncognito);
     }
 
-    layout.addCheckbox(
-        "Restart on crash", s.restartOnCrash, false,
+    layout.addCustomCheckbox(
+        "Restart on crash (requires restart)",
+        [] {
+            return getIApp()->getCrashHandler()->shouldRecover();
+        },
+        [](bool on) {
+            return getIApp()->getCrashHandler()->saveShouldRecover(on);
+        },
         "When possible, restart Chatterino if the program crashes");
 
 #if defined(Q_OS_LINUX) && !defined(NO_QTKEYCHAIN)
-    if (!getPaths()->isPortable())
+    if (!getIApp()->getPaths().isPortable())
     {
         layout.addCheckbox(
             "Use libsecret/KWallet/Gnome keychain to secure passwords",
@@ -927,6 +1032,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        "Find mentions of users in chat without the @ prefix.");
     layout.addCheckbox("Show username autocompletion popup menu",
                        s.showUsernameCompletionMenu);
+    layout.addCheckbox(
+        "Always include broadcaster in user completions",
+        s.alwaysIncludeBroadcasterInUserCompletions, false,
+        "This will ensure a broadcaster is always easy to ping, even if they "
+        "don't have chat open or have typed recently.");
     const QStringList usernameDisplayModes = {"Username", "Localized name",
                                               "Username and localized name"};
 
@@ -953,9 +1063,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Username font weight", {"50", "Default", "75", "100"}, s.boldScale,
         [](auto val) {
             if (val == 63)
+            {
                 return QString("Default");
+            }
             else
+            {
                 return QString::number(val);
+            }
         },
         [](auto args) {
             return fuzzyToFloat(args.value, 63.f);
@@ -1134,10 +1248,18 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Show a Send button next to each split input that can be "
         "clicked to send the message");
 
+    auto *soundBackend = layout.addDropdownEnumClass<SoundBackend>(
+        "Sound backend (requires restart)",
+        magic_enum::enum_names<SoundBackend>(), s.soundBackend,
+        "Change this only if you're noticing issues with sound playback on "
+        "your system",
+        {});
+    soundBackend->setMinimumWidth(soundBackend->minimumSizeHint().width());
+
     layout.addStretch();
 
     // invisible element for width
-    auto inv = new BaseWidget(this);
+    auto *inv = new BaseWidget(this);
     //    inv->setScaleIndependantWidth(600);
     layout.addWidget(inv);
 }
@@ -1149,7 +1271,7 @@ void GeneralPage::initExtra()
     {
         getSettings()->cachePath.connect(
             [cachePath = this->cachePath_](const auto &, auto) mutable {
-                QString newPath = getPaths()->cacheDirectory();
+                QString newPath = getIApp()->getPaths().cacheDirectory();
 
                 QString pathShortened = "Current location: <a href=\"file:///" +
                                         newPath + "\">" +
@@ -1167,15 +1289,20 @@ QString GeneralPage::getFont(const DropdownArgs &args) const
     {
         args.combobox->setCurrentIndex(0);
         args.combobox->setEditText("Choosing...");
-        QFontDialog dialog(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.));
+        QFontDialog dialog(
+            getIApp()->getFonts()->getFont(FontStyle::ChatMedium, 1.));
 
         auto ok = bool();
         auto font = dialog.getFont(&ok, this->window());
 
         if (ok)
+        {
             return font.family();
+        }
         else
+        {
             return args.combobox->itemText(0);
+        }
     }
     return args.value;
 }

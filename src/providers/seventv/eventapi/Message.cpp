@@ -8,4 +8,16 @@ Message::Message(QJsonObject _json)
 {
 }
 
+std::optional<Message> parseBaseMessage(const QString &blob)
+{
+    QJsonDocument jsonDoc(QJsonDocument::fromJson(blob.toUtf8()));
+
+    if (jsonDoc.isNull())
+    {
+        return std::nullopt;
+    }
+
+    return Message(jsonDoc.object());
+}
+
 }  // namespace chatterino::seventv::eventapi

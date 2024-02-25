@@ -1,9 +1,9 @@
 #include "widgets/splits/SplitHeader.hpp"
 
 #include "Application.hpp"
-#include "common/NetworkCommon.hpp"
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkCommon.hpp"
+#include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/Hotkey.hpp"
@@ -223,6 +223,7 @@ namespace chatterino {
 SplitHeader::SplitHeader(Split *split)
     : BaseWidget(split)
     , split_(split)
+    , tooltipWidget_(new TooltipWidget(this))
 {
     this->initializeLayout();
 
@@ -245,7 +246,7 @@ SplitHeader::SplitHeader(Split *split)
     });
 
     this->bSignals_.emplace_back(
-        getApp()->accounts->twitch.currentUserChanged.connect([this] {
+        getIApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
             this->updateModerationModeIcon();
         }));
 
@@ -294,7 +295,7 @@ void SplitHeader::initializeLayout()
                         case Qt::LeftButton:
                             if (getSettings()->moderationActions.empty())
                             {
-                                getApp()->windows->showSettingsDialog(
+                                getIApp()->getWindows()->showSettingsDialog(
                                     this, SettingsDialogPreference::
                                               ModerationActions);
                                 this->split_->setModerationMode(true);
@@ -312,7 +313,7 @@ void SplitHeader::initializeLayout()
 
                         case Qt::RightButton:
                         case Qt::MiddleButton:
-                            getApp()->windows->showSettingsDialog(
+                            getIApp()->getWindows()->showSettingsDialog(
                                 this,
                                 SettingsDialogPreference::ModerationActions);
                             break;
@@ -320,9 +321,9 @@ void SplitHeader::initializeLayout()
                 });
         }),
         // chatter list
-        this->viewersButton_ = makeWidget<Button>([&](auto w) {
+        this->chattersButton_ = makeWidget<Button>([&](auto w) {
             QObject::connect(w, &Button::leftClicked, this, [this]() {
-                this->split_->showViewerList();
+                this->split_->showChatterList();
             });
         }),
         // dropdown
@@ -362,7 +363,7 @@ void SplitHeader::initializeLayout()
 std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 {
     // top level menu
-    const auto &h = getApp()->hotkeys;
+    const auto &h = getIApp()->getHotkeys();
     auto menu = std::make_unique<QMenu>();
     menu->addAction(
         "Change channel", this->split_, &Split::changeChannel,
@@ -511,7 +512,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     if (twitchChannel)
     {
         moreMenu->addAction(
-            "Show chatter list", this->split_, &Split::showViewerList,
+            "Show chatter list", this->split_, &Split::showChatterList,
             h->getDisplaySequence(HotkeyCategory::Split, "openViewerList"));
 
         moreMenu->addAction("Subscribe", this->split_, &Split::openSubPage);
@@ -532,11 +533,11 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         action->setShortcut(notifySeq);
 
         QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
-            action->setChecked(getApp()->notifications->isChannelNotified(
+            action->setChecked(getIApp()->getNotifications()->isChannelNotified(
                 this->split_->getChannel()->getName(), Platform::Twitch));
         });
         QObject::connect(action, &QAction::triggered, this, [this]() {
-            getApp()->notifications->updateChannelNotification(
+            getIApp()->getNotifications()->updateChannelNotification(
                 this->split_->getChannel()->getName(), Platform::Twitch);
         });
 
@@ -745,7 +746,7 @@ void SplitHeader::scaleChangedEvent(float scale)
     this->setFixedHeight(w);
     this->dropdownButton_->setFixedWidth(w);
     this->moderationButton_->setFixedWidth(w);
-    this->viewersButton_->setFixedWidth(w);
+    this->chattersButton_->setFixedWidth(w);
     this->addButton_->setFixedWidth(w * 5 / 8);
 }
 
@@ -754,9 +755,9 @@ void SplitHeader::setAddButtonVisible(bool value)
     this->addButton_->setVisible(value);
 }
 
-void SplitHeader::setViewersButtonVisible(bool value)
+void SplitHeader::setChattersButtonVisible(bool value)
 {
-    this->viewersButton_->setVisible(value);
+    this->chattersButton_->setVisible(value);
 }
 
 void SplitHeader::updateChannelText()
@@ -804,7 +805,7 @@ void SplitHeader::updateChannelText()
             {
                 NetworkRequest(url, NetworkRequestType::Get)
                     .caller(this)
-                    .onSuccess([this](auto result) -> Outcome {
+                    .onSuccess([this](auto result) {
                         // NOTE: We do not follow the redirects, so we need to make sure we only treat code 200 as a valid image
                         if (result.status() == 200)
                         {
@@ -816,7 +817,6 @@ void SplitHeader::updateChannelText()
                             this->thumbnail_.clear();
                         }
                         this->updateChannelText();
-                        return Success;
                     })
                     .execute();
                 this->lastThumbnail_.restart();
@@ -947,17 +947,16 @@ void SplitHeader::enterEvent(QEvent *event)
 {
     if (!this->tooltipText_.isEmpty())
     {
-        auto *channel = this->split_->getChannel().get();
+        this->tooltipWidget_->setOne({nullptr, this->tooltipText_});
+        this->tooltipWidget_->setWordWrap(true);
+        this->tooltipWidget_->adjustSize();
+        auto pos =
+            this->mapToGlobal(this->rect().bottomLeft()) +
+            QPoint((this->width() - this->tooltipWidget_->width()) / 2, 1);
 
-        auto *tooltip = TooltipWidget::instance();
-        tooltip->setOne({nullptr, this->tooltipText_});
-        tooltip->setWordWrap(true);
-        tooltip->adjustSize();
-        auto pos = this->mapToGlobal(this->rect().bottomLeft()) +
-                   QPoint((this->width() - tooltip->width()) / 2, 1);
-
-        tooltip->moveTo(pos, widgets::BoundsChecking::CursorPosition);
-        tooltip->show();
+        this->tooltipWidget_->moveTo(pos,
+                                     widgets::BoundsChecking::CursorPosition);
+        this->tooltipWidget_->show();
     }
 
     BaseWidget::enterEvent(event);
@@ -965,7 +964,7 @@ void SplitHeader::enterEvent(QEvent *event)
 
 void SplitHeader::leaveEvent(QEvent *event)
 {
-    TooltipWidget::instance()->hide();
+    this->tooltipWidget_->hide();
 
     BaseWidget::leaveEvent(event);
 }
@@ -988,13 +987,13 @@ void SplitHeader::themeChangedEvent()
     // --
     if (this->theme->isLightTheme())
     {
-        this->viewersButton_->setPixmap(getResources().buttons.viewersDark);
+        this->chattersButton_->setPixmap(getResources().buttons.chattersDark);
         this->dropdownButton_->setPixmap(getResources().buttons.menuDark);
         this->addButton_->setPixmap(getResources().buttons.addSplit);
     }
     else
     {
-        this->viewersButton_->setPixmap(getResources().buttons.viewersLight);
+        this->chattersButton_->setPixmap(getResources().buttons.chattersLight);
         this->dropdownButton_->setPixmap(getResources().buttons.menuLight);
         this->addButton_->setPixmap(getResources().buttons.addSplitDark);
     }
@@ -1035,7 +1034,7 @@ void SplitHeader::reloadSubscriberEmotes()
     this->lastReloadedSubEmotes_ = now;
 
     auto channel = this->split_->getChannel();
-    getApp()->accounts->twitch.getCurrent()->loadEmotes(channel);
+    getIApp()->getAccounts()->twitch.getCurrent()->loadEmotes(channel);
 }
 
 void SplitHeader::reconnect()

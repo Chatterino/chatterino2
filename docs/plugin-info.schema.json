@@ -43,7 +43,8 @@
       "type": "string",
       "description": "A small description of your license.",
       "examples": ["MIT", "GPL-2.0-or-later"]
-    }
+    },
+    "$schema": { "type": "string" }
   },
   "required": ["name", "description", "authors", "version", "license"]
 }

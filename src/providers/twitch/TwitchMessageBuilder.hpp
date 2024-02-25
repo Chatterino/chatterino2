@@ -3,6 +3,7 @@
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
 #include "messages/SharedMessageBuilder.hpp"
+#include "pubsubmessages/LowTrustUsers.hpp"
 
 #include <IrcMessage>
 #include <QString>
@@ -19,6 +20,7 @@ using EmotePtr = std::shared_ptr<const Emote>;
 class Channel;
 class TwitchChannel;
 class MessageThread;
+class IgnorePhrase;
 struct HelixVip;
 using HelixModerator = HelixVip;
 struct ChannelPointReward;
@@ -58,6 +60,7 @@ public:
     MessagePtr build() override;
 
     void setThread(std::shared_ptr<MessageThread> thread);
+    void setParent(MessagePtr parent);
     void setMessageOffset(int offset);
 
     static void appendChannelPointRewardMessage(
@@ -88,6 +91,16 @@ public:
 
     static MessagePtr buildHypeChatMessage(Communi::IrcPrivateMessage *message);
 
+    static std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
+        const AutomodAction &action, const QString &channelName);
+    static MessagePtr makeAutomodInfoMessage(const AutomodInfoAction &action);
+
+    static std::pair<MessagePtr, MessagePtr> makeLowTrustUserMessage(
+        const PubSubLowTrustUsersMessage &action, const QString &channelName,
+        const TwitchChannel *twitchChannel);
+    static MessagePtr makeLowTrustUpdateMessage(
+        const PubSubLowTrustUsersMessage &action);
+
     // Shares some common logic from SharedMessageBuilder::parseBadgeTag
     static std::unordered_map<QString, QString> parseBadgeInfoTag(
         const QVariantMap &tags);
@@ -95,6 +108,10 @@ public:
     static std::vector<TwitchEmoteOccurrence> parseTwitchEmotes(
         const QVariantMap &tags, const QString &originalMessage,
         int messageOffset);
+
+    static void processIgnorePhrases(
+        const std::vector<IgnorePhrase> &phrases, QString &originalMessage,
+        std::vector<TwitchEmoteOccurrence> &twitchEmotes);
 
 private:
     void parseUsernameColor() override;
@@ -106,9 +123,6 @@ private:
     void parseThread();
     void appendUsername();
 
-    void runIgnoreReplaces(std::vector<TwitchEmoteOccurrence> &twitchEmotes);
-
-    std::optional<EmotePtr> getTwitchBadge(const Badge &badge) const;
     Outcome tryAppendEmote(const EmoteName &name) override;
 
     void addWords(const QStringList &words,
@@ -131,6 +145,7 @@ private:
     bool bitsStacked = false;
     bool historicalMessage_ = false;
     std::shared_ptr<MessageThread> thread_;
+    MessagePtr parent_;
 
     /**
      * Starting offset to be used on index-based operations on `originalMessage_`.

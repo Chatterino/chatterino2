@@ -91,6 +91,11 @@ bool TooltipEntryWidget::refreshPixmap()
         this->displayImage_->setPixmap(pixmap->scaled(this->customImgWidth_,
                                                       this->customImgHeight_,
                                                       Qt::KeepAspectRatio));
+        if (this->displayImage_->size() !=
+            QSize{this->customImgWidth_, this->customImgHeight_})
+        {
+            this->adjustSize();
+        }
     }
     else
     {

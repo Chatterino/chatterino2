@@ -1,9 +1,8 @@
 #include "Updates.hpp"
 
 #include "common/Modes.hpp"
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
+#include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "Settings.hpp"
@@ -27,19 +26,12 @@ namespace {
 
 }  // namespace
 
-Updates::Updates()
-    : currentVersion_(CHATTERINO_VERSION)
+Updates::Updates(const Paths &paths_)
+    : paths(paths_)
+    , currentVersion_(CHATTERINO_VERSION)
     , updateGuideLink_("https://chatterino.com")
 {
     qCDebug(chatterinoUpdate) << "init UpdateManager";
-}
-
-Updates &Updates::instance()
-{
-    // fourtf: don't add this class to the application class
-    static Updates instance;
-
-    return instance;
 }
 
 /// Checks if the online version is newer or older than the current version.
@@ -98,7 +90,7 @@ void Updates::installUpdates()
     box->exec();
     QDesktopServices::openUrl(this->updateGuideLink_);
 #elif defined Q_OS_WIN
-    if (getPaths()->isPortable())
+    if (Modes::instance().isPortable)
     {
         QMessageBox *box =
             new QMessageBox(QMessageBox::Information, "Chatterino Update",
@@ -122,7 +114,7 @@ void Updates::installUpdates()
                     box->raise();
                 });
             })
-            .onSuccess([this](auto result) -> Outcome {
+            .onSuccess([this](auto result) {
                 if (result.status() != 200)
                 {
                     auto *box = new QMessageBox(
@@ -132,12 +124,12 @@ void Updates::installUpdates()
                             .arg(result.formatError()));
                     box->setAttribute(Qt::WA_DeleteOnClose);
                     box->exec();
-                    return Failure;
+                    return;
                 }
 
                 QByteArray object = result.getData();
                 auto filename =
-                    combinePath(getPaths()->miscDirectory, "update.zip");
+                    combinePath(this->paths.miscDirectory, "update.zip");
 
                 QFile file(filename);
                 file.open(QIODevice::Truncate | QIODevice::WriteOnly);
@@ -145,7 +137,7 @@ void Updates::installUpdates()
                 if (file.write(object) == -1)
                 {
                     this->setStatus_(WriteFileFailed);
-                    return Failure;
+                    return;
                 }
                 file.flush();
                 file.close();
@@ -156,7 +148,6 @@ void Updates::installUpdates()
                     {filename, "restart"});
 
                 QApplication::exit(0);
-                return Success;
             })
             .execute();
         this->setStatus_(Downloading);
@@ -183,7 +174,7 @@ void Updates::installUpdates()
                 box->setAttribute(Qt::WA_DeleteOnClose);
                 box->exec();
             })
-            .onSuccess([this](auto result) -> Outcome {
+            .onSuccess([this](auto result) {
                 if (result.status() != 200)
                 {
                     auto *box = new QMessageBox(
@@ -193,12 +184,12 @@ void Updates::installUpdates()
                             .arg(result.formatError()));
                     box->setAttribute(Qt::WA_DeleteOnClose);
                     box->exec();
-                    return Failure;
+                    return;
                 }
 
                 QByteArray object = result.getData();
                 auto filePath =
-                    combinePath(getPaths()->miscDirectory, "Update.exe");
+                    combinePath(this->paths.miscDirectory, "Update.exe");
 
                 QFile file(filePath);
                 file.open(QIODevice::Truncate | QIODevice::WriteOnly);
@@ -216,7 +207,7 @@ void Updates::installUpdates()
                     box->exec();
 
                     QDesktopServices::openUrl(this->updateExe_);
-                    return Failure;
+                    return;
                 }
                 file.flush();
                 file.close();
@@ -239,8 +230,6 @@ void Updates::installUpdates()
 
                     QDesktopServices::openUrl(this->updateExe_);
                 }
-
-                return Success;
             })
             .execute();
         this->setStatus_(Downloading);
@@ -279,7 +268,7 @@ void Updates::checkForUpdates()
 
     NetworkRequest(url)
         .timeout(60000)
-        .onSuccess([this](auto result) -> Outcome {
+        .onSuccess([this](auto result) {
             const auto object = result.parseJson();
             /// Version available on every platform
             auto version = object["version"];
@@ -289,7 +278,7 @@ void Updates::checkForUpdates()
                 this->setStatus_(SearchFailed);
                 qCDebug(chatterinoUpdate)
                     << "error checking version - missing 'version'" << object;
-                return Failure;
+                return;
             }
 
 #    if defined Q_OS_WIN || defined Q_OS_MACOS
@@ -300,7 +289,7 @@ void Updates::checkForUpdates()
                 this->setStatus_(SearchFailed);
                 qCDebug(chatterinoUpdate)
                     << "error checking version - missing 'updateexe'" << object;
-                return Failure;
+                return;
             }
             this->updateExe_ = updateExeUrl.toString();
 
@@ -313,7 +302,7 @@ void Updates::checkForUpdates()
                 qCDebug(chatterinoUpdate)
                     << "error checking version - missing 'portable_download'"
                     << object;
-                return Failure;
+                return;
             }
             this->updatePortable_ = portableUrl.toString();
 #        endif
@@ -325,7 +314,7 @@ void Updates::checkForUpdates()
                 this->updateGuideLink_ = updateGuide.toString();
             }
 #    else
-            return Failure;
+            return;
 #    endif
 
             /// Current version
@@ -342,7 +331,6 @@ void Updates::checkForUpdates()
             {
                 this->setStatus_(NoUpdateAvailable);
             }
-            return Failure;
         })
         .execute();
     this->setStatus_(Searching);

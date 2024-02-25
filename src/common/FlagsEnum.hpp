@@ -56,9 +56,13 @@ public:
     void set(T flag, bool value)
     {
         if (value)
+        {
             this->set(flag);
+        }
         else
+        {
             this->unset(flag);
+        }
     }
 
     bool has(T flag) const
@@ -95,6 +99,11 @@ public:
     bool hasNone(std::initializer_list<T> flags) const
     {
         return !this->hasAny(flags);
+    }
+
+    T value() const
+    {
+        return this->value_;
     }
 
 private:

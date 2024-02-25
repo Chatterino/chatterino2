@@ -79,7 +79,7 @@ Fonts::Fonts()
     this->fontsByType_.resize(size_t(FontStyle::EndType));
 }
 
-void Fonts::initialize(Settings &, Paths &)
+void Fonts::initialize(Settings &, const Paths &)
 {
     this->chatFontFamily.connect(
         [this]() {
@@ -111,7 +111,7 @@ void Fonts::initialize(Settings &, Paths &)
             assertInGuiThread();
 
             // REMOVED
-            getApp()->windows->incGeneration();
+            getIApp()->getWindows()->incGeneration();
 
             for (auto &map : this->fontsByType_)
             {

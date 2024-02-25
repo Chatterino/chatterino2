@@ -1,18 +1,21 @@
-#include "TwitchIrcServer.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 
 #include "Application.hpp"
+#include "common/Channel.hpp"
 #include "common/Env.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/BttvLiveUpdates.hpp"
+#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/seventv/eventapi/Subscription.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
-#include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
@@ -24,10 +27,7 @@
 
 #include <cassert>
 
-// using namespace Communi;
 using namespace std::chrono_literals;
-
-#define TWITCH_PUBSUB_URL "wss://pubsub-edge.twitch.tv"
 
 namespace {
 
@@ -42,11 +42,10 @@ TwitchIrcServer::TwitchIrcServer()
     : whispersChannel(new Channel("/whispers", Channel::Type::TwitchWhispers))
     , mentionsChannel(new Channel("/mentions", Channel::Type::TwitchMentions))
     , liveChannel(new Channel("/live", Channel::Type::TwitchLive))
+    , automodChannel(new Channel("/automod", Channel::Type::TwitchAutomod))
     , watchingChannel(Channel::getEmpty(), Channel::Type::TwitchWatching)
 {
     this->initializeIrc();
-
-    this->pubsub = new PubSub(TWITCH_PUBSUB_URL);
 
     if (getSettings()->enableBTTVLiveUpdates &&
         getSettings()->enableBTTVChannelEmotes)
@@ -68,12 +67,11 @@ TwitchIrcServer::TwitchIrcServer()
     //                                                     false);
 }
 
-void TwitchIrcServer::initialize(Settings &settings, Paths &paths)
+void TwitchIrcServer::initialize(Settings &settings, const Paths &paths)
 {
-    getApp()->accounts->twitch.currentUserChanged.connect([this]() {
+    getIApp()->getAccounts()->twitch.currentUserChanged.connect([this]() {
         postToThread([this] {
             this->connect();
-            this->pubsub->setAccount(getApp()->accounts->twitch.getCurrent());
         });
     });
 
@@ -86,7 +84,7 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
                                            ConnectionType type)
 {
     std::shared_ptr<TwitchAccount> account =
-        getApp()->accounts->twitch.getCurrent();
+        getIApp()->getAccounts()->twitch.getCurrent();
 
     qCDebug(chatterinoTwitch) << "logging in as" << account->getUserName();
 
@@ -218,6 +216,7 @@ void TwitchIrcServer::readConnectionMessageReceived(
     {
         this->addGlobalSystemMessage(
             "Twitch Servers requested us to reconnect, reconnecting");
+        this->markChannelsConnected();
         this->connect();
     }
     else if (command == "GLOBALUSERSTATE")
@@ -269,6 +268,11 @@ std::shared_ptr<Channel> TwitchIrcServer::getCustomChannel(
     if (channelName == "/live")
     {
         return this->liveChannel;
+    }
+
+    if (channelName == "/automod")
+    {
+        return this->automodChannel;
     }
 
     static auto getTimer = [](ChannelPtr channel, int msBetweenMessages,
@@ -382,6 +386,7 @@ void TwitchIrcServer::forEachChannelAndSpecialChannels(
     func(this->whispersChannel);
     func(this->mentionsChannel);
     func(this->liveChannel);
+    func(this->automodChannel);
 }
 
 std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
@@ -393,11 +398,15 @@ std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
     {
         auto channel = weakChannel.lock();
         if (!channel)
+        {
             continue;
+        }
 
         auto twitchChannel = std::dynamic_pointer_cast<TwitchChannel>(channel);
         if (!twitchChannel)
+        {
             continue;
+        }
 
         if (twitchChannel->roomId() == channelId &&
             twitchChannel->getName().count(':') < 2)
@@ -412,9 +421,13 @@ std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
 QString TwitchIrcServer::cleanChannelName(const QString &dirtyChannelName)
 {
     if (dirtyChannelName.startsWith('#'))
+    {
         return dirtyChannelName.mid(1).toLower();
+    }
     else
+    {
         return dirtyChannelName.toLower();
+    }
 }
 
 bool TwitchIrcServer::hasSeparateWriteConnection() const
@@ -507,22 +520,19 @@ void TwitchIrcServer::onReplySendRequested(TwitchChannel *channel,
     sent = true;
 }
 
-const BttvEmotes &TwitchIrcServer::getBttvEmotes() const
+const IndirectChannel &TwitchIrcServer::getWatchingChannel() const
 {
-    return this->bttv;
+    return this->watchingChannel;
 }
-const FfzEmotes &TwitchIrcServer::getFfzEmotes() const
+
+QString TwitchIrcServer::getLastUserThatWhisperedMe() const
 {
-    return this->ffz;
-}
-const SeventvEmotes &TwitchIrcServer::getSeventvEmotes() const
-{
-    return this->seventv_;
+    return this->lastUserThatWhisperedMe.get();
 }
 
 void TwitchIrcServer::reloadBTTVGlobalEmotes()
 {
-    this->bttv.loadEmotes();
+    getIApp()->getBttvEmotes()->loadEmotes();
 }
 
 void TwitchIrcServer::reloadAllBTTVChannelEmotes()
@@ -537,7 +547,7 @@ void TwitchIrcServer::reloadAllBTTVChannelEmotes()
 
 void TwitchIrcServer::reloadFFZGlobalEmotes()
 {
-    this->ffz.loadEmotes();
+    getIApp()->getFfzEmotes()->loadEmotes();
 }
 
 void TwitchIrcServer::reloadAllFFZChannelEmotes()
@@ -552,7 +562,7 @@ void TwitchIrcServer::reloadAllFFZChannelEmotes()
 
 void TwitchIrcServer::reloadSevenTVGlobalEmotes()
 {
-    this->seventv_.loadGlobalEmotes();
+    getIApp()->getSeventvEmotes()->loadGlobalEmotes();
 }
 
 void TwitchIrcServer::reloadAllSevenTVChannelEmotes()

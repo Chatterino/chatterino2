@@ -5,6 +5,7 @@ add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
 # registers the native messageing host
 option(CHATTERINO_DEBUG_NATIVE_MESSAGES "Debug native messages" OFF)
+option(CHATTERINO_STATIC_QT_BUILD "Static link Qt" OFF)
 
 set(SOURCE_FILES
         Application.cpp
@@ -26,8 +27,6 @@ set(SOURCE_FILES
         common/ChatterSet.hpp
         common/Credentials.cpp
         common/Credentials.hpp
-        common/DownloadManager.cpp
-        common/DownloadManager.hpp
         common/Env.cpp
         common/Env.hpp
         common/LinkParser.cpp
@@ -35,22 +34,25 @@ set(SOURCE_FILES
         common/Literals.hpp
         common/Modes.cpp
         common/Modes.hpp
-        common/NetworkCommon.cpp
-        common/NetworkCommon.hpp
-        common/NetworkManager.cpp
-        common/NetworkManager.hpp
-        common/NetworkPrivate.cpp
-        common/NetworkPrivate.hpp
-        common/NetworkRequest.cpp
-        common/NetworkRequest.hpp
-        common/NetworkResult.cpp
-        common/NetworkResult.hpp
         common/QLogging.cpp
         common/QLogging.hpp
         common/WindowDescriptors.cpp
         common/WindowDescriptors.hpp
 
         common/enums/MessageOverflow.hpp
+
+        common/network/NetworkCommon.cpp
+        common/network/NetworkCommon.hpp
+        common/network/NetworkManager.cpp
+        common/network/NetworkManager.hpp
+        common/network/NetworkPrivate.cpp
+        common/network/NetworkPrivate.hpp
+        common/network/NetworkRequest.cpp
+        common/network/NetworkRequest.hpp
+        common/network/NetworkResult.cpp
+        common/network/NetworkResult.hpp
+        common/network/NetworkTask.cpp
+        common/network/NetworkTask.hpp
 
         controllers/accounts/Account.cpp
         controllers/accounts/Account.hpp
@@ -61,12 +63,50 @@ set(SOURCE_FILES
 
         controllers/commands/builtin/chatterino/Debugging.cpp
         controllers/commands/builtin/chatterino/Debugging.hpp
+        controllers/commands/builtin/Misc.cpp
+        controllers/commands/builtin/Misc.hpp
+        controllers/commands/builtin/twitch/AddModerator.cpp
+        controllers/commands/builtin/twitch/AddModerator.hpp
+        controllers/commands/builtin/twitch/AddVIP.cpp
+        controllers/commands/builtin/twitch/AddVIP.hpp
+        controllers/commands/builtin/twitch/Announce.cpp
+        controllers/commands/builtin/twitch/Announce.hpp
+        controllers/commands/builtin/twitch/Ban.cpp
+        controllers/commands/builtin/twitch/Ban.hpp
+        controllers/commands/builtin/twitch/Block.cpp
+        controllers/commands/builtin/twitch/Block.hpp
         controllers/commands/builtin/twitch/ChatSettings.cpp
         controllers/commands/builtin/twitch/ChatSettings.hpp
+        controllers/commands/builtin/twitch/Chatters.cpp
+        controllers/commands/builtin/twitch/Chatters.hpp
+        controllers/commands/builtin/twitch/DeleteMessages.cpp
+        controllers/commands/builtin/twitch/DeleteMessages.hpp
+        controllers/commands/builtin/twitch/GetModerators.cpp
+        controllers/commands/builtin/twitch/GetModerators.hpp
+        controllers/commands/builtin/twitch/GetVIPs.cpp
+        controllers/commands/builtin/twitch/GetVIPs.hpp
+        controllers/commands/builtin/twitch/Raid.cpp
+        controllers/commands/builtin/twitch/Raid.hpp
+        controllers/commands/builtin/twitch/RemoveModerator.cpp
+        controllers/commands/builtin/twitch/RemoveModerator.hpp
+        controllers/commands/builtin/twitch/RemoveVIP.cpp
+        controllers/commands/builtin/twitch/RemoveVIP.hpp
+        controllers/commands/builtin/twitch/SendReply.cpp
+        controllers/commands/builtin/twitch/SendReply.hpp
+        controllers/commands/builtin/twitch/SendWhisper.cpp
+        controllers/commands/builtin/twitch/SendWhisper.hpp
         controllers/commands/builtin/twitch/ShieldMode.cpp
         controllers/commands/builtin/twitch/ShieldMode.hpp
         controllers/commands/builtin/twitch/Shoutout.cpp
         controllers/commands/builtin/twitch/Shoutout.hpp
+        controllers/commands/builtin/twitch/StartCommercial.cpp
+        controllers/commands/builtin/twitch/StartCommercial.hpp
+        controllers/commands/builtin/twitch/Unban.cpp
+        controllers/commands/builtin/twitch/Unban.hpp
+        controllers/commands/builtin/twitch/UpdateChannel.cpp
+        controllers/commands/builtin/twitch/UpdateChannel.hpp
+        controllers/commands/builtin/twitch/UpdateColor.cpp
+        controllers/commands/builtin/twitch/UpdateColor.hpp
         controllers/commands/CommandContext.hpp
         controllers/commands/CommandController.cpp
         controllers/commands/CommandController.hpp
@@ -87,13 +127,15 @@ set(SOURCE_FILES
         controllers/completion/sources/UnifiedSource.hpp
         controllers/completion/sources/UserSource.cpp
         controllers/completion/sources/UserSource.hpp
-        controllers/completion/strategies/Strategy.hpp
         controllers/completion/strategies/ClassicEmoteStrategy.cpp
         controllers/completion/strategies/ClassicEmoteStrategy.hpp
         controllers/completion/strategies/ClassicUserStrategy.cpp
         controllers/completion/strategies/ClassicUserStrategy.hpp
         controllers/completion/strategies/CommandStrategy.cpp
         controllers/completion/strategies/CommandStrategy.hpp
+        controllers/completion/strategies/SmartEmoteStrategy.cpp
+        controllers/completion/strategies/SmartEmoteStrategy.cpp
+        controllers/completion/strategies/Strategy.hpp
         controllers/completion/TabCompletionModel.cpp
         controllers/completion/TabCompletionModel.hpp
 
@@ -179,6 +221,8 @@ set(SOURCE_FILES
         controllers/pings/MutedChannelModel.cpp
         controllers/pings/MutedChannelModel.hpp
 
+        controllers/plugins/api/ChannelRef.cpp
+        controllers/plugins/api/ChannelRef.hpp
         controllers/plugins/LuaAPI.cpp
         controllers/plugins/LuaAPI.hpp
         controllers/plugins/Plugin.cpp
@@ -188,8 +232,11 @@ set(SOURCE_FILES
         controllers/plugins/LuaUtilities.cpp
         controllers/plugins/LuaUtilities.hpp
 
-        controllers/sound/SoundController.cpp
-        controllers/sound/SoundController.hpp
+        controllers/sound/ISoundController.hpp
+        controllers/sound/MiniaudioBackend.cpp
+        controllers/sound/MiniaudioBackend.hpp
+        controllers/sound/NullBackend.cpp
+        controllers/sound/NullBackend.hpp
 
         controllers/twitch/LiveController.cpp
         controllers/twitch/LiveController.hpp
@@ -248,12 +295,8 @@ set(SOURCE_FILES
         messages/search/SubtierPredicate.cpp
         messages/search/SubtierPredicate.hpp
 
-        providers/Crashpad.cpp
-        providers/Crashpad.hpp
         providers/IvrApi.cpp
         providers/IvrApi.hpp
-        providers/LinkResolver.cpp
-        providers/LinkResolver.hpp
         providers/NetworkConfigurationProvider.cpp
         providers/NetworkConfigurationProvider.hpp
 
@@ -299,6 +342,11 @@ set(SOURCE_FILES
         providers/irc/IrcMessageBuilder.hpp
         providers/irc/IrcServer.cpp
         providers/irc/IrcServer.hpp
+
+        providers/links/LinkInfo.cpp
+        providers/links/LinkInfo.hpp
+        providers/links/LinkResolver.cpp
+        providers/links/LinkResolver.hpp
 
         providers/liveupdates/BasicPubSubClient.hpp
         providers/liveupdates/BasicPubSubManager.hpp
@@ -373,6 +421,8 @@ set(SOURCE_FILES
         providers/twitch/pubsubmessages/ChatModeratorAction.hpp
         providers/twitch/pubsubmessages/Listen.cpp
         providers/twitch/pubsubmessages/Listen.hpp
+        providers/twitch/pubsubmessages/LowTrustUsers.cpp
+        providers/twitch/pubsubmessages/LowTrustUsers.hpp
         providers/twitch/pubsubmessages/Message.hpp
         providers/twitch/pubsubmessages/Unlisten.cpp
         providers/twitch/pubsubmessages/Unlisten.hpp
@@ -384,10 +434,14 @@ set(SOURCE_FILES
 
         singletons/Badges.cpp
         singletons/Badges.hpp
+        singletons/CrashHandler.cpp
+        singletons/CrashHandler.hpp
         singletons/Emotes.cpp
         singletons/Emotes.hpp
         singletons/Fonts.cpp
         singletons/Fonts.hpp
+        singletons/ImageUploader.cpp
+        singletons/ImageUploader.hpp
         singletons/Logging.cpp
         singletons/Logging.hpp
         singletons/NativeMessaging.cpp
@@ -412,6 +466,7 @@ set(SOURCE_FILES
         singletons/helper/LoggingChannel.cpp
         singletons/helper/LoggingChannel.hpp
 
+        util/AbandonObject.hpp
         util/AttachToConsole.cpp
         util/AttachToConsole.hpp
         util/CancellationToken.hpp
@@ -439,8 +494,6 @@ set(SOURCE_FILES
         util/IpcQueue.hpp
         util/LayoutHelper.cpp
         util/LayoutHelper.hpp
-        util/NuulsUploader.cpp
-        util/NuulsUploader.hpp
         util/RapidjsonHelpers.cpp
         util/RapidjsonHelpers.hpp
         util/RatelimitBucket.cpp
@@ -547,12 +600,25 @@ set(SOURCE_FILES
         widgets/dialogs/switcher/SwitchSplitItem.cpp
         widgets/dialogs/switcher/SwitchSplitItem.hpp
 
+        widgets/helper/color/AlphaSlider.cpp
+        widgets/helper/color/AlphaSlider.hpp
+        widgets/helper/color/Checkerboard.cpp
+        widgets/helper/color/Checkerboard.hpp
+        widgets/helper/color/ColorButton.cpp
+        widgets/helper/color/ColorButton.hpp
+        widgets/helper/color/ColorInput.cpp
+        widgets/helper/color/ColorInput.hpp
+        widgets/helper/color/ColorItemDelegate.cpp
+        widgets/helper/color/ColorItemDelegate.hpp
+        widgets/helper/color/HueSlider.cpp
+        widgets/helper/color/HueSlider.hpp
+        widgets/helper/color/SBCanvas.cpp
+        widgets/helper/color/SBCanvas.hpp
+
         widgets/helper/Button.cpp
         widgets/helper/Button.hpp
         widgets/helper/ChannelView.cpp
         widgets/helper/ChannelView.hpp
-        widgets/helper/ColorButton.cpp
-        widgets/helper/ColorButton.hpp
         widgets/helper/ComboBoxItemDelegate.cpp
         widgets/helper/ComboBoxItemDelegate.hpp
         widgets/helper/DebugPopup.cpp
@@ -567,8 +633,6 @@ set(SOURCE_FILES
         widgets/helper/NotebookButton.hpp
         widgets/helper/NotebookTab.cpp
         widgets/helper/NotebookTab.hpp
-        widgets/helper/QColorPicker.cpp
-        widgets/helper/QColorPicker.hpp
         widgets/helper/RegExpItemDelegate.cpp
         widgets/helper/RegExpItemDelegate.hpp
         widgets/helper/TrimRegExpValidator.cpp
@@ -585,6 +649,8 @@ set(SOURCE_FILES
         widgets/helper/SignalLabel.hpp
         widgets/helper/TitlebarButton.cpp
         widgets/helper/TitlebarButton.hpp
+        widgets/helper/TitlebarButtons.cpp
+        widgets/helper/TitlebarButtons.hpp
 
         widgets/listview/GenericItemDelegate.cpp
         widgets/listview/GenericItemDelegate.hpp
@@ -636,6 +702,7 @@ set(SOURCE_FILES
         widgets/splits/InputCompletionPopup.hpp
         widgets/splits/Split.cpp
         widgets/splits/Split.hpp
+        widgets/splits/SplitCommon.hpp
         widgets/splits/SplitContainer.cpp
         widgets/splits/SplitContainer.hpp
         widgets/splits/SplitHeader.cpp
@@ -648,13 +715,7 @@ set(SOURCE_FILES
         ${CMAKE_SOURCE_DIR}/resources/resources.qrc
         )
 
-if (WIN32)
-    # clang-cl doesn't support resource files
-    if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        list(APPEND SOURCE_FILES "${CMAKE_SOURCE_DIR}/resources/windows.rc")
-    endif ()
-
-elseif (APPLE)
+if (APPLE)
     set(MACOS_BUNDLE_ICON_FILE "${CMAKE_SOURCE_DIR}/resources/chatterino.icns")
     list(APPEND SOURCE_FILES "${MACOS_BUNDLE_ICON_FILE}")
     set_source_files_properties(${MACOS_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
@@ -670,7 +731,7 @@ add_library(${LIBRARY_PROJECT} OBJECT ${SOURCE_FILES})
 
 if(CHATTERINO_PLUGINS)
     target_compile_definitions(${LIBRARY_PROJECT}
-        PRIVATE
+        PUBLIC
         CHATTERINO_HAVE_PLUGINS
     )
     message(STATUS "Building Chatterino with lua plugin support enabled.")
@@ -679,15 +740,15 @@ endif()
 if (CHATTERINO_GENERATE_COVERAGE)
     include(CodeCoverage)
     append_coverage_compiler_flags_to_target(${LIBRARY_PROJECT})
-    target_link_libraries(${LIBRARY_PROJECT} PUBLIC gcov)
     message(STATUS "project source dir: ${PROJECT_SOURCE_DIR}/src")
-    setup_target_for_coverage_lcov(
+    setup_target_for_coverage_gcovr_html(
         NAME coverage
-        EXECUTABLE ./bin/chatterino-test
-        BASE_DIRECTORY ${PROJECT_SOURCE_DIR}/src
+        EXECUTABLE ctest
         EXCLUDE "/usr/include/*"
         EXCLUDE "build-*/*"
         EXCLUDE "lib/*"
+        EXCLUDE "*/ui_*.h"
+        EXCLUDE "*/moc_*.cpp"
         )
 endif ()
 
@@ -713,13 +774,6 @@ target_link_libraries(${LIBRARY_PROJECT}
 if (CHATTERINO_PLUGINS)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua)
 endif()
-
-if (BUILD_WITH_QT6)
-    target_link_libraries(${LIBRARY_PROJECT}
-            PUBLIC
-            Qt${MAJOR_QT_VERSION}::Core5Compat
-            )
-endif ()
 
 if (BUILD_WITH_QTKEYCHAIN)
     target_link_libraries(${LIBRARY_PROJECT}
@@ -761,6 +815,13 @@ if (BUILD_APP)
     else()
         message(WARNING "Sanitizers support is disabled")
     endif()
+
+    if (CHATTERINO_STATIC_QT_BUILD)
+        qt_import_plugins(${EXECUTABLE_PROJECT} INCLUDE_BY_TYPE
+            platforms Qt::QXcbIntegrationPlugin
+            Qt::QMinimalIntegrationPlugin
+        )
+    endif ()
 
     target_include_directories(${EXECUTABLE_PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR}/autogen/)
 
@@ -887,7 +948,9 @@ target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     AB_CUSTOM_SETTINGS
     IRC_STATIC
     IRC_NAMESPACE=Communi
+    $<$<BOOL:${WIN32}>:_WIN32_WINNT=0x0A00> # Windows 10
     )
+
 if (USE_SYSTEM_QTKEYCHAIN)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
         CMAKE_BUILD
@@ -906,7 +969,7 @@ if (CHATTERINO_DEBUG_NATIVE_MESSAGES)
 endif ()
 
 if (MSVC)
-    target_compile_options(${LIBRARY_PROJECT} PUBLIC /EHsc /bigobj)
+    target_compile_options(${LIBRARY_PROJECT} PUBLIC /EHsc /bigobj /utf-8)
 endif ()
 
 if (APPLE AND BUILD_APP)
@@ -948,7 +1011,7 @@ if (UNIX)
     endif ()
 endif ()
 
-if (WinToast_FOUND)
+if (WIN32)
     target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
         WinToast)
@@ -977,7 +1040,6 @@ endif ()
 if (BUILD_WITH_CRASHPAD)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_WITH_CRASHPAD)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC crashpad::client)
-    set_target_directory_hierarchy(crashpad_handler crashpad)
 endif()
 
 # Configure compiler warnings
@@ -1000,10 +1062,6 @@ if (MSVC)
     # Someone adds /W3 before we add /W4.
     # This makes sure, only /W4 is specified.
     string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    # 4505 - "unreferenced local version has been removed"
-    #        Although this might give hints on dead code,
-    #        there are some cases where it's distracting.
-    #
     # 4100 - "unreferenced formal parameter"
     #        There are a lot of functions and methods where
     #        an argument was given a name but never used.
@@ -1014,6 +1072,11 @@ if (MSVC)
     #        These are implicit conversions from size_t to int/qsizetype.
     #        We don't use size_t in a lot of cases, since
     #        Qt doesn't use it - it uses int (or qsizetype in Qt6).
+    #
+    # 4458 - "declaration of 'identifier' hides class member"
+    #        We have a rule of exclusively using `this->`
+    #        to access class members, thus it's fine to reclare a variable
+    #        with the same name as a class member.
     target_compile_options(${LIBRARY_PROJECT} PUBLIC
         /W4
         # 5038 - warnings about initialization order
@@ -1021,9 +1084,9 @@ if (MSVC)
         # 4855 - implicit capture of 'this' via '[=]' is deprecated
         /w14855
         # Disable the following warnings (see reasoning above)
-        /wd4505
         /wd4100
         /wd4267
+        /wd4458
         # Enable updated '__cplusplus' macro - workaround for CMake#18837
         /Zc:__cplusplus
     )
@@ -1037,7 +1100,6 @@ else ()
         -Wno-switch
         -Wno-deprecated-declarations
         -Wno-sign-compare
-        -Wno-unused-variable
 
         # Disabling strict-aliasing warnings for now, although we probably want to re-enable this in the future
         -Wno-strict-aliasing

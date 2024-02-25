@@ -23,7 +23,7 @@ public:
         }
     }
 
-    virtual void paintEvent(QPaintEvent *)
+    void paintEvent(QPaintEvent *) override
     {
         QPainter painter(this);
 

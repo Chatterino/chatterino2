@@ -19,7 +19,9 @@ FilterSet::FilterSet(const QList<QUuid> &filterIds)
     for (const auto &f : *filters)
     {
         if (filterIds.contains(f->getId()))
+        {
             this->filters_.insert(f->getId(), f);
+        }
     }
 
     this->listener_ =
@@ -36,13 +38,17 @@ FilterSet::~FilterSet()
 bool FilterSet::filter(const MessagePtr &m, ChannelPtr channel) const
 {
     if (this->filters_.size() == 0)
+    {
         return true;
+    }
 
     filters::ContextMap context = filters::buildContextMap(m, channel.get());
     for (const auto &f : this->filters_.values())
     {
         if (!f->valid() || !f->filter(context))
+        {
             return false;
+        }
     }
 
     return true;

@@ -152,6 +152,12 @@ namespace chatterino {
 
 void Emojis::load()
 {
+    if (this->loaded_)
+    {
+        return;
+    }
+    this->loaded_ = true;
+
     this->loadEmojis();
 
     this->sortEmojis();
@@ -161,7 +167,7 @@ void Emojis::load()
 
 void Emojis::loadEmojis()
 {
-    // Current version: https://github.com/iamcal/emoji-data/blob/v14.0.0/emoji.json (Emoji version 14.0 (2022))
+    // Current version: https://github.com/iamcal/emoji-data/blob/v15.1.1/emoji.json (Emoji version 15.1 (2023))
     QFile file(":/emoji.json");
     file.open(QFile::ReadOnly);
     QTextStream s1(&file);
@@ -190,7 +196,7 @@ void Emojis::loadEmojis()
 
         this->emojiFirstByte_[emojiData->value.at(0)].append(emojiData);
 
-        this->emojis.insert(emojiData->unifiedCode, emojiData);
+        this->emojis.push_back(emojiData);
 
         if (unparsedEmoji.HasMember("skin_variations"))
         {
@@ -212,8 +218,7 @@ void Emojis::loadEmojis()
                 this->emojiFirstByte_[variationEmojiData->value.at(0)].append(
                     variationEmojiData);
 
-                this->emojis.insert(variationEmojiData->unifiedCode,
-                                    variationEmojiData);
+                this->emojis.push_back(variationEmojiData);
             }
         }
     }
@@ -238,10 +243,8 @@ void Emojis::sortEmojis()
 void Emojis::loadEmojiSet()
 {
     getSettings()->emojiSet.connect([this](const auto &emojiSet) {
-        this->emojis.each([=](const auto &name,
-                              std::shared_ptr<EmojiData> &emoji) {
-            (void)name;
-
+        for (const auto &emoji : this->emojis)
+        {
             QString emojiSetToUse = emojiSet;
             // clang-format off
             static std::map<QString, QString> emojiSets = {
@@ -266,14 +269,15 @@ void Emojis::loadEmojiSet()
             };
             // clang-format on
 
+            // As of emoji-data v15.1.1, google is the only source missing no images.
             if (!emoji->capabilities.contains(emojiSetToUse))
             {
-                emojiSetToUse = "Twitter";
+                emojiSetToUse = "Google";
             }
 
             QString code = emoji->unifiedCode.toLower();
             QString urlPrefix =
-                "https://pajbot.com/static/emoji-v2/img/twitter/64/";
+                "https://pajbot.com/static/emoji-v2/img/google/64/";
             auto it = emojiSets.find(emojiSetToUse);
             if (it != emojiSets.end())
             {
@@ -283,7 +287,7 @@ void Emojis::loadEmojiSet()
             emoji->emote = std::make_shared<Emote>(Emote{
                 EmoteName{emoji->value}, ImageSet{Image::fromUrl({url}, 0.35)},
                 Tooltip{":" + emoji->shortCodes[0] + ":<br/>Emoji"}, Url{}});
-        });
+        }
     });
 }
 
@@ -424,7 +428,7 @@ QString Emojis::replaceShortCodes(const QString &text) const
     return ret;
 }
 
-const EmojiMap &Emojis::getEmojis() const
+const std::vector<EmojiPtr> &Emojis::getEmojis() const
 {
     return this->emojis;
 }

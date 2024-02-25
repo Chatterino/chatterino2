@@ -45,9 +45,8 @@ FiltersPage::FiltersPage()
     });
 
     // We can safely ignore this signal connection since we own the view
-    std::ignore = view->addButtonPressed.connect([] {
-        ChannelFilterEditorDialog d(
-            static_cast<QWidget *>(&(getApp()->windows->getMainWindow())));
+    std::ignore = view->addButtonPressed.connect([this] {
+        ChannelFilterEditorDialog d(this->window());
         if (d.exec() == QDialog::Accepted)
         {
             getSettings()->filterRecords.append(
@@ -55,7 +54,7 @@ FiltersPage::FiltersPage()
         }
     });
 
-    auto quickAddButton = new QPushButton("Quick Add");
+    auto *quickAddButton = new QPushButton("Quick Add");
     QObject::connect(quickAddButton, &QPushButton::pressed, [] {
         getSettings()->filterRecords.append(std::make_shared<FilterRecord>(
             "My filter", "message.content contains \"hello\""));
@@ -67,7 +66,7 @@ FiltersPage::FiltersPage()
                          this->tableCellClicked(clicked, view);
                      });
 
-    auto filterHelpLabel =
+    auto *filterHelpLabel =
         new QLabel(QString("<a href='%1'><span "
                            "style='color:#99f'>filter info</span></a>")
                        .arg(FILTERS_DOCUMENTATION));

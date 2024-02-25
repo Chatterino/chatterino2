@@ -54,7 +54,9 @@ bool Settings::isHighlightedUser(const QString &username)
     for (const auto &highlightedUser : *items)
     {
         if (highlightedUser.isMatch(username))
+        {
             return true;
+        }
     }
 
     return false;
@@ -67,7 +69,9 @@ bool Settings::isBlacklistedUser(const QString &username)
     for (const auto &blacklistedUser : *items)
     {
         if (blacklistedUser.isMatch(username))
+        {
             return true;
+        }
     }
 
     return false;
@@ -137,6 +141,7 @@ bool Settings::toggleMutedChannel(const QString &channelName)
 Settings *Settings::instance_ = nullptr;
 
 Settings::Settings(const QString &settingsDirectory)
+    : prevInstance_(Settings::instance_)
 {
     QString settingsPath = settingsDirectory + "/settings.json";
 
@@ -188,7 +193,10 @@ Settings::Settings(const QString &settingsDirectory)
         false);
 }
 
-Settings::~Settings() = default;
+Settings::~Settings()
+{
+    Settings::instance_ = this->prevInstance_;
+}
 
 void Settings::saveSnapshot()
 {
@@ -204,7 +212,7 @@ void Settings::saveSnapshot()
         }
 
         rapidjson::Value key(setting->getPath().c_str(), a);
-        auto curVal = setting->unmarshalJSON();
+        auto *curVal = setting->unmarshalJSON();
         if (curVal == nullptr)
         {
             continue;

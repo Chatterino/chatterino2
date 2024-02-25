@@ -2,9 +2,8 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
+#include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "debug/Benchmark.hpp"
@@ -54,7 +53,7 @@ namespace detail {
             DebugCount::increase("animated images");
 
             this->gifTimerConnection_ =
-                getApp()->emotes->gifTimer.signal.connect([this] {
+                getIApp()->getEmotes()->getGIFTimer().signal.connect([this] {
                     this->advance();
                 });
         }
@@ -72,7 +71,8 @@ namespace detail {
         else
         {
             this->durationOffset_ = std::min<int>(
-                int(getApp()->emotes->gifTimer.position() % totalLength),
+                int(getIApp()->getEmotes()->getGIFTimer().position() %
+                    totalLength),
                 60000);
         }
         this->processOffset();
@@ -107,7 +107,7 @@ namespace detail {
         {
             auto sz = frame.image.size();
             auto area = sz.width() * sz.height();
-            auto memory = area * frame.image.depth();
+            auto memory = area * frame.image.depth() / 8;
 
             usage += memory;
         }
@@ -208,7 +208,9 @@ namespace detail {
                 // https://github.com/SevenTV/chatterino7/issues/46#issuecomment-1010595231
                 int duration = reader.nextImageDelay();
                 if (duration <= 10)
+                {
                     duration = 100;
+                }
                 duration = std::max(20, duration);
                 frames.push_back(Frame<QImage>{std::move(image), duration});
             }
@@ -250,7 +252,7 @@ namespace detail {
             }
         }
 
-        getApp()->windows->forceLayoutChannelViews();
+        getIApp()->getWindows()->forceLayoutChannelViews();
 
         loadedEventQueued = false;
     }
@@ -501,11 +503,11 @@ void Image::actuallyLoad()
     NetworkRequest(this->url().string)
         .concurrent()
         .cache()
-        .onSuccess([weak](auto result) -> Outcome {
+        .onSuccess([weak](auto result) {
             auto shared = weak.lock();
             if (!shared)
             {
-                return Failure;
+                return;
             }
 
             auto data = result.getData();
@@ -520,14 +522,14 @@ void Image::actuallyLoad()
                 qCDebug(chatterinoImage)
                     << "Error: image cant be read " << shared->url().string;
                 shared->empty_ = true;
-                return Failure;
+                return;
             }
 
             const auto size = reader.size();
             if (size.isEmpty())
             {
                 shared->empty_ = true;
-                return Failure;
+                return;
             }
 
             // returns 1 for non-animated formats
@@ -537,7 +539,7 @@ void Image::actuallyLoad()
                     << "Error: image has less than 1 frame "
                     << shared->url().string << ": " << reader.errorString();
                 shared->empty_ = true;
-                return Failure;
+                return;
             }
 
             // use "double" to prevent int overflows
@@ -548,7 +550,7 @@ void Image::actuallyLoad()
                 qCDebug(chatterinoImage) << "image too large in RAM";
 
                 shared->empty_ = true;
-                return Failure;
+                return;
             }
 
             auto parsed = detail::readFrames(reader, shared->url());
@@ -561,8 +563,6 @@ void Image::actuallyLoad()
                             std::forward<decltype(frames)>(frames));
                     }
                 }));
-
-            return Success;
         })
         .onError([weak](auto /*result*/) {
             auto shared = weak.lock();
@@ -607,6 +607,13 @@ ImageExpirationPool::ImageExpirationPool()
     this->freeTimer_->start(
         std::chrono::duration_cast<std::chrono::milliseconds>(
             IMAGE_POOL_CLEANUP_INTERVAL));
+
+    // configure all debug counts used by images
+    DebugCount::configure("image bytes", DebugCount::Flag::DataSize);
+    DebugCount::configure("image bytes (ever loaded)",
+                          DebugCount::Flag::DataSize);
+    DebugCount::configure("image bytes (ever unloaded)",
+                          DebugCount::Flag::DataSize);
 }
 
 ImageExpirationPool &ImageExpirationPool::instance()

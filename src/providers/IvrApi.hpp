@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/NetworkRequest.hpp"
+#include "common/network/NetworkRequest.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 
 #include <QJsonArray>
