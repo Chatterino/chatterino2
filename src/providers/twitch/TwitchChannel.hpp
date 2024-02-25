@@ -6,8 +6,11 @@
 #include "common/ChannelChatters.hpp"
 #include "common/Common.hpp"
 #include "common/UniqueAccess.hpp"
+#include "providers/ffz/FfzBadges.hpp"
+#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/QStringHash.hpp"
+#include "util/ThreadGuard.hpp"
 
 #include <boost/circular_buffer/space_optimized.hpp>
 #include <boost/signals2.hpp>
@@ -200,6 +203,10 @@ public:
     std::optional<EmotePtr> ffzCustomVipBadge() const;
     std::optional<EmotePtr> twitchBadge(const QString &set,
                                         const QString &version) const;
+    /**
+     * Returns a list of channel-specific FrankerFaceZ badges for the given user
+     */
+    std::vector<FfzBadges::Badge> ffzChannelBadges(const QString &userID) const;
 
     // Cheers
     std::optional<CheerEmote> cheerEmote(const QString &string);
@@ -392,6 +399,9 @@ protected:
     Atomic<std::shared_ptr<const EmoteMap>> seventvEmotes_;
     Atomic<std::optional<EmotePtr>> ffzCustomModBadge_;
     Atomic<std::optional<EmotePtr>> ffzCustomVipBadge_;
+
+    FfzChannelBadgeMap ffzChannelBadges_;
+    ThreadGuard tgFfzChannelBadges_;
 
 private:
     // Badges

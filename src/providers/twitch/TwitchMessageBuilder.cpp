@@ -1447,6 +1447,18 @@ void TwitchMessageBuilder::appendFfzBadges()
         this->emplace<FfzBadgeElement>(
             badge.emote, MessageElementFlag::BadgeFfz, badge.color);
     }
+
+    if (this->twitchChannel == nullptr)
+    {
+        return;
+    }
+
+    for (const auto &badge :
+         this->twitchChannel->ffzChannelBadges(this->userId_))
+    {
+        this->emplace<FfzBadgeElement>(
+            badge.emote, MessageElementFlag::BadgeFfz, badge.color);
+    }
 }
 
 void TwitchMessageBuilder::appendSeventvBadges()

@@ -16,6 +16,7 @@
 - Minor: All sound capabilities can now be disabled by setting your "Sound backend" setting to "Null" and restarting Chatterino. (#4978)
 - Minor: Add an option to use new experimental smarter emote completion. (#4987)
 - Minor: Add `--safe-mode` command line option that can be used for troubleshooting when Chatterino is misbehaving or is misconfigured. It disables hiding the settings button & prevents plugins from loading. (#4985)
+- Minor: Added support for FrankerFaceZ channel badges. These can be configured at https://www.frankerfacez.com/channel/mine - right now only supporting bot badges for your chat bots. (#5119)
 - Minor: Updated the flatpakref link included with nightly builds to point to up-to-date flathub-beta builds. (#5008)
 - Minor: Add a new completion API for experimental plugins feature. (#5000, #5047)
 - Minor: Re-enabled _Restart on crash_ option on Windows. (#5012)
