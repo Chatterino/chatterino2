@@ -443,6 +443,8 @@ QString openURL(const CommandContext &ctx)
     }
 
     QCommandLineParser parser;
+    parser.setOptionsAfterPositionalArgumentsMode(
+        QCommandLineParser::ParseAsPositionalArguments);
     parser.addPositionalArgument("URL", "The URL to open");
     QCommandLineOption privateModeOption(
         {
@@ -469,7 +471,7 @@ QString openURL(const CommandContext &ctx)
             "Usage: /openurl <URL> [--incognito/--no-incognito]"));
         return "";
     }
-    auto urlString = parser.positionalArguments().at(0);
+    auto urlString = parser.positionalArguments().join(' ');
 
     QUrl url = QUrl::fromUserInput(urlString);
     if (!url.isValid())

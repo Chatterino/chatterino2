@@ -2840,6 +2840,94 @@ void Helix::sendShoutout(
         .execute();
 }
 
+// https://dev.twitch.tv/docs/api/reference/#send-chat-message
+void Helix::sendChatMessage(
+    HelixSendMessageArgs args, ResultCallback<HelixSentMessage> successCallback,
+    FailureCallback<HelixSendMessageError, QString> failureCallback)
+{
+    using Error = HelixSendMessageError;
+
+    QJsonObject json{{
+        {"broadcaster_id", args.broadcasterID},
+        {"sender_id", args.senderID},
+        {"message", args.message},
+    }};
+    if (!args.replyParentMessageID.isEmpty())
+    {
+        json["reply_parent_message_id"] = args.replyParentMessageID;
+    }
+
+    this->makePost("chat/messages", {})
+        .json(json)
+        .onSuccess([successCallback](const NetworkResult &result) {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for sending chat message was "
+                    << result.formatError() << "but we expected it to be 200";
+            }
+            auto json = result.parseJson();
+
+            successCallback(HelixSentMessage(
+                json.value("data").toArray().at(0).toObject()));
+        })
+        .onError([failureCallback](const NetworkResult &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
+            const auto obj = result.parseJson();
+            auto message =
+                obj["message"].toString(u"Twitch internal server error"_s);
+
+            switch (*result.status())
+            {
+                case 400: {
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("User access token requires the",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 403: {
+                    failureCallback(Error::Forbidden, message);
+                }
+                break;
+
+                case 422: {
+                    failureCallback(Error::MessageTooLarge, message);
+                }
+                break;
+
+                case 500: {
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+
+                default: {
+                    qCWarning(chatterinoTwitch)
+                        << "Helix send chat message, unhandled error data:"
+                        << result.formatError() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+            }
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(const QString &url, const QUrlQuery &urlQuery,
                                   NetworkRequestType type)
 {

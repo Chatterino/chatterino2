@@ -140,6 +140,18 @@ StackIdx push(lua_State *L, const int &b)
     return lua_gettop(L);
 }
 
+bool peek(lua_State *L, int *out, StackIdx idx)
+{
+    StackGuard guard(L);
+    if (lua_isnumber(L, idx) == 0)
+    {
+        return false;
+    }
+
+    *out = lua_tointeger(L, idx);
+    return true;
+}
+
 bool peek(lua_State *L, bool *out, StackIdx idx)
 {
     StackGuard guard(L);

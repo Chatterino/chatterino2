@@ -185,3 +185,9 @@ function c2.register_callback(type, func) end
 ---@param ... any Values to log. Should be convertible to a string with `tostring()`.
 function c2.log(level, ...) end
 
+--- Calls callback around msec milliseconds later. Does not freeze Chatterino.
+---
+---@param callback fun() The callback that will be called.
+---@param msec number How long to wait.
+function c2.later(callback, msec) end
+

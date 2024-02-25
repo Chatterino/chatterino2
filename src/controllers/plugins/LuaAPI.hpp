@@ -86,6 +86,15 @@ int c2_register_callback(lua_State *L);
  */
 int c2_log(lua_State *L);
 
+/**
+ * Calls callback around msec milliseconds later. Does not freeze Chatterino.
+ *
+ * @lua@param callback fun() The callback that will be called.
+ * @lua@param msec number How long to wait.
+ * @exposed c2.later
+ */
+int c2_later(lua_State *L);
+
 // These ones are global
 int g_load(lua_State *L);
 int g_print(lua_State *L);

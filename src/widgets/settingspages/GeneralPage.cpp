@@ -1032,6 +1032,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        "Find mentions of users in chat without the @ prefix.");
     layout.addCheckbox("Show username autocompletion popup menu",
                        s.showUsernameCompletionMenu);
+    layout.addCheckbox(
+        "Always include broadcaster in user completions",
+        s.alwaysIncludeBroadcasterInUserCompletions, false,
+        "This will ensure a broadcaster is always easy to ping, even if they "
+        "don't have chat open or have typed recently.");
     const QStringList usernameDisplayModes = {"Username", "Localized name",
                                               "Username and localized name"};
 
@@ -1237,6 +1242,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             false);
     helixTimegateModerators->setMinimumWidth(
         helixTimegateModerators->minimumSizeHint().width());
+
+    layout.addDropdownEnumClass<ChatSendProtocol>(
+        "Chat send protocol", magic_enum::enum_names<ChatSendProtocol>(),
+        s.chatSendProtocol,
+        "'Helix' will use Twitch's Helix API to send message. 'IRC' will use "
+        "IRC to send messages.",
+        {});
 
     layout.addCheckbox(
         "Show send message button", s.showSendButton, false,

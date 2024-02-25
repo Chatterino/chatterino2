@@ -412,6 +412,41 @@ struct HelixGlobalBadges {
 
 using HelixChannelBadges = HelixGlobalBadges;
 
+struct HelixDropReason {
+    QString code;
+    QString message;
+
+    explicit HelixDropReason(const QJsonObject &jsonObject)
+        : code(jsonObject["code"].toString())
+        , message(jsonObject["message"].toString())
+    {
+    }
+};
+
+struct HelixSentMessage {
+    QString id;
+    bool isSent;
+    std::optional<HelixDropReason> dropReason;
+
+    explicit HelixSentMessage(const QJsonObject &jsonObject)
+        : id(jsonObject["message_id"].toString())
+        , isSent(jsonObject["is_sent"].toBool())
+        , dropReason(jsonObject.contains("drop_reason")
+                         ? std::optional(HelixDropReason(
+                               jsonObject["drop_reason"].toObject()))
+                         : std::nullopt)
+    {
+    }
+};
+
+struct HelixSendMessageArgs {
+    QString broadcasterID;
+    QString senderID;
+    QString message;
+    /// Optional
+    QString replyParentMessageID;
+};
+
 enum class HelixAnnouncementColor {
     Blue,
     Green,
@@ -691,6 +726,19 @@ enum class HelixStartCommercialError {
 
 enum class HelixGetGlobalBadgesError {
     Unknown,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
+enum class HelixSendMessageError {
+    Unknown,
+
+    MissingText,
+    BadRequest,
+    Forbidden,
+    MessageTooLarge,
+    UserMissingScope,
 
     // The error message is forwarded directly from the Twitch API
     Forwarded,
@@ -1027,6 +1075,12 @@ public:
         ResultCallback<> successCallback,
         FailureCallback<HelixSendShoutoutError, QString> failureCallback) = 0;
 
+    /// https://dev.twitch.tv/docs/api/reference/#send-chat-message
+    virtual void sendChatMessage(
+        HelixSendMessageArgs args,
+        ResultCallback<HelixSentMessage> successCallback,
+        FailureCallback<HelixSendMessageError, QString> failureCallback) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 
 protected:
@@ -1340,6 +1394,12 @@ public:
         QString fromBroadcasterID, QString toBroadcasterID, QString moderatorID,
         ResultCallback<> successCallback,
         FailureCallback<HelixSendShoutoutError, QString> failureCallback) final;
+
+    /// https://dev.twitch.tv/docs/api/reference/#send-chat-message
+    void sendChatMessage(
+        HelixSendMessageArgs args,
+        ResultCallback<HelixSentMessage> successCallback,
+        FailureCallback<HelixSendMessageError, QString> failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 

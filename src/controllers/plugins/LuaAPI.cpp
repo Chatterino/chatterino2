@@ -147,6 +147,63 @@ int c2_log(lua_State *L)
     return 0;
 }
 
+int c2_later(lua_State *L)
+{
+    auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
+    if (pl == nullptr)
+    {
+        return luaL_error(L, "c2.later: internal error: no plugin?");
+    }
+    if (lua_gettop(L) != 2)
+    {
+        return luaL_error(
+            L, "c2.later expects two arguments (a callback that takes no "
+               "arguments and returns nothing and a number the time in "
+               "milliseconds to wait)\n");
+    }
+    int time{};
+    if (!lua::pop(L, &time))
+    {
+        return luaL_error(L, "cannot get time (2nd arg of c2.later, "
+                             "expected a number)");
+    }
+
+    if (!lua_isfunction(L, lua_gettop(L)))
+    {
+        return luaL_error(L, "cannot get callback (1st arg of c2.later, "
+                             "expected a function)");
+    }
+
+    auto *timer = new QTimer();
+    timer->setInterval(time);
+    auto id = pl->addTimeout(timer);
+    auto name = QString("timeout_%1").arg(id);
+    auto *coro = lua_newthread(L);
+
+    QObject::connect(timer, &QTimer::timeout, [pl, coro, name, timer]() {
+        timer->deleteLater();
+        pl->removeTimeout(timer);
+        int nres{};
+        lua_resume(coro, nullptr, 0, &nres);
+
+        lua_pushnil(coro);
+        lua_setfield(coro, LUA_REGISTRYINDEX, name.toStdString().c_str());
+        if (lua_gettop(coro) != 0)
+        {
+            stackDump(coro,
+                      pl->id +
+                          ": timer returned a value, this shouldn't happen "
+                          "and is probably a plugin bug");
+        }
+    });
+    stackDump(L, "before setfield");
+    lua_setfield(L, LUA_REGISTRYINDEX, name.toStdString().c_str());
+    lua_xmove(L, coro, 1);  // move function to thread
+    timer->start();
+
+    return 0;
+}
+
 int g_load(lua_State *L)
 {
 #    ifdef NDEBUG
