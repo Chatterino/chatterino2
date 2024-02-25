@@ -89,7 +89,7 @@ size_t ChannelChatters::colorsSize() const
     return size;
 }
 
-const QColor ChannelChatters::getUserColor(const QString &user) const
+QColor ChannelChatters::getUserColor(const QString &user) const
 {
     const auto chatterColors = this->chatterColors_.access();
 
@@ -98,7 +98,7 @@ const QColor ChannelChatters::getUserColor(const QString &user) const
     if (!chatterColors->exists(lowerUser))
     {
         // Returns an invalid color so we can decide not to override `textColor`
-        return QColor();
+        return {};
     }
 
     return QColor::fromRgb(chatterColors->get(lowerUser));
