@@ -16,6 +16,8 @@
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ssl.hpp>
+#include <boost/asio/ssl/verify_mode.hpp>
+#include <boost/certify/https_verification.hpp>
 #include <boost/json.hpp>
 #include <twitch-eventsub-ws/listener.hpp>
 #include <twitch-eventsub-ws/session.hpp>
@@ -26,6 +28,20 @@
 using namespace std::literals::chrono_literals;
 
 namespace {
+
+/// Enable LOCAL_EVENTSUB when you want to debug eventsub with a local instance of the Twitch CLI
+/// twitch event websocket start-server --ssl --port 3012
+constexpr bool LOCAL_EVENTSUB = false;
+
+std::tuple<std::string, std::string, std::string> getEventSubHost()
+{
+    if constexpr (LOCAL_EVENTSUB)
+    {
+        return {"localhost", "3012", "/ws"};
+    }
+
+    return {"eventsub.wss.twitch.tv", "443", "/ws"};
+}
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 const auto &LOG = chatterinoTwitchEventSub;
@@ -250,20 +266,7 @@ void EventSub::start()
                                .toUtf8()
                                .toStdString();
 
-    // for use with twitch CLI: twitch event websocket start-server --ssl --port 3012
-    // std::string host{"localhost"};
-    // std::string port{"3012"};
-    // std::string path{"/ws"};
-
-    // for use with websocat: websocat -s 8080 --pkcs12-der certificate.p12
-    // std::string host{"localhost"};
-    // std::string port{"8080"};
-    // std::string path;
-
-    // for use with real Twitch eventsub
-    std::string host{"eventsub.wss.twitch.tv"};
-    std::string port{"443"};
-    std::string path{"/ws"};
+    auto [host, port, path] = getEventSubHost();
 
     this->mainThread = std::make_unique<std::thread>([=] {
         try
@@ -273,7 +276,16 @@ void EventSub::start()
             boost::asio::ssl::context sslContext{
                 boost::asio::ssl::context::tlsv12_client};
 
-            // TODO: Load certificates into SSL context
+            if constexpr (!LOCAL_EVENTSUB)
+            {
+                sslContext.set_verify_mode(
+                    boost::asio::ssl::verify_peer |
+                    boost::asio::ssl::verify_fail_if_no_peer_cert);
+                sslContext.set_default_verify_paths();
+
+                boost::certify::enable_native_https_server_verification(
+                    sslContext);
+            }
 
             std::make_shared<eventsub::Session>(ctx, sslContext,
                                                 std::make_unique<MyListener>())

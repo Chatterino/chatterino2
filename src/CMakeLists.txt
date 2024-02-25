@@ -775,6 +775,7 @@ target_link_libraries(${LIBRARY_PROJECT}
         LRUCache
         MagicEnum
         twitch-eventsub-ws
+        BoostCertify
         )
 
 if (CHATTERINO_PLUGINS)

@@ -194,6 +194,7 @@ if (BUILD_BENCHMARKS)
 endif ()
 
 find_package(PajladaSerialize REQUIRED)
+find_package(BoostCertify REQUIRED)
 find_package(PajladaSignals REQUIRED)
 find_package(LRUCache REQUIRED)
 find_package(MagicEnum REQUIRED)
