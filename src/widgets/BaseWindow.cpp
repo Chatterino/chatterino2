@@ -531,12 +531,27 @@ void BaseWindow::leaveEvent(QEvent *)
 
 void BaseWindow::moveTo(QPoint point, widgets::BoundsChecking mode)
 {
+    this->lastBoundsCheckPosition_ = point;
+    this->lastBoundsCheckMode_ = mode;
     widgets::moveWindowTo(this, point, mode);
 }
 
 void BaseWindow::showAndMoveTo(QPoint point, widgets::BoundsChecking mode)
 {
+    this->lastBoundsCheckPosition_ = point;
+    this->lastBoundsCheckMode_ = mode;
     widgets::showAndMoveWindowTo(this, point, mode);
+}
+
+bool BaseWindow::applyLastBoundsCheck()
+{
+    if (this->lastBoundsCheckMode_ == widgets::BoundsChecking::Off)
+    {
+        return false;
+    }
+
+    this->moveTo(this->lastBoundsCheckPosition_, this->lastBoundsCheckMode_);
+    return true;
 }
 
 void BaseWindow::resizeEvent(QResizeEvent *)
@@ -962,6 +977,13 @@ bool BaseWindow::handleSIZE(MSG *msg)
                           QPoint(rect.right - 1, rect.bottom - 1));
             }
             this->useNextBounds_.stop();
+
+            if (msg->wParam == SIZE_MINIMIZED && this->ui_.titlebarButtons)
+            {
+                // Windows doesn't send a WM_NCMOUSELEAVE event when clicking
+                // the minimize button, so we have to emulate it.
+                this->ui_.titlebarButtons->leave();
+            }
         }
     }
     return false;

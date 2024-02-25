@@ -24,7 +24,7 @@ c2.LogLevel = {}
 c2.EventType = {}
 ---@class CommandContext
 ---@field words string[] The words typed when executing the command. For example `/foo bar baz` will result in `{"/foo", "bar", "baz"}`.
----@field channel_name string The name of the channel the command was executed in.
+---@field channel Channel The channel the command was executed in.
 
 ---@class CompletionList
 ---@field values string[] The completions

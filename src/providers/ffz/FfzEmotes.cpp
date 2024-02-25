@@ -169,6 +169,33 @@ EmoteMap ffz::detail::parseChannelEmotes(const QJsonObject &jsonRoot)
     return emotes;
 }
 
+FfzChannelBadgeMap ffz::detail::parseChannelBadges(const QJsonObject &badgeRoot)
+{
+    FfzChannelBadgeMap channelBadges;
+
+    for (auto it = badgeRoot.begin(); it != badgeRoot.end(); ++it)
+    {
+        const auto badgeID = it.key().toInt();
+        const auto &jsonUserIDs = it.value().toArray();
+        for (const auto &jsonUserID : jsonUserIDs)
+        {
+            // NOTE: The Twitch User IDs come through as ints right now, the code below
+            // tries to parse them as strings first since that's how we treat them anyway.
+            if (jsonUserID.isString())
+            {
+                channelBadges[jsonUserID.toString()].emplace_back(badgeID);
+            }
+            else
+            {
+                channelBadges[QString::number(jsonUserID.toInt())].emplace_back(
+                    badgeID);
+            }
+        }
+    }
+
+    return channelBadges;
+}
+
 FfzEmotes::FfzEmotes()
     : global_(std::make_shared<EmoteMap>())
 {
@@ -220,6 +247,7 @@ void FfzEmotes::loadChannel(
     std::function<void(EmoteMap &&)> emoteCallback,
     std::function<void(std::optional<EmotePtr>)> modBadgeCallback,
     std::function<void(std::optional<EmotePtr>)> vipBadgeCallback,
+    std::function<void(FfzChannelBadgeMap &&)> channelBadgesCallback,
     bool manualRefresh)
 {
     qCDebug(LOG) << "Reload FFZ Channel Emotes for channel" << channelID;
@@ -229,8 +257,9 @@ void FfzEmotes::loadChannel(
         .timeout(20000)
         .onSuccess([emoteCallback = std::move(emoteCallback),
                     modBadgeCallback = std::move(modBadgeCallback),
-                    vipBadgeCallback = std::move(vipBadgeCallback), channel,
-                    manualRefresh](const auto &result) {
+                    vipBadgeCallback = std::move(vipBadgeCallback),
+                    channelBadgesCallback = std::move(channelBadgesCallback),
+                    channel, manualRefresh](const auto &result) {
             const auto json = result.parseJson();
 
             auto emoteMap = parseChannelEmotes(json);
@@ -238,12 +267,15 @@ void FfzEmotes::loadChannel(
                 json["room"]["mod_urls"].toObject(), "Moderator");
             auto vipBadge = parseAuthorityBadge(
                 json["room"]["vip_badge"].toObject(), "VIP");
+            auto channelBadges =
+                parseChannelBadges(json["room"]["user_badge_ids"].toObject());
 
             bool hasEmotes = !emoteMap.empty();
 
             emoteCallback(std::move(emoteMap));
             modBadgeCallback(std::move(modBadge));
             vipBadgeCallback(std::move(vipBadge));
+            channelBadgesCallback(std::move(channelBadges));
             if (auto shared = channel.lock(); manualRefresh)
             {
                 if (hasEmotes)

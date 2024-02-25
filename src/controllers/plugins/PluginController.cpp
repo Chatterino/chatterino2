@@ -166,6 +166,9 @@ void PluginController::openLibrariesFor(lua_State *L, const PluginMeta &meta,
     lua::pushEnumTable<lua::api::LPlatform>(L);
     lua_setfield(L, c2libIdx, "Platform");
 
+    lua::pushEnumTable<Channel::Type>(L);
+    lua_setfield(L, c2libIdx, "ChannelType");
+
     // Initialize metatables for objects
     lua::api::ChannelRef::createMetatable(L);
     lua_setfield(L, c2libIdx, "Channel");

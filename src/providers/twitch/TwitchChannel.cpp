@@ -18,6 +18,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/BttvLiveUpdates.hpp"
 #include "providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp"
+#include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/recentmessages/Api.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"
@@ -164,12 +165,14 @@ TwitchChannel::TwitchChannel(const QString &name)
             MessageBuilder builder;
             TwitchMessageBuilder::liveSystemMessage(this->getDisplayName(),
                                                     &builder);
+            builder.message().id = this->roomId();
             this->addMessage(builder.release());
 
             // Message in /live channel
             MessageBuilder builder2;
             TwitchMessageBuilder::liveMessage(this->getDisplayName(),
                                               &builder2);
+            builder2.message().id = this->roomId();
             getApp()->twitch->liveChannel->addMessage(builder2.release());
 
             // Notify on all channels with a ping sound
@@ -197,14 +200,12 @@ TwitchChannel::TwitchChannel(const QString &name)
 
             // MSVC hates this code if the parens are not there
             int end = (std::max)(0, snapshotLength - 200);
-            auto liveMessageSearchText =
-                QString("%1 is live!").arg(this->getDisplayName());
 
             for (int i = snapshotLength - 1; i >= end; --i)
             {
                 const auto &s = snapshot[i];
 
-                if (s->messageText == liveMessageSearchText)
+                if (s->id == this->roomId())
                 {
                     s->flags.set(MessageFlag::Disabled);
                     break;
@@ -331,6 +332,14 @@ void TwitchChannel::refreshFFZChannelEmotes(bool manualRefresh)
             {
                 this->ffzCustomVipBadge_.set(
                     std::forward<decltype(vipBadge)>(vipBadge));
+            }
+        },
+        [this, weak = weakOf<Channel>(this)](auto &&channelBadges) {
+            if (auto shared = weak.lock())
+            {
+                this->tgFfzChannelBadges_.guard();
+                this->ffzChannelBadges_ =
+                    std::forward<decltype(channelBadges)>(channelBadges);
             }
         },
         manualRefresh);
@@ -471,6 +480,15 @@ void TwitchChannel::updateStreamStatus(
 
             status->rerun = false;
             status->streamType = stream.type;
+            for (const auto &tag : stream.tags)
+            {
+                if (QString::compare(tag, "Rerun", Qt::CaseInsensitive) == 0)
+                {
+                    status->rerun = true;
+                    status->streamType = "rerun";
+                    break;
+                }
+            }
         }
         if (this->setLive(true))
         {
@@ -795,6 +813,11 @@ void TwitchChannel::setRoomModes(const RoomModes &newRoomModes)
 bool TwitchChannel::isLive() const
 {
     return this->streamStatus_.accessConst()->live;
+}
+
+bool TwitchChannel::isRerun() const
+{
+    return this->streamStatus_.accessConst()->rerun;
 }
 
 SharedAccessGuard<const TwitchChannel::StreamStatus>
@@ -1691,6 +1714,33 @@ std::optional<EmotePtr> TwitchChannel::twitchBadge(const QString &set,
         }
     }
     return std::nullopt;
+}
+
+std::vector<FfzBadges::Badge> TwitchChannel::ffzChannelBadges(
+    const QString &userID) const
+{
+    this->tgFfzChannelBadges_.guard();
+
+    auto it = this->ffzChannelBadges_.find(userID);
+    if (it == this->ffzChannelBadges_.end())
+    {
+        return {};
+    }
+
+    std::vector<FfzBadges::Badge> badges;
+
+    const auto *ffzBadges = getIApp()->getFfzBadges();
+
+    for (const auto &badgeID : it->second)
+    {
+        auto badge = ffzBadges->getBadge(badgeID);
+        if (badge.has_value())
+        {
+            badges.emplace_back(*badge);
+        }
+    }
+
+    return badges;
 }
 
 std::optional<EmotePtr> TwitchChannel::ffzCustomModBadge() const

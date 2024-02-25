@@ -29,6 +29,8 @@ public:
 
     virtual const IndirectChannel &getWatchingChannel() const = 0;
 
+    virtual QString getLastUserThatWhisperedMe() const = 0;
+
     // Update this interface with TwitchIrcServer methods as needed
 };
 
@@ -80,6 +82,8 @@ public:
     std::unique_ptr<SeventvEventAPI> seventvEventAPI;
 
     const IndirectChannel &getWatchingChannel() const override;
+
+    QString getLastUserThatWhisperedMe() const override;
 
 protected:
     void initializeConnection(IrcConnection *connection,

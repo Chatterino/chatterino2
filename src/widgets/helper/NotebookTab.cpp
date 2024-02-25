@@ -327,6 +327,18 @@ void NotebookTab::setTabLocation(NotebookTabLocation location)
     }
 }
 
+bool NotebookTab::setRerun(bool isRerun)
+{
+    if (this->isRerun_ != isRerun)
+    {
+        this->isRerun_ = isRerun;
+        this->update();
+        return true;
+    }
+
+    return false;
+}
+
 bool NotebookTab::setLive(bool isLive)
 {
     if (this->isLive_ != isLive)
@@ -514,12 +526,22 @@ void NotebookTab::paintEvent(QPaintEvent *)
     painter.fillRect(lineRect, lineColor);
 
     // draw live indicator
-    if (this->isLive_ && getSettings()->showTabLive)
+    if ((this->isLive_ || this->isRerun_) && getSettings()->showTabLive)
     {
-        painter.setPen(QColor(Qt::GlobalColor::red));
-        painter.setRenderHint(QPainter::Antialiasing);
+        // Live overrides rerun
         QBrush b;
-        b.setColor(QColor(Qt::GlobalColor::red));
+        if (this->isLive_)
+        {
+            painter.setPen(this->theme->tabs.liveIndicator);
+            b.setColor(this->theme->tabs.liveIndicator);
+        }
+        else
+        {
+            painter.setPen(this->theme->tabs.rerunIndicator);
+            b.setColor(this->theme->tabs.rerunIndicator);
+        }
+
+        painter.setRenderHint(QPainter::Antialiasing);
         b.setStyle(Qt::SolidPattern);
         painter.setBrush(b);
 

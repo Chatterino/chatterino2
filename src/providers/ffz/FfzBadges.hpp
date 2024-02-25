@@ -3,6 +3,7 @@
 #include "common/Aliases.hpp"
 #include "common/Singleton.hpp"
 #include "util/QStringHash.hpp"
+#include "util/ThreadGuard.hpp"
 
 #include <QColor>
 
@@ -30,10 +31,9 @@ public:
     };
 
     std::vector<Badge> getUserBadges(const UserId &id);
+    std::optional<Badge> getBadge(int badgeID) const;
 
 private:
-    std::optional<Badge> getBadge(int badgeID);
-
     void load();
 
     std::shared_mutex mutex_;
@@ -43,6 +43,7 @@ private:
 
     // badges points a badge ID to the information about the badge
     std::unordered_map<int, Badge> badges;
+    ThreadGuard tgBadges;
 };
 
 }  // namespace chatterino

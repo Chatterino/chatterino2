@@ -564,9 +564,10 @@ MessagePtr TwitchMessageBuilder::build()
         this->stylizeUsername(this->userName, this->message());
 
     this->message().messageText = this->originalMessage_;
-    this->message().searchText = stylizedUsername + " " +
-                                 this->message().localizedName + " " +
-                                 this->userName + ": " + this->originalMessage_;
+    this->message().searchText =
+        stylizedUsername + " " + this->message().localizedName + " " +
+        this->userName + ": " + this->originalMessage_ + " " +
+        this->message().searchText;
 
     // highlights
     this->parseHighlights();
@@ -1442,6 +1443,18 @@ void TwitchMessageBuilder::appendFfzBadges()
 {
     for (const auto &badge :
          getIApp()->getFfzBadges()->getUserBadges({this->userId_}))
+    {
+        this->emplace<FfzBadgeElement>(
+            badge.emote, MessageElementFlag::BadgeFfz, badge.color);
+    }
+
+    if (this->twitchChannel == nullptr)
+    {
+        return;
+    }
+
+    for (const auto &badge :
+         this->twitchChannel->ffzChannelBadges(this->userId_))
     {
         this->emplace<FfzBadgeElement>(
             badge.emote, MessageElementFlag::BadgeFfz, badge.color);

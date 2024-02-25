@@ -77,6 +77,9 @@ public:
         TabColors highlighted;
         TabColors selected;
         QColor dividerLine;
+
+        QColor liveIndicator;
+        QColor rerunIndicator;
     } tabs;
 
     /// MESSAGES
@@ -179,7 +182,7 @@ private:
 
     std::optional<ThemeDescriptor> findThemeByKey(const QString &key);
 
-    void parseFrom(const QJsonObject &root);
+    void parseFrom(const QJsonObject &root, bool isCustomTheme);
 
     pajlada::Signals::NoArgSignal repaintVisibleChatWidgets_;
 

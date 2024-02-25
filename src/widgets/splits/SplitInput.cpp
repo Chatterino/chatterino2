@@ -78,7 +78,7 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
 
 void SplitInput::initLayout()
 {
-    auto *app = getApp();
+    auto *app = getIApp();
     LayoutCreator<SplitInput> layoutCreator(this);
 
     auto layout =
@@ -202,7 +202,7 @@ void SplitInput::initLayout()
 
 void SplitInput::scaleChangedEvent(float scale)
 {
-    auto *app = getApp();
+    auto *app = getIApp();
     // update the icon size of the buttons
     this->updateEmoteButton();
     this->updateCancelReplyButton();
@@ -919,9 +919,14 @@ bool SplitInput::isHidden() const
     return this->hidden;
 }
 
+void SplitInput::setInputText(const QString &newInputText)
+{
+    this->ui_.textEdit->setPlainText(newInputText);
+}
+
 void SplitInput::editTextChanged()
 {
-    auto *app = getApp();
+    auto *app = getIApp();
 
     // set textLengthLabel value
     QString text = this->ui_.textEdit->toPlainText();
@@ -936,7 +941,7 @@ void SplitInput::editTextChanged()
     if (text.startsWith("/r ", Qt::CaseInsensitive) &&
         this->split_->getChannel()->isTwitchChannel())
     {
-        QString lastUser = app->twitch->lastUserThatWhisperedMe.get();
+        auto lastUser = app->getTwitch()->getLastUserThatWhisperedMe();
         if (!lastUser.isEmpty())
         {
             this->ui_.textEdit->setPlainText("/w " + lastUser + text.mid(2));
@@ -1108,16 +1113,32 @@ void SplitInput::setReply(MessagePtr reply, bool showReplyingLabel)
         // Only enable reply label if inline replying
         auto replyPrefix = "@" + this->replyThread_->displayName;
         auto plainText = this->ui_.textEdit->toPlainText().trimmed();
-        if (!plainText.startsWith(replyPrefix))
+
+        // This makes it so if plainText contains "@StreamerFan" and
+        // we are replying to "@Streamer" we don't just leave "Fan"
+        // in the text box
+        if (plainText.startsWith(replyPrefix))
         {
-            if (!plainText.isEmpty())
+            if (plainText.length() > replyPrefix.length())
             {
-                replyPrefix.append(' ');
+                if (plainText.at(replyPrefix.length()) == ',' ||
+                    plainText.at(replyPrefix.length()) == ' ')
+                {
+                    plainText.remove(0, replyPrefix.length() + 1);
+                }
             }
-            this->ui_.textEdit->setPlainText(replyPrefix + plainText + " ");
-            this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
-            this->ui_.textEdit->resetCompletion();
+            else
+            {
+                plainText.remove(0, replyPrefix.length());
+            }
         }
+        if (!plainText.isEmpty() && !plainText.startsWith(' '))
+        {
+            replyPrefix.append(' ');
+        }
+        this->ui_.textEdit->setPlainText(replyPrefix + plainText + " ");
+        this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+        this->ui_.textEdit->resetCompletion();
         this->ui_.replyLabel->setText("Replying to @" +
                                       this->replyThread_->displayName);
     }
