@@ -2840,7 +2840,7 @@ void Helix::sendShoutout(
         .execute();
 }
 
-// https://dev.twitch.tv/docs/api/reference/#send-a-shoutout
+// https://dev.twitch.tv/docs/api/reference/#send-chat-message
 void Helix::sendChatMessage(
     HelixSendMessageArgs args, ResultCallback<HelixSentMessage> successCallback,
     FailureCallback<HelixSendMessageError, QString> failureCallback)

@@ -39,7 +39,6 @@
 - Minor: Updated to Emoji v15.1. Google emojis are now used as the fallback instead of Twitter emojis. (#5182)
 - Minor: Allow theming of tab live and rerun indicators. (#5188)
 - Minor: Added a fallback theme field to custom themes that will be used in case the custom theme does not contain a color Chatterino needs. If no fallback theme is specified, we'll pull the color from the included Dark or Light theme. (#5198)
-- Minor: Twitch messages are now sent using Twitch's Helix API instead of IRC by default. (#5200)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
 - Bugfix: Trimmed custom streamlink paths on all platforms making sure you don't accidentally add spaces at the beginning or end of its path. (#4834)
@@ -162,6 +161,7 @@
 - Dev: Added signal to invalidate paint buffers of channel views without forcing a relayout. (#5123)
 - Dev: Specialize `Atomic<std::shared_ptr<T>>` if underlying standard library supports it. (#5133)
 - Dev: Added the `developer_name` field to the Linux AppData specification. (#5138)
+- Dev: Twitch messages can be sent using Twitch's Helix API instead of IRC (disabled by default). (#5200)
 
 ## 2.4.6
 

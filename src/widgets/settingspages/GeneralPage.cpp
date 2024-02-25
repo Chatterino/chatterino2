@@ -1243,10 +1243,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     helixTimegateModerators->setMinimumWidth(
         helixTimegateModerators->minimumSizeHint().width());
 
-    layout.addCheckbox("Send messages use Twitch's Helix API",
-                       s.enableHelixChatSend, false,
-                       "When enabled, sends messages using the Helix API. When "
-                       "disabled, messages are sent over IRC.");
+    layout.addDropdownEnumClass<ChatSendProtocol>(
+        "Chat send protocol", magic_enum::enum_names<ChatSendProtocol>(),
+        s.chatSendProtocol,
+        "'Helix' will use Twitch's Helix API to send message. 'IRC' will use "
+        "IRC to send messages.",
+        {});
 
     layout.addCheckbox(
         "Show send message button", s.showSendButton, false,
