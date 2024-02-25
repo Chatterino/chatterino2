@@ -432,7 +432,7 @@ ImageSet SeventvEmotes::createImageSet(const QJsonObject &emoteData)
     auto baseUrl = host["url"].toString();
     auto files = host["files"].toArray();
 
-    std::array<ImagePtr, 4> sizes;
+    std::array<ImagePtr, 3> sizes;
     double baseWidth = 0.0;
     size_t nextSize = 0;
 
