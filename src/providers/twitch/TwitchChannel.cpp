@@ -72,6 +72,9 @@ namespace {
 
     // Maximum number of chatters to fetch when refreshing chatters
     constexpr auto MAX_CHATTERS_TO_FETCH = 5000;
+
+    // From Twitch docs - expected size for a badge (1x)
+    constexpr QSize BASE_BADGE_SIZE(18, 18);
 }  // namespace
 
 TwitchChannel::TwitchChannel(const QString &name)
@@ -1466,9 +1469,12 @@ void TwitchChannel::refreshBadges()
                         .name = EmoteName{},
                         .images =
                             ImageSet{
-                                Image::fromUrl(version.imageURL1x, 1),
-                                Image::fromUrl(version.imageURL2x, .5),
-                                Image::fromUrl(version.imageURL4x, .25),
+                                Image::fromUrl(version.imageURL1x, 1,
+                                               BASE_BADGE_SIZE),
+                                Image::fromUrl(version.imageURL2x, .5,
+                                               BASE_BADGE_SIZE * 2),
+                                Image::fromUrl(version.imageURL4x, .25,
+                                               BASE_BADGE_SIZE * 4),
                             },
                         .tooltip = Tooltip{version.title},
                         .homePage = version.clickURL,
@@ -1543,25 +1549,25 @@ void TwitchChannel::refreshCheerEmotes()
                     // Combine the prefix (e.g. BibleThump) with the tier (1, 100 etc.)
                     auto emoteTooltip =
                         set.prefix + tier.id + "<br>Twitch Cheer Emote";
+                    auto makeImageSet = [](const HelixCheermoteImage &image) {
+                        return ImageSet{
+                            Image::fromUrl(image.imageURL1x, 1.0,
+                                           BASE_BADGE_SIZE),
+                            Image::fromUrl(image.imageURL2x, 0.5,
+                                           BASE_BADGE_SIZE * 2),
+                            Image::fromUrl(image.imageURL4x, 0.25,
+                                           BASE_BADGE_SIZE * 4),
+                        };
+                    };
                     cheerEmote.animatedEmote = std::make_shared<Emote>(Emote{
                         .name = EmoteName{"cheer emote"},
-                        .images =
-                            ImageSet{
-                                tier.darkAnimated.imageURL1x,
-                                tier.darkAnimated.imageURL2x,
-                                tier.darkAnimated.imageURL4x,
-                            },
+                        .images = makeImageSet(tier.darkAnimated),
                         .tooltip = Tooltip{emoteTooltip},
                         .homePage = Url{},
                     });
                     cheerEmote.staticEmote = std::make_shared<Emote>(Emote{
                         .name = EmoteName{"cheer emote"},
-                        .images =
-                            ImageSet{
-                                tier.darkStatic.imageURL1x,
-                                tier.darkStatic.imageURL2x,
-                                tier.darkStatic.imageURL4x,
-                            },
+                        .images = makeImageSet(tier.darkStatic),
                         .tooltip = Tooltip{emoteTooltip},
                         .homePage = Url{},
                     });

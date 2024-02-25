@@ -162,6 +162,7 @@
 - Dev: Specialize `Atomic<std::shared_ptr<T>>` if underlying standard library supports it. (#5133)
 - Dev: Added the `developer_name` field to the Linux AppData specification. (#5138)
 - Dev: Twitch messages can be sent using Twitch's Helix API instead of IRC (disabled by default). (#5200)
+- Dev: Added estimation for image sizes to avoid layout shifts. (#5192)
 
 ## 2.4.6
 

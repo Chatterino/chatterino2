@@ -463,7 +463,7 @@ ImageSet SeventvEmotes::createImageSet(const QJsonObject &emoteData)
 
         auto image = Image::fromUrl(
             {QString("https:%1/%2").arg(baseUrl, file["name"].toString())},
-            scale);
+            scale, {static_cast<int>(width), file["height"].toInt(16)});
 
         sizes.at(nextSize) = image;
         nextSize++;
