@@ -218,6 +218,10 @@ public:
         "/behaviour/autocompletion/emoteCompletionWithColon", true};
     BoolSetting showUsernameCompletionMenu = {
         "/behaviour/autocompletion/showUsernameCompletionMenu", true};
+    BoolSetting alwaysIncludeBroadcasterInUserCompletions = {
+        "/behaviour/autocompletion/alwaysIncludeBroadcasterInUserCompletions",
+        true,
+    };
     BoolSetting useSmartEmoteCompletion = {
         "/experiments/useSmartEmoteCompletion",
         false,

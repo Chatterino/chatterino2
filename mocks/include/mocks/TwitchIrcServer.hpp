@@ -24,8 +24,14 @@ public:
         return this->watchingChannel;
     }
 
+    QString getLastUserThatWhisperedMe() const override
+    {
+        return this->lastUserThatWhisperedMe;
+    }
+
     ChannelPtr watchingChannelInner;
     IndirectChannel watchingChannel;
+    QString lastUserThatWhisperedMe{"forsen"};
 };
 
 }  // namespace chatterino::mock

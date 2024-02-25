@@ -141,6 +141,7 @@ public:
     const QString &popoutPlayerUrl();
     int chatterCount() const;
     bool isLive() const override;
+    bool isRerun() const override;
     QString roomId() const;
     SharedAccessGuard<const RoomModes> accessRoomModes() const;
     SharedAccessGuard<const StreamStatus> accessStreamStatus() const;
@@ -270,6 +271,12 @@ public:
     void updateStreamStatus(const std::optional<HelixStream> &helixStream);
     void updateStreamTitle(const QString &title);
 
+    /**
+     * Returns the display name of the user
+     *
+     * If the display name contained chinese, japenese, or korean characters, the user's login name is returned instead
+     **/
+    const QString &getDisplayName() const override;
     void updateDisplayName(const QString &displayName);
 
 private:
@@ -328,13 +335,6 @@ private:
     void setRoomModes(const RoomModes &newRoomModes);
     void setDisplayName(const QString &name);
     void setLocalizedName(const QString &name);
-
-    /**
-     * Returns the display name of the user
-     *
-     * If the display name contained chinese, japenese, or korean characters, the user's login name is returned instead
-     **/
-    const QString &getDisplayName() const override;
 
     /**
      * Returns the localized name of the user

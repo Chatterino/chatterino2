@@ -44,7 +44,12 @@ public:
     void setLine(size_t line);
 
     MessageLayoutElement *setTrailingSpace(bool value);
-    MessageLayoutElement *setLink(const Link &link_);
+
+    /// @brief Overwrites the link for this layout element
+    ///
+    /// @sa #getLink()
+    MessageLayoutElement *setLink(const Link &link);
+
     MessageLayoutElement *setText(const QString &text_);
 
     virtual void addCopyTextToString(QString &str, uint32_t from = 0,
@@ -57,7 +62,12 @@ public:
     virtual int getMouseOverIndex(const QPoint &abs) const = 0;
     virtual int getXFromIndex(size_t index) = 0;
 
-    const Link &getLink() const;
+    /// @brief Returns the link this layout element has
+    ///
+    /// If there isn't any, an empty link is returned (type: None).
+    /// The link is sourced from the creator, but can be overwritten with
+    /// #setLink().
+    Link getLink() const;
     const QString &getText() const;
     FlagsEnum<MessageElementFlag> getFlags() const;
 
@@ -67,7 +77,7 @@ protected:
 private:
     QString text_;
     QRect rect_;
-    Link link_;
+    std::optional<Link> link_;
     MessageElement &creator_;
     /**
      * The line of the container this element is laid out at

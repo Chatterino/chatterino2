@@ -297,16 +297,7 @@ int ChannelRef::get_by_name(lua_State *L)
         return 1;
     }
     auto chn = getApp()->twitch->getChannelOrEmpty(name);
-    if (chn->isEmpty())
-    {
-        lua_pushnil(L);
-        return 1;
-    }
-    // pushes onto stack
-    WeakPtrUserData<UserData::Type::Channel, Channel>::create(
-        L, chn->weak_from_this());
-    luaL_getmetatable(L, "c2.Channel");
-    lua_setmetatable(L, -2);
+    lua::push(L, chn);
     return 1;
 }
 
@@ -330,16 +321,8 @@ int ChannelRef::get_by_twitch_id(lua_State *L)
         return 1;
     }
     auto chn = getApp()->twitch->getChannelOrEmptyByID(id);
-    if (chn->isEmpty())
-    {
-        lua_pushnil(L);
-        return 1;
-    }
-    // pushes onto stack
-    WeakPtrUserData<UserData::Type::Channel, Channel>::create(
-        L, chn->weak_from_this());
-    luaL_getmetatable(L, "c2.Channel");
-    lua_setmetatable(L, -2);
+
+    lua::push(L, chn);
     return 1;
 }
 
@@ -388,6 +371,22 @@ StackIdx push(lua_State *L, const api::LuaStreamStatus &status)
     PUSH(game_id);
 #    undef PUSH
     return out;
+}
+
+StackIdx push(lua_State *L, ChannelPtr chn)
+{
+    using namespace chatterino::lua::api;
+
+    if (chn->isEmpty())
+    {
+        lua_pushnil(L);
+        return lua_gettop(L);
+    }
+    WeakPtrUserData<UserData::Type::Channel, Channel>::create(
+        L, chn->weak_from_this());
+    luaL_getmetatable(L, "c2.Channel");
+    lua_setmetatable(L, -2);
+    return lua_gettop(L);
 }
 
 }  // namespace chatterino::lua

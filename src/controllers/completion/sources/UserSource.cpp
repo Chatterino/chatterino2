@@ -59,6 +59,26 @@ void UserSource::initializeFromChannel(const Channel *channel)
     }
 
     this->items_ = tc->accessChatters()->all();
+
+    if (getSettings()->alwaysIncludeBroadcasterInUserCompletions)
+    {
+        auto it = std::find_if(this->items_.begin(), this->items_.end(),
+                               [tc](const UserItem &user) {
+                                   return user.first == tc->getName();
+                               });
+
+        if (it != this->items_.end())
+        {
+            auto broadcaster = *it;
+            this->items_.erase(it);
+            this->items_.insert(this->items_.begin(), broadcaster);
+        }
+        else
+        {
+            this->items_.insert(this->items_.begin(),
+                                {tc->getName(), tc->getDisplayName()});
+        }
+    }
 }
 
 const std::vector<UserItem> &UserSource::output() const
