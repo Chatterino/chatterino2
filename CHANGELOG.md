@@ -34,6 +34,7 @@
 - Minor: Added support for the `{input.text}` placeholder in the **Split** -> **Run a command** hotkey. (#5130)
 - Minor: Add a new Channel API for experimental plugins feature. (#5141, #5184, #5187)
 - Minor: Added the ability to change the top-most status of a window regardless of the _Always on top_ setting (right click the notebook). (#5135)
+- Minor: Introduce `c2.later()` function to Lua API. (#5154)
 - Minor: Live streams that are marked as reruns now mark a tab as yellow instead of red. (#5176)
 - Minor: Updated to Emoji v15.1. Google emojis are now used as the fallback instead of Twitter emojis. (#5182)
 - Minor: Allow theming of tab live and rerun indicators. (#5188)

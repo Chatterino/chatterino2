@@ -118,8 +118,7 @@ void PluginController::openLibrariesFor(lua_State *L, const PluginMeta &meta,
         luaL_Reg{LUA_GNAME, luaopen_base},
         // - load - don't allow in release mode
 
-        //luaL_Reg{LUA_COLIBNAME, luaopen_coroutine},
-        // - needs special support
+        luaL_Reg{LUA_COLIBNAME, luaopen_coroutine},
         luaL_Reg{LUA_TABLIBNAME, luaopen_table},
         // luaL_Reg{LUA_IOLIBNAME, luaopen_io},
         // - explicit fs access, needs wrapper with permissions, no usage ideas yet
@@ -147,6 +146,7 @@ void PluginController::openLibrariesFor(lua_State *L, const PluginMeta &meta,
         {"register_command", lua::api::c2_register_command},
         {"register_callback", lua::api::c2_register_callback},
         {"log", lua::api::c2_log},
+        {"later", lua::api::c2_later},
         {nullptr, nullptr},
     };
     lua_pushglobaltable(L);
@@ -339,6 +339,11 @@ bool PluginController::isPluginEnabled(const QString &id)
 
 Plugin *PluginController::getPluginByStatePtr(lua_State *L)
 {
+    lua_geti(L, LUA_REGISTRYINDEX, LUA_RIDX_MAINTHREAD);
+    // Use the main thread for identification, not a coroutine instance
+    auto *mainL = lua_tothread(L, -1);
+    lua_pop(L, 1);
+    L = mainL;
     for (auto &[name, plugin] : this->plugins_)
     {
         if (plugin->state_ == L)
