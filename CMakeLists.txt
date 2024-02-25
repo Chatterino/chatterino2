@@ -127,7 +127,7 @@ endif ()
 find_package(Sanitizers QUIET)
 
 # Find boost on the system
-find_package(Boost REQUIRED OPTIONAL_COMPONENTS headers)
+find_package(Boost REQUIRED OPTIONAL_COMPONENTS headers json)
 
 # Find OpenSSL on the system
 find_package(OpenSSL REQUIRED)
@@ -194,6 +194,7 @@ if (BUILD_BENCHMARKS)
 endif ()
 
 find_package(PajladaSerialize REQUIRED)
+find_package(BoostCertify REQUIRED)
 find_package(PajladaSignals REQUIRED)
 find_package(LRUCache REQUIRED)
 find_package(MagicEnum REQUIRED)
@@ -207,6 +208,8 @@ else()
 
     add_subdirectory("${CMAKE_SOURCE_DIR}/lib/settings" EXCLUDE_FROM_ALL)
 endif()
+
+add_subdirectory("${CMAKE_SOURCE_DIR}/lib/twitch-eventsub-ws" EXCLUDE_FROM_ALL)
 
 if (CHATTERINO_PLUGINS)
     set(LUA_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lib/lua/src")

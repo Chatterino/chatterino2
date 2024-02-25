@@ -1,11 +1,16 @@
 #pragma once
 
+#include "common/Aliases.hpp"
+
 #include <QColor>
 #include <QString>
 
 #include <vector>
 
 namespace chatterino {
+
+struct Emote;
+using EmotePtr = std::shared_ptr<const Emote>;
 
 #ifndef ATTR_UNUSED
 #    ifdef Q_OS_WIN
@@ -80,5 +85,18 @@ static const QStringList TWITCH_DEFAULT_COMMANDS{
 };
 
 static const QStringList TWITCH_WHISPER_COMMANDS{"/w", ".w"};
+
+struct TwitchEmoteOccurrence {
+    int start;
+    int end;
+    EmotePtr ptr;
+    EmoteName name;
+
+    bool operator==(const TwitchEmoteOccurrence &other) const
+    {
+        return std::tie(this->start, this->end, this->ptr, this->name) ==
+               std::tie(other.start, other.end, other.ptr, other.name);
+    }
+};
 
 }  // namespace chatterino

@@ -1,12 +1,19 @@
 #include "controllers/commands/builtin/chatterino/Debugging.hpp"
 
+#include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/Env.hpp"
 #include "common/Literals.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "messages/Image.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
+#include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/EventSub.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Theme.hpp"
 #include "util/PostToThread.hpp"
 
@@ -131,6 +138,17 @@ QString forceImageUnload(const CommandContext &ctx)
         auto &iep = ImageExpirationPool::instance();
         iep.freeAll();
     });
+    return "";
+}
+
+QString debugEventSub(const CommandContext &ctx)
+{
+    (void)ctx;
+
+    static EventSub eventSub;
+
+    eventSub.start();
+
     return "";
 }
 

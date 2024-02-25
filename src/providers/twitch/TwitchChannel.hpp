@@ -209,7 +209,7 @@ public:
     std::vector<FfzBadges::Badge> ffzChannelBadges(const QString &userID) const;
 
     // Cheers
-    std::optional<CheerEmote> cheerEmote(const QString &string);
+    std::optional<CheerEmote> cheerEmote(const QString &string) const;
 
     // Replies
     /**
@@ -462,6 +462,7 @@ private:
 
     friend class TwitchIrcServer;
     friend class TwitchMessageBuilder;
+    friend class EventSubMessageBuilder;
     friend class IrcMessageHandler;
 };
 
