@@ -1243,6 +1243,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     helixTimegateModerators->setMinimumWidth(
         helixTimegateModerators->minimumSizeHint().width());
 
+    layout.addDropdownEnumClass<ChatSendProtocol>(
+        "Chat send protocol", magic_enum::enum_names<ChatSendProtocol>(),
+        s.chatSendProtocol,
+        "'Helix' will use Twitch's Helix API to send message. 'IRC' will use "
+        "IRC to send messages.",
+        {});
+
     layout.addCheckbox(
         "Show send message button", s.showSendButton, false,
         "Show a Send button next to each split input that can be "

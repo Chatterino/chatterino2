@@ -101,12 +101,13 @@ protected:
     bool hasSeparateWriteConnection() const override;
 
 private:
-    void onMessageSendRequested(TwitchChannel *channel, const QString &message,
-                                bool &sent);
-    void onReplySendRequested(TwitchChannel *channel, const QString &message,
-                              const QString &replyId, bool &sent);
+    void onMessageSendRequested(const std::shared_ptr<TwitchChannel> &channel,
+                                const QString &message, bool &sent);
+    void onReplySendRequested(const std::shared_ptr<TwitchChannel> &channel,
+                              const QString &message, const QString &replyId,
+                              bool &sent);
 
-    bool prepareToSend(TwitchChannel *channel);
+    bool prepareToSend(const std::shared_ptr<TwitchChannel> &channel);
 
     std::mutex lastMessageMutex_;
     std::queue<std::chrono::steady_clock::time_point> lastMessagePleb_;
