@@ -143,6 +143,8 @@ QString forceImageUnload(const CommandContext &ctx)
 
 QString debugEventSub(const CommandContext &ctx)
 {
+    (void)ctx;
+
     static EventSub eventSub;
 
     eventSub.start();
