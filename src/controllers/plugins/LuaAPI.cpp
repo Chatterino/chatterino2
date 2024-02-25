@@ -126,97 +126,6 @@ int c2_register_callback(lua_State *L)
     return 0;
 }
 
-int c2_send_msg(lua_State *L)
-{
-    QString text;
-    QString channel;
-    if (lua_gettop(L) != 2)
-    {
-        luaL_error(L, "send_msg needs exactly 2 arguments (channel and text)");
-        lua::push(L, false);
-        return 1;
-    }
-    if (!lua::pop(L, &text))
-    {
-        luaL_error(
-            L, "cannot get text (2nd argument of send_msg, expected a string)");
-        lua::push(L, false);
-        return 1;
-    }
-    if (!lua::pop(L, &channel))
-    {
-        luaL_error(
-            L,
-            "cannot get channel (1st argument of send_msg, expected a string)");
-        lua::push(L, false);
-        return 1;
-    }
-
-    const auto chn = getApp()->twitch->getChannelOrEmpty(channel);
-    if (chn->isEmpty())
-    {
-        auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
-
-        qCWarning(chatterinoLua)
-            << "Plugin" << pl->id
-            << "tried to send a message (using send_msg) to channel" << channel
-            << "which is not known";
-        lua::push(L, false);
-        return 1;
-    }
-    QString message = text;
-    message = message.replace('\n', ' ');
-    QString outText =
-        getIApp()->getCommands()->execCommand(message, chn, false);
-    chn->sendMessage(outText);
-    lua::push(L, true);
-    return 1;
-}
-
-int c2_system_msg(lua_State *L)
-{
-    if (lua_gettop(L) != 2)
-    {
-        luaL_error(L,
-                   "system_msg needs exactly 2 arguments (channel and text)");
-        lua::push(L, false);
-        return 1;
-    }
-    QString channel;
-    QString text;
-
-    if (!lua::pop(L, &text))
-    {
-        luaL_error(
-            L,
-            "cannot get text (2nd argument of system_msg, expected a string)");
-        lua::push(L, false);
-        return 1;
-    }
-    if (!lua::pop(L, &channel))
-    {
-        luaL_error(L, "cannot get channel (1st argument of system_msg, "
-                      "expected a string)");
-        lua::push(L, false);
-        return 1;
-    }
-
-    const auto chn = getApp()->twitch->getChannelOrEmpty(channel);
-    if (chn->isEmpty())
-    {
-        auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
-        qCWarning(chatterinoLua)
-            << "Plugin" << pl->id
-            << "tried to show a system message (using system_msg) in channel"
-            << channel << "which is not known";
-        lua::push(L, false);
-        return 1;
-    }
-    chn->addMessage(makeSystemMessage(text));
-    lua::push(L, true);
-    return 1;
-}
-
 int c2_log(lua_State *L)
 {
     auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
@@ -235,6 +144,63 @@ int c2_log(lua_State *L)
     }
     QDebug stream = qdebugStreamForLogLevel(lvl);
     logHelper(L, pl, stream, logc);
+    return 0;
+}
+
+int c2_later(lua_State *L)
+{
+    auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
+    if (pl == nullptr)
+    {
+        return luaL_error(L, "c2.later: internal error: no plugin?");
+    }
+    if (lua_gettop(L) != 2)
+    {
+        return luaL_error(
+            L, "c2.later expects two arguments (a callback that takes no "
+               "arguments and returns nothing and a number the time in "
+               "milliseconds to wait)\n");
+    }
+    int time{};
+    if (!lua::pop(L, &time))
+    {
+        return luaL_error(L, "cannot get time (2nd arg of c2.later, "
+                             "expected a number)");
+    }
+
+    if (!lua_isfunction(L, lua_gettop(L)))
+    {
+        return luaL_error(L, "cannot get callback (1st arg of c2.later, "
+                             "expected a function)");
+    }
+
+    auto *timer = new QTimer();
+    timer->setInterval(time);
+    auto id = pl->addTimeout(timer);
+    auto name = QString("timeout_%1").arg(id);
+    auto *coro = lua_newthread(L);
+
+    QObject::connect(timer, &QTimer::timeout, [pl, coro, name, timer]() {
+        timer->deleteLater();
+        pl->removeTimeout(timer);
+        int nres{};
+        lua_resume(coro, nullptr, 0, &nres);
+
+        lua_pushnil(coro);
+        lua_setfield(coro, LUA_REGISTRYINDEX, name.toStdString().c_str());
+        if (lua_gettop(coro) != 0)
+        {
+            stackDump(coro,
+                      pl->id +
+                          ": timer returned a value, this shouldn't happen "
+                          "and is probably a plugin bug");
+        }
+    });
+    stackDump(L, "before setfield");
+    lua_setfield(L, LUA_REGISTRYINDEX, name.toStdString().c_str());
+    lua_xmove(L, coro, 1);  // move function to thread
+    timer->start();
+
     return 0;
 }
 

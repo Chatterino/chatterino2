@@ -59,6 +59,28 @@ Notebook::Notebook(QWidget *parent)
     });
     this->updateTabVisibilityMenuAction();
 
+    this->toggleTopMostAction_ = new QAction("Top most window", this);
+    this->toggleTopMostAction_->setCheckable(true);
+    auto *window = dynamic_cast<BaseWindow *>(this->window());
+    if (window)
+    {
+        auto updateTopMost = [this, window] {
+            this->toggleTopMostAction_->setChecked(window->isTopMost());
+        };
+        updateTopMost();
+        QObject::connect(this->toggleTopMostAction_, &QAction::triggered,
+                         window, [window] {
+                             window->setTopMost(!window->isTopMost());
+                         });
+        QObject::connect(window, &BaseWindow::topMostChanged, this,
+                         updateTopMost);
+    }
+    else
+    {
+        qCWarning(chatterinoApp)
+            << "Notebook must be created within a BaseWindow";
+    }
+
     this->addNotebookActionsToMenu(&this->menu_);
 
     // Manually resize the add button so the initial paint uses the correct
@@ -1181,6 +1203,8 @@ void Notebook::addNotebookActionsToMenu(QMenu *menu)
     menu->addAction(this->showTabsAction_);
 
     menu->addAction(this->lockNotebookLayoutAction_);
+
+    menu->addAction(this->toggleTopMostAction_);
 }
 
 NotebookButton *Notebook::getAddButton()

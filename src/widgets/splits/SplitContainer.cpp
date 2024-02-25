@@ -869,10 +869,11 @@ void SplitContainer::applyFromDescriptorRecursively(
                 auto *node = new Node();
                 node->parent_ = baseNode;
 
-                if (const auto *n = std::get_if<ContainerNodeDescriptor>(&item))
+                if (const auto *inner =
+                        std::get_if<ContainerNodeDescriptor>(&item))
                 {
-                    node->flexH_ = n->flexH_;
-                    node->flexV_ = n->flexV_;
+                    node->flexH_ = inner->flexH_;
+                    node->flexV_ = inner->flexV_;
                 }
 
                 baseNode->children_.emplace_back(node);
@@ -925,9 +926,15 @@ void SplitContainer::refreshTabLiveStatus()
     }
 
     bool liveStatus = false;
+    bool rerunStatus = false;
     for (const auto &s : this->splits_)
     {
         auto c = s->getChannel();
+        if (c->isRerun())
+        {
+            rerunStatus = true;
+            continue;  // reruns are also marked as live, SKIP
+        }
         if (c->isLive())
         {
             liveStatus = true;
@@ -935,7 +942,7 @@ void SplitContainer::refreshTabLiveStatus()
         }
     }
 
-    if (this->tab_->setLive(liveStatus))
+    if (this->tab_->setLive(liveStatus) || this->tab_->setRerun(rerunStatus))
     {
         auto *notebook = dynamic_cast<Notebook *>(this->parentWidget());
         if (notebook)

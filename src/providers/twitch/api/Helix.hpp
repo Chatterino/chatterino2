@@ -69,6 +69,9 @@ struct HelixStream {
     QString language;
     QString thumbnailUrl;
 
+    // This is the names, the IDs are now always empty
+    std::vector<QString> tags;
+
     HelixStream()
         : id("")
         , userId("")
@@ -99,6 +102,11 @@ struct HelixStream {
         , language(jsonObject.value("language").toString())
         , thumbnailUrl(jsonObject.value("thumbnail_url").toString())
     {
+        const auto jsonTags = jsonObject.value("tags").toArray();
+        for (const auto &tag : jsonTags)
+        {
+            this->tags.push_back(tag.toString());
+        }
     }
 };
 

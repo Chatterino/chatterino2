@@ -13,6 +13,7 @@
 #include "controllers/sound/ISoundController.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
+#include "providers/links/LinkResolver.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
@@ -142,6 +143,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , ffzEmotes(new FfzEmotes)
     , seventvEmotes(new SeventvEmotes)
     , logging(new Logging(_settings))
+    , linkResolver(new LinkResolver)
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(&this->emplace(new PluginController(paths)))
 #endif
@@ -203,6 +205,10 @@ void Application::initialize(Settings &settings, const Paths &paths)
     {
         singleton->initialize(settings, paths);
     }
+
+    // XXX: Loading Twitch badges after Helix has been initialized, which only happens after
+    // the AccountController initialize has been called
+    this->twitchBadges->loadTwitchBadges();
 
     // Show crash message.
     // On Windows, the crash message was already shown.
@@ -488,6 +494,13 @@ Logging *Application::getChatLogger()
     assertInGuiThread();
 
     return this->logging.get();
+}
+
+ILinkResolver *Application::getLinkResolver()
+{
+    assertInGuiThread();
+
+    return this->linkResolver.get();
 }
 
 BttvEmotes *Application::getBttvEmotes()

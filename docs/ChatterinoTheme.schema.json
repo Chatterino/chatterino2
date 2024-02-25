@@ -339,6 +339,8 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
+            "liveIndicator": { "$ref": "#/definitions/qt-color" },
+            "rerunIndicator": { "$ref": "#/definitions/qt-color" },
             "dividerLine": { "$ref": "#/definitions/qt-color" },
             "highlighted": {
               "$ref": "#/definitions/tab-colors"
@@ -388,6 +390,11 @@
           "$comment": "Determines which icons to use. 'dark' will use dark icons (best for a light theme). 'light' will use light icons.",
           "enum": ["light", "dark"],
           "default": "light"
+        },
+        "fallbackTheme": {
+          "$comment": "Determines which built-in Chatterino theme to use as a fallback in case a color isn't configured.",
+          "enum": ["White", "Light", "Dark", "Black"],
+          "default": "Dark"
         }
       },
       "required": ["iconTheme"]

@@ -37,6 +37,8 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/XDGHelper.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Selection.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NotebookTab.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/SplitInput.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/LinkInfo.cpp
     # Add your new file above this line!
     )
 
@@ -72,5 +74,12 @@ set_target_properties(${PROJECT_NAME}
     PROPERTIES
     AUTORCC ON
     )
+
+if (CHATTERINO_STATIC_QT_BUILD)
+    qt_import_plugins(${PROJECT_NAME} INCLUDE_BY_TYPE
+        platforms Qt::QXcbIntegrationPlugin
+        Qt::QMinimalIntegrationPlugin
+    )
+endif ()
 
 gtest_discover_tests(${PROJECT_NAME})

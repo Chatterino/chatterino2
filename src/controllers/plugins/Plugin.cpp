@@ -1,6 +1,7 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/Plugin.hpp"
 
+#    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandController.hpp"
 
 #    include <lua.h>
@@ -167,9 +168,36 @@ std::unordered_set<QString> Plugin::listRegisteredCommands()
 
 Plugin::~Plugin()
 {
+    for (auto *timer : this->activeTimeouts)
+    {
+        QObject::disconnect(timer, nullptr, nullptr, nullptr);
+        timer->deleteLater();
+    }
+    qCDebug(chatterinoLua) << "Destroyed" << this->activeTimeouts.size()
+                           << "timers for plugin" << this->id
+                           << "while destroying the object";
+    this->activeTimeouts.clear();
     if (this->state_ != nullptr)
     {
         lua_close(this->state_);
+    }
+}
+int Plugin::addTimeout(QTimer *timer)
+{
+    this->activeTimeouts.push_back(timer);
+    return ++this->lastTimerId;
+}
+
+void Plugin::removeTimeout(QTimer *timer)
+{
+    for (auto it = this->activeTimeouts.begin();
+         it != this->activeTimeouts.end(); ++it)
+    {
+        if (*it == timer)
+        {
+            this->activeTimeouts.erase(it);
+            break;
+        }
     }
 }
 

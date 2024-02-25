@@ -66,6 +66,7 @@ StackIdx push(lua_State *L, const bool &b);
 StackIdx push(lua_State *L, const int &b);
 
 // returns OK?
+bool peek(lua_State *L, int *out, StackIdx idx = -1);
 bool peek(lua_State *L, bool *out, StackIdx idx = -1);
 bool peek(lua_State *L, double *out, StackIdx idx = -1);
 bool peek(lua_State *L, QString *out, StackIdx idx = -1);
@@ -136,6 +137,17 @@ public:
 };
 
 /// TEMPLATES
+
+template <typename T>
+StackIdx push(lua_State *L, std::optional<T> val)
+{
+    if (val.has_value())
+    {
+        return lua::push(L, *val);
+    }
+    lua_pushnil(L);
+    return lua_gettop(L);
+}
 
 template <typename T>
 bool peek(lua_State *L, std::optional<T> *out, StackIdx idx = -1)
@@ -262,7 +274,7 @@ StackIdx push(lua_State *L, QList<T> vec)
  *
  * @return Stack index of newly created string.
  */
-template <typename T, std::enable_if<std::is_enum_v<T>>>
+template <typename T, typename std::enable_if_t<std::is_enum_v<T>, bool> = true>
 StackIdx push(lua_State *L, T inp)
 {
     std::string_view name = magic_enum::enum_name<T>(inp);

@@ -42,8 +42,9 @@ std::vector<FfzBadges::Badge> FfzBadges::getUserBadges(const UserId &id)
     return badges;
 }
 
-std::optional<FfzBadges::Badge> FfzBadges::getBadge(const int badgeID)
+std::optional<FfzBadges::Badge> FfzBadges::getBadge(const int badgeID) const
 {
+    this->tgBadges.guard();
     auto it = this->badges.find(badgeID);
     if (it != this->badges.end())
     {
@@ -62,6 +63,7 @@ void FfzBadges::load()
             std::unique_lock lock(this->mutex_);
 
             auto jsonRoot = result.parseJson();
+            this->tgBadges.guard();
             for (const auto &jsonBadge_ : jsonRoot.value("badges").toArray())
             {
                 auto jsonBadge = jsonBadge_.toObject();

@@ -20,20 +20,9 @@
 
 namespace chatterino {
 
-TwitchBadges::TwitchBadges()
-{
-    this->loadTwitchBadges();
-}
-
 void TwitchBadges::loadTwitchBadges()
 {
     assert(this->loaded_ == false);
-
-    if (!getHelix())
-    {
-        // This is intended for tests and benchmarks.
-        return;
-    }
 
     getHelix()->getGlobalBadges(
         [this](auto globalBadges) {

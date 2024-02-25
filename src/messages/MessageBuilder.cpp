@@ -8,7 +8,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
-#include "providers/LinkResolver.hpp"
+#include "providers/links/LinkResolver.hpp"
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "singletons/Emotes.hpp"
@@ -528,12 +528,12 @@ MessageBuilder::MessageBuilder(ImageUploaderResultTag /*unused*/,
     this->emplace<TimestampElement>();
 
     using MEF = MessageElementFlag;
-    auto addText = [this](QString text, MessageElementFlags mefs = MEF::Text,
+    auto addText = [this](QString text,
                           MessageColor color =
                               MessageColor::System) -> TextElement * {
         this->message().searchText += text;
         this->message().messageText += text;
-        return this->emplace<TextElement>(text, mefs, color);
+        return this->emplace<TextElement>(text, MEF::Text, color);
     };
 
     addText("Your image has been uploaded to");
@@ -541,16 +541,14 @@ MessageBuilder::MessageBuilder(ImageUploaderResultTag /*unused*/,
     // ASSUMPTION: the user gave this uploader configuration to the program
     // therefore they trust that the host is not wrong/malicious. This doesn't obey getSettings()->lowercaseDomains.
     // This also ensures that the LinkResolver doesn't get these links.
-    addText(imageLink, {MEF::OriginalLink, MEF::LowercaseLink},
-            MessageColor::Link)
+    addText(imageLink, MessageColor::Link)
         ->setLink({Link::Url, imageLink})
         ->setTrailingSpace(false);
 
     if (!deletionLink.isEmpty())
     {
         addText("(Deletion link:");
-        addText(deletionLink, {MEF::OriginalLink, MEF::LowercaseLink},
-                MessageColor::Link)
+        addText(deletionLink, MessageColor::Link)
             ->setLink({Link::Url, deletionLink})
             ->setTrailingSpace(false);
         addText(")")->setTrailingSpace(false);
@@ -634,46 +632,13 @@ void MessageBuilder::addLink(const ParsedLink &parsedLink)
     lowercaseLinkString += parsedLink.host.toString().toLower();
     lowercaseLinkString += parsedLink.rest;
 
-    auto linkElement = Link(Link::Url, matchedLink);
-
     auto textColor = MessageColor(MessageColor::Link);
-    auto *linkMELowercase =
-        this->emplace<TextElement>(lowercaseLinkString,
-                                   MessageElementFlag::LowercaseLink, textColor)
-            ->setLink(linkElement);
-    auto *linkMEOriginal =
-        this->emplace<TextElement>(origLink, MessageElementFlag::OriginalLink,
-                                   textColor)
-            ->setLink(linkElement);
-
-    LinkResolver::getLinkInfo(
-        matchedLink, nullptr,
-        [weakMessage = this->weakOf(), linkMELowercase, linkMEOriginal,
-         matchedLink](QString tooltipText, Link originalLink,
-                      ImagePtr thumbnail) {
-            auto shared = weakMessage.lock();
-            if (!shared)
-            {
-                return;
-            }
-            if (!tooltipText.isEmpty())
-            {
-                linkMELowercase->setTooltip(tooltipText);
-                linkMEOriginal->setTooltip(tooltipText);
-            }
-            if (originalLink.value != matchedLink &&
-                !originalLink.value.isEmpty())
-            {
-                linkMELowercase->setLink(originalLink)->updateLink();
-                linkMEOriginal->setLink(originalLink)->updateLink();
-            }
-            linkMELowercase->setThumbnail(thumbnail);
-            linkMELowercase->setThumbnailType(
-                MessageElement::ThumbnailType::Link_Thumbnail);
-            linkMEOriginal->setThumbnail(thumbnail);
-            linkMEOriginal->setThumbnailType(
-                MessageElement::ThumbnailType::Link_Thumbnail);
-        });
+    auto *el = this->emplace<LinkElement>(
+        LinkElement::Parsed{.lowercase = lowercaseLinkString,
+                            .original = matchedLink},
+        MessageElementFlag::Text, textColor);
+    el->setLink({Link::Url, matchedLink});
+    getIApp()->getLinkResolver()->resolve(el->linkInfo());
 }
 
 void MessageBuilder::addIrcMessageText(const QString &text)

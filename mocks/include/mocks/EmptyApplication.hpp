@@ -186,6 +186,15 @@ public:
         return nullptr;
     }
 
+#ifdef CHATTERINO_HAVE_PLUGINS
+    PluginController *getPlugins() override
+    {
+        assert(false && "EmptyApplication::getPlugins was called without "
+                        "being initialized");
+        return nullptr;
+    }
+#endif
+
     Updates &getUpdates() override
     {
         return this->updates_;
@@ -208,6 +217,13 @@ public:
     SeventvEmotes *getSeventvEmotes() override
     {
         assert(false && "EmptyApplication::getSeventvEmotes was called without "
+                        "being initialized");
+        return nullptr;
+    }
+
+    ILinkResolver *getLinkResolver() override
+    {
+        assert(false && "EmptyApplication::getLinkResolver was called without "
                         "being initialized");
         return nullptr;
     }
