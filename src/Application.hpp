@@ -46,7 +46,6 @@ class Fonts;
 class Toasts;
 class IChatterinoBadges;
 class ChatterinoBadges;
-class SeventvBadges;
 class SeventvPaints;
 class FfzBadges;
 class SeventvBadges;

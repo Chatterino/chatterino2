@@ -260,11 +260,6 @@ private:
 class TextElement : public MessageElement
 {
 public:
-    struct Word {
-        QString text;
-        int width = -1;
-    };
-
     TextElement(const QString &text, MessageElementFlags flags,
                 const MessageColor &color = MessageColor::Text,
                 FontStyle style = FontStyle::ChatMedium);

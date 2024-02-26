@@ -1906,7 +1906,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                         {
                             // First entry gets a large image and full description
                             entries.push_back({showThumbnail
-                                                   ? emote->images.getImage(4.0)
+                                                   ? emote->images.getImage(3.0)
                                                    : nullptr,
                                                emoteTooltips[i]});
                         }

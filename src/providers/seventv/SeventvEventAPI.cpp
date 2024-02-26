@@ -8,7 +8,6 @@
 #include "providers/seventv/SeventvCosmetics.hpp"
 #include "providers/seventv/SeventvPaints.hpp"
 #include "providers/seventv/SeventvPersonalEmotes.hpp"
-#include "util/PostToThread.hpp"
 
 #include <QJsonArray>
 
