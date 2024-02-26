@@ -1992,9 +1992,10 @@ void TwitchChannel::upsertPersonalSeventvEmotes(
             [&](auto &&element) {
                 auto *elementPtr = element.get();
                 auto *textElement = dynamic_cast<TextElement *>(elementPtr);
+                auto *linkElement = dynamic_cast<LinkElement *>(elementPtr);
 
                 // Check if this contains the message text
-                if (textElement != nullptr &&
+                if (textElement && !linkElement &&
                     textElement->getFlags().has(MessageElementFlag::Text))
                 {
                     upsertWords(elements, textElement);
