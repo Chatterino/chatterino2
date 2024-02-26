@@ -90,6 +90,7 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
             if (needSizeAdjustment)
             {
                 this->adjustSize();
+                this->applyLastBoundsCheck();
             }
         });
 }

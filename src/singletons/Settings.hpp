@@ -62,6 +62,12 @@ enum UsernameRightClickBehavior : int {
     Ignore = 2,
 };
 
+enum class ChatSendProtocol : int {
+    Default = 0,
+    IRC = 1,
+    Helix = 2,
+};
+
 /// Settings which are availlable for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
 class Settings
@@ -219,6 +225,10 @@ public:
         "/behaviour/autocompletion/emoteCompletionWithColon", true};
     BoolSetting showUsernameCompletionMenu = {
         "/behaviour/autocompletion/showUsernameCompletionMenu", true};
+    BoolSetting alwaysIncludeBroadcasterInUserCompletions = {
+        "/behaviour/autocompletion/alwaysIncludeBroadcasterInUserCompletions",
+        true,
+    };
     BoolSetting useSmartEmoteCompletion = {
         "/experiments/useSmartEmoteCompletion",
         false,
@@ -532,6 +542,9 @@ public:
         "/misc/twitch/helix-timegate/commercial",
         HelixTimegateOverride::Timegate,
     };
+
+    EnumStringSetting<ChatSendProtocol> chatSendProtocol = {
+        "/misc/chatSendProtocol", ChatSendProtocol::Default};
 
     BoolSetting openLinksIncognito = {"/misc/openLinksIncognito", 0};
 

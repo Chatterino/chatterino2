@@ -22,6 +22,8 @@ namespace {
         "This channel has no BetterTTV channel emotes.");
 
     QString emoteLinkFormat("https://betterttv.com/emotes/%1");
+    // BTTV doesn't provide any data on the size, so we assume an emote is 28x28
+    constexpr QSize EMOTE_BASE_SIZE(28, 28);
 
     struct CreateEmoteResult {
         EmoteId id;
@@ -65,9 +67,12 @@ namespace {
 
             auto emote = Emote({
                 name,
-                ImageSet{Image::fromUrl(getEmoteLinkV3(id, "1x"), 1),
-                         Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5),
-                         Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.286)},
+                ImageSet{Image::fromUrl(getEmoteLinkV3(id, "1x"), 1,
+                                        EMOTE_BASE_SIZE),
+                         Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5,
+                                        EMOTE_BASE_SIZE * 2),
+                         Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25,
+                                        EMOTE_BASE_SIZE * 4)},
                 Tooltip{name.string + "<br>Global BetterTTV Emote"},
                 Url{emoteLinkFormat.arg(id.string)},
             });
@@ -90,9 +95,11 @@ namespace {
         auto emote = Emote({
             name,
             ImageSet{
-                Image::fromUrl(getEmoteLinkV3(id, "1x"), 1),
-                Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5),
-                Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25),
+                Image::fromUrl(getEmoteLinkV3(id, "1x"), 1, EMOTE_BASE_SIZE),
+                Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5,
+                               EMOTE_BASE_SIZE * 2),
+                Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25,
+                               EMOTE_BASE_SIZE * 4),
             },
             Tooltip{
                 QString("%1<br>%2 BetterTTV Emote<br>By: %3")

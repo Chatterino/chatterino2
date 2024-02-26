@@ -73,7 +73,8 @@ public:
     Image(Image &&) = delete;
     Image &operator=(Image &&) = delete;
 
-    static ImagePtr fromUrl(const Url &url, qreal scale = 1);
+    static ImagePtr fromUrl(const Url &url, qreal scale = 1,
+                            QSize expectedSize = {});
     static ImagePtr fromResourcePixmap(const QPixmap &pixmap, qreal scale = 1);
     static ImagePtr getEmpty();
 
@@ -93,7 +94,7 @@ public:
 
 private:
     Image();
-    Image(const Url &url, qreal scale);
+    Image(const Url &url, qreal scale, QSize expectedSize);
     Image(qreal scale);
 
     void setPixmap(const QPixmap &pixmap);
@@ -102,11 +103,17 @@ private:
 
     const Url url_{};
     const qreal scale_{1};
+    /// @brief The expected size of this image once its loaded.
+    ///
+    /// This doesn't represent the actual size (it can be different) - it's
+    /// just an estimation and provided to avoid (large) layout shifts when
+    /// loading images.
+    const QSize expectedSize_{16, 16};
     std::atomic_bool empty_{false};
 
-    mutable std::chrono::time_point<std::chrono::steady_clock> lastUsed_;
-
     bool shouldLoad_{false};
+
+    mutable std::chrono::time_point<std::chrono::steady_clock> lastUsed_;
 
     // gui thread only
     std::unique_ptr<detail::Frames> frames_{};

@@ -531,12 +531,27 @@ void BaseWindow::leaveEvent(QEvent *)
 
 void BaseWindow::moveTo(QPoint point, widgets::BoundsChecking mode)
 {
+    this->lastBoundsCheckPosition_ = point;
+    this->lastBoundsCheckMode_ = mode;
     widgets::moveWindowTo(this, point, mode);
 }
 
 void BaseWindow::showAndMoveTo(QPoint point, widgets::BoundsChecking mode)
 {
+    this->lastBoundsCheckPosition_ = point;
+    this->lastBoundsCheckMode_ = mode;
     widgets::showAndMoveWindowTo(this, point, mode);
+}
+
+bool BaseWindow::applyLastBoundsCheck()
+{
+    if (this->lastBoundsCheckMode_ == widgets::BoundsChecking::Off)
+    {
+        return false;
+    }
+
+    this->moveTo(this->lastBoundsCheckPosition_, this->lastBoundsCheckMode_);
+    return true;
 }
 
 void BaseWindow::resizeEvent(QResizeEvent *)

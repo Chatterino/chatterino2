@@ -539,7 +539,7 @@ ImageSet SeventvEmotes::createImageSet(const QJsonObject &emoteData)
 
         auto image = Image::fromUrl(
             {QString("https:%1/%2").arg(baseUrl, file["name"].toString())},
-            scale);
+            scale, {static_cast<int>(width), file["height"].toInt(16)});
 
         sizes.at(nextSize) = image;
         nextSize++;
@@ -562,7 +562,18 @@ ImageSet SeventvEmotes::createImageSet(const QJsonObject &emoteData)
         }
     }
 
-    return ImageSet{sizes[0], sizes[1], sizes[2], sizes[3]};
+    // Typically, 7TV provides four versions (1x, 2x, 3x, and 4x). The 3x
+    // version has a scale factor of 1/3, which is a size other providers don't
+    // provide - they only provide the 4x version (0.25). To be in line with
+    // other providers, we prefer the 4x version but fall back to the 3x one if
+    // it doesn't exist.
+    auto largest = std::move(sizes[3]);
+    if (!largest || largest->isEmpty())
+    {
+        largest = std::move(sizes[2]);
+    }
+
+    return ImageSet{sizes[0], sizes[1], largest};
 }
 
 }  // namespace chatterino

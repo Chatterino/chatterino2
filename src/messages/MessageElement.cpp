@@ -730,7 +730,7 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
             return e;
         };
 
-        static const auto ellipsis = QStringLiteral("...");
+        static const auto ellipsis = QStringLiteral("…");
 
         // String to continuously append words onto until we place it in the container
         // once we encounter an emote or reach the end of the message text. */
@@ -750,6 +750,7 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                 currentText += ' ';
             }
 
+            bool done = false;
             for (const auto &parsedWord :
                  app->getEmotes()->getEmojis()->parse(word.text))
             {
@@ -763,6 +764,7 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                                            container.remainingWidth());
                     if (currentText != prev)
                     {
+                        done = true;
                         break;
                     }
                 }
@@ -785,6 +787,7 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                                                   emoteSize.width()))
                         {
                             currentText += ellipsis;
+                            done = true;
                             break;
                         }
 
@@ -799,6 +802,11 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                                 ->setTrailingSpace(false));
                     }
                 }
+            }
+
+            if (done)
+            {
+                break;
             }
         }
 

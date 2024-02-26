@@ -66,6 +66,7 @@ StackIdx push(lua_State *L, const bool &b);
 StackIdx push(lua_State *L, const int &b);
 
 // returns OK?
+bool peek(lua_State *L, int *out, StackIdx idx = -1);
 bool peek(lua_State *L, bool *out, StackIdx idx = -1);
 bool peek(lua_State *L, double *out, StackIdx idx = -1);
 bool peek(lua_State *L, QString *out, StackIdx idx = -1);

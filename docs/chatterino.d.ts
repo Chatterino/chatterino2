@@ -9,7 +9,7 @@ declare module c2 {
   }
   class CommandContext {
     words: String[];
-    channel_name: String;
+    channel: Channel;
   }
 
   enum Platform {
@@ -95,4 +95,5 @@ declare module c2 {
     : never;
 
   function register_callback<T>(type: T, func: CbFunc<T>): void;
+  function later(callback: () => void, msec: number): void;
 }

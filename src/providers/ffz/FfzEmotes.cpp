@@ -20,6 +20,10 @@ const auto &LOG = chatterinoFfzemotes;
 const QString CHANNEL_HAS_NO_EMOTES(
     "This channel has no FrankerFaceZ channel emotes.");
 
+// FFZ doesn't provide any data on the size for room badges,
+// so we assume 18x18 (same as a Twitch badge)
+constexpr QSize BASE_BADGE_SIZE(18, 18);
+
 Url getEmoteLink(const QJsonObject &urls, const QString &emoteScale)
 {
     auto emote = urls[emoteScale];
@@ -33,20 +37,23 @@ Url getEmoteLink(const QJsonObject &urls, const QString &emoteScale)
     return parseFfzUrl(emote.toString());
 }
 
-void fillInEmoteData(const QJsonObject &urls, const EmoteName &name,
-                     const QString &tooltip, Emote &emoteData)
+void fillInEmoteData(const QJsonObject &emote, const QJsonObject &urls,
+                     const EmoteName &name, const QString &tooltip,
+                     Emote &emoteData)
 {
     auto url1x = getEmoteLink(urls, "1");
     auto url2x = getEmoteLink(urls, "2");
-    auto url4x = getEmoteLink(urls, "4");
+    auto url3x = getEmoteLink(urls, "4");
+    QSize baseSize(emote["width"].toInt(28), emote["height"].toInt(28));
 
     //, code, tooltip
     emoteData.name = name;
     emoteData.images = ImageSet{
-        Image::fromUrl(url1x, 1),
-        url2x.string.isEmpty() ? Image::getEmpty() : Image::fromUrl(url2x, 0.5),
-        url4x.string.isEmpty() ? Image::getEmpty()
-                               : Image::fromUrl(url4x, 0.250)};
+        Image::fromUrl(url1x, 1, baseSize),
+        url2x.string.isEmpty() ? Image::getEmpty()
+                               : Image::fromUrl(url2x, 0.5, baseSize * 2),
+        url3x.string.isEmpty() ? Image::getEmpty()
+                               : Image::fromUrl(url3x, 0.25, baseSize * 4)};
     emoteData.tooltip = {tooltip};
 }
 
@@ -78,7 +85,7 @@ void parseEmoteSetInto(const QJsonObject &emoteSet, const QString &kind,
         }
 
         Emote emote;
-        fillInEmoteData(urls, name,
+        fillInEmoteData(emoteJson, urls, name,
                         QString("%1<br>%2 FFZ Emote<br>By: %3")
                             .arg(name.string, kind, author.string),
                         emote);
@@ -132,13 +139,13 @@ std::optional<EmotePtr> parseAuthorityBadge(const QJsonObject &badgeUrls,
         auto authorityBadge3x = getEmoteLink(badgeUrls, "4");
 
         auto authorityBadgeImageSet = ImageSet{
-            Image::fromUrl(authorityBadge1x, 1),
+            Image::fromUrl(authorityBadge1x, 1, BASE_BADGE_SIZE),
             authorityBadge2x.string.isEmpty()
                 ? Image::getEmpty()
-                : Image::fromUrl(authorityBadge2x, 0.5),
+                : Image::fromUrl(authorityBadge2x, 0.5, BASE_BADGE_SIZE * 2),
             authorityBadge3x.string.isEmpty()
                 ? Image::getEmpty()
-                : Image::fromUrl(authorityBadge3x, 0.25),
+                : Image::fromUrl(authorityBadge3x, 0.25, BASE_BADGE_SIZE * 4),
         };
 
         authorityBadge = std::make_shared<Emote>(Emote{
@@ -167,6 +174,33 @@ EmoteMap ffz::detail::parseChannelEmotes(const QJsonObject &jsonRoot)
     }
 
     return emotes;
+}
+
+FfzChannelBadgeMap ffz::detail::parseChannelBadges(const QJsonObject &badgeRoot)
+{
+    FfzChannelBadgeMap channelBadges;
+
+    for (auto it = badgeRoot.begin(); it != badgeRoot.end(); ++it)
+    {
+        const auto badgeID = it.key().toInt();
+        const auto &jsonUserIDs = it.value().toArray();
+        for (const auto &jsonUserID : jsonUserIDs)
+        {
+            // NOTE: The Twitch User IDs come through as ints right now, the code below
+            // tries to parse them as strings first since that's how we treat them anyway.
+            if (jsonUserID.isString())
+            {
+                channelBadges[jsonUserID.toString()].emplace_back(badgeID);
+            }
+            else
+            {
+                channelBadges[QString::number(jsonUserID.toInt())].emplace_back(
+                    badgeID);
+            }
+        }
+    }
+
+    return channelBadges;
 }
 
 FfzEmotes::FfzEmotes()
@@ -220,6 +254,7 @@ void FfzEmotes::loadChannel(
     std::function<void(EmoteMap &&)> emoteCallback,
     std::function<void(std::optional<EmotePtr>)> modBadgeCallback,
     std::function<void(std::optional<EmotePtr>)> vipBadgeCallback,
+    std::function<void(FfzChannelBadgeMap &&)> channelBadgesCallback,
     bool manualRefresh)
 {
     qCDebug(LOG) << "Reload FFZ Channel Emotes for channel" << channelID;
@@ -229,8 +264,9 @@ void FfzEmotes::loadChannel(
         .timeout(20000)
         .onSuccess([emoteCallback = std::move(emoteCallback),
                     modBadgeCallback = std::move(modBadgeCallback),
-                    vipBadgeCallback = std::move(vipBadgeCallback), channel,
-                    manualRefresh](const auto &result) {
+                    vipBadgeCallback = std::move(vipBadgeCallback),
+                    channelBadgesCallback = std::move(channelBadgesCallback),
+                    channel, manualRefresh](const auto &result) {
             const auto json = result.parseJson();
 
             auto emoteMap = parseChannelEmotes(json);
@@ -238,12 +274,15 @@ void FfzEmotes::loadChannel(
                 json["room"]["mod_urls"].toObject(), "Moderator");
             auto vipBadge = parseAuthorityBadge(
                 json["room"]["vip_badge"].toObject(), "VIP");
+            auto channelBadges =
+                parseChannelBadges(json["room"]["user_badge_ids"].toObject());
 
             bool hasEmotes = !emoteMap.empty();
 
             emoteCallback(std::move(emoteMap));
             modBadgeCallback(std::move(modBadge));
             vipBadgeCallback(std::move(vipBadge));
+            channelBadgesCallback(std::move(channelBadges));
             if (auto shared = channel.lock(); manualRefresh)
             {
                 if (hasEmotes)

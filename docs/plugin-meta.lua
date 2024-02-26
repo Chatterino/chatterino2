@@ -24,7 +24,7 @@ c2.LogLevel = {}
 c2.EventType = {}
 ---@class CommandContext
 ---@field words string[] The words typed when executing the command. For example `/foo bar baz` will result in `{"/foo", "bar", "baz"}`.
----@field channel_name string The name of the channel the command was executed in.
+---@field channel Channel The channel the command was executed in.
 
 ---@class CompletionList
 ---@field values string[] The completions
@@ -184,4 +184,10 @@ function c2.register_callback(type, func) end
 ---@param level LogLevel The desired level.
 ---@param ... any Values to log. Should be convertible to a string with `tostring()`.
 function c2.log(level, ...) end
+
+--- Calls callback around msec milliseconds later. Does not freeze Chatterino.
+---
+---@param callback fun() The callback that will be called.
+---@param msec number How long to wait.
+function c2.later(callback, msec) end
 

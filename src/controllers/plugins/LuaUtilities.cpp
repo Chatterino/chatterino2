@@ -4,6 +4,7 @@
 #    include "common/Channel.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandContext.hpp"
+#    include "controllers/plugins/api/ChannelRef.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 
 #    include <lauxlib.h>
@@ -120,8 +121,9 @@ StackIdx push(lua_State *L, const CommandContext &ctx)
 
     push(L, ctx.words);
     lua_setfield(L, outIdx, "words");
-    push(L, ctx.channel->getName());
-    lua_setfield(L, outIdx, "channel_name");
+
+    push(L, ctx.channel);
+    lua_setfield(L, outIdx, "channel");
 
     return outIdx;
 }
@@ -136,6 +138,18 @@ StackIdx push(lua_State *L, const int &b)
 {
     lua_pushinteger(L, b);
     return lua_gettop(L);
+}
+
+bool peek(lua_State *L, int *out, StackIdx idx)
+{
+    StackGuard guard(L);
+    if (lua_isnumber(L, idx) == 0)
+    {
+        return false;
+    }
+
+    *out = lua_tointeger(L, idx);
+    return true;
 }
 
 bool peek(lua_State *L, bool *out, StackIdx idx)

@@ -3,6 +3,7 @@
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
 #include "messages/Emote.hpp"
+#include "messages/Image.hpp"
 #include "providers/ffz/FfzUtil.hpp"
 
 #include <QJsonArray>
@@ -42,8 +43,9 @@ std::vector<FfzBadges::Badge> FfzBadges::getUserBadges(const UserId &id)
     return badges;
 }
 
-std::optional<FfzBadges::Badge> FfzBadges::getBadge(const int badgeID)
+std::optional<FfzBadges::Badge> FfzBadges::getBadge(const int badgeID) const
 {
+    this->tgBadges.guard();
     auto it = this->badges.find(badgeID);
     if (it != this->badges.end())
     {
@@ -62,17 +64,26 @@ void FfzBadges::load()
             std::unique_lock lock(this->mutex_);
 
             auto jsonRoot = result.parseJson();
+            this->tgBadges.guard();
             for (const auto &jsonBadge_ : jsonRoot.value("badges").toArray())
             {
                 auto jsonBadge = jsonBadge_.toObject();
                 auto jsonUrls = jsonBadge.value("urls").toObject();
+                QSize baseSize(jsonBadge["width"].toInt(18),
+                               jsonBadge["height"].toInt(18));
 
-                auto emote =
-                    Emote{EmoteName{},
-                          ImageSet{parseFfzUrl(jsonUrls.value("1").toString()),
-                                   parseFfzUrl(jsonUrls.value("2").toString()),
-                                   parseFfzUrl(jsonUrls.value("4").toString())},
-                          Tooltip{jsonBadge.value("title").toString()}, Url{}};
+                auto emote = Emote{
+                    EmoteName{},
+                    ImageSet{Image::fromUrl(
+                                 parseFfzUrl(jsonUrls.value("1").toString()),
+                                 1.0, baseSize),
+                             Image::fromUrl(
+                                 parseFfzUrl(jsonUrls.value("2").toString()),
+                                 0.5, baseSize * 2),
+                             Image::fromUrl(
+                                 parseFfzUrl(jsonUrls.value("4").toString()),
+                                 0.25, baseSize * 4)},
+                    Tooltip{jsonBadge.value("title").toString()}, Url{}};
 
                 Badge badge;
 

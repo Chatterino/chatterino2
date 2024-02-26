@@ -44,12 +44,14 @@ EmotePtr TwitchEmotes::getOrCreateEmote(const EmoteId &id,
 
     if (!shared)
     {
+        // From Twitch docs - expected size for an emote (1x)
+        constexpr QSize baseSize(28, 28);
         (*cache)[id] = shared = std::make_shared<Emote>(Emote{
             EmoteName{name},
             ImageSet{
-                Image::fromUrl(getEmoteLink(id, "1.0"), 1),
-                Image::fromUrl(getEmoteLink(id, "2.0"), 0.5),
-                Image::fromUrl(getEmoteLink(id, "3.0"), 0.286),
+                Image::fromUrl(getEmoteLink(id, "1.0"), 1, baseSize),
+                Image::fromUrl(getEmoteLink(id, "2.0"), 0.5, baseSize * 2),
+                Image::fromUrl(getEmoteLink(id, "3.0"), 0.25, baseSize * 4),
             },
             Tooltip{name.toHtmlEscaped() + "<br>Twitch Emote"},
         });

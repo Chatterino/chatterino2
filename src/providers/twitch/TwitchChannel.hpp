@@ -6,8 +6,11 @@
 #include "common/ChannelChatters.hpp"
 #include "common/Common.hpp"
 #include "common/UniqueAccess.hpp"
+#include "providers/ffz/FfzBadges.hpp"
+#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/QStringHash.hpp"
+#include "util/ThreadGuard.hpp"
 
 #include <boost/circular_buffer/space_optimized.hpp>
 #include <boost/signals2.hpp>
@@ -138,6 +141,7 @@ public:
     const QString &popoutPlayerUrl();
     int chatterCount() const;
     bool isLive() const override;
+    bool isRerun() const override;
     QString roomId() const;
     SharedAccessGuard<const RoomModes> accessRoomModes() const;
     SharedAccessGuard<const StreamStatus> accessStreamStatus() const;
@@ -204,6 +208,10 @@ public:
     std::optional<EmotePtr> ffzCustomVipBadge() const;
     std::optional<EmotePtr> twitchBadge(const QString &set,
                                         const QString &version) const;
+    /**
+     * Returns a list of channel-specific FrankerFaceZ badges for the given user
+     */
+    std::vector<FfzBadges::Badge> ffzChannelBadges(const QString &userID) const;
 
     // Cheers
     std::optional<CheerEmote> cheerEmote(const QString &string);
@@ -268,6 +276,12 @@ public:
     void updateStreamStatus(const std::optional<HelixStream> &helixStream);
     void updateStreamTitle(const QString &title);
 
+    /**
+     * Returns the display name of the user
+     *
+     * If the display name contained chinese, japenese, or korean characters, the user's login name is returned instead
+     **/
+    const QString &getDisplayName() const override;
     void updateDisplayName(const QString &displayName);
 
 private:
@@ -326,13 +340,6 @@ private:
     void setRoomModes(const RoomModes &newRoomModes);
     void setDisplayName(const QString &name);
     void setLocalizedName(const QString &name);
-
-    /**
-     * Returns the display name of the user
-     *
-     * If the display name contained chinese, japenese, or korean characters, the user's login name is returned instead
-     **/
-    const QString &getDisplayName() const override;
 
     /**
      * Returns the localized name of the user
@@ -397,6 +404,9 @@ protected:
     Atomic<std::shared_ptr<const EmoteMap>> seventvEmotes_;
     Atomic<std::optional<EmotePtr>> ffzCustomModBadge_;
     Atomic<std::optional<EmotePtr>> ffzCustomVipBadge_;
+
+    FfzChannelBadgeMap ffzChannelBadges_;
+    ThreadGuard tgFfzChannelBadges_;
 
 private:
     // Badges
