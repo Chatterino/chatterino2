@@ -376,10 +376,21 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
              this->message_->flags.has(MessageFlag::LowTrustUsers))
     {
         backgroundColor = QColor("#404040");
+        if (this->message_->flags.has(MessageFlag::AutoModOffendingMessage) &&
+            ctx.preferences.enableAutomodHighlight)
+        {
+            backgroundColor =
+                *ctx.colorProvider.color(ColorType::AutomodHighlight);
+        }
     }
     else if (this->message_->flags.has(MessageFlag::Debug))
     {
         backgroundColor = QColor("#4A273D");
+    }
+    else if (this->message_->flags.has(MessageFlag::AutoModOffendingMessage) &&
+             ctx.preferences.enableAutomodHighlight)
+    {
+        backgroundColor = *ctx.colorProvider.color(ColorType::AutomodHighlight);
     }
 
     painter.fillRect(buffer->rect(), backgroundColor);

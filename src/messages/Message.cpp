@@ -69,6 +69,13 @@ ScrollbarHighlight Message::getScrollBarHighlight() const
         };
     }
 
+    if (this->flags.has(MessageFlag::AutoModOffendingMessage))
+    {
+        return {
+            ColorProvider::instance().color(ColorType::AutomodHighlight),
+        };
+    }
+
     return {};
 }
 
