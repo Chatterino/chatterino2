@@ -7,6 +7,15 @@ set -e
 
 env
 
+BUILD_TESTS="On"
+BUILD_BENCHMARKS="ON"
+
+ubuntu_version="$(lsb_release -sr)"
+if [ "$ubuntu_version" = "20.04" ]; then
+    BUILD_TESTS="Off"
+    BUILD_BENCHMARKS="Off"
+fi
+
 rm -rf build
 mkdir build
 cmake \
@@ -14,8 +23,8 @@ cmake \
     -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
     -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_APP=On \
-    -DBUILD_TESTS=On \
-    -DBUILD_BENCHMARKS=On \
+    -DBUILD_TESTS="$BUILD_TESTS" \
+    -DBUILD_BENCHMARKS="$BUILD_BENCHMARKS" \
     -DUSE_PRECOMPILED_HEADERS=OFF \
     -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
     -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
