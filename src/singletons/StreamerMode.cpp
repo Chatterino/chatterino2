@@ -77,7 +77,7 @@ bool isBroadcasterSoftwareActive()
 
     qCWarning(chatterinoStreamerMode) << "pgrep execution timed out!";
     return false;
-#elif defined(Q_OS_WIN)  // TODO(C++ 23): use elifdef
+#elif defined(Q_OS_WIN)
     if (!IsWindowsVistaOrGreater())
     {
         return false;
@@ -113,19 +113,6 @@ bool isBroadcasterSoftwareActive()
     return false;
 }
 
-class SingleConnection
-{
-public:
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    void emplace_back(auto &&conn)
-    {
-        this->conn_ = std::forward<decltype(conn)>(conn);
-    }
-
-private:
-    std::unique_ptr<pajlada::Signals::ScopedConnection> conn_;
-};
-
 }  // namespace
 
 namespace chatterino {
@@ -146,13 +133,13 @@ private:
     void check();
 
     StreamerMode *parent_;
-    SingleConnection settingConnection_;
+    pajlada::Signals::SignalHolder settingConnections_;
 
     QTimer timer_;
     QThread thread_;
 
-    std::atomic_bool enabled_ = false;
-    mutable std::atomic_uint8_t timeouts_ = 0;
+    std::atomic<bool> enabled_ = false;
+    mutable std::atomic<uint8_t> timeouts_ = 0;
     StreamerModeSetting prevValue_ = StreamerModeSetting::Disabled;
 };
 
@@ -163,9 +150,9 @@ StreamerMode::StreamerMode()
 
 StreamerMode::~StreamerMode() = default;
 
-void StreamerMode::updated()
+void StreamerMode::updated(bool enabled)
 {
-    this->changed(this->isEnabled());
+    this->changed(enabled);
 }
 
 bool StreamerMode::isEnabled() const
@@ -196,7 +183,7 @@ StreamerModePrivate::StreamerModePrivate(StreamerMode *parent)
                 this->settingChanged(static_cast<StreamerModeSetting>(value));
             });
         },
-        this->settingConnection_);
+        this->settingConnections_);
 }
 
 bool StreamerModePrivate::isEnabled() const
@@ -213,7 +200,7 @@ void StreamerModePrivate::setEnabled(bool enabled)
     }
 
     this->enabled_.store(enabled, std::memory_order::relaxed);
-    this->parent_->updated();
+    this->parent_->updated(enabled);
 }
 
 void StreamerModePrivate::settingChanged(StreamerModeSetting value)
@@ -226,12 +213,16 @@ void StreamerModePrivate::settingChanged(StreamerModeSetting value)
 
     switch (this->prevValue_)
     {
-        case StreamerModeSetting::Disabled:
+        case StreamerModeSetting::Disabled: {
             this->setEnabled(false);
-            [[fallthrough]];
-        case StreamerModeSetting::Enabled:
+            this->timer_.stop();
+        }
+        break;
+        case StreamerModeSetting::Enabled: {
             this->setEnabled(true);
             this->timer_.stop();
+        }
+        break;
         case StreamerModeSetting::DetectStreamingSoftware: {
             if (!this->timer_.isActive())
             {
@@ -242,6 +233,7 @@ void StreamerModePrivate::settingChanged(StreamerModeSetting value)
         break;
         default:
             assert(false && "Unexpected setting");
+            break;
     }
 }
 

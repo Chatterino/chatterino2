@@ -38,7 +38,7 @@ public:
     bool isEnabled() const override;
 
 private:
-    void updated();
+    void updated(bool enabled);
 
     std::unique_ptr<StreamerModePrivate> private_;
 
