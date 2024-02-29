@@ -166,6 +166,7 @@
 - Dev: Twitch messages can be sent using Twitch's Helix API instead of IRC (disabled by default). (#5200)
 - Dev: Added estimation for image sizes to avoid layout shifts. (#5192)
 - Dev: Added the `launachable` entry to Linux AppData. (#5210)
+- Dev: Refactor `StreamerMode`. (#5216)
 
 ## 2.4.6
 
