@@ -7,6 +7,7 @@
 #include "util/PostToThread.hpp"
 
 #include <QAbstractEventDispatcher>
+#include <QDebug>
 #include <QProcess>
 #include <QThread>
 #include <QTimer>
