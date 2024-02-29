@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Literals.hpp"
+#include "common/QLogging.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "util/PostToThread.hpp"
