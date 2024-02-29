@@ -11,10 +11,10 @@
 #include "messages/MessageElement.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "util/Qt.hpp"
-#include "util/StreamerMode.hpp"
 
 #include <QFileInfo>
 
@@ -204,7 +204,8 @@ void SharedMessageBuilder::triggerHighlights(
     const QString &channelName, bool playSound,
     const std::optional<QUrl> &customSoundUrl, bool windowAlert)
 {
-    if (isInStreamerMode() && getSettings()->streamerModeMuteMentions)
+    if (getIApp()->getStreamerMode()->isEnabled() &&
+        getSettings()->streamerModeMuteMentions)
     {
         // We are in streamer mode with muting mention sounds enabled. Do nothing.
         return;
