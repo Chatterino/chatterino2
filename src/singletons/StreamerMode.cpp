@@ -1,7 +1,10 @@
 #include "singletons/StreamerMode.hpp"
 
+#include "Application.hpp"
 #include "common/Literals.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
+#include "util/PostToThread.hpp"
 
 #include <QAbstractEventDispatcher>
 #include <QProcess>
@@ -20,7 +23,8 @@
 
 namespace {
 
-using namespace chatterino::literals;
+using namespace chatterino;
+using namespace literals;
 
 /// Number of timeouts to skip if nothing called `isEnabled` in the meantime.
 constexpr uint8_t SKIPPED_TIMEOUTS = 5;
@@ -61,10 +65,12 @@ bool isBroadcasterSoftwareActive()
     {
         shouldShowWarning = false;
 
-        getApp()->twitch->addGlobalSystemMessage(
-            "Streamer Mode is set to Automatic, but pgrep is missing. "
-            "Install it to fix the issue or set Streamer Mode to "
-            "Enabled or Disabled in the Settings.");
+        postToThread([] {
+            getApp()->twitch->addGlobalSystemMessage(
+                "Streamer Mode is set to Automatic, but pgrep is missing. "
+                "Install it to fix the issue or set Streamer Mode to "
+                "Enabled or Disabled in the Settings.");
+        });
     }
 
     qCWarning(chatterinoStreamerMode) << "pgrep execution timed out!";
