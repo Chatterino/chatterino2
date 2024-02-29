@@ -140,7 +140,7 @@ private:
 
     std::atomic<bool> enabled_ = false;
     mutable std::atomic<uint8_t> timeouts_ = 0;
-    StreamerModeSetting prevValue_ = StreamerModeSetting::Disabled;
+    StreamerModeSetting currentSetting_ = StreamerModeSetting::Disabled;
 };
 
 StreamerMode::StreamerMode()
@@ -205,13 +205,13 @@ void StreamerModePrivate::setEnabled(bool enabled)
 
 void StreamerModePrivate::settingChanged(StreamerModeSetting value)
 {
-    if (value == this->prevValue_)
+    if (value == this->currentSetting_)
     {
         return;
     }
-    this->prevValue_ = value;
+    this->currentSetting_ = value;
 
-    switch (this->prevValue_)
+    switch (this->currentSetting_)
     {
         case StreamerModeSetting::Disabled: {
             this->setEnabled(false);
