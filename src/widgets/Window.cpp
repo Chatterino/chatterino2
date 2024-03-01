@@ -12,6 +12,7 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/Updates.hpp"
 #include "singletons/WindowManager.hpp"
@@ -202,9 +203,8 @@ void Window::addCustomTitlebarButtons()
             getIApp()->getWindows()->showSettingsDialog(
                 this, SettingsDialogPreference::StreamerMode);
         });
-    this->signalHolder_.managedConnect(getApp()->streamerModeChanged, [this]() {
-        this->updateStreamerModeIcon();
-    });
+    QObject::connect(getIApp()->getStreamerMode(), &IStreamerMode::changed,
+                     this, &Window::updateStreamerModeIcon);
 
     // Update initial state
     this->updateStreamerModeIcon();
@@ -231,7 +231,8 @@ void Window::updateStreamerModeIcon()
         this->streamerModeTitlebarIcon_->setPixmap(
             getResources().buttons.streamerModeEnabledDark);
     }
-    this->streamerModeTitlebarIcon_->setVisible(isInStreamerMode());
+    this->streamerModeTitlebarIcon_->setVisible(
+        getIApp()->getStreamerMode()->isEnabled());
 #else
     // clang-format off
     assert(false && "Streamer mode TitleBar icon should not exist on non-Windows OSes");
@@ -609,7 +610,7 @@ void Window::addShortcuts()
              }
              else if (mode == 2)
              {
-                 if (isInStreamerMode())
+                 if (getIApp()->getStreamerMode()->isEnabled())
                  {
                      getSettings()->enableStreamerMode.setValue(
                          StreamerModeSetting::Disabled);

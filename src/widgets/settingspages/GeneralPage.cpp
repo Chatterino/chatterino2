@@ -17,7 +17,6 @@
 #include "util/FuzzyConvert.hpp"
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
-#include "util/StreamerMode.hpp"
 #include "widgets/BaseWindow.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/splits/SplitInput.hpp"

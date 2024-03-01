@@ -15,11 +15,11 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutHelper.hpp"
-#include "util/StreamerMode.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/CommonTexts.hpp"
 #include "widgets/helper/EffectLabel.hpp"
@@ -140,7 +140,7 @@ auto formatTooltip(const TwitchChannel::StreamStatus &s, QString thumbnail)
     }();
 
     auto extraStreamData = [&s]() -> QString {
-        if (isInStreamerMode() &&
+        if (getIApp()->getStreamerMode()->isEnabled() &&
             getSettings()->streamerModeHideViewerCountAndDuration)
         {
             return QStringLiteral(

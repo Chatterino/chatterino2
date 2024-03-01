@@ -7,6 +7,7 @@
 #include "messages/MessageBuilder.hpp"
 #include "mocks/Channel.hpp"
 #include "mocks/ChatterinoBadges.hpp"
+#include "mocks/DisabledStreamerMode.hpp"
 #include "mocks/EmptyApplication.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "mocks/UserData.hpp"
@@ -86,6 +87,11 @@ public:
         return &this->seventvEmotes;
     }
 
+    IStreamerMode *getStreamerMode() override
+    {
+        return &this->streamerMode;
+    }
+
     AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;
@@ -97,6 +103,7 @@ public:
     BttvEmotes bttvEmotes;
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;
+    DisabledStreamerMode streamerMode;
 };
 
 }  // namespace
