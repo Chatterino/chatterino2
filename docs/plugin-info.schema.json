@@ -44,6 +44,19 @@
       "description": "A small description of your license.",
       "examples": ["MIT", "GPL-2.0-or-later"]
     },
+    "permissions": {
+        "type": "array",
+        "description": "The permissions the plugin needs to work.",
+        "items": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "examples": ["FilesystemRead", "FilesystemWrite"]
+                }
+            }
+        }
+    },
     "$schema": { "type": "string" }
   },
   "required": ["name", "description", "authors", "version", "license"]

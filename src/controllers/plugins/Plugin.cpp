@@ -111,6 +111,45 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
             QString("version is not a string (its type is %1)").arg(type));
         this->version = semver::version(0, 0, 0);
     }
+    auto permsObj = obj.value("permissions");
+    if (!permsObj.isUndefined())
+    {
+        if (!permsObj.isArray())
+        {
+            QString type = magic_enum::enum_name(permsObj.type()).data();
+            this->errors.emplace_back(
+                QString("permissions is not an array (its type is %1)")
+                    .arg(type));
+            return;
+        }
+
+        auto permsArr = permsObj.toArray();
+        for (int i = 0; i < permsArr.size(); i++)
+        {
+            const auto &t = permsArr.at(i);
+            if (!t.isObject())
+            {
+                QString type = magic_enum::enum_name(t.type()).data();
+                this->errors.push_back(QString("permissions element #%1 is not "
+                                               "an object (its type is %2)")
+                                           .arg(i)
+                                           .arg(type));
+                return;
+            }
+            auto parsed = PluginPermission(t.toObject());
+            for (const auto &err : parsed.errors)
+            {
+                this->errors.push_back(
+                    QString("permissions element #%1: %2").arg(i).arg(err));
+            }
+            if (parsed.errors.empty())
+            {
+                // ensure no invalid permissions slip through this
+                this->permissions.push_back(parsed);
+            }
+        }
+    }
+
     auto tagsObj = obj.value("tags");
     if (!tagsObj.isUndefined())
     {

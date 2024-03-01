@@ -4,6 +4,7 @@
 #    include "Application.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
+#    include "controllers/plugins/PluginPermission.hpp"
 
 #    include <QDir>
 #    include <QString>
@@ -41,6 +42,8 @@ struct PluginMeta {
 
     // optionally tags that might help in searching for the plugin
     std::vector<QString> tags;
+
+    std::vector<PluginPermission> permissions;
 
     // errors that occurred while parsing info.json
     std::vector<QString> errors;
