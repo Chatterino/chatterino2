@@ -378,8 +378,9 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
         if (this->message_->flags.has(MessageFlag::AutoModOffendingMessage) &&
             ctx.preferences.enableAutomodHighlight)
         {
-            backgroundColor =
-                *ctx.colorProvider.color(ColorType::AutomodHighlight);
+            backgroundColor = blendColors(
+                backgroundColor,
+                *ctx.colorProvider.color(ColorType::AutomodHighlight));
         }
         else
         {
