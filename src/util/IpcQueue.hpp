@@ -6,30 +6,38 @@
 class QByteArray;
 class QString;
 
-namespace chatterino::ipc {
+namespace chatterino {
 
-void sendMessage(const char *name, const QByteArray &data);
+class Paths;
 
-class IpcQueuePrivate;
-class IpcQueue
-{
-public:
-    ~IpcQueue();
+namespace ipc {
 
-    static std::pair<std::unique_ptr<IpcQueue>, QString> tryReplaceOrCreate(
-        const char *name, size_t maxMessages, size_t maxMessageSize);
+    void initPaths(const Paths *paths);
 
-    // TODO: use std::expected
-    /// Try to receive a message.
-    /// In the case of an error, the buffer is empty.
-    QByteArray receive();
+    void sendMessage(const char *name, const QByteArray &data);
 
-private:
-    IpcQueue(IpcQueuePrivate *priv);
+    class IpcQueuePrivate;
+    class IpcQueue
+    {
+    public:
+        ~IpcQueue();
 
-    std::unique_ptr<IpcQueuePrivate> private_;
+        static std::pair<std::unique_ptr<IpcQueue>, QString> tryReplaceOrCreate(
+            const char *name, size_t maxMessages, size_t maxMessageSize);
 
-    friend class IpcQueuePrivate;
-};
+        // TODO: use std::expected
+        /// Try to receive a message.
+        /// In the case of an error, the buffer is empty.
+        QByteArray receive();
 
-}  // namespace chatterino::ipc
+    private:
+        IpcQueue(IpcQueuePrivate *priv);
+
+        std::unique_ptr<IpcQueuePrivate> private_;
+
+        friend class IpcQueuePrivate;
+    };
+
+}  // namespace ipc
+
+}  // namespace chatterino

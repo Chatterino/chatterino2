@@ -140,6 +140,11 @@ void Paths::initSubDirectories()
     this->pluginsDirectory = makePath("Plugins");
     this->themesDirectory = makePath("Themes");
     this->crashdumpDirectory = makePath("Crashes");
+#ifdef Q_OS_WIN
+    this->ipcDirectory = makePath("IPC");
+#else
+    this->ipcDirectory = "/tmp";
+#endif
 }
 
 }  // namespace chatterino
