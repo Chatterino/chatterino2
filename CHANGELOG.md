@@ -59,6 +59,7 @@
 - Bugfix: Fixed issue on Windows preventing the title bar from being dragged in the top left corner. (#4873)
 - Bugfix: Fixed an issue where reply context didn't render correctly if an emoji was touching text. (#4875, #4977, #5174)
 - Bugfix: Fixed the input completion popup from disappearing when clicking on it on Windows and macOS. (#4876)
+- Bugfix: Fixed Twitch badges not loading correctly in the badge highlighting setting page. (#5223)
 - Bugfix: Fixed double-click text selection moving its position with each new message. (#4898)
 - Bugfix: Fixed an issue where notifications on Windows would contain no or an old avatar. (#4899)
 - Bugfix: Fixed headers of tables in the settings switching to bold text when selected. (#4913)
