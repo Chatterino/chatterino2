@@ -51,12 +51,6 @@ MessageElement *MessageElement::setLink(const Link &link)
     return this;
 }
 
-MessageElement *MessageElement::setText(const QString &text)
-{
-    this->text_ = text;
-    return this;
-}
-
 MessageElement *MessageElement::setTooltip(const QString &tooltip)
 {
     this->tooltip_ = tooltip;
@@ -94,29 +88,11 @@ void MessageElement::addFlags(MessageElementFlags flags)
     this->flags_.set(flags);
 }
 
-// Empty
-EmptyElement::EmptyElement()
-    : MessageElement(MessageElementFlag::None)
-{
-}
-
-void EmptyElement::addToContainer(MessageLayoutContainer &container,
-                                  MessageElementFlags flags)
-{
-}
-
-EmptyElement &EmptyElement::instance()
-{
-    static EmptyElement instance;
-    return instance;
-}
-
 // IMAGE
 ImageElement::ImageElement(ImagePtr image, MessageElementFlags flags)
     : MessageElement(flags)
-    , image_(image)
+    , image_(std::move(image))
 {
-    //    this->setTooltip(image->getTooltip());
 }
 
 void ImageElement::addToContainer(MessageLayoutContainer &container,
@@ -136,7 +112,7 @@ CircularImageElement::CircularImageElement(ImagePtr image, int padding,
                                            QColor background,
                                            MessageElementFlags flags)
     : MessageElement(flags)
-    , image_(image)
+    , image_(std::move(image))
     , padding_(padding)
     , background_(background)
 {
@@ -808,7 +784,7 @@ void LinebreakElement::addToContainer(MessageLayoutContainer &container,
 ScalingImageElement::ScalingImageElement(ImageSet images,
                                          MessageElementFlags flags)
     : MessageElement(flags)
-    , images_(images)
+    , images_(std::move(images))
 {
 }
 
