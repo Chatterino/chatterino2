@@ -147,7 +147,7 @@ public:
         pajlada::Settings::Setting<T> &setting,
         std::function<boost::variant<int, QString>(T)> getValue,
         std::function<T(DropdownArgs)> setValue, bool editable = true,
-        QString toolTipText = {})
+        QString toolTipText = {}, bool listenToActivated = false)
     {
         auto items2 = items;
         auto selected = getValue(setting.getValue());
@@ -197,14 +197,30 @@ public:
             },
             this->managedConnections_);
 
-        QObject::connect(
-            combo, QOverload<const int>::of(&QComboBox::currentIndexChanged),
-            [combo, &setting,
-             setValue = std::move(setValue)](const int newIndex) {
-                setting = setValue(DropdownArgs{combo->itemText(newIndex),
-                                                combo->currentIndex(), combo});
-                getIApp()->getWindows()->forceLayoutChannelViews();
-            });
+        if (listenToActivated)
+        {
+            QObject::connect(
+                combo, &QComboBox::activated,
+                [combo, &setting,
+                 setValue = std::move(setValue)](const int index) {
+                    setting = setValue(DropdownArgs{
+                        combo->itemText(index), combo->currentIndex(), combo});
+                    getIApp()->getWindows()->forceLayoutChannelViews();
+                });
+        }
+        else
+        {
+            QObject::connect(
+                combo,
+                QOverload<const int>::of(&QComboBox::currentIndexChanged),
+                [combo, &setting,
+                 setValue = std::move(setValue)](const int newIndex) {
+                    setting =
+                        setValue(DropdownArgs{combo->itemText(newIndex),
+                                              combo->currentIndex(), combo});
+                    getIApp()->getWindows()->forceLayoutChannelViews();
+                });
+        }
 
         return combo;
     }
