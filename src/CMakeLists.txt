@@ -834,11 +834,6 @@ if (BUILD_APP)
 
     target_link_libraries(${EXECUTABLE_PROJECT} PUBLIC ${LIBRARY_PROJECT})
 
-    target_link_libraries(${EXECUTABLE_PROJECT}
-        PUBLIC
-        twitch-eventsub-ws
-        )
-
     set_target_directory_hierarchy(${EXECUTABLE_PROJECT})
 
     if (WIN32)

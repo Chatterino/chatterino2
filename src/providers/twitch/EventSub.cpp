@@ -266,11 +266,13 @@ void EventSub::start()
                                .toUtf8()
                                .toStdString();
 
-    auto [host, port, path] = getEventSubHost();
+    auto eventSubHost = getEventSubHost();
 
     this->mainThread = std::make_unique<std::thread>([=] {
         try
         {
+            auto [host, port, path] = eventSubHost;
+
             boost::asio::io_context ctx(1);
 
             boost::asio::ssl::context sslContext{

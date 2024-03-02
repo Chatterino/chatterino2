@@ -209,6 +209,7 @@ else()
     add_subdirectory("${CMAKE_SOURCE_DIR}/lib/settings" EXCLUDE_FROM_ALL)
 endif()
 
+set(TWITCH_EVENTSUB_WS_LIBRARY_TYPE STATIC)
 add_subdirectory("${CMAKE_SOURCE_DIR}/lib/twitch-eventsub-ws" EXCLUDE_FROM_ALL)
 
 if (CHATTERINO_PLUGINS)
