@@ -197,29 +197,26 @@ public:
             },
             this->managedConnections_);
 
+        auto updateSetting = [combo, &setting, setValue = std::move(setValue)](
+                                 const int newIndex) {
+            setting = setValue(DropdownArgs{
+                .value = combo->itemText(newIndex),
+                .index = combo->currentIndex(),
+                .combobox = combo,
+            });
+            getIApp()->getWindows()->forceLayoutChannelViews();
+        };
+
         if (listenToActivated)
         {
-            QObject::connect(
-                combo, &QComboBox::activated,
-                [combo, &setting,
-                 setValue = std::move(setValue)](const int index) {
-                    setting = setValue(DropdownArgs{
-                        combo->itemText(index), combo->currentIndex(), combo});
-                    getIApp()->getWindows()->forceLayoutChannelViews();
-                });
+            QObject::connect(combo, &QComboBox::activated, updateSetting);
         }
         else
         {
             QObject::connect(
                 combo,
                 QOverload<const int>::of(&QComboBox::currentIndexChanged),
-                [combo, &setting,
-                 setValue = std::move(setValue)](const int newIndex) {
-                    setting =
-                        setValue(DropdownArgs{combo->itemText(newIndex),
-                                              combo->currentIndex(), combo});
-                    getIApp()->getWindows()->forceLayoutChannelViews();
-                });
+                updateSetting);
         }
 
         return combo;
