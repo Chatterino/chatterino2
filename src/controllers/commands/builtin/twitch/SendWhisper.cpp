@@ -16,6 +16,7 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/Theme.hpp"
 #include "util/Twitch.hpp"
 
@@ -183,7 +184,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
 
     if (getSettings()->inlineWhispers &&
         !(getSettings()->streamerModeSuppressInlineWhispers &&
-          isInStreamerMode()))
+          getIApp()->getStreamerMode()->isEnabled()))
     {
         app->twitch->forEachChannel(
             [&messagexD, overrideFlags](ChannelPtr _channel) {
