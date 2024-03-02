@@ -160,13 +160,6 @@ using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 class MessageElement
 {
 public:
-    enum UpdateFlags : char {
-        Update_Text = 1,
-        Update_Emotes = 2,
-        Update_Images = 4,
-        Update_All = Update_Text | Update_Emotes | Update_Images
-    };
-
     virtual ~MessageElement();
 
     MessageElement(const MessageElement &) = delete;
@@ -176,7 +169,6 @@ public:
     MessageElement &operator=(MessageElement &&) = delete;
 
     MessageElement *setLink(const Link &link);
-    MessageElement *setText(const QString &text);
     MessageElement *setTooltip(const QString &tooltip);
 
     MessageElement *setTrailingSpace(bool value);
@@ -195,25 +187,9 @@ protected:
     bool trailingSpace = true;
 
 private:
-    QString text_;
     Link link_;
     QString tooltip_;
     MessageElementFlags flags_;
-};
-
-// used when layout element doesn't have a creator
-class EmptyElement : public MessageElement
-{
-public:
-    EmptyElement();
-
-    void addToContainer(MessageLayoutContainer &container,
-                        MessageElementFlags flags) override;
-
-    static EmptyElement &instance();
-
-private:
-    ImagePtr image_;
 };
 
 // contains a simple image

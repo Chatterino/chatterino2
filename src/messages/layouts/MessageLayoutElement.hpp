@@ -162,8 +162,6 @@ public:
                       const QSize &size, QColor color_, FontStyle style_,
                       float scale_);
 
-    void listenToLinkChanges();
-
 protected:
     void addCopyTextToString(QString &str, uint32_t from = 0,
                              uint32_t to = UINT32_MAX) const override;
@@ -176,8 +174,6 @@ protected:
     QColor color_;
     FontStyle style_;
     float scale_;
-
-    pajlada::Signals::SignalHolder managedConnections_;
 };
 
 // TEXT ICON
