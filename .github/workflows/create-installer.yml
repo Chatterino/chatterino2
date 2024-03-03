@@ -145,7 +145,7 @@ jobs:
           ls -l
           mv Chatterino-ubuntu-22.04-Qt-6.6.1.deb Chatterino-Ubuntu-22.04-Qt6.deb
 
-          mv Chatterino-x86_64-6.6.1.AppImage Chatterino-x86_64-Qt6.AppImage
+          mv Chatterino-x86_64-Qt-6.6.1.AppImage Chatterino-x86_64-Qt6.AppImage
 
           mv chatterino-windows-x86-64-Qt-6.5.0-symbols.pdb.7z Chatterino-Windows-debug-symbols.pdb.7z
 
