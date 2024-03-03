@@ -13,6 +13,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Updates.hpp"
 #include "util/AttachToConsole.hpp"
+#include "util/IpcQueue.hpp"
 
 #include <QApplication>
 #include <QCommandLineParser>
@@ -62,6 +63,7 @@ int main(int argc, char **argv)
         box.exec();
         return 1;
     }
+    ipc::initPaths(paths.get());
 
     const Args args(a, *paths);
 
