@@ -107,7 +107,6 @@ jobs:
   draft-release:
     runs-on: ubuntu-latest
     needs: [create-installer, check-release]
-    if: ${{ needs.check-release.outputs.IS_TAGGED == '0' }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -163,8 +162,23 @@ jobs:
       - name: Get Tag
         id: get-tag
         run: echo "VALUE=$(git describe --exact-match --match 'v*')" >> "$GITHUB_OUTPUT"
+
+      - name: Dry Run
+        if: ${{ needs.check-release.outputs.IS_TAGGED != '0' }}
+        run: |
+          echo "Dry Run"
+          echo "========================================"
+          echo "Tag: '${{ steps.get-tag.outputs.VALUE }}'"
+          echo "========================================"
+          echo "Files:"
+          ls -la build
+          echo "========================================"
+          echo "Sha256 sums:"
+          cat sha256-checksums.txt
+
       - name: Create release
         uses: ncipollo/release-action@v1.12.0
+        if: ${{ needs.check-release.outputs.IS_TAGGED == '0' }}
         with:
           replacesArtifacts: true
           allowUpdates: true
