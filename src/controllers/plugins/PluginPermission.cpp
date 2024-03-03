@@ -63,6 +63,16 @@ PluginPermission::PluginPermission(const QJsonObject &obj)
                             .arg(type));
                     return;
                 }
+                auto str = t.toString();
+                if (str.contains(','))
+                {
+                    this->errors.push_back(
+                        QString(
+                            "fs permission paths element #%1 contains a comma "
+                            "which is not allowed")
+                            .arg(i));
+                    continue;
+                }
                 this->paths.push_back(t.toString());
             }
             break;
