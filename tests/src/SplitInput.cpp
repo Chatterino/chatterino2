@@ -9,6 +9,7 @@
 #include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/Notebook.hpp"
@@ -28,7 +29,9 @@ class MockApplication : mock::EmptyApplication
 {
 public:
     MockApplication()
-        : windowManager(this->paths)
+        : settings(this->settingsDir.filePath("settings.json"))
+        , fonts(this->settings)
+        , windowManager(this->paths)
     {
     }
     Theme *getThemes() override
@@ -66,6 +69,7 @@ public:
         return &this->emotes;
     }
 
+    Settings settings;
     Theme theme;
     HotkeyController hotkeys;
     Fonts fonts;
