@@ -54,7 +54,6 @@ public:
     IntSetting chatFontSize;
 
     pajlada::Signals::NoArgSignal fontChanged;
-    static Fonts *instance;
 
 private:
     struct FontData {
@@ -86,7 +85,5 @@ private:
 
     std::vector<std::unordered_map<float, FontData>> fontsByType_;
 };
-
-Fonts *getFonts();
 
 }  // namespace chatterino

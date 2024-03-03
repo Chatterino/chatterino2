@@ -68,14 +68,10 @@ namespace {
     }
 }  // namespace
 
-Fonts *Fonts::instance = nullptr;
-
 Fonts::Fonts()
     : chatFontFamily("/appearance/currentFontFamily", DEFAULT_FONT_FAMILY)
     , chatFontSize("/appearance/currentFontSize", DEFAULT_FONT_SIZE)
 {
-    Fonts::instance = this;
-
     this->fontsByType_.resize(size_t(FontStyle::EndType));
 }
 
@@ -203,11 +199,6 @@ Fonts::FontData Fonts::createFontData(FontStyle type, float scale)
         QFont font(data.name, int(data.size * scale), data.weight, data.italic);
         return FontData(font);
     }
-}
-
-Fonts *getFonts()
-{
-    return Fonts::instance;
 }
 
 }  // namespace chatterino
