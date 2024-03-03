@@ -143,6 +143,8 @@ void Paths::initSubDirectories()
 #ifdef Q_OS_WIN
     this->ipcDirectory = makePath("IPC");
 #else
+    // NOTE: We do *NOT* use IPC on non-Windows platforms.
+    // If we start, we should re-consider this directory.
     this->ipcDirectory = "/tmp";
 #endif
 }
