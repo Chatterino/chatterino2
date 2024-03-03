@@ -101,7 +101,6 @@ void Fonts::initialize(Settings &, const Paths &)
         },
         false);
 
-#ifdef CHATTERINO
     getSettings()->boldScale.connect(
         [this]() {
             assertInGuiThread();
@@ -116,7 +115,6 @@ void Fonts::initialize(Settings &, const Paths &)
             this->fontChanged.invoke();
         },
         false);
-#endif
 }
 
 QFont Fonts::getFont(FontStyle type, float scale)
