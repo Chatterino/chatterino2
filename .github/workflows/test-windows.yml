@@ -73,7 +73,7 @@ jobs:
 
       - name: Setup sccache
         # sccache v0.5.3
-        uses: nerixyz/ccache-action@9a7e8d00116ede600ee7717350c6594b8af6aaa5
+        uses: hendrikmuhs/ccache-action@v1.2.12
         with:
           variant: sccache
           # only save on the default (master) branch
