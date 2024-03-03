@@ -1,15 +1,13 @@
 #pragma once
 
-#include "common/ChatterinoSetting.hpp"
-#include "common/Singleton.hpp"
+#include "pajlada/settings/settinglistener.hpp"
 
 #include <pajlada/signals/signal.hpp>
 #include <QFont>
-#include <QFontDatabase>
 #include <QFontMetrics>
 
-#include <array>
 #include <unordered_map>
+#include <vector>
 
 namespace chatterino {
 
@@ -38,12 +36,10 @@ enum class FontStyle : uint8_t {
     ChatEnd = ChatVeryLarge,
 };
 
-class Fonts final : public Singleton
+class Fonts final
 {
 public:
-    Fonts();
-
-    void initialize(Settings &settings, const Paths &paths) override;
+    explicit Fonts(Settings &settings);
 
     // font data gets set in createFontData(...)
 
@@ -81,6 +77,8 @@ private:
     FontData createFontData(FontStyle type, float scale);
 
     std::vector<std::unordered_map<float, FontData>> fontsByType_;
+
+    pajlada::SettingListener fontChangedListener;
 };
 
 }  // namespace chatterino

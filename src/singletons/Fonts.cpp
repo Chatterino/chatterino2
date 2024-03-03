@@ -59,51 +59,22 @@ int getBoldness()
 
 namespace chatterino {
 
-Fonts::Fonts()
+Fonts::Fonts(Settings &settings)
 {
     this->fontsByType_.resize(size_t(FontStyle::EndType));
-}
 
-void Fonts::initialize(Settings &settings, const Paths &)
-{
-    settings.chatFontFamily.connect(
-        [this]() {
-            assertInGuiThread();
+    this->fontChangedListener.setCB([this] {
+        assertInGuiThread();
 
-            for (auto &map : this->fontsByType_)
-            {
-                map.clear();
-            }
-            this->fontChanged.invoke();
-        },
-        false);
-
-    settings.chatFontSize.connect(
-        [this]() {
-            assertInGuiThread();
-
-            for (auto &map : this->fontsByType_)
-            {
-                map.clear();
-            }
-            this->fontChanged.invoke();
-        },
-        false);
-
-    settings.boldScale.connect(
-        [this]() {
-            assertInGuiThread();
-
-            // REMOVED
-            getIApp()->getWindows()->incGeneration();
-
-            for (auto &map : this->fontsByType_)
-            {
-                map.clear();
-            }
-            this->fontChanged.invoke();
-        },
-        false);
+        for (auto &map : this->fontsByType_)
+        {
+            map.clear();
+        }
+        this->fontChanged.invoke();
+    });
+    this->fontChangedListener.addSetting(settings.chatFontFamily);
+    this->fontChangedListener.addSetting(settings.chatFontSize);
+    this->fontChangedListener.addSetting(settings.boldScale);
 }
 
 QFont Fonts::getFont(FontStyle type, float scale)
