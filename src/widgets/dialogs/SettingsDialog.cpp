@@ -341,6 +341,9 @@ void SettingsDialog::showDialog(QWidget *parent,
     }
     hasShownBefore = true;
 
+    // Resets the cancel button.
+    getSettings()->saveSnapshot();
+
     switch (preferredTab)
     {
         case SettingsDialogPreference::Accounts:
@@ -379,9 +382,6 @@ void SettingsDialog::showDialog(QWidget *parent,
 
 void SettingsDialog::refresh()
 {
-    // Resets the cancel button.
-    getSettings()->saveSnapshot();
-
     // Updates tabs.
     for (auto *tab : this->tabs_)
     {
