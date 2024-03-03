@@ -133,6 +133,8 @@ public:
     int addTimeout(QTimer *timer);
     void removeTimeout(QTimer *timer);
 
+    bool hasFSPermissionFor(bool write, const QString &path);
+
 private:
     QDir loadDirectory_;
     lua_State *state_;
