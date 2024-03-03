@@ -130,7 +130,7 @@ void ColorProvider::initTypeColorMap()
               HighlightPhrase::FALLBACK_THREAD_HIGHLIGHT_COLOR);
 
     initColor(ColorType::AutomodHighlight, getSettings()->automodHighlightColor,
-              HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
+              HighlightPhrase::FALLBACK_AUTOMOD_HIGHLIGHT_COLOR);
 }
 
 void ColorProvider::initDefaultColors()
