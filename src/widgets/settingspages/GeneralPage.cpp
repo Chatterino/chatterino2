@@ -166,8 +166,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     }
 
     layout.addDropdown<QString>(
-        "Font", {"Segoe UI", "Arial", "Choose..."},
-        getIApp()->getFonts()->chatFontFamily,
+        "Font", {"Segoe UI", "Arial", "Choose..."}, s.chatFontFamily,
         [](auto val) {
             return val;
         },
@@ -177,7 +176,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         true, "", true);
     layout.addDropdown<int>(
         "Font size", {"9pt", "10pt", "12pt", "14pt", "16pt", "20pt"},
-        getIApp()->getFonts()->chatFontSize,
+        s.chatFontSize,
         [](auto val) {
             return QString::number(val) + "pt";
         },

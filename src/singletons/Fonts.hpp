@@ -50,9 +50,6 @@ public:
     QFont getFont(FontStyle type, float scale);
     QFontMetrics getFontMetrics(FontStyle type, float scale);
 
-    QStringSetting chatFontFamily;
-    IntSetting chatFontSize;
-
     pajlada::Signals::NoArgSignal fontChanged;
 
 private:

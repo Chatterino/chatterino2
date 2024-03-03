@@ -8,19 +8,6 @@
 #include <QDebug>
 #include <QtGlobal>
 
-#ifdef Q_OS_WIN32
-#    define DEFAULT_FONT_FAMILY "Segoe UI"
-#    define DEFAULT_FONT_SIZE 10
-#else
-#    ifdef Q_OS_MACOS
-#        define DEFAULT_FONT_FAMILY "Helvetica Neue"
-#        define DEFAULT_FONT_SIZE 12
-#    else
-#        define DEFAULT_FONT_FAMILY "Arial"
-#        define DEFAULT_FONT_SIZE 11
-#    endif
-#endif
-
 namespace {
 
 using namespace chatterino;
@@ -73,15 +60,13 @@ int getBoldness()
 namespace chatterino {
 
 Fonts::Fonts()
-    : chatFontFamily("/appearance/currentFontFamily", DEFAULT_FONT_FAMILY)
-    , chatFontSize("/appearance/currentFontSize", DEFAULT_FONT_SIZE)
 {
     this->fontsByType_.resize(size_t(FontStyle::EndType));
 }
 
-void Fonts::initialize(Settings &, const Paths &)
+void Fonts::initialize(Settings &settings, const Paths &)
 {
-    this->chatFontFamily.connect(
+    settings.chatFontFamily.connect(
         [this]() {
             assertInGuiThread();
 
@@ -93,7 +78,7 @@ void Fonts::initialize(Settings &, const Paths &)
         },
         false);
 
-    this->chatFontSize.connect(
+    settings.chatFontSize.connect(
         [this]() {
             assertInGuiThread();
 
@@ -105,7 +90,7 @@ void Fonts::initialize(Settings &, const Paths &)
         },
         false);
 
-    getSettings()->boldScale.connect(
+    settings.boldScale.connect(
         [this]() {
             assertInGuiThread();
 
@@ -157,6 +142,8 @@ Fonts::FontData &Fonts::getOrCreateFontData(FontStyle type, float scale)
 
 Fonts::FontData Fonts::createFontData(FontStyle type, float scale)
 {
+    auto *settings = getSettings();
+
     // check if it's a chat (scale the setting)
     if (type >= FontStyle::ChatStart && type <= FontStyle::ChatEnd)
     {
@@ -174,8 +161,8 @@ Fonts::FontData Fonts::createFontData(FontStyle type, float scale)
                                                 QFont::Weight(getBoldness())};
         auto data = sizeScale[type];
         return FontData(
-            QFont(this->chatFontFamily.getValue(),
-                  int(this->chatFontSize.getValue() * data.scale * scale),
+            QFont(settings->chatFontFamily.getValue(),
+                  int(settings->chatFontSize.getValue() * data.scale * scale),
                   data.weight, data.italic));
     }
 
