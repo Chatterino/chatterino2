@@ -53,6 +53,7 @@
 - Bugfix: Fixed selection of tabs after closing a tab when using "Live Tabs Only". (#4770)
 - Bugfix: Fixed input in reply thread popup losing focus when dragging. (#4815)
 - Bugfix: Fixed the Quick Switcher (CTRL+K) from sometimes showing up on the wrong window. (#4819)
+- Bugfix: Fixed the font switcher not remembering what font you had previously selected. (#5224)
 - Bugfix: Fixed too much text being copied when copying chat messages. (#4812, #4830, #4839)
 - Bugfix: Fixed an issue where the setting `Only search for emote autocompletion at the start of emote names` wouldn't disable if it was enabled when the client started. (#4855)
 - Bugfix: Fixed empty page being added when showing out of bounds dialog. (#4849)
