@@ -73,7 +73,7 @@ jobs:
 
       - name: Create nightly release
         if: ${{ contains(steps.build-installer.outputs.C2_INSTALLER_BASE_NAME, 'Nightly') && env.RELEASE_NIGHTLY_INSTALLER == 'ON' }}
-        uses: ncipollo/release-action@v1.12.0
+        uses: ncipollo/release-action@v1.14.0
         with:
           replacesArtifacts: true
           allowUpdates: true
@@ -93,7 +93,7 @@ jobs:
     outputs:
       IS_TAGGED: ${{ steps.is-rel.outputs.IS_TAGGED }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # allows for tags access
       - name: Check Release
@@ -108,7 +108,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [create-installer, check-release]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # allows for tags access
 
@@ -177,7 +177,7 @@ jobs:
           cat sha256-checksums.txt
 
       - name: Create release
-        uses: ncipollo/release-action@v1.12.0
+        uses: ncipollo/release-action@v1.14.0
         if: ${{ needs.check-release.outputs.IS_TAGGED == '0' }}
         with:
           replacesArtifacts: true
