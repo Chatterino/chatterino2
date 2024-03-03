@@ -194,11 +194,6 @@ Settings::Settings(const QString &settingsDirectory)
         // reset to default, so it doesn't appear in the config
         this->showUnlistedEmotesDontUse.remove();
     }
-    this->enableStreamerMode.connect(
-        []() {
-            getApp()->streamerModeChanged.invoke();
-        },
-        false);
 }
 
 Settings::~Settings()

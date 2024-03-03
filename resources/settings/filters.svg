@@ -1,16 +1,1 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="200" height="200" version="1.1" viewBox="0 0 52.916665 52.916668" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-<metadata>
-<rdf:RDF>
-<cc:Work rdf:about="">
-<dc:format>image/svg+xml</dc:format>
-<dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-<dc:title/>
-</cc:Work>
-</rdf:RDF>
-</metadata>
-<g transform="matrix(1.0131 0 0 1.1431 -.34702 -3.8339)" fill="none" shape-rendering="auto" stroke="#fff" stroke-linejoin="round">
-<path d="m1.3325 8.3773 12.563 14.985 8.2998 9.8998v11.278l8.5255-3.7176v-7.56l8.2998-9.8998 12.563-14.985h-25.126z" color="#000000" color-rendering="auto" dominant-baseline="auto" image-rendering="auto" solid-color="#000000" stop-color="#000000" stroke-width="1.3229" style="font-feature-settings:normal;font-variant-alternates:normal;font-variant-caps:normal;font-variant-east-asian:normal;font-variant-ligatures:normal;font-variant-numeric:normal;font-variant-position:normal;font-variation-settings:normal;inline-size:0;isolation:auto;mix-blend-mode:normal;shape-margin:0;shape-padding:0;text-decoration-color:#000000;text-decoration-line:none;text-decoration-style:solid;text-indent:0;text-orientation:mixed;text-transform:none;white-space:normal"/>
-<path d="m1.1964 6.1085 0.20934 0.25005 12.469 14.871 8.2012 9.7809v15.879l8.7652-3.8224v-12.057l8.2012-9.7809 12.677-15.121h-25.261zm0.65129 0.30432h49.221l-12.258 14.621-8.2729 9.8662v11.967l-8.1566 3.5569v-15.524l-8.2729-9.8662z" color="#000000" color-rendering="auto" dominant-baseline="auto" image-rendering="auto" solid-color="#000000" stop-color="#000000" stroke-width="1.708" style="font-feature-settings:normal;font-variant-alternates:normal;font-variant-caps:normal;font-variant-east-asian:normal;font-variant-ligatures:normal;font-variant-numeric:normal;font-variant-position:normal;font-variation-settings:normal;inline-size:0;isolation:auto;mix-blend-mode:normal;shape-margin:0;shape-padding:0;text-decoration-color:#000000;text-decoration-line:none;text-decoration-style:solid;text-indent:0;text-orientation:mixed;text-transform:none;white-space:normal"/>
-</g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 52.917 52.917"><g fill="none" stroke="#fff" stroke-linejoin="round" color="#000"><path stroke-width="1.323" d="m1.333 8.377 12.563 14.985 8.3 9.9V44.54l8.525-3.718v-7.56l8.3-9.9L51.584 8.379H26.458z" transform="matrix(1.0131 0 0 1.1431 -.347 -3.834)"/><path stroke-width="1.708" d="m1.196 6.109.21.25 12.469 14.87 8.2 9.781v15.88l8.766-3.823V31.01l8.201-9.78L51.72 6.107H26.46zm.652.304h49.22l-12.257 14.62-8.273 9.867v11.967l-8.157 3.557V30.9l-8.273-9.866z" transform="matrix(1.0131 0 0 1.1431 -.347 -3.834)"/></g></svg>

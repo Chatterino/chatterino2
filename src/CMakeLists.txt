@@ -471,6 +471,8 @@ set(SOURCE_FILES
         singletons/Resources.hpp
         singletons/Settings.cpp
         singletons/Settings.hpp
+        singletons/StreamerMode.cpp
+        singletons/StreamerMode.hpp
         singletons/Theme.cpp
         singletons/Theme.hpp
         singletons/Toasts.cpp
@@ -524,8 +526,6 @@ set(SOURCE_FILES
         util/SplitCommand.hpp
         util/StreamLink.cpp
         util/StreamLink.hpp
-        util/StreamerMode.cpp
-        util/StreamerMode.hpp
         util/ThreadGuard.hpp
         util/Twitch.cpp
         util/Twitch.hpp
@@ -789,6 +789,7 @@ target_link_libraries(${LIBRARY_PROJECT}
         RapidJSON::RapidJSON
         LRUCache
         MagicEnum
+        $<$<BOOL:${WIN32}>:Wtsapi32>
         )
 if (CHATTERINO_PLUGINS)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua)

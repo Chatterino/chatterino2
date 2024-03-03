@@ -2,6 +2,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "messages/Emote.hpp"
+#include "mocks/DisabledStreamerMode.hpp"
 #include "mocks/EmptyApplication.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "mocks/UserData.hpp"
@@ -93,6 +94,11 @@ public:
         return &this->seventvEmotes;
     }
 
+    IStreamerMode *getStreamerMode() override
+    {
+        return &this->streamerMode;
+    }
+
     AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;
@@ -105,6 +111,7 @@ public:
     BttvEmotes bttvEmotes;
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;
+    DisabledStreamerMode streamerMode;
 };
 
 std::optional<QJsonDocument> tryReadJsonFile(const QString &path)

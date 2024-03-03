@@ -26,13 +26,13 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
 #include "util/DistanceBetweenPoints.hpp"
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
-#include "util/StreamerMode.hpp"
 #include "util/Twitch.hpp"
 #include "widgets/dialogs/ReplyThreadPopup.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
@@ -3079,7 +3079,8 @@ void ChannelView::setLinkInfoTooltip(LinkInfo *info)
     ImagePtr thumbnail;
     if (info->hasThumbnail() && thumbnailSize > 0)
     {
-        if (isInStreamerMode() && getSettings()->streamerModeHideLinkThumbnails)
+        if (getIApp()->getStreamerMode()->isEnabled() &&
+            getSettings()->streamerModeHideLinkThumbnails)
         {
             thumbnail = Image::fromResourcePixmap(getResources().streamerMode);
         }

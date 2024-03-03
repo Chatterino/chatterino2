@@ -39,6 +39,11 @@ public:
     // Custom themes live here. <appDataDirectory>/Themes
     QString themesDirectory;
 
+    // Directory for shared memory files.
+    // <appDataDirectory>/IPC   on Windows
+    // /tmp                     elsewhere
+    QString ipcDirectory;
+
     bool createFolder(const QString &folderPath);
     [[deprecated("use Modes::instance().portable instead")]] bool isPortable()
         const;

@@ -53,6 +53,7 @@
 #include "singletons/Logging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/Updates.hpp"
@@ -148,6 +149,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , seventvEmotes(new SeventvEmotes)
     , logging(new Logging(_settings))
     , linkResolver(new LinkResolver)
+    , streamerMode(new StreamerMode)
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(&this->emplace(new PluginController(paths)))
 #endif
@@ -507,6 +509,11 @@ ILinkResolver *Application::getLinkResolver()
     return this->linkResolver.get();
 }
 
+IStreamerMode *Application::getStreamerMode()
+{
+    return this->streamerMode.get();
+}
+
 BttvEmotes *Application::getBttvEmotes()
 {
     assertInGuiThread();
@@ -711,7 +718,7 @@ void Application::initPubSub()
                 }
 
                 if (getSettings()->streamerModeHideModActions &&
-                    isInStreamerMode())
+                    this->getStreamerMode()->isEnabled())
                 {
                     return;
                 }
@@ -760,7 +767,7 @@ void Application::initPubSub()
                 }
 
                 if (getSettings()->streamerModeHideModActions &&
-                    isInStreamerMode())
+                    this->getStreamerMode()->isEnabled())
                 {
                     return;
                 }
@@ -896,9 +903,8 @@ void Application::initPubSub()
 
     std::ignore = this->twitchPubSub->moderation.automodUserMessage.connect(
         [&](const auto &action) {
-            // This condition has been set up to execute isInStreamerMode() as the last thing
-            // as it could end up being expensive.
-            if (getSettings()->streamerModeHideModActions && isInStreamerMode())
+            if (getSettings()->streamerModeHideModActions &&
+                this->getStreamerMode()->isEnabled())
             {
                 return;
             }

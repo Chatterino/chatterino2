@@ -242,6 +242,13 @@ public:
         return nullptr;
     }
 
+    IStreamerMode *getStreamerMode() override
+    {
+        assert(false && "EmptyApplication::getStreamerMode was called without "
+                        "being initialized");
+        return nullptr;
+    }
+
 private:
     Paths paths_;
     Args args_;

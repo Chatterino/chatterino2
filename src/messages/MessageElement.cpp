@@ -53,12 +53,6 @@ MessageElement *MessageElement::setLink(const Link &link)
     return this;
 }
 
-MessageElement *MessageElement::setText(const QString &text)
-{
-    this->text_ = text;
-    return this;
-}
-
 MessageElement *MessageElement::setTooltip(const QString &tooltip)
 {
     this->tooltip_ = tooltip;
@@ -74,11 +68,6 @@ MessageElement *MessageElement::setTrailingSpace(bool value)
 const QString &MessageElement::getTooltip() const
 {
     return this->tooltip_;
-}
-
-const QString &MessageElement::getText() const
-{
-    return this->text_;
 }
 
 Link MessageElement::getLink() const
@@ -103,42 +92,16 @@ void MessageElement::addFlags(MessageElementFlags flags)
 
 void MessageElement::cloneFrom(const MessageElement &source)
 {
-    this->text_ = source.text_;
     this->link_ = source.link_;
     this->tooltip_ = source.tooltip_;
     this->flags_ = source.flags_;
 }
 
-// Empty
-EmptyElement::EmptyElement()
-    : MessageElement(MessageElementFlag::None)
-{
-}
-
-void EmptyElement::addToContainer(MessageLayoutContainer &container,
-                                  MessageElementFlags flags)
-{
-}
-
-std::unique_ptr<MessageElement> EmptyElement::clone() const
-{
-    auto el = std::make_unique<EmptyElement>();
-    el->cloneFrom(*this);
-    return el;
-}
-
-EmptyElement &EmptyElement::instance()
-{
-    static EmptyElement instance;
-    return instance;
-}
-
 // IMAGE
 ImageElement::ImageElement(ImagePtr image, MessageElementFlags flags)
     : MessageElement(flags)
-    , image_(image)
+    , image_(std::move(image))
 {
-    //    this->setTooltip(image->getTooltip());
 }
 
 void ImageElement::addToContainer(MessageLayoutContainer &container,
@@ -165,7 +128,7 @@ CircularImageElement::CircularImageElement(ImagePtr image, int padding,
                                            QColor background,
                                            MessageElementFlags flags)
     : MessageElement(flags)
-    , image_(image)
+    , image_(std::move(image))
     , padding_(padding)
     , background_(background)
 {
@@ -972,7 +935,7 @@ std::unique_ptr<MessageElement> LinebreakElement::clone() const
 ScalingImageElement::ScalingImageElement(ImageSet images,
                                          MessageElementFlags flags)
     : MessageElement(flags)
-    , images_(images)
+    , images_(std::move(images))
 {
 }
 

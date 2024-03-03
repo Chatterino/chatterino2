@@ -9,6 +9,7 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/helper/CommonTexts.hpp"
 
@@ -72,7 +73,7 @@ bool Toasts::isEnabled()
 {
 #ifdef Q_OS_WIN
     return WinToast::isCompatible() && getSettings()->notificationToast &&
-           !(isInStreamerMode() &&
+           !(getIApp()->getStreamerMode()->isEnabled() &&
              getSettings()->streamerModeSuppressLiveNotifications);
 #else
     return false;
