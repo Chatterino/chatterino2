@@ -98,6 +98,7 @@
 - Bugfix: Fixed link info not updating without moving the cursor. (#5178)
 - Bugfix: Fixed an upload sometimes failing when copying an image from a browser if it contained extra properties. (#5156)
 - Bugfix: Fixed tooltips getting out of bounds when loading images. (#5186)
+- Bugfix: Fixed the "Cancel" button in the settings dialog only working after opening the settings dialog twice. (#5229)
 - Dev: Run miniaudio in a separate thread, and simplify it to not manage the device ourselves. There's a chance the simplification is a bad idea. (#4978)
 - Dev: Change clang-format from v14 to v16. (#4929)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
