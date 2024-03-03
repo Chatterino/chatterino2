@@ -166,7 +166,7 @@ jobs:
           ls -la build
           echo "========================================"
           echo "Sha256 sums:"
-          cat sha256-checksums.txt
+          cat build/sha256-checksums.txt
 
       - name: Get Tag
         id: get-tag
