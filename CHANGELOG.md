@@ -40,6 +40,7 @@
 - Minor: Allow theming of tab live and rerun indicators. (#5188)
 - Minor: Added a fallback theme field to custom themes that will be used in case the custom theme does not contain a color Chatterino needs. If no fallback theme is specified, we'll pull the color from the included Dark or Light theme. (#5198)
 - Minor: Image links now reflect the scale of their image instead of an internal label. (#5201)
+- Minor: IPC files are now stored in the Chatterino directory instead of system directories on Windows. (#5226)
 - Minor: 7TV emotes now have a 4x image rather than a 3x image. (#5209)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
@@ -170,6 +171,7 @@
 - Dev: Added the `launachable` entry to Linux AppData. (#5210)
 - Dev: Cleaned up and optimized resources. (#5222)
 - Dev: Refactor `StreamerMode`. (#5216)
+- Dev: Cleaned up unused code in `MessageElement` and `MessageLayoutElement`. (#5225)
 
 ## 2.4.6
 
