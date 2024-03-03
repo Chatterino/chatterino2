@@ -440,11 +440,6 @@ void SettingsDialog::onOkClicked()
 
 void SettingsDialog::onCancelClicked()
 {
-    for (auto &tab : this->tabs_)
-    {
-        tab->page()->cancel();
-    }
-
     getSettings()->restoreSnapshot();
 
     this->close();
