@@ -91,6 +91,11 @@ public:
         return this->loadDirectory_;
     }
 
+    QDir dataDirectory() const
+    {
+        return this->loadDirectory_.absoluteFilePath("data");
+    }
+
     // Note: The CallbackFunction object's destructor will remove the function from the lua stack
     using LuaCompletionCallback =
         lua::CallbackFunction<lua::api::CompletionList, QString, QString, int,

@@ -26,85 +26,16 @@ PluginPermission::PluginPermission(const QJsonObject &obj)
         return;  // There is no more data to get, we don't know what to do
     }
     this->type = opt.value();
-    switch (this->type)
-    {
-        case PluginPermission::Type::FilesystemRead:
-            [[fallthrough]];
-        case PluginPermission::Type::FilesystemWrite: {
-            auto pathsObj = obj.value("paths");
-            if (pathsObj.isUndefined())
-            {
-                this->errors.emplace_back(
-                    QString("fs permission is missing paths")
-                        .arg(jsontype.toString()));
-                return;
-            }
-            if (!pathsObj.isArray())
-            {
-                QString type = magic_enum::enum_name(pathsObj.type()).data();
-                this->errors.emplace_back(
-                    QString("fs permission paths is not an array (its type "
-                            "is %1)")
-                        .arg(type));
-                return;
-            }
-
-            auto pathsArr = pathsObj.toArray();
-            for (int i = 0; i < pathsArr.size(); i++)
-            {
-                const auto &t = pathsArr.at(i);
-                if (!t.isString())
-                {
-                    QString type = magic_enum::enum_name(t.type()).data();
-                    this->errors.push_back(
-                        QString("fs permission paths element #%1 is not a "
-                                "string (its type is %2)")
-                            .arg(i)
-                            .arg(type));
-                    return;
-                }
-                auto str = t.toString();
-                if (str.contains(','))
-                {
-                    this->errors.push_back(
-                        QString(
-                            "fs permission paths element #%1 contains a comma "
-                            "which is not allowed")
-                            .arg(i));
-                    continue;
-                }
-                this->paths.push_back(t.toString());
-            }
-            break;
-        }
-    }
 }
 
 QString PluginPermission::toHtmlEscaped() const
 {
-    QString friendlyName;
     switch (this->type)
     {
         case PluginPermission::Type::FilesystemRead:
-            friendlyName = "Read files:";
-            [[fallthrough]];
-        case PluginPermission::Type::FilesystemWrite: {
-            if (friendlyName.isEmpty())
-            {
-                friendlyName = "Write or create files:";
-            }
-            QString pathsStr;
-            for (size_t i = 0; i < this->paths.size(); i++)
-            {
-                if (i != 0)
-                {
-                    pathsStr += ", ";
-                }
-                pathsStr += this->paths.at(i).toHtmlEscaped();
-            }
-
-            return friendlyName + " " + pathsStr;
-        }
+            return "In its data directory.";
+        case PluginPermission::Type::FilesystemWrite:
+            return "Write to or create files in its data directory";
         default:
             assert(false && "invalid PluginPermission type in toString()");
     }

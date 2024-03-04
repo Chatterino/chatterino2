@@ -4,6 +4,7 @@
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandController.hpp"
 
+#    include <bits/ranges_algo.h>
 #    include <lua.h>
 #    include <magic_enum/magic_enum.hpp>
 #    include <QJsonArray>
@@ -242,32 +243,19 @@ void Plugin::removeTimeout(QTimer *timer)
 
 bool Plugin::hasFSPermissionFor(bool write, const QString &path)
 {
+    auto canon = QUrl(this->loadDirectory().absolutePath() + "/");
+    if (!canon.isParentOf(path))
+    {
+        return false;
+    }
+
     using PType = PluginPermission::Type;
     auto typ = write ? PType::FilesystemWrite : PType::FilesystemRead;
 
-    for (const auto &p : this->meta.permissions)
-    {
-        if (p.type != typ)
-        {
-            continue;
-        }
-        for (const auto &permpath : p.paths)
-        {
-            // Note: this should be kept the same as in
-            // src/controllers/plugins/api/IOWrapper.cpp functions to ensure
-            // that allowed path resolving doesn't get desynchronized from
-            // resolving untrusted paths given by the plugin
-            QString matchPath =
-                this->loadDirectory().absoluteFilePath(permpath);
-            auto isMatch = QDir::match(matchPath, path);
-            if (isMatch)
-            {
-                return true;
-            }
-            // qCDebug(chatterinoLua) << matchPath << ": no match";
-        }
-    }
-    return false;
+    return std::ranges::any_of(this->meta.permissions,
+                               [typ](const auto &p) -> bool {
+                                   return p.type == typ;
+                               });
 }
 
 }  // namespace chatterino

@@ -11,9 +11,9 @@ struct PluginPermission {
         FilesystemWrite,
     };
     Type type;
-    std::vector<QString> paths;
 
     std::vector<QString> errors;
+
     bool isValid() const
     {
         return this->errors.empty();

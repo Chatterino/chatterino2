@@ -309,6 +309,8 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
                                << meta.name << ") because it is disabled";
         return;
     }
+    temp->dataDirectory().mkpath(".");
+
     qCDebug(chatterinoLua) << "Running lua file:" << index;
     int err = luaL_dofile(l, index.absoluteFilePath().toStdString().c_str());
     if (err != 0)
