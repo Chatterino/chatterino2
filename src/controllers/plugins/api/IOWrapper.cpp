@@ -112,7 +112,7 @@ int io_open(lua_State *L)
         return luaL_error(L,
                           "io.open filename (1st argument) must be a string");
     }
-    QFileInfo file(pl->loadDirectory().filePath(filename));
+    QFileInfo file(pl->dataDirectory().filePath(filename));
     auto abs = file.absoluteFilePath();
     qCDebug(chatterinoLua) << "[" << pl->id << ":" << pl->meta.name
                            << "] Plugin is opening file at " << abs
@@ -157,7 +157,7 @@ int io_lines(lua_State *L)
             L,
             "io.lines filename (1st argument) must be a string or not present");
     }
-    QFileInfo file(pl->loadDirectory().filePath(filename));
+    QFileInfo file(pl->dataDirectory().filePath(filename));
     auto abs = file.absoluteFilePath();
     qCDebug(chatterinoLua) << "[" << pl->id << ":" << pl->meta.name
                            << "] Plugin is opening file at " << abs

@@ -243,7 +243,7 @@ void Plugin::removeTimeout(QTimer *timer)
 
 bool Plugin::hasFSPermissionFor(bool write, const QString &path)
 {
-    auto canon = QUrl(this->loadDirectory().absolutePath() + "/");
+    auto canon = QUrl(this->dataDirectory().absolutePath() + "/");
     if (!canon.isParentOf(path))
     {
         return false;
