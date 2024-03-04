@@ -143,7 +143,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
                 this->errors.push_back(
                     QString("permissions element #%1: %2").arg(i).arg(err));
             }
-            if (parsed.errors.empty())
+            if (parsed.isValid())
             {
                 // ensure no invalid permissions slip through this
                 this->permissions.push_back(parsed);
