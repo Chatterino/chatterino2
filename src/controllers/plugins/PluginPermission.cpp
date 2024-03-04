@@ -28,7 +28,7 @@ PluginPermission::PluginPermission(const QJsonObject &obj)
     this->type = opt.value();
 }
 
-QString PluginPermission::toHtmlEscaped() const
+QString PluginPermission::toHtml() const
 {
     switch (this->type)
     {
@@ -37,7 +37,7 @@ QString PluginPermission::toHtmlEscaped() const
         case PluginPermission::Type::FilesystemWrite:
             return "Write to or create files in its data directory";
         default:
-            assert(false && "invalid PluginPermission type in toString()");
+            assert(false && "invalid PluginPermission type in toHtml()");
     }
 }
 

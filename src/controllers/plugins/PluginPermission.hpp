@@ -18,7 +18,7 @@ struct PluginPermission {
     {
         return this->errors.empty();
     }
-    QString toHtmlEscaped() const;
+    QString toHtml() const;
 
     explicit PluginPermission(const QJsonObject &obj);
 };
