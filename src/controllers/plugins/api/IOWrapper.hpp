@@ -10,7 +10,9 @@ const char *const REG_REAL_IO_NAME = "real_lua_io_lib";
 const char *const REG_C2_IO_NAME = "c2io";
 
 /**
- * Opens a file
+ * Opens a file.
+ * If given a relative path, it will be relative to
+ * c2datadir/Plugins/pluginDir/data/
  * See https://www.lua.org/manual/5.4/manual.html#pdf-io.open
  *
  * @lua@param filename string
@@ -21,6 +23,8 @@ int io_open(lua_State *L);
 
 /**
  * Equivalent to io.input():lines("l") or a specific iterator over given file
+ * If given a relative path, it will be relative to
+ * c2datadir/Plugins/pluginDir/data/
  * See https://www.lua.org/manual/5.4/manual.html#pdf-io.lines
  *
  * @lua@param filename nil|string
