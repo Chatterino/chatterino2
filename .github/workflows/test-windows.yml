@@ -72,7 +72,7 @@ jobs:
           "C2_CONAN_CACHE_SUFFIX=$(if ($Env:C2_BUILD_WITH_QT6 -eq "on") { "-QT6" } else { "`" })" >> "$Env:GITHUB_ENV"
 
       - name: Setup sccache
-        # sccache v0.5.3
+        # sccache v0.7.4
         uses: hendrikmuhs/ccache-action@v1.2.12
         with:
           variant: sccache
