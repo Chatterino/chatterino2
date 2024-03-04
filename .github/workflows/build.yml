@@ -196,7 +196,7 @@ jobs:
         shell: powershell
 
       - name: Setup sccache (Windows)
-        # sccache v0.5.3
+        # sccache v0.7.4
         uses: hendrikmuhs/ccache-action@v1.2.12
         if: startsWith(matrix.os, 'windows')
         with:
