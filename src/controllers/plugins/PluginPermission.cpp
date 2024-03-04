@@ -33,7 +33,7 @@ QString PluginPermission::toHtmlEscaped() const
     switch (this->type)
     {
         case PluginPermission::Type::FilesystemRead:
-            return "In its data directory.";
+            return "Read files in its data directory";
         case PluginPermission::Type::FilesystemWrite:
             return "Write to or create files in its data directory";
         default:
