@@ -247,7 +247,9 @@ void PluginController::openLibrariesFor(lua_State *L, const PluginMeta &meta,
         {"lines", lua::api::io_lines},
         {"open", lua::api::io_open},
         {"output", lua::api::io_output},
+        {"popen", lua::api::io_popen},  // stub
         {"read", lua::api::io_read},
+        {"tmpfile", lua::api::io_tmpfile},  // stub
         {"write", lua::api::io_write},
         // type = realio.type
         {nullptr, nullptr},

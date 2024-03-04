@@ -85,6 +85,9 @@ int io_read(lua_State *L);
  */
 int io_write(lua_State *L);
 
+int io_popen(lua_State *L);
+int io_tmpfile(lua_State *L);
+
 // NOLINTEND(readability-identifier-naming)
 }  // namespace chatterino::lua::api
 #endif

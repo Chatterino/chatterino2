@@ -336,6 +336,16 @@ int io_write(lua_State *L)
     return 1;
 }
 
+int io_popen(lua_State *L)
+{
+    return luaL_error(L, "io.popen: This function is a stub!");
+}
+
+int io_tmpfile(lua_State *L)
+{
+    return luaL_error(L, "io.tmpfile: This function is a stub!");
+}
+
 // NOLINTEND(*vararg)
 
 }  // namespace chatterino::lua::api
