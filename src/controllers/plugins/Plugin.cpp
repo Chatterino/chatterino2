@@ -4,12 +4,12 @@
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandController.hpp"
 
-#    include <bits/ranges_algo.h>
 #    include <lua.h>
 #    include <magic_enum/magic_enum.hpp>
 #    include <QJsonArray>
 #    include <QJsonObject>
 
+#    include <algorithm>
 #    include <unordered_map>
 #    include <unordered_set>
 
