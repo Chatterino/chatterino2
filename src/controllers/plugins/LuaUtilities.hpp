@@ -283,6 +283,7 @@ StackIdx push(lua_State *L, T inp)
 
 /**
  * @brief Converts a Lua object into c++ and removes it from the stack.
+ * If peek fails, the object is still removed from the stack.
  *
  * Relies on bool peek(lua_State*, T*, StackIdx) existing.
  */
