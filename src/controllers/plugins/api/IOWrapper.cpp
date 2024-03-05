@@ -6,6 +6,7 @@
 #    include "controllers/plugins/PluginController.hpp"
 #    include "lauxlib.h"
 #    include "lua.h"
+
 namespace chatterino::lua::api {
 
 // Note: Parsing and then serializing the mode ensures we understand it before
@@ -195,6 +196,7 @@ int io_lines(lua_State *L)
 }
 
 namespace {
+
     // This is the code for both io.input and io.output
     int globalFileCommon(lua_State *L, bool output)
     {
@@ -277,6 +279,7 @@ int io_input(lua_State *L)
 {
     return globalFileCommon(L, false);
 }
+
 int io_output(lua_State *L)
 {
     return globalFileCommon(L, true);
