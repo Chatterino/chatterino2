@@ -38,6 +38,7 @@ QString PluginPermission::toHtml() const
             return "Write to or create files in its data directory";
         default:
             assert(false && "invalid PluginPermission type in toHtml()");
+            return "shut up compiler, this never happens";
     }
 }
 
