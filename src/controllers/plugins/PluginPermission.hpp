@@ -1,6 +1,9 @@
 #pragma once
 #ifdef CHATTERINO_HAVE_PLUGINS
 
+#    include <QJsonObject>
+#    include <QString>
+
 #    include <vector>
 
 namespace chatterino {
