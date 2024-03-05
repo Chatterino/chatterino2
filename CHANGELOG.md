@@ -41,6 +41,8 @@
 - Minor: Added a fallback theme field to custom themes that will be used in case the custom theme does not contain a color Chatterino needs. If no fallback theme is specified, we'll pull the color from the included Dark or Light theme. (#5198)
 - Minor: Image links now reflect the scale of their image instead of an internal label. (#5201)
 - Minor: 7TV emotes now have a 4x image rather than a 3x image. (#5209)
+- Minor: Add wrappers for Lua `io` library for experimental plugins feature. (#5231)
+- Minor: Add permissions to experimental plugins feature. (#5231)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
 - Bugfix: Trimmed custom streamlink paths on all platforms making sure you don't accidentally add spaces at the beginning or end of its path. (#4834)
