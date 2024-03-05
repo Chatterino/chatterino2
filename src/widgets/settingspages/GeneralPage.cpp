@@ -17,7 +17,6 @@
 #include "util/FuzzyConvert.hpp"
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
-#include "util/StreamerMode.hpp"
 #include "widgets/BaseWindow.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/splits/SplitInput.hpp"
@@ -174,7 +173,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         [this](auto args) {
             return this->getFont(args);
-        });
+        },
+        true, "", true);
     layout.addDropdown<int>(
         "Font size", {"9pt", "10pt", "12pt", "14pt", "16pt", "20pt"},
         getIApp()->getFonts()->chatFontSize,
@@ -1294,22 +1294,19 @@ QString GeneralPage::getFont(const DropdownArgs &args) const
 {
     if (args.combobox->currentIndex() == args.combobox->count() - 1)
     {
-        args.combobox->setCurrentIndex(0);
         args.combobox->setEditText("Choosing...");
-        QFontDialog dialog(
-            getIApp()->getFonts()->getFont(FontStyle::ChatMedium, 1.));
 
         auto ok = bool();
-        auto font = dialog.getFont(&ok, this->window());
+        auto previousFont =
+            getIApp()->getFonts()->getFont(FontStyle::ChatMedium, 1.);
+        auto font = QFontDialog::getFont(&ok, previousFont, this->window());
 
         if (ok)
         {
             return font.family();
         }
-        else
-        {
-            return args.combobox->itemText(0);
-        }
+
+        return previousFont.family();
     }
     return args.value;
 }

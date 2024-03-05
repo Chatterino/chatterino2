@@ -4,8 +4,6 @@
 #include "debug/AssertInGuiThread.hpp"
 #include "singletons/NativeMessaging.hpp"
 
-#include <pajlada/signals.hpp>
-#include <pajlada/signals/signal.hpp>
 #include <QApplication>
 
 #include <cassert>
@@ -55,6 +53,7 @@ class BttvEmotes;
 class FfzEmotes;
 class SeventvEmotes;
 class ILinkResolver;
+class IStreamerMode;
 
 class IApplication
 {
@@ -97,6 +96,7 @@ public:
     virtual FfzEmotes *getFfzEmotes() = 0;
     virtual SeventvEmotes *getSeventvEmotes() = 0;
     virtual ILinkResolver *getLinkResolver() = 0;
+    virtual IStreamerMode *getStreamerMode() = 0;
 };
 
 class Application : public IApplication
@@ -165,6 +165,7 @@ private:
     std::unique_ptr<SeventvEmotes> seventvEmotes;
     const std::unique_ptr<Logging> logging;
     std::unique_ptr<ILinkResolver> linkResolver;
+    std::unique_ptr<IStreamerMode> streamerMode;
 #ifdef CHATTERINO_HAVE_PLUGINS
     PluginController *const plugins{};
 #endif
@@ -216,8 +217,7 @@ public:
     SeventvEmotes *getSeventvEmotes() override;
 
     ILinkResolver *getLinkResolver() override;
-
-    pajlada::Signals::NoArgSignal streamerModeChanged;
+    IStreamerMode *getStreamerMode() override;
 
 private:
     void addSingleton(Singleton *singleton);

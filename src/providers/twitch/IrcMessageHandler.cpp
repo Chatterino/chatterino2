@@ -22,12 +22,12 @@
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/ChannelHelpers.hpp"
 #include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/IrcHelpers.hpp"
-#include "util/StreamerMode.hpp"
 
 #include <IrcMessage>
 #include <QLocale>
@@ -931,7 +931,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
 
     if (getSettings()->inlineWhispers &&
         !(getSettings()->streamerModeSuppressInlineWhispers &&
-          isInStreamerMode()))
+          getIApp()->getStreamerMode()->isEnabled()))
     {
         getApp()->twitch->forEachChannel(
             [&message, overrideFlags](ChannelPtr channel) {

@@ -40,6 +40,7 @@
 - Minor: Allow theming of tab live and rerun indicators. (#5188)
 - Minor: Added a fallback theme field to custom themes that will be used in case the custom theme does not contain a color Chatterino needs. If no fallback theme is specified, we'll pull the color from the included Dark or Light theme. (#5198)
 - Minor: Image links now reflect the scale of their image instead of an internal label. (#5201)
+- Minor: IPC files are now stored in the Chatterino directory instead of system directories on Windows. (#5226)
 - Minor: 7TV emotes now have a 4x image rather than a 3x image. (#5209)
 - Minor: Add wrappers for Lua `io` library for experimental plugins feature. (#5231)
 - Minor: Add permissions to experimental plugins feature. (#5231)
@@ -54,6 +55,7 @@
 - Bugfix: Fixed selection of tabs after closing a tab when using "Live Tabs Only". (#4770)
 - Bugfix: Fixed input in reply thread popup losing focus when dragging. (#4815)
 - Bugfix: Fixed the Quick Switcher (CTRL+K) from sometimes showing up on the wrong window. (#4819)
+- Bugfix: Fixed the font switcher not remembering what font you had previously selected. (#5224)
 - Bugfix: Fixed too much text being copied when copying chat messages. (#4812, #4830, #4839)
 - Bugfix: Fixed an issue where the setting `Only search for emote autocompletion at the start of emote names` wouldn't disable if it was enabled when the client started. (#4855)
 - Bugfix: Fixed empty page being added when showing out of bounds dialog. (#4849)
@@ -61,6 +63,7 @@
 - Bugfix: Fixed issue on Windows preventing the title bar from being dragged in the top left corner. (#4873)
 - Bugfix: Fixed an issue where reply context didn't render correctly if an emoji was touching text. (#4875, #4977, #5174)
 - Bugfix: Fixed the input completion popup from disappearing when clicking on it on Windows and macOS. (#4876)
+- Bugfix: Fixed Twitch badges not loading correctly in the badge highlighting setting page. (#5223)
 - Bugfix: Fixed double-click text selection moving its position with each new message. (#4898)
 - Bugfix: Fixed an issue where notifications on Windows would contain no or an old avatar. (#4899)
 - Bugfix: Fixed headers of tables in the settings switching to bold text when selected. (#4913)
@@ -168,6 +171,9 @@
 - Dev: Twitch messages can be sent using Twitch's Helix API instead of IRC (disabled by default). (#5200)
 - Dev: Added estimation for image sizes to avoid layout shifts. (#5192)
 - Dev: Added the `launachable` entry to Linux AppData. (#5210)
+- Dev: Cleaned up and optimized resources. (#5222)
+- Dev: Refactor `StreamerMode`. (#5216)
+- Dev: Cleaned up unused code in `MessageElement` and `MessageLayoutElement`. (#5225)
 
 ## 2.4.6
 

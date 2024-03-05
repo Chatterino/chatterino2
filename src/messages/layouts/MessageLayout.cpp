@@ -9,9 +9,9 @@
 #include "messages/Selection.hpp"
 #include "providers/colors/ColorProvider.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/DebugCount.hpp"
-#include "util/StreamerMode.hpp"
 
 #include <QApplication>
 #include <QDebug>
@@ -160,11 +160,9 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
         if (this->message_->flags.has(MessageFlag::Timeout) ||
             this->message_->flags.has(MessageFlag::Untimeout))
         {
-            // This condition has been set up to execute isInStreamerMode() as the last thing
-            // as it could end up being expensive.
             if (hideModerationActions ||
                 (getSettings()->streamerModeHideModActions &&
-                 isInStreamerMode()))
+                 getIApp()->getStreamerMode()->isEnabled()))
             {
                 continue;
             }
