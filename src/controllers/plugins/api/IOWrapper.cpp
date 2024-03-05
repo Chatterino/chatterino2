@@ -21,11 +21,16 @@ struct LuaFileMode {
 
     LuaFileMode(const QString &smode)
     {
+        if (smode.isEmpty())
+        {
+            this->error = "Empty mode given, use one matching /[rwa][+]?b?/.";
+            return;
+        }
         auto major = smode.at(0);
         if (major != 'r' && major != 'w' && major != 'a')
         {
-            this->error = "Invalid mode, one matching [rwa][+]?b?. "
-                          "Parsing failed at 1st character";
+            this->error = "Invalid mode, use one matching /[rwa][+]?b?/. "
+                          "Parsing failed at 1st character.";
             return;
         }
         this->major = major.toLatin1();
@@ -42,8 +47,8 @@ struct LuaFileMode {
             }
             else
             {
-                this->error = "Invalid mode, one matching [rwa][+]?b?. "
-                              "Parsing failed at 2nd character";
+                this->error = "Invalid mode, use one matching /[rwa][+]?b?/. "
+                              "Parsing failed at 2nd character.";
                 return;
             }
         }
@@ -56,8 +61,8 @@ struct LuaFileMode {
             }
             else
             {
-                this->error = "Invalid mode, one matching [rwa][+]?b?. "
-                              "Parsing failed at 3rd character";
+                this->error = "Invalid mode, use one matching /[rwa][+]?b?/. "
+                              "Parsing failed at 3rd character.";
                 return;
             }
         }
