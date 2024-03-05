@@ -252,10 +252,16 @@ bool Plugin::hasFSPermissionFor(bool write, const QString &path)
     using PType = PluginPermission::Type;
     auto typ = write ? PType::FilesystemWrite : PType::FilesystemRead;
 
-    return std::ranges::any_of(this->meta.permissions,
-                               [typ](const auto &p) -> bool {
-                                   return p.type == typ;
-                               });
+    // XXX: Older compilers don't have support for std::ranges
+    // NOLINTNEXTLINE(readability-use-anyofallof)
+    for (const auto &p : this->meta.permissions)
+    {
+        if (p.type == typ)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 }  // namespace chatterino
