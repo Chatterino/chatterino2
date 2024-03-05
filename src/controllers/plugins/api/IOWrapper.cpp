@@ -7,6 +7,8 @@
 #    include "lauxlib.h"
 #    include "lua.h"
 
+#    include <cerrno>
+
 namespace chatterino::lua::api {
 
 // Note: Parsing and then serializing the mode ensures we understand it before
@@ -86,6 +88,14 @@ struct LuaFileMode {
     }
 };
 
+int ioError(lua_State *L, const QString &value, int errnoequiv)
+{
+    lua_pushnil(L);
+    lua::push(L, value);
+    lua::push(L, errnoequiv);
+    return 3;
+}
+
 // NOLINTBEGIN(*vararg)
 int io_open(lua_State *L)
 {
@@ -127,16 +137,17 @@ int io_open(lua_State *L)
         mode.update || mode.major == 'w' || mode.major == 'a', abs);
     if (!ok)
     {
-        return luaL_error(
-            L, "Plugin does not have permissions to access given file.");
+        return ioError(L,
+                       "Plugin does not have permissions to access given file.",
+                       EACCES);
     }
     lua_getfield(L, LUA_REGISTRYINDEX, REG_REAL_IO_NAME);
     lua_getfield(L, -1, "open");
     lua_remove(L, -2);  // remove LUA_REGISTRYINDEX[REAL_IO_NAME]
     lua::push(L, abs);
     lua::push(L, mode.toString());
-    lua_call(L, 2, 1);
-    return 1;
+    lua_call(L, 2, 3);
+    return 3;
 }
 
 int io_lines(lua_State *L)
@@ -171,8 +182,9 @@ int io_lines(lua_State *L)
     bool ok = pl->hasFSPermissionFor(false, abs);
     if (!ok)
     {
-        return luaL_error(
-            L, "Plugin does not have permissions to access given file.");
+        return ioError(L,
+                       "Plugin does not have permissions to access given file.",
+                       EACCES);
     }
     // Our stack looks like this:
     // - {...}[1]
