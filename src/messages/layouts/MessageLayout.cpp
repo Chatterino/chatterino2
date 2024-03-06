@@ -375,8 +375,10 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
     else if (this->message_->flags.has(MessageFlag::AutoMod) ||
              this->message_->flags.has(MessageFlag::LowTrustUsers))
     {
-        if (this->message_->flags.has(MessageFlag::AutoModOffendingMessage) &&
-            ctx.preferences.enableAutomodHighlight)
+        if (ctx.preferences.enableAutomodHighlight &&
+            (this->message_->flags.has(MessageFlag::AutoModOffendingMessage) ||
+             this->message_->flags.has(
+                 MessageFlag::AutoModOffendingMessageHeader)))
         {
             backgroundColor = blendColors(
                 backgroundColor,
