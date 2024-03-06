@@ -170,7 +170,7 @@
 - Dev: Added estimation for image sizes to avoid layout shifts. (#5192)
 - Dev: Added the `launachable` entry to Linux AppData. (#5210)
 - Dev: Cleaned up and optimized resources. (#5222)
-- Dev: Refactor `StreamerMode`. (#5216)
+- Dev: Refactor `StreamerMode`. (#5216, #5236)
 - Dev: Cleaned up unused code in `MessageElement` and `MessageLayoutElement`. (#5225)
 
 ## 2.4.6
