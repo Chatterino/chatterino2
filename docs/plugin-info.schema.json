@@ -51,8 +51,7 @@
         "type": "object",
         "properties": {
           "type": {
-            "type": "string",
-            "examples": ["FilesystemRead", "FilesystemWrite"]
+            "enum": ["FilesystemRead", "FilesystemWrite"]
           }
         }
       }
