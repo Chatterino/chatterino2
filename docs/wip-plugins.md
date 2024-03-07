@@ -54,9 +54,10 @@ These are the valid permissions:
 Allows the plugin to read from its data directory.
 
 Example:
+
 ```json
 {
-    "type": "FilesystemRead"
+  "type": "FilesystemRead"
 }
 ```
 
@@ -65,9 +66,10 @@ Example:
 Allows the plugin to write to files and create files in its data directory.
 
 Example:
+
 ```json
 {
-    "type": "FilesystemWrite"
+  "type": "FilesystemWrite"
 }
 ```
 
@@ -361,7 +363,7 @@ Returns `true` if the current user is a VIP in the channel.
 These functions are wrappers for Lua's I/O library. Functions on file pointer
 objects (`FILE*`) are not modified or replaced. [You can read the documentation
 for them here](https://www.lua.org/manual/5.4/manual.html#pdf-file:close).
-Chatterino does *not* give you stdin and stdout as default input and output
+Chatterino does _not_ give you stdin and stdout as default input and output
 respectively. The following objects are missing from the `io` table exposed by
 Chatterino compared to Lua's native library: `stdin`, `stdout`, `stderr`.
 
