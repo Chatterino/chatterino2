@@ -1178,6 +1178,11 @@ bool TwitchChannel::setLive(bool newLiveStatus)
         return false;
     }
     guard->live = newLiveStatus;
+    if (!newLiveStatus)
+    {
+        // A rerun is just a fancy livestream
+        guard->rerun = false;
+    }
 
     return true;
 }
