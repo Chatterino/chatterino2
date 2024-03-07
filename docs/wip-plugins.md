@@ -90,9 +90,10 @@ script](../scripts/make_luals_meta.py).
 The following parts of the Lua standard library are loaded:
 
 - `_G` (most globals)
-- `table`
-- `string`
+- `io` - except `stdin`, `stdout`, `stderr`. Some functions require permissions.
 - `math`
+- `string`
+- `table`
 - `utf8`
 
 The official manual for them is available [here](https://www.lua.org/manual/5.4/manual.html#6).
@@ -425,10 +426,9 @@ See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-io.o
 
 #### `output([file_or_name])`
 
-This is identical to [`io.input()`](LINK TO BE DONE BECAUSE MARKDOWN HEADER
-NAMES ARE UNPREDICTABLE THX!) but operates on the default output and opens the
-file in write mode instead. Requires `FilesystemWrite` instead of
-`FilesystemRead`.
+This is identical to [`io.input()`](#inputfile_or_name) but operates on the
+default output and opens the file in write mode instead. Requires
+`FilesystemWrite` instead of `FilesystemRead`.
 
 See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-io.output)
 
@@ -441,8 +441,8 @@ See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-io.p
 
 #### `read(...)`
 
-Equivalent to `io.input():read(...)`. See [`io.input()`](LINK TO BE DONE
-BECAUSE MARKDOWN HEADER NAMES ARE UNPREDICTABLE THX!).
+Equivalent to `io.input():read(...)`. See [`io.input()`](#inputfile_or_name)
+and [`file:read()`](https://www.lua.org/manual/5.4/manual.html#pdf-file:read).
 
 See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-io.read)
 
@@ -462,8 +462,8 @@ See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-io.t
 
 #### `write(...)`
 
-Equivalent to `io.output():write(...)`. See [`io.output()`](LINK TO BE DONE
-BECAUSE MARKDOWN HEADER NAMES ARE UNPREDICTABLE THX!).
+Equivalent to `io.output():write(...)`. See [`io.output()`](#outputfile_or_name)
+and [`file:write()`](https://www.lua.org/manual/5.4/manual.html#pdf-file:write).
 
 See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-io.write)
 
