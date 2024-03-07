@@ -14,7 +14,9 @@ Each plugin should have its own directory.
 Chatterino Plugins dir/
 └── plugin_name/
     ├── init.lua
-    └── info.json
+    ├── info.json
+    └── data/
+        └── This is where your data/configs can be dumped
 ```
 
 `init.lua` will be the file loaded when the plugin is enabled. You may load other files using [`require` global function](#requiremodname).
@@ -35,11 +37,39 @@ Example file:
   "homepage": "https://github.com/Chatterino/Chatterino2",
   "tags": ["test"],
   "version": "0.0.0",
-  "license": "MIT"
+  "license": "MIT",
+  "permissions": []
 }
 ```
 
 An example plugin is available at [https://github.com/Mm2PL/Chatterino-test-plugin](https://github.com/Mm2PL/Chatterino-test-plugin)
+
+## Permissions
+
+Plugins can have permissions associated to them. Unless otherwise noted functions don't require permissions.
+These are the valid permissions:
+
+### FilesystemRead
+
+Allows the plugin to read from its data directory.
+
+Example:
+```json
+{
+    "type": "FilesystemRead"
+}
+```
+
+### FilesystemWrite
+
+Allows the plugin to write to files and create files in its data directory.
+
+Example:
+```json
+{
+    "type": "FilesystemWrite"
+}
+```
 
 ## Plugins with Typescript
 
