@@ -422,6 +422,8 @@ set(SOURCE_FILES
         providers/twitch/TwitchMessageBuilder.hpp
         providers/twitch/TwitchUser.cpp
         providers/twitch/TwitchUser.hpp
+        providers/twitch/TwitchUsers.cpp
+        providers/twitch/TwitchUsers.hpp
 
         providers/twitch/pubsubmessages/AutoMod.cpp
         providers/twitch/pubsubmessages/AutoMod.hpp

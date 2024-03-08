@@ -1107,44 +1107,6 @@ void TwitchMessageBuilder::processIgnorePhrases(
         }
     };
 
-    auto addReplEmotes = [&twitchEmotes](const IgnorePhrase &phrase,
-                                         const auto &midrepl,
-                                         SizeType startIndex) {
-        if (!phrase.containsEmote())
-        {
-            return;
-        }
-
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-        auto words = midrepl.tokenize(u' ');
-#else
-        auto words = midrepl.split(' ');
-#endif
-        SizeType pos = 0;
-        for (const auto &word : words)
-        {
-            for (const auto &emote : phrase.getEmotes())
-            {
-                if (word == emote.first.string)
-                {
-                    if (emote.second == nullptr)
-                    {
-                        qCDebug(chatterinoTwitch)
-                            << "emote null" << emote.first.string;
-                    }
-                    twitchEmotes.push_back(TwitchEmoteOccurrence{
-                        static_cast<int>(startIndex + pos),
-                        static_cast<int>(startIndex + pos +
-                                         emote.first.string.length()),
-                        emote.second,
-                        emote.first,
-                    });
-                }
-            }
-            pos += word.length() + 1;
-        }
-    };
-
     auto replaceMessageAt = [&](const IgnorePhrase &phrase, SizeType from,
                                 SizeType length, const QString &replacement) {
         auto removedEmotes = removeEmotesInRange(from, length);
@@ -1197,8 +1159,6 @@ void TwitchMessageBuilder::processIgnorePhrases(
                 twitchEmotes.push_back(std::move(emote));
             }
         }
-
-        addReplEmotes(phrase, midExtendedRef, wordStart);
     };
 
     for (const auto &phrase : phrases)

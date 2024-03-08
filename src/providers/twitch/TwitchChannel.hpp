@@ -9,6 +9,7 @@
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
+#include "util/CancellationToken.hpp"
 #include "util/QStringHash.hpp"
 #include "util/ThreadGuard.hpp"
 
@@ -159,17 +160,24 @@ public:
     void markConnected();
 
     // Emotes
+    std::optional<EmotePtr> twitchEmote(const EmoteName &name) const;
     std::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
     std::optional<EmotePtr> ffzEmote(const EmoteName &name) const;
     std::optional<EmotePtr> seventvEmote(const EmoteName &name) const;
+
+    std::shared_ptr<const TwitchEmoteSetMap> twitchEmoteSets() const;
+
+    std::shared_ptr<const EmoteMap> twitchEmotes() const;
     std::shared_ptr<const EmoteMap> bttvEmotes() const;
     std::shared_ptr<const EmoteMap> ffzEmotes() const;
     std::shared_ptr<const EmoteMap> seventvEmotes() const;
 
+    void refreshTwitchChannelEmotes(bool manualRefresh);
     void refreshBTTVChannelEmotes(bool manualRefresh);
     void refreshFFZChannelEmotes(bool manualRefresh);
     void refreshSevenTVChannelEmotes(bool manualRefresh);
 
+    void setTwitchEmotes(std::shared_ptr<const EmoteMap> &&map);
     void setBttvEmotes(std::shared_ptr<const EmoteMap> &&map);
     void setFfzEmotes(std::shared_ptr<const EmoteMap> &&map);
     void setSeventvEmotes(std::shared_ptr<const EmoteMap> &&map);
@@ -391,6 +399,8 @@ private:
 protected:
     void messageRemovedFromStart(const MessagePtr &msg) override;
 
+    Atomic<std::shared_ptr<const TwitchEmoteSetMap>> twitchEmoteSets_;
+    Atomic<std::shared_ptr<const EmoteMap>> twitchEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> ffzEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> seventvEmotes_;
@@ -422,6 +432,12 @@ private:
     QElapsedTimer titleRefreshedTimer_;
     QElapsedTimer clipCreationTimer_;
     bool isClipCreationInProgress{false};
+
+    /// @brief Token to cancel the loading of twitch emotes for this channel
+    ///
+    /// This is used to guard against use-after-free and overlapped loading of
+    /// emotes.
+    ScopedCancellationToken twitchEmotesToken_;
 
     /**
      * This channels 7TV user-id,

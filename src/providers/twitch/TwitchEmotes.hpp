@@ -2,7 +2,9 @@
 
 #include "common/Aliases.hpp"
 #include "common/UniqueAccess.hpp"
+#include "providers/twitch/TwitchUser.hpp"
 
+#include <boost/unordered/unordered_flat_map_fwd.hpp>
 #include <QColor>
 #include <QRegularExpression>
 #include <QString>
@@ -35,6 +37,24 @@ struct CheerEmoteSet {
     QRegularExpression regex;
     std::vector<CheerEmote> cheerEmotes;
 };
+
+struct TwitchEmoteSet {
+    /// @brief The owner of this set
+    ///
+    /// This owner might not be resolved yet
+    std::shared_ptr<TwitchUser> owner;
+
+    std::vector<EmotePtr> emotes;
+
+    /// @brief If this is subscriber-like emote set
+    ///
+    /// This is true for follower, subscriber and bitstier emote sets.
+    bool isSubLike = false;
+    bool isFollower = false;
+
+    QString title() const;
+};
+using TwitchEmoteSetMap = boost::unordered_flat_map<EmoteSetId, TwitchEmoteSet>;
 
 class ITwitchEmotes
 {

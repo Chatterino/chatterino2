@@ -399,6 +399,20 @@ qreal getEmote3xScaleFactor(const EmoteId &id)
 
 namespace chatterino {
 
+QString TwitchEmoteSet::title() const
+{
+    if (!this->owner || this->owner->name.isEmpty())
+    {
+        return "Twitch";
+    }
+    if (this->isFollower)
+    {
+        return this->owner->name + " (Follower)";
+    }
+
+    return this->owner->name;
+}
+
 QString TwitchEmotes::cleanUpEmoteCode(const QString &dirtyEmoteCode)
 {
     auto cleanCode = dirtyEmoteCode;
