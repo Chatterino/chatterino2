@@ -265,20 +265,18 @@ struct HelixEmoteSetData {
 };
 
 struct HelixChannelEmote {
-    const QString emoteId;
+    const QString id;
     const QString name;
     const QString type;
-    const QString setId;
-    const QString url;
+    const QString setID;
+    const QString ownerID;
 
-    explicit HelixChannelEmote(QJsonObject jsonObject)
-        : emoteId(jsonObject.value("id").toString())
-        , name(jsonObject.value("name").toString())
-        , type(jsonObject.value("emote_type").toString())
-        , setId(jsonObject.value("emote_set_id").toString())
-        , url(QString(TWITCH_EMOTE_TEMPLATE)
-                  .replace("{id}", this->emoteId)
-                  .replace("{scale}", "3.0"))
+    explicit HelixChannelEmote(const QJsonObject &jsonObject)
+        : id(jsonObject["id"].toString())
+        , name(jsonObject["name"].toString())
+        , type(jsonObject["emote_type"].toString())
+        , setID(jsonObject["emote_set_id"].toString())
+        , ownerID(jsonObject["owner_id"].toString())
     {
     }
 };
@@ -762,6 +760,10 @@ struct HelixError {
 
 using HelixGetChannelBadgesError = HelixGetGlobalBadgesError;
 
+struct HelixPaginationState {
+    bool done;
+};
+
 class IHelix
 {
 public:
@@ -1080,6 +1082,14 @@ public:
         HelixSendMessageArgs args,
         ResultCallback<HelixSentMessage> successCallback,
         FailureCallback<HelixSendMessageError, QString> failureCallback) = 0;
+
+    /// https://dev.twitch.tv/docs/api/reference/#get-user-emotes
+    virtual void getUserEmotes(
+        QString userID, QString broadcasterID,
+        ResultCallback<std::vector<HelixChannelEmote>, HelixPaginationState>
+            pageCallback,
+        FailureCallback<QString> failureCallback,
+        CancellationToken &&token) = 0;
 
     virtual void update(QString clientId, QString oauthToken) = 0;
 
@@ -1401,6 +1411,14 @@ public:
         ResultCallback<HelixSentMessage> successCallback,
         FailureCallback<HelixSendMessageError, QString> failureCallback) final;
 
+    /// https://dev.twitch.tv/docs/api/reference/#get-user-emotes
+    void getUserEmotes(
+        QString userID, QString broadcasterID,
+        ResultCallback<std::vector<HelixChannelEmote>, HelixPaginationState>
+            pageCallback,
+        FailureCallback<QString> failureCallback,
+        CancellationToken &&token) final;
+
     void update(QString clientId, QString oauthToken) final;
 
     static void initialize();
@@ -1455,7 +1473,9 @@ private:
     /// Paginate the `url` endpoint and use `baseQuery` as the starting point for pagination.
     /// @param onPage returns true while a new page is expected. Once false is returned, pagination will stop.
     void paginate(const QString &url, const QUrlQuery &baseQuery,
-                  std::function<bool(const QJsonObject &)> onPage,
+                  std::function<bool(const QJsonObject &,
+                                     const HelixPaginationState &state)>
+                      onPage,
                   std::function<void(NetworkResult)> onError,
                   CancellationToken &&token);
 
