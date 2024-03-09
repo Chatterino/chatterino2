@@ -163,7 +163,6 @@ bool StreamerMode::isEnabled() const
 StreamerModePrivate::StreamerModePrivate(StreamerMode *parent)
     : parent_(parent)
 {
-    this->thread_.start();
     this->timer_.moveToThread(&this->thread_);
     QObject::connect(&this->timer_, &QTimer::timeout, [this] {
         auto timeouts =
@@ -184,6 +183,11 @@ StreamerModePrivate::StreamerModePrivate(StreamerMode *parent)
             });
         },
         this->settingConnections_);
+
+    QObject::connect(&this->thread_, &QThread::started, [this] {
+        this->settingChanged(getSettings()->enableStreamerMode.getEnum());
+    });
+    this->thread_.start();
 }
 
 bool StreamerModePrivate::isEnabled() const

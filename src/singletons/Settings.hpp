@@ -394,6 +394,10 @@ public:
         "/highlighting/automod/enabled",
         true,
     };
+    BoolSetting showAutomodInMentions = {
+        "/highlighting/automod/showInMentions",
+        false,
+    };
     BoolSetting enableAutomodHighlightSound = {
         "/highlighting/automod/enableSound",
         false,
@@ -406,6 +410,7 @@ public:
         "/highlighting/automod/soundUrl",
         "",
     };
+    QStringSetting automodHighlightColor = {"/highlighting/automod/color", ""};
 
     BoolSetting enableThreadHighlight = {
         "/highlighting/thread/nameIsHighlightKeyword", true};
