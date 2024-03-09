@@ -500,7 +500,8 @@ However, the searcher and load configuration is notably different from the defau
 - `package.path` is not used, in its place are two searchers,
 - when `require()` is used, first a file relative to the currently executing
   file will be checked, then a file relative to the plugin directory,
-- binary chunks are never loaded
+- binary chunks are never loaded,
+- files inside of the plugin `data` directory are never loaded
 
 As in normal Lua, dots are converted to the path separators (`'/'` on Linux and Mac, `'\'` on Windows).
 
@@ -510,6 +511,7 @@ Example:
 require("stuff") -- executes Plugins/name/stuff.lua or $(dirname $CURR_FILE)/stuff.lua
 require("dir.name") -- executes Plugins/name/dir/name.lua or $(dirname $CURR_FILE)/dir/name.lua
 require("binary") -- tried to load Plugins/name/binary.lua and errors because binary is not a text file
+require("data.file") -- tried to load Plugins/name/data/file.lua and errors because that is not allowed
 ```
 
 #### `print(Args...)`
