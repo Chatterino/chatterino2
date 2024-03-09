@@ -37,6 +37,8 @@
 - Minor: Introduce `c2.later()` function to Lua API. (#5154)
 - Minor: Live streams that are marked as reruns now mark a tab as yellow instead of red. (#5176, #5237)
 - Minor: Updated to Emoji v15.1. Google emojis are now used as the fallback instead of Twitter emojis. (#5182)
+- Minor: Added the ability to show AutoMod caught messages in mentions. (#5215)
+- Minor: Added the ability to configure the color of highlighted AutoMod caught messages. (#5215)
 - Minor: Allow theming of tab live and rerun indicators. (#5188)
 - Minor: Added a fallback theme field to custom themes that will be used in case the custom theme does not contain a color Chatterino needs. If no fallback theme is specified, we'll pull the color from the included Dark or Light theme. (#5198)
 - Minor: Image links now reflect the scale of their image instead of an internal label. (#5201)
