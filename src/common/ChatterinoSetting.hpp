@@ -13,13 +13,16 @@ class ChatterinoSetting : public pajlada::Settings::Setting<Type>
 {
 public:
     ChatterinoSetting(const std::string &path)
-        : pajlada::Settings::Setting<Type>(path)
+        : pajlada::Settings::Setting<Type>(
+              path, pajlada::Settings::SettingOption::CompareBeforeSet)
     {
         _registerSetting(this->getData());
     }
 
     ChatterinoSetting(const std::string &path, const Type &defaultValue)
-        : pajlada::Settings::Setting<Type>(path, defaultValue)
+        : pajlada::Settings::Setting<Type>(
+              path, defaultValue,
+              pajlada::Settings::SettingOption::CompareBeforeSet)
     {
         _registerSetting(this->getData());
     }

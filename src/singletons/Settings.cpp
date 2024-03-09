@@ -9,6 +9,7 @@
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "controllers/nicknames/Nickname.hpp"
 #include "debug/Benchmark.hpp"
+#include "pajlada/settings/signalargs.hpp"
 #include "util/Clamp.hpp"
 #include "util/PersistSignalVector.hpp"
 #include "util/WindowsHelper.hpp"
@@ -257,7 +258,10 @@ void Settings::restoreSnapshot()
             continue;
         }
 
-        setting->marshalJSON(snapshot[path]);
+        pajlada::Settings::SignalArgs args;
+        args.compareBeforeSet = true;
+
+        setting->marshalJSON(snapshot[path], std::move(args));
     }
 }
 
