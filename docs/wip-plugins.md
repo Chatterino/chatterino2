@@ -57,7 +57,13 @@ Example:
 
 ```json
 {
-  "type": "FilesystemRead"
+  ...,
+  "permissions": [
+    {
+      "type": "FilesystemRead"
+    },
+    ...
+  ]
 }
 ```
 
@@ -69,7 +75,13 @@ Example:
 
 ```json
 {
-  "type": "FilesystemWrite"
+  ...,
+  "permissions": [
+    {
+      "type": "FilesystemWrite"
+    },
+    ...
+  ]
 }
 ```
 
