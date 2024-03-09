@@ -35,7 +35,7 @@
 - Minor: Add a new Channel API for experimental plugins feature. (#5141, #5184, #5187)
 - Minor: Added the ability to change the top-most status of a window regardless of the _Always on top_ setting (right click the notebook). (#5135)
 - Minor: Introduce `c2.later()` function to Lua API. (#5154)
-- Minor: Live streams that are marked as reruns now mark a tab as yellow instead of red. (#5176)
+- Minor: Live streams that are marked as reruns now mark a tab as yellow instead of red. (#5176, #5237)
 - Minor: Updated to Emoji v15.1. Google emojis are now used as the fallback instead of Twitter emojis. (#5182)
 - Minor: Allow theming of tab live and rerun indicators. (#5188)
 - Minor: Added a fallback theme field to custom themes that will be used in case the custom theme does not contain a color Chatterino needs. If no fallback theme is specified, we'll pull the color from the included Dark or Light theme. (#5198)
@@ -99,6 +99,7 @@
 - Bugfix: Fixed an upload sometimes failing when copying an image from a browser if it contained extra properties. (#5156)
 - Bugfix: Fixed tooltips getting out of bounds when loading images. (#5186)
 - Bugfix: Fixed split header tooltips showing in the wrong position on Windows. (#5230)
+- Bugfix: Fixed split header tooltips appearing too tall. (#5232)
 - Dev: Run miniaudio in a separate thread, and simplify it to not manage the device ourselves. There's a chance the simplification is a bad idea. (#4978)
 - Dev: Change clang-format from v14 to v16. (#4929)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
@@ -171,7 +172,7 @@
 - Dev: Added estimation for image sizes to avoid layout shifts. (#5192)
 - Dev: Added the `launachable` entry to Linux AppData. (#5210)
 - Dev: Cleaned up and optimized resources. (#5222)
-- Dev: Refactor `StreamerMode`. (#5216)
+- Dev: Refactor `StreamerMode`. (#5216, #5236)
 - Dev: Cleaned up unused code in `MessageElement` and `MessageLayoutElement`. (#5225)
 
 ## 2.4.6
