@@ -164,9 +164,9 @@ void PluginsPage::rebuildContent()
         if (!plugin->meta.permissions.empty())
         {
             QString perms = "<ul>";
-            for (const auto &err : plugin->meta.permissions)
+            for (const auto &perm : plugin->meta.permissions)
             {
-                perms += "<li>" + err.toHtml() + "</li>";
+                perms += "<li>" + perm.toHtml() + "</li>";
             }
             perms += "</ul>";
 
