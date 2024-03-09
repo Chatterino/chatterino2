@@ -15,7 +15,6 @@
 #include "controllers/sound/ISoundController.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
-#include "util/StreamerMode.hpp"
 #include "widgets/Notebook.hpp"
 
 #include <pajlada/settings/setting.hpp>
@@ -66,6 +65,12 @@ enum class ChatSendProtocol : int {
     Default = 0,
     IRC = 1,
     Helix = 2,
+};
+
+enum StreamerModeSetting {
+    Disabled = 0,
+    Enabled = 1,
+    DetectStreamingSoftware = 2,
 };
 
 /// Settings which are availlable for reading and writing on the gui thread.

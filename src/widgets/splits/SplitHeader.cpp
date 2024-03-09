@@ -15,11 +15,11 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutHelper.hpp"
-#include "util/StreamerMode.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/CommonTexts.hpp"
 #include "widgets/helper/EffectLabel.hpp"
@@ -140,7 +140,7 @@ auto formatTooltip(const TwitchChannel::StreamStatus &s, QString thumbnail)
     }();
 
     auto extraStreamData = [&s]() -> QString {
-        if (isInStreamerMode() &&
+        if (getIApp()->getStreamerMode()->isEnabled() &&
             getSettings()->streamerModeHideViewerCountAndDuration)
         {
             return QStringLiteral(
@@ -950,13 +950,27 @@ void SplitHeader::enterEvent(QEvent *event)
         this->tooltipWidget_->setOne({nullptr, this->tooltipText_});
         this->tooltipWidget_->setWordWrap(true);
         this->tooltipWidget_->adjustSize();
+
+        // On Windows, a lot of the resizing/activating happens when calling
+        // show() and calling it doesn't synchronously create a visible window,
+        // so moving the window won't cause the visible window to jump.
+        //
+        // On other platforms, this isn't the case, hence we call show() after
+        // moving.
+#ifdef Q_OS_WIN
+        this->tooltipWidget_->show();
+#endif
+
         auto pos =
             this->mapToGlobal(this->rect().bottomLeft()) +
             QPoint((this->width() - this->tooltipWidget_->width()) / 2, 1);
 
         this->tooltipWidget_->moveTo(pos,
                                      widgets::BoundsChecking::CursorPosition);
+
+#ifndef Q_OS_WIN
         this->tooltipWidget_->show();
+#endif
     }
 
     BaseWidget::enterEvent(event);

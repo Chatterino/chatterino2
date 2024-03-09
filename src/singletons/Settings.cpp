@@ -186,11 +186,6 @@ Settings::Settings(const QString &settingsDirectory)
         },
         false);
 #endif
-    this->enableStreamerMode.connect(
-        []() {
-            getApp()->streamerModeChanged.invoke();
-        },
-        false);
 }
 
 Settings::~Settings()

@@ -1,7 +1,9 @@
 #include "util/IpcQueue.hpp"
 
 #include "common/QLogging.hpp"
+#include "singletons/Paths.hpp"
 
+#define BOOST_INTERPROCESS_SHARED_DIR_FUNC
 #include <boost/interprocess/ipc/message_queue.hpp>
 #include <QByteArray>
 #include <QString>
@@ -9,7 +11,48 @@
 
 namespace boost_ipc = boost::interprocess;
 
+namespace {
+
+static const chatterino::Paths *PATHS = nullptr;
+
+}  // namespace
+
+namespace boost::interprocess::ipcdetail {
+
+void get_shared_dir(std::string &shared_dir)
+{
+    if (!PATHS)
+    {
+        assert(false && "PATHS not set");
+        qCCritical(chatterinoNativeMessage)
+            << "PATHS not set for shared directory";
+        return;
+    }
+    shared_dir = PATHS->ipcDirectory.toStdString();
+}
+
+#ifdef BOOST_INTERPROCESS_WINDOWS
+void get_shared_dir(std::wstring &shared_dir)
+{
+    if (!PATHS)
+    {
+        assert(false && "PATHS not set");
+        qCCritical(chatterinoNativeMessage)
+            << "PATHS not set for shared directory";
+        return;
+    }
+    shared_dir = PATHS->ipcDirectory.toStdWString();
+}
+#endif
+
+}  // namespace boost::interprocess::ipcdetail
+
 namespace chatterino::ipc {
+
+void initPaths(const Paths *paths)
+{
+    PATHS = paths;
+}
 
 void sendMessage(const char *name, const QByteArray &data)
 {

@@ -242,10 +242,11 @@ void TwitchBadges::getBadgeIcons(const QList<DisplayBadge> &badges,
 void TwitchBadges::loadEmoteImage(const QString &name, ImagePtr image,
                                   BadgeIconCallback &&callback)
 {
-    NetworkRequest(image->url().string)
+    auto url = image->url().string;
+    NetworkRequest(url)
         .concurrent()
         .cache()
-        .onSuccess([this, name, callback](auto result) {
+        .onSuccess([this, name, callback, url](auto result) {
             auto data = result.getData();
 
             // const cast since we are only reading from it
@@ -255,17 +256,18 @@ void TwitchBadges::loadEmoteImage(const QString &name, ImagePtr image,
 
             if (!reader.canRead() || reader.size().isEmpty())
             {
+                qCWarning(chatterinoTwitch)
+                    << "Can't read badge image at" << url << "for" << name
+                    << reader.errorString();
                 return;
             }
 
             QImage image = reader.read();
             if (image.isNull())
             {
-                return;
-            }
-
-            if (reader.imageCount() <= 0)
-            {
+                qCWarning(chatterinoTwitch)
+                    << "Failed reading badge image at" << url << "for" << name
+                    << reader.errorString();
                 return;
             }
 

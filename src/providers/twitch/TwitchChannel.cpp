@@ -35,6 +35,7 @@
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
@@ -180,7 +181,7 @@ TwitchChannel::TwitchChannel(const QString &name)
 
             // Notify on all channels with a ping sound
             if (getSettings()->notificationOnAnyChannel &&
-                !(isInStreamerMode() &&
+                !(getIApp()->getStreamerMode()->isEnabled() &&
                   getSettings()->streamerModeSuppressLiveNotifications))
             {
                 getIApp()->getNotifications()->playSound();
@@ -1177,6 +1178,11 @@ bool TwitchChannel::setLive(bool newLiveStatus)
         return false;
     }
     guard->live = newLiveStatus;
+    if (!newLiveStatus)
+    {
+        // A rerun is just a fancy livestream
+        guard->rerun = false;
+    }
 
     return true;
 }

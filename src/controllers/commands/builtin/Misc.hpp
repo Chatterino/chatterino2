@@ -25,6 +25,7 @@ QString clearmessages(const CommandContext &ctx);
 QString openURL(const CommandContext &ctx);
 QString sendRawMessage(const CommandContext &ctx);
 QString injectFakeMessage(const CommandContext &ctx);
+QString injectStreamUpdateNoStream(const CommandContext &ctx);
 QString copyToClipboard(const CommandContext &ctx);
 QString unstableSetUserClientSideColor(const CommandContext &ctx);
 QString openUsercard(const CommandContext &ctx);
