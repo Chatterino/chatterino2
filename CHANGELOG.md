@@ -44,6 +44,8 @@
 - Minor: Image links now reflect the scale of their image instead of an internal label. (#5201)
 - Minor: IPC files are now stored in the Chatterino directory instead of system directories on Windows. (#5226)
 - Minor: 7TV emotes now have a 4x image rather than a 3x image. (#5209)
+- Minor: Add wrappers for Lua `io` library for experimental plugins feature. (#5231)
+- Minor: Add permissions to experimental plugins feature. (#5231)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
 - Bugfix: Trimmed custom streamlink paths on all platforms making sure you don't accidentally add spaces at the beginning or end of its path. (#4834)
