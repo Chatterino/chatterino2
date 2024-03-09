@@ -161,6 +161,20 @@ void PluginsPage::rebuildContent()
         }
         pluginEntry->addRow("Commands",
                             new QLabel(commandsTxt, this->dataFrame_));
+        if (!plugin->meta.permissions.empty())
+        {
+            QString perms = "<ul>";
+            for (const auto &perm : plugin->meta.permissions)
+            {
+                perms += "<li>" + perm.toHtml() + "</li>";
+            }
+            perms += "</ul>";
+
+            auto *lbl =
+                new QLabel("Required permissions:" + perms, this->dataFrame_);
+            lbl->setTextFormat(Qt::RichText);
+            pluginEntry->addRow(lbl);
+        }
 
         if (plugin->meta.isValid())
         {

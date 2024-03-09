@@ -1,11 +1,11 @@
 #pragma once
-#include "providers/twitch/TwitchChannel.hpp"
-
-#include <optional>
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "common/Channel.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/PluginController.hpp"
+#    include "providers/twitch/TwitchChannel.hpp"
+
+#    include <optional>
 
 namespace chatterino::lua::api {
 // NOLINTBEGIN(readability-identifier-naming)
