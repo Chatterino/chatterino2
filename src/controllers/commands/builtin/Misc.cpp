@@ -29,6 +29,8 @@
 #include <QString>
 #include <QUrl>
 
+#include <optional>
+
 namespace chatterino::commands {
 
 QString follow(const CommandContext &ctx)
@@ -566,6 +568,27 @@ QString injectFakeMessage(const CommandContext &ctx)
     auto ircText = ctx.words.mid(1).join(" ");
     getApp()->twitch->addFakeMessage(ircText);
 
+    return "";
+}
+
+QString injectStreamUpdateNoStream(const CommandContext &ctx)
+{
+    /**
+     * /debug-update-to-no-stream makes the current channel mimic going offline
+     */
+    if (ctx.channel == nullptr)
+    {
+        return "";
+    }
+    if (ctx.twitchChannel == nullptr)
+    {
+        ctx.channel->addMessage(
+            makeSystemMessage("The /debug-update-to-no-stream command only "
+                              "works in Twitch channels"));
+        return "";
+    }
+
+    ctx.twitchChannel->updateStreamStatus(std::nullopt);
     return "";
 }
 
