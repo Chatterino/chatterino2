@@ -867,6 +867,14 @@ void Application::initPubSub()
                                 p.first);
                             getApp()->twitch->automodChannel->addMessage(
                                 p.second);
+
+                            if (getSettings()->showAutomodInMentions)
+                            {
+                                getApp()->twitch->mentionsChannel->addMessage(
+                                    p.first);
+                                getApp()->twitch->mentionsChannel->addMessage(
+                                    p.second);
+                            }
                         });
                     }
                     // "ALLOWED" and "DENIED" statuses remain unimplemented

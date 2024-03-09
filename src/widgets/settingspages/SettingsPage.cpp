@@ -87,11 +87,6 @@ void SettingsPage::setTab(SettingsDialogTab *tab)
     this->tab_ = tab;
 }
 
-void SettingsPage::cancel()
-{
-    this->onCancel_.invoke();
-}
-
 QCheckBox *SettingsPage::createCheckBox(
     const QString &text, pajlada::Settings::Setting<bool> &setting)
 {

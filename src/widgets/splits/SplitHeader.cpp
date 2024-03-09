@@ -950,13 +950,27 @@ void SplitHeader::enterEvent(QEvent *event)
         this->tooltipWidget_->setOne({nullptr, this->tooltipText_});
         this->tooltipWidget_->setWordWrap(true);
         this->tooltipWidget_->adjustSize();
+
+        // On Windows, a lot of the resizing/activating happens when calling
+        // show() and calling it doesn't synchronously create a visible window,
+        // so moving the window won't cause the visible window to jump.
+        //
+        // On other platforms, this isn't the case, hence we call show() after
+        // moving.
+#ifdef Q_OS_WIN
+        this->tooltipWidget_->show();
+#endif
+
         auto pos =
             this->mapToGlobal(this->rect().bottomLeft()) +
             QPoint((this->width() - this->tooltipWidget_->width()) / 2, 1);
 
         this->tooltipWidget_->moveTo(pos,
                                      widgets::BoundsChecking::CursorPosition);
+
+#ifndef Q_OS_WIN
         this->tooltipWidget_->show();
+#endif
     }
 
     BaseWidget::enterEvent(event);
