@@ -138,15 +138,18 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
                 return;
             }
             auto parsed = PluginPermission(t.toObject());
-            for (const auto &err : parsed.errors)
-            {
-                this->errors.push_back(
-                    QString("permissions element #%1: %2").arg(i).arg(err));
-            }
             if (parsed.isValid())
             {
                 // ensure no invalid permissions slip through this
                 this->permissions.push_back(parsed);
+            }
+            else
+            {
+                for (const auto &err : parsed.errors)
+                {
+                    this->errors.push_back(
+                        QString("permissions element #%1: %2").arg(i).arg(err));
+                }
             }
         }
     }
