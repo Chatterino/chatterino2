@@ -653,22 +653,21 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
 void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
                                           TwitchIrcServer &server)
 {
-    // This is for compatibility with older Chatterino versions. Twitch didn't use
-    // to allow ZERO WIDTH JOINER unicode character, so Chatterino used ESCAPE_TAG
-    // instead.
-    // See https://github.com/Chatterino/chatterino2/issues/3384 and
-    // https://mm2pl.github.io/emoji_rfc.pdf for more details
-
-    this->addMessage(
-        message, channelOrEmptyByTarget(message->target(), server),
-        message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER), server,
-        false, message->isAction());
-
     auto chan = channelOrEmptyByTarget(message->target(), server);
     if (chan->isEmpty())
     {
         return;
     }
+
+    // This is for compatibility with older Chatterino versions. Twitch didn't use
+    // to allow ZERO WIDTH JOINER unicode character, so Chatterino used ESCAPE_TAG
+    // instead.
+    // See https://github.com/Chatterino/chatterino2/issues/3384 and
+    // https://mm2pl.github.io/emoji_rfc.pdf for more details
+    this->addMessage(
+        message, chan,
+        message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER), server,
+        false, message->isAction());
 
     if (message->tags().contains(u"pinned-chat-paid-amount"_s))
     {
