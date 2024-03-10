@@ -68,6 +68,7 @@ chrrs | https://github.com/chrrs | | Contributor
 crazysmc | https://github.com/crazysmc | :/avatars/crazysmc.png | Contributor
 SputNikPlop | https://github.com/SputNikPlop | | Contributor
 fraxx | https://github.com/fraxxio | :/avatars/fraxx.png | Contributor
+KleberPF | https://github.com/KleberPF | | Contributor
 
 # If you are a contributor add yourself above this line
 

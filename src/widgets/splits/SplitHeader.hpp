@@ -29,10 +29,9 @@ public:
     explicit SplitHeader(Split *split);
 
     void setAddButtonVisible(bool value);
-    void setChattersButtonVisible(bool value);
 
     void updateChannelText();
-    void updateModerationModeIcon();
+    void updateIcons();
     // Invoked when SplitHeader should update anything refering to a TwitchChannel's mode
     // has changed (e.g. sub mode toggled)
     void updateRoomModes();

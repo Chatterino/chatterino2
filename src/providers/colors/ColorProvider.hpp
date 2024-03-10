@@ -18,6 +18,7 @@ enum class ColorType {
     ThreadMessageHighlight,
     // Used in automatic highlights of your own messages
     SelfMessageHighlight,
+    AutomodHighlight,
 };
 
 class ColorProvider

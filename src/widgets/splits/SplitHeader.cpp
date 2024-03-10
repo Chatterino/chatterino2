@@ -230,7 +230,7 @@ SplitHeader::SplitHeader(Split *split)
     this->setMouseTracking(true);
     this->updateChannelText();
     this->handleChannelChanged();
-    this->updateModerationModeIcon();
+    this->updateIcons();
 
     // The lifetime of these signals are tied to the lifetime of the Split.
     // Since the SplitHeader is owned by the Split, they will always be destroyed
@@ -247,7 +247,7 @@ SplitHeader::SplitHeader(Split *split)
 
     this->bSignals_.emplace_back(
         getIApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
-            this->updateModerationModeIcon();
+            this->updateIcons();
         }));
 
     auto _ = [this](const auto &, const auto &) {
@@ -755,11 +755,6 @@ void SplitHeader::setAddButtonVisible(bool value)
     this->addButton_->setVisible(value);
 }
 
-void SplitHeader::setChattersButtonVisible(bool value)
-{
-    this->chattersButton_->setVisible(value);
-}
-
 void SplitHeader::updateChannelText()
 {
     auto indirectChannel = this->split_->getIndirectChannel();
@@ -838,26 +833,42 @@ void SplitHeader::updateChannelText()
     this->titleLabel_->setText(title.isEmpty() ? "<empty>" : title);
 }
 
-void SplitHeader::updateModerationModeIcon()
+void SplitHeader::updateIcons()
 {
-    auto moderationMode = this->split_->getModerationMode() &&
-                          !getSettings()->moderationActions.empty();
-
-    this->moderationButton_->setPixmap(
-        moderationMode ? getResources().buttons.modModeEnabled
-                       : getResources().buttons.modModeDisabled);
-
     auto channel = this->split_->getChannel();
     auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
-    if (twitchChannel != nullptr &&
-        (twitchChannel->hasModRights() || moderationMode))
+    if (twitchChannel != nullptr)
     {
-        this->moderationButton_->show();
+        auto moderationMode = this->split_->getModerationMode() &&
+                              !getSettings()->moderationActions.empty();
+
+        this->moderationButton_->setPixmap(
+            moderationMode ? getResources().buttons.modModeEnabled
+                           : getResources().buttons.modModeDisabled);
+
+        if (twitchChannel->hasModRights() || moderationMode)
+        {
+            this->moderationButton_->show();
+        }
+        else
+        {
+            this->moderationButton_->hide();
+        }
+
+        if (twitchChannel->hasModRights())
+        {
+            this->chattersButton_->show();
+        }
+        else
+        {
+            this->chattersButton_->hide();
+        }
     }
     else
     {
         this->moderationButton_->hide();
+        this->chattersButton_->hide();
     }
 }
 
@@ -950,13 +961,27 @@ void SplitHeader::enterEvent(QEvent *event)
         this->tooltipWidget_->setOne({nullptr, this->tooltipText_});
         this->tooltipWidget_->setWordWrap(true);
         this->tooltipWidget_->adjustSize();
+
+        // On Windows, a lot of the resizing/activating happens when calling
+        // show() and calling it doesn't synchronously create a visible window,
+        // so moving the window won't cause the visible window to jump.
+        //
+        // On other platforms, this isn't the case, hence we call show() after
+        // moving.
+#ifdef Q_OS_WIN
+        this->tooltipWidget_->show();
+#endif
+
         auto pos =
             this->mapToGlobal(this->rect().bottomLeft()) +
             QPoint((this->width() - this->tooltipWidget_->width()) / 2, 1);
 
         this->tooltipWidget_->moveTo(pos,
                                      widgets::BoundsChecking::CursorPosition);
+
+#ifndef Q_OS_WIN
         this->tooltipWidget_->show();
+#endif
     }
 
     BaseWidget::enterEvent(event);

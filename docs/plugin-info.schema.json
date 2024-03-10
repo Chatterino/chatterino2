@@ -41,8 +41,20 @@
     },
     "license": {
       "type": "string",
-      "description": "A small description of your license.",
+      "description": "SPDX identifier for license of this plugin. See https://spdx.org/licenses/",
       "examples": ["MIT", "GPL-2.0-or-later"]
+    },
+    "permissions": {
+      "type": "array",
+      "description": "The permissions the plugin needs to work.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": ["FilesystemRead", "FilesystemWrite"]
+          }
+        }
+      }
     },
     "$schema": { "type": "string" }
   },
