@@ -20,6 +20,7 @@
 - Minor: Updated the flatpakref link included with nightly builds to point to up-to-date flathub-beta builds. (#5008)
 - Minor: Add a new completion API for experimental plugins feature. (#5000, #5047)
 - Minor: Re-enabled _Restart on crash_ option on Windows. (#5012)
+- Minor: The chatter list button is now hidden if you don't have moderator privileges. (#5245)
 - Minor: The whisper highlight color can now be configured through the settings. (#5053)
 - Minor: Added an option to always include the broadcaster in user completions. This is enabled by default. (#5193, #5244)
 - Minor: Added missing periods at various moderator messages and commands. (#5061)
