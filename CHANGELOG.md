@@ -21,7 +21,7 @@
 - Minor: Add a new completion API for experimental plugins feature. (#5000, #5047)
 - Minor: Re-enabled _Restart on crash_ option on Windows. (#5012)
 - Minor: The whisper highlight color can now be configured through the settings. (#5053)
-- Minor: Added an option to always include the broadcaster in user completions. This is enabled by default. (#5193)
+- Minor: Added an option to always include the broadcaster in user completions. This is enabled by default. (#5193, #5244)
 - Minor: Added missing periods at various moderator messages and commands. (#5061)
 - Minor: Improved color selection and display. (#5057)
 - Minor: Improved Streamlink documentation in the settings dialog. (#5076)
