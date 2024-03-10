@@ -885,15 +885,6 @@ void Split::setChannel(IndirectChannel newChannel)
     this->header_->updateChannelText();
     this->header_->updateRoomModes();
 
-    if (newChannel.getType() == Channel::Type::Twitch)
-    {
-        this->header_->setChattersButtonVisible(true);
-    }
-    else
-    {
-        this->header_->setChattersButtonVisible(false);
-    }
-
     this->channelSignalHolder_.managedConnect(
         this->channel_.get()->displayNameChanged, [this] {
             this->actionRequested.invoke(Action::RefreshTab);

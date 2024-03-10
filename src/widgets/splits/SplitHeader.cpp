@@ -755,11 +755,6 @@ void SplitHeader::setAddButtonVisible(bool value)
     this->addButton_->setVisible(value);
 }
 
-void SplitHeader::setChattersButtonVisible(bool value)
-{
-    this->chattersButton_->setVisible(value);
-}
-
 void SplitHeader::updateChannelText()
 {
     auto indirectChannel = this->split_->getIndirectChannel();
