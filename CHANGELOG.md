@@ -91,6 +91,7 @@
 - Bugfix: Fixed a crash that could occur when using certain features in a Reply popup after closing the split from which it was created. (#5036, #5051)
 - Bugfix: Fixed a bug on Wayland where tooltips would spawn as separate windows instead of behaving like tooltips. (#4998, #5040)
 - Bugfix: Fixes to section deletion in text input fields. (#5013)
+- Bugfix: Truncated IRC messages to be at most 512 bytes. (#5246)
 - Bugfix: Show user text input within watch streak notices. (#5029)
 - Bugfix: Fixed avatar in usercard and moderation button triggering when releasing the mouse outside their area. (#5052)
 - Bugfix: Fixed moderator-only topics being subscribed to for non-moderators. (#5056)
