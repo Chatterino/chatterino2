@@ -468,6 +468,8 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
 
         for (const auto &word : this->words_)
         {
+            auto wordId = container.nextWordId();
+
             auto getTextLayoutElement = [&](QString text, int width,
                                             bool hasTrailingSpace) {
                 auto color = this->color_.getColor(*app->getThemes());
@@ -478,7 +480,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                     this->style_, container.getScale());
                 e->setTrailingSpace(hasTrailingSpace);
                 e->setText(text);
-                e->setWordId(this->wordId_);
+                e->setWordId(wordId);
 
                 return e;
             };

@@ -72,7 +72,7 @@ public:
      */
     const MessageLayoutElement *getElementAt(QPoint point);
 
-    std::pair<int, int> getWordBounds(int wordId);
+    std::pair<int, int> getWordBounds(QPoint relativePos);
 
     /**
      * Get the index of the last character in this message's container

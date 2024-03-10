@@ -87,9 +87,11 @@ private:
      */
     size_t line_{};
 
-    /**
-     * Elements that are part of the same word originally have the same id
-     */
+    /// @brief ID of a word inside its container
+    ///
+    /// One word has exactly one ID that is used to identify elements created
+    /// from the same word (due to wrapping).
+    /// IDs are unique in a MessageLayoutContainer.
     int wordId_ = -1;
 };
 

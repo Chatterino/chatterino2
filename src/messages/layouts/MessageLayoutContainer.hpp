@@ -111,7 +111,8 @@ struct MessageLayoutContainer {
      */
     size_t getFirstMessageCharacterIndex() const;
 
-    std::pair<int, int> getWordBounds(int wordId);
+    std::pair<int, int> getWordBounds(
+        const MessageLayoutElement *hoveredElement);
 
     /**
      * Get the index of the last character in this message
@@ -155,6 +156,8 @@ struct MessageLayoutContainer {
      * Returns the remaining width of this line until we will need to start a new line
      */
     int remainingWidth() const;
+
+    int nextWordId();
 
 private:
     struct Line {
@@ -274,6 +277,7 @@ private:
     int spaceWidth_ = 4;
     int textLineHeight_ = 0;
     int dotdotdotWidth_ = 0;
+    int currentWordId_ = 0;
     bool canAddMessages_ = true;
     bool isCollapsed_ = false;
     bool wasPrevReversed_ = false;

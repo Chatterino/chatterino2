@@ -597,7 +597,6 @@ MessagePtr TwitchMessageBuilder::build()
             ->setLink({Link::ReplyToMessage, this->message().id});
     }
 
-    this->wordId_ = 0;
     return this->release();
 }
 
@@ -709,7 +708,6 @@ void TwitchMessageBuilder::addWords(
         }
 
         cursor += word.size() + 1;
-        this->wordId_++;
     }
 }
 
@@ -813,26 +811,22 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
                                        MessageElementFlag::BoldUsername,
                                        textColor, FontStyle::ChatMediumBold)
                 ->setLink({Link::UserInfo, username})
-                ->setTrailingSpace(false)
-                ->setWordId(this->wordId_);
+                ->setTrailingSpace(false);
 
             this->emplace<TextElement>(
                     username, MessageElementFlag::NonBoldUsername, textColor)
                 ->setLink({Link::UserInfo, username})
-                ->setTrailingSpace(false)
-                ->setWordId(this->wordId_);
+                ->setTrailingSpace(false);
 
             this->emplace<TextElement>(string.remove(username),
                                        MessageElementFlag::Text,
-                                       originalTextColor)
-                ->setWordId(this->wordId_);
+                                       originalTextColor);
 
             return;
         }
     }
 
-    this->emplace<TextElement>(string, MessageElementFlag::Text, textColor)
-        ->setWordId(this->wordId_);
+    this->emplace<TextElement>(string, MessageElementFlag::Text, textColor);
 }
 
 void TwitchMessageBuilder::parseMessageID()

@@ -161,8 +161,6 @@ private:
 
     QString userId_;
     bool senderIsBroadcaster{};
-
-    int wordId_ = 0;
 };
 
 }  // namespace chatterino

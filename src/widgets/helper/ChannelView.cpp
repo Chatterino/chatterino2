@@ -290,23 +290,6 @@ qreal highlightEasingFunction(qreal progress)
     return 1.0 + pow((20.0 / 9.0) * (0.5 * progress - 0.5), 3.0);
 }
 
-/// @return the start and end of the word bounds
-std::pair<int, int> getWordBounds(MessageLayout *layout,
-                                  const MessageLayoutElement *element,
-                                  const QPoint &relativePos)
-{
-    assert(layout != nullptr);
-    assert(element != nullptr);
-
-    const auto wordStart = layout->getSelectionIndex(relativePos) -
-                           element->getMouseOverIndex(relativePos);
-    const auto selectionLength = element->getSelectionIndexCount();
-    const auto length =
-        element->hasTrailingSpace() ? selectionLength - 1 : selectionLength;
-
-    return {wordStart, wordStart + length};
-}
-
 }  // namespace
 
 namespace chatterino {
@@ -1816,8 +1799,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     // selecting whole words
     if (this->isDoubleClick_ && hoverLayoutElement)
     {
-        auto [wordStart, wordEnd] =
-            layout->getWordBounds(hoverLayoutElement->getWordId());
+        auto [wordStart, wordEnd] = layout->getWordBounds(relativePos);
         auto hoveredWord = Selection{SelectionItem(messageIndex, wordStart),
                                      SelectionItem(messageIndex, wordEnd)};
         // combined selection spanning from initially selected word to hoveredWord
@@ -2647,20 +2629,10 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
     }
 
     // Probably should unify this logic somehow
-    std::pair<int, int> wordBounds;
-    if (hoverLayoutElement->getWordId() == -1)
-    {
-        wordBounds =
-            getWordBounds(layout.get(), hoverLayoutElement, relativePos);
-    }
-    else
-    {
-        wordBounds = layout->getWordBounds(hoverLayoutElement->getWordId());
-    }
+    auto [wordStart, wordEnd] = layout->getWordBounds(relativePos);
 
-    this->doubleClickSelection_ = {
-        SelectionItem(messageIndex, wordBounds.first),
-        SelectionItem(messageIndex, wordBounds.second)};
+    this->doubleClickSelection_ = {SelectionItem(messageIndex, wordStart),
+                                   SelectionItem(messageIndex, wordEnd)};
     this->setSelection(this->doubleClickSelection_);
 
     if (getSettings()->linksDoubleClickOnly)
