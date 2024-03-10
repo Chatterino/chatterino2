@@ -1817,7 +1817,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     if (this->isDoubleClick_ && hoverLayoutElement)
     {
         auto [wordStart, wordEnd] =
-            getWordBounds(layout.get(), hoverLayoutElement, relativePos);
+            layout->getWordBounds(hoverLayoutElement->getWordId());
         auto hoveredWord = Selection{SelectionItem(messageIndex, wordStart),
                                      SelectionItem(messageIndex, wordEnd)};
         // combined selection spanning from initially selected word to hoveredWord
@@ -2646,10 +2646,21 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
         return;
     }
 
-    auto [wordStart, wordEnd] =
-        getWordBounds(layout.get(), hoverLayoutElement, relativePos);
-    this->doubleClickSelection_ = {SelectionItem(messageIndex, wordStart),
-                                   SelectionItem(messageIndex, wordEnd)};
+    // Probably should unify this logic somehow
+    std::pair<int, int> wordBounds;
+    if (hoverLayoutElement->getWordId() == -1)
+    {
+        wordBounds =
+            getWordBounds(layout.get(), hoverLayoutElement, relativePos);
+    }
+    else
+    {
+        wordBounds = layout->getWordBounds(hoverLayoutElement->getWordId());
+    }
+
+    this->doubleClickSelection_ = {
+        SelectionItem(messageIndex, wordBounds.first),
+        SelectionItem(messageIndex, wordBounds.second)};
     this->setSelection(this->doubleClickSelection_);
 
     if (getSettings()->linksDoubleClickOnly)

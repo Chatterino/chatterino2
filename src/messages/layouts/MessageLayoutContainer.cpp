@@ -456,6 +456,40 @@ size_t MessageLayoutContainer::getFirstMessageCharacterIndex() const
     return index;
 }
 
+std::pair<int, int> MessageLayoutContainer::getWordBounds(int wordId)
+{
+    size_t index = 0;
+    size_t wordStart = 0;
+
+    for (; index < this->elements_.size(); index++)
+    {
+        const auto &element = this->elements_[index];
+        if (element->getWordId() == wordId)
+        {
+            break;
+        }
+
+        wordStart += element->getSelectionIndexCount();
+    }
+
+    size_t wordEnd = wordStart;
+
+    for (; index < this->elements_.size(); index++)
+    {
+        const auto &element = this->elements_[index];
+        if (element->getWordId() != wordId)
+        {
+            break;
+        }
+
+        wordEnd += element->hasTrailingSpace()
+                       ? element->getSelectionIndexCount() - 1
+                       : element->getSelectionIndexCount();
+    }
+
+    return {wordStart, wordEnd};
+}
+
 size_t MessageLayoutContainer::getLastCharacterIndex() const
 {
     if (this->lines_.empty())

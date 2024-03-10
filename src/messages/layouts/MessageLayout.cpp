@@ -449,6 +449,11 @@ const MessageLayoutElement *MessageLayout::getElementAt(QPoint point)
     return this->container_.getElementAt(point);
 }
 
+std::pair<int, int> MessageLayout::getWordBounds(int wordId)
+{
+    return this->container_.getWordBounds(wordId);
+}
+
 size_t MessageLayout::getLastCharacterIndex() const
 {
     return this->container_.getLastCharacterIndex();

@@ -88,6 +88,11 @@ void MessageElement::addFlags(MessageElementFlags flags)
     this->flags_.set(flags);
 }
 
+void MessageElement::setWordId(int wordId)
+{
+    this->wordId_ = wordId;
+}
+
 // IMAGE
 ImageElement::ImageElement(ImagePtr image, MessageElementFlags flags)
     : MessageElement(flags)
@@ -473,6 +478,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                     this->style_, container.getScale());
                 e->setTrailingSpace(hasTrailingSpace);
                 e->setText(text);
+                e->setWordId(this->wordId_);
 
                 return e;
             };

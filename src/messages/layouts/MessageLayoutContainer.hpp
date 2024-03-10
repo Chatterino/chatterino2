@@ -111,6 +111,8 @@ struct MessageLayoutContainer {
      */
     size_t getFirstMessageCharacterIndex() const;
 
+    std::pair<int, int> getWordBounds(int wordId);
+
     /**
      * Get the index of the last character in this message
      * This is the sum of all the characters in `elements_`

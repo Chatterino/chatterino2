@@ -72,6 +72,8 @@ public:
      */
     const MessageLayoutElement *getElementAt(QPoint point);
 
+    std::pair<int, int> getWordBounds(int wordId);
+
     /**
      * Get the index of the last character in this message's container
      * This is the sum of all the characters in `elements_`
