@@ -860,6 +860,10 @@ void SplitHeader::updateIcons()
         {
             this->chattersButton_->show();
         }
+        else
+        {
+            this->chattersButton_->hide();
+        }
     }
     else
     {
