@@ -151,6 +151,7 @@
 - Dev: Move `clang-tidy` checker to its own CI job. (#4996)
 - Dev: Refactored the Image Uploader feature. (#4971)
 - Dev: Refactored the SplitOverlay code. (#5082)
+- Dev: Refactored the Fonts code, making it less of a singleton. (#5228)
 - Dev: Refactored the TwitchBadges structure, making it less of a singleton. (#5096, #5144)
 - Dev: Refactored emotes out of TwitchIrcServer. (#5120, #5146)
 - Dev: Refactored the ChatterinoBadges structure, making it less of a singleton. (#5103)

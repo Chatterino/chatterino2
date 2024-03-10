@@ -118,7 +118,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     : paths_(paths)
     , args_(_args)
     , themes(&this->emplace<Theme>())
-    , fonts(&this->emplace<Fonts>())
+    , fonts(new Fonts(_settings))
     , emotes(&this->emplace<Emotes>())
     , accounts(&this->emplace<AccountController>())
     , hotkeys(&this->emplace<HotkeyController>())
@@ -170,6 +170,7 @@ void Application::fakeDtor()
     this->bttvEmotes.reset();
     this->ffzEmotes.reset();
     this->seventvEmotes.reset();
+    this->fonts.reset();
 }
 
 void Application::initialize(Settings &settings, const Paths &paths)
@@ -335,8 +336,9 @@ Theme *Application::getThemes()
 Fonts *Application::getFonts()
 {
     assertInGuiThread();
+    assert(this->fonts);
 
-    return this->fonts;
+    return this->fonts.get();
 }
 
 IEmotes *Application::getEmotes()
