@@ -230,7 +230,7 @@ SplitHeader::SplitHeader(Split *split)
     this->setMouseTracking(true);
     this->updateChannelText();
     this->handleChannelChanged();
-    this->updateModerationModeIcon();
+    this->updateIcons();
 
     // The lifetime of these signals are tied to the lifetime of the Split.
     // Since the SplitHeader is owned by the Split, they will always be destroyed
@@ -247,7 +247,7 @@ SplitHeader::SplitHeader(Split *split)
 
     this->bSignals_.emplace_back(
         getIApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
-            this->updateModerationModeIcon();
+            this->updateIcons();
         }));
 
     auto _ = [this](const auto &, const auto &) {
@@ -838,7 +838,7 @@ void SplitHeader::updateChannelText()
     this->titleLabel_->setText(title.isEmpty() ? "<empty>" : title);
 }
 
-void SplitHeader::updateModerationModeIcon()
+void SplitHeader::updateIcons()
 {
     auto moderationMode = this->split_->getModerationMode() &&
                           !getSettings()->moderationActions.empty();
