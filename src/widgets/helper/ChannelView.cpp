@@ -2628,7 +2628,6 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
         return;
     }
 
-    // Probably should unify this logic somehow
     auto [wordStart, wordEnd] = layout->getWordBounds(relativePos);
 
     this->doubleClickSelection_ = {SelectionItem(messageIndex, wordStart),
