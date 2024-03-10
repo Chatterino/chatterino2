@@ -659,6 +659,24 @@ void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
         return;
     }
 
+    auto *twitchChannel = dynamic_cast<TwitchChannel *>(chan.get());
+
+    if (twitchChannel != nullptr)
+    {
+        auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+        if (message->tag("user-id") == currentUser->getUserId())
+        {
+            auto badgesTag = message->tag("badges");
+            if (badgesTag.isValid())
+            {
+                auto parsedBadges = parseBadges(badgesTag.toString());
+                twitchChannel->setMod(parsedBadges.contains("moderator"));
+                twitchChannel->setVIP(parsedBadges.contains("vip"));
+                twitchChannel->setStaff(parsedBadges.contains("staff"));
+            }
+        }
+    }
+
     // This is for compatibility with older Chatterino versions. Twitch didn't use
     // to allow ZERO WIDTH JOINER unicode character, so Chatterino used ESCAPE_TAG
     // instead.
