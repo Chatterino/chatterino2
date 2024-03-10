@@ -182,13 +182,9 @@ public:
     virtual void addToContainer(MessageLayoutContainer &container,
                                 MessageElementFlags flags) = 0;
 
-    void setWordId(int wordId);
-
 protected:
     MessageElement(MessageElementFlags flags);
     bool trailingSpace = true;
-
-    int wordId_ = -1;
 
 private:
     Link link_;

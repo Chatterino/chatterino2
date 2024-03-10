@@ -88,11 +88,6 @@ void MessageElement::addFlags(MessageElementFlags flags)
     this->flags_.set(flags);
 }
 
-void MessageElement::setWordId(int wordId)
-{
-    this->wordId_ = wordId;
-}
-
 // IMAGE
 ImageElement::ImageElement(ImagePtr image, MessageElementFlags flags)
     : MessageElement(flags)
