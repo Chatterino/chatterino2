@@ -8,6 +8,8 @@
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "controllers/nicknames/Nickname.hpp"
+#include "debug/Benchmark.hpp"
+#include "pajlada/settings/signalargs.hpp"
 #include "util/Clamp.hpp"
 #include "util/PersistSignalVector.hpp"
 #include "util/WindowsHelper.hpp"
@@ -203,6 +205,8 @@ Settings::~Settings()
 
 void Settings::saveSnapshot()
 {
+    BenchmarkGuard benchmark("Settings::saveSnapshot");
+
     rapidjson::Document *d = new rapidjson::Document(rapidjson::kObjectType);
     rapidjson::Document::AllocatorType &a = d->GetAllocator();
 
@@ -238,6 +242,8 @@ void Settings::restoreSnapshot()
         return;
     }
 
+    BenchmarkGuard benchmark("Settings::restoreSnapshot");
+
     const auto &snapshot = *(this->snapshot_.get());
 
     if (!snapshot.IsObject())
@@ -260,7 +266,10 @@ void Settings::restoreSnapshot()
             continue;
         }
 
-        setting->marshalJSON(snapshot[path]);
+        pajlada::Settings::SignalArgs args;
+        args.compareBeforeSet = true;
+
+        setting->marshalJSON(snapshot[path], std::move(args));
     }
 }
 

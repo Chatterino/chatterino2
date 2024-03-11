@@ -586,7 +586,8 @@ void UserInfoPopup::themeChangedEvent()
 
     for (auto &&child : this->findChildren<QCheckBox *>())
     {
-        child->setFont(getFonts()->getFont(FontStyle::UiMedium, this->scale()));
+        child->setFont(
+            getIApp()->getFonts()->getFont(FontStyle::UiMedium, this->scale()));
     }
 }
 

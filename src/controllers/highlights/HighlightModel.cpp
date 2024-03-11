@@ -238,9 +238,10 @@ void HighlightModel::afterInit()
     const std::vector<QStandardItem *> automodRow = this->createRow();
     setBoolItem(automodRow[Column::Pattern],
                 getSettings()->enableAutomodHighlight.getValue(), true, false);
+    setBoolItem(automodRow[Column::ShowInMentions],
+                getSettings()->showAutomodInMentions.getValue(), true, false);
     automodRow[Column::Pattern]->setData("AutoMod Caught Messages",
                                          Qt::DisplayRole);
-    automodRow[Column::ShowInMentions]->setFlags({});
     setBoolItem(automodRow[Column::FlashTaskbar],
                 getSettings()->enableAutomodHighlightTaskbar.getValue(), true,
                 false);
@@ -253,8 +254,9 @@ void HighlightModel::afterInit()
     const auto automodSound =
         QUrl(getSettings()->automodHighlightSoundUrl.getValue());
     setFilePathItem(automodRow[Column::SoundPath], automodSound, false);
-
-    automodRow[Column::Color]->setFlags(Qt::ItemFlag::NoItemFlags);
+    auto automodColor =
+        ColorProvider::instance().color(ColorType::AutomodHighlight);
+    setColorItem(automodRow[Column::Color], *automodColor, false);
 
     this->insertCustomRow(automodRow, HighlightRowIndexes::AutomodRow);
 }
@@ -320,6 +322,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 else if (rowIndex == HighlightRowIndexes::ThreadMessageRow)
                 {
                     getSettings()->showThreadHighlightInMentions.setValue(
+                        value.toBool());
+                }
+                else if (rowIndex == HighlightRowIndexes::AutomodRow)
+                {
+                    getSettings()->showAutomodInMentions.setValue(
                         value.toBool());
                 }
             }
@@ -501,6 +508,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 {
                     setColor(getSettings()->threadHighlightColor,
                              ColorType::ThreadMessageHighlight);
+                }
+                else if (rowIndex == HighlightRowIndexes::AutomodRow)
+                {
+                    setColor(getSettings()->automodHighlightColor,
+                             ColorType::AutomodHighlight);
                 }
             }
         }

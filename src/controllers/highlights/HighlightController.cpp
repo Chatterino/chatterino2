@@ -213,6 +213,8 @@ void rebuildMessageHighlights(Settings &settings,
             settings.enableAutomodHighlightTaskbar.getValue();
         const auto highlightSoundUrlValue =
             settings.automodHighlightSoundUrl.getValue();
+        auto highlightColor =
+            ColorProvider::instance().color(ColorType::AutomodHighlight);
 
         checks.emplace_back(HighlightCheck{
             [=](const auto & /*args*/, const auto & /*badges*/,
@@ -234,7 +236,7 @@ void rebuildMessageHighlights(Settings &settings,
                     highlightAlert,     // alert
                     highlightSound,     // playSound
                     highlightSoundUrl,  // customSoundUrl
-                    nullptr,            // color
+                    highlightColor,     // color
                     false,              // showInMentions
                 };
             }});
@@ -471,6 +473,7 @@ void HighlightController::initialize(Settings &settings,
     this->rebuildListener_.addSetting(settings.showThreadHighlightInMentions);
 
     this->rebuildListener_.addSetting(settings.enableAutomodHighlight);
+    this->rebuildListener_.addSetting(settings.showAutomodInMentions);
     this->rebuildListener_.addSetting(settings.enableAutomodHighlightSound);
     this->rebuildListener_.addSetting(settings.enableAutomodHighlightTaskbar);
     this->rebuildListener_.addSetting(settings.automodHighlightSoundUrl);

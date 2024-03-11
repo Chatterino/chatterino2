@@ -14,7 +14,9 @@ Each plugin should have its own directory.
 Chatterino Plugins dir/
 └── plugin_name/
     ├── init.lua
-    └── info.json
+    ├── info.json
+    └── data/
+        └── This is where your data/configs can be dumped
 ```
 
 `init.lua` will be the file loaded when the plugin is enabled. You may load other files using [`require` global function](#requiremodname).
@@ -35,11 +37,53 @@ Example file:
   "homepage": "https://github.com/Chatterino/Chatterino2",
   "tags": ["test"],
   "version": "0.0.0",
-  "license": "MIT"
+  "license": "MIT",
+  "permissions": []
 }
 ```
 
 An example plugin is available at [https://github.com/Mm2PL/Chatterino-test-plugin](https://github.com/Mm2PL/Chatterino-test-plugin)
+
+## Permissions
+
+Plugins can have permissions associated to them. Unless otherwise noted functions don't require permissions.
+These are the valid permissions:
+
+### FilesystemRead
+
+Allows the plugin to read from its data directory.
+
+Example:
+
+```json
+{
+  ...,
+  "permissions": [
+    {
+      "type": "FilesystemRead"
+    },
+    ...
+  ]
+}
+```
+
+### FilesystemWrite
+
+Allows the plugin to write to files and create files in its data directory.
+
+Example:
+
+```json
+{
+  ...,
+  "permissions": [
+    {
+      "type": "FilesystemWrite"
+    },
+    ...
+  ]
+}
+```
 
 ## Plugins with Typescript
 
@@ -60,9 +104,10 @@ script](../scripts/make_luals_meta.py).
 The following parts of the Lua standard library are loaded:
 
 - `_G` (most globals)
-- `table`
-- `string`
+- `io` - except `stdin`, `stdout`, `stderr`. Some functions require permissions.
 - `math`
+- `string`
+- `table`
 - `utf8`
 
 The official manual for them is available [here](https://www.lua.org/manual/5.4/manual.html#6).
@@ -325,6 +370,117 @@ Returns `true` if the channel can be moderated by the current user.
 
 Returns `true` if the current user is a VIP in the channel.
 
+### Input/Output API
+
+These functions are wrappers for Lua's I/O library. Functions on file pointer
+objects (`FILE*`) are not modified or replaced. [You can read the documentation
+for them here](https://www.lua.org/manual/5.4/manual.html#pdf-file:close).
+Chatterino does _not_ give you stdin and stdout as default input and output
+respectively. The following objects are missing from the `io` table exposed by
+Chatterino compared to Lua's native library: `stdin`, `stdout`, `stderr`.
+
+#### `close([file])`
+
+Closes a file. If not given, `io.output()` is used instead.
+
+See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-io.close)
+
+#### `flush()`
+
+Flushes `io.output()`.
+
+See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-io.flush)
+
+#### `input([file_or_name])`
+
+When called with no arguments this function returns the default input file.
+This variant requires no permissions.
+
+When called with a file object, it will set the default input file to the one
+given. This one also requires no permissions.
+
+When called with a filename as a string, it will open that file for reading.
+Equivalent to: `io.input(io.open(filename))`. This variant requires
+the `FilesystemRead` permission and the given file to be within the plugin's
+data directory.
+
+See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-io.input)
+
+#### `lines([filename, ...])`
+
+With no arguments this function is equivalent to `io.input():lines("l")`. See
+[Lua documentation for file:flush()](https://www.lua.org/manual/5.4/manual.html#pdf-file:flush).
+This variant requires no permissions.
+
+With `filename` given it is most like `io.open(filename):lines(...)`. This
+variant requires the `FilesystemRead` permission and the given file to be
+within the plugin's data directory.
+
+See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-io.lines)
+
+#### `open(filename [, mode])`
+
+This functions opens the given file with a mode. It requires `filename` to be
+within the plugin's data directory. A call with no mode given is equivalent to
+one with `mode="r"`.
+Depending on the mode this function has slightly different behavior:
+
+| Mode        | Permission        | Read? | Write? | Truncate? | Create? |
+| ----------- | ----------------- | ----- | ------ | --------- | ------- |
+| `r` read    | `FilesystemRead`  | Yes   | No     | No        | No      |
+| `w` write   | `FilesystemWrite` | No    | Yes    | Yes       | Yes     |
+| `a` append  | `FilesystemWrite` | No    | Append | No        | Yes     |
+| `r+` update | `FilesystemWrite` | Yes   | Yes    | No        | No      |
+| `w+` update | `FilesystemWrite` | Yes   | Yes    | Yes       | Yes     |
+| `a+` update | `FilesystemWrite` | Yes   | Append | No        | Yes     |
+
+To open a file in binary mode add a `b` at the end of the mode.
+
+See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-io.open)
+
+#### `output([file_or_name])`
+
+This is identical to [`io.input()`](#inputfile_or_name) but operates on the
+default output and opens the file in write mode instead. Requires
+`FilesystemWrite` instead of `FilesystemRead`.
+
+See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-io.output)
+
+#### `popen(exe [, mode])`
+
+This function is unavailable in Chatterino. Calling it results in an error
+message to let you know that it's not available, no permissions needed.
+
+See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-io.popen)
+
+#### `read(...)`
+
+Equivalent to `io.input():read(...)`. See [`io.input()`](#inputfile_or_name)
+and [`file:read()`](https://www.lua.org/manual/5.4/manual.html#pdf-file:read).
+
+See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-io.read)
+
+#### `tmpfile()`
+
+This function is unavailable in Chatterino. Calling it results in an error
+message to let you know that it's not available, no permissions needed.
+
+See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-io.tmpfile)
+
+#### `type(obj)`
+
+This functions allows you to tell if the object is a `file`, a `closed file` or
+a different bit of data.
+
+See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-io.type)
+
+#### `write(...)`
+
+Equivalent to `io.output():write(...)`. See [`io.output()`](#outputfile_or_name)
+and [`file:write()`](https://www.lua.org/manual/5.4/manual.html#pdf-file:write).
+
+See [official documentation](https://www.lua.org/manual/5.4/manual.html#pdf-io.write)
+
 ### Changed globals
 
 #### `load(chunk [, chunkname [, mode [, env]]])`
@@ -344,7 +500,8 @@ However, the searcher and load configuration is notably different from the defau
 - `package.path` is not used, in its place are two searchers,
 - when `require()` is used, first a file relative to the currently executing
   file will be checked, then a file relative to the plugin directory,
-- binary chunks are never loaded
+- binary chunks are never loaded,
+- files inside of the plugin `data` directory are never loaded
 
 As in normal Lua, dots are converted to the path separators (`'/'` on Linux and Mac, `'\'` on Windows).
 
@@ -354,6 +511,7 @@ Example:
 require("stuff") -- executes Plugins/name/stuff.lua or $(dirname $CURR_FILE)/stuff.lua
 require("dir.name") -- executes Plugins/name/dir/name.lua or $(dirname $CURR_FILE)/dir/name.lua
 require("binary") -- tried to load Plugins/name/binary.lua and errors because binary is not a text file
+require("data.file") -- tried to load Plugins/name/data/file.lua and errors because that is not allowed
 ```
 
 #### `print(Args...)`

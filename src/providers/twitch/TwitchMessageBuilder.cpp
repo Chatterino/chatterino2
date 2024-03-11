@@ -2018,6 +2018,7 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeAutomodMessage(
     builder.message().flags.set(MessageFlag::PubSub);
     builder.message().flags.set(MessageFlag::Timeout);
     builder.message().flags.set(MessageFlag::AutoMod);
+    builder.message().flags.set(MessageFlag::AutoModOffendingMessageHeader);
 
     // AutoMod shield badge
     builder.emplace<BadgeElement>(makeAutoModBadge(),

@@ -283,6 +283,7 @@ StackIdx push(lua_State *L, T inp)
 
 /**
  * @brief Converts a Lua object into c++ and removes it from the stack.
+ * If peek fails, the object is still removed from the stack.
  *
  * Relies on bool peek(lua_State*, T*, StackIdx) existing.
  */
@@ -291,14 +292,11 @@ bool pop(lua_State *L, T *out, StackIdx idx = -1)
 {
     StackGuard guard(L, -1);
     auto ok = peek(L, out, idx);
-    if (ok)
+    if (idx < 0)
     {
-        if (idx < 0)
-        {
-            idx = lua_gettop(L) + idx + 1;
-        }
-        lua_remove(L, idx);
+        idx = lua_gettop(L) + idx + 1;
     }
+    lua_remove(L, idx);
     return ok;
 }
 

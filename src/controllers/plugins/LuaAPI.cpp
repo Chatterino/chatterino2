@@ -266,6 +266,14 @@ int loadfile(lua_State *L, const QString &str)
             L, QString("requested module is outside of the plugin directory"));
         return 1;
     }
+    auto datadir = QUrl(pl->dataDirectory().canonicalPath() + "/");
+    if (datadir.isParentOf(str))
+    {
+        lua::push(L, QString("requested file is data, not code, see Chatterino "
+                             "documentation"));
+        return 1;
+    }
+
     QFileInfo info(str);
     if (!info.exists())
     {

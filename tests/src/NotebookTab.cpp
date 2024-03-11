@@ -5,6 +5,7 @@
 #include "gmock/gmock.h"
 #include "mocks/EmptyApplication.hpp"
 #include "singletons/Fonts.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "widgets/Notebook.hpp"
 
@@ -21,6 +22,11 @@ namespace {
 class MockApplication : mock::EmptyApplication
 {
 public:
+    MockApplication()
+        : settings(this->settingsDir.filePath("settings.json"))
+        , fonts(this->settings)
+    {
+    }
     Theme *getThemes() override
     {
         return &this->theme;
@@ -36,6 +42,7 @@ public:
         return &this->fonts;
     }
 
+    Settings settings;
     Theme theme;
     HotkeyController hotkeys;
     Fonts fonts;

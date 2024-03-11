@@ -74,11 +74,13 @@ ChannelPtr ChannelRef::getOrError(lua_State *L, bool expiredOk)
     if (lua_isuserdata(L, lua_gettop(L)) == 0)
     {
         luaL_error(
-            L, "Called c2.Channel method with a non Channel 'self' argument.");
+            L, "Called c2.Channel method with a non-userdata 'self' argument");
         return nullptr;
     }
-    auto *data = WeakPtrUserData<UserData::Type::Channel, Channel>::from(
-        lua_touserdata(L, lua_gettop(L)));
+    // luaL_checkudata is no-return if check fails
+    auto *checked = luaL_checkudata(L, lua_gettop(L), "c2.Channel");
+    auto *data =
+        WeakPtrUserData<UserData::Type::Channel, Channel>::from(checked);
     if (data == nullptr)
     {
         luaL_error(L,

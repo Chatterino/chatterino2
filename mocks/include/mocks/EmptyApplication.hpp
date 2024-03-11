@@ -5,6 +5,8 @@
 #include "singletons/Paths.hpp"
 #include "singletons/Updates.hpp"
 
+#include <QTemporaryDir>
+
 namespace chatterino::mock {
 
 class EmptyApplication : public IApplication
@@ -249,7 +251,8 @@ public:
         return nullptr;
     }
 
-private:
+protected:
+    QTemporaryDir settingsDir;
     Paths paths_;
     Args args_;
     Updates updates_;

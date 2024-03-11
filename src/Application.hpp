@@ -140,7 +140,7 @@ public:
 
 private:
     Theme *const themes{};
-    Fonts *const fonts{};
+    std::unique_ptr<Fonts> fonts{};
     Emotes *const emotes{};
     AccountController *const accounts{};
     HotkeyController *const hotkeys{};

@@ -52,15 +52,17 @@ enum class MessageFlag : int64_t {
     LiveUpdatesAdd = (1LL << 28),
     LiveUpdatesRemove = (1LL << 29),
     LiveUpdatesUpdate = (1LL << 30),
+    /// The header of a message caught by AutoMod containing allow/disallow
+    AutoModOffendingMessageHeader = (1LL << 31),
     /// The message caught by AutoMod containing the user who sent the message & its contents
-    AutoModOffendingMessage = (1LL << 31),
-    LowTrustUsers = (1LL << 32),
+    AutoModOffendingMessage = (1LL << 32),
+    LowTrustUsers = (1LL << 33),
     /// The message is sent by a user marked as restricted with Twitch's "Low Trust"/"Suspicious User" feature
-    RestrictedMessage = (1LL << 33),
+    RestrictedMessage = (1LL << 34),
     /// The message is sent by a user marked as monitor with Twitch's "Low Trust"/"Suspicious User" feature
-    MonitoredMessage = (1LL << 34),
+    MonitoredMessage = (1LL << 35),
     /// The message is an ACTION message (/me)
-    Action = (1LL << 35),
+    Action = (1LL << 36),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 
