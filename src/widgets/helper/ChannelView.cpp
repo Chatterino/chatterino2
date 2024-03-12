@@ -891,7 +891,7 @@ ChannelPtr ChannelView::channel()
 
 bool ChannelView::showScrollbarHighlights() const
 {
-    return this->underlyingChannel_->getType() != Channel::Type::TwitchMentions;
+    return this->channel_->getType() != Channel::Type::TwitchMentions;
 }
 
 void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
@@ -1290,7 +1290,7 @@ void ChannelView::messagesUpdated()
         this->lastMessageHasAlternateBackground_ =
             !this->lastMessageHasAlternateBackground_;
 
-        if (this->underlyingChannel_->shouldIgnoreHighlights())
+        if (this->channel_->shouldIgnoreHighlights())
         {
             messageLayout->flags.set(MessageLayoutFlag::IgnoreHighlights);
         }
@@ -2183,7 +2183,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             if (hoverLayoutElement->getFlags().has(
                     MessageElementFlag::Username))
             {
-                openTwitchUsercard(this->underlyingChannel_->getName(),
+                openTwitchUsercard(this->channel_->getName(),
                                    hoverLayoutElement->getLink().value);
                 return;
             }
@@ -3057,18 +3057,18 @@ bool ChannelView::canReplyToMessages() const
         return false;
     }
 
-    if (this->underlyingChannel_ == nullptr)
+    if (this->channel_ == nullptr)
     {
         return false;
     }
 
-    if (!this->underlyingChannel_->isTwitchChannel())
+    if (!this->channel_->isTwitchChannel())
     {
         return false;
     }
 
-    if (this->underlyingChannel_->getType() == Channel::Type::TwitchWhispers ||
-        this->underlyingChannel_->getType() == Channel::Type::TwitchLive)
+    if (this->channel_->getType() == Channel::Type::TwitchWhispers ||
+        this->channel_->getType() == Channel::Type::TwitchLive)
     {
         return false;
     }
