@@ -1130,7 +1130,7 @@ void ChannelView::messageAppended(MessagePtr &message,
     {
         messageRef->flags.set(MessageLayoutFlag::AlternateBackground);
     }
-    if (this->underlyingChannel_->shouldIgnoreHighlights())
+    if (this->channel_->shouldIgnoreHighlights())
     {
         messageRef->flags.set(MessageLayoutFlag::IgnoreHighlights);
     }
