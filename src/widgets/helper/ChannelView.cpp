@@ -453,7 +453,8 @@ void ChannelView::initializeSignals()
     this->signalHolder_.managedConnect(
         getIApp()->getWindows()->layoutRequested, [&](Channel *channel) {
             if (this->isVisible() &&
-                (channel == nullptr || this->channel_.get() == channel))
+                (channel == nullptr ||
+                 this->underlyingChannel_.get() == channel))
             {
                 this->queueLayout();
             }
@@ -463,7 +464,8 @@ void ChannelView::initializeSignals()
         getIApp()->getWindows()->invalidateBuffersRequested,
         [this](Channel *channel) {
             if (this->isVisible() &&
-                (channel == nullptr || this->channel_.get() == channel))
+                (channel == nullptr ||
+                 this->underlyingChannel_.get() == channel))
             {
                 this->invalidateBuffers();
             }
@@ -889,7 +891,7 @@ ChannelPtr ChannelView::channel()
 
 bool ChannelView::showScrollbarHighlights() const
 {
-    return this->channel_->getType() != Channel::Type::TwitchMentions;
+    return this->underlyingChannel_->getType() != Channel::Type::TwitchMentions;
 }
 
 void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
@@ -1128,7 +1130,7 @@ void ChannelView::messageAppended(MessagePtr &message,
     {
         messageRef->flags.set(MessageLayoutFlag::AlternateBackground);
     }
-    if (this->channel_->shouldIgnoreHighlights())
+    if (this->underlyingChannel_->shouldIgnoreHighlights())
     {
         messageRef->flags.set(MessageLayoutFlag::IgnoreHighlights);
     }
@@ -1288,7 +1290,7 @@ void ChannelView::messagesUpdated()
         this->lastMessageHasAlternateBackground_ =
             !this->lastMessageHasAlternateBackground_;
 
-        if (this->channel_->shouldIgnoreHighlights())
+        if (this->underlyingChannel_->shouldIgnoreHighlights())
         {
             messageLayout->flags.set(MessageLayoutFlag::IgnoreHighlights);
         }
@@ -2181,7 +2183,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             if (hoverLayoutElement->getFlags().has(
                     MessageElementFlag::Username))
             {
-                openTwitchUsercard(this->channel_->getName(),
+                openTwitchUsercard(this->underlyingChannel_->getName(),
                                    hoverLayoutElement->getLink().value);
                 return;
             }
@@ -2999,10 +3001,6 @@ void ChannelView::setInputReply(const MessagePtr &message)
         // Message did not already have a thread attached, try to find or create one
         auto *tc =
             dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get());
-        if (!tc)
-        {
-            tc = dynamic_cast<TwitchChannel *>(this->channel_.get());
-        }
 
         if (tc)
         {
@@ -3059,18 +3057,18 @@ bool ChannelView::canReplyToMessages() const
         return false;
     }
 
-    if (this->channel_ == nullptr)
+    if (this->underlyingChannel_ == nullptr)
     {
         return false;
     }
 
-    if (!this->channel_->isTwitchChannel())
+    if (!this->underlyingChannel_->isTwitchChannel())
     {
         return false;
     }
 
-    if (this->channel_->getType() == Channel::Type::TwitchWhispers ||
-        this->channel_->getType() == Channel::Type::TwitchLive)
+    if (this->underlyingChannel_->getType() == Channel::Type::TwitchWhispers ||
+        this->underlyingChannel_->getType() == Channel::Type::TwitchLive)
     {
         return false;
     }
