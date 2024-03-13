@@ -26,11 +26,23 @@ QString sendAnnouncementColor(const CommandContext &ctx,
         return "";
     }
 
+    QString colorStr = "";
+    if (color != HelixAnnouncementColor::Primary)
+    {
+        colorStr =
+            QString::fromStdString(
+                std::string{
+                    magic_enum::enum_name<HelixAnnouncementColor>(color)})
+                .toLower();
+    }
+
     if (ctx.words.size() < 2)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "Usage: /announce <message> - Call attention to your "
-            "message with a highlight."));
+            QString("Usage: /announce%1 <message> - Call attention to your "
+                    "message with a %1%2highlight.")
+                .arg(colorStr)
+                .arg(color == HelixAnnouncementColor::Primary ? "" : " ")));
         return "";
     }
 
@@ -38,7 +50,8 @@ QString sendAnnouncementColor(const CommandContext &ctx,
     if (user->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "You must be logged in to use the /announce command."));
+            QString("You must be logged in to use the /announce%1 command.")
+                .arg(colorStr)));
         return "";
     }
 
