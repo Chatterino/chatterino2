@@ -11,7 +11,8 @@
 
 namespace chatterino::commands {
 
-QString sendAnnouncement(const CommandContext &ctx)
+QString sendAnnouncementColor(const CommandContext &ctx,
+                              const HelixAnnouncementColor color)
 {
     if (ctx.channel == nullptr)
     {
@@ -43,7 +44,7 @@ QString sendAnnouncement(const CommandContext &ctx)
 
     getHelix()->sendChatAnnouncement(
         ctx.twitchChannel->roomId(), user->getUserId(),
-        ctx.words.mid(1).join(" "), HelixAnnouncementColor::Primary,
+        ctx.words.mid(1).join(" "), color,
         []() {
             // do nothing.
         },
@@ -76,6 +77,31 @@ QString sendAnnouncement(const CommandContext &ctx)
             channel->addMessage(makeSystemMessage(errorMessage));
         });
     return "";
+}
+
+QString sendAnnouncement(const CommandContext &ctx)
+{
+    return sendAnnouncementColor(ctx, HelixAnnouncementColor::Primary);
+}
+
+QString sendAnnouncementBlue(const CommandContext &ctx)
+{
+    return sendAnnouncementColor(ctx, HelixAnnouncementColor::Blue);
+}
+
+QString sendAnnouncementGreen(const CommandContext &ctx)
+{
+    return sendAnnouncementColor(ctx, HelixAnnouncementColor::Green);
+}
+
+QString sendAnnouncementOrange(const CommandContext &ctx)
+{
+    return sendAnnouncementColor(ctx, HelixAnnouncementColor::Orange);
+}
+
+QString sendAnnouncementPurple(const CommandContext &ctx)
+{
+    return sendAnnouncementColor(ctx, HelixAnnouncementColor::Purple);
 }
 
 }  // namespace chatterino::commands

@@ -401,6 +401,10 @@ void CommandController::initialize(Settings &, const Paths &paths)
     this->registerCommand("/unmod", &commands::removeModerator);
 
     this->registerCommand("/announce", &commands::sendAnnouncement);
+    this->registerCommand("/announceblue", &commands::sendAnnouncementBlue);
+    this->registerCommand("/announcegreen", &commands::sendAnnouncementGreen);
+    this->registerCommand("/announceorange", &commands::sendAnnouncementOrange);
+    this->registerCommand("/announcepurple", &commands::sendAnnouncementPurple);
 
     this->registerCommand("/vip", &commands::addVIP);
 
