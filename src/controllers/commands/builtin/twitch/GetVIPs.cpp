@@ -78,11 +78,11 @@ QString getVIPs(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /vips command only works in Twitch channels"));
+            "The /vips command only works in Twitch channels."));
         return "";
     }
 
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(

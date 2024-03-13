@@ -28,7 +28,7 @@ ImageUploaderPage::ImageUploaderPage()
     {
         auto layout = tabs.appendTab(new QVBoxLayout, "Logs");
 
-        auto *model = getApp()->imageUploader->createModel(nullptr);
+        auto *model = getApp()->getImageUploader()->createModel(nullptr);
 
         auto container = layout.emplace<QVBoxLayout>();
         container->setContentsMargins(0, 0, 0, 0);
@@ -78,7 +78,7 @@ ImageUploaderPage::ImageUploaderPage()
             {
                 model->removeRow(row);
             }
-            getApp()->imageUploader->save();
+            getApp()->getImageUploader()->save();
         });
         QObject::connect(
             view, &QTableView::doubleClicked, [](const QModelIndex &clicked) {

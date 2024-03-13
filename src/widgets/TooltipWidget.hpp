@@ -29,9 +29,7 @@ class TooltipWidget : public BaseWindow
     Q_OBJECT
 
 public:
-    static TooltipWidget *instance();
-
-    TooltipWidget(BaseWidget *parent = nullptr);
+    TooltipWidget(BaseWidget *parent);
     ~TooltipWidget() override = default;
 
     void setOne(const TooltipEntry &entry,

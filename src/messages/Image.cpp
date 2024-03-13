@@ -2,8 +2,8 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "debug/Benchmark.hpp"
@@ -54,7 +54,7 @@ namespace detail {
             DebugCount::increase("animated images");
 
             this->gifTimerConnection_ =
-                getApp()->emotes->gifTimer.signal.connect([this] {
+                getIApp()->getEmotes()->getGIFTimer().signal.connect([this] {
                     this->advance();
                 });
         }
@@ -209,7 +209,9 @@ namespace detail {
                 // https://github.com/SevenTV/chatterino7/issues/46#issuecomment-1010595231
                 int duration = reader.nextImageDelay();
                 if (duration <= 10)
+                {
                     duration = 100;
+                }
                 duration = std::max(20, duration);
                 frames.push_back(Frame<QImage>{std::move(image), duration});
             }
@@ -251,7 +253,7 @@ namespace detail {
             }
         }
 
-        getApp()->windows->forceLayoutChannelViews();
+        getIApp()->getWindows()->forceLayoutChannelViews();
 
         loadedEventQueued = false;
     }
@@ -317,7 +319,7 @@ Image::~Image()
     }
 }
 
-ImagePtr Image::fromUrl(const Url &url, qreal scale)
+ImagePtr Image::fromUrl(const Url &url, qreal scale, QSize expectedSize)
 {
     static std::unordered_map<Url, std::weak_ptr<Image>> cache;
     static std::mutex mutex;
@@ -328,7 +330,7 @@ ImagePtr Image::fromUrl(const Url &url, qreal scale)
 
     if (!shared)
     {
-        cache[url] = shared = ImagePtr(new Image(url, scale));
+        cache[url] = shared = ImagePtr(new Image(url, scale, expectedSize));
     }
 
     return shared;
@@ -381,9 +383,11 @@ Image::Image()
 {
 }
 
-Image::Image(const Url &url, qreal scale)
+Image::Image(const Url &url, qreal scale, QSize expectedSize)
     : url_(url)
     , scale_(scale)
+    , expectedSize_(expectedSize.isValid() ? expectedSize
+                                           : (QSize(16, 16) * scale))
     , shouldLoad_(true)
     , frames_(std::make_unique<detail::Frames>())
 {
@@ -480,11 +484,11 @@ int Image::width() const
 
     if (auto pixmap = this->frames_->first())
     {
-        return int(pixmap->width() * this->scale_);
+        return static_cast<int>(pixmap->width() * this->scale_);
     }
 
-    // No frames loaded, use our default magic width 16
-    return 16;
+    // No frames loaded, use the expected size
+    return static_cast<int>(this->expectedSize_.width() * this->scale_);
 }
 
 int Image::height() const
@@ -493,11 +497,11 @@ int Image::height() const
 
     if (auto pixmap = this->frames_->first())
     {
-        return int(pixmap->height() * this->scale_);
+        return static_cast<int>(pixmap->height() * this->scale_);
     }
 
-    // No frames loaded, use our default magic height 16
-    return 16;
+    // No frames loaded, use the expected size
+    return static_cast<int>(this->expectedSize_.height() * this->scale_);
 }
 
 void Image::actuallyLoad()

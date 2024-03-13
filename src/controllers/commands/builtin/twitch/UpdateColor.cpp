@@ -22,16 +22,16 @@ QString updateUserColor(const CommandContext &ctx)
     if (!ctx.channel->isTwitchChannel())
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /color command only works in Twitch channels"));
+            "The /color command only works in Twitch channels."));
         return "";
     }
-    auto user = getApp()->accounts->twitch.getCurrent();
+    auto user = getIApp()->getAccounts()->twitch.getCurrent();
 
     // Avoid Helix calls without Client ID and/or OAuth Token
     if (user->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "You must be logged in to use the /color command"));
+            "You must be logged in to use the /color command."));
         return "";
     }
 

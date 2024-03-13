@@ -1,8 +1,9 @@
 #include "singletons/imageuploader/ImageUploader.hpp"
 
+#include "Application.hpp"
 #include "common/Env.hpp"
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -55,15 +56,51 @@ void ImageUploader::logToFile(const QString &originalFilePath,
                               const QString &imageLink,
                               const QString &deletionLink, ChannelPtr channel)
 {
-    this->images_.append(UploadedImage{
-        .channelName = channel->getName(),
-        .deletionLink = deletionLink,
-        .imageLink = imageLink,
-        .localPath = originalFilePath,
-        .timestamp = QDateTime::currentSecsSinceEpoch(),
-    });
-    qCDebug(chatterinoCommon) << "Saving ImageUploader.json";
-    this->sm_->save();
+    const QString logFileName =
+        combinePath((getSettings()->logPath.getValue().isEmpty()
+                         ? getIApp()->getPaths().messageLogDirectory
+                         : getSettings()->logPath),
+                    "ImageUploader.json");
+
+    //reading existing logs
+    QFile logReadFile(logFileName);
+    bool isLogFileOkay =
+        logReadFile.open(QIODevice::ReadWrite | QIODevice::Text);
+    if (!isLogFileOkay)
+    {
+        channel->addMessage(makeSystemMessage(
+            QString("Failed to open log file with links at ") + logFileName));
+        return;
+    }
+    auto logs = logReadFile.readAll();
+    if (logs.isEmpty())
+    {
+        logs = QJsonDocument(QJsonArray()).toJson();
+    }
+    logReadFile.close();
+
+    //writing new data to logs
+    QJsonObject newLogEntry;
+    newLogEntry["channelName"] = channel->getName();
+    newLogEntry["deletionLink"] =
+        deletionLink.isEmpty() ? QJsonValue(QJsonValue::Null) : deletionLink;
+    newLogEntry["imageLink"] = imageLink;
+    newLogEntry["localPath"] = originalFilePath.isEmpty()
+                                   ? QJsonValue(QJsonValue::Null)
+                                   : originalFilePath;
+    newLogEntry["timestamp"] = QDateTime::currentSecsSinceEpoch();
+    // channel name
+    // deletion link (can be empty)
+    // image link
+    // local path to an image (can be empty)
+    // timestamp
+    QSaveFile logSaveFile(logFileName);
+    logSaveFile.open(QIODevice::WriteOnly | QIODevice::Text);
+    QJsonArray entries = QJsonDocument::fromJson(logs).array();
+    entries.push_back(newLogEntry);
+    logSaveFile.write(QJsonDocument(entries).toJson());
+    logSaveFile.commit();
+    //>>>>>>> e7508332ff1399a89424bfdc0997f979fd0c9acc:src/singletons/ImageUploader.cpp
 }
 
 // extracting link to either image or its deletion from response body
@@ -103,10 +140,10 @@ UploadedImageModel *ImageUploader::createModel(QObject *parent)
     return model;
 }
 
-void ImageUploader::initialize(Settings &settings, Paths &paths)
+void ImageUploader::initialize(Settings &settings, const Paths &paths)
 {
     auto logPath = (getSettings()->logPath.getValue().isEmpty()
-                        ? getPaths()->messageLogDirectory
+                        ? paths.messageLogDirectory
                         : getSettings()->logPath);
     const QString oldLogName = combinePath(logPath, "ImageUploader.json");
 
@@ -177,9 +214,6 @@ void ImageUploader::sendImageUploadRequest(RawImageData imageData,
                                            ChannelPtr channel,
                                            QPointer<ResizingTextEdit> textEdit)
 {
-    const static char *const boundary = "thisistheboudaryasd";
-    const static QString contentType =
-        QString("multipart/form-data; boundary=%1").arg(boundary);
     QUrl url(getSettings()->imageUploaderUrl.getValue().isEmpty()
                  ? getSettings()->imageUploaderUrl.getDefaultValue()
                  : getSettings()->imageUploaderUrl);
@@ -202,11 +236,9 @@ void ImageUploader::sendImageUploadRequest(RawImageData imageData,
                    QString("form-data; name=\"%1\"; filename=\"control_v.%2\"")
                        .arg(formField)
                        .arg(imageData.format));
-    payload->setBoundary(boundary);
     payload->append(part);
 
     NetworkRequest(url, NetworkRequestType::Post)
-        .header("Content-Type", contentType)
         .headerList(extraHeaders)
         .multiPart(payload)
         .onSuccess(
@@ -292,7 +324,7 @@ void ImageUploader::handleSuccessfulUpload(const NetworkResult &result,
     }
     else
     {
-        QTimer::singleShot(UPLOAD_DELAY, [channel, &textEdit, this]() {
+        QTimer::singleShot(UPLOAD_DELAY, [channel, textEdit, this]() {
             this->sendImageUploadRequest(this->uploadQueue_.front(), channel,
                                          textEdit);
             this->uploadQueue_.pop();
@@ -313,8 +345,11 @@ void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,
     }
 
     channel->addMessage(makeSystemMessage(QString("Started upload...")));
-    if (source->hasUrls())
-    {
+    auto tryUploadFromUrls = [&]() -> bool {
+        if (!source->hasUrls())
+        {
+            return false;
+        }
         auto mimeDb = QMimeDatabase();
         // This path gets chosen when files are copied from a file manager, like explorer.exe, caja.
         // Each entry in source->urls() is a QUrl pointing to a file that was copied.
@@ -331,8 +366,7 @@ void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,
                 {
                     channel->addMessage(
                         makeSystemMessage(QString("Couldn't load image :(")));
-                    this->uploadMutex_.unlock();
-                    return;
+                    return false;
                 }
 
                 auto imageData = convertToPng(img);
@@ -347,8 +381,7 @@ void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,
                         QString("Cannot upload file: %1. Couldn't convert "
                                 "image to png.")
                             .arg(localPath)));
-                    this->uploadMutex_.unlock();
-                    return;
+                    return false;
                 }
             }
             else if (mime.inherits("image/gif"))
@@ -361,21 +394,12 @@ void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,
                 {
                     channel->addMessage(
                         makeSystemMessage(QString("Failed to open file. :(")));
-                    this->uploadMutex_.unlock();
-                    return;
+                    return false;
                 }
+                // file.readAll() => might be a bit big but it /should/ work
                 RawImageData data = {file.readAll(), "gif", localPath};
                 this->uploadQueue_.push(data);
                 file.close();
-                // file.readAll() => might be a bit big but it /should/ work
-            }
-            else
-            {
-                channel->addMessage(makeSystemMessage(
-                    QString("Cannot upload file: %1. Not an image.")
-                        .arg(localPath)));
-                this->uploadMutex_.unlock();
-                return;
             }
         }
         if (!this->uploadQueue_.empty())
@@ -383,40 +407,52 @@ void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,
             this->sendImageUploadRequest(this->uploadQueue_.front(), channel,
                                          outputTextEdit);
             this->uploadQueue_.pop();
+            return true;
         }
-    }
-    else if (source->hasFormat("image/png"))
-    {
-        // the path to file is not present every time, thus the filePath is empty
-        this->sendImageUploadRequest({source->data("image/png"), "png", ""},
-                                     channel, outputTextEdit);
-    }
-    else if (source->hasFormat("image/jpeg"))
-    {
-        this->sendImageUploadRequest({source->data("image/jpeg"), "jpeg", ""},
-                                     channel, outputTextEdit);
-    }
-    else if (source->hasFormat("image/gif"))
-    {
-        this->sendImageUploadRequest({source->data("image/gif"), "gif", ""},
-                                     channel, outputTextEdit);
-    }
+        return false;
+    };
 
-    else
-    {  // not PNG, try loading it into QImage and save it to a PNG.
+    auto tryUploadDirectly = [&]() -> bool {
+        if (source->hasFormat("image/png"))
+        {
+            // the path to file is not present every time, thus the filePath is empty
+            this->sendImageUploadRequest({source->data("image/png"), "png", ""},
+                                         channel, outputTextEdit);
+            return true;
+        }
+        if (source->hasFormat("image/jpeg"))
+        {
+            this->sendImageUploadRequest(
+                {source->data("image/jpeg"), "jpeg", ""}, channel,
+                outputTextEdit);
+            return true;
+        }
+        if (source->hasFormat("image/gif"))
+        {
+            this->sendImageUploadRequest({source->data("image/gif"), "gif", ""},
+                                         channel, outputTextEdit);
+            return true;
+        }
+        // not PNG, try loading it into QImage and save it to a PNG.
         auto image = qvariant_cast<QImage>(source->imageData());
         auto imageData = convertToPng(image);
         if (imageData)
         {
             sendImageUploadRequest({*imageData, "png", ""}, channel,
                                    outputTextEdit);
+            return true;
         }
-        else
-        {
-            channel->addMessage(makeSystemMessage(
-                QString("Cannot upload file, failed to convert to png.")));
-            this->uploadMutex_.unlock();
-        }
+        // No direct upload happenned
+        channel->addMessage(makeSystemMessage(
+            QString("Cannot upload file, failed to convert to png.")));
+        return false;
+    };
+
+    if (!tryUploadFromUrls() && !tryUploadDirectly())
+    {
+        channel->addMessage(
+            makeSystemMessage(QString("Cannot upload file from clipboard.")));
+        this->uploadMutex_.unlock();
     }
 }
 

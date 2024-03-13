@@ -8,6 +8,8 @@
 #include <QColor>
 #include <QUrl>
 
+#include <optional>
+
 namespace chatterino {
 
 class Badge;
@@ -52,11 +54,15 @@ protected:
 
     virtual Outcome tryAppendEmote(const EmoteName &name)
     {
+        (void)name;
         return Failure;
     }
 
     // parseHighlights only updates the visual state of the message, but leaves the playing of alerts and sounds to the triggerHighlights function
     virtual void parseHighlights();
+    static void triggerHighlights(const QString &channelName, bool playSound,
+                                  const std::optional<QUrl> &customSoundUrl,
+                                  bool windowAlert);
 
     void appendChannelName();
 
@@ -72,8 +78,7 @@ protected:
 
     bool highlightAlert_ = false;
     bool highlightSound_ = false;
-
-    QUrl highlightSoundUrl_;
+    std::optional<QUrl> highlightSoundCustomUrl_{};
 };
 
 }  // namespace chatterino

@@ -23,7 +23,7 @@ QString addVIP(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /vip command only works in Twitch channels"));
+            "The /vip command only works in Twitch channels."));
         return "";
     }
     if (ctx.words.size() < 2)
@@ -34,7 +34,7 @@ QString addVIP(const CommandContext &ctx)
         return "";
     }
 
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(

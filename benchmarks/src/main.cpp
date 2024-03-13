@@ -1,3 +1,4 @@
+#include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 
 #include <benchmark/benchmark.h>
@@ -10,6 +11,8 @@ using namespace chatterino;
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
+
+    initResources();
 
     ::benchmark::Initialize(&argc, argv);
 

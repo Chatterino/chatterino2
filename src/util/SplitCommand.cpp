@@ -70,7 +70,9 @@ QStringList chatterino::splitCommand(QStringView command)
         if (quoteCount)
         {
             if (quoteCount == 1)
+            {
                 inQuote = !inQuote;
+            }
             quoteCount = 0;
         }
         if (!inQuote && command.at(i).isSpace())
@@ -87,7 +89,9 @@ QStringList chatterino::splitCommand(QStringView command)
         }
     }
     if (!tmp.isEmpty())
+    {
         args += tmp;
+    }
 
     return args;
 }

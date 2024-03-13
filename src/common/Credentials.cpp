@@ -1,5 +1,7 @@
 #include "common/Credentials.hpp"
 
+#include "Application.hpp"
+#include "common/Modes.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
@@ -40,7 +42,7 @@ bool useKeyring()
 #ifdef NO_QTKEYCHAIN
     return false;
 #endif
-    if (getPaths()->isPortable())
+    if (Modes::instance().isPortable)
     {
         return false;
     }
@@ -55,7 +57,8 @@ bool useKeyring()
 // Insecure storage:
 QString insecurePath()
 {
-    return combinePath(getPaths()->settingsDirectory, "credentials.json");
+    return combinePath(getIApp()->getPaths().settingsDirectory,
+                       "credentials.json");
 }
 
 QJsonDocument loadInsecure()

@@ -35,7 +35,7 @@ public:
     void save() override;
     void upload(const QMimeData *source, ChannelPtr channel,
                 QPointer<ResizingTextEdit> outputTextEdit);
-    void initialize(Settings &settings, Paths &paths) override;
+    void initialize(Settings &settings, const Paths &paths) override;
     UploadedImageModel *createModel(QObject *parent);
 
 private:

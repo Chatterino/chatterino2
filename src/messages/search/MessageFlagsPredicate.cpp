@@ -52,6 +52,14 @@ MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags, bool negate)
         {
             this->flags_.set(MessageFlag::ReplyMessage);
         }
+        else if (flag == "restricted")
+        {
+            this->flags_.set(MessageFlag::RestrictedMessage);
+        }
+        else if (flag == "monitored")
+        {
+            this->flags_.set(MessageFlag::MonitoredMessage);
+        }
     }
 }
 

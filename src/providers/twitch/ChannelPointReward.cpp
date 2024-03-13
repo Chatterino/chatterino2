@@ -27,22 +27,31 @@ ChannelPointReward::ChannelPointReward(const QJsonObject &redemption)
     }
 
     auto imageValue = reward.value("image");
+    // From Twitch docs
+    // The size is only an estimation, the actual size might vary.
+    constexpr QSize baseSize(28, 28);
 
     if (imageValue.isObject())
     {
         auto imageObject = imageValue.toObject();
         this->image = ImageSet{
-            Image::fromUrl({imageObject.value("url_1x").toString()}, 1),
-            Image::fromUrl({imageObject.value("url_2x").toString()}, 0.5),
-            Image::fromUrl({imageObject.value("url_4x").toString()}, 0.25),
+            Image::fromUrl({imageObject.value("url_1x").toString()}, 1,
+                           baseSize),
+            Image::fromUrl({imageObject.value("url_2x").toString()}, 0.5,
+                           baseSize * 2),
+            Image::fromUrl({imageObject.value("url_4x").toString()}, 0.25,
+                           baseSize * 4),
         };
     }
     else
     {
         static const ImageSet defaultImage{
-            Image::fromUrl({TWITCH_CHANNEL_POINT_REWARD_URL("1.png")}, 1),
-            Image::fromUrl({TWITCH_CHANNEL_POINT_REWARD_URL("2.png")}, 0.5),
-            Image::fromUrl({TWITCH_CHANNEL_POINT_REWARD_URL("4.png")}, 0.25)};
+            Image::fromUrl({TWITCH_CHANNEL_POINT_REWARD_URL("1.png")}, 1,
+                           baseSize),
+            Image::fromUrl({TWITCH_CHANNEL_POINT_REWARD_URL("2.png")}, 0.5,
+                           baseSize * 2),
+            Image::fromUrl({TWITCH_CHANNEL_POINT_REWARD_URL("4.png")}, 0.25,
+                           baseSize * 4)};
         this->image = defaultImage;
     }
 }

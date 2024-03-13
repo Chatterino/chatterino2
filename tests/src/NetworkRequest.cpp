@@ -1,7 +1,7 @@
-#include "common/NetworkRequest.hpp"
+#include "common/network/NetworkRequest.hpp"
 
-#include "common/NetworkManager.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkManager.hpp"
+#include "common/network/NetworkResult.hpp"
 
 #include <gtest/gtest.h>
 #include <QCoreApplication>

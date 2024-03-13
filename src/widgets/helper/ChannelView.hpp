@@ -7,10 +7,12 @@
 #include "messages/Selection.hpp"
 #include "util/ThreadGuard.hpp"
 #include "widgets/BaseWidget.hpp"
+#include "widgets/TooltipWidget.hpp"
 
 #include <pajlada/signals/signal.hpp>
 #include <QMenu>
 #include <QPaintEvent>
+#include <QPointer>
 #include <QScroller>
 #include <QTimer>
 #include <QVariantAnimation>
@@ -46,6 +48,8 @@ class Split;
 class FilterSet;
 using FilterSetPtr = std::shared_ptr<FilterSet>;
 
+class LinkInfo;
+
 enum class PauseReason {
     Mouse,
     Selection,
@@ -74,11 +78,28 @@ public:
         Search,
     };
 
-    explicit ChannelView(BaseWidget *parent = nullptr, Split *split = nullptr,
+    /// Creates a channel view without a split.
+    /// In such a view, usercards and reply-threads can't be opened.
+    ///
+    /// @param parent The parent of this widget. Can be `nullptr`.
+    /// @param context The context in which this view is shown (e.g. as a usercard).
+    /// @param messagesLimit The maximum amount of messages this view will display.
+    explicit ChannelView(QWidget *parent, Context context = Context::None,
+                         size_t messagesLimit = 1000);
+
+    /// Creates a channel view in a split.
+    ///
+    /// @param parent The parent of this widget.
+    /// @param split The split containing this widget.
+    ///              @a split must be in the widget tree of @a parent.
+    /// @param context The context in which this view is shown (e.g. as a usercard).
+    /// @param messagesLimit The maximum amount of messages this view will display.
+    explicit ChannelView(QWidget *parent, Split *split,
                          Context context = Context::None,
                          size_t messagesLimit = 1000);
 
     void queueUpdate();
+    void queueUpdate(const QRect &area);
     Scrollbar &getScrollBar();
 
     QString getSelectedText();
@@ -130,7 +151,9 @@ public:
     bool hasSourceChannel() const;
 
     LimitedQueueSnapshot<MessageLayoutPtr> &getMessagesSnapshot();
+
     void queueLayout();
+    void invalidateBuffers();
 
     void clearMessages();
 
@@ -191,6 +214,12 @@ protected:
                          QPoint &relativePos, int &index);
 
 private:
+    struct InternalCtor {
+    };
+
+    ChannelView(InternalCtor tag, QWidget *parent, Split *split,
+                Context context, size_t messagesLimit);
+
     void initializeLayout();
     void initializeScrollbar();
     void initializeSignals();
@@ -209,7 +238,7 @@ private:
     void updateScrollbar(const LimitedQueueSnapshot<MessageLayoutPtr> &messages,
                          bool causedByScrollbar, bool causedByShow);
 
-    void drawMessages(QPainter &painter);
+    void drawMessages(QPainter &painter, const QRect &area);
     void setSelection(const SelectionItem &start, const SelectionItem &end);
     void setSelection(const Selection &newSelection);
     void selectWholeMessage(MessageLayout *layout, int &messageIndex);
@@ -246,9 +275,14 @@ private:
     bool canReplyToMessages() const;
 
     bool layoutQueued_ = false;
+    bool bufferInvalidationQueued_ = false;
 
     bool lastMessageHasAlternateBackground_ = false;
     bool lastMessageHasAlternateBackgroundReverse_ = true;
+
+    /// Tracks the area of animated elements in the last full repaint.
+    /// If this is empty (QRect::isEmpty()), no animated element is shown.
+    QRect animationArea_;
 
     bool pausable_ = false;
     QTimer pauseTimer_;
@@ -269,7 +303,7 @@ private:
     ChannelPtr channel_ = nullptr;
     ChannelPtr underlyingChannel_ = nullptr;
     ChannelPtr sourceChannel_ = nullptr;
-    Split *split_ = nullptr;
+    Split *split_;
 
     Scrollbar *scrollBar_;
     EffectLabel *goToBottom_{};
@@ -333,6 +367,19 @@ private:
     MessagePreferences messagePreferences_;
 
     void scrollUpdateRequested();
+
+    TooltipWidget *const tooltipWidget_{};
+
+    /// Pointer to a link info that hasn't loaded yet
+    QPointer<LinkInfo> pendingLinkInfo_;
+
+    /// @brief Sets the tooltip to contain the link info
+    ///
+    /// If the info isn't loaded yet, it's tracked until it's resolved or errored.
+    void setLinkInfoTooltip(LinkInfo *info);
+
+    /// Slot for the LinkInfo::stateChanged signal.
+    void pendingLinkInfoStateChanged();
 };
 
 }  // namespace chatterino

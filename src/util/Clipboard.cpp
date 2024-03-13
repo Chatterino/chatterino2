@@ -7,7 +7,7 @@ namespace chatterino {
 
 void crossPlatformCopy(const QString &text)
 {
-    auto clipboard = QApplication::clipboard();
+    auto *clipboard = QApplication::clipboard();
 
     clipboard->setText(text);
 

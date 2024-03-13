@@ -50,6 +50,8 @@
       "resizeHandleBackground": "#500094ff"
     },
     "tabs": {
+      "liveIndicator": "#ff0000",
+      "rerunIndicator": "#c7c715",
       "dividerLine": "#b4d7ff",
       "highlighted": {
         "backgrounds": {

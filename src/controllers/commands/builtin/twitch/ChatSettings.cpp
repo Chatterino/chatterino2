@@ -101,7 +101,7 @@ namespace chatterino::commands {
 
 QString emoteOnly(const CommandContext &ctx)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
@@ -111,7 +111,7 @@ QString emoteOnly(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /emoteonly command only works in Twitch channels"));
+            "The /emoteonly command only works in Twitch channels."));
         return "";
     }
 
@@ -131,7 +131,7 @@ QString emoteOnly(const CommandContext &ctx)
 
 QString emoteOnlyOff(const CommandContext &ctx)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
@@ -140,7 +140,7 @@ QString emoteOnlyOff(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /emoteonlyoff command only works in Twitch channels"));
+            "The /emoteonlyoff command only works in Twitch channels."));
         return "";
     }
 
@@ -160,7 +160,7 @@ QString emoteOnlyOff(const CommandContext &ctx)
 
 QString subscribers(const CommandContext &ctx)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
@@ -170,7 +170,7 @@ QString subscribers(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /subscribers command only works in Twitch channels"));
+            "The /subscribers command only works in Twitch channels."));
         return "";
     }
 
@@ -190,7 +190,7 @@ QString subscribers(const CommandContext &ctx)
 
 QString subscribersOff(const CommandContext &ctx)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
@@ -200,7 +200,7 @@ QString subscribersOff(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /subscribersoff command only works in Twitch channels"));
+            "The /subscribersoff command only works in Twitch channels."));
         return "";
     }
 
@@ -220,7 +220,7 @@ QString subscribersOff(const CommandContext &ctx)
 
 QString slow(const CommandContext &ctx)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
@@ -230,7 +230,7 @@ QString slow(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /slow command only works in Twitch channels"));
+            "The /slow command only works in Twitch channels."));
         return "";
     }
 
@@ -267,7 +267,7 @@ QString slow(const CommandContext &ctx)
 
 QString slowOff(const CommandContext &ctx)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
@@ -277,7 +277,7 @@ QString slowOff(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /slowoff command only works in Twitch channels"));
+            "The /slowoff command only works in Twitch channels."));
         return "";
     }
 
@@ -297,7 +297,7 @@ QString slowOff(const CommandContext &ctx)
 
 QString followers(const CommandContext &ctx)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
@@ -307,7 +307,7 @@ QString followers(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /followers command only works in Twitch channels"));
+            "The /followers command only works in Twitch channels."));
         return "";
     }
 
@@ -345,7 +345,7 @@ QString followers(const CommandContext &ctx)
 
 QString followersOff(const CommandContext &ctx)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
@@ -355,7 +355,7 @@ QString followersOff(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /followersoff command only works in Twitch channels"));
+            "The /followersoff command only works in Twitch channels."));
         return "";
     }
 
@@ -375,7 +375,7 @@ QString followersOff(const CommandContext &ctx)
 
 QString uniqueChat(const CommandContext &ctx)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
@@ -385,7 +385,7 @@ QString uniqueChat(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /uniquechat command only works in Twitch channels"));
+            "The /uniquechat command only works in Twitch channels."));
         return "";
     }
 
@@ -405,7 +405,7 @@ QString uniqueChat(const CommandContext &ctx)
 
 QString uniqueChatOff(const CommandContext &ctx)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
@@ -415,7 +415,7 @@ QString uniqueChatOff(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /uniquechatoff command only works in Twitch channels"));
+            "The /uniquechatoff command only works in Twitch channels."));
         return "";
     }
 

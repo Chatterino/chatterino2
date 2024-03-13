@@ -35,7 +35,7 @@ int compare(const QString &a, const QString &b);
 
 ```cpp
 /*
- * Matches a link and returns boost::none if it failed and a
+ * Matches a link and returns std::nullopt if it failed and a
  * QRegularExpressionMatch on success.
  * ^^^ This comment just repeats the function signature!!!
  *

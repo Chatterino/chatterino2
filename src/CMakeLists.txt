@@ -5,6 +5,7 @@ add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
 # registers the native messageing host
 option(CHATTERINO_DEBUG_NATIVE_MESSAGES "Debug native messages" OFF)
+option(CHATTERINO_STATIC_QT_BUILD "Static link Qt" OFF)
 
 set(SOURCE_FILES
         Application.cpp
@@ -33,22 +34,25 @@ set(SOURCE_FILES
         common/Literals.hpp
         common/Modes.cpp
         common/Modes.hpp
-        common/NetworkCommon.cpp
-        common/NetworkCommon.hpp
-        common/NetworkManager.cpp
-        common/NetworkManager.hpp
-        common/NetworkPrivate.cpp
-        common/NetworkPrivate.hpp
-        common/NetworkRequest.cpp
-        common/NetworkRequest.hpp
-        common/NetworkResult.cpp
-        common/NetworkResult.hpp
         common/QLogging.cpp
         common/QLogging.hpp
         common/WindowDescriptors.cpp
         common/WindowDescriptors.hpp
 
         common/enums/MessageOverflow.hpp
+
+        common/network/NetworkCommon.cpp
+        common/network/NetworkCommon.hpp
+        common/network/NetworkManager.cpp
+        common/network/NetworkManager.hpp
+        common/network/NetworkPrivate.cpp
+        common/network/NetworkPrivate.hpp
+        common/network/NetworkRequest.cpp
+        common/network/NetworkRequest.hpp
+        common/network/NetworkResult.cpp
+        common/network/NetworkResult.hpp
+        common/network/NetworkTask.cpp
+        common/network/NetworkTask.hpp
 
         controllers/accounts/Account.cpp
         controllers/accounts/Account.hpp
@@ -217,8 +221,14 @@ set(SOURCE_FILES
         controllers/pings/MutedChannelModel.cpp
         controllers/pings/MutedChannelModel.hpp
 
+        controllers/plugins/api/ChannelRef.cpp
+        controllers/plugins/api/ChannelRef.hpp
+        controllers/plugins/api/IOWrapper.cpp
+        controllers/plugins/api/IOWrapper.hpp
         controllers/plugins/LuaAPI.cpp
         controllers/plugins/LuaAPI.hpp
+        controllers/plugins/PluginPermission.cpp
+        controllers/plugins/PluginPermission.hpp
         controllers/plugins/Plugin.cpp
         controllers/plugins/Plugin.hpp
         controllers/plugins/PluginController.hpp
@@ -289,12 +299,8 @@ set(SOURCE_FILES
         messages/search/SubtierPredicate.cpp
         messages/search/SubtierPredicate.hpp
 
-        providers/Crashpad.cpp
-        providers/Crashpad.hpp
         providers/IvrApi.cpp
         providers/IvrApi.hpp
-        providers/LinkResolver.cpp
-        providers/LinkResolver.hpp
         providers/NetworkConfigurationProvider.cpp
         providers/NetworkConfigurationProvider.hpp
 
@@ -340,6 +346,11 @@ set(SOURCE_FILES
         providers/irc/IrcMessageBuilder.hpp
         providers/irc/IrcServer.cpp
         providers/irc/IrcServer.hpp
+
+        providers/links/LinkInfo.cpp
+        providers/links/LinkInfo.hpp
+        providers/links/LinkResolver.cpp
+        providers/links/LinkResolver.hpp
 
         providers/liveupdates/BasicPubSubClient.hpp
         providers/liveupdates/BasicPubSubManager.hpp
@@ -414,6 +425,8 @@ set(SOURCE_FILES
         providers/twitch/pubsubmessages/ChatModeratorAction.hpp
         providers/twitch/pubsubmessages/Listen.cpp
         providers/twitch/pubsubmessages/Listen.hpp
+        providers/twitch/pubsubmessages/LowTrustUsers.cpp
+        providers/twitch/pubsubmessages/LowTrustUsers.hpp
         providers/twitch/pubsubmessages/Message.hpp
         providers/twitch/pubsubmessages/Unlisten.cpp
         providers/twitch/pubsubmessages/Unlisten.hpp
@@ -425,6 +438,8 @@ set(SOURCE_FILES
 
         singletons/Badges.cpp
         singletons/Badges.hpp
+        singletons/CrashHandler.cpp
+        singletons/CrashHandler.hpp
         singletons/Emotes.cpp
         singletons/Emotes.hpp
         singletons/Fonts.cpp
@@ -444,6 +459,8 @@ set(SOURCE_FILES
         singletons/Resources.hpp
         singletons/Settings.cpp
         singletons/Settings.hpp
+        singletons/StreamerMode.cpp
+        singletons/StreamerMode.hpp
         singletons/Theme.cpp
         singletons/Theme.hpp
         singletons/Toasts.cpp
@@ -458,6 +475,7 @@ set(SOURCE_FILES
         singletons/helper/LoggingChannel.cpp
         singletons/helper/LoggingChannel.hpp
 
+        util/AbandonObject.hpp
         util/AttachToConsole.cpp
         util/AttachToConsole.hpp
         util/CancellationToken.hpp
@@ -496,8 +514,6 @@ set(SOURCE_FILES
         util/SplitCommand.hpp
         util/StreamLink.cpp
         util/StreamLink.hpp
-        util/StreamerMode.cpp
-        util/StreamerMode.hpp
         util/ThreadGuard.hpp
         util/Twitch.cpp
         util/Twitch.hpp
@@ -591,12 +607,25 @@ set(SOURCE_FILES
         widgets/dialogs/switcher/SwitchSplitItem.cpp
         widgets/dialogs/switcher/SwitchSplitItem.hpp
 
+        widgets/helper/color/AlphaSlider.cpp
+        widgets/helper/color/AlphaSlider.hpp
+        widgets/helper/color/Checkerboard.cpp
+        widgets/helper/color/Checkerboard.hpp
+        widgets/helper/color/ColorButton.cpp
+        widgets/helper/color/ColorButton.hpp
+        widgets/helper/color/ColorInput.cpp
+        widgets/helper/color/ColorInput.hpp
+        widgets/helper/color/ColorItemDelegate.cpp
+        widgets/helper/color/ColorItemDelegate.hpp
+        widgets/helper/color/HueSlider.cpp
+        widgets/helper/color/HueSlider.hpp
+        widgets/helper/color/SBCanvas.cpp
+        widgets/helper/color/SBCanvas.hpp
+
         widgets/helper/Button.cpp
         widgets/helper/Button.hpp
         widgets/helper/ChannelView.cpp
         widgets/helper/ChannelView.hpp
-        widgets/helper/ColorButton.cpp
-        widgets/helper/ColorButton.hpp
         widgets/helper/ComboBoxItemDelegate.cpp
         widgets/helper/ComboBoxItemDelegate.hpp
         widgets/helper/DebugPopup.cpp
@@ -611,8 +640,6 @@ set(SOURCE_FILES
         widgets/helper/NotebookButton.hpp
         widgets/helper/NotebookTab.cpp
         widgets/helper/NotebookTab.hpp
-        widgets/helper/QColorPicker.cpp
-        widgets/helper/QColorPicker.hpp
         widgets/helper/RegExpItemDelegate.cpp
         widgets/helper/RegExpItemDelegate.hpp
         widgets/helper/TrimRegExpValidator.cpp
@@ -629,6 +656,8 @@ set(SOURCE_FILES
         widgets/helper/SignalLabel.hpp
         widgets/helper/TitlebarButton.cpp
         widgets/helper/TitlebarButton.hpp
+        widgets/helper/TitlebarButtons.cpp
+        widgets/helper/TitlebarButtons.hpp
 
         widgets/listview/GenericItemDelegate.cpp
         widgets/listview/GenericItemDelegate.hpp
@@ -683,6 +712,7 @@ set(SOURCE_FILES
         widgets/splits/InputCompletionPopup.hpp
         widgets/splits/Split.cpp
         widgets/splits/Split.hpp
+        widgets/splits/SplitCommon.hpp
         widgets/splits/SplitContainer.cpp
         widgets/splits/SplitContainer.hpp
         widgets/splits/SplitHeader.cpp
@@ -711,7 +741,7 @@ add_library(${LIBRARY_PROJECT} OBJECT ${SOURCE_FILES})
 
 if(CHATTERINO_PLUGINS)
     target_compile_definitions(${LIBRARY_PROJECT}
-        PRIVATE
+        PUBLIC
         CHATTERINO_HAVE_PLUGINS
     )
     message(STATUS "Building Chatterino with lua plugin support enabled.")
@@ -750,6 +780,7 @@ target_link_libraries(${LIBRARY_PROJECT}
         RapidJSON::RapidJSON
         LRUCache
         MagicEnum
+        $<$<BOOL:${WIN32}>:Wtsapi32>
         )
 if (CHATTERINO_PLUGINS)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua)
@@ -795,6 +826,13 @@ if (BUILD_APP)
     else()
         message(WARNING "Sanitizers support is disabled")
     endif()
+
+    if (CHATTERINO_STATIC_QT_BUILD)
+        qt_import_plugins(${EXECUTABLE_PROJECT} INCLUDE_BY_TYPE
+            platforms Qt::QXcbIntegrationPlugin
+            Qt::QMinimalIntegrationPlugin
+        )
+    endif ()
 
     target_include_directories(${EXECUTABLE_PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR}/autogen/)
 
@@ -921,7 +959,9 @@ target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     AB_CUSTOM_SETTINGS
     IRC_STATIC
     IRC_NAMESPACE=Communi
+    $<$<BOOL:${WIN32}>:_WIN32_WINNT=0x0A00> # Windows 10
     )
+
 if (USE_SYSTEM_QTKEYCHAIN)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
         CMAKE_BUILD
@@ -1011,7 +1051,6 @@ endif ()
 if (BUILD_WITH_CRASHPAD)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_WITH_CRASHPAD)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC crashpad::client)
-    set_target_directory_hierarchy(crashpad_handler crashpad)
 endif()
 
 # Configure compiler warnings
@@ -1034,10 +1073,6 @@ if (MSVC)
     # Someone adds /W3 before we add /W4.
     # This makes sure, only /W4 is specified.
     string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    # 4505 - "unreferenced local version has been removed"
-    #        Although this might give hints on dead code,
-    #        there are some cases where it's distracting.
-    #
     # 4100 - "unreferenced formal parameter"
     #        There are a lot of functions and methods where
     #        an argument was given a name but never used.
@@ -1048,6 +1083,11 @@ if (MSVC)
     #        These are implicit conversions from size_t to int/qsizetype.
     #        We don't use size_t in a lot of cases, since
     #        Qt doesn't use it - it uses int (or qsizetype in Qt6).
+    #
+    # 4458 - "declaration of 'identifier' hides class member"
+    #        We have a rule of exclusively using `this->`
+    #        to access class members, thus it's fine to reclare a variable
+    #        with the same name as a class member.
     target_compile_options(${LIBRARY_PROJECT} PUBLIC
         /W4
         # 5038 - warnings about initialization order
@@ -1055,9 +1095,9 @@ if (MSVC)
         # 4855 - implicit capture of 'this' via '[=]' is deprecated
         /w14855
         # Disable the following warnings (see reasoning above)
-        /wd4505
         /wd4100
         /wd4267
+        /wd4458
         # Enable updated '__cplusplus' macro - workaround for CMake#18837
         /Zc:__cplusplus
     )
@@ -1071,7 +1111,6 @@ else ()
         -Wno-switch
         -Wno-deprecated-declarations
         -Wno-sign-compare
-        -Wno-unused-variable
 
         # Disabling strict-aliasing warnings for now, although we probably want to re-enable this in the future
         -Wno-strict-aliasing

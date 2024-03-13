@@ -9,9 +9,9 @@
 #include "messages/Selection.hpp"
 #include "providers/colors/ColorProvider.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/DebugCount.hpp"
-#include "util/StreamerMode.hpp"
 
 #include <QApplication>
 #include <QDebug>
@@ -74,11 +74,10 @@ int MessageLayout::getWidth() const
 
 // Layout
 // return true if redraw is required
-bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
+bool MessageLayout::layout(int width, float scale, MessageElementFlags flags,
+                           bool shouldInvalidateBuffer)
 {
     //    BenchmarkGuard benchmark("MessageLayout::layout()");
-
-    auto app = getApp();
 
     bool layoutRequired = false;
 
@@ -88,11 +87,12 @@ bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
     this->currentLayoutWidth_ = width;
 
     // check if layout state changed
-    if (this->layoutState_ != app->windows->getGeneration())
+    const auto layoutGeneration = getIApp()->getWindows()->getGeneration();
+    if (this->layoutState_ != layoutGeneration)
     {
         layoutRequired = true;
         this->flags.set(MessageLayoutFlag::RequiresBufferUpdate);
-        this->layoutState_ = app->windows->getGeneration();
+        this->layoutState_ = layoutGeneration;
     }
 
     // check if work mask changed
@@ -109,6 +109,11 @@ bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
 
     if (!layoutRequired)
     {
+        if (shouldInvalidateBuffer)
+        {
+            this->invalidateBuffer();
+            return true;
+        }
         return false;
     }
 
@@ -155,11 +160,9 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
         if (this->message_->flags.has(MessageFlag::Timeout) ||
             this->message_->flags.has(MessageFlag::Untimeout))
         {
-            // This condition has been set up to execute isInStreamerMode() as the last thing
-            // as it could end up being expensive.
             if (hideModerationActions ||
                 (getSettings()->streamerModeHideModActions &&
-                 isInStreamerMode()))
+                 getIApp()->getStreamerMode()->isEnabled()))
             {
                 continue;
             }
@@ -196,8 +199,10 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
 }
 
 // Painting
-void MessageLayout::paint(const MessagePaintContext &ctx)
+MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
 {
+    MessagePaintResult result;
+
     QPixmap *pixmap = this->ensureBuffer(ctx.painter, ctx.canvasWidth);
 
     if (!this->bufferValid_)
@@ -209,7 +214,8 @@ void MessageLayout::paint(const MessagePaintContext &ctx)
     ctx.painter.drawPixmap(0, ctx.y, *pixmap);
 
     // draw gif emotes
-    this->container_.paintAnimatedElements(ctx.painter, ctx.y);
+    result.hasAnimatedElements =
+        this->container_.paintAnimatedElements(ctx.painter, ctx.y);
 
     // draw disabled
     if (this->message_->flags.has(MessageFlag::Disabled))
@@ -270,6 +276,8 @@ void MessageLayout::paint(const MessagePaintContext &ctx)
     }
 
     this->bufferValid_ = true;
+
+    return result;
 }
 
 QPixmap *MessageLayout::ensureBuffer(QPainter &painter, int width)
@@ -337,9 +345,13 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
               this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
              !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
     {
-        // Blend highlight color with usual background color
-        backgroundColor =
-            blendColors(backgroundColor, *this->message_->highlightColor);
+        assert(this->message_->highlightColor);
+        if (this->message_->highlightColor)
+        {
+            // Blend highlight color with usual background color
+            backgroundColor =
+                blendColors(backgroundColor, *this->message_->highlightColor);
+        }
     }
     else if (this->message_->flags.has(MessageFlag::Subscription) &&
              ctx.preferences.enableSubHighlight)
@@ -358,9 +370,22 @@ void MessageLayout::updateBuffer(QPixmap *buffer,
             blendColors(backgroundColor,
                         *ctx.colorProvider.color(ColorType::RedeemedHighlight));
     }
-    else if (this->message_->flags.has(MessageFlag::AutoMod))
+    else if (this->message_->flags.has(MessageFlag::AutoMod) ||
+             this->message_->flags.has(MessageFlag::LowTrustUsers))
     {
-        backgroundColor = QColor("#404040");
+        if (ctx.preferences.enableAutomodHighlight &&
+            (this->message_->flags.has(MessageFlag::AutoModOffendingMessage) ||
+             this->message_->flags.has(
+                 MessageFlag::AutoModOffendingMessageHeader)))
+        {
+            backgroundColor = blendColors(
+                backgroundColor,
+                *ctx.colorProvider.color(ColorType::AutomodHighlight));
+        }
+        else
+        {
+            backgroundColor = QColor("#404040");
+        }
     }
     else if (this->message_->flags.has(MessageFlag::Debug))
     {

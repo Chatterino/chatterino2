@@ -71,7 +71,7 @@ void CommandSource::initializeItems()
     std::vector<CommandItem> commands;
 
 #ifdef CHATTERINO_HAVE_PLUGINS
-    for (const auto &command : getApp()->commands->pluginCommands())
+    for (const auto &command : getIApp()->getCommands()->pluginCommands())
     {
         addCommand(command, commands);
     }

@@ -22,12 +22,12 @@
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/ChannelHelpers.hpp"
 #include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/IrcHelpers.hpp"
-#include "util/StreamerMode.hpp"
 
 #include <IrcMessage>
 #include <QLocale>
@@ -44,12 +44,13 @@ using namespace chatterino;
 
 // Message types below are the ones that might contain special user's message on USERNOTICE
 const QSet<QString> SPECIAL_MESSAGE_TYPES{
-    "sub",            //
-    "subgift",        //
-    "resub",          // resub messages
-    "bitsbadgetier",  // bits badge upgrade
-    "ritual",         // new viewer ritual
-    "announcement",   // new mod announcement thing
+    "sub",              //
+    "subgift",          //
+    "resub",            // resub messages
+    "bitsbadgetier",    // bits badge upgrade
+    "ritual",           // new viewer ritual
+    "announcement",     // new mod announcement thing
+    "viewermilestone",  // watch streak, but other categories possible in future
 };
 
 MessagePtr generateBannedMessage(bool confirmedBan)
@@ -127,7 +128,7 @@ void updateReplyParticipatedStatus(const QVariantMap &tags,
                                    bool isNew)
 {
     const auto &currentLogin =
-        getApp()->accounts->twitch.getCurrent()->getUserName();
+        getIApp()->getAccounts()->twitch.getCurrent()->getUserName();
 
     if (thread->subscribed())
     {
@@ -385,7 +386,7 @@ std::vector<MessagePtr> parseNoticeMessage(Communi::IrcNoticeMessage *message)
     {
         const auto linkColor = MessageColor(MessageColor::Link);
         const auto accountsLink = Link(Link::OpenAccountsPage, QString());
-        const auto curUser = getApp()->accounts->twitch.getCurrent();
+        const auto curUser = getIApp()->getAccounts()->twitch.getCurrent();
         const auto expirationText = QString("Login expired for user \"%1\"!")
                                         .arg(curUser->getUserName());
         const auto loginPromptText = QString("Try adding your account again.");
@@ -652,22 +653,39 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
 void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
                                           TwitchIrcServer &server)
 {
-    // This is for compatibility with older Chatterino versions. Twitch didn't use
-    // to allow ZERO WIDTH JOINER unicode character, so Chatterino used ESCAPE_TAG
-    // instead.
-    // See https://github.com/Chatterino/chatterino2/issues/3384 and
-    // https://mm2pl.github.io/emoji_rfc.pdf for more details
-
-    this->addMessage(
-        message, channelOrEmptyByTarget(message->target(), server),
-        message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER), server,
-        false, message->isAction());
-
     auto chan = channelOrEmptyByTarget(message->target(), server);
     if (chan->isEmpty())
     {
         return;
     }
+
+    auto *twitchChannel = dynamic_cast<TwitchChannel *>(chan.get());
+
+    if (twitchChannel != nullptr)
+    {
+        auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+        if (message->tag("user-id") == currentUser->getUserId())
+        {
+            auto badgesTag = message->tag("badges");
+            if (badgesTag.isValid())
+            {
+                auto parsedBadges = parseBadges(badgesTag.toString());
+                twitchChannel->setMod(parsedBadges.contains("moderator"));
+                twitchChannel->setVIP(parsedBadges.contains("vip"));
+                twitchChannel->setStaff(parsedBadges.contains("staff"));
+            }
+        }
+    }
+
+    // This is for compatibility with older Chatterino versions. Twitch didn't use
+    // to allow ZERO WIDTH JOINER unicode character, so Chatterino used ESCAPE_TAG
+    // instead.
+    // See https://github.com/Chatterino/chatterino2/issues/3384 and
+    // https://mm2pl.github.io/emoji_rfc.pdf for more details
+    this->addMessage(
+        message, chan,
+        message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER), server,
+        false, message->isAction());
 
     if (message->tags().contains(u"pinned-chat-paid-amount"_s))
     {
@@ -773,10 +791,10 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     chan->addOrReplaceTimeout(std::move(clearChat.message));
 
     // refresh all
-    getApp()->windows->repaintVisibleChatWidgets(chan.get());
+    getIApp()->getWindows()->repaintVisibleChatWidgets(chan.get());
     if (getSettings()->hideModerated)
     {
-        getApp()->windows->forceLayoutChannelViews();
+        getIApp()->getWindows()->forceLayoutChannelViews();
     }
 }
 
@@ -827,7 +845,7 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
 
     // set received emote-sets, used in TwitchAccount::loadUserstateEmotes
     bool emoteSetsChanged = currentUser->setUserstateEmoteSets(
@@ -879,7 +897,7 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 void IrcMessageHandler::handleGlobalUserStateMessage(
     Communi::IrcMessage *message)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
 
     // set received emote-sets, this time used to initially load emotes
     // NOTE: this should always return true unless we reconnect
@@ -930,7 +948,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
 
     if (getSettings()->inlineWhispers &&
         !(getSettings()->streamerModeSuppressInlineWhispers &&
-          isInStreamerMode()))
+          getIApp()->getStreamerMode()->isEnabled()))
     {
         getApp()->twitch->forEachChannel(
             [&message, overrideFlags](ChannelPtr channel) {
@@ -1133,9 +1151,10 @@ void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
     }
 
     if (message->nick() ==
-        getApp()->accounts->twitch.getCurrent()->getUserName())
+        getIApp()->getAccounts()->twitch.getCurrent()->getUserName())
     {
         twitchChannel->addMessage(makeSystemMessage("joined channel"));
+        twitchChannel->joined.invoke();
     }
     else if (getSettings()->showJoins.getValue())
     {
@@ -1155,7 +1174,7 @@ void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
     }
 
     const auto selfAccountName =
-        getApp()->accounts->twitch.getCurrent()->getUserName();
+        getIApp()->getAccounts()->twitch.getCurrent()->getUserName();
     if (message->nick() != selfAccountName &&
         getSettings()->showParts.getValue())
     {
@@ -1205,8 +1224,9 @@ void IrcMessageHandler::setSimilarityFlags(const MessagePtr &message,
 {
     if (getSettings()->similarityEnabled)
     {
-        bool isMyself = message->loginName ==
-                        getApp()->accounts->twitch.getCurrent()->getUserName();
+        bool isMyself =
+            message->loginName ==
+            getIApp()->getAccounts()->twitch.getCurrent()->getUserName();
         bool hideMyself = getSettings()->hideSimilarMyself;
 
         if (isMyself && !hideMyself)

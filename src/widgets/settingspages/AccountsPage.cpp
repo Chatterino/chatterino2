@@ -26,8 +26,8 @@ AccountsPage::AccountsPage()
 
     EditableModelView *view =
         layout
-            .emplace<EditableModelView>(app->accounts->createModel(nullptr),
-                                        false)
+            .emplace<EditableModelView>(
+                app->getAccounts()->createModel(nullptr), false)
             .getElement();
 
     view->getTableView()->horizontalHeader()->setVisible(false);
@@ -63,7 +63,7 @@ AccountsPage::AccountsPage()
     //            return;
     //        }
 
-    //        getApp()->accounts->Twitch.removeUser(selectedUser);
+    //        getIApp()->getAccounts()->Twitch.removeUser(selectedUser);
     //    });
 }
 

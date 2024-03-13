@@ -1,4 +1,4 @@
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkResult.hpp"
 
 #include <gtest/gtest.h>
 

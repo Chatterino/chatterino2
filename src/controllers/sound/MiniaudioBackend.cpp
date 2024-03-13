@@ -68,7 +68,7 @@ namespace chatterino {
 // NUM_SOUNDS specifies how many simultaneous default ping sounds & decoders to create
 constexpr const auto NUM_SOUNDS = 4;
 
-void MiniaudioBackend::initialize(Settings &settings, Paths &paths)
+void MiniaudioBackend::initialize(Settings &settings, const Paths &paths)
 {
     (void)(settings);
     (void)(paths);
@@ -256,8 +256,8 @@ void MiniaudioBackend::play(const QUrl &sound)
         if (sound.isLocalFile())
         {
             auto soundPath = sound.toLocalFile();
-            auto result = ma_engine_play_sound(this->engine.get(),
-                                               qPrintable(soundPath), nullptr);
+            result = ma_engine_play_sound(this->engine.get(),
+                                          qPrintable(soundPath), nullptr);
             if (result != MA_SUCCESS)
             {
                 qCWarning(chatterinoSound) << "Failed to play sound" << sound

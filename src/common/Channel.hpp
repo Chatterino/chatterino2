@@ -30,6 +30,10 @@ enum class TimeoutStackStyle : int {
 class Channel : public std::enable_shared_from_this<Channel>
 {
 public:
+    // This is for Lua. See scripts/make_luals_meta.py
+    /**
+     * @exposeenum ChannelType
+     */
     enum class Type {
         None,
         Direct,
@@ -38,6 +42,7 @@ public:
         TwitchWatching,
         TwitchMentions,
         TwitchLive,
+        TwitchAutomod,
         TwitchEnd,
         Irc,
         Misc
@@ -60,8 +65,6 @@ public:
     pajlada::Signals::Signal<const std::vector<MessagePtr> &> filledInMessages;
     pajlada::Signals::NoArgSignal destroyed;
     pajlada::Signals::NoArgSignal displayNameChanged;
-    /// Invoked when AbstractIrcServer::onReadConnected occurs
-    pajlada::Signals::NoArgSignal connected;
 
     Type getType() const;
     const QString &getName() const;
@@ -101,6 +104,7 @@ public:
     virtual bool hasModRights() const;
     virtual bool hasHighRateLimit() const;
     virtual bool isLive() const;
+    virtual bool isRerun() const;
     virtual bool shouldIgnoreHighlights() const;
     virtual bool canReconnect() const;
     virtual void reconnect();

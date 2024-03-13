@@ -18,6 +18,7 @@ namespace chatterino {
 class Button;
 class EffectLabel;
 class TitleBarButton;
+class TitleBarButtons;
 enum class TitleBarButtonStyle;
 
 class BaseWindow : public BaseWidget
@@ -27,14 +28,15 @@ class BaseWindow : public BaseWidget
 public:
     enum Flags {
         None = 0,
-        EnableCustomFrame = 1,
-        Frameless = 2,
-        TopMost = 4,
-        DisableCustomScaling = 8,
-        FramelessDraggable = 16,
-        DontFocus = 32,
-        Dialog = 64,
-        DisableLayoutSave = 128,
+        EnableCustomFrame = 1 << 0,
+        Frameless = 1 << 1,
+        TopMost = 1 << 2,
+        DisableCustomScaling = 1 << 3,
+        FramelessDraggable = 1 << 4,
+        DontFocus = 1 << 5,
+        Dialog = 1 << 6,
+        DisableLayoutSave = 1 << 7,
+        BoundsCheckOnShow = 1 << 8,
     };
 
     enum ActionOnFocusLoss { Nothing, Delete, Close, Hide };
@@ -57,12 +59,37 @@ public:
 
     void moveTo(QPoint point, widgets::BoundsChecking mode);
 
+    /**
+     * Moves the window to the given point and does bounds checking according to `mode`
+     * Depending on the platform, either the move or the show will take place first
+     **/
+    void showAndMoveTo(QPoint point, widgets::BoundsChecking mode);
+
+    /// @brief Applies the last moveTo operation if that one was bounds-checked
+    ///
+    /// If there was a previous moveTo or showAndMoveTo operation with a mode
+    /// other than `Off`, a moveTo is repeated with the last supplied @a point
+    /// and @a mode. Note that in the case of showAndMoveTo, moveTo is run.
+    ///
+    /// @returns true if there was a previous bounds-checked moveTo operation
+    bool applyLastBoundsCheck();
+
     float scale() const override;
     float qtFontScale() const;
+
+    /// @returns true if the window is the top-most window.
+    ///          Either #setTopMost was called or the `TopMost` flag is set which overrides this
+    bool isTopMost() const;
+    /// Updates the window's top-most status
+    /// If the `TopMost` flag is set, this is a no-op
+    void setTopMost(bool topMost);
 
     pajlada::Signals::NoArgSignal closing;
 
     static bool supportsCustomWindowFrame();
+
+signals:
+    void topMostChanged(bool topMost);
 
 protected:
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -123,24 +150,48 @@ private:
     FlagsEnum<Flags> flags_;
     float nativeScale_ = 1;
     bool isResizeFixing_ = false;
+    bool isTopMost_ = false;
 
     struct {
         QLayout *windowLayout = nullptr;
         QHBoxLayout *titlebarBox = nullptr;
         QWidget *titleLabel = nullptr;
-        TitleBarButton *minButton = nullptr;
-        TitleBarButton *maxButton = nullptr;
-        TitleBarButton *exitButton = nullptr;
+        TitleBarButtons *titlebarButtons = nullptr;
         QWidget *layoutBase = nullptr;
         std::vector<Button *> buttons;
     } ui_;
 
+    /// The last @a pos from moveTo and showAndMoveTo
+    QPoint lastBoundsCheckPosition_;
+    /// The last @a mode from moveTo and showAndMoveTo
+    widgets::BoundsChecking lastBoundsCheckMode_ = widgets::BoundsChecking::Off;
+
 #ifdef USEWINSDK
+    /// @brief Returns the HWND of this window if it has one
+    ///
+    /// A QWidget only has an HWND if it has been created. Before that,
+    /// accessing `winID()` will create the window which can lead to unintended
+    /// bugs.
+    std::optional<HWND> safeHWND() const;
+
+    /// @brief Tries to apply the `isTopMost_` setting
+    ///
+    /// If the setting couldn't be applied (because the window wasn't created
+    /// yet), the operation is repeated after a short delay.
+    ///
+    /// @pre When calling from outside this method, `waitingForTopMost_` must
+    ///      be `false` to avoid too many pending calls.
+    /// @post If an operation was queued to be executed after some delay,
+    ///       `waitingForTopMost_` will be set to `true`.
+    void tryApplyTopMost();
+    bool waitingForTopMost_ = false;
+
     QRect initalBounds_;
     QRect currentBounds_;
     QRect nextBounds_;
     QTimer useNextBounds_;
     bool isNotMinimizedOrMaximized_{};
+    bool lastEventWasNcMouseMove_ = false;
 #endif
 
     pajlada::Signals::SignalHolder connections_;

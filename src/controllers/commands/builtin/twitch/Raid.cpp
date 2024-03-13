@@ -125,7 +125,7 @@ QString startRaid(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /raid command only works in Twitch channels"));
+            "The /raid command only works in Twitch channels."));
         return "";
     }
 
@@ -137,7 +137,7 @@ QString startRaid(const CommandContext &ctx)
         return "";
     }
 
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(
@@ -183,7 +183,7 @@ QString cancelRaid(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /unraid command only works in Twitch channels"));
+            "The /unraid command only works in Twitch channels."));
         return "";
     }
 
@@ -195,7 +195,7 @@ QString cancelRaid(const CommandContext &ctx)
         return "";
     }
 
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(

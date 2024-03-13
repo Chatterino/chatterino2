@@ -25,6 +25,8 @@ public:
      */
     void sendWhisper(const QString &target, const QString &message);
 
+    void sendRawMessage(const QString &rawMessage) override;
+
     // AbstractIrcServer interface
 protected:
     void initializeConnectionSignals(IrcConnection *connection,

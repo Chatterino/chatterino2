@@ -3,10 +3,7 @@
 #include "common/Atomic.hpp"
 #include "common/Channel.hpp"
 #include "common/Singleton.hpp"
-#include "providers/bttv/BttvEmotes.hpp"
-#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/AbstractIrcServer.hpp"
-#include "providers/seventv/SeventvEmotes.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
 
@@ -18,20 +15,21 @@ namespace chatterino {
 
 class Settings;
 class Paths;
-class PubSub;
 class TwitchChannel;
 class BttvLiveUpdates;
 class SeventvEventAPI;
+class BttvEmotes;
+class FfzEmotes;
+class SeventvEmotes;
 
 class ITwitchIrcServer
 {
 public:
     virtual ~ITwitchIrcServer() = default;
 
-    virtual const BttvEmotes &getBttvEmotes() const = 0;
-    virtual const FfzEmotes &getFfzEmotes() const = 0;
-    virtual const SeventvEmotes &getSeventvEmotes() const = 0;
     virtual const IndirectChannel &getWatchingChannel() const = 0;
+
+    virtual QString getLastUserThatWhisperedMe() const = 0;
 
     // Update this interface with TwitchIrcServer methods as needed
 };
@@ -44,7 +42,7 @@ public:
     TwitchIrcServer();
     ~TwitchIrcServer() override = default;
 
-    void initialize(Settings &settings, Paths &paths) override;
+    void initialize(Settings &settings, const Paths &paths) override;
 
     void forEachChannelAndSpecialChannels(std::function<void(ChannelPtr)> func);
 
@@ -77,16 +75,15 @@ public:
     const ChannelPtr whispersChannel;
     const ChannelPtr mentionsChannel;
     const ChannelPtr liveChannel;
+    const ChannelPtr automodChannel;
     IndirectChannel watchingChannel;
 
-    PubSub *pubsub;
     std::unique_ptr<BttvLiveUpdates> bttvLiveUpdates;
     std::unique_ptr<SeventvEventAPI> seventvEventAPI;
 
-    const BttvEmotes &getBttvEmotes() const override;
-    const FfzEmotes &getFfzEmotes() const override;
-    const SeventvEmotes &getSeventvEmotes() const override;
     const IndirectChannel &getWatchingChannel() const override;
+
+    QString getLastUserThatWhisperedMe() const override;
 
 protected:
     void initializeConnection(IrcConnection *connection,
@@ -104,22 +101,19 @@ protected:
     bool hasSeparateWriteConnection() const override;
 
 private:
-    void onMessageSendRequested(TwitchChannel *channel, const QString &message,
-                                bool &sent);
-    void onReplySendRequested(TwitchChannel *channel, const QString &message,
-                              const QString &replyId, bool &sent);
+    void onMessageSendRequested(const std::shared_ptr<TwitchChannel> &channel,
+                                const QString &message, bool &sent);
+    void onReplySendRequested(const std::shared_ptr<TwitchChannel> &channel,
+                              const QString &message, const QString &replyId,
+                              bool &sent);
 
-    bool prepareToSend(TwitchChannel *channel);
+    bool prepareToSend(const std::shared_ptr<TwitchChannel> &channel);
 
     std::mutex lastMessageMutex_;
     std::queue<std::chrono::steady_clock::time_point> lastMessagePleb_;
     std::queue<std::chrono::steady_clock::time_point> lastMessageMod_;
     std::chrono::steady_clock::time_point lastErrorTimeSpeed_;
     std::chrono::steady_clock::time_point lastErrorTimeAmount_;
-
-    BttvEmotes bttv;
-    FfzEmotes ffz;
-    SeventvEmotes seventv_;
 
     pajlada::Signals::SignalHolder signalHolder_;
 };

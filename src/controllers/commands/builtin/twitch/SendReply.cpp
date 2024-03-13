@@ -20,7 +20,7 @@ QString sendReply(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /reply command only works in Twitch channels"));
+            "The /reply command only works in Twitch channels."));
         return "";
     }
 
@@ -55,7 +55,7 @@ QString sendReply(const CommandContext &ctx)
     }
 
     ctx.channel->addMessage(
-        makeSystemMessage("A message from that user wasn't found"));
+        makeSystemMessage("A message from that user wasn't found."));
 
     return "";
 }

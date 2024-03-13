@@ -2,7 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "messages/Message.hpp"
@@ -21,7 +21,7 @@ QString deleteMessages(TwitchChannel *twitchChannel, const QString &messageID)
 {
     const auto *commandName = messageID.isEmpty() ? "/clear" : "/delete";
 
-    auto user = getApp()->accounts->twitch.getCurrent();
+    auto user = getIApp()->getAccounts()->twitch.getCurrent();
 
     // Avoid Helix calls without Client ID and/or OAuth Token
     if (user->isAnon())
@@ -102,7 +102,7 @@ QString deleteAllMessages(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /clear command only works in Twitch channels"));
+            "The /clear command only works in Twitch channels."));
         return "";
     }
 
@@ -121,7 +121,7 @@ QString deleteOneMessage(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /delete command only works in Twitch channels"));
+            "The /delete command only works in Twitch channels."));
         return "";
     }
 

@@ -48,11 +48,20 @@ public:
     bool setLive(bool isLive);
 
     /**
+     * @brief Sets the rerun status of this tab
+     *
+     * Returns true if the rerun status was changed, false if nothing changed.
+     **/
+    bool setRerun(bool isRerun);
+
+    /**
      * @brief Returns true if any split in this tab is live
      **/
     bool isLive() const;
 
     void setHighlightState(HighlightState style);
+    HighlightState highlightState() const;
+
     void setHighlightsEnabled(const bool &newVal);
     bool hasHighlightsEnabled() const;
 
@@ -83,6 +92,10 @@ protected:
 
     void mouseMoveEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
+
+    /// This exists as an alias to its base classes update, and is virtual
+    /// to allow for mocking
+    virtual void update();
 
 private:
     void showRenameDialog();
@@ -115,6 +128,7 @@ private:
     QAction *highlightNewMessagesAction_;
 
     bool isLive_{};
+    bool isRerun_{};
 
     int growWidth_ = 0;
 
