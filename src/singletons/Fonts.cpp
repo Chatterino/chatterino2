@@ -8,119 +8,73 @@
 #include <QDebug>
 #include <QtGlobal>
 
-#ifdef Q_OS_WIN32
-#    define DEFAULT_FONT_FAMILY "Segoe UI"
-#    define DEFAULT_FONT_SIZE 10
-#else
-#    ifdef Q_OS_MACOS
-#        define DEFAULT_FONT_FAMILY "Helvetica Neue"
-#        define DEFAULT_FONT_SIZE 12
-#    else
-#        define DEFAULT_FONT_FAMILY "Arial"
-#        define DEFAULT_FONT_SIZE 11
-#    endif
-#endif
-
-namespace chatterino {
 namespace {
-    int getBoldness()
-    {
+
+using namespace chatterino;
+
+int getBoldness()
+{
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-        // From qfont.cpp
-        // https://github.com/qt/qtbase/blob/589c6d066f84833a7c3dda1638037f4b2e91b7aa/src/gui/text/qfont.cpp#L143-L169
-        static constexpr std::array<std::array<int, 2>, 9> legacyToOpenTypeMap{{
-            {0, QFont::Thin},
-            {12, QFont::ExtraLight},
-            {25, QFont::Light},
-            {50, QFont::Normal},
-            {57, QFont::Medium},
-            {63, QFont::DemiBold},
-            {75, QFont::Bold},
-            {81, QFont::ExtraBold},
-            {87, QFont::Black},
-        }};
+    // From qfont.cpp
+    // https://github.com/qt/qtbase/blob/589c6d066f84833a7c3dda1638037f4b2e91b7aa/src/gui/text/qfont.cpp#L143-L169
+    static constexpr std::array<std::array<int, 2>, 9> legacyToOpenTypeMap{{
+        {0, QFont::Thin},
+        {12, QFont::ExtraLight},
+        {25, QFont::Light},
+        {50, QFont::Normal},
+        {57, QFont::Medium},
+        {63, QFont::DemiBold},
+        {75, QFont::Bold},
+        {81, QFont::ExtraBold},
+        {87, QFont::Black},
+    }};
 
-        const int target = getSettings()->boldScale.getValue();
+    const int target = getSettings()->boldScale.getValue();
 
-        int result = QFont::Medium;
-        int closestDist = INT_MAX;
+    int result = QFont::Medium;
+    int closestDist = INT_MAX;
 
-        // Go through and find the closest mapped value
-        for (const auto [weightOld, weightNew] : legacyToOpenTypeMap)
+    // Go through and find the closest mapped value
+    for (const auto [weightOld, weightNew] : legacyToOpenTypeMap)
+    {
+        const int dist = qAbs(weightOld - target);
+        if (dist < closestDist)
         {
-            const int dist = qAbs(weightOld - target);
-            if (dist < closestDist)
-            {
-                result = weightNew;
-                closestDist = dist;
-            }
-            else
-            {
-                // Break early since following values will be further away
-                break;
-            }
+            result = weightNew;
+            closestDist = dist;
         }
-
-        return result;
-#else
-        return getSettings()->boldScale.getValue();
-#endif
+        else
+        {
+            // Break early since following values will be further away
+            break;
+        }
     }
+
+    return result;
+#else
+    return getSettings()->boldScale.getValue();
+#endif
+}
 }  // namespace
 
-Fonts *Fonts::instance = nullptr;
+namespace chatterino {
 
-Fonts::Fonts()
-    : chatFontFamily("/appearance/currentFontFamily", DEFAULT_FONT_FAMILY)
-    , chatFontSize("/appearance/currentFontSize", DEFAULT_FONT_SIZE)
+Fonts::Fonts(Settings &settings)
 {
-    Fonts::instance = this;
-
     this->fontsByType_.resize(size_t(FontStyle::EndType));
-}
 
-void Fonts::initialize(Settings &, const Paths &)
-{
-    this->chatFontFamily.connect(
-        [this]() {
-            assertInGuiThread();
+    this->fontChangedListener.setCB([this] {
+        assertInGuiThread();
 
-            for (auto &map : this->fontsByType_)
-            {
-                map.clear();
-            }
-            this->fontChanged.invoke();
-        },
-        false);
-
-    this->chatFontSize.connect(
-        [this]() {
-            assertInGuiThread();
-
-            for (auto &map : this->fontsByType_)
-            {
-                map.clear();
-            }
-            this->fontChanged.invoke();
-        },
-        false);
-
-#ifdef CHATTERINO
-    getSettings()->boldScale.connect(
-        [this]() {
-            assertInGuiThread();
-
-            // REMOVED
-            getIApp()->getWindows()->incGeneration();
-
-            for (auto &map : this->fontsByType_)
-            {
-                map.clear();
-            }
-            this->fontChanged.invoke();
-        },
-        false);
-#endif
+        for (auto &map : this->fontsByType_)
+        {
+            map.clear();
+        }
+        this->fontChanged.invoke();
+    });
+    this->fontChangedListener.addSetting(settings.chatFontFamily);
+    this->fontChangedListener.addSetting(settings.chatFontSize);
+    this->fontChangedListener.addSetting(settings.boldScale);
 }
 
 QFont Fonts::getFont(FontStyle type, float scale)
@@ -159,6 +113,8 @@ Fonts::FontData &Fonts::getOrCreateFontData(FontStyle type, float scale)
 
 Fonts::FontData Fonts::createFontData(FontStyle type, float scale)
 {
+    auto *settings = getSettings();
+
     // check if it's a chat (scale the setting)
     if (type >= FontStyle::ChatStart && type <= FontStyle::ChatEnd)
     {
@@ -176,8 +132,8 @@ Fonts::FontData Fonts::createFontData(FontStyle type, float scale)
                                                 QFont::Weight(getBoldness())};
         auto data = sizeScale[type];
         return FontData(
-            QFont(this->chatFontFamily.getValue(),
-                  int(this->chatFontSize.getValue() * data.scale * scale),
+            QFont(settings->chatFontFamily.getValue(),
+                  int(settings->chatFontSize.getValue() * data.scale * scale),
                   data.weight, data.italic));
     }
 
@@ -203,11 +159,6 @@ Fonts::FontData Fonts::createFontData(FontStyle type, float scale)
         QFont font(data.name, int(data.size * scale), data.weight, data.italic);
         return FontData(font);
     }
-}
-
-Fonts *getFonts()
-{
-    return Fonts::instance;
 }
 
 }  // namespace chatterino

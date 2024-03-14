@@ -603,7 +603,7 @@ void ChannelView::scaleChangedEvent(float scale)
                      0.01, this->logicalDpiX() * this->devicePixelRatioF());
 #endif
         this->goToBottom_->getLabel().setFont(
-            getFonts()->getFont(FontStyle::UiMedium, factor));
+            getIApp()->getFonts()->getFont(FontStyle::UiMedium, factor));
     }
 }
 

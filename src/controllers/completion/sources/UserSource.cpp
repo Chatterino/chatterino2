@@ -67,16 +67,9 @@ void UserSource::initializeFromChannel(const Channel *channel)
                                    return user.first == tc->getName();
                                });
 
-        if (it != this->items_.end())
+        if (it == this->items_.end())
         {
-            auto broadcaster = *it;
-            this->items_.erase(it);
-            this->items_.insert(this->items_.begin(), broadcaster);
-        }
-        else
-        {
-            this->items_.insert(this->items_.begin(),
-                                {tc->getName(), tc->getDisplayName()});
+            this->items_.emplace_back(tc->getName(), tc->getDisplayName());
         }
     }
 }
