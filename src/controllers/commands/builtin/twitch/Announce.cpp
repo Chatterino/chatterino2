@@ -9,7 +9,8 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 
-namespace chatterino::commands {
+namespace {
+using namespace chatterino;
 
 QString sendAnnouncementColor(const CommandContext &ctx,
                               const HelixAnnouncementColor color)
@@ -91,6 +92,9 @@ QString sendAnnouncementColor(const CommandContext &ctx,
         });
     return "";
 }
+} // namespace
+
+namespace chatterino::commands {
 
 QString sendAnnouncement(const CommandContext &ctx)
 {
