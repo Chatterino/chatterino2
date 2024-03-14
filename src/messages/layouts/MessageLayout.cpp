@@ -443,13 +443,13 @@ void MessageLayout::deleteCache()
 // returns nullptr if none was found
 
 // fourtf: this should return a MessageLayoutItem
-const MessageLayoutElement *MessageLayout::getElementAt(QPoint point)
+const MessageLayoutElement *MessageLayout::getElementAt(QPoint point) const
 {
     // go through all words and return the first one that contains the point.
     return this->container_.getElementAt(point);
 }
 
-std::pair<int, int> MessageLayout::getWordBounds(QPoint relativePos)
+std::pair<int, int> MessageLayout::getWordBounds(QPoint relativePos) const
 {
     const auto *element = this->getElementAt(relativePos);
     assert(element != nullptr);

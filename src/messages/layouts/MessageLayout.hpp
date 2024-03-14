@@ -70,9 +70,9 @@ public:
      *
      * If no element is found at the given point, this returns a null pointer
      */
-    const MessageLayoutElement *getElementAt(QPoint point);
+    const MessageLayoutElement *getElementAt(QPoint point) const;
 
-    std::pair<int, int> getWordBounds(QPoint relativePos);
+    std::pair<int, int> getWordBounds(QPoint relativePos) const;
 
     /**
      * Get the index of the last character in this message's container
