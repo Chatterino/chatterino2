@@ -39,11 +39,20 @@ QString sendAnnouncementColor(const CommandContext &ctx,
 
     if (ctx.words.size() < 2)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            QString("Usage: /announce%1 <message> - Call attention to your "
-                    "message with a %1%2highlight.")
-                .arg(colorStr)
-                .arg(color == HelixAnnouncementColor::Primary ? "" : " ")));
+        QString usageMsg;
+        if (color == HelixAnnouncementColor::Primary)
+        {
+            usageMsg = "Usage: /announce <message> - Call attention to your "
+                       "message with a highlight.";
+        }
+        else
+        {
+            usageMsg =
+                QString("Usage: /announce%1 <message> - Call attention to your "
+                        "message with a %1 highlight.")
+                    .arg(colorStr);
+        }
+        ctx.channel->addMessage(makeSystemMessage(usageMsg));
         return "";
     }
 
@@ -92,7 +101,8 @@ QString sendAnnouncementColor(const CommandContext &ctx,
         });
     return "";
 }
-} // namespace
+
+}  // namespace
 
 namespace chatterino::commands {
 
