@@ -458,7 +458,7 @@ size_t MessageLayoutContainer::getFirstMessageCharacterIndex() const
 }
 
 std::pair<int, int> MessageLayoutContainer::getWordBounds(
-    const MessageLayoutElement *hoveredElement)
+    const MessageLayoutElement *hoveredElement) const
 {
     size_t index = 0;
     size_t wordStart = 0;

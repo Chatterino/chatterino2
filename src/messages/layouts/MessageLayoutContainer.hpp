@@ -112,7 +112,7 @@ struct MessageLayoutContainer {
     size_t getFirstMessageCharacterIndex() const;
 
     std::pair<int, int> getWordBounds(
-        const MessageLayoutElement *hoveredElement);
+        const MessageLayoutElement *hoveredElement) const;
 
     /**
      * Get the index of the last character in this message
