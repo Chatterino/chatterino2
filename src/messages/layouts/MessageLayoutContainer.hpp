@@ -160,6 +160,9 @@ struct MessageLayoutContainer {
      */
     int remainingWidth() const;
 
+    /**
+     * Returns the id of the next word that can be added to this container
+     */
     int nextWordId();
 
 private:
