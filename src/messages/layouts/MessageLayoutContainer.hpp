@@ -111,6 +111,9 @@ struct MessageLayoutContainer {
      */
     size_t getFirstMessageCharacterIndex() const;
 
+    /**
+     * Returns the start & end character index of the given element
+     */
     std::pair<int, int> getWordBounds(
         const MessageLayoutElement *hoveredElement) const;
 

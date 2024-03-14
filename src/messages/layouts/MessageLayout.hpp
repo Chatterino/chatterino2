@@ -72,6 +72,9 @@ public:
      */
     const MessageLayoutElement *getElementAt(QPoint point) const;
 
+    /**
+     * Returns the start & end character index of the word at the given point
+     */
     std::pair<int, int> getWordBounds(QPoint relativePos) const;
 
     /**
