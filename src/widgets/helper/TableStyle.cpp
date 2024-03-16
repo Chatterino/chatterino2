@@ -1,5 +1,10 @@
 #include "widgets/helper/TableStyle.hpp"
 
+#include <QAbstractItemView>
+#include <QPainter>
+#include <QStyleOption>
+#include <QWidget>
+
 namespace chatterino {
 
 TableStyle::TableStyle(QStyle *target)
