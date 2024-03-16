@@ -1,7 +1,6 @@
 #include "EmotePopup.hpp"
 
 #include "Application.hpp"
-#include "common/CompletionModel.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
@@ -10,12 +9,15 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
+#include "providers/bttv/BttvEmotes.hpp"
+#include "providers/ffz/FfzEmotes.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Helpers.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/TrimRegExpValidator.hpp"
 #include "widgets/Notebook.hpp"
@@ -58,8 +60,7 @@ auto makeEmoteMessage(const EmoteMap &map, const MessageElementFlag &emoteFlag)
     std::sort(vec.begin(), vec.end(),
               [](const std::pair<EmoteName, EmotePtr> &l,
                  const std::pair<EmoteName, EmotePtr> &r) {
-                  return CompletionModel::compareStrings(l.first.string,
-                                                         r.first.string);
+                  return compareEmoteStrings(l.first.string, r.first.string);
               });
     for (const auto &emote : vec)
     {
@@ -73,15 +74,14 @@ auto makeEmoteMessage(const EmoteMap &map, const MessageElementFlag &emoteFlag)
     return builder.release();
 }
 
-auto makeEmojiMessage(EmojiMap &emojiMap)
+auto makeEmojiMessage(const std::vector<EmojiPtr> &emojiMap)
 {
     MessageBuilder builder;
     builder->flags.set(MessageFlag::Centered);
     builder->flags.set(MessageFlag::DisableCompactEmotes);
 
-    emojiMap.each([&builder](const auto &key, const auto &value) {
-        (void)key;  // unused
-
+    for (const auto &value : emojiMap)
+    {
         builder
             .emplace<EmoteElement>(
                 value->emote,
@@ -89,7 +89,7 @@ auto makeEmojiMessage(EmojiMap &emojiMap)
                                     MessageElementFlag::EmojiAll})
             ->setLink(
                 Link(Link::Type::InsertText, ":" + value->shortCodes[0] + ":"));
-    });
+    }
 
     return builder.release();
 }
@@ -129,8 +129,8 @@ void addTwitchEmoteSets(
         {
             builder
                 .emplace<EmoteElement>(
-                    getApp()->emotes->twitch.getOrCreateEmote(emote.id,
-                                                              emote.name),
+                    getIApp()->getEmotes()->getTwitchEmotes()->getOrCreateEmote(
+                        emote.id, emote.name),
                     MessageElementFlags{MessageElementFlag::AlwaysShow,
                                         MessageElementFlag::TwitchEmote})
                 ->setLink(Link(Link::InsertText, emote.name.string));
@@ -166,7 +166,7 @@ void addEmotes(Channel &channel, const EmoteMap &map, const QString &title,
     channel.addMessage(makeEmoteMessage(map, emoteFlag));
 }
 
-void loadEmojis(ChannelView &view, EmojiMap &emojiMap)
+void loadEmojis(ChannelView &view, const std::vector<EmojiPtr> &emojiMap)
 {
     ChannelPtr emojiChannel(new Channel("", Channel::Type::None));
     emojiChannel->addMessage(makeEmojiMessage(emojiMap));
@@ -174,7 +174,8 @@ void loadEmojis(ChannelView &view, EmojiMap &emojiMap)
     view.setChannel(emojiChannel);
 }
 
-void loadEmojis(Channel &channel, EmojiMap &emojiMap, const QString &title)
+void loadEmojis(Channel &channel, const std::vector<EmojiPtr> &emojiMap,
+                const QString &title)
 {
     channel.addMessage(makeTitleMessage(title));
     channel.addMessage(makeEmojiMessage(emojiMap));
@@ -206,10 +207,11 @@ EmotePopup::EmotePopup(QWidget *parent)
     , search_(new QLineEdit())
     , notebook_(new Notebook(this))
 {
-    this->setStayInScreenRect(true);
-    this->moveTo(this, getApp()->windows->emotePopupPos(), false);
+    // this->setStayInScreenRect(true);
+    this->moveTo(getIApp()->getWindows()->emotePopupPos(),
+                 widgets::BoundsChecking::DesiredPosition);
 
-    auto *layout = new QVBoxLayout(this);
+    auto *layout = new QVBoxLayout();
     this->getLayoutContainer()->setLayout(layout);
 
     QRegularExpression searchRegex("\\S*");
@@ -218,7 +220,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
 
-    auto *layout2 = new QHBoxLayout(this);
+    auto *layout2 = new QHBoxLayout();
     layout2->setContentsMargins(8, 8, 8, 8);
     layout2->setSpacing(8);
 
@@ -227,6 +229,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     this->search_->setClearButtonEnabled(true);
     this->search_->findChild<QAbstractButton *>()->setIcon(
         QPixmap(":/buttons/clearSearch.png"));
+    this->search_->installEventFilter(this);
     layout2->addWidget(this->search_);
 
     layout->addLayout(layout2);
@@ -239,13 +242,15 @@ EmotePopup::EmotePopup(QWidget *parent)
     };
 
     auto makeView = [&](QString tabTitle, bool addToNotebook = true) {
-        auto *view = new ChannelView();
+        auto *view = new ChannelView(nullptr);
 
         view->setOverrideFlags(MessageElementFlags{
             MessageElementFlag::Default, MessageElementFlag::AlwaysShow,
             MessageElementFlag::EmoteImages});
         view->setEnableScrollingToBottom(false);
-        view->linkClicked.connect(clicked);
+        // We can safely ignore this signal connection since the ChannelView is deleted
+        // either when the notebook is deleted, or when our main layout is deleted.
+        std::ignore = view->linkClicked.connect(clicked);
 
         if (addToNotebook)
         {
@@ -267,9 +272,10 @@ EmotePopup::EmotePopup(QWidget *parent)
     this->globalEmotesView_ = makeView("Global");
     this->viewEmojis_ = makeView("Emojis");
 
-    loadEmojis(*this->viewEmojis_, getApp()->emotes->emojis.emojis);
+    loadEmojis(*this->viewEmojis_,
+               getApp()->getEmotes()->getEmojis()->getEmojis());
     this->addShortcuts();
-    this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
+    this->signalHolder_.managedConnect(getIApp()->getHotkeys()->onItemsUpdated,
                                        [this]() {
                                            this->clearShortcuts();
                                            this->addShortcuts();
@@ -310,7 +316,7 @@ void EmotePopup::addShortcuts()
                  int result = target.toInt(&ok);
                  if (ok)
                  {
-                     this->notebook_->selectIndex(result, false);
+                     this->notebook_->selectVisibleIndex(result, false);
                  }
                  else
                  {
@@ -367,7 +373,7 @@ void EmotePopup::addShortcuts()
          }},
     };
 
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 }
 
@@ -390,26 +396,28 @@ void EmotePopup::loadChannel(ChannelPtr channel)
     auto channelChannel = std::make_shared<Channel>("", Channel::Type::None);
 
     // twitch
-    addTwitchEmoteSets(
-        getApp()->accounts->twitch.getCurrent()->accessEmotes()->emoteSets,
-        *globalChannel, *subChannel, this->channel_->getName());
+    addTwitchEmoteSets(getIApp()
+                           ->getAccounts()
+                           ->twitch.getCurrent()
+                           ->accessEmotes()
+                           ->emoteSets,
+                       *globalChannel, *subChannel, this->channel_->getName());
 
     // global
     if (Settings::instance().enableBTTVGlobalEmotes)
     {
-        addEmotes(*globalChannel, *getApp()->twitch->getBttvEmotes().emotes(),
+        addEmotes(*globalChannel, *getApp()->getBttvEmotes()->emotes(),
                   "BetterTTV", MessageElementFlag::BttvEmote);
     }
     if (Settings::instance().enableFFZGlobalEmotes)
     {
-        addEmotes(*globalChannel, *getApp()->twitch->getFfzEmotes().emotes(),
+        addEmotes(*globalChannel, *getApp()->getFfzEmotes()->emotes(),
                   "FrankerFaceZ", MessageElementFlag::FfzEmote);
     }
     if (Settings::instance().enableSevenTVGlobalEmotes)
     {
-        addEmotes(*globalChannel,
-                  *getApp()->twitch->getSeventvEmotes().globalEmotes(), "7TV",
-                  MessageElementFlag::SevenTVEmote);
+        addEmotes(*globalChannel, *getApp()->getSeventvEmotes()->globalEmotes(),
+                  "7TV", MessageElementFlag::SevenTVEmote);
     }
 
     // channel
@@ -445,11 +453,29 @@ void EmotePopup::loadChannel(ChannelPtr channel)
     }
 }
 
+bool EmotePopup::eventFilter(QObject *object, QEvent *event)
+{
+    if (object == this->search_ && event->type() == QEvent::KeyPress)
+    {
+        auto *keyEvent = dynamic_cast<QKeyEvent *>(event);
+        if (keyEvent == QKeySequence::DeleteStartOfWord &&
+            this->search_->selectionLength() > 0)
+        {
+            this->search_->backspace();
+            return true;
+        }
+    }
+    return false;
+}
+
 void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
                                     const QString &searchText)
 {
-    auto twitchEmoteSets =
-        getApp()->accounts->twitch.getCurrent()->accessEmotes()->emoteSets;
+    auto twitchEmoteSets = getIApp()
+                               ->getAccounts()
+                               ->twitch.getCurrent()
+                               ->accessEmotes()
+                               ->emoteSets;
     std::vector<std::shared_ptr<TwitchAccount::EmoteSet>> twitchGlobalEmotes{};
 
     for (const auto &set : twitchEmoteSets)
@@ -470,11 +496,11 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     }
 
     auto bttvGlobalEmotes =
-        filterEmoteMap(searchText, getApp()->twitch->getBttvEmotes().emotes());
+        filterEmoteMap(searchText, getIApp()->getBttvEmotes()->emotes());
     auto ffzGlobalEmotes =
-        filterEmoteMap(searchText, getApp()->twitch->getFfzEmotes().emotes());
+        filterEmoteMap(searchText, getIApp()->getFfzEmotes()->emotes());
     auto seventvGlobalEmotes = filterEmoteMap(
-        searchText, getApp()->twitch->getSeventvEmotes().globalEmotes());
+        searchText, getIApp()->getSeventvEmotes()->globalEmotes());
 
     // twitch
     addTwitchEmoteSets(twitchGlobalEmotes, *searchChannel, *searchChannel,
@@ -493,7 +519,7 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     }
     if (!seventvGlobalEmotes.empty())
     {
-        addEmotes(*searchChannel, seventvGlobalEmotes, "SevenTV (Global)",
+        addEmotes(*searchChannel, seventvGlobalEmotes, "7TV (Global)",
                   MessageElementFlag::SevenTVEmote);
     }
 
@@ -522,7 +548,7 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     }
     if (!seventvChannelEmotes.empty())
     {
-        addEmotes(*searchChannel, seventvChannelEmotes, "SevenTV (Channel)",
+        addEmotes(*searchChannel, seventvChannelEmotes, "7TV (Channel)",
                   MessageElementFlag::SevenTVEmote);
     }
 }
@@ -544,17 +570,18 @@ void EmotePopup::filterEmotes(const QString &searchText)
         this->filterTwitchEmotes(searchChannel, searchText);
     }
 
-    EmojiMap filteredEmojis{};
+    std::vector<EmojiPtr> filteredEmojis{};
     int emojiCount = 0;
 
-    getApp()->emotes->emojis.emojis.each(
-        [&, searchText](const auto &name, std::shared_ptr<EmojiData> &emoji) {
-            if (emoji->shortCodes[0].contains(searchText, Qt::CaseInsensitive))
-            {
-                filteredEmojis.insert(name, emoji);
-                emojiCount++;
-            }
-        });
+    const auto &emojis = getIApp()->getEmotes()->getEmojis()->getEmojis();
+    for (const auto &emoji : emojis)
+    {
+        if (emoji->shortCodes[0].contains(searchText, Qt::CaseInsensitive))
+        {
+            filteredEmojis.push_back(emoji);
+            emojiCount++;
+        }
+    }
     // emojis
     if (emojiCount > 0)
     {
@@ -569,7 +596,7 @@ void EmotePopup::filterEmotes(const QString &searchText)
 
 void EmotePopup::closeEvent(QCloseEvent *event)
 {
-    getApp()->windows->setEmotePopupPos(this->pos());
+    getIApp()->getWindows()->setEmotePopupPos(this->pos());
     BaseWindow::closeEvent(event);
 }
 

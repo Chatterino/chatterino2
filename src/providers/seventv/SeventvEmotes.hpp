@@ -1,16 +1,19 @@
 #pragma once
 
-#include "boost/optional.hpp"
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
 #include "common/FlagsEnum.hpp"
 
+#include <QJsonArray>
+#include <QJsonObject>
+
 #include <memory>
+#include <optional>
 
 namespace chatterino {
 
+class ImageSet;
 class Channel;
-
 namespace seventv::eventapi {
     struct EmoteAddDispatch;
     struct EmoteUpdateDispatch;
@@ -61,6 +64,26 @@ struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 class EmoteMap;
 
+enum class SeventvEmoteSetKind : uint8_t {
+    Global,
+    Personal,
+    Channel,
+};
+
+enum class SeventvEmoteSetFlag : uint32_t {
+    Immutable = (1 << 0),
+    Privileged = (1 << 1),
+    Personal = (1 << 2),
+    Commercial = (1 << 3),
+};
+using SeventvEmoteSetFlags = FlagsEnum<SeventvEmoteSetFlag>;
+
+namespace seventv::detail {
+
+    EmoteMap parseEmotes(const QJsonArray &emoteSetEmotes, bool isGlobal);
+
+}  // namespace seventv::detail
+
 class SeventvEmotes final
 {
 public:
@@ -73,8 +96,9 @@ public:
     SeventvEmotes();
 
     std::shared_ptr<const EmoteMap> globalEmotes() const;
-    boost::optional<EmotePtr> globalEmote(const EmoteName &name) const;
+    std::optional<EmotePtr> globalEmote(const EmoteName &name) const;
     void loadGlobalEmotes();
+    void setGlobalEmotes(std::shared_ptr<const EmoteMap> emotes);
     static void loadChannelEmotes(
         const std::weak_ptr<Channel> &channel, const QString &channelId,
         std::function<void(EmoteMap &&, ChannelInfo)> callback,
@@ -87,7 +111,7 @@ public:
      *
      * @return The added emote if an emote was added.
      */
-    static boost::optional<EmotePtr> addEmote(
+    static std::optional<EmotePtr> addEmote(
         Atomic<std::shared_ptr<const EmoteMap>> &map,
         const seventv::eventapi::EmoteAddDispatch &dispatch);
 
@@ -98,7 +122,7 @@ public:
      *
      * @return The updated emote if any emote was updated.
      */
-    static boost::optional<EmotePtr> updateEmote(
+    static std::optional<EmotePtr> updateEmote(
         Atomic<std::shared_ptr<const EmoteMap>> &map,
         const seventv::eventapi::EmoteUpdateDispatch &dispatch);
 
@@ -109,7 +133,7 @@ public:
      *
      * @return The removed emote if any emote was removed.
      */
-    static boost::optional<EmotePtr> removeEmote(
+    static std::optional<EmotePtr> removeEmote(
         Atomic<std::shared_ptr<const EmoteMap>> &map,
         const seventv::eventapi::EmoteRemoveDispatch &dispatch);
 
@@ -118,6 +142,13 @@ public:
         const QString &emoteSetId,
         std::function<void(EmoteMap &&, QString)> successCallback,
         std::function<void(QString)> errorCallback);
+
+    /**
+     * Creates an image set from a 7TV emote or badge.
+     *
+     * @param emoteData { host: { files: [], url } }
+     */
+    static ImageSet createImageSet(const QJsonObject &emoteData);
 
 private:
     Atomic<std::shared_ptr<const EmoteMap>> global_;

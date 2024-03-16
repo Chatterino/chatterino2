@@ -1,6 +1,7 @@
 #include "widgets/Window.hpp"
 
 #include "Application.hpp"
+#include "common/Args.hpp"
 #include "common/Credentials.hpp"
 #include "common/Modes.hpp"
 #include "common/QLogging.hpp"
@@ -9,7 +10,9 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/Updates.hpp"
 #include "singletons/WindowManager.hpp"
@@ -59,7 +62,7 @@ Window::Window(WindowType type, QWidget *parent)
 #endif
 
     this->bSignals_.emplace_back(
-        getApp()->accounts->twitch.currentUserChanged.connect([this] {
+        getIApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
             this->onAccountSelected();
         }));
     this->onAccountSelected();
@@ -73,7 +76,7 @@ Window::Window(WindowType type, QWidget *parent)
         this->resize(int(300 * this->scale()), int(500 * this->scale()));
     }
 
-    this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
+    this->signalHolder_.managedConnect(getIApp()->getHotkeys()->onItemsUpdated,
                                        [this]() {
                                            this->clearShortcuts();
                                            this->addShortcuts();
@@ -102,11 +105,13 @@ bool Window::event(QEvent *event)
 {
     switch (event->type())
     {
-        case QEvent::WindowActivate:
+        case QEvent::WindowActivate: {
+            getIApp()->getWindows()->selectedWindow_ = this;
             break;
+        }
 
         case QEvent::WindowDeactivate: {
-            auto page = this->notebook_->getOrAddSelectedPage();
+            auto *page = this->notebook_->getSelectedPage();
 
             if (page != nullptr)
             {
@@ -116,12 +121,8 @@ bool Window::event(QEvent *event)
                 {
                     split->updateLastReadMessage();
                 }
-            }
 
-            if (SplitContainer *container =
-                    dynamic_cast<SplitContainer *>(page))
-            {
-                container->hideResizeHandles();
+                page->hideResizeHandles();
             }
         }
         break;
@@ -136,10 +137,14 @@ void Window::closeEvent(QCloseEvent *)
 {
     if (this->type_ == WindowType::Main)
     {
-        auto app = getApp();
-        app->windows->save();
-        app->windows->closeAll();
+        getIApp()->getWindows()->save();
+        getIApp()->getWindows()->closeAll();
     }
+
+    // Ensure selectedWindow_ is never an invalid pointer.
+    // WindowManager will return the main window if no window is pointed to by
+    // `selectedWindow_`.
+    getIApp()->getWindows()->selectedWindow_ = nullptr;
 
     this->closed.invoke();
 
@@ -151,7 +156,7 @@ void Window::closeEvent(QCloseEvent *)
 
 void Window::addLayout()
 {
-    QVBoxLayout *layout = new QVBoxLayout(this);
+    auto *layout = new QVBoxLayout();
 
     layout->addWidget(this->notebook_);
     this->getLayoutContainer()->setLayout(layout);
@@ -166,26 +171,79 @@ void Window::addLayout()
 void Window::addCustomTitlebarButtons()
 {
     if (!this->hasCustomWindowFrame())
+    {
         return;
+    }
     if (this->type_ != WindowType::Main)
+    {
         return;
+    }
 
     // settings
     this->addTitleBarButton(TitleBarButtonStyle::Settings, [this] {
-        getApp()->windows->showSettingsDialog(this);
+        getIApp()->getWindows()->showSettingsDialog(this);
     });
 
     // updates
-    auto update = this->addTitleBarButton(TitleBarButtonStyle::None, [] {});
+    auto *update = this->addTitleBarButton(TitleBarButtonStyle::None, [] {});
 
     initUpdateButton(*update, this->signalHolder_);
 
     // account
     this->userLabel_ = this->addTitleBarLabel([this] {
-        getApp()->windows->showAccountSelectPopup(this->userLabel_->mapToGlobal(
-            this->userLabel_->rect().bottomLeft()));
+        getIApp()->getWindows()->showAccountSelectPopup(
+            this->userLabel_->mapToGlobal(
+                this->userLabel_->rect().bottomLeft()));
     });
     this->userLabel_->setMinimumWidth(20 * scale());
+
+    // streamer mode
+    this->streamerModeTitlebarIcon_ =
+        this->addTitleBarButton(TitleBarButtonStyle::StreamerMode, [this] {
+            getIApp()->getWindows()->showSettingsDialog(
+                this, SettingsDialogPreference::StreamerMode);
+        });
+    QObject::connect(getIApp()->getStreamerMode(), &IStreamerMode::changed,
+                     this, &Window::updateStreamerModeIcon);
+
+    // Update initial state
+    this->updateStreamerModeIcon();
+}
+
+void Window::updateStreamerModeIcon()
+{
+    // A duplicate of this code is in SplitNotebook class (in Notebook.{c,h}pp)
+    // That one is the one near splits (on linux and mac or non-main windows on Windows)
+    // This copy handles the TitleBar icon in Window (main window on Windows)
+    if (this->streamerModeTitlebarIcon_ == nullptr)
+    {
+        return;
+    }
+#ifdef Q_OS_WIN
+    assert(this->getType() == WindowType::Main);
+    if (getTheme()->isLightTheme())
+    {
+        this->streamerModeTitlebarIcon_->setPixmap(
+            getResources().buttons.streamerModeEnabledLight);
+    }
+    else
+    {
+        this->streamerModeTitlebarIcon_->setPixmap(
+            getResources().buttons.streamerModeEnabledDark);
+    }
+    this->streamerModeTitlebarIcon_->setVisible(
+        getIApp()->getStreamerMode()->isEnabled());
+#else
+    // clang-format off
+    assert(false && "Streamer mode TitleBar icon should not exist on non-Windows OSes");
+    // clang-format on
+#endif
+}
+
+void Window::themeChangedEvent()
+{
+    this->updateStreamerModeIcon();
+    BaseWindow::themeChangedEvent();
 }
 
 void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
@@ -228,7 +286,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
                     ->toInner<PubSubCommunityPointsChannelV1Message>();
 
             app->twitch->addFakeMessage(getSampleChannelRewardIRCMessage());
-            app->twitch->pubsub->signals_.pointReward.redeemed.invoke(
+            getIApp()->getTwitchPubSub()->pointReward.redeemed.invoke(
                 oInnerMessage->data.value("redemption").toObject());
             alt = !alt;
         }
@@ -239,7 +297,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
             auto oInnerMessage =
                 oMessage->toInner<PubSubMessageMessage>()
                     ->toInner<PubSubCommunityPointsChannelV1Message>();
-            app->twitch->pubsub->signals_.pointReward.redeemed.invoke(
+            getIApp()->getTwitchPubSub()->pointReward.redeemed.invoke(
                 oInnerMessage->data.value("redemption").toObject());
             alt = !alt;
         }
@@ -308,7 +366,7 @@ void Window::addShortcuts()
                  int result = target.toInt(&ok);
                  if (ok)
                  {
-                     this->notebook_->selectIndex(result);
+                     this->notebook_->selectVisibleIndex(result);
                  }
                  else
                  {
@@ -331,10 +389,10 @@ void Window::addShortcuts()
              }
              if (arguments.at(0) == "split")
              {
-                 if (auto page = dynamic_cast<SplitContainer *>(
+                 if (auto *page = dynamic_cast<SplitContainer *>(
                          this->notebook_->getSelectedPage()))
                  {
-                     if (auto split = page->getSelectedSplit())
+                     if (auto *split = page->getSelectedSplit())
                      {
                          split->popup();
                      }
@@ -342,7 +400,7 @@ void Window::addShortcuts()
              }
              else if (arguments.at(0) == "window")
              {
-                 if (auto page = dynamic_cast<SplitContainer *>(
+                 if (auto *page = dynamic_cast<SplitContainer *>(
                          this->notebook_->getSelectedPage()))
                  {
                      page->popup();
@@ -432,13 +490,12 @@ void Window::addShortcuts()
         {"toggleLocalR9K",
          [](std::vector<QString>) -> QString {
              getSettings()->hideSimilar.setValue(!getSettings()->hideSimilar);
-             getApp()->windows->forceLayoutChannelViews();
+             getIApp()->getWindows()->forceLayoutChannelViews();
              return "";
          }},
         {"openQuickSwitcher",
-         [](std::vector<QString>) -> QString {
-             auto quickSwitcher =
-                 new QuickSwitcherPopup(&getApp()->windows->getMainWindow());
+         [this](std::vector<QString>) -> QString {
+             auto *quickSwitcher = new QuickSwitcherPopup(this);
              quickSwitcher->show();
              return "";
          }},
@@ -553,7 +610,7 @@ void Window::addShortcuts()
              }
              else if (mode == 2)
              {
-                 if (isInStreamerMode())
+                 if (getIApp()->getStreamerMode()->isEnabled())
                  {
                      getSettings()->enableStreamerMode.setValue(
                          StreamerModeSetting::Disabled);
@@ -573,53 +630,68 @@ void Window::addShortcuts()
          }},
         {"setTabVisibility",
          [this](std::vector<QString> arguments) -> QString {
-             auto mode = 2;
-             if (arguments.size() != 0)
+             QString arg = arguments.empty() ? "toggle" : arguments.front();
+
+             if (arg == "off")
              {
-                 auto arg = arguments.at(0);
-                 if (arg == "off")
+                 this->notebook_->setShowTabs(false);
+                 getSettings()->tabVisibility.setValue(
+                     NotebookTabVisibility::AllTabs);
+             }
+             else if (arg == "on")
+             {
+                 this->notebook_->setShowTabs(true);
+                 getSettings()->tabVisibility.setValue(
+                     NotebookTabVisibility::AllTabs);
+             }
+             else if (arg == "toggle")
+             {
+                 this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
+                 getSettings()->tabVisibility.setValue(
+                     NotebookTabVisibility::AllTabs);
+             }
+             else if (arg == "liveOnly")
+             {
+                 this->notebook_->setShowTabs(true);
+                 getSettings()->tabVisibility.setValue(
+                     NotebookTabVisibility::LiveOnly);
+             }
+             else if (arg == "toggleLiveOnly")
+             {
+                 if (!this->notebook_->getShowTabs())
                  {
-                     mode = 0;
-                 }
-                 else if (arg == "on")
-                 {
-                     mode = 1;
-                 }
-                 else if (arg == "toggle")
-                 {
-                     mode = 2;
+                     // Tabs are currently hidden, so the intention is to show
+                     // tabs again before enabling the live only setting
+                     this->notebook_->setShowTabs(true);
+                     getSettings()->tabVisibility.setValue(
+                         NotebookTabVisibility::LiveOnly);
                  }
                  else
                  {
-                     qCWarning(chatterinoHotkeys)
-                         << "Invalid argument for setStreamerMode hotkey: "
-                         << arg;
-                     return QString("Invalid argument for setTabVisibility "
-                                    "hotkey: %1. Use \"on\", \"off\" or "
-                                    "\"toggle\".")
-                         .arg(arg);
+                     getSettings()->tabVisibility.setValue(
+                         getSettings()->tabVisibility.getEnum() ==
+                                 NotebookTabVisibility::LiveOnly
+                             ? NotebookTabVisibility::AllTabs
+                             : NotebookTabVisibility::LiveOnly);
                  }
              }
+             else
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "Invalid argument for setTabVisibility hotkey: " << arg;
+                 return QString("Invalid argument for setTabVisibility hotkey: "
+                                "%1. Use \"on\", \"off\", \"toggle\", "
+                                "\"liveOnly\", or \"toggleLiveOnly\".")
+                     .arg(arg);
+             }
 
-             if (mode == 0)
-             {
-                 this->notebook_->setShowTabs(false);
-             }
-             else if (mode == 1)
-             {
-                 this->notebook_->setShowTabs(true);
-             }
-             else if (mode == 2)
-             {
-                 this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
-             }
              return "";
          }},
     };
 
     this->addDebugStuff(actions);
 
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::Window, actions, this);
 }
 
@@ -654,7 +726,7 @@ void Window::addMenuBar()
 
 void Window::onAccountSelected()
 {
-    auto user = getApp()->accounts->twitch.getCurrent();
+    auto user = getIApp()->getAccounts()->twitch.getCurrent();
 
     // update title (also append username on Linux and MacOS)
     QString windowTitle = Version::instance().fullVersion();
@@ -669,6 +741,11 @@ void Window::onAccountSelected()
         windowTitle += " - " + user->getUserName();
     }
 #endif
+
+    if (getApp()->getArgs().safeMode)
+    {
+        windowTitle += " (safe mode)";
+    }
 
     this->setWindowTitle(windowTitle);
 

@@ -5,26 +5,55 @@
 #include "util/RapidJsonSerializeQString.hpp"
 
 #include <pajlada/settings/setting.hpp>
-#include <QBrush>
 #include <QColor>
+#include <QJsonObject>
+#include <QPixmap>
+#include <QString>
+#include <QTimer>
+#include <QVariant>
+
+#include <memory>
+#include <optional>
+#include <vector>
 
 namespace chatterino {
 
 class WindowManager;
 
+struct ThemeDescriptor {
+    QString key;
+
+    // Path to the theme on disk
+    // Can be a Qt resource path
+    QString path;
+
+    // Name of the theme
+    QString name;
+
+    bool custom{};
+};
+
 class Theme final : public Singleton
 {
 public:
-    Theme();
+    static const std::vector<ThemeDescriptor> builtInThemes;
+
+    // The built in theme that will be used if some theme parsing fails
+    static const ThemeDescriptor fallbackTheme;
+
+    static const int AUTO_RELOAD_INTERVAL_MS = 500;
+
+    void initialize(Settings &settings, const Paths &paths) final;
 
     bool isLightTheme() const;
+    bool isSystemTheme() const;
 
     struct TabColors {
         QColor text;
         struct {
-            QBrush regular;
-            QBrush hover;
-            QBrush unfocused;
+            QColor regular;
+            QColor hover;
+            QColor unfocused;
         } backgrounds;
         struct {
             QColor regular;
@@ -39,8 +68,6 @@ public:
     struct {
         QColor background;
         QColor text;
-        QColor borderUnfocused;
-        QColor borderFocused;
     } window;
 
     /// TABS
@@ -49,8 +76,10 @@ public:
         TabColors newMessage;
         TabColors highlighted;
         TabColors selected;
-        QColor border;
         QColor dividerLine;
+
+        QColor liveIndicator;
+        QColor rerunIndicator;
     } tabs;
 
     /// MESSAGES
@@ -66,12 +95,9 @@ public:
         struct {
             QColor regular;
             QColor alternate;
-            // QColor whisper;
         } backgrounds;
 
         QColor disabled;
-        //        QColor seperator;
-        //        QColor seperatorInner;
         QColor selection;
 
         QColor highlightAnimationStart;
@@ -83,17 +109,7 @@ public:
         QColor background;
         QColor thumb;
         QColor thumbSelected;
-        struct {
-            QColor highlight;
-            QColor subscription;
-        } highlights;
     } scrollbars;
-
-    /// TOOLTIP
-    struct {
-        QColor text;
-        QColor background;
-    } tooltip;
 
     /// SPLITS
     struct {
@@ -113,17 +129,12 @@ public:
             QColor focusedBackground;
             QColor text;
             QColor focusedText;
-            // int margin;
         } header;
 
         struct {
-            QColor border;
             QColor background;
-            QColor selection;
-            QColor focusedLine;
             QColor text;
             QString styleSheet;
-            // int margin;
         } input;
     } splits;
 
@@ -132,18 +143,46 @@ public:
         QPixmap pin;
     } buttons;
 
-    void normalizeColor(QColor &color);
+    void normalizeColor(QColor &color) const;
     void update();
-    QColor blendColors(const QColor &color1, const QColor &color2, qreal ratio);
+
+    bool isAutoReloading() const;
+    void setAutoReload(bool autoReload);
+
+    /**
+     * Return a list of available themes
+     **/
+    std::vector<std::pair<QString, QVariant>> availableThemes() const;
 
     pajlada::Signals::NoArgSignal updated;
 
     QStringSetting themeName{"/appearance/theme/name", "Dark"};
-    DoubleSetting themeHue{"/appearance/theme/hue", 0.0};
+    QStringSetting lightSystemThemeName{"/appearance/theme/lightSystem",
+                                        "Light"};
+    QStringSetting darkSystemThemeName{"/appearance/theme/darkSystem", "Dark"};
 
 private:
     bool isLight_ = false;
-    void actuallyUpdate(double hue, double multiplier);
+
+    std::vector<ThemeDescriptor> availableThemes_;
+
+    QString currentThemePath_;
+    std::unique_ptr<QTimer> themeReloadTimer_;
+    // This will only be populated when auto-reloading themes
+    QJsonObject currentThemeJson_;
+
+    QObject lifetime_;
+
+    /**
+     * Figure out which themes are available in the Themes directory
+     *
+     * NOTE: This is currently not built to be reloadable
+     **/
+    void loadAvailableThemes(const Paths &paths);
+
+    std::optional<ThemeDescriptor> findThemeByKey(const QString &key);
+
+    void parseFrom(const QJsonObject &root, bool isCustomTheme);
 
     pajlada::Signals::NoArgSignal repaintVisibleChatWidgets_;
 

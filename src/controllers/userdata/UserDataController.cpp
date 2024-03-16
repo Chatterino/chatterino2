@@ -2,18 +2,18 @@
 
 #include "singletons/Paths.hpp"
 #include "util/CombinePath.hpp"
+#include "util/Helpers.hpp"
 
 namespace {
 
 using namespace chatterino;
 
-std::shared_ptr<pajlada::Settings::SettingManager> initSettingsInstance()
+std::shared_ptr<pajlada::Settings::SettingManager> initSettingsInstance(
+    const Paths &paths)
 {
     auto sm = std::make_shared<pajlada::Settings::SettingManager>();
 
-    auto *paths = getPaths();
-
-    auto path = combinePath(paths->settingsDirectory, "user-data.json");
+    auto path = combinePath(paths.settingsDirectory, "user-data.json");
 
     sm->setPath(path.toUtf8().toStdString());
 
@@ -29,8 +29,8 @@ std::shared_ptr<pajlada::Settings::SettingManager> initSettingsInstance()
 
 namespace chatterino {
 
-UserDataController::UserDataController()
-    : sm(initSettingsInstance())
+UserDataController::UserDataController(const Paths &paths)
+    : sm(initSettingsInstance(paths))
     , setting("/users", this->sm)
 {
     this->sm->load();
@@ -42,15 +42,14 @@ void UserDataController::save()
     this->sm->save();
 }
 
-boost::optional<UserData> UserDataController::getUser(
-    const QString &userID) const
+std::optional<UserData> UserDataController::getUser(const QString &userID) const
 {
     std::shared_lock lock(this->usersMutex);
     auto it = this->users.find(userID);
 
     if (it == this->users.end())
     {
-        return boost::none;
+        return std::nullopt;
     }
 
     return it->second;
@@ -67,8 +66,8 @@ void UserDataController::setUserColor(const QString &userID,
 {
     auto c = this->getUsers();
     auto it = c.find(userID);
-    boost::optional<QColor> finalColor =
-        boost::make_optional(!colorString.isEmpty(), QColor(colorString));
+    std::optional<QColor> finalColor =
+        makeConditionedOptional(!colorString.isEmpty(), QColor(colorString));
     if (it == c.end())
     {
         if (!finalColor)

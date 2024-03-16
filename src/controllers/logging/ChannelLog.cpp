@@ -7,9 +7,14 @@ ChannelLog::ChannelLog(QString channelName)
 {
 }
 
+bool ChannelLog::operator==(const ChannelLog &other) const
+{
+    return this->channelName_ == other.channelName_;
+}
+
 QString ChannelLog::channelName() const
 {
-    return this->channelName_;
+    return this->channelName_.toLower();
 }
 
 QString ChannelLog::toString() const

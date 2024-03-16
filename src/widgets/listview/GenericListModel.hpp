@@ -3,23 +3,24 @@
 #include "widgets/listview/GenericListItem.hpp"
 
 #include <QAbstractListModel>
-#include <QWidget>
+#include <QObject>
 
 #include <memory>
+#include <vector>
 
 namespace chatterino {
 
 class GenericListModel : public QAbstractListModel
 {
 public:
-    GenericListModel(QWidget *parent = nullptr);
+    GenericListModel(QObject *parent = nullptr);
 
     /**
      * @brief   Reimplements QAbstractItemModel::rowCount.
      *
-     * @return  number of items currrently present in this model
+     * @return  number of items currently present in this model
      */
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
     /**
      * @brief   Reimplements QAbstractItemModel::data. Currently, the role parameter
@@ -30,7 +31,7 @@ public:
      *
      * @return  GenericListItem * (wrapped as QVariant) at index
      */
-    QVariant data(const QModelIndex &index, int role) const;
+    QVariant data(const QModelIndex &index, int role) const override;
 
     /**
      * @brief   Add an item to this QuickSwitcherModel. It will be displayed in
@@ -49,6 +50,11 @@ public:
      *          QuickSwitcherModel::clear (and invalidate their pointers).
      */
     void clear();
+
+    /**
+     * @brief   Increases the capacity of the list model.
+     */
+    void reserve(size_t capacity);
 
 private:
     std::vector<std::unique_ptr<GenericListItem>> items_;

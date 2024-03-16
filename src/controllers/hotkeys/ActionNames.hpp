@@ -5,6 +5,20 @@
 #include <QString>
 
 #include <map>
+#include <vector>
+
+inline const std::vector<std::pair<QString, std::vector<QString>>>
+    HOTKEY_ARG_ON_OFF_TOGGLE = {
+        {"Toggle", {}},
+        {"Set to on", {"on"}},
+        {"Set to off", {"off"}},
+};
+
+inline const std::vector<std::pair<QString, std::vector<QString>>>
+    HOTKEY_ARG_WITH_OR_WITHOUT_SELECTION = {
+        {"No", {"withoutSelection"}},
+        {"Yes", {"withSelection"}},
+};
 
 namespace chatterino {
 
@@ -13,6 +27,9 @@ struct ActionDefinition {
     // displayName is the value that would be shown to a user when they edit or create a hotkey for an action
     QString displayName;
 
+    // argumentDescription is a description of the arguments in a format of
+    // "<required arg: description of possible values> [optional arg: possible
+    // values]"
     QString argumentDescription = "";
 
     // minCountArguments is the minimum amount of arguments the action accepts
@@ -21,6 +38,20 @@ struct ActionDefinition {
 
     // maxCountArguments is the maximum amount of arguments the action accepts
     uint8_t maxCountArguments = minCountArguments;
+
+    // possibleArguments is empty or contains all possible argument values,
+    // it is an ordered mapping from option name (what the user sees) to
+    // arguments (what the action code will see).
+    // As std::map<K, V> does not guarantee order this is a std::vector<...>
+    std::vector<std::pair<QString, std::vector<QString>>> possibleArguments =
+        {};
+
+    // When possibleArguments are present this should be a string like
+    // "Direction:" which will be shown before the values from
+    // possibleArguments in the UI. Otherwise, it should be empty.
+    QString argumentsPrompt = "";
+    // A more detailed description of what argumentsPrompt means
+    QString argumentsPromptHover = "";
 };
 
 using ActionDefinitionMap = std::map<QString, ActionDefinition>;
@@ -39,15 +70,22 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
           }},
          {"scrollPage",
           ActionDefinition{
-              "Scroll",
-              "<up or down>",
-              1,
+              .displayName = "Scroll",
+              .argumentDescription = "<direction: up or down>",
+              .minCountArguments = 1,
+              .maxCountArguments = 1,
+              .possibleArguments{
+                  {"Up", {"up"}},
+                  {"Down", {"down"}},
+              },
+              .argumentsPrompt = "Direction:",
           }},
          {"search", ActionDefinition{"Focus search box"}},
          {"execModeratorAction",
           ActionDefinition{
               "Usercard: execute moderation action",
               "<ban, unban or number of the timeout button to use>", 1}},
+         {"pin", ActionDefinition{"Usercard, reply thread: pin window"}},
      }},
     {HotkeyCategory::Split,
      {
@@ -57,24 +95,44 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"delete", ActionDefinition{"Close"}},
          {"focus",
           ActionDefinition{
-              "Focus neighbouring split",
-              "<up, down, left, or right>",
-              1,
+              .displayName = "Focus neighbouring split",
+              .argumentDescription = "<direction: up, down, left or right>",
+              .minCountArguments = 1,
+              .maxCountArguments = 1,
+              .possibleArguments{
+                  {"Up", {"up"}},
+                  {"Down", {"down"}},
+                  {"Left", {"left"}},
+                  {"Right", {"right"}},
+              },
+              .argumentsPrompt = "Direction:",
+              .argumentsPromptHover =
+                  "Which direction to look for a split to focus?",
           }},
          {"openInBrowser", ActionDefinition{"Open channel in browser"}},
+         {"openPlayerInBrowser",
+          ActionDefinition{"Open stream in browser player"}},
          {"openInCustomPlayer",
           ActionDefinition{"Open stream in custom player"}},
          {"openInStreamlink", ActionDefinition{"Open stream in streamlink"}},
          {"openModView", ActionDefinition{"Open mod view in browser"}},
-         {"openViewerList", ActionDefinition{"Open viewer list"}},
+         {"openViewerList", ActionDefinition{"Open chatter list"}},
          {"pickFilters", ActionDefinition{"Pick filters"}},
          {"reconnect", ActionDefinition{"Reconnect to chat"}},
          {"reloadEmotes",
           ActionDefinition{
-              "Reload emotes",
-              "[channel or subscriber]",
-              0,
-              1,
+              .displayName = "Reload emotes",
+              .argumentDescription =
+                  "[type: channel or subscriber; default: all emotes]",
+              .minCountArguments = 0,
+              .maxCountArguments = 1,
+              .possibleArguments{
+                  {"All emotes", {}},
+                  {"Channel emotes only", {"channel"}},
+                  {"Subscriber emotes only", {"subscriber"}},
+              },
+              .argumentsPrompt = "Emote type:",
+              .argumentsPromptHover = "Which emotes should Chatterino reload",
           }},
          {"runCommand",
           ActionDefinition{
@@ -84,29 +142,44 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
           }},
          {"scrollPage",
           ActionDefinition{
-              "Scroll",
-              "<up or down>",
-              1,
+              .displayName = "Scroll",
+              .argumentDescription = "<up or down>",
+              .minCountArguments = 1,
+              .maxCountArguments = 1,
+              .possibleArguments{
+                  {"Up", {"up"}},
+                  {"Down", {"down"}},
+              },
+              .argumentsPrompt = "Direction:",
+              .argumentsPromptHover =
+                  "Which direction do you want to see more messages",
           }},
          {"scrollToBottom", ActionDefinition{"Scroll to the bottom"}},
          {"scrollToTop", ActionDefinition{"Scroll to the top"}},
          {"setChannelNotification",
           ActionDefinition{
-              "Set channel live notification",
-              "[on or off. default: toggle]",
-              0,
-              1,
+              .displayName = "Set channel live notification",
+              .argumentDescription = "[on or off. default: toggle]",
+              .minCountArguments = 0,
+              .maxCountArguments = 1,
+              .possibleArguments = HOTKEY_ARG_ON_OFF_TOGGLE,
+              .argumentsPrompt = "New value:",
+              .argumentsPromptHover = "Should the channel live notification be "
+                                      "enabled, disabled or toggled",
           }},
          {"setModerationMode",
           ActionDefinition{
-              "Set moderation mode",
-              "[on or off. default: toggle]",
-              0,
-              1,
+              .displayName = "Set moderation mode",
+              .argumentDescription = "[on or off. default: toggle]",
+              .minCountArguments = 0,
+              .maxCountArguments = 1,
+              .possibleArguments = HOTKEY_ARG_ON_OFF_TOGGLE,
+              .argumentsPrompt = "New value:",
+              .argumentsPromptHover =
+                  "Should the moderation mode be enabled, disabled or toggled",
           }},
          {"showSearch", ActionDefinition{"Search current channel"}},
          {"showGlobalSearch", ActionDefinition{"Search all channels"}},
-         {"startWatching", ActionDefinition{"Start watching"}},
          {"debug", ActionDefinition{"Show debug popup"}},
      }},
     {HotkeyCategory::SplitInput,
@@ -114,21 +187,38 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"clear", ActionDefinition{"Clear message"}},
          {"copy",
           ActionDefinition{
-              "Copy",
-              "<source of text: split, splitInput or auto>",
-              1,
+              .displayName = "Copy",
+              .argumentDescription =
+                  "<source of text: auto, split or splitInput>",
+              .minCountArguments = 1,
+              .possibleArguments{
+                  {"Automatic", {"auto"}},
+                  {"Split", {"split"}},
+                  {"Split Input", {"splitInput"}},
+              },
+              .argumentsPrompt = "Source of text:",
           }},
          {"cursorToStart",
           ActionDefinition{
-              "To start of message",
-              "<withSelection or withoutSelection>",
-              1,
+              .displayName = "To start of message",
+              .argumentDescription =
+                  "<selection mode: withSelection or withoutSelection>",
+              .minCountArguments = 1,
+              .maxCountArguments = 1,
+              .possibleArguments = HOTKEY_ARG_WITH_OR_WITHOUT_SELECTION,
+              .argumentsPrompt = "Select text from cursor to start:",
+              // XXX: write a hover for this that doesn't suck
           }},
          {"cursorToEnd",
           ActionDefinition{
-              "To end of message",
-              "<withSelection or withoutSelection>",
-              1,
+              .displayName = "To end of message",
+              .argumentDescription =
+                  "<selection mode: withSelection or withoutSelection>",
+              .minCountArguments = 1,
+              .maxCountArguments = 1,
+              .possibleArguments = HOTKEY_ARG_WITH_OR_WITHOUT_SELECTION,
+              .argumentsPrompt = "Select text from cursor to end:",
+              // XXX: write a hover for this that doesn't suck
           }},
          {"nextMessage", ActionDefinition{"Choose next sent message"}},
          {"openEmotesPopup", ActionDefinition{"Open emotes list"}},
@@ -140,10 +230,16 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"selectWord", ActionDefinition{"Select word"}},
          {"sendMessage",
           ActionDefinition{
-              "Send message",
-              "[keepInput to not clear the text after sending]",
-              0,
-              1,
+              .displayName = "Send message",
+              .argumentDescription =
+                  "[keepInput to not clear the text after sending]",
+              .minCountArguments = 0,
+              .maxCountArguments = 1,
+              .possibleArguments{
+                  {"Default behavior", {}},
+                  {"Keep message in input after sending it", {"keepInput"}},
+              },
+              .argumentsPrompt = "Behavior:",
           }},
          {"undo", ActionDefinition{"Undo"}},
 
@@ -163,7 +259,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"moveTab",
           ActionDefinition{
               "Move tab",
-              "<next, previous, or new index of tab>",
+              "<where to move the tab: next, previous, or new index of tab>",
               1,
           }},
          {"newSplit", ActionDefinition{"Create a new split"}},
@@ -172,40 +268,78 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"openTab",
           ActionDefinition{
               "Select tab",
-              "<last, next, previous, or index of tab to select>",
+              "<which tab to select: last, next, previous, or index>",
               1,
           }},
          {"openQuickSwitcher", ActionDefinition{"Open the quick switcher"}},
          {"popup",
           ActionDefinition{
-              "New popup",
-              "<split or window>",
-              1,
+              .displayName = "New popup",
+              .argumentDescription = "<split or window>",
+              .minCountArguments = 1,
+              .maxCountArguments = 1,
+              .possibleArguments{
+                  {"Focused Split", {"split"}},
+                  {"Entire Tab", {"window"}},
+              },
+              .argumentsPrompt = "Include:",
+              .argumentsPromptHover =
+                  "What should be included in the new popup",
           }},
          {"quit", ActionDefinition{"Quit Chatterino"}},
          {"removeTab", ActionDefinition{"Remove current tab"}},
          {"reopenSplit", ActionDefinition{"Reopen closed split"}},
          {"setStreamerMode",
           ActionDefinition{
-              "Set streamer mode",
-              "[on, off, toggle, or auto. default: toggle]",
-              0,
-              1,
+              .displayName = "Set streamer mode",
+              .argumentDescription =
+                  "[on, off, toggle, or auto. default: toggle]",
+              .minCountArguments = 0,
+              .maxCountArguments = 1,
+              .possibleArguments =
+                  {
+                      {"Toggle on/off", {}},
+                      {"Set to on", {"on"}},
+                      {"Set to off", {"off"}},
+                      {"Set to automatic", {"auto"}},
+                  },
+              .argumentsPrompt = "New value:",
+              .argumentsPromptHover =
+                  "Should streamer mode be enabled, disabled, toggled (on/off) "
+                  "or set to auto",
           }},
          {"toggleLocalR9K", ActionDefinition{"Toggle local R9K"}},
          {"zoom",
           ActionDefinition{
-              "Zoom in/out",
-              "<in, out, or reset>",
-              1,
+              .displayName = "Zoom in/out",
+              .argumentDescription = "Argument:",
+              .minCountArguments = 1,
+              .maxCountArguments = 1,
+              .possibleArguments =
+                  {
+                      {"Zoom in", {"in"}},
+                      {"Zoom out", {"out"}},
+                      {"Reset zoom", {"reset"}},
+                  },
+              .argumentsPrompt = "Option:",
           }},
          {"setTabVisibility",
           ActionDefinition{
-              "Set tab visibility",
-              "[on, off, or toggle. default: toggle]",
-              0,
-              1,
-          }}}},
+              .displayName = "Set tab visibility",
+              .argumentDescription = "[on, off, toggle, liveOnly, or "
+                                     "toggleLiveOnly. default: toggle]",
+              .minCountArguments = 0,
+              .maxCountArguments = 1,
+              .possibleArguments{{"Toggle", {}},
+                                 {"Set to on", {"on"}},
+                                 {"Set to off", {"off"}},
+                                 {"Live only on", {"liveOnly"}},
+                                 {"Live only toggle", {"toggleLiveOnly"}}},
+              .argumentsPrompt = "New value:",
+              .argumentsPromptHover = "Should the tabs be enabled, disabled, "
+                                      "toggled, or live-only.",
+          }},
+     }},
 };
 
 }  // namespace chatterino

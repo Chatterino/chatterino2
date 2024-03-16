@@ -4,9 +4,9 @@
 #include "messages/ImageSet.hpp"
 #include "messages/Link.hpp"
 #include "messages/MessageColor.hpp"
+#include "providers/links/LinkInfo.hpp"
 #include "singletons/Fonts.hpp"
 
-#include <boost/noncopyable.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QRect>
 #include <QString>
@@ -137,13 +137,10 @@ enum class MessageElementFlag : int64_t {
     BoldUsername = (1LL << 27),
     NonBoldUsername = (1LL << 28),
 
-    // for links
-    LowercaseLink = (1LL << 29),
-    OriginalLink = (1LL << 30),
-
-    // ZeroWidthEmotes are emotes that are supposed to overlay over any pre-existing emotes
-    // e.g. BTTV's SoSnowy during christmas season or 7TV's RainTime
-    ZeroWidthEmote = (1LL << 31),
+    // used to check if links should be lowercased
+    LowercaseLinks = (1LL << 29),
+    // Unused = (1LL << 30)
+    // Unused: (1LL << 31)
 
     // for elements of the message reply
     RepliedMessage = (1LL << 32),
@@ -160,68 +157,39 @@ enum class MessageElementFlag : int64_t {
 };
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 
-class MessageElement : boost::noncopyable
+class MessageElement
 {
 public:
-    enum UpdateFlags : char {
-        Update_Text = 1,
-        Update_Emotes = 2,
-        Update_Images = 4,
-        Update_All = Update_Text | Update_Emotes | Update_Images
-    };
-    enum ThumbnailType : char {
-        Link_Thumbnail = 1,
-    };
-
     virtual ~MessageElement();
 
+    MessageElement(const MessageElement &) = delete;
+    MessageElement &operator=(const MessageElement &) = delete;
+
+    MessageElement(MessageElement &&) = delete;
+    MessageElement &operator=(MessageElement &&) = delete;
+
     MessageElement *setLink(const Link &link);
-    MessageElement *setText(const QString &text);
     MessageElement *setTooltip(const QString &tooltip);
-    MessageElement *setThumbnailType(const ThumbnailType type);
-    MessageElement *setThumbnail(const ImagePtr &thumbnail);
 
     MessageElement *setTrailingSpace(bool value);
     const QString &getTooltip() const;
-    const ImagePtr &getThumbnail() const;
-    const ThumbnailType &getThumbnailType() const;
 
-    const Link &getLink() const;
+    virtual Link getLink() const;
     bool hasTrailingSpace() const;
     MessageElementFlags getFlags() const;
-    MessageElement *updateLink();
+    void addFlags(MessageElementFlags flags);
 
     virtual void addToContainer(MessageLayoutContainer &container,
                                 MessageElementFlags flags) = 0;
-
-    pajlada::Signals::NoArgSignal linkChanged;
 
 protected:
     MessageElement(MessageElementFlags flags);
     bool trailingSpace = true;
 
 private:
-    QString text_;
     Link link_;
     QString tooltip_;
-    ImagePtr thumbnail_;
-    ThumbnailType thumbnailType_;
     MessageElementFlags flags_;
-};
-
-// used when layout element doesn't have a creator
-class EmptyElement : public MessageElement
-{
-public:
-    EmptyElement();
-
-    void addToContainer(MessageLayoutContainer &container,
-                        MessageElementFlags flags) override;
-
-    static EmptyElement &instance();
-
-private:
-    ImagePtr image_;
 };
 
 // contains a simple image
@@ -265,15 +233,12 @@ public:
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
 
+protected:
+    QStringList words_;
+
 private:
     MessageColor color_;
     FontStyle style_;
-
-    struct Word {
-        QString text;
-        int width = -1;
-    };
-    std::vector<Word> words_;
 };
 
 // contains a text that will be truncated to one line
@@ -299,6 +264,40 @@ private:
     std::vector<Word> words_;
 };
 
+class LinkElement : public TextElement
+{
+public:
+    struct Parsed {
+        QString lowercase;
+        QString original;
+    };
+
+    LinkElement(const Parsed &parsed, MessageElementFlags flags,
+                const MessageColor &color = MessageColor::Text,
+                FontStyle style = FontStyle::ChatMedium);
+    ~LinkElement() override = default;
+    LinkElement(const LinkElement &) = delete;
+    LinkElement(LinkElement &&) = delete;
+    LinkElement &operator=(const LinkElement &) = delete;
+    LinkElement &operator=(LinkElement &&) = delete;
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+
+    Link getLink() const override;
+
+    [[nodiscard]] LinkInfo *linkInfo()
+    {
+        return &this->linkInfo_;
+    }
+
+private:
+    LinkInfo linkInfo_;
+    // these are implicitly shared
+    QStringList lowercase_;
+    QStringList original_;
+};
+
 // contains emote data and will pick the emote based on :
 //   a) are images for the emote type enabled
 //   b) which size it wants
@@ -319,6 +318,48 @@ protected:
 private:
     std::unique_ptr<TextElement> textElement_;
     EmotePtr emote_;
+};
+
+// A LayeredEmoteElement represents multiple Emotes layered on top of each other.
+// This class takes care of rendering animated and non-animated emotes in the
+// correct order and aligning them in the right way.
+class LayeredEmoteElement : public MessageElement
+{
+public:
+    struct Emote {
+        EmotePtr ptr;
+        MessageElementFlags flags;
+    };
+
+    LayeredEmoteElement(
+        std::vector<Emote> &&emotes, MessageElementFlags flags,
+        const MessageColor &textElementColor = MessageColor::Text);
+
+    void addEmoteLayer(const Emote &emote);
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+
+    // Returns a concatenation of each emote layer's cleaned copy string
+    QString getCleanCopyString() const;
+    const std::vector<Emote> &getEmotes() const;
+    std::vector<Emote> getUniqueEmotes() const;
+    const std::vector<QString> &getEmoteTooltips() const;
+
+private:
+    MessageLayoutElement *makeImageLayoutElement(
+        const std::vector<ImagePtr> &image, const std::vector<QSize> &sizes,
+        QSize largestSize);
+
+    QString getCopyString() const;
+    void updateTooltips();
+    std::vector<ImagePtr> getLoadedImages(float scale);
+
+    std::vector<Emote> emotes_;
+    std::vector<QString> emoteTooltips_;
+
+    std::unique_ptr<TextElement> textElement_;
+    MessageColor textElementColor_;
 };
 
 class BadgeElement : public MessageElement

@@ -33,8 +33,8 @@ public:
                         bool dryRun);
     QStringList getDefaultChatterinoCommandList();
 
-    virtual void initialize(Settings &, Paths &paths) override;
-    virtual void save() override;
+    void initialize(Settings &, const Paths &paths) override;
+    void save() override;
 
     CommandModel *createModel(QObject *parent);
 
@@ -42,6 +42,15 @@ public:
         const QStringList &words, const Command &command, bool dryRun,
         ChannelPtr channel, const Message *message = nullptr,
         std::unordered_map<QString, QString> context = {});
+#ifdef CHATTERINO_HAVE_PLUGINS
+    bool registerPluginCommand(const QString &commandName);
+    bool unregisterPluginCommand(const QString &commandName);
+
+    const QStringList &pluginCommands()
+    {
+        return this->pluginCommands_;
+    }
+#endif
 
 private:
     void load(Paths &paths);
@@ -62,7 +71,7 @@ private:
 
     // User-created commands
     QMap<QString, Command> userCommands_;
-    int maxSpaces_ = 0;
+    qsizetype maxSpaces_ = 0;
 
     std::shared_ptr<pajlada::Settings::SettingManager> sm_;
     // Because the setting manager is not initialized until the initialize
@@ -73,6 +82,9 @@ private:
         commandsSetting_;
 
     QStringList defaultChatterinoCommandAutoCompletions_;
+#ifdef CHATTERINO_HAVE_PLUGINS
+    QStringList pluginCommands_;
+#endif
 };
 
 }  // namespace chatterino

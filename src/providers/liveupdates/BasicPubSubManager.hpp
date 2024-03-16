@@ -87,8 +87,11 @@ public:
         this->websocketClient_.set_fail_handler([this](auto hdl) {
             this->onConnectionFail(hdl);
         });
-        this->websocketClient_.set_user_agent("Chatterino/" CHATTERINO_VERSION
-                                              " (" CHATTERINO_GIT_HASH ")");
+        this->websocketClient_.set_user_agent(
+            QStringLiteral("Chatterino/%1 (%2)")
+                .arg(Version::instance().version(),
+                     Version::instance().commitHash())
+                .toStdString());
     }
 
     virtual ~BasicPubSubManager() = default;

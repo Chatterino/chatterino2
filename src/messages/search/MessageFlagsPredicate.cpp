@@ -35,7 +35,7 @@ MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags, bool negate)
         {
             this->flags_.set(MessageFlag::FirstMessage);
         }
-        else if (flag == "elevated-msg")
+        else if (flag == "elevated-msg" || flag == "hype-chat")
         {
             this->flags_.set(MessageFlag::ElevatedMessage);
         }
@@ -51,6 +51,14 @@ MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags, bool negate)
         else if (flag == "reply")
         {
             this->flags_.set(MessageFlag::ReplyMessage);
+        }
+        else if (flag == "restricted")
+        {
+            this->flags_.set(MessageFlag::RestrictedMessage);
+        }
+        else if (flag == "monitored")
+        {
+            this->flags_.set(MessageFlag::MonitoredMessage);
         }
     }
 }

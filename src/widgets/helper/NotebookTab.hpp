@@ -24,7 +24,7 @@ public:
 
     void updateSize();
 
-    QWidget *page;
+    QWidget *page{};
 
     void setCustomTitle(const QString &title);
     void resetCustomTitle();
@@ -40,8 +40,28 @@ public:
     void setInLastRow(bool value);
     void setTabLocation(NotebookTabLocation location);
 
-    void setLive(bool isLive);
+    /**
+     * @brief Sets the live status of this tab
+     *
+     * Returns true if the live status was changed, false if nothing changed.
+     **/
+    bool setLive(bool isLive);
+
+    /**
+     * @brief Sets the rerun status of this tab
+     *
+     * Returns true if the rerun status was changed, false if nothing changed.
+     **/
+    bool setRerun(bool isRerun);
+
+    /**
+     * @brief Returns true if any split in this tab is live
+     **/
+    bool isLive() const;
+
     void setHighlightState(HighlightState style);
+    HighlightState highlightState() const;
+
     void setHighlightsEnabled(const bool &newVal);
     bool hasHighlightsEnabled() const;
 
@@ -54,24 +74,28 @@ public:
     int normalTabWidth();
 
 protected:
-    virtual void themeChangedEvent() override;
+    void themeChangedEvent() override;
 
-    virtual void paintEvent(QPaintEvent *) override;
+    void paintEvent(QPaintEvent *) override;
 
-    virtual void mousePressEvent(QMouseEvent *event) override;
-    virtual void mouseReleaseEvent(QMouseEvent *event) override;
-    virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     void enterEvent(QEnterEvent *event) override;
 #else
     void enterEvent(QEvent *event) override;
 #endif
-    virtual void leaveEvent(QEvent *) override;
+    void leaveEvent(QEvent *) override;
 
-    virtual void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragEnterEvent(QDragEnterEvent *event) override;
 
-    virtual void mouseMoveEvent(QMouseEvent *event) override;
-    virtual void wheelEvent(QWheelEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
+
+    /// This exists as an alias to its base classes update, and is virtual
+    /// to allow for mocking
+    virtual void update();
 
 private:
     void showRenameDialog();
@@ -104,6 +128,7 @@ private:
     QAction *highlightNewMessagesAction_;
 
     bool isLive_{};
+    bool isRerun_{};
 
     int growWidth_ = 0;
 

@@ -4,6 +4,7 @@
 
 #include <IrcMessage>
 
+#include <optional>
 #include <vector>
 
 namespace chatterino {
@@ -16,6 +17,11 @@ using MessagePtr = std::shared_ptr<const Message>;
 class TwitchChannel;
 class TwitchMessageBuilder;
 
+struct ClearChatMessage {
+    MessagePtr message;
+    bool disableAllMessages;
+};
+
 class IrcMessageHandler
 {
     IrcMessageHandler() = default;
@@ -23,17 +29,14 @@ class IrcMessageHandler
 public:
     static IrcMessageHandler &instance();
 
-    // parseMessage parses a single IRC message into 0+ Chatterino messages
-    std::vector<MessagePtr> parseMessage(Channel *channel,
-                                         Communi::IrcMessage *message);
-
-    std::vector<MessagePtr> parseMessageWithReply(
+    /**
+     * Parse an IRC message into 0 or more Chatterino messages
+     * Takes previously loaded messages into consideration to add reply contexts
+     **/
+    static std::vector<MessagePtr> parseMessageWithReply(
         Channel *channel, Communi::IrcMessage *message,
-        const std::vector<MessagePtr> &otherLoaded);
+        std::vector<MessagePtr> &otherLoaded);
 
-    // parsePrivMessage arses a single IRC PRIVMSG into 0-1 Chatterino messages
-    std::vector<MessagePtr> parsePrivMessage(
-        Channel *channel, Communi::IrcPrivateMessage *message);
     void handlePrivMessage(Communi::IrcPrivateMessage *message,
                            TwitchIrcServer &server);
 
@@ -42,38 +45,25 @@ public:
     void handleClearMessageMessage(Communi::IrcMessage *message);
     void handleUserStateMessage(Communi::IrcMessage *message);
     void handleGlobalUserStateMessage(Communi::IrcMessage *message);
-    void handleWhisperMessage(Communi::IrcMessage *message);
+    void handleWhisperMessage(Communi::IrcMessage *ircMessage);
 
-    // parseUserNoticeMessage parses a single IRC USERNOTICE message into 0+
-    // Chatterino messages
-    std::vector<MessagePtr> parseUserNoticeMessage(
-        Channel *channel, Communi::IrcMessage *message);
     void handleUserNoticeMessage(Communi::IrcMessage *message,
                                  TwitchIrcServer &server);
 
-    void handleModeMessage(Communi::IrcMessage *message);
-
-    // parseNoticeMessage parses a single IRC NOTICE message into 0+ chatterino
-    // messages
-    std::vector<MessagePtr> parseNoticeMessage(
-        Communi::IrcNoticeMessage *message);
     void handleNoticeMessage(Communi::IrcNoticeMessage *message);
 
     void handleJoinMessage(Communi::IrcMessage *message);
     void handlePartMessage(Communi::IrcMessage *message);
 
-    static float similarity(MessagePtr msg,
-                            const LimitedQueueSnapshot<MessagePtr> &messages);
-    static void setSimilarityFlags(MessagePtr message, ChannelPtr channel);
+    void addMessage(Communi::IrcMessage *message, const ChannelPtr &chan,
+                    const QString &originalContent, TwitchIrcServer &server,
+                    bool isSub, bool isAction);
 
 private:
-    void addMessage(Communi::IrcMessage *message, const QString &target,
-                    const QString &content, TwitchIrcServer &server,
-                    bool isResub, bool isAction);
-
-    void populateReply(TwitchChannel *channel, Communi::IrcMessage *message,
-                       const std::vector<MessagePtr> &otherLoaded,
-                       TwitchMessageBuilder &builder);
+    static float similarity(const MessagePtr &msg,
+                            const LimitedQueueSnapshot<MessagePtr> &messages);
+    static void setSimilarityFlags(const MessagePtr &message,
+                                   const ChannelPtr &channel);
 };
 
 }  // namespace chatterino

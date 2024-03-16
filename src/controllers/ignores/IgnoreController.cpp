@@ -14,7 +14,7 @@ bool isIgnoredMessage(IgnoredMessageParameters &&params)
     if (!params.message.isEmpty())
     {
         // TODO(pajlada): Do we need to check if the phrase is valid first?
-        auto phrases = getCSettings().ignoredMessages.readOnly();
+        auto phrases = getSettings()->ignoredMessages.readOnly();
         for (const auto &phrase : *phrases)
         {
             if (phrase.isBlock() && phrase.isMatch(params.message))
@@ -32,10 +32,12 @@ bool isIgnoredMessage(IgnoredMessageParameters &&params)
     {
         auto sourceUserID = params.twitchUserID;
 
-        auto blocks =
-            getApp()->accounts->twitch.getCurrent()->accessBlockedUserIds();
-
-        if (auto it = blocks->find(sourceUserID); it != blocks->end())
+        bool isBlocked = getIApp()
+                             ->getAccounts()
+                             ->twitch.getCurrent()
+                             ->blockedUserIds()
+                             .contains(sourceUserID);
+        if (isBlocked)
         {
             switch (static_cast<ShowIgnoredUsersMessages>(
                 getSettings()->showBlockedUsersMessages.getValue()))

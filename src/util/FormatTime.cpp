@@ -1,4 +1,7 @@
-#include "FormatTime.hpp"
+#include "util/FormatTime.hpp"
+
+#include <algorithm>
+#include <limits>
 
 namespace chatterino {
 
@@ -55,6 +58,17 @@ QString formatTime(QString totalSecondsString)
     }
 
     return "n/a";
+}
+
+QString formatTime(std::chrono::seconds totalSeconds)
+{
+    auto count = totalSeconds.count();
+
+    return formatTime(static_cast<int>(std::clamp(
+        count,
+        static_cast<std::chrono::seconds::rep>(std::numeric_limits<int>::min()),
+        static_cast<std::chrono::seconds::rep>(
+            std::numeric_limits<int>::max()))));
 }
 
 }  // namespace chatterino

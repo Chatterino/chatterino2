@@ -1,9 +1,8 @@
 #include "Updates.hpp"
 
 #include "common/Modes.hpp"
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
+#include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "Settings.hpp"
@@ -11,6 +10,7 @@
 #include "util/CombinePath.hpp"
 #include "util/PostToThread.hpp"
 
+#include <QApplication>
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <QProcess>
@@ -26,19 +26,12 @@ namespace {
 
 }  // namespace
 
-Updates::Updates()
-    : currentVersion_(CHATTERINO_VERSION)
+Updates::Updates(const Paths &paths_)
+    : paths(paths_)
+    , currentVersion_(CHATTERINO_VERSION)
     , updateGuideLink_("https://chatterino.com")
 {
     qCDebug(chatterinoUpdate) << "init UpdateManager";
-}
-
-Updates &Updates::instance()
-{
-    // fourtf: don't add this class to the application class
-    static Updates instance;
-
-    return instance;
 }
 
 /// Checks if the online version is newer or older than the current version.
@@ -97,7 +90,7 @@ void Updates::installUpdates()
     box->exec();
     QDesktopServices::openUrl(this->updateGuideLink_);
 #elif defined Q_OS_WIN
-    if (getPaths()->isPortable())
+    if (Modes::instance().isPortable)
     {
         QMessageBox *box =
             new QMessageBox(QMessageBox::Information, "Chatterino Update",
@@ -121,10 +114,22 @@ void Updates::installUpdates()
                     box->raise();
                 });
             })
-            .onSuccess([this](auto result) -> Outcome {
+            .onSuccess([this](auto result) {
+                if (result.status() != 200)
+                {
+                    auto *box = new QMessageBox(
+                        QMessageBox::Information, "Chatterino Update",
+                        QStringLiteral("The update couldn't be downloaded "
+                                       "(Error: %1).")
+                            .arg(result.formatError()));
+                    box->setAttribute(Qt::WA_DeleteOnClose);
+                    box->exec();
+                    return;
+                }
+
                 QByteArray object = result.getData();
                 auto filename =
-                    combinePath(getPaths()->miscDirectory, "update.zip");
+                    combinePath(this->paths.miscDirectory, "update.zip");
 
                 QFile file(filename);
                 file.open(QIODevice::Truncate | QIODevice::WriteOnly);
@@ -132,7 +137,7 @@ void Updates::installUpdates()
                 if (file.write(object) == -1)
                 {
                     this->setStatus_(WriteFileFailed);
-                    return Failure;
+                    return;
                 }
                 file.flush();
                 file.close();
@@ -143,7 +148,6 @@ void Updates::installUpdates()
                     {filename, "restart"});
 
                 QApplication::exit(0);
-                return Success;
             })
             .execute();
         this->setStatus_(Downloading);
@@ -170,10 +174,22 @@ void Updates::installUpdates()
                 box->setAttribute(Qt::WA_DeleteOnClose);
                 box->exec();
             })
-            .onSuccess([this](auto result) -> Outcome {
+            .onSuccess([this](auto result) {
+                if (result.status() != 200)
+                {
+                    auto *box = new QMessageBox(
+                        QMessageBox::Information, "Chatterino Update",
+                        QStringLiteral("The update couldn't be downloaded "
+                                       "(Error: %1).")
+                            .arg(result.formatError()));
+                    box->setAttribute(Qt::WA_DeleteOnClose);
+                    box->exec();
+                    return;
+                }
+
                 QByteArray object = result.getData();
                 auto filePath =
-                    combinePath(getPaths()->miscDirectory, "Update.exe");
+                    combinePath(this->paths.miscDirectory, "Update.exe");
 
                 QFile file(filePath);
                 file.open(QIODevice::Truncate | QIODevice::WriteOnly);
@@ -191,7 +207,7 @@ void Updates::installUpdates()
                     box->exec();
 
                     QDesktopServices::openUrl(this->updateExe_);
-                    return Failure;
+                    return;
                 }
                 file.flush();
                 file.close();
@@ -214,8 +230,6 @@ void Updates::installUpdates()
 
                     QDesktopServices::openUrl(this->updateExe_);
                 }
-
-                return Success;
             })
             .execute();
         this->setStatus_(Downloading);
@@ -225,6 +239,7 @@ void Updates::installUpdates()
 
 void Updates::checkForUpdates()
 {
+#ifndef CHATTERINO_DISABLE_UPDATER
     auto version = Version::instance();
 
     if (!version.isSupportedOS())
@@ -253,53 +268,57 @@ void Updates::checkForUpdates()
 
     NetworkRequest(url)
         .timeout(60000)
-        .onSuccess([this](auto result) -> Outcome {
-            auto object = result.parseJson();
+        .onSuccess([this](auto result) {
+            const auto object = result.parseJson();
             /// Version available on every platform
-            QJsonValue version_val = object.value("version");
+            auto version = object["version"];
 
-            if (!version_val.isString())
+            if (!version.isString())
             {
                 this->setStatus_(SearchFailed);
-                qCDebug(chatterinoUpdate) << "error updating";
-                return Failure;
+                qCDebug(chatterinoUpdate)
+                    << "error checking version - missing 'version'" << object;
+                return;
             }
 
-#if defined Q_OS_WIN || defined Q_OS_MACOS
+#    if defined Q_OS_WIN || defined Q_OS_MACOS
             /// Downloads an installer for the new version
-            QJsonValue updateExe_val = object.value("updateexe");
-            if (!updateExe_val.isString())
+            auto updateExeUrl = object["updateexe"];
+            if (!updateExeUrl.isString())
             {
                 this->setStatus_(SearchFailed);
-                qCDebug(chatterinoUpdate) << "error updating";
-                return Failure;
+                qCDebug(chatterinoUpdate)
+                    << "error checking version - missing 'updateexe'" << object;
+                return;
             }
-            this->updateExe_ = updateExe_val.toString();
+            this->updateExe_ = updateExeUrl.toString();
 
-#    ifdef Q_OS_WIN
+#        ifdef Q_OS_WIN
             /// Windows portable
-            QJsonValue portable_val = object.value("portable_download");
-            if (!portable_val.isString())
+            auto portableUrl = object["portable_download"];
+            if (!portableUrl.isString())
             {
                 this->setStatus_(SearchFailed);
-                qCDebug(chatterinoUpdate) << "error updating";
-                return Failure;
+                qCDebug(chatterinoUpdate)
+                    << "error checking version - missing 'portable_download'"
+                    << object;
+                return;
             }
-            this->updatePortable_ = portable_val.toString();
+            this->updatePortable_ = portableUrl.toString();
+#        endif
+
+#    elif defined Q_OS_LINUX
+            QJsonValue updateGuide = object.value("updateguide");
+            if (updateGuide.isString())
+            {
+                this->updateGuideLink_ = updateGuide.toString();
+            }
+#    else
+            return;
 #    endif
 
-#elif defined Q_OS_LINUX
-            QJsonValue updateGuide_val = object.value("updateguide");
-            if (updateGuide_val.isString())
-            {
-                this->updateGuideLink_ = updateGuide_val.toString();
-            }
-#else
-            return Failure;
-#endif
-
             /// Current version
-            this->onlineVersion_ = version_val.toString();
+            this->onlineVersion_ = version.toString();
 
             /// Update available :)
             if (this->currentVersion_ != this->onlineVersion_)
@@ -312,10 +331,10 @@ void Updates::checkForUpdates()
             {
                 this->setStatus_(NoUpdateAvailable);
             }
-            return Failure;
         })
         .execute();
     this->setStatus_(Searching);
+#endif
 }
 
 Updates::Status Updates::getStatus() const

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 #include <QColor>
 #include <QJsonObject>
 #include <QString>
@@ -31,7 +31,8 @@ struct PubSubAutoModQueueMessage {
     QString senderUserDisplayName;
     QColor senderUserChatColor;
 
-    PubSubAutoModQueueMessage(const QJsonObject &root);
+    PubSubAutoModQueueMessage() = default;
+    explicit PubSubAutoModQueueMessage(const QJsonObject &root);
 };
 
 }  // namespace chatterino

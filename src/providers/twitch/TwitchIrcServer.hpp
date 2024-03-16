@@ -3,10 +3,7 @@
 #include "common/Atomic.hpp"
 #include "common/Channel.hpp"
 #include "common/Singleton.hpp"
-#include "providers/bttv/BttvEmotes.hpp"
-#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/AbstractIrcServer.hpp"
-#include "providers/seventv/SeventvEmotes.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
 
@@ -18,24 +15,38 @@ namespace chatterino {
 
 class Settings;
 class Paths;
-class PubSub;
 class TwitchChannel;
 class BttvLiveUpdates;
 class SeventvEventAPI;
+class BttvEmotes;
+class FfzEmotes;
+class SeventvEmotes;
 
-class TwitchIrcServer final : public AbstractIrcServer, public Singleton
+class ITwitchIrcServer
+{
+public:
+    virtual ~ITwitchIrcServer() = default;
+
+    virtual const IndirectChannel &getWatchingChannel() const = 0;
+
+    virtual QString getLastUserThatWhisperedMe() const = 0;
+
+    // Update this interface with TwitchIrcServer methods as needed
+};
+
+class TwitchIrcServer final : public AbstractIrcServer,
+                              public Singleton,
+                              public ITwitchIrcServer
 {
 public:
     TwitchIrcServer();
-    virtual ~TwitchIrcServer() override = default;
+    ~TwitchIrcServer() override = default;
 
-    virtual void initialize(Settings &settings, Paths &paths) override;
+    void initialize(Settings &settings, const Paths &paths) override;
 
     void forEachChannelAndSpecialChannels(std::function<void(ChannelPtr)> func);
 
     std::shared_ptr<Channel> getChannelOrEmptyByID(const QString &channelID);
-
-    void bulkRefreshLiveStatus();
 
     void reloadBTTVGlobalEmotes();
     void reloadAllBTTVChannelEmotes();
@@ -64,53 +75,45 @@ public:
     const ChannelPtr whispersChannel;
     const ChannelPtr mentionsChannel;
     const ChannelPtr liveChannel;
+    const ChannelPtr automodChannel;
     IndirectChannel watchingChannel;
 
-    PubSub *pubsub;
     std::unique_ptr<BttvLiveUpdates> bttvLiveUpdates;
     std::unique_ptr<SeventvEventAPI> seventvEventAPI;
 
-    const BttvEmotes &getBttvEmotes() const;
-    const FfzEmotes &getFfzEmotes() const;
-    const SeventvEmotes &getSeventvEmotes() const;
+    const IndirectChannel &getWatchingChannel() const override;
+
+    QString getLastUserThatWhisperedMe() const override;
 
 protected:
-    virtual void initializeConnection(IrcConnection *connection,
-                                      ConnectionType type) override;
-    virtual std::shared_ptr<Channel> createChannel(
-        const QString &channelName) override;
+    void initializeConnection(IrcConnection *connection,
+                              ConnectionType type) override;
+    std::shared_ptr<Channel> createChannel(const QString &channelName) override;
 
-    virtual void privateMessageReceived(
-        Communi::IrcPrivateMessage *message) override;
-    virtual void readConnectionMessageReceived(
-        Communi::IrcMessage *message) override;
-    virtual void writeConnectionMessageReceived(
-        Communi::IrcMessage *message) override;
+    void privateMessageReceived(Communi::IrcPrivateMessage *message) override;
+    void readConnectionMessageReceived(Communi::IrcMessage *message) override;
+    void writeConnectionMessageReceived(Communi::IrcMessage *message) override;
 
-    virtual std::shared_ptr<Channel> getCustomChannel(
+    std::shared_ptr<Channel> getCustomChannel(
         const QString &channelname) override;
 
-    virtual QString cleanChannelName(const QString &dirtyChannelName) override;
-    virtual bool hasSeparateWriteConnection() const override;
+    QString cleanChannelName(const QString &dirtyChannelName) override;
+    bool hasSeparateWriteConnection() const override;
 
 private:
-    void onMessageSendRequested(TwitchChannel *channel, const QString &message,
-                                bool &sent);
-    void onReplySendRequested(TwitchChannel *channel, const QString &message,
-                              const QString &replyId, bool &sent);
+    void onMessageSendRequested(const std::shared_ptr<TwitchChannel> &channel,
+                                const QString &message, bool &sent);
+    void onReplySendRequested(const std::shared_ptr<TwitchChannel> &channel,
+                              const QString &message, const QString &replyId,
+                              bool &sent);
 
-    bool prepareToSend(TwitchChannel *channel);
+    bool prepareToSend(const std::shared_ptr<TwitchChannel> &channel);
 
     std::mutex lastMessageMutex_;
     std::queue<std::chrono::steady_clock::time_point> lastMessagePleb_;
     std::queue<std::chrono::steady_clock::time_point> lastMessageMod_;
     std::chrono::steady_clock::time_point lastErrorTimeSpeed_;
     std::chrono::steady_clock::time_point lastErrorTimeAmount_;
-
-    BttvEmotes bttv;
-    FfzEmotes ffz;
-    SeventvEmotes seventv_;
-    QTimer bulkLiveStatusTimer_;
 
     pajlada::Signals::SignalHolder signalHolder_;
 };

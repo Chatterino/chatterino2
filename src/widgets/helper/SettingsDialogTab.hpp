@@ -15,6 +15,7 @@ class SettingsDialog;
 
 enum class SettingsTabId {
     None,
+    General,
     Accounts,
     Moderation,
 };
@@ -39,8 +40,8 @@ signals:
     void selectedChanged(bool);
 
 private:
-    void paintEvent(QPaintEvent *);
-    void mousePressEvent(QMouseEvent *event);
+    void paintEvent(QPaintEvent *) override;
+    void mousePressEvent(QMouseEvent *event) override;
 
     struct {
         QString labelText;

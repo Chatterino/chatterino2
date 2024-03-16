@@ -2,12 +2,13 @@
 
 #include "common/Aliases.hpp"
 #include "common/Channel.hpp"
-#include "common/NullablePtr.hpp"
 #include "widgets/BaseWidget.hpp"
+#include "widgets/splits/SplitCommon.hpp"
 
 #include <boost/signals2.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QFont>
+#include <QPointer>
 #include <QShortcut>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -15,7 +16,6 @@
 namespace chatterino {
 
 class ChannelView;
-class MessageThread;
 class SplitHeader;
 class SplitInput;
 class SplitContainer;
@@ -75,7 +75,7 @@ public:
 
     void setContainer(SplitContainer *container);
 
-    void setInputReply(const std::shared_ptr<MessageThread> &reply);
+    void setInputReply(const MessagePtr &reply);
 
     static pajlada::Signals::Signal<Qt::KeyboardModifiers>
         modifierStatusChanged;
@@ -96,8 +96,7 @@ public:
     pajlada::Signals::Signal<Action> actionRequested;
     pajlada::Signals::Signal<ChannelPtr> openSplitRequested;
 
-    // args: (SplitContainer::Direction dir, Split* parent)
-    pajlada::Signals::Signal<int, Split *> insertSplitRequested;
+    pajlada::Signals::Signal<SplitDirection, Split *> insertSplitRequested;
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -156,13 +155,17 @@ private:
     SplitInput *const input_;
     SplitOverlay *const overlay_;
 
-    NullablePtr<SelectChannelDialog> selectChannelDialog_;
+    QPointer<SelectChannelDialog> selectChannelDialog_;
 
     pajlada::Signals::Connection channelIDChangedConnection_;
     pajlada::Signals::Connection usermodeChangedConnection_;
     pajlada::Signals::Connection roomModeChangedConnection_;
 
     pajlada::Signals::Connection indirectChannelChangedConnection_;
+
+    // This signal-holder is cleared whenever this split changes the underlying channel
+    pajlada::Signals::SignalHolder channelSignalHolder_;
+
     pajlada::Signals::SignalHolder signalHolder_;
     std::vector<boost::signals2::scoped_connection> bSignals_;
 
@@ -180,10 +183,9 @@ public slots:
     void openBrowserPlayer();
     void openInStreamlink();
     void openWithCustomScheme();
-    void startWatching();
     void setFiltersDialog();
     void showSearch(bool singleChannel);
-    void showViewerList();
+    void showChatterList();
     void openSubPage();
     void reloadChannelAndSubscriberEmotes();
     void reconnect();

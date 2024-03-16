@@ -2,6 +2,7 @@
 
 #include "common/WindowDescriptors.hpp"
 #include "widgets/BaseWidget.hpp"
+#include "widgets/splits/SplitCommon.hpp"
 
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
@@ -35,21 +36,17 @@ class SplitContainer final : public BaseWidget
 public:
     struct Node;
 
-    // fourtf: !!! preserve the order of left, up, right and down
-    // It's important to preserve since we cast from an int to this enum, so 0 = left, 1 = above etc
-    enum Direction { Left, Above, Right, Below };
-
     struct Position final {
     private:
         Position() = default;
-        Position(Node *relativeNode, Direction direcion)
+        Position(Node *relativeNode, SplitDirection direction)
             : relativeNode_(relativeNode)
-            , direction_(direcion)
+            , direction_(direction)
         {
         }
 
         Node *relativeNode_{nullptr};
-        Direction direction_{Direction::Right};
+        SplitDirection direction_{SplitDirection::Right};
 
         friend struct Node;
         friend class SplitContainer;
@@ -102,9 +99,9 @@ public:
 
         bool isOrContainsNode(Node *_node);
         Node *findNodeContainingSplit(Split *_split);
-        void insertSplitRelative(Split *_split, Direction _direction);
-        void nestSplitIntoCollection(Split *_split, Direction _direction);
-        void insertNextToThis(Split *_split, Direction _direction);
+        void insertSplitRelative(Split *_split, SplitDirection _direction);
+        void nestSplitIntoCollection(Split *_split, SplitDirection _direction);
+        void insertNextToThis(Split *_split, SplitDirection _direction);
         void setSplit(Split *_split);
         Position releaseSplit();
         qreal getFlex(bool isVertical);
@@ -117,11 +114,11 @@ public:
         // Clamps the flex values ensuring they're never below 0
         void clamp();
 
-        static Type toContainerType(Direction _dir);
+        static Type toContainerType(SplitDirection _dir);
 
         Type type_;
         Split *split_;
-        Node *preferedFocusTarget_;
+        Node *preferedFocusTarget_{};
         Node *parent_;
         QRectF geometry_;
         qreal flexH_ = 1;
@@ -158,7 +155,7 @@ private:
     {
     public:
         SplitContainer *parent;
-        Node *node;
+        Node *node{};
 
         void setVertical(bool isVertical);
         ResizeHandle(SplitContainer *_parent = nullptr);
@@ -173,7 +170,7 @@ private:
     private:
         void resetFlex();
 
-        bool vertical_;
+        bool vertical_{};
         bool isMouseDown_ = false;
     };
 
@@ -190,7 +187,7 @@ public:
         Split *relativeSplit{nullptr};
 
         Node *relativeNode{nullptr};
-        std::optional<Direction> direction{};
+        std::optional<SplitDirection> direction{};
     };
 
     // Insert split into the base node of this container
@@ -209,7 +206,7 @@ public:
     Position releaseSplit(Split *split);
     Position deleteSplit(Split *split);
 
-    void selectNextSplit(Direction direction);
+    void selectNextSplit(SplitDirection direction);
     void setSelected(Split *split);
 
     std::vector<Split *> getSplits() const;
@@ -244,7 +241,7 @@ private:
                                         Node *baseNode);
 
     void layout();
-    void selectSplitRecursive(Node *node, Direction direction);
+    void selectSplitRecursive(Node *node, SplitDirection direction);
     void focusSplitRecursive(Node *node);
     void setPreferedTargetRecursive(Node *node);
 

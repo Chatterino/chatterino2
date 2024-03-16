@@ -1,8 +1,7 @@
-#include "IgnoresPage.hpp"
+#include "widgets/settingspages/IgnoresPage.hpp"
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnoreModel.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -39,6 +38,7 @@ IgnoresPage::IgnoresPage()
     addPhrasesTab(tabs.appendTab(new QVBoxLayout, "Messages"));
     addUsersTab(*this, tabs.appendTab(new QVBoxLayout, "Users"),
                 this->userListModel_);
+    this->onShow();
 }
 
 void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
@@ -63,7 +63,8 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
         view->getTableView()->setColumnWidth(0, 200);
     });
 
-    view->addButtonPressed.connect([] {
+    // We can safely ignore this signal connection since we own the view
+    std::ignore = view->addButtonPressed.connect([] {
         getSettings()->ignoredMessages.append(
             IgnorePhrase{"my pattern", false, false,
                          getSettings()->ignoredPhraseReplace.getValue(), true});
@@ -82,7 +83,7 @@ void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> users,
     {
         anyways.emplace<QLabel>("Show messages from blocked users:");
 
-        auto combo = anyways.emplace<QComboBox>().getElement();
+        auto *combo = anyways.emplace<QComboBox>().getElement();
         combo->addItems(
             {"Never", "If you are Moderator", "If you are Broadcaster"});
 
@@ -96,7 +97,9 @@ void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> users,
                          QOverload<int>::of(&QComboBox::currentIndexChanged),
                          [&setting](int index) {
                              if (index != -1)
+                             {
                                  setting = index;
+                             }
                          });
 
         anyways->addStretch(1);
@@ -115,20 +118,20 @@ void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> users,
 
 void IgnoresPage::onShow()
 {
-    auto app = getApp();
+    auto *app = getApp();
 
-    auto user = app->accounts->twitch.getCurrent();
+    auto user = app->getAccounts()->twitch.getCurrent();
 
     if (user->isAnon())
     {
+        this->userListModel_.setStringList({});
         return;
     }
 
     QStringList users;
+    users.reserve(user->blocks().size());
 
-    auto blocks = app->accounts->twitch.getCurrent()->accessBlocks();
-
-    for (const auto &blockedUser : *blocks)
+    for (const auto &blockedUser : user->blocks())
     {
         users << blockedUser.name;
     }

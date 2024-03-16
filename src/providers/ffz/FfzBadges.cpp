@@ -1,9 +1,10 @@
 #include "FfzBadges.hpp"
 
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
+#include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "messages/Emote.hpp"
+#include "messages/Image.hpp"
+#include "providers/ffz/FfzUtil.hpp"
 
 #include <QJsonArray>
 #include <QJsonObject>
@@ -16,7 +17,7 @@
 
 namespace chatterino {
 
-void FfzBadges::initialize(Settings &settings, Paths &paths)
+void FfzBadges::initialize(Settings &settings, const Paths &paths)
 {
     this->load();
 }
@@ -42,15 +43,16 @@ std::vector<FfzBadges::Badge> FfzBadges::getUserBadges(const UserId &id)
     return badges;
 }
 
-boost::optional<FfzBadges::Badge> FfzBadges::getBadge(const int badgeID)
+std::optional<FfzBadges::Badge> FfzBadges::getBadge(const int badgeID) const
 {
+    this->tgBadges.guard();
     auto it = this->badges.find(badgeID);
     if (it != this->badges.end())
     {
         return it->second;
     }
 
-    return boost::none;
+    return std::nullopt;
 }
 
 void FfzBadges::load()
@@ -58,22 +60,29 @@ void FfzBadges::load()
     static QUrl url("https://api.frankerfacez.com/v1/badges/ids");
 
     NetworkRequest(url)
-        .onSuccess([this](auto result) -> Outcome {
+        .onSuccess([this](auto result) {
             std::unique_lock lock(this->mutex_);
 
             auto jsonRoot = result.parseJson();
+            this->tgBadges.guard();
             for (const auto &jsonBadge_ : jsonRoot.value("badges").toArray())
             {
                 auto jsonBadge = jsonBadge_.toObject();
                 auto jsonUrls = jsonBadge.value("urls").toObject();
+                QSize baseSize(jsonBadge["width"].toInt(18),
+                               jsonBadge["height"].toInt(18));
 
                 auto emote = Emote{
                     EmoteName{},
-                    ImageSet{
-                        Url{QString("https:") + jsonUrls.value("1").toString()},
-                        Url{QString("https:") + jsonUrls.value("2").toString()},
-                        Url{QString("https:") +
-                            jsonUrls.value("4").toString()}},
+                    ImageSet{Image::fromUrl(
+                                 parseFfzUrl(jsonUrls.value("1").toString()),
+                                 1.0, baseSize),
+                             Image::fromUrl(
+                                 parseFfzUrl(jsonUrls.value("2").toString()),
+                                 0.5, baseSize * 2),
+                             Image::fromUrl(
+                                 parseFfzUrl(jsonUrls.value("4").toString()),
+                                 0.25, baseSize * 4)},
                     Tooltip{jsonBadge.value("title").toString()}, Url{}};
 
                 Badge badge;
@@ -104,8 +113,6 @@ void FfzBadges::load()
                     }
                 }
             }
-
-            return Success;
         })
         .execute();
 }

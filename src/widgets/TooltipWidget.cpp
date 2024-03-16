@@ -6,65 +6,279 @@
 #include "singletons/WindowManager.hpp"
 
 #include <QPainter>
-#include <QVBoxLayout>
+
+// number of columns in grid mode
+#define GRID_NUM_COLS 3
+
+namespace {
+
+#ifdef Q_OS_WIN
+template <typename T>
+inline constexpr T *tooltipParentFor(T * /*desiredParent*/)
+{
+    return nullptr;
+}
+#else
+template <typename T>
+inline constexpr T *tooltipParentFor(T *desiredParent)
+{
+    return desiredParent;
+}
+#endif
+
+}  // namespace
 
 namespace chatterino {
-
-TooltipWidget *TooltipWidget::instance()
-{
-    static TooltipWidget *tooltipWidget = new TooltipWidget();
-    return tooltipWidget;
-}
 
 TooltipWidget::TooltipWidget(BaseWidget *parent)
     : BaseWindow({BaseWindow::TopMost, BaseWindow::DontFocus,
                   BaseWindow::DisableLayoutSave},
-                 parent)
-    , displayImage_(new QLabel(this))
-    , displayText_(new QLabel(this))
+                 tooltipParentFor(parent))
 {
+    assert(parent != nullptr);
+    QObject::connect(parent, &QObject::destroyed, this, &QObject::deleteLater);
+
     this->setStyleSheet("color: #fff; background: rgba(11, 11, 11, 0.8)");
     this->setAttribute(Qt::WA_TranslucentBackground);
     this->setWindowFlag(Qt::WindowStaysOnTopHint, true);
 
-    this->setStayInScreenRect(true);
+    // Default to using vertical layout
+    this->initializeVLayout();
+    this->setLayout(this->vLayout_);
+    this->currentStyle_ = TooltipStyle::Vertical;
 
-    displayImage_->setAlignment(Qt::AlignHCenter);
-    displayImage_->setStyleSheet("background: transparent");
-
-    displayText_->setAlignment(Qt::AlignHCenter);
-    displayText_->setStyleSheet("background: transparent");
-
-    auto *layout = new QVBoxLayout(this);
-    layout->setSizeConstraint(QLayout::SetFixedSize);
-    layout->setContentsMargins(10, 5, 10, 5);
-    layout->addWidget(displayImage_);
-    layout->addWidget(displayText_);
-    this->setLayout(layout);
-
-    this->connections_.managedConnect(getFonts()->fontChanged, [this] {
-        this->updateFont();
-    });
+    this->connections_.managedConnect(getIApp()->getFonts()->fontChanged,
+                                      [this] {
+                                          this->updateFont();
+                                      });
     this->updateFont();
 
-    auto windows = getApp()->windows;
+    auto *windows = getIApp()->getWindows();
     this->connections_.managedConnect(windows->gifRepaintRequested, [this] {
-        if (this->image_ && this->image_->animated())
+        if (!this->isVisible())
         {
-            this->refreshPixmap();
+            return;
         }
-    });
 
-    this->connections_.managedConnect(windows->miscUpdate, [this] {
-        if (this->image_ && this->attemptRefresh)
+        for (int i = 0; i < this->visibleEntries_; ++i)
         {
-            if (this->refreshPixmap())
+            auto *entry = this->entryAt(i);
+            if (entry && entry->animated())
             {
-                this->attemptRefresh = false;
-                this->adjustSize();
+                entry->refreshPixmap();
             }
         }
     });
+
+    this->connections_.managedConnect(
+        windows->layoutRequested, [this](auto *chan) {
+            if (chan != nullptr || !this->isVisible())
+            {
+                return;
+            }
+
+            bool needSizeAdjustment = false;
+            for (int i = 0; i < this->visibleEntries_; ++i)
+            {
+                auto *entry = this->entryAt(i);
+                if (entry->hasImage() && entry->attemptRefresh())
+                {
+                    bool successfullyUpdated = entry->refreshPixmap();
+                    needSizeAdjustment |= successfullyUpdated;
+                }
+            }
+
+            if (needSizeAdjustment)
+            {
+                this->adjustSize();
+                this->applyLastBoundsCheck();
+            }
+        });
+}
+
+void TooltipWidget::setOne(const TooltipEntry &entry, TooltipStyle style)
+{
+    this->set({entry}, style);
+}
+
+void TooltipWidget::set(const std::vector<TooltipEntry> &entries,
+                        TooltipStyle style)
+{
+    this->setCurrentStyle(style);
+
+    int delta = entries.size() - this->currentLayoutCount();
+    if (delta > 0)
+    {
+        // Need to add more TooltipEntry instances
+        int base = this->currentLayoutCount();
+        for (int i = 0; i < delta; ++i)
+        {
+            this->addNewEntry(base + i);
+        }
+    }
+
+    this->setVisibleEntries(entries.size());
+
+    for (int i = 0; i < entries.size(); ++i)
+    {
+        if (auto *entryWidget = this->entryAt(i))
+        {
+            const auto &entry = entries[i];
+            entryWidget->setImage(entry.image);
+            entryWidget->setText(entry.text);
+            entryWidget->setImageScale(entry.customWidth, entry.customHeight);
+        }
+    }
+    this->adjustSize();
+}
+
+void TooltipWidget::setVisibleEntries(int n)
+{
+    for (int i = 0; i < this->currentLayoutCount(); ++i)
+    {
+        auto *entry = this->entryAt(i);
+        if (entry == nullptr)
+        {
+            continue;
+        }
+
+        if (i >= n)
+        {
+            entry->hide();
+            entry->clearImage();
+        }
+        else
+        {
+            entry->show();
+        }
+    }
+    this->visibleEntries_ = n;
+}
+
+void TooltipWidget::addNewEntry(int absoluteIndex)
+{
+    switch (this->currentStyle_)
+    {
+        case TooltipStyle::Vertical:
+            this->vLayout_->addWidget(new TooltipEntryWidget(),
+                                      Qt::AlignHCenter);
+            return;
+        case TooltipStyle::Grid:
+            if (absoluteIndex == 0)
+            {
+                // Top row spans all columns
+                this->gLayout_->addWidget(new TooltipEntryWidget(), 0, 0, 1,
+                                          GRID_NUM_COLS, Qt::AlignCenter);
+            }
+            else
+            {
+                int row = ((absoluteIndex - 1) / GRID_NUM_COLS) + 1;
+                int col = (absoluteIndex - 1) % GRID_NUM_COLS;
+                this->gLayout_->addWidget(new TooltipEntryWidget(), row, col,
+                                          Qt::AlignHCenter | Qt::AlignBottom);
+            }
+            return;
+        default:
+            return;
+    }
+}
+
+// May be nullptr
+QLayout *TooltipWidget::currentLayout() const
+{
+    switch (this->currentStyle_)
+    {
+        case TooltipStyle::Vertical:
+            return this->vLayout_;
+        case TooltipStyle::Grid:
+            return this->gLayout_;
+        default:
+            return nullptr;
+    }
+}
+
+int TooltipWidget::currentLayoutCount() const
+{
+    if (auto *layout = this->currentLayout())
+    {
+        return layout->count();
+    }
+    return 0;
+}
+
+// May be nullptr
+TooltipEntryWidget *TooltipWidget::entryAt(int n)
+{
+    if (auto *layout = this->currentLayout())
+    {
+        return dynamic_cast<TooltipEntryWidget *>(layout->itemAt(n)->widget());
+    }
+    return nullptr;
+}
+
+void TooltipWidget::setCurrentStyle(TooltipStyle style)
+{
+    if (this->currentStyle_ == style)
+    {
+        // Nothing to update
+        return;
+    }
+
+    this->clearEntries();
+    this->deleteCurrentLayout();
+
+    switch (style)
+    {
+        case TooltipStyle::Vertical:
+            this->initializeVLayout();
+            this->setLayout(this->vLayout_);
+            break;
+        case TooltipStyle::Grid:
+            this->initializeGLayout();
+            this->setLayout(this->gLayout_);
+            break;
+        default:
+            break;
+    }
+
+    this->currentStyle_ = style;
+}
+
+void TooltipWidget::deleteCurrentLayout()
+{
+    auto *currentLayout = this->layout();
+    delete currentLayout;
+
+    switch (this->currentStyle_)
+    {
+        case TooltipStyle::Vertical:
+            this->vLayout_ = nullptr;
+            break;
+        case TooltipStyle::Grid:
+            this->gLayout_ = nullptr;
+            break;
+        default:
+            break;
+    }
+}
+
+void TooltipWidget::initializeVLayout()
+{
+    auto *vLayout = new QVBoxLayout(this);
+    vLayout->setSizeConstraint(QLayout::SetFixedSize);
+    vLayout->setContentsMargins(10, 5, 10, 5);
+    vLayout->setSpacing(10);
+    this->vLayout_ = vLayout;
+}
+
+void TooltipWidget::initializeGLayout()
+{
+    auto *gLayout = new QGridLayout(this);
+    gLayout->setSizeConstraint(QLayout::SetFixedSize);
+    gLayout->setContentsMargins(10, 5, 10, 5);
+    gLayout->setHorizontalSpacing(8);
+    gLayout->setVerticalSpacing(10);
+    this->gLayout_ = gLayout;
 }
 
 void TooltipWidget::themeChangedEvent()
@@ -86,86 +300,35 @@ void TooltipWidget::scaleChangedEvent(float)
 
 void TooltipWidget::updateFont()
 {
-    this->setFont(
-        getFonts()->getFont(FontStyle::ChatMediumSmall, this->scale()));
-}
-
-void TooltipWidget::setText(QString text)
-{
-    this->displayText_->setText(text);
+    this->setFont(getIApp()->getFonts()->getFont(FontStyle::ChatMediumSmall,
+                                                 this->scale()));
 }
 
 void TooltipWidget::setWordWrap(bool wrap)
 {
-    this->displayText_->setWordWrap(wrap);
-}
-
-void TooltipWidget::clearImage()
-{
-    this->displayImage_->hide();
-    this->image_ = nullptr;
-    this->setImageScale(0, 0);
-}
-
-void TooltipWidget::setImage(ImagePtr image)
-{
-    if (this->image_ == image)
+    for (int i = 0; i < this->visibleEntries_; ++i)
     {
-        return;
+        auto *entry = this->entryAt(i);
+        if (entry)
+        {
+            entry->setWordWrap(wrap);
+        }
     }
-    // hide image until loaded and reset scale
-    this->clearImage();
-    this->image_ = std::move(image);
-    this->refreshPixmap();
 }
 
-void TooltipWidget::setImageScale(int w, int h)
+void TooltipWidget::clearEntries()
 {
-    if (this->customImgWidth == w && this->customImgHeight == h)
-    {
-        return;
-    }
-    this->customImgWidth = w;
-    this->customImgHeight = h;
-    this->refreshPixmap();
+    this->setVisibleEntries(0);
 }
 
 void TooltipWidget::hideEvent(QHideEvent *)
 {
-    this->clearImage();
+    this->clearEntries();
 }
 
 void TooltipWidget::showEvent(QShowEvent *)
 {
     this->adjustSize();
-}
-
-bool TooltipWidget::refreshPixmap()
-{
-    if (!this->image_)
-    {
-        return false;
-    }
-
-    auto pixmap = this->image_->pixmapOrLoad();
-    if (!pixmap)
-    {
-        this->attemptRefresh = true;
-        return false;
-    }
-
-    if (this->customImgWidth > 0 || this->customImgHeight > 0)
-    {
-        this->displayImage_->setPixmap(pixmap->scaled(
-            this->customImgWidth, this->customImgHeight, Qt::KeepAspectRatio));
-    }
-    else
-    {
-        this->displayImage_->setPixmap(*pixmap);
-    }
-    this->displayImage_->show();
-
-    return true;
 }
 
 void TooltipWidget::changeEvent(QEvent *)

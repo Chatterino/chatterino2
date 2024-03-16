@@ -1,9 +1,9 @@
 #include "widgets/splits/SplitHeader.hpp"
 
 #include "Application.hpp"
-#include "common/NetworkCommon.hpp"
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkCommon.hpp"
+#include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/Hotkey.hpp"
@@ -15,11 +15,11 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutHelper.hpp"
-#include "util/StreamerMode.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/CommonTexts.hpp"
 #include "widgets/helper/EffectLabel.hpp"
@@ -37,10 +37,6 @@
 
 #include <cmath>
 
-#ifdef USEWEBENGINE
-#    include "widgets/StreamView.hpp"
-#endif
-
 namespace {
 
 using namespace chatterino;
@@ -48,43 +44,45 @@ using namespace chatterino;
 // 5 minutes
 constexpr const uint64_t THUMBNAIL_MAX_AGE_MS = 5ULL * 60 * 1000;
 
-auto formatRoomMode(TwitchChannel &channel) -> QString
+auto formatRoomModeUnclean(
+    const SharedAccessGuard<const TwitchChannel::RoomModes> &modes) -> QString
 {
     QString text;
 
+    if (modes->r9k)
     {
-        auto modes = channel.accessRoomModes();
-
-        if (modes->r9k)
+        text += "r9k, ";
+    }
+    if (modes->slowMode > 0)
+    {
+        text += QString("slow(%1), ").arg(localizeNumbers(modes->slowMode));
+    }
+    if (modes->emoteOnly)
+    {
+        text += "emote, ";
+    }
+    if (modes->submode)
+    {
+        text += "sub, ";
+    }
+    if (modes->followerOnly != -1)
+    {
+        if (modes->followerOnly != 0)
         {
-            text += "r9k, ";
+            text += QString("follow(%1m), ")
+                        .arg(localizeNumbers(modes->followerOnly));
         }
-        if (modes->slowMode > 0)
+        else
         {
-            text += QString("slow(%1), ").arg(localizeNumbers(modes->slowMode));
-        }
-        if (modes->emoteOnly)
-        {
-            text += "emote, ";
-        }
-        if (modes->submode)
-        {
-            text += "sub, ";
-        }
-        if (modes->followerOnly != -1)
-        {
-            if (modes->followerOnly != 0)
-            {
-                text += QString("follow(%1m), ")
-                            .arg(localizeNumbers(modes->followerOnly));
-            }
-            else
-            {
-                text += QString("follow, ");
-            }
+            text += QString("follow, ");
         }
     }
 
+    return text;
+}
+
+void cleanRoomModeText(QString &text, bool hasModRights)
+{
     if (text.length() > 2)
     {
         text = text.mid(0, text.size() - 2);
@@ -101,12 +99,10 @@ auto formatRoomMode(TwitchChannel &channel) -> QString
         }
     }
 
-    if (text.isEmpty() && channel.hasModRights())
+    if (text.isEmpty() && hasModRights)
     {
-        return "none";
+        text = "none";
     }
-
-    return text;
 }
 
 auto formatTooltip(const TwitchChannel::StreamStatus &s, QString thumbnail)
@@ -144,7 +140,7 @@ auto formatTooltip(const TwitchChannel::StreamStatus &s, QString thumbnail)
     }();
 
     auto extraStreamData = [&s]() -> QString {
-        if (isInStreamerMode() &&
+        if (getIApp()->getStreamerMode()->isEnabled() &&
             getSettings()->streamerModeHideViewerCountAndDuration)
         {
             return QStringLiteral(
@@ -227,27 +223,31 @@ namespace chatterino {
 SplitHeader::SplitHeader(Split *split)
     : BaseWidget(split)
     , split_(split)
+    , tooltipWidget_(new TooltipWidget(this))
 {
     this->initializeLayout();
 
     this->setMouseTracking(true);
     this->updateChannelText();
     this->handleChannelChanged();
-    this->updateModerationModeIcon();
+    this->updateIcons();
 
-    this->split_->focused.connect([this]() {
+    // The lifetime of these signals are tied to the lifetime of the Split.
+    // Since the SplitHeader is owned by the Split, they will always be destroyed
+    // at the same time.
+    std::ignore = this->split_->focused.connect([this]() {
         this->themeChangedEvent();
     });
-    this->split_->focusLost.connect([this]() {
+    std::ignore = this->split_->focusLost.connect([this]() {
         this->themeChangedEvent();
     });
-    this->split_->channelChanged.connect([this]() {
+    std::ignore = this->split_->channelChanged.connect([this]() {
         this->handleChannelChanged();
     });
 
     this->bSignals_.emplace_back(
-        getApp()->accounts->twitch.currentUserChanged.connect([this] {
-            this->updateModerationModeIcon();
+        getIApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
+            this->updateIcons();
         }));
 
     auto _ = [this](const auto &, const auto &) {
@@ -261,6 +261,8 @@ SplitHeader::SplitHeader(Split *split)
 
 void SplitHeader::initializeLayout()
 {
+    assert(this->layout() == nullptr);
+
     auto *layout = makeLayout<QHBoxLayout>({
         // space
         makeWidget<BaseWidget>([](auto w) {
@@ -281,7 +283,6 @@ void SplitHeader::initializeLayout()
         this->modeButton_ = makeWidget<EffectLabel>([&](auto w) {
             w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
             w->hide();
-            this->initializeModeSignals(*w);
             w->setMenu(this->createChatModeMenu());
         }),
         // moderator
@@ -294,7 +295,7 @@ void SplitHeader::initializeLayout()
                         case Qt::LeftButton:
                             if (getSettings()->moderationActions.empty())
                             {
-                                getApp()->windows->showSettingsDialog(
+                                getIApp()->getWindows()->showSettingsDialog(
                                     this, SettingsDialogPreference::
                                               ModerationActions);
                                 this->split_->setModerationMode(true);
@@ -312,17 +313,17 @@ void SplitHeader::initializeLayout()
 
                         case Qt::RightButton:
                         case Qt::MiddleButton:
-                            getApp()->windows->showSettingsDialog(
+                            getIApp()->getWindows()->showSettingsDialog(
                                 this,
                                 SettingsDialogPreference::ModerationActions);
                             break;
                     }
                 });
         }),
-        // viewer list
-        this->viewersButton_ = makeWidget<Button>([&](auto w) {
+        // chatter list
+        this->chattersButton_ = makeWidget<Button>([&](auto w) {
             QObject::connect(w, &Button::leftClicked, this, [this]() {
-                this->split_->showViewerList();
+                this->split_->showChatterList();
             });
         }),
         // dropdown
@@ -362,7 +363,7 @@ void SplitHeader::initializeLayout()
 std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 {
     // top level menu
-    const auto &h = getApp()->hotkeys;
+    const auto &h = getIApp()->getHotkeys();
     auto menu = std::make_unique<QMenu>();
     menu->addAction(
         "Change channel", this->split_, &Split::changeChannel,
@@ -383,11 +384,6 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         "Set filters", this->split_, &Split::setFiltersDialog,
         h->getDisplaySequence(HotkeyCategory::Split, "pickFilters"));
     menu->addSeparator();
-#ifdef USEWEBENGINE
-    this->dropdownMenu.addAction(
-        "Start watching", this->split_, &Split::startWatching;
-        h->getDisplaySequence(HotkeyCategory::Split, "startWatching"));
-#endif
 
     auto *twitchChannel =
         dynamic_cast<TwitchChannel *>(this->split_->getChannel().get());
@@ -397,10 +393,10 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         menu->addAction(
             OPEN_IN_BROWSER, this->split_, &Split::openInBrowser,
             h->getDisplaySequence(HotkeyCategory::Split, "openInBrowser"));
-#ifndef USEWEBENGINE
         menu->addAction(OPEN_PLAYER_IN_BROWSER, this->split_,
-                        &Split::openBrowserPlayer);
-#endif
+                        &Split::openBrowserPlayer,
+                        h->getDisplaySequence(HotkeyCategory::Split,
+                                              "openPlayerInBrowser"));
         menu->addAction(
             OPEN_IN_STREAMLINK, this->split_, &Split::openInStreamlink,
             h->getDisplaySequence(HotkeyCategory::Split, "openInStreamlink"));
@@ -451,8 +447,8 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 
     if (twitchChannel)
     {
-        auto bothSeq =
-            h->getDisplaySequence(HotkeyCategory::Split, "reloadEmotes", {{}});
+        auto bothSeq = h->getDisplaySequence(
+            HotkeyCategory::Split, "reloadEmotes", {std::vector<QString>()});
         auto channelSeq = h->getDisplaySequence(HotkeyCategory::Split,
                                                 "reloadEmotes", {{"channel"}});
         auto subSeq = h->getDisplaySequence(HotkeyCategory::Split,
@@ -484,8 +480,9 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                                             "setModerationMode", {{"toggle"}});
     if (modModeSeq.isEmpty())
     {
-        modModeSeq = h->getDisplaySequence(HotkeyCategory::Split,
-                                           "setModerationMode", {{}});
+        modModeSeq =
+            h->getDisplaySequence(HotkeyCategory::Split, "setModerationMode",
+                                  {std::vector<QString>()});
         // this makes a full std::optional<> with an empty vector inside
     }
     moreMenu->addAction(
@@ -515,7 +512,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     if (twitchChannel)
     {
         moreMenu->addAction(
-            "Show viewer list", this->split_, &Split::showViewerList,
+            "Show chatter list", this->split_, &Split::showChatterList,
             h->getDisplaySequence(HotkeyCategory::Split, "openViewerList"));
 
         moreMenu->addAction("Subscribe", this->split_, &Split::openSubPage);
@@ -529,17 +526,18 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         if (notifySeq.isEmpty())
         {
             notifySeq = h->getDisplaySequence(HotkeyCategory::Split,
-                                              "setChannelNotification", {{}});
+                                              "setChannelNotification",
+                                              {std::vector<QString>()});
             // this makes a full std::optional<> with an empty vector inside
         }
         action->setShortcut(notifySeq);
 
         QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
-            action->setChecked(getApp()->notifications->isChannelNotified(
+            action->setChecked(getIApp()->getNotifications()->isChannelNotified(
                 this->split_->getChannel()->getName(), Platform::Twitch));
         });
         QObject::connect(action, &QAction::triggered, this, [this]() {
-            getApp()->notifications->updateChannelNotification(
+            getIApp()->getNotifications()->updateChannelNotification(
                 this->split_->getChannel()->getName(), Platform::Twitch);
         });
 
@@ -580,43 +578,23 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
 {
     auto menu = std::make_unique<QMenu>();
 
-    auto *setSub = new QAction("Subscriber only", this);
-    auto *setEmote = new QAction("Emote only", this);
-    auto *setSlow = new QAction("Slow", this);
-    auto *setR9k = new QAction("R9K", this);
-    auto *setFollowers = new QAction("Followers only", this);
+    this->modeActionSetSub = new QAction("Subscriber only", this);
+    this->modeActionSetEmote = new QAction("Emote only", this);
+    this->modeActionSetSlow = new QAction("Slow", this);
+    this->modeActionSetR9k = new QAction("R9K", this);
+    this->modeActionSetFollowers = new QAction("Followers only", this);
 
-    setFollowers->setCheckable(true);
-    setSub->setCheckable(true);
-    setEmote->setCheckable(true);
-    setSlow->setCheckable(true);
-    setR9k->setCheckable(true);
+    this->modeActionSetFollowers->setCheckable(true);
+    this->modeActionSetSub->setCheckable(true);
+    this->modeActionSetEmote->setCheckable(true);
+    this->modeActionSetSlow->setCheckable(true);
+    this->modeActionSetR9k->setCheckable(true);
 
-    menu->addAction(setEmote);
-    menu->addAction(setSub);
-    menu->addAction(setSlow);
-    menu->addAction(setR9k);
-    menu->addAction(setFollowers);
-
-    this->managedConnections_.managedConnect(
-        this->modeUpdateRequested_,
-        [this, setSub, setEmote, setSlow, setR9k, setFollowers]() {
-            auto *twitchChannel =
-                dynamic_cast<TwitchChannel *>(this->split_->getChannel().get());
-            if (twitchChannel == nullptr)
-            {
-                this->modeButton_->hide();
-                return;
-            }
-
-            auto roomModes = twitchChannel->accessRoomModes();
-
-            setR9k->setChecked(roomModes->r9k);
-            setSlow->setChecked(roomModes->slowMode > 0);
-            setEmote->setChecked(roomModes->emoteOnly);
-            setSub->setChecked(roomModes->submode);
-            setFollowers->setChecked(roomModes->followerOnly != -1);
-        });
+    menu->addAction(this->modeActionSetEmote);
+    menu->addAction(this->modeActionSetSub);
+    menu->addAction(this->modeActionSetSlow);
+    menu->addAction(this->modeActionSetR9k);
+    menu->addAction(this->modeActionSetFollowers);
 
     auto execCommand = [this](const QString &command) {
         auto text = getApp()->getCommands()->execCommand(
@@ -629,44 +607,44 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
         action->setChecked(!action->isChecked());
     };
 
-    QObject::connect(setSub, &QAction::triggered, this,
-                     [setSub, toggle]() mutable {
-                         toggle("/subscribers", setSub);
+    QObject::connect(this->modeActionSetSub, &QAction::triggered, this,
+                     [this, toggle]() mutable {
+                         toggle("/subscribers", this->modeActionSetSub);
                      });
 
-    QObject::connect(setEmote, &QAction::triggered, this,
-                     [setEmote, toggle]() mutable {
-                         toggle("/emoteonly", setEmote);
+    QObject::connect(this->modeActionSetEmote, &QAction::triggered, this,
+                     [this, toggle]() mutable {
+                         toggle("/emoteonly", this->modeActionSetEmote);
                      });
 
-    QObject::connect(
-        setSlow, &QAction::triggered, this, [setSlow, this, execCommand]() {
-            if (!setSlow->isChecked())
-            {
-                execCommand("/slowoff");
-                setSlow->setChecked(false);
-                return;
-            };
-            auto ok = bool();
-            auto seconds =
-                QInputDialog::getInt(this, "", "Seconds:", 10, 0, 500, 1, &ok,
-                                     Qt::FramelessWindowHint);
-            if (ok)
-            {
-                execCommand(QString("/slow %1").arg(seconds));
-            }
-            else
-            {
-                setSlow->setChecked(false);
-            }
-        });
+    QObject::connect(this->modeActionSetSlow, &QAction::triggered, this,
+                     [this, execCommand]() {
+                         if (!this->modeActionSetSlow->isChecked())
+                         {
+                             execCommand("/slowoff");
+                             this->modeActionSetSlow->setChecked(false);
+                             return;
+                         };
+                         auto ok = bool();
+                         auto seconds = QInputDialog::getInt(
+                             this, "", "Seconds:", 10, 0, 500, 1, &ok,
+                             Qt::FramelessWindowHint);
+                         if (ok)
+                         {
+                             execCommand(QString("/slow %1").arg(seconds));
+                         }
+                         else
+                         {
+                             this->modeActionSetSlow->setChecked(false);
+                         }
+                     });
 
-    QObject::connect(setFollowers, &QAction::triggered, this,
-                     [setFollowers, this, execCommand]() {
-                         if (!setFollowers->isChecked())
+    QObject::connect(this->modeActionSetFollowers, &QAction::triggered, this,
+                     [this, execCommand]() {
+                         if (!this->modeActionSetFollowers->isChecked())
                          {
                              execCommand("/followersoff");
-                             setFollowers->setChecked(false);
+                             this->modeActionSetFollowers->setChecked(false);
                              return;
                          };
                          auto ok = bool();
@@ -680,13 +658,13 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
                          }
                          else
                          {
-                             setFollowers->setChecked(false);
+                             this->modeActionSetFollowers->setChecked(false);
                          }
                      });
 
-    QObject::connect(setR9k, &QAction::triggered, this,
-                     [setR9k, toggle]() mutable {
-                         toggle("/r9kbeta", setR9k);
+    QObject::connect(this->modeActionSetR9k, &QAction::triggered, this,
+                     [this, toggle]() mutable {
+                         toggle("/r9kbeta", this->modeActionSetR9k);
                      });
 
     return menu;
@@ -694,30 +672,47 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
 
 void SplitHeader::updateRoomModes()
 {
-    this->modeUpdateRequested_.invoke();
-}
+    assert(this->modeButton_ != nullptr);
 
-void SplitHeader::initializeModeSignals(EffectLabel &label)
-{
-    this->modeUpdateRequested_.connect([this, &label] {
-        if (auto *twitchChannel =
-                dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+    // Update the mode button
+    if (auto *twitchChannel =
+            dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+    {
+        this->modeButton_->setEnable(twitchChannel->hasModRights());
+
+        QString text;
         {
-            label.setEnable(twitchChannel->hasModRights());
+            auto roomModes = twitchChannel->accessRoomModes();
+            text = formatRoomModeUnclean(roomModes);
 
-            // set the label text
-            auto text = formatRoomMode(*twitchChannel);
+            // Set menu action
+            this->modeActionSetR9k->setChecked(roomModes->r9k);
+            this->modeActionSetSlow->setChecked(roomModes->slowMode > 0);
+            this->modeActionSetEmote->setChecked(roomModes->emoteOnly);
+            this->modeActionSetSub->setChecked(roomModes->submode);
+            this->modeActionSetFollowers->setChecked(roomModes->followerOnly !=
+                                                     -1);
+        }
+        cleanRoomModeText(text, twitchChannel->hasModRights());
 
-            if (!text.isEmpty())
-            {
-                label.getLabel().setText(text);
-                label.show();
-                return;
-            }
+        // set the label text
+
+        if (!text.isEmpty())
+        {
+            this->modeButton_->getLabel().setText(text);
+            this->modeButton_->show();
+        }
+        else
+        {
+            this->modeButton_->hide();
         }
 
-        label.hide();
-    });
+        // Update the mode button menu actions
+    }
+    else
+    {
+        this->modeButton_->hide();
+    }
 }
 
 void SplitHeader::resetThumbnail()
@@ -738,7 +733,7 @@ void SplitHeader::handleChannelChanged()
     if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         this->channelConnections_.managedConnect(
-            twitchChannel->liveStatusChanged, [this]() {
+            twitchChannel->streamStatusChanged, [this]() {
                 this->updateChannelText();
             });
     }
@@ -751,18 +746,13 @@ void SplitHeader::scaleChangedEvent(float scale)
     this->setFixedHeight(w);
     this->dropdownButton_->setFixedWidth(w);
     this->moderationButton_->setFixedWidth(w);
-    this->viewersButton_->setFixedWidth(w);
+    this->chattersButton_->setFixedWidth(w);
     this->addButton_->setFixedWidth(w * 5 / 8);
 }
 
 void SplitHeader::setAddButtonVisible(bool value)
 {
     this->addButton_->setVisible(value);
-}
-
-void SplitHeader::setViewersButtonVisible(bool value)
-{
-    this->viewersButton_->setVisible(value);
 }
 
 void SplitHeader::updateChannelText()
@@ -810,7 +800,7 @@ void SplitHeader::updateChannelText()
             {
                 NetworkRequest(url, NetworkRequestType::Get)
                     .caller(this)
-                    .onSuccess([this](auto result) -> Outcome {
+                    .onSuccess([this](auto result) {
                         // NOTE: We do not follow the redirects, so we need to make sure we only treat code 200 as a valid image
                         if (result.status() == 200)
                         {
@@ -822,7 +812,6 @@ void SplitHeader::updateChannelText()
                             this->thumbnail_.clear();
                         }
                         this->updateChannelText();
-                        return Success;
                     })
                     .execute();
                 this->lastThumbnail_.restart();
@@ -844,26 +833,42 @@ void SplitHeader::updateChannelText()
     this->titleLabel_->setText(title.isEmpty() ? "<empty>" : title);
 }
 
-void SplitHeader::updateModerationModeIcon()
+void SplitHeader::updateIcons()
 {
-    auto moderationMode = this->split_->getModerationMode() &&
-                          !getSettings()->moderationActions.empty();
-
-    this->moderationButton_->setPixmap(
-        moderationMode ? getResources().buttons.modModeEnabled
-                       : getResources().buttons.modModeDisabled);
-
     auto channel = this->split_->getChannel();
     auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
-    if (twitchChannel != nullptr &&
-        (twitchChannel->hasModRights() || moderationMode))
+    if (twitchChannel != nullptr)
     {
-        this->moderationButton_->show();
+        auto moderationMode = this->split_->getModerationMode() &&
+                              !getSettings()->moderationActions.empty();
+
+        this->moderationButton_->setPixmap(
+            moderationMode ? getResources().buttons.modModeEnabled
+                           : getResources().buttons.modModeDisabled);
+
+        if (twitchChannel->hasModRights() || moderationMode)
+        {
+            this->moderationButton_->show();
+        }
+        else
+        {
+            this->moderationButton_->hide();
+        }
+
+        if (twitchChannel->hasModRights())
+        {
+            this->chattersButton_->show();
+        }
+        else
+        {
+            this->chattersButton_->hide();
+        }
     }
     else
     {
         this->moderationButton_->hide();
+        this->chattersButton_->hide();
     }
 }
 
@@ -953,22 +958,30 @@ void SplitHeader::enterEvent(QEvent *event)
 {
     if (!this->tooltipText_.isEmpty())
     {
-        auto *channel = this->split_->getChannel().get();
-        if (channel->getType() == Channel::Type::Twitch)
-        {
-            dynamic_cast<TwitchChannel *>(channel)->refreshTitle();
-        }
+        this->tooltipWidget_->setOne({nullptr, this->tooltipText_});
+        this->tooltipWidget_->setWordWrap(true);
+        this->tooltipWidget_->adjustSize();
 
-        auto *tooltip = TooltipWidget::instance();
-        tooltip->clearImage();
-        tooltip->setText(this->tooltipText_);
-        tooltip->setWordWrap(true);
-        tooltip->adjustSize();
-        auto pos = this->mapToGlobal(this->rect().bottomLeft()) +
-                   QPoint((this->width() - tooltip->width()) / 2, 1);
+        // On Windows, a lot of the resizing/activating happens when calling
+        // show() and calling it doesn't synchronously create a visible window,
+        // so moving the window won't cause the visible window to jump.
+        //
+        // On other platforms, this isn't the case, hence we call show() after
+        // moving.
+#ifdef Q_OS_WIN
+        this->tooltipWidget_->show();
+#endif
 
-        tooltip->moveTo(this, pos, false);
-        tooltip->show();
+        auto pos =
+            this->mapToGlobal(this->rect().bottomLeft()) +
+            QPoint((this->width() - this->tooltipWidget_->width()) / 2, 1);
+
+        this->tooltipWidget_->moveTo(pos,
+                                     widgets::BoundsChecking::CursorPosition);
+
+#ifndef Q_OS_WIN
+        this->tooltipWidget_->show();
+#endif
     }
 
     BaseWidget::enterEvent(event);
@@ -976,7 +989,7 @@ void SplitHeader::enterEvent(QEvent *event)
 
 void SplitHeader::leaveEvent(QEvent *event)
 {
-    TooltipWidget::instance()->hide();
+    this->tooltipWidget_->hide();
 
     BaseWidget::leaveEvent(event);
 }
@@ -999,13 +1012,13 @@ void SplitHeader::themeChangedEvent()
     // --
     if (this->theme->isLightTheme())
     {
-        this->viewersButton_->setPixmap(getResources().buttons.viewersDark);
+        this->chattersButton_->setPixmap(getResources().buttons.chattersDark);
         this->dropdownButton_->setPixmap(getResources().buttons.menuDark);
         this->addButton_->setPixmap(getResources().buttons.addSplit);
     }
     else
     {
-        this->viewersButton_->setPixmap(getResources().buttons.viewersLight);
+        this->chattersButton_->setPixmap(getResources().buttons.chattersLight);
         this->dropdownButton_->setPixmap(getResources().buttons.menuLight);
         this->addButton_->setPixmap(getResources().buttons.addSplitDark);
     }
@@ -1046,7 +1059,7 @@ void SplitHeader::reloadSubscriberEmotes()
     this->lastReloadedSubEmotes_ = now;
 
     auto channel = this->split_->getChannel();
-    getApp()->accounts->twitch.getCurrent()->loadEmotes(channel);
+    getIApp()->getAccounts()->twitch.getCurrent()->loadEmotes(channel);
 }
 
 void SplitHeader::reconnect()

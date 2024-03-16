@@ -27,7 +27,7 @@
             {                                          \
                 QPainter painter(this);                \
                 QColor color = QColor("#222222");      \
-                color.setAlphaF(0.7);                  \
+                color.setAlphaF(0.7F);                 \
                 painter.fillRect(this->rect(), color); \
             }                                          \
         }                                              \
@@ -56,8 +56,6 @@ public:
     SettingsDialogTab *tab() const;
     void setTab(SettingsDialogTab *tab);
 
-    void cancel();
-
     QCheckBox *createCheckBox(const QString &text,
                               pajlada::Settings::Setting<bool> &setting);
     QComboBox *createComboBox(const QStringList &items,
@@ -85,8 +83,7 @@ public:
     }
 
 protected:
-    SettingsDialogTab *tab_;
-    pajlada::Signals::NoArgSignal onCancel_;
+    SettingsDialogTab *tab_{};
     pajlada::Signals::SignalHolder managedConnections_;
 };
 

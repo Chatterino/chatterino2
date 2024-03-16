@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <tuple>
 #include <utility>
@@ -7,12 +9,12 @@
 namespace chatterino {
 
 struct SelectionItem {
-    uint32_t messageIndex{0};
-    uint32_t charIndex{0};
+    size_t messageIndex{0};
+    size_t charIndex{0};
 
     SelectionItem() = default;
 
-    SelectionItem(uint32_t _messageIndex, uint32_t _charIndex)
+    SelectionItem(size_t _messageIndex, size_t _charIndex)
         : messageIndex(_messageIndex)
         , charIndex(_charIndex)
     {
@@ -37,7 +39,7 @@ struct SelectionItem {
 
     bool operator!=(const SelectionItem &b) const
     {
-        return this->operator==(b);
+        return !this->operator==(b);
     }
 };
 
@@ -61,6 +63,23 @@ struct Selection {
         }
     }
 
+    bool operator==(const Selection &b) const
+    {
+        return this->start == b.start && this->end == b.end;
+    }
+
+    bool operator!=(const Selection &b) const
+    {
+        return !this->operator==(b);
+    }
+
+    //union of both selections
+    Selection operator|(const Selection &b) const
+    {
+        return {std::min(this->selectionMin, b.selectionMin),
+                std::max(this->selectionMax, b.selectionMax)};
+    }
+
     bool isEmpty() const
     {
         return this->start == this->end;
@@ -73,11 +92,12 @@ struct Selection {
     }
 
     // Shift all message selection indices `offset` back
-    void shiftMessageIndex(uint32_t offset)
+    void shiftMessageIndex(size_t offset)
     {
         if (offset > this->selectionMin.messageIndex)
         {
             this->selectionMin.messageIndex = 0;
+            this->selectionMin.charIndex = 0;
         }
         else
         {
@@ -87,6 +107,7 @@ struct Selection {
         if (offset > this->selectionMax.messageIndex)
         {
             this->selectionMax.messageIndex = 0;
+            this->selectionMax.charIndex = 0;
         }
         else
         {
@@ -96,6 +117,7 @@ struct Selection {
         if (offset > this->start.messageIndex)
         {
             this->start.messageIndex = 0;
+            this->start.charIndex = 0;
         }
         else
         {
@@ -105,6 +127,7 @@ struct Selection {
         if (offset > this->end.messageIndex)
         {
             this->end.messageIndex = 0;
+            this->end.charIndex = 0;
         }
         else
         {
@@ -112,15 +135,4 @@ struct Selection {
         }
     }
 };
-
-struct DoubleClickSelection {
-    uint32_t originalStart{0};
-    uint32_t originalEnd{0};
-    uint32_t origMessageIndex{0};
-    bool selectingLeft{false};
-    bool selectingRight{false};
-    SelectionItem origStartItem;
-    SelectionItem origEndItem;
-};
-
 }  // namespace chatterino

@@ -27,6 +27,7 @@ class PageHeader : public QFrame
 
 enum class SettingsDialogPreference {
     NoPreference,
+    StreamerMode,
     Accounts,
     ModerationActions,
 };
@@ -41,9 +42,9 @@ public:
                                SettingsDialogPreference::NoPreference);
 
 protected:
-    virtual void scaleChangedEvent(float newDpi) override;
-    virtual void themeChangedEvent() override;
-    virtual void showEvent(QShowEvent *) override;
+    void scaleChangedEvent(float newDpi) override;
+    void themeChangedEvent() override;
+    void showEvent(QShowEvent *) override;
 
 private:
     void refresh();
@@ -57,6 +58,8 @@ private:
     void selectTab(SettingsDialogTab *tab, const bool byUser = true);
     void selectTab(SettingsTabId id);
     void filterElements(const QString &query);
+    void setElementFilter(const QString &query);
+    bool eventFilter(QObject *object, QEvent *event) override;
 
     void onOkClicked();
     void onCancelClicked();
@@ -74,6 +77,7 @@ private:
     std::vector<SettingsDialogTab *> tabs_;
     SettingsDialogTab *selectedTab_{};
     SettingsDialogTab *lastSelectedByUser_{};
+    float dpi_ = 1.0F;
 
     friend class SettingsDialogTab;
 };

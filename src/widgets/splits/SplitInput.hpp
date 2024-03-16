@@ -1,12 +1,13 @@
 #pragma once
 
-#include "util/QObjectRef.hpp"
+#include "messages/Message.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPaintEvent>
+#include <QPointer>
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -19,22 +20,9 @@ class Split;
 class EmotePopup;
 class InputCompletionPopup;
 class EffectLabel;
-class MessageThread;
 class ResizingTextEdit;
 class ChannelView;
-
-// MessageOverflow is used for controlling how to guide the user into not
-// sending a message that will be discarded by Twitch
-enum MessageOverflow {
-    // Allow overflowing characters to be inserted into the input box, but highlight them in red
-    Highlight,
-
-    // Prevent more characters from being inserted into the input box
-    Prevent,
-
-    // Do nothing
-    Allow,
-};
+enum class CompletionKind;
 
 class SplitInput : public BaseWidget
 {
@@ -52,8 +40,7 @@ public:
     QString getInputText() const;
     void insertText(const QString &text);
 
-    void setReply(std::shared_ptr<MessageThread> reply,
-                  bool showInlineReplying = true);
+    void setReply(MessagePtr reply, bool showInlineReplying = true);
     void setPlaceholderText(const QString &text);
 
     /**
@@ -79,6 +66,13 @@ public:
      **/
     bool isHidden() const;
 
+    /**
+     * @brief Sets the text of this input
+     *
+     * This method should only be used in tests
+     */
+    void setInputText(const QString &newInputText);
+
     pajlada::Signals::Signal<const QString &> textChanged;
     pajlada::Signals::NoArgSignal selectionChanged;
 
@@ -93,23 +87,25 @@ protected:
 
     virtual void giveFocus(Qt::FocusReason reason);
 
-    QString handleSendMessage(std::vector<QString> &arguments);
+    QString handleSendMessage(const std::vector<QString> &arguments);
     void postMessageSend(const QString &message,
                          const std::vector<QString> &arguments);
 
     /// Clears the input box, clears reply thread if inline replies are enabled
     void clearInput();
 
-protected:
     void addShortcuts() override;
     void initLayout();
     bool eventFilter(QObject *obj, QEvent *event) override;
+#ifdef DEBUG
+    bool keyPressedEventInstalled{};
+#endif
     void installKeyPressedEvent();
     void onCursorPositionChanged();
     void onTextChanged();
     void updateEmoteButton();
     void updateCompletionPopup();
-    void showCompletionPopup(const QString &text, bool emoteCompletion);
+    void showCompletionPopup(const QString &text, CompletionKind kind);
     void hideCompletionPopup();
     void insertCompletionText(const QString &input_) const;
     void openEmotePopup();
@@ -126,12 +122,13 @@ protected:
 
     Split *const split_;
     ChannelView *const channelView_;
-    QObjectRef<EmotePopup> emotePopup_;
-    QObjectRef<InputCompletionPopup> inputCompletionPopup_;
+    QPointer<EmotePopup> emotePopup_;
+    QPointer<InputCompletionPopup> inputCompletionPopup_;
 
     struct {
         ResizingTextEdit *textEdit;
         QLabel *textEditLength;
+        EffectLabel *sendButton;
         EffectLabel *emoteButton;
 
         QHBoxLayout *hbox;
@@ -141,9 +138,9 @@ protected:
         QHBoxLayout *replyHbox;
         QLabel *replyLabel;
         EffectLabel *cancelReplyButton;
-    } ui_;
+    } ui_{};
 
-    std::shared_ptr<MessageThread> replyThread_ = nullptr;
+    MessagePtr replyThread_ = nullptr;
     bool enableInlineReplying_;
 
     pajlada::Signals::SignalHolder managedConnections_;

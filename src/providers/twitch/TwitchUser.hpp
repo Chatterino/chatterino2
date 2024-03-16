@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util/QStringHash.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 #include <pajlada/serialize.hpp>
@@ -30,6 +31,16 @@ struct TwitchUser {
     bool operator<(const TwitchUser &rhs) const
     {
         return this->id < rhs.id;
+    }
+
+    bool operator==(const TwitchUser &rhs) const
+    {
+        return this->id == rhs.id;
+    }
+
+    bool operator!=(const TwitchUser &rhs) const
+    {
+        return !(*this == rhs);
     }
 };
 
@@ -75,3 +86,11 @@ struct Deserialize<chatterino::TwitchUser> {
 };
 
 }  // namespace pajlada
+
+template <>
+struct std::hash<chatterino::TwitchUser> {
+    inline size_t operator()(const chatterino::TwitchUser &user) const noexcept
+    {
+        return std::hash<QString>{}(user.id);
+    }
+};

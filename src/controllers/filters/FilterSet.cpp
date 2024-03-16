@@ -8,22 +8,24 @@ namespace chatterino {
 FilterSet::FilterSet()
 {
     this->listener_ =
-        getCSettings().filterRecords.delayedItemsChanged.connect([this] {
+        getSettings()->filterRecords.delayedItemsChanged.connect([this] {
             this->reloadFilters();
         });
 }
 
 FilterSet::FilterSet(const QList<QUuid> &filterIds)
 {
-    auto filters = getCSettings().filterRecords.readOnly();
+    auto filters = getSettings()->filterRecords.readOnly();
     for (const auto &f : *filters)
     {
         if (filterIds.contains(f->getId()))
+        {
             this->filters_.insert(f->getId(), f);
+        }
     }
 
     this->listener_ =
-        getCSettings().filterRecords.delayedItemsChanged.connect([this] {
+        getSettings()->filterRecords.delayedItemsChanged.connect([this] {
             this->reloadFilters();
         });
 }
@@ -36,14 +38,17 @@ FilterSet::~FilterSet()
 bool FilterSet::filter(const MessagePtr &m, ChannelPtr channel) const
 {
     if (this->filters_.size() == 0)
+    {
         return true;
+    }
 
-    filterparser::ContextMap context =
-        filterparser::buildContextMap(m, channel.get());
+    filters::ContextMap context = filters::buildContextMap(m, channel.get());
     for (const auto &f : this->filters_.values())
     {
         if (!f->valid() || !f->filter(context))
+        {
             return false;
+        }
     }
 
     return true;
@@ -56,7 +61,7 @@ const QList<QUuid> FilterSet::filterIds() const
 
 void FilterSet::reloadFilters()
 {
-    auto filters = getCSettings().filterRecords.readOnly();
+    auto filters = getSettings()->filterRecords.readOnly();
     for (const auto &key : this->filters_.keys())
     {
         bool found = false;

@@ -1,60 +1,53 @@
 #pragma once
 
 #include "widgets/BaseWidget.hpp"
+#include "widgets/splits/SplitCommon.hpp"
 
-#include <pajlada/signals/signalholder.hpp>
-#include <QGridLayout>
 #include <QPushButton>
+
+#include <optional>
 
 namespace chatterino {
 
 class Split;
 
+/// Type of button in the split overlay (the overlay that appears when holding down ctrl+alt)
+enum class SplitOverlayButton {
+    Move,
+    Left,
+    Up,
+    Right,
+    Down,
+};
+
 class SplitOverlay : public BaseWidget
 {
 public:
-    explicit SplitOverlay(Split *parent = nullptr);
+    explicit SplitOverlay(Split *parent);
+
+    // Called from the Split Overlay's button when it gets hovered over
+    void setHoveredButton(std::optional<SplitOverlayButton> hoveredButton);
+
+    // Called from the Split Overlay's button when the move button is pressed
+    void dragPressed();
+
+    // Called from the Split Overlay's button when one of the direction buttons are pressed
+    void createSplitPressed(SplitDirection direction);
 
 protected:
-    //    bool event(QEvent *event) override;
+    void scaleChangedEvent(float newScale) override;
     void paintEvent(QPaintEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
-    // fourtf: !!! preserve the order of left, up, right and down
-    enum HoveredElement {
-        None,
-        SplitMove,
-        SplitLeft,
-        SplitUp,
-        SplitRight,
-        SplitDown
-    };
-
-    class ButtonEventFilter : public QObject
-    {
-        SplitOverlay *parent;
-        HoveredElement hoveredElement;
-
-    public:
-        ButtonEventFilter(SplitOverlay *parent, HoveredElement hoveredElement);
-
-    protected:
-        bool eventFilter(QObject *watched, QEvent *event) override;
-    };
-
-    HoveredElement hoveredElement_ = None;
+    std::optional<SplitOverlayButton> hoveredButton_{};
     Split *split_;
-    QGridLayout *layout_;
+    QPushButton *move_;
     QPushButton *left_;
     QPushButton *up_;
     QPushButton *right_;
     QPushButton *down_;
-
-    pajlada::Signals::SignalHolder signalHolder_;
-
-    friend class ButtonEventFilter;
 };
 
 }  // namespace chatterino

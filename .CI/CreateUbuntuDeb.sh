@@ -15,13 +15,18 @@ packaging_dir="package"
 # Get the Ubuntu Release (e.g. 20.04 or 22.04)
 ubuntu_release="$(lsb_release -rs)"
 
+# The final path where we'll save the .deb package
+deb_path="Chatterino-ubuntu-${ubuntu_release}-x86_64.deb"
+
 # Refactor opportunity:
 case "$ubuntu_release" in
     20.04)
-        dependencies="libc6, libstdc++6, libqt5core5a, libqt5concurrent5, libqt5dbus5, libqt5gui5, libqt5network5, libqt5svg5, libqt5widgets5, qt5-image-formats-plugins, libboost-filesystem1.71.0"
+        # Qt6 static-linked deb, see https://github.com/Chatterino/docker
+        dependencies="libc6, libstdc++6, libblkid1, libbsd0, libc6, libexpat1, libffi7, libfontconfig1, libfreetype6, libglib2.0-0, libglvnd0, libglx0, libgraphite2-3, libharfbuzz0b, libicu66, libjpeg-turbo8, libmount1, libopengl0, libpcre2-16-0, libpcre3, libpng16-16, libselinux1, libssl1.1, libstdc++6, libuuid1, libx11-xcb1, libxau6, libxcb1, libxcb-cursor0, libxcb-glx0, libxcb-icccm4, libxcb-image0, libxcb-keysyms1, libxcb-randr0, libxcb-render0, libxcb-render-util0, libxcb-shape0, libxcb-shm0, libxcb-sync1, libxcb-util1, libxcb-xfixes0, libxcb-xkb1, libxdmcp6, libxkbcommon0, libxkbcommon-x11-0, zlib1g"
         ;;
     22.04)
-        dependencies="libc6, libstdc++6, libqt5core5a, libqt5concurrent5, libqt5dbus5, libqt5gui5, libqt5network5, libqt5svg5, libqt5widgets5, qt5-image-formats-plugins, libboost-filesystem1.74.0"
+        # Qt6 static-linked deb, see https://github.com/Chatterino/docker
+        dependencies="libc6, libstdc++6, libglx0, libopengl0, libpng16-16, libharfbuzz0b, libfreetype6, libfontconfig1, libjpeg-turbo8, libxcb-glx0, libegl1, libx11-6, libxkbcommon0, libx11-xcb1, libxkbcommon-x11-0, libxcb-cursor0, libxcb-icccm4, libxcb-image0, libxcb-keysyms1, libxcb-randr0, libxcb-render-util0, libxcb-shm0, libxcb-sync1, libxcb-xfixes0, libxcb-render0, libxcb-shape0, libxcb-xkb1, libxcb1, libbrotli1, libglib2.0-0, zlib1g, libicu70, libpcre2-16-0, libssl3, libgraphite2-3, libexpat1, libuuid1, libxcb-util1, libxau6, libxdmcp6, libbrotli1, libffi8, libmount1, libselinux1, libpcre3, libicu70, libbsd0, libblkid1, libpcre2-8-0, libmd0"
         ;;
     *)
         echo "Unsupported Ubuntu release $ubuntu_release"
@@ -37,9 +42,10 @@ if [ ! -f ./bin/chatterino ] || [ ! -x ./bin/chatterino ]; then
     exit 1
 fi
 
-chatterino_version=$(git describe 2>/dev/null | cut -c 2-) || true
-if [ -z "$chatterino_version" ]; then
-    # Fall back to this in case the build happened outside of a git repo
+chatterino_version=$(git describe 2>/dev/null) || true
+if [ "$(echo "$chatterino_version" | cut -c1-1)" = 'v' ]; then
+    chatterino_version="$(echo "$chatterino_version" | cut -c2-)"
+else
     chatterino_version="0.0.0-dev"
 fi
 
@@ -77,15 +83,15 @@ breakline
 
 
 echo "Building package"
-dpkg-deb --build "$packaging_dir" "Chatterino-x86_64.deb"
+dpkg-deb --build "$packaging_dir" "$deb_path"
 breakline
 
 
 echo "Package info"
-dpkg --info Chatterino-x86_64.deb
+dpkg --info "$deb_path"
 breakline
 
 
 echo "Package contents"
-dpkg --contents Chatterino-x86_64.deb # Shows folders and files inside .deb file
+dpkg --contents "$deb_path"
 breakline

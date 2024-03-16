@@ -34,20 +34,20 @@ namespace {
 
 CommandPage::CommandPage()
 {
-    auto app = getApp();
-
     LayoutCreator<CommandPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
-    this->view =
-        layout.emplace<EditableModelView>(app->commands->createModel(nullptr))
-            .getElement();
+    this->view = layout
+                     .emplace<EditableModelView>(
+                         getIApp()->getCommands()->createModel(nullptr))
+                     .getElement();
 
     this->view->setTitles({"Trigger", "Command", "Show In\nMessage Menu"});
     this->view->getTableView()->horizontalHeader()->setSectionResizeMode(
         1, QHeaderView::Stretch);
-    this->view->addButtonPressed.connect([] {
-        getApp()->commands->items.append(
+    // We can safely ignore this signal connection since we own the view
+    std::ignore = this->view->addButtonPressed.connect([] {
+        getIApp()->getCommands()->items.append(
             Command{"/command", "I made a new command HeyGuys"});
     });
 
@@ -74,7 +74,7 @@ CommandPage::CommandPage()
     // TODO: asyncronously check path
     if (QFile(c1settingsPath()).exists())
     {
-        auto button = new QPushButton("Import commands from Chatterino 1");
+        auto *button = new QPushButton("Import commands from Chatterino 1");
         view->addCustomButton(button);
 
         QObject::connect(button, &QPushButton::clicked, this, [] {
@@ -86,7 +86,7 @@ CommandPage::CommandPage()
             {
                 if (int index = line.indexOf(' '); index != -1)
                 {
-                    getApp()->commands->items.insert(
+                    getIApp()->getCommands()->items.insert(
                         Command(line.mid(0, index), line.mid(index + 1)));
                 }
             }

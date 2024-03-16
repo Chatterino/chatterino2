@@ -12,7 +12,7 @@ If you're adding support for a new endpoint, these are the things you should kno
 
 1. Add a virtual function in the `IHelix` class. Naming should reflect the API name as best as possible.
 1. Override the virtual function in the `Helix` class.
-1. Mock the function in the `MockHelix` class in the `tests/src/HighlightController.cpp` file.
+1. Mock the function in the `mock::Helix` class in the `mocks/include/mocks/Helix.hpp` file.
 1. (Optional) Make a new error enum for the failure callback.
 
 For a simple example, see the `updateUserChatColor` function and its error enum `HelixUpdateUserChatColorError`.
@@ -43,7 +43,7 @@ URL: https://dev.twitch.tv/docs/api/reference#get-streams
 
 Used in:
 
-- `TwitchChannel` to get live status, game, title, and viewer count of a channel
+- `LiveController` to get live status, game, title, and viewer count of a channel
 - `NotificationController` to provide notifications for channels you might not have open in Chatterino, but are still interested in getting notifications for
 
 ### Create Clip
@@ -61,7 +61,7 @@ URL: https://dev.twitch.tv/docs/api/reference#get-channel-information
 
 Used in:
 
-- `TwitchChannel` to refresh stream title
+- `LiveController` to refresh stream title & display name
 
 ### Update Channel
 
@@ -136,6 +136,22 @@ Used in:
 
 - `providers/twitch/TwitchChannel.cpp` to resolve a chats available cheer emotes. This helps us parse incoming messages like `pajaCheer1000`
 
+### Get Global Badges
+
+URL: https://dev.twitch.tv/docs/api/reference/#get-global-chat-badges
+
+Used in:
+
+- `providers/twitch/TwitchBadges.cpp` to load global badges
+
+### Get Channel Badges
+
+URL: https://dev.twitch.tv/docs/api/reference/#get-channel-chat-badges
+
+Used in:
+
+- `providers/twitch/TwitchChannel.cpp` to load channel badges
+
 ### Get Emote Sets
 
 URL: https://dev.twitch.tv/docs/api/reference#get-emote-sets
@@ -148,13 +164,70 @@ URL: https://dev.twitch.tv/docs/api/reference#get-channel-emotes
 
 Not used anywhere at the moment.
 
-## TMI
-
-The TMI api is undocumented.
-
 ### Get Chatters
 
-**Undocumented**
+URL: https://dev.twitch.tv/docs/api/reference/#get-chatters
 
-- We use this in `widgets/splits/Split.cpp showViewerList`
-- We use this in `providers/twitch/TwitchChannel.cpp refreshChatters`
+Used for the chatter list for moderators/broadcasters.
+
+### Send Shoutout
+
+URL: https://dev.twitch.tv/docs/api/reference/#send-a-shoutout
+
+Used in:
+
+- `controllers/commands/CommandController.cpp` to send Twitch native shoutout using "/shoutout <username>"
+
+## PubSub
+
+### Whispers
+
+We listen to the `whispers.<user_id>` PubSub topic to receive information about incoming whispers to the user
+
+No EventSub alternative available.
+
+### Chat Moderator Actions
+
+We listen to the `chat_moderator_actions.<user_id>.<channel_id>` PubSub topic to receive information about incoming moderator events in a channel.
+
+We listen to this topic in every channel the user is a moderator.
+
+No complete EventSub alternative available yet. Some functionality can be pieced together but it would not be zero cost, causing the `max_total_cost` of 10 to cause issues.
+
+- For showing bans & timeouts: `channel.ban`, but does not work with moderator token???
+- For showing unbans & untimeouts: `channel.unban`, but does not work with moderator token???
+- Clear/delete message: not in eventsub, and IRC doesn't tell us which mod performed the action
+- Roomstate (slow(off), followers(off), r9k(off), emoteonly(off), subscribers(off)) => not in eventsub, and IRC doesn't tell us which mod performed the action
+- VIP added => not in eventsub, but not critical
+- VIP removed => not in eventsub, but not critical
+- Moderator added => channel.moderator.add eventsub, but doesn't work with moderator token
+- Moderator removed => channel.moderator.remove eventsub, but doesn't work with moderator token
+- Raid started => channel.raid eventsub, but cost=1 for moderator token
+- Unraid => not in eventsub
+- Add permitted term => not in eventsub
+- Delete permitted term => not in eventsub
+- Add blocked term => not in eventsub
+- Delete blocked term => not in eventsub
+- Modified automod properties => not in eventsub
+- Approve unban request => cannot read moderator message in eventsub
+- Deny unban request => not in eventsub
+
+### AutoMod Queue
+
+We listen to the `automod-queue.<moderator_id>.<channel_id>` PubSub topic to receive information about incoming automod events in a channel.
+
+We listen to this topic in every channel the user is a moderator.
+
+No EventSub alternative available yet.
+
+### Channel Point Rewards
+
+We listen to the `community-points-channel-v1.<channel_id>` PubSub topic to receive information about incoming channel points redemptions in a channel.
+
+The EventSub alternative requires broadcaster auth, which is not a feasible alternative.
+
+### Low Trust Users
+
+We want to listen to the `low-trust-users` PubSub topic to receive information about messages from users who are marked as low-trust.
+
+There is no EventSub alternative available yet.

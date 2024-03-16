@@ -7,12 +7,12 @@
 
 namespace chatterino {
 
-static bool isGuiThread()
+inline bool isGuiThread()
 {
     return QCoreApplication::instance()->thread() == QThread::currentThread();
 }
 
-static void assertInGuiThread()
+inline void assertInGuiThread()
 {
 #ifdef _DEBUG
     assert(isGuiThread());

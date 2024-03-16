@@ -1,5 +1,6 @@
 #include "Irc2.hpp"
 
+#include "Application.hpp"
 #include "common/Credentials.hpp"
 #include "common/SignalVectorModel.hpp"
 #include "providers/irc/IrcChannel2.hpp"
@@ -18,9 +19,10 @@
 namespace chatterino {
 
 namespace {
+
     QString configPath()
     {
-        return combinePath(getPaths()->settingsDirectory, "irc.json");
+        return combinePath(getIApp()->getPaths().settingsDirectory, "irc.json");
     }
 
     class Model : public SignalVectorModel<IrcServerData>
@@ -33,7 +35,7 @@ namespace {
 
         // turn a vector item into a model row
         IrcServerData getItemFromRow(std::vector<QStandardItem *> &row,
-                                     const IrcServerData &original)
+                                     const IrcServerData &original) override
         {
             return IrcServerData{
                 row[0]->data(Qt::EditRole).toString(),      // host
@@ -50,7 +52,7 @@ namespace {
 
         // turns a row in the model into a vector item
         void getRowFromItem(const IrcServerData &item,
-                            std::vector<QStandardItem *> &row)
+                            std::vector<QStandardItem *> &row) override
         {
             setStringItem(row[0], item.host, false);
             setStringItem(row[1], QString::number(item.port));
@@ -60,6 +62,7 @@ namespace {
             setStringItem(row[5], item.real);
         }
     };
+
 }  // namespace
 
 inline QString escape(QString str)
@@ -88,7 +91,9 @@ void IrcServerData::setPassword(const QString &password)
 
 Irc::Irc()
 {
-    this->connections.itemInserted.connect([this](auto &&args) {
+    // We can safely ignore this signal connection since `connections` will always
+    // be destroyed before the Irc object
+    std::ignore = this->connections.itemInserted.connect([this](auto &&args) {
         // make sure only one id can only exist for one server
         assert(this->servers_.find(args.item.id) == this->servers_.end());
 
@@ -100,10 +105,16 @@ Irc::Irc()
 
             // set server of abandoned channels
             for (auto weak : ab->second)
+            {
                 if (auto shared = weak.lock())
-                    if (auto ircChannel =
+                {
+                    if (auto *ircChannel =
                             dynamic_cast<IrcChannel *>(shared.get()))
+                    {
                         ircChannel->setServer(server.get());
+                    }
+                }
+            }
 
             // add new server with abandoned channels
             this->servers_.emplace(args.item.id, std::move(server));
@@ -117,7 +128,9 @@ Irc::Irc()
         }
     });
 
-    this->connections.itemRemoved.connect([this](auto &&args) {
+    // We can safely ignore this signal connection since `connections` will always
+    // be destroyed before the Irc object
+    std::ignore = this->connections.itemRemoved.connect([this](auto &&args) {
         // restore
         if (auto server = this->servers_.find(args.item.id);
             server != this->servers_.end())
@@ -126,10 +139,16 @@ Irc::Irc()
 
             // set server of abandoned servers to nullptr
             for (auto weak : abandoned)
+            {
                 if (auto shared = weak.lock())
-                    if (auto ircChannel =
+                {
+                    if (auto *ircChannel =
                             dynamic_cast<IrcChannel *>(shared.get()))
+                    {
                         ircChannel->setServer(nullptr);
+                    }
+                }
+            }
 
             this->abandonedChannels_[args.item.id] = abandoned;
             this->servers_.erase(server);
@@ -141,14 +160,16 @@ Irc::Irc()
         }
     });
 
-    this->connections.delayedItemsChanged.connect([this] {
+    // We can safely ignore this signal connection since `connections` will always
+    // be destroyed before the Irc object
+    std::ignore = this->connections.delayedItemsChanged.connect([this] {
         this->save();
     });
 }
 
 QAbstractTableModel *Irc::newConnectionModel(QObject *parent)
 {
-    auto model = new Model(parent);
+    auto *model = new Model(parent);
     model->initialize(&this->connections);
     return model;
 }
@@ -226,7 +247,9 @@ void Irc::save()
 void Irc::load()
 {
     if (this->loaded_)
+    {
         return;
+    }
     this->loaded_ = true;
 
     QString config = configPath();

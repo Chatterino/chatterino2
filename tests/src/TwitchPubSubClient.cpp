@@ -3,11 +3,14 @@
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/pubsubmessages/AutoMod.hpp"
 #include "providers/twitch/pubsubmessages/Whisper.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
+#include "TestHelpers.hpp"
 
 #include <gtest/gtest.h>
 #include <QString>
 
 #include <chrono>
+#include <optional>
 
 using namespace chatterino;
 using namespace std::chrono_literals;
@@ -30,415 +33,388 @@ using namespace std::chrono_literals;
 
 #ifdef RUN_PUBSUB_TESTS
 
+class FTest : public PubSub
+{
+public:
+    explicit FTest(const char *path, std::chrono::seconds pingInterval,
+                   QString token = "token")
+        : PubSub(QString("wss://127.0.0.1:9050%1").arg(path), pingInterval)
+    {
+        auto account = std::make_shared<TwitchAccount>("testaccount_420", token,
+                                                       "clientid", "123456");
+        this->setAccount(account);
+    }
+};
+
 TEST(TwitchPubSubClient, ServerRespondsToPings)
 {
-    auto pingInterval = std::chrono::seconds(1);
-    const QString host("wss://127.0.0.1:9050");
+    FTest pubSub("", 1s);
 
-    auto *pubSub = new PubSub(host, pingInterval);
-    pubSub->setAccountData("token", "123456");
-    pubSub->start();
+    pubSub.start();
 
     std::this_thread::sleep_for(50ms);
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 0);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 0);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 0);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 0);
 
-    pubSub->listenToTopic("test");
+    pubSub.listenToChannelModerationActions("123456");
 
-    std::this_thread::sleep_for(50ms);
+    std::this_thread::sleep_for(150ms);
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 2);
-    ASSERT_EQ(pubSub->diag.listenResponses, 1);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 2);
+    ASSERT_EQ(pubSub.diag.listenResponses, 1);
 
     std::this_thread::sleep_for(2s);
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 4);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 4);
 
-    pubSub->stop();
+    pubSub.stop();
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 1);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 4);
-    ASSERT_EQ(pubSub->diag.listenResponses, 1);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 1);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 4);
+    ASSERT_EQ(pubSub.diag.listenResponses, 1);
 }
 
 TEST(TwitchPubSubClient, ServerDoesntRespondToPings)
 {
-    auto pingInterval = std::chrono::seconds(1);
-    const QString host("wss://127.0.0.1:9050/dont-respond-to-ping");
+    FTest pubSub("/dont-respond-to-ping", 1s);
 
-    auto *pubSub = new PubSub(host, pingInterval);
-    pubSub->setAccountData("token", "123456");
-    pubSub->start();
-    pubSub->listenToTopic("test");
+    pubSub.start();
+    pubSub.listenToChannelModerationActions("123456");
 
     std::this_thread::sleep_for(750ms);
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 1);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 1);
 
     std::this_thread::sleep_for(500ms);
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 2);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 1);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 2);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 2);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 1);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 2);
 
-    pubSub->stop();
+    pubSub.stop();
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 2);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 2);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 2);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 2);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 2);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 2);
 }
 
 TEST(TwitchPubSubClient, DisconnectedAfter1s)
 {
-    auto pingInterval = std::chrono::seconds(10);
-    const QString host("wss://127.0.0.1:9050/disconnect-client-after-1s");
+    FTest pubSub("/disconnect-client-after-1s", 10s);
 
-    auto *pubSub = new PubSub(host, pingInterval);
-    pubSub->setAccountData("token", "123456");
-    pubSub->start();
+    pubSub.start();
 
     std::this_thread::sleep_for(50ms);
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 0);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 0);
-    ASSERT_EQ(pubSub->diag.listenResponses, 0);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 0);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 0);
+    ASSERT_EQ(pubSub.diag.listenResponses, 0);
 
-    pubSub->listenToTopic("test");
+    pubSub.listenToChannelModerationActions("123456");
 
     std::this_thread::sleep_for(500ms);
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 2);  // Listen RESPONSE & Pong
-    ASSERT_EQ(pubSub->diag.listenResponses, 1);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 2);  // Listen RESPONSE & Pong
+    ASSERT_EQ(pubSub.diag.listenResponses, 1);
 
     std::this_thread::sleep_for(350ms);
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 2);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 2);
 
     std::this_thread::sleep_for(600ms);
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 2);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 1);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub->diag.listenResponses, 2);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 4);  // new listen & new pong
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 2);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 1);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.listenResponses, 2);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 4);  // new listen & new pong
 
-    pubSub->stop();
+    pubSub.stop();
 }
 
 TEST(TwitchPubSubClient, ExceedTopicLimit)
 {
-    auto pingInterval = std::chrono::seconds(1);
-    const QString host("wss://127.0.0.1:9050");
+    FTest pubSub("", 1s);
 
-    auto *pubSub = new PubSub(host, pingInterval);
-    pubSub->setAccountData("token", "123456");
-    pubSub->start();
+    pubSub.start();
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 0);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 0);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 0);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 0);
 
     for (auto i = 0; i < PubSubClient::MAX_LISTENS; ++i)
     {
-        pubSub->listenToTopic(QString("test-1.%1").arg(i));
+        pubSub.listenToChannelModerationActions(QString("1%1").arg(i));
     }
 
     std::this_thread::sleep_for(50ms);
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
 
     for (auto i = 0; i < PubSubClient::MAX_LISTENS; ++i)
     {
-        pubSub->listenToTopic(QString("test-2.%1").arg(i));
+        pubSub.listenToChannelModerationActions(QString("2%1").arg(i));
     }
 
     std::this_thread::sleep_for(50ms);
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 2);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 2);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
 
-    pubSub->stop();
+    pubSub.stop();
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 2);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 2);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 2);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 2);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
 }
 
 TEST(TwitchPubSubClient, ExceedTopicLimitSingleStep)
 {
-    auto pingInterval = std::chrono::seconds(1);
-    const QString host("wss://127.0.0.1:9050");
+    FTest pubSub("", 1s);
 
-    auto *pubSub = new PubSub(host, pingInterval);
-    pubSub->setAccountData("token", "123456");
-    pubSub->start();
+    pubSub.start();
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 0);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 0);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 0);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 0);
 
     for (auto i = 0; i < PubSubClient::MAX_LISTENS * 2; ++i)
     {
-        pubSub->listenToTopic("test");
+        pubSub.listenToChannelModerationActions("123456");
     }
 
-    std::this_thread::sleep_for(50ms);
+    std::this_thread::sleep_for(150ms);
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 2);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 2);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
 
-    pubSub->stop();
+    pubSub.stop();
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 2);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 2);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 2);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 2);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
 }
 
 TEST(TwitchPubSubClient, ReceivedWhisper)
 {
-    auto pingInterval = std::chrono::seconds(1);
-    const QString host("wss://127.0.0.1:9050/receive-whisper");
+    FTest pubSub("/receive-whisper", 1s);
 
-    auto *pubSub = new PubSub(host, pingInterval);
-    pubSub->setAccountData("token", "123456");
-    pubSub->start();
+    pubSub.start();
 
-    boost::optional<PubSubWhisperMessage> oReceivedWhisper;
+    ReceivedMessage<PubSubWhisperMessage> aReceivedWhisper;
 
-    pubSub->signals_.whisper.received.connect(
-        [&oReceivedWhisper](const auto &whisperMessage) {
-            oReceivedWhisper = whisperMessage;
+    std::ignore = pubSub.whisper.received.connect(
+        [&aReceivedWhisper](const auto &whisperMessage) {
+            aReceivedWhisper = whisperMessage;
         });
 
-    pubSub->listenToTopic("whispers.123456");
+    pubSub.listenToWhispers();
 
-    std::this_thread::sleep_for(50ms);
+    std::this_thread::sleep_for(150ms);
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 3);
-    ASSERT_EQ(pubSub->diag.listenResponses, 1);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 3);
+    ASSERT_EQ(pubSub.diag.listenResponses, 1);
 
-    ASSERT_TRUE(oReceivedWhisper);
+    ASSERT_TRUE(aReceivedWhisper);
 
-    auto receivedWhisper = *oReceivedWhisper;
+    ASSERT_EQ(aReceivedWhisper->body, QString("me Kappa"));
+    ASSERT_EQ(aReceivedWhisper->fromUserLogin, QString("pajbot"));
+    ASSERT_EQ(aReceivedWhisper->fromUserID, QString("82008718"));
 
-    ASSERT_EQ(receivedWhisper.body, QString("me Kappa"));
-    ASSERT_EQ(receivedWhisper.fromUserLogin, QString("pajbot"));
-    ASSERT_EQ(receivedWhisper.fromUserID, QString("82008718"));
+    pubSub.stop();
 
-    pubSub->stop();
-
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 1);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 1);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
 }
 
 TEST(TwitchPubSubClient, ModeratorActionsUserBanned)
 {
-    auto pingInterval = std::chrono::seconds(1);
-    const QString host("wss://127.0.0.1:9050/moderator-actions-user-banned");
+    FTest pubSub("/moderator-actions-user-banned", 1s);
 
-    auto *pubSub = new PubSub(host, pingInterval);
-    pubSub->setAccountData("token", "123456");
-    pubSub->start();
+    pubSub.start();
 
-    boost::optional<BanAction> oReceivedAction;
+    ReceivedMessage<BanAction> received;
 
-    pubSub->signals_.moderation.userBanned.connect(
-        [&oReceivedAction](const auto &action) {
-            oReceivedAction = action;
+    std::ignore =
+        pubSub.moderation.userBanned.connect([&received](const auto &action) {
+            received = action;
         });
 
-    ASSERT_EQ(pubSub->diag.listenResponses, 0);
+    ASSERT_EQ(pubSub.diag.listenResponses, 0);
 
-    pubSub->listenToTopic("chat_moderator_actions.123456.123456");
+    pubSub.listenToChannelModerationActions("123456");
 
     std::this_thread::sleep_for(50ms);
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 3);
-    ASSERT_EQ(pubSub->diag.listenResponses, 1);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 3);
+    ASSERT_EQ(pubSub.diag.listenResponses, 1);
 
-    ASSERT_TRUE(oReceivedAction);
-
-    auto receivedAction = *oReceivedAction;
+    ASSERT_TRUE(received);
 
     ActionUser expectedTarget{"140114344", "1xelerate", "", QColor()};
     ActionUser expectedSource{"117691339", "mm2pl", "", QColor()};
 
-    ASSERT_EQ(receivedAction.reason, QString());
-    ASSERT_EQ(receivedAction.duration, 0);
-    ASSERT_EQ(receivedAction.target, expectedTarget);
-    ASSERT_EQ(receivedAction.source, expectedSource);
+    ASSERT_EQ(received->reason, QString());
+    ASSERT_EQ(received->duration, 0);
+    ASSERT_EQ(received->target, expectedTarget);
+    ASSERT_EQ(received->source, expectedSource);
 
-    pubSub->stop();
+    pubSub.stop();
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 1);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 1);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
 }
 
 TEST(TwitchPubSubClient, MissingToken)
 {
-    auto pingInterval = std::chrono::seconds(1);
     // The token that's required is "xD"
-    const QString host("wss://127.0.0.1:9050/authentication-required");
+    FTest pubSub("/authentication-required", 1s, "");
 
-    auto *pubSub = new PubSub(host, pingInterval);
-    // pubSub->setAccountData("", "123456");
-    pubSub->start();
+    pubSub.start();
 
-    pubSub->listenToTopic("chat_moderator_actions.123456.123456");
+    pubSub.listenToChannelModerationActions("123456");
 
-    std::this_thread::sleep_for(50ms);
+    std::this_thread::sleep_for(150ms);
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 2);
-    ASSERT_EQ(pubSub->diag.listenResponses, 0);
-    ASSERT_EQ(pubSub->diag.failedListenResponses, 1);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 2);
+    ASSERT_EQ(pubSub.diag.listenResponses, 0);
+    ASSERT_EQ(pubSub.diag.failedListenResponses, 1);
 
-    pubSub->stop();
+    pubSub.stop();
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 1);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 1);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
 }
 
 TEST(TwitchPubSubClient, WrongToken)
 {
-    auto pingInterval = std::chrono::seconds(1);
     // The token that's required is "xD"
-    const QString host("wss://127.0.0.1:9050/authentication-required");
+    FTest pubSub("/authentication-required", 1s);
 
-    auto *pubSub = new PubSub(host, pingInterval);
-    pubSub->setAccountData("wrongtoken", "123456");
-    pubSub->start();
+    pubSub.start();
 
-    pubSub->listenToTopic("chat_moderator_actions.123456.123456");
+    pubSub.listenToChannelModerationActions("123456");
 
     std::this_thread::sleep_for(50ms);
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 2);
-    ASSERT_EQ(pubSub->diag.listenResponses, 0);
-    ASSERT_EQ(pubSub->diag.failedListenResponses, 1);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 2);
+    ASSERT_EQ(pubSub.diag.listenResponses, 0);
+    ASSERT_EQ(pubSub.diag.failedListenResponses, 1);
 
-    pubSub->stop();
+    pubSub.stop();
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 1);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 1);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
 }
 
 TEST(TwitchPubSubClient, CorrectToken)
 {
-    auto pingInterval = std::chrono::seconds(1);
     // The token that's required is "xD"
-    const QString host("wss://127.0.0.1:9050/authentication-required");
+    FTest pubSub("/authentication-required", 1s, "xD");
 
-    auto *pubSub = new PubSub(host, pingInterval);
-    pubSub->setAccountData("xD", "123456");
-    pubSub->start();
+    pubSub.start();
 
-    pubSub->listenToTopic("chat_moderator_actions.123456.123456");
+    pubSub.listenToChannelModerationActions("123456");
 
     std::this_thread::sleep_for(50ms);
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 2);
-    ASSERT_EQ(pubSub->diag.listenResponses, 1);
-    ASSERT_EQ(pubSub->diag.failedListenResponses, 0);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 2);
+    ASSERT_EQ(pubSub.diag.listenResponses, 1);
+    ASSERT_EQ(pubSub.diag.failedListenResponses, 0);
 
-    pubSub->stop();
+    pubSub.stop();
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 1);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 1);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
 }
 
 TEST(TwitchPubSubClient, AutoModMessageHeld)
 {
-    auto pingInterval = std::chrono::seconds(1);
-    const QString host("wss://127.0.0.1:9050/automod-held");
+    FTest pubSub("/automod-held", 1s);
 
-    auto *pubSub = new PubSub(host, pingInterval);
-    pubSub->setAccountData("xD", "123456");
-    pubSub->start();
+    pubSub.start();
 
-    boost::optional<PubSubAutoModQueueMessage> oReceived;
-    boost::optional<QString> oChannelID;
+    ReceivedMessage<PubSubAutoModQueueMessage> received;
+    ReceivedMessage<QString> channelID;
 
-    pubSub->signals_.moderation.autoModMessageCaught.connect(
-        [&](const auto &msg, const QString &channelID) {
-            oReceived = msg;
-            oChannelID = channelID;
+    std::ignore = pubSub.moderation.autoModMessageCaught.connect(
+        [&](const auto &msg, const QString &incomingChannelID) {
+            received = msg;
+            channelID = incomingChannelID;
         });
 
-    pubSub->listenToTopic("automod-queue.117166826.117166826");
+    pubSub.listenToAutomod("117166826");
 
     std::this_thread::sleep_for(50ms);
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub->diag.messagesReceived, 3);
-    ASSERT_EQ(pubSub->diag.listenResponses, 1);
-    ASSERT_EQ(pubSub->diag.failedListenResponses, 0);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.messagesReceived, 3);
+    ASSERT_EQ(pubSub.diag.listenResponses, 1);
+    ASSERT_EQ(pubSub.diag.failedListenResponses, 0);
 
-    ASSERT_TRUE(oReceived);
-    ASSERT_TRUE(oChannelID);
-
-    auto received = *oReceived;
-    auto channelID = *oChannelID;
+    ASSERT_TRUE(received);
+    ASSERT_TRUE(channelID);
 
     ASSERT_EQ(channelID, "117166826");
-    ASSERT_EQ(received.messageText, "kurwa");
+    ASSERT_EQ(received->messageText, "kurwa");
 
-    pubSub->stop();
+    pubSub.stop();
 
-    ASSERT_EQ(pubSub->diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub->diag.connectionsClosed, 1);
-    ASSERT_EQ(pubSub->diag.connectionsFailed, 0);
+    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
+    ASSERT_EQ(pubSub.diag.connectionsClosed, 1);
+    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
 }
 
 #endif

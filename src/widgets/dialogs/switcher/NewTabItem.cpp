@@ -12,16 +12,17 @@
 
 namespace chatterino {
 
-NewTabItem::NewTabItem(const QString &channelName)
+NewTabItem::NewTabItem(Window *window_, const QString &channelName)
     : AbstractSwitcherItem(QIcon(":/switcher/plus.svg"))
     , channelName_(channelName)
     , text_(QString(TEXT_FORMAT).arg(channelName))
+    , window(window_)
 {
 }
 
 void NewTabItem::action()
 {
-    auto &nb = getApp()->windows->getMainWindow().getNotebook();
+    auto &nb = this->window->getNotebook();
     SplitContainer *container = nb.addPage(true);
 
     Split *split = new Split(container);
@@ -36,9 +37,10 @@ void NewTabItem::paint(QPainter *painter, const QRect &rect) const
     painter->setRenderHint(QPainter::Antialiasing, true);
 
     // TODO(leon): Right pen/brush/font settings?
-    painter->setPen(getApp()->themes->splits.header.text);
+    painter->setPen(getIApp()->getThemes()->splits.header.text);
     painter->setBrush(Qt::SolidPattern);
-    painter->setFont(getApp()->fonts->getFont(FontStyle::UiMediumBold, 1.0));
+    painter->setFont(
+        getIApp()->getFonts()->getFont(FontStyle::UiMediumBold, 1.0));
 
     QRect iconRect(rect.topLeft(), ICON_SIZE);
     this->icon_.paint(painter, iconRect, Qt::AlignLeft | Qt::AlignVCenter);

@@ -12,18 +12,23 @@
 
 namespace chatterino {
 
-void Logging::initialize(Settings &settings, Paths & /*paths*/)
+Logging::Logging(Settings &settings)
 {
-    settings.loggedChannels.delayedItemsChanged.connect([this, &settings]() {
-        this->threadGuard.guard();
+    // We can safely ignore this signal connection since settings are only-ever destroyed
+    // on application exit
+    // NOTE: SETTINGS_LIFETIME
+    std::ignore = settings.loggedChannels.delayedItemsChanged.connect(
+        [this, &settings]() {
+            this->threadGuard.guard();
 
-        this->onlyLogListedChannels.clear();
+            this->onlyLogListedChannels.clear();
 
-        for (const auto &loggedChannel : *settings.loggedChannels.readOnly())
-        {
-            this->onlyLogListedChannels.insert(loggedChannel.channelName());
-        }
-    });
+            for (const auto &loggedChannel :
+                 *settings.loggedChannels.readOnly())
+            {
+                this->onlyLogListedChannels.insert(loggedChannel.channelName());
+            }
+        });
 }
 
 void Logging::addMessage(const QString &channelName, MessagePtr message,
@@ -47,7 +52,7 @@ void Logging::addMessage(const QString &channelName, MessagePtr message,
     auto platIt = this->loggingChannels_.find(platformName);
     if (platIt == this->loggingChannels_.end())
     {
-        auto channel = new LoggingChannel(channelName, platformName);
+        auto *channel = new LoggingChannel(channelName, platformName);
         channel->addMessage(message);
         auto map = std::map<QString, std::unique_ptr<LoggingChannel>>();
         this->loggingChannels_[platformName] = std::move(map);
@@ -58,7 +63,7 @@ void Logging::addMessage(const QString &channelName, MessagePtr message,
     auto chanIt = platIt->second.find(channelName);
     if (chanIt == platIt->second.end())
     {
-        auto channel = new LoggingChannel(channelName, platformName);
+        auto *channel = new LoggingChannel(channelName, platformName);
         channel->addMessage(message);
         platIt->second.emplace(channelName, std::move(channel));
     }

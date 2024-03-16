@@ -1,0 +1,58 @@
+name: Create installer
+
+on:
+  workflow_run:
+    workflows: ["Build"]
+    types: [completed]
+    # make sure this only runs on the default branch
+    branches:
+      - master
+      - "bugfix-release/*"
+      - "release/*"
+  workflow_dispatch:
+
+jobs:
+  create-installer:
+    runs-on: windows-latest
+    # Only run manually or when a build succeeds
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    strategy:
+      matrix:
+        qt-version: ["6.5.0"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # allows for tags access
+
+      - name: Download artifact
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: build.yml
+          name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
+          commit: ${{ github.sha }}
+          path: build/
+
+      - name: Unzip
+        run: 7z e -spf chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
+        working-directory: build
+
+      - name: Install InnoSetup
+        run: choco install innosetup
+
+      - name: Add InnoSetup to path
+        run: echo "C:\Program Files (x86)\Inno Setup 6\" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Enable Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1.13.0
+
+      - name: Build installer
+        id: build-installer
+        working-directory: build
+        run: ..\.CI\build-installer.ps1
+        shell: powershell
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          path: build/${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}.exe
+          name: ${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}.exe

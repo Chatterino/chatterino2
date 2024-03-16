@@ -102,4 +102,34 @@ QDebug &operator<<(QDebug &dbg, const ObjectIDCondition &condition)
     return dbg;
 }
 
+ChannelCondition::ChannelCondition(QString twitchID)
+    : twitchID(std::move(twitchID))
+{
+}
+
+QJsonObject ChannelCondition::encode() const
+{
+    QJsonObject obj;
+    obj["ctx"] = "channel";
+    obj["platform"] = "TWITCH";
+    obj["id"] = this->twitchID;
+    return obj;
+}
+
+QDebug &operator<<(QDebug &dbg, const ChannelCondition &condition)
+{
+    dbg << "{ twitchID:" << condition.twitchID << '}';
+    return dbg;
+}
+
+bool ChannelCondition::operator==(const ChannelCondition &rhs) const
+{
+    return this->twitchID == rhs.twitchID;
+}
+
+bool ChannelCondition::operator!=(const ChannelCondition &rhs) const
+{
+    return !(*this == rhs);
+}
+
 }  // namespace chatterino::seventv::eventapi

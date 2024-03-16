@@ -42,6 +42,12 @@ public:
         reinterpret_cast<Q &>(this->value_) |= static_cast<Q>(flag);
     }
 
+    /** Adds the flags from `flags` in this enum. */
+    void set(FlagsEnum flags)
+    {
+        reinterpret_cast<Q &>(this->value_) |= static_cast<Q>(flags.value_);
+    }
+
     void unset(T flag)
     {
         reinterpret_cast<Q &>(this->value_) &= ~static_cast<Q>(flag);
@@ -50,9 +56,13 @@ public:
     void set(T flag, bool value)
     {
         if (value)
+        {
             this->set(flag);
+        }
         else
+        {
             this->unset(flag);
+        }
     }
 
     bool has(T flag) const
@@ -69,6 +79,12 @@ public:
         return xd;
     }
 
+    FlagsEnum operator|(FlagsEnum rhs)
+    {
+        return static_cast<T>(static_cast<Q>(this->value_) |
+                              static_cast<Q>(rhs.value_));
+    }
+
     bool hasAny(FlagsEnum flags) const
     {
         return static_cast<Q>(this->value_) & static_cast<Q>(flags.value_);
@@ -83,6 +99,11 @@ public:
     bool hasNone(std::initializer_list<T> flags) const
     {
         return !this->hasAny(flags);
+    }
+
+    T value() const
+    {
+        return this->value_;
     }
 
 private:

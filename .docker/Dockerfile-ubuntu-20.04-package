@@ -1,13 +1,21 @@
 FROM chatterino-ubuntu-20.04-build
 
-ADD .CI /src/.CI
+# In CI, this is set from the aqtinstall action
+ENV Qt5_DIR=/opt/qt512
 
 WORKDIR /src/build
 
-# RUN apt-get install -y wget
+ADD .CI /src/.CI
 
-# create appimage
-# RUN pwd && ./../.CI/CreateAppImage.sh
+# Install dependencies necessary for AppImage packaging
+RUN apt-get update && apt-get -y install --no-install-recommends \
+        curl \
+        libfontconfig \
+        libxrender1 \
+        file
 
 # package deb
-RUN pwd && ./../.CI/CreateUbuntuDeb.sh
+RUN ./../.CI/CreateUbuntuDeb.sh
+
+# package appimage
+RUN ./../.CI/CreateAppImage.sh

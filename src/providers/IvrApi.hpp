@@ -1,9 +1,8 @@
 #pragma once
 
-#include "common/NetworkRequest.hpp"
+#include "common/network/NetworkRequest.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 
-#include <boost/noncopyable.hpp>
 #include <QJsonArray>
 #include <QJsonObject>
 
@@ -74,7 +73,7 @@ struct IvrEmote {
     }
 };
 
-class IvrApi final : boost::noncopyable
+class IvrApi final
 {
 public:
     // https://api.ivr.fi/v2/docs/static/index.html#/Twitch/get_twitch_subage__user___channel_
@@ -88,6 +87,14 @@ public:
                           IvrFailureCallback failureCallback);
 
     static void initialize();
+
+    IvrApi() = default;
+
+    IvrApi(const IvrApi &) = delete;
+    IvrApi &operator=(const IvrApi &) = delete;
+
+    IvrApi(IvrApi &&) = delete;
+    IvrApi &operator=(IvrApi &&) = delete;
 
 private:
     NetworkRequest makeRequest(QString url, QUrlQuery urlQuery);

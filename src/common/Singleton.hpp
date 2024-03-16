@@ -1,18 +1,23 @@
 #pragma once
 
-#include <boost/noncopyable.hpp>
-
 namespace chatterino {
 
 class Settings;
 class Paths;
 
-class Singleton : boost::noncopyable
+class Singleton
 {
 public:
+    Singleton() = default;
     virtual ~Singleton() = default;
 
-    virtual void initialize(Settings &settings, Paths &paths)
+    Singleton(const Singleton &) = delete;
+    Singleton &operator=(const Singleton &) = delete;
+
+    Singleton(Singleton &&) = delete;
+    Singleton &operator=(Singleton &&) = delete;
+
+    virtual void initialize(Settings &settings, const Paths &paths)
     {
         (void)(settings);
         (void)(paths);

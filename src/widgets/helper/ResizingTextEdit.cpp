@@ -1,11 +1,13 @@
 #include "widgets/helper/ResizingTextEdit.hpp"
 
 #include "common/Common.hpp"
-#include "common/CompletionModel.hpp"
+#include "common/QLogging.hpp"
+#include "controllers/completion/TabCompletionModel.hpp"
 #include "singletons/Settings.hpp"
 
 #include <QMimeData>
 #include <QMimeDatabase>
+#include <QObject>
 
 namespace chatterino {
 
@@ -19,6 +21,19 @@ ResizingTextEdit::ResizingTextEdit()
 
     QObject::connect(this, &QTextEdit::textChanged, this,
                      &QWidget::updateGeometry);
+
+    QObject::connect(this, &QTextEdit::cursorPositionChanged, [this]() {
+        // If tab was pressed and we're completing/replacing the current word,
+        // this code will not even be called, see ResizingTextEdit::keyPressEvent
+
+        if (!this->completionInProgress_)
+        {
+            return;
+        }
+        qCDebug(chatterinoCommon)
+            << "Finishing completion because cursor moved";
+        this->completionInProgress_ = false;
+    });
 
     // Whenever the setting for emote completion changes, force a
     // refresh on the completion model the next time "Tab" is pressed
@@ -62,7 +77,11 @@ QString ResizingTextEdit::textUnderCursor(bool *hadSpace) const
 
     auto textUpToCursor = currentText.left(tc.selectionStart());
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+    auto words = QStringView{textUpToCursor}.split(' ');
+#else
     auto words = textUpToCursor.splitRef(' ');
+#endif
     if (words.size() == 0)
     {
         return QString();
@@ -105,7 +124,7 @@ bool ResizingTextEdit::eventFilter(QObject *obj, QEvent *event)
     {
         return false;
     }
-    auto ev = static_cast<QKeyEvent *>(event);
+    auto *ev = static_cast<QKeyEvent *>(event);
     ev->ignore();
     if ((ev->key() == Qt::Key_C || ev->key() == Qt::Key_Insert) &&
         ev->modifiers() == Qt::ControlModifier)
@@ -133,27 +152,33 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             return;
         }
 
-        QString currentCompletionPrefix = this->textUnderCursor();
+        QString currentCompletion = this->textUnderCursor();
 
         // check if there is something to complete
-        if (currentCompletionPrefix.size() <= 1)
+        if (currentCompletion.size() <= 1)
         {
             return;
         }
 
+        // always expected to be TabCompletionModel
         auto *completionModel =
-            static_cast<CompletionModel *>(this->completer_->model());
+            dynamic_cast<TabCompletionModel *>(this->completer_->model());
+        assert(completionModel != nullptr);
 
         if (!this->completionInProgress_)
         {
             // First type pressing tab after modifying a message, we refresh our
             // completion model
             this->completer_->setModel(completionModel);
-            completionModel->refresh(currentCompletionPrefix,
-                                     this->isFirstWord());
+            completionModel->updateResults(
+                currentCompletion, this->toPlainText(),
+                this->textCursor().position(), this->isFirstWord());
             this->completionInProgress_ = true;
-            this->completer_->setCompletionPrefix(currentCompletionPrefix);
-            this->completer_->complete();
+            {
+                // this blocks cursor movement events from resetting tab completion
+                QSignalBlocker dontTriggerCursorMovement(this);
+                this->completer_->complete();
+            }
             return;
         }
 
@@ -178,7 +203,11 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             }
         }
 
-        this->completer_->complete();
+        {
+            // this blocks cursor movement events from updating tab completion
+            QSignalBlocker dontTriggerCursorMovement(this);
+            this->completer_->complete();
+        }
         return;
     }
 
@@ -230,15 +259,6 @@ void ResizingTextEdit::setCompleter(QCompleter *c)
     this->completer_->setWidget(this);
     this->completer_->setCompletionMode(QCompleter::InlineCompletion);
     this->completer_->setCaseSensitivity(Qt::CaseInsensitive);
-
-    if (getSettings()->prefixOnlyEmoteCompletion)
-    {
-        this->completer_->setFilterMode(Qt::MatchStartsWith);
-    }
-    else
-    {
-        this->completer_->setFilterMode(Qt::MatchContains);
-    }
 
     QObject::connect(completer_,
                      static_cast<void (QCompleter::*)(const QString &)>(
@@ -317,11 +337,6 @@ void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
     }
 
     insertPlainText(source->text());
-}
-
-QCompleter *ResizingTextEdit::getCompleter() const
-{
-    return this->completer_;
 }
 
 }  // namespace chatterino

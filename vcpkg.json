@@ -2,24 +2,47 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "chatterino",
   "version": "2.0.0",
-  "builtin-baseline": "43f56137beabcd470ac2650cdf3954761f65b70e",
+  "builtin-baseline": "c6d6efed3e9b4242765bfe1b5c5befffd85f7b92",
   "dependencies": [
-    "benchmark",
     "boost-asio",
     "boost-circular-buffer",
     "boost-foreach",
     "boost-interprocess",
-    "boost-random",
     "boost-signals2",
     "boost-variant",
-    "gtest",
-    "openssl",
-    "qt5-tools"
-  ],
-  "overrides": [
     {
-      "name": "openssl",
-      "version-string": "1.1.1n"
+      "name": "qt5compat",
+      "default-features": false,
+      "features": ["textcodec"]
+    },
+    {
+      "name": "qtbase",
+      "default-features": false,
+      "features": [
+        "concurrent",
+        "gui",
+        "jpeg",
+        "network",
+        "openssl",
+        "png",
+        "widgets"
+      ]
+    },
+    {
+      "name": "qtimageformats",
+      "default-features": false,
+      "features": ["webp"]
+    },
+    "qtsvg"
+  ],
+  "features": {
+    "benchmarks": {
+      "description": "Build benchamarks",
+      "dependencies": ["benchmark"]
+    },
+    "tests": {
+      "description": "Build tests",
+      "dependencies": ["gtest"]
     }
-  ]
+  }
 }

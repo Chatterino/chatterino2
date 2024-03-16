@@ -1,6 +1,6 @@
-#include "ChannelFilterEditorDialog.hpp"
+#include "widgets/dialogs/ChannelFilterEditorDialog.hpp"
 
-#include "controllers/filters/parser/FilterParser.hpp"
+#include "controllers/filters/lang/Tokenizer.hpp"
 
 #include <QLabel>
 #include <QPushButton>
@@ -21,16 +21,16 @@ namespace {
 ChannelFilterEditorDialog::ChannelFilterEditorDialog(QWidget *parent)
     : QDialog(parent)
 {
-    auto vbox = new QVBoxLayout(this);
-    auto filterVbox = new QVBoxLayout;
-    auto buttonBox = new QHBoxLayout;
-    auto okButton = new QPushButton("Ok");
-    auto cancelButton = new QPushButton("Cancel");
+    auto *vbox = new QVBoxLayout(this);
+    auto *filterVbox = new QVBoxLayout;
+    auto *buttonBox = new QHBoxLayout;
+    auto *okButton = new QPushButton("Ok");
+    auto *cancelButton = new QPushButton("Cancel");
 
     okButton->setDefault(true);
     cancelButton->setDefault(false);
 
-    auto helpLabel =
+    auto *helpLabel =
         new QLabel(QString("<a href='%1'><span "
                            "style='color:#99f'>variable help</span></a>")
                        .arg("https://wiki.chatterino.com/Filters/#variables"));
@@ -55,16 +55,16 @@ ChannelFilterEditorDialog::ChannelFilterEditorDialog(QWidget *parent)
         Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
     this->setWindowTitle("Channel Filter Creator");
 
-    auto titleInput = new QLineEdit;
+    auto *titleInput = new QLineEdit;
     titleInput->setPlaceholderText("Filter name");
     titleInput->setText("My filter");
 
     this->titleInput_ = titleInput;
     filterVbox->addWidget(titleInput);
 
-    auto left = new ChannelFilterEditorDialog::ValueSpecifier;
-    auto right = new ChannelFilterEditorDialog::ValueSpecifier;
-    auto exp =
+    auto *left = new ChannelFilterEditorDialog::ValueSpecifier;
+    auto *right = new ChannelFilterEditorDialog::ValueSpecifier;
+    auto *exp =
         new ChannelFilterEditorDialog::BinaryOperationSpecifier(left, right);
 
     this->expressionSpecifier_ = exp;
@@ -99,7 +99,8 @@ ChannelFilterEditorDialog::ValueSpecifier::ValueSpecifier()
 
     this->typeCombo_->insertItems(
         0, {"Constant Text", "Constant Number", "Variable"});
-    this->varCombo_->insertItems(0, filterparser::validIdentifiersMap.values());
+
+    this->varCombo_->insertItems(0, filters::validIdentifiersMap.values());
 
     this->layout_->addWidget(this->typeCombo_);
     this->layout_->addWidget(this->varCombo_, 1);
@@ -141,7 +142,7 @@ void ChannelFilterEditorDialog::ValueSpecifier::setValue(const QString &value)
     if (this->typeCombo_->currentIndex() == 2)
     {
         this->varCombo_->setCurrentText(
-            filterparser::validIdentifiersMap.value(value));
+            filters::validIdentifiersMap.value(value));
     }
     else
     {
@@ -164,7 +165,7 @@ QString ChannelFilterEditorDialog::ValueSpecifier::expressionText()
         case 1:  // number
             return this->valueInput_->text();
         case 2:  // variable
-            return filterparser::validIdentifiersMap.key(
+            return filters::validIdentifiersMap.key(
                 this->varCombo_->currentText());
         default:
             return "";
@@ -221,7 +222,7 @@ QString ChannelFilterEditorDialog::BinaryOperationSpecifier::expressionText()
         return this->left_->expressionText();
     }
 
-    return QString("(%1) %2 (%3)")
+    return QString("(%1 %2 %3)")
         .arg(this->left_->expressionText())
         .arg(opText)
         .arg(this->right_->expressionText());

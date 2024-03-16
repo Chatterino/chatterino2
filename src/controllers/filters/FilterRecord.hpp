@@ -1,6 +1,6 @@
 #pragma once
 
-#include "controllers/filters/parser/FilterParser.hpp"
+#include "controllers/filters/lang/Filter.hpp"
 #include "util/RapidjsonHelpers.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
@@ -16,9 +16,9 @@ namespace chatterino {
 class FilterRecord
 {
 public:
-    FilterRecord(const QString &name, const QString &filter);
+    FilterRecord(QString name, QString filter);
 
-    FilterRecord(const QString &name, const QString &filter, const QUuid &id);
+    FilterRecord(QString name, QString filter, const QUuid &id);
 
     const QString &getName() const;
 
@@ -28,16 +28,16 @@ public:
 
     bool valid() const;
 
-    bool filter(const filterparser::ContextMap &context) const;
+    bool filter(const filters::ContextMap &context) const;
 
     bool operator==(const FilterRecord &other) const;
 
 private:
-    QString name_;
-    QString filter_;
-    QUuid id_;
+    const QString name_;
+    const QString filterText_;
+    const QUuid id_;
 
-    std::unique_ptr<filterparser::FilterParser> parser_;
+    const std::unique_ptr<filters::Filter> filter_;
 };
 
 using FilterRecordPtr = std::shared_ptr<FilterRecord>;

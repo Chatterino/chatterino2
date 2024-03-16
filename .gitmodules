@@ -2,9 +2,6 @@
 	path = lib/libcommuni
 	url = https://github.com/Chatterino/libcommuni
 	branch = chatterino-cmake
-[submodule "lib/qBreakpad"]
-	path = lib/qBreakpad
-	url = https://github.com/jiakuan/qBreakpad.git
 [submodule "lib/WinToast"]
 	path = lib/WinToast
 	url = https://github.com/mohabouje/WinToast.git
@@ -38,3 +35,9 @@
 [submodule "lib/miniaudio"]
 	path = lib/miniaudio
 	url = https://github.com/mackron/miniaudio.git
+[submodule "lib/lua/src"]
+	path = lib/lua/src
+	url = https://github.com/lua/lua
+[submodule "tools/crash-handler"]
+	path = tools/crash-handler
+	url = https://github.com/Chatterino/crash-handler

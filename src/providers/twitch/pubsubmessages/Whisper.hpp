@@ -1,6 +1,6 @@
 #pragma once
 
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 #include <QColor>
 #include <QJsonObject>
 #include <QString>
@@ -28,7 +28,8 @@ struct PubSubWhisperMessage {
     QString fromUserDisplayName;
     QColor fromUserColor;
 
-    PubSubWhisperMessage(const QJsonObject &root);
+    PubSubWhisperMessage() = default;
+    explicit PubSubWhisperMessage(const QJsonObject &root);
 };
 
 }  // namespace chatterino

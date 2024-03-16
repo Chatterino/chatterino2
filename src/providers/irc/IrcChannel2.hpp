@@ -8,7 +8,7 @@ namespace chatterino {
 class Irc;
 class IrcServer;
 
-class IrcChannel : public Channel, public ChannelChatters
+class IrcChannel final : public Channel, public ChannelChatters
 {
 public:
     explicit IrcChannel(const QString &name, IrcServer *server);
@@ -19,8 +19,8 @@ public:
     IrcServer *server();
 
     // Channel methods
-    virtual bool canReconnect() const override;
-    virtual void reconnect() override;
+    bool canReconnect() const override;
+    void reconnect() override;
 
 private:
     void setServer(IrcServer *server);

@@ -5,7 +5,6 @@
 #include "util/ExponentialBackoff.hpp"
 #include "util/QStringHash.hpp"
 
-#include <boost/optional.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QJsonObject>
 #include <QString>
@@ -15,6 +14,7 @@
 #include <chrono>
 #include <map>
 #include <memory>
+#include <optional>
 #include <thread>
 #include <unordered_map>
 #include <vector>
@@ -34,12 +34,20 @@ struct PubSubAutoModQueueMessage;
 struct AutomodAction;
 struct AutomodUserAction;
 struct AutomodInfoAction;
+struct PubSubLowTrustUsersMessage;
 struct PubSubWhisperMessage;
 
 struct PubSubListenMessage;
 struct PubSubMessage;
 struct PubSubMessageMessage;
 
+/**
+ * This handles the Twitch PubSub connection
+ *
+ * Known issues:
+ *  - Upon closing a channel, we don't unsubscribe to its pubsub connections
+ *  - Stop is never called, meaning we never do a clean shutdown
+ */
 class PubSub
 {
     using WebsocketMessagePtr =
@@ -59,84 +67,116 @@ class PubSub
     };
 
     WebsocketClient websocketClient;
-    std::unique_ptr<std::thread> mainThread;
+    std::unique_ptr<std::thread> thread;
 
     // Account credentials
-    // Set from setAccount or setAccountData
+    // Set from setAccount
     QString token_;
     QString userID_;
 
 public:
-    // The max amount of connections we may open
-    static constexpr int maxConnections = 10;
-
     PubSub(const QString &host,
            std::chrono::seconds pingInterval = std::chrono::seconds(15));
+    ~PubSub();
+
+    PubSub(const PubSub &) = delete;
+    PubSub(PubSub &&) = delete;
+    PubSub &operator=(const PubSub &) = delete;
+    PubSub &operator=(PubSub &&) = delete;
 
     void setAccount(std::shared_ptr<TwitchAccount> account);
-
-    void setAccountData(QString token, QString userID);
-
-    ~PubSub() = delete;
-
-    enum class State {
-        Connected,
-        Disconnected,
-    };
 
     void start();
     void stop();
 
-    bool isConnected() const
-    {
-        return this->state == State::Connected;
-    }
+    struct {
+        Signal<ClearChatAction> chatCleared;
+        Signal<DeleteAction> messageDeleted;
+        Signal<ModeChangedAction> modeChanged;
+        Signal<ModerationStateAction> moderationStateChanged;
+
+        Signal<BanAction> userBanned;
+        Signal<UnbanAction> userUnbanned;
+
+        Signal<PubSubLowTrustUsersMessage> suspiciousMessageReceived;
+        Signal<PubSubLowTrustUsersMessage> suspiciousTreatmentUpdated;
+
+        // Message caught by automod
+        //                                channelID
+        pajlada::Signals::Signal<PubSubAutoModQueueMessage, QString>
+            autoModMessageCaught;
+
+        // Message blocked by moderator
+        Signal<AutomodAction> autoModMessageBlocked;
+
+        Signal<AutomodUserAction> automodUserMessage;
+        Signal<AutomodInfoAction> automodInfoMessage;
+    } moderation;
 
     struct {
-        struct {
-            Signal<ClearChatAction> chatCleared;
-            Signal<DeleteAction> messageDeleted;
-            Signal<ModeChangedAction> modeChanged;
-            Signal<ModerationStateAction> moderationStateChanged;
+        // Parsing should be done in PubSubManager as well,
+        // but for now we just send the raw data
+        Signal<const PubSubWhisperMessage &> received;
+        Signal<const PubSubWhisperMessage &> sent;
+    } whisper;
 
-            Signal<BanAction> userBanned;
-            Signal<UnbanAction> userUnbanned;
+    struct {
+        Signal<const QJsonObject &> redeemed;
+    } pointReward;
 
-            // Message caught by automod
-            //                                channelID
-            pajlada::Signals::Signal<PubSubAutoModQueueMessage, QString>
-                autoModMessageCaught;
-
-            // Message blocked by moderator
-            Signal<AutomodAction> autoModMessageBlocked;
-
-            Signal<AutomodUserAction> automodUserMessage;
-            Signal<AutomodInfoAction> automodInfoMessage;
-        } moderation;
-
-        struct {
-            // Parsing should be done in PubSubManager as well,
-            // but for now we just send the raw data
-            Signal<const PubSubWhisperMessage &> received;
-            Signal<const PubSubWhisperMessage &> sent;
-        } whisper;
-
-        struct {
-            Signal<const QJsonObject &> redeemed;
-        } pointReward;
-    } signals_;
-
-    void unlistenAllModerationActions();
-    void unlistenAutomod();
+    /**
+     * Listen to incoming whispers for the currently logged in user.
+     * This topic is relevant for everyone.
+     *
+     * PubSub topic: whispers.{currentUserID}
+     */
+    bool listenToWhispers();
     void unlistenWhispers();
 
-    bool listenToWhispers();
+    /**
+     * Listen to moderation actions in the given channel.
+     * This topic is relevant for everyone.
+     * For moderators, this topic includes blocked/permitted terms updates,
+     * roomstate changes, general mod/vip updates, all bans/timeouts/deletions.
+     * For normal users, this topic includes moderation actions that are targetted at the local user:
+     * automod catching a user's sent message, a moderator approving or denying their caught messages,
+     * the user gaining/losing mod/vip, the user receiving a ban/timeout/deletion.
+     *
+     * PubSub topic: chat_moderator_actions.{currentUserID}.{channelID}
+     */
     void listenToChannelModerationActions(const QString &channelID);
+    void unlistenChannelModerationActions();
+
+    /**
+     * Listen to Automod events in the given channel.
+     * This topic is only relevant for moderators.
+     * This will send events about incoming messages that
+     * are caught by Automod.
+     *
+     * PubSub topic: automod-queue.{currentUserID}.{channelID}
+     */
     void listenToAutomod(const QString &channelID);
+    void unlistenAutomod();
 
+    /**
+     * Listen to Low Trust events in the given channel.
+     * This topic is only relevant for moderators.
+     * This will fire events about suspicious treatment updates
+     * and messages sent by restricted/monitored users.
+     *
+     * PubSub topic: low-trust-users.{currentUserID}.{channelID}
+     */
+    void listenToLowTrustUsers(const QString &channelID);
+    void unlistenLowTrustUsers();
+
+    /**
+     * Listen to incoming channel point redemptions in the given channel.
+     * This topic is relevant for everyone.
+     *
+     * PubSub topic: community-points-channel-v1.{channelID}
+     */
     void listenToChannelPointRewards(const QString &channelID);
-
-    std::vector<QString> requests;
+    void unlistenChannelPointRewards();
 
     struct {
         std::atomic<uint32_t> connectionsClosed{0};
@@ -149,19 +189,25 @@ public:
         std::atomic<uint32_t> unlistenResponses{0};
     } diag;
 
+private:
+    /**
+     * Unlistens to all topics matching the prefix in all clients
+     */
+    void unlistenPrefix(const QString &prefix);
+
     void listenToTopic(const QString &topic);
 
-private:
     void listen(PubSubListenMessage msg);
     bool tryListen(PubSubListenMessage msg);
 
     bool isListeningToTopic(const QString &topic);
 
     void addClient();
+
+    std::vector<QString> requests;
+
     std::atomic<bool> addingClient{false};
     ExponentialBackoff<5> connectBackoff{std::chrono::milliseconds(1000)};
-
-    State state = State::Connected;
 
     std::map<WebsocketHandle, std::shared_ptr<PubSubClient>,
              std::owner_less<WebsocketHandle>>
@@ -190,7 +236,7 @@ private:
     void registerNonce(QString nonce, NonceInfo nonceInfo);
 
     // Find client associated with a nonce
-    boost::optional<NonceInfo> findNonceInfo(QString nonce);
+    std::optional<NonceInfo> findNonceInfo(QString nonce);
 
     std::unordered_map<QString, NonceInfo> nonces_;
 

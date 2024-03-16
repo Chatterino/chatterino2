@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/Singleton.hpp"
 #include "util/QStringHash.hpp"
 #include "util/ThreadGuard.hpp"
 
@@ -12,19 +11,15 @@
 
 namespace chatterino {
 
-class Paths;
+class Settings;
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
 class LoggingChannel;
 
-class Logging : public Singleton
+class Logging
 {
-    Paths *pathManager = nullptr;
-
 public:
-    Logging() = default;
-
-    virtual void initialize(Settings &settings, Paths &paths) override;
+    Logging(Settings &settings);
 
     void addMessage(const QString &channelName, MessagePtr message,
                     const QString &platformName);

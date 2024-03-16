@@ -1,95 +1,38 @@
 #pragma once
 
-#include "common/UniqueAccess.hpp"
+#include "common/FlagsEnum.hpp"
 
-#include <QMap>
 #include <QString>
-
-#include <mutex>
-#include <typeinfo>
 
 namespace chatterino {
 
 class DebugCount
 {
 public:
+    enum class Flag : uint16_t {
+        None = 0,
+        /// The value is a data size in bytes
+        DataSize = 1 << 0,
+    };
+    using Flags = FlagsEnum<Flag>;
+
+    static void configure(const QString &name, Flags flags);
+
+    static void set(const QString &name, const int64_t &amount);
+
+    static void increase(const QString &name, const int64_t &amount);
     static void increase(const QString &name)
     {
-        auto counts = counts_.access();
-
-        auto it = counts->find(name);
-        if (it == counts->end())
-        {
-            counts->insert(name, 1);
-        }
-        else
-        {
-            reinterpret_cast<int64_t &>(it.value())++;
-        }
-    }
-    static void increase(const QString &name, const int64_t &amount)
-    {
-        auto counts = counts_.access();
-
-        auto it = counts->find(name);
-        if (it == counts->end())
-        {
-            counts->insert(name, amount);
-        }
-        else
-        {
-            reinterpret_cast<int64_t &>(it.value()) += amount;
-        }
+        DebugCount::increase(name, 1);
     }
 
+    static void decrease(const QString &name, const int64_t &amount);
     static void decrease(const QString &name)
     {
-        auto counts = counts_.access();
-
-        auto it = counts->find(name);
-        if (it == counts->end())
-        {
-            counts->insert(name, -1);
-        }
-        else
-        {
-            reinterpret_cast<int64_t &>(it.value())--;
-        }
-    }
-    static void decrease(const QString &name, const int64_t &amount)
-    {
-        auto counts = counts_.access();
-
-        auto it = counts->find(name);
-        if (it == counts->end())
-        {
-            counts->insert(name, -amount);
-        }
-        else
-        {
-            reinterpret_cast<int64_t &>(it.value()) -= amount;
-        }
+        DebugCount::decrease(name, 1);
     }
 
-    static QString getDebugText()
-    {
-        auto counts = counts_.access();
-
-        QString text;
-        for (auto it = counts->begin(); it != counts->end(); it++)
-        {
-            text += it.key() + ": " + QString::number(it.value()) + "\n";
-        }
-        return text;
-    }
-
-    QString toString()
-    {
-        return "";
-    }
-
-private:
-    static UniqueAccess<QMap<QString, int64_t>> counts_;
+    static QString getDebugText();
 };
 
 }  // namespace chatterino
