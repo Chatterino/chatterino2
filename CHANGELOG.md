@@ -81,6 +81,7 @@
 - Bugfix: Fixed badge highlight changes not immediately being reflected. (#5110)
 - Bugfix: Fixed emotes being reloaded when pressing "Cancel" in the settings dialog, causing a slowdown. (#5240)
 - Bugfix: Fixed some emotes not appearing when using _Ignores_. (#4965, #5126)
+- Bugfix: Fixed double-click selection not selecting words that were split onto multiple lines correctly. (#5243)
 - Bugfix: Fixed lookahead/-behind not working in _Ignores_. (#4965, #5126)
 - Bugfix: Fixed Image Uploader accidentally deleting images with some hosts when link resolver was enabled. (#4971)
 - Bugfix: Fixed rare crash with Image Uploader when closing a split right after starting an upload. (#4971)
