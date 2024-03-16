@@ -651,8 +651,8 @@ set(SOURCE_FILES
         widgets/helper/SettingsDialogTab.hpp
         widgets/helper/SignalLabel.cpp
         widgets/helper/SignalLabel.hpp
-        widgets/helper/TableStyle.cpp
-        widgets/helper/TableStyle.hpp
+        widgets/helper/TableStyles.cpp
+        widgets/helper/TableStyles.hpp
         widgets/helper/TitlebarButton.cpp
         widgets/helper/TitlebarButton.hpp
         widgets/helper/TitlebarButtons.cpp

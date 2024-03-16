@@ -1,20 +1,29 @@
-#include "widgets/helper/TableStyle.hpp"
+#include "widgets/helper/TableStyles.hpp"
 
 #include <QAbstractItemView>
 #include <QPainter>
 #include <QStyleOption>
+#include <QTableView>
 #include <QWidget>
 
 namespace chatterino {
 
-TableStyle::TableStyle(QStyle *target)
+TableRowDragStyle::TableRowDragStyle(QStyle *target)
     : QProxyStyle(target)
 {
 }
 
-void TableStyle::drawPrimitive(QStyle::PrimitiveElement element,
-                               const QStyleOption *option, QPainter *painter,
-                               const QWidget *widget) const
+void TableRowDragStyle::applyTo(QTableView *view)
+{
+    auto *proxyStyle = new TableRowDragStyle(view->style());
+    proxyStyle->setParent(view);
+    view->setStyle(proxyStyle);
+}
+
+void TableRowDragStyle::drawPrimitive(QStyle::PrimitiveElement element,
+                                      const QStyleOption *option,
+                                      QPainter *painter,
+                                      const QWidget *widget) const
 {
     if (element != QStyle::PE_IndicatorItemViewItemDrop)
     {

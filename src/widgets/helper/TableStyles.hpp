@@ -11,16 +11,20 @@ namespace chatterino {
 /// where entire rows are moved (not individual cells). The indicator is shown
 /// as a line at the position where the dragged item should be inserted. If no
 /// such position exists, a red border is drawn around the viewport.
-class TableStyle : public QProxyStyle
+class TableRowDragStyle : public QProxyStyle
 {
 public:
-    /// @param target The style to wrap. This is **not** the parent of this
-    ///               object. This object will become the parent of @a target.
-    TableStyle(QStyle *target);
+    /// Applies the style to @a view
+    static void applyTo(QTableView *view);
 
     void drawPrimitive(QStyle::PrimitiveElement element,
                        const QStyleOption *option, QPainter *painter,
                        const QWidget *widget = nullptr) const override;
+
+private:
+    /// @param target The style to wrap. This is **not** the parent of this
+    ///               object. This object will become the parent of @a target.
+    TableRowDragStyle(QStyle *target);
 };
 
 }  // namespace chatterino
