@@ -112,7 +112,15 @@ struct MessageLayoutContainer {
     size_t getFirstMessageCharacterIndex() const;
 
     /**
-     * Returns the start & end character index of the given element
+     * @brief Returns the word bounds of the given element
+     *
+     * The first value is the index of the first character in the word,
+     * the second value is the index of the character after the last character in the word.
+     *
+     * Given the word "abc" by itself, we would return (0, 3)
+     *
+     *  V  V
+     * "abc "
      */
     std::pair<int, int> getWordBounds(
         const MessageLayoutElement *hoveredElement) const;

@@ -108,17 +108,17 @@ public:
 
 TEST(TextElement, BasicCase)
 {
-    auto test = MessageLayoutTest("aaaaaaaa");
+    auto test = MessageLayoutTest("abc");
 
     // Simulate we are clicking on the first word
     auto point = QPoint(WIDTH / 20, test.layout->getHeight() / 2);
 
     const auto *hoveredElement = test.layout->getElementAt(point);
-    ASSERT_TRUE(hoveredElement != nullptr);
+    ASSERT_NE(hoveredElement, nullptr);
 
     const auto [wordStart, wordEnd] =
         test.layout->getWordBounds(hoveredElement, point);
 
     EXPECT_EQ(wordStart, 0);
-    EXPECT_EQ(wordEnd, 7);
+    EXPECT_EQ(wordEnd, 3);
 }
