@@ -72,16 +72,14 @@ void checkCommandDuplicates(EditableModelView *view, QLabel *duplicateWarning)
     }
 }
 
+QString c1settingsPath()
+{
+    return combinePath(qgetenv("appdata"), "Chatterino\\Custom\\Commands.txt");
+}
+
 }  // namespace
 
 namespace chatterino {
-namespace {
-    QString c1settingsPath()
-    {
-        return combinePath(qgetenv("appdata"),
-                           "Chatterino\\Custom\\Commands.txt");
-    }
-}  // namespace
 
 CommandPage::CommandPage()
 {
