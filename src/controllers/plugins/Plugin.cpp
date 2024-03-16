@@ -4,7 +4,9 @@
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandController.hpp"
 
+extern "C" {
 #    include <lua.h>
+}
 #    include <magic_enum/magic_enum.hpp>
 #    include <QJsonArray>
 #    include <QJsonObject>

@@ -9,8 +9,10 @@
 #    include "providers/twitch/TwitchChannel.hpp"
 #    include "providers/twitch/TwitchIrcServer.hpp"
 
+extern "C" {
 #    include <lauxlib.h>
 #    include <lua.h>
+}
 
 #    include <cassert>
 #    include <memory>
