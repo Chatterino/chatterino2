@@ -27,7 +27,7 @@ namespace {
 
 using namespace chatterino;
 
-bool checkCommandDuplicates(EditableModelView *view, QLabel *duplicateWarning)
+void checkCommandDuplicates(EditableModelView *view, QLabel *duplicateWarning)
 {
     bool foundDuplicateTrigger = false;
     QMap<QString, QList<int>> map;
@@ -72,8 +72,6 @@ bool checkCommandDuplicates(EditableModelView *view, QLabel *duplicateWarning)
     {
         duplicateWarning->hide();
     }
-
-    return foundDuplicateTrigger;
 }
 
 }  // namespace
