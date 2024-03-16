@@ -1,10 +1,11 @@
+#include "messages/layouts/MessageLayout.hpp"
+
 #include "Application.hpp"
 #include "common/Literals.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
-#include "messages/layouts/MessageLayout.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
 #include "mocks/EmptyApplication.hpp"
