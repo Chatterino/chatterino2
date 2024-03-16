@@ -2,6 +2,8 @@
 
 #include <QProxyStyle>
 
+class QTableView;
+
 namespace chatterino {
 
 /// @brief A custom style for drag operations of rows on tables
