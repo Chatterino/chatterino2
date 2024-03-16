@@ -29,7 +29,7 @@ using namespace chatterino;
 
 bool checkCommandDuplicates(EditableModelView *view, QLabel *duplicateWarning)
 {
-    bool retval = false;
+    bool foundDuplicateTrigger = false;
     QMap<QString, QList<int>> map;
     for (int i = 0; i < view->getModel()->rowCount(); i++)
     {
@@ -50,7 +50,7 @@ bool checkCommandDuplicates(EditableModelView *view, QLabel *duplicateWarning)
     {
         if (map[key].length() != 1)
         {
-            retval = true;
+            foundDuplicateTrigger = true;
             foreach (int value, map[key])
             {
                 view->getModel()->setData(view->getModel()->index(value, 0),
@@ -64,7 +64,7 @@ bool checkCommandDuplicates(EditableModelView *view, QLabel *duplicateWarning)
         }
     }
 
-    if (retval)
+    if (foundDuplicateTrigger)
     {
         duplicateWarning->show();
     }
@@ -73,7 +73,7 @@ bool checkCommandDuplicates(EditableModelView *view, QLabel *duplicateWarning)
         duplicateWarning->hide();
     }
 
-    return retval;
+    return foundDuplicateTrigger;
 }
 
 }  // namespace
