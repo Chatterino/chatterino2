@@ -453,7 +453,8 @@ void ChannelView::initializeSignals()
     this->signalHolder_.managedConnect(
         getIApp()->getWindows()->layoutRequested, [&](Channel *channel) {
             if (this->isVisible() &&
-                (channel == nullptr || this->channel_.get() == channel))
+                (channel == nullptr ||
+                 this->underlyingChannel_.get() == channel))
             {
                 this->queueLayout();
             }
@@ -463,7 +464,8 @@ void ChannelView::initializeSignals()
         getIApp()->getWindows()->invalidateBuffersRequested,
         [this](Channel *channel) {
             if (this->isVisible() &&
-                (channel == nullptr || this->channel_.get() == channel))
+                (channel == nullptr ||
+                 this->underlyingChannel_.get() == channel))
             {
                 this->invalidateBuffers();
             }
@@ -975,6 +977,41 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
             this->channel_->fillInMissingMessages(filtered);
         });
 
+    // Copy over messages from the backing channel to the filtered one
+    // and the ui.
+    auto snapshot = underlyingChannel->getMessageSnapshot();
+
+    this->scrollBar_->setMaximum(qreal(snapshot.size()));
+
+    for (const auto &msg : snapshot)
+    {
+        if (!this->shouldIncludeMessage(msg))
+        {
+            continue;
+        }
+
+        auto messageLayout = std::make_shared<MessageLayout>(msg);
+
+        if (this->lastMessageHasAlternateBackground_)
+        {
+            messageLayout->flags.set(MessageLayoutFlag::AlternateBackground);
+        }
+        this->lastMessageHasAlternateBackground_ =
+            !this->lastMessageHasAlternateBackground_;
+
+        if (underlyingChannel->shouldIgnoreHighlights())
+        {
+            messageLayout->flags.set(MessageLayoutFlag::IgnoreHighlights);
+        }
+
+        this->messages_.pushBack(messageLayout);
+        this->channel_->addMessage(msg);
+        if (this->showScrollbarHighlights())
+        {
+            this->scrollBar_->addHighlight(msg->getScrollBarHighlight());
+        }
+    }
+
     //
     // Standard channel connections
     //
@@ -1005,33 +1042,6 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
                                              [this](const auto &) {
                                                  this->messagesUpdated();
                                              });
-
-    auto snapshot = underlyingChannel->getMessageSnapshot();
-
-    this->scrollBar_->setMaximum(qreal(snapshot.size()));
-
-    for (const auto &msg : snapshot)
-    {
-        auto messageLayout = std::make_shared<MessageLayout>(msg);
-
-        if (this->lastMessageHasAlternateBackground_)
-        {
-            messageLayout->flags.set(MessageLayoutFlag::AlternateBackground);
-        }
-        this->lastMessageHasAlternateBackground_ =
-            !this->lastMessageHasAlternateBackground_;
-
-        if (underlyingChannel->shouldIgnoreHighlights())
-        {
-            messageLayout->flags.set(MessageLayoutFlag::IgnoreHighlights);
-        }
-
-        this->messages_.pushBack(messageLayout);
-        if (this->showScrollbarHighlights())
-        {
-            this->scrollBar_->addHighlight(msg->getScrollBarHighlight());
-        }
-    }
 
     this->underlyingChannel_ = underlyingChannel;
 
@@ -2991,10 +3001,6 @@ void ChannelView::setInputReply(const MessagePtr &message)
         // Message did not already have a thread attached, try to find or create one
         auto *tc =
             dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get());
-        if (!tc)
-        {
-            tc = dynamic_cast<TwitchChannel *>(this->channel_.get());
-        }
 
         if (tc)
         {
