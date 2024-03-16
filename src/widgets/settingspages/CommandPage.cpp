@@ -36,8 +36,9 @@ void checkCommandDuplicates(EditableModelView *view, QLabel *duplicateWarning)
 
     for (int i = 0; i < view->getModel()->rowCount(); i++)
     {
-        QString commandName = view->getModel()->index(i, 0).data().toString();
-        commands[commandName].push_back(i);
+        QString commandTrigger =
+            view->getModel()->index(i, 0).data().toString();
+        commands[commandTrigger].push_back(i);
     }
 
     for (const auto &[commandTrigger, rowIndices] : commands)
