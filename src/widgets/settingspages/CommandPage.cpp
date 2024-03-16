@@ -32,24 +32,17 @@ void checkCommandDuplicates(EditableModelView *view, QLabel *duplicateWarning)
     bool foundDuplicateTrigger = false;
 
     // Maps command triggers to model row indices
-    QMap<QString, QList<int>> commands;
+    QMap<QString, std::vector<int>> commands;
 
     for (int i = 0; i < view->getModel()->rowCount(); i++)
     {
         QString commandName = view->getModel()->index(i, 0).data().toString();
-        if (commands.contains(commandName))
-        {
-            commands[commandName].append(i);
-        }
-        else
-        {
-            commands.insert(commandName, {i});
-        }
+        commands[commandName].push_back(i);
     }
 
     foreach (const QString &key, commands.keys())
     {
-        if (commands[key].length() != 1)
+        if (commands[key].size() > 1)
         {
             foundDuplicateTrigger = true;
             foreach (int value, commands[key])
