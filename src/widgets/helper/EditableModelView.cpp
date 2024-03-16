@@ -1,6 +1,7 @@
 #include "EditableModelView.hpp"
 
 #include "widgets/helper/RegExpItemDelegate.hpp"
+#include "widgets/helper/TableStyle.hpp"
 
 #include <QAbstractItemView>
 #include <QAbstractTableModel>
@@ -27,6 +28,10 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
     this->tableView_->setDefaultDropAction(Qt::DropAction::MoveAction);
     this->tableView_->verticalHeader()->setVisible(false);
     this->tableView_->horizontalHeader()->setSectionsClickable(false);
+
+    auto *proxyStyle = new TableStyle(this->tableView_->style());
+    proxyStyle->setParent(this);
+    this->tableView_->setStyle(proxyStyle);
 
     // create layout
     QVBoxLayout *vbox = new QVBoxLayout(this);
