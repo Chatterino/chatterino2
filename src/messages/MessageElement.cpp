@@ -454,7 +454,7 @@ TextElement::TextElement(const QString &text, MessageElementFlags flags,
 void TextElement::addToContainer(MessageLayoutContainer &container,
                                  MessageElementFlags flags)
 {
-    auto *app = getApp();
+    auto *app = getIApp();
 
     if (flags.hasAny(this->getFlags()))
     {
