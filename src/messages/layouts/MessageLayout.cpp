@@ -452,6 +452,8 @@ const MessageLayoutElement *MessageLayout::getElementAt(QPoint point) const
 std::pair<int, int> MessageLayout::getWordBounds(
     const MessageLayoutElement *hoveredElement, QPoint relativePos) const
 {
+    // An element with wordId != -1 can be multiline, so we need to check all
+    // elements in the container
     if (hoveredElement->getWordId() != -1)
     {
         return this->container_.getWordBounds(hoveredElement);
