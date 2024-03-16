@@ -145,27 +145,26 @@ CommandPage::CommandPage()
     duplicateWarning->setStyleSheet("color: yellow");
 
     QObject::connect(view->getModel(), &QAbstractItemModel::rowsInserted, this,
-                     [view, duplicateWarning](const QModelIndex &parent,
-                                              int first, int last) {
+                     [view, duplicateWarning]() {
                          checkCommandDuplicates(view, duplicateWarning);
                      });
 
     QObject::connect(view->getModel(), &QAbstractItemModel::rowsRemoved, this,
-                     [view, duplicateWarning](const QModelIndex &parent,
-                                              int first, int last) {
+                     [view, duplicateWarning]() {
                          checkCommandDuplicates(view, duplicateWarning);
                      });
 
-    QObject::connect(
-        view->getModel(), &QAbstractItemModel::dataChanged, this,
-        [view, duplicateWarning](const QModelIndex &topLeft,
-                                 const QModelIndex &bottomRight,
-                                 const QVector<int> &roles = QVector<int>()) {
-            if (roles.contains(Qt::EditRole))
-            {
-                checkCommandDuplicates(view, duplicateWarning);
-            }
-        });
+    QObject::connect(view->getModel(), &QAbstractItemModel::dataChanged, this,
+                     [view, duplicateWarning](const QModelIndex &topLeft,
+                                              const QModelIndex &bottomRight,
+                                              const QVector<int> &roles) {
+                         (void)topLeft;
+                         (void)bottomRight;
+                         if (roles.contains(Qt::EditRole))
+                         {
+                             checkCommandDuplicates(view, duplicateWarning);
+                         }
+                     });
 
     checkCommandDuplicates(view, duplicateWarning);
 
