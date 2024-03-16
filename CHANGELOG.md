@@ -164,6 +164,7 @@
 - Dev: Load less message history upon reconnects. (#5001, #5018)
 - Dev: Removed the `NullablePtr` class. (#5091)
 - Dev: BREAKING: Replace custom `import()` with normal Lua `require()`. (#5014, #5108)
+- Dev: Compile Lua as a C library. (#5251)
 - Dev: Fixed most compiler warnings. (#5028, #5137)
 - Dev: Added the ability to show `ChannelView`s without a `Split`. (#4747)
 - Dev: Refactor Args to be less of a singleton. (#5041)
