@@ -27,6 +27,11 @@ namespace {
 
 using namespace chatterino;
 
+QString c1settingsPath()
+{
+    return combinePath(qgetenv("appdata"), "Chatterino\\Custom\\Commands.txt");
+}
+
 void checkCommandDuplicates(EditableModelView *view, QLabel *duplicateWarning)
 {
     bool foundDuplicateTrigger = false;
@@ -70,11 +75,6 @@ void checkCommandDuplicates(EditableModelView *view, QLabel *duplicateWarning)
     {
         duplicateWarning->hide();
     }
-}
-
-QString c1settingsPath()
-{
-    return combinePath(qgetenv("appdata"), "Chatterino\\Custom\\Commands.txt");
 }
 
 }  // namespace
