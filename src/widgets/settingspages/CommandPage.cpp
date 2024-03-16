@@ -30,28 +30,31 @@ using namespace chatterino;
 void checkCommandDuplicates(EditableModelView *view, QLabel *duplicateWarning)
 {
     bool foundDuplicateTrigger = false;
-    QMap<QString, QList<int>> map;
+
+    // Maps command triggers to model row indices
+    QMap<QString, QList<int>> commands;
+
     for (int i = 0; i < view->getModel()->rowCount(); i++)
     {
         QString commandName = view->getModel()->index(i, 0).data().toString();
-        if (map.contains(commandName))
+        if (commands.contains(commandName))
         {
-            QList<int> value = map[commandName];
+            QList<int> value = commands[commandName];
             value.append(i);
-            map.insert(commandName, value);
+            commands.insert(commandName, value);
         }
         else
         {
-            map.insert(commandName, {i});
+            commands.insert(commandName, {i});
         }
     }
 
-    foreach (const QString &key, map.keys())
+    foreach (const QString &key, commands.keys())
     {
-        if (map[key].length() != 1)
+        if (commands[key].length() != 1)
         {
             foundDuplicateTrigger = true;
-            foreach (int value, map[key])
+            foreach (int value, commands[key])
             {
                 view->getModel()->setData(view->getModel()->index(value, 0),
                                           QColor("yellow"), Qt::ForegroundRole);
@@ -59,8 +62,9 @@ void checkCommandDuplicates(EditableModelView *view, QLabel *duplicateWarning)
         }
         else
         {
-            view->getModel()->setData(view->getModel()->index(map[key][0], 0),
-                                      QColor("white"), Qt::ForegroundRole);
+            view->getModel()->setData(
+                view->getModel()->index(commands[key][0], 0), QColor("white"),
+                Qt::ForegroundRole);
         }
     }
 
