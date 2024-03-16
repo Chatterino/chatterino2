@@ -449,21 +449,19 @@ const MessageLayoutElement *MessageLayout::getElementAt(QPoint point) const
     return this->container_.getElementAt(point);
 }
 
-std::pair<int, int> MessageLayout::getWordBounds(QPoint relativePos) const
+std::pair<int, int> MessageLayout::getWordBounds(
+    const MessageLayoutElement *hoveredElement, QPoint relativePos) const
 {
-    const auto *element = this->getElementAt(relativePos);
-    assert(element != nullptr);
-
-    if (element->getWordId() != -1)
+    if (hoveredElement->getWordId() != -1)
     {
-        return this->container_.getWordBounds(element);
+        return this->container_.getWordBounds(hoveredElement);
     }
 
     const auto wordStart = this->getSelectionIndex(relativePos) -
-                           element->getMouseOverIndex(relativePos);
-    const auto selectionLength = element->getSelectionIndexCount();
-    const auto length =
-        element->hasTrailingSpace() ? selectionLength - 1 : selectionLength;
+                           hoveredElement->getMouseOverIndex(relativePos);
+    const auto selectionLength = hoveredElement->getSelectionIndexCount();
+    const auto length = hoveredElement->hasTrailingSpace() ? selectionLength - 1
+                                                           : selectionLength;
 
     return {wordStart, wordStart + length};
 }

@@ -1799,7 +1799,8 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     // selecting whole words
     if (this->isDoubleClick_ && hoverLayoutElement)
     {
-        auto [wordStart, wordEnd] = layout->getWordBounds(relativePos);
+        auto [wordStart, wordEnd] =
+            layout->getWordBounds(hoverLayoutElement, relativePos);
         auto hoveredWord = Selection{SelectionItem(messageIndex, wordStart),
                                      SelectionItem(messageIndex, wordEnd)};
         // combined selection spanning from initially selected word to hoveredWord
@@ -2628,7 +2629,8 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
         return;
     }
 
-    auto [wordStart, wordEnd] = layout->getWordBounds(relativePos);
+    auto [wordStart, wordEnd] =
+        layout->getWordBounds(hoverLayoutElement, relativePos);
 
     this->doubleClickSelection_ = {SelectionItem(messageIndex, wordStart),
                                    SelectionItem(messageIndex, wordEnd)};

@@ -75,7 +75,7 @@ public:
     /**
      * Returns the start & end character index of the word at the given point
      */
-    std::pair<int, int> getWordBounds(QPoint relativePos) const;
+    std::pair<int, int> getWordBounds(const MessageLayoutElement* hoveredElement, QPoint relativePos) const;
 
     /**
      * Get the index of the last character in this message's container
