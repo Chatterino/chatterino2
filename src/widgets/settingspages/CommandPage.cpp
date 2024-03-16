@@ -103,7 +103,9 @@ CommandPage::CommandPage()
     text->setOpenExternalLinks(true);
 
     this->duplicateCommandWarning =
-        layout.emplace<QLabel>("Duplicate command names / triggers detected")
+        layout
+            .emplace<QLabel>("Multiple commands with the same trigger found. "
+                             "Only one of the commands will work.")
             .getElement();
     this->duplicateCommandWarning->setStyleSheet("color: yellow");
     this->checkCommandDuplicates();
