@@ -23,6 +23,61 @@
 #define TEXT "{1} => first word &nbsp;&nbsp;&nbsp; {1+} => first word and after &nbsp;&nbsp;&nbsp; {{ => { &nbsp;&nbsp;&nbsp; <a href='https://chatterino.com/help/commands'>more info</a>"
 // clang-format on
 
+namespace {
+
+using namespace chatterino;
+
+bool checkCommandDuplicates(EditableModelView *view, QLabel *duplicateWarning)
+{
+    bool retval = false;
+    QMap<QString, QList<int>> map;
+    for (int i = 0; i < view->getModel()->rowCount(); i++)
+    {
+        QString commandName = view->getModel()->index(i, 0).data().toString();
+        if (map.contains(commandName))
+        {
+            QList<int> value = map[commandName];
+            value.append(i);
+            map.insert(commandName, value);
+        }
+        else
+        {
+            map.insert(commandName, {i});
+        }
+    }
+
+    foreach (const QString &key, map.keys())
+    {
+        if (map[key].length() != 1)
+        {
+            retval = true;
+            foreach (int value, map[key])
+            {
+                view->getModel()->setData(view->getModel()->index(value, 0),
+                                          QColor("yellow"), Qt::ForegroundRole);
+            }
+        }
+        else
+        {
+            view->getModel()->setData(view->getModel()->index(map[key][0], 0),
+                                      QColor("white"), Qt::ForegroundRole);
+        }
+    }
+
+    if (retval)
+    {
+        duplicateWarning->show();
+    }
+    else
+    {
+        duplicateWarning->hide();
+    }
+
+    return retval;
+}
+
+}  // namespace
+
 namespace chatterino {
 namespace {
     QString c1settingsPath()
@@ -37,39 +92,19 @@ CommandPage::CommandPage()
     LayoutCreator<CommandPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
-    this->view = layout
+    auto *view = layout
                      .emplace<EditableModelView>(
                          getIApp()->getCommands()->createModel(nullptr))
                      .getElement();
 
-    this->view->setTitles({"Trigger", "Command", "Show In\nMessage Menu"});
-    this->view->getTableView()->horizontalHeader()->setSectionResizeMode(
+    view->setTitles({"Trigger", "Command", "Show In\nMessage Menu"});
+    view->getTableView()->horizontalHeader()->setSectionResizeMode(
         1, QHeaderView::Stretch);
     // We can safely ignore this signal connection since we own the view
-    std::ignore = this->view->addButtonPressed.connect([] {
+    std::ignore = view->addButtonPressed.connect([] {
         getIApp()->getCommands()->items.append(
             Command{"/command", "I made a new command HeyGuys"});
     });
-
-    QObject::connect(view->getModel(), &QAbstractItemModel::rowsInserted, this,
-                     [this](const QModelIndex &parent, int first, int last) {
-                         this->checkCommandDuplicates();
-                     });
-
-    QObject::connect(view->getModel(), &QAbstractItemModel::rowsRemoved, this,
-                     [this](const QModelIndex &parent, int first, int last) {
-                         this->checkCommandDuplicates();
-                     });
-
-    QObject::connect(
-        view->getModel(), &QAbstractItemModel::dataChanged, this,
-        [this](const QModelIndex &topLeft, const QModelIndex &bottomRight,
-               const QVector<int> &roles = QVector<int>()) {
-            if (roles.contains(Qt::EditRole))
-            {
-                this->checkCommandDuplicates();
-            }
-        });
 
     // TODO: asyncronously check path
     if (QFile(c1settingsPath()).exists())
@@ -102,68 +137,40 @@ CommandPage::CommandPage()
     text->setStyleSheet("color: #bbb");
     text->setOpenExternalLinks(true);
 
-    this->duplicateCommandWarning =
+    auto *duplicateWarning =
         layout
             .emplace<QLabel>("Multiple commands with the same trigger found. "
                              "Only one of the commands will work.")
             .getElement();
-    this->duplicateCommandWarning->setStyleSheet("color: yellow");
-    this->checkCommandDuplicates();
+    duplicateWarning->setStyleSheet("color: yellow");
+
+    QObject::connect(view->getModel(), &QAbstractItemModel::rowsInserted, this,
+                     [view, duplicateWarning](const QModelIndex &parent,
+                                              int first, int last) {
+                         checkCommandDuplicates(view, duplicateWarning);
+                     });
+
+    QObject::connect(view->getModel(), &QAbstractItemModel::rowsRemoved, this,
+                     [view, duplicateWarning](const QModelIndex &parent,
+                                              int first, int last) {
+                         checkCommandDuplicates(view, duplicateWarning);
+                     });
+
+    QObject::connect(
+        view->getModel(), &QAbstractItemModel::dataChanged, this,
+        [view, duplicateWarning](const QModelIndex &topLeft,
+                                 const QModelIndex &bottomRight,
+                                 const QVector<int> &roles = QVector<int>()) {
+            if (roles.contains(Qt::EditRole))
+            {
+                checkCommandDuplicates(view, duplicateWarning);
+            }
+        });
+
+    checkCommandDuplicates(view, duplicateWarning);
 
     // ---- end of layout
     this->commandsEditTimer_.setSingleShot(true);
-}
-
-bool CommandPage::checkCommandDuplicates()
-{
-    bool retval = false;
-    QMap<QString, QList<int>> map;
-    for (int i = 0; i < this->view->getModel()->rowCount(); i++)
-    {
-        QString commandName =
-            this->view->getModel()->index(i, 0).data().toString();
-        if (map.contains(commandName))
-        {
-            QList<int> value = map[commandName];
-            value.append(i);
-            map.insert(commandName, value);
-        }
-        else
-        {
-            map.insert(commandName, {i});
-        }
-    }
-
-    foreach (const QString &key, map.keys())
-    {
-        if (map[key].length() != 1)
-        {
-            retval = true;
-            foreach (int value, map[key])
-            {
-                this->view->getModel()->setData(
-                    this->view->getModel()->index(value, 0), QColor("yellow"),
-                    Qt::ForegroundRole);
-            }
-        }
-        else
-        {
-            this->view->getModel()->setData(
-                this->view->getModel()->index(map[key][0], 0), QColor("white"),
-                Qt::ForegroundRole);
-        }
-    }
-
-    if (retval)
-    {
-        this->duplicateCommandWarning->show();
-    }
-    else
-    {
-        this->duplicateCommandWarning->hide();
-    }
-
-    return retval;
 }
 
 }  // namespace chatterino
