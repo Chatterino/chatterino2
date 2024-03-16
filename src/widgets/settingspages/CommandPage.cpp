@@ -39,9 +39,7 @@ void checkCommandDuplicates(EditableModelView *view, QLabel *duplicateWarning)
         QString commandName = view->getModel()->index(i, 0).data().toString();
         if (commands.contains(commandName))
         {
-            QList<int> value = commands[commandName];
-            value.append(i);
-            commands.insert(commandName, value);
+            commands[commandName].append(i);
         }
         else
         {
