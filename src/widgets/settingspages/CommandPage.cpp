@@ -32,7 +32,7 @@ void checkCommandDuplicates(EditableModelView *view, QLabel *duplicateWarning)
     bool foundDuplicateTrigger = false;
 
     // Maps command triggers to model row indices
-    QMap<QString, std::vector<int>> commands;
+    std::unordered_map<QString, std::vector<int>> commands;
 
     for (int i = 0; i < view->getModel()->rowCount(); i++)
     {
@@ -40,22 +40,24 @@ void checkCommandDuplicates(EditableModelView *view, QLabel *duplicateWarning)
         commands[commandName].push_back(i);
     }
 
-    foreach (const QString &key, commands.keys())
+    for (const auto &[commandTrigger, rowIndices] : commands)
     {
-        if (commands[key].size() > 1)
+        assert(!rowIndices.empty());
+
+        if (rowIndices.size() > 1)
         {
             foundDuplicateTrigger = true;
-            foreach (int value, commands[key])
+
+            for (const auto &rowIndex : rowIndices)
             {
-                view->getModel()->setData(view->getModel()->index(value, 0),
+                view->getModel()->setData(view->getModel()->index(rowIndex, 0),
                                           QColor("yellow"), Qt::ForegroundRole);
             }
         }
         else
         {
-            view->getModel()->setData(
-                view->getModel()->index(commands[key][0], 0), QColor("white"),
-                Qt::ForegroundRole);
+            view->getModel()->setData(view->getModel()->index(rowIndices[0], 0),
+                                      QColor("white"), Qt::ForegroundRole);
         }
     }
 
