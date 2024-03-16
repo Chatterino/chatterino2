@@ -138,6 +138,8 @@ CommandPage::CommandPage()
             .getElement();
     duplicateWarning->setStyleSheet("color: yellow");
 
+    // NOTE: These signals mean that the duplicate check happens in the middle of a row being moved, where he index can be wrong.
+    // This should be reconsidered, or potentially changed in the signalvectormodel. Or maybe we rely on a SignalVectorModel signal instead
     QObject::connect(view->getModel(), &QAbstractItemModel::rowsInserted, this,
                      [view, duplicateWarning]() {
                          checkCommandDuplicates(view, duplicateWarning);
