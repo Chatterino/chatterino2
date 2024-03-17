@@ -40,8 +40,6 @@ void TableRowDragStyle::drawPrimitive(QStyle::PrimitiveElement element,
 
     if (option->rect.isNull())
     {
-        painter->setPen({Qt::red, 1});
-        painter->drawRect(view->viewport()->rect().adjusted(0, 0, -1, -1));
         return;
     }
 
