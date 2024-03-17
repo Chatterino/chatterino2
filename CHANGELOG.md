@@ -47,6 +47,7 @@
 - Minor: 7TV emotes now have a 4x image rather than a 3x image. (#5209)
 - Minor: Add wrappers for Lua `io` library for experimental plugins feature. (#5231)
 - Minor: Add permissions to experimental plugins feature. (#5231)
+- Minor: Added warning message if you have multiple commands with the same trigger. (#4322)
 - Minor: Add support to send /announce[color] commands. (#5250)
 - Minor: Added drop indicator line while dragging in tables. (#5252)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
