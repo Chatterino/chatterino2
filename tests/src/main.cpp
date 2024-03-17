@@ -23,7 +23,7 @@ int main(int argc, char **argv)
 #ifdef SUPPORT_QT_NETWORK_TESTS
     QApplication app(argc, argv);
     // make sure to always debug-log
-    QLoggingCategory::setFilterRules("*.debug=true");
+    QLoggingCategory::setFilterRules("chatterino.*=true");
 
     initResources();
 
