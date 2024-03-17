@@ -1,4 +1,4 @@
-#include "HighlightingPage.hpp"
+#include "widgets/settingspages/HighlightingPage.hpp"
 
 #include "Application.hpp"
 #include "controllers/highlights/BadgeHighlightModel.hpp"
@@ -15,6 +15,7 @@
 #include "util/LayoutCreator.hpp"
 #include "widgets/dialogs/BadgePickerDialog.hpp"
 #include "widgets/dialogs/ColorPickerDialog.hpp"
+#include "widgets/dialogs/HighlightConfigureDialog.hpp"
 #include "widgets/helper/color/ColorItemDelegate.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
@@ -75,10 +76,17 @@ HighlightingPage::HighlightingPage()
                                     &getSettings()->highlightedMessages))
                         .getElement();
                 view->addRegexHelpLink();
-                view->setTitles({"Pattern", "Show in\nMentions",
-                                 "Flash\ntaskbar", "Enable\nregex",
-                                 "Case-\nsensitive", "Play\nsound",
-                                 "Custom\nsound", "Color"});
+                view->setTitles({
+                    "Pattern",
+                    "Show in\nMentions",
+                    "Flash\ntaskbar",
+                    "Enable\nregex",
+                    "Case-\nsensitive",
+                    "Play\nsound",
+                    "Custom\nsound",
+                    "Color",
+                    "Configure",
+                });
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     QHeaderView::Fixed);
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -353,6 +361,21 @@ void HighlightingPage::openColorDialog(const QModelIndex &clicked,
     dialog->show();
 }
 
+void HighlightingPage::openConfigureDialog(const QModelIndex &clicked,
+                                           EditableModelView *view,
+                                           HighlightTab tab)
+{
+    if (tab != HighlightTab::Messages)
+    {
+        return;
+    }
+
+    auto phrase =
+        getSettings()->highlightedMessages.readOnly()->at(clicked.row());
+    auto *xd = new HighlightConfigureDialog(phrase, this);
+    xd->show();
+}
+
 void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
                                         EditableModelView *view,
                                         HighlightTab tab)
@@ -375,6 +398,10 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
             else if (clicked.column() == Column::Color)
             {
                 this->openColorDialog(clicked, view, tab);
+            }
+            else if (clicked.column() == Column::Configure)
+            {
+                this->openConfigureDialog(clicked, view, tab);
             }
         }
         break;

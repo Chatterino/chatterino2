@@ -23,10 +23,11 @@ public:
         PlaySound = 5,
         SoundPath = 6,
         Color = 7,
+        Configure = 8,
         COUNT  // keep this as last member of enum
     };
 
-    enum HighlightRowIndexes {
+    enum class HighlightRowIndexes {
         SelfHighlightRow = 0,
         WhisperRow = 1,
         SubRow = 2,
@@ -35,6 +36,7 @@ public:
         ElevatedMessageRow = 5,
         ThreadMessageRow = 6,
         AutomodRow = 7,
+        COUNT,
     };
 
     enum UserHighlightRowIndexes {

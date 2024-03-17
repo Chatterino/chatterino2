@@ -568,6 +568,9 @@ set(SOURCE_FILES
         widgets/dialogs/EditHotkeyDialog.hpp
         widgets/dialogs/EmotePopup.cpp
         widgets/dialogs/EmotePopup.hpp
+        widgets/dialogs/HighlightConfigureDialog.cpp
+        widgets/dialogs/HighlightConfigureDialog.hpp
+        widgets/dialogs/HighlightConfigureDialog.ui
         widgets/dialogs/IrcConnectionEditor.cpp
         widgets/dialogs/IrcConnectionEditor.hpp
         widgets/dialogs/IrcConnectionEditor.ui
