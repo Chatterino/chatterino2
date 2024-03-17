@@ -50,4 +50,4 @@ target_include_directories(lua
     PUBLIC
     ${LUA_INCLUDE_DIRS}
 )
-set_source_files_properties(${LUA_SRC} PROPERTIES LANGUAGE CXX)
+set_source_files_properties(${LUA_SRC} PROPERTIES LANGUAGE C)

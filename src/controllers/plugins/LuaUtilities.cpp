@@ -7,8 +7,10 @@
 #    include "controllers/plugins/api/ChannelRef.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 
+extern "C" {
 #    include <lauxlib.h>
 #    include <lua.h>
+}
 
 #    include <climits>
 #    include <cstdlib>

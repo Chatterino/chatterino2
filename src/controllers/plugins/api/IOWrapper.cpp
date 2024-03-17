@@ -4,8 +4,11 @@
 #    include "Application.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/PluginController.hpp"
-#    include "lauxlib.h"
-#    include "lua.h"
+
+extern "C" {
+#    include <lauxlib.h>
+#    include <lua.h>
+}
 
 #    include <cerrno>
 
