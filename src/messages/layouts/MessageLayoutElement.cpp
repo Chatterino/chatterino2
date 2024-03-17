@@ -108,6 +108,16 @@ FlagsEnum<MessageElementFlag> MessageLayoutElement::getFlags() const
     return this->creator_.getFlags();
 }
 
+int MessageLayoutElement::getWordId() const
+{
+    return this->wordId_;
+}
+
+void MessageLayoutElement::setWordId(int wordId)
+{
+    this->wordId_ = wordId;
+}
+
 //
 // IMAGE
 //

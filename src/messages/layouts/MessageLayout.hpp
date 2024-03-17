@@ -70,7 +70,21 @@ public:
      *
      * If no element is found at the given point, this returns a null pointer
      */
-    const MessageLayoutElement *getElementAt(QPoint point);
+    const MessageLayoutElement *getElementAt(QPoint point) const;
+
+    /**
+     * @brief Returns the word bounds of the given element
+     *
+     * The first value is the index of the first character in the word,
+     * the second value is the index of the character after the last character in the word.
+     *
+     * Given the word "abc" by itself, we would return (0, 3)
+     *
+     *  V  V
+     * "abc "
+     */
+    std::pair<int, int> getWordBounds(
+        const MessageLayoutElement *hoveredElement, QPoint relativePos) const;
 
     /**
      * Get the index of the last character in this message's container
