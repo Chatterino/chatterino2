@@ -2,7 +2,9 @@
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 
+extern "C" {
 #    include <lua.h>
+}
 #    include <QString>
 
 #    include <cassert>

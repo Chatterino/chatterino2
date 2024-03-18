@@ -554,7 +554,7 @@ QStringList TextElement::words() const
 void TextElement::addToContainer(MessageLayoutContainer &container,
                                  MessageElementFlags flags)
 {
-    auto *app = getApp();
+    auto *app = getIApp();
 
     if (flags.hasAny(this->getFlags()))
     {
@@ -563,6 +563,8 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
 
         for (const auto &word : this->words_)
         {
+            auto wordId = container.nextWordId();
+
             auto getTextLayoutElement = [&](QString text, int width,
                                             bool hasTrailingSpace) {
                 auto color = this->color_.getColor(*app->getThemes());
@@ -573,6 +575,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                     this->style_, container.getScale());
                 e->setTrailingSpace(hasTrailingSpace);
                 e->setText(text);
+                e->setWordId(wordId);
 
                 return e;
             };

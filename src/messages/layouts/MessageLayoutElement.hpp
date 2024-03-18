@@ -71,6 +71,9 @@ public:
     const QString &getText() const;
     FlagsEnum<MessageElementFlag> getFlags() const;
 
+    int getWordId() const;
+    void setWordId(int wordId);
+
 protected:
     bool trailingSpace = true;
 
@@ -83,6 +86,13 @@ private:
      * The line of the container this element is laid out at
      */
     size_t line_{};
+
+    /// @brief ID of a word inside its container
+    ///
+    /// One word has exactly one ID that is used to identify elements created
+    /// from the same word (due to wrapping).
+    /// IDs are unique in a MessageLayoutContainer.
+    int wordId_ = -1;
 };
 
 // IMAGE

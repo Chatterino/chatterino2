@@ -139,15 +139,32 @@ public:
 
     MessageElementFlags getFlags() const;
 
+    /// @brief The virtual channel used to display messages
+    ///
+    /// This channel contains all messages in this view and respects the
+    /// filter settings. It will always be of type Channel, not TwitchChannel
+    /// nor IrcChannel.
+    /// It's **not** equal to the channel passed in #setChannel().
     ChannelPtr channel();
+
+    /// Set the channel this view is displaying
     void setChannel(const ChannelPtr &underlyingChannel);
 
     void setFilters(const QList<QUuid> &ids);
     QList<QUuid> getFilterIds() const;
     FilterSetPtr getFilterSet() const;
 
+    /// @brief The channel this is derived from
+    ///
+    /// In case of "nested" channel views such as in user popups,
+    /// this channel is set to the original channel the messages came from,
+    /// which is used to open user popups from this view.
+    /// It's not always set.
+    /// @see #hasSourceChannel()
     ChannelPtr sourceChannel() const;
+    /// Setter for #sourceChannel()
     void setSourceChannel(ChannelPtr sourceChannel);
+    /// Checks if this view has a #sourceChannel
     bool hasSourceChannel() const;
 
     LimitedQueueSnapshot<MessageLayoutPtr> &getMessagesSnapshot();
@@ -300,8 +317,31 @@ private:
     ThreadGuard snapshotGuard_;
     LimitedQueueSnapshot<MessageLayoutPtr> snapshot_;
 
+    /// @brief The backing (internal) channel
+    ///
+    /// This is a "virtual" channel where all filtered messages from
+    /// @a underlyingChannel_ are added to. It contains messages visible on
+    /// screen and will always be a @a Channel, or, it will never be a
+    /// TwitchChannel or IrcChannel, however, it will have the same type and
+    /// name as @a underlyingChannel_. It's not know to any registry/server.
     ChannelPtr channel_ = nullptr;
+
+    /// @brief The channel receiving messages
+    ///
+    /// This channel is the one passed in #setChannel(). It's known to the
+    /// respective registry (e.g. TwitchIrcServer). For Twitch channels for
+    /// example, this will be an instance of TwitchChannel. This channel might
+    /// contain more messages than visible if filters are active.
     ChannelPtr underlyingChannel_ = nullptr;
+
+    /// @brief The channel @a underlyingChannel_ is derived from
+    ///
+    /// In case of "nested" channel views such as in user popups,
+    /// this channel is set to the original channel the messages came from,
+    /// which is used to open user popups from this view.
+    ///
+    /// @see #sourceChannel()
+    /// @see #hasSourceChannel()
     ChannelPtr sourceChannel_ = nullptr;
     Split *split_;
 

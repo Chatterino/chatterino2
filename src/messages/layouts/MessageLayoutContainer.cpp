@@ -51,6 +51,7 @@ void MessageLayoutContainer::beginLayout(int width, float scale,
     this->textLineHeight_ = mediumFontMetrics.height();
     this->spaceWidth_ = mediumFontMetrics.horizontalAdvance(' ');
     this->dotdotdotWidth_ = mediumFontMetrics.horizontalAdvance("...");
+    this->currentWordId_ = 0;
     this->canAddMessages_ = true;
     this->isCollapsed_ = false;
     this->wasPrevReversed_ = false;
@@ -456,6 +457,50 @@ size_t MessageLayoutContainer::getFirstMessageCharacterIndex() const
     return index;
 }
 
+std::pair<int, int> MessageLayoutContainer::getWordBounds(
+    const MessageLayoutElement *hoveredElement) const
+{
+    if (this->elements_.empty())
+    {
+        return {0, 0};
+    }
+
+    size_t index = 0;
+    size_t wordStart = 0;
+
+    for (; index < this->elements_.size(); index++)
+    {
+        const auto &element = this->elements_[index];
+        if (element->getWordId() == hoveredElement->getWordId())
+        {
+            break;
+        }
+
+        wordStart += element->getSelectionIndexCount();
+    }
+
+    size_t wordEnd = wordStart;
+
+    for (; index < this->elements_.size(); index++)
+    {
+        const auto &element = this->elements_[index];
+        if (element->getWordId() != hoveredElement->getWordId())
+        {
+            break;
+        }
+
+        wordEnd += element->getSelectionIndexCount();
+    }
+
+    const auto *lastElementInSelection = this->elements_[index - 1].get();
+    if (lastElementInSelection->hasTrailingSpace())
+    {
+        wordEnd--;
+    }
+
+    return {wordStart, wordEnd};
+}
+
 size_t MessageLayoutContainer::getLastCharacterIndex() const
 {
     if (this->lines_.empty())
@@ -503,6 +548,11 @@ int MessageLayoutContainer::remainingWidth() const
             (this->line_ + 1 == MAX_UNCOLLAPSED_LINES ? this->dotdotdotWidth_
                                                       : 0)) -
            this->currentX_;
+}
+
+int MessageLayoutContainer::nextWordId()
+{
+    return this->currentWordId_++;
 }
 
 void MessageLayoutContainer::addElement(MessageLayoutElement *element,

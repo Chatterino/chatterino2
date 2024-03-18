@@ -443,10 +443,29 @@ void MessageLayout::deleteCache()
 // returns nullptr if none was found
 
 // fourtf: this should return a MessageLayoutItem
-const MessageLayoutElement *MessageLayout::getElementAt(QPoint point)
+const MessageLayoutElement *MessageLayout::getElementAt(QPoint point) const
 {
     // go through all words and return the first one that contains the point.
     return this->container_.getElementAt(point);
+}
+
+std::pair<int, int> MessageLayout::getWordBounds(
+    const MessageLayoutElement *hoveredElement, QPoint relativePos) const
+{
+    // An element with wordId != -1 can be multiline, so we need to check all
+    // elements in the container
+    if (hoveredElement->getWordId() != -1)
+    {
+        return this->container_.getWordBounds(hoveredElement);
+    }
+
+    const auto wordStart = this->getSelectionIndex(relativePos) -
+                           hoveredElement->getMouseOverIndex(relativePos);
+    const auto selectionLength = hoveredElement->getSelectionIndexCount();
+    const auto length = hoveredElement->hasTrailingSpace() ? selectionLength - 1
+                                                           : selectionLength;
+
+    return {wordStart, wordStart + length};
 }
 
 size_t MessageLayout::getLastCharacterIndex() const
