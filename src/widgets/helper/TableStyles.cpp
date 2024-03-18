@@ -15,7 +15,12 @@ TableRowDragStyle::TableRowDragStyle(const QString &name)
 
 void TableRowDragStyle::applyTo(QTableView *view)
 {
-    auto *proxyStyle = new TableRowDragStyle(view->style()->name());
+#if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
+    auto styleName = view->style()->name();
+#else
+    QString styleName = "fusion";
+#endif
+    auto *proxyStyle = new TableRowDragStyle(styleName);
     proxyStyle->setParent(view);
     view->setStyle(proxyStyle);
 }
