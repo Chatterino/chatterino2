@@ -44,7 +44,6 @@ public:
     void handleClearChatMessage(Communi::IrcMessage *message);
     void handleClearMessageMessage(Communi::IrcMessage *message);
     void handleUserStateMessage(Communi::IrcMessage *message);
-    void handleGlobalUserStateMessage(Communi::IrcMessage *message);
     void handleWhisperMessage(Communi::IrcMessage *ircMessage);
 
     void handleUserNoticeMessage(Communi::IrcMessage *message,

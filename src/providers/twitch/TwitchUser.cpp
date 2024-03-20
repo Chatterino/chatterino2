@@ -12,4 +12,11 @@ void TwitchUser::fromHelixBlock(const HelixBlock &ignore)
     this->displayName = ignore.displayName;
 }
 
+void TwitchUser::update(const HelixUser &user) const
+{
+    assert(this->id == user.id);
+    this->name = user.login;
+    this->displayName = user.displayName;
+}
+
 }  // namespace chatterino

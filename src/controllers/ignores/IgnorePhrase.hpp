@@ -42,10 +42,6 @@ public:
 
     Qt::CaseSensitivity caseSensitivity() const;
 
-    const std::unordered_map<EmoteName, EmotePtr> &getEmotes() const;
-
-    bool containsEmote() const;
-
     static IgnorePhrase createEmpty();
 
 private:
@@ -55,8 +51,6 @@ private:
     bool isBlock_;
     QString replace_;
     bool isCaseSensitive_;
-    mutable std::unordered_map<EmoteName, EmotePtr> emotes_;
-    mutable bool emotesChecked_{false};
 };
 }  // namespace chatterino
 
