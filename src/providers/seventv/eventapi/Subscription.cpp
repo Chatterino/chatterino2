@@ -11,6 +11,7 @@
 
 namespace {
 
+using namespace chatterino;
 using namespace chatterino::seventv::eventapi;
 
 QString typeToString(SubscriptionType type)
