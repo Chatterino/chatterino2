@@ -9,6 +9,7 @@
 #include "util/AbandonObject.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
+#include "util/QMagicEnum.hpp"
 
 #include <magic_enum/magic_enum.hpp>
 #include <QCryptographicHash>
@@ -181,11 +182,9 @@ void NetworkData::emitFinally()
                 });
 }
 
-QLatin1String NetworkData::typeString() const
+QStringView NetworkData::typeString() const
 {
-    auto view = magic_enum::enum_name<NetworkRequestType>(this->requestType);
-    return QLatin1String{view.data(),
-                         static_cast<QLatin1String::size_type>(view.size())};
+    return qmagicenum::enumName(this->requestType);
 }
 
 void load(std::shared_ptr<NetworkData> &&data)

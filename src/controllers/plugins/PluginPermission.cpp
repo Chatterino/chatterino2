@@ -1,6 +1,8 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/PluginPermission.hpp"
 
+#    include "util/QMagicEnum.hpp"
+
 #    include <magic_enum/magic_enum.hpp>
 #    include <QJsonObject>
 
@@ -11,14 +13,13 @@ PluginPermission::PluginPermission(const QJsonObject &obj)
     auto jsontype = obj.value("type");
     if (!jsontype.isString())
     {
-        QString tn = magic_enum::enum_name(jsontype.type()).data();
+        auto tn = qmagicenum::enumName(jsontype.type());
         this->errors.emplace_back(QString("permission type is defined but is "
                                           "not a string (its type is %1)")
                                       .arg(tn));
     }
-    auto strtype = jsontype.toString().toStdString();
-    auto opt = magic_enum::enum_cast<PluginPermission::Type>(
-        strtype, magic_enum::case_insensitive);
+    auto opt = qmagicenum::enumCast<PluginPermission::Type>(
+        jsontype.toString(), qmagicenum::CASE_INSENSITIVE);
     if (!opt.has_value())
     {
         this->errors.emplace_back(QString("permission type is an unknown (%1)")

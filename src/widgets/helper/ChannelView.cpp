@@ -33,6 +33,7 @@
 #include "util/DistanceBetweenPoints.hpp"
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
+#include "util/QMagicEnum.hpp"
 #include "util/Twitch.hpp"
 #include "widgets/dialogs/ReplyThreadPopup.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
@@ -266,8 +267,7 @@ void addHiddenContextMenuItems(QMenu *menu,
         jsonObject["id"] = message->id;
         jsonObject["searchText"] = message->searchText;
         jsonObject["messageText"] = message->messageText;
-        jsonObject["flags"] = QString::fromStdString(
-            magic_enum::enum_flags_name(message->flags.value()));
+        jsonObject["flags"] = qmagicenum::enumFlagsName(message->flags.value());
 
         jsonDocument.setObject(jsonObject);
 

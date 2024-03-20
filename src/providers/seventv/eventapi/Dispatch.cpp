@@ -1,5 +1,7 @@
 #include "providers/seventv/eventapi/Dispatch.hpp"
 
+#include "util/QMagicEnum.hpp"
+
 #include <QJsonArray>
 
 #include <utility>
@@ -7,8 +9,7 @@
 namespace chatterino::seventv::eventapi {
 
 Dispatch::Dispatch(QJsonObject obj)
-    : type(magic_enum::enum_cast<SubscriptionType>(
-               obj["type"].toString().toStdString())
+    : type(qmagicenum::enumCast<SubscriptionType>(obj["type"].toString())
                .value_or(SubscriptionType::INVALID))
     , body(obj["body"].toObject())
     , id(this->body["id"].toString())
@@ -95,8 +96,8 @@ bool UserConnectionUpdateDispatch::validate() const
 
 CosmeticCreateDispatch::CosmeticCreateDispatch(const Dispatch &dispatch)
     : data(dispatch.body["object"]["data"].toObject())
-    , kind(magic_enum::enum_cast<CosmeticKind>(
-               dispatch.body["object"]["kind"].toString().toStdString())
+    , kind(qmagicenum::enumCast<CosmeticKind>(
+               dispatch.body["object"]["kind"].toString())
                .value_or(CosmeticKind::INVALID))
 {
 }
@@ -111,8 +112,7 @@ EntitlementCreateDeleteDispatch::EntitlementCreateDeleteDispatch(
 {
     const auto obj = dispatch.body["object"].toObject();
     this->refID = obj["ref_id"].toString();
-    this->kind = magic_enum::enum_cast<CosmeticKind>(
-                     obj["kind"].toString().toStdString())
+    this->kind = qmagicenum::enumCast<CosmeticKind>(obj["kind"].toString())
                      .value_or(CosmeticKind::INVALID);
 
     const auto userConnections = obj["user"]["connections"].toArray();
