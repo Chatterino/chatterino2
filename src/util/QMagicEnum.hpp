@@ -4,130 +4,127 @@
 #include <QString>
 #include <QStringView>
 
-namespace qmagicenum {
+namespace chatterino::qmagicenum::detail {
 
-namespace detail {
+template <bool, typename R>
+struct EnableIfEnum {
+};
 
-    template <bool, typename R>
-    struct EnableIfEnum {
-    };
+template <typename R>
+struct EnableIfEnum<true, R> {
+    using type = R;
+};
 
-    template <typename R>
-    struct EnableIfEnum<true, R> {
-        using type = R;
-    };
+template <typename T, typename R, typename BinaryPredicate = std::equal_to<>,
+          typename D = std::decay_t<T>>
+using enable_if_t = typename EnableIfEnum<
+    std::is_enum_v<D> &&
+        std::is_invocable_r_v<bool, BinaryPredicate, QChar, QChar>,
+    R>::type;
 
-    template <typename T, typename R,
-              typename BinaryPredicate = std::equal_to<>,
-              typename D = std::decay_t<T>>
-    using enable_if_t = typename EnableIfEnum<
-        std::is_enum_v<D> &&
-            std::is_invocable_r_v<bool, BinaryPredicate, QChar, QChar>,
-        R>::type;
+template <std::size_t N>
+consteval QStringView fromArray(const std::array<char16_t, N> &arr)
+{
+    return QStringView{arr.data(), static_cast<QStringView::size_type>(N - 1)};
+}
 
-    template <std::size_t N>
-    consteval QStringView fromArray(const std::array<char16_t, N> &arr)
+// Only the latin1 subset may be used right now, since it's easily convertible
+template <std::size_t N>
+consteval bool isLatin1(std::string_view maybe)
+{
+    for (std::size_t i = 0; i < N; i++)
     {
-        return QStringView{arr.data(),
-                           static_cast<QStringView::size_type>(N - 1)};
-    }
-
-    // Only the latin1 subset may be used right now, since it's easily convertible
-    template <std::size_t N>
-    consteval bool isLatin1(std::string_view maybe)
-    {
-        for (std::size_t i = 0; i < N; i++)
-        {
-            if (maybe[i] < 0x20 || maybe[i] > 0x7e)
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    template <typename BinaryPredicate>
-    inline constexpr bool eq(
-        QStringView a, QStringView b,
-        [[maybe_unused]] BinaryPredicate
-            &&p) noexcept(magic_enum::detail::
-                              is_nothrow_invocable<BinaryPredicate>())
-    {
-        // Note: operator== isn't constexpr
-        if (a.size() != b.size())
+        if (maybe[i] < 0x20 || maybe[i] > 0x7e)
         {
             return false;
         }
+    }
+    return true;
+}
 
-        for (QStringView::size_type i = 0; i < a.size(); i++)
-        {
-            if (!p(a[i], b[i]))
-            {
-                return false;
-            }
-        }
-
-        return true;
+template <typename BinaryPredicate>
+inline constexpr bool eq(
+    QStringView a, QStringView b,
+    [[maybe_unused]] BinaryPredicate &&
+        p) noexcept(magic_enum::detail::is_nothrow_invocable<BinaryPredicate>())
+{
+    // Note: operator== isn't constexpr
+    if (a.size() != b.size())
+    {
+        return false;
     }
 
-    template <typename C, typename E, E V>
-    consteval auto enumNameStorage()
+    for (QStringView::size_type i = 0; i < a.size(); i++)
     {
-        constexpr auto utf8 = magic_enum::enum_name<V>();
-
-        static_assert(isLatin1<utf8.size()>(utf8),
-                      "Can't convert non-latin1 UTF8 to UTF16");
-
-        std::array<C, utf8.size() + 1> storage;
-        for (std::size_t i = 0; i < utf8.size(); i++)
+        if (!p(a[i], b[i]))
         {
-            storage[i] = static_cast<C>(utf8[i]);
+            return false;
         }
-        storage[utf8.size()] = 0;
-        return storage;
     }
 
-    template <typename E, E V>
-    inline constexpr auto ENUM_NAME_STORAGE = enumNameStorage<char16_t, E, V>();
+    return true;
+}
 
-    template <typename E, magic_enum::detail::enum_subtype S, std::size_t... I>
-    consteval auto namesStorage(std::index_sequence<I...> /*unused*/)
+template <typename C, typename E, E V>
+consteval auto enumNameStorage()
+{
+    constexpr auto utf8 = magic_enum::enum_name<V>();
+
+    static_assert(isLatin1<utf8.size()>(utf8),
+                  "Can't convert non-latin1 UTF8 to UTF16");
+
+    std::array<C, utf8.size() + 1> storage;
+    for (std::size_t i = 0; i < utf8.size(); i++)
     {
-        return std::array<QStringView, sizeof...(I)>{{detail::fromArray(
-            ENUM_NAME_STORAGE<E, magic_enum::enum_values<E, S>()[I]>)...}};
+        storage[i] = static_cast<C>(utf8[i]);
+    }
+    storage[utf8.size()] = 0;
+    return storage;
+}
+
+template <typename E, E V>
+inline constexpr auto ENUM_NAME_STORAGE = enumNameStorage<char16_t, E, V>();
+
+template <typename E, magic_enum::detail::enum_subtype S, std::size_t... I>
+consteval auto namesStorage(std::index_sequence<I...> /*unused*/)
+{
+    return std::array<QStringView, sizeof...(I)>{{detail::fromArray(
+        ENUM_NAME_STORAGE<E, magic_enum::enum_values<E, S>()[I]>)...}};
+}
+
+template <typename E,
+          magic_enum::detail::enum_subtype S = magic_enum::detail::subtype_v<E>>
+inline constexpr auto NAMES_STORAGE = namesStorage<E, S>(
+    std::make_index_sequence<magic_enum::enum_count<E, S>()>{});
+
+template <typename E, magic_enum::detail::enum_subtype S,
+          typename D = std::decay_t<E>>
+using NamesStorage = decltype((NAMES_STORAGE<D, S>));
+
+template <typename Op = std::equal_to<>>
+class CaseInsensitive
+{
+    static constexpr QChar toLower(QChar c) noexcept
+    {
+        return (c >= u'A' && c <= u'Z')
+                   ? QChar(c.unicode() + static_cast<char16_t>(u'a' - u'A'))
+                   : c;
     }
 
-    template <typename E, magic_enum::detail::enum_subtype S =
-                              magic_enum::detail::subtype_v<E>>
-    inline constexpr auto NAMES_STORAGE = namesStorage<E, S>(
-        std::make_index_sequence<magic_enum::enum_count<E, S>()>{});
-
-    template <typename E, magic_enum::detail::enum_subtype S,
-              typename D = std::decay_t<E>>
-    using NamesStorage = decltype((NAMES_STORAGE<D, S>));
-
-    template <typename Op = std::equal_to<>>
-    class CaseInsensitive
+public:
+    template <typename L, typename R>
+    constexpr std::enable_if_t<std::is_same_v<std::decay_t<L>, QChar> &&
+                                   std::is_same_v<std::decay_t<R>, QChar>,
+                               bool>
+        operator()(L lhs, R rhs) const noexcept
     {
-        static constexpr QChar toLower(QChar c) noexcept
-        {
-            return (c >= u'A' && c <= u'Z')
-                       ? QChar(c.unicode() + static_cast<char16_t>(u'a' - u'A'))
-                       : c;
-        }
+        return Op{}(toLower(lhs), toLower(rhs));
+    }
+};
 
-    public:
-        template <typename L, typename R>
-        constexpr std::enable_if_t<std::is_same_v<std::decay_t<L>, QChar> &&
-                                       std::is_same_v<std::decay_t<R>, QChar>,
-                                   bool>
-            operator()(L lhs, R rhs) const noexcept
-        {
-            return Op{}(toLower(lhs), toLower(rhs));
-        }
-    };
+}  // namespace chatterino::qmagicenum::detail
 
-}  // namespace detail
+namespace chatterino::qmagicenum {
 
 /// @brief Get the name of an enum value
 ///
@@ -313,4 +310,4 @@ template <typename E,
 /// Allows you to write qmagicenum::enumCast<foo>("bar", qmagicenum::CASE_INSENSITIVE)
 inline constexpr auto CASE_INSENSITIVE = detail::CaseInsensitive<>{};
 
-}  // namespace qmagicenum
+}  // namespace chatterino::qmagicenum

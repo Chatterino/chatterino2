@@ -274,7 +274,6 @@ public:
         return combo;
     }
 
-    /// @pre @a items must be from qmagicenum
     template <typename T, std::size_t N>
     ComboBox *addDropdownEnumClass(const QString &text,
                                    const std::array<QStringView, N> &items,
@@ -286,8 +285,7 @@ public:
 
         for (const auto &item : items)
         {
-            // Safety: item comes from qmagicenum (precondition)
-            combo->addItem(qmagicenum::staticString(item));
+            combo->addItem(item.toString());
         }
 
         if (!defaultValueText.isEmpty())

@@ -182,9 +182,9 @@ void NetworkData::emitFinally()
                 });
 }
 
-QStringView NetworkData::typeString() const
+QString NetworkData::typeString() const
 {
-    return qmagicenum::enumName(this->requestType);
+    return qmagicenum::enumNameString(this->requestType);
 }
 
 void load(std::shared_ptr<NetworkData> &&data)

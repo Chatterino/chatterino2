@@ -60,7 +60,7 @@ public:
     void emitError(NetworkResult &&result);
     void emitFinally();
 
-    QStringView typeString() const;
+    QString typeString() const;
 
 private:
     QString hash_;

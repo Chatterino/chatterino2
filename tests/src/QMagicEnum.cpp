@@ -5,7 +5,8 @@
 
 #include <gtest/gtest.h>
 
-using namespace chatterino::literals;
+using namespace chatterino;
+using namespace literals;
 
 using qmagicenum::enumCast;
 using qmagicenum::enumFlagsName;
