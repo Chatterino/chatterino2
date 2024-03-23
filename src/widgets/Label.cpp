@@ -88,11 +88,11 @@ void Label::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    QFontMetrics metrics =
-        getFonts()->getFontMetrics(this->getFontStyle(), this->scale(), this);
+    QFontMetrics metrics = getIApp()->getFonts()->getFontMetrics(
+        this->getFontStyle(), this->scale(), this);
 
-    painter.setFont(
-        getFonts()->getFont(this->getFontStyle(), this->scale(), this));
+    painter.setFont(getIApp()->getFonts()->getFont(this->getFontStyle(),
+                                                   this->scale(), this));
 
     int offset = this->getOffset();
 
@@ -118,8 +118,8 @@ void Label::paintEvent(QPaintEvent *)
 
 void Label::updateSize()
 {
-    QFontMetrics metrics =
-        getFonts()->getFontMetrics(this->fontStyle_, this->scale(), this);
+    QFontMetrics metrics = getIApp()->getFonts()->getFontMetrics(
+        this->fontStyle_, this->scale(), this);
 
     int width =
         metrics.horizontalAdvance(this->text_) + (2 * this->getOffset());

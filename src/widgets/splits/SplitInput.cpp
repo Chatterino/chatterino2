@@ -162,9 +162,10 @@ void SplitInput::initLayout()
     QObject::connect(this->ui_.textEdit, &QTextEdit::textChanged, this,
                      &SplitInput::onTextChanged);
 
-    this->managedConnections_.managedConnect(app->fonts->fontChanged, [this]() {
-        this->updateFonts();
-    });
+    this->managedConnections_.managedConnect(app->getFonts()->fontChanged,
+                                             [this]() {
+                                                 this->updateFonts();
+                                             });
 
     // open emote popup
     QObject::connect(this->ui_.emoteButton, &EffectLabel::leftClicked, [this] {
@@ -197,13 +198,13 @@ void SplitInput::initLayout()
 
 void SplitInput::updateFonts()
 {
-    auto app = getApp();
+    auto *app = getIApp();
     this->ui_.textEdit->setFont(
-        app->fonts->getFont(FontStyle::ChatMedium, this->scale(), this));
+        app->getFonts()->getFont(FontStyle::ChatMedium, this->scale(), this));
     this->ui_.textEditLength->setFont(
-        app->fonts->getFont(FontStyle::Tiny, this->scale(), this));
-    this->ui_.replyLabel->setFont(
-        app->fonts->getFont(FontStyle::ChatMediumBold, this->scale(), this));
+        app->getFonts()->getFont(FontStyle::Tiny, this->scale(), this));
+    this->ui_.replyLabel->setFont(app->getFonts()->getFont(
+        FontStyle::ChatMediumBold, this->scale(), this));
 }
 
 void SplitInput::scaleChangedEvent(float scale)

@@ -598,8 +598,8 @@ void ChannelView::scaleChangedEvent(float scale)
 
     if (this->goToBottom_)
     {
-        this->goToBottom_->getLabel().setFont(
-            getFonts()->getFont(FontStyle::UiMedium, this->scale(), this));
+        this->goToBottom_->getLabel().setFont(getIApp()->getFonts()->getFont(
+            FontStyle::UiMedium, this->scale(), this));
     }
 }
 

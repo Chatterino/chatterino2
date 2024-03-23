@@ -189,7 +189,7 @@ int NotebookTab::normalTabWidth()
     int width;
 
     QFontMetrics metrics =
-        getApp()->fonts->getFontMetrics(FontStyle::UiTabs, scale, this);
+        getIApp()->getFonts()->getFontMetrics(FontStyle::UiTabs, scale, this);
 
     if (this->hasXButton())
     {
@@ -427,13 +427,14 @@ void NotebookTab::moveAnimated(QPoint pos, bool animated)
 
 void NotebookTab::paintEvent(QPaintEvent *)
 {
-    auto *app = getApp();
+    auto *app = getIApp();
     QPainter painter(this);
     float scale = this->scale();
 
-    painter.setFont(getApp()->fonts->getFont(FontStyle::UiTabs, scale, this));
+    painter.setFont(
+        getIApp()->getFonts()->getFont(FontStyle::UiTabs, scale, this));
     QFontMetrics metrics =
-        app->fonts->getFontMetrics(FontStyle::UiTabs, scale, this);
+        app->getFonts()->getFontMetrics(FontStyle::UiTabs, scale, this);
 
     int height = int(scale * NOTEBOOK_TAB_HEIGHT);
 

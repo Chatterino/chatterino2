@@ -946,7 +946,8 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
 
 void Split::scaleChangedEvent(float scale)
 {
-    this->setFont(getApp()->fonts->getFont(FontStyle::UiMedium, scale, this));
+    this->setFont(
+        getIApp()->getFonts()->getFont(FontStyle::UiMedium, scale, this));
 }
 
 void Split::updateGifEmotes()
@@ -1202,8 +1203,8 @@ void Split::showChatterList()
     auto formatListItemText = [this](QString text) {
         auto *item = new QListWidgetItem();
         item->setText(text);
-        item->setFont(
-            getApp()->fonts->getFont(FontStyle::UiMedium, this->scale(), this));
+        item->setFont(getIApp()->getFonts()->getFont(FontStyle::UiMedium,
+                                                     this->scale(), this));
         return item;
     };
 

@@ -139,10 +139,10 @@ Fonts::FontData Fonts::createFontData(FontStyle type, float scale)
         };
 
         ChatFontData data = sizeScale[type];
-        return FontData(
-            QFont(settings->chatFontFamily.getValue(),
-                  int(settings->chatFontSize.getValue() * data.scale * scale),
-                  data.weight, data.italic));
+        return FontData(QFont(
+            getSettings()->chatFontFamily.getValue(),
+            int(getSettings()->chatFontSize.getValue() * data.scale * scale),
+            data.weight, data.italic));
     }
 
     // normal UI font
