@@ -189,6 +189,7 @@
 - Dev: Cleaned up and optimized resources. (#5222)
 - Dev: Refactor `StreamerMode`. (#5216, #5236)
 - Dev: Cleaned up unused code in `MessageElement` and `MessageLayoutElement`. (#5225)
+- Dev: Adapted `magic_enum` to Qt's Utf-16 strings. (#5258)
 - Dev: `NetworkManager`'s statics are now created in its `init` method. (#5254)
 
 ## 2.4.6

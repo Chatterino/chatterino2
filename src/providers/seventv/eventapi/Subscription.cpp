@@ -1,5 +1,7 @@
 #include "providers/seventv/eventapi/Subscription.hpp"
 
+#include "util/QMagicEnum.hpp"
+
 #include <QDebug>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -9,14 +11,15 @@
 
 namespace {
 
+using namespace chatterino;
 using namespace chatterino::seventv::eventapi;
 
-const char *typeToString(SubscriptionType type)
+QString typeToString(SubscriptionType type)
 {
-    return magic_enum::enum_name(type).data();
+    return qmagicenum::enumNameString(type);
 }
 
-QJsonObject createDataJson(const char *typeName, const Condition &condition)
+QJsonObject createDataJson(const QString &typeName, const Condition &condition)
 {
     QJsonObject data;
     data["type"] = typeName;
@@ -45,7 +48,7 @@ bool Subscription::operator!=(const Subscription &rhs) const
 
 QByteArray Subscription::encodeSubscribe() const
 {
-    const auto *typeName = typeToString(this->type);
+    auto typeName = typeToString(this->type);
     QJsonObject root;
     root["op"] = (int)Opcode::Subscribe;
     root["d"] = createDataJson(typeName, this->condition);
@@ -54,7 +57,7 @@ QByteArray Subscription::encodeSubscribe() const
 
 QByteArray Subscription::encodeUnsubscribe() const
 {
-    const auto *typeName = typeToString(this->type);
+    auto typeName = typeToString(this->type);
     QJsonObject root;
     root["op"] = (int)Opcode::Unsubscribe;
     root["d"] = createDataJson(typeName, this->condition);
@@ -66,8 +69,7 @@ QDebug &operator<<(QDebug &dbg, const Subscription &subscription)
     std::visit(
         [&](const auto &cond) {
             dbg << "Subscription{ condition:" << cond
-                << "type:" << magic_enum::enum_name(subscription.type).data()
-                << '}';
+                << "type:" << qmagicenum::enumName(subscription.type) << '}';
         },
         subscription.condition);
     return dbg;
