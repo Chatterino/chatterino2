@@ -4,19 +4,36 @@
 
 namespace chatterino {
 
-QThread NetworkManager::workerThread;
-QNetworkAccessManager NetworkManager::accessManager;
+QThread *NetworkManager::workerThread = nullptr;
+QNetworkAccessManager *NetworkManager::accessManager = nullptr;
 
 void NetworkManager::init()
 {
-    NetworkManager::accessManager.moveToThread(&NetworkManager::workerThread);
-    NetworkManager::workerThread.start();
+    assert(!NetworkManager::workerThread);
+    assert(!NetworkManager::accessManager);
+
+    NetworkManager::workerThread = new QThread;
+    NetworkManager::workerThread->start();
+
+    NetworkManager::accessManager = new QNetworkAccessManager;
+    NetworkManager::accessManager->moveToThread(NetworkManager::workerThread);
 }
 
 void NetworkManager::deinit()
 {
-    NetworkManager::workerThread.quit();
-    NetworkManager::workerThread.wait();
+    assert(NetworkManager::workerThread);
+    assert(NetworkManager::accessManager);
+
+    if (NetworkManager::workerThread)
+    {
+        NetworkManager::workerThread->quit();
+        NetworkManager::workerThread->wait();
+    }
+
+    delete NetworkManager::accessManager;
+    NetworkManager::accessManager = nullptr;
+    delete NetworkManager::workerThread;
+    NetworkManager::workerThread = nullptr;
 }
 
 }  // namespace chatterino
