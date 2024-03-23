@@ -49,7 +49,7 @@ void loadUncached(std::shared_ptr<NetworkData> &&data)
     NetworkRequester requester;
     auto *worker = new NetworkTask(std::move(data));
 
-    worker->moveToThread(&NetworkManager::workerThread);
+    worker->moveToThread(NetworkManager::workerThread);
 
     QObject::connect(&requester, &NetworkRequester::requestUrl, worker,
                      &NetworkTask::run);
