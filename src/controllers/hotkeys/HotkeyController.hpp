@@ -4,7 +4,6 @@
 #include "common/Singleton.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 
-#include <boost/optional.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
 
@@ -52,8 +51,7 @@ public:
      * @returns the new index in the SignalVector
      **/
     int replaceHotkey(QString oldName, std::shared_ptr<Hotkey> newHotkey);
-    boost::optional<HotkeyCategory> hotkeyCategoryFromName(
-        QString categoryName);
+    std::optional<HotkeyCategory> hotkeyCategoryFromName(QString categoryName);
 
     /**
      * @brief checks if the hotkey is duplicate
@@ -83,8 +81,8 @@ public:
     /**
      * @returns a const map with the HotkeyCategory enum as its key, and HotkeyCategoryData as the value.
      **/
-    [[nodiscard]] const std::map<HotkeyCategory, HotkeyCategoryData>
-        &categories() const;
+    [[nodiscard]] const std::map<HotkeyCategory, HotkeyCategoryData> &
+        categories() const;
 
     pajlada::Signals::NoArgSignal onItemsUpdated;
 

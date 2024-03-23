@@ -1,7 +1,6 @@
 #include "IvrApi.hpp"
 
-#include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 
 #include <QUrlQuery>
@@ -18,12 +17,10 @@ void IvrApi::getSubage(QString userName, QString channelName,
 
     this->makeRequest(
             QString("twitch/subage/%1/%2").arg(userName).arg(channelName), {})
-        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+        .onSuccess([successCallback, failureCallback](auto result) {
             auto root = result.parseJson();
 
             successCallback(root);
-
-            return Success;
         })
         .onError([failureCallback](auto result) {
             qCWarning(chatterinoIvr)
@@ -42,12 +39,10 @@ void IvrApi::getBulkEmoteSets(QString emoteSetList,
     urlQuery.addQueryItem("set_id", emoteSetList);
 
     this->makeRequest("twitch/emotes/sets", urlQuery)
-        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+        .onSuccess([successCallback, failureCallback](auto result) {
             auto root = result.parseJsonArray();
 
             successCallback(root);
-
-            return Success;
         })
         .onError([failureCallback](auto result) {
             qCWarning(chatterinoIvr)

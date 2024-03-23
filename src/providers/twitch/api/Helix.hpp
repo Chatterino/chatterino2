@@ -1,11 +1,11 @@
 #pragma once
 
 #include "common/Aliases.hpp"
-#include "common/NetworkRequest.hpp"
+#include "common/network/NetworkRequest.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
+#include "util/Helpers.hpp"
 #include "util/QStringHash.hpp"
 
-#include <boost/optional.hpp>
 #include <QDateTime>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -15,6 +15,7 @@
 #include <QUrlQuery>
 
 #include <functional>
+#include <optional>
 #include <unordered_set>
 #include <vector>
 
@@ -68,6 +69,9 @@ struct HelixStream {
     QString language;
     QString thumbnailUrl;
 
+    // This is the names, the IDs are now always empty
+    std::vector<QString> tags;
+
     HelixStream()
         : id("")
         , userId("")
@@ -98,6 +102,11 @@ struct HelixStream {
         , language(jsonObject.value("language").toString())
         , thumbnailUrl(jsonObject.value("thumbnail_url").toString())
     {
+        const auto jsonTags = jsonObject.value("tags").toArray();
+        for (const auto &tag : jsonTags)
+        {
+            this->tags.push_back(tag.toString());
+        }
     }
 };
 
@@ -277,24 +286,23 @@ struct HelixChannelEmote {
 struct HelixChatSettings {
     const QString broadcasterId;
     const bool emoteMode;
-    // boost::none if disabled
-    const boost::optional<int> followerModeDuration;  // time in minutes
-    const boost::optional<int>
-        nonModeratorChatDelayDuration;            // time in seconds
-    const boost::optional<int> slowModeWaitTime;  // time in seconds
+    // std::nullopt if disabled
+    const std::optional<int> followerModeDuration;           // time in minutes
+    const std::optional<int> nonModeratorChatDelayDuration;  // time in seconds
+    const std::optional<int> slowModeWaitTime;               // time in seconds
     const bool subscriberMode;
     const bool uniqueChatMode;
 
     explicit HelixChatSettings(QJsonObject jsonObject)
         : broadcasterId(jsonObject.value("broadcaster_id").toString())
         , emoteMode(jsonObject.value("emote_mode").toBool())
-        , followerModeDuration(boost::make_optional(
+        , followerModeDuration(makeConditionedOptional(
               jsonObject.value("follower_mode").toBool(),
               jsonObject.value("follower_mode_duration").toInt()))
-        , nonModeratorChatDelayDuration(boost::make_optional(
+        , nonModeratorChatDelayDuration(makeConditionedOptional(
               jsonObject.value("non_moderator_chat_delay").toBool(),
               jsonObject.value("non_moderator_chat_delay_duration").toInt()))
-        , slowModeWaitTime(boost::make_optional(
+        , slowModeWaitTime(makeConditionedOptional(
               jsonObject.value("slow_mode").toBool(),
               jsonObject.value("slow_mode_wait_time").toInt()))
         , subscriberMode(jsonObject.value("subscriber_mode").toBool())
@@ -403,6 +411,41 @@ struct HelixGlobalBadges {
 };
 
 using HelixChannelBadges = HelixGlobalBadges;
+
+struct HelixDropReason {
+    QString code;
+    QString message;
+
+    explicit HelixDropReason(const QJsonObject &jsonObject)
+        : code(jsonObject["code"].toString())
+        , message(jsonObject["message"].toString())
+    {
+    }
+};
+
+struct HelixSentMessage {
+    QString id;
+    bool isSent;
+    std::optional<HelixDropReason> dropReason;
+
+    explicit HelixSentMessage(const QJsonObject &jsonObject)
+        : id(jsonObject["message_id"].toString())
+        , isSent(jsonObject["is_sent"].toBool())
+        , dropReason(jsonObject.contains("drop_reason")
+                         ? std::optional(HelixDropReason(
+                               jsonObject["drop_reason"].toObject()))
+                         : std::nullopt)
+    {
+    }
+};
+
+struct HelixSendMessageArgs {
+    QString broadcasterID;
+    QString senderID;
+    QString message;
+    /// Optional
+    QString replyParentMessageID;
+};
 
 enum class HelixAnnouncementColor {
     Blue,
@@ -688,6 +731,19 @@ enum class HelixGetGlobalBadgesError {
     Forwarded,
 };
 
+enum class HelixSendMessageError {
+    Unknown,
+
+    MissingText,
+    BadRequest,
+    Forbidden,
+    MessageTooLarge,
+    UserMissingScope,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
 struct HelixError {
     /// Text version of the HTTP error that happened (e.g. Bad Request)
     QString error;
@@ -908,7 +964,7 @@ public:
     // https://dev.twitch.tv/docs/api/reference#update-chat-settings
     virtual void updateFollowerMode(
         QString broadcasterID, QString moderatorID,
-        boost::optional<int> followerModeDuration,
+        std::optional<int> followerModeDuration,
         ResultCallback<HelixChatSettings> successCallback,
         FailureCallback<HelixUpdateChatSettingsError, QString>
             failureCallback) = 0;
@@ -917,7 +973,7 @@ public:
     // https://dev.twitch.tv/docs/api/reference#update-chat-settings
     virtual void updateNonModeratorChatDelay(
         QString broadcasterID, QString moderatorID,
-        boost::optional<int> nonModeratorChatDelayDuration,
+        std::optional<int> nonModeratorChatDelayDuration,
         ResultCallback<HelixChatSettings> successCallback,
         FailureCallback<HelixUpdateChatSettingsError, QString>
             failureCallback) = 0;
@@ -926,7 +982,7 @@ public:
     // https://dev.twitch.tv/docs/api/reference#update-chat-settings
     virtual void updateSlowMode(
         QString broadcasterID, QString moderatorID,
-        boost::optional<int> slowModeWaitTime,
+        std::optional<int> slowModeWaitTime,
         ResultCallback<HelixChatSettings> successCallback,
         FailureCallback<HelixUpdateChatSettingsError, QString>
             failureCallback) = 0;
@@ -951,7 +1007,7 @@ public:
     // https://dev.twitch.tv/docs/api/reference#ban-user
     virtual void banUser(
         QString broadcasterID, QString moderatorID, QString userID,
-        boost::optional<int> duration, QString reason,
+        std::optional<int> duration, QString reason,
         ResultCallback<> successCallback,
         FailureCallback<HelixBanUserError, QString> failureCallback) = 0;
 
@@ -1018,6 +1074,12 @@ public:
         QString fromBroadcasterID, QString toBroadcasterID, QString moderatorID,
         ResultCallback<> successCallback,
         FailureCallback<HelixSendShoutoutError, QString> failureCallback) = 0;
+
+    /// https://dev.twitch.tv/docs/api/reference/#send-chat-message
+    virtual void sendChatMessage(
+        HelixSendMessageArgs args,
+        ResultCallback<HelixSentMessage> successCallback,
+        FailureCallback<HelixSendMessageError, QString> failureCallback) = 0;
 
     virtual void update(QString clientId, QString oauthToken) = 0;
 
@@ -1224,7 +1286,7 @@ public:
     // https://dev.twitch.tv/docs/api/reference#update-chat-settings
     void updateFollowerMode(
         QString broadcasterID, QString moderatorID,
-        boost::optional<int> followerModeDuration,
+        std::optional<int> followerModeDuration,
         ResultCallback<HelixChatSettings> successCallback,
         FailureCallback<HelixUpdateChatSettingsError, QString> failureCallback)
         final;
@@ -1233,7 +1295,7 @@ public:
     // https://dev.twitch.tv/docs/api/reference#update-chat-settings
     void updateNonModeratorChatDelay(
         QString broadcasterID, QString moderatorID,
-        boost::optional<int> nonModeratorChatDelayDuration,
+        std::optional<int> nonModeratorChatDelayDuration,
         ResultCallback<HelixChatSettings> successCallback,
         FailureCallback<HelixUpdateChatSettingsError, QString> failureCallback)
         final;
@@ -1241,7 +1303,7 @@ public:
     // Updates the slow mode using
     // https://dev.twitch.tv/docs/api/reference#update-chat-settings
     void updateSlowMode(QString broadcasterID, QString moderatorID,
-                        boost::optional<int> slowModeWaitTime,
+                        std::optional<int> slowModeWaitTime,
                         ResultCallback<HelixChatSettings> successCallback,
                         FailureCallback<HelixUpdateChatSettingsError, QString>
                             failureCallback) final;
@@ -1266,7 +1328,7 @@ public:
     // https://dev.twitch.tv/docs/api/reference#ban-user
     void banUser(
         QString broadcasterID, QString moderatorID, QString userID,
-        boost::optional<int> duration, QString reason,
+        std::optional<int> duration, QString reason,
         ResultCallback<> successCallback,
         FailureCallback<HelixBanUserError, QString> failureCallback) final;
 
@@ -1332,6 +1394,12 @@ public:
         QString fromBroadcasterID, QString toBroadcasterID, QString moderatorID,
         ResultCallback<> successCallback,
         FailureCallback<HelixSendShoutoutError, QString> failureCallback) final;
+
+    /// https://dev.twitch.tv/docs/api/reference/#send-chat-message
+    void sendChatMessage(
+        HelixSendMessageArgs args,
+        ResultCallback<HelixSentMessage> successCallback,
+        FailureCallback<HelixSendMessageError, QString> failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 

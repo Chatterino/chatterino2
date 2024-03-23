@@ -1,4 +1,5 @@
-#include "common/NetworkManager.hpp"
+#include "common/network/NetworkManager.hpp"
+#include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 
 #include <gtest/gtest.h>
@@ -22,14 +23,15 @@ int main(int argc, char **argv)
 #ifdef SUPPORT_QT_NETWORK_TESTS
     QApplication app(argc, argv);
     // make sure to always debug-log
-    QLoggingCategory::setFilterRules("*.debug=true");
+    QLoggingCategory::setFilterRules("chatterino.*=true");
+
+    initResources();
 
     chatterino::NetworkManager::init();
 
     // Ensure settings are initialized before any tests are run
     QTemporaryDir settingsDir;
     settingsDir.setAutoRemove(false);  // we'll remove it manually
-    qDebug() << "Settings directory:" << settingsDir.path();
     chatterino::Settings settings(settingsDir.path());
 
     QTimer::singleShot(0, [&]() {

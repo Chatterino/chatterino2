@@ -15,20 +15,20 @@ QString sendShoutout(const CommandContext &ctx)
 {
     auto *twitchChannel = ctx.twitchChannel;
     auto channel = ctx.channel;
-    auto words = &ctx.words;
+    const auto *words = &ctx.words;
 
     if (twitchChannel == nullptr)
     {
         channel->addMessage(makeSystemMessage(
-            "The /shoutout command only works in Twitch channels"));
+            "The /shoutout command only works in Twitch channels."));
         return "";
     }
 
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         channel->addMessage(
-            makeSystemMessage("You must be logged in to send shoutout"));
+            makeSystemMessage("You must be logged in to send shoutout."));
         return "";
     }
 
@@ -47,7 +47,7 @@ QString sendShoutout(const CommandContext &ctx)
 
     getHelix()->getUserByName(
         target,
-        [twitchChannel, channel, currentUser, &target](const auto targetUser) {
+        [twitchChannel, channel, currentUser](const auto targetUser) {
             getHelix()->sendShoutout(
                 twitchChannel->roomId(), targetUser.id,
                 currentUser->getUserId(),

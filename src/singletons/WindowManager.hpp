@@ -37,8 +37,13 @@ class WindowManager final : public Singleton
 public:
     static const QString WINDOW_LAYOUT_FILENAME;
 
-    WindowManager();
+    explicit WindowManager(const Paths &paths);
     ~WindowManager() override;
+
+    WindowManager(const WindowManager &) = delete;
+    WindowManager(WindowManager &&) = delete;
+    WindowManager &operator=(const WindowManager &) = delete;
+    WindowManager &operator=(WindowManager &&) = delete;
 
     static void encodeTab(SplitContainer *tab, bool isSelected,
                           QJsonObject &obj);
@@ -61,6 +66,10 @@ public:
     // This is called, for example, when the emote scale or timestamp format has
     // changed
     void forceLayoutChannelViews();
+
+    // Tell a channel (or all channels if channel is nullptr) to invalidate all paint buffers
+    void invalidateChannelViewBuffers(Channel *channel = nullptr);
+
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
     void repaintGifEmotes();
 
@@ -93,8 +102,8 @@ public:
     QPoint emotePopupPos();
     void setEmotePopupPos(QPoint pos);
 
-    virtual void initialize(Settings &settings, Paths &paths) override;
-    virtual void save() override;
+    void initialize(Settings &settings, const Paths &paths) override;
+    void save() override;
     void closeAll();
 
     int getGeneration() const;
@@ -119,12 +128,11 @@ public:
     // This signal fires whenever views rendering a channel, or all views if the
     // channel is a nullptr, need to redo their layout
     pajlada::Signals::Signal<Channel *> layoutRequested;
+    // This signal fires whenever views rendering a channel, or all views if the
+    // channel is a nullptr, need to invalidate their paint buffers
+    pajlada::Signals::Signal<Channel *> invalidateBuffersRequested;
 
     pajlada::Signals::NoArgSignal wordFlagsChanged;
-
-    // This signal fires every 100ms and can be used to trigger random things that require a recheck.
-    // It is currently being used by the "Tooltip Preview Image" system to recheck if an image is ready to be rendered.
-    pajlada::Signals::NoArgSignal miscUpdate;
 
     pajlada::Signals::Signal<Split *> selectSplit;
     pajlada::Signals::Signal<SplitContainer *> selectSplitContainer;
@@ -144,6 +152,7 @@ private:
     const QString windowLayoutFilePath;
 
     bool initialized_ = false;
+    bool shuttingDown_ = false;
 
     QPoint emotePopupPos_;
 
@@ -159,7 +168,6 @@ private:
     pajlada::SettingListener wordFlagsListener_;
 
     QTimer *saveTimer;
-    QTimer miscUpdateTimer_;
 
     friend class Window;  // this is for selectedWindow_
 };

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "messages/Message.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <QHBoxLayout>
@@ -19,7 +20,6 @@ class Split;
 class EmotePopup;
 class InputCompletionPopup;
 class EffectLabel;
-class MessageThread;
 class ResizingTextEdit;
 class ChannelView;
 enum class CompletionKind;
@@ -40,8 +40,7 @@ public:
     QString getInputText() const;
     void insertText(const QString &text);
 
-    void setReply(std::shared_ptr<MessageThread> reply,
-                  bool showInlineReplying = true);
+    void setReply(MessagePtr reply, bool showInlineReplying = true);
     void setPlaceholderText(const QString &text);
 
     /**
@@ -67,6 +66,13 @@ public:
      **/
     bool isHidden() const;
 
+    /**
+     * @brief Sets the text of this input
+     *
+     * This method should only be used in tests
+     */
+    void setInputText(const QString &newInputText);
+
     pajlada::Signals::Signal<const QString &> textChanged;
     pajlada::Signals::NoArgSignal selectionChanged;
 
@@ -81,14 +87,13 @@ protected:
 
     virtual void giveFocus(Qt::FocusReason reason);
 
-    QString handleSendMessage(std::vector<QString> &arguments);
+    QString handleSendMessage(const std::vector<QString> &arguments);
     void postMessageSend(const QString &message,
                          const std::vector<QString> &arguments);
 
     /// Clears the input box, clears reply thread if inline replies are enabled
     void clearInput();
 
-protected:
     void addShortcuts() override;
     void initLayout();
     bool eventFilter(QObject *obj, QEvent *event) override;
@@ -136,7 +141,7 @@ protected:
         EffectLabel *cancelReplyButton;
     } ui_{};
 
-    std::shared_ptr<MessageThread> replyThread_ = nullptr;
+    MessagePtr replyThread_ = nullptr;
     bool enableInlineReplying_;
 
     pajlada::Signals::SignalHolder managedConnections_;

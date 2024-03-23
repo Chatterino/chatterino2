@@ -3,10 +3,11 @@
 #include "util/RapidjsonHelpers.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
-#include <boost/optional.hpp>
 #include <pajlada/serialize.hpp>
 #include <QColor>
 #include <QString>
+
+#include <optional>
 
 namespace chatterino {
 
@@ -15,7 +16,7 @@ namespace chatterino {
 // or a user note that should be displayed with the user
 // Replacement fields should be optional, where none denotes that the field should not be updated for the user
 struct UserData {
-    boost::optional<QColor> color{boost::none};
+    std::optional<QColor> color{std::nullopt};
 
     // TODO: User note?
 };

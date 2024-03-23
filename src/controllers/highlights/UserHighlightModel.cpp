@@ -1,7 +1,6 @@
-#include "UserHighlightModel.hpp"
+#include "controllers/highlights/UserHighlightModel.hpp"
 
 #include "Application.hpp"
-#include "controllers/highlights/HighlightModel.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "providers/colors/ColorProvider.hpp"
 #include "singletons/Settings.hpp"
@@ -9,8 +8,6 @@
 #include "util/StandardItemHelper.hpp"
 
 namespace chatterino {
-
-using Column = HighlightModel::Column;
 
 // commandmodel
 UserHighlightModel::UserHighlightModel(QObject *parent)
@@ -106,17 +103,13 @@ void UserHighlightModel::customRowSetData(
                     // Update the setting with the new value
                     getSettings()->selfMessageHighlightColor.setValue(
                         colorName);
-                    // Update the color provider with the new color to be used for future
-                    const_cast<ColorProvider &>(ColorProvider::instance())
-                        .updateColor(ColorType::SelfMessageHighlight,
-                                     QColor(colorName));
                 }
             }
         }
         break;
     }
 
-    getApp()->windows->forceLayoutChannelViews();
+    getIApp()->getWindows()->forceLayoutChannelViews();
 }
 
 // row into vector item

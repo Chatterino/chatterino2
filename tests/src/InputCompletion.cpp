@@ -5,15 +5,15 @@
 #include "controllers/completion/strategies/ClassicUserStrategy.hpp"
 #include "controllers/completion/strategies/Strategy.hpp"
 #include "messages/Emote.hpp"
+#include "mocks/Channel.hpp"
 #include "mocks/EmptyApplication.hpp"
 #include "mocks/Helix.hpp"
-#include "providers/twitch/TwitchIrcServer.hpp"
+#include "mocks/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "widgets/splits/InputCompletionPopup.hpp"
 
-#include <boost/optional/optional_io.hpp>
 #include <gtest/gtest.h>
 #include <QDir>
 #include <QFile>
@@ -23,34 +23,13 @@
 
 #include <span>
 
+using namespace chatterino;
+using chatterino::mock::MockChannel;
+
 namespace {
 
-using namespace chatterino;
 using namespace chatterino::completion;
 using ::testing::Exactly;
-
-class MockTwitchIrcServer : public ITwitchIrcServer
-{
-public:
-    const BttvEmotes &getBttvEmotes() const override
-    {
-        return this->bttv;
-    }
-
-    const FfzEmotes &getFfzEmotes() const override
-    {
-        return this->ffz;
-    }
-
-    const SeventvEmotes &getSeventvEmotes() const override
-    {
-        return this->seventv;
-    }
-
-    BttvEmotes bttv;
-    FfzEmotes ffz;
-    SeventvEmotes seventv;
-};
 
 class MockApplication : mock::EmptyApplication
 {
@@ -70,25 +49,30 @@ public:
         return &this->emotes;
     }
 
+    BttvEmotes *getBttvEmotes() override
+    {
+        return &this->bttvEmotes;
+    }
+
+    FfzEmotes *getFfzEmotes() override
+    {
+        return &this->ffzEmotes;
+    }
+
+    SeventvEmotes *getSeventvEmotes() override
+    {
+        return &this->seventvEmotes;
+    }
+
     AccountController accounts;
-    MockTwitchIrcServer twitch;
+    mock::MockTwitchIrcServer twitch;
     Emotes emotes;
+    BttvEmotes bttvEmotes;
+    FfzEmotes ffzEmotes;
+    SeventvEmotes seventvEmotes;
 };
 
 }  // namespace
-
-namespace chatterino {
-
-class MockChannel : public Channel
-{
-public:
-    MockChannel(const QString &name)
-        : Channel(name, Channel::Type::Twitch)
-    {
-    }
-};
-
-}  // namespace chatterino
 
 EmotePtr namedEmote(const EmoteName &name)
 {
@@ -188,18 +172,18 @@ private:
         addEmote(*bttvEmotes, ":-)");
         addEmote(*bttvEmotes, "B-)");
         addEmote(*bttvEmotes, "Clap");
-        this->mockApplication->twitch.bttv.setEmotes(std::move(bttvEmotes));
+        this->mockApplication->bttvEmotes.setEmotes(std::move(bttvEmotes));
 
         auto ffzEmotes = std::make_shared<EmoteMap>();
         addEmote(*ffzEmotes, "LilZ");
         addEmote(*ffzEmotes, "ManChicken");
         addEmote(*ffzEmotes, "CatBag");
-        this->mockApplication->twitch.ffz.setEmotes(std::move(ffzEmotes));
+        this->mockApplication->ffzEmotes.setEmotes(std::move(ffzEmotes));
 
         auto seventvEmotes = std::make_shared<EmoteMap>();
         addEmote(*seventvEmotes, "Clap");
         addEmote(*seventvEmotes, "Clap2");
-        this->mockApplication->twitch.seventv.setGlobalEmotes(
+        this->mockApplication->seventvEmotes.setGlobalEmotes(
             std::move(seventvEmotes));
     }
 

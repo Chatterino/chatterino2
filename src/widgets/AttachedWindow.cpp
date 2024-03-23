@@ -2,7 +2,6 @@
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
-#include "ForwardDecl.hpp"
 #include "singletons/Settings.hpp"
 #include "util/DebugCount.hpp"
 #include "widgets/splits/Split.hpp"
@@ -273,7 +272,7 @@ void AttachedWindow::updateWindowRect(void *_attachedPtr)
     float scale = 1.f;
     if (auto dpi = getWindowDpi(attached))
     {
-        scale = dpi.get() / 96.f;
+        scale = *dpi / 96.f;
 
         for (auto w : this->ui_.split->findChildren<BaseWidget *>())
         {

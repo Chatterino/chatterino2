@@ -1,4 +1,6 @@
-#include "Label.hpp"
+#include "widgets/Label.hpp"
+
+#include "Application.hpp"
 
 #include <QPainter>
 
@@ -14,9 +16,10 @@ Label::Label(BaseWidget *parent, QString text, FontStyle style)
     , text_(std::move(text))
     , fontStyle_(style)
 {
-    this->connections_.managedConnect(getFonts()->fontChanged, [this] {
-        this->updateSize();
-    });
+    this->connections_.managedConnect(getIApp()->getFonts()->fontChanged,
+                                      [this] {
+                                          this->updateSize();
+                                      });
 }
 
 const QString &Label::getText() const

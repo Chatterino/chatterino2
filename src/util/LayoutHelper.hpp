@@ -19,7 +19,7 @@ T *makeLayout(std::initializer_list<LayoutItem> items)
 {
     auto t = new T;
 
-    for (auto &item : items)
+    for (const auto &item : items)
     {
         switch (item.which())
         {

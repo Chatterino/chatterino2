@@ -4,9 +4,10 @@
 #include "providers/seventv/eventapi/Dispatch.hpp"
 #include "providers/seventv/eventapi/Message.hpp"
 
-#include <boost/optional.hpp>
 #include <gtest/gtest.h>
 #include <QString>
+
+#include <optional>
 
 using namespace chatterino;
 using namespace chatterino::seventv::eventapi;
@@ -22,10 +23,10 @@ TEST(SeventvEventAPI, AllEvents)
     SeventvEventAPI eventAPI(host, std::chrono::milliseconds(1000));
     eventAPI.start();
 
-    boost::optional<EmoteAddDispatch> addDispatch;
-    boost::optional<EmoteUpdateDispatch> updateDispatch;
-    boost::optional<EmoteRemoveDispatch> removeDispatch;
-    boost::optional<UserConnectionUpdateDispatch> userDispatch;
+    std::optional<EmoteAddDispatch> addDispatch;
+    std::optional<EmoteUpdateDispatch> updateDispatch;
+    std::optional<EmoteRemoveDispatch> removeDispatch;
+    std::optional<UserConnectionUpdateDispatch> userDispatch;
 
     eventAPI.signals_.emoteAdded.connect([&](const auto &d) {
         addDispatch = d;
@@ -67,9 +68,9 @@ TEST(SeventvEventAPI, AllEvents)
     ASSERT_EQ(rem.emoteID, QString("621d13967cc2d4e1953838ed"));
 
     ASSERT_EQ(userDispatch.has_value(), false);
-    addDispatch = boost::none;
-    updateDispatch = boost::none;
-    removeDispatch = boost::none;
+    addDispatch = std::nullopt;
+    updateDispatch = std::nullopt;
+    removeDispatch = std::nullopt;
 
     eventAPI.subscribeUser(TARGET_USER_ID, "");
     std::this_thread::sleep_for(50ms);

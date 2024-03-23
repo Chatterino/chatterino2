@@ -1,6 +1,7 @@
 #pragma once
 
 #include "widgets/BaseWidget.hpp"
+#include "widgets/TooltipWidget.hpp"
 
 #include <boost/signals2.hpp>
 #include <pajlada/settings/setting.hpp>
@@ -28,10 +29,9 @@ public:
     explicit SplitHeader(Split *split);
 
     void setAddButtonVisible(bool value);
-    void setViewersButtonVisible(bool value);
 
     void updateChannelText();
-    void updateModerationModeIcon();
+    void updateIcons();
     // Invoked when SplitHeader should update anything refering to a TwitchChannel's mode
     // has changed (e.g. sub mode toggled)
     void updateRoomModes();
@@ -68,6 +68,7 @@ private:
 
     Split *const split_{};
     QString tooltipText_{};
+    TooltipWidget *const tooltipWidget_{};
     bool isLive_{false};
     QString thumbnail_;
     QElapsedTimer lastThumbnail_;
@@ -86,7 +87,7 @@ private:
     QAction *modeActionSetFollowers{};
 
     Button *moderationButton_{};
-    Button *viewersButton_{};
+    Button *chattersButton_{};
     Button *addButton_{};
 
     // states

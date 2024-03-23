@@ -85,19 +85,19 @@ NotebookTab::NotebookTab(Notebook *notebook)
         [this]() {
             this->notebook_->removePage(this->page);
         },
-        getApp()->hotkeys->getDisplaySequence(HotkeyCategory::Window,
-                                              "removeTab"));
+        getIApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Window,
+                                                    "removeTab"));
 
     this->menu_.addAction(
         "Popup Tab",
         [this]() {
-            if (auto container = dynamic_cast<SplitContainer *>(this->page))
+            if (auto *container = dynamic_cast<SplitContainer *>(this->page))
             {
                 container->popup();
             }
         },
-        getApp()->hotkeys->getDisplaySequence(HotkeyCategory::Window, "popup",
-                                              {{"window"}}));
+        getIApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Window,
+                                                    "popup", {{"window"}}));
 
     highlightNewMessagesAction_ =
         new QAction("Mark Tab as Unread on New Messages", &this->menu_);
@@ -116,11 +116,11 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
 void NotebookTab::showRenameDialog()
 {
-    auto dialog = new QDialog(this);
+    auto *dialog = new QDialog(this);
 
-    auto vbox = new QVBoxLayout;
+    auto *vbox = new QVBoxLayout;
 
-    auto lineEdit = new QLineEdit;
+    auto *lineEdit = new QLineEdit;
     lineEdit->setText(this->getCustomTitle());
     lineEdit->setPlaceholderText(this->getDefaultTitle());
     lineEdit->selectAll();
@@ -129,7 +129,7 @@ void NotebookTab::showRenameDialog()
     vbox->addWidget(lineEdit);
     vbox->addStretch(1);
 
-    auto buttonBox =
+    auto *buttonBox =
         new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
     vbox->addWidget(buttonBox);
@@ -281,7 +281,7 @@ const QString &NotebookTab::getTitle() const
 void NotebookTab::titleUpdated()
 {
     // Queue up save because: Tab title changed
-    getApp()->windows->queueSave();
+    getIApp()->getWindows()->queueSave();
     this->notebook_->refresh();
     this->updateSize();
     this->update();
@@ -319,6 +319,18 @@ void NotebookTab::setTabLocation(NotebookTabLocation location)
     }
 }
 
+bool NotebookTab::setRerun(bool isRerun)
+{
+    if (this->isRerun_ != isRerun)
+    {
+        this->isRerun_ = isRerun;
+        this->update();
+        return true;
+    }
+
+    return false;
+}
+
 bool NotebookTab::setLive(bool isLive)
 {
     if (this->isLive_ != isLive)
@@ -338,17 +350,30 @@ bool NotebookTab::isLive() const
 
 void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
 {
-    if (this->isSelected() || (!this->highlightEnabled_ &&
-                               newHighlightStyle == HighlightState::NewMessage))
+    if (this->isSelected())
     {
         return;
     }
-    if (this->highlightState_ != HighlightState::Highlighted)
-    {
-        this->highlightState_ = newHighlightStyle;
 
-        this->update();
+    if (!this->highlightEnabled_ &&
+        newHighlightStyle == HighlightState::NewMessage)
+    {
+        return;
     }
+
+    if (this->highlightState_ == newHighlightStyle ||
+        this->highlightState_ == HighlightState::Highlighted)
+    {
+        return;
+    }
+
+    this->highlightState_ = newHighlightStyle;
+    this->update();
+}
+
+HighlightState NotebookTab::highlightState() const
+{
+    return this->highlightState_;
 }
 
 void NotebookTab::setHighlightsEnabled(const bool &newVal)
@@ -402,7 +427,7 @@ void NotebookTab::moveAnimated(QPoint pos, bool animated)
 
 void NotebookTab::paintEvent(QPaintEvent *)
 {
-    auto app = getApp();
+    auto *app = getApp();
     QPainter painter(this);
     float scale = this->scale();
 
@@ -414,16 +439,23 @@ void NotebookTab::paintEvent(QPaintEvent *)
 
     // select the right tab colors
     Theme::TabColors colors;
-    Theme::TabColors regular = this->theme->tabs.regular;
 
     if (this->selected_)
+    {
         colors = this->theme->tabs.selected;
+    }
     else if (this->highlightState_ == HighlightState::Highlighted)
+    {
         colors = this->theme->tabs.highlighted;
+    }
     else if (this->highlightState_ == HighlightState::NewMessage)
+    {
         colors = this->theme->tabs.newMessage;
+    }
     else
+    {
         colors = this->theme->tabs.regular;
+    }
 
     bool windowFocused = this->window() == QApplication::activeWindow();
 
@@ -484,12 +516,22 @@ void NotebookTab::paintEvent(QPaintEvent *)
     painter.fillRect(lineRect, lineColor);
 
     // draw live indicator
-    if (this->isLive_ && getSettings()->showTabLive)
+    if ((this->isLive_ || this->isRerun_) && getSettings()->showTabLive)
     {
-        painter.setPen(QColor(Qt::GlobalColor::red));
-        painter.setRenderHint(QPainter::Antialiasing);
+        // Live overrides rerun
         QBrush b;
-        b.setColor(QColor(Qt::GlobalColor::red));
+        if (this->isLive_)
+        {
+            painter.setPen(this->theme->tabs.liveIndicator);
+            b.setColor(this->theme->tabs.liveIndicator);
+        }
+        else
+        {
+            painter.setPen(this->theme->tabs.rerunIndicator);
+            b.setColor(this->theme->tabs.rerunIndicator);
+        }
+
+        painter.setRenderHint(QPainter::Antialiasing);
         b.setStyle(Qt::SolidPattern);
         painter.setBrush(b);
 
@@ -583,7 +625,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
                 borderRect = QRect(0, 0, this->width(), 1);
                 break;
         }
-        painter.fillRect(borderRect, app->themes->window.background);
+        painter.fillRect(borderRect, app->getThemes()->window.background);
     }
 }
 
@@ -772,6 +814,11 @@ void NotebookTab::wheelEvent(QWheelEvent *event)
     {
         selectTab(verticalDelta);
     }
+}
+
+void NotebookTab::update()
+{
+    Button::update();
 }
 
 QRect NotebookTab::getXRect()

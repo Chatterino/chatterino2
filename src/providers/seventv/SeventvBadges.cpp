@@ -2,18 +2,15 @@
 
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
-#include "providers/seventv/SeventvAPI.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
 
 #include <QJsonArray>
 #include <QUrl>
 #include <QUrlQuery>
 
-#include <map>
-
 namespace chatterino {
 
-boost::optional<EmotePtr> SeventvBadges::getBadge(const UserId &id) const
+std::optional<EmotePtr> SeventvBadges::getBadge(const UserId &id) const
 {
     std::shared_lock lock(this->mutex_);
 
@@ -22,7 +19,7 @@ boost::optional<EmotePtr> SeventvBadges::getBadge(const UserId &id) const
     {
         return it->second;
     }
-    return boost::none;
+    return std::nullopt;
 }
 
 void SeventvBadges::assignBadgeToUser(const QString &badgeID,

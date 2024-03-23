@@ -26,8 +26,12 @@ class Paths;
 
 class PluginController : public Singleton
 {
+    const Paths &paths;
+
 public:
-    void initialize(Settings &settings, Paths &paths) override;
+    explicit PluginController(const Paths &paths_);
+
+    void initialize(Settings &settings, const Paths &paths) override;
 
     QString tryExecPluginCommand(const QString &commandName,
                                  const CommandContext &ctx);
@@ -36,6 +40,7 @@ public:
     // This is required to be public because of c functions
     Plugin *getPluginByStatePtr(lua_State *L);
 
+    // TODO: make a function that iterates plugins that aren't errored/enabled
     const std::map<QString, std::unique_ptr<Plugin>> &plugins() const;
 
     /**
@@ -52,17 +57,22 @@ public:
      */
     static bool isPluginEnabled(const QString &id);
 
+    std::pair<bool, QStringList> updateCustomCompletions(
+        const QString &query, const QString &fullTextContent,
+        int cursorPosition, bool isFirstWord) const;
+
 private:
     void loadPlugins();
     void load(const QFileInfo &index, const QDir &pluginDir,
               const PluginMeta &meta);
 
     // This function adds lua standard libraries into the state
-    static void openLibrariesFor(lua_State *L, const PluginMeta & /*meta*/);
+    static void openLibrariesFor(lua_State *L, const PluginMeta & /*meta*/,
+                                 const QDir &pluginDir);
     static void loadChatterinoLib(lua_State *l);
     bool tryLoadFromDir(const QDir &pluginDir);
     std::map<QString, std::unique_ptr<Plugin>> plugins_;
 };
 
-};  // namespace chatterino
+}  // namespace chatterino
 #endif

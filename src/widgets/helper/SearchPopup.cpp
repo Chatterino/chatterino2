@@ -52,7 +52,7 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
         // If all predicates match, add the message to the channel
         if (accept)
         {
-            auto overrideFlags = boost::optional<MessageFlags>(message->flags);
+            auto overrideFlags = std::optional<MessageFlags>(message->flags);
             overrideFlags->set(MessageFlag::DoNotLog);
 
             channel->addMessage(message, overrideFlags);
@@ -63,7 +63,12 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
 }
 
 SearchPopup::SearchPopup(QWidget *parent, Split *split)
-    : BasePopup({BaseWindow::DisableLayoutSave}, parent)
+    : BasePopup(
+          {
+              BaseWindow::DisableLayoutSave,
+              BaseWindow::BoundsCheckOnShow,
+          },
+          parent)
     , split_(split)
 {
     this->initLayout();
@@ -98,7 +103,7 @@ void SearchPopup::addShortcuts()
         {"scrollPage", nullptr},
     };
 
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 }
 
@@ -129,9 +134,11 @@ void SearchPopup::goToMessage(const MessagePtr &message)
 {
     for (const auto &view : this->searchChannels_)
     {
-        if (view.get().channel()->getType() == Channel::Type::TwitchMentions)
+        const auto type = view.get().channel()->getType();
+        if (type == Channel::Type::TwitchMentions ||
+            type == Channel::Type::TwitchAutomod)
         {
-            getApp()->windows->scrollToMessage(message);
+            getIApp()->getWindows()->scrollToMessage(message);
             return;
         }
 
@@ -161,6 +168,10 @@ void SearchPopup::updateWindowTitle()
     {
         historyName = "multiple channels'";
     }
+    else if (this->channelName_ == "/automod")
+    {
+        historyName = "automod";
+    }
     else if (this->channelName_ == "/mentions")
     {
         historyName = "mentions";
@@ -180,9 +191,10 @@ void SearchPopup::updateWindowTitle()
     this->setWindowTitle("Searching in " + historyName + " history");
 }
 
-void SearchPopup::showEvent(QShowEvent *)
+void SearchPopup::showEvent(QShowEvent *e)
 {
     this->search();
+    BaseWindow::showEvent(e);
 }
 
 bool SearchPopup::eventFilter(QObject *object, QEvent *event)
@@ -190,11 +202,10 @@ bool SearchPopup::eventFilter(QObject *object, QEvent *event)
     if (object == this->searchInput_ && event->type() == QEvent::KeyPress)
     {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-        if (keyEvent->key() == Qt::Key_Backspace &&
-            keyEvent->modifiers() == Qt::ControlModifier &&
-            this->searchInput_->text() == this->searchInput_->selectedText())
+        if (keyEvent == QKeySequence::DeleteStartOfWord &&
+            this->searchInput_->selectionLength() > 0)
         {
-            this->searchInput_->clear();
+            this->searchInput_->backspace();
             return true;
         }
     }

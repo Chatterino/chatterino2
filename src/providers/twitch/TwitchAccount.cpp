@@ -3,8 +3,7 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/Env.hpp"
-#include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "debug/AssertInGuiThread.hpp"
@@ -264,11 +263,32 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
             [this, weakChannel](QJsonArray emoteSetArray) {
                 auto emoteData = this->emotes_.access();
                 auto localEmoteData = this->localEmotes_.access();
-                for (auto emoteSet_ : emoteSetArray)
+
+                std::unordered_set<QString> subscriberChannelIDs;
+                std::vector<IvrEmoteSet> ivrEmoteSets;
+                ivrEmoteSets.reserve(emoteSetArray.size());
+
+                for (auto emoteSet : emoteSetArray)
+                {
+                    IvrEmoteSet ivrEmoteSet(emoteSet.toObject());
+                    if (!ivrEmoteSet.tier.isNull())
+                    {
+                        subscriberChannelIDs.insert(ivrEmoteSet.channelId);
+                    }
+                    ivrEmoteSets.emplace_back(ivrEmoteSet);
+                }
+
+                for (const auto &emoteSet : emoteData->emoteSets)
+                {
+                    if (emoteSet->subscriber)
+                    {
+                        subscriberChannelIDs.insert(emoteSet->channelID);
+                    }
+                }
+
+                for (const auto &ivrEmoteSet : ivrEmoteSets)
                 {
                     auto emoteSet = std::make_shared<EmoteSet>();
-
-                    IvrEmoteSet ivrEmoteSet(emoteSet_.toObject());
 
                     QString setKey = ivrEmoteSet.setId;
                     emoteSet->key = setKey;
@@ -285,8 +305,15 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
                         continue;
                     }
 
+                    emoteSet->channelID = ivrEmoteSet.channelId;
                     emoteSet->channelName = ivrEmoteSet.login;
                     emoteSet->text = ivrEmoteSet.displayName;
+                    emoteSet->subscriber = !ivrEmoteSet.tier.isNull();
+
+                    // NOTE: If a user does not have a subscriber emote set, but a follower emote set, this logic will be wrong
+                    // However, that's not a realistic problem.
+                    bool haveSubscriberSetForChannel =
+                        subscriberChannelIDs.contains(ivrEmoteSet.channelId);
 
                     for (const auto &emoteObj : ivrEmoteSet.emotes)
                     {
@@ -298,11 +325,15 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
 
                         emoteSet->emotes.push_back(TwitchEmote{id, code});
 
-                        auto emote =
-                            getApp()->emotes->twitch.getOrCreateEmote(id, code);
+                        auto emote = getIApp()
+                                         ->getEmotes()
+                                         ->getTwitchEmotes()
+                                         ->getOrCreateEmote(id, code);
 
                         // Follower emotes can be only used in their origin channel
-                        if (ivrEmote.emoteType == "FOLLOWER")
+                        // unless the user is subscribed, then they can be used anywhere.
+                        if (ivrEmote.emoteType == "FOLLOWER" &&
+                            !haveSubscriberSetForChannel)
                         {
                             emoteSet->local = true;
 
@@ -462,7 +493,15 @@ void TwitchAccount::loadSeventvUserID()
         return;
     }
 
-    getSeventvAPI().getUserByTwitchID(
+    auto *seventv = getIApp()->getSeventvAPI();
+    if (!seventv)
+    {
+        qCWarning(chatterinoSeventv)
+            << "Not loading 7TV User ID because the 7TV API is not initialized";
+        return;
+    }
+
+    seventv->getUserByTwitchID(
         this->getUserId(),
         [this](const auto &json) {
             const auto id = json["user"]["id"].toString();
@@ -470,7 +509,6 @@ void TwitchAccount::loadSeventvUserID()
             {
                 this->seventvUserID_ = id;
             }
-            return Success;
         },
         [](const auto &result) {
             qCDebug(chatterinoSeventv)

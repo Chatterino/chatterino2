@@ -2,10 +2,10 @@
 
 #include "common/Atomic.hpp"
 
-#include <boost/optional.hpp>
 #include <QString>
 #include <QThread>
 
+#include <optional>
 #include <vector>
 
 namespace chatterino {
@@ -16,10 +16,10 @@ class Channel;
 
 using ChannelPtr = std::shared_ptr<Channel>;
 
-void registerNmHost(Paths &paths);
-std::string &getNmQueueName(Paths &paths);
+void registerNmHost(const Paths &paths);
+std::string &getNmQueueName(const Paths &paths);
 
-Atomic<boost::optional<QString>> &nmIpcError();
+Atomic<std::optional<QString>> &nmIpcError();
 
 namespace nm::client {
 

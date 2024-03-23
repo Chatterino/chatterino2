@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Literals.hpp"
+#include "common/Modes.hpp"
 #include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -34,13 +35,13 @@ namespace chatterino {
 
 using namespace literals;
 
-void registerNmManifest(Paths &paths, const QString &manifestFilename,
+void registerNmManifest(const Paths &paths, const QString &manifestFilename,
                         const QString &registryKeyName,
                         const QJsonDocument &document);
 
-void registerNmHost(Paths &paths)
+void registerNmHost(const Paths &paths)
 {
-    if (paths.isPortable())
+    if (Modes::instance().isPortable)
     {
         return;
     }
@@ -80,7 +81,7 @@ void registerNmHost(Paths &paths)
     }
 }
 
-void registerNmManifest(Paths &paths, const QString &manifestFilename,
+void registerNmManifest(const Paths &paths, const QString &manifestFilename,
                         const QString &registryKeyName,
                         const QJsonDocument &document)
 {
@@ -99,7 +100,7 @@ void registerNmManifest(Paths &paths, const QString &manifestFilename,
 #endif
 }
 
-std::string &getNmQueueName(Paths &paths)
+std::string &getNmQueueName(const Paths &paths)
 {
     static std::string name =
         "chatterino_gui" + paths.applicationFilePathHash.toStdString();
@@ -312,9 +313,9 @@ void NativeMessagingServer::syncChannels(const QJsonArray &twitchChannels)
     this->channelWarmer_ = std::move(updated);
 }
 
-Atomic<boost::optional<QString>> &nmIpcError()
+Atomic<std::optional<QString>> &nmIpcError()
 {
-    static Atomic<boost::optional<QString>> x;
+    static Atomic<std::optional<QString>> x;
     return x;
 }
 

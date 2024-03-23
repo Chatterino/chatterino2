@@ -12,6 +12,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
+#include "util/Variant.hpp"
 
 namespace chatterino {
 
@@ -50,27 +51,9 @@ MessageElement *MessageElement::setLink(const Link &link)
     return this;
 }
 
-MessageElement *MessageElement::setText(const QString &text)
-{
-    this->text_ = text;
-    return this;
-}
-
 MessageElement *MessageElement::setTooltip(const QString &tooltip)
 {
     this->tooltip_ = tooltip;
-    return this;
-}
-
-MessageElement *MessageElement::setThumbnail(const ImagePtr &thumbnail)
-{
-    this->thumbnail_ = thumbnail;
-    return this;
-}
-
-MessageElement *MessageElement::setThumbnailType(const ThumbnailType type)
-{
-    this->thumbnailType_ = type;
     return this;
 }
 
@@ -85,17 +68,7 @@ const QString &MessageElement::getTooltip() const
     return this->tooltip_;
 }
 
-const ImagePtr &MessageElement::getThumbnail() const
-{
-    return this->thumbnail_;
-}
-
-const MessageElement::ThumbnailType &MessageElement::getThumbnailType() const
-{
-    return this->thumbnailType_;
-}
-
-const Link &MessageElement::getLink() const
+Link MessageElement::getLink() const
 {
     return this->link_;
 }
@@ -115,35 +88,11 @@ void MessageElement::addFlags(MessageElementFlags flags)
     this->flags_.set(flags);
 }
 
-MessageElement *MessageElement::updateLink()
-{
-    this->linkChanged.invoke();
-    return this;
-}
-
-// Empty
-EmptyElement::EmptyElement()
-    : MessageElement(MessageElementFlag::None)
-{
-}
-
-void EmptyElement::addToContainer(MessageLayoutContainer &container,
-                                  MessageElementFlags flags)
-{
-}
-
-EmptyElement &EmptyElement::instance()
-{
-    static EmptyElement instance;
-    return instance;
-}
-
 // IMAGE
 ImageElement::ImageElement(ImagePtr image, MessageElementFlags flags)
     : MessageElement(flags)
-    , image_(image)
+    , image_(std::move(image))
 {
-    //    this->setTooltip(image->getTooltip());
 }
 
 void ImageElement::addToContainer(MessageLayoutContainer &container,
@@ -154,8 +103,8 @@ void ImageElement::addToContainer(MessageLayoutContainer &container,
         auto size = QSize(this->image_->width() * container.getScale(),
                           this->image_->height() * container.getScale());
 
-        container.addElement((new ImageLayoutElement(*this, this->image_, size))
-                                 ->setLink(this->getLink()));
+        container.addElement(
+            (new ImageLayoutElement(*this, this->image_, size)));
     }
 }
 
@@ -163,7 +112,7 @@ CircularImageElement::CircularImageElement(ImagePtr image, int padding,
                                            QColor background,
                                            MessageElementFlags flags)
     : MessageElement(flags)
-    , image_(image)
+    , image_(std::move(image))
     , padding_(padding)
     , background_(background)
 {
@@ -177,10 +126,8 @@ void CircularImageElement::addToContainer(MessageLayoutContainer &container,
         auto imgSize = QSize(this->image_->width(), this->image_->height()) *
                        container.getScale();
 
-        container.addElement((new ImageWithCircleBackgroundLayoutElement(
-                                  *this, this->image_, imgSize,
-                                  this->background_, this->padding_))
-                                 ->setLink(this->getLink()));
+        container.addElement(new ImageWithCircleBackgroundLayoutElement(
+            *this, this->image_, imgSize, this->background_, this->padding_));
     }
 }
 
@@ -211,7 +158,9 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
             auto image =
                 this->emote_->images.getImageOrLoaded(container.getScale());
             if (image->isEmpty())
+            {
                 return;
+            }
 
             auto emoteScale = getSettings()->emoteScale.getValue();
 
@@ -219,8 +168,7 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
                 QSize(int(container.getScale() * image->width() * emoteScale),
                       int(container.getScale() * image->height() * emoteScale));
 
-            container.addElement(this->makeImageLayoutElement(image, size)
-                                     ->setLink(this->getLink()));
+            container.addElement(this->makeImageLayoutElement(image, size));
         }
         else
         {
@@ -281,8 +229,7 @@ void LayeredEmoteElement::addToContainer(MessageLayoutContainer &container,
             }
 
             container.addElement(this->makeImageLayoutElement(
-                                         images, individualSizes, largestSize)
-                                     ->setLink(this->getLink()));
+                images, individualSizes, largestSize));
         }
         else
         {
@@ -419,7 +366,9 @@ void BadgeElement::addToContainer(MessageLayoutContainer &container,
         auto image =
             this->emote_->images.getImageOrLoaded(container.getScale());
         if (image->isEmpty())
+        {
             return;
+        }
 
         auto size = QSize(int(container.getScale() * image->width()),
                           int(container.getScale() * image->height()));
@@ -436,8 +385,7 @@ EmotePtr BadgeElement::getEmote() const
 MessageLayoutElement *BadgeElement::makeImageLayoutElement(
     const ImagePtr &image, const QSize &size)
 {
-    auto element =
-        (new ImageLayoutElement(*this, image, size))->setLink(this->getLink());
+    auto *element = new ImageLayoutElement(*this, image, size);
 
     return element;
 }
@@ -454,9 +402,8 @@ MessageLayoutElement *ModBadgeElement::makeImageLayoutElement(
 {
     static const QColor modBadgeBackgroundColor("#34AE0A");
 
-    auto element = (new ImageWithBackgroundLayoutElement(
-                        *this, image, size, modBadgeBackgroundColor))
-                       ->setLink(this->getLink());
+    auto *element = new ImageWithBackgroundLayoutElement(
+        *this, image, size, modBadgeBackgroundColor);
 
     return element;
 }
@@ -471,8 +418,7 @@ VipBadgeElement::VipBadgeElement(const EmotePtr &data,
 MessageLayoutElement *VipBadgeElement::makeImageLayoutElement(
     const ImagePtr &image, const QSize &size)
 {
-    auto element =
-        (new ImageLayoutElement(*this, image, size))->setLink(this->getLink());
+    auto *element = new ImageLayoutElement(*this, image, size);
 
     return element;
 }
@@ -488,9 +434,8 @@ FfzBadgeElement::FfzBadgeElement(const EmotePtr &data,
 MessageLayoutElement *FfzBadgeElement::makeImageLayoutElement(
     const ImagePtr &image, const QSize &size)
 {
-    auto element =
-        (new ImageWithBackgroundLayoutElement(*this, image, size, this->color))
-            ->setLink(this->getLink());
+    auto *element =
+        new ImageWithBackgroundLayoutElement(*this, image, size, this->color);
 
     return element;
 }
@@ -502,56 +447,46 @@ TextElement::TextElement(const QString &text, MessageElementFlags flags,
     , color_(color)
     , style_(style)
 {
-    for (const auto &word : text.split(' '))
-    {
-        this->words_.push_back({word, -1});
-        // fourtf: add logic to store multiple spaces after message
-    }
+    this->words_ = text.split(' ');
+    // fourtf: add logic to store multiple spaces after message
 }
 
 void TextElement::addToContainer(MessageLayoutContainer &container,
                                  MessageElementFlags flags)
 {
-    auto app = getApp();
+    auto *app = getIApp();
 
     if (flags.hasAny(this->getFlags()))
     {
         QFontMetrics metrics =
-            app->fonts->getFontMetrics(this->style_, container.getScale());
+            app->getFonts()->getFontMetrics(this->style_, container.getScale());
 
-        for (Word &word : this->words_)
+        for (const auto &word : this->words_)
         {
+            auto wordId = container.nextWordId();
+
             auto getTextLayoutElement = [&](QString text, int width,
                                             bool hasTrailingSpace) {
-                auto color = this->color_.getColor(*app->themes);
-                app->themes->normalizeColor(color);
+                auto color = this->color_.getColor(*app->getThemes());
+                app->getThemes()->normalizeColor(color);
 
-                auto e = (new TextLayoutElement(
-                              *this, text, QSize(width, metrics.height()),
-                              color, this->style_, container.getScale()))
-                             ->setLink(this->getLink());
+                auto *e = new TextLayoutElement(
+                    *this, text, QSize(width, metrics.height()), color,
+                    this->style_, container.getScale());
                 e->setTrailingSpace(hasTrailingSpace);
                 e->setText(text);
+                e->setWordId(wordId);
 
-                // If URL link was changed,
-                // Should update it in MessageLayoutElement too!
-                if (this->getLink().type == Link::Url)
-                {
-                    static_cast<TextLayoutElement *>(e)->listenToLinkChanges();
-                }
                 return e;
             };
 
-            // fourtf: add again
-            //            if (word.width == -1) {
-            word.width = metrics.horizontalAdvance(word.text);
-            //            }
+            auto width = metrics.horizontalAdvance(word);
 
             // see if the text fits in the current line
-            if (container.fitsInLine(word.width))
+            if (container.fitsInLine(width))
             {
                 container.addElementNoLineBreak(getTextLayoutElement(
-                    word.text, word.width, this->hasTrailingSpace()));
+                    word, width, this->hasTrailingSpace()));
                 continue;
             }
 
@@ -560,53 +495,56 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
             {
                 container.breakLine();
 
-                if (container.fitsInLine(word.width))
+                if (container.fitsInLine(width))
                 {
                     container.addElementNoLineBreak(getTextLayoutElement(
-                        word.text, word.width, this->hasTrailingSpace()));
+                        word, width, this->hasTrailingSpace()));
                     continue;
                 }
             }
 
             // we done goofed, we need to wrap the text
-            QString text = word.text;
-            int textLength = text.length();
+            auto textLength = word.length();
             int wordStart = 0;
-            int width = 0;
+            width = 0;
 
             // QChar::isHighSurrogate(text[0].unicode()) ? 2 : 1
 
             for (int i = 0; i < textLength; i++)
             {
-                auto isSurrogate = text.size() > i + 1 &&
-                                   QChar::isHighSurrogate(text[i].unicode());
+                auto isSurrogate = word.size() > i + 1 &&
+                                   QChar::isHighSurrogate(word[i].unicode());
 
                 auto charWidth = isSurrogate
-                                     ? metrics.horizontalAdvance(text.mid(i, 2))
-                                     : metrics.horizontalAdvance(text[i]);
+                                     ? metrics.horizontalAdvance(word.mid(i, 2))
+                                     : metrics.horizontalAdvance(word[i]);
 
                 if (!container.fitsInLine(width + charWidth))
                 {
                     container.addElementNoLineBreak(getTextLayoutElement(
-                        text.mid(wordStart, i - wordStart), width, false));
+                        word.mid(wordStart, i - wordStart), width, false));
                     container.breakLine();
 
                     wordStart = i;
                     width = charWidth;
 
                     if (isSurrogate)
+                    {
                         i++;
+                    }
                     continue;
                 }
 
                 width += charWidth;
 
                 if (isSurrogate)
+                {
                     i++;
+                }
             }
             //add the final piece of wrapped text
             container.addElementNoLineBreak(getTextLayoutElement(
-                text.mid(wordStart), width, this->hasTrailingSpace()));
+                word.mid(wordStart), width, this->hasTrailingSpace()));
         }
     }
 }
@@ -628,102 +566,110 @@ SingleLineTextElement::SingleLineTextElement(const QString &text,
 void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
                                            MessageElementFlags flags)
 {
-    auto app = getApp();
+    auto *app = getApp();
 
     if (flags.hasAny(this->getFlags()))
     {
         QFontMetrics metrics =
-            app->fonts->getFontMetrics(this->style_, container.getScale());
+            app->getFonts()->getFontMetrics(this->style_, container.getScale());
 
         auto getTextLayoutElement = [&](QString text, int width,
                                         bool hasTrailingSpace) {
-            auto color = this->color_.getColor(*app->themes);
-            app->themes->normalizeColor(color);
+            auto color = this->color_.getColor(*app->getThemes());
+            app->getThemes()->normalizeColor(color);
 
-            auto e = (new TextLayoutElement(
-                          *this, text, QSize(width, metrics.height()), color,
-                          this->style_, container.getScale()))
-                         ->setLink(this->getLink());
+            auto *e = new TextLayoutElement(
+                *this, text, QSize(width, metrics.height()), color,
+                this->style_, container.getScale());
             e->setTrailingSpace(hasTrailingSpace);
             e->setText(text);
 
-            // If URL link was changed,
-            // Should update it in MessageLayoutElement too!
-            if (this->getLink().type == Link::Url)
-            {
-                static_cast<TextLayoutElement *>(e)->listenToLinkChanges();
-            }
             return e;
         };
 
-        static const auto ellipsis = QStringLiteral("...");
+        static const auto ellipsis = QStringLiteral("…");
 
         // String to continuously append words onto until we place it in the container
         // once we encounter an emote or reach the end of the message text. */
         QString currentText;
 
         container.first = FirstWord::Neutral;
+
+        bool firstIteration = true;
         for (Word &word : this->words_)
         {
-            auto parsedWords = app->emotes->emojis.parse(word.text);
-            if (parsedWords.size() == 0)
+            if (firstIteration)
             {
-                continue;  // sanity check
+                firstIteration = false;
+            }
+            else
+            {
+                currentText += ' ';
             }
 
-            auto &parsedWord = parsedWords[0];
-            if (parsedWord.type() == typeid(QString))
+            bool done = false;
+            for (const auto &parsedWord :
+                 app->getEmotes()->getEmojis()->parse(word.text))
             {
-                if (!currentText.isEmpty())
+                if (parsedWord.type() == typeid(QString))
                 {
-                    currentText += ' ';
-                }
-                currentText += word.text;
-                QString prev = currentText;  // only increments the ref-count
-                currentText = metrics.elidedText(currentText, Qt::ElideRight,
-                                                 container.remainingWidth());
-                if (currentText != prev)
-                {
-                    break;
-                }
-            }
-            else if (parsedWord.type() == typeid(EmotePtr))
-            {
-                auto emote = boost::get<EmotePtr>(parsedWord);
-                auto image =
-                    emote->images.getImageOrLoaded(container.getScale());
-                if (!image->isEmpty())
-                {
-                    auto emoteScale = getSettings()->emoteScale.getValue();
-
-                    int currentWidth = metrics.horizontalAdvance(currentText);
-                    auto emoteSize = QSize(image->width(), image->height()) *
-                                     (emoteScale * container.getScale());
-
-                    if (!container.fitsInLine(currentWidth + emoteSize.width()))
+                    currentText += boost::get<QString>(parsedWord);
+                    QString prev =
+                        currentText;  // only increments the ref-count
+                    currentText =
+                        metrics.elidedText(currentText, Qt::ElideRight,
+                                           container.remainingWidth());
+                    if (currentText != prev)
                     {
-                        currentText += ellipsis;
+                        done = true;
                         break;
                     }
-
-                    // Add currently pending text to container, then add the emote after.
-                    container.addElementNoLineBreak(
-                        getTextLayoutElement(currentText, currentWidth, false));
-                    currentText.clear();
-
-                    container.addElementNoLineBreak(
-                        (new ImageLayoutElement(*this, image, emoteSize))
-                            ->setLink(this->getLink()));
                 }
+                else if (parsedWord.type() == typeid(EmotePtr))
+                {
+                    auto emote = boost::get<EmotePtr>(parsedWord);
+                    auto image =
+                        emote->images.getImageOrLoaded(container.getScale());
+                    if (!image->isEmpty())
+                    {
+                        auto emoteScale = getSettings()->emoteScale.getValue();
+
+                        int currentWidth =
+                            metrics.horizontalAdvance(currentText);
+                        auto emoteSize =
+                            QSize(image->width(), image->height()) *
+                            (emoteScale * container.getScale());
+
+                        if (!container.fitsInLine(currentWidth +
+                                                  emoteSize.width()))
+                        {
+                            currentText += ellipsis;
+                            done = true;
+                            break;
+                        }
+
+                        // Add currently pending text to container, then add the emote after.
+                        container.addElementNoLineBreak(getTextLayoutElement(
+                            currentText, currentWidth, false));
+                        currentText.clear();
+
+                        container.addElementNoLineBreak(
+                            (new ImageLayoutElement(*this, image, emoteSize))
+                                ->setLink(this->getLink())
+                                ->setTrailingSpace(false));
+                    }
+                }
+            }
+
+            if (done)
+            {
+                break;
             }
         }
 
         // Add the last of the pending message text to the container.
         if (!currentText.isEmpty())
         {
-            // Remove trailing space.
-            currentText = currentText.trimmed();
-
             int width = metrics.horizontalAdvance(currentText);
             container.addElementNoLineBreak(
                 getTextLayoutElement(currentText, width, false));
@@ -731,6 +677,29 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
 
         container.breakLine();
     }
+}
+
+LinkElement::LinkElement(const Parsed &parsed, MessageElementFlags flags,
+                         const MessageColor &color, FontStyle style)
+    : TextElement({}, flags, color, style)
+    , linkInfo_(parsed.original)
+    , lowercase_({parsed.lowercase})
+    , original_({parsed.original})
+{
+    this->setTooltip(parsed.original);
+}
+
+void LinkElement::addToContainer(MessageLayoutContainer &container,
+                                 MessageElementFlags flags)
+{
+    this->words_ =
+        getSettings()->lowercaseDomains ? this->lowercase_ : this->original_;
+    TextElement::addToContainer(container, flags);
+}
+
+Link LinkElement::getLink() const
+{
+    return {Link::Url, this->linkInfo_.url()};
 }
 
 // TIMESTAMP
@@ -786,7 +755,7 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
             if (auto image = action.getImage())
             {
                 container.addElement(
-                    (new ImageLayoutElement(*this, image.get(), size))
+                    (new ImageLayoutElement(*this, *image, size))
                         ->setLink(Link(Link::UserAction, action.getAction())));
             }
             else
@@ -818,7 +787,7 @@ void LinebreakElement::addToContainer(MessageLayoutContainer &container,
 ScalingImageElement::ScalingImageElement(ImageSet images,
                                          MessageElementFlags flags)
     : MessageElement(flags)
-    , images_(images)
+    , images_(std::move(images))
 {
 }
 
@@ -830,13 +799,14 @@ void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
         const auto &image =
             this->images_.getImageOrLoaded(container.getScale());
         if (image->isEmpty())
+        {
             return;
+        }
 
         auto size = QSize(image->width() * container.getScale(),
                           image->height() * container.getScale());
 
-        container.addElement((new ImageLayoutElement(*this, image, size))
-                                 ->setLink(this->getLink()));
+        container.addElement(new ImageLayoutElement(*this, image, size));
     }
 }
 

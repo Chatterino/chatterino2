@@ -15,6 +15,7 @@
 #include "util/LayoutCreator.hpp"
 #include "widgets/dialogs/BadgePickerDialog.hpp"
 #include "widgets/dialogs/ColorPickerDialog.hpp"
+#include "widgets/helper/color/ColorItemDelegate.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
 #include <QFileDialog>
@@ -66,7 +67,7 @@ HighlightingPage::HighlightingPage()
                     "Message highlights are prioritized over badge highlights "
                     "and user highlights.");
 
-                auto view =
+                auto *view =
                     highlights
                         .emplace<EditableModelView>(
                             (new HighlightModel(nullptr))
@@ -82,6 +83,8 @@ HighlightingPage::HighlightingPage()
                     QHeaderView::Fixed);
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     0, QHeaderView::Stretch);
+                view->getTableView()->setItemDelegateForColumn(
+                    HighlightModel::Column::Color, new ColorItemDelegate(view));
 
                 // fourtf: make class extrend BaseWidget and add this to
                 // dpiChanged
@@ -134,6 +137,9 @@ HighlightingPage::HighlightingPage()
                     QHeaderView::Fixed);
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     0, QHeaderView::Stretch);
+                view->getTableView()->setItemDelegateForColumn(
+                    UserHighlightModel::Column::Color,
+                    new ColorItemDelegate(view));
 
                 // fourtf: make class extrend BaseWidget and add this to
                 // dpiChanged
@@ -164,18 +170,21 @@ HighlightingPage::HighlightingPage()
                     "user badges.\n"
                     "Badge highlights are prioritzed under user and message "
                     "highlights.");
-                auto view = badgeHighlights
-                                .emplace<EditableModelView>(
-                                    (new BadgeHighlightModel(nullptr))
-                                        ->initialized(
-                                            &getSettings()->highlightedBadges))
-                                .getElement();
+                auto *view = badgeHighlights
+                                 .emplace<EditableModelView>(
+                                     (new BadgeHighlightModel(nullptr))
+                                         ->initialized(
+                                             &getSettings()->highlightedBadges))
+                                 .getElement();
                 view->setTitles({"Name", "Show In\nMentions", "Flash\ntaskbar",
                                  "Play\nsound", "Custom\nsound", "Color"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     QHeaderView::Fixed);
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     0, QHeaderView::Stretch);
+                view->getTableView()->setItemDelegateForColumn(
+                    BadgeHighlightModel::Column::Color,
+                    new ColorItemDelegate(view));
 
                 // fourtf: make class extrend BaseWidget and add this to
                 // dpiChanged
@@ -330,61 +339,40 @@ void HighlightingPage::openColorDialog(const QModelIndex &clicked,
     auto initial =
         view->getModel()->data(clicked, Qt::DecorationRole).value<QColor>();
 
-    auto dialog = new ColorPickerDialog(initial, this);
-    dialog->setAttribute(Qt::WA_DeleteOnClose);
-    dialog->show();
-    // We can safely ignore this signal connection since the view and tab are never deleted
+    auto *dialog = new ColorPickerDialog(initial, this);
     // TODO: The QModelIndex clicked is technically not safe to persist here since the model
     // can be changed between the color dialog being created & the color dialog being closed
-    std::ignore = dialog->closed.connect([=](auto selected) {
-        if (selected.isValid())
-        {
-            view->getModel()->setData(clicked, selected, Qt::DecorationRole);
-
-            if (tab == HighlightTab::Messages)
-            {
-                /*
-                 * For preset highlights in the "Messages" tab, we need to
-                 * manually update the color map.
-                 */
-                auto instance = ColorProvider::instance();
-                switch (clicked.row())
-                {
-                    case 0:
-                        instance.updateColor(ColorType::SelfHighlight,
-                                             selected);
-                        break;
-                    case 1:
-                        instance.updateColor(ColorType::Whisper, selected);
-                        break;
-                    case 2:
-                        instance.updateColor(ColorType::Subscription, selected);
-                        break;
-                }
-            }
-        }
-    });
+    QObject::connect(dialog, &ColorPickerDialog::colorConfirmed, this,
+                     [=](auto selected) {
+                         if (selected.isValid())
+                         {
+                             view->getModel()->setData(clicked, selected,
+                                                       Qt::DecorationRole);
+                         }
+                     });
+    dialog->show();
 }
 
 void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
                                         EditableModelView *view,
                                         HighlightTab tab)
 {
+    if (!clicked.flags().testFlag(Qt::ItemIsEnabled))
+    {
+        return;
+    }
+
     switch (tab)
     {
         case HighlightTab::Messages:
         case HighlightTab::Users: {
             using Column = HighlightModel::Column;
-            bool restrictColorRow =
-                (tab == HighlightTab::Messages &&
-                 clicked.row() ==
-                     HighlightModel::HighlightRowIndexes::WhisperRow);
-            if (clicked.column() == Column::SoundPath &&
-                clicked.flags().testFlag(Qt::ItemIsEnabled))
+
+            if (clicked.column() == Column::SoundPath)
             {
                 this->openSoundDialog(clicked, view, Column::SoundPath);
             }
-            else if (clicked.column() == Column::Color && !restrictColorRow)
+            else if (clicked.column() == Column::Color)
             {
                 this->openColorDialog(clicked, view, tab);
             }

@@ -347,9 +347,7 @@ void SeventvEventAPI::onUserUpdate(const Dispatch &dispatch)
 
 void SeventvEventAPI::onCosmeticCreate(const CosmeticCreateDispatch &cosmetic)
 {
-    // We're using `Application::instance` instead of getApp(), because we're not in the GUI thread.
-    // `seventvBadges` does its own locking.
-    auto *badges = Application::instance->seventvBadges;
+    auto *badges = getIApp()->getSeventvBadges();
     switch (cosmetic.kind)
     {
         case CosmeticKind::Badge: {
@@ -364,9 +362,7 @@ void SeventvEventAPI::onCosmeticCreate(const CosmeticCreateDispatch &cosmetic)
 void SeventvEventAPI::onEntitlementCreate(
     const EntitlementCreateDeleteDispatch &entitlement)
 {
-    // We're using `Application::instance` instead of getApp(), because we're not in the GUI thread.
-    // `seventvBadges` does its own locking.
-    auto *badges = Application::instance->seventvBadges;
+    auto *badges = getIApp()->getSeventvBadges();
     switch (entitlement.kind)
     {
         case CosmeticKind::Badge: {
@@ -382,9 +378,7 @@ void SeventvEventAPI::onEntitlementCreate(
 void SeventvEventAPI::onEntitlementDelete(
     const EntitlementCreateDeleteDispatch &entitlement)
 {
-    // We're using `Application::instance` instead of getApp(), because we're not in the GUI thread.
-    // `seventvBadges` does its own locking.
-    auto *badges = Application::instance->seventvBadges;
+    auto *badges = getIApp()->getSeventvBadges();
     switch (entitlement.kind)
     {
         case CosmeticKind::Badge: {

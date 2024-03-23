@@ -1,13 +1,17 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/Plugin.hpp"
 
+#    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandController.hpp"
 
+extern "C" {
 #    include <lua.h>
-#    include <magic_enum.hpp>
+}
+#    include <magic_enum/magic_enum.hpp>
 #    include <QJsonArray>
 #    include <QJsonObject>
 
+#    include <algorithm>
 #    include <unordered_map>
 #    include <unordered_set>
 
@@ -110,6 +114,48 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
             QString("version is not a string (its type is %1)").arg(type));
         this->version = semver::version(0, 0, 0);
     }
+    auto permsObj = obj.value("permissions");
+    if (!permsObj.isUndefined())
+    {
+        if (!permsObj.isArray())
+        {
+            QString type = magic_enum::enum_name(permsObj.type()).data();
+            this->errors.emplace_back(
+                QString("permissions is not an array (its type is %1)")
+                    .arg(type));
+            return;
+        }
+
+        auto permsArr = permsObj.toArray();
+        for (int i = 0; i < permsArr.size(); i++)
+        {
+            const auto &t = permsArr.at(i);
+            if (!t.isObject())
+            {
+                QString type = magic_enum::enum_name(t.type()).data();
+                this->errors.push_back(QString("permissions element #%1 is not "
+                                               "an object (its type is %2)")
+                                           .arg(i)
+                                           .arg(type));
+                return;
+            }
+            auto parsed = PluginPermission(t.toObject());
+            if (parsed.isValid())
+            {
+                // ensure no invalid permissions slip through this
+                this->permissions.push_back(parsed);
+            }
+            else
+            {
+                for (const auto &err : parsed.errors)
+                {
+                    this->errors.push_back(
+                        QString("permissions element #%1: %2").arg(i).arg(err));
+                }
+            }
+        }
+    }
+
     auto tagsObj = obj.value("tags");
     if (!tagsObj.isUndefined())
     {
@@ -146,7 +192,7 @@ bool Plugin::registerCommand(const QString &name, const QString &functionName)
         return false;
     }
 
-    auto ok = getApp()->commands->registerPluginCommand(name);
+    auto ok = getIApp()->getCommands()->registerPluginCommand(name);
     if (!ok)
     {
         return false;
@@ -167,10 +213,60 @@ std::unordered_set<QString> Plugin::listRegisteredCommands()
 
 Plugin::~Plugin()
 {
+    for (auto *timer : this->activeTimeouts)
+    {
+        QObject::disconnect(timer, nullptr, nullptr, nullptr);
+        timer->deleteLater();
+    }
+    qCDebug(chatterinoLua) << "Destroyed" << this->activeTimeouts.size()
+                           << "timers for plugin" << this->id
+                           << "while destroying the object";
+    this->activeTimeouts.clear();
     if (this->state_ != nullptr)
     {
         lua_close(this->state_);
     }
+}
+int Plugin::addTimeout(QTimer *timer)
+{
+    this->activeTimeouts.push_back(timer);
+    return ++this->lastTimerId;
+}
+
+void Plugin::removeTimeout(QTimer *timer)
+{
+    for (auto it = this->activeTimeouts.begin();
+         it != this->activeTimeouts.end(); ++it)
+    {
+        if (*it == timer)
+        {
+            this->activeTimeouts.erase(it);
+            break;
+        }
+    }
+}
+
+bool Plugin::hasFSPermissionFor(bool write, const QString &path)
+{
+    auto canon = QUrl(this->dataDirectory().absolutePath() + "/");
+    if (!canon.isParentOf(path))
+    {
+        return false;
+    }
+
+    using PType = PluginPermission::Type;
+    auto typ = write ? PType::FilesystemWrite : PType::FilesystemRead;
+
+    // XXX: Older compilers don't have support for std::ranges
+    // NOLINTNEXTLINE(readability-use-anyofallof)
+    for (const auto &p : this->meta.permissions)
+    {
+        if (p.type == typ)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 }  // namespace chatterino

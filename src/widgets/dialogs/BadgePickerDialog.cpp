@@ -1,5 +1,6 @@
 #include "BadgePickerDialog.hpp"
 
+#include "Application.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "singletons/Resources.hpp"
 
@@ -14,8 +15,8 @@ BadgePickerDialog::BadgePickerDialog(QList<DisplayBadge> badges,
     : QDialog(parent)
 {
     this->dropdown_ = new QComboBox;
-    auto vbox = new QVBoxLayout(this);
-    auto buttonBox =
+    auto *vbox = new QVBoxLayout(this);
+    auto *buttonBox =
         new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
     vbox->addWidget(this->dropdown_);
@@ -57,11 +58,13 @@ BadgePickerDialog::BadgePickerDialog(QList<DisplayBadge> badges,
     updateBadge(0);
 
     // Set icons.
-    TwitchBadges::instance()->getBadgeIcons(
+    getIApp()->getTwitchBadges()->getBadgeIcons(
         badges,
         [&dropdown = this->dropdown_](QString identifier, const QIconPtr icon) {
             if (!dropdown)
+            {
                 return;
+            }
 
             int index = dropdown->findData(identifier);
             if (index != -1)

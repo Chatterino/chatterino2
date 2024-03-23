@@ -1,5 +1,6 @@
 #include "LoggingChannel.hpp"
 
+#include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageThread.hpp"
@@ -29,6 +30,10 @@ LoggingChannel::LoggingChannel(const QString &_channelName,
     {
         this->subDirectory = "Live";
     }
+    else if (channelName.startsWith("/automod"))
+    {
+        this->subDirectory = "AutoMod";
+    }
     else
     {
         this->subDirectory =
@@ -40,8 +45,9 @@ LoggingChannel::LoggingChannel(const QString &_channelName,
                          QDir::separator() + this->subDirectory;
 
     getSettings()->logPath.connect([this](const QString &logPath, auto) {
-        this->baseDirectory =
-            logPath.isEmpty() ? getPaths()->messageLogDirectory : logPath;
+        this->baseDirectory = logPath.isEmpty()
+                                  ? getIApp()->getPaths().messageLogDirectory
+                                  : logPath;
         this->openLogFile();
     });
 }
@@ -96,7 +102,8 @@ void LoggingChannel::addMessage(MessagePtr message)
     }
 
     QString str;
-    if (channelName.startsWith("/mentions"))
+    if (channelName.startsWith("/mentions") ||
+        channelName.startsWith("/automod"))
     {
         str.append("#" + message->channelName + " ");
     }
@@ -132,8 +139,17 @@ void LoggingChannel::addMessage(MessagePtr message)
         qsizetype colonIndex = messageText.indexOf(':');
         if (colonIndex != -1)
         {
-            QString rootMessageChatter =
-                message->replyThread->root()->loginName;
+            QString rootMessageChatter;
+            if (message->replyParent)
+            {
+                rootMessageChatter = message->replyParent->loginName;
+            }
+            else
+            {
+                // we actually want to use 'reply-parent-user-login' tag here,
+                // but it's not worth storing just for this edge case
+                rootMessageChatter = message->replyThread->root()->loginName;
+            }
             messageText.insert(colonIndex + 1, " @" + rootMessageChatter);
         }
     }

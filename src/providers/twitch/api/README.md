@@ -168,7 +168,7 @@ Not used anywhere at the moment.
 
 URL: https://dev.twitch.tv/docs/api/reference/#get-chatters
 
-Used for the viewer list for moderators/broadcasters.
+Used for the chatter list for moderators/broadcasters.
 
 ### Send Shoutout
 

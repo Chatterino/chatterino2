@@ -9,6 +9,9 @@ namespace chatterino::filters {
 class FilterParser
 {
 public:
+    /**
+     * Take input text & attempt to parse it into a filter
+     **/
     FilterParser(const QString &text);
 
     bool valid() const;

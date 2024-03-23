@@ -19,7 +19,7 @@ FramelessEmbedWindow::FramelessEmbedWindow()
     : BaseWindow({BaseWindow::Frameless, BaseWindow::DisableLayoutSave})
 {
     this->split_ = new Split((QWidget *)nullptr);
-    auto layout = new QHBoxLayout;
+    auto *layout = new QHBoxLayout;
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(this->split_);
 
@@ -64,13 +64,13 @@ bool FramelessEmbedWindow::nativeEvent(const QByteArray &eventType,
 
 void FramelessEmbedWindow::showEvent(QShowEvent *)
 {
-    if (!getArgs().parentWindowId)
+    if (!getApp()->getArgs().parentWindowId)
     {
         return;
     }
 
     if (auto parentHwnd =
-            reinterpret_cast<HWND>(getArgs().parentWindowId.get()))
+            reinterpret_cast<HWND>(getApp()->getArgs().parentWindowId.value()))
     {
         auto handle = reinterpret_cast<HWND>(this->winId());
         if (!::SetParent(handle, parentHwnd))

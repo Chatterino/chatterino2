@@ -3,15 +3,26 @@
 #include <QColor>
 #include <QLocale>
 #include <QString>
-#include <QStringRef>
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 2)
+#    include <QStringRef>
+#endif
 
 #include <cmath>
+#include <optional>
 #include <vector>
 
 namespace chatterino {
 
 // only qualified for tests
 namespace _helpers_internal {
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 2)
+    using StringView = QStringView;
+#else
+    using StringView = QStringRef;
+#endif
+    using SizeType = StringView::size_type;
 
     /**
      * Skips all spaces.
@@ -21,7 +32,7 @@ namespace _helpers_internal {
      * @param startPos The starting position (there must be a space in the view).
      * @return The position of the last space.
      */
-    int skipSpace(const QStringRef &view, int startPos);
+    SizeType skipSpace(StringView view, SizeType startPos);
 
     /**
      * Checks if `word` equals `expected` (singular) or `expected` + 's' (plural).
@@ -30,7 +41,7 @@ namespace _helpers_internal {
      * @param expected Singular of the expected word.
      * @return true if `word` is singular or plural of `expected`.
      */
-    bool matchesIgnorePlural(const QStringRef &word, const QString &expected);
+    bool matchesIgnorePlural(StringView word, const QString &expected);
 
     /**
      * Tries to find the unit starting at `pos` and returns its multiplier so
@@ -47,8 +58,8 @@ namespace _helpers_internal {
      *            if it's a valid unit, undefined otherwise.
      * @return (multiplier, ok)
      */
-    std::pair<uint64_t, bool> findUnitMultiplierToSec(const QStringRef &view,
-                                                      int &pos);
+    std::pair<uint64_t, bool> findUnitMultiplierToSec(StringView view,
+                                                      SizeType &pos);
 
 }  // namespace _helpers_internal
 
@@ -154,5 +165,29 @@ std::vector<T> splitListIntoBatches(const T &list, int batchSize = 100)
 }
 
 bool compareEmoteStrings(const QString &a, const QString &b);
+
+template <class T>
+constexpr std::optional<T> makeConditionedOptional(bool condition,
+                                                   const T &value)
+{
+    if (condition)
+    {
+        return value;
+    }
+
+    return std::nullopt;
+}
+
+template <class T>
+constexpr std::optional<std::decay_t<T>> makeConditionedOptional(bool condition,
+                                                                 T &&value)
+{
+    if (condition)
+    {
+        return std::optional<std::decay_t<T>>(std::forward<T>(value));
+    }
+
+    return std::nullopt;
+}
 
 }  // namespace chatterino

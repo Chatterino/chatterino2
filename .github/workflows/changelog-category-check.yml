@@ -14,7 +14,7 @@ jobs:
   changelog-category-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v6
+      - uses: actions/github-script@v7
         id: label-checker
         with:
           result-encoding: "string"
@@ -29,5 +29,5 @@ jobs:
             }
             return "";
 
-      - uses: pajlads/changelog-checker@v1.0.0
+      - uses: pajlads/changelog-checker@v1.0.1
         if: steps.label-checker.outputs.result != 'skip'

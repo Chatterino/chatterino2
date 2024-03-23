@@ -24,6 +24,7 @@ TooltipEntryWidget::TooltipEntryWidget(ImagePtr image, const QString &text,
     this->displayImage_ = new QLabel();
     this->displayImage_->setAlignment(Qt::AlignHCenter);
     this->displayImage_->setStyleSheet("background: transparent");
+    this->displayImage_->hide();
     this->displayText_ = new QLabel(text);
     this->displayText_->setAlignment(Qt::AlignHCenter);
     this->displayText_->setStyleSheet("background: transparent");
@@ -91,6 +92,11 @@ bool TooltipEntryWidget::refreshPixmap()
         this->displayImage_->setPixmap(pixmap->scaled(this->customImgWidth_,
                                                       this->customImgHeight_,
                                                       Qt::KeepAspectRatio));
+        if (this->displayImage_->size() !=
+            QSize{this->customImgWidth_, this->customImgHeight_})
+        {
+            this->adjustSize();
+        }
     }
     else
     {

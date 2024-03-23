@@ -1,8 +1,7 @@
-#include "common/NetworkRequest.hpp"
+#include "common/network/NetworkRequest.hpp"
 
-#include "common/NetworkManager.hpp"
-#include "common/NetworkResult.hpp"
-#include "common/Outcome.hpp"
+#include "common/network/NetworkManager.hpp"
+#include "common/network/NetworkResult.hpp"
 
 #include <gtest/gtest.h>
 #include <QCoreApplication>
@@ -75,7 +74,7 @@ TEST(NetworkRequest, Success)
 {
     const std::vector<int> codes{200, 201, 202, 203, 204, 205, 206};
 
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 
     for (const auto code : codes)
     {
@@ -83,12 +82,10 @@ TEST(NetworkRequest, Success)
         RequestWaiter waiter;
 
         NetworkRequest(url)
-            .onSuccess(
-                [code, &waiter, url](const NetworkResult &result) -> Outcome {
-                    EXPECT_EQ(result.status(), code);
-                    waiter.requestDone();
-                    return Success;
-                })
+            .onSuccess([code, &waiter, url](const NetworkResult &result) {
+                EXPECT_EQ(result.status(), code);
+                waiter.requestDone();
+            })
             .onError([&](const NetworkResult & /*result*/) {
                 // The codes should *not* throw an error
                 EXPECT_TRUE(false);
@@ -99,14 +96,14 @@ TEST(NetworkRequest, Success)
         waiter.waitForRequest();
     }
 
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 }
 
 TEST(NetworkRequest, FinallyCallbackOnSuccess)
 {
     const std::vector<int> codes{200, 201, 202, 203, 204, 205, 206};
 
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 
     for (const auto code : codes)
     {
@@ -135,7 +132,7 @@ TEST(NetworkRequest, Error)
         411, 412, 413, 414, 418, 500, 501, 502, 503, 504,
     };
 
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 
     for (const auto code : codes)
     {
@@ -143,13 +140,11 @@ TEST(NetworkRequest, Error)
         RequestWaiter waiter;
 
         NetworkRequest(url)
-            .onSuccess(
-                [&waiter, url](const NetworkResult & /*result*/) -> Outcome {
-                    // The codes should throw an error
-                    EXPECT_TRUE(false);
-                    waiter.requestDone();
-                    return Success;
-                })
+            .onSuccess([&waiter, url](const NetworkResult & /*result*/) {
+                // The codes should throw an error
+                EXPECT_TRUE(false);
+                waiter.requestDone();
+            })
             .onError([code, &waiter, url](const NetworkResult &result) {
                 EXPECT_EQ(result.status(), code);
 
@@ -160,7 +155,7 @@ TEST(NetworkRequest, Error)
         waiter.waitForRequest();
     }
 
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 }
 
 TEST(NetworkRequest, FinallyCallbackOnError)
@@ -170,7 +165,7 @@ TEST(NetworkRequest, FinallyCallbackOnError)
         411, 412, 413, 414, 418, 500, 501, 502, 503, 504,
     };
 
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 
     for (const auto code : codes)
     {
@@ -194,18 +189,17 @@ TEST(NetworkRequest, FinallyCallbackOnError)
 
 TEST(NetworkRequest, TimeoutTimingOut)
 {
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 
     auto url = getDelayURL(5);
     RequestWaiter waiter;
 
     NetworkRequest(url)
         .timeout(1000)
-        .onSuccess([&waiter](const NetworkResult & /*result*/) -> Outcome {
+        .onSuccess([&waiter](const NetworkResult & /*result*/) {
             // The timeout should throw an error
             EXPECT_TRUE(false);
             waiter.requestDone();
-            return Success;
         })
         .onError([&waiter, url](const NetworkResult &result) {
             qDebug() << QTime::currentTime().toString()
@@ -220,23 +214,22 @@ TEST(NetworkRequest, TimeoutTimingOut)
 
     waiter.waitForRequest();
 
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 }
 
 TEST(NetworkRequest, TimeoutNotTimingOut)
 {
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 
     auto url = getDelayURL(1);
     RequestWaiter waiter;
 
     NetworkRequest(url)
         .timeout(3000)
-        .onSuccess([&waiter, url](const NetworkResult &result) -> Outcome {
+        .onSuccess([&waiter, url](const NetworkResult &result) {
             EXPECT_EQ(result.status(), 200);
 
             waiter.requestDone();
-            return Success;
         })
         .onError([&waiter, url](const NetworkResult & /*result*/) {
             // The timeout should *not* throw an error
@@ -247,12 +240,12 @@ TEST(NetworkRequest, TimeoutNotTimingOut)
 
     waiter.waitForRequest();
 
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 }
 
 TEST(NetworkRequest, FinallyCallbackOnTimeout)
 {
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 
     auto url = getDelayURL(5);
 
@@ -263,9 +256,8 @@ TEST(NetworkRequest, FinallyCallbackOnTimeout)
 
     NetworkRequest(url)
         .timeout(1000)
-        .onSuccess([&](const NetworkResult & /*result*/) -> Outcome {
+        .onSuccess([&](const NetworkResult & /*result*/) {
             onSuccessCalled = true;
-            return Success;
         })
         .onError([&](const NetworkResult &result) {
             onErrorCalled = true;
@@ -284,5 +276,5 @@ TEST(NetworkRequest, FinallyCallbackOnTimeout)
     EXPECT_TRUE(finallyCalled);
     EXPECT_TRUE(onErrorCalled);
     EXPECT_FALSE(onSuccessCalled);
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 }
