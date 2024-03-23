@@ -10,6 +10,7 @@ QNetworkAccessManager *NetworkManager::accessManager = nullptr;
 void NetworkManager::init()
 {
     assert(!NetworkManager::workerThread);
+    assert(!NetworkManager::accessManager);
 
     NetworkManager::workerThread = new QThread;
     NetworkManager::workerThread->start();
@@ -20,6 +21,9 @@ void NetworkManager::init()
 
 void NetworkManager::deinit()
 {
+    assert(NetworkManager::workerThread);
+    assert(NetworkManager::accessManager);
+
     if (NetworkManager::workerThread)
     {
         NetworkManager::workerThread->quit();
