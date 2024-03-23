@@ -1,5 +1,7 @@
 #include "providers/twitch/pubsubmessages/AutoMod.hpp"
 
+#include "util/QMagicEnum.hpp"
+
 namespace chatterino {
 
 PubSubAutoModQueueMessage::PubSubAutoModQueueMessage(const QJsonObject &root)
@@ -7,7 +9,7 @@ PubSubAutoModQueueMessage::PubSubAutoModQueueMessage(const QJsonObject &root)
     , data(root.value("data").toObject())
     , status(this->data.value("status").toString())
 {
-    auto oType = magic_enum::enum_cast<Type>(this->typeString.toStdString());
+    auto oType = qmagicenum::enumCast<Type>(this->typeString);
     if (oType.has_value())
     {
         this->type = oType.value();

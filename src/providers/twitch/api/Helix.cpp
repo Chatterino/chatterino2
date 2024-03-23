@@ -5,6 +5,7 @@
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "util/CancellationToken.hpp"
+#include "util/QMagicEnum.hpp"
 
 #include <magic_enum/magic_enum.hpp>
 #include <QJsonDocument>
@@ -1172,9 +1173,7 @@ void Helix::sendChatAnnouncement(
 
     QJsonObject body;
     body.insert("message", message);
-    const auto colorStr =
-        std::string{magic_enum::enum_name<HelixAnnouncementColor>(color)};
-    body.insert("color", QString::fromStdString(colorStr).toLower());
+    body.insert("color", qmagicenum::enumNameString(color).toLower());
 
     this->makePost("chat/announcements", urlQuery)
         .json(body)
