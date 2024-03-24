@@ -16,11 +16,15 @@ The built binary should be exportable from the final image & able to run on your
 
 ### Debian 12 (bookworm) or later
 
-Install all the dependencies using `sudo apt install qt6-base-dev qt6-5compat-dev qt6-svg-dev qt6-image-formats-plugins libboost1.81-dev libssl-dev cmake g++ git`
+```sh
+sudo apt install qt6-base-dev qt6-5compat-dev qt6-svg-dev qt6-image-formats-plugins libboost1.81-dev libssl-dev cmake g++ git
+```
 
 ### Arch Linux
 
-Install all the dependencies using `sudo pacman -S --needed qt6-base qt6-tools boost-libs openssl qt6-imageformats qt6-5compat qt6-svg boost rapidjson pkgconf openssl cmake`
+```sh
+sudo pacman -S --needed qt6-base qt6-tools boost-libs openssl qt6-imageformats qt6-5compat qt6-svg boost rapidjson pkgconf openssl cmake
+```
 
 Alternatively you can use the [chatterino2-git](https://aur.archlinux.org/packages/chatterino2-git/) package to build and install Chatterino for you.
 
@@ -28,11 +32,15 @@ Alternatively you can use the [chatterino2-git](https://aur.archlinux.org/packag
 
 _Most likely works the same for other Red Hat-like distros. Substitute `dnf` with `yum`._
 
-Install all the dependencies using `sudo dnf install qt6-qtbase-devel qt6-qtimageformats qt6-qtsvg-devel qt6-qt5compat-devel g++ git openssl-devel boost-devel cmake`
+```sh
+sudo dnf install qt6-qtbase-devel qt6-qtimageformats qt6-qtsvg-devel qt6-qt5compat-devel g++ git openssl-devel boost-devel cmake
+```
 
 ### NixOS 18.09+
 
-Enter the development environment with all the dependencies: `nix-shell -p openssl boost qt6.full pkg-config cmake`
+```sh
+nix-shell -p openssl boost qt6.full pkg-config cmake
+```
 
 ## Compile
 
