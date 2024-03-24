@@ -52,7 +52,7 @@ bool isBroadcasterSoftwareActive()
 {
 #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     QProcess p;
-    p.start("pgrep", {"-x", broadcastingBinaries().join("|")},
+    p.start("pgrep", {"-xi", broadcastingBinaries().join("|")},
             QIODevice::NotOpen);
 
     if (p.waitForFinished(1000) && p.exitStatus() == QProcess::NormalExit)
