@@ -893,8 +893,10 @@ void TwitchMessageBuilder::parseThread()
             ->setLink({Link::ViewThread, this->thread_->rootId()});
 
         this->emplace<TextElement>(
-                "@" + usernameText + ":", MessageElementFlag::RepliedMessage,
-                threadRoot->usernameColor, FontStyle::ChatMediumSmall)
+                "@" + usernameText +
+                    (threadRoot->flags.has(MessageFlag::Action) ? "" : ":"),
+                MessageElementFlag::RepliedMessage, threadRoot->usernameColor,
+                FontStyle::ChatMediumSmall)
             ->setLink({Link::UserInfo, threadRoot->displayName});
 
         MessageColor color = MessageColor::Text;
