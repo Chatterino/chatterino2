@@ -28,11 +28,6 @@ Enter the development environment with all the dependencies: `nix-shell -p opens
 
 ## Compile
 
-### Through Qt Creator
-
-1. Install C++ IDE Qt Creator by using `sudo apt install qtcreator`
-1. Open `CMakeLists.txt` with Qt Creator and select build
-
 ## Manually
 
 1. In the project directory, create a build directory and enter it
@@ -48,3 +43,8 @@ Enter the development environment with all the dependencies: `nix-shell -p opens
    ```sh
    make
    ```
+
+### Through Qt Creator
+
+1. Install C++ IDE Qt Creator by using `sudo apt install qtcreator` (Or whatever equivalent for your distro)
+1. Open `CMakeLists.txt` with Qt Creator and select build
