@@ -91,7 +91,7 @@
 - Bugfix: The usercard button is now hidden in the User Info Popup when in special channels. (#4972)
 - Bugfix: Fixed support for Windows 11 Snap layouts. (#4994, #5175)
 - Bugfix: Fixed some windows appearing between screens. (#4797)
-- Bugfix: Fixed a crash when clicking `More messages below` button in a usercard and closing it quickly. (#4933)
+- Bugfix: Fixed a crash that could occur when clicking `More messages below` button in a usercard and closing it quickly. (#4933)
 - Bugfix: Fixed a crash that could occur when using certain features in a Usercard after closing the split from which it was created. (#5034, #5051)
 - Bugfix: Fixed a crash that could occur when using certain features in a Reply popup after closing the split from which it was created. (#5036, #5051)
 - Bugfix: Fixed a bug on Wayland where tooltips would spawn as separate windows instead of behaving like tooltips. (#4998, #5040)
