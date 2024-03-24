@@ -9,7 +9,7 @@
 - Minor: Moderation commands such as `/ban`, `/timeout`, `/unban`, and `/untimeout` can now be used via User IDs by using the `id:123` syntax (e.g. `/timeout id:22484632 1m stop winning`). (#4945, #4956, #4957)
 - Minor: The `/usercard` command now accepts user ids. (`/usercard id:22484632`) (#4934)
 - Minor: Added menu actions to reply directly to a message or the original thread root. (#4923)
-- Minor: The `/reply` command now replies to the latest message from the user. (#4919)
+- Minor: The `/reply` command now replies to the latest message from the user. Due to this change, the message you intended to reply to is now shown in the reply context, instead of the first message in a thread. (#4919)
 - Minor: The chatter list button is now hidden if you don't have moderator privileges. (#5245)
 - Minor: Live streams that are marked as reruns now mark a tab as yellow instead of red. (#5176, #5237)
 - Minor: Allowed theming of tab live and rerun indicators. (#5188)
