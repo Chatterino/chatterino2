@@ -41,7 +41,7 @@ Enter the development environment with all the dependencies: `nix-shell -p opens
    ```
 1. Build the project
    ```sh
-   make
+   cmake --build .
    ```
 
 ### Through Qt Creator
