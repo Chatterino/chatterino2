@@ -12,7 +12,7 @@ Install all the dependencies using `sudo apt install qttools5-dev qt5-image-form
 
 ### Arch Linux
 
-Install all the dependencies using `sudo pacman -S --needed qt5-base qt5-imageformats qt5-svg qt5-tools boost rapidjson pkgconf openssl cmake`
+Install all the dependencies using `sudo pacman -S --needed qt6-base qt6-tools boost-libs openssl qt6-imageformats qtkeychain-qt6 qt6-5compat qt6-svg boost rapidjson pkgconf openssl cmake`
 
 Alternatively you can use the [chatterino2-git](https://aur.archlinux.org/packages/chatterino2-git/) package to build and install Chatterino for you.
 
