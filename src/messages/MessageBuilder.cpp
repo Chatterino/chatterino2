@@ -547,6 +547,7 @@ MessageBuilder::MessageBuilder(ImageUploaderResultTag /*unused*/,
 
     if (!deletionLink.isEmpty())
     {
+        this->message().elements.back()->setTrailingSpace(true);
         addText("(Deletion link:");
         addText(deletionLink, MessageColor::Link)
             ->setLink({Link::Url, deletionLink})
