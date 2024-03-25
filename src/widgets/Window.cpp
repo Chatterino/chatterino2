@@ -702,6 +702,14 @@ void Window::addMenuBar()
 
     // First menu.
     QMenu *menu = mainMenu->addMenu(QString());
+
+    // About button that shows the About tab in the Settings Dialog.
+    QAction *about = menu->addAction(QString());
+    about->setMenuRole(QAction::AboutRole);
+    connect(about, &QAction::triggered, this, [this] {
+        SettingsDialog::showDialog(this, SettingsDialogPreference::About);
+    });
+
     QAction *prefs = menu->addAction(QString());
     prefs->setMenuRole(QAction::PreferencesRole);
     connect(prefs, &QAction::triggered, this, [this] {
@@ -710,6 +718,13 @@ void Window::addMenuBar()
 
     // Window menu.
     QMenu *windowMenu = mainMenu->addMenu(QString("Window"));
+
+    // Window->Minimise item
+    QAction *minimiseWindow = windowMenu->addAction(QString("Minimise"));
+    minimiseWindow->setShortcuts({QKeySequence("Meta+M")});
+    connect(minimiseWindow, &QAction::triggered, this, [this] {
+        this->setWindowState(Qt::WindowMinimized);
+    });
 
     QAction *nextTab = windowMenu->addAction(QString("Select next tab"));
     nextTab->setShortcuts({QKeySequence("Meta+Tab")});
@@ -721,6 +736,27 @@ void Window::addMenuBar()
     prevTab->setShortcuts({QKeySequence("Meta+Shift+Tab")});
     connect(prevTab, &QAction::triggered, this, [this] {
         this->notebook_->selectPreviousTab();
+    });
+
+    // Help menu.
+    QMenu *helpMenu = mainMenu->addMenu(QString("Help"));
+
+    // Help->Chatterino Wiki item
+    QAction *helpWiki = helpMenu->addAction(QString("Chatterino Wiki"));
+    connect(helpWiki, &QAction::triggered, this, []() {
+        QDesktopServices::openUrl(QUrl("https://wiki.chatterino.com"));
+    });
+
+    // Help->Chatterino Github
+    QAction *helpGithub = helpMenu->addAction(QString("Chatterino Github"));
+    connect(helpGithub, &QAction::triggered, this, []() {
+        QDesktopServices::openUrl(QUrl("https://github.com/Chatterino/chatterino2"));
+    });
+
+    // Help->Chatterino Discord
+    QAction *helpDiscord = helpMenu->addAction(QString("Chatterino Discord"));
+    connect(helpDiscord, &QAction::triggered, this, []() {
+        QDesktopServices::openUrl(QUrl("https://discord.gg/7Y5AYhAK4z"));
     });
 }
 
