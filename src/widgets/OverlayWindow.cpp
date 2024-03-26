@@ -365,6 +365,7 @@ void OverlayWindow::endInteraction()
     this->closeButton_.hide();
 }
 
+#ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
 void OverlayWindow::setInert(bool inert)
 {
     if (this->inert_ == inert)
@@ -388,5 +389,6 @@ void OverlayWindow::setInert(bool inert)
         scrollbar->scrollToBottom();
     }
 }
+#endif
 
 }  // namespace chatterino
