@@ -103,7 +103,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel)
     this->channelView_.installEventFilter(this);
     this->channelView_.setChannel(this->channel_.get());
     this->channelView_.setColorVisitor([](MessageColors &colors, Theme *theme) {
-        colors.applyOverlay(theme);
+        colors.applyOverlay(theme, getSettings()->overlayBackgroundOpacity);
     });
     this->channelView_.setAttribute(Qt::WA_TranslucentBackground);
     this->holder_.managedConnect(this->channel_.getChannelChanged(), [this]() {
@@ -120,30 +120,39 @@ OverlayWindow::OverlayWindow(IndirectChannel channel)
     this->interactAnimation_.setEndValue(1.0);
     this->interactAnimation_.setDuration(150);
 
-    auto applyDropShadowTheme = [this]() {
-        auto *theme = getTheme();
-        this->dropShadow_->setColor(theme->overlayMessages.shadow.color);
-        this->dropShadow_->setOffset(theme->overlayMessages.shadow.offset);
-        this->dropShadow_->setBlurRadius(
-            theme->overlayMessages.shadow.blurRadius);
-    };
-    getSettings()->enableOverlayShadow.connect(
-        [this, applyDropShadowTheme](bool value) {
+    auto *settings = getSettings();
+    settings->enableOverlayShadow.connect(
+        [this](bool value) {
             if (value)
             {
                 this->dropShadow_ = new QGraphicsDropShadowEffect;
-                applyDropShadowTheme();
                 this->channelView_.setGraphicsEffect(this->dropShadow_);
             }
             else
             {
                 this->channelView_.setGraphicsEffect(nullptr);
+                this->dropShadow_ = nullptr;  // deleted by setGraphicsEffect
             }
+            this->applyTheme();
         },
         this->holder_);
+    settings->overlayBackgroundOpacity.connect(
+        [this] {
+            this->channelView_.updateColorTheme();
+        },
+        this->holder_, false);
 
-    applyDropShadowTheme();
-    this->holder_.managedConnect(getTheme()->updated, applyDropShadowTheme);
+    auto applyIt = [this](auto /*unused*/) {
+        this->applyTheme();
+    };
+    settings->overlayShadowOffsetX.connect(applyIt, this->holder_, false);
+    settings->overlayShadowOffsetY.connect(applyIt, this->holder_, false);
+    settings->overlayShadowOpacity.connect(applyIt, this->holder_, false);
+    settings->overlayShadowRadius.connect(applyIt, this->holder_, false);
+
+    this->holder_.managedConnect(getTheme()->updated, [this] {
+        this->applyTheme();
+    });
 
 #ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
     getSettings()->overlayInertShortcut.connect(
@@ -171,6 +180,23 @@ OverlayWindow::OverlayWindow(IndirectChannel channel)
 }
 
 OverlayWindow::~OverlayWindow() = default;
+
+void OverlayWindow::applyTheme()
+{
+    auto *theme = getTheme();
+    auto *settings = getSettings();
+
+    if (this->dropShadow_)
+    {
+        auto shadowColor = theme->overlayMessages.shadow.color;
+        shadowColor.setAlpha(
+            std::clamp(settings->overlayShadowOpacity.getValue(), 0, 255));
+        this->dropShadow_->setColor(shadowColor);
+        this->dropShadow_->setOffset(settings->overlayShadowOffsetX,
+                                     settings->overlayShadowOffsetY);
+        this->dropShadow_->setBlurRadius(settings->overlayShadowRadius);
+    }
+}
 
 bool OverlayWindow::eventFilter(QObject * /*object*/, QEvent *event)
 {

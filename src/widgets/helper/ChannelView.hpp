@@ -192,6 +192,7 @@ public:
      */
     bool mayContainMessage(const MessagePtr &message);
 
+    void updateColorTheme();
     void setColorVisitor(
         const std::function<void(MessageColors &, Theme *)> &visitor);
 

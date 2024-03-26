@@ -43,8 +43,11 @@ private:
 
     void setOverrideCursor(const QCursor &cursor);
 
+    void applyTheme();
+
     IndirectChannel channel_;
     pajlada::Signals::SignalHolder holder_;
+
     ChannelView channelView_;
     QGraphicsDropShadowEffect *dropShadow_;
 

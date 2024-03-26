@@ -117,8 +117,6 @@ public:
 
         struct {
             QColor color;
-            QPointF offset;
-            double blurRadius = 8.0;
         } shadow;
     } overlayMessages;
 

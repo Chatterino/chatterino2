@@ -36,11 +36,9 @@
         "regular": "#ffffff",
         "system": "#8c7f7f"
       },
-      "background": "#32000000",
+      "background": "#000",
       "shadow": {
-        "color": "#000",
-        "offset": [2, 2],
-        "blurRadius": 8
+        "color": "#000"
       }
     },
     "scrollbars": {

@@ -588,13 +588,18 @@ void ChannelView::themeChangedEvent()
     }
 }
 
+void ChannelView::updateColorTheme()
+{
+    this->themeChangedEvent();
+}
+
 void ChannelView::setColorVisitor(
     const std::function<void(MessageColors &, Theme *)> &visitor)
 {
-    Q_ASSERT_X(this->colorVisitor_ == nullptr, "ChannelView::setColorVisitor",
-               "The color visitor should only be set once.");
+    assert(this->colorVisitor_ == nullptr &&
+           "The color visitor should only be set once.");
     this->colorVisitor_ = visitor;
-    this->themeChangedEvent();
+    this->updateColorTheme();
 }
 
 void ChannelView::setupHighlightAnimationColors()

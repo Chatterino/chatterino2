@@ -300,16 +300,20 @@
             "disabled": { "$ref": "#/definitions/qt-color" },
             "selection": { "$ref": "#/definitions/qt-color" },
             "textColors": { "$ref": "#/definitions/text-colors" },
-            "background": { "$ref": "#/definitions/qt-color" },
+            "background": {
+              "$ref": "#/definitions/qt-color",
+              "description": "Note: The alpha value is ignored (set through the settings)"
+            },
             "shadow": {
               "type": "object",
               "additionalProperties": false,
               "properties": {
-                "color": { "$ref": "#/definitions/qt-color" },
-                "offset": { "$ref": "#/definitions/qpointf" },
-                "blurRadius": { "type": "number", "minimum": 0 }
+                "color": {
+                  "$ref": "#/definitions/qt-color",
+                  "description": "Note: The alpha value is ignored (set through the settings)"
+                }
               },
-              "required": ["color", "offset", "blurRadius"]
+              "required": ["color"]
             }
           },
           "required": [

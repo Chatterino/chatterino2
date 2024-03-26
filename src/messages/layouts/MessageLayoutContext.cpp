@@ -3,6 +3,8 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 
+#include <algorithm>
+
 namespace chatterino {
 
 void MessageColors::applyTheme(Theme *theme)
@@ -25,9 +27,10 @@ void MessageColors::applyTheme(Theme *theme)
         this->regular.alpha() != 255 || this->alternate.alpha() != 255;
 }
 
-void MessageColors::applyOverlay(Theme *theme)
+void MessageColors::applyOverlay(Theme *theme, int backgroundOpacity)
 {
     this->channelBackground = theme->overlayMessages.background;
+    this->channelBackground.setAlpha(std::clamp(backgroundOpacity, 0, 255));
 
     this->regular = theme->overlayMessages.backgrounds.regular;
     this->alternate = theme->overlayMessages.backgrounds.alternate;
