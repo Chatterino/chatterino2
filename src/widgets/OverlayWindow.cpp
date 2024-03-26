@@ -196,6 +196,7 @@ void OverlayWindow::applyTheme()
                                      settings->overlayShadowOffsetY);
         this->dropShadow_->setBlurRadius(settings->overlayShadowRadius);
     }
+    this->update();
 }
 
 bool OverlayWindow::eventFilter(QObject * /*object*/, QEvent *event)
@@ -325,6 +326,7 @@ double OverlayWindow::interactionProgress() const
 void OverlayWindow::setInteractionProgress(double progress)
 {
     this->interactionProgress_ = progress;
+    this->update();
 }
 
 void OverlayWindow::startInteraction()
