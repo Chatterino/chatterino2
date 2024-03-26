@@ -750,7 +750,8 @@ void Window::addMenuBar()
     // Help->Chatterino Github
     QAction *helpGithub = helpMenu->addAction(QString("Chatterino Github"));
     connect(helpGithub, &QAction::triggered, this, []() {
-        QDesktopServices::openUrl(QUrl("https://github.com/Chatterino/chatterino2"));
+        QDesktopServices::openUrl(
+            QUrl("https://github.com/Chatterino/chatterino2"));
     });
 
     // Help->Chatterino Discord
