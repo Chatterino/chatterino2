@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Args.hpp"
+#include "common/Common.hpp"
 #include "common/Credentials.hpp"
 #include "common/Modes.hpp"
 #include "common/QLogging.hpp"
@@ -744,20 +745,19 @@ void Window::addMenuBar()
     // Help->Chatterino Wiki item
     QAction *helpWiki = helpMenu->addAction(QString("Chatterino Wiki"));
     connect(helpWiki, &QAction::triggered, this, []() {
-        QDesktopServices::openUrl(QUrl("https://wiki.chatterino.com"));
+        QDesktopServices::openUrl(QUrl(LINK_CHATTERINO_WIKI));
     });
 
     // Help->Chatterino Github
     QAction *helpGithub = helpMenu->addAction(QString("Chatterino Github"));
     connect(helpGithub, &QAction::triggered, this, []() {
-        QDesktopServices::openUrl(
-            QUrl("https://github.com/Chatterino/chatterino2"));
+        QDesktopServices::openUrl(QUrl(LINK_CHATTERINO_SOURCE));
     });
 
     // Help->Chatterino Discord
     QAction *helpDiscord = helpMenu->addAction(QString("Chatterino Discord"));
     connect(helpDiscord, &QAction::triggered, this, []() {
-        QDesktopServices::openUrl(QUrl("https://discord.gg/7Y5AYhAK4z"));
+        QDesktopServices::openUrl(QUrl(LINK_CHATTERINO_DISCORD));
     });
 }
 
