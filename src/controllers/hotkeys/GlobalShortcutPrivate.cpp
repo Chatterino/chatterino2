@@ -125,6 +125,8 @@ bool GlobalShortcutPrivate::unsetShortcut()
     shortcut->second.erase(it);
     if (!shortcut->second.empty())
     {
+        this->key = Qt::Key(0);
+        this->mods = Qt::NoModifier;
         return true;
     }
 

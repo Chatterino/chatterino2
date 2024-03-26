@@ -21,6 +21,18 @@ struct GlobalShortcutResult {
     uint32_t error;
 };
 
+/// @brief Platform specific functionality for global shortcuts
+///
+/// This is partially implemented per platform.
+/// The following methods must be implemented per platform:
+///
+/// - nativeKeycode()
+/// - nativeModifiers()
+/// - registerShortcut()
+/// - unregisterShortcut()
+/// - EventFilter::nativeEventFilter() (not on macOS)
+///
+/// This class is instantiated for every shortcut (at most once).
 class GlobalShortcutPrivate
 {
 public:
