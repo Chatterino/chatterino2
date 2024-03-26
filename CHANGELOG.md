@@ -113,6 +113,7 @@
 - Bugfix: Fixed split header tooltips appearing too tall. (#5232)
 - Bugfix: Fixed past messages not showing in the search popup after adding a channel. (#5248)
 - Bugfix: Detect when OBS is running on MacOS. (#5260)
+- Bugfix: Fixed a missing space when the image uploader provided a delete link. (#5269)
 - Bugfix: Remove ":" from the message the user is replying to if it's a /me message. (#5263)
 - Dev: Run miniaudio in a separate thread, and simplify it to not manage the device ourselves. There's a chance the simplification is a bad idea. (#4978)
 - Dev: Change clang-format from v14 to v16. (#4929)
