@@ -543,11 +543,10 @@ MessageBuilder::MessageBuilder(ImageUploaderResultTag /*unused*/,
     // This also ensures that the LinkResolver doesn't get these links.
     addText(imageLink, MessageColor::Link)
         ->setLink({Link::Url, imageLink})
-        ->setTrailingSpace(false);
+        ->setTrailingSpace(!deletionLink.isEmpty());
 
     if (!deletionLink.isEmpty())
     {
-        this->message().elements.back()->setTrailingSpace(true);
         addText("(Deletion link:");
         addText(deletionLink, MessageColor::Link)
             ->setLink({Link::Url, deletionLink})
