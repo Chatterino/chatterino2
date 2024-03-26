@@ -44,6 +44,8 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
      * flags.whisper
      * flags.reply
      * flags.automod
+     * flags.restricted
+     * flags.monitored
      *
      * message.content
      * message.length
@@ -101,6 +103,8 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
         {"flags.whisper", m->flags.has(MessageFlag::Whisper)},
         {"flags.reply", m->flags.has(MessageFlag::ReplyMessage)},
         {"flags.automod", m->flags.has(MessageFlag::AutoMod)},
+        {"flags.restricted", m->flags.has(MessageFlag::RestrictedMessage)},
+        {"flags.monitored", m->flags.has(MessageFlag::MonitoredMessage)},
 
         {"message.content", m->messageText},
         {"message.length", m->messageText.length()},

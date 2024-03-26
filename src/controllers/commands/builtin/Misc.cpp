@@ -24,9 +24,12 @@
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/Window.hpp"
 
+#include <QCommandLineParser>
 #include <QDesktopServices>
 #include <QString>
 #include <QUrl>
+
+#include <optional>
 
 namespace chatterino::commands {
 
@@ -66,7 +69,7 @@ QString uptime(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /uptime command only works in Twitch Channels"));
+            "The /uptime command only works in Twitch Channels."));
         return "";
     }
 
@@ -188,14 +191,14 @@ QString clip(const CommandContext &ctx)
         type != Channel::Type::Twitch && type != Channel::Type::TwitchWatching)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /clip command only works in Twitch Channels"));
+            "The /clip command only works in Twitch Channels."));
         return "";
     }
 
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /clip command only works in Twitch Channels"));
+            "The /clip command only works in Twitch Channels."));
         return "";
     }
 
@@ -214,12 +217,12 @@ QString marker(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /marker command only works in Twitch channels"));
+            "The /marker command only works in Twitch channels."));
         return "";
     }
 
     // Avoid Helix calls without Client ID and/or OAuth Token
-    if (getApp()->accounts->twitch.getCurrent()->isAnon())
+    if (getIApp()->getAccounts()->twitch.getCurrent()->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(
             "You need to be logged in to create stream markers!"));
@@ -365,8 +368,12 @@ QString popup(const CommandContext &ctx)
     // Popup the current split
     if (target.isEmpty())
     {
-        auto *currentPage = dynamic_cast<SplitContainer *>(
-            getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
+        auto *currentPage =
+            dynamic_cast<SplitContainer *>(getIApp()
+                                               ->getWindows()
+                                               ->getMainWindow()
+                                               .getNotebook()
+                                               .getSelectedPage());
         if (currentPage != nullptr)
         {
             auto *currentSplit = currentPage->getSelectedSplit();
@@ -385,7 +392,7 @@ QString popup(const CommandContext &ctx)
     // Open channel passed as argument in a popup
     auto *app = getApp();
     auto targetChannel = app->twitch->getOrAddChannel(target);
-    app->windows->openInPopup(targetChannel);
+    app->getWindows()->openInPopup(targetChannel);
 
     return "";
 }
@@ -394,8 +401,11 @@ QString clearmessages(const CommandContext &ctx)
 {
     (void)ctx;
 
-    auto *currentPage = dynamic_cast<SplitContainer *>(
-        getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
+    auto *currentPage = dynamic_cast<SplitContainer *>(getIApp()
+                                                           ->getWindows()
+                                                           ->getMainWindow()
+                                                           .getNotebook()
+                                                           .getSelectedPage());
 
     if (auto *split = currentPage->getSelectedSplit())
     {
@@ -407,26 +417,97 @@ QString clearmessages(const CommandContext &ctx)
 
 QString openURL(const CommandContext &ctx)
 {
+    /**
+     * The /openurl command
+     * Takes a positional argument as the URL to open
+     *
+     * Accepts the option --private or --no-private (or --incognito or --no-incognito).
+     * These options will force the URL to be opened in private or non-private mode, regardless of the
+     * default incognito mode setting.
+     *
+     * Examples:
+     *  - /openurl https://twitch.tv/forsen
+     *    with the setting "Open links in incognito/private mode" enabled
+     *    Opens https://twitch.tv/forsen in private mode
+     *  - /openurl https://twitch.tv/forsen
+     *    with the setting "Open links in incognito/private mode" disabled
+     *    Opens https://twitch.tv/forsen in normal mode
+     *  - /openurl https://twitch.tv/forsen --private
+     *    with the setting "Open links in incognito/private mode" disabled
+     *    Opens https://twitch.tv/forsen in private mode
+     *  - /openurl https://twitch.tv/forsen --no-private
+     *    with the setting "Open links in incognito/private mode" enabled
+     *    Opens https://twitch.tv/forsen in normal mode
+     */
     if (ctx.channel == nullptr)
     {
         return "";
     }
 
-    if (ctx.words.size() < 2)
+    QCommandLineParser parser;
+    parser.setOptionsAfterPositionalArgumentsMode(
+        QCommandLineParser::ParseAsPositionalArguments);
+    parser.addPositionalArgument("URL", "The URL to open");
+    QCommandLineOption privateModeOption(
+        {
+            "private",
+            "incognito",
+        },
+        "Force private mode. Cannot be used together with --no-private");
+    QCommandLineOption noPrivateModeOption(
+        {
+            "no-private",
+            "no-incognito",
+        },
+        "Force non-private mode. Cannot be used together with --private");
+    parser.addOptions({
+        privateModeOption,
+        noPrivateModeOption,
+    });
+    parser.parse(ctx.words);
+
+    const auto &positionalArguments = parser.positionalArguments();
+    if (positionalArguments.isEmpty())
     {
-        ctx.channel->addMessage(makeSystemMessage("Usage: /openurl <URL>"));
+        ctx.channel->addMessage(makeSystemMessage(
+            "Usage: /openurl <URL> [--incognito/--no-incognito]"));
         return "";
     }
+    auto urlString = parser.positionalArguments().join(' ');
 
-    QUrl url = QUrl::fromUserInput(ctx.words.mid(1).join(" "));
+    QUrl url = QUrl::fromUserInput(urlString);
     if (!url.isValid())
     {
         ctx.channel->addMessage(makeSystemMessage("Invalid URL specified."));
         return "";
     }
 
+    auto preferPrivateMode = getSettings()->openLinksIncognito.getValue();
+    auto forcePrivateMode = parser.isSet(privateModeOption);
+    auto forceNonPrivateMode = parser.isSet(noPrivateModeOption);
+
+    if (forcePrivateMode && forceNonPrivateMode)
+    {
+        ctx.channel->addMessage(makeSystemMessage(
+            "Error: /openurl may only be called with --incognito or "
+            "--no-incognito, not both at the same time."));
+        return "";
+    }
+
+    bool usePrivateMode = false;
+
+    if (forceNonPrivateMode)
+    {
+        usePrivateMode = false;
+    }
+    else if (supportsIncognitoLinks() &&
+             (forcePrivateMode || preferPrivateMode))
+    {
+        usePrivateMode = true;
+    }
+
     bool res = false;
-    if (supportsIncognitoLinks() && getSettings()->openLinksIncognito)
+    if (usePrivateMode)
     {
         res = openLinkIncognito(url.toString(QUrl::FullyEncoded));
     }
@@ -490,6 +571,27 @@ QString injectFakeMessage(const CommandContext &ctx)
     return "";
 }
 
+QString injectStreamUpdateNoStream(const CommandContext &ctx)
+{
+    /**
+     * /debug-update-to-no-stream makes the current channel mimic going offline
+     */
+    if (ctx.channel == nullptr)
+    {
+        return "";
+    }
+    if (ctx.twitchChannel == nullptr)
+    {
+        ctx.channel->addMessage(
+            makeSystemMessage("The /debug-update-to-no-stream command only "
+                              "works in Twitch channels"));
+        return "";
+    }
+
+    ctx.twitchChannel->updateStreamStatus(std::nullopt);
+    return "";
+}
+
 QString copyToClipboard(const CommandContext &ctx)
 {
     if (ctx.channel == nullptr)
@@ -520,7 +622,7 @@ QString unstableSetUserClientSideColor(const CommandContext &ctx)
     {
         ctx.channel->addMessage(
             makeSystemMessage("The /unstable-set-user-color command only "
-                              "works in Twitch channels"));
+                              "works in Twitch channels."));
         return "";
     }
     if (ctx.words.size() < 2)
@@ -580,8 +682,11 @@ QString openUsercard(const CommandContext &ctx)
 
     // try to link to current split if possible
     Split *currentSplit = nullptr;
-    auto *currentPage = dynamic_cast<SplitContainer *>(
-        getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
+    auto *currentPage = dynamic_cast<SplitContainer *>(getIApp()
+                                                           ->getWindows()
+                                                           ->getMainWindow()
+                                                           .getNotebook()
+                                                           .getSelectedPage());
     if (currentPage != nullptr)
     {
         currentSplit = currentPage->getSelectedSplit();
@@ -592,7 +697,8 @@ QString openUsercard(const CommandContext &ctx)
     if (differentChannel || currentSplit == nullptr)
     {
         // not possible to use current split, try searching for one
-        const auto &notebook = getApp()->windows->getMainWindow().getNotebook();
+        const auto &notebook =
+            getIApp()->getWindows()->getMainWindow().getNotebook();
         auto count = notebook.getPageCount();
         for (int i = 0; i < count; i++)
         {

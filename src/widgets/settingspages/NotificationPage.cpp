@@ -93,7 +93,7 @@ NotificationPage::NotificationPage()
                 EditableModelView *view =
                     twitchChannels
                         .emplace<EditableModelView>(
-                            getApp()->notifications->createModel(
+                            getIApp()->getNotifications()->createModel(
                                 nullptr, Platform::Twitch))
                         .getElement();
                 view->setTitles({"Twitch channels"});
@@ -112,7 +112,8 @@ NotificationPage::NotificationPage()
                 // We can safely ignore this signal connection since we own the view
                 std::ignore = view->addButtonPressed.connect([] {
                     getApp()
-                        ->notifications->channelMap[Platform::Twitch]
+                        ->getNotifications()
+                        ->channelMap[Platform::Twitch]
                         .append("channel");
                 });
             }

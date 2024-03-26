@@ -123,7 +123,9 @@ struct Deserialize<chatterino::HighlightBadge> {
 
         auto _color = QColor(encodedColor);
         if (!_color.isValid())
+        {
             _color = chatterino::HighlightBadge::FALLBACK_HIGHLIGHT_COLOR;
+        }
 
         return chatterino::HighlightBadge(_name, _displayName, _showInMentions,
                                           _hasAlert, _hasSound, _soundUrl,

@@ -167,7 +167,7 @@ void Emojis::load()
 
 void Emojis::loadEmojis()
 {
-    // Current version: https://github.com/iamcal/emoji-data/blob/v14.0.0/emoji.json (Emoji version 14.0 (2022))
+    // Current version: https://github.com/iamcal/emoji-data/blob/v15.1.1/emoji.json (Emoji version 15.1 (2023))
     QFile file(":/emoji.json");
     file.open(QFile::ReadOnly);
     QTextStream s1(&file);
@@ -269,14 +269,15 @@ void Emojis::loadEmojiSet()
             };
             // clang-format on
 
+            // As of emoji-data v15.1.1, google is the only source missing no images.
             if (!emoji->capabilities.contains(emojiSetToUse))
             {
-                emojiSetToUse = "Twitter";
+                emojiSetToUse = "Google";
             }
 
             QString code = emoji->unifiedCode.toLower();
             QString urlPrefix =
-                "https://pajbot.com/static/emoji-v2/img/twitter/64/";
+                "https://pajbot.com/static/emoji-v2/img/google/64/";
             auto it = emojiSets.find(emojiSetToUse);
             if (it != emojiSets.end())
             {
@@ -284,7 +285,8 @@ void Emojis::loadEmojiSet()
             }
             QString url = urlPrefix + code + ".png";
             emoji->emote = std::make_shared<Emote>(Emote{
-                EmoteName{emoji->value}, ImageSet{Image::fromUrl({url}, 0.35)},
+                EmoteName{emoji->value},
+                ImageSet{Image::fromUrl({url}, 0.35, {64, 64})},
                 Tooltip{":" + emoji->shortCodes[0] + ":<br/>Emoji"}, Url{}});
         }
     });

@@ -6,15 +6,19 @@
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/commands/CommandController.hpp"
+#    include "controllers/plugins/api/ChannelRef.hpp"
+#    include "controllers/plugins/api/IOWrapper.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "messages/MessageBuilder.hpp"
 #    include "singletons/Paths.hpp"
 #    include "singletons/Settings.hpp"
 
+extern "C" {
 #    include <lauxlib.h>
 #    include <lua.h>
 #    include <lualib.h>
+}
 #    include <QJsonDocument>
 
 #    include <memory>
@@ -23,7 +27,12 @@
 
 namespace chatterino {
 
-void PluginController::initialize(Settings &settings, Paths &paths)
+PluginController::PluginController(const Paths &paths_)
+    : paths(paths_)
+{
+}
+
+void PluginController::initialize(Settings &settings, const Paths &paths)
 {
     (void)paths;
 
@@ -44,7 +53,7 @@ void PluginController::initialize(Settings &settings, Paths &paths)
 void PluginController::loadPlugins()
 {
     this->plugins_.clear();
-    auto dir = QDir(getPaths()->pluginsDirectory);
+    auto dir = QDir(this->paths.pluginsDirectory);
     qCDebug(chatterinoLua) << "Loading plugins in" << dir.path();
     for (const auto &info :
          dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot))
@@ -112,8 +121,7 @@ void PluginController::openLibrariesFor(lua_State *L, const PluginMeta &meta,
         luaL_Reg{LUA_GNAME, luaopen_base},
         // - load - don't allow in release mode
 
-        //luaL_Reg{LUA_COLIBNAME, luaopen_coroutine},
-        // - needs special support
+        luaL_Reg{LUA_COLIBNAME, luaopen_coroutine},
         luaL_Reg{LUA_TABLIBNAME, luaopen_table},
         // luaL_Reg{LUA_IOLIBNAME, luaopen_io},
         // - explicit fs access, needs wrapper with permissions, no usage ideas yet
@@ -135,14 +143,15 @@ void PluginController::openLibrariesFor(lua_State *L, const PluginMeta &meta,
         luaL_requiref(L, reg.name, reg.func, int(true));
         lua_pop(L, 1);
     }
+    luaL_requiref(L, LUA_IOLIBNAME, luaopen_io, int(false));
+    lua_setfield(L, LUA_REGISTRYINDEX, lua::api::REG_REAL_IO_NAME);
 
     // NOLINTNEXTLINE(*-avoid-c-arrays)
     static const luaL_Reg c2Lib[] = {
-        {"system_msg", lua::api::c2_system_msg},
         {"register_command", lua::api::c2_register_command},
         {"register_callback", lua::api::c2_register_callback},
-        {"send_msg", lua::api::c2_send_msg},
         {"log", lua::api::c2_log},
+        {"later", lua::api::c2_later},
         {nullptr, nullptr},
     };
     lua_pushglobaltable(L);
@@ -158,6 +167,16 @@ void PluginController::openLibrariesFor(lua_State *L, const PluginMeta &meta,
 
     lua::pushEnumTable<lua::api::EventType>(L);
     lua_setfield(L, c2libIdx, "EventType");
+
+    lua::pushEnumTable<lua::api::LPlatform>(L);
+    lua_setfield(L, c2libIdx, "Platform");
+
+    lua::pushEnumTable<Channel::Type>(L);
+    lua_setfield(L, c2libIdx, "ChannelType");
+
+    // Initialize metatables for objects
+    lua::api::ChannelRef::createMetatable(L);
+    lua_setfield(L, c2libIdx, "Channel");
 
     lua_setfield(L, gtable, "c2");
 
@@ -220,8 +239,53 @@ void PluginController::openLibrariesFor(lua_State *L, const PluginMeta &meta,
     lua::push(L, QString(pluginDir.absolutePath()));
     lua_pushcclosure(L, lua::api::searcherAbsolute, 1);
     lua_seti(L, -2, 3);
+    lua_pop(L, 2);  // remove package, package.searchers
 
-    lua_pop(L, 3);  // remove gtable, package, package.searchers
+    // NOLINTNEXTLINE(*-avoid-c-arrays)
+    static const luaL_Reg ioLib[] = {
+        {"close", lua::api::io_close},
+        {"flush", lua::api::io_flush},
+        {"input", lua::api::io_input},
+        {"lines", lua::api::io_lines},
+        {"open", lua::api::io_open},
+        {"output", lua::api::io_output},
+        {"popen", lua::api::io_popen},  // stub
+        {"read", lua::api::io_read},
+        {"tmpfile", lua::api::io_tmpfile},  // stub
+        {"write", lua::api::io_write},
+        // type = realio.type
+        {nullptr, nullptr},
+    };
+    // TODO: io.popen stub
+    auto iolibIdx = lua::pushEmptyTable(L, 1);
+    luaL_setfuncs(L, ioLib, 0);
+
+    // set ourio.type = realio.type
+    lua_pushvalue(L, iolibIdx);
+    lua_getfield(L, LUA_REGISTRYINDEX, lua::api::REG_REAL_IO_NAME);
+    lua_getfield(L, -1, "type");
+    lua_remove(L, -2);  // remove realio
+    lua_setfield(L, iolibIdx, "type");
+    lua_pop(L, 1);  // still have iolib on top of stack
+
+    lua_pushvalue(L, iolibIdx);
+    lua_setfield(L, gtable, "io");
+
+    lua_pushvalue(L, iolibIdx);
+    lua_setfield(L, LUA_REGISTRYINDEX, lua::api::REG_C2_IO_NAME);
+
+    luaL_getsubtable(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
+    lua_pushvalue(L, iolibIdx);
+    lua_setfield(L, -2, "io");
+
+    lua_pop(L, 3);  // remove gtable, iolib, LOADED
+
+    // Don't give plugins the option to shit into our stdio
+    lua_pushnil(L);
+    lua_setfield(L, LUA_REGISTRYINDEX, "_IO_input");
+
+    lua_pushnil(L);
+    lua_setfield(L, LUA_REGISTRYINDEX, "_IO_output");
 }
 
 void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
@@ -233,7 +297,7 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     auto *temp = plugin.get();
     this->plugins_.insert({pluginName, std::move(plugin)});
 
-    if (getArgs().safeMode)
+    if (getApp()->getArgs().safeMode)
     {
         // This isn't done earlier to ensure the user can disable a misbehaving plugin
         qCWarning(chatterinoLua) << "Skipping loading plugin " << meta.name
@@ -249,6 +313,8 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
                                << meta.name << ") because it is disabled";
         return;
     }
+    temp->dataDirectory().mkpath(".");
+
     qCDebug(chatterinoLua) << "Running lua file:" << index;
     int err = luaL_dofile(l, index.absoluteFilePath().toStdString().c_str());
     if (err != 0)
@@ -276,7 +342,7 @@ bool PluginController::reload(const QString &id)
     }
     for (const auto &[cmd, _] : it->second->ownedCommands)
     {
-        getApp()->commands->unregisterPluginCommand(cmd);
+        getIApp()->getCommands()->unregisterPluginCommand(cmd);
     }
     it->second->ownedCommands.clear();
     QDir loadDir = it->second->loadDirectory_;
@@ -325,6 +391,11 @@ bool PluginController::isPluginEnabled(const QString &id)
 
 Plugin *PluginController::getPluginByStatePtr(lua_State *L)
 {
+    lua_geti(L, LUA_REGISTRYINDEX, LUA_RIDX_MAINTHREAD);
+    // Use the main thread for identification, not a coroutine instance
+    auto *mainL = lua_tothread(L, -1);
+    lua_pop(L, 1);
+    L = mainL;
     for (auto &[name, plugin] : this->plugins_)
     {
         if (plugin->state_ == L)

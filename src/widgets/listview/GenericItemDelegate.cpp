@@ -22,7 +22,9 @@ void SwitcherItemDelegate::paint(QPainter *painter,
     if (item)
     {
         if (option.state & QStyle::State_Selected)
+        {
             painter->fillRect(option.rect, option.palette.highlight());
+        }
 
         item->paint(painter, option.rect);
     }

@@ -86,6 +86,7 @@ public:
     static QColor FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR;
     static QColor FALLBACK_ELEVATED_MESSAGE_HIGHLIGHT_COLOR;
     static QColor FALLBACK_THREAD_HIGHLIGHT_COLOR;
+    static QColor FALLBACK_AUTOMOD_HIGHLIGHT_COLOR;
 
 private:
     QString pattern_;
@@ -164,7 +165,9 @@ struct Deserialize<chatterino::HighlightPhrase> {
 
         auto _color = QColor(encodedColor);
         if (!_color.isValid())
+        {
             _color = chatterino::HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR;
+        }
 
         return chatterino::HighlightPhrase(_pattern, _showInMentions, _hasAlert,
                                            _hasSound, _isRegex,

@@ -3,8 +3,9 @@
 #include "Application.hpp"
 #include "common/Args.hpp"
 #include "common/Modes.hpp"
-#include "common/NetworkManager.hpp"
+#include "common/network/NetworkManager.hpp"
 #include "common/QLogging.hpp"
+#include "singletons/CrashHandler.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
@@ -77,6 +78,14 @@ namespace {
     {
         // set up the QApplication flags
         QApplication::setAttribute(Qt::AA_Use96Dpi, true);
+
+#ifdef Q_OS_WIN32
+        // Avoid promoting child widgets to child windows
+        // This causes bugs with frameless windows as not all child events
+        // get sent to the parent - effectively making the window immovable.
+        QApplication::setAttribute(Qt::AA_DontCreateNativeWidgetSiblings);
+#endif
+
 #if defined(Q_OS_WIN32) && QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         QApplication::setAttribute(Qt::AA_DisableHighDpiScaling, true);
 #endif
@@ -97,23 +106,12 @@ namespace {
         installCustomPalette();
     }
 
-    void showLastCrashDialog()
+    void showLastCrashDialog(const Args &args, const Paths &paths)
     {
-        //#ifndef C_DISABLE_CRASH_DIALOG
-        //        LastRunCrashDialog dialog;
-
-        //        switch (dialog.exec())
-        //        {
-        //            case QDialog::Accepted:
-        //            {
-        //            };
-        //            break;
-        //            default:
-        //            {
-        //                _exit(0);
-        //            }
-        //        }
-        //#endif
+        auto *dialog = new LastRunCrashDialog(args, paths);
+        // Use exec() over open() to block the app from being loaded
+        // and to be able to set the safe mode.
+        dialog->exec();
     }
 
     void createRunningFile(const QString &path)
@@ -131,14 +129,13 @@ namespace {
     }
 
     std::chrono::steady_clock::time_point signalsInitTime;
-    bool restartOnSignal = false;
 
     [[noreturn]] void handleSignal(int signum)
     {
         using namespace std::chrono_literals;
 
-        if (restartOnSignal &&
-            std::chrono::steady_clock::now() - signalsInitTime > 30s)
+        if (std::chrono::steady_clock::now() - signalsInitTime > 30s &&
+            getIApp()->getCrashHandler()->shouldRecover())
         {
             QProcess proc;
 
@@ -234,15 +231,19 @@ namespace {
     }
 }  // namespace
 
-void runGui(QApplication &a, Paths &paths, Settings &settings)
+void runGui(QApplication &a, const Paths &paths, Settings &settings,
+            const Args &args, Updates &updates)
 {
     initQt();
     initResources();
     initSignalHandler();
 
-    settings.restartOnCrash.connect([](const bool &value) {
-        restartOnSignal = value;
-    });
+#ifdef Q_OS_WIN
+    if (args.crashRecovery)
+    {
+        showLastCrashDialog(args, paths);
+    }
+#endif
 
     auto thread = std::thread([dir = paths.miscDirectory] {
         {
@@ -277,33 +278,14 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
     });
 
     chatterino::NetworkManager::init();
-    chatterino::Updates::instance().checkForUpdates();
+    updates.checkForUpdates();
 
-#ifdef C_USE_BREAKPAD
-    QBreakpadInstance.setDumpPath(getPaths()->settingsFolderPath + "/Crashes");
-#endif
-
-    // Running file
-    auto runningPath =
-        paths.miscDirectory + "/running_" + paths.applicationFilePathHash;
-
-    if (QFile::exists(runningPath))
-    {
-        showLastCrashDialog();
-    }
-    else
-    {
-        createRunningFile(runningPath);
-    }
-
-    Application app(settings, paths);
+    Application app(settings, paths, args, updates);
     app.initialize(settings, paths);
     app.run(a);
     app.save();
 
-    removeRunningFile(runningPath);
-
-    if (!getArgs().dontSaveSettings)
+    if (!args.dontSaveSettings)
     {
         pajlada::Settings::SettingManager::gSave();
     }
@@ -314,6 +296,8 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
     // flushing windows clipboard to keep copied messages
     flushClipboard();
 #endif
+
+    app.fakeDtor();
 
     _exit(0);
 }

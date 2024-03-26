@@ -53,12 +53,16 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
         // Remove rows backwards so indices don't shift.
         std::vector<int> rows;
         for (auto &&index : selected)
+        {
             rows.push_back(index.row());
+        }
 
         std::sort(rows.begin(), rows.end(), std::greater{});
 
         for (auto &&row : rows)
+        {
             model_->removeRow(row);
+        }
     });
 
     if (movable)
@@ -135,7 +139,7 @@ void EditableModelView::addCustomButton(QWidget *widget)
 
 void EditableModelView::addRegexHelpLink()
 {
-    auto regexHelpLabel =
+    auto *regexHelpLabel =
         new QLabel("<a href='"
                    "https://chatterino.com/help/regex'>"
                    "<span style='color:#99f'>regex info</span></a>");
@@ -152,7 +156,9 @@ void EditableModelView::moveRow(int dir)
         (row = selected.at(0).row()) + dir >=
             this->model_->rowCount(QModelIndex()) ||
         row + dir < 0)
+    {
         return;
+    }
 
     model_->moveRows(model_->index(row, 0), row, selected.size(),
                      model_->index(row + dir, 0), row + dir);

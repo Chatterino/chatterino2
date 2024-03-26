@@ -392,6 +392,14 @@ public:
          (FailureCallback<HelixSendShoutoutError, QString> failureCallback)),
         (override));
 
+    // send message
+    MOCK_METHOD(
+        void, sendChatMessage,
+        (HelixSendMessageArgs args,
+         ResultCallback<HelixSentMessage> successCallback,
+         (FailureCallback<HelixSendMessageError, QString> failureCallback)),
+        (override));
+
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
                 (override));
 

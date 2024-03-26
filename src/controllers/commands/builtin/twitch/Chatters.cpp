@@ -70,17 +70,17 @@ QString chatters(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /chatters command only works in Twitch Channels"));
+            "The /chatters command only works in Twitch Channels."));
         return "";
     }
 
     // Refresh chatter list via helix api for mods
     getHelix()->getChatters(
         ctx.twitchChannel->roomId(),
-        getApp()->accounts->twitch.getCurrent()->getUserId(), 1,
+        getIApp()->getAccounts()->twitch.getCurrent()->getUserId(), 1,
         [channel{ctx.channel}](auto result) {
             channel->addMessage(
-                makeSystemMessage(QString("Chatter count: %1")
+                makeSystemMessage(QString("Chatter count: %1.")
                                       .arg(localizeNumbers(result.total))));
         },
         [channel{ctx.channel}](auto error, auto message) {
@@ -101,13 +101,13 @@ QString testChatters(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "The /test-chatters command only works in Twitch Channels"));
+            "The /test-chatters command only works in Twitch Channels."));
         return "";
     }
 
     getHelix()->getChatters(
         ctx.twitchChannel->roomId(),
-        getApp()->accounts->twitch.getCurrent()->getUserId(), 5000,
+        getIApp()->getAccounts()->twitch.getCurrent()->getUserId(), 5000,
         [channel{ctx.channel}, twitchChannel{ctx.twitchChannel}](auto result) {
             QStringList entries;
             for (const auto &username : result.chatters)

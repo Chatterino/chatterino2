@@ -15,118 +15,92 @@
 #include <QErrorMessage>
 #include <QFileInfo>
 #include <QProcess>
+#include <QStringBuilder>
 
 #include <functional>
 
-namespace chatterino {
-
 namespace {
 
-    const char *getBinaryName()
+using namespace chatterino;
+
+QString getStreamlinkPath()
+{
+    if (getSettings()->streamlinkUseCustomPath)
     {
-#ifdef _WIN32
-        return "streamlink.exe";
-#else
-        return "streamlink";
-#endif
+        const QString path = getSettings()->streamlinkPath;
+        return path.trimmed() % "/" % STREAMLINK_BINARY_NAME;
     }
 
-    const char *getDefaultBinaryPath()
+    return STREAMLINK_BINARY_NAME.toString();
+}
+
+void showStreamlinkNotFoundError()
+{
+    static auto *msg = new QErrorMessage;
+    msg->setWindowTitle("Chatterino - streamlink not found");
+
+    if (getSettings()->streamlinkUseCustomPath)
     {
-#ifdef _WIN32
-        return "C:\\Program Files (x86)\\Streamlink\\bin\\streamlink.exe";
-#else
-        return "/usr/bin/streamlink";
-#endif
+        msg->showMessage("Unable to find Streamlink executable\nMake sure "
+                         "your custom path is pointing to the DIRECTORY "
+                         "where the streamlink executable is located");
+    }
+    else
+    {
+        msg->showMessage(
+            "Unable to find Streamlink executable.\nIf you have Streamlink "
+            "installed, you might need to enable the custom path option");
+    }
+}
+
+QProcess *createStreamlinkProcess()
+{
+    auto *p = new QProcess;
+
+    const auto path = getStreamlinkPath();
+
+    if (Version::instance().isFlatpak())
+    {
+        p->setProgram("flatpak-spawn");
+        p->setArguments({"--host", path});
+    }
+    else
+    {
+        p->setProgram(path);
     }
 
-    bool checkStreamlinkPath(const QString &path)
-    {
-        QFileInfo fileinfo(path);
-
-        if (!fileinfo.exists())
+    QObject::connect(p, &QProcess::errorOccurred, [=](auto err) {
+        if (err == QProcess::FailedToStart)
         {
-            return false;
-            // throw Exception(fS("Streamlink path ({}) is invalid, file does
-            // not exist", path));
-        }
-
-        return fileinfo.isExecutable();
-    }
-
-    void showStreamlinkNotFoundError()
-    {
-        static QErrorMessage *msg = new QErrorMessage;
-        msg->setWindowTitle("Chatterino - streamlink not found");
-
-        if (getSettings()->streamlinkUseCustomPath)
-        {
-            msg->showMessage("Unable to find Streamlink executable\nMake sure "
-                             "your custom path is pointing to the DIRECTORY "
-                             "where the streamlink executable is located");
+            showStreamlinkNotFoundError();
         }
         else
         {
-            msg->showMessage(
-                "Unable to find Streamlink executable.\nIf you have Streamlink "
-                "installed, you might need to enable the custom path option");
-        }
-    }
-
-    QProcess *createStreamlinkProcess()
-    {
-        auto *p = new QProcess;
-
-        const QString path = []() -> QString {
-            if (getSettings()->streamlinkUseCustomPath)
-            {
-                const QString path = getSettings()->streamlinkPath;
-                return path.trimmed() + "/" + getBinaryName();
-            }
-
-            return {getBinaryName()};
-        }();
-
-        if (Version::instance().isFlatpak())
-        {
-            p->setProgram("flatpak-spawn");
-            p->setArguments({"--host", path});
-        }
-        else
-        {
-            p->setProgram(path);
+            qCWarning(chatterinoStreamlink) << "Error occurred" << err;
         }
 
-        QObject::connect(p, &QProcess::errorOccurred, [=](auto err) {
-            if (err == QProcess::FailedToStart)
-            {
-                showStreamlinkNotFoundError();
-            }
-            else
-            {
-                qCWarning(chatterinoStreamlink) << "Error occurred" << err;
-            }
+        p->deleteLater();
+    });
 
+    QObject::connect(
+        p,
+        static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
+            &QProcess::finished),
+        [=](int /*exitCode*/, QProcess::ExitStatus /*exitStatus*/) {
             p->deleteLater();
         });
 
-        QObject::connect(
-            p,
-            static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
-                &QProcess::finished),
-            [=](int /*exitCode*/, QProcess::ExitStatus /*exitStatus*/) {
-                p->deleteLater();
-            });
-
-        return p;
-    }
+    return p;
+}
 
 }  // namespace
+
+namespace chatterino {
 
 void getStreamQualities(const QString &channelURL,
                         std::function<void(QStringList)> cb)
 {
-    auto p = createStreamlinkProcess();
+    auto *p = createStreamlinkProcess();
 
     QObject::connect(
         p,
@@ -146,7 +120,7 @@ void getStreamQualities(const QString &channelURL,
                 QStringList split =
                     lastLine.right(lastLine.length() - 19).split(", ");
 
-                for (int i = split.length() - 1; i >= 0; i--)
+                for (auto i = split.length() - 1; i >= 0; i--)
                 {
                     QString option = split.at(i);
                     if (option == "best)")
@@ -186,7 +160,7 @@ void getStreamQualities(const QString &channelURL,
 void openStreamlink(const QString &channelURL, const QString &quality,
                     QStringList extraArguments)
 {
-    auto proc = createStreamlinkProcess();
+    auto *proc = createStreamlinkProcess();
     auto arguments = proc->arguments()
                      << extraArguments << channelURL << quality;
 
@@ -210,12 +184,15 @@ void openStreamlinkForChannel(const QString &channel)
 {
     static const QString INFO_TEMPLATE("Opening %1 in Streamlink ...");
 
-    auto *currentPage = dynamic_cast<SplitContainer *>(
-        getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
+    auto *currentPage = dynamic_cast<SplitContainer *>(getIApp()
+                                                           ->getWindows()
+                                                           ->getMainWindow()
+                                                           .getNotebook()
+                                                           .getSelectedPage());
     if (currentPage != nullptr)
     {
-        if (auto currentSplit = currentPage->getSelectedSplit();
-            currentSplit != nullptr)
+        auto *currentSplit = currentPage->getSelectedSplit();
+        if (currentSplit != nullptr)
         {
             currentSplit->getChannel()->addMessage(
                 makeSystemMessage(INFO_TEMPLATE.arg(channel)));

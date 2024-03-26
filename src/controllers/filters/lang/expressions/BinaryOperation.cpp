@@ -69,27 +69,39 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
             return 0;
         case MINUS:
             if (convertVariantTypes(left, right, QMetaType::Int))
+            {
                 return left.toInt() - right.toInt();
+            }
             return 0;
         case MULTIPLY:
             if (convertVariantTypes(left, right, QMetaType::Int))
+            {
                 return left.toInt() * right.toInt();
+            }
             return 0;
         case DIVIDE:
             if (convertVariantTypes(left, right, QMetaType::Int))
+            {
                 return left.toInt() / right.toInt();
+            }
             return 0;
         case MOD:
             if (convertVariantTypes(left, right, QMetaType::Int))
+            {
                 return left.toInt() % right.toInt();
+            }
             return 0;
         case OR:
             if (convertVariantTypes(left, right, QMetaType::Bool))
+            {
                 return left.toBool() || right.toBool();
+            }
             return false;
         case AND:
             if (convertVariantTypes(left, right, QMetaType::Bool))
+            {
                 return left.toBool() && right.toBool();
+            }
             return false;
         case EQ:
             if (variantTypesMatch(left, right, QMetaType::QString))
@@ -107,19 +119,27 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
             return !looselyCompareVariants(left, right);
         case LT:
             if (convertVariantTypes(left, right, QMetaType::Int))
+            {
                 return left.toInt() < right.toInt();
+            }
             return false;
         case GT:
             if (convertVariantTypes(left, right, QMetaType::Int))
+            {
                 return left.toInt() > right.toInt();
+            }
             return false;
         case LTE:
             if (convertVariantTypes(left, right, QMetaType::Int))
+            {
                 return left.toInt() <= right.toInt();
+            }
             return false;
         case GTE:
             if (convertVariantTypes(left, right, QMetaType::Int))
+            {
                 return left.toInt() >= right.toInt();
+            }
             return false;
         case CONTAINS:
             if (variantIs(left, QMetaType::QStringList) &&
@@ -215,22 +235,30 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
 
                     // list must be two items
                     if (list.size() != 2)
+                    {
                         return false;
+                    }
 
                     // list must be a regular expression and an int
                     if (variantIsNot(list.at(0),
                                      QMetaType::QRegularExpression) ||
                         variantIsNot(list.at(1), QMetaType::Int))
+                    {
                         return false;
+                    }
 
                     auto match =
                         list.at(0).toRegularExpression().match(matching);
 
                     // if matched, return nth capture group. Otherwise, return ""
                     if (match.hasMatch())
+                    {
                         return match.captured(list.at(1).toInt());
+                    }
                     else
+                    {
                         return "";
+                    }
                 }
                 default:
                     return false;
@@ -263,9 +291,13 @@ PossibleType BinaryOperation::synthesizeType(const TypingContext &context) const
     {
         case PLUS:
             if (left == Type::String)
+            {
                 return TypeClass{Type::String};  // String concatenation
+            }
             else if (left == Type::Int && right == Type::Int)
+            {
                 return TypeClass{Type::Int};
+            }
 
             return IllTyped{this, "Can only add Ints or concatenate a String"};
         case MINUS:
@@ -273,13 +305,17 @@ PossibleType BinaryOperation::synthesizeType(const TypingContext &context) const
         case DIVIDE:
         case MOD:
             if (left == Type::Int && right == Type::Int)
+            {
                 return TypeClass{Type::Int};
+            }
 
             return IllTyped{this, "Can only perform operation with Ints"};
         case OR:
         case AND:
             if (left == Type::Bool && right == Type::Bool)
+            {
                 return TypeClass{Type::Bool};
+            }
 
             return IllTyped{this,
                             "Can only perform logical operations with Bools"};
@@ -292,37 +328,53 @@ PossibleType BinaryOperation::synthesizeType(const TypingContext &context) const
         case LTE:
         case GTE:
             if (left == Type::Int && right == Type::Int)
+            {
                 return TypeClass{Type::Bool};
+            }
 
             return IllTyped{this, "Can only perform comparisons with Ints"};
         case STARTS_WITH:
         case ENDS_WITH:
             if (isList(left))
+            {
                 return TypeClass{Type::Bool};
+            }
             if (left == Type::String && right == Type::String)
+            {
                 return TypeClass{Type::Bool};
+            }
 
             return IllTyped{
                 this,
                 "Can only perform starts/ends with a List or two Strings"};
         case CONTAINS:
             if (isList(left) || left == Type::Map)
+            {
                 return TypeClass{Type::Bool};
+            }
             if (left == Type::String && right == Type::String)
+            {
                 return TypeClass{Type::Bool};
+            }
 
             return IllTyped{
                 this,
                 "Can only perform contains with a List, a Map, or two Strings"};
         case MATCH: {
             if (left != Type::String)
+            {
                 return IllTyped{this,
                                 "Left argument of match must be a String"};
+            }
 
             if (right == Type::RegularExpression)
+            {
                 return TypeClass{Type::Bool};
-            if (right == Type::MatchingSpecifier)  // group capturing
+            }
+            if (right == Type::MatchingSpecifier)
+            {  // group capturing
                 return TypeClass{Type::String};
+            }
 
             return IllTyped{this, "Can only match on a RegularExpression or a "
                                   "MatchingSpecifier"};

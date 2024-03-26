@@ -4,6 +4,7 @@
 #    include "Application.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
+#    include "controllers/plugins/PluginPermission.hpp"
 
 #    include <QDir>
 #    include <QString>
@@ -14,6 +15,7 @@
 #    include <vector>
 
 struct lua_State;
+class QTimer;
 
 namespace chatterino {
 
@@ -40,6 +42,8 @@ struct PluginMeta {
 
     // optionally tags that might help in searching for the plugin
     std::vector<QString> tags;
+
+    std::vector<PluginPermission> permissions;
 
     // errors that occurred while parsing info.json
     std::vector<QString> errors;
@@ -87,6 +91,11 @@ public:
         return this->loadDirectory_;
     }
 
+    QDir dataDirectory() const
+    {
+        return this->loadDirectory_.absoluteFilePath("data");
+    }
+
     // Note: The CallbackFunction object's destructor will remove the function from the lua stack
     using LuaCompletionCallback =
         lua::CallbackFunction<lua::api::CompletionList, QString, QString, int,
@@ -98,14 +107,14 @@ public:
             return {};
         }
         // this uses magic enum to help automatic tooling find usages
+        auto typeName =
+            magic_enum::enum_name(lua::api::EventType::CompletionRequested);
+        std::string cbName;
+        cbName.reserve(5 + typeName.size());
+        cbName += "c2cb-";
+        cbName += typeName;
         auto typ =
-            lua_getfield(this->state_, LUA_REGISTRYINDEX,
-                         QString("c2cb-%1")
-                             .arg(magic_enum::enum_name<lua::api::EventType>(
-                                      lua::api::EventType::CompletionRequested)
-                                      .data())
-                             .toStdString()
-                             .c_str());
+            lua_getfield(this->state_, LUA_REGISTRYINDEX, cbName.c_str());
         if (typ != LUA_TFUNCTION)
         {
             lua_pop(this->state_, 1);
@@ -126,6 +135,11 @@ public:
         return this->error_;
     }
 
+    int addTimeout(QTimer *timer);
+    void removeTimeout(QTimer *timer);
+
+    bool hasFSPermissionFor(bool write, const QString &path);
+
 private:
     QDir loadDirectory_;
     lua_State *state_;
@@ -134,6 +148,8 @@ private:
 
     // maps command name -> function name
     std::unordered_map<QString, QString> ownedCommands;
+    std::vector<QTimer *> activeTimeouts;
+    int lastTimerId = 0;
 
     friend class PluginController;
 };

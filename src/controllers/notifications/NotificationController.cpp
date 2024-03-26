@@ -9,6 +9,7 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
@@ -26,7 +27,7 @@
 
 namespace chatterino {
 
-void NotificationController::initialize(Settings &settings, Paths &paths)
+void NotificationController::initialize(Settings &settings, const Paths &paths)
 {
     this->initialized_ = true;
     for (const QString &channelName : this->twitchSetting_.getValue())
@@ -183,20 +184,21 @@ void NotificationController::checkStream(bool live, QString channelName)
 
     if (Toasts::isEnabled())
     {
-        getApp()->toasts->sendChannelNotification(channelName, QString(),
-                                                  Platform::Twitch);
+        getIApp()->getToasts()->sendChannelNotification(channelName, QString(),
+                                                        Platform::Twitch);
     }
+    bool inStreamerMode = getIApp()->getStreamerMode()->isEnabled();
     if (getSettings()->notificationPlaySound &&
-        !(isInStreamerMode() &&
+        !(inStreamerMode &&
           getSettings()->streamerModeSuppressLiveNotifications))
     {
-        getApp()->notifications->playSound();
+        getIApp()->getNotifications()->playSound();
     }
     if (getSettings()->notificationFlashTaskbar &&
-        !(isInStreamerMode() &&
+        !(inStreamerMode &&
           getSettings()->streamerModeSuppressLiveNotifications))
     {
-        getApp()->windows->sendAlert();
+        getIApp()->getWindows()->sendAlert();
     }
     MessageBuilder builder;
     TwitchMessageBuilder::liveMessage(channelName, &builder);
@@ -225,9 +227,10 @@ void NotificationController::removeFakeChannel(const QString channelName)
 
         for (int i = snapshotLength - 1; i >= end; --i)
         {
-            auto &s = snapshot[i];
+            const auto &s = snapshot[i];
 
-            if (s->messageText == liveMessageSearchText)
+            if (QString::compare(s->messageText, liveMessageSearchText,
+                                 Qt::CaseInsensitive) == 0)
             {
                 s->flags.set(MessageFlag::Disabled);
                 break;

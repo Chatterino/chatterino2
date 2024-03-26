@@ -9,7 +9,6 @@
 #include "providers/irc/IrcChannel2.hpp"
 #include "providers/irc/IrcServer.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "singletons/Fonts.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
@@ -50,12 +49,11 @@ const QString WindowManager::WINDOW_LAYOUT_FILENAME(
     QStringLiteral("window-layout.json"));
 
 using SplitNode = SplitContainer::Node;
-using SplitDirection = SplitContainer::Direction;
 
 void WindowManager::showSettingsDialog(QWidget *parent,
                                        SettingsDialogPreference preference)
 {
-    if (getArgs().dontSaveSettings)
+    if (getApp()->getArgs().dontSaveSettings)
     {
         QMessageBox::critical(parent, "Chatterino - Editing Settings Forbidden",
                               "Settings cannot be edited when running with\n"
@@ -92,13 +90,13 @@ void WindowManager::showAccountSelectPopup(QPoint point)
     w->setFocus();
 }
 
-WindowManager::WindowManager()
-    : windowLayoutFilePath(combinePath(getPaths()->settingsDirectory,
+WindowManager::WindowManager(const Paths &paths)
+    : windowLayoutFilePath(combinePath(paths.settingsDirectory,
                                        WindowManager::WINDOW_LAYOUT_FILENAME))
 {
     qCDebug(chatterinoWindowmanager) << "init WindowManager";
 
-    auto settings = getSettings();
+    auto *settings = getSettings();
 
     this->wordFlagsListener_.addSetting(settings->showTimestamps);
     this->wordFlagsListener_.addSetting(settings->showBadgesGlobalAuthority);
@@ -122,7 +120,7 @@ WindowManager::WindowManager()
     this->saveTimer->setSingleShot(true);
 
     QObject::connect(this->saveTimer, &QTimer::timeout, [] {
-        getApp()->windows->save();
+        getIApp()->getWindows()->save();
     });
 }
 
@@ -136,7 +134,7 @@ MessageElementFlags WindowManager::getWordFlags()
 void WindowManager::updateWordTypeMask()
 {
     using MEF = MessageElementFlag;
-    auto settings = getSettings();
+    auto *settings = getSettings();
 
     // text
     auto flags = MessageElementFlags(MEF::Text);
@@ -186,8 +184,7 @@ void WindowManager::updateWordTypeMask()
     flags.set(MEF::Collapsed);
     flags.set(settings->boldUsernames ? MEF::BoldUsername
                                       : MEF::NonBoldUsername);
-    flags.set(settings->lowercaseDomains ? MEF::LowercaseLink
-                                         : MEF::OriginalLink);
+    flags.set(MEF::LowercaseLinks, settings->lowercaseDomains);
     flags.set(MEF::ChannelPointReward);
 
     // update flags
@@ -210,6 +207,11 @@ void WindowManager::forceLayoutChannelViews()
 {
     this->incGeneration();
     this->layoutChannelViews(nullptr);
+}
+
+void WindowManager::invalidateChannelViewBuffers(Channel *channel)
+{
+    this->invalidateBuffersRequested.invoke(channel);
 }
 
 void WindowManager::repaintVisibleChatWidgets(Channel *channel)
@@ -339,7 +341,7 @@ void WindowManager::setEmotePopupPos(QPoint pos)
     this->emotePopupPos_ = pos;
 }
 
-void WindowManager::initialize(Settings &settings, Paths &paths)
+void WindowManager::initialize(Settings &settings, const Paths &paths)
 {
     (void)paths;
     assertInGuiThread();
@@ -347,22 +349,29 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
     // We can safely ignore this signal connection since both Themes and WindowManager
     // share the Application state lifetime
     // NOTE: APPLICATION_LIFETIME
-    std::ignore = getApp()->themes->repaintVisibleChatWidgets_.connect([this] {
-        this->repaintVisibleChatWidgets();
-    });
+    std::ignore =
+        getIApp()->getThemes()->repaintVisibleChatWidgets_.connect([this] {
+            this->repaintVisibleChatWidgets();
+        });
 
     assert(!this->initialized_);
 
     {
         WindowLayout windowLayout;
 
-        if (getArgs().customChannelLayout)
+        if (getApp()->getArgs().customChannelLayout)
         {
-            windowLayout = getArgs().customChannelLayout.value();
+            windowLayout = getApp()->getArgs().customChannelLayout.value();
         }
         else
         {
             windowLayout = this->loadWindowLayoutFromFile();
+        }
+
+        auto desired = getIApp()->getArgs().activateChannel;
+        if (desired)
+        {
+            windowLayout.activateOrAddChannel(desired->provider, desired->name);
         }
 
         this->emotePopupPos_ = windowLayout.emotePopupPos_;
@@ -370,7 +379,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
         this->applyWindowLayout(windowLayout);
     }
 
-    if (getArgs().isFramelessEmbed)
+    if (getApp()->getArgs().isFramelessEmbed)
     {
         this->framelessEmbedWindow_.reset(new FramelessEmbedWindow);
         this->framelessEmbedWindow_->show();
@@ -383,7 +392,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
         this->mainWindow_->getNotebook().addPage(true);
 
         // TODO: don't create main window if it's a frameless embed
-        if (getArgs().isFramelessEmbed)
+        if (getApp()->getArgs().isFramelessEmbed)
         {
             this->mainWindow_->hide();
         }
@@ -401,10 +410,10 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
         this->forceLayoutChannelViews();
     });
     settings.alternateMessages.connect([this](auto, auto) {
-        this->forceLayoutChannelViews();
+        this->invalidateChannelViewBuffers();
     });
     settings.separateMessages.connect([this](auto, auto) {
-        this->forceLayoutChannelViews();
+        this->invalidateChannelViewBuffers();
     });
     settings.collpseMessagesMinLines.connect([this](auto, auto) {
         this->forceLayoutChannelViews();
@@ -418,11 +427,18 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
 void WindowManager::save()
 {
-    if (getArgs().dontSaveSettings)
+    if (getApp()->getArgs().dontSaveSettings)
     {
         return;
     }
-    qCDebug(chatterinoWindowmanager) << "[WindowManager] Saving";
+
+    if (this->shuttingDown_)
+    {
+        qCDebug(chatterinoWindowmanager) << "Skipping save (shutting down)";
+        return;
+    }
+
+    qCDebug(chatterinoWindowmanager) << "Saving";
     assertInGuiThread();
     QJsonDocument document;
 
@@ -624,7 +640,7 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
         }
         break;
         case Channel::Type::Irc: {
-            if (auto ircChannel =
+            if (auto *ircChannel =
                     dynamic_cast<IrcChannel *>(channel.get().get()))
             {
                 obj.insert("type", "irc");
@@ -658,7 +674,7 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
 {
     assertInGuiThread();
 
-    auto app = getApp();
+    auto *app = getApp();
 
     if (descriptor.type_ == "twitch")
     {
@@ -701,6 +717,9 @@ void WindowManager::closeAll()
 {
     assertInGuiThread();
 
+    qCDebug(chatterinoWindowmanager) << "Shutting down (closing windows)";
+    this->shuttingDown_ = true;
+
     for (Window *window : windows_)
     {
         window->close();
@@ -724,7 +743,7 @@ WindowLayout WindowManager::loadWindowLayoutFromFile() const
 
 void WindowManager::applyWindowLayout(const WindowLayout &layout)
 {
-    if (getArgs().dontLoadMainWindow)
+    if (getApp()->getArgs().dontLoadMainWindow)
     {
         return;
     }

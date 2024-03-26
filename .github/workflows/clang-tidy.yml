@@ -119,12 +119,12 @@ jobs:
 
       - name: clang-tidy review
         timeout-minutes: 20
-        uses: ZedThree/clang-tidy-review@v0.14.0
+        uses: ZedThree/clang-tidy-review@v0.17.2
         with:
           build_dir: build-clang-tidy
           config_file: ".clang-tidy"
           split_workflow: true
-          exclude: "lib/*"
+          exclude: "lib/*,tools/crash-handler/*"
           cmake_command: >-
             cmake -S. -Bbuild-clang-tidy 
             -DCMAKE_BUILD_TYPE=Release 
@@ -145,4 +145,4 @@ jobs:
             libbenchmark-dev
 
       - name: clang-tidy-review upload
-        uses: ZedThree/clang-tidy-review/upload@v0.14.0
+        uses: ZedThree/clang-tidy-review/upload@v0.17.2

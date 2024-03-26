@@ -17,6 +17,8 @@
 
 namespace chatterino {
 
+class Paths;
+
 class IUserDataController
 {
 public:
@@ -31,7 +33,7 @@ public:
 class UserDataController : public IUserDataController, public Singleton
 {
 public:
-    UserDataController();
+    explicit UserDataController(const Paths &paths);
 
     // Get extra data about a user
     // If the user does not have any extra data, return none

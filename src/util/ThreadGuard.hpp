@@ -10,11 +10,11 @@ namespace chatterino {
 // Debug-class which asserts if guard of the same object has been called from different threads
 struct ThreadGuard {
 #ifndef NDEBUG
-    std::mutex mutex;
-    std::optional<std::thread::id> threadID;
+    mutable std::mutex mutex;
+    mutable std::optional<std::thread::id> threadID;
 #endif
 
-    inline void guard()
+    inline void guard() const
     {
 #ifndef NDEBUG
         std::unique_lock lock(this->mutex);

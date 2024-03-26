@@ -17,7 +17,7 @@ public:
     Singleton(Singleton &&) = delete;
     Singleton &operator=(Singleton &&) = delete;
 
-    virtual void initialize(Settings &settings, Paths &paths)
+    virtual void initialize(Settings &settings, const Paths &paths)
     {
         (void)(settings);
         (void)(paths);

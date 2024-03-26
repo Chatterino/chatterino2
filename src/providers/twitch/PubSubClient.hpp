@@ -45,7 +45,7 @@ public:
                websocketpp::close::status::value code =
                    websocketpp::close::status::normal);
 
-    bool listen(PubSubListenMessage msg);
+    bool listen(const PubSubListenMessage &msg);
     UnlistenPrefixResponse unlistenPrefix(const QString &prefix);
 
     void handleListenResponse(const PubSubMessage &message);
@@ -70,6 +70,7 @@ private:
     std::atomic<bool> awaitingPong_{false};
     std::atomic<bool> started_{false};
 
+    std::shared_ptr<boost::asio::steady_timer> heartbeatTimer_;
     const PubSubClientOptions &clientOptions_;
 };
 

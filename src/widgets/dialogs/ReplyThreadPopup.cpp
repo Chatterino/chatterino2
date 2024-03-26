@@ -77,7 +77,7 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, Split *split)
         {"search", nullptr},
     };
 
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 
     // initialize UI
@@ -98,7 +98,7 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, Split *split)
         new SplitInput(this, this->split_, this->ui_.threadView, false);
 
     this->bSignals_.emplace_back(
-        getApp()->accounts->twitch.currentUserChanged.connect([this] {
+        getIApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
             this->updateInputUI();
         }));
 
@@ -159,7 +159,8 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, Split *split)
                                      this->thread_->markUnsubscribed();
                                  }
                              });
-            hbox->addWidget(this->ui_.notificationCheckbox, 1);
+            hbox->addWidget(this->ui_.notificationCheckbox);
+            hbox->addStretch(1);
             this->ui_.notificationCheckbox->setFocusPolicy(Qt::NoFocus);
         }
 
@@ -283,7 +284,7 @@ void ReplyThreadPopup::updateInputUI()
 
     this->ui_.replyInput->setVisible(channel->isWritable());
 
-    auto user = getApp()->accounts->twitch.getCurrent();
+    auto user = getIApp()->getAccounts()->twitch.getCurrent();
     QString placeholderText;
 
     if (user->isAnon())
@@ -292,9 +293,11 @@ void ReplyThreadPopup::updateInputUI()
     }
     else
     {
-        placeholderText =
-            QStringLiteral("Reply as %1...")
-                .arg(getApp()->accounts->twitch.getCurrent()->getUserName());
+        placeholderText = QStringLiteral("Reply as %1...")
+                              .arg(getIApp()
+                                       ->getAccounts()
+                                       ->twitch.getCurrent()
+                                       ->getUserName());
     }
 
     this->ui_.replyInput->setPlaceholderText(placeholderText);

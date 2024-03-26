@@ -83,7 +83,7 @@ void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> users,
     {
         anyways.emplace<QLabel>("Show messages from blocked users:");
 
-        auto combo = anyways.emplace<QComboBox>().getElement();
+        auto *combo = anyways.emplace<QComboBox>().getElement();
         combo->addItems(
             {"Never", "If you are Moderator", "If you are Broadcaster"});
 
@@ -97,7 +97,9 @@ void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> users,
                          QOverload<int>::of(&QComboBox::currentIndexChanged),
                          [&setting](int index) {
                              if (index != -1)
+                             {
                                  setting = index;
+                             }
                          });
 
         anyways->addStretch(1);
@@ -118,7 +120,7 @@ void IgnoresPage::onShow()
 {
     auto *app = getApp();
 
-    auto user = app->accounts->twitch.getCurrent();
+    auto user = app->getAccounts()->twitch.getCurrent();
 
     if (user->isAnon())
     {
