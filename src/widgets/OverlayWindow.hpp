@@ -45,8 +45,6 @@ private:
 
     void applyTheme();
 
-    void setInert(bool inert);
-
     IndirectChannel channel_;
     pajlada::Signals::SignalHolder holder_;
 
@@ -63,6 +61,8 @@ private:
     TitleBarButton closeButton_;
 
 #ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
+    void setInert(bool inert);
+
     std::unique_ptr<GlobalShortcut> shortcut_;
     bool inert_ = false;
 #endif
