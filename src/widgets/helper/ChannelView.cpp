@@ -460,6 +460,11 @@ void ChannelView::initializeSignals()
                                        });
 }
 
+Scrollbar *ChannelView::scrollbar()
+{
+    return this->scrollBar_;
+}
+
 bool ChannelView::pausable() const
 {
     return pausable_;

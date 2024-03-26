@@ -50,6 +50,8 @@ public:
     qreal getCurrentValue() const;
     qreal getRelativeCurrentValue() const;
 
+    void setShowThumb(bool showthumb);
+
     // offset the desired value without breaking smooth scolling
     void offset(qreal value);
     pajlada::Signals::NoArgSignal &getCurrentValueChanged();
@@ -74,8 +76,6 @@ private:
     LimitedQueueSnapshot<ScrollbarHighlight> &getHighlightSnapshot();
     void updateScroll();
 
-    QMutex mutex_;
-
     QPropertyAnimation currentValueAnimation_;
 
     LimitedQueue<ScrollbarHighlight> highlights_;
@@ -83,6 +83,7 @@ private:
     LimitedQueueSnapshot<ScrollbarHighlight> highlightSnapshot_;
 
     bool atBottom_{false};
+    bool showThumb_ = true;
 
     int mouseOverIndex_ = -1;
     int mouseDownIndex_ = -1;

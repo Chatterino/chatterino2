@@ -286,18 +286,21 @@ void Scrollbar::paintEvent(QPaintEvent *)
     //    width(), this->buttonHeight),
     //                     this->themeManager->ScrollbarArrow);
 
-    this->thumbRect_.setX(xOffset);
+    if (this->showThumb_)
+    {
+        this->thumbRect_.setX(xOffset);
 
-    // mouse over thumb
-    if (this->mouseDownIndex_ == 2)
-    {
-        painter.fillRect(this->thumbRect_,
-                         this->theme->scrollbars.thumbSelected);
-    }
-    // mouse not over thumb
-    else
-    {
-        painter.fillRect(this->thumbRect_, this->theme->scrollbars.thumb);
+        // mouse over thumb
+        if (this->mouseDownIndex_ == 2)
+        {
+            painter.fillRect(this->thumbRect_,
+                             this->theme->scrollbars.thumbSelected);
+        }
+        // mouse not over thumb
+        else
+        {
+            painter.fillRect(this->thumbRect_, this->theme->scrollbars.thumb);
+        }
     }
 
     // draw highlights
@@ -507,6 +510,17 @@ void Scrollbar::updateScroll()
         this->width(),
         int(this->largeChange_ / div * this->trackHeight_) + MIN_THUMB_HEIGHT);
 
+    this->update();
+}
+
+void Scrollbar::setShowThumb(bool showThumb)
+{
+    if (this->showThumb_ == showThumb)
+    {
+        return;
+    }
+
+    this->showThumb_ = showThumb;
     this->update();
 }
 

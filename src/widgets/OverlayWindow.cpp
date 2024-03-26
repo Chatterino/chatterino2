@@ -8,6 +8,7 @@
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/InvisibleSizeGrip.hpp"
 #include "widgets/helper/TitlebarButton.hpp"
+#include "widgets/Scrollbar.hpp"
 #include "widgets/splits/Split.hpp"
 
 #include <QBoxLayout>
@@ -162,15 +163,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel)
                 this);
             QObject::connect(this->shortcut_.get(), &GlobalShortcut::activated,
                              this, [this] {
-                                 this->inert_ = !this->inert_;
-                                 this->setWindowFlag(
-                                     Qt::WindowTransparentForInput,
-                                     this->inert_);
-                                 if (this->isHidden())
-                                 {
-                                     this->show();
-                                 }
-                                 this->endInteraction();
+                                 this->setInert(!this->inert_);
                              });
         },
         this->holder_);
@@ -370,6 +363,30 @@ void OverlayWindow::endInteraction()
     this->interactAnimation_.start();
     this->setOverrideCursor(Qt::ArrowCursor);
     this->closeButton_.hide();
+}
+
+void OverlayWindow::setInert(bool inert)
+{
+    if (this->inert_ == inert)
+    {
+        return;
+    }
+
+    this->inert_ = inert;
+
+    this->setWindowFlag(Qt::WindowTransparentForInput, inert);
+    if (this->isHidden())
+    {
+        this->show();
+    }
+    this->endInteraction();
+
+    auto *scrollbar = this->channelView_.scrollbar();
+    scrollbar->setShowThumb(!inert);
+    if (inert)
+    {
+        scrollbar->scrollToBottom();
+    }
 }
 
 }  // namespace chatterino

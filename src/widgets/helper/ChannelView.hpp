@@ -196,6 +196,8 @@ public:
     void setColorVisitor(
         const std::function<void(MessageColors &, Theme *)> &visitor);
 
+    Scrollbar *scrollbar();
+
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
     pajlada::Signals::Signal<HighlightState> tabHighlightRequested;

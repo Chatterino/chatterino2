@@ -45,6 +45,8 @@ private:
 
     void applyTheme();
 
+    void setInert(bool inert);
+
     IndirectChannel channel_;
     pajlada::Signals::SignalHolder holder_;
 
