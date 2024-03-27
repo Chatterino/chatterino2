@@ -182,6 +182,11 @@ set(SOURCE_FILES
         controllers/highlights/UserHighlightModel.hpp
 
         controllers/hotkeys/ActionNames.hpp
+        controllers/hotkeys/GlobalShortcut.cpp
+        controllers/hotkeys/GlobalShortcut.hpp
+        controllers/hotkeys/GlobalShortcutFwd.hpp
+        controllers/hotkeys/GlobalShortcutPrivate.cpp
+        controllers/hotkeys/GlobalShortcutPrivate.hpp
         controllers/hotkeys/Hotkey.cpp
         controllers/hotkeys/Hotkey.hpp
         controllers/hotkeys/HotkeyCategory.hpp
@@ -549,6 +554,8 @@ set(SOURCE_FILES
         widgets/Label.hpp
         widgets/Notebook.cpp
         widgets/Notebook.hpp
+        widgets/OverlayWindow.cpp
+        widgets/OverlayWindow.hpp
         widgets/Scrollbar.cpp
         widgets/Scrollbar.hpp
         widgets/TooltipEntryWidget.cpp
@@ -718,6 +725,13 @@ set(SOURCE_FILES
 
         ${CMAKE_SOURCE_DIR}/resources/resources.qrc
         )
+
+if(WIN32)
+    # Platform specific implementations
+    list(APPEND SOURCE_FILES
+        platform/windows/GlobalShortcutPrivateWin.cpp
+    )
+endif()
 
 if (APPLE)
     set(MACOS_BUNDLE_ICON_FILE "${CMAKE_SOURCE_DIR}/resources/chatterino.icns")

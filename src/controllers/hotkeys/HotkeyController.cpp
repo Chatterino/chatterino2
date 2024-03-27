@@ -468,6 +468,9 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
                             "new popup window from tab");
 
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
+                            QKeySequence("Ctrl+Alt+N"), "popupOverlay", {},
+                            "new popup overlay");
+        this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
                             QKeySequence::ZoomIn, "zoom", {"in"}, "zoom in");
 
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,

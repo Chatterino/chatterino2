@@ -460,6 +460,11 @@ void ChannelView::initializeSignals()
                                        });
 }
 
+Scrollbar *ChannelView::scrollbar()
+{
+    return this->scrollBar_;
+}
+
 bool ChannelView::pausable() const
 {
     return pausable_;
@@ -582,6 +587,24 @@ void ChannelView::themeChangedEvent()
     this->setupHighlightAnimationColors();
     this->queueLayout();
     this->messageColors_.applyTheme(getTheme());
+    if (this->colorVisitor_)
+    {
+        this->colorVisitor_(this->messageColors_, getTheme());
+    }
+}
+
+void ChannelView::updateColorTheme()
+{
+    this->themeChangedEvent();
+}
+
+void ChannelView::setColorVisitor(
+    const std::function<void(MessageColors &, Theme *)> &visitor)
+{
+    assert(this->colorVisitor_ == nullptr &&
+           "The color visitor should only be set once.");
+    this->colorVisitor_ = visitor;
+    this->updateColorTheme();
 }
 
 void ChannelView::setupHighlightAnimationColors()
@@ -1481,7 +1504,7 @@ void ChannelView::paintEvent(QPaintEvent *event)
 
     QPainter painter(this);
 
-    painter.fillRect(rect(), this->theme->splits.background);
+    painter.fillRect(rect(), this->messageColors_.channelBackground);
 
     // draw messages
     this->drawMessages(painter, event->rect());

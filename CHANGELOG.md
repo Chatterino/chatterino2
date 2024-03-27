@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added transparent overlay window (default keybind: `CTRL + ALT + N`). (#4746)
 - Major: Allow use of Twitch follower emotes in other channels if subscribed. (#4922)
 - Major: Add `/automod` split to track automod caught messages across all open channels the user moderates. (#4986, #5026)
 - Major: Show restricted chat messages and suspicious treatment updates. (#5056, #5060)

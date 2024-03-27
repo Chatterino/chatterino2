@@ -8,6 +8,7 @@
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
+#include "controllers/hotkeys/GlobalShortcutFwd.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/logging/ChannelLog.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
@@ -186,6 +187,20 @@ public:
                                           -0.5f};
     // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame",
     // false};
+
+    IntSetting overlayBackgroundOpacity = {
+        "/appearance/overlay/backgroundOpacity", 50};
+    BoolSetting enableOverlayShadow = {"/appearance/overlay/shadow", true};
+    IntSetting overlayShadowOpacity = {"/appearance/overlay/shadowOpacity",
+                                       255};
+    // These should be floats, but there's no good input UI for them
+    IntSetting overlayShadowOffsetX = {"/appearance/overlay/shadowOffsetX", 2};
+    IntSetting overlayShadowOffsetY = {"/appearance/overlay/shadowOffsetY", 2};
+    IntSetting overlayShadowRadius = {"/appearance/overlay/shadowRadius", 8};
+#ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
+    QStringSetting overlayInertShortcut = {"/behaviour/overlay/inert",
+                                           "Ctrl+Alt+Shift+U"};
+#endif
 
     // Badges
     BoolSetting showBadgesGlobalAuthority = {
@@ -522,6 +537,7 @@ public:
 
     IntSetting startUpNotification = {"/misc/startUpNotification", 0};
     QStringSetting currentVersion = {"/misc/currentVersion", ""};
+    IntSetting overlayKnowledgeLevel = {"/misc/overlayKnowledgeLevel", 0};
 
     BoolSetting loadTwitchMessageHistoryOnConnect = {
         "/misc/twitch/loadMessageHistoryOnConnect", true};

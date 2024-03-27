@@ -192,6 +192,12 @@ public:
      */
     bool mayContainMessage(const MessagePtr &message);
 
+    void updateColorTheme();
+    void setColorVisitor(
+        const std::function<void(MessageColors &, Theme *)> &visitor);
+
+    Scrollbar *scrollbar();
+
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
     pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
@@ -405,6 +411,8 @@ private:
 
     MessageColors messageColors_;
     MessagePreferences messagePreferences_;
+
+    std::function<void(MessageColors &, Theme *)> colorVisitor_;
 
     void scrollUpdateRequested();
 
