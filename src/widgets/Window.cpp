@@ -749,7 +749,7 @@ void Window::addMenuBar()
     });
 
     // Help->Chatterino Github
-    QAction *helpGithub = helpMenu->addAction(QString("Chatterino Github"));
+    QAction *helpGithub = helpMenu->addAction(QString("Chatterino GitHub"));
     connect(helpGithub, &QAction::triggered, this, []() {
         QDesktopServices::openUrl(QUrl(LINK_CHATTERINO_SOURCE));
     });
