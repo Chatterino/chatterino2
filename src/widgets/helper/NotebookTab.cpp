@@ -27,14 +27,6 @@
 
 namespace chatterino {
 namespace {
-    qreal deviceDpi(QWidget *widget)
-    {
-#ifdef Q_OS_WIN
-        return widget->devicePixelRatioF();
-#else
-        return 1.0;
-#endif
-    }
 
     // Translates the given rectangle by an amount in the direction to appear like the tab is selected.
     // For example, if location is Top, the rectangle will be translated in the negative Y direction,
@@ -196,8 +188,8 @@ int NotebookTab::normalTabWidth()
     float scale = this->scale();
     int width;
 
-    auto metrics = getIApp()->getFonts()->getFontMetrics(
-        FontStyle::UiTabs, float(qreal(this->scale()) * deviceDpi(this)));
+    QFontMetrics metrics =
+        getIApp()->getFonts()->getFontMetrics(FontStyle::UiTabs, scale, this);
 
     if (this->hasXButton())
     {
@@ -435,15 +427,14 @@ void NotebookTab::moveAnimated(QPoint pos, bool animated)
 
 void NotebookTab::paintEvent(QPaintEvent *)
 {
-    auto *app = getApp();
+    auto *app = getIApp();
     QPainter painter(this);
     float scale = this->scale();
 
-    auto div = std::max<float>(0.01f, this->logicalDpiX() * deviceDpi(this));
     painter.setFont(
-        getIApp()->getFonts()->getFont(FontStyle::UiTabs, scale * 96.f / div));
+        getIApp()->getFonts()->getFont(FontStyle::UiTabs, scale, this));
     QFontMetrics metrics =
-        app->getFonts()->getFontMetrics(FontStyle::UiTabs, scale * 96.f / div);
+        app->getFonts()->getFontMetrics(FontStyle::UiTabs, scale, this);
 
     int height = int(scale * NOTEBOOK_TAB_HEIGHT);
 

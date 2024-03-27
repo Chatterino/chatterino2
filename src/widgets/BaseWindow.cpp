@@ -776,7 +776,7 @@ void BaseWindow::scaleChangedEvent(float scale)
 #endif
 
     this->setFont(
-        getIApp()->getFonts()->getFont(FontStyle::UiTabs, this->qtFontScale()));
+        getIApp()->getFonts()->getFont(FontStyle::UiTabs, this->scale(), this));
 }
 
 void BaseWindow::paintEvent(QPaintEvent *)

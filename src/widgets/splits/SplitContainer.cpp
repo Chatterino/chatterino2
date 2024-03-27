@@ -615,7 +615,7 @@ void SplitContainer::paintEvent(QPaintEvent * /*event*/)
         painter.setPen(this->theme->splits.header.text);
 
         const auto font = getIApp()->getFonts()->getFont(FontStyle::ChatMedium,
-                                                         this->scale());
+                                                         this->scale(), this);
         painter.setFont(font);
 
         QString text = "Click to add a split";
