@@ -444,8 +444,11 @@ set(SOURCE_FILES
         singletons/Emotes.hpp
         singletons/Fonts.cpp
         singletons/Fonts.hpp
-        singletons/ImageUploader.cpp
-        singletons/ImageUploader.hpp
+        singletons/imageuploader/ImageUploader.cpp
+        singletons/imageuploader/ImageUploader.hpp
+        singletons/imageuploader/UploadedImage.hpp
+        singletons/imageuploader/UploadedImageModel.cpp
+        singletons/imageuploader/UploadedImageModel.hpp
         singletons/Logging.cpp
         singletons/Logging.hpp
         singletons/NativeMessaging.cpp
@@ -664,6 +667,7 @@ set(SOURCE_FILES
         widgets/listview/GenericListModel.hpp
         widgets/listview/GenericListView.cpp
         widgets/listview/GenericListView.hpp
+        widgets/listview/ImagePtrItemDelegate.hpp
 
         widgets/settingspages/AboutPage.cpp
         widgets/settingspages/AboutPage.hpp
@@ -695,6 +699,8 @@ set(SOURCE_FILES
         widgets/settingspages/PluginsPage.hpp
         widgets/settingspages/SettingsPage.cpp
         widgets/settingspages/SettingsPage.hpp
+        widgets/settingspages/ImageUploaderPage.cpp
+        widgets/settingspages/ImageUploaderPage.hpp
 
         widgets/splits/ClosedSplits.cpp
         widgets/splits/ClosedSplits.hpp

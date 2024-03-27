@@ -1,4 +1,4 @@
-#include "singletons/ImageUploader.hpp"
+#include "singletons/imageuploader/ImageUploader.hpp"
 
 #include "Application.hpp"
 #include "common/Env.hpp"
@@ -7,19 +7,26 @@
 #include "common/QLogging.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
+#include "singletons/imageuploader/UploadedImageModel.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
+#include "util/RapidjsonHelpers.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
 
 #include <QBuffer>
 #include <QHttpMultiPart>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QLoggingCategory>
 #include <QMimeDatabase>
 #include <QMutex>
+#include <QObject>
 #include <QPointer>
 #include <QSaveFile>
+#include <rapidjson/document.h>
+
+#include <memory>
 
 #define UPLOAD_DELAY 2000
 // Delay between uploads in milliseconds
@@ -93,6 +100,7 @@ void ImageUploader::logToFile(const QString &originalFilePath,
     entries.push_back(newLogEntry);
     logSaveFile.write(QJsonDocument(entries).toJson());
     logSaveFile.commit();
+    //>>>>>>> e7508332ff1399a89424bfdc0997f979fd0c9acc:src/singletons/ImageUploader.cpp
 }
 
 // extracting link to either image or its deletion from response body
@@ -122,6 +130,84 @@ QString getLinkFromResponse(NetworkResult response, QString pattern)
 
 void ImageUploader::save()
 {
+    this->sm_->save();
+}
+
+UploadedImageModel *ImageUploader::createModel(QObject *parent)
+{
+    auto *model = new UploadedImageModel(parent);
+    model->initialize(&this->images_);
+    return model;
+}
+
+void ImageUploader::initialize(Settings &settings, const Paths &paths)
+{
+    auto logPath = (getSettings()->logPath.getValue().isEmpty()
+                        ? paths.messageLogDirectory
+                        : getSettings()->logPath);
+    const QString oldLogName = combinePath(logPath, "ImageUploader.json");
+
+    // read/write new one
+    const QString path = combinePath(logPath, "ImageUploader2.json");
+    this->sm_ = std::make_shared<pajlada::Settings::SettingManager>();
+    this->sm_->setPath(qPrintable(path));
+    this->sm_->setBackupEnabled(true);
+    this->sm_->setBackupSlots(9);
+
+    this->uploadedImagesSetting_ = std::make_unique<
+        pajlada::Settings::Setting<std::vector<UploadedImage>>>(
+        "/uploadedImages", this->sm_);
+    this->sm_->load();
+
+    // try to read old log
+    QFile oldLogFile(oldLogName);
+    bool isOldLogFileOkay =
+        oldLogFile.open(QIODevice::ReadOnly | QIODevice::Text);
+    if (isOldLogFileOkay)
+    {
+        auto data = oldLogFile.readAll();
+        rapidjson::Document doc;
+        doc.Parse(data.data(), data.size());
+        if (doc.HasParseError())
+        {
+            qCWarning(chatterinoCommon) << "Unable to read ImageUploader.json";
+            return;
+        }
+        std::vector<UploadedImage> temporary;
+        if (!doc.IsArray())
+        {
+            qCWarning(chatterinoCommon)
+                << "Unable to parse ImageUploader.json: not an array";
+            return;
+        }
+        if (!rj::getSafe(doc, temporary))
+        {
+            qCWarning(chatterinoCommon)
+                << "Unable to parse ImageUploader.json: getSafe failed";
+            return;
+        }
+        for (const auto &t : temporary)
+        {
+            this->images_.append(t);
+        }
+        oldLogFile.close();
+        oldLogFile.rename(combinePath(logPath, "ImageUploader.old.json"));
+    }
+
+    for (const auto &item : this->uploadedImagesSetting_->getValue())
+    {
+        this->images_.append(item);
+    }
+    this->signals_.addConnection(
+        this->images_.delayedItemsChanged.connect([this]() {
+            this->uploadedImagesSetting_->setValue(this->images_.raw());
+        }));
+
+    if (isOldLogFileOkay)
+    {
+        this->uploadedImagesSetting_->setValue(this->images_.raw());
+        this->sm_->save();
+    }
 }
 
 void ImageUploader::sendImageUploadRequest(RawImageData imageData,
