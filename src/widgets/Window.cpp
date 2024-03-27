@@ -720,10 +720,10 @@ void Window::addMenuBar()
     // Window menu.
     QMenu *windowMenu = mainMenu->addMenu(QString("Window"));
 
-    // Window->Minimise item
-    QAction *minimiseWindow = windowMenu->addAction(QString("Minimise"));
-    minimiseWindow->setShortcuts({QKeySequence("Meta+M")});
-    connect(minimiseWindow, &QAction::triggered, this, [this] {
+    // Window->Minimize item
+    QAction *minimizeWindow = windowMenu->addAction(QString("Minimize"));
+    minimizeWindow->setShortcuts({QKeySequence("Meta+M")});
+    connect(minimizeWindow, &QAction::triggered, this, [this] {
         this->setWindowState(Qt::WindowMinimized);
     });
 
