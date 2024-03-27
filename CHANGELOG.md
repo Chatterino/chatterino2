@@ -49,6 +49,7 @@
 - Minor: Add permissions to experimental plugins feature. (#5231)
 - Minor: Added warning message if you have multiple commands with the same trigger. (#4322)
 - Minor: Add support to send /announce[color] commands. (#5250)
+- Minor: Add more menu items in macOS menu bar. (#5266)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
 - Bugfix: Trimmed custom streamlink paths on all platforms making sure you don't accidentally add spaces at the beginning or end of its path. (#4834)

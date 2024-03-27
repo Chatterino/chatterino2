@@ -8,6 +8,10 @@
 #include <optional>
 #include <string>
 
+#define LINK_CHATTERINO_WIKI "https://wiki.chatterino.com"
+#define LINK_CHATTERINO_DISCORD "https://discord.gg/7Y5AYhAK4z"
+#define LINK_CHATTERINO_SOURCE "https://github.com/Chatterino/chatterino2"
+
 namespace chatterino {
 
 enum class HighlightState {
