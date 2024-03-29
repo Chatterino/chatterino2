@@ -76,11 +76,16 @@ void sendHelixMessage(const std::shared_ptr<TwitchChannel> &channel,
             }();
             chan->addMessage(errorMessage);
         },
-        [weak = std::weak_ptr(channel)](auto error, const auto &message) {
+        [weak = std::weak_ptr(channel)](auto error, auto message) {
             auto chan = weak.lock();
             if (!chan)
             {
                 return;
+            }
+
+            if (message.isEmpty())
+            {
+                message = "(empty message)";
             }
 
             using Error = decltype(error);
