@@ -1,11 +1,13 @@
 #include "providers/twitch/pubsubmessages/Whisper.hpp"
 
+#include "util/QMagicEnum.hpp"
+
 namespace chatterino {
 
 PubSubWhisperMessage::PubSubWhisperMessage(const QJsonObject &root)
     : typeString(root.value("type").toString())
 {
-    auto oType = magic_enum::enum_cast<Type>(this->typeString.toStdString());
+    auto oType = qmagicenum::enumCast<Type>(this->typeString);
     if (oType.has_value())
     {
         this->type = oType.value();

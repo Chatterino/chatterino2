@@ -1256,7 +1256,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         helixTimegateModerators->minimumSizeHint().width());
 
     layout.addDropdownEnumClass<ChatSendProtocol>(
-        "Chat send protocol", magic_enum::enum_names<ChatSendProtocol>(),
+        "Chat send protocol", qmagicenum::enumNames<ChatSendProtocol>(),
         s.chatSendProtocol,
         "'Helix' will use Twitch's Helix API to send message. 'IRC' will use "
         "IRC to send messages.",
@@ -1269,7 +1269,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     auto *soundBackend = layout.addDropdownEnumClass<SoundBackend>(
         "Sound backend (requires restart)",
-        magic_enum::enum_names<SoundBackend>(), s.soundBackend,
+        qmagicenum::enumNames<SoundBackend>(), s.soundBackend,
         "Change this only if you're noticing issues with sound playback on "
         "your system",
         {});

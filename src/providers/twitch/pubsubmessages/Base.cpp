@@ -1,5 +1,7 @@
 #include "providers/twitch/pubsubmessages/Base.hpp"
 
+#include "util/QMagicEnum.hpp"
+
 namespace chatterino {
 
 PubSubMessage::PubSubMessage(QJsonObject _object)
@@ -9,7 +11,7 @@ PubSubMessage::PubSubMessage(QJsonObject _object)
     , error(this->object.value("error").toString())
     , typeString(this->object.value("type").toString())
 {
-    auto oType = magic_enum::enum_cast<Type>(this->typeString.toStdString());
+    auto oType = qmagicenum::enumCast<Type>(this->typeString);
     if (oType.has_value())
     {
         this->type = oType.value();

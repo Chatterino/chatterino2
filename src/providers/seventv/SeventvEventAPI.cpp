@@ -8,6 +8,7 @@
 #include "providers/seventv/SeventvCosmetics.hpp"
 #include "providers/seventv/SeventvPaints.hpp"
 #include "providers/seventv/SeventvPersonalEmotes.hpp"
+#include "util/QMagicEnum.hpp"
 
 #include <QJsonArray>
 
@@ -241,7 +242,7 @@ void SeventvEventAPI::handleDispatch(const Dispatch &dispatch)
         default: {
             qCDebug(chatterinoSeventvEventAPI)
                 << "Unknown subscription type:"
-                << magic_enum::enum_name(dispatch.type).data()
+                << qmagicenum::enumName(dispatch.type)
                 << "body:" << dispatch.body;
         }
         break;

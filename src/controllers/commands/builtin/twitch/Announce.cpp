@@ -30,11 +30,7 @@ QString sendAnnouncementColor(const CommandContext &ctx,
     QString colorStr = "";
     if (color != HelixAnnouncementColor::Primary)
     {
-        colorStr =
-            QString::fromStdString(
-                std::string{
-                    magic_enum::enum_name<HelixAnnouncementColor>(color)})
-                .toLower();
+        colorStr = qmagicenum::enumNameString(color).toLower();
     }
 
     if (ctx.words.size() < 2)

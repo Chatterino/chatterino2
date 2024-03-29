@@ -74,7 +74,7 @@ TEST(NetworkRequest, Success)
 {
     const std::vector<int> codes{200, 201, 202, 203, 204, 205, 206};
 
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 
     for (const auto code : codes)
     {
@@ -96,14 +96,14 @@ TEST(NetworkRequest, Success)
         waiter.waitForRequest();
     }
 
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 }
 
 TEST(NetworkRequest, FinallyCallbackOnSuccess)
 {
     const std::vector<int> codes{200, 201, 202, 203, 204, 205, 206};
 
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 
     for (const auto code : codes)
     {
@@ -132,7 +132,7 @@ TEST(NetworkRequest, Error)
         411, 412, 413, 414, 418, 500, 501, 502, 503, 504,
     };
 
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 
     for (const auto code : codes)
     {
@@ -155,7 +155,7 @@ TEST(NetworkRequest, Error)
         waiter.waitForRequest();
     }
 
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 }
 
 TEST(NetworkRequest, FinallyCallbackOnError)
@@ -165,7 +165,7 @@ TEST(NetworkRequest, FinallyCallbackOnError)
         411, 412, 413, 414, 418, 500, 501, 502, 503, 504,
     };
 
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 
     for (const auto code : codes)
     {
@@ -189,7 +189,7 @@ TEST(NetworkRequest, FinallyCallbackOnError)
 
 TEST(NetworkRequest, TimeoutTimingOut)
 {
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 
     auto url = getDelayURL(5);
     RequestWaiter waiter;
@@ -214,12 +214,12 @@ TEST(NetworkRequest, TimeoutTimingOut)
 
     waiter.waitForRequest();
 
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 }
 
 TEST(NetworkRequest, TimeoutNotTimingOut)
 {
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 
     auto url = getDelayURL(1);
     RequestWaiter waiter;
@@ -240,12 +240,12 @@ TEST(NetworkRequest, TimeoutNotTimingOut)
 
     waiter.waitForRequest();
 
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 }
 
 TEST(NetworkRequest, FinallyCallbackOnTimeout)
 {
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 
     auto url = getDelayURL(5);
 
@@ -276,5 +276,5 @@ TEST(NetworkRequest, FinallyCallbackOnTimeout)
     EXPECT_TRUE(finallyCalled);
     EXPECT_TRUE(onErrorCalled);
     EXPECT_FALSE(onSuccessCalled);
-    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 }

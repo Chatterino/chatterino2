@@ -1,37 +1,48 @@
 # Linux
 
-Note on Qt version compatibility: If you are installing Qt from a package manager, please ensure the version you are installing is at least **Qt 5.15 or newer**.
+For all dependencies below we use Qt6. Our minimum supported version is Qt5.15, but you are on your own.
 
 ## Install dependencies
 
-### Ubuntu 20.04
+### Ubuntu
 
-_Most likely works the same for other Debian-like distros._
+Building on Ubuntu requires Docker.
 
-Install all the dependencies using `sudo apt install qttools5-dev qt5-image-formats-plugins libqt5svg5-dev libboost-dev libssl-dev libboost-system-dev libboost-filesystem-dev cmake g++ libsecret-1-dev libavif-dev`
+Use https://github.com/Chatterino/docker/pkgs/container/chatterino2-build-ubuntu-20.04 as your base if you're on Ubuntu 20.04.
+
+Use https://github.com/Chatterino/docker/pkgs/container/chatterino2-build-ubuntu-22.04 if you're on Ubuntu 22.04.
+
+The built binary should be exportable from the final image & able to run on your system assuming you perform a static build. See our [build.yml github workflow file](.github/workflows/build.yml) for the cmake line used for Ubuntu builds.
+
+### Debian 12 (bookworm) or later
+
+```sh
+sudo apt install qt6-base-dev qt6-5compat-dev qt6-svg-dev qt6-image-formats-plugins libboost1.81-dev libssl-dev cmake g++ git
+```
 
 ### Arch Linux
 
-Install all the dependencies using `sudo pacman -S --needed qt5-base qt5-imageformats qt5-svg qt5-tools boost rapidjson pkgconf openssl cmake libavif-git`
+```sh
+sudo pacman -S --needed qt6-base qt6-tools boost-libs openssl qt6-imageformats qt6-5compat qt6-svg boost rapidjson pkgconf openssl cmake
+```
 
 Alternatively you can use the [chatterino2-git](https://aur.archlinux.org/packages/chatterino2-git/) package to build and install Chatterino for you.
 
-### Fedora 28 and above
+### Fedora 39 and above
 
 _Most likely works the same for other Red Hat-like distros. Substitute `dnf` with `yum`._
 
-Install all the dependencies using `sudo dnf install qt5-qtbase-devel qt5-qtimageformats qt5-qtsvg-devel qt5-linguist libsecret-devel openssl-devel boost-devel cmake libavif-devel`
+```sh
+sudo dnf install qt6-qtbase-devel qt6-qtimageformats qt6-qtsvg-devel qt6-qt5compat-devel g++ git openssl-devel boost-devel cmake
+```
 
 ### NixOS 18.09+
 
-Enter the development environment with all of the dependencies: `nix-shell -p openssl boost qt5.full pkg-config cmake libavif`
+```sh
+nix-shell -p openssl boost qt6.full pkg-config cmake
+```
 
 ## Compile
-
-### Through Qt Creator
-
-1. Install C++ IDE Qt Creator by using `sudo apt install qtcreator`
-1. Open `CMakeLists.txt` with Qt Creator and select build
 
 ## Manually
 
@@ -42,9 +53,14 @@ Enter the development environment with all of the dependencies: `nix-shell -p op
    ```
 1. Generate build files
    ```sh
-   cmake ..
+   cmake -DBUILD_WITH_QT6=ON -DBUILD_WITH_QTKEYCHAIN=OFF ..
    ```
 1. Build the project
    ```sh
-   make
+   cmake --build .
    ```
+
+### Through Qt Creator
+
+1. Install C++ IDE Qt Creator by using `sudo apt install qtcreator` (Or whatever equivalent for your distro)
+1. Open `CMakeLists.txt` with Qt Creator and select build

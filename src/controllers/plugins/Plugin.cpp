@@ -3,6 +3,7 @@
 
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandController.hpp"
+#    include "util/QMagicEnum.hpp"
 
 extern "C" {
 #    include <lua.h>
@@ -26,7 +27,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     }
     else if (!homepageObj.isUndefined())
     {
-        QString type = magic_enum::enum_name(homepageObj.type()).data();
+        auto type = qmagicenum::enumName(homepageObj.type());
         this->errors.emplace_back(
             QString("homepage is defined but is not a string (its type is %1)")
                 .arg(type));
@@ -38,7 +39,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     }
     else
     {
-        QString type = magic_enum::enum_name(nameObj.type()).data();
+        auto type = qmagicenum::enumName(nameObj.type());
         this->errors.emplace_back(
             QString("name is not a string (its type is %1)").arg(type));
     }
@@ -50,7 +51,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     }
     else
     {
-        QString type = magic_enum::enum_name(descrObj.type()).data();
+        auto type = qmagicenum::enumName(descrObj.type());
         this->errors.emplace_back(
             QString("description is not a string (its type is %1)").arg(type));
     }
@@ -64,7 +65,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
             const auto &t = authorsArr.at(i);
             if (!t.isString())
             {
-                QString type = magic_enum::enum_name(t.type()).data();
+                auto type = qmagicenum::enumName(t.type());
                 this->errors.push_back(
                     QString("authors element #%1 is not a string (it is a %2)")
                         .arg(i)
@@ -76,7 +77,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     }
     else
     {
-        QString type = magic_enum::enum_name(authorsObj.type()).data();
+        auto type = qmagicenum::enumName(authorsObj.type());
         this->errors.emplace_back(
             QString("authors is not an array (its type is %1)").arg(type));
     }
@@ -88,7 +89,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     }
     else
     {
-        QString type = magic_enum::enum_name(licenseObj.type()).data();
+        auto type = qmagicenum::enumName(licenseObj.type());
         this->errors.emplace_back(
             QString("license is not a string (its type is %1)").arg(type));
     }
@@ -109,7 +110,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     }
     else
     {
-        QString type = magic_enum::enum_name(verObj.type()).data();
+        auto type = qmagicenum::enumName(verObj.type());
         this->errors.emplace_back(
             QString("version is not a string (its type is %1)").arg(type));
         this->version = semver::version(0, 0, 0);
@@ -119,7 +120,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     {
         if (!permsObj.isArray())
         {
-            QString type = magic_enum::enum_name(permsObj.type()).data();
+            auto type = qmagicenum::enumName(permsObj.type());
             this->errors.emplace_back(
                 QString("permissions is not an array (its type is %1)")
                     .arg(type));
@@ -132,7 +133,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
             const auto &t = permsArr.at(i);
             if (!t.isObject())
             {
-                QString type = magic_enum::enum_name(t.type()).data();
+                auto type = qmagicenum::enumName(t.type());
                 this->errors.push_back(QString("permissions element #%1 is not "
                                                "an object (its type is %2)")
                                            .arg(i)
@@ -161,7 +162,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     {
         if (!tagsObj.isArray())
         {
-            QString type = magic_enum::enum_name(tagsObj.type()).data();
+            auto type = qmagicenum::enumName(tagsObj.type());
             this->errors.emplace_back(
                 QString("tags is not an array (its type is %1)").arg(type));
             return;
@@ -173,7 +174,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
             const auto &t = tagsArr.at(i);
             if (!t.isString())
             {
-                QString type = magic_enum::enum_name(t.type()).data();
+                auto type = qmagicenum::enumName(t.type());
                 this->errors.push_back(
                     QString("tags element #%1 is not a string (its type is %2)")
                         .arg(i)
