@@ -1,5 +1,6 @@
 #include "AboutPage.hpp"
 
+#include "common/Common.hpp"
 #include "common/Modes.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
@@ -18,10 +19,8 @@
 
 #define PIXMAP_WIDTH 500
 
-#define LINK_CHATTERINO_WIKI "https://wiki.chatterino.com"
 #define LINK_DONATE "https://streamelements.com/fourtf/tip"
 #define LINK_CHATTERINO_FEATURES "https://chatterino.com/#features"
-#define LINK_CHATTERINO_DISCORD "https://discord.gg/7Y5AYhAK4z"
 
 namespace chatterino {
 

@@ -29,6 +29,7 @@
 - Minor: Added the ability to configure the color of highlighted AutoMod caught messages. (#5215)
 - Minor: Updated to Emoji v15.1. Google emojis are now used as the fallback instead of Twitter emojis. (#5182)
 - Minor: Added icons for newer versions of macOS. (#5148)
+- Minor: Added more menu items in macOS menu bar. (#5266)
 - Minor: Improved color selection and display. (#5057)
 - Minor: Added a _System_ theme setting that updates according to the system's color scheme (requires Qt 6.5). (#5118)
 - Minor: Normalized the input padding between light & dark themes. (#5095)
