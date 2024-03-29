@@ -49,6 +49,7 @@
 - Minor: Image links now reflect the scale of their image instead of an internal label. (#5201)
 - Minor: IPC files are now stored in the Chatterino directory instead of system directories on Windows. (#5226)
 - Minor: 7TV emotes now have a 4x image rather than a 3x image. (#5209)
+- Minor: Add `reward.cost` `reward.id`, `reward.title` filter variables. (#5275)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
 - Bugfix: Fixed the `/shoutout` command not working with usernames starting with @'s (e.g. `/shoutout @forsen`). (#4800)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
