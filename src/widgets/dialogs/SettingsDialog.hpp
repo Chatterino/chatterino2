@@ -30,6 +30,7 @@ enum class SettingsDialogPreference {
     StreamerMode,
     Accounts,
     ModerationActions,
+    About,
 };
 
 class SettingsDialog : public BaseWindow
