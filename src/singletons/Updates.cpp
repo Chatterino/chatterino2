@@ -1,5 +1,6 @@
 #include "Updates.hpp"
 
+#include "common/Literals.hpp"
 #include "common/Modes.hpp"
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
@@ -16,6 +17,8 @@
 #include <QProcess>
 #include <QRegularExpression>
 #include <semver/semver.hpp>
+
+using namespace chatterino::literals;
 
 namespace chatterino {
 namespace {
@@ -264,77 +267,135 @@ void Updates::checkForUpdates()
         return;
     }
 
-    QString url = "https://7tv.io/v2/chatterino/version/" CHATTERINO_OS "/" +
-                  currentBranch();
+    // See https://github.com/SevenTV/SevenTV/issues/48#issue-2193272289
+    // for the proposed structure of the response.
+    auto onSuccess = [this](const NetworkResult &result) {
+        const auto object = result.parseJson();
+        if (object.empty())
+        {
+            return;  // this should only happen on the v4 url as it's not really mapped
+        }
 
-    NetworkRequest(url)
-        .timeout(60000)
-        .followRedirects(true)
-        .onSuccess([this](auto result) {
-            const auto object = result.parseJson();
-            /// Version available on every platform
-            auto version = object["version"];
+        /// Version available on every platform
+        auto version = object["version"];
 
-            if (!version.isString())
-            {
-                this->setStatus_(SearchFailed);
-                qCDebug(chatterinoUpdate)
-                    << "error checking version - missing 'version'" << object;
-                return;
-            }
+        if (!version.isString())
+        {
+            this->setStatus_(SearchFailed);
+            qCDebug(chatterinoUpdate)
+                << "error checking version - missing 'version'" << object;
+            return;
+        }
 
-#    if defined Q_OS_WIN || defined Q_OS_MACOS
-            /// Downloads an installer for the new version
-            auto updateExeUrl = object["updateexe"];
-            if (!updateExeUrl.isString())
-            {
-                this->setStatus_(SearchFailed);
-                qCDebug(chatterinoUpdate)
-                    << "error checking version - missing 'updateexe'" << object;
-                return;
-            }
-            this->updateExe_ = updateExeUrl.toString();
+#    if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
+        /// Downloads an installer for the new version
+        auto updateExeUrl = object["updateexe"_L1];
 
-#        ifdef Q_OS_WIN
-            /// Windows portable
-            auto portableUrl = object["portable_download"];
-            if (!portableUrl.isString())
-            {
-                this->setStatus_(SearchFailed);
-                qCDebug(chatterinoUpdate)
-                    << "error checking version - missing 'portable_download'"
-                    << object;
-                return;
-            }
-            this->updatePortable_ = portableUrl.toString();
+#        if defined(Q_PROCESSOR_ARM)
+
+        if (object["update_arm"_L1].isString())
+        {
+            updateExeUrl = object["update_arm"_L1];
+        }
+
+#        elif defined(Q_PROCESSOR_X86)
+
+        if (object["update_x86"_L1].isString())
+        {
+            updateExeUrl = object["update_x86"_L1];
+        }
+
 #        endif
 
-#    elif defined Q_OS_LINUX
-            QJsonValue updateGuide = object.value("updateguide");
-            if (updateGuide.isString())
-            {
-                this->updateGuideLink_ = updateGuide.toString();
-            }
-#    else
+        if (!updateExeUrl.isString())
+        {
+            this->setStatus_(SearchFailed);
+            qCDebug(chatterinoUpdate)
+                << "error checking version - missing 'updateexe'" << object;
             return;
+        }
+
+        this->updateExe_ = updateExeUrl.toString();
+
+#        ifdef Q_OS_WIN
+        /// Windows portable
+        auto portableUrl = object["portable_download"];
+        if (!portableUrl.isString())
+        {
+            this->setStatus_(SearchFailed);
+            qCDebug(chatterinoUpdate)
+                << "error checking version - missing 'portable_download'"
+                << object;
+            return;
+        }
+        this->updatePortable_ = portableUrl.toString();
+#        endif
+
+#    elif defined(Q_OS_LINUX)
+        QJsonValue updateGuide = object.value("updateguide");
+        if (updateGuide.isString())
+        {
+            this->updateGuideLink_ = updateGuide.toString();
+        }
+#    else
+        return;
 #    endif
 
-            /// Current version
-            this->onlineVersion_ = version.toString();
+        /// Current version
+        this->onlineVersion_ = version.toString();
 
-            /// Update available :)
-            if (this->currentVersion_ != this->onlineVersion_)
-            {
-                this->setStatus_(UpdateAvailable);
-                this->isDowngrade_ = Updates::isDowngradeOf(
-                    this->onlineVersion_, this->currentVersion_);
-            }
-            else
-            {
-                this->setStatus_(NoUpdateAvailable);
-            }
-        })
-        .execute();
+        /// Update available :)
+        if (this->currentVersion_ != this->onlineVersion_)
+        {
+            this->setStatus_(UpdateAvailable);
+            this->isDowngrade_ = Updates::isDowngradeOf(this->onlineVersion_,
+                                                        this->currentVersion_);
+        }
+        else
+        {
+            this->setStatus_(NoUpdateAvailable);
+        }
+    };
+
+    // We're trying v2, v3, and v4 to get updates.
+    // The first successful one will be used
+    auto apiVersion = std::make_shared<uint8_t>(2);
+    auto fmtUrl = [apiVersion] {
+        return u"https://7tv.io/v%1/chatterino/version/"_s CHATTERINO_OS
+               "/%2".arg(QString::number(*apiVersion), currentBranch());
+    };
+
+    auto onError = std::make_shared<std::function<void(NetworkResult)>>();
+    // We need to avoid cyclic ownership, so we pass onError as a weak pointer.
+    // During the request, it's kept alive by the finally handler, which will
+    // always be called after onError and onSuccess.
+    auto makeRequest = [onSuccess,
+                        onErrorWeak = std::weak_ptr(onError)](auto url) {
+        auto onError = onErrorWeak.lock();
+        if (!onError)
+        {
+            return;
+        }
+        qCDebug(chatterinoUpdate) << "Requesting updates from" << url;
+        NetworkRequest(url)
+            .timeout(60000)
+            .followRedirects(true)
+            .onSuccess(onSuccess)
+            .onError(*onError)
+            .finally([onError]() {})
+            .execute();
+    };
+
+    *onError = [apiVersion, fmtUrl, makeRequest](const auto &) mutable {
+        if (*apiVersion >= 4)
+        {
+            return;  // nothing returned a response, we're done
+        }
+        (*apiVersion)++;
+        makeRequest(fmtUrl());
+    };
+    makeRequest(fmtUrl());
+
     this->setStatus_(Searching);
 #endif
 }
