@@ -39,9 +39,17 @@ const QString SEVENTV_EVENTAPI_URL = "wss://events.7tv.io/v3";
 void sendHelixMessage(const std::shared_ptr<TwitchChannel> &channel,
                       const QString &message, const QString &replyParentId = {})
 {
+    auto broadcasterID = channel->roomId();
+    if (broadcasterID.isEmpty())
+    {
+        channel->addMessage(makeSystemMessage(
+            "Sending messages in this channel isn't possible."));
+        return;
+    }
+
     getHelix()->sendChatMessage(
         {
-            .broadcasterID = channel->roomId(),
+            .broadcasterID = broadcasterID,
             .senderID =
                 getIApp()->getAccounts()->twitch.getCurrent()->getUserId(),
             .message = message,
