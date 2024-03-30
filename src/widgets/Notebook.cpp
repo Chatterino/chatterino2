@@ -195,7 +195,6 @@ void Notebook::duplicatePage(QWidget *page)
     newContainer->applyFromDescriptor(descriptor);
 
     int newTabPosition = this->indexOf(page) + 1;
-    assert(newTabPosition != -1);
     auto *tab = this->addPageAt(
         newContainer, newTabPosition,
         item->tab->hasCustomTitle() ? item->tab->getCustomTitle() : "", false);

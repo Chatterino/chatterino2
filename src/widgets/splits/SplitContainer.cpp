@@ -4,7 +4,6 @@
 #include "common/Common.hpp"
 #include "common/QLogging.hpp"
 #include "common/WindowDescriptors.hpp"
-#include "controllers/completion/TabCompletionModel.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Theme.hpp"
