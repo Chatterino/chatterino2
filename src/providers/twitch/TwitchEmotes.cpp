@@ -16,6 +16,14 @@ Url getEmoteLink(const EmoteId &id, const QString &emoteScale)
                 .replace("{scale}", emoteScale)};
 }
 
+QSize getEmoteExpectedBaseSize(const EmoteId &id)
+{
+    // From Twitch docs - expected size for an emote (1x)
+    constexpr QSize baseSize(28, 28);
+
+    return baseSize;
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -57,8 +65,7 @@ EmotePtr TwitchEmotes::getOrCreateEmote(const EmoteId &id,
 
     if (!shared)
     {
-        // From Twitch docs - expected size for an emote (1x)
-        constexpr QSize baseSize(28, 28);
+        auto baseSize = getEmoteExpectedBaseSize(id);
         (*cache)[id] = shared = std::make_shared<Emote>(Emote{
             EmoteName{name},
             ImageSet{
