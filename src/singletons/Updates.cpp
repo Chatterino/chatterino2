@@ -357,9 +357,12 @@ void Updates::checkForUpdates()
         }
     };
 
-    // We're trying v2, v3, and v4 to get updates.
+    // We're trying v2, v3, ~~and v4~~ to get updates.
     // The first successful one will be used
+    // TODO: remove this once v3 has the endpoint
     auto apiVersion = std::make_shared<uint8_t>(2);
+    constexpr auto maxApiVersion =
+        3;  // don't try v4 yet (we don't know the API scheme yet)
     auto fmtUrl = [apiVersion] {
         return u"https://7tv.io/v%1/chatterino/version/"_s CHATTERINO_OS
                "/%2".arg(QString::number(*apiVersion), currentBranch());
@@ -387,7 +390,7 @@ void Updates::checkForUpdates()
     };
 
     *onError = [apiVersion, fmtUrl, makeRequest](const auto &) mutable {
-        if (*apiVersion >= 4)
+        if (*apiVersion >= maxApiVersion)
         {
             return;  // nothing returned a response, we're done
         }
