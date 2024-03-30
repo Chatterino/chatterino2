@@ -5,6 +5,19 @@
 #include "messages/Image.hpp"
 #include "util/QStringHash.hpp"
 
+namespace {
+
+using namespace chatterino;
+
+Url getEmoteLink(const EmoteId &id, const QString &emoteScale)
+{
+    return {QString(TWITCH_EMOTE_TEMPLATE)
+                .replace("{id}", id.string)
+                .replace("{scale}", emoteScale)};
+}
+
+}  // namespace
+
 namespace chatterino {
 
 QString TwitchEmotes::cleanUpEmoteCode(const QString &dirtyEmoteCode)
@@ -58,13 +71,6 @@ EmotePtr TwitchEmotes::getOrCreateEmote(const EmoteId &id,
     }
 
     return shared;
-}
-
-Url TwitchEmotes::getEmoteLink(const EmoteId &id, const QString &emoteScale)
-{
-    return {QString(TWITCH_EMOTE_TEMPLATE)
-                .replace("{id}", id.string)
-                .replace("{scale}", emoteScale)};
 }
 
 }  // namespace chatterino
