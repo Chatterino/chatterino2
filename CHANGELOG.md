@@ -112,6 +112,7 @@
 - Bugfix: Fixed split header tooltips showing in the wrong position on Windows. (#5230)
 - Bugfix: Fixed split header tooltips appearing too tall. (#5232)
 - Bugfix: Fixed past messages not showing in the search popup after adding a channel. (#5248)
+- Bugfix: Fixed pause indicator not disappearing in some cases. (#5265)
 - Bugfix: Fixed the usercard popup not floating on tiling WMs on Linux when "Automatically close user popup when it loses focus" setting is enabled. (#3511)
 - Bugfix: Fixed moderator-only topics being subscribed to for non-moderators. (#5056)
 - Bugfix: Truncated IRC messages to be at most 512 bytes. (#5246)
