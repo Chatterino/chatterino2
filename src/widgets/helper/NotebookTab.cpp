@@ -98,6 +98,10 @@ NotebookTab::NotebookTab(Notebook *notebook)
         getIApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Window,
                                                     "popup", {{"window"}}));
 
+    this->menu_.addAction("Duplicate Tab", [this]() {
+        this->notebook_->duplicatePage(this->page);
+    });
+
     highlightNewMessagesAction_ =
         new QAction("Mark Tab as Unread on New Messages", &this->menu_);
     highlightNewMessagesAction_->setCheckable(true);

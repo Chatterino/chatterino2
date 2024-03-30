@@ -88,6 +88,12 @@ Notebook::Notebook(QWidget *parent)
 
 NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
 {
+    return this->addPageAt(page, -1, std::move(title), select);
+}
+
+NotebookTab *Notebook::addPageAt(QWidget *page, int position, QString title,
+                                 bool select)
+{
     // Queue up save because: Tab added
     getIApp()->getWindows()->queueSave();
 
@@ -101,7 +107,14 @@ NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
     item.page = page;
     item.tab = tab;
 
-    this->items_.append(item);
+    if (position == -1)
+    {
+        this->items_.push_back(item);
+    }
+    else
+    {
+        this->items_.insert(position, item);
+    }
 
     page->hide();
     page->setParent(this);
@@ -163,6 +176,32 @@ void Notebook::removePage(QWidget *page)
     this->items_.removeAt(removingIndex);
 
     this->performLayout(true);
+}
+
+void Notebook::duplicatePage(QWidget *page)
+{
+    auto *item = this->findItem(page);
+    assert(item != nullptr);
+
+    auto *container = dynamic_cast<SplitContainer *>(item->page);
+    if (!container)
+    {
+        return;
+    }
+
+    auto descriptor = container->buildDescriptor();
+
+    auto *newContainer = new SplitContainer(this);
+    newContainer->applyFromDescriptor(descriptor);
+
+    int newTabPosition = this->indexOf(page) + 1;
+    assert(newTabPosition != -1);
+    auto *tab = this->addPageAt(
+        newContainer, newTabPosition,
+        item->tab->hasCustomTitle() ? item->tab->getCustomTitle() : "", false);
+    tab->setHighlightState(item->tab->highlightState());
+
+    newContainer->setTab(tab);
 }
 
 void Notebook::removeCurrentPage()

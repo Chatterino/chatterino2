@@ -762,6 +762,11 @@ SplitContainer::Node *SplitContainer::getBaseNode()
     return &this->baseNode_;
 }
 
+NodeDescriptor SplitContainer::buildDescriptor()
+{
+    return this->buildDescriptorRecursively(&this->baseNode_);
+}
+
 void SplitContainer::applyFromDescriptor(const NodeDescriptor &rootNode)
 {
     assert(this->baseNode_.type_ == Node::Type::EmptyRoot);
@@ -797,6 +802,29 @@ void SplitContainer::popup()
     }
 
     window.show();
+}
+
+NodeDescriptor SplitContainer::buildDescriptorRecursively(Node *currentNode)
+{
+    if (currentNode->children_.empty())
+    {
+        SplitNodeDescriptor result;
+        result.type_ = "twitch";
+        result.channelName_ = currentNode->split_->getChannel()->getName();
+        result.filters_ = currentNode->split_->getFilters();
+        return result;
+    }
+
+    ContainerNodeDescriptor descriptor;
+    for (auto &child : currentNode->children_)
+    {
+        descriptor.vertical_ =
+            currentNode->type_ == Node::Type::VerticalContainer;
+        descriptor.items_.push_back(
+            this->buildDescriptorRecursively(child.get()));
+    }
+
+    return descriptor;
 }
 
 void SplitContainer::applyFromDescriptorRecursively(
