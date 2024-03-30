@@ -4,6 +4,7 @@
 #include "common/Common.hpp"
 #include "common/QLogging.hpp"
 #include "common/WindowDescriptors.hpp"
+#include "controllers/completion/TabCompletionModel.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Theme.hpp"
@@ -808,8 +809,33 @@ NodeDescriptor SplitContainer::buildDescriptorRecursively(Node *currentNode)
 {
     if (currentNode->children_.empty())
     {
+        const auto channelTypeToString = [](Channel::Type type) {
+            switch (type)
+            {
+                case Channel::Type::Twitch:
+                    return "twitch";
+                case Channel::Type::TwitchWhispers:
+                    return "whispers";
+                case Channel::Type::TwitchWatching:
+                    return "watching";
+                case Channel::Type::TwitchMentions:
+                    return "mentions";
+                case Channel::Type::TwitchLive:
+                    return "live";
+                case Channel::Type::TwitchAutomod:
+                    return "automod";
+                case Channel::Type::Irc:
+                    return "irc";
+                case Channel::Type::Misc:
+                    return "misc";
+                default:
+                    return "";
+            }
+        };
+
         SplitNodeDescriptor result;
-        result.type_ = "twitch";
+        result.type_ =
+            channelTypeToString(currentNode->split_->getChannel()->getType());
         result.channelName_ = currentNode->split_->getChannel()->getName();
         result.filters_ = currentNode->split_->getFilters();
         return result;
@@ -877,9 +903,9 @@ void SplitContainer::applyFromDescriptorRecursively(
                 }
                 const auto &splitNode = *inner;
                 auto *split = new Split(this);
+                split->setFilters(splitNode.filters_);
                 split->setChannel(WindowManager::decodeChannel(splitNode));
                 split->setModerationMode(splitNode.moderationMode_);
-                split->setFilters(splitNode.filters_);
 
                 auto *node = new Node();
                 node->parent_ = baseNode;
