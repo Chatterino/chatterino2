@@ -197,6 +197,7 @@
 - Dev: Adapted `magic_enum` to Qt's Utf-16 strings. (#5258)
 - Dev: `NetworkManager`'s statics are now created in its `init` method. (#5254)
 - Dev: `clang-tidy` CI now uses Qt 6. (#5273)
+- Dev: Enabled `InsertNewlineAtEOF` in `clang-format`. (#5278)
 
 ## 2.4.6
 
