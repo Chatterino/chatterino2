@@ -29,6 +29,7 @@
 - Minor: Added the ability to configure the color of highlighted AutoMod caught messages. (#5215)
 - Minor: Updated to Emoji v15.1. Google emojis are now used as the fallback instead of Twitter emojis. (#5182)
 - Minor: Added icons for newer versions of macOS. (#5148)
+- Minor: Added more menu items in macOS menu bar. (#5266)
 - Minor: Improved color selection and display. (#5057)
 - Minor: Added a _System_ theme setting that updates according to the system's color scheme (requires Qt 6.5). (#5118)
 - Minor: Normalized the input padding between light & dark themes. (#5095)
@@ -112,6 +113,7 @@
 - Bugfix: Fixed split header tooltips showing in the wrong position on Windows. (#5230)
 - Bugfix: Fixed split header tooltips appearing too tall. (#5232)
 - Bugfix: Fixed past messages not showing in the search popup after adding a channel. (#5248)
+- Bugfix: Fixed pause indicator not disappearing in some cases. (#5265)
 - Bugfix: Fixed the usercard popup not floating on tiling WMs on Linux when "Automatically close user popup when it loses focus" setting is enabled. (#3511)
 - Bugfix: Fixed moderator-only topics being subscribed to for non-moderators. (#5056)
 - Bugfix: Truncated IRC messages to be at most 512 bytes. (#5246)
@@ -186,7 +188,7 @@
 - Dev: Added signal to invalidate paint buffers of channel views without forcing a relayout. (#5123)
 - Dev: Specialize `Atomic<std::shared_ptr<T>>` if underlying standard library supports it. (#5133)
 - Dev: Added the `developer_name` field to the Linux AppData specification. (#5138)
-- Dev: Twitch messages can be sent using Twitch's Helix API instead of IRC (disabled by default). (#5200)
+- Dev: Twitch messages can be sent using Twitch's Helix API instead of IRC (disabled by default). (#5200, #5276)
 - Dev: Added estimation for image sizes to avoid layout shifts. (#5192)
 - Dev: Added the `launachable` entry to Linux AppData. (#5210)
 - Dev: Cleaned up and optimized resources. (#5222)
@@ -194,6 +196,7 @@
 - Dev: Cleaned up unused code in `MessageElement` and `MessageLayoutElement`. (#5225)
 - Dev: Adapted `magic_enum` to Qt's Utf-16 strings. (#5258)
 - Dev: `NetworkManager`'s statics are now created in its `init` method. (#5254)
+- Dev: `clang-tidy` CI now uses Qt 6. (#5273)
 
 ## 2.4.6
 

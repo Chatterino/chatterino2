@@ -18,6 +18,7 @@ enum class SettingsTabId {
     General,
     Accounts,
     Moderation,
+    About,
 };
 
 class SettingsDialogTab : public BaseWidget
