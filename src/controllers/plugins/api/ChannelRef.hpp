@@ -21,7 +21,7 @@ enum class LPlatform {
 };
 
 /**
- * @lua@class Channel: IWeakResource
+ * @lua@class Channel
  */
 struct ChannelRef {
     static void createMetatable(lua_State *L);

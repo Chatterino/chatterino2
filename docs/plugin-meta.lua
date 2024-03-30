@@ -6,15 +6,6 @@
 
 c2 = {}
 
----@class IWeakResource
-IWeakResource = {}
-
---- Returns true if the channel this object points to is valid.
---- If the object expired, returns false
---- If given a non-Channel object, it errors.
----@return boolean
-function IWeakResource:is_valid() end
-
 ---@alias c2.LogLevel integer
 ---@type { Debug: c2.LogLevel, Info: c2.LogLevel, Warning: c2.LogLevel, Critical: c2.LogLevel }
 c2.LogLevel = {}
@@ -53,7 +44,7 @@ ChannelType = {}
 ---@type { Twitch: Platform }
 Platform = {}
 
----@class Channel: IWeakResource
+---@class Channel
 Channel = {}
 
 --- Returns true if the channel this object points to is valid.
