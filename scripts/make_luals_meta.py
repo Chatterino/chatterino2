@@ -9,12 +9,6 @@ It assumes comments look like:
  * @lua@returns boolean
  * @exposed name
  */
-or
-/// Thing
-///
-/// @lua@param thing boolean
-/// @lua@returns boolean
-/// @exposed name
 - Do not have any useful info on '/**' and '*/' lines.
 - Class members are not allowed to have non-@command lines and commands different from @lua@field
 
@@ -69,11 +63,11 @@ print("Writing to", lua_meta.relative_to(repo_root))
 
 
 def strip_line(line: str):
-    return re.sub(r"^/\*\*|^\*|^///|\*/$", "", line).strip()
+    return re.sub(r"^/\*\*|^\*|\*/$", "", line).strip()
 
 
 def is_comment_start(line: str):
-    return line.startswith(("/**", "///"))
+    return line.startswith("/**")
 
 
 def is_enum_class(line: str):
@@ -114,14 +108,13 @@ class Reader:
         return None
 
     def next_doc_comment(self) -> Optional[list[str]]:
-        """Reads a documentation comment (/** ... */ or ///) and advances the cursor"""
+        """Reads a documentation comment (/** ... */) and advances the cursor"""
         lines = []
         # find the start
         while (line := self.next_line()) is not None and not is_comment_start(line):
             pass
         if not self.has_next():
             return None
-        is_triple_slash = line.startswith("///")
 
         stripped = strip_line(line)
         if stripped:
@@ -131,10 +124,7 @@ class Reader:
             return lines if lines else None
 
         while (line := self.next_line()) is not None:
-            if is_triple_slash and not line.startswith("///"):
-                self.line_idx -= 1  # consumed too much
-                break
-            if not is_triple_slash and line.startswith("*/"):
+            if line.startswith("*/"):
                 break
 
             stripped = strip_line(line)
