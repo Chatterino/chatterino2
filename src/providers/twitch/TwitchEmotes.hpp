@@ -52,7 +52,6 @@ public:
                               const EmoteName &name) override;
 
 private:
-    Url getEmoteLink(const EmoteId &id, const QString &emoteScale);
     UniqueAccess<std::unordered_map<EmoteId, std::weak_ptr<Emote>>>
         twitchEmotesCache_;
 };
