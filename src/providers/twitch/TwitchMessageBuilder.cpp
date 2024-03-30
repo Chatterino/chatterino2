@@ -1625,6 +1625,8 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
     builder->message().messageText = textList.join(" ");
     builder->message().searchText = textList.join(" ");
     builder->message().loginName = reward.user.login;
+
+    builder->message().reward = std::make_shared<ChannelPointReward>(reward);
 }
 
 void TwitchMessageBuilder::liveMessage(const QString &channelName,

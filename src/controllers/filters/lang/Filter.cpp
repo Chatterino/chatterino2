@@ -120,6 +120,18 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
             vars["channel.live"] = false;
         }
     }
+    if (m->reward != nullptr)
+    {
+        vars["reward.title"] = m->reward->title;
+        vars["reward.cost"] = m->reward->cost;
+        vars["reward.id"] = m->reward->id;
+    }
+    else
+    {
+        vars["reward.title"] = "";
+        vars["reward.cost"] = -1;
+        vars["reward.id"] = "";
+    }
     return vars;
 }
 

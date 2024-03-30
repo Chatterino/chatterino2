@@ -268,6 +268,20 @@ void addHiddenContextMenuItems(QMenu *menu,
         jsonObject["searchText"] = message->searchText;
         jsonObject["messageText"] = message->messageText;
         jsonObject["flags"] = qmagicenum::enumFlagsName(message->flags.value());
+        if (message->reward)
+        {
+            QJsonObject reward;
+            reward["id"] = message->reward->id;
+            reward["title"] = message->reward->title;
+            reward["cost"] = message->reward->cost;
+            reward["isUserInputRequired"] =
+                message->reward->isUserInputRequired;
+            jsonObject["reward"] = reward;
+        }
+        else
+        {
+            jsonObject["reward"] = QJsonValue();
+        }
 
         jsonDocument.setObject(jsonObject);
 
