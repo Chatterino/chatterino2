@@ -6,22 +6,14 @@
 
 c2 = {}
 
----@class IWeakResource
-
---- Returns true if the channel this object points to is valid.
---- If the object expired, returns false
---- If given a non-Channel object, it errors.
----@return boolean
-function IWeakResource:is_valid() end
-
-
----@alias LogLevel integer
----@type { Debug: LogLevel, Info: LogLevel, Warning: LogLevel, Critical: LogLevel }
+---@alias c2.LogLevel integer
+---@type { Debug: c2.LogLevel, Info: c2.LogLevel, Warning: c2.LogLevel, Critical: c2.LogLevel }
 c2.LogLevel = {}
 
----@alias EventType integer
----@type { CompletionRequested: EventType }
+---@alias c2.EventType integer
+---@type { CompletionRequested: c2.EventType }
 c2.EventType = {}
+
 ---@class CommandContext
 ---@field words string[] The words typed when executing the command. For example `/foo bar baz` will result in `{"/foo", "bar", "baz"}`.
 ---@field channel Channel The channel the command was executed in.
@@ -29,20 +21,31 @@ c2.EventType = {}
 ---@class CompletionList
 ---@field values string[] The completions
 ---@field hide_others boolean Whether other completions from Chatterino should be hidden/ignored.
--- Now including data from src/common/Channel.hpp.
+
+---@class CompletionEvent
+---@field query string The word being completed
+---@field full_text_content string Content of the text input
+---@field cursor_position integer Position of the cursor in the text input in unicode codepoints (not bytes)
+---@field is_first_word boolean True if this is the first word in the input
+
+-- Begin src/common/Channel.hpp
 
 ---@alias ChannelType integer
----@type { None: ChannelType }
+---@type { None: ChannelType, Direct: ChannelType, Twitch: ChannelType, TwitchWhispers: ChannelType, TwitchWatching: ChannelType, TwitchMentions: ChannelType, TwitchLive: ChannelType, TwitchAutomod: ChannelType, TwitchEnd: ChannelType, Irc: ChannelType, Misc: ChannelType }
 ChannelType = {}
--- Back to src/controllers/plugins/LuaAPI.hpp.
--- Now including data from src/controllers/plugins/api/ChannelRef.hpp.
---- This enum describes a platform for the purpose of searching for a channel.
---- Currently only Twitch is supported because identifying IRC channels is tricky.
+
+-- End src/common/Channel.hpp
+
+-- Begin src/controllers/plugins/api/ChannelRef.hpp
 
 ---@alias Platform integer
+--- This enum describes a platform for the purpose of searching for a channel.
+--- Currently only Twitch is supported because identifying IRC channels is tricky.
 ---@type { Twitch: Platform }
 Platform = {}
----@class Channel: IWeakResource
+
+---@class Channel
+Channel = {}
 
 --- Returns true if the channel this object points to is valid.
 --- If the object expired, returns false
@@ -82,10 +85,8 @@ function Channel:add_system_message(message) end
 --- Compares the channel Type. Note that enum values aren't guaranteed, just
 --- that they are equal to the exposed enum.
 ---
----@return bool
+---@return boolean
 function Channel:is_twitch_channel() end
-
---- Twitch Channel specific functions
 
 --- Returns a copy of the channel mode settings (subscriber only, r9k etc.)
 ---
@@ -119,15 +120,10 @@ function Channel:is_mod() end
 ---@return boolean
 function Channel:is_vip() end
 
---- Misc
-
 ---@return string
 function Channel:__tostring() end
 
---- Static functions
-
 --- Finds a channel by name.
----
 --- Misc channels are marked as Twitch:
 --- - /whispers
 --- - /mentions
@@ -142,19 +138,15 @@ function Channel.by_name(name, platform) end
 
 --- Finds a channel by the Twitch user ID of its owner.
 ---
----@param string id ID of the owner of the channel.
+---@param id string ID of the owner of the channel.
 ---@return Channel?
-function Channel.by_twitch_id(string) end
+function Channel.by_twitch_id(id) end
 
 ---@class RoomModes
 ---@field unique_chat boolean You might know this as r9kbeta or robot9000.
 ---@field subscriber_only boolean
----@field emotes_only boolean Whether or not text is allowed in messages.
-
---- Note that "emotes" here only means Twitch emotes, not Unicode emoji, nor 3rd party text-based emotes
-
----@field unique_chat number? Time in minutes you need to follow to chat or nil.
-
+---@field emotes_only boolean Whether or not text is allowed in messages. Note that "emotes" here only means Twitch emotes, not Unicode emoji, nor 3rd party text-based emotes
+---@field follower_only number? Time in minutes you need to follow to chat or nil.
 ---@field slow_mode number? Time in seconds you need to wait before sending messages or nil.
 
 ---@class StreamStatus
@@ -164,7 +156,8 @@ function Channel.by_twitch_id(string) end
 ---@field title string Stream title or last stream title
 ---@field game_name string
 ---@field game_id string
--- Back to src/controllers/plugins/LuaAPI.hpp.
+
+-- End src/controllers/plugins/api/ChannelRef.hpp
 
 --- Registers a new command called `name` which when executed will call `handler`.
 ---
@@ -176,12 +169,12 @@ function c2.register_command(name, handler) end
 --- Registers a callback to be invoked when completions for a term are requested.
 ---
 ---@param type "CompletionRequested"
----@param func fun(query: string, full_text_content: string, cursor_position: integer, is_first_word: boolean): CompletionList The callback to be invoked.
+---@param func fun(event: CompletionEvent): CompletionList The callback to be invoked.
 function c2.register_callback(type, func) end
 
 --- Writes a message to the Chatterino log.
 ---
----@param level LogLevel The desired level.
+---@param level c2.LogLevel The desired level.
 ---@param ... any Values to log. Should be convertible to a string with `tostring()`.
 function c2.log(level, ...) end
 

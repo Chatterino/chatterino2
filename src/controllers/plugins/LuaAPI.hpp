@@ -106,7 +106,7 @@ int c2_register_callback(lua_State *L);
 /**
  * Writes a message to the Chatterino log.
  *
- * @lua@param level LogLevel The desired level.
+ * @lua@param level c2.LogLevel The desired level.
  * @lua@param ... any Values to log. Should be convertible to a string with `tostring()`.
  * @exposed c2.log
  */
