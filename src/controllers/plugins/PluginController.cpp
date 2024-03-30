@@ -433,8 +433,12 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
             qCDebug(chatterinoLua)
                 << "Processing custom completions from plugin" << name;
             auto &cb = *opt;
-            auto errOrList =
-                cb(query, fullTextContent, cursorPosition, isFirstWord);
+            auto errOrList = cb(lua::api::CompletionEvent{
+                .query = query,
+                .full_text_content = fullTextContent,
+                .cursor_position = cursorPosition,
+                .is_first_word = isFirstWord,
+            });
             if (std::holds_alternative<int>(errOrList))
             {
                 guard.handled();
