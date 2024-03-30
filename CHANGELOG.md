@@ -186,7 +186,7 @@
 - Dev: Added signal to invalidate paint buffers of channel views without forcing a relayout. (#5123)
 - Dev: Specialize `Atomic<std::shared_ptr<T>>` if underlying standard library supports it. (#5133)
 - Dev: Added the `developer_name` field to the Linux AppData specification. (#5138)
-- Dev: Twitch messages can be sent using Twitch's Helix API instead of IRC (disabled by default). (#5200)
+- Dev: Twitch messages can be sent using Twitch's Helix API instead of IRC (disabled by default). (#5200, #5276)
 - Dev: Added estimation for image sizes to avoid layout shifts. (#5192)
 - Dev: Added the `launachable` entry to Linux AppData. (#5210)
 - Dev: Cleaned up and optimized resources. (#5222)
