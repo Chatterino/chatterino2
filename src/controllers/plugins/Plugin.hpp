@@ -98,8 +98,8 @@ public:
 
     // Note: The CallbackFunction object's destructor will remove the function from the lua stack
     using LuaCompletionCallback =
-        lua::CallbackFunction<lua::api::CompletionList, QString, QString, int,
-                              bool>;
+        lua::CallbackFunction<lua::api::CompletionList,
+                              lua::api::CompletionEvent>;
     std::optional<LuaCompletionCallback> getCompletionCallback()
     {
         if (this->state_ == nullptr || !this->error_.isNull())
@@ -123,7 +123,7 @@ public:
 
         // move
         return std::make_optional<lua::CallbackFunction<
-            lua::api::CompletionList, QString, QString, int, bool>>(
+            lua::api::CompletionList, lua::api::CompletionEvent>>(
             this->state_, lua_gettop(this->state_));
     }
 
