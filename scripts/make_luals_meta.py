@@ -12,20 +12,18 @@ It assumes comments look like:
 - Do not have any useful info on '/**' and '*/' lines.
 - Class members are not allowed to have non-@command lines and commands different from @lua@field
 
-Any lines not matching the commands are ignored
+Only entire comment blocks are used. One comment block can describe at most one
+entity (function/class/enum). Blocks without commands are ignored.
 
 Valid commands are:
 1. @exposeenum [dotted.name.in_lua.last_part]
     Define a table with keys of the enum. Values behind those keys aren't
     written on purpose.
-2. @lua@class [classname]
-    Defines a new class
-    2.1 @lua@field [type] [name] [description]
-        Defines a field inside the class. Wrapping for the description is not supported
-    2.2 @exposed [classname]:[name]
-        Defines a method on a class (the prefix must be included).
-3. @exposed [c2.name]
-    Defines a function definition line from the last `@lua@param`s.
+2. @exposed [c2.name]
+    Generates a function definition line from the last `@lua@param`s.
+3. @lua[@command]
+    Writes [@command] to the file as a comment, usually this is @class, @param, @return, ...
+    @lua@class and @lua@field have special treatment when it comes to generation of spacing new lines
 
 Non-command lines of comments are written with a space after '---'
 """
@@ -113,7 +111,7 @@ class Reader:
         # find the start
         while (line := self.next_line()) is not None and not is_comment_start(line):
             pass
-        if not self.has_next():
+        if line is None:
             return None
 
         stripped = strip_line(line)
@@ -219,7 +217,8 @@ def write_func(path: Path, line: int, comments: list[str], out: TextIOWrapper):
         panic(path, line, f"Invalid function exposure - got '{comments[-1]}'")
     name = comments[-1].split(" ", 1)[1]
     printmsg(path, line, f"function {name}")
-    out.write(f"function {name}({", ".join(params)}) end\n\n")
+    lua_params = ", ".join(params)
+    out.write(f"function {name}({lua_params}) end\n\n")
 
 
 def read_file(path: Path, out: TextIOWrapper):
@@ -328,6 +327,7 @@ def read_file(path: Path, out: TextIOWrapper):
             continue
 
 
-with lua_meta.open("w") as output:
-    output.write(BOILERPLATE[1:])  # skip the newline after triple quote
-    read_file(lua_api_file, output)
+if __name__ == "__main__":
+    with lua_meta.open("w") as output:
+        output.write(BOILERPLATE[1:])  # skip the newline after triple quote
+        read_file(lua_api_file, output)
