@@ -104,6 +104,7 @@
 - Bugfix: Fixed popup windows not persisting between restarts. (#5081)
 - Bugfix: Fixed splits not retaining their focus after minimizing. (#5080)
 - Bugfix: Fixed _Copy message_ copying the channel name in global search. (#5106)
+- Bugfix: Fixed some Twitch emotes sizes being wrong at certain zoom levels. (#5279)
 - Bugfix: Fixed a missing space when the image uploader provided a delete link. (#5269)
 - Bugfix: Reply contexts now use the color of the replied-to message. (#5145)
 - Bugfix: Fixed top-level window getting stuck after opening settings. (#5161, #5166)
