@@ -180,7 +180,7 @@
 - Dev: Added the ability to show `ChannelView`s without a `Split`. (#4747)
 - Dev: Refactor Args to be less of a singleton. (#5041)
 - Dev: Channels without any animated elements on screen will skip updates from the GIF timer. (#5042, #5043, #5045)
-- Dev: Autogenerate docs/plugin-meta.lua. (#5055)
+- Dev: Autogenerate docs/plugin-meta.lua. (#5055, #5283)
 - Dev: Changed Ubuntu & AppImage builders to statically link Qt. (#5151)
 - Dev: Refactor `NetworkPrivate`. (#5063)
 - Dev: Refactor `Paths` & `Updates`, focusing on reducing their singletoniability. (#5092, #5102)
