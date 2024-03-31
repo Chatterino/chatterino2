@@ -185,7 +185,7 @@ AboutPage::AboutPage()
 
                 if (contributorParts.size() != 3)
                 {
-                    qCDebug(chatterinoWidget)
+                    qCWarning(chatterinoWidget)
                         << "Missing parts in line" << line;
                     continue;
                 }
