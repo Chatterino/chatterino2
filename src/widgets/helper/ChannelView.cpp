@@ -782,6 +782,7 @@ void ChannelView::clearMessages()
     this->scrollBar_->setMaximum(0);
     this->scrollBar_->setMinimum(0);
     this->queueLayout();
+    this->update();
 
     this->lastMessageHasAlternateBackground_ = false;
     this->lastMessageHasAlternateBackgroundReverse_ = true;
