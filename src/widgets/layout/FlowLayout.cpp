@@ -181,13 +181,13 @@ int FlowLayout::doLayout(const QRect &rect, bool testOnly) const
             continue;
         }
 
-        auto [spaceX, spaceY] = this->getSpacing(item);
-        int nextX = x + item->sizeHint().width() + spaceX;
-        if (nextX - spaceX > effectiveRect.right() && lineHeight > 0)
+        auto space = this->getSpacing(item);
+        int nextX = x + item->sizeHint().width() + space.width();
+        if (nextX - space.width() > effectiveRect.right() && lineHeight > 0)
         {
             x = effectiveRect.x();
-            y = y + lineHeight + spaceY;
-            nextX = x + item->sizeHint().width() + spaceX;
+            y = y + lineHeight + space.height();
+            nextX = x + item->sizeHint().width() + space.width();
             lineHeight = 0;
         }
 
