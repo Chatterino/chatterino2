@@ -904,7 +904,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                           toggleLocalr9kShortcut + ".");
     layout.addCheckbox("Hide similar messages", s.similarityEnabled);
     //layout.addCheckbox("Gray out matches", s.colorSimilarDisabled);
-    layout.addCheckbox("By the same user", s.hideSimilarBySameUser);
+    layout.addCheckbox(
+        "By the same user", s.hideSimilarBySameUser, false,
+        "When checked, messages that are very similar to each other can still "
+        "be sent as long as they're sent by different users.");
     layout.addCheckbox("Hide my own messages", s.hideSimilarMyself);
     layout.addCheckbox("Receive notification sounds from hidden messages",
                        s.shownSimilarTriggerHighlights);
@@ -920,7 +923,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         [](auto args) {
             return fuzzyToFloat(args.value, 0.9f);
-        });
+        },
+        true,
+        "A value of 0.9 means the messages need to be 90% similar to be marked "
+        "as similar.");
     layout.addDropdown<int>(
         "Maximum delay between messages",
         {"5s", "10s", "15s", "30s", "60s", "120s"}, s.hideSimilarMaxDelay,
@@ -929,7 +935,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         [](auto args) {
             return fuzzyToInt(args.value, 5);
-        });
+        },
+        true,
+        "A value of 5s means if there's a 5s break inbetween messages, we will "
+        "stop looking further through the messages for similarities.");
     layout.addDropdown<int>(
         "Amount of previous messages to check", {"1", "2", "3", "4", "5"},
         s.hideSimilarMaxMessagesToCheck,
