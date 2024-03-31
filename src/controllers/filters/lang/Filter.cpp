@@ -50,6 +50,9 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
      * message.content
      * message.length
      *
+     * reward.title
+     * reward.cost
+     * reward.id
      */
 
     using MessageFlag = chatterino::MessageFlag;
