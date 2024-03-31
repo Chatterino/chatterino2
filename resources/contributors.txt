@@ -23,7 +23,7 @@ dnsge | https://github.com/dnsge |
 Felanbird | https://github.com/Felanbird |
 kornes | https://github.com/kornes |
 
-@header Contibutors
+@header Contributors
 
 Cranken | https://github.com/Cranken |
 hemirt | https://github.com/hemirt |
