@@ -176,7 +176,7 @@ AboutPage::AboutPage()
                     }
                     auto *label = new QLabel(QStringLiteral("<h1>%1</h1>")
                                                  .arg(line.mid(8).trimmed()));
-                    l->addWidget(label);
+                    l->addWidget(label, FlowLayout::Flag::IgnoreColumnAlign);
                     l->addLinebreak(8);
                     continue;
                 }
@@ -207,7 +207,7 @@ AboutPage::AboutPage()
                     if (avatarUrl.isEmpty())
                     {
                         // TODO: or anon.png
-                        avatarPixmap.load(":/avatars/anon2.png");
+                        avatarPixmap.load(":/avatars/anon.png");
                     }
                     else
                     {
