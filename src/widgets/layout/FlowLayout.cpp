@@ -1,5 +1,10 @@
 #include "widgets/layout/FlowLayout.hpp"
 
+#include <QSizePolicy>
+#include <QStyle>
+#include <QtGlobal>
+#include <QWidget>
+
 namespace {
 
 using namespace chatterino;
