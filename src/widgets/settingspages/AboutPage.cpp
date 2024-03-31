@@ -176,7 +176,7 @@ AboutPage::AboutPage()
                     }
                     auto *label = new QLabel(QStringLiteral("<h1>%1</h1>")
                                                  .arg(line.mid(8).trimmed()));
-                    l->addWidget(label, FlowLayout::Flag::IgnoreColumnAlign);
+                    l->addWidget(label);
                     l->addLinebreak(8);
                     continue;
                 }
