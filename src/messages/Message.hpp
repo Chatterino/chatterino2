@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
+#include "providers/twitch/ChannelPointReward.hpp"
 #include "util/QStringHash.hpp"
 
 #include <magic_enum/magic_enum.hpp>
@@ -106,9 +107,10 @@ struct Message {
     MessagePtr replyParent;
     uint32_t count = 1;
     std::vector<std::unique_ptr<MessageElement>> elements;
-    std::vector<QString> seventvEventTargetEmotes;
 
     ScrollbarHighlight getScrollBarHighlight() const;
+
+    std::shared_ptr<ChannelPointReward> reward = nullptr;
 
     /**
      * Clones this message. Before contructing the shared pointer, 

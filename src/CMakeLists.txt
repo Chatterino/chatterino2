@@ -675,6 +675,9 @@ set(SOURCE_FILES
         widgets/helper/TitlebarButtons.cpp
         widgets/helper/TitlebarButtons.hpp
 
+        widgets/layout/FlowLayout.cpp
+        widgets/layout/FlowLayout.hpp
+
         widgets/listview/GenericItemDelegate.cpp
         widgets/listview/GenericItemDelegate.hpp
         widgets/listview/GenericListItem.cpp

@@ -35,7 +35,11 @@ static const QMap<QString, QString> validIdentifiersMap = {
     {"flags.restricted", "restricted message?"},
     {"flags.monitored", "monitored message?"},
     {"message.content", "message text"},
-    {"message.length", "message length"}};
+    {"message.length", "message length"},
+    {"reward.title", "point reward title"},
+    {"reward.cost", "point reward cost"},
+    {"reward.id", "point reward id"},
+};
 
 // clang-format off
 static const QRegularExpression tokenRegex(

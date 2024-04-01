@@ -50,3 +50,4 @@ PointerBindsToType: false
 SpacesBeforeTrailingComments: 2
 Standard: Auto
 ReflowComments: false
+InsertNewlineAtEOF: true

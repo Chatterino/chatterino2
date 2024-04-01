@@ -3,80 +3,89 @@
 # TODO: Parse this into a CONTRIBUTORS.md too
 
 # Adding yourself? Copy and paste this template at the bottom of this file and fill in the fields in a PR!
-# Name | Link | Avatar (Loaded as a resource, avatars are not required) | Title (description of work done).
+# Name | Link | Avatar (Loaded as a resource, avatars are not required).
 
 # Avatar should be located in avatars/ directory. Its size should be 128x128 (get it from https://github.com/username.png?size=128).
 # Make sure to reduce avatar's size as much as possible with tool like pngcrush or optipng (if the file is in png format).
 # Contributor is what we use for someone who has contributed in general (like sent a programming-related PR).
 
-fourtf | https://fourtf.com | :/avatars/fourtf.png | Author, main developer
-pajlada | https://pajlada.se | :/avatars/pajlada.png | Collaborator, co-developer
-zneix | https://github.com/zneix | :/avatars/zneix.png | Collaborator
-Mm2PL | https://github.com/mm2pl | :/avatars/mm2pl.png | Collaborator
-YungLPR | https://github.com/leon-richardt | | Collaborator
-dnsge | https://github.com/dnsge | | Collaborator
-Felanbird | https://github.com/Felanbird | | Collaborator
-kornes | https://github.com/kornes | | Collaborator
+@header Maintainers
 
-Cranken | https://github.com/Cranken | | Contributor
-hemirt | https://github.com/hemirt | | Contributor
-LajamerrMittesdine | https://github.com/LajamerrMittesdine | | Contributor
-coral | https://github.com/coral |  | Contributor, design
-apa420 | https://github.com/apa420 |  | Contributor
-DatGuy1 | https://github.com/DatGuy1 |  | Contributor
-Confuseh | https://github.com/Confuseh |  | Contributor
-ch-ems | https://github.com/ch-ems |  | Contributor
-Bur0k | https://github.com/Bur0k |  | Contributor
-nuuls | https://github.com/nuuls |  | Contributor
-Chronophylos | https://github.com/Chronophylos |  | Contributor
-Ckath | https://github.com/Ckath |  | Contributor
-matijakevic | https://github.com/matijakevic |  | Contributor
-nforro | https://github.com/nforro |  | Contributor
-vanolpfan | https://github.com/vanolpfan |  | Contributor
-23rd | https://github.com/23rd |  | Contributor
-machgo | https://github.com/machgo |  | Contributor
-TranRed | https://github.com/TranRed |  | Contributor
-RAnders00 | https://github.com/RAnders00 | | Contributor
-gempir | https://github.com/gempir | | Contributor
-mfmarlow | https://github.com/mfmarlow | | Contributor
-y0dax | https://github.com/y0dax | | Contributor
-Iulian Onofrei | https://github.com/revolter | :/avatars/revolter.jpg | Contributor
-matthewde | https://github.com/m4tthewde | :/avatars/matthewde.jpg | Contributor
-Karar Al-Remahy | https://github.com/KararTY | :/avatars/kararty.png | Contributor
-Talen | https://github.com/talneoran | | Contributor
-SLCH | https://github.com/SLCH | :/avatars/slch.png | Contributor
-ALazyMeme | https://github.com/alazymeme | :/avatars/alazymeme.png | Contributor
-xHeaveny_ | https://github.com/xHeaveny | :/avatars/xheaveny.png | Contributor
-1xelerate | https://github.com/xel86 | :/avatars/_1xelerate.png | Contributor
-acdvs | https://github.com/acdvs | | Contributor
-karl-police | https://github.com/karl-police | :/avatars/karlpolice.png | Contributor
-brian6932 | https://github.com/brian6932 | :/avatars/brian6932.png | Contributor
-hicupalot | https://github.com/hicupalot | :/avatars/hicupalot.png | Contributor
-iProdigy | https://github.com/iProdigy | :/avatars/iprodigy.png | Contributor
-Jaxkey | https://github.com/Jaxkey | :/avatars/jaxkey.png | Contributor
-Explooosion | https://github.com/Explooosion-code | :/avatars/explooosion_code.png | Contributor
-mohad12211 | https://github.com/mohad12211 | :/avatars/mohad12211.png | Contributor
-Wissididom | https://github.com/Wissididom | :/avatars/wissididom.png | Contributor
-03y | https://github.com/03y | | Contributor
-ScrubN | https://github.com/ScrubN | | Contributor
-Cyclone | https://github.com/PsycloneTM | :/avatars/cyclone.png | Contributor
-2547techno | https://github.com/2547techno | :/avatars/techno.png | Contributor
-ZonianMidian | https://github.com/ZonianMidian | :/avatars/zonianmidian.png | Contributor
-olafyang | https://github.com/olafyang | | Contributor
-chrrs | https://github.com/chrrs | | Contributor
-4rneee | https://github.com/4rneee | | Contributor
-crazysmc | https://github.com/crazysmc | :/avatars/crazysmc.png | Contributor
-SputNikPlop | https://github.com/SputNikPlop | | Contributor
-fraxx | https://github.com/fraxxio | :/avatars/fraxx.png | Contributor
-KleberPF | https://github.com/KleberPF | | Contributor
+fourtf | https://fourtf.com | :/avatars/fourtf.png
+pajlada | https://pajlada.se | :/avatars/pajlada.png
+
+@header Collaborators
+
+zneix | https://github.com/zneix | :/avatars/zneix.png
+Mm2PL | https://github.com/mm2pl | :/avatars/mm2pl.png
+YungLPR | https://github.com/leon-richardt |
+dnsge | https://github.com/dnsge |
+Felanbird | https://github.com/Felanbird |
+kornes | https://github.com/kornes |
+
+@header Contributors
+
+Cranken | https://github.com/Cranken |
+hemirt | https://github.com/hemirt |
+LajamerrMittesdine | https://github.com/LajamerrMittesdine |
+coral | https://github.com/coral |
+apa420 | https://github.com/apa420 |
+DatGuy1 | https://github.com/DatGuy1 |
+Confuseh | https://github.com/Confuseh |
+ch-ems | https://github.com/ch-ems |
+Bur0k | https://github.com/Bur0k |
+nuuls | https://github.com/nuuls |
+Chronophylos | https://github.com/Chronophylos | 
+Ckath | https://github.com/Ckath |
+matijakevic | https://github.com/matijakevic |
+nforro | https://github.com/nforro |
+vanolpfan | https://github.com/vanolpfan |
+23rd | https://github.com/23rd |
+machgo | https://github.com/machgo |
+TranRed | https://github.com/TranRed |
+RAnders00 | https://github.com/RAnders00 |
+gempir | https://github.com/gempir |
+mfmarlow | https://github.com/mfmarlow |
+y0dax | https://github.com/y0dax |
+Iulian Onofrei | https://github.com/revolter | :/avatars/revolter.jpg
+matthewde | https://github.com/m4tthewde | :/avatars/matthewde.jpg
+Karar Al-Remahy | https://github.com/KararTY | :/avatars/kararty.png
+Talen | https://github.com/talneoran |
+SLCH | https://github.com/SLCH | :/avatars/slch.png
+ALazyMeme | https://github.com/alazymeme | :/avatars/alazymeme.png
+xHeaveny_ | https://github.com/xHeaveny | :/avatars/xheaveny.png
+1xelerate | https://github.com/xel86 | :/avatars/_1xelerate.png
+acdvs | https://github.com/acdvs |
+karl-police | https://github.com/karl-police | :/avatars/karlpolice.png
+brian6932 | https://github.com/brian6932 | :/avatars/brian6932.png
+hicupalot | https://github.com/hicupalot | :/avatars/hicupalot.png
+iProdigy | https://github.com/iProdigy | :/avatars/iprodigy.png
+Jaxkey | https://github.com/Jaxkey | :/avatars/jaxkey.png
+Explooosion | https://github.com/Explooosion-code | :/avatars/explooosion_code.png
+mohad12211 | https://github.com/mohad12211 | :/avatars/mohad12211.png
+Wissididom | https://github.com/Wissididom | :/avatars/wissididom.png
+03y | https://github.com/03y |
+ScrubN | https://github.com/ScrubN |
+Cyclone | https://github.com/PsycloneTM | :/avatars/cyclone.png
+2547techno | https://github.com/2547techno | :/avatars/techno.png
+ZonianMidian | https://github.com/ZonianMidian | :/avatars/zonianmidian.png
+olafyang | https://github.com/olafyang |
+chrrs | https://github.com/chrrs |
+4rneee | https://github.com/4rneee |
+crazysmc | https://github.com/crazysmc | :/avatars/crazysmc.png
+SputNikPlop | https://github.com/SputNikPlop |
+fraxx | https://github.com/fraxxio | :/avatars/fraxx.png
+KleberPF | https://github.com/KleberPF |
 
 # If you are a contributor add yourself above this line
 
-Defman21 | https://github.com/Defman21 |  | Documentation
-vilgotf | https://github.com/vilgotf |  | Documentation
-Ian321 | https://github.com/Ian321 |  | Documentation
-Yardanico | https://github.com/Yardanico |  | Documentation
-huti26 | https://github.com/huti26 |  | Documentation
-chrisduerr | https://github.com/chrisduerr |  | Documentation
+@header Documentation
+
+Defman21 | https://github.com/Defman21 |
+vilgotf | https://github.com/vilgotf |
+Ian321 | https://github.com/Ian321 |
+Yardanico | https://github.com/Yardanico |
+huti26 | https://github.com/huti26 |
+chrisduerr | https://github.com/chrisduerr |
 
 # Otherwise add yourself right above this one

@@ -12,25 +12,26 @@ It assumes comments look like:
 - Do not have any useful info on '/**' and '*/' lines.
 - Class members are not allowed to have non-@command lines and commands different from @lua@field
 
-When this scripts sees "@brief", any further lines of the comment will be ignored
+Only entire comment blocks are used. One comment block can describe at most one
+entity (function/class/enum). Blocks without commands are ignored.
 
 Valid commands are:
 1. @exposeenum [dotted.name.in_lua.last_part]
     Define a table with keys of the enum. Values behind those keys aren't
     written on purpose.
-    This generates three lines:
-     - An type alias of [last_part] to integer,
-     - A type description that describes available values of the enum,
-     - A global table definition for the num
-2. @lua[@command]
+2. @exposed [c2.name]
+    Generates a function definition line from the last `@lua@param`s.
+3. @lua[@command]
     Writes [@command] to the file as a comment, usually this is @class, @param, @return, ...
     @lua@class and @lua@field have special treatment when it comes to generation of spacing new lines
-3. @exposed [c2.name]
-    Generates a function definition line from the last `@lua@param`s.
 
 Non-command lines of comments are written with a space after '---'
 """
+
+from io import TextIOWrapper
 from pathlib import Path
+import re
+from typing import Optional
 
 BOILERPLATE = """
 ---@meta Chatterino2
@@ -41,14 +42,6 @@ BOILERPLATE = """
 
 c2 = {}
 
----@class IWeakResource
-
---- Returns true if the channel this object points to is valid.
---- If the object expired, returns false
---- If given a non-Channel object, it errors.
----@return boolean
-function IWeakResource:is_valid() end
-
 """
 
 repo_root = Path(__file__).parent.parent
@@ -58,116 +51,274 @@ lua_meta = repo_root / "docs" / "plugin-meta.lua"
 print("Writing to", lua_meta.relative_to(repo_root))
 
 
-def process_file(target, out):
-    print("Reading from", target.relative_to(repo_root))
-    with target.open("r") as f:
+def strip_line(line: str):
+    return re.sub(r"^/\*\*|^\*|\*/$", "", line).strip()
+
+
+def is_comment_start(line: str):
+    return line.startswith("/**")
+
+
+def is_enum_class(line: str):
+    return line.startswith("enum class")
+
+
+def is_class(line: str):
+    return line.startswith(("class", "struct"))
+
+
+class Reader:
+    lines: list[str]
+    line_idx: int
+
+    def __init__(self, lines: list[str]) -> None:
+        self.lines = lines
+        self.line_idx = 0
+
+    def line_no(self) -> int:
+        """Returns the current line number (starting from 1)"""
+        return self.line_idx + 1
+
+    def has_next(self) -> bool:
+        """Returns true if there are lines left to read"""
+        return self.line_idx < len(self.lines)
+
+    def peek_line(self) -> Optional[str]:
+        """Reads the line the cursor is at"""
+        if self.has_next():
+            return self.lines[self.line_idx].strip()
+        return None
+
+    def next_line(self) -> Optional[str]:
+        """Consumes and returns one line"""
+        if self.has_next():
+            self.line_idx += 1
+            return self.lines[self.line_idx - 1].strip()
+        return None
+
+    def next_doc_comment(self) -> Optional[list[str]]:
+        """Reads a documentation comment (/** ... */) and advances the cursor"""
+        lines = []
+        # find the start
+        while (line := self.next_line()) is not None and not is_comment_start(line):
+            pass
+        if line is None:
+            return None
+
+        stripped = strip_line(line)
+        if stripped:
+            lines.append(stripped)
+
+        if stripped.endswith("*/"):
+            return lines if lines else None
+
+        while (line := self.next_line()) is not None:
+            if line.startswith("*/"):
+                break
+
+            stripped = strip_line(line)
+            if not stripped:
+                continue
+
+            if stripped.startswith("@"):
+                lines.append(stripped)
+                continue
+
+            if not lines:
+                lines.append(stripped)
+            else:
+                lines[-1] += "\n--- " + stripped
+
+        return lines if lines else None
+
+    def read_class_body(self) -> list[list[str]]:
+        """The reader must be at the first line of the class/struct body. All comments inside the class are returned."""
+        items = []
+        while (line := self.peek_line()) is not None:
+            if line.startswith("};"):
+                self.next_line()
+                break
+            if not is_comment_start(line):
+                self.next_line()
+                continue
+            doc = self.next_doc_comment()
+            if not doc:
+                break
+            items.append(doc)
+        return items
+
+    def read_enum_variants(self) -> list[str]:
+        """The reader must be before an enum class definition (possibly with some comments before). It returns all variants."""
+        items = []
+        is_comment = False
+        while (line := self.peek_line()) is not None and not line.startswith("};"):
+            self.next_line()
+            if is_comment:
+                if line.endswith("*/"):
+                    is_comment = False
+                continue
+            if line.startswith("/*"):
+                is_comment = True
+                continue
+            if line.startswith("//"):
+                continue
+            if line.endswith("};"):  # oneline declaration
+                opener = line.find("{") + 1
+                closer = line.find("}")
+                items = [
+                    line.split("=", 1)[0].strip()
+                    for line in line[opener:closer].split(",")
+                ]
+                break
+            if line.startswith("enum class"):
+                continue
+
+            items.append(line.rstrip(","))
+
+        return items
+
+
+def finish_class(out, name):
+    out.write(f"{name} = {{}}\n")
+
+
+def printmsg(path: Path, line: int, message: str):
+    print(f"{path.relative_to(repo_root)}:{line} {message}")
+
+
+def panic(path: Path, line: int, message: str):
+    printmsg(path, line, message)
+    exit(1)
+
+
+def write_func(path: Path, line: int, comments: list[str], out: TextIOWrapper):
+    if not comments[0].startswith("@"):
+        out.write(f"--- {comments[0]}\n---\n")
+        comments = comments[1:]
+    params = []
+    for comment in comments[:-1]:
+        if not comment.startswith("@lua"):
+            panic(path, line, f"Invalid function specification - got '{comment}'")
+        if comment.startswith("@lua@param"):
+            params.append(comment.split(" ", 2)[1])
+
+        out.write(f"---{comment.removeprefix('@lua')}\n")
+
+    if not comments[-1].startswith("@exposed "):
+        panic(path, line, f"Invalid function exposure - got '{comments[-1]}'")
+    name = comments[-1].split(" ", 1)[1]
+    printmsg(path, line, f"function {name}")
+    lua_params = ", ".join(params)
+    out.write(f"function {name}({lua_params}) end\n\n")
+
+
+def read_file(path: Path, out: TextIOWrapper):
+    print("Reading", path.relative_to(repo_root))
+    with path.open("r") as f:
         lines = f.read().splitlines()
 
-    # Are we in a doc comment?
-    comment: bool = False
-    # This is set when @brief is encountered, making the rest of the comment be
-    # ignored
-    ignore_this_comment: bool = False
-
-    # Last `@lua@param`s seen - for @exposed generation
-    last_params_names: list[str] = []
-    # Are we in a `@lua@class` definition? - makes newlines around @lua@class and @lua@field prettier
-    is_class = False
-
-    # The name of the next enum in lua world
-    expose_next_enum_as: str | None = None
-    # Name of the current enum in c++ world, used to generate internal typenames for
-    current_enum_name: str | None = None
-    for line_num, line in enumerate(lines):
-        line = line.strip()
-        loc = f'{target.relative_to(repo_root)}:{line_num}'
-        if line.startswith("enum class "):
-            line = line.removeprefix("enum class ")
-            temp = line.split(" ", 2)
-            current_enum_name = temp[0]
-            if not expose_next_enum_as:
-                print(
-                    f"{loc} Skipping enum {current_enum_name}, there wasn't a @exposeenum command"
-                )
-                current_enum_name = None
+    reader = Reader(lines)
+    while reader.has_next():
+        doc_comment = reader.next_doc_comment()
+        if not doc_comment:
+            break
+        header_comment = None
+        if not doc_comment[0].startswith("@"):
+            if len(doc_comment) == 1:
                 continue
-            current_enum_name = expose_next_enum_as.split(".", 1)[-1]
-            out.write("---@alias " + current_enum_name + " integer\n")
-            out.write("---@type { ")
-            # temp[1] is '{'
-            if len(temp) == 2:  # no values on this line
-                continue
-            line = temp[2]
-
-        if current_enum_name is not None:
-            for i, tok in enumerate(line.split(" ")):
-                if tok == "};":
-                    break
-                entry = tok.removesuffix(",")
-                if i != 0:
-                    out.write(", ")
-                out.write(entry + ": " + current_enum_name)
-            out.write(" }\n" f"{expose_next_enum_as} = {{}}\n")
-            print(f"{loc} Wrote enum {expose_next_enum_as} => {current_enum_name}")
-            current_enum_name = None
-            expose_next_enum_as = None
-            continue
-
-        if line.startswith("/**"):
-            comment = True
-            continue
-        elif "*/" in line:
-            comment = False
-            ignore_this_comment = False
-
-            if not is_class:
-                out.write("\n")
-            continue
-        if not comment:
-            continue
-        if ignore_this_comment:
-            continue
-        line = line.replace("*", "", 1).lstrip()
-        if line == "":
-            out.write("---\n")
-        elif line.startswith('@brief '):
-            # Doxygen comment, on a C++ only method
-            ignore_this_comment = True
-        elif line.startswith("@exposeenum "):
-            expose_next_enum_as = line.split(" ", 1)[1]
-        elif line.startswith("@exposed "):
-            exp = line.replace("@exposed ", "", 1)
-            params = ", ".join(last_params_names)
-            out.write(f"function {exp}({params}) end\n")
-            print(f"{loc} Wrote function {exp}(...)")
-            last_params_names = []
-        elif line.startswith("@includefile "):
-            filename = line.replace("@includefile ", "", 1)
-            output.write(f"-- Now including data from src/{filename}.\n")
-            process_file(repo_root / 'src' / filename, output)
-            output.write(f'-- Back to {target.relative_to(repo_root)}.\n')
-        elif line.startswith("@lua"):
-            command = line.replace("@lua", "", 1)
-            if command.startswith("@param"):
-                last_params_names.append(command.split(" ", 2)[1])
-            elif command.startswith("@class"):
-                print(f"{loc} Writing {command}")
-                if is_class:
-                    out.write("\n")
-                is_class = True
-            elif not command.startswith("@field"):
-                is_class = False
-
-            out.write("---" + command + "\n")
+            header_comment = doc_comment[0]
+            header = doc_comment[1:]
         else:
-            if is_class:
-                is_class = False
+            header = doc_comment
+
+        # include block
+        if header[0].startswith("@includefile "):
+            for comment in header:
+                if not comment.startswith("@includefile "):
+                    panic(
+                        path,
+                        reader.line_no(),
+                        f"Invalid include block - got line '{comment}'",
+                    )
+                filename = comment.split(" ", 1)[1]
+                out.write(f"-- Begin src/{filename}\n\n")
+                read_file(repo_root / "src" / filename, out)
+                out.write(f"-- End src/{filename}\n\n")
+            continue
+
+        # enum
+        if header[0].startswith("@exposeenum "):
+            if len(header) > 1:
+                panic(
+                    path,
+                    reader.line_no(),
+                    f"Invalid enum exposure - one command expected, got {len(header)}",
+                )
+            name = header[0].split(" ", 1)[1]
+            printmsg(path, reader.line_no(), f"enum {name}")
+            out.write(f"---@alias {name} integer\n")
+            if header_comment:
+                out.write(f"--- {header_comment}\n")
+            out.write("---@type { ")
+            out.write(
+                ", ".join(
+                    [f"{variant}: {name}" for variant in reader.read_enum_variants()]
+                )
+            )
+            out.write(" }\n")
+            out.write(f"{name} = {{}}\n\n")
+            continue
+
+        # class
+        if header[0].startswith("@lua@class "):
+            name = header[0].split(" ", 1)[1]
+            classname = name.split(":")[0].strip()
+            printmsg(path, reader.line_no(), f"class {classname}")
+
+            if header_comment:
+                out.write(f"--- {header_comment}\n")
+            out.write(f"---@class {name}\n")
+            # inline class
+            if len(header) > 1:
+                for field in header[1:]:
+                    if not field.startswith("@lua@field "):
+                        panic(
+                            path,
+                            reader.line_no(),
+                            f"Invalid inline class exposure - all lines must be fields, got '{field}'",
+                        )
+                    out.write(f"---{field.removeprefix('@lua')}\n")
+                out.write("\n")
+                continue
+
+            # class definition
+            # save functions for later (print fields first)
+            funcs = []
+            for comment in reader.read_class_body():
+                if comment[-1].startswith("@exposed "):
+                    funcs.append(comment)
+                    continue
+                if len(comment) > 1 or not comment[0].startswith("@lua"):
+                    continue
+                out.write(f"---{comment[0].removeprefix('@lua')}\n")
+
+            if funcs:
+                # only define global if there are functions on the class
+                out.write(f"{classname} = {{}}\n\n")
+            else:
                 out.write("\n")
 
-            # note the space difference from the branch above
-            out.write("--- " + line + "\n")
+            for func in funcs:
+                write_func(path, reader.line_no(), func, out)
+            continue
+
+        # global function
+        if header[-1].startswith("@exposed "):
+            write_func(path, reader.line_no(), doc_comment, out)
+            continue
 
 
-with lua_meta.open("w") as output:
-    output.write(BOILERPLATE[1:])  # skip the newline after triple quote
-    process_file(lua_api_file, output)
+if __name__ == "__main__":
+    with lua_meta.open("w") as output:
+        output.write(BOILERPLATE[1:])  # skip the newline after triple quote
+        read_file(lua_api_file, output)

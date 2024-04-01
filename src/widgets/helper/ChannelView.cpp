@@ -268,6 +268,20 @@ void addHiddenContextMenuItems(QMenu *menu,
         jsonObject["searchText"] = message->searchText;
         jsonObject["messageText"] = message->messageText;
         jsonObject["flags"] = qmagicenum::enumFlagsName(message->flags.value());
+        if (message->reward)
+        {
+            QJsonObject reward;
+            reward["id"] = message->reward->id;
+            reward["title"] = message->reward->title;
+            reward["cost"] = message->reward->cost;
+            reward["isUserInputRequired"] =
+                message->reward->isUserInputRequired;
+            jsonObject["reward"] = reward;
+        }
+        else
+        {
+            jsonObject["reward"] = QJsonValue();
+        }
 
         jsonDocument.setObject(jsonObject);
 
@@ -536,6 +550,8 @@ void ChannelView::updatePauses()
         this->pauseScrollMaximumOffset_ = 0;
 
         this->queueLayout();
+        // make sure we re-render
+        this->update();
     }
     else if (std::any_of(this->pauses_.begin(), this->pauses_.end(),
                          [](auto &&value) {
@@ -560,8 +576,9 @@ void ChannelView::updatePauses()
         {
             /// Start the timer
             this->pauseEnd_ = pauseEnd;
-            this->pauseTimer_.start(
-                duration_cast<milliseconds>(pauseEnd - SteadyClock::now()));
+            auto duration =
+                duration_cast<milliseconds>(pauseEnd - SteadyClock::now());
+            this->pauseTimer_.start(std::max(duration, 0ms));
         }
     }
 }
@@ -765,6 +782,7 @@ void ChannelView::clearMessages()
     this->scrollBar_->setMaximum(0);
     this->scrollBar_->setMinimum(0);
     this->queueLayout();
+    this->update();
 
     this->lastMessageHasAlternateBackground_ = false;
     this->lastMessageHasAlternateBackgroundReverse_ = true;
