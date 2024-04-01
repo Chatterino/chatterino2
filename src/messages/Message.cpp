@@ -101,6 +101,7 @@ std::shared_ptr<const Message> Message::cloneWith(
     cloned->highlightColor = this->highlightColor;
     cloned->replyThread = this->replyThread;
     cloned->count = this->count;
+    cloned->reward = this->reward;
     std::transform(this->elements.cbegin(), this->elements.cend(),
                    std::back_inserter(cloned->elements),
                    [](const auto &element) {
