@@ -53,6 +53,7 @@
 - Minor: Add `reward.cost` `reward.id`, `reward.title` filter variables. (#5275)
 - Minor: Change Lua `CompletionRequested` handler to use an event table. (#5280)
 - Minor: Changed the layout of the about page. (#5287)
+- Minor: Add duration to multi-month sub gift messages. (#5293)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
 - Bugfix: Fixed the `/shoutout` command not working with usernames starting with @'s (e.g. `/shoutout @forsen`). (#4800)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
