@@ -527,13 +527,12 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
                 int months = monthsIt.value().toInt();
                 if (months > 1)
                 {
+                    auto plan = tags.value("msg-param-sub-plan").toString();
                     messageText =
                         QString("An anonymous user gifted %1 months of a Tier "
                                 "%2 sub to %3!")
                             .arg(QString::number(months),
-                                 tags.value("msg-param-sub-plan")
-                                     .toString()
-                                     .at(0),
+                                 plan.isEmpty() ? '1' : plan.at(0),
                                  tags.value("msg-param-recipient-display-name")
                                      .toString());
                 }
@@ -1042,13 +1041,12 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
                 int months = monthsIt.value().toInt();
                 if (months > 1)
                 {
+                    auto plan = tags.value("msg-param-sub-plan").toString();
                     messageText =
                         QString("An anonymous user gifted %1 months of a Tier "
                                 "%2 sub to %3!")
                             .arg(QString::number(months),
-                                 tags.value("msg-param-sub-plan")
-                                     .toString()
-                                     .at(0),
+                                 plan.isEmpty() ? '1' : plan.at(0),
                                  tags.value("msg-param-recipient-display-name")
                                      .toString());
                 }
