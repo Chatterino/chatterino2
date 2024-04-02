@@ -53,6 +53,8 @@ const QSet<QString> SPECIAL_MESSAGE_TYPES{
     "viewermilestone",  // watch streak, but other categories possible in future
 };
 
+const QString ANONYMOUS_GIFTER_ID = "274598607";
+
 MessagePtr generateBannedMessage(bool confirmedBan)
 {
     const auto linkColor = MessageColor(MessageColor::Link);
@@ -516,7 +518,8 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
         {
             messageText = "Announcement";
         }
-        else if (msgType == "subgift")
+        else if (msgType == "subgift" &&
+                 ANONYMOUS_GIFTER_ID == tags.value("user-id").toString())
         {
             if (auto monthsIt = tags.find("msg-param-gift-months");
                 monthsIt != tags.end())
@@ -525,9 +528,9 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
                 if (months > 1)
                 {
                     messageText =
-                        QString("%1 gifted %2 months of a Tier %3 sub to %4!")
-                            .arg(tags.value("display-name").toString(),
-                                 QString::number(months),
+                        QString("An anonymous user gifted %1 months of a Tier "
+                                "%2 sub to %3!")
+                            .arg(QString::number(months),
                                  tags.value("msg-param-sub-plan")
                                      .toString()
                                      .at(0),
@@ -1030,7 +1033,8 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
         {
             messageText = "Announcement";
         }
-        else if (msgType == "subgift")
+        else if (msgType == "subgift" &&
+                 ANONYMOUS_GIFTER_ID == tags.value("user-id").toString())
         {
             if (auto monthsIt = tags.find("msg-param-gift-months");
                 monthsIt != tags.end())
@@ -1039,9 +1043,9 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
                 if (months > 1)
                 {
                     messageText =
-                        QString("%1 gifted %2 months of a Tier %3 sub to %4!")
-                            .arg(tags.value("display-name").toString(),
-                                 QString::number(months),
+                        QString("An anonymous user gifted %1 months of a Tier "
+                                "%2 sub to %3!")
+                            .arg(QString::number(months),
                                  tags.value("msg-param-sub-plan")
                                      .toString()
                                      .at(0),
