@@ -516,6 +516,26 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
         {
             messageText = "Announcement";
         }
+        else if (msgType == "subgift")
+        {
+            if (auto monthsIt = tags.find("msg-param-gift-months");
+                monthsIt != tags.end())
+            {
+                int months = monthsIt.value().toInt();
+                if (months > 1)
+                {
+                    messageText =
+                        QString("%1 gifted %2 months of a Tier %3 sub to %4!")
+                            .arg(tags.value("display-name").toString(),
+                                 QString::number(months),
+                                 tags.value("msg-param-sub-plan")
+                                     .toString()
+                                     .at(0),
+                                 tags.value("msg-param-recipient-display-name")
+                                     .toString());
+                }
+            }
+        }
 
         auto b = MessageBuilder(systemMessage, parseTagString(messageText),
                                 calculateMessageTime(message).time());
@@ -1009,6 +1029,26 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
         else if (msgType == "announcement")
         {
             messageText = "Announcement";
+        }
+        else if (msgType == "subgift")
+        {
+            if (auto monthsIt = tags.find("msg-param-gift-months");
+                monthsIt != tags.end())
+            {
+                int months = monthsIt.value().toInt();
+                if (months > 1)
+                {
+                    messageText =
+                        QString("%1 gifted %2 months of a Tier %3 sub to %4!")
+                            .arg(tags.value("display-name").toString(),
+                                 QString::number(months),
+                                 tags.value("msg-param-sub-plan")
+                                     .toString()
+                                     .at(0),
+                                 tags.value("msg-param-recipient-display-name")
+                                     .toString());
+                }
+            }
         }
 
         auto b = MessageBuilder(systemMessage, parseTagString(messageText),
