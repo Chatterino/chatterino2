@@ -150,7 +150,7 @@ void SharedMessageBuilder::parseUsername()
 
 void SharedMessageBuilder::parseHighlights()
 {
-    if (getSettings()->isBlacklistedUser(this->ircMessage->nick()))
+    if (getSettings()->isBlacklistedUser(this->message().loginName))
     {
         // Do nothing. We ignore highlights from this user.
         return;
@@ -158,7 +158,7 @@ void SharedMessageBuilder::parseHighlights()
 
     auto badges = SharedMessageBuilder::parseBadgeTag(this->tags);
     auto [highlighted, highlightResult] = getIApp()->getHighlights()->check(
-        this->args, badges, this->ircMessage->nick(), this->originalMessage_,
+        this->args, badges, this->message().loginName, this->originalMessage_,
         this->message().flags);
 
     if (!highlighted)
