@@ -24,15 +24,19 @@ void NetworkManager::deinit()
     assert(NetworkManager::workerThread);
     assert(NetworkManager::accessManager);
 
+    // delete the access manager first:
+    // - put the event on the worker thread
+    // - wait for it to process
+    NetworkManager::accessManager->deleteLater();
+    NetworkManager::accessManager = nullptr;
+
     if (NetworkManager::workerThread)
     {
         NetworkManager::workerThread->quit();
         NetworkManager::workerThread->wait();
     }
 
-    delete NetworkManager::accessManager;
-    NetworkManager::accessManager = nullptr;
-    delete NetworkManager::workerThread;
+    NetworkManager::workerThread->deleteLater();
     NetworkManager::workerThread = nullptr;
 }
 
