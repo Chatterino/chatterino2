@@ -37,6 +37,7 @@
 #include <QCheckBox>
 #include <QDesktopServices>
 #include <QFile>
+#include <QMovie>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QPointer>
@@ -269,9 +270,10 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
     // first line
     auto head = layout.emplace<QHBoxLayout>().withoutMargin();
     {
+        auto avatarBox = head.emplace<QVBoxLayout>().withoutMargin();
         // avatar
         auto avatar =
-            head.emplace<Button>(nullptr).assign(&this->ui_.avatarButton);
+            avatarBox.emplace<Button>(nullptr).assign(&this->ui_.avatarButton);
 
         avatar->setScaleIndependantSize(100, 100);
         avatar->setDim(Button::Dim::None);
@@ -342,6 +344,31 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                     break;
 
                     default:;
+                }
+            });
+        auto switchAv = avatarBox.emplace<EffectLabel2>(nullptr, 2)
+                            .assign(&this->ui_.switchAvatars);
+        switchAv->hide();
+        QObject::connect(
+            switchAv.getElement(), &EffectLabel2::leftClicked, [this] {
+                if (!this->seventvAvatar_)
+                {
+                    this->ui_.switchAvatars->hide();
+                    return;
+                }
+                this->isTwitchAvatarShown_ = !this->isTwitchAvatarShown_;
+                if (this->isTwitchAvatarShown_)
+                {
+                    this->seventvAvatar_->stop();
+                    this->ui_.avatarButton->setPixmap(this->avatarPixmap_);
+                    this->ui_.switchAvatars->getLabel().setText("Show 7TV");
+                }
+                else
+                {
+                    this->ui_.avatarButton->setPixmap(
+                        this->seventvAvatar_->currentPixmap());
+                    this->seventvAvatar_->start();
+                    this->ui_.switchAvatars->getLabel().setText("Show Twitch");
                 }
             });
 
@@ -994,6 +1021,7 @@ void UserInfoPopup::loadAvatar(const HelixUser &user)
 
         avatar.loadFromData(cacheFile.readAll());
         this->ui_.avatarButton->setPixmap(avatar);
+        this->avatarPixmap_ = std::move(avatar);
     }
     else
     {
@@ -1011,6 +1039,7 @@ void UserInfoPopup::loadAvatar(const HelixUser &user)
                                  avatar.loadFromData(data);
                                  this->ui_.avatarButton->setPixmap(avatar);
                                  this->saveCacheAvatar(data, filename);
+                                 this->avatarPixmap_ = std::move(avatar);
                              }
                              else
                              {
@@ -1104,6 +1133,10 @@ void UserInfoPopup::setSevenTVAvatar(const QString &filename)
     });
 
     movie->start();
+    this->seventvAvatar_ = movie;
+    this->ui_.switchAvatars->show();
+    this->ui_.switchAvatars->getLabel().setText("Show Twitch");
+    this->isTwitchAvatarShown_ = false;
 }
 
 void UserInfoPopup::saveCacheAvatar(const QByteArray &avatar,
