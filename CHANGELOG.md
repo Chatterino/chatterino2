@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+## 2.5.0-beta.1
+
 - Major: Twitch follower emotes can now be correctly tabbed in other channels when you are subscribed to the channel the emote is from. (#4922)
 - Major: Added `/automod` split to track automod caught messages across all open channels the user moderates. (#4986, #5026)
 - Major: Moderators can now see restricted chat messages and suspicious treatment updates. (#5056, #5060)
