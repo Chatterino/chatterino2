@@ -13,6 +13,7 @@
 #include "widgets/helper/ResizingTextEdit.hpp"
 
 #include <QBuffer>
+#include <QClipboard>
 #include <QHttpMultiPart>
 #include <QJsonArray>
 #include <QJsonDocument>
