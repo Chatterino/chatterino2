@@ -26,8 +26,8 @@ class ImageUploader final : public Singleton
 {
 public:
     void save() override;
-    void upload(const QMimeData *source, ChannelPtr channel,
-                QPointer<ResizingTextEdit> outputTextEdit);
+    void uploadClipboard(ChannelPtr channel,
+                         QPointer<ResizingTextEdit> outputTextEdit);
 
 private:
     void sendImageUploadRequest(RawImageData imageData, ChannelPtr channel,

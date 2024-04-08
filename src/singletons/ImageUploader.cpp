@@ -248,9 +248,17 @@ void ImageUploader::handleSuccessfulUpload(const NetworkResult &result,
     this->logToFile(originalFilePath, link, deletionLink, channel);
 }
 
-void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,
-                           QPointer<ResizingTextEdit> outputTextEdit)
+void ImageUploader::uploadClipboard(ChannelPtr channel,
+                                    QPointer<ResizingTextEdit> outputTextEdit)
 {
+    const QMimeData *source = QApplication::clipboard()->mimeData();
+    if (!source)
+    {
+        channel->addMessage(makeSystemMessage(
+            QString("Clipboard does not have a valid image.")));
+        return;
+    }
+
     if (!this->uploadMutex_.tryLock())
     {
         channel->addMessage(makeSystemMessage(
