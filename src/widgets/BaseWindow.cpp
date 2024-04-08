@@ -527,6 +527,7 @@ void BaseWindow::changeEvent(QEvent *)
 
 void BaseWindow::leaveEvent(QEvent *)
 {
+    this->leaving.invoke();
 }
 
 void BaseWindow::moveTo(QPoint point, widgets::BoundsChecking mode)
