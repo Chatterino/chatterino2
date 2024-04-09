@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: Fixed split tooltip getting stuck in some cases. (#5309)
+
 ## 2.5.0-beta.1
 
 - Major: Twitch follower emotes can now be correctly tabbed in other channels when you are subscribed to the channel the emote is from. (#4922)
