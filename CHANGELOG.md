@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Bugfix: Fixed split tooltip getting stuck in some cases. (#5309)
+- Bugfix: Fixed the version string not showing up as expected in Finder on macOS. (#5311)
 
 ## 2.5.0-beta.1
 
