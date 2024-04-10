@@ -306,7 +306,7 @@ std::pair<std::queue<RawImageData>, QString> ImageUploader::getImages(
             }
         }
 
-        return {{}, {}};
+        return {images, {}};
     };
 
     auto tryUploadDirectly =
