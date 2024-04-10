@@ -380,11 +380,14 @@ Split::Split(QWidget *parent)
 
     // this connection can be ignored since the SplitInput is owned by this Split
     std::ignore = this->input_->ui_.textEdit->imagePasted.connect(
-        [this](const QMimeData *source) {
+        [this](const QMimeData *original) {
             if (!getSettings()->imageUploaderEnabled)
             {
                 return;
             }
+
+            std::unique_ptr<const QMimeData> source =
+                getIApp()->getImageUploader()->copyMimeData(original);
 
             if (getSettings()->askOnImageUpload.getValue())
             {
@@ -428,8 +431,8 @@ Split::Split(QWidget *parent)
                 }
             }
             QPointer<ResizingTextEdit> edit = this->input_->ui_.textEdit;
-            getIApp()->getImageUploader()->upload(source, this->getChannel(),
-                                                  edit);
+            getIApp()->getImageUploader()->upload(std::move(source),
+                                                  this->getChannel(), edit);
         });
 
     getSettings()->imageUploaderEnabled.connect(

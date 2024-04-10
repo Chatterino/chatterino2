@@ -25,8 +25,13 @@ struct RawImageData {
 class ImageUploader final : public Singleton
 {
 public:
+    /**
+     * Makes a deep copy of the input QMimeData, copying the parts relevant for use in the image uploader
+     */
+    std::unique_ptr<QMimeData> copyMimeData(const QMimeData *original);
+
     void save() override;
-    void upload(const QMimeData *source, ChannelPtr channel,
+    void upload(std::unique_ptr<const QMimeData> source, ChannelPtr channel,
                 QPointer<ResizingTextEdit> outputTextEdit);
 
 private:

@@ -44,6 +44,29 @@ std::optional<QByteArray> convertToPng(const QImage &image)
 
 namespace chatterino {
 
+std::unique_ptr<QMimeData> ImageUploader::copyMimeData(
+    const QMimeData *original)
+{
+    auto copy = std::make_unique<QMimeData>();
+
+    if (original->hasUrls())
+    {
+        copy->setUrls(original->urls());
+    }
+
+    if (original->hasImage())
+    {
+        copy->setImageData(original->imageData());
+    }
+
+    for (const auto &format : original->formats())
+    {
+        copy->setData(format, original->data(format));
+    }
+
+    return copy;
+}
+
 // logging information on successful uploads to a json file
 void ImageUploader::logToFile(const QString &originalFilePath,
                               const QString &imageLink,
@@ -248,7 +271,8 @@ void ImageUploader::handleSuccessfulUpload(const NetworkResult &result,
     this->logToFile(originalFilePath, link, deletionLink, channel);
 }
 
-void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,
+void ImageUploader::upload(std::unique_ptr<const QMimeData> source,
+                           ChannelPtr channel,
                            QPointer<ResizingTextEdit> outputTextEdit)
 {
     if (!this->uploadMutex_.tryLock())
