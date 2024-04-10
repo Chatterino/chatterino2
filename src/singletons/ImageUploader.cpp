@@ -198,6 +198,11 @@ void ImageUploader::handleFailedUpload(const NetworkResult &result,
     }
 
     channel->addMessage(makeSystemMessage(errorMessage));
+    // NOTE: We abort any future uploads on failure. Should this be handled differently?
+    while (!this->uploadQueue_.empty())
+    {
+        this->uploadQueue_.pop();
+    }
     this->uploadMutex_.unlock();
 }
 
