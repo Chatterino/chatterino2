@@ -386,8 +386,19 @@ Split::Split(QWidget *parent)
                 return;
             }
 
-            std::unique_ptr<const QMimeData> source =
-                getIApp()->getImageUploader()->copyMimeData(original);
+            auto channel = this->getChannel();
+            auto *imageUploader = getIApp()->getImageUploader();
+
+            auto [images, imageProcessError] =
+                imageUploader->getImages(original);
+            if (images.empty())
+            {
+                channel->addMessage(makeSystemMessage(
+                    QString(
+                        "An error occurred trying to process your image: %1")
+                        .arg(imageProcessError)));
+                return;
+            }
 
             if (getSettings()->askOnImageUpload.getValue())
             {
@@ -430,9 +441,9 @@ Split::Split(QWidget *parent)
                     return;
                 }
             }
+
             QPointer<ResizingTextEdit> edit = this->input_->ui_.textEdit;
-            getIApp()->getImageUploader()->upload(std::move(source),
-                                                  this->getChannel(), edit);
+            imageUploader->upload(images, channel, edit);
         });
 
     getSettings()->imageUploaderEnabled.connect(

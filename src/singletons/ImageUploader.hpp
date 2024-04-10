@@ -26,12 +26,15 @@ class ImageUploader final : public Singleton
 {
 public:
     /**
-     * Makes a deep copy of the input QMimeData, copying the parts relevant for use in the image uploader
+     * Tries to get the image(s) from the given QMimeData
+     *
+     * If no images were found, the second value in the pair will contain an error message
      */
-    std::unique_ptr<QMimeData> copyMimeData(const QMimeData *original);
+    std::pair<std::queue<RawImageData>, QString> getImages(
+        const QMimeData *source) const;
 
     void save() override;
-    void upload(std::unique_ptr<const QMimeData> source, ChannelPtr channel,
+    void upload(std::queue<RawImageData> images, ChannelPtr channel,
                 QPointer<ResizingTextEdit> outputTextEdit);
 
 private:
