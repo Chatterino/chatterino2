@@ -443,7 +443,7 @@ Split::Split(QWidget *parent)
             }
 
             QPointer<ResizingTextEdit> edit = this->input_->ui_.textEdit;
-            imageUploader->upload(images, channel, edit);
+            imageUploader->upload(std::move(images), channel, edit);
         });
 
     getSettings()->imageUploaderEnabled.connect(
