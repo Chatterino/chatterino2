@@ -295,7 +295,7 @@ std::pair<std::queue<RawImageData>, QString> ImageUploader::getImages(
                             .arg(localPath),
                     };
                 }
-                images.emplace(*imageData, "png", localPath);
+                images.push({*imageData, "png", localPath});
             }
             else if (mime.inherits("image/gif"))
             {
@@ -306,7 +306,7 @@ std::pair<std::queue<RawImageData>, QString> ImageUploader::getImages(
                     return {{}, "Failed to open file :("};
                 }
                 // file.readAll() => might be a bit big but it /should/ work
-                images.emplace(file.readAll(), "gif", localPath);
+                images.push({file.readAll(), "gif", localPath});
                 file.close();
             }
         }
@@ -321,19 +321,19 @@ std::pair<std::queue<RawImageData>, QString> ImageUploader::getImages(
         if (source->hasFormat("image/png"))
         {
             // the path to file is not present every time, thus the filePath is empty
-            images.emplace(source->data("image/png"), "png", "");
+            images.push({source->data("image/png"), "png", ""});
             return {images, {}};
         }
 
         if (source->hasFormat("image/jpeg"))
         {
-            images.emplace(source->data("image/jpeg"), "jpeg", "");
+            images.push({source->data("image/jpeg"), "jpeg", ""});
             return {images, {}};
         }
 
         if (source->hasFormat("image/gif"))
         {
-            images.emplace(source->data("image/gif"), "gif", "");
+            images.push({source->data("image/gif"), "gif", ""});
             return {images, {}};
         }
 
@@ -342,7 +342,7 @@ std::pair<std::queue<RawImageData>, QString> ImageUploader::getImages(
         auto imageData = convertToPng(image);
         if (imageData)
         {
-            images.emplace(*imageData, "png", "");
+            images.push({*imageData, "png", ""});
             return {images, {}};
         }
 
