@@ -33,7 +33,6 @@ namespace chatterino {
 
 Notebook::Notebook(QWidget *parent)
     : BaseWidget(parent)
-    , menu_(this)
     , addButton_(new NotebookButton(this))
 {
     this->addButton_->setIcon(NotebookButton::Icon::Plus);
@@ -80,8 +79,6 @@ Notebook::Notebook(QWidget *parent)
         qCWarning(chatterinoApp)
             << "Notebook must be created within a BaseWindow";
     }
-
-    this->addNotebookActionsToMenu(&this->menu_);
 
     // Manually resize the add button so the initial paint uses the correct
     // width when computing the maximum width occupied per column in vertical
@@ -1125,7 +1122,14 @@ void Notebook::mousePressEvent(QMouseEvent *event)
     switch (event->button())
     {
         case Qt::RightButton: {
-            this->menu_.popup(event->globalPos() + QPoint(0, 8));
+            event->accept();
+
+            if (!this->menu_)
+            {
+                this->menu_ = new QMenu(this);
+                this->addNotebookActionsToMenu(this->menu_);
+            }
+            this->menu_->popup(event->globalPos() + QPoint(0, 8));
         }
         break;
         default:;
@@ -1294,8 +1298,39 @@ SplitNotebook::SplitNotebook(Window *parent)
         this->addCustomButtons();
     }
 
+    this->toggleOfflineTabsAction_ = new QAction({}, this);
+    QObject::connect(this->toggleOfflineTabsAction_, &QAction::triggered, this,
+                     &SplitNotebook::toggleOfflineTabs);
+
+    auto updateShortcut = [this](bool offlineTabsShown) {
+        auto *hotkeys = getIApp()->getHotkeys();
+        auto getKeySequence = [&](auto argument) {
+            return hotkeys->getDisplaySequence(
+                HotkeyCategory::Window, "setTabVisibility", {{argument}});
+        };
+
+        auto toggleSeq = getKeySequence("toggleLiveOnly");
+
+        if (offlineTabsShown && toggleSeq.isEmpty())
+        {
+            toggleSeq = getKeySequence("liveOnly");
+        }
+
+        if (!offlineTabsShown && toggleSeq.isEmpty())
+        {
+            toggleSeq = getKeySequence("toggle");
+
+            if (toggleSeq.isEmpty())
+            {
+                toggleSeq = getKeySequence("on");
+            }
+        }
+
+        this->toggleOfflineTabsAction_->setShortcut(toggleSeq);
+    };
+
     getSettings()->tabVisibility.connect(
-        [this](int val, auto) {
+        [this, updateShortcut](int val, auto) {
             auto visibility = NotebookTabVisibility(val);
             // Set the correct TabVisibilityFilter for the given visiblity setting.
             // Note that selected tabs are always shown regardless of what the tab
@@ -1307,10 +1342,15 @@ SplitNotebook::SplitNotebook(Window *parent)
                     this->setTabVisibilityFilter([](const NotebookTab *tab) {
                         return tab->isLive();
                     });
+                    this->toggleOfflineTabsAction_->setText("Show all tabs");
+                    updateShortcut(false);
                     break;
                 case NotebookTabVisibility::AllTabs:
                 default:
                     this->setTabVisibilityFilter(nullptr);
+                    this->toggleOfflineTabsAction_->setText(
+                        "Show live tabs only");
+                    updateShortcut(true);
                     break;
             }
         },
@@ -1363,6 +1403,31 @@ SplitNotebook::SplitNotebook(Window *parent)
                 }
             }
         });
+}
+
+void SplitNotebook::toggleOfflineTabs()
+{
+    if (!this->getShowTabs())
+    {
+        // Tabs are currently hidden, so the intention is to show
+        // tabs again before enabling the live only setting
+        this->setShowTabs(true);
+        getSettings()->tabVisibility.setValue(NotebookTabVisibility::LiveOnly);
+    }
+    else
+    {
+        getSettings()->tabVisibility.setValue(
+            getSettings()->tabVisibility.getEnum() ==
+                    NotebookTabVisibility::LiveOnly
+                ? NotebookTabVisibility::AllTabs
+                : NotebookTabVisibility::LiveOnly);
+    }
+}
+
+void SplitNotebook::addNotebookActionsToMenu(QMenu *menu)
+{
+    Notebook::addNotebookActionsToMenu(menu);
+    menu->addAction(this->toggleOfflineTabsAction_);
 }
 
 void SplitNotebook::showEvent(QShowEvent * /*event*/)
