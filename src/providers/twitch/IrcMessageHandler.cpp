@@ -53,8 +53,6 @@ const QSet<QString> SPECIAL_MESSAGE_TYPES{
     "viewermilestone",  // watch streak, but other categories possible in future
 };
 
-const QString ANONYMOUS_GIFTER_ID = "274598607";
-
 MessagePtr generateBannedMessage(bool confirmedBan)
 {
     const auto linkColor = MessageColor(MessageColor::Link);
@@ -518,8 +516,7 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
         {
             messageText = "Announcement";
         }
-        else if (msgType == "subgift" &&
-                 ANONYMOUS_GIFTER_ID == tags.value("user-id").toString())
+        else if (msgType == "subgift")
         {
             if (auto monthsIt = tags.find("msg-param-gift-months");
                 monthsIt != tags.end())
@@ -529,12 +526,25 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
                 {
                     auto plan = tags.value("msg-param-sub-plan").toString();
                     messageText =
-                        QString("An anonymous user gifted %1 months of a Tier "
-                                "%2 sub to %3!")
-                            .arg(QString::number(months),
+                        QString("%1 gifted %2 months of a Tier %3 sub to %4!")
+                            .arg(tags.value("display-name").toString(),
+                                 QString::number(months),
                                  plan.isEmpty() ? '1' : plan.at(0),
                                  tags.value("msg-param-recipient-display-name")
                                      .toString());
+
+                    if (auto countIt = tags.find("msg-param-sender-count");
+                        countIt != tags.end())
+                    {
+                        int count = countIt.value().toInt();
+                        if (count > months)
+                        {
+                            messageText +=
+                                QString(
+                                    " They've gifted %1 months in the channel.")
+                                    .arg(QString::number(count));
+                        }
+                    }
                 }
             }
         }
@@ -1032,8 +1042,7 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
         {
             messageText = "Announcement";
         }
-        else if (msgType == "subgift" &&
-                 ANONYMOUS_GIFTER_ID == tags.value("user-id").toString())
+        else if (msgType == "subgift")
         {
             if (auto monthsIt = tags.find("msg-param-gift-months");
                 monthsIt != tags.end())
@@ -1043,12 +1052,25 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
                 {
                     auto plan = tags.value("msg-param-sub-plan").toString();
                     messageText =
-                        QString("An anonymous user gifted %1 months of a Tier "
-                                "%2 sub to %3!")
-                            .arg(QString::number(months),
+                        QString("%1 gifted %2 months of a Tier %3 sub to %4!")
+                            .arg(tags.value("display-name").toString(),
+                                 QString::number(months),
                                  plan.isEmpty() ? '1' : plan.at(0),
                                  tags.value("msg-param-recipient-display-name")
                                      .toString());
+
+                    if (auto countIt = tags.find("msg-param-sender-count");
+                        countIt != tags.end())
+                    {
+                        int count = countIt.value().toInt();
+                        if (count > months)
+                        {
+                            messageText +=
+                                QString(
+                                    " They've gifted %1 months in the channel.")
+                                    .arg(QString::number(count));
+                        }
+                    }
                 }
             }
         }
