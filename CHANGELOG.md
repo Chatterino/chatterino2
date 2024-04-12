@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Minor: Report sub duration for more multi-month gift cases. (#5319)
+- Minor: Improved error reporting for the automatic streamer mode detection on Linux and macOS. (#5321)
 - Bugfix: Fixed split tooltip getting stuck in some cases. (#5309)
 - Bugfix: Fixed the version string not showing up as expected in Finder on macOS. (#5311)
 
