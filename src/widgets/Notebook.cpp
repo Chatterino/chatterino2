@@ -1316,16 +1316,16 @@ SplitNotebook::SplitNotebook(Window *parent)
                         return tab->isLive();
                     });
                     this->toggleOfflineTabsAction_->setText("Show all tabs");
-                    this->updateToggleOfflineTabsHotkey(false);
                     break;
                 case NotebookTabVisibility::AllTabs:
                 default:
                     this->setTabVisibilityFilter(nullptr);
                     this->toggleOfflineTabsAction_->setText(
                         "Show live tabs only");
-                    this->updateToggleOfflineTabsHotkey(true);
                     break;
             }
+
+            this->updateToggleOfflineTabsHotkey(visibility);
         },
         this->signalHolder_, true);
 
@@ -1480,7 +1480,8 @@ void SplitNotebook::addCustomButtons()
     this->updateStreamerModeIcon();
 }
 
-void SplitNotebook::updateToggleOfflineTabsHotkey(bool offlineTabsShown)
+void SplitNotebook::updateToggleOfflineTabsHotkey(
+    NotebookTabVisibility newTabVisibility)
 {
     auto *hotkeys = getIApp()->getHotkeys();
     auto getKeySequence = [&](auto argument) {
@@ -1490,19 +1491,26 @@ void SplitNotebook::updateToggleOfflineTabsHotkey(bool offlineTabsShown)
 
     auto toggleSeq = getKeySequence("toggleLiveOnly");
 
-    if (offlineTabsShown && toggleSeq.isEmpty())
+    switch (newTabVisibility)
     {
-        toggleSeq = getKeySequence("liveOnly");
-    }
+        case NotebookTabVisibility::AllTabs:
+            if (toggleSeq.isEmpty())
+            {
+                toggleSeq = getKeySequence("liveOnly");
+            }
+            break;
 
-    if (!offlineTabsShown && toggleSeq.isEmpty())
-    {
-        toggleSeq = getKeySequence("toggle");
+        case NotebookTabVisibility::LiveOnly:
+            if (toggleSeq.isEmpty())
+            {
+                toggleSeq = getKeySequence("toggle");
 
-        if (toggleSeq.isEmpty())
-        {
-            toggleSeq = getKeySequence("on");
-        }
+                if (toggleSeq.isEmpty())
+                {
+                    toggleSeq = getKeySequence("on");
+                }
+            }
+            break;
     }
 
     this->toggleOfflineTabsAction_->setShortcut(toggleSeq);
