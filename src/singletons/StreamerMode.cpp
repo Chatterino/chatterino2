@@ -102,6 +102,7 @@ bool isBroadcasterSoftwareActive()
                 });
             }
         }
+        break;
     }
 
     return false;
