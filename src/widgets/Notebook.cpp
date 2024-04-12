@@ -1302,35 +1302,8 @@ SplitNotebook::SplitNotebook(Window *parent)
     QObject::connect(this->toggleOfflineTabsAction_, &QAction::triggered, this,
                      &SplitNotebook::toggleOfflineTabs);
 
-    auto updateShortcut = [this](bool offlineTabsShown) {
-        auto *hotkeys = getIApp()->getHotkeys();
-        auto getKeySequence = [&](auto argument) {
-            return hotkeys->getDisplaySequence(
-                HotkeyCategory::Window, "setTabVisibility", {{argument}});
-        };
-
-        auto toggleSeq = getKeySequence("toggleLiveOnly");
-
-        if (offlineTabsShown && toggleSeq.isEmpty())
-        {
-            toggleSeq = getKeySequence("liveOnly");
-        }
-
-        if (!offlineTabsShown && toggleSeq.isEmpty())
-        {
-            toggleSeq = getKeySequence("toggle");
-
-            if (toggleSeq.isEmpty())
-            {
-                toggleSeq = getKeySequence("on");
-            }
-        }
-
-        this->toggleOfflineTabsAction_->setShortcut(toggleSeq);
-    };
-
     getSettings()->tabVisibility.connect(
-        [this, updateShortcut](int val, auto) {
+        [this](int val, auto) {
             auto visibility = NotebookTabVisibility(val);
             // Set the correct TabVisibilityFilter for the given visiblity setting.
             // Note that selected tabs are always shown regardless of what the tab
@@ -1343,14 +1316,14 @@ SplitNotebook::SplitNotebook(Window *parent)
                         return tab->isLive();
                     });
                     this->toggleOfflineTabsAction_->setText("Show all tabs");
-                    updateShortcut(false);
+                    this->updateToggleOfflineTabsHotkey(false);
                     break;
                 case NotebookTabVisibility::AllTabs:
                 default:
                     this->setTabVisibilityFilter(nullptr);
                     this->toggleOfflineTabsAction_->setText(
                         "Show live tabs only");
-                    updateShortcut(true);
+                    this->updateToggleOfflineTabsHotkey(true);
                     break;
             }
         },
@@ -1505,6 +1478,34 @@ void SplitNotebook::addCustomButtons()
     QObject::connect(getIApp()->getStreamerMode(), &IStreamerMode::changed,
                      this, &SplitNotebook::updateStreamerModeIcon);
     this->updateStreamerModeIcon();
+}
+
+void SplitNotebook::updateToggleOfflineTabsHotkey(bool offlineTabsShown)
+{
+    auto *hotkeys = getIApp()->getHotkeys();
+    auto getKeySequence = [&](auto argument) {
+        return hotkeys->getDisplaySequence(HotkeyCategory::Window,
+                                           "setTabVisibility", {{argument}});
+    };
+
+    auto toggleSeq = getKeySequence("toggleLiveOnly");
+
+    if (offlineTabsShown && toggleSeq.isEmpty())
+    {
+        toggleSeq = getKeySequence("liveOnly");
+    }
+
+    if (!offlineTabsShown && toggleSeq.isEmpty())
+    {
+        toggleSeq = getKeySequence("toggle");
+
+        if (toggleSeq.isEmpty())
+        {
+            toggleSeq = getKeySequence("on");
+        }
+    }
+
+    this->toggleOfflineTabsAction_->setShortcut(toggleSeq);
 }
 
 void SplitNotebook::updateStreamerModeIcon()

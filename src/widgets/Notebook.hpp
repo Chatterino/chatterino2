@@ -227,6 +227,7 @@ private:
     pajlada::Signals::SignalHolder signalHolder_;
 
     QAction *toggleOfflineTabsAction_;
+    void updateToggleOfflineTabsHotkey(bool offlineTabsShown);
 
     // Main window on Windows has basically a duplicate of this in Window
     NotebookButton *streamerModeIcon_{};
