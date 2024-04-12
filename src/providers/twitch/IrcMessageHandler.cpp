@@ -53,6 +53,8 @@ const QSet<QString> SPECIAL_MESSAGE_TYPES{
     "viewermilestone",  // watch streak, but other categories possible in future
 };
 
+const QString ANONYMOUS_GIFTER_ID = "274598607";
+
 MessagePtr generateBannedMessage(bool confirmedBan)
 {
     const auto linkColor = MessageColor(MessageColor::Link);
@@ -525,10 +527,13 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
                 if (months > 1)
                 {
                     auto plan = tags.value("msg-param-sub-plan").toString();
+                    QString name =
+                        ANONYMOUS_GIFTER_ID == tags.value("user-id").toString()
+                            ? "An anonymous user"
+                            : tags.value("display-name").toString();
                     messageText =
                         QString("%1 gifted %2 months of a Tier %3 sub to %4!")
-                            .arg(tags.value("display-name").toString(),
-                                 QString::number(months),
+                            .arg(name, QString::number(months),
                                  plan.isEmpty() ? '1' : plan.at(0),
                                  tags.value("msg-param-recipient-display-name")
                                      .toString());
@@ -1051,10 +1056,13 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
                 if (months > 1)
                 {
                     auto plan = tags.value("msg-param-sub-plan").toString();
+                    QString name =
+                        ANONYMOUS_GIFTER_ID == tags.value("user-id").toString()
+                            ? "An anonymous user"
+                            : tags.value("display-name").toString();
                     messageText =
                         QString("%1 gifted %2 months of a Tier %3 sub to %4!")
-                            .arg(tags.value("display-name").toString(),
-                                 QString::number(months),
+                            .arg(name, QString::number(months),
                                  plan.isEmpty() ? '1' : plan.at(0),
                                  tags.value("msg-param-recipient-display-name")
                                      .toString());
