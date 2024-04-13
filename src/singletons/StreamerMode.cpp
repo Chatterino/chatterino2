@@ -51,6 +51,9 @@ const QStringList &broadcastingBinaries()
 bool isBroadcasterSoftwareActive()
 {
 #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+    static bool shouldShowTimeoutWarning = true;
+    static bool shouldShowWarning = true;
+
     QProcess p;
     p.start("pgrep", {"-xi", broadcastingBinaries().join("|")},
             QIODevice::NotOpen);
@@ -62,20 +65,46 @@ bool isBroadcasterSoftwareActive()
 
     // Fallback to false and showing a warning
 
-    static bool shouldShowWarning = true;
-    if (shouldShowWarning)
+    switch (p.error())
     {
-        shouldShowWarning = false;
+        case QProcess::Timedout: {
+            qCWarning(chatterinoStreamerMode) << "pgrep execution timed out!";
+            if (shouldShowTimeoutWarning)
+            {
+                shouldShowTimeoutWarning = false;
 
-        postToThread([] {
-            getApp()->twitch->addGlobalSystemMessage(
-                "Streamer Mode is set to Automatic, but pgrep is missing. "
-                "Install it to fix the issue or set Streamer Mode to "
-                "Enabled or Disabled in the Settings.");
-        });
+                postToThread([] {
+                    getApp()->twitch->addGlobalSystemMessage(
+                        "Streamer Mode is set to Automatic, but pgrep timed "
+                        "out. This can happen if your system lagged at the "
+                        "wrong moment. If Streamer Mode continues to not work, "
+                        "you can manually set it to Enabled or Disabled in the "
+                        "Settings.");
+                });
+            }
+        }
+        break;
+
+        default: {
+            qCWarning(chatterinoStreamerMode)
+                << "pgrep execution failed:" << p.error();
+
+            if (shouldShowWarning)
+            {
+                shouldShowWarning = false;
+
+                postToThread([] {
+                    getApp()->twitch->addGlobalSystemMessage(
+                        "Streamer Mode is set to Automatic, but pgrep is "
+                        "missing. "
+                        "Install it to fix the issue or set Streamer Mode to "
+                        "Enabled or Disabled in the Settings.");
+                });
+            }
+        }
+        break;
     }
 
-    qCWarning(chatterinoStreamerMode) << "pgrep execution timed out!";
     return false;
 #elif defined(Q_OS_WIN)
     if (!IsWindowsVistaOrGreater())
