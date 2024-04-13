@@ -8,6 +8,7 @@
 - Bugfix: Fixed a crash that could occur on Wayland when using the image uploader. (#5314)
 - Bugfix: Fixed split tooltip getting stuck in some cases. (#5309)
 - Bugfix: Fixed the version string not showing up as expected in Finder on macOS. (#5311)
+- Bugfix: Fixed links having `http://` added to the beginning in certain cases. (#5323)
 
 ## 2.5.0-beta.1
 
