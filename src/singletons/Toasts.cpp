@@ -1,6 +1,7 @@
 #include "Toasts.hpp"
 
 #include "Application.hpp"
+#include "common/Common.hpp"
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
@@ -178,8 +179,7 @@ public:
                 if (platform_ == Platform::Twitch)
                 {
                     QDesktopServices::openUrl(QUrl(
-                        u"https://player.twitch.tv/?parent=twitch.tv&channel=" %
-                        channelName_));
+                        FSTRING_TWITCH_PLAYER_URL.arg(channelName_));
                 }
                 break;
             case ToastReaction::OpenInStreamlink: {
