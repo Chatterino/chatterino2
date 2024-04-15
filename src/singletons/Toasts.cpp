@@ -178,8 +178,8 @@ public:
             case ToastReaction::OpenInPlayer:
                 if (platform_ == Platform::Twitch)
                 {
-                    QDesktopServices::openUrl(QUrl(
-                        FSTRING_TWITCH_PLAYER_URL.arg(channelName_)));
+                    QDesktopServices::openUrl(
+                        QUrl(FSTRING_TWITCH_PLAYER_URL.arg(channelName_)));
                 }
                 break;
             case ToastReaction::OpenInStreamlink: {
