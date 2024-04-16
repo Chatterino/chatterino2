@@ -76,6 +76,7 @@ crazysmc | https://github.com/crazysmc | :/avatars/crazysmc.png
 SputNikPlop | https://github.com/SputNikPlop |
 fraxx | https://github.com/fraxxio | :/avatars/fraxx.png
 KleberPF | https://github.com/KleberPF |
+nealxm | https://github.com/nealxm | :/avatars/nealxm.png
 
 # If you are a contributor add yourself above this line
 
