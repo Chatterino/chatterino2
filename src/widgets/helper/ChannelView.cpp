@@ -982,8 +982,7 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
     // and the ui.
     auto snapshot = underlyingChannel->getMessageSnapshot();
 
-    this->scrollBar_->setMaximum(qreal(snapshot.size()));
-
+    size_t nMessagesAdded = 0;
     for (const auto &msg : snapshot)
     {
         if (!this->shouldIncludeMessage(msg))
@@ -1007,11 +1006,15 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
 
         this->messages_.pushBack(messageLayout);
         this->channel_->addMessage(msg);
+        nMessagesAdded++;
         if (this->showScrollbarHighlights())
         {
             this->scrollBar_->addHighlight(msg->getScrollBarHighlight());
         }
     }
+
+    this->scrollBar_->setMaximum(
+        static_cast<qreal>(std::min(nMessagesAdded, this->messages_.limit())));
 
     //
     // Standard channel connections
