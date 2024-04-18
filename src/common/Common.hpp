@@ -14,7 +14,7 @@
 
 namespace chatterino {
 
-const QString FSTRING_TWITCH_PLAYER_URL =
+const QString TWITCH_PLAYER_URL =
     "https://player.twitch.tv/?channel=%1&parent=twitch.tv";
 
 enum class HighlightState {
