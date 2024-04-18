@@ -836,8 +836,7 @@ void Split::openChannelInBrowserPlayer(ChannelPtr channel)
     if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         QDesktopServices::openUrl(
-            "https://player.twitch.tv/?parent=twitch.tv&channel=" +
-            twitchChannel->getName());
+            QUrl(TWITCH_PLAYER_URL.arg(twitchChannel->getName())));
     }
 }
 
