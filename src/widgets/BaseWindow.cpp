@@ -263,6 +263,13 @@ void BaseWindow::tryApplyTopMost()
     }
     this->waitingForTopMost_ = false;
 
+    if (this->parent())
+    {
+        // Don't change the topmost value of child windows. This would apply
+        // to the top-level window too.
+        return;
+    }
+
     ::SetWindowPos(*hwnd, this->isTopMost_ ? HWND_TOPMOST : HWND_NOTOPMOST, 0,
                    0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
 }
