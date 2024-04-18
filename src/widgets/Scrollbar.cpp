@@ -15,6 +15,13 @@
 
 #define MIN_THUMB_HEIGHT 10
 
+namespace {
+
+/// Amount of messages to move by when clicking on the track
+constexpr qreal SCROLL_DELTA = 5.0;
+
+}  // namespace
+
 namespace chatterino {
 
 Scrollbar::Scrollbar(size_t messagesLimit, ChannelView *parent)
@@ -139,13 +146,6 @@ void Scrollbar::setLargeChange(qreal value)
     this->updateScroll();
 }
 
-void Scrollbar::setSmallChange(qreal value)
-{
-    this->smallChange_ = value;
-
-    this->updateScroll();
-}
-
 void Scrollbar::setDesiredValue(qreal value, bool animated)
 {
     value = std::max(this->minimum_, std::min(this->getBottom(), value));
@@ -201,11 +201,6 @@ qreal Scrollbar::getLargeChange() const
 qreal Scrollbar::getBottom() const
 {
     return this->maximum_ - this->largeChange_;
-}
-
-qreal Scrollbar::getSmallChange() const
-{
-    return this->smallChange_;
 }
 
 qreal Scrollbar::getDesiredValue() const
@@ -448,16 +443,14 @@ void Scrollbar::mouseReleaseEvent(QMouseEvent *event)
     {
         if (this->mouseDownIndex_ == 0)
         {
-            this->setDesiredValue(this->desiredValue_ - this->smallChange_,
-                                  true);
+            this->setDesiredValue(this->desiredValue_ - SCROLL_DELTA, true);
         }
     }
     else if (y < this->thumbRect_.y())
     {
         if (this->mouseDownIndex_ == 1)
         {
-            this->setDesiredValue(this->desiredValue_ - this->smallChange_,
-                                  true);
+            this->setDesiredValue(this->desiredValue_ - SCROLL_DELTA, true);
         }
     }
     else if (this->thumbRect_.contains(2, y))
@@ -468,16 +461,14 @@ void Scrollbar::mouseReleaseEvent(QMouseEvent *event)
     {
         if (this->mouseDownIndex_ == 3)
         {
-            this->setDesiredValue(this->desiredValue_ + this->smallChange_,
-                                  true);
+            this->setDesiredValue(this->desiredValue_ + SCROLL_DELTA, true);
         }
     }
     else
     {
         if (this->mouseDownIndex_ == 4)
         {
-            this->setDesiredValue(this->desiredValue_ + this->smallChange_,
-                                  true);
+            this->setDesiredValue(this->desiredValue_ + SCROLL_DELTA, true);
         }
     }
 

@@ -39,13 +39,11 @@ public:
     void setMinimum(qreal value);
     void offsetMinimum(qreal value);
     void setLargeChange(qreal value);
-    void setSmallChange(qreal value);
     void setDesiredValue(qreal value, bool animated = false);
     qreal getMaximum() const;
     qreal getMinimum() const;
     qreal getLargeChange() const;
     qreal getBottom() const;
-    qreal getSmallChange() const;
     qreal getDesiredValue() const;
     qreal getCurrentValue() const;
     qreal getRelativeCurrentValue() const;
@@ -96,7 +94,6 @@ private:
     qreal maximum_ = 0;
     qreal minimum_ = 0;
     qreal largeChange_ = 0;
-    qreal smallChange_ = 5;
     qreal desiredValue_ = 0;
     qreal currentValue_ = 0;
 
