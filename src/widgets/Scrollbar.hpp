@@ -5,7 +5,6 @@
 #include "widgets/helper/ScrollbarHighlight.hpp"
 
 #include <pajlada/signals/signal.hpp>
-#include <QMutex>
 #include <QPropertyAnimation>
 #include <QWidget>
 
@@ -71,8 +70,6 @@ private:
 
     LimitedQueueSnapshot<ScrollbarHighlight> &getHighlightSnapshot();
     void updateScroll();
-
-    QMutex mutex_;
 
     QPropertyAnimation currentValueAnimation_;
 
