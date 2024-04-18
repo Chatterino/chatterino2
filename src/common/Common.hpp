@@ -12,10 +12,10 @@
 #define LINK_CHATTERINO_DISCORD "https://discord.gg/7Y5AYhAK4z"
 #define LINK_CHATTERINO_SOURCE "https://github.com/Chatterino/chatterino2"
 
+namespace chatterino {
+
 const QString FSTRING_TWITCH_PLAYER_URL =
     "https://player.twitch.tv/?channel=%1&parent=twitch.tv";
-
-namespace chatterino {
 
 enum class HighlightState {
     None,
