@@ -12,6 +12,53 @@ namespace chatterino {
 
 class ChannelView;
 
+/// @brief A scrollbar for views with partially laid out items
+///
+/// This scrollbar is made for views that only lay out visible items. This is
+/// the case for a @a ChannelView for example. There, only the visible messages
+/// are laid out. For a traditional scrollbar, all messages would need to be
+/// laid out to be able to compute the total height of all items. However, for
+/// these messages this isn't possible.
+///
+/// To avoid having to lay out all items, this scrollbar tracks the position of
+/// the content in messages (as opposed to pixels). The position is given by
+/// `currentValue` which refers to the index of the message at the top plus a
+/// fraction inside the message. The position can be animated to have a smooth
+/// scrolling effect. In this case, `currentValue` refers to the displayed
+/// position and `desiredValue` refers to the position the scrollbar is set to
+/// be at after the animation. The latter is used for example to check if the
+/// scrollbar is at the bottom.
+///
+/// @cond src-only
+///
+/// The following illustrates a scrollbar in a channel view with seven
+/// messages. The scrollbar is at the bottom. No animation is active, thus
+/// `currentValue = desiredValue`.
+///
+///                ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐←╌╌╌ minimum
+///                  Alice: This message is quite           = 0
+///             ┬  ╭─────────────────────────────────╮←╮
+///             │  │ long, so it gets wrapped        │ ┆
+///             │  ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤ ╰╌╌╌ currentValue
+///             │  │ Bob: are you sure?              │       = 0.5
+///             │  ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤       = desiredValue
+/// pageSize ╌╌╌┤  │ Alice: Works for me... try for  │       = maximum
+///  = 6.5      │  │ yourself                        │         - pageSize
+///             │  ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤       = bottom
+///             │  │ Bob: I'm trying to get my really│       ⇒ atBottom = true
+///             │  │ long message to wrap so I can   │
+///             │  │ debug this issue I'm facing...  │
+///             │  ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+///             │  │ Bob: Omg it worked              │
+///             │  ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+///             │  │ Alice: That's amazing!         ╭┤ ┬
+///             │  │╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌││ ├╌╌ thumbRect.height()
+///             │  │ Bob: you're right              ╰┤ ┴
+///             ┴╭→╰─────────────────────────────────╯
+///              ┆
+///           maximum
+///            = 7
+/// @endcond
 class Scrollbar : public BaseWidget
 {
     Q_OBJECT
