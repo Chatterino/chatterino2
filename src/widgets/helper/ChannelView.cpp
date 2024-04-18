@@ -744,7 +744,7 @@ void ChannelView::updateScrollbar(
 
         if (h < 0)  // break condition
         {
-            this->scrollBar_->setLargeChange(
+            this->scrollBar_->setPageSize(
                 (messages.size() - i) +
                 qreal(h) / std::max<int>(1, message->getHeight()));
 

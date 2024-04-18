@@ -139,9 +139,9 @@ void Scrollbar::offsetMinimum(qreal value)
     this->updateScroll();
 }
 
-void Scrollbar::setLargeChange(qreal value)
+void Scrollbar::setPageSize(qreal value)
 {
-    this->largeChange_ = value;
+    this->pageSize_ = value;
 
     this->updateScroll();
 }
@@ -193,14 +193,14 @@ qreal Scrollbar::getMinimum() const
     return this->minimum_;
 }
 
-qreal Scrollbar::getLargeChange() const
+qreal Scrollbar::getPageSize() const
 {
-    return this->largeChange_;
+    return this->pageSize_;
 }
 
 qreal Scrollbar::getBottom() const
 {
-    return this->maximum_ - this->largeChange_;
+    return this->maximum_ - this->pageSize_;
 }
 
 qreal Scrollbar::getDesiredValue() const
@@ -254,11 +254,11 @@ void Scrollbar::setCurrentValue(qreal value)
 void Scrollbar::printCurrentState(const QString &prefix) const
 {
     qCDebug(chatterinoWidget)
-        << prefix                                         //
-        << "Current value: " << this->getCurrentValue()   //
-        << ". Maximum: " << this->getMaximum()            //
-        << ". Minimum: " << this->getMinimum()            //
-        << ". Large change: " << this->getLargeChange();  //
+        << prefix                                        //
+        << "Current value: " << this->getCurrentValue()  //
+        << ". Maximum: " << this->getMaximum()           //
+        << ". Minimum: " << this->getMinimum()           //
+        << ". Page size: " << this->getPageSize();       //
 }
 
 void Scrollbar::paintEvent(QPaintEvent *)
@@ -494,7 +494,7 @@ void Scrollbar::updateScroll()
         0,
         int((this->getRelativeCurrentValue()) / div * this->trackHeight_) + 1,
         this->width(),
-        int(this->largeChange_ / div * this->trackHeight_) + MIN_THUMB_HEIGHT);
+        int(this->pageSize_ / div * this->trackHeight_) + MIN_THUMB_HEIGHT);
 
     this->update();
 }

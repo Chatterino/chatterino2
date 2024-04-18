@@ -37,11 +37,11 @@ public:
     void resetMaximum();
     void setMinimum(qreal value);
     void offsetMinimum(qreal value);
-    void setLargeChange(qreal value);
+    void setPageSize(qreal value);
     void setDesiredValue(qreal value, bool animated = false);
     qreal getMaximum() const;
     qreal getMinimum() const;
-    qreal getLargeChange() const;
+    qreal getPageSize() const;
     qreal getBottom() const;
     qreal getDesiredValue() const;
     qreal getCurrentValue() const;
@@ -89,7 +89,7 @@ private:
 
     qreal maximum_ = 0;
     qreal minimum_ = 0;
-    qreal largeChange_ = 0;
+    qreal pageSize_ = 0;
     qreal desiredValue_ = 0;
     qreal currentValue_ = 0;
 
