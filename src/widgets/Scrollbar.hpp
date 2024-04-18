@@ -83,7 +83,6 @@ private:
     int mouseDownIndex_ = -1;
     QPoint lastMousePosition_;
 
-    int buttonHeight_ = 0;
     int trackHeight_ = 100;
 
     QRect thumbRect_;

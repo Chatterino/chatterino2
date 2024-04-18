@@ -370,7 +370,7 @@ void Scrollbar::mouseMoveEvent(QMouseEvent *event)
 
         auto oldIndex = this->mouseOverIndex_;
 
-        if (y < this->buttonHeight_)
+        if (y < 0)
         {
             this->mouseOverIndex_ = 0;
         }
@@ -382,7 +382,7 @@ void Scrollbar::mouseMoveEvent(QMouseEvent *event)
         {
             this->mouseOverIndex_ = 2;
         }
-        else if (y < height() - this->buttonHeight_)
+        else if (y < height())
         {
             this->mouseOverIndex_ = 3;
         }
@@ -413,7 +413,7 @@ void Scrollbar::mousePressEvent(QMouseEvent *event)
 {
     int y = event->pos().y();
 
-    if (y < this->buttonHeight_)
+    if (y < 0)
     {
         this->mouseDownIndex_ = 0;
     }
@@ -425,7 +425,7 @@ void Scrollbar::mousePressEvent(QMouseEvent *event)
     {
         this->mouseDownIndex_ = 2;
     }
-    else if (y < height() - this->buttonHeight_)
+    else if (y < height())
     {
         this->mouseDownIndex_ = 3;
     }
@@ -439,7 +439,7 @@ void Scrollbar::mouseReleaseEvent(QMouseEvent *event)
 {
     int y = event->pos().y();
 
-    if (y < this->buttonHeight_)
+    if (y < 0)
     {
         if (this->mouseDownIndex_ == 0)
         {
@@ -457,7 +457,7 @@ void Scrollbar::mouseReleaseEvent(QMouseEvent *event)
     {
         // do nothing
     }
-    else if (y < height() - this->buttonHeight_)
+    else if (y < height())
     {
         if (this->mouseDownIndex_ == 3)
         {
@@ -486,15 +486,13 @@ void Scrollbar::leaveEvent(QEvent *)
 
 void Scrollbar::updateScroll()
 {
-    this->trackHeight_ = this->height() - this->buttonHeight_ -
-                         this->buttonHeight_ - MIN_THUMB_HEIGHT - 1;
+    this->trackHeight_ = this->height() - MIN_THUMB_HEIGHT - 1;
 
     auto div = std::max<qreal>(0.0000001, this->maximum_ - this->minimum_);
 
     this->thumbRect_ = QRect(
         0,
-        int((this->getRelativeCurrentValue()) / div * this->trackHeight_) + 1 +
-            this->buttonHeight_,
+        int((this->getRelativeCurrentValue()) / div * this->trackHeight_) + 1,
         this->width(),
         int(this->largeChange_ / div * this->trackHeight_) + MIN_THUMB_HEIGHT);
 
