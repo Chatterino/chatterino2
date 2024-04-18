@@ -13,9 +13,9 @@
 
 #include <cmath>
 
-#define MIN_THUMB_HEIGHT 10
-
 namespace {
+
+constexpr int MIN_THUMB_HEIGHT = 10;
 
 /// Amount of messages to move by when clicking on the track
 constexpr qreal SCROLL_DELTA = 5.0;
