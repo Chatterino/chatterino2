@@ -1,9 +1,9 @@
 #pragma once
 
-#include "messages/LimitedQueue.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/helper/ScrollbarHighlight.hpp"
 
+#include <boost/circular_buffer.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QPropertyAnimation>
 #include <QWidget>
@@ -117,7 +117,7 @@ private:
 
     QPropertyAnimation currentValueAnimation_;
 
-    LimitedQueue<ScrollbarHighlight> highlights_;
+    boost::circular_buffer<ScrollbarHighlight> highlights_;
 
     bool atBottom_{false};
 

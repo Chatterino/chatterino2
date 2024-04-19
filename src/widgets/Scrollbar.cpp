@@ -41,18 +41,34 @@ Scrollbar::Scrollbar(size_t messagesLimit, ChannelView *parent)
 
 void Scrollbar::addHighlight(ScrollbarHighlight highlight)
 {
-    this->highlights_.pushBack(highlight);
+    this->highlights_.push_back(std::move(highlight));
 }
 
 void Scrollbar::addHighlightsAtStart(
-    const std::vector<ScrollbarHighlight> &_highlights)
+    const std::vector<ScrollbarHighlight> &highlights)
 {
-    this->highlights_.pushFront(_highlights);
+    size_t nItems = std::min(highlights.size(), this->highlights_.capacity() -
+                                                    this->highlights_.size());
+
+    if (nItems == 0)
+    {
+        return;
+    }
+
+    for (size_t i = highlights.size() - 1; i < highlights.size(); i--)
+    {
+        this->highlights_.push_front(highlights[i]);
+    }
 }
 
 void Scrollbar::replaceHighlight(size_t index, ScrollbarHighlight replacement)
 {
-    this->highlights_.replaceItem(index, replacement);
+    if (this->highlights_.size() <= index)
+    {
+        return;
+    }
+
+    this->highlights_[index] = std::move(replacement);
 }
 
 void Scrollbar::clearHighlights()
@@ -276,23 +292,22 @@ void Scrollbar::paintEvent(QPaintEvent *)
     }
 
     // draw highlights
-    auto snapshot = this->highlights_.getSnapshot();
-    size_t snapshotLength = snapshot.size();
+    size_t nHighlights = this->highlights_.size();
 
-    if (snapshotLength == 0)
+    if (this->highlights_.empty())
     {
         return;
     }
 
     int w = this->width();
     float y = 0;
-    float dY = float(this->height()) / float(snapshotLength);
+    float dY = float(this->height()) / float(nHighlights);
     int highlightHeight =
         int(std::ceil(std::max<float>(this->scale() * 2, dY)));
 
-    for (size_t i = 0; i < snapshotLength; i++, y += dY)
+    for (size_t i = 0; i < nHighlights; i++, y += dY)
     {
-        ScrollbarHighlight const &highlight = snapshot[i];
+        const auto &highlight = this->highlights_[i];
 
         if (highlight.isNull())
         {
