@@ -257,7 +257,7 @@ void Scrollbar::printCurrentState(const QString &prefix) const
         << ". Page size: " << this->getPageSize();       //
 }
 
-void Scrollbar::paintEvent(QPaintEvent *)
+void Scrollbar::paintEvent(QPaintEvent * /*event*/)
 {
     bool mouseOver = this->mouseOverIndex_ != -1;
     int xOffset = mouseOver ? 0 : width() - int(4 * this->scale());
@@ -345,7 +345,7 @@ void Scrollbar::paintEvent(QPaintEvent *)
     }
 }
 
-void Scrollbar::resizeEvent(QResizeEvent *)
+void Scrollbar::resizeEvent(QResizeEvent * /*event*/)
 {
     this->resize(int(16 * this->scale()), this->height());
 }
@@ -465,7 +465,7 @@ void Scrollbar::mouseReleaseEvent(QMouseEvent *event)
     this->update();
 }
 
-void Scrollbar::leaveEvent(QEvent *)
+void Scrollbar::leaveEvent(QEvent * /*event*/)
 {
     this->mouseOverIndex_ = -1;
 
