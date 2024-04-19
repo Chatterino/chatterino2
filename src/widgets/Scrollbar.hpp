@@ -103,12 +103,12 @@ public:
     Q_PROPERTY(qreal desiredValue_ READ getDesiredValue WRITE setDesiredValue)
 
 protected:
-    void paintEvent(QPaintEvent *) override;
-    void resizeEvent(QResizeEvent *) override;
+    void paintEvent(QPaintEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
-    void leaveEvent(QEvent *) override;
+    void leaveEvent(QEvent *event) override;
 
 private:
     Q_PROPERTY(qreal currentValue_ READ getCurrentValue WRITE setCurrentValue)
