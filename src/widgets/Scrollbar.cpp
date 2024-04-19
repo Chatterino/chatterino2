@@ -271,12 +271,6 @@ void Scrollbar::paintEvent(QPaintEvent *)
     bool enableElevatedMessageHighlights =
         getSettings()->enableElevatedMessageHighlight;
 
-    //    painter.fillRect(QRect(xOffset, 0, width(), this->buttonHeight),
-    //                     this->themeManager->ScrollbarArrow);
-    //    painter.fillRect(QRect(xOffset, height() - this->buttonHeight,
-    //    width(), this->buttonHeight),
-    //                     this->themeManager->ScrollbarArrow);
-
     this->thumbRect_.setX(xOffset);
 
     // mouse over thumb
@@ -292,13 +286,12 @@ void Scrollbar::paintEvent(QPaintEvent *)
     }
 
     // draw highlights
-    size_t nHighlights = this->highlights_.size();
-
     if (this->highlights_.empty())
     {
         return;
     }
 
+    size_t nHighlights = this->highlights_.size();
     int w = this->width();
     float y = 0;
     float dY = float(this->height()) / float(nHighlights);
