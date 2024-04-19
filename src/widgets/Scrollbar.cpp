@@ -55,29 +55,9 @@ void Scrollbar::replaceHighlight(size_t index, ScrollbarHighlight replacement)
     this->highlights_.replaceItem(index, replacement);
 }
 
-void Scrollbar::pauseHighlights()
-{
-    this->highlightsPaused_ = true;
-}
-
-void Scrollbar::unpauseHighlights()
-{
-    this->highlightsPaused_ = false;
-}
-
 void Scrollbar::clearHighlights()
 {
     this->highlights_.clear();
-}
-
-LimitedQueueSnapshot<ScrollbarHighlight> &Scrollbar::getHighlightSnapshot()
-{
-    if (!this->highlightsPaused_)
-    {
-        this->highlightSnapshot_ = this->highlights_.getSnapshot();
-    }
-
-    return this->highlightSnapshot_;
 }
 
 void Scrollbar::scrollToBottom(bool animate)
@@ -296,7 +276,7 @@ void Scrollbar::paintEvent(QPaintEvent *)
     }
 
     // draw highlights
-    auto &snapshot = this->getHighlightSnapshot();
+    auto snapshot = this->highlights_.getSnapshot();
     size_t snapshotLength = snapshot.size();
 
     if (snapshotLength == 0)

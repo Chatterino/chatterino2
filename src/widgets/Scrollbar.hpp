@@ -71,8 +71,6 @@ public:
         const std::vector<ScrollbarHighlight> &highlights_);
     void replaceHighlight(size_t index, ScrollbarHighlight replacement);
 
-    void pauseHighlights();
-    void unpauseHighlights();
     void clearHighlights();
 
     void scrollToBottom(bool animate = false);
@@ -115,14 +113,11 @@ protected:
 private:
     Q_PROPERTY(qreal currentValue_ READ getCurrentValue WRITE setCurrentValue)
 
-    LimitedQueueSnapshot<ScrollbarHighlight> &getHighlightSnapshot();
     void updateScroll();
 
     QPropertyAnimation currentValueAnimation_;
 
     LimitedQueue<ScrollbarHighlight> highlights_;
-    bool highlightsPaused_{false};
-    LimitedQueueSnapshot<ScrollbarHighlight> highlightSnapshot_;
 
     bool atBottom_{false};
 
