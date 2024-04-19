@@ -260,10 +260,11 @@ void Scrollbar::printCurrentState(const QString &prefix) const
 void Scrollbar::paintEvent(QPaintEvent * /*event*/)
 {
     bool mouseOver = this->mouseOverIndex_ != -1;
-    int xOffset = mouseOver ? 0 : width() - int(4 * this->scale());
+    int xOffset =
+        mouseOver ? 0 : this->width() - static_cast<int>(4.0F * this->scale());
 
     QPainter painter(this);
-    painter.fillRect(rect(), this->theme->scrollbars.background);
+    painter.fillRect(this->rect(), this->theme->scrollbars.background);
 
     bool enableRedeemedHighlights = getSettings()->enableRedeemedHighlight;
     bool enableFirstMessageHighlights =
@@ -293,12 +294,12 @@ void Scrollbar::paintEvent(QPaintEvent * /*event*/)
 
     size_t nHighlights = this->highlights_.size();
     int w = this->width();
-    float y = 0;
-    float dY = float(this->height()) / float(nHighlights);
+    float dY =
+        static_cast<float>(this->height()) / static_cast<float>(nHighlights);
     int highlightHeight =
-        int(std::ceil(std::max<float>(this->scale() * 2, dY)));
+        static_cast<int>(std::ceil(std::max(this->scale() * 2.0F, dY)));
 
-    for (size_t i = 0; i < nHighlights; i++, y += dY)
+    for (size_t i = 0; i < nHighlights; i++)
     {
         const auto &highlight = this->highlights_[i];
 
@@ -327,16 +328,16 @@ void Scrollbar::paintEvent(QPaintEvent * /*event*/)
         QColor color = highlight.getColor();
         color.setAlpha(255);
 
+        int y = static_cast<int>(dY * static_cast<float>(i));
         switch (highlight.getStyle())
         {
             case ScrollbarHighlight::Default: {
-                painter.fillRect(w / 8 * 3, int(y), w / 4, highlightHeight,
-                                 color);
+                painter.fillRect(w / 8 * 3, y, w / 4, highlightHeight, color);
             }
             break;
 
             case ScrollbarHighlight::Line: {
-                painter.fillRect(0, int(y), w, 1, color);
+                painter.fillRect(0, y, w, 1, color);
             }
             break;
 
