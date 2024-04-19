@@ -29,7 +29,7 @@ Scrollbar::Scrollbar(size_t messagesLimit, ChannelView *parent)
     , currentValueAnimation_(this, "currentValue_")
     , highlights_(messagesLimit)
 {
-    this->resize(int(16 * this->scale()), 100);
+    this->resize(static_cast<int>(16 * this->scale()), 100);
     this->currentValueAnimation_.setDuration(150);
     this->currentValueAnimation_.setEasingCurve(
         QEasingCurve(QEasingCurve::OutCubic));
@@ -213,7 +213,7 @@ qreal Scrollbar::getRelativeCurrentValue() const
 {
     // currentValue - minimum can be negative if minimum is incremented while
     // scrolling up to or down from the top when smooth scrolling is enabled.
-    return clamp(this->currentValue_ - this->minimum_, qreal(0.0),
+    return clamp(this->currentValue_ - this->minimum_, 0.0,
                  this->currentValue_);
 }
 
@@ -348,7 +348,7 @@ void Scrollbar::paintEvent(QPaintEvent * /*event*/)
 
 void Scrollbar::resizeEvent(QResizeEvent * /*event*/)
 {
-    this->resize(int(16 * this->scale()), this->height());
+    this->resize(static_cast<int>(16 * this->scale()), this->height());
 }
 
 void Scrollbar::mouseMoveEvent(QMouseEvent *event)
@@ -387,11 +387,12 @@ void Scrollbar::mouseMoveEvent(QMouseEvent *event)
     }
     else if (this->mouseDownIndex_ == 2)
     {
-        int delta = event->pos().y() - this->lastMousePosition_.y();
+        qreal delta =
+            static_cast<qreal>(event->pos().y() - this->lastMousePosition_.y());
 
         this->setDesiredValue(
             this->desiredValue_ +
-            (qreal(delta) / std::max<qreal>(0.00000002, this->trackHeight_)) *
+            (delta / std::max<qreal>(0.00000002, this->trackHeight_)) *
                 this->maximum_);
     }
 
@@ -414,7 +415,7 @@ void Scrollbar::mousePressEvent(QMouseEvent *event)
     {
         this->mouseDownIndex_ = 2;
     }
-    else if (y < height())
+    else if (y < this->height())
     {
         this->mouseDownIndex_ = 3;
     }
@@ -446,7 +447,7 @@ void Scrollbar::mouseReleaseEvent(QMouseEvent *event)
     {
         // do nothing
     }
-    else if (y < height())
+    else if (y < this->height())
     {
         if (this->mouseDownIndex_ == 3)
         {
@@ -479,11 +480,14 @@ void Scrollbar::updateScroll()
 
     auto div = std::max<qreal>(0.0000001, this->maximum_ - this->minimum_);
 
-    this->thumbRect_ = QRect(
-        0,
-        int((this->getRelativeCurrentValue()) / div * this->trackHeight_) + 1,
-        this->width(),
-        int(this->pageSize_ / div * this->trackHeight_) + MIN_THUMB_HEIGHT);
+    this->thumbRect_ =
+        QRect(0,
+              static_cast<int>((this->getRelativeCurrentValue()) / div *
+                               this->trackHeight_) +
+                  1,
+              this->width(),
+              static_cast<int>(this->pageSize_ / div * this->trackHeight_) +
+                  MIN_THUMB_HEIGHT);
 
     this->update();
 }
