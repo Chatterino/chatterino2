@@ -249,12 +249,14 @@ void Scrollbar::setCurrentValue(qreal value)
 
 void Scrollbar::printCurrentState(const QString &prefix) const
 {
-    qCDebug(chatterinoWidget)
-        << prefix                                        //
-        << "Current value: " << this->getCurrentValue()  //
-        << ". Maximum: " << this->getMaximum()           //
-        << ". Minimum: " << this->getMinimum()           //
-        << ". Page size: " << this->getPageSize();       //
+    qCDebug(chatterinoWidget).nospace().noquote()
+        << prefix                                          //
+        << " { currentValue: " << this->getCurrentValue()  //
+        << ", desiredValue: " << this->getDesiredValue()   //
+        << ", maximum: " << this->getMaximum()             //
+        << ", minimum: " << this->getMinimum()             //
+        << ", pageSize: " << this->getPageSize()           //
+        << " }";
 }
 
 void Scrollbar::paintEvent(QPaintEvent * /*event*/)

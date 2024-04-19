@@ -98,7 +98,8 @@ public:
     pajlada::Signals::NoArgSignal &getDesiredValueChanged();
     void setCurrentValue(qreal value);
 
-    void printCurrentState(const QString &prefix = QString()) const;
+    void printCurrentState(
+        const QString &prefix = QStringLiteral("Scrollbar")) const;
 
     Q_PROPERTY(qreal desiredValue_ READ getDesiredValue WRITE setDesiredValue)
 
