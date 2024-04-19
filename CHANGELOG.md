@@ -12,6 +12,7 @@
 - Bugfix: Fixed topmost windows from losing their status after opening dialogs on Windows. (#5330)
 - Bugfix: Fixed a gap appearing when using filters on `/watching`. (#5329)
 - Dev: Changed the order of the query parameters for Twitch player URLs. (#5326)
+- Dev: Refactor and document `Scrollbar`. (#5334)
 
 ## 2.5.0-beta.1
 
