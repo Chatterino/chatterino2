@@ -5,6 +5,7 @@
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
+#include "debug/Benchmark.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Paths.hpp"
@@ -20,6 +21,8 @@
 #include <QMutex>
 #include <QPointer>
 #include <QSaveFile>
+
+#include <utility>
 
 #define UPLOAD_DELAY 2000
 // Delay between uploads in milliseconds
@@ -195,6 +198,11 @@ void ImageUploader::handleFailedUpload(const NetworkResult &result,
     }
 
     channel->addMessage(makeSystemMessage(errorMessage));
+    // NOTE: We abort any future uploads on failure. Should this be handled differently?
+    while (!this->uploadQueue_.empty())
+    {
+        this->uploadQueue_.pop();
+    }
     this->uploadMutex_.unlock();
 }
 
@@ -248,22 +256,20 @@ void ImageUploader::handleSuccessfulUpload(const NetworkResult &result,
     this->logToFile(originalFilePath, link, deletionLink, channel);
 }
 
-void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,
-                           QPointer<ResizingTextEdit> outputTextEdit)
+std::pair<std::queue<RawImageData>, QString> ImageUploader::getImages(
+    const QMimeData *source) const
 {
-    if (!this->uploadMutex_.tryLock())
-    {
-        channel->addMessage(makeSystemMessage(
-            QString("Please wait until the upload finishes.")));
-        return;
-    }
+    BenchmarkGuard benchmarkGuard("ImageUploader::getImages");
 
-    channel->addMessage(makeSystemMessage(QString("Started upload...")));
-    auto tryUploadFromUrls = [&]() -> bool {
+    auto tryUploadFromUrls =
+        [&]() -> std::pair<std::queue<RawImageData>, QString> {
         if (!source->hasUrls())
         {
-            return false;
+            return {{}, {}};
         }
+
+        std::queue<RawImageData> images;
+
         auto mimeDb = QMimeDatabase();
         // This path gets chosen when files are copied from a file manager, like explorer.exe, caja.
         // Each entry in source->urls() is a QUrl pointing to a file that was copied.
@@ -273,101 +279,118 @@ void ImageUploader::upload(const QMimeData *source, ChannelPtr channel,
             QMimeType mime = mimeDb.mimeTypeForUrl(path);
             if (mime.name().startsWith("image") && !mime.inherits("image/gif"))
             {
-                channel->addMessage(makeSystemMessage(
-                    QString("Uploading image: %1").arg(localPath)));
                 QImage img = QImage(localPath);
                 if (img.isNull())
                 {
-                    channel->addMessage(
-                        makeSystemMessage(QString("Couldn't load image :(")));
-                    return false;
+                    return {{}, "Couldn't load image :("};
                 }
 
                 auto imageData = convertToPng(img);
-                if (imageData)
+                if (!imageData)
                 {
-                    RawImageData data = {*imageData, "png", localPath};
-                    this->uploadQueue_.push(data);
-                }
-                else
-                {
-                    channel->addMessage(makeSystemMessage(
+                    return {
+                        {},
                         QString("Cannot upload file: %1. Couldn't convert "
                                 "image to png.")
-                            .arg(localPath)));
-                    return false;
+                            .arg(localPath),
+                    };
                 }
+                images.push({*imageData, "png", localPath});
             }
             else if (mime.inherits("image/gif"))
             {
-                channel->addMessage(makeSystemMessage(
-                    QString("Uploading GIF: %1").arg(localPath)));
                 QFile file(localPath);
                 bool isOkay = file.open(QIODevice::ReadOnly);
                 if (!isOkay)
                 {
-                    channel->addMessage(
-                        makeSystemMessage(QString("Failed to open file. :(")));
-                    return false;
+                    return {{}, "Failed to open file :("};
                 }
                 // file.readAll() => might be a bit big but it /should/ work
-                RawImageData data = {file.readAll(), "gif", localPath};
-                this->uploadQueue_.push(data);
+                images.push({file.readAll(), "gif", localPath});
                 file.close();
             }
         }
-        if (!this->uploadQueue_.empty())
-        {
-            this->sendImageUploadRequest(this->uploadQueue_.front(), channel,
-                                         outputTextEdit);
-            this->uploadQueue_.pop();
-            return true;
-        }
-        return false;
+
+        return {images, {}};
     };
 
-    auto tryUploadDirectly = [&]() -> bool {
+    auto tryUploadDirectly =
+        [&]() -> std::pair<std::queue<RawImageData>, QString> {
+        std::queue<RawImageData> images;
+
         if (source->hasFormat("image/png"))
         {
             // the path to file is not present every time, thus the filePath is empty
-            this->sendImageUploadRequest({source->data("image/png"), "png", ""},
-                                         channel, outputTextEdit);
-            return true;
+            images.push({source->data("image/png"), "png", ""});
+            return {images, {}};
         }
+
         if (source->hasFormat("image/jpeg"))
         {
-            this->sendImageUploadRequest(
-                {source->data("image/jpeg"), "jpeg", ""}, channel,
-                outputTextEdit);
-            return true;
+            images.push({source->data("image/jpeg"), "jpeg", ""});
+            return {images, {}};
         }
+
         if (source->hasFormat("image/gif"))
         {
-            this->sendImageUploadRequest({source->data("image/gif"), "gif", ""},
-                                         channel, outputTextEdit);
-            return true;
+            images.push({source->data("image/gif"), "gif", ""});
+            return {images, {}};
         }
+
         // not PNG, try loading it into QImage and save it to a PNG.
         auto image = qvariant_cast<QImage>(source->imageData());
         auto imageData = convertToPng(image);
         if (imageData)
         {
-            sendImageUploadRequest({*imageData, "png", ""}, channel,
-                                   outputTextEdit);
-            return true;
+            images.push({*imageData, "png", ""});
+            return {images, {}};
         }
+
         // No direct upload happenned
-        channel->addMessage(makeSystemMessage(
-            QString("Cannot upload file, failed to convert to png.")));
-        return false;
+        return {{}, "Cannot upload file, failed to convert to png."};
     };
 
-    if (!tryUploadFromUrls() && !tryUploadDirectly())
+    const auto [urlImageData, urlError] = tryUploadFromUrls();
+
+    if (!urlImageData.empty())
     {
-        channel->addMessage(
-            makeSystemMessage(QString("Cannot upload file from clipboard.")));
-        this->uploadMutex_.unlock();
+        return {urlImageData, {}};
     }
+
+    const auto [directImageData, directError] = tryUploadDirectly();
+    if (!directImageData.empty())
+    {
+        return {directImageData, {}};
+    }
+
+    return {
+        {},
+        // TODO: verify that this looks ok xd
+        urlError + directError,
+    };
+}
+
+void ImageUploader::upload(std::queue<RawImageData> images, ChannelPtr channel,
+                           QPointer<ResizingTextEdit> outputTextEdit)
+{
+    BenchmarkGuard benchmarkGuard("upload");
+    if (!this->uploadMutex_.tryLock())
+    {
+        channel->addMessage(makeSystemMessage(
+            QString("Please wait until the upload finishes.")));
+        return;
+    }
+
+    assert(!images.empty());
+    assert(this->uploadQueue_.empty());
+
+    std::swap(this->uploadQueue_, images);
+
+    channel->addMessage(makeSystemMessage("Started upload..."));
+
+    this->sendImageUploadRequest(this->uploadQueue_.front(), std::move(channel),
+                                 std::move(outputTextEdit));
+    this->uploadQueue_.pop();
 }
 
 }  // namespace chatterino

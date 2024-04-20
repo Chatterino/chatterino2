@@ -525,9 +525,12 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 
     if (twitchChannel)
     {
-        moreMenu->addAction(
-            "Show chatter list", this->split_, &Split::showChatterList,
-            h->getDisplaySequence(HotkeyCategory::Split, "openViewerList"));
+        if (twitchChannel->hasModRights())
+        {
+            moreMenu->addAction(
+                "Show chatter list", this->split_, &Split::showChatterList,
+                h->getDisplaySequence(HotkeyCategory::Split, "openViewerList"));
+        }
 
         moreMenu->addAction("Subscribe", this->split_, &Split::openSubPage);
 

@@ -635,7 +635,7 @@ void MessageBuilder::addLink(const ParsedLink &parsedLink)
     auto textColor = MessageColor(MessageColor::Link);
     auto *el = this->emplace<LinkElement>(
         LinkElement::Parsed{.lowercase = lowercaseLinkString,
-                            .original = matchedLink},
+                            .original = origLink},
         MessageElementFlag::Text, textColor);
     el->setLink({Link::Url, matchedLink});
     getIApp()->getLinkResolver()->resolve(el->linkInfo());
