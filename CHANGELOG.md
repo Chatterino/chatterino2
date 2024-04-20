@@ -9,6 +9,9 @@
 - Bugfix: Fixed split tooltip getting stuck in some cases. (#5309)
 - Bugfix: Fixed the version string not showing up as expected in Finder on macOS. (#5311)
 - Bugfix: Fixed links having `http://` added to the beginning in certain cases. (#5323)
+- Bugfix: Fixed topmost windows from losing their status after opening dialogs on Windows. (#5330)
+- Bugfix: Fixed a gap appearing when using filters on `/watching`. (#5329)
+- Dev: Changed the order of the query parameters for Twitch player URLs. (#5326)
 
 ## 2.5.0-beta.1
 

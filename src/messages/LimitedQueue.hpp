@@ -25,14 +25,6 @@ public:
 private:
     /// Property Accessors
     /**
-     * @brief Return the limit of the internal buffer
-     */
-    [[nodiscard]] size_t limit() const
-    {
-        return this->limit_;
-    }
-
-    /**
      * @brief Return the amount of space left in the buffer
      *
      * This does not lock
@@ -43,6 +35,14 @@ private:
     }
 
 public:
+    /**
+     * @brief Return the limit of the queue
+     */
+    [[nodiscard]] size_t limit() const
+    {
+        return this->limit_;
+    }
+
     /**
      * @brief Return true if the buffer is empty
      */
