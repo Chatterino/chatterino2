@@ -11,6 +11,7 @@
 - Bugfix: Fixed links having `http://` added to the beginning in certain cases. (#5323)
 - Bugfix: Fixed topmost windows from losing their status after opening dialogs on Windows. (#5330)
 - Bugfix: Fixed a gap appearing when using filters on `/watching`. (#5329)
+- Bugfix: Removed the remnant "Show chatter list" menu entry for non-moderators. (#5336)
 - Dev: Changed the order of the query parameters for Twitch player URLs. (#5326)
 
 ## 2.5.0-beta.1
