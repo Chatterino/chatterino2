@@ -292,7 +292,10 @@ public:
         QString original;
     };
 
-    LinkElement(const Parsed &parsed, MessageElementFlags flags,
+    /// @param parsed The link as it appeared in the message
+    /// @param fullUrl A full URL (notably with a protocol)
+    LinkElement(const Parsed &parsed, const QString &fullUrl,
+                MessageElementFlags flags,
                 const MessageColor &color = MessageColor::Text,
                 FontStyle style = FontStyle::ChatMedium);
     ~LinkElement() override = default;

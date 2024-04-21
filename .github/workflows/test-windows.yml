@@ -32,6 +32,8 @@ jobs:
     env:
       C2_BUILD_WITH_QT6: ${{ startsWith(matrix.qt-version, '6.') && 'ON' || 'OFF' }}
       QT_MODULES: ${{ startsWith(matrix.qt-version, '6.') && 'qt5compat qtimageformats' || '' }}
+      C2_USE_OPENSSL3: ${{ startsWith(matrix.qt-version, '6.') && 'True' || 'False' }}
+      C2_CONAN_CACHE_SUFFIX: ${{ startsWith(matrix.qt-version, '6.') && '-QT6' || '' }}
 
     steps:
       - name: Enable plugin support
@@ -64,12 +66,6 @@ jobs:
 
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1.13.0
-
-      - name: Setup conan variables
-        if: startsWith(matrix.os, 'windows')
-        run: |
-          "C2_USE_OPENSSL3=$(if ($Env:C2_BUILD_WITH_QT6 -eq "on") { "True" } else { "False" })" >> "$Env:GITHUB_ENV"
-          "C2_CONAN_CACHE_SUFFIX=$(if ($Env:C2_BUILD_WITH_QT6 -eq "on") { "-QT6" } else { "`" })" >> "$Env:GITHUB_ENV"
 
       - name: Setup sccache
         # sccache v0.7.4

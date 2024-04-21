@@ -797,10 +797,11 @@ std::unique_ptr<MessageElement> SingleLineTextElement::clone() const
     return el;
 }
 
-LinkElement::LinkElement(const Parsed &parsed, MessageElementFlags flags,
-                         const MessageColor &color, FontStyle style)
+LinkElement::LinkElement(const Parsed &parsed, const QString &fullUrl,
+                         MessageElementFlags flags, const MessageColor &color,
+                         FontStyle style)
     : TextElement(QStringList(), flags, color, style)
-    , linkInfo_(parsed.original)
+    , linkInfo_(fullUrl)
     , lowercase_({parsed.lowercase})
     , original_({parsed.original})
 {
@@ -827,7 +828,8 @@ std::unique_ptr<MessageElement> LinkElement::clone() const
             .lowercase = this->lowercase_.at(0),
             .original = this->original_.at(0),
         },
-        this->getFlags(), this->color(), this->style());
+        this->linkInfo_.originalUrl(), this->getFlags(), this->color(),
+        this->style());
     el->cloneFrom(*this);
     return el;
 }
