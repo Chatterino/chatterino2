@@ -55,7 +55,7 @@ inline std::ostream &operator<<(std::ostream &os, const QStringView &str)
 
 inline std::ostream &operator<<(std::ostream &os, const QByteArray &bytes)
 {
-    os << qUtf8Printable(QString::fromUtf8(bytes));
+    os << bytes.toStdString();
     return os;
 }
 
