@@ -92,6 +92,11 @@ jobs:
           name: Chatterino-x86_64-Qt-${{ matrix.qt-version }}.AppImage
           path: build/Chatterino-x86_64.AppImage
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
+
       - name: Package - .deb (Ubuntu)
         if: matrix.build-deb
         run: |
