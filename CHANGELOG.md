@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: Fixed links without a protocol not being clickable. (#5345)
+
 ## 2.5.0
 
 - Major: Twitch follower emotes can now be correctly tabbed in other channels when you are subscribed to the channel the emote is from. (#4922)
