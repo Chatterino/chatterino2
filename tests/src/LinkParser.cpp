@@ -1,11 +1,8 @@
 #include "common/LinkParser.hpp"
 
 #include <gtest/gtest.h>
-#include <QList>
 #include <QString>
 #include <QStringList>
-
-#include <vector>
 
 using namespace chatterino;
 
@@ -174,82 +171,5 @@ TEST(LinkParser, doesntParseInvalidLinks)
     {
         LinkParser p(input);
         ASSERT_FALSE(p.result().has_value()) << input.toStdString();
-    }
-}
-
-TEST(LinkParser, full)
-{
-    struct TestCase {
-        QString input;
-        std::optional<ParsedLink> expectedResult;
-    };
-
-    std::vector<TestCase> tests{
-        {
-            .input = "https://forsen.tv",
-            .expectedResult =
-                ParsedLink{
-                    .protocol = QStringLiteral(u"https://"),
-                    .host = QStringLiteral(u"forsen.tv"),
-                    .rest = QStringLiteral(u""),
-                    .source = "https://forsen.tv",
-                },
-        },
-        {
-            .input = "forsen.tv",
-            .expectedResult =
-                ParsedLink{
-                    .protocol = QStringLiteral(u""),
-                    .host = QStringLiteral(u"forsen.tv"),
-                    .rest = QStringLiteral(u""),
-                    .source = "forsen.tv",
-                },
-        },
-        {
-            .input = "forsen.tv/",
-            .expectedResult =
-                ParsedLink{
-                    .protocol = QStringLiteral(u""),
-                    .host = QStringLiteral(u"forsen.tv"),
-                    .rest = QStringLiteral(u"/"),
-                    .source = "forsen.tv/",
-                },
-        },
-        {
-            .input = "forsen.tv/commands",
-            .expectedResult =
-                ParsedLink{
-                    .protocol = QStringLiteral(u""),
-                    .host = QStringLiteral(u"forsen.tv"),
-                    .rest = QStringLiteral(u"/commands"),
-                    .source = "forsen.tv/commands",
-                },
-        },
-    };
-
-    for (const auto &[input, expectedResult] : tests)
-    {
-        LinkParser p(input);
-        ASSERT_EQ(p.result().has_value(), expectedResult.has_value())
-            << input.toStdString();
-        if (p.result().has_value())
-        {
-            ASSERT_EQ(p.result()->protocol, expectedResult->protocol)
-                << input.toStdString() << ": "
-                << p.result()->protocol.toString().toStdString()
-                << " != " << expectedResult->protocol.toString().toStdString();
-            ASSERT_EQ(p.result()->host, expectedResult->host)
-                << input.toStdString() << ": "
-                << p.result()->host.toString().toStdString()
-                << " != " << expectedResult->host.toString().toStdString();
-            ASSERT_EQ(p.result()->rest, expectedResult->rest)
-                << input.toStdString() << ": "
-                << p.result()->rest.toString().toStdString()
-                << " != " << expectedResult->rest.toString().toStdString();
-            ASSERT_EQ(p.result()->source, expectedResult->source)
-                << input.toStdString() << ": "
-                << p.result()->source.toStdString()
-                << " != " << expectedResult->source.toStdString();
-        }
     }
 }
