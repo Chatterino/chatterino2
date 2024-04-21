@@ -1,5 +1,7 @@
 #include "util/XDGHelper.hpp"
 
+#include "TestHelpers.hpp"
+
 #include <gtest/gtest.h>
 #include <QDebug>
 
@@ -57,9 +59,8 @@ TEST(XDGHelper, ParseDesktopExecProgram)
         auto output = parseDesktopExecProgram(test.input);
 
         EXPECT_EQ(output, test.expectedOutput)
-            << "Input '" << test.input.toStdString() << "' failed. Expected '"
-            << test.expectedOutput.toStdString() << "' but got '"
-            << output.toStdString() << "'";
+            << "Input '" << test.input << "' failed. Expected '"
+            << test.expectedOutput << "' but got '" << output << "'";
     }
 }
 
