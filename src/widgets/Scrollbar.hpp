@@ -77,18 +77,24 @@ public:
     void scrollToTop(bool animate = false);
     bool isAtBottom() const;
 
+    qreal getMaximum() const;
     void setMaximum(qreal value);
     void offsetMaximum(qreal value);
-    void resetMaximum();
+
+    qreal getMinimum() const;
     void setMinimum(qreal value);
     void offsetMinimum(qreal value);
-    void setPageSize(qreal value);
-    void setDesiredValue(qreal value, bool animated = false);
-    qreal getMaximum() const;
-    qreal getMinimum() const;
+
+    void resetBounds();
+
     qreal getPageSize() const;
-    qreal getBottom() const;
+    void setPageSize(qreal value);
+
     qreal getDesiredValue() const;
+    void setDesiredValue(qreal value, bool animated = false);
+
+    /// The bottom-most scroll position
+    qreal getBottom() const;
     qreal getCurrentValue() const;
     qreal getRelativeCurrentValue() const;
 

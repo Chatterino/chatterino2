@@ -34,7 +34,7 @@ Scrollbar::Scrollbar(size_t messagesLimit, ChannelView *parent)
     this->currentValueAnimation_.setEasingCurve(
         QEasingCurve(QEasingCurve::OutCubic));
     connect(&this->currentValueAnimation_, &QAbstractAnimation::finished, this,
-            &Scrollbar::resetMaximum);
+            &Scrollbar::resetBounds);
 
     this->setMouseTracking(true);
 }
@@ -105,7 +105,7 @@ void Scrollbar::offsetMaximum(qreal value)
     this->updateScroll();
 }
 
-void Scrollbar::resetMaximum()
+void Scrollbar::resetBounds()
 {
     if (this->minimum_ > 0)
     {
@@ -174,7 +174,7 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
         else
         {
             this->setCurrentValue(value);
-            this->resetMaximum();
+            this->resetBounds();
         }
     }
 }
