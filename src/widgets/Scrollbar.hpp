@@ -29,6 +29,11 @@ class ChannelView;
 /// be at after the animation. The latter is used for example to check if the
 /// scrollbar is at the bottom.
 ///
+/// `minimum` and `maximum` are used to map scrollbar positions to
+/// (message-)buffer indices. The buffer is of size `maximum - minimum` and an
+/// index is computed by `scrollbarPos - minimum` - thus a scrollbar position
+/// of a message is at `index + minimum.
+///
 /// @cond src-only
 ///
 /// The following illustrates a scrollbar in a channel view with seven
@@ -59,6 +64,19 @@ class ChannelView;
 ///           maximum
 ///            = 7
 /// @endcond
+///
+/// When messages are added at the bottom, both maximum and minimum are offset
+/// by 1 and after a layout, the desired value is updated, causing the content
+/// to move. Afterwards, the bounds are reset (potentially waiting for the
+/// animation to finish).
+///
+/// While scrolling is paused, the desired (and current) value won't be
+/// updated. However, messages can still come in and "shift" the values in the
+/// backing ring-buffer. If the current value would be used, the messages would
+/// still shift upwards (just at a different offset). To avoid this, there's a
+/// _relative current value_, which is `currentValue - minimum`. It's the
+/// actual index of the top message in the buffer. Since the minimum is shifted
+/// by 1 when messages come in, the view will remain idle (visually).
 class Scrollbar : public BaseWidget
 {
     Q_OBJECT
@@ -96,6 +114,13 @@ public:
     /// The bottom-most scroll position
     qreal getBottom() const;
     qreal getCurrentValue() const;
+
+    /// @brief The current value relative to the minimum
+    ///
+    /// > currentValue - minimum
+    ///
+    /// This should be used as an index into a buffer of messages, as it is
+    /// unaffected by simultaneous shifts of minimum and maximum.
     qreal getRelativeCurrentValue() const;
 
     // offset the desired value without breaking smooth scolling
