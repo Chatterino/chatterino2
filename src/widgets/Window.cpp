@@ -647,11 +647,13 @@ void Window::addShortcuts()
              }
              else if (arg == "liveOnly")
              {
-                 this->notebook_->toggleOfflineTabsAction()->trigger();
+                 this->notebook_->setShowTabs(true);
+                 getSettings()->tabVisibility.setValue(
+                     NotebookTabVisibility::LiveOnly);
              }
              else if (arg == "toggleLiveOnly")
              {
-                 this->notebook_->toggleOfflineTabs();
+                 this->notebook_->toggleOfflineTabsAction()->trigger();
              }
              else
              {
