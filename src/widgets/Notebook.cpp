@@ -52,8 +52,8 @@ Notebook::Notebook(QWidget *parent)
                      [this](bool value) {
                          this->setLockNotebookLayout(value);
                      });
-    this->showTabsAction_ = new QAction("Toggle visibility of tabs");
-    QObject::connect(this->showTabsAction_, &QAction::triggered, [this]() {
+    this->toggleTabsAction_ = new QAction("Toggle visibility of tabs");
+    QObject::connect(this->toggleTabsAction_, &QAction::triggered, [this]() {
         this->setShowTabs(!this->getShowTabs());
     });
     this->updateTabVisibilityMenuAction();
@@ -597,6 +597,11 @@ void Notebook::refresh()
     this->updateTabVisibility();
 }
 
+QAction *Notebook::toggleTabsAction()
+{
+    return this->toggleTabsAction_;
+}
+
 void Notebook::updateTabVisibility()
 {
     for (auto &item : this->items_)
@@ -631,7 +636,7 @@ void Notebook::updateTabVisibilityMenuAction()
                 HotkeyCategory::Window, "setTabVisibility", {{"on"}});
         }
     }
-    this->showTabsAction_->setShortcut(toggleSeq);
+    this->toggleTabsAction_->setShortcut(toggleSeq);
 }
 
 bool Notebook::getShowAddButton() const
@@ -1204,7 +1209,7 @@ void Notebook::setLockNotebookLayout(bool value)
 
 void Notebook::addNotebookActionsToMenu(QMenu *menu)
 {
-    menu->addAction(this->showTabsAction_);
+    menu->addAction(this->toggleTabsAction_);
 
     menu->addAction(this->lockNotebookLayoutAction_);
 
@@ -1395,6 +1400,11 @@ void SplitNotebook::toggleOfflineTabs()
                 ? NotebookTabVisibility::AllTabs
                 : NotebookTabVisibility::LiveOnly);
     }
+}
+
+QAction *SplitNotebook::toggleOfflineTabsAction()
+{
+    return this->toggleOfflineTabsAction_;
 }
 
 void SplitNotebook::addNotebookActionsToMenu(QMenu *menu)
