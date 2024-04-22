@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Bugfix: Fixed links without a protocol not being clickable. (#5345)
+- Bugfix: Fixed <kbd>Ctrl</kbd>+<kbd>U</kbd> and "Toggle visibility of tabs" not having the same effect. (#5353)
 
 ## 2.5.0
 
