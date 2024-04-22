@@ -1,5 +1,7 @@
 #include "common/LinkParser.hpp"
 
+#include "TestHelpers.hpp"
+
 #include <gtest/gtest.h>
 #include <QString>
 #include <QStringList>
@@ -15,13 +17,13 @@ struct Case {
     {
         auto input = this->protocol + this->host + this->rest;
         LinkParser p(input);
-        ASSERT_TRUE(p.result().has_value()) << input.toStdString();
+        ASSERT_TRUE(p.result().has_value()) << input;
 
         const auto &r = *p.result();
         ASSERT_EQ(r.source, input);
-        ASSERT_EQ(r.protocol, this->protocol) << this->protocol.toStdString();
-        ASSERT_EQ(r.host, this->host) << this->host.toStdString();
-        ASSERT_EQ(r.rest, this->rest) << this->rest.toStdString();
+        ASSERT_EQ(r.protocol, this->protocol) << this->protocol;
+        ASSERT_EQ(r.host, this->host) << this->host;
+        ASSERT_EQ(r.rest, this->rest) << this->rest;
     }
 };
 
@@ -126,7 +128,7 @@ TEST(LinkParser, doesntParseInvalidIpv4Links)
     for (const auto &input : inputs)
     {
         LinkParser p(input);
-        ASSERT_FALSE(p.result().has_value()) << input.toStdString();
+        ASSERT_FALSE(p.result().has_value()) << input;
     }
 }
 
@@ -170,6 +172,6 @@ TEST(LinkParser, doesntParseInvalidLinks)
     for (const auto &input : inputs)
     {
         LinkParser p(input);
-        ASSERT_FALSE(p.result().has_value()) << input.toStdString();
+        ASSERT_FALSE(p.result().has_value()) << input;
     }
 }

@@ -2,19 +2,10 @@
 
 ## Unversioned
 
-- Minor: Added context menu action to toggle visibility of offline tabs. (#5318)
-- Minor: Report sub duration for more multi-month gift cases. (#5319)
-- Minor: Improved error reporting for the automatic streamer mode detection on Linux and macOS. (#5321)
-- Bugfix: Fixed a crash that could occur on Wayland when using the image uploader. (#5314)
-- Bugfix: Fixed split tooltip getting stuck in some cases. (#5309)
-- Bugfix: Fixed the version string not showing up as expected in Finder on macOS. (#5311)
-- Bugfix: Fixed links having `http://` added to the beginning in certain cases. (#5323)
-- Bugfix: Fixed topmost windows from losing their status after opening dialogs on Windows. (#5330)
-- Bugfix: Fixed a gap appearing when using filters on `/watching`. (#5329)
-- Dev: Changed the order of the query parameters for Twitch player URLs. (#5326)
+- Bugfix: Fixed links without a protocol not being clickable. (#5345)
 - Dev: Refactor and document `Scrollbar`. (#5334)
 
-## 2.5.0-beta.1
+## 2.5.0
 
 - Major: Twitch follower emotes can now be correctly tabbed in other channels when you are subscribed to the channel the emote is from. (#4922)
 - Major: Added `/automod` split to track automod caught messages across all open channels the user moderates. (#4986, #5026)
@@ -68,6 +59,16 @@
 - Minor: Change Lua `CompletionRequested` handler to use an event table. (#5280)
 - Minor: Changed the layout of the about page. (#5287)
 - Minor: Add duration to multi-month anon sub gift messages. (#5293)
+- Minor: Added context menu action to toggle visibility of offline tabs. (#5318)
+- Minor: Report sub duration for more multi-month gift cases. (#5319)
+- Minor: Improved error reporting for the automatic streamer mode detection on Linux and macOS. (#5321)
+- Bugfix: Fixed a crash that could occur on Wayland when using the image uploader. (#5314)
+- Bugfix: Fixed split tooltip getting stuck in some cases. (#5309)
+- Bugfix: Fixed the version string not showing up as expected in Finder on macOS. (#5311)
+- Bugfix: Fixed links having `http://` added to the beginning in certain cases. (#5323)
+- Bugfix: Fixed topmost windows from losing their status after opening dialogs on Windows. (#5330)
+- Bugfix: Fixed a gap appearing when using filters on `/watching`. (#5329)
+- Bugfix: Removed the remnant "Show chatter list" menu entry for non-moderators. (#5336)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
 - Bugfix: Fixed the `/shoutout` command not working with usernames starting with @'s (e.g. `/shoutout @forsen`). (#4800)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
@@ -138,6 +139,7 @@
 - Bugfix: Fixed a data race when disconnecting from Twitch PubSub. (#4771)
 - Bugfix: Fixed messages not immediately disappearing when clearing the chat. (#5282)
 - Bugfix: Fixed highlights triggering for ignored users in announcements. (#5295)
+- Dev: Changed the order of the query parameters for Twitch player URLs. (#5326)
 - Dev: Run miniaudio in a separate thread, and simplify it to not manage the device ourselves. There's a chance the simplification is a bad idea. (#4978)
 - Dev: Change clang-format from v14 to v16. (#4929)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
