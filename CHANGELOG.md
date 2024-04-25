@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Bugfix: Fixed links without a protocol not being clickable. (#5345)
+- Dev: Removed unused timegate settings. (#5361)
 
 ## 2.5.0
 
