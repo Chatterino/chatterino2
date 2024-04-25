@@ -112,7 +112,7 @@ jobs:
       matrix:
         include:
           # macOS
-          - os: macos-latest
+          - os: macos-13
             qt-version: 5.15.2
             force-lto: false
             plugins: false
