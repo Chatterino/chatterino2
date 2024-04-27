@@ -121,7 +121,7 @@ jobs:
             skip-artifact: false
             skip-crashpad: false
           # macOS (x86)
-          - os: macos-12
+          - os: macos-13
             qt-version: 6.5.0
             arch: x86_64
             force-lto: false

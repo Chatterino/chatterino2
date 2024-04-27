@@ -1,6 +1,10 @@
 #pragma once
 
+#include <QString>
+#include <QStringView>
+
 #include <mutex>
+#include <ostream>
 
 template <typename T>
 class ReceivedMessage
@@ -42,3 +46,21 @@ public:
         return &this->t;
     }
 };
+
+inline std::ostream &operator<<(std::ostream &os, const QStringView &str)
+{
+    os << qUtf8Printable(str.toString());
+    return os;
+}
+
+inline std::ostream &operator<<(std::ostream &os, const QByteArray &bytes)
+{
+    os << bytes.toStdString();
+    return os;
+}
+
+inline std::ostream &operator<<(std::ostream &os, const QString &str)
+{
+    os << qUtf8Printable(str);
+    return os;
+}
