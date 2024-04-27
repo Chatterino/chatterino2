@@ -304,18 +304,7 @@ jobs:
       - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-          LIBS=(boost openssl rapidjson)
-          for package in "${LIBS[@]}"
-          do
-            brew fetch --force --bottle-tag=${{ matrix.arch }}_monterey $package
-            formula=$(brew --cache --bottle-tag=${{ matrix.arch }}_monterey $package)
-            if [[ $package == "openssl" ]]; then
-              brew reinstall $formula
-            else
-              brew install $formula
-            fi
-          done
-          brew install p7zip create-dmg cmake tree
+          brew install boost openssl rapidjson p7zip create-dmg cmake tree
         shell: bash
 
       - name: Build (MacOS)
@@ -349,10 +338,8 @@ jobs:
           export MACOS_CODESIGN_CERTIFICATE="-"
           echo "-> $MACOS_CODESIGN_CERTIFICATE"
 
-          brew reinstall openssl
           echo "Downloading kimageformats plugins"
           curl -SsfLo kimg.zip "https://github.com/nerixyz/kimageformats-binaries/releases/download/cont/kimageformats-macos-latest-${{ matrix.qt-version}}.zip"
-          ${{matrix.arch == 'arm64' && 'brew reinstall $(brew --cache --bottle-tag=arm64_monterey openssl)' || ''}}
 
           ./../.CI/MacDeploy.sh
           ./../.CI/CreateDMG.sh
