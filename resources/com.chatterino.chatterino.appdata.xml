@@ -34,6 +34,9 @@
         <binary>chatterino</binary>
     </provides>
     <releases>
+        <release version="2.5.1" date="2024-04-28">
+            <url>https://github.com/Chatterino/chatterino2/releases/tag/v2.5.1</url>
+        </release>
         <release version="2.5.0" date="2024-04-21">
             <url>https://github.com/Chatterino/chatterino2/releases/tag/v2.5.0</url>
         </release>
