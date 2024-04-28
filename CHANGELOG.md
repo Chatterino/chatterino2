@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+## 2.5.1
+
 - Bugfix: Fixed links without a protocol not being clickable. (#5345)
 
 ## 2.5.0
