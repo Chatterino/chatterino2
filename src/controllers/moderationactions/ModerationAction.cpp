@@ -6,10 +6,11 @@
 #include "singletons/Resources.hpp"
 
 #include <QRegularExpression>
+#include <QUrl>
 
 namespace chatterino {
 
-ModerationAction::ModerationAction(const QString &action)
+ModerationAction::ModerationAction(const QString &action, const QUrl &iconPath)
     : action_(action)
 {
     static QRegularExpression replaceRegex("[!/.]");
@@ -84,11 +85,11 @@ ModerationAction::ModerationAction(const QString &action)
     }
     else if (action.startsWith("/ban "))
     {
-        this->imageToLoad_ = 1;
+        this->builtInImageToLoad_ = BuiltInImage::Ban;
     }
     else if (action.startsWith("/delete "))
     {
-        this->imageToLoad_ = 2;
+        this->builtInImageToLoad_ = BuiltInImage::TrashCan;
     }
     else
     {
@@ -98,6 +99,12 @@ ModerationAction::ModerationAction(const QString &action)
 
         this->line1_ = xD.mid(0, 2);
         this->line2_ = xD.mid(2, 2);
+    }
+
+    if (!iconPath.isEmpty())
+    {
+        this->builtInImageToLoad_ = BuiltInImage::None;
+        this->iconPath_ = iconPath;
     }
 }
 
@@ -115,14 +122,18 @@ const std::optional<ImagePtr> &ModerationAction::getImage() const
 {
     assertInGuiThread();
 
-    if (this->imageToLoad_ == 1)
+    if (this->builtInImageToLoad_ == BuiltInImage::Ban)
     {
         this->image_ = Image::fromResourcePixmap(getResources().buttons.ban);
     }
-    else if (this->imageToLoad_ == 2)
+    else if (this->builtInImageToLoad_ == BuiltInImage::TrashCan)
     {
         this->image_ =
             Image::fromResourcePixmap(getResources().buttons.trashCan);
+    }
+    else if (!this->iconPath_.isEmpty())
+    {
+        this->image_ = Image::fromUrl({this->iconPath_.toString()});
     }
 
     return this->image_;
