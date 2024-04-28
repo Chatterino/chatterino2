@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Bugfix: Fixed links without a protocol not being clickable. (#5345)
+- Minor: Add option to customise Moderation buttons with images. (#5369)
 
 ## 2.5.0
 
