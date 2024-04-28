@@ -221,7 +221,7 @@ ModerationPage::ModerationPage()
                 {
                     auto fileUrl = QFileDialog::getOpenFileUrl(
                         this, tr("Open Image"), QUrl(),
-                        tr("Image Files (*.png)"));
+                        tr("Image Files (*.png *.jpg *.jpeg)"));
                     view->getModel()->setData(clicked, fileUrl, Qt::UserRole);
                     view->getModel()->setData(clicked, fileUrl.fileName(),
                                               Qt::DisplayRole);
