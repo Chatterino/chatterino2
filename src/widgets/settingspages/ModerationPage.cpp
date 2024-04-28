@@ -9,12 +9,14 @@
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
+#include "util/LoadPixmapLazy.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
 #include <QFileDialog>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
+#include <QPixmap>
 #include <QPushButton>
 #include <QTableView>
 #include <QtConcurrent/QtConcurrent>
@@ -223,6 +225,21 @@ ModerationPage::ModerationPage()
                     view->getModel()->setData(clicked, fileUrl, Qt::UserRole);
                     view->getModel()->setData(clicked, fileUrl.fileName(),
                                               Qt::DisplayRole);
+                    // Clear the icon if the user canceled the dialog
+                    if (fileUrl.isEmpty())
+                    {
+                        view->getModel()->setData(clicked, QVariant(),
+                                                  Qt::DecorationRole);
+                    }
+                    else
+                    {
+                        loadPixmapFromUrlLazy(
+                            {fileUrl.toString()},
+                            [clicked, view](const QPixmap &pixmap) {
+                                view->getModel()->setData(clicked, pixmap,
+                                                          Qt::DecorationRole);
+                            });
+                    }
                 }
             });
 
