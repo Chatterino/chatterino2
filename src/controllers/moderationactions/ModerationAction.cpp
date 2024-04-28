@@ -9,24 +9,6 @@
 
 namespace chatterino {
 
-// ModerationAction::ModerationAction(Image *_image, const QString &_action)
-//    : _isImage(true)
-//    , image(_image)
-//    , action(_action)
-//{
-//}
-
-// ModerationAction::ModerationAction(const QString &_line1, const QString
-// &_line2,
-//                                   const QString &_action)
-//    : _isImage(false)
-//    , image(nullptr)
-//    , line1(_line1)
-//    , line2(_line2)
-//    , action(_action)
-//{
-//}
-
 ModerationAction::ModerationAction(const QString &action)
     : action_(action)
 {
@@ -99,13 +81,6 @@ ModerationAction::ModerationAction(const QString &action)
             }
             this->line2_ = "w";
         }
-
-        // line1 = this->line1_;
-        // line2 = this->line2_;
-        // } else {
-        //     this->_moderationActions.emplace_back(getResources().buttonTimeout,
-        //     str);
-        // }
     }
     else if (action.startsWith("/ban "))
     {
@@ -140,18 +115,14 @@ const std::optional<ImagePtr> &ModerationAction::getImage() const
 {
     assertInGuiThread();
 
-    if (this->imageToLoad_ != 0)
+    if (this->imageToLoad_ == 1)
     {
-        if (this->imageToLoad_ == 1)
-        {
-            this->image_ =
-                Image::fromResourcePixmap(getResources().buttons.ban);
-        }
-        else if (this->imageToLoad_ == 2)
-        {
-            this->image_ =
-                Image::fromResourcePixmap(getResources().buttons.trashCan);
-        }
+        this->image_ = Image::fromResourcePixmap(getResources().buttons.ban);
+    }
+    else if (this->imageToLoad_ == 2)
+    {
+        this->image_ =
+            Image::fromResourcePixmap(getResources().buttons.trashCan);
     }
 
     return this->image_;
