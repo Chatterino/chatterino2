@@ -11,6 +11,7 @@ namespace chatterino {
 
 template <typename X>
 class LayoutCreator;
+class EditableModelView;
 
 class ModerationPage : public SettingsPage
 {
@@ -27,6 +28,8 @@ private:
 
     std::vector<QLineEdit *> durationInputs_;
     std::vector<QComboBox *> unitInputs_;
+
+    void openImageDialog(const QModelIndex &clicked, EditableModelView *view);
 };
 
 }  // namespace chatterino

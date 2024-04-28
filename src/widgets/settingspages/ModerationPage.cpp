@@ -212,6 +212,19 @@ ModerationPage::ModerationPage()
             QHeaderView::Fixed);
         view->getTableView()->horizontalHeader()->setSectionResizeMode(
             0, QHeaderView::Stretch);
+        QObject::connect(
+            view->getTableView(), &QTableView::clicked,
+            [this, view](const QModelIndex &clicked) {
+                if (clicked.column() == ModerationActionModel::Column::Icon)
+                {
+                    auto fileUrl = QFileDialog::getOpenFileUrl(
+                        this, tr("Open Image"), QUrl(),
+                        tr("Image Files (*.png)"));
+                    view->getModel()->setData(clicked, fileUrl, Qt::UserRole);
+                    view->getModel()->setData(clicked, fileUrl.fileName(),
+                                              Qt::DisplayRole);
+                }
+            });
 
         // We can safely ignore this signal connection since we own the view
         std::ignore = view->addButtonPressed.connect([] {

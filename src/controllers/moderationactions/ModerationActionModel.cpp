@@ -7,7 +7,7 @@ namespace chatterino {
 
 // commandmodel
 ModerationActionModel ::ModerationActionModel(QObject *parent)
-    : SignalVectorModel<ModerationAction>(1, parent)
+    : SignalVectorModel<ModerationAction>(2, parent)
 {
 }
 
@@ -15,14 +15,17 @@ ModerationActionModel ::ModerationActionModel(QObject *parent)
 ModerationAction ModerationActionModel::getItemFromRow(
     std::vector<QStandardItem *> &row, const ModerationAction &original)
 {
-    return ModerationAction(row[0]->data(Qt::DisplayRole).toString());
+    return ModerationAction(
+        row[Column::Command]->data(Qt::DisplayRole).toString(),
+        row[Column::Icon]->data(Qt::UserRole).toString());
 }
 
 // turns a row in the model into a vector item
 void ModerationActionModel::getRowFromItem(const ModerationAction &item,
                                            std::vector<QStandardItem *> &row)
 {
-    setStringItem(row[0], item.getAction());
+    setStringItem(row[Column::Command], item.getAction());
+    setFilePathItem(row[Column::Icon], item.iconPath());
 }
 
 }  // namespace chatterino

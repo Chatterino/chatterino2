@@ -13,6 +13,11 @@ class ModerationActionModel : public SignalVectorModel<ModerationAction>
 public:
     explicit ModerationActionModel(QObject *parent);
 
+    enum Column {
+        Command,
+        Icon,
+    };
+
 protected:
     // turn a vector item into a model row
     ModerationAction getItemFromRow(std::vector<QStandardItem *> &row,
