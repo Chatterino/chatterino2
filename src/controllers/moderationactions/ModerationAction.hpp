@@ -4,6 +4,7 @@
 
 #include <pajlada/serialize.hpp>
 #include <QString>
+#include <QUrl>
 
 #include <memory>
 #include <optional>
