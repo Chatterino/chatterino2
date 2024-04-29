@@ -3,7 +3,11 @@
 #include "common/QLogging.hpp"
 #include "messages/Image.hpp"
 
+#include <QBuffer>
+#include <QImageReader>
 #include <QLoggingCategory>
+#include <QPixmap>
+
 namespace chatterino {
 
 // This was copied from TwitchBadges::loadEmoteImage and modified.
