@@ -10,6 +10,7 @@
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/LoadPixmap.hpp"
+#include "util/PostToThread.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
 #include <QFileDialog>
@@ -233,11 +234,21 @@ ModerationPage::ModerationPage()
                     }
                     else
                     {
+                        // QPointer will be cleared when view is destroyed
+                        QPointer<EditableModelView> viewtemp = view;
+
                         loadPixmapFromUrl(
                             {fileUrl.toString()},
-                            [clicked, view](const QPixmap &pixmap) {
-                                view->getModel()->setData(clicked, pixmap,
-                                                          Qt::DecorationRole);
+                            [clicked, view = viewtemp](const QPixmap &pixmap) {
+                                postToThread([clicked, view, pixmap]() {
+                                    if (view.isNull())
+                                    {
+                                        return;
+                                    }
+
+                                    view->getModel()->setData(
+                                        clicked, pixmap, Qt::DecorationRole);
+                                });
                             });
                     }
                 }
