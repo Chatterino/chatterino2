@@ -10,7 +10,6 @@
 
 namespace chatterino {
 
-// This was copied from TwitchBadges::loadEmoteImage and modified.
 void loadPixmapFromUrlLazy(const Url &url,
                            std::function<void(QPixmap)> &&callback)
 {
