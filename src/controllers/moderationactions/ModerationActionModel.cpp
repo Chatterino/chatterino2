@@ -3,6 +3,7 @@
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "messages/Image.hpp"
 #include "util/LoadPixmapLazy.hpp"
+#include "util/PostToThread.hpp"
 #include "util/StandardItemHelper.hpp"
 
 #include <QIcon>
@@ -35,7 +36,9 @@ void ModerationActionModel::getRowFromItem(const ModerationAction &item,
     {
         loadPixmapFromUrlLazy(
             (*item.getImage())->url(), [row](const QPixmap &pixmap) {
-                row[Column::Icon]->setData(pixmap, Qt::DecorationRole);
+                postToThread([row, pixmap]() {
+                    row[Column::Icon]->setData(pixmap, Qt::DecorationRole);
+                });
             });
     }
 }
