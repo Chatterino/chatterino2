@@ -14,8 +14,8 @@ public:
     explicit ModerationActionModel(QObject *parent);
 
     enum Column {
-        Command,
-        Icon,
+        Command = 0,
+        Icon = 1,
     };
 
 protected:
