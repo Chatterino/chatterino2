@@ -28,7 +28,7 @@ void loadPixmapFromUrlLazy(const Url &url,
                 if (!reader.canRead() || reader.size().isEmpty())
                 {
                     qCWarning(chatterinoSettings)
-                        << "Can't read mod action image at" << url.string << ":"
+                        << "Can't read image file at" << url.string << ":"
                         << reader.errorString();
                     return;
                 }
@@ -37,8 +37,8 @@ void loadPixmapFromUrlLazy(const Url &url,
                 if (image.isNull())
                 {
                     qCWarning(chatterinoSettings)
-                        << "Failed reading mod action image at" << url.string
-                        << ":" << reader.errorString();
+                        << "Failed reading image at" << url.string << ":"
+                        << reader.errorString();
                     return;
                 }
 
@@ -46,4 +46,5 @@ void loadPixmapFromUrlLazy(const Url &url,
             })
         .execute();
 }
+
 }  // namespace chatterino
