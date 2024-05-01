@@ -220,8 +220,8 @@ ModerationPage::ModerationPage()
                 if (clicked.column() == ModerationActionModel::Column::Icon)
                 {
                     auto fileUrl = QFileDialog::getOpenFileUrl(
-                        this, tr("Open Image"), QUrl(),
-                        tr("Image Files (*.png *.jpg *.jpeg)"));
+                        this, "Open Image", QUrl(),
+                        "Image Files (*.png *.jpg *.jpeg)");
                     view->getModel()->setData(clicked, fileUrl, Qt::UserRole);
                     view->getModel()->setData(clicked, fileUrl.fileName(),
                                               Qt::DisplayRole);
