@@ -209,7 +209,7 @@ ModerationPage::ModerationPage()
                         ->initialized(&getSettings()->moderationActions))
                 .getElement();
 
-        view->setTitles({"Actions"});
+        view->setTitles({"Action", "Icon"});
         view->getTableView()->horizontalHeader()->setSectionResizeMode(
             QHeaderView::Fixed);
         view->getTableView()->horizontalHeader()->setSectionResizeMode(
