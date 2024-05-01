@@ -10,8 +10,7 @@
 
 namespace chatterino {
 
-void loadPixmapFromUrlLazy(const Url &url,
-                           std::function<void(QPixmap)> &&callback)
+void loadPixmapFromUrl(const Url &url, std::function<void(QPixmap)> &&callback)
 {
     NetworkRequest(url.string)
         .concurrent()

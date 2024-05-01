@@ -9,7 +9,7 @@
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
-#include "util/LoadPixmapLazy.hpp"
+#include "util/LoadPixmap.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
 #include <QFileDialog>
@@ -233,7 +233,7 @@ ModerationPage::ModerationPage()
                     }
                     else
                     {
-                        loadPixmapFromUrlLazy(
+                        loadPixmapFromUrl(
                             {fileUrl.toString()},
                             [clicked, view](const QPixmap &pixmap) {
                                 view->getModel()->setData(clicked, pixmap,

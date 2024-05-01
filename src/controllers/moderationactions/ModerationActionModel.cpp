@@ -2,7 +2,7 @@
 
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "messages/Image.hpp"
-#include "util/LoadPixmapLazy.hpp"
+#include "util/LoadPixmap.hpp"
 #include "util/PostToThread.hpp"
 #include "util/StandardItemHelper.hpp"
 
@@ -34,7 +34,7 @@ void ModerationActionModel::getRowFromItem(const ModerationAction &item,
     setFilePathItem(row[Column::Icon], item.iconPath());
     if (!item.iconPath().isEmpty())
     {
-        loadPixmapFromUrlLazy(
+        loadPixmapFromUrl(
             (*item.getImage())->url(), [row](const QPixmap &pixmap) {
                 postToThread([row, pixmap]() {
                     row[Column::Icon]->setData(pixmap, Qt::DecorationRole);

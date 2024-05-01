@@ -7,7 +7,7 @@
 #include "messages/Image.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "util/DisplayBadge.hpp"
-#include "util/LoadPixmapLazy.hpp"
+#include "util/LoadPixmap.hpp"
 
 #include <QBuffer>
 #include <QFile>
@@ -244,7 +244,7 @@ void TwitchBadges::loadEmoteImage(const QString &name, ImagePtr image,
                                   BadgeIconCallback &&callback)
 {
     auto url = image->url().string;
-    loadPixmapFromUrlLazy({url}, [this, name, callback, url](auto pixmap) {
+    loadPixmapFromUrl({url}, [this, name, callback, url](auto pixmap) {
         auto icon = std::make_shared<QIcon>(pixmap);
 
         {
