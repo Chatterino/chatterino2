@@ -121,6 +121,10 @@ bool ModerationAction::isImage() const
 const std::optional<ImagePtr> &ModerationAction::getImage() const
 {
     assertInGuiThread();
+    if (this->image_.has_value())
+    {
+        return this->image_;
+    }
 
     if (this->builtInImageToLoad_ == BuiltInImage::Ban)
     {
