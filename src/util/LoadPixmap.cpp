@@ -18,9 +18,7 @@ void loadPixmapFromUrl(const Url &url, std::function<void(QPixmap)> &&callback)
         .onSuccess(
             [callback = std::move(callback), url](const NetworkResult &result) {
                 auto data = result.getData();
-
-                // const cast since we are only reading from it
-                QBuffer buffer(const_cast<QByteArray *>(&data));
+                QBuffer buffer(&data);
                 buffer.open(QIODevice::ReadOnly);
                 QImageReader reader(&buffer);
 
