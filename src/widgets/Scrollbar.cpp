@@ -39,6 +39,11 @@ Scrollbar::Scrollbar(size_t messagesLimit, ChannelView *parent)
     this->setMouseTracking(true);
 }
 
+boost::circular_buffer<ScrollbarHighlight> Scrollbar::getHighlights() const
+{
+    return this->highlights_;
+}
+
 void Scrollbar::addHighlight(ScrollbarHighlight highlight)
 {
     this->highlights_.push_back(std::move(highlight));

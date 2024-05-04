@@ -41,6 +41,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/LinkInfo.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/MessageLayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/QMagicEnum.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Scrollbar.cpp
     # Add your new file above this line!
     )
 

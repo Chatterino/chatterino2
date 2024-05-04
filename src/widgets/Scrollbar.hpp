@@ -84,6 +84,10 @@ class Scrollbar : public BaseWidget
 public:
     Scrollbar(size_t messagesLimit, ChannelView *parent = nullptr);
 
+    /// Return a copy of the highlights
+    ///
+    /// Should only be used for tests
+    boost::circular_buffer<ScrollbarHighlight> getHighlights() const;
     void addHighlight(ScrollbarHighlight highlight);
     void addHighlightsAtStart(
         const std::vector<ScrollbarHighlight> &highlights_);
