@@ -276,7 +276,7 @@ void Scrollbar::printCurrentState(const QString &prefix) const
 
 void Scrollbar::paintEvent(QPaintEvent * /*event*/)
 {
-    bool mouseOver = this->mouseOverIndex_ != -1;
+    bool mouseOver = this->mouseOverLocation_ != MouseLocation::Outside;
     int xOffset =
         mouseOver ? 0 : this->width() - static_cast<int>(4.0F * this->scale());
 
@@ -292,7 +292,7 @@ void Scrollbar::paintEvent(QPaintEvent * /*event*/)
     this->thumbRect_.setX(xOffset);
 
     // mouse over thumb
-    if (this->mouseDownIndex_ == 2)
+    if (this->mouseDownLocation_ == MouseLocation::InsideThumb)
     {
         painter.fillRect(this->thumbRect_,
                          this->theme->scrollbars.thumbSelected);
@@ -370,39 +370,16 @@ void Scrollbar::resizeEvent(QResizeEvent * /*event*/)
 
 void Scrollbar::mouseMoveEvent(QMouseEvent *event)
 {
-    if (this->mouseDownIndex_ == -1)
+    if (this->mouseDownLocation_ == MouseLocation::Outside)
     {
-        int y = event->pos().y();
-
-        auto oldIndex = this->mouseOverIndex_;
-
-        if (y < 0)
+        auto moveLocation = this->locationOfMouseEvent(event);
+        if (this->mouseOverLocation_ != moveLocation)
         {
-            this->mouseOverIndex_ = 0;
-        }
-        else if (y < this->thumbRect_.y())
-        {
-            this->mouseOverIndex_ = 1;
-        }
-        else if (this->thumbRect_.contains(2, y))
-        {
-            this->mouseOverIndex_ = 2;
-        }
-        else if (y < height())
-        {
-            this->mouseOverIndex_ = 3;
-        }
-        else
-        {
-            this->mouseOverIndex_ = 4;
-        }
-
-        if (oldIndex != this->mouseOverIndex_)
-        {
+            this->mouseOverLocation_ = moveLocation;
             this->update();
         }
     }
-    else if (this->mouseDownIndex_ == 2)
+    else if (this->mouseDownLocation_ == MouseLocation::InsideThumb)
     {
         qreal delta =
             static_cast<qreal>(event->pos().y() - this->lastMousePosition_.y());
@@ -418,76 +395,43 @@ void Scrollbar::mouseMoveEvent(QMouseEvent *event)
 
 void Scrollbar::mousePressEvent(QMouseEvent *event)
 {
-    int y = event->pos().y();
-
-    if (y < 0)
-    {
-        this->mouseDownIndex_ = 0;
-    }
-    else if (y < this->thumbRect_.y())
-    {
-        this->mouseDownIndex_ = 1;
-    }
-    else if (this->thumbRect_.contains(2, y))
-    {
-        this->mouseDownIndex_ = 2;
-    }
-    else if (y < this->height())
-    {
-        this->mouseDownIndex_ = 3;
-    }
-    else
-    {
-        this->mouseDownIndex_ = 4;
-    }
+    this->mouseDownLocation_ = this->locationOfMouseEvent(event);
+    this->update();
 }
 
 void Scrollbar::mouseReleaseEvent(QMouseEvent *event)
 {
-    int y = event->pos().y();
-
-    if (y < 0)
+    auto releaseLocation = this->locationOfMouseEvent(event);
+    if (this->mouseDownLocation_ != releaseLocation)
     {
-        if (this->mouseDownIndex_ == 0)
-        {
+        // Ignore event. User released the mouse from a different spot than
+        // they first clicked. For example, they clicked above the thumb,
+        // changed their mind, dragged the mouse below the thumb, and released.
+        this->mouseDownLocation_ = MouseLocation::Outside;
+        return;
+    }
+
+    switch (releaseLocation)
+    {
+        case MouseLocation::AboveThumb:
+            // Move scrollbar up a small bit.
             this->setDesiredValue(this->desiredValue_ - SCROLL_DELTA, true);
-        }
-    }
-    else if (y < this->thumbRect_.y())
-    {
-        if (this->mouseDownIndex_ == 1)
-        {
-            this->setDesiredValue(this->desiredValue_ - SCROLL_DELTA, true);
-        }
-    }
-    else if (this->thumbRect_.contains(2, y))
-    {
-        // do nothing
-    }
-    else if (y < this->height())
-    {
-        if (this->mouseDownIndex_ == 3)
-        {
+            break;
+        case MouseLocation::BelowThumb:
+            // Move scrollbar down a small bit.
             this->setDesiredValue(this->desiredValue_ + SCROLL_DELTA, true);
-        }
-    }
-    else
-    {
-        if (this->mouseDownIndex_ == 4)
-        {
-            this->setDesiredValue(this->desiredValue_ + SCROLL_DELTA, true);
-        }
+            break;
+        default:
+            break;
     }
 
-    this->mouseDownIndex_ = -1;
-
+    this->mouseDownLocation_ = MouseLocation::Outside;
     this->update();
 }
 
 void Scrollbar::leaveEvent(QEvent * /*event*/)
 {
-    this->mouseOverIndex_ = -1;
-
+    this->mouseOverLocation_ = MouseLocation::Outside;
     this->update();
 }
 
@@ -507,6 +451,24 @@ void Scrollbar::updateScroll()
                   MIN_THUMB_HEIGHT);
 
     this->update();
+}
+
+Scrollbar::MouseLocation Scrollbar::locationOfMouseEvent(
+    QMouseEvent *event) const
+{
+    int y = event->pos().y();
+
+    if (y < this->thumbRect_.y())
+    {
+        return MouseLocation::AboveThumb;
+    }
+
+    if (this->thumbRect_.contains(2, y))
+    {
+        return MouseLocation::InsideThumb;
+    }
+
+    return MouseLocation::BelowThumb;
 }
 
 }  // namespace chatterino
