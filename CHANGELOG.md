@@ -2,6 +2,10 @@
 
 ## Unversioned
 
+- Dev: Add doxygen build target. (#5377)
+
+## 2.5.1
+
 - Bugfix: Fixed links without a protocol not being clickable. (#5345)
 - Dev: Refactor and document `Scrollbar`. (#5334)
 
