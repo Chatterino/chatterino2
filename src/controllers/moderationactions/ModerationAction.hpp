@@ -38,11 +38,12 @@ private:
     QString line2_;
     QString action_;
 
-    enum class BuiltInImage {
+    enum class ActionIconType {
         Ban,
-        TrashCan,
+        Delete,
+        // Note: timeouts use text (line1_ and line2_), they aren't rendered with an image
     };
-    BuiltInImage builtInImageToLoad_{};
+    ActionIconType builtInImageToLoad_{};
 
     QUrl iconPath_;
 };

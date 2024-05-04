@@ -85,11 +85,11 @@ ModerationAction::ModerationAction(const QString &action, const QUrl &iconPath)
     }
     else if (action.startsWith("/ban "))
     {
-        this->builtInImageToLoad_ = BuiltInImage::Ban;
+        this->builtInImageToLoad_ = ActionIconType::Ban;
     }
     else if (action.startsWith("/delete "))
     {
-        this->builtInImageToLoad_ = BuiltInImage::TrashCan;
+        this->builtInImageToLoad_ = ActionIconType::Delete;
     }
     else
     {
@@ -129,11 +129,11 @@ const std::optional<ImagePtr> &ModerationAction::getImage() const
     {
         this->image_ = Image::fromUrl({this->iconPath_.toString()});
     }
-    else if (this->builtInImageToLoad_ == BuiltInImage::Ban)
+    else if (this->builtInImageToLoad_ == ActionIconType::Ban)
     {
         this->image_ = Image::fromResourcePixmap(getResources().buttons.ban);
     }
-    else if (this->builtInImageToLoad_ == BuiltInImage::TrashCan)
+    else if (this->builtInImageToLoad_ == ActionIconType::Delete)
     {
         this->image_ =
             Image::fromResourcePixmap(getResources().buttons.trashCan);
