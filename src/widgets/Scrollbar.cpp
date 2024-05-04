@@ -24,6 +24,16 @@ constexpr qreal SCROLL_DELTA = 5.0;
 
 namespace chatterino {
 
+namespace {
+
+    template <typename A, typename B>
+    bool areClose(const A &a, const B &b)
+    {
+        return std::abs(a - b) <= 0.0001;
+    }
+
+}  // namespace
+
 Scrollbar::Scrollbar(size_t messagesLimit, ChannelView *parent)
     : BaseWidget(parent)
     , currentValueAnimation_(this, "currentValue_")
@@ -149,10 +159,10 @@ void Scrollbar::setPageSize(qreal value)
 
 void Scrollbar::setDesiredValue(qreal value, bool animated)
 {
-    value = std::max(this->minimum_, std::min(this->getBottom(), value));
-
-    if (std::abs(this->currentValue_ - value) <= 0.0001)
+    value = std::clamp(value, this->minimum_, this->getBottom());
+    if (areClose(this->currentValue_, value))
     {
+        // value has not changed
         return;
     }
 
@@ -160,7 +170,7 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
 
     this->desiredValueChanged_.invoke();
 
-    this->atBottom_ = (this->getBottom() - value) <= 0.0001;
+    this->atBottom_ = areClose(this->getBottom(), value);
 
     if (animated && getSettings()->enableSmoothScrolling)
     {
@@ -240,9 +250,9 @@ pajlada::Signals::NoArgSignal &Scrollbar::getDesiredValueChanged()
 void Scrollbar::setCurrentValue(qreal value)
 {
     value = std::max(this->minimum_, std::min(this->getBottom(), value));
-
-    if (std::abs(this->currentValue_ - value) <= 0.0001)
+    if (areClose(this->currentValue_, value))
     {
+        // value has not changed
         return;
     }
 
