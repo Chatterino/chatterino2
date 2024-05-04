@@ -1,12 +1,7 @@
 #include "widgets/Scrollbar.hpp"
 
 #include "Application.hpp"
-#include "controllers/accounts/AccountController.hpp"
-#include "messages/layouts/MessageLayout.hpp"
-#include "messages/MessageBuilder.hpp"
-#include "messages/MessageElement.hpp"
 #include "mocks/EmptyApplication.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
@@ -14,7 +9,6 @@
 #include "widgets/helper/ScrollbarHighlight.hpp"
 
 #include <gtest/gtest.h>
-#include <QDebug>
 #include <QString>
 
 #include <memory>
