@@ -60,9 +60,9 @@ void Scrollbar::addHighlightsAtStart(
         return;
     }
 
-    for (size_t i = highlights.size() - 1; i < highlights.size(); i--)
+    for (size_t i = 0; i < nItems; i++)
     {
-        this->highlights_.push_front(highlights[i]);
+        this->highlights_.push_front(highlights[highlights.size() - 1 - i]);
     }
 }
 
