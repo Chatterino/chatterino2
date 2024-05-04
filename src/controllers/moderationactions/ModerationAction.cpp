@@ -20,6 +20,8 @@ ModerationAction::ModerationAction(const QString &action, const QUrl &iconPath)
 
     if (timeoutMatch.hasMatch())
     {
+        this->type_ = Type::Timeout;
+
         // if (multipleTimeouts > 1) {
         // QString line1;
         // QString line2;
@@ -85,14 +87,16 @@ ModerationAction::ModerationAction(const QString &action, const QUrl &iconPath)
     }
     else if (action.startsWith("/ban "))
     {
-        this->builtInImageToLoad_ = ActionIconType::Ban;
+        this->type_ = Type::Ban;
     }
     else if (action.startsWith("/delete "))
     {
-        this->builtInImageToLoad_ = ActionIconType::Delete;
+        this->type_ = Type::Delete;
     }
     else
     {
+        this->type_ = Type::Custom;
+
         QString xD = action;
 
         xD.replace(replaceRegex, "");
@@ -129,11 +133,11 @@ const std::optional<ImagePtr> &ModerationAction::getImage() const
     {
         this->image_ = Image::fromUrl({this->iconPath_.toString()});
     }
-    else if (this->builtInImageToLoad_ == ActionIconType::Ban)
+    else if (this->type_ == Type::Ban)
     {
         this->image_ = Image::fromResourcePixmap(getResources().buttons.ban);
     }
-    else if (this->builtInImageToLoad_ == ActionIconType::Delete)
+    else if (this->type_ == Type::Delete)
     {
         this->image_ =
             Image::fromResourcePixmap(getResources().buttons.trashCan);
@@ -155,6 +159,11 @@ const QString &ModerationAction::getLine2() const
 const QString &ModerationAction::getAction() const
 {
     return this->action_;
+}
+
+ModerationAction::Type ModerationAction::getType() const
+{
+    return this->type_;
 }
 
 }  // namespace chatterino

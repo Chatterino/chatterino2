@@ -98,6 +98,8 @@ TEST_F(ModerationActionTest, Parse)
         QString expectedLine2;
 
         std::optional<ImagePtr> expectedImage;
+
+        ModerationAction::Type expectedType;
     };
 
     std::vector<TestCase> tests{
@@ -105,26 +107,31 @@ TEST_F(ModerationActionTest, Parse)
             .action = "/ban forsen",
             .expectedImage =
                 Image::fromResourcePixmap(getResources().buttons.ban),
+            .expectedType = ModerationAction::Type::Ban,
         },
         {
             .action = "/delete {message.id}",
             .expectedImage =
                 Image::fromResourcePixmap(getResources().buttons.trashCan),
+            .expectedType = ModerationAction::Type::Delete,
         },
         {
             .action = "/timeout {user.name} 1d",
             .expectedLine1 = "1",
             .expectedLine2 = "d",
+            .expectedType = ModerationAction::Type::Timeout,
         },
         {
             .action = ".timeout {user.name} 300",
             .expectedLine1 = "5",
             .expectedLine2 = "m",
+            .expectedType = ModerationAction::Type::Timeout,
         },
         {
             .action = "forsen",
             .expectedLine1 = "fo",
             .expectedLine2 = "rs",
+            .expectedType = ModerationAction::Type::Custom,
         },
     };
 
@@ -141,5 +148,7 @@ TEST_F(ModerationActionTest, Parse)
         {
             EXPECT_EQ(moderationAction.getImage(), test.expectedImage);
         }
+
+        EXPECT_EQ(moderationAction.getType(), test.expectedType);
     }
 }

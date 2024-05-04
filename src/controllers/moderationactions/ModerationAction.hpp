@@ -17,6 +17,31 @@ using ImagePtr = std::shared_ptr<Image>;
 class ModerationAction
 {
 public:
+    /**
+     * Type of the action, parsed from the input `action`
+     */
+    enum class Type {
+        /**
+         * /ban <user>
+         */
+        Ban,
+
+        /**
+         * /delete <msg-id>
+         */
+        Delete,
+
+        /**
+         * /timeout <user> <duration>
+         */
+        Timeout,
+
+        /**
+         * Anything not matching the action types above
+         */
+        Custom,
+    };
+
     ModerationAction(const QString &action, const QUrl &iconPath = {});
 
     bool operator==(const ModerationAction &other) const;
@@ -26,6 +51,7 @@ public:
     const QString &getLine1() const;
     const QString &getLine2() const;
     const QString &getAction() const;
+    Type getType() const;
 
     const QUrl &iconPath() const
     {
@@ -38,12 +64,7 @@ private:
     QString line2_;
     QString action_;
 
-    enum class ActionIconType {
-        Ban,
-        Delete,
-        // Note: timeouts use text (line1_ and line2_), they aren't rendered with an image
-    };
-    ActionIconType builtInImageToLoad_{};
+    Type type_{};
 
     QUrl iconPath_;
 };
