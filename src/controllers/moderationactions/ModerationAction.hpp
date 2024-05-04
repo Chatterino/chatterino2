@@ -39,7 +39,6 @@ private:
     QString action_;
 
     enum class BuiltInImage {
-        None,
         Ban,
         TrashCan,
     };

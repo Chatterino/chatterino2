@@ -101,9 +101,8 @@ ModerationAction::ModerationAction(const QString &action, const QUrl &iconPath)
         this->line2_ = xD.mid(2, 2);
     }
 
-    if (!iconPath.isEmpty())
+    if (iconPath.isValid())
     {
-        this->builtInImageToLoad_ = BuiltInImage::None;
         this->iconPath_ = iconPath;
     }
 }
@@ -126,7 +125,11 @@ const std::optional<ImagePtr> &ModerationAction::getImage() const
         return this->image_;
     }
 
-    if (this->builtInImageToLoad_ == BuiltInImage::Ban)
+    if (this->iconPath_.isValid())
+    {
+        this->image_ = Image::fromUrl({this->iconPath_.toString()});
+    }
+    else if (this->builtInImageToLoad_ == BuiltInImage::Ban)
     {
         this->image_ = Image::fromResourcePixmap(getResources().buttons.ban);
     }
@@ -134,10 +137,6 @@ const std::optional<ImagePtr> &ModerationAction::getImage() const
     {
         this->image_ =
             Image::fromResourcePixmap(getResources().buttons.trashCan);
-    }
-    else if (!this->iconPath_.isEmpty())
-    {
-        this->image_ = Image::fromUrl({this->iconPath_.toString()});
     }
 
     return this->image_;
