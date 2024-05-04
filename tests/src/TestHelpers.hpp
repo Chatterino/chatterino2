@@ -1,66 +1,17 @@
 #pragma once
 
-#include <QString>
-#include <QStringView>
-
-#include <mutex>
 #include <ostream>
 
-template <typename T>
-class ReceivedMessage
-{
-    mutable std::mutex mutex;
+class QString;
+class QStringView;
+class QByteArray;
 
-    bool isSet{false};
-    T t;
+std::ostream &operator<<(std::ostream &os, QStringView str);
+std::ostream &operator<<(std::ostream &os, const QByteArray &bytes);
+std::ostream &operator<<(std::ostream &os, const QString &str);
 
-public:
-    ReceivedMessage() = default;
-
-    explicit operator bool() const
-    {
-        std::unique_lock lock(this->mutex);
-
-        return this->isSet;
-    }
-
-    ReceivedMessage &operator=(const T &newT)
-    {
-        std::unique_lock lock(this->mutex);
-
-        this->isSet = true;
-        this->t = newT;
-
-        return *this;
-    }
-
-    bool operator==(const T &otherT) const
-    {
-        std::unique_lock lock(this->mutex);
-
-        return this->t == otherT;
-    }
-
-    const T *operator->() const
-    {
-        return &this->t;
-    }
-};
-
-inline std::ostream &operator<<(std::ostream &os, const QStringView &str)
-{
-    os << qUtf8Printable(str.toString());
-    return os;
-}
-
-inline std::ostream &operator<<(std::ostream &os, const QByteArray &bytes)
-{
-    os << bytes.toStdString();
-    return os;
-}
-
-inline std::ostream &operator<<(std::ostream &os, const QString &str)
-{
-    os << qUtf8Printable(str);
-    return os;
-}
+// NOLINTBEGIN(readability-identifier-naming)
+void PrintTo(const QByteArray &bytes, std::ostream *os);
+void PrintTo(QStringView str, std::ostream *os);
+void PrintTo(const QString &str, std::ostream *os);
+// NOLINTEND(readability-identifier-naming)

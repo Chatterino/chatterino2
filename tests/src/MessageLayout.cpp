@@ -10,6 +10,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "TestHelpers.hpp"
 
 #include <gtest/gtest.h>
 #include <QDebug>

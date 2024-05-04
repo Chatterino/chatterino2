@@ -1,5 +1,7 @@
 #include "common/ChatterSet.hpp"
 
+#include "TestHelpers.hpp"
+
 #include <gtest/gtest.h>
 #include <QStringList>
 

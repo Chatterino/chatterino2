@@ -2,6 +2,7 @@
 
 #include "common/network/NetworkManager.hpp"
 #include "common/network/NetworkResult.hpp"
+#include "TestHelpers.hpp"
 
 #include <gtest/gtest.h>
 #include <QCoreApplication>

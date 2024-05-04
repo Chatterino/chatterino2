@@ -7,6 +7,7 @@
 #include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "TestHelpers.hpp"
 #include "widgets/Notebook.hpp"
 
 #include <gmock/gmock.h>

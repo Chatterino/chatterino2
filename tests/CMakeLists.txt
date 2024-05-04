@@ -6,6 +6,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
     ${CMAKE_CURRENT_LIST_DIR}/resources/test-resources.qrc
     ${CMAKE_CURRENT_LIST_DIR}/src/TestHelpers.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/TestHelpers.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ChannelChatters.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/AccessGuard.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NetworkCommon.cpp

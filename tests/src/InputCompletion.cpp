@@ -12,6 +12,7 @@
 #include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "TestHelpers.hpp"
 #include "widgets/splits/InputCompletionPopup.hpp"
 
 #include <gtest/gtest.h>
@@ -224,7 +225,7 @@ void containsRoughly(std::span<EmoteItem> span, std::set<QString> values)
             }
         }
 
-        ASSERT_TRUE(found) << qPrintable(v) << " was not found in the span";
+        ASSERT_TRUE(found) << v << " was not found in the span";
     }
 }
 

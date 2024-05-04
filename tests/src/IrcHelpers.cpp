@@ -1,5 +1,7 @@
 #include "util/IrcHelpers.hpp"
 
+#include "TestHelpers.hpp"
+
 #include <gtest/gtest.h>
 #include <QApplication>
 #include <QDebug>
@@ -55,7 +57,7 @@ TEST(IrcHelpers, ParseTagString)
         const auto actual = parseTagString(input);
 
         EXPECT_EQ(actual, expected)
-            << qUtf8Printable(actual) << " (" << qUtf8Printable(input)
-            << ") did not match expected value " << qUtf8Printable(expected);
+            << actual << " (" << input << ") did not match expected value "
+            << expected;
     }
 }

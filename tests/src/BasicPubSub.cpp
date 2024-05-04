@@ -1,5 +1,6 @@
 #include "providers/liveupdates/BasicPubSubClient.hpp"
 #include "providers/liveupdates/BasicPubSubManager.hpp"
+#include "TestHelpers.hpp"
 
 #include <gtest/gtest.h>
 #include <QByteArray>
