@@ -1,21 +1,10 @@
 #include "controllers/moderationactions/ModerationAction.hpp"
 
-#include "common/Literals.hpp"
-#include "controllers/accounts/AccountController.hpp"
-#include "controllers/commands/Command.hpp"
-#include "controllers/commands/CommandController.hpp"
-#include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Image.hpp"
 #include "mocks/EmptyApplication.hpp"
 #include "singletons/Emotes.hpp"
-#include "singletons/Fonts.hpp"
-#include "singletons/Paths.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
-#include "singletons/Theme.hpp"
-#include "singletons/WindowManager.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/splits/Split.hpp"
 
 #include <gtest/gtest.h>
 #include <QString>
@@ -31,38 +20,7 @@ class MockApplication : mock::EmptyApplication
 public:
     MockApplication()
         : settings(this->settingsDir.filePath("settings.json"))
-        , fonts(this->settings)
-        , windowManager(this->paths)
     {
-    }
-    Theme *getThemes() override
-    {
-        return &this->theme;
-    }
-
-    HotkeyController *getHotkeys() override
-    {
-        return &this->hotkeys;
-    }
-
-    Fonts *getFonts() override
-    {
-        return &this->fonts;
-    }
-
-    WindowManager *getWindows() override
-    {
-        return &this->windowManager;
-    }
-
-    AccountController *getAccounts() override
-    {
-        return &this->accounts;
-    }
-
-    CommandController *getCommands() override
-    {
-        return &this->commands;
     }
 
     IEmotes *getEmotes() override
@@ -71,13 +29,6 @@ public:
     }
 
     Settings settings;
-    Theme theme;
-    HotkeyController hotkeys;
-    Fonts fonts;
-    Paths paths;
-    WindowManager windowManager;
-    AccountController accounts;
-    CommandController commands;
     Emotes emotes;
 };
 
