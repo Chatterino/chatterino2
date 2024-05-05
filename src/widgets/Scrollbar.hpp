@@ -151,14 +151,27 @@ private:
 
     void updateScroll();
 
+    enum class MouseLocation {
+        /// The mouse is positioned outside this widget
+        Outside,
+        /// The mouse is positioned inside the widget, but above the thumb
+        AboveThumb,
+        /// The mouse is positioned inside the thumb
+        InsideThumb,
+        /// The mouse is positioned inside the widget, but below the thumb
+        BelowThumb
+    };
+
+    MouseLocation locationOfMouseEvent(QMouseEvent *event) const;
+
     QPropertyAnimation currentValueAnimation_;
 
     boost::circular_buffer<ScrollbarHighlight> highlights_;
 
     bool atBottom_{false};
 
-    int mouseOverIndex_ = -1;
-    int mouseDownIndex_ = -1;
+    MouseLocation mouseOverLocation_ = MouseLocation::Outside;
+    MouseLocation mouseDownLocation_ = MouseLocation::Outside;
     QPoint lastMousePosition_;
 
     int trackHeight_ = 100;
