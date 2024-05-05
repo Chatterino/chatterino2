@@ -19,19 +19,14 @@ constexpr int MIN_THUMB_HEIGHT = 10;
 /// Amount of messages to move by when clicking on the track
 constexpr qreal SCROLL_DELTA = 5.0;
 
+bool areClose(auto a, auto b)
+{
+    return std::abs(a - b) <= 0.0001;
+}
+
 }  // namespace
 
 namespace chatterino {
-
-namespace {
-
-    template <typename A, typename B>
-    bool areClose(const A &a, const B &b)
-    {
-        return std::abs(a - b) <= 0.0001;
-    }
-
-}  // namespace
 
 Scrollbar::Scrollbar(size_t messagesLimit, ChannelView *parent)
     : BaseWidget(parent)
