@@ -12,9 +12,9 @@
 #include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "Test.hpp"
 #include "widgets/splits/InputCompletionPopup.hpp"
 
-#include <gtest/gtest.h>
 #include <QDir>
 #include <QFile>
 #include <QModelIndex>

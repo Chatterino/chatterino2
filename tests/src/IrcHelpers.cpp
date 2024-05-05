@@ -1,6 +1,7 @@
 #include "util/IrcHelpers.hpp"
 
-#include <gtest/gtest.h>
+#include "Test.hpp"
+
 #include <QApplication>
 #include <QDebug>
 #include <QtConcurrent>

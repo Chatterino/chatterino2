@@ -15,8 +15,8 @@
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "singletons/Emotes.hpp"
+#include "Test.hpp"
 
-#include <gtest/gtest.h>
 #include <IrcConnection>
 #include <QDebug>
 #include <QString>

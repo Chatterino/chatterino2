@@ -1,6 +1,7 @@
 #include "util/XDGHelper.hpp"
 
-#include <gtest/gtest.h>
+#include "Test.hpp"
+
 #include <QDebug>
 
 #if defined(Q_OS_UNIX) and !defined(Q_OS_DARWIN)

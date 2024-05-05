@@ -1,8 +1,8 @@
 #include "providers/emoji/Emojis.hpp"
 
 #include "common/Literals.hpp"
+#include "Test.hpp"
 
-#include <gtest/gtest.h>
 #include <QDebug>
 #include <QString>
 

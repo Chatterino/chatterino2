@@ -1,6 +1,6 @@
+#include "Test.hpp"
 #include "util/Twitch.hpp"
 
-#include <gtest/gtest.h>
 #include <QApplication>
 #include <QDebug>
 #include <QtConcurrent>

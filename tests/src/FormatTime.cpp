@@ -1,6 +1,6 @@
 #include "util/FormatTime.hpp"
 
-#include <gtest/gtest.h>
+#include "Test.hpp"
 
 #include <chrono>
 

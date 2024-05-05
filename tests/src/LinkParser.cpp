@@ -1,6 +1,7 @@
 #include "common/LinkParser.hpp"
 
-#include <gtest/gtest.h>
+#include "Test.hpp"
+
 #include <QString>
 #include <QStringList>
 

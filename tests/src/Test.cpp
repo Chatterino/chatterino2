@@ -1,6 +1,5 @@
-#include "TestHelpers.hpp"
+#include "Test.hpp"
 
-#include <gtest/gtest.h>
 #include <QString>
 #include <QStringView>
 

@@ -4,8 +4,8 @@
 #include "providers/twitch/pubsubmessages/AutoMod.hpp"
 #include "providers/twitch/pubsubmessages/Whisper.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
+#include "Test.hpp"
 
-#include <gtest/gtest.h>
 #include <QString>
 
 #include <chrono>

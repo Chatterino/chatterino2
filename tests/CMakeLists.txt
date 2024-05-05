@@ -5,8 +5,8 @@ option(CHATTERINO_TEST_USE_PUBLIC_HTTPBIN "Use public httpbin for testing networ
 set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
     ${CMAKE_CURRENT_LIST_DIR}/resources/test-resources.qrc
-    ${CMAKE_CURRENT_LIST_DIR}/src/TestHelpers.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/TestHelpers.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Test.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Test.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ChannelChatters.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/AccessGuard.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NetworkCommon.cpp
@@ -62,10 +62,6 @@ set_target_properties(${PROJECT_NAME}
     RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/bin"
     RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/bin"
     )
-
-target_compile_options(${PROJECT_NAME} PRIVATE 
-    $<IF:$<BOOL:${MSVC}>,/FI,-include> "${CMAKE_CURRENT_LIST_DIR}/src/TestHelpers.hpp"
-)
 
 if(CHATTERINO_ENABLE_LTO)
     message(STATUS "Enabling LTO for ${PROJECT_NAME}")

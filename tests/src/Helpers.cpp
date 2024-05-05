@@ -1,6 +1,6 @@
 #include "util/Helpers.hpp"
 
-#include <gtest/gtest.h>
+#include "Test.hpp"
 
 using namespace chatterino;
 using namespace _helpers_internal;

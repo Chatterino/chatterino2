@@ -12,11 +12,10 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "Test.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/Split.hpp"
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include <QDebug>
 #include <QString>
 
