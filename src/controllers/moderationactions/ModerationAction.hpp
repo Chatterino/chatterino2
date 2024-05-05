@@ -51,12 +51,8 @@ public:
     const QString &getLine1() const;
     const QString &getLine2() const;
     const QString &getAction() const;
+    const QUrl &iconPath() const;
     Type getType() const;
-
-    const QUrl &iconPath() const
-    {
-        return this->iconPath_;
-    };
 
 private:
     mutable std::optional<ImagePtr> image_;

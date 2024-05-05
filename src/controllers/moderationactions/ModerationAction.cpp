@@ -161,6 +161,11 @@ const QString &ModerationAction::getAction() const
     return this->action_;
 }
 
+const QUrl &ModerationAction::iconPath() const
+{
+    return this->iconPath_;
+}
+
 ModerationAction::Type ModerationAction::getType() const
 {
     return this->type_;
