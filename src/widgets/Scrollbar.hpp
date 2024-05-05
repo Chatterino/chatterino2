@@ -151,7 +151,17 @@ private:
 
     void updateScroll();
 
-    enum class MouseLocation { Outside, AboveThumb, InsideThumb, BelowThumb };
+    enum class MouseLocation {
+        /// The mouse is positioned outside this widget
+        Outside,
+        /// The mouse is positioned inside the widget, but above the thumb
+        AboveThumb,
+        /// The mouse is positioned inside the thumb
+        InsideThumb,
+        /// The mouse is positioned inside the widget, but below the thumb
+        BelowThumb
+    };
+
     MouseLocation locationOfMouseEvent(QMouseEvent *event) const;
 
     QPropertyAnimation currentValueAnimation_;
