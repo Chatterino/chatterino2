@@ -34,12 +34,17 @@ void ModerationActionModel::getRowFromItem(const ModerationAction &item,
     setFilePathItem(row[Column::Icon], item.iconPath());
     if (!item.iconPath().isEmpty())
     {
-        loadPixmapFromUrl(
-            (*item.getImage())->url(), [row](const QPixmap &pixmap) {
+        auto oImage = item.getImage();
+        assert(oImage.has_value());
+        if (oImage.has_value())
+        {
+            auto url = oImage->get()->url();
+            loadPixmapFromUrl(url, [row](const QPixmap &pixmap) {
                 postToThread([row, pixmap]() {
                     row[Column::Icon]->setData(pixmap, Qt::DecorationRole);
                 });
             });
+        }
     }
 }
 
