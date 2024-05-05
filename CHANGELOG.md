@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Minor: Add option to customise Moderation buttons with images. (#5369)
+- Dev: Add doxygen build target. (#5377)
 
 ## 2.5.1
 

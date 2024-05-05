@@ -1143,3 +1143,14 @@ if(NOT CHATTERINO_UPDATER)
     message(STATUS "Disabling the updater.")
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_DISABLE_UPDATER)
 endif()
+
+if (DOXYGEN_FOUND)
+    message(STATUS "Doxygen found, adding doxygen target")
+    # output will be in docs/html
+    set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/docs")
+
+    doxygen_add_docs(
+        doxygen
+        ${CMAKE_CURRENT_LIST_DIR}
+    )
+endif ()
