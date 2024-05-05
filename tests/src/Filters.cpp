@@ -13,7 +13,6 @@
 #include "providers/twitch/TwitchBadge.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Emotes.hpp"
-#include "TestHelpers.hpp"
 
 #include <gtest/gtest.h>
 #include <QColor>

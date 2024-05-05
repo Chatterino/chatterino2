@@ -1,7 +1,5 @@
 #include "util/XDGHelper.hpp"
 
-#include "TestHelpers.hpp"
-
 #include <gtest/gtest.h>
 #include <QDebug>
 

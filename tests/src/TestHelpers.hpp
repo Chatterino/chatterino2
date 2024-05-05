@@ -2,6 +2,11 @@
 
 #include <ostream>
 
+// This file is included in all TUs in chatterino-test to avoid ODR violations.
+//
+// It defines overloads for printing Qt types to a std::ostream as well as
+// overloads for PrintTo which is used for naming parameterized tests.
+
 class QString;
 class QStringView;
 class QByteArray;

@@ -12,7 +12,6 @@
 #include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
-#include "TestHelpers.hpp"
 #include "widgets/splits/InputCompletionPopup.hpp"
 
 #include <gtest/gtest.h>

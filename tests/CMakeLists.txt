@@ -63,6 +63,10 @@ set_target_properties(${PROJECT_NAME}
     RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/bin"
     )
 
+target_compile_options(${PROJECT_NAME} PRIVATE 
+    $<IF:$<BOOL:${MSVC}>,/FI,-include> "${CMAKE_CURRENT_LIST_DIR}/src/TestHelpers.hpp"
+)
+
 if(CHATTERINO_ENABLE_LTO)
     message(STATUS "Enabling LTO for ${PROJECT_NAME}")
     set_property(TARGET ${PROJECT_NAME}

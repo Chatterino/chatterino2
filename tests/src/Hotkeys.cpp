@@ -1,5 +1,4 @@
 #include "controllers/hotkeys/HotkeyHelpers.hpp"
-#include "TestHelpers.hpp"
 
 #include <gtest/gtest.h>
 

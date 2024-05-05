@@ -10,7 +10,6 @@
 #include "providers/twitch/TwitchBadge.hpp"  // for Badge
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
-#include "TestHelpers.hpp"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

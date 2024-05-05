@@ -1,7 +1,5 @@
 #include "common/network/NetworkResult.hpp"
 
-#include "TestHelpers.hpp"
-
 #include <gtest/gtest.h>
 
 using namespace chatterino;

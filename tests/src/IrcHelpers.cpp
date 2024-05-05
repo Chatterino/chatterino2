@@ -1,7 +1,5 @@
 #include "util/IrcHelpers.hpp"
 
-#include "TestHelpers.hpp"
-
 #include <gtest/gtest.h>
 #include <QApplication>
 #include <QDebug>

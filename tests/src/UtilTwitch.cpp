@@ -1,4 +1,3 @@
-#include "TestHelpers.hpp"
 #include "util/Twitch.hpp"
 
 #include <gtest/gtest.h>

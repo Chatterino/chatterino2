@@ -1,7 +1,5 @@
 #include "util/FormatTime.hpp"
 
-#include "TestHelpers.hpp"
-
 #include <gtest/gtest.h>
 
 #include <chrono>

@@ -1,7 +1,6 @@
 #include "common/ChannelChatters.hpp"
 
 #include "mocks/Channel.hpp"
-#include "TestHelpers.hpp"
 
 #include <gtest/gtest.h>
 #include <QColor>

@@ -1,7 +1,6 @@
 #include "common/network/NetworkManager.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
-#include "TestHelpers.hpp"
 
 #include <gtest/gtest.h>
 #include <QApplication>
