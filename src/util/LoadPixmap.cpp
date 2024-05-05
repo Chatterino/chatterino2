@@ -3,7 +3,6 @@
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
-#include "messages/Image.hpp"
 
 #include <QBuffer>
 #include <QImageReader>
