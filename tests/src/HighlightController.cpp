@@ -215,11 +215,9 @@ protected:
                 input.originalMessage, input.flags);
 
             EXPECT_EQ(isMatch, expected.state)
-                << qUtf8Printable(input.senderName) << ": "
-                << qUtf8Printable(input.originalMessage);
+                << input.senderName << ": " << input.originalMessage;
             EXPECT_EQ(matchResult, expected.result)
-                << qUtf8Printable(input.senderName) << ": "
-                << qUtf8Printable(input.originalMessage);
+                << input.senderName << ": " << input.originalMessage;
         }
     }
 

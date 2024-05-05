@@ -109,9 +109,8 @@ TEST_P(SplitInputTest, Reply)
     auto reply = MessagePtr(message);
     this->input.setReply(reply);
     QString actual = this->input.getInputText();
-    ASSERT_EQ(expected, actual)
-        << "Input text after setReply should be '" << qUtf8Printable(expected)
-        << "', but got '" << qUtf8Printable(actual) << "'";
+    ASSERT_EQ(expected, actual) << "Input text after setReply should be '"
+                                << expected << "', but got '" << actual << "'";
 }
 
 INSTANTIATE_TEST_SUITE_P(
