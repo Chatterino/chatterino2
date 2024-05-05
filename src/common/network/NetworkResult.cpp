@@ -67,7 +67,9 @@ const QByteArray &NetworkResult::getData() const
 
 QString NetworkResult::formatError() const
 {
-    if (this->status_)
+    // Print the status for errors that mirror HTTP status codes (=0 || >99)
+    if (this->status_ && (this->error_ == QNetworkReply::NoError ||
+                          this->error_ > QNetworkReply::UnknownNetworkError))
     {
         return QString::number(*this->status_);
     }
@@ -77,6 +79,13 @@ QString NetworkResult::formatError() const
             this->error_);
     if (name == nullptr)
     {
+        if (this->status_)
+        {
+            return QStringLiteral("unknown error (status: %1, error: %2)")
+                .arg(QString::number(*this->status_),
+                     QString::number(this->error_));
+        }
+
         return QStringLiteral("unknown error (%1)").arg(this->error_);
     }
     return name;
