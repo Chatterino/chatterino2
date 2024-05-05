@@ -1,3 +1,5 @@
+#include "util/LoadPixmap.hpp"
+
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
