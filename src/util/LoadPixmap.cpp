@@ -26,7 +26,7 @@ void loadPixmapFromUrl(const Url &url, std::function<void(QPixmap)> &&callback)
 
                 if (!reader.canRead() || reader.size().isEmpty())
                 {
-                    qCWarning(chatterinoSettings)
+                    qCWarning(chatterinoImage)
                         << "Can't read image file at" << url.string << ":"
                         << reader.errorString();
                     return;
@@ -35,7 +35,7 @@ void loadPixmapFromUrl(const Url &url, std::function<void(QPixmap)> &&callback)
                 QImage image = reader.read();
                 if (image.isNull())
                 {
-                    qCWarning(chatterinoSettings)
+                    qCWarning(chatterinoImage)
                         << "Failed reading image at" << url.string << ":"
                         << reader.errorString();
                     return;
