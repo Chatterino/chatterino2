@@ -643,8 +643,6 @@ set(SOURCE_FILES
         widgets/helper/NotebookTab.hpp
         widgets/helper/RegExpItemDelegate.cpp
         widgets/helper/RegExpItemDelegate.hpp
-        widgets/helper/TrimRegExpValidator.cpp
-        widgets/helper/TrimRegExpValidator.hpp
         widgets/helper/ResizingTextEdit.cpp
         widgets/helper/ResizingTextEdit.hpp
         widgets/helper/ScrollbarHighlight.cpp
@@ -659,6 +657,8 @@ set(SOURCE_FILES
         widgets/helper/TitlebarButton.hpp
         widgets/helper/TitlebarButtons.cpp
         widgets/helper/TitlebarButtons.hpp
+        widgets/helper/TrimRegExpValidator.cpp
+        widgets/helper/TrimRegExpValidator.hpp
 
         widgets/layout/FlowLayout.cpp
         widgets/layout/FlowLayout.hpp
