@@ -1,6 +1,11 @@
 #pragma once
 
-#include <ostream>
+// Include guard for some compilers not supporting `#pragma once` for prepended
+// includes.
+#ifndef TEST_HELPERS_HPP_INCLUDED
+#    define TEST_HELPERS_HPP_INCLUDED
+
+#    include <ostream>
 
 // This file is included in all TUs in chatterino-test to avoid ODR violations.
 //
@@ -20,3 +25,5 @@ void PrintTo(const QByteArray &bytes, std::ostream *os);
 void PrintTo(QStringView str, std::ostream *os);
 void PrintTo(const QString &str, std::ostream *os);
 // NOLINTEND(readability-identifier-naming)
+
+#endif
