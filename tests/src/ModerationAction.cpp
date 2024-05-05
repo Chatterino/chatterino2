@@ -91,7 +91,7 @@ TEST_F(ModerationActionTest, Parse)
             .expectedLine1 = "fo",
             .expectedLine2 = "rs",
             .expectedImage =
-                Image::fromUrl(Url("file:///this-is-the-path-to-the-icon.png")),
+                Image::fromUrl(Url{"file:///this-is-the-path-to-the-icon.png"}),
             .expectedType = ModerationAction::Type::Custom,
         },
     };
