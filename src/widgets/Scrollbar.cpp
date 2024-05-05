@@ -4,7 +4,6 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/Clamp.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 #include <QMouseEvent>
@@ -228,8 +227,8 @@ qreal Scrollbar::getRelativeCurrentValue() const
 {
     // currentValue - minimum can be negative if minimum is incremented while
     // scrolling up to or down from the top when smooth scrolling is enabled.
-    return clamp(this->currentValue_ - this->minimum_, 0.0,
-                 this->currentValue_);
+    return std::clamp(this->currentValue_ - this->minimum_, 0.0,
+                      this->currentValue_);
 }
 
 void Scrollbar::offset(qreal value)
