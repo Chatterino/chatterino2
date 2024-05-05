@@ -240,20 +240,20 @@ void TwitchBadges::getBadgeIcons(const QList<DisplayBadge> &badges,
     }
 }
 
-void TwitchBadges::loadEmoteImage(const QString &name, ImagePtr image,
+void TwitchBadges::loadEmoteImage(const QString &name, const ImagePtr &image,
                                   BadgeIconCallback &&callback)
 {
-    auto url = image->url().string;
-    loadPixmapFromUrl({url}, [this, name, callback, url](auto pixmap) {
-        auto icon = std::make_shared<QIcon>(pixmap);
+    loadPixmapFromUrl(image->url(),
+                      [this, name, callback{std::move(callback)}](auto pixmap) {
+                          auto icon = std::make_shared<QIcon>(pixmap);
 
-        {
-            std::unique_lock lock(this->badgesMutex_);
-            this->badgesMap_[name] = icon;
-        }
+                          {
+                              std::unique_lock lock(this->badgesMutex_);
+                              this->badgesMap_[name] = icon;
+                          }
 
-        callback(name, icon);
-    });
+                          callback(name, icon);
+                      });
 }
 
 }  // namespace chatterino
