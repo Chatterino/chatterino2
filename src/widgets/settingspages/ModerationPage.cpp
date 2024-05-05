@@ -12,6 +12,7 @@
 #include "util/LoadPixmap.hpp"
 #include "util/PostToThread.hpp"
 #include "widgets/helper/EditableModelView.hpp"
+#include "widgets/helper/IconDelegate.hpp"
 
 #include <QFileDialog>
 #include <QHBoxLayout>
@@ -215,6 +216,8 @@ ModerationPage::ModerationPage()
             QHeaderView::Fixed);
         view->getTableView()->horizontalHeader()->setSectionResizeMode(
             0, QHeaderView::Stretch);
+        view->getTableView()->setItemDelegateForColumn(
+            ModerationActionModel::Column::Icon, new IconDelegate(view));
         QObject::connect(
             view->getTableView(), &QTableView::clicked,
             [this, view](const QModelIndex &clicked) {
