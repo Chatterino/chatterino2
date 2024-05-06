@@ -3,6 +3,7 @@
 
 #    include "Application.hpp"
 #    include "common/Args.hpp"
+#    include "common/network/NetworkCommon.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/commands/CommandController.hpp"
@@ -173,6 +174,9 @@ void PluginController::openLibrariesFor(lua_State *L, const PluginMeta &meta,
 
     lua::pushEnumTable<Channel::Type>(L);
     lua_setfield(L, c2libIdx, "ChannelType");
+
+    lua::pushEnumTable<NetworkRequestType>(L);
+    lua_setfield(L, c2libIdx, "HTTPMethod");
 
     // Initialize metatables for objects
     lua::api::ChannelRef::createMetatable(L);

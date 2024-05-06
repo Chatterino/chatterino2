@@ -159,6 +159,14 @@ function Channel.by_twitch_id(id) end
 
 -- End src/controllers/plugins/api/ChannelRef.hpp
 
+-- Begin src/common/network/NetworkCommon.hpp
+
+---@alias HTTPMethod integer
+---@type { Get: HTTPMethod, Post: HTTPMethod, Put: HTTPMethod, Delete: HTTPMethod, Patch: HTTPMethod }
+HTTPMethod = {}
+
+-- End src/common/network/NetworkCommon.hpp
+
 --- Registers a new command called `name` which when executed will call `handler`.
 ---
 ---@param name string The name of the command.
