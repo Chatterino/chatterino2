@@ -10,7 +10,10 @@
 namespace chatterino::lua::api {
 // NOLINTBEGIN(readability-identifier-naming)
 
-/*
+// XXX: HTTPResult and HTTPCallback are described in
+// scripts/make_luals_meta.py due to cursed generator problems
+
+/**
  * @lua@class HTTPRequest
  */
 class HTTPRequest : public std::enable_shared_from_this<HTTPRequest>
@@ -82,7 +85,7 @@ public:
      * Sets the timeout
      *
      * @lua@param timeout integer How long in milliseconds until the times out
-     * @exposed HTTPRequest:timeout
+     * @exposed HTTPRequest:set_timeout
      */
     static int set_timeout_wrap(lua_State *L);
     int set_timeout(lua_State *L);
@@ -123,6 +126,9 @@ public:
      *
      * @lua@param method HTTPMethod Method to use
      * @lua@param url string Where to send the request to
+     *
+     * @lua@return HTTPRequest
+     * @exposed HTTPRequest.create
      */
     static int create(lua_State *L);
 };

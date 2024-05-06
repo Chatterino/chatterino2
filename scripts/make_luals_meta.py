@@ -42,6 +42,13 @@ BOILERPLATE = """
 
 c2 = {}
 
+
+---@class HTTPResult
+---@field data string Data received from the server
+---@field status integer HTTP Status code returned by the server
+---@field error string A somewhat human readable description of an error if such happened
+
+---@alias HTTPCallback fun(result: HTTPResult): nil
 """
 
 repo_root = Path(__file__).parent.parent

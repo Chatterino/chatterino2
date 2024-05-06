@@ -6,6 +6,13 @@
 
 c2 = {}
 
+
+---@class HTTPResult
+---@field data string Data received from the server
+---@field status integer HTTP Status code returned by the server
+---@field error string A somewhat human readable description of an error if such happened
+
+---@alias HTTPCallback fun(result: HTTPResult): nil
 ---@alias c2.LogLevel integer
 ---@type { Debug: c2.LogLevel, Info: c2.LogLevel, Warning: c2.LogLevel, Critical: c2.LogLevel }
 c2.LogLevel = {}
@@ -158,6 +165,54 @@ function Channel.by_twitch_id(id) end
 ---@field game_id string
 
 -- End src/controllers/plugins/api/ChannelRef.hpp
+
+-- Begin src/controllers/plugins/api/HTTP.hpp
+
+---@class HTTPRequest
+
+--- Sets the success callback
+---
+---@param callback HTTPCallback Function to call when the HTTP request succeeds
+function HTTPRequest:on_success(callback) end
+
+--- Sets the failure callback
+---
+---@param callback HTTPCallback Function to call when the HTTP request fails or returns a non-ok status
+function HTTPRequest:on_error(callback) end
+
+--- Sets the finally callback
+---
+---@param callback HTTPCallback Function to call when the HTTP request finishes
+function HTTPRequest:finally(callback) end
+
+--- Sets the timeout
+---
+---@param timeout integer How long in milliseconds until the times out
+function HTTPRequest:set_timeout(timeout) end
+
+--- Sets the request payload
+---
+---@param data string
+function HTTPRequest:set_payload(data) end
+
+--- Sets a header in the request
+---
+---@param name string
+---@param value string
+function HTTPRequest:set_header(name, value) end
+
+--- Executes the HTTP request
+---
+function HTTPRequest:execute() end
+
+--- Creates a new HTTPRequest
+---
+---@param method HTTPMethod Method to use
+---@param url string Where to send the request to
+---@return HTTPRequest
+function HTTPRequest.create(method, url) end
+
+-- End src/controllers/plugins/api/HTTP.hpp
 
 -- Begin src/common/network/NetworkCommon.hpp
 
