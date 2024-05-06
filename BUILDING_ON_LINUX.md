@@ -51,7 +51,7 @@ nix-shell -p openssl boost qt6.full pkg-config cmake
    mkdir build
    cd build
    ```
-1. Generate build files
+1. Generate build files. To enable Lua plugins in your build add `-DCHATTERINO_PLUGINS=ON` to this command.
    ```sh
    cmake -DBUILD_WITH_QT6=ON -DBUILD_WITH_QTKEYCHAIN=OFF ..
    ```
