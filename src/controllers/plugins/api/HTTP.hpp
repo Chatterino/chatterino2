@@ -10,8 +10,16 @@
 namespace chatterino::lua::api {
 // NOLINTBEGIN(readability-identifier-naming)
 
-// XXX: HTTPResult and HTTPCallback are described in
-// scripts/make_luals_meta.py due to cursed generator problems
+/**
+ * @lua@class HTTPResult
+ * @lua@field data string Data received from the server
+ * @lua@field status integer HTTP Status code returned by the server
+ * @lua@field error string A somewhat human readable description of an error if such happened
+ */
+
+/**
+ * @lua@alias HTTPCallback fun(result: HTTPResult): nil
+ */
 
 /**
  * @lua@class HTTPRequest
@@ -75,7 +83,7 @@ public:
     /**
      * Sets the finally callback
      *
-     * @lua@param callback HTTPCallback Function to call when the HTTP request finishes
+     * @lua@param callback fun(): nil Function to call when the HTTP request finishes
      * @exposed HTTPRequest:finally
      */
     static int finally_wrap(lua_State *L);

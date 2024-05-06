@@ -7,12 +7,6 @@
 c2 = {}
 
 
----@class HTTPResult
----@field data string Data received from the server
----@field status integer HTTP Status code returned by the server
----@field error string A somewhat human readable description of an error if such happened
-
----@alias HTTPCallback fun(result: HTTPResult): nil
 ---@alias c2.LogLevel integer
 ---@type { Debug: c2.LogLevel, Info: c2.LogLevel, Warning: c2.LogLevel, Critical: c2.LogLevel }
 c2.LogLevel = {}
@@ -168,6 +162,12 @@ function Channel.by_twitch_id(id) end
 
 -- Begin src/controllers/plugins/api/HTTP.hpp
 
+---@class HTTPResult
+---@field data string Data received from the server
+---@field status integer HTTP Status code returned by the server
+---@field error string A somewhat human readable description of an error if such happened
+
+---@alias HTTPCallback fun(result: HTTPResult): nil
 ---@class HTTPRequest
 
 --- Sets the success callback
@@ -182,7 +182,7 @@ function HTTPRequest:on_error(callback) end
 
 --- Sets the finally callback
 ---
----@param callback HTTPCallback Function to call when the HTTP request finishes
+---@param callback fun(): nil Function to call when the HTTP request finishes
 function HTTPRequest:finally(callback) end
 
 --- Sets the timeout

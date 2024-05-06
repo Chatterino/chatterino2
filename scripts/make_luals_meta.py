@@ -41,14 +41,6 @@ BOILERPLATE = """
 -- Add the folder this file is in to "Lua.workspace.library".
 
 c2 = {}
-
-
----@class HTTPResult
----@field data string Data received from the server
----@field status integer HTTP Status code returned by the server
----@field error string A somewhat human readable description of an error if such happened
-
----@alias HTTPCallback fun(result: HTTPResult): nil
 """
 
 repo_root = Path(__file__).parent.parent
@@ -238,21 +230,6 @@ def read_file(path: Path, out: TextIOWrapper):
         else:
             header = doc_comment
 
-        # include block
-        if header[0].startswith("@includefile "):
-            for comment in header:
-                if not comment.startswith("@includefile "):
-                    panic(
-                        path,
-                        reader.line_no(),
-                        f"Invalid include block - got line '{comment}'",
-                    )
-                filename = comment.split(" ", 1)[1]
-                out.write(f"-- Begin src/{filename}\n\n")
-                read_file(repo_root / "src" / filename, out)
-                out.write(f"-- End src/{filename}\n\n")
-            continue
-
         # enum
         if header[0].startswith("@exposeenum "):
             if len(header) > 1:
@@ -277,7 +254,7 @@ def read_file(path: Path, out: TextIOWrapper):
             continue
 
         # class
-        if header[0].startswith("@lua@class "):
+        elif header[0].startswith("@lua@class "):
             name = header[0].split(" ", 1)[1]
             classname = name.split(":")[0].strip()
             printmsg(path, reader.line_no(), f"class {classname}")
@@ -318,11 +295,29 @@ def read_file(path: Path, out: TextIOWrapper):
             for func in funcs:
                 write_func(path, reader.line_no(), func, out)
             continue
-
         # global function
-        if header[-1].startswith("@exposed "):
+        elif header[-1].startswith("@exposed "):
             write_func(path, reader.line_no(), doc_comment, out)
             continue
+        else:
+            for comment in header:
+                inline_command(path, reader.line_no(), comment, out)
+
+
+def inline_command(path: Path, line: int, comment: str, out: TextIOWrapper):
+    if comment.startswith("@includefile "):
+        filename = comment.split(" ", 1)[1]
+        out.write(f"-- Begin src/{filename}\n\n")
+        read_file(repo_root / "src" / filename, out)
+        out.write(f"-- End src/{filename}\n\n")
+    elif comment.startswith("@lua@class"):
+        panic(
+            path,
+            line,
+            "Unexpected @lua@class command. @lua@class must be placed at the start of the comment block!",
+        )
+    elif comment.startswith("@lua@"):
+        out.write(f'---{comment.replace("@lua", "", 1)}\n')
 
 
 if __name__ == "__main__":
