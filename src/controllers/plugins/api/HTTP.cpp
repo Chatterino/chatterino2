@@ -27,6 +27,7 @@ static const luaL_Reg HTTP_REQUEST_METHODS[] = {
     {"finally", &HTTPRequest::finally_wrap},
 
     {"execute", &HTTPRequest::execute_wrap},
+    {"set_timeout", &HTTPRequest::set_timeout_wrap},
     // static
     {"create", &HTTPRequest::create},
     {nullptr, nullptr},
@@ -134,6 +135,41 @@ int HTTPRequest::on_error(lua_State *L)
     auto shared = this->pushPrivate(L);
     lua_pushvalue(L, -2);
     lua_setfield(L, shared, "error");
+    return 0;
+}
+
+int HTTPRequest::set_timeout_wrap(lua_State *L)
+{
+    auto ptr = HTTPRequest::getOrError(L, 1);
+    return ptr->set_timeout(L);
+}
+
+int HTTPRequest::set_timeout(lua_State *L)
+{
+    auto top = lua_gettop(L);
+    if (top != 1)
+    {
+        luaL_error(L, "HTTPRequest:set_timeout needs 1 argument (a number of "
+                      "milliseconds after which the request will time out)");
+        return 0;
+    }
+
+    int temporary = -1;
+    if (!lua::pop(L, &temporary))
+    {
+        luaL_error(L,
+                   "HTTPRequest:set_timeout failed to get timeout, expected a "
+                   "positive integer");
+        return 0;
+    }
+    if (temporary <= 0)
+    {
+        luaL_error(L,
+                   "HTTPRequest:set_timeout failed to get timeout, expected a "
+                   "positive integer");
+        return 0;
+    }
+    this->timeout_ = temporary;
     return 0;
 }
 

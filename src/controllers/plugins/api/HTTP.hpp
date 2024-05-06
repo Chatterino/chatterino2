@@ -79,6 +79,15 @@ public:
     int finally(lua_State *L);
 
     /**
+     * Sets the timeout
+     *
+     * @lua@param timeout integer How long in milliseconds until the times out
+     * @exposed HTTPRequest:timeout
+     */
+    static int set_timeout_wrap(lua_State *L);
+    int set_timeout(lua_State *L);
+
+    /**
      * Executes the HTTP request
      *
      * @exposed HTTPRequest:execute
