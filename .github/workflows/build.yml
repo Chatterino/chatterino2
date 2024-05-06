@@ -115,21 +115,21 @@ jobs:
           - os: macos-13
             qt-version: 5.15.2
             force-lto: false
-            plugins: false
+            plugins: true
             skip-artifact: false
             skip-crashpad: false
           # Windows
           - os: windows-latest
             qt-version: 6.5.0
             force-lto: false
-            plugins: false
+            plugins: true
             skip-artifact: false
             skip-crashpad: false
           # Windows 7/8
           - os: windows-latest
             qt-version: 5.15.2
             force-lto: false
-            plugins: false
+            plugins: true
             skip-artifact: false
             skip-crashpad: true
 
