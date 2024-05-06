@@ -29,6 +29,7 @@ static const luaL_Reg HTTP_REQUEST_METHODS[] = {
     {"execute", &HTTPRequest::execute_wrap},
     {"set_timeout", &HTTPRequest::set_timeout_wrap},
     {"set_payload", &HTTPRequest::set_payload_wrap},
+    {"set_header", &HTTPRequest::set_header_wrap},
     // static
     {"create", &HTTPRequest::create},
     {nullptr, nullptr},
@@ -227,6 +228,41 @@ int HTTPRequest::set_payload(lua_State *L)
     }
     this->req_ =
         std::move(this->req_).payload(QByteArray::fromStdString(temporary));
+    return 0;
+}
+
+int HTTPRequest::set_header_wrap(lua_State *L)
+{
+    auto ptr = HTTPRequest::getOrError(L, 1);
+    return ptr->set_header(L);
+}
+
+int HTTPRequest::set_header(lua_State *L)
+{
+    auto top = lua_gettop(L);
+    if (top != 2)
+    {
+        luaL_error(L, "HTTPRequest:set_header needs 2 arguments (a header name "
+                      "and a value)");
+        return 0;
+    }
+
+    QString value;
+    if (!lua::pop(L, &value))
+    {
+        luaL_error(L,
+                   "cannot get value (2nd argument of HTTPRequest:set_header)");
+        return 0;
+    }
+    QString name;
+    if (!lua::pop(L, &name))
+    {
+        luaL_error(L,
+                   "cannot get name (1st argument of HTTPRequest:set_header)");
+        return 0;
+    }
+    this->req_ =
+        std::move(this->req_).header(name.toStdString().c_str(), value);
     return 0;
 }
 

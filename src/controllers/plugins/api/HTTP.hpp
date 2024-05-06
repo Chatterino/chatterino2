@@ -97,6 +97,16 @@ public:
     int set_payload(lua_State *L);
 
     /**
+     * Sets a header in the request
+     *
+     * @lua@param name string
+     * @lua@param value string
+     * @exposed HTTPRequest:set_header
+     */
+    static int set_header_wrap(lua_State *L);
+    int set_header(lua_State *L);
+
+    /**
      * Executes the HTTP request
      *
      * @exposed HTTPRequest:execute
