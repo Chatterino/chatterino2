@@ -2,6 +2,16 @@
 
 ## Unversioned
 
+- Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
+- Dev: Add doxygen build target. (#5377)
+- Dev: Make printing of strings in tests easier. (#5379)
+
+## 2.5.1
+
+- Bugfix: Fixed links without a protocol not being clickable. (#5345)
+
+## 2.5.0
+
 - Major: Twitch follower emotes can now be correctly tabbed in other channels when you are subscribed to the channel the emote is from. (#4922)
 - Major: Release plugins alpha. (#5288)
 - Major: Added `/automod` split to track automod caught messages across all open channels the user moderates. (#4986, #5026)
@@ -53,6 +63,18 @@
 - Minor: 7TV emotes now have a 4x image rather than a 3x image. (#5209)
 - Minor: Add `reward.cost` `reward.id`, `reward.title` filter variables. (#5275)
 - Minor: Change Lua `CompletionRequested` handler to use an event table. (#5280)
+- Minor: Changed the layout of the about page. (#5287)
+- Minor: Add duration to multi-month anon sub gift messages. (#5293)
+- Minor: Added context menu action to toggle visibility of offline tabs. (#5318)
+- Minor: Report sub duration for more multi-month gift cases. (#5319)
+- Minor: Improved error reporting for the automatic streamer mode detection on Linux and macOS. (#5321)
+- Bugfix: Fixed a crash that could occur on Wayland when using the image uploader. (#5314)
+- Bugfix: Fixed split tooltip getting stuck in some cases. (#5309)
+- Bugfix: Fixed the version string not showing up as expected in Finder on macOS. (#5311)
+- Bugfix: Fixed links having `http://` added to the beginning in certain cases. (#5323)
+- Bugfix: Fixed topmost windows from losing their status after opening dialogs on Windows. (#5330)
+- Bugfix: Fixed a gap appearing when using filters on `/watching`. (#5329)
+- Bugfix: Removed the remnant "Show chatter list" menu entry for non-moderators. (#5336)
 - Bugfix: Fixed an issue where certain emojis did not send to Twitch chat correctly. (#4840)
 - Bugfix: Fixed the `/shoutout` command not working with usernames starting with @'s (e.g. `/shoutout @forsen`). (#4800)
 - Bugfix: Fixed capitalized channel names in log inclusion list not being logged. (#4848)
@@ -106,7 +128,7 @@
 - Bugfix: Fixed popup windows not persisting between restarts. (#5081)
 - Bugfix: Fixed splits not retaining their focus after minimizing. (#5080)
 - Bugfix: Fixed _Copy message_ copying the channel name in global search. (#5106)
-- Bugfix: Fixed some Twitch emotes sizes being wrong at certain zoom levels. (#5279)
+- Bugfix: Fixed some Twitch emotes sizes being wrong at certain zoom levels. (#5279, #5291)
 - Bugfix: Fixed a missing space when the image uploader provided a delete link. (#5269)
 - Bugfix: Reply contexts now use the color of the replied-to message. (#5145)
 - Bugfix: Fixed top-level window getting stuck after opening settings. (#5161, #5166)
@@ -122,6 +144,8 @@
 - Bugfix: Truncated IRC messages to be at most 512 bytes. (#5246)
 - Bugfix: Fixed a data race when disconnecting from Twitch PubSub. (#4771)
 - Bugfix: Fixed messages not immediately disappearing when clearing the chat. (#5282)
+- Bugfix: Fixed highlights triggering for ignored users in announcements. (#5295)
+- Dev: Changed the order of the query parameters for Twitch player URLs. (#5326)
 - Dev: Run miniaudio in a separate thread, and simplify it to not manage the device ourselves. There's a chance the simplification is a bad idea. (#4978)
 - Dev: Change clang-format from v14 to v16. (#4929)
 - Dev: Fixed UTF16 encoding of `modes` file for the installer. (#4791)
@@ -199,7 +223,7 @@
 - Dev: Refactor `StreamerMode`. (#5216, #5236)
 - Dev: Cleaned up unused code in `MessageElement` and `MessageLayoutElement`. (#5225)
 - Dev: Adapted `magic_enum` to Qt's Utf-16 strings. (#5258)
-- Dev: `NetworkManager`'s statics are now created in its `init` method. (#5254)
+- Dev: `NetworkManager`'s statics are now created in its `init` method. (#5254, #5297)
 - Dev: `clang-tidy` CI now uses Qt 6. (#5273)
 - Dev: Enabled `InsertNewlineAtEOF` in `clang-format`. (#5278)
 

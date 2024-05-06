@@ -659,22 +659,7 @@ void Window::addShortcuts()
              }
              else if (arg == "toggleLiveOnly")
              {
-                 if (!this->notebook_->getShowTabs())
-                 {
-                     // Tabs are currently hidden, so the intention is to show
-                     // tabs again before enabling the live only setting
-                     this->notebook_->setShowTabs(true);
-                     getSettings()->tabVisibility.setValue(
-                         NotebookTabVisibility::LiveOnly);
-                 }
-                 else
-                 {
-                     getSettings()->tabVisibility.setValue(
-                         getSettings()->tabVisibility.getEnum() ==
-                                 NotebookTabVisibility::LiveOnly
-                             ? NotebookTabVisibility::AllTabs
-                             : NotebookTabVisibility::LiveOnly);
-                 }
+                 this->notebook_->toggleOfflineTabs();
              }
              else
              {

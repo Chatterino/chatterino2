@@ -257,6 +257,20 @@ SplitHeader::SplitHeader(Split *split)
     getSettings()->headerStreamTitle.connect(_, this->managedConnections_);
     getSettings()->headerGame.connect(_, this->managedConnections_);
     getSettings()->headerUptime.connect(_, this->managedConnections_);
+
+    auto *window = dynamic_cast<BaseWindow *>(this->window());
+    if (window)
+    {
+        // Hack: In some cases Qt doesn't send the leaveEvent the "actual" last mouse receiver.
+        // This can happen when quickly moving the mouse out of the window and right clicking.
+        // To prevent the tooltip from getting stuck, we use the window's leaveEvent.
+        this->managedConnections_.managedConnect(window->leaving, [this] {
+            if (this->tooltipWidget_->isVisible())
+            {
+                this->tooltipWidget_->hide();
+            }
+        });
+    }
 }
 
 void SplitHeader::initializeLayout()
@@ -511,9 +525,12 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 
     if (twitchChannel)
     {
-        moreMenu->addAction(
-            "Show chatter list", this->split_, &Split::showChatterList,
-            h->getDisplaySequence(HotkeyCategory::Split, "openViewerList"));
+        if (twitchChannel->hasModRights())
+        {
+            moreMenu->addAction(
+                "Show chatter list", this->split_, &Split::showChatterList,
+                h->getDisplaySequence(HotkeyCategory::Split, "openViewerList"));
+        }
 
         moreMenu->addAction("Subscribe", this->split_, &Split::openSubPage);
 

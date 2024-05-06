@@ -1,8 +1,8 @@
 #include "singletons/Updates.hpp"
 
 #include "common/Version.hpp"
+#include "Test.hpp"
 
-#include <gtest/gtest.h>
 #include <semver/semver.hpp>
 
 using namespace chatterino;

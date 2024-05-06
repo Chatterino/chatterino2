@@ -84,8 +84,7 @@ TwitchChannel::TwitchChannel(const QString &name)
     , nameOptions{name, name, name}
     , subscriptionUrl_("https://www.twitch.tv/subs/" + name)
     , channelUrl_("https://twitch.tv/" + name)
-    , popoutPlayerUrl_("https://player.twitch.tv/?parent=twitch.tv&channel=" +
-                       name)
+    , popoutPlayerUrl_(TWITCH_PLAYER_URL.arg(name))
     , bttvEmotes_(std::make_shared<EmoteMap>())
     , ffzEmotes_(std::make_shared<EmoteMap>())
     , seventvEmotes_(std::make_shared<EmoteMap>())

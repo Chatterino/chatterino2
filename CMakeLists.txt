@@ -41,7 +41,7 @@ if(BUILD_BENCHMARKS)
 endif()
 
 project(chatterino 
-    VERSION 2.4.6
+    VERSION 2.5.1
     DESCRIPTION "Chat client for twitch.tv"
     HOMEPAGE_URL "https://chatterino.com/"
 )
@@ -197,6 +197,7 @@ find_package(PajladaSerialize REQUIRED)
 find_package(PajladaSignals REQUIRED)
 find_package(LRUCache REQUIRED)
 find_package(MagicEnum REQUIRED)
+find_package(Doxygen)
 
 if (USE_SYSTEM_PAJLADA_SETTINGS)
     find_package(PajladaSettings REQUIRED)

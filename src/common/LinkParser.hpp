@@ -12,9 +12,28 @@ struct ParsedLink {
 #else
     using StringView = QStringRef;
 #endif
+    /// The parsed protocol of the link. Can be empty.
+    ///
+    /// https://www.forsen.tv/commands
+    /// ^------^
     StringView protocol;
+
+    /// The parsed host of the link. Can not be empty.
+    ///
+    /// https://www.forsen.tv/commands
+    ///         ^-----------^
     StringView host;
+
+    /// The remainder of the link. Can be empty.
+    ///
+    /// https://www.forsen.tv/commands
+    ///                      ^-------^
     StringView rest;
+
+    /// The original unparsed link.
+    ///
+    /// https://www.forsen.tv/commands
+    /// ^----------------------------^
     QString source;
 };
 

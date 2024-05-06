@@ -85,6 +85,7 @@ public:
     void setTopMost(bool topMost);
 
     pajlada::Signals::NoArgSignal closing;
+    pajlada::Signals::NoArgSignal leaving;
 
     static bool supportsCustomWindowFrame();
 
