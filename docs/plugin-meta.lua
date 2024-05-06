@@ -164,7 +164,7 @@ function Channel.by_twitch_id(id) end
 
 ---@class HTTPResult
 ---@field data string Data received from the server
----@field status integer HTTP Status code returned by the server
+---@field status integer? HTTP Status code returned by the server
 ---@field error string A somewhat human readable description of an error if such happened
 
 ---@alias HTTPCallback fun(result: HTTPResult): nil
