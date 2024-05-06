@@ -32,8 +32,7 @@ declare module c2 {
     is_valid(): boolean;
   }
 
-  interface ISharedResource {
-  }
+  interface ISharedResource {}
 
   class RoomModes {
     unique_chat: boolean;
@@ -72,34 +71,32 @@ declare module c2 {
     static by_twitch_id(id: string): null | Channel;
   }
 
-
   enum HTTPMethod {
-      Get,
-      Post,
-      Put,
-      Delete,
-      Patch
+    Get,
+    Post,
+    Put,
+    Delete,
+    Patch,
   }
 
   type HTTPResult = {
-      data: string,
-      status: number,
+    data: string;
+    status: number;
 
-      error: string
+    error: string;
   };
 
   type HTTPCallback = (res: HTTPResult) => void;
   class HTTPRequest implements ISharedResource {
     on_success(callback: HTTPCallback): void;
     on_error(callback: HTTPCallback): void;
-    finally(callback: ()=>void): void;
+    finally(callback: () => void): void;
 
     set_timeout(millis: number): void;
     set_payload(data: string): void;
     set_header(name: string, value: string): void;
 
     execute(): void;
-
 
     // might error
     static create(method: HTTPMethod, url: string): HTTPRequest;

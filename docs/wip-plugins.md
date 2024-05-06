@@ -90,6 +90,7 @@ Example:
 Allows the plugin to send HTTP requests.
 
 Example:
+
 ```json
 {
   ...,
@@ -401,6 +402,7 @@ the names may change, do not count on them. It has the following keys:
 #### `HTTPResult`
 
 An `HTTPResult` is a table that contains the following keys:
+
 ```lua
 {
     data = "This is the data received from the server as a string",
