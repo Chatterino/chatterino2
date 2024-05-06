@@ -1,6 +1,7 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/api/HTTP.hpp"
 
+#    include "Application.hpp"
 #    include "common/network/NetworkCommon.hpp"
 #    include "common/network/NetworkRequest.hpp"
 #    include "common/network/NetworkResult.hpp"
@@ -194,6 +195,13 @@ int HTTPRequest::create(lua_State *L)
                       "expected a string)");
         lua_pushnil(L);
         return 1;
+    }
+    auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
+    if (!pl->hasHTTPPermissionFor(parsedurl))
+    {
+        luaL_error(L, "Plugin does not have permission to send HTTP requests "
+                      "to this URL");
+        return 0;
     }
     NetworkRequest r(parsedurl, method);
     lua::push(

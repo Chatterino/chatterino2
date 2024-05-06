@@ -1,6 +1,8 @@
+
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/Plugin.hpp"
 
+#    include "common/network/NetworkCommon.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandController.hpp"
 #    include "util/QMagicEnum.hpp"
@@ -11,6 +13,7 @@ extern "C" {
 #    include <magic_enum/magic_enum.hpp>
 #    include <QJsonArray>
 #    include <QJsonObject>
+#    include <QUrl>
 
 #    include <algorithm>
 #    include <unordered_map>
@@ -263,6 +266,20 @@ bool Plugin::hasFSPermissionFor(bool write, const QString &path)
     for (const auto &p : this->meta.permissions)
     {
         if (p.type == typ)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Plugin::hasHTTPPermissionFor(const QUrl &url)
+{
+    // XXX: Older compilers don't have support for std::ranges
+    // NOLINTNEXTLINE(readability-use-anyofallof)
+    for (const auto &p : this->meta.permissions)
+    {
+        if (p.type == PluginPermission::Type::HTTP)
         {
             return true;
         }

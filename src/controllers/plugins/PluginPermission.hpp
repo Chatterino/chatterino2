@@ -14,6 +14,7 @@ struct PluginPermission {
     enum class Type {
         FilesystemRead,
         FilesystemWrite,
+        HTTP,
     };
     Type type;
     std::vector<QString> errors;
