@@ -21,6 +21,11 @@ class HTTPRequest : public std::enable_shared_from_this<HTTPRequest>
 
 public:
     HTTPRequest(HTTPRequest::ConstructorAccessTag, NetworkRequest req);
+    HTTPRequest(HTTPRequest &&other) = default;
+    HTTPRequest &operator=(HTTPRequest &&) = default;
+    HTTPRequest &operator=(HTTPRequest &) = delete;
+    HTTPRequest(const HTTPRequest &other) = delete;
+    ~HTTPRequest();
 
 private:
     NetworkRequest req_;

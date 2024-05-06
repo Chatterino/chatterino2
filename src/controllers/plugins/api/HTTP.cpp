@@ -7,6 +7,7 @@
 #    include "common/network/NetworkResult.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
+#    include "util/DebugCount.hpp"
 
 extern "C" {
 #    include <lauxlib.h>
@@ -259,6 +260,10 @@ int HTTPRequest::execute(lua_State *L)
                 // no args, no return, no msgh
                 lua_pcall(thread, 0, 0, 0);
             }
+            // remove our private data
+            lua_pushnil(thread);
+            lua_setfield(thread, LUA_REGISTRYINDEX,
+                         shared->privateKey.toStdString().c_str());
             lua_closethread(thread, nullptr);
         })
         .timeout(this->timeout_)
@@ -270,6 +275,14 @@ HTTPRequest::HTTPRequest(HTTPRequest::ConstructorAccessTag /*ignored*/,
                          NetworkRequest req)
     : req_(std::move(req))
 {
+    DebugCount::increase("lua::api::HTTPRequest");
+}
+
+HTTPRequest::~HTTPRequest()
+{
+    DebugCount::decrease("lua::api::HTTPRequest");
+    // We might leak a Lua function or two here if the request isn't executed
+    // but that's better than accessing a possibly invalid lua_State pointer.
 }
 
 StackIdx HTTPRequest::pushPrivate(lua_State *L)
