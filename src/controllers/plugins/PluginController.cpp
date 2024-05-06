@@ -8,6 +8,7 @@
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/commands/CommandController.hpp"
 #    include "controllers/plugins/api/ChannelRef.hpp"
+#    include "controllers/plugins/api/HTTP.hpp"
 #    include "controllers/plugins/api/IOWrapper.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
@@ -181,6 +182,9 @@ void PluginController::openLibrariesFor(lua_State *L, const PluginMeta &meta,
     // Initialize metatables for objects
     lua::api::ChannelRef::createMetatable(L);
     lua_setfield(L, c2libIdx, "Channel");
+
+    lua::api::HTTPRequest::createMetatable(L);
+    lua_setfield(L, c2libIdx, "HTTPRequest");
 
     lua_setfield(L, gtable, "c2");
 
