@@ -1,5 +1,6 @@
 #pragma once
 #include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "controllers/plugins/LuaUtilities.hpp"
 #include "controllers/plugins/PluginController.hpp"
 
@@ -98,6 +99,7 @@ public:
 
 namespace chatterino::lua {
 StackIdx push(lua_State *L, std::shared_ptr<api::HTTPRequest> request);
+StackIdx push(lua_State *L, const NetworkResult &result);
 }  // namespace chatterino::lua
 
 #endif
