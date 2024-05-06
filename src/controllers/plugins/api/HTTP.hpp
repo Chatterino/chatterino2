@@ -88,6 +88,15 @@ public:
     int set_timeout(lua_State *L);
 
     /**
+     * Sets the request payload
+     *
+     * @lua@param data string
+     * @exposed HTTPRequest:set_payload
+     */
+    static int set_payload_wrap(lua_State *L);
+    int set_payload(lua_State *L);
+
+    /**
      * Executes the HTTP request
      *
      * @exposed HTTPRequest:execute

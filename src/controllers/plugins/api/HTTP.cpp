@@ -28,6 +28,7 @@ static const luaL_Reg HTTP_REQUEST_METHODS[] = {
 
     {"execute", &HTTPRequest::execute_wrap},
     {"set_timeout", &HTTPRequest::set_timeout_wrap},
+    {"set_payload", &HTTPRequest::set_payload_wrap},
     // static
     {"create", &HTTPRequest::create},
     {nullptr, nullptr},
@@ -197,6 +198,35 @@ int HTTPRequest::finally(lua_State *L)
     auto shared = this->pushPrivate(L);
     lua_pushvalue(L, -2);
     lua_setfield(L, shared, "finally");
+    return 0;
+}
+
+int HTTPRequest::set_payload_wrap(lua_State *L)
+{
+    auto ptr = HTTPRequest::getOrError(L, 1);
+    return ptr->set_payload(L);
+}
+
+int HTTPRequest::set_payload(lua_State *L)
+{
+    auto top = lua_gettop(L);
+    if (top != 1)
+    {
+        luaL_error(
+            L, "HTTPRequest:set_payload needs 1 argument (a string payload)");
+        return 0;
+    }
+
+    std::string temporary;
+    if (!lua::pop(L, &temporary))
+    {
+        luaL_error(L,
+                   "HTTPRequest:set_payload failed to get payload, expected a "
+                   "string");
+        return 0;
+    }
+    this->req_ =
+        std::move(this->req_).payload(QByteArray::fromStdString(temporary));
     return 0;
 }
 
