@@ -85,6 +85,23 @@ Example:
 }
 ```
 
+### HTTP
+
+Allows the plugin to send HTTP requests.
+
+Example:
+```json
+{
+  ...,
+  "permissions": [
+    {
+      "type": "HTTP"
+    },
+    ...
+  ]
+}
+```
+
 ## Plugins with Typescript
 
 If you prefer, you may use [TypescriptToLua](https://typescripttolua.github.io)
