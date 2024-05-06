@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Major: Release plugins alpha. (#5288)
 - Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
 - Dev: Add doxygen build target. (#5377)
 - Dev: Make printing of strings in tests easier. (#5379)
@@ -13,7 +14,6 @@
 ## 2.5.0
 
 - Major: Twitch follower emotes can now be correctly tabbed in other channels when you are subscribed to the channel the emote is from. (#4922)
-- Major: Release plugins alpha. (#5288)
 - Major: Added `/automod` split to track automod caught messages across all open channels the user moderates. (#4986, #5026)
 - Major: Moderators can now see restricted chat messages and suspicious treatment updates. (#5056, #5060)
 - Minor: Migrated to the new Get Channel Followers Helix endpoint, fixing follower count not showing up in usercards. (#4809)
