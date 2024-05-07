@@ -133,11 +133,13 @@ class Reader:
     def read_class_body(self) -> list[list[str]]:
         """The reader must be at the first line of the class/struct body. All comments inside the class are returned."""
         items = []
+        nesting = -1  # for the opening brace
         while (line := self.peek_line()) is not None:
-            if line.startswith("};"):
+            if line.startswith("};") and nesting == 0:
                 self.next_line()
                 break
             if not is_comment_start(line):
+                nesting += line.count("{") - line.count("}")
                 self.next_line()
                 continue
             doc = self.next_doc_comment()
