@@ -13,6 +13,7 @@ extern "C" {
 #    include <magic_enum/magic_enum.hpp>
 #    include <QJsonArray>
 #    include <QJsonObject>
+#    include <QLoggingCategory>
 #    include <QUrl>
 
 #    include <algorithm>
@@ -275,6 +276,15 @@ bool Plugin::hasFSPermissionFor(bool write, const QString &path)
 
 bool Plugin::hasHTTPPermissionFor(const QUrl &url)
 {
+    auto proto = url.scheme();
+    if (proto != "http" && proto != "https")
+    {
+        qCWarning(chatterinoLua).nospace()
+            << "Plugin " << this->id << " (" << this->meta.name
+            << ") is trying to use a non-http protocol";
+        return false;
+    }
+
     // XXX: Older compilers don't have support for std::ranges
     // NOLINTNEXTLINE(readability-use-anyofallof)
     for (const auto &p : this->meta.permissions)
