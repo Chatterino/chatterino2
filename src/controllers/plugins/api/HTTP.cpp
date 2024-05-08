@@ -247,22 +247,23 @@ int HTTPRequest::set_header(lua_State *L)
         return 0;
     }
 
-    QString value;
+    std::string value;
     if (!lua::pop(L, &value))
     {
         luaL_error(L,
                    "cannot get value (2nd argument of HTTPRequest:set_header)");
         return 0;
     }
-    QString name;
+    std::string name;
     if (!lua::pop(L, &name))
     {
         luaL_error(L,
                    "cannot get name (1st argument of HTTPRequest:set_header)");
         return 0;
     }
-    this->req_ =
-        std::move(this->req_).header(name.toStdString().c_str(), value);
+    this->req_ = std::move(this->req_)
+                     .header(QByteArray::fromStdString(name),
+                             QByteArray::fromStdString(value));
     return 0;
 }
 
