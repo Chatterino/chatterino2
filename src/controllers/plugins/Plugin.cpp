@@ -289,7 +289,7 @@ bool Plugin::hasHTTPPermissionFor(const QUrl &url)
     // NOLINTNEXTLINE(readability-use-anyofallof)
     for (const auto &p : this->meta.permissions)
     {
-        if (p.type == PluginPermission::Type::HTTP)
+        if (p.type == PluginPermission::Type::Network)
         {
             return true;
         }

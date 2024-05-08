@@ -37,8 +37,8 @@ QString PluginPermission::toHtml() const
             return "Read files in its data directory";
         case PluginPermission::Type::FilesystemWrite:
             return "Write to or create files in its data directory";
-        case PluginPermission::Type::HTTP:
-            return "Send HTTP requests";
+        case PluginPermission::Type::Network:
+            return "Make requests over the internet to third party websites";
         default:
             assert(false && "invalid PluginPermission type in toHtml()");
             return "shut up compiler, this never happens";
