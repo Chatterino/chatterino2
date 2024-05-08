@@ -40,7 +40,7 @@ std::shared_ptr<HTTPRequest> HTTPRequest::getOrError(lua_State *L,
 {
     if (lua_gettop(L) < 1)
     {
-        luaL_error(L, "Called c2.HTTPRequest method without a channel object");
+        luaL_error(L, "Called c2.HTTPRequest method without a request object");
         return nullptr;
     }
     if (lua_isuserdata(L, where) == 0)
