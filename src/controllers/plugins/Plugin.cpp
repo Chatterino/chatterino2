@@ -1,10 +1,10 @@
-
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/Plugin.hpp"
 
 #    include "common/network/NetworkCommon.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandController.hpp"
+#    include "controllers/plugins/PluginPermission.hpp"
 #    include "util/QMagicEnum.hpp"
 
 extern "C" {
@@ -262,16 +262,9 @@ bool Plugin::hasFSPermissionFor(bool write, const QString &path)
     using PType = PluginPermission::Type;
     auto typ = write ? PType::FilesystemWrite : PType::FilesystemRead;
 
-    // XXX: Older compilers don't have support for std::ranges
-    // NOLINTNEXTLINE(readability-use-anyofallof)
-    for (const auto &p : this->meta.permissions)
-    {
-        if (p.type == typ)
-        {
-            return true;
-        }
-    }
-    return false;
+    return std::ranges::any_of(this->meta.permissions, [=](const auto &p) {
+        return p.type == typ;
+    });
 }
 
 bool Plugin::hasHTTPPermissionFor(const QUrl &url)
@@ -285,16 +278,9 @@ bool Plugin::hasHTTPPermissionFor(const QUrl &url)
         return false;
     }
 
-    // XXX: Older compilers don't have support for std::ranges
-    // NOLINTNEXTLINE(readability-use-anyofallof)
-    for (const auto &p : this->meta.permissions)
-    {
-        if (p.type == PluginPermission::Type::Network)
-        {
-            return true;
-        }
-    }
-    return false;
+    return std::ranges::any_of(this->meta.permissions, [](const auto &p) {
+        return p.type == PluginPermission::Type::Network;
+    });
 }
 
 }  // namespace chatterino
