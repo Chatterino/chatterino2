@@ -16,8 +16,6 @@
 
 #include <QUrl>
 
-#include <unordered_set>
-
 namespace ranges = std::ranges;
 namespace chatterino {
 
@@ -86,7 +84,7 @@ void NotificationController::removeChannelNotification(
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
-void NotificationController::playSound()
+void NotificationController::playSound() const
 {
     QUrl highlightSoundUrl =
         getSettings()->notificationCustomSound
@@ -105,17 +103,87 @@ NotificationModel *NotificationController::createModel(QObject *parent,
     return model;
 }
 
+void NotificationController::notifyTwitchChannelLive(
+    const NotificationPayload &payload) const
+{
+    bool showNotification =
+        !(getSettings()->suppressInitialLiveNotification &&
+          payload.isInitialUpdate) &&
+        !(getIApp()->getStreamerMode()->isEnabled() &&
+          getSettings()->streamerModeSuppressLiveNotifications);
+    bool playedSound = false;
+
+    if (showNotification && getIApp()->getNotifications()->isChannelNotified(
+                                payload.channelName, Platform::Twitch))
+    {
+        if (Toasts::isEnabled())
+        {
+            getIApp()->getToasts()->sendChannelNotification(
+                payload.channelName, payload.title, Platform::Twitch);
+        }
+        if (getSettings()->notificationPlaySound)
+        {
+            this->playSound();
+            playedSound = true;
+        }
+        if (getSettings()->notificationFlashTaskbar)
+        {
+            getIApp()->getWindows()->sendAlert();
+        }
+    }
+
+    // Message in /live channel
+    MessageBuilder builder;
+    TwitchMessageBuilder::liveMessage(payload.displayName, &builder);
+    builder.message().id = payload.channelId;
+    getApp()->twitch->liveChannel->addMessage(builder.release());
+
+    // Notify on all channels with a ping sound
+    if (showNotification && !playedSound &&
+        getSettings()->notificationOnAnyChannel)
+    {
+        this->playSound();
+    }
+}
+
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+void NotificationController::notifyTwitchChannelOffline(const QString &id) const
+{
+    // "delete" old 'CHANNEL is live' message
+    LimitedQueueSnapshot<MessagePtr> snapshot =
+        getApp()->twitch->liveChannel->getMessageSnapshot();
+    int snapshotLength = static_cast<int>(snapshot.size());
+
+    int end = std::max(0, snapshotLength - 200);
+
+    for (int i = snapshotLength - 1; i >= end; --i)
+    {
+        const auto &s = snapshot[i];
+
+        if (s->id == id)
+        {
+            s->flags.set(MessageFlag::Disabled);
+            break;
+        }
+    }
+}
+
 void NotificationController::fetchFakeChannels()
 {
     qCDebug(chatterinoNotification) << "fetching fake channels";
+
     QStringList channels;
     for (size_t i = 0; i < channelMap_[Platform::Twitch].raw().size(); i++)
     {
-        auto chan = getApp()->twitch->getChannelOrEmpty(
-            channelMap_[Platform::Twitch].raw()[i]);
+        const auto &name = channelMap_[Platform::Twitch].raw()[i];
+        auto chan = getApp()->twitch->getChannelOrEmpty(name);
         if (chan->isEmpty())
         {
-            channels.push_back(channelMap_[Platform::Twitch].raw()[i]);
+            channels.push_back(name);
+        }
+        else
+        {
+            this->fakeChannels_.erase(name);
         }
     }
 
@@ -124,16 +192,25 @@ void NotificationController::fetchFakeChannels()
         getHelix()->fetchStreams(
             {}, batch,
             [batch, this](const auto &streams) {
-                std::unordered_set<QString> liveStreams;
+                std::map<QString, std::optional<HelixStream>,
+                         QCompareCaseInsensitive>
+                    liveStreams;
                 for (const auto &stream : streams)
                 {
-                    liveStreams.insert(stream.userLogin);
+                    liveStreams.emplace(stream.userLogin, stream);
                 }
 
                 for (const auto &name : batch)
                 {
-                    auto it = liveStreams.find(name.toLower());
-                    this->checkStream(it != liveStreams.end(), name);
+                    auto it = liveStreams.find(name);
+                    if (it == liveStreams.end())
+                    {
+                        this->updateFakeChannel(name, std::nullopt);
+                    }
+                    else
+                    {
+                        this->updateFakeChannel(name, it->second);
+                    }
                 }
             },
             [batch]() {
@@ -146,84 +223,56 @@ void NotificationController::fetchFakeChannels()
             });
     }
 }
-void NotificationController::checkStream(bool live, const QString &channelName)
+void NotificationController::updateFakeChannel(
+    const QString &channelName, const std::optional<HelixStream> &stream)
 {
+    bool live = stream.has_value();
     qCDebug(chatterinoNotification).nospace().noquote()
-        << "[TwitchChannel " << channelName << "] Refreshing live status";
+        << "[FakeTwitchChannel " << channelName
+        << "] New live status: " << stream.has_value();
 
+    auto channelIt = this->fakeChannels_.find(channelName);
+    bool isInitialUpdate = false;
+    if (channelIt == this->fakeChannels_.end())
+    {
+        channelIt = this->fakeChannels_
+                        .emplace(channelName,
+                                 FakeChannel{
+                                     .id = {},
+                                     .isLive = live,
+                                 })
+                        .first;
+        isInitialUpdate = true;
+    }
+    if (channelIt->second.isLive == live && !isInitialUpdate)
+    {
+        return;  // nothing changed
+    }
+
+    if (live && channelIt->second.id.isNull())
+    {
+        channelIt->second.id = stream->userId;
+    }
+
+    channelIt->second.isLive = live;
+
+    // Similar code can be found in TwitchChannel::onLiveStatusChange.
+    // Since this is a fake channel, we don't send a live message in the
+    // TwitchChannel.
     if (!live)
     {
         // Stream is offline
-        this->removeFakeChannel(channelName);
+        this->notifyTwitchChannelOffline(channelIt->second.id);
         return;
     }
 
-    // Stream is online
-    auto i = std::find(fakeTwitchChannels.begin(), fakeTwitchChannels.end(),
-                       channelName);
-
-    if (i != fakeTwitchChannels.end())
-    {
-        // We have already pushed the live state of this stream
-        // Could not find stream in fake Twitch channels!
-        return;
-    }
-
-    if (Toasts::isEnabled())
-    {
-        getIApp()->getToasts()->sendChannelNotification(channelName, QString(),
-                                                        Platform::Twitch);
-    }
-    bool inStreamerMode = getIApp()->getStreamerMode()->isEnabled();
-    if (getSettings()->notificationPlaySound &&
-        !(inStreamerMode &&
-          getSettings()->streamerModeSuppressLiveNotifications))
-    {
-        getIApp()->getNotifications()->playSound();
-    }
-    if (getSettings()->notificationFlashTaskbar &&
-        !(inStreamerMode &&
-          getSettings()->streamerModeSuppressLiveNotifications))
-    {
-        getIApp()->getWindows()->sendAlert();
-    }
-    MessageBuilder builder;
-    TwitchMessageBuilder::liveMessage(channelName, &builder);
-    getApp()->twitch->liveChannel->addMessage(builder.release());
-
-    // Indicate that we have pushed notifications for this stream
-    fakeTwitchChannels.push_back(channelName);
-}
-
-void NotificationController::removeFakeChannel(const QString &channelName)
-{
-    auto it = std::find(fakeTwitchChannels.begin(), fakeTwitchChannels.end(),
-                        channelName);
-    if (it != fakeTwitchChannels.end())
-    {
-        fakeTwitchChannels.erase(it);
-        // "delete" old 'CHANNEL is live' message
-        LimitedQueueSnapshot<MessagePtr> snapshot =
-            getApp()->twitch->liveChannel->getMessageSnapshot();
-        int snapshotLength = static_cast<int>(snapshot.size());
-
-        // MSVC hates this code if the parens are not there
-        int end = (std::max)(0, snapshotLength - 200);
-        // this assumes that channelName is a login name therefore will only delete messages from fake channels
-        auto liveMessageSearchText = QString("%1 is live!").arg(channelName);
-
-        for (int i = snapshotLength - 1; i >= end; --i)
-        {
-            const auto &s = snapshot[i];
-
-            if (QString::compare(s->messageText, liveMessageSearchText,
-                                 Qt::CaseInsensitive) == 0)
-            {
-                s->flags.set(MessageFlag::Disabled);
-                break;
-            }
-        }
-    }
+    this->notifyTwitchChannelLive({
+        .channelId = stream->userId,
+        .channelName = channelName,
+        .displayName = stream->userName,
+        .title = stream->title,
+        .isInitialUpdate = isInitialUpdate,
+    });
 }
 
 }  // namespace chatterino

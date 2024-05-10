@@ -141,85 +141,6 @@ TwitchChannel::TwitchChannel(const QString &name)
     });
     this->threadClearTimer_.start(5 * 60 * 1000);
 
-    auto onLiveStatusChanged = [this](auto isLive) {
-        if (isLive)
-        {
-            qCDebug(chatterinoTwitch)
-                << "[TwitchChannel" << this->getName() << "] Online";
-            if (getIApp()->getNotifications()->isChannelNotified(
-                    this->getName(), Platform::Twitch))
-            {
-                if (Toasts::isEnabled())
-                {
-                    getIApp()->getToasts()->sendChannelNotification(
-                        this->getName(), this->accessStreamStatus()->title,
-                        Platform::Twitch);
-                }
-                if (getSettings()->notificationPlaySound)
-                {
-                    getIApp()->getNotifications()->playSound();
-                }
-                if (getSettings()->notificationFlashTaskbar)
-                {
-                    getIApp()->getWindows()->sendAlert();
-                }
-            }
-            // Channel live message
-            MessageBuilder builder;
-            TwitchMessageBuilder::liveSystemMessage(this->getDisplayName(),
-                                                    &builder);
-            builder.message().id = this->roomId();
-            this->addMessage(builder.release());
-
-            // Message in /live channel
-            MessageBuilder builder2;
-            TwitchMessageBuilder::liveMessage(this->getDisplayName(),
-                                              &builder2);
-            builder2.message().id = this->roomId();
-            getApp()->twitch->liveChannel->addMessage(builder2.release());
-
-            // Notify on all channels with a ping sound
-            if (getSettings()->notificationOnAnyChannel &&
-                !(getIApp()->getStreamerMode()->isEnabled() &&
-                  getSettings()->streamerModeSuppressLiveNotifications))
-            {
-                getIApp()->getNotifications()->playSound();
-            }
-        }
-        else
-        {
-            qCDebug(chatterinoTwitch)
-                << "[TwitchChannel" << this->getName() << "] Offline";
-            // Channel offline message
-            MessageBuilder builder;
-            TwitchMessageBuilder::offlineSystemMessage(this->getDisplayName(),
-                                                       &builder);
-            this->addMessage(builder.release());
-
-            // "delete" old 'CHANNEL is live' message
-            LimitedQueueSnapshot<MessagePtr> snapshot =
-                getApp()->twitch->liveChannel->getMessageSnapshot();
-            int snapshotLength = snapshot.size();
-
-            // MSVC hates this code if the parens are not there
-            int end = (std::max)(0, snapshotLength - 200);
-
-            for (int i = snapshotLength - 1; i >= end; --i)
-            {
-                const auto &s = snapshot[i];
-
-                if (s->id == this->roomId())
-                {
-                    s->flags.set(MessageFlag::Disabled);
-                    break;
-                }
-            }
-        }
-    };
-
-    this->signalHolder_.managedConnect(this->liveStatusChanged,
-                                       onLiveStatusChanged);
-
     // debugging
 #if 0
     for (int i = 0; i < 1000; i++) {
@@ -463,7 +384,7 @@ std::optional<ChannelPointReward> TwitchChannel::channelPointReward(
 }
 
 void TwitchChannel::updateStreamStatus(
-    const std::optional<HelixStream> &helixStream)
+    const std::optional<HelixStream> &helixStream, bool isInitialUpdate)
 {
     if (helixStream)
     {
@@ -495,7 +416,7 @@ void TwitchChannel::updateStreamStatus(
         }
         if (this->setLive(true))
         {
-            this->liveStatusChanged.invoke(true);
+            this->onLiveStatusChanged(true, isInitialUpdate);
         }
         this->streamStatusChanged.invoke();
     }
@@ -503,11 +424,51 @@ void TwitchChannel::updateStreamStatus(
     {
         if (this->setLive(false))
         {
-            this->liveStatusChanged.invoke(false);
+            this->onLiveStatusChanged(false, isInitialUpdate);
             this->streamStatusChanged.invoke();
         }
     }
 }
+
+void TwitchChannel::onLiveStatusChanged(bool isLive, bool isInitialUpdate)
+{
+    // Similar code exists in NotificationController::updateFakeChannel.
+    // Since we're a TwitchChannel, we also send a message here.
+    if (isLive)
+    {
+        qCDebug(chatterinoTwitch).nospace().noquote()
+            << "[TwitchChannel " << this->getName() << "] Online";
+
+        getIApp()->getNotifications()->notifyTwitchChannelLive({
+            .channelId = this->roomId(),
+            .channelName = this->getName(),
+            .displayName = this->getDisplayName(),
+            .title = this->accessStreamStatus()->title,
+            .isInitialUpdate = isInitialUpdate,
+        });
+
+        // Channel live message
+        MessageBuilder builder;
+        TwitchMessageBuilder::liveSystemMessage(this->getDisplayName(),
+                                                &builder);
+        builder.message().id = this->roomId();
+        this->addMessage(builder.release());
+    }
+    else
+    {
+        qCDebug(chatterinoTwitch).nospace().noquote()
+            << "[TwitchChannel " << this->getName() << "] Offline";
+
+        // Channel offline message
+        MessageBuilder builder;
+        TwitchMessageBuilder::offlineSystemMessage(this->getDisplayName(),
+                                                   &builder);
+        this->addMessage(builder.release());
+
+        getIApp()->getNotifications()->notifyTwitchChannelOffline(
+            this->roomId());
+    }
+};
 
 void TwitchChannel::updateStreamTitle(const QString &title)
 {

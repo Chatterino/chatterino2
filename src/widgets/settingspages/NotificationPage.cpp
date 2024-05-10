@@ -42,6 +42,10 @@ NotificationPage::NotificationPage()
                 settings.append(this->createCheckBox(
                     "Play sound for any channel going live",
                     getSettings()->notificationOnAnyChannel));
+
+                settings.append(this->createCheckBox(
+                    "Suppress live notifications on startup",
+                    getSettings()->suppressInitialLiveNotification));
 #ifdef Q_OS_WIN
                 settings.append(this->createCheckBox(
                     "Show notification", getSettings()->notificationToast));
