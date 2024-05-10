@@ -17,7 +17,7 @@ enum class Platform : uint8_t {
     Twitch,  // 0
 };
 
-class NotificationController final : public Singleton, private QObject
+class NotificationController final : public Singleton
 {
 public:
     void initialize(Settings &settings, const Paths &paths) override;
@@ -29,22 +29,18 @@ public:
 
     void playSound();
 
-    SignalVector<QString> getVector(Platform p);
-
-    std::map<Platform, SignalVector<QString>> channelMap;
-
     NotificationModel *createModel(QObject *parent, Platform p);
 
 private:
-    bool initialized_ = false;
-
     void fetchFakeChannels();
-    void removeFakeChannel(const QString channelName);
-    void checkStream(bool live, QString channelName);
+    void removeFakeChannel(const QString &channelName);
+    void checkStream(bool live, const QString &channelName);
 
     // fakeTwitchChannels is a list of streams who are live that we have already sent out a notification for
     std::vector<QString> fakeTwitchChannels;
-    QTimer *liveStatusTimer_;
+    QTimer liveStatusTimer_;
+
+    std::map<Platform, SignalVector<QString>> channelMap_;
 
     ChatterinoSetting<std::vector<QString>> twitchSetting_ = {
         "/notifications/twitch"};

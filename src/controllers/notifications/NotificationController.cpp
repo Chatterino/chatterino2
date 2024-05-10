@@ -13,44 +13,36 @@
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
-#include "widgets/Window.hpp"
 
-#ifdef Q_OS_WIN
-#    include <wintoastlib.h>
-#endif
-
-#include <QDesktopServices>
-#include <QDir>
 #include <QUrl>
 
 #include <unordered_set>
 
+namespace ranges = std::ranges;
 namespace chatterino {
 
-void NotificationController::initialize(Settings &settings, const Paths &paths)
+void NotificationController::initialize(Settings & /*settings*/,
+                                        const Paths & /*paths*/)
 {
-    this->initialized_ = true;
     for (const QString &channelName : this->twitchSetting_.getValue())
     {
-        this->channelMap[Platform::Twitch].append(channelName);
+        this->channelMap_[Platform::Twitch].append(channelName);
     }
 
-    // We can safely ignore this signal connection since channelMap will always be destroyed
+    // We can safely ignore this signal connection since channelMap_ will always be destroyed
     // before the NotificationController
     std::ignore =
-        this->channelMap[Platform::Twitch].delayedItemsChanged.connect([this] {
+        this->channelMap_[Platform::Twitch].delayedItemsChanged.connect([this] {
             this->twitchSetting_.setValue(
-                this->channelMap[Platform::Twitch].raw());
+                this->channelMap_[Platform::Twitch].raw());
         });
-
-    liveStatusTimer_ = new QTimer();
 
     this->fetchFakeChannels();
 
-    QObject::connect(this->liveStatusTimer_, &QTimer::timeout, [this] {
+    QObject::connect(&this->liveStatusTimer_, &QTimer::timeout, [this] {
         this->fetchFakeChannels();
     });
-    this->liveStatusTimer_->start(60 * 1000);
+    this->liveStatusTimer_.start(60 * 1000);
 }
 
 void NotificationController::updateChannelNotification(
@@ -69,35 +61,31 @@ void NotificationController::updateChannelNotification(
 bool NotificationController::isChannelNotified(const QString &channelName,
                                                Platform p)
 {
-    for (const auto &channel : this->channelMap[p])
-    {
-        if (channelName.toLower() == channel.toLower())
-        {
-            return true;
-        }
-    }
-    return false;
+    return ranges::any_of(channelMap_[p].raw(), [&](const auto &name) {
+        return name.compare(channelName, Qt::CaseInsensitive) == 0;
+    });
 }
 
 void NotificationController::addChannelNotification(const QString &channelName,
                                                     Platform p)
 {
-    channelMap[p].append(channelName);
+    channelMap_[p].append(channelName);
 }
 
 void NotificationController::removeChannelNotification(
     const QString &channelName, Platform p)
 {
-    for (std::vector<int>::size_type i = 0; i != channelMap[p].raw().size();
-         i++)
+    for (size_t i = 0; i != channelMap_[p].raw().size(); i++)
     {
-        if (channelMap[p].raw()[i].toLower() == channelName.toLower())
+        if (channelMap_[p].raw()[i].toLower() == channelName.toLower())
         {
-            channelMap[p].removeAt(i);
+            channelMap_[p].removeAt(static_cast<int>(i));
             i--;
         }
     }
 }
+
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void NotificationController::playSound()
 {
     QUrl highlightSoundUrl =
@@ -112,8 +100,8 @@ void NotificationController::playSound()
 NotificationModel *NotificationController::createModel(QObject *parent,
                                                        Platform p)
 {
-    NotificationModel *model = new NotificationModel(parent);
-    model->initialize(&this->channelMap[p]);
+    auto *model = new NotificationModel(parent);
+    model->initialize(&this->channelMap_[p]);
     return model;
 }
 
@@ -121,14 +109,13 @@ void NotificationController::fetchFakeChannels()
 {
     qCDebug(chatterinoNotification) << "fetching fake channels";
     QStringList channels;
-    for (std::vector<int>::size_type i = 0;
-         i < channelMap[Platform::Twitch].raw().size(); i++)
+    for (size_t i = 0; i < channelMap_[Platform::Twitch].raw().size(); i++)
     {
         auto chan = getApp()->twitch->getChannelOrEmpty(
-            channelMap[Platform::Twitch].raw()[i]);
+            channelMap_[Platform::Twitch].raw()[i]);
         if (chan->isEmpty())
         {
-            channels.push_back(channelMap[Platform::Twitch].raw()[i]);
+            channels.push_back(channelMap_[Platform::Twitch].raw()[i]);
         }
     }
 
@@ -136,7 +123,7 @@ void NotificationController::fetchFakeChannels()
     {
         getHelix()->fetchStreams(
             {}, batch,
-            [batch, this](std::vector<HelixStream> streams) {
+            [batch, this](const auto &streams) {
                 std::unordered_set<QString> liveStreams;
                 for (const auto &stream : streams)
                 {
@@ -159,10 +146,10 @@ void NotificationController::fetchFakeChannels()
             });
     }
 }
-void NotificationController::checkStream(bool live, QString channelName)
+void NotificationController::checkStream(bool live, const QString &channelName)
 {
-    qCDebug(chatterinoNotification)
-        << "[TwitchChannel" << channelName << "] Refreshing live status";
+    qCDebug(chatterinoNotification).nospace().noquote()
+        << "[TwitchChannel " << channelName << "] Refreshing live status";
 
     if (!live)
     {
@@ -208,7 +195,7 @@ void NotificationController::checkStream(bool live, QString channelName)
     fakeTwitchChannels.push_back(channelName);
 }
 
-void NotificationController::removeFakeChannel(const QString channelName)
+void NotificationController::removeFakeChannel(const QString &channelName)
 {
     auto it = std::find(fakeTwitchChannels.begin(), fakeTwitchChannels.end(),
                         channelName);
@@ -218,7 +205,7 @@ void NotificationController::removeFakeChannel(const QString channelName)
         // "delete" old 'CHANNEL is live' message
         LimitedQueueSnapshot<MessagePtr> snapshot =
             getApp()->twitch->liveChannel->getMessageSnapshot();
-        int snapshotLength = snapshot.size();
+        int snapshotLength = static_cast<int>(snapshot.size());
 
         // MSVC hates this code if the parens are not there
         int end = (std::max)(0, snapshotLength - 200);

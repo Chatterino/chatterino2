@@ -111,10 +111,8 @@ NotificationPage::NotificationPage()
 
                 // We can safely ignore this signal connection since we own the view
                 std::ignore = view->addButtonPressed.connect([] {
-                    getApp()
-                        ->getNotifications()
-                        ->channelMap[Platform::Twitch]
-                        .append("channel");
+                    getApp()->getNotifications()->addChannelNotification(
+                        "channel", Platform::Twitch);
                 });
             }
         }
