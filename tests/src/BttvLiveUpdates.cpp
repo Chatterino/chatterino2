@@ -1,6 +1,7 @@
 #include "providers/bttv/BttvLiveUpdates.hpp"
 
-#include <gtest/gtest.h>
+#include "Test.hpp"
+
 #include <QString>
 
 #include <optional>
