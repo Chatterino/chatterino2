@@ -29,7 +29,6 @@
 #    pragma comment(lib, "Dwmapi.lib")
 
 #    include <QHBoxLayout>
-#    include <QOperatingSystemVersion>
 #endif
 
 #include "widgets/helper/TitlebarButton.hpp"
@@ -40,19 +39,6 @@ namespace {
 
 // From kHiddenTaskbarSize in Firefox
 constexpr UINT HIDDEN_TASKBAR_SIZE = 2;
-
-bool isWindows11OrGreater()
-{
-    static const bool result = [] {
-        // This calls RtlGetVersion under the hood so we don't have to.
-        // The micro version corresponds to dwBuildNumber.
-        auto version = QOperatingSystemVersion::current();
-        return (version.majorVersion() > 10) ||
-               (version.microVersion() >= 22000);
-    }();
-
-    return result;
-}
 
 /// Finds the taskbar HWND on a specific monitor (or any)
 HWND findTaskbarWindow(LPRECT rcMon = nullptr)
@@ -118,8 +104,7 @@ RECT windowBordersFor(HWND hwnd, bool isMaximized)
 {
     RECT margins{0, 0, 0, 0};
 
-    auto addBorders = isMaximized || isWindows11OrGreater();
-    if (addBorders)
+    if (isMaximized)
     {
         auto dpi = GetDpiForWindow(hwnd);
         auto systemMetric = [&](auto index) {
@@ -136,15 +121,9 @@ RECT windowBordersFor(HWND hwnd, bool isMaximized)
 
         margins.left += borderWidth;
         margins.right -= borderWidth;
-        if (isMaximized)
-        {
-            margins.top += borderHeight;
-        }
+        margins.top += borderHeight;
         margins.bottom -= borderHeight;
-    }
 
-    if (isMaximized)
-    {
         auto *hMonitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
         MONITORINFO mi;
         mi.cbSize = sizeof(mi);
