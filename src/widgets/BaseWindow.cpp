@@ -1169,52 +1169,6 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
     {
         *result = 0;
 
-        // Check the titlebar buttons first (avoid conflicts with the edges)
-        if (this->ui_.titlebarBox->geometry().contains(point))
-        {
-            for (const auto *widget : this->ui_.buttons)
-            {
-                if (!widget->isVisible() || !widget->geometry().contains(point))
-                {
-                    continue;
-                }
-
-                if (const auto *btn =
-                        dynamic_cast<const TitleBarButton *>(widget))
-                {
-                    switch (btn->getButtonStyle())
-                    {
-                        case TitleBarButtonStyle::Minimize: {
-                            *result = HTMINBUTTON;
-                            break;
-                        }
-                        case TitleBarButtonStyle::Unmaximize:
-                        case TitleBarButtonStyle::Maximize: {
-                            *result = HTMAXBUTTON;
-                            break;
-                        }
-                        case TitleBarButtonStyle::Close: {
-                            *result = HTCLOSE;
-                            break;
-                        }
-                        default: {
-                            *result = HTCLIENT;
-                            break;
-                        }
-                    }
-                    break;
-                }
-                *result = HTCLIENT;
-                break;
-            }
-        }
-
-        if (*result != 0)
-        {
-            return true;
-        }
-
-        // check the edges of the window
         bool resizeWidth = minimumWidth() != maximumWidth();
         bool resizeHeight = minimumHeight() != maximumHeight();
 
@@ -1272,21 +1226,60 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
             }
         }
 
-        if (*result != 0)
-        {
-            return true;
-        }
-
-        // the main layout
-        if (this->ui_.layoutBase->geometry().contains(point))
-        {
-            *result = HTCLIENT;
-        }
-
-        // nothing was hit - enable dragging
         if (*result == 0)
         {
-            *result = HTCAPTION;
+            // Check the main layout first, as it's the largest area
+            if (this->ui_.layoutBase->geometry().contains(point))
+            {
+                *result = HTCLIENT;
+            }
+
+            // Check the titlebar buttons
+            if (*result == 0 &&
+                this->ui_.titlebarBox->geometry().contains(point))
+            {
+                for (const auto *widget : this->ui_.buttons)
+                {
+                    if (!widget->isVisible() ||
+                        !widget->geometry().contains(point))
+                    {
+                        continue;
+                    }
+
+                    if (const auto *btn =
+                            dynamic_cast<const TitleBarButton *>(widget))
+                    {
+                        switch (btn->getButtonStyle())
+                        {
+                            case TitleBarButtonStyle::Minimize: {
+                                *result = HTMINBUTTON;
+                                break;
+                            }
+                            case TitleBarButtonStyle::Unmaximize:
+                            case TitleBarButtonStyle::Maximize: {
+                                *result = HTMAXBUTTON;
+                                break;
+                            }
+                            case TitleBarButtonStyle::Close: {
+                                *result = HTCLOSE;
+                                break;
+                            }
+                            default: {
+                                *result = HTCLIENT;
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                    *result = HTCLIENT;
+                    break;
+                }
+            }
+
+            if (*result == 0)
+            {
+                *result = HTCAPTION;
+            }
         }
 
         return true;
