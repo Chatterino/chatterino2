@@ -756,9 +756,7 @@ void MessageLayoutContainer::reorderRTL(int firstTextIndex)
 
         const auto neutral = isNeutral(element->getText());
         const auto neutralOrUsername =
-            neutral ||
-            element->getFlags().hasAny({MessageElementFlag::BoldUsername,
-                                        MessageElementFlag::NonBoldUsername});
+            neutral || element->getFlags().has(MessageElementFlag::Mention);
 
         if (neutral &&
             ((this->first == FirstWord::RTL && !this->wasPrevReversed_) ||

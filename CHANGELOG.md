@@ -5,6 +5,7 @@
 - Major: Release plugins alpha. (#5288)
 - Major: Improve high-DPI support on Windows. (#4868)
 - Minor: Add option to customise Moderation buttons with images. (#5369)
+- Minor: Colored usernames now update on the fly when changing the "Color @usernames" setting. (#5300)
 - Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
 - Dev: Use Qt's high DPI scaling. (#4868)
 - Dev: Add doxygen build target. (#5377)

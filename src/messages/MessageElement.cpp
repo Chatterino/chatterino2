@@ -703,6 +703,38 @@ Link LinkElement::getLink() const
     return {Link::Url, this->linkInfo_.url()};
 }
 
+MentionElement::MentionElement(const QString &name, MessageColor fallbackColor_,
+                               MessageColor userColor_)
+    : TextElement(name, {MessageElementFlag::Text, MessageElementFlag::Mention})
+    , fallbackColor(fallbackColor_)
+    , userColor(userColor_)
+{
+}
+
+void MentionElement::addToContainer(MessageLayoutContainer &container,
+                                    MessageElementFlags flags)
+{
+    if (getSettings()->colorUsernames)
+    {
+        this->color_ = this->userColor;
+    }
+    else
+    {
+        this->color_ = this->fallbackColor;
+    }
+
+    if (getSettings()->boldUsernames)
+    {
+        this->style_ = FontStyle::ChatMediumBold;
+    }
+    else
+    {
+        this->style_ = FontStyle::ChatMedium;
+    }
+
+    TextElement::addToContainer(container, flags);
+}
+
 // TIMESTAMP
 TimestampElement::TimestampElement(QTime time)
     : MessageElement(MessageElementFlag::Timestamp)
