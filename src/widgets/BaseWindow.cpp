@@ -1166,8 +1166,8 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
         return false;  // let DefWindowProc handle this
     }
 
-    long x = p.x;
-    long y = p.y;
+    auto x = point.x();
+    auto y = point.y();
 
     if (this->hasCustomWindowFrame())
     {
