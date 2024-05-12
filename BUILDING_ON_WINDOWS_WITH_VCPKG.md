@@ -50,4 +50,5 @@ This will require more than 30GB of free space on your hard drive.
    cmake --build . --parallel <threads> --config Release
    ```
    When using CMD, use `-DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake` to specify the toolchain.
+   To build with plugins add `-DCHATTERINO_PLUGINS=ON` to `cmake -B build` command.
 1. Run `.\bin\chatterino2.exe`

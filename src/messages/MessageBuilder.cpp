@@ -617,16 +617,16 @@ void MessageBuilder::addLink(const ParsedLink &parsedLink)
 {
     QString lowercaseLinkString;
     QString origLink = parsedLink.source;
-    QString matchedLink;
+    QString fullUrl;
 
     if (parsedLink.protocol.isNull())
     {
-        matchedLink = QStringLiteral("http://") + parsedLink.source;
+        fullUrl = QStringLiteral("http://") + parsedLink.source;
     }
     else
     {
         lowercaseLinkString += parsedLink.protocol;
-        matchedLink = parsedLink.source;
+        fullUrl = parsedLink.source;
     }
 
     lowercaseLinkString += parsedLink.host.toString().toLower();
@@ -635,9 +635,8 @@ void MessageBuilder::addLink(const ParsedLink &parsedLink)
     auto textColor = MessageColor(MessageColor::Link);
     auto *el = this->emplace<LinkElement>(
         LinkElement::Parsed{.lowercase = lowercaseLinkString,
-                            .original = matchedLink},
-        MessageElementFlag::Text, textColor);
-    el->setLink({Link::Url, matchedLink});
+                            .original = origLink},
+        fullUrl, MessageElementFlag::Text, textColor);
     getIApp()->getLinkResolver()->resolve(el->linkInfo());
 }
 

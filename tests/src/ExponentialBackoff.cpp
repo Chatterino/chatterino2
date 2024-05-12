@@ -1,6 +1,6 @@
 #include "util/ExponentialBackoff.hpp"
 
-#include <gtest/gtest.h>
+#include "Test.hpp"
 
 using namespace chatterino;
 

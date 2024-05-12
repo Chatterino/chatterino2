@@ -3,6 +3,7 @@
 #ifdef USEWINSDK
 #    include <Windows.h>
 
+#    include <cstdio>
 #    include <tuple>
 #endif
 

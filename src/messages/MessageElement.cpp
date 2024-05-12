@@ -679,10 +679,11 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
-LinkElement::LinkElement(const Parsed &parsed, MessageElementFlags flags,
-                         const MessageColor &color, FontStyle style)
+LinkElement::LinkElement(const Parsed &parsed, const QString &fullUrl,
+                         MessageElementFlags flags, const MessageColor &color,
+                         FontStyle style)
     : TextElement({}, flags, color, style)
-    , linkInfo_(parsed.original)
+    , linkInfo_(fullUrl)
     , lowercase_({parsed.lowercase})
     , original_({parsed.original})
 {
