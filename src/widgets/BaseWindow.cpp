@@ -816,6 +816,7 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
                 globalPos /= this->devicePixelRatio();
                 globalPos = this->mapToGlobal(globalPos);
 
+                // TODO(nerix): use TrackMouseEvent here
                 this->ui_.titlebarButtons->hover(msg->wParam, globalPos);
                 this->lastEventWasNcMouseMove_ = true;
             }
@@ -1169,8 +1170,10 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
     {
         *result = 0;
 
-        bool resizeWidth = minimumWidth() != maximumWidth();
-        bool resizeHeight = minimumHeight() != maximumHeight();
+        bool resizeWidth =
+            minimumWidth() != maximumWidth() && !this->isMaximized();
+        bool resizeHeight =
+            minimumHeight() != maximumHeight() && !this->isMaximized();
 
         if (resizeWidth)
         {
