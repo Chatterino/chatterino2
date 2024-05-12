@@ -705,7 +705,7 @@ Link LinkElement::getLink() const
 
 MentionElement::MentionElement(const QString &name, MessageColor fallbackColor_,
                                MessageColor userColor_)
-    : TextElement(name, MessageElementFlag::Username)
+    : TextElement(name, {MessageElementFlag::Text, MessageElementFlag::Mention})
     , fallbackColor(fallbackColor_)
     , userColor(userColor_)
 {
