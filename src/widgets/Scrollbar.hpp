@@ -152,14 +152,14 @@ private:
     void updateScroll();
 
     enum class MouseLocation {
-        /// The mouse is positioned outside this widget
+        /// The mouse is positioned outside the scrollbar
         Outside,
-        /// The mouse is positioned inside the widget, but above the thumb
+        /// The mouse is positioned inside the scrollbar, but above the thumb (the thing you can drag inside the scrollbar)
         AboveThumb,
-        /// The mouse is positioned inside the thumb
+        /// The mouse is positioned inside the scrollbar, and on top of the thumb
         InsideThumb,
-        /// The mouse is positioned inside the widget, but below the thumb
-        BelowThumb
+        /// The mouse is positioned inside the scrollbar, but below the thumb
+        BelowThumb,
     };
 
     MouseLocation locationOfMouseEvent(QMouseEvent *event) const;
