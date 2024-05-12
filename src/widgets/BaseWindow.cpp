@@ -1152,15 +1152,22 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
 #endif
 {
 #ifdef USEWINSDK
-    const LONG borderWidth = 8;  // in pixels
-    RECT winrect;
-    GetWindowRect(msg->hwnd, &winrect);
+    const LONG borderWidth = 8;  // in device independent pixels
 
-    long x = GET_X_LPARAM(msg->lParam);
-    long y = GET_Y_LPARAM(msg->lParam);
+    auto rect = this->rect();
 
-    QPoint point(x - winrect.left, y - winrect.top);
+    POINT p{GET_X_LPARAM(msg->lParam), GET_Y_LPARAM(msg->lParam)};
+    ScreenToClient(msg->hwnd, &p);
+
+    QPoint point(p.x, p.y);
     point /= this->devicePixelRatio();
+    if (!rect.contains(point))
+    {
+        return false;  // let DefWindowProc handle this
+    }
+
+    long x = p.x;
+    long y = p.y;
 
     if (this->hasCustomWindowFrame())
     {
@@ -1172,12 +1179,12 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
         if (resizeWidth)
         {
             // left border
-            if (x < winrect.left + borderWidth)
+            if (x < rect.left() + borderWidth)
             {
                 *result = HTLEFT;
             }
             // right border
-            if (x >= winrect.right - borderWidth)
+            if (x >= rect.right() - borderWidth)
             {
                 *result = HTRIGHT;
             }
@@ -1185,12 +1192,12 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
         if (resizeHeight)
         {
             // bottom border
-            if (y >= winrect.bottom - borderWidth)
+            if (y >= rect.bottom() - borderWidth)
             {
                 *result = HTBOTTOM;
             }
             // top border
-            if (y < winrect.top + borderWidth)
+            if (y < rect.top() + borderWidth)
             {
                 *result = HTTOP;
             }
@@ -1198,26 +1205,26 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
         if (resizeWidth && resizeHeight)
         {
             // bottom left corner
-            if (x >= winrect.left && x < winrect.left + borderWidth &&
-                y < winrect.bottom && y >= winrect.bottom - borderWidth)
+            if (x >= rect.left() && x < rect.left() + borderWidth &&
+                y < rect.bottom() && y >= rect.bottom() - borderWidth)
             {
                 *result = HTBOTTOMLEFT;
             }
             // bottom right corner
-            if (x < winrect.right && x >= winrect.right - borderWidth &&
-                y < winrect.bottom && y >= winrect.bottom - borderWidth)
+            if (x < rect.right() && x >= rect.right() - borderWidth &&
+                y < rect.bottom() && y >= rect.bottom() - borderWidth)
             {
                 *result = HTBOTTOMRIGHT;
             }
             // top left corner
-            if (x >= winrect.left && x < winrect.left + borderWidth &&
-                y >= winrect.top && y < winrect.top + borderWidth)
+            if (x >= rect.left() && x < rect.left() + borderWidth &&
+                y >= rect.top() && y < rect.top() + borderWidth)
             {
                 *result = HTTOPLEFT;
             }
             // top right corner
-            if (x < winrect.right && x >= winrect.right - borderWidth &&
-                y >= winrect.top && y < winrect.top + borderWidth)
+            if (x < rect.right() && x >= rect.right() - borderWidth &&
+                y >= rect.top() && y < rect.top() + borderWidth)
             {
                 *result = HTTOPRIGHT;
             }
