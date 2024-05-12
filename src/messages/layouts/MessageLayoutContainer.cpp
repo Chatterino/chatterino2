@@ -30,7 +30,7 @@ constexpr const QMargins MARGIN{8, 4, 8, 4};
 namespace chatterino {
 
 void MessageLayoutContainer::beginLayout(int width, float scale,
-                                         MessageFlags flags)
+                                         float imageScale, MessageFlags flags)
 {
     this->elements_.clear();
     this->lines_.clear();
@@ -45,6 +45,7 @@ void MessageLayoutContainer::beginLayout(int width, float scale,
     this->width_ = width;
     this->height_ = 0;
     this->scale_ = scale;
+    this->imageScale_ = imageScale;
     this->flags_ = flags;
     auto mediumFontMetrics =
         getIApp()->getFonts()->getFontMetrics(FontStyle::ChatMedium, scale);
@@ -524,6 +525,11 @@ int MessageLayoutContainer::getHeight() const
 float MessageLayoutContainer::getScale() const
 {
     return this->scale_;
+}
+
+float MessageLayoutContainer::getImageScale() const
+{
+    return this->imageScale_;
 }
 
 bool MessageLayoutContainer::isCollapsed() const

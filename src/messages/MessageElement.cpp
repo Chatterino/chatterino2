@@ -155,8 +155,8 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
     {
         if (flags.has(MessageElementFlag::EmoteImages))
         {
-            auto image =
-                this->emote_->images.getImageOrLoaded(container.getScale());
+            auto image = this->emote_->images.getImageOrLoaded(
+                container.getImageScale());
             if (image->isEmpty())
             {
                 return;
@@ -210,7 +210,7 @@ void LayeredEmoteElement::addToContainer(MessageLayoutContainer &container,
     {
         if (flags.has(MessageElementFlag::EmoteImages))
         {
-            auto images = this->getLoadedImages(container.getScale());
+            auto images = this->getLoadedImages(container.getImageScale());
             if (images.empty())
             {
                 return;
@@ -364,7 +364,7 @@ void BadgeElement::addToContainer(MessageLayoutContainer &container,
     if (flags.hasAny(this->getFlags()))
     {
         auto image =
-            this->emote_->images.getImageOrLoaded(container.getScale());
+            this->emote_->images.getImageOrLoaded(container.getImageScale());
         if (image->isEmpty())
         {
             return;
@@ -798,7 +798,7 @@ void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
     if (flags.hasAny(this->getFlags()))
     {
         const auto &image =
-            this->images_.getImageOrLoaded(container.getScale());
+            this->images_.getImageOrLoaded(container.getImageScale());
         if (image->isEmpty())
         {
             return;

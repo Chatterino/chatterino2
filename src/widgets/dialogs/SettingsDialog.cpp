@@ -47,7 +47,10 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 
     this->resize(915, 600);
     this->themeChangedEvent();
-    this->scaleChangedEvent(this->scale());
+    QFile styleFile(":/qss/settings.qss");
+    styleFile.open(QFile::ReadOnly);
+    QString stylesheet = QString::fromUtf8(styleFile.readAll());
+    this->setStyleSheet(stylesheet);
 
     this->initUi();
     this->addTabs();
@@ -396,25 +399,19 @@ void SettingsDialog::refresh()
 
 void SettingsDialog::scaleChangedEvent(float newDpi)
 {
-    QFile file(":/qss/settings.qss");
-    file.open(QFile::ReadOnly);
-    QString styleSheet = QLatin1String(file.readAll());
-    styleSheet.replace("<font-size>", QString::number(int(14 * newDpi)));
-    styleSheet.replace("<checkbox-size>", QString::number(int(14 * newDpi)));
+    assert(newDpi == 1.F &&
+           "Scaling is disabled for the settings dialog - its scale should "
+           "always be 1");
 
     for (SettingsDialogTab *tab : this->tabs_)
     {
-        tab->setFixedHeight(int(30 * newDpi));
+        tab->setFixedHeight(30);
     }
-
-    this->setStyleSheet(styleSheet);
 
     if (this->ui_.tabContainerContainer)
     {
-        this->ui_.tabContainerContainer->setFixedWidth(int(150 * newDpi));
+        this->ui_.tabContainerContainer->setFixedWidth(150);
     }
-
-    this->dpi_ = newDpi;
 }
 
 void SettingsDialog::themeChangedEvent()
