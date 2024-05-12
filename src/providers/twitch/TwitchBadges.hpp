@@ -48,7 +48,7 @@ public:
 private:
     void parseTwitchBadges(QJsonObject root);
     void loaded();
-    void loadEmoteImage(const QString &name, ImagePtr image,
+    void loadEmoteImage(const QString &name, const ImagePtr &image,
                         BadgeIconCallback &&callback);
 
     std::shared_mutex badgesMutex_;

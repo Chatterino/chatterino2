@@ -2,6 +2,9 @@
 
 ## Unversioned
 
+- Major: Release plugins alpha. (#5288)
+- Minor: Add option to customise Moderation buttons with images. (#5369)
+- Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
 - Dev: Add doxygen build target. (#5377)
 - Dev: Make printing of strings in tests easier. (#5379)
 - Dev: Refactor and document `Scrollbar`. (#5334)

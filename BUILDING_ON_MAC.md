@@ -20,7 +20,7 @@ Local dev machines for testing are available on Apple Silicon on macOS 13.
 1. Go to the project directory where you cloned Chatterino2 & its submodules
 1. Create a build directory and go into it:  
    `mkdir build && cd build`
-1. Run CMake:  
+1. Run CMake. To enable Lua plugins in your build add `-DCHATTERINO_PLUGINS=ON` to this command.  
    `cmake -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/qt@5 -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@1.1 ..`
 1. Build:  
    `make`
