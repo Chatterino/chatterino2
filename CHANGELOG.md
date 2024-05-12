@@ -9,6 +9,7 @@
 - Dev: Use Qt's high DPI scaling. (#4868)
 - Dev: Add doxygen build target. (#5377)
 - Dev: Make printing of strings in tests easier. (#5379)
+- Dev: Refactor and document `Scrollbar`. (#5334)
 
 ## 2.5.1
 
