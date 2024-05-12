@@ -1161,10 +1161,6 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
 
     QPoint point(p.x, p.y);
     point /= this->devicePixelRatio();
-    if (!rect.contains(point))
-    {
-        return false;  // let DefWindowProc handle this
-    }
 
     auto x = point.x();
     auto y = point.y();
