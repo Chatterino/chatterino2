@@ -1938,7 +1938,7 @@ MessagePtr TwitchMessageBuilder::makeAutomodInfoMessage(
     builder.emplace<BadgeElement>(makeAutoModBadge(),
                                   MessageElementFlag::BadgeChannelAuthority);
     // AutoMod "username"
-    builder.emplace<MentionElement>("AutoMod:", MessageColor::Text,
+    builder.emplace<MentionElement>("AutoMod:", AUTOMOD_USER_COLOR,
                                     AUTOMOD_USER_COLOR);
     switch (action.type)
     {
@@ -1993,7 +1993,7 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeAutomodMessage(
     builder.emplace<BadgeElement>(makeAutoModBadge(),
                                   MessageElementFlag::BadgeChannelAuthority);
     // AutoMod "username"
-    builder2.emplace<MentionElement>("AutoMod:", MessageColor::Text,
+    builder2.emplace<MentionElement>("AutoMod:", AUTOMOD_USER_COLOR,
                                      AUTOMOD_USER_COLOR);
     // AutoMod header message
     builder.emplace<TextElement>(
