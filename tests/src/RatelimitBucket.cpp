@@ -1,6 +1,7 @@
 #include "util/RatelimitBucket.hpp"
 
-#include <gtest/gtest.h>
+#include "Test.hpp"
+
 #include <QApplication>
 #include <QDebug>
 #include <QtConcurrent>

@@ -1,0 +1,14 @@
+name: Publish to WinGet
+on:
+  release:
+    types: [released]
+jobs:
+  publish:
+    runs-on: windows-latest
+    if: ${{ startsWith(github.event.release.tag_name, 'v') }}
+    steps:
+      - uses: vedantmgoyal2009/winget-releaser@v2
+        with:
+          identifier: ChatterinoTeam.Chatterino
+          installers-regex: ^Chatterino.Installer.exe$
+          token: ${{ secrets.WINGET_TOKEN }}

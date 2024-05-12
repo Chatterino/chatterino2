@@ -16,9 +16,8 @@
 #include "providers/seventv/SeventvPersonalEmotes.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "singletons/Emotes.hpp"
-#include "TestHelpers.hpp"
+#include "Test.hpp"
 
-#include <gtest/gtest.h>
 #include <IrcConnection>
 #include <QDebug>
 #include <QString>
