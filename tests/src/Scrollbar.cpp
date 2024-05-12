@@ -6,9 +6,9 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "Test.hpp"
 #include "widgets/helper/ScrollbarHighlight.hpp"
 
-#include <gtest/gtest.h>
 #include <QString>
 
 #include <memory>
