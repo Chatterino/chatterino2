@@ -165,12 +165,22 @@ public:
         else
         {
             int vecRow = this->getVectorIndexFromModelIndex(row);
+            // TODO: This is only a safety-thing for when we modify data that's being modified right now.
+            // It should not be necessary, but it would require some rethinking about this surrounding logic
+            if (vecRow >= this->vector_->readOnly()->size())
+            {
+                return false;
+            }
             this->vector_->removeAt(vecRow, this);
 
             assert(this->rows_[row].original);
             TVectorItem item = this->getItemFromRow(
                 this->rows_[row].items, this->rows_[row].original.value());
             this->vector_->insert(item, vecRow, this);
+
+            QVector<int> roles = QVector<int>();
+            roles.append(role);
+            emit dataChanged(index, index, roles);
         }
 
         return true;

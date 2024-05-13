@@ -503,6 +503,8 @@ set(SOURCE_FILES
         util/IpcQueue.hpp
         util/LayoutHelper.cpp
         util/LayoutHelper.hpp
+        util/LoadPixmap.cpp
+        util/LoadPixmap.hpp
         util/RapidjsonHelpers.cpp
         util/RapidjsonHelpers.hpp
         util/RatelimitBucket.cpp
@@ -634,6 +636,8 @@ set(SOURCE_FILES
         widgets/helper/EditableModelView.hpp
         widgets/helper/EffectLabel.cpp
         widgets/helper/EffectLabel.hpp
+        widgets/helper/IconDelegate.cpp
+        widgets/helper/IconDelegate.hpp
         widgets/helper/InvisibleSizeGrip.cpp
         widgets/helper/InvisibleSizeGrip.hpp
         widgets/helper/NotebookButton.cpp
@@ -642,8 +646,6 @@ set(SOURCE_FILES
         widgets/helper/NotebookTab.hpp
         widgets/helper/RegExpItemDelegate.cpp
         widgets/helper/RegExpItemDelegate.hpp
-        widgets/helper/TrimRegExpValidator.cpp
-        widgets/helper/TrimRegExpValidator.hpp
         widgets/helper/ResizingTextEdit.cpp
         widgets/helper/ResizingTextEdit.hpp
         widgets/helper/ScrollbarHighlight.cpp
@@ -658,6 +660,11 @@ set(SOURCE_FILES
         widgets/helper/TitlebarButton.hpp
         widgets/helper/TitlebarButtons.cpp
         widgets/helper/TitlebarButtons.hpp
+        widgets/helper/TrimRegExpValidator.cpp
+        widgets/helper/TrimRegExpValidator.hpp
+
+        widgets/layout/FlowLayout.cpp
+        widgets/layout/FlowLayout.hpp
 
         widgets/listview/GenericItemDelegate.cpp
         widgets/listview/GenericItemDelegate.hpp
@@ -989,7 +996,6 @@ if (APPLE AND BUILD_APP)
         PROPERTIES
         MACOSX_BUNDLE_BUNDLE_NAME "Chatterino"
         MACOSX_BUNDLE_GUI_IDENTIFIER "com.chatterino"
-        MACOSX_BUNDLE_INFO_STRING "Chat client for Twitch"
         MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}"
         MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
         MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
@@ -1145,3 +1151,14 @@ if(NOT CHATTERINO_UPDATER)
     message(STATUS "Disabling the updater.")
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_DISABLE_UPDATER)
 endif()
+
+if (DOXYGEN_FOUND)
+    message(STATUS "Doxygen found, adding doxygen target")
+    # output will be in docs/html
+    set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/docs")
+
+    doxygen_add_docs(
+        doxygen
+        ${CMAKE_CURRENT_LIST_DIR}
+    )
+endif ()

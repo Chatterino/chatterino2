@@ -108,7 +108,6 @@ WindowManager::WindowManager(const Paths &paths)
     this->wordFlagsListener_.addSetting(settings->showBadgesFfz);
     this->wordFlagsListener_.addSetting(settings->showBadgesSevenTV);
     this->wordFlagsListener_.addSetting(settings->enableEmoteImages);
-    this->wordFlagsListener_.addSetting(settings->boldUsernames);
     this->wordFlagsListener_.addSetting(settings->lowercaseDomains);
     this->wordFlagsListener_.addSetting(settings->showReplyButton);
     this->wordFlagsListener_.setCB([this] {
@@ -182,8 +181,6 @@ void WindowManager::updateWordTypeMask()
     // misc
     flags.set(MEF::AlwaysShow);
     flags.set(MEF::Collapsed);
-    flags.set(settings->boldUsernames ? MEF::BoldUsername
-                                      : MEF::NonBoldUsername);
     flags.set(MEF::LowercaseLinks, settings->lowercaseDomains);
     flags.set(MEF::ChannelPointReward);
 
@@ -419,6 +416,13 @@ void WindowManager::initialize(Settings &settings, const Paths &paths)
         this->forceLayoutChannelViews();
     });
     settings.enableRedeemedHighlight.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+
+    settings.colorUsernames.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.boldUsernames.connect([this](auto, auto) {
         this->forceLayoutChannelViews();
     });
 

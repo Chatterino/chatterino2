@@ -33,6 +33,7 @@
 #include "util/DistanceBetweenPoints.hpp"
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
+#include "util/QMagicEnum.hpp"
 #include "util/Twitch.hpp"
 #include "widgets/dialogs/ReplyThreadPopup.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
@@ -266,8 +267,21 @@ void addHiddenContextMenuItems(QMenu *menu,
         jsonObject["id"] = message->id;
         jsonObject["searchText"] = message->searchText;
         jsonObject["messageText"] = message->messageText;
-        jsonObject["flags"] = QString::fromStdString(
-            magic_enum::enum_flags_name(message->flags.value()));
+        jsonObject["flags"] = qmagicenum::enumFlagsName(message->flags.value());
+        if (message->reward)
+        {
+            QJsonObject reward;
+            reward["id"] = message->reward->id;
+            reward["title"] = message->reward->title;
+            reward["cost"] = message->reward->cost;
+            reward["isUserInputRequired"] =
+                message->reward->isUserInputRequired;
+            jsonObject["reward"] = reward;
+        }
+        else
+        {
+            jsonObject["reward"] = QJsonValue();
+        }
 
         jsonDocument.setObject(jsonObject);
 
@@ -288,23 +302,6 @@ qreal highlightEasingFunction(qreal progress)
         return 1.0 - pow(10.0 * progress, 3.0);
     }
     return 1.0 + pow((20.0 / 9.0) * (0.5 * progress - 0.5), 3.0);
-}
-
-/// @return the start and end of the word bounds
-std::pair<int, int> getWordBounds(MessageLayout *layout,
-                                  const MessageLayoutElement *element,
-                                  const QPoint &relativePos)
-{
-    assert(layout != nullptr);
-    assert(element != nullptr);
-
-    const auto wordStart = layout->getSelectionIndex(relativePos) -
-                           element->getMouseOverIndex(relativePos);
-    const auto selectionLength = element->getSelectionIndexCount();
-    const auto length =
-        element->hasTrailingSpace() ? selectionLength - 1 : selectionLength;
-
-    return {wordStart, wordStart + length};
 }
 
 }  // namespace
@@ -453,7 +450,8 @@ void ChannelView::initializeSignals()
     this->signalHolder_.managedConnect(
         getIApp()->getWindows()->layoutRequested, [&](Channel *channel) {
             if (this->isVisible() &&
-                (channel == nullptr || this->channel_.get() == channel))
+                (channel == nullptr ||
+                 this->underlyingChannel_.get() == channel))
             {
                 this->queueLayout();
             }
@@ -463,7 +461,8 @@ void ChannelView::initializeSignals()
         getIApp()->getWindows()->invalidateBuffersRequested,
         [this](Channel *channel) {
             if (this->isVisible() &&
-                (channel == nullptr || this->channel_.get() == channel))
+                (channel == nullptr ||
+                 this->underlyingChannel_.get() == channel))
             {
                 this->invalidateBuffers();
             }
@@ -551,6 +550,8 @@ void ChannelView::updatePauses()
         this->pauseScrollMaximumOffset_ = 0;
 
         this->queueLayout();
+        // make sure we re-render
+        this->update();
     }
     else if (std::any_of(this->pauses_.begin(), this->pauses_.end(),
                          [](auto &&value) {
@@ -575,8 +576,9 @@ void ChannelView::updatePauses()
         {
             /// Start the timer
             this->pauseEnd_ = pauseEnd;
-            this->pauseTimer_.start(
-                duration_cast<milliseconds>(pauseEnd - SteadyClock::now()));
+            auto duration =
+                duration_cast<milliseconds>(pauseEnd - SteadyClock::now());
+            this->pauseTimer_.start(std::max(duration, 0ms));
         }
     }
 }
@@ -613,7 +615,7 @@ void ChannelView::scaleChangedEvent(float scale)
 
     if (this->goToBottom_)
     {
-        auto factor = this->qtFontScale();
+        auto factor = this->scale();
 #ifdef Q_OS_MACOS
         factor = scale * 80.F /
                  std::max<float>(
@@ -701,8 +703,10 @@ void ChannelView::layoutVisibleMessages(
         {
             const auto &message = messages[i];
 
-            redrawRequired |= message->layout(layoutWidth, this->scale(), flags,
-                                              this->bufferInvalidationQueued_);
+            redrawRequired |= message->layout(
+                layoutWidth, this->scale(),
+                this->scale() * static_cast<float>(this->devicePixelRatio()),
+                flags, this->bufferInvalidationQueued_);
 
             y += message->getHeight();
         }
@@ -736,13 +740,16 @@ void ChannelView::updateScrollbar(
     {
         auto *message = messages[i].get();
 
-        message->layout(layoutWidth, this->scale(), flags, false);
+        message->layout(
+            layoutWidth, this->scale(),
+            this->scale() * static_cast<float>(this->devicePixelRatio()), flags,
+            false);
 
         h -= message->getHeight();
 
         if (h < 0)  // break condition
         {
-            this->scrollBar_->setLargeChange(
+            this->scrollBar_->setPageSize(
                 (messages.size() - i) +
                 qreal(h) / std::max<int>(1, message->getHeight()));
 
@@ -776,10 +783,11 @@ void ChannelView::clearMessages()
     // Clear all stored messages in this chat widget
     this->messages_.clear();
     this->scrollBar_->clearHighlights();
-    this->scrollBar_->resetMaximum();
+    this->scrollBar_->resetBounds();
     this->scrollBar_->setMaximum(0);
     this->scrollBar_->setMinimum(0);
     this->queueLayout();
+    this->update();
 
     this->lastMessageHasAlternateBackground_ = false;
     this->lastMessageHasAlternateBackgroundReverse_ = true;
@@ -975,6 +983,44 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
             this->channel_->fillInMissingMessages(filtered);
         });
 
+    // Copy over messages from the backing channel to the filtered one
+    // and the ui.
+    auto snapshot = underlyingChannel->getMessageSnapshot();
+
+    size_t nMessagesAdded = 0;
+    for (const auto &msg : snapshot)
+    {
+        if (!this->shouldIncludeMessage(msg))
+        {
+            continue;
+        }
+
+        auto messageLayout = std::make_shared<MessageLayout>(msg);
+
+        if (this->lastMessageHasAlternateBackground_)
+        {
+            messageLayout->flags.set(MessageLayoutFlag::AlternateBackground);
+        }
+        this->lastMessageHasAlternateBackground_ =
+            !this->lastMessageHasAlternateBackground_;
+
+        if (underlyingChannel->shouldIgnoreHighlights())
+        {
+            messageLayout->flags.set(MessageLayoutFlag::IgnoreHighlights);
+        }
+
+        this->messages_.pushBack(messageLayout);
+        this->channel_->addMessage(msg);
+        nMessagesAdded++;
+        if (this->showScrollbarHighlights())
+        {
+            this->scrollBar_->addHighlight(msg->getScrollBarHighlight());
+        }
+    }
+
+    this->scrollBar_->setMaximum(
+        static_cast<qreal>(std::min(nMessagesAdded, this->messages_.limit())));
+
     //
     // Standard channel connections
     //
@@ -1005,33 +1051,6 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
                                              [this](const auto &) {
                                                  this->messagesUpdated();
                                              });
-
-    auto snapshot = underlyingChannel->getMessageSnapshot();
-
-    this->scrollBar_->setMaximum(qreal(snapshot.size()));
-
-    for (const auto &msg : snapshot)
-    {
-        auto messageLayout = std::make_shared<MessageLayout>(msg);
-
-        if (this->lastMessageHasAlternateBackground_)
-        {
-            messageLayout->flags.set(MessageLayoutFlag::AlternateBackground);
-        }
-        this->lastMessageHasAlternateBackground_ =
-            !this->lastMessageHasAlternateBackground_;
-
-        if (underlyingChannel->shouldIgnoreHighlights())
-        {
-            messageLayout->flags.set(MessageLayoutFlag::IgnoreHighlights);
-        }
-
-        this->messages_.pushBack(messageLayout);
-        if (this->showScrollbarHighlights())
-        {
-            this->scrollBar_->addHighlight(msg->getScrollBarHighlight());
-        }
-    }
 
     this->underlyingChannel_ = underlyingChannel;
 
@@ -1263,7 +1282,7 @@ void ChannelView::messagesUpdated()
 
     this->messages_.clear();
     this->scrollBar_->clearHighlights();
-    this->scrollBar_->resetMaximum();
+    this->scrollBar_->resetBounds();
     this->scrollBar_->setMaximum(qreal(snapshot.size()));
     this->scrollBar_->setMinimum(0);
     this->lastMessageHasAlternateBackground_ = false;
@@ -1706,9 +1725,11 @@ void ChannelView::wheelEvent(QWheelEvent *event)
                 }
                 else
                 {
-                    snapshot[i - 1]->layout(this->getLayoutWidth(),
-                                            this->scale(), this->getFlags(),
-                                            false);
+                    snapshot[i - 1]->layout(
+                        this->getLayoutWidth(), this->scale(),
+                        this->scale() *
+                            static_cast<float>(this->devicePixelRatio()),
+                        this->getFlags(), false);
                     scrollFactor = 1;
                     currentScrollLeft = snapshot[i - 1]->getHeight();
                 }
@@ -1741,9 +1762,11 @@ void ChannelView::wheelEvent(QWheelEvent *event)
                 }
                 else
                 {
-                    snapshot[i + 1]->layout(this->getLayoutWidth(),
-                                            this->scale(), this->getFlags(),
-                                            false);
+                    snapshot[i + 1]->layout(
+                        this->getLayoutWidth(), this->scale(),
+                        this->scale() *
+                            static_cast<float>(this->devicePixelRatio()),
+                        this->getFlags(), false);
 
                     scrollFactor = 1;
                     currentScrollLeft = snapshot[i + 1]->getHeight();
@@ -1817,7 +1840,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     if (this->isDoubleClick_ && hoverLayoutElement)
     {
         auto [wordStart, wordEnd] =
-            getWordBounds(layout.get(), hoverLayoutElement, relativePos);
+            layout->getWordBounds(hoverLayoutElement, relativePos);
         auto hoveredWord = Selection{SelectionItem(messageIndex, wordStart),
                                      SelectionItem(messageIndex, wordEnd)};
         // combined selection spanning from initially selected word to hoveredWord
@@ -2647,7 +2670,8 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
     }
 
     auto [wordStart, wordEnd] =
-        getWordBounds(layout.get(), hoverLayoutElement, relativePos);
+        layout->getWordBounds(hoverLayoutElement, relativePos);
+
     this->doubleClickSelection_ = {SelectionItem(messageIndex, wordStart),
                                    SelectionItem(messageIndex, wordEnd)};
     this->setSelection(this->doubleClickSelection_);
@@ -2991,10 +3015,6 @@ void ChannelView::setInputReply(const MessagePtr &message)
         // Message did not already have a thread attached, try to find or create one
         auto *tc =
             dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get());
-        if (!tc)
-        {
-            tc = dynamic_cast<TwitchChannel *>(this->channel_.get());
-        }
 
         if (tc)
         {

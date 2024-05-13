@@ -8,59 +8,24 @@ concurrency:
   group: clang-tidy-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  CHATTERINO_REQUIRE_CLEAN_GIT: On
-  C2_BUILD_WITH_QT6: Off
-
 jobs:
-  build:
+  review:
     name: "clang-tidy ${{ matrix.os }}, Qt ${{ matrix.qt-version }})"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
-          # Ubuntu 22.04, Qt 5.15
+          # Ubuntu 22.04, Qt 6.6
           - os: ubuntu-22.04
-            qt-version: 5.15.2
-            plugins: false
+            qt-version: 6.6.2
 
       fail-fast: false
 
     steps:
-      - name: Enable plugin support
-        if: matrix.plugins
-        run: |
-          echo "C2_PLUGINS=ON" >> "$GITHUB_ENV"
-        shell: bash
-
-      - name: Set BUILD_WITH_QT6
-        if: startsWith(matrix.qt-version, '6.')
-        run: |
-          echo "C2_BUILD_WITH_QT6=ON" >> "$GITHUB_ENV"
-        shell: bash
-
       - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
-
-      - name: Install Qt5
-        if: startsWith(matrix.qt-version, '5.')
-        uses: jurplel/install-qt-action@v3.3.0
-        with:
-          cache: true
-          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
-          version: ${{ matrix.qt-version }}
-
-      - name: Install Qt 6.5.3 imageformats
-        if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v3.3.0
-        with:
-          cache: false
-          modules: qtimageformats
-          set-env: false
-          version: 6.5.3
-          extra: --noarchives
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
@@ -70,79 +35,31 @@ jobs:
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
           modules: qt5compat qtimageformats
           version: ${{ matrix.qt-version }}
-
-      # LINUX
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get -y install \
-              cmake \
-              virtualenv \
-              rapidjson-dev \
-              libfuse2 \
-              libssl-dev \
-              libboost-dev \
-              libxcb-randr0-dev \
-              libboost-system-dev \
-              libboost-filesystem-dev \
-              libpulse-dev \
-              libxkbcommon-x11-0 \
-              build-essential \
-              libgl1-mesa-dev \
-              libxcb-icccm4 \
-              libxcb-image0 \
-              libxcb-keysyms1 \
-              libxcb-render-util0 \
-              libxcb-xinerama0
-
-      - name: Apply Qt5 patches
-        if: startsWith(matrix.qt-version, '5.')
-        run: |
-          patch "$Qt5_DIR/include/QtConcurrent/qtconcurrentthreadengine.h" .patches/qt5-on-newer-gcc.patch
-        shell: bash
-
-      - name: Build
-        run: |
-          mkdir build
-          cd build
-          CXXFLAGS=-fno-sized-deallocation cmake \
-            -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
-            -DUSE_PRECOMPILED_HEADERS=OFF \
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
-            -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
-            -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
-            -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
-            ..
-        shell: bash
+          dir: ${{ github.workspace }}/.qtinstall
+          set-env: false
 
       - name: clang-tidy review
         timeout-minutes: 20
-        uses: ZedThree/clang-tidy-review@v0.17.1
+        uses: ZedThree/clang-tidy-review@v0.18.0
         with:
           build_dir: build-clang-tidy
           config_file: ".clang-tidy"
           split_workflow: true
           exclude: "lib/*,tools/crash-handler/*"
           cmake_command: >-
-            cmake -S. -Bbuild-clang-tidy 
-            -DCMAKE_BUILD_TYPE=Release 
-            -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On 
-            -DUSE_PRECOMPILED_HEADERS=OFF 
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=On 
-            -DCHATTERINO_LTO=Off 
-            -DCHATTERINO_PLUGINS=On 
-            -DBUILD_WITH_QT6=Off
-            -DBUILD_TESTS=On
-            -DBUILD_BENCHMARKS=On
+            ./.CI/setup-clang-tidy.sh
           apt_packages: >-
-            qttools5-dev, qt5-image-formats-plugins, libqt5svg5-dev, 
             libsecret-1-dev,
             libboost-dev, libboost-system-dev, libboost-filesystem-dev,
             libssl-dev,
             rapidjson-dev,
-            libbenchmark-dev
+            libbenchmark-dev,
+            build-essential,
+            libgl1-mesa-dev, libgstreamer-gl1.0-0, libpulse-dev,
+            libxcb-glx0, libxcb-icccm4, libxcb-image0, libxcb-keysyms1, libxcb-randr0,
+            libxcb-render-util0, libxcb-render0, libxcb-shape0, libxcb-shm0, libxcb-sync1,
+            libxcb-util1, libxcb-xfixes0, libxcb-xinerama0, libxcb1, libxkbcommon-dev,
+            libxkbcommon-x11-0, libxcb-xkb-dev, libxcb-cursor0
 
       - name: clang-tidy-review upload
-        uses: ZedThree/clang-tidy-review/upload@v0.17.1
+        uses: ZedThree/clang-tidy-review/upload@v0.18.0

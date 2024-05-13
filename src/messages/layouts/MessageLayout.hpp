@@ -56,8 +56,8 @@ public:
 
     MessageLayoutFlags flags;
 
-    bool layout(int width, float scale_, MessageElementFlags flags,
-                bool shouldInvalidateBuffer);
+    bool layout(int width, float scale_, float imageScale,
+                MessageElementFlags flags, bool shouldInvalidateBuffer);
 
     // Painting
     MessagePaintResult paint(const MessagePaintContext &ctx);
@@ -70,7 +70,21 @@ public:
      *
      * If no element is found at the given point, this returns a null pointer
      */
-    const MessageLayoutElement *getElementAt(QPoint point);
+    const MessageLayoutElement *getElementAt(QPoint point) const;
+
+    /**
+     * @brief Returns the word bounds of the given element
+     *
+     * The first value is the index of the first character in the word,
+     * the second value is the index of the character after the last character in the word.
+     *
+     * Given the word "abc" by itself, we would return (0, 3)
+     *
+     *  V  V
+     * "abc "
+     */
+    std::pair<int, int> getWordBounds(
+        const MessageLayoutElement *hoveredElement, QPoint relativePos) const;
 
     /**
      * Get the index of the last character in this message's container
@@ -114,6 +128,7 @@ private:
     int currentLayoutWidth_ = -1;
     int layoutState_ = -1;
     float scale_ = -1;
+    float imageScale_ = -1.F;
     MessageElementFlags currentWordFlags_;
 
 #ifdef FOURTF

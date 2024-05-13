@@ -2,7 +2,11 @@
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 
+extern "C" {
 #    include <lua.h>
+}
+#    include "controllers/plugins/LuaUtilities.hpp"
+
 #    include <QString>
 
 #    include <cassert>
@@ -54,6 +58,28 @@ struct CompletionList {
 };
 
 /**
+ * @lua@class CompletionEvent
+ */
+struct CompletionEvent {
+    /**
+     * @lua@field query string The word being completed
+     */
+    QString query;
+    /**
+     * @lua@field full_text_content string Content of the text input
+     */
+    QString full_text_content;
+    /**
+     * @lua@field cursor_position integer Position of the cursor in the text input in unicode codepoints (not bytes)
+     */
+    int cursor_position{};
+    /**
+     * @lua@field is_first_word boolean True if this is the first word in the input
+     */
+    bool is_first_word{};
+};
+
+/**
  * @includefile common/Channel.hpp
  * @includefile controllers/plugins/api/ChannelRef.hpp
  */
@@ -72,7 +98,7 @@ int c2_register_command(lua_State *L);
  * Registers a callback to be invoked when completions for a term are requested.
  *
  * @lua@param type "CompletionRequested"
- * @lua@param func fun(query: string, full_text_content: string, cursor_position: integer, is_first_word: boolean): CompletionList The callback to be invoked.
+ * @lua@param func fun(event: CompletionEvent): CompletionList The callback to be invoked.
  * @exposed c2.register_callback
  */
 int c2_register_callback(lua_State *L);
@@ -80,7 +106,7 @@ int c2_register_callback(lua_State *L);
 /**
  * Writes a message to the Chatterino log.
  *
- * @lua@param level LogLevel The desired level.
+ * @lua@param level c2.LogLevel The desired level.
  * @lua@param ... any Values to log. Should be convertible to a string with `tostring()`.
  * @exposed c2.log
  */

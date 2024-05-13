@@ -276,7 +276,7 @@ public:
 
     template <typename T, std::size_t N>
     ComboBox *addDropdownEnumClass(const QString &text,
-                                   const std::array<std::string_view, N> &items,
+                                   const std::array<QStringView, N> &items,
                                    EnumStringSetting<T> &setting,
                                    QString toolTipText,
                                    const QString &defaultValueText)
@@ -285,7 +285,7 @@ public:
 
         for (const auto &item : items)
         {
-            combo->addItem(QString::fromStdString(std::string(item)));
+            combo->addItem(item.toString());
         }
 
         if (!defaultValueText.isEmpty())
@@ -296,8 +296,7 @@ public:
         setting.connect(
             [&setting, combo](const QString &value) {
                 auto enumValue =
-                    magic_enum::enum_cast<T>(value.toStdString(),
-                                             magic_enum::case_insensitive)
+                    qmagicenum::enumCast<T>(value, qmagicenum::CASE_INSENSITIVE)
                         .value_or(setting.defaultValue);
 
                 auto i = magic_enum::enum_integer(enumValue);

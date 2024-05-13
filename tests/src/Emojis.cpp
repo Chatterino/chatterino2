@@ -1,8 +1,8 @@
 #include "providers/emoji/Emojis.hpp"
 
 #include "common/Literals.hpp"
+#include "Test.hpp"
 
-#include <gtest/gtest.h>
 #include <QDebug>
 #include <QString>
 
@@ -53,7 +53,7 @@ TEST(Emojis, ShortcodeParsing)
         }
 
         EXPECT_EQ(output, test.expectedOutput)
-            << "Input " << test.input.toStdString() << " failed";
+            << "Input " << test.input << " failed";
     }
 }
 
@@ -165,8 +165,7 @@ TEST(Emojis, Parse)
         // can't use EXPECT_EQ because EmotePtr can't be printed
         if (output != test.expectedOutput)
         {
-            EXPECT_TRUE(false)
-                << "Input " << test.input.toStdString() << " failed";
+            EXPECT_TRUE(false) << "Input " << test.input << " failed";
         }
     }
 }

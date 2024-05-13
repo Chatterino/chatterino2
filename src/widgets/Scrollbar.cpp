@@ -4,7 +4,6 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/Clamp.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 #include <QMouseEvent>
@@ -13,7 +12,19 @@
 
 #include <cmath>
 
-#define MIN_THUMB_HEIGHT 10
+namespace {
+
+constexpr int MIN_THUMB_HEIGHT = 10;
+
+/// Amount of messages to move by when clicking on the track
+constexpr qreal SCROLL_DELTA = 5.0;
+
+bool areClose(auto a, auto b)
+{
+    return std::abs(a - b) <= 0.0001;
+}
+
+}  // namespace
 
 namespace chatterino {
 
@@ -22,55 +33,56 @@ Scrollbar::Scrollbar(size_t messagesLimit, ChannelView *parent)
     , currentValueAnimation_(this, "currentValue_")
     , highlights_(messagesLimit)
 {
-    this->resize(int(16 * this->scale()), 100);
+    this->resize(static_cast<int>(16 * this->scale()), 100);
     this->currentValueAnimation_.setDuration(150);
     this->currentValueAnimation_.setEasingCurve(
         QEasingCurve(QEasingCurve::OutCubic));
     connect(&this->currentValueAnimation_, &QAbstractAnimation::finished, this,
-            &Scrollbar::resetMaximum);
+            &Scrollbar::resetBounds);
 
     this->setMouseTracking(true);
 }
 
+boost::circular_buffer<ScrollbarHighlight> Scrollbar::getHighlights() const
+{
+    return this->highlights_;
+}
+
 void Scrollbar::addHighlight(ScrollbarHighlight highlight)
 {
-    this->highlights_.pushBack(highlight);
+    this->highlights_.push_back(std::move(highlight));
 }
 
 void Scrollbar::addHighlightsAtStart(
-    const std::vector<ScrollbarHighlight> &_highlights)
+    const std::vector<ScrollbarHighlight> &highlights)
 {
-    this->highlights_.pushFront(_highlights);
+    size_t nItems = std::min(highlights.size(), this->highlights_.capacity() -
+                                                    this->highlights_.size());
+
+    if (nItems == 0)
+    {
+        return;
+    }
+
+    for (size_t i = 0; i < nItems; i++)
+    {
+        this->highlights_.push_front(highlights[highlights.size() - 1 - i]);
+    }
 }
 
 void Scrollbar::replaceHighlight(size_t index, ScrollbarHighlight replacement)
 {
-    this->highlights_.replaceItem(index, replacement);
-}
+    if (this->highlights_.size() <= index)
+    {
+        return;
+    }
 
-void Scrollbar::pauseHighlights()
-{
-    this->highlightsPaused_ = true;
-}
-
-void Scrollbar::unpauseHighlights()
-{
-    this->highlightsPaused_ = false;
+    this->highlights_[index] = std::move(replacement);
 }
 
 void Scrollbar::clearHighlights()
 {
     this->highlights_.clear();
-}
-
-LimitedQueueSnapshot<ScrollbarHighlight> &Scrollbar::getHighlightSnapshot()
-{
-    if (!this->highlightsPaused_)
-    {
-        this->highlightSnapshot_ = this->highlights_.getSnapshot();
-    }
-
-    return this->highlightSnapshot_;
 }
 
 void Scrollbar::scrollToBottom(bool animate)
@@ -102,7 +114,7 @@ void Scrollbar::offsetMaximum(qreal value)
     this->updateScroll();
 }
 
-void Scrollbar::resetMaximum()
+void Scrollbar::resetBounds()
 {
     if (this->minimum_ > 0)
     {
@@ -132,26 +144,21 @@ void Scrollbar::offsetMinimum(qreal value)
     this->updateScroll();
 }
 
-void Scrollbar::setLargeChange(qreal value)
+void Scrollbar::setPageSize(qreal value)
 {
-    this->largeChange_ = value;
-
-    this->updateScroll();
-}
-
-void Scrollbar::setSmallChange(qreal value)
-{
-    this->smallChange_ = value;
+    this->pageSize_ = value;
 
     this->updateScroll();
 }
 
 void Scrollbar::setDesiredValue(qreal value, bool animated)
 {
+    // this can't use std::clamp, because minimum_ < getBottom() isn't always
+    // true, which is a precondition for std::clamp
     value = std::max(this->minimum_, std::min(this->getBottom(), value));
-
-    if (std::abs(this->currentValue_ - value) <= 0.0001)
+    if (areClose(this->currentValue_, value))
     {
+        // value has not changed
         return;
     }
 
@@ -159,7 +166,7 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
 
     this->desiredValueChanged_.invoke();
 
-    this->atBottom_ = (this->getBottom() - value) <= 0.0001;
+    this->atBottom_ = areClose(this->getBottom(), value);
 
     if (animated && getSettings()->enableSmoothScrolling)
     {
@@ -178,7 +185,7 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
         else
         {
             this->setCurrentValue(value);
-            this->resetMaximum();
+            this->resetBounds();
         }
     }
 }
@@ -193,19 +200,14 @@ qreal Scrollbar::getMinimum() const
     return this->minimum_;
 }
 
-qreal Scrollbar::getLargeChange() const
+qreal Scrollbar::getPageSize() const
 {
-    return this->largeChange_;
+    return this->pageSize_;
 }
 
 qreal Scrollbar::getBottom() const
 {
-    return this->maximum_ - this->largeChange_;
-}
-
-qreal Scrollbar::getSmallChange() const
-{
-    return this->smallChange_;
+    return this->maximum_ - this->pageSize_;
 }
 
 qreal Scrollbar::getDesiredValue() const
@@ -222,8 +224,8 @@ qreal Scrollbar::getRelativeCurrentValue() const
 {
     // currentValue - minimum can be negative if minimum is incremented while
     // scrolling up to or down from the top when smooth scrolling is enabled.
-    return clamp(this->currentValue_ - this->minimum_, qreal(0.0),
-                 this->currentValue_);
+    return std::clamp(this->currentValue_ - this->minimum_, 0.0,
+                      this->currentValue_);
 }
 
 void Scrollbar::offset(qreal value)
@@ -244,9 +246,9 @@ pajlada::Signals::NoArgSignal &Scrollbar::getDesiredValueChanged()
 void Scrollbar::setCurrentValue(qreal value)
 {
     value = std::max(this->minimum_, std::min(this->getBottom(), value));
-
-    if (std::abs(this->currentValue_ - value) <= 0.0001)
+    if (areClose(this->currentValue_, value))
     {
+        // value has not changed
         return;
     }
 
@@ -258,21 +260,24 @@ void Scrollbar::setCurrentValue(qreal value)
 
 void Scrollbar::printCurrentState(const QString &prefix) const
 {
-    qCDebug(chatterinoWidget)
-        << prefix                                         //
-        << "Current value: " << this->getCurrentValue()   //
-        << ". Maximum: " << this->getMaximum()            //
-        << ". Minimum: " << this->getMinimum()            //
-        << ". Large change: " << this->getLargeChange();  //
+    qCDebug(chatterinoWidget).nospace().noquote()
+        << prefix                                          //
+        << " { currentValue: " << this->getCurrentValue()  //
+        << ", desiredValue: " << this->getDesiredValue()   //
+        << ", maximum: " << this->getMaximum()             //
+        << ", minimum: " << this->getMinimum()             //
+        << ", pageSize: " << this->getPageSize()           //
+        << " }";
 }
 
-void Scrollbar::paintEvent(QPaintEvent *)
+void Scrollbar::paintEvent(QPaintEvent * /*event*/)
 {
-    bool mouseOver = this->mouseOverIndex_ != -1;
-    int xOffset = mouseOver ? 0 : width() - int(4 * this->scale());
+    bool mouseOver = this->mouseOverLocation_ != MouseLocation::Outside;
+    int xOffset =
+        mouseOver ? 0 : this->width() - static_cast<int>(4.0F * this->scale());
 
     QPainter painter(this);
-    painter.fillRect(rect(), this->theme->scrollbars.background);
+    painter.fillRect(this->rect(), this->theme->scrollbars.background);
 
     bool enableRedeemedHighlights = getSettings()->enableRedeemedHighlight;
     bool enableFirstMessageHighlights =
@@ -280,16 +285,10 @@ void Scrollbar::paintEvent(QPaintEvent *)
     bool enableElevatedMessageHighlights =
         getSettings()->enableElevatedMessageHighlight;
 
-    //    painter.fillRect(QRect(xOffset, 0, width(), this->buttonHeight),
-    //                     this->themeManager->ScrollbarArrow);
-    //    painter.fillRect(QRect(xOffset, height() - this->buttonHeight,
-    //    width(), this->buttonHeight),
-    //                     this->themeManager->ScrollbarArrow);
-
     this->thumbRect_.setX(xOffset);
 
     // mouse over thumb
-    if (this->mouseDownIndex_ == 2)
+    if (this->mouseDownLocation_ == MouseLocation::InsideThumb)
     {
         painter.fillRect(this->thumbRect_,
                          this->theme->scrollbars.thumbSelected);
@@ -301,23 +300,21 @@ void Scrollbar::paintEvent(QPaintEvent *)
     }
 
     // draw highlights
-    auto &snapshot = this->getHighlightSnapshot();
-    size_t snapshotLength = snapshot.size();
-
-    if (snapshotLength == 0)
+    if (this->highlights_.empty())
     {
         return;
     }
 
+    size_t nHighlights = this->highlights_.size();
     int w = this->width();
-    float y = 0;
-    float dY = float(this->height()) / float(snapshotLength);
+    float dY =
+        static_cast<float>(this->height()) / static_cast<float>(nHighlights);
     int highlightHeight =
-        int(std::ceil(std::max<float>(this->scale() * 2, dY)));
+        static_cast<int>(std::ceil(std::max(this->scale() * 2.0F, dY)));
 
-    for (size_t i = 0; i < snapshotLength; i++, y += dY)
+    for (size_t i = 0; i < nHighlights; i++)
     {
-        ScrollbarHighlight const &highlight = snapshot[i];
+        const auto &highlight = this->highlights_[i];
 
         if (highlight.isNull())
         {
@@ -344,16 +341,16 @@ void Scrollbar::paintEvent(QPaintEvent *)
         QColor color = highlight.getColor();
         color.setAlpha(255);
 
+        int y = static_cast<int>(dY * static_cast<float>(i));
         switch (highlight.getStyle())
         {
             case ScrollbarHighlight::Default: {
-                painter.fillRect(w / 8 * 3, int(y), w / 4, highlightHeight,
-                                 color);
+                painter.fillRect(w / 8 * 3, y, w / 4, highlightHeight, color);
             }
             break;
 
             case ScrollbarHighlight::Line: {
-                painter.fillRect(0, int(y), w, 1, color);
+                painter.fillRect(0, y, w, 1, color);
             }
             break;
 
@@ -362,52 +359,30 @@ void Scrollbar::paintEvent(QPaintEvent *)
     }
 }
 
-void Scrollbar::resizeEvent(QResizeEvent *)
+void Scrollbar::resizeEvent(QResizeEvent * /*event*/)
 {
-    this->resize(int(16 * this->scale()), this->height());
+    this->resize(static_cast<int>(16 * this->scale()), this->height());
 }
 
 void Scrollbar::mouseMoveEvent(QMouseEvent *event)
 {
-    if (this->mouseDownIndex_ == -1)
+    if (this->mouseDownLocation_ == MouseLocation::Outside)
     {
-        int y = event->pos().y();
-
-        auto oldIndex = this->mouseOverIndex_;
-
-        if (y < this->buttonHeight_)
+        auto moveLocation = this->locationOfMouseEvent(event);
+        if (this->mouseOverLocation_ != moveLocation)
         {
-            this->mouseOverIndex_ = 0;
-        }
-        else if (y < this->thumbRect_.y())
-        {
-            this->mouseOverIndex_ = 1;
-        }
-        else if (this->thumbRect_.contains(2, y))
-        {
-            this->mouseOverIndex_ = 2;
-        }
-        else if (y < height() - this->buttonHeight_)
-        {
-            this->mouseOverIndex_ = 3;
-        }
-        else
-        {
-            this->mouseOverIndex_ = 4;
-        }
-
-        if (oldIndex != this->mouseOverIndex_)
-        {
+            this->mouseOverLocation_ = moveLocation;
             this->update();
         }
     }
-    else if (this->mouseDownIndex_ == 2)
+    else if (this->mouseDownLocation_ == MouseLocation::InsideThumb)
     {
-        int delta = event->pos().y() - this->lastMousePosition_.y();
+        qreal delta =
+            static_cast<qreal>(event->pos().y() - this->lastMousePosition_.y());
 
         this->setDesiredValue(
             this->desiredValue_ +
-            (qreal(delta) / std::max<qreal>(0.00000002, this->trackHeight_)) *
+            (delta / std::max<qreal>(0.00000002, this->trackHeight_)) *
                 this->maximum_);
     }
 
@@ -416,98 +391,80 @@ void Scrollbar::mouseMoveEvent(QMouseEvent *event)
 
 void Scrollbar::mousePressEvent(QMouseEvent *event)
 {
-    int y = event->pos().y();
-
-    if (y < this->buttonHeight_)
-    {
-        this->mouseDownIndex_ = 0;
-    }
-    else if (y < this->thumbRect_.y())
-    {
-        this->mouseDownIndex_ = 1;
-    }
-    else if (this->thumbRect_.contains(2, y))
-    {
-        this->mouseDownIndex_ = 2;
-    }
-    else if (y < height() - this->buttonHeight_)
-    {
-        this->mouseDownIndex_ = 3;
-    }
-    else
-    {
-        this->mouseDownIndex_ = 4;
-    }
+    this->mouseDownLocation_ = this->locationOfMouseEvent(event);
+    this->update();
 }
 
 void Scrollbar::mouseReleaseEvent(QMouseEvent *event)
 {
-    int y = event->pos().y();
-
-    if (y < this->buttonHeight_)
+    auto releaseLocation = this->locationOfMouseEvent(event);
+    if (this->mouseDownLocation_ != releaseLocation)
     {
-        if (this->mouseDownIndex_ == 0)
-        {
-            this->setDesiredValue(this->desiredValue_ - this->smallChange_,
-                                  true);
-        }
-    }
-    else if (y < this->thumbRect_.y())
-    {
-        if (this->mouseDownIndex_ == 1)
-        {
-            this->setDesiredValue(this->desiredValue_ - this->smallChange_,
-                                  true);
-        }
-    }
-    else if (this->thumbRect_.contains(2, y))
-    {
-        // do nothing
-    }
-    else if (y < height() - this->buttonHeight_)
-    {
-        if (this->mouseDownIndex_ == 3)
-        {
-            this->setDesiredValue(this->desiredValue_ + this->smallChange_,
-                                  true);
-        }
-    }
-    else
-    {
-        if (this->mouseDownIndex_ == 4)
-        {
-            this->setDesiredValue(this->desiredValue_ + this->smallChange_,
-                                  true);
-        }
+        // Ignore event. User released the mouse from a different spot than
+        // they first clicked. For example, they clicked above the thumb,
+        // changed their mind, dragged the mouse below the thumb, and released.
+        this->mouseDownLocation_ = MouseLocation::Outside;
+        return;
     }
 
-    this->mouseDownIndex_ = -1;
+    switch (releaseLocation)
+    {
+        case MouseLocation::AboveThumb:
+            // Move scrollbar up a small bit.
+            this->setDesiredValue(this->desiredValue_ - SCROLL_DELTA, true);
+            break;
+        case MouseLocation::BelowThumb:
+            // Move scrollbar down a small bit.
+            this->setDesiredValue(this->desiredValue_ + SCROLL_DELTA, true);
+            break;
+        default:
+            break;
+    }
 
+    this->mouseDownLocation_ = MouseLocation::Outside;
     this->update();
 }
 
-void Scrollbar::leaveEvent(QEvent *)
+void Scrollbar::leaveEvent(QEvent * /*event*/)
 {
-    this->mouseOverIndex_ = -1;
-
+    this->mouseOverLocation_ = MouseLocation::Outside;
     this->update();
 }
 
 void Scrollbar::updateScroll()
 {
-    this->trackHeight_ = this->height() - this->buttonHeight_ -
-                         this->buttonHeight_ - MIN_THUMB_HEIGHT - 1;
+    this->trackHeight_ = this->height() - MIN_THUMB_HEIGHT - 1;
 
     auto div = std::max<qreal>(0.0000001, this->maximum_ - this->minimum_);
 
-    this->thumbRect_ = QRect(
-        0,
-        int((this->getRelativeCurrentValue()) / div * this->trackHeight_) + 1 +
-            this->buttonHeight_,
-        this->width(),
-        int(this->largeChange_ / div * this->trackHeight_) + MIN_THUMB_HEIGHT);
+    this->thumbRect_ =
+        QRect(0,
+              static_cast<int>((this->getRelativeCurrentValue()) / div *
+                               this->trackHeight_) +
+                  1,
+              this->width(),
+              static_cast<int>(this->pageSize_ / div * this->trackHeight_) +
+                  MIN_THUMB_HEIGHT);
 
     this->update();
+}
+
+Scrollbar::MouseLocation Scrollbar::locationOfMouseEvent(
+    QMouseEvent *event) const
+{
+    int y = event->pos().y();
+
+    if (y < this->thumbRect_.y())
+    {
+        return MouseLocation::AboveThumb;
+    }
+
+    if (this->thumbRect_.contains(2, y))
+    {
+        return MouseLocation::InsideThumb;
+    }
+
+    return MouseLocation::BelowThumb;
 }
 
 }  // namespace chatterino

@@ -9,9 +9,11 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 
-namespace chatterino::commands {
+namespace {
+using namespace chatterino;
 
-QString sendAnnouncement(const CommandContext &ctx)
+QString sendAnnouncementColor(const CommandContext &ctx,
+                              const HelixAnnouncementColor color)
 {
     if (ctx.channel == nullptr)
     {
@@ -25,11 +27,28 @@ QString sendAnnouncement(const CommandContext &ctx)
         return "";
     }
 
+    QString colorStr = "";
+    if (color != HelixAnnouncementColor::Primary)
+    {
+        colorStr = qmagicenum::enumNameString(color).toLower();
+    }
+
     if (ctx.words.size() < 2)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "Usage: /announce <message> - Call attention to your "
-            "message with a highlight."));
+        QString usageMsg;
+        if (color == HelixAnnouncementColor::Primary)
+        {
+            usageMsg = "Usage: /announce <message> - Call attention to your "
+                       "message with a highlight.";
+        }
+        else
+        {
+            usageMsg =
+                QString("Usage: /announce%1 <message> - Call attention to your "
+                        "message with a %1 highlight.")
+                    .arg(colorStr);
+        }
+        ctx.channel->addMessage(makeSystemMessage(usageMsg));
         return "";
     }
 
@@ -37,13 +56,14 @@ QString sendAnnouncement(const CommandContext &ctx)
     if (user->isAnon())
     {
         ctx.channel->addMessage(makeSystemMessage(
-            "You must be logged in to use the /announce command."));
+            QString("You must be logged in to use the /announce%1 command.")
+                .arg(colorStr)));
         return "";
     }
 
     getHelix()->sendChatAnnouncement(
         ctx.twitchChannel->roomId(), user->getUserId(),
-        ctx.words.mid(1).join(" "), HelixAnnouncementColor::Primary,
+        ctx.words.mid(1).join(" "), color,
         []() {
             // do nothing.
         },
@@ -76,6 +96,35 @@ QString sendAnnouncement(const CommandContext &ctx)
             channel->addMessage(makeSystemMessage(errorMessage));
         });
     return "";
+}
+
+}  // namespace
+
+namespace chatterino::commands {
+
+QString sendAnnouncement(const CommandContext &ctx)
+{
+    return sendAnnouncementColor(ctx, HelixAnnouncementColor::Primary);
+}
+
+QString sendAnnouncementBlue(const CommandContext &ctx)
+{
+    return sendAnnouncementColor(ctx, HelixAnnouncementColor::Blue);
+}
+
+QString sendAnnouncementGreen(const CommandContext &ctx)
+{
+    return sendAnnouncementColor(ctx, HelixAnnouncementColor::Green);
+}
+
+QString sendAnnouncementOrange(const CommandContext &ctx)
+{
+    return sendAnnouncementColor(ctx, HelixAnnouncementColor::Orange);
+}
+
+QString sendAnnouncementPurple(const CommandContext &ctx)
+{
+    return sendAnnouncementColor(ctx, HelixAnnouncementColor::Purple);
 }
 
 }  // namespace chatterino::commands

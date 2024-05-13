@@ -1,6 +1,7 @@
 #pragma once
 
-#include <magic_enum/magic_enum.hpp>
+#include "util/QMagicEnum.hpp"
+
 #include <pajlada/settings.hpp>
 #include <QString>
 
@@ -108,10 +109,7 @@ public:
     template <typename T2>
     EnumStringSetting<Enum> &operator=(Enum newValue)
     {
-        std::string enumName(magic_enum::enum_name(newValue));
-        auto qEnumName = QString::fromStdString(enumName);
-
-        this->setValue(qEnumName.toLower());
+        this->setValue(qmagicenum::enumNameString(newValue).toLower());
 
         return *this;
     }
@@ -130,8 +128,8 @@ public:
 
     Enum getEnum()
     {
-        return magic_enum::enum_cast<Enum>(this->getValue().toStdString(),
-                                           magic_enum::case_insensitive)
+        return qmagicenum::enumCast<Enum>(this->getValue(),
+                                          qmagicenum::CASE_INSENSITIVE)
             .value_or(this->defaultValue);
     }
 

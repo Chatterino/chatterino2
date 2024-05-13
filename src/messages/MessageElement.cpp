@@ -155,8 +155,8 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
     {
         if (flags.has(MessageElementFlag::EmoteImages))
         {
-            auto image =
-                this->emote_->images.getImageOrLoaded(container.getScale());
+            auto image = this->emote_->images.getImageOrLoaded(
+                container.getImageScale());
             if (image->isEmpty())
             {
                 return;
@@ -210,7 +210,7 @@ void LayeredEmoteElement::addToContainer(MessageLayoutContainer &container,
     {
         if (flags.has(MessageElementFlag::EmoteImages))
         {
-            auto images = this->getLoadedImages(container.getScale());
+            auto images = this->getLoadedImages(container.getImageScale());
             if (images.empty())
             {
                 return;
@@ -364,7 +364,7 @@ void BadgeElement::addToContainer(MessageLayoutContainer &container,
     if (flags.hasAny(this->getFlags()))
     {
         auto image =
-            this->emote_->images.getImageOrLoaded(container.getScale());
+            this->emote_->images.getImageOrLoaded(container.getImageScale());
         if (image->isEmpty())
         {
             return;
@@ -454,7 +454,7 @@ TextElement::TextElement(const QString &text, MessageElementFlags flags,
 void TextElement::addToContainer(MessageLayoutContainer &container,
                                  MessageElementFlags flags)
 {
-    auto *app = getApp();
+    auto *app = getIApp();
 
     if (flags.hasAny(this->getFlags()))
     {
@@ -463,6 +463,8 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
 
         for (const auto &word : this->words_)
         {
+            auto wordId = container.nextWordId();
+
             auto getTextLayoutElement = [&](QString text, int width,
                                             bool hasTrailingSpace) {
                 auto color = this->color_.getColor(*app->getThemes());
@@ -473,6 +475,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                     this->style_, container.getScale());
                 e->setTrailingSpace(hasTrailingSpace);
                 e->setText(text);
+                e->setWordId(wordId);
 
                 return e;
             };
@@ -676,10 +679,11 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
-LinkElement::LinkElement(const Parsed &parsed, MessageElementFlags flags,
-                         const MessageColor &color, FontStyle style)
+LinkElement::LinkElement(const Parsed &parsed, const QString &fullUrl,
+                         MessageElementFlags flags, const MessageColor &color,
+                         FontStyle style)
     : TextElement({}, flags, color, style)
-    , linkInfo_(parsed.original)
+    , linkInfo_(fullUrl)
     , lowercase_({parsed.lowercase})
     , original_({parsed.original})
 {
@@ -697,6 +701,38 @@ void LinkElement::addToContainer(MessageLayoutContainer &container,
 Link LinkElement::getLink() const
 {
     return {Link::Url, this->linkInfo_.url()};
+}
+
+MentionElement::MentionElement(const QString &name, MessageColor fallbackColor_,
+                               MessageColor userColor_)
+    : TextElement(name, {MessageElementFlag::Text, MessageElementFlag::Mention})
+    , fallbackColor(fallbackColor_)
+    , userColor(userColor_)
+{
+}
+
+void MentionElement::addToContainer(MessageLayoutContainer &container,
+                                    MessageElementFlags flags)
+{
+    if (getSettings()->colorUsernames)
+    {
+        this->color_ = this->userColor;
+    }
+    else
+    {
+        this->color_ = this->fallbackColor;
+    }
+
+    if (getSettings()->boldUsernames)
+    {
+        this->style_ = FontStyle::ChatMediumBold;
+    }
+    else
+    {
+        this->style_ = FontStyle::ChatMedium;
+    }
+
+    TextElement::addToContainer(container, flags);
 }
 
 // TIMESTAMP
@@ -794,7 +830,7 @@ void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
     if (flags.hasAny(this->getFlags()))
     {
         const auto &image =
-            this->images_.getImageOrLoaded(container.getScale());
+            this->images_.getImageOrLoaded(container.getImageScale());
         if (image->isEmpty())
         {
             return;

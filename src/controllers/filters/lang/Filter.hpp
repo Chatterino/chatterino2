@@ -48,6 +48,9 @@ static const QMap<QString, Type> MESSAGE_TYPING_CONTEXT = {
     {"flags.monitored", Type::Bool},
     {"message.content", Type::String},
     {"message.length", Type::Int},
+    {"reward.title", Type::String},
+    {"reward.cost", Type::Int},
+    {"reward.id", Type::String},
 };
 
 ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel);

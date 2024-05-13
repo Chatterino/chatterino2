@@ -21,7 +21,7 @@ enum class LPlatform {
 };
 
 /**
- * @lua@class Channel: IWeakResource
+ * @lua@class Channel
  */
 struct ChannelRef {
     static void createMetatable(lua_State *L);
@@ -100,7 +100,7 @@ public:
      * Compares the channel Type. Note that enum values aren't guaranteed, just
      * that they are equal to the exposed enum.
      *
-     * @lua@return bool
+     * @lua@return boolean
      * @exposed Channel:is_twitch_channel
      */
     static int is_twitch_channel(lua_State *L);
@@ -193,7 +193,7 @@ public:
     /**
      * Finds a channel by the Twitch user ID of its owner.
      *
-     * @lua@param string id ID of the owner of the channel.
+     * @lua@param id string ID of the owner of the channel.
      * @lua@return Channel?
      * @exposed Channel.by_twitch_id
      */
@@ -216,13 +216,12 @@ struct LuaRoomModes {
     bool subscriber_only = false;
 
     /**
-     * @lua@field emotes_only boolean Whether or not text is allowed in messages.
-     * Note that "emotes" here only means Twitch emotes, not Unicode emoji, nor 3rd party text-based emotes
+     * @lua@field emotes_only boolean Whether or not text is allowed in messages. Note that "emotes" here only means Twitch emotes, not Unicode emoji, nor 3rd party text-based emotes
      */
     bool emotes_only = false;
 
     /**
-     * @lua@field unique_chat number? Time in minutes you need to follow to chat or nil.
+     * @lua@field follower_only number? Time in minutes you need to follow to chat or nil.
      */
     std::optional<int> follower_only;
     /**

@@ -118,7 +118,7 @@ public:
     bool isNotebookLayoutLocked() const;
     void setLockNotebookLayout(bool value);
 
-    void addNotebookActionsToMenu(QMenu *menu);
+    virtual void addNotebookActionsToMenu(QMenu *menu);
 
     // Update layout and tab visibility
     void refresh();
@@ -182,7 +182,7 @@ private:
     size_t visibleButtonCount() const;
 
     QList<Item> items_;
-    QMenu menu_;
+    QMenu *menu_ = nullptr;
     QWidget *selectedPage_ = nullptr;
 
     NotebookButton *addButton_;
@@ -215,6 +215,9 @@ public:
     void select(QWidget *page, bool focusPage = true) override;
     void themeChangedEvent() override;
 
+    void addNotebookActionsToMenu(QMenu *menu) override;
+    void toggleOfflineTabs();
+
 protected:
     void showEvent(QShowEvent *event) override;
 
@@ -222,6 +225,9 @@ private:
     void addCustomButtons();
 
     pajlada::Signals::SignalHolder signalHolder_;
+
+    QAction *toggleOfflineTabsAction_;
+    void updateToggleOfflineTabsHotkey(NotebookTabVisibility newTabVisibility);
 
     // Main window on Windows has basically a duplicate of this in Window
     NotebookButton *streamerModeIcon_{};

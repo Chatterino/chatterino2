@@ -167,7 +167,7 @@ Limitations/known issues:
 
 #### `register_callback("CompletionRequested", handler)`
 
-Registers a callback (`handler`) to process completions. The callback gets the following parameters:
+Registers a callback (`handler`) to process completions. The callback takes a single table with the following entries:
 
 - `query`: The queried word.
 - `full_text_content`: The whole input.
@@ -190,8 +190,8 @@ end
 
 c2.register_callback(
     "CompletionRequested",
-    function(query, full_text_content, cursor_position, is_first_word)
-        if ("!join"):startswith(query) then
+    function(event)
+        if ("!join"):startswith(event.query) then
             ---@type CompletionList
             return { hide_others = true, values = { "!join" } }
         end

@@ -1,6 +1,6 @@
 #include "messages/Selection.hpp"
 
-#include <gtest/gtest.h>
+#include "Test.hpp"
 
 using namespace chatterino;
 

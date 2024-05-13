@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
+#include "providers/twitch/ChannelPointReward.hpp"
 #include "util/QStringHash.hpp"
 
 #include <magic_enum/magic_enum.hpp>
@@ -107,6 +108,8 @@ struct Message {
     std::vector<std::unique_ptr<MessageElement>> elements;
 
     ScrollbarHighlight getScrollBarHighlight() const;
+
+    std::shared_ptr<ChannelPointReward> reward = nullptr;
 };
 
 }  // namespace chatterino

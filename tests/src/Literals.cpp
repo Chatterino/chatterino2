@@ -1,6 +1,6 @@
 #include "common/Literals.hpp"
 
-#include <gtest/gtest.h>
+#include "Test.hpp"
 
 using namespace chatterino::literals;
 
