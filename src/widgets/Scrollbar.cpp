@@ -153,7 +153,9 @@ void Scrollbar::setPageSize(qreal value)
 
 void Scrollbar::setDesiredValue(qreal value, bool animated)
 {
-    value = std::clamp(value, this->minimum_, this->getBottom());
+    // this can't use std::clamp, because minimum_ < getBottom() isn't always
+    // true, which is a precondition for std::clamp
+    value = std::max(this->minimum_, std::min(this->getBottom(), value));
     if (areClose(this->currentValue_, value))
     {
         // value has not changed
