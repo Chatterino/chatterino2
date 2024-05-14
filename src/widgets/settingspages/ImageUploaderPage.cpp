@@ -41,9 +41,6 @@ ImageUploaderPage::ImageUploaderPage()
 
         auto *view = layout.emplace<QTableView>().getElement();
         view->setModel(model);
-        this->imgDelegate_ = new ImagePtrItemDelegate(view);
-
-        view->setItemDelegateForColumn(0, this->imgDelegate_);
         view->setSelectionMode(QAbstractItemView::SingleSelection);
         view->setSelectionBehavior(QAbstractItemView::SelectRows);
 
@@ -129,11 +126,6 @@ ImageUploaderPage::ImageUploaderPage()
             "Deletion link: ",
             this->createLineEdit(getSettings()->imageUploaderDeletionLink));
     }
-}
-
-ImageUploaderPage::~ImageUploaderPage()
-{
-    delete this->imgDelegate_;
 }
 
 }  // namespace chatterino
