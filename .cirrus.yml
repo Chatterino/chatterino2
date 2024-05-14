@@ -1,5 +1,5 @@
 freebsd_instance:
-  image: freebsd-13-1-release-amd64
+  image_family: freebsd-14-0
 
 task:
   install_script:
