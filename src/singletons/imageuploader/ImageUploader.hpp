@@ -2,19 +2,17 @@
 
 #include "common/SignalVector.hpp"
 #include "common/Singleton.hpp"
-#include "pajlada/settings/setting.hpp"
-#include "pajlada/settings/settingmanager.hpp"
-#include "singletons/imageuploader/UploadedImage.hpp"
+#include "singletons/imageuploader/UploadedImageModel.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
+#include <QJsonObject>
 #include <QMimeData>
 #include <QMutex>
-#include <qobject.h>
+#include <QObject>
 #include <QString>
 
 #include <memory>
 #include <queue>
-#include <vector>
 
 namespace chatterino {
 
@@ -23,12 +21,58 @@ class Channel;
 class NetworkResult;
 using ChannelPtr = std::shared_ptr<Channel>;
 
+struct UploadedImage {
+    QString channelName;
+    QString deletionLink;
+    QString imageLink;
+    QString localPath;
+    int64_t timestamp{};
+
+    UploadedImage() = default;
+    UploadedImage(QJsonObject obj)
+        : channelName(obj["channelName"].toString())
+        , imageLink(obj["imageLink"].toString())
+        , timestamp(obj["timestamp"].toInt())
+
+    {
+        auto del = obj["deletionLink"];
+        if (!del.isNull())
+        {
+            this->deletionLink = del.toString();
+        }
+        auto path = obj["localPath"];
+        if (!path.isNull())
+        {
+            this->localPath = path.toString();
+        }
+    }
+
+    QJsonObject toJson() const
+    {
+        QJsonObject out;
+        out["channelName"] = this->channelName;
+        out["deletionLink"] = this->deletionLink.isEmpty()
+                                  ? QJsonValue(QJsonValue::Null)
+                                  : this->deletionLink;
+        out["imageLink"] = this->imageLink;
+        out["localPath"] = this->localPath.isEmpty()
+                               ? QJsonValue(QJsonValue::Null)
+                               : this->localPath;
+
+        // without cast, this is ambiguous
+        out["timestamp"] = (qint64)this->timestamp;
+        return out;
+    }
+};
+
+class UploadedImageModel;
+
 struct RawImageData {
     QByteArray data;
     QString format;
     QString filePath;
 };
-class UploadedImageModel;
+
 class ImageUploader final : public Singleton
 {
 public:
@@ -43,7 +87,6 @@ public:
     void save() override;
     void upload(std::queue<RawImageData> images, ChannelPtr channel,
                 QPointer<ResizingTextEdit> outputTextEdit);
-    void initialize(Settings &settings, const Paths &paths) override;
     UploadedImageModel *createModel(QObject *parent);
 
 private:
@@ -58,15 +101,11 @@ private:
 
     void logToFile(const QString &originalFilePath, const QString &imageLink,
                    const QString &deletionLink, ChannelPtr channel);
-
     // These variables are only used from the main thread.
     QMutex uploadMutex_;
     std::queue<RawImageData> uploadQueue_;
 
-    std::shared_ptr<pajlada::Settings::SettingManager> sm_;
     SignalVector<UploadedImage> images_;
-    std::unique_ptr<pajlada::Settings::Setting<std::vector<UploadedImage>>>
-        uploadedImagesSetting_;
     pajlada::Signals::SignalHolder signals_;
 };
 }  // namespace chatterino

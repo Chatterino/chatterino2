@@ -446,7 +446,6 @@ set(SOURCE_FILES
         singletons/Fonts.hpp
         singletons/imageuploader/ImageUploader.cpp
         singletons/imageuploader/ImageUploader.hpp
-        singletons/imageuploader/UploadedImage.hpp
         singletons/imageuploader/UploadedImageModel.cpp
         singletons/imageuploader/UploadedImageModel.hpp
         singletons/Logging.cpp
