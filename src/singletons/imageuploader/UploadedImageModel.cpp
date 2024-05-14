@@ -3,8 +3,10 @@
 #include "common/SignalVectorModel.hpp"
 #include "messages/Image.hpp"
 #include "singletons/imageuploader/ImageUploader.hpp"
+#include "singletons/Resources.hpp"
+#include "util/LoadPixmap.hpp"
+#include "util/PostToThread.hpp"
 #include "util/StandardItemHelper.hpp"
-#include "widgets/listview/ImagePtrItemDelegate.hpp"
 
 #include <qdatetime.h>
 #include <qlocale.h>
@@ -14,13 +16,12 @@
 
 namespace chatterino {
 UploadedImageModel::UploadedImageModel(QObject *parent)
-    : SignalVectorModel<UploadedImage>(4, parent)
+    : SignalVectorModel<UploadedImage>(1, parent)
 {
 }
-// image, path, delete url
 
 UploadedImage UploadedImageModel::getItemFromRow(
-    std::vector<QStandardItem *> &row, const UploadedImage &original)
+    std::vector<QStandardItem *> & /* row */, const UploadedImage &original)
 {
     return original;
 }
@@ -28,34 +29,22 @@ UploadedImage UploadedImageModel::getItemFromRow(
 void UploadedImageModel::getRowFromItem(const UploadedImage &item,
                                         std::vector<QStandardItem *> &row)
 {
-    row[0]->setData(item.imageLink, ImagePtrItemDelegate::IMAGE_URL_ROLE);
+    row[0]->setData(item.imageLink, Qt::DisplayRole);
     row[0]->setData(item.imageLink, UploadedImageModel::DOUBLE_CLICK_LINK_ROLE);
     row[0]->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 
-    auto locale = QLocale::system();
-    setStringItem(row[1],
-                  locale.toString(QDateTime::fromSecsSinceEpoch(item.timestamp),
-                                  QLocale::ShortFormat),
-                  false);
-
-    if (item.deletionLink.isNull())
-    {
-        setStringItem(row[2], "N/A", false);
-    }
-    else
-    {
-        setStringItem(row[2], "[Double click to open]", false);
-        row[2]->setData(item.deletionLink, DOUBLE_CLICK_LINK_ROLE);
-    }
-
-    if (item.localPath.isNull())
-    {
-        setStringItem(row[3], "n/a", false);
-    }
-    else
-    {
-        setStringItem(row[3], item.localPath, true);
-    }
+    loadPixmapFromUrl({item.imageLink},
+                      [row](const QPixmap &pixmap) {
+                          postToThread([pixmap, row]() {
+                              row[0]->setData(pixmap, Qt::DecorationRole);
+                          });
+                      },
+                      {[row]() {
+                          postToThread([row]() {
+                              row[0]->setData(getResources().imageFailedToLoad,
+                                              Qt::DecorationRole);
+                          });
+                      }});
 }
 
 }  // namespace chatterino

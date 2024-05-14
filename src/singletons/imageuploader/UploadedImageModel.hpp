@@ -8,6 +8,7 @@
 
 namespace chatterino {
 
+struct UploadedImage;
 class UploadedImageModel : public SignalVectorModel<UploadedImage>
 {
     explicit UploadedImageModel(QObject *parent);
