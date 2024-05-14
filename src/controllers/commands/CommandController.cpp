@@ -39,7 +39,6 @@
 #include "singletons/Paths.hpp"
 #include "util/CombinePath.hpp"
 #include "util/QStringHash.hpp"
-#include "util/Qt.hpp"
 
 #include <QString>
 

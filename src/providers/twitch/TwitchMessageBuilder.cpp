@@ -37,7 +37,6 @@
 #include "util/Helpers.hpp"
 #include "util/IrcHelpers.hpp"
 #include "util/QStringHash.hpp"
-#include "util/Qt.hpp"
 #include "widgets/Window.hpp"
 
 #include <boost/variant.hpp>
