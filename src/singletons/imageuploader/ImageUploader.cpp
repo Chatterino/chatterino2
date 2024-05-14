@@ -29,9 +29,8 @@
 #include <rapidjson/document.h>
 
 #include <memory>
-#include <vector>
-
 #include <utility>
+#include <vector>
 
 #define UPLOAD_DELAY 2000
 // Delay between uploads in milliseconds
