@@ -7,7 +7,6 @@
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/EditableModelView.hpp"
-#include "widgets/listview/ImagePtrItemDelegate.hpp"
 
 #include <QBoxLayout>
 #include <QDesktopServices>
@@ -35,48 +34,21 @@ ImageUploaderPage::ImageUploaderPage()
 
         auto buttons = container.emplace<QHBoxLayout>();
         buttons->setContentsMargins(0, 0, 0, 0);
-        auto *forget = buttons.emplace<QPushButton>().getElement();
-        forget->setText("Remove image from log");
+        //auto *forget = buttons.emplace<QPushButton>().getElement();
+        //forget->setText("Remove image from log");
         buttons->addStretch();
 
-        auto *view = layout.emplace<QTableView>().getElement();
+        auto *view = layout.emplace<QListView>().getElement();
+        view->setViewMode(QListView::IconMode);
         view->setModel(model);
-        view->setSelectionMode(QAbstractItemView::SingleSelection);
-        view->setSelectionBehavior(QAbstractItemView::SelectRows);
+        view->setIconSize(QSize(96, 96));
+        view->setLayoutMode(QListView::Batched);
+        view->setMovement(QListView::Static);
+        view->setUniformItemSizes(true);
 
-        view->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-        model->setHeaderData(0, Qt::Horizontal, "Image (double click to open)",
-                             Qt::DisplayRole);
+        // without this prop qt throws everything into a single line
+        view->setResizeMode(QListView::Adjust);
 
-        view->horizontalHeader()->setSectionResizeMode(
-            1, QHeaderView::ResizeToContents);
-        model->setHeaderData(1, Qt::Horizontal, "Date uploaded",
-                             Qt::DisplayRole);
-
-        view->horizontalHeader()->setSectionResizeMode(
-            2, QHeaderView::ResizeToContents);
-        model->setHeaderData(2, Qt::Horizontal, "Delete link", Qt::DisplayRole);
-
-        view->horizontalHeader()->setSectionResizeMode(
-            3, QHeaderView::Interactive);
-        model->setHeaderData(3, Qt::Horizontal, "Path", Qt::DisplayRole);
-
-        QObject::connect(forget, &QPushButton::pressed, this, [view, model]() {
-            auto selected = view->selectionModel()->selectedRows(0);
-            std::vector<int> rows;
-            for (auto &&index : selected)
-            {
-                rows.push_back(index.row());
-            }
-
-            std::sort(rows.begin(), rows.end(), std::greater{});
-
-            for (auto &&row : rows)
-            {
-                model->removeRow(row);
-            }
-            getApp()->getImageUploader()->save();
-        });
         QObject::connect(
             view, &QTableView::doubleClicked, [](const QModelIndex &clicked) {
                 auto url =
