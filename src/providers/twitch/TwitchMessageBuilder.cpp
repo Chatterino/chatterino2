@@ -382,13 +382,7 @@ namespace {
         dst.reserve(newLength);
         for (const QStringView &chunk : std::as_const(chunks))
         {
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 2)
-            static_assert(sizeof(QChar) == sizeof(decltype(*chunk.utf16())));
-            dst.append(reinterpret_cast<const QChar *>(chunk.utf16()),
-                       chunk.length());
-#else
             dst += chunk;
-#endif
         }
         return dst;
     }
@@ -1180,13 +1174,8 @@ void TwitchMessageBuilder::processIgnorePhrases(
         shiftIndicesAfter(static_cast<int>(from + length),
                           static_cast<int>(replacement.length() - length));
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
         auto midExtendedRef =
             QStringView{originalMessage}.mid(wordStart, wordEnd - wordStart);
-#else
-        auto midExtendedRef =
-            originalMessage.midRef(wordStart, wordEnd - wordStart);
-#endif
 
         for (auto &emote : removedEmotes)
         {

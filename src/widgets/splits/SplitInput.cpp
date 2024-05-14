@@ -226,20 +226,16 @@ void SplitInput::themeChangedEvent()
     QPalette placeholderPalette;
 
     palette.setColor(QPalette::WindowText, this->theme->splits.input.text);
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
     placeholderPalette.setColor(
         QPalette::PlaceholderText,
         this->theme->messages.textColors.chatPlaceholder);
-#endif
 
     this->updateEmoteButton();
     this->updateCancelReplyButton();
     this->ui_.textEditLength->setPalette(palette);
 
     this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
     this->ui_.textEdit->setPalette(placeholderPalette);
-#endif
     auto marginPx = static_cast<int>(2.F * this->scale());
     this->ui_.vbox->setContentsMargins(marginPx, marginPx, marginPx, marginPx);
 

@@ -4,10 +4,6 @@
 #include <QLocale>
 #include <QString>
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 2)
-#    include <QStringRef>
-#endif
-
 #include <cmath>
 #include <optional>
 #include <vector>
@@ -17,12 +13,7 @@ namespace chatterino {
 // only qualified for tests
 namespace _helpers_internal {
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 2)
-    using StringView = QStringView;
-#else
-    using StringView = QStringRef;
-#endif
-    using SizeType = StringView::size_type;
+    using SizeType = QStringView::size_type;
 
     /**
      * Skips all spaces.
@@ -32,7 +23,7 @@ namespace _helpers_internal {
      * @param startPos The starting position (there must be a space in the view).
      * @return The position of the last space.
      */
-    SizeType skipSpace(StringView view, SizeType startPos);
+    SizeType skipSpace(QStringView view, SizeType startPos);
 
     /**
      * Checks if `word` equals `expected` (singular) or `expected` + 's' (plural).
@@ -41,7 +32,7 @@ namespace _helpers_internal {
      * @param expected Singular of the expected word.
      * @return true if `word` is singular or plural of `expected`.
      */
-    bool matchesIgnorePlural(StringView word, const QString &expected);
+    bool matchesIgnorePlural(QStringView word, const QString &expected);
 
     /**
      * Tries to find the unit starting at `pos` and returns its multiplier so
@@ -58,7 +49,7 @@ namespace _helpers_internal {
      *            if it's a valid unit, undefined otherwise.
      * @return (multiplier, ok)
      */
-    std::pair<uint64_t, bool> findUnitMultiplierToSec(StringView view,
+    std::pair<uint64_t, bool> findUnitMultiplierToSec(QStringView view,
                                                       SizeType &pos);
 
 }  // namespace _helpers_internal
