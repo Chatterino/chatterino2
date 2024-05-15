@@ -95,6 +95,7 @@ void MessageElement::cloneFrom(const MessageElement &source)
     this->link_ = source.link_;
     this->tooltip_ = source.tooltip_;
     this->flags_ = source.flags_;
+    this->trailingSpace = source.trailingSpace;
 }
 
 // IMAGE
@@ -179,8 +180,8 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
     {
         if (flags.has(MessageElementFlag::EmoteImages))
         {
-            auto image =
-                this->emote_->images.getImageOrLoaded(container.getScale());
+            auto image = this->emote_->images.getImageOrLoaded(
+                container.getImageScale());
             if (image->isEmpty())
             {
                 return;
@@ -243,7 +244,7 @@ void LayeredEmoteElement::addToContainer(MessageLayoutContainer &container,
     {
         if (flags.has(MessageElementFlag::EmoteImages))
         {
-            auto images = this->getLoadedImages(container.getScale());
+            auto images = this->getLoadedImages(container.getImageScale());
             if (images.empty())
             {
                 return;
@@ -411,7 +412,7 @@ void BadgeElement::addToContainer(MessageLayoutContainer &container,
     if (flags.hasAny(this->getFlags()))
     {
         auto image =
-            this->emote_->images.getImageOrLoaded(container.getScale());
+            this->emote_->images.getImageOrLoaded(container.getImageScale());
         if (image->isEmpty())
         {
             return;
@@ -834,6 +835,55 @@ std::unique_ptr<MessageElement> LinkElement::clone() const
     return el;
 }
 
+MentionElement::MentionElement(const QString &name, MessageColor fallbackColor_,
+                               MessageColor userColor_)
+    : TextElement(name, {MessageElementFlag::Text, MessageElementFlag::Mention})
+    , fallbackColor(fallbackColor_)
+    , userColor(userColor_)
+{
+}
+
+MentionElement::MentionElement(QStringList &&words, MessageColor fallbackColor_,
+                               MessageColor userColor_)
+    : TextElement(std::move(words),
+                  {MessageElementFlag::Text, MessageElementFlag::Mention})
+    , fallbackColor(fallbackColor_)
+    , userColor(userColor_)
+{
+}
+
+void MentionElement::addToContainer(MessageLayoutContainer &container,
+                                    MessageElementFlags flags)
+{
+    if (getSettings()->colorUsernames)
+    {
+        this->color_ = this->userColor;
+    }
+    else
+    {
+        this->color_ = this->fallbackColor;
+    }
+
+    if (getSettings()->boldUsernames)
+    {
+        this->style_ = FontStyle::ChatMediumBold;
+    }
+    else
+    {
+        this->style_ = FontStyle::ChatMedium;
+    }
+
+    TextElement::addToContainer(container, flags);
+}
+
+std::unique_ptr<MessageElement> MentionElement::clone() const
+{
+    std::unique_ptr<MentionElement> el{new MentionElement(
+        this->words(), this->fallbackColor, this->userColor)};
+    el->cloneFrom(*this);
+    return el;
+}
+
 // TIMESTAMP
 TimestampElement::TimestampElement(QTime time)
     : MessageElement(MessageElementFlag::Timestamp)
@@ -950,7 +1000,7 @@ void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
     if (flags.hasAny(this->getFlags()))
     {
         const auto &image =
-            this->images_.getImageOrLoaded(container.getScale());
+            this->images_.getImageOrLoaded(container.getImageScale());
         if (image->isEmpty())
         {
             return;

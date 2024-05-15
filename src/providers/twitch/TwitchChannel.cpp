@@ -1898,6 +1898,7 @@ void TwitchChannel::upsertPersonalSeventvEmotes(
     const auto upsertWords = [&](MessageElementVec &elements,
                                  TextElement *textElement) {
         QStringList words;
+        bool anyChange = false;
 
         /// Appends a text element with the pending @a words
         /// and clears the vector.
@@ -1967,6 +1968,7 @@ void TwitchChannel::upsertPersonalSeventvEmotes(
                 words.emplace_back(word);
                 continue;
             }
+            anyChange = true;
 
             if (emoteIt->second->zeroWidth)
             {
@@ -1981,7 +1983,15 @@ void TwitchChannel::upsertPersonalSeventvEmotes(
             elements.emplace_back(std::make_unique<EmoteElement>(
                 emoteIt->second, MessageElementFlag::SevenTVEmote));
         }
-        flush();
+
+        if (anyChange)
+        {
+            flush();
+        }
+        else
+        {
+            elements.emplace_back(textElement->clone());
+        }
     };
 
     auto cloned = message.value()->cloneWith([&](Message &message) {

@@ -178,11 +178,11 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
              auto &scrollbar = this->ui_.latestMessages->getScrollBar();
              if (direction == "up")
              {
-                 scrollbar.offset(-scrollbar.getLargeChange());
+                 scrollbar.offset(-scrollbar.getPageSize());
              }
              else if (direction == "down")
              {
-                 scrollbar.offset(scrollbar.getLargeChange());
+                 scrollbar.offset(scrollbar.getPageSize());
              }
              else
              {

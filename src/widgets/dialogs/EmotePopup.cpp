@@ -351,11 +351,11 @@ void EmotePopup::addShortcuts()
              auto &scrollbar = channelView->getScrollBar();
              if (direction == "up")
              {
-                 scrollbar.offset(-scrollbar.getLargeChange());
+                 scrollbar.offset(-scrollbar.getPageSize());
              }
              else if (direction == "down")
              {
-                 scrollbar.offset(scrollbar.getLargeChange());
+                 scrollbar.offset(scrollbar.getPageSize());
              }
              else
              {

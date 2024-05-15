@@ -519,6 +519,8 @@ set(SOURCE_FILES
         util/IpcQueue.hpp
         util/LayoutHelper.cpp
         util/LayoutHelper.hpp
+        util/LoadPixmap.cpp
+        util/LoadPixmap.hpp
         util/RapidjsonHelpers.cpp
         util/RapidjsonHelpers.hpp
         util/RatelimitBucket.cpp
@@ -650,6 +652,8 @@ set(SOURCE_FILES
         widgets/helper/EditableModelView.hpp
         widgets/helper/EffectLabel.cpp
         widgets/helper/EffectLabel.hpp
+        widgets/helper/IconDelegate.cpp
+        widgets/helper/IconDelegate.hpp
         widgets/helper/InvisibleSizeGrip.cpp
         widgets/helper/InvisibleSizeGrip.hpp
         widgets/helper/NotebookButton.cpp
@@ -658,8 +662,6 @@ set(SOURCE_FILES
         widgets/helper/NotebookTab.hpp
         widgets/helper/RegExpItemDelegate.cpp
         widgets/helper/RegExpItemDelegate.hpp
-        widgets/helper/TrimRegExpValidator.cpp
-        widgets/helper/TrimRegExpValidator.hpp
         widgets/helper/ResizingTextEdit.cpp
         widgets/helper/ResizingTextEdit.hpp
         widgets/helper/ScrollbarHighlight.cpp
@@ -674,6 +676,8 @@ set(SOURCE_FILES
         widgets/helper/TitlebarButton.hpp
         widgets/helper/TitlebarButtons.cpp
         widgets/helper/TitlebarButtons.hpp
+        widgets/helper/TrimRegExpValidator.cpp
+        widgets/helper/TrimRegExpValidator.hpp
 
         widgets/layout/FlowLayout.cpp
         widgets/layout/FlowLayout.hpp

@@ -133,9 +133,10 @@ enum class MessageElementFlag : int64_t {
     // needed
     Collapsed = (1LL << 26),
 
-    // used for dynamic bold usernames
-    BoldUsername = (1LL << 27),
-    NonBoldUsername = (1LL << 28),
+    // A mention of a username that isn't the author of the message
+    Mention = (1LL << 27),
+
+    // Unused = (1LL << 28),
 
     // used to check if links should be lowercased
     LowercaseLinks = (1LL << 29),
@@ -254,7 +255,6 @@ public:
 protected:
     QStringList words_;
 
-private:
     MessageColor color_;
     FontStyle style_;
 };
@@ -321,6 +321,47 @@ private:
     // these are implicitly shared
     QStringList lowercase_;
     QStringList original_;
+};
+
+/**
+ * @brief Contains a username mention.
+ *
+ * Examples of mentions:
+ *                      V
+ * 13:37 pajlada: hello @forsen
+ *
+ *                                           V       V
+ * 13:37 The moderators of this channel are: forsen, nuuls
+ */
+class MentionElement : public TextElement
+{
+public:
+    MentionElement(const QString &name, MessageColor fallbackColor_,
+                   MessageColor userColor_);
+    ~MentionElement() override = default;
+    MentionElement(const MentionElement &) = delete;
+    MentionElement(MentionElement &&) = delete;
+    MentionElement &operator=(const MentionElement &) = delete;
+    MentionElement &operator=(MentionElement &&) = delete;
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+
+    std::unique_ptr<MessageElement> clone() const override;
+
+private:
+    MentionElement(QStringList &&words, MessageColor fallbackColor,
+                   MessageColor userColor);
+
+    /**
+     * The color of the element in case the "Colorize @usernames" is disabled
+     **/
+    MessageColor fallbackColor;
+
+    /**
+     * The color of the element in case the "Colorize @usernames" is enabled
+     **/
+    MessageColor userColor;
 };
 
 // contains emote data and will pick the emote based on :
