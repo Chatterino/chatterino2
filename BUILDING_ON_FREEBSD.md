@@ -10,11 +10,16 @@ FreeBSD 15.0-SNAP.
 
 1. Install build dependencies from package sources (or build from the
    ports tree): `# pkg install boost-libs git qt6-base qt6-svg qtkeychain-qt6 cmake`
+1. In the project directory, create a build directory and enter it
+   ```sh
+   mkdir build
+   cd build
+   ```
 1. Generate build files. To enable Lua plugins in your build add `-DCHATTERINO_PLUGINS=ON` to this command.
    ```sh
-   cmake -B build
+   cmake ..
    ```
 1. Build the project
    ```sh
-   make -C build
+   make
    ```
