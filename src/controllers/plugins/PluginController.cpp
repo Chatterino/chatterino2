@@ -420,7 +420,7 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
 
     for (const auto &[name, pl] : this->plugins())
     {
-        if (!pl->error().isNull())
+        if (!pl->error().isNull() || pl->state_ == nullptr)
         {
             continue;
         }
