@@ -227,7 +227,6 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
         [this]() {
             postToThread([this] {
                 this->updateScale();
-                this->updateScale();
             });
         },
         this->connections_, false);

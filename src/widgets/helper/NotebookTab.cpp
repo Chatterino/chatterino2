@@ -182,10 +182,15 @@ void NotebookTab::growWidth(int width)
     }
 }
 
-int NotebookTab::normalTabWidth()
+int NotebookTab::normalTabWidth() const
+{
+    return this->normalTabWidthForHeight(this->height());
+}
+
+int NotebookTab::normalTabWidthForHeight(int height) const
 {
     float scale = this->scale();
-    int width;
+    int width = 0;
 
     QFontMetrics metrics =
         getIApp()->getFonts()->getFontMetrics(FontStyle::UiTabs, scale);
@@ -199,13 +204,13 @@ int NotebookTab::normalTabWidth()
         width = (metrics.horizontalAdvance(this->getTitle()) + int(16 * scale));
     }
 
-    if (this->height() > 150 * scale)
+    if (static_cast<float>(height) > 150 * scale)
     {
-        width = this->height();
+        width = height;
     }
     else
     {
-        width = clamp(width, this->height(), int(150 * scale));
+        width = std::clamp(width, height, static_cast<int>(150 * scale));
     }
 
     return width;
@@ -214,8 +219,8 @@ int NotebookTab::normalTabWidth()
 void NotebookTab::updateSize()
 {
     float scale = this->scale();
-    int width = this->normalTabWidth();
-    auto height = int(NOTEBOOK_TAB_HEIGHT * scale);
+    auto height = static_cast<int>(NOTEBOOK_TAB_HEIGHT * scale);
+    int width = this->normalTabWidthForHeight(height);
 
     if (width < this->growWidth_)
     {
@@ -628,13 +633,13 @@ void NotebookTab::paintEvent(QPaintEvent *)
     }
 }
 
-bool NotebookTab::hasXButton()
+bool NotebookTab::hasXButton() const
 {
     return getSettings()->showTabCloseButton &&
            this->notebook_->getAllowUserTabManagement();
 }
 
-bool NotebookTab::shouldDrawXButton()
+bool NotebookTab::shouldDrawXButton() const
 {
     return this->hasXButton() && (this->mouseOver_ || this->selected_);
 }
@@ -820,18 +825,15 @@ void NotebookTab::update()
     Button::update();
 }
 
-QRect NotebookTab::getXRect()
+QRect NotebookTab::getXRect() const
 {
     QRect rect = this->rect();
     float s = this->scale();
     int size = static_cast<int>(16 * s);
 
-    int centerAdjustment =
-        this->tabLocation_ ==
-                (NotebookTabLocation::Top ||
-                 this->tabLocation_ == NotebookTabLocation::Bottom)
-            ? (size / 3)   // slightly off true center
-            : (size / 2);  // true center
+    int centerAdjustment = this->tabLocation_ == NotebookTabLocation::Top
+                               ? (size / 3)   // slightly off true center
+                               : (size / 2);  // true center
 
     QRect xRect(rect.right() - static_cast<int>(20 * s),
                 rect.center().y() - centerAdjustment, size, size);
