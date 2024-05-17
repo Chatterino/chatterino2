@@ -931,9 +931,26 @@ void BaseWindow::updateScale()
 
     this->setScale(scale);
 
-    for (auto *child : this->findChildren<BaseWidget *>())
+    BaseWindow::applyScaleRecursive(this, scale);
+}
+
+// NOLINTNEXTLINE(misc-no-recursion)
+void BaseWindow::applyScaleRecursive(QObject *root, float scale)
+{
+    for (QObject *obj : root->children())
     {
-        child->setScale(scale);
+        auto *base = dynamic_cast<BaseWidget *>(obj);
+        if (base)
+        {
+            auto *window = dynamic_cast<BaseWindow *>(obj);
+            if (window && window->flags_.has(DisableCustomScaling))
+            {
+                continue;  // stop here
+            }
+            base->setScale(scale);
+        }
+
+        applyScaleRecursive(obj, scale);
     }
 }
 

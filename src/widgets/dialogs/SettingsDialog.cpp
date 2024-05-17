@@ -196,7 +196,7 @@ void SettingsDialog::filterElements(const QString &text)
         auto *item = this->ui_.tabContainer->itemAt(i);
         if (auto *x = dynamic_cast<QSpacerItem *>(item); x)
         {
-            x->changeSize(10, shouldShowSpace ? int(16 * this->scale()) : 0);
+            x->changeSize(10, shouldShowSpace ? 16 : 0);
             shouldShowSpace = false;
         }
         else if (item->widget())
