@@ -10,6 +10,14 @@ struct CommandContext;
 
 namespace chatterino::commands {
 
+struct PerformChannelAction {
+    QString channelID;
+    QString rawTarget;
+    QString reason;
+};
+
+std::vector<PerformChannelAction> parseBanCommand(const CommandContext &ctx);
+
 /// /ban
 QString sendBan(const CommandContext &ctx);
 /// /banid

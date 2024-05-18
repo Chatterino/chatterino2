@@ -9,6 +9,8 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "util/Twitch.hpp"
 
+#include <QCommandLineParser>
+
 namespace {
 
 using namespace chatterino;
@@ -80,13 +82,12 @@ QString formatBanTimeoutError(const char *operation, HelixBanUserError error,
     return errorMessage;
 }
 
-void banUserByID(const ChannelPtr &channel, const TwitchChannel *twitchChannel,
+void banUserByID(const ChannelPtr &channel, const QString &channelID,
                  const QString &sourceUserID, const QString &targetUserID,
                  const QString &reason, const QString &displayName)
 {
     getHelix()->banUser(
-        twitchChannel->roomId(), sourceUserID, targetUserID, std::nullopt,
-        reason,
+        channelID, sourceUserID, targetUserID, std::nullopt, reason,
         [] {
             // No response for bans, they're emitted over pubsub/IRC instead
         },
@@ -97,14 +98,13 @@ void banUserByID(const ChannelPtr &channel, const TwitchChannel *twitchChannel,
         });
 }
 
-void timeoutUserByID(const ChannelPtr &channel,
-                     const TwitchChannel *twitchChannel,
+void timeoutUserByID(const ChannelPtr &channel, const QString &channelID,
                      const QString &sourceUserID, const QString &targetUserID,
                      int duration, const QString &reason,
                      const QString &displayName)
 {
     getHelix()->banUser(
-        twitchChannel->roomId(), sourceUserID, targetUserID, duration, reason,
+        channelID, sourceUserID, targetUserID, duration, reason,
         [] {
             // No response for timeouts, they're emitted over pubsub/IRC instead
         },
@@ -119,65 +119,115 @@ void timeoutUserByID(const ChannelPtr &channel,
 
 namespace chatterino::commands {
 
+std::vector<PerformChannelAction> parseBanCommand(const CommandContext &ctx)
+{
+    if (ctx.channel == nullptr)
+    {
+        // A ban action must be performed with a channel as a context
+        return {};
+    }
+
+    QCommandLineParser parser;
+    parser.setOptionsAfterPositionalArgumentsMode(
+        QCommandLineParser::ParseAsPositionalArguments);
+    parser.addPositionalArgument("username", "The name of the user to ban");
+    parser.addPositionalArgument("reason", "The optional ban reason");
+    QCommandLineOption channelOption(
+        "channel", "Override which channel(s) to perform the action in",
+        "channel id");
+    parser.addOptions({
+        channelOption,
+    });
+    parser.parse(ctx.words);
+
+    const auto &positionalArguments = parser.positionalArguments();
+    if (positionalArguments.isEmpty())
+    {
+        return {};
+    }
+
+    const auto &rawTarget = positionalArguments.first();
+    const auto reason = positionalArguments.sliced(1).join(' ');
+
+    auto overrideChannels = parser.values(channelOption);
+    if (overrideChannels.isEmpty())
+    {
+        if (ctx.twitchChannel == nullptr)
+        {
+            // No override channel specified, but the command was not run in a Twitch channel
+            return {};
+        }
+
+        return {
+            PerformChannelAction{
+                .channelID = ctx.twitchChannel->roomId(),
+                .rawTarget = rawTarget,
+                .reason = reason,
+            },
+        };
+    }
+
+    std::vector<PerformChannelAction> actions;
+
+    for (const auto &overrideChannel : overrideChannels)
+    {
+        actions.push_back(PerformChannelAction{
+            .channelID = overrideChannel,
+            .rawTarget = rawTarget,
+            .reason = reason,
+        });
+    }
+
+    return actions;
+}
+
 QString sendBan(const CommandContext &ctx)
 {
-    const auto &words = ctx.words;
-    const auto &channel = ctx.channel;
-    const auto *twitchChannel = ctx.twitchChannel;
+    const auto actions = parseBanCommand(ctx);
 
-    if (channel == nullptr)
+    if (actions.empty())
     {
-        return "";
-    }
-
-    if (twitchChannel == nullptr)
-    {
-        channel->addMessage(makeSystemMessage(
-            QString("The /ban command only works in Twitch channels.")));
-        return "";
-    }
-
-    const auto *usageStr =
-        "Usage: \"/ban <username> [reason]\" - Permanently prevent a user "
-        "from chatting. Reason is optional and will be shown to the target "
-        "user and other moderators. Use \"/unban\" to remove a ban.";
-    if (words.size() < 2)
-    {
-        channel->addMessage(makeSystemMessage(usageStr));
+        // TODO: better error message
         return "";
     }
 
     auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
-        channel->addMessage(
+        ctx.channel->addMessage(
             makeSystemMessage("You must be logged in to ban someone!"));
         return "";
     }
 
-    const auto &rawTarget = words.at(1);
-    auto [targetUserName, targetUserID] = parseUserNameOrID(rawTarget);
-    auto reason = words.mid(2).join(' ');
+    for (const auto &action : actions)
+    {
+        const auto &reason = action.reason;
+        qInfo() << "banning" << action.rawTarget << "in" << action.channelID
+                << "with reason" << action.reason;
+        auto [targetUserName, targetUserID] =
+            parseUserNameOrID(action.rawTarget);
 
-    if (!targetUserID.isEmpty())
-    {
-        banUserByID(channel, twitchChannel, currentUser->getUserId(),
-                    targetUserID, reason, targetUserID);
-    }
-    else
-    {
-        getHelix()->getUserByName(
-            targetUserName,
-            [channel, currentUser, twitchChannel,
-             reason](const auto &targetUser) {
-                banUserByID(channel, twitchChannel, currentUser->getUserId(),
-                            targetUser.id, reason, targetUser.displayName);
-            },
-            [channel, targetUserName{targetUserName}] {
-                // Equivalent error from IRC
-                channel->addMessage(makeSystemMessage(
-                    QString("Invalid username: %1").arg(targetUserName)));
-            });
+        if (!targetUserID.isEmpty())
+        {
+            banUserByID(ctx.channel, action.channelID, currentUser->getUserId(),
+                        targetUserID, reason, targetUserID);
+        }
+        else
+        {
+            getHelix()->getUserByName(
+                targetUserName,
+                [channel{ctx.channel}, channelID{action.channelID}, currentUser,
+                 twitchChannel{ctx.twitchChannel},
+                 reason](const auto &targetUser) {
+                    banUserByID(channel, channelID, currentUser->getUserId(),
+                                targetUser.id, reason, targetUser.displayName);
+                },
+                [channel{ctx.channel}, targetUserName{targetUserName}] {
+                    // Equivalent error from IRC
+                    channel->addMessage(makeSystemMessage(
+                        QString("Invalid username: %1").arg(targetUserName)));
+                });
+        }
     }
 
     return "";
@@ -221,8 +271,8 @@ QString sendBanById(const CommandContext &ctx)
     auto target = words.at(1);
     auto reason = words.mid(2).join(' ');
 
-    banUserByID(channel, twitchChannel, currentUser->getUserId(), target,
-                reason, target);
+    banUserByID(channel, twitchChannel->roomId(), currentUser->getUserId(),
+                target, reason, target);
 
     return "";
 }
@@ -283,19 +333,20 @@ QString sendTimeout(const CommandContext &ctx)
 
     if (!targetUserID.isEmpty())
     {
-        timeoutUserByID(channel, twitchChannel, currentUser->getUserId(),
-                        targetUserID, duration, reason, targetUserID);
+        timeoutUserByID(channel, twitchChannel->roomId(),
+                        currentUser->getUserId(), targetUserID, duration,
+                        reason, targetUserID);
     }
     else
     {
         getHelix()->getUserByName(
             targetUserName,
-            [channel, currentUser, twitchChannel,
+            [channel, currentUser, channelID{twitchChannel->roomId()},
              targetUserName{targetUserName}, duration,
              reason](const auto &targetUser) {
-                timeoutUserByID(channel, twitchChannel,
-                                currentUser->getUserId(), targetUser.id,
-                                duration, reason, targetUser.displayName);
+                timeoutUserByID(channel, channelID, currentUser->getUserId(),
+                                targetUser.id, duration, reason,
+                                targetUser.displayName);
             },
             [channel, targetUserName{targetUserName}] {
                 // Equivalent error from IRC
