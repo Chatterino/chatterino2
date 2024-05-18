@@ -6,6 +6,7 @@
 - Major: Improve high-DPI support on Windows. (#4868, #5391)
 - Minor: Add option to customise Moderation buttons with images. (#5369)
 - Minor: Colored usernames now update on the fly when changing the "Color @usernames" setting. (#5300)
+- Minor: Added `flags.action` filter variable, allowing you to filter on `/me` messages. (#5397)
 - Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
 - Dev: Use Qt's high DPI scaling. (#4868, #5400)
 - Dev: Add doxygen build target. (#5377)
