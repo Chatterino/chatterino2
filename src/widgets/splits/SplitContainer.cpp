@@ -810,7 +810,7 @@ NodeDescriptor SplitContainer::buildDescriptorRecursively(Node *currentNode)
 {
     if (currentNode->children_.empty())
     {
-        const auto channelType = currentNode->split_->getChannel()->getType();
+        const auto channelType = currentNode->split_->getIndirectChannel().getType();
 
         SplitNodeDescriptor result;
         result.type_ = qmagicenum::enumNameString(channelType);
