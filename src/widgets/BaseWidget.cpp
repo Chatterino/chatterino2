@@ -54,7 +54,11 @@ float BaseWidget::scale() const
 
 void BaseWidget::setScale(float value)
 {
-    // update scale value
+    if (this->scale_ == value)
+    {
+        return;
+    }
+
     this->scale_ = value;
 
     this->scaleChangedEvent(this->scale());
