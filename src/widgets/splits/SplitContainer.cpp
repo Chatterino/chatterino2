@@ -808,9 +808,16 @@ void SplitContainer::popup()
 
 NodeDescriptor SplitContainer::buildDescriptorRecursively(Node *currentNode)
 {
+    ContainerNodeDescriptor descriptor;
+    if (currentNode->type_ == Node::Type::EmptyRoot)
+    {
+        return descriptor;
+    }
+
     if (currentNode->children_.empty())
     {
-        const auto channelType = currentNode->split_->getIndirectChannel().getType();
+        const auto channelType =
+            currentNode->split_->getIndirectChannel().getType();
 
         SplitNodeDescriptor result;
         result.type_ = qmagicenum::enumNameString(channelType);
@@ -835,7 +842,6 @@ NodeDescriptor SplitContainer::buildDescriptorRecursively(Node *currentNode)
         return result;
     }
 
-    ContainerNodeDescriptor descriptor;
     for (auto &child : currentNode->children_)
     {
         descriptor.vertical_ =
