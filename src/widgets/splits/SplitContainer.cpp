@@ -5,6 +5,8 @@
 #include "common/QLogging.hpp"
 #include "common/WindowDescriptors.hpp"
 #include "debug/AssertInGuiThread.hpp"
+#include "providers/irc/IrcChannel2.hpp"
+#include "providers/irc/IrcServer.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
@@ -808,33 +810,26 @@ NodeDescriptor SplitContainer::buildDescriptorRecursively(Node *currentNode)
 {
     if (currentNode->children_.empty())
     {
-        const auto channelTypeToString = [](Channel::Type type) {
-            switch (type)
-            {
-                case Channel::Type::Twitch:
-                    return "twitch";
-                case Channel::Type::TwitchWhispers:
-                    return "whispers";
-                case Channel::Type::TwitchWatching:
-                    return "watching";
-                case Channel::Type::TwitchMentions:
-                    return "mentions";
-                case Channel::Type::TwitchLive:
-                    return "live";
-                case Channel::Type::TwitchAutomod:
-                    return "automod";
-                case Channel::Type::Irc:
-                    return "irc";
-                case Channel::Type::Misc:
-                    return "misc";
-                default:
-                    return "";
-            }
-        };
+        const auto channelType = currentNode->split_->getChannel()->getType();
 
         SplitNodeDescriptor result;
-        result.type_ =
-            channelTypeToString(currentNode->split_->getChannel()->getType());
+        result.type_ = qmagicenum::enumNameString(channelType);
+
+        switch (channelType)
+        {
+            case Channel::Type::Irc: {
+                if (auto *ircChannel = dynamic_cast<IrcChannel *>(
+                        currentNode->split_->getChannel().get()))
+                {
+                    if (ircChannel->server())
+                    {
+                        result.server_ = ircChannel->server()->id();
+                    }
+                }
+            }
+            break;
+        }
+
         result.channelName_ = currentNode->split_->getChannel()->getName();
         result.filters_ = currentNode->split_->getFilters();
         return result;
