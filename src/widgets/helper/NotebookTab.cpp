@@ -8,7 +8,6 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/Clamp.hpp"
 #include "util/Helpers.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/Notebook.hpp"
@@ -24,6 +23,8 @@
 #include <QLineEdit>
 #include <QMimeData>
 #include <QPainter>
+
+#include <algorithm>
 
 namespace chatterino {
 namespace {
