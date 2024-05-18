@@ -943,9 +943,10 @@ void BaseWindow::applyScaleRecursive(QObject *root, float scale)
         if (base)
         {
             auto *window = dynamic_cast<BaseWindow *>(obj);
-            if (window && window->flags_.has(DisableCustomScaling))
+            if (window)
             {
-                continue;  // stop here
+                // stop here, the window will get the event as well (via uiScale)
+                continue;
             }
             base->setScale(scale);
         }
