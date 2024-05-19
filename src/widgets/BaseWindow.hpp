@@ -131,6 +131,8 @@ private:
     void drawCustomWindowFrame(QPainter &painter);
     void onFocusLost();
 
+    static void applyScaleRecursive(QObject *root, float scale);
+
     bool handleSHOWWINDOW(MSG *msg);
     bool handleSIZE(MSG *msg);
     bool handleMOVE(MSG *msg);

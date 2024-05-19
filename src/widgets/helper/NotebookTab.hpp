@@ -71,7 +71,7 @@ public:
     void hideTabXChanged();
 
     void growWidth(int width);
-    int normalTabWidth();
+    int normalTabWidth() const;
 
 protected:
     void themeChangedEvent() override;
@@ -100,10 +100,12 @@ protected:
 private:
     void showRenameDialog();
 
-    bool hasXButton();
-    bool shouldDrawXButton();
-    QRect getXRect();
+    bool hasXButton() const;
+    bool shouldDrawXButton() const;
+    QRect getXRect() const;
     void titleUpdated();
+
+    int normalTabWidthForHeight(int height) const;
 
     QPropertyAnimation positionChangedAnimation_;
     bool positionChangedAnimationRunning_ = false;
