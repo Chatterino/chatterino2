@@ -397,9 +397,9 @@ void SettingsDialog::refresh()
     }
 }
 
-void SettingsDialog::scaleChangedEvent(float newDpi)
+void SettingsDialog::scaleChangedEvent(float newScale)
 {
-    assert(newDpi == 1.F &&
+    assert(newScale == 1.F &&
            "Scaling is disabled for the settings dialog - its scale should "
            "always be 1");
 
