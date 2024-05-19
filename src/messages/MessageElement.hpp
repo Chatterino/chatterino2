@@ -314,8 +314,8 @@ private:
 class MentionElement : public TextElement
 {
 public:
-    MentionElement(const QString &name, MessageColor fallbackColor_,
-                   MessageColor userColor_);
+    MentionElement(const QString &displayName, QString loginName_,
+                   MessageColor fallbackColor_, MessageColor userColor_);
     ~MentionElement() override = default;
     MentionElement(const MentionElement &) = delete;
     MentionElement(MentionElement &&) = delete;
@@ -324,6 +324,8 @@ public:
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
+
+    Link getLink() const override;
 
 private:
     /**
@@ -335,6 +337,8 @@ private:
      * The color of the element in case the "Colorize @usernames" is enabled
      **/
     MessageColor userColor;
+
+    QString userLoginName;
 };
 
 // contains emote data and will pick the emote based on :

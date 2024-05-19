@@ -703,11 +703,14 @@ Link LinkElement::getLink() const
     return {Link::Url, this->linkInfo_.url()};
 }
 
-MentionElement::MentionElement(const QString &name, MessageColor fallbackColor_,
+MentionElement::MentionElement(const QString &displayName, QString loginName_,
+                               MessageColor fallbackColor_,
                                MessageColor userColor_)
-    : TextElement(name, {MessageElementFlag::Text, MessageElementFlag::Mention})
+    : TextElement(displayName,
+                  {MessageElementFlag::Text, MessageElementFlag::Mention})
     , fallbackColor(fallbackColor_)
     , userColor(userColor_)
+    , userLoginName(std::move(loginName_))
 {
 }
 
@@ -733,6 +736,17 @@ void MentionElement::addToContainer(MessageLayoutContainer &container,
     }
 
     TextElement::addToContainer(container, flags);
+}
+
+Link MentionElement::getLink() const
+{
+    if (this->userLoginName.isEmpty())
+    {
+        // Some rare mention elements don't have the knowledge of the login name
+        return {};
+    }
+
+    return {Link::UserInfo, this->userLoginName};
 }
 
 // TIMESTAMP

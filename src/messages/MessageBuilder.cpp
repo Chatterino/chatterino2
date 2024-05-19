@@ -763,7 +763,7 @@ void MessageBuilder::addTextOrEmoji(const QString &string_)
     auto &&textColor = this->textColor_;
     if (string.startsWith('@'))
     {
-        this->emplace<MentionElement>(string, textColor, textColor);
+        this->emplace<MentionElement>(string, "", textColor, textColor);
     }
     else
     {
