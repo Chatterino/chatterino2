@@ -1938,8 +1938,8 @@ MessagePtr TwitchMessageBuilder::makeAutomodInfoMessage(
     builder.emplace<BadgeElement>(makeAutoModBadge(),
                                   MessageElementFlag::BadgeChannelAuthority);
     // AutoMod "username"
-    builder.emplace<MentionElement>("AutoMod:", AUTOMOD_USER_COLOR,
-                                    AUTOMOD_USER_COLOR);
+    builder.emplace<TextElement>("AutoMod:", MessageElementFlag::Text,
+                                 AUTOMOD_USER_COLOR, FontStyle::ChatMediumBold);
     switch (action.type)
     {
         case AutomodInfoAction::OnHold: {
@@ -1993,8 +1993,9 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeAutomodMessage(
     builder.emplace<BadgeElement>(makeAutoModBadge(),
                                   MessageElementFlag::BadgeChannelAuthority);
     // AutoMod "username"
-    builder2.emplace<MentionElement>("AutoMod:", AUTOMOD_USER_COLOR,
-                                     AUTOMOD_USER_COLOR);
+    builder2.emplace<TextElement>("AutoMod:", MessageElementFlag::Text,
+                                  AUTOMOD_USER_COLOR,
+                                  FontStyle::ChatMediumBold);
     // AutoMod header message
     builder.emplace<TextElement>(
         ("Held a message for reason: " + action.reason +
