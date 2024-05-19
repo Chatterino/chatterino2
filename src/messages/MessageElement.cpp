@@ -738,6 +738,15 @@ void MentionElement::addToContainer(MessageLayoutContainer &container,
     TextElement::addToContainer(container, flags);
 }
 
+MessageElement *MentionElement::setLink(const Link &link)
+{
+    assert(false && "MentionElement::setLink should not be called. Pass "
+                    "through a valid login name in the constructor and it will "
+                    "automatically be a UserInfo link");
+
+    return TextElement::setLink(link);
+}
+
 Link MentionElement::getLink() const
 {
     if (this->userLoginName.isEmpty())

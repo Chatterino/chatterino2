@@ -169,7 +169,7 @@ public:
     MessageElement(MessageElement &&) = delete;
     MessageElement &operator=(MessageElement &&) = delete;
 
-    MessageElement *setLink(const Link &link);
+    virtual MessageElement *setLink(const Link &link);
     MessageElement *setTooltip(const QString &tooltip);
 
     MessageElement *setTrailingSpace(bool value);
@@ -325,6 +325,7 @@ public:
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
 
+    MessageElement *setLink(const Link &link) override;
     Link getLink() const override;
 
 private:
