@@ -20,6 +20,7 @@ Label::Label(BaseWidget *parent, QString text, FontStyle style)
                                       [this] {
                                           this->updateSize();
                                       });
+    this->updateSize();
 }
 
 const QString &Label::getText() const
