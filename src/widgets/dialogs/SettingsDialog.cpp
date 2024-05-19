@@ -397,8 +397,12 @@ void SettingsDialog::refresh()
     }
 }
 
-void SettingsDialog::scaleChangedEvent(float /*newScale*/)
+void SettingsDialog::scaleChangedEvent(float newScale)
 {
+    assert(newScale == 1.F &&
+           "Scaling is disabled for the settings dialog - its scale should "
+           "always be 1");
+
     for (SettingsDialogTab *tab : this->tabs_)
     {
         tab->setFixedHeight(30);
