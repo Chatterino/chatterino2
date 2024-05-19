@@ -189,10 +189,12 @@ void Notebook::duplicatePage(QWidget *page)
         return;
     }
 
-    auto descriptor = container->buildDescriptor();
-
     auto *newContainer = new SplitContainer(this);
-    newContainer->applyFromDescriptor(descriptor);
+    if (!container->getSplits().empty())
+    {
+        auto descriptor = container->buildDescriptor();
+        newContainer->applyFromDescriptor(descriptor);
+    }
 
     int newTabPosition = this->indexOf(page) + 1;
     auto highlightState = item->tab->highlightState();
