@@ -1,5 +1,7 @@
 #pragma once
 
+#include "expected.hpp"
+
 #include <QString>
 
 namespace chatterino {
@@ -14,9 +16,12 @@ struct PerformChannelAction {
     QString channelID;
     QString rawTarget;
     QString reason;
+    int duration;
 };
 
-std::vector<PerformChannelAction> parseBanCommand(const CommandContext &ctx);
+nonstd::expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
+    const CommandContext &ctx, const QString &command, const QString &usage,
+    bool withDuration);
 
 /// /ban
 QString sendBan(const CommandContext &ctx);
