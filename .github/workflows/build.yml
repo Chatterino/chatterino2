@@ -156,6 +156,15 @@ jobs:
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
           version: ${{ matrix.qt-version }}
 
+      - name: Install Qt6
+        if: startsWith(matrix.qt-version, '6.')
+        uses: jurplel/install-qt-action@v4.0.0
+        with:
+          cache: true
+          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
+          modules: qt5compat qtimageformats
+          version: ${{ matrix.qt-version }}
+
       - name: Install Qt 6.5.3 imageformats
         if: startsWith(matrix.qt-version, '6.')
         uses: jurplel/install-qt-action@v4.0.0
@@ -175,15 +184,6 @@ jobs:
           cd (Get-ChildItem)[0].Name
           cd plugins/imageformats
           echo "PLUGIN_PATH=$(pwd)" | Out-File -Path "$Env:GITHUB_OUTPUT" -Encoding ASCII
-
-      - name: Install Qt6
-        if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v4.0.0
-        with:
-          cache: true
-          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
-          modules: qt5compat qtimageformats
-          version: ${{ matrix.qt-version }}
 
       # WINDOWS
       - name: Enable Developer Command Prompt (Windows)
