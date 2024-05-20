@@ -13,6 +13,7 @@
 - Dev: Make printing of strings in tests easier. (#5379)
 - Dev: Refactor and document `Scrollbar`. (#5334, #5393)
 - Dev: Reduced the amount of scale events. (#5404, #5406)
+- Dev: Skip conan and vcpkg autosetup when using QtCreator. (#5305)
 
 ## 2.5.1
 
