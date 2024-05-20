@@ -150,7 +150,7 @@ jobs:
 
       - name: Install Qt5
         if: startsWith(matrix.qt-version, '5.')
-        uses: jurplel/install-qt-action@v3.3.0
+        uses: jurplel/install-qt-action@v4.0.0
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -158,7 +158,7 @@ jobs:
 
       - name: Install Qt 6.5.3 imageformats
         if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v3.3.0
+        uses: jurplel/install-qt-action@v4.0.0
         with:
           cache: false
           modules: qtimageformats
@@ -178,7 +178,7 @@ jobs:
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v3.3.0
+        uses: jurplel/install-qt-action@v4.0.0
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
