@@ -594,10 +594,21 @@ void EmotePopup::filterEmotes(const QString &searchText)
     this->searchView_->show();
 }
 
+void EmotePopup::savePosition() const
+{
+    getIApp()->getWindows()->setEmotePopupPos(this->realPos());
+}
+
+void EmotePopup::moveEvent(QMoveEvent *event)
+{
+    this->savePosition();
+    BasePopup::moveEvent(event);
+}
+
 void EmotePopup::closeEvent(QCloseEvent *event)
 {
-    getIApp()->getWindows()->setEmotePopupPos(this->pos());
-    BaseWindow::closeEvent(event);
+    this->savePosition();
+    BasePopup::closeEvent(event);
 }
 
 }  // namespace chatterino

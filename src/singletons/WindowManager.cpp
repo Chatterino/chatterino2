@@ -335,7 +335,11 @@ QPoint WindowManager::emotePopupPos()
 
 void WindowManager::setEmotePopupPos(QPoint pos)
 {
-    this->emotePopupPos_ = pos;
+    if (this->emotePopupPos_ != pos)
+    {
+        this->emotePopupPos_ = pos;
+        this->queueSave();
+    }
 }
 
 void WindowManager::initialize(Settings &settings, const Paths &paths)

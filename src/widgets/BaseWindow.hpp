@@ -49,7 +49,7 @@ public:
     QRect getBounds();
 
     QWidget *getLayoutContainer();
-    bool hasCustomWindowFrame();
+    bool hasCustomWindowFrame() const;
     TitleBarButton *addTitleBarButton(const TitleBarButtonStyle &style,
                                       std::function<void()> onClicked);
     EffectLabel *addTitleBarLabel(std::function<void()> onClicked);
@@ -87,6 +87,10 @@ public:
     pajlada::Signals::NoArgSignal leaving;
 
     static bool supportsCustomWindowFrame();
+
+    /// @returns The actual position of this window with invisible margins
+    ///          removed for frameless windows.
+    QPoint realPos() const;
 
 signals:
     void topMostChanged(bool topMost);

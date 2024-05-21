@@ -29,7 +29,9 @@
 #    pragma comment(lib, "Dwmapi.lib")
 
 #    include <QHBoxLayout>
+#    include <QMargins>
 #    include <QOperatingSystemVersion>
+#    include <QWindow>
 #endif
 
 #include "widgets/helper/TitlebarButton.hpp"
@@ -444,7 +446,7 @@ QWidget *BaseWindow::getLayoutContainer()
     }
 }
 
-bool BaseWindow::hasCustomWindowFrame()
+bool BaseWindow::hasCustomWindowFrame() const
 {
     return BaseWindow::supportsCustomWindowFrame() && this->enableCustomFrame_;
 }
@@ -458,6 +460,19 @@ bool BaseWindow::supportsCustomWindowFrame()
 #else
     return false;
 #endif
+}
+
+QPoint BaseWindow::realPos() const
+{
+#ifdef USEWINSDK
+    if (this->hasCustomWindowFrame())
+    {
+        // Qt subtracts invisible margins from the position but doesn't realize we don't have any margins.
+        auto margins = this->windowHandle()->frameMargins();
+        return this->pos() + QPoint(margins.left(), margins.top());
+    }
+#endif
+    return this->pos();
 }
 
 void BaseWindow::themeChangedEvent()
