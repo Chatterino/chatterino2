@@ -3,6 +3,7 @@
 class QWidget;
 class QPoint;
 class QScreen;
+class QRect;
 
 namespace chatterino::widgets {
 
