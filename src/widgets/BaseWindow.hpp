@@ -45,8 +45,8 @@ public:
                         QWidget *parent = nullptr);
     ~BaseWindow() override;
 
-    void setInitialBounds(const QRect &bounds);
-    QRect getBounds();
+    void setInitialBounds(QRect bounds, widgets::BoundsChecking mode);
+    QRect getBounds() const;
 
     QWidget *getLayoutContainer();
     bool hasCustomWindowFrame() const;
@@ -87,10 +87,6 @@ public:
     pajlada::Signals::NoArgSignal leaving;
 
     static bool supportsCustomWindowFrame();
-
-    /// @returns The actual position of this window with invisible margins
-    ///          removed for frameless windows.
-    QPoint realPos() const;
 
 signals:
     void topMostChanged(bool topMost);

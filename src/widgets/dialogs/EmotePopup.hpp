@@ -26,6 +26,7 @@ public:
     pajlada::Signals::Signal<Link> linkClicked;
 
 protected:
+    void resizeEvent(QResizeEvent *event) override;
     void moveEvent(QMoveEvent *event) override;
 
 private:
@@ -51,7 +52,7 @@ private:
     void addShortcuts() override;
     bool eventFilter(QObject *object, QEvent *event) override;
 
-    void savePosition() const;
+    void saveBounds() const;
 };
 
 }  // namespace chatterino
