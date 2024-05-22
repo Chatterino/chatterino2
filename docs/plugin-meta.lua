@@ -16,7 +16,7 @@ c2.EventType = {}
 
 ---@class CommandContext
 ---@field words string[] The words typed when executing the command. For example `/foo bar baz` will result in `{"/foo", "bar", "baz"}`.
----@field channel Channel The channel the command was executed in.
+---@field channel c2.Channel The channel the command was executed in.
 
 ---@class CompletionList
 ---@field values string[] The completions
@@ -30,98 +30,98 @@ c2.EventType = {}
 
 -- Begin src/common/Channel.hpp
 
----@alias ChannelType integer
----@type { None: ChannelType, Direct: ChannelType, Twitch: ChannelType, TwitchWhispers: ChannelType, TwitchWatching: ChannelType, TwitchMentions: ChannelType, TwitchLive: ChannelType, TwitchAutomod: ChannelType, TwitchEnd: ChannelType, Irc: ChannelType, Misc: ChannelType }
-ChannelType = {}
+---@alias c2.ChannelType integer
+---@type { None: c2.ChannelType, Direct: c2.ChannelType, Twitch: c2.ChannelType, TwitchWhispers: c2.ChannelType, TwitchWatching: c2.ChannelType, TwitchMentions: c2.ChannelType, TwitchLive: c2.ChannelType, TwitchAutomod: c2.ChannelType, TwitchEnd: c2.ChannelType, Irc: c2.ChannelType, Misc: c2.ChannelType }
+c2.ChannelType = {}
 
 -- End src/common/Channel.hpp
 
 -- Begin src/controllers/plugins/api/ChannelRef.hpp
 
----@alias Platform integer
+---@alias c2.Platform integer
 --- This enum describes a platform for the purpose of searching for a channel.
 --- Currently only Twitch is supported because identifying IRC channels is tricky.
----@type { Twitch: Platform }
-Platform = {}
+---@type { Twitch: c2.Platform }
+c2.Platform = {}
 
----@class Channel
-Channel = {}
+---@class c2.Channel
+c2.Channel = {}
 
 --- Returns true if the channel this object points to is valid.
 --- If the object expired, returns false
 --- If given a non-Channel object, it errors.
 ---
 ---@return boolean success
-function Channel:is_valid() end
+function c2.Channel:is_valid() end
 
 --- Gets the channel's name. This is the lowercase login name.
 ---
 ---@return string name
-function Channel:get_name() end
+function c2.Channel:get_name() end
 
 --- Gets the channel's type
 ---
----@return ChannelType
-function Channel:get_type() end
+---@return c2.ChannelType
+function c2.Channel:get_type() end
 
 --- Get the channel owner's display name. This may contain non-lowercase ascii characters.
 ---
 ---@return string name
-function Channel:get_display_name() end
+function c2.Channel:get_display_name() end
 
 --- Sends a message to the target channel.
 --- Note that this does not execute client-commands.
 ---
 ---@param message string
 ---@param execute_commands boolean Should commands be run on the text?
-function Channel:send_message(message, execute_commands) end
+function c2.Channel:send_message(message, execute_commands) end
 
 --- Adds a system message client-side
 ---
 ---@param message string
-function Channel:add_system_message(message) end
+function c2.Channel:add_system_message(message) end
 
 --- Returns true for twitch channels.
 --- Compares the channel Type. Note that enum values aren't guaranteed, just
 --- that they are equal to the exposed enum.
 ---
 ---@return boolean
-function Channel:is_twitch_channel() end
+function c2.Channel:is_twitch_channel() end
 
 --- Returns a copy of the channel mode settings (subscriber only, r9k etc.)
 ---
 ---@return RoomModes
-function Channel:get_room_modes() end
+function c2.Channel:get_room_modes() end
 
 --- Returns a copy of the stream status.
 ---
 ---@return StreamStatus
-function Channel:get_stream_status() end
+function c2.Channel:get_stream_status() end
 
 --- Returns the Twitch user ID of the owner of the channel.
 ---
 ---@return string
-function Channel:get_twitch_id() end
+function c2.Channel:get_twitch_id() end
 
 --- Returns true if the channel is a Twitch channel and the user owns it
 ---
 ---@return boolean
-function Channel:is_broadcaster() end
+function c2.Channel:is_broadcaster() end
 
 --- Returns true if the channel is a Twitch channel and the user is a moderator in the channel
 --- Returns false for broadcaster.
 ---
 ---@return boolean
-function Channel:is_mod() end
+function c2.Channel:is_mod() end
 
 --- Returns true if the channel is a Twitch channel and the user is a VIP in the channel
 --- Returns false for broadcaster.
 ---
 ---@return boolean
-function Channel:is_vip() end
+function c2.Channel:is_vip() end
 
 ---@return string
-function Channel:__tostring() end
+function c2.Channel:__tostring() end
 
 --- Finds a channel by name.
 --- Misc channels are marked as Twitch:
@@ -132,15 +132,15 @@ function Channel:__tostring() end
 --- - /automod
 ---
 ---@param name string Which channel are you looking for?
----@param platform Platform Where to search for the channel?
----@return Channel?
-function Channel.by_name(name, platform) end
+---@param platform c2.Platform Where to search for the channel?
+---@return c2.Channel?
+function c2.Channel.by_name(name, platform) end
 
 --- Finds a channel by the Twitch user ID of its owner.
 ---
 ---@param id string ID of the owner of the channel.
----@return Channel?
-function Channel.by_twitch_id(id) end
+---@return c2.Channel?
+function c2.Channel.by_twitch_id(id) end
 
 ---@class RoomModes
 ---@field unique_chat boolean You might know this as r9kbeta or robot9000.

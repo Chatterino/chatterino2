@@ -13,6 +13,7 @@
 - Dev: Make printing of strings in tests easier. (#5379)
 - Dev: Refactor and document `Scrollbar`. (#5334, #5393)
 - Dev: Reduced the amount of scale events. (#5404, #5406)
+- Dev: All Lua globals now show in the `c2` global in the LuaLS metadata. (#5385)
 
 ## 2.5.1
 
