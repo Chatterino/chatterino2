@@ -227,7 +227,6 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
         [this]() {
             postToThread([this] {
                 this->updateScale();
-                this->updateScale();
             });
         },
         this->connections_, false);
@@ -931,9 +930,27 @@ void BaseWindow::updateScale()
 
     this->setScale(scale);
 
-    for (auto *child : this->findChildren<BaseWidget *>())
+    BaseWindow::applyScaleRecursive(this, scale);
+}
+
+// NOLINTNEXTLINE(misc-no-recursion)
+void BaseWindow::applyScaleRecursive(QObject *root, float scale)
+{
+    for (QObject *obj : root->children())
     {
-        child->setScale(scale);
+        auto *base = dynamic_cast<BaseWidget *>(obj);
+        if (base)
+        {
+            auto *window = dynamic_cast<BaseWindow *>(obj);
+            if (window)
+            {
+                // stop here, the window will get the event as well (via uiScale)
+                continue;
+            }
+            base->setScale(scale);
+        }
+
+        applyScaleRecursive(obj, scale);
     }
 }
 

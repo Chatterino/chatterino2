@@ -593,6 +593,12 @@ void Notebook::showTabVisibilityInfoPopup()
 
 void Notebook::refresh()
 {
+    if (this->refreshPaused_)
+    {
+        this->refreshRequested_ = true;
+        return;
+    }
+
     this->performLayout();
     this->updateTabVisibility();
 }
@@ -652,12 +658,19 @@ void Notebook::resizeAddButton()
     this->addButton_->setFixedSize(h, h);
 }
 
-void Notebook::scaleChangedEvent(float)
+void Notebook::scaleChangedEvent(float /*scale*/)
 {
     this->resizeAddButton();
+    this->refreshPaused_ = true;
+    this->refreshRequested_ = false;
     for (auto &i : this->items_)
     {
         i.tab->updateSize();
+    }
+    this->refreshPaused_ = false;
+    if (this->refreshRequested_)
+    {
+        this->refresh();
     }
 }
 
