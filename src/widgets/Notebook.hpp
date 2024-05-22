@@ -193,7 +193,12 @@ private:
     bool showAddButton_ = false;
     int lineOffset_ = 20;
     bool lockNotebookLayout_ = false;
+
+    bool refreshPaused_ = false;
+    bool refreshRequested_ = false;
+
     NotebookTabLocation tabLocation_ = NotebookTabLocation::Top;
+
     QAction *lockNotebookLayoutAction_;
     QAction *showTabsAction_;
     QAction *toggleTopMostAction_;
