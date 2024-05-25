@@ -1002,6 +1002,9 @@ target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 # semver dependency https://github.com/Neargye/semver
 target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/semver/include)
 
+# expected-lite dependency https://github.com/martinmoene/expected-lite
+target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/expected-lite/include)
+
 # miniaudio dependency https://github.com/mackron/miniaudio
 if (USE_SYSTEM_MINIAUDIO)
     message(STATUS "Building with system miniaudio")
