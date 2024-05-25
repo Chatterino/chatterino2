@@ -655,6 +655,11 @@ void TwitchIrcServer::setWatchingChannel(ChannelPtr newWatchingChannel)
     this->watchingChannel.reset(newWatchingChannel);
 }
 
+ChannelPtr TwitchIrcServer::getMentionsChannel() const
+{
+    return this->mentionsChannel;
+}
+
 ChannelPtr TwitchIrcServer::getLiveChannel() const
 {
     return this->liveChannel;

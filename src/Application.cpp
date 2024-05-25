@@ -877,10 +877,14 @@ void Application::initPubSub()
 
                             if (getSettings()->showAutomodInMentions)
                             {
-                                getApp()->twitch->mentionsChannel->addMessage(
-                                    p.first);
-                                getApp()->twitch->mentionsChannel->addMessage(
-                                    p.second);
+                                getIApp()
+                                    ->getTwitch()
+                                    ->getMentionsChannel()
+                                    ->addMessage(p.first);
+                                getIApp()
+                                    ->getTwitch()
+                                    ->getMentionsChannel()
+                                    ->addMessage(p.second);
                             }
                         });
                     }

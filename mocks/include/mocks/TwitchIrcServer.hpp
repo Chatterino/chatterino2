@@ -16,6 +16,7 @@ public:
               std::shared_ptr<Channel>(new MockChannel("testaccount_420")))
         , watchingChannel(this->watchingChannelInner,
                           Channel::Type::TwitchWatching)
+        , mentionsChannel(std::shared_ptr<Channel>(new MockChannel("forsen3")))
         , liveChannel(std::shared_ptr<Channel>(new MockChannel("forsen")))
         , automodChannel(std::shared_ptr<Channel>(new MockChannel("forsen2")))
     {
@@ -36,6 +37,11 @@ public:
         return this->lastUserThatWhisperedMe;
     }
 
+    ChannelPtr getMentionsChannel() const override
+    {
+        return this->mentionsChannel;
+    }
+
     ChannelPtr getLiveChannel() const override
     {
         return this->liveChannel;
@@ -48,6 +54,7 @@ public:
 
     ChannelPtr watchingChannelInner;
     IndirectChannel watchingChannel;
+    ChannelPtr mentionsChannel;
     ChannelPtr liveChannel;
     ChannelPtr automodChannel;
     QString lastUserThatWhisperedMe{"forsen"};

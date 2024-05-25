@@ -963,7 +963,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
 
     if (message->flags.has(MessageFlag::ShowInMentions))
     {
-        getApp()->twitch->mentionsChannel->addMessage(message);
+        getIApp()->getTwitch()->getMentionsChannel()->addMessage(message);
     }
 
     c->addMessage(message);
@@ -1446,7 +1446,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
 
         if (highlighted && showInMentions)
         {
-            server.mentionsChannel->addMessage(msg);
+            server.getMentionsChannel()->addMessage(msg);
         }
 
         chan->addMessage(msg);
