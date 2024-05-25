@@ -17,6 +17,7 @@ public:
         , watchingChannel(this->watchingChannelInner,
                           Channel::Type::TwitchWatching)
         , liveChannel(std::shared_ptr<Channel>(new MockChannel("forsen")))
+        , automodChannel(std::shared_ptr<Channel>(new MockChannel("forsen2")))
     {
     }
 
@@ -35,9 +36,15 @@ public:
         return this->liveChannel;
     }
 
+    ChannelPtr getAutomodChannel() const override
+    {
+        return this->automodChannel;
+    }
+
     ChannelPtr watchingChannelInner;
     IndirectChannel watchingChannel;
     ChannelPtr liveChannel;
+    ChannelPtr automodChannel;
     QString lastUserThatWhisperedMe{"forsen"};
 };
 

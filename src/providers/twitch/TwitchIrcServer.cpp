@@ -655,6 +655,11 @@ ChannelPtr TwitchIrcServer::getLiveChannel() const
     return this->liveChannel;
 }
 
+ChannelPtr TwitchIrcServer::getAutomodChannel() const
+{
+    return this->automodChannel;
+}
+
 QString TwitchIrcServer::getLastUserThatWhisperedMe() const
 {
     return this->lastUserThatWhisperedMe.get();

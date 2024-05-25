@@ -1386,7 +1386,8 @@ MessageElementFlags ChannelView::getFlags() const
         if (this->underlyingChannel_ == app->twitch->mentionsChannel ||
             this->underlyingChannel_ ==
                 getIApp()->getTwitch()->getLiveChannel() ||
-            this->underlyingChannel_ == app->twitch->automodChannel)
+            this->underlyingChannel_ ==
+                getIApp()->getTwitch()->getAutomodChannel())
         {
             flags.set(MessageElementFlag::ChannelName);
             flags.unset(MessageElementFlag::ChannelPointReward);
@@ -1394,7 +1395,7 @@ MessageElementFlags ChannelView::getFlags() const
     }
 
     if (this->sourceChannel_ == app->twitch->mentionsChannel ||
-        this->sourceChannel_ == app->twitch->automodChannel)
+        this->sourceChannel_ == getIApp()->getTwitch()->getAutomodChannel())
     {
         flags.set(MessageElementFlag::ChannelName);
     }

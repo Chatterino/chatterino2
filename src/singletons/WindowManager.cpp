@@ -708,7 +708,7 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
     }
     else if (descriptor.type_ == "automod")
     {
-        return app->twitch->automodChannel;
+        return getIApp()->getTwitch()->getAutomodChannel();
     }
     else if (descriptor.type_ == "irc")
     {

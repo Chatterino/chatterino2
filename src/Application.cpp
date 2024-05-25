@@ -866,10 +866,14 @@ void Application::initPubSub()
                             chan->addMessage(p.first);
                             chan->addMessage(p.second);
 
-                            getApp()->twitch->automodChannel->addMessage(
-                                p.first);
-                            getApp()->twitch->automodChannel->addMessage(
-                                p.second);
+                            getIApp()
+                                ->getTwitch()
+                                ->getAutomodChannel()
+                                ->addMessage(p.first);
+                            getIApp()
+                                ->getTwitch()
+                                ->getAutomodChannel()
+                                ->addMessage(p.second);
 
                             if (getSettings()->showAutomodInMentions)
                             {

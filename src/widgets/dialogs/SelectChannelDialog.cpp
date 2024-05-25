@@ -403,7 +403,7 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
             }
             else if (this->ui_.twitch.automod->isChecked())
             {
-                return app->twitch->automodChannel;
+                return getIApp()->getTwitch()->getAutomodChannel();
             }
         }
         break;

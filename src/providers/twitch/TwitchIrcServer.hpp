@@ -29,6 +29,7 @@ public:
 
     virtual const IndirectChannel &getWatchingChannel() const = 0;
     virtual ChannelPtr getLiveChannel() const = 0;
+    virtual ChannelPtr getAutomodChannel() const = 0;
 
     virtual QString getLastUserThatWhisperedMe() const = 0;
 
@@ -78,9 +79,9 @@ public:
 
 private:
     const ChannelPtr liveChannel;
+    const ChannelPtr automodChannel;
 
 public:
-    const ChannelPtr automodChannel;
     IndirectChannel watchingChannel;
 
     std::unique_ptr<BttvLiveUpdates> bttvLiveUpdates;
@@ -88,6 +89,7 @@ public:
 
     const IndirectChannel &getWatchingChannel() const override;
     ChannelPtr getLiveChannel() const override;
+    ChannelPtr getAutomodChannel() const override;
 
     QString getLastUserThatWhisperedMe() const override;
 
