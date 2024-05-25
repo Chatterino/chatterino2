@@ -120,7 +120,7 @@ jobs:
             skip-crashpad: false
           # Windows
           - os: windows-latest
-            qt-version: 6.5.0
+            qt-version: 6.7.1
             force-lto: false
             plugins: true
             skip-artifact: false
@@ -164,26 +164,6 @@ jobs:
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
           modules: qt5compat qtimageformats
           version: ${{ matrix.qt-version }}
-
-      - name: Install Qt 6.5.3 imageformats
-        if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v4.0.0
-        with:
-          cache: false
-          modules: qtimageformats
-          set-env: false
-          version: 6.5.3
-          extra: --noarchives
-
-      - name: Find Qt 6.5.3 Path
-        if: startsWith(matrix.qt-version, '6.') && startsWith(matrix.os, 'windows')
-        shell: pwsh
-        id: find-good-imageformats
-        run: |
-          cd "$Env:RUNNER_WORKSPACE/Qt/6.5.3"
-          cd (Get-ChildItem)[0].Name
-          cd plugins/imageformats
-          echo "PLUGIN_PATH=$(pwd)" | Out-File -Path "$Env:GITHUB_OUTPUT" -Encoding ASCII
 
       # WINDOWS
       - name: Enable Developer Command Prompt (Windows)
@@ -360,15 +340,15 @@ jobs:
 
       # Windows
       - uses: actions/download-artifact@v4
-        name: Windows Qt6.5.0
+        name: Windows Qt6.7.1
         with:
-          name: chatterino-windows-x86-64-Qt-6.5.0.zip
+          name: chatterino-windows-x86-64-Qt-6.7.1.zip
           path: release-artifacts/
 
       - uses: actions/download-artifact@v4
-        name: Windows Qt6.5.0 symbols
+        name: Windows Qt6.7.1 symbols
         with:
-          name: chatterino-windows-x86-64-Qt-6.5.0-symbols.pdb.7z
+          name: chatterino-windows-x86-64-Qt-6.7.1-symbols.pdb.7z
           path: release-artifacts/
 
       - uses: actions/download-artifact@v4
