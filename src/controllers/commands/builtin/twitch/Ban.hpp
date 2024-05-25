@@ -1,7 +1,6 @@
 #pragma once
 
-#include "expected.hpp"
-
+#include <nonstd/expected.hpp>
 #include <QString>
 
 namespace chatterino {
