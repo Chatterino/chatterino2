@@ -29,6 +29,8 @@
 #include <QUuid>
 #include <QWidget>
 
+#include <utility>
+
 namespace chatterino {
 
 Notebook::Notebook(QWidget *parent)
