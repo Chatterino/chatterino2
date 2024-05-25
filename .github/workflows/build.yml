@@ -253,12 +253,6 @@ jobs:
           cp bin/chatterino.exe Chatterino2/
           echo nightly > Chatterino2/modes
 
-      - name: Fix Qt6 (windows)
-        if: startsWith(matrix.qt-version, '6.') && startsWith(matrix.os, 'windows')
-        working-directory: build
-        run: |
-          cp ${{ steps.find-good-imageformats.outputs.PLUGIN_PATH }}/qwebp.dll Chatterino2/imageformats/qwebp.dll
-
       - name: Package (windows)
         if: startsWith(matrix.os, 'windows')
         working-directory: build
