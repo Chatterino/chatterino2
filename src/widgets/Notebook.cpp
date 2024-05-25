@@ -209,10 +209,14 @@ void Notebook::duplicatePage(QWidget *page)
         newTabPosition = tabPosition + 1;
     }
     auto newTabHighlightState = item->tab->highlightState();
+    QString newTabTitle = "";
+    if (item->tab->hasCustomTitle())
+    {
+        newTabTitle = item->tab->getCustomTitle();
+    }
 
-    auto *tab = this->addPageAt(
-        newContainer, newTabPosition,
-        item->tab->hasCustomTitle() ? item->tab->getCustomTitle() : "", false);
+    auto *tab =
+        this->addPageAt(newContainer, newTabPosition, newTabTitle, false);
     tab->setHighlightState(newTabHighlightState);
 
     newContainer->setTab(tab);
