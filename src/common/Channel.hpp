@@ -4,6 +4,7 @@
 #include "controllers/completion/TabCompletionModel.hpp"
 #include "messages/LimitedQueue.hpp"
 
+#include <magic_enum/magic_enum.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QDate>
 #include <QString>
@@ -45,7 +46,7 @@ public:
         TwitchAutomod,
         TwitchEnd,
         Irc,
-        Misc
+        Misc,
     };
 
     explicit Channel(const QString &name, Type type);
@@ -151,3 +152,32 @@ private:
 };
 
 }  // namespace chatterino
+
+template <>
+constexpr magic_enum::customize::customize_t
+    magic_enum::customize::enum_name<chatterino::Channel::Type>(
+        chatterino::Channel::Type value) noexcept
+{
+    using Type = chatterino::Channel::Type;
+    switch (value)
+    {
+        case Type::Twitch:
+            return "twitch";
+        case Type::TwitchWhispers:
+            return "whispers";
+        case Type::TwitchWatching:
+            return "watching";
+        case Type::TwitchMentions:
+            return "mentions";
+        case Type::TwitchLive:
+            return "live";
+        case Type::TwitchAutomod:
+            return "automod";
+        case Type::Irc:
+            return "irc";
+        case Type::Misc:
+            return "misc";
+        default:
+            return default_tag;
+    }
+}
