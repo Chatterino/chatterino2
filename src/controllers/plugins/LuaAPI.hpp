@@ -39,7 +39,7 @@ enum class EventType {
 /**
  * @lua@class CommandContext
  * @lua@field words string[] The words typed when executing the command. For example `/foo bar baz` will result in `{"/foo", "bar", "baz"}`.
- * @lua@field channel Channel The channel the command was executed in.
+ * @lua@field channel c2.Channel The channel the command was executed in.
  */
 
 /**
