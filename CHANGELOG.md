@@ -10,6 +10,7 @@
 - Minor: Added the ability to duplicate tabs. (#5277)
 - Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
 - Bugfix: Fixed a crash that could occur when logging was enabled in IRC servers that were removed. (#5419)
+- Dev: Update vcpkg to use Qt 6.7.0 (#5420)
 - Dev: Use Qt's high DPI scaling. (#4868, #5400)
 - Dev: Add doxygen build target. (#5377)
 - Dev: Make printing of strings in tests easier. (#5379)
