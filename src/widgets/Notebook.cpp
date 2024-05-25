@@ -202,7 +202,12 @@ void Notebook::duplicatePage(QWidget *page)
         newContainer->applyFromDescriptor(descriptor);
     }
 
-    int newTabPosition = this->indexOf(page) + 1;
+    const auto tabPosition = this->indexOf(page);
+    auto newTabPosition = -1;
+    if (tabPosition != -1)
+    {
+        newTabPosition = tabPosition + 1;
+    }
     auto highlightState = item->tab->highlightState();
     auto *tab = this->addPageAt(
         newContainer, newTabPosition,
