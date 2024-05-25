@@ -399,7 +399,7 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
             }
             else if (this->ui_.twitch.live->isChecked())
             {
-                return app->twitch->liveChannel;
+                return getIApp()->getTwitch()->getLiveChannel();
             }
             else if (this->ui_.twitch.automod->isChecked())
             {

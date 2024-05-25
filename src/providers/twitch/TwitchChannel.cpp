@@ -176,7 +176,8 @@ TwitchChannel::TwitchChannel(const QString &name)
             TwitchMessageBuilder::liveMessage(this->getDisplayName(),
                                               &builder2);
             builder2.message().id = this->roomId();
-            getApp()->twitch->liveChannel->addMessage(builder2.release());
+            getIApp()->getTwitch()->getLiveChannel()->addMessage(
+                builder2.release());
 
             // Notify on all channels with a ping sound
             if (getSettings()->notificationOnAnyChannel &&
@@ -198,7 +199,7 @@ TwitchChannel::TwitchChannel(const QString &name)
 
             // "delete" old 'CHANNEL is live' message
             LimitedQueueSnapshot<MessagePtr> snapshot =
-                getApp()->twitch->liveChannel->getMessageSnapshot();
+                getIApp()->getTwitch()->getLiveChannel()->getMessageSnapshot();
             int snapshotLength = snapshot.size();
 
             // MSVC hates this code if the parens are not there

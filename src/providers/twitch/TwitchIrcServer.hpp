@@ -28,6 +28,7 @@ public:
     virtual ~ITwitchIrcServer() = default;
 
     virtual const IndirectChannel &getWatchingChannel() const = 0;
+    virtual ChannelPtr getLiveChannel() const = 0;
 
     virtual QString getLastUserThatWhisperedMe() const = 0;
 
@@ -74,7 +75,11 @@ public:
 
     const ChannelPtr whispersChannel;
     const ChannelPtr mentionsChannel;
+
+private:
     const ChannelPtr liveChannel;
+
+public:
     const ChannelPtr automodChannel;
     IndirectChannel watchingChannel;
 
@@ -82,6 +87,7 @@ public:
     std::unique_ptr<SeventvEventAPI> seventvEventAPI;
 
     const IndirectChannel &getWatchingChannel() const override;
+    ChannelPtr getLiveChannel() const override;
 
     QString getLastUserThatWhisperedMe() const override;
 

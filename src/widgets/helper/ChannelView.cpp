@@ -1384,7 +1384,8 @@ MessageElementFlags ChannelView::getFlags() const
             flags.set(MessageElementFlag::ModeratorTools);
         }
         if (this->underlyingChannel_ == app->twitch->mentionsChannel ||
-            this->underlyingChannel_ == app->twitch->liveChannel ||
+            this->underlyingChannel_ ==
+                getIApp()->getTwitch()->getLiveChannel() ||
             this->underlyingChannel_ == app->twitch->automodChannel)
         {
             flags.set(MessageElementFlag::ChannelName);

@@ -650,6 +650,11 @@ const IndirectChannel &TwitchIrcServer::getWatchingChannel() const
     return this->watchingChannel;
 }
 
+ChannelPtr TwitchIrcServer::getLiveChannel() const
+{
+    return this->liveChannel;
+}
+
 QString TwitchIrcServer::getLastUserThatWhisperedMe() const
 {
     return this->lastUserThatWhisperedMe.get();
