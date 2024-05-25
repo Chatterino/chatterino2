@@ -238,7 +238,7 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
 
 private:
-    NodeDescriptor buildDescriptorRecursively(Node *currentNode) const;
+    NodeDescriptor buildDescriptorRecursively(const Node *currentNode) const;
     void applyFromDescriptorRecursively(const NodeDescriptor &rootNode,
                                         Node *baseNode);
 

@@ -765,7 +765,7 @@ SplitContainer::Node *SplitContainer::getBaseNode()
     return &this->baseNode_;
 }
 
-NodeDescriptor SplitContainer::buildDescriptor()
+NodeDescriptor SplitContainer::buildDescriptor() const
 {
     return this->buildDescriptorRecursively(&this->baseNode_);
 }
@@ -808,7 +808,7 @@ void SplitContainer::popup()
 }
 
 NodeDescriptor SplitContainer::buildDescriptorRecursively(
-    Node *currentNode) const
+    const Node *currentNode) const
 {
     if (currentNode->children_.empty())
     {
