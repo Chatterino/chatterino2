@@ -650,6 +650,11 @@ const IndirectChannel &TwitchIrcServer::getWatchingChannel() const
     return this->watchingChannel;
 }
 
+void TwitchIrcServer::setWatchingChannel(ChannelPtr newWatchingChannel)
+{
+    this->watchingChannel.reset(newWatchingChannel);
+}
+
 ChannelPtr TwitchIrcServer::getLiveChannel() const
 {
     return this->liveChannel;

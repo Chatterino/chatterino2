@@ -28,6 +28,7 @@ public:
     virtual ~ITwitchIrcServer() = default;
 
     virtual const IndirectChannel &getWatchingChannel() const = 0;
+    virtual void setWatchingChannel(ChannelPtr newWatchingChannel) = 0;
     virtual ChannelPtr getLiveChannel() const = 0;
     virtual ChannelPtr getAutomodChannel() const = 0;
 
@@ -80,14 +81,14 @@ public:
 private:
     const ChannelPtr liveChannel;
     const ChannelPtr automodChannel;
-
-public:
     IndirectChannel watchingChannel;
 
+public:
     std::unique_ptr<BttvLiveUpdates> bttvLiveUpdates;
     std::unique_ptr<SeventvEventAPI> seventvEventAPI;
 
     const IndirectChannel &getWatchingChannel() const override;
+    void setWatchingChannel(ChannelPtr newWatchingChannel) override;
     ChannelPtr getLiveChannel() const override;
     ChannelPtr getAutomodChannel() const override;
 

@@ -241,9 +241,9 @@ void NativeMessagingServer::ReceiverThread::handleSelect(
         if (!name.isEmpty())
         {
             auto channel = app->twitch->getOrAddChannel(name);
-            if (app->twitch->watchingChannel.get() != channel)
+            if (getIApp()->getTwitch()->getWatchingChannel().get() != channel)
             {
-                app->twitch->watchingChannel.reset(channel);
+                getIApp()->getTwitch()->setWatchingChannel(channel);
             }
         }
 

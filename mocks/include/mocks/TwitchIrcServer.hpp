@@ -26,6 +26,11 @@ public:
         return this->watchingChannel;
     }
 
+    void setWatchingChannel(ChannelPtr newWatchingChannel) override
+    {
+        this->watchingChannel.reset(newWatchingChannel);
+    }
+
     QString getLastUserThatWhisperedMe() const override
     {
         return this->lastUserThatWhisperedMe;
