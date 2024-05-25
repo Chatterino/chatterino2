@@ -807,7 +807,8 @@ void SplitContainer::popup()
     window.show();
 }
 
-NodeDescriptor SplitContainer::buildDescriptorRecursively(Node *currentNode)
+NodeDescriptor SplitContainer::buildDescriptorRecursively(
+    Node *currentNode) const
 {
     if (currentNode->children_.empty())
     {
@@ -838,7 +839,7 @@ NodeDescriptor SplitContainer::buildDescriptorRecursively(Node *currentNode)
     }
 
     ContainerNodeDescriptor descriptor;
-    for (auto &child : currentNode->children_)
+    for (const auto &child : currentNode->children_)
     {
         descriptor.vertical_ =
             currentNode->type_ == Node::Type::VerticalContainer;
