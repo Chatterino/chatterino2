@@ -184,6 +184,10 @@ void Notebook::duplicatePage(QWidget *page)
 {
     auto *item = this->findItem(page);
     assert(item != nullptr);
+    if (item == nullptr)
+    {
+        return;
+    }
 
     auto *container = dynamic_cast<SplitContainer *>(item->page);
     if (!container)
