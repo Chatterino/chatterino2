@@ -11,7 +11,7 @@
 - Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
 - Bugfix: Fixed a crash that could occur when logging was enabled in IRC servers that were removed. (#5419)
 - Dev: Update Windows build from Qt 6.5.0 to Qt 6.7.1. (#5420)
-- Dev: Update vcpkg build Qt from 6.5.0 to 6.7.0, boost from 1.83.0 to 1.85.0, openssl from 3.1.3 to 3.3.0. (#5420)
+- Dev: Update vcpkg build Qt from 6.5.0 to 6.7.0, boost from 1.83.0 to 1.85.0, openssl from 3.1.3 to 3.3.0. (#5422)
 - Dev: Use Qt's high DPI scaling. (#4868, #5400)
 - Dev: Add doxygen build target. (#5377)
 - Dev: Make printing of strings in tests easier. (#5379)
