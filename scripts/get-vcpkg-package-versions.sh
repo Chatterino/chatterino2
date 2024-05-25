@@ -1,6 +1,7 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 dependencies="$(jq -r -c '.dependencies[] | if type == "string" then . else .name end' vcpkg.json)"
+dependencies+=" openssl"
 baseline="$(jq -r -c '."builtin-baseline"' vcpkg.json)"
 
 for dependency_name in $dependencies; do
