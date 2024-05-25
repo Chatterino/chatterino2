@@ -131,7 +131,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , commands(&this->emplace<CommandController>())
     , notifications(&this->emplace<NotificationController>())
     , highlights(&this->emplace<HighlightController>())
-    , twitch(&this->emplace<TwitchIrcServer>())
+    , twitch(new TwitchIrcServer)
     , ffzBadges(&this->emplace<FfzBadges>())
     , seventvBadges(&this->emplace<SeventvBadges>())
     , userData(&this->emplace(new UserDataController(paths)))
@@ -170,6 +170,7 @@ void Application::fakeDtor()
     this->bttvEmotes.reset();
     this->ffzEmotes.reset();
     this->seventvEmotes.reset();
+    // this->twitch.reset();
     this->fonts.reset();
 }
 
@@ -483,7 +484,7 @@ ITwitchIrcServer *Application::getTwitch()
 {
     assertInGuiThread();
 
-    return this->twitch;
+    return this->twitch.get();
 }
 
 PubSub *Application::getTwitchPubSub()

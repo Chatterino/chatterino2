@@ -149,7 +149,7 @@ private:
     HighlightController *const highlights{};
 
 public:
-    TwitchIrcServer *const twitch{};
+    std::unique_ptr<TwitchIrcServer> twitch;
 
 private:
     FfzBadges *const ffzBadges{};
