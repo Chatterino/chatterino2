@@ -32,7 +32,7 @@ class Channel : public std::enable_shared_from_this<Channel>
 public:
     // This is for Lua. See scripts/make_luals_meta.py
     /**
-     * @exposeenum ChannelType
+     * @exposeenum c2.ChannelType
      */
     enum class Type {
         None,
