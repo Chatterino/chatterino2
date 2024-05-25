@@ -177,7 +177,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     b->flags.set(MessageFlag::Whisper);
     auto messagexD = b.release();
 
-    app->twitch->whispersChannel->addMessage(messagexD);
+    getIApp()->getTwitch()->getWhispersChannel()->addMessage(messagexD);
 
     auto overrideFlags = std::optional<MessageFlags>(messagexD->flags);
     overrideFlags->set(MessageFlag::DoNotLog);

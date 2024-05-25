@@ -943,7 +943,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
 
     args.isReceivedWhisper = true;
 
-    auto *c = getApp()->twitch->whispersChannel.get();
+    auto *c = getIApp()->getTwitch()->getWhispersChannel().get();
 
     TwitchMessageBuilder builder(
         c, ircMessage, args,

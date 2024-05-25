@@ -395,7 +395,7 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
             }
             else if (this->ui_.twitch.whispers->isChecked())
             {
-                return app->twitch->whispersChannel;
+                return getIApp()->getTwitch()->getWhispersChannel();
             }
             else if (this->ui_.twitch.live->isChecked())
             {

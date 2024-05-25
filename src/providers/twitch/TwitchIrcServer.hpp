@@ -29,6 +29,7 @@ public:
 
     virtual const IndirectChannel &getWatchingChannel() const = 0;
     virtual void setWatchingChannel(ChannelPtr newWatchingChannel) = 0;
+    virtual ChannelPtr getWhispersChannel() const = 0;
     virtual ChannelPtr getMentionsChannel() const = 0;
     virtual ChannelPtr getLiveChannel() const = 0;
     virtual ChannelPtr getAutomodChannel() const = 0;
@@ -76,9 +77,8 @@ public:
 
     Atomic<QString> lastUserThatWhisperedMe;
 
-    const ChannelPtr whispersChannel;
-
 private:
+    const ChannelPtr whispersChannel;
     const ChannelPtr mentionsChannel;
     const ChannelPtr liveChannel;
     const ChannelPtr automodChannel;
@@ -90,6 +90,7 @@ public:
 
     const IndirectChannel &getWatchingChannel() const override;
     void setWatchingChannel(ChannelPtr newWatchingChannel) override;
+    ChannelPtr getWhispersChannel() const override;
     ChannelPtr getMentionsChannel() const override;
     ChannelPtr getLiveChannel() const override;
     ChannelPtr getAutomodChannel() const override;

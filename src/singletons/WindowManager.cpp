@@ -700,7 +700,7 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
     }
     else if (descriptor.type_ == "whispers")
     {
-        return app->twitch->whispersChannel;
+        return getIApp()->getTwitch()->getWhispersChannel();
     }
     else if (descriptor.type_ == "live")
     {
