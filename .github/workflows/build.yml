@@ -112,24 +112,24 @@ jobs:
       matrix:
         include:
           # macOS
-          - os: macos-latest
+          - os: macos-13
             qt-version: 5.15.2
             force-lto: false
-            plugins: false
+            plugins: true
             skip-artifact: false
             skip-crashpad: false
           # Windows
           - os: windows-latest
             qt-version: 6.5.0
             force-lto: false
-            plugins: false
+            plugins: true
             skip-artifact: false
             skip-crashpad: false
           # Windows 7/8
           - os: windows-latest
             qt-version: 5.15.2
             force-lto: false
-            plugins: false
+            plugins: true
             skip-artifact: false
             skip-crashpad: true
 
@@ -150,15 +150,24 @@ jobs:
 
       - name: Install Qt5
         if: startsWith(matrix.qt-version, '5.')
-        uses: jurplel/install-qt-action@v3.3.0
+        uses: jurplel/install-qt-action@v4.0.0
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
           version: ${{ matrix.qt-version }}
 
+      - name: Install Qt6
+        if: startsWith(matrix.qt-version, '6.')
+        uses: jurplel/install-qt-action@v4.0.0
+        with:
+          cache: true
+          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
+          modules: qt5compat qtimageformats
+          version: ${{ matrix.qt-version }}
+
       - name: Install Qt 6.5.3 imageformats
         if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v3.3.0
+        uses: jurplel/install-qt-action@v4.0.0
         with:
           cache: false
           modules: qtimageformats
@@ -176,15 +185,6 @@ jobs:
           cd plugins/imageformats
           echo "PLUGIN_PATH=$(pwd)" | Out-File -Path "$Env:GITHUB_OUTPUT" -Encoding ASCII
 
-      - name: Install Qt6
-        if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v3.3.0
-        with:
-          cache: true
-          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
-          modules: qt5compat qtimageformats
-          version: ${{ matrix.qt-version }}
-
       # WINDOWS
       - name: Enable Developer Command Prompt (Windows)
         if: startsWith(matrix.os, 'windows')
@@ -192,7 +192,7 @@ jobs:
 
       - name: Setup sccache (Windows)
         # sccache v0.7.4
-        uses: hendrikmuhs/ccache-action@v1.2.12
+        uses: hendrikmuhs/ccache-action@v1.2.13
         if: startsWith(matrix.os, 'windows')
         with:
           variant: sccache

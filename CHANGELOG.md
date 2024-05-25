@@ -2,6 +2,21 @@
 
 ## Unversioned
 
+- Major: Release plugins alpha. (#5288)
+- Major: Improve high-DPI support on Windows. (#4868, #5391)
+- Minor: Add option to customise Moderation buttons with images. (#5369)
+- Minor: Colored usernames now update on the fly when changing the "Color @usernames" setting. (#5300)
+- Minor: Added `flags.action` filter variable, allowing you to filter on `/me` messages. (#5397)
+- Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
+- Dev: Use Qt's high DPI scaling. (#4868, #5400)
+- Dev: Add doxygen build target. (#5377)
+- Dev: Make printing of strings in tests easier. (#5379)
+- Dev: Refactor and document `Scrollbar`. (#5334, #5393)
+- Dev: Reduced the amount of scale events. (#5404, #5406)
+- Dev: All Lua globals now show in the `c2` global in the LuaLS metadata. (#5385)
+
+## 2.5.1
+
 - Bugfix: Fixed links without a protocol not being clickable. (#5345)
 - Dev: Removed unused timegate settings. (#5361)
 

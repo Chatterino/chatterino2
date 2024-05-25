@@ -12,9 +12,9 @@
 #include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "Test.hpp"
 #include "widgets/splits/InputCompletionPopup.hpp"
 
-#include <gtest/gtest.h>
 #include <QDir>
 #include <QFile>
 #include <QModelIndex>
@@ -224,7 +224,7 @@ void containsRoughly(std::span<EmoteItem> span, std::set<QString> values)
             }
         }
 
-        ASSERT_TRUE(found) << qPrintable(v) << " was not found in the span";
+        ASSERT_TRUE(found) << v << " was not found in the span";
     }
 }
 

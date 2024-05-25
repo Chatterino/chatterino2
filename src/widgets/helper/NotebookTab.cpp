@@ -8,7 +8,6 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/Clamp.hpp"
 #include "util/Helpers.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/Notebook.hpp"
@@ -25,17 +24,10 @@
 #include <QMimeData>
 #include <QPainter>
 
+#include <algorithm>
+
 namespace chatterino {
 namespace {
-    qreal deviceDpi(QWidget *widget)
-    {
-#ifdef Q_OS_WIN
-        return widget->devicePixelRatioF();
-#else
-        return 1.0;
-#endif
-    }
-
     // Translates the given rectangle by an amount in the direction to appear like the tab is selected.
     // For example, if location is Top, the rectangle will be translated in the negative Y direction,
     // or "up" on the screen, by amount.
@@ -191,13 +183,18 @@ void NotebookTab::growWidth(int width)
     }
 }
 
-int NotebookTab::normalTabWidth()
+int NotebookTab::normalTabWidth() const
+{
+    return this->normalTabWidthForHeight(this->height());
+}
+
+int NotebookTab::normalTabWidthForHeight(int height) const
 {
     float scale = this->scale();
-    int width;
+    int width = 0;
 
-    auto metrics = getIApp()->getFonts()->getFontMetrics(
-        FontStyle::UiTabs, float(qreal(this->scale()) * deviceDpi(this)));
+    QFontMetrics metrics =
+        getIApp()->getFonts()->getFontMetrics(FontStyle::UiTabs, scale);
 
     if (this->hasXButton())
     {
@@ -208,13 +205,13 @@ int NotebookTab::normalTabWidth()
         width = (metrics.horizontalAdvance(this->getTitle()) + int(16 * scale));
     }
 
-    if (this->height() > 150 * scale)
+    if (static_cast<float>(height) > 150 * scale)
     {
-        width = this->height();
+        width = height;
     }
     else
     {
-        width = clamp(width, this->height(), int(150 * scale));
+        width = std::clamp(width, height, static_cast<int>(150 * scale));
     }
 
     return width;
@@ -223,8 +220,8 @@ int NotebookTab::normalTabWidth()
 void NotebookTab::updateSize()
 {
     float scale = this->scale();
-    int width = this->normalTabWidth();
-    auto height = int(NOTEBOOK_TAB_HEIGHT * scale);
+    auto height = static_cast<int>(NOTEBOOK_TAB_HEIGHT * scale);
+    int width = this->normalTabWidthForHeight(height);
 
     if (width < this->growWidth_)
     {
@@ -439,11 +436,9 @@ void NotebookTab::paintEvent(QPaintEvent *)
     QPainter painter(this);
     float scale = this->scale();
 
-    auto div = std::max<float>(0.01f, this->logicalDpiX() * deviceDpi(this));
-    painter.setFont(
-        getIApp()->getFonts()->getFont(FontStyle::UiTabs, scale * 96.f / div));
+    painter.setFont(app->getFonts()->getFont(FontStyle::UiTabs, scale));
     QFontMetrics metrics =
-        app->getFonts()->getFontMetrics(FontStyle::UiTabs, scale * 96.f / div);
+        app->getFonts()->getFontMetrics(FontStyle::UiTabs, scale);
 
     int height = int(scale * NOTEBOOK_TAB_HEIGHT);
 
@@ -639,13 +634,13 @@ void NotebookTab::paintEvent(QPaintEvent *)
     }
 }
 
-bool NotebookTab::hasXButton()
+bool NotebookTab::hasXButton() const
 {
     return getSettings()->showTabCloseButton &&
            this->notebook_->getAllowUserTabManagement();
 }
 
-bool NotebookTab::shouldDrawXButton()
+bool NotebookTab::shouldDrawXButton() const
 {
     return this->hasXButton() && (this->mouseOver_ || this->selected_);
 }
@@ -831,18 +826,15 @@ void NotebookTab::update()
     Button::update();
 }
 
-QRect NotebookTab::getXRect()
+QRect NotebookTab::getXRect() const
 {
     QRect rect = this->rect();
     float s = this->scale();
     int size = static_cast<int>(16 * s);
 
-    int centerAdjustment =
-        this->tabLocation_ ==
-                (NotebookTabLocation::Top ||
-                 this->tabLocation_ == NotebookTabLocation::Bottom)
-            ? (size / 3)   // slightly off true center
-            : (size / 2);  // true center
+    int centerAdjustment = this->tabLocation_ == NotebookTabLocation::Top
+                               ? (size / 3)   // slightly off true center
+                               : (size / 2);  // true center
 
     QRect xRect(rect.right() - static_cast<int>(20 * s),
                 rect.center().y() - centerAdjustment, size, size);

@@ -32,6 +32,7 @@ static const QMap<QString, Type> MESSAGE_TYPING_CONTEXT = {
     {"channel.name", Type::String},
     {"channel.watching", Type::Bool},
     {"channel.live", Type::Bool},
+    {"flags.action", Type::Bool},
     {"flags.highlighted", Type::Bool},
     {"flags.points_redeemed", Type::Bool},
     {"flags.sub_message", Type::Bool},

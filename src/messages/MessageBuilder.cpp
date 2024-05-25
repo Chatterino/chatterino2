@@ -763,10 +763,7 @@ void MessageBuilder::addTextOrEmoji(const QString &string_)
     auto &&textColor = this->textColor_;
     if (string.startsWith('@'))
     {
-        this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
-                                   textColor, FontStyle::ChatMediumBold);
-        this->emplace<TextElement>(string, MessageElementFlag::NonBoldUsername,
-                                   textColor);
+        this->emplace<MentionElement>(string, textColor, textColor);
     }
     else
     {
