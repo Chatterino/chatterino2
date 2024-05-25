@@ -212,7 +212,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     auto bounds = getIApp()->getWindows()->emotePopupBounds();
     if (bounds.size().isEmpty())
     {
-        bounds.setSize({300, 500});
+        bounds.setSize(QSize{300, 500} * this->scale());
     }
     this->setInitialBounds(bounds, widgets::BoundsChecking::DesiredPosition);
 
