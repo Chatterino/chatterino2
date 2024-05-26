@@ -65,7 +65,7 @@ public:
     void setHighlightsEnabled(const bool &newVal);
     bool hasHighlightsEnabled() const;
 
-    void moveAnimated(QPoint pos, bool animated = true);
+    void moveAnimated(QPoint targetPos, bool animated = true);
 
     QRect getDesiredRect() const;
     void hideTabXChanged();

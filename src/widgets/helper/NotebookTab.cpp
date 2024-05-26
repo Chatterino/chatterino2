@@ -408,24 +408,24 @@ void NotebookTab::hideTabXChanged()
     this->update();
 }
 
-void NotebookTab::moveAnimated(QPoint pos, bool animated)
+void NotebookTab::moveAnimated(QPoint targetPos, bool animated)
 {
-    this->positionAnimationDesiredPoint_ = pos;
+    this->positionAnimationDesiredPoint_ = targetPos;
 
-    if (this->pos() == pos)
+    if (this->pos() == targetPos)
     {
         return;
     }
 
     if (!animated || !this->notebook_->isVisible())
     {
-        this->move(pos);
+        this->move(targetPos);
         return;
     }
 
     if (this->positionChangedAnimation_.state() ==
             QAbstractAnimation::Running &&
-        this->positionChangedAnimation_.endValue() == pos)
+        this->positionChangedAnimation_.endValue() == targetPos)
     {
         return;
     }
@@ -433,7 +433,7 @@ void NotebookTab::moveAnimated(QPoint pos, bool animated)
     this->positionChangedAnimation_.stop();
     this->positionChangedAnimation_.setDuration(75);
     this->positionChangedAnimation_.setStartValue(this->pos());
-    this->positionChangedAnimation_.setEndValue(pos);
+    this->positionChangedAnimation_.setEndValue(targetPos);
     this->positionChangedAnimation_.start();
 }
 
