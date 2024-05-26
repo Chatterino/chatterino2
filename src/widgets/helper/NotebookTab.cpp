@@ -15,6 +15,7 @@
 #include "widgets/splits/SplitContainer.hpp"
 
 #include <boost/bind/bind.hpp>
+#include <QAbstractAnimation>
 #include <QApplication>
 #include <QDebug>
 #include <QDialogButtonBox>
@@ -422,7 +423,9 @@ void NotebookTab::moveAnimated(QPoint pos, bool animated)
         return;
     }
 
-    if (this->positionChangedAnimation_.endValue() == pos)
+    if (this->positionChangedAnimation_.state() ==
+            QAbstractAnimation::Running &&
+        this->positionChangedAnimation_.endValue() == pos)
     {
         return;
     }
