@@ -108,7 +108,6 @@ private:
     int normalTabWidthForHeight(int height) const;
 
     QPropertyAnimation positionChangedAnimation_;
-    bool positionChangedAnimationRunning_ = false;
     QPoint positionAnimationDesiredPoint_;
 
     Notebook *notebook_;
