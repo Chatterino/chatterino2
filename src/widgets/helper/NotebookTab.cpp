@@ -412,6 +412,11 @@ void NotebookTab::moveAnimated(QPoint pos, bool animated)
 {
     this->positionAnimationDesiredPoint_ = pos;
 
+    if (this->pos() == pos)
+    {
+        return;
+    }
+
     QWidget *w = this->window();
 
     if ((w != nullptr && !w->isVisible()) || !animated ||
