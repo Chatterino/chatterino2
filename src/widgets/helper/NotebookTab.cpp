@@ -417,9 +417,7 @@ void NotebookTab::moveAnimated(QPoint pos, bool animated)
         return;
     }
 
-    QWidget *w = this->window();
-
-    if ((w != nullptr && !w->isVisible()) || !animated)
+    if (!animated || !this->notebook_->isVisible())
     {
         this->move(pos);
         return;
