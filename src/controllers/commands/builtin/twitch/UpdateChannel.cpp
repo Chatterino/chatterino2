@@ -30,7 +30,6 @@ QString setTitle(const CommandContext &ctx)
         return "";
     }
 
-    auto status = ctx.twitchChannel->accessStreamStatus();
     auto title = ctx.words.mid(1).join(" ");
     getHelix()->updateChannel(
         ctx.twitchChannel->roomId(), "", "", title,
