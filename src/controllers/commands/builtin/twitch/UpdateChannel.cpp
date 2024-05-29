@@ -31,6 +31,14 @@ QString setTitle(const CommandContext &ctx)
     }
 
     auto title = ctx.words.mid(1).join(" ");
+
+    if(title.size() > 140)
+    {
+        ctx.channel->addMessage(
+            makeSystemMessage("Unable to set title: Title must be 140 characters or fewer."));
+        return "";
+    }
+
     getHelix()->updateChannel(
         ctx.twitchChannel->roomId(), "", "", title,
         [channel{ctx.channel}, title](const auto &result) {
