@@ -19,6 +19,8 @@ class RatelimitBucket;
 
 class IAbstractIrcServer
 {
+public:
+    virtual ChannelPtr getOrAddChannel(const QString &dirtyChannelName) = 0;
 };
 
 class AbstractIrcServer : public IAbstractIrcServer, public QObject
@@ -44,7 +46,7 @@ public:
     virtual void sendRawMessage(const QString &rawMessage);
 
     // channels
-    ChannelPtr getOrAddChannel(const QString &dirtyChannelName);
+    ChannelPtr getOrAddChannel(const QString &dirtyChannelName) final;
     ChannelPtr getChannelOrEmpty(const QString &dirtyChannelName);
     std::vector<std::weak_ptr<Channel>> getChannels();
 

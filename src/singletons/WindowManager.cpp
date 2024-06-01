@@ -688,7 +688,8 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
 
     if (descriptor.type_ == "twitch")
     {
-        return app->twitch->getOrAddChannel(descriptor.channelName_);
+        return getIApp()->getTwitchAbstract()->getOrAddChannel(
+            descriptor.channelName_);
     }
     else if (descriptor.type_ == "mentions")
     {

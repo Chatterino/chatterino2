@@ -390,9 +390,9 @@ QString popup(const CommandContext &ctx)
     }
 
     // Open channel passed as argument in a popup
-    auto *app = getApp();
-    auto targetChannel = app->twitch->getOrAddChannel(target);
-    app->getWindows()->openInPopup(targetChannel);
+    auto targetChannel =
+        getIApp()->getTwitchAbstract()->getOrAddChannel(target);
+    getIApp()->getWindows()->openInPopup(targetChannel);
 
     return "";
 }
