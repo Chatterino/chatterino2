@@ -778,7 +778,7 @@ bool TwitchChannel::canReconnect() const
 
 void TwitchChannel::reconnect()
 {
-    getApp()->twitch->connect();
+    getIApp()->getTwitchAbstract()->connect();
 }
 
 QString TwitchChannel::roomId() const
