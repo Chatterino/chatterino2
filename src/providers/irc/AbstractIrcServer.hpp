@@ -28,6 +28,8 @@ public:
     virtual void addFakeMessage(const QString &data) = 0;
 
     virtual void addGlobalSystemMessage(const QString &messageText) = 0;
+
+    virtual void forEachChannel(std::function<void(ChannelPtr)> func) = 0;
 };
 
 class AbstractIrcServer : public IAbstractIrcServer, public QObject
@@ -66,7 +68,7 @@ public:
     void addGlobalSystemMessage(const QString &messageText) final;
 
     // iteration
-    void forEachChannel(std::function<void(ChannelPtr)> func);
+    void forEachChannel(std::function<void(ChannelPtr)> func) final;
 
 protected:
     AbstractIrcServer();

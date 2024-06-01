@@ -976,7 +976,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
         !(getSettings()->streamerModeSuppressInlineWhispers &&
           getIApp()->getStreamerMode()->isEnabled()))
     {
-        getApp()->twitch->forEachChannel(
+        getIApp()->getTwitchAbstract()->forEachChannel(
             [&message, overrideFlags](ChannelPtr channel) {
                 channel->addMessage(message, overrideFlags);
             });
