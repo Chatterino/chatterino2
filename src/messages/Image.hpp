@@ -29,6 +29,7 @@ struct Frame {
     QPixmap image;
     int duration;
 };
+
 class Frames
 {
 public:

@@ -204,7 +204,10 @@ QList<Frame> readFrames(QImageReader &reader, const Url &url)
                 duration = 100;
             }
             duration = std::max(20, duration);
-            frames.append(Frame(std::move(pixmap), duration));
+            frames.append(Frame{
+                .image = std::move(pixmap),
+                .duration = duration,
+            });
         }
     }
 
