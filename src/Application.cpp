@@ -13,6 +13,7 @@
 #include "controllers/sound/ISoundController.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
+#include "providers/irc/AbstractIrcServer.hpp"
 #include "providers/links/LinkResolver.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
@@ -481,6 +482,13 @@ PluginController *Application::getPlugins()
 #endif
 
 ITwitchIrcServer *Application::getTwitch()
+{
+    assertInGuiThread();
+
+    return this->twitch.get();
+}
+
+IAbstractIrcServer *Application::getTwitchAbstract()
 {
     assertInGuiThread();
 

@@ -54,6 +54,7 @@ class FfzEmotes;
 class SeventvEmotes;
 class ILinkResolver;
 class IStreamerMode;
+class IAbstractIrcServer;
 
 class IApplication
 {
@@ -77,6 +78,7 @@ public:
     virtual HighlightController *getHighlights() = 0;
     virtual NotificationController *getNotifications() = 0;
     virtual ITwitchIrcServer *getTwitch() = 0;
+    virtual IAbstractIrcServer *getTwitchAbstract() = 0;
     virtual PubSub *getTwitchPubSub() = 0;
     virtual Logging *getChatLogger() = 0;
     virtual IChatterinoBadges *getChatterinoBadges() = 0;
@@ -191,6 +193,7 @@ public:
     NotificationController *getNotifications() override;
     HighlightController *getHighlights() override;
     ITwitchIrcServer *getTwitch() override;
+    IAbstractIrcServer *getTwitchAbstract() override;
     PubSub *getTwitchPubSub() override;
     Logging *getChatLogger() override;
     FfzBadges *getFfzBadges() override;

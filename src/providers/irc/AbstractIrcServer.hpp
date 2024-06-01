@@ -17,7 +17,11 @@ class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 class RatelimitBucket;
 
-class AbstractIrcServer : public QObject
+class IAbstractIrcServer
+{
+};
+
+class AbstractIrcServer : public IAbstractIrcServer, public QObject
 {
 public:
     enum ConnectionType { Read = 1, Write = 2, Both = 3 };
