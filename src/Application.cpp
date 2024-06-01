@@ -1001,7 +1001,9 @@ void Application::initPubSub()
 
 void Application::initBttvLiveUpdates()
 {
-    if (!this->twitch->bttvLiveUpdates)
+    auto &bttvLiveUpdates = this->twitch->getBTTVLiveUpdates();
+
+    if (!bttvLiveUpdates)
     {
         qCDebug(chatterinoBttv)
             << "Skipping initialization of Live Updates as it's disabled";
@@ -1010,8 +1012,8 @@ void Application::initBttvLiveUpdates()
 
     // We can safely ignore these signal connections since the twitch object will always
     // be destroyed before the Application
-    std::ignore = this->twitch->bttvLiveUpdates->signals_.emoteAdded.connect(
-        [&](const auto &data) {
+    std::ignore =
+        bttvLiveUpdates->signals_.emoteAdded.connect([&](const auto &data) {
             auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);
 
             postToThread([chan, data] {
@@ -1021,8 +1023,8 @@ void Application::initBttvLiveUpdates()
                 }
             });
         });
-    std::ignore = this->twitch->bttvLiveUpdates->signals_.emoteUpdated.connect(
-        [&](const auto &data) {
+    std::ignore =
+        bttvLiveUpdates->signals_.emoteUpdated.connect([&](const auto &data) {
             auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);
 
             postToThread([chan, data] {
@@ -1032,8 +1034,8 @@ void Application::initBttvLiveUpdates()
                 }
             });
         });
-    std::ignore = this->twitch->bttvLiveUpdates->signals_.emoteRemoved.connect(
-        [&](const auto &data) {
+    std::ignore =
+        bttvLiveUpdates->signals_.emoteRemoved.connect([&](const auto &data) {
             auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);
 
             postToThread([chan, data] {
@@ -1043,7 +1045,7 @@ void Application::initBttvLiveUpdates()
                 }
             });
         });
-    this->twitch->bttvLiveUpdates->start();
+    bttvLiveUpdates->start();
 }
 
 void Application::initSeventvEventAPI()

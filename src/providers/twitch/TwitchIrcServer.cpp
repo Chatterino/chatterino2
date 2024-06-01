@@ -645,6 +645,11 @@ void TwitchIrcServer::onReplySendRequested(
     sent = true;
 }
 
+std::unique_ptr<BttvLiveUpdates> &TwitchIrcServer::getBTTVLiveUpdates()
+{
+    return this->bttvLiveUpdates;
+}
+
 const IndirectChannel &TwitchIrcServer::getWatchingChannel() const
 {
     return this->watchingChannel;

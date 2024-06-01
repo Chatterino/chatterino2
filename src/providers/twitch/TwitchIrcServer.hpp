@@ -33,6 +33,8 @@ public:
     virtual std::shared_ptr<Channel> getChannelOrEmptyByID(
         const QString &channelID) = 0;
 
+    virtual std::unique_ptr<BttvLiveUpdates> &getBTTVLiveUpdates() = 0;
+
     virtual const IndirectChannel &getWatchingChannel() const = 0;
     virtual void setWatchingChannel(ChannelPtr newWatchingChannel) = 0;
     virtual ChannelPtr getWhispersChannel() const = 0;
@@ -93,9 +95,12 @@ private:
     const ChannelPtr automodChannel;
     IndirectChannel watchingChannel;
 
-public:
     std::unique_ptr<BttvLiveUpdates> bttvLiveUpdates;
+
+public:
     std::unique_ptr<SeventvEventAPI> seventvEventAPI;
+
+    std::unique_ptr<BttvLiveUpdates> &getBTTVLiveUpdates() override;
 
     const IndirectChannel &getWatchingChannel() const override;
     void setWatchingChannel(ChannelPtr newWatchingChannel) override;
