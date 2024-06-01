@@ -1111,7 +1111,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
         {
             // Notice wasn't targeted at a single channel, send to all twitch
             // channels
-            getApp()->twitch->forEachChannelAndSpecialChannels(
+            getIApp()->getTwitch()->forEachChannelAndSpecialChannels(
                 [msg](const auto &c) {
                     c->addMessage(msg);
                 });

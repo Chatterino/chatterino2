@@ -27,6 +27,9 @@ class ITwitchIrcServer
 public:
     virtual ~ITwitchIrcServer() = default;
 
+    virtual void forEachChannelAndSpecialChannels(
+        std::function<void(ChannelPtr)> func) = 0;
+
     virtual const IndirectChannel &getWatchingChannel() const = 0;
     virtual void setWatchingChannel(ChannelPtr newWatchingChannel) = 0;
     virtual ChannelPtr getWhispersChannel() const = 0;
@@ -49,7 +52,8 @@ public:
 
     void initialize(Settings &settings, const Paths &paths) override;
 
-    void forEachChannelAndSpecialChannels(std::function<void(ChannelPtr)> func);
+    void forEachChannelAndSpecialChannels(
+        std::function<void(ChannelPtr)> func) override;
 
     std::shared_ptr<Channel> getChannelOrEmptyByID(const QString &channelID);
 

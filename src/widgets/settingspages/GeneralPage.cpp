@@ -570,7 +570,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     // as an official description from 7TV devs is best
     s.showUnlistedSevenTVEmotes.connect(
         []() {
-            getApp()->twitch->forEachChannelAndSpecialChannels(
+            getIApp()->getTwitch()->forEachChannelAndSpecialChannels(
                 [](const auto &c) {
                     if (c->isTwitchChannel())
                     {

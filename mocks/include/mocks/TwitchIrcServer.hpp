@@ -23,6 +23,12 @@ public:
     {
     }
 
+    void forEachChannelAndSpecialChannels(
+        std::function<void(ChannelPtr)> func) override
+    {
+        //
+    }
+
     const IndirectChannel &getWatchingChannel() const override
     {
         return this->watchingChannel;
