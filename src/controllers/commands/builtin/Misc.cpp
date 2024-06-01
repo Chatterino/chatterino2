@@ -667,7 +667,7 @@ QString openUsercard(const CommandContext &ctx)
         stripChannelName(channelName);
 
         ChannelPtr channelTemp =
-            getApp()->twitch->getChannelOrEmpty(channelName);
+            getIApp()->getTwitchAbstract()->getChannelOrEmpty(channelName);
 
         if (channelTemp->isEmpty())
         {

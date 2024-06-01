@@ -718,7 +718,8 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
     }
     else if (descriptor.type_ == "misc")
     {
-        return app->twitch->getChannelOrEmpty(descriptor.channelName_);
+        return getIApp()->getTwitchAbstract()->getChannelOrEmpty(
+            descriptor.channelName_);
     }
 
     return Channel::getEmpty();

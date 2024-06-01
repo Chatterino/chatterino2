@@ -300,7 +300,7 @@ int ChannelRef::get_by_name(lua_State *L)
         lua_pushnil(L);
         return 1;
     }
-    auto chn = getApp()->twitch->getChannelOrEmpty(name);
+    auto chn = getIApp()->getTwitchAbstract()->getChannelOrEmpty(name);
     lua::push(L, chn);
     return 1;
 }

@@ -21,6 +21,7 @@ class IAbstractIrcServer
 {
 public:
     virtual ChannelPtr getOrAddChannel(const QString &dirtyChannelName) = 0;
+    virtual ChannelPtr getChannelOrEmpty(const QString &dirtyChannelName) = 0;
 };
 
 class AbstractIrcServer : public IAbstractIrcServer, public QObject
@@ -47,7 +48,7 @@ public:
 
     // channels
     ChannelPtr getOrAddChannel(const QString &dirtyChannelName) final;
-    ChannelPtr getChannelOrEmpty(const QString &dirtyChannelName);
+    ChannelPtr getChannelOrEmpty(const QString &dirtyChannelName) final;
     std::vector<std::weak_ptr<Channel>> getChannels();
 
     // signals
