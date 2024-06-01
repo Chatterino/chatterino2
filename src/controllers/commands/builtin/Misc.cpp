@@ -533,7 +533,8 @@ QString sendRawMessage(const CommandContext &ctx)
 
     if (ctx.channel->isTwitchChannel())
     {
-        getApp()->twitch->sendRawMessage(ctx.words.mid(1).join(" "));
+        getIApp()->getTwitchAbstract()->sendRawMessage(
+            ctx.words.mid(1).join(" "));
     }
     else
     {

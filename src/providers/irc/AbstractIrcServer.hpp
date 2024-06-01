@@ -20,6 +20,8 @@ class RatelimitBucket;
 class IAbstractIrcServer
 {
 public:
+    virtual void sendRawMessage(const QString &rawMessage) = 0;
+
     virtual ChannelPtr getOrAddChannel(const QString &dirtyChannelName) = 0;
     virtual ChannelPtr getChannelOrEmpty(const QString &dirtyChannelName) = 0;
 
@@ -48,7 +50,7 @@ public:
     void disconnect();
 
     void sendMessage(const QString &channelName, const QString &message);
-    virtual void sendRawMessage(const QString &rawMessage);
+    void sendRawMessage(const QString &rawMessage) override;
 
     // channels
     ChannelPtr getOrAddChannel(const QString &dirtyChannelName) final;
