@@ -29,7 +29,9 @@
 #    pragma comment(lib, "Dwmapi.lib")
 
 #    include <QHBoxLayout>
+#    include <QMargins>
 #    include <QOperatingSystemVersion>
+#    include <QWindow>
 #endif
 
 #include "widgets/helper/TitlebarButton.hpp"
@@ -251,8 +253,9 @@ BaseWindow::~BaseWindow()
     DebugCount::decrease("BaseWindow");
 }
 
-void BaseWindow::setInitialBounds(const QRect &bounds)
+void BaseWindow::setInitialBounds(QRect bounds, widgets::BoundsChecking mode)
 {
+    bounds = widgets::checkInitialBounds(bounds, mode);
 #ifdef USEWINSDK
     this->initalBounds_ = bounds;
 #else
@@ -260,7 +263,7 @@ void BaseWindow::setInitialBounds(const QRect &bounds)
 #endif
 }
 
-QRect BaseWindow::getBounds()
+QRect BaseWindow::getBounds() const
 {
 #ifdef USEWINSDK
     return this->currentBounds_;
@@ -444,7 +447,7 @@ QWidget *BaseWindow::getLayoutContainer()
     }
 }
 
-bool BaseWindow::hasCustomWindowFrame()
+bool BaseWindow::hasCustomWindowFrame() const
 {
     return BaseWindow::supportsCustomWindowFrame() && this->enableCustomFrame_;
 }

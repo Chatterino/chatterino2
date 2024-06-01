@@ -179,7 +179,8 @@ TwitchChannel::TwitchChannel(const QString &name)
             TwitchMessageBuilder::liveMessage(this->getDisplayName(),
                                               &builder2);
             builder2.message().id = this->roomId();
-            getApp()->twitch->liveChannel->addMessage(builder2.release());
+            getIApp()->getTwitch()->getLiveChannel()->addMessage(
+                builder2.release());
 
             // Notify on all channels with a ping sound
             if (getSettings()->notificationOnAnyChannel &&
@@ -201,7 +202,7 @@ TwitchChannel::TwitchChannel(const QString &name)
 
             // "delete" old 'CHANNEL is live' message
             LimitedQueueSnapshot<MessagePtr> snapshot =
-                getApp()->twitch->liveChannel->getMessageSnapshot();
+                getIApp()->getTwitch()->getLiveChannel()->getMessageSnapshot();
             int snapshotLength = snapshot.size();
 
             // MSVC hates this code if the parens are not there
@@ -240,17 +241,18 @@ TwitchChannel::~TwitchChannel()
         return;
     }
 
-    getApp()->twitch->dropSeventvChannel(this->seventvUserID_,
-                                         this->seventvEmoteSetID_);
+    getIApp()->getTwitch()->dropSeventvChannel(this->seventvUserID_,
+                                               this->seventvEmoteSetID_);
 
-    if (getApp()->twitch->bttvLiveUpdates)
+    if (getIApp()->getTwitch()->getBTTVLiveUpdates())
     {
-        getApp()->twitch->bttvLiveUpdates->partChannel(this->roomId());
+        getIApp()->getTwitch()->getBTTVLiveUpdates()->partChannel(
+            this->roomId());
     }
 
-    if (getApp()->twitch->seventvEventAPI)
+    if (getIApp()->getTwitch()->getSeventvEventAPI())
     {
-        getApp()->twitch->seventvEventAPI->unsubscribeTwitchChannel(
+        getIApp()->getTwitch()->getSeventvEventAPI()->unsubscribeTwitchChannel(
             this->roomId());
     }
 }
@@ -428,7 +430,7 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
             << "] Channel point reward added:" << reward.id << ","
             << reward.title << "," << reward.isUserInputRequired;
 
-        auto *server = getApp()->twitch;
+        auto *server = getIApp()->getTwitch();
         auto it = std::remove_if(
             this->waitingRedemptions_.begin(), this->waitingRedemptions_.end(),
             [&](const QueuedRedemption &msg) {
@@ -779,7 +781,7 @@ bool TwitchChannel::canReconnect() const
 
 void TwitchChannel::reconnect()
 {
-    getApp()->twitch->connect();
+    getIApp()->getTwitchAbstract()->connect();
 }
 
 QString TwitchChannel::roomId() const
@@ -894,7 +896,7 @@ const QString &TwitchChannel::seventvEmoteSetID() const
 
 void TwitchChannel::joinBttvChannel() const
 {
-    if (getApp()->twitch->bttvLiveUpdates)
+    if (getIApp()->getTwitch()->getBTTVLiveUpdates())
     {
         const auto currentAccount =
             getIApp()->getAccounts()->twitch.getCurrent();
@@ -903,8 +905,8 @@ void TwitchChannel::joinBttvChannel() const
         {
             userName = currentAccount->getUserName();
         }
-        getApp()->twitch->bttvLiveUpdates->joinChannel(this->roomId(),
-                                                       userName);
+        getIApp()->getTwitch()->getBTTVLiveUpdates()->joinChannel(
+            this->roomId(), userName);
     }
 }
 
@@ -1051,14 +1053,14 @@ void TwitchChannel::updateSeventvData(const QString &newUserID,
     this->seventvUserID_ = newUserID;
     this->seventvEmoteSetID_ = newEmoteSetID;
     runInGuiThread([this, oldUserID, oldEmoteSetID]() {
-        if (getApp()->twitch->seventvEventAPI)
+        if (getIApp()->getTwitch()->getSeventvEventAPI())
         {
-            getApp()->twitch->seventvEventAPI->subscribeUser(
+            getIApp()->getTwitch()->getSeventvEventAPI()->subscribeUser(
                 this->seventvUserID_, this->seventvEmoteSetID_);
 
             if (oldUserID || oldEmoteSetID)
             {
-                getApp()->twitch->dropSeventvChannel(
+                getIApp()->getTwitch()->dropSeventvChannel(
                     oldUserID.value_or(QString()),
                     oldEmoteSetID.value_or(QString()));
             }
@@ -1254,7 +1256,8 @@ void TwitchChannel::loadRecentMessages()
                 tc->addRecentChatter(msg->displayName);
             }
 
-            getApp()->twitch->mentionsChannel->fillInMissingMessages(msgs);
+            getIApp()->getTwitch()->getMentionsChannel()->fillInMissingMessages(
+                msgs);
         },
         [weak]() {
             auto shared = weak.lock();
@@ -1844,9 +1847,9 @@ void TwitchChannel::updateSevenTVActivity()
 
 void TwitchChannel::listenSevenTVCosmetics() const
 {
-    if (getApp()->twitch->seventvEventAPI)
+    if (getIApp()->getTwitch()->getSeventvEventAPI())
     {
-        getApp()->twitch->seventvEventAPI->subscribeTwitchChannel(
+        getIApp()->getTwitch()->getSeventvEventAPI()->subscribeTwitchChannel(
             this->roomId());
     }
 }

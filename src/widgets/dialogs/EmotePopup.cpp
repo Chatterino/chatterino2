@@ -204,13 +204,18 @@ EmoteMap filterEmoteMap(const QString &text,
 namespace chatterino {
 
 EmotePopup::EmotePopup(QWidget *parent)
-    : BasePopup(BaseWindow::EnableCustomFrame, parent)
+    : BasePopup({BaseWindow::EnableCustomFrame, BaseWindow::DisableLayoutSave},
+                parent)
     , search_(new QLineEdit())
     , notebook_(new Notebook(this))
 {
     // this->setStayInScreenRect(true);
-    this->moveTo(getIApp()->getWindows()->emotePopupPos(),
-                 widgets::BoundsChecking::DesiredPosition);
+    auto bounds = getIApp()->getWindows()->emotePopupBounds();
+    if (bounds.size().isEmpty())
+    {
+        bounds.setSize(QSize{300, 500} * this->scale());
+    }
+    this->setInitialBounds(bounds, widgets::BoundsChecking::DesiredPosition);
 
     auto *layout = new QVBoxLayout();
     this->getLayoutContainer()->setLayout(layout);
@@ -615,10 +620,27 @@ void EmotePopup::filterEmotes(const QString &searchText)
     this->searchView_->show();
 }
 
+void EmotePopup::saveBounds() const
+{
+    getIApp()->getWindows()->setEmotePopupBounds(this->getBounds());
+}
+
+void EmotePopup::resizeEvent(QResizeEvent *event)
+{
+    this->saveBounds();
+    BasePopup::resizeEvent(event);
+}
+
+void EmotePopup::moveEvent(QMoveEvent *event)
+{
+    this->saveBounds();
+    BasePopup::moveEvent(event);
+}
+
 void EmotePopup::closeEvent(QCloseEvent *event)
 {
-    getIApp()->getWindows()->setEmotePopupPos(this->pos());
-    BaseWindow::closeEvent(event);
+    this->saveBounds();
+    BasePopup::closeEvent(event);
 }
 
 }  // namespace chatterino

@@ -45,11 +45,11 @@ public:
                         QWidget *parent = nullptr);
     ~BaseWindow() override;
 
-    void setInitialBounds(const QRect &bounds);
-    QRect getBounds();
+    void setInitialBounds(QRect bounds, widgets::BoundsChecking mode);
+    QRect getBounds() const;
 
     QWidget *getLayoutContainer();
-    bool hasCustomWindowFrame();
+    bool hasCustomWindowFrame() const;
     TitleBarButton *addTitleBarButton(const TitleBarButtonStyle &style,
                                       std::function<void()> onClicked);
     EffectLabel *addTitleBarLabel(std::function<void()> onClicked);

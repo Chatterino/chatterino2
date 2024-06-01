@@ -169,7 +169,7 @@ public:
     MessageElement(MessageElement &&) = delete;
     MessageElement &operator=(MessageElement &&) = delete;
 
-    MessageElement *setLink(const Link &link);
+    virtual MessageElement *setLink(const Link &link);
     MessageElement *setTooltip(const QString &tooltip);
 
     MessageElement *setTrailingSpace(bool value);
@@ -336,8 +336,8 @@ private:
 class MentionElement : public TextElement
 {
 public:
-    MentionElement(const QString &name, MessageColor fallbackColor_,
-                   MessageColor userColor_);
+    MentionElement(const QString &displayName, QString loginName_,
+                   MessageColor fallbackColor_, MessageColor userColor_);
     ~MentionElement() override = default;
     MentionElement(const MentionElement &) = delete;
     MentionElement(MentionElement &&) = delete;
@@ -348,6 +348,9 @@ public:
                         MessageElementFlags flags) override;
 
     std::unique_ptr<MessageElement> clone() const override;
+
+    MessageElement *setLink(const Link &link) override;
+    Link getLink() const override;
 
 private:
     MentionElement(QStringList &&words, MessageColor fallbackColor,
@@ -362,6 +365,8 @@ private:
      * The color of the element in case the "Colorize @usernames" is enabled
      **/
     MessageColor userColor;
+
+    QString userLoginName;
 };
 
 // contains emote data and will pick the emote based on :

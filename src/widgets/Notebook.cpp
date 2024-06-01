@@ -29,6 +29,8 @@
 #include <QUuid>
 #include <QWidget>
 
+#include <utility>
+
 namespace chatterino {
 
 Notebook::Notebook(QWidget *parent)
@@ -88,6 +90,12 @@ Notebook::Notebook(QWidget *parent)
 
 NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
 {
+    return this->addPageAt(page, -1, std::move(title), select);
+}
+
+NotebookTab *Notebook::addPageAt(QWidget *page, int position, QString title,
+                                 bool select)
+{
     // Queue up save because: Tab added
     getIApp()->getWindows()->queueSave();
 
@@ -101,7 +109,14 @@ NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
     item.page = page;
     item.tab = tab;
 
-    this->items_.append(item);
+    if (position == -1)
+    {
+        this->items_.push_back(item);
+    }
+    else
+    {
+        this->items_.insert(position, item);
+    }
 
     page->hide();
     page->setParent(this);
@@ -163,6 +178,48 @@ void Notebook::removePage(QWidget *page)
     this->items_.removeAt(removingIndex);
 
     this->performLayout(true);
+}
+
+void Notebook::duplicatePage(QWidget *page)
+{
+    auto *item = this->findItem(page);
+    assert(item != nullptr);
+    if (item == nullptr)
+    {
+        return;
+    }
+
+    auto *container = dynamic_cast<SplitContainer *>(item->page);
+    if (!container)
+    {
+        return;
+    }
+
+    auto *newContainer = new SplitContainer(this);
+    if (!container->getSplits().empty())
+    {
+        auto descriptor = container->buildDescriptor();
+        newContainer->applyFromDescriptor(descriptor);
+    }
+
+    const auto tabPosition = this->indexOf(page);
+    auto newTabPosition = -1;
+    if (tabPosition != -1)
+    {
+        newTabPosition = tabPosition + 1;
+    }
+    auto newTabHighlightState = item->tab->highlightState();
+    QString newTabTitle = "";
+    if (item->tab->hasCustomTitle())
+    {
+        newTabTitle = item->tab->getCustomTitle();
+    }
+
+    auto *tab =
+        this->addPageAt(newContainer, newTabPosition, newTabTitle, false);
+    tab->setHighlightState(newTabHighlightState);
+
+    newContainer->setTab(tab);
 }
 
 void Notebook::removeCurrentPage()

@@ -314,21 +314,23 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                         menu->addAction(
                             "Open channel in a new popup window", this,
                             [loginName] {
-                                auto *app = getApp();
+                                auto *app = getIApp();
                                 auto &window = app->getWindows()->createWindow(
                                     WindowType::Popup, true);
                                 auto *split = window.getNotebook()
                                                   .getOrAddSelectedPage()
                                                   ->appendNewSplit(false);
-                                split->setChannel(app->twitch->getOrAddChannel(
-                                    loginName.toLower()));
+                                split->setChannel(
+                                    app->getTwitchAbstract()->getOrAddChannel(
+                                        loginName.toLower()));
                             });
 
                         menu->addAction(
                             "Open channel in a new tab", this, [loginName] {
                                 ChannelPtr channel =
-                                    getApp()->twitch->getOrAddChannel(
-                                        loginName);
+                                    getIApp()
+                                        ->getTwitchAbstract()
+                                        ->getOrAddChannel(loginName);
                                 auto &nb = getApp()
                                                ->getWindows()
                                                ->getMainWindow()

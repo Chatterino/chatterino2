@@ -835,11 +835,14 @@ std::unique_ptr<MessageElement> LinkElement::clone() const
     return el;
 }
 
-MentionElement::MentionElement(const QString &name, MessageColor fallbackColor_,
+MentionElement::MentionElement(const QString &displayName, QString loginName_,
+                               MessageColor fallbackColor_,
                                MessageColor userColor_)
-    : TextElement(name, {MessageElementFlag::Text, MessageElementFlag::Mention})
+    : TextElement(displayName,
+                  {MessageElementFlag::Text, MessageElementFlag::Mention})
     , fallbackColor(fallbackColor_)
     , userColor(userColor_)
+    , userLoginName(std::move(loginName_))
 {
 }
 
@@ -882,6 +885,26 @@ std::unique_ptr<MessageElement> MentionElement::clone() const
         this->words(), this->fallbackColor, this->userColor)};
     el->cloneFrom(*this);
     return el;
+}
+
+MessageElement *MentionElement::setLink(const Link &link)
+{
+    assert(false && "MentionElement::setLink should not be called. Pass "
+                    "through a valid login name in the constructor and it will "
+                    "automatically be a UserInfo link");
+
+    return TextElement::setLink(link);
+}
+
+Link MentionElement::getLink() const
+{
+    if (this->userLoginName.isEmpty())
+    {
+        // Some rare mention elements don't have the knowledge of the login name
+        return {};
+    }
+
+    return {Link::UserInfo, this->userLoginName};
 }
 
 // TIMESTAMP

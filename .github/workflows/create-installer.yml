@@ -20,7 +20,7 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     strategy:
       matrix:
-        qt-version: [6.5.0]
+        qt-version: ["6.7.1"]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -147,10 +147,10 @@ jobs:
 
           mv Chatterino-x86_64-Qt-6.6.1.AppImage Chatterino-x86_64-Qt6.AppImage
 
-          mv chatterino-windows-x86-64-Qt-6.5.0-symbols.pdb.7z Chatterino-Windows-debug-symbols.pdb.7z
+          mv chatterino-windows-x86-64-Qt-6.7.1-symbols.pdb.7z Chatterino-Windows-debug-symbols.pdb.7z
 
-          mv chatterino-macos-Qt-6.5.0-x86_64.dmg Chatterino-x86_64.dmg
-          mv chatterino-macos-Qt-6.5.0-arm64.dmg Chatterino-arm64.dmg
+          mv chatterino-macos-Qt-6.7.1-x86_64.dmg Chatterino-x86_64.dmg
+          mv chatterino-macos-Qt-6.7.1-arm64.dmg Chatterino-arm64.dmg
 
       - name: Hash files
         working-directory: build
