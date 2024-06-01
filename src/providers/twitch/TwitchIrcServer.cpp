@@ -263,7 +263,7 @@ std::shared_ptr<Channel> TwitchIrcServer::createChannel(
 void TwitchIrcServer::privateMessageReceived(
     Communi::IrcPrivateMessage *message)
 {
-    IrcMessageHandler::instance().handlePrivMessage(message, *this);
+    IrcMessageHandler::instance().handlePrivMessage(message, *this, *this);
 }
 
 void TwitchIrcServer::readConnectionMessageReceived(
@@ -310,7 +310,7 @@ void TwitchIrcServer::readConnectionMessageReceived(
     }
     else if (command == "USERNOTICE")
     {
-        handler.handleUserNoticeMessage(message, *this);
+        handler.handleUserNoticeMessage(message, *this, *this);
     }
     else if (command == "NOTICE")
     {

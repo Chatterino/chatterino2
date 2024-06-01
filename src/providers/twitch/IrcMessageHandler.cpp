@@ -13,6 +13,7 @@
 #include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/MessageThread.hpp"
+#include "providers/irc/AbstractIrcServer.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchAccountManager.hpp"
@@ -169,7 +170,7 @@ void updateReplyParticipatedStatus(const QVariantMap &tags,
 }
 
 ChannelPtr channelOrEmptyByTarget(const QString &target,
-                                  TwitchIrcServer &server)
+                                  IAbstractIrcServer &server)
 {
     QString channelName;
     if (!trimChannelName(target, channelName))
@@ -677,9 +678,10 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
 }
 
 void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
-                                          TwitchIrcServer &server)
+                                          ITwitchIrcServer &twitchServer,
+                                          IAbstractIrcServer &abstractIrcServer)
 {
-    auto chan = channelOrEmptyByTarget(message->target(), server);
+    auto chan = channelOrEmptyByTarget(message->target(), abstractIrcServer);
     if (chan->isEmpty())
     {
         return;
@@ -710,8 +712,8 @@ void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
     // https://mm2pl.github.io/emoji_rfc.pdf for more details
     this->addMessage(
         message, chan,
-        message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER), server,
-        false, message->isAction());
+        message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER),
+        twitchServer, false, message->isAction());
 
     if (message->tags().contains(u"pinned-chat-paid-amount"_s))
     {
@@ -983,8 +985,9 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
     }
 }
 
-void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
-                                                TwitchIrcServer &server)
+void IrcMessageHandler::handleUserNoticeMessage(
+    Communi::IrcMessage *message, ITwitchIrcServer &twitchServer,
+    IAbstractIrcServer &abstractIrcServer)
 {
     auto tags = message->tags();
     auto parameters = message->parameters();
@@ -997,7 +1000,7 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
         content = parameters[1];
     }
 
-    auto chn = server.getChannelOrEmpty(target);
+    auto chn = abstractIrcServer.getChannelOrEmpty(target);
     if (isIgnoredMessage({
             .message = content,
             .twitchUserID = tags.value("user-id").toString(),
@@ -1013,7 +1016,7 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
         // Messages are not required, so they might be empty
         if (!content.isEmpty())
         {
-            this->addMessage(message, chn, content, server, true, false);
+            this->addMessage(message, chn, content, twitchServer, true, false);
         }
     }
 
@@ -1090,7 +1093,7 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
             return;
         }
 
-        auto chan = server.getChannelOrEmpty(channelName);
+        auto chan = abstractIrcServer.getChannelOrEmpty(channelName);
 
         if (!chan->isEmpty())
         {
@@ -1312,7 +1315,7 @@ void IrcMessageHandler::setSimilarityFlags(const MessagePtr &message,
 void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
                                    const ChannelPtr &chan,
                                    const QString &originalContent,
-                                   TwitchIrcServer &server, bool isSub,
+                                   ITwitchIrcServer &server, bool isSub,
                                    bool isAction)
 {
     if (chan->isEmpty())

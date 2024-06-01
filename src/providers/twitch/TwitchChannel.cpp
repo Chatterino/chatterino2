@@ -427,7 +427,7 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
             << "] Channel point reward added:" << reward.id << ","
             << reward.title << "," << reward.isUserInputRequired;
 
-        auto &server = getApp()->twitch;
+        auto *server = getIApp()->getTwitch();
         auto it = std::remove_if(
             this->waitingRedemptions_.begin(), this->waitingRedemptions_.end(),
             [&](const QueuedRedemption &msg) {
