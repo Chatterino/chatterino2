@@ -566,7 +566,7 @@ QString injectFakeMessage(const CommandContext &ctx)
     }
 
     auto ircText = ctx.words.mid(1).join(" ");
-    getApp()->twitch->addFakeMessage(ircText);
+    getIApp()->getTwitchAbstract()->addFakeMessage(ircText);
 
     return "";
 }

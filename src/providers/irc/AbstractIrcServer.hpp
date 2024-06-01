@@ -22,6 +22,8 @@ class IAbstractIrcServer
 public:
     virtual ChannelPtr getOrAddChannel(const QString &dirtyChannelName) = 0;
     virtual ChannelPtr getChannelOrEmpty(const QString &dirtyChannelName) = 0;
+
+    virtual void addFakeMessage(const QString &data) = 0;
 };
 
 class AbstractIrcServer : public IAbstractIrcServer, public QObject
@@ -55,7 +57,7 @@ public:
     pajlada::Signals::NoArgSignal connected;
     pajlada::Signals::NoArgSignal disconnected;
 
-    void addFakeMessage(const QString &data);
+    void addFakeMessage(const QString &data) final;
 
     void addGlobalSystemMessage(const QString &messageText);
 
