@@ -149,11 +149,7 @@ private:
     CommandController *const commands{};
     NotificationController *const notifications{};
     HighlightController *const highlights{};
-
-public:
     std::unique_ptr<TwitchIrcServer> twitch;
-
-private:
     FfzBadges *const ffzBadges{};
     SeventvBadges *const seventvBadges{};
     UserDataController *const userData{};
