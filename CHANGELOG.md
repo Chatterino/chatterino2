@@ -8,6 +8,7 @@
 - Minor: Colored usernames now update on the fly when changing the "Color @usernames" setting. (#5300)
 - Minor: Added `flags.action` filter variable, allowing you to filter on `/me` messages. (#5397)
 - Minor: Added the ability to duplicate tabs. (#5277)
+- Bugfix: Fixed tab move animation occasionally failing to start after closing a tab. (#5426)
 - Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
 - Bugfix: Fixed a crash that could occur when logging was enabled in IRC servers that were removed. (#5419)
 - Dev: Update Windows build from Qt 6.5.0 to Qt 6.7.1. (#5420)
