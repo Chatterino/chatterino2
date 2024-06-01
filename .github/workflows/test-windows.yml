@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest]
-        qt-version: [5.15.2, 6.5.0]
+        qt-version: [5.15.2, 6.7.1]
         plugins: [false]
         skip-artifact: [false]
         skip-crashpad: [false]
@@ -57,7 +57,7 @@ jobs:
           fetch-depth: 0 # allows for tags access
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3.3.0
+        uses: jurplel/install-qt-action@v4.0.0
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2

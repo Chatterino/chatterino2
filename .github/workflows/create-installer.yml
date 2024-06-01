@@ -18,7 +18,7 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     strategy:
       matrix:
-        qt-version: ["6.5.0"]
+        qt-version: ["6.7.1"]
     steps:
       - uses: actions/checkout@v4
         with:

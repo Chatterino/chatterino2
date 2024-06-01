@@ -435,19 +435,8 @@ std::vector<MessagePtr> parseNoticeMessage(Communi::IrcNoticeMessage *message)
     // default case
     std::vector<MessagePtr> builtMessages;
 
-    auto content = message->content();
-    if (content.startsWith(
-            "Your settings prevent you from sending this whisper",
-            Qt::CaseInsensitive) &&
-        getSettings()->helixTimegateWhisper.getValue() ==
-            HelixTimegateOverride::Timegate)
-    {
-        content = content +
-                  " Consider setting \"Helix timegate /w behaviour\" "
-                  "to \"Always use Helix\" in your Chatterino settings.";
-    }
-    builtMessages.emplace_back(
-        makeSystemMessage(content, calculateMessageTime(message).time()));
+    builtMessages.emplace_back(makeSystemMessage(
+        message->content(), calculateMessageTime(message).time()));
 
     return builtMessages;
 }

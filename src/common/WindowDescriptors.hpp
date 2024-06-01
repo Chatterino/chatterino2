@@ -98,7 +98,7 @@ class WindowLayout
 {
 public:
     // A complete window layout has a single emote popup position that is shared among all windows
-    QPoint emotePopupPos_;
+    QRect emotePopupBounds_;
 
     std::vector<WindowDescriptor> windows_;
 
