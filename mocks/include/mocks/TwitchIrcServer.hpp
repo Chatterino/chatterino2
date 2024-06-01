@@ -29,6 +29,12 @@ public:
         //
     }
 
+    std::shared_ptr<Channel> getChannelOrEmptyByID(
+        const QString &channelID) override
+    {
+        return {};
+    }
+
     const IndirectChannel &getWatchingChannel() const override
     {
         return this->watchingChannel;
