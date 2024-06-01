@@ -238,8 +238,8 @@ TwitchChannel::~TwitchChannel()
         return;
     }
 
-    getApp()->twitch->dropSeventvChannel(this->seventvUserID_,
-                                         this->seventvEmoteSetID_);
+    getIApp()->getTwitch()->dropSeventvChannel(this->seventvUserID_,
+                                               this->seventvEmoteSetID_);
 
     if (getIApp()->getTwitch()->getBTTVLiveUpdates())
     {
@@ -1057,7 +1057,7 @@ void TwitchChannel::updateSeventvData(const QString &newUserID,
 
             if (oldUserID || oldEmoteSetID)
             {
-                getApp()->twitch->dropSeventvChannel(
+                getIApp()->getTwitch()->dropSeventvChannel(
                     oldUserID.value_or(QString()),
                     oldEmoteSetID.value_or(QString()));
             }

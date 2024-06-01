@@ -40,6 +40,12 @@ public:
         return {};
     }
 
+    void dropSeventvChannel(const QString &userID,
+                            const QString &emoteSetID) override
+    {
+        //
+    }
+
     std::unique_ptr<BttvLiveUpdates> &getBTTVLiveUpdates() override
     {
         return this->bttvLiveUpdates;

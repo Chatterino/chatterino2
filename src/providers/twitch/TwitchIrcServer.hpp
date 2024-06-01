@@ -33,6 +33,9 @@ public:
     virtual std::shared_ptr<Channel> getChannelOrEmptyByID(
         const QString &channelID) = 0;
 
+    virtual void dropSeventvChannel(const QString &userID,
+                                    const QString &emoteSetID) = 0;
+
     virtual std::unique_ptr<BttvLiveUpdates> &getBTTVLiveUpdates() = 0;
     virtual std::unique_ptr<SeventvEventAPI> &getSeventvEventAPI() = 0;
 
@@ -85,7 +88,8 @@ public:
      * It's currently not possible to share emote sets among users,
      * but it's a commonly requested feature.
      */
-    void dropSeventvChannel(const QString &userID, const QString &emoteSetID);
+    void dropSeventvChannel(const QString &userID,
+                            const QString &emoteSetID) override;
 
 private:
     Atomic<QString> lastUserThatWhisperedMe;
