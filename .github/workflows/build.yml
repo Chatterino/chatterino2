@@ -313,7 +313,7 @@ jobs:
           echo "-> $MACOS_CODESIGN_CERTIFICATE"
 
           echo "Downloading kimageformats plugins"
-          curl -SsfLo kimg.zip "https://github.com/nerixyz/kimageformats-binaries/releases/download/cont/kimageformats-macos-latest-${{ matrix.qt-version}}.zip"
+          curl -SsfLo kimg.zip "https://github.com/nerixyz/kimageformats-binaries/releases/download/cont/kimageformats-macos-13-${{ matrix.qt-version}}.zip"
 
           ./../.CI/MacDeploy.sh
           ./../.CI/CreateDMG.sh

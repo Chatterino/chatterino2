@@ -16,7 +16,7 @@ if [ -n "$Qt5_DIR" ]; then
 elif [ -n "$Qt6_DIR" ]; then
     echo "Using Qt DIR from Qt6_DIR: $Qt6_DIR"
     _QT_DIR="$Qt6_DIR"
-    _img_version="6.5.0"
+    _img_version="6.7.1"
 fi
 
 if [ -n "$_QT_DIR" ]; then
