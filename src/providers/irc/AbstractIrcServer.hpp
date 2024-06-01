@@ -24,6 +24,8 @@ public:
     virtual ChannelPtr getChannelOrEmpty(const QString &dirtyChannelName) = 0;
 
     virtual void addFakeMessage(const QString &data) = 0;
+
+    virtual void addGlobalSystemMessage(const QString &messageText) = 0;
 };
 
 class AbstractIrcServer : public IAbstractIrcServer, public QObject
@@ -59,7 +61,7 @@ public:
 
     void addFakeMessage(const QString &data) final;
 
-    void addGlobalSystemMessage(const QString &messageText);
+    void addGlobalSystemMessage(const QString &messageText) final;
 
     // iteration
     void forEachChannel(std::function<void(ChannelPtr)> func);
