@@ -959,7 +959,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
     MessagePtr message = builder.build();
     builder.triggerHighlights();
 
-    getApp()->twitch->lastUserThatWhisperedMe.set(builder.userName);
+    getIApp()->getTwitch()->setLastUserThatWhisperedMe(builder.userName);
 
     if (message->flags.has(MessageFlag::ShowInMentions))
     {

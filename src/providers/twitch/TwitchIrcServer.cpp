@@ -680,6 +680,11 @@ QString TwitchIrcServer::getLastUserThatWhisperedMe() const
     return this->lastUserThatWhisperedMe.get();
 }
 
+void TwitchIrcServer::setLastUserThatWhisperedMe(const QString &user)
+{
+    this->lastUserThatWhisperedMe.set(user);
+}
+
 void TwitchIrcServer::reloadBTTVGlobalEmotes()
 {
     getIApp()->getBttvEmotes()->loadEmotes();

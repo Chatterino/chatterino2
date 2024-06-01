@@ -44,6 +44,11 @@ public:
         return this->lastUserThatWhisperedMe;
     }
 
+    void setLastUserThatWhisperedMe(const QString &user) override
+    {
+        this->lastUserThatWhisperedMe = user;
+    }
+
     ChannelPtr getWhispersChannel() const override
     {
         return this->whispersChannel;

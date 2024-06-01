@@ -38,6 +38,7 @@ public:
     virtual ChannelPtr getAutomodChannel() const = 0;
 
     virtual QString getLastUserThatWhisperedMe() const = 0;
+    virtual void setLastUserThatWhisperedMe(const QString &user) = 0;
 
     // Update this interface with TwitchIrcServer methods as needed
 };
@@ -79,9 +80,9 @@ public:
      */
     void dropSeventvChannel(const QString &userID, const QString &emoteSetID);
 
+private:
     Atomic<QString> lastUserThatWhisperedMe;
 
-private:
     const ChannelPtr whispersChannel;
     const ChannelPtr mentionsChannel;
     const ChannelPtr liveChannel;
@@ -100,6 +101,7 @@ public:
     ChannelPtr getAutomodChannel() const override;
 
     QString getLastUserThatWhisperedMe() const override;
+    void setLastUserThatWhisperedMe(const QString &user) override;
 
 protected:
     void initializeConnection(IrcConnection *connection,
