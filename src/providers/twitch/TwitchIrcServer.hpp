@@ -27,9 +27,27 @@ class ITwitchIrcServer
 public:
     virtual ~ITwitchIrcServer() = default;
 
+    virtual void forEachChannelAndSpecialChannels(
+        std::function<void(ChannelPtr)> func) = 0;
+
+    virtual std::shared_ptr<Channel> getChannelOrEmptyByID(
+        const QString &channelID) = 0;
+
+    virtual void dropSeventvChannel(const QString &userID,
+                                    const QString &emoteSetID) = 0;
+
+    virtual std::unique_ptr<BttvLiveUpdates> &getBTTVLiveUpdates() = 0;
+    virtual std::unique_ptr<SeventvEventAPI> &getSeventvEventAPI() = 0;
+
     virtual const IndirectChannel &getWatchingChannel() const = 0;
+    virtual void setWatchingChannel(ChannelPtr newWatchingChannel) = 0;
+    virtual ChannelPtr getWhispersChannel() const = 0;
+    virtual ChannelPtr getMentionsChannel() const = 0;
+    virtual ChannelPtr getLiveChannel() const = 0;
+    virtual ChannelPtr getAutomodChannel() const = 0;
 
     virtual QString getLastUserThatWhisperedMe() const = 0;
+    virtual void setLastUserThatWhisperedMe(const QString &user) = 0;
 
     // Update this interface with TwitchIrcServer methods as needed
 };
@@ -44,9 +62,11 @@ public:
 
     void initialize(Settings &settings, const Paths &paths) override;
 
-    void forEachChannelAndSpecialChannels(std::function<void(ChannelPtr)> func);
+    void forEachChannelAndSpecialChannels(
+        std::function<void(ChannelPtr)> func) override;
 
-    std::shared_ptr<Channel> getChannelOrEmptyByID(const QString &channelID);
+    std::shared_ptr<Channel> getChannelOrEmptyByID(
+        const QString &channelID) override;
 
     void reloadBTTVGlobalEmotes();
     void reloadAllBTTVChannelEmotes();
@@ -68,8 +88,10 @@ public:
      * It's currently not possible to share emote sets among users,
      * but it's a commonly requested feature.
      */
-    void dropSeventvChannel(const QString &userID, const QString &emoteSetID);
+    void dropSeventvChannel(const QString &userID,
+                            const QString &emoteSetID) override;
 
+private:
     Atomic<QString> lastUserThatWhisperedMe;
 
     const ChannelPtr whispersChannel;
@@ -81,9 +103,19 @@ public:
     std::unique_ptr<BttvLiveUpdates> bttvLiveUpdates;
     std::unique_ptr<SeventvEventAPI> seventvEventAPI;
 
+public:
+    std::unique_ptr<BttvLiveUpdates> &getBTTVLiveUpdates() override;
+    std::unique_ptr<SeventvEventAPI> &getSeventvEventAPI() override;
+
     const IndirectChannel &getWatchingChannel() const override;
+    void setWatchingChannel(ChannelPtr newWatchingChannel) override;
+    ChannelPtr getWhispersChannel() const override;
+    ChannelPtr getMentionsChannel() const override;
+    ChannelPtr getLiveChannel() const override;
+    ChannelPtr getAutomodChannel() const override;
 
     QString getLastUserThatWhisperedMe() const override;
+    void setLastUserThatWhisperedMe(const QString &user) override;
 
 protected:
     void initializeConnection(IrcConnection *connection,
