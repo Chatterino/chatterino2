@@ -3,6 +3,7 @@
 class QWidget;
 class QPoint;
 class QScreen;
+class QRect;
 
 namespace chatterino::widgets {
 
@@ -16,6 +17,14 @@ enum class BoundsChecking {
     /// Attempt to keep the window within bounds of the screen the desired position is on.
     DesiredPosition,
 };
+
+/// Applies bounds checking to @a initialBounds.
+///
+/// @param initialBounds The bounds to check.
+/// @param mode The desired bounds checking.
+/// @returns The potentially modified bounds.
+QRect checkInitialBounds(QRect initialBounds,
+                         BoundsChecking mode = BoundsChecking::DesiredPosition);
 
 /// Moves the `window` to the (global) `position`
 /// while doing bounds-checking according to `mode` to ensure the window stays on one screen.

@@ -8,8 +8,7 @@
 
 namespace {
 
-/// Move the `window` into the `screen` geometry if it's not already in there.
-void moveWithinScreen(QWidget *window, QScreen *screen, QPoint point)
+QPoint applyBounds(QScreen *screen, QPoint point, QSize frameSize, int height)
 {
     if (screen == nullptr)
     {
@@ -21,9 +20,6 @@ void moveWithinScreen(QWidget *window, QScreen *screen, QPoint point)
     bool stickRight = false;
     bool stickBottom = false;
 
-    const auto w = window->frameGeometry().width();
-    const auto h = window->frameGeometry().height();
-
     if (point.x() < bounds.left())
     {
         point.setX(bounds.left());
@@ -32,29 +28,71 @@ void moveWithinScreen(QWidget *window, QScreen *screen, QPoint point)
     {
         point.setY(bounds.top());
     }
-    if (point.x() + w > bounds.right())
+    if (point.x() + frameSize.width() > bounds.right())
     {
         stickRight = true;
-        point.setX(bounds.right() - w);
+        point.setX(bounds.right() - frameSize.width());
     }
-    if (point.y() + h > bounds.bottom())
+    if (point.y() + frameSize.height() > bounds.bottom())
     {
         stickBottom = true;
-        point.setY(bounds.bottom() - h);
+        point.setY(bounds.bottom() - frameSize.height());
     }
 
     if (stickRight && stickBottom)
     {
         const QPoint globalCursorPos = QCursor::pos();
-        point.setY(globalCursorPos.y() - window->height() - 16);
+        point.setY(globalCursorPos.y() - height - 16);
     }
 
-    window->move(point);
+    return point;
+}
+
+/// Move the `window` into the `screen` geometry if it's not already in there.
+void moveWithinScreen(QWidget *window, QScreen *screen, QPoint point)
+{
+    auto checked =
+        applyBounds(screen, point, window->frameSize(), window->height());
+    window->move(checked);
 }
 
 }  // namespace
 
 namespace chatterino::widgets {
+
+QRect checkInitialBounds(QRect initialBounds, BoundsChecking mode)
+{
+    switch (mode)
+    {
+        case BoundsChecking::Off: {
+            return initialBounds;
+        }
+        break;
+
+        case BoundsChecking::CursorPosition: {
+            return QRect{
+                applyBounds(QGuiApplication::screenAt(QCursor::pos()),
+                            initialBounds.topLeft(), initialBounds.size(),
+                            initialBounds.height()),
+                initialBounds.size(),
+            };
+        }
+        break;
+
+        case BoundsChecking::DesiredPosition: {
+            return QRect{
+                applyBounds(QGuiApplication::screenAt(initialBounds.topLeft()),
+                            initialBounds.topLeft(), initialBounds.size(),
+                            initialBounds.height()),
+                initialBounds.size(),
+            };
+        }
+        break;
+        default:
+            assert(false && "Invalid bounds checking mode");
+            return initialBounds;
+    }
+}
 
 void moveWindowTo(QWidget *window, QPoint position, BoundsChecking mode)
 {

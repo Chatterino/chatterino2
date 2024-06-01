@@ -328,14 +328,18 @@ void WindowManager::scrollToMessage(const MessagePtr &message)
     this->scrollToMessageSignal.invoke(message);
 }
 
-QPoint WindowManager::emotePopupPos()
+QRect WindowManager::emotePopupBounds() const
 {
-    return this->emotePopupPos_;
+    return this->emotePopupBounds_;
 }
 
-void WindowManager::setEmotePopupPos(QPoint pos)
+void WindowManager::setEmotePopupBounds(QRect bounds)
 {
-    this->emotePopupPos_ = pos;
+    if (this->emotePopupBounds_ != bounds)
+    {
+        this->emotePopupBounds_ = bounds;
+        this->queueSave();
+    }
 }
 
 void WindowManager::initialize(Settings &settings, const Paths &paths)
@@ -371,7 +375,7 @@ void WindowManager::initialize(Settings &settings, const Paths &paths)
             windowLayout.activateOrAddChannel(desired->provider, desired->name);
         }
 
-        this->emotePopupPos_ = windowLayout.emotePopupPos_;
+        this->emotePopupBounds_ = windowLayout.emotePopupBounds_;
 
         this->applyWindowLayout(windowLayout);
     }
@@ -483,10 +487,12 @@ void WindowManager::save()
         windowObj.insert("width", rect.width());
         windowObj.insert("height", rect.height());
 
-        QJsonObject emotePopupObj;
-        emotePopupObj.insert("x", this->emotePopupPos_.x());
-        emotePopupObj.insert("y", this->emotePopupPos_.y());
-        windowObj.insert("emotePopup", emotePopupObj);
+        windowObj["emotePopup"] = QJsonObject{
+            {"x", this->emotePopupBounds_.x()},
+            {"y", this->emotePopupBounds_.y()},
+            {"width", this->emotePopupBounds_.width()},
+            {"height", this->emotePopupBounds_.height()},
+        };
 
         // window tabs
         QJsonArray tabsArr;
@@ -753,7 +759,7 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
     }
 
     // Set emote popup position
-    this->emotePopupPos_ = layout.emotePopupPos_;
+    this->emotePopupBounds_ = layout.emotePopupBounds_;
 
     for (const auto &windowData : layout.windows_)
     {
@@ -802,10 +808,14 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
                 // Have to offset x by one because qt moves the window 1px too
                 // far to the left:w
 
-                window.setInitialBounds({windowData.geometry_.x(),
-                                         windowData.geometry_.y(),
-                                         windowData.geometry_.width(),
-                                         windowData.geometry_.height()});
+                window.setInitialBounds(
+                    {
+                        windowData.geometry_.x(),
+                        windowData.geometry_.y(),
+                        windowData.geometry_.width(),
+                        windowData.geometry_.height(),
+                    },
+                    widgets::BoundsChecking::Off);
             }
         }
 
