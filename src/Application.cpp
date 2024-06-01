@@ -1050,7 +1050,9 @@ void Application::initBttvLiveUpdates()
 
 void Application::initSeventvEventAPI()
 {
-    if (!this->twitch->seventvEventAPI)
+    auto &seventvEventAPI = this->twitch->getSeventvEventAPI();
+
+    if (!seventvEventAPI)
     {
         qCDebug(chatterinoSeventvEventAPI)
             << "Skipping initialization as the EventAPI is disabled";
@@ -1059,8 +1061,8 @@ void Application::initSeventvEventAPI()
 
     // We can safely ignore these signal connections since the twitch object will always
     // be destroyed before the Application
-    std::ignore = this->twitch->seventvEventAPI->signals_.emoteAdded.connect(
-        [&](const auto &data) {
+    std::ignore =
+        seventvEventAPI->signals_.emoteAdded.connect([&](const auto &data) {
             postToThread([this, data] {
                 this->twitch->forEachSeventvEmoteSet(
                     data.emoteSetID, [data](TwitchChannel &chan) {
@@ -1068,8 +1070,8 @@ void Application::initSeventvEventAPI()
                     });
             });
         });
-    std::ignore = this->twitch->seventvEventAPI->signals_.emoteUpdated.connect(
-        [&](const auto &data) {
+    std::ignore =
+        seventvEventAPI->signals_.emoteUpdated.connect([&](const auto &data) {
             postToThread([this, data] {
                 this->twitch->forEachSeventvEmoteSet(
                     data.emoteSetID, [data](TwitchChannel &chan) {
@@ -1077,8 +1079,8 @@ void Application::initSeventvEventAPI()
                     });
             });
         });
-    std::ignore = this->twitch->seventvEventAPI->signals_.emoteRemoved.connect(
-        [&](const auto &data) {
+    std::ignore =
+        seventvEventAPI->signals_.emoteRemoved.connect([&](const auto &data) {
             postToThread([this, data] {
                 this->twitch->forEachSeventvEmoteSet(
                     data.emoteSetID, [data](TwitchChannel &chan) {
@@ -1086,15 +1088,15 @@ void Application::initSeventvEventAPI()
                     });
             });
         });
-    std::ignore = this->twitch->seventvEventAPI->signals_.userUpdated.connect(
-        [&](const auto &data) {
+    std::ignore =
+        seventvEventAPI->signals_.userUpdated.connect([&](const auto &data) {
             this->twitch->forEachSeventvUser(data.userID,
                                              [data](TwitchChannel &chan) {
                                                  chan.updateSeventvUser(data);
                                              });
         });
 
-    this->twitch->seventvEventAPI->start();
+    seventvEventAPI->start();
 }
 
 Application *getApp()

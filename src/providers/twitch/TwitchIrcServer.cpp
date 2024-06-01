@@ -650,6 +650,11 @@ std::unique_ptr<BttvLiveUpdates> &TwitchIrcServer::getBTTVLiveUpdates()
     return this->bttvLiveUpdates;
 }
 
+std::unique_ptr<SeventvEventAPI> &TwitchIrcServer::getSeventvEventAPI()
+{
+    return this->seventvEventAPI;
+}
+
 const IndirectChannel &TwitchIrcServer::getWatchingChannel() const
 {
     return this->watchingChannel;
