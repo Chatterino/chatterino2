@@ -83,14 +83,14 @@ nonstd::expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
     });
     parser.parse(ctx.words);
 
-    const auto &positionalArguments = parser.positionalArguments();
+    auto positionalArguments = parser.positionalArguments();
     if (positionalArguments.isEmpty())
     {
         return nonstd::make_unexpected("Missing target - " % usage);
     }
 
     auto [targetUserName, targetUserID] =
-        parseUserNameOrID(positionalArguments.first());
+        parseUserNameOrID(positionalArguments.takeFirst());
 
     PerformChannelAction base{
         .target =
@@ -104,13 +104,13 @@ nonstd::expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
 
     if (withDuration)
     {
-        auto durationStr = positionalArguments.value(1);
-        if (durationStr.isEmpty())
+        if (positionalArguments.isEmpty())
         {
             base.duration = 10 * 60;  // 10 min
         }
         else
         {
+            auto durationStr = positionalArguments.takeFirst();
             base.duration = (int)parseDurationToSeconds(durationStr);
             if (base.duration <= 0)
             {
@@ -118,7 +118,7 @@ nonstd::expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
             }
             if (withReason)
             {
-                base.reason = positionalArguments.sliced(2).join(' ');
+                base.reason = positionalArguments.join(' ');
             }
         }
     }
@@ -126,7 +126,7 @@ nonstd::expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
     {
         if (withReason)
         {
-            base.reason = positionalArguments.sliced(1).join(' ');
+            base.reason = positionalArguments.join(' ');
         }
     }
 
