@@ -4,14 +4,11 @@
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandContext.hpp"
+#include "controllers/commands/common/ChannelAction.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "util/Twitch.hpp"
-
-#include <QCommandLineParser>
-#include <QStringBuilder>
 
 namespace {
 
@@ -121,108 +118,12 @@ void timeoutUserByID(const ChannelPtr &channel, const QString &channelID,
 
 namespace chatterino::commands {
 
-nonstd::expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
-    const CommandContext &ctx, const QString &command, const QString &usage,
-    bool withDuration)
-{
-    if (ctx.channel == nullptr)
-    {
-        // A ban action must be performed with a channel as a context
-        return nonstd::make_unexpected(
-            "A " % command %
-            " action must be performed with a channel as a context");
-    }
-
-    QCommandLineParser parser;
-    parser.setOptionsAfterPositionalArgumentsMode(
-        QCommandLineParser::ParseAsPositionalArguments);
-    parser.addPositionalArgument("username", "The name of the user to ban");
-    if (withDuration)
-    {
-        parser.addPositionalArgument("duration", "Duration of the action");
-    }
-    parser.addPositionalArgument("reason", "The optional ban reason");
-    QCommandLineOption channelOption(
-        "channel", "Override which channel(s) to perform the action in",
-        "channel id");
-    parser.addOptions({
-        channelOption,
-    });
-    parser.parse(ctx.words);
-
-    const auto &positionalArguments = parser.positionalArguments();
-    if (positionalArguments.isEmpty())
-    {
-        return nonstd::make_unexpected("Missing target - " % usage);
-    }
-
-    PerformChannelAction base{
-        .rawTarget = positionalArguments.first(),
-        .duration = 0,
-    };
-
-    if (withDuration)
-    {
-        auto durationStr = positionalArguments.value(1);
-        if (durationStr.isEmpty())
-        {
-            base.duration = 10 * 60;  // 10 min
-        }
-        else
-        {
-            base.duration = (int)parseDurationToSeconds(durationStr);
-            if (base.duration <= 0)
-            {
-                return nonstd::make_unexpected("Invalid duration - " % usage);
-            }
-        }
-        base.reason = positionalArguments.sliced(2).join(' ');
-    }
-    else
-    {
-        base.reason = positionalArguments.sliced(1).join(' ');
-    }
-
-    std::vector<PerformChannelAction> actions;
-
-    auto overrideChannels = parser.values(channelOption);
-    if (overrideChannels.isEmpty())
-    {
-        if (ctx.twitchChannel == nullptr)
-        {
-            return nonstd::make_unexpected(
-                "The " % command % " command only works in Twitch channels");
-        }
-
-        actions.push_back(PerformChannelAction{
-            .channelID = ctx.twitchChannel->roomId(),
-            .rawTarget = base.rawTarget,
-            .reason = base.reason,
-            .duration = base.duration,
-        });
-    }
-    else
-    {
-        for (const auto &overrideChannel : overrideChannels)
-        {
-            actions.push_back(PerformChannelAction{
-                .channelID = overrideChannel,
-                .rawTarget = base.rawTarget,
-                .reason = base.reason,
-                .duration = base.duration,
-            });
-        }
-    }
-
-    return actions;
-}
-
 QString sendBan(const CommandContext &ctx)
 {
     const auto command = QStringLiteral("/ban");
     const auto usage = QStringLiteral(
-        R"(Usage: "/ban [options...] <username> [reason]" - Permanently prevent a user from chatting via their username. Reason is optional and will be shown to the target user and other moderators. Options: --channel <channelID> to override which channel the ban takes place in (can be specified multiple times).)");
-    const auto actions = parseChannelAction(ctx, command, usage, false);
+        R"(Usage: "/ban [options...] <username> [reason]" - Permanently prevent a user from chatting via their username. Reason is optional and will be shown to the target user and other moderators. Options: --channel <channel> to override which channel the ban takes place in (can be specified multiple times).)");
+    const auto actions = parseChannelAction(ctx, command, usage, false, true);
 
     if (!actions.has_value())
     {
@@ -252,28 +153,74 @@ QString sendBan(const CommandContext &ctx)
     for (const auto &action : actions.value())
     {
         const auto &reason = action.reason;
-        auto [targetUserName, targetUserID] =
-            parseUserNameOrID(action.rawTarget);
 
-        if (!targetUserID.isEmpty())
+        QStringList userLoginsToFetch;
+        QStringList userIDs;
+        if (action.target.id.isEmpty())
         {
-            banUserByID(ctx.channel, action.channelID, currentUser->getUserId(),
-                        targetUserID, reason, targetUserID);
+            assert(!action.target.login.isEmpty() &&
+                   "Ban Action target username AND user ID may not be "
+                   "empty at the same time");
+            userLoginsToFetch.append(action.target.login);
         }
         else
         {
-            getHelix()->getUserByName(
-                targetUserName,
-                [channel{ctx.channel}, channelID{action.channelID}, currentUser,
-                 reason](const auto &targetUser) {
-                    banUserByID(channel, channelID, currentUser->getUserId(),
-                                targetUser.id, reason, targetUser.displayName);
+            // For hydration
+            userIDs.append(action.target.id);
+        }
+        if (action.channel.id.isEmpty())
+        {
+            assert(!action.channel.login.isEmpty() &&
+                   "Ban Action channel username AND user ID may not be "
+                   "empty at the same time");
+            userLoginsToFetch.append(action.channel.login);
+        }
+        else
+        {
+            // For hydration
+            userIDs.append(action.channel.id);
+        }
+
+        if (!userLoginsToFetch.isEmpty())
+        {
+            // At least 1 user ID needs to be resolved before we can take action
+            // userIDs is filled up with the data we already have to hydrate the action channel & action target
+            getHelix()->fetchUsers(
+                userIDs, userLoginsToFetch,
+                [channel{ctx.channel}, actionChannel{action.channel},
+                 actionTarget{action.target}, currentUser, reason,
+                 userLoginsToFetch](const auto &users) mutable {
+                    if (!actionChannel.hydrateFrom(users))
+                    {
+                        channel->addMessage(makeSystemMessage(
+                            QString("Failed to ban, bad channel name: %1")
+                                .arg(actionChannel.login)));
+                        return;
+                    }
+                    if (!actionTarget.hydrateFrom(users))
+                    {
+                        channel->addMessage(makeSystemMessage(
+                            QString("Failed to ban, bad target name: %1")
+                                .arg(actionTarget.login)));
+                        return;
+                    }
+
+                    banUserByID(channel, actionChannel.id,
+                                currentUser->getUserId(), actionTarget.id,
+                                reason, actionTarget.displayName);
                 },
-                [channel{ctx.channel}, targetUserName{targetUserName}] {
-                    // Equivalent error from IRC
+                [channel{ctx.channel}, userLoginsToFetch] {
                     channel->addMessage(makeSystemMessage(
-                        QString("Invalid username: %1").arg(targetUserName)));
+                        QString("Failed to ban, bad username(s): %1")
+                            .arg(userLoginsToFetch.join(", "))));
                 });
+        }
+        else
+        {
+            // If both IDs are available, we do no hydration & just use the id as the display name
+            banUserByID(ctx.channel, action.channel.id,
+                        currentUser->getUserId(), action.target.id, reason,
+                        action.target.id);
         }
     }
 
@@ -282,43 +229,44 @@ QString sendBan(const CommandContext &ctx)
 
 QString sendBanById(const CommandContext &ctx)
 {
-    const auto command = QStringLiteral("/banid");
-    const auto usage = QStringLiteral(
-        R"(Usage: "/banid [options...] <userID> [reason]" - Permanently prevent a user from chatting via their user ID. Reason is optional and will be shown to the target user and other moderators. Options: --channel <channelID> to override which channel the ban takes place in (can be specified multiple times).)");
-    const auto actions = parseChannelAction(ctx, command, usage, false);
+    const auto &words = ctx.words;
+    const auto &channel = ctx.channel;
+    const auto *twitchChannel = ctx.twitchChannel;
 
-    if (!actions.has_value())
+    if (channel == nullptr)
     {
-        if (ctx.channel != nullptr)
-        {
-            ctx.channel->addMessage(makeSystemMessage(actions.error()));
-        }
-        else
-        {
-            qCWarning(chatterinoCommands)
-                << "Error parsing command:" << actions.error();
-        }
-
+        return "";
+    }
+    if (twitchChannel == nullptr)
+    {
+        channel->addMessage(makeSystemMessage(
+            QString("The /banid command only works in Twitch channels.")));
         return "";
     }
 
-    assert(!actions.value().empty());
+    const auto *usageStr =
+        "Usage: \"/banid <userID> [reason]\" - Permanently prevent a user "
+        "from chatting via their user ID. Reason is optional and will be "
+        "shown to the target user and other moderators.";
+    if (words.size() < 2)
+    {
+        channel->addMessage(makeSystemMessage(usageStr));
+        return "";
+    }
 
     auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
-        ctx.channel->addMessage(
+        channel->addMessage(
             makeSystemMessage("You must be logged in to ban someone!"));
         return "";
     }
 
-    for (const auto &action : actions.value())
-    {
-        const auto &reason = action.reason;
-        const auto &targetUserID = action.rawTarget;
-        banUserByID(ctx.channel, action.channelID, currentUser->getUserId(),
-                    targetUserID, reason, targetUserID);
-    }
+    auto target = words.at(1);
+    auto reason = words.mid(2).join(' ');
+
+    banUserByID(channel, twitchChannel->roomId(), currentUser->getUserId(),
+                target, reason, target);
 
     return "";
 }
@@ -327,8 +275,8 @@ QString sendTimeout(const CommandContext &ctx)
 {
     const auto command = QStringLiteral("/timeout");
     const auto usage = QStringLiteral(
-        R"(Usage: "/timeout [options...] <username> [duration][time unit] [reason]" - Temporarily prevent a user from chatting. Duration (optional, default=10 minutes) must be a positive integer; time unit (optional, default=s) must be one of s, m, h, d, w; maximum duration is 2 weeks. Combinations like 1d2h are also allowed. Reason is optional and will be shown to the target user and other moderators. Use \"/untimeout\" to remove a timeout. Options: --channel <channelID> to override which channel the ban takes place in (can be specified multiple times).)");
-    const auto actions = parseChannelAction(ctx, command, usage, true);
+        R"(Usage: "/timeout [options...] <username> [duration][time unit] [reason]" - Temporarily prevent a user from chatting. Duration (optional, default=10 minutes) must be a positive integer; time unit (optional, default=s) must be one of s, m, h, d, w; maximum duration is 2 weeks. Combinations like 1d2h are also allowed. Reason is optional and will be shown to the target user and other moderators. Use "/untimeout" to remove a timeout. Options: --channel <channel> to override which channel the unban takes place in (can be specified multiple times).)");
+    const auto actions = parseChannelAction(ctx, command, usage, true, true);
 
     if (!actions.has_value())
     {
@@ -358,31 +306,75 @@ QString sendTimeout(const CommandContext &ctx)
     for (const auto &action : actions.value())
     {
         const auto &reason = action.reason;
-        const auto duration = action.duration;
-        auto [targetUserName, targetUserID] =
-            parseUserNameOrID(action.rawTarget);
 
-        if (!targetUserID.isEmpty())
+        QStringList userLoginsToFetch;
+        QStringList userIDs;
+        if (action.target.id.isEmpty())
         {
-            timeoutUserByID(ctx.channel, action.channelID,
-                            currentUser->getUserId(), targetUserID, duration,
-                            reason, targetUserID);
+            assert(!action.target.login.isEmpty() &&
+                   "Timeout Action target username AND user ID may not be "
+                   "empty at the same time");
+            userLoginsToFetch.append(action.target.login);
         }
         else
         {
-            getHelix()->getUserByName(
-                targetUserName,
-                [channel{ctx.channel}, channelID{action.channelID}, currentUser,
-                 duration, reason](const auto &targetUser) {
-                    timeoutUserByID(channel, channelID,
-                                    currentUser->getUserId(), targetUser.id,
-                                    duration, reason, targetUser.displayName);
+            // For hydration
+            userIDs.append(action.target.id);
+        }
+        if (action.channel.id.isEmpty())
+        {
+            assert(!action.channel.login.isEmpty() &&
+                   "Timeout Action channel username AND user ID may not be "
+                   "empty at the same time");
+            userLoginsToFetch.append(action.channel.login);
+        }
+        else
+        {
+            // For hydration
+            userIDs.append(action.channel.id);
+        }
+
+        if (!userLoginsToFetch.isEmpty())
+        {
+            // At least 1 user ID needs to be resolved before we can take action
+            // userIDs is filled up with the data we already have to hydrate the action channel & action target
+            getHelix()->fetchUsers(
+                userIDs, userLoginsToFetch,
+                [channel{ctx.channel}, duration{action.duration},
+                 actionChannel{action.channel}, actionTarget{action.target},
+                 currentUser, reason,
+                 userLoginsToFetch](const auto &users) mutable {
+                    if (!actionChannel.hydrateFrom(users))
+                    {
+                        channel->addMessage(makeSystemMessage(
+                            QString("Failed to timeout, bad channel name: %1")
+                                .arg(actionChannel.login)));
+                        return;
+                    }
+                    if (!actionTarget.hydrateFrom(users))
+                    {
+                        channel->addMessage(makeSystemMessage(
+                            QString("Failed to timeout, bad target name: %1")
+                                .arg(actionTarget.login)));
+                        return;
+                    }
+
+                    timeoutUserByID(channel, actionChannel.id,
+                                    currentUser->getUserId(), actionTarget.id,
+                                    duration, reason, actionTarget.displayName);
                 },
-                [channel{ctx.channel}, targetUserName{targetUserName}] {
-                    // Equivalent error from IRC
+                [channel{ctx.channel}, userLoginsToFetch] {
                     channel->addMessage(makeSystemMessage(
-                        QString("Invalid username: %1").arg(targetUserName)));
+                        QString("Failed to timeout, bad username(s): %1")
+                            .arg(userLoginsToFetch.join(", "))));
                 });
+        }
+        else
+        {
+            // If both IDs are available, we do no hydration & just use the id as the display name
+            timeoutUserByID(ctx.channel, action.channel.id,
+                            currentUser->getUserId(), action.target.id,
+                            action.duration, reason, action.target.id);
         }
     }
 

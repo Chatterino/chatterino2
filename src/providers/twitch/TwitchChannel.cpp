@@ -231,13 +231,6 @@ TwitchChannel::TwitchChannel(const QString &name)
 
 TwitchChannel::~TwitchChannel()
 {
-    if (!getApp())
-    {
-        // This is for tests and benchmarks, where live-updates aren't mocked
-        // see comment in constructor.
-        return;
-    }
-
     getIApp()->getTwitch()->dropSeventvChannel(this->seventvUserID_,
                                                this->seventvEmoteSetID_);
 
