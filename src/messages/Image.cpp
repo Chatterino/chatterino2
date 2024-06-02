@@ -247,7 +247,7 @@ void assignFrames(std::weak_ptr<Image> weak, QList<Frame> parsed)
         }
     };
 
-    postToThread(cb);
+    postToGuiThread(cb);
 }
 
 }  // namespace chatterino::detail

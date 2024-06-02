@@ -70,4 +70,13 @@ static void runInGuiThread(F &&fun)
     }
 }
 
+template <typename F>
+static void postToGuiThread(F &&fun)
+{
+    assert(!isGuiThread() &&
+           "postToGuiThread must be called from a non-GUI thread");
+
+    postToThread(fun);
+}
+
 }  // namespace chatterino
