@@ -2,7 +2,6 @@
 
 #include "common/Atomic.hpp"
 #include "common/Channel.hpp"
-#include "common/Singleton.hpp"
 #include "providers/irc/AbstractIrcServer.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
@@ -52,15 +51,18 @@ public:
     // Update this interface with TwitchIrcServer methods as needed
 };
 
-class TwitchIrcServer final : public AbstractIrcServer,
-                              public Singleton,
-                              public ITwitchIrcServer
+class TwitchIrcServer final : public AbstractIrcServer, public ITwitchIrcServer
 {
 public:
     TwitchIrcServer();
     ~TwitchIrcServer() override = default;
 
-    void initialize(Settings &settings, const Paths &paths) override;
+    TwitchIrcServer(const TwitchIrcServer &) = delete;
+    TwitchIrcServer(TwitchIrcServer &&) = delete;
+    TwitchIrcServer &operator=(const TwitchIrcServer &) = delete;
+    TwitchIrcServer &operator=(TwitchIrcServer &&) = delete;
+
+    void initialize();
 
     void forEachChannelAndSpecialChannels(
         std::function<void(ChannelPtr)> func) override;
