@@ -686,7 +686,6 @@ void Helix::updateChannel(QString broadcasterId, QString gameId,
                 }
                 break;
 
-                case 409:
                 case 429: {
                     failureCallback(Error::Ratelimited, message);
                 }
