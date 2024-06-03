@@ -57,6 +57,11 @@ public:
     TwitchIrcServer();
     ~TwitchIrcServer() override = default;
 
+    TwitchIrcServer(const TwitchIrcServer &) = delete;
+    TwitchIrcServer(TwitchIrcServer &&) = delete;
+    TwitchIrcServer &operator=(const TwitchIrcServer &) = delete;
+    TwitchIrcServer &operator=(TwitchIrcServer &&) = delete;
+
     void initialize();
 
     void forEachChannelAndSpecialChannels(
