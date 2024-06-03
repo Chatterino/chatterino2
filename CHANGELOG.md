@@ -19,10 +19,11 @@
 - Dev: Add doxygen build target. (#5377)
 - Dev: Make printing of strings in tests easier. (#5379)
 - Dev: Refactor and document `Scrollbar`. (#5334, #5393)
-- Dev: Refactor `TwitchIrcServer`, making it abstracted. (#5421)
+- Dev: Refactor `TwitchIrcServer`, making it abstracted. (#5421, #5435)
 - Dev: Reduced the amount of scale events. (#5404, #5406)
 - Dev: Removed unused timegate settings. (#5361)
 - Dev: All Lua globals now show in the `c2` global in the LuaLS metadata. (#5385)
+- Dev: Images are now loaded in worker threads. (#5431)
 
 ## 2.5.1
 
