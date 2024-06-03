@@ -1193,8 +1193,9 @@ public:
     void updateChannel(QString broadcasterId, QString gameId, QString language,
                        QString title,
                        std::function<void(NetworkResult)> successCallback,
-                       FailureCallback<HelixUpdateChannelError, QString> failureCallback) final;
-    
+                       FailureCallback<HelixUpdateChannelError, QString>
+                           failureCallback) final;
+
     // https://dev.twitch.tv/docs/api/reference#manage-held-automod-messages
     void manageAutoModMessages(
         QString userID, QString msgID, QString action,

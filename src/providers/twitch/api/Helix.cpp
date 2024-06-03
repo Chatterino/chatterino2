@@ -613,10 +613,10 @@ void Helix::unblockUser(QString targetUserId, const QObject *caller,
         .execute();
 }
 
-void Helix::updateChannel(QString broadcasterId, QString gameId,
-                          QString language, QString title,
-                          std::function<void(NetworkResult)> successCallback,
-                          FailureCallback<HelixUpdateChannelError, QString> failureCallback)
+void Helix::updateChannel(
+    QString broadcasterId, QString gameId, QString language, QString title,
+    std::function<void(NetworkResult)> successCallback,
+    FailureCallback<HelixUpdateChannelError, QString> failureCallback)
 {
 
     using Error = HelixUpdateChannelError;
@@ -658,7 +658,7 @@ void Helix::updateChannel(QString broadcasterId, QString gameId,
             auto obj = result.parseJson();
             auto message = obj.value("message").toString();
 
-            switch(*result.status())
+            switch (*result.status())
             {
                 case 401: {
                     if (message.startsWith("Missing scope",
@@ -697,8 +697,8 @@ void Helix::updateChannel(QString broadcasterId, QString gameId,
 
                 default: {
                     qCDebug(chatterinoTwitch)
-                        << "Helix update channel, unhandled error data:" << result.formatError()
-                        << result.getData() << obj;
+                        << "Helix update channel, unhandled error data:"
+                        << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }
                 break;
