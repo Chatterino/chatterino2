@@ -1383,17 +1383,20 @@ MessageElementFlags ChannelView::getFlags() const
         {
             flags.set(MessageElementFlag::ModeratorTools);
         }
-        if (this->underlyingChannel_ == app->twitch->mentionsChannel ||
-            this->underlyingChannel_ == app->twitch->liveChannel ||
-            this->underlyingChannel_ == app->twitch->automodChannel)
+        if (this->underlyingChannel_ ==
+                getIApp()->getTwitch()->getMentionsChannel() ||
+            this->underlyingChannel_ ==
+                getIApp()->getTwitch()->getLiveChannel() ||
+            this->underlyingChannel_ ==
+                getIApp()->getTwitch()->getAutomodChannel())
         {
             flags.set(MessageElementFlag::ChannelName);
             flags.unset(MessageElementFlag::ChannelPointReward);
         }
     }
 
-    if (this->sourceChannel_ == app->twitch->mentionsChannel ||
-        this->sourceChannel_ == app->twitch->automodChannel)
+    if (this->sourceChannel_ == getIApp()->getTwitch()->getMentionsChannel() ||
+        this->sourceChannel_ == getIApp()->getTwitch()->getAutomodChannel())
     {
         flags.set(MessageElementFlag::ChannelName);
     }
@@ -1546,8 +1549,8 @@ void ChannelView::drawMessages(QPainter &painter, const QRect &area)
 
         .canvasWidth = this->width(),
         .isWindowFocused = this->window() == QApplication::activeWindow(),
-        .isMentions =
-            this->underlyingChannel_ == getApp()->twitch->mentionsChannel,
+        .isMentions = this->underlyingChannel_ ==
+                      getIApp()->getTwitch()->getMentionsChannel(),
 
         .y = int(-(messagesSnapshot[start]->getHeight() *
                    (fmod(this->scrollBar_->getRelativeCurrentValue(), 1)))),
@@ -2707,8 +2710,8 @@ void ChannelView::showUserInfoPopup(const QString &userName,
     auto *userPopup =
         new UserInfoPopup(getSettings()->autoCloseUserPopup, this->split_);
 
-    auto contextChannel =
-        getApp()->twitch->getChannelOrEmpty(alternativePopoutChannel);
+    auto contextChannel = getIApp()->getTwitchAbstract()->getChannelOrEmpty(
+        alternativePopoutChannel);
     auto openingChannel = this->hasSourceChannel() ? this->sourceChannel_
                                                    : this->underlyingChannel_;
     userPopup->setData(userName, contextChannel, openingChannel);
