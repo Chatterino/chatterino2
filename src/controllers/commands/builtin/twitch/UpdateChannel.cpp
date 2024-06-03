@@ -32,13 +32,6 @@ QString setTitle(const CommandContext &ctx)
 
     auto title = ctx.words.mid(1).join(" ");
 
-    if(title.size() > 140)
-    {
-        ctx.channel->addMessage(
-            makeSystemMessage("Unable to set title: Title must be 140 characters or fewer."));
-        return "";
-    }
-
     getHelix()->updateChannel(
         ctx.twitchChannel->roomId(), "", "", title,
         [channel{ctx.channel}, title](const auto &result) {
@@ -47,10 +40,46 @@ QString setTitle(const CommandContext &ctx)
             channel->addMessage(
                 makeSystemMessage(QString("Updated title to %1").arg(title)));
         },
-        [channel{ctx.channel}] {
-            channel->addMessage(
-                makeSystemMessage("Title update failed! Are you "
-                                  "missing the required scope?"));
+        [channel{ctx.channel}](auto error, auto message) {
+            QString errorMessage = QString("Failed to set title - ");
+
+            using Error = HelixUpdateChannelError;
+
+            switch(error)
+            {
+                case Error::UserMissingScope: {
+                    errorMessage += "Missing required scope. "
+                                    "Re-login with your "
+                                    "account and try again.";
+                }
+                break;
+
+                case Error::UserNotAuthorized: {
+                    errorMessage += "You must be the broadcaster "
+                                    "to set the title.";
+                }
+                break;
+
+                case Error::Ratelimited: {
+                    errorMessage +=
+                        "You are being ratelimited by Twitch. Try "
+                        "again in a few seconds.";
+                }
+                break;
+
+                case Error::Forwarded: {
+                    errorMessage += message;
+                }
+                break;
+
+                case Error::Unknown:
+                default: {
+                    errorMessage += "An unknown error has occured.";
+                }
+                break;
+            }
+
+            channel->addMessage(makeSystemMessage(errorMessage));
         });
 
     return "";
@@ -112,10 +141,46 @@ QString setGame(const CommandContext &ctx)
                     channel->addMessage(makeSystemMessage(
                         QString("Updated game to %1").arg(matchedGame.name)));
                 },
-                [channel] {
-                    channel->addMessage(
-                        makeSystemMessage("Game update failed! Are you "
-                                          "missing the required scope?"));
+                [channel](auto error, auto message) {
+                    QString errorMessage = QString("Failed to set game - ");
+
+                    using Error = HelixUpdateChannelError;
+
+                    switch(error)
+                    {
+                        case Error::UserMissingScope: {
+                            errorMessage += "Missing required scope. "
+                                            "Re-login with your "
+                                            "account and try again.";
+                        }
+                        break;
+
+                        case Error::UserNotAuthorized: {
+                            errorMessage += "You must be the broadcaster "
+                                            "to set the game.";
+                        }
+                        break;
+
+                        case Error::Ratelimited: {
+                            errorMessage +=
+                                "You are being ratelimited by Twitch. Try "
+                                "again in a few seconds.";
+                        }
+                        break;
+
+                        case Error::Forwarded: {
+                            errorMessage += message;
+                        }
+                        break;
+
+                        case Error::Unknown:
+                        default: {
+                            errorMessage += "An unknown error has occured.";
+                        }
+                        break;
+                    }
+
+                    channel->addMessage(makeSystemMessage(errorMessage));
                 });
         },
         [channel{ctx.channel}] {

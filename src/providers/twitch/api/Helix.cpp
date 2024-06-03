@@ -616,8 +616,11 @@ void Helix::unblockUser(QString targetUserId, const QObject *caller,
 void Helix::updateChannel(QString broadcasterId, QString gameId,
                           QString language, QString title,
                           std::function<void(NetworkResult)> successCallback,
-                          HelixFailureCallback failureCallback)
+                          FailureCallback<HelixUpdateChannelError, QString> failureCallback)
 {
+
+    using Error = HelixUpdateChannelError;
+
     QUrlQuery urlQuery;
     auto obj = QJsonObject();
     if (!gameId.isEmpty())
@@ -646,7 +649,61 @@ void Helix::updateChannel(QString broadcasterId, QString gameId,
             successCallback(result);
         })
         .onError([failureCallback](NetworkResult result) {
-            failureCallback();
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch(*result.status())
+            {
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.compare(
+                                 "The ID in broadcaster_id must match the user "
+                                 "ID found in the request's OAuth token.",
+                                 Qt::CaseInsensitive) == 0)
+                    {
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 400:
+                case 403: {
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 409:
+                case 429: {
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
+
+                case 500: {
+                    failureCallback(Error::Unknown, message);
+                }
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Helix update channel, unhandled error data:" << result.formatError()
+                        << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
         })
         .execute();
 }
