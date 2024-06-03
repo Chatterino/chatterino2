@@ -123,7 +123,7 @@ public:
                 (QString broadcasterId, QString gameId, QString language,
                  QString title,
                  std::function<void(NetworkResult)> successCallback,
-                 HelixFailureCallback failureCallback),
+                (FailureCallback<HelixUpdateChannelError, QString> failureCallback),
                 (override));
 
     MOCK_METHOD(void, manageAutoModMessages,
