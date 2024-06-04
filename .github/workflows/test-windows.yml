@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest]
-        qt-version: [5.15.2, 6.7.1]
+        qt-version: [6.7.1]
         plugins: [false]
         skip-artifact: [false]
         skip-crashpad: [false]
