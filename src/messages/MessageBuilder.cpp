@@ -331,6 +331,7 @@ MessageBuilder::MessageBuilder(const WarnAction &action)
 
     QString text;
 
+    // TODO: Use MentionElement here, once WarnAction includes username/displayname
     this->emplaceSystemTextAndUpdate("A moderator", text)
         ->setLink({Link::UserInfo, "id:" + action.source.id});
     this->emplaceSystemTextAndUpdate("warned", text);

@@ -660,6 +660,7 @@ void Application::initPubSub()
                 return;
             }
 
+            // TODO: Resolve the moderator's user ID into a full user here, so message can look better
             postToThread([chan, action] {
                 MessageBuilder msg(action);
                 msg->flags.set(MessageFlag::PubSub);
