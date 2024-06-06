@@ -24,7 +24,7 @@
 - Dev: Removed unused timegate settings. (#5361)
 - Dev: All Lua globals now show in the `c2` global in the LuaLS metadata. (#5385)
 - Dev: Images are now loaded in worker threads. (#5431)
-- Dev: Skip conan and vcpkg autosetup when using QtCreator. (#5305)
+- Dev: Qt Creator now auto-configures Conan when loading the project and skips vcpkg. (#5305)
 
 ## 2.5.1
 
