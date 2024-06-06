@@ -124,7 +124,7 @@ void NotificationController::fetchFakeChannels()
     for (std::vector<int>::size_type i = 0;
          i < channelMap[Platform::Twitch].raw().size(); i++)
     {
-        auto chan = getApp()->twitch->getChannelOrEmpty(
+        auto chan = getIApp()->getTwitchAbstract()->getChannelOrEmpty(
             channelMap[Platform::Twitch].raw()[i]);
         if (chan->isEmpty())
         {
@@ -202,7 +202,7 @@ void NotificationController::checkStream(bool live, QString channelName)
     }
     MessageBuilder builder;
     TwitchMessageBuilder::liveMessage(channelName, &builder);
-    getApp()->twitch->liveChannel->addMessage(builder.release());
+    getIApp()->getTwitch()->getLiveChannel()->addMessage(builder.release());
 
     // Indicate that we have pushed notifications for this stream
     fakeTwitchChannels.push_back(channelName);
@@ -217,7 +217,7 @@ void NotificationController::removeFakeChannel(const QString channelName)
         fakeTwitchChannels.erase(it);
         // "delete" old 'CHANNEL is live' message
         LimitedQueueSnapshot<MessagePtr> snapshot =
-            getApp()->twitch->liveChannel->getMessageSnapshot();
+            getIApp()->getTwitch()->getLiveChannel()->getMessageSnapshot();
         int snapshotLength = snapshot.size();
 
         // MSVC hates this code if the parens are not there

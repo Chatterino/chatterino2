@@ -21,7 +21,8 @@ NewPopupItem::NewPopupItem(const QString &channelName)
 
 void NewPopupItem::action()
 {
-    auto channel = getApp()->twitch->getOrAddChannel(this->channelName_);
+    auto channel =
+        getIApp()->getTwitchAbstract()->getOrAddChannel(this->channelName_);
     getIApp()->getWindows()->openInPopup(channel);
 }
 

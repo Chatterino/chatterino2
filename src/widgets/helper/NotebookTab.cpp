@@ -15,6 +15,7 @@
 #include "widgets/splits/SplitContainer.hpp"
 
 #include <boost/bind/bind.hpp>
+#include <QAbstractAnimation>
 #include <QApplication>
 #include <QDebug>
 #include <QDialogButtonBox>
@@ -98,6 +99,10 @@ NotebookTab::NotebookTab(Notebook *notebook)
         },
         getIApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Window,
                                                     "popup", {{"window"}}));
+
+    this->menu_.addAction("Duplicate Tab", [this]() {
+        this->notebook_->duplicatePage(this->page);
+    });
 
     highlightNewMessagesAction_ =
         new QAction("Mark Tab as Unread on New Messages", &this->menu_);
@@ -403,22 +408,24 @@ void NotebookTab::hideTabXChanged()
     this->update();
 }
 
-void NotebookTab::moveAnimated(QPoint pos, bool animated)
+void NotebookTab::moveAnimated(QPoint targetPos, bool animated)
 {
-    this->positionAnimationDesiredPoint_ = pos;
+    this->positionAnimationDesiredPoint_ = targetPos;
 
-    QWidget *w = this->window();
-
-    if ((w != nullptr && !w->isVisible()) || !animated ||
-        !this->positionChangedAnimationRunning_)
+    if (this->pos() == targetPos)
     {
-        this->move(pos);
-
-        this->positionChangedAnimationRunning_ = true;
         return;
     }
 
-    if (this->positionChangedAnimation_.endValue() == pos)
+    if (!animated || !this->notebook_->isVisible())
+    {
+        this->move(targetPos);
+        return;
+    }
+
+    if (this->positionChangedAnimation_.state() ==
+            QAbstractAnimation::Running &&
+        this->positionChangedAnimation_.endValue() == targetPos)
     {
         return;
     }
@@ -426,7 +433,7 @@ void NotebookTab::moveAnimated(QPoint pos, bool animated)
     this->positionChangedAnimation_.stop();
     this->positionChangedAnimation_.setDuration(75);
     this->positionChangedAnimation_.setStartValue(this->pos());
-    this->positionChangedAnimation_.setEndValue(pos);
+    this->positionChangedAnimation_.setEndValue(targetPos);
     this->positionChangedAnimation_.start();
 }
 
