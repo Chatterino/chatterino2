@@ -336,12 +336,12 @@ MessageBuilder::MessageBuilder(const WarnAction &action)
         ->setLink({Link::UserInfo, "id:" + action.source.id});
     this->emplaceSystemTextAndUpdate("warned", text);
     this->emplaceSystemTextAndUpdate(
-            action.target.login + (action.reason.isEmpty() ? "." : ":"), text)
+            action.target.login + (action.reasons.isEmpty() ? "." : ":"), text)
         ->setLink({Link::UserInfo, action.target.login});
 
-    if (!action.reason.isEmpty())
+    if (!action.reasons.isEmpty())
     {
-        this->emplaceSystemTextAndUpdate(action.reason, text);
+        this->emplaceSystemTextAndUpdate(action.reasons.join(", "), text);
     }
 
     this->message().messageText = text;

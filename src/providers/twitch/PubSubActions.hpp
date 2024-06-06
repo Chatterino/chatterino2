@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QJsonObject>
 #include <QString>
+#include <QStringList>
 
 #include <chrono>
 #include <cinttypes>
@@ -176,7 +177,7 @@ struct WarnAction : PubSubAction {
 
     ActionUser target;
 
-    QString reason;
+    QStringList reasons;
 };
 
 }  // namespace chatterino

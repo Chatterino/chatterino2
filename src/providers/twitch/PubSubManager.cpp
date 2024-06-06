@@ -297,10 +297,18 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         action.target.id = data.value("target_user_id").toString();
         action.target.login = data.value("target_user_login").toString();
 
-        const auto args = data.value("args").toArray();
-        if (args.size() > 1)
-        {
-            action.reason = args[1].toString();
+        const auto reasons = data.value("args").toArray();
+        bool firstArg = true;
+        for (const auto &reasonValue : reasons) {
+            if (firstArg) {
+                // Skip first arg in the reasons array since it's not a reason
+                firstArg = false;
+                continue;
+            }
+            const auto &reason = reasonValue.toString();
+            if (!reason.isEmpty()) {
+                action.reasons.append(reason);
+            }
         }
 
         this->moderation.userWarned.invoke(action);
