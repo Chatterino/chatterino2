@@ -650,6 +650,24 @@ void Application::initPubSub()
                 chan->addOrReplaceTimeout(msg.release());
             });
         });
+
+    std::ignore = this->twitchPubSub->moderation.userWarned.connect(
+        [&](const auto &action) {
+            auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
+
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            // TODO: Resolve the moderator's user ID into a full user here, so message can look better
+            postToThread([chan, action] {
+                MessageBuilder msg(action);
+                msg->flags.set(MessageFlag::PubSub);
+                chan->addMessage(msg.release());
+            });
+        });
+
     std::ignore = this->twitchPubSub->moderation.messageDeleted.connect(
         [&](const auto &action) {
             auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);

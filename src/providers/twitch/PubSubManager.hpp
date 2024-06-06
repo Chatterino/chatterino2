@@ -34,6 +34,7 @@ struct PubSubAutoModQueueMessage;
 struct AutomodAction;
 struct AutomodUserAction;
 struct AutomodInfoAction;
+struct WarnAction;
 struct PubSubLowTrustUsersMessage;
 struct PubSubWhisperMessage;
 
@@ -97,6 +98,7 @@ public:
 
         Signal<BanAction> userBanned;
         Signal<UnbanAction> userUnbanned;
+        Signal<WarnAction> userWarned;
 
         Signal<PubSubLowTrustUsersMessage> suspiciousMessageReceived;
         Signal<PubSubLowTrustUsersMessage> suspiciousTreatmentUpdated;
