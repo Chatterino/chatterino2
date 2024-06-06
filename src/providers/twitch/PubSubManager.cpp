@@ -286,6 +286,26 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         this->moderation.userUnbanned.invoke(action);
     };
 
+    this->moderationActionHandlers["warn"] = [this](const auto &data,
+                                                    const auto &roomID) {
+        WarnAction action(data, roomID);
+
+        action.source.id = data.value("created_by_user_id").toString();
+        action.source.login =
+            data.value("created_by").toString();  // currently always empty
+
+        action.target.id = data.value("target_user_id").toString();
+        action.target.login = data.value("target_user_login").toString();
+
+        const auto args = data.value("args").toArray();
+        if (args.size() > 1)
+        {
+            action.reason = args[1].toString();
+        }
+
+        this->moderation.userWarned.invoke(action);
+    };
+
     /*
     // This handler is no longer required as we use the automod-queue topic now
     this->moderationActionHandlers["automod_rejected"] =
@@ -1131,8 +1151,8 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
 
             case PubSubChatModeratorActionMessage::Type::INVALID:
             default: {
-                qCDebug(chatterinoPubSub)
-                    << "Invalid whisper type:" << innerMessage.typeString;
+                qCDebug(chatterinoPubSub) << "Invalid moderator action type:"
+                                          << innerMessage.typeString;
             }
             break;
         }

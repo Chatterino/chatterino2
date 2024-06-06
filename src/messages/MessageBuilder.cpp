@@ -323,6 +323,30 @@ MessageBuilder::MessageBuilder(const UnbanAction &action)
     this->message().searchText = text;
 }
 
+MessageBuilder::MessageBuilder(const WarnAction &action)
+    : MessageBuilder()
+{
+    this->emplace<TimestampElement>();
+    this->message().flags.set(MessageFlag::System);
+
+    QString text;
+
+    this->emplaceSystemTextAndUpdate("A moderator", text)
+        ->setLink({Link::UserInfo, "id:" + action.source.id});
+    this->emplaceSystemTextAndUpdate("warned", text);
+    this->emplaceSystemTextAndUpdate(
+            action.target.login + (action.reason.isEmpty() ? "." : ":"), text)
+        ->setLink({Link::UserInfo, action.target.login});
+
+    if (!action.reason.isEmpty())
+    {
+        this->emplaceSystemTextAndUpdate(action.reason, text);
+    }
+
+    this->message().messageText = text;
+    this->message().searchText = text;
+}
+
 MessageBuilder::MessageBuilder(const AutomodUserAction &action)
     : MessageBuilder()
 {

@@ -171,4 +171,12 @@ struct AutomodInfoAction : PubSubAction {
     } type;
 };
 
+struct WarnAction : PubSubAction {
+    using PubSubAction::PubSubAction;
+
+    ActionUser target;
+
+    QString reason;
+};
+
 }  // namespace chatterino
