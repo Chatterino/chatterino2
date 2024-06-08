@@ -595,7 +595,10 @@ enum class HelixUpdateChatSettingsError {  // update chat settings
     Forwarded,
 };  // update chat settings
 
-enum class HelixUpdateChannelError {  // /settitle, /setgame
+/// Error type for Helix::updateChannel
+///
+/// Used in the /settitle and /setgame commands
+enum class HelixUpdateChannelError {
     Unknown,
     UserMissingScope,
     UserNotAuthorized,
@@ -603,7 +606,7 @@ enum class HelixUpdateChannelError {  // /settitle, /setgame
 
     // The error message is forwarded directly from the Twitch API
     Forwarded,
-};  // /settitle, /setgame
+};
 
 enum class HelixBanUserError {  // /timeout, /ban
     Unknown,
