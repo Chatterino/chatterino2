@@ -105,6 +105,12 @@ jobs:
               --output-folder=. `
               -o with_openssl3="$Env:C2_USE_OPENSSL3"
 
+      # The Windows runners currently use an older version of the CRT
+      - name: Install CRT
+        run: |
+          mkdir -Force build-test/bin
+          cp "$((ls $Env:VCToolsRedistDir/onecore/x64 -Filter '*.CRT')[0].FullName)/*" build-test/bin
+
       - name: Build
         run: |
           cmake `
