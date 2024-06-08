@@ -693,6 +693,7 @@ void Helix::updateChannel(
                 case 500: {
                     failureCallback(Error::Unknown, message);
                 }
+                break;
 
                 default: {
                     qCDebug(chatterinoTwitch)
