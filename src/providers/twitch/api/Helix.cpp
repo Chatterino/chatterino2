@@ -618,7 +618,6 @@ void Helix::updateChannel(
     std::function<void(NetworkResult)> successCallback,
     FailureCallback<HelixUpdateChannelError, QString> failureCallback)
 {
-
     using Error = HelixUpdateChannelError;
 
     QUrlQuery urlQuery;
