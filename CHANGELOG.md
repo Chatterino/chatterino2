@@ -9,6 +9,7 @@
 - Minor: Added `flags.action` filter variable, allowing you to filter on `/me` messages. (#5397)
 - Minor: The size of the emote popup is now saved. (#5415)
 - Minor: Added the ability to duplicate tabs. (#5277)
+- Minor: Improved error messages for channel update commands. (#5429)
 - Minor: Moderators can now see when users are warned. (#5441)
 - Bugfix: Fixed tab move animation occasionally failing to start after closing a tab. (#5426)
 - Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
