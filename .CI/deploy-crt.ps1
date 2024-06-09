@@ -13,16 +13,16 @@ $vclibs = (Get-ChildItem "$Env:VCToolsRedistDir\onecore\x64" -Filter '*.CRT')[0]
 # All executables and libraries in the installation directory
 $targets = Get-ChildItem -Recurse -Include '*.dll', '*.exe' $InstallDir;
 # All dependencies of the targets (with duplicates)
-$all_deps = $targets | ForEach-Object { dumpbin /DEPENDENTS $_.FullName -match '.dll$' } | ForEach-Object { $_.Trim() };
+$all_deps = $targets | ForEach-Object { (dumpbin /DEPENDENTS $_.FullName) -match '^(?!Dump of).+\.dll$' } | ForEach-Object { $_.Trim() };
 # All dependencies without duplicates
 $dependencies = $all_deps | Sort-Object -Unique;
 
 $n_deployed = 0;
 foreach ($dll in $dependencies) {
     Write-Output "Checking for $dll";
-    if (Test-Path -PathType Leaf "$vclibs\$dll" -ErrorAction Continue) {
+    if (Test-Path -PathType Leaf "$vclibs\$dll") {
         Write-Output "Deploying $dll";
-        Copy-Item "$vclibs\$dll" "$InstallDir\$dll" -ErrorAction Continue;
+        Copy-Item "$vclibs\$dll" "$InstallDir\$dll" -Force;
         $n_deployed++;
     }
 }
