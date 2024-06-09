@@ -20,6 +20,6 @@ $dependencies = $all_deps | Sort-Object -Unique;
 foreach ($dll in $dependencies) {
     if (Test-Path -PathType Leaf "$vclibs\$dll") {
         Write-Output "Deploying $dll";
-        Copy-Item "$vclibs\$dll" "$InstallDir\$dll";
+        Copy-Item "$vclibs\$dll" "$InstallDir\$dll" -ErrorAction Continue;
     }
 }
