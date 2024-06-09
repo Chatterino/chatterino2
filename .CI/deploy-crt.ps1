@@ -17,9 +17,14 @@ $all_deps = $targets | ForEach-Object { dumpbin /DEPENDENTS $_.FullName -match '
 # All dependencies without duplicates
 $dependencies = $all_deps | Sort-Object -Unique;
 
+$n_deployed = 0;
 foreach ($dll in $dependencies) {
-    if (Test-Path -PathType Leaf "$vclibs\$dll") {
+    Write-Output "Checking for $dll";
+    if (Test-Path -PathType Leaf "$vclibs\$dll" -ErrorAction Continue) {
         Write-Output "Deploying $dll";
         Copy-Item "$vclibs\$dll" "$InstallDir\$dll" -ErrorAction Continue;
+        $n_deployed++;
     }
 }
+
+Write-Output "Deployed $n_deployed libraries";
