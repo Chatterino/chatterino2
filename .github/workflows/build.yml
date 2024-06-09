@@ -249,7 +249,7 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         run: |
           cd build
-          windeployqt bin/chatterino.exe --no-translations --no-opengl-sw
+          windeployqt bin/chatterino.exe --release --no-translations --no-opengl-sw --dir Chatterino2/
           cp bin/chatterino.exe Chatterino2/
           echo nightly > Chatterino2/modes
 
