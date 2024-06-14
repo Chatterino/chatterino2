@@ -7,6 +7,58 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 
+namespace {
+
+using namespace chatterino;
+
+QString formatUpdateChannelError(const char *updateType,
+                                 HelixUpdateChannelError error,
+                                 const QString &message)
+{
+    using Error = HelixUpdateChannelError;
+
+    QString errorMessage = QString("Failed to set %1 - ").arg(updateType);
+
+    switch (error)
+    {
+        case Error::UserMissingScope: {
+            errorMessage += "Missing required scope. "
+                            "Re-login with your "
+                            "account and try again.";
+        }
+        break;
+
+        case Error::UserNotAuthorized: {
+            errorMessage += QString("You must be the broadcaster "
+                                    "to set the %1.")
+                                .arg(updateType);
+        }
+        break;
+
+        case Error::Ratelimited: {
+            errorMessage += "You are being ratelimited by Twitch. Try "
+                            "again in a few seconds.";
+        }
+        break;
+
+        case Error::Forwarded: {
+            errorMessage += message;
+        }
+        break;
+
+        case Error::Unknown:
+        default: {
+            errorMessage +=
+                QString("An unknown error has occurred (%1).").arg(message);
+        }
+        break;
+    }
+
+    return errorMessage;
+}
+
+}  // namespace
+
 namespace chatterino::commands {
 
 QString setTitle(const CommandContext &ctx)
@@ -30,8 +82,8 @@ QString setTitle(const CommandContext &ctx)
         return "";
     }
 
-    auto status = ctx.twitchChannel->accessStreamStatus();
     auto title = ctx.words.mid(1).join(" ");
+
     getHelix()->updateChannel(
         ctx.twitchChannel->roomId(), "", "", title,
         [channel{ctx.channel}, title](const auto &result) {
@@ -40,10 +92,10 @@ QString setTitle(const CommandContext &ctx)
             channel->addMessage(
                 makeSystemMessage(QString("Updated title to %1").arg(title)));
         },
-        [channel{ctx.channel}] {
-            channel->addMessage(
-                makeSystemMessage("Title update failed! Are you "
-                                  "missing the required scope?"));
+        [channel{ctx.channel}](auto error, auto message) {
+            auto errorMessage =
+                formatUpdateChannelError("title", error, message);
+            channel->addMessage(makeSystemMessage(errorMessage));
         });
 
     return "";
@@ -105,10 +157,10 @@ QString setGame(const CommandContext &ctx)
                     channel->addMessage(makeSystemMessage(
                         QString("Updated game to %1").arg(matchedGame.name)));
                 },
-                [channel] {
-                    channel->addMessage(
-                        makeSystemMessage("Game update failed! Are you "
-                                          "missing the required scope?"));
+                [channel](auto error, auto message) {
+                    auto errorMessage =
+                        formatUpdateChannelError("game", error, message);
+                    channel->addMessage(makeSystemMessage(errorMessage));
                 });
         },
         [channel{ctx.channel}] {
