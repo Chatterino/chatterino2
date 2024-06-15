@@ -211,6 +211,8 @@ void Application::initialize(Settings &settings, const Paths &paths)
         singleton->initialize(settings, paths);
     }
 
+    this->twitch->initialize();
+
     // XXX: Loading Twitch badges after Helix has been initialized, which only happens after
     // the AccountController initialize has been called
     this->twitchBadges->loadTwitchBadges();
@@ -648,6 +650,24 @@ void Application::initPubSub()
                 chan->addOrReplaceTimeout(msg.release());
             });
         });
+
+    std::ignore = this->twitchPubSub->moderation.userWarned.connect(
+        [&](const auto &action) {
+            auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
+
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            // TODO: Resolve the moderator's user ID into a full user here, so message can look better
+            postToThread([chan, action] {
+                MessageBuilder msg(action);
+                msg->flags.set(MessageFlag::PubSub);
+                chan->addMessage(msg.release());
+            });
+        });
+
     std::ignore = this->twitchPubSub->moderation.messageDeleted.connect(
         [&](const auto &action) {
             auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);

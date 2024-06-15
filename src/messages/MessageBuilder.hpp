@@ -12,6 +12,7 @@
 namespace chatterino {
 struct BanAction;
 struct UnbanAction;
+struct WarnAction;
 struct AutomodAction;
 struct AutomodUserAction;
 struct AutomodInfoAction;
@@ -78,6 +79,7 @@ public:
                    const QTime &time = QTime::currentTime());
     MessageBuilder(const BanAction &action, uint32_t count = 1);
     MessageBuilder(const UnbanAction &action);
+    MessageBuilder(const WarnAction &action);
     MessageBuilder(const AutomodUserAction &action);
 
     MessageBuilder(LiveUpdatesAddEmoteMessageTag, const QString &platform,

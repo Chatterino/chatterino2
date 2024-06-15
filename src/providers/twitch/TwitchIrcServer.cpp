@@ -165,7 +165,7 @@ TwitchIrcServer::TwitchIrcServer()
     //                                                     false);
 }
 
-void TwitchIrcServer::initialize(Settings &settings, const Paths &paths)
+void TwitchIrcServer::initialize()
 {
     getIApp()->getAccounts()->twitch.currentUserChanged.connect([this]() {
         postToThread([this] {
