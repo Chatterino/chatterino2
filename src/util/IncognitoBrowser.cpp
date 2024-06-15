@@ -21,6 +21,7 @@ QString getPrivateSwitch(const QString &browserExecutable)
         {"waterfox", "-private-window"},
         {"icecat", "-private-window"},
         {"chrome", "-incognito"},
+        {"google-chrome-stable", "-incognito"},
         {"vivaldi", "-incognito"},
         {"opera", "-newprivatetab"},
         {"opera\\launcher", "--private"},
