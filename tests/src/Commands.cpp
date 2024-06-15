@@ -1,15 +1,24 @@
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandContext.hpp"
+#include "controllers/commands/CommandController.hpp"
 #include "controllers/commands/common/ChannelAction.hpp"
 #include "mocks/EmptyApplication.hpp"
+#include "mocks/Helix.hpp"
+#include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "Test.hpp"
 
 #include <QStringBuilder>
 
 using namespace chatterino;
+
+using ::testing::_;
+using ::testing::StrictMock;
 
 namespace {
 
@@ -31,12 +40,32 @@ public:
         return &this->accounts;
     }
 
+    CommandController *getCommands() override
+    {
+        return &this->commands;
+    }
+
+    IEmotes *getEmotes() override
+    {
+        return &this->emotes;
+    }
+
+    ILogging *getChatLogger() override
+    {
+        return &this->chatLogger;
+    }
+
     Settings settings;
     AccountController accounts;
+    CommandController commands;
     mock::MockTwitchIrcServer twitch;
+    Emotes emotes;
+    mock::EmptyLogging chatLogger;
 };
 
 }  // namespace
+
+namespace chatterino {
 
 TEST(Commands, parseBanActions)
 {
@@ -798,3 +827,231 @@ TEST(Commands, parseUnbanActions)
         }
     }
 }
+
+TEST(Commands, E2E)
+{
+    ::testing::InSequence seq;
+    MockApplication app;
+
+    app.commands.initialize(*getSettings(), getIApp()->getPaths());
+
+    QJsonObject pajlada;
+    pajlada["id"] = "11148817";
+    pajlada["login"] = "pajlada";
+    pajlada["display_name"] = "pajlada";
+    pajlada["created_at"] = "2010-03-17T11:50:53Z";
+    pajlada["description"] = " ͡° ͜ʖ ͡°)";
+    pajlada["profile_image_url"] =
+        "https://static-cdn.jtvnw.net/jtv_user_pictures/"
+        "cbe986e3-06ad-4506-a3aa-eb05466c839c-profile_image-300x300.png";
+
+    QJsonObject testaccount420;
+    testaccount420["id"] = "117166826";
+    testaccount420["login"] = "testaccount_420";
+    testaccount420["display_name"] = "테스트계정420";
+    testaccount420["created_at"] = "2016-02-27T18:55:59Z";
+    testaccount420["description"] = "";
+    testaccount420["profile_image_url"] =
+        "https://static-cdn.jtvnw.net/user-default-pictures-uv/"
+        "ead5c8b2-a4c9-4724-b1dd-9f00b46cbd3d-profile_image-300x300.png";
+
+    QJsonObject forsen;
+    forsen["id"] = "22484632";
+    forsen["login"] = "forsen";
+    forsen["display_name"] = "Forsen";
+    forsen["created_at"] = "2011-05-19T00:28:28Z";
+    forsen["description"] =
+        "Approach with caution! No roleplaying or tryharding allowed.";
+    forsen["profile_image_url"] =
+        "https://static-cdn.jtvnw.net/jtv_user_pictures/"
+        "forsen-profile_image-48b43e1e4f54b5c8-300x300.png";
+
+    std::shared_ptr<TwitchChannel> channel =
+        std::make_shared<TwitchChannel>("pajlada");
+    channel->setRoomId("11148817");
+
+    StrictMock<mock::Helix> mockHelix;
+    initializeHelix(&mockHelix);
+
+    EXPECT_CALL(mockHelix, update).Times(1);
+    EXPECT_CALL(mockHelix, loadBlocks).Times(1);
+
+    auto account = std::make_shared<TwitchAccount>(
+        testaccount420["login"].toString(), "token", "oauthclient",
+        testaccount420["id"].toString());
+    getIApp()->getAccounts()->twitch.accounts.append(account);
+    getIApp()->getAccounts()->twitch.currentUsername =
+        testaccount420["login"].toString();
+    getIApp()->getAccounts()->twitch.load();
+
+    // Simple single-channel ban
+    EXPECT_CALL(mockHelix, fetchUsers(QStringList{"11148817"},
+                                      QStringList{"forsen"}, _, _))
+        .WillOnce([=](auto, auto, auto success, auto) {
+            std::vector<HelixUser> users{
+                HelixUser(pajlada),
+                HelixUser(forsen),
+            };
+            success(users);
+        });
+
+    EXPECT_CALL(mockHelix,
+                banUser(pajlada["id"].toString(), QString("117166826"),
+                        forsen["id"].toString(), std::optional<int>{},
+                        QString(""), _, _))
+        .Times(1);
+
+    getIApp()->getCommands()->execCommand("/ban forsen", channel, false);
+
+    // Multi-channel ban
+    EXPECT_CALL(mockHelix, fetchUsers(QStringList{"11148817"},
+                                      QStringList{"forsen"}, _, _))
+        .WillOnce([=](auto, auto, auto success, auto) {
+            std::vector<HelixUser> users{
+                HelixUser(pajlada),
+                HelixUser(forsen),
+            };
+            success(users);
+        });
+
+    EXPECT_CALL(mockHelix, banUser(pajlada["id"].toString(),
+                                   testaccount420["id"].toString(),
+                                   forsen["id"].toString(),
+                                   std::optional<int>{}, QString(""), _, _))
+        .Times(1);
+
+    EXPECT_CALL(mockHelix,
+                fetchUsers(QStringList{},
+                           QStringList{"forsen", "testaccount_420"}, _, _))
+        .WillOnce([=](auto, auto, auto success, auto) {
+            std::vector<HelixUser> users{
+                HelixUser(testaccount420),
+                HelixUser(forsen),
+            };
+            success(users);
+        });
+
+    EXPECT_CALL(mockHelix, banUser(testaccount420["id"].toString(),
+                                   testaccount420["id"].toString(),
+                                   forsen["id"].toString(),
+                                   std::optional<int>{}, QString(""), _, _))
+        .Times(1);
+
+    getIApp()->getCommands()->execCommand(
+        "/ban --channel id:11148817 --channel testaccount_420 forsen", channel,
+        false);
+
+    // ID-based ban
+    EXPECT_CALL(mockHelix,
+                banUser(pajlada["id"].toString(), QString("117166826"),
+                        forsen["id"].toString(), std::optional<int>{},
+                        QString(""), _, _))
+        .Times(1);
+
+    getIApp()->getCommands()->execCommand("/ban id:22484632", channel, false);
+
+    // ID-based redirected ban
+    EXPECT_CALL(mockHelix,
+                banUser(testaccount420["id"].toString(), QString("117166826"),
+                        forsen["id"].toString(), std::optional<int>{},
+                        QString(""), _, _))
+        .Times(1);
+
+    getIApp()->getCommands()->execCommand(
+        "/ban --channel id:117166826 id:22484632", channel, false);
+
+    // name-based redirected ban
+    EXPECT_CALL(mockHelix, fetchUsers(QStringList{"22484632"},
+                                      QStringList{"testaccount_420"}, _, _))
+        .WillOnce([=](auto, auto, auto success, auto) {
+            std::vector<HelixUser> users{
+                HelixUser(testaccount420),
+                HelixUser(forsen),
+            };
+            success(users);
+        });
+    EXPECT_CALL(mockHelix,
+                banUser(testaccount420["id"].toString(), QString("117166826"),
+                        forsen["id"].toString(), std::optional<int>{},
+                        QString(""), _, _))
+        .Times(1);
+
+    getIApp()->getCommands()->execCommand(
+        "/ban --channel testaccount_420 id:22484632", channel, false);
+
+    // Multi-channel timeout
+    EXPECT_CALL(mockHelix, fetchUsers(QStringList{"11148817"},
+                                      QStringList{"forsen"}, _, _))
+        .WillOnce([=](auto, auto, auto success, auto) {
+            std::vector<HelixUser> users{
+                HelixUser(pajlada),
+                HelixUser(forsen),
+            };
+            success(users);
+        });
+
+    EXPECT_CALL(mockHelix, banUser(pajlada["id"].toString(),
+                                   testaccount420["id"].toString(),
+                                   forsen["id"].toString(),
+                                   std::optional<int>{600}, QString(""), _, _))
+        .Times(1);
+
+    EXPECT_CALL(mockHelix,
+                fetchUsers(QStringList{},
+                           QStringList{"forsen", "testaccount_420"}, _, _))
+        .WillOnce([=](auto, auto, auto success, auto) {
+            std::vector<HelixUser> users{
+                HelixUser(testaccount420),
+                HelixUser(forsen),
+            };
+            success(users);
+        });
+
+    EXPECT_CALL(mockHelix, banUser(testaccount420["id"].toString(),
+                                   testaccount420["id"].toString(),
+                                   forsen["id"].toString(),
+                                   std::optional<int>{600}, QString(""), _, _))
+        .Times(1);
+
+    getIApp()->getCommands()->execCommand(
+        "/timeout --channel id:11148817 --channel testaccount_420 forsen",
+        channel, false);
+
+    // Multi-channel unban
+    EXPECT_CALL(mockHelix, fetchUsers(QStringList{"11148817"},
+                                      QStringList{"forsen"}, _, _))
+        .WillOnce([=](auto, auto, auto success, auto) {
+            std::vector<HelixUser> users{
+                HelixUser(pajlada),
+                HelixUser(forsen),
+            };
+            success(users);
+        });
+
+    EXPECT_CALL(mockHelix, unbanUser(pajlada["id"].toString(),
+                                     testaccount420["id"].toString(),
+                                     forsen["id"].toString(), _, _))
+        .Times(1);
+
+    EXPECT_CALL(mockHelix,
+                fetchUsers(QStringList{},
+                           QStringList{"forsen", "testaccount_420"}, _, _))
+        .WillOnce([=](auto, auto, auto success, auto) {
+            std::vector<HelixUser> users{
+                HelixUser(testaccount420),
+                HelixUser(forsen),
+            };
+            success(users);
+        });
+
+    EXPECT_CALL(mockHelix, unbanUser(testaccount420["id"].toString(),
+                                     testaccount420["id"].toString(),
+                                     forsen["id"].toString(), _, _))
+        .Times(1);
+
+    getIApp()->getCommands()->execCommand(
+        "/unban --channel id:11148817 --channel testaccount_420 forsen",
+        channel, false);
+}
+
+}  // namespace chatterino
