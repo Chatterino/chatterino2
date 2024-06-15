@@ -3,6 +3,10 @@
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
 
+#include <chrono>
+
+using namespace std::chrono_literals;
+
 namespace chatterino {
 
 namespace {
@@ -64,7 +68,25 @@ IrcConnection::IrcConnection(QObject *parent)
                 // If we're still receiving messages, all is well
                 this->recentlyReceivedMessage_ = false;
                 this->waitingForPong_ = false;
-                this->heartbeat.invoke();
+
+                // Check if we got invoked too late (e.g. due to a sleep)
+                auto now = std::chrono::system_clock::now();
+                auto elapsed = now - this->lastPing_;
+                if (elapsed < 3 * 5000ms)
+                {
+                    this->heartbeat.invoke();
+                }
+                else
+                {
+                    qCDebug(chatterinoIrc).nospace()
+                        << "Got late ping (skipping heartbeat): "
+                        << std::chrono::duration_cast<
+                               std::chrono::milliseconds>(elapsed)
+                               .count()
+                        << "ms";
+                }
+                this->lastPing_ = now;
+
                 return;
             }
 
