@@ -91,13 +91,6 @@ TwitchChannel::TwitchChannel(const QString &name)
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
-    // if (!getApp())
-    // {
-    //     // This is intended for tests and benchmarks.
-    //     // Irc, Pubsub, live-updates, and live-notifications aren't mocked there.
-    //     return;
-    // }
-
     this->bSignals_.emplace_back(
         getIApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
             this->setMod(false);
