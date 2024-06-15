@@ -65,13 +65,13 @@ public:
     void setHighlightsEnabled(const bool &newVal);
     bool hasHighlightsEnabled() const;
 
-    void moveAnimated(QPoint pos, bool animated = true);
+    void moveAnimated(QPoint targetPos, bool animated = true);
 
     QRect getDesiredRect() const;
     void hideTabXChanged();
 
     void growWidth(int width);
-    int normalTabWidth();
+    int normalTabWidth() const;
 
 protected:
     void themeChangedEvent() override;
@@ -100,13 +100,14 @@ protected:
 private:
     void showRenameDialog();
 
-    bool hasXButton();
-    bool shouldDrawXButton();
-    QRect getXRect();
+    bool hasXButton() const;
+    bool shouldDrawXButton() const;
+    QRect getXRect() const;
     void titleUpdated();
 
+    int normalTabWidthForHeight(int height) const;
+
     QPropertyAnimation positionChangedAnimation_;
-    bool positionChangedAnimationRunning_ = false;
     QPoint positionAnimationDesiredPoint_;
 
     Notebook *notebook_;

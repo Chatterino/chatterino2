@@ -155,8 +155,8 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
     {
         if (flags.has(MessageElementFlag::EmoteImages))
         {
-            auto image =
-                this->emote_->images.getImageOrLoaded(container.getScale());
+            auto image = this->emote_->images.getImageOrLoaded(
+                container.getImageScale());
             if (image->isEmpty())
             {
                 return;
@@ -210,7 +210,7 @@ void LayeredEmoteElement::addToContainer(MessageLayoutContainer &container,
     {
         if (flags.has(MessageElementFlag::EmoteImages))
         {
-            auto images = this->getLoadedImages(container.getScale());
+            auto images = this->getLoadedImages(container.getImageScale());
             if (images.empty())
             {
                 return;
@@ -364,7 +364,7 @@ void BadgeElement::addToContainer(MessageLayoutContainer &container,
     if (flags.hasAny(this->getFlags()))
     {
         auto image =
-            this->emote_->images.getImageOrLoaded(container.getScale());
+            this->emote_->images.getImageOrLoaded(container.getImageScale());
         if (image->isEmpty())
         {
             return;
@@ -703,6 +703,61 @@ Link LinkElement::getLink() const
     return {Link::Url, this->linkInfo_.url()};
 }
 
+MentionElement::MentionElement(const QString &displayName, QString loginName_,
+                               MessageColor fallbackColor_,
+                               MessageColor userColor_)
+    : TextElement(displayName,
+                  {MessageElementFlag::Text, MessageElementFlag::Mention})
+    , fallbackColor(fallbackColor_)
+    , userColor(userColor_)
+    , userLoginName(std::move(loginName_))
+{
+}
+
+void MentionElement::addToContainer(MessageLayoutContainer &container,
+                                    MessageElementFlags flags)
+{
+    if (getSettings()->colorUsernames)
+    {
+        this->color_ = this->userColor;
+    }
+    else
+    {
+        this->color_ = this->fallbackColor;
+    }
+
+    if (getSettings()->boldUsernames)
+    {
+        this->style_ = FontStyle::ChatMediumBold;
+    }
+    else
+    {
+        this->style_ = FontStyle::ChatMedium;
+    }
+
+    TextElement::addToContainer(container, flags);
+}
+
+MessageElement *MentionElement::setLink(const Link &link)
+{
+    assert(false && "MentionElement::setLink should not be called. Pass "
+                    "through a valid login name in the constructor and it will "
+                    "automatically be a UserInfo link");
+
+    return TextElement::setLink(link);
+}
+
+Link MentionElement::getLink() const
+{
+    if (this->userLoginName.isEmpty())
+    {
+        // Some rare mention elements don't have the knowledge of the login name
+        return {};
+    }
+
+    return {Link::UserInfo, this->userLoginName};
+}
+
 // TIMESTAMP
 TimestampElement::TimestampElement(QTime time)
     : MessageElement(MessageElementFlag::Timestamp)
@@ -798,7 +853,7 @@ void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
     if (flags.hasAny(this->getFlags()))
     {
         const auto &image =
-            this->images_.getImageOrLoaded(container.getScale());
+            this->images_.getImageOrLoaded(container.getImageScale());
         if (image->isEmpty())
         {
             return;

@@ -3,6 +3,7 @@
 class QPoint;
 class QWidget;
 
+#include <QObject>
 #include <QtGlobal>
 
 namespace chatterino {
