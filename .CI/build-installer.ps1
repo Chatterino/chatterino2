@@ -42,7 +42,7 @@ $VCRTVersion = (Get-Item "$Env:VCToolsRedistDir\vc_redist.x64.exe").VersionInfo;
 ISCC `
     /DWORKING_DIR="$($pwd.Path)\" `
     /DINSTALLER_BASE_NAME="$installerBaseName" `
-    /DSHIPPED_VCRT_BUILD="$($VCRTVersion.FileBuildPart)" `
+    /DSHIPPED_VCRT_MINOR="$($VCRTVersion.FileMinorPart)" `
     /DSHIPPED_VCRT_VERSION="$($VCRTVersion.FileDescription)" `
     $defines `
     /O. `
