@@ -89,7 +89,7 @@ QString unbanUser(const CommandContext &ctx)
     const auto command = ctx.words.at(0).toLower();
     const auto usage =
         QStringLiteral(
-            R"(Usage: "%1 <username> - Removes a ban on a user. Options: --channel <channel> to override which channel the timeout takes place in (can be specified multiple times).)")
+            R"(Usage: "%1 <username> - Removes a ban on a user. Options: --channel <channel> to override which channel the unban takes place in (can be specified multiple times).)")
             .arg(command);
     const auto actions = parseChannelAction(ctx, command, usage, false, false);
     if (!actions.has_value())
@@ -126,7 +126,7 @@ QString unbanUser(const CommandContext &ctx)
         if (action.target.id.isEmpty())
         {
             assert(!action.target.login.isEmpty() &&
-                   "Timeout Action target username AND user ID may not be "
+                   "Unban Action target username AND user ID may not be "
                    "empty at the same time");
             userLoginsToFetch.append(action.target.login);
         }
@@ -138,7 +138,7 @@ QString unbanUser(const CommandContext &ctx)
         if (action.channel.id.isEmpty())
         {
             assert(!action.channel.login.isEmpty() &&
-                   "Timeout Action channel username AND user ID may not be "
+                   "Unban Action channel username AND user ID may not be "
                    "empty at the same time");
             userLoginsToFetch.append(action.channel.login);
         }
