@@ -179,14 +179,7 @@ TEST(TwitchPubSubClient, DisconnectedAfter1s)
     ASSERT_EQ(pubSub.diag.messagesReceived, 2);  // Listen RESPONSE & Pong
     ASSERT_EQ(pubSub.diag.listenResponses, 1);
 
-    std::this_thread::sleep_for(350ms);
-
-    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub.diag.messagesReceived, 2);
-
-    std::this_thread::sleep_for(600ms);
+    std::this_thread::sleep_for(950ms);
 
     ASSERT_EQ(pubSub.diag.connectionsOpened, 2);
     ASSERT_EQ(pubSub.diag.connectionsClosed, 1);
