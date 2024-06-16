@@ -16,13 +16,22 @@ struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
 class LoggingChannel;
 
-class Logging
+class ILogging
+{
+public:
+    virtual ~ILogging() = default;
+
+    virtual void addMessage(const QString &channelName, MessagePtr message,
+                            const QString &platformName) = 0;
+};
+
+class Logging : public ILogging
 {
 public:
     Logging(Settings &settings);
 
     void addMessage(const QString &channelName, MessagePtr message,
-                    const QString &platformName);
+                    const QString &platformName) override;
 
 private:
     using PlatformName = QString;

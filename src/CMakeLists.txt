@@ -107,6 +107,8 @@ set(SOURCE_FILES
         controllers/commands/builtin/twitch/UpdateChannel.hpp
         controllers/commands/builtin/twitch/UpdateColor.cpp
         controllers/commands/builtin/twitch/UpdateColor.hpp
+        controllers/commands/common/ChannelAction.cpp
+        controllers/commands/common/ChannelAction.hpp
         controllers/commands/CommandContext.hpp
         controllers/commands/CommandController.cpp
         controllers/commands/CommandController.hpp
@@ -1002,6 +1004,9 @@ target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 
 # semver dependency https://github.com/Neargye/semver
 target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/semver/include)
+
+# expected-lite dependency https://github.com/martinmoene/expected-lite
+target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/expected-lite/include)
 
 # miniaudio dependency https://github.com/mackron/miniaudio
 if (USE_SYSTEM_MINIAUDIO)

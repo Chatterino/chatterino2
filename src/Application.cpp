@@ -504,7 +504,7 @@ PubSub *Application::getTwitchPubSub()
     return this->twitchPubSub.get();
 }
 
-Logging *Application::getChatLogger()
+ILogging *Application::getChatLogger()
 {
     assertInGuiThread();
 
