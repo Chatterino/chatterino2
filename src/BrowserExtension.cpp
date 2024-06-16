@@ -30,7 +30,7 @@ void initFileMode()
 void sendToBrowser(QLatin1String str)
 {
     auto len = static_cast<uint32_t>(str.length());
-    std::cout.write(std::bit_cast<const char *>(&len), sizeof(len));
+    std::cout.write(reinterpret_cast<const char *>(&len), sizeof(len));
     std::cout.write(str.data(), str.length());
     std::cout.flush();
 }
@@ -38,7 +38,7 @@ void sendToBrowser(QLatin1String str)
 QByteArray receiveFromBrowser()
 {
     uint32_t size = 0;
-    std::cin.read(std::bit_cast<char *>(&size), sizeof(size));
+    std::cin.read(reinterpret_cast<char *>(&size), sizeof(size));
 
     if (std::cin.eof())
     {
