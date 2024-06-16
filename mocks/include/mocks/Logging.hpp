@@ -14,8 +14,10 @@ public:
     Logging() = default;
     ~Logging() override = default;
 
-    MOCK_METHOD(void, addMessage, (const QString &channelName, MessagePtr message,
-                    const QString &platformName), (override));
+    MOCK_METHOD(void, addMessage,
+                (const QString &channelName, MessagePtr message,
+                 const QString &platformName),
+                (override));
 };
 
 class EmptyLogging : public ILogging
@@ -25,7 +27,8 @@ public:
     ~EmptyLogging() override = default;
 
     void addMessage(const QString &channelName, MessagePtr message,
-                    const QString &platformName) override {
+                    const QString &platformName) override
+    {
         //
     }
 };
