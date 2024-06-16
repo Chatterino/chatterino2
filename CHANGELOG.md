@@ -13,6 +13,7 @@
 - Minor: Improved error messages for channel update commands. (#5429)
 - Minor: Moderators can now see when users are warned. (#5441)
 - Minor: Added support for Brave & google-chrome-stable browsers. (#5452)
+- Minor: Added drop indicator line while dragging in tables. (#5256)
 - Bugfix: Fixed tab move animation occasionally failing to start after closing a tab. (#5426)
 - Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
 - Bugfix: Fixed restricted users usernames not being clickable. (#5405)
