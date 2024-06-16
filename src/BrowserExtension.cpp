@@ -45,7 +45,8 @@ QByteArray receiveFromBrowser()
         return {};
     }
 
-    QByteArray buffer{static_cast<qsizetype>(size), Qt::Uninitialized};
+    QByteArray buffer{static_cast<QByteArray::size_type>(size),
+                      Qt::Uninitialized};
     std::cin.read(buffer.data(), size);
 
     return buffer;
