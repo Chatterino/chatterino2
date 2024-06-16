@@ -29,7 +29,7 @@ void initFileMode()
 // TODO(Qt6): Use QUtf8String
 void sendToBrowser(QLatin1String str)
 {
-    auto len = static_cast<uint32_t>(str.length());
+    auto len = static_cast<uint32_t>(str.size());
     std::cout.write(reinterpret_cast<const char *>(&len), sizeof(len));
     std::cout.write(str.data(), str.length());
     std::cout.flush();
@@ -45,7 +45,7 @@ QByteArray receiveFromBrowser()
         return {};
     }
 
-    QByteArray buffer{size, Qt::Uninitialized};
+    QByteArray buffer{static_cast<qsizetype>(size), Qt::Uninitialized};
     std::cin.read(buffer.data(), size);
 
     return buffer;
