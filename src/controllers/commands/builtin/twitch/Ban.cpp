@@ -275,7 +275,7 @@ QString sendTimeout(const CommandContext &ctx)
 {
     const auto command = QStringLiteral("/timeout");
     const auto usage = QStringLiteral(
-        R"(Usage: "/timeout [options...] <username> [duration][time unit] [reason]" - Temporarily prevent a user from chatting. Duration (optional, default=10 minutes) must be a positive integer; time unit (optional, default=s) must be one of s, m, h, d, w; maximum duration is 2 weeks. Combinations like 1d2h are also allowed. Reason is optional and will be shown to the target user and other moderators. Use "/untimeout" to remove a timeout. Options: --channel <channel> to override which channel the unban takes place in (can be specified multiple times).)");
+        R"(Usage: "/timeout [options...] <username> [duration][time unit] [reason]" - Temporarily prevent a user from chatting. Duration (optional, default=10 minutes) must be a positive integer; time unit (optional, default=s) must be one of s, m, h, d, w; maximum duration is 2 weeks. Combinations like 1d2h are also allowed. Reason is optional and will be shown to the target user and other moderators. Use "/untimeout" to remove a timeout. Options: --channel <channel> to override which channel the timeout takes place in (can be specified multiple times).)");
     const auto actions = parseChannelAction(ctx, command, usage, true, true);
 
     if (!actions.has_value())
@@ -299,7 +299,7 @@ QString sendTimeout(const CommandContext &ctx)
     if (currentUser->isAnon())
     {
         ctx.channel->addMessage(
-            makeSystemMessage("You must be logged in to ban someone!"));
+            makeSystemMessage("You must be logged in to timeout someone!"));
         return "";
     }
 
