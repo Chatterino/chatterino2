@@ -3,6 +3,10 @@
 #include <nonstd/expected.hpp>
 #include <QString>
 
+#include <ostream>
+#include <tuple>
+#include <vector>
+
 namespace chatterino {
 
 struct CommandContext;
@@ -32,7 +36,7 @@ struct PerformChannelAction {
     // Target to perform the action on
     IncompleteHelixUser target;
     QString reason;
-    int duration;
+    int duration{};
 
     bool operator==(const PerformChannelAction &other) const
     {

@@ -3,10 +3,16 @@
 #include "controllers/commands/CommandContext.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "util/Helpers.hpp"
 #include "util/Twitch.hpp"
 
 #include <QCommandLineParser>
 #include <QStringBuilder>
+
+#include <algorithm>
+#include <ostream>
+#include <string>
+#include <vector>
 
 namespace chatterino::commands {
 
@@ -77,7 +83,7 @@ nonstd::expected<std::vector<PerformChannelAction>, QString> parseChannelAction(
     }
     QCommandLineOption channelOption(
         "channel", "Override which channel(s) to perform the action in",
-        "channel id");
+        "channel");
     parser.addOptions({
         channelOption,
     });
