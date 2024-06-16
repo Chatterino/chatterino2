@@ -88,6 +88,7 @@ void HTTPRequest::createMetatable(lua_State *L)
 
 int HTTPRequest::on_success_wrap(lua_State *L)
 {
+    lua::StackGuard guard(L, -2);
     auto ptr = HTTPRequest::getOrError(L, 1);
     return ptr->on_success(L);
 }
@@ -109,12 +110,14 @@ int HTTPRequest::on_success(lua_State *L)
     }
     auto shared = this->pushPrivate(L);
     lua_pushvalue(L, -2);
-    lua_setfield(L, shared, "success");
+    lua_setfield(L, shared, "success");  // this deletes the function copy
+    lua_pop(L, 2);  // delete the table and function original
     return 0;
 }
 
 int HTTPRequest::on_error_wrap(lua_State *L)
 {
+    lua::StackGuard guard(L, -2);
     auto ptr = HTTPRequest::getOrError(L, 1);
     return ptr->on_error(L);
 }
@@ -136,12 +139,14 @@ int HTTPRequest::on_error(lua_State *L)
     }
     auto shared = this->pushPrivate(L);
     lua_pushvalue(L, -2);
-    lua_setfield(L, shared, "error");
+    lua_setfield(L, shared, "error");  // this deletes the function copy
+    lua_pop(L, 2);                     // delete the table and function original
     return 0;
 }
 
 int HTTPRequest::set_timeout_wrap(lua_State *L)
 {
+    lua::StackGuard guard(L, -2);
     auto ptr = HTTPRequest::getOrError(L, 1);
     return ptr->set_timeout(L);
 }
@@ -177,6 +182,7 @@ int HTTPRequest::set_timeout(lua_State *L)
 
 int HTTPRequest::finally_wrap(lua_State *L)
 {
+    lua::StackGuard guard(L, -1);
     auto ptr = HTTPRequest::getOrError(L, 1);
     return ptr->finally(L);
 }
@@ -198,12 +204,14 @@ int HTTPRequest::finally(lua_State *L)
     }
     auto shared = this->pushPrivate(L);
     lua_pushvalue(L, -2);
-    lua_setfield(L, shared, "finally");
+    lua_setfield(L, shared, "finally");  // this deletes the function copy
+    lua_pop(L, 2);  // delete the table and function original
     return 0;
 }
 
 int HTTPRequest::set_payload_wrap(lua_State *L)
 {
+    lua::StackGuard guard(L, -1);
     auto ptr = HTTPRequest::getOrError(L, 1);
     return ptr->set_payload(L);
 }
@@ -233,6 +241,7 @@ int HTTPRequest::set_payload(lua_State *L)
 
 int HTTPRequest::set_header_wrap(lua_State *L)
 {
+    lua::StackGuard guard(L, -1);
     auto ptr = HTTPRequest::getOrError(L, 1);
     return ptr->set_header(L);
 }
@@ -269,6 +278,7 @@ int HTTPRequest::set_header(lua_State *L)
 
 int HTTPRequest::create(lua_State *L)
 {
+    lua::StackGuard guard(L, -1);
     if (lua_gettop(L) != 2)
     {
         luaL_error(L, "HTTPRequest.create needs exactly 2 arguments (method "
@@ -325,6 +335,7 @@ int HTTPRequest::execute(lua_State *L)
     this->done = true;
     std::move(this->req_)
         .onSuccess([shared, L](const NetworkResult &res) {
+            lua::StackGuard guard(L);
             auto *thread = lua_newthread(L);
 
             auto priv = shared->pushPrivate(thread);
@@ -336,9 +347,15 @@ int HTTPRequest::execute(lua_State *L)
                 // one arg, no return, no msgh
                 lua_pcall(thread, 1, 0, 0);
             }
+            else
+            {
+                lua_pop(thread, 1);  // remove callback
+            }
             lua_closethread(thread, nullptr);
+            lua_pop(L, 1);  // remove thread from L
         })
         .onError([shared, L](const NetworkResult &res) {
+            lua::StackGuard guard(L);
             auto *thread = lua_newthread(L);
 
             auto priv = shared->pushPrivate(thread);
@@ -350,9 +367,15 @@ int HTTPRequest::execute(lua_State *L)
                 // one arg, no return, no msgh
                 lua_pcall(thread, 1, 0, 0);
             }
+            else
+            {
+                lua_pop(thread, 1);  // remove callback
+            }
             lua_closethread(thread, nullptr);
+            lua_pop(L, 1);  // remove thread from L
         })
         .finally([shared, L]() {
+            lua::StackGuard guard(L);
             auto *thread = lua_newthread(L);
 
             auto priv = shared->pushPrivate(thread);
@@ -363,11 +386,16 @@ int HTTPRequest::execute(lua_State *L)
                 // no args, no return, no msgh
                 lua_pcall(thread, 0, 0, 0);
             }
+            else
+            {
+                lua_pop(thread, 1);  // remove callback
+            }
             // remove our private data
             lua_pushnil(thread);
             lua_setfield(thread, LUA_REGISTRYINDEX,
                          shared->privateKey.toStdString().c_str());
             lua_closethread(thread, nullptr);
+            lua_pop(L, 1);  // remove thread from L
         })
         .timeout(this->timeout_)
         .execute();
