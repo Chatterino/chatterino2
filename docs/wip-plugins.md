@@ -425,10 +425,10 @@ containing a valid URL (ex. `https://example.com/path/to/api`).
 
 ```lua
 local req = c2.HTTPRequest.create(c2.HTTPMethod.Get, "https://example.com")
-req.on_success(function (res)
+req:on_success(function (res)
     print(res.data)
 end)
-req.execute()
+req:execute()
 ```
 
 ##### `HTTPRequest:on_success(callback)`
