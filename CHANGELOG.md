@@ -33,6 +33,7 @@
 - Dev: Qt Creator now auto-configures Conan when loading the project and skips vcpkg. (#5305)
 - Dev: The MSVC CRT is now bundled with Chatterino as it depends on having a recent version installed. (#5447)
 - Dev: Refactor/unsingletonize `UserDataController`. (#5459)
+- Dev: Cleanup `BrowserExtension`. (#5465)
 
 ## 2.5.1
 
