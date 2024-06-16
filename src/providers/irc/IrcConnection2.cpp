@@ -60,6 +60,7 @@ IrcConnection::IrcConnection(QObject *parent)
     // Send ping every x seconds
     this->pingTimer_.setInterval(5000);
     this->pingTimer_.start();
+    this->lastPing_ = std::chrono::system_clock::now();
     QObject::connect(&this->pingTimer_, &QTimer::timeout, [this] {
         if (this->isConnected())
         {
