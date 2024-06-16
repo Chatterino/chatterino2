@@ -85,7 +85,7 @@ Example:
 }
 ```
 
-### HTTP
+### Network
 
 Allows the plugin to send HTTP requests.
 
@@ -96,7 +96,7 @@ Example:
   ...,
   "permissions": [
     {
-      "type": "HTTP"
+      "type": "Network"
     },
     ...
   ]
