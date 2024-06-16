@@ -90,7 +90,7 @@ TEST(Commands, parseBanActions)
 
     std::vector<Test> tests{
         {
-            // Normal ban with an added reason, with the user maybe trying to use the --channal parameter at the end, but it gets eaten by the reason
+            // Normal ban with an added reason, with the user maybe trying to use the --channel parameter at the end, but it gets eaten by the reason
             .inputContext =
                 {
                     .words = {"/ban", "forsen", "the", "ban", "reason",
