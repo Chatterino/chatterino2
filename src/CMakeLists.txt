@@ -358,6 +358,19 @@ set(SOURCE_FILES
         providers/liveupdates/BasicPubSubManager.hpp
         providers/liveupdates/BasicPubSubWebsocket.hpp
 
+        providers/pronouns/Pronouns.hpp
+        providers/pronouns/Pronouns.cpp
+        providers/pronouns/PronounUser.hpp
+        providers/pronouns/PronounUser.cpp
+        providers/pronouns/UserPronouns.hpp
+        providers/pronouns/UserPronouns.cpp
+        providers/pronouns/IPronounsApi.hpp
+        providers/pronouns/common/PronounsApiRequest.hpp
+        providers/pronouns/alejo/PronounsAlejoApi.hpp
+        providers/pronouns/alejo/PronounsAlejoApi.cpp
+        providers/pronouns/pronoundb/PronounsPronounDbApi.hpp
+        providers/pronouns/pronoundb/PronounsPronounDbApi.cpp
+
         providers/recentmessages/Api.cpp
         providers/recentmessages/Api.hpp
         providers/recentmessages/Impl.cpp

@@ -1026,6 +1026,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox(
         "Automatically close reply thread popup when it loses focus",
         s.autoCloseThreadPopup);
+    layout.addCheckbox("Show pronouns for users", s.showPronouns);
     layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains,
                        false,
                        "Make all clickable links lowercase to deter "

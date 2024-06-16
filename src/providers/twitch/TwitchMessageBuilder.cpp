@@ -18,6 +18,7 @@
 #include "providers/colors/ColorProvider.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
+#include "providers/pronouns/Pronouns.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -1005,6 +1006,26 @@ void TwitchMessageBuilder::parseUsername()
     }
 }
 
+std::optional<QString> getPronouns(QString loginName)
+{
+    if (!getSettings()->showPronouns)
+    {
+        return {};
+    }
+
+    auto pronouns =
+        getIApp()->getPronouns()->getForUsername(loginName.toStdString());
+    if (pronouns && *pronouns)
+    {
+        QString pronounsText;
+        pronounsText += "(" + pronouns->format() + ")";
+
+        return {pronounsText};
+    }
+
+    return {};
+}
+
 void TwitchMessageBuilder::appendUsername()
 {
     auto *app = getIApp();
@@ -1052,6 +1073,16 @@ void TwitchMessageBuilder::appendUsername()
                                    FontStyle::ChatMediumBold)
             ->setLink({Link::UserWhisper, this->message().displayName});
 
+        // Sender pronouns
+        auto senderPronouns = getPronouns(this->message().loginName);
+        if (senderPronouns)
+        {
+            this->emplace<TextElement>(
+                    *senderPronouns, MessageElementFlag::Username,
+                    this->usernameColor_, FontStyle::ChatMedium)
+                ->setLink({Link::UserWhisper, this->message().displayName});
+        }
+
         auto currentUser = app->getAccounts()->twitch.getCurrent();
 
         // Separator
@@ -1069,7 +1100,9 @@ void TwitchMessageBuilder::appendUsername()
     }
     else
     {
-        if (!this->action_)
+        auto pronouns = getPronouns(this->message().loginName);
+
+        if (!this->action_ && !pronouns)
         {
             usernameText += ":";
         }
@@ -1078,6 +1111,22 @@ void TwitchMessageBuilder::appendUsername()
                                    this->usernameColor_,
                                    FontStyle::ChatMediumBold)
             ->setLink({Link::UserInfo, this->message().displayName});
+
+        // Sender pronouns
+        if (pronouns)
+        {
+            auto pronounText = *pronouns;
+
+            if (!this->action_)
+            {
+                pronounText += ":";
+            }
+
+            this->emplace<TextElement>(
+                    pronounText, MessageElementFlag::Username,
+                    this->usernameColor_, FontStyle::ChatMedium)
+                ->setLink({Link::UserInfo, this->message().displayName});
+        }
     }
 }
 

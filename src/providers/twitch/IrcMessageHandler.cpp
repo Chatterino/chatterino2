@@ -14,6 +14,7 @@
 #include "messages/MessageElement.hpp"
 #include "messages/MessageThread.hpp"
 #include "providers/irc/AbstractIrcServer.hpp"
+#include "providers/pronouns/Pronouns.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchAccountManager.hpp"
@@ -1451,6 +1452,12 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
         if (highlighted && showInMentions)
         {
             server.getMentionsChannel()->addMessage(msg);
+        }
+
+        if (getSettings()->showPronouns)
+        {
+            getIApp()->getPronouns()->enqueueFetch(
+                {msg->loginName.toStdString()});
         }
 
         chan->addMessage(msg);

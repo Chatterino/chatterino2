@@ -5,6 +5,7 @@
 #include "messages/MessageBuilder.hpp"
 #include "providers/irc/IrcChannel2.hpp"
 #include "providers/irc/IrcServer.hpp"
+#include "providers/pronouns/Pronouns.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Logging.hpp"
