@@ -3,11 +3,10 @@
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 #include <QPixmap>
-#include "common/Singleton.hpp"
 
 namespace chatterino {
 
-class Resources2 : public Singleton
+class Resources2
 {
 public:
     Resources2();
