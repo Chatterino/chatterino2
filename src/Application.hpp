@@ -160,7 +160,7 @@ private:
     std::unique_ptr<TwitchIrcServer> twitch;
     FfzBadges *const ffzBadges{};
     SeventvBadges *const seventvBadges{};
-    UserDataController *const userData{};
+    std::unique_ptr<UserDataController> userData;
     ISoundController *const sound{};
     TwitchLiveController *const twitchLiveController{};
     std::unique_ptr<PubSub> twitchPubSub;
