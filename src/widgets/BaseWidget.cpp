@@ -54,7 +54,11 @@ float BaseWidget::scale() const
 
 void BaseWidget::setScale(float value)
 {
-    // update scale value
+    if (this->scale_ == value)
+    {
+        return;
+    }
+
     this->scale_ = value;
 
     this->scaleChangedEvent(this->scale());
@@ -118,19 +122,6 @@ void BaseWidget::setScaleIndependantHeight(int value)
 {
     this->setScaleIndependantSize(
         QSize(this->scaleIndependantSize_.width(), value));
-}
-
-float BaseWidget::qtFontScale() const
-{
-    if (auto *window = dynamic_cast<BaseWindow *>(this->window()))
-    {
-        // ensure no div by 0
-        return this->scale() / std::max<float>(0.01f, window->nativeScale_);
-    }
-    else
-    {
-        return this->scale();
-    }
 }
 
 void BaseWidget::childEvent(QChildEvent *event)

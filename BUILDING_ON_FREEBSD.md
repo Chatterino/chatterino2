@@ -15,7 +15,7 @@ FreeBSD 13.0-CURRENT.
    mkdir build
    cd build
    ```
-1. Generate build files
+1. Generate build files. To enable Lua plugins in your build add `-DCHATTERINO_PLUGINS=ON` to this command.
    ```sh
    cmake ..
    ```

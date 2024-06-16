@@ -1,5 +1,7 @@
 #include "providers/twitch/pubsubmessages/ChatModeratorAction.hpp"
 
+#include "util/QMagicEnum.hpp"
+
 namespace chatterino {
 
 PubSubChatModeratorActionMessage::PubSubChatModeratorActionMessage(
@@ -7,7 +9,7 @@ PubSubChatModeratorActionMessage::PubSubChatModeratorActionMessage(
     : typeString(root.value("type").toString())
     , data(root.value("data").toObject())
 {
-    auto oType = magic_enum::enum_cast<Type>(this->typeString.toStdString());
+    auto oType = qmagicenum::enumCast<Type>(this->typeString);
     if (oType.has_value())
     {
         this->type = oType.value();

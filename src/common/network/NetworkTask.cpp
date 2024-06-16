@@ -54,41 +54,41 @@ QNetworkReply *NetworkTask::createReply()
 {
     const auto &data = this->data_;
     const auto &request = this->data_->request;
-    auto &accessManager = NetworkManager::accessManager;
+    auto *accessManager = NetworkManager::accessManager;
     switch (this->data_->requestType)
     {
         case NetworkRequestType::Get:
-            return accessManager.get(request);
+            return accessManager->get(request);
 
         case NetworkRequestType::Put:
-            return accessManager.put(request, data->payload);
+            return accessManager->put(request, data->payload);
 
         case NetworkRequestType::Delete:
-            return accessManager.deleteResource(data->request);
+            return accessManager->deleteResource(data->request);
 
         case NetworkRequestType::Post:
             if (data->multiPartPayload)
             {
                 assert(data->payload.isNull());
 
-                return accessManager.post(request,
-                                          data->multiPartPayload.get());
+                return accessManager->post(request,
+                                           data->multiPartPayload.get());
             }
             else
             {
-                return accessManager.post(request, data->payload);
+                return accessManager->post(request, data->payload);
             }
         case NetworkRequestType::Patch:
             if (data->multiPartPayload)
             {
                 assert(data->payload.isNull());
 
-                return accessManager.sendCustomRequest(
+                return accessManager->sendCustomRequest(
                     request, "PATCH", data->multiPartPayload.get());
             }
             else
             {
-                return NetworkManager::accessManager.sendCustomRequest(
+                return NetworkManager::accessManager->sendCustomRequest(
                     request, "PATCH", data->payload);
             }
     }

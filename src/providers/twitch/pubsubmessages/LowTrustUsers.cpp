@@ -1,5 +1,7 @@
 #include "providers/twitch/pubsubmessages/LowTrustUsers.hpp"
 
+#include "util/QMagicEnum.hpp"
+
 #include <QDateTime>
 #include <QJsonArray>
 
@@ -8,8 +10,7 @@ namespace chatterino {
 PubSubLowTrustUsersMessage::PubSubLowTrustUsersMessage(const QJsonObject &root)
     : typeString(root.value("type").toString())
 {
-    if (const auto oType =
-            magic_enum::enum_cast<Type>(this->typeString.toStdString());
+    if (const auto oType = qmagicenum::enumCast<Type>(this->typeString);
         oType.has_value())
     {
         this->type = oType.value();
@@ -75,8 +76,8 @@ PubSubLowTrustUsersMessage::PubSubLowTrustUsersMessage(const QJsonObject &root)
     this->updatedByUserDisplayName = updatedBy.value("display_name").toString();
 
     this->treatmentString = data.value("treatment").toString();
-    if (const auto oTreatment = magic_enum::enum_cast<Treatment>(
-            this->treatmentString.toStdString());
+    if (const auto oTreatment =
+            qmagicenum::enumCast<Treatment>(this->treatmentString);
         oTreatment.has_value())
     {
         this->treatment = oTreatment.value();
@@ -84,8 +85,8 @@ PubSubLowTrustUsersMessage::PubSubLowTrustUsersMessage(const QJsonObject &root)
 
     this->evasionEvaluationString =
         data.value("ban_evasion_evaluation").toString();
-    if (const auto oEvaluation = magic_enum::enum_cast<EvasionEvaluation>(
-            this->evasionEvaluationString.toStdString());
+    if (const auto oEvaluation = qmagicenum::enumCast<EvasionEvaluation>(
+            this->evasionEvaluationString);
         oEvaluation.has_value())
     {
         this->evasionEvaluation = oEvaluation.value();
@@ -93,8 +94,8 @@ PubSubLowTrustUsersMessage::PubSubLowTrustUsersMessage(const QJsonObject &root)
 
     for (const auto &rType : data.value("types").toArray())
     {
-        if (const auto oRestriction = magic_enum::enum_cast<RestrictionType>(
-                rType.toString().toStdString());
+        if (const auto oRestriction =
+                qmagicenum::enumCast<RestrictionType>(rType.toString());
             oRestriction.has_value())
         {
             this->restrictionTypes.set(oRestriction.value());

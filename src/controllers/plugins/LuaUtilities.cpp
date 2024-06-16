@@ -142,6 +142,20 @@ StackIdx push(lua_State *L, const int &b)
     return lua_gettop(L);
 }
 
+StackIdx push(lua_State *L, const api::CompletionEvent &ev)
+{
+    auto idx = pushEmptyTable(L, 4);
+#    define PUSH(field)         \
+        lua::push(L, ev.field); \
+        lua_setfield(L, idx, #field)
+    PUSH(query);
+    PUSH(full_text_content);
+    PUSH(cursor_position);
+    PUSH(is_first_word);
+#    undef PUSH
+    return idx;
+}
+
 bool peek(lua_State *L, int *out, StackIdx idx)
 {
     StackGuard guard(L);

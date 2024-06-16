@@ -119,9 +119,12 @@ int c2_register_callback(lua_State *L)
         return 0;
     }
 
-    auto callbackSavedName = QString("c2cb-%1").arg(
-        magic_enum::enum_name<EventType>(evtType).data());
-    lua_setfield(L, LUA_REGISTRYINDEX, callbackSavedName.toStdString().c_str());
+    auto typeName = magic_enum::enum_name(evtType);
+    std::string callbackSavedName;
+    callbackSavedName.reserve(5 + typeName.size());
+    callbackSavedName += "c2cb-";
+    callbackSavedName += typeName;
+    lua_setfield(L, LUA_REGISTRYINDEX, callbackSavedName.c_str());
 
     lua_pop(L, 2);
 

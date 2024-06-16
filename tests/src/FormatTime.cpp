@@ -1,6 +1,6 @@
 #include "util/FormatTime.hpp"
 
-#include <gtest/gtest.h>
+#include "Test.hpp"
 
 #include <chrono>
 
@@ -62,8 +62,8 @@ TEST(FormatTime, Int)
         const auto actual = formatTime(input);
 
         EXPECT_EQ(actual, expected)
-            << qUtf8Printable(actual) << " (" << input
-            << ") did not match expected value " << qUtf8Printable(expected);
+            << actual << " (" << input << ") did not match expected value "
+            << expected;
     }
 }
 
@@ -130,8 +130,8 @@ TEST(FormatTime, QString)
         const auto actual = formatTime(input);
 
         EXPECT_EQ(actual, expected)
-            << qUtf8Printable(actual) << " (" << qUtf8Printable(input)
-            << ") did not match expected value " << qUtf8Printable(expected);
+            << actual << " (" << input << ") did not match expected value "
+            << expected;
     }
 }
 
@@ -202,7 +202,6 @@ TEST(FormatTime, chrono)
         const auto actual = formatTime(input);
 
         EXPECT_EQ(actual, expected)
-            << qUtf8Printable(actual) << " did not match expected value "
-            << qUtf8Printable(expected);
+            << actual << " did not match expected value " << expected;
     }
 }

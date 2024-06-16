@@ -1,8 +1,8 @@
 #include "common/network/NetworkManager.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
+#include "Test.hpp"
 
-#include <gtest/gtest.h>
 #include <QApplication>
 #include <QJsonArray>
 #include <QLoggingCategory>

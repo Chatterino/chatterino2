@@ -29,11 +29,12 @@
 #include <QUuid>
 #include <QWidget>
 
+#include <utility>
+
 namespace chatterino {
 
 Notebook::Notebook(QWidget *parent)
     : BaseWidget(parent)
-    , menu_(this)
     , addButton_(new NotebookButton(this))
 {
     this->addButton_->setIcon(NotebookButton::Icon::Plus);
@@ -81,8 +82,6 @@ Notebook::Notebook(QWidget *parent)
             << "Notebook must be created within a BaseWindow";
     }
 
-    this->addNotebookActionsToMenu(&this->menu_);
-
     // Manually resize the add button so the initial paint uses the correct
     // width when computing the maximum width occupied per column in vertical
     // tab rendering.
@@ -90,6 +89,12 @@ Notebook::Notebook(QWidget *parent)
 }
 
 NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
+{
+    return this->addPageAt(page, -1, std::move(title), select);
+}
+
+NotebookTab *Notebook::addPageAt(QWidget *page, int position, QString title,
+                                 bool select)
 {
     // Queue up save because: Tab added
     getIApp()->getWindows()->queueSave();
@@ -104,7 +109,14 @@ NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
     item.page = page;
     item.tab = tab;
 
-    this->items_.append(item);
+    if (position == -1)
+    {
+        this->items_.push_back(item);
+    }
+    else
+    {
+        this->items_.insert(position, item);
+    }
 
     page->hide();
     page->setParent(this);
@@ -166,6 +178,48 @@ void Notebook::removePage(QWidget *page)
     this->items_.removeAt(removingIndex);
 
     this->performLayout(true);
+}
+
+void Notebook::duplicatePage(QWidget *page)
+{
+    auto *item = this->findItem(page);
+    assert(item != nullptr);
+    if (item == nullptr)
+    {
+        return;
+    }
+
+    auto *container = dynamic_cast<SplitContainer *>(item->page);
+    if (!container)
+    {
+        return;
+    }
+
+    auto *newContainer = new SplitContainer(this);
+    if (!container->getSplits().empty())
+    {
+        auto descriptor = container->buildDescriptor();
+        newContainer->applyFromDescriptor(descriptor);
+    }
+
+    const auto tabPosition = this->indexOf(page);
+    auto newTabPosition = -1;
+    if (tabPosition != -1)
+    {
+        newTabPosition = tabPosition + 1;
+    }
+    auto newTabHighlightState = item->tab->highlightState();
+    QString newTabTitle = "";
+    if (item->tab->hasCustomTitle())
+    {
+        newTabTitle = item->tab->getCustomTitle();
+    }
+
+    auto *tab =
+        this->addPageAt(newContainer, newTabPosition, newTabTitle, false);
+    tab->setHighlightState(newTabHighlightState);
+
+    newContainer->setTab(tab);
 }
 
 void Notebook::removeCurrentPage()
@@ -596,6 +650,12 @@ void Notebook::showTabVisibilityInfoPopup()
 
 void Notebook::refresh()
 {
+    if (this->refreshPaused_)
+    {
+        this->refreshRequested_ = true;
+        return;
+    }
+
     this->performLayout();
     this->updateTabVisibility();
 }
@@ -655,12 +715,19 @@ void Notebook::resizeAddButton()
     this->addButton_->setFixedSize(h, h);
 }
 
-void Notebook::scaleChangedEvent(float)
+void Notebook::scaleChangedEvent(float /*scale*/)
 {
     this->resizeAddButton();
+    this->refreshPaused_ = true;
+    this->refreshRequested_ = false;
     for (auto &i : this->items_)
     {
         i.tab->updateSize();
+    }
+    this->refreshPaused_ = false;
+    if (this->refreshRequested_)
+    {
+        this->refresh();
     }
 }
 
@@ -1125,7 +1192,14 @@ void Notebook::mousePressEvent(QMouseEvent *event)
     switch (event->button())
     {
         case Qt::RightButton: {
-            this->menu_.popup(event->globalPos() + QPoint(0, 8));
+            event->accept();
+
+            if (!this->menu_)
+            {
+                this->menu_ = new QMenu(this);
+                this->addNotebookActionsToMenu(this->menu_);
+            }
+            this->menu_->popup(event->globalPos() + QPoint(0, 8));
         }
         break;
         default:;
@@ -1294,6 +1368,10 @@ SplitNotebook::SplitNotebook(Window *parent)
         this->addCustomButtons();
     }
 
+    this->toggleOfflineTabsAction_ = new QAction({}, this);
+    QObject::connect(this->toggleOfflineTabsAction_, &QAction::triggered, this,
+                     &SplitNotebook::toggleOfflineTabs);
+
     getSettings()->tabVisibility.connect(
         [this](int val, auto) {
             auto visibility = NotebookTabVisibility(val);
@@ -1307,12 +1385,17 @@ SplitNotebook::SplitNotebook(Window *parent)
                     this->setTabVisibilityFilter([](const NotebookTab *tab) {
                         return tab->isLive();
                     });
+                    this->toggleOfflineTabsAction_->setText("Show all tabs");
                     break;
                 case NotebookTabVisibility::AllTabs:
                 default:
                     this->setTabVisibilityFilter(nullptr);
+                    this->toggleOfflineTabsAction_->setText(
+                        "Show live tabs only");
                     break;
             }
+
+            this->updateToggleOfflineTabsHotkey(visibility);
         },
         this->signalHolder_, true);
 
@@ -1363,6 +1446,31 @@ SplitNotebook::SplitNotebook(Window *parent)
                 }
             }
         });
+}
+
+void SplitNotebook::toggleOfflineTabs()
+{
+    if (!this->getShowTabs())
+    {
+        // Tabs are currently hidden, so the intention is to show
+        // tabs again before enabling the live only setting
+        this->setShowTabs(true);
+        getSettings()->tabVisibility.setValue(NotebookTabVisibility::LiveOnly);
+    }
+    else
+    {
+        getSettings()->tabVisibility.setValue(
+            getSettings()->tabVisibility.getEnum() ==
+                    NotebookTabVisibility::LiveOnly
+                ? NotebookTabVisibility::AllTabs
+                : NotebookTabVisibility::LiveOnly);
+    }
+}
+
+void SplitNotebook::addNotebookActionsToMenu(QMenu *menu)
+{
+    Notebook::addNotebookActionsToMenu(menu);
+    menu->addAction(this->toggleOfflineTabsAction_);
 }
 
 void SplitNotebook::showEvent(QShowEvent * /*event*/)
@@ -1440,6 +1548,42 @@ void SplitNotebook::addCustomButtons()
     QObject::connect(getIApp()->getStreamerMode(), &IStreamerMode::changed,
                      this, &SplitNotebook::updateStreamerModeIcon);
     this->updateStreamerModeIcon();
+}
+
+void SplitNotebook::updateToggleOfflineTabsHotkey(
+    NotebookTabVisibility newTabVisibility)
+{
+    auto *hotkeys = getIApp()->getHotkeys();
+    auto getKeySequence = [&](auto argument) {
+        return hotkeys->getDisplaySequence(HotkeyCategory::Window,
+                                           "setTabVisibility", {{argument}});
+    };
+
+    auto toggleSeq = getKeySequence("toggleLiveOnly");
+
+    switch (newTabVisibility)
+    {
+        case NotebookTabVisibility::AllTabs:
+            if (toggleSeq.isEmpty())
+            {
+                toggleSeq = getKeySequence("liveOnly");
+            }
+            break;
+
+        case NotebookTabVisibility::LiveOnly:
+            if (toggleSeq.isEmpty())
+            {
+                toggleSeq = getKeySequence("toggle");
+
+                if (toggleSeq.isEmpty())
+                {
+                    toggleSeq = getKeySequence("on");
+                }
+            }
+            break;
+    }
+
+    this->toggleOfflineTabsAction_->setShortcut(toggleSeq);
 }
 
 void SplitNotebook::updateStreamerModeIcon()
