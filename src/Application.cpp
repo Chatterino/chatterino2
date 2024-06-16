@@ -136,7 +136,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , ffzBadges(&this->emplace<FfzBadges>())
     , seventvBadges(&this->emplace<SeventvBadges>())
     , userData(&this->emplace(new UserDataController(paths)))
-    , sound(&this->emplace<ISoundController>(makeSoundController(_settings)))
+    , sound(makeSoundController(_settings))
     , twitchLiveController(&this->emplace<TwitchLiveController>())
     , twitchPubSub(new PubSub(TWITCH_PUBSUB_URL))
     , twitchBadges(new TwitchBadges)
@@ -173,6 +173,7 @@ void Application::fakeDtor()
     this->seventvEmotes.reset();
     // this->twitch.reset();
     this->fonts.reset();
+    this->sound.reset();
 }
 
 void Application::initialize(Settings &settings, const Paths &paths)
@@ -434,7 +435,7 @@ ISoundController *Application::getSound()
 {
     assertInGuiThread();
 
-    return this->sound;
+    return this->sound.get();
 }
 
 ITwitchLiveController *Application::getTwitchLiveController()
