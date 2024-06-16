@@ -40,6 +40,7 @@ std::shared_ptr<HTTPRequest> HTTPRequest::getOrError(lua_State *L,
 {
     if (lua_gettop(L) < 1)
     {
+        // The nullptr is there just to appease the compiler, luaL_error is no return
         luaL_error(L, "Called c2.HTTPRequest method without a request object");
         return nullptr;
     }
@@ -64,6 +65,7 @@ std::shared_ptr<HTTPRequest> HTTPRequest::getOrError(lua_State *L,
     if (data->target->done)
     {
         luaL_error(L, "This c2.HTTPRequest has already been executed!");
+        return nullptr;
     }
     return data->target;
 }
@@ -98,15 +100,15 @@ int HTTPRequest::on_success(lua_State *L)
     auto top = lua_gettop(L);
     if (top != 1)
     {
-        luaL_error(L, "HTTPRequest:on_success needs 1 argument (a callback "
-                      "that takes an HTTPResult and doesn't return anything)");
-        return 0;
+        return luaL_error(
+            L, "HTTPRequest:on_success needs 1 argument (a callback "
+               "that takes an HTTPResult and doesn't return anything)");
     }
     if (!lua_isfunction(L, top))
     {
-        luaL_error(L, "HTTPRequest:on_success needs 1 argument (a callback "
-                      "that takes an HTTPResult and doesn't return anything)");
-        return 0;
+        return luaL_error(
+            L, "HTTPRequest:on_success needs 1 argument (a callback "
+               "that takes an HTTPResult and doesn't return anything)");
     }
     auto shared = this->pushPrivate(L);
     lua_pushvalue(L, -2);
@@ -127,15 +129,15 @@ int HTTPRequest::on_error(lua_State *L)
     auto top = lua_gettop(L);
     if (top != 1)
     {
-        luaL_error(L, "HTTPRequest:on_error needs 1 argument (a callback "
-                      "that takes an HTTPResult and doesn't return anything)");
-        return 0;
+        return luaL_error(
+            L, "HTTPRequest:on_error needs 1 argument (a callback "
+               "that takes an HTTPResult and doesn't return anything)");
     }
     if (!lua_isfunction(L, top))
     {
-        luaL_error(L, "HTTPRequest:on_error needs 1 argument (a callback "
-                      "that takes an HTTPResult and doesn't return anything)");
-        return 0;
+        return luaL_error(
+            L, "HTTPRequest:on_error needs 1 argument (a callback "
+               "that takes an HTTPResult and doesn't return anything)");
     }
     auto shared = this->pushPrivate(L);
     lua_pushvalue(L, -2);
@@ -156,25 +158,23 @@ int HTTPRequest::set_timeout(lua_State *L)
     auto top = lua_gettop(L);
     if (top != 1)
     {
-        luaL_error(L, "HTTPRequest:set_timeout needs 1 argument (a number of "
-                      "milliseconds after which the request will time out)");
-        return 0;
+        return luaL_error(
+            L, "HTTPRequest:set_timeout needs 1 argument (a number of "
+               "milliseconds after which the request will time out)");
     }
 
     int temporary = -1;
     if (!lua::pop(L, &temporary))
     {
-        luaL_error(L,
-                   "HTTPRequest:set_timeout failed to get timeout, expected a "
-                   "positive integer");
-        return 0;
+        return luaL_error(
+            L, "HTTPRequest:set_timeout failed to get timeout, expected a "
+               "positive integer");
     }
     if (temporary <= 0)
     {
-        luaL_error(L,
-                   "HTTPRequest:set_timeout failed to get timeout, expected a "
-                   "positive integer");
-        return 0;
+        return luaL_error(
+            L, "HTTPRequest:set_timeout failed to get timeout, expected a "
+               "positive integer");
     }
     this->timeout_ = temporary;
     return 0;
@@ -192,15 +192,13 @@ int HTTPRequest::finally(lua_State *L)
     auto top = lua_gettop(L);
     if (top != 1)
     {
-        luaL_error(L, "HTTPRequest:finally needs 1 argument (a callback "
-                      "that takes nothing and doesn't return anything)");
-        return 0;
+        return luaL_error(L, "HTTPRequest:finally needs 1 argument (a callback "
+                             "that takes nothing and doesn't return anything)");
     }
     if (!lua_isfunction(L, top))
     {
-        luaL_error(L, "HTTPRequest:finally needs 1 argument (a callback "
-                      "that takes nothing and doesn't return anything)");
-        return 0;
+        return luaL_error(L, "HTTPRequest:finally needs 1 argument (a callback "
+                             "that takes nothing and doesn't return anything)");
     }
     auto shared = this->pushPrivate(L);
     lua_pushvalue(L, -2);
@@ -221,18 +219,16 @@ int HTTPRequest::set_payload(lua_State *L)
     auto top = lua_gettop(L);
     if (top != 1)
     {
-        luaL_error(
+        return luaL_error(
             L, "HTTPRequest:set_payload needs 1 argument (a string payload)");
-        return 0;
     }
 
     std::string temporary;
     if (!lua::pop(L, &temporary))
     {
-        luaL_error(L,
-                   "HTTPRequest:set_payload failed to get payload, expected a "
-                   "string");
-        return 0;
+        return luaL_error(
+            L, "HTTPRequest:set_payload failed to get payload, expected a "
+               "string");
     }
     this->req_ =
         std::move(this->req_).payload(QByteArray::fromStdString(temporary));
@@ -251,24 +247,22 @@ int HTTPRequest::set_header(lua_State *L)
     auto top = lua_gettop(L);
     if (top != 2)
     {
-        luaL_error(L, "HTTPRequest:set_header needs 2 arguments (a header name "
-                      "and a value)");
-        return 0;
+        return luaL_error(
+            L, "HTTPRequest:set_header needs 2 arguments (a header name "
+               "and a value)");
     }
 
     std::string value;
     if (!lua::pop(L, &value))
     {
-        luaL_error(L,
-                   "cannot get value (2nd argument of HTTPRequest:set_header)");
-        return 0;
+        return luaL_error(
+            L, "cannot get value (2nd argument of HTTPRequest:set_header)");
     }
     std::string name;
     if (!lua::pop(L, &name))
     {
-        luaL_error(L,
-                   "cannot get name (1st argument of HTTPRequest:set_header)");
-        return 0;
+        return luaL_error(
+            L, "cannot get name (1st argument of HTTPRequest:set_header)");
     }
     this->req_ = std::move(this->req_)
                      .header(QByteArray::fromStdString(name),
@@ -281,41 +275,37 @@ int HTTPRequest::create(lua_State *L)
     lua::StackGuard guard(L, -1);
     if (lua_gettop(L) != 2)
     {
-        luaL_error(L, "HTTPRequest.create needs exactly 2 arguments (method "
-                      "and url)");
-        lua_pushnil(L);
-        return 1;
+        return luaL_error(
+            L, "HTTPRequest.create needs exactly 2 arguments (method "
+               "and url)");
     }
     QString url;
     if (!lua::pop(L, &url))
     {
-        luaL_error(L, "cannot get url (2nd argument of HTTPRequest.create, "
-                      "expected a string)");
-        lua_pushnil(L);
-        return 1;
+        return luaL_error(L,
+                          "cannot get url (2nd argument of HTTPRequest.create, "
+                          "expected a string)");
     }
     auto parsedurl = QUrl(url);
     if (!parsedurl.isValid())
     {
-        luaL_error(L, "cannot parse url (2nd argument of HTTPRequest.create, "
-                      "got invalid url in argument)");
-        lua_pushnil(L);
-        return 1;
+        return luaL_error(
+            L, "cannot parse url (2nd argument of HTTPRequest.create, "
+               "got invalid url in argument)");
     }
     NetworkRequestType method{};
     if (!lua::pop(L, &method))
     {
-        luaL_error(L, "cannot get method (1st argument of HTTPRequest.create, "
-                      "expected a string)");
-        lua_pushnil(L);
-        return 1;
+        return luaL_error(
+            L, "cannot get method (1st argument of HTTPRequest.create, "
+               "expected a string)");
     }
     auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
     if (!pl->hasHTTPPermissionFor(parsedurl))
     {
-        luaL_error(L, "Plugin does not have permission to send HTTP requests "
-                      "to this URL");
-        return 0;
+        return luaL_error(
+            L, "Plugin does not have permission to send HTTP requests "
+               "to this URL");
     }
     NetworkRequest r(parsedurl, method);
     lua::push(
