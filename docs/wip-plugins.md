@@ -399,9 +399,9 @@ the names may change, do not count on them. It has the following keys:
 - `Delete`
 - `Patch`
 
-#### `HTTPResult`
+#### `HTTPResponse`
 
-An `HTTPResult` is a table that contains the following keys:
+An `HTTPResponse` is a table that contains the following keys:
 
 ```lua
 {
@@ -434,13 +434,13 @@ req:execute()
 ##### `HTTPRequest:on_success(callback)`
 
 Sets the success callback. It accepts a function that takes a single parameter
-of type `HTTPResult`. The callback will be called on success. This function
+of type `HTTPResponse`. The callback will be called on success. This function
 returns nothing.
 
 ##### `HTTPRequest:on_error(callback)`
 
 Sets the error callback. It accepts a function that takes a single parameter of
-type `HTTPResult`. The callback will be called if the request fails. To see why
+type `HTTPResponse`. The callback will be called if the request fails. To see why
 it failed check the `error` field of the result. This function returns nothing.
 
 ##### `HTTPRequest:finally(callback)`
