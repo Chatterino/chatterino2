@@ -49,11 +49,15 @@ private:
      *
      * If the object given is not a userdatum or the pointer inside that
      * userdatum doesn't point to a HTTPRequest, a lua error is thrown.
+     *
+     * This function always returns a non-null pointer.
      */
     static std::shared_ptr<HTTPRequest> getOrError(lua_State *L,
                                                    StackIdx where = -1);
     /**
-     * Pushes the private table onto the lua stack
+     * Pushes the private table onto the lua stack.
+     *
+     * This might create it if it doesn't exist.
      */
     StackIdx pushPrivate(lua_State *L);
 
@@ -65,6 +69,11 @@ private:
     bool done = false;
 
 public:
+    // These functions are wrapped so data can be accessed more easily. When a call from Lua comes in:
+    //  - the static wrapper function is called
+    //  - it calls getOrError
+    //  - and then the wrapped method
+
     /**
      * Sets the success callback
      *
