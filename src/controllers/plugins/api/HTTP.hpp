@@ -57,6 +57,9 @@ private:
      */
     StackIdx pushPrivate(lua_State *L);
 
+    // This is the key in the registry the private table it held at (if it exists)
+    // This might be a null QString if the request has already been executed or
+    // the table wasn't created yet.
     QString privateKey;
     int timeout_ = 10'000;
     bool done = false;

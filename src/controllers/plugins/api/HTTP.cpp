@@ -393,6 +393,9 @@ int HTTPRequest::execute(lua_State *L)
                          shared->privateKey.toStdString().c_str());
             lua_closethread(thread, nullptr);
             lua_pop(L, 1);  // remove thread from L
+
+            // we removed our private table, forget the key for it
+            shared->privateKey = QString();
         })
         .timeout(this->timeout_)
         .execute();
