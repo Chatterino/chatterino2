@@ -1,5 +1,5 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
-#    include "controllers/plugins/api/HTTP.hpp"
+#    include "controllers/plugins/api/HTTPRequest.hpp"
 
 #    include "Application.hpp"
 #    include "common/network/NetworkCommon.hpp"

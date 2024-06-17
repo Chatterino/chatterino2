@@ -82,7 +82,7 @@ struct CompletionEvent {
 /**
  * @includefile common/Channel.hpp
  * @includefile controllers/plugins/api/ChannelRef.hpp
- * @includefile controllers/plugins/api/HTTP.hpp
+ * @includefile controllers/plugins/api/HTTPRequest.hpp
  * @includefile common/network/NetworkCommon.hpp
  */
 
