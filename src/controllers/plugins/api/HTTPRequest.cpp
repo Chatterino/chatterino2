@@ -189,7 +189,7 @@ int HTTPRequest::set_timeout(lua_State *L)
 
 int HTTPRequest::finally_wrap(lua_State *L)
 {
-    lua::StackGuard guard(L, -1);
+    lua::StackGuard guard(L, -2);
     auto ptr = HTTPRequest::getOrError(L, 1);
     return ptr->finally(L);
 }
@@ -216,7 +216,7 @@ int HTTPRequest::finally(lua_State *L)
 
 int HTTPRequest::set_payload_wrap(lua_State *L)
 {
-    lua::StackGuard guard(L, -1);
+    lua::StackGuard guard(L, -2);
     auto ptr = HTTPRequest::getOrError(L, 1);
     return ptr->set_payload(L);
 }
@@ -244,7 +244,7 @@ int HTTPRequest::set_payload(lua_State *L)
 
 int HTTPRequest::set_header_wrap(lua_State *L)
 {
-    lua::StackGuard guard(L, -1);
+    lua::StackGuard guard(L, -3);
     auto ptr = HTTPRequest::getOrError(L, 1);
     return ptr->set_header(L);
 }
