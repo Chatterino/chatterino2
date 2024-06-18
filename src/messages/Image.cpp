@@ -60,7 +60,7 @@ Frames::Frames(QList<Frame> &&frames)
                                            return init + frame.duration;
                                        });
 
-    if (totalLength == 0)
+    if (totalLength <= 1)
     {
         this->durationOffset_ = 0;
     }
