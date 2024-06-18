@@ -20,6 +20,8 @@ struct ChannelPointReward {
     ImageSet image;
     bool isUserInputRequired = false;
     bool isBits = false;
+    QString emoteId;    // currently only for celebrations
+    QString emoteName;  // currently only for celebrations
 
     struct {
         QString id;

@@ -34,6 +34,14 @@ ChannelPointReward::ChannelPointReward(const QJsonObject &redemption)
     {
         this->id = rewardType;
         this->title = "On-Screen Celebration";
+        const auto metadata =
+            redemption.value("redemption_metadata").toObject();
+        const auto emote = metadata.value("celebration_emote_metadata")
+                               .toObject()
+                               .value("emote")
+                               .toObject();
+        this->emoteId = emote.value("id").toString();
+        this->emoteName = emote.value("token").toString();
     }
 
     // use bits cost when channel points were not used

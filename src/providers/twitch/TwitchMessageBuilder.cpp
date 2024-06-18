@@ -1594,6 +1594,15 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
     }
     builder->emplace<TextElement>(redeemed,
                                   MessageElementFlag::ChannelPointReward);
+    if (reward.id == "CELEBRATION")
+    {
+        const auto emotePtr =
+            getIApp()->getEmotes()->getTwitchEmotes()->getOrCreateEmote(
+                EmoteId{reward.emoteId}, EmoteName{reward.emoteName});
+        builder->emplace<EmoteElement>(emotePtr,
+                                       MessageElementFlag::ChannelPointReward,
+                                       MessageColor::Text);
+    }
     builder->emplace<TextElement>(
         reward.title, MessageElementFlag::ChannelPointReward,
         MessageColor::Text, FontStyle::ChatMediumBold);
