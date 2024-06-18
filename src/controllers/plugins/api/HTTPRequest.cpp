@@ -5,6 +5,7 @@
 #    include "common/network/NetworkCommon.hpp"
 #    include "common/network/NetworkRequest.hpp"
 #    include "common/network/NetworkResult.hpp"
+#    include "controllers/plugins/api/HTTPResponse.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "util/DebugCount.hpp"
@@ -16,6 +17,7 @@ extern "C" {
 #    include <QRandomGenerator>
 #    include <QUrl>
 
+#    include <memory>
 #    include <utility>
 
 namespace chatterino::lua::api {
@@ -340,7 +342,7 @@ int HTTPRequest::execute(lua_State *L)
             auto cb = lua_gettop(thread);
             if (lua_isfunction(thread, cb))
             {
-                lua::push(thread, res);
+                lua::push(thread, std::make_shared<HTTPResponse>(res));
                 // one arg, no return, no msgh
                 lua_pcall(thread, 1, 0, 0);
             }
@@ -360,7 +362,7 @@ int HTTPRequest::execute(lua_State *L)
             auto cb = lua_gettop(thread);
             if (lua_isfunction(thread, cb))
             {
-                lua::push(thread, res);
+                lua::push(thread, std::make_shared<HTTPResponse>(res));
                 // one arg, no return, no msgh
                 lua_pcall(thread, 1, 0, 0);
             }
@@ -445,18 +447,5 @@ StackIdx push(lua_State *L, std::shared_ptr<api::HTTPRequest> request)
     lua_setmetatable(L, -2);
     return lua_gettop(L);
 }
-
-StackIdx push(lua_State *L, const NetworkResult &result)
-{
-    auto out = pushEmptyTable(L, 3);
-    lua::push(L, result.getData().toStdString());
-    lua_setfield(L, out, "data");
-    lua::push(L, result.status());
-    lua_setfield(L, out, "status");
-    lua::push(L, result.formatError());
-    lua_setfield(L, out, "error");
-    return out;
-}
-
 }  // namespace chatterino::lua
 #endif

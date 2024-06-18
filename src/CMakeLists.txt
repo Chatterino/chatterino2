@@ -227,6 +227,8 @@ set(SOURCE_FILES
         controllers/plugins/api/IOWrapper.hpp
         controllers/plugins/api/HTTPRequest.cpp
         controllers/plugins/api/HTTPRequest.hpp
+        controllers/plugins/api/HTTPResponse.cpp
+        controllers/plugins/api/HTTPResponse.hpp
         controllers/plugins/LuaAPI.cpp
         controllers/plugins/LuaAPI.hpp
         controllers/plugins/PluginPermission.cpp

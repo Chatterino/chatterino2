@@ -158,7 +158,6 @@ public:
 
 namespace chatterino::lua {
 StackIdx push(lua_State *L, std::shared_ptr<api::HTTPRequest> request);
-StackIdx push(lua_State *L, const NetworkResult &result);
 }  // namespace chatterino::lua
 
 #endif

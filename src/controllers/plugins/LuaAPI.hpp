@@ -83,6 +83,7 @@ struct CompletionEvent {
  * @includefile common/Channel.hpp
  * @includefile controllers/plugins/api/ChannelRef.hpp
  * @includefile controllers/plugins/api/HTTPRequest.hpp
+ * @includefile controllers/plugins/api/HTTPResponse.hpp
  * @includefile common/network/NetworkCommon.hpp
  */
 
@@ -138,6 +139,7 @@ struct UserData {
     enum class Type {
         Channel,
         HTTPRequest,
+        HTTPResponse,
     };
     Type type;
     bool isWeak;
