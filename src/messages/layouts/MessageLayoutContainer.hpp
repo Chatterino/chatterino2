@@ -10,6 +10,10 @@
 #include <optional>
 #include <vector>
 
+#if __has_include(<gtest/gtest_prod.h>)
+#    include <gtest/gtest_prod.h>
+#endif
+
 class QPainter;
 
 namespace chatterino {
@@ -370,6 +374,10 @@ private:
      * These lines hold no relation to the elements that are in this
      */
     std::vector<Line> lines_;
+
+#ifdef FRIEND_TEST
+    FRIEND_TEST(MessageLayoutContainerTest, RtlReordering);
+#endif
 };
 
 }  // namespace chatterino
