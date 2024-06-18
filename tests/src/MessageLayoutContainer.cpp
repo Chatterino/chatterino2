@@ -1,11 +1,13 @@
 #include "messages/layouts/MessageLayoutContainer.hpp"
 
 #include "common/Literals.hpp"
+#include "messages/Emote.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
 #include "mocks/EmptyApplication.hpp"
 #include "singletons/Fonts.hpp"
+#include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "Test.hpp"
@@ -63,6 +65,17 @@ std::vector<std::shared_ptr<MessageElement>> makeElements(const QString &text)
             }
             continue;
         }
+
+        if (word.startsWith('!'))
+        {
+            auto emote = std::make_shared<Emote>(
+                EmoteName{word}, ImageSet{Image::fromResourcePixmap(
+                                     getResources().buttons.addSplit)});
+            elements.emplace_back(std::make_shared<EmoteElement>(
+                emote, MessageElementFlag::TwitchEmote));
+            continue;
+        }
+
         elements.emplace_back(std::make_shared<TextElement>(
             word, MessageElementFlag::Text, MessageColor{},
             FontStyle::ChatMedium));
@@ -94,8 +107,11 @@ TEST_P(MessageLayoutContainerTest, RtlReordering)
     auto elements = makeElements(inputText);
     for (const auto &element : elements)
     {
-        element->addToContainer(container, {MessageElementFlag::Text,
-                                            MessageElementFlag::Username});
+        element->addToContainer(container, {
+                                               MessageElementFlag::Text,
+                                               MessageElementFlag::Username,
+                                               MessageElementFlag::TwitchEmote,
+                                           });
     }
     container.breakLine();
     ASSERT_EQ(container.line_, 1) << "unexpected linebreak";
@@ -119,7 +135,17 @@ TEST_P(MessageLayoutContainerTest, RtlReordering)
         {
             got.append(' ');
         }
-        got.append(el->getText());
+
+        if (dynamic_cast<ImageLayoutElement *>(el))
+        {
+            el->addCopyTextToString(got);
+            ASSERT_TRUE(got.endsWith(' '));
+            got.chop(1);
+        }
+        else
+        {
+            got.append(el->getText());
+        }
     }
 
     ASSERT_EQ(got, expected) << got;
@@ -129,9 +155,10 @@ INSTANTIATE_TEST_SUITE_P(
     MessageLayoutContainer, MessageLayoutContainerTest,
     testing::Values(
         TestParam{
-            u"@aliens foo bar baz"_s,
-            u"@aliens foo bar baz"_s,
+            u"@aliens foo bar baz @foo qox !emote1 !emote2"_s,
+            u"@aliens foo bar baz @foo qox !emote1 !emote2"_s,
         },
+        // RTL
         TestParam{
             u"@aliens و غير دارت إعادة, بل كما وقام قُدُماً. قام تم الجوي بوابة, خلاف أراض هو بلا. عن وحتّى ميناء غير"_s,
             u"@aliens غير ميناء وحتّى عن بلا. هو أراض خلاف بوابة, الجوي تم قام قُدُماً. وقام كما بل إعادة, دارت غير و"_s,
@@ -139,6 +166,39 @@ INSTANTIATE_TEST_SUITE_P(
         TestParam{
             u"@aliens و غير دارت إعادة, بل ض هو my LTR 123 بلا. عن 123 456 وحتّى ميناء غير"_s,
             u"@aliens غير ميناء وحتّى 456 123 عن بلا. my LTR 123 هو ض بل إعادة, دارت غير و"_s,
+        },
+        TestParam{
+            u"@aliens ور دارت إ @user baz bar عاد هو my LTR 123 بلا. عن 123 456 وحتّ غير"_s,
+            u"@aliens غير وحتّ 456 123 عن بلا. my LTR 123 هو عاد baz bar @user إ دارت ور"_s,
+        },
+        TestParam{
+            u"@aliens ور !emote1 !emote2 !emote3 دارت إ @user baz bar عاد هو my LTR 123 بلا. عن 123 456 وحتّ غير"_s,
+            u"@aliens غير وحتّ 456 123 عن بلا. my LTR 123 هو عاد baz bar @user إ دارت !emote3 !emote2 !emote1 ور"_s,
+        },
+        TestParam{
+            u"@aliens ور !emote1 !emote2 LTR text !emote3 !emote4 غير"_s,
+            u"@aliens غير LTR text !emote3 !emote4 !emote2 !emote1 ور"_s,
+        },
+        // LTR
+        TestParam{
+            u"@aliens LTR و غير دا ميناء غير"_s,
+            u"@aliens LTR غير ميناء دا غير و"_s,
+        },
+        TestParam{
+            u"@aliens LTR و غير د ض هو my LTR 123 بلا. عن 123 456 وحتّى مير"_s,
+            u"@aliens LTR هو ض د غير و my LTR 123 مير وحتّى 456 123 عن بلا."_s,
+        },
+        TestParam{
+            u"@aliens LTR ور دارت إ @user baz bar عاد هو my LTR 123 بلا. عن 123 456 وحتّ غير"_s,
+            u"@aliens LTR @user إ دارت ور baz bar هو عاد my LTR 123 غير وحتّ 456 123 عن بلا."_s,
+        },
+        TestParam{
+            u"@aliens LTR ور !emote1 !emote2 !emote3 دارت إ @user baz bar عاد هو my LTR 123 بلا. عن 123 456 وحتّ غير"_s,
+            u"@aliens LTR @user إ دارت !emote3 !emote2 !emote1 ور baz bar هو عاد my LTR 123 غير وحتّ 456 123 عن بلا."_s,
+        },
+        TestParam{
+            u"@aliens LTR غير وحتّ !emote1 !emote2 LTR text !emote3 !emote4 عاد هو"_s,
+            u"@aliens LTR !emote2 !emote1 وحتّ غير LTR text !emote3 !emote4 هو عاد"_s,
         }));
 
 }  // namespace chatterino
