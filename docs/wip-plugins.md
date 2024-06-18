@@ -401,7 +401,25 @@ the names may change, do not count on them. It has the following keys:
 
 #### `HTTPResponse`
 
-An `HTTPResponse` is a table that contains the following keys:
+An `HTTPResponse` is a table you receive in the callback after a completed `HTTPRequest`.
+
+##### `HTTPResponse.data()`
+
+This function returns the data received from the server as a string. Usually
+this will be UTF-8-encoded however that is not guaranteed, this could be any
+binary data.
+
+##### `HTTPResponse.error()`
+
+If an error happened this function returns a human readable description of it.
+
+It returns something like: `"ConnectionRefusedError"`, `"401"`.
+
+##### `HTTPResponse.status()`
+
+This function returns the HTTP status code of the request or `nil` if there was
+an error before a status code could be received.
+
 
 ```lua
 {
