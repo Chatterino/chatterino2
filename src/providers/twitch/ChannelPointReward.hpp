@@ -19,6 +19,7 @@ struct ChannelPointReward {
     int cost;
     ImageSet image;
     bool isUserInputRequired = false;
+    QString rewardType;
 
     struct {
         QString id;

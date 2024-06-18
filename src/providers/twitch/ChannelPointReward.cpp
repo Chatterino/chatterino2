@@ -14,6 +14,38 @@ ChannelPointReward::ChannelPointReward(const QJsonObject &redemption)
     this->title = reward.value("title").toString();
     this->cost = reward.value("cost").toInt();
     this->isUserInputRequired = reward.value("is_user_input_required").toBool();
+    this->rewardType = reward.value("reward_type").toString();
+
+    // accommodate idiosyncrasies of automatic reward redemptions
+    if (this->rewardType == "SEND_ANIMATED_MESSAGE")
+    {
+        this->id = "animated-message";
+        this->isUserInputRequired = true;
+        this->title = "Message Effects";
+    }
+    else if (this->rewardType == "SEND_GIGANTIFIED_EMOTE")
+    {
+        this->id = "gigantified-emote-message";
+        this->isUserInputRequired = true;
+        this->title = "Gigantify an Emote";
+    }
+    else if (this->rewardType == "CELEBRATION")
+    {
+        this->id = this->rewardType;
+        this->title = "On-Screen Celebration";
+    }
+
+    // use bits cost when channel points were not used
+    if (cost == 0)
+    {
+        this->cost = reward.value("bits_cost").toInt();
+    }
+
+    // workaround twitch bug where bits_cost is always 0 in practice
+    if (cost == 0)
+    {
+        this->cost = reward.value("default_bits_cost").toInt();
+    }
 
     // We don't need to store user information for rewards with user input
     // because we will get the user info from a corresponding IRC message
@@ -27,6 +59,13 @@ ChannelPointReward::ChannelPointReward(const QJsonObject &redemption)
     }
 
     auto imageValue = reward.value("image");
+
+    // automatic reward redemptions have specialized default images
+    if (imageValue.isNull() && !this->rewardType.isEmpty())
+    {
+        imageValue = reward.value("default_image");
+    }
+
     // From Twitch docs
     // The size is only an estimation, the actual size might vary.
     constexpr QSize baseSize(28, 28);
