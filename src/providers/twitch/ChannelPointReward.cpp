@@ -14,6 +14,7 @@ ChannelPointReward::ChannelPointReward(const QJsonObject &redemption)
     this->title = reward.value("title").toString();
     this->cost = reward.value("cost").toInt();
     this->isUserInputRequired = reward.value("is_user_input_required").toBool();
+    this->isBits = reward.value("pricing_type").toString() == "BITS";
 
     // accommodate idiosyncrasies of automatic reward redemptions
     const auto rewardType = reward.value("reward_type").toString();
@@ -61,7 +62,7 @@ ChannelPointReward::ChannelPointReward(const QJsonObject &redemption)
     auto imageValue = reward.value("image");
 
     // automatic reward redemptions have specialized default images
-    if (imageValue.isNull() && !rewardType.isEmpty())
+    if (imageValue.isNull() && this->isBits)
     {
         imageValue = reward.value("default_image");
     }

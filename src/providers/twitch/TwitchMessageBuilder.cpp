@@ -1602,6 +1602,12 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
     builder->emplace<TextElement>(
         QString::number(reward.cost), MessageElementFlag::ChannelPointReward,
         MessageColor::Text, FontStyle::ChatMediumBold);
+    if (reward.isBits)
+    {
+        builder->emplace<TextElement>(
+            "bits", MessageElementFlag::ChannelPointReward, MessageColor::Text,
+            FontStyle::ChatMediumBold);
+    }
     if (reward.isUserInputRequired)
     {
         builder->emplace<LinebreakElement>(
