@@ -62,16 +62,16 @@ std::shared_ptr<HTTPRequest> HTTPRequest::getOrError(lua_State *L,
         return nullptr;
     }
     lua_remove(L, where);
-    if (data->target->done)
-    {
-        luaL_error(L, "This c2.HTTPRequest has already been executed!");
-        return nullptr;
-    }
     if (data->target == nullptr)
     {
         luaL_error(
             L, "Internal error: SharedPtrUserData<UserData::Type::HTTPRequest, "
                "HTTPRequest>::target was null. This is a Chatterino bug!");
+        return nullptr;
+    }
+    if (data->target->done)
+    {
+        luaL_error(L, "This c2.HTTPRequest has already been executed!");
         return nullptr;
     }
     return data->target;
