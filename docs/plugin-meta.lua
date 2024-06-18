@@ -5,8 +5,6 @@
 -- Add the folder this file is in to "Lua.workspace.library".
 
 c2 = {}
-
-
 ---@alias c2.LogLevel integer
 ---@type { Debug: c2.LogLevel, Info: c2.LogLevel, Warning: c2.LogLevel, Critical: c2.LogLevel }
 c2.LogLevel = {}
@@ -160,15 +158,16 @@ function c2.Channel.by_twitch_id(id) end
 
 -- End src/controllers/plugins/api/ChannelRef.hpp
 
--- Begin src/controllers/plugins/api/HTTP.hpp
+-- Begin src/controllers/plugins/api/HTTPRequest.hpp
 
----@class HTTPResult
+---@class HTTPResponse
 ---@field data string Data received from the server
 ---@field status integer? HTTP Status code returned by the server
 ---@field error string A somewhat human readable description of an error if such happened
 
----@alias HTTPCallback fun(result: HTTPResult): nil
+---@alias HTTPCallback fun(result: HTTPResponse): nil
 ---@class HTTPRequest
+HTTPRequest = {}
 
 --- Sets the success callback
 ---
@@ -212,7 +211,27 @@ function HTTPRequest:execute() end
 ---@return HTTPRequest
 function HTTPRequest.create(method, url) end
 
--- End src/controllers/plugins/api/HTTP.hpp
+-- End src/controllers/plugins/api/HTTPRequest.hpp
+
+-- Begin src/controllers/plugins/api/HTTPResponse.hpp
+
+---@class HTTPResponse
+HTTPResponse = {}
+
+--- Returns the data. This is not guaranteed to be encoded using any
+--- particular encoding scheme. It's just the bytes the server returned.
+---
+function HTTPResponse:data() end
+
+--- Returns the status code.
+---
+function HTTPResponse:status() end
+
+--- A somewhat human readable description of an error if such happened
+---
+function HTTPResponse:error() end
+
+-- End src/controllers/plugins/api/HTTPResponse.hpp
 
 -- Begin src/common/network/NetworkCommon.hpp
 
