@@ -99,8 +99,10 @@ int main(int argc, char **argv)
         qCInfo(chatterinoApp) << "Chatterino Qt SSL active backend:"
                               << QSslSocket::activeBackend() << "of"
                               << QSslSocket::availableBackends().join(", ");
+#    if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
         qCInfo(chatterinoApp) << "Chatterino Qt SSL active backend features:"
                               << QSslSocket::supportedFeatures();
+#    endif
         qCInfo(chatterinoApp) << "Chatterino Qt SSL active backend protocols:"
                               << QSslSocket::supportedProtocols();
 #endif
