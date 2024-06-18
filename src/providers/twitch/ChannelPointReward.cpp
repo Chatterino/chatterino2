@@ -14,24 +14,24 @@ ChannelPointReward::ChannelPointReward(const QJsonObject &redemption)
     this->title = reward.value("title").toString();
     this->cost = reward.value("cost").toInt();
     this->isUserInputRequired = reward.value("is_user_input_required").toBool();
-    this->rewardType = reward.value("reward_type").toString();
 
     // accommodate idiosyncrasies of automatic reward redemptions
-    if (this->rewardType == "SEND_ANIMATED_MESSAGE")
+    const auto rewardType = reward.value("reward_type").toString();
+    if (rewardType == "SEND_ANIMATED_MESSAGE")
     {
         this->id = "animated-message";
         this->isUserInputRequired = true;
         this->title = "Message Effects";
     }
-    else if (this->rewardType == "SEND_GIGANTIFIED_EMOTE")
+    else if (rewardType == "SEND_GIGANTIFIED_EMOTE")
     {
         this->id = "gigantified-emote-message";
         this->isUserInputRequired = true;
         this->title = "Gigantify an Emote";
     }
-    else if (this->rewardType == "CELEBRATION")
+    else if (rewardType == "CELEBRATION")
     {
-        this->id = this->rewardType;
+        this->id = rewardType;
         this->title = "On-Screen Celebration";
     }
 
@@ -61,7 +61,7 @@ ChannelPointReward::ChannelPointReward(const QJsonObject &redemption)
     auto imageValue = reward.value("image");
 
     // automatic reward redemptions have specialized default images
-    if (imageValue.isNull() && !this->rewardType.isEmpty())
+    if (imageValue.isNull() && !rewardType.isEmpty())
     {
         imageValue = reward.value("default_image");
     }
