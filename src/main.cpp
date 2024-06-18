@@ -18,6 +18,7 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QMessageBox>
+#include <QSslSocket>
 #include <QStringList>
 
 #include <memory>
@@ -89,6 +90,20 @@ int main(int argc, char **argv)
         {
             attachToConsole();
         }
+
+        qCInfo(chatterinoApp)
+            << "Chatterino Qt SSL library build version:"
+            << QSslSocket::sslLibraryBuildVersionString()
+            << ", library version:" << QSslSocket::sslLibraryVersionString();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
+        qCInfo(chatterinoApp) << "Chatterino Qt SSL active backend:"
+                              << QSslSocket::activeBackend() << "of"
+                              << QSslSocket::availableBackends().join(", ");
+        qCInfo(chatterinoApp) << "Chatterino Qt SSL active backend features:"
+                              << QSslSocket::supportedFeatures();
+        qCInfo(chatterinoApp) << "Chatterino Qt SSL active backend protocols:"
+                              << QSslSocket::supportedProtocols();
+#endif
 
         Updates updates(*paths);
 
