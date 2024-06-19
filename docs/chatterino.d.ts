@@ -79,14 +79,13 @@ declare module c2 {
     Patch,
   }
 
-  type HTTPResult = {
-    data: string;
-    status: number;
+  class HTTPResponse implements ISharedResource {
+    data(): string;
+    status(): number;
+    error(): string;
+  }
 
-    error: string;
-  };
-
-  type HTTPCallback = (res: HTTPResult) => void;
+  type HTTPCallback = (res: HTTPResponse) => void;
   class HTTPRequest implements ISharedResource {
     on_success(callback: HTTPCallback): void;
     on_error(callback: HTTPCallback): void;
