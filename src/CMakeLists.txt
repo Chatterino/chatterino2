@@ -107,6 +107,8 @@ set(SOURCE_FILES
         controllers/commands/builtin/twitch/UpdateChannel.hpp
         controllers/commands/builtin/twitch/UpdateColor.cpp
         controllers/commands/builtin/twitch/UpdateColor.hpp
+        controllers/commands/common/ChannelAction.cpp
+        controllers/commands/common/ChannelAction.hpp
         controllers/commands/CommandContext.hpp
         controllers/commands/CommandController.cpp
         controllers/commands/CommandController.hpp
@@ -653,6 +655,8 @@ set(SOURCE_FILES
         widgets/helper/SettingsDialogTab.hpp
         widgets/helper/SignalLabel.cpp
         widgets/helper/SignalLabel.hpp
+        widgets/helper/TableStyles.cpp
+        widgets/helper/TableStyles.hpp
         widgets/helper/TitlebarButton.cpp
         widgets/helper/TitlebarButton.hpp
         widgets/helper/TitlebarButtons.cpp
@@ -865,6 +869,7 @@ if (BUILD_APP)
         endif()
         get_filename_component(QT_BIN_DIR ${QT_CORE_LOC} DIRECTORY)
 
+        # This assumes the installed CRT is up-to-date (see .CI/deploy-crt.ps1)
         set(WINDEPLOYQT_COMMAND_ARGV "${WINDEPLOYQT_PATH}" "$<TARGET_FILE:${EXECUTABLE_PROJECT}>" ${WINDEPLOYQT_MODE} --no-compiler-runtime --no-translations --no-opengl-sw)
         string(REPLACE ";" " " WINDEPLOYQT_COMMAND "${WINDEPLOYQT_COMMAND_ARGV}")
 
@@ -1001,6 +1006,9 @@ target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 
 # semver dependency https://github.com/Neargye/semver
 target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/semver/include)
+
+# expected-lite dependency https://github.com/martinmoene/expected-lite
+target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/expected-lite/include)
 
 # miniaudio dependency https://github.com/mackron/miniaudio
 if (USE_SYSTEM_MINIAUDIO)

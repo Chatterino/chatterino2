@@ -165,7 +165,7 @@ TwitchIrcServer::TwitchIrcServer()
     //                                                     false);
 }
 
-void TwitchIrcServer::initialize(Settings &settings, const Paths &paths)
+void TwitchIrcServer::initialize()
 {
     getIApp()->getAccounts()->twitch.currentUserChanged.connect([this]() {
         postToThread([this] {
@@ -263,7 +263,7 @@ std::shared_ptr<Channel> TwitchIrcServer::createChannel(
 void TwitchIrcServer::privateMessageReceived(
     Communi::IrcPrivateMessage *message)
 {
-    IrcMessageHandler::instance().handlePrivMessage(message, *this);
+    IrcMessageHandler::instance().handlePrivMessage(message, *this, *this);
 }
 
 void TwitchIrcServer::readConnectionMessageReceived(
@@ -310,7 +310,7 @@ void TwitchIrcServer::readConnectionMessageReceived(
     }
     else if (command == "USERNOTICE")
     {
-        handler.handleUserNoticeMessage(message, *this);
+        handler.handleUserNoticeMessage(message, *this, *this);
     }
     else if (command == "NOTICE")
     {
@@ -645,14 +645,54 @@ void TwitchIrcServer::onReplySendRequested(
     sent = true;
 }
 
+std::unique_ptr<BttvLiveUpdates> &TwitchIrcServer::getBTTVLiveUpdates()
+{
+    return this->bttvLiveUpdates;
+}
+
+std::unique_ptr<SeventvEventAPI> &TwitchIrcServer::getSeventvEventAPI()
+{
+    return this->seventvEventAPI;
+}
+
 const IndirectChannel &TwitchIrcServer::getWatchingChannel() const
 {
     return this->watchingChannel;
 }
 
+void TwitchIrcServer::setWatchingChannel(ChannelPtr newWatchingChannel)
+{
+    this->watchingChannel.reset(newWatchingChannel);
+}
+
+ChannelPtr TwitchIrcServer::getWhispersChannel() const
+{
+    return this->whispersChannel;
+}
+
+ChannelPtr TwitchIrcServer::getMentionsChannel() const
+{
+    return this->mentionsChannel;
+}
+
+ChannelPtr TwitchIrcServer::getLiveChannel() const
+{
+    return this->liveChannel;
+}
+
+ChannelPtr TwitchIrcServer::getAutomodChannel() const
+{
+    return this->automodChannel;
+}
+
 QString TwitchIrcServer::getLastUserThatWhisperedMe() const
 {
     return this->lastUserThatWhisperedMe.get();
+}
+
+void TwitchIrcServer::setLastUserThatWhisperedMe(const QString &user)
+{
+    this->lastUserThatWhisperedMe.set(user);
 }
 
 void TwitchIrcServer::reloadBTTVGlobalEmotes()

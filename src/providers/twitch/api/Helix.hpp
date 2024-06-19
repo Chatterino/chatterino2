@@ -595,6 +595,19 @@ enum class HelixUpdateChatSettingsError {  // update chat settings
     Forwarded,
 };  // update chat settings
 
+/// Error type for Helix::updateChannel
+///
+/// Used in the /settitle and /setgame commands
+enum class HelixUpdateChannelError {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    Ratelimited,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
 enum class HelixBanUserError {  // /timeout, /ban
     Unknown,
     UserMissingScope,
@@ -862,7 +875,7 @@ public:
     virtual void updateChannel(
         QString broadcasterId, QString gameId, QString language, QString title,
         std::function<void(NetworkResult)> successCallback,
-        HelixFailureCallback failureCallback) = 0;
+        FailureCallback<HelixUpdateChannelError, QString> failureCallback) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#manage-held-automod-messages
     virtual void manageAutoModMessages(
@@ -1183,7 +1196,8 @@ public:
     void updateChannel(QString broadcasterId, QString gameId, QString language,
                        QString title,
                        std::function<void(NetworkResult)> successCallback,
-                       HelixFailureCallback failureCallback) final;
+                       FailureCallback<HelixUpdateChannelError, QString>
+                           failureCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference#manage-held-automod-messages
     void manageAutoModMessages(

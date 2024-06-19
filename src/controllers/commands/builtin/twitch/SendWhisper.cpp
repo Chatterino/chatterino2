@@ -92,7 +92,7 @@ QString formatWhisperError(HelixWhisperError error, const QString &message)
 
 bool appendWhisperMessageWordsLocally(const QStringList &words)
 {
-    auto *app = getApp();
+    auto *app = getIApp();
 
     MessageBuilder b;
 
@@ -177,7 +177,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     b->flags.set(MessageFlag::Whisper);
     auto messagexD = b.release();
 
-    app->twitch->whispersChannel->addMessage(messagexD);
+    getIApp()->getTwitch()->getWhispersChannel()->addMessage(messagexD);
 
     auto overrideFlags = std::optional<MessageFlags>(messagexD->flags);
     overrideFlags->set(MessageFlag::DoNotLog);
@@ -186,7 +186,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
         !(getSettings()->streamerModeSuppressInlineWhispers &&
           getIApp()->getStreamerMode()->isEnabled()))
     {
-        app->twitch->forEachChannel(
+        app->getTwitchAbstract()->forEachChannel(
             [&messagexD, overrideFlags](ChannelPtr _channel) {
                 _channel->addMessage(messagexD, overrideFlags);
             });

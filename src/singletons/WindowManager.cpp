@@ -328,14 +328,18 @@ void WindowManager::scrollToMessage(const MessagePtr &message)
     this->scrollToMessageSignal.invoke(message);
 }
 
-QPoint WindowManager::emotePopupPos()
+QRect WindowManager::emotePopupBounds() const
 {
-    return this->emotePopupPos_;
+    return this->emotePopupBounds_;
 }
 
-void WindowManager::setEmotePopupPos(QPoint pos)
+void WindowManager::setEmotePopupBounds(QRect bounds)
 {
-    this->emotePopupPos_ = pos;
+    if (this->emotePopupBounds_ != bounds)
+    {
+        this->emotePopupBounds_ = bounds;
+        this->queueSave();
+    }
 }
 
 void WindowManager::initialize(Settings &settings, const Paths &paths)
@@ -371,7 +375,7 @@ void WindowManager::initialize(Settings &settings, const Paths &paths)
             windowLayout.activateOrAddChannel(desired->provider, desired->name);
         }
 
-        this->emotePopupPos_ = windowLayout.emotePopupPos_;
+        this->emotePopupBounds_ = windowLayout.emotePopupBounds_;
 
         this->applyWindowLayout(windowLayout);
     }
@@ -483,10 +487,12 @@ void WindowManager::save()
         windowObj.insert("width", rect.width());
         windowObj.insert("height", rect.height());
 
-        QJsonObject emotePopupObj;
-        emotePopupObj.insert("x", this->emotePopupPos_.x());
-        emotePopupObj.insert("y", this->emotePopupPos_.y());
-        windowObj.insert("emotePopup", emotePopupObj);
+        windowObj["emotePopup"] = QJsonObject{
+            {"x", this->emotePopupBounds_.x()},
+            {"y", this->emotePopupBounds_.y()},
+            {"width", this->emotePopupBounds_.width()},
+            {"height", this->emotePopupBounds_.height()},
+        };
 
         // window tabs
         QJsonArray tabsArr;
@@ -682,27 +688,28 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
 
     if (descriptor.type_ == "twitch")
     {
-        return app->twitch->getOrAddChannel(descriptor.channelName_);
+        return getIApp()->getTwitchAbstract()->getOrAddChannel(
+            descriptor.channelName_);
     }
     else if (descriptor.type_ == "mentions")
     {
-        return app->twitch->mentionsChannel;
+        return getIApp()->getTwitch()->getMentionsChannel();
     }
     else if (descriptor.type_ == "watching")
     {
-        return app->twitch->watchingChannel;
+        return getIApp()->getTwitch()->getWatchingChannel();
     }
     else if (descriptor.type_ == "whispers")
     {
-        return app->twitch->whispersChannel;
+        return getIApp()->getTwitch()->getWhispersChannel();
     }
     else if (descriptor.type_ == "live")
     {
-        return app->twitch->liveChannel;
+        return getIApp()->getTwitch()->getLiveChannel();
     }
     else if (descriptor.type_ == "automod")
     {
-        return app->twitch->automodChannel;
+        return getIApp()->getTwitch()->getAutomodChannel();
     }
     else if (descriptor.type_ == "irc")
     {
@@ -711,7 +718,8 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
     }
     else if (descriptor.type_ == "misc")
     {
-        return app->twitch->getChannelOrEmpty(descriptor.channelName_);
+        return getIApp()->getTwitchAbstract()->getChannelOrEmpty(
+            descriptor.channelName_);
     }
 
     return Channel::getEmpty();
@@ -753,7 +761,7 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
     }
 
     // Set emote popup position
-    this->emotePopupPos_ = layout.emotePopupPos_;
+    this->emotePopupBounds_ = layout.emotePopupBounds_;
 
     for (const auto &windowData : layout.windows_)
     {
@@ -802,10 +810,14 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
                 // Have to offset x by one because qt moves the window 1px too
                 // far to the left:w
 
-                window.setInitialBounds({windowData.geometry_.x(),
-                                         windowData.geometry_.y(),
-                                         windowData.geometry_.width(),
-                                         windowData.geometry_.height()});
+                window.setInitialBounds(
+                    {
+                        windowData.geometry_.x(),
+                        windowData.geometry_.y(),
+                        windowData.geometry_.width(),
+                        windowData.geometry_.height(),
+                    },
+                    widgets::BoundsChecking::Off);
             }
         }
 

@@ -1,24 +1,25 @@
+#include "controllers/commands/builtin/twitch/Unban.hpp"
+
 #include "Application.hpp"
+#include "common/Channel.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "controllers/commands/builtin/twitch/Ban.hpp"
 #include "controllers/commands/CommandContext.hpp"
+#include "controllers/commands/common/ChannelAction.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
-#include "util/Twitch.hpp"
 
 namespace {
 
 using namespace chatterino;
 
-void unbanUserByID(const ChannelPtr &channel,
-                   const TwitchChannel *twitchChannel,
+void unbanUserByID(const ChannelPtr &channel, const QString &channelID,
                    const QString &sourceUserID, const QString &targetUserID,
                    const QString &displayName)
 {
     getHelix()->unbanUser(
-        twitchChannel->roomId(), sourceUserID, targetUserID,
+        channelID, sourceUserID, targetUserID,
         [] {
             // No response for unbans, they're emitted over pubsub/IRC instead
         },
@@ -85,26 +86,28 @@ namespace chatterino::commands {
 
 QString unbanUser(const CommandContext &ctx)
 {
-    if (ctx.channel == nullptr)
+    const auto command = ctx.words.at(0).toLower();
+    const auto usage =
+        QStringLiteral(
+            R"(Usage: "%1 <username> - Removes a ban on a user. Options: --channel <channel> to override which channel the unban takes place in (can be specified multiple times).)")
+            .arg(command);
+    const auto actions = parseChannelAction(ctx, command, usage, false, false);
+    if (!actions.has_value())
     {
+        if (ctx.channel != nullptr)
+        {
+            ctx.channel->addMessage(makeSystemMessage(actions.error()));
+        }
+        else
+        {
+            qCWarning(chatterinoCommands)
+                << "Error parsing command:" << actions.error();
+        }
+
         return "";
     }
 
-    auto commandName = ctx.words.at(0).toLower();
-    if (ctx.twitchChannel == nullptr)
-    {
-        ctx.channel->addMessage(makeSystemMessage(
-            QString("The %1 command only works in Twitch channels.")
-                .arg(commandName)));
-        return "";
-    }
-    if (ctx.words.size() < 2)
-    {
-        ctx.channel->addMessage(makeSystemMessage(
-            QString("Usage: \"%1 <username>\" - Removes a ban on a user.")
-                .arg(commandName)));
-        return "";
-    }
+    assert(!actions.value().empty());
 
     auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
@@ -114,29 +117,78 @@ QString unbanUser(const CommandContext &ctx)
         return "";
     }
 
-    const auto &rawTarget = ctx.words.at(1);
-    auto [targetUserName, targetUserID] = parseUserNameOrID(rawTarget);
+    for (const auto &action : actions.value())
+    {
+        const auto &reason = action.reason;
 
-    if (!targetUserID.isEmpty())
-    {
-        unbanUserByID(ctx.channel, ctx.twitchChannel, currentUser->getUserId(),
-                      targetUserID, targetUserID);
-    }
-    else
-    {
-        getHelix()->getUserByName(
-            targetUserName,
-            [channel{ctx.channel}, currentUser,
-             twitchChannel{ctx.twitchChannel},
-             targetUserName{targetUserName}](const auto &targetUser) {
-                unbanUserByID(channel, twitchChannel, currentUser->getUserId(),
-                              targetUser.id, targetUser.displayName);
-            },
-            [channel{ctx.channel}, targetUserName{targetUserName}] {
-                // Equivalent error from IRC
-                channel->addMessage(makeSystemMessage(
-                    QString("Invalid username: %1").arg(targetUserName)));
-            });
+        QStringList userLoginsToFetch;
+        QStringList userIDs;
+        if (action.target.id.isEmpty())
+        {
+            assert(!action.target.login.isEmpty() &&
+                   "Unban Action target username AND user ID may not be "
+                   "empty at the same time");
+            userLoginsToFetch.append(action.target.login);
+        }
+        else
+        {
+            // For hydration
+            userIDs.append(action.target.id);
+        }
+        if (action.channel.id.isEmpty())
+        {
+            assert(!action.channel.login.isEmpty() &&
+                   "Unban Action channel username AND user ID may not be "
+                   "empty at the same time");
+            userLoginsToFetch.append(action.channel.login);
+        }
+        else
+        {
+            // For hydration
+            userIDs.append(action.channel.id);
+        }
+
+        if (!userLoginsToFetch.isEmpty())
+        {
+            // At least 1 user ID needs to be resolved before we can take action
+            // userIDs is filled up with the data we already have to hydrate the action channel & action target
+            getHelix()->fetchUsers(
+                userIDs, userLoginsToFetch,
+                [channel{ctx.channel}, actionChannel{action.channel},
+                 actionTarget{action.target}, currentUser, reason,
+                 userLoginsToFetch](const auto &users) mutable {
+                    if (!actionChannel.hydrateFrom(users))
+                    {
+                        channel->addMessage(makeSystemMessage(
+                            QString("Failed to timeout, bad channel name: %1")
+                                .arg(actionChannel.login)));
+                        return;
+                    }
+                    if (!actionTarget.hydrateFrom(users))
+                    {
+                        channel->addMessage(makeSystemMessage(
+                            QString("Failed to timeout, bad target name: %1")
+                                .arg(actionTarget.login)));
+                        return;
+                    }
+
+                    unbanUserByID(channel, actionChannel.id,
+                                  currentUser->getUserId(), actionTarget.id,
+                                  actionTarget.displayName);
+                },
+                [channel{ctx.channel}, userLoginsToFetch] {
+                    channel->addMessage(makeSystemMessage(
+                        QString("Failed to timeout, bad username(s): %1")
+                            .arg(userLoginsToFetch.join(", "))));
+                });
+        }
+        else
+        {
+            // If both IDs are available, we do no hydration & just use the id as the display name
+            unbanUserByID(ctx.channel, action.channel.id,
+                          currentUser->getUserId(), action.target.id,
+                          action.target.id);
+        }
     }
 
     return "";

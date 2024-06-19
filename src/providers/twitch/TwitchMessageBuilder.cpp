@@ -770,9 +770,8 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
 
             auto prefixedUsername = '@' + username;
             auto remainder = string.remove(prefixedUsername);
-            this->emplace<MentionElement>(prefixedUsername, originalTextColor,
-                                          textColor)
-                ->setLink({Link::UserInfo, username})
+            this->emplace<MentionElement>(prefixedUsername, username,
+                                          originalTextColor, textColor)
                 ->setTrailingSpace(remainder.isEmpty());
 
             if (!remainder.isEmpty())
@@ -802,9 +801,8 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
             }
 
             auto remainder = string.remove(username);
-            this->emplace<MentionElement>(username, originalTextColor,
+            this->emplace<MentionElement>(username, username, originalTextColor,
                                           textColor)
-                ->setLink({Link::UserInfo, username})
                 ->setTrailingSpace(remainder.isEmpty());
 
             if (!remainder.isEmpty())
@@ -1821,8 +1819,10 @@ void TwitchMessageBuilder::listOfUsersSystemMessage(QString prefix,
             }
         }
 
-        builder->emplace<MentionElement>(username, MessageColor::System, color)
-            ->setLink({Link::UserInfo, username})
+        // TODO: Ensure we make use of display name / username(login name) correctly here
+        builder
+            ->emplace<MentionElement>(username, username, MessageColor::System,
+                                      color)
             ->setTrailingSpace(false);
     }
 }
@@ -1867,9 +1867,8 @@ void TwitchMessageBuilder::listOfUsersSystemMessage(
         }
 
         builder
-            ->emplace<MentionElement>(user.userName, MessageColor::System,
-                                      color)
-            ->setLink({Link::UserInfo, user.userLogin})
+            ->emplace<MentionElement>(user.userName, user.userLogin,
+                                      MessageColor::System, color)
             ->setTrailingSpace(false);
     }
 
@@ -1938,8 +1937,8 @@ MessagePtr TwitchMessageBuilder::makeAutomodInfoMessage(
     builder.emplace<BadgeElement>(makeAutoModBadge(),
                                   MessageElementFlag::BadgeChannelAuthority);
     // AutoMod "username"
-    builder.emplace<MentionElement>("AutoMod:", AUTOMOD_USER_COLOR,
-                                    AUTOMOD_USER_COLOR);
+    builder.emplace<TextElement>("AutoMod:", MessageElementFlag::Text,
+                                 AUTOMOD_USER_COLOR, FontStyle::ChatMediumBold);
     switch (action.type)
     {
         case AutomodInfoAction::OnHold: {
@@ -1993,8 +1992,9 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeAutomodMessage(
     builder.emplace<BadgeElement>(makeAutoModBadge(),
                                   MessageElementFlag::BadgeChannelAuthority);
     // AutoMod "username"
-    builder2.emplace<MentionElement>("AutoMod:", AUTOMOD_USER_COLOR,
-                                     AUTOMOD_USER_COLOR);
+    builder2.emplace<TextElement>("AutoMod:", MessageElementFlag::Text,
+                                  AUTOMOD_USER_COLOR,
+                                  FontStyle::ChatMediumBold);
     // AutoMod header message
     builder.emplace<TextElement>(
         ("Held a message for reason: " + action.reason +
@@ -2041,10 +2041,9 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeAutomodMessage(
     builder2.message().flags.set(MessageFlag::AutoModOffendingMessage);
 
     // sender username
-    builder2
-        .emplace<MentionElement>(action.target.displayName + ":",
-                                 MessageColor::Text, action.target.color)
-        ->setLink({Link::UserInfo, action.target.login});
+    builder2.emplace<MentionElement>(action.target.displayName + ":",
+                                     action.target.login, MessageColor::Text,
+                                     action.target.color);
     // sender's message caught by AutoMod
     builder2.emplace<TextElement>(action.message, MessageElementFlag::Text,
                                   MessageColor::Text);
@@ -2239,9 +2238,9 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeLowTrustUserMessage(
     appendBadges(&builder2, action.senderBadges, {}, twitchChannel);
 
     // sender username
-    builder2.emplace<MentionElement>(action.suspiciousUserDisplayName + ":",
-                                     MessageColor::Text,
-                                     action.suspiciousUserColor);
+    builder2.emplace<MentionElement>(
+        action.suspiciousUserDisplayName + ":", action.suspiciousUserLogin,
+        MessageColor::Text, action.suspiciousUserColor);
 
     // sender's message caught by AutoMod
     for (const auto &fragment : action.fragments)

@@ -25,8 +25,6 @@ namespace chatterino {
  **/
 class MiniaudioBackend : public ISoundController
 {
-    void initialize(Settings &settings, const Paths &paths) override;
-
 public:
     MiniaudioBackend();
     ~MiniaudioBackend() override;
