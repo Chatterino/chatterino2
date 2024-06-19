@@ -2,10 +2,15 @@
 
 #include "debug/AssertInGuiThread.hpp"
 
-namespace chatterino {
 namespace {
-    static Resources2 *resources = nullptr;
-}
+
+using namespace chatterino;
+
+static Resources2 *resources = nullptr;
+
+}  // namespace
+
+namespace chatterino {
 
 Resources2 &getResources()
 {

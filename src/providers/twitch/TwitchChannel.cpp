@@ -91,13 +91,6 @@ TwitchChannel::TwitchChannel(const QString &name)
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
-    if (!getApp())
-    {
-        // This is intended for tests and benchmarks.
-        // Irc, Pubsub, live-updates, and live-notifications aren't mocked there.
-        return;
-    }
-
     this->bSignals_.emplace_back(
         getIApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
             this->setMod(false);
@@ -231,13 +224,6 @@ TwitchChannel::TwitchChannel(const QString &name)
 
 TwitchChannel::~TwitchChannel()
 {
-    if (!getApp())
-    {
-        // This is for tests and benchmarks, where live-updates aren't mocked
-        // see comment in constructor.
-        return;
-    }
-
     getIApp()->getTwitch()->dropSeventvChannel(this->seventvUserID_,
                                                this->seventvEmoteSetID_);
 
@@ -586,6 +572,10 @@ void TwitchChannel::showLoginMessage()
 
 void TwitchChannel::roomIdChanged()
 {
+    if (getIApp()->isTest())
+    {
+        return;
+    }
     this->refreshPubSub();
     this->refreshBadges();
     this->refreshCheerEmotes();
@@ -792,7 +782,7 @@ void TwitchChannel::setRoomId(const QString &id)
     {
         *this->roomID_.access() = id;
         // This is intended for tests and benchmarks. See comment in constructor.
-        if (getApp())
+        if (!getIApp()->isTest())
         {
             this->roomIdChanged();
             this->loadRecentMessages();
@@ -1341,6 +1331,11 @@ void TwitchChannel::loadRecentMessagesReconnect()
 
 void TwitchChannel::refreshPubSub()
 {
+    if (getIApp()->isTest())
+    {
+        return;
+    }
+
     auto roomId = this->roomId();
     if (roomId.isEmpty())
     {

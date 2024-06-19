@@ -35,6 +35,7 @@ class PluginController;
 
 class Theme;
 class WindowManager;
+class ILogging;
 class Logging;
 class Paths;
 class Emotes;
@@ -64,6 +65,8 @@ public:
 
     static IApplication *instance;
 
+    virtual bool isTest() const = 0;
+
     virtual const Paths &getPaths() = 0;
     virtual const Args &getArgs() = 0;
     virtual Theme *getThemes() = 0;
@@ -80,7 +83,7 @@ public:
     virtual ITwitchIrcServer *getTwitch() = 0;
     virtual IAbstractIrcServer *getTwitchAbstract() = 0;
     virtual PubSub *getTwitchPubSub() = 0;
-    virtual Logging *getChatLogger() = 0;
+    virtual ILogging *getChatLogger() = 0;
     virtual IChatterinoBadges *getChatterinoBadges() = 0;
     virtual FfzBadges *getFfzBadges() = 0;
     virtual SeventvBadges *getSeventvBadges() = 0;
@@ -121,6 +124,11 @@ public:
     Application &operator=(const Application &) = delete;
     Application &operator=(Application &&) = delete;
 
+    bool isTest() const override
+    {
+        return false;
+    }
+
     /**
      * In the interim, before we remove _exit(0); from RunGui.cpp,
      * this will destroy things we know can be destroyed
@@ -152,8 +160,8 @@ private:
     std::unique_ptr<TwitchIrcServer> twitch;
     FfzBadges *const ffzBadges{};
     SeventvBadges *const seventvBadges{};
-    UserDataController *const userData{};
-    ISoundController *const sound{};
+    std::unique_ptr<UserDataController> userData;
+    std::unique_ptr<ISoundController> sound;
     TwitchLiveController *const twitchLiveController{};
     std::unique_ptr<PubSub> twitchPubSub;
     std::unique_ptr<TwitchBadges> twitchBadges;
@@ -191,7 +199,7 @@ public:
     ITwitchIrcServer *getTwitch() override;
     IAbstractIrcServer *getTwitchAbstract() override;
     PubSub *getTwitchPubSub() override;
-    Logging *getChatLogger() override;
+    ILogging *getChatLogger() override;
     FfzBadges *getFfzBadges() override;
     SeventvBadges *getSeventvBadges() override;
     IUserDataController *getUserData() override;

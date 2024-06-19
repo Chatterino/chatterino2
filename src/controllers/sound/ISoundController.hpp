@@ -1,13 +1,8 @@
 #pragma once
 
-#include "common/Singleton.hpp"
-
 #include <QUrl>
 
 namespace chatterino {
-
-class Settings;
-class Paths;
 
 enum class SoundBackend {
     Miniaudio,
@@ -17,11 +12,11 @@ enum class SoundBackend {
 /**
  * @brief Handles sound loading & playback
  **/
-class ISoundController : public Singleton
+class ISoundController
 {
 public:
     ISoundController() = default;
-    ~ISoundController() override = default;
+    virtual ~ISoundController() = default;
     ISoundController(const ISoundController &) = delete;
     ISoundController(ISoundController &&) = delete;
     ISoundController &operator=(const ISoundController &) = delete;

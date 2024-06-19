@@ -463,6 +463,7 @@ private:
     friend class TwitchIrcServer;
     friend class TwitchMessageBuilder;
     friend class IrcMessageHandler;
+    friend class Commands_E2E_Test;
 };
 
 }  // namespace chatterino
