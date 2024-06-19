@@ -81,7 +81,7 @@ declare module c2 {
 
   class HTTPResponse implements ISharedResource {
     data(): string;
-    status(): number;
+    status(): number|null;
     error(): string;
   }
 
