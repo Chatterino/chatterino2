@@ -420,7 +420,6 @@ It returns something like: `"ConnectionRefusedError"`, `"401"`.
 This function returns the HTTP status code of the request or `nil` if there was
 an error before a status code could be received.
 
-
 ```lua
 {
     data = "This is the data received from the server as a string",
