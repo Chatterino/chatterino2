@@ -7,6 +7,8 @@
 #    include "controllers/plugins/api/ChannelRef.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 
+#    include <cassert>
+
 extern "C" {
 #    include <lauxlib.h>
 #    include <lua.h>
@@ -142,6 +144,12 @@ StackIdx push(lua_State *L, const int &b)
     return lua_gettop(L);
 }
 
+StackIdx push(lua_State *L, const double &n)
+{
+    lua_pushnumber(L, n);
+    return lua_gettop(L);
+}
+
 StackIdx push(lua_State *L, const api::CompletionEvent &ev)
 {
     auto idx = pushEmptyTable(L, 4);
@@ -154,6 +162,76 @@ StackIdx push(lua_State *L, const api::CompletionEvent &ev)
     PUSH(is_first_word);
 #    undef PUSH
     return idx;
+}
+
+StackIdx push(lua_State *L, const QJsonDocument &doc)
+{
+    if (doc.isNull())
+    {
+        lua_pushnil(L);
+        return lua_gettop(L);
+    }
+
+    if (doc.isArray())
+    {
+        return push(L, doc.array());
+    }
+    if (doc.isObject())
+    {
+        return push(L, doc.object());
+    }
+    assert(false && "A QJsonDocument must be null, an array or an object");
+    return 0;
+}
+
+StackIdx push(lua_State *L, const QJsonArray &arr)
+{
+    auto out = pushEmptyArray(L, arr.size());
+    int index = 1;
+    for (const auto &val : arr)
+    {
+        lua::push(L, val);
+        lua_seti(L, out, index);
+        index += 1;
+    }
+    return out;
+}
+
+StackIdx push(lua_State *L, const QJsonObject &obj)
+{
+    auto out = pushEmptyTable(L, obj.size());
+    for (const auto &key : obj.keys())
+    {
+        const auto &value = obj.value(key);
+        lua::push(L, value);
+        lua_setfield(L, out, key.toStdString().c_str());
+    }
+    return out;
+}
+StackIdx push(lua_State *L, const QJsonValue &val)
+{
+    switch (val.type())
+    {
+        case QJsonValue::Null:
+            lua_pushnil(L);
+            return lua_gettop(L);
+        case QJsonValue::Bool:
+            return push(L, val.toBool());
+        case QJsonValue::String:
+            return push(L, val.toString());
+        case QJsonValue::Array:
+            return push(L, val.toArray());
+        case QJsonValue::Object:
+            return push(L, val.toObject());
+        case QJsonValue::Double:
+            return push(L, val.toDouble());
+
+        case QJsonValue::Undefined:
+            assert(false && "Tried to push undefined/erroneous QJsonValue into "
+                            "Lua, this is not allowed.");
+        default:
+            assert(false && "Malformed QJsonValue type. This never happens");
+    }
 }
 
 bool peek(lua_State *L, int *out, StackIdx idx)

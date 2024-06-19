@@ -121,6 +121,18 @@ int c2_log(lua_State *L);
  */
 int c2_later(lua_State *L);
 
+/**
+ * @lua@alias AnyJSON integer|boolean|string|number|table
+ */
+
+/**
+ * Loads json data from a string into Lua tables.
+ *
+ * @lua@param json_data string Data you want to load
+ * @lua@return AnyJSON Deserialized data.
+ */
+int c2_json_load(lua_State *L);
+
 // These ones are global
 int g_load(lua_State *L);
 int g_print(lua_State *L);

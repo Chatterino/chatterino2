@@ -9,6 +9,7 @@ extern "C" {
 #    include <lualib.h>
 }
 #    include <magic_enum/magic_enum.hpp>
+#    include <QJsonDocument>
 #    include <QList>
 
 #    include <cassert>
@@ -67,7 +68,12 @@ StackIdx push(lua_State *L, const QString &str);
 StackIdx push(lua_State *L, const std::string &str);
 StackIdx push(lua_State *L, const bool &b);
 StackIdx push(lua_State *L, const int &b);
+StackIdx push(lua_State *L, const double &n);
 StackIdx push(lua_State *L, const api::CompletionEvent &ev);
+StackIdx push(lua_State *L, const QJsonDocument &doc);
+StackIdx push(lua_State *L, const QJsonArray &arr);
+StackIdx push(lua_State *L, const QJsonObject &obj);
+StackIdx push(lua_State *L, const QJsonValue &val);
 
 // returns OK?
 bool peek(lua_State *L, int *out, StackIdx idx = -1);

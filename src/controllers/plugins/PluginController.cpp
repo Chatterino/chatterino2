@@ -152,6 +152,7 @@ void PluginController::openLibrariesFor(lua_State *L, const PluginMeta &meta,
         {"register_callback", lua::api::c2_register_callback},
         {"log", lua::api::c2_log},
         {"later", lua::api::c2_later},
+        {"json_load", lua::api::c2_json_load},
         {nullptr, nullptr},
     };
     lua_pushglobaltable(L);

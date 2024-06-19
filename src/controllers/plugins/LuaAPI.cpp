@@ -15,6 +15,7 @@ extern "C" {
 #    include <lualib.h>
 }
 #    include <QFileInfo>
+#    include <QJsonDocument>
 #    include <QLoggingCategory>
 #    include <QTextCodec>
 #    include <QUrl>
@@ -207,6 +208,28 @@ int c2_later(lua_State *L)
     timer->start();
 
     return 0;
+}
+
+int c2_json_load(lua_State *L)
+{
+    lua::StackGuard guard(L, 0);  // 1 in, 1 out
+
+    std::string str;
+    if (!lua::pop(L, &str))
+    {
+        return luaL_error(
+            L, "Cannot get json_data (only argument of c2.json_load, "
+               "expected a string)");
+    }
+    QJsonParseError err{};
+    auto doc = QJsonDocument::fromJson(QByteArray::fromStdString(str), &err);
+    if (err.error != QJsonParseError::NoError)
+    {
+        return luaL_error(L, "Failed to parse JSON data: %s",
+                          err.errorString().toStdString().c_str());
+    }
+    lua::push(L, doc);
+    return 1;
 }
 
 int g_load(lua_State *L)
