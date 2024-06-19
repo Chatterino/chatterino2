@@ -7,9 +7,8 @@
 
 extern "C" {
 #    include <lauxlib.h>
-
-#    include <utility>
 }
+#    include <utility>
 
 namespace chatterino::lua::api {
 // NOLINTBEGIN(*vararg)

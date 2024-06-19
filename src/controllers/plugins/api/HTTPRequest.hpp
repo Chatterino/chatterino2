@@ -1,11 +1,10 @@
 #pragma once
-#include "common/network/NetworkRequest.hpp"
-#include "common/network/NetworkResult.hpp"
-#include "controllers/plugins/LuaUtilities.hpp"
-#include "controllers/plugins/PluginController.hpp"
-
-#include <memory>
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include "common/network/NetworkRequest.hpp"
+#    include "controllers/plugins/LuaUtilities.hpp"
+#    include "controllers/plugins/PluginController.hpp"
+
+#    include <memory>
 
 namespace chatterino::lua::api {
 // NOLINTBEGIN(readability-identifier-naming)
