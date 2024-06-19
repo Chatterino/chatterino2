@@ -19,6 +19,7 @@
 - Bugfix: Fixed restricted users usernames not being clickable. (#5405)
 - Bugfix: Fixed a crash that could occur when logging was enabled in IRC servers that were removed. (#5419)
 - Bugfix: Fixed message history occasionally not loading after a sleep. (#5457)
+- Bugfix: Fixed a crash when tab completing while having an invalid plugin loaded. (#5401)
 - Dev: Update Windows build from Qt 6.5.0 to Qt 6.7.1. (#5420)
 - Dev: Update vcpkg build Qt from 6.5.0 to 6.7.0, boost from 1.83.0 to 1.85.0, openssl from 3.1.3 to 3.3.0. (#5422)
 - Dev: Unsingletonize `ISoundController`. (#5462)
