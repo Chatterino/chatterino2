@@ -91,14 +91,17 @@ int main(int argc, char **argv)
             attachToConsole();
         }
 
-        qCInfo(chatterinoApp)
+        qCInfo(chatterinoApp).noquote()
             << "Chatterino Qt SSL library build version:"
-            << QSslSocket::sslLibraryBuildVersionString()
-            << ", library version:" << QSslSocket::sslLibraryVersionString();
+            << QSslSocket::sslLibraryBuildVersionString();
+        qCInfo(chatterinoApp).noquote()
+            << "Chatterino Qt SSL library version:"
+            << QSslSocket::sslLibraryVersionString();
 #if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
-        qCInfo(chatterinoApp) << "Chatterino Qt SSL active backend:"
-                              << QSslSocket::activeBackend() << "of"
-                              << QSslSocket::availableBackends().join(", ");
+        qCInfo(chatterinoApp).noquote()
+            << "Chatterino Qt SSL active backend:"
+            << QSslSocket::activeBackend() << "of"
+            << QSslSocket::availableBackends().join(", ");
 #    if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
         qCInfo(chatterinoApp) << "Chatterino Qt SSL active backend features:"
                               << QSslSocket::supportedFeatures();
