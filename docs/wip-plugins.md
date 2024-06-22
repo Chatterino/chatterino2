@@ -85,6 +85,24 @@ Example:
 }
 ```
 
+### Network
+
+Allows the plugin to send HTTP requests.
+
+Example:
+
+```json
+{
+  ...,
+  "permissions": [
+    {
+      "type": "Network"
+    },
+    ...
+  ]
+}
+```
+
 ## Plugins with Typescript
 
 If you prefer, you may use [TypescriptToLua](https://typescripttolua.github.io)
@@ -369,6 +387,138 @@ Returns `true` if the channel can be moderated by the current user.
 ##### `Channel:is_vip()`
 
 Returns `true` if the current user is a VIP in the channel.
+
+#### `HTTPMethod` enum
+
+This table describes HTTP methods available to Lua Plugins. The values behind
+the names may change, do not count on them. It has the following keys:
+
+- `Get`
+- `Post`
+- `Put`
+- `Delete`
+- `Patch`
+
+#### `HTTPResponse`
+
+An `HTTPResponse` is a table you receive in the callback after a completed `HTTPRequest`.
+
+##### `HTTPResponse.data()`
+
+This function returns the data received from the server as a string. Usually
+this will be UTF-8-encoded however that is not guaranteed, this could be any
+binary data.
+
+##### `HTTPResponse.error()`
+
+If an error happened this function returns a human readable description of it.
+
+It returns something like: `"ConnectionRefusedError"`, `"401"`.
+
+##### `HTTPResponse.status()`
+
+This function returns the HTTP status code of the request or `nil` if there was
+an error before a status code could be received.
+
+```lua
+{
+    data = "This is the data received from the server as a string",
+    status = 200, -- HTTP status code returned by the server or nil if no response was received because of an error
+    error = "A somewhat human readable description of an error if such happened"
+}
+```
+
+#### `HTTPRequest`
+
+Allows you to send an HTTP request to a URL. Do not create requests that you
+don't want to call `execute()` on. For the time being that leaks callback
+functions and all their upvalues with them.
+
+##### `HTTPRequest.create(method, url)`
+
+Creates a new `HTTPRequest`. The `method` argument is an
+[`HTTPMethod`](#HTTPMethod-enum). The `url` argument must be a string
+containing a valid URL (ex. `https://example.com/path/to/api`).
+
+```lua
+local req = c2.HTTPRequest.create(c2.HTTPMethod.Get, "https://example.com")
+req:on_success(function (res)
+    print(res.data)
+end)
+req:execute()
+```
+
+##### `HTTPRequest:on_success(callback)`
+
+Sets the success callback. It accepts a function that takes a single parameter
+of type `HTTPResponse`. The callback will be called on success. This function
+returns nothing.
+
+##### `HTTPRequest:on_error(callback)`
+
+Sets the error callback. It accepts a function that takes a single parameter of
+type `HTTPResponse`. The callback will be called if the request fails. To see why
+it failed check the `error` field of the result. This function returns nothing.
+
+##### `HTTPRequest:finally(callback)`
+
+Sets the finally callback. It accepts a function that takes no parameters and
+returns nothing. It will be always called after `success` or `error`. This
+function returns nothing.
+
+##### `HTTPRequest:set_timeout(timeout)`
+
+Sets how long the request will take before it times out. The `timeout`
+parameter is in milliseconds. This function returns nothing.
+
+##### `HTTPRequest:set_payload(data)`
+
+Sets the data that will be sent with the request. The `data` parameter must be
+a string. This function returns nothing.
+
+##### `HTTPRequest:set_header(name, value)`
+
+Adds or overwrites a header in the request. Both `name` and `value` should be
+strings. If they are not strings they will be converted to strings. This
+function returns nothing.
+
+##### `HTTPRequest:execute()`
+
+Sends the request. This function returns nothing.
+
+```lua
+local url = "http://localhost:8080/thing"
+local request = c2.HTTPRequest.create("Post", url)
+request:set_timeout(1000)
+request:set_payload("TEST!")
+request:set_header("X-Test", "Testing!")
+request:set_header("Content-Type", "text/plain")
+request:on_success(function (res)
+    print('Success!')
+    -- Data is in res.data
+    print(res.status)
+end)
+request:on_error(function (res)
+    print('Error!')
+    print(res.status)
+    print(res.error)
+end)
+request:finally(function ()
+    print('Finally')
+end)
+request:execute()
+
+-- This prints:
+-- Success!
+-- [content of /thing]
+-- 200
+-- Finally
+
+-- Or:
+-- Error!
+-- nil
+-- ConnectionRefusedError
+```
 
 ### Input/Output API
 
