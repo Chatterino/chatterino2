@@ -118,8 +118,8 @@ QString sendWarn(const CommandContext &ctx)
         const auto &reason = action.reason;
         if (reason.isEmpty())
         {
-            ctx.channel->addMessage(makeSystemMessage(
-                QString("Failed to warn, you must specify a reason")));
+            ctx.channel->addMessage(
+                makeSystemMessage("Failed to warn, you must specify a reason"));
             break;
         }
 
