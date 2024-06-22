@@ -41,7 +41,6 @@ BOILERPLATE = """
 -- Add the folder this file is in to "Lua.workspace.library".
 
 c2 = {}
-
 """
 
 repo_root = Path(__file__).parent.parent

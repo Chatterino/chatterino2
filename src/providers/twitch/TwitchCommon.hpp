@@ -77,6 +77,7 @@ static const QStringList TWITCH_DEFAULT_COMMANDS{
     "delete",
     "announce",
     "requests",
+    "warn",
 };
 
 static const QStringList TWITCH_WHISPER_COMMANDS{"/w", ".w"};
