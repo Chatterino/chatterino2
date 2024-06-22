@@ -1,3 +1,4 @@
+#pragma once
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "common/network/NetworkResult.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
