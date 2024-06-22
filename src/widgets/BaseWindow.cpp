@@ -1137,7 +1137,11 @@ bool BaseWindow::handleSIZE(MSG *msg)
 
             if (this->isNotMinimizedOrMaximized_)
             {
-                this->currentBounds_ = this->geometry();
+                // Wait for WM_SIZE to be processed by Qt and update the current
+                // bounds afterwards.
+                postToThread([this] {
+                    this->currentBounds_ = this->geometry();
+                });
             }
             this->useNextBounds_.stop();
 
