@@ -1170,7 +1170,11 @@ bool BaseWindow::handleMOVE(MSG *msg)
 #ifdef USEWINSDK
     if (this->isNotMinimizedOrMaximized_)
     {
-        this->nextBounds_ = this->geometry();
+        // Wait for WM_MOVE to be processed by Qt and update the next bounds
+        // afterwards.
+        postToThread([this] {
+            this->nextBounds_ = this->geometry();
+        });
         this->useNextBounds_.start(10);
     }
 #endif
