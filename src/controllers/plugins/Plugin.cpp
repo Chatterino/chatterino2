@@ -1,8 +1,10 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/Plugin.hpp"
 
+#    include "common/network/NetworkCommon.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandController.hpp"
+#    include "controllers/plugins/PluginPermission.hpp"
 #    include "util/QMagicEnum.hpp"
 
 extern "C" {
@@ -11,6 +13,8 @@ extern "C" {
 #    include <magic_enum/magic_enum.hpp>
 #    include <QJsonArray>
 #    include <QJsonObject>
+#    include <QLoggingCategory>
+#    include <QUrl>
 
 #    include <algorithm>
 #    include <unordered_map>
@@ -258,16 +262,25 @@ bool Plugin::hasFSPermissionFor(bool write, const QString &path)
     using PType = PluginPermission::Type;
     auto typ = write ? PType::FilesystemWrite : PType::FilesystemRead;
 
-    // XXX: Older compilers don't have support for std::ranges
-    // NOLINTNEXTLINE(readability-use-anyofallof)
-    for (const auto &p : this->meta.permissions)
+    return std::ranges::any_of(this->meta.permissions, [=](const auto &p) {
+        return p.type == typ;
+    });
+}
+
+bool Plugin::hasHTTPPermissionFor(const QUrl &url)
+{
+    auto proto = url.scheme();
+    if (proto != "http" && proto != "https")
     {
-        if (p.type == typ)
-        {
-            return true;
-        }
+        qCWarning(chatterinoLua).nospace()
+            << "Plugin " << this->id << " (" << this->meta.name
+            << ") is trying to use a non-http protocol";
+        return false;
     }
-    return false;
+
+    return std::ranges::any_of(this->meta.permissions, [](const auto &p) {
+        return p.type == PluginPermission::Type::Network;
+    });
 }
 
 }  // namespace chatterino
