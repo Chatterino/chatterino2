@@ -5,7 +5,6 @@
 -- Add the folder this file is in to "Lua.workspace.library".
 
 c2 = {}
-
 ---@alias c2.LogLevel integer
 ---@type { Debug: c2.LogLevel, Info: c2.LogLevel, Warning: c2.LogLevel, Critical: c2.LogLevel }
 c2.LogLevel = {}
@@ -158,6 +157,89 @@ function c2.Channel.by_twitch_id(id) end
 ---@field game_id string
 
 -- End src/controllers/plugins/api/ChannelRef.hpp
+
+-- Begin src/controllers/plugins/api/HTTPRequest.hpp
+
+---@class HTTPResponse
+---@field data string Data received from the server
+---@field status integer? HTTP Status code returned by the server
+---@field error string A somewhat human readable description of an error if such happened
+
+---@alias HTTPCallback fun(result: HTTPResponse): nil
+---@class HTTPRequest
+HTTPRequest = {}
+
+--- Sets the success callback
+---
+---@param callback HTTPCallback Function to call when the HTTP request succeeds
+function HTTPRequest:on_success(callback) end
+
+--- Sets the failure callback
+---
+---@param callback HTTPCallback Function to call when the HTTP request fails or returns a non-ok status
+function HTTPRequest:on_error(callback) end
+
+--- Sets the finally callback
+---
+---@param callback fun(): nil Function to call when the HTTP request finishes
+function HTTPRequest:finally(callback) end
+
+--- Sets the timeout
+---
+---@param timeout integer How long in milliseconds until the times out
+function HTTPRequest:set_timeout(timeout) end
+
+--- Sets the request payload
+---
+---@param data string
+function HTTPRequest:set_payload(data) end
+
+--- Sets a header in the request
+---
+---@param name string
+---@param value string
+function HTTPRequest:set_header(name, value) end
+
+--- Executes the HTTP request
+---
+function HTTPRequest:execute() end
+
+--- Creates a new HTTPRequest
+---
+---@param method HTTPMethod Method to use
+---@param url string Where to send the request to
+---@return HTTPRequest
+function HTTPRequest.create(method, url) end
+
+-- End src/controllers/plugins/api/HTTPRequest.hpp
+
+-- Begin src/controllers/plugins/api/HTTPResponse.hpp
+
+---@class HTTPResponse
+HTTPResponse = {}
+
+--- Returns the data. This is not guaranteed to be encoded using any
+--- particular encoding scheme. It's just the bytes the server returned.
+---
+function HTTPResponse:data() end
+
+--- Returns the status code.
+---
+function HTTPResponse:status() end
+
+--- A somewhat human readable description of an error if such happened
+---
+function HTTPResponse:error() end
+
+-- End src/controllers/plugins/api/HTTPResponse.hpp
+
+-- Begin src/common/network/NetworkCommon.hpp
+
+---@alias HTTPMethod integer
+---@type { Get: HTTPMethod, Post: HTTPMethod, Put: HTTPMethod, Delete: HTTPMethod, Patch: HTTPMethod }
+HTTPMethod = {}
+
+-- End src/common/network/NetworkCommon.hpp
 
 --- Registers a new command called `name` which when executed will call `handler`.
 ---

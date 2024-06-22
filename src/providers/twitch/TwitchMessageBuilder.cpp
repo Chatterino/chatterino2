@@ -1594,6 +1594,15 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
     }
     builder->emplace<TextElement>(redeemed,
                                   MessageElementFlag::ChannelPointReward);
+    if (reward.id == "CELEBRATION")
+    {
+        const auto emotePtr =
+            getIApp()->getEmotes()->getTwitchEmotes()->getOrCreateEmote(
+                EmoteId{reward.emoteId}, EmoteName{reward.emoteName});
+        builder->emplace<EmoteElement>(emotePtr,
+                                       MessageElementFlag::ChannelPointReward,
+                                       MessageColor::Text);
+    }
     builder->emplace<TextElement>(
         reward.title, MessageElementFlag::ChannelPointReward,
         MessageColor::Text, FontStyle::ChatMediumBold);
@@ -1602,6 +1611,12 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
     builder->emplace<TextElement>(
         QString::number(reward.cost), MessageElementFlag::ChannelPointReward,
         MessageColor::Text, FontStyle::ChatMediumBold);
+    if (reward.isBits)
+    {
+        builder->emplace<TextElement>(
+            "bits", MessageElementFlag::ChannelPointReward, MessageColor::Text,
+            FontStyle::ChatMediumBold);
+    }
     if (reward.isUserInputRequired)
     {
         builder->emplace<LinebreakElement>(

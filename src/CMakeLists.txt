@@ -107,6 +107,8 @@ set(SOURCE_FILES
         controllers/commands/builtin/twitch/UpdateChannel.hpp
         controllers/commands/builtin/twitch/UpdateColor.cpp
         controllers/commands/builtin/twitch/UpdateColor.hpp
+        controllers/commands/builtin/twitch/Warn.cpp
+        controllers/commands/builtin/twitch/Warn.hpp
         controllers/commands/common/ChannelAction.cpp
         controllers/commands/common/ChannelAction.hpp
         controllers/commands/CommandContext.hpp
@@ -227,6 +229,10 @@ set(SOURCE_FILES
         controllers/plugins/api/ChannelRef.hpp
         controllers/plugins/api/IOWrapper.cpp
         controllers/plugins/api/IOWrapper.hpp
+        controllers/plugins/api/HTTPRequest.cpp
+        controllers/plugins/api/HTTPRequest.hpp
+        controllers/plugins/api/HTTPResponse.cpp
+        controllers/plugins/api/HTTPResponse.hpp
         controllers/plugins/LuaAPI.cpp
         controllers/plugins/LuaAPI.hpp
         controllers/plugins/PluginPermission.cpp
