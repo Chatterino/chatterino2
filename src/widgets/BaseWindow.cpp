@@ -240,7 +240,7 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
 #ifdef USEWINSDK
     this->useNextBounds_.setSingleShot(true);
     QObject::connect(&this->useNextBounds_, &QTimer::timeout, this, [this]() {
-        this->currentBounds_ = this->nextBounds_;
+        this->currentBounds_ = this->geometry();
     });
 #endif
 
@@ -725,6 +725,7 @@ void BaseWindow::moveEvent(QMoveEvent *event)
 {
     // Queue up save because: Window position changed
 #ifdef CHATTERINO
+    qDebug() << this->geometry();
     if (!flags_.has(DisableLayoutSave))
     {
         getIApp()->getWindows()->queueSave();
@@ -1170,11 +1171,8 @@ bool BaseWindow::handleMOVE(MSG *msg)
 #ifdef USEWINSDK
     if (this->isNotMinimizedOrMaximized_)
     {
-        // Wait for WM_MOVE to be processed by Qt and update the next bounds
-        // afterwards.
-        postToThread([this] {
-            this->nextBounds_ = this->geometry();
-        });
+        // Wait for WM_SIZE (in case the window was maximized, we don't want to
+        // save the bounds but keep the old ones)
         this->useNextBounds_.start(10);
     }
 #endif
