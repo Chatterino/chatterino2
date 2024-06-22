@@ -1338,21 +1338,30 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
     auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
 
     const auto &tags = message->tags();
+    QString rewardId;
     if (const auto it = tags.find("custom-reward-id"); it != tags.end())
     {
-        const auto rewardId = it.value().toString();
-        if (!rewardId.isEmpty() &&
-            !channel->isChannelPointRewardKnown(rewardId))
-        {
-            // Need to wait for pubsub reward notification
-            qCDebug(chatterinoTwitch) << "TwitchChannel reward added ADD "
-                                         "callback since reward is not known:"
-                                      << rewardId;
-            channel->addQueuedRedemption(rewardId, originalContent, message);
-            return;
-        }
-        args.channelPointRewardId = rewardId;
+        rewardId = it.value().toString();
     }
+    else if (const auto typeIt = tags.find("msg-id"); typeIt != tags.end())
+    {
+        // slight hack to treat bits power-ups as channel point redemptions
+        const auto msgId = typeIt.value().toString();
+        if (msgId == "animated-message" || msgId == "gigantified-emote-message")
+        {
+            rewardId = msgId;
+        }
+    }
+    if (!rewardId.isEmpty() && !channel->isChannelPointRewardKnown(rewardId))
+    {
+        // Need to wait for pubsub reward notification
+        qCDebug(chatterinoTwitch) << "TwitchChannel reward added ADD "
+                                     "callback since reward is not known:"
+                                  << rewardId;
+        channel->addQueuedRedemption(rewardId, originalContent, message);
+        return;
+    }
+    args.channelPointRewardId = rewardId;
 
     QString content = originalContent;
     int messageOffset = stripLeadingReplyMention(tags, content);
