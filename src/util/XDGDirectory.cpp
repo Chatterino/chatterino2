@@ -1,7 +1,6 @@
 #include "util/XDGDirectory.hpp"
 
 #include "util/CombinePath.hpp"
-#include "util/Qt.hpp"
 
 #include <unordered_map>
 

@@ -2,7 +2,6 @@
 
 #include "common/LinkParser.hpp"
 #include "messages/Message.hpp"
-#include "util/Qt.hpp"
 
 namespace chatterino {
 
