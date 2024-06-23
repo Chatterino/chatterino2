@@ -8,7 +8,6 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/Clamp.hpp"
 #include "util/Helpers.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/Notebook.hpp"
@@ -16,6 +15,7 @@
 #include "widgets/splits/SplitContainer.hpp"
 
 #include <boost/bind/bind.hpp>
+#include <QAbstractAnimation>
 #include <QApplication>
 #include <QDebug>
 #include <QDialogButtonBox>
@@ -24,6 +24,8 @@
 #include <QLineEdit>
 #include <QMimeData>
 #include <QPainter>
+
+#include <algorithm>
 
 namespace chatterino {
 namespace {
@@ -97,6 +99,10 @@ NotebookTab::NotebookTab(Notebook *notebook)
         },
         getIApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Window,
                                                     "popup", {{"window"}}));
+
+    this->menu_.addAction("Duplicate Tab", [this]() {
+        this->notebook_->duplicatePage(this->page);
+    });
 
     highlightNewMessagesAction_ =
         new QAction("Mark Tab as Unread on New Messages", &this->menu_);
@@ -182,10 +188,15 @@ void NotebookTab::growWidth(int width)
     }
 }
 
-int NotebookTab::normalTabWidth()
+int NotebookTab::normalTabWidth() const
+{
+    return this->normalTabWidthForHeight(this->height());
+}
+
+int NotebookTab::normalTabWidthForHeight(int height) const
 {
     float scale = this->scale();
-    int width;
+    int width = 0;
 
     QFontMetrics metrics =
         getIApp()->getFonts()->getFontMetrics(FontStyle::UiTabs, scale);
@@ -199,13 +210,13 @@ int NotebookTab::normalTabWidth()
         width = (metrics.horizontalAdvance(this->getTitle()) + int(16 * scale));
     }
 
-    if (this->height() > 150 * scale)
+    if (static_cast<float>(height) > 150 * scale)
     {
-        width = this->height();
+        width = height;
     }
     else
     {
-        width = clamp(width, this->height(), int(150 * scale));
+        width = std::clamp(width, height, static_cast<int>(150 * scale));
     }
 
     return width;
@@ -214,8 +225,8 @@ int NotebookTab::normalTabWidth()
 void NotebookTab::updateSize()
 {
     float scale = this->scale();
-    int width = this->normalTabWidth();
-    auto height = int(NOTEBOOK_TAB_HEIGHT * scale);
+    auto height = static_cast<int>(NOTEBOOK_TAB_HEIGHT * scale);
+    int width = this->normalTabWidthForHeight(height);
 
     if (width < this->growWidth_)
     {
@@ -397,22 +408,24 @@ void NotebookTab::hideTabXChanged()
     this->update();
 }
 
-void NotebookTab::moveAnimated(QPoint pos, bool animated)
+void NotebookTab::moveAnimated(QPoint targetPos, bool animated)
 {
-    this->positionAnimationDesiredPoint_ = pos;
+    this->positionAnimationDesiredPoint_ = targetPos;
 
-    QWidget *w = this->window();
-
-    if ((w != nullptr && !w->isVisible()) || !animated ||
-        !this->positionChangedAnimationRunning_)
+    if (this->pos() == targetPos)
     {
-        this->move(pos);
-
-        this->positionChangedAnimationRunning_ = true;
         return;
     }
 
-    if (this->positionChangedAnimation_.endValue() == pos)
+    if (!animated || !this->notebook_->isVisible())
+    {
+        this->move(targetPos);
+        return;
+    }
+
+    if (this->positionChangedAnimation_.state() ==
+            QAbstractAnimation::Running &&
+        this->positionChangedAnimation_.endValue() == targetPos)
     {
         return;
     }
@@ -420,7 +433,7 @@ void NotebookTab::moveAnimated(QPoint pos, bool animated)
     this->positionChangedAnimation_.stop();
     this->positionChangedAnimation_.setDuration(75);
     this->positionChangedAnimation_.setStartValue(this->pos());
-    this->positionChangedAnimation_.setEndValue(pos);
+    this->positionChangedAnimation_.setEndValue(targetPos);
     this->positionChangedAnimation_.start();
 }
 
@@ -628,13 +641,13 @@ void NotebookTab::paintEvent(QPaintEvent *)
     }
 }
 
-bool NotebookTab::hasXButton()
+bool NotebookTab::hasXButton() const
 {
     return getSettings()->showTabCloseButton &&
            this->notebook_->getAllowUserTabManagement();
 }
 
-bool NotebookTab::shouldDrawXButton()
+bool NotebookTab::shouldDrawXButton() const
 {
     return this->hasXButton() && (this->mouseOver_ || this->selected_);
 }
@@ -820,18 +833,15 @@ void NotebookTab::update()
     Button::update();
 }
 
-QRect NotebookTab::getXRect()
+QRect NotebookTab::getXRect() const
 {
     QRect rect = this->rect();
     float s = this->scale();
     int size = static_cast<int>(16 * s);
 
-    int centerAdjustment =
-        this->tabLocation_ ==
-                (NotebookTabLocation::Top ||
-                 this->tabLocation_ == NotebookTabLocation::Bottom)
-            ? (size / 3)   // slightly off true center
-            : (size / 2);  // true center
+    int centerAdjustment = this->tabLocation_ == NotebookTabLocation::Top
+                               ? (size / 3)   // slightly off true center
+                               : (size / 2);  // true center
 
     QRect xRect(rect.right() - static_cast<int>(20 * s),
                 rect.center().y() - centerAdjustment, size, size);

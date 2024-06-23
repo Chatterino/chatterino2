@@ -41,3 +41,6 @@
 [submodule "tools/crash-handler"]
 	path = tools/crash-handler
 	url = https://github.com/Chatterino/crash-handler
+[submodule "lib/expected-lite"]
+	path = lib/expected-lite
+	url = https://github.com/martinmoene/expected-lite

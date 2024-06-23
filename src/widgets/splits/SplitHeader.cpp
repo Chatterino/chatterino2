@@ -271,6 +271,8 @@ SplitHeader::SplitHeader(Split *split)
             }
         });
     }
+
+    this->scaleChangedEvent(this->scale());
 }
 
 void SplitHeader::initializeLayout()

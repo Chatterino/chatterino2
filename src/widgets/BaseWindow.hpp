@@ -45,11 +45,11 @@ public:
                         QWidget *parent = nullptr);
     ~BaseWindow() override;
 
-    void setInitialBounds(const QRect &bounds);
-    QRect getBounds();
+    void setInitialBounds(QRect bounds, widgets::BoundsChecking mode);
+    QRect getBounds() const;
 
     QWidget *getLayoutContainer();
-    bool hasCustomWindowFrame();
+    bool hasCustomWindowFrame() const;
     TitleBarButton *addTitleBarButton(const TitleBarButtonStyle &style,
                                       std::function<void()> onClicked);
     EffectLabel *addTitleBarLabel(std::function<void()> onClicked);
@@ -131,6 +131,8 @@ private:
     void drawCustomWindowFrame(QPainter &painter);
     void onFocusLost();
 
+    static void applyScaleRecursive(QObject *root, float scale);
+
     bool handleSHOWWINDOW(MSG *msg);
     bool handleSIZE(MSG *msg);
     bool handleMOVE(MSG *msg);
@@ -186,7 +188,6 @@ private:
 
     QRect initalBounds_;
     QRect currentBounds_;
-    QRect nextBounds_;
     QTimer useNextBounds_;
     bool isNotMinimizedOrMaximized_{};
     bool lastEventWasNcMouseMove_ = false;

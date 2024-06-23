@@ -196,7 +196,7 @@ void SettingsDialog::filterElements(const QString &text)
         auto *item = this->ui_.tabContainer->itemAt(i);
         if (auto *x = dynamic_cast<QSpacerItem *>(item); x)
         {
-            x->changeSize(10, shouldShowSpace ? int(16 * this->scale()) : 0);
+            x->changeSize(10, shouldShowSpace ? 16 : 0);
             shouldShowSpace = false;
         }
         else if (item->widget())
@@ -397,9 +397,9 @@ void SettingsDialog::refresh()
     }
 }
 
-void SettingsDialog::scaleChangedEvent(float newDpi)
+void SettingsDialog::scaleChangedEvent(float newScale)
 {
-    assert(newDpi == 1.F &&
+    assert(newScale == 1.F &&
            "Scaling is disabled for the settings dialog - its scale should "
            "always be 1");
 

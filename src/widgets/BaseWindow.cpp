@@ -29,7 +29,9 @@
 #    pragma comment(lib, "Dwmapi.lib")
 
 #    include <QHBoxLayout>
+#    include <QMargins>
 #    include <QOperatingSystemVersion>
+#    include <QWindow>
 #endif
 
 #include "widgets/helper/TitlebarButton.hpp"
@@ -227,7 +229,6 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
         [this]() {
             postToThread([this] {
                 this->updateScale();
-                this->updateScale();
             });
         },
         this->connections_, false);
@@ -239,7 +240,7 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
 #ifdef USEWINSDK
     this->useNextBounds_.setSingleShot(true);
     QObject::connect(&this->useNextBounds_, &QTimer::timeout, this, [this]() {
-        this->currentBounds_ = this->nextBounds_;
+        this->currentBounds_ = this->geometry();
     });
 #endif
 
@@ -252,8 +253,9 @@ BaseWindow::~BaseWindow()
     DebugCount::decrease("BaseWindow");
 }
 
-void BaseWindow::setInitialBounds(const QRect &bounds)
+void BaseWindow::setInitialBounds(QRect bounds, widgets::BoundsChecking mode)
 {
+    bounds = widgets::checkInitialBounds(bounds, mode);
 #ifdef USEWINSDK
     this->initalBounds_ = bounds;
 #else
@@ -261,7 +263,7 @@ void BaseWindow::setInitialBounds(const QRect &bounds)
 #endif
 }
 
-QRect BaseWindow::getBounds()
+QRect BaseWindow::getBounds() const
 {
 #ifdef USEWINSDK
     return this->currentBounds_;
@@ -445,7 +447,7 @@ QWidget *BaseWindow::getLayoutContainer()
     }
 }
 
-bool BaseWindow::hasCustomWindowFrame()
+bool BaseWindow::hasCustomWindowFrame() const
 {
     return BaseWindow::supportsCustomWindowFrame() && this->enableCustomFrame_;
 }
@@ -931,9 +933,27 @@ void BaseWindow::updateScale()
 
     this->setScale(scale);
 
-    for (auto *child : this->findChildren<BaseWidget *>())
+    BaseWindow::applyScaleRecursive(this, scale);
+}
+
+// NOLINTNEXTLINE(misc-no-recursion)
+void BaseWindow::applyScaleRecursive(QObject *root, float scale)
+{
+    for (QObject *obj : root->children())
     {
-        child->setScale(scale);
+        auto *base = dynamic_cast<BaseWidget *>(obj);
+        if (base)
+        {
+            auto *window = dynamic_cast<BaseWindow *>(obj);
+            if (window)
+            {
+                // stop here, the window will get the event as well (via uiScale)
+                continue;
+            }
+            base->setScale(scale);
+        }
+
+        applyScaleRecursive(obj, scale);
     }
 }
 
@@ -1117,7 +1137,11 @@ bool BaseWindow::handleSIZE(MSG *msg)
 
             if (this->isNotMinimizedOrMaximized_)
             {
-                this->currentBounds_ = this->geometry();
+                // Wait for WM_SIZE to be processed by Qt and update the current
+                // bounds afterwards.
+                postToThread([this] {
+                    this->currentBounds_ = this->geometry();
+                });
             }
             this->useNextBounds_.stop();
 
@@ -1146,7 +1170,8 @@ bool BaseWindow::handleMOVE(MSG *msg)
 #ifdef USEWINSDK
     if (this->isNotMinimizedOrMaximized_)
     {
-        this->nextBounds_ = this->geometry();
+        // Wait for WM_SIZE (in case the window was maximized, we don't want to
+        // save the bounds but keep the old ones)
         this->useNextBounds_.start(10);
     }
 #endif

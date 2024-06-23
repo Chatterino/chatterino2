@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest]
-        qt-version: [5.15.2, 6.5.0]
+        qt-version: [5.15.2, 6.7.1]
         plugins: [false]
         skip-artifact: [false]
         skip-crashpad: [false]
@@ -57,7 +57,7 @@ jobs:
           fetch-depth: 0 # allows for tags access
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3.3.0
+        uses: jurplel/install-qt-action@v4.0.0
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -104,6 +104,12 @@ jobs:
               -b missing `
               --output-folder=. `
               -o with_openssl3="$Env:C2_USE_OPENSSL3"
+
+      # The Windows runners currently use an older version of the CRT
+      - name: Install CRT
+        run: |
+          mkdir -Force build-test/bin
+          cp "$((ls $Env:VCToolsRedistDir/onecore/x64 -Filter '*.CRT')[0].FullName)/*" build-test/bin
 
       - name: Build
         run: |

@@ -74,7 +74,7 @@ bool isBroadcasterSoftwareActive()
                 shouldShowTimeoutWarning = false;
 
                 postToThread([] {
-                    getApp()->twitch->addGlobalSystemMessage(
+                    getIApp()->getTwitchAbstract()->addGlobalSystemMessage(
                         "Streamer Mode is set to Automatic, but pgrep timed "
                         "out. This can happen if your system lagged at the "
                         "wrong moment. If Streamer Mode continues to not work, "
@@ -94,7 +94,7 @@ bool isBroadcasterSoftwareActive()
                 shouldShowWarning = false;
 
                 postToThread([] {
-                    getApp()->twitch->addGlobalSystemMessage(
+                    getIApp()->getTwitchAbstract()->addGlobalSystemMessage(
                         "Streamer Mode is set to Automatic, but pgrep is "
                         "missing. "
                         "Install it to fix the issue or set Streamer Mode to "

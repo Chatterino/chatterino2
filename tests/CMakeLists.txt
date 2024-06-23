@@ -44,6 +44,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/QMagicEnum.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ModerationAction.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Scrollbar.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Commands.cpp
     # Add your new file above this line!
     )
 

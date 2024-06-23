@@ -613,11 +613,13 @@ void Helix::unblockUser(QString targetUserId, const QObject *caller,
         .execute();
 }
 
-void Helix::updateChannel(QString broadcasterId, QString gameId,
-                          QString language, QString title,
-                          std::function<void(NetworkResult)> successCallback,
-                          HelixFailureCallback failureCallback)
+void Helix::updateChannel(
+    QString broadcasterId, QString gameId, QString language, QString title,
+    std::function<void(NetworkResult)> successCallback,
+    FailureCallback<HelixUpdateChannelError, QString> failureCallback)
 {
+    using Error = HelixUpdateChannelError;
+
     QUrlQuery urlQuery;
     auto obj = QJsonObject();
     if (!gameId.isEmpty())
@@ -646,7 +648,61 @@ void Helix::updateChannel(QString broadcasterId, QString gameId,
             successCallback(result);
         })
         .onError([failureCallback](NetworkResult result) {
-            failureCallback();
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (*result.status())
+            {
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else if (message.compare(
+                                 "The ID in broadcaster_id must match the user "
+                                 "ID found in the request's OAuth token.",
+                                 Qt::CaseInsensitive) == 0)
+                    {
+                        failureCallback(Error::UserNotAuthorized, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 400:
+                case 403: {
+                    failureCallback(Error::Forwarded, message);
+                }
+                break;
+
+                case 429: {
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
+
+                case 500: {
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Helix update channel, unhandled error data:"
+                        << result.formatError() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
         })
         .execute();
 }
@@ -1407,16 +1463,6 @@ void Helix::removeChannelVIP(
         .execute();
 }
 
-// These changes are from the helix-command-migration/unban-untimeout branch
-// These changes are from the helix-command-migration/unban-untimeout branch
-// These changes are from the helix-command-migration/unban-untimeout branch
-// These changes are from the helix-command-migration/unban-untimeout branch
-// These changes are from the helix-command-migration/unban-untimeout branch
-// These changes are from the helix-command-migration/unban-untimeout branch
-// These changes are from the helix-command-migration/unban-untimeout branch
-// These changes are from the helix-command-migration/unban-untimeout branch
-// These changes are from the helix-command-migration/unban-untimeout branch
-// These changes are from the helix-command-migration/unban-untimeout branch
 void Helix::unbanUser(
     QString broadcasterID, QString moderatorID, QString userID,
     ResultCallback<> successCallback,
@@ -1516,18 +1562,7 @@ void Helix::unbanUser(
             }
         })
         .execute();
-}  // These changes are from the helix-command-migration/unban-untimeout branch
-// These changes are from the helix-command-migration/unban-untimeout branch
-// These changes are from the helix-command-migration/unban-untimeout branch
-// These changes are from the helix-command-migration/unban-untimeout branch
-// These changes are from the helix-command-migration/unban-untimeout branch
-// These changes are from the helix-command-migration/unban-untimeout branch
-// These changes are from the helix-command-migration/unban-untimeout branch
-// These changes are from the helix-command-migration/unban-untimeout branch
-// These changes are from the helix-command-migration/unban-untimeout branch
-// These changes are from the helix-command-migration/unban-untimeout branch
-// These changes are from the helix-command-migration/unban-untimeout branch
-// These changes are from the helix-command-migration/unban-untimeout branch
+}
 
 void Helix::startRaid(
     QString fromBroadcasterID, QString toBroadcasterID,
@@ -2201,6 +2236,107 @@ void Helix::banUser(QString broadcasterID, QString moderatorID, QString userID,
                 default: {
                     qCDebug(chatterinoTwitch)
                         << "Unhandled error banning user:"
+                        << result.formatError() << result.getData() << obj;
+                    failureCallback(Error::Unknown, message);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
+// Warn a user
+// https://dev.twitch.tv/docs/api/reference#warn-chat-user
+void Helix::warnUser(
+    QString broadcasterID, QString moderatorID, QString userID, QString reason,
+    ResultCallback<> successCallback,
+    FailureCallback<HelixWarnUserError, QString> failureCallback)
+{
+    using Error = HelixWarnUserError;
+
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterID);
+    urlQuery.addQueryItem("moderator_id", moderatorID);
+
+    QJsonObject payload;
+    {
+        QJsonObject data;
+        data["reason"] = reason;
+        data["user_id"] = userID;
+
+        payload["data"] = data;
+    }
+
+    this->makePost("moderation/warnings", urlQuery)
+        .json(payload)
+        .onSuccess([successCallback](auto result) {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for warning a user was"
+                    << result.formatError() << "but we expected it to be 200";
+            }
+            // we don't care about the response
+            successCallback();
+        })
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(Error::Unknown, result.formatError());
+                return;
+            }
+
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+
+            switch (*result.status())
+            {
+                case 400: {
+                    if (message.startsWith("The user specified in the user_id "
+                                           "field may not be warned",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::CannotWarnUser, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::UserMissingScope, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                case 403: {
+                    failureCallback(Error::UserNotAuthorized, message);
+                }
+                break;
+
+                case 409: {
+                    failureCallback(Error::ConflictingOperation, message);
+                }
+                break;
+
+                case 429: {
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Unhandled error warning user:"
                         << result.formatError() << result.getData() << obj;
                     failureCallback(Error::Unknown, message);
                 }

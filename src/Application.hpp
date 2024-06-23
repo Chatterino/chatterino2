@@ -35,6 +35,7 @@ class PluginController;
 
 class Theme;
 class WindowManager;
+class ILogging;
 class Logging;
 class Paths;
 class Emotes;
@@ -54,6 +55,7 @@ class FfzEmotes;
 class SeventvEmotes;
 class ILinkResolver;
 class IStreamerMode;
+class IAbstractIrcServer;
 
 class IApplication
 {
@@ -62,6 +64,8 @@ public:
     virtual ~IApplication() = default;
 
     static IApplication *instance;
+
+    virtual bool isTest() const = 0;
 
     virtual const Paths &getPaths() = 0;
     virtual const Args &getArgs() = 0;
@@ -77,8 +81,9 @@ public:
     virtual HighlightController *getHighlights() = 0;
     virtual NotificationController *getNotifications() = 0;
     virtual ITwitchIrcServer *getTwitch() = 0;
+    virtual IAbstractIrcServer *getTwitchAbstract() = 0;
     virtual PubSub *getTwitchPubSub() = 0;
-    virtual Logging *getChatLogger() = 0;
+    virtual ILogging *getChatLogger() = 0;
     virtual IChatterinoBadges *getChatterinoBadges() = 0;
     virtual FfzBadges *getFfzBadges() = 0;
     virtual SeventvBadges *getSeventvBadges() = 0;
@@ -119,6 +124,11 @@ public:
     Application &operator=(const Application &) = delete;
     Application &operator=(Application &&) = delete;
 
+    bool isTest() const override
+    {
+        return false;
+    }
+
     /**
      * In the interim, before we remove _exit(0); from RunGui.cpp,
      * this will destroy things we know can be destroyed
@@ -147,15 +157,11 @@ private:
     CommandController *const commands{};
     NotificationController *const notifications{};
     HighlightController *const highlights{};
-
-public:
-    TwitchIrcServer *const twitch{};
-
-private:
+    std::unique_ptr<TwitchIrcServer> twitch;
     FfzBadges *const ffzBadges{};
     SeventvBadges *const seventvBadges{};
-    UserDataController *const userData{};
-    ISoundController *const sound{};
+    std::unique_ptr<UserDataController> userData;
+    std::unique_ptr<ISoundController> sound;
     TwitchLiveController *const twitchLiveController{};
     std::unique_ptr<PubSub> twitchPubSub;
     std::unique_ptr<TwitchBadges> twitchBadges;
@@ -191,8 +197,9 @@ public:
     NotificationController *getNotifications() override;
     HighlightController *getHighlights() override;
     ITwitchIrcServer *getTwitch() override;
+    IAbstractIrcServer *getTwitchAbstract() override;
     PubSub *getTwitchPubSub() override;
-    Logging *getChatLogger() override;
+    ILogging *getChatLogger() override;
     FfzBadges *getFfzBadges() override;
     SeventvBadges *getSeventvBadges() override;
     IUserDataController *getUserData() override;
