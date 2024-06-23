@@ -2,7 +2,6 @@
 
 #include "common/ChatterinoSetting.hpp"
 #include "common/SignalVector.hpp"
-#include "common/Singleton.hpp"
 
 #include <QTimer>
 
@@ -17,10 +16,13 @@ enum class Platform : uint8_t {
     Twitch,  // 0
 };
 
-class NotificationController final : public Singleton, private QObject
+/**
+ * NotificationController is responsible for ?
+ */
+class NotificationController final : private QObject
 {
 public:
-    void initialize(Settings &settings, const Paths &paths) override;
+    NotificationController();
 
     bool isChannelNotified(const QString &channelName, Platform p);
     void updateChannelNotification(const QString &channelName, Platform p);
@@ -36,8 +38,6 @@ public:
     NotificationModel *createModel(QObject *parent, Platform p);
 
 private:
-    bool initialized_ = false;
-
     void fetchFakeChannels();
     void removeFakeChannel(const QString channelName);
     void checkStream(bool live, QString channelName);

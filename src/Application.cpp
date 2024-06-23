@@ -121,29 +121,29 @@ Application::Application(Settings &_settings, const Paths &paths,
     , themes(&this->emplace<Theme>())
     , fonts(new Fonts(_settings))
     , emotes(&this->emplace<Emotes>())
-    , accounts(&this->emplace<AccountController>())
+    , accounts(new AccountController)
+    , bttvEmotes(new BttvEmotes)
+    , ffzEmotes(new FfzEmotes)
+    , seventvAPI(new SeventvAPI)
+    , seventvEmotes(new SeventvEmotes)
+    , seventvBadges(new SeventvBadges)
     , hotkeys(&this->emplace<HotkeyController>())
     , windows(&this->emplace(new WindowManager(paths)))
     , toasts(&this->emplace<Toasts>())
     , imageUploader(&this->emplace<ImageUploader>())
-    , seventvAPI(&this->emplace<SeventvAPI>())
     , crashHandler(&this->emplace(new CrashHandler(paths)))
 
     , commands(&this->emplace<CommandController>())
-    , notifications(&this->emplace<NotificationController>())
     , highlights(&this->emplace<HighlightController>())
     , twitch(new TwitchIrcServer)
     , ffzBadges(&this->emplace<FfzBadges>())
-    , seventvBadges(&this->emplace<SeventvBadges>())
     , userData(new UserDataController(paths))
     , sound(makeSoundController(_settings))
     , twitchLiveController(&this->emplace<TwitchLiveController>())
+    , notifications(new NotificationController)
     , twitchPubSub(new PubSub(TWITCH_PUBSUB_URL))
     , twitchBadges(new TwitchBadges)
     , chatterinoBadges(new ChatterinoBadges)
-    , bttvEmotes(new BttvEmotes)
-    , ffzEmotes(new FfzEmotes)
-    , seventvEmotes(new SeventvEmotes)
     , logging(new Logging(_settings))
     , linkResolver(new LinkResolver)
     , streamerMode(new StreamerMode)
@@ -168,13 +168,17 @@ void Application::fakeDtor()
     this->twitchPubSub.reset();
     this->twitchBadges.reset();
     this->chatterinoBadges.reset();
-    this->bttvEmotes.reset();
-    this->ffzEmotes.reset();
-    this->seventvEmotes.reset();
     // this->twitch.reset();
     this->fonts.reset();
     this->sound.reset();
     this->userData.reset();
+
+    this->seventvBadges.reset();
+    this->seventvEmotes.reset();
+    this->seventvAPI.reset();
+    this->ffzEmotes.reset();
+    this->bttvEmotes.reset();
+    this->accounts.reset();
 }
 
 void Application::initialize(Settings &settings, const Paths &paths)
@@ -357,8 +361,9 @@ IEmotes *Application::getEmotes()
 AccountController *Application::getAccounts()
 {
     assertInGuiThread();
+    assert(this->accounts);
 
-    return this->accounts;
+    return this->accounts.get();
 }
 
 HotkeyController *Application::getHotkeys()
@@ -400,8 +405,9 @@ CommandController *Application::getCommands()
 NotificationController *Application::getNotifications()
 {
     assertInGuiThread();
+    assert(this->notifications);
 
-    return this->notifications;
+    return this->notifications.get();
 }
 
 HighlightController *Application::getHighlights()
@@ -421,8 +427,9 @@ FfzBadges *Application::getFfzBadges()
 SeventvBadges *Application::getSeventvBadges()
 {
     // SeventvBadges handles its own locks, so we don't need to assert that this is called in the GUI thread
+    assert(this->seventvBadges);
 
-    return this->seventvBadges;
+    return this->seventvBadges.get();
 }
 
 IUserDataController *Application::getUserData()
@@ -472,8 +479,9 @@ ImageUploader *Application::getImageUploader()
 SeventvAPI *Application::getSeventvAPI()
 {
     assertInGuiThread();
+    assert(this->seventvAPI);
 
-    return this->seventvAPI;
+    return this->seventvAPI.get();
 }
 
 #ifdef CHATTERINO_HAVE_PLUGINS

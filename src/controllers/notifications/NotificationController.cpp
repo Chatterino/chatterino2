@@ -27,9 +27,9 @@
 
 namespace chatterino {
 
-void NotificationController::initialize(Settings &settings, const Paths &paths)
+NotificationController::NotificationController()
+    : liveStatusTimer_(new QTimer(this))
 {
-    this->initialized_ = true;
     for (const QString &channelName : this->twitchSetting_.getValue())
     {
         this->channelMap[Platform::Twitch].append(channelName);
@@ -42,8 +42,6 @@ void NotificationController::initialize(Settings &settings, const Paths &paths)
             this->twitchSetting_.setValue(
                 this->channelMap[Platform::Twitch].raw());
         });
-
-    liveStatusTimer_ = new QTimer();
 
     this->fetchFakeChannels();
 
