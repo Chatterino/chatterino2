@@ -725,7 +725,6 @@ void BaseWindow::moveEvent(QMoveEvent *event)
 {
     // Queue up save because: Window position changed
 #ifdef CHATTERINO
-    qDebug() << this->geometry();
     if (!flags_.has(DisableLayoutSave))
     {
         getIApp()->getWindows()->queueSave();
