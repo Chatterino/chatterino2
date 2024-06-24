@@ -4,10 +4,23 @@
 
 set -eo pipefail
 
-if [ -d bin/chatterino.app ] && [ ! -d chatterino.app ]; then
-    >&2 echo "Moving bin/chatterino.app down one directory"
-    mv bin/chatterino.app chatterino.app
+if [ ! -d bin/chatterino.app ]; then
+    >&2 echo "No chatterino.app found under ./bin - rm -rf bin & build clean"
+    exit
 fi
+
+if [ -d chatterino.app ]; then
+    >&2 echo "chatterino.app found - deleting it"
+    rm -rf chatterino.app
+fi
+
+if [ -d /opt/homebrew/chatterino.app ]; then
+    >&2 echo "chatterino.app found under /opt/homebrew - deleting it"
+    rm -rf /opt/homebrew/chatterino.app
+fi
+
+>&2 echo "Moving bin/chatterino.app to /opt/homebrew"
+mv bin/chatterino.app /opt/homebrew/
 
 if [ -n "$Qt5_DIR" ]; then
     echo "Using Qt DIR from Qt5_DIR: $Qt5_DIR"
@@ -31,9 +44,13 @@ if [ -n "$MACOS_CODESIGN_CERTIFICATE" ]; then
     _macdeployqt_args+=("-codesign=$MACOS_CODESIGN_CERTIFICATE")
 fi
 
-macdeployqt chatterino.app "${_macdeployqt_args[@]}"
+macdeployqt /opt/homebrew/chatterino.app "${_macdeployqt_args[@]}"
 
 if [ -n "$MACOS_CODESIGN_CERTIFICATE" ]; then
+    echo "Running codesign to validate"
     # Validate that chatterino.app was codesigned correctly
-    codesign -v chatterino.app
+    codesign -v /opt/homebrew/chatterino.app
 fi
+
+>&2 echo "Moving /opt/homebrew/chatterino.app back"
+mv /opt/homebrew/chatterino.app ./
