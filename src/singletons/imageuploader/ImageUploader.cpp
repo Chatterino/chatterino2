@@ -1,4 +1,4 @@
-#include "singletons/ImageUploader.hpp"
+#include "singletons/imageuploader/ImageUploader.hpp"
 
 #include "Application.hpp"
 #include "common/Env.hpp"
@@ -8,21 +8,29 @@
 #include "debug/Benchmark.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
+#include "singletons/imageuploader/UploadedImageModel.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
+#include "util/RapidjsonHelpers.hpp"
+#include "util/Result.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
 
 #include <QBuffer>
 #include <QHttpMultiPart>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QLoggingCategory>
 #include <QMimeDatabase>
 #include <QMutex>
+#include <QObject>
 #include <QPointer>
 #include <QSaveFile>
+#include <rapidjson/document.h>
 
+#include <memory>
 #include <utility>
+#include <vector>
 
 #define UPLOAD_DELAY 2000
 // Delay between uploads in milliseconds
@@ -43,6 +51,48 @@ std::optional<QByteArray> convertToPng(const QImage &image)
     return std::nullopt;
 }
 
+using namespace chatterino;
+Result<std::vector<UploadedImage>, QString> loadLogFile(
+    const QString &logFileName)
+{
+    //reading existing logs
+    QFile logReadFile(logFileName);
+    bool isLogFileOkay =
+        logReadFile.open(QIODevice::ReadWrite | QIODevice::Text);
+    if (!isLogFileOkay)
+    {
+        return QString("Failed to open log file with links at ") + logFileName;
+    }
+    auto logs = logReadFile.readAll();
+    if (logs.isEmpty())
+    {
+        logs = QJsonDocument(QJsonArray()).toJson();
+    }
+    logReadFile.close();
+    QJsonArray entries = QJsonDocument::fromJson(logs).array();
+    std::vector<UploadedImage> images;
+    for (const auto &entry : entries)
+    {
+        if (!entry.isObject())
+        {
+            qCWarning(chatterinoImageuploader)
+                << "History file contains non-Object JSON data!";
+            continue;
+        }
+        auto obj = entry.toObject();
+        images.emplace_back(obj);
+    }
+    return images;
+}
+
+QString getLogFilePath()
+{
+    return combinePath((getSettings()->logPath.getValue().isEmpty()
+                            ? getIApp()->getPaths().messageLogDirectory
+                            : getSettings()->logPath),
+                       "ImageUploader.json");
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -52,49 +102,35 @@ void ImageUploader::logToFile(const QString &originalFilePath,
                               const QString &imageLink,
                               const QString &deletionLink, ChannelPtr channel)
 {
-    const QString logFileName =
-        combinePath((getSettings()->logPath.getValue().isEmpty()
-                         ? getIApp()->getPaths().messageLogDirectory
-                         : getSettings()->logPath),
-                    "ImageUploader.json");
-
-    //reading existing logs
-    QFile logReadFile(logFileName);
-    bool isLogFileOkay =
-        logReadFile.open(QIODevice::ReadWrite | QIODevice::Text);
-    if (!isLogFileOkay)
+    const QString logFileName = getLogFilePath();
+    auto res = loadLogFile(logFileName);
+    if (!res.isOk())
     {
-        channel->addMessage(makeSystemMessage(
-            QString("Failed to open log file with links at ") + logFileName));
+        channel->addMessage(makeSystemMessage(res.error()));
         return;
     }
-    auto logs = logReadFile.readAll();
-    if (logs.isEmpty())
-    {
-        logs = QJsonDocument(QJsonArray()).toJson();
-    }
-    logReadFile.close();
-
+    auto entries = res.value();
     //writing new data to logs
-    QJsonObject newLogEntry;
-    newLogEntry["channelName"] = channel->getName();
-    newLogEntry["deletionLink"] =
-        deletionLink.isEmpty() ? QJsonValue(QJsonValue::Null) : deletionLink;
-    newLogEntry["imageLink"] = imageLink;
-    newLogEntry["localPath"] = originalFilePath.isEmpty()
-                                   ? QJsonValue(QJsonValue::Null)
-                                   : originalFilePath;
-    newLogEntry["timestamp"] = QDateTime::currentSecsSinceEpoch();
+    UploadedImage img;
+    img.channelName = channel->getName();
+    img.deletionLink = deletionLink;
+    img.imageLink = imageLink;
+    img.localPath = originalFilePath;
+    img.timestamp = QDateTime::currentSecsSinceEpoch();
+    entries.push_back(img);
     // channel name
     // deletion link (can be empty)
     // image link
     // local path to an image (can be empty)
     // timestamp
+    QJsonArray arr;
+    for (auto &entry : entries)
+    {
+        arr.append(entry.toJson());
+    }
     QSaveFile logSaveFile(logFileName);
     logSaveFile.open(QIODevice::WriteOnly | QIODevice::Text);
-    QJsonArray entries = QJsonDocument::fromJson(logs).array();
-    entries.push_back(newLogEntry);
-    logSaveFile.write(QJsonDocument(entries).toJson());
+    logSaveFile.write(QJsonDocument(arr).toJson());
     logSaveFile.commit();
 }
 
@@ -125,6 +161,28 @@ QString getLinkFromResponse(NetworkResult response, QString pattern)
 
 void ImageUploader::save()
 {
+}
+
+UploadedImageModel *ImageUploader::createModel(QObject *parent)
+{
+    auto *model = new UploadedImageModel(parent);
+    auto res = loadLogFile(getLogFilePath());
+
+    // Replace content of images_
+    auto len = this->images_.raw().size();
+    for (int i = 0; i < len; i++)
+    {
+        this->images_.removeAt(0);
+    }
+
+    std::vector<UploadedImage> vec = res.valueOr({});
+    for (const auto &img : vec)
+    {
+        this->images_.append(img);
+    }
+
+    model->initialize(&this->images_);
+    return model;
 }
 
 void ImageUploader::sendImageUploadRequest(RawImageData imageData,
