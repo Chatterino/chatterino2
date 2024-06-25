@@ -252,12 +252,6 @@ TEST(Helpers, BatchDifferentInputType)
     EXPECT_EQ(result, expectation);
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 2)
-#    define makeView(x) x
-#else
-#    define makeView(str) (&(str))
-#endif
-
 TEST(Helpers, skipSpace)
 {
     struct TestCase {
@@ -272,7 +266,7 @@ TEST(Helpers, skipSpace)
 
     for (const auto &c : tests)
     {
-        const auto actual = skipSpace(makeView(c.input), c.startIdx);
+        const auto actual = skipSpace(c.input, c.startIdx);
 
         EXPECT_EQ(actual, c.expected)
             << actual << " (" << c.input << ") did not match expected value "
@@ -414,7 +408,7 @@ TEST(Helpers, findUnitMultiplierToSec)
     for (const auto &c : tests)
     {
         SizeType pos = c.startPos;
-        const auto actual = findUnitMultiplierToSec(makeView(c.input), pos);
+        const auto actual = findUnitMultiplierToSec(c.input, pos);
 
         if (c.expectedMultiplier == bad)
         {

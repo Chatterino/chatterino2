@@ -13,7 +13,7 @@ namespace chatterino::lua::api {
 /**
  * This enum describes a platform for the purpose of searching for a channel.
  * Currently only Twitch is supported because identifying IRC channels is tricky.
- * @exposeenum Platform
+ * @exposeenum c2.Platform
  */
 enum class LPlatform {
     Twitch,
@@ -21,7 +21,7 @@ enum class LPlatform {
 };
 
 /**
- * @lua@class Channel
+ * @lua@class c2.Channel
  */
 struct ChannelRef {
     static void createMetatable(lua_State *L);
@@ -49,7 +49,7 @@ public:
      * If given a non-Channel object, it errors.
      *
      * @lua@return boolean success
-     * @exposed Channel:is_valid
+     * @exposed c2.Channel:is_valid
      */
     static int is_valid(lua_State *L);
 
@@ -57,15 +57,15 @@ public:
      * Gets the channel's name. This is the lowercase login name.
      *
      * @lua@return string name
-     * @exposed Channel:get_name
+     * @exposed c2.Channel:get_name
      */
     static int get_name(lua_State *L);
 
     /**
      * Gets the channel's type
      *
-     * @lua@return ChannelType
-     * @exposed Channel:get_type
+     * @lua@return c2.ChannelType
+     * @exposed c2.Channel:get_type
      */
     static int get_type(lua_State *L);
 
@@ -73,7 +73,7 @@ public:
      * Get the channel owner's display name. This may contain non-lowercase ascii characters.
      *
      * @lua@return string name
-     * @exposed Channel:get_display_name
+     * @exposed c2.Channel:get_display_name
      */
     static int get_display_name(lua_State *L);
 
@@ -83,7 +83,7 @@ public:
      *
      * @lua@param message string
      * @lua@param execute_commands boolean Should commands be run on the text?
-     * @exposed Channel:send_message
+     * @exposed c2.Channel:send_message
      */
     static int send_message(lua_State *L);
 
@@ -91,7 +91,7 @@ public:
      * Adds a system message client-side
      *
      * @lua@param message string
-     * @exposed Channel:add_system_message
+     * @exposed c2.Channel:add_system_message
      */
     static int add_system_message(lua_State *L);
 
@@ -101,7 +101,7 @@ public:
      * that they are equal to the exposed enum.
      *
      * @lua@return boolean
-     * @exposed Channel:is_twitch_channel
+     * @exposed c2.Channel:is_twitch_channel
      */
     static int is_twitch_channel(lua_State *L);
 
@@ -113,7 +113,7 @@ public:
      * Returns a copy of the channel mode settings (subscriber only, r9k etc.)
      *
      * @lua@return RoomModes
-     * @exposed Channel:get_room_modes
+     * @exposed c2.Channel:get_room_modes
      */
     static int get_room_modes(lua_State *L);
 
@@ -121,7 +121,7 @@ public:
      * Returns a copy of the stream status.
      *
      * @lua@return StreamStatus
-     * @exposed Channel:get_stream_status
+     * @exposed c2.Channel:get_stream_status
      */
     static int get_stream_status(lua_State *L);
 
@@ -129,7 +129,7 @@ public:
      * Returns the Twitch user ID of the owner of the channel.
      *
      * @lua@return string
-     * @exposed Channel:get_twitch_id
+     * @exposed c2.Channel:get_twitch_id
      */
     static int get_twitch_id(lua_State *L);
 
@@ -137,7 +137,7 @@ public:
      * Returns true if the channel is a Twitch channel and the user owns it
      *
      * @lua@return boolean
-     * @exposed Channel:is_broadcaster
+     * @exposed c2.Channel:is_broadcaster
      */
     static int is_broadcaster(lua_State *L);
 
@@ -146,7 +146,7 @@ public:
      * Returns false for broadcaster.
      *
      * @lua@return boolean
-     * @exposed Channel:is_mod
+     * @exposed c2.Channel:is_mod
      */
     static int is_mod(lua_State *L);
 
@@ -155,7 +155,7 @@ public:
      * Returns false for broadcaster.
      *
      * @lua@return boolean
-     * @exposed Channel:is_vip
+     * @exposed c2.Channel:is_vip
      */
     static int is_vip(lua_State *L);
 
@@ -165,7 +165,7 @@ public:
 
     /**
      * @lua@return string
-     * @exposed Channel:__tostring
+     * @exposed c2.Channel:__tostring
      */
     static int to_string(lua_State *L);
 
@@ -184,9 +184,9 @@ public:
      *  - /automod
      *
      * @lua@param name string Which channel are you looking for?
-     * @lua@param platform Platform Where to search for the channel?
-     * @lua@return Channel?
-     * @exposed Channel.by_name
+     * @lua@param platform c2.Platform Where to search for the channel?
+     * @lua@return c2.Channel?
+     * @exposed c2.Channel.by_name
      */
     static int get_by_name(lua_State *L);
 
@@ -194,8 +194,8 @@ public:
      * Finds a channel by the Twitch user ID of its owner.
      *
      * @lua@param id string ID of the owner of the channel.
-     * @lua@return Channel?
-     * @exposed Channel.by_twitch_id
+     * @lua@return c2.Channel?
+     * @exposed c2.Channel.by_twitch_id
      */
     static int get_by_twitch_id(lua_State *L);
 };

@@ -1,6 +1,6 @@
 # Building on Windows with vcpkg
 
-This will require more than 30GB of free space on your hard drive.
+This will require more than 30 GB of free space on your hard drive.
 
 ## Prerequisites
 
@@ -29,7 +29,7 @@ This will require more than 30GB of free space on your hard drive.
      See [VCPKG_ROOT documentation](https://learn.microsoft.com/en-gb/vcpkg/users/config-environment#vcpkg_root)
    - Append the vcpkg path to your path  
      e.g. `setx PATH "%PATH%;<path to vcpkg>"`
-   - For more configurations, see https://learn.microsoft.com/en-gb/vcpkg/users/config-environment
+   - For more configurations, see <https://learn.microsoft.com/en-gb/vcpkg/users/config-environment>
 1. You may need to restart your computer to ensure all your environment variables and what-not are loaded everywhere.
 
 ## Building

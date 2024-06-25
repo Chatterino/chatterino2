@@ -42,7 +42,16 @@ public:
 
     NotebookTab *addPage(QWidget *page, QString title = QString(),
                          bool select = false);
+
+    /**
+     * @brief Adds a page to the Notebook at a given position.
+     *
+     * @param position if set to -1, adds the page to the end
+     **/
+    NotebookTab *addPageAt(QWidget *page, int position,
+                           QString title = QString(), bool select = false);
     void removePage(QWidget *page);
+    void duplicatePage(QWidget *page);
     void removeCurrentPage();
 
     /**
@@ -193,7 +202,12 @@ private:
     bool showAddButton_ = false;
     int lineOffset_ = 20;
     bool lockNotebookLayout_ = false;
+
+    bool refreshPaused_ = false;
+    bool refreshRequested_ = false;
+
     NotebookTabLocation tabLocation_ = NotebookTabLocation::Top;
+
     QAction *lockNotebookLayoutAction_;
     QAction *showTabsAction_;
     QAction *toggleTopMostAction_;

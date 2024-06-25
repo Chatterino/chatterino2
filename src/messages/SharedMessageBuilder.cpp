@@ -14,7 +14,6 @@
 #include "singletons/StreamerMode.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
-#include "util/Qt.hpp"
 
 #include <QFileInfo>
 

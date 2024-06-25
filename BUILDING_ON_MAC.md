@@ -1,6 +1,6 @@
 # Building on macOS
 
-Chatterino2 is built in CI on Intel on macOS 12.
+Chatterino2 is built in CI on Intel on macOS 13.
 Local dev machines for testing are available on Apple Silicon on macOS 13.
 
 ## Installing dependencies

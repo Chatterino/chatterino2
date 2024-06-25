@@ -21,276 +21,238 @@
 #include <QNetworkRequest>
 #include <QTimer>
 
-#include <functional>
-#include <queue>
-#include <thread>
+#include <atomic>
 
 // Duration between each check of every Image instance
 const auto IMAGE_POOL_CLEANUP_INTERVAL = std::chrono::minutes(1);
 // Duration since last usage of Image pixmap before expiration of frames
 const auto IMAGE_POOL_IMAGE_LIFETIME = std::chrono::minutes(10);
 
-namespace chatterino {
-namespace detail {
-    // Frames
-    Frames::Frames()
+namespace chatterino::detail {
+
+Frames::Frames()
+{
+    DebugCount::increase("images");
+}
+
+Frames::Frames(QList<Frame> &&frames)
+    : items_(std::move(frames))
+{
+    assertInGuiThread();
+    DebugCount::increase("images");
+    if (!this->empty())
     {
-        DebugCount::increase("images");
+        DebugCount::increase("loaded images");
     }
 
-    Frames::Frames(QVector<Frame<QPixmap>> &&frames)
-        : items_(std::move(frames))
+    if (this->animated())
     {
-        assertInGuiThread();
-        DebugCount::increase("images");
-        if (!this->empty())
+        DebugCount::increase("animated images");
+
+        this->gifTimerConnection_ =
+            getIApp()->getEmotes()->getGIFTimer().signal.connect([this] {
+                this->advance();
+            });
+    }
+
+    auto totalLength = std::accumulate(this->items_.begin(), this->items_.end(),
+                                       0UL, [](auto init, auto &&frame) {
+                                           return init + frame.duration;
+                                       });
+
+    if (totalLength == 0)
+    {
+        this->durationOffset_ = 0;
+    }
+    else
+    {
+        this->durationOffset_ = std::min<int>(
+            int(getIApp()->getEmotes()->getGIFTimer().position() % totalLength),
+            60000);
+    }
+    this->processOffset();
+    DebugCount::increase("image bytes", this->memoryUsage());
+    DebugCount::increase("image bytes (ever loaded)", this->memoryUsage());
+}
+
+Frames::~Frames()
+{
+    assertInGuiThread();
+    DebugCount::decrease("images");
+    if (!this->empty())
+    {
+        DebugCount::decrease("loaded images");
+    }
+
+    if (this->animated())
+    {
+        DebugCount::decrease("animated images");
+    }
+    DebugCount::decrease("image bytes", this->memoryUsage());
+    DebugCount::increase("image bytes (ever unloaded)", this->memoryUsage());
+
+    this->gifTimerConnection_.disconnect();
+}
+
+int64_t Frames::memoryUsage() const
+{
+    int64_t usage = 0;
+    for (const auto &frame : this->items_)
+    {
+        auto sz = frame.image.size();
+        auto area = sz.width() * sz.height();
+        auto memory = area * frame.image.depth() / 8;
+
+        usage += memory;
+    }
+    return usage;
+}
+
+void Frames::advance()
+{
+    this->durationOffset_ += GIF_FRAME_LENGTH;
+    this->processOffset();
+}
+
+void Frames::processOffset()
+{
+    if (this->items_.isEmpty())
+    {
+        return;
+    }
+
+    while (true)
+    {
+        this->index_ %= this->items_.size();
+
+        if (this->durationOffset_ > this->items_[this->index_].duration)
         {
-            DebugCount::increase("loaded images");
-        }
-
-        if (this->animated())
-        {
-            DebugCount::increase("animated images");
-
-            this->gifTimerConnection_ =
-                getIApp()->getEmotes()->getGIFTimer().signal.connect([this] {
-                    this->advance();
-                });
-        }
-
-        auto totalLength =
-            std::accumulate(this->items_.begin(), this->items_.end(), 0UL,
-                            [](auto init, auto &&frame) {
-                                return init + frame.duration;
-                            });
-
-        if (totalLength == 0)
-        {
-            this->durationOffset_ = 0;
+            this->durationOffset_ -= this->items_[this->index_].duration;
+            this->index_ = (this->index_ + 1) % this->items_.size();
         }
         else
         {
-            this->durationOffset_ = std::min<int>(
-                int(getIApp()->getEmotes()->getGIFTimer().position() %
-                    totalLength),
-                60000);
+            break;
         }
-        this->processOffset();
-        DebugCount::increase("image bytes", this->memoryUsage());
-        DebugCount::increase("image bytes (ever loaded)", this->memoryUsage());
+    }
+}
+
+void Frames::clear()
+{
+    assertInGuiThread();
+    if (!this->empty())
+    {
+        DebugCount::decrease("loaded images");
+    }
+    DebugCount::decrease("image bytes", this->memoryUsage());
+    DebugCount::increase("image bytes (ever unloaded)", this->memoryUsage());
+
+    this->items_.clear();
+    this->index_ = 0;
+    this->durationOffset_ = 0;
+    this->gifTimerConnection_.disconnect();
+}
+
+bool Frames::empty() const
+{
+    return this->items_.empty();
+}
+
+bool Frames::animated() const
+{
+    return this->items_.size() > 1;
+}
+
+std::optional<QPixmap> Frames::current() const
+{
+    if (this->items_.empty())
+    {
+        return std::nullopt;
     }
 
-    Frames::~Frames()
+    return this->items_[this->index_].image;
+}
+
+std::optional<QPixmap> Frames::first() const
+{
+    if (this->items_.empty())
     {
-        assertInGuiThread();
-        DebugCount::decrease("images");
-        if (!this->empty())
+        return std::nullopt;
+    }
+
+    return this->items_.front().image;
+}
+
+QList<Frame> readFrames(QImageReader &reader, const Url &url)
+{
+    QList<Frame> frames;
+    frames.reserve(reader.imageCount());
+
+    for (int index = 0; index < reader.imageCount(); ++index)
+    {
+        auto pixmap = QPixmap::fromImageReader(&reader);
+        if (!pixmap.isNull())
         {
-            DebugCount::decrease("loaded images");
+            // It seems that browsers have special logic for fast animations.
+            // This implements Chrome and Firefox's behavior which uses
+            // a duration of 100 ms for any frames that specify a duration of <= 10 ms.
+            // See http://webkit.org/b/36082 for more information.
+            // https://github.com/SevenTV/chatterino7/issues/46#issuecomment-1010595231
+            int duration = reader.nextImageDelay();
+            if (duration <= 10)
+            {
+                duration = 100;
+            }
+            duration = std::max(20, duration);
+            frames.append(Frame{
+                .image = std::move(pixmap),
+                .duration = duration,
+            });
         }
-
-        if (this->animated())
-        {
-            DebugCount::decrease("animated images");
-        }
-        DebugCount::decrease("image bytes", this->memoryUsage());
-        DebugCount::increase("image bytes (ever unloaded)",
-                             this->memoryUsage());
-
-        this->gifTimerConnection_.disconnect();
     }
 
-    int64_t Frames::memoryUsage() const
+    if (frames.empty())
     {
-        int64_t usage = 0;
-        for (const auto &frame : this->items_)
-        {
-            auto sz = frame.image.size();
-            auto area = sz.width() * sz.height();
-            auto memory = area * frame.image.depth() / 8;
-
-            usage += memory;
-        }
-        return usage;
+        qCDebug(chatterinoImage) << "Error while reading image" << url.string
+                                 << ": '" << reader.errorString() << "'";
     }
 
-    void Frames::advance()
-    {
-        this->durationOffset_ += GIF_FRAME_LENGTH;
-        this->processOffset();
-    }
+    return frames;
+}
 
-    void Frames::processOffset()
-    {
-        if (this->items_.isEmpty())
+void assignFrames(std::weak_ptr<Image> weak, QList<Frame> parsed)
+{
+    static bool isPushQueued;
+
+    auto cb = [parsed = std::move(parsed), weak = std::move(weak)]() mutable {
+        auto shared = weak.lock();
+        if (!shared)
         {
             return;
         }
+        shared->frames_ = std::make_unique<detail::Frames>(std::move(parsed));
 
-        while (true)
+        // Avoid too many layouts in one event-loop iteration
+        //
+        // This callback is called for every image, so there might be multiple
+        // callbacks queued on the event-loop in this iteration, but we only
+        // want to generate one invalidation.
+        if (!isPushQueued)
         {
-            this->index_ %= this->items_.size();
-
-            if (this->durationOffset_ > this->items_[this->index_].duration)
-            {
-                this->durationOffset_ -= this->items_[this->index_].duration;
-                this->index_ = (this->index_ + 1) % this->items_.size();
-            }
-            else
-            {
-                break;
-            }
+            isPushQueued = true;
+            postToThread([] {
+                isPushQueued = false;
+                getIApp()->getWindows()->forceLayoutChannelViews();
+            });
         }
-    }
+    };
 
-    void Frames::clear()
-    {
-        assertInGuiThread();
-        if (!this->empty())
-        {
-            DebugCount::decrease("loaded images");
-        }
-        DebugCount::decrease("image bytes", this->memoryUsage());
-        DebugCount::increase("image bytes (ever unloaded)",
-                             this->memoryUsage());
+    postToGuiThread(cb);
+}
 
-        this->items_.clear();
-        this->index_ = 0;
-        this->durationOffset_ = 0;
-        this->gifTimerConnection_.disconnect();
-    }
+}  // namespace chatterino::detail
 
-    bool Frames::empty() const
-    {
-        return this->items_.empty();
-    }
-
-    bool Frames::animated() const
-    {
-        return this->items_.size() > 1;
-    }
-
-    std::optional<QPixmap> Frames::current() const
-    {
-        if (this->items_.empty())
-        {
-            return std::nullopt;
-        }
-
-        return this->items_[this->index_].image;
-    }
-
-    std::optional<QPixmap> Frames::first() const
-    {
-        if (this->items_.empty())
-        {
-            return std::nullopt;
-        }
-
-        return this->items_.front().image;
-    }
-
-    // functions
-    QVector<Frame<QImage>> readFrames(QImageReader &reader, const Url &url)
-    {
-        QVector<Frame<QImage>> frames;
-        frames.reserve(reader.imageCount());
-
-        QImage image;
-        for (int index = 0; index < reader.imageCount(); ++index)
-        {
-            if (reader.read(&image))
-            {
-                // It seems that browsers have special logic for fast animations.
-                // This implements Chrome and Firefox's behavior which uses
-                // a duration of 100 ms for any frames that specify a duration of <= 10 ms.
-                // See http://webkit.org/b/36082 for more information.
-                // https://github.com/SevenTV/chatterino7/issues/46#issuecomment-1010595231
-                int duration = reader.nextImageDelay();
-                if (duration <= 10)
-                {
-                    duration = 100;
-                }
-                duration = std::max(20, duration);
-                frames.push_back(Frame<QImage>{std::move(image), duration});
-            }
-        }
-
-        if (frames.empty())
-        {
-            qCDebug(chatterinoImage)
-                << "Error while reading image" << url.string << ": '"
-                << reader.errorString() << "'";
-        }
-
-        return frames;
-    }
-
-    // parsed
-    template <typename Assign>
-    void assignDelayed(
-        std::queue<std::pair<Assign, QVector<Frame<QPixmap>>>> &queued,
-        std::mutex &mutex, std::atomic_bool &loadedEventQueued)
-    {
-        std::lock_guard<std::mutex> lock(mutex);
-        int i = 0;
-
-        while (!queued.empty())
-        {
-            auto front = std::move(queued.front());
-            queued.pop();
-
-            // Call Assign with the vector of frames
-            front.first(std::move(front.second));
-
-            if (++i > 50)
-            {
-                QTimer::singleShot(3, [&] {
-                    assignDelayed(queued, mutex, loadedEventQueued);
-                });
-                return;
-            }
-        }
-
-        getIApp()->getWindows()->forceLayoutChannelViews();
-
-        loadedEventQueued = false;
-    }
-
-    template <typename Assign>
-    auto makeConvertCallback(const QVector<Frame<QImage>> &parsed,
-                             Assign assign)
-    {
-        static std::queue<std::pair<Assign, QVector<Frame<QPixmap>>>> queued;
-        static std::mutex mutex;
-        static std::atomic_bool loadedEventQueued{false};
-
-        return [parsed, assign] {
-            // convert to pixmap
-            QVector<Frame<QPixmap>> frames;
-            frames.reserve(parsed.size());
-            std::transform(parsed.begin(), parsed.end(),
-                           std::back_inserter(frames), [](auto &frame) {
-                               return Frame<QPixmap>{
-                                   QPixmap::fromImage(frame.image),
-                                   frame.duration};
-                           });
-
-            // put into stack
-            std::lock_guard<std::mutex> lock(mutex);
-            queued.emplace(assign, frames);
-
-            if (!loadedEventQueued)
-            {
-                loadedEventQueued = true;
-
-                QTimer::singleShot(100, [=] {
-                    assignDelayed(queued, mutex, loadedEventQueued);
-                });
-            }
-        };
-    }
-}  // namespace detail
+namespace chatterino {
 
 // IMAGE2
 Image::~Image()
@@ -402,7 +364,7 @@ void Image::setPixmap(const QPixmap &pixmap)
 {
     auto setFrames = [shared = this->shared_from_this(), pixmap]() {
         shared->frames_ = std::make_unique<detail::Frames>(
-            QVector<detail::Frame<QPixmap>>{detail::Frame<QPixmap>{pixmap, 1}});
+            QList<detail::Frame>{detail::Frame{pixmap, 1}});
     };
 
     if (isGuiThread())
@@ -512,11 +474,8 @@ void Image::actuallyLoad()
                 return;
             }
 
-            auto data = result.getData();
-
-            // const cast since we are only reading from it
-            QBuffer buffer(const_cast<QByteArray *>(&data));
-            buffer.open(QIODevice::ReadOnly);
+            QBuffer buffer;
+            buffer.setData(result.getData());
             QImageReader reader(&buffer);
 
             if (!reader.canRead())
@@ -557,14 +516,7 @@ void Image::actuallyLoad()
 
             auto parsed = detail::readFrames(reader, shared->url());
 
-            postToThread(makeConvertCallback(
-                parsed, [weak = std::weak_ptr<Image>(shared)](auto &&frames) {
-                    if (auto shared = weak.lock())
-                    {
-                        shared->frames_ = std::make_unique<detail::Frames>(
-                            std::forward<decltype(frames)>(frames));
-                    }
-                }));
+            assignFrames(shared, parsed);
         })
         .onError([weak](auto /*result*/) {
             auto shared = weak.lock();

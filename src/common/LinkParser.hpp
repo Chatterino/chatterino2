@@ -7,28 +7,23 @@
 namespace chatterino {
 
 struct ParsedLink {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-    using StringView = QStringView;
-#else
-    using StringView = QStringRef;
-#endif
     /// The parsed protocol of the link. Can be empty.
     ///
     /// https://www.forsen.tv/commands
     /// ^------^
-    StringView protocol;
+    QStringView protocol;
 
     /// The parsed host of the link. Can not be empty.
     ///
     /// https://www.forsen.tv/commands
     ///         ^-----------^
-    StringView host;
+    QStringView host;
 
     /// The remainder of the link. Can be empty.
     ///
     /// https://www.forsen.tv/commands
     ///                      ^-------^
-    StringView rest;
+    QStringView rest;
 
     /// The original unparsed link.
     ///

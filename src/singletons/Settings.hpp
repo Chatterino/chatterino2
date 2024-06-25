@@ -47,19 +47,6 @@ enum UsernameDisplayMode : int {
     UsernameAndLocalizedName = 3,  // Username (Localized name)
 };
 
-enum HelixTimegateOverride : int {
-    // Use the default timegated behaviour
-    // This means we use the old IRC command up until the migration date and
-    // switch over to the Helix API only after the migration date
-    Timegate = 1,
-
-    // Ignore timegating and always force use the IRC command
-    AlwaysUseIRC = 2,
-
-    // Ignore timegating and always force use the Helix API
-    AlwaysUseHelix = 3,
-};
-
 enum ThumbnailPreviewMode : int {
     DontShow = 0,
 
@@ -538,29 +525,6 @@ public:
     IntSetting scrollbackUsercardLimit = {
         "/misc/scrollback/usercardLimit",
         1000,
-    };
-
-    // Temporary time-gate-overrides
-    EnumSetting<HelixTimegateOverride> helixTimegateRaid = {
-        "/misc/twitch/helix-timegate/raid",
-        HelixTimegateOverride::Timegate,
-    };
-    EnumSetting<HelixTimegateOverride> helixTimegateWhisper = {
-        "/misc/twitch/helix-timegate/whisper",
-        HelixTimegateOverride::Timegate,
-    };
-    EnumSetting<HelixTimegateOverride> helixTimegateVIPs = {
-        "/misc/twitch/helix-timegate/vips",
-        HelixTimegateOverride::Timegate,
-    };
-    EnumSetting<HelixTimegateOverride> helixTimegateModerators = {
-        "/misc/twitch/helix-timegate/moderators",
-        HelixTimegateOverride::Timegate,
-    };
-
-    EnumSetting<HelixTimegateOverride> helixTimegateCommercial = {
-        "/misc/twitch/helix-timegate/commercial",
-        HelixTimegateOverride::Timegate,
     };
 
     EnumStringSetting<ChatSendProtocol> chatSendProtocol = {

@@ -136,7 +136,7 @@ void NotificationController::notifyTwitchChannelLive(
     MessageBuilder builder;
     TwitchMessageBuilder::liveMessage(payload.displayName, &builder);
     builder.message().id = payload.channelId;
-    getApp()->twitch->liveChannel->addMessage(builder.release());
+    getIApp()->getTwitch()->getLiveChannel()->addMessage(builder.release());
 
     // Notify on all channels with a ping sound
     if (showNotification && !playedSound &&
@@ -151,7 +151,7 @@ void NotificationController::notifyTwitchChannelOffline(const QString &id) const
 {
     // "delete" old 'CHANNEL is live' message
     LimitedQueueSnapshot<MessagePtr> snapshot =
-        getApp()->twitch->liveChannel->getMessageSnapshot();
+        getIApp()->getTwitch()->getLiveChannel()->getMessageSnapshot();
     int snapshotLength = static_cast<int>(snapshot.size());
 
     int end = std::max(0, snapshotLength - 200);
@@ -176,7 +176,7 @@ void NotificationController::fetchFakeChannels()
     for (size_t i = 0; i < channelMap_[Platform::Twitch].raw().size(); i++)
     {
         const auto &name = channelMap_[Platform::Twitch].raw()[i];
-        auto chan = getApp()->twitch->getChannelOrEmpty(name);
+        auto chan = getIApp()->getTwitchAbstract()->getChannelOrEmpty(name);
         if (chan->isEmpty())
         {
             channels.push_back(name);

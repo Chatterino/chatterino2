@@ -15,7 +15,6 @@
 #include "singletons/Resources.hpp"
 #include "singletons/Theme.hpp"
 #include "util/FormatTime.hpp"
-#include "util/Qt.hpp"
 
 #include <QDateTime>
 
@@ -318,6 +317,31 @@ MessageBuilder::MessageBuilder(const UnbanAction &action)
         action.wasBan() ? "unbanned" : "untimedout", text);
     this->emplaceSystemTextAndUpdate(action.target.login + ".", text)
         ->setLink({Link::UserInfo, action.target.login});
+
+    this->message().messageText = text;
+    this->message().searchText = text;
+}
+
+MessageBuilder::MessageBuilder(const WarnAction &action)
+    : MessageBuilder()
+{
+    this->emplace<TimestampElement>();
+    this->message().flags.set(MessageFlag::System);
+
+    QString text;
+
+    // TODO: Use MentionElement here, once WarnAction includes username/displayname
+    this->emplaceSystemTextAndUpdate("A moderator", text)
+        ->setLink({Link::UserInfo, "id:" + action.source.id});
+    this->emplaceSystemTextAndUpdate("warned", text);
+    this->emplaceSystemTextAndUpdate(
+            action.target.login + (action.reasons.isEmpty() ? "." : ":"), text)
+        ->setLink({Link::UserInfo, action.target.login});
+
+    if (!action.reasons.isEmpty())
+    {
+        this->emplaceSystemTextAndUpdate(action.reasons.join(", "), text);
+    }
 
     this->message().messageText = text;
     this->message().searchText = text;
@@ -763,7 +787,7 @@ void MessageBuilder::addTextOrEmoji(const QString &string_)
     auto &&textColor = this->textColor_;
     if (string.startsWith('@'))
     {
-        this->emplace<MentionElement>(string, textColor, textColor);
+        this->emplace<MentionElement>(string, "", textColor, textColor);
     }
     else
     {

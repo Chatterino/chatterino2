@@ -68,10 +68,13 @@ namespace chatterino {
 // NUM_SOUNDS specifies how many simultaneous default ping sounds & decoders to create
 constexpr const auto NUM_SOUNDS = 4;
 
-void MiniaudioBackend::initialize(Settings &settings, const Paths &paths)
+MiniaudioBackend::MiniaudioBackend()
+    : context(std::make_unique<ma_context>())
+    , engine(std::make_unique<ma_engine>())
+    , workGuard(boost::asio::make_work_guard(this->ioContext))
+    , sleepTimer(this->ioContext)
 {
-    (void)(settings);
-    (void)(paths);
+    qCInfo(chatterinoSound) << "Initializing miniaudio sound backend";
 
     boost::asio::post(this->ioContext, [this] {
         ma_result result{};
@@ -190,15 +193,6 @@ void MiniaudioBackend::initialize(Settings &settings, const Paths &paths)
     this->audioThread = std::make_unique<std::thread>([this] {
         this->ioContext.run();
     });
-}
-
-MiniaudioBackend::MiniaudioBackend()
-    : context(std::make_unique<ma_context>())
-    , engine(std::make_unique<ma_engine>())
-    , workGuard(boost::asio::make_work_guard(this->ioContext))
-    , sleepTimer(this->ioContext)
-{
-    qCInfo(chatterinoSound) << "Initializing miniaudio sound backend";
 }
 
 MiniaudioBackend::~MiniaudioBackend()
