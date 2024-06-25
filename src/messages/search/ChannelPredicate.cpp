@@ -1,7 +1,6 @@
 #include "messages/search/ChannelPredicate.hpp"
 
 #include "messages/Message.hpp"
-#include "util/Qt.hpp"
 
 namespace chatterino {
 

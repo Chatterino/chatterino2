@@ -140,8 +140,8 @@ Application::Application(Settings &_settings, const Paths &paths,
     , seventvBadges(&this->emplace<SeventvBadges>())
     , seventvPaints(&this->emplace<SeventvPaints>())
     , seventvPersonalEmotes(&this->emplace<SeventvPersonalEmotes>())
-    , userData(&this->emplace(new UserDataController(paths)))
-    , sound(&this->emplace<ISoundController>(makeSoundController(_settings)))
+    , userData(new UserDataController(paths))
+    , sound(makeSoundController(_settings))
     , twitchLiveController(&this->emplace<TwitchLiveController>())
     , twitchPubSub(new PubSub(TWITCH_PUBSUB_URL))
     , twitchBadges(new TwitchBadges)
@@ -178,6 +178,8 @@ void Application::fakeDtor()
     this->seventvEmotes.reset();
     // this->twitch.reset();
     this->fonts.reset();
+    this->sound.reset();
+    this->userData.reset();
 }
 
 void Application::initialize(Settings &settings, const Paths &paths)
@@ -468,14 +470,14 @@ IUserDataController *Application::getUserData()
 {
     assertInGuiThread();
 
-    return this->userData;
+    return this->userData.get();
 }
 
 ISoundController *Application::getSound()
 {
     assertInGuiThread();
 
-    return this->sound;
+    return this->sound.get();
 }
 
 ITwitchLiveController *Application::getTwitchLiveController()
@@ -545,7 +547,7 @@ PubSub *Application::getTwitchPubSub()
     return this->twitchPubSub.get();
 }
 
-Logging *Application::getChatLogger()
+ILogging *Application::getChatLogger()
 {
     assertInGuiThread();
 

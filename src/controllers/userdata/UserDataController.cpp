@@ -37,11 +37,6 @@ UserDataController::UserDataController(const Paths &paths)
     this->users = this->setting.getValue();
 }
 
-void UserDataController::save()
-{
-    this->sm->save();
-}
-
 std::optional<UserData> UserDataController::getUser(const QString &userID) const
 {
     std::shared_lock lock(this->usersMutex);

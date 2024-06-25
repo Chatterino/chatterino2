@@ -107,6 +107,10 @@ set(SOURCE_FILES
         controllers/commands/builtin/twitch/UpdateChannel.hpp
         controllers/commands/builtin/twitch/UpdateColor.cpp
         controllers/commands/builtin/twitch/UpdateColor.hpp
+        controllers/commands/builtin/twitch/Warn.cpp
+        controllers/commands/builtin/twitch/Warn.hpp
+        controllers/commands/common/ChannelAction.cpp
+        controllers/commands/common/ChannelAction.hpp
         controllers/commands/CommandContext.hpp
         controllers/commands/CommandController.cpp
         controllers/commands/CommandController.hpp
@@ -225,6 +229,10 @@ set(SOURCE_FILES
         controllers/plugins/api/ChannelRef.hpp
         controllers/plugins/api/IOWrapper.cpp
         controllers/plugins/api/IOWrapper.hpp
+        controllers/plugins/api/HTTPRequest.cpp
+        controllers/plugins/api/HTTPRequest.hpp
+        controllers/plugins/api/HTTPResponse.cpp
+        controllers/plugins/api/HTTPResponse.hpp
         controllers/plugins/LuaAPI.cpp
         controllers/plugins/LuaAPI.hpp
         controllers/plugins/PluginPermission.cpp
@@ -672,6 +680,8 @@ set(SOURCE_FILES
         widgets/helper/SettingsDialogTab.hpp
         widgets/helper/SignalLabel.cpp
         widgets/helper/SignalLabel.hpp
+        widgets/helper/TableStyles.cpp
+        widgets/helper/TableStyles.hpp
         widgets/helper/TitlebarButton.cpp
         widgets/helper/TitlebarButton.hpp
         widgets/helper/TitlebarButtons.cpp
@@ -1026,6 +1036,9 @@ target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 
 # semver dependency https://github.com/Neargye/semver
 target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/semver/include)
+
+# expected-lite dependency https://github.com/martinmoene/expected-lite
+target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/expected-lite/include)
 
 # miniaudio dependency https://github.com/mackron/miniaudio
 if (USE_SYSTEM_MINIAUDIO)

@@ -124,15 +124,6 @@ LinkParser::LinkParser(const QString &unparsedString)
     QStringView remaining(unparsedString);
     QStringView protocol(remaining);
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-    QStringView wholeString(unparsedString);
-    const auto refFromView = [&](QStringView view) {
-        return QStringRef(&unparsedString,
-                          static_cast<int>(view.begin() - wholeString.begin()),
-                          static_cast<int>(view.size()));
-    };
-#endif
-
     // Check protocol for https?://
     if (remaining.startsWith(QStringLiteral("http"), Qt::CaseInsensitive) &&
         remaining.length() >= 4 + 3 + 1)  // 'http' + '://' + [any]
@@ -149,12 +140,7 @@ LinkParser::LinkParser(const QString &unparsedString)
         {
             // there's really a protocol => consume it
             remaining = withProto.mid(3);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
             result.protocol = {protocol.begin(), remaining.begin()};
-#else
-            result.protocol =
-                refFromView({protocol.begin(), remaining.begin()});
-#endif
         }
     }
 
@@ -219,13 +205,8 @@ LinkParser::LinkParser(const QString &unparsedString)
     if ((nDots == 3 && isValidIpv4(host)) ||
         isValidTld(host.mid(lastDotPos + 1)))
     {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
         result.host = host;
         result.rest = rest;
-#else
-        result.host = refFromView(host);
-        result.rest = refFromView(rest);
-#endif
         result.source = unparsedString;
         this->result_ = std::move(result);
     }

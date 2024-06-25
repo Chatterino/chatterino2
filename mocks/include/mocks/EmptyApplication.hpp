@@ -19,6 +19,11 @@ public:
 
     virtual ~EmptyApplication() = default;
 
+    bool isTest() const override
+    {
+        return true;
+    }
+
     const Paths &getPaths() override
     {
         return this->paths_;
@@ -137,7 +142,7 @@ public:
         return nullptr;
     }
 
-    Logging *getChatLogger() override
+    ILogging *getChatLogger() override
     {
         assert(!"getChatLogger was called without being initialized");
         return nullptr;

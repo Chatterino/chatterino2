@@ -55,6 +55,10 @@ jobs:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
 
+      - name: Fix git permission error
+        run: |
+          git config --global --add safe.directory '*'
+
       - name: Build
         run: |
           mkdir build

@@ -38,7 +38,6 @@
 #include "util/Helpers.hpp"
 #include "util/IrcHelpers.hpp"
 #include "util/QStringHash.hpp"
-#include "util/Qt.hpp"
 #include "widgets/Window.hpp"
 
 #include <boost/variant.hpp>
@@ -383,13 +382,7 @@ namespace {
         dst.reserve(newLength);
         for (const QStringView &chunk : std::as_const(chunks))
         {
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 2)
-            static_assert(sizeof(QChar) == sizeof(decltype(*chunk.utf16())));
-            dst.append(reinterpret_cast<const QChar *>(chunk.utf16()),
-                       chunk.length());
-#else
             dst += chunk;
-#endif
         }
         return dst;
     }
@@ -1179,13 +1172,8 @@ void TwitchMessageBuilder::processIgnorePhrases(
         shiftIndicesAfter(static_cast<int>(from + length),
                           static_cast<int>(replacement.length() - length));
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
         auto midExtendedRef =
             QStringView{originalMessage}.mid(wordStart, wordEnd - wordStart);
-#else
-        auto midExtendedRef =
-            originalMessage.midRef(wordStart, wordEnd - wordStart);
-#endif
 
         for (auto &emote : removedEmotes)
         {
@@ -1603,6 +1591,15 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
     }
     builder->emplace<TextElement>(redeemed,
                                   MessageElementFlag::ChannelPointReward);
+    if (reward.id == "CELEBRATION")
+    {
+        const auto emotePtr =
+            getIApp()->getEmotes()->getTwitchEmotes()->getOrCreateEmote(
+                EmoteId{reward.emoteId}, EmoteName{reward.emoteName});
+        builder->emplace<EmoteElement>(emotePtr,
+                                       MessageElementFlag::ChannelPointReward,
+                                       MessageColor::Text);
+    }
     builder->emplace<TextElement>(
         reward.title, MessageElementFlag::ChannelPointReward,
         MessageColor::Text, FontStyle::ChatMediumBold);
@@ -1611,6 +1608,12 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
     builder->emplace<TextElement>(
         QString::number(reward.cost), MessageElementFlag::ChannelPointReward,
         MessageColor::Text, FontStyle::ChatMediumBold);
+    if (reward.isBits)
+    {
+        builder->emplace<TextElement>(
+            "bits", MessageElementFlag::ChannelPointReward, MessageColor::Text,
+            FontStyle::ChatMediumBold);
+    }
     if (reward.isUserInputRequired)
     {
         builder->emplace<LinebreakElement>(

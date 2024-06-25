@@ -24,7 +24,7 @@ Notes:
 
 Notes:
 
-- Installing the latest **stable** Qt version is advised for new installations, but if you want to use your existing installation please ensure you are running **Qt 5.12 or later**.
+- Installing the latest **stable** Qt version is advised for new installations, but if you want to use your existing installation please ensure you are running **Qt 5.15.2 or later**.
 
 #### Components
 
@@ -33,7 +33,7 @@ When prompted which components to install, do the following:
 1. Unfold the tree element that says "Qt"
 2. Unfold the top most tree element (latest stable Qt version, e.g. `Qt 6.5.3`)
 3. Under this version, select the following entries:
-   - `MSVC 2019 64-bit` (or alternative version if you are using that)
+   - `MSVC 2019 64-bit` (or `MSVC 2022 64-bit` from Qt 6.8 onwards)
    - `Qt 5 Compatibility Module`
    - `Additional Libraries` > `Qt Image Formats`
 4. Under the "Tools" tree element (at the bottom), ensure that `Qt Creator X.X.X` and `Debugging Tools for Windows` are selected. (they should be checked by default)
@@ -66,9 +66,9 @@ These dependencies are only required if you are not using a package manager
    - Visit the downloads list on [SourceForge](https://sourceforge.net/projects/boost/files/boost-binaries/).
    - Select the latest version from the list.
    - Download the `.exe` file appropriate to your Visual Studio installation version and system bitness (choose `-64` for 64-bit systems).
-     Visual Studio versions map as follows: `14.3` in the filename corresponds to MSVC 2022,`14.2` to 2019, `14.1` to 2017, `14.0` to 2015. _Anything prior to Visual Studio 2015 is unsupported. Please upgrade should you have an older installation._
+     Visual Studio versions map as follows: `14.3` in the filename corresponds to MSVC 2022. _Anything prior to Visual Studio 2022 is unsupported. Please upgrade should you have an older installation._
 
-     **Convenience link for Visual Studio 2022: [boost_1_79_0-msvc-14.3-64.exe](https://sourceforge.net/projects/boost/files/boost-binaries/1.79.0/boost_1_79_0-msvc-14.3-64.exe/download)**
+     **Convenience link for Visual Studio 2022: [boost_1_84_0-msvc-14.3-64.exe](https://sourceforge.net/projects/boost/files/boost-binaries/1.84.0/boost_1_84_0-msvc-14.3-64.exe/download)**
 
 2. When prompted where to install Boost, set the location to `C:\local\boost`.
 3. After the installation finishes, rename the `C:\local\boost\lib64-msvc-14.3` (or similar) directory to simply `lib` (`C:\local\boost\lib`).
@@ -237,7 +237,7 @@ Select the `CMake Applications > chatterino` configuration and add a new _Run Ex
 
 Now you can run the `chatterino | Debug` configuration.
 
-If you want to run the portable version of Chatterino, create a file called `modes` inside of `build/bin` and
+If you want to run the portable version of Chatterino, create a file called `modes` inside `build/bin` and
 write `portable` into it.
 
 #### Debugging

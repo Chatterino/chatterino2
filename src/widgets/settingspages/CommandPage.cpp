@@ -7,7 +7,6 @@
 #include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
 #include "util/LayoutCreator.hpp"
-#include "util/Qt.hpp"
 #include "util/StandardItemHelper.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 

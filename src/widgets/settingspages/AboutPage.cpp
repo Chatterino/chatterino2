@@ -130,6 +130,9 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "KImageFormats",
                        "https://invent.kde.org/frameworks/kimageformats",
                        ":/licenses/kimageformats.txt");
+            addLicense(form.getElement(), "expected-lite",
+                       "https://github.com/martinmoene/expected-lite",
+                       ":/licenses/expected-lite.txt");
         }
 
         // Attributions

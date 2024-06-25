@@ -11,7 +11,7 @@ namespace chatterino {
 
 namespace _helpers_internal {
 
-    SizeType skipSpace(StringView view, SizeType startPos)
+    SizeType skipSpace(QStringView view, SizeType startPos)
     {
         while (startPos < view.length() && view.at(startPos).isSpace())
         {
@@ -20,7 +20,7 @@ namespace _helpers_internal {
         return startPos - 1;
     }
 
-    bool matchesIgnorePlural(StringView word, const QString &expected)
+    bool matchesIgnorePlural(QStringView word, const QString &expected)
     {
         if (!word.startsWith(expected))
         {
@@ -34,7 +34,7 @@ namespace _helpers_internal {
                word.at(word.length() - 1).toLatin1() == 's';
     }
 
-    std::pair<uint64_t, bool> findUnitMultiplierToSec(StringView view,
+    std::pair<uint64_t, bool> findUnitMultiplierToSec(QStringView view,
                                                       SizeType &pos)
     {
         // Step 1. find end of unit
@@ -207,11 +207,7 @@ int64_t parseDurationToSeconds(const QString &inputString,
         return -1;
     }
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 2)
-    StringView input(inputString);
-#else
-    StringView input(&inputString);
-#endif
+    QStringView input(inputString);
     input = input.trimmed();
 
     uint64_t currentValue = 0;

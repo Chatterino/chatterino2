@@ -1,7 +1,5 @@
 #include "messages/search/MessageFlagsPredicate.hpp"
 
-#include "util/Qt.hpp"
-
 namespace chatterino {
 
 MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags, bool negate)
