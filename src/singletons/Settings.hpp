@@ -471,6 +471,8 @@ public:
                                             "qrc:/sounds/ping3.wav"};
     BoolSetting notificationOnAnyChannel = {"/notifications/onAnyChannel",
                                             false};
+    BoolSetting suppressInitialLiveNotification = {
+        "/notifications/suppressInitialLive", false};
 
     BoolSetting notificationToast = {"/notifications/enableToast", false};
     IntSetting openFromToast = {"/notifications/openFromToast",

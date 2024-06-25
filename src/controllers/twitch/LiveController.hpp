@@ -49,6 +49,11 @@ public:
     void add(const std::shared_ptr<TwitchChannel> &newChannel) override;
 
 private:
+    struct ChannelEntry {
+        std::weak_ptr<TwitchChannel> ptr;
+        bool wasChecked = false;
+    };
+
     /**
      * Run batched Helix Channels & Stream requests for channels
      *
@@ -64,7 +69,7 @@ private:
      *
      * These channels will have their stream status updated every REFRESH_INTERVAL seconds
      **/
-    std::unordered_map<QString, std::weak_ptr<TwitchChannel>> channels;
+    std::unordered_map<QString, ChannelEntry> channels;
     std::shared_mutex channelsMutex;
 
     /**

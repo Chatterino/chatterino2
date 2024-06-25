@@ -589,7 +589,7 @@ QString injectStreamUpdateNoStream(const CommandContext &ctx)
         return "";
     }
 
-    ctx.twitchChannel->updateStreamStatus(std::nullopt);
+    ctx.twitchChannel->updateStreamStatus(std::nullopt, false);
     return "";
 }
 
