@@ -5,7 +5,7 @@ from os import path
 
 class Chatterino(ConanFile):
     name = "Chatterino"
-    requires = "libavif/1.0.1"
+    requires = "libavif/1.0.4"
     settings = "os", "compiler", "build_type", "arch"
     default_options = {
         "with_benchmark": False,
@@ -24,14 +24,11 @@ class Chatterino(ConanFile):
         if self.settings.os != "Windows":
             return
 
-        self.requires("boost/1.83.0")
+        self.requires("boost/1.85.0")
         if self.options.get_safe("with_benchmark", False):
-            self.requires("benchmark/1.7.1")
+            self.requires("benchmark/1.8.4")
 
-        if self.options.get_safe("with_openssl3", False):
-            self.requires("openssl/3.2.0")
-        else:
-            self.requires("openssl/1.1.1t")
+        self.requires("openssl/3.2.2")
 
     def generate(self):
         def copy_bin(dep, selector, subdir):
