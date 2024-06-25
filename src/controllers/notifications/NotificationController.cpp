@@ -75,7 +75,8 @@ void NotificationController::removeChannelNotification(
 {
     for (size_t i = 0; i != channelMap_[p].raw().size(); i++)
     {
-        if (channelMap_[p].raw()[i].toLower() == channelName.toLower())
+        if (channelMap_[p].raw()[i].compare(channelName, Qt::CaseInsensitive) ==
+            0)
         {
             channelMap_[p].removeAt(static_cast<int>(i));
             i--;
