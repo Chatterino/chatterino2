@@ -132,6 +132,8 @@ public:
     // Update layout and tab visibility
     void refresh();
 
+    QAction *toggleTabsAction();
+
 protected:
     void scaleChangedEvent(float scale_) override;
     void resizeEvent(QResizeEvent *) override;
@@ -209,7 +211,7 @@ private:
     NotebookTabLocation tabLocation_ = NotebookTabLocation::Top;
 
     QAction *lockNotebookLayoutAction_;
-    QAction *showTabsAction_;
+    QAction *toggleTabsAction_;
     QAction *toggleTopMostAction_;
 
     // This filter, if set, is used to figure out the visibility of
@@ -231,6 +233,8 @@ public:
 
     void addNotebookActionsToMenu(QMenu *menu) override;
     void toggleOfflineTabs();
+
+    QAction *toggleOfflineTabsAction();
 
 protected:
     void showEvent(QShowEvent *event) override;
