@@ -8,21 +8,48 @@
 using namespace chatterino;
 
 struct Case {
+    // -Wmissing-field-initializers complains otherwise
+    // NOLINTBEGIN(readability-redundant-member-init)
     QString protocol{};
     QString host{};
     QString rest{};
+    // NOLINTEND(readability-redundant-member-init)
 
     void check() const
     {
-        auto input = this->protocol + this->host + this->rest;
-        LinkParser p(input);
-        ASSERT_TRUE(p.result().has_value()) << input;
+        QStringList prefixes{
+            "", "_", "__", "<", "<<", "<_<", "(((", "<*_~(", "**", "~~",
+        };
+        QStringList suffixes{
+            "",  ">", "?",  "!",   ".",       ",",  ":", "*",
+            "_", "~", ">>", "?!.", "~~,*_!?", "**", "_", "__",
+        };
 
-        const auto &r = *p.result();
-        ASSERT_EQ(r.source, input);
-        ASSERT_EQ(r.protocol, this->protocol) << this->protocol;
-        ASSERT_EQ(r.host, this->host) << this->host;
-        ASSERT_EQ(r.rest, this->rest) << this->rest;
+        for (const auto &prefix : prefixes)
+        {
+            for (const auto &suffix : suffixes)
+            {
+                checkSingle(prefix, suffix);
+            }
+        }
+    }
+
+    void checkSingle(const QString &prefix, const QString &suffix) const
+    {
+        auto link = this->protocol + this->host + this->rest;
+        auto input = prefix + link + suffix;
+        auto p = linkparser::parse(input);
+        ASSERT_TRUE(p.has_value()) << input;
+
+        const auto &r = *p;
+        ASSERT_EQ(r.link, link);
+        ASSERT_EQ(r.protocol, this->protocol);
+        ASSERT_EQ(r.host, this->host);
+        ASSERT_EQ(r.rest, this->rest);
+        ASSERT_EQ(r.prefix(input), prefix);
+        ASSERT_EQ(r.suffix(input), suffix);
+        ASSERT_EQ(r.hasPrefix(input), !prefix.isEmpty());
+        ASSERT_EQ(r.hasSuffix(input), !suffix.isEmpty());
     }
 };
 
@@ -56,6 +83,11 @@ TEST(LinkParser, parseDomainLinks)
         {"", "https.cat"},
         {"", "httpsd.cat"},
         {"", "http.cat", "/200"},
+        {"", "http.cat", "/200("},
+        {"", "chatterino.com><chatterino.com"},
+        {"https://", "chatterino.com><chatterino.com"},
+        {"", "a.com", "?("},
+        {"", "a.com", "#("},
         // test case-insensitiveness
         {"HtTpS://", "127.0.0.1.CoM"},
         {"HTTP://", "XD.CHATTERINO.COM", "/#?FOO"},
@@ -82,7 +114,6 @@ TEST(LinkParser, parseIpv4Links)
         {"", "1.1.1.1"},
         {"", "001.001.01.1"},
         {"", "123.246.87.0"},
-        {"", "196.168.0.1", ":"},
         {"", "196.168.4.2", "/foo"},
         {"", "196.168.4.2", "?foo"},
         {"http://", "196.168.4.0", "#foo"},
@@ -122,12 +153,24 @@ TEST(LinkParser, doesntParseInvalidIpv4Links)
         "255.256.255.255",
         "255.255.256.255",
         "255.255.255.256",
+        ":127.0.0.1",
+        ">1.2.3.4",
+        "?196.162.8.1",
+        "!196.162.8.1",
+        ".196.162.8.1",
+        ",196.162.8.1",
+        ":196.162.8.1",
+        "+196.162.8.1",
+        "196.162.8.1<",
+        "196.162.8.1(())",
+        "196.162.8.1(",
+        "196.162.8.1(!",
     };
 
     for (const auto &input : inputs)
     {
-        LinkParser p(input);
-        ASSERT_FALSE(p.result().has_value()) << input;
+        auto p = linkparser::parse(input);
+        ASSERT_FALSE(p.has_value()) << input;
     }
 }
 
@@ -166,11 +209,17 @@ TEST(LinkParser, doesntParseInvalidLinks)
         "http:/cat.com",
         "http:/cat.com",
         "https:/cat.com",
+        "chatterino.com-",
+        "<<>>",
+        ">><<",
+        "a.com>><<",
+        "~~a.com()",
+
     };
 
     for (const auto &input : inputs)
     {
-        LinkParser p(input);
-        ASSERT_FALSE(p.result().has_value()) << input;
+        auto p = linkparser::parse(input);
+        ASSERT_FALSE(p.has_value()) << input;
     }
 }
