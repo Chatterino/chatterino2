@@ -21,8 +21,8 @@ struct Case {
             "", "_", "__", "<", "<<", "<_<", "(((", "<*_~(", "**", "~~",
         };
         QStringList suffixes{
-            "",  ">", "?",  "!",   ".",       ",",  ":", "*",
-            "_", "~", ">>", "?!.", "~~,*_!?", "**", "_", "__",
+            "",  ">", "?",  "!",   ".",      ",",  ":",
+            "*", "~", ">>", "?!.", "~~,*!?", "**",
         };
 
         for (const auto &prefix : prefixes)
@@ -41,15 +41,19 @@ struct Case {
         auto p = linkparser::parse(input);
         ASSERT_TRUE(p.has_value()) << input;
 
-        const auto &r = *p;
-        ASSERT_EQ(r.link, link);
-        ASSERT_EQ(r.protocol, this->protocol);
-        ASSERT_EQ(r.host, this->host);
-        ASSERT_EQ(r.rest, this->rest);
-        ASSERT_EQ(r.prefix(input), prefix);
-        ASSERT_EQ(r.suffix(input), suffix);
-        ASSERT_EQ(r.hasPrefix(input), !prefix.isEmpty());
-        ASSERT_EQ(r.hasSuffix(input), !suffix.isEmpty());
+        if (!p)
+        {
+            return;
+        }
+
+        ASSERT_EQ(p->link, link);
+        ASSERT_EQ(p->protocol, this->protocol);
+        ASSERT_EQ(p->host, this->host);
+        ASSERT_EQ(p->rest, this->rest);
+        ASSERT_EQ(p->prefix(input), prefix);
+        ASSERT_EQ(p->suffix(input), suffix);
+        ASSERT_EQ(p->hasPrefix(input), !prefix.isEmpty());
+        ASSERT_EQ(p->hasSuffix(input), !suffix.isEmpty());
     }
 };
 
@@ -88,6 +92,7 @@ TEST(LinkParser, parseDomainLinks)
         {"https://", "chatterino.com><chatterino.com"},
         {"", "a.com", "?("},
         {"", "a.com", "#("},
+        {"", "a.com", "/__my_user__"},
         // test case-insensitiveness
         {"HtTpS://", "127.0.0.1.CoM"},
         {"HTTP://", "XD.CHATTERINO.COM", "/#?FOO"},

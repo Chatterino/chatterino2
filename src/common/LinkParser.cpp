@@ -118,9 +118,10 @@ bool startsWithPort(QStringView string)
 /// As per https://github.github.com/gfm/#autolinks-extension-:
 ///
 /// '<', '*', '_', '~', and '(' are ignored at the beginning
-/// '>', '?', '!', '.', ',', ':', '*', '_', '~', and ')' are ignored at the end
+/// '>', '?', '!', '.', ',', ':', '*', '~', and ')' are ignored at the end
 ///
-/// A difference to GFM is that the source isn't scanned for parentheses.
+/// A difference to GFM is that the source isn't scanned for parentheses and '_'
+/// isn't a valid suffix.
 void strip(QStringView &source)
 {
     while (!source.isEmpty())
@@ -138,7 +139,7 @@ void strip(QStringView &source)
     {
         auto c = source.last();
         if (c == u'>' || c == u'?' || c == u'!' || c == u'.' || c == u',' ||
-            c == u':' || c == u'*' || c == u'_' || c == u'~' || c == u')')
+            c == u':' || c == u'*' || c == u'~' || c == u')')
         {
             source.chop(1);
             continue;

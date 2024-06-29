@@ -14,9 +14,11 @@ namespace chatterino::linkparser {
 /// always next to eachother in the input string, however together, they don't
 /// span the whole input as it could contain prefixes or suffixes.
 ///
-/// Prefixes and suffixes are identical to the ones in GitHub Flavored Markdown
-/// (GFM - https://github.github.com/gfm/#autolinks-extension-).
-/// Matching is done case insensitive (e.g. 'HTTp://a.com' would be valid).
+/// Prefixes and suffixes are almost identical to the ones in GitHub Flavored
+/// Markdown (GFM - https://github.github.com/gfm/#autolinks-extension-).
+/// The main differences are that '_' isn't a valid suffix and parentheses
+/// aren't counted (e.g. "(a.com/(foo)! would result in "a.com/(foo").
+/// Matching is done case insensitive (e.g. "HTTp://a.com" would be valid).
 ///
 /// A @a protocol can either be empty, "http://", or "https://".
 /// A @a host can either be an IPv4 address or a hostname. The hostname must end
