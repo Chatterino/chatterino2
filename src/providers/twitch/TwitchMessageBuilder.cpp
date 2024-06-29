@@ -733,12 +733,12 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
     }
 
     // Actually just text
-    LinkParser parsed(string);
+    auto link = linkparser::parse(string);
     auto textColor = this->textColor_;
 
-    if (parsed.result())
+    if (link)
     {
-        this->addLink(*parsed.result());
+        this->addLink(*link, string);
         return;
     }
 
