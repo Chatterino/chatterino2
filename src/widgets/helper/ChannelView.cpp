@@ -1010,7 +1010,15 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
         }
 
         this->messages_.pushBack(messageLayout);
-        this->channel_->addMessage(msg);
+
+        auto overrideFlags = std::optional<MessageFlags>(msg->flags);
+        if (this->context_ != Context::None)
+        {
+            overrideFlags->set(MessageFlag::DoNotLog);
+        }
+
+        this->channel_->addMessage(msg, overrideFlags);
+
         nMessagesAdded++;
         if (this->showScrollbarHighlights())
         {

@@ -84,7 +84,11 @@ void Channel::addMessage(MessagePtr message,
 {
     MessagePtr deleted;
 
-    if (!overridingFlags || !overridingFlags->has(MessageFlag::DoNotLog))
+    auto isDoNotLogSet =
+        (overridingFlags && overridingFlags->has(MessageFlag::DoNotLog)) ||
+        message->flags.has(MessageFlag::DoNotLog);
+
+    if (!isDoNotLogSet)
     {
         QString channelPlatform("other");
         if (this->type_ == Type::Irc)
