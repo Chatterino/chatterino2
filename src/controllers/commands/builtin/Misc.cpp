@@ -401,11 +401,11 @@ QString clearmessages(const CommandContext &ctx)
 {
     (void)ctx;
 
-    auto *currentPage = dynamic_cast<SplitContainer *>(getIApp()
-                                                           ->getWindows()
-                                                           ->getMainWindow()
-                                                           .getNotebook()
-                                                           .getSelectedPage());
+    auto *currentPage = getIApp()
+                            ->getWindows()
+                            ->getLastSelectedWindow()
+                            ->getNotebook()
+                            .getSelectedPage();
 
     if (auto *split = currentPage->getSelectedSplit())
     {
