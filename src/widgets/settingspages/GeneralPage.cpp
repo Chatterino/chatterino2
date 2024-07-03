@@ -462,7 +462,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addTitle("Messages");
     layout.addCheckbox(
         "Separate with lines", s.separateMessages, false,
-        "Adds a line inbetween each message to help better tell them apart.");
+        "Adds a line between each message to help better tell them apart.");
     layout.addCheckbox("Alternate background color", s.alternateMessages, false,
                        "Slightly change the background behind every other "
                        "message to help better tell them apart.");
@@ -570,7 +570,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     // as an official description from 7TV devs is best
     s.showUnlistedSevenTVEmotes.connect(
         []() {
-            getApp()->twitch->forEachChannelAndSpecialChannels(
+            getIApp()->getTwitch()->forEachChannelAndSpecialChannels(
                 [](const auto &c) {
                     if (c->isTwitchChannel())
                     {
@@ -904,7 +904,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                           toggleLocalr9kShortcut + ".");
     layout.addCheckbox("Hide similar messages", s.similarityEnabled);
     //layout.addCheckbox("Gray out matches", s.colorSimilarDisabled);
-    layout.addCheckbox("By the same user", s.hideSimilarBySameUser);
+    layout.addCheckbox(
+        "By the same user", s.hideSimilarBySameUser, false,
+        "When checked, messages that are very similar to each other can still "
+        "be shown as long as they're sent by different users.");
     layout.addCheckbox("Hide my own messages", s.hideSimilarMyself);
     layout.addCheckbox("Receive notification sounds from hidden messages",
                        s.shownSimilarTriggerHighlights);
@@ -920,7 +923,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         [](auto args) {
             return fuzzyToFloat(args.value, 0.9f);
-        });
+        },
+        true,
+        "A value of 0.9 means the messages need to be 90% similar to be marked "
+        "as similar.");
     layout.addDropdown<int>(
         "Maximum delay between messages",
         {"5s", "10s", "15s", "30s", "60s", "120s"}, s.hideSimilarMaxDelay,
@@ -929,7 +935,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         [](auto args) {
             return fuzzyToInt(args.value, 5);
-        });
+        },
+        true,
+        "A value of 5s means if there's a 5s break between messages, we will "
+        "stop looking further through the messages for similarities.");
     layout.addDropdown<int>(
         "Amount of previous messages to check", {"1", "2", "3", "4", "5"},
         s.hideSimilarMaxMessagesToCheck,
@@ -1186,96 +1195,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "When disabled, messages sent in reply threads will include the "
         "@mention for the related thread. If the reply context is hidden, "
         "these mentions will never be stripped.");
-
-    // Helix timegate settings
-    auto helixTimegateGetValue = [](auto val) {
-        switch (val)
-        {
-            case HelixTimegateOverride::Timegate:
-                return "Timegate";
-            case HelixTimegateOverride::AlwaysUseIRC:
-                return "Always use IRC";
-            case HelixTimegateOverride::AlwaysUseHelix:
-                return "Always use Helix";
-            default:
-                return "Timegate";
-        }
-    };
-
-    auto helixTimegateSetValue = [](auto args) {
-        const auto &v = args.value;
-        if (v == "Timegate")
-        {
-            return HelixTimegateOverride::Timegate;
-        }
-        if (v == "Always use IRC")
-        {
-            return HelixTimegateOverride::AlwaysUseIRC;
-        }
-        if (v == "Always use Helix")
-        {
-            return HelixTimegateOverride::AlwaysUseHelix;
-        }
-
-        qCDebug(chatterinoSettings) << "Unknown Helix timegate override value"
-                                    << v << ", using default value Timegate";
-        return HelixTimegateOverride::Timegate;
-    };
-
-    auto *helixTimegateRaid =
-        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
-            "Helix timegate /raid behaviour",
-            {"Timegate", "Always use IRC", "Always use Helix"},
-            s.helixTimegateRaid,
-            helixTimegateGetValue,  //
-            helixTimegateSetValue,  //
-            false);
-    helixTimegateRaid->setMinimumWidth(
-        helixTimegateRaid->minimumSizeHint().width());
-
-    auto *helixTimegateWhisper =
-        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
-            "Helix timegate /w behaviour",
-            {"Timegate", "Always use IRC", "Always use Helix"},
-            s.helixTimegateWhisper,
-            helixTimegateGetValue,  //
-            helixTimegateSetValue,  //
-            false);
-    helixTimegateWhisper->setMinimumWidth(
-        helixTimegateWhisper->minimumSizeHint().width());
-
-    auto *helixTimegateVIPs =
-        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
-            "Helix timegate /vips behaviour",
-            {"Timegate", "Always use IRC", "Always use Helix"},
-            s.helixTimegateVIPs,
-            helixTimegateGetValue,  //
-            helixTimegateSetValue,  //
-            false);
-    helixTimegateVIPs->setMinimumWidth(
-        helixTimegateVIPs->minimumSizeHint().width());
-
-    auto *helixTimegateCommercial =
-        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
-            "Helix timegate /commercial behaviour",
-            {"Timegate", "Always use IRC", "Always use Helix"},
-            s.helixTimegateCommercial,
-            helixTimegateGetValue,  //
-            helixTimegateSetValue,  //
-            false);
-    helixTimegateCommercial->setMinimumWidth(
-        helixTimegateCommercial->minimumSizeHint().width());
-
-    auto *helixTimegateModerators =
-        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
-            "Helix timegate /mods behaviour",
-            {"Timegate", "Always use IRC", "Always use Helix"},
-            s.helixTimegateModerators,
-            helixTimegateGetValue,  //
-            helixTimegateSetValue,  //
-            false);
-    helixTimegateModerators->setMinimumWidth(
-        helixTimegateModerators->minimumSizeHint().width());
 
     layout.addDropdownEnumClass<ChatSendProtocol>(
         "Chat send protocol", qmagicenum::enumNames<ChatSendProtocol>(),

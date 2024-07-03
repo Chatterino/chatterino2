@@ -2,7 +2,6 @@
 
 #include "messages/Message.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
-#include "util/Qt.hpp"
 
 namespace chatterino {
 

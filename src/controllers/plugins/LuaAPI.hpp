@@ -5,6 +5,8 @@
 extern "C" {
 #    include <lua.h>
 }
+#    include "controllers/plugins/LuaUtilities.hpp"
+
 #    include <QString>
 
 #    include <cassert>
@@ -37,7 +39,7 @@ enum class EventType {
 /**
  * @lua@class CommandContext
  * @lua@field words string[] The words typed when executing the command. For example `/foo bar baz` will result in `{"/foo", "bar", "baz"}`.
- * @lua@field channel Channel The channel the command was executed in.
+ * @lua@field channel c2.Channel The channel the command was executed in.
  */
 
 /**
@@ -56,8 +58,33 @@ struct CompletionList {
 };
 
 /**
+ * @lua@class CompletionEvent
+ */
+struct CompletionEvent {
+    /**
+     * @lua@field query string The word being completed
+     */
+    QString query;
+    /**
+     * @lua@field full_text_content string Content of the text input
+     */
+    QString full_text_content;
+    /**
+     * @lua@field cursor_position integer Position of the cursor in the text input in unicode codepoints (not bytes)
+     */
+    int cursor_position{};
+    /**
+     * @lua@field is_first_word boolean True if this is the first word in the input
+     */
+    bool is_first_word{};
+};
+
+/**
  * @includefile common/Channel.hpp
  * @includefile controllers/plugins/api/ChannelRef.hpp
+ * @includefile controllers/plugins/api/HTTPRequest.hpp
+ * @includefile controllers/plugins/api/HTTPResponse.hpp
+ * @includefile common/network/NetworkCommon.hpp
  */
 
 /**
@@ -74,7 +101,7 @@ int c2_register_command(lua_State *L);
  * Registers a callback to be invoked when completions for a term are requested.
  *
  * @lua@param type "CompletionRequested"
- * @lua@param func fun(query: string, full_text_content: string, cursor_position: integer, is_first_word: boolean): CompletionList The callback to be invoked.
+ * @lua@param func fun(event: CompletionEvent): CompletionList The callback to be invoked.
  * @exposed c2.register_callback
  */
 int c2_register_callback(lua_State *L);
@@ -82,7 +109,7 @@ int c2_register_callback(lua_State *L);
 /**
  * Writes a message to the Chatterino log.
  *
- * @lua@param level LogLevel The desired level.
+ * @lua@param level c2.LogLevel The desired level.
  * @lua@param ... any Values to log. Should be convertible to a string with `tostring()`.
  * @exposed c2.log
  */
@@ -109,7 +136,11 @@ int searcherRelative(lua_State *L);
 // This is a fat pointer that allows us to type check values given to functions needing a userdata.
 // Ensure ALL userdata given to Lua are a subclass of this! Otherwise we garbage as a pointer!
 struct UserData {
-    enum class Type { Channel };
+    enum class Type {
+        Channel,
+        HTTPRequest,
+        HTTPResponse,
+    };
     Type type;
     bool isWeak;
 };

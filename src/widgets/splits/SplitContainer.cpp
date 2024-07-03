@@ -5,9 +5,12 @@
 #include "common/QLogging.hpp"
 #include "common/WindowDescriptors.hpp"
 #include "debug/AssertInGuiThread.hpp"
+#include "providers/irc/IrcChannel2.hpp"
+#include "providers/irc/IrcServer.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/QMagicEnum.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/Notebook.hpp"
@@ -762,6 +765,11 @@ SplitContainer::Node *SplitContainer::getBaseNode()
     return &this->baseNode_;
 }
 
+NodeDescriptor SplitContainer::buildDescriptor() const
+{
+    return this->buildDescriptorRecursively(&this->baseNode_);
+}
+
 void SplitContainer::applyFromDescriptor(const NodeDescriptor &rootNode)
 {
     assert(this->baseNode_.type_ == Node::Type::EmptyRoot);
@@ -797,6 +805,49 @@ void SplitContainer::popup()
     }
 
     window.show();
+}
+
+NodeDescriptor SplitContainer::buildDescriptorRecursively(
+    const Node *currentNode) const
+{
+    if (currentNode->children_.empty())
+    {
+        const auto channelType =
+            currentNode->split_->getIndirectChannel().getType();
+
+        SplitNodeDescriptor result;
+        result.type_ = qmagicenum::enumNameString(channelType);
+
+        switch (channelType)
+        {
+            case Channel::Type::Irc: {
+                if (auto *ircChannel = dynamic_cast<IrcChannel *>(
+                        currentNode->split_->getChannel().get()))
+                {
+                    if (ircChannel->server())
+                    {
+                        result.server_ = ircChannel->server()->id();
+                    }
+                }
+            }
+            break;
+        }
+
+        result.channelName_ = currentNode->split_->getChannel()->getName();
+        result.filters_ = currentNode->split_->getFilters();
+        return result;
+    }
+
+    ContainerNodeDescriptor descriptor;
+    for (const auto &child : currentNode->children_)
+    {
+        descriptor.vertical_ =
+            currentNode->type_ == Node::Type::VerticalContainer;
+        descriptor.items_.push_back(
+            this->buildDescriptorRecursively(child.get()));
+    }
+
+    return descriptor;
 }
 
 void SplitContainer::applyFromDescriptorRecursively(
@@ -849,9 +900,9 @@ void SplitContainer::applyFromDescriptorRecursively(
                 }
                 const auto &splitNode = *inner;
                 auto *split = new Split(this);
+                split->setFilters(splitNode.filters_);
                 split->setChannel(WindowManager::decodeChannel(splitNode));
                 split->setModerationMode(splitNode.moderationMode_);
-                split->setFilters(splitNode.filters_);
 
                 auto *node = new Node();
                 node->parent_ = baseNode;

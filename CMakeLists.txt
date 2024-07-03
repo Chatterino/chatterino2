@@ -28,7 +28,7 @@ option(CHATTERINO_GENERATE_COVERAGE "Generate coverage files" OFF)
 option(BUILD_TRANSLATIONS "" OFF)
 option(BUILD_SHARED_LIBS "" OFF)
 option(CHATTERINO_LTO "Enable LTO for all targets" OFF)
-option(CHATTERINO_PLUGINS "Enable EXPERIMENTAL plugin support in Chatterino" OFF)
+option(CHATTERINO_PLUGINS "Enable ALPHA plugin support in Chatterino" OFF)
 
 option(CHATTERINO_UPDATER "Enable update checks" ON)
 mark_as_advanced(CHATTERINO_UPDATER)
@@ -41,7 +41,7 @@ if(BUILD_BENCHMARKS)
 endif()
 
 project(chatterino 
-    VERSION 2.4.6
+    VERSION 2.5.1
     DESCRIPTION "Chat client for twitch.tv"
     HOMEPAGE_URL "https://chatterino.com/"
 )
@@ -197,6 +197,7 @@ find_package(PajladaSerialize REQUIRED)
 find_package(PajladaSignals REQUIRED)
 find_package(LRUCache REQUIRED)
 find_package(MagicEnum REQUIRED)
+find_package(Doxygen)
 
 if (USE_SYSTEM_PAJLADA_SETTINGS)
     find_package(PajladaSettings REQUIRED)

@@ -15,7 +15,6 @@
 #include "singletons/Resources.hpp"
 #include "singletons/Theme.hpp"
 #include "util/FormatTime.hpp"
-#include "util/Qt.hpp"
 
 #include <QDateTime>
 
@@ -323,6 +322,31 @@ MessageBuilder::MessageBuilder(const UnbanAction &action)
     this->message().searchText = text;
 }
 
+MessageBuilder::MessageBuilder(const WarnAction &action)
+    : MessageBuilder()
+{
+    this->emplace<TimestampElement>();
+    this->message().flags.set(MessageFlag::System);
+
+    QString text;
+
+    // TODO: Use MentionElement here, once WarnAction includes username/displayname
+    this->emplaceSystemTextAndUpdate("A moderator", text)
+        ->setLink({Link::UserInfo, "id:" + action.source.id});
+    this->emplaceSystemTextAndUpdate("warned", text);
+    this->emplaceSystemTextAndUpdate(
+            action.target.login + (action.reasons.isEmpty() ? "." : ":"), text)
+        ->setLink({Link::UserInfo, action.target.login});
+
+    if (!action.reasons.isEmpty())
+    {
+        this->emplaceSystemTextAndUpdate(action.reasons.join(", "), text);
+    }
+
+    this->message().messageText = text;
+    this->message().searchText = text;
+}
+
 MessageBuilder::MessageBuilder(const AutomodUserAction &action)
     : MessageBuilder()
 {
@@ -543,7 +567,7 @@ MessageBuilder::MessageBuilder(ImageUploaderResultTag /*unused*/,
     // This also ensures that the LinkResolver doesn't get these links.
     addText(imageLink, MessageColor::Link)
         ->setLink({Link::Url, imageLink})
-        ->setTrailingSpace(false);
+        ->setTrailingSpace(!deletionLink.isEmpty());
 
     if (!deletionLink.isEmpty())
     {
@@ -617,16 +641,16 @@ void MessageBuilder::addLink(const ParsedLink &parsedLink)
 {
     QString lowercaseLinkString;
     QString origLink = parsedLink.source;
-    QString matchedLink;
+    QString fullUrl;
 
     if (parsedLink.protocol.isNull())
     {
-        matchedLink = QStringLiteral("http://") + parsedLink.source;
+        fullUrl = QStringLiteral("http://") + parsedLink.source;
     }
     else
     {
         lowercaseLinkString += parsedLink.protocol;
-        matchedLink = parsedLink.source;
+        fullUrl = parsedLink.source;
     }
 
     lowercaseLinkString += parsedLink.host.toString().toLower();
@@ -635,9 +659,8 @@ void MessageBuilder::addLink(const ParsedLink &parsedLink)
     auto textColor = MessageColor(MessageColor::Link);
     auto *el = this->emplace<LinkElement>(
         LinkElement::Parsed{.lowercase = lowercaseLinkString,
-                            .original = matchedLink},
-        MessageElementFlag::Text, textColor);
-    el->setLink({Link::Url, matchedLink});
+                            .original = origLink},
+        fullUrl, MessageElementFlag::Text, textColor);
     getIApp()->getLinkResolver()->resolve(el->linkInfo());
 }
 
@@ -764,10 +787,7 @@ void MessageBuilder::addTextOrEmoji(const QString &string_)
     auto &&textColor = this->textColor_;
     if (string.startsWith('@'))
     {
-        this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
-                                   textColor, FontStyle::ChatMediumBold);
-        this->emplace<TextElement>(string, MessageElementFlag::NonBoldUsername,
-                                   textColor);
+        this->emplace<MentionElement>(string, "", textColor, textColor);
     }
     else
     {

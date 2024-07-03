@@ -57,6 +57,8 @@ public:
     NetworkRequest header(const char *headerName, const char *value) &&;
     NetworkRequest header(const char *headerName, const QByteArray &value) &&;
     NetworkRequest header(const char *headerName, const QString &value) &&;
+    NetworkRequest header(const QByteArray &headerName,
+                          const QByteArray &value) &&;
     NetworkRequest header(QNetworkRequest::KnownHeaders header,
                           const QVariant &value) &&;
     NetworkRequest headerList(

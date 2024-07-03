@@ -37,6 +37,21 @@ PluginsPage::PluginsPage()
         auto group = layout.emplace<QGroupBox>("General plugin settings");
         this->generalGroup = group.getElement();
         auto groupLayout = group.setLayoutType<QFormLayout>();
+        auto *scaryLabel = new QLabel(
+            "Plugins can expand functionality of "
+            "Chatterino. They can be made in Lua. This functionality is "
+            "still in public alpha stage. Use ONLY the plugins you trust. "
+            "The permission system is best effort, always "
+            "assume plugins can bypass permissions and can execute "
+            "arbitrary code. To see how to create plugins " +
+            formatRichNamedLink("https://github.com/Chatterino/chatterino2/"
+                                "blob/master/docs/wip-plugins.md",
+                                "look at the manual") +
+            ".");
+        scaryLabel->setWordWrap(true);
+        scaryLabel->setOpenExternalLinks(true);
+        groupLayout->addRow(scaryLabel);
+
         auto *description =
             new QLabel("You can load plugins by putting them into " +
                        formatRichNamedLink(

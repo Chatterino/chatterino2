@@ -219,9 +219,15 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
         }
 
         // Load emote popup position
-        QJsonObject emote_popup_obj = windowObj.value("emotePopup").toObject();
-        layout.emotePopupPos_ = QPoint(emote_popup_obj.value("x").toInt(),
-                                       emote_popup_obj.value("y").toInt());
+        {
+            auto emotePopup = windowObj["emotePopup"].toObject();
+            layout.emotePopupBounds_ = QRect{
+                emotePopup["x"].toInt(),
+                emotePopup["y"].toInt(),
+                emotePopup["width"].toInt(),
+                emotePopup["height"].toInt(),
+            };
+        }
 
         layout.windows_.emplace_back(std::move(window));
     }

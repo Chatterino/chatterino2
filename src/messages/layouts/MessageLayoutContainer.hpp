@@ -32,7 +32,8 @@ struct MessageLayoutContainer {
      * This will reset all line calculations, and will be considered incomplete
      * until the accompanying end function has been called
      */
-    void beginLayout(int width_, float scale_, MessageFlags flags_);
+    void beginLayout(int width, float scale, float imageScale,
+                     MessageFlags flags);
 
     /**
      * Finish the layout process of this message
@@ -145,6 +146,11 @@ struct MessageLayoutContainer {
      * Returns the scale of this message
      */
     float getScale() const;
+
+    /**
+     * Returns the image scale
+     */
+    float getImageScale() const;
 
     /**
      * Returns true if this message is collapsed
@@ -270,6 +276,10 @@ private:
 
     // variables
     float scale_ = 1.F;
+    /**
+     * Scale factor for images
+     */
+    float imageScale_ = 1.F;
     int width_ = 0;
     MessageFlags flags_{};
     /**

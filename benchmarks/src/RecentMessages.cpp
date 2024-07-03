@@ -4,6 +4,7 @@
 #include "messages/Emote.hpp"
 #include "mocks/DisabledStreamerMode.hpp"
 #include "mocks/EmptyApplication.hpp"
+#include "mocks/LinkResolver.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "mocks/UserData.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
@@ -99,10 +100,16 @@ public:
         return &this->streamerMode;
     }
 
+    ILinkResolver *getLinkResolver() override
+    {
+        return &this->linkResolver;
+    }
+
     AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;
     mock::MockTwitchIrcServer twitch;
+    mock::EmptyLinkResolver linkResolver;
     ChatterinoBadges chatterinoBadges;
     FfzBadges ffzBadges;
     SeventvBadges seventvBadges;

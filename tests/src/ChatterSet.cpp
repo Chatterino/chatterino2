@@ -1,6 +1,7 @@
 #include "common/ChatterSet.hpp"
 
-#include <gtest/gtest.h>
+#include "Test.hpp"
+
 #include <QStringList>
 
 TEST(ChatterSet, insert)

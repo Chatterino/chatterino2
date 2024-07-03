@@ -15,8 +15,8 @@
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "singletons/Emotes.hpp"
+#include "Test.hpp"
 
-#include <gtest/gtest.h>
 #include <IrcConnection>
 #include <QDebug>
 #include <QString>
@@ -147,7 +147,7 @@ TEST(TwitchMessageBuilder, CommaSeparatedListTagParsing)
         auto output = TwitchMessageBuilder::slashKeyValue(test.input);
 
         EXPECT_EQ(output, test.expectedOutput)
-            << "Input " << test.input.toStdString() << " failed";
+            << "Input " << test.input << " failed";
     }
 }
 
@@ -230,12 +230,12 @@ TEST(TwitchMessageBuilder, BadgeInfoParsing)
         auto outputBadgeInfo =
             TwitchMessageBuilder::parseBadgeInfoTag(privmsg->tags());
         EXPECT_EQ(outputBadgeInfo, test.expectedBadgeInfo)
-            << "Input for badgeInfo " << test.input.toStdString() << " failed";
+            << "Input for badgeInfo " << test.input << " failed";
 
         auto outputBadges =
             SharedMessageBuilder::parseBadgeTag(privmsg->tags());
         EXPECT_EQ(outputBadges, test.expectedBadges)
-            << "Input for badges " << test.input.toStdString() << " failed";
+            << "Input for badges " << test.input << " failed";
 
         delete privmsg;
     }
@@ -413,8 +413,7 @@ TEST_F(TestTwitchMessageBuilder, ParseTwitchEmotes)
             privmsg->tags(), originalMessage, 0);
 
         EXPECT_EQ(actualTwitchEmotes, test.expectedTwitchEmotes)
-            << "Input for twitch emotes " << test.input.toStdString()
-            << " failed";
+            << "Input for twitch emotes " << test.input << " failed";
 
         delete privmsg;
     }
@@ -617,11 +616,11 @@ TEST_F(TestTwitchMessageBuilder, IgnoresReplace)
                                                    emotes);
 
         EXPECT_EQ(message, test.expectedMessage)
-            << "Message not equal for input '" << test.input.toStdString()
-            << "' - expected: '" << test.expectedMessage.toStdString()
-            << "' got: '" << message.toStdString() << "'";
+            << "Message not equal for input '" << test.input
+            << "' - expected: '" << test.expectedMessage << "' got: '"
+            << message << "'";
         EXPECT_EQ(emotes, test.expectedTwitchEmotes)
-            << "Twitch emotes not equal for input '" << test.input.toStdString()
-            << "' and output '" << message.toStdString() << "'";
+            << "Twitch emotes not equal for input '" << test.input
+            << "' and output '" << message << "'";
     }
 }

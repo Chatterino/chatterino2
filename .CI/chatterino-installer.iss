@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Chatterino"
-#define MyAppVersion "2.4.6"
+#define MyAppVersion "2.5.1"
 #define MyAppPublisher "Chatterino Team"
 #define MyAppURL "https://www.chatterino.com"
 #define MyAppExeName "chatterino.exe"
@@ -120,15 +120,15 @@ begin
     Result := VCRTVersion + ' is installed';
 end;
 
-// Checks if a new VCRT is needed by comparing the builds.
+// Checks if a new VCRT is needed by comparing the minor version (the major one is locked at 14).
 function NeedsNewVCRT(): Boolean;
 var
   VCRTBuild: Cardinal;
 begin
   Result := True;
-  if RegQueryDWordValue(HKEY_LOCAL_MACHINE, 'SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64', 'Bld', VCRTBuild) then
+  if RegQueryDWordValue(HKEY_LOCAL_MACHINE, 'SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64', 'Minor', VCRTBuild) then
   begin
-    if VCRTBuild >= {#SHIPPED_VCRT_BUILD} then
+    if VCRTBuild >= {#SHIPPED_VCRT_MINOR} then
         Result := False;
   end;
 end;

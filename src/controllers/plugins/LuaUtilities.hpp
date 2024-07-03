@@ -28,6 +28,7 @@ namespace chatterino::lua {
 
 namespace api {
     struct CompletionList;
+    struct CompletionEvent;
 }  // namespace api
 
 constexpr int ERROR_BAD_PEEK = LUA_OK - 1;
@@ -66,6 +67,7 @@ StackIdx push(lua_State *L, const QString &str);
 StackIdx push(lua_State *L, const std::string &str);
 StackIdx push(lua_State *L, const bool &b);
 StackIdx push(lua_State *L, const int &b);
+StackIdx push(lua_State *L, const api::CompletionEvent &ev);
 
 // returns OK?
 bool peek(lua_State *L, int *out, StackIdx idx = -1);

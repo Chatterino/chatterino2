@@ -26,4 +26,5 @@ jobs:
           echo "Running bump-cask-pr for cask '$C2_CASK_NAME' and version '$C2_TAGGED_VERSION'"
           C2_TAGGED_VERSION_STRIPPED="${C2_TAGGED_VERSION:1}"
           echo "Stripped version: '$C2_TAGGED_VERSION_STRIPPED'"
+          brew developer on
           brew bump-cask-pr --version "$C2_TAGGED_VERSION_STRIPPED" "$C2_CASK_NAME"

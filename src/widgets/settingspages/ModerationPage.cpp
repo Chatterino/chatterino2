@@ -9,12 +9,16 @@
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
+#include "util/LoadPixmap.hpp"
+#include "util/PostToThread.hpp"
 #include "widgets/helper/EditableModelView.hpp"
+#include "widgets/helper/IconDelegate.hpp"
 
 #include <QFileDialog>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
+#include <QPixmap>
 #include <QPushButton>
 #include <QTableView>
 #include <QtConcurrent/QtConcurrent>
@@ -207,11 +211,51 @@ ModerationPage::ModerationPage()
                         ->initialized(&getSettings()->moderationActions))
                 .getElement();
 
-        view->setTitles({"Actions"});
+        view->setTitles({"Action", "Icon"});
         view->getTableView()->horizontalHeader()->setSectionResizeMode(
             QHeaderView::Fixed);
         view->getTableView()->horizontalHeader()->setSectionResizeMode(
             0, QHeaderView::Stretch);
+        view->getTableView()->setItemDelegateForColumn(
+            ModerationActionModel::Column::Icon, new IconDelegate(view));
+        QObject::connect(
+            view->getTableView(), &QTableView::clicked,
+            [this, view](const QModelIndex &clicked) {
+                if (clicked.column() == ModerationActionModel::Column::Icon)
+                {
+                    auto fileUrl = QFileDialog::getOpenFileUrl(
+                        this, "Open Image", QUrl(),
+                        "Image Files (*.png *.jpg *.jpeg)");
+                    view->getModel()->setData(clicked, fileUrl, Qt::UserRole);
+                    view->getModel()->setData(clicked, fileUrl.fileName(),
+                                              Qt::DisplayRole);
+                    // Clear the icon if the user canceled the dialog
+                    if (fileUrl.isEmpty())
+                    {
+                        view->getModel()->setData(clicked, QVariant(),
+                                                  Qt::DecorationRole);
+                    }
+                    else
+                    {
+                        // QPointer will be cleared when view is destroyed
+                        QPointer<EditableModelView> viewtemp = view;
+
+                        loadPixmapFromUrl(
+                            {fileUrl.toString()},
+                            [clicked, view = viewtemp](const QPixmap &pixmap) {
+                                postToThread([clicked, view, pixmap]() {
+                                    if (view.isNull())
+                                    {
+                                        return;
+                                    }
+
+                                    view->getModel()->setData(
+                                        clicked, pixmap, Qt::DecorationRole);
+                                });
+                            });
+                    }
+                }
+            });
 
         // We can safely ignore this signal connection since we own the view
         std::ignore = view->addButtonPressed.connect([] {

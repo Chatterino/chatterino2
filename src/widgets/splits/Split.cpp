@@ -272,7 +272,7 @@ Split::Split(QWidget *parent)
     std::ignore = this->view_->openChannelIn.connect(
         [this](QString twitchChannel, FromTwitchLinkOpenChannelIn openIn) {
             ChannelPtr channel =
-                getApp()->twitch->getOrAddChannel(twitchChannel);
+                getIApp()->getTwitchAbstract()->getOrAddChannel(twitchChannel);
             switch (openIn)
             {
                 case FromTwitchLinkOpenChannelIn::Split:
@@ -380,9 +380,23 @@ Split::Split(QWidget *parent)
 
     // this connection can be ignored since the SplitInput is owned by this Split
     std::ignore = this->input_->ui_.textEdit->imagePasted.connect(
-        [this](const QMimeData *source) {
+        [this](const QMimeData *original) {
             if (!getSettings()->imageUploaderEnabled)
             {
+                return;
+            }
+
+            auto channel = this->getChannel();
+            auto *imageUploader = getIApp()->getImageUploader();
+
+            auto [images, imageProcessError] =
+                imageUploader->getImages(original);
+            if (images.empty())
+            {
+                channel->addMessage(makeSystemMessage(
+                    QString(
+                        "An error occurred trying to process your image: %1")
+                        .arg(imageProcessError)));
                 return;
             }
 
@@ -427,9 +441,9 @@ Split::Split(QWidget *parent)
                     return;
                 }
             }
+
             QPointer<ResizingTextEdit> edit = this->input_->ui_.textEdit;
-            getIApp()->getImageUploader()->upload(source, this->getChannel(),
-                                                  edit);
+            imageUploader->upload(std::move(images), channel, edit);
         });
 
     getSettings()->imageUploaderEnabled.connect(
@@ -539,11 +553,11 @@ void Split::addShortcuts()
              auto &scrollbar = this->getChannelView().getScrollBar();
              if (direction == "up")
              {
-                 scrollbar.offset(-scrollbar.getLargeChange());
+                 scrollbar.offset(-scrollbar.getPageSize());
              }
              else if (direction == "down")
              {
-                 scrollbar.offset(scrollbar.getLargeChange());
+                 scrollbar.offset(scrollbar.getPageSize());
              }
              else
              {
@@ -822,8 +836,7 @@ void Split::openChannelInBrowserPlayer(ChannelPtr channel)
     if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         QDesktopServices::openUrl(
-            "https://player.twitch.tv/?parent=twitch.tv&channel=" +
-            twitchChannel->getName());
+            QUrl(TWITCH_PLAYER_URL.arg(twitchChannel->getName())));
     }
 }
 

@@ -99,8 +99,8 @@ public:
      */
     void scrollToMessage(const MessagePtr &message);
 
-    QPoint emotePopupPos();
-    void setEmotePopupPos(QPoint pos);
+    QRect emotePopupBounds() const;
+    void setEmotePopupBounds(QRect bounds);
 
     void initialize(Settings &settings, const Paths &paths) override;
     void save() override;
@@ -154,7 +154,7 @@ private:
     bool initialized_ = false;
     bool shuttingDown_ = false;
 
-    QPoint emotePopupPos_;
+    QRect emotePopupBounds_;
 
     std::atomic<int> generation_{0};
 

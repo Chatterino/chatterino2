@@ -10,9 +10,8 @@
 #include "providers/twitch/TwitchBadge.hpp"  // for Badge
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "Test.hpp"
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include <QDebug>
 #include <QDir>
 #include <QFile>
@@ -216,11 +215,9 @@ protected:
                 input.originalMessage, input.flags);
 
             EXPECT_EQ(isMatch, expected.state)
-                << qUtf8Printable(input.senderName) << ": "
-                << qUtf8Printable(input.originalMessage);
+                << input.senderName << ": " << input.originalMessage;
             EXPECT_EQ(matchResult, expected.result)
-                << qUtf8Printable(input.senderName) << ": "
-                << qUtf8Printable(input.originalMessage);
+                << input.senderName << ": " << input.originalMessage;
         }
     }
 

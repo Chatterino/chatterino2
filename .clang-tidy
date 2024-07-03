@@ -22,6 +22,7 @@ Checks: "-*,
   -readability-magic-numbers,
   -performance-noexcept-move-constructor,
   -misc-non-private-member-variables-in-classes,
+  -misc-no-recursion,
   -cppcoreguidelines-non-private-member-variables-in-classes,
   -modernize-use-nodiscard,
   -modernize-use-trailing-return-type,
@@ -29,7 +30,8 @@ Checks: "-*,
   -readability-function-cognitive-complexity,
   -bugprone-easily-swappable-parameters,
   -cert-err58-cpp,
-  -modernize-avoid-c-arrays
+  -modernize-avoid-c-arrays,
+  -misc-include-cleaner
   "
 CheckOptions:
   - key: readability-identifier-naming.ClassCase

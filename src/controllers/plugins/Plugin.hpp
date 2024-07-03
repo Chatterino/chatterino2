@@ -2,12 +2,14 @@
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "Application.hpp"
+#    include "common/network/NetworkCommon.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/PluginPermission.hpp"
 
 #    include <QDir>
 #    include <QString>
+#    include <QUrl>
 #    include <semver/semver.hpp>
 
 #    include <unordered_map>
@@ -98,8 +100,8 @@ public:
 
     // Note: The CallbackFunction object's destructor will remove the function from the lua stack
     using LuaCompletionCallback =
-        lua::CallbackFunction<lua::api::CompletionList, QString, QString, int,
-                              bool>;
+        lua::CallbackFunction<lua::api::CompletionList,
+                              lua::api::CompletionEvent>;
     std::optional<LuaCompletionCallback> getCompletionCallback()
     {
         if (this->state_ == nullptr || !this->error_.isNull())
@@ -123,7 +125,7 @@ public:
 
         // move
         return std::make_optional<lua::CallbackFunction<
-            lua::api::CompletionList, QString, QString, int, bool>>(
+            lua::api::CompletionList, lua::api::CompletionEvent>>(
             this->state_, lua_gettop(this->state_));
     }
 
@@ -139,6 +141,7 @@ public:
     void removeTimeout(QTimer *timer);
 
     bool hasFSPermissionFor(bool write, const QString &path);
+    bool hasHTTPPermissionFor(const QUrl &url);
 
 private:
     QDir loadDirectory_;

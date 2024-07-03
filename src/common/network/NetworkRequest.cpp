@@ -98,6 +98,13 @@ NetworkRequest NetworkRequest::header(QNetworkRequest::KnownHeaders header,
     return std::move(*this);
 }
 
+NetworkRequest NetworkRequest::header(const QByteArray &headerName,
+                                      const QByteArray &value) &&
+{
+    this->data->request.setRawHeader(headerName, value);
+    return std::move(*this);
+}
+
 NetworkRequest NetworkRequest::headerList(
     const std::vector<std::pair<QByteArray, QByteArray>> &headers) &&
 {

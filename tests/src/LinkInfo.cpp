@@ -2,8 +2,7 @@
 
 #include "common/Literals.hpp"
 #include "SignalSpy.hpp"
-
-#include <gtest/gtest.h>
+#include "Test.hpp"
 
 using namespace chatterino;
 using namespace literals;
