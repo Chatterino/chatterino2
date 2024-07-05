@@ -16,7 +16,7 @@
 - Minor: Added drop indicator line while dragging in tables. (#5256)
 - Minor: Add channel points indication for new bits power-up redemptions. (#5471)
 - Minor: Added `/warn <username> <reason>` command for mods. This prevents the user from chatting until they acknowledge the warning. (#5474)
-- Minor: Introduce HTTP API for plugins. (#5383)
+- Minor: Introduce HTTP API for plugins. (#5383, #5492)
 - Bugfix: Fixed tab move animation occasionally failing to start after closing a tab. (#5426)
 - Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
 - Bugfix: Fixed restricted users usernames not being clickable. (#5405)
