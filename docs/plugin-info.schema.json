@@ -51,7 +51,7 @@
         "type": "object",
         "properties": {
           "type": {
-            "enum": ["FilesystemRead", "FilesystemWrite"]
+            "enum": ["FilesystemRead", "FilesystemWrite", "Network"]
           }
         }
       }
