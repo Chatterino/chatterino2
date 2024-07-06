@@ -10,13 +10,6 @@ namespace chatterino::lua::api {
 // NOLINTBEGIN(readability-identifier-naming)
 
 /**
- * @lua@class HTTPResponse
- * @lua@field data string Data received from the server
- * @lua@field status integer? HTTP Status code returned by the server
- * @lua@field error string A somewhat human readable description of an error if such happened
- */
-
-/**
  * @lua@alias HTTPCallback fun(result: HTTPResponse): nil
  */
 
