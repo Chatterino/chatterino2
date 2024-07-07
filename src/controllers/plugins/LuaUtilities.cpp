@@ -266,5 +266,29 @@ QString toString(lua_State *L, StackIdx idx)
     const auto *ptr = luaL_tolstring(L, idx, &len);
     return QString::fromUtf8(ptr, int(len));
 }
+
+void PeekResult::throwAsLuaError(lua_State *L)
+{
+    // Note that this uses lua buffers to ensure deallocation of the error string
+    luaL_Buffer buf;
+    luaL_buffinit(L, &buf);
+    bool first = true;
+    for (const auto &s : this->errorReason)
+    {
+        if (!first)
+        {
+            luaL_addchar(&buf, '\n');
+        }
+        first = false;
+        luaL_addstring(&buf, s.toStdString().c_str());
+    }
+    // Remove our copy
+    this->errorReason.clear();
+
+    luaL_pushresult(&buf);
+    lua_error(L);  // This call never returns
+    assert(false && "unreachable");
+}
+
 }  // namespace chatterino::lua
 #endif

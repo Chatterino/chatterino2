@@ -69,6 +69,22 @@ StackIdx push(lua_State *L, const bool &b);
 StackIdx push(lua_State *L, const int &b);
 StackIdx push(lua_State *L, const api::CompletionEvent &ev);
 
+struct PeekResult {
+    bool ok = true;
+    std::vector<QString> errorReason = {};
+
+    operator bool() const
+    {
+        return this->ok;
+    }
+
+    /**
+     * Combines errorReason into a single string and then calls luaL_error.
+     * As luaL_error never returns this function does not either.
+     */
+    [[noreturn]] void throwAsLuaError(lua_State *L);
+};
+
 // returns OK?
 bool peek(lua_State *L, int *out, StackIdx idx = -1);
 bool peek(lua_State *L, bool *out, StackIdx idx = -1);
