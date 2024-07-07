@@ -36,6 +36,7 @@
 - Dev: Refactor `TwitchIrcServer`, making it abstracted. (#5421, #5435)
 - Dev: Reduced the amount of scale events. (#5404, #5406)
 - Dev: Removed unused timegate settings. (#5361)
+- Dev: Add `Channel::addSystemMessage` helper function, allowing us to avoid the common `channel->addMessage(makeSystemMessage(...));` pattern. (#5500)
 - Dev: Unsingletonize `Resources2`. (#5460)
 - Dev: All Lua globals now show in the `c2` global in the LuaLS metadata. (#5385)
 - Dev: Images are now loaded in worker threads. (#5431)
