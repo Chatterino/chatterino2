@@ -930,7 +930,8 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
                         QLocale().toString(QDate::currentDate(),
                                            QLocale::LongFormat),
                         QTime(0, 0));
-                    this->channel_->addMessage(msg);
+                    // TODO: Verify
+                    this->channel_->addMessage(msg, MessageContext::Original);
                 }
                 // When the message was received in the underlyingChannel,
                 // logging will be handled. Prevent duplications.
@@ -944,7 +945,9 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
                     overridingFlags->set(MessageFlag::DoNotLog);
                 }
 
-                this->channel_->addMessage(message, overridingFlags);
+                // TODO: Verify
+                this->channel_->addMessage(message, MessageContext::Repost,
+                                           overridingFlags);
             }
         });
 
@@ -1017,7 +1020,8 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
             overrideFlags->set(MessageFlag::DoNotLog);
         }
 
-        this->channel_->addMessage(msg, overrideFlags);
+        // TODO: Verify
+        this->channel_->addMessage(msg, MessageContext::Repost, overrideFlags);
 
         nMessagesAdded++;
         if (this->showScrollbarHighlights())

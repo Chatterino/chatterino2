@@ -28,6 +28,14 @@ enum class TimeoutStackStyle : int {
     Default = DontStackBeyondUserMessage,
 };
 
+/// Context of the message being added to a channel
+enum class MessageContext {
+    /// This message is the original
+    Original,
+    /// This message is a repost of a message that has already been added in a channel
+    Repost,
+};
+
 class Channel : public std::enable_shared_from_this<Channel>
 {
 public:
@@ -69,6 +77,7 @@ public:
 
     Type getType() const;
     const QString &getName() const;
+    QString getPlatform() const;
     virtual const QString &getDisplayName() const;
     virtual const QString &getLocalizedName() const;
     bool isTwitchChannel() const;
@@ -79,7 +88,7 @@ public:
     // overridingFlags can be filled in with flags that should be used instead
     // of the message's flags. This is useful in case a flag is specific to a
     // type of split
-    void addMessage(MessagePtr message,
+    void addMessage(MessagePtr message, MessageContext context,
                     std::optional<MessageFlags> overridingFlags = std::nullopt);
     void addMessagesAtStart(const std::vector<MessagePtr> &messages_);
 

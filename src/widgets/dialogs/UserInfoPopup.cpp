@@ -112,12 +112,9 @@ namespace {
         {
             MessagePtr message = snapshot[i];
 
-            auto overrideFlags = std::optional<MessageFlags>(message->flags);
-            overrideFlags->set(MessageFlag::DoNotLog);
-
             if (checkMessageUserName(userName, message))
             {
-                channelPtr->addMessage(message, overrideFlags);
+                channelPtr->addMessage(message, MessageContext::Repost);
             }
         }
 
@@ -787,7 +784,7 @@ void UserInfoPopup::updateLatestMessages()
                     {
                         // display message in ChannelView
                         this->ui_.latestMessages->channel()->addMessage(
-                            message);
+                            message, MessageContext::Repost);
                     }
                     else
                     {

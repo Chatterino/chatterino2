@@ -239,7 +239,7 @@ void ImageUploader::handleSuccessfulUpload(const NetworkResult &result,
     auto timeToUpload = this->uploadQueue_.size() * (UPLOAD_DELAY / 1000 + 1);
     MessageBuilder builder(imageUploaderResultMessage, link, deletionLink,
                            this->uploadQueue_.size(), timeToUpload);
-    channel->addMessage(builder.release());
+    channel->addMessage(builder.release(), MessageContext::Original);
     if (this->uploadQueue_.empty())
     {
         this->uploadMutex_.unlock();

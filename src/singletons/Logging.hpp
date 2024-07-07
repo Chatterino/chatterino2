@@ -1,7 +1,9 @@
 #pragma once
 
+#include "common/Channel.hpp"
 #include "util/QStringHash.hpp"
 #include "util/ThreadGuard.hpp"
+#include "widgets/helper/ChannelView.hpp"
 
 #include <QString>
 
@@ -22,7 +24,9 @@ public:
     virtual ~ILogging() = default;
 
     virtual void addMessage(const QString &channelName, MessagePtr message,
-                            const QString &platformName) = 0;
+                            const QString &platformName,
+                            std::optional<MessageFlags> overridingFlags,
+                            MessageContext context) = 0;
 };
 
 class Logging : public ILogging
@@ -31,7 +35,9 @@ public:
     Logging(Settings &settings);
 
     void addMessage(const QString &channelName, MessagePtr message,
-                    const QString &platformName) override;
+                    const QString &platformName,
+                    std::optional<MessageFlags> overridingFlags,
+                    MessageContext context) override;
 
 private:
     using PlatformName = QString;

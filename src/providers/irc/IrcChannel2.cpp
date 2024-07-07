@@ -70,7 +70,7 @@ void IrcChannel::sendMessage(const QString &message)
             builder.message().messageText = message;
             builder.message().searchText = username + ": " + message;
 
-            this->addMessage(builder.release());
+            this->addMessage(builder.release(), MessageContext::Original);
         }
         else
         {
@@ -79,7 +79,7 @@ void IrcChannel::sendMessage(const QString &message)
     }
 }
 
-IrcServer *IrcChannel::server()
+IrcServer *IrcChannel::server() const
 {
     assertInGuiThread();
 

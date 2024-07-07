@@ -664,7 +664,7 @@ void Application::initPubSub()
             postToThread([chan, action] {
                 MessageBuilder msg(action);
                 msg->flags.set(MessageFlag::PubSub);
-                chan->addMessage(msg.release());
+                chan->addMessage(msg.release(), MessageContext::Original);
             });
         });
 
@@ -703,7 +703,7 @@ void Application::initPubSub()
                 }
                 if (!replaced)
                 {
-                    chan->addMessage(msg);
+                    chan->addMessage(msg, MessageContext::Original);
                 }
             });
         });
@@ -720,7 +720,7 @@ void Application::initPubSub()
             auto msg = MessageBuilder(action).release();
 
             postToThread([chan, msg] {
-                chan->addMessage(msg);
+                chan->addMessage(msg, MessageContext::Original);
             });
         });
 
@@ -770,8 +770,10 @@ void Application::initPubSub()
                         TwitchMessageBuilder::makeLowTrustUserMessage(
                             action, twitchChannel->getName(),
                             twitchChannel.get());
-                    twitchChannel->addMessage(p.first);
-                    twitchChannel->addMessage(p.second);
+                    twitchChannel->addMessage(p.first,
+                                              MessageContext::Original);
+                    twitchChannel->addMessage(p.second,
+                                              MessageContext::Original);
                 });
             });
 
@@ -809,7 +811,7 @@ void Application::initPubSub()
                 postToThread([chan, action] {
                     auto msg =
                         TwitchMessageBuilder::makeLowTrustUpdateMessage(action);
-                    chan->addMessage(msg);
+                    chan->addMessage(msg, MessageContext::Original);
                 });
             });
 
@@ -891,28 +893,41 @@ void Application::initPubSub()
                             const auto p =
                                 TwitchMessageBuilder::makeAutomodMessage(
                                     action, chan->getName());
-                            chan->addMessage(p.first);
-                            chan->addMessage(p.second);
+                            chan->addMessage(p.first, MessageContext::Original);
+                            chan->addMessage(p.second,
+                                             MessageContext::Original);
 
                             getIApp()
                                 ->getTwitch()
                                 ->getAutomodChannel()
-                                ->addMessage(p.first);
+                                ->addMessage(
+                                    p.first,
+                                    MessageContext::
+                                        Original);  // is this original?
                             getIApp()
                                 ->getTwitch()
                                 ->getAutomodChannel()
-                                ->addMessage(p.second);
+                                ->addMessage(
+                                    p.second,
+                                    MessageContext::
+                                        Original);  // is this original?
 
                             if (getSettings()->showAutomodInMentions)
                             {
                                 getIApp()
                                     ->getTwitch()
                                     ->getMentionsChannel()
-                                    ->addMessage(p.first);
+                                    ->addMessage(
+                                        p.first,
+                                        MessageContext::
+                                            Original);  // is this original?
                                 getIApp()
                                     ->getTwitch()
                                     ->getMentionsChannel()
-                                    ->addMessage(p.second);
+                                    ->addMessage(
+                                        p.second,
+                                        MessageContext::
+                                            Original);  // is this original?
                             }
                         });
                     }
@@ -939,8 +954,8 @@ void Application::initPubSub()
             postToThread([chan, action] {
                 const auto p = TwitchMessageBuilder::makeAutomodMessage(
                     action, chan->getName());
-                chan->addMessage(p.first);
-                chan->addMessage(p.second);
+                chan->addMessage(p.first, MessageContext::Original);
+                chan->addMessage(p.second, MessageContext::Original);
             });
         });
 
@@ -961,7 +976,7 @@ void Application::initPubSub()
             auto msg = MessageBuilder(action).release();
 
             postToThread([chan, msg] {
-                chan->addMessage(msg);
+                chan->addMessage(msg, MessageContext::Original);
             });
             chan->deleteMessage(msg->id);
         });
@@ -978,7 +993,7 @@ void Application::initPubSub()
             postToThread([chan, action] {
                 const auto p =
                     TwitchMessageBuilder::makeAutomodInfoMessage(action);
-                chan->addMessage(p);
+                chan->addMessage(p, MessageContext::Original);
             });
         });
 

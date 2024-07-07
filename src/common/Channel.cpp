@@ -49,6 +49,34 @@ const QString &Channel::getName() const
     return this->name_;
 }
 
+QString Channel::getPlatform() const
+{
+    QString channelPlatform("other");
+    if (this->type_ == Type::Irc)
+    {
+        const auto *irc = dynamic_cast<const IrcChannel *>(this);
+        if (irc != nullptr)
+        {
+            auto *ircServer = irc->server();
+            if (ircServer != nullptr)
+            {
+                channelPlatform = QString("irc-%1").arg(
+                    irc->server()->userFriendlyIdentifier());
+            }
+            else
+            {
+                channelPlatform = "irc-unknown";
+            }
+        }
+    }
+    else if (this->isTwitchChannel())
+    {
+        channelPlatform = "twitch";
+    }
+
+    return channelPlatform;
+}
+
 const QString &Channel::getDisplayName() const
 {
     return this->getName();
@@ -79,42 +107,13 @@ LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot()
     return this->messages_.getSnapshot();
 }
 
-void Channel::addMessage(MessagePtr message,
+void Channel::addMessage(MessagePtr message, MessageContext context,
                          std::optional<MessageFlags> overridingFlags)
 {
     MessagePtr deleted;
 
-    auto isDoNotLogSet =
-        (overridingFlags && overridingFlags->has(MessageFlag::DoNotLog)) ||
-        message->flags.has(MessageFlag::DoNotLog);
-
-    if (!isDoNotLogSet)
-    {
-        QString channelPlatform("other");
-        if (this->type_ == Type::Irc)
-        {
-            auto *irc = dynamic_cast<IrcChannel *>(this);
-            if (irc != nullptr)
-            {
-                auto *ircServer = irc->server();
-                if (ircServer != nullptr)
-                {
-                    channelPlatform = QString("irc-%1").arg(
-                        irc->server()->userFriendlyIdentifier());
-                }
-                else
-                {
-                    channelPlatform = "irc-unknown";
-                }
-            }
-        }
-        else if (this->isTwitchChannel())
-        {
-            channelPlatform = "twitch";
-        }
-        getIApp()->getChatLogger()->addMessage(this->name_, message,
-                                               channelPlatform);
-    }
+    getIApp()->getChatLogger()->addMessage(
+        this->name_, message, this->getPlatform(), overridingFlags, context);
 
     if (this->messages_.pushBack(message, deleted))
     {
@@ -127,7 +126,7 @@ void Channel::addMessage(MessagePtr message,
 void Channel::addSystemMessage(const QString &contents)
 {
     auto msg = makeSystemMessage(contents);
-    this->addMessage(msg);
+    this->addMessage(msg, MessageContext::Original);
 }
 
 void Channel::addOrReplaceTimeout(MessagePtr message)
@@ -138,7 +137,7 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
             this->replaceMessage(msg, replacement);
         },
         [this](auto msg) {
-            this->addMessage(msg);
+            this->addMessage(msg, MessageContext::Original);
         },
         true);
 

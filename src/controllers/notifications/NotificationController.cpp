@@ -202,7 +202,8 @@ void NotificationController::checkStream(bool live, QString channelName)
     }
     MessageBuilder builder;
     TwitchMessageBuilder::liveMessage(channelName, &builder);
-    getIApp()->getTwitch()->getLiveChannel()->addMessage(builder.release());
+    getIApp()->getTwitch()->getLiveChannel()->addMessage(
+        builder.release(), MessageContext::Original);
 
     // Indicate that we have pushed notifications for this stream
     fakeTwitchChannels.push_back(channelName);

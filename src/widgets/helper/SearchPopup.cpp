@@ -55,7 +55,8 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
             auto overrideFlags = std::optional<MessageFlags>(message->flags);
             overrideFlags->set(MessageFlag::DoNotLog);
 
-            channel->addMessage(message, overrideFlags);
+            // TODO: Verify
+            channel->addMessage(message, MessageContext::Repost, overrideFlags);
         }
     }
 

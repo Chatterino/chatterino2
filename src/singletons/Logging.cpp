@@ -1,5 +1,6 @@
 #include "singletons/Logging.hpp"
 
+#include "messages/Message.hpp"
 #include "singletons/helper/LoggingChannel.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
@@ -32,7 +33,9 @@ Logging::Logging(Settings &settings)
 }
 
 void Logging::addMessage(const QString &channelName, MessagePtr message,
-                         const QString &platformName)
+                         const QString &platformName,
+                         std::optional<MessageFlags> overridingFlags,
+                         MessageContext context)
 {
     this->threadGuard.guard();
 
@@ -47,6 +50,20 @@ void Logging::addMessage(const QString &channelName, MessagePtr message,
         {
             return;
         }
+    }
+
+    if (context == MessageContext::Repost)
+    {
+        return;
+    }
+
+    auto isDoNotLogSet =
+        (overridingFlags && overridingFlags->has(MessageFlag::DoNotLog)) ||
+        message->flags.has(MessageFlag::DoNotLog);
+
+    if (isDoNotLogSet)
+    {
+        return;
     }
 
     auto platIt = this->loggingChannels_.find(platformName);
