@@ -420,14 +420,6 @@ It returns something like: `"ConnectionRefusedError"`, `"401"`.
 This function returns the HTTP status code of the request or `nil` if there was
 an error before a status code could be received.
 
-```lua
-{
-    data = "This is the data received from the server as a string",
-    status = 200, -- HTTP status code returned by the server or nil if no response was received because of an error
-    error = "A somewhat human readable description of an error if such happened"
-}
-```
-
 #### `HTTPRequest`
 
 Allows you to send an HTTP request to a URL. Do not create requests that you
@@ -443,7 +435,7 @@ containing a valid URL (ex. `https://example.com/path/to/api`).
 ```lua
 local req = c2.HTTPRequest.create(c2.HTTPMethod.Get, "https://example.com")
 req:on_success(function (res)
-    print(res.data)
+    print(res:data())
 end)
 req:execute()
 ```
@@ -496,12 +488,12 @@ request:set_header("Content-Type", "text/plain")
 request:on_success(function (res)
     print('Success!')
     -- Data is in res.data
-    print(res.status)
+    print(res:status())
 end)
 request:on_error(function (res)
     print('Error!')
-    print(res.status)
-    print(res.error)
+    print(res:status())
+    print(res:error())
 end)
 request:finally(function ()
     print('Finally')
