@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Major: Add an Image Uploader tab to the Settings. (#4995)
 - Major: Release plugins alpha. (#5288)
 - Major: Improve high-DPI support on Windows. (#4868, #5391)
 - Minor: Add option to customise Moderation buttons with images. (#5369)

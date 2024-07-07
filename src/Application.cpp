@@ -18,7 +18,7 @@
 #include "providers/seventv/SeventvAPI.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
-#include "singletons/ImageUploader.hpp"
+#include "singletons/imageuploader/ImageUploader.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/PluginController.hpp"
 #endif
