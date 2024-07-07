@@ -64,8 +64,8 @@ void ImageUploader::logToFile(const QString &originalFilePath,
         logReadFile.open(QIODevice::ReadWrite | QIODevice::Text);
     if (!isLogFileOkay)
     {
-        channel->addMessage(makeSystemMessage(
-            QString("Failed to open log file with links at ") + logFileName));
+        channel->addSystemMessage(
+            QString("Failed to open log file with links at ") + logFileName);
         return;
     }
     auto logs = logReadFile.readAll();
@@ -197,7 +197,7 @@ void ImageUploader::handleFailedUpload(const NetworkResult &result,
         }
     }
 
-    channel->addMessage(makeSystemMessage(errorMessage));
+    channel->addSystemMessage(errorMessage);
     // NOTE: We abort any future uploads on failure. Should this be handled differently?
     while (!this->uploadQueue_.empty())
     {
@@ -376,8 +376,7 @@ void ImageUploader::upload(std::queue<RawImageData> images, ChannelPtr channel,
     BenchmarkGuard benchmarkGuard("upload");
     if (!this->uploadMutex_.tryLock())
     {
-        channel->addMessage(makeSystemMessage(
-            QString("Please wait until the upload finishes.")));
+        channel->addSystemMessage("Please wait until the upload finishes.");
         return;
     }
 
@@ -386,7 +385,7 @@ void ImageUploader::upload(std::queue<RawImageData> images, ChannelPtr channel,
 
     std::swap(this->uploadQueue_, images);
 
-    channel->addMessage(makeSystemMessage("Started upload..."));
+    channel->addSystemMessage("Started upload...");
 
     this->sendImageUploadRequest(this->uploadQueue_.front(), std::move(channel),
                                  std::move(outputTextEdit));

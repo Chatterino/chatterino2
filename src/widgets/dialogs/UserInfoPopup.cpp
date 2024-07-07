@@ -620,17 +620,17 @@ void UserInfoPopup::installEvents()
                     getIApp()->getAccounts()->twitch.getCurrent()->unblockUser(
                         this->userId_, this,
                         [this, reenableBlockCheckbox, currentUser] {
-                            this->channel_->addMessage(makeSystemMessage(
+                            this->channel_->addSystemMessage(
                                 QString("You successfully unblocked user %1")
-                                    .arg(this->userName_)));
+                                    .arg(this->userName_));
                             reenableBlockCheckbox();
                         },
                         [this, reenableBlockCheckbox] {
-                            this->channel_->addMessage(makeSystemMessage(
+                            this->channel_->addSystemMessage(
                                 QString(
                                     "User %1 couldn't be unblocked, an unknown "
                                     "error occurred!")
-                                    .arg(this->userName_)));
+                                    .arg(this->userName_));
                             reenableBlockCheckbox();
                         });
                 }
@@ -647,17 +647,17 @@ void UserInfoPopup::installEvents()
                     getIApp()->getAccounts()->twitch.getCurrent()->blockUser(
                         this->userId_, this,
                         [this, reenableBlockCheckbox, currentUser] {
-                            this->channel_->addMessage(makeSystemMessage(
+                            this->channel_->addSystemMessage(
                                 QString("You successfully blocked user %1")
-                                    .arg(this->userName_)));
+                                    .arg(this->userName_));
                             reenableBlockCheckbox();
                         },
                         [this, reenableBlockCheckbox] {
-                            this->channel_->addMessage(makeSystemMessage(
+                            this->channel_->addSystemMessage(
                                 QString(
                                     "User %1 couldn't be blocked, an unknown "
                                     "error occurred!")
-                                    .arg(this->userName_)));
+                                    .arg(this->userName_));
                             reenableBlockCheckbox();
                         });
                 }

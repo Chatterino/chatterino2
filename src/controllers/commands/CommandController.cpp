@@ -554,8 +554,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 
     if (!dryRun && channel->getType() == Channel::Type::TwitchWhispers)
     {
-        channel->addMessage(
-            makeSystemMessage("Use /w <username> <message> to whisper"));
+        channel->addSystemMessage("Use /w <username> <message> to whisper");
         return "";
     }
 

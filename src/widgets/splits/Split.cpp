@@ -393,10 +393,10 @@ Split::Split(QWidget *parent)
                 imageUploader->getImages(original);
             if (images.empty())
             {
-                channel->addMessage(makeSystemMessage(
+                channel->addSystemMessage(
                     QString(
                         "An error occurred trying to process your image: %1")
-                        .arg(imageProcessError)));
+                        .arg(imageProcessError));
                 return;
             }
 
