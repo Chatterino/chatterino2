@@ -120,6 +120,12 @@ void Channel::addMessage(MessagePtr message,
     this->messageAppended.invoke(message, overridingFlags);
 }
 
+void Channel::addSystemMessage(const QString &contents)
+{
+    auto msg = makeSystemMessage(contents);
+    this->addMessage(msg);
+}
+
 void Channel::addOrReplaceTimeout(MessagePtr message)
 {
     addOrReplaceChannelTimeout(

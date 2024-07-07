@@ -84,10 +84,10 @@ void IrcServer::initializeConnectionSignals(IrcConnection *connection,
             {
                 if (auto shared = weak.lock())
                 {
-                    shared->addMessage(makeSystemMessage(
+                    shared->addSystemMessage(
                         QStringLiteral("Socket error: ") +
                         QAbstractSocket::staticMetaObject.enumerator(index)
-                            .valueToKey(error)));
+                            .valueToKey(error));
                 }
             }
         });
@@ -270,7 +270,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
                 {
                     if (message->nick() == this->data_->nick)
                     {
-                        shared->addMessage(makeSystemMessage("joined"));
+                        shared->addSystemMessage("joined");
                     }
                     else
                     {
@@ -295,7 +295,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
                 {
                     if (message->nick() == this->data_->nick)
                     {
-                        shared->addMessage(makeSystemMessage("parted"));
+                        shared->addSystemMessage("parted");
                     }
                     else
                     {

@@ -83,6 +83,8 @@ public:
                     std::optional<MessageFlags> overridingFlags = std::nullopt);
     void addMessagesAtStart(const std::vector<MessagePtr> &messages_);
 
+    void addSystemMessage(const QString &contents);
+
     /// Inserts the given messages in order by Message::serverReceivedTime.
     void fillInMissingMessages(const std::vector<MessagePtr> &messages);
 
