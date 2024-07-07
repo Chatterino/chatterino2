@@ -246,12 +246,12 @@ QString marker(const CommandContext &ctx)
         [channel{ctx.channel},
          arguments](const HelixStreamMarker &streamMarker) {
             channel->addSystemMessage(
-                (QString("Successfully added a stream marker at %1%2")
-                     .arg(formatTime(streamMarker.positionSeconds))
-                     .arg(streamMarker.description.isEmpty()
-                              ? ""
-                              : QString(": \"%1\"")
-                                    .arg(streamMarker.description))));
+                QString("Successfully added a stream marker at %1%2")
+                    .arg(formatTime(streamMarker.positionSeconds))
+                    .arg(streamMarker.description.isEmpty()
+                             ? ""
+                             : QString(": \"%1\"")
+                                   .arg(streamMarker.description)));
         },
         [channel{ctx.channel}](auto error) {
             QString errorMessage("Failed to create stream marker - ");
