@@ -21,22 +21,21 @@ QString addVIP(const CommandContext &ctx)
     if (ctx.twitchChannel == nullptr)
     {
         ctx.channel->addSystemMessage(
-            ("The /vip command only works in Twitch channels."));
+            "The /vip command only works in Twitch channels.");
         return "";
     }
     if (ctx.words.size() < 2)
     {
         ctx.channel->addSystemMessage(
-            ("Usage: \"/vip <username>\" - Grant VIP status to a user. Use "
-             "\"/vips\" to list the VIPs of this channel."));
+            "Usage: \"/vip <username>\" - Grant VIP status to a user. Use "
+            "\"/vips\" to list the VIPs of this channel.");
         return "";
     }
 
     auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
-        ctx.channel->addSystemMessage(
-            ("You must be logged in to VIP someone!"));
+        ctx.channel->addSystemMessage("You must be logged in to VIP someone!");
         return "";
     }
 
@@ -51,8 +50,8 @@ QString addVIP(const CommandContext &ctx)
                 twitchChannel->roomId(), targetUser.id,
                 [channel, targetUser] {
                     channel->addSystemMessage(
-                        (QString("You have added %1 as a VIP of this channel.")
-                             .arg(targetUser.displayName)));
+                        QString("You have added %1 as a VIP of this channel.")
+                            .arg(targetUser.displayName));
                 },
                 [channel, targetUser](auto error, auto message) {
                     QString errorMessage = QString("Failed to add VIP - ");
@@ -95,13 +94,13 @@ QString addVIP(const CommandContext &ctx)
                         }
                         break;
                     }
-                    channel->addSystemMessage((errorMessage));
+                    channel->addSystemMessage(errorMessage);
                 });
         },
         [channel{ctx.channel}, target] {
             // Equivalent error from IRC
             channel->addSystemMessage(
-                (QString("Invalid username: %1").arg(target)));
+                QString("Invalid username: %1").arg(target));
         });
 
     return "";
