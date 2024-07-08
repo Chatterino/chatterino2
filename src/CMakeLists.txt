@@ -947,6 +947,10 @@ set_target_properties(${LIBRARY_PROJECT}
 # this is its own project.
 set(VERSION_SOURCE_FILES common/Version.cpp common/Version.hpp)
 add_library(${VERSION_PROJECT} STATIC ${VERSION_SOURCE_FILES})
+target_compile_definitions(${VERSION_PROJECT} PRIVATE
+    $<$<BOOL:${WIN32}>:USEWINSDK>
+    $<$<BOOL:${BUILD_WITH_CRASHPAD}>:CHATTERINO_WITH_CRASHPAD>
+)
 
 # source group for IDEs
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${VERSION_SOURCE_FILES})
