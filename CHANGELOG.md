@@ -45,6 +45,7 @@
 - Dev: Refactor/unsingletonize `UserDataController`. (#5459)
 - Dev: Cleanup `BrowserExtension`. (#5465)
 - Dev: Deprecate Qt 5.12. (#5396)
+- Dev: The running Qt version is now shown in the about page if it differs from the compiled version. (#5501)
 
 ## 2.5.1
 
