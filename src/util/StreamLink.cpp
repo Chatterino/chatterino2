@@ -194,8 +194,8 @@ void openStreamlinkForChannel(const QString &channel)
         auto *currentSplit = currentPage->getSelectedSplit();
         if (currentSplit != nullptr)
         {
-            currentSplit->getChannel()->addMessage(
-                makeSystemMessage(INFO_TEMPLATE.arg(channel)));
+            currentSplit->getChannel()->addSystemMessage(
+                INFO_TEMPLATE.arg(channel));
         }
     }
 

@@ -1,6 +1,7 @@
 #include "Application.hpp"
 
 #include "common/Args.hpp"
+#include "common/Channel.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -274,10 +275,10 @@ void Application::initialize(Settings &settings, const Paths &paths)
                 {
                     if (auto channel = split->getChannel(); !channel->isEmpty())
                     {
-                        channel->addMessage(makeSystemMessage(
+                        channel->addSystemMessage(
                             "Chatterino unexpectedly crashed and restarted. "
                             "You can disable automatic restarts in the "
-                            "settings."));
+                            "settings.");
                     }
                 }
             }
@@ -625,9 +626,8 @@ void Application::initPubSub()
             QString text =
                 QString("%1 cleared the chat.").arg(action.source.login);
 
-            auto msg = makeSystemMessage(text);
-            postToThread([chan, msg] {
-                chan->addMessage(msg);
+            postToThread([chan, text] {
+                chan->addSystemMessage(text);
             });
         });
 
@@ -651,9 +651,8 @@ void Application::initPubSub()
                 text += QString(" (%1 seconds)").arg(action.duration);
             }
 
-            auto msg = makeSystemMessage(text);
-            postToThread([chan, msg] {
-                chan->addMessage(msg);
+            postToThread([chan, text] {
+                chan->addSystemMessage(text);
             });
         });
 
@@ -672,9 +671,8 @@ void Application::initPubSub()
                             (action.modded ? "modded" : "unmodded"),
                             action.target.login);
 
-            auto msg = makeSystemMessage(text);
-            postToThread([chan, msg] {
-                chan->addMessage(msg);
+            postToThread([chan, text] {
+                chan->addSystemMessage(text);
             });
         });
 

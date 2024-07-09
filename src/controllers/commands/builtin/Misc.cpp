@@ -5,7 +5,6 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "controllers/userdata/UserDataController.hpp"
-#include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -39,10 +38,10 @@ QString follow(const CommandContext &ctx)
     {
         return "";
     }
-    ctx.channel->addMessage(makeSystemMessage(
+    ctx.channel->addSystemMessage(
         "Twitch has removed the ability to follow users through "
         "third-party applications. For more information, see "
-        "https://github.com/Chatterino/chatterino2/issues/3076"));
+        "https://github.com/Chatterino/chatterino2/issues/3076");
     return "";
 }
 
@@ -52,10 +51,10 @@ QString unfollow(const CommandContext &ctx)
     {
         return "";
     }
-    ctx.channel->addMessage(makeSystemMessage(
+    ctx.channel->addSystemMessage(
         "Twitch has removed the ability to unfollow users through "
         "third-party applications. For more information, see "
-        "https://github.com/Chatterino/chatterino2/issues/3076"));
+        "https://github.com/Chatterino/chatterino2/issues/3076");
     return "";
 }
 
@@ -68,8 +67,8 @@ QString uptime(const CommandContext &ctx)
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /uptime command only works in Twitch Channels."));
+        ctx.channel->addSystemMessage(
+            "The /uptime command only works in Twitch Channels.");
         return "";
     }
 
@@ -78,7 +77,7 @@ QString uptime(const CommandContext &ctx)
     QString messageText =
         streamStatus->live ? streamStatus->uptime : "Channel is not live.";
 
-    ctx.channel->addMessage(makeSystemMessage(messageText));
+    ctx.channel->addSystemMessage(messageText);
 
     return "";
 }
@@ -92,8 +91,7 @@ QString user(const CommandContext &ctx)
 
     if (ctx.words.size() < 2)
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("Usage: /user <user> [channel]"));
+        ctx.channel->addSystemMessage("Usage: /user <user> [channel]");
         return "";
     }
     QString userName = ctx.words[1];
@@ -129,11 +127,11 @@ QString requests(const CommandContext &ctx)
         }
         else
         {
-            ctx.channel->addMessage(makeSystemMessage(
+            ctx.channel->addSystemMessage(
                 "Usage: /requests [channel]. You can also use the command "
                 "without arguments in any Twitch channel to open its "
                 "channel points requests queue. Only the broadcaster and "
-                "moderators have permission to view the queue."));
+                "moderators have permission to view the queue.");
             return "";
         }
     }
@@ -163,11 +161,11 @@ QString lowtrust(const CommandContext &ctx)
         }
         else
         {
-            ctx.channel->addMessage(makeSystemMessage(
+            ctx.channel->addSystemMessage(
                 "Usage: /lowtrust [channel]. You can also use the command "
                 "without arguments in any Twitch channel to open its "
                 "suspicious user activity feed. Only the broadcaster and "
-                "moderators have permission to view this feed."));
+                "moderators have permission to view this feed.");
             return "";
         }
     }
@@ -190,15 +188,15 @@ QString clip(const CommandContext &ctx)
     if (const auto type = ctx.channel->getType();
         type != Channel::Type::Twitch && type != Channel::Type::TwitchWatching)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /clip command only works in Twitch Channels."));
+        ctx.channel->addSystemMessage(
+            "The /clip command only works in Twitch Channels.");
         return "";
     }
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /clip command only works in Twitch Channels."));
+        ctx.channel->addSystemMessage(
+            "The /clip command only works in Twitch Channels.");
         return "";
     }
 
@@ -216,25 +214,25 @@ QString marker(const CommandContext &ctx)
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /marker command only works in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "The /marker command only works in Twitch channels.");
         return "";
     }
 
     // Avoid Helix calls without Client ID and/or OAuth Token
     if (getIApp()->getAccounts()->twitch.getCurrent()->isAnon())
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "You need to be logged in to create stream markers!"));
+        ctx.channel->addSystemMessage(
+            "You need to be logged in to create stream markers!");
         return "";
     }
 
     // Exact same message as in webchat
     if (!ctx.twitchChannel->isLive())
     {
-        ctx.channel->addMessage(makeSystemMessage(
+        ctx.channel->addSystemMessage(
             "You can only add stream markers during live streams. Try "
-            "again when the channel is live streaming."));
+            "again when the channel is live streaming.");
         return "";
     }
 
@@ -247,13 +245,13 @@ QString marker(const CommandContext &ctx)
         ctx.twitchChannel->roomId(), arguments.join(" ").left(140),
         [channel{ctx.channel},
          arguments](const HelixStreamMarker &streamMarker) {
-            channel->addMessage(makeSystemMessage(
+            channel->addSystemMessage(
                 QString("Successfully added a stream marker at %1%2")
                     .arg(formatTime(streamMarker.positionSeconds))
                     .arg(streamMarker.description.isEmpty()
                              ? ""
                              : QString(": \"%1\"")
-                                   .arg(streamMarker.description))));
+                                   .arg(streamMarker.description)));
         },
         [channel{ctx.channel}](auto error) {
             QString errorMessage("Failed to create stream marker - ");
@@ -279,7 +277,7 @@ QString marker(const CommandContext &ctx)
                 break;
             }
 
-            channel->addMessage(makeSystemMessage(errorMessage));
+            channel->addSystemMessage(errorMessage);
         });
 
     return "";
@@ -303,10 +301,10 @@ QString streamlink(const CommandContext &ctx)
         }
         else
         {
-            ctx.channel->addMessage(makeSystemMessage(
+            ctx.channel->addSystemMessage(
                 "/streamlink [channel]. Open specified Twitch channel in "
                 "streamlink. If no channel argument is specified, open the "
-                "current Twitch channel instead."));
+                "current Twitch channel instead.");
             return "";
         }
     }
@@ -335,10 +333,10 @@ QString popout(const CommandContext &ctx)
         }
         else
         {
-            ctx.channel->addMessage(makeSystemMessage(
+            ctx.channel->addSystemMessage(
                 "Usage: /popout <channel>. You can also use the command "
                 "without arguments in any Twitch channel to open its "
-                "popout chat."));
+                "popout chat.");
             return "";
         }
     }
@@ -385,7 +383,7 @@ QString popup(const CommandContext &ctx)
             }
         }
 
-        ctx.channel->addMessage(makeSystemMessage(usageMessage));
+        ctx.channel->addSystemMessage(usageMessage);
         return "";
     }
 
@@ -401,11 +399,11 @@ QString clearmessages(const CommandContext &ctx)
 {
     (void)ctx;
 
-    auto *currentPage = dynamic_cast<SplitContainer *>(getIApp()
-                                                           ->getWindows()
-                                                           ->getMainWindow()
-                                                           .getNotebook()
-                                                           .getSelectedPage());
+    auto *currentPage = getIApp()
+                            ->getWindows()
+                            ->getLastSelectedWindow()
+                            ->getNotebook()
+                            .getSelectedPage();
 
     if (auto *split = currentPage->getSelectedSplit())
     {
@@ -469,8 +467,8 @@ QString openURL(const CommandContext &ctx)
     const auto &positionalArguments = parser.positionalArguments();
     if (positionalArguments.isEmpty())
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "Usage: /openurl <URL> [--incognito/--no-incognito]"));
+        ctx.channel->addSystemMessage(
+            "Usage: /openurl <URL> [--incognito/--no-incognito]");
         return "";
     }
     auto urlString = parser.positionalArguments().join(' ');
@@ -478,7 +476,7 @@ QString openURL(const CommandContext &ctx)
     QUrl url = QUrl::fromUserInput(urlString);
     if (!url.isValid())
     {
-        ctx.channel->addMessage(makeSystemMessage("Invalid URL specified."));
+        ctx.channel->addSystemMessage("Invalid URL specified.");
         return "";
     }
 
@@ -488,9 +486,9 @@ QString openURL(const CommandContext &ctx)
 
     if (forcePrivateMode && forceNonPrivateMode)
     {
-        ctx.channel->addMessage(makeSystemMessage(
+        ctx.channel->addSystemMessage(
             "Error: /openurl may only be called with --incognito or "
-            "--no-incognito, not both at the same time."));
+            "--no-incognito, not both at the same time.");
         return "";
     }
 
@@ -518,7 +516,7 @@ QString openURL(const CommandContext &ctx)
 
     if (!res)
     {
-        ctx.channel->addMessage(makeSystemMessage("Could not open URL."));
+        ctx.channel->addSystemMessage("Could not open URL.");
     }
 
     return "";
@@ -553,16 +551,16 @@ QString injectFakeMessage(const CommandContext &ctx)
 
     if (!ctx.channel->isTwitchChannel())
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /fakemsg command only works in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "The /fakemsg command only works in Twitch channels.");
         return "";
     }
 
     if (ctx.words.size() < 2)
     {
-        ctx.channel->addMessage(makeSystemMessage(
+        ctx.channel->addSystemMessage(
             "Usage: /fakemsg (raw irc text) - injects raw irc text as "
-            "if it was a message received from TMI"));
+            "if it was a message received from TMI");
         return "";
     }
 
@@ -583,9 +581,9 @@ QString injectStreamUpdateNoStream(const CommandContext &ctx)
     }
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("The /debug-update-to-no-stream command only "
-                              "works in Twitch channels"));
+        ctx.channel->addSystemMessage(
+            "The /debug-update-to-no-stream command only "
+            "works in Twitch channels");
         return "";
     }
 
@@ -602,9 +600,8 @@ QString copyToClipboard(const CommandContext &ctx)
 
     if (ctx.words.size() < 2)
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("Usage: /copy <text> - copies provided "
-                              "text to clipboard."));
+        ctx.channel->addSystemMessage("Usage: /copy <text> - copies provided "
+                                      "text to clipboard.");
         return "";
     }
 
@@ -621,15 +618,15 @@ QString unstableSetUserClientSideColor(const CommandContext &ctx)
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("The /unstable-set-user-color command only "
-                              "works in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "The /unstable-set-user-color command only "
+            "works in Twitch channels.");
         return "";
     }
     if (ctx.words.size() < 2)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            QString("Usage: %1 <TwitchUserID> [color]").arg(ctx.words.at(0))));
+        ctx.channel->addSystemMessage(
+            QString("Usage: %1 <TwitchUserID> [color]").arg(ctx.words.at(0)));
         return "";
     }
 
@@ -653,9 +650,8 @@ QString openUsercard(const CommandContext &ctx)
 
     if (ctx.words.size() < 2)
     {
-        channel->addMessage(
-            makeSystemMessage("Usage: /usercard <username> [channel] or "
-                              "/usercard id:<id> [channel]"));
+        channel->addSystemMessage("Usage: /usercard <username> [channel] or "
+                                  "/usercard id:<id> [channel]");
         return "";
     }
 
@@ -672,9 +668,9 @@ QString openUsercard(const CommandContext &ctx)
 
         if (channelTemp->isEmpty())
         {
-            channel->addMessage(makeSystemMessage(
+            channel->addSystemMessage(
                 "A usercard can only be displayed for a channel that is "
-                "currently opened in Chatterino."));
+                "currently opened in Chatterino.");
             return "";
         }
 

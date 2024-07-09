@@ -2,7 +2,6 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
-#include "common/Env.hpp"
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
@@ -220,7 +219,7 @@ TwitchChannel::TwitchChannel(const QString &name)
     // debugging
 #if 0
     for (int i = 0; i < 1000; i++) {
-        this->addMessage(makeSystemMessage("asef"));
+        this->addSystemMessage("asef");
     }
 #endif
 }
@@ -1015,9 +1014,9 @@ void TwitchChannel::updateSeventvUser(
                 if (auto shared = weak.lock())
                 {
                     this->seventvEmotes_.set(EMPTY_EMOTE_MAP);
-                    this->addMessage(makeSystemMessage(
+                    this->addSystemMessage(
                         QString("Failed updating 7TV emote set (%1).")
-                            .arg(reason)));
+                            .arg(reason));
                 }
             });
         });
@@ -1515,7 +1514,7 @@ void TwitchChannel::refreshBadges()
                 break;
             }
 
-            this->addMessage(makeSystemMessage(errorMessage));
+            this->addSystemMessage(errorMessage);
         });
 }
 
@@ -1603,8 +1602,8 @@ void TwitchChannel::createClip()
 {
     if (!this->isLive())
     {
-        this->addMessage(makeSystemMessage(
-            "Cannot create clip while the channel is offline!"));
+        this->addSystemMessage(
+            "Cannot create clip while the channel is offline!");
         return;
     }
 
@@ -1619,7 +1618,7 @@ void TwitchChannel::createClip()
         return;
     }
 
-    this->addMessage(makeSystemMessage("Creating clip..."));
+    this->addSystemMessage("Creating clip...");
     this->isClipCreationInProgress = true;
 
     getHelix()->createClip(

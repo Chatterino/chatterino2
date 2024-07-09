@@ -208,16 +208,15 @@ QString sendWhisper(const CommandContext &ctx)
 
     if (ctx.words.size() < 3)
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("Usage: /w <username> <message>"));
+        ctx.channel->addSystemMessage("Usage: /w <username> <message>");
         return "";
     }
 
     auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("You must be logged in to send a whisper!"));
+        ctx.channel->addSystemMessage(
+            "You must be logged in to send a whisper!");
         return "";
     }
     auto target = ctx.words.at(1);
@@ -236,12 +235,11 @@ QString sendWhisper(const CommandContext &ctx)
                     },
                     [channel, target, targetUser](auto error, auto message) {
                         auto errorMessage = formatWhisperError(error, message);
-                        channel->addMessage(makeSystemMessage(errorMessage));
+                        channel->addSystemMessage(errorMessage);
                     });
             },
             [channel{ctx.channel}] {
-                channel->addMessage(
-                    makeSystemMessage("No user matching that username."));
+                channel->addSystemMessage("No user matching that username.");
             });
         return "";
     }

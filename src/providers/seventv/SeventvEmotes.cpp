@@ -337,13 +337,11 @@ void SeventvEmotes::loadChannelEmotes(
             {
                 if (hasEmotes)
                 {
-                    shared->addMessage(
-                        makeSystemMessage("7TV channel emotes reloaded."));
+                    shared->addSystemMessage("7TV channel emotes reloaded.");
                 }
                 else
                 {
-                    shared->addMessage(
-                        makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
+                    shared->addSystemMessage(CHANNEL_HAS_NO_EMOTES);
                 }
             }
         },
@@ -360,8 +358,7 @@ void SeventvEmotes::loadChannelEmotes(
                     << result.parseJson();
                 if (manualRefresh)
                 {
-                    shared->addMessage(
-                        makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
+                    shared->addSystemMessage(CHANNEL_HAS_NO_EMOTES);
                 }
             }
             else
@@ -371,10 +368,10 @@ void SeventvEmotes::loadChannelEmotes(
                 qCWarning(chatterinoSeventv)
                     << "Error fetching 7TV emotes for channel" << channelId
                     << ", error" << errorString;
-                shared->addMessage(makeSystemMessage(
+                shared->addSystemMessage(
                     QStringLiteral("Failed to fetch 7TV channel "
                                    "emotes. (Error: %1)")
-                        .arg(errorString)));
+                        .arg(errorString));
             }
         });
 }

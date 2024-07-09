@@ -1,6 +1,7 @@
 #include "providers/twitch/IrcMessageHandler.hpp"
 
 #include "Application.hpp"
+#include "common/Channel.hpp"
 #include "common/Common.hpp"
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
@@ -1136,15 +1137,15 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
         QString tags = message->tags().value("msg-id").toString();
         if (tags == "usage_delete")
         {
-            channel->addMessage(makeSystemMessage(
+            channel->addSystemMessage(
                 "Usage: /delete <msg-id> - Deletes the specified message. "
-                "Can't take more than one argument."));
+                "Can't take more than one argument.");
         }
         else if (tags == "bad_delete_message_error")
         {
-            channel->addMessage(makeSystemMessage(
+            channel->addSystemMessage(
                 "There was a problem deleting the message. "
-                "It might be from another channel or too old to delete."));
+                "It might be from another channel or too old to delete.");
         }
         else if (tags == "host_on" || tags == "host_target_went_offline")
         {
@@ -1218,7 +1219,7 @@ void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
     if (message->nick() ==
         getIApp()->getAccounts()->twitch.getCurrent()->getUserName())
     {
-        twitchChannel->addMessage(makeSystemMessage("joined channel"));
+        twitchChannel->addSystemMessage("joined channel");
         twitchChannel->joined.invoke();
     }
     else if (getSettings()->showJoins.getValue())

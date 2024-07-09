@@ -1,5 +1,6 @@
 #include "IrcChannel2.hpp"
 
+#include "common/Channel.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -28,7 +29,7 @@ void IrcChannel::sendMessage(const QString &message)
 
     if (message.startsWith("/"))
     {
-        int index = message.indexOf(' ', 1);
+        auto index = message.indexOf(' ', 1);
         QString command = message.mid(1, index - 1);
         QString params = index == -1 ? "" : message.mid(index + 1);
 
@@ -73,7 +74,7 @@ void IrcChannel::sendMessage(const QString &message)
         }
         else
         {
-            this->addMessage(makeSystemMessage("You are not connected."));
+            this->addSystemMessage("You are not connected.");
         }
     }
 }

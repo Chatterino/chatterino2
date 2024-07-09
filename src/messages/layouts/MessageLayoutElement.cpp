@@ -399,6 +399,7 @@ void ImageWithCircleBackgroundLayoutElement::paint(
     if (pixmap && !this->image_->animated())
     {
         QRectF boxRect(this->getRect());
+        painter.setRenderHint(QPainter::Antialiasing);
         painter.setPen(Qt::NoPen);
         painter.setBrush(QBrush(this->color_, Qt::SolidPattern));
         painter.drawEllipse(boxRect);
