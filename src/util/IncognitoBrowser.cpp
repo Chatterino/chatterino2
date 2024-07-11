@@ -31,6 +31,7 @@ QString getPrivateSwitch(const QString &browserExecutable)
         {"chromium", "-incognito"},
         {"brave", "-incognito"},
         {"firefox-devedition", "-private-window"},
+        {"firefox-developer-edition", "-private-window"},
         {"firefox-beta", "-private-window"},
         {"firefox-nightly", "-private-window"},
     };
