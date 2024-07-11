@@ -33,7 +33,6 @@ QString getPrivateSwitch(const QString &browserExecutable)
         {"firefox-devedition", "-private-window"},
         {"firefox-beta", "-private-window"},
         {"firefox-nightly", "-private-window"},
-        {"qutebrowser", "--target", "private-window"},
     };
 
     // compare case-insensitively
