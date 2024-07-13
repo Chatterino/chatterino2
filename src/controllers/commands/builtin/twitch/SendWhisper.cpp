@@ -184,12 +184,10 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
         !(getSettings()->streamerModeSuppressInlineWhispers &&
           getIApp()->getStreamerMode()->isEnabled()))
     {
-        app->getTwitchAbstract()->forEachChannel([&messagexD](
-                                                     ChannelPtr _channel) {
-            // is an inline whisper an original message or a repost?
-            // if it is a repost, and we don't log reposts, we would not need to set the DoNotLog flag
-            _channel->addMessage(messagexD, MessageContext::Repost);
-        });
+        app->getTwitchAbstract()->forEachChannel(
+            [&messagexD](ChannelPtr _channel) {
+                _channel->addMessage(messagexD, MessageContext::Repost);
+            });
     }
 
     return true;
