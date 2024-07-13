@@ -33,9 +33,7 @@ Logging::Logging(Settings &settings)
 }
 
 void Logging::addMessage(const QString &channelName, MessagePtr message,
-                         const QString &platformName,
-                         std::optional<MessageFlags> overridingFlags,
-                         MessageContext context)
+                         const QString &platformName)
 {
     this->threadGuard.guard();
 
@@ -50,20 +48,6 @@ void Logging::addMessage(const QString &channelName, MessagePtr message,
         {
             return;
         }
-    }
-
-    if (context == MessageContext::Repost)
-    {
-        return;
-    }
-
-    auto isDoNotLogSet =
-        (overridingFlags && overridingFlags->has(MessageFlag::DoNotLog)) ||
-        message->flags.has(MessageFlag::DoNotLog);
-
-    if (isDoNotLogSet)
-    {
-        return;
     }
 
     auto platIt = this->loggingChannels_.find(platformName);

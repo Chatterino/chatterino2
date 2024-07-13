@@ -112,8 +112,20 @@ void Channel::addMessage(MessagePtr message, MessageContext context,
 {
     MessagePtr deleted;
 
-    getIApp()->getChatLogger()->addMessage(
-        this->name_, message, this->getPlatform(), overridingFlags, context);
+    if (context == MessageContext::Original)
+    {
+        // Only log original messages
+        auto isDoNotLogSet =
+            (overridingFlags && overridingFlags->has(MessageFlag::DoNotLog)) ||
+            message->flags.has(MessageFlag::DoNotLog);
+
+        if (!isDoNotLogSet)
+        {
+            // Only log messages where the `DoNotLog` flag is not set
+            getIApp()->getChatLogger()->addMessage(this->name_, message,
+                                                   this->getPlatform());
+        }
+    }
 
     if (this->messages_.pushBack(message, deleted))
     {

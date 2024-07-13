@@ -24,9 +24,7 @@ public:
     virtual ~ILogging() = default;
 
     virtual void addMessage(const QString &channelName, MessagePtr message,
-                            const QString &platformName,
-                            std::optional<MessageFlags> overridingFlags,
-                            MessageContext context) = 0;
+                            const QString &platformName) = 0;
 };
 
 class Logging : public ILogging
@@ -35,9 +33,7 @@ public:
     Logging(Settings &settings);
 
     void addMessage(const QString &channelName, MessagePtr message,
-                    const QString &platformName,
-                    std::optional<MessageFlags> overridingFlags,
-                    MessageContext context) override;
+                    const QString &platformName) override;
 
 private:
     using PlatformName = QString;

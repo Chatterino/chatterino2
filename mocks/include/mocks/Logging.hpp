@@ -16,9 +16,7 @@ public:
 
     MOCK_METHOD(void, addMessage,
                 (const QString &channelName, MessagePtr message,
-                 const QString &platformName,
-                 std::optional<MessageFlags> overridingFlags,
-                 MessageContext context),
+                 const QString &platformName),
                 (override));
 };
 
@@ -29,9 +27,7 @@ public:
     ~EmptyLogging() override = default;
 
     void addMessage(const QString &channelName, MessagePtr message,
-                    const QString &platformName,
-                    std::optional<MessageFlags> overridingFlags,
-                    MessageContext context) override
+                    const QString &platformName) override
     {
         //
     }
