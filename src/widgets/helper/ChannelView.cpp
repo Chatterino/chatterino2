@@ -925,12 +925,13 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
             {
                 if (this->channel_->lastDate_ != QDate::currentDate())
                 {
+                    // Day change message
                     this->channel_->lastDate_ = QDate::currentDate();
                     auto msg = makeSystemMessage(
                         QLocale().toString(QDate::currentDate(),
                                            QLocale::LongFormat),
                         QTime(0, 0));
-                    // TODO: Verify
+                    msg->flags.set(MessageFlag::DoNotLog);
                     this->channel_->addMessage(msg, MessageContext::Original);
                 }
                 // When the message was received in the underlyingChannel,
