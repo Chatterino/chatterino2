@@ -56,10 +56,9 @@ QString generateDateString(const QDateTime &now)
 
 namespace chatterino {
 
-LoggingChannel::LoggingChannel(const QString &_channelName,
-                               const QString &_platform)
-    : channelName(_channelName)
-    , platform(_platform)
+LoggingChannel::LoggingChannel(QString _channelName, QString _platform)
+    : channelName(std::move(_channelName))
+    , platform(std::move(_platform))
 {
     if (this->channelName.startsWith("/whispers"))
     {

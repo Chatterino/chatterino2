@@ -13,8 +13,7 @@ using MessagePtr = std::shared_ptr<const Message>;
 
 class LoggingChannel
 {
-    explicit LoggingChannel(const QString &_channelName,
-                            const QString &platform);
+    explicit LoggingChannel(QString _channelName, QString _platform);
 
 public:
     ~LoggingChannel();
