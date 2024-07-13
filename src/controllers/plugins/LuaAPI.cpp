@@ -8,6 +8,7 @@
 #    include "controllers/plugins/PluginController.hpp"
 #    include "messages/MessageBuilder.hpp"
 #    include "providers/twitch/TwitchIrcServer.hpp"
+#    include "util/drop.hpp"
 
 extern "C" {
 #    include <lauxlib.h>
@@ -73,15 +74,21 @@ int c2_register_command(lua_State *L)
     }
 
     QString name;
-    if (!lua::peek(L, &name, 1))
+    auto pres = lua::peek(L, &name, 1);
+    if (!pres)
     {
-        luaL_error(L, "cannot get command name (1st arg of register_command, "
-                      "expected a string)");
+        pres.errorReason.push_back(
+            QString("While getting command name (1st arg of register_command, "
+                    "expected a string got %1)")
+                .arg(luaL_typename(L, 1)));
+        drop(name);
+        pres.throwAsLuaError(L);
         return 0;
     }
     if (lua_isnoneornil(L, 2))
     {
-        luaL_error(L, "missing argument for register_command: function "
+        drop(name);
+        luaL_error(L, "Missing argument for register_command: function "
                       "\"pointer\"");
         return 0;
     }
@@ -106,10 +113,15 @@ int c2_register_callback(lua_State *L)
         return 0;
     }
     EventType evtType{};
-    if (!lua::peek(L, &evtType, 1))
+    auto pres = lua::peek(L, &evtType, 1);
+    if (!pres)
     {
-        luaL_error(L, "cannot get event name (1st arg of register_callback, "
-                      "expected a string)");
+        pres.errorReason.push_back(
+            QString("cannot get event name (1st arg of register_callback, "
+                    "expected a string, got %1)")
+                .arg(lua_typename(L, 1)));
+        // no types to drop yet
+        pres.throwAsLuaError(L);
         return 0;
     }
     if (lua_isnoneornil(L, 2))
@@ -139,14 +151,25 @@ int c2_log(lua_State *L)
         luaL_error(L, "c2_log: internal error: no plugin?");
         return 0;
     }
-    auto logc = lua_gettop(L) - 1;
-    // This is almost the expansion of qCDebug() macro, actual thing is wrapped in a for loop
-    LogLevel lvl{};
-    if (!lua::pop(L, &lvl, 1))
+    if (lua_gettop(L) < 2)
     {
-        luaL_error(L, "Invalid log level, use one from c2.LogLevel.");
+        // no arguments
+        return luaL_error(L,
+                          "c2.log expects at least two arguments, a log level "
+                          "(c2.LogLevel) and an object to print "
+                          "(usually a string)");
+    }
+    auto logc = lua_gettop(L) - 1;
+    LogLevel lvl{};
+    auto pres = lua::pop(L, &lvl, 1);
+    if (!pres)
+    {
+        pres.errorReason.emplace_back(
+            "While getting log level (1st argument of c2.log)");
+        pres.throwAsLuaError(L);
         return 0;
     }
+    // This is almost the expansion of qCDebug() macro, actual thing is wrapped in a for loop
     QDebug stream = qdebugStreamForLogLevel(lvl);
     logHelper(L, pl, stream, logc);
     return 0;
@@ -224,6 +247,8 @@ int g_load(lua_State *L)
         utf8->toUnicode(data.constData(), data.size(), &state);
         if (state.invalidChars != 0)
         {
+            drop(data);
+            drop(state);
             luaL_error(L, "invalid utf-8 in load() is not allowed");
             return 0;
         }
@@ -297,6 +322,10 @@ int loadfile(lua_State *L, const QString &str)
         return 2;
     }
 
+    drop(temp);
+    drop(info);
+    drop(datadir);
+    drop(dir);
     return luaL_error(L, "error loading module '%s' from file '%s':\n\t%s",
                       lua_tostring(L, 1), filename, lua_tostring(L, -1));
 }
@@ -306,10 +335,10 @@ int searcherAbsolute(lua_State *L)
     auto name = QString::fromUtf8(luaL_checkstring(L, 1));
     name = name.replace('.', QDir::separator());
 
-    QString filename;
     auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
     if (pl == nullptr)
     {
+        drop(name);
         return luaL_error(L, "searcherAbsolute: internal error: no plugin?");
     }
 
@@ -332,7 +361,7 @@ int searcherRelative(lua_State *L)
         lua::push(
             L,
             QString(
-                "Unable to load relative to file:caller has no source file"));
+                "Unable to load relative to file: caller has no source file"));
         return 1;
     }
 

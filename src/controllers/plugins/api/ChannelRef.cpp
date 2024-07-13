@@ -8,7 +8,7 @@
 #    include "messages/MessageBuilder.hpp"
 #    include "providers/twitch/TwitchChannel.hpp"
 #    include "providers/twitch/TwitchIrcServer.hpp"
-
+#    include "util/drop.hpp"
 extern "C" {
 #    include <lauxlib.h>
 #    include <lua.h>
@@ -163,9 +163,15 @@ int ChannelRef::send_message(lua_State *L)
     }
 
     QString text;
-    if (!lua::pop(L, &text))
+    auto pres = lua::pop(L, &text);
+    if (!pres)
     {
-        luaL_error(L, "cannot get text (1st argument of Channel:send_message)");
+        pres.errorReason.push_back(
+            QString("While getting text (1st argument of Channel:send_message, "
+                    "expected a string, got %1)")
+                .arg(luaL_typename(L, 1)));
+        drop(text);
+        pres.throwAsLuaError(L);
         return 0;
     }
 
@@ -192,10 +198,15 @@ int ChannelRef::add_system_message(lua_State *L)
     }
 
     QString text;
-    if (!lua::pop(L, &text))
+    auto pres = lua::pop(L, &text);
+    if (!pres)
     {
-        luaL_error(
-            L, "cannot get text (1st argument of Channel:add_system_message)");
+        pres.errorReason.push_back(QString("While getting text (1st argument "
+                                           "of Channel:add_system_message, "
+                                           "expected a string, got %1)")
+                                       .arg(luaL_typename(L, 1)));
+        drop(text);
+        pres.throwAsLuaError(L);
         return 0;
     }
     ChannelPtr that = ChannelRef::getOrError(L);
@@ -280,25 +291,30 @@ int ChannelRef::get_by_name(lua_State *L)
     {
         luaL_error(L, "Channel.by_name needs exactly 2 arguments (channel "
                       "name and platform)");
-        lua_pushnil(L);
-        return 1;
+        return 0;
     }
     LPlatform platform{};
-    if (!lua::pop(L, &platform))
+    auto pres = lua::pop(L, &platform);
+    if (!pres)
     {
-        luaL_error(L, "cannot get platform (2nd argument of Channel.by_name, "
-                      "expected a string)");
-        lua_pushnil(L);
-        return 1;
+        pres.errorReason.push_back(
+            QString("cannot get platform (2nd argument of Channel.by_name, "
+                    "expected a string, got %1)")
+                .arg(luaL_typename(L, 1)));
+        pres.throwAsLuaError(L);
+        return 0;
     }
     QString name;
-    if (!lua::pop(L, &name))
+    pres = lua::pop(L, &name);
+    if (!pres)
     {
-        luaL_error(L,
-                   "cannot get channel name (1st argument of Channel.by_name, "
-                   "expected a string)");
-        lua_pushnil(L);
-        return 1;
+        pres.errorReason.push_back(
+            QString("cannot get channel name (1st argument of Channel.by_name, "
+                    "expected a string, got %1)")
+                .arg(luaL_typename(L, 1)));
+        drop(name);
+        pres.throwAsLuaError(L);
+        return 0;
     }
     auto chn = getIApp()->getTwitchAbstract()->getChannelOrEmpty(name);
     lua::push(L, chn);
@@ -312,17 +328,19 @@ int ChannelRef::get_by_twitch_id(lua_State *L)
         luaL_error(
             L, "Channel.by_twitch_id needs exactly 1 arguments (channel owner "
                "id)");
-        lua_pushnil(L);
-        return 1;
+        return 0;
     }
     QString id;
-    if (!lua::pop(L, &id))
+    auto pres = lua::pop(L, &id);
+    if (!pres)
     {
-        luaL_error(L,
-                   "cannot get channel name (1st argument of Channel.by_name, "
-                   "expected a string)");
-        lua_pushnil(L);
-        return 1;
+        pres.errorReason.push_back(
+            QString("cannot get channel name (1st argument of Channel.by_name, "
+                    "expected a string, got %1)")
+                .arg(luaL_typename(L, 1)));
+        drop(id);
+        pres.throwAsLuaError(L);
+        return 0;
     }
     auto chn = getIApp()->getTwitch()->getChannelOrEmptyByID(id);
 

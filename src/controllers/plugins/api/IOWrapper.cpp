@@ -113,11 +113,14 @@ int io_open(lua_State *L)
     {
         // we have a mode
         QString smode;
-        if (!lua::pop(L, &smode))
+        auto pres = lua::pop(L, &smode);
+        if (!pres)
         {
-            return luaL_error(
-                L,
-                "io.open mode (2nd argument) must be a string or not present");
+            pres.errorReason.push_back(
+                QString("io.open mode (2nd argument) must be a string or not "
+                        "present, got %1")
+                    .arg(luaL_typename(L, 1)));
+            pres.throwAsLuaError(L);
         }
         mode = LuaFileMode(smode);
         if (!mode.error.isEmpty())
