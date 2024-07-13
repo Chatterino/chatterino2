@@ -32,8 +32,6 @@ private:
     void openLogFile();
     void openStreamLogFile(const QString &streamID);
 
-    QString generateOpeningString(
-        const QDateTime &now = QDateTime::currentDateTime()) const;
     QString generateClosingString(
         const QDateTime &now = QDateTime::currentDateTime()) const;
 
