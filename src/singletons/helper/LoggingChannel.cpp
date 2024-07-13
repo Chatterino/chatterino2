@@ -46,6 +46,11 @@ QString generateClosingString(
     return ret;
 }
 
+QString generateDateString(const QDateTime &now)
+{
+    return now.toString("yyyy-MM-dd");
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -99,7 +104,7 @@ LoggingChannel::~LoggingChannel()
 void LoggingChannel::openLogFile()
 {
     QDateTime now = QDateTime::currentDateTime();
-    this->dateString = this->generateDateString(now);
+    this->dateString = generateDateString(now);
 
     if (this->fileHandle.isOpen())
     {
@@ -162,7 +167,7 @@ void LoggingChannel::addMessage(MessagePtr message, const QString &streamID)
 {
     QDateTime now = QDateTime::currentDateTime();
 
-    QString messageDateString = this->generateDateString(now);
+    QString messageDateString = generateDateString(now);
     if (messageDateString != this->dateString)
     {
         this->dateString = messageDateString;
@@ -235,11 +240,6 @@ void LoggingChannel::addMessage(MessagePtr message, const QString &streamID)
 
         appendLine(this->currentStreamFileHandle, str);
     }
-}
-
-QString LoggingChannel::generateDateString(const QDateTime &now)
-{
-    return now.toString("yyyy-MM-dd");
 }
 
 }  // namespace chatterino

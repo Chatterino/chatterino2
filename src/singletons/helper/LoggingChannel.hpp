@@ -32,8 +32,6 @@ private:
     void openLogFile();
     void openStreamLogFile(const QString &streamID);
 
-    QString generateDateString(const QDateTime &now);
-
     const QString channelName;
     const QString platform;
     QString baseDirectory;
