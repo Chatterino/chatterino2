@@ -12,7 +12,7 @@
 
 namespace {
 
-QByteArray endline("\n");
+const QByteArray ENDLINE("\n");
 
 void appendLine(QFile &fileHandle, const QString &line)
 {
@@ -30,7 +30,7 @@ QString generateOpeningString(
 
     ret.append(now.toString("yyyy-MM-dd HH:mm:ss "));
     ret.append(now.timeZoneAbbreviation());
-    ret.append(endline);
+    ret.append(ENDLINE);
 
     return ret;
 }
@@ -42,7 +42,7 @@ QString generateClosingString(
 
     ret.append(now.toString("yyyy-MM-dd HH:mm:ss"));
     ret.append(now.timeZoneAbbreviation());
-    ret.append(endline);
+    ret.append(ENDLINE);
 
     return ret;
 }
@@ -228,7 +228,7 @@ void LoggingChannel::addMessage(MessagePtr message, const QString &streamID)
         }
     }
     str.append(messageText);
-    str.append(endline);
+    str.append(ENDLINE);
 
     appendLine(this->fileHandle, str);
 
