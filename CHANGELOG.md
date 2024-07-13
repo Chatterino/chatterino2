@@ -26,6 +26,7 @@
 - Bugfix: Fixed message history occasionally not loading after a sleep. (#5457)
 - Bugfix: Fixed a crash when tab completing while having an invalid plugin loaded. (#5401)
 - Bugfix: Fixed windows on Windows not saving correctly when snapping them to the edges. (#5478)
+- Bugfix: Fixed user info card popups adding duplicate line to log files. (#5499)
 - Bugfix: Fixed `/clearmessages` not working with more than one window. (#5489)
 - Bugfix: Fixed splits staying paused after unfocusing Chatterino in certain configurations. (#5504)
 - Dev: Update Windows build from Qt 6.5.0 to Qt 6.7.1. (#5420)

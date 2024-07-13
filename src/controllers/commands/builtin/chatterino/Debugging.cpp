@@ -90,7 +90,7 @@ QString listEnvironmentVariables(const CommandContext &ctx)
         builder.emplace<TimestampElement>(QTime::currentTime());
         builder.emplace<TextElement>(str, MessageElementFlag::Text,
                                      MessageColor::System);
-        channel->addMessage(builder.release());
+        channel->addMessage(builder.release(), MessageContext::Original);
     }
     return "";
 }

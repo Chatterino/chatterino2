@@ -200,7 +200,7 @@ int ChannelRef::add_system_message(lua_State *L)
     }
     ChannelPtr that = ChannelRef::getOrError(L);
     text = text.replace('\n', ' ');
-    that->addMessage(makeSystemMessage(text));
+    that->addSystemMessage(text);
     return 0;
 }
 

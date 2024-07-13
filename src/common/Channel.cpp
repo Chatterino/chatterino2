@@ -32,6 +32,12 @@ Channel::Channel(const QString &name, Type type)
     , messages_(getSettings()->scrollbackSplitLimit)
     , type_(type)
 {
+    if (this->isTwitchChannel())
+    {
+        this->platform_ = "twitch";
+    }
+
+    // Irc platform is set through IrcChannel2 ctor
 }
 
 Channel::~Channel()
@@ -79,37 +85,24 @@ LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot()
     return this->messages_.getSnapshot();
 }
 
-void Channel::addMessage(MessagePtr message,
+void Channel::addMessage(MessagePtr message, MessageContext context,
                          std::optional<MessageFlags> overridingFlags)
 {
     MessagePtr deleted;
 
-    if (!overridingFlags || !overridingFlags->has(MessageFlag::DoNotLog))
+    if (context == MessageContext::Original)
     {
-        QString channelPlatform("other");
-        if (this->type_ == Type::Irc)
+        // Only log original messages
+        auto isDoNotLogSet =
+            (overridingFlags && overridingFlags->has(MessageFlag::DoNotLog)) ||
+            message->flags.has(MessageFlag::DoNotLog);
+
+        if (!isDoNotLogSet)
         {
-            auto *irc = dynamic_cast<IrcChannel *>(this);
-            if (irc != nullptr)
-            {
-                auto *ircServer = irc->server();
-                if (ircServer != nullptr)
-                {
-                    channelPlatform = QString("irc-%1").arg(
-                        irc->server()->userFriendlyIdentifier());
-                }
-                else
-                {
-                    channelPlatform = "irc-unknown";
-                }
-            }
+            // Only log messages where the `DoNotLog` flag is not set
+            getIApp()->getChatLogger()->addMessage(this->name_, message,
+                                                   this->platform_);
         }
-        else if (this->isTwitchChannel())
-        {
-            channelPlatform = "twitch";
-        }
-        getIApp()->getChatLogger()->addMessage(this->name_, message,
-                                               channelPlatform);
     }
 
     if (this->messages_.pushBack(message, deleted))
@@ -123,7 +116,7 @@ void Channel::addMessage(MessagePtr message,
 void Channel::addSystemMessage(const QString &contents)
 {
     auto msg = makeSystemMessage(contents);
-    this->addMessage(msg);
+    this->addMessage(msg, MessageContext::Original);
 }
 
 void Channel::addOrReplaceTimeout(MessagePtr message)
@@ -134,7 +127,7 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
             this->replaceMessage(msg, replacement);
         },
         [this](auto msg) {
-            this->addMessage(msg);
+            this->addMessage(msg, MessageContext::Original);
         },
         true);
 

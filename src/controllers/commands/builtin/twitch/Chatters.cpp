@@ -129,7 +129,7 @@ QString testChatters(const CommandContext &ctx)
             TwitchMessageBuilder::listOfUsersSystemMessage(
                 prefix, entries, twitchChannel, &builder);
 
-            channel->addMessage(builder.release());
+            channel->addMessage(builder.release(), MessageContext::Original);
         },
         [channel{ctx.channel}](auto error, auto message) {
             auto errorMessage = formatChattersError(error, message);
