@@ -2,7 +2,6 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
-#include "common/Env.hpp"
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
@@ -162,7 +161,7 @@ TwitchChannel::TwitchChannel(const QString &name)
             TwitchMessageBuilder::liveSystemMessage(this->getDisplayName(),
                                                     &builder);
             builder.message().id = this->roomId();
-            this->addMessage(builder.release());
+            this->addMessage(builder.release(), MessageContext::Original);
 
             // Message in /live channel
             MessageBuilder builder2;
@@ -170,7 +169,7 @@ TwitchChannel::TwitchChannel(const QString &name)
                                               &builder2);
             builder2.message().id = this->roomId();
             getIApp()->getTwitch()->getLiveChannel()->addMessage(
-                builder2.release());
+                builder2.release(), MessageContext::Original);
 
             // Notify on all channels with a ping sound
             if (getSettings()->notificationOnAnyChannel &&
@@ -188,7 +187,7 @@ TwitchChannel::TwitchChannel(const QString &name)
             MessageBuilder builder;
             TwitchMessageBuilder::offlineSystemMessage(this->getDisplayName(),
                                                        &builder);
-            this->addMessage(builder.release());
+            this->addMessage(builder.release(), MessageContext::Original);
 
             // "delete" old 'CHANNEL is live' message
             LimitedQueueSnapshot<MessagePtr> snapshot =
@@ -217,7 +216,7 @@ TwitchChannel::TwitchChannel(const QString &name)
     // debugging
 #if 0
     for (int i = 0; i < 1000; i++) {
-        this->addMessage(makeSystemMessage("asef"));
+        this->addSystemMessage("asef");
     }
 #endif
 }
@@ -396,7 +395,7 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
         MessageBuilder builder;
         TwitchMessageBuilder::appendChannelPointRewardMessage(
             reward, &builder, this->isMod(), this->isBroadcaster());
-        this->addMessage(builder.release());
+        this->addMessage(builder.release(), MessageContext::Original);
         return;
     }
 
@@ -567,7 +566,7 @@ void TwitchChannel::showLoginMessage()
                               linkColor)
         ->setLink(accountsLink);
 
-    this->addMessage(builder.release());
+    this->addMessage(builder.release(), MessageContext::Original);
 }
 
 void TwitchChannel::roomIdChanged()
@@ -926,7 +925,7 @@ void TwitchChannel::updateBttvEmote(
     auto builder = MessageBuilder(liveUpdatesUpdateEmoteMessage, "BTTV",
                                   QString() /* actor */, newEmote->name.string,
                                   oldEmote->name.string);
-    this->addMessage(builder.release());
+    this->addMessage(builder.release(), MessageContext::Original);
 }
 
 void TwitchChannel::removeBttvEmote(
@@ -965,7 +964,7 @@ void TwitchChannel::updateSeventvEmote(
     auto builder =
         MessageBuilder(liveUpdatesUpdateEmoteMessage, "7TV", dispatch.actorName,
                        dispatch.emoteName, dispatch.oldEmoteName);
-    this->addMessage(builder.release());
+    this->addMessage(builder.release(), MessageContext::Original);
 }
 
 void TwitchChannel::removeSeventvEmote(
@@ -1003,7 +1002,8 @@ void TwitchChannel::updateSeventvUser(
                     auto builder =
                         MessageBuilder(liveUpdatesUpdateEmoteSetMessage, "7TV",
                                        dispatch.actorName, name);
-                    this->addMessage(builder.release());
+                    this->addMessage(builder.release(),
+                                     MessageContext::Original);
                 }
             });
         },
@@ -1012,9 +1012,9 @@ void TwitchChannel::updateSeventvUser(
                 if (auto shared = weak.lock())
                 {
                     this->seventvEmotes_.set(EMPTY_EMOTE_MAP);
-                    this->addMessage(makeSystemMessage(
+                    this->addSystemMessage(
                         QString("Failed updating 7TV emote set (%1).")
-                            .arg(reason)));
+                            .arg(reason));
                 }
             });
         });
@@ -1086,7 +1086,7 @@ void TwitchChannel::addOrReplaceLiveUpdatesAddRemove(bool isEmoteAdd,
     this->lastLiveUpdateEmotePlatform_ = platform;
     this->lastLiveUpdateMessage_ = msg;
     this->lastLiveUpdateEmoteActor_ = actor;
-    this->addMessage(msg);
+    this->addMessage(msg, MessageContext::Original);
 }
 
 bool TwitchChannel::tryReplaceLastLiveUpdateAddOrRemove(
@@ -1512,7 +1512,7 @@ void TwitchChannel::refreshBadges()
                 break;
             }
 
-            this->addMessage(makeSystemMessage(errorMessage));
+            this->addSystemMessage(errorMessage);
         });
 }
 
@@ -1600,8 +1600,8 @@ void TwitchChannel::createClip()
 {
     if (!this->isLive())
     {
-        this->addMessage(makeSystemMessage(
-            "Cannot create clip while the channel is offline!"));
+        this->addSystemMessage(
+            "Cannot create clip while the channel is offline!");
         return;
     }
 
@@ -1616,7 +1616,7 @@ void TwitchChannel::createClip()
         return;
     }
 
-    this->addMessage(makeSystemMessage("Creating clip..."));
+    this->addSystemMessage("Creating clip...");
     this->isClipCreationInProgress = true;
 
     getHelix()->createClip(
@@ -1651,7 +1651,7 @@ void TwitchChannel::createClip()
                                       MessageColor::Link)
                 ->setLink(Link(Link::Url, clip.editUrl));
 
-            this->addMessage(builder.release());
+            this->addMessage(builder.release(), MessageContext::Original);
         },
         // failureCallback
         [this](auto error) {
@@ -1700,7 +1700,7 @@ void TwitchChannel::createClip()
             builder.message().messageText = text;
             builder.message().searchText = text;
 
-            this->addMessage(builder.release());
+            this->addMessage(builder.release(), MessageContext::Original);
         },
         // finallyCallback - this will always execute, so clip creation won't ever be stuck
         [this] {

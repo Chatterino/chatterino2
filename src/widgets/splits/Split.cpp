@@ -393,10 +393,10 @@ Split::Split(QWidget *parent)
                 imageUploader->getImages(original);
             if (images.empty())
             {
-                channel->addMessage(makeSystemMessage(
+                channel->addSystemMessage(
                     QString(
                         "An error occurred trying to process your image: %1")
-                        .arg(imageProcessError)));
+                        .arg(imageProcessError));
                 return;
             }
 
@@ -1597,6 +1597,13 @@ void Split::drag()
 void Split::setInputReply(const MessagePtr &reply)
 {
     this->input_->setReply(reply);
+}
+
+void Split::unpause()
+{
+    this->view_->unpause(PauseReason::KeyboardModifier);
+    this->view_->unpause(PauseReason::DoubleClick);
+    // Mouse intentionally left out, we may still have the mouse over the split
 }
 
 }  // namespace chatterino

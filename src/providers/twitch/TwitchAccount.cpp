@@ -362,8 +362,8 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
 
                 if (auto channel = weakChannel.lock(); channel != nullptr)
                 {
-                    channel->addMessage(makeSystemMessage(
-                        "Twitch subscriber emotes reloaded."));
+                    channel->addSystemMessage(
+                        "Twitch subscriber emotes reloaded.");
                 }
             },
             [] {
@@ -427,7 +427,7 @@ void TwitchAccount::autoModAllow(const QString msgID, ChannelPtr channel)
                 break;
             }
 
-            channel->addMessage(makeSystemMessage(errorMessage));
+            channel->addSystemMessage(errorMessage);
         });
 }
 
@@ -473,7 +473,7 @@ void TwitchAccount::autoModDeny(const QString msgID, ChannelPtr channel)
                 break;
             }
 
-            channel->addMessage(makeSystemMessage(errorMessage));
+            channel->addSystemMessage(errorMessage);
         });
 }
 

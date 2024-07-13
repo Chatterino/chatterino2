@@ -1,5 +1,6 @@
 #include "singletons/Logging.hpp"
 
+#include "messages/Message.hpp"
 #include "singletons/helper/LoggingChannel.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"

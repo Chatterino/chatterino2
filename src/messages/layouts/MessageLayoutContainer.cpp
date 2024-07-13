@@ -233,7 +233,9 @@ void MessageLayoutContainer::paintElements(QPainter &painter,
         painter.drawRect(element->getRect());
 #endif
 
+        painter.save();
         element->paint(painter, ctx.messageColors);
+        painter.restore();
     }
 }
 
