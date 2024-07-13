@@ -900,34 +900,25 @@ void Application::initPubSub()
                             getIApp()
                                 ->getTwitch()
                                 ->getAutomodChannel()
-                                ->addMessage(
-                                    p.first,
-                                    MessageContext::
-                                        Original);  // is this original?
+                                ->addMessage(p.first, MessageContext::Original);
                             getIApp()
                                 ->getTwitch()
                                 ->getAutomodChannel()
-                                ->addMessage(
-                                    p.second,
-                                    MessageContext::
-                                        Original);  // is this original?
+                                ->addMessage(p.second,
+                                             MessageContext::Original);
 
                             if (getSettings()->showAutomodInMentions)
                             {
                                 getIApp()
                                     ->getTwitch()
                                     ->getMentionsChannel()
-                                    ->addMessage(
-                                        p.first,
-                                        MessageContext::
-                                            Original);  // is this original?
+                                    ->addMessage(p.first,
+                                                 MessageContext::Original);
                                 getIApp()
                                     ->getTwitch()
                                     ->getMentionsChannel()
-                                    ->addMessage(
-                                        p.second,
-                                        MessageContext::
-                                            Original);  // is this original?
+                                    ->addMessage(p.second,
+                                                 MessageContext::Original);
                             }
                         });
                     }
