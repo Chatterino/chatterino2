@@ -88,8 +88,6 @@ TEST(LinkParser, parseDomainLinks)
         {"", "httpsd.cat"},
         {"", "http.cat", "/200"},
         {"", "http.cat", "/200("},
-        {"", "chatterino.com><chatterino.com"},
-        {"https://", "chatterino.com><chatterino.com"},
         {"", "a.com", "?("},
         {"", "a.com", "#("},
         {"", "a.com", "/__my_user__"},
@@ -219,7 +217,13 @@ TEST(LinkParser, doesntParseInvalidLinks)
         ">><<",
         "a.com>><<",
         "~~a.com()",
-
+        "https://chatterino.com><https://chatterino.com",
+        "<https://chatterino.com><https://chatterino.com>",
+        // invalid characters are still accepted (see #4769)
+        // "chatterino.com><chatterino.com",
+        // "https://chatterino.com><chatterino.com",
+        // "<chatterino.com><chatterino.com>",
+        // "<https://chatterino.com><chatterino.com>",
     };
 
     for (const auto &input : inputs)
