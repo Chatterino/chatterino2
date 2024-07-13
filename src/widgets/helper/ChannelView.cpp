@@ -934,19 +934,6 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
                     msg->flags.set(MessageFlag::DoNotLog);
                     this->channel_->addMessage(msg, MessageContext::Original);
                 }
-                // When the message was received in the underlyingChannel,
-                // logging will be handled. Prevent duplications.
-                if (overridingFlags)
-                {
-                    overridingFlags->set(MessageFlag::DoNotLog);
-                }
-                else
-                {
-                    overridingFlags = MessageFlags(message->flags);
-                    overridingFlags->set(MessageFlag::DoNotLog);
-                }
-
-                // TODO: Verify
                 this->channel_->addMessage(message, MessageContext::Repost,
                                            overridingFlags);
             }
