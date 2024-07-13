@@ -244,7 +244,6 @@ void ReplyThreadPopup::addMessagesFromThread()
         std::optional<MessageFlags>(this->thread_->root()->flags);
     rootOverrideFlags->set(MessageFlag::DoNotLog);
 
-    // TODO: Verify
     this->virtualChannel_->addMessage(
         this->thread_->root(), MessageContext::Repost, rootOverrideFlags);
     for (const auto &msgRef : this->thread_->replies())
@@ -254,7 +253,6 @@ void ReplyThreadPopup::addMessagesFromThread()
             auto overrideFlags = std::optional<MessageFlags>(msg->flags);
             overrideFlags->set(MessageFlag::DoNotLog);
 
-            // TODO: Verify
             this->virtualChannel_->addMessage(msg, MessageContext::Repost,
                                               overrideFlags);
         }
@@ -271,7 +269,6 @@ void ReplyThreadPopup::addMessagesFromThread()
                         overrideFlags->set(MessageFlag::DoNotLog);
 
                         // same reply thread, add message
-                        // TODO: Verify
                         this->virtualChannel_->addMessage(
                             message, MessageContext::Repost, overrideFlags);
                     }
