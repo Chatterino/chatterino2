@@ -34,6 +34,18 @@ QString generateOpeningString(
     return ret;
 }
 
+QString generateClosingString(
+    const QDateTime &now = QDateTime::currentDateTime())
+{
+    QString ret("# Stop logging at ");
+
+    ret.append(now.toString("yyyy-MM-dd HH:mm:ss"));
+    ret.append(now.timeZoneAbbreviation());
+    ret.append(endline);
+
+    return ret;
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -79,7 +91,7 @@ LoggingChannel::LoggingChannel(const QString &_channelName,
 
 LoggingChannel::~LoggingChannel()
 {
-    appendLine(this->fileHandle, this->generateClosingString());
+    appendLine(this->fileHandle, generateClosingString());
     this->fileHandle.close();
     this->currentStreamFileHandle.close();
 }
@@ -143,7 +155,7 @@ void LoggingChannel::openStreamLogFile(const QString &streamID)
     this->currentStreamFileHandle.setFileName(fileName);
 
     this->currentStreamFileHandle.open(QIODevice::Append);
-    appendLine(this->currentStreamFileHandle, this->generateOpeningString(now));
+    appendLine(this->currentStreamFileHandle, generateOpeningString(now));
 }
 
 void LoggingChannel::addMessage(MessagePtr message, const QString &streamID)
@@ -223,17 +235,6 @@ void LoggingChannel::addMessage(MessagePtr message, const QString &streamID)
 
         appendLine(this->currentStreamFileHandle, str);
     }
-}
-
-QString LoggingChannel::generateClosingString(const QDateTime &now) const
-{
-    QString ret("# Stop logging at ");
-
-    ret.append(now.toString("yyyy-MM-dd HH:mm:ss"));
-    ret.append(now.timeZoneAbbreviation());
-    ret.append(endline);
-
-    return ret;
 }
 
 QString LoggingChannel::generateDateString(const QDateTime &now)
