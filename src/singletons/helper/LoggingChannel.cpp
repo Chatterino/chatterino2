@@ -9,6 +9,19 @@
 
 #include <QDir>
 
+namespace {
+
+void appendLine(QFile &fileHandle, const QString &line)
+{
+    assert(fileHandle.isOpen());
+    assert(fileHandle.isWritable());
+
+    fileHandle.write(line.toUtf8());
+    fileHandle.flush();
+}
+
+}  // namespace
+
 namespace chatterino {
 
 QByteArray endline("\n");
@@ -54,8 +67,9 @@ LoggingChannel::LoggingChannel(const QString &_channelName,
 
 LoggingChannel::~LoggingChannel()
 {
-    this->appendLine(this->generateClosingString());
+    appendLine(this->fileHandle, this->generateClosingString());
     this->fileHandle.close();
+    this->currentStreamFileHandle.close();
 }
 
 void LoggingChannel::openLogFile()
@@ -87,10 +101,40 @@ void LoggingChannel::openLogFile()
 
     this->fileHandle.open(QIODevice::Append);
 
-    this->appendLine(this->generateOpeningString(now));
+    appendLine(this->fileHandle, this->generateOpeningString(now));
 }
 
-void LoggingChannel::addMessage(MessagePtr message)
+void LoggingChannel::openStreamLogFile(const QString &streamID)
+{
+    QDateTime now = QDateTime::currentDateTime();
+    this->currentStreamID = streamID;
+
+    if (this->currentStreamFileHandle.isOpen())
+    {
+        this->currentStreamFileHandle.flush();
+        this->currentStreamFileHandle.close();
+    }
+
+    QString baseFileName = this->channelName + "-" + streamID + ".log";
+
+    QString directory =
+        this->baseDirectory + QDir::separator() + this->subDirectory;
+
+    if (!QDir().mkpath(directory))
+    {
+        qCDebug(chatterinoHelper) << "Unable to create logging path";
+        return;
+    }
+
+    QString fileName = directory + QDir::separator() + baseFileName;
+    qCDebug(chatterinoHelper) << "Logging stream to" << fileName;
+    this->currentStreamFileHandle.setFileName(fileName);
+
+    this->currentStreamFileHandle.open(QIODevice::Append);
+    appendLine(this->currentStreamFileHandle, this->generateOpeningString(now));
+}
+
+void LoggingChannel::addMessage(MessagePtr message, const QString &streamID)
 {
     QDateTime now = QDateTime::currentDateTime();
 
@@ -156,7 +200,17 @@ void LoggingChannel::addMessage(MessagePtr message)
     str.append(messageText);
     str.append(endline);
 
-    this->appendLine(str);
+    appendLine(this->fileHandle, str);
+
+    if (!streamID.isEmpty() && getSettings()->separatelyStoreStreamLogs)
+    {
+        if (this->currentStreamID != streamID)
+        {
+            this->openStreamLogFile(streamID);
+        }
+
+        appendLine(this->currentStreamFileHandle, str);
+    }
 }
 
 QString LoggingChannel::generateOpeningString(const QDateTime &now) const
@@ -179,12 +233,6 @@ QString LoggingChannel::generateClosingString(const QDateTime &now) const
     ret.append(endline);
 
     return ret;
-}
-
-void LoggingChannel::appendLine(const QString &line)
-{
-    this->fileHandle.write(line.toUtf8());
-    this->fileHandle.flush();
 }
 
 QString LoggingChannel::generateDateString(const QDateTime &now)

@@ -26,17 +26,16 @@ public:
     LoggingChannel(LoggingChannel &&) = delete;
     LoggingChannel &operator=(LoggingChannel &&) = delete;
 
-    void addMessage(MessagePtr message);
+    void addMessage(MessagePtr message, const QString &streamID);
 
 private:
     void openLogFile();
+    void openStreamLogFile(const QString &streamID);
 
     QString generateOpeningString(
         const QDateTime &now = QDateTime::currentDateTime()) const;
     QString generateClosingString(
         const QDateTime &now = QDateTime::currentDateTime()) const;
-
-    void appendLine(const QString &line);
 
     QString generateDateString(const QDateTime &now);
 
@@ -46,6 +45,8 @@ private:
     QString subDirectory;
 
     QFile fileHandle;
+    QFile currentStreamFileHandle;
+    QString currentStreamID;
 
     QString dateString;
 

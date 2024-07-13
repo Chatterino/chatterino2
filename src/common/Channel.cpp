@@ -101,7 +101,8 @@ void Channel::addMessage(MessagePtr message, MessageContext context,
         {
             // Only log messages where the `DoNotLog` flag is not set
             getIApp()->getChatLogger()->addMessage(this->name_, message,
-                                                   this->platform_);
+                                                   this->platform_,
+                                                   this->getCurrentStreamID());
         }
     }
 
@@ -354,6 +355,11 @@ bool Channel::canReconnect() const
 
 void Channel::reconnect()
 {
+}
+
+QString Channel::getCurrentStreamID() const
+{
+    return {};
 }
 
 std::shared_ptr<Channel> Channel::getEmpty()
