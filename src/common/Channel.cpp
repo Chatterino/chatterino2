@@ -32,6 +32,12 @@ Channel::Channel(const QString &name, Type type)
     , messages_(getSettings()->scrollbackSplitLimit)
     , type_(type)
 {
+    if (this->isTwitchChannel())
+    {
+        this->platform_ = "twitch";
+    }
+
+    // Irc platform is set through IrcChannel2 ctor
 }
 
 Channel::~Channel()
@@ -51,30 +57,7 @@ const QString &Channel::getName() const
 
 QString Channel::getPlatform() const
 {
-    QString channelPlatform("other");
-    if (this->type_ == Type::Irc)
-    {
-        const auto *irc = dynamic_cast<const IrcChannel *>(this);
-        if (irc != nullptr)
-        {
-            auto *ircServer = irc->server();
-            if (ircServer != nullptr)
-            {
-                channelPlatform = QString("irc-%1").arg(
-                    irc->server()->userFriendlyIdentifier());
-            }
-            else
-            {
-                channelPlatform = "irc-unknown";
-            }
-        }
-    }
-    else if (this->isTwitchChannel())
-    {
-        channelPlatform = "twitch";
-    }
-
-    return channelPlatform;
+    return this->platform_;
 }
 
 const QString &Channel::getDisplayName() const

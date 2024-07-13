@@ -17,6 +17,16 @@ IrcChannel::IrcChannel(const QString &name, IrcServer *server)
     , ChannelChatters(*static_cast<Channel *>(this))
     , server_(server)
 {
+    auto *ircServer = this->server();
+    if (ircServer != nullptr)
+    {
+        this->platform_ =
+            QString("irc-%1").arg(ircServer->userFriendlyIdentifier());
+    }
+    else
+    {
+        this->platform_ = "irc-unknown";
+    }
 }
 
 void IrcChannel::sendMessage(const QString &message)
