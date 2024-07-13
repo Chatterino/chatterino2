@@ -18,6 +18,7 @@
 - Minor: Added `/warn <username> <reason>` command for mods. This prevents the user from chatting until they acknowledge the warning. (#5474)
 - Minor: Improve appearance of reply button. (#5491)
 - Minor: Introduce HTTP API for plugins. (#5383, #5492, #5494)
+- Minor: Support more Firefox variants for incognito link opening. (#5503)
 - Bugfix: Fixed tab move animation occasionally failing to start after closing a tab. (#5426)
 - Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
 - Bugfix: Fixed restricted users usernames not being clickable. (#5405)
@@ -27,6 +28,7 @@
 - Bugfix: Fixed windows on Windows not saving correctly when snapping them to the edges. (#5478)
 - Bugfix: Fixed user info card popups adding duplicate line to log files. (#5487)
 - Bugfix: Fixed `/clearmessages` not working with more than one window. (#5489)
+- Bugfix: Fixed splits staying paused after unfocusing Chatterino in certain configurations. (#5504)
 - Dev: Update Windows build from Qt 6.5.0 to Qt 6.7.1. (#5420)
 - Dev: Update vcpkg build Qt from 6.5.0 to 6.7.0, boost from 1.83.0 to 1.85.0, openssl from 3.1.3 to 3.3.0. (#5422)
 - Dev: Unsingletonize `ISoundController`. (#5462)
@@ -46,6 +48,7 @@
 - Dev: Refactor/unsingletonize `UserDataController`. (#5459)
 - Dev: Cleanup `BrowserExtension`. (#5465)
 - Dev: Deprecate Qt 5.12. (#5396)
+- Dev: The running Qt version is now shown in the about page if it differs from the compiled version. (#5501)
 
 ## 2.5.1
 
