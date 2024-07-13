@@ -1120,7 +1120,6 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             // channels
             getIApp()->getTwitch()->forEachChannelAndSpecialChannels(
                 [msg](const auto &c) {
-                    // assume it's original?
                     c->addMessage(msg, MessageContext::Original);
                 });
 
