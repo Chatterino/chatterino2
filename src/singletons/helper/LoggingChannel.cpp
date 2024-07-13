@@ -1,4 +1,4 @@
-#include "LoggingChannel.hpp"
+#include "singletons/helper/LoggingChannel.hpp"
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
