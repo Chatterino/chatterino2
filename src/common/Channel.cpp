@@ -55,11 +55,6 @@ const QString &Channel::getName() const
     return this->name_;
 }
 
-QString Channel::getPlatform() const
-{
-    return this->platform_;
-}
-
 const QString &Channel::getDisplayName() const
 {
     return this->getName();
@@ -106,7 +101,7 @@ void Channel::addMessage(MessagePtr message, MessageContext context,
         {
             // Only log messages where the `DoNotLog` flag is not set
             getIApp()->getChatLogger()->addMessage(this->name_, message,
-                                                   this->getPlatform());
+                                                   this->platform_);
         }
     }
 

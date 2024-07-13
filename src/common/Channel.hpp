@@ -77,7 +77,6 @@ public:
 
     Type getType() const;
     const QString &getName() const;
-    QString getPlatform() const;
     virtual const QString &getDisplayName() const;
     virtual const QString &getLocalizedName() const;
     bool isTwitchChannel() const;
