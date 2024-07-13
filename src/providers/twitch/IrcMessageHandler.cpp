@@ -983,7 +983,6 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
     {
         getIApp()->getTwitchAbstract()->forEachChannel(
             [&message, overrideFlags](ChannelPtr channel) {
-                // is inline whisper a repost? probably!
                 channel->addMessage(message, MessageContext::Repost,
                                     overrideFlags);
             });
