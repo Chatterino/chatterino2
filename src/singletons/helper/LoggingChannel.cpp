@@ -11,6 +11,8 @@
 
 namespace {
 
+QByteArray endline("\n");
+
 void appendLine(QFile &fileHandle, const QString &line)
 {
     assert(fileHandle.isOpen());
@@ -23,8 +25,6 @@ void appendLine(QFile &fileHandle, const QString &line)
 }  // namespace
 
 namespace chatterino {
-
-QByteArray endline("\n");
 
 LoggingChannel::LoggingChannel(const QString &_channelName,
                                const QString &_platform)
