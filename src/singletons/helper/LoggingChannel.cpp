@@ -164,7 +164,8 @@ void LoggingChannel::openStreamLogFile(const QString &streamID)
     appendLine(this->currentStreamFileHandle, generateOpeningString(now));
 }
 
-void LoggingChannel::addMessage(MessagePtr message, const QString &streamID)
+void LoggingChannel::addMessage(const MessagePtr &message,
+                                const QString &streamID)
 {
     QDateTime now = QDateTime::currentDateTime();
 

@@ -25,7 +25,7 @@ public:
     LoggingChannel(LoggingChannel &&) = delete;
     LoggingChannel &operator=(LoggingChannel &&) = delete;
 
-    void addMessage(MessagePtr message, const QString &streamID);
+    void addMessage(const MessagePtr &message, const QString &streamID);
 
 private:
     void openLogFile();
