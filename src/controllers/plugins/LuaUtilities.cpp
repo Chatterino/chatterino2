@@ -288,7 +288,7 @@ QString toString(lua_State *L, StackIdx idx)
 
 void PeekResult::throwAsLuaError(lua_State *L)
 {
-    // Note that this uses lua buffers to ensure deallocation of the error string
+    // This uses lua buffers to ensure deallocation of the error string
     luaL_Buffer buf;
     luaL_buffinit(L, &buf);
     bool first = true;
