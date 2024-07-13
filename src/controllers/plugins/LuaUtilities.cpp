@@ -156,31 +156,35 @@ StackIdx push(lua_State *L, const api::CompletionEvent &ev)
     return idx;
 }
 
-bool peek(lua_State *L, int *out, StackIdx idx)
+PeekResult peek(lua_State *L, int *out, StackIdx idx)
 {
     StackGuard guard(L);
     if (lua_isnumber(L, idx) == 0)
     {
-        return false;
+        return {
+            false,
+            {QString("Expected an integer got %1").arg(luaL_typename(L, idx))}};
     }
 
     *out = lua_tointeger(L, idx);
-    return true;
+    return {};
 }
 
-bool peek(lua_State *L, bool *out, StackIdx idx)
+PeekResult peek(lua_State *L, bool *out, StackIdx idx)
 {
     StackGuard guard(L);
     if (!lua_isboolean(L, idx))
     {
-        return false;
+        return {
+            false,
+            {QString("Expected a boolean got %1").arg(luaL_typename(L, idx))}};
     }
 
     *out = bool(lua_toboolean(L, idx));
-    return true;
+    return {};
 }
 
-bool peek(lua_State *L, double *out, StackIdx idx)
+PeekResult peek(lua_State *L, double *out, StackIdx idx)
 {
     StackGuard guard(L);
     int ok{0};
@@ -188,76 +192,91 @@ bool peek(lua_State *L, double *out, StackIdx idx)
     if (ok != 0)
     {
         *out = v;
+        return {};
     }
-    return ok != 0;
+
+    return PeekResult::ofTypeError(L, idx, "integer or float");
 }
 
-bool peek(lua_State *L, QString *out, StackIdx idx)
+PeekResult peek(lua_State *L, QString *out, StackIdx idx)
 {
     StackGuard guard(L);
     size_t len{0};
     const char *str = lua_tolstring(L, idx, &len);
     if (str == nullptr)
     {
-        return false;
+        return PeekResult::ofTypeError(L, idx, "string");
     }
     if (len >= INT_MAX)
     {
-        assert(false && "string longer than INT_MAX, shit's fucked, yo");
+        return {false,
+                {QString("Strings bigger than 2.1 gigabytes are not allowed")}};
     }
     *out = QString::fromUtf8(str, int(len));
-    return true;
+    return {};
 }
 
-bool peek(lua_State *L, QByteArray *out, StackIdx idx)
+PeekResult peek(lua_State *L, QByteArray *out, StackIdx idx)
 {
     StackGuard guard(L);
     size_t len{0};
     const char *str = lua_tolstring(L, idx, &len);
     if (str == nullptr)
     {
-        return false;
+        return PeekResult::ofTypeError(L, idx, "string");
     }
     if (len >= INT_MAX)
     {
-        assert(false && "string longer than INT_MAX, shit's fucked, yo");
+        return {false,
+                {QString("Strings bigger than 2.1 gigabytes are not allowed")}};
     }
     *out = QByteArray(str, int(len));
-    return true;
+    return {};
 }
 
-bool peek(lua_State *L, std::string *out, StackIdx idx)
+PeekResult peek(lua_State *L, std::string *out, StackIdx idx)
 {
     StackGuard guard(L);
     size_t len{0};
     const char *str = lua_tolstring(L, idx, &len);
     if (str == nullptr)
     {
-        return false;
+        return PeekResult::ofTypeError(L, idx, "string");
     }
     if (len >= INT_MAX)
     {
-        assert(false && "string longer than INT_MAX, shit's fucked, yo");
+        return {false,
+                {QString("Strings bigger than 2.1 gigabytes are not allowed")}};
     }
     *out = std::string(str, len);
-    return true;
+    return {};
 }
 
-bool peek(lua_State *L, api::CompletionList *out, StackIdx idx)
+PeekResult peek(lua_State *L, api::CompletionList *out, StackIdx idx)
 {
     StackGuard guard(L);
     int typ = lua_getfield(L, idx, "values");
     if (typ != LUA_TTABLE)
     {
         lua_pop(L, 1);
-        return false;
+        auto res = PeekResult::ofTypeError(L, idx, "string");
+        res.errorReason.emplace_back("While processing CompletionList.values");
+        return res;
     }
-    if (!lua::pop(L, &out->values, -1))
+    auto pres = lua::pop(L, &out->values, -1);
+    if (!pres)
     {
-        return false;
+        pres.errorReason.emplace_back("While processing CompletionList.values");
+        return pres;
     }
     lua_getfield(L, idx, "hide_others");
-    return lua::pop(L, &out->hideOthers);
+    pres = lua::pop(L, &out->hideOthers);
+    if (!pres)
+    {
+        pres.errorReason.emplace_back(
+            "While processing CompletionList.hide_others");
+    }
+    return pres;
 }
 
 QString toString(lua_State *L, StackIdx idx)
@@ -290,5 +309,13 @@ void PeekResult::throwAsLuaError(lua_State *L)
     assert(false && "unreachable");
 }
 
+PeekResult PeekResult::ofTypeError(lua_State *L, StackIdx idx,
+                                   const QString &expect)
+{
+    return PeekResult{
+        .ok = false,
+        .errorReason = {
+            QString("Expected %1, got %2").arg(expect, luaL_typename(L, idx))}};
+}
 }  // namespace chatterino::lua
 #endif

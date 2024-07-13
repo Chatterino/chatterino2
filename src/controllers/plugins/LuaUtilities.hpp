@@ -1,8 +1,9 @@
 #pragma once
 
 #ifdef CHATTERINO_HAVE_PLUGINS
-
 #    include "common/QLogging.hpp"
+
+#    include <boost/type_index.hpp>
 
 extern "C" {
 #    include <lua.h>
@@ -19,7 +20,6 @@ extern "C" {
 #    include <variant>
 #    include <vector>
 struct lua_State;
-class QJsonObject;
 namespace chatterino {
 struct CommandContext;
 }  // namespace chatterino
@@ -83,16 +83,19 @@ struct PeekResult {
      * As luaL_error never returns this function does not either.
      */
     [[noreturn]] void throwAsLuaError(lua_State *L);
+
+    static PeekResult ofTypeError(lua_State *L, StackIdx idx,
+                                  const QString &expect);
 };
 
 // returns OK?
-bool peek(lua_State *L, int *out, StackIdx idx = -1);
-bool peek(lua_State *L, bool *out, StackIdx idx = -1);
-bool peek(lua_State *L, double *out, StackIdx idx = -1);
-bool peek(lua_State *L, QString *out, StackIdx idx = -1);
-bool peek(lua_State *L, QByteArray *out, StackIdx idx = -1);
-bool peek(lua_State *L, std::string *out, StackIdx idx = -1);
-bool peek(lua_State *L, api::CompletionList *out, StackIdx idx = -1);
+PeekResult peek(lua_State *L, int *out, StackIdx idx = -1);
+PeekResult peek(lua_State *L, bool *out, StackIdx idx = -1);
+PeekResult peek(lua_State *L, double *out, StackIdx idx = -1);
+PeekResult peek(lua_State *L, QString *out, StackIdx idx = -1);
+PeekResult peek(lua_State *L, QByteArray *out, StackIdx idx = -1);
+PeekResult peek(lua_State *L, std::string *out, StackIdx idx = -1);
+PeekResult peek(lua_State *L, api::CompletionList *out, StackIdx idx = -1);
 
 /**
  * @brief Converts Lua object at stack index idx to a string.
@@ -170,12 +173,12 @@ StackIdx push(lua_State *L, std::optional<T> val)
 }
 
 template <typename T>
-bool peek(lua_State *L, std::optional<T> *out, StackIdx idx = -1)
+PeekResult peek(lua_State *L, std::optional<T> *out, StackIdx idx = -1)
 {
     if (lua_isnil(L, idx))
     {
         *out = std::nullopt;
-        return true;
+        return {};
     }
 
     *out = T();
@@ -183,7 +186,7 @@ bool peek(lua_State *L, std::optional<T> *out, StackIdx idx = -1)
 }
 
 template <typename T>
-bool peek(lua_State *L, std::vector<T> *vec, StackIdx idx = -1)
+PeekResult peek(lua_State *L, std::vector<T> *vec, StackIdx idx = -1)
 {
     StackGuard guard(L);
 
@@ -192,37 +195,44 @@ bool peek(lua_State *L, std::vector<T> *vec, StackIdx idx = -1)
         lua::stackDump(L, "!table");
         qCDebug(chatterinoLua)
             << "value is not a table, type is" << lua_type(L, idx);
-        return false;
+        return {false,
+                {QString("Expected value to be a table, its actual type is %1")
+                     .arg(lua_typename(L, lua_type(L, idx)))}};
     }
     auto len = lua_rawlen(L, idx);
     if (len == 0)
     {
         qCDebug(chatterinoLua) << "value has 0 length";
-        return true;
+        return {};
     }
     if (len > 1'000'000)
     {
         qCDebug(chatterinoLua) << "value is too long";
-        return false;
+        return {
+            false,
+            {QString("Table is too long, %1 > 1_000_000 elements").arg(len)}};
     }
     // count like lua
     for (int i = 1; i <= len; i++)
     {
         lua_geti(L, idx, i);
         std::optional<T> obj;
-        if (!lua::peek(L, &obj))
+        PeekResult pres = lua::peek(L, &obj);
+        if (!pres)
         {
-            //lua_seti(L, LUA_REGISTRYINDEX, 1);  // lazy
             qCDebug(chatterinoLua)
                 << "Failed to convert lua object into c++: at array index " << i
                 << ":";
-            stackDump(L, "bad conversion into string");
-            return false;
+            stackDump(L, "bad conversion");
+            pres.errorReason.push_back(
+                QString("At element %1 of a table").arg(i));
+
+            return pres;
         }
         lua_pop(L, 1);
         vec->push_back(obj.value());
     }
-    return true;
+    return {};
 }
 
 /**
@@ -230,21 +240,29 @@ bool peek(lua_State *L, std::vector<T> *vec, StackIdx idx = -1)
  */
 template <typename T,
           typename std::enable_if<std::is_enum_v<T>, bool>::type = true>
-bool peek(lua_State *L, T *out, StackIdx idx = -1)
+PeekResult peek(lua_State *L, T *out, StackIdx idx = -1)
 {
     std::string tmp;
-    if (!lua::peek(L, &tmp, idx))
+    auto pres = lua::peek(L, &tmp, idx);
+    if (!pres)
     {
-        return false;
+        std::string type = boost::typeindex::type_id<T>().pretty_name();
+        pres.errorReason.push_back(QString("While converting to enum %1")
+                                       .arg(QString::fromStdString(type)));
+        return pres;
     }
     std::optional<T> opt = magic_enum::enum_cast<T>(tmp);
     if (opt.has_value())
     {
         *out = opt.value();
-        return true;
+        return {};
     }
 
-    return false;
+    std::string type = boost::typeindex::type_id<T>().pretty_name();
+    return {.ok = false,
+            .errorReason = {QString("Invalid enum value \"%1\" for enum %2")
+                                .arg(QString::fromStdString(tmp),
+                                     QString::fromStdString(type))}};
 }
 
 /**
@@ -305,19 +323,19 @@ StackIdx push(lua_State *L, T inp)
  * @brief Converts a Lua object into c++ and removes it from the stack.
  * If peek fails, the object is still removed from the stack.
  *
- * Relies on bool peek(lua_State*, T*, StackIdx) existing.
+ * Relies on PeekResult peek(lua_State*, T*, StackIdx) existing.
  */
 template <typename T>
-bool pop(lua_State *L, T *out, StackIdx idx = -1)
+PeekResult pop(lua_State *L, T *out, StackIdx idx = -1)
 {
     StackGuard guard(L, -1);
-    auto ok = peek(L, out, idx);
+    auto res = peek(L, out, idx);
     if (idx < 0)
     {
         idx = lua_gettop(L) + idx + 1;
     }
     lua_remove(L, idx);
-    return ok;
+    return res;
 }
 
 /**
