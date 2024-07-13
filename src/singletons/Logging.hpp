@@ -1,9 +1,7 @@
 #pragma once
 
-#include "common/Channel.hpp"
 #include "util/QStringHash.hpp"
 #include "util/ThreadGuard.hpp"
-#include "widgets/helper/ChannelView.hpp"
 
 #include <QString>
 
