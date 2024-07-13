@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QDateTime>
 #include <QFile>
 #include <QString>
 

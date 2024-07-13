@@ -7,6 +7,7 @@
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 
+#include <QDateTime>
 #include <QDir>
 
 namespace {
