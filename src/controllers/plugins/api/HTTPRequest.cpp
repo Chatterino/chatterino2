@@ -9,6 +9,7 @@
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "util/DebugCount.hpp"
+#    include "util/drop.hpp"
 
 extern "C" {
 #    include <lauxlib.h>
@@ -264,12 +265,15 @@ int HTTPRequest::set_header(lua_State *L)
     std::string value;
     if (!lua::pop(L, &value))
     {
+        drop(value);
         return luaL_error(
             L, "cannot get value (2nd argument of HTTPRequest:set_header)");
     }
     std::string name;
     if (!lua::pop(L, &name))
     {
+        drop(value);
+        drop(name);
         return luaL_error(
             L, "cannot get name (1st argument of HTTPRequest:set_header)");
     }
