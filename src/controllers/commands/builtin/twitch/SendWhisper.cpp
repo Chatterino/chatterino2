@@ -152,10 +152,10 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                     void operator()(const QString &string,
                                     MessageBuilder &b) const
                     {
-                        LinkParser parser(string);
-                        if (parser.result())
+                        auto link = linkparser::parse(string);
+                        if (link)
                         {
-                            b.addLink(*parser.result());
+                            b.addLink(*link, string);
                         }
                         else
                         {
