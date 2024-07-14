@@ -148,6 +148,16 @@ void strip(QStringView &source)
     }
 }
 
+/// @brief Checks if @a c is valid in a domain
+///
+/// Valid characters are 0-9, A-Z, a-z, '-', '_', and '.' (like in GFM)
+/// and all non-ASCII characters (unlike in GFM).
+Q_ALWAYS_INLINE bool isValidDomainChar(char16_t c)
+{
+    return c >= 0x80 || (u'0' <= c && c <= u'9') || (u'A' <= c && c <= u'Z') ||
+           (u'a' <= c && c <= u'z') || c == u'_' || c == u'-' || c == u'.';
+}
+
 }  // namespace
 
 namespace chatterino::linkparser {
@@ -232,6 +242,11 @@ std::optional<Parsed> parse(const QString &source) noexcept
             host = remaining.mid(0, i);
             rest = remaining.mid(i);
             break;
+        }
+
+        if (!isValidDomainChar(currentChar))
+        {
+            return result;
         }
     }
 

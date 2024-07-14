@@ -1,11 +1,13 @@
 #include "common/LinkParser.hpp"
 
+#include "common/Literals.hpp"
 #include "Test.hpp"
 
 #include <QString>
 #include <QStringList>
 
 using namespace chatterino;
+using namespace literals;
 
 struct Case {
     // -Wmissing-field-initializers complains otherwise
@@ -91,6 +93,14 @@ TEST(LinkParser, parseDomainLinks)
         {"", "a.com", "?("},
         {"", "a.com", "#("},
         {"", "a.com", "/__my_user__"},
+        {"", "a.b.c.-._.1.com", ""},
+        {"", "0123456789.com", ""},
+        {"", "ABCDEFGHIJKLMNOPQRSTUVWXYZ.com", ""},
+        {"", "abcdefghijklmnopqrstuvwxyz.com", ""},
+        // non-ASCII characters are allowed
+        {"", u"köln.de"_s, ""},
+        {"", u"ü.com"_s, ""},
+        {"", u"─.com"_s, ""},
         // test case-insensitiveness
         {"HtTpS://", "127.0.0.1.CoM"},
         {"HTTP://", "XD.CHATTERINO.COM", "/#?FOO"},
@@ -168,6 +178,7 @@ TEST(LinkParser, doesntParseInvalidIpv4Links)
         "196.162.8.1(())",
         "196.162.8.1(",
         "196.162.8.1(!",
+        "127.1.1;.com",
     };
 
     for (const auto &input : inputs)
@@ -219,11 +230,22 @@ TEST(LinkParser, doesntParseInvalidLinks)
         "~~a.com()",
         "https://chatterino.com><https://chatterino.com",
         "<https://chatterino.com><https://chatterino.com>",
-        // invalid characters are still accepted (see #4769)
-        // "chatterino.com><chatterino.com",
-        // "https://chatterino.com><chatterino.com",
-        // "<chatterino.com><chatterino.com>",
-        // "<https://chatterino.com><chatterino.com>",
+        "chatterino.com><chatterino.com",
+        "https://chatterino.com><chatterino.com",
+        "<chatterino.com><chatterino.com>",
+        "<https://chatterino.com><chatterino.com>",
+        "info@example.com",
+        "user:pass@example.com",
+        ":.com",
+        "a:.com",
+        "1:.com",
+        "[a].com",
+        "`a`.com",
+        "{a}.com",
+        "a.com:pass@example.com",
+        "@@@.com",
+        "%%%.com",
+        "*.com",
     };
 
     for (const auto &input : inputs)
