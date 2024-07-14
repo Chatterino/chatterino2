@@ -1,5 +1,6 @@
 #include "singletons/Logging.hpp"
 
+#include "messages/Message.hpp"
 #include "singletons/helper/LoggingChannel.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
@@ -12,7 +13,7 @@
 
 namespace chatterino {
 
-void Logging::initialize(Settings &settings, Paths & /*paths*/)
+Logging::Logging(Settings &settings)
 {
     // We can safely ignore this signal connection since settings are only-ever destroyed
     // on application exit
@@ -52,7 +53,7 @@ void Logging::addMessage(const QString &channelName, MessagePtr message,
     auto platIt = this->loggingChannels_.find(platformName);
     if (platIt == this->loggingChannels_.end())
     {
-        auto channel = new LoggingChannel(channelName, platformName);
+        auto *channel = new LoggingChannel(channelName, platformName);
         channel->addMessage(message);
         auto map = std::map<QString, std::unique_ptr<LoggingChannel>>();
         this->loggingChannels_[platformName] = std::move(map);
@@ -63,7 +64,7 @@ void Logging::addMessage(const QString &channelName, MessagePtr message,
     auto chanIt = platIt->second.find(channelName);
     if (chanIt == platIt->second.end())
     {
-        auto channel = new LoggingChannel(channelName, platformName);
+        auto *channel = new LoggingChannel(channelName, platformName);
         channel->addMessage(message);
         platIt->second.emplace(channelName, std::move(channel));
     }

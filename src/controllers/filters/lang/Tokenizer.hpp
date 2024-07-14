@@ -18,6 +18,7 @@ static const QMap<QString, QString> validIdentifiersMap = {
     {"channel.name", "channel name"},
     {"channel.watching", "/watching channel?"},
     {"channel.live", "channel live?"},
+    {"flags.action", "action/me message?"},
     {"flags.highlighted", "highlighted?"},
     {"flags.points_redeemed", "redeemed points?"},
     {"flags.sub_message", "sub/resub message?"},
@@ -32,8 +33,14 @@ static const QMap<QString, QString> validIdentifiersMap = {
     {"flags.whisper", "whisper message?"},
     {"flags.reply", "reply message?"},
     {"flags.automod", "automod message?"},
+    {"flags.restricted", "restricted message?"},
+    {"flags.monitored", "monitored message?"},
     {"message.content", "message text"},
-    {"message.length", "message length"}};
+    {"message.length", "message length"},
+    {"reward.title", "point reward title"},
+    {"reward.cost", "point reward cost"},
+    {"reward.id", "point reward id"},
+};
 
 // clang-format off
 static const QRegularExpression tokenRegex(

@@ -3,7 +3,6 @@
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "util/CombinePath.hpp"
-#include "util/Qt.hpp"
 #include "util/XDGDesktopFile.hpp"
 #include "util/XDGDirectory.hpp"
 

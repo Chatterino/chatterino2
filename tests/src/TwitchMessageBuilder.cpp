@@ -3,18 +3,20 @@
 #include "common/Channel.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
+#include "controllers/ignores/IgnorePhrase.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "mocks/Channel.hpp"
+#include "mocks/ChatterinoBadges.hpp"
+#include "mocks/DisabledStreamerMode.hpp"
 #include "mocks/EmptyApplication.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "mocks/UserData.hpp"
-#include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "singletons/Emotes.hpp"
+#include "Test.hpp"
 
-#include <gtest/gtest.h>
 #include <IrcConnection>
 #include <QDebug>
 #include <QString>
@@ -50,7 +52,7 @@ public:
         return &this->twitch;
     }
 
-    ChatterinoBadges *getChatterinoBadges() override
+    IChatterinoBadges *getChatterinoBadges() override
     {
         return &this->chatterinoBadges;
     }
@@ -70,14 +72,38 @@ public:
         return &this->highlights;
     }
 
+    BttvEmotes *getBttvEmotes() override
+    {
+        return &this->bttvEmotes;
+    }
+
+    FfzEmotes *getFfzEmotes() override
+    {
+        return &this->ffzEmotes;
+    }
+
+    SeventvEmotes *getSeventvEmotes() override
+    {
+        return &this->seventvEmotes;
+    }
+
+    IStreamerMode *getStreamerMode() override
+    {
+        return &this->streamerMode;
+    }
+
     AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;
     mock::MockTwitchIrcServer twitch;
-    ChatterinoBadges chatterinoBadges;
+    mock::ChatterinoBadges chatterinoBadges;
     FfzBadges ffzBadges;
     SeventvBadges seventvBadges;
     HighlightController highlights;
+    BttvEmotes bttvEmotes;
+    FfzEmotes ffzEmotes;
+    SeventvEmotes seventvEmotes;
+    DisabledStreamerMode streamerMode;
 };
 
 }  // namespace
@@ -121,7 +147,7 @@ TEST(TwitchMessageBuilder, CommaSeparatedListTagParsing)
         auto output = TwitchMessageBuilder::slashKeyValue(test.input);
 
         EXPECT_EQ(output, test.expectedOutput)
-            << "Input " << test.input.toStdString() << " failed";
+            << "Input " << test.input << " failed";
     }
 }
 
@@ -204,12 +230,12 @@ TEST(TwitchMessageBuilder, BadgeInfoParsing)
         auto outputBadgeInfo =
             TwitchMessageBuilder::parseBadgeInfoTag(privmsg->tags());
         EXPECT_EQ(outputBadgeInfo, test.expectedBadgeInfo)
-            << "Input for badgeInfo " << test.input.toStdString() << " failed";
+            << "Input for badgeInfo " << test.input << " failed";
 
         auto outputBadges =
             SharedMessageBuilder::parseBadgeTag(privmsg->tags());
         EXPECT_EQ(outputBadges, test.expectedBadges)
-            << "Input for badges " << test.input.toStdString() << " failed";
+            << "Input for badges " << test.input << " failed";
 
         delete privmsg;
     }
@@ -387,8 +413,7 @@ TEST_F(TestTwitchMessageBuilder, ParseTwitchEmotes)
             privmsg->tags(), originalMessage, 0);
 
         EXPECT_EQ(actualTwitchEmotes, test.expectedTwitchEmotes)
-            << "Input for twitch emotes " << test.input.toStdString()
-            << " failed";
+            << "Input for twitch emotes " << test.input << " failed";
 
         delete privmsg;
     }
@@ -458,5 +483,144 @@ TEST_F(TestTwitchMessageBuilder, ParseMessage)
         EXPECT_NE(msg.get(), nullptr);
 
         delete privmsg;
+    }
+}
+
+TEST_F(TestTwitchMessageBuilder, IgnoresReplace)
+{
+    struct TestCase {
+        std::vector<IgnorePhrase> phrases;
+        QString input;
+        std::vector<TwitchEmoteOccurrence> twitchEmotes;
+        QString expectedMessage;
+        std::vector<TwitchEmoteOccurrence> expectedTwitchEmotes;
+    };
+
+    auto *twitchEmotes = this->mockApplication->getEmotes()->getTwitchEmotes();
+
+    auto emoteAt = [&](int at, const QString &name) {
+        return TwitchEmoteOccurrence{
+            .start = at,
+            .end = static_cast<int>(at + name.size() - 1),
+            .ptr =
+                twitchEmotes->getOrCreateEmote(EmoteId{name}, EmoteName{name}),
+            .name = EmoteName{name},
+        };
+    };
+
+    auto regularReplace = [](auto pattern, auto replace,
+                             bool caseSensitive = true) {
+        return IgnorePhrase(pattern, false, false, replace, caseSensitive);
+    };
+    auto regexReplace = [](auto pattern, auto regex,
+                           bool caseSensitive = true) {
+        return IgnorePhrase(pattern, true, false, regex, caseSensitive);
+    };
+
+    std::vector<TestCase> testCases{
+        {
+            {regularReplace("foo1", "baz1")},
+            "foo1 Kappa",
+            {emoteAt(4, "Kappa")},
+            "baz1 Kappa",
+            {emoteAt(4, "Kappa")},
+        },
+        {
+            {regularReplace("foo1", "baz1", false)},
+            "FoO1 Kappa",
+            {emoteAt(4, "Kappa")},
+            "baz1 Kappa",
+            {emoteAt(4, "Kappa")},
+        },
+        {
+            {regexReplace("f(o+)1", "baz1[\\1]")},
+            "foo1 Kappa",
+            {emoteAt(4, "Kappa")},
+            "baz1[oo] Kappa",
+            {emoteAt(8, "Kappa")},
+        },
+
+        {
+            {regexReplace("f(o+)1", R"(baz1[\0][\1][\2])")},
+            "foo1 Kappa",
+            {emoteAt(4, "Kappa")},
+            "baz1[\\0][oo][\\2] Kappa",
+            {emoteAt(16, "Kappa")},
+        },
+        {
+            {regexReplace("f(o+)(\\d+)", "baz1[\\1+\\2]")},
+            "foo123 Kappa",
+            {emoteAt(6, "Kappa")},
+            "baz1[oo+123] Kappa",
+            {emoteAt(12, "Kappa")},
+        },
+        {
+            {regexReplace("(?<=foo)(\\d+)", "[\\1]")},
+            "foo123 Kappa",
+            {emoteAt(6, "Kappa")},
+            "foo[123] Kappa",
+            {emoteAt(8, "Kappa")},
+        },
+        {
+            {regexReplace("a(?=a| )", "b")},
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            "aaaa"
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa "
+            "Kappa",
+            {emoteAt(127, "Kappa")},
+            "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+            "bbbb"
+            "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb "
+            "Kappa",
+            {emoteAt(127, "Kappa")},
+        },
+        {
+            {regexReplace("abc", "def", false)},
+            "AbC Kappa",
+            {emoteAt(3, "Kappa")},
+            "def Kappa",
+            {emoteAt(3, "Kappa")},
+        },
+        {
+            {
+                regexReplace("abc", "def", false),
+                regularReplace("def", "ghi"),
+            },
+            "AbC Kappa",
+            {emoteAt(3, "Kappa")},
+            "ghi Kappa",
+            {emoteAt(3, "Kappa")},
+        },
+        {
+            {
+                regexReplace("a(?=a| )", "b"),
+                regexReplace("b(?=b| )", "c"),
+            },
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            "aaaa"
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa "
+            "Kappa",
+            {emoteAt(127, "Kappa")},
+            "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+            "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc "
+            "Kappa",
+            {emoteAt(127, "Kappa")},
+        },
+    };
+
+    for (const auto &test : testCases)
+    {
+        auto message = test.input;
+        auto emotes = test.twitchEmotes;
+        TwitchMessageBuilder::processIgnorePhrases(test.phrases, message,
+                                                   emotes);
+
+        EXPECT_EQ(message, test.expectedMessage)
+            << "Message not equal for input '" << test.input
+            << "' - expected: '" << test.expectedMessage << "' got: '"
+            << message << "'";
+        EXPECT_EQ(emotes, test.expectedTwitchEmotes)
+            << "Twitch emotes not equal for input '" << test.input
+            << "' and output '" << message << "'";
     }
 }

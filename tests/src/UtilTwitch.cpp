@@ -1,6 +1,6 @@
+#include "Test.hpp"
 #include "util/Twitch.hpp"
 
-#include <gtest/gtest.h>
 #include <QApplication>
 #include <QDebug>
 #include <QtConcurrent>
@@ -72,9 +72,8 @@ TEST(UtilTwitch, StripUserName)
         stripUserName(userName);
 
         EXPECT_EQ(userName, expectedUserName)
-            << qUtf8Printable(userName) << " (" << qUtf8Printable(inputUserName)
-            << ") did not match expected value "
-            << qUtf8Printable(expectedUserName);
+            << userName << " (" << inputUserName
+            << ") did not match expected value " << expectedUserName;
     }
 }
 
@@ -153,10 +152,8 @@ TEST(UtilTwitch, StripChannelName)
         stripChannelName(userName);
 
         EXPECT_EQ(userName, expectedChannelName)
-            << qUtf8Printable(userName) << " ("
-            << qUtf8Printable(inputChannelName)
-            << ") did not match expected value "
-            << qUtf8Printable(expectedChannelName);
+            << userName << " (" << inputChannelName
+            << ") did not match expected value " << expectedChannelName;
     }
 }
 
@@ -259,14 +256,12 @@ TEST(UtilTwitch, ParseUserNameOrID)
         auto [actualUserName, actualUserID] = parseUserNameOrID(input);
 
         EXPECT_EQ(actualUserName, expectedUserName)
-            << "name " << qUtf8Printable(actualUserName) << " ("
-            << qUtf8Printable(input) << ") did not match expected value "
-            << qUtf8Printable(expectedUserName);
+            << "name " << actualUserName << " (" << input
+            << ") did not match expected value " << expectedUserName;
 
         EXPECT_EQ(actualUserID, expectedUserID)
-            << "id " << qUtf8Printable(actualUserID) << " ("
-            << qUtf8Printable(input) << ") did not match expected value "
-            << qUtf8Printable(expectedUserID);
+            << "id " << actualUserID << " (" << input
+            << ") did not match expected value " << expectedUserID;
     }
 }
 
@@ -319,7 +314,7 @@ TEST(UtilTwitch, UserLoginRegexp)
         auto actual = regexp.match(inputUserLogin);
 
         EXPECT_EQ(match.hasMatch(), expectedMatch)
-            << qUtf8Printable(inputUserLogin) << " did not match as expected";
+            << inputUserLogin << " did not match as expected";
     }
 }
 
@@ -371,7 +366,7 @@ TEST(UtilTwitch, UserNameRegexp)
         auto actual = regexp.match(inputUserLogin);
 
         EXPECT_EQ(match.hasMatch(), expectedMatch)
-            << qUtf8Printable(inputUserLogin) << " did not match as expected";
+            << inputUserLogin << " did not match as expected";
     }
 }
 
@@ -405,8 +400,7 @@ TEST(UtilTwitch, CleanHelixColor)
         cleanHelixColorName(actualColor);
 
         EXPECT_EQ(actualColor, expectedColor)
-            << qUtf8Printable(inputColor) << " cleaned up to "
-            << qUtf8Printable(actualColor) << " instead of "
-            << qUtf8Printable(expectedColor);
+            << inputColor << " cleaned up to " << actualColor << " instead of "
+            << expectedColor;
     }
 }

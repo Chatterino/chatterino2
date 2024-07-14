@@ -4,6 +4,7 @@
 #include "messages/ImageSet.hpp"
 #include "messages/Link.hpp"
 #include "messages/MessageColor.hpp"
+#include "providers/links/LinkInfo.hpp"
 #include "singletons/Fonts.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
@@ -132,14 +133,14 @@ enum class MessageElementFlag : int64_t {
     // needed
     Collapsed = (1LL << 26),
 
-    // used for dynamic bold usernames
-    BoldUsername = (1LL << 27),
-    NonBoldUsername = (1LL << 28),
+    // A mention of a username that isn't the author of the message
+    Mention = (1LL << 27),
 
-    // for links
-    LowercaseLink = (1LL << 29),
-    OriginalLink = (1LL << 30),
+    // Unused = (1LL << 28),
 
+    // used to check if links should be lowercased
+    LowercaseLinks = (1LL << 29),
+    // Unused = (1LL << 30)
     // Unused: (1LL << 31)
 
     // for elements of the message reply
@@ -160,16 +161,6 @@ using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 class MessageElement
 {
 public:
-    enum UpdateFlags : char {
-        Update_Text = 1,
-        Update_Emotes = 2,
-        Update_Images = 4,
-        Update_All = Update_Text | Update_Emotes | Update_Images
-    };
-    enum ThumbnailType : char {
-        Link_Thumbnail = 1,
-    };
-
     virtual ~MessageElement();
 
     MessageElement(const MessageElement &) = delete;
@@ -178,54 +169,28 @@ public:
     MessageElement(MessageElement &&) = delete;
     MessageElement &operator=(MessageElement &&) = delete;
 
-    MessageElement *setLink(const Link &link);
-    MessageElement *setText(const QString &text);
+    virtual MessageElement *setLink(const Link &link);
     MessageElement *setTooltip(const QString &tooltip);
-    MessageElement *setThumbnailType(const ThumbnailType type);
-    MessageElement *setThumbnail(const ImagePtr &thumbnail);
 
     MessageElement *setTrailingSpace(bool value);
     const QString &getTooltip() const;
-    const ImagePtr &getThumbnail() const;
-    const ThumbnailType &getThumbnailType() const;
 
-    const Link &getLink() const;
+    virtual Link getLink() const;
     bool hasTrailingSpace() const;
     MessageElementFlags getFlags() const;
     void addFlags(MessageElementFlags flags);
-    MessageElement *updateLink();
 
     virtual void addToContainer(MessageLayoutContainer &container,
                                 MessageElementFlags flags) = 0;
-
-    pajlada::Signals::NoArgSignal linkChanged;
 
 protected:
     MessageElement(MessageElementFlags flags);
     bool trailingSpace = true;
 
 private:
-    QString text_;
     Link link_;
     QString tooltip_;
-    ImagePtr thumbnail_;
-    ThumbnailType thumbnailType_{};
     MessageElementFlags flags_;
-};
-
-// used when layout element doesn't have a creator
-class EmptyElement : public MessageElement
-{
-public:
-    EmptyElement();
-
-    void addToContainer(MessageLayoutContainer &container,
-                        MessageElementFlags flags) override;
-
-    static EmptyElement &instance();
-
-private:
-    ImagePtr image_;
 };
 
 // contains a simple image
@@ -269,15 +234,11 @@ public:
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
 
-private:
+protected:
+    QStringList words_;
+
     MessageColor color_;
     FontStyle style_;
-
-    struct Word {
-        QString text;
-        int width = -1;
-    };
-    std::vector<Word> words_;
 };
 
 // contains a text that will be truncated to one line
@@ -301,6 +262,84 @@ private:
         int width = -1;
     };
     std::vector<Word> words_;
+};
+
+class LinkElement : public TextElement
+{
+public:
+    struct Parsed {
+        QString lowercase;
+        QString original;
+    };
+
+    /// @param parsed The link as it appeared in the message
+    /// @param fullUrl A full URL (notably with a protocol)
+    LinkElement(const Parsed &parsed, const QString &fullUrl,
+                MessageElementFlags flags,
+                const MessageColor &color = MessageColor::Text,
+                FontStyle style = FontStyle::ChatMedium);
+    ~LinkElement() override = default;
+    LinkElement(const LinkElement &) = delete;
+    LinkElement(LinkElement &&) = delete;
+    LinkElement &operator=(const LinkElement &) = delete;
+    LinkElement &operator=(LinkElement &&) = delete;
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+
+    Link getLink() const override;
+
+    [[nodiscard]] LinkInfo *linkInfo()
+    {
+        return &this->linkInfo_;
+    }
+
+private:
+    LinkInfo linkInfo_;
+    // these are implicitly shared
+    QStringList lowercase_;
+    QStringList original_;
+};
+
+/**
+ * @brief Contains a username mention.
+ *
+ * Examples of mentions:
+ *                      V
+ * 13:37 pajlada: hello @forsen
+ *
+ *                                           V       V
+ * 13:37 The moderators of this channel are: forsen, nuuls
+ */
+class MentionElement : public TextElement
+{
+public:
+    MentionElement(const QString &displayName, QString loginName_,
+                   MessageColor fallbackColor_, MessageColor userColor_);
+    ~MentionElement() override = default;
+    MentionElement(const MentionElement &) = delete;
+    MentionElement(MentionElement &&) = delete;
+    MentionElement &operator=(const MentionElement &) = delete;
+    MentionElement &operator=(MentionElement &&) = delete;
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+
+    MessageElement *setLink(const Link &link) override;
+    Link getLink() const override;
+
+private:
+    /**
+     * The color of the element in case the "Colorize @usernames" is disabled
+     **/
+    MessageColor fallbackColor;
+
+    /**
+     * The color of the element in case the "Colorize @usernames" is enabled
+     **/
+    MessageColor userColor;
+
+    QString userLoginName;
 };
 
 // contains emote data and will pick the emote based on :

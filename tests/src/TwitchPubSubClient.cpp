@@ -3,12 +3,13 @@
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/pubsubmessages/AutoMod.hpp"
 #include "providers/twitch/pubsubmessages/Whisper.hpp"
-#include "TestHelpers.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
+#include "Test.hpp"
 
-#include <gtest/gtest.h>
 #include <QString>
 
 #include <chrono>
+#include <mutex>
 #include <optional>
 
 using namespace chatterino;
@@ -32,12 +33,57 @@ using namespace std::chrono_literals;
 
 #ifdef RUN_PUBSUB_TESTS
 
+template <typename T>
+class ReceivedMessage
+{
+    mutable std::mutex mutex;
+
+    bool isSet{false};
+    T t;
+
+public:
+    ReceivedMessage() = default;
+
+    explicit operator bool() const
+    {
+        std::unique_lock lock(this->mutex);
+
+        return this->isSet;
+    }
+
+    ReceivedMessage &operator=(const T &newT)
+    {
+        std::unique_lock lock(this->mutex);
+
+        this->isSet = true;
+        this->t = newT;
+
+        return *this;
+    }
+
+    bool operator==(const T &otherT) const
+    {
+        std::unique_lock lock(this->mutex);
+
+        return this->t == otherT;
+    }
+
+    const T *operator->() const
+    {
+        return &this->t;
+    }
+};
+
 class FTest : public PubSub
 {
 public:
-    explicit FTest(const char *path, std::chrono::seconds pingInterval)
+    explicit FTest(const char *path, std::chrono::seconds pingInterval,
+                   QString token = "token")
         : PubSub(QString("wss://127.0.0.1:9050%1").arg(path), pingInterval)
     {
+        auto account = std::make_shared<TwitchAccount>("testaccount_420", token,
+                                                       "clientid", "123456");
+        this->setAccount(account);
     }
 };
 
@@ -45,7 +91,6 @@ TEST(TwitchPubSubClient, ServerRespondsToPings)
 {
     FTest pubSub("", 1s);
 
-    pubSub.setAccountData("token", "123456");
     pubSub.start();
 
     std::this_thread::sleep_for(50ms);
@@ -55,7 +100,7 @@ TEST(TwitchPubSubClient, ServerRespondsToPings)
     ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
     ASSERT_EQ(pubSub.diag.messagesReceived, 0);
 
-    pubSub.listenToTopic("test");
+    pubSub.listenToChannelModerationActions("123456");
 
     std::this_thread::sleep_for(150ms);
 
@@ -85,9 +130,8 @@ TEST(TwitchPubSubClient, ServerDoesntRespondToPings)
 {
     FTest pubSub("/dont-respond-to-ping", 1s);
 
-    pubSub.setAccountData("token", "123456");
     pubSub.start();
-    pubSub.listenToTopic("test");
+    pubSub.listenToChannelModerationActions("123456");
 
     std::this_thread::sleep_for(750ms);
 
@@ -115,7 +159,6 @@ TEST(TwitchPubSubClient, DisconnectedAfter1s)
 {
     FTest pubSub("/disconnect-client-after-1s", 10s);
 
-    pubSub.setAccountData("token", "123456");
     pubSub.start();
 
     std::this_thread::sleep_for(50ms);
@@ -126,7 +169,7 @@ TEST(TwitchPubSubClient, DisconnectedAfter1s)
     ASSERT_EQ(pubSub.diag.messagesReceived, 0);
     ASSERT_EQ(pubSub.diag.listenResponses, 0);
 
-    pubSub.listenToTopic("test");
+    pubSub.listenToChannelModerationActions("123456");
 
     std::this_thread::sleep_for(500ms);
 
@@ -136,14 +179,7 @@ TEST(TwitchPubSubClient, DisconnectedAfter1s)
     ASSERT_EQ(pubSub.diag.messagesReceived, 2);  // Listen RESPONSE & Pong
     ASSERT_EQ(pubSub.diag.listenResponses, 1);
 
-    std::this_thread::sleep_for(350ms);
-
-    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub.diag.messagesReceived, 2);
-
-    std::this_thread::sleep_for(600ms);
+    std::this_thread::sleep_for(950ms);
 
     ASSERT_EQ(pubSub.diag.connectionsOpened, 2);
     ASSERT_EQ(pubSub.diag.connectionsClosed, 1);
@@ -158,7 +194,6 @@ TEST(TwitchPubSubClient, ExceedTopicLimit)
 {
     FTest pubSub("", 1s);
 
-    pubSub.setAccountData("token", "123456");
     pubSub.start();
 
     ASSERT_EQ(pubSub.diag.connectionsOpened, 0);
@@ -168,7 +203,7 @@ TEST(TwitchPubSubClient, ExceedTopicLimit)
 
     for (auto i = 0; i < PubSubClient::MAX_LISTENS; ++i)
     {
-        pubSub.listenToTopic(QString("test-1.%1").arg(i));
+        pubSub.listenToChannelModerationActions(QString("1%1").arg(i));
     }
 
     std::this_thread::sleep_for(50ms);
@@ -179,7 +214,7 @@ TEST(TwitchPubSubClient, ExceedTopicLimit)
 
     for (auto i = 0; i < PubSubClient::MAX_LISTENS; ++i)
     {
-        pubSub.listenToTopic(QString("test-2.%1").arg(i));
+        pubSub.listenToChannelModerationActions(QString("2%1").arg(i));
     }
 
     std::this_thread::sleep_for(50ms);
@@ -199,7 +234,6 @@ TEST(TwitchPubSubClient, ExceedTopicLimitSingleStep)
 {
     FTest pubSub("", 1s);
 
-    pubSub.setAccountData("token", "123456");
     pubSub.start();
 
     ASSERT_EQ(pubSub.diag.connectionsOpened, 0);
@@ -209,7 +243,7 @@ TEST(TwitchPubSubClient, ExceedTopicLimitSingleStep)
 
     for (auto i = 0; i < PubSubClient::MAX_LISTENS * 2; ++i)
     {
-        pubSub.listenToTopic("test");
+        pubSub.listenToChannelModerationActions("123456");
     }
 
     std::this_thread::sleep_for(150ms);
@@ -229,17 +263,16 @@ TEST(TwitchPubSubClient, ReceivedWhisper)
 {
     FTest pubSub("/receive-whisper", 1s);
 
-    pubSub.setAccountData("token", "123456");
     pubSub.start();
 
     ReceivedMessage<PubSubWhisperMessage> aReceivedWhisper;
 
-    pubSub.signals_.whisper.received.connect(
+    std::ignore = pubSub.whisper.received.connect(
         [&aReceivedWhisper](const auto &whisperMessage) {
             aReceivedWhisper = whisperMessage;
         });
 
-    pubSub.listenToTopic("whispers.123456");
+    pubSub.listenToWhispers();
 
     std::this_thread::sleep_for(150ms);
 
@@ -266,19 +299,18 @@ TEST(TwitchPubSubClient, ModeratorActionsUserBanned)
 {
     FTest pubSub("/moderator-actions-user-banned", 1s);
 
-    pubSub.setAccountData("token", "123456");
     pubSub.start();
 
     ReceivedMessage<BanAction> received;
 
-    pubSub.signals_.moderation.userBanned.connect(
-        [&received](const auto &action) {
+    std::ignore =
+        pubSub.moderation.userBanned.connect([&received](const auto &action) {
             received = action;
         });
 
     ASSERT_EQ(pubSub.diag.listenResponses, 0);
 
-    pubSub.listenToTopic("chat_moderator_actions.123456.123456");
+    pubSub.listenToChannelModerationActions("123456");
 
     std::this_thread::sleep_for(50ms);
 
@@ -308,12 +340,11 @@ TEST(TwitchPubSubClient, ModeratorActionsUserBanned)
 TEST(TwitchPubSubClient, MissingToken)
 {
     // The token that's required is "xD"
-    FTest pubSub("/authentication-required", 1s);
+    FTest pubSub("/authentication-required", 1s, "");
 
-    // pubSub.setAccountData("", "123456");
     pubSub.start();
 
-    pubSub.listenToTopic("chat_moderator_actions.123456.123456");
+    pubSub.listenToChannelModerationActions("123456");
 
     std::this_thread::sleep_for(150ms);
 
@@ -336,10 +367,9 @@ TEST(TwitchPubSubClient, WrongToken)
     // The token that's required is "xD"
     FTest pubSub("/authentication-required", 1s);
 
-    pubSub.setAccountData("wrongtoken", "123456");
     pubSub.start();
 
-    pubSub.listenToTopic("chat_moderator_actions.123456.123456");
+    pubSub.listenToChannelModerationActions("123456");
 
     std::this_thread::sleep_for(50ms);
 
@@ -360,12 +390,11 @@ TEST(TwitchPubSubClient, WrongToken)
 TEST(TwitchPubSubClient, CorrectToken)
 {
     // The token that's required is "xD"
-    FTest pubSub("/authentication-required", 1s);
+    FTest pubSub("/authentication-required", 1s, "xD");
 
-    pubSub.setAccountData("xD", "123456");
     pubSub.start();
 
-    pubSub.listenToTopic("chat_moderator_actions.123456.123456");
+    pubSub.listenToChannelModerationActions("123456");
 
     std::this_thread::sleep_for(50ms);
 
@@ -387,19 +416,18 @@ TEST(TwitchPubSubClient, AutoModMessageHeld)
 {
     FTest pubSub("/automod-held", 1s);
 
-    pubSub.setAccountData("xD", "123456");
     pubSub.start();
 
     ReceivedMessage<PubSubAutoModQueueMessage> received;
     ReceivedMessage<QString> channelID;
 
-    pubSub.signals_.moderation.autoModMessageCaught.connect(
+    std::ignore = pubSub.moderation.autoModMessageCaught.connect(
         [&](const auto &msg, const QString &incomingChannelID) {
             received = msg;
             channelID = incomingChannelID;
         });
 
-    pubSub.listenToTopic("automod-queue.117166826.117166826");
+    pubSub.listenToAutomod("117166826");
 
     std::this_thread::sleep_for(50ms);
 

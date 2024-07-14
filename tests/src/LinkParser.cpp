@@ -1,27 +1,59 @@
 #include "common/LinkParser.hpp"
 
-#include <gtest/gtest.h>
+#include "Test.hpp"
+
 #include <QString>
 #include <QStringList>
 
 using namespace chatterino;
 
 struct Case {
+    // -Wmissing-field-initializers complains otherwise
+    // NOLINTBEGIN(readability-redundant-member-init)
     QString protocol{};
     QString host{};
     QString rest{};
+    // NOLINTEND(readability-redundant-member-init)
 
     void check() const
     {
-        auto input = this->protocol + this->host + this->rest;
-        LinkParser p(input);
-        ASSERT_TRUE(p.result().has_value()) << input.toStdString();
+        QStringList prefixes{
+            "", "_", "__", "<", "<<", "<_<", "(((", "<*_~(", "**", "~~",
+        };
+        QStringList suffixes{
+            "",  ">", "?",  "!",   ".",      ",",  ":",
+            "*", "~", ">>", "?!.", "~~,*!?", "**",
+        };
 
-        const auto &r = *p.result();
-        ASSERT_EQ(r.source, input);
-        ASSERT_EQ(r.protocol, this->protocol) << this->protocol.toStdString();
-        ASSERT_EQ(r.host, this->host) << this->host.toStdString();
-        ASSERT_EQ(r.rest, this->rest) << this->rest.toStdString();
+        for (const auto &prefix : prefixes)
+        {
+            for (const auto &suffix : suffixes)
+            {
+                checkSingle(prefix, suffix);
+            }
+        }
+    }
+
+    void checkSingle(const QString &prefix, const QString &suffix) const
+    {
+        auto link = this->protocol + this->host + this->rest;
+        auto input = prefix + link + suffix;
+        auto p = linkparser::parse(input);
+        ASSERT_TRUE(p.has_value()) << input;
+
+        if (!p)
+        {
+            return;
+        }
+
+        ASSERT_EQ(p->link, link);
+        ASSERT_EQ(p->protocol, this->protocol);
+        ASSERT_EQ(p->host, this->host);
+        ASSERT_EQ(p->rest, this->rest);
+        ASSERT_EQ(p->prefix(input), prefix);
+        ASSERT_EQ(p->suffix(input), suffix);
+        ASSERT_EQ(p->hasPrefix(input), !prefix.isEmpty());
+        ASSERT_EQ(p->hasSuffix(input), !suffix.isEmpty());
     }
 };
 
@@ -55,6 +87,10 @@ TEST(LinkParser, parseDomainLinks)
         {"", "https.cat"},
         {"", "httpsd.cat"},
         {"", "http.cat", "/200"},
+        {"", "http.cat", "/200("},
+        {"", "a.com", "?("},
+        {"", "a.com", "#("},
+        {"", "a.com", "/__my_user__"},
         // test case-insensitiveness
         {"HtTpS://", "127.0.0.1.CoM"},
         {"HTTP://", "XD.CHATTERINO.COM", "/#?FOO"},
@@ -81,7 +117,6 @@ TEST(LinkParser, parseIpv4Links)
         {"", "1.1.1.1"},
         {"", "001.001.01.1"},
         {"", "123.246.87.0"},
-        {"", "196.168.0.1", ":"},
         {"", "196.168.4.2", "/foo"},
         {"", "196.168.4.2", "?foo"},
         {"http://", "196.168.4.0", "#foo"},
@@ -121,12 +156,24 @@ TEST(LinkParser, doesntParseInvalidIpv4Links)
         "255.256.255.255",
         "255.255.256.255",
         "255.255.255.256",
+        ":127.0.0.1",
+        ">1.2.3.4",
+        "?196.162.8.1",
+        "!196.162.8.1",
+        ".196.162.8.1",
+        ",196.162.8.1",
+        ":196.162.8.1",
+        "+196.162.8.1",
+        "196.162.8.1<",
+        "196.162.8.1(())",
+        "196.162.8.1(",
+        "196.162.8.1(!",
     };
 
     for (const auto &input : inputs)
     {
-        LinkParser p(input);
-        ASSERT_FALSE(p.result().has_value()) << input.toStdString();
+        auto p = linkparser::parse(input);
+        ASSERT_FALSE(p.has_value()) << input;
     }
 }
 
@@ -165,11 +212,23 @@ TEST(LinkParser, doesntParseInvalidLinks)
         "http:/cat.com",
         "http:/cat.com",
         "https:/cat.com",
+        "chatterino.com-",
+        "<<>>",
+        ">><<",
+        "a.com>><<",
+        "~~a.com()",
+        "https://chatterino.com><https://chatterino.com",
+        "<https://chatterino.com><https://chatterino.com>",
+        // invalid characters are still accepted (see #4769)
+        // "chatterino.com><chatterino.com",
+        // "https://chatterino.com><chatterino.com",
+        // "<chatterino.com><chatterino.com>",
+        // "<https://chatterino.com><chatterino.com>",
     };
 
     for (const auto &input : inputs)
     {
-        LinkParser p(input);
-        ASSERT_FALSE(p.result().has_value()) << input.toStdString();
+        auto p = linkparser::parse(input);
+        ASSERT_FALSE(p.has_value()) << input;
     }
 }

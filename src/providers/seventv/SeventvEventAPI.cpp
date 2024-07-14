@@ -6,6 +6,7 @@
 #include "providers/seventv/eventapi/Message.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/seventv/SeventvCosmetics.hpp"
+#include "util/QMagicEnum.hpp"
 
 #include <QJsonArray>
 
@@ -228,7 +229,7 @@ void SeventvEventAPI::handleDispatch(const Dispatch &dispatch)
         default: {
             qCDebug(chatterinoSeventvEventAPI)
                 << "Unknown subscription type:"
-                << magic_enum::enum_name(dispatch.type).data()
+                << qmagicenum::enumName(dispatch.type)
                 << "body:" << dispatch.body;
         }
         break;
@@ -347,9 +348,7 @@ void SeventvEventAPI::onUserUpdate(const Dispatch &dispatch)
 
 void SeventvEventAPI::onCosmeticCreate(const CosmeticCreateDispatch &cosmetic)
 {
-    // We're using `Application::instance` instead of getApp(), because we're not in the GUI thread.
-    // `seventvBadges` does its own locking.
-    auto *badges = Application::instance->seventvBadges;
+    auto *badges = getIApp()->getSeventvBadges();
     switch (cosmetic.kind)
     {
         case CosmeticKind::Badge: {
@@ -364,9 +363,7 @@ void SeventvEventAPI::onCosmeticCreate(const CosmeticCreateDispatch &cosmetic)
 void SeventvEventAPI::onEntitlementCreate(
     const EntitlementCreateDeleteDispatch &entitlement)
 {
-    // We're using `Application::instance` instead of getApp(), because we're not in the GUI thread.
-    // `seventvBadges` does its own locking.
-    auto *badges = Application::instance->seventvBadges;
+    auto *badges = getIApp()->getSeventvBadges();
     switch (entitlement.kind)
     {
         case CosmeticKind::Badge: {
@@ -382,9 +379,7 @@ void SeventvEventAPI::onEntitlementCreate(
 void SeventvEventAPI::onEntitlementDelete(
     const EntitlementCreateDeleteDispatch &entitlement)
 {
-    // We're using `Application::instance` instead of getApp(), because we're not in the GUI thread.
-    // `seventvBadges` does its own locking.
-    auto *badges = Application::instance->seventvBadges;
+    auto *badges = getIApp()->getSeventvBadges();
     switch (entitlement.kind)
     {
         case CosmeticKind::Badge: {

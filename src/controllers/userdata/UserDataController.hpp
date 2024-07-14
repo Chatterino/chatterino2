@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/Singleton.hpp"
 #include "controllers/userdata/UserData.hpp"
 #include "util/QStringHash.hpp"
 #include "util/RapidjsonHelpers.hpp"
@@ -17,6 +16,8 @@
 
 namespace chatterino {
 
+class Paths;
+
 class IUserDataController
 {
 public:
@@ -28,10 +29,10 @@ public:
                               const QString &colorString) = 0;
 };
 
-class UserDataController : public IUserDataController, public Singleton
+class UserDataController : public IUserDataController
 {
 public:
-    UserDataController();
+    explicit UserDataController(const Paths &paths);
 
     // Get extra data about a user
     // If the user does not have any extra data, return none
@@ -40,9 +41,6 @@ public:
     // Update or insert extra data for the user's color override
     void setUserColor(const QString &userID,
                       const QString &colorString) override;
-
-protected:
-    void save() override;
 
 private:
     void update(std::unordered_map<QString, UserData> &&newUsers);

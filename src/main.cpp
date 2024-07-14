@@ -4,18 +4,21 @@
 #include "common/Modes.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
-#include "providers/Crashpad.hpp"
 #include "providers/IvrApi.hpp"
 #include "providers/NetworkConfigurationProvider.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "RunGui.hpp"
+#include "singletons/CrashHandler.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/Updates.hpp"
 #include "util/AttachToConsole.hpp"
+#include "util/IpcQueue.hpp"
 
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QMessageBox>
+#include <QSslSocket>
 #include <QStringList>
 
 #include <memory>
@@ -24,22 +27,17 @@ using namespace chatterino;
 
 int main(int argc, char **argv)
 {
-    // TODO: This is a temporary fix (see #4552).
-#if defined(Q_OS_WINDOWS) && QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    qputenv("QT_ENABLE_HIGHDPI_SCALING", "0");
-#endif
-
     QApplication a(argc, argv);
 
     QCoreApplication::setApplicationName("chatterino");
     QCoreApplication::setApplicationVersion(CHATTERINO_VERSION);
     QCoreApplication::setOrganizationDomain("chatterino.com");
 
-    Paths *paths{};
+    std::unique_ptr<Paths> paths;
 
     try
     {
-        paths = new Paths;
+        paths = std::make_unique<Paths>();
     }
     catch (std::runtime_error &error)
     {
@@ -61,19 +59,20 @@ int main(int argc, char **argv)
         box.exec();
         return 1;
     }
+    ipc::initPaths(paths.get());
 
-    initArgs(a);
+    const Args args(a, *paths);
 
 #ifdef CHATTERINO_WITH_CRASHPAD
-    const auto crashpadHandler = installCrashHandler();
+    const auto crashpadHandler = installCrashHandler(args, *paths);
 #endif
 
     // run in gui mode or browser extension host mode
-    if (getArgs().shouldRunBrowserExtensionHost)
+    if (args.shouldRunBrowserExtensionHost)
     {
         runBrowserExtensionHost();
     }
-    else if (getArgs().printVersion)
+    else if (args.printVersion)
     {
         attachToConsole();
 
@@ -87,10 +86,31 @@ int main(int argc, char **argv)
     }
     else
     {
-        if (getArgs().verbose)
+        if (args.verbose)
         {
             attachToConsole();
         }
+
+        qCInfo(chatterinoApp).noquote()
+            << "Chatterino Qt SSL library build version:"
+            << QSslSocket::sslLibraryBuildVersionString();
+        qCInfo(chatterinoApp).noquote()
+            << "Chatterino Qt SSL library version:"
+            << QSslSocket::sslLibraryVersionString();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
+        qCInfo(chatterinoApp).noquote()
+            << "Chatterino Qt SSL active backend:"
+            << QSslSocket::activeBackend() << "of"
+            << QSslSocket::availableBackends().join(", ");
+#    if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+        qCInfo(chatterinoApp) << "Chatterino Qt SSL active backend features:"
+                              << QSslSocket::supportedFeatures();
+#    endif
+        qCInfo(chatterinoApp) << "Chatterino Qt SSL active backend protocols:"
+                              << QSslSocket::supportedProtocols();
+#endif
+
+        Updates updates(*paths);
 
         NetworkConfigurationProvider::applyFromEnv(Env::get());
 
@@ -99,7 +119,7 @@ int main(int argc, char **argv)
 
         Settings settings(paths->settingsDirectory);
 
-        runGui(a, *paths, settings);
+        runGui(a, *paths, settings, args, updates);
     }
     return 0;
 }

@@ -2,7 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Literals.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
@@ -128,7 +128,34 @@ bool checkEmoteVisibility(const QJsonObject &emoteData)
     return !flags.has(SeventvEmoteFlag::ContentTwitchDisallowed);
 }
 
-EmoteMap parseEmotes(const QJsonArray &emoteSetEmotes, bool isGlobal)
+EmotePtr createUpdatedEmote(const EmotePtr &oldEmote,
+                            const EmoteUpdateDispatch &dispatch)
+{
+    bool toNonAliased = oldEmote->baseName.has_value() &&
+                        dispatch.emoteName == oldEmote->baseName->string;
+
+    auto baseName = oldEmote->baseName.value_or(oldEmote->name);
+    auto emote = std::make_shared<const Emote>(Emote(
+        {EmoteName{dispatch.emoteName}, oldEmote->images,
+         toNonAliased
+             ? createTooltip(dispatch.emoteName, oldEmote->author.string, false)
+             : createAliasedTooltip(dispatch.emoteName, baseName.string,
+                                    oldEmote->author.string, false),
+         oldEmote->homePage, oldEmote->zeroWidth, oldEmote->id,
+         oldEmote->author, makeConditionedOptional(!toNonAliased, baseName)}));
+    return emote;
+}
+
+}  // namespace
+
+namespace chatterino {
+
+using namespace seventv::eventapi;
+using namespace seventv::detail;
+using namespace literals;
+
+EmoteMap seventv::detail::parseEmotes(const QJsonArray &emoteSetEmotes,
+                                      bool isGlobal)
 {
     auto emotes = EmoteMap();
 
@@ -157,31 +184,6 @@ EmoteMap parseEmotes(const QJsonArray &emoteSetEmotes, bool isGlobal)
 
     return emotes;
 }
-
-EmotePtr createUpdatedEmote(const EmotePtr &oldEmote,
-                            const EmoteUpdateDispatch &dispatch)
-{
-    bool toNonAliased = oldEmote->baseName.has_value() &&
-                        dispatch.emoteName == oldEmote->baseName->string;
-
-    auto baseName = oldEmote->baseName.value_or(oldEmote->name);
-    auto emote = std::make_shared<const Emote>(Emote(
-        {EmoteName{dispatch.emoteName}, oldEmote->images,
-         toNonAliased
-             ? createTooltip(dispatch.emoteName, oldEmote->author.string, false)
-             : createAliasedTooltip(dispatch.emoteName, baseName.string,
-                                    oldEmote->author.string, false),
-         oldEmote->homePage, oldEmote->zeroWidth, oldEmote->id,
-         oldEmote->author, makeConditionedOptional(!toNonAliased, baseName)}));
-    return emote;
-}
-
-}  // namespace
-
-namespace chatterino {
-
-using namespace seventv::eventapi;
-using namespace literals;
 
 SeventvEmotes::SeventvEmotes()
     : global_(std::make_shared<EmoteMap>())
@@ -287,13 +289,11 @@ void SeventvEmotes::loadChannelEmotes(
             {
                 if (hasEmotes)
                 {
-                    shared->addMessage(
-                        makeSystemMessage("7TV channel emotes reloaded."));
+                    shared->addSystemMessage("7TV channel emotes reloaded.");
                 }
                 else
                 {
-                    shared->addMessage(
-                        makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
+                    shared->addSystemMessage(CHANNEL_HAS_NO_EMOTES);
                 }
             }
         },
@@ -310,8 +310,7 @@ void SeventvEmotes::loadChannelEmotes(
                     << result.parseJson();
                 if (manualRefresh)
                 {
-                    shared->addMessage(
-                        makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
+                    shared->addSystemMessage(CHANNEL_HAS_NO_EMOTES);
                 }
             }
             else
@@ -321,10 +320,10 @@ void SeventvEmotes::loadChannelEmotes(
                 qCWarning(chatterinoSeventv)
                     << "Error fetching 7TV emotes for channel" << channelId
                     << ", error" << errorString;
-                shared->addMessage(makeSystemMessage(
+                shared->addSystemMessage(
                     QStringLiteral("Failed to fetch 7TV channel "
                                    "emotes. (Error: %1)")
-                        .arg(errorString)));
+                        .arg(errorString));
             }
         });
 }
@@ -430,7 +429,7 @@ ImageSet SeventvEmotes::createImageSet(const QJsonObject &emoteData)
     auto baseUrl = host["url"].toString();
     auto files = host["files"].toArray();
 
-    std::array<ImagePtr, 3> sizes;
+    std::array<ImagePtr, 4> sizes;
     double baseWidth = 0.0;
     size_t nextSize = 0;
 
@@ -461,7 +460,7 @@ ImageSet SeventvEmotes::createImageSet(const QJsonObject &emoteData)
 
         auto image = Image::fromUrl(
             {QString("https:%1/%2").arg(baseUrl, file["name"].toString())},
-            scale);
+            scale, {static_cast<int>(width), file["height"].toInt(16)});
 
         sizes.at(nextSize) = image;
         nextSize++;
@@ -484,7 +483,18 @@ ImageSet SeventvEmotes::createImageSet(const QJsonObject &emoteData)
         }
     }
 
-    return ImageSet{sizes[0], sizes[1], sizes[2]};
+    // Typically, 7TV provides four versions (1x, 2x, 3x, and 4x). The 3x
+    // version has a scale factor of 1/3, which is a size other providers don't
+    // provide - they only provide the 4x version (0.25). To be in line with
+    // other providers, we prefer the 4x version but fall back to the 3x one if
+    // it doesn't exist.
+    auto largest = std::move(sizes[3]);
+    if (!largest || largest->isEmpty())
+    {
+        largest = std::move(sizes[2]);
+    }
+
+    return ImageSet{sizes[0], sizes[1], largest};
 }
 
 }  // namespace chatterino

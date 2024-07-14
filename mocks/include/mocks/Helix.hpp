@@ -119,12 +119,12 @@ public:
                  HelixFailureCallback failureCallback),
                 (override));
 
-    MOCK_METHOD(void, updateChannel,
-                (QString broadcasterId, QString gameId, QString language,
-                 QString title,
-                 std::function<void(NetworkResult)> successCallback,
-                 HelixFailureCallback failureCallback),
-                (override));
+    MOCK_METHOD(
+        void, updateChannel,
+        (QString broadcasterId, QString gameId, QString language, QString title,
+         std::function<void(NetworkResult)> successCallback,
+         (FailureCallback<HelixUpdateChannelError, QString> failureCallback)),
+        (override));
 
     MOCK_METHOD(void, manageAutoModMessages,
                 (QString userID, QString msgID, QString action,
@@ -326,6 +326,16 @@ public:
                  (FailureCallback<HelixBanUserError, QString> failureCallback)),
                 (override));  // /timeout, /ban
 
+    // /warn
+    // The extra parenthesis around the failure callback is because its type
+    // contains a comma
+    MOCK_METHOD(
+        void, warnUser,
+        (QString broadcasterID, QString moderatorID, QString userID,
+         QString reason, ResultCallback<> successCallback,
+         (FailureCallback<HelixWarnUserError, QString> failureCallback)),
+        (override));  // /warn
+
     // /w
     // The extra parenthesis around the failure callback is because its type
     // contains a comma
@@ -390,6 +400,14 @@ public:
         (QString fromBroadcasterID, QString toBroadcasterID,
          QString moderatorID, ResultCallback<> successCallback,
          (FailureCallback<HelixSendShoutoutError, QString> failureCallback)),
+        (override));
+
+    // send message
+    MOCK_METHOD(
+        void, sendChatMessage,
+        (HelixSendMessageArgs args,
+         ResultCallback<HelixSentMessage> successCallback,
+         (FailureCallback<HelixSendMessageError, QString> failureCallback)),
         (override));
 
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),

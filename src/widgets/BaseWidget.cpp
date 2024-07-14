@@ -1,5 +1,6 @@
 #include "widgets/BaseWidget.hpp"
 
+#include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "singletons/Theme.hpp"
@@ -17,10 +18,8 @@ namespace chatterino {
 
 BaseWidget::BaseWidget(QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
+    , theme(getIApp()->getThemes())
 {
-    // REMOVED
-    this->theme = getTheme();
-
     this->signalHolder_.managedConnect(this->theme->updated, [this]() {
         this->themeChangedEvent();
 
@@ -29,7 +28,7 @@ BaseWidget::BaseWidget(QWidget *parent, Qt::WindowFlags f)
 }
 void BaseWidget::clearShortcuts()
 {
-    for (auto shortcut : this->shortcuts_)
+    for (auto *shortcut : this->shortcuts_)
     {
         shortcut->setKey(QKeySequence());
         shortcut->removeEventFilter(this);
@@ -55,7 +54,11 @@ float BaseWidget::scale() const
 
 void BaseWidget::setScale(float value)
 {
-    // update scale value
+    if (this->scale_ == value)
+    {
+        return;
+    }
+
     this->scale_ = value;
 
     this->scaleChangedEvent(this->scale());
@@ -121,25 +124,12 @@ void BaseWidget::setScaleIndependantHeight(int value)
         QSize(this->scaleIndependantSize_.width(), value));
 }
 
-float BaseWidget::qtFontScale() const
-{
-    if (auto window = dynamic_cast<BaseWindow *>(this->window()))
-    {
-        // ensure no div by 0
-        return this->scale() / std::max<float>(0.01f, window->nativeScale_);
-    }
-    else
-    {
-        return this->scale();
-    }
-}
-
 void BaseWidget::childEvent(QChildEvent *event)
 {
     if (event->added())
     {
         // add element if it's a basewidget
-        if (auto widget = dynamic_cast<BaseWidget *>(event->child()))
+        if (auto *widget = dynamic_cast<BaseWidget *>(event->child()))
         {
             this->widgets_.push_back(widget);
         }

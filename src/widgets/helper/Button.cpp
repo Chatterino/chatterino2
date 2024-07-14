@@ -8,21 +8,43 @@
 #include <QPainter>
 #include <QScreen>
 
-namespace chatterino {
 namespace {
 
-    // returns a new resized image or the old one if the size didn't change
-    auto resizePixmap(const QPixmap &current, const QPixmap resized,
-                      const QSize &size) -> QPixmap
+QSizeF deviceIndependentSize(const QPixmap &pixmap)
+{
+#if QT_VERSION < QT_VERSION_CHECK(6, 2, 0)
+    return QSizeF(pixmap.width(), pixmap.height()) / pixmap.devicePixelRatio();
+#else
+    return pixmap.deviceIndependentSize();
+#endif
+}
+
+/**
+ * Resizes a pixmap to a desired size.
+ * Does nothing if the target pixmap is already sized correctly.
+ * 
+ * @param target The target pixmap.
+ * @param source The unscaled pixmap.
+ * @param size The desired device independent size.
+ * @param dpr The device pixel ratio of the target area. The size of the target in pixels will be `size * dpr`.
+ */
+void resizePixmap(QPixmap &target, const QPixmap &source, const QSize &size,
+                  qreal dpr)
+{
+    if (deviceIndependentSize(target) == size)
     {
-        if (resized.size() == size)
-            return resized;
-        else
-            return current.scaled(size, Qt::IgnoreAspectRatio,
-                                  Qt::SmoothTransformation);
+        return;
     }
 
+    QPixmap resized = source;
+    resized.setDevicePixelRatio(dpr);
+    target = resized.scaled(size * dpr, Qt::IgnoreAspectRatio,
+                            Qt::SmoothTransformation);
+}
+
 }  // namespace
+
+namespace chatterino {
 
 Button::Button(BaseWidget *parent)
     : BaseWidget(parent)
@@ -43,6 +65,12 @@ void Button::setMouseEffectColor(std::optional<QColor> color)
 
 void Button::setPixmap(const QPixmap &_pixmap)
 {
+    // Avoid updates if the pixmap didn't change
+    if (_pixmap.cacheKey() == this->pixmap_.cacheKey())
+    {
+        return;
+    }
+
     this->pixmap_ = _pixmap;
     this->resizedPixmap_ = {};
     this->update();
@@ -92,11 +120,17 @@ bool Button::getEnableMargin() const
 qreal Button::getCurrentDimAmount() const
 {
     if (this->dimPixmap_ == Dim::None || this->mouseOver_)
+    {
         return 1;
+    }
     else if (this->dimPixmap_ == Dim::Some)
+    {
         return 0.7;
+    }
     else
+    {
         return 0.15;
+    }
 }
 
 void Button::setBorderColor(const QColor &color)
@@ -114,7 +148,9 @@ const QColor &Button::getBorderColor() const
 void Button::setMenu(std::unique_ptr<QMenu> menu)
 {
     if (this->menu_)
+    {
         this->menu_.release()->deleteLater();
+    }
 
     this->menu_ = std::move(menu);
 
@@ -146,8 +182,8 @@ void Button::paintButton(QPainter &painter)
 
         QRect rect = this->rect();
 
-        this->resizedPixmap_ =
-            resizePixmap(this->pixmap_, this->resizedPixmap_, rect.size());
+        resizePixmap(this->resizedPixmap_, this->pixmap_, rect.size(),
+                     this->devicePixelRatio());
 
         int margin = this->height() < 22 * this->scale() ? 3 : 6;
 
@@ -222,12 +258,20 @@ void Button::enterEvent(QEnterEvent * /*event*/)
 void Button::enterEvent(QEvent * /*event*/)
 #endif
 {
-    this->mouseOver_ = true;
+    if (!this->mouseOver_)
+    {
+        this->mouseOver_ = true;
+        this->update();
+    }
 }
 
-void Button::leaveEvent(QEvent *)
+void Button::leaveEvent(QEvent * /*event*/)
 {
-    this->mouseOver_ = false;
+    if (this->mouseOver_)
+    {
+        this->mouseOver_ = false;
+        this->update();
+    }
 }
 
 void Button::mousePressEvent(QMouseEvent *event)
@@ -261,17 +305,26 @@ void Button::mousePressEvent(QMouseEvent *event)
 void Button::mouseReleaseEvent(QMouseEvent *event)
 {
     if (!this->enabled_)
+    {
         return;
+    }
+
+    bool isInside = this->rect().contains(event->pos());
 
     if (event->button() == Qt::LeftButton)
     {
         this->mouseDown_ = false;
 
-        if (this->rect().contains(event->pos()))
+        if (isInside)
+        {
             emit leftClicked();
+        }
     }
 
-    emit clicked(event->button());
+    if (isInside)
+    {
+        emit clicked(event->button());
+    }
 }
 
 void Button::mouseMoveEvent(QMouseEvent *event)
@@ -345,7 +398,9 @@ void Button::onMouseEffectTimeout()
 void Button::showMenu()
 {
     if (!this->menu_)
+    {
         return;
+    }
 
     auto menuSizeHint = this->menu_->sizeHint();
     auto point = this->mapToGlobal(

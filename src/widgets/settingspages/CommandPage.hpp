@@ -2,7 +2,6 @@
 
 #include "widgets/settingspages/SettingsPage.hpp"
 
-#include <QTextEdit>
 #include <QTimer>
 
 namespace chatterino {

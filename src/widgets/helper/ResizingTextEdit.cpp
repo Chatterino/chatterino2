@@ -77,11 +77,7 @@ QString ResizingTextEdit::textUnderCursor(bool *hadSpace) const
 
     auto textUpToCursor = currentText.left(tc.selectionStart());
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
     auto words = QStringView{textUpToCursor}.split(' ');
-#else
-    auto words = textUpToCursor.splitRef(' ');
-#endif
     if (words.size() == 0)
     {
         return QString();
@@ -124,7 +120,7 @@ bool ResizingTextEdit::eventFilter(QObject *obj, QEvent *event)
     {
         return false;
     }
-    auto ev = static_cast<QKeyEvent *>(event);
+    auto *ev = static_cast<QKeyEvent *>(event);
     ev->ignore();
     if ((ev->key() == Qt::Key_C || ev->key() == Qt::Key_Insert) &&
         ev->modifiers() == Qt::ControlModifier)
@@ -170,8 +166,9 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             // First type pressing tab after modifying a message, we refresh our
             // completion model
             this->completer_->setModel(completionModel);
-            completionModel->updateResults(currentCompletion,
-                                           this->isFirstWord());
+            completionModel->updateResults(
+                currentCompletion, this->toPlainText(),
+                this->textCursor().position(), this->isFirstWord());
             this->completionInProgress_ = true;
             {
                 // this blocks cursor movement events from resetting tab completion

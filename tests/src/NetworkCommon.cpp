@@ -1,6 +1,6 @@
-#include "common/NetworkCommon.hpp"
+#include "common/network/NetworkCommon.hpp"
 
-#include <gtest/gtest.h>
+#include "Test.hpp"
 
 using namespace chatterino;
 

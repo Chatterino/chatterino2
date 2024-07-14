@@ -113,28 +113,58 @@ bool startsWithPort(QStringView string)
     return true;
 }
 
+/// @brief Strips ignored characters off @a source
+///
+/// As per https://github.github.com/gfm/#autolinks-extension-:
+///
+/// '<', '*', '_', '~', and '(' are ignored at the beginning
+/// '>', '?', '!', '.', ',', ':', '*', '~', and ')' are ignored at the end
+///
+/// A difference to GFM is that the source isn't scanned for parentheses and '_'
+/// isn't a valid suffix.
+void strip(QStringView &source)
+{
+    while (!source.isEmpty())
+    {
+        auto c = source.first();
+        if (c == u'<' || c == u'*' || c == u'_' || c == u'~' || c == u'(')
+        {
+            source = source.mid(1);
+            continue;
+        }
+        break;
+    }
+
+    while (!source.isEmpty())
+    {
+        auto c = source.last();
+        if (c == u'>' || c == u'?' || c == u'!' || c == u'.' || c == u',' ||
+            c == u':' || c == u'*' || c == u'~' || c == u')')
+        {
+            source.chop(1);
+            continue;
+        }
+        break;
+    }
+}
+
 }  // namespace
 
-namespace chatterino {
+namespace chatterino::linkparser {
 
-LinkParser::LinkParser(const QString &unparsedString)
+std::optional<Parsed> parse(const QString &source) noexcept
 {
-    ParsedLink result;
+    std::optional<Parsed> result;
     // This is not implemented with a regex to increase performance.
-    QStringView remaining(unparsedString);
-    QStringView protocol(remaining);
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-    QStringView wholeString(unparsedString);
-    const auto refFromView = [&](QStringView view) {
-        return QStringRef(&unparsedString,
-                          static_cast<int>(view.begin() - wholeString.begin()),
-                          static_cast<int>(view.size()));
-    };
-#endif
+    QStringView link{source};
+    strip(link);
+
+    QStringView remaining = link;
+    QStringView protocol;
 
     // Check protocol for https?://
-    if (remaining.startsWith(QStringLiteral("http"), Qt::CaseInsensitive) &&
+    if (remaining.startsWith(u"http", Qt::CaseInsensitive) &&
         remaining.length() >= 4 + 3 + 1)  // 'http' + '://' + [any]
     {
         // optimistic view assuming there's a protocol (http or https)
@@ -145,16 +175,11 @@ LinkParser::LinkParser(const QString &unparsedString)
             withProto = withProto.mid(1);
         }
 
-        if (withProto.startsWith(QStringLiteral("://")))
+        if (withProto.startsWith(u"://"))
         {
             // there's really a protocol => consume it
             remaining = withProto.mid(3);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-            result.protocol = {protocol.begin(), remaining.begin()};
-#else
-            result.protocol =
-                refFromView({protocol.begin(), remaining.begin()});
-#endif
+            protocol = {link.begin(), remaining.begin()};
         }
     }
 
@@ -175,7 +200,7 @@ LinkParser::LinkParser(const QString &unparsedString)
         {
             if (lastWasDot)  // no double dots ..
             {
-                return;
+                return result;
             }
             lastDotPos = i;
             lastWasDot = true;
@@ -195,7 +220,7 @@ LinkParser::LinkParser(const QString &unparsedString)
 
             if (!startsWithPort(remaining))
             {
-                return;
+                return result;
             }
 
             break;
@@ -212,28 +237,22 @@ LinkParser::LinkParser(const QString &unparsedString)
 
     if (lastWasDot || lastDotPos <= 0)
     {
-        return;
+        return result;
     }
 
     // check host/tld
     if ((nDots == 3 && isValidIpv4(host)) ||
         isValidTld(host.mid(lastDotPos + 1)))
     {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-        result.host = host;
-        result.rest = rest;
-#else
-        result.host = refFromView(host);
-        result.rest = refFromView(rest);
-#endif
-        result.source = unparsedString;
-        this->result_ = std::move(result);
+        result = Parsed{
+            .protocol = protocol,
+            .host = host,
+            .rest = rest,
+            .link = link,
+        };
     }
+
+    return result;
 }
 
-const std::optional<ParsedLink> &LinkParser::result() const
-{
-    return this->result_;
-}
-
-}  // namespace chatterino
+}  // namespace chatterino::linkparser

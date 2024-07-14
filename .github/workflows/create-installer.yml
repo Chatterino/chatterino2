@@ -18,14 +18,14 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     strategy:
       matrix:
-        qt-version: ["6.5.0"]
+        qt-version: ["6.7.1"]
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # allows for tags access
 
       - name: Download artifact
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         with:
           workflow: build.yml
           name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip
@@ -43,7 +43,7 @@ jobs:
         run: echo "C:\Program Files (x86)\Inno Setup 6\" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Enable Developer Command Prompt
-        uses: ilammy/msvc-dev-cmd@v1.12.1
+        uses: ilammy/msvc-dev-cmd@v1.13.0
 
       - name: Build installer
         id: build-installer
@@ -52,7 +52,7 @@ jobs:
         shell: powershell
 
       - name: Upload installer
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: build/${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}.exe
           name: ${{ steps.build-installer.outputs.C2_INSTALLER_BASE_NAME }}.exe

@@ -15,7 +15,6 @@
 #include "controllers/sound/ISoundController.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
-#include "util/StreamerMode.hpp"
 #include "widgets/Notebook.hpp"
 
 #include <pajlada/settings/setting.hpp>
@@ -26,6 +25,19 @@ using TimeoutButton = std::pair<QString, int>;
 
 namespace chatterino {
 
+#ifdef Q_OS_WIN32
+#    define DEFAULT_FONT_FAMILY "Segoe UI"
+#    define DEFAULT_FONT_SIZE 10
+#else
+#    ifdef Q_OS_MACOS
+#        define DEFAULT_FONT_FAMILY "Helvetica Neue"
+#        define DEFAULT_FONT_SIZE 12
+#    else
+#        define DEFAULT_FONT_FAMILY "Arial"
+#        define DEFAULT_FONT_SIZE 11
+#    endif
+#endif
+
 void _actuallyRegisterSetting(
     std::weak_ptr<pajlada::Settings::SettingData> setting);
 
@@ -33,19 +45,6 @@ enum UsernameDisplayMode : int {
     Username = 1,                  // Username
     LocalizedName = 2,             // Localized name
     UsernameAndLocalizedName = 3,  // Username (Localized name)
-};
-
-enum HelixTimegateOverride : int {
-    // Use the default timegated behaviour
-    // This means we use the old IRC command up until the migration date and
-    // switch over to the Helix API only after the migration date
-    Timegate = 1,
-
-    // Ignore timegating and always force use the IRC command
-    AlwaysUseIRC = 2,
-
-    // Ignore timegating and always force use the Helix API
-    AlwaysUseHelix = 3,
 };
 
 enum ThumbnailPreviewMode : int {
@@ -60,6 +59,18 @@ enum UsernameRightClickBehavior : int {
     Reply = 0,
     Mention = 1,
     Ignore = 2,
+};
+
+enum class ChatSendProtocol : int {
+    Default = 0,
+    IRC = 1,
+    Helix = 2,
+};
+
+enum StreamerModeSetting {
+    Disabled = 0,
+    Enabled = 1,
+    DetectStreamingSoftware = 2,
 };
 
 /// Settings which are availlable for reading and writing on the gui thread.
@@ -123,6 +134,14 @@ public:
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
+    QStringSetting chatFontFamily{
+        "/appearance/currentFontFamily",
+        DEFAULT_FONT_FAMILY,
+    };
+    IntSetting chatFontSize{
+        "/appearance/currentFontSize",
+        DEFAULT_FONT_SIZE,
+    };
     BoolSetting hideReplyContext = {"/appearance/hideReplyContext", false};
     BoolSetting showReplyButton = {"/appearance/showReplyButton", false};
     BoolSetting stripReplyMention = {"/appearance/stripReplyMention", true};
@@ -218,6 +237,10 @@ public:
         "/behaviour/autocompletion/emoteCompletionWithColon", true};
     BoolSetting showUsernameCompletionMenu = {
         "/behaviour/autocompletion/showUsernameCompletionMenu", true};
+    BoolSetting alwaysIncludeBroadcasterInUserCompletions = {
+        "/behaviour/autocompletion/alwaysIncludeBroadcasterInUserCompletions",
+        true,
+    };
     BoolSetting useSmartEmoteCompletion = {
         "/experiments/useSmartEmoteCompletion",
         false,
@@ -375,6 +398,28 @@ public:
                                            ""};
     QStringSetting subHighlightColor = {"/highlighting/subHighlightColor", ""};
 
+    BoolSetting enableAutomodHighlight = {
+        "/highlighting/automod/enabled",
+        true,
+    };
+    BoolSetting showAutomodInMentions = {
+        "/highlighting/automod/showInMentions",
+        false,
+    };
+    BoolSetting enableAutomodHighlightSound = {
+        "/highlighting/automod/enableSound",
+        false,
+    };
+    BoolSetting enableAutomodHighlightTaskbar = {
+        "/highlighting/automod/enableTaskbarFlashing",
+        false,
+    };
+    QStringSetting automodHighlightSoundUrl = {
+        "/highlighting/automod/soundUrl",
+        "",
+    };
+    QStringSetting automodHighlightColor = {"/highlighting/automod/color", ""};
+
     BoolSetting enableThreadHighlight = {
         "/highlighting/thread/nameIsHighlightKeyword", true};
     BoolSetting showThreadHighlightInMentions = {
@@ -480,28 +525,8 @@ public:
         1000,
     };
 
-    // Temporary time-gate-overrides
-    EnumSetting<HelixTimegateOverride> helixTimegateRaid = {
-        "/misc/twitch/helix-timegate/raid",
-        HelixTimegateOverride::Timegate,
-    };
-    EnumSetting<HelixTimegateOverride> helixTimegateWhisper = {
-        "/misc/twitch/helix-timegate/whisper",
-        HelixTimegateOverride::Timegate,
-    };
-    EnumSetting<HelixTimegateOverride> helixTimegateVIPs = {
-        "/misc/twitch/helix-timegate/vips",
-        HelixTimegateOverride::Timegate,
-    };
-    EnumSetting<HelixTimegateOverride> helixTimegateModerators = {
-        "/misc/twitch/helix-timegate/moderators",
-        HelixTimegateOverride::Timegate,
-    };
-
-    EnumSetting<HelixTimegateOverride> helixTimegateCommercial = {
-        "/misc/twitch/helix-timegate/commercial",
-        HelixTimegateOverride::Timegate,
-    };
+    EnumStringSetting<ChatSendProtocol> chatSendProtocol = {
+        "/misc/chatSendProtocol", ChatSendProtocol::Default};
 
     BoolSetting openLinksIncognito = {"/misc/openLinksIncognito", 0};
 
@@ -510,7 +535,6 @@ public:
         ThumbnailPreviewMode::AlwaysShow,
     };
     QStringSetting cachePath = {"/cache/path", ""};
-    BoolSetting restartOnCrash = {"/misc/restartOnCrash", false};
     BoolSetting attachExtensionToAnyProcess = {
         "/misc/attachExtensionToAnyProcess", false};
     BoolSetting askOnImageUpload = {"/misc/askOnImageUpload", true};

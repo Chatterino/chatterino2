@@ -1,13 +1,22 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/Plugin.hpp"
 
+#    include "common/network/NetworkCommon.hpp"
+#    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandController.hpp"
+#    include "controllers/plugins/PluginPermission.hpp"
+#    include "util/QMagicEnum.hpp"
 
+extern "C" {
 #    include <lua.h>
+}
 #    include <magic_enum/magic_enum.hpp>
 #    include <QJsonArray>
 #    include <QJsonObject>
+#    include <QLoggingCategory>
+#    include <QUrl>
 
+#    include <algorithm>
 #    include <unordered_map>
 #    include <unordered_set>
 
@@ -22,7 +31,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     }
     else if (!homepageObj.isUndefined())
     {
-        QString type = magic_enum::enum_name(homepageObj.type()).data();
+        auto type = qmagicenum::enumName(homepageObj.type());
         this->errors.emplace_back(
             QString("homepage is defined but is not a string (its type is %1)")
                 .arg(type));
@@ -34,7 +43,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     }
     else
     {
-        QString type = magic_enum::enum_name(nameObj.type()).data();
+        auto type = qmagicenum::enumName(nameObj.type());
         this->errors.emplace_back(
             QString("name is not a string (its type is %1)").arg(type));
     }
@@ -46,7 +55,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     }
     else
     {
-        QString type = magic_enum::enum_name(descrObj.type()).data();
+        auto type = qmagicenum::enumName(descrObj.type());
         this->errors.emplace_back(
             QString("description is not a string (its type is %1)").arg(type));
     }
@@ -60,7 +69,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
             const auto &t = authorsArr.at(i);
             if (!t.isString())
             {
-                QString type = magic_enum::enum_name(t.type()).data();
+                auto type = qmagicenum::enumName(t.type());
                 this->errors.push_back(
                     QString("authors element #%1 is not a string (it is a %2)")
                         .arg(i)
@@ -72,7 +81,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     }
     else
     {
-        QString type = magic_enum::enum_name(authorsObj.type()).data();
+        auto type = qmagicenum::enumName(authorsObj.type());
         this->errors.emplace_back(
             QString("authors is not an array (its type is %1)").arg(type));
     }
@@ -84,7 +93,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     }
     else
     {
-        QString type = magic_enum::enum_name(licenseObj.type()).data();
+        auto type = qmagicenum::enumName(licenseObj.type());
         this->errors.emplace_back(
             QString("license is not a string (its type is %1)").arg(type));
     }
@@ -105,17 +114,59 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     }
     else
     {
-        QString type = magic_enum::enum_name(verObj.type()).data();
+        auto type = qmagicenum::enumName(verObj.type());
         this->errors.emplace_back(
             QString("version is not a string (its type is %1)").arg(type));
         this->version = semver::version(0, 0, 0);
     }
+    auto permsObj = obj.value("permissions");
+    if (!permsObj.isUndefined())
+    {
+        if (!permsObj.isArray())
+        {
+            auto type = qmagicenum::enumName(permsObj.type());
+            this->errors.emplace_back(
+                QString("permissions is not an array (its type is %1)")
+                    .arg(type));
+            return;
+        }
+
+        auto permsArr = permsObj.toArray();
+        for (int i = 0; i < permsArr.size(); i++)
+        {
+            const auto &t = permsArr.at(i);
+            if (!t.isObject())
+            {
+                auto type = qmagicenum::enumName(t.type());
+                this->errors.push_back(QString("permissions element #%1 is not "
+                                               "an object (its type is %2)")
+                                           .arg(i)
+                                           .arg(type));
+                return;
+            }
+            auto parsed = PluginPermission(t.toObject());
+            if (parsed.isValid())
+            {
+                // ensure no invalid permissions slip through this
+                this->permissions.push_back(parsed);
+            }
+            else
+            {
+                for (const auto &err : parsed.errors)
+                {
+                    this->errors.push_back(
+                        QString("permissions element #%1: %2").arg(i).arg(err));
+                }
+            }
+        }
+    }
+
     auto tagsObj = obj.value("tags");
     if (!tagsObj.isUndefined())
     {
         if (!tagsObj.isArray())
         {
-            QString type = magic_enum::enum_name(tagsObj.type()).data();
+            auto type = qmagicenum::enumName(tagsObj.type());
             this->errors.emplace_back(
                 QString("tags is not an array (its type is %1)").arg(type));
             return;
@@ -127,7 +178,7 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
             const auto &t = tagsArr.at(i);
             if (!t.isString())
             {
-                QString type = magic_enum::enum_name(t.type()).data();
+                auto type = qmagicenum::enumName(t.type());
                 this->errors.push_back(
                     QString("tags element #%1 is not a string (its type is %2)")
                         .arg(i)
@@ -146,7 +197,7 @@ bool Plugin::registerCommand(const QString &name, const QString &functionName)
         return false;
     }
 
-    auto ok = getApp()->commands->registerPluginCommand(name);
+    auto ok = getIApp()->getCommands()->registerPluginCommand(name);
     if (!ok)
     {
         return false;
@@ -167,10 +218,69 @@ std::unordered_set<QString> Plugin::listRegisteredCommands()
 
 Plugin::~Plugin()
 {
+    for (auto *timer : this->activeTimeouts)
+    {
+        QObject::disconnect(timer, nullptr, nullptr, nullptr);
+        timer->deleteLater();
+    }
+    qCDebug(chatterinoLua) << "Destroyed" << this->activeTimeouts.size()
+                           << "timers for plugin" << this->id
+                           << "while destroying the object";
+    this->activeTimeouts.clear();
     if (this->state_ != nullptr)
     {
         lua_close(this->state_);
     }
+}
+int Plugin::addTimeout(QTimer *timer)
+{
+    this->activeTimeouts.push_back(timer);
+    return ++this->lastTimerId;
+}
+
+void Plugin::removeTimeout(QTimer *timer)
+{
+    for (auto it = this->activeTimeouts.begin();
+         it != this->activeTimeouts.end(); ++it)
+    {
+        if (*it == timer)
+        {
+            this->activeTimeouts.erase(it);
+            break;
+        }
+    }
+}
+
+bool Plugin::hasFSPermissionFor(bool write, const QString &path)
+{
+    auto canon = QUrl(this->dataDirectory().absolutePath() + "/");
+    if (!canon.isParentOf(path))
+    {
+        return false;
+    }
+
+    using PType = PluginPermission::Type;
+    auto typ = write ? PType::FilesystemWrite : PType::FilesystemRead;
+
+    return std::ranges::any_of(this->meta.permissions, [=](const auto &p) {
+        return p.type == typ;
+    });
+}
+
+bool Plugin::hasHTTPPermissionFor(const QUrl &url)
+{
+    auto proto = url.scheme();
+    if (proto != "http" && proto != "https")
+    {
+        qCWarning(chatterinoLua).nospace()
+            << "Plugin " << this->id << " (" << this->meta.name
+            << ") is trying to use a non-http protocol";
+        return false;
+    }
+
+    return std::ranges::any_of(this->meta.permissions, [](const auto &p) {
+        return p.type == PluginPermission::Type::Network;
+    });
 }
 
 }  // namespace chatterino

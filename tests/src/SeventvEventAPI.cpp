@@ -3,8 +3,8 @@
 #include "providers/seventv/eventapi/Client.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"
 #include "providers/seventv/eventapi/Message.hpp"
+#include "Test.hpp"
 
-#include <gtest/gtest.h>
 #include <QString>
 
 #include <optional>

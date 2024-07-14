@@ -4,6 +4,7 @@
 #include "controllers/completion/TabCompletionModel.hpp"
 #include "messages/LimitedQueue.hpp"
 
+#include <magic_enum/magic_enum.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QDate>
 #include <QString>
@@ -27,9 +28,21 @@ enum class TimeoutStackStyle : int {
     Default = DontStackBeyondUserMessage,
 };
 
+/// Context of the message being added to a channel
+enum class MessageContext {
+    /// This message is the original
+    Original,
+    /// This message is a repost of a message that has already been added in a channel
+    Repost,
+};
+
 class Channel : public std::enable_shared_from_this<Channel>
 {
 public:
+    // This is for Lua. See scripts/make_luals_meta.py
+    /**
+     * @exposeenum c2.ChannelType
+     */
     enum class Type {
         None,
         Direct,
@@ -41,7 +54,7 @@ public:
         TwitchAutomod,
         TwitchEnd,
         Irc,
-        Misc
+        Misc,
     };
 
     explicit Channel(const QString &name, Type type);
@@ -74,9 +87,11 @@ public:
     // overridingFlags can be filled in with flags that should be used instead
     // of the message's flags. This is useful in case a flag is specific to a
     // type of split
-    void addMessage(MessagePtr message,
+    void addMessage(MessagePtr message, MessageContext context,
                     std::optional<MessageFlags> overridingFlags = std::nullopt);
     void addMessagesAtStart(const std::vector<MessagePtr> &messages_);
+
+    void addSystemMessage(const QString &contents);
 
     /// Inserts the given messages in order by Message::serverReceivedTime.
     void fillInMissingMessages(const std::vector<MessagePtr> &messages);
@@ -100,6 +115,7 @@ public:
     virtual bool hasModRights() const;
     virtual bool hasHighRateLimit() const;
     virtual bool isLive() const;
+    virtual bool isRerun() const;
     virtual bool shouldIgnoreHighlights() const;
     virtual bool canReconnect() const;
     virtual void reconnect();
@@ -112,6 +128,7 @@ public:
 protected:
     virtual void onConnected();
     virtual void messageRemovedFromStart(const MessagePtr &msg);
+    QString platform_{"other"};
 
 private:
     const QString name_;
@@ -146,3 +163,32 @@ private:
 };
 
 }  // namespace chatterino
+
+template <>
+constexpr magic_enum::customize::customize_t
+    magic_enum::customize::enum_name<chatterino::Channel::Type>(
+        chatterino::Channel::Type value) noexcept
+{
+    using Type = chatterino::Channel::Type;
+    switch (value)
+    {
+        case Type::Twitch:
+            return "twitch";
+        case Type::TwitchWhispers:
+            return "whispers";
+        case Type::TwitchWatching:
+            return "watching";
+        case Type::TwitchMentions:
+            return "mentions";
+        case Type::TwitchLive:
+            return "live";
+        case Type::TwitchAutomod:
+            return "automod";
+        case Type::Irc:
+            return "irc";
+        case Type::Misc:
+            return "misc";
+        default:
+            return default_tag;
+    }
+}

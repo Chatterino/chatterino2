@@ -3,7 +3,8 @@
 #ifdef USEWINSDK
 #    include <Windows.h>
 
-#    include <iostream>
+#    include <cstdio>
+#    include <tuple>
 #endif
 
 namespace chatterino {
@@ -13,8 +14,8 @@ void attachToConsole()
 #ifdef USEWINSDK
     if (AttachConsole(ATTACH_PARENT_PROCESS))
     {
-        freopen("CONOUT$", "w", stdout);
-        freopen("CONOUT$", "w", stderr);
+        std::ignore = freopen_s(nullptr, "CONOUT$", "w", stdout);
+        std::ignore = freopen_s(nullptr, "CONOUT$", "w", stderr);
     }
 #endif
 }

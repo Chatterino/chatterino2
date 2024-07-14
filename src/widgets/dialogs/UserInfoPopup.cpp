@@ -1,8 +1,8 @@
-#include "UserInfoPopup.hpp"
+#include "widgets/dialogs/UserInfoPopup.hpp"
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
-#include "common/NetworkRequest.hpp"
+#include "common/network/NetworkRequest.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
@@ -18,12 +18,12 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
-#include "util/StreamerMode.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/InvisibleSizeGrip.hpp"
@@ -56,7 +56,7 @@ namespace {
         {
             button.assign(copyButton);
         }
-        button->setPixmap(getApp()->themes->buttons.copy);
+        button->setPixmap(getIApp()->getThemes()->buttons.copy);
         button->setScaleIndependantSize(18, 18);
         button->setDim(Button::Dim::Lots);
         button->setToolTip(tooltip);
@@ -75,7 +75,9 @@ namespace {
     bool checkMessageUserName(const QString &userName, MessagePtr message)
     {
         if (message->flags.has(MessageFlag::Whisper))
+        {
             return false;
+        }
 
         bool isSubscription = message->flags.has(MessageFlag::Subscription) &&
                               message->loginName.isEmpty() &&
@@ -110,12 +112,9 @@ namespace {
         {
             MessagePtr message = snapshot[i];
 
-            auto overrideFlags = std::optional<MessageFlags>(message->flags);
-            overrideFlags->set(MessageFlag::DoNotLog);
-
             if (checkMessageUserName(userName, message))
             {
-                channelPtr->addMessage(message, overrideFlags);
+                channelPtr->addMessage(message, MessageContext::Repost);
             }
         }
 
@@ -134,9 +133,8 @@ namespace {
 
 }  // namespace
 
-UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
-                             Split *split)
-    : DraggablePopup(closeAutomatically, parent)
+UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
+    : DraggablePopup(closeAutomatically, split)
     , split_(split)
     , closeAutomatically_(closeAutomatically)
 {
@@ -163,11 +161,11 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
              auto &scrollbar = this->ui_.latestMessages->getScrollBar();
              if (direction == "up")
              {
-                 scrollbar.offset(-scrollbar.getLargeChange());
+                 scrollbar.offset(-scrollbar.getPageSize());
              }
              else if (direction == "down")
              {
-                 scrollbar.offset(scrollbar.getLargeChange());
+                 scrollbar.offset(scrollbar.getPageSize());
              }
              else
              {
@@ -225,7 +223,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
                            .arg(calculateTimeoutDuration(button));
              }
 
-             msg = getApp()->commands->execCommand(
+             msg = getIApp()->getCommands()->execCommand(
                  msg, this->underlyingChannel_, false);
 
              this->underlyingChannel_->sendMessage(msg);
@@ -244,7 +242,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
         {"search", nullptr},
     };
 
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 
     auto layers = LayoutCreator<QWidget>(this->getLayoutContainer())
@@ -297,23 +295,26 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
                         menu->addAction(
                             "Open channel in a new popup window", this,
                             [loginName] {
-                                auto app = getApp();
-                                auto &window = app->windows->createWindow(
+                                auto *app = getIApp();
+                                auto &window = app->getWindows()->createWindow(
                                     WindowType::Popup, true);
-                                auto split = window.getNotebook()
-                                                 .getOrAddSelectedPage()
-                                                 ->appendNewSplit(false);
-                                split->setChannel(app->twitch->getOrAddChannel(
-                                    loginName.toLower()));
+                                auto *split = window.getNotebook()
+                                                  .getOrAddSelectedPage()
+                                                  ->appendNewSplit(false);
+                                split->setChannel(
+                                    app->getTwitchAbstract()->getOrAddChannel(
+                                        loginName.toLower()));
                             });
 
                         menu->addAction(
                             "Open channel in a new tab", this, [loginName] {
                                 ChannelPtr channel =
-                                    getApp()->twitch->getOrAddChannel(
-                                        loginName);
+                                    getIApp()
+                                        ->getTwitchAbstract()
+                                        ->getOrAddChannel(loginName);
                                 auto &nb = getApp()
-                                               ->windows->getMainWindow()
+                                               ->getWindows()
+                                               ->getMainWindow()
                                                .getNotebook();
                                 SplitContainer *container = nb.addPage(true);
                                 Split *split = new Split(container);
@@ -413,25 +414,25 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
 
         QObject::connect(mod.getElement(), &Button::leftClicked, [this] {
             QString value = "/mod " + this->userName_;
-            value = getApp()->commands->execCommand(
+            value = getIApp()->getCommands()->execCommand(
                 value, this->underlyingChannel_, false);
             this->underlyingChannel_->sendMessage(value);
         });
         QObject::connect(unmod.getElement(), &Button::leftClicked, [this] {
             QString value = "/unmod " + this->userName_;
-            value = getApp()->commands->execCommand(
+            value = getIApp()->getCommands()->execCommand(
                 value, this->underlyingChannel_, false);
             this->underlyingChannel_->sendMessage(value);
         });
         QObject::connect(vip.getElement(), &Button::leftClicked, [this] {
             QString value = "/vip " + this->userName_;
-            value = getApp()->commands->execCommand(
+            value = getIApp()->getCommands()->execCommand(
                 value, this->underlyingChannel_, false);
             this->underlyingChannel_->sendMessage(value);
         });
         QObject::connect(unvip.getElement(), &Button::leftClicked, [this] {
             QString value = "/unvip " + this->userName_;
-            value = getApp()->commands->execCommand(
+            value = getIApp()->getCommands()->execCommand(
                 value, this->underlyingChannel_, false);
             this->underlyingChannel_->sendMessage(value);
         });
@@ -449,9 +450,11 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
             if (twitchChannel)
             {
                 bool isMyself =
-                    QString::compare(
-                        getApp()->accounts->twitch.getCurrent()->getUserName(),
-                        this->userName_, Qt::CaseInsensitive) == 0;
+                    QString::compare(getIApp()
+                                         ->getAccounts()
+                                         ->twitch.getCurrent()
+                                         ->getUserName(),
+                                     this->userName_, Qt::CaseInsensitive) == 0;
 
                 visibilityModButtons =
                     twitchChannel->isBroadcaster() && !isMyself;
@@ -496,7 +499,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
                     if (this->underlyingChannel_)
                     {
                         QString value = "/ban " + this->userName_;
-                        value = getApp()->commands->execCommand(
+                        value = getIApp()->getCommands()->execCommand(
                             value, this->underlyingChannel_, false);
 
                         this->underlyingChannel_->sendMessage(value);
@@ -507,7 +510,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
                     if (this->underlyingChannel_)
                     {
                         QString value = "/unban " + this->userName_;
-                        value = getApp()->commands->execCommand(
+                        value = getIApp()->getCommands()->execCommand(
                             value, this->underlyingChannel_, false);
 
                         this->underlyingChannel_->sendMessage(value);
@@ -520,7 +523,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent,
                         QString value = "/timeout " + this->userName_ + " " +
                                         QString::number(arg);
 
-                        value = getApp()->commands->execCommand(
+                        value = getIApp()->getCommands()->execCommand(
                             value, this->underlyingChannel_, false);
 
                         this->underlyingChannel_->sendMessage(value);
@@ -568,7 +571,8 @@ void UserInfoPopup::themeChangedEvent()
 
     for (auto &&child : this->findChildren<QCheckBox *>())
     {
-        child->setFont(getFonts()->getFont(FontStyle::UiMedium, this->scale()));
+        child->setFont(
+            getIApp()->getFonts()->getFont(FontStyle::UiMedium, this->scale()));
     }
 }
 
@@ -593,7 +597,7 @@ void UserInfoPopup::installEvents()
     QObject::connect(
         this->ui_.block, &QCheckBox::stateChanged,
         [this](int newState) mutable {
-            auto currentUser = getApp()->accounts->twitch.getCurrent();
+            auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
 
             const auto reenableBlockCheckbox = [this] {
                 this->ui_.block->setEnabled(true);
@@ -610,20 +614,20 @@ void UserInfoPopup::installEvents()
                 case Qt::CheckState::Unchecked: {
                     this->ui_.block->setEnabled(false);
 
-                    getApp()->accounts->twitch.getCurrent()->unblockUser(
+                    getIApp()->getAccounts()->twitch.getCurrent()->unblockUser(
                         this->userId_, this,
                         [this, reenableBlockCheckbox, currentUser] {
-                            this->channel_->addMessage(makeSystemMessage(
+                            this->channel_->addSystemMessage(
                                 QString("You successfully unblocked user %1")
-                                    .arg(this->userName_)));
+                                    .arg(this->userName_));
                             reenableBlockCheckbox();
                         },
                         [this, reenableBlockCheckbox] {
-                            this->channel_->addMessage(makeSystemMessage(
+                            this->channel_->addSystemMessage(
                                 QString(
                                     "User %1 couldn't be unblocked, an unknown "
                                     "error occurred!")
-                                    .arg(this->userName_)));
+                                    .arg(this->userName_));
                             reenableBlockCheckbox();
                         });
                 }
@@ -637,20 +641,20 @@ void UserInfoPopup::installEvents()
                 case Qt::CheckState::Checked: {
                     this->ui_.block->setEnabled(false);
 
-                    getApp()->accounts->twitch.getCurrent()->blockUser(
+                    getIApp()->getAccounts()->twitch.getCurrent()->blockUser(
                         this->userId_, this,
                         [this, reenableBlockCheckbox, currentUser] {
-                            this->channel_->addMessage(makeSystemMessage(
+                            this->channel_->addSystemMessage(
                                 QString("You successfully blocked user %1")
-                                    .arg(this->userName_)));
+                                    .arg(this->userName_));
                             reenableBlockCheckbox();
                         },
                         [this, reenableBlockCheckbox] {
-                            this->channel_->addMessage(makeSystemMessage(
+                            this->channel_->addSystemMessage(
                                 QString(
                                     "User %1 couldn't be blocked, an unknown "
                                     "error occurred!")
-                                    .arg(this->userName_)));
+                                    .arg(this->userName_));
                             reenableBlockCheckbox();
                         });
                 }
@@ -772,13 +776,15 @@ void UserInfoPopup::updateLatestMessages()
             this->underlyingChannel_->messageAppended.connect(
                 [this, hasMessages](auto message, auto) {
                     if (!checkMessageUserName(this->userName_, message))
+                    {
                         return;
+                    }
 
                     if (hasMessages)
                     {
                         // display message in ChannelView
                         this->ui_.latestMessages->channel()->addMessage(
-                            message);
+                            message, MessageContext::Repost);
                     }
                     else
                     {
@@ -792,7 +798,7 @@ void UserInfoPopup::updateLatestMessages()
 void UserInfoPopup::updateUserData()
 {
     std::weak_ptr<bool> hack = this->lifetimeHack_;
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
 
     const auto onUserFetchFailed = [this, hack] {
         if (!hack.lock())
@@ -852,7 +858,7 @@ void UserInfoPopup::updateUserData()
         this->ui_.userIDLabel->setText(TEXT_USER_ID + user.id);
         this->ui_.userIDLabel->setProperty("copy-text", user.id);
 
-        if (isInStreamerMode() &&
+        if (getIApp()->getStreamerMode()->isEnabled() &&
             getSettings()->streamerModeHideUsercardAvatars)
         {
             this->ui_.avatarButton->setPixmap(getResources().streamerMode);
@@ -962,7 +968,7 @@ void UserInfoPopup::updateUserData()
 void UserInfoPopup::loadAvatar(const QUrl &url)
 {
     QNetworkRequest req(url);
-    static auto manager = new QNetworkAccessManager();
+    static auto *manager = new QNetworkAccessManager();
     auto *reply = manager->get(req);
 
     QObject::connect(reply, &QNetworkReply::finished, this, [=, this] {
@@ -992,42 +998,10 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
                       .setLayoutType<QHBoxLayout>()
                       .withoutMargin();
 
-    QColor color1(255, 255, 255, 80);
-    QColor color2(255, 255, 255, 0);
-
     int buttonWidth = 40;
-    // int buttonWidth = 24;
-    int buttonWidth2 = 32;
     int buttonHeight = 32;
 
     layout->setSpacing(16);
-
-    //auto addButton = [&](Action action, const QString &text,
-    //                     const QPixmap &pixmap) {
-    //    auto vbox = layout.emplace<QVBoxLayout>().withoutMargin();
-    //    {
-    //        auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
-    //        title->addStretch(1);
-    //        auto label = title.emplace<Label>(text);
-    //        label->setHasOffset(false);
-    //        label->setStyleSheet("color: #BBB");
-    //        title->addStretch(1);
-
-    //        auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
-    //        hbox->setSpacing(0);
-    //        {
-    //            auto button = hbox.emplace<Button>(nullptr);
-    //            button->setPixmap(pixmap);
-    //            button->setScaleIndependantSize(buttonHeight, buttonHeight);
-    //            button->setBorderColor(QColor(255, 255, 255, 127));
-
-    //            QObject::connect(
-    //                button.getElement(), &Button::leftClicked, [this, action] {
-    //                    this->buttonClicked.invoke(std::make_pair(action, -1));
-    //                });
-    //        }
-    //    }
-    //};
 
     const auto addLayout = [&](const QString &text) {
         auto vbox = layout.emplace<QVBoxLayout>().withoutMargin();

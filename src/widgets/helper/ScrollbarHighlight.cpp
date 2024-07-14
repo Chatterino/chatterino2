@@ -26,6 +26,7 @@ ScrollbarHighlight::ScrollbarHighlight(const std::shared_ptr<QColor> color,
 
 QColor ScrollbarHighlight::getColor() const
 {
+    assert(this->color_);
     return *this->color_;
 }
 

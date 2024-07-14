@@ -6,7 +6,15 @@
 class QByteArray;
 class QString;
 
+namespace chatterino {
+
+class Paths;
+
+}  // namespace chatterino
+
 namespace chatterino::ipc {
+
+void initPaths(const Paths *paths);
 
 void sendMessage(const char *name, const QByteArray &data);
 

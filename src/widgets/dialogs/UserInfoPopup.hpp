@@ -23,8 +23,11 @@ class UserInfoPopup final : public DraggablePopup
     Q_OBJECT
 
 public:
-    UserInfoPopup(bool closeAutomatically, QWidget *parent,
-                  Split *split = nullptr);
+    /**
+     * @param closeAutomatically Decides whether the popup should close when it loses focus
+     * @param split Will be used as the popup's parent. Must not be null
+     */
+    UserInfoPopup(bool closeAutomatically, Split *split);
 
     void setData(const QString &name, const ChannelPtr &channel);
     void setData(const QString &name, const ChannelPtr &contextChannel,

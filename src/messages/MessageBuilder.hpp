@@ -12,6 +12,7 @@
 namespace chatterino {
 struct BanAction;
 struct UnbanAction;
+struct WarnAction;
 struct AutomodAction;
 struct AutomodUserAction;
 struct AutomodInfoAction;
@@ -23,7 +24,9 @@ class TextElement;
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 
-struct ParsedLink;
+namespace linkparser {
+    struct Parsed;
+}  // namespace linkparser
 
 struct SystemMessageTag {
 };
@@ -53,9 +56,6 @@ const ImageUploaderResultTag imageUploaderResultMessage{};
 
 MessagePtr makeSystemMessage(const QString &text);
 MessagePtr makeSystemMessage(const QString &text, const QTime &time);
-std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
-    const AutomodAction &action, const QString &channelName);
-MessagePtr makeAutomodInfoMessage(const AutomodInfoAction &action);
 
 struct MessageParseArgs {
     bool disablePingSounds = false;
@@ -81,6 +81,7 @@ public:
                    const QTime &time = QTime::currentTime());
     MessageBuilder(const BanAction &action, uint32_t count = 1);
     MessageBuilder(const UnbanAction &action);
+    MessageBuilder(const WarnAction &action);
     MessageBuilder(const AutomodUserAction &action);
 
     MessageBuilder(LiveUpdatesAddEmoteMessageTag, const QString &platform,
@@ -113,7 +114,7 @@ public:
     std::weak_ptr<Message> weakOf();
 
     void append(std::unique_ptr<MessageElement> element);
-    void addLink(const ParsedLink &parsedLink);
+    void addLink(const linkparser::Parsed &parsedLink, const QString &source);
 
     /**
      * Adds the text, applies irc colors, adds links,

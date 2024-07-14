@@ -145,16 +145,13 @@ static void BM_EmojiParsing(benchmark::State &state)
 
 BENCHMARK(BM_EmojiParsing);
 
-template <class... Args>
-static void BM_EmojiParsing2(benchmark::State &state, Args &&...args)
+static void BM_EmojiParsing2(benchmark::State &state, const QString &input,
+                             int expectedNumEmojis)
 {
     Emojis emojis;
 
     emojis.load();
 
-    auto argsTuple = std::make_tuple(std::move(args)...);
-    auto input = std::get<0>(argsTuple);
-    auto expectedNumEmojis = std::get<1>(argsTuple);
     for (auto _ : state)
     {
         auto output = emojis.parse(input);

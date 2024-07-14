@@ -1,4 +1,6 @@
-#include "Label.hpp"
+#include "widgets/Label.hpp"
+
+#include "Application.hpp"
 
 #include <QPainter>
 
@@ -14,9 +16,11 @@ Label::Label(BaseWidget *parent, QString text, FontStyle style)
     , text_(std::move(text))
     , fontStyle_(style)
 {
-    this->connections_.managedConnect(getFonts()->fontChanged, [this] {
-        this->updateSize();
-    });
+    this->connections_.managedConnect(getIApp()->getFonts()->fontChanged,
+                                      [this] {
+                                          this->updateSize();
+                                      });
+    this->updateSize();
 }
 
 const QString &Label::getText() const
@@ -85,21 +89,10 @@ void Label::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    qreal deviceDpi =
-#ifdef Q_OS_WIN
-        this->devicePixelRatioF();
-#else
-        1.0;
-#endif
-
-    QFontMetrics metrics = getFonts()->getFontMetrics(
-        this->getFontStyle(),
-        this->scale() * 96.f /
-            std::max<float>(0.01, this->logicalDpiX() * deviceDpi));
-    painter.setFont(getFonts()->getFont(
-        this->getFontStyle(),
-        this->scale() * 96.f /
-            std::max<float>(0.02, this->logicalDpiX() * deviceDpi)));
+    QFontMetrics metrics = getIApp()->getFonts()->getFontMetrics(
+        this->getFontStyle(), this->scale());
+    painter.setFont(
+        getIApp()->getFonts()->getFont(this->getFontStyle(), this->scale()));
 
     int offset = this->getOffset();
 
@@ -126,7 +119,7 @@ void Label::paintEvent(QPaintEvent *)
 void Label::updateSize()
 {
     QFontMetrics metrics =
-        getFonts()->getFontMetrics(this->fontStyle_, this->scale());
+        getIApp()->getFonts()->getFontMetrics(this->fontStyle_, this->scale());
 
     int width =
         metrics.horizontalAdvance(this->text_) + (2 * this->getOffset());

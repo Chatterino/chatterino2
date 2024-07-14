@@ -78,6 +78,7 @@ class ComboBox : public QComboBox
 
     void wheelEvent(QWheelEvent *event) override
     {
+        (void)event;
     }
 };
 
@@ -103,6 +104,11 @@ public:
     /// @param inverse Inverses true to false and vice versa
     QCheckBox *addCheckbox(const QString &text, BoolSetting &setting,
                            bool inverse = false, QString toolTipText = {});
+    QCheckBox *addCustomCheckbox(const QString &text,
+                                 const std::function<bool()> &load,
+                                 std::function<void(bool)> save,
+                                 const QString &toolTipText = {});
+
     ComboBox *addDropdown(const QString &text, const QStringList &items,
                           QString toolTipText = {});
     ComboBox *addDropdown(const QString &text, const QStringList &items,
@@ -118,7 +124,7 @@ public:
     template <typename OnClick>
     QPushButton *makeButton(const QString &text, OnClick onClick)
     {
-        auto button = new QPushButton(text);
+        auto *button = new QPushButton(text);
         this->groups_.back().widgets.push_back({button, {text}});
         QObject::connect(button, &QPushButton::clicked, onClick);
         return button;
@@ -128,7 +134,7 @@ public:
     QPushButton *addButton(const QString &text, OnClick onClick)
     {
         auto button = makeButton(text, onClick);
-        auto layout = new QHBoxLayout();
+        auto *layout = new QHBoxLayout();
         layout->addWidget(button);
         layout->addStretch(1);
         this->addLayout(layout);
@@ -141,7 +147,7 @@ public:
         pajlada::Settings::Setting<T> &setting,
         std::function<boost::variant<int, QString>(T)> getValue,
         std::function<T(DropdownArgs)> setValue, bool editable = true,
-        QString toolTipText = {})
+        QString toolTipText = {}, bool listenToActivated = false)
     {
         auto items2 = items;
         auto selected = getValue(setting.getValue());
@@ -150,19 +156,25 @@ public:
         {
             // QString
             if (!editable && !items2.contains(boost::get<QString>(selected)))
+            {
                 items2.insert(0, boost::get<QString>(selected));
+            }
         }
 
-        auto combo = this->addDropdown(text, items2, toolTipText);
+        auto *combo = this->addDropdown(text, items2, toolTipText);
         if (editable)
+        {
             combo->setEditable(true);
+        }
 
         if (selected.which() == 0)
         {
             // int
             auto value = boost::get<int>(selected);
             if (value >= 0 && value < items2.size())
+            {
                 combo->setCurrentIndex(value);
+            }
         }
         else if (selected.which() == 1)
         {
@@ -174,7 +186,9 @@ public:
             [getValue = std::move(getValue), combo](const T &value, auto) {
                 auto var = getValue(value);
                 if (var.which() == 0)
+                {
                     combo->setCurrentIndex(boost::get<int>(var));
+                }
                 else
                 {
                     combo->setCurrentText(boost::get<QString>(var));
@@ -183,14 +197,27 @@ public:
             },
             this->managedConnections_);
 
-        QObject::connect(
-            combo, QOverload<const int>::of(&QComboBox::currentIndexChanged),
-            [combo, &setting,
-             setValue = std::move(setValue)](const int newIndex) {
-                setting = setValue(DropdownArgs{combo->itemText(newIndex),
-                                                combo->currentIndex(), combo});
-                getApp()->windows->forceLayoutChannelViews();
+        auto updateSetting = [combo, &setting, setValue = std::move(setValue)](
+                                 const int newIndex) {
+            setting = setValue(DropdownArgs{
+                .value = combo->itemText(newIndex),
+                .index = combo->currentIndex(),
+                .combobox = combo,
             });
+            getIApp()->getWindows()->forceLayoutChannelViews();
+        };
+
+        if (listenToActivated)
+        {
+            QObject::connect(combo, &QComboBox::activated, updateSetting);
+        }
+        else
+        {
+            QObject::connect(
+                combo,
+                QOverload<const int>::of(&QComboBox::currentIndexChanged),
+                updateSetting);
+        }
 
         return combo;
     }
@@ -206,9 +233,9 @@ public:
     {
         auto *combo = this->addDropdown(text, {}, std::move(toolTipText));
 
-        for (const auto &[text, userData] : items)
+        for (const auto &[itemText, userData] : items)
         {
-            combo->addItem(text, userData);
+            combo->addItem(itemText, userData);
         }
 
         if (!defaultValueText.isEmpty())
@@ -241,7 +268,7 @@ public:
              setValue = std::move(setValue)](const int newIndex) {
                 setting = setValue(DropdownArgs{combo->itemText(newIndex),
                                                 combo->currentIndex(), combo});
-                getApp()->windows->forceLayoutChannelViews();
+                getIApp()->getWindows()->forceLayoutChannelViews();
             });
 
         return combo;
@@ -249,16 +276,16 @@ public:
 
     template <typename T, std::size_t N>
     ComboBox *addDropdownEnumClass(const QString &text,
-                                   const std::array<std::string_view, N> &items,
+                                   const std::array<QStringView, N> &items,
                                    EnumStringSetting<T> &setting,
                                    QString toolTipText,
                                    const QString &defaultValueText)
     {
         auto *combo = this->addDropdown(text, {}, std::move(toolTipText));
 
-        for (const auto &text : items)
+        for (const auto &item : items)
         {
-            combo->addItem(QString::fromStdString(std::string(text)));
+            combo->addItem(item.toString());
         }
 
         if (!defaultValueText.isEmpty())
@@ -269,8 +296,7 @@ public:
         setting.connect(
             [&setting, combo](const QString &value) {
                 auto enumValue =
-                    magic_enum::enum_cast<T>(value.toStdString(),
-                                             magic_enum::case_insensitive)
+                    qmagicenum::enumCast<T>(value, qmagicenum::CASE_INSENSITIVE)
                         .value_or(setting.defaultValue);
 
                 auto i = magic_enum::enum_integer(enumValue);
@@ -286,10 +312,19 @@ public:
                 // Instead, it's up to the getters to make sure that the setting is legic - see the enum_cast above
                 // You could also use the settings `getEnum` function
                 setting = newText;
-                getApp()->windows->forceLayoutChannelViews();
+                getIApp()->getWindows()->forceLayoutChannelViews();
             });
 
         return combo;
+    }
+
+    void enableIf(QComboBox *widget, auto &setting, auto cb)
+    {
+        auto updateVisibility = [cb = std::move(cb), &setting, widget]() {
+            auto enabled = cb(setting.getValue());
+            widget->setEnabled(enabled);
+        };
+        setting.connect(updateVisibility, this->managedConnections_);
     }
 
     DescriptionLabel *addDescription(const QString &text);
@@ -298,8 +333,9 @@ public:
     bool filterElements(const QString &query);
 
 protected:
-    void resizeEvent(QResizeEvent *ev) override
+    void resizeEvent(QResizeEvent *event) override
     {
+        (void)event;
     }
 
 private:

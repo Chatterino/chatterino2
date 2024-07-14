@@ -1,6 +1,7 @@
 #include "Application.hpp"
 
 #include "common/Args.hpp"
+#include "common/Channel.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -11,7 +12,13 @@
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "controllers/sound/ISoundController.hpp"
+#include "providers/bttv/BttvEmotes.hpp"
+#include "providers/ffz/FfzEmotes.hpp"
+#include "providers/irc/AbstractIrcServer.hpp"
+#include "providers/links/LinkResolver.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
+#include "providers/twitch/TwitchBadges.hpp"
 #include "singletons/ImageUploader.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/PluginController.hpp"
@@ -35,15 +42,18 @@
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/PubSubMessages.hpp"
+#include "providers/twitch/pubsubmessages/LowTrustUsers.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
+#include "singletons/CrashHandler.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/helper/LoggingChannel.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/Updates.hpp"
@@ -85,6 +95,8 @@ ISoundController *makeSoundController(Settings &settings)
     }
 }
 
+const QString TWITCH_PUBSUB_URL = "wss://pubsub-edge.twitch.tv";
+
 }  // namespace
 
 namespace chatterino {
@@ -103,33 +115,45 @@ IApplication::IApplication()
 // It will create the instances of the major classes, and connect their signals
 // to each other
 
-Application::Application(Settings &_settings, Paths &_paths)
-    : themes(&this->emplace<Theme>())
-    , fonts(&this->emplace<Fonts>())
+Application::Application(Settings &_settings, const Paths &paths,
+                         const Args &_args, Updates &_updates)
+    : paths_(paths)
+    , args_(_args)
+    , themes(&this->emplace<Theme>())
+    , fonts(new Fonts(_settings))
     , emotes(&this->emplace<Emotes>())
     , accounts(&this->emplace<AccountController>())
     , hotkeys(&this->emplace<HotkeyController>())
-    , windows(&this->emplace<WindowManager>())
+    , windows(&this->emplace(new WindowManager(paths)))
     , toasts(&this->emplace<Toasts>())
     , imageUploader(&this->emplace<ImageUploader>())
     , seventvAPI(&this->emplace<SeventvAPI>())
+    , crashHandler(&this->emplace(new CrashHandler(paths)))
 
     , commands(&this->emplace<CommandController>())
     , notifications(&this->emplace<NotificationController>())
     , highlights(&this->emplace<HighlightController>())
-    , twitch(&this->emplace<TwitchIrcServer>())
-    , chatterinoBadges(&this->emplace<ChatterinoBadges>())
+    , twitch(new TwitchIrcServer)
     , ffzBadges(&this->emplace<FfzBadges>())
     , seventvBadges(&this->emplace<SeventvBadges>())
-    , userData(&this->emplace<UserDataController>())
-    , sound(&this->emplace<ISoundController>(makeSoundController(_settings)))
+    , userData(new UserDataController(paths))
+    , sound(makeSoundController(_settings))
     , twitchLiveController(&this->emplace<TwitchLiveController>())
+    , twitchPubSub(new PubSub(TWITCH_PUBSUB_URL))
+    , twitchBadges(new TwitchBadges)
+    , chatterinoBadges(new ChatterinoBadges)
+    , bttvEmotes(new BttvEmotes)
+    , ffzEmotes(new FfzEmotes)
+    , seventvEmotes(new SeventvEmotes)
+    , logging(new Logging(_settings))
+    , linkResolver(new LinkResolver)
+    , streamerMode(new StreamerMode)
 #ifdef CHATTERINO_HAVE_PLUGINS
-    , plugins(&this->emplace<PluginController>())
+    , plugins(&this->emplace(new PluginController(paths)))
 #endif
-    , logging(&this->emplace<Logging>())
+    , updates(_updates)
 {
-    this->instance = this;
+    Application::instance = this;
 
     // We can safely ignore this signal's connection since the Application will always
     // be destroyed after fonts
@@ -138,19 +162,35 @@ Application::Application(Settings &_settings, Paths &_paths)
     });
 }
 
-void Application::initialize(Settings &settings, Paths &paths)
+Application::~Application() = default;
+
+void Application::fakeDtor()
+{
+    this->twitchPubSub.reset();
+    this->twitchBadges.reset();
+    this->chatterinoBadges.reset();
+    this->bttvEmotes.reset();
+    this->ffzEmotes.reset();
+    this->seventvEmotes.reset();
+    // this->twitch.reset();
+    this->fonts.reset();
+    this->sound.reset();
+    this->userData.reset();
+}
+
+void Application::initialize(Settings &settings, const Paths &paths)
 {
     assert(isAppInitialized == false);
     isAppInitialized = true;
 
     // Show changelog
-    if (!getArgs().isFramelessEmbed &&
+    if (!this->args_.isFramelessEmbed &&
         getSettings()->currentVersion.getValue() != "" &&
         getSettings()->currentVersion.getValue() != CHATTERINO_VERSION)
     {
-        auto box = new QMessageBox(QMessageBox::Information, "Chatterino 2",
-                                   "Show changelog?",
-                                   QMessageBox::Yes | QMessageBox::No);
+        auto *box = new QMessageBox(QMessageBox::Information, "Chatterino 2",
+                                    "Show changelog?",
+                                    QMessageBox::Yes | QMessageBox::No);
         box->setAttribute(Qt::WA_DeleteOnClose);
         if (box->exec() == QMessageBox::Yes)
         {
@@ -159,7 +199,7 @@ void Application::initialize(Settings &settings, Paths &paths)
         }
     }
 
-    if (!getArgs().isFramelessEmbed)
+    if (!this->args_.isFramelessEmbed)
     {
         getSettings()->currentVersion.setValue(CHATTERINO_VERSION);
 
@@ -174,31 +214,40 @@ void Application::initialize(Settings &settings, Paths &paths)
         singleton->initialize(settings, paths);
     }
 
-    // add crash message
-    if (!getArgs().isFramelessEmbed && getArgs().crashRecovery)
+    this->twitch->initialize();
+
+    // XXX: Loading Twitch badges after Helix has been initialized, which only happens after
+    // the AccountController initialize has been called
+    this->twitchBadges->loadTwitchBadges();
+
+    // Show crash message.
+    // On Windows, the crash message was already shown.
+#ifndef Q_OS_WIN
+    if (!this->args_.isFramelessEmbed && this->args_.crashRecovery)
     {
-        if (auto selected =
+        if (auto *selected =
                 this->windows->getMainWindow().getNotebook().getSelectedPage())
         {
-            if (auto container = dynamic_cast<SplitContainer *>(selected))
+            if (auto *container = dynamic_cast<SplitContainer *>(selected))
             {
                 for (auto &&split : container->getSplits())
                 {
                     if (auto channel = split->getChannel(); !channel->isEmpty())
                     {
-                        channel->addMessage(makeSystemMessage(
+                        channel->addSystemMessage(
                             "Chatterino unexpectedly crashed and restarted. "
                             "You can disable automatic restarts in the "
-                            "settings."));
+                            "settings.");
                     }
                 }
             }
         }
     }
+#endif
 
     this->windows->updateWordTypeMask();
 
-    if (!getArgs().isFramelessEmbed)
+    if (!this->args_.isFramelessEmbed)
     {
         this->initNm(paths);
     }
@@ -214,14 +263,14 @@ int Application::run(QApplication &qtApp)
 
     this->twitch->connect();
 
-    if (!getArgs().isFramelessEmbed)
+    if (!this->args_.isFramelessEmbed)
     {
         this->windows->getMainWindow().show();
     }
 
     getSettings()->betaUpdates.connect(
-        [] {
-            Updates::instance().checkForUpdates();
+        [this] {
+            this->updates.checkForUpdates();
         },
         false);
 
@@ -239,6 +288,10 @@ int Application::run(QApplication &qtApp)
         });
     std::ignore =
         getSettings()->highlightedUsers.delayedItemsChanged.connect([this] {
+            this->windows->forceLayoutChannelViews();
+        });
+    std::ignore =
+        getSettings()->highlightedBadges.delayedItemsChanged.connect([this] {
             this->windows->forceLayoutChannelViews();
         });
 
@@ -280,29 +333,221 @@ int Application::run(QApplication &qtApp)
     return qtApp.exec();
 }
 
+Theme *Application::getThemes()
+{
+    assertInGuiThread();
+
+    return this->themes;
+}
+
+Fonts *Application::getFonts()
+{
+    assertInGuiThread();
+    assert(this->fonts);
+
+    return this->fonts.get();
+}
+
 IEmotes *Application::getEmotes()
 {
+    assertInGuiThread();
+
     return this->emotes;
+}
+
+AccountController *Application::getAccounts()
+{
+    assertInGuiThread();
+
+    return this->accounts;
+}
+
+HotkeyController *Application::getHotkeys()
+{
+    assertInGuiThread();
+
+    return this->hotkeys;
+}
+
+WindowManager *Application::getWindows()
+{
+    assertInGuiThread();
+    assert(this->windows);
+
+    return this->windows;
+}
+
+Toasts *Application::getToasts()
+{
+    assertInGuiThread();
+
+    return this->toasts;
+}
+
+CrashHandler *Application::getCrashHandler()
+{
+    assertInGuiThread();
+
+    return this->crashHandler;
+}
+
+CommandController *Application::getCommands()
+{
+    assertInGuiThread();
+
+    return this->commands;
+}
+
+NotificationController *Application::getNotifications()
+{
+    assertInGuiThread();
+
+    return this->notifications;
+}
+
+HighlightController *Application::getHighlights()
+{
+    assertInGuiThread();
+
+    return this->highlights;
+}
+
+FfzBadges *Application::getFfzBadges()
+{
+    assertInGuiThread();
+
+    return this->ffzBadges;
+}
+
+SeventvBadges *Application::getSeventvBadges()
+{
+    // SeventvBadges handles its own locks, so we don't need to assert that this is called in the GUI thread
+
+    return this->seventvBadges;
 }
 
 IUserDataController *Application::getUserData()
 {
-    return this->userData;
+    assertInGuiThread();
+
+    return this->userData.get();
 }
 
 ISoundController *Application::getSound()
 {
-    return this->sound;
+    assertInGuiThread();
+
+    return this->sound.get();
 }
 
 ITwitchLiveController *Application::getTwitchLiveController()
 {
+    assertInGuiThread();
+
     return this->twitchLiveController;
 }
 
+TwitchBadges *Application::getTwitchBadges()
+{
+    assertInGuiThread();
+    assert(this->twitchBadges);
+
+    return this->twitchBadges.get();
+}
+
+IChatterinoBadges *Application::getChatterinoBadges()
+{
+    assertInGuiThread();
+    assert(this->chatterinoBadges);
+
+    return this->chatterinoBadges.get();
+}
+
+ImageUploader *Application::getImageUploader()
+{
+    assertInGuiThread();
+
+    return this->imageUploader;
+}
+
+SeventvAPI *Application::getSeventvAPI()
+{
+    assertInGuiThread();
+
+    return this->seventvAPI;
+}
+
+#ifdef CHATTERINO_HAVE_PLUGINS
+PluginController *Application::getPlugins()
+{
+    assertInGuiThread();
+
+    return this->plugins;
+}
+#endif
+
 ITwitchIrcServer *Application::getTwitch()
 {
-    return this->twitch;
+    assertInGuiThread();
+
+    return this->twitch.get();
+}
+
+IAbstractIrcServer *Application::getTwitchAbstract()
+{
+    assertInGuiThread();
+
+    return this->twitch.get();
+}
+
+PubSub *Application::getTwitchPubSub()
+{
+    assertInGuiThread();
+
+    return this->twitchPubSub.get();
+}
+
+ILogging *Application::getChatLogger()
+{
+    assertInGuiThread();
+
+    return this->logging.get();
+}
+
+ILinkResolver *Application::getLinkResolver()
+{
+    assertInGuiThread();
+
+    return this->linkResolver.get();
+}
+
+IStreamerMode *Application::getStreamerMode()
+{
+    return this->streamerMode.get();
+}
+
+BttvEmotes *Application::getBttvEmotes()
+{
+    assertInGuiThread();
+    assert(this->bttvEmotes);
+
+    return this->bttvEmotes.get();
+}
+
+FfzEmotes *Application::getFfzEmotes()
+{
+    assertInGuiThread();
+    assert(this->ffzEmotes);
+
+    return this->ffzEmotes.get();
+}
+
+SeventvEmotes *Application::getSeventvEmotes()
+{
+    assertInGuiThread();
+    assert(this->seventvEmotes);
+
+    return this->seventvEmotes.get();
 }
 
 void Application::save()
@@ -313,7 +558,7 @@ void Application::save()
     }
 }
 
-void Application::initNm(Paths &paths)
+void Application::initNm(const Paths &paths)
 {
     (void)paths;
 
@@ -329,7 +574,7 @@ void Application::initPubSub()
 {
     // We can safely ignore these signal connections since the twitch object will always
     // be destroyed before the Application
-    std::ignore = this->twitch->pubsub->signals_.moderation.chatCleared.connect(
+    std::ignore = this->twitchPubSub->moderation.chatCleared.connect(
         [this](const auto &action) {
             auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
             if (chan->isEmpty())
@@ -338,15 +583,14 @@ void Application::initPubSub()
             }
 
             QString text =
-                QString("%1 cleared the chat").arg(action.source.login);
+                QString("%1 cleared the chat.").arg(action.source.login);
 
-            auto msg = makeSystemMessage(text);
-            postToThread([chan, msg] {
-                chan->addMessage(msg);
+            postToThread([chan, text] {
+                chan->addSystemMessage(text);
             });
         });
 
-    std::ignore = this->twitch->pubsub->signals_.moderation.modeChanged.connect(
+    std::ignore = this->twitchPubSub->moderation.modeChanged.connect(
         [this](const auto &action) {
             auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
             if (chan->isEmpty())
@@ -355,7 +599,7 @@ void Application::initPubSub()
             }
 
             QString text =
-                QString("%1 turned %2 %3 mode")
+                QString("%1 turned %2 %3 mode.")
                     .arg(action.source.login)
                     .arg(action.state == ModeChangedAction::State::On ? "on"
                                                                       : "off")
@@ -366,35 +610,32 @@ void Application::initPubSub()
                 text += QString(" (%1 seconds)").arg(action.duration);
             }
 
-            auto msg = makeSystemMessage(text);
-            postToThread([chan, msg] {
-                chan->addMessage(msg);
+            postToThread([chan, text] {
+                chan->addSystemMessage(text);
             });
         });
 
-    std::ignore =
-        this->twitch->pubsub->signals_.moderation.moderationStateChanged
-            .connect([this](const auto &action) {
-                auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
-                if (chan->isEmpty())
-                {
-                    return;
-                }
+    std::ignore = this->twitchPubSub->moderation.moderationStateChanged.connect(
+        [this](const auto &action) {
+            auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
+            if (chan->isEmpty())
+            {
+                return;
+            }
 
-                QString text;
+            QString text;
 
-                text = QString("%1 %2 %3")
-                           .arg(action.source.login,
-                                (action.modded ? "modded" : "unmodded"),
-                                action.target.login);
+            text = QString("%1 %2 %3.")
+                       .arg(action.source.login,
+                            (action.modded ? "modded" : "unmodded"),
+                            action.target.login);
 
-                auto msg = makeSystemMessage(text);
-                postToThread([chan, msg] {
-                    chan->addMessage(msg);
-                });
+            postToThread([chan, text] {
+                chan->addSystemMessage(text);
             });
+        });
 
-    std::ignore = this->twitch->pubsub->signals_.moderation.userBanned.connect(
+    std::ignore = this->twitchPubSub->moderation.userBanned.connect(
         [&](const auto &action) {
             auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
 
@@ -409,225 +650,346 @@ void Application::initPubSub()
                 chan->addOrReplaceTimeout(msg.release());
             });
         });
-    std::ignore =
-        this->twitch->pubsub->signals_.moderation.messageDeleted.connect(
-            [&](const auto &action) {
-                auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
 
-                if (chan->isEmpty() || getSettings()->hideDeletionActions)
-                {
-                    return;
-                }
+    std::ignore = this->twitchPubSub->moderation.userWarned.connect(
+        [&](const auto &action) {
+            auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
 
-                MessageBuilder msg;
-                TwitchMessageBuilder::deletionMessage(action, &msg);
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            // TODO: Resolve the moderator's user ID into a full user here, so message can look better
+            postToThread([chan, action] {
+                MessageBuilder msg(action);
                 msg->flags.set(MessageFlag::PubSub);
+                chan->addMessage(msg.release(), MessageContext::Original);
+            });
+        });
 
-                postToThread([chan, msg = msg.release()] {
-                    auto replaced = false;
-                    LimitedQueueSnapshot<MessagePtr> snapshot =
-                        chan->getMessageSnapshot();
-                    int snapshotLength = snapshot.size();
+    std::ignore = this->twitchPubSub->moderation.messageDeleted.connect(
+        [&](const auto &action) {
+            auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
 
-                    // without parens it doesn't build on windows
-                    int end = (std::max)(0, snapshotLength - 200);
+            if (chan->isEmpty() || getSettings()->hideDeletionActions)
+            {
+                return;
+            }
 
-                    for (int i = snapshotLength - 1; i >= end; --i)
+            MessageBuilder msg;
+            TwitchMessageBuilder::deletionMessage(action, &msg);
+            msg->flags.set(MessageFlag::PubSub);
+
+            postToThread([chan, msg = msg.release()] {
+                auto replaced = false;
+                LimitedQueueSnapshot<MessagePtr> snapshot =
+                    chan->getMessageSnapshot();
+                int snapshotLength = snapshot.size();
+
+                // without parens it doesn't build on windows
+                int end = (std::max)(0, snapshotLength - 200);
+
+                for (int i = snapshotLength - 1; i >= end; --i)
+                {
+                    const auto &s = snapshot[i];
+                    if (!s->flags.has(MessageFlag::PubSub) &&
+                        s->timeoutUser == msg->timeoutUser)
                     {
-                        auto &s = snapshot[i];
-                        if (!s->flags.has(MessageFlag::PubSub) &&
-                            s->timeoutUser == msg->timeoutUser)
-                        {
-                            chan->replaceMessage(s, msg);
-                            replaced = true;
-                            break;
-                        }
+                        chan->replaceMessage(s, msg);
+                        replaced = true;
+                        break;
                     }
-                    if (!replaced)
-                    {
-                        chan->addMessage(msg);
-                    }
-                });
+                }
+                if (!replaced)
+                {
+                    chan->addMessage(msg, MessageContext::Original);
+                }
             });
+        });
+
+    std::ignore = this->twitchPubSub->moderation.userUnbanned.connect(
+        [&](const auto &action) {
+            auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
+
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            auto msg = MessageBuilder(action).release();
+
+            postToThread([chan, msg] {
+                chan->addMessage(msg, MessageContext::Original);
+            });
+        });
 
     std::ignore =
-        this->twitch->pubsub->signals_.moderation.userUnbanned.connect(
+        this->twitchPubSub->moderation.suspiciousMessageReceived.connect(
             [&](const auto &action) {
-                auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
+                if (action.treatment ==
+                    PubSubLowTrustUsersMessage::Treatment::INVALID)
+                {
+                    qCWarning(chatterinoTwitch)
+                        << "Received suspicious message with unknown "
+                           "treatment:"
+                        << action.treatmentString;
+                    return;
+                }
 
-                if (chan->isEmpty())
+                // monitored chats are received over irc; in the future, we will use pubsub instead
+                if (action.treatment !=
+                    PubSubLowTrustUsersMessage::Treatment::Restricted)
                 {
                     return;
                 }
 
-                auto msg = MessageBuilder(action).release();
-
-                postToThread([chan, msg] {
-                    chan->addMessage(msg);
-                });
-            });
-
-    std::ignore =
-        this->twitch->pubsub->signals_.moderation.autoModMessageCaught.connect(
-            [&](const auto &msg, const QString &channelID) {
-                auto chan = this->twitch->getChannelOrEmptyByID(channelID);
-                if (chan->isEmpty())
-                {
-                    return;
-                }
-
-                switch (msg.type)
-                {
-                    case PubSubAutoModQueueMessage::Type::
-                        AutoModCaughtMessage: {
-                        if (msg.status == "PENDING")
-                        {
-                            AutomodAction action(msg.data, channelID);
-                            action.reason = QString("%1 level %2")
-                                                .arg(msg.contentCategory)
-                                                .arg(msg.contentLevel);
-
-                            action.msgID = msg.messageID;
-                            action.message = msg.messageText;
-
-                            // this message also contains per-word automod data, which could be implemented
-
-                            // extract sender data manually because Twitch loves not being consistent
-                            QString senderDisplayName =
-                                msg.senderUserDisplayName;  // Might be transformed later
-                            bool hasLocalizedName = false;
-                            if (!msg.senderUserDisplayName.isEmpty())
-                            {
-                                // check for non-ascii display names
-                                if (QString::compare(msg.senderUserDisplayName,
-                                                     msg.senderUserLogin,
-                                                     Qt::CaseInsensitive) != 0)
-                                {
-                                    hasLocalizedName = true;
-                                }
-                            }
-                            QColor senderColor = msg.senderUserChatColor;
-                            QString senderColor_;
-                            if (!senderColor.isValid() &&
-                                getSettings()->colorizeNicknames)
-                            {
-                                // color may be not present if user is a grey-name
-                                senderColor = getRandomColor(msg.senderUserID);
-                            }
-
-                            // handle username style based on prefered setting
-                            switch (
-                                getSettings()->usernameDisplayMode.getValue())
-                            {
-                                case UsernameDisplayMode::Username: {
-                                    if (hasLocalizedName)
-                                    {
-                                        senderDisplayName = msg.senderUserLogin;
-                                    }
-                                    break;
-                                }
-                                case UsernameDisplayMode::LocalizedName: {
-                                    break;
-                                }
-                                case UsernameDisplayMode::
-                                    UsernameAndLocalizedName: {
-                                    if (hasLocalizedName)
-                                    {
-                                        senderDisplayName =
-                                            QString("%1(%2)").arg(
-                                                msg.senderUserLogin,
-                                                msg.senderUserDisplayName);
-                                    }
-                                    break;
-                                }
-                            }
-
-                            action.target = ActionUser{
-                                msg.senderUserID, msg.senderUserLogin,
-                                senderDisplayName, senderColor};
-                            postToThread([chan, action] {
-                                const auto p =
-                                    makeAutomodMessage(action, chan->getName());
-                                chan->addMessage(p.first);
-                                chan->addMessage(p.second);
-
-                                getApp()->twitch->automodChannel->addMessage(
-                                    p.first);
-                                getApp()->twitch->automodChannel->addMessage(
-                                    p.second);
-                            });
-                        }
-                        // "ALLOWED" and "DENIED" statuses remain unimplemented
-                        // They are versions of automod_message_(denied|approved) but for mods.
-                    }
-                    break;
-
-                    case PubSubAutoModQueueMessage::Type::INVALID:
-                    default: {
-                    }
-                    break;
-                }
-            });
-
-    std::ignore =
-        this->twitch->pubsub->signals_.moderation.autoModMessageBlocked.connect(
-            [&](const auto &action) {
-                auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
-                if (chan->isEmpty())
-                {
-                    return;
-                }
-
-                postToThread([chan, action] {
-                    const auto p = makeAutomodMessage(action, chan->getName());
-                    chan->addMessage(p.first);
-                    chan->addMessage(p.second);
-                });
-            });
-
-    std::ignore =
-        this->twitch->pubsub->signals_.moderation.automodUserMessage.connect(
-            [&](const auto &action) {
-                // This condition has been set up to execute isInStreamerMode() as the last thing
-                // as it could end up being expensive.
                 if (getSettings()->streamerModeHideModActions &&
-                    isInStreamerMode())
+                    this->getStreamerMode()->isEnabled())
                 {
                     return;
                 }
-                auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
+
+                auto chan =
+                    this->twitch->getChannelOrEmptyByID(action.channelID);
 
                 if (chan->isEmpty())
                 {
                     return;
                 }
 
-                auto msg = MessageBuilder(action).release();
+                auto twitchChannel =
+                    std::dynamic_pointer_cast<TwitchChannel>(chan);
+                if (!twitchChannel)
+                {
+                    return;
+                }
 
-                postToThread([chan, msg] {
-                    chan->addMessage(msg);
+                postToThread([twitchChannel, action] {
+                    const auto p =
+                        TwitchMessageBuilder::makeLowTrustUserMessage(
+                            action, twitchChannel->getName(),
+                            twitchChannel.get());
+                    twitchChannel->addMessage(p.first,
+                                              MessageContext::Original);
+                    twitchChannel->addMessage(p.second,
+                                              MessageContext::Original);
                 });
-                chan->deleteMessage(msg->id);
             });
 
     std::ignore =
-        this->twitch->pubsub->signals_.moderation.automodInfoMessage.connect(
+        this->twitchPubSub->moderation.suspiciousTreatmentUpdated.connect(
             [&](const auto &action) {
-                auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
+                if (action.treatment ==
+                    PubSubLowTrustUsersMessage::Treatment::INVALID)
+                {
+                    qCWarning(chatterinoTwitch)
+                        << "Received suspicious user update with unknown "
+                           "treatment:"
+                        << action.treatmentString;
+                    return;
+                }
 
+                if (action.updatedByUserLogin.isEmpty())
+                {
+                    return;
+                }
+
+                if (getSettings()->streamerModeHideModActions &&
+                    this->getStreamerMode()->isEnabled())
+                {
+                    return;
+                }
+
+                auto chan =
+                    this->twitch->getChannelOrEmptyByID(action.channelID);
                 if (chan->isEmpty())
                 {
                     return;
                 }
 
                 postToThread([chan, action] {
-                    const auto p = makeAutomodInfoMessage(action);
-                    chan->addMessage(p);
+                    auto msg =
+                        TwitchMessageBuilder::makeLowTrustUpdateMessage(action);
+                    chan->addMessage(msg, MessageContext::Original);
                 });
             });
 
-    std::ignore = this->twitch->pubsub->signals_.pointReward.redeemed.connect(
-        [&](auto &data) {
+    std::ignore = this->twitchPubSub->moderation.autoModMessageCaught.connect(
+        [&](const auto &msg, const QString &channelID) {
+            auto chan = this->twitch->getChannelOrEmptyByID(channelID);
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            switch (msg.type)
+            {
+                case PubSubAutoModQueueMessage::Type::AutoModCaughtMessage: {
+                    if (msg.status == "PENDING")
+                    {
+                        AutomodAction action(msg.data, channelID);
+                        action.reason = QString("%1 level %2")
+                                            .arg(msg.contentCategory)
+                                            .arg(msg.contentLevel);
+
+                        action.msgID = msg.messageID;
+                        action.message = msg.messageText;
+
+                        // this message also contains per-word automod data, which could be implemented
+
+                        // extract sender data manually because Twitch loves not being consistent
+                        QString senderDisplayName =
+                            msg.senderUserDisplayName;  // Might be transformed later
+                        bool hasLocalizedName = false;
+                        if (!msg.senderUserDisplayName.isEmpty())
+                        {
+                            // check for non-ascii display names
+                            if (QString::compare(msg.senderUserDisplayName,
+                                                 msg.senderUserLogin,
+                                                 Qt::CaseInsensitive) != 0)
+                            {
+                                hasLocalizedName = true;
+                            }
+                        }
+                        QColor senderColor = msg.senderUserChatColor;
+                        QString senderColor_;
+                        if (!senderColor.isValid() &&
+                            getSettings()->colorizeNicknames)
+                        {
+                            // color may be not present if user is a grey-name
+                            senderColor = getRandomColor(msg.senderUserID);
+                        }
+
+                        // handle username style based on prefered setting
+                        switch (getSettings()->usernameDisplayMode.getValue())
+                        {
+                            case UsernameDisplayMode::Username: {
+                                if (hasLocalizedName)
+                                {
+                                    senderDisplayName = msg.senderUserLogin;
+                                }
+                                break;
+                            }
+                            case UsernameDisplayMode::LocalizedName: {
+                                break;
+                            }
+                            case UsernameDisplayMode::
+                                UsernameAndLocalizedName: {
+                                if (hasLocalizedName)
+                                {
+                                    senderDisplayName = QString("%1(%2)").arg(
+                                        msg.senderUserLogin,
+                                        msg.senderUserDisplayName);
+                                }
+                                break;
+                            }
+                        }
+
+                        action.target =
+                            ActionUser{msg.senderUserID, msg.senderUserLogin,
+                                       senderDisplayName, senderColor};
+                        postToThread([chan, action] {
+                            const auto p =
+                                TwitchMessageBuilder::makeAutomodMessage(
+                                    action, chan->getName());
+                            chan->addMessage(p.first, MessageContext::Original);
+                            chan->addMessage(p.second,
+                                             MessageContext::Original);
+
+                            getIApp()
+                                ->getTwitch()
+                                ->getAutomodChannel()
+                                ->addMessage(p.first, MessageContext::Original);
+                            getIApp()
+                                ->getTwitch()
+                                ->getAutomodChannel()
+                                ->addMessage(p.second,
+                                             MessageContext::Original);
+
+                            if (getSettings()->showAutomodInMentions)
+                            {
+                                getIApp()
+                                    ->getTwitch()
+                                    ->getMentionsChannel()
+                                    ->addMessage(p.first,
+                                                 MessageContext::Original);
+                                getIApp()
+                                    ->getTwitch()
+                                    ->getMentionsChannel()
+                                    ->addMessage(p.second,
+                                                 MessageContext::Original);
+                            }
+                        });
+                    }
+                    // "ALLOWED" and "DENIED" statuses remain unimplemented
+                    // They are versions of automod_message_(denied|approved) but for mods.
+                }
+                break;
+
+                case PubSubAutoModQueueMessage::Type::INVALID:
+                default: {
+                }
+                break;
+            }
+        });
+
+    std::ignore = this->twitchPubSub->moderation.autoModMessageBlocked.connect(
+        [&](const auto &action) {
+            auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            postToThread([chan, action] {
+                const auto p = TwitchMessageBuilder::makeAutomodMessage(
+                    action, chan->getName());
+                chan->addMessage(p.first, MessageContext::Original);
+                chan->addMessage(p.second, MessageContext::Original);
+            });
+        });
+
+    std::ignore = this->twitchPubSub->moderation.automodUserMessage.connect(
+        [&](const auto &action) {
+            if (getSettings()->streamerModeHideModActions &&
+                this->getStreamerMode()->isEnabled())
+            {
+                return;
+            }
+            auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
+
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            auto msg = MessageBuilder(action).release();
+
+            postToThread([chan, msg] {
+                chan->addMessage(msg, MessageContext::Original);
+            });
+            chan->deleteMessage(msg->id);
+        });
+
+    std::ignore = this->twitchPubSub->moderation.automodInfoMessage.connect(
+        [&](const auto &action) {
+            auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
+
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            postToThread([chan, action] {
+                const auto p =
+                    TwitchMessageBuilder::makeAutomodInfoMessage(action);
+                chan->addMessage(p, MessageContext::Original);
+            });
+        });
+
+    std::ignore =
+        this->twitchPubSub->pointReward.redeemed.connect([&](auto &data) {
             QString channelId = data.value("channel_id").toString();
             if (channelId.isEmpty())
             {
@@ -641,40 +1003,33 @@ void Application::initPubSub()
             auto reward = ChannelPointReward(data);
 
             postToThread([chan, reward] {
-                if (auto channel = dynamic_cast<TwitchChannel *>(chan.get()))
+                if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
                 {
                     channel->addChannelPointReward(reward);
                 }
             });
         });
 
-    this->twitch->pubsub->start();
-
-    auto RequestModerationActions = [this]() {
-        this->twitch->pubsub->setAccount(
-            getApp()->accounts->twitch.getCurrent());
-        // TODO(pajlada): Unlisten to all authed topics instead of only
-        // moderation topics this->twitch->pubsub->UnlistenAllAuthedTopics();
-
-        this->twitch->pubsub->listenToWhispers();
-    };
+    this->twitchPubSub->start();
+    this->twitchPubSub->setAccount(this->accounts->twitch.getCurrent());
 
     this->accounts->twitch.currentUserChanged.connect(
         [this] {
-            this->twitch->pubsub->unlistenAllModerationActions();
-            this->twitch->pubsub->unlistenAutomod();
-            this->twitch->pubsub->unlistenWhispers();
+            this->twitchPubSub->unlistenChannelModerationActions();
+            this->twitchPubSub->unlistenAutomod();
+            this->twitchPubSub->unlistenLowTrustUsers();
+            this->twitchPubSub->unlistenChannelPointRewards();
+
+            this->twitchPubSub->setAccount(this->accounts->twitch.getCurrent());
         },
         boost::signals2::at_front);
-
-    this->accounts->twitch.currentUserChanged.connect(RequestModerationActions);
-
-    RequestModerationActions();
 }
 
 void Application::initBttvLiveUpdates()
 {
-    if (!this->twitch->bttvLiveUpdates)
+    auto &bttvLiveUpdates = this->twitch->getBTTVLiveUpdates();
+
+    if (!bttvLiveUpdates)
     {
         qCDebug(chatterinoBttv)
             << "Skipping initialization of Live Updates as it's disabled";
@@ -683,8 +1038,8 @@ void Application::initBttvLiveUpdates()
 
     // We can safely ignore these signal connections since the twitch object will always
     // be destroyed before the Application
-    std::ignore = this->twitch->bttvLiveUpdates->signals_.emoteAdded.connect(
-        [&](const auto &data) {
+    std::ignore =
+        bttvLiveUpdates->signals_.emoteAdded.connect([&](const auto &data) {
             auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);
 
             postToThread([chan, data] {
@@ -694,8 +1049,8 @@ void Application::initBttvLiveUpdates()
                 }
             });
         });
-    std::ignore = this->twitch->bttvLiveUpdates->signals_.emoteUpdated.connect(
-        [&](const auto &data) {
+    std::ignore =
+        bttvLiveUpdates->signals_.emoteUpdated.connect([&](const auto &data) {
             auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);
 
             postToThread([chan, data] {
@@ -705,8 +1060,8 @@ void Application::initBttvLiveUpdates()
                 }
             });
         });
-    std::ignore = this->twitch->bttvLiveUpdates->signals_.emoteRemoved.connect(
-        [&](const auto &data) {
+    std::ignore =
+        bttvLiveUpdates->signals_.emoteRemoved.connect([&](const auto &data) {
             auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);
 
             postToThread([chan, data] {
@@ -716,12 +1071,14 @@ void Application::initBttvLiveUpdates()
                 }
             });
         });
-    this->twitch->bttvLiveUpdates->start();
+    bttvLiveUpdates->start();
 }
 
 void Application::initSeventvEventAPI()
 {
-    if (!this->twitch->seventvEventAPI)
+    auto &seventvEventAPI = this->twitch->getSeventvEventAPI();
+
+    if (!seventvEventAPI)
     {
         qCDebug(chatterinoSeventvEventAPI)
             << "Skipping initialization as the EventAPI is disabled";
@@ -730,8 +1087,8 @@ void Application::initSeventvEventAPI()
 
     // We can safely ignore these signal connections since the twitch object will always
     // be destroyed before the Application
-    std::ignore = this->twitch->seventvEventAPI->signals_.emoteAdded.connect(
-        [&](const auto &data) {
+    std::ignore =
+        seventvEventAPI->signals_.emoteAdded.connect([&](const auto &data) {
             postToThread([this, data] {
                 this->twitch->forEachSeventvEmoteSet(
                     data.emoteSetID, [data](TwitchChannel &chan) {
@@ -739,8 +1096,8 @@ void Application::initSeventvEventAPI()
                     });
             });
         });
-    std::ignore = this->twitch->seventvEventAPI->signals_.emoteUpdated.connect(
-        [&](const auto &data) {
+    std::ignore =
+        seventvEventAPI->signals_.emoteUpdated.connect([&](const auto &data) {
             postToThread([this, data] {
                 this->twitch->forEachSeventvEmoteSet(
                     data.emoteSetID, [data](TwitchChannel &chan) {
@@ -748,8 +1105,8 @@ void Application::initSeventvEventAPI()
                     });
             });
         });
-    std::ignore = this->twitch->seventvEventAPI->signals_.emoteRemoved.connect(
-        [&](const auto &data) {
+    std::ignore =
+        seventvEventAPI->signals_.emoteRemoved.connect([&](const auto &data) {
             postToThread([this, data] {
                 this->twitch->forEachSeventvEmoteSet(
                     data.emoteSetID, [data](TwitchChannel &chan) {
@@ -757,22 +1114,20 @@ void Application::initSeventvEventAPI()
                     });
             });
         });
-    std::ignore = this->twitch->seventvEventAPI->signals_.userUpdated.connect(
-        [&](const auto &data) {
+    std::ignore =
+        seventvEventAPI->signals_.userUpdated.connect([&](const auto &data) {
             this->twitch->forEachSeventvUser(data.userID,
                                              [data](TwitchChannel &chan) {
                                                  chan.updateSeventvUser(data);
                                              });
         });
 
-    this->twitch->seventvEventAPI->start();
+    seventvEventAPI->start();
 }
 
 Application *getApp()
 {
     assert(Application::instance != nullptr);
-
-    assertInGuiThread();
 
     return Application::instance;
 }
@@ -780,8 +1135,6 @@ Application *getApp()
 IApplication *getIApp()
 {
     assert(IApplication::instance != nullptr);
-
-    assertInGuiThread();
 
     return IApplication::instance;
 }

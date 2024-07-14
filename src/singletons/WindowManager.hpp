@@ -37,8 +37,13 @@ class WindowManager final : public Singleton
 public:
     static const QString WINDOW_LAYOUT_FILENAME;
 
-    WindowManager();
+    explicit WindowManager(const Paths &paths);
     ~WindowManager() override;
+
+    WindowManager(const WindowManager &) = delete;
+    WindowManager(WindowManager &&) = delete;
+    WindowManager &operator=(const WindowManager &) = delete;
+    WindowManager &operator=(WindowManager &&) = delete;
 
     static void encodeTab(SplitContainer *tab, bool isSelected,
                           QJsonObject &obj);
@@ -61,6 +66,10 @@ public:
     // This is called, for example, when the emote scale or timestamp format has
     // changed
     void forceLayoutChannelViews();
+
+    // Tell a channel (or all channels if channel is nullptr) to invalidate all paint buffers
+    void invalidateChannelViewBuffers(Channel *channel = nullptr);
+
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
     void repaintGifEmotes();
 
@@ -90,10 +99,10 @@ public:
      */
     void scrollToMessage(const MessagePtr &message);
 
-    QPoint emotePopupPos();
-    void setEmotePopupPos(QPoint pos);
+    QRect emotePopupBounds() const;
+    void setEmotePopupBounds(QRect bounds);
 
-    void initialize(Settings &settings, Paths &paths) override;
+    void initialize(Settings &settings, const Paths &paths) override;
     void save() override;
     void closeAll();
 
@@ -119,6 +128,9 @@ public:
     // This signal fires whenever views rendering a channel, or all views if the
     // channel is a nullptr, need to redo their layout
     pajlada::Signals::Signal<Channel *> layoutRequested;
+    // This signal fires whenever views rendering a channel, or all views if the
+    // channel is a nullptr, need to invalidate their paint buffers
+    pajlada::Signals::Signal<Channel *> invalidateBuffersRequested;
 
     pajlada::Signals::NoArgSignal wordFlagsChanged;
 
@@ -140,8 +152,9 @@ private:
     const QString windowLayoutFilePath;
 
     bool initialized_ = false;
+    bool shuttingDown_ = false;
 
-    QPoint emotePopupPos_;
+    QRect emotePopupBounds_;
 
     std::atomic<int> generation_{0};
 

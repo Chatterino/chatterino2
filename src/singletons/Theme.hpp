@@ -43,9 +43,10 @@ public:
 
     static const int AUTO_RELOAD_INTERVAL_MS = 500;
 
-    void initialize(Settings &settings, Paths &paths) final;
+    void initialize(Settings &settings, const Paths &paths) final;
 
     bool isLightTheme() const;
+    bool isSystemTheme() const;
 
     struct TabColors {
         QColor text;
@@ -76,6 +77,9 @@ public:
         TabColors highlighted;
         TabColors selected;
         QColor dividerLine;
+
+        QColor liveIndicator;
+        QColor rerunIndicator;
     } tabs;
 
     /// MESSAGES
@@ -153,6 +157,9 @@ public:
     pajlada::Signals::NoArgSignal updated;
 
     QStringSetting themeName{"/appearance/theme/name", "Dark"};
+    QStringSetting lightSystemThemeName{"/appearance/theme/lightSystem",
+                                        "Light"};
+    QStringSetting darkSystemThemeName{"/appearance/theme/darkSystem", "Dark"};
 
 private:
     bool isLight_ = false;
@@ -164,16 +171,18 @@ private:
     // This will only be populated when auto-reloading themes
     QJsonObject currentThemeJson_;
 
+    QObject lifetime_;
+
     /**
      * Figure out which themes are available in the Themes directory
      *
      * NOTE: This is currently not built to be reloadable
      **/
-    void loadAvailableThemes();
+    void loadAvailableThemes(const Paths &paths);
 
     std::optional<ThemeDescriptor> findThemeByKey(const QString &key);
 
-    void parseFrom(const QJsonObject &root);
+    void parseFrom(const QJsonObject &root, bool isCustomTheme);
 
     pajlada::Signals::NoArgSignal repaintVisibleChatWidgets_;
 

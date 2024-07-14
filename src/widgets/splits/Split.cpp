@@ -2,10 +2,11 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
-#include "common/NetworkRequest.hpp"
-#include "common/NetworkResult.hpp"
+#include "common/network/NetworkRequest.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
@@ -199,11 +200,11 @@ namespace {
             parent);
         window->setWindowTitle("Chatterino - " + title);
         window->setAttribute(Qt::WA_DeleteOnClose);
-        auto layout = new QVBoxLayout();
+        auto *layout = new QVBoxLayout();
         layout->addWidget(new QLabel(description));
-        auto label = new QLabel(window);
+        auto *label = new QLabel(window);
         layout->addWidget(label);
-        auto movie = new QMovie(label);
+        auto *movie = new QMovie(label);
         movie->setFileName(source);
         label->setMovie(movie);
         movie->start();
@@ -241,7 +242,7 @@ Split::Split(QWidget *parent)
 
     // update placeholder text on Twitch account change and channel change
     this->bSignals_.emplace_back(
-        getApp()->accounts->twitch.currentUserChanged.connect([this] {
+        getIApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
             this->updateInputPlaceholder();
         }));
     this->signalHolder_.managedConnect(channelChanged, [this] {
@@ -271,7 +272,7 @@ Split::Split(QWidget *parent)
     std::ignore = this->view_->openChannelIn.connect(
         [this](QString twitchChannel, FromTwitchLinkOpenChannelIn openIn) {
             ChannelPtr channel =
-                getApp()->twitch->getOrAddChannel(twitchChannel);
+                getIApp()->getTwitchAbstract()->getOrAddChannel(twitchChannel);
             switch (openIn)
             {
                 case FromTwitchLinkOpenChannelIn::Split:
@@ -330,7 +331,7 @@ Split::Split(QWidget *parent)
         },
         this->signalHolder_);
 
-    this->header_->updateModerationModeIcon();
+    this->header_->updateIcons();
     this->overlay_->hide();
 
     this->setSizePolicy(QSizePolicy::MinimumExpanding,
@@ -379,9 +380,25 @@ Split::Split(QWidget *parent)
 
     // this connection can be ignored since the SplitInput is owned by this Split
     std::ignore = this->input_->ui_.textEdit->imagePasted.connect(
-        [this](const QMimeData *source) {
+        [this](const QMimeData *original) {
             if (!getSettings()->imageUploaderEnabled)
+            {
                 return;
+            }
+
+            auto channel = this->getChannel();
+            auto *imageUploader = getIApp()->getImageUploader();
+
+            auto [images, imageProcessError] =
+                imageUploader->getImages(original);
+            if (images.empty())
+            {
+                channel->addSystemMessage(
+                    QString(
+                        "An error occurred trying to process your image: %1")
+                        .arg(imageProcessError));
+                return;
+            }
 
             if (getSettings()->askOnImageUpload.getValue())
             {
@@ -392,24 +409,41 @@ Split::Split(QWidget *parent)
                     "You are uploading an image to a 3rd party service not in "
                     "control of the Chatterino team. You may not be able to "
                     "remove the image from the site. Are you okay with this?");
-                msgBox.addButton(QMessageBox::Cancel);
-                msgBox.addButton(QMessageBox::Yes);
-                msgBox.addButton("Yes, don't ask again", QMessageBox::YesRole);
+                auto *cancel = msgBox.addButton(QMessageBox::Cancel);
+                auto *yes = msgBox.addButton(QMessageBox::Yes);
+                auto *yesDontAskAgain = msgBox.addButton("Yes, don't ask again",
+                                                         QMessageBox::YesRole);
 
                 msgBox.setDefaultButton(QMessageBox::Yes);
 
-                auto picked = msgBox.exec();
-                if (picked == QMessageBox::Cancel)
-                {
-                    return;
-                }
-                else if (picked == 0)  // don't ask again button
+                msgBox.exec();
+
+                auto *clickedButton = msgBox.clickedButton();
+                if (clickedButton == yesDontAskAgain)
                 {
                     getSettings()->askOnImageUpload.setValue(false);
                 }
+                else if (clickedButton == yes)
+                {
+                    // Continue with image upload
+                }
+                else if (clickedButton == cancel)
+                {
+                    // Not continuing with image upload
+                    return;
+                }
+                else
+                {
+                    // An unknown "button" was pressed - handle it as if cancel was pressed
+                    // cancel is already handled as the "escape" option, so this should never happen
+                    qCWarning(chatterinoImageuploader)
+                        << "Unhandled button pressed:" << clickedButton;
+                    return;
+                }
             }
+
             QPointer<ResizingTextEdit> edit = this->input_->ui_.textEdit;
-            getApp()->imageUploader->upload(source, this->getChannel(), edit);
+            imageUploader->upload(std::move(images), channel, edit);
         });
 
     getSettings()->imageUploaderEnabled.connect(
@@ -418,7 +452,7 @@ Split::Split(QWidget *parent)
         },
         this->signalHolder_);
     this->addShortcuts();
-    this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
+    this->signalHolder_.managedConnect(getIApp()->getHotkeys()->onItemsUpdated,
                                        [this]() {
                                            this->clearShortcuts();
                                            this->addShortcuts();
@@ -519,11 +553,11 @@ void Split::addShortcuts()
              auto &scrollbar = this->getChannelView().getScrollBar();
              if (direction == "up")
              {
-                 scrollbar.offset(-scrollbar.getLargeChange());
+                 scrollbar.offset(-scrollbar.getPageSize());
              }
              else if (direction == "down")
              {
-                 scrollbar.offset(scrollbar.getLargeChange());
+                 scrollbar.offset(scrollbar.getPageSize());
              }
              else
              {
@@ -665,15 +699,25 @@ void Split::addShortcuts()
          }},
         {"runCommand",
          [this](std::vector<QString> arguments) -> QString {
-             if (arguments.size() == 0)
+             if (arguments.empty())
              {
                  qCWarning(chatterinoHotkeys)
                      << "runCommand hotkey called without arguments!";
                  return "runCommand hotkey called without arguments!";
              }
-             QString command = getApp()->commands->execCommand(
-                 arguments.at(0).replace('\n', ' '), this->getChannel(), false);
-             this->getChannel()->sendMessage(command);
+             QString requestedText = arguments.at(0).replace('\n', ' ');
+
+             QString inputText = this->getInput().getInputText();
+             QString message = getIApp()->getCommands()->execCustomCommand(
+                 requestedText.split(' '), Command{"(hotkey)", requestedText},
+                 true, this->getChannel(), nullptr,
+                 {
+                     {"input.text", inputText},
+                 });
+
+             message = getIApp()->getCommands()->execCommand(
+                 message, this->getChannel(), false);
+             this->getChannel()->sendMessage(message);
              return "";
          }},
         {"setChannelNotification",
@@ -706,24 +750,24 @@ void Split::addShortcuts()
 
              if (mode == 0)
              {
-                 getApp()->notifications->removeChannelNotification(
+                 getIApp()->getNotifications()->removeChannelNotification(
                      this->getChannel()->getName(), Platform::Twitch);
              }
              else if (mode == 1)
              {
-                 getApp()->notifications->addChannelNotification(
+                 getIApp()->getNotifications()->addChannelNotification(
                      this->getChannel()->getName(), Platform::Twitch);
              }
              else
              {
-                 getApp()->notifications->updateChannelNotification(
+                 getIApp()->getNotifications()->updateChannelNotification(
                      this->getChannel()->getName(), Platform::Twitch);
              }
              return "";
          }},
     };
 
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::Split, actions, this);
 }
 
@@ -752,7 +796,7 @@ void Split::updateInputPlaceholder()
         return;
     }
 
-    auto user = getApp()->accounts->twitch.getCurrent();
+    auto user = getIApp()->getAccounts()->twitch.getCurrent();
     QString placeholderText;
 
     if (user->isAnon())
@@ -761,9 +805,11 @@ void Split::updateInputPlaceholder()
     }
     else
     {
-        placeholderText =
-            QString("Send message as %1...")
-                .arg(getApp()->accounts->twitch.getCurrent()->getUserName());
+        placeholderText = QString("Send message as %1...")
+                              .arg(getIApp()
+                                       ->getAccounts()
+                                       ->twitch.getCurrent()
+                                       ->getUserName());
     }
 
     this->input_->ui_.textEdit->setPlaceholderText(placeholderText);
@@ -771,7 +817,7 @@ void Split::updateInputPlaceholder()
 
 void Split::joinChannelInNewTab(ChannelPtr channel)
 {
-    auto &nb = getApp()->windows->getMainWindow().getNotebook();
+    auto &nb = getIApp()->getWindows()->getMainWindow().getNotebook();
     SplitContainer *container = nb.addPage(true);
 
     Split *split = new Split(container);
@@ -781,17 +827,16 @@ void Split::joinChannelInNewTab(ChannelPtr channel)
 
 void Split::refreshModerationMode()
 {
-    this->header_->updateModerationModeIcon();
+    this->header_->updateIcons();
     this->view_->queueLayout();
 }
 
 void Split::openChannelInBrowserPlayer(ChannelPtr channel)
 {
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         QDesktopServices::openUrl(
-            "https://player.twitch.tv/?parent=twitch.tv&channel=" +
-            twitchChannel->getName());
+            QUrl(TWITCH_PLAYER_URL.arg(twitchChannel->getName())));
     }
 }
 
@@ -833,7 +878,7 @@ void Split::setChannel(IndirectChannel newChannel)
     if (tc != nullptr)
     {
         this->usermodeChangedConnection_ = tc->userStateChanged.connect([this] {
-            this->header_->updateModerationModeIcon();
+            this->header_->updateIcons();
             this->header_->updateRoomModes();
         });
 
@@ -849,18 +894,9 @@ void Split::setChannel(IndirectChannel newChannel)
             });
         });
 
-    this->header_->updateModerationModeIcon();
+    this->header_->updateIcons();
     this->header_->updateChannelText();
     this->header_->updateRoomModes();
-
-    if (newChannel.getType() == Channel::Type::Twitch)
-    {
-        this->header_->setChattersButtonVisible(true);
-    }
-    else
-    {
-        this->header_->setChattersButtonVisible(false);
-    }
 
     this->channelSignalHolder_.managedConnect(
         this->channel_.get()->displayNameChanged, [this] {
@@ -871,7 +907,7 @@ void Split::setChannel(IndirectChannel newChannel)
     this->actionRequested.invoke(Action::RefreshTab);
 
     // Queue up save because: Split channel changed
-    getApp()->windows->queueSave();
+    getIApp()->getWindows()->queueSave();
 }
 
 void Split::setModerationMode(bool value)
@@ -893,14 +929,14 @@ void Split::insertTextToInput(const QString &text)
 void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
                                    std::function<void(bool)> callback)
 {
-    if (this->selectChannelDialog_.hasElement())
+    if (!this->selectChannelDialog_.isNull())
     {
         this->selectChannelDialog_->raise();
 
         return;
     }
 
-    auto dialog = new SelectChannelDialog(this);
+    auto *dialog = new SelectChannelDialog(this);
     if (!empty)
     {
         dialog->setSelectedChannel(this->getIndirectChannel());
@@ -917,7 +953,6 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
         }
 
         callback(dialog->hasSeletedChannel());
-        this->selectChannelDialog_ = nullptr;
     });
     this->selectChannelDialog_ = dialog;
 }
@@ -942,17 +977,23 @@ void Split::paintEvent(QPaintEvent *)
 
 void Split::mouseMoveEvent(QMouseEvent *event)
 {
+    (void)event;
+
     this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 }
 
 void Split::keyPressEvent(QKeyEvent *event)
 {
+    (void)event;
+
     this->view_->unsetCursor();
     this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 }
 
 void Split::keyReleaseEvent(QKeyEvent *event)
 {
+    (void)event;
+
     this->view_->unsetCursor();
     this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 }
@@ -960,7 +1001,7 @@ void Split::keyReleaseEvent(QKeyEvent *event)
 void Split::resizeEvent(QResizeEvent *event)
 {
     // Queue up save because: Split resized
-    getApp()->windows->queueSave();
+    getIApp()->getWindows()->queueSave();
 
     BaseWidget::resizeEvent(event);
 
@@ -988,6 +1029,8 @@ void Split::enterEvent(QEvent * /*event*/)
 
 void Split::leaveEvent(QEvent *event)
 {
+    (void)event;
+
     this->isMouseOver_ = false;
 
     this->overlay_->hide();
@@ -1047,8 +1090,8 @@ void Split::explainSplitting()
 
 void Split::popup()
 {
-    auto app = getApp();
-    Window &window = app->windows->createWindow(WindowType::Popup);
+    auto *app = getApp();
+    Window &window = app->getWindows()->createWindow(WindowType::Popup);
 
     Split *split = new Split(static_cast<SplitContainer *>(
         window.getNotebook().getOrAddSelectedPage()));
@@ -1070,7 +1113,7 @@ void Split::openInBrowser()
 {
     auto channel = this->getChannel();
 
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         QDesktopServices::openUrl("https://twitch.tv/" +
                                   twitchChannel->getName());
@@ -1079,7 +1122,8 @@ void Split::openInBrowser()
 
 void Split::openWhispersInBrowser()
 {
-    auto userName = getApp()->accounts->twitch.getCurrent()->getUserName();
+    auto userName =
+        getIApp()->getAccounts()->twitch.getCurrent()->getUserName();
     QDesktopServices::openUrl("https://twitch.tv/popout/moderator/" + userName +
                               "/whispers");
 }
@@ -1093,7 +1137,7 @@ void Split::openModViewInBrowser()
 {
     auto channel = this->getChannel();
 
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         QDesktopServices::openUrl("https://twitch.tv/moderator/" +
                                   twitchChannel->getName());
@@ -1113,9 +1157,9 @@ void Split::openWithCustomScheme()
         return;
     }
 
-    const auto channel = this->getChannel().get();
+    auto *const channel = this->getChannel().get();
 
-    if (const auto twitchChannel = dynamic_cast<TwitchChannel *>(channel))
+    if (auto *const twitchChannel = dynamic_cast<TwitchChannel *>(channel))
     {
         QDesktopServices::openUrl(QString("%1https://twitch.tv/%2")
                                       .arg(scheme)
@@ -1166,7 +1210,8 @@ void Split::showChatterList()
     auto formatListItemText = [](QString text) {
         auto *item = new QListWidgetItem();
         item->setText(text);
-        item->setFont(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.0));
+        item->setFont(
+            getIApp()->getFonts()->getFont(FontStyle::ChatMedium, 1.0));
         return item;
     };
 
@@ -1216,7 +1261,7 @@ void Split::showChatterList()
     auto loadChatters = [=](auto modList, auto vipList, bool isBroadcaster) {
         getHelix()->getChatters(
             twitchChannel->roomId(),
-            getApp()->accounts->twitch.getCurrent()->getUserId(), 50000,
+            getIApp()->getAccounts()->twitch.getCurrent()->getUserId(), 50000,
             [=](auto chatters) {
                 auto broadcaster = channel->getName().toLower();
                 QStringList chatterList;
@@ -1381,8 +1426,8 @@ void Split::showChatterList()
          }},
     };
 
-    getApp()->hotkeys->shortcutsForCategory(HotkeyCategory::PopupWindow,
-                                            actions, chatterDock);
+    getIApp()->getHotkeys()->shortcutsForCategory(HotkeyCategory::PopupWindow,
+                                                  actions, chatterDock);
 
     dockVbox->addWidget(searchBar);
     dockVbox->addWidget(loadingLabel);
@@ -1404,7 +1449,7 @@ void Split::openSubPage()
 {
     ChannelPtr channel = this->getChannel();
 
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         QDesktopServices::openUrl(twitchChannel->subscriptionUrl());
     }
@@ -1445,11 +1490,11 @@ void Split::showSearch(bool singleChannel)
     }
 
     // Pass every ChannelView for every Split across the app to the search popup
-    auto &notebook = getApp()->windows->getMainWindow().getNotebook();
+    auto &notebook = getIApp()->getWindows()->getMainWindow().getNotebook();
     for (int i = 0; i < notebook.getPageCount(); ++i)
     {
-        auto container = dynamic_cast<SplitContainer *>(notebook.getPageAt(i));
-        for (auto split : container->getSplits())
+        auto *container = dynamic_cast<SplitContainer *>(notebook.getPageAt(i));
+        for (auto *split : container->getSplits())
         {
             if (split->channel_.getType() != Channel::Type::TwitchAutomod)
             {
@@ -1464,9 +1509,9 @@ void Split::showSearch(bool singleChannel)
 void Split::reloadChannelAndSubscriberEmotes()
 {
     auto channel = this->getChannel();
-    getApp()->accounts->twitch.getCurrent()->loadEmotes(channel);
+    getIApp()->getAccounts()->twitch.getCurrent()->loadEmotes(channel);
 
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         twitchChannel->refreshBTTVChannelEmotes(true);
         twitchChannel->refreshFFZChannelEmotes(true);
@@ -1533,8 +1578,8 @@ void Split::drag()
     startDraggingSplit();
 
     auto originalLocation = container->releaseSplit(this);
-    auto drag = new QDrag(this);
-    auto mimeData = new QMimeData;
+    auto *drag = new QDrag(this);
+    auto *mimeData = new QMimeData;
 
     mimeData->setData("chatterino/split", "xD");
     drag->setMimeData(mimeData);
@@ -1552,6 +1597,13 @@ void Split::drag()
 void Split::setInputReply(const MessagePtr &reply)
 {
     this->input_->setReply(reply);
+}
+
+void Split::unpause()
+{
+    this->view_->unpause(PauseReason::KeyboardModifier);
+    this->view_->unpause(PauseReason::DoubleClick);
+    // Mouse intentionally left out, we may still have the mouse over the split
 }
 
 }  // namespace chatterino

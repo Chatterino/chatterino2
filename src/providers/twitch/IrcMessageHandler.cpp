@@ -1,6 +1,7 @@
 #include "providers/twitch/IrcMessageHandler.hpp"
 
 #include "Application.hpp"
+#include "common/Channel.hpp"
 #include "common/Common.hpp"
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
@@ -13,6 +14,7 @@
 #include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/MessageThread.hpp"
+#include "providers/irc/AbstractIrcServer.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchAccountManager.hpp"
@@ -22,12 +24,12 @@
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/ChannelHelpers.hpp"
 #include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
 #include "util/IrcHelpers.hpp"
-#include "util/StreamerMode.hpp"
 
 #include <IrcMessage>
 #include <QLocale>
@@ -44,13 +46,16 @@ using namespace chatterino;
 
 // Message types below are the ones that might contain special user's message on USERNOTICE
 const QSet<QString> SPECIAL_MESSAGE_TYPES{
-    "sub",            //
-    "subgift",        //
-    "resub",          // resub messages
-    "bitsbadgetier",  // bits badge upgrade
-    "ritual",         // new viewer ritual
-    "announcement",   // new mod announcement thing
+    "sub",              //
+    "subgift",          //
+    "resub",            // resub messages
+    "bitsbadgetier",    // bits badge upgrade
+    "ritual",           // new viewer ritual
+    "announcement",     // new mod announcement thing
+    "viewermilestone",  // watch streak, but other categories possible in future
 };
+
+const QString ANONYMOUS_GIFTER_ID = "274598607";
 
 MessagePtr generateBannedMessage(bool confirmedBan)
 {
@@ -127,7 +132,7 @@ void updateReplyParticipatedStatus(const QVariantMap &tags,
                                    bool isNew)
 {
     const auto &currentLogin =
-        getApp()->accounts->twitch.getCurrent()->getUserName();
+        getIApp()->getAccounts()->twitch.getCurrent()->getUserName();
 
     if (thread->subscribed())
     {
@@ -166,7 +171,7 @@ void updateReplyParticipatedStatus(const QVariantMap &tags,
 }
 
 ChannelPtr channelOrEmptyByTarget(const QString &target,
-                                  TwitchIrcServer &server)
+                                  IAbstractIrcServer &server)
 {
     QString channelName;
     if (!trimChannelName(target, channelName))
@@ -385,7 +390,7 @@ std::vector<MessagePtr> parseNoticeMessage(Communi::IrcNoticeMessage *message)
     {
         const auto linkColor = MessageColor(MessageColor::Link);
         const auto accountsLink = Link(Link::OpenAccountsPage, QString());
-        const auto curUser = getApp()->accounts->twitch.getCurrent();
+        const auto curUser = getIApp()->getAccounts()->twitch.getCurrent();
         const auto expirationText = QString("Login expired for user \"%1\"!")
                                         .arg(curUser->getUserName());
         const auto loginPromptText = QString("Try adding your account again.");
@@ -432,19 +437,8 @@ std::vector<MessagePtr> parseNoticeMessage(Communi::IrcNoticeMessage *message)
     // default case
     std::vector<MessagePtr> builtMessages;
 
-    auto content = message->content();
-    if (content.startsWith(
-            "Your settings prevent you from sending this whisper",
-            Qt::CaseInsensitive) &&
-        getSettings()->helixTimegateWhisper.getValue() ==
-            HelixTimegateOverride::Timegate)
-    {
-        content = content +
-                  " Consider setting \"Helix timegate /w behaviour\" "
-                  "to \"Always use Helix\" in your Chatterino settings.";
-    }
-    builtMessages.emplace_back(
-        makeSystemMessage(content, calculateMessageTime(message).time()));
+    builtMessages.emplace_back(makeSystemMessage(
+        message->content(), calculateMessageTime(message).time()));
 
     return builtMessages;
 }
@@ -514,6 +508,41 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
         else if (msgType == "announcement")
         {
             messageText = "Announcement";
+        }
+        else if (msgType == "subgift")
+        {
+            if (auto monthsIt = tags.find("msg-param-gift-months");
+                monthsIt != tags.end())
+            {
+                int months = monthsIt.value().toInt();
+                if (months > 1)
+                {
+                    auto plan = tags.value("msg-param-sub-plan").toString();
+                    QString name =
+                        ANONYMOUS_GIFTER_ID == tags.value("user-id").toString()
+                            ? "An anonymous user"
+                            : tags.value("display-name").toString();
+                    messageText =
+                        QString("%1 gifted %2 months of a Tier %3 sub to %4!")
+                            .arg(name, QString::number(months),
+                                 plan.isEmpty() ? '1' : plan.at(0),
+                                 tags.value("msg-param-recipient-display-name")
+                                     .toString());
+
+                    if (auto countIt = tags.find("msg-param-sender-count");
+                        countIt != tags.end())
+                    {
+                        int count = countIt.value().toInt();
+                        if (count > months)
+                        {
+                            messageText +=
+                                QString(
+                                    " They've gifted %1 months in the channel.")
+                                    .arg(QString::number(count));
+                        }
+                    }
+                }
+            }
         }
 
         auto b = MessageBuilder(systemMessage, parseTagString(messageText),
@@ -650,31 +679,49 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
 }
 
 void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
-                                          TwitchIrcServer &server)
+                                          ITwitchIrcServer &twitchServer,
+                                          IAbstractIrcServer &abstractIrcServer)
 {
+    auto chan = channelOrEmptyByTarget(message->target(), abstractIrcServer);
+    if (chan->isEmpty())
+    {
+        return;
+    }
+
+    auto *twitchChannel = dynamic_cast<TwitchChannel *>(chan.get());
+
+    if (twitchChannel != nullptr)
+    {
+        auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+        if (message->tag("user-id") == currentUser->getUserId())
+        {
+            auto badgesTag = message->tag("badges");
+            if (badgesTag.isValid())
+            {
+                auto parsedBadges = parseBadges(badgesTag.toString());
+                twitchChannel->setMod(parsedBadges.contains("moderator"));
+                twitchChannel->setVIP(parsedBadges.contains("vip"));
+                twitchChannel->setStaff(parsedBadges.contains("staff"));
+            }
+        }
+    }
+
     // This is for compatibility with older Chatterino versions. Twitch didn't use
     // to allow ZERO WIDTH JOINER unicode character, so Chatterino used ESCAPE_TAG
     // instead.
     // See https://github.com/Chatterino/chatterino2/issues/3384 and
     // https://mm2pl.github.io/emoji_rfc.pdf for more details
-
     this->addMessage(
-        message, channelOrEmptyByTarget(message->target(), server),
-        message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER), server,
-        false, message->isAction());
-
-    auto chan = channelOrEmptyByTarget(message->target(), server);
-    if (chan->isEmpty())
-    {
-        return;
-    }
+        message, chan,
+        message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER),
+        twitchServer, false, message->isAction());
 
     if (message->tags().contains(u"pinned-chat-paid-amount"_s))
     {
         auto ptr = TwitchMessageBuilder::buildHypeChatMessage(message);
         if (ptr)
         {
-            chan->addMessage(ptr);
+            chan->addMessage(ptr, MessageContext::Original);
         }
     }
 }
@@ -689,7 +736,7 @@ void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
     {
         return;
     }
-    auto chan = getApp()->twitch->getChannelOrEmpty(chanName);
+    auto chan = getIApp()->getTwitchAbstract()->getChannelOrEmpty(chanName);
 
     auto *twitchChannel = dynamic_cast<TwitchChannel *>(chan.get());
     if (!twitchChannel)
@@ -751,7 +798,7 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     }
 
     // get channel
-    auto chan = getApp()->twitch->getChannelOrEmpty(chanName);
+    auto chan = getIApp()->getTwitchAbstract()->getChannelOrEmpty(chanName);
 
     if (chan->isEmpty())
     {
@@ -765,7 +812,8 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     if (clearChat.disableAllMessages)
     {
         chan->disableAllMessages();
-        chan->addMessage(std::move(clearChat.message));
+        chan->addMessage(std::move(clearChat.message),
+                         MessageContext::Original);
 
         return;
     }
@@ -773,10 +821,10 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     chan->addOrReplaceTimeout(std::move(clearChat.message));
 
     // refresh all
-    getApp()->windows->repaintVisibleChatWidgets(chan.get());
+    getIApp()->getWindows()->repaintVisibleChatWidgets(chan.get());
     if (getSettings()->hideModerated)
     {
-        getApp()->windows->forceLayoutChannelViews();
+        getIApp()->getWindows()->forceLayoutChannelViews();
     }
 }
 
@@ -795,7 +843,7 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
     }
 
     // get channel
-    auto chan = getApp()->twitch->getChannelOrEmpty(chanName);
+    auto chan = getIApp()->getTwitchAbstract()->getChannelOrEmpty(chanName);
 
     if (chan->isEmpty())
     {
@@ -821,13 +869,13 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
     {
         MessageBuilder builder;
         TwitchMessageBuilder::deletionMessage(msg, &builder);
-        chan->addMessage(builder.release());
+        chan->addMessage(builder.release(), MessageContext::Original);
     }
 }
 
 void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
 
     // set received emote-sets, used in TwitchAccount::loadUserstateEmotes
     bool emoteSetsChanged = currentUser->setUserstateEmoteSets(
@@ -844,7 +892,7 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
         return;
     }
 
-    auto c = getApp()->twitch->getChannelOrEmpty(channelName);
+    auto c = getIApp()->getTwitchAbstract()->getChannelOrEmpty(channelName);
     if (c->isEmpty())
     {
         return;
@@ -879,7 +927,7 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 void IrcMessageHandler::handleGlobalUserStateMessage(
     Communi::IrcMessage *message)
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
 
     // set received emote-sets, this time used to initially load emotes
     // NOTE: this should always return true unless we reconnect
@@ -899,7 +947,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
 
     args.isReceivedWhisper = true;
 
-    auto *c = getApp()->twitch->whispersChannel.get();
+    auto *c = getIApp()->getTwitch()->getWhispersChannel().get();
 
     TwitchMessageBuilder builder(
         c, ircMessage, args,
@@ -915,14 +963,15 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
     MessagePtr message = builder.build();
     builder.triggerHighlights();
 
-    getApp()->twitch->lastUserThatWhisperedMe.set(builder.userName);
+    getIApp()->getTwitch()->setLastUserThatWhisperedMe(builder.userName);
 
     if (message->flags.has(MessageFlag::ShowInMentions))
     {
-        getApp()->twitch->mentionsChannel->addMessage(message);
+        getIApp()->getTwitch()->getMentionsChannel()->addMessage(
+            message, MessageContext::Original);
     }
 
-    c->addMessage(message);
+    c->addMessage(message, MessageContext::Original);
 
     auto overrideFlags = std::optional<MessageFlags>(message->flags);
     overrideFlags->set(MessageFlag::DoNotTriggerNotification);
@@ -930,17 +979,19 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
 
     if (getSettings()->inlineWhispers &&
         !(getSettings()->streamerModeSuppressInlineWhispers &&
-          isInStreamerMode()))
+          getIApp()->getStreamerMode()->isEnabled()))
     {
-        getApp()->twitch->forEachChannel(
+        getIApp()->getTwitchAbstract()->forEachChannel(
             [&message, overrideFlags](ChannelPtr channel) {
-                channel->addMessage(message, overrideFlags);
+                channel->addMessage(message, MessageContext::Repost,
+                                    overrideFlags);
             });
     }
 }
 
-void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
-                                                TwitchIrcServer &server)
+void IrcMessageHandler::handleUserNoticeMessage(
+    Communi::IrcMessage *message, ITwitchIrcServer &twitchServer,
+    IAbstractIrcServer &abstractIrcServer)
 {
     auto tags = message->tags();
     auto parameters = message->parameters();
@@ -953,7 +1004,7 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
         content = parameters[1];
     }
 
-    auto chn = server.getChannelOrEmpty(target);
+    auto chn = abstractIrcServer.getChannelOrEmpty(target);
     if (isIgnoredMessage({
             .message = content,
             .twitchUserID = tags.value("user-id").toString(),
@@ -969,7 +1020,7 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
         // Messages are not required, so they might be empty
         if (!content.isEmpty())
         {
-            this->addMessage(message, chn, content, server, true, false);
+            this->addMessage(message, chn, content, twitchServer, true, false);
         }
     }
 
@@ -992,6 +1043,41 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
         {
             messageText = "Announcement";
         }
+        else if (msgType == "subgift")
+        {
+            if (auto monthsIt = tags.find("msg-param-gift-months");
+                monthsIt != tags.end())
+            {
+                int months = monthsIt.value().toInt();
+                if (months > 1)
+                {
+                    auto plan = tags.value("msg-param-sub-plan").toString();
+                    QString name =
+                        ANONYMOUS_GIFTER_ID == tags.value("user-id").toString()
+                            ? "An anonymous user"
+                            : tags.value("display-name").toString();
+                    messageText =
+                        QString("%1 gifted %2 months of a Tier %3 sub to %4!")
+                            .arg(name, QString::number(months),
+                                 plan.isEmpty() ? '1' : plan.at(0),
+                                 tags.value("msg-param-recipient-display-name")
+                                     .toString());
+
+                    if (auto countIt = tags.find("msg-param-sender-count");
+                        countIt != tags.end())
+                    {
+                        int count = countIt.value().toInt();
+                        if (count > months)
+                        {
+                            messageText +=
+                                QString(
+                                    " They've gifted %1 months in the channel.")
+                                    .arg(QString::number(count));
+                        }
+                    }
+                }
+            }
+        }
 
         auto b = MessageBuilder(systemMessage, parseTagString(messageText),
                                 calculateMessageTime(message).time());
@@ -1011,11 +1097,11 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
             return;
         }
 
-        auto chan = server.getChannelOrEmpty(channelName);
+        auto chan = abstractIrcServer.getChannelOrEmpty(channelName);
 
         if (!chan->isEmpty())
         {
-            chan->addMessage(newMessage);
+            chan->addMessage(newMessage, MessageContext::Original);
         }
     }
 }
@@ -1032,15 +1118,16 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
         {
             // Notice wasn't targeted at a single channel, send to all twitch
             // channels
-            getApp()->twitch->forEachChannelAndSpecialChannels(
+            getIApp()->getTwitch()->forEachChannelAndSpecialChannels(
                 [msg](const auto &c) {
-                    c->addMessage(msg);
+                    c->addMessage(msg, MessageContext::Original);
                 });
 
             return;
         }
 
-        auto channel = getApp()->twitch->getChannelOrEmpty(channelName);
+        auto channel =
+            getIApp()->getTwitchAbstract()->getChannelOrEmpty(channelName);
 
         if (channel->isEmpty())
         {
@@ -1053,15 +1140,15 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
         QString tags = message->tags().value("msg-id").toString();
         if (tags == "usage_delete")
         {
-            channel->addMessage(makeSystemMessage(
+            channel->addSystemMessage(
                 "Usage: /delete <msg-id> - Deletes the specified message. "
-                "Can't take more than one argument."));
+                "Can't take more than one argument.");
         }
         else if (tags == "bad_delete_message_error")
         {
-            channel->addMessage(makeSystemMessage(
+            channel->addSystemMessage(
                 "There was a problem deleting the message. "
-                "It might be from another channel or too old to delete."));
+                "It might be from another channel or too old to delete.");
         }
         else if (tags == "host_on" || tags == "host_target_went_offline")
         {
@@ -1083,7 +1170,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             MessageBuilder builder;
             TwitchMessageBuilder::hostingSystemMessage(hostedChannelName,
                                                        &builder, hostOn);
-            channel->addMessage(builder.release());
+            channel->addMessage(builder.release(), MessageContext::Original);
         }
         else if (tags == "room_mods" || tags == "vips_success")
         {
@@ -1112,19 +1199,19 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             users.sort(Qt::CaseInsensitive);
             TwitchMessageBuilder::listOfUsersSystemMessage(msgParts.at(0),
                                                            users, tc, &builder);
-            channel->addMessage(builder.release());
+            channel->addMessage(builder.release(), MessageContext::Original);
         }
         else
         {
-            channel->addMessage(msg);
+            channel->addMessage(msg, MessageContext::Original);
         }
     }
 }
 
 void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
 {
-    auto channel =
-        getApp()->twitch->getChannelOrEmpty(message->parameter(0).remove(0, 1));
+    auto channel = getIApp()->getTwitchAbstract()->getChannelOrEmpty(
+        message->parameter(0).remove(0, 1));
 
     auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
     if (!twitchChannel)
@@ -1133,9 +1220,9 @@ void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
     }
 
     if (message->nick() ==
-        getApp()->accounts->twitch.getCurrent()->getUserName())
+        getIApp()->getAccounts()->twitch.getCurrent()->getUserName())
     {
-        twitchChannel->addMessage(makeSystemMessage("joined channel"));
+        twitchChannel->addSystemMessage("joined channel");
         twitchChannel->joined.invoke();
     }
     else if (getSettings()->showJoins.getValue())
@@ -1146,8 +1233,8 @@ void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
 {
-    auto channel =
-        getApp()->twitch->getChannelOrEmpty(message->parameter(0).remove(0, 1));
+    auto channel = getIApp()->getTwitchAbstract()->getChannelOrEmpty(
+        message->parameter(0).remove(0, 1));
 
     auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
     if (!twitchChannel)
@@ -1156,7 +1243,7 @@ void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
     }
 
     const auto selfAccountName =
-        getApp()->accounts->twitch.getCurrent()->getUserName();
+        getIApp()->getAccounts()->twitch.getCurrent()->getUserName();
     if (message->nick() != selfAccountName &&
         getSettings()->showParts.getValue())
     {
@@ -1165,7 +1252,8 @@ void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
 
     if (message->nick() == selfAccountName)
     {
-        channel->addMessage(generateBannedMessage(false));
+        channel->addMessage(generateBannedMessage(false),
+                            MessageContext::Original);
     }
 }
 
@@ -1206,8 +1294,9 @@ void IrcMessageHandler::setSimilarityFlags(const MessagePtr &message,
 {
     if (getSettings()->similarityEnabled)
     {
-        bool isMyself = message->loginName ==
-                        getApp()->accounts->twitch.getCurrent()->getUserName();
+        bool isMyself =
+            message->loginName ==
+            getIApp()->getAccounts()->twitch.getCurrent()->getUserName();
         bool hideMyself = getSettings()->hideSimilarMyself;
 
         if (isMyself && !hideMyself)
@@ -1231,7 +1320,7 @@ void IrcMessageHandler::setSimilarityFlags(const MessagePtr &message,
 void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
                                    const ChannelPtr &chan,
                                    const QString &originalContent,
-                                   TwitchIrcServer &server, bool isSub,
+                                   ITwitchIrcServer &server, bool isSub,
                                    bool isAction)
 {
     if (chan->isEmpty())
@@ -1254,21 +1343,30 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
     auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
 
     const auto &tags = message->tags();
+    QString rewardId;
     if (const auto it = tags.find("custom-reward-id"); it != tags.end())
     {
-        const auto rewardId = it.value().toString();
-        if (!rewardId.isEmpty() &&
-            !channel->isChannelPointRewardKnown(rewardId))
-        {
-            // Need to wait for pubsub reward notification
-            qCDebug(chatterinoTwitch) << "TwitchChannel reward added ADD "
-                                         "callback since reward is not known:"
-                                      << rewardId;
-            channel->addQueuedRedemption(rewardId, originalContent, message);
-            return;
-        }
-        args.channelPointRewardId = rewardId;
+        rewardId = it.value().toString();
     }
+    else if (const auto typeIt = tags.find("msg-id"); typeIt != tags.end())
+    {
+        // slight hack to treat bits power-ups as channel point redemptions
+        const auto msgId = typeIt.value().toString();
+        if (msgId == "animated-message" || msgId == "gigantified-emote-message")
+        {
+            rewardId = msgId;
+        }
+    }
+    if (!rewardId.isEmpty() && !channel->isChannelPointRewardKnown(rewardId))
+    {
+        // Need to wait for pubsub reward notification
+        qCDebug(chatterinoTwitch) << "TwitchChannel reward added ADD "
+                                     "callback since reward is not known:"
+                                  << rewardId;
+        channel->addQueuedRedemption(rewardId, originalContent, message);
+        return;
+    }
+    args.channelPointRewardId = rewardId;
 
     QString content = originalContent;
     int messageOffset = stripLeadingReplyMention(tags, content);
@@ -1366,10 +1464,11 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
 
         if (highlighted && showInMentions)
         {
-            server.mentionsChannel->addMessage(msg);
+            server.getMentionsChannel()->addMessage(msg,
+                                                    MessageContext::Original);
         }
 
-        chan->addMessage(msg);
+        chan->addMessage(msg, MessageContext::Original);
         if (auto *chatters = dynamic_cast<ChannelChatters *>(chan.get()))
         {
             chatters->addRecentChatter(msg->displayName);

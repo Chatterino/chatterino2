@@ -9,6 +9,7 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
@@ -26,7 +27,7 @@
 
 namespace chatterino {
 
-void NotificationController::initialize(Settings &settings, Paths &paths)
+void NotificationController::initialize(Settings &settings, const Paths &paths)
 {
     this->initialized_ = true;
     for (const QString &channelName : this->twitchSetting_.getValue())
@@ -123,7 +124,7 @@ void NotificationController::fetchFakeChannels()
     for (std::vector<int>::size_type i = 0;
          i < channelMap[Platform::Twitch].raw().size(); i++)
     {
-        auto chan = getApp()->twitch->getChannelOrEmpty(
+        auto chan = getIApp()->getTwitchAbstract()->getChannelOrEmpty(
             channelMap[Platform::Twitch].raw()[i]);
         if (chan->isEmpty())
         {
@@ -183,24 +184,26 @@ void NotificationController::checkStream(bool live, QString channelName)
 
     if (Toasts::isEnabled())
     {
-        getApp()->toasts->sendChannelNotification(channelName, QString(),
-                                                  Platform::Twitch);
+        getIApp()->getToasts()->sendChannelNotification(channelName, QString(),
+                                                        Platform::Twitch);
     }
+    bool inStreamerMode = getIApp()->getStreamerMode()->isEnabled();
     if (getSettings()->notificationPlaySound &&
-        !(isInStreamerMode() &&
+        !(inStreamerMode &&
           getSettings()->streamerModeSuppressLiveNotifications))
     {
-        getApp()->notifications->playSound();
+        getIApp()->getNotifications()->playSound();
     }
     if (getSettings()->notificationFlashTaskbar &&
-        !(isInStreamerMode() &&
+        !(inStreamerMode &&
           getSettings()->streamerModeSuppressLiveNotifications))
     {
-        getApp()->windows->sendAlert();
+        getIApp()->getWindows()->sendAlert();
     }
     MessageBuilder builder;
     TwitchMessageBuilder::liveMessage(channelName, &builder);
-    getApp()->twitch->liveChannel->addMessage(builder.release());
+    getIApp()->getTwitch()->getLiveChannel()->addMessage(
+        builder.release(), MessageContext::Original);
 
     // Indicate that we have pushed notifications for this stream
     fakeTwitchChannels.push_back(channelName);
@@ -208,14 +211,14 @@ void NotificationController::checkStream(bool live, QString channelName)
 
 void NotificationController::removeFakeChannel(const QString channelName)
 {
-    auto i = std::find(fakeTwitchChannels.begin(), fakeTwitchChannels.end(),
-                       channelName);
-    if (i != fakeTwitchChannels.end())
+    auto it = std::find(fakeTwitchChannels.begin(), fakeTwitchChannels.end(),
+                        channelName);
+    if (it != fakeTwitchChannels.end())
     {
-        fakeTwitchChannels.erase(i);
+        fakeTwitchChannels.erase(it);
         // "delete" old 'CHANNEL is live' message
         LimitedQueueSnapshot<MessagePtr> snapshot =
-            getApp()->twitch->liveChannel->getMessageSnapshot();
+            getIApp()->getTwitch()->getLiveChannel()->getMessageSnapshot();
         int snapshotLength = snapshot.size();
 
         // MSVC hates this code if the parens are not there
@@ -225,9 +228,10 @@ void NotificationController::removeFakeChannel(const QString channelName)
 
         for (int i = snapshotLength - 1; i >= end; --i)
         {
-            auto &s = snapshot[i];
+            const auto &s = snapshot[i];
 
-            if (s->messageText == liveMessageSearchText)
+            if (QString::compare(s->messageText, liveMessageSearchText,
+                                 Qt::CaseInsensitive) == 0)
             {
                 s->flags.set(MessageFlag::Disabled);
                 break;

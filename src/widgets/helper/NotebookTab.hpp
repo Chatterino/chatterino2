@@ -48,21 +48,30 @@ public:
     bool setLive(bool isLive);
 
     /**
+     * @brief Sets the rerun status of this tab
+     *
+     * Returns true if the rerun status was changed, false if nothing changed.
+     **/
+    bool setRerun(bool isRerun);
+
+    /**
      * @brief Returns true if any split in this tab is live
      **/
     bool isLive() const;
 
     void setHighlightState(HighlightState style);
+    HighlightState highlightState() const;
+
     void setHighlightsEnabled(const bool &newVal);
     bool hasHighlightsEnabled() const;
 
-    void moveAnimated(QPoint pos, bool animated = true);
+    void moveAnimated(QPoint targetPos, bool animated = true);
 
     QRect getDesiredRect() const;
     void hideTabXChanged();
 
     void growWidth(int width);
-    int normalTabWidth();
+    int normalTabWidth() const;
 
 protected:
     void themeChangedEvent() override;
@@ -84,16 +93,21 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
 
+    /// This exists as an alias to its base classes update, and is virtual
+    /// to allow for mocking
+    virtual void update();
+
 private:
     void showRenameDialog();
 
-    bool hasXButton();
-    bool shouldDrawXButton();
-    QRect getXRect();
+    bool hasXButton() const;
+    bool shouldDrawXButton() const;
+    QRect getXRect() const;
     void titleUpdated();
 
+    int normalTabWidthForHeight(int height) const;
+
     QPropertyAnimation positionChangedAnimation_;
-    bool positionChangedAnimationRunning_ = false;
     QPoint positionAnimationDesiredPoint_;
 
     Notebook *notebook_;
@@ -115,6 +129,7 @@ private:
     QAction *highlightNewMessagesAction_;
 
     bool isLive_{};
+    bool isRerun_{};
 
     int growWidth_ = 0;
 

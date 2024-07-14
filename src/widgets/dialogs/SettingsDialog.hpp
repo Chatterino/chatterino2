@@ -30,6 +30,7 @@ enum class SettingsDialogPreference {
     StreamerMode,
     Accounts,
     ModerationActions,
+    About,
 };
 
 class SettingsDialog : public BaseWindow
@@ -59,6 +60,7 @@ private:
     void selectTab(SettingsTabId id);
     void filterElements(const QString &query);
     void setElementFilter(const QString &query);
+    bool eventFilter(QObject *object, QEvent *event) override;
 
     void onOkClicked();
     void onCancelClicked();
@@ -76,6 +78,7 @@ private:
     std::vector<SettingsDialogTab *> tabs_;
     SettingsDialogTab *selectedTab_{};
     SettingsDialogTab *lastSelectedByUser_{};
+    float dpi_ = 1.0F;
 
     friend class SettingsDialogTab;
 };

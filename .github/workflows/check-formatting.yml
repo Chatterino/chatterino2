@@ -26,11 +26,11 @@ jobs:
         run: sudo apt-get -y install dos2unix
 
       - name: Check formatting
-        uses: DoozyX/clang-format-lint-action@v0.16.2
+        uses: DoozyX/clang-format-lint-action@v0.17
         with:
           source: "./src ./tests/src ./benchmarks/src ./mocks/include"
           extensions: "hpp,cpp"
           clangFormatVersion: 16
 
       - name: Check line-endings
-        run: ./tools/check-line-endings.sh
+        run: ./scripts/check-line-endings.sh

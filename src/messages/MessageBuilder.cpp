@@ -8,14 +8,13 @@
 #include "messages/Message.hpp"
 #include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
-#include "providers/LinkResolver.hpp"
+#include "providers/links/LinkResolver.hpp"
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Theme.hpp"
 #include "util/FormatTime.hpp"
-#include "util/Qt.hpp"
 
 #include <QDateTime>
 
@@ -78,159 +77,6 @@ MessagePtr makeSystemMessage(const QString &text, const QTime &time)
     return MessageBuilder(systemMessage, text, time).release();
 }
 
-EmotePtr makeAutoModBadge()
-{
-    return std::make_shared<Emote>(Emote{
-        EmoteName{},
-        ImageSet{Image::fromResourcePixmap(getResources().twitch.automod)},
-        Tooltip{"AutoMod"},
-        Url{"https://dashboard.twitch.tv/settings/moderation/automod"}});
-}
-
-MessagePtr makeAutomodInfoMessage(const AutomodInfoAction &action)
-{
-    auto builder = MessageBuilder();
-    QString text("AutoMod: ");
-
-    builder.emplace<TimestampElement>();
-    builder.message().flags.set(MessageFlag::PubSub);
-
-    // AutoMod shield badge
-    builder.emplace<BadgeElement>(makeAutoModBadge(),
-                                  MessageElementFlag::BadgeChannelAuthority);
-    // AutoMod "username"
-    builder.emplace<TextElement>("AutoMod:", MessageElementFlag::BoldUsername,
-                                 MessageColor(QColor("blue")),
-                                 FontStyle::ChatMediumBold);
-    builder.emplace<TextElement>(
-        "AutoMod:", MessageElementFlag::NonBoldUsername,
-        MessageColor(QColor("blue")));
-    switch (action.type)
-    {
-        case AutomodInfoAction::OnHold: {
-            QString info("Hey! Your message is being checked "
-                         "by mods and has not been sent.");
-            text += info;
-            builder.emplace<TextElement>(info, MessageElementFlag::Text,
-                                         MessageColor::Text);
-        }
-        break;
-        case AutomodInfoAction::Denied: {
-            QString info("Mods have removed your message.");
-            text += info;
-            builder.emplace<TextElement>(info, MessageElementFlag::Text,
-                                         MessageColor::Text);
-        }
-        break;
-        case AutomodInfoAction::Approved: {
-            QString info("Mods have accepted your message.");
-            text += info;
-            builder.emplace<TextElement>(info, MessageElementFlag::Text,
-                                         MessageColor::Text);
-        }
-        break;
-    }
-
-    builder.message().flags.set(MessageFlag::AutoMod);
-    builder.message().messageText = text;
-    builder.message().searchText = text;
-
-    auto message = builder.release();
-
-    return message;
-}
-
-std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
-    const AutomodAction &action, const QString &channelName)
-{
-    MessageBuilder builder, builder2;
-
-    //
-    // Builder for AutoMod message with explanation
-    builder.message().loginName = "automod";
-    builder.message().channelName = channelName;
-    builder.message().flags.set(MessageFlag::PubSub);
-    builder.message().flags.set(MessageFlag::Timeout);
-    builder.message().flags.set(MessageFlag::AutoMod);
-
-    // AutoMod shield badge
-    builder.emplace<BadgeElement>(makeAutoModBadge(),
-                                  MessageElementFlag::BadgeChannelAuthority);
-    // AutoMod "username"
-    builder.emplace<TextElement>("AutoMod:", MessageElementFlag::BoldUsername,
-                                 MessageColor(QColor("blue")),
-                                 FontStyle::ChatMediumBold);
-    builder.emplace<TextElement>(
-        "AutoMod:", MessageElementFlag::NonBoldUsername,
-        MessageColor(QColor("blue")));
-    // AutoMod header message
-    builder.emplace<TextElement>(
-        ("Held a message for reason: " + action.reason +
-         ". Allow will post it in chat. "),
-        MessageElementFlag::Text, MessageColor::Text);
-    // Allow link button
-    builder
-        .emplace<TextElement>("Allow", MessageElementFlag::Text,
-                              MessageColor(QColor("green")),
-                              FontStyle::ChatMediumBold)
-        ->setLink({Link::AutoModAllow, action.msgID});
-    // Deny link button
-    builder
-        .emplace<TextElement>(" Deny", MessageElementFlag::Text,
-                              MessageColor(QColor("red")),
-                              FontStyle::ChatMediumBold)
-        ->setLink({Link::AutoModDeny, action.msgID});
-    // ID of message caught by AutoMod
-    //    builder.emplace<TextElement>(action.msgID, MessageElementFlag::Text,
-    //                                 MessageColor::Text);
-    auto text1 =
-        QString("AutoMod: Held a message for reason: %1. Allow will post "
-                "it in chat. Allow Deny")
-            .arg(action.reason);
-    builder.message().messageText = text1;
-    builder.message().searchText = text1;
-
-    auto message1 = builder.release();
-
-    //
-    // Builder for offender's message
-    builder2.message().channelName = channelName;
-    builder2
-        .emplace<TextElement>("#" + channelName,
-                              MessageElementFlag::ChannelName,
-                              MessageColor::System)
-        ->setLink({Link::JumpToChannel, channelName});
-    builder2.emplace<TimestampElement>();
-    builder2.emplace<TwitchModerationElement>();
-    builder2.message().loginName = action.target.login;
-    builder2.message().flags.set(MessageFlag::PubSub);
-    builder2.message().flags.set(MessageFlag::Timeout);
-    builder2.message().flags.set(MessageFlag::AutoMod);
-
-    // sender username
-    builder2
-        .emplace<TextElement>(
-            action.target.displayName + ":", MessageElementFlag::BoldUsername,
-            MessageColor(action.target.color), FontStyle::ChatMediumBold)
-        ->setLink({Link::UserInfo, action.target.login});
-    builder2
-        .emplace<TextElement>(action.target.displayName + ":",
-                              MessageElementFlag::NonBoldUsername,
-                              MessageColor(action.target.color))
-        ->setLink({Link::UserInfo, action.target.login});
-    // sender's message caught by AutoMod
-    builder2.emplace<TextElement>(action.message, MessageElementFlag::Text,
-                                  MessageColor::Text);
-    auto text2 =
-        QString("%1: %2").arg(action.target.displayName, action.message);
-    builder2.message().messageText = text2;
-    builder2.message().searchText = text2;
-
-    auto message2 = builder2.release();
-
-    return std::make_pair(message1, message2);
-}
-
 MessageBuilder::MessageBuilder()
     : message_(std::make_shared<Message>())
 {
@@ -248,10 +94,10 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
         text.split(QRegularExpression("\\s"), Qt::SkipEmptyParts);
     for (const auto &word : textFragments)
     {
-        LinkParser parser(word);
-        if (parser.result())
+        auto link = linkparser::parse(word);
+        if (link)
         {
-            this->addLink(*parser.result());
+            this->addLink(*link, word);
             continue;
         }
 
@@ -357,7 +203,7 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
 MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
     : MessageBuilder()
 {
-    auto current = getApp()->accounts->twitch.getCurrent();
+    auto current = getIApp()->getAccounts()->twitch.getCurrent();
 
     this->emplace<TimestampElement>();
     this->message().flags.set(MessageFlag::System);
@@ -408,7 +254,8 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
             this->emplaceSystemTextAndUpdate("banned", text);
             if (action.reason.isEmpty())
             {
-                this->emplaceSystemTextAndUpdate(action.target.login, text)
+                this->emplaceSystemTextAndUpdate(action.target.login + ".",
+                                                 text)
                     ->setLink({Link::UserInfo, action.target.login});
             }
             else
@@ -468,8 +315,33 @@ MessageBuilder::MessageBuilder(const UnbanAction &action)
         ->setLink({Link::UserInfo, action.source.login});
     this->emplaceSystemTextAndUpdate(
         action.wasBan() ? "unbanned" : "untimedout", text);
-    this->emplaceSystemTextAndUpdate(action.target.login, text)
+    this->emplaceSystemTextAndUpdate(action.target.login + ".", text)
         ->setLink({Link::UserInfo, action.target.login});
+
+    this->message().messageText = text;
+    this->message().searchText = text;
+}
+
+MessageBuilder::MessageBuilder(const WarnAction &action)
+    : MessageBuilder()
+{
+    this->emplace<TimestampElement>();
+    this->message().flags.set(MessageFlag::System);
+
+    QString text;
+
+    // TODO: Use MentionElement here, once WarnAction includes username/displayname
+    this->emplaceSystemTextAndUpdate("A moderator", text)
+        ->setLink({Link::UserInfo, "id:" + action.source.id});
+    this->emplaceSystemTextAndUpdate("warned", text);
+    this->emplaceSystemTextAndUpdate(
+            action.target.login + (action.reasons.isEmpty() ? "." : ":"), text)
+        ->setLink({Link::UserInfo, action.target.login});
+
+    if (!action.reasons.isEmpty())
+    {
+        this->emplaceSystemTextAndUpdate(action.reasons.join(", "), text);
+    }
 
     this->message().messageText = text;
     this->message().searchText = text;
@@ -680,12 +552,12 @@ MessageBuilder::MessageBuilder(ImageUploaderResultTag /*unused*/,
     this->emplace<TimestampElement>();
 
     using MEF = MessageElementFlag;
-    auto addText = [this](QString text, MessageElementFlags mefs = MEF::Text,
+    auto addText = [this](QString text,
                           MessageColor color =
                               MessageColor::System) -> TextElement * {
         this->message().searchText += text;
         this->message().messageText += text;
-        return this->emplace<TextElement>(text, mefs, color);
+        return this->emplace<TextElement>(text, MEF::Text, color);
     };
 
     addText("Your image has been uploaded to");
@@ -693,16 +565,14 @@ MessageBuilder::MessageBuilder(ImageUploaderResultTag /*unused*/,
     // ASSUMPTION: the user gave this uploader configuration to the program
     // therefore they trust that the host is not wrong/malicious. This doesn't obey getSettings()->lowercaseDomains.
     // This also ensures that the LinkResolver doesn't get these links.
-    addText(imageLink, {MEF::OriginalLink, MEF::LowercaseLink},
-            MessageColor::Link)
+    addText(imageLink, MessageColor::Link)
         ->setLink({Link::Url, imageLink})
-        ->setTrailingSpace(false);
+        ->setTrailingSpace(!deletionLink.isEmpty());
 
     if (!deletionLink.isEmpty())
     {
         addText("(Deletion link:");
-        addText(deletionLink, {MEF::OriginalLink, MEF::LowercaseLink},
-                MessageColor::Link)
+        addText(deletionLink, MessageColor::Link)
             ->setLink({Link::Url, deletionLink})
             ->setTrailingSpace(false);
         addText(")")->setTrailingSpace(false);
@@ -767,65 +637,46 @@ std::unique_ptr<MessageElement> MessageBuilder::releaseBack()
     return ptr;
 }
 
-void MessageBuilder::addLink(const ParsedLink &parsedLink)
+void MessageBuilder::addLink(const linkparser::Parsed &parsedLink,
+                             const QString &source)
 {
     QString lowercaseLinkString;
-    QString origLink = parsedLink.source;
-    QString matchedLink;
+    QString origLink = parsedLink.link.toString();
+    QString fullUrl;
 
     if (parsedLink.protocol.isNull())
     {
-        matchedLink = QStringLiteral("http://") + parsedLink.source;
+        fullUrl = QStringLiteral("http://") + origLink;
     }
     else
     {
         lowercaseLinkString += parsedLink.protocol;
-        matchedLink = parsedLink.source;
+        fullUrl = origLink;
     }
 
     lowercaseLinkString += parsedLink.host.toString().toLower();
     lowercaseLinkString += parsedLink.rest;
 
-    auto linkElement = Link(Link::Url, matchedLink);
-
     auto textColor = MessageColor(MessageColor::Link);
-    auto linkMELowercase =
-        this->emplace<TextElement>(lowercaseLinkString,
-                                   MessageElementFlag::LowercaseLink, textColor)
-            ->setLink(linkElement);
-    auto linkMEOriginal =
-        this->emplace<TextElement>(origLink, MessageElementFlag::OriginalLink,
-                                   textColor)
-            ->setLink(linkElement);
 
-    LinkResolver::getLinkInfo(
-        matchedLink, nullptr,
-        [weakMessage = this->weakOf(), linkMELowercase, linkMEOriginal,
-         matchedLink](QString tooltipText, Link originalLink,
-                      ImagePtr thumbnail) {
-            auto shared = weakMessage.lock();
-            if (!shared)
-            {
-                return;
-            }
-            if (!tooltipText.isEmpty())
-            {
-                linkMELowercase->setTooltip(tooltipText);
-                linkMEOriginal->setTooltip(tooltipText);
-            }
-            if (originalLink.value != matchedLink &&
-                !originalLink.value.isEmpty())
-            {
-                linkMELowercase->setLink(originalLink)->updateLink();
-                linkMEOriginal->setLink(originalLink)->updateLink();
-            }
-            linkMELowercase->setThumbnail(thumbnail);
-            linkMELowercase->setThumbnailType(
-                MessageElement::ThumbnailType::Link_Thumbnail);
-            linkMEOriginal->setThumbnail(thumbnail);
-            linkMEOriginal->setThumbnailType(
-                MessageElement::ThumbnailType::Link_Thumbnail);
-        });
+    if (parsedLink.hasPrefix(source))
+    {
+        this->emplace<TextElement>(parsedLink.prefix(source).toString(),
+                                   MessageElementFlag::Text, this->textColor_)
+            ->setTrailingSpace(false);
+    }
+    auto *el = this->emplace<LinkElement>(
+        LinkElement::Parsed{.lowercase = lowercaseLinkString,
+                            .original = origLink},
+        fullUrl, MessageElementFlag::Text, textColor);
+    if (parsedLink.hasSuffix(source))
+    {
+        el->setTrailingSpace(false);
+        this->emplace<TextElement>(parsedLink.suffix(source).toString(),
+                                   MessageElementFlag::Text, this->textColor_);
+    }
+
+    getIApp()->getLinkResolver()->resolve(el->linkInfo());
 }
 
 void MessageBuilder::addIrcMessageText(const QString &text)
@@ -834,25 +685,24 @@ void MessageBuilder::addIrcMessageText(const QString &text)
 
     auto words = text.split(' ');
     MessageColor defaultColorType = MessageColor::Text;
-    const auto &defaultColor = defaultColorType.getColor(*getApp()->themes);
+    const auto &defaultColor =
+        defaultColorType.getColor(*getIApp()->getThemes());
     QColor textColor = defaultColor;
     int fg = -1;
     int bg = -1;
 
-    for (const auto &word : words)
+    for (const auto &string : words)
     {
-        if (word.isEmpty())
+        if (string.isEmpty())
         {
             continue;
         }
 
-        auto string = QString(word);
-
         // Actually just text
-        LinkParser parser(string);
-        if (parser.result())
+        auto link = linkparser::parse(string);
+        if (link)
         {
-            this->addLink(*parser.result());
+            this->addLink(*link, string);
             continue;
         }
 
@@ -878,7 +728,7 @@ void MessageBuilder::addIrcMessageText(const QString &text)
                 if (fg >= 0 && fg <= 98)
                 {
                     textColor = IRC_COLORS[fg];
-                    getApp()->themes->normalizeColor(textColor);
+                    getIApp()->getThemes()->normalizeColor(textColor);
                 }
                 else
                 {
@@ -918,7 +768,7 @@ void MessageBuilder::addIrcMessageText(const QString &text)
         if (fg >= 0 && fg <= 98)
         {
             textColor = IRC_COLORS[fg];
-            getApp()->themes->normalizeColor(textColor);
+            getIApp()->getThemes()->normalizeColor(textColor);
         }
         else
         {
@@ -935,25 +785,20 @@ void MessageBuilder::addTextOrEmoji(EmotePtr emote)
     this->emplace<EmoteElement>(emote, MessageElementFlag::EmojiAll);
 }
 
-void MessageBuilder::addTextOrEmoji(const QString &string_)
+void MessageBuilder::addTextOrEmoji(const QString &string)
 {
-    auto string = QString(string_);
-
     // Actually just text
-    LinkParser linkParser(string);
-    if (linkParser.result())
+    auto link = linkparser::parse(string);
+    if (link)
     {
-        this->addLink(*linkParser.result());
+        this->addLink(*link, string);
         return;
     }
 
     auto &&textColor = this->textColor_;
     if (string.startsWith('@'))
     {
-        this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
-                                   textColor, FontStyle::ChatMediumBold);
-        this->emplace<TextElement>(string, MessageElementFlag::NonBoldUsername,
-                                   textColor);
+        this->emplace<MentionElement>(string, "", textColor, textColor);
     }
     else
     {
@@ -965,7 +810,7 @@ void MessageBuilder::addIrcWord(const QString &text, const QColor &color,
                                 bool addSpace)
 {
     this->textColor_ = color;
-    for (auto &variant : getApp()->emotes->emojis.parse(text))
+    for (auto &variant : getIApp()->getEmotes()->getEmojis()->parse(text))
     {
         boost::apply_visitor(
             [&](auto &&arg) {

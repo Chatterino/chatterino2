@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/SignalVectorModel.hpp"
+#include "controllers/highlights/HighlightModel.hpp"
 
 #include <QObject>
 
@@ -12,6 +13,8 @@ class HighlightPhrase;
 class UserHighlightModel : public SignalVectorModel<HighlightPhrase>
 {
 public:
+    using Column = HighlightModel::Column;
+
     explicit UserHighlightModel(QObject *parent);
 
 protected:

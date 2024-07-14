@@ -24,11 +24,12 @@ const QString TEXT_TITLE("Reply Thread - @%1 in #%2");
 
 namespace chatterino {
 
-ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
-                                   Split *split)
-    : DraggablePopup(closeAutomatically, parent)
+ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, Split *split)
+    : DraggablePopup(closeAutomatically, split)
     , split_(split)
 {
+    assert(split != nullptr);
+
     this->setWindowTitle(QStringLiteral("Reply Thread"));
 
     HotkeyController::HotkeyMap actions{
@@ -50,11 +51,11 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
              auto &scrollbar = this->ui_.threadView->getScrollBar();
              if (direction == "up")
              {
-                 scrollbar.offset(-scrollbar.getLargeChange());
+                 scrollbar.offset(-scrollbar.getPageSize());
              }
              else if (direction == "down")
              {
-                 scrollbar.offset(scrollbar.getLargeChange());
+                 scrollbar.offset(scrollbar.getPageSize());
              }
              else
              {
@@ -76,7 +77,7 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
         {"search", nullptr},
     };
 
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 
     // initialize UI
@@ -97,7 +98,7 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
         new SplitInput(this, this->split_, this->ui_.threadView, false);
 
     this->bSignals_.emplace_back(
-        getApp()->accounts->twitch.currentUserChanged.connect([this] {
+        getIApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
             this->updateInputUI();
         }));
 
@@ -158,7 +159,8 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, QWidget *parent,
                                      this->thread_->markUnsubscribed();
                                  }
                              });
-            hbox->addWidget(this->ui_.notificationCheckbox, 1);
+            hbox->addWidget(this->ui_.notificationCheckbox);
+            hbox->addStretch(1);
             this->ui_.notificationCheckbox->setFocusPolicy(Qt::NoFocus);
         }
 
@@ -238,11 +240,12 @@ void ReplyThreadPopup::addMessagesFromThread()
     this->ui_.threadView->setChannel(this->virtualChannel_);
     this->ui_.threadView->setSourceChannel(sourceChannel);
 
-    auto overrideFlags =
+    auto rootOverrideFlags =
         std::optional<MessageFlags>(this->thread_->root()->flags);
-    overrideFlags->set(MessageFlag::DoNotLog);
+    rootOverrideFlags->set(MessageFlag::DoNotLog);
 
-    this->virtualChannel_->addMessage(this->thread_->root(), overrideFlags);
+    this->virtualChannel_->addMessage(
+        this->thread_->root(), MessageContext::Repost, rootOverrideFlags);
     for (const auto &msgRef : this->thread_->replies())
     {
         if (auto msg = msgRef.lock())
@@ -250,24 +253,26 @@ void ReplyThreadPopup::addMessagesFromThread()
             auto overrideFlags = std::optional<MessageFlags>(msg->flags);
             overrideFlags->set(MessageFlag::DoNotLog);
 
-            this->virtualChannel_->addMessage(msg, overrideFlags);
+            this->virtualChannel_->addMessage(msg, MessageContext::Repost,
+                                              overrideFlags);
         }
     }
 
     this->messageConnection_ =
         std::make_unique<pajlada::Signals::ScopedConnection>(
-            sourceChannel->messageAppended.connect([this](MessagePtr &message,
-                                                          auto) {
-                if (message->replyThread == this->thread_)
-                {
-                    auto overrideFlags =
-                        std::optional<MessageFlags>(message->flags);
-                    overrideFlags->set(MessageFlag::DoNotLog);
+            sourceChannel->messageAppended.connect(
+                [this](MessagePtr &message, auto) {
+                    if (message->replyThread == this->thread_)
+                    {
+                        auto overrideFlags =
+                            std::optional<MessageFlags>(message->flags);
+                        overrideFlags->set(MessageFlag::DoNotLog);
 
-                    // same reply thread, add message
-                    this->virtualChannel_->addMessage(message, overrideFlags);
-                }
-            }));
+                        // same reply thread, add message
+                        this->virtualChannel_->addMessage(
+                            message, MessageContext::Repost, overrideFlags);
+                    }
+                }));
 }
 
 void ReplyThreadPopup::updateInputUI()
@@ -282,7 +287,7 @@ void ReplyThreadPopup::updateInputUI()
 
     this->ui_.replyInput->setVisible(channel->isWritable());
 
-    auto user = getApp()->accounts->twitch.getCurrent();
+    auto user = getIApp()->getAccounts()->twitch.getCurrent();
     QString placeholderText;
 
     if (user->isAnon())
@@ -291,9 +296,11 @@ void ReplyThreadPopup::updateInputUI()
     }
     else
     {
-        placeholderText =
-            QStringLiteral("Reply as %1...")
-                .arg(getApp()->accounts->twitch.getCurrent()->getUserName());
+        placeholderText = QStringLiteral("Reply as %1...")
+                              .arg(getIApp()
+                                       ->getAccounts()
+                                       ->twitch.getCurrent()
+                                       ->getUserName());
     }
 
     this->ui_.replyInput->setPlaceholderText(placeholderText);

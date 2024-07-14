@@ -171,7 +171,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         QWidget::setTabOrder(live_btn.getElement(), automod_btn.getElement());
 
         // tab
-        auto tab = notebook->addPage(obj.getElement());
+        auto *tab = notebook->addPage(obj.getElement());
         tab->setCustomTitle("Twitch");
     }
 
@@ -181,7 +181,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         auto outerBox = obj.setLayoutType<QFormLayout>();
 
         {
-            auto view = this->ui_.irc.servers =
+            auto *view = this->ui_.irc.servers =
                 new EditableModelView(Irc::instance().newConnectionModel(this));
 
             view->setTitles({"host", "port", "ssl", "user", "nick", "real",
@@ -199,7 +199,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                 auto unique = IrcServerData{};
                 unique.id = Irc::instance().uniqueId();
 
-                auto editor = new IrcConnectionEditor(unique);
+                auto *editor = new IrcConnectionEditor(unique);
                 if (editor->exec() == QDialog::Accepted)
                 {
                     Irc::instance().connections.append(editor->data());
@@ -209,7 +209,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
             QObject::connect(
                 view->getTableView(), &QTableView::doubleClicked,
                 [](const QModelIndex &index) {
-                    auto editor = new IrcConnectionEditor(
+                    auto *editor = new IrcConnectionEditor(
                         Irc::instance().connections.raw()[size_t(index.row())]);
 
                     if (editor->exec() == QDialog::Accepted)
@@ -235,7 +235,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
         outerBox->addRow("Channel: #", this->ui_.irc.channel = new QLineEdit);
 
-        auto tab = notebook->addPage(obj.getElement());
+        auto *tab = notebook->addPage(obj.getElement());
         tab->setCustomTitle("Irc (Beta)");
 
         if (!getSettings()->enableExperimentalIrc)
@@ -338,10 +338,10 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
             this->ui_.notebook->selectIndex(TAB_IRC);
             this->ui_.irc.channel->setText(_channel.get()->getName());
 
-            if (auto ircChannel =
+            if (auto *ircChannel =
                     dynamic_cast<IrcChannel *>(_channel.get().get()))
             {
-                if (auto server = ircChannel->server())
+                if (auto *server = ircChannel->server())
                 {
                     int i = 0;
                     for (auto &&conn : Irc::instance().connections)
@@ -375,35 +375,33 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
         return this->selectedChannel_;
     }
 
-    auto app = getApp();
-
     switch (this->ui_.notebook->getSelectedIndex())
     {
         case TAB_TWITCH: {
             if (this->ui_.twitch.channel->isChecked())
             {
-                return app->twitch->getOrAddChannel(
+                return getIApp()->getTwitchAbstract()->getOrAddChannel(
                     this->ui_.twitch.channelName->text().trimmed());
             }
             else if (this->ui_.twitch.watching->isChecked())
             {
-                return app->twitch->watchingChannel;
+                return getIApp()->getTwitch()->getWatchingChannel();
             }
             else if (this->ui_.twitch.mentions->isChecked())
             {
-                return app->twitch->mentionsChannel;
+                return getIApp()->getTwitch()->getMentionsChannel();
             }
             else if (this->ui_.twitch.whispers->isChecked())
             {
-                return app->twitch->whispersChannel;
+                return getIApp()->getTwitch()->getWhispersChannel();
             }
             else if (this->ui_.twitch.live->isChecked())
             {
-                return app->twitch->liveChannel;
+                return getIApp()->getTwitch()->getLiveChannel();
             }
             else if (this->ui_.twitch.automod->isChecked())
             {
-                return app->twitch->automodChannel;
+                return getIApp()->getTwitch()->getAutomodChannel();
             }
         }
         break;
@@ -495,6 +493,12 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
             }
 
             widget->previousInFocusChain()->setFocus();
+            return true;
+        }
+        else if (event_key == QKeySequence::DeleteStartOfWord &&
+                 this->dialog->ui_.twitch.channelName->selectionLength() > 0)
+        {
+            this->dialog->ui_.twitch.channelName->backspace();
             return true;
         }
         else
@@ -609,7 +613,7 @@ void SelectChannelDialog::addShortcuts()
         actions.emplace("openTab", nullptr);
     }
 
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 }
 

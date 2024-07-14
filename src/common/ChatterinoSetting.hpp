@@ -1,6 +1,7 @@
 #pragma once
 
-#include <magic_enum/magic_enum.hpp>
+#include "util/QMagicEnum.hpp"
+
 #include <pajlada/settings.hpp>
 #include <QString>
 
@@ -13,13 +14,16 @@ class ChatterinoSetting : public pajlada::Settings::Setting<Type>
 {
 public:
     ChatterinoSetting(const std::string &path)
-        : pajlada::Settings::Setting<Type>(path)
+        : pajlada::Settings::Setting<Type>(
+              path, pajlada::Settings::SettingOption::CompareBeforeSet)
     {
         _registerSetting(this->getData());
     }
 
     ChatterinoSetting(const std::string &path, const Type &defaultValue)
-        : pajlada::Settings::Setting<Type>(path, defaultValue)
+        : pajlada::Settings::Setting<Type>(
+              path, defaultValue,
+              pajlada::Settings::SettingOption::CompareBeforeSet)
     {
         _registerSetting(this->getData());
     }
@@ -105,10 +109,7 @@ public:
     template <typename T2>
     EnumStringSetting<Enum> &operator=(Enum newValue)
     {
-        std::string enumName(magic_enum::enum_name(newValue));
-        auto qEnumName = QString::fromStdString(enumName);
-
-        this->setValue(qEnumName.toLower());
+        this->setValue(qmagicenum::enumNameString(newValue).toLower());
 
         return *this;
     }
@@ -127,8 +128,8 @@ public:
 
     Enum getEnum()
     {
-        return magic_enum::enum_cast<Enum>(this->getValue().toStdString(),
-                                           magic_enum::case_insensitive)
+        return qmagicenum::enumCast<Enum>(this->getValue(),
+                                          qmagicenum::CASE_INSENSITIVE)
             .value_or(this->defaultValue);
     }
 

@@ -38,6 +38,9 @@
 [submodule "lib/lua/src"]
 	path = lib/lua/src
 	url = https://github.com/lua/lua
-[submodule "lib/crashpad"]
-	path = lib/crashpad
-	url = https://github.com/getsentry/crashpad
+[submodule "tools/crash-handler"]
+	path = tools/crash-handler
+	url = https://github.com/Chatterino/crash-handler
+[submodule "lib/expected-lite"]
+	path = lib/expected-lite
+	url = https://github.com/martinmoene/expected-lite

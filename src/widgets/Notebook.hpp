@@ -42,7 +42,16 @@ public:
 
     NotebookTab *addPage(QWidget *page, QString title = QString(),
                          bool select = false);
+
+    /**
+     * @brief Adds a page to the Notebook at a given position.
+     *
+     * @param position if set to -1, adds the page to the end
+     **/
+    NotebookTab *addPageAt(QWidget *page, int position,
+                           QString title = QString(), bool select = false);
     void removePage(QWidget *page);
+    void duplicatePage(QWidget *page);
     void removeCurrentPage();
 
     /**
@@ -118,7 +127,7 @@ public:
     bool isNotebookLayoutLocked() const;
     void setLockNotebookLayout(bool value);
 
-    void addNotebookActionsToMenu(QMenu *menu);
+    virtual void addNotebookActionsToMenu(QMenu *menu);
 
     // Update layout and tab visibility
     void refresh();
@@ -182,7 +191,7 @@ private:
     size_t visibleButtonCount() const;
 
     QList<Item> items_;
-    QMenu menu_;
+    QMenu *menu_ = nullptr;
     QWidget *selectedPage_ = nullptr;
 
     NotebookButton *addButton_;
@@ -193,9 +202,15 @@ private:
     bool showAddButton_ = false;
     int lineOffset_ = 20;
     bool lockNotebookLayout_ = false;
+
+    bool refreshPaused_ = false;
+    bool refreshRequested_ = false;
+
     NotebookTabLocation tabLocation_ = NotebookTabLocation::Top;
+
     QAction *lockNotebookLayoutAction_;
     QAction *showTabsAction_;
+    QAction *toggleTopMostAction_;
 
     // This filter, if set, is used to figure out the visibility of
     // the tabs in this notebook.
@@ -214,6 +229,9 @@ public:
     void select(QWidget *page, bool focusPage = true) override;
     void themeChangedEvent() override;
 
+    void addNotebookActionsToMenu(QMenu *menu) override;
+    void toggleOfflineTabs();
+
 protected:
     void showEvent(QShowEvent *event) override;
 
@@ -222,9 +240,11 @@ private:
 
     pajlada::Signals::SignalHolder signalHolder_;
 
+    QAction *toggleOfflineTabsAction_;
+    void updateToggleOfflineTabsHotkey(NotebookTabVisibility newTabVisibility);
+
     // Main window on Windows has basically a duplicate of this in Window
     NotebookButton *streamerModeIcon_{};
-
     void updateStreamerModeIcon();
 };
 

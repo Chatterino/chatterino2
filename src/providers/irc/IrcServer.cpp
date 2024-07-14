@@ -84,10 +84,10 @@ void IrcServer::initializeConnectionSignals(IrcConnection *connection,
             {
                 if (auto shared = weak.lock())
                 {
-                    shared->addMessage(makeSystemMessage(
+                    shared->addSystemMessage(
                         QStringLiteral("Socket error: ") +
                         QAbstractSocket::staticMetaObject.enumerator(index)
-                            .valueToKey(error)));
+                            .valueToKey(error));
                 }
             }
         });
@@ -111,7 +111,8 @@ void IrcServer::initializeConnectionSignals(IrcConnection *connection,
                          {
                              if (auto shared = weak.lock())
                              {
-                                 shared->addMessage(msg);
+                                 shared->addMessage(msg,
+                                                    MessageContext::Original);
                              }
                          }
                      });
@@ -218,7 +219,7 @@ void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
         {
             if (auto shared = weak.lock())
             {
-                shared->addMessage(msg);
+                shared->addMessage(msg, MessageContext::Original);
             }
         }
         return;
@@ -236,7 +237,7 @@ void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
         {
             auto msg = builder.build();
 
-            channel->addMessage(msg);
+            channel->addMessage(msg, MessageContext::Original);
             builder.triggerHighlights();
             const auto highlighted = msg->flags.has(MessageFlag::Highlighted);
             const auto showInMentions =
@@ -244,7 +245,8 @@ void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 
             if (highlighted && showInMentions)
             {
-                getApp()->twitch->mentionsChannel->addMessage(msg);
+                getIApp()->getTwitch()->getMentionsChannel()->addMessage(
+                    msg, MessageContext::Original);
             }
         }
         else
@@ -261,7 +263,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
     switch (message->type())
     {
         case Communi::IrcMessage::Join: {
-            auto x = static_cast<Communi::IrcJoinMessage *>(message);
+            auto *x = static_cast<Communi::IrcJoinMessage *>(message);
 
             if (auto it = this->channels.find(x->channel());
                 it != this->channels.end())
@@ -270,13 +272,15 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
                 {
                     if (message->nick() == this->data_->nick)
                     {
-                        shared->addMessage(makeSystemMessage("joined"));
+                        shared->addSystemMessage("joined");
                     }
                     else
                     {
-                        if (auto c =
+                        if (auto *c =
                                 dynamic_cast<ChannelChatters *>(shared.get()))
+                        {
                             c->addJoinedUser(x->nick());
+                        }
                     }
                 }
             }
@@ -284,7 +288,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
         }
 
         case Communi::IrcMessage::Part: {
-            auto x = static_cast<Communi::IrcPartMessage *>(message);
+            auto *x = static_cast<Communi::IrcPartMessage *>(message);
 
             if (auto it = this->channels.find(x->channel());
                 it != this->channels.end())
@@ -293,13 +297,15 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
                 {
                     if (message->nick() == this->data_->nick)
                     {
-                        shared->addMessage(makeSystemMessage("parted"));
+                        shared->addSystemMessage("parted");
                     }
                     else
                     {
-                        if (auto c =
+                        if (auto *c =
                                 dynamic_cast<ChannelChatters *>(shared.get()))
+                        {
                             c->addPartedUser(x->nick());
+                        }
                     }
                 }
             }
@@ -327,7 +333,9 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
                 for (auto &&weak : this->channels)
                 {
                     if (auto shared = weak.lock())
-                        shared->addMessage(msg);
+                    {
+                        shared->addMessage(msg, MessageContext::Original);
+                    }
                 }
             };
     }
@@ -360,9 +368,14 @@ void IrcServer::sendWhisper(const QString &target, const QString &message)
     {
         if (auto shared = weak.lock())
         {
-            shared->addMessage(msg);
+            shared->addMessage(msg, MessageContext::Original);
         }
     }
+}
+
+void IrcServer::sendRawMessage(const QString &rawMessage)
+{
+    AbstractIrcServer::sendRawMessage(rawMessage.left(510));
 }
 
 bool IrcServer::hasEcho() const

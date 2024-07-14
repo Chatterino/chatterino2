@@ -11,12 +11,13 @@
 #include "messages/MessageElement.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
-#include "util/Qt.hpp"
-#include "util/StreamerMode.hpp"
 
 #include <QFileInfo>
+
+#include <optional>
 
 namespace {
 
@@ -75,6 +76,7 @@ void SharedMessageBuilder::parse()
     if (this->action_)
     {
         this->textColor_ = this->usernameColor_;
+        this->message().flags.set(MessageFlag::Action);
     }
 
     this->parseUsername();
@@ -147,7 +149,7 @@ void SharedMessageBuilder::parseUsername()
 
 void SharedMessageBuilder::parseHighlights()
 {
-    if (getSettings()->isBlacklistedUser(this->ircMessage->nick()))
+    if (getSettings()->isBlacklistedUser(this->message().loginName))
     {
         // Do nothing. We ignore highlights from this user.
         return;
@@ -155,7 +157,7 @@ void SharedMessageBuilder::parseHighlights()
 
     auto badges = SharedMessageBuilder::parseBadgeTag(this->tags);
     auto [highlighted, highlightResult] = getIApp()->getHighlights()->check(
-        this->args, badges, this->ircMessage->nick(), this->originalMessage_,
+        this->args, badges, this->message().loginName, this->originalMessage_,
         this->message().flags);
 
     if (!highlighted)
@@ -170,17 +172,9 @@ void SharedMessageBuilder::parseHighlights()
     this->highlightAlert_ = highlightResult.alert;
 
     this->highlightSound_ = highlightResult.playSound;
+    this->highlightSoundCustomUrl_ = highlightResult.customSoundUrl;
 
     this->message().highlightColor = highlightResult.color;
-
-    if (highlightResult.customSoundUrl)
-    {
-        this->highlightSoundUrl_ = *highlightResult.customSoundUrl;
-    }
-    else
-    {
-        this->highlightSoundUrl_ = getFallbackHighlightSound();
-    }
 
     if (highlightResult.showInMentions)
     {
@@ -200,29 +194,50 @@ void SharedMessageBuilder::appendChannelName()
 
 void SharedMessageBuilder::triggerHighlights()
 {
-    if (isInStreamerMode() && getSettings()->streamerModeMuteMentions)
+    SharedMessageBuilder::triggerHighlights(
+        this->channel->getName(), this->highlightSound_,
+        this->highlightSoundCustomUrl_, this->highlightAlert_);
+}
+
+void SharedMessageBuilder::triggerHighlights(
+    const QString &channelName, bool playSound,
+    const std::optional<QUrl> &customSoundUrl, bool windowAlert)
+{
+    if (getIApp()->getStreamerMode()->isEnabled() &&
+        getSettings()->streamerModeMuteMentions)
     {
         // We are in streamer mode with muting mention sounds enabled. Do nothing.
         return;
     }
 
-    if (getSettings()->isMutedChannel(this->channel->getName()))
+    if (getSettings()->isMutedChannel(channelName))
     {
         // Do nothing. Pings are muted in this channel.
         return;
     }
 
-    bool hasFocus = (QApplication::focusWidget() != nullptr);
-    bool resolveFocus = !hasFocus || getSettings()->highlightAlwaysPlaySound;
+    const bool hasFocus = (QApplication::focusWidget() != nullptr);
+    const bool resolveFocus =
+        !hasFocus || getSettings()->highlightAlwaysPlaySound;
 
-    if (this->highlightSound_ && resolveFocus)
+    if (playSound && resolveFocus)
     {
-        getIApp()->getSound()->play(this->highlightSoundUrl_);
+        // TODO(C++23): optional or_else
+        QUrl soundUrl;
+        if (customSoundUrl)
+        {
+            soundUrl = *customSoundUrl;
+        }
+        else
+        {
+            soundUrl = getFallbackHighlightSound();
+        }
+        getIApp()->getSound()->play(soundUrl);
     }
 
-    if (this->highlightAlert_)
+    if (windowAlert)
     {
-        getApp()->windows->sendAlert();
+        getIApp()->getWindows()->sendAlert();
     }
 }
 

@@ -1,5 +1,6 @@
 #include "IrcChannel2.hpp"
 
+#include "common/Channel.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -16,6 +17,16 @@ IrcChannel::IrcChannel(const QString &name, IrcServer *server)
     , ChannelChatters(*static_cast<Channel *>(this))
     , server_(server)
 {
+    auto *ircServer = this->server();
+    if (ircServer != nullptr)
+    {
+        this->platform_ =
+            QString("irc-%1").arg(ircServer->userFriendlyIdentifier());
+    }
+    else
+    {
+        this->platform_ = "irc-unknown";
+    }
 }
 
 void IrcChannel::sendMessage(const QString &message)
@@ -28,7 +39,7 @@ void IrcChannel::sendMessage(const QString &message)
 
     if (message.startsWith("/"))
     {
-        int index = message.indexOf(' ', 1);
+        auto index = message.indexOf(' ', 1);
         QString command = message.mid(1, index - 1);
         QString params = index == -1 ? "" : message.mid(index + 1);
 
@@ -69,16 +80,16 @@ void IrcChannel::sendMessage(const QString &message)
             builder.message().messageText = message;
             builder.message().searchText = username + ": " + message;
 
-            this->addMessage(builder.release());
+            this->addMessage(builder.release(), MessageContext::Original);
         }
         else
         {
-            this->addMessage(makeSystemMessage("You are not connected."));
+            this->addSystemMessage("You are not connected.");
         }
     }
 }
 
-IrcServer *IrcChannel::server()
+IrcServer *IrcChannel::server() const
 {
     assertInGuiThread();
 
@@ -100,7 +111,9 @@ bool IrcChannel::canReconnect() const
 void IrcChannel::reconnect()
 {
     if (this->server())
+    {
         this->server()->connect();
+    }
 }
 
 }  // namespace chatterino

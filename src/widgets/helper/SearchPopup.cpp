@@ -55,7 +55,7 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
             auto overrideFlags = std::optional<MessageFlags>(message->flags);
             overrideFlags->set(MessageFlag::DoNotLog);
 
-            channel->addMessage(message, overrideFlags);
+            channel->addMessage(message, MessageContext::Repost, overrideFlags);
         }
     }
 
@@ -103,7 +103,7 @@ void SearchPopup::addShortcuts()
         {"scrollPage", nullptr},
     };
 
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 }
 
@@ -138,7 +138,7 @@ void SearchPopup::goToMessage(const MessagePtr &message)
         if (type == Channel::Type::TwitchMentions ||
             type == Channel::Type::TwitchAutomod)
         {
-            getApp()->windows->scrollToMessage(message);
+            getIApp()->getWindows()->scrollToMessage(message);
             return;
         }
 
@@ -202,11 +202,10 @@ bool SearchPopup::eventFilter(QObject *object, QEvent *event)
     if (object == this->searchInput_ && event->type() == QEvent::KeyPress)
     {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-        if (keyEvent->key() == Qt::Key_Backspace &&
-            keyEvent->modifiers() == Qt::ControlModifier &&
-            this->searchInput_->text() == this->searchInput_->selectedText())
+        if (keyEvent == QKeySequence::DeleteStartOfWord &&
+            this->searchInput_->selectionLength() > 0)
         {
-            this->searchInput_->clear();
+            this->searchInput_->backspace();
             return true;
         }
     }
