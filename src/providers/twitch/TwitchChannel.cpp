@@ -457,6 +457,7 @@ void TwitchChannel::updateStreamStatus(
         auto stream = *helixStream;
         {
             auto status = this->streamStatus_.access();
+            status->streamId = stream.id;
             status->viewerCount = stream.viewerCount;
             status->gameId = stream.gameId;
             status->game = stream.gameName;
@@ -768,6 +769,17 @@ bool TwitchChannel::canReconnect() const
 void TwitchChannel::reconnect()
 {
     getIApp()->getTwitchAbstract()->connect();
+}
+
+QString TwitchChannel::getCurrentStreamID() const
+{
+    auto streamStatus = this->accessStreamStatus();
+    if (streamStatus->live)
+    {
+        return streamStatus->streamId;
+    }
+
+    return {};
 }
 
 QString TwitchChannel::roomId() const
