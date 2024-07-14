@@ -120,7 +120,8 @@ void MessageView::layoutMessage()
     }
 
     bool updateRequired = this->messageLayout_->layout(
-        this->width_, this->scale(), this->scale() /* todo this is wrong xd */,
+        this->width_, this->scale(),
+        this->scale() * static_cast<float>(this->devicePixelRatio()),
         MESSAGE_FLAGS, false);
 
     if (updateRequired)
