@@ -33,7 +33,7 @@ Logging::Logging(Settings &settings)
 }
 
 void Logging::addMessage(const QString &channelName, MessagePtr message,
-                         const QString &platformName)
+                         const QString &platformName, const QString &streamID)
 {
     this->threadGuard.guard();
 
@@ -54,7 +54,7 @@ void Logging::addMessage(const QString &channelName, MessagePtr message,
     if (platIt == this->loggingChannels_.end())
     {
         auto *channel = new LoggingChannel(channelName, platformName);
-        channel->addMessage(message);
+        channel->addMessage(message, streamID);
         auto map = std::map<QString, std::unique_ptr<LoggingChannel>>();
         this->loggingChannels_[platformName] = std::move(map);
         auto &ref = this->loggingChannels_.at(platformName);
@@ -65,12 +65,12 @@ void Logging::addMessage(const QString &channelName, MessagePtr message,
     if (chanIt == platIt->second.end())
     {
         auto *channel = new LoggingChannel(channelName, platformName);
-        channel->addMessage(message);
+        channel->addMessage(message, streamID);
         platIt->second.emplace(channelName, std::move(channel));
     }
     else
     {
-        chanIt->second->addMessage(message);
+        chanIt->second->addMessage(message, streamID);
     }
 }
 

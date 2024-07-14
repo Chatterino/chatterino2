@@ -157,11 +157,21 @@ ModerationPage::ModerationPage()
         onlyLogListedChannels->setEnabled(getSettings()->enableLogging);
         logs.append(onlyLogListedChannels);
 
+        auto *separatelyStoreStreamLogs =
+            this->createCheckBox("Store live stream logs as separate files",
+                                 getSettings()->separatelyStoreStreamLogs);
+
+        separatelyStoreStreamLogs->setEnabled(getSettings()->enableLogging);
+        logs.append(separatelyStoreStreamLogs);
+
         // Select event
         QObject::connect(
             enableLogging, &QCheckBox::stateChanged, this,
-            [enableLogging, onlyLogListedChannels]() mutable {
+            [enableLogging, onlyLogListedChannels,
+             separatelyStoreStreamLogs]() mutable {
                 onlyLogListedChannels->setEnabled(enableLogging->isChecked());
+                separatelyStoreStreamLogs->setEnabled(
+                    getSettings()->enableLogging);
             });
 
         EditableModelView *view =

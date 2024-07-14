@@ -119,6 +119,7 @@ public:
     virtual bool shouldIgnoreHighlights() const;
     virtual bool canReconnect() const;
     virtual void reconnect();
+    virtual QString getCurrentStreamID() const;
 
     static std::shared_ptr<Channel> getEmpty();
 
