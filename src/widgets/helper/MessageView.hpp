@@ -2,7 +2,6 @@
 
 #include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/Message.hpp"
-#include "messages/MessageElement.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <QWidget>
@@ -19,26 +18,25 @@ class MessageView : public BaseWidget
 
 public:
     MessageView();
-    MessageView(MessagePtr message);
-
     ~MessageView() override;
+    MessageView(const MessageView &) = delete;
+    MessageView(MessageView &&) = delete;
+    MessageView &operator=(const MessageView &) = delete;
+    MessageView &operator=(MessageView &&) = delete;
 
-    void setMessage(MessagePtr message);
+    void setMessage(const MessagePtr &message);
     void clearMessage();
 
     void setWidth(int width);
 
 protected:
-    void paintEvent(QPaintEvent * /*event*/) override;
+    void paintEvent(QPaintEvent *event) override;
     void themeChangedEvent() override;
-    void scaleChangedEvent(float /*newScale*/) override;
+    void scaleChangedEvent(float newScale) override;
 
 private:
     void createMessageLayout();
-    void maybeUpdate();
     void layoutMessage();
-
-    MessageElementFlags getFlags() const;
 
     MessagePtr message_;
     std::unique_ptr<MessageLayout> messageLayout_;
@@ -46,7 +44,7 @@ private:
     MessageColors messageColors_;
     MessagePreferences messagePreferences_;
 
-    int width_;
+    int width_{};
 };
 
 }  // namespace chatterino

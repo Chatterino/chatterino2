@@ -101,8 +101,11 @@ void SplitInput::initLayout()
     auto replyHbox =
         replyVbox.emplace<QHBoxLayout>().assign(&this->ui_.replyHbox);
 
+    auto messageVbox = layoutCreator.setLayoutType<QVBoxLayout>();
     this->ui_.replyMessage = new MessageView();
-    replyVbox->addWidget(this->ui_.replyMessage);
+    messageVbox->addWidget(this->ui_.replyMessage, 1, Qt::AlignLeft);
+    messageVbox->setContentsMargins(10, 0, 0, 0);
+    replyVbox->addLayout(messageVbox->layout(), 1);
 
     auto replyLabel = replyHbox.emplace<QLabel>().assign(&this->ui_.replyLabel);
     replyLabel->setAlignment(Qt::AlignLeft);

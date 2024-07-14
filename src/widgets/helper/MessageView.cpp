@@ -1,54 +1,34 @@
-#include "MessageView.hpp"
+#include "widgets/helper/MessageView.hpp"
 
 #include "Application.hpp"
 #include "messages/layouts/MessageLayout.hpp"
+#include "messages/MessageElement.hpp"
 #include "messages/Selection.hpp"
 #include "providers/colors/ColorProvider.hpp"
-#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 
 #include <QApplication>
 #include <QPainter>
 
-namespace chatterino {
-
 namespace {
-    const Selection EMPTY_SELECTION;
+
+using namespace chatterino;
+
+const Selection EMPTY_SELECTION;
+
+const MessageElementFlags MESSAGE_FLAGS{
+    MessageElementFlag::Text,
+    MessageElementFlag::EmojiAll,
+    MessageElementFlag::EmoteText,
+};
+
 }  // namespace
 
-MessageView::MessageView()
-    : MessageView(nullptr)
-{
-}
+namespace chatterino {
 
-MessageView::MessageView(MessagePtr message)
-    : message_(std::move(message))
-    , width_(0)
-{
-    this->createMessageLayout();
-
-    // Configure theme and preferences for rendering message
-    this->messageColors_.applyTheme(getTheme());
-    this->messagePreferences_.connectSettings(getSettings(),
-                                              this->signalHolder_);
-
-    // Update frame for any GIFs
-    this->signalHolder_.managedConnect(
-        getIApp()->getWindows()->gifRepaintRequested, [&] {
-            this->maybeUpdate();
-        });
-
-    // Re-layout and potentially update if base flags change (e.g. settings for badges).
-    this->signalHolder_.managedConnect(
-        getIApp()->getWindows()->wordFlagsChanged, [this] {
-            this->layoutMessage();
-        });
-}
-
-MessageView::~MessageView()
-{
-}
+MessageView::MessageView() = default;
+MessageView::~MessageView() = default;
 
 void MessageView::createMessageLayout()
 {
@@ -61,14 +41,21 @@ void MessageView::createMessageLayout()
     this->messageLayout_ = std::make_unique<MessageLayout>(this->message_);
 }
 
-void MessageView::setMessage(MessagePtr message)
+void MessageView::setMessage(const MessagePtr &message)
 {
-    if (this->message_ != message)
+    if (!message)
     {
-        this->message_ = std::move(message);
-        this->createMessageLayout();
-        this->layoutMessage();
+        return;
     }
+
+    auto singleLineMessage = std::make_shared<Message>();
+    singleLineMessage->elements.emplace_back(
+        std::make_unique<SingleLineTextElement>(
+            message->messageText, MESSAGE_FLAGS, MessageColor::Type::System,
+            FontStyle::ChatMediumSmall));
+    this->message_ = std::move(singleLineMessage);
+    this->createMessageLayout();
+    this->layoutMessage();
 }
 
 void MessageView::clearMessage()
@@ -110,20 +97,19 @@ void MessageView::paintEvent(QPaintEvent * /*event*/)
 
 void MessageView::themeChangedEvent()
 {
-    this->layoutMessage();
-}
-
-void MessageView::scaleChangedEvent(float /*newScale*/)
-{
-    this->layoutMessage();
-}
-
-void MessageView::maybeUpdate()
-{
-    if (this->messageLayout_ != nullptr)
+    this->messageColors_.applyTheme(getTheme());
+    this->messageColors_.regular = getTheme()->splits.input.background;
+    if (this->messageLayout_)
     {
-        this->update();
+        this->messageLayout_->invalidateBuffer();
     }
+}
+
+void MessageView::scaleChangedEvent(float newScale)
+{
+    (void)newScale;
+
+    this->layoutMessage();
 }
 
 void MessageView::layoutMessage()
@@ -133,28 +119,15 @@ void MessageView::layoutMessage()
         return;
     }
 
-    auto flags = getFlags();
     bool updateRequired = this->messageLayout_->layout(
         this->width_, this->scale(), this->scale() /* todo this is wrong xd */,
-        flags, false);
+        MESSAGE_FLAGS, false);
 
     if (updateRequired)
     {
         this->setFixedSize(this->width_, this->messageLayout_->getHeight());
         this->update();
     }
-}
-
-MessageElementFlags MessageView::getFlags() const
-{
-    // Start with base global flags
-    auto flags = getIApp()->getWindows()->getWordFlags();
-
-    // Don't show inline replies or reply button
-    flags.unset(MessageElementFlag::RepliedMessage);
-    flags.unset(MessageElementFlag::ReplyButton);
-
-    return flags;
 }
 
 }  // namespace chatterino
