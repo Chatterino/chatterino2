@@ -40,10 +40,10 @@ MessageView::MessageView(MessagePtr message)
         });
 
     // Re-layout and potentially update if base flags change (e.g. settings for badges).
-    this->signalHolder_.managedConnect(getApp()->windows->wordFlagsChanged,
-                                       [this] {
-                                           this->layoutMessage();
-                                       });
+    this->signalHolder_.managedConnect(
+        getIApp()->getWindows()->wordFlagsChanged, [this] {
+            this->layoutMessage();
+        });
 }
 
 MessageView::~MessageView()
@@ -134,8 +134,9 @@ void MessageView::layoutMessage()
     }
 
     auto flags = getFlags();
-    bool updateRequired =
-        this->messageLayout_->layout(this->width_, this->scale(), flags);
+    bool updateRequired = this->messageLayout_->layout(
+        this->width_, this->scale(), this->scale() /* todo this is wrong xd */,
+        flags, false);
 
     if (updateRequired)
     {

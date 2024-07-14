@@ -388,7 +388,7 @@ QString SplitInput::handleSendMessage(const std::vector<QString> &arguments)
 
         message = message.replace('\n', ' ');
         QString sendMessage =
-            getApp()->commands->execCommand(message, c, false);
+            getIApp()->getCommands()->execCommand(message, c, false);
 
         // Reply within TwitchChannel
         tc->sendReply(sendMessage, this->replyTarget_->id);
@@ -402,7 +402,7 @@ QString SplitInput::handleSendMessage(const std::vector<QString> &arguments)
     if (this->enableInlineReplying_)
     {
         // Remove @username prefix that is inserted when doing inline replies
-        message.remove(0, this->replyThread_->displayName.length() +
+        message.remove(0, this->replyTarget_->displayName.length() +
                               1);  // remove "@username"
 
         if (!message.isEmpty() && message.at(0) == ' ')
@@ -416,7 +416,7 @@ QString SplitInput::handleSendMessage(const std::vector<QString> &arguments)
         getIApp()->getCommands()->execCommand(message, c, false);
 
     // Reply within TwitchChannel
-    tc->sendReply(sendMessage, this->replyThread_->id);
+    tc->sendReply(sendMessage, this->replyTarget_->id);
 
     this->postMessageSend(message, arguments);
     return "";
