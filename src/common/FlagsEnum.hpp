@@ -82,14 +82,14 @@ public:
 
     constexpr FlagsEnum operator|(T flag) const noexcept
     {
-        return FlagsEnum(static_cast<T>(static_cast<Int>(this->value_) |
-                                        static_cast<Int>(flag)));
+        return static_cast<T>(static_cast<Int>(this->value_) |
+                              static_cast<Int>(flag));
     }
 
     constexpr FlagsEnum operator|(FlagsEnum rhs) const noexcept
     {
-        return FlagsEnum(static_cast<T>(static_cast<Int>(this->value_) |
-                                        static_cast<Int>(rhs.value_)));
+        return static_cast<T>(static_cast<Int>(this->value_) |
+                              static_cast<Int>(rhs.value_));
     }
 
     constexpr bool has(T flag) const noexcept

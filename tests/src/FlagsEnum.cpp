@@ -61,7 +61,7 @@ TEST(FlagsEnum, sizeAndAlign)
 }
 
 template <typename E>
-consteval static void testCtor()
+consteval void testCtor()
 {
     using FE = FlagsEnum<E>;
     using U = std::underlying_type_t<E>;
@@ -83,7 +83,7 @@ TEST(FlagsEnum, ctor)
 }
 
 template <typename E>
-consteval static void testOperatorEq()
+consteval void testOperatorEq()
 {
     using FE = FlagsEnum<E>;
 
@@ -106,7 +106,7 @@ TEST(FlagsEnum, operatorEq)
 }
 
 template <typename E>
-consteval static void testOperatorNeq()
+consteval void testOperatorNeq()
 {
     using FE = FlagsEnum<E>;
 
@@ -129,7 +129,7 @@ TEST(FlagsEnum, operatorNeq)
 }
 
 template <typename E>
-static void testSetUnset()
+inline void testSetUnset()
 {
     using FE = FlagsEnum<E>;
 
@@ -196,7 +196,7 @@ TEST(FlagsEnum, setUnset)
 }
 
 template <typename E>
-consteval static void testOperatorBitOr()
+consteval void testOperatorBitOr()
 {
     using FE = FlagsEnum<E>;
 
@@ -220,7 +220,7 @@ TEST(FlagsEnum, operatorBitOr)
 }
 
 template <typename E>
-consteval static void testHas()
+consteval void testHas()
 {
     using FE = FlagsEnum<E>;
 
@@ -244,7 +244,7 @@ TEST(FlagsEnum, has)
 }
 
 template <typename E>
-consteval static void testHasAny()
+consteval void testHasAny()
 {
     using FE = FlagsEnum<E>;
 
@@ -270,7 +270,7 @@ TEST(FlagsEnum, hasAny)
 }
 
 template <typename E>
-consteval static void testHasAll()
+consteval void testHasAll()
 {
     using FE = FlagsEnum<E>;
 
@@ -304,7 +304,7 @@ TEST(FlagsEnum, hasAll)
 }
 
 template <typename E>
-consteval static void testHasNone()
+consteval void testHasNone()
 {
     using FE = FlagsEnum<E>;
 
@@ -324,4 +324,22 @@ TEST(FlagsEnum, hasNone)
 {
     testHasNone<BasicScoped>();
     testHasNone<BasicUnscoped>();
+}
+
+template <typename T>
+constexpr inline auto CONSTRUCTION_VALID = requires() { FlagsEnum<T>{}; };
+
+TEST(FlagsEnum, templateParam)
+{
+    struct S {
+    };
+
+    static_assert(!CONSTRUCTION_VALID<S>);
+    static_assert(!CONSTRUCTION_VALID<int>);
+    static_assert(!CONSTRUCTION_VALID<bool>);
+    static_assert(!CONSTRUCTION_VALID<BasicScoped &>);
+    static_assert(!CONSTRUCTION_VALID<BasicUnscoped &>);
+
+    static_assert(CONSTRUCTION_VALID<BasicScoped>);
+    static_assert(CONSTRUCTION_VALID<BasicUnscoped>);
 }
