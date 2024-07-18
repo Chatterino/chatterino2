@@ -7,7 +7,6 @@
 #include "providers/twitch/PubSubHelpers.hpp"
 #include "providers/twitch/PubSubMessages.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
-#include "pubsubmessages/LowTrustUsers.hpp"
 #include "util/DebugCount.hpp"
 #include "util/Helpers.hpp"
 #include "util/RapidjsonHelpers.hpp"
