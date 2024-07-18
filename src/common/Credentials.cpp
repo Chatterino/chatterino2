@@ -6,7 +6,6 @@
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
-#include "util/Overloaded.hpp"
 #include "util/Variant.hpp"
 
 #include <QJsonDocument>

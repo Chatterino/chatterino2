@@ -7,7 +7,6 @@
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
-#include "util/SplitCommand.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/Window.hpp"
@@ -162,16 +161,16 @@ void openStreamlink(const QString &channelURL, const QString &quality,
 {
     auto *proc = createStreamlinkProcess();
     auto arguments = proc->arguments()
-                     << extraArguments << channelURL << quality;
+                     << std::move(extraArguments) << channelURL << quality;
 
     // Remove empty arguments before appending additional streamlink options
     // as the options might purposely contain empty arguments
     arguments.removeAll(QString());
 
     QString additionalOptions = getSettings()->streamlinkOpts.getValue();
-    arguments << splitCommand(additionalOptions);
+    arguments << QProcess::splitCommand(additionalOptions);
 
-    proc->setArguments(std::move(arguments));
+    proc->setArguments(arguments);
     bool res = proc->startDetached();
 
     if (!res)

@@ -274,17 +274,16 @@ ModerationPage::ModerationPage()
         });
     }
 
-    this->addModerationButtonSettings(tabs);
+    this->addModerationButtonSettings(tabs.getElement());
 
     // ---- misc
     this->itemsChangedTimer_.setSingleShot(true);
 }
 
-void ModerationPage::addModerationButtonSettings(
-    LayoutCreator<QTabWidget> &tabs)
+void ModerationPage::addModerationButtonSettings(QTabWidget *tabs)
 {
     auto timeoutLayout =
-        tabs.appendTab(new QVBoxLayout, "User Timeout Buttons");
+        LayoutCreator{tabs}.appendTab(new QVBoxLayout, "User Timeout Buttons");
     auto texts = timeoutLayout.emplace<QVBoxLayout>().withoutMargin();
     {
         auto infoLabel = texts.emplace<QLabel>();

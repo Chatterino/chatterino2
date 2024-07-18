@@ -487,7 +487,6 @@ set(SOURCE_FILES
         util/ChannelHelpers.hpp
         util/Clipboard.cpp
         util/Clipboard.hpp
-        util/ConcurrentMap.hpp
         util/DebugCount.cpp
         util/DebugCount.hpp
         util/DisplayBadge.cpp
@@ -517,8 +516,6 @@ set(SOURCE_FILES
         util/SampleData.cpp
         util/SampleData.hpp
         util/SharedPtrElementLess.hpp
-        util/SplitCommand.cpp
-        util/SplitCommand.hpp
         util/StreamLink.cpp
         util/StreamLink.hpp
         util/ThreadGuard.hpp
