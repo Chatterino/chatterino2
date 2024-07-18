@@ -131,12 +131,12 @@ public:
 private:
     T *item_;
 
-    static void addItem(QLayout *layout, std::derived_from<QWidget> auto *item)
+    static void addItem(QLayout *layout, QWidget *item)
     {
         layout->addWidget(item);
     }
 
-    static void addItem(QLayout *layout, std::derived_from<QLayout> auto *item)
+    static void addItem(QLayout *layout, QLayout *item)
     {
         auto *widget = new QWidget();
         widget->setLayout(item);
