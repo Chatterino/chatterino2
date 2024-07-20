@@ -92,25 +92,7 @@ jobs:
           ctest --repeat until-pass:4 --output-on-failure --exclude-regex ClassicEmoteNameFiltering
         working-directory: build-test
 
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v44
-        with:
-          files: |
-            tests/**
-            .github/workflows/test**
-
-      - name: Export Coverage
-        if: steps.changed-files.outputs.any_modified || github.event_name == 'push'
-        run: |
-          ls -la
-          ls -la cov
-          llvm-profdata merge -sparse cov/*.profraw -o default.profdata
-          llvm-cov export bin/chatterino-test --instr-profile default.profdata --format lcov > lcov.txt
-        working-directory: build-test
-
       - name: Upload coverage reports to Codecov
-        if: steps.changed-files.outputs.any_modified || github.event_name == 'push'
         uses: codecov/codecov-action@v4.5.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
