@@ -43,11 +43,11 @@ jobs:
       - name: Create build directory (Ubuntu)
         run: mkdir build-test
 
-      - name: Install googlebench
+      - name: Install googlebench and gcovr
         run: |
           sudo apt update
           sudo apt -y install \
-            libbenchmark-dev
+            libbenchmark-dev gcovr
 
       - name: Build (Ubuntu)
         run: |
@@ -60,6 +60,7 @@ jobs:
             -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
             -DCHATTERINO_STATIC_QT_BUILD=On \
             -DCHATTERINO_GENERATE_COVERAGE=On \
+            -DCMAKE_BUILD_TYPE=Debug \
             ..
           cmake --build .
         working-directory: build-test
