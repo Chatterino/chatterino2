@@ -4,7 +4,6 @@
 #include "common/Channel.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandContext.hpp"
-#include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "util/Twitch.hpp"
@@ -26,14 +25,14 @@ QString blockUser(const CommandContext &ctx)
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /block command only works in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "The /block command only works in Twitch channels.");
         return "";
     }
 
     if (ctx.words.size() < 2)
     {
-        ctx.channel->addMessage(makeSystemMessage("Usage: /block <user>"));
+        ctx.channel->addSystemMessage("Usage: /block <user>");
         return "";
     }
 
@@ -41,8 +40,8 @@ QString blockUser(const CommandContext &ctx)
 
     if (currentUser->isAnon())
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("You must be logged in to block someone!"));
+        ctx.channel->addSystemMessage(
+            "You must be logged in to block someone!");
         return "";
     }
 
@@ -56,22 +55,21 @@ QString blockUser(const CommandContext &ctx)
             getIApp()->getAccounts()->twitch.getCurrent()->blockUser(
                 targetUser.id, nullptr,
                 [channel, target, targetUser] {
-                    channel->addMessage(makeSystemMessage(
+                    channel->addSystemMessage(
                         QString("You successfully blocked user %1")
-                            .arg(target)));
+                            .arg(target));
                 },
                 [channel, target] {
-                    channel->addMessage(makeSystemMessage(
+                    channel->addSystemMessage(
                         QString("User %1 couldn't be blocked, an unknown "
                                 "error occurred!")
-                            .arg(target)));
+                            .arg(target));
                 });
         },
         [channel{ctx.channel}, target] {
-            channel->addMessage(
-                makeSystemMessage(QString("User %1 couldn't be blocked, no "
-                                          "user with that name found!")
-                                      .arg(target)));
+            channel->addSystemMessage(QString("User %1 couldn't be blocked, no "
+                                              "user with that name found!")
+                                          .arg(target));
         });
 
     return "";
@@ -84,9 +82,9 @@ QString ignoreUser(const CommandContext &ctx)
         return "";
     }
 
-    ctx.channel->addMessage(makeSystemMessage(
+    ctx.channel->addSystemMessage(
         "Ignore command has been renamed to /block, please use it from "
-        "now on as /ignore is going to be removed soon."));
+        "now on as /ignore is going to be removed soon.");
 
     return blockUser(ctx);
 }
@@ -100,14 +98,14 @@ QString unblockUser(const CommandContext &ctx)
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /unblock command only works in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "The /unblock command only works in Twitch channels.");
         return "";
     }
 
     if (ctx.words.size() < 2)
     {
-        ctx.channel->addMessage(makeSystemMessage("Usage: /unblock <user>"));
+        ctx.channel->addSystemMessage("Usage: /unblock <user>");
         return "";
     }
 
@@ -115,8 +113,8 @@ QString unblockUser(const CommandContext &ctx)
 
     if (currentUser->isAnon())
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("You must be logged in to unblock someone!"));
+        ctx.channel->addSystemMessage(
+            "You must be logged in to unblock someone!");
         return "";
     }
 
@@ -129,22 +127,21 @@ QString unblockUser(const CommandContext &ctx)
             getIApp()->getAccounts()->twitch.getCurrent()->unblockUser(
                 targetUser.id, nullptr,
                 [channel, target, targetUser] {
-                    channel->addMessage(makeSystemMessage(
+                    channel->addSystemMessage(
                         QString("You successfully unblocked user %1")
-                            .arg(target)));
+                            .arg(target));
                 },
                 [channel, target] {
-                    channel->addMessage(makeSystemMessage(
+                    channel->addSystemMessage(
                         QString("User %1 couldn't be unblocked, an unknown "
                                 "error occurred!")
-                            .arg(target)));
+                            .arg(target));
                 });
         },
         [channel{ctx.channel}, target] {
-            channel->addMessage(
-                makeSystemMessage(QString("User %1 couldn't be unblocked, "
-                                          "no user with that name found!")
-                                      .arg(target)));
+            channel->addSystemMessage(QString("User %1 couldn't be unblocked, "
+                                              "no user with that name found!")
+                                          .arg(target));
         });
 
     return "";
@@ -157,9 +154,9 @@ QString unignoreUser(const CommandContext &ctx)
         return "";
     }
 
-    ctx.channel->addMessage(makeSystemMessage(
+    ctx.channel->addSystemMessage(
         "Unignore command has been renamed to /unblock, please use it "
-        "from now on as /unignore is going to be removed soon."));
+        "from now on as /unignore is going to be removed soon.");
     return unblockUser(ctx);
 }
 

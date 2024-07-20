@@ -69,8 +69,8 @@ QString chatters(const CommandContext &ctx)
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /chatters command only works in Twitch Channels."));
+        ctx.channel->addSystemMessage(
+            "The /chatters command only works in Twitch Channels.");
         return "";
     }
 
@@ -79,13 +79,12 @@ QString chatters(const CommandContext &ctx)
         ctx.twitchChannel->roomId(),
         getIApp()->getAccounts()->twitch.getCurrent()->getUserId(), 1,
         [channel{ctx.channel}](auto result) {
-            channel->addMessage(
-                makeSystemMessage(QString("Chatter count: %1.")
-                                      .arg(localizeNumbers(result.total))));
+            channel->addSystemMessage(QString("Chatter count: %1.")
+                                          .arg(localizeNumbers(result.total)));
         },
         [channel{ctx.channel}](auto error, auto message) {
             auto errorMessage = formatChattersError(error, message);
-            channel->addMessage(makeSystemMessage(errorMessage));
+            channel->addSystemMessage(errorMessage);
         });
 
     return "";
@@ -100,8 +99,8 @@ QString testChatters(const CommandContext &ctx)
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /test-chatters command only works in Twitch Channels."));
+        ctx.channel->addSystemMessage(
+            "The /test-chatters command only works in Twitch Channels.");
         return "";
     }
 
@@ -130,11 +129,11 @@ QString testChatters(const CommandContext &ctx)
             TwitchMessageBuilder::listOfUsersSystemMessage(
                 prefix, entries, twitchChannel, &builder);
 
-            channel->addMessage(builder.release());
+            channel->addMessage(builder.release(), MessageContext::Original);
         },
         [channel{ctx.channel}](auto error, auto message) {
             auto errorMessage = formatChattersError(error, message);
-            channel->addMessage(makeSystemMessage(errorMessage));
+            channel->addSystemMessage(errorMessage);
         });
 
     return "";

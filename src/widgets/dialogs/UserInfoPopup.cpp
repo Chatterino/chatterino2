@@ -112,12 +112,9 @@ namespace {
         {
             MessagePtr message = snapshot[i];
 
-            auto overrideFlags = std::optional<MessageFlags>(message->flags);
-            overrideFlags->set(MessageFlag::DoNotLog);
-
             if (checkMessageUserName(userName, message))
             {
-                channelPtr->addMessage(message, overrideFlags);
+                channelPtr->addMessage(message, MessageContext::Repost);
             }
         }
 
@@ -620,17 +617,17 @@ void UserInfoPopup::installEvents()
                     getIApp()->getAccounts()->twitch.getCurrent()->unblockUser(
                         this->userId_, this,
                         [this, reenableBlockCheckbox, currentUser] {
-                            this->channel_->addMessage(makeSystemMessage(
+                            this->channel_->addSystemMessage(
                                 QString("You successfully unblocked user %1")
-                                    .arg(this->userName_)));
+                                    .arg(this->userName_));
                             reenableBlockCheckbox();
                         },
                         [this, reenableBlockCheckbox] {
-                            this->channel_->addMessage(makeSystemMessage(
+                            this->channel_->addSystemMessage(
                                 QString(
                                     "User %1 couldn't be unblocked, an unknown "
                                     "error occurred!")
-                                    .arg(this->userName_)));
+                                    .arg(this->userName_));
                             reenableBlockCheckbox();
                         });
                 }
@@ -647,17 +644,17 @@ void UserInfoPopup::installEvents()
                     getIApp()->getAccounts()->twitch.getCurrent()->blockUser(
                         this->userId_, this,
                         [this, reenableBlockCheckbox, currentUser] {
-                            this->channel_->addMessage(makeSystemMessage(
+                            this->channel_->addSystemMessage(
                                 QString("You successfully blocked user %1")
-                                    .arg(this->userName_)));
+                                    .arg(this->userName_));
                             reenableBlockCheckbox();
                         },
                         [this, reenableBlockCheckbox] {
-                            this->channel_->addMessage(makeSystemMessage(
+                            this->channel_->addSystemMessage(
                                 QString(
                                     "User %1 couldn't be blocked, an unknown "
                                     "error occurred!")
-                                    .arg(this->userName_)));
+                                    .arg(this->userName_));
                             reenableBlockCheckbox();
                         });
                 }
@@ -787,7 +784,7 @@ void UserInfoPopup::updateLatestMessages()
                     {
                         // display message in ChannelView
                         this->ui_.latestMessages->channel()->addMessage(
-                            message);
+                            message, MessageContext::Repost);
                     }
                     else
                     {

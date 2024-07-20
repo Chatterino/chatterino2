@@ -380,8 +380,8 @@ QString PluginController::tryExecPluginCommand(const QString &commandName,
             auto res = lua_pcall(L, 1, 0, 0);
             if (res != LUA_OK)
             {
-                ctx.channel->addMessage(makeSystemMessage(
-                    "Lua error: " + lua::humanErrorText(L, res)));
+                ctx.channel->addSystemMessage("Lua error: " +
+                                              lua::humanErrorText(L, res));
                 return "";
             }
             return "";

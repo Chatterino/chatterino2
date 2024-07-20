@@ -145,7 +145,7 @@ void addTwitchEmoteSets(
     auto currentChannelPair = mapOfSets[currentChannelName];
     for (const auto &message : currentChannelPair.second)
     {
-        subChannel.addMessage(message);
+        subChannel.addMessage(message, MessageContext::Original);
     }
     mapOfSets.remove(currentChannelName);
 
@@ -154,7 +154,7 @@ void addTwitchEmoteSets(
         auto &channel = pair.first ? globalChannel : subChannel;
         for (const auto &message : pair.second)
         {
-            channel.addMessage(message);
+            channel.addMessage(message, MessageContext::Original);
         }
     }
 }
@@ -162,14 +162,16 @@ void addTwitchEmoteSets(
 void addEmotes(Channel &channel, const EmoteMap &map, const QString &title,
                const MessageElementFlag &emoteFlag)
 {
-    channel.addMessage(makeTitleMessage(title));
-    channel.addMessage(makeEmoteMessage(map, emoteFlag));
+    channel.addMessage(makeTitleMessage(title), MessageContext::Original);
+    channel.addMessage(makeEmoteMessage(map, emoteFlag),
+                       MessageContext::Original);
 }
 
 void loadEmojis(ChannelView &view, const std::vector<EmojiPtr> &emojiMap)
 {
     ChannelPtr emojiChannel(new Channel("", Channel::Type::None));
-    emojiChannel->addMessage(makeEmojiMessage(emojiMap));
+    emojiChannel->addMessage(makeEmojiMessage(emojiMap),
+                             MessageContext::Original);
 
     view.setChannel(emojiChannel);
 }
@@ -177,8 +179,8 @@ void loadEmojis(ChannelView &view, const std::vector<EmojiPtr> &emojiMap)
 void loadEmojis(Channel &channel, const std::vector<EmojiPtr> &emojiMap,
                 const QString &title)
 {
-    channel.addMessage(makeTitleMessage(title));
-    channel.addMessage(makeEmojiMessage(emojiMap));
+    channel.addMessage(makeTitleMessage(title), MessageContext::Original);
+    channel.addMessage(makeEmojiMessage(emojiMap), MessageContext::Original);
 }
 
 // Create an emote
@@ -454,7 +456,7 @@ void EmotePopup::loadChannel(ChannelPtr channel)
         builder.emplace<TextElement>("no subscription emotes available",
                                      MessageElementFlag::Text,
                                      MessageColor::System);
-        subChannel->addMessage(builder.release());
+        subChannel->addMessage(builder.release(), MessageContext::Original);
     }
 }
 

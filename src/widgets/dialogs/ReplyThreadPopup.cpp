@@ -244,7 +244,8 @@ void ReplyThreadPopup::addMessagesFromThread()
         std::optional<MessageFlags>(this->thread_->root()->flags);
     rootOverrideFlags->set(MessageFlag::DoNotLog);
 
-    this->virtualChannel_->addMessage(this->thread_->root(), rootOverrideFlags);
+    this->virtualChannel_->addMessage(
+        this->thread_->root(), MessageContext::Repost, rootOverrideFlags);
     for (const auto &msgRef : this->thread_->replies())
     {
         if (auto msg = msgRef.lock())
@@ -252,24 +253,26 @@ void ReplyThreadPopup::addMessagesFromThread()
             auto overrideFlags = std::optional<MessageFlags>(msg->flags);
             overrideFlags->set(MessageFlag::DoNotLog);
 
-            this->virtualChannel_->addMessage(msg, overrideFlags);
+            this->virtualChannel_->addMessage(msg, MessageContext::Repost,
+                                              overrideFlags);
         }
     }
 
     this->messageConnection_ =
         std::make_unique<pajlada::Signals::ScopedConnection>(
-            sourceChannel->messageAppended.connect([this](MessagePtr &message,
-                                                          auto) {
-                if (message->replyThread == this->thread_)
-                {
-                    auto overrideFlags =
-                        std::optional<MessageFlags>(message->flags);
-                    overrideFlags->set(MessageFlag::DoNotLog);
+            sourceChannel->messageAppended.connect(
+                [this](MessagePtr &message, auto) {
+                    if (message->replyThread == this->thread_)
+                    {
+                        auto overrideFlags =
+                            std::optional<MessageFlags>(message->flags);
+                        overrideFlags->set(MessageFlag::DoNotLog);
 
-                    // same reply thread, add message
-                    this->virtualChannel_->addMessage(message, overrideFlags);
-                }
-            }));
+                        // same reply thread, add message
+                        this->virtualChannel_->addMessage(
+                            message, MessageContext::Repost, overrideFlags);
+                    }
+                }));
 }
 
 void ReplyThreadPopup::updateInputUI()

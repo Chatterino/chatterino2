@@ -1,6 +1,7 @@
 #include "providers/twitch/IrcMessageHandler.hpp"
 
 #include "Application.hpp"
+#include "common/Channel.hpp"
 #include "common/Common.hpp"
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
@@ -720,7 +721,7 @@ void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
         auto ptr = TwitchMessageBuilder::buildHypeChatMessage(message);
         if (ptr)
         {
-            chan->addMessage(ptr);
+            chan->addMessage(ptr, MessageContext::Original);
         }
     }
 }
@@ -811,7 +812,8 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     if (clearChat.disableAllMessages)
     {
         chan->disableAllMessages();
-        chan->addMessage(std::move(clearChat.message));
+        chan->addMessage(std::move(clearChat.message),
+                         MessageContext::Original);
 
         return;
     }
@@ -867,7 +869,7 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
     {
         MessageBuilder builder;
         TwitchMessageBuilder::deletionMessage(msg, &builder);
-        chan->addMessage(builder.release());
+        chan->addMessage(builder.release(), MessageContext::Original);
     }
 }
 
@@ -965,10 +967,11 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
 
     if (message->flags.has(MessageFlag::ShowInMentions))
     {
-        getIApp()->getTwitch()->getMentionsChannel()->addMessage(message);
+        getIApp()->getTwitch()->getMentionsChannel()->addMessage(
+            message, MessageContext::Original);
     }
 
-    c->addMessage(message);
+    c->addMessage(message, MessageContext::Original);
 
     auto overrideFlags = std::optional<MessageFlags>(message->flags);
     overrideFlags->set(MessageFlag::DoNotTriggerNotification);
@@ -980,7 +983,8 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
     {
         getIApp()->getTwitchAbstract()->forEachChannel(
             [&message, overrideFlags](ChannelPtr channel) {
-                channel->addMessage(message, overrideFlags);
+                channel->addMessage(message, MessageContext::Repost,
+                                    overrideFlags);
             });
     }
 }
@@ -1097,7 +1101,7 @@ void IrcMessageHandler::handleUserNoticeMessage(
 
         if (!chan->isEmpty())
         {
-            chan->addMessage(newMessage);
+            chan->addMessage(newMessage, MessageContext::Original);
         }
     }
 }
@@ -1116,7 +1120,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             // channels
             getIApp()->getTwitch()->forEachChannelAndSpecialChannels(
                 [msg](const auto &c) {
-                    c->addMessage(msg);
+                    c->addMessage(msg, MessageContext::Original);
                 });
 
             return;
@@ -1136,15 +1140,15 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
         QString tags = message->tags().value("msg-id").toString();
         if (tags == "usage_delete")
         {
-            channel->addMessage(makeSystemMessage(
+            channel->addSystemMessage(
                 "Usage: /delete <msg-id> - Deletes the specified message. "
-                "Can't take more than one argument."));
+                "Can't take more than one argument.");
         }
         else if (tags == "bad_delete_message_error")
         {
-            channel->addMessage(makeSystemMessage(
+            channel->addSystemMessage(
                 "There was a problem deleting the message. "
-                "It might be from another channel or too old to delete."));
+                "It might be from another channel or too old to delete.");
         }
         else if (tags == "host_on" || tags == "host_target_went_offline")
         {
@@ -1166,7 +1170,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             MessageBuilder builder;
             TwitchMessageBuilder::hostingSystemMessage(hostedChannelName,
                                                        &builder, hostOn);
-            channel->addMessage(builder.release());
+            channel->addMessage(builder.release(), MessageContext::Original);
         }
         else if (tags == "room_mods" || tags == "vips_success")
         {
@@ -1195,11 +1199,11 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             users.sort(Qt::CaseInsensitive);
             TwitchMessageBuilder::listOfUsersSystemMessage(msgParts.at(0),
                                                            users, tc, &builder);
-            channel->addMessage(builder.release());
+            channel->addMessage(builder.release(), MessageContext::Original);
         }
         else
         {
-            channel->addMessage(msg);
+            channel->addMessage(msg, MessageContext::Original);
         }
     }
 }
@@ -1218,7 +1222,7 @@ void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
     if (message->nick() ==
         getIApp()->getAccounts()->twitch.getCurrent()->getUserName())
     {
-        twitchChannel->addMessage(makeSystemMessage("joined channel"));
+        twitchChannel->addSystemMessage("joined channel");
         twitchChannel->joined.invoke();
     }
     else if (getSettings()->showJoins.getValue())
@@ -1248,7 +1252,8 @@ void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
 
     if (message->nick() == selfAccountName)
     {
-        channel->addMessage(generateBannedMessage(false));
+        channel->addMessage(generateBannedMessage(false),
+                            MessageContext::Original);
     }
 }
 
@@ -1459,10 +1464,11 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
 
         if (highlighted && showInMentions)
         {
-            server.getMentionsChannel()->addMessage(msg);
+            server.getMentionsChannel()->addMessage(msg,
+                                                    MessageContext::Original);
         }
 
-        chan->addMessage(msg);
+        chan->addMessage(msg, MessageContext::Original);
         if (auto *chatters = dynamic_cast<ChannelChatters *>(chan.get()))
         {
             chatters->addRecentChatter(msg->displayName);
