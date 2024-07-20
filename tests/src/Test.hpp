@@ -1,7 +1,7 @@
 #pragma once
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include <gmock/gmock.h>  // IWYU pragma: export
+#include <gtest/gtest.h>  // IWYU pragma: export
 
 #include <ostream>
 

@@ -20,6 +20,7 @@
 - Minor: Improve appearance of reply button. (#5491)
 - Minor: Introduce HTTP API for plugins. (#5383, #5492, #5494)
 - Minor: Support more Firefox variants for incognito link opening. (#5503)
+- Minor: Replying to a message will now display the message being replied to. (#4350)
 - Minor: Links can now have prefixes and suffixes such as parentheses. (#5486)
 - Bugfix: Fixed tab move animation occasionally failing to start after closing a tab. (#5426)
 - Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
@@ -52,6 +53,7 @@
 - Dev: Cleanup `BrowserExtension`. (#5465)
 - Dev: Deprecate Qt 5.12. (#5396)
 - Dev: The running Qt version is now shown in the about page if it differs from the compiled version. (#5501)
+- Dev: `FlagsEnum` is now `constexpr`. (#5510)
 
 ## 2.5.1
 
