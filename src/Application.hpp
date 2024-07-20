@@ -158,7 +158,7 @@ private:
     NotificationController *const notifications{};
     HighlightController *const highlights{};
     std::unique_ptr<TwitchIrcServer> twitch;
-    FfzBadges *const ffzBadges{};
+    std::unique_ptr<FfzBadges> ffzBadges;
     SeventvBadges *const seventvBadges{};
     std::unique_ptr<UserDataController> userData;
     std::unique_ptr<ISoundController> sound;

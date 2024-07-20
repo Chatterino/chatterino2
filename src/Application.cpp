@@ -133,7 +133,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , notifications(&this->emplace<NotificationController>())
     , highlights(&this->emplace<HighlightController>())
     , twitch(new TwitchIrcServer)
-    , ffzBadges(&this->emplace<FfzBadges>())
+    , ffzBadges(new FfzBadges)
     , seventvBadges(&this->emplace<SeventvBadges>())
     , userData(new UserDataController(paths))
     , sound(makeSoundController(_settings))
@@ -171,6 +171,7 @@ void Application::fakeDtor()
     this->bttvEmotes.reset();
     this->ffzEmotes.reset();
     this->seventvEmotes.reset();
+    this->ffzBadges.reset();
     // this->twitch.reset();
     this->fonts.reset();
     this->sound.reset();
@@ -213,6 +214,7 @@ void Application::initialize(Settings &settings, const Paths &paths)
         singleton->initialize(settings, paths);
     }
 
+    this->ffzBadges->load();
     this->twitch->initialize();
 
     // XXX: Loading Twitch badges after Helix has been initialized, which only happens after
@@ -414,8 +416,9 @@ HighlightController *Application::getHighlights()
 FfzBadges *Application::getFfzBadges()
 {
     assertInGuiThread();
+    assert(this->ffzBadges);
 
-    return this->ffzBadges;
+    return this->ffzBadges.get();
 }
 
 SeventvBadges *Application::getSeventvBadges()
