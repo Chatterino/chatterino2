@@ -46,7 +46,7 @@ jobs:
       - name: Install googlebench and gcovr
         run: |
           sudo apt update
-          sudo apt -y install \
+          DEBIAN_FRONTEND=noninteractive sudo apt -y install \
             libbenchmark-dev gcovr
 
       - name: Build (Ubuntu)
