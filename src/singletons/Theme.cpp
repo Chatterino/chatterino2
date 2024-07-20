@@ -282,7 +282,7 @@ bool Theme::isSystemTheme() const
     return this->themeName == u"System"_s;
 }
 
-void Theme::initialize(Settings &settings, const Paths &paths)
+Theme::Theme(const Paths &paths)
 {
     this->themeName.connect(
         [this](auto themeName) {

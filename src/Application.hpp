@@ -144,8 +144,8 @@ public:
     friend void test();
 
 private:
-    Theme *const themes{};
-    std::unique_ptr<Fonts> fonts{};
+    std::unique_ptr<Theme> themes;
+    std::unique_ptr<Fonts> fonts;
     Emotes *const emotes{};
     AccountController *const accounts{};
     HotkeyController *const hotkeys{};

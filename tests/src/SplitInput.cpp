@@ -29,8 +29,9 @@ class MockApplication : mock::EmptyApplication
 public:
     MockApplication()
         : settings(this->settingsDir.filePath("settings.json"))
+        , theme(this->paths_)
         , fonts(this->settings)
-        , windowManager(this->paths)
+        , windowManager(this->paths_)
     {
     }
     Theme *getThemes() override
@@ -72,7 +73,6 @@ public:
     Theme theme;
     HotkeyController hotkeys;
     Fonts fonts;
-    Paths paths;
     WindowManager windowManager;
     AccountController accounts;
     CommandController commands;

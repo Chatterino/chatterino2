@@ -118,7 +118,7 @@ Application::Application(Settings &_settings, const Paths &paths,
                          const Args &_args, Updates &_updates)
     : paths_(paths)
     , args_(_args)
-    , themes(&this->emplace<Theme>())
+    , themes(new Theme(paths))
     , fonts(new Fonts(_settings))
     , emotes(&this->emplace<Emotes>())
     , accounts(&this->emplace<AccountController>())
@@ -176,6 +176,7 @@ void Application::fakeDtor()
     this->fonts.reset();
     this->sound.reset();
     this->userData.reset();
+    this->themes.reset();
 }
 
 void Application::initialize(Settings &settings, const Paths &paths)
@@ -337,8 +338,9 @@ int Application::run(QApplication &qtApp)
 Theme *Application::getThemes()
 {
     assertInGuiThread();
+    assert(this->themes);
 
-    return this->themes;
+    return this->themes.get();
 }
 
 Fonts *Application::getFonts()
