@@ -102,6 +102,8 @@ TEST(LinkParser, parseDomainLinks)
         {"", "example.com", "/(f)(o)(o)(b)(a)r"},
         {"", "example.com", "/foobar()()"},
         {"", "example.com", "/foobar()(())baz"},
+        {"", "example.com", "/(foo)"},
+        {"", "example.com", "/()"},
         // non-ASCII characters are allowed
         {"", u"köln.de"_s, ""},
         {"", u"ü.com"_s, ""},
@@ -251,6 +253,8 @@ TEST(LinkParser, doesntParseInvalidLinks)
         "@@@.com",
         "%%%.com",
         "*.com",
+        "example.com(foo)",
+        "example.com()",
     };
 
     for (const auto &input : inputs)
