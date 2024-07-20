@@ -19,20 +19,19 @@
 namespace ranges = std::ranges;
 namespace chatterino {
 
-void NotificationController::initialize(Settings & /*settings*/,
-                                        const Paths & /*paths*/)
+void NotificationController::initialize(Settings &settings, const Paths &paths)
 {
     for (const QString &channelName : this->twitchSetting_.getValue())
     {
-        this->channelMap_[Platform::Twitch].append(channelName);
+        this->channelMap[Platform::Twitch].append(channelName);
     }
 
-    // We can safely ignore this signal connection since channelMap_ will always be destroyed
+    // We can safely ignore this signal connection since channelMap will always be destroyed
     // before the NotificationController
     std::ignore =
-        this->channelMap_[Platform::Twitch].delayedItemsChanged.connect([this] {
+        this->channelMap[Platform::Twitch].delayedItemsChanged.connect([this] {
             this->twitchSetting_.setValue(
-                this->channelMap_[Platform::Twitch].raw());
+                this->channelMap[Platform::Twitch].raw());
         });
 
     this->fetchFakeChannels();
@@ -59,7 +58,7 @@ void NotificationController::updateChannelNotification(
 bool NotificationController::isChannelNotified(const QString &channelName,
                                                Platform p)
 {
-    return ranges::any_of(channelMap_[p].raw(), [&](const auto &name) {
+    return ranges::any_of(channelMap[p].raw(), [&](const auto &name) {
         return name.compare(channelName, Qt::CaseInsensitive) == 0;
     });
 }
@@ -67,24 +66,24 @@ bool NotificationController::isChannelNotified(const QString &channelName,
 void NotificationController::addChannelNotification(const QString &channelName,
                                                     Platform p)
 {
-    channelMap_[p].append(channelName);
+    channelMap[p].append(channelName);
 }
 
 void NotificationController::removeChannelNotification(
     const QString &channelName, Platform p)
 {
-    for (size_t i = 0; i != channelMap_[p].raw().size(); i++)
+    for (std::vector<int>::size_type i = 0; i != channelMap[p].raw().size();
+         i++)
     {
-        if (channelMap_[p].raw()[i].compare(channelName, Qt::CaseInsensitive) ==
+        if (channelMap[p].raw()[i].compare(channelName, Qt::CaseInsensitive) ==
             0)
         {
-            channelMap_[p].removeAt(static_cast<int>(i));
+            channelMap[p].removeAt(static_cast<int>(i));
             i--;
         }
     }
 }
 
-// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void NotificationController::playSound() const
 {
     QUrl highlightSoundUrl =
@@ -100,7 +99,7 @@ NotificationModel *NotificationController::createModel(QObject *parent,
                                                        Platform p)
 {
     auto *model = new NotificationModel(parent);
-    model->initialize(&this->channelMap_[p]);
+    model->initialize(&this->channelMap[p]);
     return model;
 }
 
@@ -174,9 +173,9 @@ void NotificationController::fetchFakeChannels()
     qCDebug(chatterinoNotification) << "fetching fake channels";
 
     QStringList channels;
-    for (size_t i = 0; i < channelMap_[Platform::Twitch].raw().size(); i++)
+    for (size_t i = 0; i < channelMap[Platform::Twitch].raw().size(); i++)
     {
-        const auto &name = channelMap_[Platform::Twitch].raw()[i];
+        const auto &name = channelMap[Platform::Twitch].raw()[i];
         auto chan = getIApp()->getTwitchAbstract()->getChannelOrEmpty(name);
         if (chan->isEmpty())
         {

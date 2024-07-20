@@ -70,7 +70,7 @@ private:
 
     QTimer liveStatusTimer_;
 
-    std::map<Platform, SignalVector<QString>> channelMap_;
+    std::map<Platform, SignalVector<QString>> channelMap;
 
     ChatterinoSetting<std::vector<QString>> twitchSetting_ = {
         "/notifications/twitch"};
