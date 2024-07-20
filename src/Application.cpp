@@ -125,7 +125,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , hotkeys(&this->emplace<HotkeyController>())
     , windows(&this->emplace(new WindowManager(paths)))
     , toasts(&this->emplace<Toasts>())
-    , imageUploader(&this->emplace<ImageUploader>())
+    , imageUploader(new ImageUploader)
     , seventvAPI(&this->emplace<SeventvAPI>())
     , crashHandler(&this->emplace(new CrashHandler(paths)))
 
@@ -176,6 +176,7 @@ void Application::fakeDtor()
     this->highlights.reset();
     this->ffzBadges.reset();
     // this->twitch.reset();
+    this->imageUploader.reset();
     this->fonts.reset();
     this->sound.reset();
     this->userData.reset();
@@ -476,8 +477,9 @@ IChatterinoBadges *Application::getChatterinoBadges()
 ImageUploader *Application::getImageUploader()
 {
     assertInGuiThread();
+    assert(this->imageUploader);
 
-    return this->imageUploader;
+    return this->imageUploader.get();
 }
 
 SeventvAPI *Application::getSeventvAPI()

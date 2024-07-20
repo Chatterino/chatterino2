@@ -123,10 +123,6 @@ QString getLinkFromResponse(NetworkResult response, QString pattern)
     return pattern;
 }
 
-void ImageUploader::save()
-{
-}
-
 void ImageUploader::sendImageUploadRequest(RawImageData imageData,
                                            ChannelPtr channel,
                                            QPointer<ResizingTextEdit> textEdit)

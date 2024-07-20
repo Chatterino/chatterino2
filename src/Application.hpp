@@ -151,7 +151,7 @@ private:
     HotkeyController *const hotkeys{};
     WindowManager *const windows{};
     Toasts *const toasts{};
-    ImageUploader *const imageUploader{};
+    std::unique_ptr<ImageUploader> imageUploader;
     SeventvAPI *const seventvAPI{};
     CrashHandler *const crashHandler{};
     std::unique_ptr<CommandController> commands;
