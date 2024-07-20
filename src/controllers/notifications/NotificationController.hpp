@@ -24,7 +24,7 @@ class NotificationController final : public Singleton
 public:
     void initialize(Settings &settings, const Paths &paths) override;
 
-    bool isChannelNotified(const QString &channelName, Platform p);
+    bool isChannelNotified(const QString &channelName, Platform p) const;
     void updateChannelNotification(const QString &channelName, Platform p);
     void addChannelNotification(const QString &channelName, Platform p);
     void removeChannelNotification(const QString &channelName, Platform p);

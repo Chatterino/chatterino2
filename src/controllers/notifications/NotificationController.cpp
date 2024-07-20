@@ -45,20 +45,20 @@ void NotificationController::initialize(Settings &settings, const Paths &paths)
 void NotificationController::updateChannelNotification(
     const QString &channelName, Platform p)
 {
-    if (isChannelNotified(channelName, p))
+    if (this->isChannelNotified(channelName, p))
     {
-        removeChannelNotification(channelName, p);
+        this->removeChannelNotification(channelName, p);
     }
     else
     {
-        addChannelNotification(channelName, p);
+        this->addChannelNotification(channelName, p);
     }
 }
 
 bool NotificationController::isChannelNotified(const QString &channelName,
-                                               Platform p)
+                                               Platform p) const
 {
-    return ranges::any_of(channelMap[p].raw(), [&](const auto &name) {
+    return ranges::any_of(channelMap.at(p).raw(), [&](const auto &name) {
         return name.compare(channelName, Qt::CaseInsensitive) == 0;
     });
 }
@@ -113,8 +113,8 @@ void NotificationController::notifyTwitchChannelLive(
           getSettings()->streamerModeSuppressLiveNotifications);
     bool playedSound = false;
 
-    if (showNotification && getIApp()->getNotifications()->isChannelNotified(
-                                payload.channelName, Platform::Twitch))
+    if (showNotification &&
+        this->isChannelNotified(payload.channelName, Platform::Twitch))
     {
         if (Toasts::isEnabled())
         {
