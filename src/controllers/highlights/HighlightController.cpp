@@ -442,9 +442,11 @@ std::ostream &operator<<(std::ostream &os, const HighlightResult &result)
     return os;
 }
 
-void HighlightController::initialize(Settings &settings,
-                                     const Paths & /*paths*/)
+HighlightController::HighlightController(Settings &settings,
+                                         AccountController *accounts)
 {
+    assert(accounts != nullptr);
+
     this->rebuildListener_.addSetting(settings.enableSelfHighlight);
     this->rebuildListener_.addSetting(settings.enableSelfHighlightSound);
     this->rebuildListener_.addSetting(settings.enableSelfHighlightTaskbar);
@@ -507,12 +509,11 @@ void HighlightController::initialize(Settings &settings,
             this->rebuildChecks(settings);
         });
 
-    getIApp()->getAccounts()->twitch.currentUserChanged.connect(
-        [this, &settings] {
-            qCDebug(chatterinoHighlights)
-                << "Rebuild checks because user swapped accounts";
-            this->rebuildChecks(settings);
-        });
+    accounts->twitch.currentUserChanged.connect([this, &settings] {
+        qCDebug(chatterinoHighlights)
+            << "Rebuild checks because user swapped accounts";
+        this->rebuildChecks(settings);
+    });
 
     this->rebuildChecks(settings);
 }

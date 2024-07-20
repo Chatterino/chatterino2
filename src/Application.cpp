@@ -131,7 +131,7 @@ Application::Application(Settings &_settings, const Paths &paths,
 
     , commands(new CommandController(paths))
     , notifications(&this->emplace<NotificationController>())
-    , highlights(&this->emplace<HighlightController>())
+    , highlights(new HighlightController(_settings, this->accounts))
     , twitch(new TwitchIrcServer)
     , ffzBadges(new FfzBadges)
     , seventvBadges(&this->emplace<SeventvBadges>())
@@ -172,6 +172,7 @@ void Application::fakeDtor()
     this->ffzEmotes.reset();
     this->seventvEmotes.reset();
     this->commands.reset();
+    this->highlights.reset();
     this->ffzBadges.reset();
     // this->twitch.reset();
     this->fonts.reset();
@@ -413,8 +414,9 @@ NotificationController *Application::getNotifications()
 HighlightController *Application::getHighlights()
 {
     assertInGuiThread();
+    assert(this->highlights);
 
-    return this->highlights;
+    return this->highlights.get();
 }
 
 FfzBadges *Application::getFfzBadges()

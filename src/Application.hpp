@@ -156,7 +156,7 @@ private:
     CrashHandler *const crashHandler{};
     std::unique_ptr<CommandController> commands;
     NotificationController *const notifications{};
-    HighlightController *const highlights{};
+    std::unique_ptr<HighlightController> highlights;
     std::unique_ptr<TwitchIrcServer> twitch;
     std::unique_ptr<FfzBadges> ffzBadges;
     SeventvBadges *const seventvBadges{};

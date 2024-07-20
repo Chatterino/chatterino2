@@ -8,7 +8,6 @@
 #include "mocks/UserData.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchBadge.hpp"  // for Badge
-#include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "Test.hpp"
 
@@ -23,9 +22,16 @@ using ::testing::Exactly;
 
 namespace {
 
-class MockApplication : mock::EmptyApplication
+class MockApplication : public mock::EmptyApplication
 {
 public:
+    MockApplication(const QString &settingsBody)
+        : mock::EmptyApplication(settingsBody)
+        , settings(this->settingsDir.path())
+        , highlights(this->settings, &this->accounts)
+    {
+    }
+
     AccountController *getAccounts() override
     {
         return &this->accounts;
@@ -41,10 +47,10 @@ public:
         return &this->userData;
     }
 
+    Settings settings;
     AccountController accounts;
     HighlightController highlights;
     mock::UserDataController userData;
-    // TODO: Figure this out
 };
 
 }  // namespace
@@ -180,13 +186,7 @@ protected:
     void configure(const QString &settings, bool isAnon)
     {
         // Write default settings to the mock settings json file
-        this->settingsDir_ = std::make_unique<QTemporaryDir>();
-
-        QFile settingsFile(this->settingsDir_->filePath("settings.json"));
-        ASSERT_TRUE(settingsFile.open(QIODevice::WriteOnly | QIODevice::Text));
-        ASSERT_GT(settingsFile.write(settings.toUtf8()), 0);
-        ASSERT_TRUE(settingsFile.flush());
-        settingsFile.close();
+        this->mockApplication = std::make_unique<MockApplication>(settings);
 
         this->mockHelix = new mock::Helix;
 
@@ -195,24 +195,18 @@ protected:
         EXPECT_CALL(*this->mockHelix, loadBlocks).Times(Exactly(1));
         EXPECT_CALL(*this->mockHelix, update).Times(Exactly(isAnon ? 0 : 1));
 
-        this->mockApplication = std::make_unique<MockApplication>();
-        this->settings = std::make_unique<Settings>(this->settingsDir_->path());
-        this->paths = std::make_unique<Paths>();
-
-        this->controller = std::make_unique<HighlightController>();
-
-        this->mockApplication->accounts.initialize(*this->settings,
-                                                   *this->paths);
-        this->controller->initialize(*this->settings, *this->paths);
+        this->mockApplication->accounts.initialize(
+            this->mockApplication->settings, this->mockApplication->paths_);
     }
 
     void runTests(const std::vector<TestCase> &tests)
     {
         for (const auto &[input, expected] : tests)
         {
-            auto [isMatch, matchResult] = this->controller->check(
-                input.args, input.badges, input.senderName,
-                input.originalMessage, input.flags);
+            auto [isMatch, matchResult] =
+                this->mockApplication->getHighlights()->check(
+                    input.args, input.badges, input.senderName,
+                    input.originalMessage, input.flags);
 
             EXPECT_EQ(isMatch, expected.state)
                 << input.senderName << ": " << input.originalMessage;
@@ -224,23 +218,11 @@ protected:
     void TearDown() override
     {
         this->mockApplication.reset();
-        this->settings.reset();
-        this->paths.reset();
-
-        this->controller.reset();
-
-        this->settingsDir_.reset();
 
         delete this->mockHelix;
     }
 
-    std::unique_ptr<QTemporaryDir> settingsDir_;
-
     std::unique_ptr<MockApplication> mockApplication;
-    std::unique_ptr<Settings> settings;
-    std::unique_ptr<Paths> paths;
-
-    std::unique_ptr<HighlightController> controller;
 
     mock::Helix *mockHelix;
 };
