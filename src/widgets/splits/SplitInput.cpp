@@ -12,7 +12,6 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
-#include "util/Clamp.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/dialogs/EmotePopup.hpp"
@@ -811,7 +810,7 @@ void SplitInput::updateCompletionPopup()
         return;
     }
 
-    for (int i = clamp(position, 0, (int)text.length() - 1); i >= 0; i--)
+    for (int i = std::clamp(position, 0, (int)text.length() - 1); i >= 0; i--)
     {
         if (text[i] == ' ')
         {
@@ -894,7 +893,7 @@ void SplitInput::insertCompletionText(const QString &input_) const
     auto text = edit.toPlainText();
     auto position = edit.textCursor().position() - 1;
 
-    for (int i = clamp(position, 0, (int)text.length() - 1); i >= 0; i--)
+    for (int i = std::clamp(position, 0, (int)text.length() - 1); i >= 0; i--)
     {
         bool done = false;
         if (text[i] == ':')
