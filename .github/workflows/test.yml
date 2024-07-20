@@ -43,17 +43,11 @@ jobs:
       - name: Create build directory (Ubuntu)
         run: mkdir build-test
 
-      - name: Install googlebench & ncurses
+      - name: Install googlebench
         run: |
           sudo apt update
           sudo apt -y install \
-            libbenchmark-dev libncurses5
-
-      - name: Install LLVM and Clang
-        # See https://github.com/KyleMayes/install-llvm-action/pull/76
-        uses: gentoo-root/install-llvm-action@abb6cec0ec431e834bc5e5090ea39a2d1d63a4c6
-        with:
-          version: 18
+            libbenchmark-dev
 
       - name: Build (Ubuntu)
         run: |
@@ -65,10 +59,7 @@ jobs:
             -DCMAKE_PREFIX_PATH="$Qt6_DIR/lib/cmake" \
             -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
             -DCHATTERINO_STATIC_QT_BUILD=On \
-            -DCMAKE_CXX_FLAGS="-fprofile-instr-generate -fcoverage-mapping" \
-            -DCMAKE_C_FLAGS="-fprofile-instr-generate -fcoverage-mapping" \
-            -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_C_COMPILER=clang \
+            -DCHATTERINO_GENERATE_COVERAGE=On \
             ..
           cmake --build .
         working-directory: build-test
@@ -121,5 +112,7 @@ jobs:
         if: steps.changed-files.outputs.any_modified || github.event_name == 'push'
         uses: codecov/codecov-action@v4.5.0
         with:
-          file: build-test/lcov.txt
           token: ${{ secrets.CODECOV_TOKEN }}
+          plugin: gcov
+          fail_ci_if_error: true
+          verbose: true
