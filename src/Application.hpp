@@ -162,7 +162,7 @@ private:
     SeventvBadges *const seventvBadges{};
     std::unique_ptr<UserDataController> userData;
     std::unique_ptr<ISoundController> sound;
-    TwitchLiveController *const twitchLiveController{};
+    std::unique_ptr<TwitchLiveController> twitchLiveController;
     std::unique_ptr<PubSub> twitchPubSub;
     std::unique_ptr<TwitchBadges> twitchBadges;
     std::unique_ptr<ChatterinoBadges> chatterinoBadges;

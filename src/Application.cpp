@@ -137,7 +137,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , seventvBadges(&this->emplace<SeventvBadges>())
     , userData(new UserDataController(paths))
     , sound(makeSoundController(_settings))
-    , twitchLiveController(&this->emplace<TwitchLiveController>())
+    , twitchLiveController(new TwitchLiveController)
     , twitchPubSub(new PubSub(TWITCH_PUBSUB_URL))
     , twitchBadges(new TwitchBadges)
     , chatterinoBadges(new ChatterinoBadges)
@@ -167,6 +167,7 @@ void Application::fakeDtor()
 {
     this->twitchPubSub.reset();
     this->twitchBadges.reset();
+    this->twitchLiveController.reset();
     this->chatterinoBadges.reset();
     this->bttvEmotes.reset();
     this->ffzEmotes.reset();
@@ -451,8 +452,9 @@ ISoundController *Application::getSound()
 ITwitchLiveController *Application::getTwitchLiveController()
 {
     assertInGuiThread();
+    assert(this->twitchLiveController);
 
-    return this->twitchLiveController;
+    return this->twitchLiveController.get();
 }
 
 TwitchBadges *Application::getTwitchBadges()
