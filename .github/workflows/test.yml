@@ -5,6 +5,10 @@ on:
   pull_request:
   workflow_dispatch:
   merge_group:
+  push:
+    branches:
+      - master
+      - main
 
 env:
   TWITCH_PUBSUB_SERVER_TAG: v1.0.7
@@ -39,11 +43,17 @@ jobs:
       - name: Create build directory (Ubuntu)
         run: mkdir build-test
 
-      - name: Install googlebench
+      - name: Install googlebench & ncurses
         run: |
           sudo apt update
           sudo apt -y install \
-            libbenchmark-dev
+            libbenchmark-dev libncurses5
+
+      - name: Install LLVM and Clang
+        # See https://github.com/KyleMayes/install-llvm-action/pull/76
+        uses: gentoo-root/install-llvm-action@abb6cec0ec431e834bc5e5090ea39a2d1d63a4c6
+        with:
+          version: 18
 
       - name: Build (Ubuntu)
         run: |
@@ -55,6 +65,10 @@ jobs:
             -DCMAKE_PREFIX_PATH="$Qt6_DIR/lib/cmake" \
             -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
             -DCHATTERINO_STATIC_QT_BUILD=On \
+            -DCMAKE_CXX_FLAGS="-fprofile-instr-generate -fcoverage-mapping" \
+            -DCMAKE_C_FLAGS="-fprofile-instr-generate -fcoverage-mapping" \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER=clang \
             ..
           cmake --build .
         working-directory: build-test
@@ -82,5 +96,30 @@ jobs:
           cd ../pubsub-server-test
           ./server 127.0.0.1:9050 &
           cd ../build-test
+          export LLVM_PROFILE_FILE="$(pwd)/cov/c2-%p.profraw"
           ctest --repeat until-pass:4 --output-on-failure --exclude-regex ClassicEmoteNameFiltering
         working-directory: build-test
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            tests/**
+            .github/workflows/test**
+
+      - name: Export Coverage
+        if: steps.changed-files.outputs.any_modified || github.event_name == 'push'
+        run: |
+          ls -la
+          ls -la cov
+          llvm-profdata merge -sparse cov/*.profraw -o default.profdata
+          llvm-cov export bin/chatterino-test --instr-profile default.profdata --format lcov > lcov.txt
+        working-directory: build-test
+
+      - name: Upload coverage reports to Codecov
+        if: steps.changed-files.outputs.any_modified || github.event_name == 'push'
+        uses: codecov/codecov-action@v4.5.0
+        with:
+          file: build-test/lcov.txt
+          token: ${{ secrets.CODECOV_TOKEN }}
