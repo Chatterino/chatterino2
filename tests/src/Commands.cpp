@@ -27,6 +27,7 @@ class MockApplication : mock::EmptyApplication
 public:
     MockApplication()
         : settings(this->settingsDir.filePath("settings.json"))
+        , commands(this->paths_)
     {
     }
 
@@ -832,8 +833,6 @@ TEST(Commands, E2E)
 {
     ::testing::InSequence seq;
     MockApplication app;
-
-    app.commands.initialize(*getSettings(), getIApp()->getPaths());
 
     QJsonObject pajlada;
     pajlada["id"] = "11148817";

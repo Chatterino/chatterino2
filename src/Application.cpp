@@ -129,7 +129,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , seventvAPI(&this->emplace<SeventvAPI>())
     , crashHandler(&this->emplace(new CrashHandler(paths)))
 
-    , commands(&this->emplace<CommandController>())
+    , commands(new CommandController(paths))
     , notifications(&this->emplace<NotificationController>())
     , highlights(&this->emplace<HighlightController>())
     , twitch(new TwitchIrcServer)
@@ -171,6 +171,7 @@ void Application::fakeDtor()
     this->bttvEmotes.reset();
     this->ffzEmotes.reset();
     this->seventvEmotes.reset();
+    this->commands.reset();
     this->ffzBadges.reset();
     // this->twitch.reset();
     this->fonts.reset();
@@ -397,8 +398,9 @@ CrashHandler *Application::getCrashHandler()
 CommandController *Application::getCommands()
 {
     assertInGuiThread();
+    assert(this->commands);
 
-    return this->commands;
+    return this->commands.get();
 }
 
 NotificationController *Application::getNotifications()
@@ -560,6 +562,8 @@ void Application::save()
     {
         singleton->save();
     }
+
+    this->commands->save();
 }
 
 void Application::initNm(const Paths &paths)

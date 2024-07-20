@@ -154,7 +154,7 @@ private:
     ImageUploader *const imageUploader{};
     SeventvAPI *const seventvAPI{};
     CrashHandler *const crashHandler{};
-    CommandController *const commands{};
+    std::unique_ptr<CommandController> commands;
     NotificationController *const notifications{};
     HighlightController *const highlights{};
     std::unique_ptr<TwitchIrcServer> twitch;

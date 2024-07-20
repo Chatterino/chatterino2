@@ -32,6 +32,7 @@ public:
         , theme(this->paths_)
         , fonts(this->settings)
         , windowManager(this->paths_)
+        , commands(this->paths_)
     {
     }
     Theme *getThemes() override

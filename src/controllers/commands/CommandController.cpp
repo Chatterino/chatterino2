@@ -263,7 +263,7 @@ const std::unordered_map<QString, VariableReplacer> COMMAND_VARS{
 
 namespace chatterino {
 
-void CommandController::initialize(Settings &, const Paths &paths)
+CommandController::CommandController(const Paths &paths)
 {
     // Update commands map when the vector of commands has been updated
     auto addFirstMatchToMap = [this](auto args) {
