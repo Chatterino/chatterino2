@@ -88,7 +88,6 @@ jobs:
           cd ../pubsub-server-test
           ./server 127.0.0.1:9050 &
           cd ../build-test
-          export LLVM_PROFILE_FILE="$(pwd)/cov/c2-%p.profraw"
           ctest --repeat until-pass:4 --output-on-failure --exclude-regex ClassicEmoteNameFiltering
         working-directory: build-test
 
