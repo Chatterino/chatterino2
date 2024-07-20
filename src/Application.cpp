@@ -122,7 +122,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , fonts(new Fonts(_settings))
     , emotes(&this->emplace<Emotes>())
     , accounts(&this->emplace<AccountController>())
-    , hotkeys(&this->emplace<HotkeyController>())
+    , hotkeys(new HotkeyController)
     , windows(&this->emplace(new WindowManager(paths)))
     , toasts(&this->emplace<Toasts>())
     , imageUploader(new ImageUploader)
@@ -177,6 +177,7 @@ void Application::fakeDtor()
     this->ffzBadges.reset();
     // this->twitch.reset();
     this->imageUploader.reset();
+    this->hotkeys.reset();
     this->fonts.reset();
     this->sound.reset();
     this->userData.reset();
@@ -372,8 +373,9 @@ AccountController *Application::getAccounts()
 HotkeyController *Application::getHotkeys()
 {
     assertInGuiThread();
+    assert(this->hotkeys);
 
-    return this->hotkeys;
+    return this->hotkeys.get();
 }
 
 WindowManager *Application::getWindows()
@@ -570,6 +572,7 @@ void Application::save()
     }
 
     this->commands->save();
+    this->hotkeys->save();
 }
 
 void Application::initNm(const Paths &paths)
