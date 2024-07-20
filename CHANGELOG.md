@@ -17,6 +17,7 @@
 - Minor: Add channel points indication for new bits power-up redemptions. (#5471)
 - Minor: Added option to log streams by their ID, allowing for easier "per-stream" log analyzing. (#5507)
 - Minor: Added `/warn <username> <reason>` command for mods. This prevents the user from chatting until they acknowledge the warning. (#5474)
+- Minor: Added option to suppress live notifictions on startup. (#5388)
 - Minor: Improve appearance of reply button. (#5491)
 - Minor: Introduce HTTP API for plugins. (#5383, #5492, #5494)
 - Minor: Support more Firefox variants for incognito link opening. (#5503)
