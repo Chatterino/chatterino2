@@ -16,8 +16,9 @@ namespace chatterino::linkparser {
 ///
 /// Prefixes and suffixes are almost identical to the ones in GitHub Flavored
 /// Markdown (GFM - https://github.github.com/gfm/#autolinks-extension-).
-/// The main differences are that '_' isn't a valid suffix and parentheses
-/// aren't counted (e.g. "(a.com/(foo)! would result in "a.com/(foo").
+/// The main difference is that '_' isn't a valid suffix.
+/// Parentheses are counted inside the @a rest: parsing "(a.com/(foo))" would
+/// result in the link "a.com/(foo)".
 /// Matching is done case insensitive (e.g. "HTTp://a.com" would be valid).
 ///
 /// A @a protocol can either be empty, "http://", or "https://".

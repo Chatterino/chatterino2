@@ -97,6 +97,11 @@ TEST(LinkParser, parseDomainLinks)
         {"", "0123456789.com", ""},
         {"", "ABCDEFGHIJKLMNOPQRSTUVWXYZ.com", ""},
         {"", "abcdefghijklmnopqrstuvwxyz.com", ""},
+        {"", "example.com", "/foo(bar)"},
+        {"", "example.com", "/foo((bar))"},
+        {"", "example.com", "/(f)(o)(o)(b)(a)r"},
+        {"", "example.com", "/foobar()()"},
+        {"", "example.com", "/foobar()(())baz"},
         // non-ASCII characters are allowed
         {"", u"köln.de"_s, ""},
         {"", u"ü.com"_s, ""},

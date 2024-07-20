@@ -118,10 +118,12 @@ bool startsWithPort(QStringView string)
 /// As per https://github.github.com/gfm/#autolinks-extension-:
 ///
 /// '<', '*', '_', '~', and '(' are ignored at the beginning
-/// '>', '?', '!', '.', ',', ':', '*', '~', and ')' are ignored at the end
+/// '>', '?', '!', '.', ',', ':', '*', '~', and ')' are ignored at the end.
 ///
-/// A difference to GFM is that the source isn't scanned for parentheses and '_'
-/// isn't a valid suffix.
+/// A difference to GFM is that '_' isn't a valid suffix.
+///
+/// This might remove more than desired (e.g. "(a.com/(foo))" -> "a.com/(foo").
+/// Parentheses are counted after recognizing a valid IP/host.
 void strip(QStringView &source)
 {
     while (!source.isEmpty())
@@ -259,6 +261,43 @@ std::optional<Parsed> parse(const QString &source) noexcept
     if ((nDots == 3 && isValidIpv4(host)) ||
         isValidTld(host.mid(lastDotPos + 1)))
     {
+        // scan for parentheses (only if there were characters excluded)
+        if (link.end() != source.end() && !rest.empty())
+        {
+            size_t nestingLevel = 0;
+            // position after the last closing brace (i.e. the minimum characters to include)
+            const auto *lastClose = link.end();
+
+            // scan source from rest until the end:
+            //                            lastClose
+            //                                v
+            // (example.com/foo/bar/#baz_(qox)),
+            //             ▏╌╌rest (before)╌ ▏
+            //  ▏╌╌╌╌╌╌╌link (before)╌╌╌╌╌╌╌ ▏
+            //             ▏╌╌rest (after)╌╌╌ ▏
+            //  ▏╌╌╌╌╌╌╌link (after)╌╌╌╌╌╌╌╌╌ ▏
+            // ▏╌╌╌╌╌╌╌╌╌╌╌╌╌source╌╌╌╌╌╌╌╌╌╌╌╌ ▏
+            //             ▏╌╌╌╌╌╌╌search╌╌╌╌╌╌ ▏
+            for (const auto *it = rest.begin(); it < source.end(); it++)
+            {
+                if (it->unicode() == u'(')
+                {
+                    nestingLevel++;
+                    continue;
+                }
+
+                if (nestingLevel != 0 && it->unicode() == u')')
+                {
+                    nestingLevel--;
+                    if (nestingLevel == 0)
+                    {
+                        lastClose = it + 1;
+                    }
+                }
+            }
+            link = QStringView{link.begin(), std::max(link.end(), lastClose)};
+            rest = QStringView{rest.begin(), std::max(rest.end(), lastClose)};
+        }
         result = Parsed{
             .protocol = protocol,
             .host = host,
