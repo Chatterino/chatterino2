@@ -111,7 +111,8 @@ void IrcServer::initializeConnectionSignals(IrcConnection *connection,
                          {
                              if (auto shared = weak.lock())
                              {
-                                 shared->addMessage(msg);
+                                 shared->addMessage(msg,
+                                                    MessageContext::Original);
                              }
                          }
                      });
@@ -218,7 +219,7 @@ void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
         {
             if (auto shared = weak.lock())
             {
-                shared->addMessage(msg);
+                shared->addMessage(msg, MessageContext::Original);
             }
         }
         return;
@@ -236,7 +237,7 @@ void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
         {
             auto msg = builder.build();
 
-            channel->addMessage(msg);
+            channel->addMessage(msg, MessageContext::Original);
             builder.triggerHighlights();
             const auto highlighted = msg->flags.has(MessageFlag::Highlighted);
             const auto showInMentions =
@@ -244,7 +245,8 @@ void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 
             if (highlighted && showInMentions)
             {
-                getIApp()->getTwitch()->getMentionsChannel()->addMessage(msg);
+                getIApp()->getTwitch()->getMentionsChannel()->addMessage(
+                    msg, MessageContext::Original);
             }
         }
         else
@@ -332,7 +334,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
                 {
                     if (auto shared = weak.lock())
                     {
-                        shared->addMessage(msg);
+                        shared->addMessage(msg, MessageContext::Original);
                     }
                 }
             };
@@ -366,7 +368,7 @@ void IrcServer::sendWhisper(const QString &target, const QString &message)
     {
         if (auto shared = weak.lock())
         {
-            shared->addMessage(msg);
+            shared->addMessage(msg, MessageContext::Original);
         }
     }
 }

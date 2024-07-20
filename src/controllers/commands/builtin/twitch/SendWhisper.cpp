@@ -152,10 +152,10 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                     void operator()(const QString &string,
                                     MessageBuilder &b) const
                     {
-                        LinkParser parser(string);
-                        if (parser.result())
+                        auto link = linkparser::parse(string);
+                        if (link)
                         {
-                            b.addLink(*parser.result());
+                            b.addLink(*link, string);
                         }
                         else
                         {
@@ -177,18 +177,16 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     b->flags.set(MessageFlag::Whisper);
     auto messagexD = b.release();
 
-    getIApp()->getTwitch()->getWhispersChannel()->addMessage(messagexD);
-
-    auto overrideFlags = std::optional<MessageFlags>(messagexD->flags);
-    overrideFlags->set(MessageFlag::DoNotLog);
+    getIApp()->getTwitch()->getWhispersChannel()->addMessage(
+        messagexD, MessageContext::Original);
 
     if (getSettings()->inlineWhispers &&
         !(getSettings()->streamerModeSuppressInlineWhispers &&
           getIApp()->getStreamerMode()->isEnabled()))
     {
         app->getTwitchAbstract()->forEachChannel(
-            [&messagexD, overrideFlags](ChannelPtr _channel) {
-                _channel->addMessage(messagexD, overrideFlags);
+            [&messagexD](ChannelPtr _channel) {
+                _channel->addMessage(messagexD, MessageContext::Repost);
             });
     }
 

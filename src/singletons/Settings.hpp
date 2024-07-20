@@ -458,6 +458,10 @@ public:
     BoolSetting enableLogging = {"/logging/enabled", false};
     BoolSetting onlyLogListedChannels = {"/logging/onlyLogListedChannels",
                                          false};
+    BoolSetting separatelyStoreStreamLogs = {
+        "/logging/separatelyStoreStreamLogs",
+        false,
+    };
 
     QStringSetting logPath = {"/logging/path", ""};
 

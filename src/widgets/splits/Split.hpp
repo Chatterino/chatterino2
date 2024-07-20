@@ -77,6 +77,9 @@ public:
 
     void setInputReply(const MessagePtr &reply);
 
+    // This is called on window focus lost
+    void unpause();
+
     static pajlada::Signals::Signal<Qt::KeyboardModifiers>
         modifierStatusChanged;
     static Qt::KeyboardModifiers modifierStatus;

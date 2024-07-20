@@ -3,7 +3,6 @@
 #include "messages/MessageBuilder.hpp"
 #include "providers/irc/IrcChannel2.hpp"
 #include "providers/irc/IrcServer.hpp"
-#include "util/Overloaded.hpp"
 #include "util/QStringHash.hpp"
 
 namespace chatterino {

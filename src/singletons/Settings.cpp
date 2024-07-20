@@ -10,8 +10,6 @@
 #include "controllers/nicknames/Nickname.hpp"
 #include "debug/Benchmark.hpp"
 #include "pajlada/settings/signalargs.hpp"
-#include "util/Clamp.hpp"
-#include "util/PersistSignalVector.hpp"
 #include "util/WindowsHelper.hpp"
 
 #include <pajlada/signals/scoped-connection.hpp>
@@ -275,12 +273,12 @@ void Settings::restoreSnapshot()
 
 float Settings::getClampedUiScale() const
 {
-    return clamp<float>(this->uiScale.getValue(), 0.2f, 10);
+    return std::clamp(this->uiScale.getValue(), 0.2F, 10.F);
 }
 
 void Settings::setClampedUiScale(float value)
 {
-    this->uiScale.setValue(clamp<float>(value, 0.2f, 10));
+    this->uiScale.setValue(std::clamp(value, 0.2F, 10.F));
 }
 
 Settings &Settings::instance()

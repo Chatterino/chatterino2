@@ -157,11 +157,21 @@ ModerationPage::ModerationPage()
         onlyLogListedChannels->setEnabled(getSettings()->enableLogging);
         logs.append(onlyLogListedChannels);
 
+        auto *separatelyStoreStreamLogs =
+            this->createCheckBox("Store live stream logs as separate files",
+                                 getSettings()->separatelyStoreStreamLogs);
+
+        separatelyStoreStreamLogs->setEnabled(getSettings()->enableLogging);
+        logs.append(separatelyStoreStreamLogs);
+
         // Select event
         QObject::connect(
             enableLogging, &QCheckBox::stateChanged, this,
-            [enableLogging, onlyLogListedChannels]() mutable {
+            [enableLogging, onlyLogListedChannels,
+             separatelyStoreStreamLogs]() mutable {
                 onlyLogListedChannels->setEnabled(enableLogging->isChecked());
+                separatelyStoreStreamLogs->setEnabled(
+                    getSettings()->enableLogging);
             });
 
         EditableModelView *view =
@@ -264,17 +274,16 @@ ModerationPage::ModerationPage()
         });
     }
 
-    this->addModerationButtonSettings(tabs);
+    this->addModerationButtonSettings(tabs.getElement());
 
     // ---- misc
     this->itemsChangedTimer_.setSingleShot(true);
 }
 
-void ModerationPage::addModerationButtonSettings(
-    LayoutCreator<QTabWidget> &tabs)
+void ModerationPage::addModerationButtonSettings(QTabWidget *tabs)
 {
     auto timeoutLayout =
-        tabs.appendTab(new QVBoxLayout, "User Timeout Buttons");
+        LayoutCreator{tabs}.appendTab(new QVBoxLayout, "User Timeout Buttons");
     auto texts = timeoutLayout.emplace<QVBoxLayout>().withoutMargin();
     {
         auto infoLabel = texts.emplace<QLabel>();

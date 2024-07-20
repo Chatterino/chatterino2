@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QDateTime>
 #include <QFile>
 #include <QString>
 
@@ -14,8 +13,7 @@ using MessagePtr = std::shared_ptr<const Message>;
 
 class LoggingChannel
 {
-    explicit LoggingChannel(const QString &_channelName,
-                            const QString &platform);
+    explicit LoggingChannel(QString _channelName, QString _platform);
 
 public:
     ~LoggingChannel();
@@ -26,19 +24,11 @@ public:
     LoggingChannel(LoggingChannel &&) = delete;
     LoggingChannel &operator=(LoggingChannel &&) = delete;
 
-    void addMessage(MessagePtr message);
+    void addMessage(const MessagePtr &message, const QString &streamID);
 
 private:
     void openLogFile();
-
-    QString generateOpeningString(
-        const QDateTime &now = QDateTime::currentDateTime()) const;
-    QString generateClosingString(
-        const QDateTime &now = QDateTime::currentDateTime()) const;
-
-    void appendLine(const QString &line);
-
-    QString generateDateString(const QDateTime &now);
+    void openStreamLogFile(const QString &streamID);
 
     const QString channelName;
     const QString platform;
@@ -46,6 +36,8 @@ private:
     QString subDirectory;
 
     QFile fileHandle;
+    QFile currentStreamFileHandle;
+    QString currentStreamID;
 
     QString dateString;
 

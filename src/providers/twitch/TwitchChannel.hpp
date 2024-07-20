@@ -87,6 +87,7 @@ public:
         QString uptime;
         int uptimeSeconds = 0;
         QString streamType;
+        QString streamId;
     };
 
     struct RoomModes {
@@ -133,6 +134,7 @@ public:
     bool hasHighRateLimit() const override;
     bool canReconnect() const override;
     void reconnect() override;
+    QString getCurrentStreamID() const override;
     void createClip();
 
     // Data

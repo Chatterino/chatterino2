@@ -1599,6 +1599,13 @@ void Split::setInputReply(const MessagePtr &reply)
     this->input_->setReply(reply);
 }
 
+void Split::unpause()
+{
+    this->view_->unpause(PauseReason::KeyboardModifier);
+    this->view_->unpause(PauseReason::DoubleClick);
+    // Mouse intentionally left out, we may still have the mouse over the split
+}
+
 }  // namespace chatterino
 
 QDebug operator<<(QDebug dbg, const chatterino::Split &split)

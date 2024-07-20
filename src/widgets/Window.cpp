@@ -43,6 +43,7 @@
 #include <QDesktopServices>
 #include <QHeaderView>
 #include <QMenuBar>
+#include <QObject>
 #include <QPalette>
 #include <QStandardItemModel>
 #include <QVBoxLayout>
@@ -112,6 +113,12 @@ bool Window::event(QEvent *event)
         }
 
         case QEvent::WindowDeactivate: {
+            for (const auto &split :
+                 this->notebook_->getSelectedPage()->getSplits())
+            {
+                split->unpause();
+            }
+
             auto *page = this->notebook_->getSelectedPage();
 
             if (page != nullptr)

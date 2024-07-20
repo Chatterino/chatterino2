@@ -24,7 +24,9 @@ class TextElement;
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 
-struct ParsedLink;
+namespace linkparser {
+    struct Parsed;
+}  // namespace linkparser
 
 struct SystemMessageTag {
 };
@@ -112,7 +114,7 @@ public:
     std::weak_ptr<Message> weakOf();
 
     void append(std::unique_ptr<MessageElement> element);
-    void addLink(const ParsedLink &parsedLink);
+    void addLink(const linkparser::Parsed &parsedLink, const QString &source);
 
     /**
      * Adds the text, applies irc colors, adds links,
