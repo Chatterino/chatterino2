@@ -147,7 +147,7 @@ private:
     std::unique_ptr<Theme> themes;
     std::unique_ptr<Fonts> fonts;
     std::unique_ptr<Emotes> emotes;
-    AccountController *const accounts{};
+    std::unique_ptr<AccountController> accounts;
     std::unique_ptr<HotkeyController> hotkeys;
     std::unique_ptr<WindowManager> windows;
     std::unique_ptr<Toasts> toasts;

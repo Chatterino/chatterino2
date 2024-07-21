@@ -195,8 +195,7 @@ protected:
         EXPECT_CALL(*this->mockHelix, loadBlocks).Times(Exactly(1));
         EXPECT_CALL(*this->mockHelix, update).Times(Exactly(isAnon ? 0 : 1));
 
-        this->mockApplication->accounts.initialize(
-            this->mockApplication->settings, this->mockApplication->paths_);
+        this->mockApplication->accounts.load();
     }
 
     void runTests(const std::vector<TestCase> &tests)

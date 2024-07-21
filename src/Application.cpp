@@ -121,7 +121,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , themes(new Theme(paths))
     , fonts(new Fonts(_settings))
     , emotes(new Emotes)
-    , accounts(&this->emplace<AccountController>())
+    , accounts(new AccountController)
     , hotkeys(new HotkeyController)
     , windows(new WindowManager(paths))
     , toasts(new Toasts)
@@ -131,7 +131,7 @@ Application::Application(Settings &_settings, const Paths &paths,
 
     , commands(new CommandController(paths))
     , notifications(new NotificationController)
-    , highlights(new HighlightController(_settings, this->accounts))
+    , highlights(new HighlightController(_settings, this->accounts.get()))
     , twitch(new TwitchIrcServer)
     , ffzBadges(new FfzBadges)
     , seventvBadges(new SeventvBadges)
@@ -189,6 +189,7 @@ void Application::fakeDtor()
     this->sound.reset();
     this->userData.reset();
     this->toasts.reset();
+    this->accounts.reset();
     this->emotes.reset();
     this->themes.reset();
 }
@@ -223,6 +224,8 @@ void Application::initialize(Settings &settings, const Paths &paths)
             Irc::instance().load();
         }
     }
+
+    this->accounts->load();
 
     this->windows->initialize(settings);
 
@@ -385,8 +388,9 @@ IEmotes *Application::getEmotes()
 AccountController *Application::getAccounts()
 {
     assertInGuiThread();
+    assert(this->accounts);
 
-    return this->accounts;
+    return this->accounts.get();
 }
 
 HotkeyController *Application::getHotkeys()
