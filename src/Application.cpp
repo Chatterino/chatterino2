@@ -127,7 +127,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , toasts(&this->emplace<Toasts>())
     , imageUploader(new ImageUploader)
     , seventvAPI(&this->emplace<SeventvAPI>())
-    , crashHandler(&this->emplace(new CrashHandler(paths)))
+    , crashHandler(new CrashHandler(paths))
 
     , commands(new CommandController(paths))
     , notifications(new NotificationController)
@@ -174,6 +174,9 @@ void Application::fakeDtor()
     this->seventvEmotes.reset();
     this->notifications.reset();
     this->commands.reset();
+    // If a crash happens after crashHandler has been reset, we'll assert
+    // This isn't super different from before, where if the app is already killed, the getIApp() portion of it is already dead
+    this->crashHandler.reset();
     this->highlights.reset();
     this->ffzBadges.reset();
     // this->twitch.reset();
@@ -400,8 +403,9 @@ Toasts *Application::getToasts()
 CrashHandler *Application::getCrashHandler()
 {
     assertInGuiThread();
+    assert(this->crashHandler);
 
-    return this->crashHandler;
+    return this->crashHandler.get();
 }
 
 CommandController *Application::getCommands()

@@ -153,7 +153,7 @@ private:
     Toasts *const toasts{};
     std::unique_ptr<ImageUploader> imageUploader;
     SeventvAPI *const seventvAPI{};
-    CrashHandler *const crashHandler{};
+    std::unique_ptr<CrashHandler> crashHandler;
     std::unique_ptr<CommandController> commands;
     std::unique_ptr<NotificationController> notifications;
     std::unique_ptr<HighlightController> highlights;
