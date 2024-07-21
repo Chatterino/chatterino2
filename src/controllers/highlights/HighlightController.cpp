@@ -509,11 +509,12 @@ HighlightController::HighlightController(Settings &settings,
             this->rebuildChecks(settings);
         });
 
-    accounts->twitch.currentUserChanged.connect([this, &settings] {
-        qCDebug(chatterinoHighlights)
-            << "Rebuild checks because user swapped accounts";
-        this->rebuildChecks(settings);
-    });
+    this->bConnections.emplace_back(
+        accounts->twitch.currentUserChanged.connect([this, &settings] {
+            qCDebug(chatterinoHighlights)
+                << "Rebuild checks because user swapped accounts";
+            this->rebuildChecks(settings);
+        }));
 
     this->rebuildChecks(settings);
 }
