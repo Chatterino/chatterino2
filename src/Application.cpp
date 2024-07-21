@@ -126,7 +126,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , windows(&this->emplace(new WindowManager(paths)))
     , toasts(&this->emplace<Toasts>())
     , imageUploader(new ImageUploader)
-    , seventvAPI(&this->emplace<SeventvAPI>())
+    , seventvAPI(new SeventvAPI)
     , crashHandler(new CrashHandler(paths))
 
     , commands(new CommandController(paths))
@@ -177,6 +177,7 @@ void Application::fakeDtor()
     // If a crash happens after crashHandler has been reset, we'll assert
     // This isn't super different from before, where if the app is already killed, the getIApp() portion of it is already dead
     this->crashHandler.reset();
+    this->seventvAPI.reset();
     this->highlights.reset();
     this->ffzBadges.reset();
     // this->twitch.reset();
@@ -496,8 +497,9 @@ ImageUploader *Application::getImageUploader()
 SeventvAPI *Application::getSeventvAPI()
 {
     assertInGuiThread();
+    assert(this->seventvAPI);
 
-    return this->seventvAPI;
+    return this->seventvAPI.get();
 }
 
 #ifdef CHATTERINO_HAVE_PLUGINS

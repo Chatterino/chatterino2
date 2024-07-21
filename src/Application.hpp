@@ -152,7 +152,7 @@ private:
     WindowManager *const windows{};
     Toasts *const toasts{};
     std::unique_ptr<ImageUploader> imageUploader;
-    SeventvAPI *const seventvAPI{};
+    std::unique_ptr<SeventvAPI> seventvAPI;
     std::unique_ptr<CrashHandler> crashHandler;
     std::unique_ptr<CommandController> commands;
     std::unique_ptr<NotificationController> notifications;
