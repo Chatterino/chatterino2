@@ -165,7 +165,9 @@ Application::~Application() = default;
 
 void Application::fakeDtor()
 {
+#ifdef CHATTERINO_HAVE_PLUGINS
     this->plugins.reset();
+#endif
     this->twitchPubSub.reset();
     this->twitchBadges.reset();
     this->twitchLiveController.reset();
