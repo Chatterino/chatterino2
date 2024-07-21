@@ -131,7 +131,6 @@ protected:
 
         this->mockApplication->accounts.initialize(*this->settings,
                                                    *this->paths);
-        this->mockApplication->emotes.initialize(*this->settings, *this->paths);
 
         this->channelPtr = std::make_shared<MockChannel>("icelys");
 

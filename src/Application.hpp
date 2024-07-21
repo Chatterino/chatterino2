@@ -146,7 +146,7 @@ public:
 private:
     std::unique_ptr<Theme> themes;
     std::unique_ptr<Fonts> fonts;
-    Emotes *const emotes{};
+    std::unique_ptr<Emotes> emotes;
     AccountController *const accounts{};
     std::unique_ptr<HotkeyController> hotkeys;
     WindowManager *const windows{};

@@ -4,10 +4,6 @@ namespace chatterino {
 
 Emotes::Emotes()
 {
-}
-
-void Emotes::initialize(Settings &settings, const Paths &paths)
-{
     this->emojis.load();
 
     this->gifTimer.initialize();
