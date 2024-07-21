@@ -444,8 +444,6 @@ set(SOURCE_FILES
         providers/twitch/api/Helix.cpp
         providers/twitch/api/Helix.hpp
 
-        singletons/Badges.cpp
-        singletons/Badges.hpp
         singletons/CrashHandler.cpp
         singletons/CrashHandler.hpp
         singletons/Emotes.cpp
