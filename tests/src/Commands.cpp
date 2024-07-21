@@ -878,10 +878,10 @@ TEST(Commands, E2E)
     auto account = std::make_shared<TwitchAccount>(
         testaccount420["login"].toString(), "token", "oauthclient",
         testaccount420["id"].toString());
-    getIApp()->getAccounts()->twitch.accounts.append(account);
-    getIApp()->getAccounts()->twitch.currentUsername =
+    getApp()->getAccounts()->twitch.accounts.append(account);
+    getApp()->getAccounts()->twitch.currentUsername =
         testaccount420["login"].toString();
-    getIApp()->getAccounts()->twitch.load();
+    getApp()->getAccounts()->twitch.load();
 
     // Simple single-channel ban
     EXPECT_CALL(mockHelix, fetchUsers(QStringList{"11148817"},
@@ -900,7 +900,7 @@ TEST(Commands, E2E)
                         QString(""), _, _))
         .Times(1);
 
-    getIApp()->getCommands()->execCommand("/ban forsen", channel, false);
+    getApp()->getCommands()->execCommand("/ban forsen", channel, false);
 
     // Multi-channel ban
     EXPECT_CALL(mockHelix, fetchUsers(QStringList{"11148817"},
@@ -936,7 +936,7 @@ TEST(Commands, E2E)
                                    std::optional<int>{}, QString(""), _, _))
         .Times(1);
 
-    getIApp()->getCommands()->execCommand(
+    getApp()->getCommands()->execCommand(
         "/ban --channel id:11148817 --channel testaccount_420 forsen", channel,
         false);
 
@@ -947,7 +947,7 @@ TEST(Commands, E2E)
                         QString(""), _, _))
         .Times(1);
 
-    getIApp()->getCommands()->execCommand("/ban id:22484632", channel, false);
+    getApp()->getCommands()->execCommand("/ban id:22484632", channel, false);
 
     // ID-based redirected ban
     EXPECT_CALL(mockHelix,
@@ -956,7 +956,7 @@ TEST(Commands, E2E)
                         QString(""), _, _))
         .Times(1);
 
-    getIApp()->getCommands()->execCommand(
+    getApp()->getCommands()->execCommand(
         "/ban --channel id:117166826 id:22484632", channel, false);
 
     // name-based redirected ban
@@ -975,7 +975,7 @@ TEST(Commands, E2E)
                         QString(""), _, _))
         .Times(1);
 
-    getIApp()->getCommands()->execCommand(
+    getApp()->getCommands()->execCommand(
         "/ban --channel testaccount_420 id:22484632", channel, false);
 
     // Multi-channel timeout
@@ -1012,7 +1012,7 @@ TEST(Commands, E2E)
                                    std::optional<int>{600}, QString(""), _, _))
         .Times(1);
 
-    getIApp()->getCommands()->execCommand(
+    getApp()->getCommands()->execCommand(
         "/timeout --channel id:11148817 --channel testaccount_420 forsen",
         channel, false);
 
@@ -1048,7 +1048,7 @@ TEST(Commands, E2E)
                                      forsen["id"].toString(), _, _))
         .Times(1);
 
-    getIApp()->getCommands()->execCommand(
+    getApp()->getCommands()->execCommand(
         "/unban --channel id:11148817 --channel testaccount_420 forsen",
         channel, false);
 }

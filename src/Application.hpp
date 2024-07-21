@@ -234,9 +234,6 @@ private:
     Updates &updates;
 };
 
-Application *getApp();
-
-// Get an interface version of the Application class - should be preferred when possible for new code
-IApplication *getIApp();
+IApplication *getApp();
 
 }  // namespace chatterino

@@ -92,7 +92,7 @@ QString formatWhisperError(HelixWhisperError error, const QString &message)
 
 bool appendWhisperMessageWordsLocally(const QStringList &words)
 {
-    auto *app = getIApp();
+    auto *app = getApp();
 
     MessageBuilder b;
 
@@ -102,7 +102,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
         MessageElementFlag::Text, MessageColor::Text,
         FontStyle::ChatMediumBold);
     b.emplace<TextElement>("->", MessageElementFlag::Text,
-                           getIApp()->getThemes()->messages.textColors.system);
+                           getApp()->getThemes()->messages.textColors.system);
     b.emplace<TextElement>(words[1] + ":", MessageElementFlag::Text,
                            MessageColor::Text, FontStyle::ChatMediumBold);
 
@@ -177,12 +177,12 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     b->flags.set(MessageFlag::Whisper);
     auto messagexD = b.release();
 
-    getIApp()->getTwitch()->getWhispersChannel()->addMessage(
+    getApp()->getTwitch()->getWhispersChannel()->addMessage(
         messagexD, MessageContext::Original);
 
     if (getSettings()->inlineWhispers &&
         !(getSettings()->streamerModeSuppressInlineWhispers &&
-          getIApp()->getStreamerMode()->isEnabled()))
+          getApp()->getStreamerMode()->isEnabled()))
     {
         app->getTwitchAbstract()->forEachChannel(
             [&messagexD](ChannelPtr _channel) {
@@ -210,7 +210,7 @@ QString sendWhisper(const CommandContext &ctx)
         return "";
     }
 
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addSystemMessage(

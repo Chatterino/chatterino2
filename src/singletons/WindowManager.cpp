@@ -118,7 +118,7 @@ WindowManager::WindowManager(const Paths &paths)
     this->saveTimer->setSingleShot(true);
 
     QObject::connect(this->saveTimer, &QTimer::timeout, [] {
-        getIApp()->getWindows()->save();
+        getApp()->getWindows()->save();
     });
 }
 
@@ -349,23 +349,23 @@ void WindowManager::initialize(Settings &settings)
     // share the Application state lifetime
     // NOTE: APPLICATION_LIFETIME
     std::ignore =
-        getIApp()->getThemes()->repaintVisibleChatWidgets_.connect([this] {
+        getApp()->getThemes()->repaintVisibleChatWidgets_.connect([this] {
             this->repaintVisibleChatWidgets();
         });
 
     {
         WindowLayout windowLayout;
 
-        if (getIApp()->getArgs().customChannelLayout)
+        if (getApp()->getArgs().customChannelLayout)
         {
-            windowLayout = getIApp()->getArgs().customChannelLayout.value();
+            windowLayout = getApp()->getArgs().customChannelLayout.value();
         }
         else
         {
             windowLayout = this->loadWindowLayoutFromFile();
         }
 
-        auto desired = getIApp()->getArgs().activateChannel;
+        auto desired = getApp()->getArgs().activateChannel;
         if (desired)
         {
             windowLayout.activateOrAddChannel(desired->provider, desired->name);
@@ -376,7 +376,7 @@ void WindowManager::initialize(Settings &settings)
         this->applyWindowLayout(windowLayout);
     }
 
-    if (getIApp()->getArgs().isFramelessEmbed)
+    if (getApp()->getArgs().isFramelessEmbed)
     {
         this->framelessEmbedWindow_.reset(new FramelessEmbedWindow);
         this->framelessEmbedWindow_->show();
@@ -389,7 +389,7 @@ void WindowManager::initialize(Settings &settings)
         this->mainWindow_->getNotebook().addPage(true);
 
         // TODO: don't create main window if it's a frameless embed
-        if (getIApp()->getArgs().isFramelessEmbed)
+        if (getApp()->getArgs().isFramelessEmbed)
         {
             this->mainWindow_->hide();
         }
@@ -682,28 +682,28 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
 
     if (descriptor.type_ == "twitch")
     {
-        return getIApp()->getTwitchAbstract()->getOrAddChannel(
+        return getApp()->getTwitchAbstract()->getOrAddChannel(
             descriptor.channelName_);
     }
     else if (descriptor.type_ == "mentions")
     {
-        return getIApp()->getTwitch()->getMentionsChannel();
+        return getApp()->getTwitch()->getMentionsChannel();
     }
     else if (descriptor.type_ == "watching")
     {
-        return getIApp()->getTwitch()->getWatchingChannel();
+        return getApp()->getTwitch()->getWatchingChannel();
     }
     else if (descriptor.type_ == "whispers")
     {
-        return getIApp()->getTwitch()->getWhispersChannel();
+        return getApp()->getTwitch()->getWhispersChannel();
     }
     else if (descriptor.type_ == "live")
     {
-        return getIApp()->getTwitch()->getLiveChannel();
+        return getApp()->getTwitch()->getLiveChannel();
     }
     else if (descriptor.type_ == "automod")
     {
-        return getIApp()->getTwitch()->getAutomodChannel();
+        return getApp()->getTwitch()->getAutomodChannel();
     }
     else if (descriptor.type_ == "irc")
     {
@@ -712,7 +712,7 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
     }
     else if (descriptor.type_ == "misc")
     {
-        return getIApp()->getTwitchAbstract()->getChannelOrEmpty(
+        return getApp()->getTwitchAbstract()->getChannelOrEmpty(
             descriptor.channelName_);
     }
 

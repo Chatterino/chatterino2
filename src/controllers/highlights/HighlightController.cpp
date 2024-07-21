@@ -183,7 +183,7 @@ void rebuildReplyThreadHighlight(Settings &settings,
 void rebuildMessageHighlights(Settings &settings,
                               std::vector<HighlightCheck> &checks)
 {
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     QString currentUsername = currentUser->getUserName();
 
     if (settings.enableSelfHighlight && !currentUsername.isEmpty() &&
@@ -551,7 +551,7 @@ std::pair<bool, HighlightResult> HighlightController::check(
     // Access for checking
     const auto checks = this->checks_.accessConst();
 
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     auto self = (senderName == currentUser->getUserName());
 
     for (const auto &check : *checks)

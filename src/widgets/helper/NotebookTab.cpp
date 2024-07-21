@@ -86,8 +86,8 @@ NotebookTab::NotebookTab(Notebook *notebook)
         [this]() {
             this->notebook_->removePage(this->page);
         },
-        getIApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Window,
-                                                    "removeTab"));
+        getApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Window,
+                                                   "removeTab"));
 
     this->menu_.addAction(
         "Popup Tab",
@@ -97,8 +97,8 @@ NotebookTab::NotebookTab(Notebook *notebook)
                 container->popup();
             }
         },
-        getIApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Window,
-                                                    "popup", {{"window"}}));
+        getApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Window,
+                                                   "popup", {{"window"}}));
 
     this->menu_.addAction("Duplicate Tab", [this]() {
         this->notebook_->duplicatePage(this->page);
@@ -199,7 +199,7 @@ int NotebookTab::normalTabWidthForHeight(int height) const
     int width = 0;
 
     QFontMetrics metrics =
-        getIApp()->getFonts()->getFontMetrics(FontStyle::UiTabs, scale);
+        getApp()->getFonts()->getFontMetrics(FontStyle::UiTabs, scale);
 
     if (this->hasXButton())
     {
@@ -291,7 +291,7 @@ const QString &NotebookTab::getTitle() const
 void NotebookTab::titleUpdated()
 {
     // Queue up save because: Tab title changed
-    getIApp()->getWindows()->queueSave();
+    getApp()->getWindows()->queueSave();
     this->notebook_->refresh();
     this->updateSize();
     this->update();

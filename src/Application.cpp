@@ -176,7 +176,7 @@ void Application::fakeDtor()
     this->notifications.reset();
     this->commands.reset();
     // If a crash happens after crashHandler has been reset, we'll assert
-    // This isn't super different from before, where if the app is already killed, the getIApp() portion of it is already dead
+    // This isn't super different from before, where if the app is already killed, the getApp() portion of it is already dead
     this->crashHandler.reset();
     this->seventvAPI.reset();
     this->highlights.reset();
@@ -934,11 +934,11 @@ void Application::initPubSub()
                             chan->addMessage(p.second,
                                              MessageContext::Original);
 
-                            getIApp()
+                            getApp()
                                 ->getTwitch()
                                 ->getAutomodChannel()
                                 ->addMessage(p.first, MessageContext::Original);
-                            getIApp()
+                            getApp()
                                 ->getTwitch()
                                 ->getAutomodChannel()
                                 ->addMessage(p.second,
@@ -946,12 +946,12 @@ void Application::initPubSub()
 
                             if (getSettings()->showAutomodInMentions)
                             {
-                                getIApp()
+                                getApp()
                                     ->getTwitch()
                                     ->getMentionsChannel()
                                     ->addMessage(p.first,
                                                  MessageContext::Original);
-                                getIApp()
+                                getApp()
                                     ->getTwitch()
                                     ->getMentionsChannel()
                                     ->addMessage(p.second,
@@ -1162,14 +1162,7 @@ void Application::initSeventvEventAPI()
     seventvEventAPI->start();
 }
 
-Application *getApp()
-{
-    assert(Application::instance != nullptr);
-
-    return Application::instance;
-}
-
-IApplication *getIApp()
+IApplication *getApp()
 {
     assert(IApplication::instance != nullptr);
 

@@ -307,7 +307,7 @@ Theme::Theme(const Paths &paths)
                          if (this->isSystemTheme())
                          {
                              this->update();
-                             getIApp()->getWindows()->forceLayoutChannelViews();
+                             getApp()->getWindows()->forceLayoutChannelViews();
                          }
                      });
 #endif
@@ -597,7 +597,7 @@ void Theme::normalizeColor(QColor &color) const
 
 Theme *getTheme()
 {
-    return getIApp()->getThemes();
+    return getApp()->getThemes();
 }
 
 }  // namespace chatterino

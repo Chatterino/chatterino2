@@ -352,7 +352,7 @@ bool PluginController::reload(const QString &id)
     }
     for (const auto &[cmd, _] : it->second->ownedCommands)
     {
-        getIApp()->getCommands()->unregisterPluginCommand(cmd);
+        getApp()->getCommands()->unregisterPluginCommand(cmd);
     }
     it->second->ownedCommands.clear();
     QDir loadDir = it->second->loadDirectory_;

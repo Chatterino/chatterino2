@@ -183,7 +183,7 @@ void openStreamlinkForChannel(const QString &channel)
 {
     static const QString INFO_TEMPLATE("Opening %1 in Streamlink ...");
 
-    auto *currentPage = dynamic_cast<SplitContainer *>(getIApp()
+    auto *currentPage = dynamic_cast<SplitContainer *>(getApp()
                                                            ->getWindows()
                                                            ->getMainWindow()
                                                            .getNotebook()

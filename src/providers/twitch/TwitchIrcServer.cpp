@@ -51,7 +51,7 @@ void sendHelixMessage(const std::shared_ptr<TwitchChannel> &channel,
         {
             .broadcasterID = broadcasterID,
             .senderID =
-                getIApp()->getAccounts()->twitch.getCurrent()->getUserId(),
+                getApp()->getAccounts()->twitch.getCurrent()->getUserId(),
             .message = message,
             .replyParentMessageID = replyParentId,
         },
@@ -167,7 +167,7 @@ TwitchIrcServer::TwitchIrcServer()
 
 void TwitchIrcServer::initialize()
 {
-    getIApp()->getAccounts()->twitch.currentUserChanged.connect([this]() {
+    getApp()->getAccounts()->twitch.currentUserChanged.connect([this]() {
         postToThread([this] {
             this->connect();
         });
@@ -182,7 +182,7 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
                                            ConnectionType type)
 {
     std::shared_ptr<TwitchAccount> account =
-        getIApp()->getAccounts()->twitch.getCurrent();
+        getApp()->getAccounts()->twitch.getCurrent();
 
     qCDebug(chatterinoTwitch) << "logging in as" << account->getUserName();
 
@@ -690,7 +690,7 @@ void TwitchIrcServer::setLastUserThatWhisperedMe(const QString &user)
 
 void TwitchIrcServer::reloadBTTVGlobalEmotes()
 {
-    getIApp()->getBttvEmotes()->loadEmotes();
+    getApp()->getBttvEmotes()->loadEmotes();
 }
 
 void TwitchIrcServer::reloadAllBTTVChannelEmotes()
@@ -705,7 +705,7 @@ void TwitchIrcServer::reloadAllBTTVChannelEmotes()
 
 void TwitchIrcServer::reloadFFZGlobalEmotes()
 {
-    getIApp()->getFfzEmotes()->loadEmotes();
+    getApp()->getFfzEmotes()->loadEmotes();
 }
 
 void TwitchIrcServer::reloadAllFFZChannelEmotes()
@@ -720,7 +720,7 @@ void TwitchIrcServer::reloadAllFFZChannelEmotes()
 
 void TwitchIrcServer::reloadSevenTVGlobalEmotes()
 {
-    getIApp()->getSeventvEmotes()->loadGlobalEmotes();
+    getApp()->getSeventvEmotes()->loadGlobalEmotes();
 }
 
 void TwitchIrcServer::reloadAllSevenTVChannelEmotes()

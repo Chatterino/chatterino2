@@ -68,7 +68,7 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
         this->hideCompletionPopup();
     });
     this->scaleChangedEvent(this->scale());
-    this->signalHolder_.managedConnect(getIApp()->getHotkeys()->onItemsUpdated,
+    this->signalHolder_.managedConnect(getApp()->getHotkeys()->onItemsUpdated,
                                        [this]() {
                                            this->clearShortcuts();
                                            this->addShortcuts();
@@ -77,7 +77,7 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
 
 void SplitInput::initLayout()
 {
-    auto *app = getIApp();
+    auto *app = getApp();
     LayoutCreator<SplitInput> layoutCreator(this);
 
     auto layout =
@@ -219,7 +219,7 @@ void SplitInput::initLayout()
 
 void SplitInput::scaleChangedEvent(float scale)
 {
-    auto *app = getIApp();
+    auto *app = getApp();
     // update the icon size of the buttons
     this->updateEmoteButton();
     this->updateCancelReplyButton();
@@ -352,7 +352,7 @@ QString SplitInput::handleSendMessage(const std::vector<QString> &arguments)
 
         message = message.replace('\n', ' ');
         QString sendMessage =
-            getIApp()->getCommands()->execCommand(message, c, false);
+            getApp()->getCommands()->execCommand(message, c, false);
 
         c->sendMessage(sendMessage);
 
@@ -388,7 +388,7 @@ QString SplitInput::handleSendMessage(const std::vector<QString> &arguments)
 
         message = message.replace('\n', ' ');
         QString sendMessage =
-            getIApp()->getCommands()->execCommand(message, c, false);
+            getApp()->getCommands()->execCommand(message, c, false);
 
         // Reply within TwitchChannel
         tc->sendReply(sendMessage, this->replyTarget_->id);
@@ -413,7 +413,7 @@ QString SplitInput::handleSendMessage(const std::vector<QString> &arguments)
 
     message = message.replace('\n', ' ');
     QString sendMessage =
-        getIApp()->getCommands()->execCommand(message, c, false);
+        getApp()->getCommands()->execCommand(message, c, false);
 
     // Reply within TwitchChannel
     tc->sendReply(sendMessage, this->replyTarget_->id);
@@ -698,7 +698,7 @@ void SplitInput::addShortcuts()
          }},
     };
 
-    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
+    this->shortcuts_ = getApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::SplitInput, actions, this->parentWidget());
 }
 
@@ -983,7 +983,7 @@ void SplitInput::setInputText(const QString &newInputText)
 
 void SplitInput::editTextChanged()
 {
-    auto *app = getIApp();
+    auto *app = getApp();
 
     // set textLengthLabel value
     QString text = this->ui_.textEdit->toPlainText();
