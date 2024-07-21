@@ -58,7 +58,7 @@ BadgePickerDialog::BadgePickerDialog(QList<DisplayBadge> badges,
     updateBadge(0);
 
     // Set icons.
-    getIApp()->getTwitchBadges()->getBadgeIcons(
+    getApp()->getTwitchBadges()->getBadgeIcons(
         badges,
         [&dropdown = this->dropdown_](QString identifier, const QIconPtr icon) {
             if (!dropdown)

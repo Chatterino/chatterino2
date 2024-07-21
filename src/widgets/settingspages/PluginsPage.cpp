@@ -37,10 +37,25 @@ PluginsPage::PluginsPage()
         auto group = layout.emplace<QGroupBox>("General plugin settings");
         this->generalGroup = group.getElement();
         auto groupLayout = group.setLayoutType<QFormLayout>();
+        auto *scaryLabel = new QLabel(
+            "Plugins can expand functionality of "
+            "Chatterino. They can be made in Lua. This functionality is "
+            "still in public alpha stage. Use ONLY the plugins you trust. "
+            "The permission system is best effort, always "
+            "assume plugins can bypass permissions and can execute "
+            "arbitrary code. To see how to create plugins " +
+            formatRichNamedLink("https://github.com/Chatterino/chatterino2/"
+                                "blob/master/docs/wip-plugins.md",
+                                "look at the manual") +
+            ".");
+        scaryLabel->setWordWrap(true);
+        scaryLabel->setOpenExternalLinks(true);
+        groupLayout->addRow(scaryLabel);
+
         auto *description =
             new QLabel("You can load plugins by putting them into " +
                        formatRichNamedLink(
-                           "file:///" + getIApp()->getPaths().pluginsDirectory,
+                           "file:///" + getApp()->getPaths().pluginsDirectory,
                            "the Plugins directory") +
                        ". Each one is a new directory.");
         description->setOpenExternalLinks(true);
@@ -80,7 +95,7 @@ void PluginsPage::rebuildContent()
     this->scrollAreaWidget_.append(this->dataFrame_);
     auto layout = frame.setLayoutType<QVBoxLayout>();
     layout->setParent(this->dataFrame_);
-    for (const auto &[id, plugin] : getIApp()->getPlugins()->plugins())
+    for (const auto &[id, plugin] : getApp()->getPlugins()->plugins())
     {
         auto groupHeaderText =
             QString("%1 (%2, from %3)")
@@ -199,7 +214,7 @@ void PluginsPage::rebuildContent()
                         val.push_back(name);
                     }
                     getSettings()->enabledPlugins.setValue(val);
-                    getIApp()->getPlugins()->reload(name);
+                    getApp()->getPlugins()->reload(name);
                     this->rebuildContent();
                 });
             pluginEntry->addRow(toggleButton);
@@ -208,7 +223,7 @@ void PluginsPage::rebuildContent()
         auto *reloadButton = new QPushButton("Reload", this->dataFrame_);
         QObject::connect(reloadButton, &QPushButton::pressed,
                          [name = id, this]() {
-                             getIApp()->getPlugins()->reload(name);
+                             getApp()->getPlugins()->reload(name);
                              this->rebuildContent();
                          });
         pluginEntry->addRow(reloadButton);

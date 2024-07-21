@@ -122,7 +122,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addTitle("Interface");
 
     {
-        auto *themes = getIApp()->getThemes();
+        auto *themes = getApp()->getThemes();
         auto available = themes->availableThemes();
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         available.emplace_back("System", "System");
@@ -273,7 +273,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Show message reply button", s.showReplyButton, false,
                        "Show a reply button next to every chat message");
 
-    auto removeTabSeq = getIApp()->getHotkeys()->getDisplaySequence(
+    auto removeTabSeq = getApp()->getHotkeys()->getDisplaySequence(
         HotkeyCategory::Window, "removeTab");
     QString removeTabShortcut = "an assigned hotkey (Window -> remove tab)";
     if (!removeTabSeq.isEmpty())
@@ -294,7 +294,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 #endif
     if (!BaseWindow::supportsCustomWindowFrame())
     {
-        auto settingsSeq = getIApp()->getHotkeys()->getDisplaySequence(
+        auto settingsSeq = getApp()->getHotkeys()->getDisplaySequence(
             HotkeyCategory::Window, "openSettings");
         QString shortcut = " (no key bound to open them otherwise)";
         // TODO: maybe prevent the user from locking themselves out of the settings?
@@ -570,7 +570,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     // as an official description from 7TV devs is best
     s.showUnlistedSevenTVEmotes.connect(
         []() {
-            getApp()->twitch->forEachChannelAndSpecialChannels(
+            getApp()->getTwitch()->forEachChannelAndSpecialChannels(
                 [](const auto &c) {
                     if (c->isTwitchChannel())
                     {
@@ -824,9 +824,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addButton("Open AppData directory", [] {
 #ifdef Q_OS_DARWIN
         QDesktopServices::openUrl("file://" +
-                                  getIApp()->getPaths().rootAppDataDirectory);
+                                  getApp()->getPaths().rootAppDataDirectory);
 #else
-        QDesktopServices::openUrl(getIApp()->getPaths().rootAppDataDirectory);
+        QDesktopServices::openUrl(getApp()->getPaths().rootAppDataDirectory);
 #endif
     });
 
@@ -838,7 +838,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     auto *cachePathLabel = layout.addDescription("placeholder :D");
     getSettings()->cachePath.connect([cachePathLabel](const auto &,
                                                       auto) mutable {
-        QString newPath = getIApp()->getPaths().cacheDirectory();
+        QString newPath = getApp()->getPaths().cacheDirectory();
 
         QString pathShortened = "Cache saved at <a href=\"file:///" + newPath +
                                 "\"><span style=\"color: white;\">" +
@@ -866,9 +866,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
             if (reply == QMessageBox::Yes)
             {
-                auto cacheDir = QDir(getIApp()->getPaths().cacheDirectory());
+                auto cacheDir = QDir(getApp()->getPaths().cacheDirectory());
                 cacheDir.removeRecursively();
-                cacheDir.mkdir(getIApp()->getPaths().cacheDirectory());
+                cacheDir.mkdir(getApp()->getPaths().cacheDirectory());
             }
         }));
         box->addStretch(1);
@@ -890,7 +890,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        "Show the stream title");
 
     layout.addSubtitle("R9K");
-    auto toggleLocalr9kSeq = getIApp()->getHotkeys()->getDisplaySequence(
+    auto toggleLocalr9kSeq = getApp()->getHotkeys()->getDisplaySequence(
         HotkeyCategory::Window, "toggleLocalR9K");
     QString toggleLocalr9kShortcut =
         "an assigned hotkey (Window -> Toggle local R9K)";
@@ -913,7 +913,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.shownSimilarTriggerHighlights);
     s.hideSimilar.connect(
         []() {
-            getIApp()->getWindows()->forceLayoutChannelViews();
+            getApp()->getWindows()->forceLayoutChannelViews();
         },
         false);
     layout.addDropdown<float>(
@@ -981,15 +981,15 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCustomCheckbox(
         "Restart on crash (requires restart)",
         [] {
-            return getIApp()->getCrashHandler()->shouldRecover();
+            return getApp()->getCrashHandler()->shouldRecover();
         },
         [](bool on) {
-            return getIApp()->getCrashHandler()->saveShouldRecover(on);
+            return getApp()->getCrashHandler()->saveShouldRecover(on);
         },
         "When possible, restart Chatterino if the program crashes");
 
 #if defined(Q_OS_LINUX) && !defined(NO_QTKEYCHAIN)
-    if (!getIApp()->getPaths().isPortable())
+    if (!getApp()->getPaths().isPortable())
     {
         layout.addCheckbox(
             "Use libsecret/KWallet/Gnome keychain to secure passwords",
@@ -1161,96 +1161,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "@mention for the related thread. If the reply context is hidden, "
         "these mentions will never be stripped.");
 
-    // Helix timegate settings
-    auto helixTimegateGetValue = [](auto val) {
-        switch (val)
-        {
-            case HelixTimegateOverride::Timegate:
-                return "Timegate";
-            case HelixTimegateOverride::AlwaysUseIRC:
-                return "Always use IRC";
-            case HelixTimegateOverride::AlwaysUseHelix:
-                return "Always use Helix";
-            default:
-                return "Timegate";
-        }
-    };
-
-    auto helixTimegateSetValue = [](auto args) {
-        const auto &v = args.value;
-        if (v == "Timegate")
-        {
-            return HelixTimegateOverride::Timegate;
-        }
-        if (v == "Always use IRC")
-        {
-            return HelixTimegateOverride::AlwaysUseIRC;
-        }
-        if (v == "Always use Helix")
-        {
-            return HelixTimegateOverride::AlwaysUseHelix;
-        }
-
-        qCDebug(chatterinoSettings) << "Unknown Helix timegate override value"
-                                    << v << ", using default value Timegate";
-        return HelixTimegateOverride::Timegate;
-    };
-
-    auto *helixTimegateRaid =
-        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
-            "Helix timegate /raid behaviour",
-            {"Timegate", "Always use IRC", "Always use Helix"},
-            s.helixTimegateRaid,
-            helixTimegateGetValue,  //
-            helixTimegateSetValue,  //
-            false);
-    helixTimegateRaid->setMinimumWidth(
-        helixTimegateRaid->minimumSizeHint().width());
-
-    auto *helixTimegateWhisper =
-        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
-            "Helix timegate /w behaviour",
-            {"Timegate", "Always use IRC", "Always use Helix"},
-            s.helixTimegateWhisper,
-            helixTimegateGetValue,  //
-            helixTimegateSetValue,  //
-            false);
-    helixTimegateWhisper->setMinimumWidth(
-        helixTimegateWhisper->minimumSizeHint().width());
-
-    auto *helixTimegateVIPs =
-        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
-            "Helix timegate /vips behaviour",
-            {"Timegate", "Always use IRC", "Always use Helix"},
-            s.helixTimegateVIPs,
-            helixTimegateGetValue,  //
-            helixTimegateSetValue,  //
-            false);
-    helixTimegateVIPs->setMinimumWidth(
-        helixTimegateVIPs->minimumSizeHint().width());
-
-    auto *helixTimegateCommercial =
-        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
-            "Helix timegate /commercial behaviour",
-            {"Timegate", "Always use IRC", "Always use Helix"},
-            s.helixTimegateCommercial,
-            helixTimegateGetValue,  //
-            helixTimegateSetValue,  //
-            false);
-    helixTimegateCommercial->setMinimumWidth(
-        helixTimegateCommercial->minimumSizeHint().width());
-
-    auto *helixTimegateModerators =
-        layout.addDropdown<std::underlying_type<HelixTimegateOverride>::type>(
-            "Helix timegate /mods behaviour",
-            {"Timegate", "Always use IRC", "Always use Helix"},
-            s.helixTimegateModerators,
-            helixTimegateGetValue,  //
-            helixTimegateSetValue,  //
-            false);
-    helixTimegateModerators->setMinimumWidth(
-        helixTimegateModerators->minimumSizeHint().width());
-
     layout.addDropdownEnumClass<ChatSendProtocol>(
         "Chat send protocol", qmagicenum::enumNames<ChatSendProtocol>(),
         s.chatSendProtocol,
@@ -1286,7 +1196,7 @@ void GeneralPage::initExtra()
     {
         getSettings()->cachePath.connect(
             [cachePath = this->cachePath_](const auto &, auto) mutable {
-                QString newPath = getIApp()->getPaths().cacheDirectory();
+                QString newPath = getApp()->getPaths().cacheDirectory();
 
                 QString pathShortened = "Current location: <a href=\"file:///" +
                                         newPath + "\">" +
@@ -1306,7 +1216,7 @@ QString GeneralPage::getFont(const DropdownArgs &args) const
 
         auto ok = bool();
         auto previousFont =
-            getIApp()->getFonts()->getFont(FontStyle::ChatMedium, 1.);
+            getApp()->getFonts()->getFont(FontStyle::ChatMedium, 1.);
         auto font = QFontDialog::getFont(&ok, previousFont, this->window());
 
         if (ok)

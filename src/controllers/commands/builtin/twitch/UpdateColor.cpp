@@ -21,17 +21,17 @@ QString updateUserColor(const CommandContext &ctx)
 
     if (!ctx.channel->isTwitchChannel())
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /color command only works in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "The /color command only works in Twitch channels.");
         return "";
     }
-    auto user = getIApp()->getAccounts()->twitch.getCurrent();
+    auto user = getApp()->getAccounts()->twitch.getCurrent();
 
     // Avoid Helix calls without Client ID and/or OAuth Token
     if (user->isAnon())
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "You must be logged in to use the /color command."));
+        ctx.channel->addSystemMessage(
+            "You must be logged in to use the /color command.");
         return "";
     }
 
@@ -39,11 +39,11 @@ QString updateUserColor(const CommandContext &ctx)
 
     if (colorString.isEmpty())
     {
-        ctx.channel->addMessage(makeSystemMessage(
+        ctx.channel->addSystemMessage(
             QString("Usage: /color <color> - Color must be one of Twitch's "
                     "supported colors (%1) or a hex code (#000000) if you "
                     "have Turbo or Prime.")
-                .arg(VALID_HELIX_COLORS.join(", "))));
+                .arg(VALID_HELIX_COLORS.join(", ")));
         return "";
     }
 
@@ -54,7 +54,7 @@ QString updateUserColor(const CommandContext &ctx)
         [colorString, channel{ctx.channel}] {
             QString successMessage =
                 QString("Your color has been changed to %1.").arg(colorString);
-            channel->addMessage(makeSystemMessage(successMessage));
+            channel->addSystemMessage(successMessage);
         },
         [colorString, channel{ctx.channel}](auto error, auto message) {
             QString errorMessage =
@@ -90,7 +90,7 @@ QString updateUserColor(const CommandContext &ctx)
                 break;
             }
 
-            channel->addMessage(makeSystemMessage(errorMessage));
+            channel->addSystemMessage(errorMessage);
         });
 
     return "";

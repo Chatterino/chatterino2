@@ -22,7 +22,7 @@ using namespace chatterino;
 void tableCellClicked(const QModelIndex &clicked, EditableModelView *view,
                       HotkeyModel *model)
 {
-    auto hotkey = getIApp()->getHotkeys()->getHotkeyByName(
+    auto hotkey = getApp()->getHotkeys()->getHotkeyByName(
         clicked.siblingAtColumn(0).data(Qt::EditRole).toString());
     if (!hotkey)
     {
@@ -34,8 +34,8 @@ void tableCellClicked(const QModelIndex &clicked, EditableModelView *view,
     if (wasAccepted)
     {
         auto newHotkey = dialog.data();
-        getIApp()->getHotkeys()->replaceHotkey(hotkey->name(), newHotkey);
-        getIApp()->getHotkeys()->save();
+        getApp()->getHotkeys()->replaceHotkey(hotkey->name(), newHotkey);
+        getApp()->getHotkeys()->save();
     }
 }
 
@@ -48,7 +48,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     LayoutCreator<KeyboardSettingsPage> layoutCreator(this);
     auto layout = layoutCreator.emplace<QVBoxLayout>();
 
-    auto *model = getIApp()->getHotkeys()->createModel(nullptr);
+    auto *model = getApp()->getHotkeys()->createModel(nullptr);
     EditableModelView *view =
         layout.emplace<EditableModelView>(model).getElement();
 
@@ -68,8 +68,8 @@ KeyboardSettingsPage::KeyboardSettingsPage()
         if (wasAccepted)
         {
             auto newHotkey = dialog.data();
-            getIApp()->getHotkeys()->hotkeys_.append(newHotkey);
-            getIApp()->getHotkeys()->save();
+            getApp()->getHotkeys()->hotkeys_.append(newHotkey);
+            getApp()->getHotkeys()->save();
         }
     });
 
@@ -87,7 +87,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
 
         if (reply == QMessageBox::Yes)
         {
-            getIApp()->getHotkeys()->resetToDefaults();
+            getApp()->getHotkeys()->resetToDefaults();
         }
     });
     view->addCustomButton(resetEverything);

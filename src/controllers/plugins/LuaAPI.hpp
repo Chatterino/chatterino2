@@ -39,7 +39,7 @@ enum class EventType {
 /**
  * @lua@class CommandContext
  * @lua@field words string[] The words typed when executing the command. For example `/foo bar baz` will result in `{"/foo", "bar", "baz"}`.
- * @lua@field channel Channel The channel the command was executed in.
+ * @lua@field channel c2.Channel The channel the command was executed in.
  */
 
 /**
@@ -82,6 +82,9 @@ struct CompletionEvent {
 /**
  * @includefile common/Channel.hpp
  * @includefile controllers/plugins/api/ChannelRef.hpp
+ * @includefile controllers/plugins/api/HTTPResponse.hpp
+ * @includefile controllers/plugins/api/HTTPRequest.hpp
+ * @includefile common/network/NetworkCommon.hpp
  */
 
 /**
@@ -133,7 +136,11 @@ int searcherRelative(lua_State *L);
 // This is a fat pointer that allows us to type check values given to functions needing a userdata.
 // Ensure ALL userdata given to Lua are a subclass of this! Otherwise we garbage as a pointer!
 struct UserData {
-    enum class Type { Channel };
+    enum class Type {
+        Channel,
+        HTTPRequest,
+        HTTPResponse,
+    };
     Type type;
     bool isWeak;
 };

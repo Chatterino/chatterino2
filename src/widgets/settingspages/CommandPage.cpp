@@ -7,7 +7,6 @@
 #include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
 #include "util/LayoutCreator.hpp"
-#include "util/Qt.hpp"
 #include "util/StandardItemHelper.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
@@ -88,7 +87,7 @@ CommandPage::CommandPage()
 
     auto *view = layout
                      .emplace<EditableModelView>(
-                         getIApp()->getCommands()->createModel(nullptr))
+                         getApp()->getCommands()->createModel(nullptr))
                      .getElement();
 
     view->setTitles({"Trigger", "Command", "Show In\nMessage Menu"});
@@ -96,7 +95,7 @@ CommandPage::CommandPage()
         1, QHeaderView::Stretch);
     // We can safely ignore this signal connection since we own the view
     std::ignore = view->addButtonPressed.connect([] {
-        getIApp()->getCommands()->items.append(
+        getApp()->getCommands()->items.append(
             Command{"/command", "I made a new command HeyGuys"});
     });
 
@@ -115,7 +114,7 @@ CommandPage::CommandPage()
             {
                 if (int index = line.indexOf(' '); index != -1)
                 {
-                    getIApp()->getCommands()->items.insert(
+                    getApp()->getCommands()->items.insert(
                         Command(line.mid(0, index), line.mid(index + 1)));
                 }
             }

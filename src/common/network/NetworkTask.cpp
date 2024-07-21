@@ -118,7 +118,7 @@ void NetworkTask::logReply()
 void NetworkTask::writeToCache(const QByteArray &bytes) const
 {
     std::ignore = QtConcurrent::run([data = this->data_, bytes] {
-        QFile cachedFile(getIApp()->getPaths().cacheDirectory() + "/" +
+        QFile cachedFile(getApp()->getPaths().cacheDirectory() + "/" +
                          data->getHash());
 
         if (cachedFile.open(QIODevice::WriteOnly))

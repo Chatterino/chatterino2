@@ -30,7 +30,7 @@ constexpr const QMargins MARGIN{8, 4, 8, 4};
 namespace chatterino {
 
 void MessageLayoutContainer::beginLayout(int width, float scale,
-                                         MessageFlags flags)
+                                         float imageScale, MessageFlags flags)
 {
     this->elements_.clear();
     this->lines_.clear();
@@ -45,9 +45,10 @@ void MessageLayoutContainer::beginLayout(int width, float scale,
     this->width_ = width;
     this->height_ = 0;
     this->scale_ = scale;
+    this->imageScale_ = imageScale;
     this->flags_ = flags;
     auto mediumFontMetrics =
-        getIApp()->getFonts()->getFontMetrics(FontStyle::ChatMedium, scale);
+        getApp()->getFonts()->getFontMetrics(FontStyle::ChatMedium, scale);
     this->textLineHeight_ = mediumFontMetrics.height();
     this->spaceWidth_ = mediumFontMetrics.horizontalAdvance(' ');
     this->dotdotdotWidth_ = mediumFontMetrics.horizontalAdvance("...");
@@ -232,7 +233,9 @@ void MessageLayoutContainer::paintElements(QPainter &painter,
         painter.drawRect(element->getRect());
 #endif
 
+        painter.save();
         element->paint(painter, ctx.messageColors);
+        painter.restore();
     }
 }
 
@@ -526,6 +529,11 @@ float MessageLayoutContainer::getScale() const
     return this->scale_;
 }
 
+float MessageLayoutContainer::getImageScale() const
+{
+    return this->imageScale_;
+}
+
 bool MessageLayoutContainer::isCollapsed() const
 {
     return this->isCollapsed_;
@@ -750,9 +758,7 @@ void MessageLayoutContainer::reorderRTL(int firstTextIndex)
 
         const auto neutral = isNeutral(element->getText());
         const auto neutralOrUsername =
-            neutral ||
-            element->getFlags().hasAny({MessageElementFlag::BoldUsername,
-                                        MessageElementFlag::NonBoldUsername});
+            neutral || element->getFlags().has(MessageElementFlag::Mention);
 
         if (neutral &&
             ((this->first == FirstWord::RTL && !this->wasPrevReversed_) ||

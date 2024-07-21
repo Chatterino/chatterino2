@@ -43,6 +43,7 @@
 #include <QDesktopServices>
 #include <QHeaderView>
 #include <QMenuBar>
+#include <QObject>
 #include <QPalette>
 #include <QStandardItemModel>
 #include <QVBoxLayout>
@@ -63,7 +64,7 @@ Window::Window(WindowType type, QWidget *parent)
 #endif
 
     this->bSignals_.emplace_back(
-        getIApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
+        getApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
             this->onAccountSelected();
         }));
     this->onAccountSelected();
@@ -77,7 +78,7 @@ Window::Window(WindowType type, QWidget *parent)
         this->resize(int(300 * this->scale()), int(500 * this->scale()));
     }
 
-    this->signalHolder_.managedConnect(getIApp()->getHotkeys()->onItemsUpdated,
+    this->signalHolder_.managedConnect(getApp()->getHotkeys()->onItemsUpdated,
                                        [this]() {
                                            this->clearShortcuts();
                                            this->addShortcuts();
@@ -107,11 +108,17 @@ bool Window::event(QEvent *event)
     switch (event->type())
     {
         case QEvent::WindowActivate: {
-            getIApp()->getWindows()->selectedWindow_ = this;
+            getApp()->getWindows()->selectedWindow_ = this;
             break;
         }
 
         case QEvent::WindowDeactivate: {
+            for (const auto &split :
+                 this->notebook_->getSelectedPage()->getSplits())
+            {
+                split->unpause();
+            }
+
             auto *page = this->notebook_->getSelectedPage();
 
             if (page != nullptr)
@@ -138,14 +145,14 @@ void Window::closeEvent(QCloseEvent *)
 {
     if (this->type_ == WindowType::Main)
     {
-        getIApp()->getWindows()->save();
-        getIApp()->getWindows()->closeAll();
+        getApp()->getWindows()->save();
+        getApp()->getWindows()->closeAll();
     }
 
     // Ensure selectedWindow_ is never an invalid pointer.
     // WindowManager will return the main window if no window is pointed to by
     // `selectedWindow_`.
-    getIApp()->getWindows()->selectedWindow_ = nullptr;
+    getApp()->getWindows()->selectedWindow_ = nullptr;
 
     this->closed.invoke();
 
@@ -182,7 +189,7 @@ void Window::addCustomTitlebarButtons()
 
     // settings
     this->addTitleBarButton(TitleBarButtonStyle::Settings, [this] {
-        getIApp()->getWindows()->showSettingsDialog(this);
+        getApp()->getWindows()->showSettingsDialog(this);
     });
 
     // updates
@@ -192,7 +199,7 @@ void Window::addCustomTitlebarButtons()
 
     // account
     this->userLabel_ = this->addTitleBarLabel([this] {
-        getIApp()->getWindows()->showAccountSelectPopup(
+        getApp()->getWindows()->showAccountSelectPopup(
             this->userLabel_->mapToGlobal(
                 this->userLabel_->rect().bottomLeft()));
     });
@@ -201,11 +208,11 @@ void Window::addCustomTitlebarButtons()
     // streamer mode
     this->streamerModeTitlebarIcon_ =
         this->addTitleBarButton(TitleBarButtonStyle::StreamerMode, [this] {
-            getIApp()->getWindows()->showSettingsDialog(
+            getApp()->getWindows()->showSettingsDialog(
                 this, SettingsDialogPreference::StreamerMode);
         });
-    QObject::connect(getIApp()->getStreamerMode(), &IStreamerMode::changed,
-                     this, &Window::updateStreamerModeIcon);
+    QObject::connect(getApp()->getStreamerMode(), &IStreamerMode::changed, this,
+                     &Window::updateStreamerModeIcon);
 
     // Update initial state
     this->updateStreamerModeIcon();
@@ -233,7 +240,7 @@ void Window::updateStreamerModeIcon()
             getResources().buttons.streamerModeEnabledDark);
     }
     this->streamerModeTitlebarIcon_->setVisible(
-        getIApp()->getStreamerMode()->isEnabled());
+        getApp()->getStreamerMode()->isEnabled());
 #else
     // clang-format off
     assert(false && "Streamer mode TitleBar icon should not exist on non-Windows OSes");
@@ -254,7 +261,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         const auto &messages = getSampleMiscMessages();
         static int index = 0;
         const auto &msg = messages[index++ % messages.size()];
-        getApp()->twitch->addFakeMessage(msg);
+        getApp()->getTwitchAbstract()->addFakeMessage(msg);
         return "";
     });
 
@@ -262,7 +269,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         const auto &messages = getSampleCheerMessages();
         static int index = 0;
         const auto &msg = messages[index++ % messages.size()];
-        getApp()->twitch->addFakeMessage(msg);
+        getApp()->getTwitchAbstract()->addFakeMessage(msg);
         return "";
     });
 
@@ -270,13 +277,12 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         const auto &messages = getSampleLinkMessages();
         static int index = 0;
         const auto &msg = messages[index++ % messages.size()];
-        getApp()->twitch->addFakeMessage(msg);
+        getApp()->getTwitchAbstract()->addFakeMessage(msg);
         return "";
     });
 
     actions.emplace("addRewardMessage", [=](std::vector<QString>) -> QString {
         rapidjson::Document doc;
-        auto app = getApp();
         static bool alt = true;
         if (alt)
         {
@@ -286,8 +292,9 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
                 oMessage->toInner<PubSubMessageMessage>()
                     ->toInner<PubSubCommunityPointsChannelV1Message>();
 
-            app->twitch->addFakeMessage(getSampleChannelRewardIRCMessage());
-            getIApp()->getTwitchPubSub()->pointReward.redeemed.invoke(
+            getApp()->getTwitchAbstract()->addFakeMessage(
+                getSampleChannelRewardIRCMessage());
+            getApp()->getTwitchPubSub()->pointReward.redeemed.invoke(
                 oInnerMessage->data.value("redemption").toObject());
             alt = !alt;
         }
@@ -298,7 +305,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
             auto oInnerMessage =
                 oMessage->toInner<PubSubMessageMessage>()
                     ->toInner<PubSubCommunityPointsChannelV1Message>();
-            getIApp()->getTwitchPubSub()->pointReward.redeemed.invoke(
+            getApp()->getTwitchPubSub()->pointReward.redeemed.invoke(
                 oInnerMessage->data.value("redemption").toObject());
             alt = !alt;
         }
@@ -309,7 +316,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         const auto &messages = getSampleEmoteTestMessages();
         static int index = 0;
         const auto &msg = messages[index++ % messages.size()];
-        getApp()->twitch->addFakeMessage(msg);
+        getApp()->getTwitchAbstract()->addFakeMessage(msg);
         return "";
     });
 
@@ -317,7 +324,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         const auto &messages = getSampleSubMessages();
         static int index = 0;
         const auto &msg = messages[index++ % messages.size()];
-        getApp()->twitch->addFakeMessage(msg);
+        getApp()->getTwitchAbstract()->addFakeMessage(msg);
         return "";
     });
 #endif
@@ -480,8 +487,8 @@ void Window::addShortcuts()
                  splitContainer = this->notebook_->getOrAddSelectedPage();
              }
              Split *split = new Split(splitContainer);
-             split->setChannel(
-                 getApp()->twitch->getOrAddChannel(si.channelName));
+             split->setChannel(getApp()->getTwitchAbstract()->getOrAddChannel(
+                 si.channelName));
              split->setFilters(si.filters);
              splitContainer->insertSplit(split);
              splitContainer->setSelected(split);
@@ -491,7 +498,7 @@ void Window::addShortcuts()
         {"toggleLocalR9K",
          [](std::vector<QString>) -> QString {
              getSettings()->hideSimilar.setValue(!getSettings()->hideSimilar);
-             getIApp()->getWindows()->forceLayoutChannelViews();
+             getApp()->getWindows()->forceLayoutChannelViews();
              return "";
          }},
         {"openQuickSwitcher",
@@ -611,7 +618,7 @@ void Window::addShortcuts()
              }
              else if (mode == 2)
              {
-                 if (getIApp()->getStreamerMode()->isEnabled())
+                 if (getApp()->getStreamerMode()->isEnabled())
                  {
                      getSettings()->enableStreamerMode.setValue(
                          StreamerModeSetting::Disabled);
@@ -677,7 +684,7 @@ void Window::addShortcuts()
 
     this->addDebugStuff(actions);
 
-    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
+    this->shortcuts_ = getApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::Window, actions, this);
 }
 
@@ -748,7 +755,7 @@ void Window::addMenuBar()
 
 void Window::onAccountSelected()
 {
-    auto user = getIApp()->getAccounts()->twitch.getCurrent();
+    auto user = getApp()->getAccounts()->twitch.getCurrent();
 
     // update title (also append username on Linux and MacOS)
     QString windowTitle = Version::instance().fullVersion();

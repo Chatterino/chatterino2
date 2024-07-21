@@ -86,10 +86,6 @@ namespace {
         QApplication::setAttribute(Qt::AA_DontCreateNativeWidgetSiblings);
 #endif
 
-#if defined(Q_OS_WIN32) && QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        QApplication::setAttribute(Qt::AA_DisableHighDpiScaling, true);
-#endif
-
         QApplication::setStyle(QStyleFactory::create("Fusion"));
 
 #ifndef Q_OS_MAC
@@ -135,7 +131,7 @@ namespace {
         using namespace std::chrono_literals;
 
         if (std::chrono::steady_clock::now() - signalsInitTime > 30s &&
-            getIApp()->getCrashHandler()->shouldRecover())
+            getApp()->getCrashHandler()->shouldRecover())
         {
             QProcess proc;
 

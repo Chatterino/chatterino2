@@ -2,12 +2,14 @@
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "Application.hpp"
+#    include "common/network/NetworkCommon.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/PluginPermission.hpp"
 
 #    include <QDir>
 #    include <QString>
+#    include <QUrl>
 #    include <semver/semver.hpp>
 
 #    include <unordered_map>
@@ -139,6 +141,7 @@ public:
     void removeTimeout(QTimer *timer);
 
     bool hasFSPermissionFor(bool write, const QString &path);
+    bool hasHTTPPermissionFor(const QUrl &url);
 
 private:
     QDir loadDirectory_;

@@ -3,10 +3,13 @@
 
 #    include "Application.hpp"
 #    include "common/Args.hpp"
+#    include "common/network/NetworkCommon.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/commands/CommandController.hpp"
 #    include "controllers/plugins/api/ChannelRef.hpp"
+#    include "controllers/plugins/api/HTTPRequest.hpp"
+#    include "controllers/plugins/api/HTTPResponse.hpp"
 #    include "controllers/plugins/api/IOWrapper.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
@@ -32,10 +35,8 @@ PluginController::PluginController(const Paths &paths_)
 {
 }
 
-void PluginController::initialize(Settings &settings, const Paths &paths)
+void PluginController::initialize(Settings &settings)
 {
-    (void)paths;
-
     // actuallyInitialize will be called by this connection
     settings.pluginsEnabled.connect([this](bool enabled) {
         if (enabled)
@@ -174,9 +175,18 @@ void PluginController::openLibrariesFor(lua_State *L, const PluginMeta &meta,
     lua::pushEnumTable<Channel::Type>(L);
     lua_setfield(L, c2libIdx, "ChannelType");
 
+    lua::pushEnumTable<NetworkRequestType>(L);
+    lua_setfield(L, c2libIdx, "HTTPMethod");
+
     // Initialize metatables for objects
     lua::api::ChannelRef::createMetatable(L);
     lua_setfield(L, c2libIdx, "Channel");
+
+    lua::api::HTTPRequest::createMetatable(L);
+    lua_setfield(L, c2libIdx, "HTTPRequest");
+
+    lua::api::HTTPResponse::createMetatable(L);
+    lua_setfield(L, c2libIdx, "HTTPResponse");
 
     lua_setfield(L, gtable, "c2");
 
@@ -342,7 +352,7 @@ bool PluginController::reload(const QString &id)
     }
     for (const auto &[cmd, _] : it->second->ownedCommands)
     {
-        getIApp()->getCommands()->unregisterPluginCommand(cmd);
+        getApp()->getCommands()->unregisterPluginCommand(cmd);
     }
     it->second->ownedCommands.clear();
     QDir loadDir = it->second->loadDirectory_;
@@ -368,8 +378,8 @@ QString PluginController::tryExecPluginCommand(const QString &commandName,
             auto res = lua_pcall(L, 1, 0, 0);
             if (res != LUA_OK)
             {
-                ctx.channel->addMessage(makeSystemMessage(
-                    "Lua error: " + lua::humanErrorText(L, res)));
+                ctx.channel->addSystemMessage("Lua error: " +
+                                              lua::humanErrorText(L, res));
                 return "";
             }
             return "";
@@ -420,7 +430,7 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
 
     for (const auto &[name, pl] : this->plugins())
     {
-        if (!pl->error().isNull())
+        if (!pl->error().isNull() || pl->state_ == nullptr)
         {
             continue;
         }

@@ -1,9 +1,9 @@
 #include "util/Helpers.hpp"
 
-#include <gtest/gtest.h>
+#include "Test.hpp"
 
 using namespace chatterino;
-using namespace _helpers_internal;
+using namespace helpers::detail;
 
 TEST(Helpers, formatUserMention)
 {
@@ -252,12 +252,6 @@ TEST(Helpers, BatchDifferentInputType)
     EXPECT_EQ(result, expectation);
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 2)
-#    define makeView(x) x
-#else
-#    define makeView(str) (&(str))
-#endif
-
 TEST(Helpers, skipSpace)
 {
     struct TestCase {
@@ -272,11 +266,11 @@ TEST(Helpers, skipSpace)
 
     for (const auto &c : tests)
     {
-        const auto actual = skipSpace(makeView(c.input), c.startIdx);
+        const auto actual = skipSpace(c.input, c.startIdx);
 
         EXPECT_EQ(actual, c.expected)
-            << actual << " (" << qUtf8Printable(c.input)
-            << ") did not match expected value " << c.expected;
+            << actual << " (" << c.input << ") did not match expected value "
+            << c.expected;
     }
 }
 
@@ -414,18 +408,17 @@ TEST(Helpers, findUnitMultiplierToSec)
     for (const auto &c : tests)
     {
         SizeType pos = c.startPos;
-        const auto actual = findUnitMultiplierToSec(makeView(c.input), pos);
+        const auto actual = findUnitMultiplierToSec(c.input, pos);
 
         if (c.expectedMultiplier == bad)
         {
-            EXPECT_FALSE(actual.second) << qUtf8Printable(c.input);
+            EXPECT_FALSE(actual.second) << c.input;
         }
         else
         {
             EXPECT_TRUE(pos == c.expectedEndPos && actual.second &&
                         actual.first == c.expectedMultiplier)
-                << qUtf8Printable(c.input)
-                << ": Expected(end: " << c.expectedEndPos
+                << c.input << ": Expected(end: " << c.expectedEndPos
                 << ", mult: " << c.expectedMultiplier << ") Actual(end: " << pos
                 << ", mult: " << actual.first << ")";
         }
@@ -503,7 +496,7 @@ TEST(Helpers, parseDurationToSeconds)
         const auto actual = parseDurationToSeconds(c.input, c.noUnitMultiplier);
 
         EXPECT_EQ(actual, c.output)
-            << actual << " (" << qUtf8Printable(c.input)
-            << ") did not match expected value " << c.output;
+            << actual << " (" << c.input << ") did not match expected value "
+            << c.output;
     }
 }

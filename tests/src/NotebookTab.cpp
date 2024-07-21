@@ -7,10 +7,9 @@
 #include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "Test.hpp"
 #include "widgets/Notebook.hpp"
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include <QDebug>
 #include <QString>
 
@@ -24,6 +23,7 @@ class MockApplication : mock::EmptyApplication
 public:
     MockApplication()
         : settings(this->settingsDir.filePath("settings.json"))
+        , theme(this->paths_)
         , fonts(this->settings)
     {
     }

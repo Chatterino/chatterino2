@@ -1,6 +1,7 @@
 #include "Application.hpp"
 
 #include "common/Args.hpp"
+#include "common/Channel.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -13,6 +14,7 @@
 #include "controllers/sound/ISoundController.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
+#include "providers/irc/AbstractIrcServer.hpp"
 #include "providers/links/LinkResolver.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
@@ -40,7 +42,6 @@
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/PubSubMessages.hpp"
-#include "providers/twitch/pubsubmessages/LowTrustUsers.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -117,26 +118,26 @@ Application::Application(Settings &_settings, const Paths &paths,
                          const Args &_args, Updates &_updates)
     : paths_(paths)
     , args_(_args)
-    , themes(&this->emplace<Theme>())
+    , themes(new Theme(paths))
     , fonts(new Fonts(_settings))
-    , emotes(&this->emplace<Emotes>())
-    , accounts(&this->emplace<AccountController>())
-    , hotkeys(&this->emplace<HotkeyController>())
-    , windows(&this->emplace(new WindowManager(paths)))
-    , toasts(&this->emplace<Toasts>())
-    , imageUploader(&this->emplace<ImageUploader>())
-    , seventvAPI(&this->emplace<SeventvAPI>())
-    , crashHandler(&this->emplace(new CrashHandler(paths)))
+    , emotes(new Emotes)
+    , accounts(new AccountController)
+    , hotkeys(new HotkeyController)
+    , windows(new WindowManager(paths))
+    , toasts(new Toasts)
+    , imageUploader(new ImageUploader)
+    , seventvAPI(new SeventvAPI)
+    , crashHandler(new CrashHandler(paths))
 
-    , commands(&this->emplace<CommandController>())
-    , notifications(&this->emplace<NotificationController>())
-    , highlights(&this->emplace<HighlightController>())
-    , twitch(&this->emplace<TwitchIrcServer>())
-    , ffzBadges(&this->emplace<FfzBadges>())
-    , seventvBadges(&this->emplace<SeventvBadges>())
-    , userData(&this->emplace(new UserDataController(paths)))
-    , sound(&this->emplace<ISoundController>(makeSoundController(_settings)))
-    , twitchLiveController(&this->emplace<TwitchLiveController>())
+    , commands(new CommandController(paths))
+    , notifications(new NotificationController)
+    , highlights(new HighlightController(_settings, this->accounts.get()))
+    , twitch(new TwitchIrcServer)
+    , ffzBadges(new FfzBadges)
+    , seventvBadges(new SeventvBadges)
+    , userData(new UserDataController(paths))
+    , sound(makeSoundController(_settings))
+    , twitchLiveController(new TwitchLiveController)
     , twitchPubSub(new PubSub(TWITCH_PUBSUB_URL))
     , twitchBadges(new TwitchBadges)
     , chatterinoBadges(new ChatterinoBadges)
@@ -147,7 +148,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , linkResolver(new LinkResolver)
     , streamerMode(new StreamerMode)
 #ifdef CHATTERINO_HAVE_PLUGINS
-    , plugins(&this->emplace(new PluginController(paths)))
+    , plugins(new PluginController(paths))
 #endif
     , updates(_updates)
 {
@@ -164,13 +165,35 @@ Application::~Application() = default;
 
 void Application::fakeDtor()
 {
+#ifdef CHATTERINO_HAVE_PLUGINS
+    this->plugins.reset();
+#endif
     this->twitchPubSub.reset();
     this->twitchBadges.reset();
+    this->twitchLiveController.reset();
     this->chatterinoBadges.reset();
     this->bttvEmotes.reset();
     this->ffzEmotes.reset();
     this->seventvEmotes.reset();
+    this->notifications.reset();
+    this->commands.reset();
+    // If a crash happens after crashHandler has been reset, we'll assert
+    // This isn't super different from before, where if the app is already killed, the getApp() portion of it is already dead
+    this->crashHandler.reset();
+    this->seventvAPI.reset();
+    this->highlights.reset();
+    this->seventvBadges.reset();
+    this->ffzBadges.reset();
+    // this->twitch.reset();
+    this->imageUploader.reset();
+    this->hotkeys.reset();
     this->fonts.reset();
+    this->sound.reset();
+    this->userData.reset();
+    this->toasts.reset();
+    this->accounts.reset();
+    this->emotes.reset();
+    this->themes.reset();
 }
 
 void Application::initialize(Settings &settings, const Paths &paths)
@@ -204,14 +227,23 @@ void Application::initialize(Settings &settings, const Paths &paths)
         }
     }
 
-    for (auto &singleton : this->singletons_)
-    {
-        singleton->initialize(settings, paths);
-    }
+    this->accounts->load();
+
+    this->windows->initialize(settings);
+
+    this->ffzBadges->load();
+    this->twitch->initialize();
+
+    // Load live status
+    this->notifications->initialize();
 
     // XXX: Loading Twitch badges after Helix has been initialized, which only happens after
     // the AccountController initialize has been called
     this->twitchBadges->loadTwitchBadges();
+
+#ifdef CHATTERINO_HAVE_PLUGINS
+    this->plugins->initialize(settings);
+#endif
 
     // Show crash message.
     // On Windows, the crash message was already shown.
@@ -227,10 +259,10 @@ void Application::initialize(Settings &settings, const Paths &paths)
                 {
                     if (auto channel = split->getChannel(); !channel->isEmpty())
                     {
-                        channel->addMessage(makeSystemMessage(
+                        channel->addSystemMessage(
                             "Chatterino unexpectedly crashed and restarted. "
                             "You can disable automatic restarts in the "
-                            "settings."));
+                            "settings.");
                     }
                 }
             }
@@ -329,8 +361,9 @@ int Application::run(QApplication &qtApp)
 Theme *Application::getThemes()
 {
     assertInGuiThread();
+    assert(this->themes);
 
-    return this->themes;
+    return this->themes.get();
 }
 
 Fonts *Application::getFonts()
@@ -344,22 +377,25 @@ Fonts *Application::getFonts()
 IEmotes *Application::getEmotes()
 {
     assertInGuiThread();
+    assert(this->emotes);
 
-    return this->emotes;
+    return this->emotes.get();
 }
 
 AccountController *Application::getAccounts()
 {
     assertInGuiThread();
+    assert(this->accounts);
 
-    return this->accounts;
+    return this->accounts.get();
 }
 
 HotkeyController *Application::getHotkeys()
 {
     assertInGuiThread();
+    assert(this->hotkeys);
 
-    return this->hotkeys;
+    return this->hotkeys.get();
 }
 
 WindowManager *Application::getWindows()
@@ -367,77 +403,85 @@ WindowManager *Application::getWindows()
     assertInGuiThread();
     assert(this->windows);
 
-    return this->windows;
+    return this->windows.get();
 }
 
 Toasts *Application::getToasts()
 {
     assertInGuiThread();
+    assert(this->toasts);
 
-    return this->toasts;
+    return this->toasts.get();
 }
 
 CrashHandler *Application::getCrashHandler()
 {
     assertInGuiThread();
+    assert(this->crashHandler);
 
-    return this->crashHandler;
+    return this->crashHandler.get();
 }
 
 CommandController *Application::getCommands()
 {
     assertInGuiThread();
+    assert(this->commands);
 
-    return this->commands;
+    return this->commands.get();
 }
 
 NotificationController *Application::getNotifications()
 {
     assertInGuiThread();
+    assert(this->notifications);
 
-    return this->notifications;
+    return this->notifications.get();
 }
 
 HighlightController *Application::getHighlights()
 {
     assertInGuiThread();
+    assert(this->highlights);
 
-    return this->highlights;
+    return this->highlights.get();
 }
 
 FfzBadges *Application::getFfzBadges()
 {
     assertInGuiThread();
+    assert(this->ffzBadges);
 
-    return this->ffzBadges;
+    return this->ffzBadges.get();
 }
 
 SeventvBadges *Application::getSeventvBadges()
 {
     // SeventvBadges handles its own locks, so we don't need to assert that this is called in the GUI thread
+    assert(this->seventvBadges);
 
-    return this->seventvBadges;
+    return this->seventvBadges.get();
 }
 
 IUserDataController *Application::getUserData()
 {
     assertInGuiThread();
 
-    return this->userData;
+    return this->userData.get();
 }
 
 ISoundController *Application::getSound()
 {
     assertInGuiThread();
 
-    return this->sound;
+    return this->sound.get();
 }
 
 ITwitchLiveController *Application::getTwitchLiveController()
 {
     assertInGuiThread();
+    assert(this->twitchLiveController);
 
-    return this->twitchLiveController;
+    return this->twitchLiveController.get();
 }
 
 TwitchBadges *Application::getTwitchBadges()
@@ -459,23 +503,26 @@ IChatterinoBadges *Application::getChatterinoBadges()
 ImageUploader *Application::getImageUploader()
 {
     assertInGuiThread();
+    assert(this->imageUploader);
 
-    return this->imageUploader;
+    return this->imageUploader.get();
 }
 
 SeventvAPI *Application::getSeventvAPI()
 {
     assertInGuiThread();
+    assert(this->seventvAPI);
 
-    return this->seventvAPI;
+    return this->seventvAPI.get();
 }
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 PluginController *Application::getPlugins()
 {
     assertInGuiThread();
+    assert(this->plugins);
 
-    return this->plugins;
+    return this->plugins.get();
 }
 #endif
 
@@ -483,7 +530,14 @@ ITwitchIrcServer *Application::getTwitch()
 {
     assertInGuiThread();
 
-    return this->twitch;
+    return this->twitch.get();
+}
+
+IAbstractIrcServer *Application::getTwitchAbstract()
+{
+    assertInGuiThread();
+
+    return this->twitch.get();
 }
 
 PubSub *Application::getTwitchPubSub()
@@ -493,7 +547,7 @@ PubSub *Application::getTwitchPubSub()
     return this->twitchPubSub.get();
 }
 
-Logging *Application::getChatLogger()
+ILogging *Application::getChatLogger()
 {
     assertInGuiThread();
 
@@ -538,10 +592,9 @@ SeventvEmotes *Application::getSeventvEmotes()
 
 void Application::save()
 {
-    for (auto &singleton : this->singletons_)
-    {
-        singleton->save();
-    }
+    this->commands->save();
+    this->hotkeys->save();
+    this->windows->save();
 }
 
 void Application::initNm(const Paths &paths)
@@ -571,9 +624,8 @@ void Application::initPubSub()
             QString text =
                 QString("%1 cleared the chat.").arg(action.source.login);
 
-            auto msg = makeSystemMessage(text);
-            postToThread([chan, msg] {
-                chan->addMessage(msg);
+            postToThread([chan, text] {
+                chan->addSystemMessage(text);
             });
         });
 
@@ -597,9 +649,8 @@ void Application::initPubSub()
                 text += QString(" (%1 seconds)").arg(action.duration);
             }
 
-            auto msg = makeSystemMessage(text);
-            postToThread([chan, msg] {
-                chan->addMessage(msg);
+            postToThread([chan, text] {
+                chan->addSystemMessage(text);
             });
         });
 
@@ -618,9 +669,8 @@ void Application::initPubSub()
                             (action.modded ? "modded" : "unmodded"),
                             action.target.login);
 
-            auto msg = makeSystemMessage(text);
-            postToThread([chan, msg] {
-                chan->addMessage(msg);
+            postToThread([chan, text] {
+                chan->addSystemMessage(text);
             });
         });
 
@@ -639,6 +689,24 @@ void Application::initPubSub()
                 chan->addOrReplaceTimeout(msg.release());
             });
         });
+
+    std::ignore = this->twitchPubSub->moderation.userWarned.connect(
+        [&](const auto &action) {
+            auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
+
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            // TODO: Resolve the moderator's user ID into a full user here, so message can look better
+            postToThread([chan, action] {
+                MessageBuilder msg(action);
+                msg->flags.set(MessageFlag::PubSub);
+                chan->addMessage(msg.release(), MessageContext::Original);
+            });
+        });
+
     std::ignore = this->twitchPubSub->moderation.messageDeleted.connect(
         [&](const auto &action) {
             auto chan = this->twitch->getChannelOrEmptyByID(action.roomID);
@@ -674,7 +742,7 @@ void Application::initPubSub()
                 }
                 if (!replaced)
                 {
-                    chan->addMessage(msg);
+                    chan->addMessage(msg, MessageContext::Original);
                 }
             });
         });
@@ -691,7 +759,7 @@ void Application::initPubSub()
             auto msg = MessageBuilder(action).release();
 
             postToThread([chan, msg] {
-                chan->addMessage(msg);
+                chan->addMessage(msg, MessageContext::Original);
             });
         });
 
@@ -741,8 +809,10 @@ void Application::initPubSub()
                         TwitchMessageBuilder::makeLowTrustUserMessage(
                             action, twitchChannel->getName(),
                             twitchChannel.get());
-                    twitchChannel->addMessage(p.first);
-                    twitchChannel->addMessage(p.second);
+                    twitchChannel->addMessage(p.first,
+                                              MessageContext::Original);
+                    twitchChannel->addMessage(p.second,
+                                              MessageContext::Original);
                 });
             });
 
@@ -780,7 +850,7 @@ void Application::initPubSub()
                 postToThread([chan, action] {
                     auto msg =
                         TwitchMessageBuilder::makeLowTrustUpdateMessage(action);
-                    chan->addMessage(msg);
+                    chan->addMessage(msg, MessageContext::Original);
                 });
             });
 
@@ -862,20 +932,32 @@ void Application::initPubSub()
                             const auto p =
                                 TwitchMessageBuilder::makeAutomodMessage(
                                     action, chan->getName());
-                            chan->addMessage(p.first);
-                            chan->addMessage(p.second);
+                            chan->addMessage(p.first, MessageContext::Original);
+                            chan->addMessage(p.second,
+                                             MessageContext::Original);
 
-                            getApp()->twitch->automodChannel->addMessage(
-                                p.first);
-                            getApp()->twitch->automodChannel->addMessage(
-                                p.second);
+                            getApp()
+                                ->getTwitch()
+                                ->getAutomodChannel()
+                                ->addMessage(p.first, MessageContext::Original);
+                            getApp()
+                                ->getTwitch()
+                                ->getAutomodChannel()
+                                ->addMessage(p.second,
+                                             MessageContext::Original);
 
                             if (getSettings()->showAutomodInMentions)
                             {
-                                getApp()->twitch->mentionsChannel->addMessage(
-                                    p.first);
-                                getApp()->twitch->mentionsChannel->addMessage(
-                                    p.second);
+                                getApp()
+                                    ->getTwitch()
+                                    ->getMentionsChannel()
+                                    ->addMessage(p.first,
+                                                 MessageContext::Original);
+                                getApp()
+                                    ->getTwitch()
+                                    ->getMentionsChannel()
+                                    ->addMessage(p.second,
+                                                 MessageContext::Original);
                             }
                         });
                     }
@@ -902,8 +984,8 @@ void Application::initPubSub()
             postToThread([chan, action] {
                 const auto p = TwitchMessageBuilder::makeAutomodMessage(
                     action, chan->getName());
-                chan->addMessage(p.first);
-                chan->addMessage(p.second);
+                chan->addMessage(p.first, MessageContext::Original);
+                chan->addMessage(p.second, MessageContext::Original);
             });
         });
 
@@ -924,7 +1006,7 @@ void Application::initPubSub()
             auto msg = MessageBuilder(action).release();
 
             postToThread([chan, msg] {
-                chan->addMessage(msg);
+                chan->addMessage(msg, MessageContext::Original);
             });
             chan->deleteMessage(msg->id);
         });
@@ -941,7 +1023,7 @@ void Application::initPubSub()
             postToThread([chan, action] {
                 const auto p =
                     TwitchMessageBuilder::makeAutomodInfoMessage(action);
-                chan->addMessage(p);
+                chan->addMessage(p, MessageContext::Original);
             });
         });
 
@@ -984,7 +1066,9 @@ void Application::initPubSub()
 
 void Application::initBttvLiveUpdates()
 {
-    if (!this->twitch->bttvLiveUpdates)
+    auto &bttvLiveUpdates = this->twitch->getBTTVLiveUpdates();
+
+    if (!bttvLiveUpdates)
     {
         qCDebug(chatterinoBttv)
             << "Skipping initialization of Live Updates as it's disabled";
@@ -993,8 +1077,8 @@ void Application::initBttvLiveUpdates()
 
     // We can safely ignore these signal connections since the twitch object will always
     // be destroyed before the Application
-    std::ignore = this->twitch->bttvLiveUpdates->signals_.emoteAdded.connect(
-        [&](const auto &data) {
+    std::ignore =
+        bttvLiveUpdates->signals_.emoteAdded.connect([&](const auto &data) {
             auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);
 
             postToThread([chan, data] {
@@ -1004,8 +1088,8 @@ void Application::initBttvLiveUpdates()
                 }
             });
         });
-    std::ignore = this->twitch->bttvLiveUpdates->signals_.emoteUpdated.connect(
-        [&](const auto &data) {
+    std::ignore =
+        bttvLiveUpdates->signals_.emoteUpdated.connect([&](const auto &data) {
             auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);
 
             postToThread([chan, data] {
@@ -1015,8 +1099,8 @@ void Application::initBttvLiveUpdates()
                 }
             });
         });
-    std::ignore = this->twitch->bttvLiveUpdates->signals_.emoteRemoved.connect(
-        [&](const auto &data) {
+    std::ignore =
+        bttvLiveUpdates->signals_.emoteRemoved.connect([&](const auto &data) {
             auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);
 
             postToThread([chan, data] {
@@ -1026,12 +1110,14 @@ void Application::initBttvLiveUpdates()
                 }
             });
         });
-    this->twitch->bttvLiveUpdates->start();
+    bttvLiveUpdates->start();
 }
 
 void Application::initSeventvEventAPI()
 {
-    if (!this->twitch->seventvEventAPI)
+    auto &seventvEventAPI = this->twitch->getSeventvEventAPI();
+
+    if (!seventvEventAPI)
     {
         qCDebug(chatterinoSeventvEventAPI)
             << "Skipping initialization as the EventAPI is disabled";
@@ -1040,8 +1126,8 @@ void Application::initSeventvEventAPI()
 
     // We can safely ignore these signal connections since the twitch object will always
     // be destroyed before the Application
-    std::ignore = this->twitch->seventvEventAPI->signals_.emoteAdded.connect(
-        [&](const auto &data) {
+    std::ignore =
+        seventvEventAPI->signals_.emoteAdded.connect([&](const auto &data) {
             postToThread([this, data] {
                 this->twitch->forEachSeventvEmoteSet(
                     data.emoteSetID, [data](TwitchChannel &chan) {
@@ -1049,8 +1135,8 @@ void Application::initSeventvEventAPI()
                     });
             });
         });
-    std::ignore = this->twitch->seventvEventAPI->signals_.emoteUpdated.connect(
-        [&](const auto &data) {
+    std::ignore =
+        seventvEventAPI->signals_.emoteUpdated.connect([&](const auto &data) {
             postToThread([this, data] {
                 this->twitch->forEachSeventvEmoteSet(
                     data.emoteSetID, [data](TwitchChannel &chan) {
@@ -1058,8 +1144,8 @@ void Application::initSeventvEventAPI()
                     });
             });
         });
-    std::ignore = this->twitch->seventvEventAPI->signals_.emoteRemoved.connect(
-        [&](const auto &data) {
+    std::ignore =
+        seventvEventAPI->signals_.emoteRemoved.connect([&](const auto &data) {
             postToThread([this, data] {
                 this->twitch->forEachSeventvEmoteSet(
                     data.emoteSetID, [data](TwitchChannel &chan) {
@@ -1067,25 +1153,18 @@ void Application::initSeventvEventAPI()
                     });
             });
         });
-    std::ignore = this->twitch->seventvEventAPI->signals_.userUpdated.connect(
-        [&](const auto &data) {
+    std::ignore =
+        seventvEventAPI->signals_.userUpdated.connect([&](const auto &data) {
             this->twitch->forEachSeventvUser(data.userID,
                                              [data](TwitchChannel &chan) {
                                                  chan.updateSeventvUser(data);
                                              });
         });
 
-    this->twitch->seventvEventAPI->start();
+    seventvEventAPI->start();
 }
 
-Application *getApp()
-{
-    assert(Application::instance != nullptr);
-
-    return Application::instance;
-}
-
-IApplication *getIApp()
+IApplication *getApp()
 {
     assert(IApplication::instance != nullptr);
 

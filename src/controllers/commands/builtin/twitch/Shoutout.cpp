@@ -3,7 +3,6 @@
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandContext.hpp"
-#include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -19,24 +18,22 @@ QString sendShoutout(const CommandContext &ctx)
 
     if (twitchChannel == nullptr)
     {
-        channel->addMessage(makeSystemMessage(
-            "The /shoutout command only works in Twitch channels."));
+        channel->addSystemMessage(
+            "The /shoutout command only works in Twitch channels.");
         return "";
     }
 
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
-        channel->addMessage(
-            makeSystemMessage("You must be logged in to send shoutout."));
+        channel->addSystemMessage("You must be logged in to send shoutout.");
         return "";
     }
 
     if (words->size() < 2)
     {
-        channel->addMessage(
-            makeSystemMessage("Usage: \"/shoutout <username>\" - Sends a "
-                              "shoutout to the specified twitch user"));
+        channel->addSystemMessage("Usage: \"/shoutout <username>\" - Sends a "
+                                  "shoutout to the specified twitch user");
         return "";
     }
 
@@ -52,8 +49,8 @@ QString sendShoutout(const CommandContext &ctx)
                 twitchChannel->roomId(), targetUser.id,
                 currentUser->getUserId(),
                 [channel, targetUser]() {
-                    channel->addMessage(makeSystemMessage(
-                        QString("Sent shoutout to %1").arg(targetUser.login)));
+                    channel->addSystemMessage(
+                        QString("Sent shoutout to %1").arg(targetUser.login));
                 },
                 [channel](auto error, auto message) {
                     QString errorMessage = "Failed to send shoutout - ";
@@ -99,13 +96,13 @@ QString sendShoutout(const CommandContext &ctx)
                         break;
                     }
 
-                    channel->addMessage(makeSystemMessage(errorMessage));
+                    channel->addSystemMessage(errorMessage);
                 });
         },
         [channel, target] {
             // Equivalent error from IRC
-            channel->addMessage(
-                makeSystemMessage(QString("Invalid username: %1").arg(target)));
+            channel->addSystemMessage(
+                QString("Invalid username: %1").arg(target));
         });
 
     return "";

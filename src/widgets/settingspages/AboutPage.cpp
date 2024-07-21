@@ -127,6 +127,9 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "Fluent icons",
                        "https://github.com/microsoft/fluentui-system-icons",
                        ":/licenses/fluenticons.txt");
+            addLicense(form.getElement(), "expected-lite",
+                       "https://github.com/martinmoene/expected-lite",
+                       ":/licenses/expected-lite.txt");
         }
 
         // Attributions

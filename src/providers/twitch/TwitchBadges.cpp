@@ -7,6 +7,7 @@
 #include "messages/Image.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "util/DisplayBadge.hpp"
+#include "util/LoadPixmap.hpp"
 
 #include <QBuffer>
 #include <QFile>
@@ -239,48 +240,20 @@ void TwitchBadges::getBadgeIcons(const QList<DisplayBadge> &badges,
     }
 }
 
-void TwitchBadges::loadEmoteImage(const QString &name, ImagePtr image,
+void TwitchBadges::loadEmoteImage(const QString &name, const ImagePtr &image,
                                   BadgeIconCallback &&callback)
 {
-    auto url = image->url().string;
-    NetworkRequest(url)
-        .concurrent()
-        .cache()
-        .onSuccess([this, name, callback, url](auto result) {
-            auto data = result.getData();
+    loadPixmapFromUrl(image->url(),
+                      [this, name, callback{std::move(callback)}](auto pixmap) {
+                          auto icon = std::make_shared<QIcon>(pixmap);
 
-            // const cast since we are only reading from it
-            QBuffer buffer(const_cast<QByteArray *>(&data));
-            buffer.open(QIODevice::ReadOnly);
-            QImageReader reader(&buffer);
+                          {
+                              std::unique_lock lock(this->badgesMutex_);
+                              this->badgesMap_[name] = icon;
+                          }
 
-            if (!reader.canRead() || reader.size().isEmpty())
-            {
-                qCWarning(chatterinoTwitch)
-                    << "Can't read badge image at" << url << "for" << name
-                    << reader.errorString();
-                return;
-            }
-
-            QImage image = reader.read();
-            if (image.isNull())
-            {
-                qCWarning(chatterinoTwitch)
-                    << "Failed reading badge image at" << url << "for" << name
-                    << reader.errorString();
-                return;
-            }
-
-            auto icon = std::make_shared<QIcon>(QPixmap::fromImage(image));
-
-            {
-                std::unique_lock lock(this->badgesMutex_);
-                this->badgesMap_[name] = icon;
-            }
-
-            callback(name, icon);
-        })
-        .execute();
+                          callback(name, icon);
+                      });
 }
 
 }  // namespace chatterino

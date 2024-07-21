@@ -12,9 +12,9 @@
 #include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "Test.hpp"
 #include "widgets/splits/InputCompletionPopup.hpp"
 
-#include <gtest/gtest.h>
 #include <QDir>
 #include <QFile>
 #include <QModelIndex>
@@ -129,9 +129,7 @@ protected:
         this->settings = std::make_unique<Settings>(this->settingsDir_->path());
         this->paths = std::make_unique<Paths>();
 
-        this->mockApplication->accounts.initialize(*this->settings,
-                                                   *this->paths);
-        this->mockApplication->emotes.initialize(*this->settings, *this->paths);
+        this->mockApplication->accounts.load();
 
         this->channelPtr = std::make_shared<MockChannel>("icelys");
 
@@ -224,7 +222,7 @@ void containsRoughly(std::span<EmoteItem> span, std::set<QString> values)
             }
         }
 
-        ASSERT_TRUE(found) << qPrintable(v) << " was not found in the span";
+        ASSERT_TRUE(found) << v << " was not found in the span";
     }
 }
 

@@ -5,18 +5,17 @@
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
-#include "mocks/EmptyApplication.hpp"
+#include "mocks/BaseApplication.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "Test.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/Split.hpp"
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include <QDebug>
 #include <QString>
 
@@ -25,13 +24,14 @@ using ::testing::Exactly;
 
 namespace {
 
-class MockApplication : mock::EmptyApplication
+class MockApplication : public mock::BaseApplication
 {
 public:
     MockApplication()
-        : settings(this->settingsDir.filePath("settings.json"))
+        : theme(this->paths_)
         , fonts(this->settings)
-        , windowManager(this->paths)
+        , windowManager(this->paths_)
+        , commands(this->paths_)
     {
     }
     Theme *getThemes() override
@@ -69,11 +69,9 @@ public:
         return &this->emotes;
     }
 
-    Settings settings;
     Theme theme;
     HotkeyController hotkeys;
     Fonts fonts;
-    Paths paths;
     WindowManager windowManager;
     AccountController accounts;
     CommandController commands;
@@ -110,9 +108,8 @@ TEST_P(SplitInputTest, Reply)
     auto reply = MessagePtr(message);
     this->input.setReply(reply);
     QString actual = this->input.getInputText();
-    ASSERT_EQ(expected, actual)
-        << "Input text after setReply should be '" << qUtf8Printable(expected)
-        << "', but got '" << qUtf8Printable(actual) << "'";
+    ASSERT_EQ(expected, actual) << "Input text after setReply should be '"
+                                << expected << "', but got '" << actual << "'";
 }
 
 INSTANTIATE_TEST_SUITE_P(

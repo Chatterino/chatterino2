@@ -7,7 +7,6 @@
 #include "providers/twitch/PubSubHelpers.hpp"
 #include "providers/twitch/PubSubMessages.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
-#include "pubsubmessages/LowTrustUsers.hpp"
 #include "util/DebugCount.hpp"
 #include "util/Helpers.hpp"
 #include "util/RapidjsonHelpers.hpp"
@@ -284,6 +283,37 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         action.target.login = args[0].toString();
 
         this->moderation.userUnbanned.invoke(action);
+    };
+
+    this->moderationActionHandlers["warn"] = [this](const auto &data,
+                                                    const auto &roomID) {
+        WarnAction action(data, roomID);
+
+        action.source.id = data.value("created_by_user_id").toString();
+        action.source.login =
+            data.value("created_by").toString();  // currently always empty
+
+        action.target.id = data.value("target_user_id").toString();
+        action.target.login = data.value("target_user_login").toString();
+
+        const auto reasons = data.value("args").toArray();
+        bool firstArg = true;
+        for (const auto &reasonValue : reasons)
+        {
+            if (firstArg)
+            {
+                // Skip first arg in the reasons array since it's not a reason
+                firstArg = false;
+                continue;
+            }
+            const auto &reason = reasonValue.toString();
+            if (!reason.isEmpty())
+            {
+                action.reasons.append(reason);
+            }
+        }
+
+        this->moderation.userWarned.invoke(action);
     };
 
     /*
@@ -1131,8 +1161,8 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
 
             case PubSubChatModeratorActionMessage::Type::INVALID:
             default: {
-                qCDebug(chatterinoPubSub)
-                    << "Invalid whisper type:" << innerMessage.typeString;
+                qCDebug(chatterinoPubSub) << "Invalid moderator action type:"
+                                          << innerMessage.typeString;
             }
             break;
         }
@@ -1150,6 +1180,8 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
 
         switch (innerMessage.type)
         {
+            case PubSubCommunityPointsChannelV1Message::Type::
+                AutomaticRewardRedeemed:
             case PubSubCommunityPointsChannelV1Message::Type::RewardRedeemed: {
                 auto redemption =
                     innerMessage.data.value("redemption").toObject();

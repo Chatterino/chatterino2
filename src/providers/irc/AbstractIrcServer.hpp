@@ -17,7 +17,24 @@ class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 class RatelimitBucket;
 
-class AbstractIrcServer : public QObject
+class IAbstractIrcServer
+{
+public:
+    virtual void connect() = 0;
+
+    virtual void sendRawMessage(const QString &rawMessage) = 0;
+
+    virtual ChannelPtr getOrAddChannel(const QString &dirtyChannelName) = 0;
+    virtual ChannelPtr getChannelOrEmpty(const QString &dirtyChannelName) = 0;
+
+    virtual void addFakeMessage(const QString &data) = 0;
+
+    virtual void addGlobalSystemMessage(const QString &messageText) = 0;
+
+    virtual void forEachChannel(std::function<void(ChannelPtr)> func) = 0;
+};
+
+class AbstractIrcServer : public IAbstractIrcServer, public QObject
 {
 public:
     enum ConnectionType { Read = 1, Write = 2, Both = 3 };
@@ -33,27 +50,27 @@ public:
     void initializeIrc();
 
     // connection
-    void connect();
+    void connect() final;
     void disconnect();
 
     void sendMessage(const QString &channelName, const QString &message);
-    virtual void sendRawMessage(const QString &rawMessage);
+    void sendRawMessage(const QString &rawMessage) override;
 
     // channels
-    ChannelPtr getOrAddChannel(const QString &dirtyChannelName);
-    ChannelPtr getChannelOrEmpty(const QString &dirtyChannelName);
+    ChannelPtr getOrAddChannel(const QString &dirtyChannelName) final;
+    ChannelPtr getChannelOrEmpty(const QString &dirtyChannelName) final;
     std::vector<std::weak_ptr<Channel>> getChannels();
 
     // signals
     pajlada::Signals::NoArgSignal connected;
     pajlada::Signals::NoArgSignal disconnected;
 
-    void addFakeMessage(const QString &data);
+    void addFakeMessage(const QString &data) final;
 
-    void addGlobalSystemMessage(const QString &messageText);
+    void addGlobalSystemMessage(const QString &messageText) final;
 
     // iteration
-    void forEachChannel(std::function<void(ChannelPtr)> func);
+    void forEachChannel(std::function<void(ChannelPtr)> func) final;
 
 protected:
     AbstractIrcServer();

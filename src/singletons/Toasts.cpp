@@ -1,6 +1,7 @@
 #include "Toasts.hpp"
 
 #include "Application.hpp"
+#include "common/Common.hpp"
 #include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
@@ -34,7 +35,7 @@ using namespace literals;
 QString avatarFilePath(const QString &channelName)
 {
     // TODO: cleanup channel (to be used as a file) and use combinePath
-    return getIApp()->getPaths().twitchProfileAvatars % '/' % channelName %
+    return getApp()->getPaths().twitchProfileAvatars % '/' % channelName %
            u".png";
 }
 
@@ -73,7 +74,7 @@ bool Toasts::isEnabled()
 {
 #ifdef Q_OS_WIN
     return WinToast::isCompatible() && getSettings()->notificationToast &&
-           !(getIApp()->getStreamerMode()->isEnabled() &&
+           !(getApp()->getStreamerMode()->isEnabled() &&
              getSettings()->streamerModeSuppressLiveNotifications);
 #else
     return false;
@@ -177,9 +178,8 @@ public:
             case ToastReaction::OpenInPlayer:
                 if (platform_ == Platform::Twitch)
                 {
-                    QDesktopServices::openUrl(QUrl(
-                        u"https://player.twitch.tv/?parent=twitch.tv&channel=" %
-                        channelName_));
+                    QDesktopServices::openUrl(
+                        QUrl(TWITCH_PLAYER_URL.arg(channelName_)));
                 }
                 break;
             case ToastReaction::OpenInStreamlink: {

@@ -107,6 +107,10 @@ set(SOURCE_FILES
         controllers/commands/builtin/twitch/UpdateChannel.hpp
         controllers/commands/builtin/twitch/UpdateColor.cpp
         controllers/commands/builtin/twitch/UpdateColor.hpp
+        controllers/commands/builtin/twitch/Warn.cpp
+        controllers/commands/builtin/twitch/Warn.hpp
+        controllers/commands/common/ChannelAction.cpp
+        controllers/commands/common/ChannelAction.hpp
         controllers/commands/CommandContext.hpp
         controllers/commands/CommandController.cpp
         controllers/commands/CommandController.hpp
@@ -225,6 +229,10 @@ set(SOURCE_FILES
         controllers/plugins/api/ChannelRef.hpp
         controllers/plugins/api/IOWrapper.cpp
         controllers/plugins/api/IOWrapper.hpp
+        controllers/plugins/api/HTTPRequest.cpp
+        controllers/plugins/api/HTTPRequest.hpp
+        controllers/plugins/api/HTTPResponse.cpp
+        controllers/plugins/api/HTTPResponse.hpp
         controllers/plugins/LuaAPI.cpp
         controllers/plugins/LuaAPI.hpp
         controllers/plugins/PluginPermission.cpp
@@ -436,8 +444,6 @@ set(SOURCE_FILES
         providers/twitch/api/Helix.cpp
         providers/twitch/api/Helix.hpp
 
-        singletons/Badges.cpp
-        singletons/Badges.hpp
         singletons/CrashHandler.cpp
         singletons/CrashHandler.hpp
         singletons/Emotes.cpp
@@ -479,7 +485,6 @@ set(SOURCE_FILES
         util/ChannelHelpers.hpp
         util/Clipboard.cpp
         util/Clipboard.hpp
-        util/ConcurrentMap.hpp
         util/DebugCount.cpp
         util/DebugCount.hpp
         util/DisplayBadge.cpp
@@ -500,6 +505,8 @@ set(SOURCE_FILES
         util/IpcQueue.hpp
         util/LayoutHelper.cpp
         util/LayoutHelper.hpp
+        util/LoadPixmap.cpp
+        util/LoadPixmap.hpp
         util/RapidjsonHelpers.cpp
         util/RapidjsonHelpers.hpp
         util/RatelimitBucket.cpp
@@ -507,8 +514,6 @@ set(SOURCE_FILES
         util/SampleData.cpp
         util/SampleData.hpp
         util/SharedPtrElementLess.hpp
-        util/SplitCommand.cpp
-        util/SplitCommand.hpp
         util/StreamLink.cpp
         util/StreamLink.hpp
         util/ThreadGuard.hpp
@@ -575,8 +580,6 @@ set(SOURCE_FILES
         widgets/dialogs/LastRunCrashDialog.hpp
         widgets/dialogs/LoginDialog.cpp
         widgets/dialogs/LoginDialog.hpp
-        widgets/dialogs/NotificationPopup.cpp
-        widgets/dialogs/NotificationPopup.hpp
         widgets/dialogs/QualityPopup.cpp
         widgets/dialogs/QualityPopup.hpp
         widgets/dialogs/ReplyThreadPopup.cpp
@@ -631,16 +634,18 @@ set(SOURCE_FILES
         widgets/helper/EditableModelView.hpp
         widgets/helper/EffectLabel.cpp
         widgets/helper/EffectLabel.hpp
+        widgets/helper/IconDelegate.cpp
+        widgets/helper/IconDelegate.hpp
         widgets/helper/InvisibleSizeGrip.cpp
         widgets/helper/InvisibleSizeGrip.hpp
+        widgets/helper/MessageView.cpp
+        widgets/helper/MessageView.hpp
         widgets/helper/NotebookButton.cpp
         widgets/helper/NotebookButton.hpp
         widgets/helper/NotebookTab.cpp
         widgets/helper/NotebookTab.hpp
         widgets/helper/RegExpItemDelegate.cpp
         widgets/helper/RegExpItemDelegate.hpp
-        widgets/helper/TrimRegExpValidator.cpp
-        widgets/helper/TrimRegExpValidator.hpp
         widgets/helper/ResizingTextEdit.cpp
         widgets/helper/ResizingTextEdit.hpp
         widgets/helper/ScrollbarHighlight.cpp
@@ -651,10 +656,14 @@ set(SOURCE_FILES
         widgets/helper/SettingsDialogTab.hpp
         widgets/helper/SignalLabel.cpp
         widgets/helper/SignalLabel.hpp
+        widgets/helper/TableStyles.cpp
+        widgets/helper/TableStyles.hpp
         widgets/helper/TitlebarButton.cpp
         widgets/helper/TitlebarButton.hpp
         widgets/helper/TitlebarButtons.cpp
         widgets/helper/TitlebarButtons.hpp
+        widgets/helper/TrimRegExpValidator.cpp
+        widgets/helper/TrimRegExpValidator.hpp
 
         widgets/layout/FlowLayout.cpp
         widgets/layout/FlowLayout.hpp
@@ -861,6 +870,7 @@ if (BUILD_APP)
         endif()
         get_filename_component(QT_BIN_DIR ${QT_CORE_LOC} DIRECTORY)
 
+        # This assumes the installed CRT is up-to-date (see .CI/deploy-crt.ps1)
         set(WINDEPLOYQT_COMMAND_ARGV "${WINDEPLOYQT_PATH}" "$<TARGET_FILE:${EXECUTABLE_PROJECT}>" ${WINDEPLOYQT_MODE} --no-compiler-runtime --no-translations --no-opengl-sw)
         string(REPLACE ";" " " WINDEPLOYQT_COMMAND "${WINDEPLOYQT_COMMAND_ARGV}")
 
@@ -934,6 +944,10 @@ set_target_properties(${LIBRARY_PROJECT}
 # this is its own project.
 set(VERSION_SOURCE_FILES common/Version.cpp common/Version.hpp)
 add_library(${VERSION_PROJECT} STATIC ${VERSION_SOURCE_FILES})
+target_compile_definitions(${VERSION_PROJECT} PRIVATE
+    $<$<BOOL:${WIN32}>:USEWINSDK>
+    $<$<BOOL:${BUILD_WITH_CRASHPAD}>:CHATTERINO_WITH_CRASHPAD>
+)
 
 # source group for IDEs
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${VERSION_SOURCE_FILES})
@@ -997,6 +1011,9 @@ target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 
 # semver dependency https://github.com/Neargye/semver
 target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/semver/include)
+
+# expected-lite dependency https://github.com/martinmoene/expected-lite
+target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_SOURCE_DIR}/lib/expected-lite/include)
 
 # miniaudio dependency https://github.com/mackron/miniaudio
 if (USE_SYSTEM_MINIAUDIO)
@@ -1141,3 +1158,14 @@ if(NOT CHATTERINO_UPDATER)
     message(STATUS "Disabling the updater.")
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_DISABLE_UPDATER)
 endif()
+
+if (DOXYGEN_FOUND)
+    message(STATUS "Doxygen found, adding doxygen target")
+    # output will be in docs/html
+    set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/docs")
+
+    doxygen_add_docs(
+        doxygen
+        ${CMAKE_CURRENT_LIST_DIR}
+    )
+endif ()

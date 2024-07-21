@@ -178,13 +178,21 @@ Used in:
 
 - `controllers/commands/CommandController.cpp` to send Twitch native shoutout using "/shoutout <username>"
 
+### Warn Chat User
+
+URL: https://dev.twitch.tv/docs/api/reference/#warn-chat-user
+
+Used in:
+
+- `controllers/commands/CommandController.cpp` to warn users via "/warn" command
+
 ## PubSub
 
 ### Whispers
 
 We listen to the `whispers.<user_id>` PubSub topic to receive information about incoming whispers to the user
 
-No EventSub alternative available.
+The EventSub alternative (`user.whisper.message`) is not yet implemented.
 
 ### Chat Moderator Actions
 
@@ -192,25 +200,17 @@ We listen to the `chat_moderator_actions.<user_id>.<channel_id>` PubSub topic to
 
 We listen to this topic in every channel the user is a moderator.
 
-No complete EventSub alternative available yet. Some functionality can be pieced together but it would not be zero cost, causing the `max_total_cost` of 10 to cause issues.
+We have not yet migrated to the EventSub equivalent topics:
 
-- For showing bans & timeouts: `channel.ban`, but does not work with moderator token???
-- For showing unbans & untimeouts: `channel.unban`, but does not work with moderator token???
-- Clear/delete message: not in eventsub, and IRC doesn't tell us which mod performed the action
-- Roomstate (slow(off), followers(off), r9k(off), emoteonly(off), subscribers(off)) => not in eventsub, and IRC doesn't tell us which mod performed the action
-- VIP added => not in eventsub, but not critical
-- VIP removed => not in eventsub, but not critical
-- Moderator added => channel.moderator.add eventsub, but doesn't work with moderator token
-- Moderator removed => channel.moderator.remove eventsub, but doesn't work with moderator token
-- Raid started => channel.raid eventsub, but cost=1 for moderator token
-- Unraid => not in eventsub
-- Add permitted term => not in eventsub
-- Delete permitted term => not in eventsub
-- Add blocked term => not in eventsub
-- Delete blocked term => not in eventsub
-- Modified automod properties => not in eventsub
-- Approve unban request => cannot read moderator message in eventsub
-- Deny unban request => not in eventsub
+- For showing bans & timeouts => `channel.moderate`
+- For showing unbans & untimeouts => `channel.moderate`
+- Clear/delete message => `channel.moderate`
+- Roomstate (slow(off), followers(off), r9k(off), emoteonly(off), subscribers(off)) => `channel.moderate`
+- VIP/Moderator added/removed => `channel.moderate`
+- Raid started/cancelled => `channel.moderate`
+- Add/delete permitted/blocked term => `channel.moderate` (or `automod.terms.update`)
+- Modified automod properties => `automod.settings.update`
+- Approve/deny unban request => `channel.moderate` (or `channel.unban_request.resolve`)
 
 ### AutoMod Queue
 
@@ -218,7 +218,7 @@ We listen to the `automod-queue.<moderator_id>.<channel_id>` PubSub topic to rec
 
 We listen to this topic in every channel the user is a moderator.
 
-No EventSub alternative available yet.
+The EventSub alternative (`automod.message.hold` and `automod.message.update`) is not yet implemented.
 
 ### Channel Point Rewards
 
@@ -230,4 +230,4 @@ The EventSub alternative requires broadcaster auth, which is not a feasible alte
 
 We want to listen to the `low-trust-users` PubSub topic to receive information about messages from users who are marked as low-trust.
 
-There is no EventSub alternative available yet.
+The EventSub alternative (`channel.suspicious_user.message` and `channel.suspicious_user.update`) is not yet implemented.
