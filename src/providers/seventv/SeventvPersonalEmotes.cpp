@@ -9,13 +9,12 @@
 
 namespace chatterino {
 
-void SeventvPersonalEmotes::initialize(Settings &settings,
-                                       const Paths & /*paths*/)
+SeventvPersonalEmotes::SeventvPersonalEmotes()
 {
-    settings.enableSevenTVPersonalEmotes.connect(
+    getSettings()->enableSevenTVPersonalEmotes.connect(
         [this]() {
             std::unique_lock<std::shared_mutex> lock(this->mutex_);
-            this->enabled_ = Settings::instance().enableSevenTVPersonalEmotes;
+            this->enabled_ = getSettings()->enableSevenTVPersonalEmotes;
         },
         this->signalHolder_);
 }

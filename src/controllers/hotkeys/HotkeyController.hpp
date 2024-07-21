@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/SignalVector.hpp"
-#include "common/Singleton.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 
 #include <pajlada/signals/signal.hpp>
@@ -18,7 +17,7 @@ class Hotkey;
 
 class HotkeyModel;
 
-class HotkeyController final : public Singleton
+class HotkeyController final
 {
 public:
     using HotkeyFunction = std::function<QString(std::vector<QString>)>;
@@ -31,7 +30,7 @@ public:
                                                   HotkeyMap actionMap,
                                                   QWidget *parent);
 
-    void save() override;
+    void save();
     std::shared_ptr<Hotkey> getHotkeyByName(QString name);
     /**
      * @brief returns a QKeySequence that perfoms the actions requested.

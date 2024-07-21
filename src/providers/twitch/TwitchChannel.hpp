@@ -244,14 +244,6 @@ public:
     pajlada::Signals::NoArgSignal userStateChanged;
 
     /**
-     * This signals fires whenever the live status is changed
-     *
-     * Streams are counted as offline by default, so if a stream does not go online
-     * this signal will never fire
-     **/
-    pajlada::Signals::Signal<bool> liveStatusChanged;
-
-    /**
      * This signal fires whenever the stream status is changed
      *
      * This includes when the stream goes from offline to online,
@@ -275,7 +267,8 @@ public:
         const QString &rewardId) const;
 
     // Live status
-    void updateStreamStatus(const std::optional<HelixStream> &helixStream);
+    void updateStreamStatus(const std::optional<HelixStream> &helixStream,
+                            bool isInitialUpdate);
     void updateStreamTitle(const QString &title);
 
     /**
@@ -342,6 +335,8 @@ private:
     void setRoomModes(const RoomModes &newRoomModes);
     void setDisplayName(const QString &name);
     void setLocalizedName(const QString &name);
+
+    void onLiveStatusChanged(bool isLive, bool isInitialUpdate);
 
     /**
      * Returns the localized name of the user

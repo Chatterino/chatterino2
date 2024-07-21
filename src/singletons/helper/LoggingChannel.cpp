@@ -88,7 +88,7 @@ LoggingChannel::LoggingChannel(QString _channelName, QString _platform)
 
     getSettings()->logPath.connect([this](const QString &logPath, auto) {
         this->baseDirectory = logPath.isEmpty()
-                                  ? getIApp()->getPaths().messageLogDirectory
+                                  ? getApp()->getPaths().messageLogDirectory
                                   : logPath;
         this->openLogFile();
     });

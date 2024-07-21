@@ -100,9 +100,9 @@ void Channel::addMessage(MessagePtr message, MessageContext context,
         if (!isDoNotLogSet)
         {
             // Only log messages where the `DoNotLog` flag is not set
-            getIApp()->getChatLogger()->addMessage(this->name_, message,
-                                                   this->platform_,
-                                                   this->getCurrentStreamID());
+            getApp()->getChatLogger()->addMessage(this->name_, message,
+                                                  this->platform_,
+                                                  this->getCurrentStreamID());
         }
     }
 

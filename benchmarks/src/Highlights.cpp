@@ -5,7 +5,7 @@
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "messages/Message.hpp"
 #include "messages/SharedMessageBuilder.hpp"
-#include "mocks/EmptyApplication.hpp"
+#include "mocks/BaseApplication.hpp"
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 
@@ -47,9 +47,14 @@ public:
     }
 };
 
-class MockApplication : mock::EmptyApplication
+class MockApplication : public mock::BaseApplication
 {
 public:
+    MockApplication()
+        : highlights(this->settings, &this->accounts)
+    {
+    }
+
     AccountController *getAccounts() override
     {
         return &this->accounts;
@@ -61,7 +66,6 @@ public:
 
     AccountController accounts;
     HighlightController highlights;
-    // TODO: Figure this out
 };
 
 static void BM_HighlightTest(benchmark::State &state)

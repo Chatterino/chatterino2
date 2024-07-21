@@ -89,7 +89,7 @@ void EmoteSource::addToStringList(QStringList &list, size_t maxCount,
 
 void EmoteSource::initializeFromChannel(const Channel *channel)
 {
-    auto *app = getIApp();
+    auto *app = getApp();
 
     std::vector<EmoteItem> emotes;
     const auto *tc = dynamic_cast<const TwitchChannel *>(channel);

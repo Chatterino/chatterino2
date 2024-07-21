@@ -337,7 +337,7 @@ void SeventvEventAPI::onEmoteSetUpdate(const Dispatch &dispatch)
     if (this->lastPersonalEmoteAssignment_->emoteSetID == dispatch.id)
     {
         auto emoteSet =
-            getIApp()->getSeventvPersonalEmotes()->getEmoteSetByID(dispatch.id);
+            getApp()->getSeventvPersonalEmotes()->getEmoteSetByID(dispatch.id);
         if (emoteSet)
         {
             qCDebug(chatterinoSeventvEventAPI) << "Flushed last emote set";
@@ -389,7 +389,7 @@ void SeventvEventAPI::onUserUpdate(const Dispatch &dispatch)
 // NOLINTBEGIN(readability-convert-member-functions-to-static)
 void SeventvEventAPI::onCosmeticCreate(const CosmeticCreateDispatch &cosmetic)
 {
-    auto *badges = getIApp()->getSeventvBadges();
+    auto *badges = getApp()->getSeventvBadges();
     switch (cosmetic.kind)
     {
         case CosmeticKind::Badge: {
@@ -397,7 +397,7 @@ void SeventvEventAPI::onCosmeticCreate(const CosmeticCreateDispatch &cosmetic)
         }
         break;
         case CosmeticKind::Paint: {
-            getIApp()->getSeventvPaints()->addPaint(cosmetic.data);
+            getApp()->getSeventvPaints()->addPaint(cosmetic.data);
         }
         break;
         default:
@@ -408,7 +408,7 @@ void SeventvEventAPI::onCosmeticCreate(const CosmeticCreateDispatch &cosmetic)
 void SeventvEventAPI::onEntitlementCreate(
     const EntitlementCreateDeleteDispatch &entitlement)
 {
-    auto *badges = getIApp()->getSeventvBadges();
+    auto *badges = getApp()->getSeventvBadges();
     switch (entitlement.kind)
     {
         case CosmeticKind::Badge: {
@@ -417,7 +417,7 @@ void SeventvEventAPI::onEntitlementCreate(
         }
         break;
         case CosmeticKind::Paint: {
-            getIApp()->getSeventvPaints()->assignPaintToUser(
+            getApp()->getSeventvPaints()->assignPaintToUser(
                 entitlement.refID, UserName{entitlement.userName});
         }
         break;
@@ -426,7 +426,7 @@ void SeventvEventAPI::onEntitlementCreate(
                 << "Assign user" << entitlement.userID << "to emote set"
                 << entitlement.refID;
             if (auto set =
-                    getIApp()->getSeventvPersonalEmotes()->assignUserToEmoteSet(
+                    getApp()->getSeventvPersonalEmotes()->assignUserToEmoteSet(
                         entitlement.refID, entitlement.userID))
             {
                 if ((*set)->empty())
@@ -457,7 +457,7 @@ void SeventvEventAPI::onEntitlementCreate(
 void SeventvEventAPI::onEntitlementDelete(
     const EntitlementCreateDeleteDispatch &entitlement)
 {
-    auto *badges = getIApp()->getSeventvBadges();
+    auto *badges = getApp()->getSeventvBadges();
     switch (entitlement.kind)
     {
         case CosmeticKind::Badge: {
@@ -466,7 +466,7 @@ void SeventvEventAPI::onEntitlementDelete(
         }
         break;
         case CosmeticKind::Paint: {
-            getIApp()->getSeventvPaints()->clearPaintFromUser(
+            getApp()->getSeventvPaints()->clearPaintFromUser(
                 entitlement.refID, UserName{entitlement.userName});
         }
         break;
@@ -491,7 +491,7 @@ void SeventvEventAPI::onEmoteSetCreate(const Dispatch &dispatch)
     {
         qCDebug(chatterinoSeventvEventAPI)
             << "Create emote set" << createDispatch.emoteSetID;
-        getIApp()->getSeventvPersonalEmotes()->createEmoteSet(
+        getApp()->getSeventvPersonalEmotes()->createEmoteSet(
             createDispatch.emoteSetID);
     }
 }

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/Atomic.hpp"
-#include "common/Singleton.hpp"
 #include "messages/Emote.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"
 
@@ -15,10 +14,10 @@
 
 namespace chatterino {
 
-class SeventvPersonalEmotes : public Singleton
+class SeventvPersonalEmotes
 {
 public:
-    void initialize(Settings &settings, const Paths &paths) override;
+    SeventvPersonalEmotes();
 
     void createEmoteSet(const QString &id);
 

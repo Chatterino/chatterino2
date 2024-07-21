@@ -131,7 +131,7 @@ namespace {
         using namespace std::chrono_literals;
 
         if (std::chrono::steady_clock::now() - signalsInitTime > 30s &&
-            getIApp()->getCrashHandler()->shouldRecover())
+            getApp()->getCrashHandler()->shouldRecover())
         {
             QProcess proc;
 

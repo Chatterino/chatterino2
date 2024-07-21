@@ -519,7 +519,7 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
         break;
     }
 
-    getIApp()->getWindows()->forceLayoutChannelViews();
+    getApp()->getWindows()->forceLayoutChannelViews();
 }
 
 }  // namespace chatterino

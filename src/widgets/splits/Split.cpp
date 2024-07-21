@@ -242,7 +242,7 @@ Split::Split(QWidget *parent)
 
     // update placeholder text on Twitch account change and channel change
     this->bSignals_.emplace_back(
-        getIApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
+        getApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
             this->updateInputPlaceholder();
         }));
     this->signalHolder_.managedConnect(channelChanged, [this] {
@@ -272,7 +272,7 @@ Split::Split(QWidget *parent)
     std::ignore = this->view_->openChannelIn.connect(
         [this](QString twitchChannel, FromTwitchLinkOpenChannelIn openIn) {
             ChannelPtr channel =
-                getIApp()->getTwitchAbstract()->getOrAddChannel(twitchChannel);
+                getApp()->getTwitchAbstract()->getOrAddChannel(twitchChannel);
             switch (openIn)
             {
                 case FromTwitchLinkOpenChannelIn::Split:
@@ -387,7 +387,7 @@ Split::Split(QWidget *parent)
             }
 
             auto channel = this->getChannel();
-            auto *imageUploader = getIApp()->getImageUploader();
+            auto *imageUploader = getApp()->getImageUploader();
 
             auto [images, imageProcessError] =
                 imageUploader->getImages(original);
@@ -452,7 +452,7 @@ Split::Split(QWidget *parent)
         },
         this->signalHolder_);
     this->addShortcuts();
-    this->signalHolder_.managedConnect(getIApp()->getHotkeys()->onItemsUpdated,
+    this->signalHolder_.managedConnect(getApp()->getHotkeys()->onItemsUpdated,
                                        [this]() {
                                            this->clearShortcuts();
                                            this->addShortcuts();
@@ -708,14 +708,14 @@ void Split::addShortcuts()
              QString requestedText = arguments.at(0).replace('\n', ' ');
 
              QString inputText = this->getInput().getInputText();
-             QString message = getIApp()->getCommands()->execCustomCommand(
+             QString message = getApp()->getCommands()->execCustomCommand(
                  requestedText.split(' '), Command{"(hotkey)", requestedText},
                  true, this->getChannel(), nullptr,
                  {
                      {"input.text", inputText},
                  });
 
-             message = getIApp()->getCommands()->execCommand(
+             message = getApp()->getCommands()->execCommand(
                  message, this->getChannel(), false);
              this->getChannel()->sendMessage(message);
              return "";
@@ -750,24 +750,24 @@ void Split::addShortcuts()
 
              if (mode == 0)
              {
-                 getIApp()->getNotifications()->removeChannelNotification(
+                 getApp()->getNotifications()->removeChannelNotification(
                      this->getChannel()->getName(), Platform::Twitch);
              }
              else if (mode == 1)
              {
-                 getIApp()->getNotifications()->addChannelNotification(
+                 getApp()->getNotifications()->addChannelNotification(
                      this->getChannel()->getName(), Platform::Twitch);
              }
              else
              {
-                 getIApp()->getNotifications()->updateChannelNotification(
+                 getApp()->getNotifications()->updateChannelNotification(
                      this->getChannel()->getName(), Platform::Twitch);
              }
              return "";
          }},
     };
 
-    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
+    this->shortcuts_ = getApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::Split, actions, this);
 }
 
@@ -796,7 +796,7 @@ void Split::updateInputPlaceholder()
         return;
     }
 
-    auto user = getIApp()->getAccounts()->twitch.getCurrent();
+    auto user = getApp()->getAccounts()->twitch.getCurrent();
     QString placeholderText;
 
     if (user->isAnon())
@@ -806,7 +806,7 @@ void Split::updateInputPlaceholder()
     else
     {
         placeholderText = QString("Send message as %1...")
-                              .arg(getIApp()
+                              .arg(getApp()
                                        ->getAccounts()
                                        ->twitch.getCurrent()
                                        ->getUserName());
@@ -817,7 +817,7 @@ void Split::updateInputPlaceholder()
 
 void Split::joinChannelInNewTab(ChannelPtr channel)
 {
-    auto &nb = getIApp()->getWindows()->getMainWindow().getNotebook();
+    auto &nb = getApp()->getWindows()->getMainWindow().getNotebook();
     SplitContainer *container = nb.addPage(true);
 
     Split *split = new Split(container);
@@ -907,7 +907,7 @@ void Split::setChannel(IndirectChannel newChannel)
     this->actionRequested.invoke(Action::RefreshTab);
 
     // Queue up save because: Split channel changed
-    getIApp()->getWindows()->queueSave();
+    getApp()->getWindows()->queueSave();
 }
 
 void Split::setModerationMode(bool value)
@@ -1001,7 +1001,7 @@ void Split::keyReleaseEvent(QKeyEvent *event)
 void Split::resizeEvent(QResizeEvent *event)
 {
     // Queue up save because: Split resized
-    getIApp()->getWindows()->queueSave();
+    getApp()->getWindows()->queueSave();
 
     BaseWidget::resizeEvent(event);
 
@@ -1122,8 +1122,7 @@ void Split::openInBrowser()
 
 void Split::openWhispersInBrowser()
 {
-    auto userName =
-        getIApp()->getAccounts()->twitch.getCurrent()->getUserName();
+    auto userName = getApp()->getAccounts()->twitch.getCurrent()->getUserName();
     QDesktopServices::openUrl("https://twitch.tv/popout/moderator/" + userName +
                               "/whispers");
 }
@@ -1211,7 +1210,7 @@ void Split::showChatterList()
         auto *item = new QListWidgetItem();
         item->setText(text);
         item->setFont(
-            getIApp()->getFonts()->getFont(FontStyle::ChatMedium, 1.0));
+            getApp()->getFonts()->getFont(FontStyle::ChatMedium, 1.0));
         return item;
     };
 
@@ -1261,7 +1260,7 @@ void Split::showChatterList()
     auto loadChatters = [=](auto modList, auto vipList, bool isBroadcaster) {
         getHelix()->getChatters(
             twitchChannel->roomId(),
-            getIApp()->getAccounts()->twitch.getCurrent()->getUserId(), 50000,
+            getApp()->getAccounts()->twitch.getCurrent()->getUserId(), 50000,
             [=](auto chatters) {
                 auto broadcaster = channel->getName().toLower();
                 QStringList chatterList;
@@ -1426,8 +1425,8 @@ void Split::showChatterList()
          }},
     };
 
-    getIApp()->getHotkeys()->shortcutsForCategory(HotkeyCategory::PopupWindow,
-                                                  actions, chatterDock);
+    getApp()->getHotkeys()->shortcutsForCategory(HotkeyCategory::PopupWindow,
+                                                 actions, chatterDock);
 
     dockVbox->addWidget(searchBar);
     dockVbox->addWidget(loadingLabel);
@@ -1490,7 +1489,7 @@ void Split::showSearch(bool singleChannel)
     }
 
     // Pass every ChannelView for every Split across the app to the search popup
-    auto &notebook = getIApp()->getWindows()->getMainWindow().getNotebook();
+    auto &notebook = getApp()->getWindows()->getMainWindow().getNotebook();
     for (int i = 0; i < notebook.getPageCount(); ++i)
     {
         auto *container = dynamic_cast<SplitContainer *>(notebook.getPageAt(i));
@@ -1509,7 +1508,7 @@ void Split::showSearch(bool singleChannel)
 void Split::reloadChannelAndSubscriberEmotes()
 {
     auto channel = this->getChannel();
-    getIApp()->getAccounts()->twitch.getCurrent()->loadEmotes(channel);
+    getApp()->getAccounts()->twitch.getCurrent()->loadEmotes(channel);
 
     if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {

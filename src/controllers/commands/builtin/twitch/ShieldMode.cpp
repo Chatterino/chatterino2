@@ -22,7 +22,7 @@ QString toggleShieldMode(const CommandContext &ctx, bool isActivating)
         return {};
     }
 
-    auto user = getIApp()->getAccounts()->twitch.getCurrent();
+    auto user = getApp()->getAccounts()->twitch.getCurrent();
 
     // Avoid Helix calls without Client ID and/or OAuth Token
     if (user->isAnon())

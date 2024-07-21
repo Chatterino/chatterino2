@@ -130,7 +130,7 @@ std::optional<std::shared_ptr<Paint>> parsePaint(const QJsonObject &paintJson)
 
 namespace chatterino {
 
-void SeventvPaints::initialize(Settings & /*settings*/, const Paths & /*paths*/)
+SeventvPaints::SeventvPaints()
 {
     this->loadSeventvPaints();
 }
@@ -192,7 +192,7 @@ void SeventvPaints::assignPaintToUser(const QString &paintID,
         if (changed)
         {
             postToThread([] {
-                getIApp()->getWindows()->invalidateChannelViewBuffers();
+                getApp()->getWindows()->invalidateChannelViewBuffers();
             });
         }
     }

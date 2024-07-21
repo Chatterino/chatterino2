@@ -68,7 +68,7 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
         this->hideCompletionPopup();
     });
     this->scaleChangedEvent(this->scale());
-    this->signalHolder_.managedConnect(getIApp()->getHotkeys()->onItemsUpdated,
+    this->signalHolder_.managedConnect(getApp()->getHotkeys()->onItemsUpdated,
                                        [this]() {
                                            this->clearShortcuts();
                                            this->addShortcuts();
@@ -77,34 +77,33 @@ SplitInput::SplitInput(QWidget *parent, Split *_chatWidget,
 
 void SplitInput::initLayout()
 {
-    auto *app = getIApp();
+    auto *app = getApp();
     LayoutCreator<SplitInput> layoutCreator(this);
 
     auto layout =
         layoutCreator.setLayoutType<QVBoxLayout>().withoutMargin().assign(
             &this->ui_.vbox);
     layout->setSpacing(0);
-    auto marginPx = this->marginForTheme();
-    layout->setContentsMargins(marginPx, marginPx, marginPx, marginPx);
+    this->applyOuterMargin();
 
     // reply label stuff
     auto replyWrapper =
         layout.emplace<QWidget>().assign(&this->ui_.replyWrapper);
-    replyWrapper->setContentsMargins(0, 0, 0, 0);
+    replyWrapper->setContentsMargins(0, 0, 1, 1);
 
     auto replyVbox =
         replyWrapper.setLayoutType<QVBoxLayout>().withoutMargin().assign(
             &this->ui_.replyVbox);
-    replyVbox->setSpacing(0);
+    replyVbox->setSpacing(1);
 
     auto replyHbox =
         replyVbox.emplace<QHBoxLayout>().assign(&this->ui_.replyHbox);
 
     auto messageVbox = layoutCreator.setLayoutType<QVBoxLayout>();
     this->ui_.replyMessage = new MessageView();
-    messageVbox->addWidget(this->ui_.replyMessage, 1, Qt::AlignLeft);
+    messageVbox->addWidget(this->ui_.replyMessage, 0, Qt::AlignLeft);
     messageVbox->setContentsMargins(10, 0, 0, 0);
-    replyVbox->addLayout(messageVbox->layout(), 1);
+    replyVbox->addLayout(messageVbox->layout(), 0);
 
     auto replyLabel = replyHbox.emplace<QLabel>().assign(&this->ui_.replyLabel);
     replyLabel->setAlignment(Qt::AlignLeft);
@@ -122,7 +121,7 @@ void SplitInput::initLayout()
 
     auto inputWrapper =
         layout.emplace<QWidget>().assign(&this->ui_.inputWrapper);
-    inputWrapper->setContentsMargins(0, 0, 0, 0);
+    inputWrapper->setContentsMargins(1, 1, 1, 1);
 
     // hbox for input, right box
     auto hboxLayout =
@@ -220,7 +219,7 @@ void SplitInput::initLayout()
 
 void SplitInput::scaleChangedEvent(float scale)
 {
-    auto *app = getIApp();
+    auto *app = getApp();
     // update the icon size of the buttons
     this->updateEmoteButton();
     this->updateCancelReplyButton();
@@ -231,7 +230,7 @@ void SplitInput::scaleChangedEvent(float scale)
         this->setMaximumHeight(this->scaledMaxHeight());
         if (this->replyTarget_ != nullptr)
         {
-            this->ui_.vbox->setSpacing(this->marginForTheme() * 2);
+            this->ui_.vbox->setSpacing(this->marginForTheme());
         }
     }
     this->ui_.textEdit->setFont(
@@ -271,11 +270,10 @@ void SplitInput::themeChangedEvent()
     }
 
     // update vbox
-    auto marginPx = this->marginForTheme();
-    this->ui_.vbox->setContentsMargins(marginPx, marginPx, marginPx, marginPx);
+    this->applyOuterMargin();
     if (this->replyTarget_ != nullptr)
     {
-        this->ui_.vbox->setSpacing(this->marginForTheme() * 2);
+        this->ui_.vbox->setSpacing(this->marginForTheme());
     }
 }
 
@@ -354,7 +352,7 @@ QString SplitInput::handleSendMessage(const std::vector<QString> &arguments)
 
         message = message.replace('\n', ' ');
         QString sendMessage =
-            getIApp()->getCommands()->execCommand(message, c, false);
+            getApp()->getCommands()->execCommand(message, c, false);
 
         c->sendMessage(sendMessage);
 
@@ -390,7 +388,7 @@ QString SplitInput::handleSendMessage(const std::vector<QString> &arguments)
 
         message = message.replace('\n', ' ');
         QString sendMessage =
-            getIApp()->getCommands()->execCommand(message, c, false);
+            getApp()->getCommands()->execCommand(message, c, false);
 
         // Reply within TwitchChannel
         tc->sendReply(sendMessage, this->replyTarget_->id);
@@ -415,7 +413,7 @@ QString SplitInput::handleSendMessage(const std::vector<QString> &arguments)
 
     message = message.replace('\n', ' ');
     QString sendMessage =
-        getIApp()->getCommands()->execCommand(message, c, false);
+        getApp()->getCommands()->execCommand(message, c, false);
 
     // Reply within TwitchChannel
     tc->sendReply(sendMessage, this->replyTarget_->id);
@@ -700,7 +698,7 @@ void SplitInput::addShortcuts()
          }},
     };
 
-    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
+    this->shortcuts_ = getApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::SplitInput, actions, this->parentWidget());
 }
 
@@ -985,7 +983,7 @@ void SplitInput::setInputText(const QString &newInputText)
 
 void SplitInput::editTextChanged()
 {
-    auto *app = getIApp();
+    auto *app = getApp();
 
     // set textLengthLabel value
     QString text = this->ui_.textEdit->toPlainText();
@@ -1095,26 +1093,26 @@ void SplitInput::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
 
-    int s = this->marginForTheme();
     QColor borderColor =
         this->theme->isLightTheme() ? QColor("#ccc") : QColor("#333");
 
     QRect baseRect = this->rect();
-    QRect inputBoxRect = this->ui_.inputWrapper->geometry();
-    inputBoxRect.setX(baseRect.x());
-    inputBoxRect.setWidth(baseRect.width());
+    baseRect.setWidth(baseRect.width() - 1);
 
-    painter.fillRect(inputBoxRect, this->theme->splits.input.background);
+    auto *inputWrap = this->ui_.inputWrapper;
+    auto inputBoxRect = inputWrap->geometry();
+    inputBoxRect.setSize(inputBoxRect.size() - QSize{1, 1});
+
+    painter.setBrush({this->theme->splits.input.background});
     painter.setPen(borderColor);
     painter.drawRect(inputBoxRect);
 
     if (this->enableInlineReplying_ && this->replyTarget_ != nullptr)
     {
-        QRect replyRect = this->ui_.replyWrapper->geometry();
-        replyRect.setX(baseRect.x());
-        replyRect.setWidth(baseRect.width());
+        auto replyRect = this->ui_.replyWrapper->geometry();
+        replyRect.setSize(replyRect.size() - QSize{1, 1});
 
-        painter.fillRect(replyRect, this->theme->splits.input.background);
+        painter.setBrush(this->theme->splits.input.background);
         painter.setPen(borderColor);
         painter.drawRect(replyRect);
 
@@ -1140,7 +1138,7 @@ void SplitInput::resizeEvent(QResizeEvent *event)
         this->ui_.textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     }
 
-    this->ui_.replyMessage->setWidth(this->width());
+    this->ui_.replyMessage->setWidth(this->replyMessageWidth());
 }
 
 void SplitInput::giveFocus(Qt::FocusReason reason)
@@ -1170,11 +1168,11 @@ void SplitInput::setReply(MessagePtr target)
 
     if (this->enableInlineReplying_)
     {
+        this->ui_.replyMessage->setWidth(this->replyMessageWidth());
         this->ui_.replyMessage->setMessage(this->replyTarget_);
-        this->ui_.replyMessage->setWidth(this->width());
 
         // add spacing between reply box and input box
-        this->ui_.vbox->setSpacing(this->marginForTheme() * 2);
+        this->ui_.vbox->setSpacing(this->marginForTheme());
         if (!this->isHidden())
         {
             // update maximum height to give space for message
@@ -1272,6 +1270,17 @@ int SplitInput::marginForTheme() const
     {
         return int(1 * this->scale());
     }
+}
+
+void SplitInput::applyOuterMargin()
+{
+    auto margin = std::max(this->marginForTheme() - 1, 0);
+    this->ui_.vbox->setContentsMargins(margin, margin, margin, margin);
+}
+
+int SplitInput::replyMessageWidth() const
+{
+    return this->ui_.inputWrapper->width() - 1 - 10;
 }
 
 }  // namespace chatterino

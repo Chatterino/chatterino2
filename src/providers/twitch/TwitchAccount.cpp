@@ -111,7 +111,7 @@ void TwitchAccount::loadBlocks()
     this->ignoresUserIds_.clear();
 
     getHelix()->loadBlocks(
-        getIApp()->getAccounts()->twitch.getCurrent()->userId_,
+        getApp()->getAccounts()->twitch.getCurrent()->userId_,
         [this](const std::vector<HelixBlock> &blocks) {
             assertInGuiThread();
 
@@ -327,7 +327,7 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
 
                         emoteSet->emotes.push_back(TwitchEmote{id, code});
 
-                        auto emote = getIApp()
+                        auto emote = getApp()
                                          ->getEmotes()
                                          ->getTwitchEmotes()
                                          ->getOrCreateEmote(id, code);
@@ -501,7 +501,7 @@ void TwitchAccount::loadSeventvUserID()
             emoteSetID,
             [twitchUserID, emoteSetID](auto &&emoteMap,
                                        const auto & /*emoteSetName*/) {
-                getIApp()->getSeventvPersonalEmotes()->addEmoteSetForUser(
+                getApp()->getSeventvPersonalEmotes()->addEmoteSetForUser(
                     emoteSetID, std::forward<decltype(emoteMap)>(emoteMap),
                     twitchUserID);
             },
@@ -513,7 +513,7 @@ void TwitchAccount::loadSeventvUserID()
             });
     };
 
-    auto *seventv = getIApp()->getSeventvAPI();
+    auto *seventv = getApp()->getSeventvAPI();
     if (!seventv)
     {
         qCWarning(chatterinoSeventv)

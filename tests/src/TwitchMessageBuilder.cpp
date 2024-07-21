@@ -33,6 +33,12 @@ namespace {
 class MockApplication : mock::EmptyApplication
 {
 public:
+    MockApplication()
+        : settings(this->settingsDir.filePath("settings.json"))
+        , highlights(this->settings, &this->accounts)
+    {
+    }
+
     IEmotes *getEmotes() override
     {
         return &this->emotes;
@@ -98,6 +104,7 @@ public:
         return &this->streamerMode;
     }
 
+    Settings settings;
     AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;

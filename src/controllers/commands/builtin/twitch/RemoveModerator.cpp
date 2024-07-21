@@ -32,7 +32,7 @@ QString removeModerator(const CommandContext &ctx)
         return "";
     }
 
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addSystemMessage(

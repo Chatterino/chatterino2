@@ -204,7 +204,7 @@ public:
                 .index = combo->currentIndex(),
                 .combobox = combo,
             });
-            getIApp()->getWindows()->forceLayoutChannelViews();
+            getApp()->getWindows()->forceLayoutChannelViews();
         };
 
         if (listenToActivated)
@@ -268,7 +268,7 @@ public:
              setValue = std::move(setValue)](const int newIndex) {
                 setting = setValue(DropdownArgs{combo->itemText(newIndex),
                                                 combo->currentIndex(), combo});
-                getIApp()->getWindows()->forceLayoutChannelViews();
+                getApp()->getWindows()->forceLayoutChannelViews();
             });
 
         return combo;
@@ -312,7 +312,7 @@ public:
                 // Instead, it's up to the getters to make sure that the setting is legic - see the enum_cast above
                 // You could also use the settings `getEnum` function
                 setting = newText;
-                getIApp()->getWindows()->forceLayoutChannelViews();
+                getApp()->getWindows()->forceLayoutChannelViews();
             });
 
         return combo;

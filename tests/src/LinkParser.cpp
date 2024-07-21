@@ -23,8 +23,8 @@ struct Case {
             "", "_", "__", "<", "<<", "<_<", "(((", "<*_~(", "**", "~~",
         };
         QStringList suffixes{
-            "",  ">", "?",  "!",   ".",      ",",  ":",
-            "*", "~", ">>", "?!.", "~~,*!?", "**",
+            "",   ">",   "?",      "!",  ".",  ",",  ":",  "*",    "~",
+            ">>", "?!.", "~~,*!?", "**", ").", "),", ",)", ")),.", ")?",
         };
 
         for (const auto &prefix : prefixes)
@@ -89,14 +89,21 @@ TEST(LinkParser, parseDomainLinks)
         {"", "https.cat"},
         {"", "httpsd.cat"},
         {"", "http.cat", "/200"},
-        {"", "http.cat", "/200("},
-        {"", "a.com", "?("},
-        {"", "a.com", "#("},
+        {"", "http.cat", "/200()"},
+        {"", "a.com", "?()"},
+        {"", "a.com", "#()"},
         {"", "a.com", "/__my_user__"},
         {"", "a.b.c.-._.1.com", ""},
         {"", "0123456789.com", ""},
         {"", "ABCDEFGHIJKLMNOPQRSTUVWXYZ.com", ""},
         {"", "abcdefghijklmnopqrstuvwxyz.com", ""},
+        {"", "example.com", "/foo(bar)"},
+        {"", "example.com", "/foo((bar))"},
+        {"", "example.com", "/(f)(o)(o)(b)(a)r"},
+        {"", "example.com", "/foobar()()"},
+        {"", "example.com", "/foobar()(())baz"},
+        {"", "example.com", "/(foo)"},
+        {"", "example.com", "/()"},
         // non-ASCII characters are allowed
         {"", u"köln.de"_s, ""},
         {"", u"ü.com"_s, ""},
@@ -246,6 +253,8 @@ TEST(LinkParser, doesntParseInvalidLinks)
         "@@@.com",
         "%%%.com",
         "*.com",
+        "example.com(foo)",
+        "example.com()",
     };
 
     for (const auto &input : inputs)
