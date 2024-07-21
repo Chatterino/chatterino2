@@ -4,6 +4,8 @@
 #include "mocks/EmptyApplication.hpp"
 #include "singletons/Settings.hpp"
 
+#include <QString>
+
 namespace chatterino::mock {
 
 /**
