@@ -148,7 +148,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , linkResolver(new LinkResolver)
     , streamerMode(new StreamerMode)
 #ifdef CHATTERINO_HAVE_PLUGINS
-    , plugins(&this->emplace(new PluginController(paths)))
+    , plugins(new PluginController(paths))
 #endif
     , updates(_updates)
 {
@@ -165,6 +165,7 @@ Application::~Application() = default;
 
 void Application::fakeDtor()
 {
+    this->plugins.reset();
     this->twitchPubSub.reset();
     this->twitchBadges.reset();
     this->twitchLiveController.reset();
@@ -239,6 +240,10 @@ void Application::initialize(Settings &settings, const Paths &paths)
     // XXX: Loading Twitch badges after Helix has been initialized, which only happens after
     // the AccountController initialize has been called
     this->twitchBadges->loadTwitchBadges();
+
+#ifdef CHATTERINO_HAVE_PLUGINS
+    this->plugins->initialize(settings);
+#endif
 
     // Show crash message.
     // On Windows, the crash message was already shown.
@@ -514,8 +519,9 @@ SeventvAPI *Application::getSeventvAPI()
 PluginController *Application::getPlugins()
 {
     assertInGuiThread();
+    assert(this->plugins);
 
-    return this->plugins;
+    return this->plugins.get();
 }
 #endif
 

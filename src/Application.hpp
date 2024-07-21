@@ -173,7 +173,7 @@ private:
     std::unique_ptr<ILinkResolver> linkResolver;
     std::unique_ptr<IStreamerMode> streamerMode;
 #ifdef CHATTERINO_HAVE_PLUGINS
-    PluginController *const plugins{};
+    std::unique_ptr<PluginController> plugins;
 #endif
 
 public:

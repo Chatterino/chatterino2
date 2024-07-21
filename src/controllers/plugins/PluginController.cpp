@@ -35,10 +35,8 @@ PluginController::PluginController(const Paths &paths_)
 {
 }
 
-void PluginController::initialize(Settings &settings, const Paths &paths)
+void PluginController::initialize(Settings &settings)
 {
-    (void)paths;
-
     // actuallyInitialize will be called by this connection
     settings.pluginsEnabled.connect([this](bool enabled) {
         if (enabled)
