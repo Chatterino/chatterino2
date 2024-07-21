@@ -134,7 +134,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , highlights(new HighlightController(_settings, this->accounts))
     , twitch(new TwitchIrcServer)
     , ffzBadges(new FfzBadges)
-    , seventvBadges(&this->emplace<SeventvBadges>())
+    , seventvBadges(new SeventvBadges)
     , userData(new UserDataController(paths))
     , sound(makeSoundController(_settings))
     , twitchLiveController(new TwitchLiveController)
@@ -179,6 +179,7 @@ void Application::fakeDtor()
     this->crashHandler.reset();
     this->seventvAPI.reset();
     this->highlights.reset();
+    this->seventvBadges.reset();
     this->ffzBadges.reset();
     // this->twitch.reset();
     this->imageUploader.reset();
@@ -444,8 +445,9 @@ FfzBadges *Application::getFfzBadges()
 SeventvBadges *Application::getSeventvBadges()
 {
     // SeventvBadges handles its own locks, so we don't need to assert that this is called in the GUI thread
+    assert(this->seventvBadges);
 
-    return this->seventvBadges;
+    return this->seventvBadges.get();
 }
 
 IUserDataController *Application::getUserData()

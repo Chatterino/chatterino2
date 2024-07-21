@@ -159,7 +159,7 @@ private:
     std::unique_ptr<HighlightController> highlights;
     std::unique_ptr<TwitchIrcServer> twitch;
     std::unique_ptr<FfzBadges> ffzBadges;
-    SeventvBadges *const seventvBadges{};
+    std::unique_ptr<SeventvBadges> seventvBadges;
     std::unique_ptr<UserDataController> userData;
     std::unique_ptr<ISoundController> sound;
     std::unique_ptr<TwitchLiveController> twitchLiveController;
