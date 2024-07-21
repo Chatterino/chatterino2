@@ -12,9 +12,14 @@ namespace chatterino::mock {
 class BaseApplication : public EmptyApplication
 {
 public:
-    // TODO: implement ctor where you can insert a settings body that will be loaded
     BaseApplication()
         : settings(this->settingsDir.filePath("settings.json"))
+    {
+    }
+
+    explicit BaseApplication(const QString &settingsData)
+        : EmptyApplication(settingsData)
+        , settings(this->settingsDir.filePath("settings.json"))
     {
     }
 
