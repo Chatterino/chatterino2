@@ -109,7 +109,7 @@ void UserHighlightModel::customRowSetData(
         break;
     }
 
-    getIApp()->getWindows()->forceLayoutChannelViews();
+    getApp()->getWindows()->forceLayoutChannelViews();
 }
 
 // row into vector item

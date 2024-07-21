@@ -2,7 +2,6 @@
 
 #include "common/ChatterinoSetting.hpp"
 #include "common/SignalVector.hpp"
-#include "common/Singleton.hpp"
 #include "util/QCompareCaseInsensitive.hpp"
 
 #include <QTimer>
@@ -19,10 +18,13 @@ enum class Platform : uint8_t {
     Twitch,  // 0
 };
 
-class NotificationController final : public Singleton
+class NotificationController final
 {
 public:
-    void initialize(Settings &settings, const Paths &paths) override;
+    NotificationController();
+
+    // Perform an initial load so we don't have to wait for the timer
+    void initialize();
 
     bool isChannelNotified(const QString &channelName, Platform p) const;
     void updateChannelNotification(const QString &channelName, Platform p);

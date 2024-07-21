@@ -50,7 +50,7 @@ QString sendAnnouncementColor(const CommandContext &ctx,
         return "";
     }
 
-    auto user = getIApp()->getAccounts()->twitch.getCurrent();
+    auto user = getApp()->getAccounts()->twitch.getCurrent();
     if (user->isAnon())
     {
         ctx.channel->addSystemMessage(

@@ -380,28 +380,28 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
         case TAB_TWITCH: {
             if (this->ui_.twitch.channel->isChecked())
             {
-                return getIApp()->getTwitchAbstract()->getOrAddChannel(
+                return getApp()->getTwitchAbstract()->getOrAddChannel(
                     this->ui_.twitch.channelName->text().trimmed());
             }
             else if (this->ui_.twitch.watching->isChecked())
             {
-                return getIApp()->getTwitch()->getWatchingChannel();
+                return getApp()->getTwitch()->getWatchingChannel();
             }
             else if (this->ui_.twitch.mentions->isChecked())
             {
-                return getIApp()->getTwitch()->getMentionsChannel();
+                return getApp()->getTwitch()->getMentionsChannel();
             }
             else if (this->ui_.twitch.whispers->isChecked())
             {
-                return getIApp()->getTwitch()->getWhispersChannel();
+                return getApp()->getTwitch()->getWhispersChannel();
             }
             else if (this->ui_.twitch.live->isChecked())
             {
-                return getIApp()->getTwitch()->getLiveChannel();
+                return getApp()->getTwitch()->getLiveChannel();
             }
             else if (this->ui_.twitch.automod->isChecked())
             {
-                return getIApp()->getTwitch()->getAutomodChannel();
+                return getApp()->getTwitch()->getAutomodChannel();
             }
         }
         break;
@@ -613,7 +613,7 @@ void SelectChannelDialog::addShortcuts()
         actions.emplace("openTab", nullptr);
     }
 
-    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
+    this->shortcuts_ = getApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 }
 

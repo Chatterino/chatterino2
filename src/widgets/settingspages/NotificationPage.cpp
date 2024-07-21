@@ -97,7 +97,7 @@ NotificationPage::NotificationPage()
                 EditableModelView *view =
                     twitchChannels
                         .emplace<EditableModelView>(
-                            getIApp()->getNotifications()->createModel(
+                            getApp()->getNotifications()->createModel(
                                 nullptr, Platform::Twitch))
                         .getElement();
                 view->setTitles({"Twitch channels"});

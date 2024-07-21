@@ -17,9 +17,10 @@
 #include <QUrl>
 
 namespace ranges = std::ranges;
+
 namespace chatterino {
 
-void NotificationController::initialize(Settings &settings, const Paths &paths)
+NotificationController::NotificationController()
 {
     for (const QString &channelName : this->twitchSetting_.getValue())
     {
@@ -34,12 +35,15 @@ void NotificationController::initialize(Settings &settings, const Paths &paths)
                 this->channelMap[Platform::Twitch].raw());
         });
 
-    this->fetchFakeChannels();
-
     QObject::connect(&this->liveStatusTimer_, &QTimer::timeout, [this] {
         this->fetchFakeChannels();
     });
     this->liveStatusTimer_.start(60 * 1000);
+}
+
+void NotificationController::initialize()
+{
+    this->fetchFakeChannels();
 }
 
 void NotificationController::updateChannelNotification(
@@ -92,7 +96,7 @@ void NotificationController::playSound() const
                   getSettings()->notificationPathSound.getValue())
             : QUrl("qrc:/sounds/ping2.wav");
 
-    getIApp()->getSound()->play(highlightSoundUrl);
+    getApp()->getSound()->play(highlightSoundUrl);
 }
 
 NotificationModel *NotificationController::createModel(QObject *parent,
@@ -109,7 +113,7 @@ void NotificationController::notifyTwitchChannelLive(
     bool showNotification =
         !(getSettings()->suppressInitialLiveNotification &&
           payload.isInitialUpdate) &&
-        !(getIApp()->getStreamerMode()->isEnabled() &&
+        !(getApp()->getStreamerMode()->isEnabled() &&
           getSettings()->streamerModeSuppressLiveNotifications);
     bool playedSound = false;
 
@@ -118,7 +122,7 @@ void NotificationController::notifyTwitchChannelLive(
     {
         if (Toasts::isEnabled())
         {
-            getIApp()->getToasts()->sendChannelNotification(
+            getApp()->getToasts()->sendChannelNotification(
                 payload.channelName, payload.title, Platform::Twitch);
         }
         if (getSettings()->notificationPlaySound)
@@ -128,7 +132,7 @@ void NotificationController::notifyTwitchChannelLive(
         }
         if (getSettings()->notificationFlashTaskbar)
         {
-            getIApp()->getWindows()->sendAlert();
+            getApp()->getWindows()->sendAlert();
         }
     }
 
@@ -136,7 +140,7 @@ void NotificationController::notifyTwitchChannelLive(
     MessageBuilder builder;
     TwitchMessageBuilder::liveMessage(payload.displayName, &builder);
     builder.message().id = payload.channelId;
-    getIApp()->getTwitch()->getLiveChannel()->addMessage(
+    getApp()->getTwitch()->getLiveChannel()->addMessage(
         builder.release(), MessageContext::Original);
 
     // Notify on all channels with a ping sound
@@ -152,7 +156,7 @@ void NotificationController::notifyTwitchChannelOffline(const QString &id) const
 {
     // "delete" old 'CHANNEL is live' message
     LimitedQueueSnapshot<MessagePtr> snapshot =
-        getIApp()->getTwitch()->getLiveChannel()->getMessageSnapshot();
+        getApp()->getTwitch()->getLiveChannel()->getMessageSnapshot();
     int snapshotLength = static_cast<int>(snapshot.size());
 
     int end = std::max(0, snapshotLength - 200);
@@ -177,7 +181,7 @@ void NotificationController::fetchFakeChannels()
     for (size_t i = 0; i < channelMap[Platform::Twitch].raw().size(); i++)
     {
         const auto &name = channelMap[Platform::Twitch].raw()[i];
-        auto chan = getIApp()->getTwitchAbstract()->getChannelOrEmpty(name);
+        auto chan = getApp()->getTwitchAbstract()->getChannelOrEmpty(name);
         if (chan->isEmpty())
         {
             channels.push_back(name);

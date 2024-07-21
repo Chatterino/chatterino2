@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/Singleton.hpp"
 #include "util/QStringHash.hpp"
 
 #include <QString>
@@ -26,7 +25,7 @@ public:
     virtual void add(const std::shared_ptr<TwitchChannel> &newChannel) = 0;
 };
 
-class TwitchLiveController : public ITwitchLiveController, public Singleton
+class TwitchLiveController : public ITwitchLiveController
 {
 public:
     // Controls how often all channels have their stream status refreshed

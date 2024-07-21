@@ -309,7 +309,7 @@ int HTTPRequest::create(lua_State *L)
             L, "cannot get method (1st argument of HTTPRequest.create, "
                "expected a string)");
     }
-    auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
+    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
     if (!pl->hasHTTPPermissionFor(parsedurl))
     {
         return luaL_error(

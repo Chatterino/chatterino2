@@ -56,7 +56,7 @@ namespace {
         {
             button.assign(copyButton);
         }
-        button->setPixmap(getIApp()->getThemes()->buttons.copy);
+        button->setPixmap(getApp()->getThemes()->buttons.copy);
         button->setScaleIndependantSize(18, 18);
         button->setDim(Button::Dim::Lots);
         button->setToolTip(tooltip);
@@ -223,7 +223,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                            .arg(calculateTimeoutDuration(button));
              }
 
-             msg = getIApp()->getCommands()->execCommand(
+             msg = getApp()->getCommands()->execCommand(
                  msg, this->underlyingChannel_, false);
 
              this->underlyingChannel_->sendMessage(msg);
@@ -242,7 +242,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
         {"search", nullptr},
     };
 
-    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
+    this->shortcuts_ = getApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 
     auto layers = LayoutCreator<QWidget>(this->getLayoutContainer())
@@ -295,7 +295,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                         menu->addAction(
                             "Open channel in a new popup window", this,
                             [loginName] {
-                                auto *app = getIApp();
+                                auto *app = getApp();
                                 auto &window = app->getWindows()->createWindow(
                                     WindowType::Popup, true);
                                 auto *split = window.getNotebook()
@@ -309,7 +309,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                         menu->addAction(
                             "Open channel in a new tab", this, [loginName] {
                                 ChannelPtr channel =
-                                    getIApp()
+                                    getApp()
                                         ->getTwitchAbstract()
                                         ->getOrAddChannel(loginName);
                                 auto &nb = getApp()
@@ -414,25 +414,25 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
 
         QObject::connect(mod.getElement(), &Button::leftClicked, [this] {
             QString value = "/mod " + this->userName_;
-            value = getIApp()->getCommands()->execCommand(
+            value = getApp()->getCommands()->execCommand(
                 value, this->underlyingChannel_, false);
             this->underlyingChannel_->sendMessage(value);
         });
         QObject::connect(unmod.getElement(), &Button::leftClicked, [this] {
             QString value = "/unmod " + this->userName_;
-            value = getIApp()->getCommands()->execCommand(
+            value = getApp()->getCommands()->execCommand(
                 value, this->underlyingChannel_, false);
             this->underlyingChannel_->sendMessage(value);
         });
         QObject::connect(vip.getElement(), &Button::leftClicked, [this] {
             QString value = "/vip " + this->userName_;
-            value = getIApp()->getCommands()->execCommand(
+            value = getApp()->getCommands()->execCommand(
                 value, this->underlyingChannel_, false);
             this->underlyingChannel_->sendMessage(value);
         });
         QObject::connect(unvip.getElement(), &Button::leftClicked, [this] {
             QString value = "/unvip " + this->userName_;
-            value = getIApp()->getCommands()->execCommand(
+            value = getApp()->getCommands()->execCommand(
                 value, this->underlyingChannel_, false);
             this->underlyingChannel_->sendMessage(value);
         });
@@ -450,7 +450,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
             if (twitchChannel)
             {
                 bool isMyself =
-                    QString::compare(getIApp()
+                    QString::compare(getApp()
                                          ->getAccounts()
                                          ->twitch.getCurrent()
                                          ->getUserName(),
@@ -499,7 +499,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                     if (this->underlyingChannel_)
                     {
                         QString value = "/ban " + this->userName_;
-                        value = getIApp()->getCommands()->execCommand(
+                        value = getApp()->getCommands()->execCommand(
                             value, this->underlyingChannel_, false);
 
                         this->underlyingChannel_->sendMessage(value);
@@ -510,7 +510,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                     if (this->underlyingChannel_)
                     {
                         QString value = "/unban " + this->userName_;
-                        value = getIApp()->getCommands()->execCommand(
+                        value = getApp()->getCommands()->execCommand(
                             value, this->underlyingChannel_, false);
 
                         this->underlyingChannel_->sendMessage(value);
@@ -523,7 +523,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                         QString value = "/timeout " + this->userName_ + " " +
                                         QString::number(arg);
 
-                        value = getIApp()->getCommands()->execCommand(
+                        value = getApp()->getCommands()->execCommand(
                             value, this->underlyingChannel_, false);
 
                         this->underlyingChannel_->sendMessage(value);
@@ -572,7 +572,7 @@ void UserInfoPopup::themeChangedEvent()
     for (auto &&child : this->findChildren<QCheckBox *>())
     {
         child->setFont(
-            getIApp()->getFonts()->getFont(FontStyle::UiMedium, this->scale()));
+            getApp()->getFonts()->getFont(FontStyle::UiMedium, this->scale()));
     }
 }
 
@@ -597,7 +597,7 @@ void UserInfoPopup::installEvents()
     QObject::connect(
         this->ui_.block, &QCheckBox::stateChanged,
         [this](int newState) mutable {
-            auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+            auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
 
             const auto reenableBlockCheckbox = [this] {
                 this->ui_.block->setEnabled(true);
@@ -614,7 +614,7 @@ void UserInfoPopup::installEvents()
                 case Qt::CheckState::Unchecked: {
                     this->ui_.block->setEnabled(false);
 
-                    getIApp()->getAccounts()->twitch.getCurrent()->unblockUser(
+                    getApp()->getAccounts()->twitch.getCurrent()->unblockUser(
                         this->userId_, this,
                         [this, reenableBlockCheckbox, currentUser] {
                             this->channel_->addSystemMessage(
@@ -641,7 +641,7 @@ void UserInfoPopup::installEvents()
                 case Qt::CheckState::Checked: {
                     this->ui_.block->setEnabled(false);
 
-                    getIApp()->getAccounts()->twitch.getCurrent()->blockUser(
+                    getApp()->getAccounts()->twitch.getCurrent()->blockUser(
                         this->userId_, this,
                         [this, reenableBlockCheckbox, currentUser] {
                             this->channel_->addSystemMessage(
@@ -798,7 +798,7 @@ void UserInfoPopup::updateLatestMessages()
 void UserInfoPopup::updateUserData()
 {
     std::weak_ptr<bool> hack = this->lifetimeHack_;
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
 
     const auto onUserFetchFailed = [this, hack] {
         if (!hack.lock())
@@ -858,7 +858,7 @@ void UserInfoPopup::updateUserData()
         this->ui_.userIDLabel->setText(TEXT_USER_ID + user.id);
         this->ui_.userIDLabel->setProperty("copy-text", user.id);
 
-        if (getIApp()->getStreamerMode()->isEnabled() &&
+        if (getApp()->getStreamerMode()->isEnabled() &&
             getSettings()->streamerModeHideUsercardAvatars)
         {
             this->ui_.avatarButton->setPixmap(getResources().streamerMode);

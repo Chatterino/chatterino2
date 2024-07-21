@@ -95,7 +95,7 @@ bool IgnorePhrase::containsEmote() const
 {
     if (!this->emotesChecked_)
     {
-        const auto &accvec = getIApp()->getAccounts()->twitch.accounts;
+        const auto &accvec = getApp()->getAccounts()->twitch.accounts;
         for (const auto &acc : accvec)
         {
             const auto &accemotes = *acc->accessEmotes();

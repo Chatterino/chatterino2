@@ -58,7 +58,7 @@ QString formatSize(qint64 size)
 QString fetchLogDirectorySize()
 {
     QString logsDirectoryPath = getSettings()->logPath.getValue().isEmpty()
-                                    ? getIApp()->getPaths().messageLogDirectory
+                                    ? getApp()->getPaths().messageLogDirectory
                                     : getSettings()->logPath;
 
     auto logsSize = dirSize(logsDirectoryPath);
@@ -83,20 +83,20 @@ ModerationPage::ModerationPage()
         auto logsPathLabel = logs.emplace<QLabel>();
 
         // Logs (copied from LoggingMananger)
-        getSettings()->logPath.connect([logsPathLabel](const QString &logPath,
-                                                       auto) mutable {
-            QString pathOriginal =
-                logPath.isEmpty() ? getIApp()->getPaths().messageLogDirectory
-                                  : logPath;
+        getSettings()->logPath.connect(
+            [logsPathLabel](const QString &logPath, auto) mutable {
+                QString pathOriginal =
+                    logPath.isEmpty() ? getApp()->getPaths().messageLogDirectory
+                                      : logPath;
 
-            QString pathShortened =
-                "Logs are saved at <a href=\"file:///" + pathOriginal +
-                "\"><span style=\"color: white;\">" +
-                shortenString(pathOriginal, 50) + "</span></a>";
+                QString pathShortened =
+                    "Logs are saved at <a href=\"file:///" + pathOriginal +
+                    "\"><span style=\"color: white;\">" +
+                    shortenString(pathOriginal, 50) + "</span></a>";
 
-            logsPathLabel->setText(pathShortened);
-            logsPathLabel->setToolTip(pathOriginal);
-        });
+                logsPathLabel->setText(pathShortened);
+                logsPathLabel->setToolTip(pathOriginal);
+            });
 
         logsPathLabel->setTextFormat(Qt::RichText);
         logsPathLabel->setTextInteractionFlags(Qt::TextBrowserInteraction |

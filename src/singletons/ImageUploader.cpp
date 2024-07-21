@@ -54,7 +54,7 @@ void ImageUploader::logToFile(const QString &originalFilePath,
 {
     const QString logFileName =
         combinePath((getSettings()->logPath.getValue().isEmpty()
-                         ? getIApp()->getPaths().messageLogDirectory
+                         ? getApp()->getPaths().messageLogDirectory
                          : getSettings()->logPath),
                     "ImageUploader.json");
 
@@ -121,10 +121,6 @@ QString getLinkFromResponse(NetworkResult response, QString pattern)
         match = regExp.match(pattern);
     }
     return pattern;
-}
-
-void ImageUploader::save()
-{
 }
 
 void ImageUploader::sendImageUploadRequest(RawImageData imageData,

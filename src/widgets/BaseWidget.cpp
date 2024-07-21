@@ -18,7 +18,7 @@ namespace chatterino {
 
 BaseWidget::BaseWidget(QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
-    , theme(getIApp()->getThemes())
+    , theme(getApp()->getThemes())
 {
     this->signalHolder_.managedConnect(this->theme->updated, [this]() {
         this->themeChangedEvent();
