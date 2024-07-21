@@ -21,8 +21,6 @@ class Emotes final : public IEmotes
 public:
     Emotes();
 
-    bool isIgnoredEmote(const QString &emote);
-
     ITwitchEmotes *getTwitchEmotes() final
     {
         return &this->twitch;

@@ -9,9 +9,4 @@ Emotes::Emotes()
     this->gifTimer.initialize();
 }
 
-bool Emotes::isIgnoredEmote(const QString &)
-{
-    return false;
-}
-
 }  // namespace chatterino
