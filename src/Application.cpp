@@ -124,7 +124,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , accounts(&this->emplace<AccountController>())
     , hotkeys(new HotkeyController)
     , windows(&this->emplace(new WindowManager(paths)))
-    , toasts(&this->emplace<Toasts>())
+    , toasts(new Toasts)
     , imageUploader(new ImageUploader)
     , seventvAPI(new SeventvAPI)
     , crashHandler(new CrashHandler(paths))
@@ -187,6 +187,7 @@ void Application::fakeDtor()
     this->fonts.reset();
     this->sound.reset();
     this->userData.reset();
+    this->toasts.reset();
     this->emotes.reset();
     this->themes.reset();
 }
@@ -400,8 +401,9 @@ WindowManager *Application::getWindows()
 Toasts *Application::getToasts()
 {
     assertInGuiThread();
+    assert(this->toasts);
 
-    return this->toasts;
+    return this->toasts.get();
 }
 
 CrashHandler *Application::getCrashHandler()

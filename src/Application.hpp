@@ -150,7 +150,7 @@ private:
     AccountController *const accounts{};
     std::unique_ptr<HotkeyController> hotkeys;
     WindowManager *const windows{};
-    Toasts *const toasts{};
+    std::unique_ptr<Toasts> toasts;
     std::unique_ptr<ImageUploader> imageUploader;
     std::unique_ptr<SeventvAPI> seventvAPI;
     std::unique_ptr<CrashHandler> crashHandler;
