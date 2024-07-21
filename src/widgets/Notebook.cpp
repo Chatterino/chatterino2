@@ -97,7 +97,7 @@ NotebookTab *Notebook::addPageAt(QWidget *page, int position, QString title,
                                  bool select)
 {
     // Queue up save because: Tab added
-    getIApp()->getWindows()->queueSave();
+    getApp()->getWindows()->queueSave();
 
     auto *tab = new NotebookTab(this);
     tab->page = page;
@@ -134,7 +134,7 @@ NotebookTab *Notebook::addPageAt(QWidget *page, int position, QString title,
 void Notebook::removePage(QWidget *page)
 {
     // Queue up save because: Tab removed
-    getIApp()->getWindows()->queueSave();
+    getApp()->getWindows()->queueSave();
 
     int removingIndex = this->indexOf(page);
     assert(removingIndex != -1);
@@ -567,7 +567,7 @@ void Notebook::rearrangePage(QWidget *page, int index)
     }
 
     // Queue up save because: Tab rearranged
-    getIApp()->getWindows()->queueSave();
+    getApp()->getWindows()->queueSave();
 
     this->items_.move(this->indexOf(page), index);
 
@@ -608,16 +608,16 @@ void Notebook::setShowTabs(bool value)
 
 void Notebook::showTabVisibilityInfoPopup()
 {
-    auto unhideSeq = getIApp()->getHotkeys()->getDisplaySequence(
+    auto unhideSeq = getApp()->getHotkeys()->getDisplaySequence(
         HotkeyCategory::Window, "setTabVisibility", {std::vector<QString>()});
     if (unhideSeq.isEmpty())
     {
-        unhideSeq = getIApp()->getHotkeys()->getDisplaySequence(
+        unhideSeq = getApp()->getHotkeys()->getDisplaySequence(
             HotkeyCategory::Window, "setTabVisibility", {{"toggle"}});
     }
     if (unhideSeq.isEmpty())
     {
-        unhideSeq = getIApp()->getHotkeys()->getDisplaySequence(
+        unhideSeq = getApp()->getHotkeys()->getDisplaySequence(
             HotkeyCategory::Window, "setTabVisibility", {{"on"}});
     }
     QString hotkeyInfo = "(currently unbound)";
@@ -670,7 +670,7 @@ void Notebook::updateTabVisibility()
 
 void Notebook::updateTabVisibilityMenuAction()
 {
-    const auto *hotkeys = getIApp()->getHotkeys();
+    const auto *hotkeys = getApp()->getHotkeys();
 
     auto toggleSeq = hotkeys->getDisplaySequence(
         HotkeyCategory::Window, "setTabVisibility", {std::vector<QString>()});
@@ -1400,7 +1400,7 @@ SplitNotebook::SplitNotebook(Window *parent)
         this->signalHolder_, true);
 
     this->signalHolder_.managedConnect(
-        getIApp()->getWindows()->selectSplit, [this](Split *split) {
+        getApp()->getWindows()->selectSplit, [this](Split *split) {
             for (auto &&item : this->items())
             {
                 if (auto *sc = dynamic_cast<SplitContainer *>(item.page))
@@ -1418,13 +1418,13 @@ SplitNotebook::SplitNotebook(Window *parent)
         });
 
     this->signalHolder_.managedConnect(
-        getIApp()->getWindows()->selectSplitContainer,
+        getApp()->getWindows()->selectSplitContainer,
         [this](SplitContainer *sc) {
             this->select(sc);
         });
 
     this->signalHolder_.managedConnect(
-        getIApp()->getWindows()->scrollToMessageSignal,
+        getApp()->getWindows()->scrollToMessageSignal,
         [this](const MessagePtr &message) {
             for (auto &&item : this->items())
             {
@@ -1515,7 +1515,7 @@ void SplitNotebook::addCustomButtons()
     settingsBtn->setIcon(NotebookButton::Settings);
 
     QObject::connect(settingsBtn, &NotebookButton::leftClicked, [this] {
-        getIApp()->getWindows()->showSettingsDialog(this);
+        getApp()->getWindows()->showSettingsDialog(this);
     });
 
     // account
@@ -1529,7 +1529,7 @@ void SplitNotebook::addCustomButtons()
 
     userBtn->setIcon(NotebookButton::User);
     QObject::connect(userBtn, &NotebookButton::leftClicked, [this, userBtn] {
-        getIApp()->getWindows()->showAccountSelectPopup(
+        getApp()->getWindows()->showAccountSelectPopup(
             this->mapToGlobal(userBtn->rect().bottomRight()));
     });
 
@@ -1542,18 +1542,18 @@ void SplitNotebook::addCustomButtons()
     this->streamerModeIcon_ = this->addCustomButton();
     QObject::connect(this->streamerModeIcon_, &NotebookButton::leftClicked,
                      [this] {
-                         getIApp()->getWindows()->showSettingsDialog(
+                         getApp()->getWindows()->showSettingsDialog(
                              this, SettingsDialogPreference::StreamerMode);
                      });
-    QObject::connect(getIApp()->getStreamerMode(), &IStreamerMode::changed,
-                     this, &SplitNotebook::updateStreamerModeIcon);
+    QObject::connect(getApp()->getStreamerMode(), &IStreamerMode::changed, this,
+                     &SplitNotebook::updateStreamerModeIcon);
     this->updateStreamerModeIcon();
 }
 
 void SplitNotebook::updateToggleOfflineTabsHotkey(
     NotebookTabVisibility newTabVisibility)
 {
-    auto *hotkeys = getIApp()->getHotkeys();
+    auto *hotkeys = getApp()->getHotkeys();
     auto getKeySequence = [&](auto argument) {
         return hotkeys->getDisplaySequence(HotkeyCategory::Window,
                                            "setTabVisibility", {{argument}});
@@ -1606,7 +1606,7 @@ void SplitNotebook::updateStreamerModeIcon()
             getResources().buttons.streamerModeEnabledDark);
     }
     this->streamerModeIcon_->setVisible(
-        getIApp()->getStreamerMode()->isEnabled());
+        getApp()->getStreamerMode()->isEnabled());
 }
 
 void SplitNotebook::themeChangedEvent()

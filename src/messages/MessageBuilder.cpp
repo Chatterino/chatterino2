@@ -203,7 +203,7 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
 MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
     : MessageBuilder()
 {
-    auto current = getIApp()->getAccounts()->twitch.getCurrent();
+    auto current = getApp()->getAccounts()->twitch.getCurrent();
 
     this->emplace<TimestampElement>();
     this->message().flags.set(MessageFlag::System);
@@ -676,7 +676,7 @@ void MessageBuilder::addLink(const linkparser::Parsed &parsedLink,
                                    MessageElementFlag::Text, this->textColor_);
     }
 
-    getIApp()->getLinkResolver()->resolve(el->linkInfo());
+    getApp()->getLinkResolver()->resolve(el->linkInfo());
 }
 
 void MessageBuilder::addIrcMessageText(const QString &text)
@@ -686,7 +686,7 @@ void MessageBuilder::addIrcMessageText(const QString &text)
     auto words = text.split(' ');
     MessageColor defaultColorType = MessageColor::Text;
     const auto &defaultColor =
-        defaultColorType.getColor(*getIApp()->getThemes());
+        defaultColorType.getColor(*getApp()->getThemes());
     QColor textColor = defaultColor;
     int fg = -1;
     int bg = -1;
@@ -728,7 +728,7 @@ void MessageBuilder::addIrcMessageText(const QString &text)
                 if (fg >= 0 && fg <= 98)
                 {
                     textColor = IRC_COLORS[fg];
-                    getIApp()->getThemes()->normalizeColor(textColor);
+                    getApp()->getThemes()->normalizeColor(textColor);
                 }
                 else
                 {
@@ -768,7 +768,7 @@ void MessageBuilder::addIrcMessageText(const QString &text)
         if (fg >= 0 && fg <= 98)
         {
             textColor = IRC_COLORS[fg];
-            getIApp()->getThemes()->normalizeColor(textColor);
+            getApp()->getThemes()->normalizeColor(textColor);
         }
         else
         {
@@ -810,7 +810,7 @@ void MessageBuilder::addIrcWord(const QString &text, const QColor &color,
                                 bool addSpace)
 {
     this->textColor_ = color;
-    for (auto &variant : getIApp()->getEmotes()->getEmojis()->parse(text))
+    for (auto &variant : getApp()->getEmotes()->getEmojis()->parse(text))
     {
         boost::apply_visitor(
             [&](auto &&arg) {

@@ -32,7 +32,7 @@ bool isIgnoredMessage(IgnoredMessageParameters &&params)
     {
         auto sourceUserID = params.twitchUserID;
 
-        bool isBlocked = getIApp()
+        bool isBlocked = getApp()
                              ->getAccounts()
                              ->twitch.getCurrent()
                              ->blockedUserIds()

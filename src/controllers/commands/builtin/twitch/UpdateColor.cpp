@@ -25,7 +25,7 @@ QString updateUserColor(const CommandContext &ctx)
             "The /color command only works in Twitch channels.");
         return "";
     }
-    auto user = getIApp()->getAccounts()->twitch.getCurrent();
+    auto user = getApp()->getAccounts()->twitch.getCurrent();
 
     // Avoid Helix calls without Client ID and/or OAuth Token
     if (user->isAnon())

@@ -118,26 +118,26 @@ Application::Application(Settings &_settings, const Paths &paths,
                          const Args &_args, Updates &_updates)
     : paths_(paths)
     , args_(_args)
-    , themes(&this->emplace<Theme>())
+    , themes(new Theme(paths))
     , fonts(new Fonts(_settings))
-    , emotes(&this->emplace<Emotes>())
-    , accounts(&this->emplace<AccountController>())
-    , hotkeys(&this->emplace<HotkeyController>())
-    , windows(&this->emplace(new WindowManager(paths)))
-    , toasts(&this->emplace<Toasts>())
-    , imageUploader(&this->emplace<ImageUploader>())
-    , seventvAPI(&this->emplace<SeventvAPI>())
-    , crashHandler(&this->emplace(new CrashHandler(paths)))
+    , emotes(new Emotes)
+    , accounts(new AccountController)
+    , hotkeys(new HotkeyController)
+    , windows(new WindowManager(paths))
+    , toasts(new Toasts)
+    , imageUploader(new ImageUploader)
+    , seventvAPI(new SeventvAPI)
+    , crashHandler(new CrashHandler(paths))
 
-    , commands(&this->emplace<CommandController>())
-    , notifications(&this->emplace<NotificationController>())
-    , highlights(&this->emplace<HighlightController>())
+    , commands(new CommandController(paths))
+    , notifications(new NotificationController)
+    , highlights(new HighlightController(_settings, this->accounts.get()))
     , twitch(new TwitchIrcServer)
-    , ffzBadges(&this->emplace<FfzBadges>())
-    , seventvBadges(&this->emplace<SeventvBadges>())
+    , ffzBadges(new FfzBadges)
+    , seventvBadges(new SeventvBadges)
     , userData(new UserDataController(paths))
     , sound(makeSoundController(_settings))
-    , twitchLiveController(&this->emplace<TwitchLiveController>())
+    , twitchLiveController(new TwitchLiveController)
     , twitchPubSub(new PubSub(TWITCH_PUBSUB_URL))
     , twitchBadges(new TwitchBadges)
     , chatterinoBadges(new ChatterinoBadges)
@@ -148,7 +148,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , linkResolver(new LinkResolver)
     , streamerMode(new StreamerMode)
 #ifdef CHATTERINO_HAVE_PLUGINS
-    , plugins(&this->emplace(new PluginController(paths)))
+    , plugins(new PluginController(paths))
 #endif
     , updates(_updates)
 {
@@ -165,16 +165,35 @@ Application::~Application() = default;
 
 void Application::fakeDtor()
 {
+#ifdef CHATTERINO_HAVE_PLUGINS
+    this->plugins.reset();
+#endif
     this->twitchPubSub.reset();
     this->twitchBadges.reset();
+    this->twitchLiveController.reset();
     this->chatterinoBadges.reset();
     this->bttvEmotes.reset();
     this->ffzEmotes.reset();
     this->seventvEmotes.reset();
+    this->notifications.reset();
+    this->commands.reset();
+    // If a crash happens after crashHandler has been reset, we'll assert
+    // This isn't super different from before, where if the app is already killed, the getApp() portion of it is already dead
+    this->crashHandler.reset();
+    this->seventvAPI.reset();
+    this->highlights.reset();
+    this->seventvBadges.reset();
+    this->ffzBadges.reset();
     // this->twitch.reset();
+    this->imageUploader.reset();
+    this->hotkeys.reset();
     this->fonts.reset();
     this->sound.reset();
     this->userData.reset();
+    this->toasts.reset();
+    this->accounts.reset();
+    this->emotes.reset();
+    this->themes.reset();
 }
 
 void Application::initialize(Settings &settings, const Paths &paths)
@@ -208,16 +227,23 @@ void Application::initialize(Settings &settings, const Paths &paths)
         }
     }
 
-    for (auto &singleton : this->singletons_)
-    {
-        singleton->initialize(settings, paths);
-    }
+    this->accounts->load();
 
+    this->windows->initialize(settings);
+
+    this->ffzBadges->load();
     this->twitch->initialize();
+
+    // Load live status
+    this->notifications->initialize();
 
     // XXX: Loading Twitch badges after Helix has been initialized, which only happens after
     // the AccountController initialize has been called
     this->twitchBadges->loadTwitchBadges();
+
+#ifdef CHATTERINO_HAVE_PLUGINS
+    this->plugins->initialize(settings);
+#endif
 
     // Show crash message.
     // On Windows, the crash message was already shown.
@@ -335,8 +361,9 @@ int Application::run(QApplication &qtApp)
 Theme *Application::getThemes()
 {
     assertInGuiThread();
+    assert(this->themes);
 
-    return this->themes;
+    return this->themes.get();
 }
 
 Fonts *Application::getFonts()
@@ -350,22 +377,25 @@ Fonts *Application::getFonts()
 IEmotes *Application::getEmotes()
 {
     assertInGuiThread();
+    assert(this->emotes);
 
-    return this->emotes;
+    return this->emotes.get();
 }
 
 AccountController *Application::getAccounts()
 {
     assertInGuiThread();
+    assert(this->accounts);
 
-    return this->accounts;
+    return this->accounts.get();
 }
 
 HotkeyController *Application::getHotkeys()
 {
     assertInGuiThread();
+    assert(this->hotkeys);
 
-    return this->hotkeys;
+    return this->hotkeys.get();
 }
 
 WindowManager *Application::getWindows()
@@ -373,56 +403,63 @@ WindowManager *Application::getWindows()
     assertInGuiThread();
     assert(this->windows);
 
-    return this->windows;
+    return this->windows.get();
 }
 
 Toasts *Application::getToasts()
 {
     assertInGuiThread();
+    assert(this->toasts);
 
-    return this->toasts;
+    return this->toasts.get();
 }
 
 CrashHandler *Application::getCrashHandler()
 {
     assertInGuiThread();
+    assert(this->crashHandler);
 
-    return this->crashHandler;
+    return this->crashHandler.get();
 }
 
 CommandController *Application::getCommands()
 {
     assertInGuiThread();
+    assert(this->commands);
 
-    return this->commands;
+    return this->commands.get();
 }
 
 NotificationController *Application::getNotifications()
 {
     assertInGuiThread();
+    assert(this->notifications);
 
-    return this->notifications;
+    return this->notifications.get();
 }
 
 HighlightController *Application::getHighlights()
 {
     assertInGuiThread();
+    assert(this->highlights);
 
-    return this->highlights;
+    return this->highlights.get();
 }
 
 FfzBadges *Application::getFfzBadges()
 {
     assertInGuiThread();
+    assert(this->ffzBadges);
 
-    return this->ffzBadges;
+    return this->ffzBadges.get();
 }
 
 SeventvBadges *Application::getSeventvBadges()
 {
     // SeventvBadges handles its own locks, so we don't need to assert that this is called in the GUI thread
+    assert(this->seventvBadges);
 
-    return this->seventvBadges;
+    return this->seventvBadges.get();
 }
 
 IUserDataController *Application::getUserData()
@@ -442,8 +479,9 @@ ISoundController *Application::getSound()
 ITwitchLiveController *Application::getTwitchLiveController()
 {
     assertInGuiThread();
+    assert(this->twitchLiveController);
 
-    return this->twitchLiveController;
+    return this->twitchLiveController.get();
 }
 
 TwitchBadges *Application::getTwitchBadges()
@@ -465,23 +503,26 @@ IChatterinoBadges *Application::getChatterinoBadges()
 ImageUploader *Application::getImageUploader()
 {
     assertInGuiThread();
+    assert(this->imageUploader);
 
-    return this->imageUploader;
+    return this->imageUploader.get();
 }
 
 SeventvAPI *Application::getSeventvAPI()
 {
     assertInGuiThread();
+    assert(this->seventvAPI);
 
-    return this->seventvAPI;
+    return this->seventvAPI.get();
 }
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 PluginController *Application::getPlugins()
 {
     assertInGuiThread();
+    assert(this->plugins);
 
-    return this->plugins;
+    return this->plugins.get();
 }
 #endif
 
@@ -551,10 +592,9 @@ SeventvEmotes *Application::getSeventvEmotes()
 
 void Application::save()
 {
-    for (auto &singleton : this->singletons_)
-    {
-        singleton->save();
-    }
+    this->commands->save();
+    this->hotkeys->save();
+    this->windows->save();
 }
 
 void Application::initNm(const Paths &paths)
@@ -896,11 +936,11 @@ void Application::initPubSub()
                             chan->addMessage(p.second,
                                              MessageContext::Original);
 
-                            getIApp()
+                            getApp()
                                 ->getTwitch()
                                 ->getAutomodChannel()
                                 ->addMessage(p.first, MessageContext::Original);
-                            getIApp()
+                            getApp()
                                 ->getTwitch()
                                 ->getAutomodChannel()
                                 ->addMessage(p.second,
@@ -908,12 +948,12 @@ void Application::initPubSub()
 
                             if (getSettings()->showAutomodInMentions)
                             {
-                                getIApp()
+                                getApp()
                                     ->getTwitch()
                                     ->getMentionsChannel()
                                     ->addMessage(p.first,
                                                  MessageContext::Original);
-                                getIApp()
+                                getApp()
                                     ->getTwitch()
                                     ->getMentionsChannel()
                                     ->addMessage(p.second,
@@ -1124,14 +1164,7 @@ void Application::initSeventvEventAPI()
     seventvEventAPI->start();
 }
 
-Application *getApp()
-{
-    assert(Application::instance != nullptr);
-
-    return Application::instance;
-}
-
-IApplication *getIApp()
+IApplication *getApp()
 {
     assert(IApplication::instance != nullptr);
 

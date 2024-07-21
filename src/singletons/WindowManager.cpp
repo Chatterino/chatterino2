@@ -118,7 +118,7 @@ WindowManager::WindowManager(const Paths &paths)
     this->saveTimer->setSingleShot(true);
 
     QObject::connect(this->saveTimer, &QTimer::timeout, [] {
-        getIApp()->getWindows()->save();
+        getApp()->getWindows()->save();
     });
 }
 
@@ -341,20 +341,17 @@ void WindowManager::setEmotePopupBounds(QRect bounds)
     }
 }
 
-void WindowManager::initialize(Settings &settings, const Paths &paths)
+void WindowManager::initialize(Settings &settings)
 {
-    (void)paths;
     assertInGuiThread();
 
     // We can safely ignore this signal connection since both Themes and WindowManager
     // share the Application state lifetime
     // NOTE: APPLICATION_LIFETIME
     std::ignore =
-        getIApp()->getThemes()->repaintVisibleChatWidgets_.connect([this] {
+        getApp()->getThemes()->repaintVisibleChatWidgets_.connect([this] {
             this->repaintVisibleChatWidgets();
         });
-
-    assert(!this->initialized_);
 
     {
         WindowLayout windowLayout;
@@ -368,7 +365,7 @@ void WindowManager::initialize(Settings &settings, const Paths &paths)
             windowLayout = this->loadWindowLayoutFromFile();
         }
 
-        auto desired = getIApp()->getArgs().activateChannel;
+        auto desired = getApp()->getArgs().activateChannel;
         if (desired)
         {
             windowLayout.activateOrAddChannel(desired->provider, desired->name);
@@ -428,8 +425,6 @@ void WindowManager::initialize(Settings &settings, const Paths &paths)
     settings.boldUsernames.connect([this](auto, auto) {
         this->forceLayoutChannelViews();
     });
-
-    this->initialized_ = true;
 }
 
 void WindowManager::save()
@@ -687,28 +682,28 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
 
     if (descriptor.type_ == "twitch")
     {
-        return getIApp()->getTwitchAbstract()->getOrAddChannel(
+        return getApp()->getTwitchAbstract()->getOrAddChannel(
             descriptor.channelName_);
     }
     else if (descriptor.type_ == "mentions")
     {
-        return getIApp()->getTwitch()->getMentionsChannel();
+        return getApp()->getTwitch()->getMentionsChannel();
     }
     else if (descriptor.type_ == "watching")
     {
-        return getIApp()->getTwitch()->getWatchingChannel();
+        return getApp()->getTwitch()->getWatchingChannel();
     }
     else if (descriptor.type_ == "whispers")
     {
-        return getIApp()->getTwitch()->getWhispersChannel();
+        return getApp()->getTwitch()->getWhispersChannel();
     }
     else if (descriptor.type_ == "live")
     {
-        return getIApp()->getTwitch()->getLiveChannel();
+        return getApp()->getTwitch()->getLiveChannel();
     }
     else if (descriptor.type_ == "automod")
     {
-        return getIApp()->getTwitch()->getAutomodChannel();
+        return getApp()->getTwitch()->getAutomodChannel();
     }
     else if (descriptor.type_ == "irc")
     {
@@ -717,7 +712,7 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
     }
     else if (descriptor.type_ == "misc")
     {
-        return getIApp()->getTwitchAbstract()->getChannelOrEmpty(
+        return getApp()->getTwitchAbstract()->getChannelOrEmpty(
             descriptor.channelName_);
     }
 

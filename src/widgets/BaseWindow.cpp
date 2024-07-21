@@ -712,7 +712,7 @@ void BaseWindow::resizeEvent(QResizeEvent *)
     // Queue up save because: Window resized
     if (!flags_.has(DisableLayoutSave))
     {
-        getIApp()->getWindows()->queueSave();
+        getApp()->getWindows()->queueSave();
     }
 
 #ifdef USEWINSDK
@@ -727,7 +727,7 @@ void BaseWindow::moveEvent(QMoveEvent *event)
 #ifdef CHATTERINO
     if (!flags_.has(DisableLayoutSave))
     {
-        getIApp()->getWindows()->queueSave();
+        getApp()->getWindows()->queueSave();
     }
 #endif
 
@@ -909,7 +909,7 @@ void BaseWindow::scaleChangedEvent(float scale)
 #endif
 
     this->setFont(
-        getIApp()->getFonts()->getFont(FontStyle::UiTabs, this->scale()));
+        getApp()->getFonts()->getFont(FontStyle::UiTabs, this->scale()));
 }
 
 void BaseWindow::paintEvent(QPaintEvent *)

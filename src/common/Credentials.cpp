@@ -56,7 +56,7 @@ bool useKeyring()
 // Insecure storage:
 QString insecurePath()
 {
-    return combinePath(getIApp()->getPaths().settingsDirectory,
+    return combinePath(getApp()->getPaths().settingsDirectory,
                        "credentials.json");
 }
 

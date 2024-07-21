@@ -141,7 +141,7 @@ QString sendBan(const CommandContext &ctx)
 
     assert(!actions.value().empty());
 
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addSystemMessage("You must be logged in to ban someone!");
@@ -252,7 +252,7 @@ QString sendBanById(const CommandContext &ctx)
         return "";
     }
 
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         channel->addSystemMessage("You must be logged in to ban someone!");
@@ -292,7 +292,7 @@ QString sendTimeout(const CommandContext &ctx)
 
     assert(!actions.value().empty());
 
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
         ctx.channel->addSystemMessage(

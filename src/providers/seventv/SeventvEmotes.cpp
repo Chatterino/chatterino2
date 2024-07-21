@@ -217,7 +217,7 @@ void SeventvEmotes::loadGlobalEmotes()
 
     qCDebug(chatterinoSeventv) << "Loading 7TV Global Emotes";
 
-    getIApp()->getSeventvAPI()->getEmoteSet(
+    getApp()->getSeventvAPI()->getEmoteSet(
         u"global"_s,
         [this](const auto &json) {
             QJsonArray parsedEmotes = json["emotes"].toArray();
@@ -246,7 +246,7 @@ void SeventvEmotes::loadChannelEmotes(
     qCDebug(chatterinoSeventv)
         << "Reloading 7TV Channel Emotes" << channelId << manualRefresh;
 
-    getIApp()->getSeventvAPI()->getUserByTwitchID(
+    getApp()->getSeventvAPI()->getUserByTwitchID(
         channelId,
         [callback = std::move(callback), channel, channelId,
          manualRefresh](const auto &json) {
@@ -405,7 +405,7 @@ void SeventvEmotes::getEmoteSet(
 {
     qCDebug(chatterinoSeventv) << "Loading 7TV Emote Set" << emoteSetId;
 
-    getIApp()->getSeventvAPI()->getEmoteSet(
+    getApp()->getSeventvAPI()->getEmoteSet(
         emoteSetId,
         [callback = std::move(successCallback), emoteSetId](const auto &json) {
             auto parsedEmotes = json["emotes"].toArray();
