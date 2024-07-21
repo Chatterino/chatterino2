@@ -341,9 +341,8 @@ void WindowManager::setEmotePopupBounds(QRect bounds)
     }
 }
 
-void WindowManager::initialize(Settings &settings, const Paths &paths)
+void WindowManager::initialize(Settings &settings)
 {
-    (void)paths;
     assertInGuiThread();
 
     // We can safely ignore this signal connection since both Themes and WindowManager
@@ -354,14 +353,12 @@ void WindowManager::initialize(Settings &settings, const Paths &paths)
             this->repaintVisibleChatWidgets();
         });
 
-    assert(!this->initialized_);
-
     {
         WindowLayout windowLayout;
 
-        if (getApp()->getArgs().customChannelLayout)
+        if (getIApp()->getArgs().customChannelLayout)
         {
-            windowLayout = getApp()->getArgs().customChannelLayout.value();
+            windowLayout = getIApp()->getArgs().customChannelLayout.value();
         }
         else
         {
@@ -379,7 +376,7 @@ void WindowManager::initialize(Settings &settings, const Paths &paths)
         this->applyWindowLayout(windowLayout);
     }
 
-    if (getApp()->getArgs().isFramelessEmbed)
+    if (getIApp()->getArgs().isFramelessEmbed)
     {
         this->framelessEmbedWindow_.reset(new FramelessEmbedWindow);
         this->framelessEmbedWindow_->show();
@@ -392,7 +389,7 @@ void WindowManager::initialize(Settings &settings, const Paths &paths)
         this->mainWindow_->getNotebook().addPage(true);
 
         // TODO: don't create main window if it's a frameless embed
-        if (getApp()->getArgs().isFramelessEmbed)
+        if (getIApp()->getArgs().isFramelessEmbed)
         {
             this->mainWindow_->hide();
         }
@@ -428,8 +425,6 @@ void WindowManager::initialize(Settings &settings, const Paths &paths)
     settings.boldUsernames.connect([this](auto, auto) {
         this->forceLayoutChannelViews();
     });
-
-    this->initialized_ = true;
 }
 
 void WindowManager::save()

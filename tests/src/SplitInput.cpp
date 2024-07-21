@@ -5,7 +5,7 @@
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
-#include "mocks/EmptyApplication.hpp"
+#include "mocks/BaseApplication.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Paths.hpp"
@@ -24,12 +24,11 @@ using ::testing::Exactly;
 
 namespace {
 
-class MockApplication : mock::EmptyApplication
+class MockApplication : public mock::BaseApplication
 {
 public:
     MockApplication()
-        : settings(this->settingsDir.filePath("settings.json"))
-        , theme(this->paths_)
+        : theme(this->paths_)
         , fonts(this->settings)
         , windowManager(this->paths_)
         , commands(this->paths_)
@@ -70,7 +69,6 @@ public:
         return &this->emotes;
     }
 
-    Settings settings;
     Theme theme;
     HotkeyController hotkeys;
     Fonts fonts;

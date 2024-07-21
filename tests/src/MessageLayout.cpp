@@ -4,7 +4,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
-#include "mocks/EmptyApplication.hpp"
+#include "mocks/BaseApplication.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
@@ -21,16 +21,16 @@ using namespace chatterino;
 
 namespace {
 
-class MockApplication : mock::EmptyApplication
+class MockApplication : mock::BaseApplication
 {
 public:
     MockApplication()
-        : settings(this->settingsDir.filePath("settings.json"))
-        , theme(this->paths_)
+        : theme(this->paths_)
         , fonts(this->settings)
         , windowManager(this->paths_)
     {
     }
+
     Theme *getThemes() override
     {
         return &this->theme;
@@ -46,7 +46,12 @@ public:
         return &this->windowManager;
     }
 
-    Settings settings;
+    AccountController *getAccounts() override
+    {
+        return &this->accounts;
+    }
+
+    AccountController accounts;
     Theme theme;
     Fonts fonts;
     WindowManager windowManager;

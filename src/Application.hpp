@@ -149,7 +149,7 @@ private:
     std::unique_ptr<Emotes> emotes;
     AccountController *const accounts{};
     std::unique_ptr<HotkeyController> hotkeys;
-    WindowManager *const windows{};
+    std::unique_ptr<WindowManager> windows;
     std::unique_ptr<Toasts> toasts;
     std::unique_ptr<ImageUploader> imageUploader;
     std::unique_ptr<SeventvAPI> seventvAPI;

@@ -123,7 +123,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , emotes(new Emotes)
     , accounts(&this->emplace<AccountController>())
     , hotkeys(new HotkeyController)
-    , windows(&this->emplace(new WindowManager(paths)))
+    , windows(new WindowManager(paths))
     , toasts(new Toasts)
     , imageUploader(new ImageUploader)
     , seventvAPI(new SeventvAPI)
@@ -222,6 +222,8 @@ void Application::initialize(Settings &settings, const Paths &paths)
             Irc::instance().load();
         }
     }
+
+    this->windows->initialize(settings);
 
     for (auto &singleton : this->singletons_)
     {
@@ -395,7 +397,7 @@ WindowManager *Application::getWindows()
     assertInGuiThread();
     assert(this->windows);
 
-    return this->windows;
+    return this->windows.get();
 }
 
 Toasts *Application::getToasts()
@@ -590,6 +592,7 @@ void Application::save()
 
     this->commands->save();
     this->hotkeys->save();
+    this->windows->save();
 }
 
 void Application::initNm(const Paths &paths)
