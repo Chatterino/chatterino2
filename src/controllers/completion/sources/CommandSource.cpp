@@ -71,20 +71,20 @@ void CommandSource::initializeItems()
     std::vector<CommandItem> commands;
 
 #ifdef CHATTERINO_HAVE_PLUGINS
-    for (const auto &command : getIApp()->getCommands()->pluginCommands())
+    for (const auto &command : getApp()->getCommands()->pluginCommands())
     {
         addCommand(command, commands);
     }
 #endif
 
     // Custom Chatterino commands
-    for (const auto &command : getIApp()->getCommands()->items)
+    for (const auto &command : getApp()->getCommands()->items)
     {
         addCommand(command.name, commands);
     }
 
     // Default Chatterino commands
-    auto x = getIApp()->getCommands()->getDefaultChatterinoCommandList();
+    auto x = getApp()->getCommands()->getDefaultChatterinoCommandList();
     for (const auto &command : x)
     {
         addCommand(command, commands);

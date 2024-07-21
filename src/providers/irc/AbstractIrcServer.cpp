@@ -156,7 +156,7 @@ void AbstractIrcServer::addGlobalSystemMessage(const QString &messageText)
             continue;
         }
 
-        chan->addMessage(message);
+        chan->addMessage(message, MessageContext::Original);
     }
 }
 
@@ -329,7 +329,7 @@ void AbstractIrcServer::onReadConnected(IrcConnection *connection)
         }
         else
         {
-            chan->addMessage(connectedMsg);
+            chan->addMessage(connectedMsg, MessageContext::Original);
         }
     }
 
@@ -357,7 +357,7 @@ void AbstractIrcServer::onDisconnected()
             continue;
         }
 
-        chan->addMessage(disconnectedMsg);
+        chan->addMessage(disconnectedMsg, MessageContext::Original);
 
         if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
         {

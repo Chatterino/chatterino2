@@ -42,8 +42,8 @@ void sendHelixMessage(const std::shared_ptr<TwitchChannel> &channel,
     auto broadcasterID = channel->roomId();
     if (broadcasterID.isEmpty())
     {
-        channel->addMessage(makeSystemMessage(
-            "Sending messages in this channel isn't possible."));
+        channel->addSystemMessage(
+            "Sending messages in this channel isn't possible.");
         return;
     }
 
@@ -51,7 +51,7 @@ void sendHelixMessage(const std::shared_ptr<TwitchChannel> &channel,
         {
             .broadcasterID = broadcasterID,
             .senderID =
-                getIApp()->getAccounts()->twitch.getCurrent()->getUserId(),
+                getApp()->getAccounts()->twitch.getCurrent()->getUserId(),
             .message = message,
             .replyParentMessageID = replyParentId,
         },
@@ -67,14 +67,14 @@ void sendHelixMessage(const std::shared_ptr<TwitchChannel> &channel,
                 return;
             }
 
-            auto errorMessage = [&] {
-                if (res.dropReason)
-                {
-                    return makeSystemMessage(res.dropReason->message);
-                }
-                return makeSystemMessage("Your message was not sent.");
-            }();
-            chan->addMessage(errorMessage);
+            if (res.dropReason)
+            {
+                chan->addSystemMessage(res.dropReason->message);
+            }
+            else
+            {
+                chan->addSystemMessage("Your message was not sent.");
+            }
         },
         [weak = std::weak_ptr(channel)](auto error, auto message) {
             auto chan = weak.lock();
@@ -112,7 +112,7 @@ void sendHelixMessage(const std::shared_ptr<TwitchChannel> &channel,
                         return "Unknown error: " + message;
                 }
             }();
-            chan->addMessage(makeSystemMessage(errorMessage));
+            chan->addSystemMessage(errorMessage);
         });
 }
 
@@ -167,7 +167,7 @@ TwitchIrcServer::TwitchIrcServer()
 
 void TwitchIrcServer::initialize()
 {
-    getIApp()->getAccounts()->twitch.currentUserChanged.connect([this]() {
+    getApp()->getAccounts()->twitch.currentUserChanged.connect([this]() {
         postToThread([this] {
             this->connect();
         });
@@ -182,7 +182,7 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
                                            ConnectionType type)
 {
     std::shared_ptr<TwitchAccount> account =
-        getIApp()->getAccounts()->twitch.getCurrent();
+        getApp()->getAccounts()->twitch.getCurrent();
 
     qCDebug(chatterinoTwitch) << "logging in as" << account->getUserName();
 
@@ -390,14 +390,13 @@ std::shared_ptr<Channel> TwitchIrcServer::getCustomChannel(
         {
             for (auto i = 0; i < 1000; i++)
             {
-                channel->addMessage(makeSystemMessage(QString::number(i + 1)));
+                channel->addSystemMessage(QString::number(i + 1));
             }
         }
 
         auto *timer = new QTimer;
         QObject::connect(timer, &QTimer::timeout, [channel] {
-            channel->addMessage(
-                makeSystemMessage(QTime::currentTime().toString()));
+            channel->addSystemMessage(QTime::currentTime().toString());
         });
         timer->start(msBetweenMessages);
         return timer;
@@ -562,10 +561,7 @@ bool TwitchIrcServer::prepareToSend(
     {
         if (this->lastErrorTimeSpeed_ + 30s < now)
         {
-            auto errorMessage =
-                makeSystemMessage("You are sending messages too quickly.");
-
-            channel->addMessage(errorMessage);
+            channel->addSystemMessage("You are sending messages too quickly.");
 
             this->lastErrorTimeSpeed_ = now;
         }
@@ -583,10 +579,7 @@ bool TwitchIrcServer::prepareToSend(
     {
         if (this->lastErrorTimeAmount_ + 30s < now)
         {
-            auto errorMessage =
-                makeSystemMessage("You are sending too many messages.");
-
-            channel->addMessage(errorMessage);
+            channel->addSystemMessage("You are sending too many messages.");
 
             this->lastErrorTimeAmount_ = now;
         }
@@ -697,7 +690,7 @@ void TwitchIrcServer::setLastUserThatWhisperedMe(const QString &user)
 
 void TwitchIrcServer::reloadBTTVGlobalEmotes()
 {
-    getIApp()->getBttvEmotes()->loadEmotes();
+    getApp()->getBttvEmotes()->loadEmotes();
 }
 
 void TwitchIrcServer::reloadAllBTTVChannelEmotes()
@@ -712,7 +705,7 @@ void TwitchIrcServer::reloadAllBTTVChannelEmotes()
 
 void TwitchIrcServer::reloadFFZGlobalEmotes()
 {
-    getIApp()->getFfzEmotes()->loadEmotes();
+    getApp()->getFfzEmotes()->loadEmotes();
 }
 
 void TwitchIrcServer::reloadAllFFZChannelEmotes()
@@ -727,7 +720,7 @@ void TwitchIrcServer::reloadAllFFZChannelEmotes()
 
 void TwitchIrcServer::reloadSevenTVGlobalEmotes()
 {
-    getIApp()->getSeventvEmotes()->loadGlobalEmotes();
+    getApp()->getSeventvEmotes()->loadGlobalEmotes();
 }
 
 void TwitchIrcServer::reloadAllSevenTVChannelEmotes()

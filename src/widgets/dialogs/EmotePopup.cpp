@@ -129,7 +129,7 @@ void addTwitchEmoteSets(
         {
             builder
                 .emplace<EmoteElement>(
-                    getIApp()->getEmotes()->getTwitchEmotes()->getOrCreateEmote(
+                    getApp()->getEmotes()->getTwitchEmotes()->getOrCreateEmote(
                         emote.id, emote.name),
                     MessageElementFlags{MessageElementFlag::AlwaysShow,
                                         MessageElementFlag::TwitchEmote})
@@ -145,7 +145,7 @@ void addTwitchEmoteSets(
     auto currentChannelPair = mapOfSets[currentChannelName];
     for (const auto &message : currentChannelPair.second)
     {
-        subChannel.addMessage(message);
+        subChannel.addMessage(message, MessageContext::Original);
     }
     mapOfSets.remove(currentChannelName);
 
@@ -154,7 +154,7 @@ void addTwitchEmoteSets(
         auto &channel = pair.first ? globalChannel : subChannel;
         for (const auto &message : pair.second)
         {
-            channel.addMessage(message);
+            channel.addMessage(message, MessageContext::Original);
         }
     }
 }
@@ -162,14 +162,16 @@ void addTwitchEmoteSets(
 void addEmotes(Channel &channel, const EmoteMap &map, const QString &title,
                const MessageElementFlag &emoteFlag)
 {
-    channel.addMessage(makeTitleMessage(title));
-    channel.addMessage(makeEmoteMessage(map, emoteFlag));
+    channel.addMessage(makeTitleMessage(title), MessageContext::Original);
+    channel.addMessage(makeEmoteMessage(map, emoteFlag),
+                       MessageContext::Original);
 }
 
 void loadEmojis(ChannelView &view, const std::vector<EmojiPtr> &emojiMap)
 {
     ChannelPtr emojiChannel(new Channel("", Channel::Type::None));
-    emojiChannel->addMessage(makeEmojiMessage(emojiMap));
+    emojiChannel->addMessage(makeEmojiMessage(emojiMap),
+                             MessageContext::Original);
 
     view.setChannel(emojiChannel);
 }
@@ -177,8 +179,8 @@ void loadEmojis(ChannelView &view, const std::vector<EmojiPtr> &emojiMap)
 void loadEmojis(Channel &channel, const std::vector<EmojiPtr> &emojiMap,
                 const QString &title)
 {
-    channel.addMessage(makeTitleMessage(title));
-    channel.addMessage(makeEmojiMessage(emojiMap));
+    channel.addMessage(makeTitleMessage(title), MessageContext::Original);
+    channel.addMessage(makeEmojiMessage(emojiMap), MessageContext::Original);
 }
 
 // Create an emote
@@ -209,7 +211,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     , notebook_(new Notebook(this))
 {
     // this->setStayInScreenRect(true);
-    auto bounds = getIApp()->getWindows()->emotePopupBounds();
+    auto bounds = getApp()->getWindows()->emotePopupBounds();
     if (bounds.size().isEmpty())
     {
         bounds.setSize(QSize{300, 500} * this->scale());
@@ -280,7 +282,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     loadEmojis(*this->viewEmojis_,
                getApp()->getEmotes()->getEmojis()->getEmojis());
     this->addShortcuts();
-    this->signalHolder_.managedConnect(getIApp()->getHotkeys()->onItemsUpdated,
+    this->signalHolder_.managedConnect(getApp()->getHotkeys()->onItemsUpdated,
                                        [this]() {
                                            this->clearShortcuts();
                                            this->addShortcuts();
@@ -378,7 +380,7 @@ void EmotePopup::addShortcuts()
          }},
     };
 
-    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
+    this->shortcuts_ = getApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 }
 
@@ -401,12 +403,9 @@ void EmotePopup::loadChannel(ChannelPtr channel)
     auto channelChannel = std::make_shared<Channel>("", Channel::Type::None);
 
     // twitch
-    addTwitchEmoteSets(getIApp()
-                           ->getAccounts()
-                           ->twitch.getCurrent()
-                           ->accessEmotes()
-                           ->emoteSets,
-                       *globalChannel, *subChannel, this->channel_->getName());
+    addTwitchEmoteSets(
+        getApp()->getAccounts()->twitch.getCurrent()->accessEmotes()->emoteSets,
+        *globalChannel, *subChannel, this->channel_->getName());
 
     // global
     if (Settings::instance().enableBTTVGlobalEmotes)
@@ -454,7 +453,7 @@ void EmotePopup::loadChannel(ChannelPtr channel)
         builder.emplace<TextElement>("no subscription emotes available",
                                      MessageElementFlag::Text,
                                      MessageColor::System);
-        subChannel->addMessage(builder.release());
+        subChannel->addMessage(builder.release(), MessageContext::Original);
     }
 }
 
@@ -476,11 +475,8 @@ bool EmotePopup::eventFilter(QObject *object, QEvent *event)
 void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
                                     const QString &searchText)
 {
-    auto twitchEmoteSets = getIApp()
-                               ->getAccounts()
-                               ->twitch.getCurrent()
-                               ->accessEmotes()
-                               ->emoteSets;
+    auto twitchEmoteSets =
+        getApp()->getAccounts()->twitch.getCurrent()->accessEmotes()->emoteSets;
     std::vector<std::shared_ptr<TwitchAccount::EmoteSet>> twitchGlobalEmotes{};
 
     for (const auto &set : twitchEmoteSets)
@@ -501,11 +497,11 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     }
 
     auto bttvGlobalEmotes =
-        filterEmoteMap(searchText, getIApp()->getBttvEmotes()->emotes());
+        filterEmoteMap(searchText, getApp()->getBttvEmotes()->emotes());
     auto ffzGlobalEmotes =
-        filterEmoteMap(searchText, getIApp()->getFfzEmotes()->emotes());
+        filterEmoteMap(searchText, getApp()->getFfzEmotes()->emotes());
     auto seventvGlobalEmotes = filterEmoteMap(
-        searchText, getIApp()->getSeventvEmotes()->globalEmotes());
+        searchText, getApp()->getSeventvEmotes()->globalEmotes());
 
     // twitch
     addTwitchEmoteSets(twitchGlobalEmotes, *searchChannel, *searchChannel,
@@ -578,7 +574,7 @@ void EmotePopup::filterEmotes(const QString &searchText)
     std::vector<EmojiPtr> filteredEmojis{};
     int emojiCount = 0;
 
-    const auto &emojis = getIApp()->getEmotes()->getEmojis()->getEmojis();
+    const auto &emojis = getApp()->getEmotes()->getEmojis()->getEmojis();
     for (const auto &emoji : emojis)
     {
         if (emoji->shortCodes[0].contains(searchText, Qt::CaseInsensitive))
@@ -601,7 +597,7 @@ void EmotePopup::filterEmotes(const QString &searchText)
 
 void EmotePopup::saveBounds() const
 {
-    getIApp()->getWindows()->setEmotePopupBounds(this->getBounds());
+    getApp()->getWindows()->setEmotePopupBounds(this->getBounds());
 }
 
 void EmotePopup::resizeEvent(QResizeEvent *event)

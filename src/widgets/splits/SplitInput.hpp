@@ -20,6 +20,7 @@ class Split;
 class EmotePopup;
 class InputCompletionPopup;
 class EffectLabel;
+class MessageView;
 class ResizingTextEdit;
 class ChannelView;
 enum class CompletionKind;
@@ -40,7 +41,7 @@ public:
     QString getInputText() const;
     void insertText(const QString &text);
 
-    void setReply(MessagePtr reply, bool showInlineReplying = true);
+    void setReply(MessagePtr target);
     void setPlaceholderText(const QString &text);
 
     /**
@@ -91,7 +92,7 @@ protected:
     void postMessageSend(const QString &message,
                          const std::vector<QString> &arguments);
 
-    /// Clears the input box, clears reply thread if inline replies are enabled
+    /// Clears the input box, clears reply target if inline replies are enabled
     void clearInput();
 
     void addShortcuts() override;
@@ -109,6 +110,7 @@ protected:
     void hideCompletionPopup();
     void insertCompletionText(const QString &input_) const;
     void openEmotePopup();
+    void clearReplyTarget();
 
     void updateCancelReplyButton();
 
@@ -120,27 +122,39 @@ protected:
     // the user's setting is set to Prevent, and the given text goes beyond the Twitch message length limit
     bool shouldPreventInput(const QString &text) const;
 
+    int marginForTheme() const;
+
+    void applyOuterMargin();
+
+    int replyMessageWidth() const;
+
     Split *const split_;
     ChannelView *const channelView_;
     QPointer<EmotePopup> emotePopup_;
     QPointer<InputCompletionPopup> inputCompletionPopup_;
 
     struct {
+        // vbox for all components
+        QVBoxLayout *vbox;
+
+        // reply widgets
+        QWidget *replyWrapper;
+        QVBoxLayout *replyVbox;
+        QHBoxLayout *replyHbox;
+        MessageView *replyMessage;
+        QLabel *replyLabel;
+        EffectLabel *cancelReplyButton;
+
+        // input widgets
+        QWidget *inputWrapper;
+        QHBoxLayout *inputHbox;
         ResizingTextEdit *textEdit;
         QLabel *textEditLength;
         EffectLabel *sendButton;
         EffectLabel *emoteButton;
+    } ui_;
 
-        QHBoxLayout *hbox;
-        QVBoxLayout *vbox;
-
-        QWidget *replyWrapper;
-        QHBoxLayout *replyHbox;
-        QLabel *replyLabel;
-        EffectLabel *cancelReplyButton;
-    } ui_{};
-
-    MessagePtr replyThread_ = nullptr;
+    MessagePtr replyTarget_ = nullptr;
     bool enableInlineReplying_;
 
     pajlada::Signals::SignalHolder managedConnections_;

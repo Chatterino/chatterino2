@@ -3,7 +3,6 @@
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandContext.hpp"
-#include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -87,8 +86,8 @@ auto successCallback = [](auto result) {};
 auto failureCallback = [](ChannelPtr channel, int durationUnitMultiplier = 1) {
     return [channel, durationUnitMultiplier](const auto &error,
                                              const QString &message) {
-        channel->addMessage(makeSystemMessage(
-            formatError(error, message, durationUnitMultiplier)));
+        channel->addSystemMessage(
+            formatError(error, message, durationUnitMultiplier));
     };
 };
 
@@ -101,24 +100,24 @@ namespace chatterino::commands {
 
 QString emoteOnly(const CommandContext &ctx)
 {
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
-        ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
+        ctx.channel->addSystemMessage(P_NOT_LOGGED_IN);
         return "";
     }
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /emoteonly command only works in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "The /emoteonly command only works in Twitch channels.");
         return "";
     }
 
     if (ctx.twitchChannel->accessRoomModes()->emoteOnly)
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("This room is already in emote-only mode."));
+        ctx.channel->addSystemMessage(
+            "This room is already in emote-only mode.");
         return "";
     }
 
@@ -131,23 +130,22 @@ QString emoteOnly(const CommandContext &ctx)
 
 QString emoteOnlyOff(const CommandContext &ctx)
 {
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
-        ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
+        ctx.channel->addSystemMessage(P_NOT_LOGGED_IN);
         return "";
     }
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /emoteonlyoff command only works in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "The /emoteonlyoff command only works in Twitch channels.");
         return "";
     }
 
     if (!ctx.twitchChannel->accessRoomModes()->emoteOnly)
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("This room is not in emote-only mode."));
+        ctx.channel->addSystemMessage("This room is not in emote-only mode.");
         return "";
     }
 
@@ -160,24 +158,24 @@ QString emoteOnlyOff(const CommandContext &ctx)
 
 QString subscribers(const CommandContext &ctx)
 {
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
-        ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
+        ctx.channel->addSystemMessage(P_NOT_LOGGED_IN);
         return "";
     }
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /subscribers command only works in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "The /subscribers command only works in Twitch channels.");
         return "";
     }
 
     if (ctx.twitchChannel->accessRoomModes()->submode)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "This room is already in subscribers-only mode."));
+        ctx.channel->addSystemMessage(
+            "This room is already in subscribers-only mode.");
         return "";
     }
 
@@ -190,24 +188,24 @@ QString subscribers(const CommandContext &ctx)
 
 QString subscribersOff(const CommandContext &ctx)
 {
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
-        ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
+        ctx.channel->addSystemMessage(P_NOT_LOGGED_IN);
         return "";
     }
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /subscribersoff command only works in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "The /subscribersoff command only works in Twitch channels.");
         return "";
     }
 
     if (!ctx.twitchChannel->accessRoomModes()->submode)
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("This room is not in subscribers-only mode."));
+        ctx.channel->addSystemMessage(
+            "This room is not in subscribers-only mode.");
         return "";
     }
 
@@ -220,17 +218,17 @@ QString subscribersOff(const CommandContext &ctx)
 
 QString slow(const CommandContext &ctx)
 {
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
-        ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
+        ctx.channel->addSystemMessage(P_NOT_LOGGED_IN);
         return "";
     }
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /slow command only works in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "The /slow command only works in Twitch channels.");
         return "";
     }
 
@@ -241,20 +239,20 @@ QString slow(const CommandContext &ctx)
         duration = ctx.words.at(1).toInt(&ok);
         if (!ok || duration <= 0)
         {
-            ctx.channel->addMessage(makeSystemMessage(
+            ctx.channel->addSystemMessage(
                 "Usage: \"/slow [duration]\" - Enables slow mode (limit how "
                 "often users may send messages). Duration (optional, "
                 "default=30) must be a positive number of seconds. Use "
-                "\"slowoff\" to disable."));
+                "\"slowoff\" to disable.");
             return "";
         }
     }
 
     if (ctx.twitchChannel->accessRoomModes()->slowMode == duration)
     {
-        ctx.channel->addMessage(makeSystemMessage(
+        ctx.channel->addSystemMessage(
             QString("This room is already in %1-second slow mode.")
-                .arg(duration)));
+                .arg(duration));
         return "";
     }
 
@@ -267,24 +265,23 @@ QString slow(const CommandContext &ctx)
 
 QString slowOff(const CommandContext &ctx)
 {
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
-        ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
+        ctx.channel->addSystemMessage(P_NOT_LOGGED_IN);
         return "";
     }
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /slowoff command only works in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "The /slowoff command only works in Twitch channels.");
         return "";
     }
 
     if (ctx.twitchChannel->accessRoomModes()->slowMode <= 0)
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("This room is not in slow mode."));
+        ctx.channel->addSystemMessage("This room is not in slow mode.");
         return "";
     }
 
@@ -297,17 +294,17 @@ QString slowOff(const CommandContext &ctx)
 
 QString followers(const CommandContext &ctx)
 {
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
-        ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
+        ctx.channel->addSystemMessage(P_NOT_LOGGED_IN);
         return "";
     }
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /followers command only works in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "The /followers command only works in Twitch channels.");
         return "";
     }
 
@@ -319,20 +316,20 @@ QString followers(const CommandContext &ctx)
         // -1 / 60 == 0 => use parsed
         if (parsed < 0)
         {
-            ctx.channel->addMessage(makeSystemMessage(
+            ctx.channel->addSystemMessage(
                 "Usage: \"/followers [duration]\" - Enables followers-only "
                 "mode (only users who have followed for 'duration' may chat). "
                 "Examples: \"30m\", \"1 week\", \"5 days 12 hours\". Must be "
-                "less than 3 months."));
+                "less than 3 months.");
             return "";
         }
     }
 
     if (ctx.twitchChannel->accessRoomModes()->followerOnly == duration)
     {
-        ctx.channel->addMessage(makeSystemMessage(
+        ctx.channel->addSystemMessage(
             QString("This room is already in %1 followers-only mode.")
-                .arg(formatTime(duration * 60))));
+                .arg(formatTime(duration * 60)));
         return "";
     }
 
@@ -345,24 +342,24 @@ QString followers(const CommandContext &ctx)
 
 QString followersOff(const CommandContext &ctx)
 {
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
-        ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
+        ctx.channel->addSystemMessage(P_NOT_LOGGED_IN);
         return "";
     }
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /followersoff command only works in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "The /followersoff command only works in Twitch channels.");
         return "";
     }
 
     if (ctx.twitchChannel->accessRoomModes()->followerOnly < 0)
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("This room is not in followers-only mode. "));
+        ctx.channel->addSystemMessage(
+            "This room is not in followers-only mode. ");
         return "";
     }
 
@@ -375,24 +372,24 @@ QString followersOff(const CommandContext &ctx)
 
 QString uniqueChat(const CommandContext &ctx)
 {
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
-        ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
+        ctx.channel->addSystemMessage(P_NOT_LOGGED_IN);
         return "";
     }
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /uniquechat command only works in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "The /uniquechat command only works in Twitch channels.");
         return "";
     }
 
     if (ctx.twitchChannel->accessRoomModes()->r9k)
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("This room is already in unique-chat mode."));
+        ctx.channel->addSystemMessage(
+            "This room is already in unique-chat mode.");
         return "";
     }
 
@@ -405,24 +402,23 @@ QString uniqueChat(const CommandContext &ctx)
 
 QString uniqueChatOff(const CommandContext &ctx)
 {
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
-        ctx.channel->addMessage(makeSystemMessage(P_NOT_LOGGED_IN));
+        ctx.channel->addSystemMessage(P_NOT_LOGGED_IN);
         return "";
     }
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /uniquechatoff command only works in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "The /uniquechatoff command only works in Twitch channels.");
         return "";
     }
 
     if (!ctx.twitchChannel->accessRoomModes()->r9k)
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("This room is not in unique-chat mode."));
+        ctx.channel->addSystemMessage("This room is not in unique-chat mode.");
         return "";
     }
 

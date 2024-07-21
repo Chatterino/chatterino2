@@ -6,15 +6,13 @@
 
 namespace chatterino {
 
-inline float distanceBetweenPoints(const QPointF &p1, const QPointF &p2)
+inline qreal distanceBetweenPoints(const QPointF &p1, const QPointF &p2)
 {
     QPointF tmp = p1 - p2;
 
-    float distance = 0.f;
-    distance += tmp.x() * tmp.x();
-    distance += tmp.y() * tmp.y();
+    qreal distance = tmp.x() * tmp.x() + tmp.y() * tmp.y();
 
-    return sqrt(distance);
+    return std::sqrt(distance);
 }
 
 }  // namespace chatterino

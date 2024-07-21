@@ -444,8 +444,6 @@ set(SOURCE_FILES
         providers/twitch/api/Helix.cpp
         providers/twitch/api/Helix.hpp
 
-        singletons/Badges.cpp
-        singletons/Badges.hpp
         singletons/CrashHandler.cpp
         singletons/CrashHandler.hpp
         singletons/Emotes.cpp
@@ -487,7 +485,6 @@ set(SOURCE_FILES
         util/ChannelHelpers.hpp
         util/Clipboard.cpp
         util/Clipboard.hpp
-        util/ConcurrentMap.hpp
         util/DebugCount.cpp
         util/DebugCount.hpp
         util/DisplayBadge.cpp
@@ -517,8 +514,6 @@ set(SOURCE_FILES
         util/SampleData.cpp
         util/SampleData.hpp
         util/SharedPtrElementLess.hpp
-        util/SplitCommand.cpp
-        util/SplitCommand.hpp
         util/StreamLink.cpp
         util/StreamLink.hpp
         util/ThreadGuard.hpp
@@ -585,8 +580,6 @@ set(SOURCE_FILES
         widgets/dialogs/LastRunCrashDialog.hpp
         widgets/dialogs/LoginDialog.cpp
         widgets/dialogs/LoginDialog.hpp
-        widgets/dialogs/NotificationPopup.cpp
-        widgets/dialogs/NotificationPopup.hpp
         widgets/dialogs/QualityPopup.cpp
         widgets/dialogs/QualityPopup.hpp
         widgets/dialogs/ReplyThreadPopup.cpp
@@ -645,6 +638,8 @@ set(SOURCE_FILES
         widgets/helper/IconDelegate.hpp
         widgets/helper/InvisibleSizeGrip.cpp
         widgets/helper/InvisibleSizeGrip.hpp
+        widgets/helper/MessageView.cpp
+        widgets/helper/MessageView.hpp
         widgets/helper/NotebookButton.cpp
         widgets/helper/NotebookButton.hpp
         widgets/helper/NotebookTab.cpp
@@ -949,6 +944,10 @@ set_target_properties(${LIBRARY_PROJECT}
 # this is its own project.
 set(VERSION_SOURCE_FILES common/Version.cpp common/Version.hpp)
 add_library(${VERSION_PROJECT} STATIC ${VERSION_SOURCE_FILES})
+target_compile_definitions(${VERSION_PROJECT} PRIVATE
+    $<$<BOOL:${WIN32}>:USEWINSDK>
+    $<$<BOOL:${BUILD_WITH_CRASHPAD}>:CHATTERINO_WITH_CRASHPAD>
+)
 
 # source group for IDEs
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${VERSION_SOURCE_FILES})

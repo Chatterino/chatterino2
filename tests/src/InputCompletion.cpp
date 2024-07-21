@@ -129,9 +129,7 @@ protected:
         this->settings = std::make_unique<Settings>(this->settingsDir_->path());
         this->paths = std::make_unique<Paths>();
 
-        this->mockApplication->accounts.initialize(*this->settings,
-                                                   *this->paths);
-        this->mockApplication->emotes.initialize(*this->settings, *this->paths);
+        this->mockApplication->accounts.load();
 
         this->channelPtr = std::make_shared<MockChannel>("icelys");
 

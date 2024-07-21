@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/Singleton.hpp"
 #include "util/QStringHash.hpp"
 
 #include <QString>
@@ -26,7 +25,7 @@ public:
     virtual void add(const std::shared_ptr<TwitchChannel> &newChannel) = 0;
 };
 
-class TwitchLiveController : public ITwitchLiveController, public Singleton
+class TwitchLiveController : public ITwitchLiveController
 {
 public:
     // Controls how often all channels have their stream status refreshed
@@ -49,6 +48,11 @@ public:
     void add(const std::shared_ptr<TwitchChannel> &newChannel) override;
 
 private:
+    struct ChannelEntry {
+        std::weak_ptr<TwitchChannel> ptr;
+        bool wasChecked = false;
+    };
+
     /**
      * Run batched Helix Channels & Stream requests for channels
      *
@@ -64,7 +68,7 @@ private:
      *
      * These channels will have their stream status updated every REFRESH_INTERVAL seconds
      **/
-    std::unordered_map<QString, std::weak_ptr<TwitchChannel>> channels;
+    std::unordered_map<QString, ChannelEntry> channels;
     std::shared_mutex channelsMutex;
 
     /**

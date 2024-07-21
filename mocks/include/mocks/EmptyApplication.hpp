@@ -17,7 +17,17 @@ public:
     {
     }
 
-    virtual ~EmptyApplication() = default;
+    explicit EmptyApplication(const QString &settingsData)
+        : EmptyApplication()
+    {
+        QFile settingsFile(this->settingsDir.filePath("settings.json"));
+        settingsFile.open(QIODevice::WriteOnly | QIODevice::Text);
+        settingsFile.write(settingsData.toUtf8());
+        settingsFile.flush();
+        settingsFile.close();
+    }
+
+    ~EmptyApplication() override = default;
 
     bool isTest() const override
     {
@@ -249,7 +259,6 @@ public:
         return nullptr;
     }
 
-protected:
     QTemporaryDir settingsDir;
     Paths paths_;
     Args args_;

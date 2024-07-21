@@ -1,4 +1,4 @@
-#include "FfzBadges.hpp"
+#include "providers/ffz/FfzBadges.hpp"
 
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
@@ -16,11 +16,6 @@
 #include <shared_mutex>
 
 namespace chatterino {
-
-void FfzBadges::initialize(Settings &settings, const Paths &paths)
-{
-    this->load();
-}
 
 std::vector<FfzBadges::Badge> FfzBadges::getUserBadges(const UserId &id)
 {
