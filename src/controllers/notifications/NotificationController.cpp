@@ -17,9 +17,10 @@
 #include <QUrl>
 
 namespace ranges = std::ranges;
+
 namespace chatterino {
 
-void NotificationController::initialize(Settings &settings, const Paths &paths)
+NotificationController::NotificationController()
 {
     for (const QString &channelName : this->twitchSetting_.getValue())
     {
@@ -34,12 +35,15 @@ void NotificationController::initialize(Settings &settings, const Paths &paths)
                 this->channelMap[Platform::Twitch].raw());
         });
 
-    this->fetchFakeChannels();
-
     QObject::connect(&this->liveStatusTimer_, &QTimer::timeout, [this] {
         this->fetchFakeChannels();
     });
     this->liveStatusTimer_.start(60 * 1000);
+}
+
+void NotificationController::initialize()
+{
+    this->fetchFakeChannels();
 }
 
 void NotificationController::updateChannelNotification(

@@ -130,7 +130,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , crashHandler(&this->emplace(new CrashHandler(paths)))
 
     , commands(new CommandController(paths))
-    , notifications(&this->emplace<NotificationController>())
+    , notifications(new NotificationController)
     , highlights(new HighlightController(_settings, this->accounts))
     , twitch(new TwitchIrcServer)
     , ffzBadges(new FfzBadges)
@@ -172,6 +172,7 @@ void Application::fakeDtor()
     this->bttvEmotes.reset();
     this->ffzEmotes.reset();
     this->seventvEmotes.reset();
+    this->notifications.reset();
     this->commands.reset();
     this->highlights.reset();
     this->ffzBadges.reset();
@@ -222,6 +223,9 @@ void Application::initialize(Settings &settings, const Paths &paths)
 
     this->ffzBadges->load();
     this->twitch->initialize();
+
+    // Load live status
+    this->notifications->initialize();
 
     // XXX: Loading Twitch badges after Helix has been initialized, which only happens after
     // the AccountController initialize has been called
@@ -411,8 +415,9 @@ CommandController *Application::getCommands()
 NotificationController *Application::getNotifications()
 {
     assertInGuiThread();
+    assert(this->notifications);
 
-    return this->notifications;
+    return this->notifications.get();
 }
 
 HighlightController *Application::getHighlights()
