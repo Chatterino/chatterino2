@@ -229,11 +229,6 @@ void Application::initialize(Settings &settings, const Paths &paths)
 
     this->windows->initialize(settings);
 
-    for (auto &singleton : this->singletons_)
-    {
-        singleton->initialize(settings, paths);
-    }
-
     this->ffzBadges->load();
     this->twitch->initialize();
 
@@ -595,11 +590,6 @@ SeventvEmotes *Application::getSeventvEmotes()
 
 void Application::save()
 {
-    for (auto &singleton : this->singletons_)
-    {
-        singleton->save();
-    }
-
     this->commands->save();
     this->hotkeys->save();
     this->windows->save();

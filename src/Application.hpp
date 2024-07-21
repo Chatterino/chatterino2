@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/Singleton.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "singletons/NativeMessaging.hpp"
 
@@ -108,7 +107,6 @@ class Application : public IApplication
 {
     const Paths &paths_;
     const Args &args_;
-    std::vector<std::unique_ptr<Singleton>> singletons_;
     int argc_{};
     char **argv_{};
 
@@ -227,28 +225,10 @@ public:
     IStreamerMode *getStreamerMode() override;
 
 private:
-    void addSingleton(Singleton *singleton);
     void initPubSub();
     void initBttvLiveUpdates();
     void initSeventvEventAPI();
     void initNm(const Paths &paths);
-
-    template <typename T,
-              typename = std::enable_if_t<std::is_base_of<Singleton, T>::value>>
-    T &emplace()
-    {
-        auto t = new T;
-        this->singletons_.push_back(std::unique_ptr<T>(t));
-        return *t;
-    }
-
-    template <typename T,
-              typename = std::enable_if_t<std::is_base_of<Singleton, T>::value>>
-    T &emplace(T *t)
-    {
-        this->singletons_.push_back(std::unique_ptr<T>(t));
-        return *t;
-    }
 
     NativeMessagingServer nmServer{};
     Updates &updates;
