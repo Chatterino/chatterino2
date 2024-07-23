@@ -72,6 +72,8 @@ TEST(LinkParser, parseDomainLinks)
         {"", "chatterino.com", ":80"},
         {"", "wiki.chatterino.com", ":80"},
         {"", "wiki.chatterino.com", ":80/foo/bar"},
+        {"", "wiki.chatterino.com", ":80?foo"},
+        {"", "wiki.chatterino.com", ":80#foo"},
         {"", "wiki.chatterino.com", "/:80?foo/bar"},
         {"", "wiki.chatterino.com", "/127.0.0.1"},
         {"", "a.b.c.chatterino.com"},
@@ -156,6 +158,7 @@ TEST(LinkParser, parseIpv4Links)
 TEST(LinkParser, doesntParseInvalidIpv4Links)
 {
     const QStringList inputs = {
+        "196.162.a.1",
         // U+0660 - in category "number digits"
         QStringLiteral("٠.٠.٠.٠"),
         "https://127.0.0.",
@@ -186,6 +189,10 @@ TEST(LinkParser, doesntParseInvalidIpv4Links)
         "196.162.8.1(",
         "196.162.8.1(!",
         "127.1.1;.com",
+        "127.0.-.1",
+        "127...",
+        "1.1.1.",
+        "1.1.1.:80",
     };
 
     for (const auto &input : inputs)
@@ -223,6 +230,10 @@ TEST(LinkParser, doesntParseInvalidLinks)
         "https://pn./",
         "pn./",
         "pn.",
+        "pn.:80",
+        "pn./foo",
+        "pn.#foo",
+        "pn.?foo",
         "http/chatterino.com",
         "http/wiki.chatterino.com",
         "http:cat.com",

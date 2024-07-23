@@ -1,17 +1,24 @@
 #define QT_NO_CAST_FROM_ASCII  // avoids unexpected implicit casts
 #include "common/LinkParser.hpp"
 
+#include "util/QCompareCaseInsensitive.hpp"
+
 #include <QFile>
-#include <QSet>
 #include <QString>
 #include <QStringView>
 #include <QTextStream>
 
+#include <set>
+
 namespace {
 
-QSet<QString> &tlds()
+using namespace chatterino;
+
+using TldSet = std::set<QString, QCompareCaseInsensitive>;
+
+TldSet &tlds()
 {
-    static QSet<QString> tlds = [] {
+    static TldSet tlds = [] {
         QFile file(QStringLiteral(":/tlds.txt"));
         file.open(QFile::ReadOnly);
         QTextStream stream(&file);
@@ -21,19 +28,12 @@ QSet<QString> &tlds()
 #else
         stream.setCodec("UTF-8");
 #endif
-        int safetyMax = 20000;
 
-        QSet<QString> set;
+        TldSet set;
 
         while (!stream.atEnd())
         {
-            auto line = stream.readLine();
-            set.insert(line);
-
-            if (safetyMax-- == 0)
-            {
-                break;
-            }
+            set.emplace(stream.readLine());
         }
 
         return set;
@@ -43,7 +43,7 @@ QSet<QString> &tlds()
 
 bool isValidTld(QStringView tld)
 {
-    return tlds().contains(tld.toString().toLower());
+    return tlds().contains(tld);
 }
 
 bool isValidIpv4(QStringView host)
@@ -166,6 +166,8 @@ namespace chatterino::linkparser {
 
 std::optional<Parsed> parse(const QString &source) noexcept
 {
+    using SizeType = QString::size_type;
+
     std::optional<Parsed> result;
     // This is not implemented with a regex to increase performance.
 
@@ -201,11 +203,11 @@ std::optional<Parsed> parse(const QString &source) noexcept
     QStringView host = remaining;
     QStringView rest;
     bool lastWasDot = true;
-    int lastDotPos = -1;
-    int nDots = 0;
+    SizeType lastDotPos = -1;
+    SizeType nDots = 0;
 
     // Extract the host
-    for (int i = 0; i < remaining.size(); i++)
+    for (SizeType i = 0; i < remaining.size(); i++)
     {
         char16_t currentChar = remaining[i].unicode();
         if (currentChar == u'.')
