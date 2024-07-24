@@ -25,6 +25,7 @@ class MockApplication : mock::EmptyApplication
 public:
     MockApplication()
         : settings(this->settingsDir.filePath("settings.json"))
+        , theme(this->paths_)
         , fonts(this->settings)
     {
     }
@@ -68,9 +69,16 @@ std::vector<std::shared_ptr<MessageElement>> makeElements(const QString &text)
 
         if (word.startsWith('!'))
         {
-            auto emote = std::make_shared<Emote>(
-                EmoteName{word}, ImageSet{Image::fromResourcePixmap(
-                                     getResources().buttons.addSplit)});
+            auto emote = std::make_shared<Emote>(Emote{
+                .name = EmoteName{word},
+                .images = ImageSet{Image::fromResourcePixmap(
+                    getResources().buttons.addSplit)},
+                .tooltip = {},
+                .homePage = {},
+                .id = {},
+                .author = {},
+                .baseName = {},
+            });
             elements.emplace_back(std::make_shared<EmoteElement>(
                 emote, MessageElementFlag::TwitchEmote));
             continue;
