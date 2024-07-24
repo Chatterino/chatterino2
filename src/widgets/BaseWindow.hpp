@@ -188,7 +188,6 @@ private:
 
     QRect initalBounds_;
     QRect currentBounds_;
-    QRect nextBounds_;
     QTimer useNextBounds_;
     bool isNotMinimizedOrMaximized_{};
     bool lastEventWasNcMouseMove_ = false;

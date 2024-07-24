@@ -282,7 +282,7 @@ bool Theme::isSystemTheme() const
     return this->themeName == u"System"_s;
 }
 
-void Theme::initialize(Settings &settings, const Paths &paths)
+Theme::Theme(const Paths &paths)
 {
     this->themeName.connect(
         [this](auto themeName) {
@@ -307,7 +307,7 @@ void Theme::initialize(Settings &settings, const Paths &paths)
                          if (this->isSystemTheme())
                          {
                              this->update();
-                             getIApp()->getWindows()->forceLayoutChannelViews();
+                             getApp()->getWindows()->forceLayoutChannelViews();
                          }
                      });
 #endif
@@ -597,7 +597,7 @@ void Theme::normalizeColor(QColor &color) const
 
 Theme *getTheme()
 {
-    return getIApp()->getThemes();
+    return getApp()->getThemes();
 }
 
 }  // namespace chatterino

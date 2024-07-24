@@ -77,7 +77,7 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, Split *split)
         {"search", nullptr},
     };
 
-    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
+    this->shortcuts_ = getApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 
     // initialize UI
@@ -98,7 +98,7 @@ ReplyThreadPopup::ReplyThreadPopup(bool closeAutomatically, Split *split)
         new SplitInput(this, this->split_, this->ui_.threadView, false);
 
     this->bSignals_.emplace_back(
-        getIApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
+        getApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
             this->updateInputUI();
         }));
 
@@ -244,7 +244,8 @@ void ReplyThreadPopup::addMessagesFromThread()
         std::optional<MessageFlags>(this->thread_->root()->flags);
     rootOverrideFlags->set(MessageFlag::DoNotLog);
 
-    this->virtualChannel_->addMessage(this->thread_->root(), rootOverrideFlags);
+    this->virtualChannel_->addMessage(
+        this->thread_->root(), MessageContext::Repost, rootOverrideFlags);
     for (const auto &msgRef : this->thread_->replies())
     {
         if (auto msg = msgRef.lock())
@@ -252,24 +253,26 @@ void ReplyThreadPopup::addMessagesFromThread()
             auto overrideFlags = std::optional<MessageFlags>(msg->flags);
             overrideFlags->set(MessageFlag::DoNotLog);
 
-            this->virtualChannel_->addMessage(msg, overrideFlags);
+            this->virtualChannel_->addMessage(msg, MessageContext::Repost,
+                                              overrideFlags);
         }
     }
 
     this->messageConnection_ =
         std::make_unique<pajlada::Signals::ScopedConnection>(
-            sourceChannel->messageAppended.connect([this](MessagePtr &message,
-                                                          auto) {
-                if (message->replyThread == this->thread_)
-                {
-                    auto overrideFlags =
-                        std::optional<MessageFlags>(message->flags);
-                    overrideFlags->set(MessageFlag::DoNotLog);
+            sourceChannel->messageAppended.connect(
+                [this](MessagePtr &message, auto) {
+                    if (message->replyThread == this->thread_)
+                    {
+                        auto overrideFlags =
+                            std::optional<MessageFlags>(message->flags);
+                        overrideFlags->set(MessageFlag::DoNotLog);
 
-                    // same reply thread, add message
-                    this->virtualChannel_->addMessage(message, overrideFlags);
-                }
-            }));
+                        // same reply thread, add message
+                        this->virtualChannel_->addMessage(
+                            message, MessageContext::Repost, overrideFlags);
+                    }
+                }));
 }
 
 void ReplyThreadPopup::updateInputUI()
@@ -284,7 +287,7 @@ void ReplyThreadPopup::updateInputUI()
 
     this->ui_.replyInput->setVisible(channel->isWritable());
 
-    auto user = getIApp()->getAccounts()->twitch.getCurrent();
+    auto user = getApp()->getAccounts()->twitch.getCurrent();
     QString placeholderText;
 
     if (user->isAnon())
@@ -294,7 +297,7 @@ void ReplyThreadPopup::updateInputUI()
     else
     {
         placeholderText = QStringLiteral("Reply as %1...")
-                              .arg(getIApp()
+                              .arg(getApp()
                                        ->getAccounts()
                                        ->twitch.getCurrent()
                                        ->getUserName());

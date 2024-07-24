@@ -427,11 +427,11 @@ void ChannelView::initializeScrollbar()
 
 void ChannelView::initializeSignals()
 {
-    this->signalHolder_.managedConnect(
-        getIApp()->getWindows()->wordFlagsChanged, [this] {
-            this->queueLayout();
-            this->update();
-        });
+    this->signalHolder_.managedConnect(getApp()->getWindows()->wordFlagsChanged,
+                                       [this] {
+                                           this->queueLayout();
+                                           this->update();
+                                       });
 
     getSettings()->showLastMessageIndicator.connect(
         [this](auto, auto) {
@@ -440,7 +440,7 @@ void ChannelView::initializeSignals()
         this->signalHolder_);
 
     this->signalHolder_.managedConnect(
-        getIApp()->getWindows()->gifRepaintRequested, [&] {
+        getApp()->getWindows()->gifRepaintRequested, [&] {
             if (!this->animationArea_.isEmpty())
             {
                 this->queueUpdate(this->animationArea_);
@@ -448,7 +448,7 @@ void ChannelView::initializeSignals()
         });
 
     this->signalHolder_.managedConnect(
-        getIApp()->getWindows()->layoutRequested, [&](Channel *channel) {
+        getApp()->getWindows()->layoutRequested, [&](Channel *channel) {
             if (this->isVisible() &&
                 (channel == nullptr ||
                  this->underlyingChannel_.get() == channel))
@@ -458,7 +458,7 @@ void ChannelView::initializeSignals()
         });
 
     this->signalHolder_.managedConnect(
-        getIApp()->getWindows()->invalidateBuffersRequested,
+        getApp()->getWindows()->invalidateBuffersRequested,
         [this](Channel *channel) {
             if (this->isVisible() &&
                 (channel == nullptr ||
@@ -468,7 +468,7 @@ void ChannelView::initializeSignals()
             }
         });
 
-    this->signalHolder_.managedConnect(getIApp()->getFonts()->fontChanged,
+    this->signalHolder_.managedConnect(getApp()->getFonts()->fontChanged,
                                        [this] {
                                            this->queueLayout();
                                        });
@@ -622,7 +622,7 @@ void ChannelView::scaleChangedEvent(float scale)
                      0.01, this->logicalDpiX() * this->devicePixelRatioF());
 #endif
         this->goToBottom_->getLabel().setFont(
-            getIApp()->getFonts()->getFont(FontStyle::UiMedium, factor));
+            getApp()->getFonts()->getFont(FontStyle::UiMedium, factor));
     }
 }
 
@@ -925,26 +925,17 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
             {
                 if (this->channel_->lastDate_ != QDate::currentDate())
                 {
+                    // Day change message
                     this->channel_->lastDate_ = QDate::currentDate();
                     auto msg = makeSystemMessage(
                         QLocale().toString(QDate::currentDate(),
                                            QLocale::LongFormat),
                         QTime(0, 0));
-                    this->channel_->addMessage(msg);
+                    msg->flags.set(MessageFlag::DoNotLog);
+                    this->channel_->addMessage(msg, MessageContext::Original);
                 }
-                // When the message was received in the underlyingChannel,
-                // logging will be handled. Prevent duplications.
-                if (overridingFlags)
-                {
-                    overridingFlags->set(MessageFlag::DoNotLog);
-                }
-                else
-                {
-                    overridingFlags = MessageFlags(message->flags);
-                    overridingFlags->set(MessageFlag::DoNotLog);
-                }
-
-                this->channel_->addMessage(message, overridingFlags);
+                this->channel_->addMessage(message, MessageContext::Repost,
+                                           overridingFlags);
             }
         });
 
@@ -1010,7 +1001,9 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
         }
 
         this->messages_.pushBack(messageLayout);
-        this->channel_->addMessage(msg);
+
+        this->channel_->addMessage(msg, MessageContext::Repost);
+
         nMessagesAdded++;
         if (this->showScrollbarHighlights())
         {
@@ -1094,11 +1087,8 @@ bool ChannelView::shouldIncludeMessage(const MessagePtr &m) const
     if (this->channelFilters_)
     {
         if (getSettings()->excludeUserMessagesFromFilter &&
-            getIApp()
-                    ->getAccounts()
-                    ->twitch.getCurrent()
-                    ->getUserName()
-                    .compare(m->loginName, Qt::CaseInsensitive) == 0)
+            getApp()->getAccounts()->twitch.getCurrent()->getUserName().compare(
+                m->loginName, Qt::CaseInsensitive) == 0)
         {
             return true;
         }
@@ -1384,19 +1374,19 @@ MessageElementFlags ChannelView::getFlags() const
             flags.set(MessageElementFlag::ModeratorTools);
         }
         if (this->underlyingChannel_ ==
-                getIApp()->getTwitch()->getMentionsChannel() ||
+                getApp()->getTwitch()->getMentionsChannel() ||
             this->underlyingChannel_ ==
-                getIApp()->getTwitch()->getLiveChannel() ||
+                getApp()->getTwitch()->getLiveChannel() ||
             this->underlyingChannel_ ==
-                getIApp()->getTwitch()->getAutomodChannel())
+                getApp()->getTwitch()->getAutomodChannel())
         {
             flags.set(MessageElementFlag::ChannelName);
             flags.unset(MessageElementFlag::ChannelPointReward);
         }
     }
 
-    if (this->sourceChannel_ == getIApp()->getTwitch()->getMentionsChannel() ||
-        this->sourceChannel_ == getIApp()->getTwitch()->getAutomodChannel())
+    if (this->sourceChannel_ == getApp()->getTwitch()->getMentionsChannel() ||
+        this->sourceChannel_ == getApp()->getTwitch()->getAutomodChannel())
     {
         flags.set(MessageElementFlag::ChannelName);
     }
@@ -1453,7 +1443,7 @@ bool ChannelView::scrollToMessage(const MessagePtr &message)
     this->scrollToMessageLayout(messagesSnapshot[messageIdx].get(), messageIdx);
     if (this->split_)
     {
-        getIApp()->getWindows()->select(this->split_);
+        getApp()->getWindows()->select(this->split_);
     }
     return true;
 }
@@ -1485,7 +1475,7 @@ bool ChannelView::scrollToMessageId(const QString &messageId)
     this->scrollToMessageLayout(messagesSnapshot[messageIdx].get(), messageIdx);
     if (this->split_)
     {
-        getIApp()->getWindows()->select(this->split_);
+        getApp()->getWindows()->select(this->split_);
     }
     return true;
 }
@@ -1550,7 +1540,7 @@ void ChannelView::drawMessages(QPainter &painter, const QRect &area)
         .canvasWidth = this->width(),
         .isWindowFocused = this->window() == QApplication::activeWindow(),
         .isMentions = this->underlyingChannel_ ==
-                      getIApp()->getTwitch()->getMentionsChannel(),
+                      getApp()->getTwitch()->getMentionsChannel(),
 
         .y = int(-(messagesSnapshot[start]->getHeight() *
                    (fmod(this->scrollBar_->getRelativeCurrentValue(), 1)))),
@@ -1975,7 +1965,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             {
                 if (linkElement->linkInfo()->isPending())
                 {
-                    getIApp()->getLinkResolver()->resolve(
+                    getApp()->getLinkResolver()->resolve(
                         linkElement->linkInfo());
                 }
                 this->setLinkInfoTooltip(linkElement->linkInfo());
@@ -2486,7 +2476,7 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
             }
             else if (isMentions || isAutomod)
             {
-                getIApp()->getWindows()->scrollToMessage(messagePtr);
+                getApp()->getWindows()->scrollToMessage(messagePtr);
             }
             else if (isReplyOrUserCard)
             {
@@ -2496,7 +2486,7 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
                 if (type == Channel::Type::TwitchMentions ||
                     type == Channel::Type::TwitchAutomod)
                 {
-                    getIApp()->getWindows()->scrollToMessage(messagePtr);
+                    getApp()->getWindows()->scrollToMessage(messagePtr);
                 }
                 else
                 {
@@ -2577,7 +2567,7 @@ void ChannelView::addCommandExecutionContextMenuItems(
     /* Get commands to be displayed in context menu; 
      * only those that had the showInMsgContextMenu check box marked in the Commands page */
     std::vector<Command> cmds;
-    for (const auto &cmd : getIApp()->getCommands()->items)
+    for (const auto &cmd : getApp()->getCommands()->items)
     {
         if (cmd.showInMsgContextMenu)
         {
@@ -2624,14 +2614,13 @@ void ChannelView::addCommandExecutionContextMenuItems(
             }
 
             // Execute command through right-clicking a message -> Execute command
-            QString value = getIApp()->getCommands()->execCustomCommand(
+            QString value = getApp()->getCommands()->execCustomCommand(
                 inputText.split(' '), cmd, true, channel, layout->getMessage(),
                 {
                     {"input.text", userText},
                 });
 
-            value =
-                getIApp()->getCommands()->execCommand(value, channel, false);
+            value = getApp()->getCommands()->execCommand(value, channel, false);
 
             channel->sendMessage(value);
         });
@@ -2710,7 +2699,7 @@ void ChannelView::showUserInfoPopup(const QString &userName,
     auto *userPopup =
         new UserInfoPopup(getSettings()->autoCloseUserPopup, this->split_);
 
-    auto contextChannel = getIApp()->getTwitchAbstract()->getChannelOrEmpty(
+    auto contextChannel = getApp()->getTwitchAbstract()->getChannelOrEmpty(
         alternativePopoutChannel);
     auto openingChannel = this->hasSourceChannel() ? this->sourceChannel_
                                                    : this->underlyingChannel_;
@@ -2797,25 +2786,24 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
             }
 
             // Execute command clicking a moderator button
-            value = getIApp()->getCommands()->execCustomCommand(
+            value = getApp()->getCommands()->execCustomCommand(
                 QStringList(), Command{"(modaction)", value}, true, channel,
                 layout->getMessage());
 
-            value =
-                getIApp()->getCommands()->execCommand(value, channel, false);
+            value = getApp()->getCommands()->execCommand(value, channel, false);
 
             channel->sendMessage(value);
         }
         break;
 
         case Link::AutoModAllow: {
-            getIApp()->getAccounts()->twitch.getCurrent()->autoModAllow(
+            getApp()->getAccounts()->twitch.getCurrent()->autoModAllow(
                 link.value, this->channel());
         }
         break;
 
         case Link::AutoModDeny: {
-            getIApp()->getAccounts()->twitch.getCurrent()->autoModDeny(
+            getApp()->getAccounts()->twitch.getCurrent()->autoModDeny(
                 link.value, this->channel());
         }
         break;
@@ -2829,7 +2817,7 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
             // Get all currently open pages
             QList<SplitContainer *> openPages;
 
-            auto &nb = getIApp()->getWindows()->getMainWindow().getNotebook();
+            auto &nb = getApp()->getWindows()->getMainWindow().getNotebook();
             for (int i = 0; i < nb.getPageCount(); ++i)
             {
                 openPages.push_back(
@@ -3102,7 +3090,7 @@ void ChannelView::setLinkInfoTooltip(LinkInfo *info)
     ImagePtr thumbnail;
     if (info->hasThumbnail() && thumbnailSize > 0)
     {
-        if (getIApp()->getStreamerMode()->isEnabled() &&
+        if (getApp()->getStreamerMode()->isEnabled() &&
             getSettings()->streamerModeHideLinkThumbnails)
         {
             thumbnail = Image::fromResourcePixmap(getResources().streamerMode);

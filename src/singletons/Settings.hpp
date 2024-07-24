@@ -447,6 +447,10 @@ public:
     BoolSetting enableLogging = {"/logging/enabled", false};
     BoolSetting onlyLogListedChannels = {"/logging/onlyLogListedChannels",
                                          false};
+    BoolSetting separatelyStoreStreamLogs = {
+        "/logging/separatelyStoreStreamLogs",
+        false,
+    };
 
     QStringSetting logPath = {"/logging/path", ""};
 
@@ -471,6 +475,8 @@ public:
                                             "qrc:/sounds/ping3.wav"};
     BoolSetting notificationOnAnyChannel = {"/notifications/onAnyChannel",
                                             false};
+    BoolSetting suppressInitialLiveNotification = {
+        "/notifications/suppressInitialLive", false};
 
     BoolSetting notificationToast = {"/notifications/enableToast", false};
     IntSetting openFromToast = {"/notifications/openFromToast",

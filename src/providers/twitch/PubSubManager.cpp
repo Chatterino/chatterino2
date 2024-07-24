@@ -7,7 +7,6 @@
 #include "providers/twitch/PubSubHelpers.hpp"
 #include "providers/twitch/PubSubMessages.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
-#include "pubsubmessages/LowTrustUsers.hpp"
 #include "util/DebugCount.hpp"
 #include "util/Helpers.hpp"
 #include "util/RapidjsonHelpers.hpp"
@@ -1181,6 +1180,8 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
 
         switch (innerMessage.type)
         {
+            case PubSubCommunityPointsChannelV1Message::Type::
+                AutomaticRewardRedeemed:
             case PubSubCommunityPointsChannelV1Message::Type::RewardRedeemed: {
                 auto redemption =
                     innerMessage.data.value("redemption").toObject();

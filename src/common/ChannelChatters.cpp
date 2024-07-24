@@ -43,7 +43,8 @@ void ChannelChatters::addJoinedUser(const QString &user)
             TwitchMessageBuilder::listOfUsersSystemMessage(
                 "Users joined:", *joinedUsers, &this->channel_, &builder);
             builder->flags.set(MessageFlag::Collapsed);
-            this->channel_.addMessage(builder.release());
+            this->channel_.addMessage(builder.release(),
+                                      MessageContext::Original);
 
             joinedUsers->clear();
             this->joinedUsersMergeQueued_ = false;
@@ -68,7 +69,8 @@ void ChannelChatters::addPartedUser(const QString &user)
             TwitchMessageBuilder::listOfUsersSystemMessage(
                 "Users parted:", *partedUsers, &this->channel_, &builder);
             builder->flags.set(MessageFlag::Collapsed);
-            this->channel_.addMessage(builder.release());
+            this->channel_.addMessage(builder.release(),
+                                      MessageContext::Original);
 
             partedUsers->clear();
             this->partedUsersMergeQueued_ = false;

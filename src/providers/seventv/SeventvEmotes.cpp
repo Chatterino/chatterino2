@@ -217,7 +217,7 @@ void SeventvEmotes::loadGlobalEmotes()
 
     qCDebug(chatterinoSeventv) << "Loading 7TV Global Emotes";
 
-    getIApp()->getSeventvAPI()->getEmoteSet(
+    getApp()->getSeventvAPI()->getEmoteSet(
         u"global"_s,
         [this](const auto &json) {
             QJsonArray parsedEmotes = json["emotes"].toArray();
@@ -246,7 +246,7 @@ void SeventvEmotes::loadChannelEmotes(
     qCDebug(chatterinoSeventv)
         << "Reloading 7TV Channel Emotes" << channelId << manualRefresh;
 
-    getIApp()->getSeventvAPI()->getUserByTwitchID(
+    getApp()->getSeventvAPI()->getUserByTwitchID(
         channelId,
         [callback = std::move(callback), channel, channelId,
          manualRefresh](const auto &json) {
@@ -289,13 +289,11 @@ void SeventvEmotes::loadChannelEmotes(
             {
                 if (hasEmotes)
                 {
-                    shared->addMessage(
-                        makeSystemMessage("7TV channel emotes reloaded."));
+                    shared->addSystemMessage("7TV channel emotes reloaded.");
                 }
                 else
                 {
-                    shared->addMessage(
-                        makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
+                    shared->addSystemMessage(CHANNEL_HAS_NO_EMOTES);
                 }
             }
         },
@@ -312,8 +310,7 @@ void SeventvEmotes::loadChannelEmotes(
                     << result.parseJson();
                 if (manualRefresh)
                 {
-                    shared->addMessage(
-                        makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
+                    shared->addSystemMessage(CHANNEL_HAS_NO_EMOTES);
                 }
             }
             else
@@ -323,10 +320,10 @@ void SeventvEmotes::loadChannelEmotes(
                 qCWarning(chatterinoSeventv)
                     << "Error fetching 7TV emotes for channel" << channelId
                     << ", error" << errorString;
-                shared->addMessage(makeSystemMessage(
+                shared->addSystemMessage(
                     QStringLiteral("Failed to fetch 7TV channel "
                                    "emotes. (Error: %1)")
-                        .arg(errorString)));
+                        .arg(errorString));
             }
         });
 }
@@ -408,7 +405,7 @@ void SeventvEmotes::getEmoteSet(
 {
     qCDebug(chatterinoSeventv) << "Loading 7TV Emote Set" << emoteSetId;
 
-    getIApp()->getSeventvAPI()->getEmoteSet(
+    getApp()->getSeventvAPI()->getEmoteSet(
         emoteSetId,
         [callback = std::move(successCallback), emoteSetId](const auto &json) {
             auto parsedEmotes = json["emotes"].toArray();

@@ -15,7 +15,6 @@
 #include "singletons/Resources.hpp"
 #include "singletons/Theme.hpp"
 #include "util/FormatTime.hpp"
-#include "util/Qt.hpp"
 
 #include <QDateTime>
 
@@ -95,10 +94,10 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
         text.split(QRegularExpression("\\s"), Qt::SkipEmptyParts);
     for (const auto &word : textFragments)
     {
-        LinkParser parser(word);
-        if (parser.result())
+        auto link = linkparser::parse(word);
+        if (link)
         {
-            this->addLink(*parser.result());
+            this->addLink(*link, word);
             continue;
         }
 
@@ -204,7 +203,7 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
 MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
     : MessageBuilder()
 {
-    auto current = getIApp()->getAccounts()->twitch.getCurrent();
+    auto current = getApp()->getAccounts()->twitch.getCurrent();
 
     this->emplace<TimestampElement>();
     this->message().flags.set(MessageFlag::System);
@@ -638,31 +637,46 @@ std::unique_ptr<MessageElement> MessageBuilder::releaseBack()
     return ptr;
 }
 
-void MessageBuilder::addLink(const ParsedLink &parsedLink)
+void MessageBuilder::addLink(const linkparser::Parsed &parsedLink,
+                             const QString &source)
 {
     QString lowercaseLinkString;
-    QString origLink = parsedLink.source;
+    QString origLink = parsedLink.link.toString();
     QString fullUrl;
 
     if (parsedLink.protocol.isNull())
     {
-        fullUrl = QStringLiteral("http://") + parsedLink.source;
+        fullUrl = QStringLiteral("http://") + origLink;
     }
     else
     {
         lowercaseLinkString += parsedLink.protocol;
-        fullUrl = parsedLink.source;
+        fullUrl = origLink;
     }
 
     lowercaseLinkString += parsedLink.host.toString().toLower();
     lowercaseLinkString += parsedLink.rest;
 
     auto textColor = MessageColor(MessageColor::Link);
+
+    if (parsedLink.hasPrefix(source))
+    {
+        this->emplace<TextElement>(parsedLink.prefix(source).toString(),
+                                   MessageElementFlag::Text, this->textColor_)
+            ->setTrailingSpace(false);
+    }
     auto *el = this->emplace<LinkElement>(
         LinkElement::Parsed{.lowercase = lowercaseLinkString,
                             .original = origLink},
         fullUrl, MessageElementFlag::Text, textColor);
-    getIApp()->getLinkResolver()->resolve(el->linkInfo());
+    if (parsedLink.hasSuffix(source))
+    {
+        el->setTrailingSpace(false);
+        this->emplace<TextElement>(parsedLink.suffix(source).toString(),
+                                   MessageElementFlag::Text, this->textColor_);
+    }
+
+    getApp()->getLinkResolver()->resolve(el->linkInfo());
 }
 
 void MessageBuilder::addIrcMessageText(const QString &text)
@@ -672,25 +686,23 @@ void MessageBuilder::addIrcMessageText(const QString &text)
     auto words = text.split(' ');
     MessageColor defaultColorType = MessageColor::Text;
     const auto &defaultColor =
-        defaultColorType.getColor(*getIApp()->getThemes());
+        defaultColorType.getColor(*getApp()->getThemes());
     QColor textColor = defaultColor;
     int fg = -1;
     int bg = -1;
 
-    for (const auto &word : words)
+    for (const auto &string : words)
     {
-        if (word.isEmpty())
+        if (string.isEmpty())
         {
             continue;
         }
 
-        auto string = QString(word);
-
         // Actually just text
-        LinkParser parser(string);
-        if (parser.result())
+        auto link = linkparser::parse(string);
+        if (link)
         {
-            this->addLink(*parser.result());
+            this->addLink(*link, string);
             continue;
         }
 
@@ -716,7 +728,7 @@ void MessageBuilder::addIrcMessageText(const QString &text)
                 if (fg >= 0 && fg <= 98)
                 {
                     textColor = IRC_COLORS[fg];
-                    getIApp()->getThemes()->normalizeColor(textColor);
+                    getApp()->getThemes()->normalizeColor(textColor);
                 }
                 else
                 {
@@ -756,7 +768,7 @@ void MessageBuilder::addIrcMessageText(const QString &text)
         if (fg >= 0 && fg <= 98)
         {
             textColor = IRC_COLORS[fg];
-            getIApp()->getThemes()->normalizeColor(textColor);
+            getApp()->getThemes()->normalizeColor(textColor);
         }
         else
         {
@@ -773,15 +785,13 @@ void MessageBuilder::addTextOrEmoji(EmotePtr emote)
     this->emplace<EmoteElement>(emote, MessageElementFlag::EmojiAll);
 }
 
-void MessageBuilder::addTextOrEmoji(const QString &string_)
+void MessageBuilder::addTextOrEmoji(const QString &string)
 {
-    auto string = QString(string_);
-
     // Actually just text
-    LinkParser linkParser(string);
-    if (linkParser.result())
+    auto link = linkparser::parse(string);
+    if (link)
     {
-        this->addLink(*linkParser.result());
+        this->addLink(*link, string);
         return;
     }
 
@@ -800,7 +810,7 @@ void MessageBuilder::addIrcWord(const QString &text, const QColor &color,
                                 bool addSpace)
 {
     this->textColor_ = color;
-    for (auto &variant : getIApp()->getEmotes()->getEmojis()->parse(text))
+    for (auto &variant : getApp()->getEmotes()->getEmojis()->parse(text))
     {
         boost::apply_visitor(
             [&](auto &&arg) {

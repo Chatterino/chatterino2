@@ -88,7 +88,7 @@ bool MessageLayout::layout(int width, float scale, float imageScale,
     this->currentLayoutWidth_ = width;
 
     // check if layout state changed
-    const auto layoutGeneration = getIApp()->getWindows()->getGeneration();
+    const auto layoutGeneration = getApp()->getWindows()->getGeneration();
     if (this->layoutState_ != layoutGeneration)
     {
         layoutRequired = true;
@@ -166,7 +166,7 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
         {
             if (hideModerationActions ||
                 (getSettings()->streamerModeHideModActions &&
-                 getIApp()->getStreamerMode()->isEnabled()))
+                 getApp()->getStreamerMode()->isEnabled()))
             {
                 continue;
             }

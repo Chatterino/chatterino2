@@ -348,7 +348,7 @@ void SeventvEventAPI::onUserUpdate(const Dispatch &dispatch)
 
 void SeventvEventAPI::onCosmeticCreate(const CosmeticCreateDispatch &cosmetic)
 {
-    auto *badges = getIApp()->getSeventvBadges();
+    auto *badges = getApp()->getSeventvBadges();
     switch (cosmetic.kind)
     {
         case CosmeticKind::Badge: {
@@ -363,7 +363,7 @@ void SeventvEventAPI::onCosmeticCreate(const CosmeticCreateDispatch &cosmetic)
 void SeventvEventAPI::onEntitlementCreate(
     const EntitlementCreateDeleteDispatch &entitlement)
 {
-    auto *badges = getIApp()->getSeventvBadges();
+    auto *badges = getApp()->getSeventvBadges();
     switch (entitlement.kind)
     {
         case CosmeticKind::Badge: {
@@ -379,7 +379,7 @@ void SeventvEventAPI::onEntitlementCreate(
 void SeventvEventAPI::onEntitlementDelete(
     const EntitlementCreateDeleteDispatch &entitlement)
 {
-    auto *badges = getIApp()->getSeventvBadges();
+    auto *badges = getApp()->getSeventvBadges();
     switch (entitlement.kind)
     {
         case CosmeticKind::Badge: {

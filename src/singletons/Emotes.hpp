@@ -1,14 +1,10 @@
 #pragma once
 
-#include "common/Singleton.hpp"
 #include "providers/emoji/Emojis.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "singletons/helper/GifTimer.hpp"
 
 namespace chatterino {
-
-class Settings;
-class Paths;
 
 class IEmotes
 {
@@ -20,14 +16,10 @@ public:
     virtual GIFTimer &getGIFTimer() = 0;
 };
 
-class Emotes final : public IEmotes, public Singleton
+class Emotes final : public IEmotes
 {
 public:
     Emotes();
-
-    void initialize(Settings &settings, const Paths &paths) override;
-
-    bool isIgnoredEmote(const QString &emote);
 
     ITwitchEmotes *getTwitchEmotes() final
     {

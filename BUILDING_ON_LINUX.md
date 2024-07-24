@@ -1,6 +1,6 @@
 # Linux
 
-For all dependencies below we use Qt6. Our minimum supported version is Qt5.15, but you are on your own.
+For all dependencies below we use Qt 6. Our minimum supported version is Qt 5.15.2, but you are on your own.
 
 ## Install dependencies
 
@@ -8,11 +8,11 @@ For all dependencies below we use Qt6. Our minimum supported version is Qt5.15, 
 
 Building on Ubuntu requires Docker.
 
-Use https://github.com/Chatterino/docker/pkgs/container/chatterino2-build-ubuntu-20.04 as your base if you're on Ubuntu 20.04.
+Use <https://github.com/Chatterino/docker/pkgs/container/chatterino2-build-ubuntu-20.04> as your base if you're on Ubuntu 20.04.
 
-Use https://github.com/Chatterino/docker/pkgs/container/chatterino2-build-ubuntu-22.04 if you're on Ubuntu 22.04.
+Use <https://github.com/Chatterino/docker/pkgs/container/chatterino2-build-ubuntu-22.04> if you're on Ubuntu 22.04.
 
-The built binary should be exportable from the final image & able to run on your system assuming you perform a static build. See our [build.yml github workflow file](.github/workflows/build.yml) for the cmake line used for Ubuntu builds.
+The built binary should be exportable from the final image & able to run on your system assuming you perform a static build. See our [build.yml GitHub workflow file](.github/workflows/build.yml) for the CMake line used for Ubuntu builds.
 
 ### Debian 12 (bookworm) or later
 

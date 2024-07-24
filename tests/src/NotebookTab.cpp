@@ -23,6 +23,7 @@ class MockApplication : mock::EmptyApplication
 public:
     MockApplication()
         : settings(this->settingsDir.filePath("settings.json"))
+        , theme(this->paths_)
         , fonts(this->settings)
     {
     }

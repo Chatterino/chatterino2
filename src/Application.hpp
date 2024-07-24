@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/Singleton.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "singletons/NativeMessaging.hpp"
 
@@ -108,7 +107,6 @@ class Application : public IApplication
 {
     const Paths &paths_;
     const Args &args_;
-    std::vector<std::unique_ptr<Singleton>> singletons_;
     int argc_{};
     char **argv_{};
 
@@ -144,25 +142,25 @@ public:
     friend void test();
 
 private:
-    Theme *const themes{};
-    std::unique_ptr<Fonts> fonts{};
-    Emotes *const emotes{};
-    AccountController *const accounts{};
-    HotkeyController *const hotkeys{};
-    WindowManager *const windows{};
-    Toasts *const toasts{};
-    ImageUploader *const imageUploader{};
-    SeventvAPI *const seventvAPI{};
-    CrashHandler *const crashHandler{};
-    CommandController *const commands{};
-    NotificationController *const notifications{};
-    HighlightController *const highlights{};
+    std::unique_ptr<Theme> themes;
+    std::unique_ptr<Fonts> fonts;
+    std::unique_ptr<Emotes> emotes;
+    std::unique_ptr<AccountController> accounts;
+    std::unique_ptr<HotkeyController> hotkeys;
+    std::unique_ptr<WindowManager> windows;
+    std::unique_ptr<Toasts> toasts;
+    std::unique_ptr<ImageUploader> imageUploader;
+    std::unique_ptr<SeventvAPI> seventvAPI;
+    std::unique_ptr<CrashHandler> crashHandler;
+    std::unique_ptr<CommandController> commands;
+    std::unique_ptr<NotificationController> notifications;
+    std::unique_ptr<HighlightController> highlights;
     std::unique_ptr<TwitchIrcServer> twitch;
-    FfzBadges *const ffzBadges{};
-    SeventvBadges *const seventvBadges{};
+    std::unique_ptr<FfzBadges> ffzBadges;
+    std::unique_ptr<SeventvBadges> seventvBadges;
     std::unique_ptr<UserDataController> userData;
     std::unique_ptr<ISoundController> sound;
-    TwitchLiveController *const twitchLiveController{};
+    std::unique_ptr<TwitchLiveController> twitchLiveController;
     std::unique_ptr<PubSub> twitchPubSub;
     std::unique_ptr<TwitchBadges> twitchBadges;
     std::unique_ptr<ChatterinoBadges> chatterinoBadges;
@@ -173,7 +171,7 @@ private:
     std::unique_ptr<ILinkResolver> linkResolver;
     std::unique_ptr<IStreamerMode> streamerMode;
 #ifdef CHATTERINO_HAVE_PLUGINS
-    PluginController *const plugins{};
+    std::unique_ptr<PluginController> plugins;
 #endif
 
 public:
@@ -227,36 +225,15 @@ public:
     IStreamerMode *getStreamerMode() override;
 
 private:
-    void addSingleton(Singleton *singleton);
     void initPubSub();
     void initBttvLiveUpdates();
     void initSeventvEventAPI();
     void initNm(const Paths &paths);
 
-    template <typename T,
-              typename = std::enable_if_t<std::is_base_of<Singleton, T>::value>>
-    T &emplace()
-    {
-        auto t = new T;
-        this->singletons_.push_back(std::unique_ptr<T>(t));
-        return *t;
-    }
-
-    template <typename T,
-              typename = std::enable_if_t<std::is_base_of<Singleton, T>::value>>
-    T &emplace(T *t)
-    {
-        this->singletons_.push_back(std::unique_ptr<T>(t));
-        return *t;
-    }
-
     NativeMessagingServer nmServer{};
     Updates &updates;
 };
 
-Application *getApp();
-
-// Get an interface version of the Application class - should be preferred when possible for new code
-IApplication *getIApp();
+IApplication *getApp();
 
 }  // namespace chatterino

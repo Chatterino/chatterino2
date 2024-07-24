@@ -6,7 +6,6 @@
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
-#include "util/Overloaded.hpp"
 #include "util/Variant.hpp"
 
 #include <QJsonDocument>
@@ -57,7 +56,7 @@ bool useKeyring()
 // Insecure storage:
 QString insecurePath()
 {
-    return combinePath(getIApp()->getPaths().settingsDirectory,
+    return combinePath(getApp()->getPaths().settingsDirectory,
                        "credentials.json");
 }
 

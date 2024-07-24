@@ -5,6 +5,10 @@ on:
   pull_request:
   workflow_dispatch:
   merge_group:
+  push:
+    branches:
+      - master
+      - main
 
 env:
   TWITCH_PUBSUB_SERVER_TAG: v1.0.7
@@ -39,11 +43,11 @@ jobs:
       - name: Create build directory (Ubuntu)
         run: mkdir build-test
 
-      - name: Install googlebench
+      - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt -y install \
-            libbenchmark-dev
+          sudo DEBIAN_FRONTEND=noninteractive apt -y --no-install-recommends install \
+            libbenchmark-dev gcovr gnupg
 
       - name: Build (Ubuntu)
         run: |
@@ -55,6 +59,8 @@ jobs:
             -DCMAKE_PREFIX_PATH="$Qt6_DIR/lib/cmake" \
             -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
             -DCHATTERINO_STATIC_QT_BUILD=On \
+            -DCHATTERINO_GENERATE_COVERAGE=On \
+            -DCMAKE_BUILD_TYPE=Debug \
             ..
           cmake --build .
         working-directory: build-test
@@ -84,3 +90,11 @@ jobs:
           cd ../build-test
           ctest --repeat until-pass:4 --output-on-failure --exclude-regex ClassicEmoteNameFiltering
         working-directory: build-test
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.5.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          plugin: gcov
+          fail_ci_if_error: true
+          verbose: true

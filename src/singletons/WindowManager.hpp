@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
-#include "common/Singleton.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
 #include <pajlada/settings/settinglistener.hpp>
@@ -32,13 +31,13 @@ enum class WindowType;
 enum class SettingsDialogPreference;
 class FramelessEmbedWindow;
 
-class WindowManager final : public Singleton
+class WindowManager final
 {
 public:
     static const QString WINDOW_LAYOUT_FILENAME;
 
     explicit WindowManager(const Paths &paths);
-    ~WindowManager() override;
+    ~WindowManager();
 
     WindowManager(const WindowManager &) = delete;
     WindowManager(WindowManager &&) = delete;
@@ -102,8 +101,9 @@ public:
     QRect emotePopupBounds() const;
     void setEmotePopupBounds(QRect bounds);
 
-    void initialize(Settings &settings, const Paths &paths) override;
-    void save() override;
+    // Set up some final signals & actually show the windows
+    void initialize(Settings &settings);
+    void save();
     void closeAll();
 
     int getGeneration() const;
@@ -151,7 +151,6 @@ private:
     // Contains the full path to the window layout file, e.g. /home/pajlada/.local/share/Chatterino/Settings/window-layout.json
     const QString windowLayoutFilePath;
 
-    bool initialized_ = false;
     bool shuttingDown_ = false;
 
     QRect emotePopupBounds_;

@@ -240,7 +240,7 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
 #ifdef USEWINSDK
     this->useNextBounds_.setSingleShot(true);
     QObject::connect(&this->useNextBounds_, &QTimer::timeout, this, [this]() {
-        this->currentBounds_ = this->nextBounds_;
+        this->currentBounds_ = this->geometry();
     });
 #endif
 
@@ -712,7 +712,7 @@ void BaseWindow::resizeEvent(QResizeEvent *)
     // Queue up save because: Window resized
     if (!flags_.has(DisableLayoutSave))
     {
-        getIApp()->getWindows()->queueSave();
+        getApp()->getWindows()->queueSave();
     }
 
 #ifdef USEWINSDK
@@ -727,7 +727,7 @@ void BaseWindow::moveEvent(QMoveEvent *event)
 #ifdef CHATTERINO
     if (!flags_.has(DisableLayoutSave))
     {
-        getIApp()->getWindows()->queueSave();
+        getApp()->getWindows()->queueSave();
     }
 #endif
 
@@ -909,7 +909,7 @@ void BaseWindow::scaleChangedEvent(float scale)
 #endif
 
     this->setFont(
-        getIApp()->getFonts()->getFont(FontStyle::UiTabs, this->scale()));
+        getApp()->getFonts()->getFont(FontStyle::UiTabs, this->scale()));
 }
 
 void BaseWindow::paintEvent(QPaintEvent *)
@@ -1137,7 +1137,11 @@ bool BaseWindow::handleSIZE(MSG *msg)
 
             if (this->isNotMinimizedOrMaximized_)
             {
-                this->currentBounds_ = this->geometry();
+                // Wait for WM_SIZE to be processed by Qt and update the current
+                // bounds afterwards.
+                postToThread([this] {
+                    this->currentBounds_ = this->geometry();
+                });
             }
             this->useNextBounds_.stop();
 
@@ -1166,7 +1170,8 @@ bool BaseWindow::handleMOVE(MSG *msg)
 #ifdef USEWINSDK
     if (this->isNotMinimizedOrMaximized_)
     {
-        this->nextBounds_ = this->geometry();
+        // Wait for WM_SIZE (in case the window was maximized, we don't want to
+        // save the bounds but keep the old ones)
         this->useNextBounds_.start(10);
     }
 #endif

@@ -14,7 +14,6 @@
 #include "singletons/StreamerMode.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
-#include "util/Qt.hpp"
 
 #include <QFileInfo>
 
@@ -157,7 +156,7 @@ void SharedMessageBuilder::parseHighlights()
     }
 
     auto badges = SharedMessageBuilder::parseBadgeTag(this->tags);
-    auto [highlighted, highlightResult] = getIApp()->getHighlights()->check(
+    auto [highlighted, highlightResult] = getApp()->getHighlights()->check(
         this->args, badges, this->message().loginName, this->originalMessage_,
         this->message().flags);
 
@@ -204,7 +203,7 @@ void SharedMessageBuilder::triggerHighlights(
     const QString &channelName, bool playSound,
     const std::optional<QUrl> &customSoundUrl, bool windowAlert)
 {
-    if (getIApp()->getStreamerMode()->isEnabled() &&
+    if (getApp()->getStreamerMode()->isEnabled() &&
         getSettings()->streamerModeMuteMentions)
     {
         // We are in streamer mode with muting mention sounds enabled. Do nothing.
@@ -233,12 +232,12 @@ void SharedMessageBuilder::triggerHighlights(
         {
             soundUrl = getFallbackHighlightSound();
         }
-        getIApp()->getSound()->play(soundUrl);
+        getApp()->getSound()->play(soundUrl);
     }
 
     if (windowAlert)
     {
-        getIApp()->getWindows()->sendAlert();
+        getApp()->getWindows()->sendAlert();
     }
 }
 

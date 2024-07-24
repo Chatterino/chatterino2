@@ -49,7 +49,7 @@ void MessageLayoutContainer::beginLayout(int width, float scale,
     this->imageScale_ = imageScale;
     this->flags_ = flags;
     auto mediumFontMetrics =
-        getIApp()->getFonts()->getFontMetrics(FontStyle::ChatMedium, scale);
+        getApp()->getFonts()->getFontMetrics(FontStyle::ChatMedium, scale);
     this->textLineHeight_ = mediumFontMetrics.height();
     this->spaceWidth_ = mediumFontMetrics.horizontalAdvance(' ');
     this->dotdotdotWidth_ = mediumFontMetrics.horizontalAdvance("...");
@@ -234,7 +234,9 @@ void MessageLayoutContainer::paintElements(QPainter &painter,
         painter.drawRect(element->getRect());
 #endif
 
+        painter.save();
         element->paint(painter, ctx.messageColors);
+        painter.restore();
     }
 }
 

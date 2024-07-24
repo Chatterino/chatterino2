@@ -50,7 +50,7 @@ Frames::Frames(QList<Frame> &&frames)
         DebugCount::increase("animated images");
 
         this->gifTimerConnection_ =
-            getIApp()->getEmotes()->getGIFTimer().signal.connect([this] {
+            getApp()->getEmotes()->getGIFTimer().signal.connect([this] {
                 this->advance();
             });
     }
@@ -67,7 +67,7 @@ Frames::Frames(QList<Frame> &&frames)
     else
     {
         this->durationOffset_ = std::min<int>(
-            int(getIApp()->getEmotes()->getGIFTimer().position() % totalLength),
+            int(getApp()->getEmotes()->getGIFTimer().position() % totalLength),
             60000);
     }
     this->processOffset();
@@ -242,7 +242,7 @@ void assignFrames(std::weak_ptr<Image> weak, QList<Frame> parsed)
             isPushQueued = true;
             postToThread([] {
                 isPushQueued = false;
-                getIApp()->getWindows()->forceLayoutChannelViews();
+                getApp()->getWindows()->forceLayoutChannelViews();
             });
         }
     };
