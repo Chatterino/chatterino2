@@ -54,6 +54,7 @@
 #include <QDebug>
 #include <QDesktopServices>
 #include <QEasingCurve>
+#include <QGestureEvent>
 #include <QGraphicsBlurEffect>
 #include <QJsonDocument>
 #include <QMessageBox>
@@ -368,6 +369,8 @@ ChannelView::ChannelView(InternalCtor /*tag*/, QWidget *parent, Split *split,
     QObject::connect(&this->scrollTimer_, &QTimer::timeout, this, [this] {
         this->scrollUpdateRequested();
     });
+
+    this->grabGesture(Qt::PanGesture);
 
     // TODO: Figure out if we need this, and if so, why
     // StrongFocus means we can focus this event through clicking it
@@ -1786,8 +1789,48 @@ void ChannelView::leaveEvent(QEvent * /*event*/)
     this->unpause(PauseReason::Mouse);
 }
 
+bool ChannelView::event(QEvent *event)
+{
+     if (event->type() == QEvent::Gesture)
+     {
+         return gestureEvent(dynamic_cast<QGestureEvent*>(event));
+     }
+
+    return BaseWidget::event(event);
+}
+
+bool ChannelView::gestureEvent(const QGestureEvent *event)
+{
+     if (QGesture *pan = event->gesture(Qt::PanGesture))
+     {
+         auto const *gesture = dynamic_cast<QPanGesture *>(pan);
+
+         switch (gesture->state())
+         {
+             case Qt::GestureStarted:
+             case Qt::GestureUpdated:
+                 this->isPanning_ = true;
+                 this->clearSelection();
+                 break;
+             default:
+                 this->isPanning_ = false;
+                 break;
+         }
+
+         this->scrollBar_->offset(-gesture->delta().y() * 0.5);
+     }
+
+     return false;
+}
+
 void ChannelView::mouseMoveEvent(QMouseEvent *event)
 {
+    if (this->isPanning_)
+    {
+        // Don't do any text selection, hovering, etc while panning
+        return;
+    }
+
     /// Pause on hover
     if (float pauseTime = getSettings()->pauseOnHoverDuration;
         pauseTime > 0.001F)
