@@ -5,10 +5,9 @@
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
-#include "mocks/EmptyApplication.hpp"
+#include "mocks/BaseApplication.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Resources.hpp"
-#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "Test.hpp"
 
@@ -20,12 +19,11 @@ using namespace literals;
 
 namespace {
 
-class MockApplication : mock::EmptyApplication
+class MockApplication : mock::BaseApplication
 {
 public:
     MockApplication()
-        : settings(this->settingsDir.filePath("settings.json"))
-        , theme(this->paths_)
+        : theme(this->paths_)
         , fonts(this->settings)
     {
     }
@@ -39,7 +37,6 @@ public:
         return &this->fonts;
     }
 
-    Settings settings;
     Theme theme;
     Fonts fonts;
 };
