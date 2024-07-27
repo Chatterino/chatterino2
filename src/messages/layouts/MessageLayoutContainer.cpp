@@ -991,11 +991,6 @@ bool MessageLayoutContainer::canCollapse() const
            this->flags_.has(MessageFlag::Collapsed);
 }
 
-void MessageLayoutContainer::resetTextDirection() noexcept
-{
-    this->textDirection_ = TextDirection::Neutral;
-}
-
 bool MessageLayoutContainer::isRTL() const noexcept
 {
     return this->textDirection_ == TextDirection::RTL;

@@ -593,8 +593,6 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
         // once we encounter an emote or reach the end of the message text. */
         QString currentText;
 
-        container.resetTextDirection();
-
         bool firstIteration = true;
         for (Word &word : this->words_)
         {

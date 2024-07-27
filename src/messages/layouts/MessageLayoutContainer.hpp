@@ -186,9 +186,6 @@ struct MessageLayoutContainer {
      */
     int nextWordId();
 
-    /// Resets the internal text direction to "neutral"
-    void resetTextDirection() noexcept;
-
 private:
     struct Line {
         /**
