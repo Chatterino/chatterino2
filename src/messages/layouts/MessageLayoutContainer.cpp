@@ -1,4 +1,4 @@
-#include "MessageLayoutContainer.hpp"
+#include "messages/layouts/MessageLayoutContainer.hpp"
 
 #include "Application.hpp"
 #include "messages/layouts/MessageLayoutContext.hpp"
