@@ -357,6 +357,9 @@ private:
     /// linebreak after which it's reset to `false`.
     bool lineContainsRTL_ = false;
 
+    /// True if there was any RTL/LTR reordering done in this container
+    bool anyReorderingDone_ = false;
+
     /// @brief The direction of the text in this container.
     ///
     /// This starts off as neutral until an element is encountered that is
