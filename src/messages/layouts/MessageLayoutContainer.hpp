@@ -18,6 +18,12 @@ class QPainter;
 
 namespace chatterino {
 
+enum class TextDirection : uint8_t {
+    Neutral,
+    RTL,
+    LTR,
+};
+
 enum class MessageFlag : int64_t;
 using MessageFlags = FlagsEnum<MessageFlag>;
 class MessageLayoutElement;
@@ -216,12 +222,6 @@ private:
         QRect rect;
     };
 
-    enum class Direction : uint8_t {
-        Neutral,
-        RTL,
-        LTR,
-    };
-
     /// @brief Attempts to add @a element to this container
     ///
     /// This can be called in two scenarios.
@@ -364,7 +364,7 @@ private:
     ///
     /// This starts off as neutral until an element is encountered that is
     /// either LTR or RTL (afterwards this remains constant).
-    Direction textDirection_ = Direction::Neutral;
+    TextDirection textDirection_ = TextDirection::Neutral;
 
     std::vector<std::unique_ptr<MessageLayoutElement>> elements_;
 

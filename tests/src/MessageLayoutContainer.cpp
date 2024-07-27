@@ -92,7 +92,7 @@ std::vector<std::shared_ptr<MessageElement>> makeElements(const QString &text)
     return elements;
 }
 
-using TestParam = std::tuple<QString, QString>;
+using TestParam = std::tuple<QString, QString, TextDirection>;
 
 }  // namespace
 
@@ -108,7 +108,7 @@ public:
 
 TEST_P(MessageLayoutContainerTest, RtlReordering)
 {
-    auto [inputText, expected] = GetParam();
+    auto [inputText, expected, expectedDirection] = GetParam();
     MessageLayoutContainer container;
     container.beginLayout(10000, 1.0F, 1.0F, {MessageFlag::Collapsed});
 
@@ -157,6 +157,7 @@ TEST_P(MessageLayoutContainerTest, RtlReordering)
     }
 
     ASSERT_EQ(got, expected) << got;
+    ASSERT_EQ(container.textDirection_, expectedDirection) << got;
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -165,48 +166,75 @@ INSTANTIATE_TEST_SUITE_P(
         TestParam{
             u"@aliens foo bar baz @foo qox !emote1 !emote2"_s,
             u"@aliens foo bar baz @foo qox !emote1 !emote2"_s,
+            TextDirection::LTR,
+        },
+        TestParam{
+            u"@aliens ! foo bar baz @foo qox !emote1 !emote2"_s,
+            u"@aliens ! foo bar baz @foo qox !emote1 !emote2"_s,
+            TextDirection::LTR,
+        },
+        TestParam{
+            u"@aliens ."_s,
+            u"@aliens ."_s,
+            TextDirection::Neutral,
         },
         // RTL
         TestParam{
             u"@aliens و غير دارت إعادة, بل كما وقام قُدُماً. قام تم الجوي بوابة, خلاف أراض هو بلا. عن وحتّى ميناء غير"_s,
             u"@aliens غير ميناء وحتّى عن بلا. هو أراض خلاف بوابة, الجوي تم قام قُدُماً. وقام كما بل إعادة, دارت غير و"_s,
+            TextDirection::RTL,
         },
         TestParam{
             u"@aliens و غير دارت إعادة, بل ض هو my LTR 123 بلا. عن 123 456 وحتّى ميناء غير"_s,
             u"@aliens غير ميناء وحتّى 456 123 عن بلا. my LTR 123 هو ض بل إعادة, دارت غير و"_s,
+            TextDirection::RTL,
         },
         TestParam{
             u"@aliens ور دارت إ @user baz bar عاد هو my LTR 123 بلا. عن 123 456 وحتّ غير"_s,
             u"@aliens غير وحتّ 456 123 عن بلا. my LTR 123 هو عاد baz bar @user إ دارت ور"_s,
+            TextDirection::RTL,
         },
         TestParam{
             u"@aliens ور !emote1 !emote2 !emote3 دارت إ @user baz bar عاد هو my LTR 123 بلا. عن 123 456 وحتّ غير"_s,
             u"@aliens غير وحتّ 456 123 عن بلا. my LTR 123 هو عاد baz bar @user إ دارت !emote3 !emote2 !emote1 ور"_s,
+            TextDirection::RTL,
         },
         TestParam{
             u"@aliens ور !emote1 !emote2 LTR text !emote3 !emote4 غير"_s,
             u"@aliens غير LTR text !emote3 !emote4 !emote2 !emote1 ور"_s,
+            TextDirection::RTL,
+        },
+
+        TestParam{
+            u"@aliens !!! ور !emote1 !emote2 LTR text !emote3 !emote4 غير"_s,
+            u"@aliens غير LTR text !emote3 !emote4 !emote2 !emote1 ور !!!"_s,
+            TextDirection::RTL,
         },
         // LTR
         TestParam{
             u"@aliens LTR و غير دا ميناء غير"_s,
             u"@aliens LTR غير ميناء دا غير و"_s,
+            TextDirection::LTR,
         },
         TestParam{
             u"@aliens LTR و غير د ض هو my LTR 123 بلا. عن 123 456 وحتّى مير"_s,
             u"@aliens LTR هو ض د غير و my LTR 123 مير وحتّى 456 123 عن بلا."_s,
+            TextDirection::LTR,
         },
         TestParam{
             u"@aliens LTR ور دارت إ @user baz bar عاد هو my LTR 123 بلا. عن 123 456 وحتّ غير"_s,
             u"@aliens LTR @user إ دارت ور baz bar هو عاد my LTR 123 غير وحتّ 456 123 عن بلا."_s,
+            TextDirection::LTR,
         },
         TestParam{
             u"@aliens LTR ور !emote1 !emote2 !emote3 دارت إ @user baz bar عاد هو my LTR 123 بلا. عن 123 456 وحتّ غير"_s,
             u"@aliens LTR @user إ دارت !emote3 !emote2 !emote1 ور baz bar هو عاد my LTR 123 غير وحتّ 456 123 عن بلا."_s,
+            TextDirection::LTR,
         },
         TestParam{
             u"@aliens LTR غير وحتّ !emote1 !emote2 LTR text !emote3 !emote4 عاد هو"_s,
             u"@aliens LTR !emote2 !emote1 وحتّ غير LTR text !emote3 !emote4 هو عاد"_s,
+            TextDirection::LTR,
         }));
 
 }  // namespace chatterino

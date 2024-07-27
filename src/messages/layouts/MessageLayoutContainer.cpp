@@ -629,11 +629,11 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element,
     {
         if (isRTLElement)
         {
-            this->textDirection_ = Direction::RTL;
+            this->textDirection_ = TextDirection::RTL;
         }
         else if (!chatterino::isNeutral(element->getText()))
         {
-            this->textDirection_ = Direction::LTR;
+            this->textDirection_ = TextDirection::LTR;
         }
     }
 
@@ -993,22 +993,22 @@ bool MessageLayoutContainer::canCollapse() const
 
 void MessageLayoutContainer::resetTextDirection() noexcept
 {
-    this->textDirection_ = Direction::Neutral;
+    this->textDirection_ = TextDirection::Neutral;
 }
 
 bool MessageLayoutContainer::isRTL() const noexcept
 {
-    return this->textDirection_ == Direction::RTL;
+    return this->textDirection_ == TextDirection::RTL;
 }
 
 bool MessageLayoutContainer::isLTR() const noexcept
 {
-    return this->textDirection_ == Direction::LTR;
+    return this->textDirection_ == TextDirection::LTR;
 }
 
 bool MessageLayoutContainer::isNeutral() const noexcept
 {
-    return this->textDirection_ == Direction::Neutral;
+    return this->textDirection_ == TextDirection::Neutral;
 }
 
 }  // namespace chatterino
