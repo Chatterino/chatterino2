@@ -217,8 +217,8 @@ protected:
 #endif
     void leaveEvent(QEvent * /*event*/) override;
 
-    bool event(QEvent* event) override;
-    bool gestureEvent(const QGestureEvent* event);
+    bool event(QEvent *event) override;
+    bool gestureEvent(const QGestureEvent *event);
 
     void mouseMoveEvent(QMouseEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;

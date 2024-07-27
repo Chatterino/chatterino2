@@ -1791,36 +1791,52 @@ void ChannelView::leaveEvent(QEvent * /*event*/)
 
 bool ChannelView::event(QEvent *event)
 {
-     if (event->type() == QEvent::Gesture)
-     {
-         return gestureEvent(dynamic_cast<QGestureEvent*>(event));
-     }
+    if (event->type() == QEvent::Gesture)
+    {
+        if (const auto *gestureEvent = dynamic_cast<QGestureEvent *>(event))
+        {
+            return this->gestureEvent(gestureEvent);
+        }
+    }
 
-    return BaseWidget::event(event);
+   return BaseWidget::event(event);
 }
 
 bool ChannelView::gestureEvent(const QGestureEvent *event)
 {
-     if (QGesture *pan = event->gesture(Qt::PanGesture))
-     {
-         auto const *gesture = dynamic_cast<QPanGesture *>(pan);
+    if (QGesture *pan = event->gesture(Qt::PanGesture))
+    {
+        if (const auto *gesture = dynamic_cast<QPanGesture *>(pan))
+        {
+            switch (gesture->state())
+            {
+                case Qt::GestureStarted:
+                    this->isPanning_ = true;
+                    // Remove any selections and hide tooltip while panning
+                    this->clearSelection();
+                    this->tooltipWidget_->hide();
+                    if (this->isScrolling_)
+                    {
+                        this->disableScrolling();
+                    }
+                break;
+                case Qt::GestureUpdated:
+                    if (this->scrollBar_->isVisible())
+                    {
+                        this->scrollBar_->offset(-gesture->delta().y() * 0.1);
+                    }
+                break;
+                case Qt::GestureFinished:
+                case Qt::GestureCanceled:
+                default:
+                    this->clearSelection();
+                    this->isPanning_ = false;
+                break;
+            }
+        }
+    }
 
-         switch (gesture->state())
-         {
-             case Qt::GestureStarted:
-             case Qt::GestureUpdated:
-                 this->isPanning_ = true;
-                 this->clearSelection();
-                 break;
-             default:
-                 this->isPanning_ = false;
-                 break;
-         }
-
-         this->scrollBar_->offset(-gesture->delta().y() * 0.5);
-     }
-
-     return false;
+    return false;
 }
 
 void ChannelView::mouseMoveEvent(QMouseEvent *event)
