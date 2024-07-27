@@ -580,7 +580,7 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element,
     bool isRTLAdjusting = this->isRTL() && !isAddingMode;
 
     /// Returns `true` if a previously added `spaceWidth_` should be removed
-    /// before the to be added emote. The space would was inserted by the
+    /// before the to be added emote. The space was inserted by the
     /// previous element but isn't desired as "removeSpacesBetweenEmotes" is
     /// enabled and both elements are emotes.
     auto shouldRemoveSpaceBetweenEmotes = [this, prevIndex,

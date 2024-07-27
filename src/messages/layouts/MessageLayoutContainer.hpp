@@ -241,7 +241,7 @@ private:
     ///    indicate no predecessor.
     ///
     /// @param element[in] The element to add. This must be non-null and
-    ///                    allocated with `malloc`. Ownership is transferred
+    ///                    allocated with `new`. Ownership is transferred
     ///                    into this container.
     /// @param forceAdd When enabled, @a element will be added regardless of
     ///                 `canAddElements`. If @a element won't be added it will
