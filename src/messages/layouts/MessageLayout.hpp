@@ -119,9 +119,9 @@ private:
     QPixmap *ensureBuffer(QPainter &painter, int width);
 
     // variables
-    MessagePtr message_;
+    const MessagePtr message_;
     MessageLayoutContainer container_;
-    std::unique_ptr<QPixmap> buffer_{};
+    std::unique_ptr<QPixmap> buffer_;
     bool bufferValid_ = false;
 
     int height_ = 0;
