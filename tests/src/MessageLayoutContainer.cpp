@@ -118,34 +118,31 @@ TEST_P(MessageLayoutContainerTest, RtlReordering)
                                                MessageElementFlag::TwitchEmote,
                                            });
     }
-    container.breakLine();
+    container.endLayout();
     ASSERT_EQ(container.line_, 1) << "unexpected linebreak";
 
-    // message layout elements ordered by x position
-    std::vector<MessageLayoutElement *> ordered;
-    ordered.reserve(container.elements_.size());
+    int x = -1;
     for (const auto &el : container.elements_)
     {
-        ordered.push_back(el.get());
+        ASSERT_LT(x, el->getRect().x());
+        x = el->getRect().x();
     }
 
-    std::ranges::sort(ordered, [](auto *a, auto *b) {
-        return a->getRect().x() < b->getRect().x();
-    });
-
     QString got;
-    for (const auto &el : ordered)
+    for (const auto &el : container.elements_)
     {
         if (!got.isNull())
         {
             got.append(' ');
         }
 
-        if (dynamic_cast<ImageLayoutElement *>(el))
+        if (dynamic_cast<ImageLayoutElement *>(el.get()))
         {
             el->addCopyTextToString(got);
-            ASSERT_TRUE(got.endsWith(' '));
-            got.chop(1);
+            if (el->hasTrailingSpace())
+            {
+                got.chop(1);
+            }
         }
         else
         {

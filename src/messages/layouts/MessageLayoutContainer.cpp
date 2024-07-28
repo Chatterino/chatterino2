@@ -56,6 +56,8 @@ void MessageLayoutContainer::beginLayout(int width, float scale,
     this->currentWordId_ = 0;
     this->canAddMessages_ = true;
     this->isCollapsed_ = false;
+    this->lineContainsRTL_ = false;
+    this->anyReorderingDone_ = false;
 }
 
 void MessageLayoutContainer::endLayout()
@@ -105,6 +107,17 @@ void MessageLayoutContainer::endLayout()
     {
         this->elements_.back()->setTrailingSpace(false);
     }
+
+    if (this->anyReorderingDone_)
+    {
+        std::ranges::sort(this->elements_, [](const auto &a, const auto &b) {
+            if (a->getLine() == b->getLine())
+            {
+                return a->getRect().x() < b->getRect().x();
+            }
+            return a->getLine() < b->getLine();
+        });
+    }
 }
 
 void MessageLayoutContainer::addElement(MessageLayoutElement *element)
@@ -137,6 +150,7 @@ void MessageLayoutContainer::breakLine()
             }
         }
         this->lineContainsRTL_ = false;
+        this->anyReorderingDone_ = true;
     }
 
     int xOffset = 0;
