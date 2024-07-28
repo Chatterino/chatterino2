@@ -1799,7 +1799,7 @@ bool ChannelView::event(QEvent *event)
         }
     }
 
-   return BaseWidget::event(event);
+    return BaseWidget::event(event);
 }
 
 bool ChannelView::gestureEvent(const QGestureEvent *event)
@@ -1810,7 +1810,7 @@ bool ChannelView::gestureEvent(const QGestureEvent *event)
         {
             switch (gesture->state())
             {
-                case Qt::GestureStarted:
+                case Qt::GestureStarted: {
                     this->isPanning_ = true;
                     // Remove any selections and hide tooltip while panning
                     this->clearSelection();
@@ -1819,18 +1819,23 @@ bool ChannelView::gestureEvent(const QGestureEvent *event)
                     {
                         this->disableScrolling();
                     }
+                }
                 break;
-                case Qt::GestureUpdated:
+
+                case Qt::GestureUpdated: {
                     if (this->scrollBar_->isVisible())
                     {
                         this->scrollBar_->offset(-gesture->delta().y() * 0.1);
                     }
+                }
                 break;
+
                 case Qt::GestureFinished:
                 case Qt::GestureCanceled:
-                default:
+                default: {
                     this->clearSelection();
                     this->isPanning_ = false;
+                }
                 break;
             }
         }
