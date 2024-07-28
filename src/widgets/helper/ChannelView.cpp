@@ -1819,6 +1819,8 @@ bool ChannelView::gestureEvent(const QGestureEvent *event)
                     {
                         this->disableScrolling();
                     }
+
+                    return true;
                 }
                 break;
 
@@ -1827,6 +1829,8 @@ bool ChannelView::gestureEvent(const QGestureEvent *event)
                     {
                         this->scrollBar_->offset(-gesture->delta().y() * 0.1);
                     }
+
+                    return true;
                 }
                 break;
 
@@ -1835,6 +1839,8 @@ bool ChannelView::gestureEvent(const QGestureEvent *event)
                 default: {
                     this->clearSelection();
                     this->isPanning_ = false;
+
+                    return true;
                 }
                 break;
             }
