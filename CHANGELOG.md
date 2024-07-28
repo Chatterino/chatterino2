@@ -55,6 +55,7 @@
 - Dev: Deprecate Qt 5.12. (#5396)
 - Dev: The running Qt version is now shown in the about page if it differs from the compiled version. (#5501)
 - Dev: `FlagsEnum` is now `constexpr`. (#5510)
+- Dev: Documented and added tests to RTL handling. (#5473)
 
 ## 2.5.1
 
