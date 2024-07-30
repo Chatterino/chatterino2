@@ -1,4 +1,4 @@
-#include "AccountsPage.hpp"
+#include "widgets/settingspages/AccountsPage.hpp"
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"

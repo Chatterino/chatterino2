@@ -1,4 +1,4 @@
-#include "IrcCommands.hpp"
+#include "providers/irc/IrcCommands.hpp"
 
 #include "messages/MessageBuilder.hpp"
 #include "providers/irc/IrcChannel2.hpp"

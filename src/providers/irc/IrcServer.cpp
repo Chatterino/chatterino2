@@ -1,4 +1,4 @@
-#include "IrcServer.hpp"
+#include "providers/irc/IrcServer.hpp"
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"

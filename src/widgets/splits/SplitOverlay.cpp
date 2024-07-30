@@ -1,4 +1,4 @@
-#include "SplitOverlay.hpp"
+#include "widgets/split/SplitOverlay.hpp"
 
 #include "Application.hpp"
 #include "singletons/Resources.hpp"

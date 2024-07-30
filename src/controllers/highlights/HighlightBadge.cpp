@@ -1,4 +1,4 @@
-#include "HighlightBadge.hpp"
+#include "highlights/HighlightBadge.hpp"
 
 #include "messages/SharedMessageBuilder.hpp"
 #include "providers/twitch/TwitchBadge.hpp"

@@ -30,7 +30,7 @@ int main(int argc, char **argv)
     QApplication a(argc, argv);
 
     QCoreApplication::setApplicationName("chatterino");
-    QCoreApplication::setApplicationVersion(CHATTERINO_VERSION);
+    QCoreApplication::setApplicationVersion(Version::instance().version());
     QCoreApplication::setOrganizationDomain("chatterino.com");
 
     std::unique_ptr<Paths> paths;

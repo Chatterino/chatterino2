@@ -1,4 +1,4 @@
-#include "SearchPopup.hpp"
+#include "widgets/helper/SearchPopup.hpp"
 
 #include "Application.hpp"
 #include "common/Channel.hpp"

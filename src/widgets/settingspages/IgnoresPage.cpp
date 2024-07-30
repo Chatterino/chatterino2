@@ -1,6 +1,7 @@
 #include "widgets/settingspages/IgnoresPage.hpp"
 
 #include "Application.hpp"
+#include "common/Literals.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/ignores/IgnoreModel.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
@@ -19,11 +20,13 @@
 #include <QTableView>
 #include <QVBoxLayout>
 
-// clang-format off
-#define INFO "/block <user> in chat blocks a user.\n/unblock <user> in chat unblocks a user.\nYou can also click on a user to open the usercard."
-// clang-format on
-
 namespace chatterino {
+
+using namespace literals;
+
+// clang-format off
+inline const QString INFO = u"/block <user> in chat blocks a user.\n/unblock <user> in chat unblocks a user.\nYou can also click on a user to open the usercard."_s;
+// clang-format on
 
 static void addPhrasesTab(LayoutCreator<QVBoxLayout> box);
 static void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> box,

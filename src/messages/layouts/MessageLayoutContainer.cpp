@@ -18,13 +18,17 @@
 
 #include <optional>
 
-#define COMPACT_EMOTES_OFFSET 4
-#define MAX_UNCOLLAPSED_LINES \
-    (getSettings()->collpseMessagesMinLines.getValue())
-
 namespace {
 
-constexpr const QMargins MARGIN{8, 4, 8, 4};
+using namespace chatterino;
+
+constexpr QMargins MARGIN{8, 4, 8, 4};
+constexpr int COMPACT_EMOTES_OFFSET = 4;
+
+int maxUncollapsedLines()
+{
+    return getSettings()->collpseMessagesMinLines.getValue();
+}
 
 }  // namespace
 
@@ -208,7 +212,7 @@ void MessageLayoutContainer::breakLine()
     this->lineStart_ = this->elements_.size();
     //    this->currentX = (int)(this->scale * 8);
 
-    if (this->canCollapse() && this->line_ + 1 >= MAX_UNCOLLAPSED_LINES)
+    if (this->canCollapse() && this->line_ + 1 >= maxUncollapsedLines())
     {
         this->canAddMessages_ = false;
         return;
@@ -568,8 +572,9 @@ int MessageLayoutContainer::remainingWidth() const
 {
     return (this->width_ - int(MARGIN.left() * this->scale_) -
             int(MARGIN.right() * this->scale_) -
-            (this->line_ + 1 == MAX_UNCOLLAPSED_LINES ? this->dotdotdotWidth_
-                                                      : 0)) -
+            (static_cast<int>(this->line_ + 1) == maxUncollapsedLines()
+                 ? this->dotdotdotWidth_
+                 : 0)) -
            this->currentX_;
 }
 

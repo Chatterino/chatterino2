@@ -10,12 +10,15 @@
 #include <memory>
 #include <unordered_map>
 
+namespace chatterino {
+
 // NB: "default" can be replaced with "static" to always get a non-animated
 // variant
-#define TWITCH_EMOTE_TEMPLATE \
-    "https://static-cdn.jtvnw.net/emoticons/v2/{id}/default/dark/{scale}"
+/// %1 <-> {id}
+/// %2 <-> {scale} (1.0, 2.0, 3.0)
+constexpr QStringView TWITCH_EMOTE_TEMPLATE =
+    u"https://static-cdn.jtvnw.net/emoticons/v2/%1/default/dark/%2";
 
-namespace chatterino {
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 

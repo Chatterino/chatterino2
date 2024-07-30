@@ -737,19 +737,19 @@ void Window::addMenuBar()
     // Help->Chatterino Wiki item
     QAction *helpWiki = helpMenu->addAction(QString("Chatterino Wiki"));
     connect(helpWiki, &QAction::triggered, this, []() {
-        QDesktopServices::openUrl(QUrl(LINK_CHATTERINO_WIKI));
+        QDesktopServices::openUrl(QUrl(LINK_CHATTERINO_WIKI.toString()));
     });
 
     // Help->Chatterino Github
     QAction *helpGithub = helpMenu->addAction(QString("Chatterino GitHub"));
     connect(helpGithub, &QAction::triggered, this, []() {
-        QDesktopServices::openUrl(QUrl(LINK_CHATTERINO_SOURCE));
+        QDesktopServices::openUrl(QUrl(LINK_CHATTERINO_SOURCE.toString()));
     });
 
     // Help->Chatterino Discord
     QAction *helpDiscord = helpMenu->addAction(QString("Chatterino Discord"));
     connect(helpDiscord, &QAction::triggered, this, []() {
-        QDesktopServices::openUrl(QUrl(LINK_CHATTERINO_DISCORD));
+        QDesktopServices::openUrl(QUrl(LINK_CHATTERINO_DISCORD.toString()));
     });
 }
 

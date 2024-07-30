@@ -1,4 +1,4 @@
-#include "HighlightingPage.hpp"
+#include "widgets/settingspages/HighlightingPage.hpp"
 
 #include "Application.hpp"
 #include "controllers/highlights/BadgeHighlightModel.hpp"
@@ -10,7 +10,6 @@
 #include "controllers/highlights/UserHighlightModel.hpp"
 #include "providers/colors/ColorProvider.hpp"
 #include "singletons/Settings.hpp"
-#include "singletons/Theme.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/dialogs/BadgePickerDialog.hpp"
@@ -24,8 +23,6 @@
 #include <QStandardItemModel>
 #include <QTableView>
 #include <QTabWidget>
-
-#define ALWAYS_PLAY "Play highlight sound even when Chatterino is focused"
 
 namespace chatterino {
 
@@ -312,8 +309,9 @@ HighlightingPage::HighlightingPage()
                 this->managedConnections_);
         }
 
-        layout.append(createCheckBox(ALWAYS_PLAY,
-                                     getSettings()->highlightAlwaysPlaySound));
+        layout.append(createCheckBox(
+            "Play highlight sound even when Chatterino is focused",
+            getSettings()->highlightAlwaysPlaySound));
         layout.append(createCheckBox(
             "Flash taskbar only stops highlighting when Chatterino is focused",
             getSettings()->longAlerts));

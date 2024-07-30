@@ -1,4 +1,4 @@
-#include "IrcConnectionEditor.hpp"
+#include "widgets/dialogs/IrcConnectionEditor.hpp"
 
 #include "ui_IrcConnectionEditor.h"
 

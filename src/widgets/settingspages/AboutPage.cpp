@@ -1,13 +1,11 @@
-#include "AboutPage.hpp"
+#include "widgets/settingspages/AboutPage.hpp"
 
 #include "common/Common.hpp"
-#include "common/Modes.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
 #include "widgets/BasePopup.hpp"
-#include "widgets/helper/SignalLabel.hpp"
 #include "widgets/layout/FlowLayout.hpp"
 
 #include <QFile>
@@ -18,12 +16,12 @@
 #include <QTextStream>
 #include <QVBoxLayout>
 
-#define PIXMAP_WIDTH 500
-
-#define LINK_DONATE "https://streamelements.com/fourtf/tip"
-#define LINK_CHATTERINO_FEATURES "https://chatterino.com/#features"
-
 namespace chatterino {
+
+constexpr int PIXMAP_WIDTH = 500;
+
+constexpr QStringView LINK_CHATTERINO_FEATURES =
+    u"https://chatterino.com/#features";
 
 AboutPage::AboutPage()
 {
@@ -66,9 +64,9 @@ AboutPage::AboutPage()
             auto l = aboutChatterino.emplace<QVBoxLayout>();
 
             // clang-format off
-            l.emplace<QLabel>("Chatterino Wiki can be found <a href=\"" LINK_CHATTERINO_WIKI "\">here</a>")->setOpenExternalLinks(true);
-            l.emplace<QLabel>("All about Chatterino's <a href=\"" LINK_CHATTERINO_FEATURES "\">features</a>")->setOpenExternalLinks(true);
-            l.emplace<QLabel>("Join the official Chatterino <a href=\"" LINK_CHATTERINO_DISCORD "\">Discord</a>")->setOpenExternalLinks(true);
+            l.emplace<QLabel>("Chatterino Wiki can be found <a href=\"" % LINK_CHATTERINO_WIKI % "\">here</a>")->setOpenExternalLinks(true);
+            l.emplace<QLabel>("All about Chatterino's <a href=\"" % LINK_CHATTERINO_FEATURES % "\">features</a>")->setOpenExternalLinks(true);
+            l.emplace<QLabel>("Join the official Chatterino <a href=\"" % LINK_CHATTERINO_DISCORD % "\">Discord</a>")->setOpenExternalLinks(true);
             // clang-format on
         }
 

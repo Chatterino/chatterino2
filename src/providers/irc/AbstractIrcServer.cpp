@@ -1,4 +1,4 @@
-#include "AbstractIrcServer.hpp"
+#include "providers/irc/AbstractIrcServer.hpp"
 
 #include "common/Channel.hpp"
 #include "common/QLogging.hpp"

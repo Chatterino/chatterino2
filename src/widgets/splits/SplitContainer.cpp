@@ -41,7 +41,7 @@ SplitContainer::SplitContainer(Notebook *parent)
         Split::modifierStatusChanged, [this](auto modifiers) {
             this->layout();
 
-            if (modifiers == showResizeHandlesModifiers)
+            if (modifiers == SHOW_RESIZE_HANDLES_MODIFIERS)
             {
                 for (auto &handle : this->resizeHandles_)
                 {
@@ -57,7 +57,7 @@ SplitContainer::SplitContainer(Notebook *parent)
                 }
             }
 
-            if (modifiers == showSplitOverlayModifiers)
+            if (modifiers == SHOW_SPLIT_OVERLAY_MODIFIERS)
             {
                 this->setCursor(Qt::PointingHandCursor);
             }
@@ -496,7 +496,7 @@ void SplitContainer::layout()
     std::vector<ResizeRect> resizeRects;
 
     const bool addSpacing =
-        Split::modifierStatus == showAddSplitRegions || this->isDragging_;
+        Split::modifierStatus == SHOW_ADD_SPLIT_REGIONS || this->isDragging_;
     this->baseNode_.layout(addSpacing, this->scale(), dropRects, resizeRects);
 
     this->dropRects_ = dropRects;
@@ -559,7 +559,7 @@ void SplitContainer::layout()
             handle->setVertical(resizeRect.vertical);
             handle->node = resizeRect.node;
 
-            if (Split::modifierStatus == showResizeHandlesModifiers)
+            if (Split::modifierStatus == SHOW_RESIZE_HANDLES_MODIFIERS)
             {
                 handle->show();
                 handle->raise();
@@ -720,7 +720,7 @@ void SplitContainer::dragEnterEvent(QDragEnterEvent *event)
 
 void SplitContainer::mouseMoveEvent(QMouseEvent *event)
 {
-    if (Split::modifierStatus == showSplitOverlayModifiers)
+    if (Split::modifierStatus == SHOW_SPLIT_OVERLAY_MODIFIERS)
     {
         this->setCursor(Qt::PointingHandCursor);
     }

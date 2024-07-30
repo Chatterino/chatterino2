@@ -1,4 +1,4 @@
-#include "NotificationPage.hpp"
+#include "widgets/settingspages/NotificationPage.hpp"
 
 #include "Application.hpp"
 #include "controllers/notifications/NotificationController.hpp"
