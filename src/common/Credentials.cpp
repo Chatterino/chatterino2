@@ -4,6 +4,7 @@
 #include "common/Modes.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
 #include "util/Variant.hpp"
 
