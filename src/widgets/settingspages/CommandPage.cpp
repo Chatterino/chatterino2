@@ -19,7 +19,6 @@
 #include <QTableView>
 #include <QTextEdit>
 
-
 namespace {
 
 using namespace chatterino;
