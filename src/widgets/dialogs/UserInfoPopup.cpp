@@ -38,6 +38,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QPointer>
+#include <QStringBuilder>
 
 namespace {
 

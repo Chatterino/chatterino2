@@ -16,6 +16,7 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QRegularExpression>
+#include <QStringBuilder>
 #include <semver/semver.hpp>
 
 namespace {

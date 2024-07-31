@@ -2,6 +2,8 @@
 
 #include "messages/Image.hpp"
 
+#include <QStringBuilder>
+
 namespace {
 
 QString twitchChannelPointRewardUrl(const QString &file)

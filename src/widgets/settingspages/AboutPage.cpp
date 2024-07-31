@@ -12,6 +12,7 @@
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QLabel>
+#include <QStringBuilder>
 #include <QTextEdit>
 #include <QTextStream>
 #include <QVBoxLayout>
