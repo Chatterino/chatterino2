@@ -1030,6 +1030,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        false,
                        "Make all clickable links lowercase to deter "
                        "phishing attempts.");
+    layout.addCheckbox("Show pronouns for users", s.showPronouns);
     layout.addCheckbox("Bold @usernames", s.boldUsernames, false,
                        "Bold @mentions to make them more noticable.");
     layout.addCheckbox("Color @usernames", s.colorUsernames, false,

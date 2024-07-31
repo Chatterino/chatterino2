@@ -11,6 +11,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
+#include "providers/pronouns/Pronouns.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -42,8 +43,10 @@
 const QString TEXT_FOLLOWERS("Followers: %1");
 const QString TEXT_CREATED("Created: %1");
 const QString TEXT_TITLE("%1's Usercard - #%2");
+const QString TEXT_PRONOUNS("Pronouns: %1");
 #define TEXT_USER_ID "ID: "
 #define TEXT_UNAVAILABLE "(not available)"
+#define TEXT_UNSPECIFIED "(unspecified)"
 
 namespace chatterino {
 namespace {
@@ -367,6 +370,11 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
             }
 
             // items on the left
+            if (getSettings()->showPronouns)
+            {
+                vbox.emplace<Label>(TEXT_PRONOUNS.arg(""))
+                    .assign(&this->ui_.pronounsLabel);
+            }
             vbox.emplace<Label>(TEXT_FOLLOWERS.arg(""))
                 .assign(&this->ui_.followerCountLabel);
             vbox.emplace<Label>(TEXT_CREATED.arg(""))
@@ -948,6 +956,38 @@ void UserInfoPopup::updateUserData()
                 }
             },
             [] {});
+
+        // get pronouns
+        if (getSettings()->showPronouns)
+        {
+            getApp()->getPronouns()->fetch(
+                user.login,
+                [this, hack](const auto pronouns) {
+                    if (!hack.lock() || this->ui_.pronounsLabel == nullptr)
+                    {
+                        return;
+                    }
+                    if (!pronouns.isUnspecified())
+                    {
+                        this->ui_.pronounsLabel->setText(
+                            TEXT_PRONOUNS.arg(pronouns.format()));
+                    }
+                    else
+                    {
+                        this->ui_.pronounsLabel->setText(
+                            TEXT_PRONOUNS.arg(TEXT_UNSPECIFIED));
+                    }
+                },
+                [this, hack]() {
+                    qCWarning(chatterinoTwitch) << "Error getting pronouns";
+                    if (!hack.lock())
+                    {
+                        return;
+                    }
+                    this->ui_.pronounsLabel->setText(
+                        TEXT_PRONOUNS.arg(TEXT_UNSPECIFIED));
+                });
+        }
     };
 
     if (!this->userId_.isEmpty())
