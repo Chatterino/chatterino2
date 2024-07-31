@@ -31,10 +31,10 @@ using namespace literals;
  *  - 2.4.0-alpha.2
  *  - 2.4.0-alpha
  **/
-inline const QString CHATTERINO_VERSION = u"2.5.1"_s;
+constexpr QStringView CHATTERINO_VERSION = u"2.5.1";
 
 Version::Version()
-    : version_(CHATTERINO_VERSION)
+    : version_(CHATTERINO_VERSION.toString())
     , commitHash_(QStringLiteral(CHATTERINO_GIT_HASH))
     , isModified_(CHATTERINO_GIT_MODIFIED == 1)
     , dateOfBuild_(QStringLiteral(CHATTERINO_CMAKE_GEN_DATE))
