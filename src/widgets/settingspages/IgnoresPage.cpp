@@ -24,10 +24,6 @@ namespace chatterino {
 
 using namespace literals;
 
-// clang-format off
-inline const QString INFO = u"/block <user> in chat blocks a user.\n/unblock <user> in chat unblocks a user.\nYou can also click on a user to open the usercard."_s;
-// clang-format on
-
 static void addPhrasesTab(LayoutCreator<QVBoxLayout> box);
 static void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> box,
                         QStringListModel &model);
@@ -77,7 +73,8 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
 void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> users,
                  QStringListModel &userModel)
 {
-    auto label = users.emplace<QLabel>(INFO);
+    auto label = users.emplace<QLabel>(
+        u"/block <user> in chat blocks a user.\n/unblock <user> in chat unblocks a user.\nYou can also click on a user to open the usercard."_s);
     label->setWordWrap(true);
     users.append(page.createCheckBox("Enable Twitch blocked users",
                                      getSettings()->enableTwitchBlockedUsers));

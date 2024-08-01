@@ -16,8 +16,15 @@
 #include <variant>
 
 #ifndef NO_QTKEYCHAIN
-#    include "keychain.h"
-#endif
+#    ifdef CMAKE_BUILD
+#        if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#            include "qt6keychain/keychain.h"
+#        else
+#            include "qt5keychain/keychain.h"
+#        endif
+#    else
+#        include "keychain.h"
+#    endif
 
 namespace {
 
@@ -31,19 +38,19 @@ QString formatName(const QString &provider, const QString &name)
 
 bool useKeyring()
 {
-#ifdef NO_QTKEYCHAIN
+#    ifdef NO_QTKEYCHAIN
     return false;
-#endif
+#    endif
     if (Modes::instance().isPortable)
     {
         return false;
     }
 
-#ifdef Q_OS_LINUX
+#    ifdef Q_OS_LINUX
     return getSettings()->useKeyring;
-#else
+#    else
     return true;
-#endif
+#    endif
 }
 
 // Insecure storage:
@@ -109,7 +116,7 @@ std::queue<Job> &jobQueue()
 
 void runNextJob()
 {
-#ifndef NO_QTKEYCHAIN
+#    ifndef NO_QTKEYCHAIN
     auto &&queue = jobQueue();
 
     if (!queue.empty())
@@ -146,7 +153,7 @@ void runNextJob()
 
         queue.pop();
     }
-#endif
+#    endif
 }
 
 void queueJob(Job &&job)
@@ -181,7 +188,7 @@ void Credentials::get(const QString &provider, const QString &name_,
 
     if (useKeyring())
     {
-#ifndef NO_QTKEYCHAIN
+#    ifndef NO_QTKEYCHAIN
         // if NO_QTKEYCHAIN is set, then this code is never used either way
         auto *job = new QKeychain::ReadPasswordJob("chatterino");
         job->setAutoDelete(true);
@@ -193,7 +200,7 @@ void Credentials::get(const QString &provider, const QString &name_,
             },
             Qt::DirectConnection);
         job->start();
-#endif
+#    endif
     }
     else
     {
