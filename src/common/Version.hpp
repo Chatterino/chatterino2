@@ -4,6 +4,29 @@
 
 namespace chatterino {
 
+/**
+ * Valid version formats, in order of latest to oldest
+ *
+ * Stable:
+ *  - 2.4.0
+ *
+ * Release candidate:
+ *  - 2.4.0-rc.3
+ *  - 2.4.0-rc.2
+ *  - 2.4.0-rc
+ *
+ * Beta:
+ *  - 2.4.0-beta.3
+ *  - 2.4.0-beta.2
+ *  - 2.4.0-beta
+ *
+ * Alpha:
+ *  - 2.4.0-alpha.3
+ *  - 2.4.0-alpha.2
+ *  - 2.4.0-alpha
+ **/
+inline const QString CHATTERINO_VERSION = QStringLiteral("2.5.1");
+
 class Version
 {
 public:

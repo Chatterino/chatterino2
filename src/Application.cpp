@@ -204,8 +204,7 @@ void Application::initialize(Settings &settings, const Paths &paths)
     // Show changelog
     if (!this->args_.isFramelessEmbed &&
         getSettings()->currentVersion.getValue() != "" &&
-        getSettings()->currentVersion.getValue() !=
-            Version::instance().version())
+        getSettings()->currentVersion.getValue() != CHATTERINO_VERSION)
     {
         auto *box = new QMessageBox(QMessageBox::Information, "Chatterino 2",
                                     "Show changelog?",
@@ -220,7 +219,7 @@ void Application::initialize(Settings &settings, const Paths &paths)
 
     if (!this->args_.isFramelessEmbed)
     {
-        getSettings()->currentVersion.setValue(Version::instance().version());
+        getSettings()->currentVersion.setValue(CHATTERINO_VERSION);
 
         if (getSettings()->enableExperimentalIrc)
         {

@@ -2,7 +2,7 @@
 
 ## In the release PR
 
-- [ ] Updated version code in `src/common/Version.cpp`
+- [ ] Updated version code in `src/common/Version.hpp`
 - [ ] Updated version code in `CMakeLists.txt`  
        This can only be "whole versions", so if you're releasing `2.4.0-beta` you'll need to condense it to `2.4.0`
 - [ ] Add a new release at the top of the `releases` key in `resources/com.chatterino.chatterino.appdata.xml`  

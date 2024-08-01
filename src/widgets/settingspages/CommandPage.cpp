@@ -108,7 +108,7 @@ CommandPage::CommandPage()
         view->addCustomButton(button);
 
         QObject::connect(button, &QPushButton::clicked, this, [] {
-            QFile c1settings = c1settingsPath();
+            QFile c1settings(c1settingsPath());
             c1settings.open(QIODevice::ReadOnly);
             for (auto line :
                  QString(c1settings.readAll())

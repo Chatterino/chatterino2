@@ -48,7 +48,7 @@ namespace chatterino {
 
 Updates::Updates(const Paths &paths_)
     : paths(paths_)
-    , currentVersion_(Version::instance().version())
+    , currentVersion_(CHATTERINO_VERSION)
     , updateGuideLink_("https://chatterino.com")
 {
     qCDebug(chatterinoUpdate) << "init UpdateManager";
