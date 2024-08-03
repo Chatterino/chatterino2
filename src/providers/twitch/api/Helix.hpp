@@ -11,6 +11,7 @@
 #include <QJsonObject>
 #include <QString>
 #include <QStringList>
+#include <QTimeZone>
 #include <QUrl>
 #include <QUrlQuery>
 
@@ -722,7 +723,7 @@ struct HelixShieldModeStatus {
         , lastActivatedAt(QDateTime::fromString(
               json["last_activated_at"].toString(), Qt::ISODate))
     {
-        this->lastActivatedAt.setTimeSpec(Qt::UTC);
+        this->lastActivatedAt.setTimeZone(QTimeZone::utc());
     }
 };
 
