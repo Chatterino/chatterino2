@@ -1,4 +1,3 @@
-
 #include "singletons/Theme.hpp"
 
 #include "Application.hpp"

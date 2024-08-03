@@ -58,6 +58,7 @@
 - Dev: The running Qt version is now shown in the about page if it differs from the compiled version. (#5501)
 - Dev: `FlagsEnum` is now `constexpr`. (#5510)
 - Dev: Documented and added tests to RTL handling. (#5473)
+- Dev: Refactored a few `#define`s into `const(expr)` and cleaned includes. (#5527)
 
 ## 2.5.1
 

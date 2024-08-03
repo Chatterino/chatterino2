@@ -1,4 +1,4 @@
-#include "IrcChannel2.hpp"
+#include "providers/irc/IrcChannel2.hpp"
 
 #include "common/Channel.hpp"
 #include "debug/AssertInGuiThread.hpp"

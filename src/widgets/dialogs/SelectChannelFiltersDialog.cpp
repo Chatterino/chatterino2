@@ -1,4 +1,4 @@
-#include "SelectChannelFiltersDialog.hpp"
+#include "widgets/dialogs/SelectChannelFiltersDialog.hpp"
 
 #include "controllers/filters/FilterRecord.hpp"
 #include "singletons/Settings.hpp"

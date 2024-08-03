@@ -1,4 +1,4 @@
-#include "MessageBuilder.hpp"
+#include "messages/MessageBuilder.hpp"
 
 #include "Application.hpp"
 #include "common/IrcColors.hpp"

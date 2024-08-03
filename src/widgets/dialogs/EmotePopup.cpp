@@ -1,4 +1,4 @@
-#include "EmotePopup.hpp"
+#include "widgets/dialogs/EmotePopup.hpp"
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"

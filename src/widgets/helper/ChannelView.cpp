@@ -68,11 +68,9 @@
 #include <functional>
 #include <memory>
 
-#define SELECTION_RESUME_SCROLLING_MSG_THRESHOLD 3
-#define CHAT_HOVER_PAUSE_DURATION 1000
-#define TOOLTIP_EMOTE_ENTRIES_LIMIT 7
-
 namespace {
+
+constexpr size_t TOOLTIP_EMOTE_ENTRIES_LIMIT = 7;
 
 using namespace chatterino;
 

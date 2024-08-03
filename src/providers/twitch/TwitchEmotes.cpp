@@ -11,9 +11,7 @@ using namespace chatterino;
 
 Url getEmoteLink(const EmoteId &id, const QString &emoteScale)
 {
-    return {QString(TWITCH_EMOTE_TEMPLATE)
-                .replace("{id}", id.string)
-                .replace("{scale}", emoteScale)};
+    return {TWITCH_EMOTE_TEMPLATE.arg(id.string, emoteScale)};
 }
 
 QSize getEmoteExpectedBaseSize(const EmoteId &id)

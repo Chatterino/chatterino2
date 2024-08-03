@@ -1,4 +1,4 @@
-#include "EditableModelView.hpp"
+#include "widgets/helper/EditableModelView.hpp"
 
 #include "widgets/helper/RegExpItemDelegate.hpp"
 #include "widgets/helper/TableStyles.hpp"

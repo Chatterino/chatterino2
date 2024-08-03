@@ -1,4 +1,4 @@
-#include "Irc2.hpp"
+#include "providers/irc/Irc2.hpp"
 
 #include "Application.hpp"
 #include "common/Credentials.hpp"

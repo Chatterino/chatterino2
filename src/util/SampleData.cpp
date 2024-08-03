@@ -1,4 +1,4 @@
-#include "SampleData.hpp"
+#include "util/SampleData.hpp"
 
 namespace chatterino {
 

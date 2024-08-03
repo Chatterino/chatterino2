@@ -24,10 +24,10 @@
 
 #include <utility>
 
-#define UPLOAD_DELAY 2000
-// Delay between uploads in milliseconds
-
 namespace {
+
+// Delay between uploads in milliseconds
+constexpr int UPLOAD_DELAY = 2000;
 
 std::optional<QByteArray> convertToPng(const QImage &image)
 {
