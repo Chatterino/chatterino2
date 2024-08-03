@@ -29,19 +29,18 @@ QString currentBranch()
     return getSettings()->betaUpdates ? "beta" : "stable";
 }
 
-const QString CHATTERINO_OS = u""_s
 #if defined(Q_OS_WIN)
-                              "win"
+const QString CHATTERINO_OS = u"win"_s;
 #elif defined(Q_OS_MACOS)
-                              "macos"
+const QString CHATTERINO_OS = u"macos"_s;
 #elif defined(Q_OS_LINUX)
-                              "linux"
+const QString CHATTERINO_OS = u"linux"_s;
 #elif defined(Q_OS_FREEBSD)
-                              "freebsd"
+const QString CHATTERINO_OS = u"freebsd"_s;
 #else
-                              "unknown"
+const QString CHATTERINO_OS = u"unknown"_s;
 #endif
-    ;
+;
 
 }  // namespace
 namespace chatterino {
