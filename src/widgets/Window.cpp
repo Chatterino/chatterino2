@@ -642,21 +642,19 @@ void Window::addShortcuts()
 
              if (arg == "off")
              {
-                 this->notebook_->setShowTabs(false);
+                 this->notebook_->hideAllTabsAction->trigger();
              }
              else if (arg == "on")
              {
-                 this->notebook_->setShowTabs(true);
+                 this->notebook_->showAllTabsAction->trigger();
              }
              else if (arg == "toggle")
              {
-                 this->notebook_->toggleTabsAction()->trigger();
+                 this->notebook_->toggleTabVisibility();
              }
              else if (arg == "liveOnly")
              {
-                 this->notebook_->setShowTabs(true);
-                 getSettings()->tabVisibility.setValue(
-                     NotebookTabVisibility::LiveOnly);
+                 this->notebook_->onlyShowLiveTabsAction->trigger();
              }
              else if (arg == "toggleLiveOnly")
              {

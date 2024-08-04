@@ -116,9 +116,6 @@ public:
     bool getAllowUserTabManagement() const;
     void setAllowUserTabManagement(bool value);
 
-    bool getShowTabs() const;
-    void setShowTabs(bool value);
-
     bool getShowAddButton() const;
     void setShowAddButton(bool value);
 
@@ -132,9 +129,10 @@ public:
     // Update layout and tab visibility
     void refresh();
 
-    QAction *toggleTabsAction();
-
 protected:
+    bool getShowTabs() const;
+    void setShowTabs(bool value);
+
     void scaleChangedEvent(float scale_) override;
     void resizeEvent(QResizeEvent *) override;
     void mousePressEvent(QMouseEvent *event) override;
@@ -180,7 +178,6 @@ private:
      * @brief Updates the visibility state of all tabs
      **/
     void updateTabVisibility();
-    void updateTabVisibilityMenuAction();
     void resizeAddButton();
 
     bool containsPage(QWidget *page);
@@ -211,7 +208,6 @@ private:
     NotebookTabLocation tabLocation_ = NotebookTabLocation::Top;
 
     QAction *lockNotebookLayoutAction_;
-    QAction *toggleTabsAction_;
     QAction *toggleTopMostAction_;
 
     // This filter, if set, is used to figure out the visibility of
@@ -232,9 +228,15 @@ public:
     void themeChangedEvent() override;
 
     void addNotebookActionsToMenu(QMenu *menu) override;
-    void toggleOfflineTabs();
 
-    QAction *toggleOfflineTabsAction();
+    /**
+     * Toggles between the "Show all tabs" and "Hide all tabs" tab visibility states
+     */
+    void toggleTabVisibility();
+
+    QAction *showAllTabsAction;
+    QAction *onlyShowLiveTabsAction;
+    QAction *hideAllTabsAction;
 
 protected:
     void showEvent(QShowEvent *event) override;
@@ -243,9 +245,6 @@ private:
     void addCustomButtons();
 
     pajlada::Signals::SignalHolder signalHolder_;
-
-    QAction *toggleOfflineTabsAction_;
-    void updateToggleOfflineTabsHotkey(NotebookTabVisibility newTabVisibility);
 
     // Main window on Windows has basically a duplicate of this in Window
     NotebookButton *streamerModeIcon_{};
