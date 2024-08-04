@@ -25,6 +25,9 @@ HotkeyController::HotkeyController()
     : hotkeys_(hotkeySortCompare_)
 {
     this->loadHotkeys();
+
+    this->removeDeprecatedHotkeys();
+
     this->signalHolder_.managedConnect(
         this->hotkeys_.delayedItemsChanged, [this]() {
             qCDebug(chatterinoHotkeys) << "Reloading hotkeys!";
@@ -500,10 +503,6 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
                             QKeySequence("Ctrl+U"), "setTabVisibility",
                             {"toggle"}, "toggle tab visibility");
-
-        this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
-                            QKeySequence("Ctrl+Shift+L"), "setTabVisibility",
-                            {"toggleLiveOnly"}, "toggle live tabs only");
     }
 }
 
@@ -524,6 +523,14 @@ void HotkeyController::resetToDefaults()
     this->loadHotkeys();
 }
 
+void HotkeyController::removeDeprecatedHotkeys()
+{
+    // The "toggleLiveOnly" argument was removed 2024-08-04
+    this->tryRemoveDefault(HotkeyCategory::Window, QKeySequence("Ctrl+Shift+L"),
+                           "setTabVisibility", {"toggleLiveOnly"},
+                           "toggle live tabs only");
+}
+
 void HotkeyController::tryAddDefault(std::set<QString> &addedHotkeys,
                                      HotkeyCategory category,
                                      QKeySequence keySequence, QString action,
@@ -539,6 +546,19 @@ void HotkeyController::tryAddDefault(std::set<QString> &addedHotkeys,
     this->hotkeys_.append(
         std::make_shared<Hotkey>(category, keySequence, action, args, name));
     addedHotkeys.insert(name);
+}
+
+bool HotkeyController::tryRemoveDefault(HotkeyCategory category,
+                                        QKeySequence keySequence,
+                                        QString action,
+                                        std::vector<QString> args, QString name)
+{
+    return this->hotkeys_.removeFirstMatching([&](const auto &hotkey) {
+        return hotkey->category() == category &&
+               hotkey->keySequence() == keySequence &&
+               hotkey->action() == action && hotkey->arguments() == args &&
+               hotkey->name() == name;
+    });
 }
 
 void HotkeyController::showHotkeyError(const std::shared_ptr<Hotkey> &hotkey,
