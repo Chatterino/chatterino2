@@ -132,4 +132,16 @@ QString forceImageUnload(const CommandContext &ctx)
     return "";
 }
 
+QString debugTest(const CommandContext &ctx)
+{
+    if (!ctx.channel)
+    {
+        return "";
+    }
+
+    ctx.channel->addSystemMessage("debug-test called");
+
+    return "";
+}
+
 }  // namespace chatterino::commands
