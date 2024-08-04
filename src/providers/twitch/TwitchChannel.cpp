@@ -152,9 +152,9 @@ TwitchChannel::~TwitchChannel()
             this->roomId());
     }
 
-    if (getApp()->getTwitch()->getSeventvEventAPI())
+    if (getApp()->getSeventvEventAPI())
     {
-        getApp()->getTwitch()->getSeventvEventAPI()->unsubscribeTwitchChannel(
+        getApp()->getSeventvEventAPI()->unsubscribeTwitchChannel(
             this->roomId());
     }
 }
@@ -1012,9 +1012,9 @@ void TwitchChannel::updateSeventvData(const QString &newUserID,
     this->seventvUserID_ = newUserID;
     this->seventvEmoteSetID_ = newEmoteSetID;
     runInGuiThread([this, oldUserID, oldEmoteSetID]() {
-        if (getApp()->getTwitch()->getSeventvEventAPI())
+        if (getApp()->getSeventvEventAPI())
         {
-            getApp()->getTwitch()->getSeventvEventAPI()->subscribeUser(
+            getApp()->getSeventvEventAPI()->subscribeUser(
                 this->seventvUserID_, this->seventvEmoteSetID_);
 
             if (oldUserID || oldEmoteSetID)
@@ -1811,10 +1811,9 @@ void TwitchChannel::updateSevenTVActivity()
 
 void TwitchChannel::listenSevenTVCosmetics() const
 {
-    if (getApp()->getTwitch()->getSeventvEventAPI())
+    if (getApp()->getSeventvEventAPI())
     {
-        getApp()->getTwitch()->getSeventvEventAPI()->subscribeTwitchChannel(
-            this->roomId());
+        getApp()->getSeventvEventAPI()->subscribeTwitchChannel(this->roomId());
     }
 }
 

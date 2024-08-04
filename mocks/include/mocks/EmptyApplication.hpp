@@ -245,6 +245,13 @@ public:
         return nullptr;
     }
 
+    SeventvEventAPI *getSeventvEventAPI() override
+    {
+        assert(false && "EmptyApplication::getSeventvEventAPI was called "
+                        "without being initialized");
+        return nullptr;
+    }
+
     ILinkResolver *getLinkResolver() override
     {
         assert(false && "EmptyApplication::getLinkResolver was called without "

@@ -16,7 +16,6 @@ class Settings;
 class Paths;
 class TwitchChannel;
 class BttvLiveUpdates;
-class SeventvEventAPI;
 class BttvEmotes;
 class FfzEmotes;
 class SeventvEmotes;
@@ -36,7 +35,6 @@ public:
                                     const QString &emoteSetID) = 0;
 
     virtual std::unique_ptr<BttvLiveUpdates> &getBTTVLiveUpdates() = 0;
-    virtual std::unique_ptr<SeventvEventAPI> &getSeventvEventAPI() = 0;
 
     virtual const IndirectChannel &getWatchingChannel() const = 0;
     virtual void setWatchingChannel(ChannelPtr newWatchingChannel) = 0;
@@ -103,11 +101,9 @@ private:
     IndirectChannel watchingChannel;
 
     std::unique_ptr<BttvLiveUpdates> bttvLiveUpdates;
-    std::unique_ptr<SeventvEventAPI> seventvEventAPI;
 
 public:
     std::unique_ptr<BttvLiveUpdates> &getBTTVLiveUpdates() override;
-    std::unique_ptr<SeventvEventAPI> &getSeventvEventAPI() override;
 
     const IndirectChannel &getWatchingChannel() const override;
     void setWatchingChannel(ChannelPtr newWatchingChannel) override;

@@ -34,7 +34,6 @@ namespace {
 using namespace chatterino;
 
 const QString BTTV_LIVE_UPDATES_URL = "wss://sockets.betterttv.net/ws";
-const QString SEVENTV_EVENTAPI_URL = "wss://events.7tv.io/v3";
 
 void sendHelixMessage(const std::shared_ptr<TwitchChannel> &channel,
                       const QString &message, const QString &replyParentId = {})
@@ -150,13 +149,6 @@ TwitchIrcServer::TwitchIrcServer()
     {
         this->bttvLiveUpdates =
             std::make_unique<BttvLiveUpdates>(BTTV_LIVE_UPDATES_URL);
-    }
-
-    if (getSettings()->enableSevenTVEventAPI &&
-        getSettings()->enableSevenTVChannelEmotes)
-    {
-        this->seventvEventAPI =
-            std::make_unique<SeventvEventAPI>(SEVENTV_EVENTAPI_URL);
     }
 
     // getSettings()->twitchSeperateWriteConnection.connect([this](auto, auto) {
@@ -643,11 +635,6 @@ std::unique_ptr<BttvLiveUpdates> &TwitchIrcServer::getBTTVLiveUpdates()
     return this->bttvLiveUpdates;
 }
 
-std::unique_ptr<SeventvEventAPI> &TwitchIrcServer::getSeventvEventAPI()
-{
-    return this->seventvEventAPI;
-}
-
 const IndirectChannel &TwitchIrcServer::getWatchingChannel() const
 {
     return this->watchingChannel;
@@ -759,7 +746,7 @@ void TwitchIrcServer::forEachSeventvUser(
 void TwitchIrcServer::dropSeventvChannel(const QString &userID,
                                          const QString &emoteSetID)
 {
-    if (!this->seventvEventAPI)
+    if (!getApp()->getSeventvEventAPI())
     {
         return;
     }
@@ -798,11 +785,11 @@ void TwitchIrcServer::dropSeventvChannel(const QString &userID,
 
     if (!foundUser)
     {
-        this->seventvEventAPI->unsubscribeUser(userID);
+        getApp()->getSeventvEventAPI()->unsubscribeUser(userID);
     }
     if (!foundSet)
     {
-        this->seventvEventAPI->unsubscribeEmoteSet(emoteSetID);
+        getApp()->getSeventvEventAPI()->unsubscribeEmoteSet(emoteSetID);
     }
 }
 

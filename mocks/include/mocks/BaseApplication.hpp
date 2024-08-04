@@ -30,6 +30,11 @@ public:
         return &this->streamerMode;
     }
 
+    SeventvEventAPI *getSeventvEventAPI() override
+    {
+        return nullptr;
+    }
+
     Settings settings;
     DisabledStreamerMode streamerMode;
 };

@@ -8,7 +8,6 @@
 #include "providers/seventv/eventapi/Dispatch.hpp"
 #include "providers/seventv/eventapi/Message.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
-#include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 
 namespace chatterino::mock {
@@ -49,11 +48,6 @@ public:
     std::unique_ptr<BttvLiveUpdates> &getBTTVLiveUpdates() override
     {
         return this->bttvLiveUpdates;
-    }
-
-    std::unique_ptr<SeventvEventAPI> &getSeventvEventAPI() override
-    {
-        return this->seventvEventAPI;
     }
 
     const IndirectChannel &getWatchingChannel() const override
@@ -105,7 +99,6 @@ public:
     QString lastUserThatWhisperedMe{"forsen"};
 
     std::unique_ptr<BttvLiveUpdates> bttvLiveUpdates;
-    std::unique_ptr<SeventvEventAPI> seventvEventAPI;
 };
 
 }  // namespace chatterino::mock

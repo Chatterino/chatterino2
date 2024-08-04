@@ -72,6 +72,8 @@ namespace {
 
 using namespace chatterino;
 
+const QString SEVENTV_EVENTAPI_URL = "wss://events.7tv.io/v3";
+
 ISoundController *makeSoundController(Settings &settings)
 {
     SoundBackend soundBackend = settings.soundBackend;
@@ -92,6 +94,18 @@ ISoundController *makeSoundController(Settings &settings)
         }
         break;
     }
+}
+
+SeventvEventAPI *makeSeventvEventAPI(Settings &settings)
+{
+    bool enabled = settings.enableSevenTVEventAPI;
+
+    if (enabled)
+    {
+        return new SeventvEventAPI(SEVENTV_EVENTAPI_URL);
+    }
+
+    return nullptr;
 }
 
 const QString TWITCH_PUBSUB_URL = "wss://pubsub-edge.twitch.tv";
@@ -144,6 +158,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , bttvEmotes(new BttvEmotes)
     , ffzEmotes(new FfzEmotes)
     , seventvEmotes(new SeventvEmotes)
+    , seventvEventAPI(makeSeventvEventAPI(_settings))
     , logging(new Logging(_settings))
     , linkResolver(new LinkResolver)
     , streamerMode(new StreamerMode)
@@ -177,6 +192,7 @@ void Application::fakeDtor()
     this->chatterinoBadges.reset();
     this->bttvEmotes.reset();
     this->ffzEmotes.reset();
+    // this->seventvEventAPI.reset();
     this->seventvEmotes.reset();
     this->notifications.reset();
     this->commands.reset();
@@ -592,6 +608,14 @@ SeventvEmotes *Application::getSeventvEmotes()
     assert(this->seventvEmotes);
 
     return this->seventvEmotes.get();
+}
+
+SeventvEventAPI *Application::getSeventvEventAPI()
+{
+    assertInGuiThread();
+    // seventvEventAPI may be nullptr if it's not enabled
+
+    return this->seventvEventAPI.get();
 }
 
 void Application::save()
@@ -1119,9 +1143,7 @@ void Application::initBttvLiveUpdates()
 
 void Application::initSeventvEventAPI()
 {
-    auto &seventvEventAPI = this->twitch->getSeventvEventAPI();
-
-    if (!seventvEventAPI)
+    if (!this->seventvEventAPI)
     {
         qCDebug(chatterinoSeventvEventAPI)
             << "Skipping initialization as the EventAPI is disabled";
@@ -1130,8 +1152,8 @@ void Application::initSeventvEventAPI()
 
     // We can safely ignore these signal connections since the twitch object will always
     // be destroyed before the Application
-    std::ignore =
-        seventvEventAPI->signals_.emoteAdded.connect([&](const auto &data) {
+    std::ignore = this->seventvEventAPI->signals_.emoteAdded.connect(
+        [&](const auto &data) {
             postToThread([this, data] {
                 this->twitch->forEachSeventvEmoteSet(
                     data.emoteSetID, [data](TwitchChannel &chan) {
@@ -1139,8 +1161,8 @@ void Application::initSeventvEventAPI()
                     });
             });
         });
-    std::ignore =
-        seventvEventAPI->signals_.emoteUpdated.connect([&](const auto &data) {
+    std::ignore = this->seventvEventAPI->signals_.emoteUpdated.connect(
+        [&](const auto &data) {
             postToThread([this, data] {
                 this->twitch->forEachSeventvEmoteSet(
                     data.emoteSetID, [data](TwitchChannel &chan) {
@@ -1148,8 +1170,8 @@ void Application::initSeventvEventAPI()
                     });
             });
         });
-    std::ignore =
-        seventvEventAPI->signals_.emoteRemoved.connect([&](const auto &data) {
+    std::ignore = this->seventvEventAPI->signals_.emoteRemoved.connect(
+        [&](const auto &data) {
             postToThread([this, data] {
                 this->twitch->forEachSeventvEmoteSet(
                     data.emoteSetID, [data](TwitchChannel &chan) {
@@ -1157,15 +1179,15 @@ void Application::initSeventvEventAPI()
                     });
             });
         });
-    std::ignore =
-        seventvEventAPI->signals_.userUpdated.connect([&](const auto &data) {
+    std::ignore = this->seventvEventAPI->signals_.userUpdated.connect(
+        [&](const auto &data) {
             this->twitch->forEachSeventvUser(data.userID,
                                              [data](TwitchChannel &chan) {
                                                  chan.updateSeventvUser(data);
                                              });
         });
 
-    seventvEventAPI->start();
+    this->seventvEventAPI->start();
 }
 
 IApplication *getApp()
