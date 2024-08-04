@@ -161,7 +161,10 @@ Application::Application(Settings &_settings, const Paths &paths,
     });
 }
 
-Application::~Application() = default;
+Application::~Application()
+{
+    Application::instance = nullptr;
+}
 
 void Application::fakeDtor()
 {
