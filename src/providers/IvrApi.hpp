@@ -64,9 +64,7 @@ struct IvrEmote {
         : code(root.value("code").toString())
         , id(root.value("id").toString())
         , setId(root.value("setID").toString())
-        , url(QString(TWITCH_EMOTE_TEMPLATE)
-                  .replace("{id}", this->id)
-                  .replace("{scale}", "3.0"))
+        , url(TWITCH_EMOTE_TEMPLATE.arg(this->id, u"3.0"))
         , emoteType(root.value("type").toString())
         , imageType(root.value("assetType").toString())
     {

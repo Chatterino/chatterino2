@@ -12,7 +12,7 @@ namespace chatterino::filters {
 
 ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
 {
-    auto watchingChannel = getIApp()->getTwitch()->getWatchingChannel().get();
+    auto watchingChannel = getApp()->getTwitch()->getWatchingChannel().get();
 
     /* 
      * Looking to add a new identifier to filters? Here's what to do: 
@@ -93,6 +93,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
         {"channel.name", m->channelName},
         {"channel.watching", watching},
 
+        {"flags.action", m->flags.has(MessageFlag::Action)},
         {"flags.highlighted", m->flags.has(MessageFlag::Highlighted)},
         {"flags.points_redeemed", m->flags.has(MessageFlag::RedeemedHighlight)},
         {"flags.sub_message", m->flags.has(MessageFlag::Subscription)},

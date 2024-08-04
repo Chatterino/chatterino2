@@ -11,6 +11,7 @@
 #include <QJsonObject>
 #include <QString>
 #include <QStringList>
+#include <QTimeZone>
 #include <QUrl>
 #include <QUrlQuery>
 
@@ -276,9 +277,7 @@ struct HelixChannelEmote {
         , name(jsonObject.value("name").toString())
         , type(jsonObject.value("emote_type").toString())
         , setId(jsonObject.value("emote_set_id").toString())
-        , url(QString(TWITCH_EMOTE_TEMPLATE)
-                  .replace("{id}", this->emoteId)
-                  .replace("{scale}", "3.0"))
+        , url(TWITCH_EMOTE_TEMPLATE.arg(this->emoteId, u"3.0"))
     {
     }
 };
@@ -595,6 +594,19 @@ enum class HelixUpdateChatSettingsError {  // update chat settings
     Forwarded,
 };  // update chat settings
 
+/// Error type for Helix::updateChannel
+///
+/// Used in the /settitle and /setgame commands
+enum class HelixUpdateChannelError {
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    Ratelimited,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};
+
 enum class HelixBanUserError {  // /timeout, /ban
     Unknown,
     UserMissingScope,
@@ -607,6 +619,18 @@ enum class HelixBanUserError {  // /timeout, /ban
     // The error message is forwarded directly from the Twitch API
     Forwarded,
 };  // /timeout, /ban
+
+enum class HelixWarnUserError {  // /warn
+    Unknown,
+    UserMissingScope,
+    UserNotAuthorized,
+    Ratelimited,
+    ConflictingOperation,
+    CannotWarnUser,
+
+    // The error message is forwarded directly from the Twitch API
+    Forwarded,
+};  // /warn
 
 enum class HelixWhisperError {  // /w
     Unknown,
@@ -699,7 +723,7 @@ struct HelixShieldModeStatus {
         , lastActivatedAt(QDateTime::fromString(
               json["last_activated_at"].toString(), Qt::ISODate))
     {
-        this->lastActivatedAt.setTimeSpec(Qt::UTC);
+        this->lastActivatedAt.setTimeZone(QTimeZone::utc());
     }
 };
 
@@ -862,7 +886,7 @@ public:
     virtual void updateChannel(
         QString broadcasterId, QString gameId, QString language, QString title,
         std::function<void(NetworkResult)> successCallback,
-        HelixFailureCallback failureCallback) = 0;
+        FailureCallback<HelixUpdateChannelError, QString> failureCallback) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#manage-held-automod-messages
     virtual void manageAutoModMessages(
@@ -1010,6 +1034,13 @@ public:
         std::optional<int> duration, QString reason,
         ResultCallback<> successCallback,
         FailureCallback<HelixBanUserError, QString> failureCallback) = 0;
+
+    // Warn a user
+    // https://dev.twitch.tv/docs/api/reference#warn-chat-user
+    virtual void warnUser(
+        QString broadcasterID, QString moderatorID, QString userID,
+        QString reason, ResultCallback<> successCallback,
+        FailureCallback<HelixWarnUserError, QString> failureCallback) = 0;
 
     // Send a whisper
     // https://dev.twitch.tv/docs/api/reference#send-whisper
@@ -1183,7 +1214,8 @@ public:
     void updateChannel(QString broadcasterId, QString gameId, QString language,
                        QString title,
                        std::function<void(NetworkResult)> successCallback,
-                       HelixFailureCallback failureCallback) final;
+                       FailureCallback<HelixUpdateChannelError, QString>
+                           failureCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference#manage-held-automod-messages
     void manageAutoModMessages(
@@ -1331,6 +1363,13 @@ public:
         std::optional<int> duration, QString reason,
         ResultCallback<> successCallback,
         FailureCallback<HelixBanUserError, QString> failureCallback) final;
+
+    // Warn a user
+    // https://dev.twitch.tv/docs/api/reference#warn-chat-user
+    void warnUser(
+        QString broadcasterID, QString moderatorID, QString userID,
+        QString reason, ResultCallback<> successCallback,
+        FailureCallback<HelixWarnUserError, QString> failureCallback) final;
 
     // Send a whisper
     // https://dev.twitch.tv/docs/api/reference#send-whisper

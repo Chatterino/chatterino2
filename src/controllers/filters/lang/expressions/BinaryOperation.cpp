@@ -56,9 +56,8 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
     switch (this->op_)
     {
         case PLUS:
-            if (static_cast<QMetaType::Type>(left.type()) ==
-                    QMetaType::QString &&
-                right.canConvert(QMetaType::QString))
+            if (variantIs(left, QMetaType::QString) &&
+                right.canConvert<QString>())
             {
                 return left.toString().append(right.toString());
             }
@@ -143,14 +142,14 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
             return false;
         case CONTAINS:
             if (variantIs(left, QMetaType::QStringList) &&
-                right.canConvert(QMetaType::QString))
+                right.canConvert<QString>())
             {
                 return left.toStringList().contains(right.toString(),
                                                     Qt::CaseInsensitive);
             }
 
             if (variantIs(left, QMetaType::QVariantMap) &&
-                right.canConvert(QMetaType::QString))
+                right.canConvert<QString>())
             {
                 return left.toMap().contains(right.toString());
             }
@@ -160,8 +159,7 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
                 return left.toList().contains(right);
             }
 
-            if (left.canConvert(QMetaType::QString) &&
-                right.canConvert(QMetaType::QString))
+            if (left.canConvert<QString>() && right.canConvert<QString>())
             {
                 return left.toString().contains(right.toString(),
                                                 Qt::CaseInsensitive);
@@ -170,7 +168,7 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
             return false;
         case STARTS_WITH:
             if (variantIs(left, QMetaType::QStringList) &&
-                right.canConvert(QMetaType::QString))
+                right.canConvert<QString>())
             {
                 auto list = left.toStringList();
                 return !list.isEmpty() &&
@@ -183,8 +181,7 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
                 return left.toList().startsWith(right);
             }
 
-            if (left.canConvert(QMetaType::QString) &&
-                right.canConvert(QMetaType::QString))
+            if (left.canConvert<QString>() && right.canConvert<QString>())
             {
                 return left.toString().startsWith(right.toString(),
                                                   Qt::CaseInsensitive);
@@ -194,7 +191,7 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
 
         case ENDS_WITH:
             if (variantIs(left, QMetaType::QStringList) &&
-                right.canConvert(QMetaType::QString))
+                right.canConvert<QString>())
             {
                 auto list = left.toStringList();
                 return !list.isEmpty() &&
@@ -207,8 +204,7 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
                 return left.toList().endsWith(right);
             }
 
-            if (left.canConvert(QMetaType::QString) &&
-                right.canConvert(QMetaType::QString))
+            if (left.canConvert<QString>() && right.canConvert<QString>())
             {
                 return left.toString().endsWith(right.toString(),
                                                 Qt::CaseInsensitive);
@@ -216,14 +212,18 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
 
             return false;
         case MATCH: {
-            if (!left.canConvert(QMetaType::QString))
+            if (!left.canConvert<QString>())
             {
                 return false;
             }
 
             auto matching = left.toString();
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            switch (static_cast<QMetaType::Type>(right.typeId()))
+#else
             switch (static_cast<QMetaType::Type>(right.type()))
+#endif
             {
                 case QMetaType::QRegularExpression: {
                     return right.toRegularExpression()

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/Aliases.hpp"
-#include "common/Singleton.hpp"
 #include "util/QStringHash.hpp"
 
 #include <QJsonObject>
@@ -16,7 +15,7 @@ namespace chatterino {
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 
-class SeventvBadges : public Singleton
+class SeventvBadges
 {
 public:
     // Return the badge, if any, that is assigned to the user

@@ -1,4 +1,4 @@
-#include "Button.hpp"
+#include "widgets/helper/Button.hpp"
 
 #include "singletons/Theme.hpp"
 #include "util/FunctionEventFilter.hpp"
@@ -8,25 +8,43 @@
 #include <QPainter>
 #include <QScreen>
 
-namespace chatterino {
 namespace {
 
-    // returns a new resized image or the old one if the size didn't change
-    auto resizePixmap(const QPixmap &current, const QPixmap resized,
-                      const QSize &size) -> QPixmap
+QSizeF deviceIndependentSize(const QPixmap &pixmap)
+{
+#if QT_VERSION < QT_VERSION_CHECK(6, 2, 0)
+    return QSizeF(pixmap.width(), pixmap.height()) / pixmap.devicePixelRatio();
+#else
+    return pixmap.deviceIndependentSize();
+#endif
+}
+
+/**
+ * Resizes a pixmap to a desired size.
+ * Does nothing if the target pixmap is already sized correctly.
+ * 
+ * @param target The target pixmap.
+ * @param source The unscaled pixmap.
+ * @param size The desired device independent size.
+ * @param dpr The device pixel ratio of the target area. The size of the target in pixels will be `size * dpr`.
+ */
+void resizePixmap(QPixmap &target, const QPixmap &source, const QSize &size,
+                  qreal dpr)
+{
+    if (deviceIndependentSize(target) == size)
     {
-        if (resized.size() == size)
-        {
-            return resized;
-        }
-        else
-        {
-            return current.scaled(size, Qt::IgnoreAspectRatio,
-                                  Qt::SmoothTransformation);
-        }
+        return;
     }
 
+    QPixmap resized = source;
+    resized.setDevicePixelRatio(dpr);
+    target = resized.scaled(size * dpr, Qt::IgnoreAspectRatio,
+                            Qt::SmoothTransformation);
+}
+
 }  // namespace
+
+namespace chatterino {
 
 Button::Button(BaseWidget *parent)
     : BaseWidget(parent)
@@ -47,6 +65,12 @@ void Button::setMouseEffectColor(std::optional<QColor> color)
 
 void Button::setPixmap(const QPixmap &_pixmap)
 {
+    // Avoid updates if the pixmap didn't change
+    if (_pixmap.cacheKey() == this->pixmap_.cacheKey())
+    {
+        return;
+    }
+
     this->pixmap_ = _pixmap;
     this->resizedPixmap_ = {};
     this->update();
@@ -158,8 +182,8 @@ void Button::paintButton(QPainter &painter)
 
         QRect rect = this->rect();
 
-        this->resizedPixmap_ =
-            resizePixmap(this->pixmap_, this->resizedPixmap_, rect.size());
+        resizePixmap(this->resizedPixmap_, this->pixmap_, rect.size(),
+                     this->devicePixelRatio());
 
         int margin = this->height() < 22 * this->scale() ? 3 : 6;
 

@@ -18,14 +18,14 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     strategy:
       matrix:
-        qt-version: ["6.5.0"]
+        qt-version: ["6.7.1"]
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # allows for tags access
 
       - name: Download artifact
-        uses: dawidd6/action-download-artifact@v3
+        uses: dawidd6/action-download-artifact@v6
         with:
           workflow: build.yml
           name: chatterino-windows-x86-64-Qt-${{ matrix.qt-version }}.zip

@@ -1,12 +1,13 @@
-#include "Updates.hpp"
+#include "singletons/Updates.hpp"
 
+#include "common/Literals.hpp"
 #include "common/Modes.hpp"
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
-#include "Settings.hpp"
 #include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
 #include "util/PostToThread.hpp"
 
@@ -15,16 +16,34 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QRegularExpression>
+#include <QStringBuilder>
 #include <semver/semver.hpp>
 
-namespace chatterino {
 namespace {
-    QString currentBranch()
-    {
-        return getSettings()->betaUpdates ? "beta" : "stable";
-    }
+
+using namespace chatterino;
+using namespace literals;
+
+QString currentBranch()
+{
+    return getSettings()->betaUpdates ? "beta" : "stable";
+}
+
+#if defined(Q_OS_WIN)
+const QString CHATTERINO_OS = u"win"_s;
+#elif defined(Q_OS_MACOS)
+const QString CHATTERINO_OS = u"macos"_s;
+#elif defined(Q_OS_LINUX)
+const QString CHATTERINO_OS = u"linux"_s;
+#elif defined(Q_OS_FREEBSD)
+const QString CHATTERINO_OS = u"freebsd"_s;
+#else
+const QString CHATTERINO_OS = u"unknown"_s;
+#endif
+;
 
 }  // namespace
+namespace chatterino {
 
 Updates::Updates(const Paths &paths_)
     : paths(paths_)
@@ -262,9 +281,8 @@ void Updates::checkForUpdates()
         return;
     }
 
-    QString url =
-        "https://notitia.chatterino.com/version/chatterino/" CHATTERINO_OS "/" +
-        currentBranch();
+    QString url = "https://notitia.chatterino.com/version/chatterino/" %
+                  CHATTERINO_OS % "/" % currentBranch();
 
     NetworkRequest(url)
         .timeout(60000)

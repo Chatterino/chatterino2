@@ -15,9 +15,8 @@
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "singletons/Emotes.hpp"
-#include "TestHelpers.hpp"
+#include "Test.hpp"
 
-#include <gtest/gtest.h>
 #include <IrcConnection>
 #include <QDebug>
 #include <QString>
@@ -33,6 +32,12 @@ namespace {
 class MockApplication : mock::EmptyApplication
 {
 public:
+    MockApplication()
+        : settings(this->settingsDir.filePath("settings.json"))
+        , highlights(this->settings, &this->accounts)
+    {
+    }
+
     IEmotes *getEmotes() override
     {
         return &this->emotes;
@@ -93,6 +98,7 @@ public:
         return &this->streamerMode;
     }
 
+    Settings settings;
     AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;

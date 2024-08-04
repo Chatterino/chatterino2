@@ -21,14 +21,14 @@ QString deleteMessages(TwitchChannel *twitchChannel, const QString &messageID)
 {
     const auto *commandName = messageID.isEmpty() ? "/clear" : "/delete";
 
-    auto user = getIApp()->getAccounts()->twitch.getCurrent();
+    auto user = getApp()->getAccounts()->twitch.getCurrent();
 
     // Avoid Helix calls without Client ID and/or OAuth Token
     if (user->isAnon())
     {
-        twitchChannel->addMessage(makeSystemMessage(
+        twitchChannel->addSystemMessage(
             QString("You must be logged in to use the %1 command.")
-                .arg(commandName)));
+                .arg(commandName));
         return "";
     }
 
@@ -82,7 +82,7 @@ QString deleteMessages(TwitchChannel *twitchChannel, const QString &messageID)
                 break;
             }
 
-            twitchChannel->addMessage(makeSystemMessage(errorMessage));
+            twitchChannel->addSystemMessage(errorMessage);
         });
 
     return "";
@@ -101,8 +101,8 @@ QString deleteAllMessages(const CommandContext &ctx)
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /clear command only works in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "The /clear command only works in Twitch channels.");
         return "";
     }
 
@@ -120,16 +120,15 @@ QString deleteOneMessage(const CommandContext &ctx)
     // We use this to ensure the user gets better error messages for missing or malformed arguments
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /delete command only works in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "The /delete command only works in Twitch channels.");
         return "";
     }
 
     if (ctx.words.size() < 2)
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("Usage: /delete <msg-id> - Deletes the "
-                              "specified message."));
+        ctx.channel->addSystemMessage("Usage: /delete <msg-id> - Deletes the "
+                                      "specified message.");
         return "";
     }
 
@@ -138,8 +137,8 @@ QString deleteOneMessage(const CommandContext &ctx)
     if (uuid.isNull())
     {
         // The message id must be a valid UUID
-        ctx.channel->addMessage(makeSystemMessage(
-            QString("Invalid msg-id: \"%1\"").arg(messageID)));
+        ctx.channel->addSystemMessage(
+            QString("Invalid msg-id: \"%1\"").arg(messageID));
         return "";
     }
 
@@ -149,9 +148,9 @@ QString deleteOneMessage(const CommandContext &ctx)
         if (msg->loginName == ctx.channel->getName() &&
             !ctx.channel->isBroadcaster())
         {
-            ctx.channel->addMessage(makeSystemMessage(
+            ctx.channel->addSystemMessage(
                 "You cannot delete the broadcaster's messages unless "
-                "you are the broadcaster."));
+                "you are the broadcaster.");
             return "";
         }
     }

@@ -1,13 +1,17 @@
-#include "IrcConnection2.hpp"
+#include "providers/irc/IrcConnection2.hpp"
 
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 namespace chatterino {
 
 namespace {
 
-    const auto payload = QString("chatterino/" CHATTERINO_VERSION);
+    const auto payload = "chatterino/" + CHATTERINO_VERSION;
 
 }  // namespace
 
@@ -56,6 +60,7 @@ IrcConnection::IrcConnection(QObject *parent)
     // Send ping every x seconds
     this->pingTimer_.setInterval(5000);
     this->pingTimer_.start();
+    this->lastPing_ = std::chrono::system_clock::now();
     QObject::connect(&this->pingTimer_, &QTimer::timeout, [this] {
         if (this->isConnected())
         {
@@ -64,7 +69,25 @@ IrcConnection::IrcConnection(QObject *parent)
                 // If we're still receiving messages, all is well
                 this->recentlyReceivedMessage_ = false;
                 this->waitingForPong_ = false;
-                this->heartbeat.invoke();
+
+                // Check if we got invoked too late (e.g. due to a sleep)
+                auto now = std::chrono::system_clock::now();
+                auto elapsed = now - this->lastPing_;
+                if (elapsed < 3 * 5000ms)
+                {
+                    this->heartbeat.invoke();
+                }
+                else
+                {
+                    qCDebug(chatterinoIrc).nospace()
+                        << "Got late ping (skipping heartbeat): "
+                        << std::chrono::duration_cast<
+                               std::chrono::milliseconds>(elapsed)
+                               .count()
+                        << "ms";
+                }
+                this->lastPing_ = now;
+
                 return;
             }
 

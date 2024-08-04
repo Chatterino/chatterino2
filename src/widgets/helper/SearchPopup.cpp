@@ -1,4 +1,4 @@
-#include "SearchPopup.hpp"
+#include "widgets/helper/SearchPopup.hpp"
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
@@ -55,7 +55,7 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
             auto overrideFlags = std::optional<MessageFlags>(message->flags);
             overrideFlags->set(MessageFlag::DoNotLog);
 
-            channel->addMessage(message, overrideFlags);
+            channel->addMessage(message, MessageContext::Repost, overrideFlags);
         }
     }
 
@@ -103,7 +103,7 @@ void SearchPopup::addShortcuts()
         {"scrollPage", nullptr},
     };
 
-    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
+    this->shortcuts_ = getApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 }
 
@@ -138,7 +138,7 @@ void SearchPopup::goToMessage(const MessagePtr &message)
         if (type == Channel::Type::TwitchMentions ||
             type == Channel::Type::TwitchAutomod)
         {
-            getIApp()->getWindows()->scrollToMessage(message);
+            getApp()->getWindows()->scrollToMessage(message);
             return;
         }
 

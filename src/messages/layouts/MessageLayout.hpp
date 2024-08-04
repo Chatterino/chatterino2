@@ -56,8 +56,8 @@ public:
 
     MessageLayoutFlags flags;
 
-    bool layout(int width, float scale_, MessageElementFlags flags,
-                bool shouldInvalidateBuffer);
+    bool layout(int width, float scale_, float imageScale,
+                MessageElementFlags flags, bool shouldInvalidateBuffer);
 
     // Painting
     MessagePaintResult paint(const MessagePaintContext &ctx);
@@ -119,15 +119,16 @@ private:
     QPixmap *ensureBuffer(QPainter &painter, int width);
 
     // variables
-    MessagePtr message_;
+    const MessagePtr message_;
     MessageLayoutContainer container_;
-    std::unique_ptr<QPixmap> buffer_{};
+    std::unique_ptr<QPixmap> buffer_;
     bool bufferValid_ = false;
 
     int height_ = 0;
     int currentLayoutWidth_ = -1;
     int layoutState_ = -1;
     float scale_ = -1;
+    float imageScale_ = -1.F;
     MessageElementFlags currentWordFlags_;
 
 #ifdef FOURTF

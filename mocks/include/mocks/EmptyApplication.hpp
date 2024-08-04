@@ -17,7 +17,22 @@ public:
     {
     }
 
-    virtual ~EmptyApplication() = default;
+    explicit EmptyApplication(const QString &settingsData)
+        : EmptyApplication()
+    {
+        QFile settingsFile(this->settingsDir.filePath("settings.json"));
+        settingsFile.open(QIODevice::WriteOnly | QIODevice::Text);
+        settingsFile.write(settingsData.toUtf8());
+        settingsFile.flush();
+        settingsFile.close();
+    }
+
+    ~EmptyApplication() override = default;
+
+    bool isTest() const override
+    {
+        return true;
+    }
 
     const Paths &getPaths() override
     {
@@ -118,6 +133,13 @@ public:
         return nullptr;
     }
 
+    IAbstractIrcServer *getTwitchAbstract() override
+    {
+        assert(false && "EmptyApplication::getTwitchAbstract was called "
+                        "without being initialized");
+        return nullptr;
+    }
+
     PubSub *getTwitchPubSub() override
     {
         assert(false && "getTwitchPubSub was called without being initialized");
@@ -130,7 +152,7 @@ public:
         return nullptr;
     }
 
-    Logging *getChatLogger() override
+    ILogging *getChatLogger() override
     {
         assert(!"getChatLogger was called without being initialized");
         return nullptr;
@@ -237,7 +259,6 @@ public:
         return nullptr;
     }
 
-protected:
     QTemporaryDir settingsDir;
     Paths paths_;
     Args args_;

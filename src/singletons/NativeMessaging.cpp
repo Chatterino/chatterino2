@@ -236,14 +236,12 @@ void NativeMessagingServer::ReceiverThread::handleSelect(
     }
 
     postToThread([=] {
-        auto *app = getApp();
-
         if (!name.isEmpty())
         {
-            auto channel = app->twitch->getOrAddChannel(name);
-            if (app->twitch->watchingChannel.get() != channel)
+            auto channel = getApp()->getTwitchAbstract()->getOrAddChannel(name);
+            if (getApp()->getTwitch()->getWatchingChannel().get() != channel)
             {
-                app->twitch->watchingChannel.reset(channel);
+                getApp()->getTwitch()->setWatchingChannel(channel);
             }
         }
 
@@ -253,7 +251,8 @@ void NativeMessagingServer::ReceiverThread::handleSelect(
             auto *window = AttachedWindow::getForeground(args);
             if (!name.isEmpty())
             {
-                window->setChannel(app->twitch->getOrAddChannel(name));
+                window->setChannel(
+                    getApp()->getTwitchAbstract()->getOrAddChannel(name));
             }
 #endif
         }
@@ -294,8 +293,6 @@ void NativeMessagingServer::syncChannels(const QJsonArray &twitchChannels)
 {
     assertInGuiThread();
 
-    auto *app = getApp();
-
     std::vector<ChannelPtr> updated;
     updated.reserve(twitchChannels.size());
     for (const auto &value : twitchChannels)
@@ -306,7 +303,8 @@ void NativeMessagingServer::syncChannels(const QJsonArray &twitchChannels)
             continue;
         }
         // the deduping is done on the extension side
-        updated.emplace_back(app->twitch->getOrAddChannel(name));
+        updated.emplace_back(
+            getApp()->getTwitchAbstract()->getOrAddChannel(name));
     }
 
     // This will destroy channels that aren't used anymore.

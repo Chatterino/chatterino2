@@ -77,6 +77,8 @@ SputNikPlop | https://github.com/SputNikPlop |
 fraxx | https://github.com/fraxxio | :/avatars/fraxx.png
 KleberPF | https://github.com/KleberPF |
 nealxm | https://github.com/nealxm | :/avatars/nealxm.png
+Niller2005 | https://github.com/Niller2005 | :/avatars/niller2005.png
+JakeRYW | https://github.com/JakeRYW | :/avatars/jakeryw.png
 
 # If you are a contributor add yourself above this line
 

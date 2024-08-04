@@ -1,4 +1,4 @@
-#include "SelectChannelDialog.hpp"
+#include "widgets/dialogs/SelectChannelDialog.hpp"
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
@@ -25,10 +25,10 @@
 #include <QTableView>
 #include <QVBoxLayout>
 
-#define TAB_TWITCH 0
-#define TAB_IRC 1
-
 namespace chatterino {
+
+constexpr int TAB_TWITCH = 0;
+constexpr int TAB_IRC = 1;
 
 SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     : BaseWindow(
@@ -375,35 +375,33 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
         return this->selectedChannel_;
     }
 
-    auto *app = getApp();
-
     switch (this->ui_.notebook->getSelectedIndex())
     {
         case TAB_TWITCH: {
             if (this->ui_.twitch.channel->isChecked())
             {
-                return app->twitch->getOrAddChannel(
+                return getApp()->getTwitchAbstract()->getOrAddChannel(
                     this->ui_.twitch.channelName->text().trimmed());
             }
             else if (this->ui_.twitch.watching->isChecked())
             {
-                return app->twitch->watchingChannel;
+                return getApp()->getTwitch()->getWatchingChannel();
             }
             else if (this->ui_.twitch.mentions->isChecked())
             {
-                return app->twitch->mentionsChannel;
+                return getApp()->getTwitch()->getMentionsChannel();
             }
             else if (this->ui_.twitch.whispers->isChecked())
             {
-                return app->twitch->whispersChannel;
+                return getApp()->getTwitch()->getWhispersChannel();
             }
             else if (this->ui_.twitch.live->isChecked())
             {
-                return app->twitch->liveChannel;
+                return getApp()->getTwitch()->getLiveChannel();
             }
             else if (this->ui_.twitch.automod->isChecked())
             {
-                return app->twitch->automodChannel;
+                return getApp()->getTwitch()->getAutomodChannel();
             }
         }
         break;
@@ -615,7 +613,7 @@ void SelectChannelDialog::addShortcuts()
         actions.emplace("openTab", nullptr);
     }
 
-    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
+    this->shortcuts_ = getApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 }
 

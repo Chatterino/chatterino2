@@ -37,7 +37,6 @@
 #include "util/Helpers.hpp"
 #include "util/IrcHelpers.hpp"
 #include "util/QStringHash.hpp"
-#include "util/Qt.hpp"
 #include "widgets/Window.hpp"
 
 #include <boost/variant.hpp>
@@ -50,6 +49,8 @@
 using namespace chatterino::literals;
 
 namespace {
+
+const QColor AUTOMOD_USER_COLOR{"blue"};
 
 using namespace std::chrono_literals;
 
@@ -91,7 +92,7 @@ namespace {
                                       const QString &originalMessage,
                                       int messageOffset)
     {
-        auto *app = getIApp();
+        auto *app = getApp();
         if (!emote.contains(':'))
         {
             return;
@@ -166,7 +167,7 @@ namespace {
         }
 
         if (auto globalBadge =
-                getIApp()->getTwitchBadges()->badge(badge.key_, badge.value_))
+                getApp()->getTwitchBadges()->badge(badge.key_, badge.value_))
         {
             return globalBadge;
         }
@@ -380,13 +381,7 @@ namespace {
         dst.reserve(newLength);
         for (const QStringView &chunk : std::as_const(chunks))
         {
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 2)
-            static_assert(sizeof(QChar) == sizeof(decltype(*chunk.utf16())));
-            dst.append(reinterpret_cast<const QChar *>(chunk.utf16()),
-                       chunk.length());
-#else
             dst += chunk;
-#endif
         }
         return dst;
     }
@@ -678,7 +673,7 @@ void TwitchMessageBuilder::addWords(
             // 1. Add text before the emote
             QString preText = word.left(currentTwitchEmote.start - cursor);
             for (auto &variant :
-                 getIApp()->getEmotes()->getEmojis()->parse(preText))
+                 getApp()->getEmotes()->getEmojis()->parse(preText))
             {
                 boost::apply_visitor(
                     [&](auto &&arg) {
@@ -698,7 +693,7 @@ void TwitchMessageBuilder::addWords(
         }
 
         // split words
-        for (auto &variant : getIApp()->getEmotes()->getEmojis()->parse(word))
+        for (auto &variant : getApp()->getEmotes()->getEmojis()->parse(word))
         {
             boost::apply_visitor(
                 [&](auto &&arg) {
@@ -738,12 +733,12 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
     }
 
     // Actually just text
-    LinkParser parsed(string);
+    auto link = linkparser::parse(string);
     auto textColor = this->textColor_;
 
-    if (parsed.result())
+    if (link)
     {
-        this->addLink(*parsed.result());
+        this->addLink(*link, string);
         return;
     }
 
@@ -756,7 +751,7 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
             QString username = match.captured(1);
             auto originalTextColor = textColor;
 
-            if (this->twitchChannel != nullptr && getSettings()->colorUsernames)
+            if (this->twitchChannel != nullptr)
             {
                 if (auto userColor =
                         this->twitchChannel->getUserColor(username);
@@ -767,21 +762,16 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
             }
 
             auto prefixedUsername = '@' + username;
-            this->emplace<TextElement>(prefixedUsername,
-                                       MessageElementFlag::BoldUsername,
-                                       textColor, FontStyle::ChatMediumBold)
-                ->setLink({Link::UserInfo, username})
-                ->setTrailingSpace(false);
+            auto remainder = string.remove(prefixedUsername);
+            this->emplace<MentionElement>(prefixedUsername, username,
+                                          originalTextColor, textColor)
+                ->setTrailingSpace(remainder.isEmpty());
 
-            this->emplace<TextElement>(prefixedUsername,
-                                       MessageElementFlag::NonBoldUsername,
-                                       textColor)
-                ->setLink({Link::UserInfo, username})
-                ->setTrailingSpace(false);
-
-            this->emplace<TextElement>(string.remove(prefixedUsername),
-                                       MessageElementFlag::Text,
-                                       originalTextColor);
+            if (!remainder.isEmpty())
+            {
+                this->emplace<TextElement>(remainder, MessageElementFlag::Text,
+                                           originalTextColor);
+            }
 
             return;
         }
@@ -797,30 +787,22 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
         {
             auto originalTextColor = textColor;
 
-            if (getSettings()->colorUsernames)
+            if (auto userColor = this->twitchChannel->getUserColor(username);
+                userColor.isValid())
             {
-                if (auto userColor =
-                        this->twitchChannel->getUserColor(username);
-                    userColor.isValid())
-                {
-                    textColor = userColor;
-                }
+                textColor = userColor;
             }
 
-            this->emplace<TextElement>(username,
-                                       MessageElementFlag::BoldUsername,
-                                       textColor, FontStyle::ChatMediumBold)
-                ->setLink({Link::UserInfo, username})
-                ->setTrailingSpace(false);
+            auto remainder = string.remove(username);
+            this->emplace<MentionElement>(username, username, originalTextColor,
+                                          textColor)
+                ->setTrailingSpace(remainder.isEmpty());
 
-            this->emplace<TextElement>(
-                    username, MessageElementFlag::NonBoldUsername, textColor)
-                ->setLink({Link::UserInfo, username})
-                ->setTrailingSpace(false);
-
-            this->emplace<TextElement>(string.remove(username),
-                                       MessageElementFlag::Text,
-                                       originalTextColor);
+            if (!remainder.isEmpty())
+            {
+                this->emplace<TextElement>(remainder, MessageElementFlag::Text,
+                                           originalTextColor);
+            }
 
             return;
         }
@@ -955,7 +937,7 @@ void TwitchMessageBuilder::parseThread()
 
 void TwitchMessageBuilder::parseUsernameColor()
 {
-    const auto *userData = getIApp()->getUserData();
+    const auto *userData = getApp()->getUserData();
     assert(userData != nullptr);
 
     if (const auto &user = userData->getUser(this->userId_))
@@ -1009,7 +991,7 @@ void TwitchMessageBuilder::parseUsername()
     }
 
     // Update current user color if this is our message
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (this->ircMessage->nick() == currentUser->getUserName())
     {
         currentUser->setColor(this->usernameColor_);
@@ -1018,7 +1000,7 @@ void TwitchMessageBuilder::parseUsername()
 
 void TwitchMessageBuilder::appendUsername()
 {
-    auto *app = getIApp();
+    auto *app = getApp();
 
     QString username = this->userName;
     this->message().loginName = username;
@@ -1189,13 +1171,8 @@ void TwitchMessageBuilder::processIgnorePhrases(
         shiftIndicesAfter(static_cast<int>(from + length),
                           static_cast<int>(replacement.length() - length));
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
         auto midExtendedRef =
             QStringView{originalMessage}.mid(wordStart, wordEnd - wordStart);
-#else
-        auto midExtendedRef =
-            originalMessage.midRef(wordStart, wordEnd - wordStart);
-#endif
 
         for (auto &emote : removedEmotes)
         {
@@ -1208,7 +1185,11 @@ void TwitchMessageBuilder::processIgnorePhrases(
             QRegularExpression emoteregex(
                 "\\b" + emote.name.string + "\\b",
                 QRegularExpression::UseUnicodePropertiesOption);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+            auto match = emoteregex.matchView(midExtendedRef);
+#else
             auto match = emoteregex.match(midExtendedRef);
+#endif
             if (match.hasMatch())
             {
                 emote.start = static_cast<int>(from + match.capturedStart());
@@ -1279,7 +1260,7 @@ void TwitchMessageBuilder::processIgnorePhrases(
 
 Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 {
-    auto *app = getIApp();
+    auto *app = getApp();
 
     const auto *globalBttvEmotes = app->getBttvEmotes();
     const auto *globalFfzEmotes = app->getFfzEmotes();
@@ -1433,8 +1414,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
 
 void TwitchMessageBuilder::appendChatterinoBadges()
 {
-    if (auto badge =
-            getIApp()->getChatterinoBadges()->getBadge({this->userId_}))
+    if (auto badge = getApp()->getChatterinoBadges()->getBadge({this->userId_}))
     {
         this->emplace<BadgeElement>(*badge,
                                     MessageElementFlag::BadgeChatterino);
@@ -1444,7 +1424,7 @@ void TwitchMessageBuilder::appendChatterinoBadges()
 void TwitchMessageBuilder::appendFfzBadges()
 {
     for (const auto &badge :
-         getIApp()->getFfzBadges()->getUserBadges({this->userId_}))
+         getApp()->getFfzBadges()->getUserBadges({this->userId_}))
     {
         this->emplace<FfzBadgeElement>(
             badge.emote, MessageElementFlag::BadgeFfz, badge.color);
@@ -1465,7 +1445,7 @@ void TwitchMessageBuilder::appendFfzBadges()
 
 void TwitchMessageBuilder::appendSeventvBadges()
 {
-    if (auto badge = getIApp()->getSeventvBadges()->getBadge({this->userId_}))
+    if (auto badge = getApp()->getSeventvBadges()->getBadge({this->userId_}))
     {
         this->emplace<BadgeElement>(*badge, MessageElementFlag::BadgeSevenTV);
     }
@@ -1605,6 +1585,15 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
     }
     builder->emplace<TextElement>(redeemed,
                                   MessageElementFlag::ChannelPointReward);
+    if (reward.id == "CELEBRATION")
+    {
+        const auto emotePtr =
+            getApp()->getEmotes()->getTwitchEmotes()->getOrCreateEmote(
+                EmoteId{reward.emoteId}, EmoteName{reward.emoteName});
+        builder->emplace<EmoteElement>(emotePtr,
+                                       MessageElementFlag::ChannelPointReward,
+                                       MessageColor::Text);
+    }
     builder->emplace<TextElement>(
         reward.title, MessageElementFlag::ChannelPointReward,
         MessageColor::Text, FontStyle::ChatMediumBold);
@@ -1613,6 +1602,12 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
     builder->emplace<TextElement>(
         QString::number(reward.cost), MessageElementFlag::ChannelPointReward,
         MessageColor::Text, FontStyle::ChatMediumBold);
+    if (reward.isBits)
+    {
+        builder->emplace<TextElement>(
+            "bits", MessageElementFlag::ChannelPointReward, MessageColor::Text,
+            FontStyle::ChatMediumBold);
+    }
     if (reward.isUserInputRequired)
     {
         builder->emplace<LinebreakElement>(
@@ -1821,7 +1816,7 @@ void TwitchMessageBuilder::listOfUsersSystemMessage(QString prefix,
 
         MessageColor color = MessageColor::System;
 
-        if (tc && getSettings()->colorUsernames)
+        if (tc)
         {
             if (auto userColor = tc->getUserColor(username);
                 userColor.isValid())
@@ -1830,15 +1825,10 @@ void TwitchMessageBuilder::listOfUsersSystemMessage(QString prefix,
             }
         }
 
+        // TODO: Ensure we make use of display name / username(login name) correctly here
         builder
-            ->emplace<TextElement>(username, MessageElementFlag::BoldUsername,
-                                   color, FontStyle::ChatMediumBold)
-            ->setLink({Link::UserInfo, username})
-            ->setTrailingSpace(false);
-        builder
-            ->emplace<TextElement>(username,
-                                   MessageElementFlag::NonBoldUsername, color)
-            ->setLink({Link::UserInfo, username})
+            ->emplace<MentionElement>(username, username, MessageColor::System,
+                                      color)
             ->setTrailingSpace(false);
     }
 }
@@ -1873,7 +1863,7 @@ void TwitchMessageBuilder::listOfUsersSystemMessage(
 
         MessageColor color = MessageColor::System;
 
-        if (tc && getSettings()->colorUsernames)
+        if (tc)
         {
             if (auto userColor = tc->getUserColor(user.userLogin);
                 userColor.isValid())
@@ -1883,15 +1873,8 @@ void TwitchMessageBuilder::listOfUsersSystemMessage(
         }
 
         builder
-            ->emplace<TextElement>(user.userName,
-                                   MessageElementFlag::BoldUsername, color,
-                                   FontStyle::ChatMediumBold)
-            ->setLink({Link::UserInfo, user.userLogin})
-            ->setTrailingSpace(false);
-        builder
-            ->emplace<TextElement>(user.userName,
-                                   MessageElementFlag::NonBoldUsername, color)
-            ->setLink({Link::UserInfo, user.userLogin})
+            ->emplace<MentionElement>(user.userName, user.userLogin,
+                                      MessageColor::System, color)
             ->setTrailingSpace(false);
     }
 
@@ -1960,12 +1943,8 @@ MessagePtr TwitchMessageBuilder::makeAutomodInfoMessage(
     builder.emplace<BadgeElement>(makeAutoModBadge(),
                                   MessageElementFlag::BadgeChannelAuthority);
     // AutoMod "username"
-    builder.emplace<TextElement>("AutoMod:", MessageElementFlag::BoldUsername,
-                                 MessageColor(QColor("blue")),
-                                 FontStyle::ChatMediumBold);
-    builder.emplace<TextElement>(
-        "AutoMod:", MessageElementFlag::NonBoldUsername,
-        MessageColor(QColor("blue")));
+    builder.emplace<TextElement>("AutoMod:", MessageElementFlag::Text,
+                                 AUTOMOD_USER_COLOR, FontStyle::ChatMediumBold);
     switch (action.type)
     {
         case AutomodInfoAction::OnHold: {
@@ -2019,12 +1998,9 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeAutomodMessage(
     builder.emplace<BadgeElement>(makeAutoModBadge(),
                                   MessageElementFlag::BadgeChannelAuthority);
     // AutoMod "username"
-    builder.emplace<TextElement>("AutoMod:", MessageElementFlag::BoldUsername,
-                                 MessageColor(QColor("blue")),
-                                 FontStyle::ChatMediumBold);
-    builder.emplace<TextElement>(
-        "AutoMod:", MessageElementFlag::NonBoldUsername,
-        MessageColor(QColor("blue")));
+    builder2.emplace<TextElement>("AutoMod:", MessageElementFlag::Text,
+                                  AUTOMOD_USER_COLOR,
+                                  FontStyle::ChatMediumBold);
     // AutoMod header message
     builder.emplace<TextElement>(
         ("Held a message for reason: " + action.reason +
@@ -2071,16 +2047,9 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeAutomodMessage(
     builder2.message().flags.set(MessageFlag::AutoModOffendingMessage);
 
     // sender username
-    builder2
-        .emplace<TextElement>(
-            action.target.displayName + ":", MessageElementFlag::BoldUsername,
-            MessageColor(action.target.color), FontStyle::ChatMediumBold)
-        ->setLink({Link::UserInfo, action.target.login});
-    builder2
-        .emplace<TextElement>(action.target.displayName + ":",
-                              MessageElementFlag::NonBoldUsername,
-                              MessageColor(action.target.color))
-        ->setLink({Link::UserInfo, action.target.login});
+    builder2.emplace<MentionElement>(action.target.displayName + ":",
+                                     action.target.login, MessageColor::Text,
+                                     action.target.color);
     // sender's message caught by AutoMod
     builder2.emplace<TextElement>(action.message, MessageElementFlag::Text,
                                   MessageColor::Text);
@@ -2094,7 +2063,7 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeAutomodMessage(
     // Normally highlights would be checked & triggered during the builder parse steps
     // and when the message is added to the channel
     // We do this a bit weird since the message comes in from PubSub and not the normal message route
-    auto [highlighted, highlightResult] = getIApp()->getHighlights()->check(
+    auto [highlighted, highlightResult] = getApp()->getHighlights()->check(
         {}, {}, action.target.login, action.message, message2->flags);
     if (highlighted)
     {
@@ -2275,17 +2244,9 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeLowTrustUserMessage(
     appendBadges(&builder2, action.senderBadges, {}, twitchChannel);
 
     // sender username
-    builder2
-        .emplace<TextElement>(action.suspiciousUserDisplayName + ":",
-                              MessageElementFlag::BoldUsername,
-                              MessageColor(action.suspiciousUserColor),
-                              FontStyle::ChatMediumBold)
-        ->setLink({Link::UserInfo, action.suspiciousUserLogin});
-    builder2
-        .emplace<TextElement>(action.suspiciousUserDisplayName + ":",
-                              MessageElementFlag::NonBoldUsername,
-                              MessageColor(action.suspiciousUserColor))
-        ->setLink({Link::UserInfo, action.suspiciousUserLogin});
+    builder2.emplace<MentionElement>(
+        action.suspiciousUserDisplayName + ":", action.suspiciousUserLogin,
+        MessageColor::Text, action.suspiciousUserColor);
 
     // sender's message caught by AutoMod
     for (const auto &fragment : action.fragments)
@@ -2298,7 +2259,7 @@ std::pair<MessagePtr, MessagePtr> TwitchMessageBuilder::makeLowTrustUserMessage(
         else
         {
             const auto emotePtr =
-                getIApp()->getEmotes()->getTwitchEmotes()->getOrCreateEmote(
+                getApp()->getEmotes()->getTwitchEmotes()->getOrCreateEmote(
                     EmoteId{fragment.emoteID}, EmoteName{fragment.text});
             builder2.emplace<EmoteElement>(
                 emotePtr, MessageElementFlag::TwitchEmote, MessageColor::Text);

@@ -1,11 +1,11 @@
 * {
-    font-size: <font-size>px;
+    font-size: 14px;
     font-family: "Segoe UI";
 }
 
 QCheckBox::indicator {
-    width: <checkbox-size>px;
-    height: <checkbox-size>px;
+    width: 14px;
+    height: 14px;
 }
 
 chatterino--ComboBox {

@@ -109,7 +109,7 @@ void TwitchAccount::loadBlocks()
     this->ignoresUserIds_.clear();
 
     getHelix()->loadBlocks(
-        getIApp()->getAccounts()->twitch.getCurrent()->userId_,
+        getApp()->getAccounts()->twitch.getCurrent()->userId_,
         [this](const std::vector<HelixBlock> &blocks) {
             assertInGuiThread();
 
@@ -232,7 +232,7 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
     }
 
     // filter out emote sets from userstate message, which are not in fetched emote set list
-    for (const auto &emoteSetKey : qAsConst(this->userstateEmoteSets_))
+    for (const auto &emoteSetKey : this->userstateEmoteSets_)
     {
         if (!existingEmoteSetKeys.contains(emoteSetKey))
         {
@@ -325,7 +325,7 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
 
                         emoteSet->emotes.push_back(TwitchEmote{id, code});
 
-                        auto emote = getIApp()
+                        auto emote = getApp()
                                          ->getEmotes()
                                          ->getTwitchEmotes()
                                          ->getOrCreateEmote(id, code);
@@ -362,8 +362,8 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
 
                 if (auto channel = weakChannel.lock(); channel != nullptr)
                 {
-                    channel->addMessage(makeSystemMessage(
-                        "Twitch subscriber emotes reloaded."));
+                    channel->addSystemMessage(
+                        "Twitch subscriber emotes reloaded.");
                 }
             },
             [] {
@@ -427,7 +427,7 @@ void TwitchAccount::autoModAllow(const QString msgID, ChannelPtr channel)
                 break;
             }
 
-            channel->addMessage(makeSystemMessage(errorMessage));
+            channel->addSystemMessage(errorMessage);
         });
 }
 
@@ -473,7 +473,7 @@ void TwitchAccount::autoModDeny(const QString msgID, ChannelPtr channel)
                 break;
             }
 
-            channel->addMessage(makeSystemMessage(errorMessage));
+            channel->addSystemMessage(errorMessage);
         });
 }
 
@@ -493,7 +493,7 @@ void TwitchAccount::loadSeventvUserID()
         return;
     }
 
-    auto *seventv = getIApp()->getSeventvAPI();
+    auto *seventv = getApp()->getSeventvAPI();
     if (!seventv)
     {
         qCWarning(chatterinoSeventv)

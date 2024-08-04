@@ -1,4 +1,4 @@
-#include "Irc2.hpp"
+#include "providers/irc/Irc2.hpp"
 
 #include "Application.hpp"
 #include "common/Credentials.hpp"
@@ -22,7 +22,7 @@ namespace {
 
     QString configPath()
     {
-        return combinePath(getIApp()->getPaths().settingsDirectory, "irc.json");
+        return combinePath(getApp()->getPaths().settingsDirectory, "irc.json");
     }
 
     class Model : public SignalVectorModel<IrcServerData>

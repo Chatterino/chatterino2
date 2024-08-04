@@ -12,7 +12,6 @@
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
-#include "util/Clamp.hpp"
 #include "util/CombinePath.hpp"
 #include "widgets/AccountSwitchPopup.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
@@ -108,7 +107,6 @@ WindowManager::WindowManager(const Paths &paths)
     this->wordFlagsListener_.addSetting(settings->showBadgesFfz);
     this->wordFlagsListener_.addSetting(settings->showBadgesSevenTV);
     this->wordFlagsListener_.addSetting(settings->enableEmoteImages);
-    this->wordFlagsListener_.addSetting(settings->boldUsernames);
     this->wordFlagsListener_.addSetting(settings->lowercaseDomains);
     this->wordFlagsListener_.addSetting(settings->showReplyButton);
     this->wordFlagsListener_.setCB([this] {
@@ -120,7 +118,7 @@ WindowManager::WindowManager(const Paths &paths)
     this->saveTimer->setSingleShot(true);
 
     QObject::connect(this->saveTimer, &QTimer::timeout, [] {
-        getIApp()->getWindows()->save();
+        getApp()->getWindows()->save();
     });
 }
 
@@ -182,8 +180,6 @@ void WindowManager::updateWordTypeMask()
     // misc
     flags.set(MEF::AlwaysShow);
     flags.set(MEF::Collapsed);
-    flags.set(settings->boldUsernames ? MEF::BoldUsername
-                                      : MEF::NonBoldUsername);
     flags.set(MEF::LowercaseLinks, settings->lowercaseDomains);
     flags.set(MEF::ChannelPointReward);
 
@@ -331,30 +327,31 @@ void WindowManager::scrollToMessage(const MessagePtr &message)
     this->scrollToMessageSignal.invoke(message);
 }
 
-QPoint WindowManager::emotePopupPos()
+QRect WindowManager::emotePopupBounds() const
 {
-    return this->emotePopupPos_;
+    return this->emotePopupBounds_;
 }
 
-void WindowManager::setEmotePopupPos(QPoint pos)
+void WindowManager::setEmotePopupBounds(QRect bounds)
 {
-    this->emotePopupPos_ = pos;
+    if (this->emotePopupBounds_ != bounds)
+    {
+        this->emotePopupBounds_ = bounds;
+        this->queueSave();
+    }
 }
 
-void WindowManager::initialize(Settings &settings, const Paths &paths)
+void WindowManager::initialize(Settings &settings)
 {
-    (void)paths;
     assertInGuiThread();
 
     // We can safely ignore this signal connection since both Themes and WindowManager
     // share the Application state lifetime
     // NOTE: APPLICATION_LIFETIME
     std::ignore =
-        getIApp()->getThemes()->repaintVisibleChatWidgets_.connect([this] {
+        getApp()->getThemes()->repaintVisibleChatWidgets_.connect([this] {
             this->repaintVisibleChatWidgets();
         });
-
-    assert(!this->initialized_);
 
     {
         WindowLayout windowLayout;
@@ -368,13 +365,13 @@ void WindowManager::initialize(Settings &settings, const Paths &paths)
             windowLayout = this->loadWindowLayoutFromFile();
         }
 
-        auto desired = getIApp()->getArgs().activateChannel;
+        auto desired = getApp()->getArgs().activateChannel;
         if (desired)
         {
             windowLayout.activateOrAddChannel(desired->provider, desired->name);
         }
 
-        this->emotePopupPos_ = windowLayout.emotePopupPos_;
+        this->emotePopupBounds_ = windowLayout.emotePopupBounds_;
 
         this->applyWindowLayout(windowLayout);
     }
@@ -422,7 +419,12 @@ void WindowManager::initialize(Settings &settings, const Paths &paths)
         this->forceLayoutChannelViews();
     });
 
-    this->initialized_ = true;
+    settings.colorUsernames.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.boldUsernames.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
 }
 
 void WindowManager::save()
@@ -479,10 +481,12 @@ void WindowManager::save()
         windowObj.insert("width", rect.width());
         windowObj.insert("height", rect.height());
 
-        QJsonObject emotePopupObj;
-        emotePopupObj.insert("x", this->emotePopupPos_.x());
-        emotePopupObj.insert("y", this->emotePopupPos_.y());
-        windowObj.insert("emotePopup", emotePopupObj);
+        windowObj["emotePopup"] = QJsonObject{
+            {"x", this->emotePopupBounds_.x()},
+            {"y", this->emotePopupBounds_.y()},
+            {"width", this->emotePopupBounds_.width()},
+            {"height", this->emotePopupBounds_.height()},
+        };
 
         // window tabs
         QJsonArray tabsArr;
@@ -678,27 +682,28 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
 
     if (descriptor.type_ == "twitch")
     {
-        return app->twitch->getOrAddChannel(descriptor.channelName_);
+        return getApp()->getTwitchAbstract()->getOrAddChannel(
+            descriptor.channelName_);
     }
     else if (descriptor.type_ == "mentions")
     {
-        return app->twitch->mentionsChannel;
+        return getApp()->getTwitch()->getMentionsChannel();
     }
     else if (descriptor.type_ == "watching")
     {
-        return app->twitch->watchingChannel;
+        return getApp()->getTwitch()->getWatchingChannel();
     }
     else if (descriptor.type_ == "whispers")
     {
-        return app->twitch->whispersChannel;
+        return getApp()->getTwitch()->getWhispersChannel();
     }
     else if (descriptor.type_ == "live")
     {
-        return app->twitch->liveChannel;
+        return getApp()->getTwitch()->getLiveChannel();
     }
     else if (descriptor.type_ == "automod")
     {
-        return app->twitch->automodChannel;
+        return getApp()->getTwitch()->getAutomodChannel();
     }
     else if (descriptor.type_ == "irc")
     {
@@ -707,7 +712,8 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
     }
     else if (descriptor.type_ == "misc")
     {
-        return app->twitch->getChannelOrEmpty(descriptor.channelName_);
+        return getApp()->getTwitchAbstract()->getChannelOrEmpty(
+            descriptor.channelName_);
     }
 
     return Channel::getEmpty();
@@ -749,7 +755,7 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
     }
 
     // Set emote popup position
-    this->emotePopupPos_ = layout.emotePopupPos_;
+    this->emotePopupBounds_ = layout.emotePopupBounds_;
 
     for (const auto &windowData : layout.windows_)
     {
@@ -798,10 +804,14 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
                 // Have to offset x by one because qt moves the window 1px too
                 // far to the left:w
 
-                window.setInitialBounds({windowData.geometry_.x(),
-                                         windowData.geometry_.y(),
-                                         windowData.geometry_.width(),
-                                         windowData.geometry_.height()});
+                window.setInitialBounds(
+                    {
+                        windowData.geometry_.x(),
+                        windowData.geometry_.y(),
+                        windowData.geometry_.width(),
+                        windowData.geometry_.height(),
+                    },
+                    widgets::BoundsChecking::Off);
             }
         }
 

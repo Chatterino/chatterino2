@@ -248,13 +248,12 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
             {
                 if (hasEmotes)
                 {
-                    shared->addMessage(makeSystemMessage(
-                        "BetterTTV channel emotes reloaded."));
+                    shared->addSystemMessage(
+                        "BetterTTV channel emotes reloaded.");
                 }
                 else
                 {
-                    shared->addMessage(
-                        makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
+                    shared->addSystemMessage(CHANNEL_HAS_NO_EMOTES);
                 }
             }
         })
@@ -270,8 +269,7 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                 // User does not have any BTTV emotes
                 if (manualRefresh)
                 {
-                    shared->addMessage(
-                        makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
+                    shared->addSystemMessage(CHANNEL_HAS_NO_EMOTES);
                 }
             }
             else
@@ -281,10 +279,10 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                 qCWarning(chatterinoBttv)
                     << "Error fetching BTTV emotes for channel" << channelId
                     << ", error" << errorString;
-                shared->addMessage(makeSystemMessage(
+                shared->addSystemMessage(
                     QStringLiteral("Failed to fetch BetterTTV channel "
                                    "emotes. (Error: %1)")
-                        .arg(errorString)));
+                        .arg(errorString));
             }
         })
         .execute();

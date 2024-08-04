@@ -1,15 +1,14 @@
 #pragma once
 
 #include "common/Aliases.hpp"
-#include "common/Common.hpp"
 
 #include <boost/variant.hpp>
 #include <pajlada/signals/signal.hpp>
+#include <QList>
 #include <QPixmap>
 #include <QString>
 #include <QThread>
 #include <QTimer>
-#include <QVector>
 
 #include <atomic>
 #include <chrono>
@@ -19,41 +18,53 @@
 #include <optional>
 
 namespace chatterino {
-namespace detail {
-    template <typename Image>
-    struct Frame {
-        Image image;
-        int duration;
-    };
-    class Frames
-    {
-    public:
-        Frames();
-        Frames(QVector<Frame<QPixmap>> &&frames);
-        ~Frames();
 
-        Frames(const Frames &) = delete;
-        Frames &operator=(const Frames &) = delete;
+class Image;
 
-        Frames(Frames &&) = delete;
-        Frames &operator=(Frames &&) = delete;
+}  // namespace chatterino
 
-        void clear();
-        bool empty() const;
-        bool animated() const;
-        void advance();
-        std::optional<QPixmap> current() const;
-        std::optional<QPixmap> first() const;
+namespace chatterino::detail {
 
-    private:
-        int64_t memoryUsage() const;
-        void processOffset();
-        QVector<Frame<QPixmap>> items_;
-        int index_{0};
-        int durationOffset_{0};
-        pajlada::Signals::Connection gifTimerConnection_;
-    };
-}  // namespace detail
+struct Frame {
+    QPixmap image;
+    int duration;
+};
+
+class Frames
+{
+public:
+    Frames();
+    Frames(QList<Frame> &&frames);
+    ~Frames();
+
+    Frames(const Frames &) = delete;
+    Frames &operator=(const Frames &) = delete;
+
+    Frames(Frames &&) = delete;
+    Frames &operator=(Frames &&) = delete;
+
+    void clear();
+    bool empty() const;
+    bool animated() const;
+    void advance();
+    std::optional<QPixmap> current() const;
+    std::optional<QPixmap> first() const;
+
+private:
+    int64_t memoryUsage() const;
+    void processOffset();
+    QList<Frame> items_;
+    QList<Frame>::size_type index_{0};
+    int durationOffset_{0};
+    pajlada::Signals::Connection gifTimerConnection_;
+};
+
+QList<Frame> readFrames(QImageReader &reader, const Url &url);
+void assignFrames(std::weak_ptr<Image> weak, QList<Frame> parsed);
+
+}  // namespace chatterino::detail
+
+namespace chatterino {
 
 class Image;
 using ImagePtr = std::shared_ptr<Image>;
@@ -116,9 +127,11 @@ private:
     mutable std::chrono::time_point<std::chrono::steady_clock> lastUsed_;
 
     // gui thread only
-    std::unique_ptr<detail::Frames> frames_{};
+    std::unique_ptr<detail::Frames> frames_;
 
     friend class ImageExpirationPool;
+    friend void detail::assignFrames(std::weak_ptr<Image>,
+                                     QList<detail::Frame>);
 };
 
 // forward-declarable function that calls Image::getEmpty() under the hood.

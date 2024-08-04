@@ -1,7 +1,5 @@
 #pragma once
 
-#include "common/Singleton.hpp"
-
 #include <pajlada/settings/setting.hpp>
 #include <QString>
 
@@ -16,7 +14,7 @@ enum class ToastReaction {
     DontOpen = 3
 };
 
-class Toasts final : public Singleton
+class Toasts final
 {
 public:
     void sendChannelNotification(const QString &channelName,

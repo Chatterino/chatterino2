@@ -24,10 +24,10 @@
 
 #include <utility>
 
-#define UPLOAD_DELAY 2000
-// Delay between uploads in milliseconds
-
 namespace {
+
+// Delay between uploads in milliseconds
+constexpr int UPLOAD_DELAY = 2000;
 
 std::optional<QByteArray> convertToPng(const QImage &image)
 {
@@ -54,7 +54,7 @@ void ImageUploader::logToFile(const QString &originalFilePath,
 {
     const QString logFileName =
         combinePath((getSettings()->logPath.getValue().isEmpty()
-                         ? getIApp()->getPaths().messageLogDirectory
+                         ? getApp()->getPaths().messageLogDirectory
                          : getSettings()->logPath),
                     "ImageUploader.json");
 
@@ -64,8 +64,8 @@ void ImageUploader::logToFile(const QString &originalFilePath,
         logReadFile.open(QIODevice::ReadWrite | QIODevice::Text);
     if (!isLogFileOkay)
     {
-        channel->addMessage(makeSystemMessage(
-            QString("Failed to open log file with links at ") + logFileName));
+        channel->addSystemMessage(
+            QString("Failed to open log file with links at ") + logFileName);
         return;
     }
     auto logs = logReadFile.readAll();
@@ -121,10 +121,6 @@ QString getLinkFromResponse(NetworkResult response, QString pattern)
         match = regExp.match(pattern);
     }
     return pattern;
-}
-
-void ImageUploader::save()
-{
 }
 
 void ImageUploader::sendImageUploadRequest(RawImageData imageData,
@@ -197,7 +193,7 @@ void ImageUploader::handleFailedUpload(const NetworkResult &result,
         }
     }
 
-    channel->addMessage(makeSystemMessage(errorMessage));
+    channel->addSystemMessage(errorMessage);
     // NOTE: We abort any future uploads on failure. Should this be handled differently?
     while (!this->uploadQueue_.empty())
     {
@@ -239,7 +235,7 @@ void ImageUploader::handleSuccessfulUpload(const NetworkResult &result,
     auto timeToUpload = this->uploadQueue_.size() * (UPLOAD_DELAY / 1000 + 1);
     MessageBuilder builder(imageUploaderResultMessage, link, deletionLink,
                            this->uploadQueue_.size(), timeToUpload);
-    channel->addMessage(builder.release());
+    channel->addMessage(builder.release(), MessageContext::Original);
     if (this->uploadQueue_.empty())
     {
         this->uploadMutex_.unlock();
@@ -376,8 +372,7 @@ void ImageUploader::upload(std::queue<RawImageData> images, ChannelPtr channel,
     BenchmarkGuard benchmarkGuard("upload");
     if (!this->uploadMutex_.tryLock())
     {
-        channel->addMessage(makeSystemMessage(
-            QString("Please wait until the upload finishes.")));
+        channel->addSystemMessage("Please wait until the upload finishes.");
         return;
     }
 
@@ -386,7 +381,7 @@ void ImageUploader::upload(std::queue<RawImageData> images, ChannelPtr channel,
 
     std::swap(this->uploadQueue_, images);
 
-    channel->addMessage(makeSystemMessage("Started upload..."));
+    channel->addSystemMessage("Started upload...");
 
     this->sendImageUploadRequest(this->uploadQueue_.front(), std::move(channel),
                                  std::move(outputTextEdit));

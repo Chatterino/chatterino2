@@ -102,7 +102,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
         MessageElementFlag::Text, MessageColor::Text,
         FontStyle::ChatMediumBold);
     b.emplace<TextElement>("->", MessageElementFlag::Text,
-                           getIApp()->getThemes()->messages.textColors.system);
+                           getApp()->getThemes()->messages.textColors.system);
     b.emplace<TextElement>(words[1] + ":", MessageElementFlag::Text,
                            MessageColor::Text, FontStyle::ChatMediumBold);
 
@@ -152,10 +152,10 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                     void operator()(const QString &string,
                                     MessageBuilder &b) const
                     {
-                        LinkParser parser(string);
-                        if (parser.result())
+                        auto link = linkparser::parse(string);
+                        if (link)
                         {
-                            b.addLink(*parser.result());
+                            b.addLink(*link, string);
                         }
                         else
                         {
@@ -177,18 +177,16 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     b->flags.set(MessageFlag::Whisper);
     auto messagexD = b.release();
 
-    app->twitch->whispersChannel->addMessage(messagexD);
-
-    auto overrideFlags = std::optional<MessageFlags>(messagexD->flags);
-    overrideFlags->set(MessageFlag::DoNotLog);
+    getApp()->getTwitch()->getWhispersChannel()->addMessage(
+        messagexD, MessageContext::Original);
 
     if (getSettings()->inlineWhispers &&
         !(getSettings()->streamerModeSuppressInlineWhispers &&
-          getIApp()->getStreamerMode()->isEnabled()))
+          getApp()->getStreamerMode()->isEnabled()))
     {
-        app->twitch->forEachChannel(
-            [&messagexD, overrideFlags](ChannelPtr _channel) {
-                _channel->addMessage(messagexD, overrideFlags);
+        app->getTwitchAbstract()->forEachChannel(
+            [&messagexD](ChannelPtr _channel) {
+                _channel->addMessage(messagexD, MessageContext::Repost);
             });
     }
 
@@ -208,16 +206,15 @@ QString sendWhisper(const CommandContext &ctx)
 
     if (ctx.words.size() < 3)
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("Usage: /w <username> <message>"));
+        ctx.channel->addSystemMessage("Usage: /w <username> <message>");
         return "";
     }
 
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("You must be logged in to send a whisper!"));
+        ctx.channel->addSystemMessage(
+            "You must be logged in to send a whisper!");
         return "";
     }
     auto target = ctx.words.at(1);
@@ -236,12 +233,11 @@ QString sendWhisper(const CommandContext &ctx)
                     },
                     [channel, target, targetUser](auto error, auto message) {
                         auto errorMessage = formatWhisperError(error, message);
-                        channel->addMessage(makeSystemMessage(errorMessage));
+                        channel->addSystemMessage(errorMessage);
                     });
             },
             [channel{ctx.channel}] {
-                channel->addMessage(
-                    makeSystemMessage("No user matching that username."));
+                channel->addSystemMessage("No user matching that username.");
             });
         return "";
     }

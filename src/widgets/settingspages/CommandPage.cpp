@@ -1,13 +1,13 @@
-#include "CommandPage.hpp"
+#include "widgets/settingspages/CommandPage.hpp"
 
 #include "Application.hpp"
+#include "common/Literals.hpp"
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/commands/CommandModel.hpp"
 #include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
 #include "util/LayoutCreator.hpp"
-#include "util/Qt.hpp"
 #include "util/StandardItemHelper.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
@@ -19,13 +19,14 @@
 #include <QTableView>
 #include <QTextEdit>
 
-// clang-format off
-#define TEXT "{1} => first word &nbsp;&nbsp;&nbsp; {1+} => first word and after &nbsp;&nbsp;&nbsp; {{ => { &nbsp;&nbsp;&nbsp; <a href='https://chatterino.com/help/commands'>more info</a>"
-// clang-format on
-
 namespace {
 
 using namespace chatterino;
+using namespace literals;
+
+// clang-format off
+inline const QString HELP_TEXT = u"{1} => first word &nbsp;&nbsp;&nbsp; {1+} => first word and after &nbsp;&nbsp;&nbsp; {{ => { &nbsp;&nbsp;&nbsp; <a href='https://chatterino.com/help/commands'>more info</a>"_s;
+// clang-format on
 
 QString c1settingsPath()
 {
@@ -88,7 +89,7 @@ CommandPage::CommandPage()
 
     auto *view = layout
                      .emplace<EditableModelView>(
-                         getIApp()->getCommands()->createModel(nullptr))
+                         getApp()->getCommands()->createModel(nullptr))
                      .getElement();
 
     view->setTitles({"Trigger", "Command", "Show In\nMessage Menu"});
@@ -96,7 +97,7 @@ CommandPage::CommandPage()
         1, QHeaderView::Stretch);
     // We can safely ignore this signal connection since we own the view
     std::ignore = view->addButtonPressed.connect([] {
-        getIApp()->getCommands()->items.append(
+        getApp()->getCommands()->items.append(
             Command{"/command", "I made a new command HeyGuys"});
     });
 
@@ -107,7 +108,7 @@ CommandPage::CommandPage()
         view->addCustomButton(button);
 
         QObject::connect(button, &QPushButton::clicked, this, [] {
-            QFile c1settings = c1settingsPath();
+            QFile c1settings(c1settingsPath());
             c1settings.open(QIODevice::ReadOnly);
             for (auto line :
                  QString(c1settings.readAll())
@@ -115,7 +116,7 @@ CommandPage::CommandPage()
             {
                 if (int index = line.indexOf(' '); index != -1)
                 {
-                    getIApp()->getCommands()->items.insert(
+                    getApp()->getCommands()->items.insert(
                         Command(line.mid(0, index), line.mid(index + 1)));
                 }
             }
@@ -126,7 +127,7 @@ CommandPage::CommandPage()
         this->createCheckBox("Also match the trigger at the end of the message",
                              getSettings()->allowCommandsAtEnd));
 
-    QLabel *text = layout.emplace<QLabel>(TEXT).getElement();
+    QLabel *text = layout.emplace<QLabel>(HELP_TEXT).getElement();
     text->setWordWrap(true);
     text->setStyleSheet("color: #bbb");
     text->setOpenExternalLinks(true);
