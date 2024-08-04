@@ -332,9 +332,9 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               .maxCountArguments = 1,
               .possibleArguments{
                   {"Toggle", {}},
-                  {"Set to on", {"on"}},
-                  {"Set to off", {"off"}},
-                  {"Live only on", {"liveOnly"}},
+                  {"Show all tabs", {"on"}},
+                  {"Hide all tabs", {"off"}},
+                  {"Only show live tabs", {"liveOnly"}},
               },
               .argumentsPrompt = "New value:",
               .argumentsPromptHover = "Should the tabs be enabled, disabled, "
