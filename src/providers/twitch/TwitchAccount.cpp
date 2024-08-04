@@ -232,7 +232,7 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
     }
 
     // filter out emote sets from userstate message, which are not in fetched emote set list
-    for (const auto &emoteSetKey : qAsConst(this->userstateEmoteSets_))
+    for (const auto &emoteSetKey : this->userstateEmoteSets_)
     {
         if (!existingEmoteSetKeys.contains(emoteSetKey))
         {

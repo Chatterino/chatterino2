@@ -59,6 +59,7 @@
 - Dev: `FlagsEnum` is now `constexpr`. (#5510)
 - Dev: Documented and added tests to RTL handling. (#5473)
 - Dev: Refactored a few `#define`s into `const(expr)` and cleaned includes. (#5527)
+- Dev: Prepared for Qt 6.8 by addressing some deprecations. (#5529)
 
 ## 2.5.1
 

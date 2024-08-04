@@ -1185,7 +1185,11 @@ void TwitchMessageBuilder::processIgnorePhrases(
             QRegularExpression emoteregex(
                 "\\b" + emote.name.string + "\\b",
                 QRegularExpression::UseUnicodePropertiesOption);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+            auto match = emoteregex.matchView(midExtendedRef);
+#else
             auto match = emoteregex.match(midExtendedRef);
+#endif
             if (match.hasMatch())
             {
                 emote.start = static_cast<int>(from + match.capturedStart());
