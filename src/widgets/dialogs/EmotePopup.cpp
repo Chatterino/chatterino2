@@ -127,22 +127,22 @@ void addTwitchEmoteSets(const std::shared_ptr<const TwitchEmoteSetMap> &sets,
     // Put current channel emotes at the top
     for (const auto &[_id, set] : *sets)
     {
-        if (set.owner->id == currentChannelID)
+        if (set->owner->id == currentChannelID)
         {
-            addEmotes(subChannel, set.emotes, set.title(),
+            addEmotes(subChannel, set->emotes, set->title(),
                       MessageElementFlag::TwitchEmote);
         }
     }
 
     for (const auto &[id, set] : *sets)
     {
-        if (set.owner->id == currentChannelID)
+        if (set->owner->id == currentChannelID)
         {
             continue;
         }
 
-        addEmotes(set.isSubLike ? subChannel : globalChannel, set.emotes,
-                  set.title(), MessageElementFlag::TwitchEmote);
+        addEmotes(set->isSubLike ? subChannel : globalChannel, set->emotes,
+                  set->title(), MessageElementFlag::TwitchEmote);
     }
 }
 
@@ -473,8 +473,8 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
     {
         for (const auto &[_id, set] : *this->twitchChannel_->twitchEmoteSets())
         {
-            addEmotes(*searchChannel, filterEmoteVec(searchText, set.emotes),
-                      set.title(), MessageElementFlag::TwitchEmote);
+            addEmotes(*searchChannel, filterEmoteVec(searchText, set->emotes),
+                      set->title(), MessageElementFlag::TwitchEmote);
         }
     }
 

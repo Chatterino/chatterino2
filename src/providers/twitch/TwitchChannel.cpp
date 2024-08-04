@@ -244,14 +244,15 @@ void TwitchChannel::refreshTwitchChannelEmotes(bool manualRefresh)
         auto set = sets->find(EmoteSetId{actualSetID});
         if (set == sets->end())
         {
-            set =
-                sets->emplace(EmoteSetId{actualSetID}, TwitchEmoteSet{}).first;
-            set->second.owner = twitchUsers->resolveID(
+            set = sets->emplace(EmoteSetId{actualSetID},
+                                std::make_shared<TwitchEmoteSet>())
+                      .first;
+            set->second->owner = twitchUsers->resolveID(
                 UserId{isSubLike ? emote.ownerID : QString()});
-            set->second.isFollower = isFollower;
-            set->second.isSubLike = isSubLike;
+            set->second->isFollower = isFollower;
+            set->second->isSubLike = isSubLike;
         }
-        set->second.emotes.emplace_back(std::move(emotePtr));
+        set->second->emotes.emplace_back(std::move(emotePtr));
     };
 
     getHelix()->getUserEmotes(
@@ -269,9 +270,14 @@ void TwitchChannel::refreshTwitchChannelEmotes(bool manualRefresh)
 
             if (state.done)
             {
+                this->everLoadedEmotes_.store(true, std::memory_order::relaxed);
                 qDebug(chatterinoTwitch).nospace()
                     << "[TwitchChannel " << this->getName() << "] Loaded "
                     << emoteMap->size() << " Twitch emotes";
+                getApp()
+                    ->getAccounts()
+                    ->twitch.getCurrent()
+                    ->deduplicateEmoteSets(*sets);
                 this->twitchEmoteSets_.set(std::move(sets));
                 this->setTwitchEmotes(std::move(emoteMap));
 
@@ -283,6 +289,7 @@ void TwitchChannel::refreshTwitchChannelEmotes(bool manualRefresh)
             }
         },
         [this](const auto &error) {
+            this->everLoadedEmotes_.store(true, std::memory_order::relaxed);
             this->addMessage(
                 makeSystemMessage(u"Failed to load Twitch emotes: "_s + error),
                 MessageContext::Original);
@@ -895,7 +902,7 @@ SharedAccessGuard<const TwitchChannel::StreamStatus>
 
 std::optional<EmotePtr> TwitchChannel::twitchEmote(const EmoteName &name) const
 {
-    auto emotes = this->twitchEmotes_.get();
+    auto emotes = this->twitchEmotes();
     auto it = emotes->find(name);
 
     if (it == emotes->end())
@@ -948,7 +955,12 @@ std::shared_ptr<const TwitchEmoteSetMap> TwitchChannel::twitchEmoteSets() const
 
 std::shared_ptr<const EmoteMap> TwitchChannel::twitchEmotes() const
 {
-    return this->twitchEmotes_.get();
+    if (this->everLoadedEmotes_.load(std::memory_order::relaxed))
+    {
+        return this->twitchEmotes_.get();
+    }
+
+    return getApp()->getAccounts()->twitch.getCurrent()->cachedNonLocalEmotes();
 }
 
 std::shared_ptr<const EmoteMap> TwitchChannel::bttvEmotes() const

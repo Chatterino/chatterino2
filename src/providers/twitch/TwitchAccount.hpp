@@ -2,10 +2,13 @@
 
 #include "common/Atomic.hpp"
 #include "controllers/accounts/Account.hpp"
+#include "messages/Emote.hpp"
+#include "providers/twitch/TwitchEmotes.hpp"
 #include "providers/twitch/TwitchUser.hpp"
 #include "util/CancellationToken.hpp"
 #include "util/QStringHash.hpp"
 
+#include <boost/unordered/unordered_flat_map_fwd.hpp>
 #include <QColor>
 #include <QElapsedTimer>
 #include <QObject>
@@ -13,6 +16,7 @@
 #include <rapidjson/document.h>
 
 #include <functional>
+#include <mutex>
 #include <unordered_set>
 
 namespace chatterino {
@@ -25,6 +29,11 @@ class TwitchAccount : public Account
 public:
     TwitchAccount(const QString &username, const QString &oauthToken_,
                   const QString &oauthClient_, const QString &_userID);
+    ~TwitchAccount();
+    TwitchAccount(const TwitchAccount &) = delete;
+    TwitchAccount(TwitchAccount &&) = delete;
+    TwitchAccount &operator=(const TwitchAccount &) = delete;
+    TwitchAccount &operator=(TwitchAccount &&) = delete;
 
     QString toString() const override;
 
@@ -69,6 +78,9 @@ public:
 
     void loadSeventvUserID();
 
+    void deduplicateEmoteSets(TwitchEmoteSetMap &sets);
+    std::shared_ptr<const EmoteMap> cachedNonLocalEmotes() const;
+
 private:
     QString oauthClient_;
     QString oauthToken_;
@@ -82,6 +94,16 @@ private:
     ScopedCancellationToken blockToken_;
     std::unordered_set<TwitchUser> ignores_;
     std::unordered_set<QString> ignoresUserIds_;
+
+    struct CachedEmoteSet {
+        size_t hash;
+        std::shared_ptr<TwitchEmoteSet> ptr;
+    };
+    std::unique_ptr<boost::unordered_flat_map<EmoteSetId, const CachedEmoteSet>>
+        emoteSetCache_;
+    std::mutex emoteCacheMutex_;
+
+    Atomic<std::shared_ptr<const EmoteMap>> cachedNonLocalEmotes_;
 
     QString seventvUserID_;
 };

@@ -7,6 +7,7 @@
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "debug/AssertInGuiThread.hpp"
+#include "messages/Emote.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/irc/IrcMessageBuilder.hpp"
@@ -20,7 +21,25 @@
 #include "util/QStringHash.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
+#include <boost/functional/hash.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <QThread>
+
+#include <ranges>
+
+namespace {
+
+using namespace chatterino;
+
+size_t hashEmoteSet(const TwitchEmoteSet &set)
+{
+    auto &&rng = set.emotes | std::views::transform([](const auto &it) {
+                     return it->id;
+                 });
+    return boost::hash_unordered_range(std::begin(rng), std::end(rng));
+}
+
+}  // namespace
 
 namespace chatterino {
 
@@ -32,8 +51,11 @@ TwitchAccount::TwitchAccount(const QString &username, const QString &oauthToken,
     , userName_(username)
     , userId_(userID)
     , isAnon_(username == ANONYMOUS_USERNAME)
+    , emoteSetCache_(new decltype(this->emoteSetCache_)::element_type())
 {
 }
+
+TwitchAccount::~TwitchAccount() = default;
 
 QString TwitchAccount::toString() const
 {
@@ -306,6 +328,58 @@ void TwitchAccount::loadSeventvUserID()
             qCDebug(chatterinoSeventv)
                 << "Failed to load 7TV user-id:" << result.formatError();
         });
+}
+
+void TwitchAccount::deduplicateEmoteSets(TwitchEmoteSetMap &sets)
+{
+    std::lock_guard guard(this->emoteCacheMutex_);
+
+    bool anyModification = false;
+    for (auto &it : sets)
+    {
+        if (it.second->isFollower)
+        {
+            continue;
+        }
+        auto hash = hashEmoteSet(*it.second);
+        auto cachedIt = this->emoteSetCache_->find(it.first);
+        if (cachedIt != this->emoteSetCache_->end() &&
+            cachedIt->second.hash == hash)
+        {
+            // same hash - replace with cached value
+            it.second = cachedIt->second.ptr;
+            continue;
+        }
+
+        // not yet cached or mismatch - add/update to cache
+        this->emoteSetCache_->emplace(it.first, CachedEmoteSet{
+                                                    .hash = hash,
+                                                    .ptr = it.second,
+                                                });
+        anyModification = true;
+        qCDebug(chatterinoTwitch)
+            << "Updated cache for emote set" << it.first.string;
+    }
+
+    if (anyModification)
+    {
+        // rebuild non-local emote map
+        EmoteMap map;
+        for (const auto &[id, emotes] : *this->emoteSetCache_)
+        {
+            for (auto emote : emotes.ptr->emotes)
+            {
+                map.emplace(emote->name, std::move(emote));
+            }
+        }
+        this->cachedNonLocalEmotes_.set(
+            std::make_shared<EmoteMap>(std::move(map)));
+    }
+}
+
+std::shared_ptr<const EmoteMap> TwitchAccount::cachedNonLocalEmotes() const
+{
+    return this->cachedNonLocalEmotes_.get();
 }
 
 }  // namespace chatterino

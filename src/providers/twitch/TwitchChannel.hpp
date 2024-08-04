@@ -433,6 +433,7 @@ private:
     QElapsedTimer clipCreationTimer_;
     bool isClipCreationInProgress{false};
 
+    std::atomic<bool> everLoadedEmotes_ = false;
     /// @brief Token to cancel the loading of twitch emotes for this channel
     ///
     /// This is used to guard against use-after-free and overlapped loading of

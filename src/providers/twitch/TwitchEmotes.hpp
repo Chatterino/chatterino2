@@ -54,7 +54,8 @@ struct TwitchEmoteSet {
 
     QString title() const;
 };
-using TwitchEmoteSetMap = boost::unordered_flat_map<EmoteSetId, TwitchEmoteSet>;
+using TwitchEmoteSetMap =
+    boost::unordered_flat_map<EmoteSetId, std::shared_ptr<TwitchEmoteSet>>;
 
 class ITwitchEmotes
 {
