@@ -135,16 +135,16 @@ int calculateTimeoutDuration(TimeoutButton timeout)
     return timeout.second * durations[timeout.first];
 }
 
-    QString hashSevenTVUrl(const QString &url)
-    {
-        QByteArray bytes;
+QString hashSevenTVUrl(const QString &url)
+{
+    QByteArray bytes;
 
-        bytes.append(url.toUtf8());
-        QByteArray hashBytes(
-            QCryptographicHash::hash(bytes, QCryptographicHash::Sha256));
+    bytes.append(url.toUtf8());
+    QByteArray hashBytes(
+        QCryptographicHash::hash(bytes, QCryptographicHash::Sha256));
 
-        return hashBytes.toHex();
-    }
+    return hashBytes.toHex();
+}
 
 }  // namespace
 
