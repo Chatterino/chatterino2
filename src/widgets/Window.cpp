@@ -660,7 +660,22 @@ void Window::addShortcuts()
              }
              else if (arg == "toggleLiveOnly")
              {
-                 this->notebook_->toggleOfflineTabsAction()->trigger();
+                 // NOOP: Removed 2024-08-04
+                 auto *selectedPage = this->notebook_->getSelectedPage();
+                 if (selectedPage != nullptr)
+                 {
+                     auto *selectedSplit = selectedPage->getSelectedSplit();
+                     if (selectedSplit != nullptr)
+                     {
+                         auto selectedChannel = selectedSplit->getChannel();
+                         if (selectedChannel)
+                         {
+                             selectedChannel->addSystemMessage(
+                                 "setTabVisibility's toggleLiveOnly has been "
+                                 "removed");
+                         }
+                     }
+                 }
              }
              else
              {
