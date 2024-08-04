@@ -666,7 +666,7 @@ void Window::addShortcuts()
                      if (selectedSplit != nullptr)
                      {
                          auto selectedChannel = selectedSplit->getChannel();
-                         if (selectedChannel)
+                         if (selectedChannel != nullptr)
                          {
                              selectedChannel->addSystemMessage(
                                  "setTabVisibility's toggleLiveOnly has been "
