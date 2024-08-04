@@ -194,6 +194,7 @@ void Application::fakeDtor()
     this->accounts.reset();
     this->emotes.reset();
     this->themes.reset();
+    this->streamerMode.reset();
 }
 
 void Application::initialize(Settings &settings, const Paths &paths)

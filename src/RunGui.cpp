@@ -297,4 +297,5 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
 
     _exit(0);
 }
+
 }  // namespace chatterino
