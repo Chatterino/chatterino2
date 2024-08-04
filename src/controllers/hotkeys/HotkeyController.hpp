@@ -85,7 +85,13 @@ public:
 
     pajlada::Signals::NoArgSignal onItemsUpdated;
 
-    void removeDeprecatedHotkeys();
+    /**
+     * @brief Removes hotkeys that were previously added as default hotkeys.
+     *
+     * This will potentially remove hotkeys that were explicitly added by the user if they added a hotkey
+     * with the exact same parameters as the default hotkey.
+     */
+    void clearRemovedDefaults();
 
 private:
     /**

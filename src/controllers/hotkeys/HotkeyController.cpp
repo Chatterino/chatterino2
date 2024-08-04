@@ -26,7 +26,7 @@ HotkeyController::HotkeyController()
 {
     this->loadHotkeys();
 
-    this->removeDeprecatedHotkeys();
+    this->clearRemovedDefaults();
 
     this->signalHolder_.managedConnect(
         this->hotkeys_.delayedItemsChanged, [this]() {
@@ -523,7 +523,7 @@ void HotkeyController::resetToDefaults()
     this->loadHotkeys();
 }
 
-void HotkeyController::removeDeprecatedHotkeys()
+void HotkeyController::clearRemovedDefaults()
 {
     // The "toggleLiveOnly" argument was removed 2024-08-04
     this->tryRemoveDefault(HotkeyCategory::Window, QKeySequence("Ctrl+Shift+L"),
