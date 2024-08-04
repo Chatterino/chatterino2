@@ -146,10 +146,9 @@ TwitchChannel::~TwitchChannel()
     getApp()->getTwitch()->dropSeventvChannel(this->seventvUserID_,
                                               this->seventvEmoteSetID_);
 
-    if (getApp()->getTwitch()->getBTTVLiveUpdates())
+    if (getApp()->getBttvLiveUpdates())
     {
-        getApp()->getTwitch()->getBTTVLiveUpdates()->partChannel(
-            this->roomId());
+        getApp()->getBttvLiveUpdates()->partChannel(this->roomId());
     }
 
     if (getApp()->getSeventvEventAPI())
@@ -854,7 +853,7 @@ const QString &TwitchChannel::seventvEmoteSetID() const
 
 void TwitchChannel::joinBttvChannel() const
 {
-    if (getApp()->getTwitch()->getBTTVLiveUpdates())
+    if (getApp()->getBttvLiveUpdates())
     {
         const auto currentAccount =
             getApp()->getAccounts()->twitch.getCurrent();
@@ -863,8 +862,7 @@ void TwitchChannel::joinBttvChannel() const
         {
             userName = currentAccount->getUserName();
         }
-        getApp()->getTwitch()->getBTTVLiveUpdates()->joinChannel(this->roomId(),
-                                                                 userName);
+        getApp()->getBttvLiveUpdates()->joinChannel(this->roomId(), userName);
     }
 }
 

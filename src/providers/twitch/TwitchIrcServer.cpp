@@ -33,8 +33,6 @@ namespace {
 
 using namespace chatterino;
 
-const QString BTTV_LIVE_UPDATES_URL = "wss://sockets.betterttv.net/ws";
-
 void sendHelixMessage(const std::shared_ptr<TwitchChannel> &channel,
                       const QString &message, const QString &replyParentId = {})
 {
@@ -143,13 +141,6 @@ TwitchIrcServer::TwitchIrcServer()
     , watchingChannel(Channel::getEmpty(), Channel::Type::TwitchWatching)
 {
     this->initializeIrc();
-
-    if (getSettings()->enableBTTVLiveUpdates &&
-        getSettings()->enableBTTVChannelEmotes)
-    {
-        this->bttvLiveUpdates =
-            std::make_unique<BttvLiveUpdates>(BTTV_LIVE_UPDATES_URL);
-    }
 
     // getSettings()->twitchSeperateWriteConnection.connect([this](auto, auto) {
     // this->connect(); },
@@ -628,11 +619,6 @@ void TwitchIrcServer::onReplySendRequested(
                              channel->getName() + " :" + message);
     }
     sent = true;
-}
-
-std::unique_ptr<BttvLiveUpdates> &TwitchIrcServer::getBTTVLiveUpdates()
-{
-    return this->bttvLiveUpdates;
 }
 
 const IndirectChannel &TwitchIrcServer::getWatchingChannel() const

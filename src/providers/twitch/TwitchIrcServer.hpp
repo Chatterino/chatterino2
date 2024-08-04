@@ -15,7 +15,6 @@ namespace chatterino {
 class Settings;
 class Paths;
 class TwitchChannel;
-class BttvLiveUpdates;
 class BttvEmotes;
 class FfzEmotes;
 class SeventvEmotes;
@@ -33,8 +32,6 @@ public:
 
     virtual void dropSeventvChannel(const QString &userID,
                                     const QString &emoteSetID) = 0;
-
-    virtual std::unique_ptr<BttvLiveUpdates> &getBTTVLiveUpdates() = 0;
 
     virtual const IndirectChannel &getWatchingChannel() const = 0;
     virtual void setWatchingChannel(ChannelPtr newWatchingChannel) = 0;
@@ -100,11 +97,7 @@ private:
     const ChannelPtr automodChannel;
     IndirectChannel watchingChannel;
 
-    std::unique_ptr<BttvLiveUpdates> bttvLiveUpdates;
-
 public:
-    std::unique_ptr<BttvLiveUpdates> &getBTTVLiveUpdates() override;
-
     const IndirectChannel &getWatchingChannel() const override;
     void setWatchingChannel(ChannelPtr newWatchingChannel) override;
     ChannelPtr getWhispersChannel() const override;

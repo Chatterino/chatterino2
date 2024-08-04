@@ -50,6 +50,7 @@ class ImageUploader;
 class SeventvAPI;
 class CrashHandler;
 class BttvEmotes;
+class BttvLiveUpdates;
 class FfzEmotes;
 class SeventvEmotes;
 class SeventvEventAPI;
@@ -98,6 +99,7 @@ public:
 #endif
     virtual Updates &getUpdates() = 0;
     virtual BttvEmotes *getBttvEmotes() = 0;
+    virtual BttvLiveUpdates *getBttvLiveUpdates() = 0;
     virtual FfzEmotes *getFfzEmotes() = 0;
     virtual SeventvEmotes *getSeventvEmotes() = 0;
     virtual SeventvEventAPI *getSeventvEventAPI() = 0;
@@ -167,6 +169,7 @@ private:
     std::unique_ptr<TwitchBadges> twitchBadges;
     std::unique_ptr<ChatterinoBadges> chatterinoBadges;
     std::unique_ptr<BttvEmotes> bttvEmotes;
+    std::unique_ptr<BttvLiveUpdates> bttvLiveUpdates;
     std::unique_ptr<FfzEmotes> ffzEmotes;
     std::unique_ptr<SeventvEmotes> seventvEmotes;
     std::unique_ptr<SeventvEventAPI> seventvEventAPI;
@@ -221,6 +224,7 @@ public:
     }
 
     BttvEmotes *getBttvEmotes() override;
+    BttvLiveUpdates *getBttvLiveUpdates() override;
     FfzEmotes *getFfzEmotes() override;
     SeventvEmotes *getSeventvEmotes() override;
     SeventvEventAPI *getSeventvEventAPI() override;

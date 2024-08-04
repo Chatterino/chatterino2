@@ -72,6 +72,7 @@ namespace {
 
 using namespace chatterino;
 
+const QString BTTV_LIVE_UPDATES_URL = "wss://sockets.betterttv.net/ws";
 const QString SEVENTV_EVENTAPI_URL = "wss://events.7tv.io/v3";
 
 ISoundController *makeSoundController(Settings &settings)
@@ -94,6 +95,19 @@ ISoundController *makeSoundController(Settings &settings)
         }
         break;
     }
+}
+
+BttvLiveUpdates *makeBttvLiveUpdates(Settings &settings)
+{
+    bool enabled =
+        settings.enableBTTVLiveUpdates && settings.enableBTTVChannelEmotes;
+
+    if (enabled)
+    {
+        return new BttvLiveUpdates(BTTV_LIVE_UPDATES_URL);
+    }
+
+    return nullptr;
 }
 
 SeventvEventAPI *makeSeventvEventAPI(Settings &settings)
@@ -156,6 +170,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , twitchBadges(new TwitchBadges)
     , chatterinoBadges(new ChatterinoBadges)
     , bttvEmotes(new BttvEmotes)
+    , bttvLiveUpdates(makeBttvLiveUpdates(_settings))
     , ffzEmotes(new FfzEmotes)
     , seventvEmotes(new SeventvEmotes)
     , seventvEventAPI(makeSeventvEventAPI(_settings))
@@ -190,6 +205,7 @@ void Application::fakeDtor()
     this->twitchBadges.reset();
     this->twitchLiveController.reset();
     this->chatterinoBadges.reset();
+    // this->bttvLiveUpdates.reset();
     this->bttvEmotes.reset();
     this->ffzEmotes.reset();
     // this->seventvEventAPI.reset();
@@ -592,6 +608,14 @@ BttvEmotes *Application::getBttvEmotes()
     assert(this->bttvEmotes);
 
     return this->bttvEmotes.get();
+}
+
+BttvLiveUpdates *Application::getBttvLiveUpdates()
+{
+    assertInGuiThread();
+    // bttvLiveUpdates may be nullptr if it's not enabled
+
+    return this->bttvLiveUpdates.get();
 }
 
 FfzEmotes *Application::getFfzEmotes()
@@ -1094,9 +1118,7 @@ void Application::initPubSub()
 
 void Application::initBttvLiveUpdates()
 {
-    auto &bttvLiveUpdates = this->twitch->getBTTVLiveUpdates();
-
-    if (!bttvLiveUpdates)
+    if (!this->bttvLiveUpdates)
     {
         qCDebug(chatterinoBttv)
             << "Skipping initialization of Live Updates as it's disabled";
@@ -1105,8 +1127,8 @@ void Application::initBttvLiveUpdates()
 
     // We can safely ignore these signal connections since the twitch object will always
     // be destroyed before the Application
-    std::ignore =
-        bttvLiveUpdates->signals_.emoteAdded.connect([&](const auto &data) {
+    std::ignore = this->bttvLiveUpdates->signals_.emoteAdded.connect(
+        [&](const auto &data) {
             auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);
 
             postToThread([chan, data] {
@@ -1116,8 +1138,8 @@ void Application::initBttvLiveUpdates()
                 }
             });
         });
-    std::ignore =
-        bttvLiveUpdates->signals_.emoteUpdated.connect([&](const auto &data) {
+    std::ignore = this->bttvLiveUpdates->signals_.emoteUpdated.connect(
+        [&](const auto &data) {
             auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);
 
             postToThread([chan, data] {
@@ -1127,8 +1149,8 @@ void Application::initBttvLiveUpdates()
                 }
             });
         });
-    std::ignore =
-        bttvLiveUpdates->signals_.emoteRemoved.connect([&](const auto &data) {
+    std::ignore = this->bttvLiveUpdates->signals_.emoteRemoved.connect(
+        [&](const auto &data) {
             auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);
 
             postToThread([chan, data] {
@@ -1138,7 +1160,7 @@ void Application::initBttvLiveUpdates()
                 }
             });
         });
-    bttvLiveUpdates->start();
+    this->bttvLiveUpdates->start();
 }
 
 void Application::initSeventvEventAPI()

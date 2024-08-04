@@ -231,6 +231,13 @@ public:
         return nullptr;
     }
 
+    BttvLiveUpdates *getBttvLiveUpdates() override
+    {
+        assert(false && "EmptyApplication::getBttvLiveUpdates was called "
+                        "without being initialized");
+        return nullptr;
+    }
+
     FfzEmotes *getFfzEmotes() override
     {
         assert(false && "EmptyApplication::getFfzEmotes was called without "

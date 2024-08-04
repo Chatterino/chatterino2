@@ -2,7 +2,6 @@
 
 #include "mocks/Channel.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
-#include "providers/bttv/BttvLiveUpdates.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/seventv/eventapi/Client.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"
@@ -43,11 +42,6 @@ public:
                             const QString &emoteSetID) override
     {
         //
-    }
-
-    std::unique_ptr<BttvLiveUpdates> &getBTTVLiveUpdates() override
-    {
-        return this->bttvLiveUpdates;
     }
 
     const IndirectChannel &getWatchingChannel() const override
@@ -97,8 +91,6 @@ public:
     ChannelPtr liveChannel;
     ChannelPtr automodChannel;
     QString lastUserThatWhisperedMe{"forsen"};
-
-    std::unique_ptr<BttvLiveUpdates> bttvLiveUpdates;
 };
 
 }  // namespace chatterino::mock
