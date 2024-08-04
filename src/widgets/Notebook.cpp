@@ -1378,7 +1378,7 @@ SplitNotebook::SplitNotebook(Window *parent)
                      });
     tabVisibilityActionGroup->addAction(this->hideAllTabsAction);
 
-    switch (getSettings()->tabVisibility.getValue())
+    switch (getSettings()->tabVisibility.getEnum())
     {
         case NotebookTabVisibility::AllTabs: {
             this->showAllTabsAction->setChecked(true);
