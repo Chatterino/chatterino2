@@ -1,4 +1,4 @@
-#include "MessageColor.hpp"
+#include "messages/MessageColor.hpp"
 
 #include "singletons/Theme.hpp"
 

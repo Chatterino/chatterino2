@@ -1,4 +1,4 @@
-#include "ModerationPage.hpp"
+#include "widgets/settingspages/ModerationPage.hpp"
 
 #include "Application.hpp"
 #include "controllers/logging/ChannelLoggingModel.hpp"

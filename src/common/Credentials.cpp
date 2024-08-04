@@ -11,6 +11,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSaveFile>
+#include <QStringBuilder>
 
 #include <variant>
 
@@ -26,15 +27,15 @@
 #    endif
 #endif
 
-#define FORMAT_NAME                                                  \
-    ([&] {                                                           \
-        assert(!provider.contains(":"));                             \
-        return QString("chatterino:%1:%2").arg(provider).arg(name_); \
-    })()
-
 namespace {
 
 using namespace chatterino;
+
+QString formatName(const QString &provider, const QString &name)
+{
+    assert(!provider.contains(":"));
+    return u"chatterino:" % provider % u':' % name;
+}
 
 bool useKeyring()
 {
@@ -184,7 +185,7 @@ void Credentials::get(const QString &provider, const QString &name_,
 {
     assertInGuiThread();
 
-    auto name = FORMAT_NAME;
+    auto name = formatName(provider, name_);
 
     if (useKeyring())
     {
@@ -219,7 +220,7 @@ void Credentials::set(const QString &provider, const QString &name_,
     /// On linux, we try to use a keychain but show a message to disable it when it fails.
     /// XXX: add said message
 
-    auto name = FORMAT_NAME;
+    auto name = formatName(provider, name_);
 
     if (useKeyring())
     {
@@ -242,7 +243,7 @@ void Credentials::erase(const QString &provider, const QString &name_)
 {
     assertInGuiThread();
 
-    auto name = FORMAT_NAME;
+    auto name = formatName(provider, name_);
 
     if (useKeyring())
     {

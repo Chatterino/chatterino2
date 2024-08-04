@@ -1,4 +1,4 @@
-#include "IrcAccount.hpp"
+#include "providers/irc/IrcAccount.hpp"
 
 // namespace chatterino {
 //

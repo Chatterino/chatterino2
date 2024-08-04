@@ -2,6 +2,7 @@
 
 #include <IrcMessage>
 #include <QString>
+#include <QTimeZone>
 
 namespace chatterino {
 
@@ -88,7 +89,7 @@ inline QDateTime calculateMessageTime(const Communi::IrcMessage *message)
         QString timedate = message->tags().value("time").toString();
 
         auto date = QDateTime::fromString(timedate, Qt::ISODate);
-        date.setTimeSpec(Qt::TimeSpec::UTC);
+        date.setTimeZone(QTimeZone::utc());
         return date.toLocalTime();
     }
 

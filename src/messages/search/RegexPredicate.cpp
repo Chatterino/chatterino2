@@ -1,4 +1,4 @@
-#include "RegexPredicate.hpp"
+#include "messages/search/RegexPredicate.hpp"
 
 #include "messages/Message.hpp"
 

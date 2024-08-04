@@ -1,7 +1,8 @@
 #pragma once
 
 #include <QString>
-#include <QtGlobal>
+
+namespace chatterino {
 
 /**
  * Valid version formats, in order of latest to oldest
@@ -24,21 +25,7 @@
  *  - 2.4.0-alpha.2
  *  - 2.4.0-alpha
  **/
-#define CHATTERINO_VERSION "7.5.1"
-
-#if defined(Q_OS_WIN)
-#    define CHATTERINO_OS "win"
-#elif defined(Q_OS_MACOS)
-#    define CHATTERINO_OS "macos"
-#elif defined(Q_OS_LINUX)
-#    define CHATTERINO_OS "linux"
-#elif defined(Q_OS_FREEBSD)
-#    define CHATTERINO_OS "freebsd"
-#else
-#    define CHATTERINO_OS "unknown"
-#endif
-
-namespace chatterino {
+inline const QString CHATTERINO_VERSION = QStringLiteral("7.5.1");
 
 class Version
 {

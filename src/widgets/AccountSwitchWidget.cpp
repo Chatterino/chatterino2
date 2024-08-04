@@ -1,4 +1,4 @@
-#include "AccountSwitchWidget.hpp"
+#include "widgets/AccountSwitchWidget.hpp"
 
 #include "Application.hpp"
 #include "common/Common.hpp"

@@ -343,29 +343,30 @@ Split::Split(QWidget *parent)
             this->refreshModerationMode();
         });
 
-    this->signalHolder_.managedConnect(
-        modifierStatusChanged, [this](Qt::KeyboardModifiers status) {
-            if ((status ==
-                 showSplitOverlayModifiers /*|| status == showAddSplitRegions*/) &&
-                this->isMouseOver_)
-            {
-                this->overlay_->show();
-            }
-            else
-            {
-                this->overlay_->hide();
-            }
+    this->signalHolder_.managedConnect(modifierStatusChanged, [this](
+                                                                  Qt::KeyboardModifiers
+                                                                      status) {
+        if ((status ==
+             SHOW_SPLIT_OVERLAY_MODIFIERS /*|| status == showAddSplitRegions*/) &&
+            this->isMouseOver_)
+        {
+            this->overlay_->show();
+        }
+        else
+        {
+            this->overlay_->hide();
+        }
 
-            if (getSettings()->pauseChatModifier.getEnum() != Qt::NoModifier &&
-                status == getSettings()->pauseChatModifier.getEnum())
-            {
-                this->view_->pause(PauseReason::KeyboardModifier);
-            }
-            else
-            {
-                this->view_->unpause(PauseReason::KeyboardModifier);
-            }
-        });
+        if (getSettings()->pauseChatModifier.getEnum() != Qt::NoModifier &&
+            status == getSettings()->pauseChatModifier.getEnum())
+        {
+            this->view_->pause(PauseReason::KeyboardModifier);
+        }
+        else
+        {
+            this->view_->unpause(PauseReason::KeyboardModifier);
+        }
+    });
 
     this->signalHolder_.managedConnect(this->input_->ui_.textEdit->focused,
                                        [this] {
@@ -1019,7 +1020,7 @@ void Split::enterEvent(QEvent * /*event*/)
     this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 
     if (modifierStatus ==
-        showSplitOverlayModifiers /*|| modifierStatus == showAddSplitRegions*/)
+        SHOW_SPLIT_OVERLAY_MODIFIERS /*|| modifierStatus == showAddSplitRegions*/)
     {
         this->overlay_->show();
     }

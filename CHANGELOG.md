@@ -23,6 +23,7 @@
 - Minor: Support more Firefox variants for incognito link opening. (#5503)
 - Minor: Replying to a message will now display the message being replied to. (#4350, #5519)
 - Minor: Links can now have prefixes and suffixes such as parentheses. (#5486, #5515)
+- Minor: Added support for scrolling in splits with touchscreen panning gestures. (#5524)
 - Bugfix: Fixed tab move animation occasionally failing to start after closing a tab. (#5426)
 - Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
 - Bugfix: Fixed restricted users usernames not being clickable. (#5405)
@@ -34,6 +35,7 @@
 - Bugfix: Fixed `/clearmessages` not working with more than one window. (#5489)
 - Bugfix: Fixed splits staying paused after unfocusing Chatterino in certain configurations. (#5504)
 - Bugfix: Links with invalid characters in the domain are no longer detected. (#5509)
+- Bugfix: Fixed janky selection for messages with RTL segments (selection is still wrong, but consistently wrong). (#5525)
 - Dev: Update Windows build from Qt 6.5.0 to Qt 6.7.1. (#5420)
 - Dev: Update vcpkg build Qt from 6.5.0 to 6.7.0, boost from 1.83.0 to 1.85.0, openssl from 3.1.3 to 3.3.0. (#5422)
 - Dev: Unsingletonize `ISoundController`. (#5462)
@@ -55,6 +57,9 @@
 - Dev: Deprecate Qt 5.12. (#5396)
 - Dev: The running Qt version is now shown in the about page if it differs from the compiled version. (#5501)
 - Dev: `FlagsEnum` is now `constexpr`. (#5510)
+- Dev: Documented and added tests to RTL handling. (#5473)
+- Dev: Refactored a few `#define`s into `const(expr)` and cleaned includes. (#5527)
+- Dev: Prepared for Qt 6.8 by addressing some deprecations. (#5529)
 
 ## 2.5.1
 

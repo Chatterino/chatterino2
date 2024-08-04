@@ -1,6 +1,7 @@
 #include "widgets/settingspages/GeneralPage.hpp"
 
 #include "Application.hpp"
+#include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
@@ -19,7 +20,6 @@
 #include "util/IncognitoBrowser.hpp"
 #include "widgets/BaseWindow.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
-#include "widgets/splits/SplitInput.hpp"
 
 #include <magic_enum/magic_enum.hpp>
 #include <QDesktopServices>
@@ -28,63 +28,62 @@
 #include <QLabel>
 #include <QScrollArea>
 
-#define CHROME_EXTENSION_LINK                                           \
-    "https://chrome.google.com/webstore/detail/chatterino-native-host/" \
-    "glknmaideaikkmemifbfkhnomoknepka"
-#define FIREFOX_EXTENSION_LINK \
-    "https://addons.mozilla.org/en-US/firefox/addon/chatterino-native-host/"
+namespace {
 
-// define to highlight sections in editor
-#define addTitle addTitle
-#define addSubtitle addSubtitle
+using namespace chatterino;
+using namespace literals;
+
+const QString CHROME_EXTENSION_LINK =
+    u"https://chrome.google.com/webstore/detail/chatterino-native-host/glknmaideaikkmemifbfkhnomoknepka"_s;
+const QString FIREFOX_EXTENSION_LINK =
+    u"https://addons.mozilla.org/en-US/firefox/addon/chatterino-native-host/"_s;
 
 #ifdef Q_OS_WIN
-#    define META_KEY "Windows"
+const QString META_KEY = u"Windows"_s;
 #else
-#    define META_KEY "Meta"
+const QString META_KEY = u"Meta"_s;
 #endif
 
-namespace chatterino {
-namespace {
-    void addKeyboardModifierSetting(GeneralPageView &layout,
-                                    const QString &title,
-                                    EnumSetting<Qt::KeyboardModifier> &setting)
-    {
-        layout.addDropdown<std::underlying_type<Qt::KeyboardModifier>::type>(
-            title, {"None", "Shift", "Control", "Alt", META_KEY}, setting,
-            [](int index) {
-                switch (index)
-                {
-                    case Qt::ShiftModifier:
-                        return 1;
-                    case Qt::ControlModifier:
-                        return 2;
-                    case Qt::AltModifier:
-                        return 3;
-                    case Qt::MetaModifier:
-                        return 4;
-                    default:
-                        return 0;
-                }
-            },
-            [](DropdownArgs args) {
-                switch (args.index)
-                {
-                    case 1:
-                        return Qt::ShiftModifier;
-                    case 2:
-                        return Qt::ControlModifier;
-                    case 3:
-                        return Qt::AltModifier;
-                    case 4:
-                        return Qt::MetaModifier;
-                    default:
-                        return Qt::NoModifier;
-                }
-            },
-            false);
-    }
+void addKeyboardModifierSetting(GeneralPageView &layout, const QString &title,
+                                EnumSetting<Qt::KeyboardModifier> &setting)
+{
+    layout.addDropdown<std::underlying_type<Qt::KeyboardModifier>::type>(
+        title, {"None", "Shift", "Control", "Alt", META_KEY}, setting,
+        [](int index) {
+            switch (index)
+            {
+                case Qt::ShiftModifier:
+                    return 1;
+                case Qt::ControlModifier:
+                    return 2;
+                case Qt::AltModifier:
+                    return 3;
+                case Qt::MetaModifier:
+                    return 4;
+                default:
+                    return 0;
+            }
+        },
+        [](DropdownArgs args) {
+            switch (args.index)
+            {
+                case 1:
+                    return Qt::ShiftModifier;
+                case 2:
+                    return Qt::ControlModifier;
+                case 3:
+                    return Qt::AltModifier;
+                case 4:
+                    return Qt::MetaModifier;
+                default:
+                    return Qt::NoModifier;
+            }
+        },
+        false);
+}
 }  // namespace
+
+namespace chatterino {
 
 GeneralPage::GeneralPage()
 {

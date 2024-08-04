@@ -1,4 +1,4 @@
-#include "SelectChannelDialog.hpp"
+#include "widgets/dialogs/SelectChannelDialog.hpp"
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
@@ -25,10 +25,10 @@
 #include <QTableView>
 #include <QVBoxLayout>
 
-#define TAB_TWITCH 0
-#define TAB_IRC 1
-
 namespace chatterino {
+
+constexpr int TAB_TWITCH = 0;
+constexpr int TAB_IRC = 1;
 
 SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     : BaseWindow(

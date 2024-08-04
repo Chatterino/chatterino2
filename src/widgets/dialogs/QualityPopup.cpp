@@ -1,4 +1,4 @@
-#include "QualityPopup.hpp"
+#include "widgets/dialogs/QualityPopup.hpp"
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"

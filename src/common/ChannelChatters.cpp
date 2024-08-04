@@ -1,4 +1,4 @@
-#include "ChannelChatters.hpp"
+#include "common/ChannelChatters.hpp"
 
 #include "common/Channel.hpp"
 #include "messages/Message.hpp"

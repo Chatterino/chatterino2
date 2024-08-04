@@ -1,4 +1,4 @@
-#include "NicknamesPage.hpp"
+#include "widgets/settingspages/NicknamesPage.hpp"
 
 #include "controllers/nicknames/Nickname.hpp"
 #include "controllers/nicknames/NicknamesModel.hpp"

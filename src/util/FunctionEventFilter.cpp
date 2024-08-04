@@ -1,4 +1,4 @@
-#include "FunctionEventFilter.hpp"
+#include "util/FunctionEventFilter.hpp"
 
 namespace chatterino {
 

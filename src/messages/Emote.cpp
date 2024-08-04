@@ -1,4 +1,4 @@
-#include "Emote.hpp"
+#include "messages/Emote.hpp"
 
 #include <unordered_map>
 

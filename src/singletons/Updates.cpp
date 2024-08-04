@@ -1,4 +1,4 @@
-#include "Updates.hpp"
+#include "singletons/Updates.hpp"
 
 #include "common/Literals.hpp"
 #include "common/Modes.hpp"
@@ -6,8 +6,8 @@
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
-#include "Settings.hpp"
 #include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
 #include "util/PostToThread.hpp"
 
@@ -16,18 +16,34 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QRegularExpression>
+#include <QStringBuilder>
 #include <semver/semver.hpp>
 
-using namespace chatterino::literals;
-
-namespace chatterino {
 namespace {
-    QString currentBranch()
-    {
-        return getSettings()->betaUpdates ? "beta" : "stable";
-    }
+
+using namespace chatterino;
+using namespace literals;
+
+QString currentBranch()
+{
+    return getSettings()->betaUpdates ? "beta" : "stable";
+}
+
+#if defined(Q_OS_WIN)
+const QString CHATTERINO_OS = u"win"_s;
+#elif defined(Q_OS_MACOS)
+const QString CHATTERINO_OS = u"macos"_s;
+#elif defined(Q_OS_LINUX)
+const QString CHATTERINO_OS = u"linux"_s;
+#elif defined(Q_OS_FREEBSD)
+const QString CHATTERINO_OS = u"freebsd"_s;
+#else
+const QString CHATTERINO_OS = u"unknown"_s;
+#endif
+;
 
 }  // namespace
+namespace chatterino {
 
 Updates::Updates(const Paths &paths_)
     : paths(paths_)
@@ -363,9 +379,9 @@ void Updates::checkForUpdates()
     auto apiVersion = std::make_shared<uint8_t>(2);
     constexpr auto maxApiVersion =
         3;  // don't try v4 yet (we don't know the API scheme yet)
-    auto fmtUrl = [apiVersion] {
-        return u"https://7tv.io/v%1/chatterino/version/"_s CHATTERINO_OS
-               "/%2".arg(QString::number(*apiVersion), currentBranch());
+    auto fmtUrl = [apiVersion]() -> QString {
+        return u"https://7tv.io/v" % QString::number(*apiVersion) %
+               "/chatterino/version/" % CHATTERINO_OS % "/" % currentBranch();
     };
 
     auto onError = std::make_shared<std::function<void(NetworkResult)>>();

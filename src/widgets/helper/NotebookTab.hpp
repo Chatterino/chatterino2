@@ -11,7 +11,7 @@
 
 namespace chatterino {
 
-#define NOTEBOOK_TAB_HEIGHT 28
+constexpr int NOTEBOOK_TAB_HEIGHT = 28;
 
 class SplitContainer;
 
