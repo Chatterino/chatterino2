@@ -210,6 +210,7 @@ void TwitchChannel::refreshTwitchChannelEmotes(bool manualRefresh)
 
     auto sets = std::make_shared<TwitchEmoteSetMap>();
     auto emoteMap = std::make_shared<EmoteMap>();
+    auto nCalls = std::make_shared<size_t>();  // TODO: remove before merge
 
     auto *twitchEmotes = getApp()->getEmotes()->getTwitchEmotes();
     auto *twitchUsers = getApp()->getTwitchUsers();
@@ -255,12 +256,23 @@ void TwitchChannel::refreshTwitchChannelEmotes(bool manualRefresh)
         set->second->emotes.emplace_back(std::move(emotePtr));
     };
 
+    auto userID = getApp()->getAccounts()->twitch.getCurrent()->getUserId();
+    qDebug(chatterinoTwitch).nospace()
+        << "[TwitchChannel " << this->getName()
+        << "] Loading Twitch emotes - userID: " << userID
+        << ", broadcasterID: " << this->roomId()
+        << ", manualRefresh: " << manualRefresh;
+
     getHelix()->getUserEmotes(
         getApp()->getAccounts()->twitch.getCurrent()->getUserId(),
         this->roomId(),
-        [this, manualRefresh, emoteMap, sets, addEmote](
+        [this, manualRefresh, emoteMap, sets, addEmote, nCalls](
             const auto &emotes, const auto &state) mutable {
             assert(emoteMap && sets);
+            (*nCalls)++;
+            qDebug(chatterinoTwitch).nospace()
+                << "[TwitchChannel " << this->getName() << "] Got "
+                << emotes.size() << " more emote(s)";
 
             emoteMap->reserve(emoteMap->size() + emotes.size());
             for (const auto &emote : emotes)
@@ -273,7 +285,8 @@ void TwitchChannel::refreshTwitchChannelEmotes(bool manualRefresh)
                 this->everLoadedEmotes_.store(true, std::memory_order::relaxed);
                 qDebug(chatterinoTwitch).nospace()
                     << "[TwitchChannel " << this->getName() << "] Loaded "
-                    << emoteMap->size() << " Twitch emotes";
+                    << emoteMap->size() << " Twitch emotes (" << *nCalls
+                    << " requests)";
                 getApp()
                     ->getAccounts()
                     ->twitch.getCurrent()
