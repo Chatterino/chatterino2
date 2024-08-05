@@ -26,6 +26,7 @@
 #include <QAbstractButton>
 #include <QHBoxLayout>
 #include <QRegularExpression>
+#include <QStringBuilder>
 #include <QTabWidget>
 
 #include <utility>
@@ -120,29 +121,37 @@ void addEmotes(Channel &channel, auto emotes, const QString &title,
                        MessageContext::Original);
 }
 
-void addTwitchEmoteSets(const std::shared_ptr<const TwitchEmoteSetMap> &sets,
+void addTwitchEmoteSets(const std::shared_ptr<const EmoteMap> &local,
+                        const std::shared_ptr<const TwitchEmoteSetMap> &sets,
                         Channel &globalChannel, Channel &subChannel,
-                        const QString &currentChannelID)
+                        const QString &currentChannelID,
+                        const QString &channelName)
 {
+    if (!local->empty())
+    {
+        addEmotes(subChannel, *local, channelName % u" (follower)",
+                  MessageElementFlag::TwitchEmote);
+    }
+
     // Put current channel emotes at the top
     for (const auto &[_id, set] : *sets)
     {
-        if (set->owner->id == currentChannelID)
+        if (set.owner->id == currentChannelID)
         {
-            addEmotes(subChannel, set->emotes, set->title(),
+            addEmotes(subChannel, set.emotes, set.title(),
                       MessageElementFlag::TwitchEmote);
         }
     }
 
     for (const auto &[id, set] : *sets)
     {
-        if (set->owner->id == currentChannelID)
+        if (set.owner->id == currentChannelID)
         {
             continue;
         }
 
-        addEmotes(set->isSubLike ? subChannel : globalChannel, set->emotes,
-                  set->title(), MessageElementFlag::TwitchEmote);
+        addEmotes(set.isSubLike ? subChannel : globalChannel, set.emotes,
+                  set.title(), MessageElementFlag::TwitchEmote);
     }
 }
 
@@ -398,8 +407,11 @@ void EmotePopup::loadChannel(ChannelPtr channel)
     auto channelChannel = std::make_shared<Channel>("", Channel::Type::None);
 
     // twitch
-    addTwitchEmoteSets(twitchChannel_->twitchEmoteSets(), *globalChannel,
-                       *subChannel, twitchChannel_->roomId());
+    addTwitchEmoteSets(
+        twitchChannel_->localTwitchEmotes(),
+        *getApp()->getAccounts()->twitch.getCurrent()->accessEmoteSets(),
+        *globalChannel, *subChannel, twitchChannel_->roomId(),
+        twitchChannel_->getName());
 
     // global
     if (Settings::instance().enableBTTVGlobalEmotes)
@@ -471,10 +483,20 @@ void EmotePopup::filterTwitchEmotes(std::shared_ptr<Channel> searchChannel,
 {
     if (this->twitchChannel_)
     {
-        for (const auto &[_id, set] : *this->twitchChannel_->twitchEmoteSets())
+        auto local = filterEmoteMap(searchText,
+                                    this->twitchChannel_->localTwitchEmotes());
+        if (!local.empty())
         {
-            addEmotes(*searchChannel, filterEmoteVec(searchText, set->emotes),
-                      set->title(), MessageElementFlag::TwitchEmote);
+            addEmotes(*searchChannel, local,
+                      this->twitchChannel_->getName() % u" (local)",
+                      MessageElementFlag::TwitchEmote);
+        }
+
+        for (const auto &[_id, set] :
+             **getApp()->getAccounts()->twitch.getCurrent()->accessEmoteSets())
+        {
+            addEmotes(*searchChannel, filterEmoteVec(searchText, set.emotes),
+                      set.title(), MessageElementFlag::TwitchEmote);
         }
     }
 

@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/Env.hpp"
+#include "common/Literals.hpp"
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -15,6 +16,7 @@
 #include "providers/seventv/SeventvAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
+#include "providers/twitch/TwitchUsers.hpp"
 #include "singletons/Emotes.hpp"
 #include "util/CancellationToken.hpp"
 #include "util/Helpers.hpp"
@@ -23,6 +25,7 @@
 
 #include <boost/functional/hash.hpp>
 #include <boost/unordered/unordered_flat_map.hpp>
+#include <QStringBuilder>
 #include <QThread>
 
 #include <ranges>
@@ -43,6 +46,8 @@ size_t hashEmoteSet(const TwitchEmoteSet &set)
 
 namespace chatterino {
 
+using namespace literals;
+
 TwitchAccount::TwitchAccount(const QString &username, const QString &oauthToken,
                              const QString &oauthClient, const QString &userID)
     : Account(ProviderId::Twitch)
@@ -51,7 +56,8 @@ TwitchAccount::TwitchAccount(const QString &username, const QString &oauthToken,
     , userName_(username)
     , userId_(userID)
     , isAnon_(username == ANONYMOUS_USERNAME)
-    , emoteSetCache_(new decltype(this->emoteSetCache_)::element_type())
+    , emoteSets_(std::make_shared<TwitchEmoteSetMap>())
+    , emotes_(std::make_shared<EmoteMap>())
 {
 }
 
@@ -330,56 +336,141 @@ void TwitchAccount::loadSeventvUserID()
         });
 }
 
-void TwitchAccount::deduplicateEmoteSets(TwitchEmoteSetMap &sets)
+bool TwitchAccount::hasEmoteSet(const EmoteSetId &id) const
 {
-    std::lock_guard guard(this->emoteCacheMutex_);
-
-    bool anyModification = false;
-    for (auto &it : sets)
-    {
-        if (it.second->isFollower)
-        {
-            continue;
-        }
-        auto hash = hashEmoteSet(*it.second);
-        auto cachedIt = this->emoteSetCache_->find(it.first);
-        if (cachedIt != this->emoteSetCache_->end() &&
-            cachedIt->second.hash == hash)
-        {
-            // same hash - replace with cached value
-            it.second = cachedIt->second.ptr;
-            continue;
-        }
-
-        // not yet cached or mismatch - add/update to cache
-        this->emoteSetCache_->emplace(it.first, CachedEmoteSet{
-                                                    .hash = hash,
-                                                    .ptr = it.second,
-                                                });
-        anyModification = true;
-        qCDebug(chatterinoTwitch)
-            << "Updated cache for emote set" << it.first.string;
-    }
-
-    if (anyModification)
-    {
-        // rebuild non-local emote map
-        EmoteMap map;
-        for (const auto &[id, emotes] : *this->emoteSetCache_)
-        {
-            for (auto emote : emotes.ptr->emotes)
-            {
-                map.emplace(emote->name, std::move(emote));
-            }
-        }
-        this->cachedNonLocalEmotes_.set(
-            std::make_shared<EmoteMap>(std::move(map)));
-    }
+    auto emotes = this->emoteSets_.accessConst();
+    return emotes->get()->contains(id);
 }
 
-std::shared_ptr<const EmoteMap> TwitchAccount::cachedNonLocalEmotes() const
+SharedAccessGuard<std::shared_ptr<const TwitchEmoteSetMap>>
+    TwitchAccount::accessEmoteSets() const
 {
-    return this->cachedNonLocalEmotes_.get();
+    return this->emoteSets_.accessConst();
+}
+
+SharedAccessGuard<std::shared_ptr<const EmoteMap>> TwitchAccount::accessEmotes()
+    const
+{
+    return this->emotes_.accessConst();
+}
+
+std::optional<EmotePtr> TwitchAccount::twitchEmote(const EmoteName &name) const
+{
+    auto emotes = this->emotes_.accessConst();
+    auto it = (*emotes)->find(name);
+    if (it != (*emotes)->end())
+    {
+        return it->second;
+    }
+    return std::nullopt;
+}
+
+void TwitchAccount::reloadEmotes(void *caller)
+{
+    if (this->isAnon())
+    {
+        return;
+    }
+
+    CancellationToken token(false);
+    this->emoteToken_ = token;
+
+    auto sets = std::make_shared<TwitchEmoteSetMap>();
+    auto emoteMap = std::make_shared<EmoteMap>();
+    auto nCalls = std::make_shared<size_t>();  // TODO: remove before merge
+
+    auto *twitchEmotes = getApp()->getEmotes()->getTwitchEmotes();
+    auto *twitchUsers = getApp()->getTwitchUsers();
+
+    auto addEmote = [sets, emoteMap, twitchEmotes,
+                     twitchUsers](const HelixChannelEmote &emote) {
+        EmoteId id{emote.id};
+        EmoteName name{emote.name};
+        bool isSub = emote.type == u"subscriptions";
+        bool isBits = emote.type == u"bitstier";
+        bool isSubLike = isSub || isBits;
+
+        // A lot of emotes don't have their emote-set-id set, so we create a
+        // virtual emote set that groups emotes by the owner.
+        // Additionally, a lot of emote sets are small, so they're grouped together as globals.
+        auto actualSetID = [&]() -> QString {
+            if (!isSub && !isBits)
+            {
+                return u"x-c2-globals"_s;
+            }
+
+            if (!emote.setID.isEmpty())
+            {
+                return emote.setID;
+            }
+
+            // identical to ID in TwitchChannel::refreshTwitchChannelEmotes
+            if (isSub)
+            {
+                return u"x-c2-s-" % emote.ownerID;
+            }
+            // isBits
+            return u"x-c2-b-" % emote.ownerID;
+        }();
+
+        auto emotePtr = twitchEmotes->getOrCreateEmote(id, name);
+        (*emoteMap)[name] = emotePtr;
+
+        auto set = sets->find(EmoteSetId{actualSetID});
+        if (set == sets->end())
+        {
+            set = sets->emplace(EmoteSetId{actualSetID},
+                                TwitchEmoteSet{
+                                    .owner = twitchUsers->resolveID(UserId{
+                                        isSubLike ? emote.ownerID : QString()}),
+                                    .emotes = {},
+                                    .isBits = isBits,
+                                    .isSubLike = isSubLike,
+                                })
+                      .first;
+        }
+        set->second.emotes.emplace_back(std::move(emotePtr));
+    };
+
+    auto userID = this->getUserId();
+    qDebug(chatterinoTwitch).nospace()
+        << "Loading Twitch emotes - userID: " << userID
+        << ", broadcasterID: none, manualRefresh: " << (caller != nullptr);
+
+    getHelix()->getUserEmotes(
+        this->getUserId(), {},
+        [this, caller, emoteMap, sets, addEmote, nCalls](
+            const auto &emotes, const auto &state) mutable {
+            assert(emoteMap && sets);
+            (*nCalls)++;
+            qDebug(chatterinoTwitch).nospace()
+                << "Got " << emotes.size() << " more emote(s)";
+
+            emoteMap->reserve(emoteMap->size() + emotes.size());
+            for (const auto &emote : emotes)
+            {
+                addEmote(emote);
+            }
+
+            if (state.done)
+            {
+                qDebug(chatterinoTwitch).nospace()
+                    << "Loaded " << emoteMap->size() << " Twitch emotes ("
+                    << *nCalls << " requests)";
+
+                *this->emotes_.access() = std::move(emoteMap);
+                *this->emoteSets_.access() = std::move(sets);
+                getApp()->getAccounts()->twitch.emotesReloaded.invoke(caller,
+                                                                      {});
+            }
+        },
+        [caller](const auto &error) {
+            qDebug(chatterinoTwitch)
+                << "Failed to load Twitch emotes:" << error;
+            getApp()->getAccounts()->twitch.emotesReloaded.invoke(caller,
+                                                                  error);
+        },
+        std::move(token));
 }
 
 }  // namespace chatterino

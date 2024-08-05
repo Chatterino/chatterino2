@@ -165,9 +165,7 @@ public:
     std::optional<EmotePtr> ffzEmote(const EmoteName &name) const;
     std::optional<EmotePtr> seventvEmote(const EmoteName &name) const;
 
-    std::shared_ptr<const TwitchEmoteSetMap> twitchEmoteSets() const;
-
-    std::shared_ptr<const EmoteMap> twitchEmotes() const;
+    std::shared_ptr<const EmoteMap> localTwitchEmotes() const;
     std::shared_ptr<const EmoteMap> bttvEmotes() const;
     std::shared_ptr<const EmoteMap> ffzEmotes() const;
     std::shared_ptr<const EmoteMap> seventvEmotes() const;
@@ -177,7 +175,6 @@ public:
     void refreshFFZChannelEmotes(bool manualRefresh);
     void refreshSevenTVChannelEmotes(bool manualRefresh);
 
-    void setTwitchEmotes(std::shared_ptr<const EmoteMap> &&map);
     void setBttvEmotes(std::shared_ptr<const EmoteMap> &&map);
     void setFfzEmotes(std::shared_ptr<const EmoteMap> &&map);
     void setSeventvEmotes(std::shared_ptr<const EmoteMap> &&map);
@@ -399,8 +396,8 @@ private:
 protected:
     void messageRemovedFromStart(const MessagePtr &msg) override;
 
-    Atomic<std::shared_ptr<const TwitchEmoteSetMap>> twitchEmoteSets_;
-    Atomic<std::shared_ptr<const EmoteMap>> twitchEmotes_;
+    Atomic<std::shared_ptr<const EmoteMap>> localTwitchEmotes_;
+    Atomic<QString> localTwitchEmoteSetID_;
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> ffzEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> seventvEmotes_;
@@ -433,7 +430,6 @@ private:
     QElapsedTimer clipCreationTimer_;
     bool isClipCreationInProgress{false};
 
-    std::atomic<bool> everLoadedEmotes_ = false;
     /// @brief Token to cancel the loading of twitch emotes for this channel
     ///
     /// This is used to guard against use-after-free and overlapped loading of

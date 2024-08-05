@@ -1,9 +1,12 @@
 #include "providers/twitch/TwitchEmotes.hpp"
 
 #include "common/QLogging.hpp"
+#include "common/UniqueAccess.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "util/QStringHash.hpp"
+
+#include <boost/unordered/unordered_flat_map.hpp>
 
 namespace {
 
@@ -399,15 +402,29 @@ qreal getEmote3xScaleFactor(const EmoteId &id)
 
 namespace chatterino {
 
+class TwitchEmotesPrivate
+{
+public:
+    UniqueAccess<boost::unordered_flat_map<EmoteId, std::weak_ptr<Emote>>>
+        twitchEmotesCache;
+};
+
+TwitchEmotes::TwitchEmotes()
+    : private_(new TwitchEmotesPrivate)
+{
+}
+
+TwitchEmotes::~TwitchEmotes() = default;
+
 QString TwitchEmoteSet::title() const
 {
     if (!this->owner || this->owner->name.isEmpty())
     {
         return "Twitch";
     }
-    if (this->isFollower)
+    if (this->isBits)
     {
-        return this->owner->name + " (Follower)";
+        return this->owner->name + " (Bits)";
     }
 
     return this->owner->name;
@@ -445,7 +462,7 @@ EmotePtr TwitchEmotes::getOrCreateEmote(const EmoteId &id,
     auto name = TwitchEmotes::cleanUpEmoteCode(name_.string);
 
     // search in cache or create new emote
-    auto cache = this->twitchEmotesCache_.access();
+    auto cache = this->private_->twitchEmotesCache.access();
     auto shared = (*cache)[id].lock();
 
     if (!shared)

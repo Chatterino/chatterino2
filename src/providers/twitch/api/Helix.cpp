@@ -3070,12 +3070,14 @@ void Helix::getUserEmotes(
         pageCallback,
     FailureCallback<QString> failureCallback, CancellationToken &&token)
 {
+    QUrlQuery query{{u"user_id"_s, userID}};
+    if (!broadcasterID.isEmpty())
+    {
+        query.addQueryItem(u"broadcaster_id"_s, broadcasterID);
+    }
+
     this->paginate(
-        u"chat/emotes/user"_s,
-        {
-            {u"user_id"_s, userID},
-            {u"broadcaster_id"_s, broadcasterID},
-        },
+        u"chat/emotes/user"_s, query,
         [pageCallback](const QJsonObject &json, const auto &state) mutable {
             const auto data = json["data"_L1].toArray();
 
@@ -3127,6 +3129,56 @@ void Helix::getUserEmotes(
             }
         },
         std::move(token));
+}
+
+void Helix::getFollowedChannel(
+    QString userID, QString broadcasterID,
+    ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
+    FailureCallback<QString> failureCallback)
+{
+    this->makeGet("channels/followed",
+                  {
+                      {u"user_id"_s, userID},
+                      {u"broadcaster_id"_s, broadcasterID},
+                  })
+        .onSuccess([successCallback](auto result) {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for getting badges was "
+                    << result.formatError() << "but we expected it to be 200";
+            }
+
+            const auto response = result.parseJson();
+            const auto channel = response["data"_L1].toArray().at(0);
+            if (channel.isObject())
+            {
+                successCallback(HelixFollowedChannel(channel.toObject()));
+            }
+            else
+            {
+                successCallback(std::nullopt);
+            }
+        })
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(result.formatError());
+                return;
+            }
+
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+            if (!message.isEmpty())
+            {
+                failureCallback(message);
+            }
+            else
+            {
+                failureCallback(result.formatError());
+            }
+        })
+        .execute();
 }
 
 NetworkRequest Helix::makeRequest(const QString &url, const QUrlQuery &urlQuery,

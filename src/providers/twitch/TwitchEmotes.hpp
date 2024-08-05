@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/Aliases.hpp"
-#include "common/UniqueAccess.hpp"
 #include "providers/twitch/TwitchUser.hpp"
 
 #include <boost/unordered/unordered_flat_map_fwd.hpp>
@@ -10,7 +9,6 @@
 #include <QString>
 
 #include <memory>
-#include <unordered_map>
 
 namespace chatterino {
 
@@ -46,16 +44,17 @@ struct TwitchEmoteSet {
 
     std::vector<EmotePtr> emotes;
 
-    /// @brief If this is subscriber-like emote set
+    /// If this is a bitstier emote set
+    bool isBits = false;
+
+    /// @brief If this emote set is a subscriber or similar emote set
     ///
-    /// This is true for follower, subscriber and bitstier emote sets.
+    /// This includes sub and bit emotes
     bool isSubLike = false;
-    bool isFollower = false;
 
     QString title() const;
 };
-using TwitchEmoteSetMap =
-    boost::unordered_flat_map<EmoteSetId, std::shared_ptr<TwitchEmoteSet>>;
+using TwitchEmoteSetMap = boost::unordered_flat_map<EmoteSetId, TwitchEmoteSet>;
 
 class ITwitchEmotes
 {
@@ -66,18 +65,25 @@ public:
                                       const EmoteName &name) = 0;
 };
 
+class TwitchEmotesPrivate;
 class TwitchEmotes : public ITwitchEmotes
 {
 public:
+    TwitchEmotes();
+    ~TwitchEmotes() override;
+
+    TwitchEmotes(const TwitchEmotes &) = delete;
+    TwitchEmotes(TwitchEmotes &&) = delete;
+    TwitchEmotes &operator=(const TwitchEmotes &) = delete;
+    TwitchEmotes &operator=(TwitchEmotes &&) = delete;
+
     static QString cleanUpEmoteCode(const QString &dirtyEmoteCode);
-    TwitchEmotes() = default;
 
     EmotePtr getOrCreateEmote(const EmoteId &id,
                               const EmoteName &name) override;
 
 private:
-    UniqueAccess<std::unordered_map<EmoteId, std::weak_ptr<Emote>>>
-        twitchEmotesCache_;
+    std::unique_ptr<TwitchEmotesPrivate> private_;
 };
 
 }  // namespace chatterino

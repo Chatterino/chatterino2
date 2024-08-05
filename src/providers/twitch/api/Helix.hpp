@@ -438,6 +438,22 @@ struct HelixSentMessage {
     }
 };
 
+struct HelixFollowedChannel {
+    QString broadcasterID;
+    QString broadcasterLogin;
+    QString broadcasterName;
+    QDateTime followedAt;
+
+    explicit HelixFollowedChannel(const QJsonObject &jsonObject)
+        : broadcasterID(jsonObject["broadcaster_id"].toString())
+        , broadcasterLogin(jsonObject["broadcaster_login"].toString())
+        , broadcasterName(jsonObject["broadcaster_name"].toString())
+        , followedAt(QDateTime::fromString(jsonObject["followed_at"].toString(),
+                                           Qt::ISODate))
+    {
+    }
+};
+
 struct HelixSendMessageArgs {
     QString broadcasterID;
     QString senderID;
@@ -1124,6 +1140,13 @@ public:
         FailureCallback<QString> failureCallback,
         CancellationToken &&token) = 0;
 
+    /// https://dev.twitch.tv/docs/api/reference/#get-followed-channels
+    /// (non paginated)
+    virtual void getFollowedChannel(
+        QString userID, QString broadcasterID,
+        ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
+        FailureCallback<QString> failureCallback) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 
 protected:
@@ -1459,6 +1482,13 @@ public:
             pageCallback,
         FailureCallback<QString> failureCallback,
         CancellationToken &&token) final;
+
+    /// https://dev.twitch.tv/docs/api/reference/#get-followed-channels
+    /// (non paginated)
+    void getFollowedChannel(
+        QString userID, QString broadcasterID,
+        ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
+        FailureCallback<QString> failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 
