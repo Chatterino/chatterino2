@@ -350,7 +350,7 @@ std::optional<EmotePtr> TwitchAccount::twitchEmote(const EmoteName &name) const
 
 void TwitchAccount::reloadEmotes(void *caller)
 {
-    if (this->isAnon())
+    if (this->isAnon() || getApp()->isTest())
     {
         return;
     }

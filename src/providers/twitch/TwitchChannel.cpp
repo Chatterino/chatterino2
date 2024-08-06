@@ -235,6 +235,11 @@ void TwitchChannel::setLocalizedName(const QString &name)
 
 void TwitchChannel::refreshTwitchChannelEmotes(bool manualRefresh)
 {
+    if (getApp()->isTest())
+    {
+        return;
+    }
+
     // Twitch's 'Get User Emotes' doesn't assigns a different set-ID to follower
     // emotes compared to subscriber emotes.
     QString setID = TWITCH_SUB_EMOTE_SET_PREFIX % this->roomId();
