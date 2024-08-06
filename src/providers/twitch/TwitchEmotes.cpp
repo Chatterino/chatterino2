@@ -1,12 +1,14 @@
 #include "providers/twitch/TwitchEmotes.hpp"
 
+#include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "common/UniqueAccess.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "util/QStringHash.hpp"
 
-#include <boost/unordered/unordered_flat_map.hpp>
+#include <QStringBuilder>
 
 namespace {
 
@@ -402,19 +404,7 @@ qreal getEmote3xScaleFactor(const EmoteId &id)
 
 namespace chatterino {
 
-class TwitchEmotesPrivate
-{
-public:
-    UniqueAccess<boost::unordered_flat_map<EmoteId, std::weak_ptr<Emote>>>
-        twitchEmotesCache;
-};
-
-TwitchEmotes::TwitchEmotes()
-    : private_(new TwitchEmotesPrivate)
-{
-}
-
-TwitchEmotes::~TwitchEmotes() = default;
+using namespace literals;
 
 QString TwitchEmoteSet::title() const
 {
@@ -462,7 +452,7 @@ EmotePtr TwitchEmotes::getOrCreateEmote(const EmoteId &id,
     auto name = TwitchEmotes::cleanUpEmoteCode(name_.string);
 
     // search in cache or create new emote
-    auto cache = this->private_->twitchEmotesCache.access();
+    auto cache = this->twitchEmotesCache_.access();
     auto shared = (*cache)[id].lock();
 
     if (!shared)
@@ -470,20 +460,53 @@ EmotePtr TwitchEmotes::getOrCreateEmote(const EmoteId &id,
         auto baseSize = getEmoteExpectedBaseSize(id);
         auto emote3xScaleFactor = getEmote3xScaleFactor(id);
         (*cache)[id] = shared = std::make_shared<Emote>(Emote{
-            .name = EmoteName{name},
-            .images =
-                ImageSet{
-                    Image::fromUrl(getEmoteLink(id, "1.0"), 1, baseSize),
-                    Image::fromUrl(getEmoteLink(id, "2.0"), 0.5, baseSize * 2),
-                    Image::fromUrl(getEmoteLink(id, "3.0"), emote3xScaleFactor,
-                                   baseSize * (1.0 / emote3xScaleFactor)),
-                },
-            .tooltip = Tooltip{name.toHtmlEscaped() + "<br>Twitch Emote"},
-            .id = id,
+            EmoteName{name},
+            ImageSet{
+                Image::fromUrl(getEmoteLink(id, "1.0"), 1, baseSize),
+                Image::fromUrl(getEmoteLink(id, "2.0"), 0.5, baseSize * 2),
+                Image::fromUrl(getEmoteLink(id, "3.0"), emote3xScaleFactor,
+                               baseSize * (1.0 / emote3xScaleFactor)),
+            },
+            Tooltip{name.toHtmlEscaped() + "<br>Twitch Emote"},
         });
     }
 
     return shared;
+}
+
+TwitchEmoteSetMeta getTwitchEmoteSetMeta(const HelixChannelEmote &emote)
+{
+    bool isSub = emote.type == u"subscriptions";
+    bool isBits = emote.type == u"bitstier";
+    bool isSubLike = isSub || isBits;
+
+    // A lot of emotes don't have their emote-set-id set, so we create a
+    // virtual emote set that groups emotes by the owner.
+    // Additionally, a lot of emote sets are small, so they're grouped together as globals.
+    auto actualSetID = [&]() -> QString {
+        if (!isSub && !isBits)
+        {
+            return u"x-c2-globals"_s;
+        }
+
+        if (!emote.setID.isEmpty())
+        {
+            return emote.setID;
+        }
+
+        if (isSub)
+        {
+            return TWITCH_SUB_EMOTE_SET_PREFIX % emote.ownerID;
+        }
+        // isBits
+        return TWITCH_BIT_EMOTE_SET_PREFIX % emote.ownerID;
+    }();
+
+    return {
+        .setID = actualSetID,
+        .isBits = isBits,
+        .isSubLike = isSubLike,
+    };
 }
 
 }  // namespace chatterino

@@ -235,10 +235,9 @@ void TwitchChannel::setLocalizedName(const QString &name)
 
 void TwitchChannel::refreshTwitchChannelEmotes(bool manualRefresh)
 {
-    // identical to ID in TwitchAccount::reloadEmotes
     // Twitch's 'Get User Emotes' doesn't assigns a different set-ID to follower
     // emotes compared to subscriber emotes.
-    QString setID = u"x-c2-s-" % this->roomId();
+    QString setID = TWITCH_SUB_EMOTE_SET_PREFIX % this->roomId();
     this->localTwitchEmoteSetID_.set(setID);
     if (getApp()->getAccounts()->twitch.getCurrent()->hasEmoteSet(
             EmoteSetId{setID}))
@@ -247,10 +246,26 @@ void TwitchChannel::refreshTwitchChannelEmotes(bool manualRefresh)
         return;
     }
 
+    auto makeEmotes = [](const auto &emotes) {
+        EmoteMap map;
+        for (const auto &emote : emotes)
+        {
+            if (emote.type != u"follower")
+            {
+                continue;
+            }
+            map.emplace(
+                EmoteName{emote.name},
+                getApp()->getEmotes()->getTwitchEmotes()->getOrCreateEmote(
+                    EmoteId{emote.id}, EmoteName{emote.name}));
+        }
+        return map;
+    };
+
     getHelix()->getFollowedChannel(
         getApp()->getAccounts()->twitch.getCurrent()->getUserId(),
         this->roomId(),
-        [weak{std::weak_ptr{this->shared_from_this()}}](const auto &chan) {
+        [weak{this->weak_from_this()}, makeEmotes](const auto &chan) {
             auto self = std::dynamic_pointer_cast<TwitchChannel>(weak.lock());
             if (!self || !chan)
             {
@@ -258,31 +273,16 @@ void TwitchChannel::refreshTwitchChannelEmotes(bool manualRefresh)
             }
             getHelix()->getChannelEmotes(
                 self->roomId(),
-                [weak](const auto &emotes) {
+                [weak, makeEmotes](const auto &emotes) {
                     auto self =
                         std::dynamic_pointer_cast<TwitchChannel>(weak.lock());
                     if (!self)
                     {
                         return;
                     }
-                    EmoteMap map;
-                    for (const auto &emote : emotes)
-                    {
-                        if (emote.type != u"follower")
-                        {
-                            continue;
-                        }
-                        map.emplace(
-                            EmoteName{emote.name},
-                            getApp()
-                                ->getEmotes()
-                                ->getTwitchEmotes()
-                                ->getOrCreateEmote(EmoteId{emote.id},
-                                                   EmoteName{emote.name}));
-                    }
 
                     self->localTwitchEmotes_.set(
-                        std::make_shared<EmoteMap>(std::move(map)));
+                        std::make_shared<EmoteMap>(makeEmotes(emotes)));
                 },
                 [weak] {
                     auto self = weak.lock();

@@ -9,7 +9,6 @@
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
-#include "util/CancellationToken.hpp"
 #include "util/QStringHash.hpp"
 #include "util/ThreadGuard.hpp"
 
@@ -429,12 +428,6 @@ private:
     QElapsedTimer titleRefreshedTimer_;
     QElapsedTimer clipCreationTimer_;
     bool isClipCreationInProgress{false};
-
-    /// @brief Token to cancel the loading of twitch emotes for this channel
-    ///
-    /// This is used to guard against use-after-free and overlapped loading of
-    /// emotes.
-    ScopedCancellationToken twitchEmotesToken_;
 
     /**
      * This channels 7TV user-id,

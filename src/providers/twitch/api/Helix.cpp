@@ -3263,8 +3263,9 @@ void Helix::paginate(
         }
 
         const auto json = res.parseJson();
+        const auto pagination = json["pagination"_L1].toObject();
 
-        auto cursor = json["pagination"_L1]["cursor"_L1].toString();
+        auto cursor = pagination["cursor"_L1].toString();
         HelixPaginationState state{.done = cursor.isEmpty()};
 
         if (!onPage(json, state))

@@ -107,12 +107,23 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                            MessageColor::Text, FontStyle::ChatMediumBold);
 
     const auto &acc = app->getAccounts()->twitch.getCurrent();
+    const auto &accemotes = *acc->accessEmotes();
     const auto *bttvemotes = app->getBttvEmotes();
     const auto *ffzemotes = app->getFfzEmotes();
     auto flags = MessageElementFlags();
     auto emote = std::optional<EmotePtr>{};
     for (int i = 2; i < words.length(); i++)
     {
+        {  // Twitch emote
+            auto it = accemotes->find({words[i]});
+            if (it != accemotes->end())
+            {
+                b.emplace<EmoteElement>(it->second,
+                                        MessageElementFlag::TwitchEmote);
+                continue;
+            }
+        }  // Twitch emote
+
         {  // bttv/ffz emote
             if ((emote = bttvemotes->emote({words[i]})))
             {

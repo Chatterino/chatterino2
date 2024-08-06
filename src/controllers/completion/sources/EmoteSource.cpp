@@ -99,13 +99,13 @@ void EmoteSource::initializeFromChannel(const Channel *channel)
         {
             if (auto twitch = tc->localTwitchEmotes())
             {
-                addEmotes(emotes, *twitch, "Twitch (follower)");
+                addEmotes(emotes, *twitch, "Local Twitch Emotes");
             }
 
-            addEmotes(
-                emotes,
-                **getApp()->getAccounts()->twitch.getCurrent()->accessEmotes(),
-                "Twitch");
+            if (auto user = getApp()->getAccounts()->twitch.getCurrent())
+            {
+                addEmotes(emotes, **user->accessEmotes(), "Twitch Emote");
+            }
 
             // TODO extract "Channel {BetterTTV,7TV,FrankerFaceZ}" text into a #define.
             if (auto bttv = tc->bttvEmotes())

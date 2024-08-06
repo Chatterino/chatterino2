@@ -86,6 +86,33 @@ Qt::CaseSensitivity IgnorePhrase::caseSensitivity() const
     return this->isCaseSensitive_ ? Qt::CaseSensitive : Qt::CaseInsensitive;
 }
 
+const std::unordered_map<EmoteName, EmotePtr> &IgnorePhrase::getEmotes() const
+{
+    return this->emotes_;
+}
+
+bool IgnorePhrase::containsEmote() const
+{
+    if (!this->emotesChecked_)
+    {
+        const auto &accvec = getApp()->getAccounts()->twitch.accounts;
+        for (const auto &acc : accvec)
+        {
+            const auto &accemotes = *acc->accessEmotes();
+            for (const auto &emote : *accemotes)
+            {
+                if (this->replace_.contains(emote.first.string,
+                                            Qt::CaseSensitive))
+                {
+                    this->emotes_.emplace(emote.first, emote.second);
+                }
+            }
+        }
+        this->emotesChecked_ = true;
+    }
+    return !this->emotes_.empty();
+}
+
 IgnorePhrase IgnorePhrase::createEmpty()
 {
     return IgnorePhrase(QString(), false, false,

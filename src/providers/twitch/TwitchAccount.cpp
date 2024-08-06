@@ -30,20 +30,6 @@
 
 #include <ranges>
 
-namespace {
-
-using namespace chatterino;
-
-size_t hashEmoteSet(const TwitchEmoteSet &set)
-{
-    auto &&rng = set.emotes | std::views::transform([](const auto &it) {
-                     return it->id;
-                 });
-    return boost::hash_unordered_range(std::begin(rng), std::end(rng));
-}
-
-}  // namespace
-
 namespace chatterino {
 
 using namespace literals;
@@ -386,47 +372,23 @@ void TwitchAccount::reloadEmotes(void *caller)
                      twitchUsers](const HelixChannelEmote &emote) {
         EmoteId id{emote.id};
         EmoteName name{emote.name};
-        bool isSub = emote.type == u"subscriptions";
-        bool isBits = emote.type == u"bitstier";
-        bool isSubLike = isSub || isBits;
-
-        // A lot of emotes don't have their emote-set-id set, so we create a
-        // virtual emote set that groups emotes by the owner.
-        // Additionally, a lot of emote sets are small, so they're grouped together as globals.
-        auto actualSetID = [&]() -> QString {
-            if (!isSub && !isBits)
-            {
-                return u"x-c2-globals"_s;
-            }
-
-            if (!emote.setID.isEmpty())
-            {
-                return emote.setID;
-            }
-
-            // identical to ID in TwitchChannel::refreshTwitchChannelEmotes
-            if (isSub)
-            {
-                return u"x-c2-s-" % emote.ownerID;
-            }
-            // isBits
-            return u"x-c2-b-" % emote.ownerID;
-        }();
+        auto meta = getTwitchEmoteSetMeta(emote);
 
         auto emotePtr = twitchEmotes->getOrCreateEmote(id, name);
         (*emoteMap)[name] = emotePtr;
 
-        auto set = sets->find(EmoteSetId{actualSetID});
+        auto set = sets->find(EmoteSetId{meta.setID});
         if (set == sets->end())
         {
-            set = sets->emplace(EmoteSetId{actualSetID},
-                                TwitchEmoteSet{
-                                    .owner = twitchUsers->resolveID(UserId{
-                                        isSubLike ? emote.ownerID : QString()}),
-                                    .emotes = {},
-                                    .isBits = isBits,
-                                    .isSubLike = isSubLike,
-                                })
+            set = sets->emplace(
+                          EmoteSetId{meta.setID},
+                          TwitchEmoteSet{
+                              .owner = twitchUsers->resolveID(UserId{
+                                  meta.isSubLike ? emote.ownerID : QString()}),
+                              .emotes = {},
+                              .isBits = meta.isBits,
+                              .isSubLike = meta.isSubLike,
+                          })
                       .first;
         }
         set->second.emotes.emplace_back(std::move(emotePtr));

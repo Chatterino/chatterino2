@@ -86,6 +86,8 @@ public:
     SharedAccessGuard<std::shared_ptr<const EmoteMap>> accessEmotes() const;
     std::optional<EmotePtr> twitchEmote(const EmoteName &name) const;
 
+    /// Once emotes are reloaded, TwitchAccountManager::emotesReloaded is
+    /// invoked with @a caller and an optional error.
     void reloadEmotes(void *caller = nullptr);
 
 private:

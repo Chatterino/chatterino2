@@ -12,8 +12,7 @@ namespace {
 
 auto withSelf(auto ptr, auto cb)
 {
-    auto weak = ptr->weak_from_this();
-    return [weak = std::move(weak), cb = std::move(cb)](auto... args) {
+    return [weak{ptr->weak_from_this()}, cb = std::move(cb)](auto... args) {
         auto self = weak.lock();
         if (!self)
         {
