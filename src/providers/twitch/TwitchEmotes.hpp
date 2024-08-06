@@ -61,7 +61,7 @@ using TwitchEmoteSetMap = boost::unordered_flat_map<EmoteSetId, TwitchEmoteSet>;
 struct HelixChannelEmote;
 
 constexpr QStringView TWITCH_SUB_EMOTE_SET_PREFIX = u"x-c2-s-";
-constexpr QStringView TWITCH_BIT_EMOTE_SET_PREFIX = u"x-c2-s-";
+constexpr QStringView TWITCH_BIT_EMOTE_SET_PREFIX = u"x-c2-b-";
 
 struct TwitchEmoteSetMeta {
     QString setID;

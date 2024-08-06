@@ -23,12 +23,9 @@
 #include "util/QStringHash.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
-#include <boost/functional/hash.hpp>
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <QStringBuilder>
 #include <QThread>
-
-#include <ranges>
 
 namespace chatterino {
 
@@ -363,7 +360,7 @@ void TwitchAccount::reloadEmotes(void *caller)
 
     auto sets = std::make_shared<TwitchEmoteSetMap>();
     auto emoteMap = std::make_shared<EmoteMap>();
-    auto nCalls = std::make_shared<size_t>();  // TODO: remove before merge
+    auto nCalls = std::make_shared<size_t>();
 
     auto *twitchEmotes = getApp()->getEmotes()->getTwitchEmotes();
     auto *twitchUsers = getApp()->getTwitchUsers();
