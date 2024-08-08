@@ -19,6 +19,8 @@
 #include <QStringBuilder>
 #include <semver/semver.hpp>
 
+#include <thread>
+
 namespace {
 
 using namespace chatterino;
@@ -73,6 +75,26 @@ bool Updates::isDowngradeOf(const QString &online, const QString &current)
     }
 
     return onlineVersion < currentVersion;
+}
+
+void Updates::deleteOldFiles()
+{
+    auto thread = std::thread([dir = paths.miscDirectory] {
+        {
+            auto path = combinePath(dir, "Update.exe");
+            if (QFile::exists(path))
+            {
+                QFile::remove(path);
+            }
+        }
+        {
+            auto path = combinePath(dir, "update.zip");
+            if (QFile::exists(path))
+            {
+                QFile::remove(path);
+            }
+        }
+    });
 }
 
 const QString &Updates::getCurrentVersion() const
