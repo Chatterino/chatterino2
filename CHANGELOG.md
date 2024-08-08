@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added transparent overlay window (default keybind: `CTRL + ALT + N`). (#4746)
 - Major: Release plugins alpha. (#5288)
 - Major: Improve high-DPI support on Windows. (#4868, #5391)
 - Minor: Add option to customise Moderation buttons with images. (#5369)

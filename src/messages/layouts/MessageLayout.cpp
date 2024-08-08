@@ -201,10 +201,15 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
 {
     MessagePaintResult result;
 
-    QPixmap *pixmap = this->ensureBuffer(ctx.painter, ctx.canvasWidth);
+    QPixmap *pixmap = this->ensureBuffer(ctx.painter, ctx.canvasWidth,
+                                         ctx.messageColors.hasTransparency);
 
     if (!this->bufferValid_)
     {
+        if (ctx.messageColors.hasTransparency)
+        {
+            pixmap->fill(Qt::transparent);
+        }
         this->updateBuffer(pixmap, ctx);
     }
 
@@ -278,7 +283,7 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
     return result;
 }
 
-QPixmap *MessageLayout::ensureBuffer(QPainter &painter, int width)
+QPixmap *MessageLayout::ensureBuffer(QPainter &painter, int width, bool clear)
 {
     if (this->buffer_ != nullptr)
     {
@@ -291,6 +296,11 @@ QPixmap *MessageLayout::ensureBuffer(QPainter &painter, int width)
         int(this->container_.getHeight() *
             painter.device()->devicePixelRatioF()));
     this->buffer_->setDevicePixelRatio(painter.device()->devicePixelRatioF());
+
+    if (clear)
+    {
+        this->buffer_->fill(Qt::transparent);
+    }
 
     this->bufferValid_ = false;
     DebugCount::increase("message drawing buffers");
