@@ -99,7 +99,7 @@ bool IgnorePhrase::containsEmote() const
         for (const auto &acc : accvec)
         {
             const auto &accemotes = *acc->accessEmotes();
-            for (const auto &emote : accemotes.emotes)
+            for (const auto &emote : *accemotes)
             {
                 if (this->replace_.contains(emote.first.string,
                                             Qt::CaseSensitive))

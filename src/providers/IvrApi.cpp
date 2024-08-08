@@ -31,28 +31,6 @@ void IvrApi::getSubage(QString userName, QString channelName,
         .execute();
 }
 
-void IvrApi::getBulkEmoteSets(QString emoteSetList,
-                              ResultCallback<QJsonArray> successCallback,
-                              IvrFailureCallback failureCallback)
-{
-    QUrlQuery urlQuery;
-    urlQuery.addQueryItem("set_id", emoteSetList);
-
-    this->makeRequest("twitch/emotes/sets", urlQuery)
-        .onSuccess([successCallback, failureCallback](auto result) {
-            auto root = result.parseJsonArray();
-
-            successCallback(root);
-        })
-        .onError([failureCallback](auto result) {
-            qCWarning(chatterinoIvr)
-                << "Failed IVR API Call!" << result.formatError()
-                << QString(result.getData());
-            failureCallback();
-        })
-        .execute();
-}
-
 NetworkRequest IvrApi::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));

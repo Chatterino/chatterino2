@@ -540,7 +540,8 @@ void Helix::loadBlocks(QString userId,
     size_t receivedItems = 0;
     this->paginate(
         u"users/blocks"_s, query,
-        [pageCallback, receivedItems](const QJsonObject &json) mutable {
+        [pageCallback, receivedItems](const QJsonObject &json,
+                                      const auto & /*state*/) mutable {
             const auto data = json["data"_L1].toArray();
 
             if (data.isEmpty())
@@ -3063,6 +3064,123 @@ void Helix::sendChatMessage(
         .execute();
 }
 
+void Helix::getUserEmotes(
+    QString userID, QString broadcasterID,
+    ResultCallback<std::vector<HelixChannelEmote>, HelixPaginationState>
+        pageCallback,
+    FailureCallback<QString> failureCallback, CancellationToken &&token)
+{
+    QUrlQuery query{{u"user_id"_s, userID}};
+    if (!broadcasterID.isEmpty())
+    {
+        query.addQueryItem(u"broadcaster_id"_s, broadcasterID);
+    }
+
+    this->paginate(
+        u"chat/emotes/user"_s, query,
+        [pageCallback](const QJsonObject &json, const auto &state) mutable {
+            const auto data = json["data"_L1].toArray();
+
+            if (data.isEmpty())
+            {
+                return false;
+            }
+
+            std::vector<HelixChannelEmote> emotes;
+            emotes.reserve(data.count());
+
+            for (const auto &emote : data)
+            {
+                emotes.emplace_back(emote.toObject());
+            }
+
+            pageCallback(emotes, state);
+
+            return true;
+        },
+        [failureCallback](const NetworkResult &result) {
+            if (!result.status())
+            {
+                failureCallback(result.formatError());
+                return;
+            }
+
+            const auto obj = result.parseJson();
+            auto message = obj["message"].toString();
+
+            switch (*result.status())
+            {
+                case 401: {
+                    if (message.startsWith("Missing scope",
+                                           Qt::CaseInsensitive))
+                    {
+                        failureCallback("Missing required scope. Re-login with "
+                                        "your account and try again.");
+                        break;
+                    }
+                    [[fallthrough]];
+                }
+                default: {
+                    qCWarning(chatterinoTwitch)
+                        << "Helix get user emotes, unhandled error data:"
+                        << result.formatError() << result.getData() << obj;
+                    failureCallback(message);
+                }
+            }
+        },
+        std::move(token));
+}
+
+void Helix::getFollowedChannel(
+    QString userID, QString broadcasterID,
+    ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
+    FailureCallback<QString> failureCallback)
+{
+    this->makeGet("channels/followed",
+                  {
+                      {u"user_id"_s, userID},
+                      {u"broadcaster_id"_s, broadcasterID},
+                  })
+        .onSuccess([successCallback](auto result) {
+            if (result.status() != 200)
+            {
+                qCWarning(chatterinoTwitch)
+                    << "Success result for getting badges was "
+                    << result.formatError() << "but we expected it to be 200";
+            }
+
+            const auto response = result.parseJson();
+            const auto channel = response["data"_L1].toArray().at(0);
+            if (channel.isObject())
+            {
+                successCallback(HelixFollowedChannel(channel.toObject()));
+            }
+            else
+            {
+                successCallback(std::nullopt);
+            }
+        })
+        .onError([failureCallback](const auto &result) -> void {
+            if (!result.status())
+            {
+                failureCallback(result.formatError());
+                return;
+            }
+
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
+            if (!message.isEmpty())
+            {
+                failureCallback(message);
+            }
+            else
+            {
+                failureCallback(result.formatError());
+            }
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(const QString &url, const QUrlQuery &urlQuery,
                                   NetworkRequestType type)
 {
@@ -3120,10 +3238,12 @@ NetworkRequest Helix::makePatch(const QString &url, const QUrlQuery &urlQuery)
     return this->makeRequest(url, urlQuery, NetworkRequestType::Patch);
 }
 
-void Helix::paginate(const QString &url, const QUrlQuery &baseQuery,
-                     std::function<bool(const QJsonObject &)> onPage,
-                     std::function<void(NetworkResult)> onError,
-                     CancellationToken &&cancellationToken)
+void Helix::paginate(
+    const QString &url, const QUrlQuery &baseQuery,
+    std::function<bool(const QJsonObject &, const HelixPaginationState &state)>
+        onPage,
+    std::function<void(NetworkResult)> onError,
+    CancellationToken &&cancellationToken)
 {
     auto onSuccess =
         std::make_shared<std::function<void(NetworkResult)>>(nullptr);
@@ -3143,14 +3263,19 @@ void Helix::paginate(const QString &url, const QUrlQuery &baseQuery,
         }
 
         const auto json = res.parseJson();
-        if (!onPage(json))
+        const auto pagination = json["pagination"_L1].toObject();
+
+        auto cursor = pagination["cursor"_L1].toString();
+        HelixPaginationState state{.done = cursor.isEmpty()};
+
+        if (!onPage(json, state))
         {
             // The consumer doesn't want any more pages
             return;
         }
 
-        auto cursor = json["pagination"_L1]["cursor"_L1].toString();
-        if (cursor.isEmpty())
+        // After done is set, onPage must never be called again
+        if (state.done)
         {
             return;
         }

@@ -57,6 +57,7 @@ class SeventvEventAPI;
 class ILinkResolver;
 class IStreamerMode;
 class IAbstractIrcServer;
+class ITwitchUsers;
 
 class IApplication
 {
@@ -105,6 +106,7 @@ public:
     virtual SeventvEventAPI *getSeventvEventAPI() = 0;
     virtual ILinkResolver *getLinkResolver() = 0;
     virtual IStreamerMode *getStreamerMode() = 0;
+    virtual ITwitchUsers *getTwitchUsers() = 0;
 };
 
 class Application : public IApplication
@@ -176,6 +178,7 @@ private:
     const std::unique_ptr<Logging> logging;
     std::unique_ptr<ILinkResolver> linkResolver;
     std::unique_ptr<IStreamerMode> streamerMode;
+    std::unique_ptr<ITwitchUsers> twitchUsers;
 #ifdef CHATTERINO_HAVE_PLUGINS
     std::unique_ptr<PluginController> plugins;
 #endif
@@ -231,6 +234,7 @@ public:
 
     ILinkResolver *getLinkResolver() override;
     IStreamerMode *getStreamerMode() override;
+    ITwitchUsers *getTwitchUsers() override;
 
 private:
     void initPubSub();

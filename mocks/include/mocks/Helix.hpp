@@ -410,6 +410,23 @@ public:
          (FailureCallback<HelixSendMessageError, QString> failureCallback)),
         (override));
 
+    // get user emotes
+    MOCK_METHOD(
+        void, getUserEmotes,
+        (QString userID, QString broadcasterID,
+         (ResultCallback<std::vector<HelixChannelEmote>, HelixPaginationState>
+              successCallback),
+         FailureCallback<QString> failureCallback, CancellationToken &&token),
+        (override));
+
+    // get followed channel
+    MOCK_METHOD(
+        void, getFollowedChannel,
+        (QString userID, QString broadcasterID,
+         ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
+         FailureCallback<QString> failureCallback),
+        (override));
+
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
                 (override));
 

@@ -58,6 +58,11 @@ public:
 
     SignalVector<std::shared_ptr<TwitchAccount>> accounts;
 
+    /// The signal is invoked with (caller, error) where caller is the argument
+    /// passed to reloadEmotes() and error is an optional error (if this is
+    /// null, there isn't any error).
+    pajlada::Signals::Signal<void *, QString> emotesReloaded;
+
 private:
     enum class AddUserResponse {
         UserAlreadyExists,
