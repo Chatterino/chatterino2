@@ -241,22 +241,7 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
     }
 #endif
 
-    auto thread = std::thread([dir = paths.miscDirectory] {
-        {
-            auto path = combinePath(dir, "Update.exe");
-            if (QFile::exists(path))
-            {
-                QFile::remove(path);
-            }
-        }
-        {
-            auto path = combinePath(dir, "update.zip");
-            if (QFile::exists(path))
-            {
-                QFile::remove(path);
-            }
-        }
-    });
+    updates.deleteOldFiles();
 
     // Clear the cache 1 minute after start.
     QTimer::singleShot(60 * 1000, [cachePath = paths.cacheDirectory(),
