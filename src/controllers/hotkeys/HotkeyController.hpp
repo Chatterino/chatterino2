@@ -85,6 +85,14 @@ public:
 
     pajlada::Signals::NoArgSignal onItemsUpdated;
 
+    /**
+     * @brief Removes hotkeys that were previously added as default hotkeys.
+     *
+     * This will potentially remove hotkeys that were explicitly added by the user if they added a hotkey
+     * with the exact same parameters as the default hotkey.
+     */
+    void clearRemovedDefaults();
+
 private:
     /**
      * @brief load hotkeys from under the /hotkeys settings path
@@ -117,6 +125,17 @@ private:
     void tryAddDefault(std::set<QString> &addedHotkeys, HotkeyCategory category,
                        QKeySequence keySequence, QString action,
                        std::vector<QString> args, QString name);
+
+    /**
+     * @brief try to remove a default hotkey if it hasn't already been modified by the user
+     *
+     * NOTE: This could also remove a user-added hotkey assuming it matches all parameters
+     *
+     * @returns true if the hotkey was removed
+     **/
+    bool tryRemoveDefault(HotkeyCategory category, QKeySequence keySequence,
+                          QString action, std::vector<QString> args,
+                          QString name);
 
     /**
      * @brief show an error dialog about a hotkey in a standard format

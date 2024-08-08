@@ -459,6 +459,8 @@ CommandController::CommandController(const Paths &paths)
     this->registerCommand("/debug-force-image-unload",
                           &commands::forceImageUnload);
 
+    this->registerCommand("/debug-test", &commands::debugTest);
+
     this->registerCommand("/shield", &commands::shieldModeOn);
     this->registerCommand("/shieldoff", &commands::shieldModeOff);
 
