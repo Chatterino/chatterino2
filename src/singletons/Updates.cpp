@@ -41,9 +41,9 @@ const QString CHATTERINO_OS = u"freebsd"_s;
 #else
 const QString CHATTERINO_OS = u"unknown"_s;
 #endif
-;
 
 }  // namespace
+
 namespace chatterino {
 
 Updates::Updates(const Paths &paths_)
