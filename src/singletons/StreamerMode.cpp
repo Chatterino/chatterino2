@@ -152,6 +152,11 @@ class StreamerModePrivate
 {
 public:
     StreamerModePrivate(StreamerMode *parent_);
+    ~StreamerModePrivate();
+    StreamerModePrivate(const StreamerModePrivate &) = delete;
+    StreamerModePrivate(StreamerModePrivate &&) = delete;
+    StreamerModePrivate &operator=(const StreamerModePrivate &) = delete;
+    StreamerModePrivate &operator=(StreamerModePrivate &&) = delete;
 
     [[nodiscard]] bool isEnabled() const;
 
@@ -217,6 +222,12 @@ StreamerModePrivate::StreamerModePrivate(StreamerMode *parent)
         this->settingChanged(getSettings()->enableStreamerMode.getEnum());
     });
     this->thread_.start();
+}
+
+StreamerModePrivate::~StreamerModePrivate()
+{
+    this->thread_.quit();
+    this->thread_.wait(50);
 }
 
 bool StreamerModePrivate::isEnabled() const

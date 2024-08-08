@@ -2,6 +2,7 @@
 
 #include "mocks/DisabledStreamerMode.hpp"
 #include "mocks/EmptyApplication.hpp"
+#include "providers/bttv/BttvLiveUpdates.hpp"
 #include "singletons/Settings.hpp"
 
 #include <QString>
@@ -28,6 +29,16 @@ public:
     IStreamerMode *getStreamerMode() override
     {
         return &this->streamerMode;
+    }
+
+    BttvLiveUpdates *getBttvLiveUpdates() override
+    {
+        return nullptr;
+    }
+
+    SeventvEventAPI *getSeventvEventAPI() override
+    {
+        return nullptr;
     }
 
     Settings settings;
