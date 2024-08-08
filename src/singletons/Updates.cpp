@@ -17,9 +17,8 @@
 #include <QProcess>
 #include <QRegularExpression>
 #include <QStringBuilder>
+#include <QtConcurrent>
 #include <semver/semver.hpp>
-
-#include <thread>
 
 namespace {
 
@@ -79,7 +78,7 @@ bool Updates::isDowngradeOf(const QString &online, const QString &current)
 
 void Updates::deleteOldFiles()
 {
-    auto thread = std::thread([dir = paths.miscDirectory] {
+    std::ignore = QtConcurrent::run([dir{this->paths.miscDirectory}] {
         {
             auto path = combinePath(dir, "Update.exe");
             if (QFile::exists(path))
