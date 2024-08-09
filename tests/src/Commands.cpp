@@ -3,7 +3,7 @@
 #include "controllers/commands/CommandContext.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/commands/common/ChannelAction.hpp"
-#include "mocks/EmptyApplication.hpp"
+#include "mocks/BaseApplication.hpp"
 #include "mocks/Helix.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
@@ -22,12 +22,11 @@ using ::testing::StrictMock;
 
 namespace {
 
-class MockApplication : mock::EmptyApplication
+class MockApplication : public mock::BaseApplication
 {
 public:
     MockApplication()
-        : settings(this->settingsDir.filePath("settings.json"))
-        , commands(this->paths_)
+        : commands(this->paths_)
     {
     }
 
@@ -56,7 +55,6 @@ public:
         return &this->chatLogger;
     }
 
-    Settings settings;
     AccountController accounts;
     CommandController commands;
     mock::MockTwitchIrcServer twitch;

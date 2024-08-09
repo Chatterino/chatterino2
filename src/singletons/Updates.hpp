@@ -31,6 +31,11 @@ public:
 
     static bool isDowngradeOf(const QString &online, const QString &current);
 
+    /**
+     * @brief Delete old files that belong to the update process
+     */
+    void deleteOldFiles();
+
     void checkForUpdates();
     const QString &getCurrentVersion() const;
     const QString &getOnlineVersion() const;
