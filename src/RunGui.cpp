@@ -279,8 +279,6 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
 #endif
 
     app.fakeDtor();
-
-    _exit(0);
 }
 
 }  // namespace chatterino
