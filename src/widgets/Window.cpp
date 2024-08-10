@@ -658,7 +658,7 @@ void Window::addShortcuts()
              }
              else if (arg == "toggleLiveOnly")
              {
-                 // NOOP: Removed 2024-08-04
+                 // NOOP: Removed 2024-08-04 https://github.com/Chatterino/chatterino2/pull/5530
                  auto *selectedPage = this->notebook_->getSelectedPage();
                  if (selectedPage != nullptr)
                  {
