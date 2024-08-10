@@ -659,21 +659,8 @@ void Window::addShortcuts()
              else if (arg == "toggleLiveOnly")
              {
                  // NOOP: Removed 2024-08-04 https://github.com/Chatterino/chatterino2/pull/5530
-                 auto *selectedPage = this->notebook_->getSelectedPage();
-                 if (selectedPage != nullptr)
-                 {
-                     auto *selectedSplit = selectedPage->getSelectedSplit();
-                     if (selectedSplit != nullptr)
-                     {
-                         auto selectedChannel = selectedSplit->getChannel();
-                         if (selectedChannel != nullptr)
-                         {
-                             selectedChannel->addSystemMessage(
-                                 "setTabVisibility's toggleLiveOnly has been "
-                                 "removed");
-                         }
-                     }
-                 }
+                 return "toggleLiveOnly is no longer a valid argument for "
+                        "setTabVisibility";
              }
              else
              {
