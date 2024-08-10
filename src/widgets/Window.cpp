@@ -667,8 +667,8 @@ void Window::addShortcuts()
                  qCWarning(chatterinoHotkeys)
                      << "Invalid argument for setTabVisibility hotkey: " << arg;
                  return QString("Invalid argument for setTabVisibility hotkey: "
-                                "%1. Use \"on\", \"off\", \"toggle\", "
-                                "\"liveOnly\", or \"toggleLiveOnly\".")
+                                "%1. Use \"on\", \"off\", \"toggle\", or "
+                                "\"liveOnly\".")
                      .arg(arg);
              }
 
