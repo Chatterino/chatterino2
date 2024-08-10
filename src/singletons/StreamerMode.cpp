@@ -238,7 +238,7 @@ void StreamerModePrivate::start()
 StreamerModePrivate::~StreamerModePrivate()
 {
     this->thread_.quit();
-    this->thread_.wait(50);
+    this->thread_.wait(500);
 }
 
 bool StreamerModePrivate::isEnabled() const
