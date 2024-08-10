@@ -280,6 +280,8 @@ void Application::initialize(Settings &settings, const Paths &paths)
 
     this->initBttvLiveUpdates();
     this->initSeventvEventAPI();
+
+    this->streamerMode->start();
 }
 
 int Application::run(QApplication &qtApp)

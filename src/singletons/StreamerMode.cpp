@@ -160,6 +160,8 @@ public:
 
     [[nodiscard]] bool isEnabled() const;
 
+    void start();
+
 private:
     void settingChanged(StreamerModeSetting value);
     void setEnabled(bool enabled);
@@ -194,6 +196,11 @@ bool StreamerMode::isEnabled() const
     return this->private_->isEnabled();
 }
 
+void StreamerMode::start()
+{
+    this->private_->start();
+}
+
 StreamerModePrivate::StreamerModePrivate(StreamerMode *parent)
     : parent_(parent)
 {
@@ -221,6 +228,10 @@ StreamerModePrivate::StreamerModePrivate(StreamerMode *parent)
     QObject::connect(&this->thread_, &QThread::started, [this] {
         this->settingChanged(getSettings()->enableStreamerMode.getEnum());
     });
+}
+
+void StreamerModePrivate::start()
+{
     this->thread_.start();
 }
 
