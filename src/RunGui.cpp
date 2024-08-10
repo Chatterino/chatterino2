@@ -277,10 +277,6 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
     // flushing windows clipboard to keep copied messages
     flushClipboard();
 #endif
-
-    app.fakeDtor();
-
-    _exit(0);
 }
 
 }  // namespace chatterino

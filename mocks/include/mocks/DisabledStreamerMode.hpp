@@ -9,4 +9,8 @@ public:
     {
         return false;
     }
+
+    void start() override
+    {
+    }
 };
