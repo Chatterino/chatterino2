@@ -93,6 +93,11 @@ public:
      */
     void clearRemovedDefaults();
 
+    /// Returns the names of removed or deprecated hotkeys the user had at launch, if any
+    ///
+    /// This is used to populate the on-launch warning in the hotkey dialog
+    const std::set<QString> &removedOrDeprecatedHotkeys() const;
+
 private:
     /**
      * @brief load hotkeys from under the /hotkeys settings path
@@ -137,6 +142,11 @@ private:
                           QString action, std::vector<QString> args,
                           QString name);
 
+    /// Add hotkeys matching the given arguments to list of removed/deprecated hotkeys
+    /// that the user should remove
+    void warnForRemovedHotkeyActions(HotkeyCategory category, QString action,
+                                     std::vector<QString> args);
+
     /**
      * @brief show an error dialog about a hotkey in a standard format
      **/
@@ -155,6 +165,9 @@ private:
         const std::optional<std::vector<QString>> &arguments = {}) const;
 
     friend class KeyboardSettingsPage;
+
+    /// Stores a list of names the user had at launch that contained deprecated or removed hotkey actions
+    std::set<QString> removedOrDeprecatedHotkeys_;
 
     SignalVector<std::shared_ptr<Hotkey>> hotkeys_;
     pajlada::Signals::SignalHolder signalHolder_;

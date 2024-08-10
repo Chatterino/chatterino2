@@ -210,6 +210,11 @@ bool HotkeyController::isDuplicate(std::shared_ptr<Hotkey> hotkey,
     return false;
 }
 
+const std::set<QString> &HotkeyController::removedOrDeprecatedHotkeys() const
+{
+    return this->removedOrDeprecatedHotkeys_;
+}
+
 void HotkeyController::loadHotkeys()
 {
     auto defaultHotkeysAdded =
@@ -541,6 +546,9 @@ void HotkeyController::clearRemovedDefaults()
     this->tryRemoveDefault(HotkeyCategory::Window, QKeySequence("Ctrl+Shift+L"),
                            "setTabVisibility", {"toggleLiveOnly"},
                            "toggle live tabs only");
+
+    this->warnForRemovedHotkeyActions(HotkeyCategory::Window,
+                                      "setTabVisibility", {"toggleLiveOnly"});
 }
 
 void HotkeyController::tryAddDefault(std::set<QString> &addedHotkeys,
@@ -571,6 +579,20 @@ bool HotkeyController::tryRemoveDefault(HotkeyCategory category,
                hotkey->action() == action && hotkey->arguments() == args &&
                hotkey->name() == name;
     });
+}
+
+void HotkeyController::warnForRemovedHotkeyActions(HotkeyCategory category,
+                                                   QString action,
+                                                   std::vector<QString> args)
+{
+    for (const auto &hotkey : this->hotkeys_)
+    {
+        if (hotkey->category() == category && hotkey->action() == action &&
+            hotkey->arguments() == args)
+        {
+            this->removedOrDeprecatedHotkeys_.insert(hotkey->name());
+        }
+    }
 }
 
 void HotkeyController::showHotkeyError(const std::shared_ptr<Hotkey> &hotkey,
