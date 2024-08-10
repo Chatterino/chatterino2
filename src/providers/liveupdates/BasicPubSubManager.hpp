@@ -8,10 +8,12 @@
 #include "providers/twitch/PubSubHelpers.hpp"
 #include "util/DebugCount.hpp"
 #include "util/ExponentialBackoff.hpp"
+#include "util/RenameThread.hpp"
 
 #include <pajlada/signals/signal.hpp>
 #include <QJsonObject>
 #include <QString>
+#include <QStringBuilder>
 #include <websocketpp/client.hpp>
 
 #include <algorithm>
@@ -59,8 +61,9 @@ template <typename Subscription>
 class BasicPubSubManager
 {
 public:
-    BasicPubSubManager(QString host)
+    BasicPubSubManager(QString host, QString shortName)
         : host_(std::move(host))
+        , shortName_(std::move(shortName))
     {
         this->websocketClient_.set_access_channels(
             websocketpp::log::alevel::all);
@@ -115,6 +118,8 @@ public:
         this->mainThread_.reset(new std::thread([this] {
             runThread();
         }));
+
+        renameThread(*this->mainThread_.get(), "BPSM-" % this->shortName_);
     }
 
     void stop()
@@ -372,6 +377,9 @@ private:
     std::unique_ptr<std::thread> mainThread_;
 
     const QString host_;
+
+    /// Short name of the service (e.g. "7TV" or "BTTV")
+    const QString shortName_;
 
     bool stopping_{false};
 };
