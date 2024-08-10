@@ -10,7 +10,7 @@
 namespace chatterino {
 
 template <typename T>
-void renameThread(T &&thread, const QString &threadName)
+void renameThread(T &thread, const QString &threadName)
 {
 #ifdef Q_OS_LINUX
     pthread_setname_np(thread.native_handle(), threadName.toLocal8Bit());
