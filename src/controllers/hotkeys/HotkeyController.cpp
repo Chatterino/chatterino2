@@ -8,7 +8,53 @@
 
 #include <QShortcut>
 
+namespace {
+
+using namespace chatterino;
+
+const std::map<HotkeyCategory, HotkeyCategoryData> HOTKEY_CATEGORIES = {
+    {HotkeyCategory::PopupWindow, {"popupWindow", "Popup Windows"}},
+    {HotkeyCategory::Split, {"split", "Split"}},
+    {HotkeyCategory::SplitInput, {"splitInput", "Split input box"}},
+    {HotkeyCategory::Window, {"window", "Window"}},
+};
+
+}  // namespace
+
 namespace chatterino {
+
+const std::map<HotkeyCategory, HotkeyCategoryData> &hotkeyCategories()
+{
+    return HOTKEY_CATEGORIES;
+}
+
+QString hotkeyCategoryName(HotkeyCategory category)
+{
+    if (!HOTKEY_CATEGORIES.contains(category))
+    {
+        qCWarning(chatterinoHotkeys) << "Invalid HotkeyCategory passed to "
+                                        "categoryDisplayName function";
+        return {};
+    }
+
+    const auto &categoryData = HOTKEY_CATEGORIES.at(category);
+
+    return categoryData.name;
+}
+
+QString hotkeyCategoryDisplayName(HotkeyCategory category)
+{
+    if (!HOTKEY_CATEGORIES.contains(category))
+    {
+        qCWarning(chatterinoHotkeys) << "Invalid HotkeyCategory passed to "
+                                        "categoryDisplayName function";
+        return {};
+    }
+
+    const auto &categoryData = HOTKEY_CATEGORIES.at(category);
+
+    return categoryData.displayName;
+}
 
 static bool hotkeySortCompare_(const std::shared_ptr<Hotkey> &a,
                                const std::shared_ptr<Hotkey> &b)
@@ -133,7 +179,7 @@ int HotkeyController::replaceHotkey(QString oldName,
 std::optional<HotkeyCategory> HotkeyController::hotkeyCategoryFromName(
     QString categoryName)
 {
-    for (const auto &[category, data] : this->categories())
+    for (const auto &[category, data] : HOTKEY_CATEGORIES)
     {
         if (data.name == categoryName)
         {
@@ -162,40 +208,6 @@ bool HotkeyController::isDuplicate(std::shared_ptr<Hotkey> hotkey,
         }
     }
     return false;
-}
-
-QString HotkeyController::categoryDisplayName(HotkeyCategory category) const
-{
-    if (this->hotkeyCategories_.count(category) == 0)
-    {
-        qCWarning(chatterinoHotkeys) << "Invalid HotkeyCategory passed to "
-                                        "categoryDisplayName function";
-        return QString();
-    }
-
-    const auto &categoryData = this->hotkeyCategories_.at(category);
-
-    return categoryData.displayName;
-}
-
-QString HotkeyController::categoryName(HotkeyCategory category) const
-{
-    if (this->hotkeyCategories_.count(category) == 0)
-    {
-        qCWarning(chatterinoHotkeys) << "Invalid HotkeyCategory passed to "
-                                        "categoryName function";
-        return QString();
-    }
-
-    const auto &categoryData = this->hotkeyCategories_.at(category);
-
-    return categoryData.name;
-}
-
-const std::map<HotkeyCategory, HotkeyCategoryData> &
-    HotkeyController::categories() const
-{
-    return this->hotkeyCategories_;
 }
 
 void HotkeyController::loadHotkeys()
@@ -283,7 +295,7 @@ void HotkeyController::saveHotkeys()
         pajlada::Settings::Setting<QString>::set(
             section + "/keySequence", hotkey->keySequence().toString());
 
-        auto categoryName = this->categoryName(hotkey->category());
+        auto categoryName = hotkeyCategoryName(hotkey->category());
         pajlada::Settings::Setting<QString>::set(section + "/category",
                                                  categoryName);
         pajlada::Settings::Setting<std::vector<QString>>::set(

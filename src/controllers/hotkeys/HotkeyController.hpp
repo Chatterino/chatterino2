@@ -17,6 +17,26 @@ class Hotkey;
 
 class HotkeyModel;
 
+/**
+ * @returns a const map with the HotkeyCategory enum as its key, and HotkeyCategoryData as the value.
+ **/
+[[nodiscard]] const std::map<HotkeyCategory, HotkeyCategoryData> &
+    hotkeyCategories();
+
+/**
+ * @brief Returns the name of the given hotkey category
+ *
+ * @returns the name, or an empty string if an invalid hotkey category was given
+ **/
+[[nodiscard]] QString hotkeyCategoryName(HotkeyCategory category);
+
+/**
+ * @brief Returns the display name of the given hotkey category
+ *
+ * @returns the display name, or an empty string if an invalid hotkey category was given
+ **/
+[[nodiscard]] QString hotkeyCategoryDisplayName(HotkeyCategory category);
+
 class HotkeyController final
 {
 public:
@@ -62,26 +82,6 @@ public:
      **/
     [[nodiscard]] bool isDuplicate(std::shared_ptr<Hotkey> hotkey,
                                    QString ignoreNamed);
-
-    /**
-     * @brief Returns the display name of the given hotkey category
-     *
-     * @returns the display name, or an empty string if an invalid hotkey category was given
-     **/
-    [[nodiscard]] QString categoryDisplayName(HotkeyCategory category) const;
-
-    /**
-     * @brief Returns the name of the given hotkey category
-     *
-     * @returns the name, or an empty string if an invalid hotkey category was given
-     **/
-    [[nodiscard]] QString categoryName(HotkeyCategory category) const;
-
-    /**
-     * @returns a const map with the HotkeyCategory enum as its key, and HotkeyCategoryData as the value.
-     **/
-    [[nodiscard]] const std::map<HotkeyCategory, HotkeyCategoryData> &
-        categories() const;
 
     pajlada::Signals::NoArgSignal onItemsUpdated;
 
@@ -158,13 +158,6 @@ private:
 
     SignalVector<std::shared_ptr<Hotkey>> hotkeys_;
     pajlada::Signals::SignalHolder signalHolder_;
-
-    const std::map<HotkeyCategory, HotkeyCategoryData> hotkeyCategories_ = {
-        {HotkeyCategory::PopupWindow, {"popupWindow", "Popup Windows"}},
-        {HotkeyCategory::Split, {"split", "Split"}},
-        {HotkeyCategory::SplitInput, {"splitInput", "Split input box"}},
-        {HotkeyCategory::Window, {"window", "Window"}},
-    };
 };
 
 }  // namespace chatterino
