@@ -105,6 +105,12 @@ bool isBroadcasterSoftwareActive()
         break;
     }
 
+    if (!p.waitForFinished(1000))
+    {
+        qCWarning(chatterinoStreamerMode) << "Force-killing pgrep";
+        p.kill();
+    }
+
     return false;
 #elif defined(Q_OS_WIN)
     if (!IsWindowsVistaOrGreater())
