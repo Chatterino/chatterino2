@@ -196,12 +196,6 @@ Application::~Application()
     Application::instance = nullptr;
 }
 
-void Application::fakeDtor()
-{
-    // TODO: destruct this properly
-    std::ignore = this->seventvEventAPI.release();
-}
-
 void Application::initialize(Settings &settings, const Paths &paths)
 {
     assert(isAppInitialized == false);

@@ -131,12 +131,6 @@ public:
         return false;
     }
 
-    /**
-     * In the interim, before we remove _exit(0); from RunGui.cpp,
-     * this will destroy things we know can be destroyed
-     */
-    void fakeDtor();
-
     void initialize(Settings &settings, const Paths &paths);
     void load();
     void save();
