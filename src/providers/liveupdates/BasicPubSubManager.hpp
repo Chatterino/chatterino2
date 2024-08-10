@@ -97,7 +97,10 @@ public:
                 .toStdString());
     }
 
-    virtual ~BasicPubSubManager() = default;
+    virtual ~BasicPubSubManager()
+    {
+        this->stop();
+    }
 
     BasicPubSubManager(const BasicPubSubManager &) = delete;
     BasicPubSubManager(const BasicPubSubManager &&) = delete;
