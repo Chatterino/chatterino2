@@ -245,7 +245,12 @@ void StreamerModePrivate::start()
 StreamerModePrivate::~StreamerModePrivate()
 {
     this->thread_.quit();
-    this->thread_.wait(500);
+    if (!this->thread_.wait(500))
+    {
+        qCWarning(chatterinoStreamerMode)
+            << "Failed waiting for thread, terminating it";
+        this->thread_.terminate();
+    }
 }
 
 bool StreamerModePrivate::isEnabled() const
