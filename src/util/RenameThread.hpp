@@ -7,15 +7,11 @@
 #    include <pthread.h>
 #endif
 
-#ifdef Q_OS_WIN
-using HANDLE = void *;
-#endif
-
 namespace chatterino {
 
 #ifdef Q_OS_WIN
 namespace windows::detail {
-    void renameThread(HANDLE hThread, const QString &name);
+    void renameThread(void *hThread, const QString &name);
 }  // namespace windows::detail
 #endif
 
