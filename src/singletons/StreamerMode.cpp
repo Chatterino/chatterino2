@@ -210,6 +210,7 @@ void StreamerMode::start()
 StreamerModePrivate::StreamerModePrivate(StreamerMode *parent)
     : parent_(parent)
 {
+    this->thread_.setObjectName("StreamerMode");
     this->timer_.moveToThread(&this->thread_);
     QObject::connect(&this->timer_, &QTimer::timeout, [this] {
         auto timeouts =
