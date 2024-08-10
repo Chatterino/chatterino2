@@ -196,42 +196,6 @@ Application::~Application()
     Application::instance = nullptr;
 }
 
-void Application::fakeDtor()
-{
-#ifdef CHATTERINO_HAVE_PLUGINS
-    this->plugins.reset();
-#endif
-    this->twitchPubSub.reset();
-    this->twitchBadges.reset();
-    this->twitchLiveController.reset();
-    this->chatterinoBadges.reset();
-    // this->bttvLiveUpdates.reset();
-    this->bttvEmotes.reset();
-    this->ffzEmotes.reset();
-    // this->seventvEventAPI.reset();
-    this->seventvEmotes.reset();
-    this->notifications.reset();
-    this->commands.reset();
-    // If a crash happens after crashHandler has been reset, we'll assert
-    // This isn't super different from before, where if the app is already killed, the getApp() portion of it is already dead
-    this->crashHandler.reset();
-    this->seventvAPI.reset();
-    this->highlights.reset();
-    this->seventvBadges.reset();
-    this->ffzBadges.reset();
-    // this->twitch.reset();
-    this->imageUploader.reset();
-    this->hotkeys.reset();
-    this->fonts.reset();
-    this->sound.reset();
-    this->userData.reset();
-    this->toasts.reset();
-    this->accounts.reset();
-    this->emotes.reset();
-    this->themes.reset();
-    this->streamerMode.reset();
-}
-
 void Application::initialize(Settings &settings, const Paths &paths)
 {
     assert(isAppInitialized == false);
@@ -316,6 +280,8 @@ void Application::initialize(Settings &settings, const Paths &paths)
 
     this->initBttvLiveUpdates();
     this->initSeventvEventAPI();
+
+    this->streamerMode->start();
 }
 
 int Application::run(QApplication &qtApp)

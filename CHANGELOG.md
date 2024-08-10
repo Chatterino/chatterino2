@@ -60,6 +60,7 @@
 - Dev: Documented and added tests to RTL handling. (#5473)
 - Dev: Refactored 7TV/BTTV definitions out of `TwitchIrcServer` into `Application`. (#5532)
 - Dev: Refactored code that's responsible for deleting old update files. (#5535)
+- Dev: Cleanly exit on shutdown. (#5537)
 - Dev: Refactored a few `#define`s into `const(expr)` and cleaned includes. (#5527)
 - Dev: Prepared for Qt 6.8 by addressing some deprecations. (#5529)
 
