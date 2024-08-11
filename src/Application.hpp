@@ -1,6 +1,5 @@
 #pragma once
 
-#include "debug/AssertInGuiThread.hpp"
 #include "singletons/NativeMessaging.hpp"
 
 #include <QApplication>
@@ -62,9 +61,12 @@ class IApplication
 {
 public:
     IApplication();
-    virtual ~IApplication() = default;
+    virtual ~IApplication();
 
-    static IApplication *instance;
+    IApplication(const IApplication &) = delete;
+    IApplication(IApplication &&) = delete;
+    IApplication &operator=(const IApplication &) = delete;
+    IApplication &operator=(IApplication &&) = delete;
 
     virtual bool isTest() const = 0;
 
@@ -115,8 +117,6 @@ class Application : public IApplication
     char **argv_{};
 
 public:
-    static Application *instance;
-
     Application(Settings &_settings, const Paths &paths, const Args &_args,
                 Updates &_updates);
     ~Application() override;
@@ -210,12 +210,7 @@ public:
 #ifdef CHATTERINO_HAVE_PLUGINS
     PluginController *getPlugins() override;
 #endif
-    Updates &getUpdates() override
-    {
-        assertInGuiThread();
-
-        return this->updates;
-    }
+    Updates &getUpdates() override;
 
     BttvEmotes *getBttvEmotes() override;
     BttvLiveUpdates *getBttvLiveUpdates() override;
@@ -232,7 +227,7 @@ private:
     void initSeventvEventAPI();
     void initNm(const Paths &paths);
 
-    NativeMessagingServer nmServer{};
+    NativeMessagingServer nmServer;
     Updates &updates;
 };
 
