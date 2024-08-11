@@ -10,6 +10,7 @@
 #include "util/DebugCount.hpp"
 #include "util/Helpers.hpp"
 #include "util/RapidjsonHelpers.hpp"
+#include "util/RenameThread.hpp"
 
 #include <QJsonArray>
 
@@ -17,6 +18,7 @@
 #include <exception>
 #include <future>
 #include <iostream>
+#include <memory>
 #include <thread>
 
 using websocketpp::lib::bind;
@@ -543,7 +545,10 @@ void PubSub::start()
 {
     this->work = std::make_shared<boost::asio::io_service::work>(
         this->websocketClient.get_io_service());
-    this->thread.reset(new std::thread(std::bind(&PubSub::runThread, this)));
+    this->thread = std::make_unique<std::thread>([this] {
+        runThread();
+    });
+    renameThread(*this->thread, "PubSub");
 }
 
 void PubSub::stop()
