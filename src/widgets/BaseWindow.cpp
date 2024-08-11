@@ -505,9 +505,9 @@ bool BaseWindow::event(QEvent *event)
     }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
-    if (this->flags_.has(DontFocus))
+    if (this->flags_.has(DontFocus) || this->flags_.has(Dialog))
     {
-        // This ensures tooltip-like windows (namely the TooltipWidget & completion widget) retains their nullptr parent
+        // This certain windows (e.g. TooltipWidget, input completion widget, and the search popup) retains their nullptr parent
         // NOTE that this currently does not retain their original transient parent (which is the window it was created under)
         // For now, we haven't noticed that this creates any issues, and I don't know of a good place to store the previous transient
         // parent to restore it.
