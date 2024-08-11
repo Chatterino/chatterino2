@@ -124,22 +124,23 @@ SeventvEventAPI *makeSeventvEventAPI(Settings &settings)
 
 const QString TWITCH_PUBSUB_URL = "wss://pubsub-edge.twitch.tv";
 
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+IApplication *INSTANCE = nullptr;
+
 }  // namespace
 
 namespace chatterino {
 
 static std::atomic<bool> isAppInitialized{false};
 
-IApplication *IApplication::instance = nullptr;
-
 IApplication::IApplication()
 {
-    IApplication::instance = this;
+    INSTANCE = this;
 }
 
 IApplication::~IApplication()
 {
-    IApplication::instance = nullptr;
+    INSTANCE = nullptr;
 }
 
 // this class is responsible for handling the workflow of Chatterino
@@ -193,7 +194,11 @@ Application::Application(Settings &_settings, const Paths &paths,
     });
 }
 
-Application::~Application() = default;
+Application::~Application()
+{
+    // we do this early to ensure getApp isn't used in any dtors
+    INSTANCE = nullptr;
+}
 
 void Application::initialize(Settings &settings, const Paths &paths)
 {
@@ -526,6 +531,13 @@ PluginController *Application::getPlugins()
     return this->plugins.get();
 }
 #endif
+
+Updates &Application::getUpdates()
+{
+    assertInGuiThread();
+
+    return this->updates;
+}
 
 ITwitchIrcServer *Application::getTwitch()
 {
@@ -1179,9 +1191,9 @@ void Application::initSeventvEventAPI()
 
 IApplication *getApp()
 {
-    assert(IApplication::instance != nullptr);
+    assert(INSTANCE != nullptr);
 
-    return IApplication::instance;
+    return INSTANCE;
 }
 
 }  // namespace chatterino
