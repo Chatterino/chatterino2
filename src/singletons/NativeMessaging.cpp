@@ -134,6 +134,7 @@ namespace nm::client {
 NativeMessagingServer::NativeMessagingServer()
     : thread(*this)
 {
+    this->thread.setObjectName("NativeMessagingReceiver");
 }
 
 NativeMessagingServer::~NativeMessagingServer()
