@@ -32,6 +32,7 @@
 - Bugfix: Fixed a crash when tab completing while having an invalid plugin loaded. (#5401)
 - Bugfix: Fixed windows on Windows not saving correctly when snapping them to the edges. (#5478)
 - Bugfix: Fixed user info card popups adding duplicate line to log files. (#5499)
+- Bugfix: Fixed tooltips on X11 & Sway not working after moving a split. (#5541)
 - Bugfix: Fixed `/clearmessages` not working with more than one window. (#5489)
 - Bugfix: Fixed splits staying paused after unfocusing Chatterino in certain configurations. (#5504)
 - Bugfix: Links with invalid characters in the domain are no longer detected. (#5509)
