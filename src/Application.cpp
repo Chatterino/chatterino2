@@ -130,12 +130,16 @@ namespace chatterino {
 
 static std::atomic<bool> isAppInitialized{false};
 
-Application *Application::instance = nullptr;
 IApplication *IApplication::instance = nullptr;
 
 IApplication::IApplication()
 {
     IApplication::instance = this;
+}
+
+IApplication::~IApplication()
+{
+    IApplication::instance = nullptr;
 }
 
 // this class is responsible for handling the workflow of Chatterino
@@ -182,8 +186,6 @@ Application::Application(Settings &_settings, const Paths &paths,
 #endif
     , updates(_updates)
 {
-    Application::instance = this;
-
     // We can safely ignore this signal's connection since the Application will always
     // be destroyed after fonts
     std::ignore = this->fonts->fontChanged.connect([this]() {
@@ -191,10 +193,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     });
 }
 
-Application::~Application()
-{
-    Application::instance = nullptr;
-}
+Application::~Application() = default;
 
 void Application::initialize(Settings &settings, const Paths &paths)
 {

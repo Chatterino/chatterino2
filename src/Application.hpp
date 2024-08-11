@@ -62,7 +62,7 @@ class IApplication
 {
 public:
     IApplication();
-    virtual ~IApplication() = default;
+    virtual ~IApplication();
 
     static IApplication *instance;
 
@@ -115,8 +115,6 @@ class Application : public IApplication
     char **argv_{};
 
 public:
-    static Application *instance;
-
     Application(Settings &_settings, const Paths &paths, const Args &_args,
                 Updates &_updates);
     ~Application() override;
