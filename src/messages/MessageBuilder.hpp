@@ -206,8 +206,8 @@ public:
     // Messages in normal chat for channel stuff
     static MessagePtr makeLiveSystemMessage(const QString &channelName,
                                             const QString &channelID);
-    static void offlineSystemMessage(const QString &channelName,
-                                     MessageBuilder *builder);
+    static MessagePtr makeOfflineSystemMessage(const QString &channelName,
+                                               const QString &channelID);
     static void hostingSystemMessage(const QString &channelName,
                                      MessageBuilder *builder, bool hostOn);
     static void deletionMessage(const MessagePtr originalMessage,

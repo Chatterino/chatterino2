@@ -444,9 +444,9 @@ void TwitchChannel::onLiveStatusChanged(bool isLive, bool isInitialUpdate)
             << "[TwitchChannel " << this->getName() << "] Offline";
 
         // Channel offline message
-        MessageBuilder builder;
-        MessageBuilder::offlineSystemMessage(this->getDisplayName(), &builder);
-        this->addMessage(builder.release(), MessageContext::Original);
+        this->addMessage(MessageBuilder::makeOfflineSystemMessage(
+                             this->getDisplayName(), this->roomId()),
+                         MessageContext::Original);
 
         getApp()->getNotifications()->notifyTwitchChannelOffline(
             this->roomId());
