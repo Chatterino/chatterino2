@@ -195,9 +195,11 @@ public:
     void setParent(MessagePtr parent);
     void setMessageOffset(int offset);
 
-    static void appendChannelPointRewardMessage(
-        const ChannelPointReward &reward, MessageBuilder *builder, bool isMod,
-        bool isBroadcaster);
+    void appendChannelPointRewardMessage(const ChannelPointReward &reward,
+                                         bool isMod, bool isBroadcaster);
+
+    static MessagePtr makeChannelPointRewardMessage(
+        const ChannelPointReward &reward, bool isMod, bool isBroadcaster);
 
     // Message in the /live chat for channel going live
     static MessagePtr makeLiveMessage(const QString &channelName,

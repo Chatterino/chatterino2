@@ -1254,8 +1254,8 @@ MessagePtr MessageBuilder::build()
             this->args.channelPointRewardId);
         if (reward)
         {
-            MessageBuilder::appendChannelPointRewardMessage(
-                *reward, this, this->channel->isMod(),
+            this->appendChannelPointRewardMessage(
+                *reward, this->channel->isMod(),
                 this->channel->isBroadcaster());
         }
     }
@@ -1400,8 +1400,7 @@ void MessageBuilder::setMessageOffset(int offset)
 }
 
 void MessageBuilder::appendChannelPointRewardMessage(
-    const ChannelPointReward &reward, MessageBuilder *builder, bool isMod,
-    bool isBroadcaster)
+    const ChannelPointReward &reward, bool isMod, bool isBroadcaster)
 {
     if (isIgnoredMessage({
             /*.message = */ "",
@@ -1413,58 +1412,66 @@ void MessageBuilder::appendChannelPointRewardMessage(
         return;
     }
 
-    builder->emplace<TimestampElement>();
+    this->emplace<TimestampElement>();
     QString redeemed = "Redeemed";
     QStringList textList;
     if (!reward.isUserInputRequired)
     {
-        builder
-            ->emplace<TextElement>(
+        this->emplace<TextElement>(
                 reward.user.login, MessageElementFlag::ChannelPointReward,
                 MessageColor::Text, FontStyle::ChatMediumBold)
             ->setLink({Link::UserInfo, reward.user.login});
         redeemed = "redeemed";
         textList.append(reward.user.login);
     }
-    builder->emplace<TextElement>(redeemed,
-                                  MessageElementFlag::ChannelPointReward);
+    this->emplace<TextElement>(redeemed,
+                               MessageElementFlag::ChannelPointReward);
     if (reward.id == "CELEBRATION")
     {
         const auto emotePtr =
             getApp()->getEmotes()->getTwitchEmotes()->getOrCreateEmote(
                 EmoteId{reward.emoteId}, EmoteName{reward.emoteName});
-        builder->emplace<EmoteElement>(emotePtr,
-                                       MessageElementFlag::ChannelPointReward,
-                                       MessageColor::Text);
+        this->emplace<EmoteElement>(emotePtr,
+                                    MessageElementFlag::ChannelPointReward,
+                                    MessageColor::Text);
     }
-    builder->emplace<TextElement>(
-        reward.title, MessageElementFlag::ChannelPointReward,
-        MessageColor::Text, FontStyle::ChatMediumBold);
-    builder->emplace<ScalingImageElement>(
+    this->emplace<TextElement>(reward.title,
+                               MessageElementFlag::ChannelPointReward,
+                               MessageColor::Text, FontStyle::ChatMediumBold);
+    this->emplace<ScalingImageElement>(
         reward.image, MessageElementFlag::ChannelPointRewardImage);
-    builder->emplace<TextElement>(
-        QString::number(reward.cost), MessageElementFlag::ChannelPointReward,
-        MessageColor::Text, FontStyle::ChatMediumBold);
+    this->emplace<TextElement>(QString::number(reward.cost),
+                               MessageElementFlag::ChannelPointReward,
+                               MessageColor::Text, FontStyle::ChatMediumBold);
     if (reward.isBits)
     {
-        builder->emplace<TextElement>(
+        this->emplace<TextElement>(
             "bits", MessageElementFlag::ChannelPointReward, MessageColor::Text,
             FontStyle::ChatMediumBold);
     }
     if (reward.isUserInputRequired)
     {
-        builder->emplace<LinebreakElement>(
-            MessageElementFlag::ChannelPointReward);
+        this->emplace<LinebreakElement>(MessageElementFlag::ChannelPointReward);
     }
 
-    builder->message().flags.set(MessageFlag::RedeemedChannelPointReward);
+    this->message().flags.set(MessageFlag::RedeemedChannelPointReward);
 
     textList.append({redeemed, reward.title, QString::number(reward.cost)});
-    builder->message().messageText = textList.join(" ");
-    builder->message().searchText = textList.join(" ");
-    builder->message().loginName = reward.user.login;
+    this->message().messageText = textList.join(" ");
+    this->message().searchText = textList.join(" ");
+    this->message().loginName = reward.user.login;
 
-    builder->message().reward = std::make_shared<ChannelPointReward>(reward);
+    this->message().reward = std::make_shared<ChannelPointReward>(reward);
+}
+
+MessagePtr MessageBuilder::makeChannelPointRewardMessage(
+    const ChannelPointReward &reward, bool isMod, bool isBroadcaster)
+{
+    MessageBuilder builder;
+
+    builder.appendChannelPointRewardMessage(reward, isMod, isBroadcaster);
+
+    return builder.release();
 }
 
 MessagePtr MessageBuilder::makeLiveMessage(const QString &channelName,
