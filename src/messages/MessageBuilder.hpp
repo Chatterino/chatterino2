@@ -208,8 +208,8 @@ public:
                                             const QString &channelID);
     static MessagePtr makeOfflineSystemMessage(const QString &channelName,
                                                const QString &channelID);
-    static void hostingSystemMessage(const QString &channelName,
-                                     MessageBuilder *builder, bool hostOn);
+    static MessagePtr makeHostingSystemMessage(const QString &channelName,
+                                               bool hostOn);
     static void deletionMessage(const MessagePtr originalMessage,
                                 MessageBuilder *builder);
     static void deletionMessage(const DeleteAction &action,

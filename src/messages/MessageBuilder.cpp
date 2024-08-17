@@ -1528,19 +1528,20 @@ MessagePtr MessageBuilder::makeOfflineSystemMessage(const QString &channelName,
     return builder.release();
 }
 
-void MessageBuilder::hostingSystemMessage(const QString &channelName,
-                                          MessageBuilder *builder, bool hostOn)
+MessagePtr MessageBuilder::makeHostingSystemMessage(const QString &channelName,
+                                                    bool hostOn)
 {
+    MessageBuilder builder;
     QString text;
-    builder->emplace<TimestampElement>();
-    builder->message().flags.set(MessageFlag::System);
-    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder.emplace<TimestampElement>();
+    builder.message().flags.set(MessageFlag::System);
+    builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
     if (hostOn)
     {
-        builder->emplace<TextElement>("Now hosting", MessageElementFlag::Text,
-                                      MessageColor::System);
+        builder.emplace<TextElement>("Now hosting", MessageElementFlag::Text,
+                                     MessageColor::System);
         builder
-            ->emplace<TextElement>(
+            .emplace<TextElement>(
                 channelName + ".", MessageElementFlag::Username,
                 MessageColor::System, FontStyle::ChatMediumBold)
             ->setLink({Link::UserInfo, channelName});
@@ -1549,18 +1550,19 @@ void MessageBuilder::hostingSystemMessage(const QString &channelName,
     else
     {
         builder
-            ->emplace<TextElement>(channelName, MessageElementFlag::Username,
-                                   MessageColor::System,
-                                   FontStyle::ChatMediumBold)
+            .emplace<TextElement>(channelName, MessageElementFlag::Username,
+                                  MessageColor::System,
+                                  FontStyle::ChatMediumBold)
             ->setLink({Link::UserInfo, channelName});
-        builder->emplace<TextElement>("has gone offline. Exiting host mode.",
-                                      MessageElementFlag::Text,
-                                      MessageColor::System);
+        builder.emplace<TextElement>("has gone offline. Exiting host mode.",
+                                     MessageElementFlag::Text,
+                                     MessageColor::System);
         text =
             QString("%1 has gone offline. Exiting host mode.").arg(channelName);
     }
-    builder->message().messageText = text;
-    builder->message().searchText = text;
+    builder.message().messageText = text;
+    builder.message().searchText = text;
+    return builder.release();
 }
 
 // IRC variant

@@ -1161,10 +1161,9 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             {
                 hostedChannelName.chop(1);
             }
-            MessageBuilder builder;
-            MessageBuilder::hostingSystemMessage(hostedChannelName, &builder,
-                                                 hostOn);
-            channel->addMessage(builder.release(), MessageContext::Original);
+            channel->addMessage(MessageBuilder::makeHostingSystemMessage(
+                                    hostedChannelName, hostOn),
+                                MessageContext::Original);
         }
         else if (tags == "room_mods" || tags == "vips_success")
         {
