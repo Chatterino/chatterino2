@@ -33,6 +33,8 @@ public:
                     std::chrono::milliseconds defaultHeartbeatInterval =
                         std::chrono::milliseconds(25000));
 
+    ~SeventvEventAPI() override;
+
     struct {
         Signal<seventv::eventapi::EmoteAddDispatch> emoteAdded;
         Signal<seventv::eventapi::EmoteUpdateDispatch> emoteUpdated;
