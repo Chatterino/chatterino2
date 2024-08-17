@@ -1467,19 +1467,24 @@ void MessageBuilder::appendChannelPointRewardMessage(
     builder->message().reward = std::make_shared<ChannelPointReward>(reward);
 }
 
-void MessageBuilder::liveMessage(const QString &channelName,
-                                 MessageBuilder *builder)
+MessagePtr MessageBuilder::makeLiveMessage(const QString &channelName,
+                                           const QString &channelID)
 {
-    builder->emplace<TimestampElement>();
+    MessageBuilder builder;
+
+    builder.emplace<TimestampElement>();
     builder
-        ->emplace<TextElement>(channelName, MessageElementFlag::Username,
-                               MessageColor::Text, FontStyle::ChatMediumBold)
+        .emplace<TextElement>(channelName, MessageElementFlag::Username,
+                              MessageColor::Text, FontStyle::ChatMediumBold)
         ->setLink({Link::UserInfo, channelName});
-    builder->emplace<TextElement>("is live!", MessageElementFlag::Text,
-                                  MessageColor::Text);
+    builder.emplace<TextElement>("is live!", MessageElementFlag::Text,
+                                 MessageColor::Text);
     auto text = QString("%1 is live!").arg(channelName);
-    builder->message().messageText = text;
-    builder->message().searchText = text;
+    builder.message().messageText = text;
+    builder.message().searchText = text;
+    builder.message().id = channelID;
+
+    return builder.release();
 }
 
 void MessageBuilder::liveSystemMessage(const QString &channelName,
