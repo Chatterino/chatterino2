@@ -210,8 +210,8 @@ public:
                                                const QString &channelID);
     static MessagePtr makeHostingSystemMessage(const QString &channelName,
                                                bool hostOn);
-    static void deletionMessage(const MessagePtr originalMessage,
-                                MessageBuilder *builder);
+    static MessagePtr makeDeletionMessageFromIRC(
+        const MessagePtr &originalMessage);
     static void deletionMessage(const DeleteAction &action,
                                 MessageBuilder *builder);
     static MessagePtr makeListOfUsersSystemMessage(QString prefix,

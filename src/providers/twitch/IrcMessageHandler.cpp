@@ -863,9 +863,8 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
     msg->flags.set(MessageFlag::Disabled);
     if (!getSettings()->hideDeletionActions)
     {
-        MessageBuilder builder;
-        MessageBuilder::deletionMessage(msg, &builder);
-        chan->addMessage(builder.release(), MessageContext::Original);
+        chan->addMessage(MessageBuilder::makeDeletionMessageFromIRC(msg),
+                         MessageContext::Original);
     }
 }
 
