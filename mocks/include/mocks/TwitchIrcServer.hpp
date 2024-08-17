@@ -26,6 +26,36 @@ public:
     {
     }
 
+    void connect() override
+    {
+    }
+
+    void sendRawMessage(const QString &rawMessage) override
+    {
+    }
+
+    ChannelPtr getOrAddChannel(const QString &dirtyChannelName) override
+    {
+        assert(false && "unimplemented getOrAddChannel in mock irc server");
+    }
+
+    ChannelPtr getChannelOrEmpty(const QString &dirtyChannelName) override
+    {
+        assert(false && "unimplemented getChannelOrEmpty in mock irc server");
+    }
+
+    void addFakeMessage(const QString &data) override
+    {
+    }
+
+    void addGlobalSystemMessage(const QString &messageText) override
+    {
+    }
+
+    void forEachChannel(std::function<void(ChannelPtr)> func) override
+    {
+    }
+
     void forEachChannelAndSpecialChannels(
         std::function<void(ChannelPtr)> func) override
     {

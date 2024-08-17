@@ -14,7 +14,6 @@
 #include "controllers/sound/ISoundController.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
-#include "providers/irc/AbstractIrcServer.hpp"
 #include "providers/links/LinkResolver.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
@@ -546,7 +545,7 @@ ITwitchIrcServer *Application::getTwitch()
     return this->twitch.get();
 }
 
-IAbstractIrcServer *Application::getTwitchAbstract()
+ITwitchIrcServer *Application::getTwitchAbstract()
 {
     assertInGuiThread();
 
