@@ -37,11 +37,13 @@ public:
     ChannelPtr getOrAddChannel(const QString &dirtyChannelName) override
     {
         assert(false && "unimplemented getOrAddChannel in mock irc server");
+        return {};
     }
 
     ChannelPtr getChannelOrEmpty(const QString &dirtyChannelName) override
     {
         assert(false && "unimplemented getChannelOrEmpty in mock irc server");
+        return {};
     }
 
     void addFakeMessage(const QString &data) override
