@@ -737,11 +737,9 @@ void Application::initPubSub()
                 return;
             }
 
-            MessageBuilder msg;
-            MessageBuilder::deletionMessage(action, &msg);
-            msg->flags.set(MessageFlag::PubSub);
+            auto msg = MessageBuilder::makeDeletionMessageFromPubSub(action);
 
-            postToThread([chan, msg = msg.release()] {
+            postToThread([chan, msg] {
                 auto replaced = false;
                 LimitedQueueSnapshot<MessagePtr> snapshot =
                     chan->getMessageSnapshot();

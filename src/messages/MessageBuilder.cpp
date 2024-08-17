@@ -1604,46 +1604,48 @@ MessagePtr MessageBuilder::makeDeletionMessageFromIRC(
     return builder.release();
 }
 
-// pubsub variant
-void MessageBuilder::deletionMessage(const DeleteAction &action,
-                                     MessageBuilder *builder)
+MessagePtr MessageBuilder::makeDeletionMessageFromPubSub(
+    const DeleteAction &action)
 {
-    builder->emplace<TimestampElement>();
-    builder->message().flags.set(MessageFlag::System);
-    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
-    builder->message().flags.set(MessageFlag::Timeout);
+    MessageBuilder builder;
+
+    builder.emplace<TimestampElement>();
+    builder.message().flags.set(MessageFlag::System);
+    builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder.message().flags.set(MessageFlag::Timeout);
 
     builder
-        ->emplace<TextElement>(action.source.login,
-                               MessageElementFlag::Username,
-                               MessageColor::System, FontStyle::ChatMediumBold)
+        .emplace<TextElement>(action.source.login, MessageElementFlag::Username,
+                              MessageColor::System, FontStyle::ChatMediumBold)
         ->setLink({Link::UserInfo, action.source.login});
     // TODO(mm2pl): If or when jumping to a single message gets implemented a link,
     // add a link to the originalMessage
-    builder->emplace<TextElement>(
+    builder.emplace<TextElement>(
         "deleted message from", MessageElementFlag::Text, MessageColor::System);
     builder
-        ->emplace<TextElement>(action.target.login,
-                               MessageElementFlag::Username,
-                               MessageColor::System, FontStyle::ChatMediumBold)
+        .emplace<TextElement>(action.target.login, MessageElementFlag::Username,
+                              MessageColor::System, FontStyle::ChatMediumBold)
         ->setLink({Link::UserInfo, action.target.login});
-    builder->emplace<TextElement>("saying:", MessageElementFlag::Text,
-                                  MessageColor::System);
+    builder.emplace<TextElement>("saying:", MessageElementFlag::Text,
+                                 MessageColor::System);
     if (action.messageText.length() > 50)
     {
         builder
-            ->emplace<TextElement>(action.messageText.left(50) + "…",
-                                   MessageElementFlag::Text, MessageColor::Text)
+            .emplace<TextElement>(action.messageText.left(50) + "…",
+                                  MessageElementFlag::Text, MessageColor::Text)
             ->setLink({Link::JumpToMessage, action.messageId});
     }
     else
     {
         builder
-            ->emplace<TextElement>(action.messageText, MessageElementFlag::Text,
-                                   MessageColor::Text)
+            .emplace<TextElement>(action.messageText, MessageElementFlag::Text,
+                                  MessageColor::Text)
             ->setLink({Link::JumpToMessage, action.messageId});
     }
-    builder->message().timeoutUser = "msg:" + action.messageId;
+    builder.message().timeoutUser = "msg:" + action.messageId;
+    builder.message().flags.set(MessageFlag::PubSub);
+
+    return builder.release();
 }
 
 MessagePtr MessageBuilder::makeListOfUsersSystemMessage(QString prefix,

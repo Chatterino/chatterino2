@@ -212,8 +212,7 @@ public:
                                                bool hostOn);
     static MessagePtr makeDeletionMessageFromIRC(
         const MessagePtr &originalMessage);
-    static void deletionMessage(const DeleteAction &action,
-                                MessageBuilder *builder);
+    static MessagePtr makeDeletionMessageFromPubSub(const DeleteAction &action);
     static MessagePtr makeListOfUsersSystemMessage(QString prefix,
                                                    QStringList users,
                                                    Channel *channel,
