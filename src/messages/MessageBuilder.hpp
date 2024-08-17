@@ -214,12 +214,13 @@ public:
                                 MessageBuilder *builder);
     static void deletionMessage(const DeleteAction &action,
                                 MessageBuilder *builder);
-    static void listOfUsersSystemMessage(QString prefix, QStringList users,
-                                         Channel *channel,
-                                         MessageBuilder *builder);
-    static void listOfUsersSystemMessage(
+    static MessagePtr makeListOfUsersSystemMessage(QString prefix,
+                                                   QStringList users,
+                                                   Channel *channel,
+                                                   bool collapsed);
+    static MessagePtr makeListOfUsersSystemMessage(
         QString prefix, const std::vector<HelixModerator> &users,
-        Channel *channel, MessageBuilder *builder);
+        Channel *channel, bool collapsed);
 
     static MessagePtr buildHypeChatMessage(Communi::IrcPrivateMessage *message);
 

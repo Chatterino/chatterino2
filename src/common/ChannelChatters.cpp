@@ -38,12 +38,10 @@ void ChannelChatters::addJoinedUser(const QString &user)
             auto joinedUsers = this->joinedUsers_.access();
             joinedUsers->sort();
 
-            MessageBuilder builder;
-            MessageBuilder::listOfUsersSystemMessage(
-                "Users joined:", *joinedUsers, &this->channel_, &builder);
-            builder->flags.set(MessageFlag::Collapsed);
-            this->channel_.addMessage(builder.release(),
-                                      MessageContext::Original);
+            this->channel_.addMessage(
+                MessageBuilder::makeListOfUsersSystemMessage(
+                    "Users joined:", *joinedUsers, &this->channel_, true),
+                MessageContext::Original);
 
             joinedUsers->clear();
             this->joinedUsersMergeQueued_ = false;
@@ -64,12 +62,10 @@ void ChannelChatters::addPartedUser(const QString &user)
             auto partedUsers = this->partedUsers_.access();
             partedUsers->sort();
 
-            MessageBuilder builder;
-            MessageBuilder::listOfUsersSystemMessage(
-                "Users parted:", *partedUsers, &this->channel_, &builder);
-            builder->flags.set(MessageFlag::Collapsed);
-            this->channel_.addMessage(builder.release(),
-                                      MessageContext::Original);
+            this->channel_.addMessage(
+                MessageBuilder::makeListOfUsersSystemMessage(
+                    "Users parted:", *partedUsers, &this->channel_, true),
+                MessageContext::Original);
 
             partedUsers->clear();
             this->partedUsersMergeQueued_ = false;

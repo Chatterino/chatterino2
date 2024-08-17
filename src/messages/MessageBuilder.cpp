@@ -1643,20 +1643,23 @@ void MessageBuilder::deletionMessage(const DeleteAction &action,
     builder->message().timeoutUser = "msg:" + action.messageId;
 }
 
-void MessageBuilder::listOfUsersSystemMessage(QString prefix, QStringList users,
-                                              Channel *channel,
-                                              MessageBuilder *builder)
+MessagePtr MessageBuilder::makeListOfUsersSystemMessage(QString prefix,
+                                                        QStringList users,
+                                                        Channel *channel,
+                                                        bool collapsed)
 {
+    MessageBuilder builder;
+
     QString text = prefix + users.join(", ");
 
-    builder->message().messageText = text;
-    builder->message().searchText = text;
+    builder.message().messageText = text;
+    builder.message().searchText = text;
 
-    builder->emplace<TimestampElement>();
-    builder->message().flags.set(MessageFlag::System);
-    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
-    builder->emplace<TextElement>(prefix, MessageElementFlag::Text,
-                                  MessageColor::System);
+    builder.emplace<TimestampElement>();
+    builder.message().flags.set(MessageFlag::System);
+    builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder.emplace<TextElement>(prefix, MessageElementFlag::Text,
+                                 MessageColor::System);
     bool isFirst = true;
     auto *tc = dynamic_cast<TwitchChannel *>(channel);
     for (const QString &username : users)
@@ -1664,8 +1667,8 @@ void MessageBuilder::listOfUsersSystemMessage(QString prefix, QStringList users,
         if (!isFirst)
         {
             // this is used to add the ", " after each but the last entry
-            builder->emplace<TextElement>(",", MessageElementFlag::Text,
-                                          MessageColor::System);
+            builder.emplace<TextElement>(",", MessageElementFlag::Text,
+                                         MessageColor::System);
         }
         isFirst = false;
 
@@ -1682,23 +1685,32 @@ void MessageBuilder::listOfUsersSystemMessage(QString prefix, QStringList users,
 
         // TODO: Ensure we make use of display name / username(login name) correctly here
         builder
-            ->emplace<MentionElement>(username, username, MessageColor::System,
-                                      color)
+            .emplace<MentionElement>(username, username, MessageColor::System,
+                                     color)
             ->setTrailingSpace(false);
     }
+
+    if (collapsed)
+    {
+        builder.message().flags.set(MessageFlag::Collapsed);
+    }
+
+    return builder.release();
 }
 
-void MessageBuilder::listOfUsersSystemMessage(
+MessagePtr MessageBuilder::makeListOfUsersSystemMessage(
     QString prefix, const std::vector<HelixModerator> &users, Channel *channel,
-    MessageBuilder *builder)
+    bool collapsed)
 {
+    MessageBuilder builder;
+
     QString text = prefix;
 
-    builder->emplace<TimestampElement>();
-    builder->message().flags.set(MessageFlag::System);
-    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
-    builder->emplace<TextElement>(prefix, MessageElementFlag::Text,
-                                  MessageColor::System);
+    builder.emplace<TimestampElement>();
+    builder.message().flags.set(MessageFlag::System);
+    builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder.emplace<TextElement>(prefix, MessageElementFlag::Text,
+                                 MessageColor::System);
     bool isFirst = true;
     auto *tc = dynamic_cast<TwitchChannel *>(channel);
     for (const auto &user : users)
@@ -1706,8 +1718,8 @@ void MessageBuilder::listOfUsersSystemMessage(
         if (!isFirst)
         {
             // this is used to add the ", " after each but the last entry
-            builder->emplace<TextElement>(",", MessageElementFlag::Text,
-                                          MessageColor::System);
+            builder.emplace<TextElement>(",", MessageElementFlag::Text,
+                                         MessageColor::System);
             text += QString(", %1").arg(user.userName);
         }
         else
@@ -1728,13 +1740,20 @@ void MessageBuilder::listOfUsersSystemMessage(
         }
 
         builder
-            ->emplace<MentionElement>(user.userName, user.userLogin,
-                                      MessageColor::System, color)
+            .emplace<MentionElement>(user.userName, user.userLogin,
+                                     MessageColor::System, color)
             ->setTrailingSpace(false);
     }
 
-    builder->message().messageText = text;
-    builder->message().searchText = text;
+    builder.message().messageText = text;
+    builder.message().searchText = text;
+
+    if (collapsed)
+    {
+        builder.message().flags.set(MessageFlag::Collapsed);
+    }
+
+    return builder.release();
 }
 
 MessagePtr MessageBuilder::buildHypeChatMessage(
