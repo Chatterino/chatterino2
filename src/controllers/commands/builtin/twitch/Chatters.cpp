@@ -11,7 +11,6 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Theme.hpp"
 
 #include <QApplication>
@@ -126,8 +125,8 @@ QString testChatters(const CommandContext &ctx)
             }
 
             MessageBuilder builder;
-            TwitchMessageBuilder::listOfUsersSystemMessage(
-                prefix, entries, twitchChannel, &builder);
+            MessageBuilder::listOfUsersSystemMessage(prefix, entries,
+                                                     twitchChannel, &builder);
 
             channel->addMessage(builder.release(), MessageContext::Original);
         },

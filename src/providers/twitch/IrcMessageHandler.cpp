@@ -20,7 +20,6 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchHelpers.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
@@ -126,7 +125,7 @@ int stripLeadingReplyMention(const QVariantMap &tags, QString &content)
 
 void updateReplyParticipatedStatus(const QVariantMap &tags,
                                    const QString &senderLogin,
-                                   TwitchMessageBuilder &builder,
+                                   MessageBuilder &builder,
                                    std::shared_ptr<MessageThread> &thread,
                                    bool isNew)
 {
@@ -245,7 +244,7 @@ QMap<QString, QString> parseBadges(const QString &badgesString)
 
 void populateReply(TwitchChannel *channel, Communi::IrcMessage *message,
                    const std::vector<MessagePtr> &otherLoaded,
-                   TwitchMessageBuilder &builder)
+                   MessageBuilder &builder)
 {
     const auto &tags = message->tags();
     if (const auto it = tags.find("reply-thread-parent-msg-id");
@@ -481,8 +480,7 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
             MessageParseArgs args;
             args.trimSubscriberUsername = true;
 
-            TwitchMessageBuilder builder(channel, message, args, content,
-                                         false);
+            MessageBuilder builder(channel, message, args, content, false);
             builder->flags.set(MessageFlag::Subscription);
             builder->flags.unset(MessageFlag::Highlighted);
             builtMessages.emplace_back(builder.build());
@@ -566,8 +564,8 @@ std::vector<MessagePtr> parsePrivMessage(Channel *channel,
 
     std::vector<MessagePtr> builtMessages;
     MessageParseArgs args;
-    TwitchMessageBuilder builder(channel, message, args, message->content(),
-                                 message->isAction());
+    MessageBuilder builder(channel, message, args, message->content(),
+                           message->isAction());
     if (!builder.isIgnored())
     {
         builtMessages.emplace_back(builder.build());
@@ -576,7 +574,7 @@ std::vector<MessagePtr> parsePrivMessage(Channel *channel,
 
     if (message->tags().contains(u"pinned-chat-paid-amount"_s))
     {
-        auto ptr = TwitchMessageBuilder::buildHypeChatMessage(message);
+        auto ptr = MessageBuilder::buildHypeChatMessage(message);
         if (ptr)
         {
             builtMessages.emplace_back(std::move(ptr));
@@ -618,8 +616,8 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
         QString content = privMsg->content();
         int messageOffset = stripLeadingReplyMention(privMsg->tags(), content);
         MessageParseArgs args;
-        TwitchMessageBuilder builder(channel, message, args, content,
-                                     privMsg->isAction());
+        MessageBuilder builder(channel, message, args, content,
+                               privMsg->isAction());
         builder.setMessageOffset(messageOffset);
 
         populateReply(tc, message, otherLoaded, builder);
@@ -716,7 +714,7 @@ void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
 
     if (message->tags().contains(u"pinned-chat-paid-amount"_s))
     {
-        auto ptr = TwitchMessageBuilder::buildHypeChatMessage(message);
+        auto ptr = MessageBuilder::buildHypeChatMessage(message);
         if (ptr)
         {
             chan->addMessage(ptr, MessageContext::Original);
@@ -866,7 +864,7 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
     if (!getSettings()->hideDeletionActions)
     {
         MessageBuilder builder;
-        TwitchMessageBuilder::deletionMessage(msg, &builder);
+        MessageBuilder::deletionMessage(msg, &builder);
         chan->addMessage(builder.release(), MessageContext::Original);
     }
 }
@@ -947,7 +945,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
 
     auto *c = getApp()->getTwitch()->getWhispersChannel().get();
 
-    TwitchMessageBuilder builder(
+    MessageBuilder builder(
         c, ircMessage, args,
         ircMessage->parameter(1).replace(COMBINED_FIXER, ZERO_WIDTH_JOINER),
         false);
@@ -1164,8 +1162,8 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
                 hostedChannelName.chop(1);
             }
             MessageBuilder builder;
-            TwitchMessageBuilder::hostingSystemMessage(hostedChannelName,
-                                                       &builder, hostOn);
+            MessageBuilder::hostingSystemMessage(hostedChannelName, &builder,
+                                                 hostOn);
             channel->addMessage(builder.release(), MessageContext::Original);
         }
         else if (tags == "room_mods" || tags == "vips_success")
@@ -1193,8 +1191,8 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
                              .mid(1)  // there is a space before the first user
                              .split(", ");
             users.sort(Qt::CaseInsensitive);
-            TwitchMessageBuilder::listOfUsersSystemMessage(msgParts.at(0),
-                                                           users, tc, &builder);
+            MessageBuilder::listOfUsersSystemMessage(msgParts.at(0), users, tc,
+                                                     &builder);
             channel->addMessage(builder.release(), MessageContext::Original);
         }
         else
@@ -1367,7 +1365,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
     QString content = originalContent;
     int messageOffset = stripLeadingReplyMention(tags, content);
 
-    TwitchMessageBuilder builder(channel, message, args, content, isAction);
+    MessageBuilder builder(channel, message, args, content, isAction);
     builder.setMessageOffset(messageOffset);
 
     if (const auto it = tags.find("reply-thread-parent-msg-id");

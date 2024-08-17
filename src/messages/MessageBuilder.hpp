@@ -1,15 +1,24 @@
 #pragma once
 
+#include "common/Aliases.hpp"
+#include "common/Outcome.hpp"
 #include "messages/MessageColor.hpp"
+#include "providers/twitch/pubsubmessages/LowTrustUsers.hpp"
 
+#include <IrcMessage>
 #include <QRegularExpression>
+#include <QString>
 #include <QTime>
+#include <QVariant>
 
 #include <ctime>
 #include <memory>
+#include <optional>
+#include <unordered_map>
 #include <utility>
 
 namespace chatterino {
+
 struct BanAction;
 struct UnbanAction;
 struct WarnAction;
@@ -23,6 +32,15 @@ class MessageElement;
 class TextElement;
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
+
+class Channel;
+class TwitchChannel;
+class MessageThread;
+class IgnorePhrase;
+struct HelixVip;
+using HelixModerator = HelixVip;
+struct ChannelPointReward;
+struct DeleteAction;
 
 namespace linkparser {
     struct Parsed;
@@ -67,10 +85,38 @@ struct MessageParseArgs {
     QString channelPointRewardId = "";
 };
 
+struct TwitchEmoteOccurrence {
+    int start;
+    int end;
+    EmotePtr ptr;
+    EmoteName name;
+
+    bool operator==(const TwitchEmoteOccurrence &other) const
+    {
+        return std::tie(this->start, this->end, this->ptr, this->name) ==
+               std::tie(other.start, other.end, other.ptr, other.name);
+    }
+};
+
 class MessageBuilder
 {
 public:
+    /// Build a message without a base IRC message.
+    ///
+    /// This constructor should be made private.
     MessageBuilder();
+
+    /// Build a message based on an incoming IRC PRIVMSG
+    explicit MessageBuilder(Channel *_channel,
+                            const Communi::IrcPrivateMessage *_ircMessage,
+                            const MessageParseArgs &_args);
+
+    /// Build a message based on an incoming IRC message (e.g. notice)
+    explicit MessageBuilder(Channel *_channel,
+                            const Communi::IrcMessage *_ircMessage,
+                            const MessageParseArgs &_args, QString content,
+                            bool isAction);
+
     MessageBuilder(SystemMessageTag, const QString &text,
                    const QTime &time = QTime::currentTime());
     MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
@@ -106,7 +152,16 @@ public:
                    const QString &deletionLink, size_t imagesStillQueued = 0,
                    size_t secondsLeft = 0);
 
-    virtual ~MessageBuilder() = default;
+    MessageBuilder(const MessageBuilder &) = delete;
+    MessageBuilder(MessageBuilder &&) = delete;
+    MessageBuilder &operator=(const MessageBuilder &) = delete;
+    MessageBuilder &operator=(MessageBuilder &&) = delete;
+
+    ~MessageBuilder() = default;
+
+    QString userName;
+
+    TwitchChannel *twitchChannel = nullptr;
 
     Message *operator->();
     Message &message();
@@ -131,9 +186,70 @@ public:
         return pointer;
     }
 
-protected:
-    virtual void addTextOrEmoji(EmotePtr emote);
-    virtual void addTextOrEmoji(const QString &value);
+    [[nodiscard]] bool isIgnored() const;
+    bool isIgnoredReply() const;
+    void triggerHighlights();
+    MessagePtr build();
+
+    void setThread(std::shared_ptr<MessageThread> thread);
+    void setParent(MessagePtr parent);
+    void setMessageOffset(int offset);
+
+    static void appendChannelPointRewardMessage(
+        const ChannelPointReward &reward, MessageBuilder *builder, bool isMod,
+        bool isBroadcaster);
+
+    // Message in the /live chat for channel going live
+    static void liveMessage(const QString &channelName,
+                            MessageBuilder *builder);
+
+    // Messages in normal chat for channel stuff
+    static void liveSystemMessage(const QString &channelName,
+                                  MessageBuilder *builder);
+    static void offlineSystemMessage(const QString &channelName,
+                                     MessageBuilder *builder);
+    static void hostingSystemMessage(const QString &channelName,
+                                     MessageBuilder *builder, bool hostOn);
+    static void deletionMessage(const MessagePtr originalMessage,
+                                MessageBuilder *builder);
+    static void deletionMessage(const DeleteAction &action,
+                                MessageBuilder *builder);
+    static void listOfUsersSystemMessage(QString prefix, QStringList users,
+                                         Channel *channel,
+                                         MessageBuilder *builder);
+    static void listOfUsersSystemMessage(
+        QString prefix, const std::vector<HelixModerator> &users,
+        Channel *channel, MessageBuilder *builder);
+
+    static MessagePtr buildHypeChatMessage(Communi::IrcPrivateMessage *message);
+
+    static std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
+        const AutomodAction &action, const QString &channelName);
+    static MessagePtr makeAutomodInfoMessage(const AutomodInfoAction &action);
+
+    static std::pair<MessagePtr, MessagePtr> makeLowTrustUserMessage(
+        const PubSubLowTrustUsersMessage &action, const QString &channelName,
+        const TwitchChannel *twitchChannel);
+    static MessagePtr makeLowTrustUpdateMessage(
+        const PubSubLowTrustUsersMessage &action);
+
+    static std::unordered_map<QString, QString> parseBadgeInfoTag(
+        const QVariantMap &tags);
+
+    // Parses "badges" tag which contains a comma separated list of key-value elements
+    static std::vector<Badge> parseBadgeTag(const QVariantMap &tags);
+
+    static std::vector<TwitchEmoteOccurrence> parseTwitchEmotes(
+        const QVariantMap &tags, const QString &originalMessage,
+        int messageOffset);
+
+    static void processIgnorePhrases(
+        const std::vector<IgnorePhrase> &phrases, QString &originalMessage,
+        std::vector<TwitchEmoteOccurrence> &twitchEmotes);
+
+private:
+    void addTextOrEmoji(EmotePtr emote);
+    void addTextOrEmoji(const QString &string_);
 
     bool isEmpty() const;
     MessageElement &back();
@@ -141,7 +257,6 @@ protected:
 
     MessageColor textColor_ = MessageColor::Text;
 
-private:
     // Helper method that emplaces some text stylized as system text
     // and then appends that text to the QString parameter "toUpdate".
     // Returns the TextElement that was emplaced.
@@ -149,6 +264,70 @@ private:
                                             QString &toUpdate);
 
     std::shared_ptr<Message> message_;
+
+    void parse();
+    void parseUsernameColor();
+    void parseUsername();
+    void parseMessageID();
+    void parseRoomID();
+    // Parse & build thread information into the message
+    // Will read information from thread_ or from IRC tags
+    void parseThread();
+    // parseHighlights only updates the visual state of the message, but leaves the playing of alerts and sounds to the triggerHighlights function
+    void parseHighlights();
+    void appendChannelName();
+    void appendUsername();
+
+    Outcome tryAppendEmote(const EmoteName &name);
+
+    void addWords(const QStringList &words,
+                  const std::vector<TwitchEmoteOccurrence> &twitchEmotes);
+
+    void appendTwitchBadges();
+    void appendChatterinoBadges();
+    void appendFfzBadges();
+    void appendSeventvBadges();
+    Outcome tryParseCheermote(const QString &string);
+
+    bool shouldAddModerationElements() const;
+
+    QString roomID_;
+    bool hasBits_ = false;
+    QString bits;
+    int bitsLeft{};
+    bool bitsStacked = false;
+    bool historicalMessage_ = false;
+    std::shared_ptr<MessageThread> thread_;
+    MessagePtr parent_;
+
+    /**
+     * Starting offset to be used on index-based operations on `originalMessage_`.
+     *
+     * For example:
+     * originalMessage_ = "there"
+     * messageOffset_ = 4
+     * (the irc message is "hey there")
+     *
+     * then the index 6 would resolve to 6 - 4 = 2 => 'e'
+     */
+    int messageOffset_ = 0;
+
+    QString userId_;
+    bool senderIsBroadcaster{};
+
+    Channel *channel = nullptr;
+    const Communi::IrcMessage *ircMessage;
+    MessageParseArgs args;
+    const QVariantMap tags;
+    QString originalMessage_;
+
+    const bool action_{};
+
+    QColor usernameColor_ = {153, 153, 153};
+
+    bool highlightAlert_ = false;
+    bool highlightSound_ = false;
+    std::optional<QUrl> highlightSoundCustomUrl_{};
 };
 
 }  // namespace chatterino

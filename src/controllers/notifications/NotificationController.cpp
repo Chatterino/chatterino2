@@ -5,9 +5,9 @@
 #include "controllers/notifications/NotificationModel.hpp"
 #include "controllers/sound/ISoundController.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
 #include "singletons/Toasts.hpp"
@@ -138,7 +138,7 @@ void NotificationController::notifyTwitchChannelLive(
 
     // Message in /live channel
     MessageBuilder builder;
-    TwitchMessageBuilder::liveMessage(payload.displayName, &builder);
+    MessageBuilder::liveMessage(payload.displayName, &builder);
     builder.message().id = payload.channelId;
     getApp()->getTwitch()->getLiveChannel()->addMessage(
         builder.release(), MessageContext::Original);

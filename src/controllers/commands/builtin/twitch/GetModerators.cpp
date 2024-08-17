@@ -5,7 +5,6 @@
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 
 namespace {
 
@@ -78,7 +77,7 @@ QString getModerators(const CommandContext &ctx)
             // TODO: sort results?
 
             MessageBuilder builder;
-            TwitchMessageBuilder::listOfUsersSystemMessage(
+            MessageBuilder::listOfUsersSystemMessage(
                 "The moderators of this channel are", result, twitchChannel,
                 &builder);
             channel->addMessage(builder.release(), MessageContext::Original);

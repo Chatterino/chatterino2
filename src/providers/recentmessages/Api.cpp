@@ -4,7 +4,6 @@
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "providers/recentmessages/Impl.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "util/PostToThread.hpp"
 
 namespace {

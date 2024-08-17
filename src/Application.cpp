@@ -42,7 +42,6 @@
 #include "providers/twitch/PubSubMessages.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/CrashHandler.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
@@ -739,7 +738,7 @@ void Application::initPubSub()
             }
 
             MessageBuilder msg;
-            TwitchMessageBuilder::deletionMessage(action, &msg);
+            MessageBuilder::deletionMessage(action, &msg);
             msg->flags.set(MessageFlag::PubSub);
 
             postToThread([chan, msg = msg.release()] {
@@ -827,10 +826,8 @@ void Application::initPubSub()
                 }
 
                 postToThread([twitchChannel, action] {
-                    const auto p =
-                        TwitchMessageBuilder::makeLowTrustUserMessage(
-                            action, twitchChannel->getName(),
-                            twitchChannel.get());
+                    const auto p = MessageBuilder::makeLowTrustUserMessage(
+                        action, twitchChannel->getName(), twitchChannel.get());
                     twitchChannel->addMessage(p.first,
                                               MessageContext::Original);
                     twitchChannel->addMessage(p.second,
@@ -871,7 +868,7 @@ void Application::initPubSub()
 
                 postToThread([chan, action] {
                     auto msg =
-                        TwitchMessageBuilder::makeLowTrustUpdateMessage(action);
+                        MessageBuilder::makeLowTrustUpdateMessage(action);
                     chan->addMessage(msg, MessageContext::Original);
                 });
             });
@@ -951,9 +948,8 @@ void Application::initPubSub()
                             ActionUser{msg.senderUserID, msg.senderUserLogin,
                                        senderDisplayName, senderColor};
                         postToThread([chan, action] {
-                            const auto p =
-                                TwitchMessageBuilder::makeAutomodMessage(
-                                    action, chan->getName());
+                            const auto p = MessageBuilder::makeAutomodMessage(
+                                action, chan->getName());
                             chan->addMessage(p.first, MessageContext::Original);
                             chan->addMessage(p.second,
                                              MessageContext::Original);
@@ -1004,8 +1000,8 @@ void Application::initPubSub()
             }
 
             postToThread([chan, action] {
-                const auto p = TwitchMessageBuilder::makeAutomodMessage(
-                    action, chan->getName());
+                const auto p =
+                    MessageBuilder::makeAutomodMessage(action, chan->getName());
                 chan->addMessage(p.first, MessageContext::Original);
                 chan->addMessage(p.second, MessageContext::Original);
             });
@@ -1043,8 +1039,7 @@ void Application::initPubSub()
             }
 
             postToThread([chan, action] {
-                const auto p =
-                    TwitchMessageBuilder::makeAutomodInfoMessage(action);
+                const auto p = MessageBuilder::makeAutomodInfoMessage(action);
                 chan->addMessage(p, MessageContext::Original);
             });
         });

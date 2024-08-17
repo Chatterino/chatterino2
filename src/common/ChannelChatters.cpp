@@ -3,7 +3,6 @@
 #include "common/Channel.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 
 #include <QColor>
 
@@ -40,7 +39,7 @@ void ChannelChatters::addJoinedUser(const QString &user)
             joinedUsers->sort();
 
             MessageBuilder builder;
-            TwitchMessageBuilder::listOfUsersSystemMessage(
+            MessageBuilder::listOfUsersSystemMessage(
                 "Users joined:", *joinedUsers, &this->channel_, &builder);
             builder->flags.set(MessageFlag::Collapsed);
             this->channel_.addMessage(builder.release(),
@@ -66,7 +65,7 @@ void ChannelChatters::addPartedUser(const QString &user)
             partedUsers->sort();
 
             MessageBuilder builder;
-            TwitchMessageBuilder::listOfUsersSystemMessage(
+            MessageBuilder::listOfUsersSystemMessage(
                 "Users parted:", *partedUsers, &this->channel_, &builder);
             builder->flags.set(MessageFlag::Collapsed);
             this->channel_.addMessage(builder.release(),

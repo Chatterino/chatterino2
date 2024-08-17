@@ -7,7 +7,6 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 
 namespace {
 
@@ -107,8 +106,8 @@ QString getVIPs(const CommandContext &ctx)
 
             // TODO: sort results?
             MessageBuilder builder;
-            TwitchMessageBuilder::listOfUsersSystemMessage(
-                messagePrefix, vipList, twitchChannel, &builder);
+            MessageBuilder::listOfUsersSystemMessage(messagePrefix, vipList,
+                                                     twitchChannel, &builder);
 
             channel->addMessage(builder.release(), MessageContext::Original);
         },
