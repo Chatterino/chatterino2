@@ -26,8 +26,6 @@ SeventvEventAPI::SeventvEventAPI(
 {
 }
 
-SeventvEventAPI::~SeventvEventAPI() = default;
-
 void SeventvEventAPI::subscribeUser(const QString &userID,
                                     const QString &emoteSetID)
 {
