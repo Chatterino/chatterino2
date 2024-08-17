@@ -204,8 +204,8 @@ public:
                                       const QString &channelID);
 
     // Messages in normal chat for channel stuff
-    static void liveSystemMessage(const QString &channelName,
-                                  MessageBuilder *builder);
+    static MessagePtr makeLiveSystemMessage(const QString &channelName,
+                                            const QString &channelID);
     static void offlineSystemMessage(const QString &channelName,
                                      MessageBuilder *builder);
     static void hostingSystemMessage(const QString &channelName,

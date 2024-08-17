@@ -1487,21 +1487,24 @@ MessagePtr MessageBuilder::makeLiveMessage(const QString &channelName,
     return builder.release();
 }
 
-void MessageBuilder::liveSystemMessage(const QString &channelName,
-                                       MessageBuilder *builder)
+MessagePtr MessageBuilder::makeLiveSystemMessage(const QString &channelName,
+                                                 const QString &channelID)
 {
-    builder->emplace<TimestampElement>();
-    builder->message().flags.set(MessageFlag::System);
-    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    MessageBuilder builder;
+    builder.emplace<TimestampElement>();
+    builder.message().flags.set(MessageFlag::System);
+    builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
     builder
-        ->emplace<TextElement>(channelName, MessageElementFlag::Username,
-                               MessageColor::System, FontStyle::ChatMediumBold)
+        .emplace<TextElement>(channelName, MessageElementFlag::Username,
+                              MessageColor::System, FontStyle::ChatMediumBold)
         ->setLink({Link::UserInfo, channelName});
-    builder->emplace<TextElement>("is live!", MessageElementFlag::Text,
-                                  MessageColor::System);
+    builder.emplace<TextElement>("is live!", MessageElementFlag::Text,
+                                 MessageColor::System);
     auto text = QString("%1 is live!").arg(channelName);
-    builder->message().messageText = text;
-    builder->message().searchText = text;
+    builder.message().messageText = text;
+    builder.message().searchText = text;
+    builder.message().id = channelID;
+    return builder.release();
 }
 
 void MessageBuilder::offlineSystemMessage(const QString &channelName,

@@ -434,10 +434,9 @@ void TwitchChannel::onLiveStatusChanged(bool isLive, bool isInitialUpdate)
         });
 
         // Channel live message
-        MessageBuilder builder;
-        MessageBuilder::liveSystemMessage(this->getDisplayName(), &builder);
-        builder.message().id = this->roomId();
-        this->addMessage(builder.release(), MessageContext::Original);
+        this->addMessage(MessageBuilder::makeLiveSystemMessage(
+                             this->getDisplayName(), this->roomId()),
+                         MessageContext::Original);
     }
     else
     {
