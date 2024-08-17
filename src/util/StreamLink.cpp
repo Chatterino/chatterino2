@@ -3,7 +3,6 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
-#include "providers/irc/IrcMessageBuilder.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"

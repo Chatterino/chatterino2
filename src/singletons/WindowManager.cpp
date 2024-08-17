@@ -5,9 +5,6 @@
 #include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/MessageElement.hpp"
-#include "providers/irc/Irc2.hpp"
-#include "providers/irc/IrcChannel2.hpp"
-#include "providers/irc/IrcServer.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
@@ -643,19 +640,6 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
             obj.insert("type", "live");
         }
         break;
-        case Channel::Type::Irc: {
-            if (auto *ircChannel =
-                    dynamic_cast<IrcChannel *>(channel.get().get()))
-            {
-                obj.insert("type", "irc");
-                if (ircChannel->server())
-                {
-                    obj.insert("server", ircChannel->server()->id());
-                }
-                obj.insert("channel", ircChannel->getName());
-            }
-        }
-        break;
         case Channel::Type::Misc: {
             obj.insert("type", "misc");
             obj.insert("name", channel.get()->getName());
@@ -704,11 +688,6 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
     else if (descriptor.type_ == "automod")
     {
         return getApp()->getTwitch()->getAutomodChannel();
-    }
-    else if (descriptor.type_ == "irc")
-    {
-        return Irc::instance().getOrAddChannel(descriptor.server_,
-                                               descriptor.channelName_);
     }
     else if (descriptor.type_ == "misc")
     {

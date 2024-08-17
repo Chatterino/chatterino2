@@ -3,8 +3,6 @@
 #include "Application.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "providers/irc/IrcChannel2.hpp"
-#include "providers/irc/IrcServer.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Logging.hpp"
@@ -36,8 +34,6 @@ Channel::Channel(const QString &name, Type type)
     {
         this->platform_ = "twitch";
     }
-
-    // Irc platform is set through IrcChannel2 ctor
 }
 
 Channel::~Channel()

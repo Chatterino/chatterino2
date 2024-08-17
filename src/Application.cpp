@@ -32,7 +32,6 @@
 #include "providers/bttv/BttvLiveUpdates.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
-#include "providers/irc/Irc2.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"
 #include "providers/seventv/eventapi/Subscription.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
@@ -223,11 +222,6 @@ void Application::initialize(Settings &settings, const Paths &paths)
     if (!this->args_.isFramelessEmbed)
     {
         getSettings()->currentVersion.setValue(CHATTERINO_VERSION);
-
-        if (getSettings()->enableExperimentalIrc)
-        {
-            Irc::instance().load();
-        }
     }
 
     this->accounts->load();

@@ -5,8 +5,6 @@
 #include "common/QLogging.hpp"
 #include "common/WindowDescriptors.hpp"
 #include "debug/AssertInGuiThread.hpp"
-#include "providers/irc/IrcChannel2.hpp"
-#include "providers/irc/IrcServer.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
@@ -817,22 +815,6 @@ NodeDescriptor SplitContainer::buildDescriptorRecursively(
 
         SplitNodeDescriptor result;
         result.type_ = qmagicenum::enumNameString(channelType);
-
-        switch (channelType)
-        {
-            case Channel::Type::Irc: {
-                if (auto *ircChannel = dynamic_cast<IrcChannel *>(
-                        currentNode->split_->getChannel().get()))
-                {
-                    if (ircChannel->server())
-                    {
-                        result.server_ = ircChannel->server()->id();
-                    }
-                }
-            }
-            break;
-        }
-
         result.channelName_ = currentNode->split_->getChannel()->getName();
         result.filters_ = currentNode->split_->getFilters();
         return result;
