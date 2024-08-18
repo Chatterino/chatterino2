@@ -14,7 +14,6 @@
 #include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/MessageThread.hpp"
-#include "providers/irc/AbstractIrcServer.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchAccountManager.hpp"
@@ -171,7 +170,7 @@ void updateReplyParticipatedStatus(const QVariantMap &tags,
 }
 
 ChannelPtr channelOrEmptyByTarget(const QString &target,
-                                  IAbstractIrcServer &server)
+                                  ITwitchIrcServer &server)
 {
     QString channelName;
     if (!trimChannelName(target, channelName))
@@ -679,10 +678,9 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
 }
 
 void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
-                                          ITwitchIrcServer &twitchServer,
-                                          IAbstractIrcServer &abstractIrcServer)
+                                          ITwitchIrcServer &twitchServer)
 {
-    auto chan = channelOrEmptyByTarget(message->target(), abstractIrcServer);
+    auto chan = channelOrEmptyByTarget(message->target(), twitchServer);
     if (chan->isEmpty())
     {
         return;
@@ -988,9 +986,8 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
     }
 }
 
-void IrcMessageHandler::handleUserNoticeMessage(
-    Communi::IrcMessage *message, ITwitchIrcServer &twitchServer,
-    IAbstractIrcServer &abstractIrcServer)
+void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
+                                                ITwitchIrcServer &twitchServer)
 {
     auto tags = message->tags();
     auto parameters = message->parameters();
@@ -1003,7 +1000,7 @@ void IrcMessageHandler::handleUserNoticeMessage(
         content = parameters[1];
     }
 
-    auto chn = abstractIrcServer.getChannelOrEmpty(target);
+    auto chn = twitchServer.getChannelOrEmpty(target);
     if (isIgnoredMessage({
             .message = content,
             .twitchUserID = tags.value("user-id").toString(),
@@ -1096,7 +1093,7 @@ void IrcMessageHandler::handleUserNoticeMessage(
             return;
         }
 
-        auto chan = abstractIrcServer.getChannelOrEmpty(channelName);
+        auto chan = twitchServer.getChannelOrEmpty(channelName);
 
         if (!chan->isEmpty())
         {

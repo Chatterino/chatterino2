@@ -55,7 +55,6 @@ class SeventvEmotes;
 class SeventvEventAPI;
 class ILinkResolver;
 class IStreamerMode;
-class IAbstractIrcServer;
 
 class IApplication
 {
@@ -84,7 +83,7 @@ public:
     virtual HighlightController *getHighlights() = 0;
     virtual NotificationController *getNotifications() = 0;
     virtual ITwitchIrcServer *getTwitch() = 0;
-    virtual IAbstractIrcServer *getTwitchAbstract() = 0;
+    virtual ITwitchIrcServer *getTwitchAbstract() = 0;
     virtual PubSub *getTwitchPubSub() = 0;
     virtual ILogging *getChatLogger() = 0;
     virtual IChatterinoBadges *getChatterinoBadges() = 0;
@@ -195,7 +194,8 @@ public:
     NotificationController *getNotifications() override;
     HighlightController *getHighlights() override;
     ITwitchIrcServer *getTwitch() override;
-    IAbstractIrcServer *getTwitchAbstract() override;
+    [[deprecated("use getTwitch()")]] ITwitchIrcServer *getTwitchAbstract()
+        override;
     PubSub *getTwitchPubSub() override;
     ILogging *getChatLogger() override;
     FfzBadges *getFfzBadges() override;

@@ -24,6 +24,7 @@
 - Minor: Replying to a message will now display the message being replied to. (#4350, #5519)
 - Minor: Links can now have prefixes and suffixes such as parentheses. (#5486, #5515)
 - Minor: Added support for scrolling in splits with touchscreen panning gestures. (#5524)
+- Minor: Removed experimental IRC support. (#5547)
 - Bugfix: Fixed tab move animation occasionally failing to start after closing a tab. (#5426)
 - Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
 - Bugfix: Fixed restricted users usernames not being clickable. (#5405)

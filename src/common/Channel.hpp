@@ -51,7 +51,6 @@ public:
         TwitchLive,
         TwitchAutomod,
         TwitchEnd,
-        Irc,
         Misc,
     };
 
@@ -183,8 +182,6 @@ constexpr magic_enum::customize::customize_t
             return "live";
         case Type::TwitchAutomod:
             return "automod";
-        case Type::Irc:
-            return "irc";
         case Type::Misc:
             return "misc";
         default:
