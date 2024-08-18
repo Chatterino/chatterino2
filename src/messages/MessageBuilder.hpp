@@ -243,7 +243,7 @@ public:
         const std::vector<IgnorePhrase> &phrases, QString &originalMessage,
         std::vector<TwitchEmoteOccurrence> &twitchEmotes);
 
-private:
+protected:
     void addTextOrEmoji(EmotePtr emote);
     void addTextOrEmoji(const QString &string_);
 
