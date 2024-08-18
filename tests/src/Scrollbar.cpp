@@ -17,23 +17,12 @@ using namespace chatterino;
 
 namespace {
 
-class MockApplication : mock::BaseApplication
+class MockApplication : public mock::BaseApplication
 {
 public:
     MockApplication()
-        : theme(this->paths_)
-        , fonts(this->settings)
-        , windowManager(this->paths_)
+        : windowManager(this->paths_, this->settings, this->theme, this->fonts)
     {
-    }
-    Theme *getThemes() override
-    {
-        return &this->theme;
-    }
-
-    Fonts *getFonts() override
-    {
-        return &this->fonts;
     }
 
     WindowManager *getWindows() override
@@ -41,8 +30,6 @@ public:
         return &this->windowManager;
     }
 
-    Theme theme;
-    Fonts fonts;
     WindowManager windowManager;
 };
 
