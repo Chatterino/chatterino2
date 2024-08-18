@@ -1189,8 +1189,8 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
                              .mid(1)  // there is a space before the first user
                              .split(", ");
             users.sort(Qt::CaseInsensitive);
-            channel->addMessage(MessageBuilder::makeListOfUsersSystemMessage(
-                                    msgParts.at(0), users, tc, false),
+            channel->addMessage(MessageBuilder::makeListOfUsersMessage(
+                                    msgParts.at(0), users, tc),
                                 MessageContext::Original);
         }
         else

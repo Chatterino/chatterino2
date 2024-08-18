@@ -76,9 +76,9 @@ QString getModerators(const CommandContext &ctx)
 
             // TODO: sort results?
 
-            channel->addMessage(MessageBuilder::makeListOfUsersSystemMessage(
+            channel->addMessage(MessageBuilder::makeListOfUsersMessage(
                                     "The moderators of this channel are",
-                                    result, twitchChannel, false),
+                                    result, twitchChannel),
                                 MessageContext::Original);
         },
         [channel{ctx.channel}](auto error, auto message) {

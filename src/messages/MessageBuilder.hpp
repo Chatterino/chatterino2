@@ -210,13 +210,12 @@ public:
     static MessagePtr makeDeletionMessageFromIRC(
         const MessagePtr &originalMessage);
     static MessagePtr makeDeletionMessageFromPubSub(const DeleteAction &action);
-    static MessagePtr makeListOfUsersSystemMessage(QString prefix,
-                                                   QStringList users,
-                                                   Channel *channel,
-                                                   bool collapsed);
-    static MessagePtr makeListOfUsersSystemMessage(
+    static MessagePtr makeListOfUsersMessage(QString prefix, QStringList users,
+                                             Channel *channel,
+                                             MessageFlags extraFlags = {});
+    static MessagePtr makeListOfUsersMessage(
         QString prefix, const std::vector<HelixModerator> &users,
-        Channel *channel, bool collapsed);
+        Channel *channel, MessageFlags extraFlags = {});
 
     static MessagePtr buildHypeChatMessage(Communi::IrcPrivateMessage *message);
 

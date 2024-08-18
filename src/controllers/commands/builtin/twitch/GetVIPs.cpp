@@ -106,10 +106,9 @@ QString getVIPs(const CommandContext &ctx)
 
             // TODO: sort results?
 
-            channel->addMessage(
-                MessageBuilder::makeListOfUsersSystemMessage(
-                    messagePrefix, vipList, twitchChannel, false),
-                MessageContext::Original);
+            channel->addMessage(MessageBuilder::makeListOfUsersMessage(
+                                    messagePrefix, vipList, twitchChannel),
+                                MessageContext::Original);
         },
         [channel{ctx.channel}](auto error, auto message) {
             auto errorMessage = formatGetVIPsError(error, message);

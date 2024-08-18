@@ -39,8 +39,9 @@ void ChannelChatters::addJoinedUser(const QString &user)
             joinedUsers->sort();
 
             this->channel_.addMessage(
-                MessageBuilder::makeListOfUsersSystemMessage(
-                    "Users joined:", *joinedUsers, &this->channel_, true),
+                MessageBuilder::makeListOfUsersMessage(
+                    "Users joined:", *joinedUsers, &this->channel_,
+                    {MessageFlag::Collapsed}),
                 MessageContext::Original);
 
             joinedUsers->clear();
@@ -63,8 +64,9 @@ void ChannelChatters::addPartedUser(const QString &user)
             partedUsers->sort();
 
             this->channel_.addMessage(
-                MessageBuilder::makeListOfUsersSystemMessage(
-                    "Users parted:", *partedUsers, &this->channel_, true),
+                MessageBuilder::makeListOfUsersMessage(
+                    "Users parted:", *partedUsers, &this->channel_,
+                    {MessageFlag::Collapsed}),
                 MessageContext::Original);
 
             partedUsers->clear();

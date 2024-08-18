@@ -124,8 +124,8 @@ QString testChatters(const CommandContext &ctx)
                 prefix += QString("(%1):").arg(result.total);
             }
 
-            channel->addMessage(MessageBuilder::makeListOfUsersSystemMessage(
-                                    prefix, entries, twitchChannel, false),
+            channel->addMessage(MessageBuilder::makeListOfUsersMessage(
+                                    prefix, entries, twitchChannel),
                                 MessageContext::Original);
         },
         [channel{ctx.channel}](auto error, auto message) {

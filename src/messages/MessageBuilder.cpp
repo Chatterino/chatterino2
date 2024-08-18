@@ -1641,10 +1641,10 @@ MessagePtr MessageBuilder::makeDeletionMessageFromPubSub(
     return builder.release();
 }
 
-MessagePtr MessageBuilder::makeListOfUsersSystemMessage(QString prefix,
-                                                        QStringList users,
-                                                        Channel *channel,
-                                                        bool collapsed)
+MessagePtr MessageBuilder::makeListOfUsersMessage(QString prefix,
+                                                  QStringList users,
+                                                  Channel *channel,
+                                                  MessageFlags extraFlags)
 {
     MessageBuilder builder;
 
@@ -1688,17 +1688,17 @@ MessagePtr MessageBuilder::makeListOfUsersSystemMessage(QString prefix,
             ->setTrailingSpace(false);
     }
 
-    if (collapsed)
+    if (!extraFlags.isEmpty())
     {
-        builder.message().flags.set(MessageFlag::Collapsed);
+        builder.message().flags.set(extraFlags);
     }
 
     return builder.release();
 }
 
-MessagePtr MessageBuilder::makeListOfUsersSystemMessage(
+MessagePtr MessageBuilder::makeListOfUsersMessage(
     QString prefix, const std::vector<HelixModerator> &users, Channel *channel,
-    bool collapsed)
+    MessageFlags extraFlags)
 {
     MessageBuilder builder;
 
@@ -1746,9 +1746,9 @@ MessagePtr MessageBuilder::makeListOfUsersSystemMessage(
     builder.message().messageText = text;
     builder.message().searchText = text;
 
-    if (collapsed)
+    if (!extraFlags.isEmpty())
     {
-        builder.message().flags.set(MessageFlag::Collapsed);
+        builder.message().flags.set(extraFlags);
     }
 
     return builder.release();
