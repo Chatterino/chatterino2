@@ -3,6 +3,7 @@
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
 #include "messages/MessageColor.hpp"
+#include "messages/MessageFlag.hpp"
 #include "providers/twitch/pubsubmessages/LowTrustUsers.hpp"
 
 #include <IrcMessage>
@@ -199,13 +200,12 @@ public:
     static MessagePtr makeChannelPointRewardMessage(
         const ChannelPointReward &reward, bool isMod, bool isBroadcaster);
 
-    // Message in the /live chat for channel going live
+    /// Make a "CHANNEL_NAME has gone live!" message
     static MessagePtr makeLiveMessage(const QString &channelName,
-                                      const QString &channelID);
+                                      const QString &channelID,
+                                      MessageFlags extraFlags = {});
 
     // Messages in normal chat for channel stuff
-    static MessagePtr makeLiveSystemMessage(const QString &channelName,
-                                            const QString &channelID);
     static MessagePtr makeOfflineSystemMessage(const QString &channelName,
                                                const QString &channelID);
     static MessagePtr makeHostingSystemMessage(const QString &channelName,

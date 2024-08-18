@@ -1475,7 +1475,8 @@ MessagePtr MessageBuilder::makeChannelPointRewardMessage(
 }
 
 MessagePtr MessageBuilder::makeLiveMessage(const QString &channelName,
-                                           const QString &channelID)
+                                           const QString &channelID,
+                                           MessageFlags extraFlags)
 {
     MessageBuilder builder;
 
@@ -1491,26 +1492,11 @@ MessagePtr MessageBuilder::makeLiveMessage(const QString &channelName,
     builder.message().searchText = text;
     builder.message().id = channelID;
 
-    return builder.release();
-}
+    if (!extraFlags.isEmpty())
+    {
+        builder.message().flags.set(extraFlags);
+    }
 
-MessagePtr MessageBuilder::makeLiveSystemMessage(const QString &channelName,
-                                                 const QString &channelID)
-{
-    MessageBuilder builder;
-    builder.emplace<TimestampElement>();
-    builder.message().flags.set(MessageFlag::System);
-    builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
-    builder
-        .emplace<TextElement>(channelName, MessageElementFlag::Username,
-                              MessageColor::System, FontStyle::ChatMediumBold)
-        ->setLink({Link::UserInfo, channelName});
-    builder.emplace<TextElement>("is live!", MessageElementFlag::Text,
-                                 MessageColor::System);
-    auto text = QString("%1 is live!").arg(channelName);
-    builder.message().messageText = text;
-    builder.message().searchText = text;
-    builder.message().id = channelID;
     return builder.release();
 }
 
