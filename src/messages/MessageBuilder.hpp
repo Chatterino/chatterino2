@@ -171,10 +171,7 @@ public:
     void addLink(const linkparser::Parsed &parsedLink, const QString &source);
 
     template <typename T, typename... Args>
-    // clang-format off
-    // clang-format can be enabled once clang-format v11+ has been installed in CI
     T *emplace(Args &&...args)
-    // clang-format on
     {
         static_assert(std::is_base_of<MessageElement, T>::value,
                       "T must extend MessageElement");
