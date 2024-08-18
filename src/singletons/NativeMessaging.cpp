@@ -134,6 +134,22 @@ namespace nm::client {
 NativeMessagingServer::NativeMessagingServer()
     : thread(*this)
 {
+    this->thread.setObjectName("NativeMessagingReceiver");
+}
+
+NativeMessagingServer::~NativeMessagingServer()
+{
+    if (!ipc::IpcQueue::remove("chatterino_gui"))
+    {
+        qCWarning(chatterinoNativeMessage) << "Failed to remove message queue";
+    }
+    this->thread.requestInterruption();
+    this->thread.quit();
+    // Most likely, the receiver thread will still wait for a message
+    if (!this->thread.wait(250))
+    {
+        this->thread.terminate();
+    }
 }
 
 void NativeMessagingServer::start()
@@ -161,7 +177,7 @@ void NativeMessagingServer::ReceiverThread::run()
         return;
     }
 
-    while (true)
+    while (!this->isInterruptionRequested())
     {
         auto buf = messageQueue->receive();
         if (buf.isEmpty())

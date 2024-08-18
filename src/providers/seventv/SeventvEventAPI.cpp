@@ -1,6 +1,7 @@
 #include "providers/seventv/SeventvEventAPI.hpp"
 
 #include "Application.hpp"
+#include "common/Literals.hpp"
 #include "providers/seventv/eventapi/Client.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"
 #include "providers/seventv/eventapi/Message.hpp"
@@ -17,10 +18,11 @@
 namespace chatterino {
 using namespace seventv;
 using namespace seventv::eventapi;
+using namespace chatterino::literals;
 
 SeventvEventAPI::SeventvEventAPI(
     QString host, std::chrono::milliseconds defaultHeartbeatInterval)
-    : BasicPubSubManager(std::move(host))
+    : BasicPubSubManager(std::move(host), u"7TV"_s)
     , heartbeatInterval_(defaultHeartbeatInterval)
 {
 }

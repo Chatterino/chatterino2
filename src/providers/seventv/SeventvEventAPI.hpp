@@ -2,6 +2,7 @@
 
 #include "providers/liveupdates/BasicPubSubClient.hpp"
 #include "providers/liveupdates/BasicPubSubManager.hpp"
+#include "providers/seventv/eventapi/Subscription.hpp"
 #include "util/QStringHash.hpp"
 
 #include <pajlada/signals/signal.hpp>
@@ -9,7 +10,6 @@
 namespace chatterino {
 
 namespace seventv::eventapi {
-    struct Subscription;
     struct Dispatch;
     struct EmoteAddDispatch;
     struct EmoteUpdateDispatch;

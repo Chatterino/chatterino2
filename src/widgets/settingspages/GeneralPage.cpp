@@ -1142,13 +1142,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addIntInput("Usercard scrollback limit (requires restart)",
                        s.scrollbackUsercardLimit, 100, 100000, 100);
 
-    layout.addCheckbox("Enable experimental IRC support (requires restart)",
-                       s.enableExperimentalIrc, false,
-                       "When enabled, attempting to join a channel will "
-                       "include an \"IRC (Beta)\" tab allowing the user to "
-                       "connect to an IRC server outside of Twitch ");
-    layout.addCheckbox("Show unhandled IRC messages",
-                       s.showUnhandledIrcMessages);
     layout.addDropdown<int>(
         "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
         s.timeoutStackStyle,

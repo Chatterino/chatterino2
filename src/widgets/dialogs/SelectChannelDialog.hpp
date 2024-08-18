@@ -51,10 +51,6 @@ private:
             QRadioButton *live;
             QRadioButton *automod;
         } twitch;
-        struct {
-            QLineEdit *channel;
-            EditableModelView *servers;
-        } irc;
     } ui_;
 
     EventFilter tabFilter_;

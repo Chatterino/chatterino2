@@ -17,6 +17,7 @@
 #include <QProcess>
 #include <QRegularExpression>
 #include <QStringBuilder>
+#include <QtConcurrent>
 #include <semver/semver.hpp>
 
 namespace {
@@ -40,9 +41,9 @@ const QString CHATTERINO_OS = u"freebsd"_s;
 #else
 const QString CHATTERINO_OS = u"unknown"_s;
 #endif
-;
 
 }  // namespace
+
 namespace chatterino {
 
 Updates::Updates(const Paths &paths_)
@@ -73,6 +74,26 @@ bool Updates::isDowngradeOf(const QString &online, const QString &current)
     }
 
     return onlineVersion < currentVersion;
+}
+
+void Updates::deleteOldFiles()
+{
+    std::ignore = QtConcurrent::run([dir{this->paths.miscDirectory}] {
+        {
+            auto path = combinePath(dir, "Update.exe");
+            if (QFile::exists(path))
+            {
+                QFile::remove(path);
+            }
+        }
+        {
+            auto path = combinePath(dir, "update.zip");
+            if (QFile::exists(path))
+            {
+                QFile::remove(path);
+            }
+        }
+    });
 }
 
 const QString &Updates::getCurrentVersion() const

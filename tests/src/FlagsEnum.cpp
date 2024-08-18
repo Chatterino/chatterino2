@@ -326,6 +326,23 @@ TEST(FlagsEnum, hasNone)
     testHasNone<BasicUnscoped>();
 }
 
+template <typename E>
+consteval void testIsEmpty()
+{
+    using FE = FlagsEnum<E>;
+
+    static_assert(FE{}.isEmpty());
+    static_assert(!FE{E::Foo}.isEmpty());
+    static_assert(FE{E::None}.isEmpty());
+    static_assert(!FE{E::Foo, E::Waldo}.isEmpty());
+}
+
+TEST(FlagsEnum, isEmpty)
+{
+    testIsEmpty<BasicScoped>();
+    testIsEmpty<BasicUnscoped>();
+}
+
 template <typename T>
 constexpr inline auto CONSTRUCTION_VALID = requires() { FlagsEnum<T>{}; };
 

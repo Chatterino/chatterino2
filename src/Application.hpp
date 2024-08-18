@@ -1,6 +1,5 @@
 #pragma once
 
-#include "debug/AssertInGuiThread.hpp"
 #include "singletons/NativeMessaging.hpp"
 
 #include <QApplication>
@@ -52,19 +51,23 @@ class ImageUploader;
 class SeventvAPI;
 class CrashHandler;
 class BttvEmotes;
+class BttvLiveUpdates;
 class FfzEmotes;
 class SeventvEmotes;
+class SeventvEventAPI;
 class ILinkResolver;
 class IStreamerMode;
-class IAbstractIrcServer;
 
 class IApplication
 {
 public:
     IApplication();
-    virtual ~IApplication() = default;
+    virtual ~IApplication();
 
-    static IApplication *instance;
+    IApplication(const IApplication &) = delete;
+    IApplication(IApplication &&) = delete;
+    IApplication &operator=(const IApplication &) = delete;
+    IApplication &operator=(IApplication &&) = delete;
 
     virtual bool isTest() const = 0;
 
@@ -82,7 +85,7 @@ public:
     virtual HighlightController *getHighlights() = 0;
     virtual NotificationController *getNotifications() = 0;
     virtual ITwitchIrcServer *getTwitch() = 0;
-    virtual IAbstractIrcServer *getTwitchAbstract() = 0;
+    virtual ITwitchIrcServer *getTwitchAbstract() = 0;
     virtual PubSub *getTwitchPubSub() = 0;
     virtual ILogging *getChatLogger() = 0;
     virtual IChatterinoBadges *getChatterinoBadges() = 0;
@@ -102,8 +105,10 @@ public:
 #endif
     virtual Updates &getUpdates() = 0;
     virtual BttvEmotes *getBttvEmotes() = 0;
+    virtual BttvLiveUpdates *getBttvLiveUpdates() = 0;
     virtual FfzEmotes *getFfzEmotes() = 0;
     virtual SeventvEmotes *getSeventvEmotes() = 0;
+    virtual SeventvEventAPI *getSeventvEventAPI() = 0;
     virtual ILinkResolver *getLinkResolver() = 0;
     virtual IStreamerMode *getStreamerMode() = 0;
 };
@@ -116,8 +121,6 @@ class Application : public IApplication
     char **argv_{};
 
 public:
-    static Application *instance;
-
     Application(Settings &_settings, const Paths &paths, const Args &_args,
                 Updates &_updates);
     ~Application() override;
@@ -131,12 +134,6 @@ public:
     {
         return false;
     }
-
-    /**
-     * In the interim, before we remove _exit(0); from RunGui.cpp,
-     * this will destroy things we know can be destroyed
-     */
-    void fakeDtor();
 
     void initialize(Settings &settings, const Paths &paths);
     void load();
@@ -172,8 +169,10 @@ private:
     std::unique_ptr<TwitchBadges> twitchBadges;
     std::unique_ptr<ChatterinoBadges> chatterinoBadges;
     std::unique_ptr<BttvEmotes> bttvEmotes;
+    std::unique_ptr<BttvLiveUpdates> bttvLiveUpdates;
     std::unique_ptr<FfzEmotes> ffzEmotes;
     std::unique_ptr<SeventvEmotes> seventvEmotes;
+    std::unique_ptr<SeventvEventAPI> seventvEventAPI;
     const std::unique_ptr<Logging> logging;
     std::unique_ptr<ILinkResolver> linkResolver;
     std::unique_ptr<IStreamerMode> streamerMode;
@@ -202,7 +201,8 @@ public:
     NotificationController *getNotifications() override;
     HighlightController *getHighlights() override;
     ITwitchIrcServer *getTwitch() override;
-    IAbstractIrcServer *getTwitchAbstract() override;
+    [[deprecated("use getTwitch()")]] ITwitchIrcServer *getTwitchAbstract()
+        override;
     PubSub *getTwitchPubSub() override;
     ILogging *getChatLogger() override;
     FfzBadges *getFfzBadges() override;
@@ -217,19 +217,16 @@ public:
 #ifdef CHATTERINO_HAVE_PLUGINS
     PluginController *getPlugins() override;
 #endif
-    Updates &getUpdates() override
-    {
-        assertInGuiThread();
-
-        return this->updates;
-    }
+    Updates &getUpdates() override;
 
     SeventvPersonalEmotes *getSeventvPersonalEmotes() override;
     SeventvPaints *getSeventvPaints() override;
 
     BttvEmotes *getBttvEmotes() override;
+    BttvLiveUpdates *getBttvLiveUpdates() override;
     FfzEmotes *getFfzEmotes() override;
     SeventvEmotes *getSeventvEmotes() override;
+    SeventvEventAPI *getSeventvEventAPI() override;
 
     ILinkResolver *getLinkResolver() override;
     IStreamerMode *getStreamerMode() override;
@@ -240,7 +237,7 @@ private:
     void initSeventvEventAPI();
     void initNm(const Paths &paths);
 
-    NativeMessagingServer nmServer{};
+    NativeMessagingServer nmServer;
     Updates &updates;
 };
 

@@ -522,7 +522,6 @@ public:
 #ifdef Q_OS_LINUX
     BoolSetting useKeyring = {"/misc/useKeyring", true};
 #endif
-    BoolSetting enableExperimentalIrc = {"/misc/experimentalIrc", false};
 
     IntSetting startUpNotification = {"/misc/startUpNotification", 0};
     QStringSetting currentVersion = {"/misc/currentVersion", ""};
@@ -561,14 +560,7 @@ public:
                                                true};
     BoolSetting lockNotebookLayout = {"/misc/lockNotebookLayout", false};
 
-    /// Debug
-    BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",
-                                            false};
-
     /// UI
-    // Purely QOL settings are here (like last item in a list).
-    IntSetting lastSelectChannelTab = {"/ui/lastSelectChannelTab", 0};
-    IntSetting lastSelectIrcConn = {"/ui/lastSelectIrcConn", 0};
 
     BoolSetting showSendButton = {"/ui/showSendButton", false};
 

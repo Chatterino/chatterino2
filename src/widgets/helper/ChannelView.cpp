@@ -2782,7 +2782,6 @@ bool ChannelView::mayContainMessage(const MessagePtr &message)
         case Channel::Type::Direct:
         case Channel::Type::Twitch:
         case Channel::Type::TwitchWatching:
-        case Channel::Type::Irc:
             // XXX: system messages may not have the channel set
             return message->flags.has(MessageFlag::System) ||
                    this->channel()->getName() == message->channelName;

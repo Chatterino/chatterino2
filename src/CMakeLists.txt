@@ -276,6 +276,7 @@ set(SOURCE_FILES
         messages/MessageColor.hpp
         messages/MessageElement.cpp
         messages/MessageElement.hpp
+        messages/MessageFlag.hpp
         messages/MessageThread.cpp
         messages/MessageThread.hpp
 
@@ -355,22 +356,8 @@ set(SOURCE_FILES
         providers/ffz/FfzUtil.cpp
         providers/ffz/FfzUtil.hpp
 
-        providers/irc/AbstractIrcServer.cpp
-        providers/irc/AbstractIrcServer.hpp
-        providers/irc/Irc2.cpp
-        providers/irc/Irc2.hpp
-        providers/irc/IrcAccount.cpp
-        providers/irc/IrcAccount.hpp
-        providers/irc/IrcChannel2.cpp
-        providers/irc/IrcChannel2.hpp
-        providers/irc/IrcCommands.cpp
-        providers/irc/IrcCommands.hpp
         providers/irc/IrcConnection2.cpp
         providers/irc/IrcConnection2.hpp
-        providers/irc/IrcMessageBuilder.cpp
-        providers/irc/IrcMessageBuilder.hpp
-        providers/irc/IrcServer.cpp
-        providers/irc/IrcServer.hpp
 
         providers/links/LinkInfo.cpp
         providers/links/LinkInfo.hpp
@@ -530,6 +517,8 @@ set(SOURCE_FILES
         util/RapidjsonHelpers.hpp
         util/RatelimitBucket.cpp
         util/RatelimitBucket.hpp
+        util/RenameThread.cpp
+        util/RenameThread.hpp
         util/SampleData.cpp
         util/SampleData.hpp
         util/SharedPtrElementLess.hpp
@@ -592,9 +581,6 @@ set(SOURCE_FILES
         widgets/dialogs/EditHotkeyDialog.hpp
         widgets/dialogs/EmotePopup.cpp
         widgets/dialogs/EmotePopup.hpp
-        widgets/dialogs/IrcConnectionEditor.cpp
-        widgets/dialogs/IrcConnectionEditor.hpp
-        widgets/dialogs/IrcConnectionEditor.ui
         widgets/dialogs/LastRunCrashDialog.cpp
         widgets/dialogs/LastRunCrashDialog.hpp
         widgets/dialogs/LoginDialog.cpp

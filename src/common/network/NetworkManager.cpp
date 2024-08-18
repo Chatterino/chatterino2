@@ -13,6 +13,7 @@ void NetworkManager::init()
     assert(!NetworkManager::accessManager);
 
     NetworkManager::workerThread = new QThread;
+    NetworkManager::workerThread->setObjectName("NetworkWorker");
     NetworkManager::workerThread->start();
 
     NetworkManager::accessManager = new QNetworkAccessManager;
