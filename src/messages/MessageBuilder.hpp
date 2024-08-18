@@ -102,8 +102,6 @@ class MessageBuilder
 {
 public:
     /// Build a message without a base IRC message.
-    ///
-    /// This constructor should be made private.
     MessageBuilder();
 
     /// Build a message based on an incoming IRC PRIVMSG
