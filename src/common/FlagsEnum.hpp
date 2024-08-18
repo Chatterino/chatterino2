@@ -132,6 +132,12 @@ public:
         return this->hasNone(FlagsEnum{flags...});
     }
 
+    /// Returns true if the enum has no flag set (i.e. its underlying value is 0)
+    constexpr bool isEmpty() const noexcept
+    {
+        return static_cast<Int>(this->value_) == 0;
+    }
+
     constexpr T value() const noexcept
     {
         return this->value_;

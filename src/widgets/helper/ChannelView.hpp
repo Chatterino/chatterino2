@@ -4,6 +4,7 @@
 #include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
+#include "messages/MessageFlag.hpp"
 #include "messages/Selection.hpp"
 #include "util/ThreadGuard.hpp"
 #include "widgets/BaseWidget.hpp"
@@ -31,9 +32,6 @@ using ChannelPtr = std::shared_ptr<Channel>;
 
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
-
-enum class MessageFlag : int64_t;
-using MessageFlags = FlagsEnum<MessageFlag>;
 
 class MessageLayout;
 using MessageLayoutPtr = std::shared_ptr<MessageLayout>;

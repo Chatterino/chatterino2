@@ -57,6 +57,7 @@
 - Dev: Refactor/unsingletonize `UserDataController`. (#5459)
 - Dev: Cleanup `BrowserExtension`. (#5465)
 - Dev: Deprecate Qt 5.12. (#5396)
+- Dev: Refactored `MessageFlag` into its own file. (#5549)
 - Dev: The running Qt version is now shown in the about page if it differs from the compiled version. (#5501)
 - Dev: `FlagsEnum` is now `constexpr`. (#5510)
 - Dev: Documented and added tests to RTL handling. (#5473)
@@ -65,6 +66,7 @@
 - Dev: Cleanly exit on shutdown. (#5537)
 - Dev: Renamed threads created by Chatterino on Linux and Windows. (#5538, #5539, #5544)
 - Dev: Refactored a few `#define`s into `const(expr)` and cleaned includes. (#5527)
+- Dev: Added `FlagsEnum::isEmpty`. (#5550)
 - Dev: Prepared for Qt 6.8 by addressing some deprecations. (#5529)
 
 ## 2.5.1

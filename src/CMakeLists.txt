@@ -276,6 +276,7 @@ set(SOURCE_FILES
         messages/MessageColor.hpp
         messages/MessageElement.cpp
         messages/MessageElement.hpp
+        messages/MessageFlag.hpp
         messages/MessageThread.cpp
         messages/MessageThread.hpp
 
