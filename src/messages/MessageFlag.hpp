@@ -57,5 +57,6 @@ using MessageFlags = FlagsEnum<MessageFlag>;
 
 template <>
 struct magic_enum::customize::enum_range<chatterino::MessageFlag> {
+    // NOLINTNEXTLINE(readability-identifier-naming)
     static constexpr bool is_flags = true;
 };
