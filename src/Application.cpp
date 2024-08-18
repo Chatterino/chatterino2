@@ -223,6 +223,12 @@ void Application::initialize(Settings &settings, const Paths &paths)
     this->windows->initialize();
 
     this->ffzBadges->load();
+
+    // Load global emotes
+    this->bttvEmotes->loadEmotes();
+    this->ffzEmotes->loadEmotes();
+    this->seventvEmotes->loadGlobalEmotes();
+
     this->twitch->initialize();
 
     // Load live status
@@ -292,7 +298,7 @@ int Application::run(QApplication &qtApp)
 
     getSettings()->enableBTTVGlobalEmotes.connect(
         [this] {
-            this->twitch->reloadBTTVGlobalEmotes();
+            this->bttvEmotes->loadEmotes();
         },
         false);
     getSettings()->enableBTTVChannelEmotes.connect(
@@ -302,7 +308,7 @@ int Application::run(QApplication &qtApp)
         false);
     getSettings()->enableFFZGlobalEmotes.connect(
         [this] {
-            this->twitch->reloadFFZGlobalEmotes();
+            this->ffzEmotes->loadEmotes();
         },
         false);
     getSettings()->enableFFZChannelEmotes.connect(
@@ -312,7 +318,7 @@ int Application::run(QApplication &qtApp)
         false);
     getSettings()->enableSevenTVGlobalEmotes.connect(
         [this] {
-            this->twitch->reloadSevenTVGlobalEmotes();
+            this->seventvEmotes->loadGlobalEmotes();
         },
         false);
     getSettings()->enableSevenTVChannelEmotes.connect(
