@@ -68,6 +68,7 @@
 - Dev: Refactored a few `#define`s into `const(expr)` and cleaned includes. (#5527)
 - Dev: Added `FlagsEnum::isEmpty`. (#5550)
 - Dev: Prepared for Qt 6.8 by addressing some deprecations. (#5529)
+- Dev: Recent changes are now shown in the nightly release description. (#5553)
 
 ## 2.5.1
 
