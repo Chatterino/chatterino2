@@ -389,6 +389,17 @@ jobs:
         working-directory: release-artifacts
         shell: bash
 
+      - name: Format changes
+        id: format-changes
+        run: |
+          delimiter=$(openssl rand -hex 32)
+          {
+            echo "changelog<<$delimiter"
+            python3 ./.CI/format-recent-changes.py
+            echo $delimiter
+          } >> "$GITHUB_OUTPUT"
+        shell: bash
+
       - name: Create release
         uses: ncipollo/release-action@v1.14.0
         with:
@@ -396,7 +407,7 @@ jobs:
           allowUpdates: true
           artifactErrorsFailBuild: true
           artifacts: "release-artifacts/*"
-          body: ${{ github.event.head_commit.message }}
+          body: ${{ steps.format-changes.outputs.changelog }}
           prerelease: true
           name: Nightly Release
           tag: nightly-build
