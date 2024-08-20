@@ -152,6 +152,22 @@ jobs:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
 
+      - name: Temporary test
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Format changes
+        id: format-changes
+        run: |
+          delimiter=$(openssl rand -hex 32)
+          {
+            echo "changelog<<$delimiter"
+            python3 ./.CI/format-recent-changes.py
+            echo $delimiter
+          } >> "$GITHUB_OUTPUT"
+        shell: bash
+
       - name: Install Qt5
         if: startsWith(matrix.qt-version, '5.')
         uses: jurplel/install-qt-action@v4.0.0
@@ -388,6 +404,10 @@ jobs:
           mv chatterino-windows-x86-64-Qt-5.15.2.zip chatterino-windows-old-x86-64-Qt-5.15.2.zip
         working-directory: release-artifacts
         shell: bash
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
       - name: Format changes
         id: format-changes
