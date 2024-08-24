@@ -581,8 +581,6 @@ void PubSub::stop()
             this->websocketClient.stop();
         }
     }
-
-    assert(this->clients.empty());
 }
 
 bool PubSub::listenToWhispers()
