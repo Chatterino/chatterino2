@@ -49,6 +49,15 @@ jobs:
             skip-crashpad: false
             build-appimage: true
             build-deb: true
+          - os: ubuntu-24.04
+            container: ghcr.io/chatterino/chatterino2-build-ubuntu-24.04:latest
+            qt-version: 6.6.1
+            force-lto: false
+            plugins: true
+            skip-artifact: false
+            skip-crashpad: false
+            build-appimage: false
+            build-deb: true
     env:
       C2_ENABLE_LTO: ${{ matrix.force-lto }}
       C2_PLUGINS: ${{ matrix.plugins }}
