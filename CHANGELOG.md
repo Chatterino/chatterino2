@@ -4,6 +4,8 @@
 
 - Major: Release plugins alpha. (#5288)
 - Major: Improve high-DPI support on Windows. (#4868, #5391)
+- Minor: Removed the Ctrl+Shift+L hotkey for toggling the "live only" tab visibility state. (#5530)
+- Minor: Moved tab visibility control to a submenu, without any toggle actions. (#5530)
 - Minor: Add option to customise Moderation buttons with images. (#5369)
 - Minor: Colored usernames now update on the fly when changing the "Color @usernames" setting. (#5300)
 - Minor: Added `flags.action` filter variable, allowing you to filter on `/me` messages. (#5397)
@@ -38,6 +40,7 @@
 - Bugfix: Fixed splits staying paused after unfocusing Chatterino in certain configurations. (#5504)
 - Bugfix: Links with invalid characters in the domain are no longer detected. (#5509)
 - Bugfix: Fixed janky selection for messages with RTL segments (selection is still wrong, but consistently wrong). (#5525)
+- Bugfix: Fixed tab visibility being controllable in the emote popup. (#5530)
 - Dev: Update Windows build from Qt 6.5.0 to Qt 6.7.1. (#5420)
 - Dev: Update vcpkg build Qt from 6.5.0 to 6.7.0, boost from 1.83.0 to 1.85.0, openssl from 3.1.3 to 3.3.0. (#5422)
 - Dev: Unsingletonize `ISoundController`. (#5462)
