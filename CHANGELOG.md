@@ -52,6 +52,7 @@
 - Dev: Unsingletonize `Resources2`. (#5460)
 - Dev: All Lua globals now show in the `c2` global in the LuaLS metadata. (#5385)
 - Dev: Images are now loaded in worker threads. (#5431)
+- Dev: Fixed broken `SignalVector::operator[]` implementation. (#5556)
 - Dev: Qt Creator now auto-configures Conan when loading the project and skips vcpkg. (#5305)
 - Dev: The MSVC CRT is now bundled with Chatterino as it depends on having a recent version installed. (#5447)
 - Dev: Refactor/unsingletonize `UserDataController`. (#5459)
