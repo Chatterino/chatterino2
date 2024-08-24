@@ -14,7 +14,6 @@
 #include "controllers/sound/ISoundController.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
-#include "providers/irc/AbstractIrcServer.hpp"
 #include "providers/links/LinkResolver.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
@@ -33,7 +32,6 @@
 #include "providers/bttv/BttvLiveUpdates.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
-#include "providers/irc/Irc2.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"
 #include "providers/seventv/eventapi/Subscription.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
@@ -124,18 +122,23 @@ SeventvEventAPI *makeSeventvEventAPI(Settings &settings)
 
 const QString TWITCH_PUBSUB_URL = "wss://pubsub-edge.twitch.tv";
 
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+IApplication *INSTANCE = nullptr;
+
 }  // namespace
 
 namespace chatterino {
 
 static std::atomic<bool> isAppInitialized{false};
 
-Application *Application::instance = nullptr;
-IApplication *IApplication::instance = nullptr;
-
 IApplication::IApplication()
 {
-    IApplication::instance = this;
+    INSTANCE = this;
+}
+
+IApplication::~IApplication()
+{
+    INSTANCE = nullptr;
 }
 
 // this class is responsible for handling the workflow of Chatterino
@@ -182,8 +185,6 @@ Application::Application(Settings &_settings, const Paths &paths,
 #endif
     , updates(_updates)
 {
-    Application::instance = this;
-
     // We can safely ignore this signal's connection since the Application will always
     // be destroyed after fonts
     std::ignore = this->fonts->fontChanged.connect([this]() {
@@ -193,7 +194,8 @@ Application::Application(Settings &_settings, const Paths &paths,
 
 Application::~Application()
 {
-    Application::instance = nullptr;
+    // we do this early to ensure getApp isn't used in any dtors
+    INSTANCE = nullptr;
 }
 
 void Application::initialize(Settings &settings, const Paths &paths)
@@ -220,11 +222,6 @@ void Application::initialize(Settings &settings, const Paths &paths)
     if (!this->args_.isFramelessEmbed)
     {
         getSettings()->currentVersion.setValue(CHATTERINO_VERSION);
-
-        if (getSettings()->enableExperimentalIrc)
-        {
-            Irc::instance().load();
-        }
     }
 
     this->accounts->load();
@@ -528,6 +525,13 @@ PluginController *Application::getPlugins()
 }
 #endif
 
+Updates &Application::getUpdates()
+{
+    assertInGuiThread();
+
+    return this->updates;
+}
+
 ITwitchIrcServer *Application::getTwitch()
 {
     assertInGuiThread();
@@ -535,7 +539,7 @@ ITwitchIrcServer *Application::getTwitch()
     return this->twitch.get();
 }
 
-IAbstractIrcServer *Application::getTwitchAbstract()
+ITwitchIrcServer *Application::getTwitchAbstract()
 {
     assertInGuiThread();
 
@@ -1180,9 +1184,9 @@ void Application::initSeventvEventAPI()
 
 IApplication *getApp()
 {
-    assert(IApplication::instance != nullptr);
+    assert(INSTANCE != nullptr);
 
-    return IApplication::instance;
+    return INSTANCE;
 }
 
 }  // namespace chatterino

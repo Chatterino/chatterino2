@@ -1,10 +1,8 @@
 #include "messages/MessageBuilder.hpp"
 
 #include "Application.hpp"
-#include "common/IrcColors.hpp"
 #include "common/LinkParser.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "messages/Image.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
@@ -12,17 +10,11 @@
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "singletons/Emotes.hpp"
-#include "singletons/Resources.hpp"
-#include "singletons/Theme.hpp"
 #include "util/FormatTime.hpp"
 
 #include <QDateTime>
 
 namespace {
-
-QRegularExpression IRC_COLOR_PARSE_REGEX(
-    "(\u0003(\\d{1,2})?(,(\\d{1,2}))?|\u000f)",
-    QRegularExpression::UseUnicodePropertiesOption);
 
 QString formatUpdatedEmoteList(const QString &platform,
                                const std::vector<QString> &emoteNames,
@@ -679,107 +671,6 @@ void MessageBuilder::addLink(const linkparser::Parsed &parsedLink,
     getApp()->getLinkResolver()->resolve(el->linkInfo());
 }
 
-void MessageBuilder::addIrcMessageText(const QString &text)
-{
-    this->message().messageText = text;
-
-    auto words = text.split(' ');
-    MessageColor defaultColorType = MessageColor::Text;
-    const auto &defaultColor =
-        defaultColorType.getColor(*getApp()->getThemes());
-    QColor textColor = defaultColor;
-    int fg = -1;
-    int bg = -1;
-
-    for (const auto &string : words)
-    {
-        if (string.isEmpty())
-        {
-            continue;
-        }
-
-        // Actually just text
-        auto link = linkparser::parse(string);
-        if (link)
-        {
-            this->addLink(*link, string);
-            continue;
-        }
-
-        // Does the word contain a color changer? If so, split on it.
-        // Add color indicators, then combine into the same word with the color being changed
-
-        auto i = IRC_COLOR_PARSE_REGEX.globalMatch(string);
-
-        if (!i.hasNext())
-        {
-            this->addIrcWord(string, textColor);
-            continue;
-        }
-
-        int lastPos = 0;
-
-        while (i.hasNext())
-        {
-            auto match = i.next();
-
-            if (lastPos != match.capturedStart() && match.capturedStart() != 0)
-            {
-                if (fg >= 0 && fg <= 98)
-                {
-                    textColor = IRC_COLORS[fg];
-                    getApp()->getThemes()->normalizeColor(textColor);
-                }
-                else
-                {
-                    textColor = defaultColor;
-                }
-                this->addIrcWord(
-                    string.mid(lastPos, match.capturedStart() - lastPos),
-                    textColor, false);
-                lastPos = match.capturedStart() + match.capturedLength();
-            }
-            if (!match.captured(1).isEmpty())
-            {
-                fg = -1;
-                bg = -1;
-            }
-
-            if (!match.captured(2).isEmpty())
-            {
-                fg = match.captured(2).toInt(nullptr);
-            }
-            else
-            {
-                fg = -1;
-            }
-            if (!match.captured(4).isEmpty())
-            {
-                bg = match.captured(4).toInt(nullptr);
-            }
-            else if (fg == -1)
-            {
-                bg = -1;
-            }
-
-            lastPos = match.capturedStart() + match.capturedLength();
-        }
-
-        if (fg >= 0 && fg <= 98)
-        {
-            textColor = IRC_COLORS[fg];
-            getApp()->getThemes()->normalizeColor(textColor);
-        }
-        else
-        {
-            textColor = defaultColor;
-        }
-        this->addIrcWord(string.mid(lastPos), textColor);
-    }
-
-    this->message().elements.back()->setTrailingSpace(false);
-}
-
 void MessageBuilder::addTextOrEmoji(EmotePtr emote)
 {
     this->emplace<EmoteElement>(emote, MessageElementFlag::EmojiAll);
@@ -803,24 +694,6 @@ void MessageBuilder::addTextOrEmoji(const QString &string)
     else
     {
         this->emplace<TextElement>(string, MessageElementFlag::Text, textColor);
-    }
-}
-
-void MessageBuilder::addIrcWord(const QString &text, const QColor &color,
-                                bool addSpace)
-{
-    this->textColor_ = color;
-    for (auto &variant : getApp()->getEmotes()->getEmojis()->parse(text))
-    {
-        boost::apply_visitor(
-            [&](auto &&arg) {
-                this->addTextOrEmoji(arg);
-            },
-            variant);
-        if (!addSpace)
-        {
-            this->message().elements.back()->setTrailingSpace(false);
-        }
     }
 }
 

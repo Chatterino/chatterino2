@@ -17,6 +17,7 @@
 #include <QFont>
 #include <QIcon>
 #include <QScreen>
+#include <QWindow>
 
 #include <functional>
 
@@ -502,6 +503,24 @@ bool BaseWindow::event(QEvent *event)
     {
         this->onFocusLost();
     }
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+    if (this->flags_.has(DontFocus) || this->flags_.has(Dialog))
+    {
+        // This certain windows (e.g. TooltipWidget, input completion widget, and the search popup) retains their nullptr parent
+        // NOTE that this currently does not retain their original transient parent (which is the window it was created under)
+        // For now, we haven't noticed that this creates any issues, and I don't know of a good place to store the previous transient
+        // parent to restore it.
+        if (event->type() == QEvent::ParentWindowChange)
+        {
+            assert(this->windowHandle() != nullptr);
+            if (this->windowHandle()->parent() != nullptr)
+            {
+                this->windowHandle()->setParent(nullptr);
+            }
+        }
+    }
+#endif
 
     return QWidget::event(event);
 }

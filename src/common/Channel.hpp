@@ -1,8 +1,8 @@
 #pragma once
 
-#include "common/FlagsEnum.hpp"
 #include "controllers/completion/TabCompletionModel.hpp"
 #include "messages/LimitedQueue.hpp"
+#include "messages/MessageFlag.hpp"
 
 #include <magic_enum/magic_enum.hpp>
 #include <pajlada/signals/signal.hpp>
@@ -17,8 +17,6 @@ namespace chatterino {
 
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
-enum class MessageFlag : int64_t;
-using MessageFlags = FlagsEnum<MessageFlag>;
 
 enum class TimeoutStackStyle : int {
     StackHard = 0,
@@ -53,7 +51,6 @@ public:
         TwitchLive,
         TwitchAutomod,
         TwitchEnd,
-        Irc,
         Misc,
     };
 
@@ -185,8 +182,6 @@ constexpr magic_enum::customize::customize_t
             return "live";
         case Type::TwitchAutomod:
             return "automod";
-        case Type::Irc:
-            return "irc";
         case Type::Misc:
             return "misc";
         default:

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "debug/AssertInGuiThread.hpp"
 #include "singletons/NativeMessaging.hpp"
 
 #include <QApplication>
@@ -56,15 +55,17 @@ class SeventvEmotes;
 class SeventvEventAPI;
 class ILinkResolver;
 class IStreamerMode;
-class IAbstractIrcServer;
 
 class IApplication
 {
 public:
     IApplication();
-    virtual ~IApplication() = default;
+    virtual ~IApplication();
 
-    static IApplication *instance;
+    IApplication(const IApplication &) = delete;
+    IApplication(IApplication &&) = delete;
+    IApplication &operator=(const IApplication &) = delete;
+    IApplication &operator=(IApplication &&) = delete;
 
     virtual bool isTest() const = 0;
 
@@ -82,7 +83,7 @@ public:
     virtual HighlightController *getHighlights() = 0;
     virtual NotificationController *getNotifications() = 0;
     virtual ITwitchIrcServer *getTwitch() = 0;
-    virtual IAbstractIrcServer *getTwitchAbstract() = 0;
+    virtual ITwitchIrcServer *getTwitchAbstract() = 0;
     virtual PubSub *getTwitchPubSub() = 0;
     virtual ILogging *getChatLogger() = 0;
     virtual IChatterinoBadges *getChatterinoBadges() = 0;
@@ -115,8 +116,6 @@ class Application : public IApplication
     char **argv_{};
 
 public:
-    static Application *instance;
-
     Application(Settings &_settings, const Paths &paths, const Args &_args,
                 Updates &_updates);
     ~Application() override;
@@ -195,7 +194,8 @@ public:
     NotificationController *getNotifications() override;
     HighlightController *getHighlights() override;
     ITwitchIrcServer *getTwitch() override;
-    IAbstractIrcServer *getTwitchAbstract() override;
+    [[deprecated("use getTwitch()")]] ITwitchIrcServer *getTwitchAbstract()
+        override;
     PubSub *getTwitchPubSub() override;
     ILogging *getChatLogger() override;
     FfzBadges *getFfzBadges() override;
@@ -210,12 +210,7 @@ public:
 #ifdef CHATTERINO_HAVE_PLUGINS
     PluginController *getPlugins() override;
 #endif
-    Updates &getUpdates() override
-    {
-        assertInGuiThread();
-
-        return this->updates;
-    }
+    Updates &getUpdates() override;
 
     BttvEmotes *getBttvEmotes() override;
     BttvLiveUpdates *getBttvLiveUpdates() override;
@@ -232,7 +227,7 @@ private:
     void initSeventvEventAPI();
     void initNm(const Paths &paths);
 
-    NativeMessagingServer nmServer{};
+    NativeMessagingServer nmServer;
     Updates &updates;
 };
 
