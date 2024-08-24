@@ -3,10 +3,10 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
+#include "mocks/BaseApplication.hpp"
 #include "mocks/Channel.hpp"
 #include "mocks/ChatterinoBadges.hpp"
 #include "mocks/DisabledStreamerMode.hpp"
-#include "mocks/EmptyApplication.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "mocks/UserData.hpp"
 #include "providers/ffz/FfzBadges.hpp"
@@ -28,12 +28,11 @@ using chatterino::mock::MockChannel;
 
 namespace {
 
-class MockApplication : mock::EmptyApplication
+class MockApplication : public mock::BaseApplication
 {
 public:
     MockApplication()
-        : settings(this->settingsDir.filePath("settings.json"))
-        , highlights(this->settings, &this->accounts)
+        : highlights(this->settings, &this->accounts)
     {
     }
 
@@ -92,12 +91,6 @@ public:
         return &this->seventvEmotes;
     }
 
-    IStreamerMode *getStreamerMode() override
-    {
-        return &this->streamerMode;
-    }
-
-    Settings settings;
     AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;
@@ -109,7 +102,6 @@ public:
     BttvEmotes bttvEmotes;
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;
-    DisabledStreamerMode streamerMode;
 };
 
 }  // namespace

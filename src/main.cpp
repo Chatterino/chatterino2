@@ -117,7 +117,7 @@ int main(int argc, char **argv)
         IvrApi::initialize();
         Helix::initialize();
 
-        Settings settings(paths->settingsDirectory);
+        Settings settings(args, paths->settingsDirectory);
 
         runGui(a, *paths, settings, args, updates);
     }

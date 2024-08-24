@@ -25,6 +25,8 @@ using TimeoutButton = std::pair<QString, int>;
 
 namespace chatterino {
 
+class Args;
+
 #ifdef Q_OS_WIN32
 #    define DEFAULT_FONT_FAMILY "Segoe UI"
 #    define DEFAULT_FONT_SIZE 10
@@ -80,11 +82,18 @@ class Settings
     static Settings *instance_;
     Settings *prevInstance_ = nullptr;
 
+    const bool disableSaving;
+
 public:
-    Settings(const QString &settingsDirectory);
+    Settings(const Args &args, const QString &settingsDirectory);
     ~Settings();
 
     static Settings &instance();
+
+    /// Request the settings to be saved to file
+    ///
+    /// Depending on the launch options, a save might end up not happening
+    void requestSave() const;
 
     void saveSnapshot();
     void restoreSnapshot();
