@@ -6,7 +6,6 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "mocks/BaseApplication.hpp"
-#include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 
 #include <benchmark/benchmark.h>
@@ -72,8 +71,6 @@ public:
 static void BM_HighlightTest(benchmark::State &state)
 {
     MockApplication mockApplication;
-    QTemporaryDir settingsDir;
-    Settings settings(settingsDir.path());
 
     std::string message =
         R"(@badge-info=subscriber/34;badges=moderator/1,subscriber/24;color=#FF0000;display-name=테스트계정420;emotes=41:6-13,15-22;flags=;id=a3196c7e-be4c-4b49-9c5a-8b8302b50c2a;mod=1;room-id=11148817;subscriber=1;tmi-sent-ts=1590922213730;turbo=0;user-id=117166826;user-type=mod :testaccount_420!testaccount_420@testaccount_420.tmi.twitch.tv PRIVMSG #pajlada :-tags Kreygasm,Kreygasm (no space))";

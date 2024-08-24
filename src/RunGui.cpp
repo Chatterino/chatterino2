@@ -266,10 +266,7 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
     app.run(a);
     app.save();
 
-    if (!args.dontSaveSettings)
-    {
-        pajlada::Settings::SettingManager::gSave();
-    }
+    settings.requestSave();
 
     chatterino::NetworkManager::deinit();
 

@@ -3,12 +3,11 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "messages/MessageBuilder.hpp"  // for MessageParseArgs
-#include "mocks/EmptyApplication.hpp"
+#include "mocks/BaseApplication.hpp"
 #include "mocks/Helix.hpp"
 #include "mocks/UserData.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchBadge.hpp"  // for Badge
-#include "singletons/Settings.hpp"
 #include "Test.hpp"
 
 #include <QDebug>
@@ -22,12 +21,11 @@ using ::testing::Exactly;
 
 namespace {
 
-class MockApplication : public mock::EmptyApplication
+class MockApplication : public mock::BaseApplication
 {
 public:
     MockApplication(const QString &settingsBody)
-        : mock::EmptyApplication(settingsBody)
-        , settings(this->settingsDir.path())
+        : mock::BaseApplication(settingsBody)
         , highlights(this->settings, &this->accounts)
     {
     }
@@ -47,7 +45,6 @@ public:
         return &this->userData;
     }
 
-    Settings settings;
     AccountController accounts;
     HighlightController highlights;
     mock::UserDataController userData;

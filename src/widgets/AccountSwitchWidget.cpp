@@ -5,6 +5,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
+#include "singletons/Settings.hpp"
 
 namespace chatterino {
 
@@ -54,6 +55,8 @@ AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
             {
                 app->getAccounts()->twitch.currentUsername = newUsername;
             }
+
+            getSettings()->requestSave();
         }
     });
 }

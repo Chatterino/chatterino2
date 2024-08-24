@@ -4,6 +4,7 @@
 #include "controllers/filters/lang/Types.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "mocks/BaseApplication.hpp"
 #include "mocks/Channel.hpp"
 #include "mocks/ChatterinoBadges.hpp"
 #include "mocks/EmptyApplication.hpp"
@@ -26,12 +27,11 @@ TypingContext typingContext = MESSAGE_TYPING_CONTEXT;
 
 namespace {
 
-class MockApplication : mock::EmptyApplication
+class MockApplication : public mock::BaseApplication
 {
 public:
     MockApplication()
-        : settings(this->settingsDir.filePath("settings.json"))
-        , highlights(this->settings, &this->accounts)
+        : highlights(this->settings, &this->accounts)
     {
     }
 
@@ -75,7 +75,6 @@ public:
         return &this->highlights;
     }
 
-    Settings settings;
     AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;
