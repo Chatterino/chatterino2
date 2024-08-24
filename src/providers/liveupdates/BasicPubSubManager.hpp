@@ -138,7 +138,19 @@ public:
 
         if (this->mainThread_->joinable())
         {
-            this->mainThread_->join();
+            // NOTE: We spawn a new thread to join the websocket thread.
+            // There is a case where a new client was initiated but not added to the clients list.
+            // We just don't join the thread & let the operating system nuke the thread if joining fails
+            // within 1s.
+            auto joiner = std::async(std::launch::async, &std::thread::join,
+                                     this->mainThread_.get());
+            if (joiner.wait_for(std::chrono::seconds(1)) ==
+                std::future_status::timeout)
+            {
+                qCWarning(chatterinoLiveupdates)
+                    << "Thread didn't join within 1 second, rip it out";
+                this->websocketClient_.stop();
+            }
         }
 
         assert(this->clients_.empty());
