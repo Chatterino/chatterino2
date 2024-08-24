@@ -3,6 +3,7 @@
 #include "controllers/filters/lang/Filter.hpp"
 #include "controllers/filters/lang/Types.hpp"
 #include "controllers/highlights/HighlightController.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "mocks/Channel.hpp"
 #include "mocks/ChatterinoBadges.hpp"
 #include "mocks/EmptyApplication.hpp"
@@ -11,7 +12,6 @@
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Emotes.hpp"
 #include "Test.hpp"
 
@@ -280,7 +280,7 @@ TEST_F(FiltersF, TypingContextChecks)
 
     QString originalMessage = privmsg->content();
 
-    TwitchMessageBuilder builder(&channel, privmsg, MessageParseArgs{});
+    MessageBuilder builder(&channel, privmsg, MessageParseArgs{});
 
     auto msg = builder.build();
     EXPECT_NE(msg.get(), nullptr);

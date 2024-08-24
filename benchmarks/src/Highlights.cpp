@@ -4,7 +4,7 @@
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "messages/Message.hpp"
-#include "messages/SharedMessageBuilder.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "mocks/BaseApplication.hpp"
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
@@ -16,15 +16,16 @@
 
 using namespace chatterino;
 
-class BenchmarkMessageBuilder : public SharedMessageBuilder
+class BenchmarkMessageBuilder : public MessageBuilder
 {
 public:
     explicit BenchmarkMessageBuilder(
         Channel *_channel, const Communi::IrcPrivateMessage *_ircMessage,
         const MessageParseArgs &_args)
-        : SharedMessageBuilder(_channel, _ircMessage, _args)
+        : MessageBuilder(_channel, _ircMessage, _args)
     {
     }
+
     virtual MessagePtr build()
     {
         // PARSE

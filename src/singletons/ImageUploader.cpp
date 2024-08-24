@@ -7,7 +7,6 @@
 #include "common/QLogging.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
