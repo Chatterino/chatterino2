@@ -128,7 +128,10 @@ public:
 
     void stop()
     {
-        assert(!this->stopping_);
+        if (this->stopping_)
+        {
+            return;
+        }
 
         this->stopping_ = true;
 
