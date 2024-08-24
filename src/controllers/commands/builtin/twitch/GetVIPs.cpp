@@ -7,7 +7,6 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 
 namespace {
 
@@ -106,11 +105,10 @@ QString getVIPs(const CommandContext &ctx)
             auto messagePrefix = QString("The VIPs of this channel are");
 
             // TODO: sort results?
-            MessageBuilder builder;
-            TwitchMessageBuilder::listOfUsersSystemMessage(
-                messagePrefix, vipList, twitchChannel, &builder);
 
-            channel->addMessage(builder.release(), MessageContext::Original);
+            channel->addMessage(MessageBuilder::makeListOfUsersMessage(
+                                    messagePrefix, vipList, twitchChannel),
+                                MessageContext::Original);
         },
         [channel{ctx.channel}](auto error, auto message) {
             auto errorMessage = formatGetVIPsError(error, message);
