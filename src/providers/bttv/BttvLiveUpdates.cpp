@@ -15,6 +15,11 @@ BttvLiveUpdates::BttvLiveUpdates(QString host)
 {
 }
 
+BttvLiveUpdates::~BttvLiveUpdates()
+{
+    this->stop();
+}
+
 void BttvLiveUpdates::joinChannel(const QString &channelID,
                                   const QString &userName)
 {

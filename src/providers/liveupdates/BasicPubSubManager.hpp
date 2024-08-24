@@ -99,7 +99,8 @@ public:
 
     virtual ~BasicPubSubManager()
     {
-        this->stop();
+        // The derived class must call stop in its destructor
+        assert(this->stopping_);
     }
 
     BasicPubSubManager(const BasicPubSubManager &) = delete;
@@ -127,6 +128,8 @@ public:
 
     void stop()
     {
+        assert(!this->stopping_);
+
         this->stopping_ = true;
 
         for (const auto &client : this->clients_)
