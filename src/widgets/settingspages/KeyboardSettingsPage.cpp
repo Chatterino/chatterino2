@@ -91,6 +91,42 @@ KeyboardSettingsPage::KeyboardSettingsPage()
         }
     });
     view->addCustomButton(resetEverything);
+
+    // We only check this once since a user *should* not have the ability to create a new hotkey with a deprecated or removed action
+    // However, we also don't update this after the user has deleted a hotkey. This is a big lift that should probably be solved on the model level rather
+    // than individually here. Same goes for marking specific rows as deprecated/removed
+    const auto &removedOrDeprecatedHotkeys =
+        getApp()->getHotkeys()->removedOrDeprecatedHotkeys();
+
+    if (!removedOrDeprecatedHotkeys.empty())
+    {
+        QString warningMessage =
+            "Some of your hotkeys use deprecated actions and will not "
+            "work as expected: ";
+
+        bool first = true;
+        for (const auto &hotkeyName : removedOrDeprecatedHotkeys)
+        {
+            if (!first)
+            {
+                warningMessage.append(',');
+            }
+            warningMessage.append(' ');
+            warningMessage.append('"');
+            warningMessage.append(hotkeyName);
+            warningMessage.append('"');
+
+            first = false;
+        }
+        warningMessage.append('.');
+        auto deprecatedWarning = layout.emplace<QLabel>(warningMessage);
+        deprecatedWarning->setStyleSheet("color: yellow");
+        deprecatedWarning->setWordWrap(true);
+        auto deprecatedWarning2 = layout.emplace<QLabel>(
+            "You can ignore this warning after you have removed or edited the "
+            "above-mentioned hotkeys.");
+        deprecatedWarning2->setStyleSheet("color: yellow");
+    }
 }
 
 }  // namespace chatterino

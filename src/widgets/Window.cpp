@@ -642,39 +642,33 @@ void Window::addShortcuts()
 
              if (arg == "off")
              {
-                 this->notebook_->setShowTabs(false);
-                 getSettings()->tabVisibility.setValue(
-                     NotebookTabVisibility::AllTabs);
+                 this->notebook_->hideAllTabsAction->trigger();
              }
              else if (arg == "on")
              {
-                 this->notebook_->setShowTabs(true);
-                 getSettings()->tabVisibility.setValue(
-                     NotebookTabVisibility::AllTabs);
+                 this->notebook_->showAllTabsAction->trigger();
              }
              else if (arg == "toggle")
              {
-                 this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
-                 getSettings()->tabVisibility.setValue(
-                     NotebookTabVisibility::AllTabs);
+                 this->notebook_->toggleTabVisibility();
              }
              else if (arg == "liveOnly")
              {
-                 this->notebook_->setShowTabs(true);
-                 getSettings()->tabVisibility.setValue(
-                     NotebookTabVisibility::LiveOnly);
+                 this->notebook_->onlyShowLiveTabsAction->trigger();
              }
              else if (arg == "toggleLiveOnly")
              {
-                 this->notebook_->toggleOfflineTabs();
+                 // NOOP: Removed 2024-08-04 https://github.com/Chatterino/chatterino2/pull/5530
+                 return "toggleLiveOnly is no longer a valid argument for "
+                        "setTabVisibility";
              }
              else
              {
                  qCWarning(chatterinoHotkeys)
                      << "Invalid argument for setTabVisibility hotkey: " << arg;
                  return QString("Invalid argument for setTabVisibility hotkey: "
-                                "%1. Use \"on\", \"off\", \"toggle\", "
-                                "\"liveOnly\", or \"toggleLiveOnly\".")
+                                "%1. Use \"on\", \"off\", \"toggle\", or "
+                                "\"liveOnly\".")
                      .arg(arg);
              }
 
