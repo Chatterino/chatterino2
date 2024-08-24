@@ -155,8 +155,6 @@ public:
                 this->websocketClient_.stop();
             }
         }
-
-        assert(this->clients_.empty());
     }
 
 protected:
