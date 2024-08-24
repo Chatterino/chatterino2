@@ -155,7 +155,7 @@ public:
     decltype(auto) operator[](size_t index)
     {
         assertInGuiThread();
-        return this->items[index];
+        return this->items_[index];
     }
 
     auto empty()
