@@ -74,6 +74,7 @@
 - Dev: Refactored a few `#define`s into `const(expr)` and cleaned includes. (#5527)
 - Dev: Added `FlagsEnum::isEmpty`. (#5550)
 - Dev: Prepared for Qt 6.8 by addressing some deprecations. (#5529)
+- Dev: Fixed benchmarks segfaulting on run. (#5559)
 - Dev: Refactored `MessageBuilder` to be a single class. (#5548)
 - Dev: Recent changes are now shown in the nightly release description. (#5553, #5554)
 

@@ -6,6 +6,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "mocks/BaseApplication.hpp"
+#include "mocks/UserData.hpp"
 #include "util/Helpers.hpp"
 
 #include <benchmark/benchmark.h>
@@ -64,8 +65,14 @@ public:
         return &this->highlights;
     }
 
+    IUserDataController *getUserData() override
+    {
+        return &this->userData;
+    }
+
     AccountController accounts;
     HighlightController highlights;
+    mock::UserDataController userData;
 };
 
 static void BM_HighlightTest(benchmark::State &state)
