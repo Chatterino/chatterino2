@@ -22,7 +22,19 @@ using namespace chatterino;
 const QString CHANNEL_HAS_NO_EMOTES(
     "This channel has no BetterTTV channel emotes.");
 
+/// The emote page template.
+///
+/// %1 being the emote ID (e.g. 566ca04265dbbdab32ec054a)
 constexpr QStringView EMOTE_LINK_FORMAT = u"https://betterttv.com/emotes/%1";
+
+/// The emote CDN link template.
+///
+/// %1 being the emote ID (e.g. 566ca04265dbbdab32ec054a)
+///
+/// %2 being the emote size (e.g. 3x)
+constexpr QStringView EMOTE_CDN_FORMAT =
+    u"https://cdn.betterttv.net/emote/%1/%2";
+
 // BTTV doesn't provide any data on the size, so we assume an emote is 28x28
 constexpr QSize EMOTE_BASE_SIZE(28, 28);
 
@@ -34,9 +46,7 @@ struct CreateEmoteResult {
 
 Url getEmoteLinkV3(const EmoteId &id, const QString &emoteScale)
 {
-    static const QString urlTemplate("https://cdn.betterttv.net/emote/%1/%2");
-
-    return {urlTemplate.arg(id.string, emoteScale)};
+    return {EMOTE_CDN_FORMAT.arg(id.string, emoteScale)};
 }
 
 EmotePtr cachedOrMake(Emote &&emote, const EmoteId &id)
