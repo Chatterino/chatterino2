@@ -96,5 +96,5 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           plugin: gcov
-          fail_ci_if_error: false
+          fail_ci_if_error: true
           verbose: true
