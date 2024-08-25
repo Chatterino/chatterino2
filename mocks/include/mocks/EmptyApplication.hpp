@@ -133,13 +133,6 @@ public:
         return nullptr;
     }
 
-    ITwitchIrcServer *getTwitchAbstract() override
-    {
-        assert(false && "EmptyApplication::getTwitchAbstract was called "
-                        "without being initialized");
-        return nullptr;
-    }
-
     PubSub *getTwitchPubSub() override
     {
         assert(false && "getTwitchPubSub was called without being initialized");

@@ -2763,8 +2763,8 @@ void ChannelView::showUserInfoPopup(const QString &userName,
     auto *userPopup =
         new UserInfoPopup(getSettings()->autoCloseUserPopup, this->split_);
 
-    auto contextChannel = getApp()->getTwitchAbstract()->getChannelOrEmpty(
-        alternativePopoutChannel);
+    auto contextChannel =
+        getApp()->getTwitch()->getChannelOrEmpty(alternativePopoutChannel);
     auto openingChannel = this->hasSourceChannel() ? this->sourceChannel_
                                                    : this->underlyingChannel_;
     userPopup->setData(userName, contextChannel, openingChannel);

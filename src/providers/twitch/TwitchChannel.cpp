@@ -725,7 +725,7 @@ bool TwitchChannel::canReconnect() const
 
 void TwitchChannel::reconnect()
 {
-    getApp()->getTwitchAbstract()->connect();
+    getApp()->getTwitch()->connect();
 }
 
 QString TwitchChannel::getCurrentStreamID() const
