@@ -751,7 +751,7 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
         // get geometry
         {
             // out of bounds windows
-            auto screens = qApp->screens();
+            auto screens = QApplication::screens();
             bool outOfBounds =
                 !qEnvironmentVariableIsSet("I3SOCK") &&
                 std::none_of(screens.begin(), screens.end(),

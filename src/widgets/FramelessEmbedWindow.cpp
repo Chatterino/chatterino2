@@ -5,6 +5,7 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "widgets/splits/Split.hpp"
 
+#include <QApplication>
 #include <QHBoxLayout>
 #include <QJsonDocument>
 #include <QMessageBox>
@@ -75,7 +76,7 @@ void FramelessEmbedWindow::showEvent(QShowEvent *)
         auto handle = reinterpret_cast<HWND>(this->winId());
         if (!::SetParent(handle, parentHwnd))
         {
-            qApp->exit(1);
+            QApplication::exit(1);
         }
 
         QJsonDocument doc;
