@@ -14,6 +14,7 @@
 #include "messages/Image.hpp"
 #include "messages/Link.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/MessageThread.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
@@ -33,7 +34,6 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "providers/twitch/TwitchUsers.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
@@ -184,15 +184,14 @@ TwitchChannel::~TwitchChannel()
     getApp()->getTwitch()->dropSeventvChannel(this->seventvUserID_,
                                               this->seventvEmoteSetID_);
 
-    if (getApp()->getTwitch()->getBTTVLiveUpdates())
+    if (getApp()->getBttvLiveUpdates())
     {
-        getApp()->getTwitch()->getBTTVLiveUpdates()->partChannel(
-            this->roomId());
+        getApp()->getBttvLiveUpdates()->partChannel(this->roomId());
     }
 
-    if (getApp()->getTwitch()->getSeventvEventAPI())
+    if (getApp()->getSeventvEventAPI())
     {
-        getApp()->getTwitch()->getSeventvEventAPI()->unsubscribeTwitchChannel(
+        getApp()->getSeventvEventAPI()->unsubscribeTwitchChannel(
             this->roomId());
     }
 }
@@ -426,10 +425,9 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
 
     if (!reward.isUserInputRequired)
     {
-        MessageBuilder builder;
-        TwitchMessageBuilder::appendChannelPointRewardMessage(
-            reward, &builder, this->isMod(), this->isBroadcaster());
-        this->addMessage(builder.release(), MessageContext::Original);
+        this->addMessage(MessageBuilder::makeChannelPointRewardMessage(
+                             reward, this->isMod(), this->isBroadcaster()),
+                         MessageContext::Original);
         return;
     }
 
@@ -549,11 +547,11 @@ void TwitchChannel::onLiveStatusChanged(bool isLive, bool isInitialUpdate)
         });
 
         // Channel live message
-        MessageBuilder builder;
-        TwitchMessageBuilder::liveSystemMessage(this->getDisplayName(),
-                                                &builder);
-        builder.message().id = this->roomId();
-        this->addMessage(builder.release(), MessageContext::Original);
+        this->addMessage(
+            MessageBuilder::makeLiveMessage(
+                this->getDisplayName(), this->roomId(),
+                {MessageFlag::System, MessageFlag::DoNotTriggerNotification}),
+            MessageContext::Original);
     }
     else
     {
@@ -561,10 +559,9 @@ void TwitchChannel::onLiveStatusChanged(bool isLive, bool isInitialUpdate)
             << "[TwitchChannel " << this->getName() << "] Offline";
 
         // Channel offline message
-        MessageBuilder builder;
-        TwitchMessageBuilder::offlineSystemMessage(this->getDisplayName(),
-                                                   &builder);
-        this->addMessage(builder.release(), MessageContext::Original);
+        this->addMessage(MessageBuilder::makeOfflineSystemMessage(
+                             this->getDisplayName(), this->roomId()),
+                         MessageContext::Original);
 
         getApp()->getNotifications()->notifyTwitchChannelOffline(
             this->roomId());
@@ -986,7 +983,7 @@ const QString &TwitchChannel::seventvEmoteSetID() const
 
 void TwitchChannel::joinBttvChannel() const
 {
-    if (getApp()->getTwitch()->getBTTVLiveUpdates())
+    if (getApp()->getBttvLiveUpdates())
     {
         const auto currentAccount =
             getApp()->getAccounts()->twitch.getCurrent();
@@ -995,8 +992,7 @@ void TwitchChannel::joinBttvChannel() const
         {
             userName = currentAccount->getUserName();
         }
-        getApp()->getTwitch()->getBTTVLiveUpdates()->joinChannel(this->roomId(),
-                                                                 userName);
+        getApp()->getBttvLiveUpdates()->joinChannel(this->roomId(), userName);
     }
 }
 
@@ -1144,9 +1140,9 @@ void TwitchChannel::updateSeventvData(const QString &newUserID,
     this->seventvUserID_ = newUserID;
     this->seventvEmoteSetID_ = newEmoteSetID;
     runInGuiThread([this, oldUserID, oldEmoteSetID]() {
-        if (getApp()->getTwitch()->getSeventvEventAPI())
+        if (getApp()->getSeventvEventAPI())
         {
-            getApp()->getTwitch()->getSeventvEventAPI()->subscribeUser(
+            getApp()->getSeventvEventAPI()->subscribeUser(
                 this->seventvUserID_, this->seventvEmoteSetID_);
 
             if (oldUserID || oldEmoteSetID)
@@ -1211,19 +1207,27 @@ bool TwitchChannel::tryReplaceLastLiveUpdateAddOrRemove(
     // Update the message
     this->lastLiveUpdateEmoteNames_.push_back(emoteName);
 
-    MessageBuilder replacement;
-    if (op == MessageFlag::LiveUpdatesAdd)
-    {
-        replacement =
-            MessageBuilder(liveUpdatesAddEmoteMessage, platform,
-                           last->loginName, this->lastLiveUpdateEmoteNames_);
-    }
-    else  // op == RemoveEmoteMessage
-    {
-        replacement =
-            MessageBuilder(liveUpdatesRemoveEmoteMessage, platform,
-                           last->loginName, this->lastLiveUpdateEmoteNames_);
-    }
+    auto makeReplacement = [&](MessageFlag op) -> MessageBuilder {
+        if (op == MessageFlag::LiveUpdatesAdd)
+        {
+            return {
+                liveUpdatesAddEmoteMessage,
+                platform,
+                last->loginName,
+                this->lastLiveUpdateEmoteNames_,
+            };
+        }
+
+        // op == RemoveEmoteMessage
+        return {
+            liveUpdatesRemoveEmoteMessage,
+            platform,
+            last->loginName,
+            this->lastLiveUpdateEmoteNames_,
+        };
+    };
+
+    auto replacement = makeReplacement(op);
 
     replacement->flags = last->flags;
 
@@ -1943,10 +1947,9 @@ void TwitchChannel::updateSevenTVActivity()
 
 void TwitchChannel::listenSevenTVCosmetics() const
 {
-    if (getApp()->getTwitch()->getSeventvEventAPI())
+    if (getApp()->getSeventvEventAPI())
     {
-        getApp()->getTwitch()->getSeventvEventAPI()->subscribeTwitchChannel(
-            this->roomId());
+        getApp()->getSeventvEventAPI()->subscribeTwitchChannel(this->roomId());
     }
 }
 

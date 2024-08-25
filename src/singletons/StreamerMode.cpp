@@ -105,6 +105,12 @@ bool isBroadcasterSoftwareActive()
         break;
     }
 
+    if (!p.waitForFinished(1000))
+    {
+        qCWarning(chatterinoStreamerMode) << "Force-killing pgrep";
+        p.kill();
+    }
+
     return false;
 #elif defined(Q_OS_WIN)
     if (!IsWindowsVistaOrGreater())
@@ -152,8 +158,15 @@ class StreamerModePrivate
 {
 public:
     StreamerModePrivate(StreamerMode *parent_);
+    ~StreamerModePrivate();
+    StreamerModePrivate(const StreamerModePrivate &) = delete;
+    StreamerModePrivate(StreamerModePrivate &&) = delete;
+    StreamerModePrivate &operator=(const StreamerModePrivate &) = delete;
+    StreamerModePrivate &operator=(StreamerModePrivate &&) = delete;
 
     [[nodiscard]] bool isEnabled() const;
+
+    void start();
 
 private:
     void settingChanged(StreamerModeSetting value);
@@ -189,9 +202,15 @@ bool StreamerMode::isEnabled() const
     return this->private_->isEnabled();
 }
 
+void StreamerMode::start()
+{
+    this->private_->start();
+}
+
 StreamerModePrivate::StreamerModePrivate(StreamerMode *parent)
     : parent_(parent)
 {
+    this->thread_.setObjectName("StreamerMode");
     this->timer_.moveToThread(&this->thread_);
     QObject::connect(&this->timer_, &QTimer::timeout, [this] {
         auto timeouts =
@@ -216,7 +235,22 @@ StreamerModePrivate::StreamerModePrivate(StreamerMode *parent)
     QObject::connect(&this->thread_, &QThread::started, [this] {
         this->settingChanged(getSettings()->enableStreamerMode.getEnum());
     });
+}
+
+void StreamerModePrivate::start()
+{
     this->thread_.start();
+}
+
+StreamerModePrivate::~StreamerModePrivate()
+{
+    this->thread_.quit();
+    if (!this->thread_.wait(500))
+    {
+        qCWarning(chatterinoStreamerMode)
+            << "Failed waiting for thread, terminating it";
+        this->thread_.terminate();
+    }
 }
 
 bool StreamerModePrivate::isEnabled() const

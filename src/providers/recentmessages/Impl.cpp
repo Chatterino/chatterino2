@@ -2,9 +2,9 @@
 
 #include "common/Env.hpp"
 #include "common/QLogging.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "util/FormatTime.hpp"
 
 #include <QJsonArray>

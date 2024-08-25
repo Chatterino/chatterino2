@@ -1,14 +1,12 @@
-#include "providers/twitch/TwitchMessageBuilder.hpp"
+#include "messages/MessageBuilder.hpp"
 
-#include "common/Channel.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
-#include "messages/MessageBuilder.hpp"
+#include "mocks/BaseApplication.hpp"
 #include "mocks/Channel.hpp"
 #include "mocks/ChatterinoBadges.hpp"
 #include "mocks/DisabledStreamerMode.hpp"
-#include "mocks/EmptyApplication.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "mocks/UserData.hpp"
 #include "providers/ffz/FfzBadges.hpp"
@@ -16,6 +14,7 @@
 #include "providers/twitch/TwitchBadge.hpp"
 #include "singletons/Emotes.hpp"
 #include "Test.hpp"
+#include "util/IrcHelpers.hpp"
 
 #include <IrcConnection>
 #include <QDebug>
@@ -29,12 +28,11 @@ using chatterino::mock::MockChannel;
 
 namespace {
 
-class MockApplication : mock::EmptyApplication
+class MockApplication : public mock::BaseApplication
 {
 public:
     MockApplication()
-        : settings(this->settingsDir.filePath("settings.json"))
-        , highlights(this->settings, &this->accounts)
+        : highlights(this->settings, &this->accounts)
     {
     }
 
@@ -93,12 +91,6 @@ public:
         return &this->seventvEmotes;
     }
 
-    IStreamerMode *getStreamerMode() override
-    {
-        return &this->streamerMode;
-    }
-
-    Settings settings;
     AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;
@@ -110,12 +102,11 @@ public:
     BttvEmotes bttvEmotes;
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;
-    DisabledStreamerMode streamerMode;
 };
 
 }  // namespace
 
-TEST(TwitchMessageBuilder, CommaSeparatedListTagParsing)
+TEST(MessageBuilder, CommaSeparatedListTagParsing)
 {
     struct TestCase {
         QString input;
@@ -151,14 +142,14 @@ TEST(TwitchMessageBuilder, CommaSeparatedListTagParsing)
 
     for (const auto &test : testCases)
     {
-        auto output = TwitchMessageBuilder::slashKeyValue(test.input);
+        auto output = slashKeyValue(test.input);
 
         EXPECT_EQ(output, test.expectedOutput)
             << "Input " << test.input << " failed";
     }
 }
 
-class TestTwitchMessageBuilder : public ::testing::Test
+class TestMessageBuilder : public ::testing::Test
 {
 protected:
     void SetUp() override
@@ -174,7 +165,7 @@ protected:
     std::unique_ptr<MockApplication> mockApplication;
 };
 
-TEST(TwitchMessageBuilder, BadgeInfoParsing)
+TEST(MessageBuilder, BadgeInfoParsing)
 {
     struct TestCase {
         QByteArray input;
@@ -235,12 +226,11 @@ TEST(TwitchMessageBuilder, BadgeInfoParsing)
             Communi::IrcPrivateMessage::fromData(test.input, nullptr);
 
         auto outputBadgeInfo =
-            TwitchMessageBuilder::parseBadgeInfoTag(privmsg->tags());
+            MessageBuilder::parseBadgeInfoTag(privmsg->tags());
         EXPECT_EQ(outputBadgeInfo, test.expectedBadgeInfo)
             << "Input for badgeInfo " << test.input << " failed";
 
-        auto outputBadges =
-            SharedMessageBuilder::parseBadgeTag(privmsg->tags());
+        auto outputBadges = MessageBuilder::parseBadgeTag(privmsg->tags());
         EXPECT_EQ(outputBadges, test.expectedBadges)
             << "Input for badges " << test.input << " failed";
 
@@ -248,7 +238,7 @@ TEST(TwitchMessageBuilder, BadgeInfoParsing)
     }
 }
 
-TEST_F(TestTwitchMessageBuilder, ParseTwitchEmotes)
+TEST_F(TestMessageBuilder, ParseTwitchEmotes)
 {
     struct TestCase {
         QByteArray input;
@@ -416,7 +406,7 @@ TEST_F(TestTwitchMessageBuilder, ParseTwitchEmotes)
         QString originalMessage = privmsg->content();
 
         // TODO: Add tests with replies
-        auto actualTwitchEmotes = TwitchMessageBuilder::parseTwitchEmotes(
+        auto actualTwitchEmotes = MessageBuilder::parseTwitchEmotes(
             privmsg->tags(), originalMessage, 0);
 
         EXPECT_EQ(actualTwitchEmotes, test.expectedTwitchEmotes)
@@ -426,7 +416,7 @@ TEST_F(TestTwitchMessageBuilder, ParseTwitchEmotes)
     }
 }
 
-TEST_F(TestTwitchMessageBuilder, ParseMessage)
+TEST_F(TestMessageBuilder, ParseMessage)
 {
     MockChannel channel("pajlada");
 
@@ -484,7 +474,7 @@ TEST_F(TestTwitchMessageBuilder, ParseMessage)
 
         QString originalMessage = privmsg->content();
 
-        TwitchMessageBuilder builder(&channel, privmsg, MessageParseArgs{});
+        MessageBuilder builder(&channel, privmsg, MessageParseArgs{});
 
         auto msg = builder.build();
         EXPECT_NE(msg.get(), nullptr);
@@ -493,7 +483,7 @@ TEST_F(TestTwitchMessageBuilder, ParseMessage)
     }
 }
 
-TEST_F(TestTwitchMessageBuilder, IgnoresReplace)
+TEST_F(TestMessageBuilder, IgnoresReplace)
 {
     struct TestCase {
         std::vector<IgnorePhrase> phrases;
@@ -619,8 +609,7 @@ TEST_F(TestTwitchMessageBuilder, IgnoresReplace)
     {
         auto message = test.input;
         auto emotes = test.twitchEmotes;
-        TwitchMessageBuilder::processIgnorePhrases(test.phrases, message,
-                                                   emotes);
+        MessageBuilder::processIgnorePhrases(test.phrases, message, emotes);
 
         EXPECT_EQ(message, test.expectedMessage)
             << "Message not equal for input '" << test.input

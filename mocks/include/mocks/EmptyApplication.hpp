@@ -133,7 +133,7 @@ public:
         return nullptr;
     }
 
-    IAbstractIrcServer *getTwitchAbstract() override
+    ITwitchIrcServer *getTwitchAbstract() override
     {
         assert(false && "EmptyApplication::getTwitchAbstract was called "
                         "without being initialized");
@@ -231,6 +231,13 @@ public:
         return nullptr;
     }
 
+    BttvLiveUpdates *getBttvLiveUpdates() override
+    {
+        assert(false && "EmptyApplication::getBttvLiveUpdates was called "
+                        "without being initialized");
+        return nullptr;
+    }
+
     FfzEmotes *getFfzEmotes() override
     {
         assert(false && "EmptyApplication::getFfzEmotes was called without "
@@ -242,6 +249,13 @@ public:
     {
         assert(false && "EmptyApplication::getSeventvEmotes was called without "
                         "being initialized");
+        return nullptr;
+    }
+
+    SeventvEventAPI *getSeventvEventAPI() override
+    {
+        assert(false && "EmptyApplication::getSeventvEventAPI was called "
+                        "without being initialized");
         return nullptr;
     }
 

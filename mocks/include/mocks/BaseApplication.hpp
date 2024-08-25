@@ -1,7 +1,9 @@
 #pragma once
 
+#include "common/Args.hpp"
 #include "mocks/DisabledStreamerMode.hpp"
 #include "mocks/EmptyApplication.hpp"
+#include "providers/bttv/BttvLiveUpdates.hpp"
 #include "singletons/Settings.hpp"
 
 #include <QString>
@@ -15,13 +17,13 @@ class BaseApplication : public EmptyApplication
 {
 public:
     BaseApplication()
-        : settings(this->settingsDir.filePath("settings.json"))
+        : settings(this->args, this->settingsDir.path())
     {
     }
 
     explicit BaseApplication(const QString &settingsData)
         : EmptyApplication(settingsData)
-        , settings(this->settingsDir.filePath("settings.json"))
+        , settings(this->args, this->settingsDir.path())
     {
     }
 
@@ -30,6 +32,17 @@ public:
         return &this->streamerMode;
     }
 
+    BttvLiveUpdates *getBttvLiveUpdates() override
+    {
+        return nullptr;
+    }
+
+    SeventvEventAPI *getSeventvEventAPI() override
+    {
+        return nullptr;
+    }
+
+    Args args;
     Settings settings;
     DisabledStreamerMode streamerMode;
 };

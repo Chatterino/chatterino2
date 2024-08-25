@@ -14,7 +14,6 @@
 #include "controllers/sound/ISoundController.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
-#include "providers/irc/AbstractIrcServer.hpp"
 #include "providers/links/LinkResolver.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
@@ -33,7 +32,6 @@
 #include "providers/bttv/BttvLiveUpdates.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
-#include "providers/irc/Irc2.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"
 #include "providers/seventv/eventapi/Subscription.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
@@ -44,7 +42,6 @@
 #include "providers/twitch/PubSubMessages.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "providers/twitch/TwitchUsers.hpp"
 #include "singletons/CrashHandler.hpp"
 #include "singletons/Emotes.hpp"
@@ -73,6 +70,9 @@ namespace {
 
 using namespace chatterino;
 
+const QString BTTV_LIVE_UPDATES_URL = "wss://sockets.betterttv.net/ws";
+const QString SEVENTV_EVENTAPI_URL = "wss://events.7tv.io/v3";
+
 ISoundController *makeSoundController(Settings &settings)
 {
     SoundBackend soundBackend = settings.soundBackend;
@@ -95,7 +95,35 @@ ISoundController *makeSoundController(Settings &settings)
     }
 }
 
+BttvLiveUpdates *makeBttvLiveUpdates(Settings &settings)
+{
+    bool enabled =
+        settings.enableBTTVLiveUpdates && settings.enableBTTVChannelEmotes;
+
+    if (enabled)
+    {
+        return new BttvLiveUpdates(BTTV_LIVE_UPDATES_URL);
+    }
+
+    return nullptr;
+}
+
+SeventvEventAPI *makeSeventvEventAPI(Settings &settings)
+{
+    bool enabled = settings.enableSevenTVEventAPI;
+
+    if (enabled)
+    {
+        return new SeventvEventAPI(SEVENTV_EVENTAPI_URL);
+    }
+
+    return nullptr;
+}
+
 const QString TWITCH_PUBSUB_URL = "wss://pubsub-edge.twitch.tv";
+
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+IApplication *INSTANCE = nullptr;
 
 }  // namespace
 
@@ -103,12 +131,14 @@ namespace chatterino {
 
 static std::atomic<bool> isAppInitialized{false};
 
-Application *Application::instance = nullptr;
-IApplication *IApplication::instance = nullptr;
-
 IApplication::IApplication()
 {
-    IApplication::instance = this;
+    INSTANCE = this;
+}
+
+IApplication::~IApplication()
+{
+    INSTANCE = nullptr;
 }
 
 // this class is responsible for handling the workflow of Chatterino
@@ -143,8 +173,10 @@ Application::Application(Settings &_settings, const Paths &paths,
     , twitchBadges(new TwitchBadges)
     , chatterinoBadges(new ChatterinoBadges)
     , bttvEmotes(new BttvEmotes)
+    , bttvLiveUpdates(makeBttvLiveUpdates(_settings))
     , ffzEmotes(new FfzEmotes)
     , seventvEmotes(new SeventvEmotes)
+    , seventvEventAPI(makeSeventvEventAPI(_settings))
     , logging(new Logging(_settings))
     , linkResolver(new LinkResolver)
     , streamerMode(new StreamerMode)
@@ -154,8 +186,6 @@ Application::Application(Settings &_settings, const Paths &paths,
 #endif
     , updates(_updates)
 {
-    Application::instance = this;
-
     // We can safely ignore this signal's connection since the Application will always
     // be destroyed after fonts
     std::ignore = this->fonts->fontChanged.connect([this]() {
@@ -163,39 +193,10 @@ Application::Application(Settings &_settings, const Paths &paths,
     });
 }
 
-Application::~Application() = default;
-
-void Application::fakeDtor()
+Application::~Application()
 {
-#ifdef CHATTERINO_HAVE_PLUGINS
-    this->plugins.reset();
-#endif
-    this->twitchPubSub.reset();
-    this->twitchBadges.reset();
-    this->twitchLiveController.reset();
-    this->chatterinoBadges.reset();
-    this->bttvEmotes.reset();
-    this->ffzEmotes.reset();
-    this->seventvEmotes.reset();
-    this->notifications.reset();
-    this->commands.reset();
-    // If a crash happens after crashHandler has been reset, we'll assert
-    // This isn't super different from before, where if the app is already killed, the getApp() portion of it is already dead
-    this->crashHandler.reset();
-    this->seventvAPI.reset();
-    this->highlights.reset();
-    this->seventvBadges.reset();
-    this->ffzBadges.reset();
-    // this->twitch.reset();
-    this->imageUploader.reset();
-    this->hotkeys.reset();
-    this->fonts.reset();
-    this->sound.reset();
-    this->userData.reset();
-    this->toasts.reset();
-    this->accounts.reset();
-    this->emotes.reset();
-    this->themes.reset();
+    // we do this early to ensure getApp isn't used in any dtors
+    INSTANCE = nullptr;
 }
 
 void Application::initialize(Settings &settings, const Paths &paths)
@@ -222,11 +223,6 @@ void Application::initialize(Settings &settings, const Paths &paths)
     if (!this->args_.isFramelessEmbed)
     {
         getSettings()->currentVersion.setValue(CHATTERINO_VERSION);
-
-        if (getSettings()->enableExperimentalIrc)
-        {
-            Irc::instance().load();
-        }
     }
 
     this->accounts->load();
@@ -282,6 +278,8 @@ void Application::initialize(Settings &settings, const Paths &paths)
 
     this->initBttvLiveUpdates();
     this->initSeventvEventAPI();
+
+    this->streamerMode->start();
 }
 
 int Application::run(QApplication &qtApp)
@@ -528,6 +526,13 @@ PluginController *Application::getPlugins()
 }
 #endif
 
+Updates &Application::getUpdates()
+{
+    assertInGuiThread();
+
+    return this->updates;
+}
+
 ITwitchIrcServer *Application::getTwitch()
 {
     assertInGuiThread();
@@ -535,7 +540,7 @@ ITwitchIrcServer *Application::getTwitch()
     return this->twitch.get();
 }
 
-IAbstractIrcServer *Application::getTwitchAbstract()
+ITwitchIrcServer *Application::getTwitchAbstract()
 {
     assertInGuiThread();
 
@@ -581,6 +586,14 @@ BttvEmotes *Application::getBttvEmotes()
     return this->bttvEmotes.get();
 }
 
+BttvLiveUpdates *Application::getBttvLiveUpdates()
+{
+    assertInGuiThread();
+    // bttvLiveUpdates may be nullptr if it's not enabled
+
+    return this->bttvLiveUpdates.get();
+}
+
 FfzEmotes *Application::getFfzEmotes()
 {
     assertInGuiThread();
@@ -595,6 +608,14 @@ SeventvEmotes *Application::getSeventvEmotes()
     assert(this->seventvEmotes);
 
     return this->seventvEmotes.get();
+}
+
+SeventvEventAPI *Application::getSeventvEventAPI()
+{
+    assertInGuiThread();
+    // seventvEventAPI may be nullptr if it's not enabled
+
+    return this->seventvEventAPI.get();
 }
 
 void Application::save()
@@ -723,11 +744,9 @@ void Application::initPubSub()
                 return;
             }
 
-            MessageBuilder msg;
-            TwitchMessageBuilder::deletionMessage(action, &msg);
-            msg->flags.set(MessageFlag::PubSub);
+            auto msg = MessageBuilder::makeDeletionMessageFromPubSub(action);
 
-            postToThread([chan, msg = msg.release()] {
+            postToThread([chan, msg] {
                 auto replaced = false;
                 LimitedQueueSnapshot<MessagePtr> snapshot =
                     chan->getMessageSnapshot();
@@ -812,10 +831,8 @@ void Application::initPubSub()
                 }
 
                 postToThread([twitchChannel, action] {
-                    const auto p =
-                        TwitchMessageBuilder::makeLowTrustUserMessage(
-                            action, twitchChannel->getName(),
-                            twitchChannel.get());
+                    const auto p = MessageBuilder::makeLowTrustUserMessage(
+                        action, twitchChannel->getName(), twitchChannel.get());
                     twitchChannel->addMessage(p.first,
                                               MessageContext::Original);
                     twitchChannel->addMessage(p.second,
@@ -856,7 +873,7 @@ void Application::initPubSub()
 
                 postToThread([chan, action] {
                     auto msg =
-                        TwitchMessageBuilder::makeLowTrustUpdateMessage(action);
+                        MessageBuilder::makeLowTrustUpdateMessage(action);
                     chan->addMessage(msg, MessageContext::Original);
                 });
             });
@@ -936,9 +953,8 @@ void Application::initPubSub()
                             ActionUser{msg.senderUserID, msg.senderUserLogin,
                                        senderDisplayName, senderColor};
                         postToThread([chan, action] {
-                            const auto p =
-                                TwitchMessageBuilder::makeAutomodMessage(
-                                    action, chan->getName());
+                            const auto p = MessageBuilder::makeAutomodMessage(
+                                action, chan->getName());
                             chan->addMessage(p.first, MessageContext::Original);
                             chan->addMessage(p.second,
                                              MessageContext::Original);
@@ -989,8 +1005,8 @@ void Application::initPubSub()
             }
 
             postToThread([chan, action] {
-                const auto p = TwitchMessageBuilder::makeAutomodMessage(
-                    action, chan->getName());
+                const auto p =
+                    MessageBuilder::makeAutomodMessage(action, chan->getName());
                 chan->addMessage(p.first, MessageContext::Original);
                 chan->addMessage(p.second, MessageContext::Original);
             });
@@ -1028,8 +1044,7 @@ void Application::initPubSub()
             }
 
             postToThread([chan, action] {
-                const auto p =
-                    TwitchMessageBuilder::makeAutomodInfoMessage(action);
+                const auto p = MessageBuilder::makeAutomodInfoMessage(action);
                 chan->addMessage(p, MessageContext::Original);
             });
         });
@@ -1073,9 +1088,7 @@ void Application::initPubSub()
 
 void Application::initBttvLiveUpdates()
 {
-    auto &bttvLiveUpdates = this->twitch->getBTTVLiveUpdates();
-
-    if (!bttvLiveUpdates)
+    if (!this->bttvLiveUpdates)
     {
         qCDebug(chatterinoBttv)
             << "Skipping initialization of Live Updates as it's disabled";
@@ -1084,8 +1097,8 @@ void Application::initBttvLiveUpdates()
 
     // We can safely ignore these signal connections since the twitch object will always
     // be destroyed before the Application
-    std::ignore =
-        bttvLiveUpdates->signals_.emoteAdded.connect([&](const auto &data) {
+    std::ignore = this->bttvLiveUpdates->signals_.emoteAdded.connect(
+        [&](const auto &data) {
             auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);
 
             postToThread([chan, data] {
@@ -1095,8 +1108,8 @@ void Application::initBttvLiveUpdates()
                 }
             });
         });
-    std::ignore =
-        bttvLiveUpdates->signals_.emoteUpdated.connect([&](const auto &data) {
+    std::ignore = this->bttvLiveUpdates->signals_.emoteUpdated.connect(
+        [&](const auto &data) {
             auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);
 
             postToThread([chan, data] {
@@ -1106,8 +1119,8 @@ void Application::initBttvLiveUpdates()
                 }
             });
         });
-    std::ignore =
-        bttvLiveUpdates->signals_.emoteRemoved.connect([&](const auto &data) {
+    std::ignore = this->bttvLiveUpdates->signals_.emoteRemoved.connect(
+        [&](const auto &data) {
             auto chan = this->twitch->getChannelOrEmptyByID(data.channelID);
 
             postToThread([chan, data] {
@@ -1117,14 +1130,12 @@ void Application::initBttvLiveUpdates()
                 }
             });
         });
-    bttvLiveUpdates->start();
+    this->bttvLiveUpdates->start();
 }
 
 void Application::initSeventvEventAPI()
 {
-    auto &seventvEventAPI = this->twitch->getSeventvEventAPI();
-
-    if (!seventvEventAPI)
+    if (!this->seventvEventAPI)
     {
         qCDebug(chatterinoSeventvEventAPI)
             << "Skipping initialization as the EventAPI is disabled";
@@ -1133,8 +1144,8 @@ void Application::initSeventvEventAPI()
 
     // We can safely ignore these signal connections since the twitch object will always
     // be destroyed before the Application
-    std::ignore =
-        seventvEventAPI->signals_.emoteAdded.connect([&](const auto &data) {
+    std::ignore = this->seventvEventAPI->signals_.emoteAdded.connect(
+        [&](const auto &data) {
             postToThread([this, data] {
                 this->twitch->forEachSeventvEmoteSet(
                     data.emoteSetID, [data](TwitchChannel &chan) {
@@ -1142,8 +1153,8 @@ void Application::initSeventvEventAPI()
                     });
             });
         });
-    std::ignore =
-        seventvEventAPI->signals_.emoteUpdated.connect([&](const auto &data) {
+    std::ignore = this->seventvEventAPI->signals_.emoteUpdated.connect(
+        [&](const auto &data) {
             postToThread([this, data] {
                 this->twitch->forEachSeventvEmoteSet(
                     data.emoteSetID, [data](TwitchChannel &chan) {
@@ -1151,8 +1162,8 @@ void Application::initSeventvEventAPI()
                     });
             });
         });
-    std::ignore =
-        seventvEventAPI->signals_.emoteRemoved.connect([&](const auto &data) {
+    std::ignore = this->seventvEventAPI->signals_.emoteRemoved.connect(
+        [&](const auto &data) {
             postToThread([this, data] {
                 this->twitch->forEachSeventvEmoteSet(
                     data.emoteSetID, [data](TwitchChannel &chan) {
@@ -1160,22 +1171,22 @@ void Application::initSeventvEventAPI()
                     });
             });
         });
-    std::ignore =
-        seventvEventAPI->signals_.userUpdated.connect([&](const auto &data) {
+    std::ignore = this->seventvEventAPI->signals_.userUpdated.connect(
+        [&](const auto &data) {
             this->twitch->forEachSeventvUser(data.userID,
                                              [data](TwitchChannel &chan) {
                                                  chan.updateSeventvUser(data);
                                              });
         });
 
-    seventvEventAPI->start();
+    this->seventvEventAPI->start();
 }
 
 IApplication *getApp()
 {
-    assert(IApplication::instance != nullptr);
+    assert(INSTANCE != nullptr);
 
-    return IApplication::instance;
+    return INSTANCE;
 }
 
 }  // namespace chatterino
