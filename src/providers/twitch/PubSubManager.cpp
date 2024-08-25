@@ -340,7 +340,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
     };
 
     this->moderationActionHandlers["unraid"] = [this](const auto &data,
-                                                    const auto &roomID) {
+                                                      const auto &roomID) {
         UnraidAction action(data, roomID);
 
         action.source.id = data.value("created_by_user_id").toString();
