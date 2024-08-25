@@ -32,21 +32,13 @@ struct CreateEmoteResult {
     Emote emote;
 };
 
-Url getEmoteLink(QString urlTemplate, const EmoteId &id,
-                 const QString &emoteScale)
-{
-    urlTemplate.detach();
-
-    return {urlTemplate.replace("{{id}}", id.string)
-                .replace("{{image}}", emoteScale)};
-}
-
 Url getEmoteLinkV3(const EmoteId &id, const QString &emoteScale)
 {
     static const QString urlTemplate("https://cdn.betterttv.net/emote/%1/%2");
 
     return {urlTemplate.arg(id.string, emoteScale)};
 }
+
 EmotePtr cachedOrMake(Emote &&emote, const EmoteId &id)
 {
     static std::unordered_map<EmoteId, std::weak_ptr<const Emote>> cache;
@@ -54,6 +46,7 @@ EmotePtr cachedOrMake(Emote &&emote, const EmoteId &id)
 
     return cachedOrMakeEmotePtr(std::move(emote), cache, mutex, id);
 }
+
 std::pair<Outcome, EmoteMap> parseGlobalEmotes(const QJsonArray &jsonEmotes,
                                                const EmoteMap &currentEmotes)
 {
@@ -360,16 +353,5 @@ std::optional<EmotePtr> BttvEmotes::removeEmote(
 
     return emote;
 }
-
-/*
-static Url getEmoteLink(QString urlTemplate, const EmoteId &id,
-                        const QString &emoteScale)
-{
-    urlTemplate.detach();
-
-    return {urlTemplate.replace("{{id}}", id.string)
-                .replace("{{image}}", emoteScale)};
-}
-*/
 
 }  // namespace chatterino
