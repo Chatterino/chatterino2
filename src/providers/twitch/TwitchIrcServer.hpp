@@ -202,8 +202,6 @@ private:
     std::queue<std::chrono::steady_clock::time_point> lastMessageMod_;
     std::chrono::steady_clock::time_point lastErrorTimeSpeed_;
     std::chrono::steady_clock::time_point lastErrorTimeAmount_;
-
-    pajlada::Signals::SignalHolder signalHolder_;
 };
 
 }  // namespace chatterino
