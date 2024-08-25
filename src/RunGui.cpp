@@ -263,7 +263,7 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
 
     Application app(settings, paths, args, updates);
     app.initialize(settings, paths);
-    app.run(a);
+    app.run();
     app.save();
 
     settings.requestSave();

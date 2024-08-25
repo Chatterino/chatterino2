@@ -61,6 +61,7 @@
 #include "widgets/Window.hpp"
 
 #include <miniaudio.h>
+#include <QApplication>
 #include <QDesktopServices>
 
 namespace {
@@ -276,7 +277,7 @@ void Application::initialize(Settings &settings, const Paths &paths)
     this->initialized = true;
 }
 
-int Application::run(QApplication &qtApp)
+int Application::run()
 {
     assert(this->initialized);
 
@@ -324,7 +325,7 @@ int Application::run(QApplication &qtApp)
         },
         false);
 
-    return qtApp.exec();
+    return QApplication::exec();
 }
 
 Theme *Application::getThemes()

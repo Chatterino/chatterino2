@@ -2,8 +2,6 @@
 
 #include "singletons/NativeMessaging.hpp"
 
-#include <QApplication>
-
 #include <cassert>
 #include <memory>
 
@@ -133,7 +131,7 @@ public:
     void load();
     void save();
 
-    int run(QApplication &qtApp);
+    int run();
 
     friend void test();
 
