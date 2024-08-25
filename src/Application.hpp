@@ -217,7 +217,6 @@ public:
     IStreamerMode *getStreamerMode() override;
 
 private:
-    void initPubSub();
     void initBttvLiveUpdates();
     void initSeventvEventAPI();
     void initNm(const Paths &paths);
