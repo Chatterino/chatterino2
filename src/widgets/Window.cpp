@@ -261,7 +261,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         const auto &messages = getSampleMiscMessages();
         static int index = 0;
         const auto &msg = messages[index++ % messages.size()];
-        getApp()->getTwitchAbstract()->addFakeMessage(msg);
+        getApp()->getTwitch()->addFakeMessage(msg);
         return "";
     });
 
@@ -269,7 +269,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         const auto &messages = getSampleCheerMessages();
         static int index = 0;
         const auto &msg = messages[index++ % messages.size()];
-        getApp()->getTwitchAbstract()->addFakeMessage(msg);
+        getApp()->getTwitch()->addFakeMessage(msg);
         return "";
     });
 
@@ -277,7 +277,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         const auto &messages = getSampleLinkMessages();
         static int index = 0;
         const auto &msg = messages[index++ % messages.size()];
-        getApp()->getTwitchAbstract()->addFakeMessage(msg);
+        getApp()->getTwitch()->addFakeMessage(msg);
         return "";
     });
 
@@ -292,7 +292,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
                 oMessage->toInner<PubSubMessageMessage>()
                     ->toInner<PubSubCommunityPointsChannelV1Message>();
 
-            getApp()->getTwitchAbstract()->addFakeMessage(
+            getApp()->getTwitch()->addFakeMessage(
                 getSampleChannelRewardIRCMessage());
             getApp()->getTwitchPubSub()->pointReward.redeemed.invoke(
                 oInnerMessage->data.value("redemption").toObject());
@@ -316,7 +316,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         const auto &messages = getSampleEmoteTestMessages();
         static int index = 0;
         const auto &msg = messages[index++ % messages.size()];
-        getApp()->getTwitchAbstract()->addFakeMessage(msg);
+        getApp()->getTwitch()->addFakeMessage(msg);
         return "";
     });
 
@@ -324,7 +324,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
         const auto &messages = getSampleSubMessages();
         static int index = 0;
         const auto &msg = messages[index++ % messages.size()];
-        getApp()->getTwitchAbstract()->addFakeMessage(msg);
+        getApp()->getTwitch()->addFakeMessage(msg);
         return "";
     });
 #endif
@@ -487,8 +487,8 @@ void Window::addShortcuts()
                  splitContainer = this->notebook_->getOrAddSelectedPage();
              }
              Split *split = new Split(splitContainer);
-             split->setChannel(getApp()->getTwitchAbstract()->getOrAddChannel(
-                 si.channelName));
+             split->setChannel(
+                 getApp()->getTwitch()->getOrAddChannel(si.channelName));
              split->setFilters(si.filters);
              splitContainer->insertSplit(split);
              splitContainer->setSelected(split);

@@ -54,8 +54,7 @@ bool FramelessEmbedWindow::nativeEvent(const QByteArray &eventType,
                 auto channelName = root.value("channel-name").toString();
 
                 this->split_->setChannel(
-                    getApp()->getTwitchAbstract()->getOrAddChannel(
-                        channelName));
+                    getApp()->getTwitch()->getOrAddChannel(channelName));
             }
         }
     }

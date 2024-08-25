@@ -70,6 +70,7 @@
 - Dev: Refactored 7TV/BTTV definitions out of `TwitchIrcServer` into `Application`. (#5532)
 - Dev: Refactored code that's responsible for deleting old update files. (#5535)
 - Dev: Cleanly exit on shutdown. (#5537)
+- Dev: Removed the `getTwitchAbstract` method in `Application`. (#5560)
 - Dev: Renamed threads created by Chatterino on Linux and Windows. (#5538, #5539, #5544)
 - Dev: Refactored a few `#define`s into `const(expr)` and cleaned includes. (#5527)
 - Dev: Added `FlagsEnum::isEmpty`. (#5550)

@@ -512,13 +512,6 @@ ITwitchIrcServer *Application::getTwitch()
     return this->twitch.get();
 }
 
-ITwitchIrcServer *Application::getTwitchAbstract()
-{
-    assertInGuiThread();
-
-    return this->twitch.get();
-}
-
 PubSub *Application::getTwitchPubSub()
 {
     assertInGuiThread();

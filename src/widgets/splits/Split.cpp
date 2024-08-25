@@ -271,7 +271,7 @@ Split::Split(QWidget *parent)
     std::ignore = this->view_->openChannelIn.connect(
         [this](QString twitchChannel, FromTwitchLinkOpenChannelIn openIn) {
             ChannelPtr channel =
-                getApp()->getTwitchAbstract()->getOrAddChannel(twitchChannel);
+                getApp()->getTwitch()->getOrAddChannel(twitchChannel);
             switch (openIn)
             {
                 case FromTwitchLinkOpenChannelIn::Split:

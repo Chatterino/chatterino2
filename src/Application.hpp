@@ -83,7 +83,6 @@ public:
     virtual HighlightController *getHighlights() = 0;
     virtual NotificationController *getNotifications() = 0;
     virtual ITwitchIrcServer *getTwitch() = 0;
-    virtual ITwitchIrcServer *getTwitchAbstract() = 0;
     virtual PubSub *getTwitchPubSub() = 0;
     virtual ILogging *getChatLogger() = 0;
     virtual IChatterinoBadges *getChatterinoBadges() = 0;
@@ -194,8 +193,6 @@ public:
     NotificationController *getNotifications() override;
     HighlightController *getHighlights() override;
     ITwitchIrcServer *getTwitch() override;
-    [[deprecated("use getTwitch()")]] ITwitchIrcServer *getTwitchAbstract()
-        override;
     PubSub *getTwitchPubSub() override;
     ILogging *getChatLogger() override;
     FfzBadges *getFfzBadges() override;
