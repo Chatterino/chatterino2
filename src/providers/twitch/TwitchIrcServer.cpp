@@ -230,10 +230,6 @@ void TwitchIrcServer::initialize()
             this->connect();
         });
     });
-
-    this->reloadBTTVGlobalEmotes();
-    this->reloadFFZGlobalEmotes();
-    this->reloadSevenTVGlobalEmotes();
 }
 
 void TwitchIrcServer::initializeConnection(IrcConnection *connection,
@@ -806,11 +802,6 @@ void TwitchIrcServer::setLastUserThatWhisperedMe(const QString &user)
     this->lastUserThatWhisperedMe.set(user);
 }
 
-void TwitchIrcServer::reloadBTTVGlobalEmotes()
-{
-    getApp()->getBttvEmotes()->loadEmotes();
-}
-
 void TwitchIrcServer::reloadAllBTTVChannelEmotes()
 {
     this->forEachChannel([](const auto &chan) {
@@ -821,11 +812,6 @@ void TwitchIrcServer::reloadAllBTTVChannelEmotes()
     });
 }
 
-void TwitchIrcServer::reloadFFZGlobalEmotes()
-{
-    getApp()->getFfzEmotes()->loadEmotes();
-}
-
 void TwitchIrcServer::reloadAllFFZChannelEmotes()
 {
     this->forEachChannel([](const auto &chan) {
@@ -834,11 +820,6 @@ void TwitchIrcServer::reloadAllFFZChannelEmotes()
             channel->refreshFFZChannelEmotes(false);
         }
     });
-}
-
-void TwitchIrcServer::reloadSevenTVGlobalEmotes()
-{
-    getApp()->getSeventvEmotes()->loadGlobalEmotes();
 }
 
 void TwitchIrcServer::reloadAllSevenTVChannelEmotes()

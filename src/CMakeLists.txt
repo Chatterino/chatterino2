@@ -498,6 +498,7 @@ set(SOURCE_FILES
         util/SampleData.cpp
         util/SampleData.hpp
         util/SharedPtrElementLess.hpp
+        util/SignalListener.hpp
         util/StreamLink.cpp
         util/StreamLink.hpp
         util/ThreadGuard.hpp

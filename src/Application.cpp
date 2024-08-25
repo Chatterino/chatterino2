@@ -153,7 +153,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , emotes(new Emotes)
     , accounts(new AccountController)
     , hotkeys(new HotkeyController)
-    , windows(new WindowManager(paths))
+    , windows(new WindowManager(paths, _settings, *this->themes, *this->fonts))
     , toasts(new Toasts)
     , imageUploader(new ImageUploader)
     , seventvAPI(new SeventvAPI)
@@ -184,11 +184,6 @@ Application::Application(Settings &_settings, const Paths &paths,
 #endif
     , updates(_updates)
 {
-    // We can safely ignore this signal's connection since the Application will always
-    // be destroyed after fonts
-    std::ignore = this->fonts->fontChanged.connect([this]() {
-        this->windows->layoutChannelViews();
-    });
 }
 
 Application::~Application()
@@ -225,9 +220,15 @@ void Application::initialize(Settings &settings, const Paths &paths)
 
     this->accounts->load();
 
-    this->windows->initialize(settings);
+    this->windows->initialize();
 
     this->ffzBadges->load();
+
+    // Load global emotes
+    this->bttvEmotes->loadEmotes();
+    this->ffzEmotes->loadEmotes();
+    this->seventvEmotes->loadGlobalEmotes();
+
     this->twitch->initialize();
 
     // Load live status
@@ -266,8 +267,6 @@ void Application::initialize(Settings &settings, const Paths &paths)
     }
 #endif
 
-    this->windows->updateWordTypeMask();
-
     if (!this->args_.isFramelessEmbed)
     {
         this->initNm(paths);
@@ -297,34 +296,9 @@ int Application::run(QApplication &qtApp)
         },
         false);
 
-    // We can safely ignore the signal connections since Application will always live longer than
-    // everything else, including settings. right?
-    // NOTE: SETTINGS_LIFETIME
-    std::ignore =
-        getSettings()->moderationActions.delayedItemsChanged.connect([this] {
-            this->windows->forceLayoutChannelViews();
-        });
-
-    std::ignore =
-        getSettings()->highlightedMessages.delayedItemsChanged.connect([this] {
-            this->windows->forceLayoutChannelViews();
-        });
-    std::ignore =
-        getSettings()->highlightedUsers.delayedItemsChanged.connect([this] {
-            this->windows->forceLayoutChannelViews();
-        });
-    std::ignore =
-        getSettings()->highlightedBadges.delayedItemsChanged.connect([this] {
-            this->windows->forceLayoutChannelViews();
-        });
-
-    getSettings()->removeSpacesBetweenEmotes.connect([this] {
-        this->windows->forceLayoutChannelViews();
-    });
-
     getSettings()->enableBTTVGlobalEmotes.connect(
         [this] {
-            this->twitch->reloadBTTVGlobalEmotes();
+            this->bttvEmotes->loadEmotes();
         },
         false);
     getSettings()->enableBTTVChannelEmotes.connect(
@@ -334,7 +308,7 @@ int Application::run(QApplication &qtApp)
         false);
     getSettings()->enableFFZGlobalEmotes.connect(
         [this] {
-            this->twitch->reloadFFZGlobalEmotes();
+            this->ffzEmotes->loadEmotes();
         },
         false);
     getSettings()->enableFFZChannelEmotes.connect(
@@ -344,7 +318,7 @@ int Application::run(QApplication &qtApp)
         false);
     getSettings()->enableSevenTVGlobalEmotes.connect(
         [this] {
-            this->twitch->reloadSevenTVGlobalEmotes();
+            this->seventvEmotes->loadGlobalEmotes();
         },
         false);
     getSettings()->enableSevenTVChannelEmotes.connect(
