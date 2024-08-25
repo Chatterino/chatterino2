@@ -575,6 +575,9 @@ IStreamerMode *Application::getStreamerMode()
 
 ITwitchUsers *Application::getTwitchUsers()
 {
+    assertInGuiThread();
+    assert(this->twitchUsers);
+
     return this->twitchUsers.get();
 }
 
