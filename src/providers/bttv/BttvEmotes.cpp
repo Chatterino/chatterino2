@@ -15,82 +15,54 @@
 #include <QJsonArray>
 #include <QThread>
 
-namespace chatterino {
 namespace {
 
-    const QString CHANNEL_HAS_NO_EMOTES(
-        "This channel has no BetterTTV channel emotes.");
+using namespace chatterino;
 
-    QString emoteLinkFormat("https://betterttv.com/emotes/%1");
-    // BTTV doesn't provide any data on the size, so we assume an emote is 28x28
-    constexpr QSize EMOTE_BASE_SIZE(28, 28);
+const QString CHANNEL_HAS_NO_EMOTES(
+    "This channel has no BetterTTV channel emotes.");
 
-    struct CreateEmoteResult {
-        EmoteId id;
-        EmoteName name;
-        Emote emote;
-    };
+QString emoteLinkFormat("https://betterttv.com/emotes/%1");
+// BTTV doesn't provide any data on the size, so we assume an emote is 28x28
+constexpr QSize EMOTE_BASE_SIZE(28, 28);
 
-    Url getEmoteLink(QString urlTemplate, const EmoteId &id,
-                     const QString &emoteScale)
+struct CreateEmoteResult {
+    EmoteId id;
+    EmoteName name;
+    Emote emote;
+};
+
+Url getEmoteLink(QString urlTemplate, const EmoteId &id,
+                 const QString &emoteScale)
+{
+    urlTemplate.detach();
+
+    return {urlTemplate.replace("{{id}}", id.string)
+                .replace("{{image}}", emoteScale)};
+}
+
+Url getEmoteLinkV3(const EmoteId &id, const QString &emoteScale)
+{
+    static const QString urlTemplate("https://cdn.betterttv.net/emote/%1/%2");
+
+    return {urlTemplate.arg(id.string, emoteScale)};
+}
+EmotePtr cachedOrMake(Emote &&emote, const EmoteId &id)
+{
+    static std::unordered_map<EmoteId, std::weak_ptr<const Emote>> cache;
+    static std::mutex mutex;
+
+    return cachedOrMakeEmotePtr(std::move(emote), cache, mutex, id);
+}
+std::pair<Outcome, EmoteMap> parseGlobalEmotes(const QJsonArray &jsonEmotes,
+                                               const EmoteMap &currentEmotes)
+{
+    auto emotes = EmoteMap();
+
+    for (auto jsonEmote : jsonEmotes)
     {
-        urlTemplate.detach();
-
-        return {urlTemplate.replace("{{id}}", id.string)
-                    .replace("{{image}}", emoteScale)};
-    }
-
-    Url getEmoteLinkV3(const EmoteId &id, const QString &emoteScale)
-    {
-        static const QString urlTemplate(
-            "https://cdn.betterttv.net/emote/%1/%2");
-
-        return {urlTemplate.arg(id.string, emoteScale)};
-    }
-    EmotePtr cachedOrMake(Emote &&emote, const EmoteId &id)
-    {
-        static std::unordered_map<EmoteId, std::weak_ptr<const Emote>> cache;
-        static std::mutex mutex;
-
-        return cachedOrMakeEmotePtr(std::move(emote), cache, mutex, id);
-    }
-    std::pair<Outcome, EmoteMap> parseGlobalEmotes(
-        const QJsonArray &jsonEmotes, const EmoteMap &currentEmotes)
-    {
-        auto emotes = EmoteMap();
-
-        for (auto jsonEmote : jsonEmotes)
-        {
-            auto id = EmoteId{jsonEmote.toObject().value("id").toString()};
-            auto name =
-                EmoteName{jsonEmote.toObject().value("code").toString()};
-
-            auto emote = Emote({
-                name,
-                ImageSet{Image::fromUrl(getEmoteLinkV3(id, "1x"), 1,
-                                        EMOTE_BASE_SIZE),
-                         Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5,
-                                        EMOTE_BASE_SIZE * 2),
-                         Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25,
-                                        EMOTE_BASE_SIZE * 4)},
-                Tooltip{name.string + "<br>Global BetterTTV Emote"},
-                Url{emoteLinkFormat.arg(id.string)},
-            });
-
-            emotes[name] =
-                cachedOrMakeEmotePtr(std::move(emote), currentEmotes);
-        }
-
-        return {Success, std::move(emotes)};
-    }
-
-    CreateEmoteResult createChannelEmote(const QString &channelDisplayName,
-                                         const QJsonObject &jsonEmote)
-    {
-        auto id = EmoteId{jsonEmote.value("id").toString()};
-        auto name = EmoteName{jsonEmote.value("code").toString()};
-        auto author = EmoteAuthor{
-            jsonEmote.value("user").toObject().value("displayName").toString()};
+        auto id = EmoteId{jsonEmote.toObject().value("id").toString()};
+        auto name = EmoteName{jsonEmote.toObject().value("code").toString()};
 
         auto emote = Emote({
             name,
@@ -99,57 +71,81 @@ namespace {
                 Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5,
                                EMOTE_BASE_SIZE * 2),
                 Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25,
-                               EMOTE_BASE_SIZE * 4),
-            },
-            Tooltip{
-                QString("%1<br>%2 BetterTTV Emote<br>By: %3")
-                    .arg(name.string)
-                    // when author is empty, it is a channel emote created by the broadcaster
-                    .arg(author.string.isEmpty() ? "Channel" : "Shared")
-                    .arg(author.string.isEmpty() ? channelDisplayName
-                                                 : author.string)},
+                               EMOTE_BASE_SIZE * 4)},
+            Tooltip{name.string + "<br>Global BetterTTV Emote"},
             Url{emoteLinkFormat.arg(id.string)},
-            false,
-            id,
         });
 
-        return {id, name, emote};
+        emotes[name] = cachedOrMakeEmotePtr(std::move(emote), currentEmotes);
     }
 
-    bool updateChannelEmote(Emote &emote, const QString &channelDisplayName,
-                            const QJsonObject &jsonEmote)
+    return {Success, std::move(emotes)};
+}
+
+CreateEmoteResult createChannelEmote(const QString &channelDisplayName,
+                                     const QJsonObject &jsonEmote)
+{
+    auto id = EmoteId{jsonEmote.value("id").toString()};
+    auto name = EmoteName{jsonEmote.value("code").toString()};
+    auto author = EmoteAuthor{
+        jsonEmote.value("user").toObject().value("displayName").toString()};
+
+    auto emote = Emote({
+        name,
+        ImageSet{
+            Image::fromUrl(getEmoteLinkV3(id, "1x"), 1, EMOTE_BASE_SIZE),
+            Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5, EMOTE_BASE_SIZE * 2),
+            Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25, EMOTE_BASE_SIZE * 4),
+        },
+        Tooltip{
+            QString("%1<br>%2 BetterTTV Emote<br>By: %3")
+                .arg(name.string)
+                // when author is empty, it is a channel emote created by the broadcaster
+                .arg(author.string.isEmpty() ? "Channel" : "Shared")
+                .arg(author.string.isEmpty() ? channelDisplayName
+                                             : author.string)},
+        Url{emoteLinkFormat.arg(id.string)},
+        false,
+        id,
+    });
+
+    return {id, name, emote};
+}
+
+bool updateChannelEmote(Emote &emote, const QString &channelDisplayName,
+                        const QJsonObject &jsonEmote)
+{
+    bool anyModifications = false;
+
+    if (jsonEmote.contains("code"))
     {
-        bool anyModifications = false;
-
-        if (jsonEmote.contains("code"))
-        {
-            emote.name = EmoteName{jsonEmote.value("code").toString()};
-            anyModifications = true;
-        }
-        if (jsonEmote.contains("user"))
-        {
-            emote.author = EmoteAuthor{jsonEmote.value("user")
-                                           .toObject()
-                                           .value("displayName")
-                                           .toString()};
-            anyModifications = true;
-        }
-
-        if (anyModifications)
-        {
-            emote.tooltip = Tooltip{
-                QString("%1<br>%2 BetterTTV Emote<br>By: %3")
-                    .arg(emote.name.string)
-                    // when author is empty, it is a channel emote created by the broadcaster
-                    .arg(emote.author.string.isEmpty() ? "Channel" : "Shared")
-                    .arg(emote.author.string.isEmpty() ? channelDisplayName
-                                                       : emote.author.string)};
-        }
-
-        return anyModifications;
+        emote.name = EmoteName{jsonEmote.value("code").toString()};
+        anyModifications = true;
     }
+    if (jsonEmote.contains("user"))
+    {
+        emote.author = EmoteAuthor{
+            jsonEmote.value("user").toObject().value("displayName").toString()};
+        anyModifications = true;
+    }
+
+    if (anyModifications)
+    {
+        emote.tooltip = Tooltip{
+            QString("%1<br>%2 BetterTTV Emote<br>By: %3")
+                .arg(emote.name.string)
+                // when author is empty, it is a channel emote created by the broadcaster
+                .arg(emote.author.string.isEmpty() ? "Channel" : "Shared")
+                .arg(emote.author.string.isEmpty() ? channelDisplayName
+                                                   : emote.author.string)};
+    }
+
+    return anyModifications;
+}
 
 }  // namespace
+
+namespace chatterino {
 
 using namespace bttv::detail;
 
