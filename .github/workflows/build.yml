@@ -385,7 +385,7 @@ jobs:
           path: release-artifacts/
 
       - uses: actions/download-artifact@v4
-        name: Ubuntu 22.04 deb
+        name: Ubuntu 24.04 deb
         with:
           name: Chatterino-ubuntu-24.04-Qt-6.6.1.deb
           path: release-artifacts/
