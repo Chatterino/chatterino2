@@ -346,7 +346,7 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         action.source.id = data.value("created_by_user_id").toString();
         action.source.login = data.value("created_by").toString();
 
-        this->moderation.raidCancelled.invoke(action);
+        this->moderation.raidCanceled.invoke(action);
     };
 
     /*

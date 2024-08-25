@@ -107,7 +107,7 @@ public:
         Signal<ModerationStateAction> moderationStateChanged;
 
         Signal<RaidAction> raidStarted;
-        Signal<UnraidAction> raidCancelled;
+        Signal<UnraidAction> raidCanceled;
 
         Signal<BanAction> userBanned;
         Signal<UnbanAction> userUnbanned;

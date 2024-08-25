@@ -666,7 +666,7 @@ void TwitchIrcServer::initialize()
         });
 
     this->connections_.managedConnect(
-        getApp()->getTwitchPubSub()->moderation.raidCancelled,
+        getApp()->getTwitchPubSub()->moderation.raidCanceled,
         [this](const auto &action) {
             auto chan = this->getChannelOrEmptyByID(action.roomID);
 

@@ -908,7 +908,7 @@ MessageBuilder::MessageBuilder(const UnraidAction &action)
 
     this->emplaceSystemTextAndUpdate(action.source.login, text)
         ->setLink({Link::UserInfo, "id:" + action.source.id});
-    this->emplaceSystemTextAndUpdate("cancelled the raid.", text);
+    this->emplaceSystemTextAndUpdate("canceled the raid.", text);
 
     this->message().messageText = text;
     this->message().searchText = text;
