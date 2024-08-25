@@ -44,6 +44,7 @@ struct PubSubAutoModQueueMessage;
 struct AutomodAction;
 struct AutomodUserAction;
 struct AutomodInfoAction;
+struct RaidAction;
 struct WarnAction;
 struct PubSubLowTrustUsersMessage;
 struct PubSubWhisperMessage;
@@ -103,6 +104,8 @@ public:
         Signal<DeleteAction> messageDeleted;
         Signal<ModeChangedAction> modeChanged;
         Signal<ModerationStateAction> moderationStateChanged;
+
+        Signal<RaidAction> raidStarted;
 
         Signal<BanAction> userBanned;
         Signal<UnbanAction> userUnbanned;

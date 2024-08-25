@@ -172,6 +172,12 @@ struct AutomodInfoAction : PubSubAction {
     } type;
 };
 
+struct RaidAction : PubSubAction {
+    using PubSubAction::PubSubAction;
+
+    QString target;
+};
+
 struct WarnAction : PubSubAction {
     using PubSubAction::PubSubAction;
 
