@@ -22,7 +22,7 @@ using namespace chatterino;
 const QString CHANNEL_HAS_NO_EMOTES(
     "This channel has no BetterTTV channel emotes.");
 
-QString emoteLinkFormat("https://betterttv.com/emotes/%1");
+constexpr QStringView EMOTE_LINK_FORMAT = u"https://betterttv.com/emotes/%1";
 // BTTV doesn't provide any data on the size, so we assume an emote is 28x28
 constexpr QSize EMOTE_BASE_SIZE(28, 28);
 
@@ -73,7 +73,7 @@ std::pair<Outcome, EmoteMap> parseGlobalEmotes(const QJsonArray &jsonEmotes,
                 Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25,
                                EMOTE_BASE_SIZE * 4)},
             Tooltip{name.string + "<br>Global BetterTTV Emote"},
-            Url{emoteLinkFormat.arg(id.string)},
+            Url{EMOTE_LINK_FORMAT.arg(id.string)},
         });
 
         emotes[name] = cachedOrMakeEmotePtr(std::move(emote), currentEmotes);
@@ -104,7 +104,7 @@ CreateEmoteResult createChannelEmote(const QString &channelDisplayName,
                 .arg(author.string.isEmpty() ? "Channel" : "Shared")
                 .arg(author.string.isEmpty() ? channelDisplayName
                                              : author.string)},
-        Url{emoteLinkFormat.arg(id.string)},
+        Url{EMOTE_LINK_FORMAT.arg(id.string)},
         false,
         id,
     });
