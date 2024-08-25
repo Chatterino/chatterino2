@@ -178,6 +178,10 @@ struct RaidAction : PubSubAction {
     QString target;
 };
 
+struct UnraidAction : PubSubAction {
+    using PubSubAction::PubSubAction;
+};
+
 struct WarnAction : PubSubAction {
     using PubSubAction::PubSubAction;
 

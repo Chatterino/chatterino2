@@ -24,6 +24,7 @@ struct BanAction;
 struct UnbanAction;
 struct WarnAction;
 struct RaidAction;
+struct UnraidAction;
 struct AutomodAction;
 struct AutomodUserAction;
 struct AutomodInfoAction;
@@ -129,6 +130,7 @@ public:
     MessageBuilder(const UnbanAction &action);
     MessageBuilder(const WarnAction &action);
     MessageBuilder(const RaidAction &action);
+    MessageBuilder(const UnraidAction &action);
     MessageBuilder(const AutomodUserAction &action);
 
     MessageBuilder(LiveUpdatesAddEmoteMessageTag, const QString &platform,

@@ -201,8 +201,8 @@ QString cancelRaid(const CommandContext &ctx)
 
     getHelix()->cancelRaid(
         ctx.twitchChannel->roomId(),
-        [channel{ctx.channel}] {
-            channel->addSystemMessage("You cancelled the raid.");
+        [] {
+            // do nothing
         },
         [channel{ctx.channel}](auto error, auto message) {
             auto errorMessage = formatCancelRaidError(error, message);
