@@ -152,9 +152,8 @@ QString startRaid(const CommandContext &ctx)
          channel{ctx.channel}](const HelixUser &targetUser) {
             getHelix()->startRaid(
                 twitchChannel->roomId(), targetUser.id,
-                [channel, targetUser] {
-                    channel->addSystemMessage(QString("You started to raid %1.")
-                                                  .arg(targetUser.displayName));
+                [] {
+                    // do nothing
                 },
                 [channel, targetUser](auto error, auto message) {
                     auto errorMessage = formatStartRaidError(error, message);
