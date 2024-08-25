@@ -48,6 +48,7 @@
 #include "widgets/Window.hpp"
 
 #include <magic_enum/magic_enum_flags.hpp>
+#include <QApplication>
 #include <QClipboard>
 #include <QColor>
 #include <QDate>

@@ -2,8 +2,6 @@
 
 #include "singletons/NativeMessaging.hpp"
 
-#include <QApplication>
-
 #include <cassert>
 #include <memory>
 
@@ -133,7 +131,7 @@ public:
     void load();
     void save();
 
-    int run(QApplication &qtApp);
+    int run();
 
     friend void test();
 
@@ -219,13 +217,14 @@ public:
     IStreamerMode *getStreamerMode() override;
 
 private:
-    void initPubSub();
     void initBttvLiveUpdates();
     void initSeventvEventAPI();
     void initNm(const Paths &paths);
 
     NativeMessagingServer nmServer;
     Updates &updates;
+
+    bool initialized{false};
 };
 
 IApplication *getApp();

@@ -10,7 +10,7 @@ namespace chatterino {
 // https://stackoverflow.com/questions/21646467/how-to-execute-a-functor-or-a-lambda-in-a-given-thread-in-qt-gcd-style
 // Qt 5/4 - preferred, has least allocations
 template <typename F>
-static void postToThread(F &&fun, QObject *obj = qApp)
+static void postToThread(F &&fun, QObject *obj = QCoreApplication::instance())
 {
     struct Event : public QEvent {
         using Fun = typename std::decay<F>::type;

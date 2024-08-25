@@ -664,8 +664,6 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
 {
     assertInGuiThread();
 
-    auto *app = getApp();
-
     if (descriptor.type_ == "twitch")
     {
         return getApp()->getTwitch()->getOrAddChannel(descriptor.channelName_);
@@ -753,7 +751,7 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
         // get geometry
         {
             // out of bounds windows
-            auto screens = qApp->screens();
+            auto screens = QApplication::screens();
             bool outOfBounds =
                 !qEnvironmentVariableIsSet("I3SOCK") &&
                 std::none_of(screens.begin(), screens.end(),

@@ -1,6 +1,8 @@
 #include "providers/twitch/PubSubManager.hpp"
 
+#include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "providers/NetworkConfigurationProvider.hpp"
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/PubSubClient.hpp"
@@ -506,6 +508,23 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
 PubSub::~PubSub()
 {
     this->stop();
+}
+
+void PubSub::initialize()
+{
+    this->start();
+    this->setAccount(getApp()->getAccounts()->twitch.getCurrent());
+
+    getApp()->getAccounts()->twitch.currentUserChanged.connect(
+        [this] {
+            this->unlistenChannelModerationActions();
+            this->unlistenAutomod();
+            this->unlistenLowTrustUsers();
+            this->unlistenChannelPointRewards();
+
+            this->setAccount(getApp()->getAccounts()->twitch.getCurrent());
+        },
+        boost::signals2::at_front);
 }
 
 void PubSub::setAccount(std::shared_ptr<TwitchAccount> account)

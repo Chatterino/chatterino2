@@ -8,6 +8,7 @@
 #include "util/CombinePath.hpp"
 #include "util/Variant.hpp"
 
+#include <QApplication>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSaveFile>
@@ -89,7 +90,7 @@ void queueInsecureSave()
     if (!isQueued)
     {
         isQueued = true;
-        QTimer::singleShot(200, qApp, [] {
+        QTimer::singleShot(200, QApplication::instance(), [] {
             storeInsecure(insecureInstance());
             isQueued = false;
         });
@@ -133,8 +134,8 @@ void runNextJob()
                     job->setAutoDelete(true);
                     job->setKey(set.name);
                     job->setTextData(set.credential);
-                    QObject::connect(job, &QKeychain::Job::finished, qApp,
-                                     [](auto) {
+                    QObject::connect(job, &QKeychain::Job::finished,
+                                     QApplication::instance(), [](auto) {
                                          runNextJob();
                                      });
                     job->start();
@@ -143,8 +144,8 @@ void runNextJob()
                     auto *job = new QKeychain::DeletePasswordJob("chatterino");
                     job->setAutoDelete(true);
                     job->setKey(erase.name);
-                    QObject::connect(job, &QKeychain::Job::finished, qApp,
-                                     [](auto) {
+                    QObject::connect(job, &QKeychain::Job::finished,
+                                     QApplication::instance(), [](auto) {
                                          runNextJob();
                                      });
                     job->start();

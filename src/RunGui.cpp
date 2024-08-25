@@ -41,7 +41,7 @@ namespace {
     {
         // borrowed from
         // https://stackoverflow.com/questions/15035767/is-the-qt-5-dark-fusion-theme-available-for-windows
-        auto dark = qApp->palette();
+        auto dark = QApplication::palette();
 
         dark.setColor(QPalette::Window, QColor(22, 22, 22));
         dark.setColor(QPalette::WindowText, Qt::white);
@@ -71,7 +71,7 @@ namespace {
         dark.setColor(QPalette::Disabled, QPalette::WindowText,
                       QColor(127, 127, 127));
 
-        qApp->setPalette(dark);
+        QApplication::setPalette(dark);
     }
 
     void initQt()
@@ -263,7 +263,7 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
 
     Application app(settings, paths, args, updates);
     app.initialize(settings, paths);
-    app.run(a);
+    app.run();
     app.save();
 
     settings.requestSave();
