@@ -54,6 +54,9 @@ struct TwitchEmoteSet {
     /// This includes sub and bit emotes
     bool isSubLike = false;
 
+    /// @brief The title of this set
+    ///
+    /// We generate this based on the emote set's flags & owner
     QString title() const;
 };
 using TwitchEmoteSetMap = boost::unordered_flat_map<EmoteSetId, TwitchEmoteSet>;
