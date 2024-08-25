@@ -6,6 +6,7 @@
 
 #include <functional>
 
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define QStringAlias(name)                                      \
     namespace chatterino {                                      \
     struct name {                                               \

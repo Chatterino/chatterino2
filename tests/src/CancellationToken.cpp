@@ -33,6 +33,7 @@ TEST(CancellationToken, moveCtor)
     CancellationToken token(false);
     ASSERT_FALSE(token.isCancelled());
     CancellationToken token2(std::move(token));
+    // NOLINTNEXTLINE(bugprone-use-after-move)
     ASSERT_TRUE(token.isCancelled());
     ASSERT_FALSE(token2.isCancelled());
 
@@ -51,6 +52,7 @@ TEST(CancellationToken, moveAssign)
     ASSERT_TRUE(token2.isCancelled());
 
     token2 = std::move(token);
+    // NOLINTNEXTLINE(bugprone-use-after-move)
     ASSERT_TRUE(token.isCancelled());
     ASSERT_FALSE(token2.isCancelled());
     token.cancel();
@@ -108,6 +110,7 @@ TEST(ScopedCancellationToken, moveCancelCtor)
     ASSERT_FALSE(token.isCancelled());
     {
         ScopedCancellationToken scoped(std::move(token));
+        // NOLINTNEXTLINE(bugprone-use-after-move)
         ASSERT_TRUE(token.isCancelled());
     }
 }
@@ -131,6 +134,7 @@ TEST(ScopedCancellationToken, moveCtor)
         ScopedCancellationToken scoped(token);
         {
             ScopedCancellationToken inner(std::move(scoped));
+            ASSERT_FALSE(token.isCancelled());
         }
         ASSERT_TRUE(token.isCancelled());
     }
