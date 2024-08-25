@@ -178,6 +178,11 @@ EmoteMap bttv::detail::parseChannelEmotes(const QJsonObject &jsonRoot,
 BttvEmotes::BttvEmotes()
     : global_(std::make_shared<EmoteMap>())
 {
+    getSettings()->enableBTTVGlobalEmotes.connect(
+        [this] {
+            this->loadEmotes();
+        },
+        this->managedConnections, false);
 }
 
 std::shared_ptr<const EmoteMap> BttvEmotes::emotes() const

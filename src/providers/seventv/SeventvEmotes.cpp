@@ -188,6 +188,11 @@ EmoteMap seventv::detail::parseEmotes(const QJsonArray &emoteSetEmotes,
 SeventvEmotes::SeventvEmotes()
     : global_(std::make_shared<EmoteMap>())
 {
+    getSettings()->enableSevenTVGlobalEmotes.connect(
+        [this] {
+            this->loadGlobalEmotes();
+        },
+        this->managedConnections, false);
 }
 
 std::shared_ptr<const EmoteMap> SeventvEmotes::globalEmotes() const

@@ -294,29 +294,14 @@ int Application::run()
         },
         false);
 
-    getSettings()->enableBTTVGlobalEmotes.connect(
-        [this] {
-            this->bttvEmotes->loadEmotes();
-        },
-        false);
     getSettings()->enableBTTVChannelEmotes.connect(
         [this] {
             this->twitch->reloadAllBTTVChannelEmotes();
         },
         false);
-    getSettings()->enableFFZGlobalEmotes.connect(
-        [this] {
-            this->ffzEmotes->loadEmotes();
-        },
-        false);
     getSettings()->enableFFZChannelEmotes.connect(
         [this] {
             this->twitch->reloadAllFFZChannelEmotes();
-        },
-        false);
-    getSettings()->enableSevenTVGlobalEmotes.connect(
-        [this] {
-            this->seventvEmotes->loadGlobalEmotes();
         },
         false);
     getSettings()->enableSevenTVChannelEmotes.connect(
