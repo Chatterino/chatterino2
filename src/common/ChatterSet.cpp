@@ -2,8 +2,6 @@
 
 #include "debug/Benchmark.hpp"
 
-#include <tuple>
-
 namespace chatterino {
 
 ChatterSet::ChatterSet()
