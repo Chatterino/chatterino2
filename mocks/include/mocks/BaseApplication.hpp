@@ -20,6 +20,7 @@ class BaseApplication : public EmptyApplication
 public:
     BaseApplication()
         : settings(this->args, this->settingsDir.path())
+        , updates(this->paths_, this->settings)
         , theme(this->paths_)
         , fonts(this->settings)
     {
@@ -28,9 +29,15 @@ public:
     explicit BaseApplication(const QString &settingsData)
         : EmptyApplication(settingsData)
         , settings(this->args, this->settingsDir.path())
+        , updates(this->paths_, this->settings)
         , theme(this->paths_)
         , fonts(this->settings)
     {
+    }
+
+    Updates &getUpdates() override
+    {
+        return this->updates;
     }
 
     IStreamerMode *getStreamerMode() override
@@ -60,6 +67,7 @@ public:
 
     Args args;
     Settings settings;
+    Updates updates;
     DisabledStreamerMode streamerMode;
     Theme theme;
     Fonts fonts;

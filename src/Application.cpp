@@ -288,12 +288,6 @@ int Application::run()
         this->windows->getMainWindow().show();
     }
 
-    getSettings()->betaUpdates.connect(
-        [this] {
-            this->updates.checkForUpdates();
-        },
-        false);
-
     getSettings()->enableBTTVChannelEmotes.connect(
         [this] {
             this->twitch->reloadAllBTTVChannelEmotes();
