@@ -48,7 +48,7 @@ QString formatTime(int totalSeconds)
     return res;
 }
 
-QString formatTime(QString totalSecondsString)
+QString formatTime(const QString &totalSecondsString)
 {
     bool ok = true;
     int totalSeconds(totalSecondsString.toInt(&ok));
