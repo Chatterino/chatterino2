@@ -664,8 +664,6 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
 {
     assertInGuiThread();
 
-    auto *app = getApp();
-
     if (descriptor.type_ == "twitch")
     {
         return getApp()->getTwitch()->getOrAddChannel(descriptor.channelName_);
