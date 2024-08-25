@@ -63,8 +63,6 @@
 #include <miniaudio.h>
 #include <QDesktopServices>
 
-#include <atomic>
-
 namespace {
 
 using namespace chatterino;
@@ -127,8 +125,6 @@ IApplication *INSTANCE = nullptr;
 }  // namespace
 
 namespace chatterino {
-
-static std::atomic<bool> isAppInitialized{false};
 
 IApplication::IApplication()
 {
@@ -194,8 +190,7 @@ Application::~Application()
 
 void Application::initialize(Settings &settings, const Paths &paths)
 {
-    assert(isAppInitialized == false);
-    isAppInitialized = true;
+    assert(!this->initialized);
 
     // Show changelog
     if (!this->args_.isFramelessEmbed &&
@@ -277,11 +272,13 @@ void Application::initialize(Settings &settings, const Paths &paths)
     this->initSeventvEventAPI();
 
     this->streamerMode->start();
+
+    this->initialized = true;
 }
 
 int Application::run(QApplication &qtApp)
 {
-    assert(isAppInitialized);
+    assert(this->initialized);
 
     this->twitch->connect();
 

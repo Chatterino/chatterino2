@@ -226,6 +226,8 @@ private:
 
     NativeMessagingServer nmServer;
     Updates &updates;
+
+    bool initialized{false};
 };
 
 IApplication *getApp();
