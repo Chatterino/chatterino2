@@ -305,16 +305,15 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                                                   .getOrAddSelectedPage()
                                                   ->appendNewSplit(false);
                                 split->setChannel(
-                                    app->getTwitchAbstract()->getOrAddChannel(
+                                    app->getTwitch()->getOrAddChannel(
                                         loginName.toLower()));
                             });
 
                         menu->addAction(
                             "Open channel in a new tab", this, [loginName] {
                                 ChannelPtr channel =
-                                    getApp()
-                                        ->getTwitchAbstract()
-                                        ->getOrAddChannel(loginName);
+                                    getApp()->getTwitch()->getOrAddChannel(
+                                        loginName);
                                 auto &nb = getApp()
                                                ->getWindows()
                                                ->getMainWindow()

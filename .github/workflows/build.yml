@@ -49,6 +49,15 @@ jobs:
             skip-crashpad: false
             build-appimage: true
             build-deb: true
+          - os: ubuntu-24.04
+            container: ghcr.io/chatterino/chatterino2-build-ubuntu-24.04:latest
+            qt-version: 6.6.1
+            force-lto: false
+            plugins: true
+            skip-artifact: false
+            skip-crashpad: false
+            build-appimage: false
+            build-deb: true
     env:
       C2_ENABLE_LTO: ${{ matrix.force-lto }}
       C2_PLUGINS: ${{ matrix.plugins }}
@@ -373,6 +382,12 @@ jobs:
         name: Ubuntu 22.04 deb
         with:
           name: Chatterino-ubuntu-22.04-Qt-6.6.1.deb
+          path: release-artifacts/
+
+      - uses: actions/download-artifact@v4
+        name: Ubuntu 24.04 deb
+        with:
+          name: Chatterino-ubuntu-24.04-Qt-6.6.1.deb
           path: release-artifacts/
 
       - name: Copy flatpakref

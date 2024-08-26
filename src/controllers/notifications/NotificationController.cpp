@@ -179,7 +179,7 @@ void NotificationController::fetchFakeChannels()
     for (size_t i = 0; i < channelMap[Platform::Twitch].raw().size(); i++)
     {
         const auto &name = channelMap[Platform::Twitch].raw()[i];
-        auto chan = getApp()->getTwitchAbstract()->getChannelOrEmpty(name);
+        auto chan = getApp()->getTwitch()->getChannelOrEmpty(name);
         if (chan->isEmpty())
         {
             channels.push_back(name);

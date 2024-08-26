@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
+#include "util/SignalListener.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
 #include <pajlada/settings/settinglistener.hpp>
@@ -23,6 +24,8 @@ using ChannelPtr = std::shared_ptr<Channel>;
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
 class WindowLayout;
+class Theme;
+class Fonts;
 
 enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
@@ -33,10 +36,13 @@ class FramelessEmbedWindow;
 
 class WindowManager final
 {
+    Theme &themes;
+
 public:
     static const QString WINDOW_LAYOUT_FILENAME;
 
-    explicit WindowManager(const Paths &paths);
+    explicit WindowManager(const Paths &paths, Settings &settings,
+                           Theme &themes_, Fonts &fonts);
     ~WindowManager();
 
     WindowManager(const WindowManager &) = delete;
@@ -102,7 +108,7 @@ public:
     void setEmotePopupBounds(QRect bounds);
 
     // Set up some final signals & actually show the windows
-    void initialize(Settings &settings);
+    void initialize();
     void save();
     void closeAll();
 
@@ -164,9 +170,16 @@ private:
     Window *selectedWindow_{};
 
     MessageElementFlags wordFlags_{};
-    pajlada::SettingListener wordFlagsListener_;
 
     QTimer *saveTimer;
+
+    pajlada::Signals::SignalHolder signalHolder;
+
+    SignalListener updateWordTypeMaskListener;
+    SignalListener forceLayoutChannelViewsListener;
+    SignalListener layoutChannelViewsListener;
+    SignalListener invalidateChannelViewBuffersListener;
+    SignalListener repaintVisibleChatWidgetsListener;
 
     friend class Window;  // this is for selectedWindow_
 };

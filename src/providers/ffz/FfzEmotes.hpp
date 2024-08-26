@@ -5,10 +5,14 @@
 #include "util/QStringHash.hpp"
 
 #include <boost/unordered/unordered_flat_map.hpp>
+#include <pajlada/signals/scoped-connection.hpp>
 #include <QJsonObject>
+#include <QString>
 
+#include <functional>
 #include <memory>
 #include <optional>
+#include <vector>
 
 namespace chatterino {
 
@@ -51,6 +55,9 @@ public:
 
 private:
     Atomic<std::shared_ptr<const EmoteMap>> global_;
+
+    std::vector<std::unique_ptr<pajlada::Signals::ScopedConnection>>
+        managedConnections;
 };
 
 }  // namespace chatterino

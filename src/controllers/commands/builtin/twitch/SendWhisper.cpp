@@ -182,10 +182,9 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
         !(getSettings()->streamerModeSuppressInlineWhispers &&
           getApp()->getStreamerMode()->isEnabled()))
     {
-        app->getTwitchAbstract()->forEachChannel(
-            [&messagexD](ChannelPtr _channel) {
-                _channel->addMessage(messagexD, MessageContext::Repost);
-            });
+        app->getTwitch()->forEachChannel([&messagexD](ChannelPtr _channel) {
+            _channel->addMessage(messagexD, MessageContext::Repost);
+        });
     }
 
     return true;

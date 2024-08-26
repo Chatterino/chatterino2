@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/Aliases.hpp"
-#include "util/QStringHash.hpp"
 #include "util/ThreadGuard.hpp"
 
 #include <QColor>

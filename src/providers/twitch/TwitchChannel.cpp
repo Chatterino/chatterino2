@@ -841,7 +841,7 @@ bool TwitchChannel::canReconnect() const
 
 void TwitchChannel::reconnect()
 {
-    getApp()->getTwitchAbstract()->connect();
+    getApp()->getTwitch()->connect();
 }
 
 QString TwitchChannel::getCurrentStreamID() const
@@ -1452,8 +1452,6 @@ void TwitchChannel::refreshPubSub()
     }
 
     auto currentAccount = getApp()->getAccounts()->twitch.getCurrent();
-
-    getApp()->getTwitchPubSub()->setAccount(currentAccount);
 
     getApp()->getTwitchPubSub()->listenToChannelModerationActions(roomId);
     if (this->hasModRights())

@@ -206,6 +206,11 @@ FfzChannelBadgeMap ffz::detail::parseChannelBadges(const QJsonObject &badgeRoot)
 FfzEmotes::FfzEmotes()
     : global_(std::make_shared<EmoteMap>())
 {
+    getSettings()->enableFFZGlobalEmotes.connect(
+        [this] {
+            this->loadEmotes();
+        },
+        this->managedConnections, false);
 }
 
 std::shared_ptr<const EmoteMap> FfzEmotes::emotes() const
