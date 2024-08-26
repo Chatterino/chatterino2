@@ -163,7 +163,7 @@ TEST(ScopedCancellationToken, copyAssign)
     CancellationToken token(false);
     CancellationToken token2(false);
     {
-        ScopedCancellationToken scoped = token;
+        ScopedCancellationToken scoped(token);
         ASSERT_FALSE(token.isCancelled());
         scoped = token2;
         ASSERT_FALSE(token2.isCancelled());

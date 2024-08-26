@@ -371,7 +371,12 @@ void TwitchAccount::reloadEmotes(void *caller)
         auto meta = getTwitchEmoteSetMeta(emote);
 
         auto emotePtr = twitchEmotes->getOrCreateEmote(id, name);
-        (*emoteMap)[name] = emotePtr;
+        if (!emoteMap->try_emplace(name, emotePtr).second)
+        {
+            // if the emote already exists, we don't want to add it to a set as
+            // those are assumed to be disjoint
+            return;
+        }
 
         auto set = sets->find(EmoteSetId{meta.setID});
         if (set == sets->end())
@@ -415,6 +420,14 @@ void TwitchAccount::reloadEmotes(void *caller)
                 qDebug(chatterinoTwitch).nospace()
                     << "Loaded " << emoteMap->size() << " Twitch emotes ("
                     << *nCalls << " requests)";
+
+                for (auto &[id, set] : *sets)
+                {
+                    std::ranges::sort(
+                        set.emotes, [](const auto &l, const auto &r) {
+                            return l->name.string < r->name.string;
+                        });
+                }
 
                 *this->emotes_.access() = std::move(emoteMap);
                 *this->emoteSets_.access() = std::move(sets);

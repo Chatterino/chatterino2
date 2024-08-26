@@ -45,7 +45,7 @@ jobs:
           build_dir: build-clang-tidy
           config_file: ".clang-tidy"
           split_workflow: true
-          exclude: "lib/*,tools/crash-handler/*"
+          exclude: "lib/*,tools/crash-handler/*,mocks/*"
           cmake_command: >-
             ./.CI/setup-clang-tidy.sh
           apt_packages: >-

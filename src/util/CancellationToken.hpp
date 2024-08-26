@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <memory>
+#include <utility>
 
 namespace chatterino {
 
@@ -18,7 +19,7 @@ public:
 
     CancellationToken(const CancellationToken &) = default;
     CancellationToken(CancellationToken &&other) noexcept
-        : isCancelled_(std::move(other.isCancelled_)){};
+        : isCancelled_(std::move(other.isCancelled_)) {};
 
     /// @brief This destructor doesn't cancel the token
     ///
@@ -56,34 +57,29 @@ class ScopedCancellationToken
 {
 public:
     ScopedCancellationToken() = default;
-    ScopedCancellationToken(CancellationToken &&backingToken)
+    explicit ScopedCancellationToken(CancellationToken backingToken)
         : backingToken_(std::move(backingToken))
     {
     }
-    ScopedCancellationToken(const CancellationToken &backingToken)
-        : backingToken_(backingToken)
-    {
-    }
-
-    ScopedCancellationToken(ScopedCancellationToken &&other) noexcept
-        : backingToken_(std::move(other.backingToken_)){};
 
     ScopedCancellationToken(const ScopedCancellationToken &) = delete;
-    ScopedCancellationToken &operator=(const ScopedCancellationToken &) =
-        delete;
+    ScopedCancellationToken(ScopedCancellationToken &&other) noexcept
+        : backingToken_(std::move(other.backingToken_)) {};
 
     ~ScopedCancellationToken()
     {
         this->backingToken_.cancel();
     }
 
-    ScopedCancellationToken &operator=(const CancellationToken &token) noexcept
+    ScopedCancellationToken &operator=(CancellationToken token) noexcept
     {
         this->backingToken_.cancel();
-        this->backingToken_ = token;
+        this->backingToken_ = std::move(token);
         return *this;
     }
 
+    ScopedCancellationToken &operator=(const ScopedCancellationToken &) =
+        delete;
     ScopedCancellationToken &operator=(ScopedCancellationToken &&other) noexcept
     {
         this->backingToken_.cancel();

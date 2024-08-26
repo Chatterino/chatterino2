@@ -5,20 +5,20 @@
 #include "providers/twitch/TwitchUser.hpp"
 
 #include <boost/unordered/unordered_flat_map.hpp>
-#include <boost/unordered/unordered_flat_set.hpp>
+#include <QStringList>
 #include <QTimer>
 
 namespace {
 
-auto withSelf(auto ptr, auto cb)
+auto withSelf(auto *ptr, auto cb)
 {
-    return [weak{ptr->weak_from_this()}, cb = std::move(cb)](auto... args) {
+    return [weak{ptr->weak_from_this()}, cb = std::move(cb)](auto &&...args) {
         auto self = weak.lock();
         if (!self)
         {
             return;
         }
-        cb(self, args...);
+        cb(std::move(self), std::forward<decltype(args)>(args)...);
     };
 }
 

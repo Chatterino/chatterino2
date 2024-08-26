@@ -2,10 +2,7 @@
 
 #include "common/Aliases.hpp"
 
-#include <QStringList>
-
 #include <memory>
-#include <optional>
 
 namespace chatterino {
 
@@ -22,6 +19,15 @@ public:
     ITwitchUsers &operator=(const ITwitchUsers &) = delete;
     ITwitchUsers &operator=(ITwitchUsers &&) = delete;
 
+    /// @brief Resolve a TwitchUser by their ID
+    ///
+    /// Users are cached. If the user wasn't resolved yet, a request will be
+    /// scheduled. The returned shared pointer must only be used on the GUI
+    /// thread as it will be updated from there.
+    ///
+    /// @returns A shared reference to the TwitchUser. The `name` and
+    ///          `displayName` might be empty if the user wasn't resolved yet or
+    ///          they don't exist.
     virtual std::shared_ptr<TwitchUser> resolveID(const UserId &id) = 0;
 };
 
@@ -36,6 +42,7 @@ public:
     TwitchUsers &operator=(const TwitchUsers &) = delete;
     TwitchUsers &operator=(TwitchUsers &&) = delete;
 
+    /// @see ITwitchUsers::resolveID()
     std::shared_ptr<TwitchUser> resolveID(const UserId &id) override;
 
 private:
