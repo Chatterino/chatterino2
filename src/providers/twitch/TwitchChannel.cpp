@@ -144,8 +144,8 @@ TwitchChannel::TwitchChannel(const QString &name)
 
     this->signalHolder_.managedConnect(
         getApp()->getAccounts()->twitch.emotesReloaded,
-        [this](auto *caller, const auto &error) {
-            if (error.isNull())
+        [this](auto *caller, const auto &result) {
+            if (result)
             {
                 // emotes were reloaded - clear follower emotes if the user is
                 // now subscribed to the streamer
@@ -167,7 +167,8 @@ TwitchChannel::TwitchChannel(const QString &name)
             if (caller == this || caller == nullptr)
             {
                 this->addSystemMessage(
-                    u"Failed to load Twitch subscriber emotes: " % error);
+                    u"Failed to load Twitch subscriber emotes: " %
+                    result.error());
             }
         });
 

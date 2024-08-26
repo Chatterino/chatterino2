@@ -473,6 +473,7 @@ set(SOURCE_FILES
         util/DebugCount.hpp
         util/DisplayBadge.cpp
         util/DisplayBadge.hpp
+        util/Expected.hpp
         util/FormatTime.cpp
         util/FormatTime.hpp
         util/FunctionEventFilter.cpp

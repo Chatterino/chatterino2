@@ -2,6 +2,7 @@
 
 #include "common/ChatterinoSetting.hpp"
 #include "common/SignalVector.hpp"
+#include "util/Expected.hpp"
 #include "util/QStringHash.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
@@ -59,9 +60,8 @@ public:
     SignalVector<std::shared_ptr<TwitchAccount>> accounts;
 
     /// The signal is invoked with (caller, error) where caller is the argument
-    /// passed to reloadEmotes() and error is an optional error (if this is
-    /// null, there isn't any error).
-    pajlada::Signals::Signal<void *, QString> emotesReloaded;
+    /// passed to reloadEmotes() and error.
+    pajlada::Signals::Signal<void *, ExpectedStr<void>> emotesReloaded;
 
 private:
     enum class AddUserResponse {

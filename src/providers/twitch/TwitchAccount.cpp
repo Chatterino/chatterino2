@@ -438,8 +438,8 @@ void TwitchAccount::reloadEmotes(void *caller)
         [caller](const auto &error) {
             qDebug(chatterinoTwitch)
                 << "Failed to load Twitch emotes:" << error;
-            getApp()->getAccounts()->twitch.emotesReloaded.invoke(caller,
-                                                                  error);
+            getApp()->getAccounts()->twitch.emotesReloaded.invoke(
+                caller, makeUnexpected(error));
         },
         std::move(token));
 }

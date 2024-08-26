@@ -23,6 +23,7 @@
 
 #ifdef USEWINSDK
 #    include <dwmapi.h>
+#    include <shellapi.h>
 #    include <VersionHelpers.h>
 #    include <Windows.h>
 #    include <windowsx.h>
@@ -32,7 +33,6 @@
 #    include <QHBoxLayout>
 #    include <QMargins>
 #    include <QOperatingSystemVersion>
-#    include <QWindow>
 #endif
 
 #include "widgets/helper/TitlebarButton.hpp"
