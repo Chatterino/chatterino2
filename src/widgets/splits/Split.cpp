@@ -15,7 +15,6 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/ImageUploader.hpp"
 #include "singletons/Settings.hpp"
@@ -272,7 +271,7 @@ Split::Split(QWidget *parent)
     std::ignore = this->view_->openChannelIn.connect(
         [this](QString twitchChannel, FromTwitchLinkOpenChannelIn openIn) {
             ChannelPtr channel =
-                getApp()->getTwitchAbstract()->getOrAddChannel(twitchChannel);
+                getApp()->getTwitch()->getOrAddChannel(twitchChannel);
             switch (openIn)
             {
                 case FromTwitchLinkOpenChannelIn::Split:

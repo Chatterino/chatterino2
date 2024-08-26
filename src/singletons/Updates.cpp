@@ -46,12 +46,18 @@ const QString CHATTERINO_OS = u"unknown"_s;
 
 namespace chatterino {
 
-Updates::Updates(const Paths &paths_)
+Updates::Updates(const Paths &paths_, Settings &settings)
     : paths(paths_)
     , currentVersion_(CHATTERINO_VERSION)
     , updateGuideLink_("https://chatterino.com")
 {
     qCDebug(chatterinoUpdate) << "init UpdateManager";
+
+    settings.betaUpdates.connect(
+        [this] {
+            this->checkForUpdates();
+        },
+        this->managedConnections, false);
 }
 
 /// Checks if the online version is newer or older than the current version.

@@ -115,14 +115,14 @@ int main(int argc, char **argv)
                               << QSslSocket::supportedProtocols();
 #endif
 
-        Updates updates(*paths);
+        Settings settings(args, paths->settingsDirectory);
+
+        Updates updates(*paths, settings);
 
         NetworkConfigurationProvider::applyFromEnv(Env::get());
 
         IvrApi::initialize();
         Helix::initialize();
-
-        Settings settings(paths->settingsDirectory);
 
         runGui(a, *paths, settings, args, updates);
     }

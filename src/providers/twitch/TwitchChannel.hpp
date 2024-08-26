@@ -463,7 +463,7 @@ private:
     std::vector<boost::signals2::scoped_connection> bSignals_;
 
     friend class TwitchIrcServer;
-    friend class TwitchMessageBuilder;
+    friend class MessageBuilder;
     friend class IrcMessageHandler;
     friend class Commands_E2E_Test;
 };

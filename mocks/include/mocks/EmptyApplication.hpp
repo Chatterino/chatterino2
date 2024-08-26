@@ -12,13 +12,9 @@ namespace chatterino::mock {
 class EmptyApplication : public IApplication
 {
 public:
-    EmptyApplication()
-        : updates_(this->paths_)
-    {
-    }
+    EmptyApplication() = default;
 
     explicit EmptyApplication(const QString &settingsData)
-        : EmptyApplication()
     {
         QFile settingsFile(this->settingsDir.filePath("settings.json"));
         settingsFile.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -133,13 +129,6 @@ public:
         return nullptr;
     }
 
-    ITwitchIrcServer *getTwitchAbstract() override
-    {
-        assert(false && "EmptyApplication::getTwitchAbstract was called "
-                        "without being initialized");
-        return nullptr;
-    }
-
     PubSub *getTwitchPubSub() override
     {
         assert(false && "getTwitchPubSub was called without being initialized");
@@ -233,11 +222,6 @@ public:
     }
 #endif
 
-    Updates &getUpdates() override
-    {
-        return this->updates_;
-    }
-
     BttvEmotes *getBttvEmotes() override
     {
         assert(false && "EmptyApplication::getBttvEmotes was called without "
@@ -290,7 +274,6 @@ public:
     QTemporaryDir settingsDir;
     Paths paths_;
     Args args_;
-    Updates updates_;
 };
 
 }  // namespace chatterino::mock

@@ -27,6 +27,11 @@ SeventvEventAPI::SeventvEventAPI(
 {
 }
 
+SeventvEventAPI::~SeventvEventAPI()
+{
+    this->stop();
+}
+
 void SeventvEventAPI::subscribeUser(const QString &userID,
                                     const QString &emoteSetID)
 {

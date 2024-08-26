@@ -95,11 +95,8 @@ public:
     std::shared_ptr<Channel> getChannelOrEmptyByID(
         const QString &channelID) override;
 
-    void reloadBTTVGlobalEmotes();
     void reloadAllBTTVChannelEmotes();
-    void reloadFFZGlobalEmotes();
     void reloadAllFFZChannelEmotes();
-    void reloadSevenTVGlobalEmotes();
     void reloadAllSevenTVChannelEmotes();
 
     /** Calls `func` with all twitch channels that have `emoteSetId` added. */
@@ -205,8 +202,6 @@ private:
     std::queue<std::chrono::steady_clock::time_point> lastMessageMod_;
     std::chrono::steady_clock::time_point lastErrorTimeSpeed_;
     std::chrono::steady_clock::time_point lastErrorTimeAmount_;
-
-    pajlada::Signals::SignalHolder signalHolder_;
 };
 
 }  // namespace chatterino

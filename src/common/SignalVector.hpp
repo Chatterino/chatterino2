@@ -127,6 +127,27 @@ public:
         this->itemsChanged_();
     }
 
+    bool removeFirstMatching(std::function<bool(const T &)> matcher,
+                             void *caller = nullptr)
+    {
+        assertInGuiThread();
+
+        for (int index = 0; index < this->items_.size(); ++index)
+        {
+            T item = this->items_[index];
+            if (matcher(item))
+            {
+                this->items_.erase(this->items_.begin() + index);
+                SignalVectorItemEvent<T> args{item, index, caller};
+                this->itemRemoved.invoke(args);
+                this->itemsChanged_();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     const std::vector<T> &raw() const
     {
         assertInGuiThread();
@@ -155,7 +176,7 @@ public:
     decltype(auto) operator[](size_t index)
     {
         assertInGuiThread();
-        return this->items[index];
+        return this->items_[index];
     }
 
     auto empty()

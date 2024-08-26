@@ -2,8 +2,6 @@
 
 #include "singletons/NativeMessaging.hpp"
 
-#include <QApplication>
-
 #include <cassert>
 #include <memory>
 
@@ -85,7 +83,6 @@ public:
     virtual HighlightController *getHighlights() = 0;
     virtual NotificationController *getNotifications() = 0;
     virtual ITwitchIrcServer *getTwitch() = 0;
-    virtual ITwitchIrcServer *getTwitchAbstract() = 0;
     virtual PubSub *getTwitchPubSub() = 0;
     virtual ILogging *getChatLogger() = 0;
     virtual IChatterinoBadges *getChatterinoBadges() = 0;
@@ -139,7 +136,7 @@ public:
     void load();
     void save();
 
-    int run(QApplication &qtApp);
+    int run();
 
     friend void test();
 
@@ -201,8 +198,6 @@ public:
     NotificationController *getNotifications() override;
     HighlightController *getHighlights() override;
     ITwitchIrcServer *getTwitch() override;
-    [[deprecated("use getTwitch()")]] ITwitchIrcServer *getTwitchAbstract()
-        override;
     PubSub *getTwitchPubSub() override;
     ILogging *getChatLogger() override;
     FfzBadges *getFfzBadges() override;
@@ -232,13 +227,14 @@ public:
     IStreamerMode *getStreamerMode() override;
 
 private:
-    void initPubSub();
     void initBttvLiveUpdates();
     void initSeventvEventAPI();
     void initNm(const Paths &paths);
 
     NativeMessagingServer nmServer;
     Updates &updates;
+
+    bool initialized{false};
 };
 
 IApplication *getApp();

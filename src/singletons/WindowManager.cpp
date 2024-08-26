@@ -10,6 +10,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/CombinePath.hpp"
+#include "util/SignalListener.hpp"
 #include "widgets/AccountSwitchPopup.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/FramelessEmbedWindow.hpp"
@@ -86,29 +87,67 @@ void WindowManager::showAccountSelectPopup(QPoint point)
     w->setFocus();
 }
 
-WindowManager::WindowManager(const Paths &paths)
-    : windowLayoutFilePath(combinePath(paths.settingsDirectory,
+WindowManager::WindowManager(const Paths &paths, Settings &settings,
+                             Theme &themes_, Fonts &fonts)
+    : themes(themes_)
+    , windowLayoutFilePath(combinePath(paths.settingsDirectory,
                                        WindowManager::WINDOW_LAYOUT_FILENAME))
+    , updateWordTypeMaskListener([this] {
+        this->updateWordTypeMask();
+    })
+    , forceLayoutChannelViewsListener([this] {
+        this->forceLayoutChannelViews();
+    })
+    , layoutChannelViewsListener([this] {
+        this->layoutChannelViews();
+    })
+    , invalidateChannelViewBuffersListener([this] {
+        this->invalidateChannelViewBuffers();
+    })
+    , repaintVisibleChatWidgetsListener([this] {
+        this->repaintVisibleChatWidgets();
+    })
 {
     qCDebug(chatterinoWindowmanager) << "init WindowManager";
 
-    auto *settings = getSettings();
+    this->updateWordTypeMaskListener.add(settings.showTimestamps);
+    this->updateWordTypeMaskListener.add(settings.showBadgesGlobalAuthority);
+    this->updateWordTypeMaskListener.add(settings.showBadgesPredictions);
+    this->updateWordTypeMaskListener.add(settings.showBadgesChannelAuthority);
+    this->updateWordTypeMaskListener.add(settings.showBadgesSubscription);
+    this->updateWordTypeMaskListener.add(settings.showBadgesVanity);
+    this->updateWordTypeMaskListener.add(settings.showBadgesChatterino);
+    this->updateWordTypeMaskListener.add(settings.showBadgesFfz);
+    this->updateWordTypeMaskListener.add(settings.showBadgesSevenTV);
+    this->updateWordTypeMaskListener.add(settings.enableEmoteImages);
+    this->updateWordTypeMaskListener.add(settings.lowercaseDomains);
+    this->updateWordTypeMaskListener.add(settings.showReplyButton);
 
-    this->wordFlagsListener_.addSetting(settings->showTimestamps);
-    this->wordFlagsListener_.addSetting(settings->showBadgesGlobalAuthority);
-    this->wordFlagsListener_.addSetting(settings->showBadgesPredictions);
-    this->wordFlagsListener_.addSetting(settings->showBadgesChannelAuthority);
-    this->wordFlagsListener_.addSetting(settings->showBadgesSubscription);
-    this->wordFlagsListener_.addSetting(settings->showBadgesVanity);
-    this->wordFlagsListener_.addSetting(settings->showBadgesChatterino);
-    this->wordFlagsListener_.addSetting(settings->showBadgesFfz);
-    this->wordFlagsListener_.addSetting(settings->showBadgesSevenTV);
-    this->wordFlagsListener_.addSetting(settings->enableEmoteImages);
-    this->wordFlagsListener_.addSetting(settings->lowercaseDomains);
-    this->wordFlagsListener_.addSetting(settings->showReplyButton);
-    this->wordFlagsListener_.setCB([this] {
-        this->updateWordTypeMask();
-    });
+    this->forceLayoutChannelViewsListener.add(
+        settings.moderationActions.delayedItemsChanged);
+    this->forceLayoutChannelViewsListener.add(
+        settings.highlightedMessages.delayedItemsChanged);
+    this->forceLayoutChannelViewsListener.add(
+        settings.highlightedUsers.delayedItemsChanged);
+    this->forceLayoutChannelViewsListener.add(
+        settings.highlightedBadges.delayedItemsChanged);
+    this->forceLayoutChannelViewsListener.add(
+        settings.removeSpacesBetweenEmotes);
+    this->forceLayoutChannelViewsListener.add(settings.emoteScale);
+    this->forceLayoutChannelViewsListener.add(settings.timestampFormat);
+    this->forceLayoutChannelViewsListener.add(settings.collpseMessagesMinLines);
+    this->forceLayoutChannelViewsListener.add(settings.enableRedeemedHighlight);
+    this->forceLayoutChannelViewsListener.add(settings.colorUsernames);
+    this->forceLayoutChannelViewsListener.add(settings.boldUsernames);
+
+    this->layoutChannelViewsListener.add(settings.timestampFormat);
+    this->layoutChannelViewsListener.add(fonts.fontChanged);
+
+    this->invalidateChannelViewBuffersListener.add(settings.alternateMessages);
+    this->invalidateChannelViewBuffersListener.add(settings.separateMessages);
+
+    this->repaintVisibleChatWidgetsListener.add(
+        this->themes.repaintVisibleChatWidgets_);
 
     this->saveTimer = new QTimer;
 
@@ -117,6 +156,8 @@ WindowManager::WindowManager(const Paths &paths)
     QObject::connect(this->saveTimer, &QTimer::timeout, [] {
         getApp()->getWindows()->save();
     });
+
+    this->updateWordTypeMask();
 }
 
 WindowManager::~WindowManager() = default;
@@ -338,17 +379,9 @@ void WindowManager::setEmotePopupBounds(QRect bounds)
     }
 }
 
-void WindowManager::initialize(Settings &settings)
+void WindowManager::initialize()
 {
     assertInGuiThread();
-
-    // We can safely ignore this signal connection since both Themes and WindowManager
-    // share the Application state lifetime
-    // NOTE: APPLICATION_LIFETIME
-    std::ignore =
-        getApp()->getThemes()->repaintVisibleChatWidgets_.connect([this] {
-            this->repaintVisibleChatWidgets();
-        });
 
     {
         WindowLayout windowLayout;
@@ -391,37 +424,6 @@ void WindowManager::initialize(Settings &settings)
             this->mainWindow_->hide();
         }
     }
-
-    settings.timestampFormat.connect([this](auto, auto) {
-        this->layoutChannelViews();
-    });
-
-    settings.emoteScale.connect([this](auto, auto) {
-        this->forceLayoutChannelViews();
-    });
-
-    settings.timestampFormat.connect([this](auto, auto) {
-        this->forceLayoutChannelViews();
-    });
-    settings.alternateMessages.connect([this](auto, auto) {
-        this->invalidateChannelViewBuffers();
-    });
-    settings.separateMessages.connect([this](auto, auto) {
-        this->invalidateChannelViewBuffers();
-    });
-    settings.collpseMessagesMinLines.connect([this](auto, auto) {
-        this->forceLayoutChannelViews();
-    });
-    settings.enableRedeemedHighlight.connect([this](auto, auto) {
-        this->forceLayoutChannelViews();
-    });
-
-    settings.colorUsernames.connect([this](auto, auto) {
-        this->forceLayoutChannelViews();
-    });
-    settings.boldUsernames.connect([this](auto, auto) {
-        this->forceLayoutChannelViews();
-    });
 }
 
 void WindowManager::save()
@@ -662,12 +664,9 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
 {
     assertInGuiThread();
 
-    auto *app = getApp();
-
     if (descriptor.type_ == "twitch")
     {
-        return getApp()->getTwitchAbstract()->getOrAddChannel(
-            descriptor.channelName_);
+        return getApp()->getTwitch()->getOrAddChannel(descriptor.channelName_);
     }
     else if (descriptor.type_ == "mentions")
     {
@@ -691,7 +690,7 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
     }
     else if (descriptor.type_ == "misc")
     {
-        return getApp()->getTwitchAbstract()->getChannelOrEmpty(
+        return getApp()->getTwitch()->getChannelOrEmpty(
             descriptor.channelName_);
     }
 
@@ -752,7 +751,7 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
         // get geometry
         {
             // out of bounds windows
-            auto screens = qApp->screens();
+            auto screens = QApplication::screens();
             bool outOfBounds =
                 !qEnvironmentVariableIsSet("I3SOCK") &&
                 std::none_of(screens.begin(), screens.end(),

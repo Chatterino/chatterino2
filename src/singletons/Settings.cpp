@@ -1,6 +1,7 @@
 #include "singletons/Settings.hpp"
 
 #include "Application.hpp"
+#include "common/Args.hpp"
 #include "controllers/filters/FilterRecord.hpp"
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
@@ -140,8 +141,9 @@ bool Settings::toggleMutedChannel(const QString &channelName)
 
 Settings *Settings::instance_ = nullptr;
 
-Settings::Settings(const QString &settingsDirectory)
+Settings::Settings(const Args &args, const QString &settingsDirectory)
     : prevInstance_(Settings::instance_)
+    , disableSaving(args.dontSaveSettings)
 {
     QString settingsPath = settingsDirectory + "/settings.json";
 
@@ -153,7 +155,7 @@ Settings::Settings(const QString &settingsDirectory)
     settingsInstance->setBackupEnabled(true);
     settingsInstance->setBackupSlots(9);
     settingsInstance->saveMethod =
-        pajlada::Settings::SettingManager::SaveMethod::SaveOnExit;
+        pajlada::Settings::SettingManager::SaveMethod::SaveManually;
 
     initializeSignalVector(this->signalHolder, this->highlightedMessagesSetting,
                            this->highlightedMessages);
@@ -199,6 +201,16 @@ Settings::Settings(const QString &settingsDirectory)
 Settings::~Settings()
 {
     Settings::instance_ = this->prevInstance_;
+}
+
+void Settings::requestSave() const
+{
+    if (this->disableSaving)
+    {
+        return;
+    }
+
+    pajlada::Settings::SettingManager::gSave();
 }
 
 void Settings::saveSnapshot()

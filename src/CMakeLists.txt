@@ -280,9 +280,6 @@ set(SOURCE_FILES
         messages/MessageThread.cpp
         messages/MessageThread.hpp
 
-        messages/SharedMessageBuilder.cpp
-        messages/SharedMessageBuilder.hpp
-
         messages/layouts/MessageLayout.cpp
         messages/layouts/MessageLayout.hpp
         messages/layouts/MessageLayoutContainer.cpp
@@ -424,8 +421,6 @@ set(SOURCE_FILES
         providers/twitch/TwitchHelpers.hpp
         providers/twitch/TwitchIrcServer.cpp
         providers/twitch/TwitchIrcServer.hpp
-        providers/twitch/TwitchMessageBuilder.cpp
-        providers/twitch/TwitchMessageBuilder.hpp
         providers/twitch/TwitchUser.cpp
         providers/twitch/TwitchUser.hpp
 
@@ -522,6 +517,7 @@ set(SOURCE_FILES
         util/SampleData.cpp
         util/SampleData.hpp
         util/SharedPtrElementLess.hpp
+        util/SignalListener.hpp
         util/StreamLink.cpp
         util/StreamLink.hpp
         util/ThreadGuard.hpp

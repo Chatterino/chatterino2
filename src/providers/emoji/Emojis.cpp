@@ -299,7 +299,7 @@ std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
     auto result = std::vector<boost::variant<EmotePtr, QString>>();
     QString::size_type lastParsedEmojiEndIndex = 0;
 
-    for (auto i = 0; i < text.length(); ++i)
+    for (qsizetype i = 0; i < text.length(); ++i)
     {
         const QChar character = text.at(i);
 
@@ -401,7 +401,7 @@ QString Emojis::replaceShortCodes(const QString &text) const
     QString ret(text);
     auto it = this->findShortCodesRegex_.globalMatch(text);
 
-    int32_t offset = 0;
+    qsizetype offset = 0;
 
     while (it.hasNext())
     {

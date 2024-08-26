@@ -13,6 +13,7 @@
 #include "messages/Image.hpp"
 #include "messages/Link.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/MessageThread.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
@@ -32,7 +33,6 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
@@ -314,10 +314,9 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
 
     if (!reward.isUserInputRequired)
     {
-        MessageBuilder builder;
-        TwitchMessageBuilder::appendChannelPointRewardMessage(
-            reward, &builder, this->isMod(), this->isBroadcaster());
-        this->addMessage(builder.release(), MessageContext::Original);
+        this->addMessage(MessageBuilder::makeChannelPointRewardMessage(
+                             reward, this->isMod(), this->isBroadcaster()),
+                         MessageContext::Original);
         return;
     }
 
@@ -437,11 +436,11 @@ void TwitchChannel::onLiveStatusChanged(bool isLive, bool isInitialUpdate)
         });
 
         // Channel live message
-        MessageBuilder builder;
-        TwitchMessageBuilder::liveSystemMessage(this->getDisplayName(),
-                                                &builder);
-        builder.message().id = this->roomId();
-        this->addMessage(builder.release(), MessageContext::Original);
+        this->addMessage(
+            MessageBuilder::makeLiveMessage(
+                this->getDisplayName(), this->roomId(),
+                {MessageFlag::System, MessageFlag::DoNotTriggerNotification}),
+            MessageContext::Original);
     }
     else
     {
@@ -449,10 +448,9 @@ void TwitchChannel::onLiveStatusChanged(bool isLive, bool isInitialUpdate)
             << "[TwitchChannel " << this->getName() << "] Offline";
 
         // Channel offline message
-        MessageBuilder builder;
-        TwitchMessageBuilder::offlineSystemMessage(this->getDisplayName(),
-                                                   &builder);
-        this->addMessage(builder.release(), MessageContext::Original);
+        this->addMessage(MessageBuilder::makeOfflineSystemMessage(
+                             this->getDisplayName(), this->roomId()),
+                         MessageContext::Original);
 
         getApp()->getNotifications()->notifyTwitchChannelOffline(
             this->roomId());
@@ -730,7 +728,7 @@ bool TwitchChannel::canReconnect() const
 
 void TwitchChannel::reconnect()
 {
-    getApp()->getTwitchAbstract()->connect();
+    getApp()->getTwitch()->connect();
 }
 
 QString TwitchChannel::getCurrentStreamID() const
@@ -1080,19 +1078,27 @@ bool TwitchChannel::tryReplaceLastLiveUpdateAddOrRemove(
     // Update the message
     this->lastLiveUpdateEmoteNames_.push_back(emoteName);
 
-    MessageBuilder replacement;
-    if (op == MessageFlag::LiveUpdatesAdd)
-    {
-        replacement =
-            MessageBuilder(liveUpdatesAddEmoteMessage, platform,
-                           last->loginName, this->lastLiveUpdateEmoteNames_);
-    }
-    else  // op == RemoveEmoteMessage
-    {
-        replacement =
-            MessageBuilder(liveUpdatesRemoveEmoteMessage, platform,
-                           last->loginName, this->lastLiveUpdateEmoteNames_);
-    }
+    auto makeReplacement = [&](MessageFlag op) -> MessageBuilder {
+        if (op == MessageFlag::LiveUpdatesAdd)
+        {
+            return {
+                liveUpdatesAddEmoteMessage,
+                platform,
+                last->loginName,
+                this->lastLiveUpdateEmoteNames_,
+            };
+        }
+
+        // op == RemoveEmoteMessage
+        return {
+            liveUpdatesRemoveEmoteMessage,
+            platform,
+            last->loginName,
+            this->lastLiveUpdateEmoteNames_,
+        };
+    };
+
+    auto replacement = makeReplacement(op);
 
     replacement->flags = last->flags;
 
@@ -1316,8 +1322,6 @@ void TwitchChannel::refreshPubSub()
     }
 
     auto currentAccount = getApp()->getAccounts()->twitch.getCurrent();
-
-    getApp()->getTwitchPubSub()->setAccount(currentAccount);
 
     getApp()->getTwitchPubSub()->listenToChannelModerationActions(roomId);
     if (this->hasModRights())

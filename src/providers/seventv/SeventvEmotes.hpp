@@ -4,11 +4,17 @@
 #include "common/Atomic.hpp"
 #include "common/FlagsEnum.hpp"
 
+#include <pajlada/signals/scoped-connection.hpp>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QString>
 
+#include <cstddef>
+#include <cstdint>
+#include <functional>
 #include <memory>
 #include <optional>
+#include <vector>
 
 namespace chatterino {
 
@@ -21,7 +27,7 @@ namespace seventv::eventapi {
 }  // namespace seventv::eventapi
 
 // https://github.com/SevenTV/API/blob/a84e884b5590dbb5d91a5c6b3548afabb228f385/data/model/emote-set.model.go#L29-L36
-enum class SeventvActiveEmoteFlag : int64_t {
+enum class SeventvActiveEmoteFlag : std::int64_t {
     None = 0LL,
 
     // Emote is zero-width
@@ -155,6 +161,9 @@ public:
 
 private:
     Atomic<std::shared_ptr<const EmoteMap>> global_;
+
+    std::vector<std::unique_ptr<pajlada::Signals::ScopedConnection>>
+        managedConnections;
 };
 
 }  // namespace chatterino
