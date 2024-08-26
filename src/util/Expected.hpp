@@ -14,11 +14,9 @@ using ExpectedStr = Expected<T, QString>;
 
 // convenience function from nonstd/expected.hpp
 template <typename E>
-constexpr nonstd::unexpected<typename std::decay<E>::type> makeUnexpected(
-    E &&value)
+constexpr nonstd::unexpected<std::decay_t<E>> makeUnexpected(E &&value)
 {
-    return nonstd::unexpected<typename std::decay<E>::type>(
-        std::forward<E>(value));
+    return nonstd::unexpected<std::decay_t<E>>(std::forward<E>(value));
 }
 
 }  // namespace chatterino
