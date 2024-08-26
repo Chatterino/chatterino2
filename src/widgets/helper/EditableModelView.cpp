@@ -41,14 +41,14 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
     vbox->addLayout(buttons);
 
     // add
-    QPushButton *add = new QPushButton("Add");
+    QPushButton *add = new QPushButton("&Add");
     buttons->addWidget(add);
     QObject::connect(add, &QPushButton::clicked, [this] {
         this->addButtonPressed.invoke();
     });
 
     // remove
-    QPushButton *remove = new QPushButton("Remove");
+    QPushButton *remove = new QPushButton("&Remove");
     buttons->addWidget(remove);
     QObject::connect(remove, &QPushButton::clicked, [this] {
         auto selected = this->getTableView()->selectionModel()->selectedRows(0);
@@ -71,14 +71,14 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
     if (movable)
     {
         // move up
-        QPushButton *moveUp = new QPushButton("Move up");
+        QPushButton *moveUp = new QPushButton("&Move up");
         buttons->addWidget(moveUp);
         QObject::connect(moveUp, &QPushButton::clicked, this, [this] {
             this->moveRow(-1);
         });
 
         // move down
-        QPushButton *moveDown = new QPushButton("Move down");
+        QPushButton *moveDown = new QPushButton("M&ove down");
         buttons->addWidget(moveDown);
         QObject::connect(moveDown, &QPushButton::clicked, this, [this] {
             this->moveRow(1);
