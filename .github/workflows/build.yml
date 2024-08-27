@@ -32,7 +32,7 @@ jobs:
       matrix:
         include:
           - os: ubuntu-20.04
-            container: ghcr.io/wissididom/chatterino2-build-ubuntu-20.04:latest
+            container: ghcr.io/chatterino/chatterino2-build-ubuntu-20.04:latest
             qt-version: 6.7.2
             force-lto: false
             plugins: true
@@ -41,7 +41,7 @@ jobs:
             build-appimage: false
             build-deb: true
           - os: ubuntu-22.04
-            container: ghcr.io/wissididom/chatterino2-build-ubuntu-22.04:latest
+            container: ghcr.io/chatterino/chatterino2-build-ubuntu-22.04:latest
             qt-version: 6.7.2
             force-lto: false
             plugins: true
@@ -50,7 +50,7 @@ jobs:
             build-appimage: true
             build-deb: true
           - os: ubuntu-24.04
-            container: ghcr.io/wissididom/chatterino2-build-ubuntu-24.04:latest
+            container: ghcr.io/chatterino/chatterino2-build-ubuntu-24.04:latest
             qt-version: 6.7.2
             force-lto: false
             plugins: true
