@@ -114,6 +114,13 @@ void parseRecursive<QColor>(const QJsonObject &obj,
                                   "current theme, and no fallback value found.";
 }
 
+consteval bool shouldParse(std::string_view name, auto &&r)
+{
+    return std::ranges::none_of(r, [name](auto v) {
+        return name == v;
+    });
+}
+
 template <typename T, size_t Index>
 void parseStructMember(const QJsonObject &json, const QJsonObject &fallback,
                        T &target)
@@ -122,8 +129,7 @@ void parseStructMember(const QJsonObject &json, const QJsonObject &fallback,
     constexpr auto fieldName = boost::pfr::get_name<Index, T>();
     constexpr QLatin1String key{fieldName.data(), fieldName.size()};
 
-    if constexpr (!theme::detail::IGNORE_DESER<std::addressof(
-                      boost::pfr::get<Index>(theme::detail::fakeObject<T>()))>)
+    if constexpr (shouldParse(fieldName, theme::detail::IGNORE_DESER<T>))
     {
         parseRecursive(json, fallback, key, boost::pfr::get<Index>(target));
     }

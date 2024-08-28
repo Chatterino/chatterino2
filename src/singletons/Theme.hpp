@@ -219,12 +219,11 @@ namespace theme::detail {
         return EXTERN_WRAPPER<T>.value;
     }
 
-    template <auto Ptr>
-    constexpr bool IGNORE_DESER = false;
+    template <typename T>
+    constexpr std::array<std::string_view, 0> IGNORE_DESER = {};
 
     template <>
-    constexpr bool IGNORE_DESER<std::addressof(
-        fakeObject<Theme::Splits::Input>().styleSheet)> = true;
+    constexpr std::array IGNORE_DESER<Theme::Splits::Input> = {"styleSheet"};
 
 }  // namespace theme::detail
 
