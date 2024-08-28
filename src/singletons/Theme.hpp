@@ -50,28 +50,31 @@ public:
 
     struct TabColors {
         QColor text;
-        struct {
+        struct Backgrounds {
             QColor regular;
             QColor hover;
             QColor unfocused;
-        } backgrounds;
-        struct {
+        };
+        Backgrounds backgrounds;
+        struct Line {
             QColor regular;
             QColor hover;
             QColor unfocused;
-        } line;
+        };
+        Line line;
     };
 
     QColor accent{"#00aeef"};
 
     /// WINDOW
-    struct {
+    struct Window {
         QColor background;
         QColor text;
-    } window;
+    };
+    Window window;
 
     /// TABS
-    struct {
+    struct Tabs {
         TabColors regular;
         TabColors newMessage;
         TabColors highlighted;
@@ -80,39 +83,44 @@ public:
 
         QColor liveIndicator;
         QColor rerunIndicator;
-    } tabs;
+    };
+    Tabs tabs;
 
     /// MESSAGES
-    struct {
-        struct {
+    struct Messages {
+        struct TextColors {
             QColor regular;
             QColor caret;
             QColor link;
             QColor system;
             QColor chatPlaceholder;
-        } textColors;
+        };
+        TextColors textColors;
 
-        struct {
+        struct Backgrounds {
             QColor regular;
             QColor alternate;
-        } backgrounds;
+        };
+        Backgrounds backgrounds;
 
         QColor disabled;
         QColor selection;
 
         QColor highlightAnimationStart;
         QColor highlightAnimationEnd;
-    } messages;
+    };
+    Messages messages;
 
     /// SCROLLBAR
-    struct {
+    struct Scrollbars {
         QColor background;
         QColor thumb;
         QColor thumbSelected;
-    } scrollbars;
+    };
+    Scrollbars scrollbars;
 
     /// SPLITS
-    struct {
+    struct Splits {
         QColor messageSeperator;
         QColor background;
         QColor dropPreview;
@@ -122,21 +130,24 @@ public:
         QColor resizeHandle;
         QColor resizeHandleBackground;
 
-        struct {
+        struct Header {
             QColor border;
             QColor focusedBorder;
             QColor background;
             QColor focusedBackground;
             QColor text;
             QColor focusedText;
-        } header;
+        };
+        Header header;
 
-        struct {
+        struct Input {
             QColor background;
             QColor text;
             QString styleSheet;
-        } input;
-    } splits;
+        };
+        Input input;
+    };
+    Splits splits;
 
     struct {
         QPixmap copy;
@@ -190,4 +201,31 @@ private:
 };
 
 Theme *getTheme();
+
+namespace theme::detail {
+
+    // from Boost PFR (fake_object.hpp)
+    // Used to create a reference to an object at constant evaluation
+    template <class T>
+    struct Wrapper {
+        const T value;
+    };
+
+    template <class T>
+    extern const Wrapper<T> EXTERN_WRAPPER;
+    template <class T>
+    consteval const T &fakeObject() noexcept
+    {
+        return EXTERN_WRAPPER<T>.value;
+    }
+
+    template <auto Ptr>
+    constexpr bool IGNORE_DESER = false;
+
+    template <>
+    constexpr bool IGNORE_DESER<std::addressof(
+        fakeObject<Theme::Splits::Input>().styleSheet)> = true;
+
+}  // namespace theme::detail
+
 }  // namespace chatterino

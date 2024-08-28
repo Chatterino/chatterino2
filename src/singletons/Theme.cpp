@@ -16,6 +16,8 @@
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
 #    include <QStyleHints>
 #endif
+#include <boost/pfr/core.hpp>
+#include <boost/pfr/core_name.hpp>
 #include <QApplication>
 
 #include <cmath>
@@ -25,8 +27,52 @@ namespace {
 using namespace chatterino;
 using namespace literals;
 
-void parseInto(const QJsonObject &obj, const QJsonObject &fallbackObj,
-               QLatin1String key, QColor &color)
+template <typename T, size_t Index>
+void parseStructMember(const QJsonObject &json, const QJsonObject &fallback,
+                       T &target)
+    requires std::is_aggregate_v<T>;
+
+template <typename T, size_t... I>
+void parseThemeAggregate(const QJsonObject &json, const QJsonObject &fallback,
+                         T &target, std::index_sequence<I...> /*seq*/)
+    requires std::is_aggregate_v<T>
+{
+    ((parseStructMember<T, I>(json, fallback, target)), ...);
+}
+
+template <typename T>
+void parseThemeAggregate(const QJsonObject &json, const QJsonObject &fallback,
+                         T &target)
+    requires std::is_aggregate_v<T>
+{
+    parseThemeAggregate(
+        json, fallback, target,
+        std::make_index_sequence<boost::pfr::tuple_size_v<T>>());
+}
+
+template <typename T>
+void parseRecursive(const QJsonObject & /*parent*/,
+                    const QJsonObject & /*parentFallback*/,
+                    QLatin1String /*key*/, T & /*target*/)
+{
+    static_assert(false, "Invalid data type (T)");
+}
+
+template <typename T>
+void parseRecursive(const QJsonObject &parent,
+                    const QJsonObject &parentFallback, QLatin1String key,
+                    T &target)
+    requires std::is_aggregate_v<T>
+{
+    const QJsonObject json = parent[key].toObject();
+    const QJsonObject fallback = parentFallback[key].toObject();
+    parseThemeAggregate(json, fallback, target);
+}
+
+template <>
+void parseRecursive<QColor>(const QJsonObject &obj,
+                            const QJsonObject &fallbackObj, QLatin1String key,
+                            QColor &color)
 {
     auto parseColorFrom = [](const auto &obj,
                              QLatin1String key) -> std::optional<QColor> {
@@ -68,143 +114,42 @@ void parseInto(const QJsonObject &obj, const QJsonObject &fallbackObj,
                                   "current theme, and no fallback value found.";
 }
 
-// NOLINTBEGIN(cppcoreguidelines-macro-usage)
-#define _c2StringLit(s, ty) s##ty
-#define parseColor(to, from, key) \
-    parseInto(from, from##Fallback, _c2StringLit(#key, _L1), (to).from.key)
-// NOLINTEND(cppcoreguidelines-macro-usage)
-
-void parseWindow(const QJsonObject &window, const QJsonObject &windowFallback,
-                 chatterino::Theme &theme)
+template <typename T, size_t Index>
+void parseStructMember(const QJsonObject &json, const QJsonObject &fallback,
+                       T &target)
+    requires std::is_aggregate_v<T>
 {
-    parseColor(theme, window, background);
-    parseColor(theme, window, text);
-}
+    constexpr auto fieldName = boost::pfr::get_name<Index, T>();
+    constexpr QLatin1String key{fieldName.data(), fieldName.size()};
 
-void parseTabs(const QJsonObject &tabs, const QJsonObject &tabsFallback,
-               chatterino::Theme &theme)
-{
-    const auto parseTabColors = [](const auto &json, const auto &jsonFallback,
-                                   auto &tab) {
-        parseInto(json, jsonFallback, "text"_L1, tab.text);
-        {
-            const auto backgrounds = json["backgrounds"_L1].toObject();
-            const auto backgroundsFallback =
-                jsonFallback["backgrounds"_L1].toObject();
-            parseColor(tab, backgrounds, regular);
-            parseColor(tab, backgrounds, hover);
-            parseColor(tab, backgrounds, unfocused);
-        }
-        {
-            const auto line = json["line"_L1].toObject();
-            const auto lineFallback = jsonFallback["line"_L1].toObject();
-            parseColor(tab, line, regular);
-            parseColor(tab, line, hover);
-            parseColor(tab, line, unfocused);
-        }
-    };
-    parseColor(theme, tabs, dividerLine);
-    parseColor(theme, tabs, liveIndicator);
-    parseColor(theme, tabs, rerunIndicator);
-    parseTabColors(tabs["regular"_L1].toObject(),
-                   tabsFallback["regular"_L1].toObject(), theme.tabs.regular);
-    parseTabColors(tabs["newMessage"_L1].toObject(),
-                   tabsFallback["newMessage"_L1].toObject(),
-                   theme.tabs.newMessage);
-    parseTabColors(tabs["highlighted"_L1].toObject(),
-                   tabsFallback["highlighted"_L1].toObject(),
-                   theme.tabs.highlighted);
-    parseTabColors(tabs["selected"_L1].toObject(),
-                   tabsFallback["selected"_L1].toObject(), theme.tabs.selected);
-}
-
-void parseMessages(const QJsonObject &messages,
-                   const QJsonObject &messagesFallback,
-                   chatterino::Theme &theme)
-{
+    if constexpr (!theme::detail::IGNORE_DESER<std::addressof(
+                      boost::pfr::get<Index>(theme::detail::fakeObject<T>()))>)
     {
-        const auto textColors = messages["textColors"_L1].toObject();
-        const auto textColorsFallback =
-            messagesFallback["textColors"_L1].toObject();
-        parseColor(theme.messages, textColors, regular);
-        parseColor(theme.messages, textColors, caret);
-        parseColor(theme.messages, textColors, link);
-        parseColor(theme.messages, textColors, system);
-        parseColor(theme.messages, textColors, chatPlaceholder);
-    }
-    {
-        const auto backgrounds = messages["backgrounds"_L1].toObject();
-        const auto backgroundsFallback =
-            messagesFallback["backgrounds"_L1].toObject();
-        parseColor(theme.messages, backgrounds, regular);
-        parseColor(theme.messages, backgrounds, alternate);
-    }
-    parseColor(theme, messages, disabled);
-    parseColor(theme, messages, selection);
-    parseColor(theme, messages, highlightAnimationStart);
-    parseColor(theme, messages, highlightAnimationEnd);
-}
-
-void parseScrollbars(const QJsonObject &scrollbars,
-                     const QJsonObject &scrollbarsFallback,
-                     chatterino::Theme &theme)
-{
-    parseColor(theme, scrollbars, background);
-    parseColor(theme, scrollbars, thumb);
-    parseColor(theme, scrollbars, thumbSelected);
-}
-
-void parseSplits(const QJsonObject &splits, const QJsonObject &splitsFallback,
-                 chatterino::Theme &theme)
-{
-    parseColor(theme, splits, messageSeperator);
-    parseColor(theme, splits, background);
-    parseColor(theme, splits, dropPreview);
-    parseColor(theme, splits, dropPreviewBorder);
-    parseColor(theme, splits, dropTargetRect);
-    parseColor(theme, splits, dropTargetRectBorder);
-    parseColor(theme, splits, resizeHandle);
-    parseColor(theme, splits, resizeHandleBackground);
-
-    {
-        const auto header = splits["header"_L1].toObject();
-        const auto headerFallback = splitsFallback["header"_L1].toObject();
-        parseColor(theme.splits, header, border);
-        parseColor(theme.splits, header, focusedBorder);
-        parseColor(theme.splits, header, background);
-        parseColor(theme.splits, header, focusedBackground);
-        parseColor(theme.splits, header, text);
-        parseColor(theme.splits, header, focusedText);
-    }
-    {
-        const auto input = splits["input"_L1].toObject();
-        const auto inputFallback = splitsFallback["input"_L1].toObject();
-        parseColor(theme.splits, input, background);
-        parseColor(theme.splits, input, text);
+        parseRecursive(json, fallback, key, boost::pfr::get<Index>(target));
     }
 }
 
-void parseColors(const QJsonObject &root, const QJsonObject &fallbackTheme,
-                 chatterino::Theme &theme)
+template <size_t... I>
+void parseThemeDispatch(const QJsonObject &json, const QJsonObject &fallback,
+                        auto &&roots, std::index_sequence<I...> /*seq*/)
 {
-    const auto colors = root["colors"_L1].toObject();
-    const auto fallbackColors = fallbackTheme["colors"_L1].toObject();
-
-    parseInto(colors, fallbackColors, "accent"_L1, theme.accent);
-
-    parseWindow(colors["window"_L1].toObject(),
-                fallbackColors["window"_L1].toObject(), theme);
-    parseTabs(colors["tabs"_L1].toObject(),
-              fallbackColors["tabs"_L1].toObject(), theme);
-    parseMessages(colors["messages"_L1].toObject(),
-                  fallbackColors["messages"_L1].toObject(), theme);
-    parseScrollbars(colors["scrollbars"_L1].toObject(),
-                    fallbackColors["scrollbars"_L1].toObject(), theme);
-    parseSplits(colors["splits"_L1].toObject(),
-                fallbackColors["splits"_L1].toObject(), theme);
+    ((parseRecursive(
+         json, fallback,
+         QLatin1String(std::get<I * 2>(std::forward<decltype(roots)>(roots))),
+         std::get<I * 2 + 1>(std::forward<decltype(roots)>(roots)))),
+     ...);
 }
-#undef parseColor
-#undef _c2StringLit
+
+void parseThemeColors(const QJsonObject &json, const QJsonObject &fallback,
+                      auto &&...roots)
+{
+    const auto colors = json["colors"_L1].toObject();
+    const auto fallbackColors = fallback["colors"_L1].toObject();
+    parseThemeDispatch(
+        colors, fallbackColors,
+        std::forward_as_tuple(std::forward<decltype(roots)>(roots)...),
+        std::make_index_sequence<(sizeof...(roots)) / 2>());
+}
 
 std::optional<QJsonObject> loadThemeFromPath(const QString &path)
 {
@@ -502,7 +447,15 @@ void Theme::parseFrom(const QJsonObject &root, bool isCustomTheme)
         }
     }
 
-    parseColors(root, fallbackTheme.value_or(QJsonObject()), *this);
+    // clang-format off
+    parseThemeColors(root, fallbackTheme.value_or(QJsonObject()), 
+                       "window", this->window, 
+                       "tabs", this->tabs, 
+                       "messages", this->messages, 
+                       "scrollbars", this->scrollbars, 
+                       "splits", this->splits
+    );
+    // clang-format on
 
     this->splits.input.styleSheet = uR"(
         background: %1;
