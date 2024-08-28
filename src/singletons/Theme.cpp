@@ -53,10 +53,7 @@ void parseThemeAggregate(const QJsonObject &json, const QJsonObject &fallback,
 template <typename T>
 void parseRecursive(const QJsonObject & /*parent*/,
                     const QJsonObject & /*parentFallback*/,
-                    QLatin1String /*key*/, T & /*target*/)
-{
-    static_assert(false, "Invalid data type (T)");
-}
+                    QLatin1String /*key*/, T & /*target*/) = delete;
 
 template <typename T>
 void parseRecursive(const QJsonObject &parent,
