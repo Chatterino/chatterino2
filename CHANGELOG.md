@@ -79,6 +79,7 @@
 - Dev: Fixed benchmarks segfaulting on run. (#5559)
 - Dev: Refactored `MessageBuilder` to be a single class. (#5548)
 - Dev: Recent changes are now shown in the nightly release description. (#5553, #5554)
+- Dev: Themes are now deserialized automatically. (#5570)
 
 ## 2.5.1
 
