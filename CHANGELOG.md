@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Minor: Add option to show pronouns in user card. (#5442)
+
 ## Unversioned
 
 - Major: Release plugins alpha. (#5288)

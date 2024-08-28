@@ -5,7 +5,7 @@
 #include "common/QLogging.hpp"
 #include "providers/pronouns/UserPronouns.hpp"
 
-namespace chatterino::Pronouns {
+namespace chatterino::pronouns {
 
 UserPronouns AlejoApi::parse(QJsonObject object)
 {
@@ -22,7 +22,7 @@ UserPronouns AlejoApi::parse(QJsonObject object)
     }
 
     auto pronounStr = pronoun.toString();
-    std::lock_guard<std::mutex> lock(this->mutex);
+    std::shared_lock<std::shared_mutex> lock(this->mutex);
     auto iter = this->pronounsFromId->find(pronounStr);
     if (iter != this->pronounsFromId->end())
     {
@@ -33,7 +33,7 @@ UserPronouns AlejoApi::parse(QJsonObject object)
 
 AlejoApi::AlejoApi()
 {
-    std::lock_guard<std::mutex> lock(this->mutex);
+    std::shared_lock<std::shared_mutex> lock(this->mutex);
     if (!this->pronounsFromId)
     {
         qCDebug(chatterinoPronouns)
@@ -48,7 +48,7 @@ AlejoApi::AlejoApi()
                     return;
                 }
 
-                std::lock_guard<std::mutex> lock(this->mutex);
+                std::unique_lock<std::shared_mutex> lock(this->mutex);
                 this->pronounsFromId = {std::unordered_map<QString, QString>()};
                 for (auto const &pronounId : object.keys())
                 {
@@ -86,7 +86,7 @@ void AlejoApi::fetch(const QString &username,
 {
     bool havePronounList{true};
     {
-        std::lock_guard<std::mutex> lock(this->mutex);
+        std::shared_lock<std::shared_mutex> lock(this->mutex);
         havePronounList = this->pronounsFromId.has_value();
     }  // unlock mutex
 
@@ -118,4 +118,4 @@ void AlejoApi::fetch(const QString &username,
         .execute();
 }
 
-}  // namespace chatterino::Pronouns
+}  // namespace chatterino::pronouns

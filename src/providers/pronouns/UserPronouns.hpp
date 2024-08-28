@@ -1,24 +1,23 @@
 #pragma once
 
+#include <QString>
+
 #include <optional>
 #include <string>
 
-namespace chatterino {
+namespace chatterino::pronouns {
 
 class UserPronouns
 {
-private:
-    std::optional<QString> representation;
-
 public:
     UserPronouns() = default;
     UserPronouns(QString);
 
     inline QString format() const
     {
-        if (this->representation)
+        if (!this->representation.isNull())
         {
-            return *(this->representation);
+            return this->representation;
         }
         return "unspecified";
     }
@@ -27,6 +26,9 @@ public:
 
     // True, iff the pronouns are not unspecified.
     operator bool() const;
+
+private:
+    QString representation;
 };
 
 }  // namespace chatterino

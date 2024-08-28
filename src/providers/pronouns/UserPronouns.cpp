@@ -1,29 +1,24 @@
 #include "providers/pronouns/UserPronouns.hpp"
 
+#include <QString>
+
 #include <optional>
 
-namespace chatterino {
+namespace chatterino::pronouns {
 
 UserPronouns::UserPronouns(QString pronouns)
+    : representation{pronouns.length() != 0 ? std::move(pronouns) : QString()}
 {
-    if (pronouns.length() == 0)
-    {
-        this->representation = {};
-    }
-    else
-    {
-        this->representation = {std::move(pronouns)};
-    }
 }
 
 bool UserPronouns::isUnspecified() const
 {
-    return !this->representation.has_value();
+    return this->representation.isNull();
 }
 
 UserPronouns::operator bool() const
 {
-    return this->representation.has_value();
+    return !this->representation.isNull();
 }
 
-}  // namespace chatterino
+}  // namespace chatterino::pronouns

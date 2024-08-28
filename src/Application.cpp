@@ -148,7 +148,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , logging(new Logging(_settings))
     , linkResolver(new LinkResolver)
     , streamerMode(new StreamerMode)
-    , pronouns(new Pronouns::Pronouns)
+    , pronouns(new pronouns::Pronouns)
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(new PluginController(paths))
 #endif
@@ -593,7 +593,7 @@ SeventvEmotes *Application::getSeventvEmotes()
     return this->seventvEmotes.get();
 }
 
-Pronouns::Pronouns *Application::getPronouns()
+pronouns::Pronouns *Application::getPronouns()
 {
     assert(this->pronouns);
 

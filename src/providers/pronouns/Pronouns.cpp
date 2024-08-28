@@ -5,18 +5,19 @@
 #include "providers/pronouns/alejo/PronounsAlejoApi.hpp"
 #include "providers/pronouns/UserPronouns.hpp"
 
+#include <mutex>
 #include <string>
 #include <unordered_map>
 
-namespace chatterino::Pronouns {
+namespace chatterino::pronouns {
 
 void Pronouns::fetch(const QString &username,
-                     const std::function<void(UserPronouns)> callbackSuccess,
-                     const std::function<void()> callbackFail)
+                     const std::function<void(UserPronouns)> &callbackSuccess,
+                     const std::function<void()> &callbackFail)
 {
     // Only fetch pronouns if we haven't fetched before.
     {
-        std::lock_guard<std::mutex> lock(this->mutex);
+        std::shared_lock<std::shared_mutex> lock(this->mutex);
 
         auto iter = this->saved.find(username);
         if (iter != this->saved.end())
@@ -26,7 +27,6 @@ void Pronouns::fetch(const QString &username,
         }
     }  // unlock mutex
 
-    // Some logging
     qCDebug(chatterinoPronouns)
         << "Fetching pronouns from alejo.io for " << username;
 
@@ -35,7 +35,7 @@ void Pronouns::fetch(const QString &username,
         if (result.has_value())
         {
             {
-                std::lock_guard<std::mutex> lock(this->mutex);
+                std::unique_lock<std::shared_mutex> lock(this->mutex);
                 this->saved[username] = *result;
             }  // unlock mutex
             qCDebug(chatterinoPronouns)
@@ -52,7 +52,7 @@ void Pronouns::fetch(const QString &username,
 
 std::optional<UserPronouns> Pronouns::getForUsername(const QString &username)
 {
-    std::lock_guard<std::mutex> lock(this->mutex);
+    std::shared_lock<std::shared_mutex> lock(this->mutex);
     auto it = this->saved.find(username);
     if (it != this->saved.end())
     {
@@ -61,4 +61,4 @@ std::optional<UserPronouns> Pronouns::getForUsername(const QString &username)
     return {};
 }
 
-}  // namespace chatterino::Pronouns
+}  // namespace chatterino::pronouns

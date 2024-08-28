@@ -259,6 +259,13 @@ public:
         return nullptr;
     }
 
+    pronouns::Pronouns *getPronouns() override
+    {
+        assert(false && "EmptyApplication::getPronouns was called without "
+                        "being initialized");
+        return nullptr;
+    }
+
     QTemporaryDir settingsDir;
     Paths paths_;
     Args args_;

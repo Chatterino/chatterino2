@@ -3,21 +3,17 @@
 #include "providers/pronouns/alejo/PronounsAlejoApi.hpp"
 #include "providers/pronouns/UserPronouns.hpp"
 
-#include <QTimer>
-
-#include <mutex>
+#include <shared_mutex>
 #include <optional>
 #include <unordered_map>
 
-namespace chatterino::Pronouns {
-
-enum class PronounProvider { PRONOUNDB, ALEJO };
+namespace chatterino::pronouns {
 
 class Pronouns
 {
 private:
     // mutex for editing the saved map.
-    std::mutex mutex;
+    std::shared_mutex mutex;
     // Login name -> Pronouns
     std::unordered_map<QString, UserPronouns> saved;
     AlejoApi alejoApi;
@@ -26,11 +22,11 @@ public:
     Pronouns() = default;
 
     void fetch(const QString &user,
-               std::function<void(UserPronouns)> callbackSuccess,
-               std::function<void()> callbackFail);
+               const std::function<void(UserPronouns)> &callbackSuccess,
+               const std::function<void()> &callbackFail);
 
     // Retrieve cached pronouns for user.
     std::optional<UserPronouns> getForUsername(const QString &username);
 };
 
-}  // namespace chatterino::Pronouns
+}  // namespace chatterino::pronouns

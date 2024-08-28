@@ -55,9 +55,9 @@ class SeventvEmotes;
 class ILinkResolver;
 class IStreamerMode;
 class IAbstractIrcServer;
-namespace Pronouns {
+namespace pronouns {
     class Pronouns;
-}
+}  // namespace pronouns
 
 class IApplication
 {
@@ -104,7 +104,7 @@ public:
     virtual SeventvEmotes *getSeventvEmotes() = 0;
     virtual ILinkResolver *getLinkResolver() = 0;
     virtual IStreamerMode *getStreamerMode() = 0;
-    virtual Pronouns::Pronouns *getPronouns() = 0;
+    virtual pronouns::Pronouns *getPronouns() = 0;
 };
 
 class Application : public IApplication
@@ -174,7 +174,7 @@ private:
     const std::unique_ptr<Logging> logging;
     std::unique_ptr<ILinkResolver> linkResolver;
     std::unique_ptr<IStreamerMode> streamerMode;
-    std::shared_ptr<Pronouns::Pronouns> pronouns;
+    std::shared_ptr<pronouns::Pronouns> pronouns;
 #ifdef CHATTERINO_HAVE_PLUGINS
     std::unique_ptr<PluginController> plugins;
 #endif
@@ -225,7 +225,7 @@ public:
     BttvEmotes *getBttvEmotes() override;
     FfzEmotes *getFfzEmotes() override;
     SeventvEmotes *getSeventvEmotes() override;
-    Pronouns::Pronouns *getPronouns() override;
+    pronouns::Pronouns *getPronouns() override;
 
     ILinkResolver *getLinkResolver() override;
     IStreamerMode *getStreamerMode() override;

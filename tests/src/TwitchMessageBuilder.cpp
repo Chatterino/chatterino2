@@ -98,6 +98,11 @@ public:
         return &this->streamerMode;
     }
 
+    pronouns::Pronouns *getPronouns() override
+    {
+        return &this->pronouns;
+    }
+
     Settings settings;
     AccountController accounts;
     Emotes emotes;
@@ -111,6 +116,7 @@ public:
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;
     DisabledStreamerMode streamerMode;
+    Pronouns::Pronouns pronouns;
 };
 
 }  // namespace

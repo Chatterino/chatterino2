@@ -110,6 +110,11 @@ public:
         return &this->linkResolver;
     }
 
+    pronouns::Pronouns *getPronouns() override
+    {
+        return &this->pronouns;
+    }
+
     AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;
@@ -124,6 +129,7 @@ public:
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;
     DisabledStreamerMode streamerMode;
+    Pronouns pronouns;
 };
 
 std::optional<QJsonDocument> tryReadJsonFile(const QString &path)

@@ -25,6 +25,7 @@
 #include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
+#include "util/PostToThread.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/InvisibleSizeGrip.hpp"
@@ -47,6 +48,7 @@ const QString TEXT_PRONOUNS("Pronouns: %1");
 #define TEXT_USER_ID "ID: "
 #define TEXT_UNAVAILABLE "(not available)"
 #define TEXT_UNSPECIFIED "(unspecified)"
+#define TEXT_LOADING "(loading...)"
 
 namespace chatterino {
 namespace {
@@ -372,7 +374,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
             // items on the left
             if (getSettings()->showPronouns)
             {
-                vbox.emplace<Label>(TEXT_PRONOUNS.arg(""))
+                vbox.emplace<Label>(TEXT_PRONOUNS.arg(TEXT_LOADING))
                     .assign(&this->ui_.pronounsLabel);
             }
             vbox.emplace<Label>(TEXT_FOLLOWERS.arg(""))
@@ -963,29 +965,34 @@ void UserInfoPopup::updateUserData()
             getApp()->getPronouns()->fetch(
                 user.login,
                 [this, hack](const auto pronouns) {
-                    if (!hack.lock() || this->ui_.pronounsLabel == nullptr)
-                    {
-                        return;
-                    }
-                    if (!pronouns.isUnspecified())
-                    {
-                        this->ui_.pronounsLabel->setText(
-                            TEXT_PRONOUNS.arg(pronouns.format()));
-                    }
-                    else
-                    {
-                        this->ui_.pronounsLabel->setText(
-                            TEXT_PRONOUNS.arg(TEXT_UNSPECIFIED));
-                    }
+                    runInGuiThread([this, hack,
+                                    pronouns = std::move(pronouns)]() {
+                        if (!hack.lock() || this->ui_.pronounsLabel == nullptr)
+                        {
+                            return;
+                        }
+                        if (!pronouns.isUnspecified())
+                        {
+                            this->ui_.pronounsLabel->setText(
+                                TEXT_PRONOUNS.arg(pronouns.format()));
+                        }
+                        else
+                        {
+                            this->ui_.pronounsLabel->setText(
+                                TEXT_PRONOUNS.arg(TEXT_UNSPECIFIED));
+                        }
+                    });
                 },
                 [this, hack]() {
-                    qCWarning(chatterinoTwitch) << "Error getting pronouns";
-                    if (!hack.lock())
-                    {
-                        return;
-                    }
-                    this->ui_.pronounsLabel->setText(
-                        TEXT_PRONOUNS.arg(TEXT_UNSPECIFIED));
+                    runInGuiThread([this, hack]() {
+                        qCWarning(chatterinoTwitch) << "Error getting pronouns";
+                        if (!hack.lock())
+                        {
+                            return;
+                        }
+                        this->ui_.pronounsLabel->setText(
+                            TEXT_PRONOUNS.arg(TEXT_UNSPECIFIED));
+                    });
                 });
         }
     };
