@@ -114,7 +114,7 @@ void AlejoApi::fetch(const QString &username,
                 onDone({UserPronouns()});
                 return;
             }
-            qCDebug(chatterinoPronouns)
+            qCWarning(chatterinoPronouns)
                 << "alejo.io returned " << status
                 << " when fetching pronouns for " << username;
             onDone({});
