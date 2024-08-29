@@ -7,18 +7,18 @@
 namespace chatterino::pronouns {
 
 UserPronouns::UserPronouns(QString pronouns)
-    : representation{pronouns.length() != 0 ? std::move(pronouns) : QString()}
+    : representation{!pronouns.isEmpty() ? std::move(pronouns) : QString()}
 {
 }
 
 bool UserPronouns::isUnspecified() const
 {
-    return this->representation.isNull();
+    return this->representation.isEmpty();
 }
 
 UserPronouns::operator bool() const
 {
-    return !this->representation.isNull();
+    return !isUnspecified();
 }
 
 }  // namespace chatterino::pronouns

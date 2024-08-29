@@ -26,7 +26,7 @@ private:
     /** A map from alejo.io ids to human readable representation like theythem -> they/them, other -> other. */
     std::optional<std::unordered_map<QString, QString>> pronounsFromId =
         std::nullopt;
-    UserPronouns parse(const QJsonObject &);
+    UserPronouns parse(const QJsonObject &object);
     inline static const QString API_URL = "https://api.pronouns.alejo.io/v1";
     inline static const QString API_USERS = "/users";
     inline static const QString API_PRONOUNS = "/pronouns";

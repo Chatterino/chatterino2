@@ -8,15 +8,15 @@ class UserPronouns
 {
 public:
     UserPronouns() = default;
-    UserPronouns(QString);
+    UserPronouns(QString pronouns);
 
     QString format() const
     {
-        if (!this->representation.isNull())
+        if (isUnspecified())
         {
-            return this->representation;
+            return "unspecified";
         }
-        return "unspecified";
+        return this->representation;
     }
 
     bool isUnspecified() const;
