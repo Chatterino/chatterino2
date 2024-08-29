@@ -6,6 +6,7 @@
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/RenameThread.hpp"
 #include "widgets/Window.hpp"
 
 #include <boost/asio/executor_work_guard.hpp>
@@ -193,6 +194,7 @@ MiniaudioBackend::MiniaudioBackend()
     this->audioThread = std::make_unique<std::thread>([this] {
         this->ioContext.run();
     });
+    renameThread(*this->audioThread, "C2Miniaudio");
 }
 
 MiniaudioBackend::~MiniaudioBackend()

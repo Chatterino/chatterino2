@@ -388,7 +388,7 @@ QString popup(const CommandContext &ctx)
     }
 
     // Open channel passed as argument in a popup
-    auto targetChannel = getApp()->getTwitchAbstract()->getOrAddChannel(target);
+    auto targetChannel = getApp()->getTwitch()->getOrAddChannel(target);
     getApp()->getWindows()->openInPopup(targetChannel);
 
     return "";
@@ -530,8 +530,7 @@ QString sendRawMessage(const CommandContext &ctx)
 
     if (ctx.channel->isTwitchChannel())
     {
-        getApp()->getTwitchAbstract()->sendRawMessage(
-            ctx.words.mid(1).join(" "));
+        getApp()->getTwitch()->sendRawMessage(ctx.words.mid(1).join(" "));
     }
     else
     {
@@ -564,7 +563,7 @@ QString injectFakeMessage(const CommandContext &ctx)
     }
 
     auto ircText = ctx.words.mid(1).join(" ");
-    getApp()->getTwitchAbstract()->addFakeMessage(ircText);
+    getApp()->getTwitch()->addFakeMessage(ircText);
 
     return "";
 }
@@ -663,7 +662,7 @@ QString openUsercard(const CommandContext &ctx)
         stripChannelName(channelName);
 
         ChannelPtr channelTemp =
-            getApp()->getTwitchAbstract()->getChannelOrEmpty(channelName);
+            getApp()->getTwitch()->getChannelOrEmpty(channelName);
 
         if (channelTemp->isEmpty())
         {

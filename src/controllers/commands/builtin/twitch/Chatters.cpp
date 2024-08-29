@@ -11,7 +11,6 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Theme.hpp"
 
 #include <QApplication>
@@ -125,11 +124,9 @@ QString testChatters(const CommandContext &ctx)
                 prefix += QString("(%1):").arg(result.total);
             }
 
-            MessageBuilder builder;
-            TwitchMessageBuilder::listOfUsersSystemMessage(
-                prefix, entries, twitchChannel, &builder);
-
-            channel->addMessage(builder.release(), MessageContext::Original);
+            channel->addMessage(MessageBuilder::makeListOfUsersMessage(
+                                    prefix, entries, twitchChannel),
+                                MessageContext::Original);
         },
         [channel{ctx.channel}](auto error, auto message) {
             auto errorMessage = formatChattersError(error, message);

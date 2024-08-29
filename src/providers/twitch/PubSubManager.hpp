@@ -3,21 +3,31 @@
 #include "providers/twitch/PubSubClientOptions.hpp"
 #include "providers/twitch/PubSubWebsocket.hpp"
 #include "util/ExponentialBackoff.hpp"
-#include "util/QStringHash.hpp"
 
+#include <boost/asio/io_service.hpp>
+#include <boost/asio/ssl/context.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QJsonObject>
 #include <QString>
 #include <websocketpp/client.hpp>
+#include <websocketpp/common/connection_hdl.hpp>
+#include <websocketpp/common/memory.hpp>
+#include <websocketpp/config/asio_client.hpp>
 
 #include <atomic>
 #include <chrono>
+#include <cstdint>
+#include <functional>
 #include <map>
 #include <memory>
 #include <optional>
 #include <thread>
 #include <unordered_map>
 #include <vector>
+
+#if __has_include(<gtest/gtest_prod.h>)
+#    include <gtest/gtest_prod.h>
+#endif
 
 namespace chatterino {
 
@@ -85,10 +95,8 @@ public:
     PubSub &operator=(const PubSub &) = delete;
     PubSub &operator=(PubSub &&) = delete;
 
-    void setAccount(std::shared_ptr<TwitchAccount> account);
-
-    void start();
-    void stop();
+    /// Set up connections between itself & other parts of the application
+    void initialize();
 
     struct {
         Signal<ClearChatAction> chatCleared;
@@ -192,6 +200,11 @@ public:
     } diag;
 
 private:
+    void setAccount(std::shared_ptr<TwitchAccount> account);
+
+    void start();
+    void stop();
+
     /**
      * Unlistens to all topics matching the prefix in all clients
      */
@@ -250,6 +263,22 @@ private:
     const PubSubClientOptions clientOptions_;
 
     bool stopping_{false};
+
+#ifdef FRIEND_TEST
+    friend class FTest;
+
+    FRIEND_TEST(TwitchPubSubClient, ServerRespondsToPings);
+    FRIEND_TEST(TwitchPubSubClient, ServerDoesntRespondToPings);
+    FRIEND_TEST(TwitchPubSubClient, DisconnectedAfter1s);
+    FRIEND_TEST(TwitchPubSubClient, ExceedTopicLimit);
+    FRIEND_TEST(TwitchPubSubClient, ExceedTopicLimitSingleStep);
+    FRIEND_TEST(TwitchPubSubClient, ReceivedWhisper);
+    FRIEND_TEST(TwitchPubSubClient, ModeratorActionsUserBanned);
+    FRIEND_TEST(TwitchPubSubClient, MissingToken);
+    FRIEND_TEST(TwitchPubSubClient, WrongToken);
+    FRIEND_TEST(TwitchPubSubClient, CorrectToken);
+    FRIEND_TEST(TwitchPubSubClient, AutoModMessageHeld);
+#endif
 };
 
 }  // namespace chatterino

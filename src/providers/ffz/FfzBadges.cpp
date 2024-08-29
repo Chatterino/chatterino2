@@ -12,9 +12,6 @@
 #include <QThread>
 #include <QUrl>
 
-#include <map>
-#include <shared_mutex>
-
 namespace chatterino {
 
 std::vector<FfzBadges::Badge> FfzBadges::getUserBadges(const UserId &id)

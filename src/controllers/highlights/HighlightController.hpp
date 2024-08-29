@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common/FlagsEnum.hpp"
 #include "common/UniqueAccess.hpp"
+#include "messages/MessageFlag.hpp"
 #include "singletons/Settings.hpp"
 
 #include <boost/signals2/connection.hpp>
@@ -19,8 +19,6 @@ namespace chatterino {
 
 class Badge;
 struct MessageParseArgs;
-enum class MessageFlag : int64_t;
-using MessageFlags = FlagsEnum<MessageFlag>;
 class AccountController;
 
 struct HighlightResult {

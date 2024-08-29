@@ -1,4 +1,4 @@
-#include "Modes.hpp"
+#include "common/Modes.hpp"
 
 #include "util/CombinePath.hpp"
 

@@ -2,6 +2,7 @@
 
 #include <IrcMessage>
 #include <QString>
+#include <QTimeZone>
 
 namespace chatterino {
 
@@ -88,12 +89,25 @@ inline QDateTime calculateMessageTime(const Communi::IrcMessage *message)
         QString timedate = message->tags().value("time").toString();
 
         auto date = QDateTime::fromString(timedate, Qt::ISODate);
-        date.setTimeSpec(Qt::TimeSpec::UTC);
+        date.setTimeZone(QTimeZone::utc());
         return date.toLocalTime();
     }
 
     // Fallback to current time
     return QDateTime::currentDateTime();
+}
+
+// "foo/bar/baz,tri/hard" can be a valid badge-info tag
+// In that case, valid map content should be 'split by slash' only once:
+// {"foo": "bar/baz", "tri": "hard"}
+inline std::pair<QString, QString> slashKeyValue(const QString &kvStr)
+{
+    return {
+        // part before first slash (index 0 of section)
+        kvStr.section('/', 0, 0),
+        // part after first slash (index 1 of section)
+        kvStr.section('/', 1, -1),
+    };
 }
 
 }  // namespace chatterino

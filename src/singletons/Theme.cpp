@@ -1,4 +1,3 @@
-
 #include "singletons/Theme.hpp"
 
 #include "Application.hpp"
@@ -17,6 +16,7 @@
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
 #    include <QStyleHints>
 #endif
+#include <QApplication>
 
 #include <cmath>
 
@@ -302,8 +302,9 @@ Theme::Theme(const Paths &paths)
     this->loadAvailableThemes(paths);
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-    QObject::connect(qApp->styleHints(), &QStyleHints::colorSchemeChanged,
-                     &this->lifetime_, [this] {
+    QObject::connect(QApplication::styleHints(),
+                     &QStyleHints::colorSchemeChanged, &this->lifetime_,
+                     [this] {
                          if (this->isSystemTheme())
                          {
                              this->update();
@@ -321,7 +322,7 @@ void Theme::update()
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         if (this->isSystemTheme())
         {
-            switch (qApp->styleHints()->colorScheme())
+            switch (QApplication::styleHints()->colorScheme())
             {
                 case Qt::ColorScheme::Light:
                     return this->lightSystemThemeName;

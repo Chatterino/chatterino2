@@ -2,12 +2,10 @@
 
 #include "debug/Benchmark.hpp"
 
-#include <tuple>
-
 namespace chatterino {
 
 ChatterSet::ChatterSet()
-    : items(chatterLimit)
+    : items(ChatterSet::CHATTER_LIMIT)
 {
 }
 
@@ -22,7 +20,7 @@ void ChatterSet::updateOnlineChatters(
     BenchmarkGuard bench("update online chatters");
 
     // Create a new lru cache without the users that are not present anymore.
-    cache::lru_cache<QString, QString> tmp(chatterLimit);
+    cache::lru_cache<QString, QString> tmp(ChatterSet::CHATTER_LIMIT);
 
     for (auto &&chatter : lowerCaseUsernames)
     {
@@ -32,7 +30,7 @@ void ChatterSet::updateOnlineChatters(
 
             // Less chatters than the limit => try to preserve as many as possible.
         }
-        else if (lowerCaseUsernames.size() < chatterLimit)
+        else if (lowerCaseUsernames.size() < ChatterSet::CHATTER_LIMIT)
         {
             tmp.put(chatter, chatter);
         }

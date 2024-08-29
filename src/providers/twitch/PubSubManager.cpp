@@ -1,6 +1,8 @@
 #include "providers/twitch/PubSubManager.hpp"
 
+#include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "providers/NetworkConfigurationProvider.hpp"
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/PubSubClient.hpp"
@@ -10,6 +12,7 @@
 #include "util/DebugCount.hpp"
 #include "util/Helpers.hpp"
 #include "util/RapidjsonHelpers.hpp"
+#include "util/RenameThread.hpp"
 
 #include <QJsonArray>
 
@@ -17,6 +20,7 @@
 #include <exception>
 #include <future>
 #include <iostream>
+#include <memory>
 #include <thread>
 
 using websocketpp::lib::bind;
@@ -506,6 +510,23 @@ PubSub::~PubSub()
     this->stop();
 }
 
+void PubSub::initialize()
+{
+    this->start();
+    this->setAccount(getApp()->getAccounts()->twitch.getCurrent());
+
+    getApp()->getAccounts()->twitch.currentUserChanged.connect(
+        [this] {
+            this->unlistenChannelModerationActions();
+            this->unlistenAutomod();
+            this->unlistenLowTrustUsers();
+            this->unlistenChannelPointRewards();
+
+            this->setAccount(getApp()->getAccounts()->twitch.getCurrent());
+        },
+        boost::signals2::at_front);
+}
+
 void PubSub::setAccount(std::shared_ptr<TwitchAccount> account)
 {
     this->token_ = account->getOAuthToken();
@@ -543,7 +564,10 @@ void PubSub::start()
 {
     this->work = std::make_shared<boost::asio::io_service::work>(
         this->websocketClient.get_io_service());
-    this->thread.reset(new std::thread(std::bind(&PubSub::runThread, this)));
+    this->thread = std::make_unique<std::thread>([this] {
+        runThread();
+    });
+    renameThread(*this->thread, "PubSub");
 }
 
 void PubSub::stop()
@@ -576,8 +600,6 @@ void PubSub::stop()
             this->websocketClient.stop();
         }
     }
-
-    assert(this->clients.empty());
 }
 
 bool PubSub::listenToWhispers()

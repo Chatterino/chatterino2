@@ -48,6 +48,7 @@
 #include "widgets/Window.hpp"
 
 #include <magic_enum/magic_enum_flags.hpp>
+#include <QApplication>
 #include <QClipboard>
 #include <QColor>
 #include <QDate>
@@ -68,11 +69,9 @@
 #include <functional>
 #include <memory>
 
-#define SELECTION_RESUME_SCROLLING_MSG_THRESHOLD 3
-#define CHAT_HOVER_PAUSE_DURATION 1000
-#define TOOLTIP_EMOTE_ENTRIES_LIMIT 7
-
 namespace {
+
+constexpr size_t TOOLTIP_EMOTE_ENTRIES_LIMIT = 7;
 
 using namespace chatterino;
 
@@ -2765,8 +2764,8 @@ void ChannelView::showUserInfoPopup(const QString &userName,
     auto *userPopup =
         new UserInfoPopup(getSettings()->autoCloseUserPopup, this->split_);
 
-    auto contextChannel = getApp()->getTwitchAbstract()->getChannelOrEmpty(
-        alternativePopoutChannel);
+    auto contextChannel =
+        getApp()->getTwitch()->getChannelOrEmpty(alternativePopoutChannel);
     auto openingChannel = this->hasSourceChannel() ? this->sourceChannel_
                                                    : this->underlyingChannel_;
     userPopup->setData(userName, contextChannel, openingChannel);
@@ -2784,7 +2783,6 @@ bool ChannelView::mayContainMessage(const MessagePtr &message)
         case Channel::Type::Direct:
         case Channel::Type::Twitch:
         case Channel::Type::TwitchWatching:
-        case Channel::Type::Irc:
             // XXX: system messages may not have the channel set
             return message->flags.has(MessageFlag::System) ||
                    this->channel()->getName() == message->channelName;

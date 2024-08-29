@@ -2,6 +2,7 @@
 
 #include "common/Common.hpp"
 #include "common/FlagsEnum.hpp"
+#include "messages/MessageFlag.hpp"
 
 #include <QPoint>
 #include <QRect>
@@ -24,8 +25,6 @@ enum class TextDirection : uint8_t {
     LTR,
 };
 
-enum class MessageFlag : int64_t;
-using MessageFlags = FlagsEnum<MessageFlag>;
 class MessageLayoutElement;
 struct Selection;
 struct MessagePaintContext;

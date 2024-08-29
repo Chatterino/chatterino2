@@ -9,7 +9,6 @@
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "providers/irc/IrcMessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -232,7 +231,7 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
     }
 
     // filter out emote sets from userstate message, which are not in fetched emote set list
-    for (const auto &emoteSetKey : qAsConst(this->userstateEmoteSets_))
+    for (const auto &emoteSetKey : this->userstateEmoteSets_)
     {
         if (!existingEmoteSetKeys.contains(emoteSetKey))
         {

@@ -435,8 +435,10 @@ void SettingsDialog::onOkClicked()
     if (!getApp()->getArgs().dontSaveSettings)
     {
         getApp()->getCommands()->save();
-        pajlada::Settings::SettingManager::gSave();
     }
+
+    getSettings()->requestSave();
+
     this->close();
 }
 

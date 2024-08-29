@@ -5,9 +5,9 @@
 #include "controllers/notifications/NotificationModel.hpp"
 #include "controllers/sound/ISoundController.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
 #include "singletons/Toasts.hpp"
@@ -137,11 +137,9 @@ void NotificationController::notifyTwitchChannelLive(
     }
 
     // Message in /live channel
-    MessageBuilder builder;
-    TwitchMessageBuilder::liveMessage(payload.displayName, &builder);
-    builder.message().id = payload.channelId;
     getApp()->getTwitch()->getLiveChannel()->addMessage(
-        builder.release(), MessageContext::Original);
+        MessageBuilder::makeLiveMessage(payload.displayName, payload.channelId),
+        MessageContext::Original);
 
     // Notify on all channels with a ping sound
     if (showNotification && !playedSound &&
@@ -181,7 +179,7 @@ void NotificationController::fetchFakeChannels()
     for (size_t i = 0; i < channelMap[Platform::Twitch].raw().size(); i++)
     {
         const auto &name = channelMap[Platform::Twitch].raw()[i];
-        auto chan = getApp()->getTwitchAbstract()->getChannelOrEmpty(name);
+        auto chan = getApp()->getTwitch()->getChannelOrEmpty(name);
         if (chan->isEmpty())
         {
             channels.push_back(name);

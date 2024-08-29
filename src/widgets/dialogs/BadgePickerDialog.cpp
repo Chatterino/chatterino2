@@ -1,4 +1,4 @@
-#include "BadgePickerDialog.hpp"
+#include "widgets/dialogs/BadgePickerDialog.hpp"
 
 #include "Application.hpp"
 #include "providers/twitch/TwitchBadges.hpp"

@@ -11,6 +11,7 @@
 #include <QJsonObject>
 #include <QString>
 #include <QStringList>
+#include <QTimeZone>
 #include <QUrl>
 #include <QUrlQuery>
 
@@ -276,9 +277,7 @@ struct HelixChannelEmote {
         , name(jsonObject.value("name").toString())
         , type(jsonObject.value("emote_type").toString())
         , setId(jsonObject.value("emote_set_id").toString())
-        , url(QString(TWITCH_EMOTE_TEMPLATE)
-                  .replace("{id}", this->emoteId)
-                  .replace("{scale}", "3.0"))
+        , url(TWITCH_EMOTE_TEMPLATE.arg(this->emoteId, u"3.0"))
     {
     }
 };
@@ -724,7 +723,7 @@ struct HelixShieldModeStatus {
         , lastActivatedAt(QDateTime::fromString(
               json["last_activated_at"].toString(), Qt::ISODate))
     {
-        this->lastActivatedAt.setTimeSpec(Qt::UTC);
+        this->lastActivatedAt.setTimeZone(QTimeZone::utc());
     }
 };
 

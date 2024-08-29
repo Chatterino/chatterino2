@@ -15,7 +15,11 @@ void ColorItemDelegate::paint(QPainter *painter,
 {
     auto data = index.data(Qt::DecorationRole);
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    if (data.typeId() != QMetaType::QColor)
+#else
     if (data.type() != QVariant::Color)
+#endif
     {
         return QStyledItemDelegate::paint(painter, option, index);
     }

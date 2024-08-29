@@ -9,8 +9,6 @@
 #include "messages/MessageElement.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
-#include "providers/irc/IrcChannel2.hpp"
-#include "providers/irc/IrcServer.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -184,10 +182,9 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
         !(getSettings()->streamerModeSuppressInlineWhispers &&
           getApp()->getStreamerMode()->isEnabled()))
     {
-        app->getTwitchAbstract()->forEachChannel(
-            [&messagexD](ChannelPtr _channel) {
-                _channel->addMessage(messagexD, MessageContext::Repost);
-            });
+        app->getTwitch()->forEachChannel([&messagexD](ChannelPtr _channel) {
+            _channel->addMessage(messagexD, MessageContext::Repost);
+        });
     }
 
     return true;
@@ -241,17 +238,6 @@ QString sendWhisper(const CommandContext &ctx)
             });
         return "";
     }
-
-    // we must be on IRC
-    auto *ircChannel = dynamic_cast<IrcChannel *>(ctx.channel.get());
-    if (ircChannel == nullptr)
-    {
-        // give up
-        return "";
-    }
-
-    auto *server = ircChannel->server();
-    server->sendWhisper(target, message);
 
     return "";
 }

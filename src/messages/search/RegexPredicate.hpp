@@ -1,8 +1,8 @@
 #pragma once
 
 #include "messages/search/MessagePredicate.hpp"
-#include "QRegularExpression"
 
+#include <QRegularExpression>
 #include <QString>
 
 namespace chatterino {

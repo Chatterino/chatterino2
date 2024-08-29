@@ -7,10 +7,10 @@
 
 #include <QPainter>
 
-// number of columns in grid mode
-#define GRID_NUM_COLS 3
-
 namespace {
+
+// number of columns in grid mode
+constexpr int GRID_NUM_COLS = 3;
 
 #ifdef Q_OS_WIN
 template <typename T>

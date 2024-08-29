@@ -19,12 +19,6 @@
 #include <QtGlobal>
 #include <QThread>
 
-#define MARGIN_LEFT (int)(8 * this->scale)
-#define MARGIN_RIGHT (int)(8 * this->scale)
-#define MARGIN_TOP (int)(4 * this->scale)
-#define MARGIN_BOTTOM (int)(4 * this->scale)
-#define COMPACT_EMOTES_OFFSET 6
-
 namespace chatterino {
 
 namespace {

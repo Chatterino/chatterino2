@@ -1,4 +1,4 @@
-#include "SettingsPage.hpp"
+#include "widgets/settingspages/SettingsPage.hpp"
 
 #include "Application.hpp"
 #include "singletons/WindowManager.hpp"

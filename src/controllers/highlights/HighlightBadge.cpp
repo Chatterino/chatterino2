@@ -1,8 +1,7 @@
-#include "HighlightBadge.hpp"
+#include "controllers/highlights/HighlightBadge.hpp"
 
-#include "messages/SharedMessageBuilder.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
-#include "singletons/Resources.hpp"
+#include "util/IrcHelpers.hpp"
 
 namespace chatterino {
 
@@ -97,7 +96,7 @@ bool HighlightBadge::compare(const QString &id, const Badge &badge) const
 {
     if (this->hasVersions_)
     {
-        auto parts = SharedMessageBuilder::slashKeyValue(id);
+        auto parts = slashKeyValue(id);
         return parts.first.compare(badge.key_, Qt::CaseInsensitive) == 0 &&
                parts.second.compare(badge.value_, Qt::CaseInsensitive) == 0;
     }
