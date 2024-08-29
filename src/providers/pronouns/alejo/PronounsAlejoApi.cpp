@@ -42,7 +42,6 @@ AlejoApi::AlejoApi()
     qCDebug(chatterinoPronouns) << "Fetching available pronouns for alejo.io";
     NetworkRequest(AlejoApi::API_URL + AlejoApi::API_PRONOUNS)
         .concurrent()
-        .cache()
         .onSuccess([this](const auto &result) {
             auto object = result.parseJson();
             if (object.isEmpty())
