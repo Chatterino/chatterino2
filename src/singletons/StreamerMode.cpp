@@ -177,8 +177,8 @@ private:
     StreamerMode *parent_;
     pajlada::Signals::SignalHolder settingConnections_;
 
-    QTimer timer_;
     QThread thread_;
+    QTimer *timer_;
 
     std::atomic<bool> enabled_ = false;
     mutable std::atomic<uint8_t> timeouts_ = 0;
@@ -209,10 +209,11 @@ void StreamerMode::start()
 
 StreamerModePrivate::StreamerModePrivate(StreamerMode *parent)
     : parent_(parent)
+    , timer_(new QTimer(&this->thread_))
 {
     this->thread_.setObjectName("StreamerMode");
-    this->timer_.moveToThread(&this->thread_);
-    QObject::connect(&this->timer_, &QTimer::timeout, [this] {
+    this->timer_->moveToThread(&this->thread_);
+    QObject::connect(this->timer_, &QTimer::timeout, [this] {
         auto timeouts =
             this->timeouts_.fetch_add(1, std::memory_order::relaxed);
         if (timeouts < SKIPPED_TIMEOUTS)
@@ -244,6 +245,8 @@ void StreamerModePrivate::start()
 
 StreamerModePrivate::~StreamerModePrivate()
 {
+    this->timer_->deleteLater();
+    this->timer_ = nullptr;
     this->thread_.quit();
     if (!this->thread_.wait(500))
     {
@@ -282,18 +285,18 @@ void StreamerModePrivate::settingChanged(StreamerModeSetting value)
     {
         case StreamerModeSetting::Disabled: {
             this->setEnabled(false);
-            this->timer_.stop();
+            this->timer_->stop();
         }
         break;
         case StreamerModeSetting::Enabled: {
             this->setEnabled(true);
-            this->timer_.stop();
+            this->timer_->stop();
         }
         break;
         case StreamerModeSetting::DetectStreamingSoftware: {
-            if (!this->timer_.isActive())
+            if (!this->timer_->isActive())
             {
-                this->timer_.start(20s);
+                this->timer_->start(20s);
                 this->check();
             }
         }
