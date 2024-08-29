@@ -14,7 +14,7 @@ class Pronouns
 public:
     Pronouns() = default;
 
-    void fetch(const QString &user,
+    void fetch(const QString &username,
                const std::function<void(UserPronouns)> &callbackSuccess,
                const std::function<void()> &callbackFail);
 
