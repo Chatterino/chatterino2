@@ -7,7 +7,7 @@
 
 namespace chatterino::pronouns {
 
-UserPronouns AlejoApi::parse(QJsonObject object)
+UserPronouns AlejoApi::parse(const QJsonObject &object)
 {
     if (!this->pronounsFromId.has_value())
     {
@@ -22,7 +22,7 @@ UserPronouns AlejoApi::parse(QJsonObject object)
     }
 
     auto pronounStr = pronoun.toString();
-    std::shared_lock<std::shared_mutex> lock(this->mutex);
+    std::shared_lock lock(this->mutex);
     auto iter = this->pronounsFromId->find(pronounStr);
     if (iter != this->pronounsFromId->end())
     {
@@ -33,52 +33,53 @@ UserPronouns AlejoApi::parse(QJsonObject object)
 
 AlejoApi::AlejoApi()
 {
-    std::shared_lock<std::shared_mutex> lock(this->mutex);
-    if (!this->pronounsFromId)
+    std::shared_lock lock(this->mutex);
+    if (this->pronounsFromId)
     {
-        qCDebug(chatterinoPronouns)
-            << "Fetching available pronouns for alejo.io";
-        NetworkRequest(AlejoApi::API_URL + AlejoApi::API_PRONOUNS)
-            .concurrent()
-            .cache()
-            .onSuccess([this](auto result) {
-                auto object = result.parseJson();
-                if (object.isEmpty())
-                {
-                    return;
-                }
-
-                std::unique_lock<std::shared_mutex> lock(this->mutex);
-                this->pronounsFromId = {std::unordered_map<QString, QString>()};
-                for (auto const &pronounId : object.keys())
-                {
-                    if (!object[pronounId].isObject())
-                    {
-                        continue;
-                    };
-
-                    auto pronounObj = object[pronounId].toObject();
-
-                    if (!pronounObj["subject"].isString())
-                    {
-                        continue;
-                    }
-
-                    QString pronouns = pronounObj["subject"].toString();
-
-                    auto singular = pronounObj["singular"];
-                    if (singular.isBool() && !singular.toBool() &&
-                        pronounObj["object"].isString())
-                    {
-                        pronouns += "/" + pronounObj["object"].toString();
-                    }
-
-                    (*this->pronounsFromId)
-                        .insert_or_assign(pronounId, pronouns.toLower());
-                }
-            })
-            .execute();
+        return;
     }
+
+    qCDebug(chatterinoPronouns) << "Fetching available pronouns for alejo.io";
+    NetworkRequest(AlejoApi::API_URL + AlejoApi::API_PRONOUNS)
+        .concurrent()
+        .cache()
+        .onSuccess([this](const auto &result) {
+            auto object = result.parseJson();
+            if (object.isEmpty())
+            {
+                return;
+            }
+
+            std::unique_lock lock(this->mutex);
+            this->pronounsFromId = {std::unordered_map<QString, QString>()};
+            for (auto const &pronounId : object.keys())
+            {
+                if (!object[pronounId].isObject())
+                {
+                    continue;
+                };
+
+                const auto pronounObj = object[pronounId].toObject();
+
+                if (!pronounObj["subject"].isString())
+                {
+                    continue;
+                }
+
+                QString pronouns = pronounObj["subject"].toString();
+
+                auto singular = pronounObj["singular"];
+                if (singular.isBool() && !singular.toBool() &&
+                    pronounObj["object"].isString())
+                {
+                    pronouns += "/" + pronounObj["object"].toString();
+                }
+
+                this->pronounsFromId->insert_or_assign(pronounId,
+                                                       pronouns.toLower());
+            }
+        })
+        .execute();
 }
 
 void AlejoApi::fetch(const QString &username,
@@ -86,7 +87,7 @@ void AlejoApi::fetch(const QString &username,
 {
     bool havePronounList{true};
     {
-        std::shared_lock<std::shared_mutex> lock(this->mutex);
+        std::shared_lock lock(this->mutex);
         havePronounList = this->pronounsFromId.has_value();
     }  // unlock mutex
 
@@ -99,12 +100,12 @@ void AlejoApi::fetch(const QString &username,
 
     NetworkRequest(AlejoApi::API_URL + AlejoApi::API_USERS + "/" + username)
         .concurrent()
-        .onSuccess([this, username, onDone](auto result) {
+        .onSuccess([this, username, onDone](const auto &result) {
             auto object = result.parseJson();
             auto parsed = this->parse(object);
             onDone({parsed});
         })
-        .onError([onDone](auto result) {
+        .onError([onDone, username](auto result) {
             auto status = result.status();
             if (status.has_value() && status == 404)
             {
@@ -113,6 +114,9 @@ void AlejoApi::fetch(const QString &username,
                 onDone({UserPronouns()});
                 return;
             }
+            qCDebug(chatterinoPronouns)
+                << "alejo.io returned " << status
+                << " when fetching pronouns for " << username;
             onDone({});
         })
         .execute();

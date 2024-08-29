@@ -17,7 +17,7 @@ void Pronouns::fetch(const QString &username,
 {
     // Only fetch pronouns if we haven't fetched before.
     {
-        std::shared_lock<std::shared_mutex> lock(this->mutex);
+        std::shared_lock lock(this->mutex);
 
         auto iter = this->saved.find(username);
         if (iter != this->saved.end())
@@ -35,7 +35,7 @@ void Pronouns::fetch(const QString &username,
         if (result.has_value())
         {
             {
-                std::unique_lock<std::shared_mutex> lock(this->mutex);
+                std::unique_lock lock(this->mutex);
                 this->saved[username] = *result;
             }  // unlock mutex
             qCDebug(chatterinoPronouns)
@@ -52,7 +52,7 @@ void Pronouns::fetch(const QString &username,
 
 std::optional<UserPronouns> Pronouns::getForUsername(const QString &username)
 {
-    std::shared_lock<std::shared_mutex> lock(this->mutex);
+    std::shared_lock lock(this->mutex);
     auto it = this->saved.find(username);
     if (it != this->saved.end())
     {

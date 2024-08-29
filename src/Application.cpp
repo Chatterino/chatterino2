@@ -148,7 +148,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , logging(new Logging(_settings))
     , linkResolver(new LinkResolver)
     , streamerMode(new StreamerMode)
-    , pronouns(new pronouns::Pronouns)
+    , pronouns(std::make_shared<pronouns::Pronouns>())
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(new PluginController(paths))
 #endif
@@ -595,6 +595,7 @@ SeventvEmotes *Application::getSeventvEmotes()
 
 pronouns::Pronouns *Application::getPronouns()
 {
+    // pronouns::Pronouns handles its own locks, so we don't need to assert that this is called in the GUI thread
     assert(this->pronouns);
 
     return this->pronouns.get();
