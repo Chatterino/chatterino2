@@ -91,11 +91,6 @@ public:
         return &this->seventvEmotes;
     }
 
-    IStreamerMode *getStreamerMode() override
-    {
-        return &this->streamerMode;
-    }
-
     pronouns::Pronouns *getPronouns() override
     {
         return &this->pronouns;
