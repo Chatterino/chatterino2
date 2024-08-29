@@ -69,7 +69,7 @@ public:
         return &this->seventvEmotes;
     }
 
-    Pronouns *getPronouns() override
+    pronouns::Pronouns *getPronouns() override
     {
         return &this->pronouns;
     }
@@ -80,7 +80,7 @@ public:
     BttvEmotes bttvEmotes;
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;
-    Pronouns pronouns;
+    pronouns::Pronouns pronouns;
 };
 
 }  // namespace

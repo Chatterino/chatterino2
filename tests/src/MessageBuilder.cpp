@@ -91,7 +91,6 @@ public:
         return &this->seventvEmotes;
     }
 
-<<<<<<< HEAD:tests/src/TwitchMessageBuilder.cpp
     IStreamerMode *getStreamerMode() override
     {
         return &this->streamerMode;
@@ -103,8 +102,6 @@ public:
     }
 
     Settings settings;
-=======
->>>>>>> master:tests/src/MessageBuilder.cpp
     AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;
@@ -116,7 +113,7 @@ public:
     BttvEmotes bttvEmotes;
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;
-    Pronouns::Pronouns pronouns;
+    pronouns::Pronouns pronouns;
 };
 
 }  // namespace

@@ -129,7 +129,7 @@ public:
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;
     DisabledStreamerMode streamerMode;
-    Pronouns pronouns;
+    pronouns::Pronouns pronouns;
 };
 
 std::optional<QJsonDocument> tryReadJsonFile(const QString &path)
