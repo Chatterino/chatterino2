@@ -28,7 +28,7 @@ jobs:
         include:
           - os: "ubuntu-22.04"
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-22.04:latest
-            qt-version: 6.6.1
+            qt-version: 6.7.1
             plugins: true
       fail-fast: false
     env:
