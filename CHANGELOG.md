@@ -53,6 +53,7 @@
 - Dev: Refactor `TwitchIrcServer`, making it abstracted. (#5421, #5435)
 - Dev: Reduced the amount of scale events. (#5404, #5406)
 - Dev: Removed unused timegate settings. (#5361)
+- Dev: Launch StreamLink with its own directory as its working directory, ensuring the Chatterino directory isn't locked while streamlink & its video player is still running. (#5573)
 - Dev: Add `Channel::addSystemMessage` helper function, allowing us to avoid the common `channel->addMessage(makeSystemMessage(...));` pattern. (#5500)
 - Dev: Unsingletonize `Resources2`. (#5460)
 - Dev: All Lua globals now show in the `c2` global in the LuaLS metadata. (#5385)

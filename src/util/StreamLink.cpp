@@ -10,6 +10,7 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/Window.hpp"
 
+#include <QDir>
 #include <QErrorMessage>
 #include <QFileInfo>
 #include <QProcess>
@@ -56,6 +57,8 @@ QProcess *createStreamlinkProcess()
     auto *p = new QProcess;
 
     const auto path = getStreamlinkPath();
+
+    p->setWorkingDirectory(QDir(path).dirName());
 
     if (Version::instance().isFlatpak())
     {
