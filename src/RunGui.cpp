@@ -49,7 +49,7 @@ namespace {
         dark.setColor(QPalette::Base, QColor("#333"));
         dark.setColor(QPalette::AlternateBase, QColor("#444"));
         dark.setColor(QPalette::ToolTipBase, Qt::white);
-        dark.setColor(QPalette::ToolTipText, Qt::white);
+        dark.setColor(QPalette::ToolTipText, Qt::black);
         dark.setColor(QPalette::Dark, QColor(35, 35, 35));
         dark.setColor(QPalette::Shadow, QColor(20, 20, 20));
         dark.setColor(QPalette::Button, QColor(70, 70, 70));
