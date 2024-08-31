@@ -649,6 +649,40 @@ void TwitchIrcServer::initialize()
         });
 
     this->connections_.managedConnect(
+        getApp()->getTwitchPubSub()->moderation.raidStarted,
+        [this](const auto &action) {
+            auto chan = this->getChannelOrEmptyByID(action.roomID);
+
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            auto msg = MessageBuilder(action).release();
+
+            postToThread([chan, msg] {
+                chan->addMessage(msg, MessageContext::Original);
+            });
+        });
+
+    this->connections_.managedConnect(
+        getApp()->getTwitchPubSub()->moderation.raidCanceled,
+        [this](const auto &action) {
+            auto chan = this->getChannelOrEmptyByID(action.roomID);
+
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            auto msg = MessageBuilder(action).release();
+
+            postToThread([chan, msg] {
+                chan->addMessage(msg, MessageContext::Original);
+            });
+        });
+
+    this->connections_.managedConnect(
         getApp()->getTwitchPubSub()->pointReward.redeemed, [this](auto &data) {
             QString channelId = data.value("channel_id").toString();
             if (channelId.isEmpty())
