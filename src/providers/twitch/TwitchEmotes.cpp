@@ -476,7 +476,12 @@ EmotePtr TwitchEmotes::getOrCreateEmote(const EmoteId &id,
 
 TwitchEmoteSetMeta getTwitchEmoteSetMeta(const HelixChannelEmote &emote)
 {
-    bool isSub = emote.type == u"subscriptions";
+    // follower emotes are treated as sub emotes
+    // A sub emote must have an owner or an emote-set id (otherwise it's a
+    // global like "BopBop")
+    bool isSub =
+        (emote.type == u"subscriptions" || emote.type == u"follower") &&
+        !(emote.ownerID.isEmpty() && emote.setID.isEmpty());
     bool isBits = emote.type == u"bitstier";
     bool isSubLike = isSub || isBits;
 
