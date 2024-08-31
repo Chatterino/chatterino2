@@ -381,15 +381,20 @@ void TwitchAccount::reloadEmotes(void *caller)
         auto set = sets->find(EmoteSetId{meta.setID});
         if (set == sets->end())
         {
-            set = sets->emplace(
-                          EmoteSetId{meta.setID},
-                          TwitchEmoteSet{
-                              .owner = twitchUsers->resolveID(UserId{
-                                  meta.isSubLike ? emote.ownerID : QString()}),
-                              .emotes = {},
-                              .isBits = meta.isBits,
-                              .isSubLike = meta.isSubLike,
-                          })
+            auto owner = [&]() {
+                if (meta.isSubLike)
+                {
+                    return twitchUsers->resolveID({emote.ownerID});
+                }
+                return std::make_shared<TwitchUser>(u"[x-c2-global-owner]"_s);
+            }();
+            set = sets->emplace(EmoteSetId{meta.setID},
+                                TwitchEmoteSet{
+                                    .owner = owner,
+                                    .emotes = {},
+                                    .isBits = meta.isBits,
+                                    .isSubLike = meta.isSubLike,
+                                })
                       .first;
         }
         set->second.emotes.emplace_back(std::move(emotePtr));
