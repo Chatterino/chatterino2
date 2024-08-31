@@ -1,5 +1,7 @@
-#include "CommandModel.hpp"
+#include "controllers/commands/CommandModel.hpp"
 
+#include "common/SignalVector.hpp"
+#include "controllers/commands/Command.hpp"
 #include "util/StandardItemHelper.hpp"
 
 namespace chatterino {

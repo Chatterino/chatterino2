@@ -1,31 +1,16 @@
-#include "ModerationAction.hpp"
+#include "controllers/moderationactions/ModerationAction.hpp"
 
-#include <QRegularExpression>
 #include "Application.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "messages/Image.hpp"
 #include "singletons/Resources.hpp"
 
+#include <QRegularExpression>
+#include <QUrl>
+
 namespace chatterino {
 
-// ModerationAction::ModerationAction(Image *_image, const QString &_action)
-//    : _isImage(true)
-//    , image(_image)
-//    , action(_action)
-//{
-//}
-
-// ModerationAction::ModerationAction(const QString &_line1, const QString
-// &_line2,
-//                                   const QString &_action)
-//    : _isImage(false)
-//    , image(nullptr)
-//    , line1(_line1)
-//    , line2(_line2)
-//    , action(_action)
-//{
-//}
-
-ModerationAction::ModerationAction(const QString &action)
+ModerationAction::ModerationAction(const QString &action, const QUrl &iconPath)
     : action_(action)
 {
     static QRegularExpression replaceRegex("[!/.]");
@@ -35,6 +20,8 @@ ModerationAction::ModerationAction(const QString &action)
 
     if (timeoutMatch.hasMatch())
     {
+        this->type_ = Type::Timeout;
+
         // if (multipleTimeouts > 1) {
         // QString line1;
         // QString line2;
@@ -97,30 +84,30 @@ ModerationAction::ModerationAction(const QString &action)
             }
             this->line2_ = "w";
         }
-
-        // line1 = this->line1_;
-        // line2 = this->line2_;
-        // } else {
-        //     this->_moderationActions.emplace_back(getResources().buttonTimeout,
-        //     str);
-        // }
     }
     else if (action.startsWith("/ban "))
     {
-        this->imageToLoad_ = 1;
+        this->type_ = Type::Ban;
     }
     else if (action.startsWith("/delete "))
     {
-        this->imageToLoad_ = 2;
+        this->type_ = Type::Delete;
     }
     else
     {
+        this->type_ = Type::Custom;
+
         QString xD = action;
 
         xD.replace(replaceRegex, "");
 
         this->line1_ = xD.mid(0, 2);
         this->line2_ = xD.mid(2, 2);
+    }
+
+    if (iconPath.isValid())
+    {
+        this->iconPath_ = iconPath;
     }
 }
 
@@ -134,16 +121,26 @@ bool ModerationAction::isImage() const
     return bool(this->image_);
 }
 
-const boost::optional<ImagePtr> &ModerationAction::getImage() const
+const std::optional<ImagePtr> &ModerationAction::getImage() const
 {
     assertInGuiThread();
-
-    if (this->imageToLoad_ != 0)
+    if (this->image_.has_value())
     {
-        if (this->imageToLoad_ == 1)
-            this->image_ = Image::fromPixmap(getResources().buttons.ban);
-        else if (this->imageToLoad_ == 2)
-            this->image_ = Image::fromPixmap(getResources().buttons.trashCan);
+        return this->image_;
+    }
+
+    if (this->iconPath_.isValid())
+    {
+        this->image_ = Image::fromUrl({this->iconPath_.toString()});
+    }
+    else if (this->type_ == Type::Ban)
+    {
+        this->image_ = Image::fromResourcePixmap(getResources().buttons.ban);
+    }
+    else if (this->type_ == Type::Delete)
+    {
+        this->image_ =
+            Image::fromResourcePixmap(getResources().buttons.trashCan);
     }
 
     return this->image_;
@@ -162,6 +159,16 @@ const QString &ModerationAction::getLine2() const
 const QString &ModerationAction::getAction() const
 {
     return this->action_;
+}
+
+const QUrl &ModerationAction::iconPath() const
+{
+    return this->iconPath_;
+}
+
+ModerationAction::Type ModerationAction::getType() const
+{
+    return this->type_;
 }
 
 }  // namespace chatterino

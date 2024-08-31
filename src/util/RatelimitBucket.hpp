@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QString>
 
+#include <functional>
+
 namespace chatterino {
 
 class RatelimitBucket : public QObject

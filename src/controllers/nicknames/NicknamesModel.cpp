@@ -1,8 +1,6 @@
-#include "NicknamesModel.hpp"
+#include "controllers/nicknames/NicknamesModel.hpp"
 
-#include "Application.hpp"
-#include "providers/twitch/api/Helix.hpp"
-#include "singletons/Settings.hpp"
+#include "controllers/nicknames/Nickname.hpp"
 #include "util/StandardItemHelper.hpp"
 
 namespace chatterino {
@@ -16,7 +14,7 @@ NicknamesModel::NicknamesModel(QObject *parent)
 Nickname NicknamesModel::getItemFromRow(std::vector<QStandardItem *> &row,
                                         const Nickname &original)
 {
-    return Nickname{row[0]->data(Qt::DisplayRole).toString(),
+    return Nickname{row[0]->data(Qt::DisplayRole).toString().trimmed(),
                     row[1]->data(Qt::DisplayRole).toString(),
                     row[2]->data(Qt::CheckStateRole).toBool(),
                     row[3]->data(Qt::CheckStateRole).toBool()};

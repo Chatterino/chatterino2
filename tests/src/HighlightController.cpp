@@ -1,219 +1,58 @@
 #include "controllers/highlights/HighlightController.hpp"
-#include "Application.hpp"
-#include "BaseSettings.hpp"
-#include "messages/MessageBuilder.hpp"       // for MessageParseArgs
-#include "providers/twitch/TwitchBadge.hpp"  // for Badge
-#include "providers/twitch/api/Helix.hpp"
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include "controllers/accounts/AccountController.hpp"
+#include "controllers/highlights/HighlightPhrase.hpp"
+#include "messages/MessageBuilder.hpp"  // for MessageParseArgs
+#include "mocks/BaseApplication.hpp"
+#include "mocks/Helix.hpp"
+#include "mocks/UserData.hpp"
+#include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/TwitchBadge.hpp"  // for Badge
+#include "Test.hpp"
+
 #include <QDebug>
 #include <QDir>
 #include <QFile>
 #include <QString>
+#include <QTemporaryDir>
 
 using namespace chatterino;
 using ::testing::Exactly;
 
-class MockApplication : IApplication
+namespace {
+
+class MockApplication : public mock::BaseApplication
 {
 public:
-    Theme *getThemes() override
+    MockApplication(const QString &settingsBody)
+        : mock::BaseApplication(settingsBody)
+        , highlights(this->settings, &this->accounts)
     {
-        return nullptr;
     }
-    Fonts *getFonts() override
-    {
-        return nullptr;
-    }
-    Emotes *getEmotes() override
-    {
-        return nullptr;
-    }
+
     AccountController *getAccounts() override
     {
         return &this->accounts;
     }
-    HotkeyController *getHotkeys() override
-    {
-        return nullptr;
-    }
-    WindowManager *getWindows() override
-    {
-        return nullptr;
-    }
-    Toasts *getToasts() override
-    {
-        return nullptr;
-    }
-    CommandController *getCommands() override
-    {
-        return nullptr;
-    }
-    NotificationController *getNotifications() override
-    {
-        return nullptr;
-    }
+
     HighlightController *getHighlights() override
     {
         return &this->highlights;
     }
-    TwitchIrcServer *getTwitch() override
+
+    IUserDataController *getUserData() override
     {
-        return nullptr;
-    }
-    ChatterinoBadges *getChatterinoBadges() override
-    {
-        return nullptr;
-    }
-    FfzBadges *getFfzBadges() override
-    {
-        return nullptr;
+        return &this->userData;
     }
 
     AccountController accounts;
     HighlightController highlights;
-    // TODO: Figure this out
+    mock::UserDataController userData;
 };
 
-class MockHelix : public IHelix
-{
-public:
-    MOCK_METHOD(void, fetchUsers,
-                (QStringList userIds, QStringList userLogins,
-                 ResultCallback<std::vector<HelixUser>> successCallback,
-                 HelixFailureCallback failureCallback),
-                (override));
+}  // namespace
 
-    MOCK_METHOD(void, getUserByName,
-                (QString userName, ResultCallback<HelixUser> successCallback,
-                 HelixFailureCallback failureCallback),
-                (override));
-    MOCK_METHOD(void, getUserById,
-                (QString userId, ResultCallback<HelixUser> successCallback,
-                 HelixFailureCallback failureCallback),
-                (override));
-
-    MOCK_METHOD(void, fetchUsersFollows,
-                (QString fromId, QString toId,
-                 ResultCallback<HelixUsersFollowsResponse> successCallback,
-                 HelixFailureCallback failureCallback),
-                (override));
-
-    MOCK_METHOD(void, getUserFollowers,
-                (QString userId,
-                 ResultCallback<HelixUsersFollowsResponse> successCallback,
-                 HelixFailureCallback failureCallback),
-                (override));
-
-    MOCK_METHOD(void, fetchStreams,
-                (QStringList userIds, QStringList userLogins,
-                 ResultCallback<std::vector<HelixStream>> successCallback,
-                 HelixFailureCallback failureCallback,
-                 std::function<void()> finallyCallback),
-                (override));
-
-    MOCK_METHOD(void, getStreamById,
-                (QString userId,
-                 (ResultCallback<bool, HelixStream> successCallback),
-                 HelixFailureCallback failureCallback,
-                 std::function<void()> finallyCallback),
-                (override));
-
-    MOCK_METHOD(void, getStreamByName,
-                (QString userName,
-                 (ResultCallback<bool, HelixStream> successCallback),
-                 HelixFailureCallback failureCallback,
-                 std::function<void()> finallyCallback),
-                (override));
-
-    MOCK_METHOD(void, fetchGames,
-                (QStringList gameIds, QStringList gameNames,
-                 (ResultCallback<std::vector<HelixGame>> successCallback),
-                 HelixFailureCallback failureCallback),
-                (override));
-
-    MOCK_METHOD(void, searchGames,
-                (QString gameName,
-                 ResultCallback<std::vector<HelixGame>> successCallback,
-                 HelixFailureCallback failureCallback),
-                (override));
-
-    MOCK_METHOD(void, getGameById,
-                (QString gameId, ResultCallback<HelixGame> successCallback,
-                 HelixFailureCallback failureCallback),
-                (override));
-
-    MOCK_METHOD(void, createClip,
-                (QString channelId, ResultCallback<HelixClip> successCallback,
-                 std::function<void(HelixClipError)> failureCallback,
-                 std::function<void()> finallyCallback),
-                (override));
-
-    MOCK_METHOD(void, getChannel,
-                (QString broadcasterId,
-                 ResultCallback<HelixChannel> successCallback,
-                 HelixFailureCallback failureCallback),
-                (override));
-
-    MOCK_METHOD(void, createStreamMarker,
-                (QString broadcasterId, QString description,
-                 ResultCallback<HelixStreamMarker> successCallback,
-                 std::function<void(HelixStreamMarkerError)> failureCallback),
-                (override));
-
-    MOCK_METHOD(void, loadBlocks,
-                (QString userId,
-                 ResultCallback<std::vector<HelixBlock>> successCallback,
-                 HelixFailureCallback failureCallback),
-                (override));
-
-    MOCK_METHOD(void, blockUser,
-                (QString targetUserId, std::function<void()> successCallback,
-                 HelixFailureCallback failureCallback),
-                (override));
-
-    MOCK_METHOD(void, unblockUser,
-                (QString targetUserId, std::function<void()> successCallback,
-                 HelixFailureCallback failureCallback),
-                (override));
-
-    MOCK_METHOD(void, updateChannel,
-                (QString broadcasterId, QString gameId, QString language,
-                 QString title,
-                 std::function<void(NetworkResult)> successCallback,
-                 HelixFailureCallback failureCallback),
-                (override));
-
-    MOCK_METHOD(void, manageAutoModMessages,
-                (QString userID, QString msgID, QString action,
-                 std::function<void()> successCallback,
-                 std::function<void(HelixAutoModMessageError)> failureCallback),
-                (override));
-
-    MOCK_METHOD(void, getCheermotes,
-                (QString broadcasterId,
-                 ResultCallback<std::vector<HelixCheermoteSet>> successCallback,
-                 HelixFailureCallback failureCallback),
-                (override));
-
-    MOCK_METHOD(void, getEmoteSetData,
-                (QString emoteSetId,
-                 ResultCallback<HelixEmoteSetData> successCallback,
-                 HelixFailureCallback failureCallback),
-                (override));
-
-    MOCK_METHOD(void, getChannelEmotes,
-                (QString broadcasterId,
-                 ResultCallback<std::vector<HelixChannelEmote>> successCallback,
-                 HelixFailureCallback failureCallback),
-                (override));
-
-    MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
-                (override));
-};
-
-static QString DEFAULT_SETTINGS = R"!(
+static QString SETTINGS_DEFAULT = R"!(
 {
     "accounts": {
         "uid117166826": {
@@ -303,10 +142,23 @@ static QString DEFAULT_SETTINGS = R"!(
                 "sound": false,
                 "soundUrl": "",
                 "color": "#7fe8b7eb"
+            },
+            {
+                "name": "vip",
+                "displayName": "VIP",
+                "showInMentions": true,
+                "alert": false,
+                "sound": false,
+                "soundUrl": "",
+                "color": "#7fe8b7ec"
             }
         ],
         "subHighlightColor": "#64ffd641"
     }
+})!";
+
+static QString SETTINGS_ANON_EMPTY = R"!(
+{
 })!";
 
 struct TestCase {
@@ -316,6 +168,7 @@ struct TestCase {
         std::vector<Badge> badges;
         QString senderName;
         QString originalMessage;
+        MessageFlags flags;
     } input;
 
     struct {
@@ -327,60 +180,53 @@ struct TestCase {
 class HighlightControllerTest : public ::testing::Test
 {
 protected:
-    void SetUp() override
+    void configure(const QString &settings, bool isAnon)
     {
-        {
-            // Write default settings to the mock settings json file
-            QDir().mkpath("/tmp/c2-tests");
-            QFile settingsFile("/tmp/c2-tests/settings.json");
-            assert(settingsFile.open(QIODevice::WriteOnly | QIODevice::Text));
-            QTextStream out(&settingsFile);
-            out << DEFAULT_SETTINGS;
-        }
+        // Write default settings to the mock settings json file
+        this->mockApplication = std::make_unique<MockApplication>(settings);
 
-        this->mockHelix = new MockHelix;
+        this->mockHelix = new mock::Helix;
 
         initializeHelix(this->mockHelix);
 
         EXPECT_CALL(*this->mockHelix, loadBlocks).Times(Exactly(1));
-        EXPECT_CALL(*this->mockHelix, update).Times(Exactly(1));
+        EXPECT_CALL(*this->mockHelix, update).Times(Exactly(isAnon ? 0 : 1));
 
-        this->mockApplication = std::make_unique<MockApplication>();
-        this->settings = std::make_unique<Settings>("/tmp/c2-tests");
-        this->paths = std::make_unique<Paths>();
+        this->mockApplication->accounts.load();
+    }
 
-        this->controller = std::make_unique<HighlightController>();
+    void runTests(const std::vector<TestCase> &tests)
+    {
+        for (const auto &[input, expected] : tests)
+        {
+            auto [isMatch, matchResult] =
+                this->mockApplication->getHighlights()->check(
+                    input.args, input.badges, input.senderName,
+                    input.originalMessage, input.flags);
 
-        this->mockApplication->accounts.initialize(*this->settings,
-                                                   *this->paths);
-        this->controller->initialize(*this->settings, *this->paths);
+            EXPECT_EQ(isMatch, expected.state)
+                << input.senderName << ": " << input.originalMessage;
+            EXPECT_EQ(matchResult, expected.result)
+                << input.senderName << ": " << input.originalMessage;
+        }
     }
 
     void TearDown() override
     {
-        QDir().rmdir("/tmp/c2-tests");
         this->mockApplication.reset();
-        this->settings.reset();
-        this->paths.reset();
-
-        this->controller.reset();
 
         delete this->mockHelix;
     }
 
     std::unique_ptr<MockApplication> mockApplication;
-    std::unique_ptr<Settings> settings;
-    std::unique_ptr<Paths> paths;
 
-    std::unique_ptr<HighlightController> controller;
-
-    MockHelix *mockHelix;
+    mock::Helix *mockHelix;
 };
 
-TEST_F(HighlightControllerTest, A)
+TEST_F(HighlightControllerTest, LoggedInAndConfigured)
 {
-    auto currentUser =
-        this->mockApplication->getAccounts()->twitch.getCurrent();
+    configure(SETTINGS_DEFAULT, false);
+
     std::vector<TestCase> tests{
         {
             {
@@ -396,7 +242,7 @@ TEST_F(HighlightControllerTest, A)
                 {
                     false,                                  // alert
                     false,                                  // playsound
-                    boost::none,                            // custom sound url
+                    std::nullopt,                           // custom sound url
                     std::make_shared<QColor>("#7fffffff"),  // color
                     false,
                 },
@@ -435,7 +281,7 @@ TEST_F(HighlightControllerTest, A)
                 {
                     true,                                   // alert
                     false,                                  // playsound
-                    boost::none,                            // custom sound url
+                    std::nullopt,                           // custom sound url
                     std::make_shared<QColor>("#7fe8b7eb"),  // color
                     false,                                  //showInMentions
                 },
@@ -460,9 +306,35 @@ TEST_F(HighlightControllerTest, A)
                 {
                     true,                                   // alert
                     false,                                  // playsound
-                    boost::none,                            // custom sound url
+                    std::nullopt,                           // custom sound url
                     std::make_shared<QColor>("#7fffffff"),  // color
                     false,                                  //showInMentions
+                },
+            },
+        },
+        {
+            // Badge highlight with showInMentions only
+            {
+                // input
+                MessageParseArgs{},  // no special args
+                {
+                    {
+                        "vip",
+                        "0",
+                    },
+                },
+                "badge",                  // sender name
+                "show in mentions only",  // original message
+            },
+            {
+                // expected
+                true,  // state
+                {
+                    false,                                  // alert
+                    false,                                  // playsound
+                    std::nullopt,                           // custom sound url
+                    std::make_shared<QColor>("#7fe8b7ec"),  // color
+                    true,                                   // showInMentions
                 },
             },
         },
@@ -481,7 +353,7 @@ TEST_F(HighlightControllerTest, A)
                 {
                     true,                                   // alert
                     false,                                  // playsound
-                    boost::none,                            // custom sound url
+                    std::nullopt,                           // custom sound url
                     std::make_shared<QColor>("#7ff19900"),  // color
                     true,                                   // showInMentions
                 },
@@ -501,7 +373,7 @@ TEST_F(HighlightControllerTest, A)
                 {
                     true,                                   // alert
                     true,                                   // playsound
-                    boost::none,                            // custom sound url
+                    std::nullopt,                           // custom sound url
                     std::make_shared<QColor>("#7f7f3f49"),  // color
                     true,                                   // showInMentions
                 },
@@ -522,22 +394,101 @@ TEST_F(HighlightControllerTest, A)
                 {
                     false,                                  // alert
                     false,                                  // playsound
-                    boost::none,                            // custom sound url
+                    std::nullopt,                           // custom sound url
                     std::make_shared<QColor>("#6fffffff"),  // color
                     false,
                 },
             },
         },
+        {
+            // TEST CASE: Whispers that do not hit a highlight phrase should not be added to /mentions
+            {
+                // input
+                .args =
+                    MessageParseArgs{
+                        .isReceivedWhisper = true,
+                    },
+                .senderName = "forsen",
+                .originalMessage = "Hello NymN!",
+            },
+            {
+                // expected
+                .state = true,  // state
+                .result =
+                    {
+                        false,         // alert
+                        false,         // playsound
+                        std::nullopt,  // custom sound url
+                        std::make_shared<QColor>(
+                            HighlightPhrase::
+                                FALLBACK_HIGHLIGHT_COLOR),  // color
+                        false,                              // showInMentions
+                    },
+            },
+        },
+        {
+            // TEST CASE: Whispers that do hit a highlight phrase should be added to /mentions
+            {
+                // input
+                .args =
+                    MessageParseArgs{
+                        .isReceivedWhisper = true,
+                    },
+                .senderName = "forsen",
+                .originalMessage = "!testmanxd",
+            },
+            {
+                // expected
+                .state = true,  // state
+                .result =
+                    {
+                        true,          // alert
+                        true,          // playsound
+                        std::nullopt,  // custom sound url
+                        std::make_shared<QColor>("#7f7f3f49"),  // color
+                        true,  // showInMentions
+                    },
+            },
+        },
     };
 
-    for (const auto &[input, expected] : tests)
-    {
-        auto [isMatch, matchResult] = this->controller->check(
-            input.args, input.badges, input.senderName, input.originalMessage);
+    this->runTests(tests);
+}
 
-        EXPECT_EQ(isMatch, expected.state)
-            << qUtf8Printable(input.senderName) << ": "
-            << qUtf8Printable(input.originalMessage);
-        EXPECT_EQ(matchResult, expected.result);
-    }
+TEST_F(HighlightControllerTest, AnonEmpty)
+{
+    configure(SETTINGS_ANON_EMPTY, true);
+
+    std::vector<TestCase> tests{
+        {
+            {
+                // input
+                MessageParseArgs{},  // no special args
+                {},                  // no badges
+                "pajlada2",          // sender name
+                "hello!",            // original message
+            },
+            {
+                // expected
+                false,                           // state
+                HighlightResult::emptyResult(),  // result
+            },
+        },
+        {
+            // anonymous default username
+            {
+                MessageParseArgs{},  // no special args
+                {},                  // no badges
+                "pajlada2",          // sender name
+                "justinfan64537",    // original message
+            },
+            {
+                // expected
+                false,                           // state
+                HighlightResult::emptyResult(),  // result
+            },
+        },
+    };
+
+    this->runTests(tests);
 }

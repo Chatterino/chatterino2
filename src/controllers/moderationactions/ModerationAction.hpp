@@ -1,12 +1,13 @@
 #pragma once
 
-#include <QString>
-#include <boost/optional.hpp>
-#include <pajlada/serialize.hpp>
-
 #include "util/RapidjsonHelpers.hpp"
 
+#include <pajlada/serialize.hpp>
+#include <QString>
+#include <QUrl>
+
 #include <memory>
+#include <optional>
 
 namespace chatterino {
 
@@ -16,22 +17,52 @@ using ImagePtr = std::shared_ptr<Image>;
 class ModerationAction
 {
 public:
-    ModerationAction(const QString &action);
+    /**
+     * Type of the action, parsed from the input `action`
+     */
+    enum class Type {
+        /**
+         * /ban <user>
+         */
+        Ban,
+
+        /**
+         * /delete <msg-id>
+         */
+        Delete,
+
+        /**
+         * /timeout <user> <duration>
+         */
+        Timeout,
+
+        /**
+         * Anything not matching the action types above
+         */
+        Custom,
+    };
+
+    ModerationAction(const QString &action, const QUrl &iconPath = {});
 
     bool operator==(const ModerationAction &other) const;
 
     bool isImage() const;
-    const boost::optional<ImagePtr> &getImage() const;
+    const std::optional<ImagePtr> &getImage() const;
     const QString &getLine1() const;
     const QString &getLine2() const;
     const QString &getAction() const;
+    const QUrl &iconPath() const;
+    Type getType() const;
 
 private:
-    mutable boost::optional<ImagePtr> image_;
+    mutable std::optional<ImagePtr> image_;
     QString line1_;
     QString line2_;
     QString action_;
-    int imageToLoad_{};
+
+    Type type_{};
+
+    QUrl iconPath_;
 };
 
 }  // namespace chatterino
@@ -46,6 +77,7 @@ struct Serialize<chatterino::ModerationAction> {
         rapidjson::Value ret(rapidjson::kObjectType);
 
         chatterino::rj::set(ret, "pattern", value.getAction(), a);
+        chatterino::rj::set(ret, "icon", value.iconPath().toString(), a);
 
         return ret;
     }
@@ -63,10 +95,12 @@ struct Deserialize<chatterino::ModerationAction> {
         }
 
         QString pattern;
-
         chatterino::rj::getSafe(value, "pattern", pattern);
 
-        return chatterino::ModerationAction(pattern);
+        QString icon;
+        chatterino::rj::getSafe(value, "icon", icon);
+
+        return chatterino::ModerationAction(pattern, QUrl(icon));
     }
 };
 

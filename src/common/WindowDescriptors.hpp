@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/ProviderId.hpp"
+
 #include <QJsonObject>
 #include <QList>
 #include <QRect>
@@ -8,6 +10,7 @@
 
 #include <optional>
 #include <variant>
+#include <vector>
 
 namespace chatterino {
 
@@ -29,7 +32,7 @@ namespace chatterino {
 enum class WindowType;
 
 struct SplitDescriptor {
-    // Twitch or mentions or watching or whispers or IRC
+    // Twitch or mentions or watching or live or automod or whispers or IRC
     QString type_;
 
     // Twitch Channel name or IRC channel name
@@ -94,12 +97,22 @@ struct WindowDescriptor {
 class WindowLayout
 {
 public:
-    static WindowLayout loadFromFile(const QString &path);
-
     // A complete window layout has a single emote popup position that is shared among all windows
-    QPoint emotePopupPos_;
+    QRect emotePopupBounds_;
 
     std::vector<WindowDescriptor> windows_;
+
+    /// Selects the split containing the channel specified by @a name for the specified
+    /// @a provider. Currently, only Twitch is supported as the provider
+    /// and special channels (such as /mentions) are ignored.
+    ///
+    /// Tabs with fewer splits are preferred.
+    /// Channels without filters are preferred.
+    ///
+    /// If no split with the channel exists, a new one is added.
+    /// If no window exists, a new one is added.
+    void activateOrAddChannel(ProviderId provider, const QString &name);
+    static WindowLayout loadFromFile(const QString &path);
 };
 
 }  // namespace chatterino

@@ -1,0 +1,20 @@
+This patch ensures Qt 5.15 in particular can build with modern compilers
+
+See https://bugreports.qt.io/browse/QTBUG-91909 and https://codereview.qt-project.org/c/qt/qtbase/+/339417
+---
+
+diff --git a/src/concurrent/qtconcurrentthreadengine.h b/src/concurrent/qtconcurrentthreadengine.h
+index cbd8ad04..4cd5b85 100644
+--- a/src/concurrent/qtconcurrentthreadengine.h
++++ b/src/concurrent/qtconcurrentthreadengine.h
+@@ -256,8 +256,8 @@
+ class ThreadEngineStarter<void> : public ThreadEngineStarterBase<void>
+ {
+ public:
+-    ThreadEngineStarter<void>(ThreadEngine<void> *_threadEngine)
+-    :ThreadEngineStarterBase<void>(_threadEngine) {}
++    ThreadEngineStarter(ThreadEngine<void> *_threadEngine)
++        : ThreadEngineStarterBase<void>(_threadEngine) {}
+
+     void startBlocking()
+     {

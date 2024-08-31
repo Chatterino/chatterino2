@@ -2,9 +2,11 @@
 
 #include "common/Common.hpp"
 #include "common/QLogging.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
-#include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/TwitchUser.hpp"
+#include "util/SharedPtrElementLess.hpp"
 
 namespace chatterino {
 
@@ -15,9 +17,12 @@ TwitchAccountManager::TwitchAccountManager()
     this->currentUserChanged.connect([this] {
         auto currentUser = this->getCurrent();
         currentUser->loadBlocks();
+        currentUser->loadSeventvUserID();
     });
 
-    this->accounts.itemRemoved.connect([this](const auto &acc) {
+    // We can safely ignore this signal connection since accounts will always be removed
+    // before TwitchAccountManager
+    std::ignore = this->accounts.itemRemoved.connect([this](const auto &acc) {
         this->removeUser(acc.item.get());
     });
 }

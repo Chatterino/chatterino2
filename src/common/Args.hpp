@@ -1,35 +1,74 @@
 #pragma once
 
-#include <QApplication>
-#include <boost/optional.hpp>
+#include "common/ProviderId.hpp"
 #include "common/WindowDescriptors.hpp"
+
+#include <QApplication>
+
+#include <optional>
 
 namespace chatterino {
 
+class Paths;
+
 /// Command line arguments passed to Chatterino.
+///
+/// All accepted arguments:
+///
+/// Crash recovery:
+///   --crash-recovery
+///   --cr-exception-code code
+///   --cr-exception-message message
+///
+/// Native messaging:
+///   --parent-window
+///   --x-attach-split-to-window=window-id
+///
+/// -v, --verbose
+/// -V, --version
+/// -c, --channels=t:channel1;t:channel2;...
+/// -a, --activate=t:channel
+///     --safe-mode
+///
+/// See documentation on `QGuiApplication` for documentation on Qt arguments like -platform.
 class Args
 {
 public:
-    Args(const QApplication &app);
+    struct Channel {
+        ProviderId provider;
+        QString name;
+    };
+
+    Args() = default;
+    Args(const QApplication &app, const Paths &paths);
 
     bool printVersion{};
+
     bool crashRecovery{};
+    /// Native, platform-specific exception code from crashpad
+    std::optional<uint32_t> exceptionCode{};
+    /// Text version of the exception code. Potentially contains more context.
+    std::optional<QString> exceptionMessage{};
+
     bool shouldRunBrowserExtensionHost{};
     // Shows a single chat. Used on windows to embed in another application.
     bool isFramelessEmbed{};
-    boost::optional<unsigned long long> parentWindowId{};
+    std::optional<unsigned long long> parentWindowId{};
 
     // Not settings directly
     bool dontSaveSettings{};
     bool dontLoadMainWindow{};
-    boost::optional<WindowLayout> customChannelLayout;
+    std::optional<WindowLayout> customChannelLayout;
+    std::optional<Channel> activateChannel;
     bool verbose{};
+    bool safeMode{};
+
+    QStringList currentArguments() const;
 
 private:
-    void applyCustomChannelLayout(const QString &argValue);
-};
+    void applyCustomChannelLayout(const QString &argValue, const Paths &paths);
 
-void initArgs(const QApplication &app);
-const Args &getArgs();
+    QStringList currentArguments_;
+};
 
 }  // namespace chatterino

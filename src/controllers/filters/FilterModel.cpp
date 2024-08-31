@@ -1,6 +1,7 @@
-#include "FilterModel.hpp"
+#include "controllers/filters/FilterModel.hpp"
 
 #include "Application.hpp"
+#include "controllers/filters/FilterRecord.hpp"
 #include "singletons/Settings.hpp"
 #include "util/StandardItemHelper.hpp"
 

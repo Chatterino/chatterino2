@@ -1,6 +1,10 @@
 #include "providers/colors/ColorProvider.hpp"
 
-#include "singletons/Theme.hpp"
+#include "common/QLogging.hpp"
+#include "controllers/highlights/HighlightPhrase.hpp"
+#include "singletons/Settings.hpp"
+
+#include <QSet>
 
 namespace chatterino {
 
@@ -11,22 +15,14 @@ const ColorProvider &ColorProvider::instance()
 }
 
 ColorProvider::ColorProvider()
-    : typeColorMap_()
-    , defaultColors_()
 {
     this->initTypeColorMap();
     this->initDefaultColors();
 }
 
-const std::shared_ptr<QColor> ColorProvider::color(ColorType type) const
+std::shared_ptr<QColor> ColorProvider::color(ColorType type) const
 {
     return this->typeColorMap_.at(type);
-}
-
-void ColorProvider::updateColor(ColorType type, QColor color)
-{
-    auto colorPtr = this->typeColorMap_.at(type);
-    *colorPtr = std::move(color);
 }
 
 QSet<QColor> ColorProvider::recentColors() const
@@ -37,12 +33,12 @@ QSet<QColor> ColorProvider::recentColors() const
      * Currently, only colors used in highlight phrases are considered. This
      * may change at any point in the future.
      */
-    for (auto phrase : getSettings()->highlightedMessages)
+    for (const auto &phrase : getSettings()->highlightedMessages)
     {
         retVal.insert(*phrase.getColor());
     }
 
-    for (auto userHl : getSettings()->highlightedUsers)
+    for (const auto &userHl : getSettings()->highlightedUsers)
     {
         retVal.insert(*userHl.getColor());
     }
@@ -64,75 +60,77 @@ void ColorProvider::initTypeColorMap()
 {
     // Read settings for custom highlight colors and save them in map.
     // If no custom values can be found, set up default values instead.
+    // Set up a signal to the respective setting for updating the color when it's changed
+    auto initColor = [this](ColorType colorType, QStringSetting &setting,
+                            QColor fallbackColor) {
+        const auto &colorString = setting.getValue();
+        QColor color(colorString);
+        if (color.isValid())
+        {
+            this->typeColorMap_.insert({
+                colorType,
+                std::make_shared<QColor>(color),
+            });
+        }
+        else
+        {
+            this->typeColorMap_.insert({
+                colorType,
+                std::make_shared<QColor>(fallbackColor),
+            });
+        }
 
-    QString customColor = getSettings()->selfHighlightColor;
-    if (QColor(customColor).isValid())
-    {
-        this->typeColorMap_.insert(
-            {ColorType::SelfHighlight, std::make_shared<QColor>(customColor)});
-    }
-    else
-    {
-        this->typeColorMap_.insert(
-            {ColorType::SelfHighlight,
-             std::make_shared<QColor>(
-                 HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR)});
-    }
+        setting.connect(
+            [this, colorType](const auto &colorString) {
+                QColor color(colorString);
+                if (color.isValid())
+                {
+                    // Update color based on the update from the setting
+                    *this->typeColorMap_.at(colorType) = color;
+                }
+                else
+                {
+                    qCWarning(chatterinoCommon)
+                        << "Updated"
+                        << static_cast<std::underlying_type_t<ColorType>>(
+                               colorType)
+                        << "to invalid color" << colorString;
+                }
+            },
+            false);
+    };
 
-    customColor = getSettings()->subHighlightColor;
-    if (QColor(customColor).isValid())
-    {
-        this->typeColorMap_.insert(
-            {ColorType::Subscription, std::make_shared<QColor>(customColor)});
-    }
-    else
-    {
-        this->typeColorMap_.insert(
-            {ColorType::Subscription,
-             std::make_shared<QColor>(HighlightPhrase::FALLBACK_SUB_COLOR)});
-    }
+    initColor(ColorType::SelfHighlight, getSettings()->selfHighlightColor,
+              HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
 
-    customColor = getSettings()->whisperHighlightColor;
-    if (QColor(customColor).isValid())
-    {
-        this->typeColorMap_.insert(
-            {ColorType::Whisper, std::make_shared<QColor>(customColor)});
-    }
-    else
-    {
-        this->typeColorMap_.insert(
-            {ColorType::Whisper,
-             std::make_shared<QColor>(
-                 HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR)});
-    }
+    initColor(ColorType::SelfMessageHighlight,
+              getSettings()->selfMessageHighlightColor,
+              HighlightPhrase::FALLBACK_SELF_MESSAGE_HIGHLIGHT_COLOR);
 
-    customColor = getSettings()->redeemedHighlightColor;
-    if (QColor(customColor).isValid())
-    {
-        this->typeColorMap_.insert({ColorType::RedeemedHighlight,
-                                    std::make_shared<QColor>(customColor)});
-    }
-    else
-    {
-        this->typeColorMap_.insert(
-            {ColorType::RedeemedHighlight,
-             std::make_shared<QColor>(
-                 HighlightPhrase::FALLBACK_REDEEMED_HIGHLIGHT_COLOR)});
-    }
+    initColor(ColorType::Subscription, getSettings()->subHighlightColor,
+              HighlightPhrase::FALLBACK_SUB_COLOR);
 
-    customColor = getSettings()->firstMessageHighlightColor;
-    if (QColor(customColor).isValid())
-    {
-        this->typeColorMap_.insert({ColorType::FirstMessageHighlight,
-                                    std::make_shared<QColor>(customColor)});
-    }
-    else
-    {
-        this->typeColorMap_.insert(
-            {ColorType::FirstMessageHighlight,
-             std::make_shared<QColor>(
-                 HighlightPhrase::FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR)});
-    }
+    initColor(ColorType::Whisper, getSettings()->whisperHighlightColor,
+              HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
+
+    initColor(ColorType::RedeemedHighlight,
+              getSettings()->redeemedHighlightColor,
+              HighlightPhrase::FALLBACK_REDEEMED_HIGHLIGHT_COLOR);
+
+    initColor(ColorType::FirstMessageHighlight,
+              getSettings()->firstMessageHighlightColor,
+              HighlightPhrase::FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR);
+
+    initColor(ColorType::ElevatedMessageHighlight,
+              getSettings()->elevatedMessageHighlightColor,
+              HighlightPhrase::FALLBACK_ELEVATED_MESSAGE_HIGHLIGHT_COLOR);
+
+    initColor(ColorType::ThreadMessageHighlight,
+              getSettings()->threadHighlightColor,
+              HighlightPhrase::FALLBACK_THREAD_HIGHLIGHT_COLOR);
+
+    initColor(ColorType::AutomodHighlight, getSettings()->automodHighlightColor,
+              HighlightPhrase::FALLBACK_AUTOMOD_HIGHLIGHT_COLOR);
 }
 
 void ColorProvider::initDefaultColors()

@@ -1,4 +1,5 @@
-#include "Benchmark.hpp"
+#include "debug/Benchmark.hpp"
+
 #include "common/QLogging.hpp"
 
 namespace chatterino {

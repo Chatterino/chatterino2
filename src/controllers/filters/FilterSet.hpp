@@ -1,86 +1,37 @@
 #pragma once
 
-#include "controllers/filters/FilterRecord.hpp"
-#include "singletons/Settings.hpp"
+#include <pajlada/signals.hpp>
+#include <QList>
+#include <QMap>
+#include <QUuid>
+
+#include <memory>
 
 namespace chatterino {
+
+class FilterRecord;
+using FilterRecordPtr = std::shared_ptr<FilterRecord>;
+struct Message;
+class Channel;
+using MessagePtr = std::shared_ptr<const Message>;
+using ChannelPtr = std::shared_ptr<Channel>;
 
 class FilterSet
 {
 public:
-    FilterSet()
-    {
-        this->listener_ =
-            getCSettings().filterRecords.delayedItemsChanged.connect([this] {
-                this->reloadFilters();
-            });
-    }
+    FilterSet();
+    FilterSet(const QList<QUuid> &filterIds);
 
-    FilterSet(const QList<QUuid> &filterIds)
-    {
-        auto filters = getCSettings().filterRecords.readOnly();
-        for (const auto &f : *filters)
-        {
-            if (filterIds.contains(f->getId()))
-                this->filters_.insert(f->getId(), f);
-        }
+    ~FilterSet();
 
-        this->listener_ =
-            getCSettings().filterRecords.delayedItemsChanged.connect([this] {
-                this->reloadFilters();
-            });
-    }
-
-    ~FilterSet()
-    {
-        this->listener_.disconnect();
-    }
-
-    bool filter(const MessagePtr &m, ChannelPtr channel) const
-    {
-        if (this->filters_.size() == 0)
-            return true;
-
-        filterparser::ContextMap context =
-            filterparser::buildContextMap(m, channel.get());
-        for (const auto &f : this->filters_.values())
-        {
-            if (!f->valid() || !f->filter(context))
-                return false;
-        }
-
-        return true;
-    }
-
-    const QList<QUuid> filterIds() const
-    {
-        return this->filters_.keys();
-    }
+    bool filter(const MessagePtr &m, ChannelPtr channel) const;
+    const QList<QUuid> filterIds() const;
 
 private:
     QMap<QUuid, FilterRecordPtr> filters_;
     pajlada::Signals::Connection listener_;
 
-    void reloadFilters()
-    {
-        auto filters = getCSettings().filterRecords.readOnly();
-        for (const auto &key : this->filters_.keys())
-        {
-            bool found = false;
-            for (const auto &f : *filters)
-            {
-                if (f->getId() == key)
-                {
-                    found = true;
-                    this->filters_.insert(key, f);
-                }
-            }
-            if (!found)
-            {
-                this->filters_.remove(key);
-            }
-        }
-    }
+    void reloadFilters();
 };
 
 using FilterSetPtr = std::shared_ptr<FilterSet>;

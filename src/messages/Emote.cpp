@@ -1,4 +1,4 @@
-#include "Emote.hpp"
+#include "messages/Emote.hpp"
 
 #include <unordered_map>
 
@@ -20,7 +20,9 @@ EmotePtr cachedOrMakeEmotePtr(Emote &&emote, const EmoteMap &cache)
     // reuse old shared_ptr if nothing changed
     auto it = cache.find(emote.name);
     if (it != cache.end() && *it->second == emote)
+    {
         return it->second;
+    }
 
     return std::make_shared<Emote>(std::move(emote));
 }
@@ -44,6 +46,25 @@ EmotePtr cachedOrMakeEmotePtr(
         cache[id] = shared;
         return shared;
     }
+}
+
+EmoteMap::const_iterator EmoteMap::findEmote(const QString &emoteNameHint,
+                                             const QString &emoteID) const
+{
+    auto it = this->end();
+    if (!emoteNameHint.isEmpty())
+    {
+        it = this->find(EmoteName{emoteNameHint});
+    }
+
+    if (it == this->end() || it->second->id.string != emoteID)
+    {
+        it = std::find_if(this->begin(), this->end(),
+                          [emoteID](const auto entry) {
+                              return entry.second->id.string == emoteID;
+                          });
+    }
+    return it;
 }
 
 }  // namespace chatterino

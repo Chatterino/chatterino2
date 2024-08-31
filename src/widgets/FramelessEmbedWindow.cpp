@@ -1,13 +1,14 @@
-#include "FramelessEmbedWindow.hpp"
+#include "widgets/FramelessEmbedWindow.hpp"
 
-#include <QHBoxLayout>
 #include "Application.hpp"
-#include "QJsonDocument"
-#include "QMessageBox"
-#include "providers/twitch/TwitchIrcServer.hpp"
-//#include "widgets/helper/ChannelView.hpp"
 #include "common/Args.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "widgets/splits/Split.hpp"
+
+#include <QApplication>
+#include <QHBoxLayout>
+#include <QJsonDocument>
+#include <QMessageBox>
 
 #ifdef USEWINSDK
 #    include "Windows.h"
@@ -16,10 +17,10 @@
 namespace chatterino {
 
 FramelessEmbedWindow::FramelessEmbedWindow()
-    : BaseWindow(BaseWindow::Frameless)
+    : BaseWindow({BaseWindow::Frameless, BaseWindow::DisableLayoutSave})
 {
     this->split_ = new Split((QWidget *)nullptr);
-    auto layout = new QHBoxLayout;
+    auto *layout = new QHBoxLayout;
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(this->split_);
 
@@ -27,8 +28,13 @@ FramelessEmbedWindow::FramelessEmbedWindow()
 }
 
 #ifdef USEWINSDK
+#    if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+bool FramelessEmbedWindow::nativeEvent(const QByteArray &eventType,
+                                       void *message, qintptr *result)
+#    else
 bool FramelessEmbedWindow::nativeEvent(const QByteArray &eventType,
                                        void *message, long *result)
+#    endif
 {
     MSG *msg = reinterpret_cast<MSG *>(message);
 
@@ -49,7 +55,7 @@ bool FramelessEmbedWindow::nativeEvent(const QByteArray &eventType,
                 auto channelName = root.value("channel-name").toString();
 
                 this->split_->setChannel(
-                    getApp()->twitch->getOrAddChannel(channelName));
+                    getApp()->getTwitch()->getOrAddChannel(channelName));
             }
         }
     }
@@ -59,18 +65,18 @@ bool FramelessEmbedWindow::nativeEvent(const QByteArray &eventType,
 
 void FramelessEmbedWindow::showEvent(QShowEvent *)
 {
-    if (!getArgs().parentWindowId)
+    if (!getApp()->getArgs().parentWindowId)
     {
         return;
     }
 
     if (auto parentHwnd =
-            reinterpret_cast<HWND>(getArgs().parentWindowId.get()))
+            reinterpret_cast<HWND>(getApp()->getArgs().parentWindowId.value()))
     {
         auto handle = reinterpret_cast<HWND>(this->winId());
         if (!::SetParent(handle, parentHwnd))
         {
-            qApp->exit(1);
+            QApplication::exit(1);
         }
 
         QJsonDocument doc;

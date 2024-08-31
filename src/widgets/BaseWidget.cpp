@@ -1,9 +1,9 @@
 #include "widgets/BaseWidget.hpp"
 
-#include "BaseSettings.hpp"
-#include "BaseTheme.hpp"
+#include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "singletons/Theme.hpp"
 #include "widgets/BaseWindow.hpp"
 
 #include <QChildEvent>
@@ -11,16 +11,15 @@
 #include <QIcon>
 #include <QLayout>
 #include <QtGlobal>
+
 #include <algorithm>
 
 namespace chatterino {
 
 BaseWidget::BaseWidget(QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
+    , theme(getApp()->getThemes())
 {
-    // REMOVED
-    this->theme = getTheme();
-
     this->signalHolder_.managedConnect(this->theme->updated, [this]() {
         this->themeChangedEvent();
 
@@ -29,7 +28,7 @@ BaseWidget::BaseWidget(QWidget *parent, Qt::WindowFlags f)
 }
 void BaseWidget::clearShortcuts()
 {
-    for (auto shortcut : this->shortcuts_)
+    for (auto *shortcut : this->shortcuts_)
     {
         shortcut->setKey(QKeySequence());
         shortcut->removeEventFilter(this);
@@ -42,21 +41,24 @@ float BaseWidget::scale() const
 {
     if (this->overrideScale_)
     {
-        return this->overrideScale_.get();
+        return *this->overrideScale_;
     }
-    else if (auto baseWidget = dynamic_cast<BaseWidget *>(this->window()))
+
+    if (auto *baseWidget = dynamic_cast<BaseWidget *>(this->window()))
     {
         return baseWidget->scale_;
     }
-    else
-    {
-        return 1.f;
-    }
+
+    return 1.F;
 }
 
 void BaseWidget::setScale(float value)
 {
-    // update scale value
+    if (this->scale_ == value)
+    {
+        return;
+    }
+
     this->scale_ = value;
 
     this->scaleChangedEvent(this->scale());
@@ -65,13 +67,13 @@ void BaseWidget::setScale(float value)
     this->setScaleIndependantSize(this->scaleIndependantSize());
 }
 
-void BaseWidget::setOverrideScale(boost::optional<float> value)
+void BaseWidget::setOverrideScale(std::optional<float> value)
 {
     this->overrideScale_ = value;
     this->setScale(this->scale());
 }
 
-boost::optional<float> BaseWidget::overrideScale() const
+std::optional<float> BaseWidget::overrideScale() const
 {
     return this->overrideScale_;
 }
@@ -122,25 +124,12 @@ void BaseWidget::setScaleIndependantHeight(int value)
         QSize(this->scaleIndependantSize_.width(), value));
 }
 
-float BaseWidget::qtFontScale() const
-{
-    if (auto window = dynamic_cast<BaseWindow *>(this->window()))
-    {
-        // ensure no div by 0
-        return this->scale() / std::max<float>(0.01f, window->nativeScale_);
-    }
-    else
-    {
-        return this->scale();
-    }
-}
-
 void BaseWidget::childEvent(QChildEvent *event)
 {
     if (event->added())
     {
         // add element if it's a basewidget
-        if (auto widget = dynamic_cast<BaseWidget *>(event->child()))
+        if (auto *widget = dynamic_cast<BaseWidget *>(event->child()))
         {
             this->widgets_.push_back(widget);
         }

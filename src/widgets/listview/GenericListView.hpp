@@ -1,7 +1,6 @@
 #pragma once
 
 #include "widgets/listview/GenericItemDelegate.hpp"
-#include "widgets/listview/GenericListItem.hpp"
 
 #include <QListView>
 
@@ -17,7 +16,7 @@ class GenericListView : public QListView
 public:
     GenericListView();
 
-    virtual void setModel(QAbstractItemModel *model) override;
+    void setModel(QAbstractItemModel *model) override;
     void setModel(GenericListModel *);
     void setInvokeActionOnTab(bool);
     bool eventFilter(QObject *watched, QEvent *event) override;

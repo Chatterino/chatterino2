@@ -1,20 +1,19 @@
 #pragma once
 
-#include "Application.hpp"
-#include "common/Channel.hpp"
 #include "widgets/BaseWindow.hpp"
 
 #include <pajlada/signals/signal.hpp>
-
 #include <QLabel>
-#include <QRadioButton>
-
 #include <QLineEdit>
+#include <QRadioButton>
 
 namespace chatterino {
 
 class Notebook;
 class EditableModelView;
+class IndirectChannel;
+class Channel;
+using ChannelPtr = std::shared_ptr<Channel>;
 
 class SelectChannelDialog final : public BaseWindow
 {
@@ -28,8 +27,8 @@ public:
     pajlada::Signals::NoArgSignal closed;
 
 protected:
-    virtual void closeEvent(QCloseEvent *) override;
-    virtual void themeChangedEvent() override;
+    void closeEvent(QCloseEvent *) override;
+    void themeChangedEvent() override;
 
 private:
     class EventFilter : public QObject
@@ -38,7 +37,7 @@ private:
         SelectChannelDialog *dialog;
 
     protected:
-        virtual bool eventFilter(QObject *watched, QEvent *event) override;
+        bool eventFilter(QObject *watched, QEvent *event) override;
     };
 
     struct {
@@ -50,11 +49,8 @@ private:
             QRadioButton *mentions;
             QRadioButton *watching;
             QRadioButton *live;
+            QRadioButton *automod;
         } twitch;
-        struct {
-            QLineEdit *channel;
-            EditableModelView *servers;
-        } irc;
     } ui_;
 
     EventFilter tabFilter_;

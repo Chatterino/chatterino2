@@ -6,6 +6,18 @@ this folder describes what sort of API requests we do, what permissions are requ
 
 Full Helix API reference: https://dev.twitch.tv/docs/api/reference
 
+### Adding support for a new endpoint
+
+If you're adding support for a new endpoint, these are the things you should know.
+
+1. Add a virtual function in the `IHelix` class. Naming should reflect the API name as best as possible.
+1. Override the virtual function in the `Helix` class.
+1. Mock the function in the `mock::Helix` class in the `mocks/include/mocks/Helix.hpp` file.
+1. (Optional) Make a new error enum for the failure callback.
+
+For a simple example, see the `updateUserChatColor` function and its error enum `HelixUpdateUserChatColorError`.
+The API is used in the "/color" command in [CommandController.cpp](../../../controllers/commands/CommandController.cpp)
+
 ### Get Users
 
 URL: https://dev.twitch.tv/docs/api/reference#get-users
@@ -31,7 +43,7 @@ URL: https://dev.twitch.tv/docs/api/reference#get-streams
 
 Used in:
 
-- `TwitchChannel` to get live status, game, title, and viewer count of a channel
+- `LiveController` to get live status, game, title, and viewer count of a channel
 - `NotificationController` to provide notifications for channels you might not have open in Chatterino, but are still interested in getting notifications for
 
 ### Create Clip
@@ -49,7 +61,7 @@ URL: https://dev.twitch.tv/docs/api/reference#get-channel-information
 
 Used in:
 
-- `TwitchChannel` to refresh stream title
+- `LiveController` to refresh stream title & display name
 
 ### Update Channel
 
@@ -124,6 +136,22 @@ Used in:
 
 - `providers/twitch/TwitchChannel.cpp` to resolve a chats available cheer emotes. This helps us parse incoming messages like `pajaCheer1000`
 
+### Get Global Badges
+
+URL: https://dev.twitch.tv/docs/api/reference/#get-global-chat-badges
+
+Used in:
+
+- `providers/twitch/TwitchBadges.cpp` to load global badges
+
+### Get Channel Badges
+
+URL: https://dev.twitch.tv/docs/api/reference/#get-channel-chat-badges
+
+Used in:
+
+- `providers/twitch/TwitchChannel.cpp` to load channel badges
+
 ### Get Emote Sets
 
 URL: https://dev.twitch.tv/docs/api/reference#get-emote-sets
@@ -136,13 +164,70 @@ URL: https://dev.twitch.tv/docs/api/reference#get-channel-emotes
 
 Not used anywhere at the moment.
 
-## TMI
-
-The TMI api is undocumented.
-
 ### Get Chatters
 
-**Undocumented**
+URL: https://dev.twitch.tv/docs/api/reference/#get-chatters
 
-- We use this in `widgets/splits/Split.cpp showViewerList`
-- We use this in `providers/twitch/TwitchChannel.cpp refreshChatters`
+Used for the chatter list for moderators/broadcasters.
+
+### Send Shoutout
+
+URL: https://dev.twitch.tv/docs/api/reference/#send-a-shoutout
+
+Used in:
+
+- `controllers/commands/CommandController.cpp` to send Twitch native shoutout using "/shoutout <username>"
+
+### Warn Chat User
+
+URL: https://dev.twitch.tv/docs/api/reference/#warn-chat-user
+
+Used in:
+
+- `controllers/commands/CommandController.cpp` to warn users via "/warn" command
+
+## PubSub
+
+### Whispers
+
+We listen to the `whispers.<user_id>` PubSub topic to receive information about incoming whispers to the user
+
+The EventSub alternative (`user.whisper.message`) is not yet implemented.
+
+### Chat Moderator Actions
+
+We listen to the `chat_moderator_actions.<user_id>.<channel_id>` PubSub topic to receive information about incoming moderator events in a channel.
+
+We listen to this topic in every channel the user is a moderator.
+
+We have not yet migrated to the EventSub equivalent topics:
+
+- For showing bans & timeouts => `channel.moderate`
+- For showing unbans & untimeouts => `channel.moderate`
+- Clear/delete message => `channel.moderate`
+- Roomstate (slow(off), followers(off), r9k(off), emoteonly(off), subscribers(off)) => `channel.moderate`
+- VIP/Moderator added/removed => `channel.moderate`
+- Raid started/cancelled => `channel.moderate`
+- Add/delete permitted/blocked term => `channel.moderate` (or `automod.terms.update`)
+- Modified automod properties => `automod.settings.update`
+- Approve/deny unban request => `channel.moderate` (or `channel.unban_request.resolve`)
+
+### AutoMod Queue
+
+We listen to the `automod-queue.<moderator_id>.<channel_id>` PubSub topic to receive information about incoming automod events in a channel.
+
+We listen to this topic in every channel the user is a moderator.
+
+The EventSub alternative (`automod.message.hold` and `automod.message.update`) is not yet implemented.
+
+### Channel Point Rewards
+
+We listen to the `community-points-channel-v1.<channel_id>` PubSub topic to receive information about incoming channel points redemptions in a channel.
+
+The EventSub alternative requires broadcaster auth, which is not a feasible alternative.
+
+### Low Trust Users
+
+We want to listen to the `low-trust-users` PubSub topic to receive information about messages from users who are marked as low-trust.
+
+The EventSub alternative (`channel.suspicious_user.message` and `channel.suspicious_user.update`) is not yet implemented.

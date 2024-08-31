@@ -1,26 +1,40 @@
 #pragma once
 
-#include "common/Singleton.hpp"
-
-#include "providers/bttv/BttvEmotes.hpp"
 #include "providers/emoji/Emojis.hpp"
-#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "singletons/helper/GifTimer.hpp"
 
 namespace chatterino {
 
-class Settings;
-class Paths;
+class IEmotes
+{
+public:
+    virtual ~IEmotes() = default;
 
-class Emotes final : public Singleton
+    virtual ITwitchEmotes *getTwitchEmotes() = 0;
+    virtual IEmojis *getEmojis() = 0;
+    virtual GIFTimer &getGIFTimer() = 0;
+};
+
+class Emotes final : public IEmotes
 {
 public:
     Emotes();
 
-    virtual void initialize(Settings &settings, Paths &paths) override;
+    ITwitchEmotes *getTwitchEmotes() final
+    {
+        return &this->twitch;
+    }
 
-    bool isIgnoredEmote(const QString &emote);
+    IEmojis *getEmojis() final
+    {
+        return &this->emojis;
+    }
+
+    GIFTimer &getGIFTimer() final
+    {
+        return this->gifTimer;
+    }
 
     TwitchEmotes twitch;
     Emojis emojis;

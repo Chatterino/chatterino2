@@ -1,30 +1,21 @@
 #include "common/Version.hpp"
 
+#include "common/Literals.hpp"
 #include "common/Modes.hpp"
 
 #include <QFileInfo>
-
-#define UGLYMACROHACK1(s) #s
-#define FROM_EXTERNAL_DEFINE(s) UGLYMACROHACK1(s)
+#include <QStringBuilder>
 
 namespace chatterino {
 
+using namespace literals;
+
 Version::Version()
+    : version_(CHATTERINO_VERSION)
+    , commitHash_(QStringLiteral(CHATTERINO_GIT_HASH))
+    , isModified_(CHATTERINO_GIT_MODIFIED == 1)
+    , dateOfBuild_(QStringLiteral(CHATTERINO_CMAKE_GEN_DATE))
 {
-    this->version_ = CHATTERINO_VERSION;
-
-    this->commitHash_ =
-        QString(FROM_EXTERNAL_DEFINE(CHATTERINO_GIT_HASH)).remove('"');
-
-#ifdef CHATTERINO_GIT_MODIFIED
-    this->isModified_ = true;
-#endif
-
-#ifdef CHATTERINO_CMAKE_GEN_DATE
-    this->dateOfBuild_ =
-        QString(FROM_EXTERNAL_DEFINE(CHATTERINO_CMAKE_GEN_DATE)).remove('"');
-#endif
-
     this->fullVersion_ = "Chatterino ";
     if (Modes::instance().isNightly)
     {
@@ -92,13 +83,22 @@ QStringList Version::buildTags() const
 {
     QStringList tags;
 
-    tags.append("Qt " QT_VERSION_STR);
+    const auto *runtimeVersion = qVersion();
+    if (runtimeVersion != QLatin1String{QT_VERSION_STR})
+    {
+        tags.append(u"Qt "_s QT_VERSION_STR u" (running on " % runtimeVersion %
+                    u")");
+    }
+    else
+    {
+        tags.append(u"Qt "_s QT_VERSION_STR);
+    }
 
-#ifdef USEWINSDK
-    tags.append("Windows SDK");
-#endif
 #ifdef _MSC_FULL_VER
     tags.append("MSVC " + QString::number(_MSC_FULL_VER, 10));
+#endif
+#ifdef CHATTERINO_WITH_CRASHPAD
+    tags.append("Crashpad");
 #endif
 
     return tags;

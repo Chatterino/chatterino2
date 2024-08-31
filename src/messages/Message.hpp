@@ -1,53 +1,34 @@
 #pragma once
 
-#include "common/FlagsEnum.hpp"
-#include "providers/twitch/TwitchBadge.hpp"
+#include "messages/MessageFlag.hpp"
+#include "providers/twitch/ChannelPointReward.hpp"
 #include "util/QStringHash.hpp"
-#include "widgets/helper/ScrollbarHighlight.hpp"
 
+#include <QColor>
 #include <QTime>
-#include <boost/noncopyable.hpp>
+
 #include <cinttypes>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 namespace chatterino {
 class MessageElement;
 class MessageThread;
+class Badge;
+class ScrollbarHighlight;
 
-enum class MessageFlag : uint32_t {
-    None = 0,
-    System = (1 << 0),
-    Timeout = (1 << 1),
-    Highlighted = (1 << 2),
-    DoNotTriggerNotification = (1 << 3),  // disable notification sound
-    Centered = (1 << 4),
-    Disabled = (1 << 5),
-    DisableCompactEmotes = (1 << 6),
-    Collapsed = (1 << 7),
-    ConnectedMessage = (1 << 8),
-    DisconnectedMessage = (1 << 9),
-    Untimeout = (1 << 10),
-    PubSub = (1 << 11),
-    Subscription = (1 << 12),
-    DoNotLog = (1 << 13),
-    AutoMod = (1 << 14),
-    RecentMessage = (1 << 15),
-    Whisper = (1 << 16),
-    HighlightedWhisper = (1 << 17),
-    Debug = (1 << 18),
-    Similar = (1 << 19),
-    RedeemedHighlight = (1 << 20),
-    RedeemedChannelPointReward = (1 << 21),
-    ShowInMentions = (1 << 22),
-    FirstMessage = (1 << 23),
-    ReplyMessage = (1 << 24),
-};
-using MessageFlags = FlagsEnum<MessageFlag>;
-
-struct Message : boost::noncopyable {
+struct Message;
+using MessagePtr = std::shared_ptr<const Message>;
+struct Message {
     Message();
     ~Message();
+
+    Message(const Message &) = delete;
+    Message &operator=(const Message &) = delete;
+
+    Message(Message &&) = delete;
+    Message &operator=(Message &&) = delete;
 
     // Making this a mutable means that we can update a messages flags,
     // while still keeping Message constant. This means that a message's flag
@@ -74,12 +55,13 @@ struct Message : boost::noncopyable {
     // the reply thread will be cleaned up by the TwitchChannel.
     // The root of the thread does not have replyThread set.
     std::shared_ptr<MessageThread> replyThread;
+    MessagePtr replyParent;
     uint32_t count = 1;
     std::vector<std::unique_ptr<MessageElement>> elements;
 
     ScrollbarHighlight getScrollBarHighlight() const;
-};
 
-using MessagePtr = std::shared_ptr<const Message>;
+    std::shared_ptr<ChannelPointReward> reward = nullptr;
+};
 
 }  // namespace chatterino

@@ -1,0 +1,17 @@
+FROM chatterino-ubuntu-22.04-base
+
+ADD . /src
+
+RUN mkdir /src/build
+
+# cmake
+RUN cd /src/build && \
+        CXXFLAGS=-fno-sized-deallocation cmake \
+        -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
+        -DCMAKE_PREFIX_PATH=/opt/qt515/lib/cmake \
+        -DBUILD_WITH_QTKEYCHAIN=OFF \
+        ..
+
+# build
+RUN cd /src/build && \
+        make -j8

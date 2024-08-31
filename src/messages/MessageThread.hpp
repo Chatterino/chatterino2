@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/signals2.hpp>
 #include <QString>
 
 #include <memory>
@@ -11,6 +12,12 @@ struct Message;
 class MessageThread
 {
 public:
+    enum class Subscription : uint8_t {
+        None,
+        Subscribed,
+        Unsubscribed,
+    };
+
     MessageThread(std::shared_ptr<const Message> rootMessage);
     ~MessageThread();
 
@@ -22,6 +29,23 @@ public:
 
     /// Returns the number of live reply references
     size_t liveCount(const std::shared_ptr<const Message> &exclude) const;
+
+    bool subscribed() const
+    {
+        return this->subscription_ == Subscription::Subscribed;
+    }
+
+    /// Returns true if and only if the user manually unsubscribed from the thread
+    /// @see #markUnsubscribed()
+    bool unsubscribed() const
+    {
+        return this->subscription_ == Subscription::Unsubscribed;
+    }
+
+    /// Subscribe to this thread.
+    void markSubscribed();
+    /// Unsubscribe from this thread.
+    void markUnsubscribed();
 
     const QString &rootId() const
     {
@@ -38,10 +62,14 @@ public:
         return replies_;
     }
 
+    boost::signals2::signal<void()> subscriptionUpdated;
+
 private:
     const QString rootMessageId_;
     const std::shared_ptr<const Message> rootMessage_;
     std::vector<std::weak_ptr<const Message>> replies_;
+
+    Subscription subscription_ = Subscription::None;
 };
 
 }  // namespace chatterino

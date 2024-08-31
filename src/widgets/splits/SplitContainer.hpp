@@ -2,19 +2,18 @@
 
 #include "common/WindowDescriptors.hpp"
 #include "widgets/BaseWidget.hpp"
+#include "widgets/splits/SplitCommon.hpp"
 
+#include <pajlada/signals/signal.hpp>
+#include <pajlada/signals/signalholder.hpp>
 #include <QDragEnterEvent>
-#include <QHBoxLayout>
 #include <QRect>
-#include <QVBoxLayout>
-#include <QVector>
 #include <QWidget>
 
 #include <algorithm>
-#include <functional>
-#include <pajlada/signals/signal.hpp>
-#include <pajlada/signals/signalholder.hpp>
+#include <optional>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 class QJsonObject;
@@ -37,20 +36,17 @@ class SplitContainer final : public BaseWidget
 public:
     struct Node;
 
-    // fourtf: !!! preserve the order of left, up, right and down
-    enum Direction { Left, Above, Right, Below };
-
     struct Position final {
     private:
         Position() = default;
-        Position(Node *relativeNode, Direction direcion)
+        Position(Node *relativeNode, SplitDirection direction)
             : relativeNode_(relativeNode)
-            , direction_(direcion)
+            , direction_(direction)
         {
         }
 
-        Node *relativeNode_;
-        Direction direction_;
+        Node *relativeNode_{nullptr};
+        SplitDirection direction_{SplitDirection::Right};
 
         friend struct Node;
         friend class SplitContainer;
@@ -83,13 +79,18 @@ private:
 
 public:
     struct Node final {
-        enum Type { EmptyRoot, _Split, VerticalContainer, HorizontalContainer };
+        enum class Type {
+            EmptyRoot,
+            Split,
+            VerticalContainer,
+            HorizontalContainer,
+        };
 
-        Type getType();
-        Split *getSplit();
-        Node *getParent();
-        qreal getHorizontalFlex();
-        qreal getVerticalFlex();
+        Type getType() const;
+        Split *getSplit() const;
+        Node *getParent() const;
+        qreal getHorizontalFlex() const;
+        qreal getVerticalFlex() const;
         const std::vector<std::unique_ptr<Node>> &getChildren();
 
     private:
@@ -98,9 +99,9 @@ public:
 
         bool isOrContainsNode(Node *_node);
         Node *findNodeContainingSplit(Split *_split);
-        void insertSplitRelative(Split *_split, Direction _direction);
-        void nestSplitIntoCollection(Split *_split, Direction _direction);
-        void insertNextToThis(Split *_split, Direction _direction);
+        void insertSplitRelative(Split *_split, SplitDirection _direction);
+        void nestSplitIntoCollection(Split *_split, SplitDirection _direction);
+        void insertNextToThis(Split *_split, SplitDirection _direction);
         void setSplit(Split *_split);
         Position releaseSplit();
         qreal getFlex(bool isVertical);
@@ -110,11 +111,14 @@ public:
                     std::vector<DropRect> &dropRects_,
                     std::vector<ResizeRect> &resizeRects);
 
-        static Type toContainerType(Direction _dir);
+        // Clamps the flex values ensuring they're never below 0
+        void clamp();
+
+        static Type toContainerType(SplitDirection _dir);
 
         Type type_;
         Split *split_;
-        Node *preferedFocusTarget_;
+        Node *preferedFocusTarget_{};
         Node *parent_;
         QRectF geometry_;
         qreal flexH_ = 1;
@@ -151,7 +155,7 @@ private:
     {
     public:
         SplitContainer *parent;
-        Node *node;
+        Node *node{};
 
         void setVertical(bool isVertical);
         ResizeHandle(SplitContainer *_parent = nullptr);
@@ -166,7 +170,7 @@ private:
     private:
         void resetFlex();
 
-        bool vertical_;
+        bool vertical_{};
         bool isMouseDown_ = false;
     };
 
@@ -174,33 +178,49 @@ public:
     SplitContainer(Notebook *parent);
 
     Split *appendNewSplit(bool openChannelNameDialog);
-    void appendSplit(Split *split);
-    void insertSplit(Split *split, const Position &position);
-    void insertSplit(Split *split, Direction direction, Split *relativeTo);
-    void insertSplit(Split *split, Direction direction,
-                     Node *relativeTo = nullptr);
+
+    struct InsertOptions {
+        /// Position must be set alone, as if it's set it will override direction & relativeNode with its underlying values
+        std::optional<Position> position{};
+
+        /// Will be used to figure out the relative node, so relative node or position must not be set if using this
+        Split *relativeSplit{nullptr};
+
+        Node *relativeNode{nullptr};
+        std::optional<SplitDirection> direction{};
+    };
+
+    // Insert split into the base node of this container
+    // Default values for each field must be specified due to these bugs:
+    //  - https://bugs.llvm.org/show_bug.cgi?id=36684
+    //  - https://gcc.gnu.org/bugzilla/show_bug.cgi?id=96645
+    void insertSplit(Split *split, InsertOptions &&options = InsertOptions{
+                                       .position = std::nullopt,
+                                       .relativeSplit = nullptr,
+                                       .relativeNode = nullptr,
+                                       .direction = std::nullopt,
+                                   });
+
+    // Returns a pointer to the selected split
     Split *getSelectedSplit() const;
     Position releaseSplit(Split *split);
     Position deleteSplit(Split *split);
 
-    void selectNextSplit(Direction direction);
-    void setSelected(Split *selected_);
+    void selectNextSplit(SplitDirection direction);
+    void setSelected(Split *split);
 
-    int getSplitCount();
-    const std::vector<Split *> getSplits() const;
+    std::vector<Split *> getSplits() const;
 
     void refreshTab();
 
     NotebookTab *getTab() const;
     Node *getBaseNode();
 
-    void setTab(NotebookTab *tab_);
+    void setTab(NotebookTab *tab);
     void hideResizeHandles();
     void resetMouseStatus();
 
-    static bool isDraggingSplit;
-    static Split *draggingSplit;
-
+    NodeDescriptor buildDescriptor() const;
     void applyFromDescriptor(const NodeDescriptor &rootNode);
 
     void popup();
@@ -218,11 +238,12 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
 
 private:
+    NodeDescriptor buildDescriptorRecursively(const Node *currentNode) const;
     void applyFromDescriptorRecursively(const NodeDescriptor &rootNode,
-                                        Node *node);
+                                        Node *baseNode);
 
     void layout();
-    void selectSplitRecursive(Node *node, Direction direction);
+    void selectSplitRecursive(Node *node, SplitDirection direction);
     void focusSplitRecursive(Node *node);
     void setPreferedTargetRecursive(Node *node);
 
@@ -233,19 +254,7 @@ private:
     void refreshTabTitle();
     void refreshTabLiveStatus();
 
-    struct DropRegion {
-        QRect rect;
-        std::pair<int, int> position;
-
-        DropRegion(QRect rect, std::pair<int, int> position)
-        {
-            this->rect = rect;
-            this->position = position;
-        }
-    };
-
     std::vector<DropRect> dropRects_;
-    std::vector<DropRegion> dropRegions_;
     DropOverlay overlay_;
     std::vector<std::unique_ptr<ResizeHandle>> resizeHandles_;
     QPoint mouseOverPoint_;
@@ -263,6 +272,7 @@ private:
 
     pajlada::Signals::SignalHolder signalHolder_;
 
+    // Specifies whether the user is currently dragging something over this container
     bool isDragging_ = false;
 };
 

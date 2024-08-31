@@ -1,0 +1,53 @@
+Language: Cpp
+
+AccessModifierOffset: -4
+AlignEscapedNewlinesLeft: true
+AllowShortFunctionsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLambdasOnASingleLine: Empty
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakAfterDefinitionReturnType: false
+AlwaysBreakBeforeMultilineStrings: false
+BasedOnStyle: Google
+BraceWrapping:
+  AfterClass: "true"
+  AfterControlStatement: "true"
+  AfterFunction: "true"
+  AfterNamespace: "false"
+  BeforeCatch: "true"
+  BeforeElse: "true"
+BreakBeforeBraces: Custom
+BreakConstructorInitializersBeforeComma: true
+ColumnLimit: 80
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+DerivePointerBinding: false
+FixNamespaceComments: true
+IndentCaseLabels: true
+IndentWidth: 4
+IndentWrappedFunctionNames: true
+IndentPPDirectives: AfterHash
+SortIncludes: CaseInsensitive
+IncludeBlocks: Regroup
+IncludeCategories:
+  # Project includes
+  - Regex: '^"[a-zA-Z\._-]+(/[a-zA-Z0-9\._-]+)*"$'
+    Priority: 1
+  # Qt includes
+  - Regex: '^<Q[a-zA-Z0-9\._\/-]+>$'
+    Priority: 3
+    CaseSensitive: true
+  # LibCommuni includes
+  - Regex: "^<Irc[a-zA-Z]+>$"
+    Priority: 3
+  # Standard library includes
+  - Regex: "^<[a-zA-Z_]+>$"
+    Priority: 4
+  # Third party library includes
+  - Regex: "^<([a-zA-Z_0-9-]+/)*[a-zA-Z_0-9-]+.h(pp)?>$"
+    Priority: 3
+NamespaceIndentation: Inner
+PointerBindsToType: false
+SpacesBeforeTrailingComments: 2
+Standard: Auto
+ReflowComments: false
+InsertNewlineAtEOF: true

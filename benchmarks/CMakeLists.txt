@@ -1,12 +1,16 @@
 project(chatterino-benchmark)
 
 set(benchmark_SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/Emojis.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/Highlights.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/FormatTime.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/Helpers.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/LimitedQueue.cpp
+    src/main.cpp
+    resources/bench.qrc
+
+    src/Emojis.cpp
+    src/Highlights.cpp
+    src/FormatTime.cpp
+    src/Helpers.cpp
+    src/LimitedQueue.cpp
+    src/LinkParser.cpp
+    src/RecentMessages.cpp
     # Add your new file above this line!
     )
 
@@ -14,12 +18,9 @@ add_executable(${PROJECT_NAME} ${benchmark_SOURCES})
 add_sanitizers(${PROJECT_NAME})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE chatterino-lib)
+target_link_libraries(${PROJECT_NAME} PRIVATE chatterino-mocks)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE benchmark::benchmark)
-
-target_compile_definitions(${PROJECT_NAME} PRIVATE
-    CHATTERINO_TEST
-    )
 
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
@@ -29,4 +30,12 @@ set_target_properties(${PROJECT_NAME}
     RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/bin"
     RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/bin"
     RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/bin"
+    AUTORCC ON
     )
+
+if (CHATTERINO_STATIC_QT_BUILD)
+    qt_import_plugins(${PROJECT_NAME} INCLUDE_BY_TYPE
+        platforms Qt::QXcbIntegrationPlugin
+        Qt::QMinimalIntegrationPlugin
+    )
+endif ()

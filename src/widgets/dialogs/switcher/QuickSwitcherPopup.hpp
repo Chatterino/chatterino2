@@ -1,18 +1,16 @@
 #pragma once
 
-#include "common/Channel.hpp"
 #include "widgets/BasePopup.hpp"
 #include "widgets/dialogs/switcher/QuickSwitcherModel.hpp"
-#include "widgets/splits/Split.hpp"
-#include "widgets/splits/SplitContainer.hpp"
-
-#include <functional>
 
 #include <QLineEdit>
+
+#include <functional>
 
 namespace chatterino {
 
 class GenericListView;
+class Window;
 
 class QuickSwitcherPopup : public BasePopup
 {
@@ -20,19 +18,19 @@ public:
     /**
      * @brief   Construct a new QuickSwitcherPopup.
      *
-     * @param   parent  Parent widget of the popup. The popup will be placed
-     *                  in the center of the parent widget.
+     * @param   parent  Parent window of the popup. The popup will be placed
+     *                  in the center of the window.
      */
-    explicit QuickSwitcherPopup(QWidget *parent = nullptr);
+    explicit QuickSwitcherPopup(Window *parent);
 
 protected:
-    virtual void themeChangedEvent() override;
+    void themeChangedEvent() override;
 
 public slots:
     void updateSuggestions(const QString &text);
 
 private:
-    static const QSize MINIMUM_SIZE;
+    constexpr static const QSize MINIMUM_SIZE{500, 300};
 
     struct {
         QLineEdit *searchEdit{};
@@ -40,6 +38,8 @@ private:
     } ui_;
 
     QuickSwitcherModel switcherModel_;
+
+    Window *window{};
 
     void initWidgets();
 };

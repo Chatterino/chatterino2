@@ -1,7 +1,9 @@
 #pragma once
 
-#include <QString>
+#include "util/QMagicEnum.hpp"
+
 #include <pajlada/settings.hpp>
+#include <QString>
 
 namespace chatterino {
 
@@ -12,13 +14,16 @@ class ChatterinoSetting : public pajlada::Settings::Setting<Type>
 {
 public:
     ChatterinoSetting(const std::string &path)
-        : pajlada::Settings::Setting<Type>(path)
+        : pajlada::Settings::Setting<Type>(
+              path, pajlada::Settings::SettingOption::CompareBeforeSet)
     {
         _registerSetting(this->getData());
     }
 
     ChatterinoSetting(const std::string &path, const Type &defaultValue)
-        : pajlada::Settings::Setting<Type>(path, defaultValue)
+        : pajlada::Settings::Setting<Type>(
+              path, defaultValue,
+              pajlada::Settings::SettingOption::CompareBeforeSet)
     {
         _registerSetting(this->getData());
     }
@@ -84,5 +89,66 @@ public:
         return Enum(this->getValue());
     }
 };
+
+/**
+ * Setters in this class allow for bad values, it's only the enum-specific getters that are protected.
+ * If you get a QString from this setting, it will be the raw value from the settings file.
+ * Use the explicit Enum conversions or getEnum to get a typed check with a default
+ **/
+template <typename Enum>
+class EnumStringSetting : public pajlada::Settings::Setting<QString>
+{
+public:
+    EnumStringSetting(const std::string &path, const Enum &defaultValue_)
+        : pajlada::Settings::Setting<QString>(path)
+        , defaultValue(defaultValue_)
+    {
+        _registerSetting(this->getData());
+    }
+
+    template <typename T2>
+    EnumStringSetting<Enum> &operator=(Enum newValue)
+    {
+        this->setValue(qmagicenum::enumNameString(newValue).toLower());
+
+        return *this;
+    }
+
+    EnumStringSetting<Enum> &operator=(QString newValue)
+    {
+        this->setValue(newValue.toLower());
+
+        return *this;
+    }
+
+    operator Enum()
+    {
+        return this->getEnum();
+    }
+
+    Enum getEnum()
+    {
+        return qmagicenum::enumCast<Enum>(this->getValue(),
+                                          qmagicenum::CASE_INSENSITIVE)
+            .value_or(this->defaultValue);
+    }
+
+    Enum defaultValue;
+
+    using pajlada::Settings::Setting<QString>::operator==;
+    using pajlada::Settings::Setting<QString>::operator!=;
+
+    using pajlada::Settings::Setting<QString>::operator QString;
+};
+
+template <typename T>
+struct IsChatterinoSettingT : std::false_type {
+};
+template <typename T>
+struct IsChatterinoSettingT<ChatterinoSetting<T>> : std::true_type {
+};
+
+template <typename T>
+concept IsChatterinoSetting = IsChatterinoSettingT<T>::value;
 
 }  // namespace chatterino

@@ -1,0 +1,65 @@
+---
+name: clang-tidy
+
+on:
+  pull_request:
+
+concurrency:
+  group: clang-tidy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    name: "clang-tidy ${{ matrix.os }}, Qt ${{ matrix.qt-version }})"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          # Ubuntu 22.04, Qt 6.6
+          - os: ubuntu-22.04
+            qt-version: 6.6.2
+
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0 # allows for tags access
+
+      - name: Install Qt6
+        if: startsWith(matrix.qt-version, '6.')
+        uses: jurplel/install-qt-action@v4.0.0
+        with:
+          cache: true
+          cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
+          modules: qt5compat qtimageformats
+          version: ${{ matrix.qt-version }}
+          dir: ${{ github.workspace }}/.qtinstall
+          set-env: false
+
+      - name: clang-tidy review
+        timeout-minutes: 20
+        uses: ZedThree/clang-tidy-review@v0.19.0
+        with:
+          build_dir: build-clang-tidy
+          config_file: ".clang-tidy"
+          split_workflow: true
+          exclude: "lib/*,tools/crash-handler/*"
+          cmake_command: >-
+            ./.CI/setup-clang-tidy.sh
+          apt_packages: >-
+            libsecret-1-dev,
+            libboost-dev, libboost-system-dev, libboost-filesystem-dev,
+            libssl-dev,
+            rapidjson-dev,
+            libbenchmark-dev,
+            build-essential,
+            libgl1-mesa-dev, libgstreamer-gl1.0-0, libpulse-dev,
+            libxcb-glx0, libxcb-icccm4, libxcb-image0, libxcb-keysyms1, libxcb-randr0,
+            libxcb-render-util0, libxcb-render0, libxcb-shape0, libxcb-shm0, libxcb-sync1,
+            libxcb-util1, libxcb-xfixes0, libxcb-xinerama0, libxcb1, libxkbcommon-dev,
+            libxkbcommon-x11-0, libxcb-xkb-dev, libxcb-cursor0
+
+      - name: clang-tidy-review upload
+        uses: ZedThree/clang-tidy-review/upload@v0.19.0

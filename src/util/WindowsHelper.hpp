@@ -2,16 +2,22 @@
 
 #ifdef USEWINSDK
 
+#    include <QString>
 #    include <Windows.h>
-#    include <boost/optional.hpp>
+
+#    include <optional>
 
 namespace chatterino {
 
-boost::optional<UINT> getWindowDpi(HWND hwnd);
+enum class AssociationQueryType { Protocol, FileExtension };
+
+std::optional<UINT> getWindowDpi(HWND hwnd);
 void flushClipboard();
 
 bool isRegisteredForStartup();
 void setRegisteredForStartup(bool isRegistered);
+
+QString getAssociatedExecutable(AssociationQueryType queryType, LPCWSTR query);
 
 }  // namespace chatterino
 

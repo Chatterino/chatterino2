@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QString>
 #include <pajlada/serialize.hpp>
+#include <QString>
 
 namespace pajlada {
 

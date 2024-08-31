@@ -1,5 +1,6 @@
-#include "InitUpdateButton.hpp"
+#include "util/InitUpdateButton.hpp"
 
+#include "Application.hpp"
 #include "widgets/dialogs/UpdateDialog.hpp"
 #include "widgets/helper/Button.hpp"
 
@@ -12,7 +13,7 @@ void initUpdateButton(Button &button,
 
     // show update prompt when clicking the button
     QObject::connect(&button, &Button::leftClicked, [&button] {
-        auto dialog = new UpdateDialog();
+        auto *dialog = new UpdateDialog();
         dialog->setActionOnFocusLoss(BaseWindow::Delete);
 
         auto globalPoint = button.mapToGlobal(
@@ -24,11 +25,15 @@ void initUpdateButton(Button &button,
             globalPoint.setX(0);
         }
 
-        dialog->move(globalPoint);
+        dialog->moveTo(globalPoint, widgets::BoundsChecking::DesiredPosition);
         dialog->show();
         dialog->raise();
 
-        dialog->buttonClicked.connect([&button](auto buttonType) {
+        // We can safely ignore the signal connection because the dialog will always
+        // be destroyed before the button is destroyed, since it is destroyed on focus loss
+        //
+        // The button is either attached to a Notebook, or a Window frame
+        std::ignore = dialog->buttonClicked.connect([&button](auto buttonType) {
             switch (buttonType)
             {
                 case UpdateDialog::Dismiss: {
@@ -36,7 +41,7 @@ void initUpdateButton(Button &button,
                 }
                 break;
                 case UpdateDialog::Install: {
-                    Updates::instance().installUpdates();
+                    getApp()->getUpdates().installUpdates();
                 }
                 break;
             }
@@ -48,17 +53,17 @@ void initUpdateButton(Button &button,
 
     // update image when state changes
     auto updateChange = [&button](auto) {
-        button.setVisible(Updates::instance().shouldShowUpdateButton());
+        button.setVisible(getApp()->getUpdates().shouldShowUpdateButton());
 
-        auto imageUrl = Updates::instance().isError()
-                            ? ":/buttons/updateError.png"
-                            : ":/buttons/update.png";
+        const auto *imageUrl = getApp()->getUpdates().isError()
+                                   ? ":/buttons/updateError.png"
+                                   : ":/buttons/update.png";
         button.setPixmap(QPixmap(imageUrl));
     };
 
-    updateChange(Updates::instance().getStatus());
+    updateChange(getApp()->getUpdates().getStatus());
 
-    signalHolder.managedConnect(Updates::instance().statusUpdated,
+    signalHolder.managedConnect(getApp()->getUpdates().statusUpdated,
                                 [updateChange](auto status) {
                                     updateChange(status);
                                 });

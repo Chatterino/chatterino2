@@ -1,20 +1,21 @@
-#include "FiltersPage.hpp"
+#include "widgets/settingspages/FiltersPage.hpp"
 
+#include "Application.hpp"
 #include "controllers/filters/FilterModel.hpp"
+#include "controllers/filters/FilterRecord.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/dialogs/ChannelFilterEditorDialog.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
+#include <QHeaderView>
 #include <QTableView>
 
-#include <QHeaderView>
-
-#define FILTERS_DOCUMENTATION "https://wiki.chatterino.com/Filters"
-
 namespace chatterino {
+
+constexpr QStringView FILTERS_DOCUMENTATION =
+    u"https://wiki.chatterino.com/Filters";
 
 FiltersPage::FiltersPage()
 {
@@ -43,9 +44,9 @@ FiltersPage::FiltersPage()
         view->getTableView()->setColumnWidth(2, 125);
     });
 
-    view->addButtonPressed.connect([] {
-        ChannelFilterEditorDialog d(
-            static_cast<QWidget *>(&(getApp()->windows->getMainWindow())));
+    // We can safely ignore this signal connection since we own the view
+    std::ignore = view->addButtonPressed.connect([this] {
+        ChannelFilterEditorDialog d(this->window());
         if (d.exec() == QDialog::Accepted)
         {
             getSettings()->filterRecords.append(
@@ -53,7 +54,7 @@ FiltersPage::FiltersPage()
         }
     });
 
-    auto quickAddButton = new QPushButton("Quick Add");
+    auto *quickAddButton = new QPushButton("Quick Add");
     QObject::connect(quickAddButton, &QPushButton::pressed, [] {
         getSettings()->filterRecords.append(std::make_shared<FilterRecord>(
             "My filter", "message.content contains \"hello\""));
@@ -65,9 +66,9 @@ FiltersPage::FiltersPage()
                          this->tableCellClicked(clicked, view);
                      });
 
-    auto filterHelpLabel =
-        new QLabel(QString("<a href='%1'><span "
-                           "style='color:#99f'>filter info</span></a>")
+    auto *filterHelpLabel =
+        new QLabel(QStringView(u"<a href='%1'><span "
+                               "style='color:#99f'>filter info</span></a>")
                        .arg(FILTERS_DOCUMENTATION));
     filterHelpLabel->setOpenExternalLinks(true);
     view->addCustomButton(filterHelpLabel);
@@ -90,23 +91,39 @@ void FiltersPage::tableCellClicked(const QModelIndex &clicked,
     {
         QMessageBox popup(this->window());
 
-        filterparser::FilterParser f(
-            view->getModel()->data(clicked.siblingAtColumn(1)).toString());
+        auto filterText =
+            view->getModel()->data(clicked.siblingAtColumn(1)).toString();
+        auto filterResult = filters::Filter::fromString(filterText);
 
-        if (f.valid())
+        if (std::holds_alternative<filters::Filter>(filterResult))
         {
-            popup.setIcon(QMessageBox::Icon::Information);
-            popup.setWindowTitle("Valid filter");
-            popup.setText("Filter is valid");
-            popup.setInformativeText(
-                QString("Parsed as:\n%1").arg(f.filterString()));
+            auto f = std::move(std::get<filters::Filter>(filterResult));
+            if (f.returnType() == filters::Type::Bool)
+            {
+                popup.setIcon(QMessageBox::Icon::Information);
+                popup.setWindowTitle("Valid filter");
+                popup.setText("Filter is valid");
+                popup.setInformativeText(
+                    QString("Parsed as:\n%1").arg(f.filterString()));
+            }
+            else
+            {
+                popup.setIcon(QMessageBox::Icon::Warning);
+                popup.setWindowTitle("Invalid filter");
+                popup.setText(QString("Unexpected filter return type"));
+                popup.setInformativeText(
+                    QString("Expected %1 but got %2")
+                        .arg(filters::typeToString(filters::Type::Bool))
+                        .arg(filters::typeToString(f.returnType())));
+            }
         }
         else
         {
+            auto err = std::move(std::get<filters::FilterError>(filterResult));
             popup.setIcon(QMessageBox::Icon::Warning);
             popup.setWindowTitle("Invalid filter");
             popup.setText(QString("Parsing errors occurred:"));
-            popup.setInformativeText(f.errors().join("\n"));
+            popup.setInformativeText(err.message);
         }
 
         popup.exec();

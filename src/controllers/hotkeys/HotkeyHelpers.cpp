@@ -1,6 +1,11 @@
 #include "controllers/hotkeys/HotkeyHelpers.hpp"
 
+#include "controllers/hotkeys/ActionNames.hpp"
+#include "controllers/hotkeys/HotkeyCategory.hpp"
+
 #include <QStringList>
+
+#include <optional>
 
 namespace chatterino {
 
@@ -25,6 +30,22 @@ std::vector<QString> parseHotkeyArguments(QString argumentString)
     }
 
     return arguments;
+}
+
+std::optional<ActionDefinition> findHotkeyActionDefinition(
+    HotkeyCategory category, const QString &action)
+{
+    auto allActions = actionNames.find(category);
+    if (allActions != actionNames.end())
+    {
+        const auto &actionsMap = allActions->second;
+        auto definition = actionsMap.find(action);
+        if (definition != actionsMap.end())
+        {
+            return {definition->second};
+        }
+    }
+    return {};
 }
 
 }  // namespace chatterino

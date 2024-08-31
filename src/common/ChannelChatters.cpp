@@ -1,8 +1,10 @@
-#include "ChannelChatters.hpp"
+#include "common/ChannelChatters.hpp"
 
+#include "common/Channel.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
+
+#include <QColor>
 
 namespace chatterino {
 
@@ -36,11 +38,11 @@ void ChannelChatters::addJoinedUser(const QString &user)
             auto joinedUsers = this->joinedUsers_.access();
             joinedUsers->sort();
 
-            MessageBuilder builder;
-            TwitchMessageBuilder::listOfUsersSystemMessage(
-                "Users joined:", *joinedUsers, &this->channel_, &builder);
-            builder->flags.set(MessageFlag::Collapsed);
-            this->channel_.addMessage(builder.release());
+            this->channel_.addMessage(
+                MessageBuilder::makeListOfUsersMessage(
+                    "Users joined:", *joinedUsers, &this->channel_,
+                    {MessageFlag::Collapsed}),
+                MessageContext::Original);
 
             joinedUsers->clear();
             this->joinedUsersMergeQueued_ = false;
@@ -61,11 +63,11 @@ void ChannelChatters::addPartedUser(const QString &user)
             auto partedUsers = this->partedUsers_.access();
             partedUsers->sort();
 
-            MessageBuilder builder;
-            TwitchMessageBuilder::listOfUsersSystemMessage(
-                "Users parted:", *partedUsers, &this->channel_, &builder);
-            builder->flags.set(MessageFlag::Collapsed);
-            this->channel_.addMessage(builder.release());
+            this->channel_.addMessage(
+                MessageBuilder::makeListOfUsersMessage(
+                    "Users parted:", *partedUsers, &this->channel_,
+                    {MessageFlag::Collapsed}),
+                MessageContext::Original);
 
             partedUsers->clear();
             this->partedUsersMergeQueued_ = false;

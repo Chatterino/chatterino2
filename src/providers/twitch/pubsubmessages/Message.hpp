@@ -6,7 +6,7 @@
 #include <QJsonObject>
 #include <QString>
 
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace chatterino {
 
@@ -43,15 +43,15 @@ struct PubSubMessageMessage {
     }
 
     template <class InnerClass>
-    boost::optional<InnerClass> toInner() const;
+    std::optional<InnerClass> toInner() const;
 };
 
 template <class InnerClass>
-boost::optional<InnerClass> PubSubMessageMessage::toInner() const
+std::optional<InnerClass> PubSubMessageMessage::toInner() const
 {
     if (this->messageObject.empty())
     {
-        return boost::none;
+        return std::nullopt;
     }
 
     return InnerClass{this->messageObject};

@@ -1,25 +1,25 @@
 #include "providers/twitch/TwitchAccount.hpp"
 
-#include <QThread>
-
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/Env.hpp"
-#include "common/NetworkRequest.hpp"
-#include "common/Outcome.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
-#include "providers/irc/IrcMessageBuilder.hpp"
-#include "providers/twitch/TwitchCommon.hpp"
-#include "providers/twitch/TwitchUser.hpp"
+#include "providers/seventv/SeventvAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/TwitchCommon.hpp"
 #include "singletons/Emotes.hpp"
+#include "util/CancellationToken.hpp"
 #include "util/Helpers.hpp"
 #include "util/QStringHash.hpp"
 #include "util/RapidjsonHelpers.hpp"
+
+#include <QThread>
 
 namespace chatterino {
 
@@ -100,77 +100,79 @@ bool TwitchAccount::isAnon() const
 
 void TwitchAccount::loadBlocks()
 {
+    assertInGuiThread();
+
+    auto token = CancellationToken(false);
+    this->blockToken_ = token;
+    this->ignores_.clear();
+    this->ignoresUserIds_.clear();
+
     getHelix()->loadBlocks(
-        getIApp()->getAccounts()->twitch.getCurrent()->userId_,
-        [this](std::vector<HelixBlock> blocks) {
-            auto ignores = this->ignores_.access();
-            auto userIds = this->ignoresUserIds_.access();
-            ignores->clear();
-            userIds->clear();
+        getApp()->getAccounts()->twitch.getCurrent()->userId_,
+        [this](const std::vector<HelixBlock> &blocks) {
+            assertInGuiThread();
 
             for (const HelixBlock &block : blocks)
             {
                 TwitchUser blockedUser;
                 blockedUser.fromHelixBlock(block);
-                ignores->insert(blockedUser);
-                userIds->insert(blockedUser.id);
+                this->ignores_.insert(blockedUser);
+                this->ignoresUserIds_.insert(blockedUser.id);
             }
         },
-        [] {
-            qCWarning(chatterinoTwitch) << "Fetching blocks failed!";
-        });
+        [](auto error) {
+            qCWarning(chatterinoTwitch).noquote()
+                << "Fetching blocks failed:" << error;
+        },
+        std::move(token));
 }
 
-void TwitchAccount::blockUser(QString userId, std::function<void()> onSuccess,
+void TwitchAccount::blockUser(const QString &userId, const QObject *caller,
+                              std::function<void()> onSuccess,
                               std::function<void()> onFailure)
 {
     getHelix()->blockUser(
-        userId,
-        [this, userId, onSuccess] {
+        userId, caller,
+        [this, userId, onSuccess = std::move(onSuccess)] {
+            assertInGuiThread();
+
             TwitchUser blockedUser;
             blockedUser.id = userId;
-            {
-                auto ignores = this->ignores_.access();
-                auto userIds = this->ignoresUserIds_.access();
-
-                ignores->insert(blockedUser);
-                userIds->insert(blockedUser.id);
-            }
+            this->ignores_.insert(blockedUser);
+            this->ignoresUserIds_.insert(blockedUser.id);
             onSuccess();
         },
         std::move(onFailure));
 }
 
-void TwitchAccount::unblockUser(QString userId, std::function<void()> onSuccess,
+void TwitchAccount::unblockUser(const QString &userId, const QObject *caller,
+                                std::function<void()> onSuccess,
                                 std::function<void()> onFailure)
 {
     getHelix()->unblockUser(
-        userId,
-        [this, userId, onSuccess] {
+        userId, caller,
+        [this, userId, onSuccess = std::move(onSuccess)] {
+            assertInGuiThread();
+
             TwitchUser ignoredUser;
             ignoredUser.id = userId;
-            {
-                auto ignores = this->ignores_.access();
-                auto userIds = this->ignoresUserIds_.access();
-
-                ignores->erase(ignoredUser);
-                userIds->erase(ignoredUser.id);
-            }
+            this->ignores_.erase(ignoredUser);
+            this->ignoresUserIds_.erase(ignoredUser.id);
             onSuccess();
         },
         std::move(onFailure));
 }
 
-SharedAccessGuard<const std::set<TwitchUser>> TwitchAccount::accessBlocks()
-    const
+const std::unordered_set<TwitchUser> &TwitchAccount::blocks() const
 {
-    return this->ignores_.accessConst();
+    assertInGuiThread();
+    return this->ignores_;
 }
 
-SharedAccessGuard<const std::set<QString>> TwitchAccount::accessBlockedUserIds()
-    const
+const std::unordered_set<QString> &TwitchAccount::blockedUserIds() const
 {
-    return this->ignoresUserIds_.accessConst();
+    assertInGuiThread();
+    return this->ignoresUserIds_;
 }
 
 void TwitchAccount::loadEmotes(std::weak_ptr<Channel> weakChannel)
@@ -229,7 +231,7 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
     }
 
     // filter out emote sets from userstate message, which are not in fetched emote set list
-    for (const auto &emoteSetKey : qAsConst(this->userstateEmoteSets_))
+    for (const auto &emoteSetKey : this->userstateEmoteSets_)
     {
         if (!existingEmoteSetKeys.contains(emoteSetKey))
         {
@@ -260,11 +262,32 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
             [this, weakChannel](QJsonArray emoteSetArray) {
                 auto emoteData = this->emotes_.access();
                 auto localEmoteData = this->localEmotes_.access();
-                for (auto emoteSet_ : emoteSetArray)
+
+                std::unordered_set<QString> subscriberChannelIDs;
+                std::vector<IvrEmoteSet> ivrEmoteSets;
+                ivrEmoteSets.reserve(emoteSetArray.size());
+
+                for (auto emoteSet : emoteSetArray)
+                {
+                    IvrEmoteSet ivrEmoteSet(emoteSet.toObject());
+                    if (!ivrEmoteSet.tier.isNull())
+                    {
+                        subscriberChannelIDs.insert(ivrEmoteSet.channelId);
+                    }
+                    ivrEmoteSets.emplace_back(ivrEmoteSet);
+                }
+
+                for (const auto &emoteSet : emoteData->emoteSets)
+                {
+                    if (emoteSet->subscriber)
+                    {
+                        subscriberChannelIDs.insert(emoteSet->channelID);
+                    }
+                }
+
+                for (const auto &ivrEmoteSet : ivrEmoteSets)
                 {
                     auto emoteSet = std::make_shared<EmoteSet>();
-
-                    IvrEmoteSet ivrEmoteSet(emoteSet_.toObject());
 
                     QString setKey = ivrEmoteSet.setId;
                     emoteSet->key = setKey;
@@ -281,8 +304,15 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
                         continue;
                     }
 
+                    emoteSet->channelID = ivrEmoteSet.channelId;
                     emoteSet->channelName = ivrEmoteSet.login;
                     emoteSet->text = ivrEmoteSet.displayName;
+                    emoteSet->subscriber = !ivrEmoteSet.tier.isNull();
+
+                    // NOTE: If a user does not have a subscriber emote set, but a follower emote set, this logic will be wrong
+                    // However, that's not a realistic problem.
+                    bool haveSubscriberSetForChannel =
+                        subscriberChannelIDs.contains(ivrEmoteSet.channelId);
 
                     for (const auto &emoteObj : ivrEmoteSet.emotes)
                     {
@@ -294,11 +324,15 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
 
                         emoteSet->emotes.push_back(TwitchEmote{id, code});
 
-                        auto emote =
-                            getApp()->emotes->twitch.getOrCreateEmote(id, code);
+                        auto emote = getApp()
+                                         ->getEmotes()
+                                         ->getTwitchEmotes()
+                                         ->getOrCreateEmote(id, code);
 
                         // Follower emotes can be only used in their origin channel
-                        if (ivrEmote.emoteType == "FOLLOWER")
+                        // unless the user is subscribed, then they can be used anywhere.
+                        if (ivrEmote.emoteType == "FOLLOWER" &&
+                            !haveSubscriberSetForChannel)
                         {
                             emoteSet->local = true;
 
@@ -327,8 +361,8 @@ void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
 
                 if (auto channel = weakChannel.lock(); channel != nullptr)
                 {
-                    channel->addMessage(makeSystemMessage(
-                        "Twitch subscriber emotes reloaded."));
+                    channel->addSystemMessage(
+                        "Twitch subscriber emotes reloaded.");
                 }
             },
             [] {
@@ -392,7 +426,7 @@ void TwitchAccount::autoModAllow(const QString msgID, ChannelPtr channel)
                 break;
             }
 
-            channel->addMessage(makeSystemMessage(errorMessage));
+            channel->addSystemMessage(errorMessage);
         });
 }
 
@@ -438,74 +472,46 @@ void TwitchAccount::autoModDeny(const QString msgID, ChannelPtr channel)
                 break;
             }
 
-            channel->addMessage(makeSystemMessage(errorMessage));
+            channel->addSystemMessage(errorMessage);
         });
 }
 
-void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
+const QString &TwitchAccount::getSeventvUserID() const
 {
-    if (!emoteSet)
+    return this->seventvUserID_;
+}
+
+void TwitchAccount::loadSeventvUserID()
+{
+    if (this->isAnon())
     {
-        qCWarning(chatterinoTwitch) << "null emote set sent";
+        return;
+    }
+    if (!this->seventvUserID_.isEmpty())
+    {
         return;
     }
 
-    auto staticSetIt = this->staticEmoteSets.find(emoteSet->key);
-    if (staticSetIt != this->staticEmoteSets.end())
+    auto *seventv = getApp()->getSeventvAPI();
+    if (!seventv)
     {
-        const auto &staticSet = staticSetIt->second;
-        emoteSet->channelName = staticSet.channelName;
-        emoteSet->text = staticSet.text;
+        qCWarning(chatterinoSeventv)
+            << "Not loading 7TV User ID because the 7TV API is not initialized";
         return;
     }
 
-    getHelix()->getEmoteSetData(
-        emoteSet->key,
-        [emoteSet](HelixEmoteSetData emoteSetData) {
-            // Follower emotes can be only used in their origin channel
-            if (emoteSetData.emoteType == "follower")
+    seventv->getUserByTwitchID(
+        this->getUserId(),
+        [this](const auto &json) {
+            const auto id = json["user"]["id"].toString();
+            if (!id.isEmpty())
             {
-                emoteSet->local = true;
+                this->seventvUserID_ = id;
             }
-
-            if (emoteSetData.ownerId.isEmpty() ||
-                emoteSetData.setId != emoteSet->key)
-            {
-                qCDebug(chatterinoTwitch)
-                    << QString("Failed to fetch emoteSetData for %1, assuming "
-                               "Twitch is the owner")
-                           .arg(emoteSet->key);
-
-                // most (if not all) emotes that fail to load are time limited event emotes owned by Twitch
-                emoteSet->channelName = "twitch";
-                emoteSet->text = "Twitch";
-
-                return;
-            }
-
-            // emote set 0 = global emotes
-            if (emoteSetData.ownerId == "0")
-            {
-                // emoteSet->channelName = QString();
-                emoteSet->text = "Twitch Global";
-                return;
-            }
-
-            getHelix()->getUserById(
-                emoteSetData.ownerId,
-                [emoteSet](HelixUser user) {
-                    emoteSet->channelName = user.login;
-                    emoteSet->text = user.displayName;
-                },
-                [emoteSetData] {
-                    qCWarning(chatterinoTwitch)
-                        << "Failed to query user by id:" << emoteSetData.ownerId
-                        << emoteSetData.setId;
-                });
         },
-        [emoteSet] {
-            // fetching emoteset data failed
-            return;
+        [](const auto &result) {
+            qCDebug(chatterinoSeventv)
+                << "Failed to load 7TV user-id:" << result.formatError();
         });
 }
 

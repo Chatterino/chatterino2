@@ -1,165 +1,177 @@
-#include "Credentials.hpp"
+#include "common/Credentials.hpp"
 
+#include "Application.hpp"
+#include "common/Modes.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
-#include "util/Overloaded.hpp"
+#include "util/Variant.hpp"
 
+#include <QApplication>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QSaveFile>
+#include <QStringBuilder>
+
+#include <variant>
 
 #ifndef NO_QTKEYCHAIN
 #    ifdef CMAKE_BUILD
-#        include "qt5keychain/keychain.h"
+#        if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#            include "qt6keychain/keychain.h"
+#        else
+#            include "qt5keychain/keychain.h"
+#        endif
 #    else
 #        include "keychain.h"
 #    endif
 #endif
-#include <QSaveFile>
-#include <boost/variant.hpp>
-
-#define FORMAT_NAME                                                  \
-    ([&] {                                                           \
-        assert(!provider.contains(":"));                             \
-        return QString("chatterino:%1:%2").arg(provider).arg(name_); \
-    })()
-
-namespace chatterino {
 
 namespace {
-    bool useKeyring()
-    {
+
+using namespace chatterino;
+
+QString formatName(const QString &provider, const QString &name)
+{
+    assert(!provider.contains(":"));
+    return u"chatterino:" % provider % u':' % name;
+}
+
+bool useKeyring()
+{
 #ifdef NO_QTKEYCHAIN
+    return false;
+#endif
+    if (Modes::instance().isPortable)
+    {
         return false;
-#endif
-        if (getPaths()->isPortable())
-        {
-            return false;
-        }
-        else
-        {
+    }
+
 #ifdef Q_OS_LINUX
-            return getSettings()->useKeyring;
+    return getSettings()->useKeyring;
 #else
-            return true;
+    return true;
 #endif
-        }
-    }
+}
 
-    // Insecure storage:
-    QString insecurePath()
+// Insecure storage:
+QString insecurePath()
+{
+    return combinePath(getApp()->getPaths().settingsDirectory,
+                       "credentials.json");
+}
+
+QJsonDocument loadInsecure()
+{
+    QFile file(insecurePath());
+    file.open(QIODevice::ReadOnly);
+    return QJsonDocument::fromJson(file.readAll());
+}
+
+void storeInsecure(const QJsonDocument &doc)
+{
+    QSaveFile file(insecurePath());
+    file.open(QIODevice::WriteOnly);
+    file.write(doc.toJson());
+    file.commit();
+}
+
+QJsonDocument &insecureInstance()
+{
+    static auto store = loadInsecure();
+    return store;
+}
+
+void queueInsecureSave()
+{
+    static bool isQueued = false;
+
+    if (!isQueued)
     {
-        return combinePath(getPaths()->settingsDirectory, "credentials.json");
+        isQueued = true;
+        QTimer::singleShot(200, QApplication::instance(), [] {
+            storeInsecure(insecureInstance());
+            isQueued = false;
+        });
     }
+}
 
-    QJsonDocument loadInsecure()
-    {
-        QFile file(insecurePath());
-        file.open(QIODevice::ReadOnly);
-        return QJsonDocument::fromJson(file.readAll());
-    }
+// QKeychain runs jobs asyncronously, so we have to assure that set/erase
+// jobs gets executed in order.
+struct SetJob {
+    QString name;
+    QString credential;
+};
 
-    void storeInsecure(const QJsonDocument &doc)
-    {
-        QSaveFile file(insecurePath());
-        file.open(QIODevice::WriteOnly);
-        file.write(doc.toJson());
-        file.commit();
-    }
+struct EraseJob {
+    QString name;
+};
 
-    QJsonDocument &insecureInstance()
-    {
-        static auto store = loadInsecure();
-        return store;
-    }
+using Job = std::variant<SetJob, EraseJob>;
 
-    void queueInsecureSave()
-    {
-        static bool isQueued = false;
+std::queue<Job> &jobQueue()
+{
+    static std::queue<Job> jobs;
+    return jobs;
+}
 
-        if (!isQueued)
-        {
-            isQueued = true;
-            QTimer::singleShot(200, qApp, [] {
-                storeInsecure(insecureInstance());
-                isQueued = false;
-            });
-        }
-    }
-
-    // QKeychain runs jobs asyncronously, so we have to assure that set/erase
-    // jobs gets executed in order.
-    struct SetJob {
-        QString name;
-        QString credential;
-    };
-
-    struct EraseJob {
-        QString name;
-    };
-
-    using Job = boost::variant<SetJob, EraseJob>;
-
-    static std::queue<Job> &jobQueue()
-    {
-        static std::queue<Job> jobs;
-        return jobs;
-    }
-
-    static void runNextJob()
-    {
+void runNextJob()
+{
 #ifndef NO_QTKEYCHAIN
-        auto &&queue = jobQueue();
+    auto &&queue = jobQueue();
 
-        if (!queue.empty())
-        {
-            // we were gonna use std::visit here but macos is shit
-
-            auto &&item = queue.front();
-
-            if (item.which() == 0)  // set job
-            {
-                auto set = boost::get<SetJob>(item);
-                auto job = new QKeychain::WritePasswordJob("chatterino");
-                job->setAutoDelete(true);
-                job->setKey(set.name);
-                job->setTextData(set.credential);
-                QObject::connect(job, &QKeychain::Job::finished, qApp,
-                                 [](auto) {
-                                     runNextJob();
-                                 });
-                job->start();
-            }
-            else  // erase job
-            {
-                auto erase = boost::get<EraseJob>(item);
-                auto job = new QKeychain::DeletePasswordJob("chatterino");
-                job->setAutoDelete(true);
-                job->setKey(erase.name);
-                QObject::connect(job, &QKeychain::Job::finished, qApp,
-                                 [](auto) {
-                                     runNextJob();
-                                 });
-                job->start();
-            }
-
-            queue.pop();
-        }
-#endif
-    }
-
-    static void queueJob(Job &&job)
+    if (!queue.empty())
     {
-        auto &&queue = jobQueue();
+        // we were gonna use std::visit here but macos is shit
 
-        queue.push(std::move(job));
-        if (queue.size() == 1)
-        {
-            runNextJob();
-        }
+        auto &&item = queue.front();
+
+        std::visit(
+            variant::Overloaded{
+                [](const SetJob &set) {
+                    auto *job = new QKeychain::WritePasswordJob("chatterino");
+                    job->setAutoDelete(true);
+                    job->setKey(set.name);
+                    job->setTextData(set.credential);
+                    QObject::connect(job, &QKeychain::Job::finished,
+                                     QApplication::instance(), [](auto) {
+                                         runNextJob();
+                                     });
+                    job->start();
+                },
+                [](const EraseJob &erase) {
+                    auto *job = new QKeychain::DeletePasswordJob("chatterino");
+                    job->setAutoDelete(true);
+                    job->setKey(erase.name);
+                    QObject::connect(job, &QKeychain::Job::finished,
+                                     QApplication::instance(), [](auto) {
+                                         runNextJob();
+                                     });
+                    job->start();
+                },
+            },
+            item);
+
+        queue.pop();
     }
+#endif
+}
+
+void queueJob(Job &&job)
+{
+    auto &&queue = jobQueue();
+
+    queue.push(std::move(job));
+    if (queue.size() == 1)
+    {
+        runNextJob();
+    }
+}
+
 }  // namespace
+
+namespace chatterino {
 
 Credentials &Credentials::instance()
 {
@@ -167,23 +179,20 @@ Credentials &Credentials::instance()
     return creds;
 }
 
-Credentials::Credentials()
-{
-}
-
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Credentials::get(const QString &provider, const QString &name_,
                       QObject *receiver,
                       std::function<void(const QString &)> &&onLoaded)
 {
     assertInGuiThread();
 
-    auto name = FORMAT_NAME;
+    auto name = formatName(provider, name_);
 
     if (useKeyring())
     {
 #ifndef NO_QTKEYCHAIN
         // if NO_QTKEYCHAIN is set, then this code is never used either way
-        auto job = new QKeychain::ReadPasswordJob("chatterino");
+        auto *job = new QKeychain::ReadPasswordJob("chatterino");
         job->setAutoDelete(true);
         job->setKey(name);
         QObject::connect(
@@ -197,12 +206,13 @@ void Credentials::get(const QString &provider, const QString &name_,
     }
     else
     {
-        auto &instance = insecureInstance();
+        const auto &instance = insecureInstance();
 
-        onLoaded(instance.object().find(name).value().toString());
+        onLoaded(instance[name].toString());
     }
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Credentials::set(const QString &provider, const QString &name_,
                       const QString &credential)
 {
@@ -211,7 +221,7 @@ void Credentials::set(const QString &provider, const QString &name_,
     /// On linux, we try to use a keychain but show a message to disable it when it fails.
     /// XXX: add said message
 
-    auto name = FORMAT_NAME;
+    auto name = formatName(provider, name_);
 
     if (useKeyring())
     {
@@ -229,11 +239,12 @@ void Credentials::set(const QString &provider, const QString &name_,
     }
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Credentials::erase(const QString &provider, const QString &name_)
 {
     assertInGuiThread();
 
-    auto name = FORMAT_NAME;
+    auto name = formatName(provider, name_);
 
     if (useKeyring())
     {

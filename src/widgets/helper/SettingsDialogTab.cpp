@@ -1,4 +1,5 @@
 #include "widgets/helper/SettingsDialogTab.hpp"
+
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/settingspages/SettingsPage.hpp"
 
@@ -41,7 +42,9 @@ void SettingsDialogTab::setSelected(bool _selected)
 SettingsPage *SettingsDialogTab::page()
 {
     if (this->page_)
+    {
         return this->page_;
+    }
 
     this->page_ = this->lazyPage_();
     this->page_->setTab(this);
@@ -53,7 +56,7 @@ void SettingsDialogTab::paintEvent(QPaintEvent *)
     QPainter painter(this);
 
     QStyleOption opt;
-    opt.init(this);
+    opt.initFrom(this);
 
     this->style()->drawPrimitive(QStyle::PE_Widget, &opt, &painter, this);
 

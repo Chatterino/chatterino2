@@ -1,15 +1,28 @@
 #pragma once
 
-#include <QString>
+#include <pajlada/signals/scoped-connection.hpp>
 #include <pajlada/signals/signal.hpp>
+#include <QString>
+
+#include <memory>
+#include <vector>
 
 namespace chatterino {
 
+class Paths;
+class Settings;
+
+/**
+ * To check for updates, use the `checkForUpdates` method.
+ * The class by itself does not start any automatic updates.
+ */
 class Updates
 {
-    Updates();
+    const Paths &paths;
 
 public:
+    Updates(const Paths &paths_, Settings &settings);
+
     enum Status {
         None,
         Searching,
@@ -21,8 +34,12 @@ public:
         WriteFileFailed,
     };
 
-    // fourtf: don't add this class to the application class
-    static Updates &instance();
+    static bool isDowngradeOf(const QString &online, const QString &current);
+
+    /**
+     * @brief Delete old files that belong to the update process
+     */
+    void deleteOldFiles();
 
     void checkForUpdates();
     const QString &getCurrentVersion() const;
@@ -47,6 +64,9 @@ private:
     QString updateGuideLink_;
 
     void setStatus_(Status status);
+
+    std::vector<std::unique_ptr<pajlada::Signals::ScopedConnection>>
+        managedConnections;
 };
 
 }  // namespace chatterino

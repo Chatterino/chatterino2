@@ -1,6 +1,6 @@
-#include "IvrApi.hpp"
+#include "providers/IvrApi.hpp"
 
-#include "common/Outcome.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 
 #include <QUrlQuery>
@@ -17,16 +17,14 @@ void IvrApi::getSubage(QString userName, QString channelName,
 
     this->makeRequest(
             QString("twitch/subage/%1/%2").arg(userName).arg(channelName), {})
-        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+        .onSuccess([successCallback, failureCallback](auto result) {
             auto root = result.parseJson();
 
             successCallback(root);
-
-            return Success;
         })
         .onError([failureCallback](auto result) {
             qCWarning(chatterinoIvr)
-                << "Failed IVR API Call!" << result.status()
+                << "Failed IVR API Call!" << result.formatError()
                 << QString(result.getData());
             failureCallback();
         })
@@ -40,17 +38,15 @@ void IvrApi::getBulkEmoteSets(QString emoteSetList,
     QUrlQuery urlQuery;
     urlQuery.addQueryItem("set_id", emoteSetList);
 
-    this->makeRequest("v2/twitch/emotes/sets", urlQuery)
-        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+    this->makeRequest("twitch/emotes/sets", urlQuery)
+        .onSuccess([successCallback, failureCallback](auto result) {
             auto root = result.parseJsonArray();
 
             successCallback(root);
-
-            return Success;
         })
         .onError([failureCallback](auto result) {
             qCWarning(chatterinoIvr)
-                << "Failed IVR API Call!" << result.status()
+                << "Failed IVR API Call!" << result.formatError()
                 << QString(result.getData());
             failureCallback();
         })
@@ -61,7 +57,7 @@ NetworkRequest IvrApi::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
 
-    const QString baseUrl("https://api.ivr.fi/");
+    const QString baseUrl("https://api.ivr.fi/v2/");
     QUrl fullUrl(baseUrl + url);
     fullUrl.setQuery(urlQuery);
 

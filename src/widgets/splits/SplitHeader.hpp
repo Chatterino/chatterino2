@@ -1,14 +1,15 @@
 #pragma once
 
 #include "widgets/BaseWidget.hpp"
+#include "widgets/TooltipWidget.hpp"
 
-#include <QElapsedTimer>
-#include <QMenu>
-#include <QPoint>
 #include <boost/signals2.hpp>
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/signals/connection.hpp>
 #include <pajlada/signals/signalholder.hpp>
+#include <QElapsedTimer>
+#include <QMenu>
+#include <QPoint>
 
 #include <memory>
 #include <vector>
@@ -25,26 +26,31 @@ class SplitHeader final : public BaseWidget
     Q_OBJECT
 
 public:
-    explicit SplitHeader(Split *_chatWidget);
+    explicit SplitHeader(Split *split);
 
     void setAddButtonVisible(bool value);
-    void setViewersButtonVisible(bool value);
 
     void updateChannelText();
-    void updateModerationModeIcon();
+    void updateIcons();
+    // Invoked when SplitHeader should update anything refering to a TwitchChannel's mode
+    // has changed (e.g. sub mode toggled)
     void updateRoomModes();
 
 protected:
-    virtual void scaleChangedEvent(float) override;
-    virtual void themeChangedEvent() override;
+    void scaleChangedEvent(float scale) override;
+    void themeChangedEvent() override;
 
-    virtual void paintEvent(QPaintEvent *) override;
-    virtual void mousePressEvent(QMouseEvent *event) override;
-    virtual void mouseReleaseEvent(QMouseEvent *event) override;
-    virtual void mouseMoveEvent(QMouseEvent *event) override;
-    virtual void enterEvent(QEvent *) override;
-    virtual void leaveEvent(QEvent *event) override;
-    virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    void enterEvent(QEnterEvent *event) override;
+#else
+    void enterEvent(QEvent *event) override;
+#endif
+    void leaveEvent(QEvent *event) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 private:
     void initializeLayout();
@@ -62,6 +68,7 @@ private:
 
     Split *const split_{};
     QString tooltipText_{};
+    TooltipWidget *const tooltipWidget_{};
     bool isLive_{false};
     QString thumbnail_;
     QElapsedTimer lastThumbnail_;
@@ -71,9 +78,16 @@ private:
     // ui
     Button *dropdownButton_{};
     Label *titleLabel_{};
+
     EffectLabel *modeButton_{};
+    QAction *modeActionSetEmote{};
+    QAction *modeActionSetSub{};
+    QAction *modeActionSetSlow{};
+    QAction *modeActionSetR9k{};
+    QAction *modeActionSetFollowers{};
+
     Button *moderationButton_{};
-    Button *viewersButton_{};
+    Button *chattersButton_{};
     Button *addButton_{};
 
     // states
@@ -82,8 +96,8 @@ private:
     bool doubleClicked_{false};
     bool menuVisible_{false};
 
-    // signals
-    pajlada::Signals::NoArgSignal modeUpdateRequested_;
+    // managedConnections_ contains connections for signals that are not managed by us
+    // and don't change when the parent Split changes its underlying channel
     pajlada::Signals::SignalHolder managedConnections_;
     pajlada::Signals::SignalHolder channelConnections_;
     std::vector<boost::signals2::scoped_connection> bSignals_;

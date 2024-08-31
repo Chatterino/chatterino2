@@ -1,23 +1,35 @@
-#include "GeneralPageView.hpp"
-#include <QScrollBar>
+#include "widgets/settingspages/GeneralPageView.hpp"
+
 #include "Application.hpp"
-#include "singletons/Settings.hpp"
-#include "singletons/WindowManager.hpp"
 #include "util/LayoutHelper.hpp"
+#include "util/RapidJsonSerializeQString.hpp"
 #include "widgets/dialogs/ColorPickerDialog.hpp"
-#include "widgets/helper/ColorButton.hpp"
+#include "widgets/helper/color/ColorButton.hpp"
 #include "widgets/helper/Line.hpp"
+
+#include <QRegularExpression>
+#include <QScrollArea>
+#include <QScrollBar>
+
+namespace {
+
+constexpr int MAX_TOOLTIP_LINE_LENGTH = 50;
+const auto MAX_TOOLTIP_LINE_LENGTH_PATTERN =
+    QStringLiteral(R"(.{%1}\S*\K(\s+))").arg(MAX_TOOLTIP_LINE_LENGTH);
+const QRegularExpression MAX_TOOLTIP_LINE_LENGTH_REGEX(
+    MAX_TOOLTIP_LINE_LENGTH_PATTERN);
+}  // namespace
 
 namespace chatterino {
 
 GeneralPageView::GeneralPageView(QWidget *parent)
     : QWidget(parent)
 {
-    auto scrollArea = this->contentScrollArea_ =
+    auto *scrollArea = this->contentScrollArea_ =
         makeScrollArea(this->contentLayout_ = new QVBoxLayout);
     scrollArea->setObjectName("generalSettingsScrollContent");
 
-    auto navigation =
+    auto *navigation =
         wrapLayout(this->navigationLayout_ = makeLayout<QVBoxLayout>({}));
     navigation->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Minimum);
     this->navigationLayout_->setAlignment(Qt::AlignTop);
@@ -27,7 +39,7 @@ GeneralPageView::GeneralPageView(QWidget *parent)
         {scrollArea, new QSpacerItem(16, 1), navigation}));
 
     QObject::connect(scrollArea->verticalScrollBar(), &QScrollBar::valueChanged,
-                     this, [=] {
+                     this, [this] {
                          this->updateNavigationHighlighting();
                      });
 }
@@ -51,18 +63,20 @@ TitleLabel *GeneralPageView::addTitle(const QString &title)
 {
     // space
     if (!this->groups_.empty())
+    {
         this->addWidget(this->groups_.back().space = new Space);
+    }
 
     // title
-    auto label = new TitleLabel(title + ":");
+    auto *label = new TitleLabel(title + ":");
     this->addWidget(label);
 
     // navigation item
-    auto navLabel = new NavigationLabel(title);
+    auto *navLabel = new NavigationLabel(title);
     navLabel->setCursor(Qt::PointingHandCursor);
     this->navigationLayout_->addWidget(navLabel);
 
-    QObject::connect(navLabel, &NavigationLabel::leftMouseUp, label, [=] {
+    QObject::connect(navLabel, &NavigationLabel::leftMouseUp, label, [=, this] {
         this->contentScrollArea_->verticalScrollBar()->setValue(label->y());
     });
 
@@ -70,14 +84,16 @@ TitleLabel *GeneralPageView::addTitle(const QString &title)
     this->groups_.push_back(Group{title, label, navLabel, nullptr, {}});
 
     if (this->groups_.size() == 1)
+    {
         this->updateNavigationHighlighting();
+    }
 
     return label;
 }
 
 SubtitleLabel *GeneralPageView::addSubtitle(const QString &title)
 {
-    auto label = new SubtitleLabel(title + ":");
+    auto *label = new SubtitleLabel(title + ":");
     this->addWidget(label);
 
     this->groups_.back().widgets.push_back({label, {title}});
@@ -86,9 +102,11 @@ SubtitleLabel *GeneralPageView::addSubtitle(const QString &title)
 }
 
 QCheckBox *GeneralPageView::addCheckbox(const QString &text,
-                                        BoolSetting &setting, bool inverse)
+                                        BoolSetting &setting, bool inverse,
+                                        QString toolTipText)
 {
-    auto check = new QCheckBox(text);
+    auto *check = new QCheckBox(text);
+    this->addToolTip(*check, toolTipText);
 
     // update when setting changes
     setting.connect(
@@ -111,19 +129,43 @@ QCheckBox *GeneralPageView::addCheckbox(const QString &text,
     return check;
 }
 
-ComboBox *GeneralPageView::addDropdown(const QString &text,
-                                       const QStringList &list)
+QCheckBox *GeneralPageView::addCustomCheckbox(const QString &text,
+                                              const std::function<bool()> &load,
+                                              std::function<void(bool)> save,
+                                              const QString &toolTipText)
 {
-    auto layout = new QHBoxLayout;
-    auto combo = new ComboBox;
+    auto *check = new QCheckBox(text);
+    this->addToolTip(*check, toolTipText);
+
+    check->setChecked(load());
+
+    QObject::connect(check, &QCheckBox::toggled, this,
+                     [save = std::move(save)](bool state) {
+                         save(state);
+                     });
+
+    this->addWidget(check);
+
+    this->groups_.back().widgets.push_back({check, {text}});
+
+    return check;
+}
+
+ComboBox *GeneralPageView::addDropdown(const QString &text,
+                                       const QStringList &list,
+                                       QString toolTipText)
+{
+    auto *layout = new QHBoxLayout;
+    auto *combo = new ComboBox;
     combo->setFocusPolicy(Qt::StrongFocus);
     combo->addItems(list);
 
-    auto label = new QLabel(text + ":");
+    auto *label = new QLabel(text + ":");
     layout->addWidget(label);
     layout->addStretch(1);
     layout->addWidget(combo);
 
+    this->addToolTip(*label, toolTipText);
     this->addLayout(layout);
 
     // groups
@@ -135,12 +177,15 @@ ComboBox *GeneralPageView::addDropdown(const QString &text,
 
 ComboBox *GeneralPageView::addDropdown(
     const QString &text, const QStringList &items,
-    pajlada::Settings::Setting<QString> &setting, bool editable)
+    pajlada::Settings::Setting<QString> &setting, bool editable,
+    QString toolTipText)
 {
-    auto combo = this->addDropdown(text, items);
+    auto *combo = this->addDropdown(text, items, toolTipText);
 
     if (editable)
+    {
         combo->setEditable(true);
+    }
 
     // update when setting changes
     setting.connect(
@@ -152,7 +197,7 @@ ComboBox *GeneralPageView::addDropdown(
     QObject::connect(combo, &QComboBox::currentTextChanged,
                      [&setting](const QString &newValue) {
                          setting = newValue;
-                         getApp()->windows->forceLayoutChannelViews();
+                         getApp()->getWindows()->forceLayoutChannelViews();
                      });
 
     return combo;
@@ -160,27 +205,33 @@ ComboBox *GeneralPageView::addDropdown(
 
 ColorButton *GeneralPageView::addColorButton(
     const QString &text, const QColor &color,
-    pajlada::Settings::Setting<QString> &setting)
+    pajlada::Settings::Setting<QString> &setting, QString toolTipText)
 {
-    auto colorButton = new ColorButton(color);
-    auto layout = new QHBoxLayout();
-    auto label = new QLabel(text + ":");
+    auto *colorButton = new ColorButton(color);
+    auto *layout = new QHBoxLayout();
+    auto *label = new QLabel(text + ":");
+
     layout->addWidget(label);
     layout->addStretch(1);
     layout->addWidget(colorButton);
+
+    this->addToolTip(*label, toolTipText);
     this->addLayout(layout);
+
     QObject::connect(
         colorButton, &ColorButton::clicked, [this, &setting, colorButton]() {
-            auto dialog = new ColorPickerDialog(QColor(setting), this);
-            dialog->setAttribute(Qt::WA_DeleteOnClose);
+            auto *dialog = new ColorPickerDialog(QColor(setting), this);
+            // colorButton & setting are never deleted and the signal is deleted
+            // once the dialog is closed
+            QObject::connect(dialog, &ColorPickerDialog::colorConfirmed, this,
+                             [&setting, colorButton](auto selected) {
+                                 if (selected.isValid())
+                                 {
+                                     setting = selected.name(QColor::HexArgb);
+                                     colorButton->setColor(selected);
+                                 }
+                             });
             dialog->show();
-            dialog->closed.connect([&setting, colorButton](QColor selected) {
-                if (selected.isValid())
-                {
-                    setting = selected.name(QColor::HexArgb);
-                    colorButton->setColor(selected);
-                }
-            });
         });
 
     this->groups_.back().widgets.push_back({label, {text}});
@@ -190,13 +241,15 @@ ColorButton *GeneralPageView::addColorButton(
 }
 
 QSpinBox *GeneralPageView::addIntInput(const QString &text, IntSetting &setting,
-                                       int min, int max, int step)
+                                       int min, int max, int step,
+                                       QString toolTipText)
 {
-    auto layout = new QHBoxLayout;
+    auto *layout = new QHBoxLayout;
 
-    auto label = new QLabel(text + ":");
+    auto *label = new QLabel(text + ":");
+    this->addToolTip(*label, toolTipText);
 
-    auto input = new QSpinBox;
+    auto *input = new QSpinBox;
     input->setMinimum(min);
     input->setMaximum(max);
 
@@ -233,7 +286,7 @@ void GeneralPageView::addNavigationSpacing()
 
 DescriptionLabel *GeneralPageView::addDescription(const QString &text)
 {
-    auto label = new DescriptionLabel(text);
+    auto *label = new DescriptionLabel(text);
 
     label->setTextInteractionFlags(Qt::TextBrowserInteraction |
                                    Qt::LinksAccessibleByKeyboard);
@@ -263,7 +316,7 @@ bool GeneralPageView::filterElements(const QString &query)
         bool descriptionMatches{};
         for (auto &&widget : group.widgets)
         {
-            if (auto x = dynamic_cast<DescriptionLabel *>(widget.element); x)
+            if (auto *x = dynamic_cast<DescriptionLabel *>(widget.element); x)
             {
                 if (x->text().contains(query, Qt::CaseInsensitive))
                 {
@@ -278,7 +331,9 @@ bool GeneralPageView::filterElements(const QString &query)
             descriptionMatches)
         {
             for (auto &&widget : group.widgets)
+            {
                 widget.element->show();
+            }
 
             group.title->show();
             group.navigationLink->show();
@@ -295,11 +350,13 @@ bool GeneralPageView::filterElements(const QString &query)
 
             for (auto &&widget : group.widgets)
             {
-                if (auto x = dynamic_cast<SubtitleLabel *>(widget.element))
+                if (auto *x = dynamic_cast<SubtitleLabel *>(widget.element))
                 {
                     currentSubtitleSearched = false;
                     if (currentSubtitle)
+                    {
                         currentSubtitle->setVisible(currentSubtitleVisible);
+                    }
 
                     currentSubtitleVisible = false;
                     currentSubtitle = widget.element;
@@ -328,10 +385,14 @@ bool GeneralPageView::filterElements(const QString &query)
             }
 
             if (currentSubtitle)
+            {
                 currentSubtitle->setVisible(currentSubtitleVisible);
+            }
 
             if (group.space)
+            {
                 group.space->setVisible(groupAny);
+            }
 
             group.title->setVisible(groupAny);
             group.navigationLink->setVisible(groupAny);
@@ -360,6 +421,24 @@ void GeneralPageView::updateNavigationHighlighting()
             group.navigationLink->setStyleSheet("");
         }
     }
+}
+
+void GeneralPageView::addToolTip(QWidget &widget, QString text) const
+{
+    if (text.isEmpty())
+    {
+        return;
+    }
+
+    if (text.length() > MAX_TOOLTIP_LINE_LENGTH)
+    {
+        // match MAX_TOOLTIP_LINE_LENGTH characters, any remaining
+        // non-space, and then capture the following space for
+        // replacement with newline
+        text.replace(MAX_TOOLTIP_LINE_LENGTH_REGEX, "\n");
+    }
+
+    widget.setToolTip(text);
 }
 
 }  // namespace chatterino

@@ -1,13 +1,10 @@
 #include "messages/Message.hpp"
 
-#include "Application.hpp"
-#include "MessageElement.hpp"
-#include "providers/twitch/PubSubActions.hpp"
-#include "singletons/Theme.hpp"
+#include "providers/colors/ColorProvider.hpp"
+#include "providers/twitch/TwitchBadge.hpp"
+#include "singletons/Settings.hpp"
 #include "util/DebugCount.hpp"
-#include "util/IrcHelpers.hpp"
-
-using SBHighlight = chatterino::ScrollbarHighlight;
+#include "widgets/helper/ScrollbarHighlight.hpp"
 
 namespace chatterino {
 
@@ -22,38 +19,65 @@ Message::~Message()
     DebugCount::decrease("messages");
 }
 
-SBHighlight Message::getScrollBarHighlight() const
+ScrollbarHighlight Message::getScrollBarHighlight() const
 {
     if (this->flags.has(MessageFlag::Highlighted) ||
         this->flags.has(MessageFlag::HighlightedWhisper))
     {
-        return SBHighlight(this->highlightColor);
+        return {
+            this->highlightColor,
+        };
     }
-    else if (this->flags.has(MessageFlag::Subscription) &&
-             getSettings()->enableSubHighlight)
+
+    if (this->flags.has(MessageFlag::Subscription) &&
+        getSettings()->enableSubHighlight)
     {
-        return SBHighlight(
-            ColorProvider::instance().color(ColorType::Subscription));
+        return {
+            ColorProvider::instance().color(ColorType::Subscription),
+        };
     }
-    else if (this->flags.has(MessageFlag::RedeemedHighlight) ||
-             this->flags.has(MessageFlag::RedeemedChannelPointReward))
+
+    if (this->flags.has(MessageFlag::RedeemedHighlight) ||
+        this->flags.has(MessageFlag::RedeemedChannelPointReward))
     {
-        return SBHighlight(
+        return {
             ColorProvider::instance().color(ColorType::RedeemedHighlight),
-            SBHighlight::Default, true);
+            ScrollbarHighlight::Default,
+            true,
+        };
     }
-    else if (this->flags.has(MessageFlag::FirstMessage))
+
+    if (this->flags.has(MessageFlag::ElevatedMessage))
     {
-        return SBHighlight(
-            ColorProvider::instance().color(ColorType::FirstMessageHighlight),
-            SBHighlight::Default, false, true);
+        return {
+            ColorProvider::instance().color(
+                ColorType::ElevatedMessageHighlight),
+            ScrollbarHighlight::Default,
+            false,
+            false,
+            true,
+        };
     }
-    return SBHighlight();
+
+    if (this->flags.has(MessageFlag::FirstMessage))
+    {
+        return {
+            ColorProvider::instance().color(ColorType::FirstMessageHighlight),
+            ScrollbarHighlight::Default,
+            false,
+            true,
+        };
+    }
+
+    if (this->flags.has(MessageFlag::AutoModOffendingMessage) ||
+        this->flags.has(MessageFlag::AutoModOffendingMessageHeader))
+    {
+        return {
+            ColorProvider::instance().color(ColorType::AutomodHighlight),
+        };
+    }
+
+    return {};
 }
-
-// Static
-namespace {
-
-}  // namespace
 
 }  // namespace chatterino

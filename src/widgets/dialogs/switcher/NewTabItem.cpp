@@ -5,28 +5,30 @@
 #include "singletons/Fonts.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/helper/NotebookTab.hpp"
+#include "widgets/Notebook.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/Window.hpp"
 
 namespace chatterino {
 
-NewTabItem::NewTabItem(const QString &channelName)
+NewTabItem::NewTabItem(Window *window_, const QString &channelName)
     : AbstractSwitcherItem(QIcon(":/switcher/plus.svg"))
     , channelName_(channelName)
     , text_(QString(TEXT_FORMAT).arg(channelName))
+    , window(window_)
 {
 }
 
 void NewTabItem::action()
 {
-    auto &nb = getApp()->windows->getMainWindow().getNotebook();
+    auto &nb = this->window->getNotebook();
     SplitContainer *container = nb.addPage(true);
 
     Split *split = new Split(container);
-    split->setChannel(getApp()->twitch->getOrAddChannel(this->channelName_));
-    container->appendSplit(split);
+    split->setChannel(
+        getApp()->getTwitch()->getOrAddChannel(this->channelName_));
+    container->insertSplit(split);
 }
 
 void NewTabItem::paint(QPainter *painter, const QRect &rect) const
@@ -36,9 +38,10 @@ void NewTabItem::paint(QPainter *painter, const QRect &rect) const
     painter->setRenderHint(QPainter::Antialiasing, true);
 
     // TODO(leon): Right pen/brush/font settings?
-    painter->setPen(getApp()->themes->splits.header.text);
+    painter->setPen(getApp()->getThemes()->splits.header.text);
     painter->setBrush(Qt::SolidPattern);
-    painter->setFont(getApp()->fonts->getFont(FontStyle::UiMediumBold, 1.0));
+    painter->setFont(
+        getApp()->getFonts()->getFont(FontStyle::UiMediumBold, 1.0));
 
     QRect iconRect(rect.topLeft(), ICON_SIZE);
     this->icon_.paint(painter, iconRect, Qt::AlignLeft | Qt::AlignVCenter);

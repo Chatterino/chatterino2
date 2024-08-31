@@ -1,47 +1,78 @@
-Checks: '-*,
-    clang-diagnostic-*,
-    llvm-*,
-    misc-*,
-    -misc-unused-parameters,
-    readability-identifier-naming,
-    -llvm-header-guard,
-    modernize-*,
-    readability-*,
-    performance-*,
-    misc-*,
-    bugprone-*,
-    cert-*,
-    cppcoreguidelines-*,
-    -cppcoreguidelines-pro-type-cstyle-cast,
-    -cppcoreguidelines-pro-bounds-pointer-arithmetic,
-    -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
-    -cppcoreguidelines-pro-type-member-init,
-    -cppcoreguidelines-owning-memory,
-    -cppcoreguidelines-avoid-magic-numbers,
-    -readability-magic-numbers,
-    -performance-noexcept-move-constructor,
-    -misc-non-private-member-variables-in-classes,
-    -cppcoreguidelines-non-private-member-variables-in-classes,
-    -modernize-use-nodiscard,
-    -modernize-use-trailing-return-type,
-    -readability-identifier-length,
-    -readability-function-cognitive-complexity,
-    -bugprone-easily-swappable-parameters,
-    '
+Checks: "-*,
+  clang-diagnostic-*,
+  llvm-*,
+  misc-*,
+  -misc-unused-parameters,
+  readability-identifier-naming,
+  -llvm-header-guard,
+  -llvm-include-order,
+  modernize-*,
+  readability-*,
+  performance-*,
+  misc-*,
+  bugprone-*,
+  cert-*,
+  cppcoreguidelines-*,
+  -cppcoreguidelines-pro-type-cstyle-cast,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-avoid-const-or-ref-data-members,
+  -readability-magic-numbers,
+  -performance-noexcept-move-constructor,
+  -misc-non-private-member-variables-in-classes,
+  -misc-no-recursion,
+  -cppcoreguidelines-non-private-member-variables-in-classes,
+  -modernize-use-nodiscard,
+  -modernize-use-trailing-return-type,
+  -readability-identifier-length,
+  -readability-function-cognitive-complexity,
+  -bugprone-easily-swappable-parameters,
+  -cert-err58-cpp,
+  -modernize-avoid-c-arrays,
+  -misc-include-cleaner
+  "
 CheckOptions:
-  - key:             readability-identifier-naming.ClassCase
-    value:           CamelCase
-  - key:             readability-identifier-naming.EnumCase
-    value:           CamelCase
-  - key:             readability-identifier-naming.FunctionCase
-    value:           camelBack
-  - key:             readability-identifier-naming.MemberCase
-    value:           camelBack
-  - key:             readability-identifier-naming.PrivateMemberSuffix
-    value:           _
-  - key:             readability-identifier-naming.UnionCase
-    value:           CamelCase
-  - key:             readability-identifier-naming.GlobalVariableCase
-    value:           UPPER_CASE
-  - key:             readability-identifier-naming.VariableCase
-    value:           camelBack
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+
+  - key: readability-identifier-naming.FunctionCase
+    value: camelBack
+  - key: readability-identifier-naming.FunctionIgnoredRegexp
+    value: ^TEST$
+
+  - key: readability-identifier-naming.MemberCase
+    value: camelBack
+  - key: readability-identifier-naming.PrivateMemberIgnoredRegexp
+    value: ^.*_$
+  - key: readability-identifier-naming.ProtectedMemberIgnoredRegexp
+    value: ^.*_$
+  - key: readability-identifier-naming.UnionCase
+    value: CamelCase
+  - key: readability-identifier-naming.GlobalConstantCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.GlobalVariableCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.VariableCase
+    value: camelBack
+  - key: readability-implicit-bool-conversion.AllowPointerConditions
+    value: true
+
+  # Lua state
+  - key: readability-identifier-naming.LocalPointerIgnoredRegexp
+    value: ^L$
+
+  # Benchmarks
+  - key: readability-identifier-naming.FunctionIgnoredRegexp
+    value: ^BM_[^_]+$
+  - key: readability-identifier-naming.ClassIgnoredRegexp
+    value: ^BM_[^_]+$
+
+  - key: misc-const-correctness.AnalyzeValues
+    value: false
+
+  - key: cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
+    value: true

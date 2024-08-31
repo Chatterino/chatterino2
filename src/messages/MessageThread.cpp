@@ -1,4 +1,4 @@
-#include "MessageThread.hpp"
+#include "messages/MessageThread.hpp"
 
 #include "messages/Message.hpp"
 #include "util/DebugCount.hpp"
@@ -56,6 +56,28 @@ size_t MessageThread::liveCount(
     }
 
     return count;
+}
+
+void MessageThread::markSubscribed()
+{
+    if (this->subscription_ == Subscription::Subscribed)
+    {
+        return;
+    }
+
+    this->subscription_ = Subscription::Subscribed;
+    this->subscriptionUpdated();
+}
+
+void MessageThread::markUnsubscribed()
+{
+    if (this->subscription_ == Subscription::Unsubscribed)
+    {
+        return;
+    }
+
+    this->subscription_ = Subscription::Unsubscribed;
+    this->subscriptionUpdated();
 }
 
 }  // namespace chatterino

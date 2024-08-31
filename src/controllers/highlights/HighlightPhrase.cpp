@@ -9,12 +9,21 @@ namespace {
 
 }  // namespace
 
-QColor HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR = QColor(238, 97, 102, 65);
+// change made but removed in merge conflict
+// QColor HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR = QColor(238, 97, 102, 65);
+QColor HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR = QColor(127, 63, 73, 127);
+QColor HighlightPhrase::FALLBACK_SELF_MESSAGE_HIGHLIGHT_COLOR =
+    QColor(0, 118, 221, 115);
 QColor HighlightPhrase::FALLBACK_REDEEMED_HIGHLIGHT_COLOR =
     QColor(28, 126, 141, 60);
 QColor HighlightPhrase::FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR =
     QColor(72, 127, 63, 60);
+QColor HighlightPhrase::FALLBACK_ELEVATED_MESSAGE_HIGHLIGHT_COLOR =
+    QColor(255, 174, 66, 60);
+QColor HighlightPhrase::FALLBACK_THREAD_HIGHLIGHT_COLOR =
+    QColor(143, 48, 24, 60);
 QColor HighlightPhrase::FALLBACK_SUB_COLOR = QColor(196, 102, 255, 100);
+QColor HighlightPhrase::FALLBACK_AUTOMOD_HIGHLIGHT_COLOR = QColor(64, 64, 64);
 
 bool HighlightPhrase::operator==(const HighlightPhrase &other) const
 {

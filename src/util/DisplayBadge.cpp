@@ -1,4 +1,4 @@
-#include "DisplayBadge.hpp"
+#include "util/DisplayBadge.hpp"
 
 namespace chatterino {
 DisplayBadge::DisplayBadge(QString displayName, QString badgeName)

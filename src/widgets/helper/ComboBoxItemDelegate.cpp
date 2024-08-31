@@ -1,4 +1,4 @@
-#include "ComboBoxItemDelegate.hpp"
+#include "widgets/helper/ComboBoxItemDelegate.hpp"
 
 #include <QComboBox>
 
@@ -56,10 +56,14 @@ void ComboBoxItemDelegate::setModelData(QWidget *editor,
                                         const QModelIndex &index) const
 {
     if (QComboBox *cb = qobject_cast<QComboBox *>(editor))
+    {
         // save the current text of the combo box as the current value of the
         // item
         model->setData(index, cb->currentText(), Qt::EditRole);
+    }
     else
+    {
         QStyledItemDelegate::setModelData(editor, model, index);
+    }
 }
 }  // namespace chatterino

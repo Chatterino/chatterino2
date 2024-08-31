@@ -2,6 +2,7 @@
 
 #include <QHash>
 #include <QString>
+
 #include <functional>
 
 #define QStringAlias(name)                                 \

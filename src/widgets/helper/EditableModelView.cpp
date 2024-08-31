@@ -1,16 +1,17 @@
-#include "EditableModelView.hpp"
+#include "widgets/helper/EditableModelView.hpp"
+
 #include "widgets/helper/RegExpItemDelegate.hpp"
+#include "widgets/helper/TableStyles.hpp"
 
 #include <QAbstractItemView>
 #include <QAbstractTableModel>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QLabel>
 #include <QModelIndex>
 #include <QPushButton>
 #include <QTableView>
 #include <QVBoxLayout>
-
-#include <QLabel>
 
 namespace chatterino {
 
@@ -26,13 +27,16 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
     this->tableView_->setDragDropOverwriteMode(false);
     this->tableView_->setDefaultDropAction(Qt::DropAction::MoveAction);
     this->tableView_->verticalHeader()->setVisible(false);
+    this->tableView_->horizontalHeader()->setSectionsClickable(false);
+
+    TableRowDragStyle::applyTo(this->tableView_);
 
     // create layout
     QVBoxLayout *vbox = new QVBoxLayout(this);
-    vbox->setMargin(0);
+    vbox->setContentsMargins(0, 0, 0, 0);
 
     // create button layout
-    QHBoxLayout *buttons = new QHBoxLayout(this);
+    auto *buttons = new QHBoxLayout();
     this->buttons_ = buttons;
     vbox->addLayout(buttons);
 
@@ -52,12 +56,16 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
         // Remove rows backwards so indices don't shift.
         std::vector<int> rows;
         for (auto &&index : selected)
+        {
             rows.push_back(index.row());
+        }
 
         std::sort(rows.begin(), rows.end(), std::greater{});
 
         for (auto &&row : rows)
+        {
             model_->removeRow(row);
+        }
     });
 
     if (movable)
@@ -82,7 +90,13 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
     QObject::connect(this->model_, &QAbstractTableModel::rowsMoved, this,
                      [this](const QModelIndex &parent, int start, int end,
                             const QModelIndex &destination, int row) {
-                         this->selectRow(row);
+                         this->tableView_->selectRow(row);
+                     });
+
+    // select freshly added row
+    QObject::connect(this->model_, &QAbstractTableModel::rowsInserted, this,
+                     [this](const QModelIndex &parent, int first, int last) {
+                         this->tableView_->selectRow(last);
                      });
 
     // add tableview
@@ -128,7 +142,7 @@ void EditableModelView::addCustomButton(QWidget *widget)
 
 void EditableModelView::addRegexHelpLink()
 {
-    auto regexHelpLabel =
+    auto *regexHelpLabel =
         new QLabel("<a href='"
                    "https://chatterino.com/help/regex'>"
                    "<span style='color:#99f'>regex info</span></a>");
@@ -145,19 +159,13 @@ void EditableModelView::moveRow(int dir)
         (row = selected.at(0).row()) + dir >=
             this->model_->rowCount(QModelIndex()) ||
         row + dir < 0)
+    {
         return;
+    }
 
     model_->moveRows(model_->index(row, 0), row, selected.size(),
                      model_->index(row + dir, 0), row + dir);
-    this->selectRow(row + dir);
-}
-
-void EditableModelView::selectRow(int row)
-{
-    this->getTableView()->selectionModel()->clear();
-    this->getTableView()->selectionModel()->select(
-        this->model_->index(row, 0),
-        QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
+    this->tableView_->selectRow(row + dir);
 }
 
 }  // namespace chatterino

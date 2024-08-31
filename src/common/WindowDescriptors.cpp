@@ -219,14 +219,124 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
         }
 
         // Load emote popup position
-        QJsonObject emote_popup_obj = windowObj.value("emotePopup").toObject();
-        layout.emotePopupPos_ = QPoint(emote_popup_obj.value("x").toInt(),
-                                       emote_popup_obj.value("y").toInt());
+        {
+            auto emotePopup = windowObj["emotePopup"].toObject();
+            layout.emotePopupBounds_ = QRect{
+                emotePopup["x"].toInt(),
+                emotePopup["y"].toInt(),
+                emotePopup["width"].toInt(),
+                emotePopup["height"].toInt(),
+            };
+        }
 
         layout.windows_.emplace_back(std::move(window));
     }
 
     return layout;
+}
+
+void WindowLayout::activateOrAddChannel(ProviderId provider,
+                                        const QString &name)
+{
+    if (provider != ProviderId::Twitch || name.startsWith(u'/') ||
+        name.startsWith(u'$'))
+    {
+        qCWarning(chatterinoWindowmanager)
+            << "Only twitch channels can be set as active";
+        return;
+    }
+
+    auto mainWindow = std::find_if(this->windows_.begin(), this->windows_.end(),
+                                   [](const auto &win) {
+                                       return win.type_ == WindowType::Main;
+                                   });
+
+    if (mainWindow == this->windows_.end())
+    {
+        this->windows_.emplace_back(WindowDescriptor{
+            .type_ = WindowType::Main,
+            .geometry_ = {-1, -1, -1, -1},
+            .tabs_ =
+                {
+                    TabDescriptor{
+                        .selected_ = true,
+                        .rootNode_ = SplitNodeDescriptor{{
+                            .type_ = "twitch",
+                            .channelName_ = name,
+                        }},
+                    },
+                },
+        });
+        return;
+    }
+
+    TabDescriptor *bestTab = nullptr;
+    // The tab score is calculated as follows:
+    // +2 for every split
+    // +1 if the desired split has filters
+    // Thus lower is better and having one split of a channel is preferred over multiple
+    size_t bestTabScore = std::numeric_limits<size_t>::max();
+
+    for (auto &tab : mainWindow->tabs_)
+    {
+        tab.selected_ = false;
+
+        if (!tab.rootNode_)
+        {
+            continue;
+        }
+
+        // recursive visitor
+        struct Visitor {
+            const QString &spec;
+            size_t score = 0;
+            bool hasChannel = false;
+
+            void operator()(const SplitNodeDescriptor &split)
+            {
+                this->score += 2;
+                if (split.channelName_ == this->spec)
+                {
+                    hasChannel = true;
+                    if (!split.filters_.empty())
+                    {
+                        this->score += 1;
+                    }
+                }
+            }
+
+            void operator()(const ContainerNodeDescriptor &container)
+            {
+                for (const auto &item : container.items_)
+                {
+                    std::visit(*this, item);
+                }
+            }
+        } visitor{name};
+
+        std::visit(visitor, *tab.rootNode_);
+
+        if (visitor.hasChannel && visitor.score < bestTabScore)
+        {
+            bestTab = &tab;
+            bestTabScore = visitor.score;
+        }
+    }
+
+    if (bestTab)
+    {
+        bestTab->selected_ = true;
+        return;
+    }
+
+    TabDescriptor tab{
+        .selected_ = true,
+        .rootNode_ = SplitNodeDescriptor{{
+            .type_ = "twitch",
+            .channelName_ = name,
+        }},
+    };
+    mainWindow->tabs_.emplace_back(tab);
 }
 
 }  // namespace chatterino

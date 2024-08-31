@@ -1,10 +1,11 @@
-#include "BadgePickerDialog.hpp"
-#include <QSizePolicy>
+#include "widgets/dialogs/BadgePickerDialog.hpp"
+
+#include "Application.hpp"
+#include "providers/twitch/TwitchBadges.hpp"
 #include "singletons/Resources.hpp"
 
-#include "providers/twitch/TwitchBadges.hpp"
-
 #include <QDialogButtonBox>
+#include <QSizePolicy>
 #include <QVBoxLayout>
 
 namespace chatterino {
@@ -14,8 +15,8 @@ BadgePickerDialog::BadgePickerDialog(QList<DisplayBadge> badges,
     : QDialog(parent)
 {
     this->dropdown_ = new QComboBox;
-    auto vbox = new QVBoxLayout(this);
-    auto buttonBox =
+    auto *vbox = new QVBoxLayout(this);
+    auto *buttonBox =
         new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
     vbox->addWidget(this->dropdown_);
@@ -42,7 +43,7 @@ BadgePickerDialog::BadgePickerDialog(QList<DisplayBadge> badges,
         this->dropdown_->addItem(item.displayName(), item.badgeName());
     }
 
-    const auto updateBadge = [=](int index) {
+    const auto updateBadge = [=, this](int index) {
         BadgeOpt badge;
         if (index >= 0 && index < badges.size())
         {
@@ -57,11 +58,13 @@ BadgePickerDialog::BadgePickerDialog(QList<DisplayBadge> badges,
     updateBadge(0);
 
     // Set icons.
-    TwitchBadges::instance()->getBadgeIcons(
+    getApp()->getTwitchBadges()->getBadgeIcons(
         badges,
         [&dropdown = this->dropdown_](QString identifier, const QIconPtr icon) {
             if (!dropdown)
+            {
                 return;
+            }
 
             int index = dropdown->findData(identifier);
             if (index != -1)

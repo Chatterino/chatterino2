@@ -1,14 +1,17 @@
 #pragma once
 
-#include "common/Channel.hpp"
 #include "common/ChatterSet.hpp"
 #include "common/UniqueAccess.hpp"
 #include "lrucache/lrucache.hpp"
 #include "util/QStringHash.hpp"
 
+#include <QColor>
+#include <QObject>
 #include <QRgb>
 
 namespace chatterino {
+
+class Channel;
 
 class ChannelChatters
 {

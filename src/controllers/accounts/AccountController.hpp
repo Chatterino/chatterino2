@@ -1,11 +1,9 @@
 #pragma once
 
-#include <QObject>
-
 #include "common/SignalVector.hpp"
-#include "common/Singleton.hpp"
 #include "providers/twitch/TwitchAccountManager.hpp"
-#include "util/SharedPtrElementLess.hpp"
+
+#include <QObject>
 
 namespace chatterino {
 
@@ -15,14 +13,17 @@ class Paths;
 
 class AccountModel;
 
-class AccountController final : public Singleton
+class AccountController final
 {
 public:
     AccountController();
 
     AccountModel *createModel(QObject *parent);
 
-    virtual void initialize(Settings &settings, Paths &paths) override;
+    /**
+     * Load current user & send off a signal to subscribers about any potential changes
+     */
+    void load();
 
     TwitchAccountManager twitch;
 

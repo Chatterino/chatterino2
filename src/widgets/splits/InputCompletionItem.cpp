@@ -1,4 +1,7 @@
-#include "InputCompletionItem.hpp"
+#include "widgets/splits/InputCompletionItem.hpp"
+
+#include "messages/Emote.hpp"
+#include "messages/Image.hpp"
 
 namespace chatterino {
 
@@ -16,9 +19,13 @@ void InputCompletionItem::action()
     if (this->action_)
     {
         if (this->emote_)
+        {
             this->action_(this->emote_->name.string);
+        }
         else
+        {
             this->action_(this->text_);
+        }
     }
 }
 

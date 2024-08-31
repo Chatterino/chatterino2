@@ -2,15 +2,21 @@
 
 #include <QElapsedTimer>
 #include <QString>
-#include <boost/noncopyable.hpp>
 
 namespace chatterino {
 
-class BenchmarkGuard : boost::noncopyable
+class BenchmarkGuard
 {
 public:
     BenchmarkGuard(const QString &_name);
     ~BenchmarkGuard();
+
+    BenchmarkGuard(const BenchmarkGuard &) = delete;
+    BenchmarkGuard &operator=(const BenchmarkGuard &) = delete;
+
+    BenchmarkGuard(BenchmarkGuard &&) = delete;
+    BenchmarkGuard &operator=(BenchmarkGuard &&) = delete;
+
     qreal getElapsedMs();
 
 private:

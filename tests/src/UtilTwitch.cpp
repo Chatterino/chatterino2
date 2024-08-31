@@ -1,6 +1,6 @@
+#include "Test.hpp"
 #include "util/Twitch.hpp"
 
-#include <gtest/gtest.h>
 #include <QApplication>
 #include <QDebug>
 #include <QtConcurrent>
@@ -72,9 +72,8 @@ TEST(UtilTwitch, StripUserName)
         stripUserName(userName);
 
         EXPECT_EQ(userName, expectedUserName)
-            << qUtf8Printable(userName) << " (" << qUtf8Printable(inputUserName)
-            << ") did not match expected value "
-            << qUtf8Printable(expectedUserName);
+            << userName << " (" << inputUserName
+            << ") did not match expected value " << expectedUserName;
     }
 }
 
@@ -153,10 +152,116 @@ TEST(UtilTwitch, StripChannelName)
         stripChannelName(userName);
 
         EXPECT_EQ(userName, expectedChannelName)
-            << qUtf8Printable(userName) << " ("
-            << qUtf8Printable(inputChannelName)
-            << ") did not match expected value "
-            << qUtf8Printable(expectedChannelName);
+            << userName << " (" << inputChannelName
+            << ") did not match expected value " << expectedChannelName;
+    }
+}
+
+TEST(UtilTwitch, ParseUserNameOrID)
+{
+    struct TestCase {
+        QString input;
+        QString expectedUserName;
+        QString expectedUserID;
+    };
+
+    std::vector<TestCase> tests{
+        {
+            "pajlada",
+            "pajlada",
+            {},
+        },
+        {
+            "Pajlada",
+            "Pajlada",
+            {},
+        },
+        {
+            "@Pajlada",
+            "Pajlada",
+            {},
+        },
+        {
+            "#Pajlada",
+            "Pajlada",
+            {},
+        },
+        {
+            "#Pajlada,",
+            "Pajlada",
+            {},
+        },
+        {
+            "#Pajlada,",
+            "Pajlada",
+            {},
+        },
+        {
+            "@@Pajlada,",
+            "@Pajlada",
+            {},
+        },
+        {
+            // We only strip one character off the front
+            "#@Pajlada,",
+            "@Pajlada",
+            {},
+        },
+        {
+            "@@Pajlada,,",
+            "@Pajlada,",
+            {},
+        },
+        {
+            "",
+            "",
+            {},
+        },
+        {
+            "@",
+            "",
+            {},
+        },
+        {
+            ",",
+            "",
+            {},
+        },
+        {
+            // We purposefully don't handle spaces at the end, as all expected usages of this function split the message up by space and strip the parameters by themselves
+            ", ",
+            ", ",
+            {},
+        },
+        {
+            // We purposefully don't handle spaces at the start, as all expected usages of this function split the message up by space and strip the parameters by themselves
+            " #",
+            " #",
+            {},
+        },
+        {
+            "id:123",
+            {},
+            "123",
+        },
+        {
+            "id:",
+            {},
+            "",
+        },
+    };
+
+    for (const auto &[input, expectedUserName, expectedUserID] : tests)
+    {
+        auto [actualUserName, actualUserID] = parseUserNameOrID(input);
+
+        EXPECT_EQ(actualUserName, expectedUserName)
+            << "name " << actualUserName << " (" << input
+            << ") did not match expected value " << expectedUserName;
+
+        EXPECT_EQ(actualUserID, expectedUserID)
+            << "id " << actualUserID << " (" << input
+            << ") did not match expected value " << expectedUserID;
     }
 }
 
@@ -209,7 +314,7 @@ TEST(UtilTwitch, UserLoginRegexp)
         auto actual = regexp.match(inputUserLogin);
 
         EXPECT_EQ(match.hasMatch(), expectedMatch)
-            << qUtf8Printable(inputUserLogin) << " did not match as expected";
+            << inputUserLogin << " did not match as expected";
     }
 }
 
@@ -261,6 +366,41 @@ TEST(UtilTwitch, UserNameRegexp)
         auto actual = regexp.match(inputUserLogin);
 
         EXPECT_EQ(match.hasMatch(), expectedMatch)
-            << qUtf8Printable(inputUserLogin) << " did not match as expected";
+            << inputUserLogin << " did not match as expected";
+    }
+}
+
+TEST(UtilTwitch, CleanHelixColor)
+{
+    struct TestCase {
+        QString inputColor;
+        QString expectedColor;
+    };
+
+    std::vector<TestCase> tests{
+        {"foo", "foo"},
+        {"BlueViolet", "blue_violet"},
+        {"blueviolet", "blue_violet"},
+        {"DODGERBLUE", "dodger_blue"},
+        {"blUEviolet", "blue_violet"},
+        {"caDEtblue", "cadet_blue"},
+        {"doDGerblue", "dodger_blue"},
+        {"goLDenrod", "golden_rod"},
+        {"hoTPink", "hot_pink"},
+        {"orANgered", "orange_red"},
+        {"seAGreen", "sea_green"},
+        {"spRInggreen", "spring_green"},
+        {"yeLLowgreen", "yellow_green"},
+        {"xDxD", "xdxd"},
+    };
+
+    for (const auto &[inputColor, expectedColor] : tests)
+    {
+        QString actualColor = inputColor;
+        cleanHelixColorName(actualColor);
+
+        EXPECT_EQ(actualColor, expectedColor)
+            << inputColor << " cleaned up to " << actualColor << " instead of "
+            << expectedColor;
     }
 }

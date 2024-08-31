@@ -1,12 +1,11 @@
 #include "common/ChatterSet.hpp"
 
-#include <tuple>
 #include "debug/Benchmark.hpp"
 
 namespace chatterino {
 
 ChatterSet::ChatterSet()
-    : items(chatterLimit)
+    : items(ChatterSet::CHATTER_LIMIT)
 {
 }
 
@@ -21,16 +20,20 @@ void ChatterSet::updateOnlineChatters(
     BenchmarkGuard bench("update online chatters");
 
     // Create a new lru cache without the users that are not present anymore.
-    cache::lru_cache<QString, QString> tmp(chatterLimit);
+    cache::lru_cache<QString, QString> tmp(ChatterSet::CHATTER_LIMIT);
 
     for (auto &&chatter : lowerCaseUsernames)
     {
         if (this->items.exists(chatter))
+        {
             tmp.put(chatter, this->items.get(chatter));
 
-        // Less chatters than the limit => try to preserve as many as possible.
-        else if (lowerCaseUsernames.size() < chatterLimit)
+            // Less chatters than the limit => try to preserve as many as possible.
+        }
+        else if (lowerCaseUsernames.size() < ChatterSet::CHATTER_LIMIT)
+        {
             tmp.put(chatter, chatter);
+        }
     }
 
     this->items = std::move(tmp);
@@ -49,10 +52,17 @@ std::vector<QString> ChatterSet::filterByPrefix(const QString &prefix) const
     for (auto &&item : this->items)
     {
         if (item.first.startsWith(lowerPrefix))
+        {
             result.push_back(item.second);
+        }
     }
 
     return result;
+}
+
+std::vector<std::pair<QString, QString>> ChatterSet::all() const
+{
+    return {this->items.begin(), this->items.end()};
 }
 
 }  // namespace chatterino

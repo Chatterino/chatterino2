@@ -5,10 +5,10 @@
 #include "singletons/Fonts.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/helper/NotebookTab.hpp"
+#include "widgets/Notebook.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/Window.hpp"
 
 namespace chatterino {
 
@@ -21,9 +21,8 @@ NewPopupItem::NewPopupItem(const QString &channelName)
 
 void NewPopupItem::action()
 {
-    auto *app = getApp();
-    auto channel = app->twitch->getOrAddChannel(this->channelName_);
-    app->windows->openInPopup(channel);
+    auto channel = getApp()->getTwitch()->getOrAddChannel(this->channelName_);
+    getApp()->getWindows()->openInPopup(channel);
 }
 
 void NewPopupItem::paint(QPainter *painter, const QRect &rect) const
@@ -32,9 +31,10 @@ void NewPopupItem::paint(QPainter *painter, const QRect &rect) const
 
     painter->setRenderHint(QPainter::Antialiasing, true);
 
-    painter->setPen(getApp()->themes->splits.header.text);
+    painter->setPen(getApp()->getThemes()->splits.header.text);
     painter->setBrush(Qt::SolidPattern);
-    painter->setFont(getApp()->fonts->getFont(FontStyle::UiMediumBold, 1.0));
+    painter->setFont(
+        getApp()->getFonts()->getFont(FontStyle::UiMediumBold, 1.0));
 
     QRect iconRect(rect.topLeft(), ICON_SIZE);
     this->icon_.paint(painter, iconRect, Qt::AlignLeft | Qt::AlignVCenter);

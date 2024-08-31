@@ -2,12 +2,14 @@
 <!-- 2019 Artem Polishchuk <ego.cordatus@gmail.com> -->
 <component type="desktop-application">
     <id>com.chatterino.chatterino.desktop</id>
+    <launchable type="desktop-id">com.chatterino.chatterino.desktop</launchable>
     <metadata_license>CC0-1.0</metadata_license>
     <project_license>MIT</project_license>
     <content_rating type="oars-1.0">
         <content_attribute id="social-chat">intense</content_attribute>
     </content_rating>
     <name>Chatterino</name>
+    <developer_name>Chatterino Developers</developer_name>
     <summary>
         Chat client for twitch.tv
     </summary>
@@ -18,7 +20,7 @@
     </description>
     <screenshots>
         <screenshot type="default">
-            <image>https://i.imgur.com/CFLDARZ.png</image>
+            <image>https://chatterino.com/img/example_01.png</image>
         </screenshot>
     </screenshots>
     <keywords>
@@ -32,6 +34,29 @@
         <binary>chatterino</binary>
     </provides>
     <releases>
-        <release version="2.3.5" date="2022-04-05"/>
+        <release version="2.5.1" date="2024-04-28">
+            <url>https://github.com/Chatterino/chatterino2/releases/tag/v2.5.1</url>
+        </release>
+        <release version="2.5.0" date="2024-04-21">
+            <url>https://github.com/Chatterino/chatterino2/releases/tag/v2.5.0</url>
+        </release>
+        <release version="2.5.0~beta1" date="2024-04-07">
+            <url>https://github.com/Chatterino/chatterino2/releases/tag/v2.5.0-beta.1</url>
+        </release>
+        <release version="2.4.6" date="2023-09-30">
+            <url>https://github.com/Chatterino/chatterino2/releases/tag/v2.4.6</url>
+        </release>
+        <release version="2.4.5" date="2023-08-26">
+            <url>https://github.com/Chatterino/chatterino2/releases/tag/v2.4.5</url>
+        </release>
+        <release version="2.4.4" date="2023-05-14">
+            <url>https://github.com/Chatterino/chatterino2/releases/tag/v2.4.4</url>
+        </release>
+        <release version="2.4.3" date="2023-04-30">
+            <url>https://github.com/Chatterino/chatterino2/releases/tag/v2.4.3</url>
+        </release>
+        <release version="2.4.2" date="2023-03-05">
+            <url>https://github.com/Chatterino/chatterino2/releases/tag/v2.4.2</url>
+        </release>
     </releases>
 </component>

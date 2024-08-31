@@ -1,9 +1,8 @@
 #pragma once
 
-#include <QTextEdit>
-#include <QTimer>
-
 #include "widgets/settingspages/SettingsPage.hpp"
+
+#include <QTimer>
 
 namespace chatterino {
 

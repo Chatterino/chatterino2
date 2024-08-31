@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QJsonObject>
 #include <QString>
+#include <QStringList>
 
 #include <chrono>
 #include <cinttypes>
@@ -33,6 +34,7 @@ inline QDebug operator<<(QDebug dbg, const ActionUser &user)
 }
 
 struct PubSubAction {
+    PubSubAction() = default;
     PubSubAction(const QJsonObject &data, const QString &_roomID);
     ActionUser source;
 
@@ -168,6 +170,24 @@ struct AutomodInfoAction : PubSubAction {
         Denied,
         Approved,
     } type;
+};
+
+struct RaidAction : PubSubAction {
+    using PubSubAction::PubSubAction;
+
+    QString target;
+};
+
+struct UnraidAction : PubSubAction {
+    using PubSubAction::PubSubAction;
+};
+
+struct WarnAction : PubSubAction {
+    using PubSubAction::PubSubAction;
+
+    ActionUser target;
+
+    QStringList reasons;
 };
 
 }  // namespace chatterino

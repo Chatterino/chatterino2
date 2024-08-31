@@ -1,9 +1,8 @@
 #pragma once
 
-#include <QObject>
-
 #include "common/SignalVectorModel.hpp"
-#include "controllers/notifications/NotificationController.hpp"
+
+#include <QObject>
 
 namespace chatterino {
 
@@ -15,12 +14,12 @@ class NotificationModel : public SignalVectorModel<QString>
 
 protected:
     // turn a vector item into a model row
-    virtual QString getItemFromRow(std::vector<QStandardItem *> &row,
-                                   const QString &original) override;
+    QString getItemFromRow(std::vector<QStandardItem *> &row,
+                           const QString &original) override;
 
     // turns a row in the model into a vector item
-    virtual void getRowFromItem(const QString &item,
-                                std::vector<QStandardItem *> &row) override;
+    void getRowFromItem(const QString &item,
+                        std::vector<QStandardItem *> &row) override;
 
     friend class NotificationController;
 };

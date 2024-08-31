@@ -1,15 +1,14 @@
 #pragma once
 
 #include <QString>
-#include <boost/optional.hpp>
+
+#include <optional>
 
 namespace chatterino {
 
 class Paths
 {
 public:
-    static Paths *instance;
-
     Paths();
 
     // Root directory for the configuration files. %APPDATA%/chatterino or
@@ -25,16 +24,31 @@ public:
     // Directory for miscellaneous files. Same as <appDataDirectory>/Misc
     QString miscDirectory;
 
+    // Directory for crashdumps. Same as <appDataDirectory>/Crashes
+    QString crashdumpDirectory;
+
     // Hash of QCoreApplication::applicationFilePath()
     QString applicationFilePathHash;
 
-    // Profile avatars for Twitch <appDataDirectory>/cache/twitch
+    // Profile avatars for Twitch <appDataDirectory>/ProfileAvatars/twitch
     QString twitchProfileAvatars;
 
-    bool createFolder(const QString &folderPath);
-    bool isPortable();
+    // Plugin files live here. <appDataDirectory>/Plugins
+    QString pluginsDirectory;
 
-    QString cacheDirectory();
+    // Custom themes live here. <appDataDirectory>/Themes
+    QString themesDirectory;
+
+    // Directory for shared memory files.
+    // <appDataDirectory>/IPC   on Windows
+    // /tmp                     elsewhere
+    QString ipcDirectory;
+
+    bool createFolder(const QString &folderPath);
+    [[deprecated("use Modes::instance().portable instead")]] bool isPortable()
+        const;
+
+    QString cacheDirectory() const;
 
 private:
     void initAppFilePathHash();
@@ -42,12 +56,10 @@ private:
     void initRootDirectory();
     void initSubDirectories();
 
-    boost::optional<bool> portable_;
+    std::optional<bool> portable_;
 
     // Directory for cache files. Same as <appDataDirectory>/Misc
     QString cacheDirectory_;
 };
-
-Paths *getPaths();
 
 }  // namespace chatterino

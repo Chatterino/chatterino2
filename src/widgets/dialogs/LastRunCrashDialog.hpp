@@ -1,17 +1,16 @@
 #pragma once
 
 #include <QDialog>
-#include <pajlada/signals/signalholder.hpp>
 
 namespace chatterino {
+
+class Args;
+class Paths;
 
 class LastRunCrashDialog : public QDialog
 {
 public:
-    LastRunCrashDialog();
-
-private:
-    pajlada::Signals::SignalHolder signalHolder_;
+    explicit LastRunCrashDialog(const Args &args, const Paths &paths);
 };
 
 }  // namespace chatterino

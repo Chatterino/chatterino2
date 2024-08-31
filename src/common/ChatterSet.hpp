@@ -1,12 +1,12 @@
 #pragma once
 
-#include <QString>
-#include <functional>
-#include <set>
-#include <unordered_map>
-#include <unordered_set>
-#include "lrucache/lrucache.hpp"
 #include "util/QStringHash.hpp"
+
+#include <lrucache/lrucache.hpp>
+#include <QString>
+
+#include <unordered_set>
+#include <vector>
 
 namespace chatterino {
 
@@ -16,7 +16,7 @@ class ChatterSet
 {
 public:
     /// The limit of how many chatters can be saved for a channel.
-    static constexpr size_t chatterLimit = 2000;
+    static constexpr size_t CHATTER_LIMIT = 2000;
 
     ChatterSet();
 
@@ -35,6 +35,10 @@ public:
     /// Get filtered usernames by a prefix for autocompletion. Contained items
     /// are in mixed case if available.
     std::vector<QString> filterByPrefix(const QString &prefix) const;
+
+    /// Get all recent chatters. The first pair element contains the username
+    /// in lowercase, while the second pair element is the original case.
+    std::vector<std::pair<QString, QString>> all() const;
 
 private:
     // user name in lower case -> user name in normal case

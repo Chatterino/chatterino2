@@ -1,12 +1,60 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 
 #include "common/QLogging.hpp"
+#include "controllers/hotkeys/Hotkey.hpp"
+#include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyModel.hpp"
 #include "singletons/Settings.hpp"
 
 #include <QShortcut>
 
+namespace {
+
+using namespace chatterino;
+
+const std::map<HotkeyCategory, HotkeyCategoryData> HOTKEY_CATEGORIES = {
+    {HotkeyCategory::PopupWindow, {"popupWindow", "Popup Windows"}},
+    {HotkeyCategory::Split, {"split", "Split"}},
+    {HotkeyCategory::SplitInput, {"splitInput", "Split input box"}},
+    {HotkeyCategory::Window, {"window", "Window"}},
+};
+
+}  // namespace
+
 namespace chatterino {
+
+const std::map<HotkeyCategory, HotkeyCategoryData> &hotkeyCategories()
+{
+    return HOTKEY_CATEGORIES;
+}
+
+QString hotkeyCategoryName(HotkeyCategory category)
+{
+    if (!HOTKEY_CATEGORIES.contains(category))
+    {
+        qCWarning(chatterinoHotkeys) << "Invalid HotkeyCategory passed to "
+                                        "categoryDisplayName function";
+        return {};
+    }
+
+    const auto &categoryData = HOTKEY_CATEGORIES.at(category);
+
+    return categoryData.name;
+}
+
+QString hotkeyCategoryDisplayName(HotkeyCategory category)
+{
+    if (!HOTKEY_CATEGORIES.contains(category))
+    {
+        qCWarning(chatterinoHotkeys) << "Invalid HotkeyCategory passed to "
+                                        "categoryDisplayName function";
+        return {};
+    }
+
+    const auto &categoryData = HOTKEY_CATEGORIES.at(category);
+
+    return categoryData.displayName;
+}
 
 static bool hotkeySortCompare_(const std::shared_ptr<Hotkey> &a,
                                const std::shared_ptr<Hotkey> &b)
@@ -23,6 +71,9 @@ HotkeyController::HotkeyController()
     : hotkeys_(hotkeySortCompare_)
 {
     this->loadHotkeys();
+
+    this->clearRemovedDefaults();
+
     this->signalHolder_.managedConnect(
         this->hotkeys_.delayedItemsChanged, [this]() {
             qCDebug(chatterinoHotkeys) << "Reloading hotkeys!";
@@ -54,7 +105,7 @@ std::vector<QShortcut *> HotkeyController::shortcutsForCategory(
         {
             qCDebug(chatterinoHotkeys)
                 << qPrintable(parent->objectName())
-                << "Unimplemeneted hotkey action:" << hotkey->action() << "in "
+                << "Unimplemented hotkey action:" << hotkey->action() << "in"
                 << hotkey->getCategory();
             continue;
         }
@@ -64,7 +115,7 @@ std::vector<QShortcut *> HotkeyController::shortcutsForCategory(
             continue;
         }
         auto createShortcutFromKeySeq = [&](QKeySequence qs) {
-            auto s = new QShortcut(qs, parent);
+            auto *s = new QShortcut(qs, parent);
             s->setContext(hotkey->getContext());
             auto functionPointer = target->second;
             QObject::connect(s, &QShortcut::activated, parent,
@@ -99,7 +150,7 @@ void HotkeyController::save()
 
 std::shared_ptr<Hotkey> HotkeyController::getHotkeyByName(QString name)
 {
-    for (auto &hotkey : this->hotkeys_)
+    for (const auto &hotkey : this->hotkeys_)
     {
         if (hotkey->name() == name)
         {
@@ -113,7 +164,7 @@ int HotkeyController::replaceHotkey(QString oldName,
                                     std::shared_ptr<Hotkey> newHotkey)
 {
     int i = 0;
-    for (auto &hotkey : this->hotkeys_)
+    for (const auto &hotkey : this->hotkeys_)
     {
         if (hotkey->name() == oldName)
         {
@@ -125,10 +176,10 @@ int HotkeyController::replaceHotkey(QString oldName,
     return this->hotkeys_.append(newHotkey);
 }
 
-boost::optional<HotkeyCategory> HotkeyController::hotkeyCategoryFromName(
+std::optional<HotkeyCategory> HotkeyController::hotkeyCategoryFromName(
     QString categoryName)
 {
-    for (const auto &[category, data] : this->categories())
+    for (const auto &[category, data] : HOTKEY_CATEGORIES)
     {
         if (data.name == categoryName)
         {
@@ -159,38 +210,9 @@ bool HotkeyController::isDuplicate(std::shared_ptr<Hotkey> hotkey,
     return false;
 }
 
-QString HotkeyController::categoryDisplayName(HotkeyCategory category) const
+const std::set<QString> &HotkeyController::removedOrDeprecatedHotkeys() const
 {
-    if (this->hotkeyCategories_.count(category) == 0)
-    {
-        qCWarning(chatterinoHotkeys) << "Invalid HotkeyCategory passed to "
-                                        "categoryDisplayName function";
-        return QString();
-    }
-
-    const auto &categoryData = this->hotkeyCategories_.at(category);
-
-    return categoryData.displayName;
-}
-
-QString HotkeyController::categoryName(HotkeyCategory category) const
-{
-    if (this->hotkeyCategories_.count(category) == 0)
-    {
-        qCWarning(chatterinoHotkeys) << "Invalid HotkeyCategory passed to "
-                                        "categoryName function";
-        return QString();
-    }
-
-    const auto &categoryData = this->hotkeyCategories_.at(category);
-
-    return categoryData.name;
-}
-
-const std::map<HotkeyCategory, HotkeyCategoryData>
-    &HotkeyController::categories() const
-{
-    return this->hotkeyCategories_;
+    return this->removedOrDeprecatedHotkeys_;
 }
 
 void HotkeyController::loadHotkeys()
@@ -278,7 +300,7 @@ void HotkeyController::saveHotkeys()
         pajlada::Settings::Setting<QString>::set(
             section + "/keySequence", hotkey->keySequence().toString());
 
-        auto categoryName = this->categoryName(hotkey->category());
+        auto categoryName = hotkeyCategoryName(hotkey->category());
         pajlada::Settings::Setting<QString>::set(section + "/category",
                                                  categoryName);
         pajlada::Settings::Setting<std::vector<QString>>::set(
@@ -518,6 +540,17 @@ void HotkeyController::resetToDefaults()
     this->loadHotkeys();
 }
 
+void HotkeyController::clearRemovedDefaults()
+{
+    // The "toggleLiveOnly" argument was removed 2024-08-04
+    this->tryRemoveDefault(HotkeyCategory::Window, QKeySequence("Ctrl+Shift+L"),
+                           "setTabVisibility", {"toggleLiveOnly"},
+                           "toggle live tabs only");
+
+    this->warnForRemovedHotkeyActions(HotkeyCategory::Window,
+                                      "setTabVisibility", {"toggleLiveOnly"});
+}
+
 void HotkeyController::tryAddDefault(std::set<QString> &addedHotkeys,
                                      HotkeyCategory category,
                                      QKeySequence keySequence, QString action,
@@ -535,16 +568,79 @@ void HotkeyController::tryAddDefault(std::set<QString> &addedHotkeys,
     addedHotkeys.insert(name);
 }
 
+bool HotkeyController::tryRemoveDefault(HotkeyCategory category,
+                                        QKeySequence keySequence,
+                                        QString action,
+                                        std::vector<QString> args, QString name)
+{
+    return this->hotkeys_.removeFirstMatching([&](const auto &hotkey) {
+        return hotkey->category() == category &&
+               hotkey->keySequence() == keySequence &&
+               hotkey->action() == action && hotkey->arguments() == args &&
+               hotkey->name() == name;
+    });
+}
+
+void HotkeyController::warnForRemovedHotkeyActions(HotkeyCategory category,
+                                                   QString action,
+                                                   std::vector<QString> args)
+{
+    for (const auto &hotkey : this->hotkeys_)
+    {
+        if (hotkey->category() == category && hotkey->action() == action &&
+            hotkey->arguments() == args)
+        {
+            this->removedOrDeprecatedHotkeys_.insert(hotkey->name());
+        }
+    }
+}
+
 void HotkeyController::showHotkeyError(const std::shared_ptr<Hotkey> &hotkey,
                                        QString warning)
 {
-    auto msgBox = new QMessageBox(
+    auto *msgBox = new QMessageBox(
         QMessageBox::Icon::Warning, "Hotkey error",
         QString(
             "There was an error while executing your hotkey named \"%1\": \n%2")
             .arg(hotkey->name(), warning),
         QMessageBox::Ok);
     msgBox->exec();
+}
+
+QKeySequence HotkeyController::getDisplaySequence(
+    HotkeyCategory category, const QString &action,
+    const std::optional<std::vector<QString>> &arguments) const
+{
+    const auto &found = this->findLike(category, action, arguments);
+    if (found != nullptr)
+    {
+        return found->keySequence();
+    }
+    return {};
+}
+
+std::shared_ptr<Hotkey> HotkeyController::findLike(
+    HotkeyCategory category, const QString &action,
+    const std::optional<std::vector<QString>> &arguments) const
+{
+    for (auto other : this->hotkeys_)
+    {
+        if (other->category() == category && other->action() == action)
+        {
+            if (arguments)
+            {
+                if (other->arguments() == *arguments)
+                {
+                    return other;
+                }
+            }
+            else
+            {
+                return other;
+            }
+        }
+    }
+    return nullptr;
 }
 
 }  // namespace chatterino

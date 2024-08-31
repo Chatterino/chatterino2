@@ -1,13 +1,15 @@
 #pragma once
 
-#include "pajlada/signals/signalholder.hpp"
 #include "singletons/Updates.hpp"
 #include "widgets/BaseWindow.hpp"
-#include "widgets/Label.hpp"
+
+#include <pajlada/signals/signalholder.hpp>
 
 class QPushButton;
 
 namespace chatterino {
+
+class Label;
 
 class UpdateDialog : public BaseWindow
 {

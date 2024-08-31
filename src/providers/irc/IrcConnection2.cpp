@@ -1,13 +1,17 @@
-#include "IrcConnection2.hpp"
+#include "providers/irc/IrcConnection2.hpp"
 
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 namespace chatterino {
 
 namespace {
 
-    const auto payload = QString("chatterino/" CHATTERINO_VERSION);
+    const auto payload = "chatterino/" + CHATTERINO_VERSION;
 
 }  // namespace
 
@@ -16,7 +20,7 @@ IrcConnection::IrcConnection(QObject *parent)
 {
     // Log connection errors for ease-of-debugging
     QObject::connect(this, &Communi::IrcConnection::socketError, this,
-                     [this](QAbstractSocket::SocketError error) {
+                     [](QAbstractSocket::SocketError error) {
                          qCDebug(chatterinoIrc) << "Connection error:" << error;
                      });
 
@@ -38,18 +42,6 @@ IrcConnection::IrcConnection(QObject *parent)
             }
         });
 
-    // Schedule a reconnect that won't violate RECONNECT_MIN_INTERVAL
-    this->smartReconnect.connect([this] {
-        if (this->reconnectTimer_.isActive())
-        {
-            return;
-        }
-
-        auto delay = this->reconnectBackoff_.next();
-        qCDebug(chatterinoIrc) << "Reconnecting in" << delay.count() << "ms";
-        this->reconnectTimer_.start(delay);
-    });
-
     this->reconnectTimer_.setSingleShot(true);
     QObject::connect(&this->reconnectTimer_, &QTimer::timeout, [this] {
         if (this->isConnected())
@@ -68,6 +60,7 @@ IrcConnection::IrcConnection(QObject *parent)
     // Send ping every x seconds
     this->pingTimer_.setInterval(5000);
     this->pingTimer_.start();
+    this->lastPing_ = std::chrono::system_clock::now();
     QObject::connect(&this->pingTimer_, &QTimer::timeout, [this] {
         if (this->isConnected())
         {
@@ -76,6 +69,25 @@ IrcConnection::IrcConnection(QObject *parent)
                 // If we're still receiving messages, all is well
                 this->recentlyReceivedMessage_ = false;
                 this->waitingForPong_ = false;
+
+                // Check if we got invoked too late (e.g. due to a sleep)
+                auto now = std::chrono::system_clock::now();
+                auto elapsed = now - this->lastPing_;
+                if (elapsed < 3 * 5000ms)
+                {
+                    this->heartbeat.invoke();
+                }
+                else
+                {
+                    qCDebug(chatterinoIrc).nospace()
+                        << "Got late ping (skipping heartbeat): "
+                        << std::chrono::duration_cast<
+                               std::chrono::milliseconds>(elapsed)
+                               .count()
+                        << "ms";
+                }
+                this->lastPing_ = now;
+
                 return;
             }
 
@@ -121,6 +133,19 @@ IrcConnection::~IrcConnection()
 {
     // Prematurely disconnect all QObject connections
     this->disconnect();
+}
+
+void IrcConnection::smartReconnect()
+{
+    if (this->reconnectTimer_.isActive())
+    {
+        // Ignore this reconnect request, we already have a reconnect request queued up
+        return;
+    }
+
+    auto delay = this->reconnectBackoff_.next();
+    qCDebug(chatterinoIrc) << "Reconnecting in" << delay.count() << "ms";
+    this->reconnectTimer_.start(delay);
 }
 
 void IrcConnection::open()

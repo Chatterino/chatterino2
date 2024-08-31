@@ -1,7 +1,6 @@
-#include "AttachedWindow.hpp"
+#include "widgets/AttachedWindow.hpp"
 
 #include "Application.hpp"
-#include "ForwardDecl.hpp"
 #include "common/QLogging.hpp"
 #include "singletons/Settings.hpp"
 #include "util/DebugCount.hpp"
@@ -9,14 +8,17 @@
 
 #include <QTimer>
 #include <QVBoxLayout>
+
 #include <memory>
 
 #ifdef USEWINSDK
 #    include "util/WindowsHelper.hpp"
 
-#    include "Windows.h"
+// clang-format off
 // don't even think about reordering these
+#    include "Windows.h"
 #    include "Psapi.h"
+// clang-format on
 #    pragma comment(lib, "Dwmapi.lib")
 #endif
 
@@ -48,7 +50,7 @@ AttachedWindow::AttachedWindow(void *_target, int _yOffset)
     , yOffset_(_yOffset)
 {
     QLayout *layout = new QVBoxLayout(this);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     this->setLayout(layout);
 
     auto *split = new Split(this);
@@ -132,6 +134,13 @@ AttachedWindow *AttachedWindow::get(void *target, const GetArgs &args)
 
     return window;
 }
+
+#ifdef USEWINSDK
+AttachedWindow *AttachedWindow::getForeground(const GetArgs &args)
+{
+    return AttachedWindow::get(::GetForegroundWindow(), args);
+}
+#endif
 
 void AttachedWindow::detach(const QString &winId)
 {
@@ -261,20 +270,22 @@ void AttachedWindow::updateWindowRect(void *_attachedPtr)
     }
 
     float scale = 1.f;
+    float ourScale = 1.F;
     if (auto dpi = getWindowDpi(attached))
     {
-        scale = dpi.get() / 96.f;
+        scale = *dpi / 96.f;
+        ourScale = scale / this->devicePixelRatio();
 
         for (auto w : this->ui_.split->findChildren<BaseWidget *>())
         {
-            w->setOverrideScale(scale);
+            w->setOverrideScale(ourScale);
         }
-        this->ui_.split->setOverrideScale(scale);
+        this->ui_.split->setOverrideScale(ourScale);
     }
 
     if (this->height_ != -1)
     {
-        this->ui_.split->setFixedWidth(int(this->width_ * scale));
+        this->ui_.split->setFixedWidth(int(this->width_ * ourScale));
 
         // offset
         int o = this->fullscreen_ ? 0 : 8;

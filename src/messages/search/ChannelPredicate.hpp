@@ -2,6 +2,9 @@
 
 #include "messages/search/MessagePredicate.hpp"
 
+#include <QString>
+#include <QStringList>
+
 namespace chatterino {
 
 /**
@@ -16,10 +19,12 @@ public:
     /**
      * @brief Create a ChannelPredicate with a list of channels to search for.
      *
-     * @param channels a list of channel names that a message should be sent in
+     * @param channels one or more comma-separated channel names that a message should be sent in
+     * @param negate when set, excludes list of channel names from results
      */
-    ChannelPredicate(const QStringList &channels);
+    ChannelPredicate(const QString &channels, bool negate);
 
+protected:
     /**
      * @brief Checks whether the message was sent in any of the channels passed
      *        in the constructor.
@@ -28,7 +33,7 @@ public:
      * @return true if the message was sent in one of the specified channels,
      *         false otherwise
      */
-    bool appliesTo(const Message &message);
+    bool appliesToImpl(const Message &message) override;
 
 private:
     /// Holds the channel names that will be searched for

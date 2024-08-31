@@ -31,6 +31,7 @@ public:
 protected:
     void closeEvent(QCloseEvent *event) override;
     bool event(QEvent *event) override;
+    void themeChangedEvent() override;
 
 private:
     void addCustomTitlebarButtons();
@@ -50,6 +51,10 @@ private:
 
     pajlada::Signals::SignalHolder signalHolder_;
     std::vector<boost::signals2::scoped_connection> bSignals_;
+
+    // this is only used on Windows and only on the main window, for the one used otherwise, see SplitNotebook in Notebook.hpp
+    TitleBarButton *streamerModeTitlebarIcon_ = nullptr;
+    void updateStreamerModeIcon();
 
     friend class Notebook;
 };

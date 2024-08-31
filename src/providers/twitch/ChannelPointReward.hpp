@@ -1,16 +1,11 @@
 #pragma once
 
-#include "common/Aliases.hpp"
-#include "messages/Image.hpp"
 #include "messages/ImageSet.hpp"
 
 #include <QJsonObject>
 
-#define TWITCH_CHANNEL_POINT_REWARD_URL(x)                                  \
-    QString("https://static-cdn.jtvnw.net/custom-reward-images/default-%1") \
-        .arg(x)
-
 namespace chatterino {
+
 struct ChannelPointReward {
     ChannelPointReward(const QJsonObject &redemption);
     ChannelPointReward() = delete;
@@ -20,6 +15,9 @@ struct ChannelPointReward {
     int cost;
     ImageSet image;
     bool isUserInputRequired = false;
+    bool isBits = false;
+    QString emoteId;    // currently only for celebrations
+    QString emoteName;  // currently only for celebrations
 
     struct {
         QString id;

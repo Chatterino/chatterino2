@@ -25,7 +25,7 @@ GenericListView::GenericListView()
 
 void GenericListView::setModel(QAbstractItemModel *model)
 {
-    auto casted = dynamic_cast<GenericListModel *>(model);
+    auto *casted = dynamic_cast<GenericListModel *>(model);
     assert(casted);
     this->setModel(casted);
 }
@@ -103,20 +103,57 @@ bool GenericListView::eventFilter(QObject * /*watched*/, QEvent *event)
 
 void GenericListView::refreshTheme(const Theme &theme)
 {
-    const QString textCol = theme.window.text.name();
-    const QString bgCol = theme.window.background.name();
+    const auto textCol = theme.window.text.name(QColor::HexArgb);
 
-    const QString selCol =
-        (theme.isLightTheme()
-             ? "#68B1FF"  // Copied from Theme::splits.input.styleSheet
-             : theme.tabs.selected.backgrounds.regular.color().name());
+    auto accentColor = theme.accent;
+    accentColor.setAlpha(100);
+    const auto selCol = accentColor.name(QColor::HexArgb);
 
-    const QString listStyle =
-        QString(
-            "color: %1; background-color: %2; selection-background-color: %3")
-            .arg(textCol)
-            .arg(bgCol)
-            .arg(selCol);
+    const auto listStyle = QStringLiteral(R"(
+        QListView {
+            border: none;
+            color: %1;
+            background: transparent;
+            selection-background-color: %2;
+        }
+
+        QAbstractScrollArea::corner {
+            border: none;
+        }
+
+        QScrollBar {
+            background: transparent;
+        }
+        QScrollBar:vertical {
+            margin-left: 4;
+        }
+        QScrollBar:horizontal {
+            margin-top: 4;
+        }
+
+        QScrollBar::add-line,
+        QScrollBar::sub-line,
+        QScrollBar::left-arrow,
+        QScrollBar::right-arrow,
+        QScrollBar::down-arrow,
+        QScrollBar::up-arrow {
+            width: 0;
+            height: 0;
+        }
+
+        QScrollBar::handle {
+            background: %2;
+            border-radius: 4;
+        }
+        QScrollBar::handle:vertical {
+            min-height: 8;
+            width: 8;
+        }
+        QScrollBar::handle:horizontal {
+            min-width: 8;
+            height: 8;
+        })")
+                               .arg(textCol, selCol);
 
     this->setStyleSheet(listStyle);
 }
@@ -124,7 +161,6 @@ void GenericListView::refreshTheme(const Theme &theme)
 bool GenericListView::acceptCompletion()
 {
     const QModelIndex &curIdx = this->currentIndex();
-    const int curRow = curIdx.row();
     const int count = this->model_->rowCount(curIdx);
     if (count <= 0)
     {

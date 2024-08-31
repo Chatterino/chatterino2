@@ -1,0 +1,20 @@
+---
+name: Post clang-tidy review comments
+
+on:
+  workflow_run:
+    workflows: ["clang-tidy"]
+    types:
+      - completed
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    # Only when a build succeeds
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - uses: ZedThree/clang-tidy-review/post@v0.19.0
+        with:
+          lgtm_comment_body: ""
+          num_comments_as_exitcode: false

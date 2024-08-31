@@ -1,88 +1,146 @@
 #pragma once
 
-#include <initializer_list>
+#include <concepts>
 #include <type_traits>
 
 namespace chatterino {
 
-template <typename T, typename Q = typename std::underlying_type<T>::type>
+template <typename T>
+    requires std::is_enum_v<T>
 class FlagsEnum
 {
 public:
-    FlagsEnum()
-        : value_(static_cast<T>(0))
+    using Int = std::underlying_type_t<T>;
+
+    constexpr FlagsEnum() noexcept = default;
+
+    constexpr FlagsEnum(std::convertible_to<T> auto... flags) noexcept
+        : value_(
+              static_cast<T>((static_cast<Int>(static_cast<T>(flags)) | ...)))
     {
     }
 
-    FlagsEnum(T value)
-        : value_(value)
+    friend constexpr bool operator==(FlagsEnum lhs, FlagsEnum rhs) noexcept
     {
+        return lhs.value_ == rhs.value_;
+    }
+    friend constexpr bool operator!=(FlagsEnum lhs, FlagsEnum rhs) noexcept
+    {
+        return lhs.value_ != rhs.value_;
     }
 
-    FlagsEnum(std::initializer_list<T> flags)
+    friend constexpr bool operator==(FlagsEnum lhs, T rhs) noexcept
     {
-        for (auto flag : flags)
+        return lhs.value_ == rhs;
+    }
+    friend constexpr bool operator!=(FlagsEnum lhs, T rhs) noexcept
+    {
+        return lhs.value_ != rhs;
+    }
+
+    friend constexpr bool operator==(T lhs, FlagsEnum rhs) noexcept
+    {
+        return lhs == rhs.value_;
+    }
+    friend constexpr bool operator!=(T lhs, FlagsEnum rhs) noexcept
+    {
+        return lhs != rhs.value_;
+    }
+
+    constexpr void set(std::convertible_to<T> auto... flags) noexcept
+    {
+        this->value_ =
+            static_cast<T>(static_cast<Int>(this->value_) |
+                           (static_cast<Int>(static_cast<T>(flags)) | ...));
+    }
+
+    /** Adds the flags from `flags` in this enum. */
+    constexpr void set(FlagsEnum flags) noexcept
+    {
+        this->value_ = static_cast<T>(static_cast<Int>(this->value_) |
+                                      static_cast<Int>(flags.value_));
+    }
+
+    constexpr void unset(std::convertible_to<T> auto... flags) noexcept
+    {
+        this->value_ =
+            static_cast<T>(static_cast<Int>(this->value_) &
+                           ~(static_cast<Int>(static_cast<T>(flags)) | ...));
+    }
+
+    constexpr void set(T flag, bool value) noexcept
+    {
+        if (value)
         {
             this->set(flag);
         }
-    }
-
-    bool operator==(const FlagsEnum<T> &other)
-    {
-        return this->value_ == other.value_;
-    }
-
-    bool operator!=(const FlagsEnum &other)
-    {
-        return this->value_ != other.value_;
-    }
-
-    void set(T flag)
-    {
-        reinterpret_cast<Q &>(this->value_) |= static_cast<Q>(flag);
-    }
-
-    void unset(T flag)
-    {
-        reinterpret_cast<Q &>(this->value_) &= ~static_cast<Q>(flag);
-    }
-
-    void set(T flag, bool value)
-    {
-        if (value)
-            this->set(flag);
         else
+        {
             this->unset(flag);
+        }
     }
 
-    bool has(T flag) const
+    constexpr FlagsEnum operator|(T flag) const noexcept
     {
-        return static_cast<Q>(this->value_) & static_cast<Q>(flag);
+        return static_cast<T>(static_cast<Int>(this->value_) |
+                              static_cast<Int>(flag));
     }
 
-    FlagsEnum operator|(T flag)
+    constexpr FlagsEnum operator|(FlagsEnum rhs) const noexcept
     {
-        FlagsEnum xd;
-        xd.value_ = this->value_;
-        xd.set(flag, true);
-
-        return xd;
+        return static_cast<T>(static_cast<Int>(this->value_) |
+                              static_cast<Int>(rhs.value_));
     }
 
-    bool hasAny(FlagsEnum flags) const
+    constexpr bool has(T flag) const noexcept
     {
-        return static_cast<Q>(this->value_) & static_cast<Q>(flags.value_);
+        return static_cast<Int>(this->value_) & static_cast<Int>(flag);
     }
 
-    bool hasAll(FlagsEnum<T> flags) const
+    constexpr bool hasAny(FlagsEnum flags) const noexcept
     {
-        return (static_cast<Q>(this->value_) & static_cast<Q>(flags.value_)) &&
-               static_cast<Q>(flags->value);
+        return (static_cast<Int>(this->value_) &
+                static_cast<Int>(flags.value_)) != 0;
     }
 
-    bool hasNone(std::initializer_list<T> flags) const
+    constexpr bool hasAny(std::convertible_to<T> auto... flags) const noexcept
     {
-        return !this->hasAny(flags);
+        return this->hasAny(FlagsEnum{flags...});
+    }
+
+    constexpr bool hasAll(FlagsEnum flags) const noexcept
+    {
+        return (static_cast<Int>(this->value_) &
+                static_cast<Int>(flags.value_)) ==
+               static_cast<Int>(flags.value_);
+    }
+
+    constexpr bool hasAll(std::convertible_to<T> auto... flags) const noexcept
+    {
+        return this->hasAll(FlagsEnum{flags...});
+    }
+
+    constexpr bool hasNone(FlagsEnum flags) const noexcept
+    {
+        return (static_cast<Int>(this->value_) &
+                static_cast<Int>(flags.value_)) == 0;
+    }
+
+    constexpr bool hasNone() const noexcept = delete;
+    constexpr bool hasNone(std::convertible_to<T> auto... flags) const noexcept
+    {
+        return this->hasNone(FlagsEnum{flags...});
+    }
+
+    /// Returns true if the enum has no flag set (i.e. its underlying value is 0)
+    constexpr bool isEmpty() const noexcept
+    {
+        return static_cast<Int>(this->value_) == 0;
+    }
+
+    constexpr T value() const noexcept
+    {
+        return this->value_;
     }
 
 private:

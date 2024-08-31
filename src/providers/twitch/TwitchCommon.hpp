@@ -3,6 +3,8 @@
 #include <QColor>
 #include <QString>
 
+#include <vector>
+
 namespace chatterino {
 
 #ifndef ATTR_UNUSED
@@ -14,6 +16,8 @@ namespace chatterino {
 #endif
 
 static const char *ANONYMOUS_USERNAME ATTR_UNUSED = "justinfan64537";
+
+static constexpr int TWITCH_MESSAGE_LIMIT = 500;
 
 inline QByteArray getDefaultClientID()
 {
@@ -73,6 +77,7 @@ static const QStringList TWITCH_DEFAULT_COMMANDS{
     "delete",
     "announce",
     "requests",
+    "warn",
 };
 
 static const QStringList TWITCH_WHISPER_COMMANDS{"/w", ".w"};

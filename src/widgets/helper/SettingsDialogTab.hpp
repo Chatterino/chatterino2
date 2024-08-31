@@ -5,6 +5,7 @@
 #include <QIcon>
 #include <QPaintEvent>
 #include <QWidget>
+
 #include <functional>
 
 namespace chatterino {
@@ -12,10 +13,12 @@ namespace chatterino {
 class SettingsPage;
 class SettingsDialog;
 
-enum SettingsTabId {
+enum class SettingsTabId {
     None,
+    General,
     Accounts,
     Moderation,
+    About,
 };
 
 class SettingsDialogTab : public BaseWidget
@@ -38,8 +41,8 @@ signals:
     void selectedChanged(bool);
 
 private:
-    void paintEvent(QPaintEvent *);
-    void mousePressEvent(QMouseEvent *event);
+    void paintEvent(QPaintEvent *) override;
+    void mousePressEvent(QMouseEvent *event) override;
 
     struct {
         QString labelText;

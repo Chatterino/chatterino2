@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algorithm>
 #include <chrono>
 
 namespace chatterino {
@@ -20,7 +19,6 @@ public:
      **/
     ExponentialBackoff(const std::chrono::milliseconds &start)
         : start_(start)
-        , step_{1}
     {
         static_assert(maxSteps > 1, "maxSteps must be higher than 1");
     }
@@ -54,7 +52,7 @@ public:
 
 private:
     const std::chrono::milliseconds start_;
-    unsigned step_;
+    unsigned step_ = 1;
 };
 
 }  // namespace chatterino

@@ -1,6 +1,5 @@
 #include "controllers/hotkeys/HotkeyHelpers.hpp"
-
-#include <gtest/gtest.h>
+#include "Test.hpp"
 
 #include <vector>
 

@@ -1,23 +1,13 @@
 #include "common/ChannelChatters.hpp"
 
-#include <gtest/gtest.h>
+#include "mocks/Channel.hpp"
+#include "Test.hpp"
+
 #include <QColor>
 #include <QStringList>
 
-namespace chatterino {
-
-class MockChannel : public Channel
-{
-public:
-    MockChannel(const QString &name)
-        : Channel(name, Channel::Type::Twitch)
-    {
-    }
-};
-
-}  // namespace chatterino
-
 using namespace chatterino;
+using chatterino::mock::MockChannel;
 
 // Ensure inserting the same user does not increase the size of the stored colors
 TEST(ChatterChatters, insertSameUser)

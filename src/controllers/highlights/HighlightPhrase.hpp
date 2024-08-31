@@ -1,14 +1,13 @@
 #pragma once
 
-#include "providers/colors/ColorProvider.hpp"
-#include "util/RapidJsonSerializeQString.hpp"
 #include "util/RapidjsonHelpers.hpp"
+#include "util/RapidJsonSerializeQString.hpp"
 
+#include <pajlada/serialize.hpp>
 #include <QColor>
 #include <QRegularExpression>
 #include <QString>
 #include <QUrl>
-#include <pajlada/serialize.hpp>
 
 #include <memory>
 
@@ -80,9 +79,14 @@ public:
      * Qt>=5.13.
      */
     static QColor FALLBACK_HIGHLIGHT_COLOR;
+    // Used for automatic self messages highlighing
+    static QColor FALLBACK_SELF_MESSAGE_HIGHLIGHT_COLOR;
     static QColor FALLBACK_REDEEMED_HIGHLIGHT_COLOR;
     static QColor FALLBACK_SUB_COLOR;
     static QColor FALLBACK_FIRST_MESSAGE_HIGHLIGHT_COLOR;
+    static QColor FALLBACK_ELEVATED_MESSAGE_HIGHLIGHT_COLOR;
+    static QColor FALLBACK_THREAD_HIGHLIGHT_COLOR;
+    static QColor FALLBACK_AUTOMOD_HIGHLIGHT_COLOR;
 
 private:
     QString pattern_;
@@ -161,7 +165,9 @@ struct Deserialize<chatterino::HighlightPhrase> {
 
         auto _color = QColor(encodedColor);
         if (!_color.isValid())
+        {
             _color = chatterino::HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR;
+        }
 
         return chatterino::HighlightPhrase(_pattern, _showInMentions, _hasAlert,
                                            _hasSound, _isRegex,

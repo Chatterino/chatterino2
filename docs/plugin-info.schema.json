@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "https://raw.githubusercontent.com/Chatterino/chatterino2/master/docs/plugin-info.schema.json",
+  "title": "Plugin info",
+  "description": "Describes a Chatterino2 plugin (draft)",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Plugin name shown to the user."
+    },
+    "description": {
+      "type": "string",
+      "description": "Plugin description shown to the user."
+    },
+    "authors": {
+      "type": "array",
+      "description": "An array of authors of this Plugin.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "homepage": {
+      "type": "string",
+      "description": "Optional URL to your Plugin's homepage. This could be your GitHub repo for example."
+    },
+    "tags": {
+      "description": "Something that could in the future be used to find your plugin.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "examples": ["moderation", "utility", "commands"]
+      },
+      "uniqueItems": true
+    },
+    "version": {
+      "type": "string",
+      "description": "Semver version string, for more info see https://semver.org.",
+      "examples": ["0.0.1", "1.0.0-rc.1"]
+    },
+    "license": {
+      "type": "string",
+      "description": "SPDX identifier for license of this plugin. See https://spdx.org/licenses/",
+      "examples": ["MIT", "GPL-2.0-or-later"]
+    },
+    "permissions": {
+      "type": "array",
+      "description": "The permissions the plugin needs to work.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": ["FilesystemRead", "FilesystemWrite", "Network"]
+          }
+        }
+      }
+    },
+    "$schema": { "type": "string" }
+  },
+  "required": ["name", "description", "authors", "version", "license"]
+}

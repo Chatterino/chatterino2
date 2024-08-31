@@ -1,6 +1,6 @@
 include(FindPackageHandleStandardArgs)
 
-find_path(MagicEnum_INCLUDE_DIR magic_enum.hpp HINTS ${CMAKE_SOURCE_DIR}/lib/magic_enum/include)
+find_path(MagicEnum_INCLUDE_DIR magic_enum/magic_enum.hpp HINTS ${CMAKE_SOURCE_DIR}/lib/magic_enum/include)
 
 find_package_handle_standard_args(MagicEnum DEFAULT_MSG MagicEnum_INCLUDE_DIR)
 

@@ -14,6 +14,12 @@ public:
     using std::runtime_error::runtime_error;
 };
 
+#ifdef Q_OS_WIN
+constexpr inline QStringView STREAMLINK_BINARY_NAME = u"streamlink.exe";
+#else
+constexpr inline QStringView STREAMLINK_BINARY_NAME = u"streamlink";
+#endif
+
 // Open streamlink for given channel, quality and extra arguments
 // the "Additional arguments" are fetched and added at the beginning of the
 // streamlink call

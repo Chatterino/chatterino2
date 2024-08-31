@@ -2,15 +2,14 @@
 
 #include "widgets/BaseWindow.hpp"
 
+#include <pajlada/settings/setting.hpp>
+#include <QFrame>
 #include <QPushButton>
 #include <QStackedLayout>
 #include <QVBoxLayout>
 #include <QWidget>
-#include <functional>
-#include <pajlada/settings/setting.hpp>
-#include "widgets/helper/SettingsDialogTab.hpp"
 
-#include <QFrame>
+#include <functional>
 
 class QLineEdit;
 
@@ -19,6 +18,7 @@ namespace chatterino {
 class SettingsPage;
 class SettingsDialogTab;
 class ModerationPage;
+enum class SettingsTabId;
 
 class PageHeader : public QFrame
 {
@@ -27,8 +27,10 @@ class PageHeader : public QFrame
 
 enum class SettingsDialogPreference {
     NoPreference,
+    StreamerMode,
     Accounts,
     ModerationActions,
+    About,
 };
 
 class SettingsDialog : public BaseWindow
@@ -41,9 +43,9 @@ public:
                                SettingsDialogPreference::NoPreference);
 
 protected:
-    virtual void scaleChangedEvent(float newDpi) override;
-    virtual void themeChangedEvent() override;
-    virtual void showEvent(QShowEvent *) override;
+    void scaleChangedEvent(float newDpi) override;
+    void themeChangedEvent() override;
+    void showEvent(QShowEvent *) override;
 
 private:
     void refresh();
@@ -57,10 +59,13 @@ private:
     void selectTab(SettingsDialogTab *tab, const bool byUser = true);
     void selectTab(SettingsTabId id);
     void filterElements(const QString &query);
+    void setElementFilter(const QString &query);
+    bool eventFilter(QObject *object, QEvent *event) override;
 
     void onOkClicked();
     void onCancelClicked();
     void addShortcuts() override;
+    void setSearchPlaceholderText();
 
     struct {
         QWidget *tabContainerContainer{};
@@ -73,6 +78,7 @@ private:
     std::vector<SettingsDialogTab *> tabs_;
     SettingsDialogTab *selectedTab_{};
     SettingsDialogTab *lastSelectedByUser_{};
+    float dpi_ = 1.0F;
 
     friend class SettingsDialogTab;
 };

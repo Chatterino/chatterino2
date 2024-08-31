@@ -1,14 +1,14 @@
 #pragma once
 
+#include <magic_enum/magic_enum.hpp>
 #include <QJsonObject>
 #include <QString>
-
-#include <magic_enum.hpp>
 
 namespace chatterino {
 
 struct PubSubCommunityPointsChannelV1Message {
     enum class Type {
+        AutomaticRewardRedeemed,
         RewardRedeemed,
 
         INVALID,
@@ -31,6 +31,9 @@ constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<
 {
     switch (value)
     {
+        case chatterino::PubSubCommunityPointsChannelV1Message::Type::
+            AutomaticRewardRedeemed:
+            return "automatic-reward-redeemed";
         case chatterino::PubSubCommunityPointsChannelV1Message::Type::
             RewardRedeemed:
             return "reward-redeemed";

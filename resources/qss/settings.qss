@@ -1,11 +1,11 @@
 * {
-    font-size: <font-size>px;
+    font-size: 14px;
     font-family: "Segoe UI";
 }
 
 QCheckBox::indicator {
-    width: <checkbox-size>px;
-    height: <checkbox-size>px;
+    width: 14px;
+    height: 14px;
 }
 
 chatterino--ComboBox {
@@ -32,6 +32,13 @@ chatterino--SettingsDialog chatterino--SettingsDialogTab {
 
 chatterino--SettingsPage #generalSettingsScrollContent {
     background: #222;
+}
+
+chatterino--SettingsPage QToolTip {
+    padding: 2px;
+    background-color: #333333;
+    border: 1px solid #545454;
+    color: white;
 }
 
 chatterino--PageHeader {

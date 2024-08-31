@@ -1,7 +1,11 @@
-#include "BadgeHighlightModel.hpp"
+#include "controllers/highlights/BadgeHighlightModel.hpp"
 
 #include "Application.hpp"
+#include "common/SignalVectorModel.hpp"
+#include "controllers/highlights/HighlightBadge.hpp"
+#include "controllers/highlights/HighlightPhrase.hpp"
 #include "messages/Emote.hpp"
+#include "providers/twitch/TwitchBadges.hpp"
 #include "singletons/Settings.hpp"
 #include "util/StandardItemHelper.hpp"
 
@@ -9,7 +13,7 @@ namespace chatterino {
 
 // commandmodel
 BadgeHighlightModel::BadgeHighlightModel(QObject *parent)
-    : SignalVectorModel<HighlightBadge>(5, parent)
+    : SignalVectorModel<HighlightBadge>(6, parent)
 {
 }
 
@@ -28,6 +32,7 @@ HighlightBadge BadgeHighlightModel::getItemFromRow(
     return HighlightBadge{
         original.badgeName(),
         row[Column::Badge]->data(Qt::DisplayRole).toString(),
+        row[Column::ShowInMentions]->data(Qt::CheckStateRole).toBool(),
         row[Column::FlashTaskbar]->data(Qt::CheckStateRole).toBool(),
         row[Column::PlaySound]->data(Qt::CheckStateRole).toBool(),
         row[Column::SoundPath]->data(Qt::UserRole).toString(),
@@ -42,12 +47,13 @@ void BadgeHighlightModel::getRowFromItem(const HighlightBadge &item,
     using Column = BadgeHighlightModel::Column;
 
     setStringItem(row[Column::Badge], item.displayName(), false, true);
+    setBoolItem(row[Column::ShowInMentions], item.showInMentions());
     setBoolItem(row[Column::FlashTaskbar], item.hasAlert());
     setBoolItem(row[Column::PlaySound], item.hasSound());
     setFilePathItem(row[Column::SoundPath], item.getSoundUrl());
     setColorItem(row[Column::Color], *item.getColor());
 
-    TwitchBadges::instance()->getBadgeIcon(
+    getApp()->getTwitchBadges()->getBadgeIcon(
         item.badgeName(), [item, row](QString /*name*/, const QIconPtr pixmap) {
             row[Column::Badge]->setData(QVariant(*pixmap), Qt::DecorationRole);
         });
