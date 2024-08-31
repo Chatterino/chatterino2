@@ -386,7 +386,12 @@ void TwitchAccount::reloadEmotes(void *caller)
                 {
                     return twitchUsers->resolveID({emote.ownerID});
                 }
-                return std::make_shared<TwitchUser>(u"[x-c2-global-owner]"_s);
+
+                return std::make_shared<TwitchUser>(TwitchUser{
+                    .id = u"[x-c2-global-owner]"_s,
+                    .name = {},
+                    .displayName = {},
+                });
             }();
             set = sets->emplace(EmoteSetId{meta.setID},
                                 TwitchEmoteSet{
