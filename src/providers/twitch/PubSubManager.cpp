@@ -320,6 +320,35 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         this->moderation.userWarned.invoke(action);
     };
 
+    this->moderationActionHandlers["raid"] = [this](const auto &data,
+                                                    const auto &roomID) {
+        RaidAction action(data, roomID);
+
+        action.source.id = data.value("created_by_user_id").toString();
+        action.source.login = data.value("created_by").toString();
+
+        const auto args = data.value("args").toArray();
+
+        if (args.isEmpty())
+        {
+            return;
+        }
+
+        action.target = args[0].toString();
+
+        this->moderation.raidStarted.invoke(action);
+    };
+
+    this->moderationActionHandlers["unraid"] = [this](const auto &data,
+                                                      const auto &roomID) {
+        UnraidAction action(data, roomID);
+
+        action.source.id = data.value("created_by_user_id").toString();
+        action.source.login = data.value("created_by").toString();
+
+        this->moderation.raidCanceled.invoke(action);
+    };
+
     /*
     // This handler is no longer required as we use the automod-queue topic now
     this->moderationActionHandlers["automod_rejected"] =
