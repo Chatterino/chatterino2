@@ -91,12 +91,6 @@ public:
         return &this->seventvEmotes;
     }
 
-    pronouns::Pronouns *getPronouns() override
-    {
-        return &this->pronouns;
-    }
-
-    Settings settings;
     AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;
@@ -108,7 +102,6 @@ public:
     BttvEmotes bttvEmotes;
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;
-    pronouns::Pronouns pronouns;
 };
 
 }  // namespace

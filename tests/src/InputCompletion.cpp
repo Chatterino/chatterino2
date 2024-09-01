@@ -69,18 +69,12 @@ public:
         return &this->seventvEmotes;
     }
 
-    pronouns::Pronouns *getPronouns() override
-    {
-        return &this->pronouns;
-    }
-
     AccountController accounts;
     mock::MockTwitchIrcServer twitch;
     Emotes emotes;
     BttvEmotes bttvEmotes;
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;
-    pronouns::Pronouns pronouns;
 };
 
 }  // namespace
