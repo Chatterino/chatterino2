@@ -897,6 +897,11 @@ ChannelPtr ChannelView::channel()
     return this->channel_;
 }
 
+ChannelPtr ChannelView::underlyingChannel() const
+{
+    return this->underlyingChannel_;
+}
+
 bool ChannelView::showScrollbarHighlights() const
 {
     return this->channel_->getType() != Channel::Type::TwitchMentions;
