@@ -78,6 +78,8 @@ auto makeEmoteMessage(const EmoteMap &map, const MessageElementFlag &emoteFlag)
     if (map.empty())
     {
         MessageBuilder builder;
+        builder->flags.set(MessageFlag::Centered);
+        builder->flags.set(MessageFlag::DisableCompactEmotes);
         builder.emplace<TextElement>("no emotes available",
                                      MessageElementFlag::Text,
                                      MessageColor::System);
