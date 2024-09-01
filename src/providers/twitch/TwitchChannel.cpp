@@ -240,6 +240,11 @@ void TwitchChannel::refreshTwitchChannelEmotes(bool manualRefresh)
         return;
     }
 
+    if (manualRefresh)
+    {
+        getApp()->getAccounts()->twitch.getCurrent()->reloadEmotes(this);
+    }
+
     // Twitch's 'Get User Emotes' doesn't assigns a different set-ID to follower
     // emotes compared to subscriber emotes.
     QString setID = TWITCH_SUB_EMOTE_SET_PREFIX % this->roomId();
@@ -302,11 +307,6 @@ void TwitchChannel::refreshTwitchChannelEmotes(bool manualRefresh)
             qCWarning(chatterinoTwitch)
                 << "Failed to get following status:" << error;
         });
-
-    if (manualRefresh)
-    {
-        getApp()->getAccounts()->twitch.getCurrent()->reloadEmotes(this);
-    }
 }
 
 void TwitchChannel::refreshBTTVChannelEmotes(bool manualRefresh)

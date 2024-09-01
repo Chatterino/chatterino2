@@ -71,6 +71,7 @@ public:
     pajlada::Signals::Signal<const std::vector<MessagePtr> &> filledInMessages;
     pajlada::Signals::NoArgSignal destroyed;
     pajlada::Signals::NoArgSignal displayNameChanged;
+    pajlada::Signals::NoArgSignal messagesCleared;
 
     Type getType() const;
     const QString &getName() const;
@@ -98,6 +99,9 @@ public:
     void replaceMessage(MessagePtr message, MessagePtr replacement);
     void replaceMessage(size_t index, MessagePtr replacement);
     void deleteMessage(QString messageID);
+
+    /// Removes all messages from this channel and invokes #messagesCleared
+    void clearMessages();
 
     MessagePtr findMessage(QString messageID);
 
