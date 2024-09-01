@@ -29,6 +29,7 @@ enum class SettingsDialogPreference {
     NoPreference,
     StreamerMode,
     Accounts,
+    Highlights,
     ModerationActions,
     About,
 };
@@ -40,7 +41,7 @@ class SettingsDialog : public BaseWindow
 public:
     static void showDialog(QWidget *parent,
                            SettingsDialogPreference preferredTab =
-                               SettingsDialogPreference::NoPreference);
+                               SettingsDialogPreference::Highlights);
 
 protected:
     void scaleChangedEvent(float newDpi) override;
