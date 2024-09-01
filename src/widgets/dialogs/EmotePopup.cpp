@@ -295,6 +295,17 @@ EmotePopup::EmotePopup(QWidget *parent)
                                        });
 
     this->search_->setFocus();
+
+    this->signalHolder_.managedConnect(
+        getApp()->getAccounts()->twitch.emotesReloaded,
+        [this](auto * /*caller*/, const auto &result) {
+            if (!result)
+            {
+                // some error occurred, no need to reload
+                return;
+            }
+            this->reloadEmotes();
+        });
 }
 
 void EmotePopup::addShortcuts()
@@ -404,9 +415,30 @@ void EmotePopup::loadChannel(ChannelPtr channel)
         return;
     }
 
-    auto subChannel = std::make_shared<Channel>("", Channel::Type::None);
-    auto globalChannel = std::make_shared<Channel>("", Channel::Type::None);
-    auto channelChannel = std::make_shared<Channel>("", Channel::Type::None);
+    this->globalEmotesView_->setChannel(
+        std::make_shared<Channel>("", Channel::Type::None));
+    this->subEmotesView_->setChannel(
+        std::make_shared<Channel>("", Channel::Type::None));
+    this->channelEmotesView_->setChannel(
+        std::make_shared<Channel>("", Channel::Type::None));
+
+    this->reloadEmotes();
+}
+
+void EmotePopup::reloadEmotes()
+{
+    if (this->twitchChannel_ == nullptr)
+    {
+        return;
+    }
+
+    auto subChannel = this->subEmotesView_->underlyingChannel();
+    auto globalChannel = this->globalEmotesView_->underlyingChannel();
+    auto channelChannel = this->channelEmotesView_->underlyingChannel();
+
+    subChannel->clearMessages();
+    globalChannel->clearMessages();
+    channelChannel->clearMessages();
 
     // twitch
     addTwitchEmoteSets(
@@ -448,10 +480,6 @@ void EmotePopup::loadChannel(ChannelPtr channel)
         addEmotes(*channelChannel, *this->twitchChannel_->seventvEmotes(),
                   "7TV", MessageElementFlag::SevenTVEmote);
     }
-
-    this->globalEmotesView_->setChannel(globalChannel);
-    this->subEmotesView_->setChannel(subChannel);
-    this->channelEmotesView_->setChannel(channelChannel);
 
     if (subChannel->getMessageSnapshot().size() == 0)
     {
