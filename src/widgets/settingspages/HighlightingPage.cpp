@@ -10,6 +10,9 @@
 #include "controllers/highlights/UserHighlightModel.hpp"
 #include "providers/colors/ColorProvider.hpp"
 #include "singletons/Settings.hpp"
+#include "TestDelegate.hpp"
+#include "TestModel.hpp"
+#include "TestView.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/dialogs/BadgePickerDialog.hpp"
@@ -19,10 +22,14 @@
 
 #include <QFileDialog>
 #include <QHeaderView>
+#include <QListView>
 #include <QPushButton>
 #include <QStandardItemModel>
 #include <QTableView>
 #include <QTabWidget>
+#include <QTreeView>
+
+#include "TestView2.hpp"
 
 namespace chatterino {
 
@@ -55,6 +62,47 @@ HighlightingPage::HighlightingPage()
         // TABS
         auto tabs = layout.emplace<QTabWidget>();
         {
+            // TEST
+            {
+                auto highlights = tabs.appendTab(new QVBoxLayout, "TEST");
+
+                auto *model =
+                    (new HighlightModel(nullptr))
+                        ->initialized(&getSettings()->highlightedMessages);
+                auto *view = highlights.emplace<QListView>(this).getElement();
+                view->setSpacing(2);
+                QObject::connect(
+                    view, &QAbstractItemView::clicked,
+                    [view, model](const QModelIndex &index) {
+                        qInfo() << "XXX: ITEM CLICKED?"
+                                << index.data(Qt::UserRole + 1).type();
+                        if (index.data(Qt::UserRole + 1).value<bool>())
+                        {
+                            auto res =
+                                model->setData(index, false, Qt::UserRole + 1);
+                            qInfo() << "XXX: ITEM CLICKED? Set to false" << res;
+                        }
+                        else
+                        {
+                            auto res =
+                                model->setData(index, QVariant::fromValue(true),
+                                               Qt::UserRole + 1);
+                            qInfo() << "XXX: ITEM CLICKED? Set to true" << res;
+                        }
+                        view->update();
+                        view->viewport()->update();
+
+                        view->updateGeometry();
+                        view->viewport()->updateGeometry();
+                        // view->update();
+                        // view->repaint();
+                    });
+                view->setModel(model);
+                view->setHorizontalScrollBarPolicy(
+                    Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+                view->setItemDelegate(new TestDelegate(this));
+            }
+
             // HIGHLIGHTS
             auto highlights = tabs.appendTab(new QVBoxLayout, "Messages");
             {
