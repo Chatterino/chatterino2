@@ -976,6 +976,11 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
             this->channel_->fillInMissingMessages(filtered);
         });
 
+    this->channelConnections_.managedConnect(underlyingChannel->messagesCleared,
+                                             [this]() {
+                                                 this->clearMessages();
+                                             });
+
     // Copy over messages from the backing channel to the filtered one
     // and the ui.
     auto snapshot = underlyingChannel->getMessageSnapshot();
