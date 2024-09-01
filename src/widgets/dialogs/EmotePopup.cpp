@@ -129,7 +129,7 @@ void addTwitchEmoteSets(const std::shared_ptr<const EmoteMap> &local,
 {
     if (!local->empty())
     {
-        addEmotes(subChannel, *local, channelName % u" (follower)",
+        addEmotes(subChannel, *local, channelName % u" (Follower)",
                   MessageElementFlag::TwitchEmote);
     }
 
