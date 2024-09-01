@@ -257,6 +257,13 @@ public:
         return nullptr;
     }
 
+    ITwitchUsers *getTwitchUsers() override
+    {
+        assert(false && "EmptyApplication::getTwitchUsers was called without "
+                        "being initialized");
+        return nullptr;
+    }
+
     QTemporaryDir settingsDir;
     Paths paths_;
     Args args_;

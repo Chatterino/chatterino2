@@ -42,6 +42,7 @@
 #include "providers/twitch/PubSubMessages.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "providers/twitch/TwitchUsers.hpp"
 #include "singletons/CrashHandler.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
@@ -176,6 +177,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , logging(new Logging(_settings))
     , linkResolver(new LinkResolver)
     , streamerMode(new StreamerMode)
+    , twitchUsers(new TwitchUsers)
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(new PluginController(paths))
 #endif
@@ -513,6 +515,14 @@ ILinkResolver *Application::getLinkResolver()
 IStreamerMode *Application::getStreamerMode()
 {
     return this->streamerMode.get();
+}
+
+ITwitchUsers *Application::getTwitchUsers()
+{
+    assertInGuiThread();
+    assert(this->twitchUsers);
+
+    return this->twitchUsers.get();
 }
 
 BttvEmotes *Application::getBttvEmotes()

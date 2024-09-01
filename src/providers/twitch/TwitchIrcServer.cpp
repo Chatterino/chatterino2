@@ -853,10 +853,6 @@ void TwitchIrcServer::readConnectionMessageReceived(
         this->markChannelsConnected();
         this->connect();
     }
-    else if (command == "GLOBALUSERSTATE")
-    {
-        handler.handleGlobalUserStateMessage(message);
-    }
 }
 
 void TwitchIrcServer::writeConnectionMessageReceived(
