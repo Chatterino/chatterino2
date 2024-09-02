@@ -96,26 +96,16 @@ void EmoteSource::initializeFromChannel(const Channel *channel)
     // returns true also for special Twitch channels (/live, /mentions, /whispers, etc.)
     if (channel->isTwitchChannel())
     {
-        if (auto user = app->getAccounts()->twitch.getCurrent())
-        {
-            // Twitch Emotes available globally
-            auto emoteData = user->accessEmotes();
-            addEmotes(emotes, emoteData->emotes, "Twitch Emote");
-
-            // Twitch Emotes available locally
-            auto localEmoteData = user->accessLocalEmotes();
-            if ((tc != nullptr) &&
-                localEmoteData->find(tc->roomId()) != localEmoteData->end())
-            {
-                if (const auto *localEmotes = &localEmoteData->at(tc->roomId()))
-                {
-                    addEmotes(emotes, *localEmotes, "Local Twitch Emotes");
-                }
-            }
-        }
-
         if (tc)
         {
+            if (auto twitch = tc->localTwitchEmotes())
+            {
+                addEmotes(emotes, *twitch, "Local Twitch Emotes");
+            }
+
+            auto user = getApp()->getAccounts()->twitch.getCurrent();
+            addEmotes(emotes, **user->accessEmotes(), "Twitch Emote");
+
             for (const auto &map :
                  app->getSeventvPersonalEmotes()->getEmoteSetsForUser(
                      app->getAccounts()->twitch.getCurrent()->getUserId()))

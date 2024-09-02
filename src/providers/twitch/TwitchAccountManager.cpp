@@ -162,6 +162,7 @@ void TwitchAccountManager::load()
         }
 
         this->currentUserChanged();
+        this->currentUser_->reloadEmotes();
     });
 }
 

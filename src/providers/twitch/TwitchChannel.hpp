@@ -159,13 +159,17 @@ public:
     void markConnected();
 
     // Emotes
+    std::optional<EmotePtr> twitchEmote(const EmoteName &name) const;
     std::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
     std::optional<EmotePtr> ffzEmote(const EmoteName &name) const;
     std::optional<EmotePtr> seventvEmote(const EmoteName &name) const;
+
+    std::shared_ptr<const EmoteMap> localTwitchEmotes() const;
     std::shared_ptr<const EmoteMap> bttvEmotes() const;
     std::shared_ptr<const EmoteMap> ffzEmotes() const;
     std::shared_ptr<const EmoteMap> seventvEmotes() const;
 
+    void refreshTwitchChannelEmotes(bool manualRefresh);
     void refreshBTTVChannelEmotes(bool manualRefresh);
     void refreshFFZChannelEmotes(bool manualRefresh);
     void refreshSevenTVChannelEmotes(bool manualRefresh);
@@ -396,6 +400,8 @@ private:
 protected:
     void messageRemovedFromStart(const MessagePtr &msg) override;
 
+    Atomic<std::shared_ptr<const EmoteMap>> localTwitchEmotes_;
+    Atomic<QString> localTwitchEmoteSetID_;
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> ffzEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> seventvEmotes_;

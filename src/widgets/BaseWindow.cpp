@@ -23,6 +23,7 @@
 
 #ifdef USEWINSDK
 #    include <dwmapi.h>
+#    include <shellapi.h>
 #    include <VersionHelpers.h>
 #    include <Windows.h>
 #    include <windowsx.h>
@@ -32,7 +33,6 @@
 #    include <QHBoxLayout>
 #    include <QMargins>
 #    include <QOperatingSystemVersion>
-#    include <QWindow>
 #endif
 
 #include "widgets/helper/TitlebarButton.hpp"
@@ -505,7 +505,7 @@ bool BaseWindow::event(QEvent *event)
     }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
-    if (this->flags_.has(DontFocus) || this->flags_.has(Dialog))
+    if (this->flags_.hasAny(DontFocus, Dialog, FramelessDraggable))
     {
         // This certain windows (e.g. TooltipWidget, input completion widget, and the search popup) retains their nullptr parent
         // NOTE that this currently does not retain their original transient parent (which is the window it was created under)

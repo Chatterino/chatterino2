@@ -423,6 +423,8 @@ set(SOURCE_FILES
         providers/twitch/TwitchIrcServer.hpp
         providers/twitch/TwitchUser.cpp
         providers/twitch/TwitchUser.hpp
+        providers/twitch/TwitchUsers.cpp
+        providers/twitch/TwitchUsers.hpp
 
         providers/twitch/pubsubmessages/AutoMod.cpp
         providers/twitch/pubsubmessages/AutoMod.hpp
@@ -490,6 +492,7 @@ set(SOURCE_FILES
         util/DebugCount.hpp
         util/DisplayBadge.cpp
         util/DisplayBadge.hpp
+        util/Expected.hpp
         util/FormatTime.cpp
         util/FormatTime.hpp
         util/FunctionEventFilter.cpp

@@ -275,6 +275,12 @@ void Channel::deleteMessage(QString messageID)
     }
 }
 
+void Channel::clearMessages()
+{
+    this->messages_.clear();
+    this->messagesCleared.invoke();
+}
+
 MessagePtr Channel::findMessage(QString messageID)
 {
     MessagePtr res;

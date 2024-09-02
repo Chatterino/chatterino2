@@ -2,7 +2,9 @@
 
 #include "common/Aliases.hpp"
 #include "common/UniqueAccess.hpp"
+#include "providers/twitch/TwitchUser.hpp"
 
+#include <boost/unordered/unordered_flat_map_fwd.hpp>
 #include <QColor>
 #include <QRegularExpression>
 #include <QString>
@@ -35,6 +37,45 @@ struct CheerEmoteSet {
     QRegularExpression regex;
     std::vector<CheerEmote> cheerEmotes;
 };
+
+struct TwitchEmoteSet {
+    /// @brief The owner of this set
+    ///
+    /// This owner might not be resolved yet
+    std::shared_ptr<TwitchUser> owner;
+
+    std::vector<EmotePtr> emotes;
+
+    /// If this is a bitstier emote set
+    bool isBits = false;
+
+    /// @brief If this emote set is a subscriber or similar emote set
+    ///
+    /// This includes sub and bit emotes
+    bool isSubLike = false;
+
+    /// @brief The title of this set
+    ///
+    /// We generate this based on the emote set's flags & owner
+    QString title() const;
+};
+using TwitchEmoteSetMap = boost::unordered_flat_map<EmoteSetId, TwitchEmoteSet>;
+
+struct HelixChannelEmote;
+
+constexpr QStringView TWITCH_SUB_EMOTE_SET_PREFIX = u"x-c2-s-";
+constexpr QStringView TWITCH_BIT_EMOTE_SET_PREFIX = u"x-c2-b-";
+
+struct TwitchEmoteSetMeta {
+    QString setID;
+
+    /// See TwitchEmoteSet::isBits
+    bool isBits = false;
+    /// See TwitchEmoteSet::isSubLike
+    bool isSubLike = false;
+};
+
+TwitchEmoteSetMeta getTwitchEmoteSetMeta(const HelixChannelEmote &emote);
 
 class ITwitchEmotes
 {

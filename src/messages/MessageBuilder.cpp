@@ -881,6 +881,40 @@ MessageBuilder::MessageBuilder(const WarnAction &action)
     this->message().searchText = text;
 }
 
+MessageBuilder::MessageBuilder(const RaidAction &action)
+    : MessageBuilder()
+{
+    this->emplace<TimestampElement>();
+    this->message().flags.set(MessageFlag::System);
+
+    QString text;
+
+    this->emplaceSystemTextAndUpdate(action.source.login, text)
+        ->setLink({Link::UserInfo, "id:" + action.source.id});
+    this->emplaceSystemTextAndUpdate("initiated a raid to", text);
+    this->emplaceSystemTextAndUpdate(action.target + ".", text)
+        ->setLink({Link::UserInfo, action.target});
+
+    this->message().messageText = text;
+    this->message().searchText = text;
+}
+
+MessageBuilder::MessageBuilder(const UnraidAction &action)
+    : MessageBuilder()
+{
+    this->emplace<TimestampElement>();
+    this->message().flags.set(MessageFlag::System);
+
+    QString text;
+
+    this->emplaceSystemTextAndUpdate(action.source.login, text)
+        ->setLink({Link::UserInfo, "id:" + action.source.id});
+    this->emplaceSystemTextAndUpdate("canceled the raid.", text);
+
+    this->message().messageText = text;
+    this->message().searchText = text;
+}
+
 MessageBuilder::MessageBuilder(const AutomodUserAction &action)
     : MessageBuilder()
 {

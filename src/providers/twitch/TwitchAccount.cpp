@@ -3,10 +3,12 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/Env.hpp"
+#include "common/Literals.hpp"
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "debug/AssertInGuiThread.hpp"
+#include "messages/Emote.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
@@ -15,15 +17,20 @@
 #include "providers/seventv/SeventvPersonalEmotes.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
+#include "providers/twitch/TwitchUsers.hpp"
 #include "singletons/Emotes.hpp"
 #include "util/CancellationToken.hpp"
 #include "util/Helpers.hpp"
 #include "util/QStringHash.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
+#include <boost/unordered/unordered_flat_map.hpp>
+#include <QStringBuilder>
 #include <QThread>
 
 namespace chatterino {
+
+using namespace literals;
 
 TwitchAccount::TwitchAccount(const QString &username, const QString &oauthToken,
                              const QString &oauthClient, const QString &userID)
@@ -33,8 +40,12 @@ TwitchAccount::TwitchAccount(const QString &username, const QString &oauthToken,
     , userName_(username)
     , userId_(userID)
     , isAnon_(username == ANONYMOUS_USERNAME)
+    , emoteSets_(std::make_shared<TwitchEmoteSetMap>())
+    , emotes_(std::make_shared<EmoteMap>())
 {
 }
+
+TwitchAccount::~TwitchAccount() = default;
 
 QString TwitchAccount::toString() const
 {
@@ -175,214 +186,6 @@ const std::unordered_set<QString> &TwitchAccount::blockedUserIds() const
 {
     assertInGuiThread();
     return this->ignoresUserIds_;
-}
-
-void TwitchAccount::loadEmotes(std::weak_ptr<Channel> weakChannel)
-{
-    qCDebug(chatterinoTwitch)
-        << "Loading Twitch emotes for user" << this->getUserName();
-
-    if (this->getOAuthClient().isEmpty() || this->getOAuthToken().isEmpty())
-    {
-        qCDebug(chatterinoTwitch)
-            << "Aborted loadEmotes due to missing Client ID and/or OAuth token";
-        return;
-    }
-
-    {
-        auto emoteData = this->emotes_.access();
-        emoteData->emoteSets.clear();
-        emoteData->emotes.clear();
-        qCDebug(chatterinoTwitch) << "Cleared emotes!";
-    }
-
-    this->loadUserstateEmotes(weakChannel);
-}
-
-bool TwitchAccount::setUserstateEmoteSets(QStringList newEmoteSets)
-{
-    newEmoteSets.sort();
-
-    if (this->userstateEmoteSets_ == newEmoteSets)
-    {
-        // Nothing has changed
-        return false;
-    }
-
-    this->userstateEmoteSets_ = newEmoteSets;
-
-    return true;
-}
-
-void TwitchAccount::loadUserstateEmotes(std::weak_ptr<Channel> weakChannel)
-{
-    if (this->userstateEmoteSets_.isEmpty())
-    {
-        return;
-    }
-
-    QStringList newEmoteSetKeys, existingEmoteSetKeys;
-
-    auto emoteData = this->emotes_.access();
-    auto userEmoteSets = emoteData->emoteSets;
-
-    // get list of already fetched emote sets
-    for (const auto &userEmoteSet : userEmoteSets)
-    {
-        existingEmoteSetKeys.push_back(userEmoteSet->key);
-    }
-
-    // filter out emote sets from userstate message, which are not in fetched emote set list
-    for (const auto &emoteSetKey : this->userstateEmoteSets_)
-    {
-        if (!existingEmoteSetKeys.contains(emoteSetKey))
-        {
-            newEmoteSetKeys.push_back(emoteSetKey);
-        }
-    }
-
-    // return if there are no new emote sets
-    if (newEmoteSetKeys.isEmpty())
-    {
-        return;
-    }
-
-    // requesting emotes
-    auto batches = splitListIntoBatches(newEmoteSetKeys);
-    for (int i = 0; i < batches.size(); i++)
-    {
-        qCDebug(chatterinoTwitch)
-            << QString(
-                   "Loading %1 emotesets from IVR; batch %2/%3 (%4 sets): %5")
-                   .arg(newEmoteSetKeys.size())
-                   .arg(i + 1)
-                   .arg(batches.size())
-                   .arg(batches.at(i).size())
-                   .arg(batches.at(i).join(","));
-        getIvr()->getBulkEmoteSets(
-            batches.at(i).join(","),
-            [this, weakChannel](QJsonArray emoteSetArray) {
-                auto emoteData = this->emotes_.access();
-                auto localEmoteData = this->localEmotes_.access();
-
-                std::unordered_set<QString> subscriberChannelIDs;
-                std::vector<IvrEmoteSet> ivrEmoteSets;
-                ivrEmoteSets.reserve(emoteSetArray.size());
-
-                for (auto emoteSet : emoteSetArray)
-                {
-                    IvrEmoteSet ivrEmoteSet(emoteSet.toObject());
-                    if (!ivrEmoteSet.tier.isNull())
-                    {
-                        subscriberChannelIDs.insert(ivrEmoteSet.channelId);
-                    }
-                    ivrEmoteSets.emplace_back(ivrEmoteSet);
-                }
-
-                for (const auto &emoteSet : emoteData->emoteSets)
-                {
-                    if (emoteSet->subscriber)
-                    {
-                        subscriberChannelIDs.insert(emoteSet->channelID);
-                    }
-                }
-
-                for (const auto &ivrEmoteSet : ivrEmoteSets)
-                {
-                    auto emoteSet = std::make_shared<EmoteSet>();
-
-                    QString setKey = ivrEmoteSet.setId;
-                    emoteSet->key = setKey;
-
-                    // check if the emoteset is already in emoteData
-                    auto isAlreadyFetched =
-                        std::find_if(emoteData->emoteSets.begin(),
-                                     emoteData->emoteSets.end(),
-                                     [setKey](std::shared_ptr<EmoteSet> set) {
-                                         return (set->key == setKey);
-                                     });
-                    if (isAlreadyFetched != emoteData->emoteSets.end())
-                    {
-                        continue;
-                    }
-
-                    emoteSet->channelID = ivrEmoteSet.channelId;
-                    emoteSet->channelName = ivrEmoteSet.login;
-                    emoteSet->text = ivrEmoteSet.displayName;
-                    emoteSet->subscriber = !ivrEmoteSet.tier.isNull();
-
-                    // NOTE: If a user does not have a subscriber emote set, but a follower emote set, this logic will be wrong
-                    // However, that's not a realistic problem.
-                    bool haveSubscriberSetForChannel =
-                        subscriberChannelIDs.contains(ivrEmoteSet.channelId);
-
-                    for (const auto &emoteObj : ivrEmoteSet.emotes)
-                    {
-                        IvrEmote ivrEmote(emoteObj.toObject());
-
-                        auto id = EmoteId{ivrEmote.id};
-                        auto code = EmoteName{
-                            TwitchEmotes::cleanUpEmoteCode(ivrEmote.code)};
-
-                        emoteSet->emotes.push_back(TwitchEmote{id, code});
-
-                        auto emote = getApp()
-                                         ->getEmotes()
-                                         ->getTwitchEmotes()
-                                         ->getOrCreateEmote(id, code);
-
-                        // Follower emotes can be only used in their origin channel
-                        // unless the user is subscribed, then they can be used anywhere.
-                        if (ivrEmote.emoteType == "FOLLOWER" &&
-                            !haveSubscriberSetForChannel)
-                        {
-                            emoteSet->local = true;
-
-                            // EmoteMap for target channel wasn't initialized yet, doing it now
-                            if (localEmoteData->find(ivrEmoteSet.channelId) ==
-                                localEmoteData->end())
-                            {
-                                localEmoteData->emplace(ivrEmoteSet.channelId,
-                                                        EmoteMap());
-                            }
-
-                            localEmoteData->at(ivrEmoteSet.channelId)
-                                .emplace(code, emote);
-                        }
-                        else
-                        {
-                            emoteData->emotes.emplace(code, emote);
-                        }
-                    }
-                    std::sort(emoteSet->emotes.begin(), emoteSet->emotes.end(),
-                              [](const TwitchEmote &l, const TwitchEmote &r) {
-                                  return l.name.string < r.name.string;
-                              });
-                    emoteData->emoteSets.emplace_back(emoteSet);
-                }
-
-                if (auto channel = weakChannel.lock(); channel != nullptr)
-                {
-                    channel->addSystemMessage(
-                        "Twitch subscriber emotes reloaded.");
-                }
-            },
-            [] {
-                // fetching emotes failed, ivr API might be down
-            });
-    };
-}
-
-SharedAccessGuard<const TwitchAccount::TwitchAccountEmoteData>
-    TwitchAccount::accessEmotes() const
-{
-    return this->emotes_.accessConst();
-}
-
-SharedAccessGuard<const std::unordered_map<QString, EmoteMap>>
-    TwitchAccount::accessLocalEmotes() const
-{
-    return this->localEmotes_.accessConst();
 }
 
 // AutoModActions
@@ -548,6 +351,142 @@ void TwitchAccount::loadSeventvUserID()
             qCDebug(chatterinoSeventv)
                 << "Failed to load 7TV user-id:" << result.formatError();
         });
+}
+
+bool TwitchAccount::hasEmoteSet(const EmoteSetId &id) const
+{
+    auto emotes = this->emoteSets_.accessConst();
+    return emotes->get()->contains(id);
+}
+
+SharedAccessGuard<std::shared_ptr<const TwitchEmoteSetMap>>
+    TwitchAccount::accessEmoteSets() const
+{
+    return this->emoteSets_.accessConst();
+}
+
+SharedAccessGuard<std::shared_ptr<const EmoteMap>> TwitchAccount::accessEmotes()
+    const
+{
+    return this->emotes_.accessConst();
+}
+
+std::optional<EmotePtr> TwitchAccount::twitchEmote(const EmoteName &name) const
+{
+    auto emotes = this->emotes_.accessConst();
+    auto it = (*emotes)->find(name);
+    if (it != (*emotes)->end())
+    {
+        return it->second;
+    }
+    return std::nullopt;
+}
+
+void TwitchAccount::reloadEmotes(void *caller)
+{
+    if (this->isAnon() || getApp()->isTest())
+    {
+        return;
+    }
+
+    CancellationToken token(false);
+    this->emoteToken_ = token;
+
+    auto sets = std::make_shared<TwitchEmoteSetMap>();
+    auto emoteMap = std::make_shared<EmoteMap>();
+    auto nCalls = std::make_shared<size_t>();
+
+    auto *twitchEmotes = getApp()->getEmotes()->getTwitchEmotes();
+    auto *twitchUsers = getApp()->getTwitchUsers();
+
+    auto addEmote = [sets, emoteMap, twitchEmotes,
+                     twitchUsers](const HelixChannelEmote &emote) {
+        EmoteId id{emote.id};
+        EmoteName name{emote.name};
+        auto meta = getTwitchEmoteSetMeta(emote);
+
+        auto emotePtr = twitchEmotes->getOrCreateEmote(id, name);
+        if (!emoteMap->try_emplace(name, emotePtr).second)
+        {
+            // if the emote already exists, we don't want to add it to a set as
+            // those are assumed to be disjoint
+            return;
+        }
+
+        auto set = sets->find(EmoteSetId{meta.setID});
+        if (set == sets->end())
+        {
+            auto owner = [&]() {
+                if (meta.isSubLike)
+                {
+                    return twitchUsers->resolveID({emote.ownerID});
+                }
+
+                return std::make_shared<TwitchUser>(TwitchUser{
+                    .id = u"[x-c2-global-owner]"_s,
+                    .name = {},
+                    .displayName = {},
+                });
+            }();
+            set = sets->emplace(EmoteSetId{meta.setID},
+                                TwitchEmoteSet{
+                                    .owner = owner,
+                                    .emotes = {},
+                                    .isBits = meta.isBits,
+                                    .isSubLike = meta.isSubLike,
+                                })
+                      .first;
+        }
+        set->second.emotes.emplace_back(std::move(emotePtr));
+    };
+
+    auto userID = this->getUserId();
+    qDebug(chatterinoTwitch).nospace()
+        << "Loading Twitch emotes - userID: " << userID
+        << ", broadcasterID: none, manualRefresh: " << (caller != nullptr);
+
+    getHelix()->getUserEmotes(
+        this->getUserId(), {},
+        [this, caller, emoteMap, sets, addEmote, nCalls](
+            const auto &emotes, const auto &state) mutable {
+            assert(emoteMap && sets);
+            (*nCalls)++;
+            qDebug(chatterinoTwitch).nospace()
+                << "Got " << emotes.size() << " more emote(s)";
+
+            emoteMap->reserve(emoteMap->size() + emotes.size());
+            for (const auto &emote : emotes)
+            {
+                addEmote(emote);
+            }
+
+            if (state.done)
+            {
+                qDebug(chatterinoTwitch).nospace()
+                    << "Loaded " << emoteMap->size() << " Twitch emotes ("
+                    << *nCalls << " requests)";
+
+                for (auto &[id, set] : *sets)
+                {
+                    std::ranges::sort(
+                        set.emotes, [](const auto &l, const auto &r) {
+                            return l->name.string < r->name.string;
+                        });
+                }
+
+                *this->emotes_.access() = std::move(emoteMap);
+                *this->emoteSets_.access() = std::move(sets);
+                getApp()->getAccounts()->twitch.emotesReloaded.invoke(caller,
+                                                                      {});
+            }
+        },
+        [caller](const auto &error) {
+            qDebug(chatterinoTwitch)
+                << "Failed to load Twitch emotes:" << error;
+            getApp()->getAccounts()->twitch.emotesReloaded.invoke(
+                caller, makeUnexpected(error));
+        },
+        std::move(token));
 }
 
 }  // namespace chatterino

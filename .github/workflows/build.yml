@@ -33,7 +33,7 @@ jobs:
         include:
           - os: ubuntu-22.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-22.04:latest
-            qt-version: 6.6.1
+            qt-version: 6.7.2
             force-lto: false
             plugins: true
             skip-artifact: false
@@ -42,7 +42,7 @@ jobs:
             build-deb: true
           - os: ubuntu-24.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-24.04:latest
-            qt-version: 6.6.1
+            qt-version: 6.7.2
             force-lto: false
             plugins: true
             skip-artifact: false
@@ -363,13 +363,19 @@ jobs:
       - uses: actions/download-artifact@v4
         name: Linux AppImage
         with:
-          name: Chatterino-x86_64-Qt-6.6.1.AppImage
+          name: Chatterino-x86_64-Qt-6.7.2.AppImage
           path: release-artifacts/
 
       - uses: actions/download-artifact@v4
         name: Ubuntu 22.04 deb
         with:
-          name: Chatterino-ubuntu-22.04-Qt-6.6.1.deb
+          name: Chatterino-ubuntu-22.04-Qt-6.7.2.deb
+          path: release-artifacts/
+      
+      - uses: actions/download-artifact@v4
+        name: Ubuntu 24.04 deb
+        with:
+          name: Chatterino-ubuntu-24.04-Qt-6.7.2.deb
           path: release-artifacts/
 
       # macOS
