@@ -7,8 +7,8 @@ Most of them live in `src/controllers/plugins/LuaUtilities.hpp`.
   `lua::StackGuard`, which will abort the program should the stack size not be
   what you expect.
 - When possible use `lua::push(lua_State *, T)`,
- `lua::peek(lua_State*, T*, StackIdx)` or `lua::pop(lua_State *, T*)` instead
- of Lua's APIs directly.
+  `lua::peek(lua_State*, T*, StackIdx)` or `lua::pop(lua_State *, T*)` instead
+  of Lua's APIs directly.
 
 # Error paths
 
