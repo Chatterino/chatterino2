@@ -47,6 +47,7 @@
 - Bugfix: Fixed tab visibility being controllable in the emote popup. (#5530)
 - Bugfix: Fixed account switch not being saved if no other settings were changed. (#5558)
 - Bugfix: Fixed some tooltips not being readable. (#5578)
+- Bugfix: Fixed Lua plugins leaking memory in error branches. (#5508)
 - Dev: Update Windows build from Qt 6.5.0 to Qt 6.7.1. (#5420)
 - Dev: Update vcpkg build Qt from 6.5.0 to 6.7.0, boost from 1.83.0 to 1.85.0, openssl from 3.1.3 to 3.3.0. (#5422)
 - Dev: Unsingletonize `ISoundController`. (#5462)
