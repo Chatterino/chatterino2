@@ -113,8 +113,8 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     for (int i = 2; i < words.length(); i++)
     {
         {  // Twitch emote
-            auto it = accemotes.emotes.find({words[i]});
-            if (it != accemotes.emotes.end())
+            auto it = accemotes->find({words[i]});
+            if (it != accemotes->end())
             {
                 b.emplace<EmoteElement>(it->second,
                                         MessageElementFlag::TwitchEmote);

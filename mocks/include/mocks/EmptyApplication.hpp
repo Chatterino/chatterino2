@@ -257,6 +257,13 @@ public:
         return nullptr;
     }
 
+    ITwitchUsers *getTwitchUsers() override
+    {
+        assert(false && "EmptyApplication::getTwitchUsers was called without "
+                        "being initialized");
+        return nullptr;
+    }
+
     pronouns::Pronouns *getPronouns() override
     {
         assert(false && "EmptyApplication::getPronouns was called without "

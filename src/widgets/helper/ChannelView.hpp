@@ -144,9 +144,20 @@ public:
     /// filter settings. It will always be of type Channel, not TwitchChannel
     /// nor IrcChannel.
     /// It's **not** equal to the channel passed in #setChannel().
+    /// @see #underlyingChannel()
     ChannelPtr channel();
 
-    /// Set the channel this view is displaying
+    /// @brief The channel this view displays messages for
+    ///
+    /// This channel potentially contains more messages than visible in this
+    /// view due to filter settings.
+    /// It's equal to the channel passed in #setChannel().
+    /// @see #channel()
+    ChannelPtr underlyingChannel() const;
+
+    /// @brief Set the channel this view is displaying
+    ///
+    /// @see #underlyingChannel()
     void setChannel(const ChannelPtr &underlyingChannel);
 
     void setFilters(const QList<QUuid> &ids);
