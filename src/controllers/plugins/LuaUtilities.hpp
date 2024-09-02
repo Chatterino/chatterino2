@@ -40,6 +40,12 @@ constexpr int ERROR_BAD_PEEK = LUA_OK - 1;
  */
 void stackDump(lua_State *L, const QString &tag);
 
+#    ifndef NDEBUG
+// This is for debugging with the use of stackDump because creating a QString
+// with gdb is more painful than it should be
+const QString DUMMY_TAG = "DUMMY";
+#    endif
+
 /**
  * @brief Converts a lua error code and potentially string on top of the stack into a human readable message
  */
