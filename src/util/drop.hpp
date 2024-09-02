@@ -15,6 +15,6 @@ inline void drop(T &var)
  * Helps you avoid accidentally dropping a pointer not the object behind it.
  */
 template <typename T>
-inline void drop(T * /*var*/) = delete;
+void drop(T * /*var*/) = delete;
 
 }  // namespace chatterino
