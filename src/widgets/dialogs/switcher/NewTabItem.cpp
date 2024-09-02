@@ -27,7 +27,7 @@ void NewTabItem::action()
 
     Split *split = new Split(container);
     split->setChannel(
-        getIApp()->getTwitchAbstract()->getOrAddChannel(this->channelName_));
+        getApp()->getTwitch()->getOrAddChannel(this->channelName_));
     container->insertSplit(split);
 }
 
@@ -38,10 +38,10 @@ void NewTabItem::paint(QPainter *painter, const QRect &rect) const
     painter->setRenderHint(QPainter::Antialiasing, true);
 
     // TODO(leon): Right pen/brush/font settings?
-    painter->setPen(getIApp()->getThemes()->splits.header.text);
+    painter->setPen(getApp()->getThemes()->splits.header.text);
     painter->setBrush(Qt::SolidPattern);
     painter->setFont(
-        getIApp()->getFonts()->getFont(FontStyle::UiMediumBold, 1.0));
+        getApp()->getFonts()->getFont(FontStyle::UiMediumBold, 1.0));
 
     QRect iconRect(rect.topLeft(), ICON_SIZE);
     this->icon_.paint(painter, iconRect, Qt::AlignLeft | Qt::AlignVCenter);

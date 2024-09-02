@@ -9,7 +9,6 @@
 
 namespace chatterino {
 
-class IAbstractIrcServer;
 class ITwitchIrcServer;
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
@@ -39,19 +38,16 @@ public:
         std::vector<MessagePtr> &otherLoaded);
 
     void handlePrivMessage(Communi::IrcPrivateMessage *message,
-                           ITwitchIrcServer &twitchServer,
-                           IAbstractIrcServer &abstractIrcServer);
+                           ITwitchIrcServer &twitchServer);
 
     void handleRoomStateMessage(Communi::IrcMessage *message);
     void handleClearChatMessage(Communi::IrcMessage *message);
     void handleClearMessageMessage(Communi::IrcMessage *message);
     void handleUserStateMessage(Communi::IrcMessage *message);
-    void handleGlobalUserStateMessage(Communi::IrcMessage *message);
     void handleWhisperMessage(Communi::IrcMessage *ircMessage);
 
     void handleUserNoticeMessage(Communi::IrcMessage *message,
-                                 ITwitchIrcServer &twitchServer,
-                                 IAbstractIrcServer &abstractIrcServer);
+                                 ITwitchIrcServer &twitchServer);
 
     void handleNoticeMessage(Communi::IrcNoticeMessage *message);
 

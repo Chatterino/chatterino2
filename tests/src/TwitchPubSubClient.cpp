@@ -10,7 +10,6 @@
 
 #include <chrono>
 #include <mutex>
-#include <optional>
 
 using namespace chatterino;
 using namespace std::chrono_literals;
@@ -32,6 +31,8 @@ using namespace std::chrono_literals;
 #define RUN_PUBSUB_TESTS
 
 #ifdef RUN_PUBSUB_TESTS
+
+namespace chatterino {
 
 template <typename T>
 class ReceivedMessage
@@ -450,5 +451,7 @@ TEST(TwitchPubSubClient, AutoModMessageHeld)
     ASSERT_EQ(pubSub.diag.connectionsClosed, 1);
     ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
 }
+
+}  // namespace chatterino
 
 #endif

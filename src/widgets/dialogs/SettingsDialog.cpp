@@ -57,7 +57,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     this->overrideBackgroundColor_ = QColor("#111111");
 
     this->addShortcuts();
-    this->signalHolder_.managedConnect(getIApp()->getHotkeys()->onItemsUpdated,
+    this->signalHolder_.managedConnect(getApp()->getHotkeys()->onItemsUpdated,
                                        [this]() {
                                            this->clearShortcuts();
                                            this->addShortcuts();
@@ -81,13 +81,13 @@ void SettingsDialog::addShortcuts()
         {"openTab", nullptr},
     };
 
-    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
+    this->shortcuts_ = getApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 }
 void SettingsDialog::setSearchPlaceholderText()
 {
     QString searchHotkey;
-    auto searchSeq = getIApp()->getHotkeys()->getDisplaySequence(
+    auto searchSeq = getApp()->getHotkeys()->getDisplaySequence(
         HotkeyCategory::PopupWindow, "search");
     if (!searchSeq.isEmpty())
     {
@@ -434,9 +434,11 @@ void SettingsDialog::onOkClicked()
 {
     if (!getApp()->getArgs().dontSaveSettings)
     {
-        getIApp()->getCommands()->save();
-        pajlada::Settings::SettingManager::gSave();
+        getApp()->getCommands()->save();
     }
+
+    getSettings()->requestSave();
+
     this->close();
 }
 

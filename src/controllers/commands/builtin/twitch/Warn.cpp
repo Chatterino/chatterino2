@@ -1,14 +1,13 @@
 #include "controllers/commands/builtin/twitch/Warn.hpp"
 
 #include "Application.hpp"
+#include "common/Channel.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "controllers/commands/common/ChannelAction.hpp"
-#include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
 
 namespace {
 
@@ -73,7 +72,7 @@ void warnUserByID(const ChannelPtr &channel, const QString &channelID,
                 break;
             }
 
-            channel->addMessage(makeSystemMessage(errorMessage));
+            channel->addSystemMessage(errorMessage);
         });
 }
 
@@ -92,7 +91,7 @@ QString sendWarn(const CommandContext &ctx)
     {
         if (ctx.channel != nullptr)
         {
-            ctx.channel->addMessage(makeSystemMessage(actions.error()));
+            ctx.channel->addSystemMessage(actions.error());
         }
         else
         {
@@ -105,11 +104,10 @@ QString sendWarn(const CommandContext &ctx)
 
     assert(!actions.value().empty());
 
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("You must be logged in to warn someone!"));
+        ctx.channel->addSystemMessage("You must be logged in to warn someone!");
         return "";
     }
 
@@ -118,8 +116,8 @@ QString sendWarn(const CommandContext &ctx)
         const auto &reason = action.reason;
         if (reason.isEmpty())
         {
-            ctx.channel->addMessage(
-                makeSystemMessage("Failed to warn, you must specify a reason"));
+            ctx.channel->addSystemMessage(
+                "Failed to warn, you must specify a reason");
             break;
         }
 
@@ -161,16 +159,16 @@ QString sendWarn(const CommandContext &ctx)
                  userLoginsToFetch](const auto &users) mutable {
                     if (!actionChannel.hydrateFrom(users))
                     {
-                        channel->addMessage(makeSystemMessage(
+                        channel->addSystemMessage(
                             QString("Failed to warn, bad channel name: %1")
-                                .arg(actionChannel.login)));
+                                .arg(actionChannel.login));
                         return;
                     }
                     if (!actionTarget.hydrateFrom(users))
                     {
-                        channel->addMessage(makeSystemMessage(
+                        channel->addSystemMessage(
                             QString("Failed to warn, bad target name: %1")
-                                .arg(actionTarget.login)));
+                                .arg(actionTarget.login));
                         return;
                     }
 
@@ -179,9 +177,9 @@ QString sendWarn(const CommandContext &ctx)
                                  reason, actionTarget.displayName);
                 },
                 [channel{ctx.channel}, userLoginsToFetch] {
-                    channel->addMessage(makeSystemMessage(
+                    channel->addSystemMessage(
                         QString("Failed to warn, bad username(s): %1")
-                            .arg(userLoginsToFetch.join(", "))));
+                            .arg(userLoginsToFetch.join(", ")));
                 });
         }
         else

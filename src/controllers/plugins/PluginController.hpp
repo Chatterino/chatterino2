@@ -2,7 +2,6 @@
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 
-#    include "common/Singleton.hpp"
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/plugins/Plugin.hpp"
 
@@ -24,14 +23,14 @@ namespace chatterino {
 
 class Paths;
 
-class PluginController : public Singleton
+class PluginController
 {
     const Paths &paths;
 
 public:
     explicit PluginController(const Paths &paths_);
 
-    void initialize(Settings &settings, const Paths &paths) override;
+    void initialize(Settings &settings);
 
     QString tryExecPluginCommand(const QString &commandName,
                                  const CommandContext &ctx);

@@ -1,9 +1,14 @@
 #include "providers/twitch/TwitchEmotes.hpp"
 
+#include "common/Literals.hpp"
 #include "common/QLogging.hpp"
+#include "common/UniqueAccess.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "util/QStringHash.hpp"
+
+#include <QStringBuilder>
 
 namespace {
 
@@ -11,9 +16,7 @@ using namespace chatterino;
 
 Url getEmoteLink(const EmoteId &id, const QString &emoteScale)
 {
-    return {QString(TWITCH_EMOTE_TEMPLATE)
-                .replace("{id}", id.string)
-                .replace("{scale}", emoteScale)};
+    return {TWITCH_EMOTE_TEMPLATE.arg(id.string, emoteScale)};
 }
 
 QSize getEmoteExpectedBaseSize(const EmoteId &id)
@@ -401,6 +404,22 @@ qreal getEmote3xScaleFactor(const EmoteId &id)
 
 namespace chatterino {
 
+using namespace literals;
+
+QString TwitchEmoteSet::title() const
+{
+    if (!this->owner || this->owner->name.isEmpty())
+    {
+        return "Twitch";
+    }
+    if (this->isBits)
+    {
+        return this->owner->name + " (Bits)";
+    }
+
+    return this->owner->name;
+}
+
 QString TwitchEmotes::cleanUpEmoteCode(const QString &dirtyEmoteCode)
 {
     auto cleanCode = dirtyEmoteCode;
@@ -453,6 +472,46 @@ EmotePtr TwitchEmotes::getOrCreateEmote(const EmoteId &id,
     }
 
     return shared;
+}
+
+TwitchEmoteSetMeta getTwitchEmoteSetMeta(const HelixChannelEmote &emote)
+{
+    // follower emotes are treated as sub emotes
+    // A sub emote must have an owner or an emote-set id (otherwise it's a
+    // global like "BopBop")
+    bool isSub =
+        (emote.type == u"subscriptions" || emote.type == u"follower") &&
+        !(emote.ownerID.isEmpty() && emote.setID.isEmpty());
+    bool isBits = emote.type == u"bitstier";
+    bool isSubLike = isSub || isBits;
+
+    // A lot of emotes don't have their emote-set-id set, so we create a
+    // virtual emote set that groups emotes by the owner.
+    // Additionally, a lot of emote sets are small, so they're grouped together as globals.
+    auto actualSetID = [&]() -> QString {
+        if (!isSub && !isBits)
+        {
+            return u"x-c2-globals"_s;
+        }
+
+        if (!emote.setID.isEmpty())
+        {
+            return emote.setID;
+        }
+
+        if (isSub)
+        {
+            return TWITCH_SUB_EMOTE_SET_PREFIX % emote.ownerID;
+        }
+        // isBits
+        return TWITCH_BIT_EMOTE_SET_PREFIX % emote.ownerID;
+    }();
+
+    return {
+        .setID = actualSetID,
+        .isBits = isBits,
+        .isSubLike = isSubLike,
+    };
 }
 
 }  // namespace chatterino

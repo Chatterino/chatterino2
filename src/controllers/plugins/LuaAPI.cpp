@@ -66,7 +66,7 @@ namespace chatterino::lua::api {
 
 int c2_register_command(lua_State *L)
 {
-    auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
+    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
     if (pl == nullptr)
     {
         luaL_error(L, "internal error: no plugin");
@@ -106,7 +106,7 @@ int c2_register_command(lua_State *L)
 
 int c2_register_callback(lua_State *L)
 {
-    auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
+    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
     if (pl == nullptr)
     {
         luaL_error(L, "internal error: no plugin");
@@ -145,7 +145,7 @@ int c2_register_callback(lua_State *L)
 
 int c2_log(lua_State *L)
 {
-    auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
+    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
     if (pl == nullptr)
     {
         luaL_error(L, "c2_log: internal error: no plugin?");
@@ -177,7 +177,7 @@ int c2_log(lua_State *L)
 
 int c2_later(lua_State *L)
 {
-    auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
+    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
     if (pl == nullptr)
     {
         return luaL_error(L, "c2.later: internal error: no plugin?");
@@ -282,7 +282,7 @@ int g_load(lua_State *L)
 
 int loadfile(lua_State *L, const QString &str)
 {
-    auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
+    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
     if (pl == nullptr)
     {
         return luaL_error(L, "loadfile: internal error: no plugin?");
@@ -335,7 +335,7 @@ int searcherAbsolute(lua_State *L)
     auto name = QString::fromUtf8(luaL_checkstring(L, 1));
     name = name.replace('.', QDir::separator());
 
-    auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
+    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
     if (pl == nullptr)
     {
         drop(name);
@@ -377,7 +377,7 @@ int searcherRelative(lua_State *L)
 
 int g_print(lua_State *L)
 {
-    auto *pl = getIApp()->getPlugins()->getPluginByStatePtr(L);
+    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
     if (pl == nullptr)
     {
         luaL_error(L, "c2_print: internal error: no plugin?");

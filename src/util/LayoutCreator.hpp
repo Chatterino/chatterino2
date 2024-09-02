@@ -6,11 +6,12 @@
 #include <QWidget>
 
 #include <cassert>
-#include <type_traits>
+#include <concepts>
 
 namespace chatterino {
 
 template <class T>
+    requires std::derived_from<T, QWidget> || std::derived_from<T, QLayout>
 class LayoutCreator
 {
 public:
@@ -34,49 +35,41 @@ public:
         return this->item_;
     }
 
-    template <typename T2>
-    LayoutCreator<T2> append(T2 *_item)
+    template <typename U>
+    LayoutCreator<U> append(U *item)
     {
-        this->addItem(this->getOrCreateLayout(), _item);
+        addItem(this->getOrCreateLayout(), item);
 
-        return LayoutCreator<T2>(_item);
+        return LayoutCreator<U>(item);
     }
 
-    template <typename T2, typename... Args>
-    // clang-format off
-    // clang-format can be enabled once clang-format v11+ has been installed in CI
-    LayoutCreator<T2> emplace(Args &&...args)
-    // clang-format on
+    template <typename U>
+    LayoutCreator<U> emplace(auto &&...args)
     {
-        T2 *t = new T2(std::forward<Args>(args)...);
+        auto *t = new U(std::forward<decltype(args)>(args)...);
 
-        this->addItem(this->getOrCreateLayout(), t);
+        addItem(this->getOrCreateLayout(), t);
 
-        return LayoutCreator<T2>(t);
+        return LayoutCreator<U>(t);
     }
 
-    template <typename Q = T,
-              typename std::enable_if<std::is_base_of<QScrollArea, Q>::value,
-                                      int>::type = 0>
     LayoutCreator<QWidget> emplaceScrollAreaWidget()
+        requires std::derived_from<T, QScrollArea>
     {
-        QWidget *widget = new QWidget;
+        auto *widget = new QWidget;
         this->item_->setWidget(widget);
-        return LayoutCreator<QWidget>(widget);
+        return {widget};
     }
 
-    template <typename T2, typename Q = T,
-              typename std::enable_if<std::is_base_of<QWidget, Q>::value,
-                                      int>::type = 0,
-              typename std::enable_if<std::is_base_of<QLayout, T2>::value,
-                                      int>::type = 0>
-    LayoutCreator<T2> setLayoutType()
+    template <std::derived_from<QLayout> U>
+    LayoutCreator<U> setLayoutType()
+        requires std::derived_from<T, QWidget>
     {
-        T2 *layout = new T2;
+        U *layout = new U;
 
         this->item_->setLayout(layout);
 
-        return LayoutCreator<T2>(layout);
+        return LayoutCreator<U>(layout);
     }
 
     LayoutCreator<T> assign(T **ptr)
@@ -86,9 +79,6 @@ public:
         return *this;
     }
 
-    template <typename Q = T,
-              typename std::enable_if<std::is_base_of<QLayout, Q>::value,
-                                      int>::type = 0>
     LayoutCreator<T> withoutMargin()
     {
         this->item_->setContentsMargins(0, 0, 0, 0);
@@ -97,36 +87,31 @@ public:
     }
 
     LayoutCreator<T> withoutSpacing()
+        requires std::derived_from<T, QLayout>
     {
         this->item_->setSpacing(0);
 
         return *this;
     }
 
-    template <typename Q = T,
-              typename std::enable_if<std::is_base_of<QWidget, Q>::value,
-                                      int>::type = 0>
     LayoutCreator<T> hidden()
+        requires std::derived_from<T, QWidget>
     {
         this->item_->setVisible(false);
 
         return *this;
     }
 
-    template <typename Q = T, typename T2,
-              typename std::enable_if<std::is_same<QTabWidget, Q>::value,
-                                      int>::type = 0>
-    LayoutCreator<T2> appendTab(T2 *item, const QString &title)
+    template <std::derived_from<QLayout> U>
+    LayoutCreator<U> appendTab(U *item, const QString &title)
+        requires std::derived_from<T, QWidget>
     {
-        static_assert(std::is_base_of<QLayout, T2>::value,
-                      "needs to be QLayout");
-
-        QWidget *widget = new QWidget;
+        auto *widget = new QWidget;
         widget->setLayout(item);
 
         this->item_->addTab(widget, title);
 
-        return LayoutCreator<T2>(item);
+        return LayoutCreator<U>(item);
     }
 
     template <typename Slot, typename Func>
@@ -146,36 +131,26 @@ public:
 private:
     T *item_;
 
-    template <typename T2,
-              typename std::enable_if<std::is_base_of<QWidget, T2>::value,
-                                      int>::type = 0>
-    void addItem(QLayout *layout, T2 *item)
+    static void addItem(QLayout *layout, QWidget *item)
     {
         layout->addWidget(item);
     }
 
-    template <typename T2,
-              typename std::enable_if<std::is_base_of<QLayout, T2>::value,
-                                      int>::type = 0>
-    void addItem(QLayout *layout, T2 *item)
+    static void addItem(QLayout *layout, QLayout *item)
     {
-        QWidget *widget = new QWidget();
+        auto *widget = new QWidget();
         widget->setLayout(item);
         layout->addWidget(widget);
     }
 
-    template <typename Q = T,
-              typename std::enable_if<std::is_base_of<QLayout, Q>::value,
-                                      int>::type = 0>
     QLayout *getOrCreateLayout()
+        requires std::derived_from<T, QLayout>
     {
         return this->item_;
     }
 
-    template <typename Q = T,
-              typename std::enable_if<std::is_base_of<QWidget, Q>::value,
-                                      int>::type = 0>
     QLayout *getOrCreateLayout()
+        requires std::derived_from<T, QWidget>
     {
         if (!this->item_->layout())
         {
@@ -186,13 +161,10 @@ private:
     }
 };
 
-template <typename T, typename... Args>
-// clang-format off
-// clang-format can be enabled once clang-format v11+ has been installed in CI
-LayoutCreator<T> makeDialog(Args &&...args)
-// clang-format on
+template <typename T>
+LayoutCreator<T> makeDialog(auto &&...args)
 {
-    T *t = new T(std::forward<Args>(args)...);
+    T *t = new T(std::forward<decltype(args)>(args)...);
     t->setAttribute(Qt::WA_DeleteOnClose);
     return LayoutCreator<T>(t);
 }

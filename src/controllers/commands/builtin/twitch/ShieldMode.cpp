@@ -3,7 +3,6 @@
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandContext.hpp"
-#include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -17,20 +16,20 @@ QString toggleShieldMode(const CommandContext &ctx, bool isActivating)
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
+        ctx.channel->addSystemMessage(
             QStringLiteral("The %1 command only works in Twitch channels.")
-                .arg(command)));
+                .arg(command));
         return {};
     }
 
-    auto user = getIApp()->getAccounts()->twitch.getCurrent();
+    auto user = getApp()->getAccounts()->twitch.getCurrent();
 
     // Avoid Helix calls without Client ID and/or OAuth Token
     if (user->isAnon())
     {
-        ctx.channel->addMessage(makeSystemMessage(
+        ctx.channel->addSystemMessage(
             QStringLiteral("You must be logged in to use the %1 command.")
-                .arg(command)));
+                .arg(command));
         return {};
     }
 
@@ -39,13 +38,11 @@ QString toggleShieldMode(const CommandContext &ctx, bool isActivating)
         [channel = ctx.channel](const auto &res) {
             if (!res.isActive)
             {
-                channel->addMessage(
-                    makeSystemMessage("Shield mode was deactivated."));
+                channel->addSystemMessage("Shield mode was deactivated.");
                 return;
             }
 
-            channel->addMessage(
-                makeSystemMessage("Shield mode was activated."));
+            channel->addSystemMessage("Shield mode was activated.");
         },
         [channel = ctx.channel](const auto error, const auto &message) {
             using Error = HelixUpdateShieldModeError;
@@ -78,7 +75,7 @@ QString toggleShieldMode(const CommandContext &ctx, bool isActivating)
                 }
                 break;
             }
-            channel->addMessage(makeSystemMessage(errorMessage));
+            channel->addSystemMessage(errorMessage);
         });
 
     return {};

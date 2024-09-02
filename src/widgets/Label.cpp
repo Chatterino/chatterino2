@@ -16,7 +16,7 @@ Label::Label(BaseWidget *parent, QString text, FontStyle style)
     , text_(std::move(text))
     , fontStyle_(style)
 {
-    this->connections_.managedConnect(getIApp()->getFonts()->fontChanged,
+    this->connections_.managedConnect(getApp()->getFonts()->fontChanged,
                                       [this] {
                                           this->updateSize();
                                       });
@@ -89,10 +89,10 @@ void Label::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    QFontMetrics metrics = getIApp()->getFonts()->getFontMetrics(
+    QFontMetrics metrics = getApp()->getFonts()->getFontMetrics(
         this->getFontStyle(), this->scale());
     painter.setFont(
-        getIApp()->getFonts()->getFont(this->getFontStyle(), this->scale()));
+        getApp()->getFonts()->getFont(this->getFontStyle(), this->scale()));
 
     int offset = this->getOffset();
 
@@ -119,7 +119,7 @@ void Label::paintEvent(QPaintEvent *)
 void Label::updateSize()
 {
     QFontMetrics metrics =
-        getIApp()->getFonts()->getFontMetrics(this->fontStyle_, this->scale());
+        getApp()->getFonts()->getFontMetrics(this->fontStyle_, this->scale());
 
     int width =
         metrics.horizontalAdvance(this->text_) + (2 * this->getOffset());

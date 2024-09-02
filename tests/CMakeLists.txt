@@ -22,7 +22,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/UtilTwitch.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/IrcHelpers.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/TwitchPubSubClient.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/TwitchMessageBuilder.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/MessageBuilder.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/HighlightController.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/FormatTime.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/LimitedQueue.cpp
@@ -45,6 +45,9 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/ModerationAction.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Scrollbar.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Commands.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/FlagsEnum.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/MessageLayoutContainer.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/CancellationToken.cpp
     # Add your new file above this line!
     )
 

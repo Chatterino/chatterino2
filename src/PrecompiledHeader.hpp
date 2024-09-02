@@ -6,6 +6,7 @@
 #    include <IrcCommand>
 #    include <IrcConnection>
 #    include <IrcMessage>
+#    include <nonstd/expected.hpp>
 #    include <pajlada/serialize.hpp>
 #    include <pajlada/settings/setting.hpp>
 #    include <pajlada/settings/settinglistener.hpp>
@@ -108,6 +109,7 @@
 #    include <cinttypes>
 #    include <climits>
 #    include <cmath>
+#    include <concepts>
 #    include <cstdint>
 #    include <ctime>
 #    include <functional>

@@ -1,14 +1,11 @@
 #include "controllers/commands/builtin/twitch/RemoveModerator.hpp"
 
 #include "Application.hpp"
-#include "common/Channel.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandContext.hpp"
-#include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "util/Twitch.hpp"
 
 namespace chatterino::commands {
@@ -22,23 +19,23 @@ QString removeModerator(const CommandContext &ctx)
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /unmod command only works in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "The /unmod command only works in Twitch channels.");
         return "";
     }
     if (ctx.words.size() < 2)
     {
-        ctx.channel->addMessage(makeSystemMessage(
+        ctx.channel->addSystemMessage(
             "Usage: \"/unmod <username>\" - Revoke moderator status from a "
-            "user. Use \"/mods\" to list the moderators of this channel."));
+            "user. Use \"/mods\" to list the moderators of this channel.");
         return "";
     }
 
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("You must be logged in to unmod someone!"));
+        ctx.channel->addSystemMessage(
+            "You must be logged in to unmod someone!");
         return "";
     }
 
@@ -52,10 +49,10 @@ QString removeModerator(const CommandContext &ctx)
             getHelix()->removeChannelModerator(
                 twitchChannel->roomId(), targetUser.id,
                 [channel, targetUser] {
-                    channel->addMessage(makeSystemMessage(
+                    channel->addSystemMessage(
                         QString("You have removed %1 as a moderator of "
                                 "this channel.")
-                            .arg(targetUser.displayName)));
+                            .arg(targetUser.displayName));
                 },
                 [channel, targetUser](auto error, auto message) {
                     QString errorMessage =
@@ -107,13 +104,13 @@ QString removeModerator(const CommandContext &ctx)
                         }
                         break;
                     }
-                    channel->addMessage(makeSystemMessage(errorMessage));
+                    channel->addSystemMessage(errorMessage);
                 });
         },
         [channel{ctx.channel}, target] {
             // Equivalent error from IRC
-            channel->addMessage(
-                makeSystemMessage(QString("Invalid username: %1").arg(target)));
+            channel->addSystemMessage(
+                QString("Invalid username: %1").arg(target));
         });
 
     return "";

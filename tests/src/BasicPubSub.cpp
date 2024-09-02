@@ -68,7 +68,7 @@ class MyManager : public BasicPubSubManager<DummySubscription>
 {
 public:
     MyManager(QString host)
-        : BasicPubSubManager(std::move(host))
+        : BasicPubSubManager(std::move(host), "Test")
     {
     }
 

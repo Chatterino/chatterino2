@@ -88,33 +88,23 @@ void EmoteSource::addToStringList(QStringList &list, size_t maxCount,
 
 void EmoteSource::initializeFromChannel(const Channel *channel)
 {
-    auto *app = getIApp();
+    auto *app = getApp();
 
     std::vector<EmoteItem> emotes;
     const auto *tc = dynamic_cast<const TwitchChannel *>(channel);
     // returns true also for special Twitch channels (/live, /mentions, /whispers, etc.)
     if (channel->isTwitchChannel())
     {
-        if (auto user = app->getAccounts()->twitch.getCurrent())
-        {
-            // Twitch Emotes available globally
-            auto emoteData = user->accessEmotes();
-            addEmotes(emotes, emoteData->emotes, "Twitch Emote");
-
-            // Twitch Emotes available locally
-            auto localEmoteData = user->accessLocalEmotes();
-            if ((tc != nullptr) &&
-                localEmoteData->find(tc->roomId()) != localEmoteData->end())
-            {
-                if (const auto *localEmotes = &localEmoteData->at(tc->roomId()))
-                {
-                    addEmotes(emotes, *localEmotes, "Local Twitch Emotes");
-                }
-            }
-        }
-
         if (tc)
         {
+            if (auto twitch = tc->localTwitchEmotes())
+            {
+                addEmotes(emotes, *twitch, "Local Twitch Emotes");
+            }
+
+            auto user = getApp()->getAccounts()->twitch.getCurrent();
+            addEmotes(emotes, **user->accessEmotes(), "Twitch Emote");
+
             // TODO extract "Channel {BetterTTV,7TV,FrankerFaceZ}" text into a #define.
             if (auto bttv = tc->bttvEmotes())
             {

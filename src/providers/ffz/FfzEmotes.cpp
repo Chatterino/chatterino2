@@ -206,6 +206,11 @@ FfzChannelBadgeMap ffz::detail::parseChannelBadges(const QJsonObject &badgeRoot)
 FfzEmotes::FfzEmotes()
     : global_(std::make_shared<EmoteMap>())
 {
+    getSettings()->enableFFZGlobalEmotes.connect(
+        [this] {
+            this->loadEmotes();
+        },
+        this->managedConnections, false);
 }
 
 std::shared_ptr<const EmoteMap> FfzEmotes::emotes() const
@@ -287,13 +292,12 @@ void FfzEmotes::loadChannel(
             {
                 if (hasEmotes)
                 {
-                    shared->addMessage(makeSystemMessage(
-                        "FrankerFaceZ channel emotes reloaded."));
+                    shared->addSystemMessage(
+                        "FrankerFaceZ channel emotes reloaded.");
                 }
                 else
                 {
-                    shared->addMessage(
-                        makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
+                    shared->addSystemMessage(CHANNEL_HAS_NO_EMOTES);
                 }
             }
         })
@@ -309,8 +313,7 @@ void FfzEmotes::loadChannel(
                 // User does not have any FFZ emotes
                 if (manualRefresh)
                 {
-                    shared->addMessage(
-                        makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
+                    shared->addSystemMessage(CHANNEL_HAS_NO_EMOTES);
                 }
             }
             else
@@ -319,10 +322,10 @@ void FfzEmotes::loadChannel(
                 auto errorString = result.formatError();
                 qCWarning(LOG) << "Error fetching FFZ emotes for channel"
                                << channelID << ", error" << errorString;
-                shared->addMessage(makeSystemMessage(
+                shared->addSystemMessage(
                     QStringLiteral("Failed to fetch FrankerFaceZ channel "
                                    "emotes. (Error: %1)")
-                        .arg(errorString)));
+                        .arg(errorString));
             }
         })
         .execute();

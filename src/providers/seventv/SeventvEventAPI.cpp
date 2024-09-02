@@ -1,6 +1,7 @@
 #include "providers/seventv/SeventvEventAPI.hpp"
 
 #include "Application.hpp"
+#include "common/Literals.hpp"
 #include "providers/seventv/eventapi/Client.hpp"
 #include "providers/seventv/eventapi/Dispatch.hpp"
 #include "providers/seventv/eventapi/Message.hpp"
@@ -16,12 +17,18 @@ namespace chatterino {
 
 using namespace seventv;
 using namespace seventv::eventapi;
+using namespace chatterino::literals;
 
 SeventvEventAPI::SeventvEventAPI(
     QString host, std::chrono::milliseconds defaultHeartbeatInterval)
-    : BasicPubSubManager(std::move(host))
+    : BasicPubSubManager(std::move(host), u"7TV"_s)
     , heartbeatInterval_(defaultHeartbeatInterval)
 {
+}
+
+SeventvEventAPI::~SeventvEventAPI()
+{
+    this->stop();
 }
 
 void SeventvEventAPI::subscribeUser(const QString &userID,
@@ -348,7 +355,7 @@ void SeventvEventAPI::onUserUpdate(const Dispatch &dispatch)
 
 void SeventvEventAPI::onCosmeticCreate(const CosmeticCreateDispatch &cosmetic)
 {
-    auto *badges = getIApp()->getSeventvBadges();
+    auto *badges = getApp()->getSeventvBadges();
     switch (cosmetic.kind)
     {
         case CosmeticKind::Badge: {
@@ -363,7 +370,7 @@ void SeventvEventAPI::onCosmeticCreate(const CosmeticCreateDispatch &cosmetic)
 void SeventvEventAPI::onEntitlementCreate(
     const EntitlementCreateDeleteDispatch &entitlement)
 {
-    auto *badges = getIApp()->getSeventvBadges();
+    auto *badges = getApp()->getSeventvBadges();
     switch (entitlement.kind)
     {
         case CosmeticKind::Badge: {
@@ -379,7 +386,7 @@ void SeventvEventAPI::onEntitlementCreate(
 void SeventvEventAPI::onEntitlementDelete(
     const EntitlementCreateDeleteDispatch &entitlement)
 {
-    auto *badges = getIApp()->getSeventvBadges();
+    auto *badges = getApp()->getSeventvBadges();
     switch (entitlement.kind)
     {
         case CosmeticKind::Badge: {

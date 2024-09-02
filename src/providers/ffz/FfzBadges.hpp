@@ -1,8 +1,6 @@
 #pragma once
 
 #include "common/Aliases.hpp"
-#include "common/Singleton.hpp"
-#include "util/QStringHash.hpp"
 #include "util/ThreadGuard.hpp"
 
 #include <QColor>
@@ -19,10 +17,9 @@ namespace chatterino {
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 
-class FfzBadges : public Singleton
+class FfzBadges
 {
 public:
-    void initialize(Settings &settings, const Paths &paths) override;
     FfzBadges() = default;
 
     struct Badge {
@@ -33,9 +30,9 @@ public:
     std::vector<Badge> getUserBadges(const UserId &id);
     std::optional<Badge> getBadge(int badgeID) const;
 
-private:
     void load();
 
+private:
     std::shared_mutex mutex_;
 
     // userBadges points a user ID to the list of badges they have

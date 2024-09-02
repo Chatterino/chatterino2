@@ -1,14 +1,16 @@
 #pragma once
 
-#include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
 #include "common/UniqueAccess.hpp"
 #include "controllers/accounts/Account.hpp"
 #include "messages/Emote.hpp"
+#include "providers/twitch/TwitchEmotes.hpp"
 #include "providers/twitch/TwitchUser.hpp"
 #include "util/CancellationToken.hpp"
 #include "util/QStringHash.hpp"
 
+#include <boost/unordered/unordered_flat_map_fwd.hpp>
+#include <pajlada/signals.hpp>
 #include <QColor>
 #include <QElapsedTimer>
 #include <QObject>
@@ -18,7 +20,6 @@
 #include <functional>
 #include <mutex>
 #include <unordered_set>
-#include <vector>
 
 namespace chatterino {
 
@@ -28,31 +29,13 @@ using ChannelPtr = std::shared_ptr<Channel>;
 class TwitchAccount : public Account
 {
 public:
-    struct TwitchEmote {
-        EmoteId id;
-        EmoteName name;
-    };
-
-    struct EmoteSet {
-        QString key;
-        QString channelName;
-        QString channelID;
-        QString text;
-        bool subscriber{false};
-        bool local{false};
-        std::vector<TwitchEmote> emotes;
-    };
-
-    struct TwitchAccountEmoteData {
-        std::vector<std::shared_ptr<EmoteSet>> emoteSets;
-
-        // this EmoteMap should contain all emotes available globally
-        // excluding locally available emotes, such as follower ones
-        EmoteMap emotes;
-    };
-
     TwitchAccount(const QString &username, const QString &oauthToken_,
                   const QString &oauthClient_, const QString &_userID);
+    ~TwitchAccount() override;
+    TwitchAccount(const TwitchAccount &) = delete;
+    TwitchAccount(TwitchAccount &&) = delete;
+    TwitchAccount &operator=(const TwitchAccount &) = delete;
+    TwitchAccount &operator=(TwitchAccount &&) = delete;
 
     QString toString() const override;
 
@@ -91,22 +74,31 @@ public:
     [[nodiscard]] const std::unordered_set<TwitchUser> &blocks() const;
     [[nodiscard]] const std::unordered_set<QString> &blockedUserIds() const;
 
-    void loadEmotes(std::weak_ptr<Channel> weakChannel = {});
-    // loadUserstateEmotes loads emote sets that are part of the USERSTATE emote-sets key
-    // this function makes sure not to load emote sets that have already been loaded
-    void loadUserstateEmotes(std::weak_ptr<Channel> weakChannel = {});
-    // setUserStateEmoteSets sets the emote sets that were parsed from the USERSTATE emote-sets key
-    // Returns true if the newly inserted emote sets differ from the ones previously saved
-    [[nodiscard]] bool setUserstateEmoteSets(QStringList newEmoteSets);
-    SharedAccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
-    SharedAccessGuard<const std::unordered_map<QString, EmoteMap>>
-        accessLocalEmotes() const;
-
     // Automod actions
     void autoModAllow(const QString msgID, ChannelPtr channel);
     void autoModDeny(const QString msgID, ChannelPtr channel);
 
     void loadSeventvUserID();
+
+    /// Returns true if the account has access to the given emote set
+    bool hasEmoteSet(const EmoteSetId &id) const;
+
+    /// Return a map of emote sets the account has access to
+    ///
+    /// Key being the emote set ID, and contents being information about the emote set
+    /// and the emotes contained in the emote set
+    SharedAccessGuard<std::shared_ptr<const TwitchEmoteSetMap>>
+        accessEmoteSets() const;
+
+    /// Return a map of emotes the account has access to
+    SharedAccessGuard<std::shared_ptr<const EmoteMap>> accessEmotes() const;
+
+    /// Return the emote by emote name if the account has access to the emote
+    std::optional<EmotePtr> twitchEmote(const EmoteName &name) const;
+
+    /// Once emotes are reloaded, TwitchAccountManager::emotesReloaded is
+    /// invoked with @a caller and an optional error.
+    void reloadEmotes(void *caller = nullptr);
 
 private:
     QString oauthClient_;
@@ -122,9 +114,9 @@ private:
     std::unordered_set<TwitchUser> ignores_;
     std::unordered_set<QString> ignoresUserIds_;
 
-    //    std::map<UserId, TwitchAccountEmoteData> emotes;
-    UniqueAccess<TwitchAccountEmoteData> emotes_;
-    UniqueAccess<std::unordered_map<QString, EmoteMap>> localEmotes_;
+    ScopedCancellationToken emoteToken_;
+    UniqueAccess<std::shared_ptr<const TwitchEmoteSetMap>> emoteSets_;
+    UniqueAccess<std::shared_ptr<const EmoteMap>> emotes_;
 
     QString seventvUserID_;
 };

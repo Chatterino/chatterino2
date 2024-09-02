@@ -1,10 +1,8 @@
 #include "controllers/commands/builtin/twitch/Announce.hpp"
 
 #include "Application.hpp"
-#include "common/Channel.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandContext.hpp"
-#include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -22,8 +20,8 @@ QString sendAnnouncementColor(const CommandContext &ctx,
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "This command can only be used in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "This command can only be used in Twitch channels.");
         return "";
     }
 
@@ -48,16 +46,16 @@ QString sendAnnouncementColor(const CommandContext &ctx,
                         "message with a %1 highlight.")
                     .arg(colorStr);
         }
-        ctx.channel->addMessage(makeSystemMessage(usageMsg));
+        ctx.channel->addSystemMessage(usageMsg);
         return "";
     }
 
-    auto user = getIApp()->getAccounts()->twitch.getCurrent();
+    auto user = getApp()->getAccounts()->twitch.getCurrent();
     if (user->isAnon())
     {
-        ctx.channel->addMessage(makeSystemMessage(
+        ctx.channel->addSystemMessage(
             QString("You must be logged in to use the /announce%1 command.")
-                .arg(colorStr)));
+                .arg(colorStr));
         return "";
     }
 
@@ -93,7 +91,7 @@ QString sendAnnouncementColor(const CommandContext &ctx,
                 break;
             }
 
-            channel->addMessage(makeSystemMessage(errorMessage));
+            channel->addSystemMessage(errorMessage);
         });
     return "";
 }

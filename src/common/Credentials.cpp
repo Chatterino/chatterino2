@@ -6,12 +6,13 @@
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
-#include "util/Overloaded.hpp"
 #include "util/Variant.hpp"
 
+#include <QApplication>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSaveFile>
+#include <QStringBuilder>
 
 #include <variant>
 
@@ -27,15 +28,15 @@
 #    endif
 #endif
 
-#define FORMAT_NAME                                                  \
-    ([&] {                                                           \
-        assert(!provider.contains(":"));                             \
-        return QString("chatterino:%1:%2").arg(provider).arg(name_); \
-    })()
-
 namespace {
 
 using namespace chatterino;
+
+QString formatName(const QString &provider, const QString &name)
+{
+    assert(!provider.contains(":"));
+    return u"chatterino:" % provider % u':' % name;
+}
 
 bool useKeyring()
 {
@@ -57,7 +58,7 @@ bool useKeyring()
 // Insecure storage:
 QString insecurePath()
 {
-    return combinePath(getIApp()->getPaths().settingsDirectory,
+    return combinePath(getApp()->getPaths().settingsDirectory,
                        "credentials.json");
 }
 
@@ -89,7 +90,7 @@ void queueInsecureSave()
     if (!isQueued)
     {
         isQueued = true;
-        QTimer::singleShot(200, qApp, [] {
+        QTimer::singleShot(200, QApplication::instance(), [] {
             storeInsecure(insecureInstance());
             isQueued = false;
         });
@@ -133,8 +134,8 @@ void runNextJob()
                     job->setAutoDelete(true);
                     job->setKey(set.name);
                     job->setTextData(set.credential);
-                    QObject::connect(job, &QKeychain::Job::finished, qApp,
-                                     [](auto) {
+                    QObject::connect(job, &QKeychain::Job::finished,
+                                     QApplication::instance(), [](auto) {
                                          runNextJob();
                                      });
                     job->start();
@@ -143,8 +144,8 @@ void runNextJob()
                     auto *job = new QKeychain::DeletePasswordJob("chatterino");
                     job->setAutoDelete(true);
                     job->setKey(erase.name);
-                    QObject::connect(job, &QKeychain::Job::finished, qApp,
-                                     [](auto) {
+                    QObject::connect(job, &QKeychain::Job::finished,
+                                     QApplication::instance(), [](auto) {
                                          runNextJob();
                                      });
                     job->start();
@@ -185,7 +186,7 @@ void Credentials::get(const QString &provider, const QString &name_,
 {
     assertInGuiThread();
 
-    auto name = FORMAT_NAME;
+    auto name = formatName(provider, name_);
 
     if (useKeyring())
     {
@@ -220,7 +221,7 @@ void Credentials::set(const QString &provider, const QString &name_,
     /// On linux, we try to use a keychain but show a message to disable it when it fails.
     /// XXX: add said message
 
-    auto name = FORMAT_NAME;
+    auto name = formatName(provider, name_);
 
     if (useKeyring())
     {
@@ -243,7 +244,7 @@ void Credentials::erase(const QString &provider, const QString &name_)
 {
     assertInGuiThread();
 
-    auto name = FORMAT_NAME;
+    auto name = formatName(provider, name_);
 
     if (useKeyring())
     {

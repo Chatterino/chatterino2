@@ -1,4 +1,4 @@
-#include "ModerationPage.hpp"
+#include "widgets/settingspages/ModerationPage.hpp"
 
 #include "Application.hpp"
 #include "controllers/logging/ChannelLoggingModel.hpp"
@@ -58,7 +58,7 @@ QString formatSize(qint64 size)
 QString fetchLogDirectorySize()
 {
     QString logsDirectoryPath = getSettings()->logPath.getValue().isEmpty()
-                                    ? getIApp()->getPaths().messageLogDirectory
+                                    ? getApp()->getPaths().messageLogDirectory
                                     : getSettings()->logPath;
 
     auto logsSize = dirSize(logsDirectoryPath);
@@ -83,20 +83,20 @@ ModerationPage::ModerationPage()
         auto logsPathLabel = logs.emplace<QLabel>();
 
         // Logs (copied from LoggingMananger)
-        getSettings()->logPath.connect([logsPathLabel](const QString &logPath,
-                                                       auto) mutable {
-            QString pathOriginal =
-                logPath.isEmpty() ? getIApp()->getPaths().messageLogDirectory
-                                  : logPath;
+        getSettings()->logPath.connect(
+            [logsPathLabel](const QString &logPath, auto) mutable {
+                QString pathOriginal =
+                    logPath.isEmpty() ? getApp()->getPaths().messageLogDirectory
+                                      : logPath;
 
-            QString pathShortened =
-                "Logs are saved at <a href=\"file:///" + pathOriginal +
-                "\"><span style=\"color: white;\">" +
-                shortenString(pathOriginal, 50) + "</span></a>";
+                QString pathShortened =
+                    "Logs are saved at <a href=\"file:///" + pathOriginal +
+                    "\"><span style=\"color: white;\">" +
+                    shortenString(pathOriginal, 50) + "</span></a>";
 
-            logsPathLabel->setText(pathShortened);
-            logsPathLabel->setToolTip(pathOriginal);
-        });
+                logsPathLabel->setText(pathShortened);
+                logsPathLabel->setToolTip(pathOriginal);
+            });
 
         logsPathLabel->setTextFormat(Qt::RichText);
         logsPathLabel->setTextInteractionFlags(Qt::TextBrowserInteraction |
@@ -157,11 +157,21 @@ ModerationPage::ModerationPage()
         onlyLogListedChannels->setEnabled(getSettings()->enableLogging);
         logs.append(onlyLogListedChannels);
 
+        auto *separatelyStoreStreamLogs =
+            this->createCheckBox("Store live stream logs as separate files",
+                                 getSettings()->separatelyStoreStreamLogs);
+
+        separatelyStoreStreamLogs->setEnabled(getSettings()->enableLogging);
+        logs.append(separatelyStoreStreamLogs);
+
         // Select event
         QObject::connect(
             enableLogging, &QCheckBox::stateChanged, this,
-            [enableLogging, onlyLogListedChannels]() mutable {
+            [enableLogging, onlyLogListedChannels,
+             separatelyStoreStreamLogs]() mutable {
                 onlyLogListedChannels->setEnabled(enableLogging->isChecked());
+                separatelyStoreStreamLogs->setEnabled(
+                    getSettings()->enableLogging);
             });
 
         EditableModelView *view =
@@ -264,17 +274,16 @@ ModerationPage::ModerationPage()
         });
     }
 
-    this->addModerationButtonSettings(tabs);
+    this->addModerationButtonSettings(tabs.getElement());
 
     // ---- misc
     this->itemsChangedTimer_.setSingleShot(true);
 }
 
-void ModerationPage::addModerationButtonSettings(
-    LayoutCreator<QTabWidget> &tabs)
+void ModerationPage::addModerationButtonSettings(QTabWidget *tabs)
 {
     auto timeoutLayout =
-        tabs.appendTab(new QVBoxLayout, "User Timeout Buttons");
+        LayoutCreator{tabs}.appendTab(new QVBoxLayout, "User Timeout Buttons");
     auto texts = timeoutLayout.emplace<QVBoxLayout>().withoutMargin();
     {
         auto infoLabel = texts.emplace<QLabel>();

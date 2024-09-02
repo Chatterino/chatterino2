@@ -1,14 +1,11 @@
 #include "controllers/commands/builtin/twitch/StartCommercial.hpp"
 
 #include "Application.hpp"
-#include "common/Channel.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandContext.hpp"
-#include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 
 namespace {
 
@@ -83,8 +80,8 @@ QString startCommercial(const CommandContext &ctx)
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /commercial command only works in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "The /commercial command only works in Twitch channels.");
         return "";
     }
 
@@ -96,17 +93,17 @@ QString startCommercial(const CommandContext &ctx)
 
     if (ctx.words.size() < 2)
     {
-        ctx.channel->addMessage(makeSystemMessage(usageStr));
+        ctx.channel->addSystemMessage(usageStr);
         return "";
     }
 
-    auto user = getIApp()->getAccounts()->twitch.getCurrent();
+    auto user = getApp()->getAccounts()->twitch.getCurrent();
 
     // Avoid Helix calls without Client ID and/or OAuth Token
     if (user->isAnon())
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "You must be logged in to use the /commercial command."));
+        ctx.channel->addSystemMessage(
+            "You must be logged in to use the /commercial command.");
         return "";
     }
 
@@ -116,18 +113,18 @@ QString startCommercial(const CommandContext &ctx)
     getHelix()->startCommercial(
         broadcasterID, length,
         [channel{ctx.channel}](auto response) {
-            channel->addMessage(makeSystemMessage(
+            channel->addSystemMessage(
                 QString("Starting %1 second long commercial break. "
                         "Keep in mind you are still "
                         "live and not all viewers will receive a "
                         "commercial. "
                         "You may run another commercial in %2 seconds.")
                     .arg(response.length)
-                    .arg(response.retryAfter)));
+                    .arg(response.retryAfter));
         },
         [channel{ctx.channel}](auto error, auto message) {
             auto errorMessage = formatStartCommercialError(error, message);
-            channel->addMessage(makeSystemMessage(errorMessage));
+            channel->addSystemMessage(errorMessage);
         });
 
     return "";

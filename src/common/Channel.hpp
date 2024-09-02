@@ -1,8 +1,8 @@
 #pragma once
 
-#include "common/FlagsEnum.hpp"
 #include "controllers/completion/TabCompletionModel.hpp"
 #include "messages/LimitedQueue.hpp"
+#include "messages/MessageFlag.hpp"
 
 #include <magic_enum/magic_enum.hpp>
 #include <pajlada/signals/signal.hpp>
@@ -17,8 +17,6 @@ namespace chatterino {
 
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
-enum class MessageFlag : int64_t;
-using MessageFlags = FlagsEnum<MessageFlag>;
 
 enum class TimeoutStackStyle : int {
     StackHard = 0,
@@ -26,6 +24,14 @@ enum class TimeoutStackStyle : int {
     DontStack = 2,
 
     Default = DontStackBeyondUserMessage,
+};
+
+/// Context of the message being added to a channel
+enum class MessageContext {
+    /// This message is the original
+    Original,
+    /// This message is a repost of a message that has already been added in a channel
+    Repost,
 };
 
 class Channel : public std::enable_shared_from_this<Channel>
@@ -45,7 +51,6 @@ public:
         TwitchLive,
         TwitchAutomod,
         TwitchEnd,
-        Irc,
         Misc,
     };
 
@@ -66,6 +71,7 @@ public:
     pajlada::Signals::Signal<const std::vector<MessagePtr> &> filledInMessages;
     pajlada::Signals::NoArgSignal destroyed;
     pajlada::Signals::NoArgSignal displayNameChanged;
+    pajlada::Signals::NoArgSignal messagesCleared;
 
     Type getType() const;
     const QString &getName() const;
@@ -79,9 +85,11 @@ public:
     // overridingFlags can be filled in with flags that should be used instead
     // of the message's flags. This is useful in case a flag is specific to a
     // type of split
-    void addMessage(MessagePtr message,
+    void addMessage(MessagePtr message, MessageContext context,
                     std::optional<MessageFlags> overridingFlags = std::nullopt);
     void addMessagesAtStart(const std::vector<MessagePtr> &messages_);
+
+    void addSystemMessage(const QString &contents);
 
     /// Inserts the given messages in order by Message::serverReceivedTime.
     void fillInMissingMessages(const std::vector<MessagePtr> &messages);
@@ -91,6 +99,9 @@ public:
     void replaceMessage(MessagePtr message, MessagePtr replacement);
     void replaceMessage(size_t index, MessagePtr replacement);
     void deleteMessage(QString messageID);
+
+    /// Removes all messages from this channel and invokes #messagesCleared
+    void clearMessages();
 
     MessagePtr findMessage(QString messageID);
 
@@ -109,15 +120,17 @@ public:
     virtual bool shouldIgnoreHighlights() const;
     virtual bool canReconnect() const;
     virtual void reconnect();
+    virtual QString getCurrentStreamID() const;
 
     static std::shared_ptr<Channel> getEmpty();
 
-    TabCompletionModel completionModel;
+    TabCompletionModel *completionModel;
     QDate lastDate_;
 
 protected:
     virtual void onConnected();
     virtual void messageRemovedFromStart(const MessagePtr &msg);
+    QString platform_{"other"};
 
 private:
     const QString name_;
@@ -173,8 +186,6 @@ constexpr magic_enum::customize::customize_t
             return "live";
         case Type::TwitchAutomod:
             return "automod";
-        case Type::Irc:
-            return "irc";
         case Type::Misc:
             return "misc";
         default:

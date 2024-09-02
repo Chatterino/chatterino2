@@ -1,4 +1,4 @@
-#include "FiltersPage.hpp"
+#include "widgets/settingspages/FiltersPage.hpp"
 
 #include "Application.hpp"
 #include "controllers/filters/FilterModel.hpp"
@@ -8,14 +8,14 @@
 #include "util/LayoutCreator.hpp"
 #include "widgets/dialogs/ChannelFilterEditorDialog.hpp"
 #include "widgets/helper/EditableModelView.hpp"
-#include "widgets/Window.hpp"
 
 #include <QHeaderView>
 #include <QTableView>
 
-#define FILTERS_DOCUMENTATION "https://wiki.chatterino.com/Filters"
-
 namespace chatterino {
+
+constexpr QStringView FILTERS_DOCUMENTATION =
+    u"https://wiki.chatterino.com/Filters";
 
 FiltersPage::FiltersPage()
 {
@@ -67,8 +67,8 @@ FiltersPage::FiltersPage()
                      });
 
     auto *filterHelpLabel =
-        new QLabel(QString("<a href='%1'><span "
-                           "style='color:#99f'>filter info</span></a>")
+        new QLabel(QStringView(u"<a href='%1'><span "
+                               "style='color:#99f'>filter info</span></a>")
                        .arg(FILTERS_DOCUMENTATION));
     filterHelpLabel->setOpenExternalLinks(true);
     view->addCustomButton(filterHelpLabel);

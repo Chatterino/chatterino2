@@ -5,8 +5,8 @@
 #include "controllers/completion/strategies/ClassicUserStrategy.hpp"
 #include "controllers/completion/strategies/Strategy.hpp"
 #include "messages/Emote.hpp"
+#include "mocks/BaseApplication.hpp"
 #include "mocks/Channel.hpp"
-#include "mocks/EmptyApplication.hpp"
 #include "mocks/Helix.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
@@ -31,9 +31,14 @@ namespace {
 using namespace chatterino::completion;
 using ::testing::Exactly;
 
-class MockApplication : mock::EmptyApplication
+class MockApplication : public mock::BaseApplication
 {
 public:
+    explicit MockApplication(const QString &settingsData)
+        : BaseApplication(settingsData)
+    {
+    }
+
     AccountController *getAccounts() override
     {
         return &this->accounts;
@@ -110,28 +115,16 @@ class InputCompletionTest : public ::testing::Test
 protected:
     void SetUp() override
     {
-        // Write default settings to the mock settings json file
-        this->settingsDir_ = std::make_unique<QTemporaryDir>();
-
-        QFile settingsFile(this->settingsDir_->filePath("settings.json"));
-        ASSERT_TRUE(settingsFile.open(QIODevice::WriteOnly | QIODevice::Text));
-        ASSERT_GT(settingsFile.write(DEFAULT_SETTINGS.toUtf8()), 0);
-        ASSERT_TRUE(settingsFile.flush());
-        settingsFile.close();
-
         // Initialize helix client
         this->mockHelix = std::make_unique<mock::Helix>();
         initializeHelix(this->mockHelix.get());
         EXPECT_CALL(*this->mockHelix, loadBlocks).Times(Exactly(1));
         EXPECT_CALL(*this->mockHelix, update).Times(Exactly(1));
 
-        this->mockApplication = std::make_unique<MockApplication>();
-        this->settings = std::make_unique<Settings>(this->settingsDir_->path());
-        this->paths = std::make_unique<Paths>();
+        this->mockApplication =
+            std::make_unique<MockApplication>(DEFAULT_SETTINGS);
 
-        this->mockApplication->accounts.initialize(*this->settings,
-                                                   *this->paths);
-        this->mockApplication->emotes.initialize(*this->settings, *this->paths);
+        this->mockApplication->accounts.load();
 
         this->channelPtr = std::make_shared<MockChannel>("icelys");
 
@@ -141,19 +134,11 @@ protected:
     void TearDown() override
     {
         this->mockApplication.reset();
-        this->settings.reset();
-        this->paths.reset();
         this->mockHelix.reset();
         this->channelPtr.reset();
-
-        this->settingsDir_.reset();
     }
 
-    std::unique_ptr<QTemporaryDir> settingsDir_;
-
     std::unique_ptr<MockApplication> mockApplication;
-    std::unique_ptr<Settings> settings;
-    std::unique_ptr<Paths> paths;
     std::unique_ptr<mock::Helix> mockHelix;
 
     ChannelPtr channelPtr;
