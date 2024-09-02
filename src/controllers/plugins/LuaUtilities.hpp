@@ -77,7 +77,7 @@ StackIdx push(lua_State *L, const api::CompletionEvent &ev);
 
 struct PeekResult {
     bool ok = true;
-    std::vector<QString> errorReason = {};
+    std::vector<QString> errorReason;
 
     operator bool() const
     {
