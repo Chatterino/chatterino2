@@ -787,7 +787,7 @@ target_link_libraries(${LIBRARY_PROJECT}
         $<$<BOOL:${WIN32}>:Wtsapi32>
         )
 if (CHATTERINO_PLUGINS)
-    target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua)
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua sol2::sol2)
 endif()
 
 if (BUILD_WITH_QTKEYCHAIN)
