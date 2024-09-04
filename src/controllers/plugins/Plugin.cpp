@@ -7,9 +7,7 @@
 #    include "controllers/plugins/PluginPermission.hpp"
 #    include "util/QMagicEnum.hpp"
 
-extern "C" {
 #    include <lua.h>
-}
 #    include <magic_enum/magic_enum.hpp>
 #    include <QJsonArray>
 #    include <QJsonObject>

@@ -10,10 +10,8 @@
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "util/DebugCount.hpp"
 
-extern "C" {
 #    include <lauxlib.h>
 #    include <lua.h>
-}
 #    include <QRandomGenerator>
 #    include <QUrl>
 

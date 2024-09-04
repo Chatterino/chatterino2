@@ -5,9 +5,8 @@
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "util/DebugCount.hpp"
 
-extern "C" {
 #    include <lauxlib.h>
-}
+
 #    include <utility>
 
 namespace chatterino::lua::api {

@@ -3,10 +3,9 @@
 #    include "common/network/NetworkResult.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 
-#    include <memory>
-extern "C" {
 #    include <lua.h>
-}
+
+#    include <memory>
 
 namespace chatterino {
 class PluginController;

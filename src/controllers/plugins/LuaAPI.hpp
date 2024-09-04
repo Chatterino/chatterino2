@@ -2,9 +2,7 @@
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 
-extern "C" {
 #    include <lua.h>
-}
 #    include "controllers/plugins/LuaUtilities.hpp"
 
 #    include <QString>

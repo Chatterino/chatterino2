@@ -4,10 +4,8 @@
 
 #    include "common/QLogging.hpp"
 
-extern "C" {
 #    include <lua.h>
 #    include <lualib.h>
-}
 #    include <magic_enum/magic_enum.hpp>
 #    include <QList>
 

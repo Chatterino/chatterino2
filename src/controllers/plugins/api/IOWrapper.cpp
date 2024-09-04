@@ -5,10 +5,8 @@
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/PluginController.hpp"
 
-extern "C" {
 #    include <lauxlib.h>
 #    include <lua.h>
-}
 
 #    include <cerrno>
 
