@@ -1,6 +1,7 @@
 #include "singletons/Settings.hpp"
 
 #include "Application.hpp"
+#include "common/Args.hpp"
 #include "controllers/filters/FilterRecord.hpp"
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
@@ -10,8 +11,6 @@
 #include "controllers/nicknames/Nickname.hpp"
 #include "debug/Benchmark.hpp"
 #include "pajlada/settings/signalargs.hpp"
-#include "util/Clamp.hpp"
-#include "util/PersistSignalVector.hpp"
 #include "util/WindowsHelper.hpp"
 
 #include <pajlada/signals/scoped-connection.hpp>
@@ -142,8 +141,9 @@ bool Settings::toggleMutedChannel(const QString &channelName)
 
 Settings *Settings::instance_ = nullptr;
 
-Settings::Settings(const QString &settingsDirectory)
+Settings::Settings(const Args &args, const QString &settingsDirectory)
     : prevInstance_(Settings::instance_)
+    , disableSaving(args.dontSaveSettings)
 {
     QString settingsPath = settingsDirectory + "/settings.json";
 
@@ -155,7 +155,7 @@ Settings::Settings(const QString &settingsDirectory)
     settingsInstance->setBackupEnabled(true);
     settingsInstance->setBackupSlots(9);
     settingsInstance->saveMethod =
-        pajlada::Settings::SettingManager::SaveMethod::SaveOnExit;
+        pajlada::Settings::SettingManager::SaveMethod::SaveManually;
 
     initializeSignalVector(this->signalHolder, this->highlightedMessagesSetting,
                            this->highlightedMessages);
@@ -193,6 +193,16 @@ Settings::Settings(const QString &settingsDirectory)
 Settings::~Settings()
 {
     Settings::instance_ = this->prevInstance_;
+}
+
+void Settings::requestSave() const
+{
+    if (this->disableSaving)
+    {
+        return;
+    }
+
+    pajlada::Settings::SettingManager::gSave();
 }
 
 void Settings::saveSnapshot()
@@ -267,12 +277,12 @@ void Settings::restoreSnapshot()
 
 float Settings::getClampedUiScale() const
 {
-    return clamp<float>(this->uiScale.getValue(), 0.2f, 10);
+    return std::clamp(this->uiScale.getValue(), 0.2F, 10.F);
 }
 
 void Settings::setClampedUiScale(float value)
 {
-    this->uiScale.setValue(clamp<float>(value, 0.2f, 10));
+    this->uiScale.setValue(std::clamp(value, 0.2F, 10.F));
 }
 
 Settings &Settings::instance()

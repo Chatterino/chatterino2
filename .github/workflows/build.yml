@@ -33,7 +33,7 @@ jobs:
         include:
           - os: ubuntu-20.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-20.04:latest
-            qt-version: 6.6.1
+            qt-version: 6.7.2
             force-lto: false
             plugins: true
             skip-artifact: false
@@ -42,12 +42,21 @@ jobs:
             build-deb: true
           - os: ubuntu-22.04
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-22.04:latest
-            qt-version: 6.6.1
+            qt-version: 6.7.2
             force-lto: false
             plugins: true
             skip-artifact: false
             skip-crashpad: false
             build-appimage: true
+            build-deb: true
+          - os: ubuntu-24.04
+            container: ghcr.io/chatterino/chatterino2-build-ubuntu-24.04:latest
+            qt-version: 6.7.2
+            force-lto: false
+            plugins: true
+            skip-artifact: false
+            skip-crashpad: false
+            build-appimage: false
             build-deb: true
     env:
       C2_ENABLE_LTO: ${{ matrix.force-lto }}
@@ -176,7 +185,7 @@ jobs:
 
       - name: Setup sccache (Windows)
         # sccache v0.7.4
-        uses: hendrikmuhs/ccache-action@v1.2.13
+        uses: hendrikmuhs/ccache-action@v1.2.14
         if: startsWith(matrix.os, 'windows')
         with:
           variant: sccache
@@ -360,19 +369,25 @@ jobs:
       - uses: actions/download-artifact@v4
         name: Linux AppImage
         with:
-          name: Chatterino-x86_64-Qt-6.6.1.AppImage
+          name: Chatterino-x86_64-Qt-6.7.2.AppImage
           path: release-artifacts/
 
       - uses: actions/download-artifact@v4
         name: Ubuntu 20.04 deb
         with:
-          name: Chatterino-ubuntu-20.04-Qt-6.6.1.deb
+          name: Chatterino-ubuntu-20.04-Qt-6.7.2.deb
           path: release-artifacts/
 
       - uses: actions/download-artifact@v4
         name: Ubuntu 22.04 deb
         with:
-          name: Chatterino-ubuntu-22.04-Qt-6.6.1.deb
+          name: Chatterino-ubuntu-22.04-Qt-6.7.2.deb
+          path: release-artifacts/
+
+      - uses: actions/download-artifact@v4
+        name: Ubuntu 24.04 deb
+        with:
+          name: Chatterino-ubuntu-24.04-Qt-6.7.2.deb
           path: release-artifacts/
 
       - name: Copy flatpakref
@@ -389,6 +404,22 @@ jobs:
         working-directory: release-artifacts
         shell: bash
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Format changes
+        id: format-changes
+        run: |
+          delimiter=$(openssl rand -hex 32)
+          {
+            echo "changelog<<$delimiter"
+            python3 ./.CI/format-recent-changes.py
+            echo $delimiter
+          } >> "$GITHUB_OUTPUT"
+        shell: bash
+
       - name: Create release
         uses: ncipollo/release-action@v1.14.0
         with:
@@ -396,7 +427,7 @@ jobs:
           allowUpdates: true
           artifactErrorsFailBuild: true
           artifacts: "release-artifacts/*"
-          body: ${{ github.event.head_commit.message }}
+          body: ${{ steps.format-changes.outputs.changelog }}
           prerelease: true
           name: Nightly Release
           tag: nightly-build

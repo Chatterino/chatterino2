@@ -1,4 +1,4 @@
-#include "GenericListModel.hpp"
+#include "widgets/listview/GenericListModel.hpp"
 
 namespace chatterino {
 

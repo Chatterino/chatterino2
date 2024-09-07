@@ -36,6 +36,7 @@ public:
     NativeMessagingServer(NativeMessagingServer &&) = delete;
     NativeMessagingServer &operator=(const NativeMessagingServer &) = delete;
     NativeMessagingServer &operator=(NativeMessagingServer &&) = delete;
+    ~NativeMessagingServer();
 
     void start();
 

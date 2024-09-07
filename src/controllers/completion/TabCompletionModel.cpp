@@ -39,7 +39,7 @@ void TabCompletionModel::updateResults(const QString &query,
         // Try plugins first
         bool done{};
         std::tie(done, results) =
-            getIApp()->getPlugins()->updateCustomCompletions(
+            getApp()->getPlugins()->updateCustomCompletions(
                 query, fullTextContent, cursorPosition, isFirstWord);
         if (done)
         {

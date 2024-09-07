@@ -174,7 +174,7 @@ int ChannelRef::send_message(lua_State *L)
     text = text.replace('\n', ' ');
     if (execcmds)
     {
-        text = getIApp()->getCommands()->execCommand(text, that, false);
+        text = getApp()->getCommands()->execCommand(text, that, false);
     }
     that->sendMessage(text);
     return 0;
@@ -200,7 +200,7 @@ int ChannelRef::add_system_message(lua_State *L)
     }
     ChannelPtr that = ChannelRef::getOrError(L);
     text = text.replace('\n', ' ');
-    that->addMessage(makeSystemMessage(text));
+    that->addSystemMessage(text);
     return 0;
 }
 
@@ -300,7 +300,7 @@ int ChannelRef::get_by_name(lua_State *L)
         lua_pushnil(L);
         return 1;
     }
-    auto chn = getIApp()->getTwitchAbstract()->getChannelOrEmpty(name);
+    auto chn = getApp()->getTwitch()->getChannelOrEmpty(name);
     lua::push(L, chn);
     return 1;
 }
@@ -324,7 +324,7 @@ int ChannelRef::get_by_twitch_id(lua_State *L)
         lua_pushnil(L);
         return 1;
     }
-    auto chn = getIApp()->getTwitch()->getChannelOrEmptyByID(id);
+    auto chn = getApp()->getTwitch()->getChannelOrEmptyByID(id);
 
     lua::push(L, chn);
     return 1;

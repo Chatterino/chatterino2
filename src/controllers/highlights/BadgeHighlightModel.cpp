@@ -53,7 +53,7 @@ void BadgeHighlightModel::getRowFromItem(const HighlightBadge &item,
     setFilePathItem(row[Column::SoundPath], item.getSoundUrl());
     setColorItem(row[Column::Color], *item.getColor());
 
-    getIApp()->getTwitchBadges()->getBadgeIcon(
+    getApp()->getTwitchBadges()->getBadgeIcon(
         item.badgeName(), [item, row](QString /*name*/, const QIconPtr pixmap) {
             row[Column::Badge]->setData(QVariant(*pixmap), Qt::DecorationRole);
         });

@@ -21,9 +21,8 @@ NewPopupItem::NewPopupItem(const QString &channelName)
 
 void NewPopupItem::action()
 {
-    auto channel =
-        getIApp()->getTwitchAbstract()->getOrAddChannel(this->channelName_);
-    getIApp()->getWindows()->openInPopup(channel);
+    auto channel = getApp()->getTwitch()->getOrAddChannel(this->channelName_);
+    getApp()->getWindows()->openInPopup(channel);
 }
 
 void NewPopupItem::paint(QPainter *painter, const QRect &rect) const
@@ -32,10 +31,10 @@ void NewPopupItem::paint(QPainter *painter, const QRect &rect) const
 
     painter->setRenderHint(QPainter::Antialiasing, true);
 
-    painter->setPen(getIApp()->getThemes()->splits.header.text);
+    painter->setPen(getApp()->getThemes()->splits.header.text);
     painter->setBrush(Qt::SolidPattern);
     painter->setFont(
-        getIApp()->getFonts()->getFont(FontStyle::UiMediumBold, 1.0));
+        getApp()->getFonts()->getFont(FontStyle::UiMediumBold, 1.0));
 
     QRect iconRect(rect.topLeft(), ICON_SIZE);
     this->icon_.paint(painter, iconRect, Qt::AlignLeft | Qt::AlignVCenter);

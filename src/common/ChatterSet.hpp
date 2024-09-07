@@ -5,9 +5,6 @@
 #include <lrucache/lrucache.hpp>
 #include <QString>
 
-#include <functional>
-#include <set>
-#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -19,7 +16,7 @@ class ChatterSet
 {
 public:
     /// The limit of how many chatters can be saved for a channel.
-    static constexpr size_t chatterLimit = 2000;
+    static constexpr size_t CHATTER_LIMIT = 2000;
 
     ChatterSet();
 

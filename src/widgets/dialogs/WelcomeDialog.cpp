@@ -1,4 +1,4 @@
-#include "WelcomeDialog.hpp"
+#include "widgets/dialogs/WelcomeDialog.hpp"
 
 namespace chatterino {
 

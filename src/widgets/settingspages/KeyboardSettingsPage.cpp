@@ -22,7 +22,7 @@ using namespace chatterino;
 void tableCellClicked(const QModelIndex &clicked, EditableModelView *view,
                       HotkeyModel *model)
 {
-    auto hotkey = getIApp()->getHotkeys()->getHotkeyByName(
+    auto hotkey = getApp()->getHotkeys()->getHotkeyByName(
         clicked.siblingAtColumn(0).data(Qt::EditRole).toString());
     if (!hotkey)
     {
@@ -34,8 +34,8 @@ void tableCellClicked(const QModelIndex &clicked, EditableModelView *view,
     if (wasAccepted)
     {
         auto newHotkey = dialog.data();
-        getIApp()->getHotkeys()->replaceHotkey(hotkey->name(), newHotkey);
-        getIApp()->getHotkeys()->save();
+        getApp()->getHotkeys()->replaceHotkey(hotkey->name(), newHotkey);
+        getApp()->getHotkeys()->save();
     }
 }
 
@@ -48,7 +48,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     LayoutCreator<KeyboardSettingsPage> layoutCreator(this);
     auto layout = layoutCreator.emplace<QVBoxLayout>();
 
-    auto *model = getIApp()->getHotkeys()->createModel(nullptr);
+    auto *model = getApp()->getHotkeys()->createModel(nullptr);
     EditableModelView *view =
         layout.emplace<EditableModelView>(model).getElement();
 
@@ -68,8 +68,8 @@ KeyboardSettingsPage::KeyboardSettingsPage()
         if (wasAccepted)
         {
             auto newHotkey = dialog.data();
-            getIApp()->getHotkeys()->hotkeys_.append(newHotkey);
-            getIApp()->getHotkeys()->save();
+            getApp()->getHotkeys()->hotkeys_.append(newHotkey);
+            getApp()->getHotkeys()->save();
         }
     });
 
@@ -87,10 +87,46 @@ KeyboardSettingsPage::KeyboardSettingsPage()
 
         if (reply == QMessageBox::Yes)
         {
-            getIApp()->getHotkeys()->resetToDefaults();
+            getApp()->getHotkeys()->resetToDefaults();
         }
     });
     view->addCustomButton(resetEverything);
+
+    // We only check this once since a user *should* not have the ability to create a new hotkey with a deprecated or removed action
+    // However, we also don't update this after the user has deleted a hotkey. This is a big lift that should probably be solved on the model level rather
+    // than individually here. Same goes for marking specific rows as deprecated/removed
+    const auto &removedOrDeprecatedHotkeys =
+        getApp()->getHotkeys()->removedOrDeprecatedHotkeys();
+
+    if (!removedOrDeprecatedHotkeys.empty())
+    {
+        QString warningMessage =
+            "Some of your hotkeys use deprecated actions and will not "
+            "work as expected: ";
+
+        bool first = true;
+        for (const auto &hotkeyName : removedOrDeprecatedHotkeys)
+        {
+            if (!first)
+            {
+                warningMessage.append(',');
+            }
+            warningMessage.append(' ');
+            warningMessage.append('"');
+            warningMessage.append(hotkeyName);
+            warningMessage.append('"');
+
+            first = false;
+        }
+        warningMessage.append('.');
+        auto deprecatedWarning = layout.emplace<QLabel>(warningMessage);
+        deprecatedWarning->setStyleSheet("color: yellow");
+        deprecatedWarning->setWordWrap(true);
+        auto deprecatedWarning2 = layout.emplace<QLabel>(
+            "You can ignore this warning after you have removed or edited the "
+            "above-mentioned hotkeys.");
+        deprecatedWarning2->setStyleSheet("color: yellow");
+    }
 }
 
 }  // namespace chatterino

@@ -9,8 +9,6 @@
 #include "messages/MessageElement.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
-#include "providers/irc/IrcChannel2.hpp"
-#include "providers/irc/IrcServer.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -92,7 +90,7 @@ QString formatWhisperError(HelixWhisperError error, const QString &message)
 
 bool appendWhisperMessageWordsLocally(const QStringList &words)
 {
-    auto *app = getIApp();
+    auto *app = getApp();
 
     MessageBuilder b;
 
@@ -102,7 +100,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
         MessageElementFlag::Text, MessageColor::Text,
         FontStyle::ChatMediumBold);
     b.emplace<TextElement>("->", MessageElementFlag::Text,
-                           getIApp()->getThemes()->messages.textColors.system);
+                           getApp()->getThemes()->messages.textColors.system);
     b.emplace<TextElement>(words[1] + ":", MessageElementFlag::Text,
                            MessageColor::Text, FontStyle::ChatMediumBold);
 
@@ -115,8 +113,8 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     for (int i = 2; i < words.length(); i++)
     {
         {  // Twitch emote
-            auto it = accemotes.emotes.find({words[i]});
-            if (it != accemotes.emotes.end())
+            auto it = accemotes->find({words[i]});
+            if (it != accemotes->end())
             {
                 b.emplace<EmoteElement>(it->second,
                                         MessageElementFlag::TwitchEmote);
@@ -152,10 +150,10 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                     void operator()(const QString &string,
                                     MessageBuilder &b) const
                     {
-                        LinkParser parser(string);
-                        if (parser.result())
+                        auto link = linkparser::parse(string);
+                        if (link)
                         {
-                            b.addLink(*parser.result());
+                            b.addLink(*link, string);
                         }
                         else
                         {
@@ -177,19 +175,16 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     b->flags.set(MessageFlag::Whisper);
     auto messagexD = b.release();
 
-    getIApp()->getTwitch()->getWhispersChannel()->addMessage(messagexD);
-
-    auto overrideFlags = std::optional<MessageFlags>(messagexD->flags);
-    overrideFlags->set(MessageFlag::DoNotLog);
+    getApp()->getTwitch()->getWhispersChannel()->addMessage(
+        messagexD, MessageContext::Original);
 
     if (getSettings()->inlineWhispers &&
         !(getSettings()->streamerModeSuppressInlineWhispers &&
-          getIApp()->getStreamerMode()->isEnabled()))
+          getApp()->getStreamerMode()->isEnabled()))
     {
-        app->getTwitchAbstract()->forEachChannel(
-            [&messagexD, overrideFlags](ChannelPtr _channel) {
-                _channel->addMessage(messagexD, overrideFlags);
-            });
+        app->getTwitch()->forEachChannel([&messagexD](ChannelPtr _channel) {
+            _channel->addMessage(messagexD, MessageContext::Repost);
+        });
     }
 
     return true;
@@ -208,16 +203,15 @@ QString sendWhisper(const CommandContext &ctx)
 
     if (ctx.words.size() < 3)
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("Usage: /w <username> <message>"));
+        ctx.channel->addSystemMessage("Usage: /w <username> <message>");
         return "";
     }
 
-    auto currentUser = getIApp()->getAccounts()->twitch.getCurrent();
+    auto currentUser = getApp()->getAccounts()->twitch.getCurrent();
     if (currentUser->isAnon())
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("You must be logged in to send a whisper!"));
+        ctx.channel->addSystemMessage(
+            "You must be logged in to send a whisper!");
         return "";
     }
     auto target = ctx.words.at(1);
@@ -236,26 +230,14 @@ QString sendWhisper(const CommandContext &ctx)
                     },
                     [channel, target, targetUser](auto error, auto message) {
                         auto errorMessage = formatWhisperError(error, message);
-                        channel->addMessage(makeSystemMessage(errorMessage));
+                        channel->addSystemMessage(errorMessage);
                     });
             },
             [channel{ctx.channel}] {
-                channel->addMessage(
-                    makeSystemMessage("No user matching that username."));
+                channel->addSystemMessage("No user matching that username.");
             });
         return "";
     }
-
-    // we must be on IRC
-    auto *ircChannel = dynamic_cast<IrcChannel *>(ctx.channel.get());
-    if (ircChannel == nullptr)
-    {
-        // give up
-        return "";
-    }
-
-    auto *server = ircChannel->server();
-    server->sendWhisper(target, message);
 
     return "";
 }

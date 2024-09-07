@@ -6,12 +6,13 @@
 
 #include <cmath>
 #include <optional>
+#include <utility>
 #include <vector>
 
 namespace chatterino {
 
 // only qualified for tests
-namespace _helpers_internal {
+namespace helpers::detail {
 
     using SizeType = QStringView::size_type;
 
@@ -52,7 +53,7 @@ namespace _helpers_internal {
     std::pair<uint64_t, bool> findUnitMultiplierToSec(QStringView view,
                                                       SizeType &pos);
 
-}  // namespace _helpers_internal
+}  // namespace helpers::detail
 
 /**
  * @brief startsWithOrContains is a wrapper for checking

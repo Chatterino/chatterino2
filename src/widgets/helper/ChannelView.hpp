@@ -4,12 +4,14 @@
 #include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
+#include "messages/MessageFlag.hpp"
 #include "messages/Selection.hpp"
 #include "util/ThreadGuard.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/TooltipWidget.hpp"
 
 #include <pajlada/signals/signal.hpp>
+#include <QGestureEvent>
 #include <QMenu>
 #include <QPaintEvent>
 #include <QPointer>
@@ -30,9 +32,6 @@ using ChannelPtr = std::shared_ptr<Channel>;
 
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
-
-enum class MessageFlag : int64_t;
-using MessageFlags = FlagsEnum<MessageFlag>;
 
 class MessageLayout;
 using MessageLayoutPtr = std::shared_ptr<MessageLayout>;
@@ -145,9 +144,20 @@ public:
     /// filter settings. It will always be of type Channel, not TwitchChannel
     /// nor IrcChannel.
     /// It's **not** equal to the channel passed in #setChannel().
+    /// @see #underlyingChannel()
     ChannelPtr channel();
 
-    /// Set the channel this view is displaying
+    /// @brief The channel this view displays messages for
+    ///
+    /// This channel potentially contains more messages than visible in this
+    /// view due to filter settings.
+    /// It's equal to the channel passed in #setChannel().
+    /// @see #channel()
+    ChannelPtr underlyingChannel() const;
+
+    /// @brief Set the channel this view is displaying
+    ///
+    /// @see #underlyingChannel()
     void setChannel(const ChannelPtr &underlyingChannel);
 
     void setFilters(const QList<QUuid> &ids);
@@ -221,6 +231,9 @@ protected:
     void enterEvent(QEvent * /*event*/) override;
 #endif
     void leaveEvent(QEvent * /*event*/) override;
+
+    bool event(QEvent *event) override;
+    bool gestureEvent(const QGestureEvent *event);
 
     void mouseMoveEvent(QMouseEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
@@ -380,6 +393,7 @@ private:
     QTimer clickTimer_;
 
     bool isScrolling_ = false;
+    bool isPanning_ = false;
     QPointF lastMiddlePressPosition_;
     QPointF currentMousePosition_;
     QTimer scrollTimer_;

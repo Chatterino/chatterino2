@@ -2,6 +2,7 @@
 
 #include "common/Common.hpp"
 #include "common/FlagsEnum.hpp"
+#include "messages/MessageFlag.hpp"
 
 #include <QPoint>
 #include <QRect>
@@ -10,21 +11,26 @@
 #include <optional>
 #include <vector>
 
+#if __has_include(<gtest/gtest_prod.h>)
+#    include <gtest/gtest_prod.h>
+#endif
+
 class QPainter;
 
 namespace chatterino {
 
-enum class MessageFlag : int64_t;
-enum class FirstWord { Neutral, RTL, LTR };
-using MessageFlags = FlagsEnum<MessageFlag>;
+enum class TextDirection : uint8_t {
+    Neutral,
+    RTL,
+    LTR,
+};
+
 class MessageLayoutElement;
 struct Selection;
 struct MessagePaintContext;
 
 struct MessageLayoutContainer {
     MessageLayoutContainer() = default;
-
-    FirstWord first = FirstWord::Neutral;
 
     /**
      * Begin the layout process of this message
@@ -212,24 +218,54 @@ private:
         QRect rect;
     };
 
-    /*
-    addElement is called at two stages. first stage is the normal one where we want to add message layout elements to the container.
-    If we detect an RTL word in the message, reorderRTL will be called, which is the second stage, where we call _addElement
-    again for each layout element, but in the correct order this time, without adding the elemnt to the this->element_ vector.
-    Due to compact emote logic, we need the previous element to check if we should change the spacing or not.
-    in stage one, this is simply elements_.back(), but in stage 2 that's not the case due to the reordering, and we need to pass the 
-    index of the reordered previous element. 
-    In stage one we don't need that and we pass -2 to indicate stage one (i.e. adding mode)
-    In stage two, we pass -1 for the first element, and the index of the oredered privous element for the rest.
-    */
+    /// @brief Attempts to add @a element to this container
+    ///
+    /// This can be called in two scenarios.
+    ///
+    /// 1. **Regular**: In this scenario, @a element is positioned and added
+    ///    to the internal container.
+    ///    This is active iff @a prevIndex is `-2`.
+    ///    During this stage, if there isn't any @a textDirection_ detected yet,
+    ///    the added element is checked if it contains RTL/LTR text to infer the
+    ///    direction. Only upon calling @a breakLine, the elements will be
+    ///    visually reorderd.
+    ///
+    /// 2. **Repositioning**: In this scenario, @a element is already added to
+    ///    the container thus it's only repositioned.
+    ///    This is active iff @a prevIndex is not `-2`.
+    ///    @a prevIndex is used to handle compact emotes. `-1` is used to
+    ///    indicate no predecessor.
+    ///
+    /// @param element[in] The element to add. This must be non-null and
+    ///                    allocated with `new`. Ownership is transferred
+    ///                    into this container.
+    /// @param forceAdd When enabled, @a element will be added regardless of
+    ///                 `canAddElements`. If @a element won't be added it will
+    ///                 be `delete`d.
+    /// @param prevIndex Controls the "scenario" (see above). `-2` indicates
+    ///                  "regular" mode; other values indicate "repositioning".
+    ///                  In case of repositioning, this contains the index of
+    ///                  the precesding element (visually, according to
+    ///                  @a textDirection_ [RTL/LTR]).
     void addElement(MessageLayoutElement *element, bool forceAdd,
-                    int prevIndex);
+                    qsizetype prevIndex);
 
-    // this method is called when a message has an RTL word
-    // we need to reorder the words to be shown properly
-    // however we don't we to reorder non-text elements like badges, timestamps, username
-    // firstTextIndex is the index of the first text element that we need to start the reordering from
-    void reorderRTL(int firstTextIndex);
+    /// @brief Reorders the last line according to @a textDirection_
+    ///
+    /// If a line contains RTL or the text direction is RTL, elements need to be
+    /// reordered (see @a lineContainsRTL_ and @a isRTL respectively).
+    /// This method reverses sequences of text in the opposite direction for it
+    /// to remain in its intended direction when rendered. Non-text elements
+    /// won't be reordered.
+    ///
+    /// For example, in an RTL container, the sequence
+    /// "1_R 2_R 3_N 4_R 5_L 6_L 7_N 8_R" will be (visually) reordered to
+    /// "8_R 5_L 6_L 7_N 4_R 3_N 2_R 1_R" (x_{L,N,R} indicates the element with
+    /// id x which is in the direction {LTR,Neutral,RTL}).
+    ///
+    /// @param firstTextIndex The index of the first element of the message
+    ///                       (i.e. the index after the username).
+    void reorderRTL(size_t firstTextIndex);
 
     /**
      * Paint a selection rectangle over the given line
@@ -274,6 +310,15 @@ private:
      */
     bool canCollapse() const;
 
+    /// @returns true, if @a textDirection_ is RTL
+    [[nodiscard]] bool isRTL() const noexcept;
+
+    /// @returns true, if @a textDirection_ is LTR
+    [[nodiscard]] bool isLTR() const noexcept;
+
+    /// @returns true, if @a textDirection_ is Neutral
+    [[nodiscard]] bool isNeutral() const noexcept;
+
     // variables
     float scale_ = 1.F;
     /**
@@ -304,13 +349,21 @@ private:
     int currentWordId_ = 0;
     bool canAddMessages_ = true;
     bool isCollapsed_ = false;
-    bool wasPrevReversed_ = false;
 
-    /**
-     * containsRTL indicates whether or not any of the text in this message
-     * contains any right-to-left characters (e.g. arabic)
-     */
-    bool containsRTL = false;
+    /// @brief True if the current line contains any RTL text.
+    ///
+    /// If the line contains any RTL, it needs to be reordered after a
+    /// linebreak after which it's reset to `false`.
+    bool lineContainsRTL_ = false;
+
+    /// True if there was any RTL/LTR reordering done in this container
+    bool anyReorderingDone_ = false;
+
+    /// @brief The direction of the text in this container.
+    ///
+    /// This starts off as neutral until an element is encountered that is
+    /// either LTR or RTL (afterwards this remains constant).
+    TextDirection textDirection_ = TextDirection::Neutral;
 
     std::vector<std::unique_ptr<MessageLayoutElement>> elements_;
 
@@ -320,6 +373,10 @@ private:
      * These lines hold no relation to the elements that are in this
      */
     std::vector<Line> lines_;
+
+#ifdef FRIEND_TEST
+    FRIEND_TEST(MessageLayoutContainerTest, RtlReordering);
+#endif
 };
 
 }  // namespace chatterino

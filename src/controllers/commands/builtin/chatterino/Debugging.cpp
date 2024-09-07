@@ -22,12 +22,12 @@ QString setLoggingRules(const CommandContext &ctx)
 {
     if (ctx.words.size() < 2)
     {
-        ctx.channel->addMessage(makeSystemMessage(
+        ctx.channel->addSystemMessage(
             "Usage: /c2-set-logging-rules <rules...>. To enable debug logging "
             "for all categories from chatterino, use "
             "'chatterino.*.debug=true'. For the format on the rules, see "
             "https://doc.qt.io/qt-6/"
-            "qloggingcategory.html#configuring-categories"));
+            "qloggingcategory.html#configuring-categories");
         return {};
     }
 
@@ -47,7 +47,7 @@ QString setLoggingRules(const CommandContext &ctx)
             "https://doc.qt.io/qt-6/qloggingcategory.html#setFilterRules");
     }
 
-    ctx.channel->addMessage(makeSystemMessage(message));
+    ctx.channel->addSystemMessage(message);
     return {};
 }
 
@@ -56,15 +56,13 @@ QString toggleThemeReload(const CommandContext &ctx)
     if (getTheme()->isAutoReloading())
     {
         getTheme()->setAutoReload(false);
-        ctx.channel->addMessage(
-            makeSystemMessage(u"Disabled theme auto reloading."_s));
+        ctx.channel->addSystemMessage(u"Disabled theme auto reloading."_s);
         return {};
     }
 
     getTheme()->setAutoReload(true);
-    ctx.channel->addMessage(
-        makeSystemMessage(u"Auto reloading theme every %1 ms."_s.arg(
-            Theme::AUTO_RELOAD_INTERVAL_MS)));
+    ctx.channel->addSystemMessage(u"Auto reloading theme every %1 ms."_s.arg(
+        Theme::AUTO_RELOAD_INTERVAL_MS));
     return {};
 }
 
@@ -92,7 +90,7 @@ QString listEnvironmentVariables(const CommandContext &ctx)
         builder.emplace<TimestampElement>(QTime::currentTime());
         builder.emplace<TextElement>(str, MessageElementFlag::Text,
                                      MessageColor::System);
-        channel->addMessage(builder.release());
+        channel->addMessage(builder.release(), MessageContext::Original);
     }
     return "";
 }
@@ -107,7 +105,7 @@ QString listArgs(const CommandContext &ctx)
 
     QString msg = QApplication::instance()->arguments().join(' ');
 
-    channel->addMessage(makeSystemMessage(msg));
+    channel->addSystemMessage(msg);
 
     return "";
 }
@@ -131,6 +129,18 @@ QString forceImageUnload(const CommandContext &ctx)
         auto &iep = ImageExpirationPool::instance();
         iep.freeAll();
     });
+    return "";
+}
+
+QString debugTest(const CommandContext &ctx)
+{
+    if (!ctx.channel)
+    {
+        return "";
+    }
+
+    ctx.channel->addSystemMessage("debug-test called");
+
     return "";
 }
 

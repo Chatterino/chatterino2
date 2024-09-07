@@ -1,7 +1,17 @@
-#include "ChannelPointReward.hpp"
+#include "providers/twitch/ChannelPointReward.hpp"
 
-#include "common/QLogging.hpp"
 #include "messages/Image.hpp"
+
+#include <QStringBuilder>
+
+namespace {
+
+QString twitchChannelPointRewardUrl(const QString &file)
+{
+    return u"https://static-cdn.jtvnw.net/custom-reward-images/default-" % file;
+}
+
+}  // namespace
 
 namespace chatterino {
 
@@ -94,11 +104,10 @@ ChannelPointReward::ChannelPointReward(const QJsonObject &redemption)
     else
     {
         static const ImageSet defaultImage{
-            Image::fromUrl({TWITCH_CHANNEL_POINT_REWARD_URL("1.png")}, 1,
-                           baseSize),
-            Image::fromUrl({TWITCH_CHANNEL_POINT_REWARD_URL("2.png")}, 0.5,
+            Image::fromUrl({twitchChannelPointRewardUrl("1.png")}, 1, baseSize),
+            Image::fromUrl({twitchChannelPointRewardUrl("2.png")}, 0.5,
                            baseSize * 2),
-            Image::fromUrl({TWITCH_CHANNEL_POINT_REWARD_URL("4.png")}, 0.25,
+            Image::fromUrl({twitchChannelPointRewardUrl("4.png")}, 0.25,
                            baseSize * 4)};
         this->image = defaultImage;
     }

@@ -7,10 +7,10 @@
 
 #include <QPainter>
 
-// number of columns in grid mode
-#define GRID_NUM_COLS 3
-
 namespace {
+
+// number of columns in grid mode
+constexpr int GRID_NUM_COLS = 3;
 
 #ifdef Q_OS_WIN
 template <typename T>
@@ -47,13 +47,13 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     this->setLayout(this->vLayout_);
     this->currentStyle_ = TooltipStyle::Vertical;
 
-    this->connections_.managedConnect(getIApp()->getFonts()->fontChanged,
+    this->connections_.managedConnect(getApp()->getFonts()->fontChanged,
                                       [this] {
                                           this->updateFont();
                                       });
     this->updateFont();
 
-    auto *windows = getIApp()->getWindows();
+    auto *windows = getApp()->getWindows();
     this->connections_.managedConnect(windows->gifRepaintRequested, [this] {
         if (!this->isVisible())
         {
@@ -300,8 +300,8 @@ void TooltipWidget::scaleChangedEvent(float)
 
 void TooltipWidget::updateFont()
 {
-    this->setFont(getIApp()->getFonts()->getFont(FontStyle::ChatMediumSmall,
-                                                 this->scale()));
+    this->setFont(getApp()->getFonts()->getFont(FontStyle::ChatMediumSmall,
+                                                this->scale()));
 }
 
 void TooltipWidget::setWordWrap(bool wrap)

@@ -454,7 +454,7 @@ TextElement::TextElement(const QString &text, MessageElementFlags flags,
 void TextElement::addToContainer(MessageLayoutContainer &container,
                                  MessageElementFlags flags)
 {
-    auto *app = getIApp();
+    auto *app = getApp();
 
     if (flags.hasAny(this->getFlags()))
     {
@@ -592,8 +592,6 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
         // String to continuously append words onto until we place it in the container
         // once we encounter an emote or reach the end of the message text. */
         QString currentText;
-
-        container.first = FirstWord::Neutral;
 
         bool firstIteration = true;
         for (Word &word : this->words_)

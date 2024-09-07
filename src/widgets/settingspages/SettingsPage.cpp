@@ -1,4 +1,4 @@
-#include "SettingsPage.hpp"
+#include "widgets/settingspages/SettingsPage.hpp"
 
 #include "Application.hpp"
 #include "singletons/WindowManager.hpp"
@@ -103,7 +103,7 @@ QCheckBox *SettingsPage::createCheckBox(
     QObject::connect(checkbox, &QCheckBox::toggled, this,
                      [&setting](bool state) {
                          setting = state;
-                         getIApp()->getWindows()->forceLayoutChannelViews();
+                         getApp()->getWindows()->forceLayoutChannelViews();
                      });
 
     return checkbox;

@@ -1,7 +1,7 @@
 #include "widgets/Scrollbar.hpp"
 
 #include "Application.hpp"
-#include "mocks/EmptyApplication.hpp"
+#include "mocks/BaseApplication.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
@@ -17,23 +17,12 @@ using namespace chatterino;
 
 namespace {
 
-class MockApplication : mock::EmptyApplication
+class MockApplication : public mock::BaseApplication
 {
 public:
     MockApplication()
-        : settings(this->settingsDir.filePath("settings.json"))
-        , fonts(this->settings)
-        , windowManager(this->paths_)
+        : windowManager(this->paths_, this->settings, this->theme, this->fonts)
     {
-    }
-    Theme *getThemes() override
-    {
-        return &this->theme;
-    }
-
-    Fonts *getFonts() override
-    {
-        return &this->fonts;
     }
 
     WindowManager *getWindows() override
@@ -41,9 +30,6 @@ public:
         return &this->windowManager;
     }
 
-    Settings settings;
-    Theme theme;
-    Fonts fonts;
     WindowManager windowManager;
 };
 

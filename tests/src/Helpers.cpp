@@ -3,7 +3,7 @@
 #include "Test.hpp"
 
 using namespace chatterino;
-using namespace _helpers_internal;
+using namespace helpers::detail;
 
 TEST(Helpers, formatUserMention)
 {

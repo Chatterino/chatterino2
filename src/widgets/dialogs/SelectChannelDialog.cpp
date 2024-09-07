@@ -1,16 +1,12 @@
-#include "SelectChannelDialog.hpp"
+#include "widgets/dialogs/SelectChannelDialog.hpp"
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
-#include "providers/irc/Irc2.hpp"
-#include "providers/irc/IrcChannel2.hpp"
-#include "providers/irc/IrcServer.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/dialogs/IrcConnectionEditor.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/Notebook.hpp"
@@ -25,10 +21,9 @@
 #include <QTableView>
 #include <QVBoxLayout>
 
-#define TAB_TWITCH 0
-#define TAB_IRC 1
-
 namespace chatterino {
+
+constexpr int TAB_TWITCH = 0;
 
 SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     : BaseWindow(
@@ -175,76 +170,6 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         tab->setCustomTitle("Twitch");
     }
 
-    // irc
-    {
-        LayoutCreator<QWidget> obj(new QWidget());
-        auto outerBox = obj.setLayoutType<QFormLayout>();
-
-        {
-            auto *view = this->ui_.irc.servers =
-                new EditableModelView(Irc::instance().newConnectionModel(this));
-
-            view->setTitles({"host", "port", "ssl", "user", "nick", "real",
-                             "password", "login command"});
-            view->getTableView()->horizontalHeader()->resizeSection(0, 140);
-
-            view->getTableView()->horizontalHeader()->setSectionHidden(1, true);
-            view->getTableView()->horizontalHeader()->setSectionHidden(2, true);
-            view->getTableView()->horizontalHeader()->setSectionHidden(4, true);
-            view->getTableView()->horizontalHeader()->setSectionHidden(5, true);
-
-            // We can safely ignore this signal's connection since the button won't be
-            // accessible after this dialog is closed
-            std::ignore = view->addButtonPressed.connect([] {
-                auto unique = IrcServerData{};
-                unique.id = Irc::instance().uniqueId();
-
-                auto *editor = new IrcConnectionEditor(unique);
-                if (editor->exec() == QDialog::Accepted)
-                {
-                    Irc::instance().connections.append(editor->data());
-                }
-            });
-
-            QObject::connect(
-                view->getTableView(), &QTableView::doubleClicked,
-                [](const QModelIndex &index) {
-                    auto *editor = new IrcConnectionEditor(
-                        Irc::instance().connections.raw()[size_t(index.row())]);
-
-                    if (editor->exec() == QDialog::Accepted)
-                    {
-                        auto data = editor->data();
-                        auto &&conns = Irc::instance().connections.raw();
-                        int i = 0;
-                        for (auto &&conn : conns)
-                        {
-                            if (conn.id == data.id)
-                            {
-                                Irc::instance().connections.removeAt(
-                                    i, Irc::noEraseCredentialCaller);
-                                Irc::instance().connections.insert(data, i);
-                            }
-                            i++;
-                        }
-                    }
-                });
-
-            outerBox->addRow("Server:", view);
-        }
-
-        outerBox->addRow("Channel: #", this->ui_.irc.channel = new QLineEdit);
-
-        auto *tab = notebook->addPage(obj.getElement());
-        tab->setCustomTitle("Irc (Beta)");
-
-        if (!getSettings()->enableExperimentalIrc)
-        {
-            tab->setEnable(false);
-            tab->setVisible(false);
-        }
-    }
-
     layout->setStretchFactor(notebook.getElement(), 1);
 
     auto buttons =
@@ -265,29 +190,11 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     this->ui_.notebook->selectIndex(TAB_TWITCH);
     this->ui_.twitch.channel->setFocus();
 
-    // restore ui state
-    // fourtf: enable when releasing irc
-    if (getSettings()->enableExperimentalIrc)
-    {
-        this->ui_.notebook->selectIndex(getSettings()->lastSelectChannelTab);
-    }
-
     this->addShortcuts();
-
-    this->ui_.irc.servers->getTableView()->selectRow(
-        getSettings()->lastSelectIrcConn);
 }
 
 void SelectChannelDialog::ok()
 {
-    // save ui state
-    getSettings()->lastSelectChannelTab =
-        this->ui_.notebook->getSelectedIndex();
-    getSettings()->lastSelectIrcConn = this->ui_.irc.servers->getTableView()
-                                           ->selectionModel()
-                                           ->currentIndex()
-                                           .row();
-
     // accept and close
     this->hasSelectedChannel_ = true;
     this->close();
@@ -334,31 +241,6 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
             this->ui_.twitch.automod->setFocus();
         }
         break;
-        case Channel::Type::Irc: {
-            this->ui_.notebook->selectIndex(TAB_IRC);
-            this->ui_.irc.channel->setText(_channel.get()->getName());
-
-            if (auto *ircChannel =
-                    dynamic_cast<IrcChannel *>(_channel.get().get()))
-            {
-                if (auto *server = ircChannel->server())
-                {
-                    int i = 0;
-                    for (auto &&conn : Irc::instance().connections)
-                    {
-                        if (conn.id == server->id())
-                        {
-                            this->ui_.irc.servers->getTableView()->selectRow(i);
-                            break;
-                        }
-                        i++;
-                    }
-                }
-            }
-
-            this->ui_.irc.channel->setFocus();
-        }
-        break;
         default: {
             this->ui_.notebook->selectIndex(TAB_TWITCH);
             this->ui_.twitch.channel->setFocus();
@@ -380,50 +262,31 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
         case TAB_TWITCH: {
             if (this->ui_.twitch.channel->isChecked())
             {
-                return getIApp()->getTwitchAbstract()->getOrAddChannel(
+                return getApp()->getTwitch()->getOrAddChannel(
                     this->ui_.twitch.channelName->text().trimmed());
             }
             else if (this->ui_.twitch.watching->isChecked())
             {
-                return getIApp()->getTwitch()->getWatchingChannel();
+                return getApp()->getTwitch()->getWatchingChannel();
             }
             else if (this->ui_.twitch.mentions->isChecked())
             {
-                return getIApp()->getTwitch()->getMentionsChannel();
+                return getApp()->getTwitch()->getMentionsChannel();
             }
             else if (this->ui_.twitch.whispers->isChecked())
             {
-                return getIApp()->getTwitch()->getWhispersChannel();
+                return getApp()->getTwitch()->getWhispersChannel();
             }
             else if (this->ui_.twitch.live->isChecked())
             {
-                return getIApp()->getTwitch()->getLiveChannel();
+                return getApp()->getTwitch()->getLiveChannel();
             }
             else if (this->ui_.twitch.automod->isChecked())
             {
-                return getIApp()->getTwitch()->getAutomodChannel();
+                return getApp()->getTwitch()->getAutomodChannel();
             }
         }
         break;
-        case TAB_IRC: {
-            int row = this->ui_.irc.servers->getTableView()
-                          ->selectionModel()
-                          ->currentIndex()
-                          .row();
-
-            auto &&vector = Irc::instance().connections.raw();
-
-            if (row >= 0 && row < int(vector.size()))
-            {
-                return Irc::instance().getOrAddChannel(
-                    vector[size_t(row)].id, this->ui_.irc.channel->text());
-            }
-            else
-            {
-                return Channel::getEmpty();
-            }
-        }
-            //break;
     }
 
     return this->selectedChannel_;
@@ -559,61 +422,10 @@ void SelectChannelDialog::addShortcuts()
         {"scrollPage", nullptr},
         {"search", nullptr},
         {"delete", nullptr},
+        {"openTab", nullptr},
     };
 
-    if (getSettings()->enableExperimentalIrc)
-    {
-        actions.insert(
-            {"openTab", [this](std::vector<QString> arguments) -> QString {
-                 if (arguments.size() == 0)
-                 {
-                     qCWarning(chatterinoHotkeys)
-                         << "openTab shortcut called without arguments. "
-                            "Takes only "
-                            "one argument: tab specifier";
-                     return "openTab shortcut called without arguments. "
-                            "Takes only one argument: tab specifier";
-                 }
-                 auto target = arguments.at(0);
-                 if (target == "last")
-                 {
-                     this->ui_.notebook->selectLastTab();
-                 }
-                 else if (target == "next")
-                 {
-                     this->ui_.notebook->selectNextTab();
-                 }
-                 else if (target == "previous")
-                 {
-                     this->ui_.notebook->selectPreviousTab();
-                 }
-                 else
-                 {
-                     bool ok;
-                     int result = target.toInt(&ok);
-                     if (ok)
-                     {
-                         this->ui_.notebook->selectIndex(result);
-                     }
-                     else
-                     {
-                         qCWarning(chatterinoHotkeys)
-                             << "Invalid argument for openTab shortcut";
-                         return QString("Invalid argument for openTab "
-                                        "shortcut: \"%1\". Use \"last\", "
-                                        "\"next\", \"previous\" or an integer.")
-                             .arg(target);
-                     }
-                 }
-                 return "";
-             }});
-    }
-    else
-    {
-        actions.emplace("openTab", nullptr);
-    }
-
-    this->shortcuts_ = getIApp()->getHotkeys()->shortcutsForCategory(
+    this->shortcuts_ = getApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::PopupWindow, actions, this);
 }
 

@@ -101,6 +101,11 @@ std::pair<std::unique_ptr<IpcQueue>, QString> IpcQueue::tryReplaceOrCreate(
     }
 }
 
+bool IpcQueue::remove(const char *name)
+{
+    return boost_ipc::message_queue::remove(name);
+}
+
 QByteArray IpcQueue::receive()
 {
     try

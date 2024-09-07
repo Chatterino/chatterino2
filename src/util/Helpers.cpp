@@ -1,4 +1,4 @@
-#include "Helpers.hpp"
+#include "util/Helpers.hpp"
 
 #include "providers/twitch/TwitchCommon.hpp"
 
@@ -9,7 +9,7 @@
 
 namespace chatterino {
 
-namespace _helpers_internal {
+namespace helpers::detail {
 
     SizeType skipSpace(QStringView view, SizeType startPos)
     {
@@ -110,8 +110,8 @@ namespace _helpers_internal {
         return std::make_pair(0, false);
     }
 
-}  // namespace _helpers_internal
-using namespace _helpers_internal;
+}  // namespace helpers::detail
+using namespace helpers::detail;
 
 bool startsWithOrContains(const QString &str1, const QString &str2,
                           Qt::CaseSensitivity caseSensitivity, bool startsWith)

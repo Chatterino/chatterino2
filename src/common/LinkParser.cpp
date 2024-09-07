@@ -1,17 +1,24 @@
 #define QT_NO_CAST_FROM_ASCII  // avoids unexpected implicit casts
 #include "common/LinkParser.hpp"
 
+#include "util/QCompareCaseInsensitive.hpp"
+
 #include <QFile>
-#include <QSet>
 #include <QString>
 #include <QStringView>
 #include <QTextStream>
 
+#include <set>
+
 namespace {
 
-QSet<QString> &tlds()
+using namespace chatterino;
+
+using TldSet = std::set<QString, QCompareCaseInsensitive>;
+
+TldSet &tlds()
 {
-    static QSet<QString> tlds = [] {
+    static TldSet tlds = [] {
         QFile file(QStringLiteral(":/tlds.txt"));
         file.open(QFile::ReadOnly);
         QTextStream stream(&file);
@@ -21,19 +28,12 @@ QSet<QString> &tlds()
 #else
         stream.setCodec("UTF-8");
 #endif
-        int safetyMax = 20000;
 
-        QSet<QString> set;
+        TldSet set;
 
         while (!stream.atEnd())
         {
-            auto line = stream.readLine();
-            set.insert(line);
-
-            if (safetyMax-- == 0)
-            {
-                break;
-            }
+            set.emplace(stream.readLine());
         }
 
         return set;
@@ -43,7 +43,7 @@ QSet<QString> &tlds()
 
 bool isValidTld(QStringView tld)
 {
-    return tlds().contains(tld.toString().toLower());
+    return tlds().contains(tld);
 }
 
 bool isValidIpv4(QStringView host)
@@ -113,19 +113,72 @@ bool startsWithPort(QStringView string)
     return true;
 }
 
+/// @brief Strips ignored characters off @a source
+///
+/// As per https://github.github.com/gfm/#autolinks-extension-:
+///
+/// '<', '*', '_', '~', and '(' are ignored at the beginning
+/// '>', '?', '!', '.', ',', ':', '*', '~', and ')' are ignored at the end.
+///
+/// A difference to GFM is that '_' isn't a valid suffix.
+///
+/// This might remove more than desired (e.g. "(a.com/(foo))" -> "a.com/(foo").
+/// Parentheses are counted after recognizing a valid IP/host.
+void strip(QStringView &source)
+{
+    while (!source.isEmpty())
+    {
+        auto c = source.first();
+        if (c == u'<' || c == u'*' || c == u'_' || c == u'~' || c == u'(')
+        {
+            source = source.mid(1);
+            continue;
+        }
+        break;
+    }
+
+    while (!source.isEmpty())
+    {
+        auto c = source.last();
+        if (c == u'>' || c == u'?' || c == u'!' || c == u'.' || c == u',' ||
+            c == u':' || c == u'*' || c == u'~' || c == u')')
+        {
+            source.chop(1);
+            continue;
+        }
+        break;
+    }
+}
+
+/// @brief Checks if @a c is valid in a domain
+///
+/// Valid characters are 0-9, A-Z, a-z, '-', '_', and '.' (like in GFM)
+/// and all non-ASCII characters (unlike in GFM).
+Q_ALWAYS_INLINE bool isValidDomainChar(char16_t c)
+{
+    return c >= 0x80 || (u'0' <= c && c <= u'9') || (u'A' <= c && c <= u'Z') ||
+           (u'a' <= c && c <= u'z') || c == u'_' || c == u'-' || c == u'.';
+}
+
 }  // namespace
 
-namespace chatterino {
+namespace chatterino::linkparser {
 
-LinkParser::LinkParser(const QString &unparsedString)
+std::optional<Parsed> parse(const QString &source) noexcept
 {
-    ParsedLink result;
+    using SizeType = QString::size_type;
+
+    std::optional<Parsed> result;
     // This is not implemented with a regex to increase performance.
-    QStringView remaining(unparsedString);
-    QStringView protocol(remaining);
+
+    QStringView link{source};
+    strip(link);
+
+    QStringView remaining = link;
+    QStringView protocol;
 
     // Check protocol for https?://
-    if (remaining.startsWith(QStringLiteral("http"), Qt::CaseInsensitive) &&
+    if (remaining.startsWith(u"http", Qt::CaseInsensitive) &&
         remaining.length() >= 4 + 3 + 1)  // 'http' + '://' + [any]
     {
         // optimistic view assuming there's a protocol (http or https)
@@ -136,11 +189,11 @@ LinkParser::LinkParser(const QString &unparsedString)
             withProto = withProto.mid(1);
         }
 
-        if (withProto.startsWith(QStringLiteral("://")))
+        if (withProto.startsWith(u"://"))
         {
             // there's really a protocol => consume it
             remaining = withProto.mid(3);
-            result.protocol = {protocol.begin(), remaining.begin()};
+            protocol = {link.begin(), remaining.begin()};
         }
     }
 
@@ -150,18 +203,18 @@ LinkParser::LinkParser(const QString &unparsedString)
     QStringView host = remaining;
     QStringView rest;
     bool lastWasDot = true;
-    int lastDotPos = -1;
-    int nDots = 0;
+    SizeType lastDotPos = -1;
+    SizeType nDots = 0;
 
     // Extract the host
-    for (int i = 0; i < remaining.size(); i++)
+    for (SizeType i = 0; i < remaining.size(); i++)
     {
         char16_t currentChar = remaining[i].unicode();
         if (currentChar == u'.')
         {
             if (lastWasDot)  // no double dots ..
             {
-                return;
+                return result;
             }
             lastDotPos = i;
             lastWasDot = true;
@@ -181,7 +234,7 @@ LinkParser::LinkParser(const QString &unparsedString)
 
             if (!startsWithPort(remaining))
             {
-                return;
+                return result;
             }
 
             break;
@@ -194,27 +247,68 @@ LinkParser::LinkParser(const QString &unparsedString)
             rest = remaining.mid(i);
             break;
         }
+
+        if (!isValidDomainChar(currentChar))
+        {
+            return result;
+        }
     }
 
     if (lastWasDot || lastDotPos <= 0)
     {
-        return;
+        return result;
     }
 
     // check host/tld
     if ((nDots == 3 && isValidIpv4(host)) ||
         isValidTld(host.mid(lastDotPos + 1)))
     {
-        result.host = host;
-        result.rest = rest;
-        result.source = unparsedString;
-        this->result_ = std::move(result);
+        // scan for parentheses (only if there were characters excluded)
+        if (link.end() != source.end() && !rest.empty())
+        {
+            size_t nestingLevel = 0;
+            // position after the last closing brace (i.e. the minimum characters to include)
+            const auto *lastClose = link.end();
+
+            // scan source from rest until the end:
+            //                            lastClose
+            //                                v
+            // (example.com/foo/bar/#baz_(qox)),
+            //             ▏╌╌rest (before)╌ ▏
+            //  ▏╌╌╌╌╌╌╌link (before)╌╌╌╌╌╌╌ ▏
+            //             ▏╌╌rest (after)╌╌╌ ▏
+            //  ▏╌╌╌╌╌╌╌link (after)╌╌╌╌╌╌╌╌╌ ▏
+            // ▏╌╌╌╌╌╌╌╌╌╌╌╌╌source╌╌╌╌╌╌╌╌╌╌╌╌ ▏
+            //             ▏╌╌╌╌╌╌╌search╌╌╌╌╌╌ ▏
+            for (const auto *it = rest.begin(); it < source.end(); it++)
+            {
+                if (it->unicode() == u'(')
+                {
+                    nestingLevel++;
+                    continue;
+                }
+
+                if (nestingLevel != 0 && it->unicode() == u')')
+                {
+                    nestingLevel--;
+                    if (nestingLevel == 0)
+                    {
+                        lastClose = it + 1;
+                    }
+                }
+            }
+            link = QStringView{link.begin(), std::max(link.end(), lastClose)};
+            rest = QStringView{rest.begin(), std::max(rest.end(), lastClose)};
+        }
+        result = Parsed{
+            .protocol = protocol,
+            .host = host,
+            .rest = rest,
+            .link = link,
+        };
     }
+
+    return result;
 }
 
-const std::optional<ParsedLink> &LinkParser::result() const
-{
-    return this->result_;
-}
-
-}  // namespace chatterino
+}  // namespace chatterino::linkparser

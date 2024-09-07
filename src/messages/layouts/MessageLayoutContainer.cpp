@@ -1,4 +1,4 @@
-#include "MessageLayoutContainer.hpp"
+#include "messages/layouts/MessageLayoutContainer.hpp"
 
 #include "Application.hpp"
 #include "messages/layouts/MessageLayoutContext.hpp"
@@ -14,16 +14,21 @@
 #include <QDebug>
 #include <QMargins>
 #include <QPainter>
+#include <QVarLengthArray>
 
 #include <optional>
 
-#define COMPACT_EMOTES_OFFSET 4
-#define MAX_UNCOLLAPSED_LINES \
-    (getSettings()->collpseMessagesMinLines.getValue())
-
 namespace {
 
-constexpr const QMargins MARGIN{8, 4, 8, 4};
+using namespace chatterino;
+
+constexpr QMargins MARGIN{8, 4, 8, 4};
+constexpr int COMPACT_EMOTES_OFFSET = 4;
+
+int maxUncollapsedLines()
+{
+    return getSettings()->collpseMessagesMinLines.getValue();
+}
 
 }  // namespace
 
@@ -48,14 +53,15 @@ void MessageLayoutContainer::beginLayout(int width, float scale,
     this->imageScale_ = imageScale;
     this->flags_ = flags;
     auto mediumFontMetrics =
-        getIApp()->getFonts()->getFontMetrics(FontStyle::ChatMedium, scale);
+        getApp()->getFonts()->getFontMetrics(FontStyle::ChatMedium, scale);
     this->textLineHeight_ = mediumFontMetrics.height();
     this->spaceWidth_ = mediumFontMetrics.horizontalAdvance(' ');
     this->dotdotdotWidth_ = mediumFontMetrics.horizontalAdvance("...");
     this->currentWordId_ = 0;
     this->canAddMessages_ = true;
     this->isCollapsed_ = false;
-    this->wasPrevReversed_ = false;
+    this->lineContainsRTL_ = false;
+    this->anyReorderingDone_ = false;
 }
 
 void MessageLayoutContainer::endLayout()
@@ -71,7 +77,7 @@ void MessageLayoutContainer::endLayout()
             QSize(this->dotdotdotWidth_, this->textLineHeight_),
             QColor("#00D80A"), FontStyle::ChatMediumBold, this->scale_);
 
-        if (this->first == FirstWord::RTL)
+        if (this->isRTL())
         {
             // Shift all elements in the next line to the left
             for (auto i = this->lines_.back().startIndex;
@@ -105,6 +111,17 @@ void MessageLayoutContainer::endLayout()
     {
         this->elements_.back()->setTrailingSpace(false);
     }
+
+    if (this->anyReorderingDone_)
+    {
+        std::ranges::sort(this->elements_, [](const auto &a, const auto &b) {
+            if (a->getLine() == b->getLine())
+            {
+                return a->getRect().x() < b->getRect().x();
+            }
+            return a->getLine() < b->getLine();
+        });
+    }
 }
 
 void MessageLayoutContainer::addElement(MessageLayoutElement *element)
@@ -125,9 +142,9 @@ void MessageLayoutContainer::addElementNoLineBreak(
 
 void MessageLayoutContainer::breakLine()
 {
-    if (this->containsRTL)
+    if (this->lineContainsRTL_ || this->isRTL())
     {
-        for (int i = 0; i < this->elements_.size(); i++)
+        for (size_t i = 0; i < this->elements_.size(); i++)
         {
             if (this->elements_[i]->getFlags().has(
                     MessageElementFlag::Username))
@@ -136,6 +153,8 @@ void MessageLayoutContainer::breakLine()
                 break;
             }
         }
+        this->lineContainsRTL_ = false;
+        this->anyReorderingDone_ = true;
     }
 
     int xOffset = 0;
@@ -193,7 +212,7 @@ void MessageLayoutContainer::breakLine()
     this->lineStart_ = this->elements_.size();
     //    this->currentX = (int)(this->scale * 8);
 
-    if (this->canCollapse() && this->line_ + 1 >= MAX_UNCOLLAPSED_LINES)
+    if (this->canCollapse() && this->line_ + 1 >= maxUncollapsedLines())
     {
         this->canAddMessages_ = false;
         return;
@@ -233,7 +252,9 @@ void MessageLayoutContainer::paintElements(QPainter &painter,
         painter.drawRect(element->getRect());
 #endif
 
+        painter.save();
         element->paint(painter, ctx.messageColors);
+        painter.restore();
     }
 }
 
@@ -402,7 +423,7 @@ size_t MessageLayoutContainer::getSelectionIndex(QPoint point) const
 
     size_t index = 0;
 
-    for (auto i = 0; i < lineEnd; i++)
+    for (size_t i = 0; i < lineEnd; i++)
     {
         auto &&element = this->elements_[i];
 
@@ -551,8 +572,9 @@ int MessageLayoutContainer::remainingWidth() const
 {
     return (this->width_ - int(MARGIN.left() * this->scale_) -
             int(MARGIN.right() * this->scale_) -
-            (this->line_ + 1 == MAX_UNCOLLAPSED_LINES ? this->dotdotdotWidth_
-                                                      : 0)) -
+            (static_cast<int>(this->line_ + 1) == maxUncollapsedLines()
+                 ? this->dotdotdotWidth_
+                 : 0)) -
            this->currentX_;
 }
 
@@ -563,30 +585,37 @@ int MessageLayoutContainer::nextWordId()
 
 void MessageLayoutContainer::addElement(MessageLayoutElement *element,
                                         const bool forceAdd,
-                                        const int prevIndex)
+                                        const qsizetype prevIndex)
 {
     if (!this->canAddElements() && !forceAdd)
     {
+        assert(prevIndex == -2 &&
+               "element is still referenced in this->elements_");
         delete element;
         return;
     }
 
-    bool isRTLMode = this->first == FirstWord::RTL && prevIndex != -2;
     bool isAddingMode = prevIndex == -2;
+    bool isRTLAdjusting = this->isRTL() && !isAddingMode;
 
-    // This lambda contains the logic for when to step one 'space width' back for compact x emotes
-    auto shouldRemoveSpaceBetweenEmotes = [this, prevIndex]() -> bool {
+    /// Returns `true` if a previously added `spaceWidth_` should be removed
+    /// before the to be added emote. The space was inserted by the
+    /// previous element but isn't desired as "removeSpacesBetweenEmotes" is
+    /// enabled and both elements are emotes.
+    auto shouldRemoveSpaceBetweenEmotes = [this, prevIndex,
+                                           isAddingMode]() -> bool {
         if (prevIndex == -1 || this->elements_.empty())
         {
             // No previous element found
             return false;
         }
 
-        const auto &lastElement = prevIndex == -2 ? this->elements_.back()
-                                                  : this->elements_[prevIndex];
+        const auto &lastElement =
+            isAddingMode ? this->elements_.back() : this->elements_[prevIndex];
 
         if (!lastElement)
         {
+            assert(false && "Empty element in container found");
             return false;
         }
 
@@ -606,23 +635,24 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element,
         return lastElement->getFlags().has(MessageElementFlag::EmoteImages);
     };
 
-    if (element->getText().isRightToLeft())
+    bool isRTLElement = element->getText().isRightToLeft();
+    if (isRTLElement)
     {
-        this->containsRTL = true;
+        this->lineContainsRTL_ = true;
     }
 
     // check the first non-neutral word to see if we should render RTL or LTR
-    if (isAddingMode && this->first == FirstWord::Neutral &&
+    if (isAddingMode && this->isNeutral() &&
         element->getFlags().has(MessageElementFlag::Text) &&
         !element->getFlags().has(MessageElementFlag::RepliedMessage))
     {
-        if (element->getText().isRightToLeft())
+        if (isRTLElement)
         {
-            this->first = FirstWord::RTL;
+            this->textDirection_ = TextDirection::RTL;
         }
-        else if (!isNeutral(element->getText()))
+        else if (!chatterino::isNeutral(element->getText()))
         {
-            this->first = FirstWord::LTR;
+            this->textDirection_ = TextDirection::LTR;
         }
     }
 
@@ -663,7 +693,7 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element,
         shouldRemoveSpaceBetweenEmotes())
     {
         // Move cursor one 'space width' to the left (right in case of RTL) to combine hug the previous emote
-        if (isRTLMode)
+        if (isRTLAdjusting)
         {
             this->currentX_ += this->spaceWidth_;
         }
@@ -673,7 +703,7 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element,
         }
     }
 
-    if (isRTLMode)
+    if (isRTLAdjusting)
     {
         // shift by width since we are calculating according to top right in RTL mode
         // but setPosition wants top left
@@ -695,7 +725,7 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element,
     }
 
     // set current x
-    if (isRTLMode)
+    if (isRTLAdjusting)
     {
         this->currentX_ -= element->getRect().width();
     }
@@ -706,7 +736,7 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element,
 
     if (element->hasTrailingSpace())
     {
-        if (isRTLMode)
+        if (isRTLAdjusting)
         {
             this->currentX_ -= this->spaceWidth_;
         }
@@ -717,15 +747,15 @@ void MessageLayoutContainer::addElement(MessageLayoutElement *element,
     }
 }
 
-void MessageLayoutContainer::reorderRTL(int firstTextIndex)
+void MessageLayoutContainer::reorderRTL(size_t firstTextIndex)
 {
     if (this->elements_.empty())
     {
         return;
     }
 
-    int startIndex = static_cast<int>(this->lineStart_);
-    int endIndex = static_cast<int>(this->elements_.size()) - 1;
+    size_t startIndex = this->lineStart_;
+    size_t endIndex = this->elements_.size() - 1;
 
     if (firstTextIndex >= endIndex || startIndex >= this->elements_.size())
     {
@@ -733,64 +763,53 @@ void MessageLayoutContainer::reorderRTL(int firstTextIndex)
     }
     startIndex = std::max(startIndex, firstTextIndex);
 
-    std::vector<int> correctSequence;
-    std::stack<int> swappedSequence;
+    QVarLengthArray<size_t, 32> correctSequence;
+    // temporary buffer to store elements in opposite order
+    QVarLengthArray<size_t, 32> swappedSequence;
 
-    // we reverse a sequence of words if it's opposite to the text direction
-    // the second condition below covers the possible three cases:
-    // 1 - if we are in RTL mode (first non-neutral word is RTL)
-    // we render RTL, reversing LTR sequences,
-    // 2 - if we are in LTR mode (first non-neutral word is LTR or all words are neutral)
-    // we render LTR, reversing RTL sequences
-    // 3 - neutral words follow previous words, we reverse a neutral word when the previous word was reversed
-
-    // the first condition checks if a neutral word is treated as a RTL word
-    // this is used later to add U+202B (RTL embedding) character signal to
-    // fix punctuation marks and mixing embedding LTR in an RTL word
-    // this can happen in two cases:
-    // 1 - in RTL mode, the previous word should be RTL (i.e. not reversed)
-    // 2 - in LTR mode, the previous word should be RTL (i.e. reversed)
-    for (int i = startIndex; i <= endIndex; i++)
+    bool isReversing = false;
+    for (size_t i = startIndex; i <= endIndex; i++)
     {
         auto &element = this->elements_[i];
 
-        const auto neutral = isNeutral(element->getText());
+        const auto neutral = chatterino::isNeutral(element->getText());
         const auto neutralOrUsername =
             neutral || element->getFlags().has(MessageElementFlag::Mention);
 
+        // check if neutral words are treated as RTL to add U+202B (RTL
+        // embedding) which fixes punctuation marks
         if (neutral &&
-            ((this->first == FirstWord::RTL && !this->wasPrevReversed_) ||
-             (this->first == FirstWord::LTR && this->wasPrevReversed_)))
+            ((this->isRTL() && !isReversing) || (this->isLTR() && isReversing)))
         {
             element->reversedNeutral = true;
         }
-        if (((element->getText().isRightToLeft() !=
-              (this->first == FirstWord::RTL)) &&
+
+        if ((element->getText().isRightToLeft() != this->isRTL() &&
              !neutralOrUsername) ||
-            (neutralOrUsername && this->wasPrevReversed_))
+            (neutralOrUsername && isReversing))
         {
-            swappedSequence.push(i);
-            this->wasPrevReversed_ = true;
+            swappedSequence.append(i);
+            isReversing = true;
         }
         else
         {
             while (!swappedSequence.empty())
             {
-                correctSequence.push_back(swappedSequence.top());
-                swappedSequence.pop();
+                correctSequence.push_back(swappedSequence.last());
+                swappedSequence.pop_back();
             }
             correctSequence.push_back(i);
-            this->wasPrevReversed_ = false;
+            isReversing = false;
         }
     }
     while (!swappedSequence.empty())
     {
-        correctSequence.push_back(swappedSequence.top());
-        swappedSequence.pop();
+        correctSequence.push_back(swappedSequence.last());
+        swappedSequence.pop_back();
     }
 
     // render right to left if we are in RTL mode, otherwise LTR
-    if (this->first == FirstWord::RTL)
+    if (this->isRTL())
     {
         this->currentX_ = this->elements_[endIndex]->getRect().right();
     }
@@ -804,10 +823,11 @@ void MessageLayoutContainer::reorderRTL(int firstTextIndex)
         this->addElement(this->elements_[correctSequence[0]].get(), false, -1);
     }
 
-    for (int i = 1; i < correctSequence.size() && this->canAddElements(); i++)
+    for (qsizetype i = 1; i < correctSequence.size() && this->canAddElements();
+         i++)
     {
         this->addElement(this->elements_[correctSequence[i]].get(), false,
-                         correctSequence[i - 1]);
+                         static_cast<qsizetype>(correctSequence[i - 1]));
     }
 }
 
@@ -988,6 +1008,21 @@ bool MessageLayoutContainer::canCollapse() const
 {
     return getSettings()->collpseMessagesMinLines.getValue() > 0 &&
            this->flags_.has(MessageFlag::Collapsed);
+}
+
+bool MessageLayoutContainer::isRTL() const noexcept
+{
+    return this->textDirection_ == TextDirection::RTL;
+}
+
+bool MessageLayoutContainer::isLTR() const noexcept
+{
+    return this->textDirection_ == TextDirection::LTR;
+}
+
+bool MessageLayoutContainer::isNeutral() const noexcept
+{
+    return this->textDirection_ == TextDirection::Neutral;
 }
 
 }  // namespace chatterino

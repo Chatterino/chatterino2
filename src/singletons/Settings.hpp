@@ -26,6 +26,8 @@ using TimeoutButton = std::pair<QString, int>;
 
 namespace chatterino {
 
+class Args;
+
 #ifdef Q_OS_WIN32
 #    define DEFAULT_FONT_FAMILY "Segoe UI"
 #    define DEFAULT_FONT_SIZE 10
@@ -81,11 +83,18 @@ class Settings
     static Settings *instance_;
     Settings *prevInstance_ = nullptr;
 
+    const bool disableSaving;
+
 public:
-    Settings(const QString &settingsDirectory);
+    Settings(const Args &args, const QString &settingsDirectory);
     ~Settings();
 
     static Settings &instance();
+
+    /// Request the settings to be saved to file
+    ///
+    /// Depending on the launch options, a save might end up not happening
+    void requestSave() const;
 
     void saveSnapshot();
     void restoreSnapshot();
@@ -462,6 +471,10 @@ public:
     BoolSetting enableLogging = {"/logging/enabled", false};
     BoolSetting onlyLogListedChannels = {"/logging/onlyLogListedChannels",
                                          false};
+    BoolSetting separatelyStoreStreamLogs = {
+        "/logging/separatelyStoreStreamLogs",
+        false,
+    };
 
     QStringSetting logPath = {"/logging/path", ""};
 
@@ -486,6 +499,8 @@ public:
                                             "qrc:/sounds/ping3.wav"};
     BoolSetting notificationOnAnyChannel = {"/notifications/onAnyChannel",
                                             false};
+    BoolSetting suppressInitialLiveNotification = {
+        "/notifications/suppressInitialLive", false};
 
     BoolSetting notificationToast = {"/notifications/enableToast", false};
     IntSetting openFromToast = {"/notifications/openFromToast",
@@ -520,7 +535,6 @@ public:
 #ifdef Q_OS_LINUX
     BoolSetting useKeyring = {"/misc/useKeyring", true};
 #endif
-    BoolSetting enableExperimentalIrc = {"/misc/experimentalIrc", false};
 
     IntSetting startUpNotification = {"/misc/startUpNotification", 0};
     QStringSetting currentVersion = {"/misc/currentVersion", ""};
@@ -558,14 +572,7 @@ public:
                                                true};
     BoolSetting lockNotebookLayout = {"/misc/lockNotebookLayout", false};
 
-    /// Debug
-    BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",
-                                            false};
-
     /// UI
-    // Purely QOL settings are here (like last item in a list).
-    IntSetting lastSelectChannelTab = {"/ui/lastSelectChannelTab", 0};
-    IntSetting lastSelectIrcConn = {"/ui/lastSelectIrcConn", 0};
 
     BoolSetting showSendButton = {"/ui/showSendButton", false};
 

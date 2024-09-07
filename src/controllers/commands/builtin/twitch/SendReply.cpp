@@ -1,9 +1,7 @@
 #include "controllers/commands/builtin/twitch/SendReply.hpp"
 
-#include "common/Channel.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "messages/Message.hpp"
-#include "messages/MessageBuilder.hpp"
 #include "messages/MessageThread.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "util/Twitch.hpp"
@@ -19,15 +17,14 @@ QString sendReply(const CommandContext &ctx)
 
     if (ctx.twitchChannel == nullptr)
     {
-        ctx.channel->addMessage(makeSystemMessage(
-            "The /reply command only works in Twitch channels."));
+        ctx.channel->addSystemMessage(
+            "The /reply command only works in Twitch channels.");
         return "";
     }
 
     if (ctx.words.size() < 3)
     {
-        ctx.channel->addMessage(
-            makeSystemMessage("Usage: /reply <username> <message>"));
+        ctx.channel->addSystemMessage("Usage: /reply <username> <message>");
         return "";
     }
 
@@ -54,8 +51,7 @@ QString sendReply(const CommandContext &ctx)
         }
     }
 
-    ctx.channel->addMessage(
-        makeSystemMessage("A message from that user wasn't found."));
+    ctx.channel->addSystemMessage("A message from that user wasn't found.");
 
     return "";
 }

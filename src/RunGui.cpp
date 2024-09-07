@@ -41,7 +41,7 @@ namespace {
     {
         // borrowed from
         // https://stackoverflow.com/questions/15035767/is-the-qt-5-dark-fusion-theme-available-for-windows
-        auto dark = qApp->palette();
+        auto dark = QApplication::palette();
 
         dark.setColor(QPalette::Window, QColor(22, 22, 22));
         dark.setColor(QPalette::WindowText, Qt::white);
@@ -49,7 +49,7 @@ namespace {
         dark.setColor(QPalette::Base, QColor("#333"));
         dark.setColor(QPalette::AlternateBase, QColor("#444"));
         dark.setColor(QPalette::ToolTipBase, Qt::white);
-        dark.setColor(QPalette::ToolTipText, Qt::white);
+        dark.setColor(QPalette::ToolTipText, Qt::black);
         dark.setColor(QPalette::Dark, QColor(35, 35, 35));
         dark.setColor(QPalette::Shadow, QColor(20, 20, 20));
         dark.setColor(QPalette::Button, QColor(70, 70, 70));
@@ -71,7 +71,7 @@ namespace {
         dark.setColor(QPalette::Disabled, QPalette::WindowText,
                       QColor(127, 127, 127));
 
-        qApp->setPalette(dark);
+        QApplication::setPalette(dark);
     }
 
     void initQt()
@@ -131,7 +131,7 @@ namespace {
         using namespace std::chrono_literals;
 
         if (std::chrono::steady_clock::now() - signalsInitTime > 30s &&
-            getIApp()->getCrashHandler()->shouldRecover())
+            getApp()->getCrashHandler()->shouldRecover())
         {
             QProcess proc;
 
@@ -241,22 +241,7 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
     }
 #endif
 
-    auto thread = std::thread([dir = paths.miscDirectory] {
-        {
-            auto path = combinePath(dir, "Update.exe");
-            if (QFile::exists(path))
-            {
-                QFile::remove(path);
-            }
-        }
-        {
-            auto path = combinePath(dir, "update.zip");
-            if (QFile::exists(path))
-            {
-                QFile::remove(path);
-            }
-        }
-    });
+    updates.deleteOldFiles();
 
     // Clear the cache 1 minute after start.
     QTimer::singleShot(60 * 1000, [cachePath = paths.cacheDirectory(),
@@ -278,13 +263,10 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
 
     Application app(settings, paths, args, updates);
     app.initialize(settings, paths);
-    app.run(a);
+    app.run();
     app.save();
 
-    if (!args.dontSaveSettings)
-    {
-        pajlada::Settings::SettingManager::gSave();
-    }
+    settings.requestSave();
 
     chatterino::NetworkManager::deinit();
 
@@ -292,9 +274,6 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
     // flushing windows clipboard to keep copied messages
     flushClipboard();
 #endif
-
-    app.fakeDtor();
-
-    _exit(0);
 }
+
 }  // namespace chatterino

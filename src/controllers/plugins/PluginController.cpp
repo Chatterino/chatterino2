@@ -35,10 +35,8 @@ PluginController::PluginController(const Paths &paths_)
 {
 }
 
-void PluginController::initialize(Settings &settings, const Paths &paths)
+void PluginController::initialize(Settings &settings)
 {
-    (void)paths;
-
     // actuallyInitialize will be called by this connection
     settings.pluginsEnabled.connect([this](bool enabled) {
         if (enabled)
@@ -354,7 +352,7 @@ bool PluginController::reload(const QString &id)
     }
     for (const auto &[cmd, _] : it->second->ownedCommands)
     {
-        getIApp()->getCommands()->unregisterPluginCommand(cmd);
+        getApp()->getCommands()->unregisterPluginCommand(cmd);
     }
     it->second->ownedCommands.clear();
     QDir loadDir = it->second->loadDirectory_;
@@ -380,8 +378,8 @@ QString PluginController::tryExecPluginCommand(const QString &commandName,
             auto res = lua_pcall(L, 1, 0, 0);
             if (res != LUA_OK)
             {
-                ctx.channel->addMessage(makeSystemMessage(
-                    "Lua error: " + lua::humanErrorText(L, res)));
+                ctx.channel->addSystemMessage("Lua error: " +
+                                              lua::humanErrorText(L, res));
                 return "";
             }
             return "";

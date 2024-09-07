@@ -134,6 +134,22 @@ namespace nm::client {
 NativeMessagingServer::NativeMessagingServer()
     : thread(*this)
 {
+    this->thread.setObjectName("NativeMessagingReceiver");
+}
+
+NativeMessagingServer::~NativeMessagingServer()
+{
+    if (!ipc::IpcQueue::remove("chatterino_gui"))
+    {
+        qCWarning(chatterinoNativeMessage) << "Failed to remove message queue";
+    }
+    this->thread.requestInterruption();
+    this->thread.quit();
+    // Most likely, the receiver thread will still wait for a message
+    if (!this->thread.wait(250))
+    {
+        this->thread.terminate();
+    }
 }
 
 void NativeMessagingServer::start()
@@ -161,7 +177,7 @@ void NativeMessagingServer::ReceiverThread::run()
         return;
     }
 
-    while (true)
+    while (!this->isInterruptionRequested())
     {
         auto buf = messageQueue->receive();
         if (buf.isEmpty())
@@ -238,11 +254,10 @@ void NativeMessagingServer::ReceiverThread::handleSelect(
     postToThread([=] {
         if (!name.isEmpty())
         {
-            auto channel =
-                getIApp()->getTwitchAbstract()->getOrAddChannel(name);
-            if (getIApp()->getTwitch()->getWatchingChannel().get() != channel)
+            auto channel = getApp()->getTwitch()->getOrAddChannel(name);
+            if (getApp()->getTwitch()->getWatchingChannel().get() != channel)
             {
-                getIApp()->getTwitch()->setWatchingChannel(channel);
+                getApp()->getTwitch()->setWatchingChannel(channel);
             }
         }
 
@@ -253,7 +268,7 @@ void NativeMessagingServer::ReceiverThread::handleSelect(
             if (!name.isEmpty())
             {
                 window->setChannel(
-                    getIApp()->getTwitchAbstract()->getOrAddChannel(name));
+                    getApp()->getTwitch()->getOrAddChannel(name));
             }
 #endif
         }
@@ -304,8 +319,7 @@ void NativeMessagingServer::syncChannels(const QJsonArray &twitchChannels)
             continue;
         }
         // the deduping is done on the extension side
-        updated.emplace_back(
-            getIApp()->getTwitchAbstract()->getOrAddChannel(name));
+        updated.emplace_back(getApp()->getTwitch()->getOrAddChannel(name));
     }
 
     // This will destroy channels that aren't used anymore.

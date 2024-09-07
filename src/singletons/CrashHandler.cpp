@@ -131,10 +131,6 @@ using namespace std::string_literals;
 CrashHandler::CrashHandler(const Paths &paths_)
     : paths(paths_)
 {
-}
-
-void CrashHandler::initialize(Settings & /*settings*/, const Paths &paths_)
-{
     auto optSettings = readRecoverySettings(paths);
     if (optSettings)
     {

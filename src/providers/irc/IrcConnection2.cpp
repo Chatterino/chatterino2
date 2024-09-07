@@ -1,4 +1,4 @@
-#include "IrcConnection2.hpp"
+#include "providers/irc/IrcConnection2.hpp"
 
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
@@ -11,7 +11,7 @@ namespace chatterino {
 
 namespace {
 
-    const auto payload = QString("chatterino/" CHATTERINO_VERSION);
+    const auto payload = "chatterino/" + CHATTERINO_VERSION;
 
 }  // namespace
 

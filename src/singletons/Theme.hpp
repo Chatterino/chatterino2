@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/ChatterinoSetting.hpp"
-#include "common/Singleton.hpp"
+#include "singletons/Paths.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
 #include <pajlada/settings/setting.hpp>
@@ -33,7 +33,7 @@ struct ThemeDescriptor {
     bool custom{};
 };
 
-class Theme final : public Singleton
+class Theme final
 {
 public:
     static const std::vector<ThemeDescriptor> builtInThemes;
@@ -43,7 +43,7 @@ public:
 
     static const int AUTO_RELOAD_INTERVAL_MS = 500;
 
-    void initialize(Settings &settings, const Paths &paths) final;
+    Theme(const Paths &paths);
 
     bool isLightTheme() const;
     bool isSystemTheme() const;

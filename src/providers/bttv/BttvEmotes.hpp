@@ -3,10 +3,15 @@
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
 
+#include <pajlada/signals/scoped-connection.hpp>
 #include <QJsonObject>
+#include <QString>
 
+#include <functional>
 #include <memory>
 #include <optional>
+#include <utility>
+#include <vector>
 
 namespace chatterino {
 
@@ -81,6 +86,9 @@ public:
 
 private:
     Atomic<std::shared_ptr<const EmoteMap>> global_;
+
+    std::vector<std::unique_ptr<pajlada::Signals::ScopedConnection>>
+        managedConnections;
 };
 
 }  // namespace chatterino

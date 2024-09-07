@@ -1,3 +1,4 @@
+#include "common/Args.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 
@@ -16,10 +17,12 @@ int main(int argc, char **argv)
 
     ::benchmark::Initialize(&argc, argv);
 
+    Args args;
+
     // Ensure settings are initialized before any benchmarks are run
     QTemporaryDir settingsDir;
     settingsDir.setAutoRemove(false);  // we'll remove it manually
-    chatterino::Settings settings(settingsDir.path());
+    chatterino::Settings settings(args, settingsDir.path());
 
     QTimer::singleShot(0, [&]() {
         ::benchmark::RunSpecifiedBenchmarks();
