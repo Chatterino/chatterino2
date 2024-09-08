@@ -27,7 +27,6 @@
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/helper/TitlebarButton.hpp"
 #include "widgets/Notebook.hpp"
-#include "widgets/OverlayWindow.hpp"
 #include "widgets/splits/ClosedSplits.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
@@ -421,18 +420,6 @@ void Window::addShortcuts()
                         "\"window\".";
              }
              return "";
-         }},
-        {"popupOverlay",
-         [this](const auto &) -> QString {
-             if (auto *page = dynamic_cast<SplitContainer *>(
-                     this->notebook_->getSelectedPage()))
-             {
-                 if (auto *split = page->getSelectedSplit())
-                 {
-                     (new OverlayWindow(split->getIndirectChannel()))->show();
-                 }
-             }
-             return {};
          }},
         {"zoom",
          [](std::vector<QString> arguments) -> QString {

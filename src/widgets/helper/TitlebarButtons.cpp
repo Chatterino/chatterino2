@@ -47,33 +47,65 @@ void TitleBarButtons::hover(size_t ht, QPoint at)
             assert(false && "TitleBarButtons::hover precondition violated");
             return;
     }
-    hovered->ncEnter();
-    hovered->ncMove(hovered->mapFromGlobal(at));
-    other1->ncLeave();
-    other2->ncLeave();
+
+    if (hovered)
+    {
+        hovered->ncEnter();
+        hovered->ncMove(hovered->mapFromGlobal(at));
+    }
+
+    if (other1)
+    {
+        other1->ncLeave();
+    }
+
+    if (other2)
+    {
+        other2->ncLeave();
+    }
 }
 
 void TitleBarButtons::leave()
 {
-    this->minButton_->ncLeave();
-    this->maxButton_->ncLeave();
-    this->closeButton_->ncLeave();
+    if (this->minButton_)
+    {
+        this->minButton_->ncLeave();
+    }
+    if (this->maxButton_)
+    {
+        this->maxButton_->ncLeave();
+    }
+    if (this->closeButton_)
+    {
+        this->closeButton_->ncLeave();
+    }
 }
 
 void TitleBarButtons::mousePress(size_t ht, QPoint at)
 {
     auto *button = this->buttonForHt(ht);
-    button->ncMousePress(button->mapFromGlobal(at));
+    if (button)
+    {
+        button->ncMousePress(button->mapFromGlobal(at));
+    }
 }
 
 void TitleBarButtons::mouseRelease(size_t ht, QPoint at)
 {
     auto *button = this->buttonForHt(ht);
-    button->ncMouseRelease(button->mapFromGlobal(at));
+    if (button)
+    {
+        button->ncMouseRelease(button->mapFromGlobal(at));
+    }
 }
 
 void TitleBarButtons::updateMaxButton()
 {
+    if (!this->maxButton_)
+    {
+        return;
+    }
+
     this->maxButton_->setButtonStyle(
         this->window_->windowState().testFlag(Qt::WindowMaximized)
             ? TitleBarButtonStyle::Unmaximize
@@ -82,16 +114,28 @@ void TitleBarButtons::updateMaxButton()
 
 void TitleBarButtons::setSmallSize()
 {
-    this->minButton_->setScaleIndependantSize(30, 30);
-    this->maxButton_->setScaleIndependantSize(30, 30);
-    this->closeButton_->setScaleIndependantSize(30, 30);
+    this->setSize(30, 30);
+}
+
+void TitleBarButtons::setSize(int width, int height)
+{
+    if (this->minButton_)
+    {
+        this->minButton_->setScaleIndependantSize(width, height);
+    }
+    if (this->maxButton_)
+    {
+        this->maxButton_->setScaleIndependantSize(width, height);
+    }
+    if (this->closeButton_)
+    {
+        this->closeButton_->setScaleIndependantSize(width, height);
+    }
 }
 
 void TitleBarButtons::setRegularSize()
 {
-    this->minButton_->setScaleIndependantSize(46, 30);
-    this->maxButton_->setScaleIndependantSize(46, 30);
-    this->closeButton_->setScaleIndependantSize(46, 30);
+    this->setSize(46, 30);
 }
 
 TitleBarButton *TitleBarButtons::buttonForHt(size_t ht) const

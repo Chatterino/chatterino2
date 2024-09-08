@@ -33,6 +33,7 @@
 #include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/helper/SearchPopup.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/OverlayWindow.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/splits/DraggedSplit.hpp"
 #include "widgets/splits/SplitContainer.hpp"
@@ -57,6 +58,7 @@
 
 #include <functional>
 #include <random>
+
 
 namespace {
 
@@ -765,6 +767,11 @@ void Split::addShortcuts()
              }
              return "";
          }},
+        {"popupOverlay",
+         [this](const auto &) -> QString {
+             this->popupOverlay();
+             return {};
+         }},
     };
 
     this->shortcuts_ = getApp()->getHotkeys()->shortcutsForCategory(
@@ -1102,6 +1109,11 @@ void Split::popup()
 
     window.getNotebook().getOrAddSelectedPage()->insertSplit(split);
     window.show();
+}
+
+void Split::popupOverlay()
+{
+    (new OverlayWindow(this->getIndirectChannel()))->show();
 }
 
 void Split::clear()

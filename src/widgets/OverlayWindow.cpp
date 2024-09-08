@@ -1,5 +1,6 @@
 #include "widgets/OverlayWindow.hpp"
 
+#include "common/FlagsEnum.hpp"
 #include "common/Literals.hpp"
 #include "controllers/hotkeys/GlobalShortcut.hpp"
 #include "singletons/Settings.hpp"
@@ -7,7 +8,6 @@
 #include "widgets/BaseWidget.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/InvisibleSizeGrip.hpp"
-#include "widgets/helper/TitlebarButton.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/splits/Split.hpp"
 
@@ -18,13 +18,22 @@
 #include <QKeySequence>
 #include <QSizeGrip>
 
-#include <array>
+#ifdef Q_OS_WIN
+#    include <Windows.h>
+#    include <windowsx.h>
+
+// This definition can be used to test the move interaction for other platforms
+// on Windows by commenting it out. In a final build, Windows must always use
+// this, as it's much smoother.
+#    define OVERLAY_NATIVE_MOVE
+#endif
 
 namespace {
 
 using namespace chatterino;
 using namespace literals;
 
+/// Progress the user has made in exploring the overlay
 enum class Knowledge : std::int32_t {
     None = 0,
     // User opened the overlay at least once
@@ -33,73 +42,54 @@ enum class Knowledge : std::int32_t {
 
 bool hasKnowledge(Knowledge knowledge)
 {
-    QFlags current(static_cast<Knowledge>(
+    FlagsEnum<Knowledge> current(static_cast<Knowledge>(
         getSettings()->overlayKnowledgeLevel.getValue()));
-    return current.testFlag(knowledge);
+    return current.has(knowledge);
 }
 
 void acquireKnowledge(Knowledge knowledge)
 {
-    QFlags current(static_cast<Knowledge>(
+    FlagsEnum<Knowledge> current(static_cast<Knowledge>(
         getSettings()->overlayKnowledgeLevel.getValue()));
-    current.setFlag(knowledge);
-    getSettings()->overlayKnowledgeLevel = current;
-}
-
-void triggerFirstActivation(QWidget *parent)
-{
-    if (hasKnowledge(Knowledge::Activation))
-    {
-        return;
-    }
-    acquireKnowledge(Knowledge::Activation);
-
-    auto welcomeText =
-        u"Hey! It looks like this is the first time you're using the overlay. You can move the overlay holding SHIFT and dragging it with your mouse. To resize the window, drag on the bottom right corner."_s;
-#ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
-    auto actualShortcut =
-        QKeySequence::fromString(getSettings()->overlayInertShortcut,
-                                 QKeySequence::PortableText)
-            .toString(QKeySequence::PortableText);
-    welcomeText +=
-        u"By default the overlay is interactive. To toggle the click-through mode, press %1 (customizable in the settings)."_s
-            .arg(actualShortcut);
-#endif
-
-    auto *box =
-        new QMessageBox(QMessageBox::Information, u"Chatterino - Overlay"_s,
-                        welcomeText, QMessageBox::Ok, parent);
-    box->open();
+    current.set(knowledge);
+    getSettings()->overlayKnowledgeLevel =
+        static_cast<std::underlying_type_t<Knowledge>>(current.value());
 }
 
 }  // namespace
 
 namespace chatterino {
 
+using namespace std::chrono_literals;
+
 OverlayWindow::OverlayWindow(IndirectChannel channel)
     : QWidget(nullptr,
               Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)
+#ifdef Q_OS_WIN
+    , sizeAllCursor_(::LoadCursor(nullptr, IDC_SIZEALL))
+#endif
     , channel_(std::move(channel))
     , channelView_(nullptr)
-    , interactAnimation_(this, "interactionProgress"_ba)
+    , interaction_(this)
 {
     this->setAttribute(Qt::WA_DeleteOnClose);
     this->setWindowTitle(u"Chatterino - Overlay"_s);
 
     auto *grid = new QGridLayout(this);
     grid->addWidget(&this->channelView_, 0, 0);
+#ifndef OVERLAY_NATIVE_MOVE
     grid->addWidget(new InvisibleSizeGrip(this), 0, 0,
                     Qt::AlignBottom | Qt::AlignRight);
-    grid->addWidget(&this->closeButton_, 0, 0, Qt::AlignTop | Qt::AlignRight);
-    grid->setContentsMargins(0, 0, 0, 0);
+#endif
+    this->interaction_.attach(grid);
 
-    this->closeButton_.setButtonStyle(TitleBarButtonStyle::Close);
-    this->closeButton_.setScaleIndependantSize(46, 30);
-    this->closeButton_.hide();
-    connect(&this->closeButton_, &TitleBarButton::leftClicked, [this]() {
-        this->close();
+    // the interaction overlay currently captures all events
+    this->interaction_.installEventFilter(this);
+
+    this->shortInteraction_.setInterval(750ms);
+    QObject::connect(&this->shortInteraction_, &QTimer::timeout, [this] {
+        this->endInteraction();
     });
-    this->closeButton_.setCursor(Qt::PointingHandCursor);
 
     this->channelView_.installEventFilter(this);
     this->channelView_.setChannel(this->channel_.get());
@@ -110,16 +100,13 @@ OverlayWindow::OverlayWindow(IndirectChannel channel)
     this->holder_.managedConnect(this->channel_.getChannelChanged(), [this]() {
         this->channelView_.setChannel(this->channel_.get());
     });
+    this->channelView_.scrollbar()->setShowThumb(false);
 
     this->setAutoFillBackground(false);
     this->resize(300, 500);
     this->move(QCursor::pos() - this->rect().center());
     this->setContentsMargins(0, 0, 0, 0);
     this->setAttribute(Qt::WA_TranslucentBackground);
-
-    this->interactAnimation_.setStartValue(0.0);
-    this->interactAnimation_.setEndValue(1.0);
-    this->interactAnimation_.setDuration(150);
 
     auto *settings = getSettings();
     settings->enableOverlayShadow.connect(
@@ -169,10 +156,15 @@ OverlayWindow::OverlayWindow(IndirectChannel channel)
         this->holder_);
 #endif
 
-    triggerFirstActivation(this);
+    this->triggerFirstActivation();
 }
 
-OverlayWindow::~OverlayWindow() = default;
+OverlayWindow::~OverlayWindow()
+{
+#ifdef Q_OS_WIN
+    ::DestroyCursor(this->sizeAllCursor_);
+#endif
+}
 
 void OverlayWindow::applyTheme()
 {
@@ -194,18 +186,14 @@ void OverlayWindow::applyTheme()
 
 bool OverlayWindow::eventFilter(QObject * /*object*/, QEvent *event)
 {
+#ifndef OVERLAY_NATIVE_MOVE
     switch (event->type())
     {
         case QEvent::MouseButtonPress: {
             auto *evt = dynamic_cast<QMouseEvent *>(event);
-            if (evt->modifiers().testFlag(Qt::ShiftModifier))
-            {
-                this->moving_ = true;
-                this->moveOrigin_ = evt->globalPos();
-                this->startInteraction();
-                return true;
-            }
-            return false;
+            this->moving_ = true;
+            this->moveOrigin_ = evt->globalPos();
+            return true;
         }
         break;
         case QEvent::MouseButtonRelease: {
@@ -219,18 +207,6 @@ bool OverlayWindow::eventFilter(QObject * /*object*/, QEvent *event)
         break;
         case QEvent::MouseMove: {
             auto *evt = dynamic_cast<QMouseEvent *>(event);
-            auto shiftPressed = evt->modifiers().testFlag(Qt::ShiftModifier);
-            if (!this->interacting_ && shiftPressed)
-            {
-                this->startInteraction();
-                return true;
-            }
-            if (this->interacting_ && !shiftPressed)
-            {
-                this->endInteraction();
-                return true;
-            }
-
             if (this->moving_)
             {
                 auto newPos = evt->globalPos() - this->moveOrigin_;
@@ -238,7 +214,7 @@ bool OverlayWindow::eventFilter(QObject * /*object*/, QEvent *event)
                 this->moveOrigin_ = evt->globalPos();
                 return true;
             }
-            if (this->interacting_)
+            if (this->interaction_.isInteracting())
             {
                 this->setOverrideCursor(Qt::SizeAllCursor);
                 return true;
@@ -249,6 +225,10 @@ bool OverlayWindow::eventFilter(QObject * /*object*/, QEvent *event)
         default:
             return false;
     }
+#else
+    (void)event;
+    return false;
+#endif
 }
 
 void OverlayWindow::setOverrideCursor(const QCursor &cursor)
@@ -257,69 +237,193 @@ void OverlayWindow::setOverrideCursor(const QCursor &cursor)
     this->setCursor(cursor);
 }
 
-void OverlayWindow::keyPressEvent(QKeyEvent *event)
+void OverlayWindow::enterEvent(EnterEvent * /*event*/)
 {
-    if (event->key() == Qt::Key_Shift)
-    {
-        this->startInteraction();
-    }
+#ifndef OVERLAY_NATIVE_MOVE
+    this->startInteraction();
+#endif
 }
 
-void OverlayWindow::keyReleaseEvent(QKeyEvent *event)
+void OverlayWindow::leaveEvent(QEvent * /*event*/)
 {
-    if (event->key() == Qt::Key_Shift)
-    {
-        this->endInteraction();
-    }
+#ifndef OVERLAY_NATIVE_MOVE
+    this->endInteraction();
+#endif
 }
 
-void OverlayWindow::paintEvent(QPaintEvent * /*event*/)
+#ifdef Q_OS_WIN
+bool OverlayWindow::nativeEvent(const QByteArray &eventType, void *message,
+                                NativeResult *result)
 {
-#ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
-    if (this->inert_)
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+    MSG *msg = reinterpret_cast<MSG *>(message);
+
+    bool returnValue = false;
+
+    switch (msg->message)
     {
-        return;
+#    ifdef OVERLAY_NATIVE_MOVE
+        case WM_NCHITTEST:
+            this->handleNCHITTEST(msg, result);
+            returnValue = true;
+            break;
+        case WM_MOUSEMOVE:
+        case WM_NCMOUSEMOVE:
+            this->startShortInteraction();
+            break;
+        case WM_ENTERSIZEMOVE:
+            this->startInteraction();
+            break;
+        case WM_EXITSIZEMOVE:
+            // wait a few seconds before hiding
+            this->startShortInteraction();
+            break;
+        case WM_SETCURSOR: {
+            // When the window can be moved, the size-all cursor should be
+            // shown. Qt doesn't provide an interface to do this, so this
+            // manually sets the cursor.
+            if (LOWORD(msg->lParam) == HTCAPTION)
+            {
+                ::SetCursor(this->sizeAllCursor_);
+                *result = TRUE;
+                returnValue = true;
+            }
+        }
+        break;
+#    endif
+
+        default:
+            return QWidget::nativeEvent(eventType, message, result);
     }
+
+    QWidget::nativeEvent(eventType, message, result);
+
+    return returnValue;
+}
+
+void OverlayWindow::handleNCHITTEST(MSG *msg, qintptr *result)
+{
+    // This implementation is similar to the one of BaseWindow, but has the
+    // following differences:
+    // - The window can always be resized (or: it can't be maximized)
+    // - The close button is advertised as HTCLIENT instead of HTCLOSE
+    // - There isn't any other client area (the entire window can be moved)
+    const LONG borderWidth = 8;  // in device independent pixels
+
+    auto rect = this->rect();
+
+    POINT p{GET_X_LPARAM(msg->lParam), GET_Y_LPARAM(msg->lParam)};
+    ScreenToClient(msg->hwnd, &p);
+
+    QPoint point(p.x, p.y);
+    point /= this->devicePixelRatio();
+
+    auto x = point.x();
+    auto y = point.y();
+
+    *result = 0;
+
+    // left border
+    if (x < rect.left() + borderWidth)
+    {
+        *result = HTLEFT;
+    }
+    // right border
+    if (x >= rect.right() - borderWidth)
+    {
+        *result = HTRIGHT;
+    }
+
+    // bottom border
+    if (y >= rect.bottom() - borderWidth)
+    {
+        *result = HTBOTTOM;
+    }
+    // top border
+    if (y < rect.top() + borderWidth)
+    {
+        *result = HTTOP;
+    }
+
+    // bottom left corner
+    if (x >= rect.left() && x < rect.left() + borderWidth &&
+        y < rect.bottom() && y >= rect.bottom() - borderWidth)
+    {
+        *result = HTBOTTOMLEFT;
+    }
+    // bottom right corner
+    if (x < rect.right() && x >= rect.right() - borderWidth &&
+        y < rect.bottom() && y >= rect.bottom() - borderWidth)
+    {
+        *result = HTBOTTOMRIGHT;
+    }
+    // top left corner
+    if (x >= rect.left() && x < rect.left() + borderWidth && y >= rect.top() &&
+        y < rect.top() + borderWidth)
+    {
+        *result = HTTOPLEFT;
+    }
+    // top right corner
+    if (x < rect.right() && x >= rect.right() - borderWidth &&
+        y >= rect.top() && y < rect.top() + borderWidth)
+    {
+        *result = HTTOPRIGHT;
+    }
+
+    if (*result == 0)
+    {
+        auto *closeButton = this->interaction_.closeButton();
+        if (closeButton->isVisible() && closeButton->geometry().contains(point))
+        {
+            *result = HTCLIENT;
+        }
+        else
+        {
+            *result = HTCAPTION;
+        }
+    }
+}
 #endif
 
-    QPainter painter(this);
-    QColor highlightColor(
-        255, 255, 255, std::max(int(255.0 * this->interactionProgress()), 50));
-
-    painter.setPen({highlightColor, 2});
-    // outline
-    auto bounds = this->rect();
-    painter.drawRect(bounds);
-
-    if (this->interactionProgress() <= 0.0)
+void OverlayWindow::triggerFirstActivation()
+{
+    if (hasKnowledge(Knowledge::Activation))
     {
         return;
     }
+    acquireKnowledge(Knowledge::Activation);
 
-    painter.setBrush(highlightColor);
-    painter.setPen(Qt::transparent);
+    auto welcomeText =
+        u"Hey! It looks like this is the first time you're using the overlay. "_s
+        "You can move the overlay by dragging it with your mouse. "
+#ifdef OVERLAY_NATIVE_MOVE
+        "To resize the window, drag on any edge."
+#else
+        "To resize the window, drag on the bottom right corner."
+#endif
+        ;
 
-    // bottom resize triangle
-    auto br = bounds.bottomRight();
-    std::array<QPoint, 3> triangle = {br - QPoint{20, 0}, br,
-                                      br - QPoint{0, 20}};
-    painter.drawPolygon(triangle.data(), triangle.size());
+#ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
+    auto actualShortcut =
+        QKeySequence::fromString(getSettings()->overlayInertShortcut,
+                                 QKeySequence::PortableText)
+            .toString(QKeySequence::PortableText);
+    welcomeText += u"<br><br>"_s
+                   "By default, the overlay is interactive. "
+                   "To toggle the click-through mode, press %1 (customizable "
+                   "in the settings).".arg(actualShortcut);
+#endif
 
-    // close button
-    auto buttonSize = this->closeButton_.size();
-    painter.drawRect(
-        QRect{bounds.topRight() - QPoint{buttonSize.width(), 0}, buttonSize});
-}
+    welcomeText += u"<br><br>"_s
+                   "This is still an early version and some features are "
+                   "missing. Please provide feedback <a "
+                   "href=\"https://github.com/Chatterino/chatterino2/"
+                   "discussions\">on GitHub</a>.";
 
-double OverlayWindow::interactionProgress() const
-{
-    return this->interactionProgress_;
-}
-
-void OverlayWindow::setInteractionProgress(double progress)
-{
-    this->interactionProgress_ = progress;
-    this->update();
+    auto *box =
+        new QMessageBox(QMessageBox::Information, u"Chatterino - Overlay"_s,
+                        welcomeText, QMessageBox::Ok, this);
+    box->open();
 }
 
 void OverlayWindow::startInteraction()
@@ -331,38 +435,26 @@ void OverlayWindow::startInteraction()
     }
 #endif
 
-    if (this->interacting_)
+    this->interaction_.startInteraction();
+    this->shortInteraction_.stop();
+}
+
+void OverlayWindow::startShortInteraction()
+{
+#ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
+    if (this->inert_)
     {
         return;
     }
+#endif
 
-    this->interacting_ = true;
-    if (this->interactAnimation_.state() != QPropertyAnimation::Stopped)
-    {
-        this->interactAnimation_.stop();
-    }
-    this->interactAnimation_.setDirection(QPropertyAnimation::Forward);
-    this->interactAnimation_.start();
-    this->setOverrideCursor(Qt::SizeAllCursor);
-    this->closeButton_.show();
+    this->interaction_.startInteraction();
+    this->shortInteraction_.start();
 }
 
 void OverlayWindow::endInteraction()
 {
-    if (!this->interacting_)
-    {
-        return;
-    }
-
-    this->interacting_ = false;
-    if (this->interactAnimation_.state() != QPropertyAnimation::Stopped)
-    {
-        this->interactAnimation_.stop();
-    }
-    this->interactAnimation_.setDirection(QPropertyAnimation::Backward);
-    this->interactAnimation_.start();
-    this->setOverrideCursor(Qt::ArrowCursor);
-    this->closeButton_.hide();
+    this->interaction_.endInteraction();
 }
 
 #ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
@@ -382,11 +474,14 @@ void OverlayWindow::setInert(bool inert)
     }
     this->endInteraction();
 
-    auto *scrollbar = this->channelView_.scrollbar();
-    scrollbar->setShowThumb(!inert);
     if (inert)
     {
-        scrollbar->scrollToBottom();
+        this->channelView_.scrollbar()->scrollToBottom();
+        this->interaction_.hide();
+    }
+    else
+    {
+        this->interaction_.show();
     }
 }
 #endif

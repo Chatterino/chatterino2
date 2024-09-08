@@ -403,6 +403,9 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Split,
                             QKeySequence("F10"), "debug",
                             std::vector<QString>(), "open debug popup");
+        this->tryAddDefault(addedHotkeys, HotkeyCategory::Split,
+                            QKeySequence("Ctrl+Alt+N"), "popupOverlay", {},
+                            "open overlay");
     }
 
     // split input
@@ -487,9 +490,6 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
                             QKeySequence("Ctrl+Shift+N"), "popup", {"window"},
                             "new popup window from tab");
 
-        this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
-                            QKeySequence("Ctrl+Alt+N"), "popupOverlay", {},
-                            "new popup overlay");
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
                             QKeySequence::ZoomIn, "zoom", {"in"}, "zoom in");
 

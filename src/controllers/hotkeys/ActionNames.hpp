@@ -181,6 +181,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"showSearch", ActionDefinition{"Search current channel"}},
          {"showGlobalSearch", ActionDefinition{"Search all channels"}},
          {"debug", ActionDefinition{"Show debug popup"}},
+         {"popupOverlay", ActionDefinition{"New overlay popup"}},
      }},
     {HotkeyCategory::SplitInput,
      {
@@ -287,7 +288,6 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               .argumentsPromptHover =
                   "What should be included in the new popup",
           }},
-         {"popupOverlay", ActionDefinition{"New overlay popup"}},
          {"quit", ActionDefinition{"Quit Chatterino"}},
          {"removeTab", ActionDefinition{"Remove current tab"}},
          {"reopenSplit", ActionDefinition{"Reopen closed split"}},

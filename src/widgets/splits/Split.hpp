@@ -179,6 +179,7 @@ public slots:
     void explainMoving();
     void explainSplitting();
     void popup();
+    void popupOverlay();
     void clear();
     void openInBrowser();
     void openModViewInBrowser();
