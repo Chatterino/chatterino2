@@ -59,7 +59,7 @@ private:
     void applyTheme();
 
 #ifdef Q_OS_WIN
-    void handleNCHITTEST(MSG *msg, qintptr *result);
+    void handleNCHITTEST(MSG *msg, NativeResult *result);
 
     HCURSOR sizeAllCursor_;
 #endif
