@@ -3,9 +3,9 @@
 ## Unversioned
 
 - Major: Add option to show pronouns in user card. (#5442, #5583)
-- Minor: Added transparent overlay window (default keybind: <kbd>CTRL</kbd> + <kbd>ALT</kbd> + <kbd>N</kbd>). (#4746)
 - Major: Release plugins alpha. (#5288)
 - Major: Improve high-DPI support on Windows. (#4868, #5391)
+- Major: Added transparent overlay window (default keybind: <kbd>CTRL</kbd> + <kbd>ALT</kbd> + <kbd>N</kbd>). (#4746)
 - Minor: Removed the Ctrl+Shift+L hotkey for toggling the "live only" tab visibility state. (#5530)
 - Minor: Moved tab visibility control to a submenu, without any toggle actions. (#5530)
 - Minor: Add option to customise Moderation buttons with images. (#5369)
