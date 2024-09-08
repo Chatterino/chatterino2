@@ -376,11 +376,10 @@ bool GeneralPageView::filterElements(const QString &query)
                         currentSubtitleVisible = true;
                         widget.element->show();
                         groupAny = true;
+                        break;
                     }
-                    else
-                    {
-                        widget.element->hide();
-                    }
+
+                    widget.element->hide();
                 }
             }
 
