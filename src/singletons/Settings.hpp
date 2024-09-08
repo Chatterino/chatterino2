@@ -192,10 +192,6 @@ public:
     IntSetting overlayShadowOffsetX = {"/appearance/overlay/shadowOffsetX", 2};
     IntSetting overlayShadowOffsetY = {"/appearance/overlay/shadowOffsetY", 2};
     IntSetting overlayShadowRadius = {"/appearance/overlay/shadowRadius", 8};
-#ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
-    QStringSetting overlayInertShortcut = {"/behaviour/overlay/inert",
-                                           "Ctrl+Alt+Shift+U"};
-#endif
 
     // Badges
     BoolSetting showBadgesGlobalAuthority = {

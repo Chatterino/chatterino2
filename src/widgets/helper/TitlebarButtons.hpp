@@ -59,9 +59,6 @@ private:
     /// @pre ht must be one of { HTMAXBUTTON, HTMINBUTTON, HTCLOSE }.
     TitleBarButton *buttonForHt(size_t ht) const;
 
-    /// Sets the size for all buttons
-    void setSize(int width, int height);
-
     QWidget *window_ = nullptr;
     TitleBarButton *minButton_ = nullptr;
     TitleBarButton *maxButton_ = nullptr;
