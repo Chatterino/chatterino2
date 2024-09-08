@@ -28,4 +28,5 @@ private:
     std::unordered_map<QString, UserPronouns> saved;
     AlejoApi alejoApi;
 };
+
 }  // namespace chatterino::pronouns
