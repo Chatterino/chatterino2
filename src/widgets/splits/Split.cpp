@@ -1148,7 +1148,7 @@ void Split::popup()
 
 OverlayWindow *Split::overlayWindow()
 {
-    return this->overlayWindow_.get();
+    return this->overlayWindow_.data();
 }
 
 void Split::showOverlayWindow()
