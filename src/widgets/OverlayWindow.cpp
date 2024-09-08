@@ -97,11 +97,11 @@ OverlayWindow::OverlayWindow(IndirectChannel channel)
     // QGridLayout is (ab)used to stack widgets and position them
     auto *grid = new QGridLayout(this);
     grid->addWidget(&this->channelView_, 0, 0);
+    this->interaction_.attach(grid);
 #ifndef OVERLAY_NATIVE_MOVE
     grid->addWidget(new InvisibleSizeGrip(this), 0, 0,
                     Qt::AlignBottom | Qt::AlignRight);
 #endif
-    this->interaction_.attach(grid);
 
     // the interaction overlay currently captures all events
     this->interaction_.installEventFilter(this);
