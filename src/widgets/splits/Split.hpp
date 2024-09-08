@@ -161,7 +161,7 @@ private:
     SplitInput *const input_;
     SplitOverlay *const overlay_;
 
-    QPointer<OverlayWindow> overlayWindow_ = nullptr;
+    QPointer<OverlayWindow> overlayWindow_;
 
     QPointer<SelectChannelDialog> selectChannelDialog_;
 
