@@ -89,6 +89,7 @@
 - Dev: Refactor and document `Scrollbar`. (#5334, #5393)
 - Dev: Refactor `TwitchIrcServer`, making it abstracted. (#5421, #5435)
 - Dev: Reduced the amount of scale events. (#5404, #5406)
+- Dev: Refactored settings widget creation. (#5585)
 - Dev: Removed unused timegate settings. (#5361)
 - Dev: Add `Channel::addSystemMessage` helper function, allowing us to avoid the common `channel->addMessage(makeSystemMessage(...));` pattern. (#5500)
 - Dev: Unsingletonize `Resources2`. (#5460)
