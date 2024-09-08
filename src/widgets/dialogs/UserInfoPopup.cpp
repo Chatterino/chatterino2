@@ -964,17 +964,17 @@ void UserInfoPopup::updateUserData()
         {
             getApp()->getPronouns()->getUserPronoun(
                 user.login,
-                [this, hack](const auto pronouns) {
+                [this, hack](const auto userPronoun) {
                     runInGuiThread([this, hack,
-                                    pronouns = std::move(pronouns)]() {
+                                    userPronoun = std::move(userPronoun)]() {
                         if (!hack.lock() || this->ui_.pronounsLabel == nullptr)
                         {
                             return;
                         }
-                        if (!pronouns.isUnspecified())
+                        if (!userPronoun.isUnspecified())
                         {
                             this->ui_.pronounsLabel->setText(
-                                TEXT_PRONOUNS.arg(pronouns.format()));
+                                TEXT_PRONOUNS.arg(userPronoun.format()));
                         }
                         else
                         {
