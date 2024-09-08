@@ -28,6 +28,7 @@ Q_DECLARE_LOGGING_CATEGORY(chatterinoMessage);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoNativeMessage);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoNetwork);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoNotification);
+Q_DECLARE_LOGGING_CATEGORY(chatterinoPronouns);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoPubSub);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoRecentMessages);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoSettings);

@@ -1064,6 +1064,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        false,
                        "Make all clickable links lowercase to deter "
                        "phishing attempts.");
+    layout.addCheckbox(
+        "Show user's pronouns in user card", s.showPronouns, false,
+        "Shows users' pronouns in their user card. "
+        "Pronouns are retrieved from alejo.io when the user card is opened.");
     layout.addCheckbox("Bold @usernames", s.boldUsernames, false,
                        "Bold @mentions to make them more noticable.");
     layout.addCheckbox("Color @usernames", s.colorUsernames, false,

@@ -2,7 +2,8 @@
 
 ## Unversioned
 
-- Minor: Added transparent overlay window (default keybind: `CTRL + ALT + N`). (#4746)
+- Major: Add option to show pronouns in user card. (#5442, #5583)
+- Minor: Added transparent overlay window (default keybind: <kbd>CTRL</kbd> + <kbd>ALT</kbd> + <kbd>N</kbd>). (#4746)
 - Major: Release plugins alpha. (#5288)
 - Major: Improve high-DPI support on Windows. (#4868, #5391)
 - Minor: Removed the Ctrl+Shift+L hotkey for toggling the "live only" tab visibility state. (#5530)
