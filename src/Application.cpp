@@ -15,6 +15,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/links/LinkResolver.hpp"
+#include "providers/pronouns/Pronouns.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
@@ -178,6 +179,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , linkResolver(new LinkResolver)
     , streamerMode(new StreamerMode)
     , twitchUsers(new TwitchUsers)
+    , pronouns(std::make_shared<pronouns::Pronouns>())
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(new PluginController(paths))
 #endif
@@ -563,6 +565,14 @@ SeventvEventAPI *Application::getSeventvEventAPI()
     // seventvEventAPI may be nullptr if it's not enabled
 
     return this->seventvEventAPI.get();
+}
+
+pronouns::Pronouns *Application::getPronouns()
+{
+    // pronouns::Pronouns handles its own locks, so we don't need to assert that this is called in the GUI thread
+    assert(this->pronouns);
+
+    return this->pronouns.get();
 }
 
 void Application::save()

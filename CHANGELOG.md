@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Major: Add option to show pronouns in user card. (#5442)
 - Major: Release plugins alpha. (#5288)
 - Major: Improve high-DPI support on Windows. (#4868, #5391)
 - Minor: Removed the Ctrl+Shift+L hotkey for toggling the "live only" tab visibility state. (#5530)
