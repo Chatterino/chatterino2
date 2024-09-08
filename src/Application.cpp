@@ -179,7 +179,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , linkResolver(new LinkResolver)
     , streamerMode(new StreamerMode)
     , twitchUsers(new TwitchUsers)
-    , pronouns(std::make_shared<pronouns::Pronouns>())
+    , pronouns(new pronouns::Pronouns)
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(new PluginController(paths))
 #endif
