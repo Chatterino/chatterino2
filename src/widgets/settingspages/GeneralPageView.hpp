@@ -21,6 +21,7 @@ class QScrollArea;
 namespace chatterino {
 
 class ColorButton;
+class SettingWidget;
 
 class Space : public QLabel
 {
@@ -95,7 +96,7 @@ class GeneralPageView : public QWidget
 public:
     GeneralPageView(QWidget *parent = nullptr);
 
-    void addWidget(QWidget *widget);
+    void addWidget(QWidget *widget, QStringList keywords = {});
     void addLayout(QLayout *layout);
     void addStretch();
 
@@ -268,50 +269,6 @@ public:
              setValue = std::move(setValue)](const int newIndex) {
                 setting = setValue(DropdownArgs{combo->itemText(newIndex),
                                                 combo->currentIndex(), combo});
-                getApp()->getWindows()->forceLayoutChannelViews();
-            });
-
-        return combo;
-    }
-
-    template <typename T, std::size_t N>
-    ComboBox *addDropdownEnumClass(const QString &text,
-                                   const std::array<QStringView, N> &items,
-                                   EnumStringSetting<T> &setting,
-                                   QString toolTipText,
-                                   const QString &defaultValueText)
-    {
-        auto *combo = this->addDropdown(text, {}, std::move(toolTipText));
-
-        for (const auto &item : items)
-        {
-            combo->addItem(item.toString());
-        }
-
-        if (!defaultValueText.isEmpty())
-        {
-            combo->setCurrentText(defaultValueText);
-        }
-
-        setting.connect(
-            [&setting, combo](const QString &value) {
-                auto enumValue =
-                    qmagicenum::enumCast<T>(value, qmagicenum::CASE_INSENSITIVE)
-                        .value_or(setting.defaultValue);
-
-                auto i = magic_enum::enum_integer(enumValue);
-
-                combo->setCurrentIndex(i);
-            },
-            this->managedConnections_);
-
-        QObject::connect(
-            combo, &QComboBox::currentTextChanged,
-            [&setting](const auto &newText) {
-                // The setter for EnumStringSetting does not check that this value is valid
-                // Instead, it's up to the getters to make sure that the setting is legic - see the enum_cast above
-                // You could also use the settings `getEnum` function
-                setting = newText;
                 getApp()->getWindows()->forceLayoutChannelViews();
             });
 

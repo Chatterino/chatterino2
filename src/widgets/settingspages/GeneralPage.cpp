@@ -20,6 +20,7 @@
 #include "util/IncognitoBrowser.hpp"
 #include "widgets/BaseWindow.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
+#include "widgets/settingspages/SettingWidget.hpp"
 
 #include <magic_enum/magic_enum.hpp>
 #include <QDesktopServices>
@@ -265,10 +266,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         false, "Choose which tabs are visible in the notebook");
 
-    layout.addCheckbox(
-        "Show message reply context", s.hideReplyContext, true,
-        "This setting will only affect how messages are shown. You can reply "
-        "to a message regardless of this setting.");
+    SettingWidget::inverseCheckbox("Show message reply context",
+                                   s.hideReplyContext)
+        ->setTooltip(
+            "This setting will only affect how messages are shown. You can "
+            "reply to a message regardless of this setting.")
+        ->addTo(layout);
+
     layout.addCheckbox("Show message reply button", s.showReplyButton, false,
                        "Show a reply button next to every chat message");
 
@@ -622,25 +626,48 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                            "Google",
                        },
                        s.emojiSet);
-    layout.addCheckbox("Show BetterTTV global emotes",
-                       s.enableBTTVGlobalEmotes);
-    layout.addCheckbox("Show BetterTTV channel emotes",
-                       s.enableBTTVChannelEmotes);
-    layout.addCheckbox("Enable BetterTTV live emote updates (requires restart)",
-                       s.enableBTTVLiveUpdates);
-    layout.addCheckbox("Show FrankerFaceZ global emotes",
-                       s.enableFFZGlobalEmotes);
-    layout.addCheckbox("Show FrankerFaceZ channel emotes",
-                       s.enableFFZChannelEmotes);
-    layout.addCheckbox("Show 7TV global emotes", s.enableSevenTVGlobalEmotes);
-    layout.addCheckbox("Show 7TV channel emotes", s.enableSevenTVChannelEmotes);
-    layout.addCheckbox("Enable 7TV live emote updates (requires restart)",
-                       s.enableSevenTVEventAPI);
-    layout.addCheckbox("Send activity to 7TV", s.sendSevenTVActivity, false,
-                       "When enabled, Chatterino will signal an activity to "
-                       "7TV when you send a chat mesage. This is used for "
-                       "badges, paints, and personal emotes. When disabled, no "
-                       "activity is sent and others won't see your cosmetics.");
+    SettingWidget::checkbox("Show BetterTTV global emotes",
+                            s.enableBTTVGlobalEmotes)
+        ->addKeywords({"bttv"})
+        ->addTo(layout);
+    SettingWidget::checkbox("Show BetterTTV channel emotes",
+                            s.enableBTTVChannelEmotes)
+        ->addKeywords({"bttv"})
+        ->addTo(layout);
+    SettingWidget::checkbox(
+        "Enable BetterTTV live emote updates (requires restart)",
+        s.enableBTTVLiveUpdates)
+        ->addKeywords({"bttv"})
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Show FrankerFaceZ global emotes",
+                            s.enableFFZGlobalEmotes)
+        ->addKeywords({"ffz"})
+        ->addTo(layout);
+    SettingWidget::checkbox("Show FrankerFaceZ channel emotes",
+                            s.enableFFZChannelEmotes)
+        ->addKeywords({"ffz"})
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Show 7TV global emotes",
+                            s.enableSevenTVGlobalEmotes)
+        ->addKeywords({"seventv"})
+        ->addTo(layout);
+    SettingWidget::checkbox("Show 7TV channel emotes",
+                            s.enableSevenTVChannelEmotes)
+        ->addKeywords({"seventv"})
+        ->addTo(layout);
+    SettingWidget::checkbox("Enable 7TV live emote updates (requires restart)",
+                            s.enableSevenTVEventAPI)
+        ->addKeywords({"seventv"})
+        ->addTo(layout);
+    SettingWidget::checkbox("Send activity to 7TV", s.sendSevenTVActivity)
+        ->setTooltip("When enabled, Chatterino will signal an activity to 7TV "
+                     "when you send a chat mesage. This is used for badges, "
+                     "paints, and personal emotes. When disabled, no activity "
+                     "is sent and others won't see your cosmetics.")
+        ->addKeywords({"seventv"})
+        ->addTo(layout);
 
     layout.addTitle("Streamer Mode");
     layout.addDescription(
@@ -1075,10 +1102,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        false,
                        "Make all clickable links lowercase to deter "
                        "phishing attempts.");
-    layout.addCheckbox(
-        "Show user's pronouns in user card", s.showPronouns, false,
-        "Shows users' pronouns in their user card. "
-        "Pronouns are retrieved from alejo.io when the user card is opened.");
+    SettingWidget::checkbox("Show user's pronouns in user card", s.showPronouns)
+        ->setDescription(
+            R"(Pronouns are retrieved from <a href="https://pr.alejo.io">pr.alejo.io</a> when a user card is opened.)")
+        ->addTo(layout);
+
     layout.addCheckbox("Bold @usernames", s.boldUsernames, false,
                        "Bold @mentions to make them more noticable.");
     layout.addCheckbox("Color @usernames", s.colorUsernames, false,
@@ -1179,13 +1207,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addIntInput("Usercard scrollback limit (requires restart)",
                        s.scrollbackUsercardLimit, 100, 100000, 100);
 
-    layout.addDropdownEnumClass<ShowModerationState>(
-        "Show blocked term automod messages",
-        qmagicenum::enumNames<ShowModerationState>(),
-        s.showBlockedTermAutomodMessages,
-        "Show messages that are blocked by AutoMod for containing a public "
-        "blocked term in the current channel.",
-        {});
+    SettingWidget::dropdown("Show blocked term automod messages",
+                            s.showBlockedTermAutomodMessages)
+        ->setTooltip("Show messages that are blocked by AutoMod for containing "
+                     "a public blocked term in the current channel.")
+        ->addTo(layout);
 
     layout.addDropdown<int>(
         "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
@@ -1211,25 +1237,20 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "@mention for the related thread. If the reply context is hidden, "
         "these mentions will never be stripped.");
 
-    layout.addDropdownEnumClass<ChatSendProtocol>(
-        "Chat send protocol", qmagicenum::enumNames<ChatSendProtocol>(),
-        s.chatSendProtocol,
-        "'Helix' will use Twitch's Helix API to send message. 'IRC' will use "
-        "IRC to send messages.",
-        {});
+    SettingWidget::dropdown("Chat send protocol", s.chatSendProtocol)
+        ->setTooltip("'Helix' will use Twitch's Helix API to send message. "
+                     "'IRC' will use IRC to send messages.")
+        ->addTo(layout);
 
-    layout.addCheckbox(
-        "Show send message button", s.showSendButton, false,
-        "Show a Send button next to each split input that can be "
-        "clicked to send the message");
+    SettingWidget::checkbox("Show send message button", s.showSendButton)
+        ->setTooltip("Show a Send button next to each split input that can be "
+                     "clicked to send the message")
+        ->addTo(layout);
 
-    auto *soundBackend = layout.addDropdownEnumClass<SoundBackend>(
-        "Sound backend (requires restart)",
-        qmagicenum::enumNames<SoundBackend>(), s.soundBackend,
-        "Change this only if you're noticing issues with sound playback on "
-        "your system",
-        {});
-    soundBackend->setMinimumWidth(soundBackend->minimumSizeHint().width());
+    SettingWidget::dropdown("Sound backend (requires restart)", s.soundBackend)
+        ->setTooltip("Change this only if you're noticing issues "
+                     "with sound playback on your system")
+        ->addTo(layout);
 
     layout.addStretch();
 

@@ -6,6 +6,7 @@
 #include "widgets/dialogs/ColorPickerDialog.hpp"
 #include "widgets/helper/color/ColorButton.hpp"
 #include "widgets/helper/Line.hpp"
+#include "widgets/settingspages/SettingWidget.hpp"
 
 #include <QRegularExpression>
 #include <QScrollArea>
@@ -44,9 +45,16 @@ GeneralPageView::GeneralPageView(QWidget *parent)
                      });
 }
 
-void GeneralPageView::addWidget(QWidget *widget)
+void GeneralPageView::addWidget(QWidget *widget, QStringList keywords)
 {
     this->contentLayout_->addWidget(widget);
+    if (!keywords.isEmpty())
+    {
+        this->groups_.back().widgets.push_back({
+            .element = widget,
+            .keywords = keywords,
+        });
+    }
 }
 
 void GeneralPageView::addLayout(QLayout *layout)
