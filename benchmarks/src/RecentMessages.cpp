@@ -11,7 +11,6 @@
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
-#include "providers/pronouns/Pronouns.hpp"
 #include "providers/recentmessages/Impl.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
@@ -111,11 +110,6 @@ public:
         return &this->linkResolver;
     }
 
-    pronouns::Pronouns *getPronouns() override
-    {
-        return &this->pronouns;
-    }
-
     AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;
@@ -130,7 +124,6 @@ public:
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;
     DisabledStreamerMode streamerMode;
-    pronouns::Pronouns pronouns;
 };
 
 std::optional<QJsonDocument> tryReadJsonFile(const QString &path)
