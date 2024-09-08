@@ -6,51 +6,53 @@
 #include "providers/pronouns/UserPronouns.hpp"
 
 #include <mutex>
-#include <string>
 #include <unordered_map>
+
+namespace {
+
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+const auto &LOG = chatterinoPronouns;
+
+}  // namespace
 
 namespace chatterino::pronouns {
 
-void Pronouns::fetch(const QString &username,
-                     const std::function<void(UserPronouns)> &callbackSuccess,
-                     const std::function<void()> &callbackFail)
+void Pronouns::getUserPronoun(
+    const QString &username,
+    const std::function<void(UserPronouns)> &callbackSuccess,
+    const std::function<void()> &callbackFail)
 {
     // Only fetch pronouns if we haven't fetched before.
+    auto cachedPronoun = this->getCachedUserPronoun(username);
+    if (cachedPronoun.has_value())
     {
-        std::shared_lock lock(this->mutex);
+        callbackSuccess(*cachedPronoun);
+        return;
+    }
 
-        auto iter = this->saved.find(username);
-        if (iter != this->saved.end())
-        {
-            callbackSuccess(iter->second);
-            return;
-        }
-    }  // unlock mutex
-
-    qCDebug(chatterinoPronouns)
-        << "Fetching pronouns from alejo.io for " << username;
-
-    alejoApi.fetch(username, [this, callbackSuccess, callbackFail,
-                              username](std::optional<UserPronouns> result) {
-        if (result.has_value())
-        {
-            {
-                std::unique_lock lock(this->mutex);
-                this->saved[username] = *result;
-            }  // unlock mutex
-            qCDebug(chatterinoPronouns)
-                << "Adding pronouns " << result->format() << " for user "
-                << username;
-            callbackSuccess(*result);
-        }
-        else
+    this->alejoApi.fetch(username, [this, callbackSuccess, callbackFail,
+                                    username](const auto &oUserPronoun) {
+        if (!oUserPronoun.has_value())
         {
             callbackFail();
+            return;
         }
+
+        const auto &userPronoun = *oUserPronoun;
+
+        qCDebug(LOG) << "Caching pronoun" << userPronoun.format() << "for user"
+                     << username;
+        {
+            std::unique_lock lock(this->mutex);
+            this->saved[username] = userPronoun;
+        }
+
+        callbackSuccess(userPronoun);
     });
 }
 
-std::optional<UserPronouns> Pronouns::getForUsername(const QString &username)
+std::optional<UserPronouns> Pronouns::getCachedUserPronoun(
+    const QString &username)
 {
     std::shared_lock lock(this->mutex);
     auto it = this->saved.find(username);

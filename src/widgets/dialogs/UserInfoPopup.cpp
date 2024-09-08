@@ -962,7 +962,7 @@ void UserInfoPopup::updateUserData()
         // get pronouns
         if (getSettings()->showPronouns)
         {
-            getApp()->getPronouns()->fetch(
+            getApp()->getPronouns()->getUserPronoun(
                 user.login,
                 [this, hack](const auto pronouns) {
                     runInGuiThread([this, hack,
