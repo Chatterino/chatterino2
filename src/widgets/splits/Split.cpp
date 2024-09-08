@@ -59,7 +59,6 @@
 #include <functional>
 #include <random>
 
-
 namespace {
 
 using namespace chatterino;
