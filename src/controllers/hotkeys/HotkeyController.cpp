@@ -406,6 +406,9 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Split,
                             QKeySequence("Ctrl+Alt+N"), "popupOverlay", {},
                             "open overlay");
+        this->tryAddDefault(addedHotkeys, HotkeyCategory::Split,
+                            QKeySequence("Ctrl+Shift+U"), "togglePopupInertia",
+                            {"thisOrAll"}, "toggle overlay click-through");
     }
 
     // split input

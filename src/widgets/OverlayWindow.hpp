@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/Channel.hpp"
-#include "controllers/hotkeys/GlobalShortcutFwd.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/OverlayInteraction.hpp"
 
@@ -31,6 +30,8 @@ public:
 
     void setOverrideCursor(const QCursor &cursor);
 
+    void toggleInertia();
+
 protected:
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     using NativeResult = qintptr;
@@ -52,9 +53,13 @@ protected:
 private:
     void triggerFirstActivation();
 
+    void addShortcuts();
+
     void startInteraction();
     void startShortInteraction();
     void endInteraction();
+
+    void setInert(bool inert);
 
     void applyTheme();
 
@@ -70,18 +75,13 @@ private:
     ChannelView channelView_;
     QGraphicsDropShadowEffect *dropShadow_;
 
+    bool inert_ = false;
+
     bool moving_ = false;
     QPoint moveOrigin_;
 
     OverlayInteraction interaction_;
     QTimer shortInteraction_;
-
-#ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
-    void setInert(bool inert);
-
-    std::unique_ptr<GlobalShortcut> shortcut_;
-    bool inert_ = false;
-#endif
 };
 
 }  // namespace chatterino

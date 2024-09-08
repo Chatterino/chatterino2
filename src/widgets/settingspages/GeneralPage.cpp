@@ -999,10 +999,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                      "device-independent pixels. A negative value offsets to "
                      "the top and a positive to the bottom.")
         ->setSuffix("dp");
-#ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
-    layout.addGlobalShortcut("Clickthrough Hotkey", s.overlayInertShortcut,
-                             "Toggles the inertia of the overlay.");
-#endif
 
     layout.addSubtitle("Miscellaneous");
 

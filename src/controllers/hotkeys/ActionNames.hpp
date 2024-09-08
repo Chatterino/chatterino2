@@ -182,6 +182,19 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"showGlobalSearch", ActionDefinition{"Search all channels"}},
          {"debug", ActionDefinition{"Show debug popup"}},
          {"popupOverlay", ActionDefinition{"New overlay popup"}},
+         {"togglePopupInertia",
+          ActionDefinition{
+              .displayName = "Toggle overlay click-through",
+              .argumentDescription = "<target popup: this or thisOrAll or all>",
+              .minCountArguments = 1,
+              .maxCountArguments = 1,
+              .possibleArguments{
+                  {"This", {"this"}},
+                  {"All", {"all"}},
+                  {"This or all", {"thisOrAll"}},
+              },
+              .argumentsPrompt = "Target popup:",
+          }},
      }},
     {HotkeyCategory::SplitInput,
      {

@@ -768,7 +768,43 @@ void Split::addShortcuts()
          }},
         {"popupOverlay",
          [this](const auto &) -> QString {
-             this->popupOverlay();
+             this->showOverlayWindow();
+             return {};
+         }},
+        {"togglePopupInertia",
+         [this](const auto &args) -> QString {
+             if (args.empty())
+             {
+                 return "No arguments provided to togglePopupInertia (expected "
+                        "one)";
+             }
+             const auto &arg = args.front();
+
+             if (arg == "this")
+             {
+                 if (this->overlayWindow_)
+                 {
+                     this->overlayWindow_->toggleInertia();
+                 }
+                 return {};
+             }
+             if (arg == "thisOrAll")
+             {
+                 if (this->overlayWindow_)
+                 {
+                     this->overlayWindow_->toggleInertia();
+                 }
+                 else
+                 {
+                     getApp()->getWindows()->toggleAllPopupInertia();
+                 }
+                 return {};
+             }
+             if (arg == "all")
+             {
+                 getApp()->getWindows()->toggleAllPopupInertia();
+                 return {};
+             }
              return {};
          }},
     };
@@ -1110,9 +1146,18 @@ void Split::popup()
     window.show();
 }
 
-void Split::popupOverlay()
+OverlayWindow *Split::overlayWindow()
 {
-    (new OverlayWindow(this->getIndirectChannel()))->show();
+    return this->overlayWindow_.get();
+}
+
+void Split::showOverlayWindow()
+{
+    if (!this->overlayWindow_)
+    {
+        this->overlayWindow_ = new OverlayWindow(this->getIndirectChannel());
+    }
+    this->overlayWindow_->show();
 }
 
 void Split::clear()

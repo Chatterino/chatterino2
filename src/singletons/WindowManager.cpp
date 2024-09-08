@@ -16,6 +16,7 @@
 #include "widgets/FramelessEmbedWindow.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/OverlayWindow.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/Window.hpp"
@@ -542,6 +543,20 @@ void WindowManager::queueSave()
     using namespace std::chrono_literals;
 
     this->saveTimer->start(10s);
+}
+
+void WindowManager::toggleAllPopupInertia()
+{
+    for (auto *window : this->windows_)
+    {
+        window->getNotebook().forEachSplit([&](auto *split) {
+            auto *overlay = split->overlayWindow();
+            if (overlay)
+            {
+                overlay->toggleInertia();
+            }
+        });
+    }
 }
 
 void WindowManager::encodeTab(SplitContainer *tab, bool isSelected,

@@ -128,6 +128,9 @@ public:
     // again
     void queueSave();
 
+    /// Toggles the inertia in all open popup windows
+    void toggleAllPopupInertia();
+
     /// Signals
     pajlada::Signals::NoArgSignal gifRepaintRequested;
 

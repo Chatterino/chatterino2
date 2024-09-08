@@ -1,8 +1,9 @@
 #include "widgets/OverlayWindow.hpp"
 
+#include "Application.hpp"
 #include "common/FlagsEnum.hpp"
 #include "common/Literals.hpp"
-#include "controllers/hotkeys/GlobalShortcut.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "widgets/BaseWidget.hpp"
@@ -56,6 +57,24 @@ void acquireKnowledge(Knowledge knowledge)
         static_cast<std::underlying_type_t<Knowledge>>(current.value());
 }
 
+QKeySequence toggleIntertiaShortcut()
+{
+    auto seq = getApp()->getHotkeys()->getDisplaySequence(
+        HotkeyCategory::Split, u"togglePopupInertia"_s, {{u"this"_s}});
+    if (!seq.isEmpty())
+    {
+        return seq;
+    }
+    seq = getApp()->getHotkeys()->getDisplaySequence(
+        HotkeyCategory::Split, u"togglePopupInertia"_s, {{u"thisOrAll"_s}});
+    if (!seq.isEmpty())
+    {
+        return seq;
+    }
+    return getApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Split,
+                                                      u"togglePopupInertia"_s);
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -75,6 +94,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel)
     this->setAttribute(Qt::WA_DeleteOnClose);
     this->setWindowTitle(u"Chatterino - Overlay"_s);
 
+    // QGridLayout is (ab)used to stack widgets and position them
     auto *grid = new QGridLayout(this);
     grid->addWidget(&this->channelView_, 0, 0);
 #ifndef OVERLAY_NATIVE_MOVE
@@ -142,20 +162,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel)
         this->applyTheme();
     });
 
-#ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
-    getSettings()->overlayInertShortcut.connect(
-        [this](const auto &value) {
-            this->shortcut_ = std::make_unique<GlobalShortcut>(
-                QKeySequence::fromString(value, QKeySequence::PortableText),
-                this);
-            QObject::connect(this->shortcut_.get(), &GlobalShortcut::activated,
-                             this, [this] {
-                                 this->setInert(!this->inert_);
-                             });
-        },
-        this->holder_);
-#endif
-
+    this->addShortcuts();
     this->triggerFirstActivation();
 }
 
@@ -235,6 +242,11 @@ void OverlayWindow::setOverrideCursor(const QCursor &cursor)
 {
     this->channelView_.setCursor(cursor);
     this->setCursor(cursor);
+}
+
+void OverlayWindow::toggleInertia()
+{
+    this->setInert(!this->inert_);
 }
 
 void OverlayWindow::enterEvent(EnterEvent * /*event*/)
@@ -401,18 +413,24 @@ void OverlayWindow::triggerFirstActivation()
 #else
         "To resize the window, drag on the bottom right corner."
 #endif
-        ;
+        "<br><br>"
+        "By default, the overlay is interactive. ";
 
-#ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
-    auto actualShortcut =
-        QKeySequence::fromString(getSettings()->overlayInertShortcut,
-                                 QKeySequence::PortableText)
-            .toString(QKeySequence::PortableText);
-    welcomeText += u"<br><br>"_s
-                   "By default, the overlay is interactive. "
-                   "To toggle the click-through mode, press %1 (customizable "
-                   "in the settings).".arg(actualShortcut);
-#endif
+    auto actualShortcut = toggleIntertiaShortcut();
+    if (actualShortcut.isEmpty())
+    {
+        welcomeText +=
+            u"To toggle the click-through mode, "
+            "add a hotkey for \"Toggle overlay click-through\" in the split "
+            "category to press while any Chatterino window is focused."_s;
+    }
+    else
+    {
+        welcomeText +=
+            u"To toggle the click-through mode, press %1 (customizable "_s
+            "in the settings) while any Chatterino window is focused.".arg(
+                actualShortcut.toString());
+    }
 
     welcomeText += u"<br><br>"_s
                    "This is still an early version and some features are "
@@ -426,14 +444,25 @@ void OverlayWindow::triggerFirstActivation()
     box->open();
 }
 
+void OverlayWindow::addShortcuts()
+{
+    auto seq = toggleIntertiaShortcut();
+    if (seq.isEmpty())
+    {
+        return;
+    }
+
+    auto *shortcut = new QShortcut(seq, this);
+    QObject::connect(shortcut, &QShortcut::activated, this,
+                     &OverlayWindow::toggleInertia);
+}
+
 void OverlayWindow::startInteraction()
 {
-#ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
     if (this->inert_)
     {
         return;
     }
-#endif
 
     this->interaction_.startInteraction();
     this->shortInteraction_.stop();
@@ -441,12 +470,10 @@ void OverlayWindow::startInteraction()
 
 void OverlayWindow::startShortInteraction()
 {
-#ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
     if (this->inert_)
     {
         return;
     }
-#endif
 
     this->interaction_.startInteraction();
     this->shortInteraction_.start();
@@ -457,7 +484,6 @@ void OverlayWindow::endInteraction()
     this->interaction_.endInteraction();
 }
 
-#ifdef CHATTERINO_HAS_GLOBAL_SHORTCUT
 void OverlayWindow::setInert(bool inert)
 {
     if (this->inert_ == inert)
@@ -484,6 +510,5 @@ void OverlayWindow::setInert(bool inert)
         this->interaction_.show();
     }
 }
-#endif
 
 }  // namespace chatterino
