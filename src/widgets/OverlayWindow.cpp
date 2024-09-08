@@ -301,7 +301,7 @@ bool OverlayWindow::nativeEvent(const QByteArray &eventType, void *message,
     return returnValue;
 }
 
-void OverlayWindow::handleNCHITTEST(MSG *msg, qintptr *result)
+void OverlayWindow::handleNCHITTEST(MSG *msg, NativeResult *result)
 {
     // This implementation is similar to the one of BaseWindow, but has the
     // following differences:
