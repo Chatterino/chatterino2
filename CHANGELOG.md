@@ -25,7 +25,7 @@
 - Minor: Improve appearance of reply button. (#5491)
 - Minor: Introduce HTTP API for plugins. (#5383, #5492, #5494)
 - Minor: Support more Firefox variants for incognito link opening. (#5503)
-- Minor: Replying to a message will now display the message being replied to. (#4350, #5519)
+- Minor: Replying to a message will now display the message being replied to. (#4350, #5519, #5586)
 - Minor: Links can now have prefixes and suffixes such as parentheses. (#5486, #5515)
 - Minor: Added support for scrolling in splits with touchscreen panning gestures. (#5524)
 - Minor: Removed experimental IRC support. (#5547)
