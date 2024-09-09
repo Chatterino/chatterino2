@@ -85,6 +85,7 @@
 - Dev: Refactored `MessageBuilder` to be a single class. (#5548)
 - Dev: Recent changes are now shown in the nightly release description. (#5553, #5554)
 - Dev: The timer for `StreamerMode` is now destroyed on the correct thread. (#5571)
+- Dev: Cleanup some parts of the `magic_enum` adaptation for Qt. (#5587)
 
 ## 2.5.1
 
