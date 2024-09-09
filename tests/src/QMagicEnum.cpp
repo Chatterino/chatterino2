@@ -27,6 +27,8 @@ enum class MyFlag {
     Two = 2,
     Four = 4,
     Eight = 8,
+    TwoPow9 = 512,
+    TwoPow10 = 1024,
 };
 using MyFlags = chatterino::FlagsEnum<MyFlag>;
 
@@ -130,7 +132,8 @@ TEST(QMagicEnum, flags)
     static_assert(checkConst(MyFlag::Eight, u"Eight"));
     static_assert(checkConst(MyFlag::Eight, u"Eight"));
     static_assert(eq(enumName(static_cast<MyFlag>(16)), u""));
-    static_assert(checkValues<MyFlag>({u"One", u"Two", u"Four", u"Eight"}));
+    static_assert(checkValues<MyFlag>(
+        {u"One", u"Two", u"Four", u"Eight", u"TwoPow9", u"TwoPow10"}));
 }
 
 TEST(QMagicEnum, enumNameString)
