@@ -4,15 +4,13 @@
 
 namespace {
 
-// clang-format off
-const QRegularExpression tokenRegex(""
-    "((r|ri)?\\\")((\\\\\")|[^\\\"])*\\\"|"         // String/Regex literal
-    "[\\w\\.]+|"                                    // Identifier or reserved keyword
+const QRegularExpression TOKEN_REGEX(
+    "((r|ri)?\\\")((\\\\\")|[^\\\"])*\\\"|"  // String/Regex literal
+    "[\\w\\.]+|"                             // Identifier or reserved keyword
     "(<=?|>=?|!=?|==|\\|\\||&&|\\+|-|\\*|\\/|%)+|"  // Operator
     "[\\(\\)]|"                                     // Parentheses
     "[{},]"                                         // List
 );
-// clang-format on
 
 }  // namespace
 
@@ -125,7 +123,7 @@ QString tokenTypeToInfoString(TokenType type)
 
 Tokenizer::Tokenizer(const QString &text)
 {
-    QRegularExpressionMatchIterator i = tokenRegex.globalMatch(text);
+    QRegularExpressionMatchIterator i = TOKEN_REGEX.globalMatch(text);
     while (i.hasNext())
     {
         auto capturedText = i.next().captured();
