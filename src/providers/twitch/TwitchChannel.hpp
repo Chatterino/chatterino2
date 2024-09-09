@@ -32,10 +32,10 @@ namespace chatterino {
 // instead.
 // See https://github.com/Chatterino/chatterino2/issues/3384 and
 // https://mm2pl.github.io/emoji_rfc.pdf for more details
-inline const QString ZERO_WIDTH_JOINER = QStringLiteral("\u200D");
+const QString ZERO_WIDTH_JOINER = QStringLiteral("\u200D");
 
 // Note: \U requires /utf-8 for MSVC
-inline const QRegularExpression COMBINED_FIXER(
+const QRegularExpression COMBINED_FIXER(
     QStringLiteral("(?<!\U000E0002)\U000E0002"),
     QRegularExpression::UseUnicodePropertiesOption);
 
