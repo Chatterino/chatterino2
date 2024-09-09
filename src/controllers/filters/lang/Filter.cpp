@@ -10,6 +10,38 @@
 
 namespace chatterino::filters {
 
+const QMap<QString, Type> MESSAGE_TYPING_CONTEXT = {
+    {"author.badges", Type::StringList},
+    {"author.color", Type::Color},
+    {"author.name", Type::String},
+    {"author.no_color", Type::Bool},
+    {"author.subbed", Type::Bool},
+    {"author.sub_length", Type::Int},
+    {"channel.name", Type::String},
+    {"channel.watching", Type::Bool},
+    {"channel.live", Type::Bool},
+    {"flags.action", Type::Bool},
+    {"flags.highlighted", Type::Bool},
+    {"flags.points_redeemed", Type::Bool},
+    {"flags.sub_message", Type::Bool},
+    {"flags.system_message", Type::Bool},
+    {"flags.reward_message", Type::Bool},
+    {"flags.first_message", Type::Bool},
+    {"flags.elevated_message", Type::Bool},
+    {"flags.hype_chat", Type::Bool},
+    {"flags.cheer_message", Type::Bool},
+    {"flags.whisper", Type::Bool},
+    {"flags.reply", Type::Bool},
+    {"flags.automod", Type::Bool},
+    {"flags.restricted", Type::Bool},
+    {"flags.monitored", Type::Bool},
+    {"message.content", Type::String},
+    {"message.length", Type::Int},
+    {"reward.title", Type::String},
+    {"reward.cost", Type::Int},
+    {"reward.id", Type::String},
+};
+
 ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
 {
     auto watchingChannel = getApp()->getTwitch()->getWatchingChannel().get();

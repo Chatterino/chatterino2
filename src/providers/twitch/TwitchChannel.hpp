@@ -32,17 +32,11 @@ namespace chatterino {
 // instead.
 // See https://github.com/Chatterino/chatterino2/issues/3384 and
 // https://mm2pl.github.io/emoji_rfc.pdf for more details
-const QString ZERO_WIDTH_JOINER = QString(QChar(0x200D));
+inline const QString ZERO_WIDTH_JOINER = QStringLiteral("\u200D");
 
-// Here be MSVC: Do NOT replace with "\U" literal, it will fail silently.
-namespace {
-    const QChar ESCAPE_TAG_CHARS[2] = {QChar::highSurrogate(0xE0002),
-                                       QChar::lowSurrogate(0xE0002)};
-}
-const QString ESCAPE_TAG = QString(ESCAPE_TAG_CHARS, 2);
-
-const static QRegularExpression COMBINED_FIXER(
-    QString("(?<!%1)%1").arg(ESCAPE_TAG),
+// Note: \U requires /utf-8 for MSVC
+inline const QRegularExpression COMBINED_FIXER(
+    QStringLiteral("(?<!\U000E0002)\U000E0002"),
     QRegularExpression::UseUnicodePropertiesOption);
 
 enum class HighlightState;
