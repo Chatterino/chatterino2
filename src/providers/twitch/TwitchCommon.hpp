@@ -7,8 +7,7 @@
 
 namespace chatterino {
 
-[[maybe_unused]]
-inline const char *const ANONYMOUS_USERNAME = "justinfan64537";
+[[maybe_unused]] inline const char *const ANONYMOUS_USERNAME = "justinfan64537";
 
 inline constexpr int TWITCH_MESSAGE_LIMIT = 500;
 
