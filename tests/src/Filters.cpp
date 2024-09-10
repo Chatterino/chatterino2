@@ -23,9 +23,9 @@ using namespace chatterino;
 using namespace chatterino::filters;
 using chatterino::mock::MockChannel;
 
-TypingContext typingContext = MESSAGE_TYPING_CONTEXT;
-
 namespace {
+
+const TypingContext &typingContext = messageTypingContext();
 
 class MockApplication : public mock::BaseApplication
 {
@@ -286,7 +286,7 @@ TEST_F(FiltersF, TypingContextChecks)
 
     auto contextMap = buildContextMap(msg, &channel);
 
-    EXPECT_EQ(contextMap.size(), MESSAGE_TYPING_CONTEXT.size());
+    EXPECT_EQ(contextMap.size(), typingContext.size());
 
     delete privmsg;
 }
