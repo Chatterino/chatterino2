@@ -37,7 +37,7 @@ FilterParser::FilterParser(const QString &text)
     // safety: returnType must not live longer than the parsed expression. See
     // comment on IllTyped::expr.
     auto returnType =
-        this->builtExpression_->synthesizeType(messageTypingContext());
+        this->builtExpression_->synthesizeType(MESSAGE_TYPING_CONTEXT);
     if (isIllTyped(returnType))
     {
         this->errorLog(explainIllType(std::get<IllTyped>(returnType)));
@@ -314,7 +314,7 @@ const QStringList &FilterParser::errors() const
 
 const QString FilterParser::debugString() const
 {
-    return this->builtExpression_->debug(messageTypingContext());
+    return this->builtExpression_->debug(MESSAGE_TYPING_CONTEXT);
 }
 
 }  // namespace chatterino::filters

@@ -8,13 +8,14 @@
 
 namespace chatterino {
 
-constexpr QStringView LINK_CHATTERINO_WIKI = u"https://wiki.chatterino.com";
-constexpr QStringView LINK_CHATTERINO_DISCORD =
+inline constexpr QStringView LINK_CHATTERINO_WIKI =
+    u"https://wiki.chatterino.com";
+inline constexpr QStringView LINK_CHATTERINO_DISCORD =
     u"https://discord.gg/7Y5AYhAK4z";
-constexpr QStringView LINK_CHATTERINO_SOURCE =
+inline constexpr QStringView LINK_CHATTERINO_SOURCE =
     u"https://github.com/Chatterino/chatterino2";
 
-constexpr QStringView TWITCH_PLAYER_URL =
+inline constexpr QStringView TWITCH_PLAYER_URL =
     u"https://player.twitch.tv/?channel=%1&parent=twitch.tv";
 
 enum class HighlightState {

@@ -25,8 +25,6 @@ using chatterino::mock::MockChannel;
 
 namespace {
 
-const TypingContext &typingContext = messageTypingContext();
-
 class MockApplication : public mock::BaseApplication
 {
 public:
@@ -181,7 +179,8 @@ TEST(Filters, TypeSynthesis)
         T type = filter.returnType();
         EXPECT_EQ(type, expected)
             << "Filter{ " << input << " } has type " << type << " instead of "
-            << expected << ".\nDebug: " << filter.debugString(typingContext);
+            << expected
+            << ".\nDebug: " << filter.debugString(MESSAGE_TYPING_CONTEXT);
     }
 }
 
@@ -258,7 +257,7 @@ TEST(Filters, Evaluation)
         EXPECT_EQ(result, expected)
             << "Filter{ " << input << " } evaluated to " << result.toString()
             << " instead of " << expected.toString()
-            << ".\nDebug: " << filter.debugString(typingContext);
+            << ".\nDebug: " << filter.debugString(MESSAGE_TYPING_CONTEXT);
     }
 }
 
@@ -286,7 +285,7 @@ TEST_F(FiltersF, TypingContextChecks)
 
     auto contextMap = buildContextMap(msg, &channel);
 
-    EXPECT_EQ(contextMap.size(), typingContext.size());
+    EXPECT_EQ(contextMap.size(), MESSAGE_TYPING_CONTEXT.size());
 
     delete privmsg;
 }
@@ -361,7 +360,8 @@ TEST_F(FiltersF, ExpressionDebug)
         EXPECT_NE(filter, nullptr) << "Filter::fromString(" << input
                                    << ") did not build a proper filter";
 
-        const auto actualDebugString = filter->debugString(typingContext);
+        const auto actualDebugString =
+            filter->debugString(MESSAGE_TYPING_CONTEXT);
         EXPECT_EQ(actualDebugString, debugString)
             << "filter->debugString() on '" << input << "' should be '"
             << debugString << "', but got '" << actualDebugString << "'";

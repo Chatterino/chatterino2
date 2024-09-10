@@ -8,7 +8,7 @@
 
 namespace chatterino::filters {
 
-const QMap<QString, QString> &validIdentifiersMap();
+extern const QMap<QString, QString> VALID_IDENTIFIERS_MAP;
 
 enum TokenType {
     // control

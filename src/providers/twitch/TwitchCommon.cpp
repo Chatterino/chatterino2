@@ -2,7 +2,7 @@
 
 namespace chatterino {
 
-extern const std::vector<QColor> TWITCH_USERNAME_COLORS = {
+const std::vector<QColor> TWITCH_USERNAME_COLORS = {
     {255, 0, 0},      // Red
     {0, 0, 255},      // Blue
     {0, 255, 0},      // Green
@@ -20,7 +20,7 @@ extern const std::vector<QColor> TWITCH_USERNAME_COLORS = {
     {0, 255, 127},    // SpringGreen
 };
 
-extern const QStringList TWITCH_DEFAULT_COMMANDS{
+const QStringList TWITCH_DEFAULT_COMMANDS{
     "help",
     "w",
     "me",
@@ -58,6 +58,6 @@ extern const QStringList TWITCH_DEFAULT_COMMANDS{
     "warn",
 };
 
-extern const QStringList TWITCH_WHISPER_COMMANDS{"/w", ".w"};
+const QStringList TWITCH_WHISPER_COMMANDS{"/w", ".w"};
 
 }  // namespace chatterino
