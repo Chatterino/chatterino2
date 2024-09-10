@@ -8,15 +8,23 @@
 
 namespace chatterino {
 
-inline constexpr QStringView LINK_CHATTERINO_WIKI =
+inline constexpr auto &LINK_CHATTERINO_WIKI_DATA =
     u"https://wiki.chatterino.com";
-inline constexpr QStringView LINK_CHATTERINO_DISCORD =
+inline constexpr auto &LINK_CHATTERINO_DISCORD_DATA =
     u"https://discord.gg/7Y5AYhAK4z";
-inline constexpr QStringView LINK_CHATTERINO_SOURCE =
+inline constexpr auto &LINK_CHATTERINO_SOURCE_DATA =
     u"https://github.com/Chatterino/chatterino2";
 
-inline constexpr QStringView TWITCH_PLAYER_URL =
+inline constexpr auto &TWITCH_PLAYER_URL_DATA =
     u"https://player.twitch.tv/?channel=%1&parent=twitch.tv";
+
+inline constexpr QStringView LINK_CHATTERINO_WIKI = LINK_CHATTERINO_WIKI_DATA;
+inline constexpr QStringView LINK_CHATTERINO_DISCORD =
+    LINK_CHATTERINO_DISCORD_DATA;
+inline constexpr QStringView LINK_CHATTERINO_SOURCE =
+    LINK_CHATTERINO_SOURCE_DATA;
+
+inline constexpr QStringView TWITCH_PLAYER_URL = TWITCH_PLAYER_URL_DATA;
 
 enum class HighlightState {
     None,

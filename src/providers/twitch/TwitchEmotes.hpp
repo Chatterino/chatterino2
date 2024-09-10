@@ -18,8 +18,9 @@ namespace chatterino {
 // variant
 /// %1 <-> {id}
 /// %2 <-> {scale} (1.0, 2.0, 3.0)
-inline constexpr QStringView TWITCH_EMOTE_TEMPLATE =
+inline constexpr auto &TWITCH_EMOTE_TEMPLATE_DATA =
     u"https://static-cdn.jtvnw.net/emoticons/v2/%1/default/dark/%2";
+inline constexpr QStringView TWITCH_EMOTE_TEMPLATE = TWITCH_EMOTE_TEMPLATE_DATA;
 
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
@@ -63,8 +64,12 @@ using TwitchEmoteSetMap = boost::unordered_flat_map<EmoteSetId, TwitchEmoteSet>;
 
 struct HelixChannelEmote;
 
-inline constexpr QStringView TWITCH_SUB_EMOTE_SET_PREFIX = u"x-c2-s-";
-inline constexpr QStringView TWITCH_BIT_EMOTE_SET_PREFIX = u"x-c2-b-";
+inline constexpr auto &TWITCH_SUB_EMOTE_SET_PREFIX_DATA = u"x-c2-s-";
+inline constexpr auto &TWITCH_BIT_EMOTE_SET_PREFIX_DATA = u"x-c2-b-";
+inline constexpr QStringView TWITCH_SUB_EMOTE_SET_PREFIX =
+    TWITCH_SUB_EMOTE_SET_PREFIX_DATA;
+inline constexpr QStringView TWITCH_BIT_EMOTE_SET_PREFIX =
+    TWITCH_BIT_EMOTE_SET_PREFIX_DATA;
 
 struct TwitchEmoteSetMeta {
     QString setID;
