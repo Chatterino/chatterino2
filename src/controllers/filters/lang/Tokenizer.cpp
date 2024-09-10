@@ -16,7 +16,7 @@ const QRegularExpression TOKEN_REGEX(
 
 namespace chatterino::filters {
 
-const QMap<QString, QString> validIdentifiersMap = {
+extern const QMap<QString, QString> validIdentifiersMap = {
     {"author.badges", "author badges"},
     {"author.color", "author color"},
     {"author.name", "author name"},

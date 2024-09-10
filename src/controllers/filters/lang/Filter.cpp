@@ -10,7 +10,7 @@
 
 namespace chatterino::filters {
 
-const QMap<QString, Type> MESSAGE_TYPING_CONTEXT = {
+extern const QMap<QString, Type> MESSAGE_TYPING_CONTEXT = {
     {"author.badges", Type::StringList},
     {"author.color", Type::Color},
     {"author.name", Type::String},
