@@ -1,6 +1,7 @@
 #include "providers/emoji/Emojis.hpp"
 
 #include "common/Literals.hpp"
+#include "messages/Emote.hpp"
 #include "Test.hpp"
 
 #include <QDebug>
@@ -14,6 +15,9 @@ TEST(Emojis, ShortcodeParsing)
     Emojis emojis;
 
     emojis.load();
+
+    ASSERT_NE(EMPTY_EMOTE_MAP, nullptr);
+    ASSERT_TRUE(EMPTY_EMOTE_MAP->empty());
 
     struct TestCase {
         QString input;
