@@ -74,4 +74,15 @@ void Logging::addMessage(const QString &channelName, MessagePtr message,
     }
 }
 
+void Logging::closeChannel(const QString &channelName,
+                           const QString &platformName)
+{
+    auto platIt = this->loggingChannels_.find(platformName);
+    if (platIt == this->loggingChannels_.end())
+    {
+        return;
+    }
+    platIt->second.erase(channelName);
+}
+
 }  // namespace chatterino

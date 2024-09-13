@@ -8,6 +8,7 @@
 #include "mocks/BaseApplication.hpp"
 #include "mocks/Channel.hpp"
 #include "mocks/Helix.hpp"
+#include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
@@ -69,12 +70,18 @@ public:
         return &this->seventvEmotes;
     }
 
+    ILogging *getChatLogger() override
+    {
+        return &this->logging;
+    }
+
     AccountController accounts;
     mock::MockTwitchIrcServer twitch;
     Emotes emotes;
     BttvEmotes bttvEmotes;
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;
+    mock::EmptyLogging logging;
 };
 
 }  // namespace

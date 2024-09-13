@@ -239,4 +239,7 @@ private:
 
 IApplication *getApp();
 
+/// Might return `nullptr` if the app is being destroyed
+IApplication *tryGetApp();
+
 }  // namespace chatterino

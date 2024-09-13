@@ -697,4 +697,9 @@ IApplication *getApp()
     return INSTANCE;
 }
 
+IApplication *tryGetApp()
+{
+    return INSTANCE;
+}
+
 }  // namespace chatterino

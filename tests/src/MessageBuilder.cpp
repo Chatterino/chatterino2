@@ -7,6 +7,7 @@
 #include "mocks/Channel.hpp"
 #include "mocks/ChatterinoBadges.hpp"
 #include "mocks/DisabledStreamerMode.hpp"
+#include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "mocks/UserData.hpp"
 #include "providers/ffz/FfzBadges.hpp"
@@ -91,6 +92,11 @@ public:
         return &this->seventvEmotes;
     }
 
+    ILogging *getChatLogger() override
+    {
+        return &this->logging;
+    }
+
     AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;
@@ -102,6 +108,7 @@ public:
     BttvEmotes bttvEmotes;
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;
+    mock::EmptyLogging logging;
 };
 
 }  // namespace
