@@ -144,6 +144,7 @@ public:
 private:
     std::unique_ptr<Theme> themes;
     std::unique_ptr<Fonts> fonts;
+    const std::unique_ptr<Logging> logging;
     std::unique_ptr<Emotes> emotes;
     std::unique_ptr<AccountController> accounts;
     std::unique_ptr<HotkeyController> hotkeys;
@@ -169,7 +170,6 @@ private:
     std::unique_ptr<FfzEmotes> ffzEmotes;
     std::unique_ptr<SeventvEmotes> seventvEmotes;
     std::unique_ptr<SeventvEventAPI> seventvEventAPI;
-    const std::unique_ptr<Logging> logging;
     std::unique_ptr<ILinkResolver> linkResolver;
     std::unique_ptr<IStreamerMode> streamerMode;
     std::unique_ptr<ITwitchUsers> twitchUsers;
