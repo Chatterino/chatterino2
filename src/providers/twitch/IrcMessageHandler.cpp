@@ -702,15 +702,8 @@ void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
         }
     }
 
-    // This is for compatibility with older Chatterino versions. Twitch didn't use
-    // to allow ZERO WIDTH JOINER unicode character, so Chatterino used ESCAPE_TAG
-    // instead.
-    // See https://github.com/Chatterino/chatterino2/issues/3384 and
-    // https://mm2pl.github.io/emoji_rfc.pdf for more details
-    this->addMessage(
-        message, chan,
-        message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER),
-        twitchServer, false, message->isAction());
+    this->addMessage(message, chan, unescapeZeroWidthJoiner(message->content()),
+                     twitchServer, false, message->isAction());
 
     if (message->tags().contains(u"pinned-chat-paid-amount"_s))
     {
@@ -915,10 +908,9 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
 
     auto *c = getApp()->getTwitch()->getWhispersChannel().get();
 
-    MessageBuilder builder(
-        c, ircMessage, args,
-        ircMessage->parameter(1).replace(COMBINED_FIXER, ZERO_WIDTH_JOINER),
-        false);
+    MessageBuilder builder(c, ircMessage, args,
+                           unescapeZeroWidthJoiner(ircMessage->parameter(1)),
+                           false);
 
     if (builder.isIgnored())
     {
