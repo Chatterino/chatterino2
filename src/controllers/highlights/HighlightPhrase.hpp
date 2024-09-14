@@ -5,6 +5,7 @@
 
 #include <pajlada/serialize.hpp>
 #include <QColor>
+#include <QObject>
 #include <QRegularExpression>
 #include <QString>
 #include <QUrl>
@@ -17,6 +18,8 @@ class HighlightPhrase
 {
 public:
     bool operator==(const HighlightPhrase &other) const;
+
+    HighlightPhrase(const HighlightPhrase &other) = default;
 
     /**
      * @brief Create a new HighlightPhrase.
@@ -101,6 +104,8 @@ private:
 };
 
 }  // namespace chatterino
+
+Q_DECLARE_METATYPE(chatterino::HighlightPhrase *);
 
 namespace pajlada {
 
