@@ -13,6 +13,7 @@
 #include "TestDelegate.hpp"
 #include "TestModel.hpp"
 #include "TestView.hpp"
+#include "TestWidget.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/dialogs/BadgePickerDialog.hpp"
@@ -20,10 +21,12 @@
 #include "widgets/helper/color/ColorItemDelegate.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
+#include <qabstractitemview.h>
 #include <QFileDialog>
 #include <QHeaderView>
 #include <QListView>
 #include <QPushButton>
+#include <qscrollarea.h>
 #include <QStandardItemModel>
 #include <QTableView>
 #include <QTabWidget>
@@ -62,6 +65,44 @@ HighlightingPage::HighlightingPage()
         // TABS
         auto tabs = layout.emplace<QTabWidget>();
         {
+            // TEST 2
+            {
+                auto highlights = tabs.appendTab(new QVBoxLayout, "TEST 2");
+
+                auto *model =
+                    (new HighlightModel(nullptr))
+                        ->initialized(&getSettings()->highlightedMessages);
+                auto *view = highlights.emplace<QScrollArea>(this).getElement();
+                view->setHorizontalScrollBarPolicy(
+                    Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+                view->setVerticalScrollBarPolicy(
+                    Qt::ScrollBarPolicy::ScrollBarAlwaysOn);
+                auto *box = new QVBoxLayout;
+                view->setLayout(box);
+
+                box->setSizeConstraint(
+                    QLayout::SizeConstraint::SetMinAndMaxSize);
+                QStringList data{
+                    "1",  "2",  "3",  "4",  "5",  "6",  "7",  "8",  "9",
+                    "10", "11", "12", "13", "14", "15", "16", "17", "18",
+                    "19", "20", "21", "22", "23", "24", "25", "26", "27",
+                    "19", "20", "21", "22", "23", "24", "25", "26", "27",
+                    "19", "20", "21", "22", "23", "24", "25", "26", "27",
+                    "19", "20", "21", "22", "23", "24", "25", "26", "27",
+                };
+                for (const auto &xd : data)
+                {
+                    // auto *w = new TestWidget(this);
+                    // w->setMinimumHeight(50);
+                    auto *w = new QPushButton("xd");
+                    /*
+                    w->setSizePolicy(
+                        {QSizePolicy::Maximum, QSizePolicy::Minimum});
+                        */
+                    box->addWidget(w, 1);
+                }
+            }
+
             // TEST
             {
                 auto highlights = tabs.appendTab(new QVBoxLayout, "TEST");
@@ -71,16 +112,19 @@ HighlightingPage::HighlightingPage()
                         ->initialized(&getSettings()->highlightedMessages);
                 auto *view = highlights.emplace<QListView>(this).getElement();
                 view->setSpacing(2);
+                // view->setEditTriggers(QAbstractItemView::AllEditTriggers);
                 QObject::connect(
                     view, &QAbstractItemView::clicked,
                     [view, model](const QModelIndex &index) {
                         qInfo() << "XXX: ITEM CLICKED?"
                                 << index.data(Qt::UserRole + 1).type();
+                        view->openPersistentEditor(index);
                         if (index.data(Qt::UserRole + 1).value<bool>())
                         {
                             auto res =
                                 model->setData(index, false, Qt::UserRole + 1);
                             qInfo() << "XXX: ITEM CLICKED? Set to false" << res;
+                            view->edit(index);
                         }
                         else
                         {
