@@ -81,6 +81,7 @@ public:
         return &this->logging;
     }
 
+    mock::EmptyLogging logging;
     AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;
@@ -89,7 +90,6 @@ public:
     FfzBadges ffzBadges;
     SeventvBadges seventvBadges;
     HighlightController highlights;
-    mock::EmptyLogging logging;
 };
 
 class FiltersF : public ::testing::Test

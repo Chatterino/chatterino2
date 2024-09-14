@@ -97,6 +97,7 @@ public:
         return &this->logging;
     }
 
+    mock::EmptyLogging logging;
     AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;
@@ -108,7 +109,6 @@ public:
     BttvEmotes bttvEmotes;
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;
-    mock::EmptyLogging logging;
 };
 
 }  // namespace

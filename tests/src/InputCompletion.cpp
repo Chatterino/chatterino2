@@ -75,13 +75,13 @@ public:
         return &this->logging;
     }
 
+    mock::EmptyLogging logging;
     AccountController accounts;
     mock::MockTwitchIrcServer twitch;
     Emotes emotes;
     BttvEmotes bttvEmotes;
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;
-    mock::EmptyLogging logging;
 };
 
 }  // namespace
@@ -140,9 +140,9 @@ protected:
 
     void TearDown() override
     {
-        this->mockApplication.reset();
-        this->mockHelix.reset();
         this->channelPtr.reset();
+        this->mockHelix.reset();
+        this->mockApplication.reset();
     }
 
     std::unique_ptr<MockApplication> mockApplication;
