@@ -24,8 +24,6 @@ using namespace chatterino;
 using namespace chatterino::filters;
 using chatterino::mock::MockChannel;
 
-TypingContext typingContext = MESSAGE_TYPING_CONTEXT;
-
 namespace {
 
 class MockApplication : public mock::BaseApplication
@@ -188,7 +186,8 @@ TEST(Filters, TypeSynthesis)
         T type = filter.returnType();
         EXPECT_EQ(type, expected)
             << "Filter{ " << input << " } has type " << type << " instead of "
-            << expected << ".\nDebug: " << filter.debugString(typingContext);
+            << expected
+            << ".\nDebug: " << filter.debugString(MESSAGE_TYPING_CONTEXT);
     }
 }
 
@@ -265,7 +264,7 @@ TEST(Filters, Evaluation)
         EXPECT_EQ(result, expected)
             << "Filter{ " << input << " } evaluated to " << result.toString()
             << " instead of " << expected.toString()
-            << ".\nDebug: " << filter.debugString(typingContext);
+            << ".\nDebug: " << filter.debugString(MESSAGE_TYPING_CONTEXT);
     }
 }
 
@@ -368,7 +367,8 @@ TEST_F(FiltersF, ExpressionDebug)
         EXPECT_NE(filter, nullptr) << "Filter::fromString(" << input
                                    << ") did not build a proper filter";
 
-        const auto actualDebugString = filter->debugString(typingContext);
+        const auto actualDebugString =
+            filter->debugString(MESSAGE_TYPING_CONTEXT);
         EXPECT_EQ(actualDebugString, debugString)
             << "filter->debugString() on '" << input << "' should be '"
             << debugString << "', but got '" << actualDebugString << "'";

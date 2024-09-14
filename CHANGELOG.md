@@ -87,6 +87,7 @@
 - Dev: Recent changes are now shown in the nightly release description. (#5553, #5554, #5593)
 - Dev: The timer for `StreamerMode` is now destroyed on the correct thread. (#5571)
 - Dev: Cleanup some parts of the `magic_enum` adaptation for Qt. (#5587)
+- Dev: Refactored `static`s in headers to only be present once in the final app. (#5588)
 
 ## 2.5.1
 
