@@ -503,6 +503,7 @@ PubSub *Application::getTwitchPubSub()
 ILogging *Application::getChatLogger()
 {
     assertInGuiThread();
+    assert(this->logging);
 
     return this->logging.get();
 }
