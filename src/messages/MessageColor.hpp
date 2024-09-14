@@ -6,10 +6,15 @@ namespace chatterino {
 class Theme;
 
 struct MessageColor {
-    enum Type { Custom, Text, Link, System };
+    enum Type : uint8_t { Custom, Text, Link, System };
 
     MessageColor(const QColor &color);
     MessageColor(Type type_ = Text);
+
+    Type type() const
+    {
+        return this->type_;
+    }
 
     const QColor &getColor(Theme &themeManager) const;
 

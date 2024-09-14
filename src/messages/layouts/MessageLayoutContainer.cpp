@@ -75,7 +75,8 @@ void MessageLayoutContainer::endLayout()
         auto *element = new TextLayoutElement(
             dotdotdot, dotdotdotText,
             QSize(this->dotdotdotWidth_, this->textLineHeight_),
-            QColor("#00D80A"), FontStyle::ChatMediumBold, this->scale_);
+            QColor("#00D80A"), FontStyle::ChatMediumBold, MessageColor::Text,
+            this->scale_);
 
         if (this->isRTL())
         {

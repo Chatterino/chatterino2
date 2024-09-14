@@ -419,10 +419,13 @@ void ImageWithCircleBackgroundLayoutElement::paint(
 
 TextLayoutElement::TextLayoutElement(MessageElement &_creator, QString &_text,
                                      const QSize &_size, QColor _color,
-                                     FontStyle _style, float _scale)
+                                     FontStyle _style,
+                                     MessageColor::Type messageColor,
+                                     float _scale)
     : MessageLayoutElement(_creator, _size)
     , color_(_color)
     , style_(_style)
+    , messageColor_(messageColor)
     , scale_(_scale)
 {
     this->setText(_text);
@@ -458,7 +461,8 @@ void TextLayoutElement::paint(QPainter &painter,
 
     bool isNametag = this->getLink().type == chatterino::Link::UserInfo ||
                      this->getLink().type == chatterino::Link::UserWhisper;
-    bool drawPaint = isNametag && getSettings()->displaySevenTVPaints;
+    bool drawPaint = isNametag && this->messageColor_ != MessageColor::System &&
+                     getSettings()->displaySevenTVPaints;
     auto seventvPaint =
         app->getSeventvPaints()->getPaint(this->getLink().value.toLower());
     if (drawPaint && seventvPaint.has_value())

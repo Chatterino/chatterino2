@@ -2,6 +2,7 @@
 
 #include "common/FlagsEnum.hpp"
 #include "messages/Link.hpp"
+#include "messages/MessageColor.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
 #include <QPen>
@@ -170,7 +171,7 @@ class TextLayoutElement : public MessageLayoutElement
 public:
     TextLayoutElement(MessageElement &creator_, QString &text,
                       const QSize &size, QColor color_, FontStyle style_,
-                      float scale_);
+                      MessageColor::Type messageColor, float scale_);
 
 protected:
     void addCopyTextToString(QString &str, uint32_t from = 0,
@@ -183,6 +184,9 @@ protected:
 
     QColor color_;
     FontStyle style_;
+    // 7tv: this is used to check for system messages - it doesn't take extra
+    // space (fits in the padding of `style_`)
+    MessageColor::Type messageColor_;
     float scale_;
 };
 
