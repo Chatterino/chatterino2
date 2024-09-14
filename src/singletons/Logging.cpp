@@ -4,6 +4,7 @@
 #include "singletons/helper/LoggingChannel.hpp"
 #include "singletons/Settings.hpp"
 
+#include <boost/stacktrace.hpp>
 #include <QDir>
 #include <QStandardPaths>
 
@@ -11,6 +12,17 @@
 #include <utility>
 
 namespace chatterino {
+
+void ILogging::closeChannel(const QString & /*channelName*/,
+                            const QString & /*platform*/)
+{
+    auto st = boost::stacktrace::stacktrace();
+    qFatal() << "closeChannel called without ILogging instance";
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)  // idc about qt 5
+    qFatal() << boost::stacktrace::to_string(st);
+#endif
+    assert(false);
+}
 
 Logging::Logging(Settings &settings)
 {

@@ -26,7 +26,7 @@ public:
                             const QString &streamID) = 0;
 
     virtual void closeChannel(const QString &channelName,
-                              const QString &platformName) = 0;
+                              const QString &platformName);
 };
 
 class Logging : public ILogging
