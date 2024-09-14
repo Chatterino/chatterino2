@@ -8,6 +8,7 @@
 #include "mocks/Channel.hpp"
 #include "mocks/ChatterinoBadges.hpp"
 #include "mocks/EmptyApplication.hpp"
+#include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "mocks/UserData.hpp"
 #include "providers/ffz/FfzBadges.hpp"
@@ -75,6 +76,12 @@ public:
         return &this->highlights;
     }
 
+    ILogging *getChatLogger() override
+    {
+        return &this->logging;
+    }
+
+    mock::EmptyLogging logging;
     AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;

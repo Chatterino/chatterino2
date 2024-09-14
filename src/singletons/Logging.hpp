@@ -24,6 +24,9 @@ public:
     virtual void addMessage(const QString &channelName, MessagePtr message,
                             const QString &platformName,
                             const QString &streamID) = 0;
+
+    virtual void closeChannel(const QString &channelName,
+                              const QString &platformName) = 0;
 };
 
 class Logging : public ILogging
@@ -34,6 +37,9 @@ public:
     void addMessage(const QString &channelName, MessagePtr message,
                     const QString &platformName,
                     const QString &streamID) override;
+
+    void closeChannel(const QString &channelName,
+                      const QString &platformName) override;
 
 private:
     using PlatformName = QString;
