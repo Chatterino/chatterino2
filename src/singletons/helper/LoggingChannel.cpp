@@ -40,7 +40,7 @@ QString generateClosingString(
 {
     QString ret("# Stop logging at ");
 
-    ret.append(now.toString("yyyy-MM-dd HH:mm:ss"));
+    ret.append(now.toString("yyyy-MM-dd HH:mm:ss "));
     ret.append(now.timeZoneAbbreviation());
     ret.append(ENDLINE);
 

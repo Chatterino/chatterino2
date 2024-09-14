@@ -15,6 +15,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/links/LinkResolver.hpp"
+#include "providers/pronouns/Pronouns.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
@@ -151,6 +152,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , args_(_args)
     , themes(new Theme(paths))
     , fonts(new Fonts(_settings))
+    , logging(new Logging(_settings))
     , emotes(new Emotes)
     , accounts(new AccountController)
     , hotkeys(new HotkeyController)
@@ -179,10 +181,10 @@ Application::Application(Settings &_settings, const Paths &paths,
     , ffzEmotes(new FfzEmotes)
     , seventvEmotes(new SeventvEmotes)
     , seventvEventAPI(makeSeventvEventAPI(_settings))
-    , logging(new Logging(_settings))
     , linkResolver(new LinkResolver)
     , streamerMode(new StreamerMode)
     , twitchUsers(new TwitchUsers)
+    , pronouns(new pronouns::Pronouns)
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(new PluginController(paths))
 #endif
@@ -542,6 +544,7 @@ PubSub *Application::getTwitchPubSub()
 ILogging *Application::getChatLogger()
 {
     assertInGuiThread();
+    assert(this->logging);
 
     return this->logging.get();
 }
@@ -618,6 +621,14 @@ SeventvEventAPI *Application::getSeventvEventAPI()
     // seventvEventAPI may be nullptr if it's not enabled
 
     return this->seventvEventAPI.get();
+}
+
+pronouns::Pronouns *Application::getPronouns()
+{
+    // pronouns::Pronouns handles its own locks, so we don't need to assert that this is called in the GUI thread
+    assert(this->pronouns);
+
+    return this->pronouns.get();
 }
 
 void Application::save()
@@ -776,6 +787,11 @@ IApplication *getApp()
 {
     assert(INSTANCE != nullptr);
 
+    return INSTANCE;
+}
+
+IApplication *tryGetApp()
+{
     return INSTANCE;
 }
 

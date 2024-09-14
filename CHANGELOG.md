@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Major: Add option to show pronouns in user card. (#5442, #5583)
 - Major: Release plugins alpha. (#5288)
 - Major: Improve high-DPI support on Windows. (#4868, #5391)
 - Minor: Removed the Ctrl+Shift+L hotkey for toggling the "live only" tab visibility state. (#5530)
@@ -23,7 +24,7 @@
 - Minor: Improve appearance of reply button. (#5491)
 - Minor: Introduce HTTP API for plugins. (#5383, #5492, #5494)
 - Minor: Support more Firefox variants for incognito link opening. (#5503)
-- Minor: Replying to a message will now display the message being replied to. (#4350, #5519)
+- Minor: Replying to a message will now display the message being replied to. (#4350, #5519, #5586)
 - Minor: Links can now have prefixes and suffixes such as parentheses. (#5486, #5515)
 - Minor: Added support for scrolling in splits with touchscreen panning gestures. (#5524)
 - Minor: Removed experimental IRC support. (#5547)
@@ -47,6 +48,7 @@
 - Bugfix: Fixed tab visibility being controllable in the emote popup. (#5530)
 - Bugfix: Fixed account switch not being saved if no other settings were changed. (#5558)
 - Bugfix: Fixed some tooltips not being readable. (#5578)
+- Bugfix: Fixed log files being locked longer than needed. (#5592)
 - Dev: Update Windows build from Qt 6.5.0 to Qt 6.7.1. (#5420)
 - Dev: Update vcpkg build Qt from 6.5.0 to 6.7.0, boost from 1.83.0 to 1.85.0, openssl from 3.1.3 to 3.3.0. (#5422)
 - Dev: Unsingletonize `ISoundController`. (#5462)
@@ -84,6 +86,7 @@
 - Dev: Refactored `MessageBuilder` to be a single class. (#5548)
 - Dev: Recent changes are now shown in the nightly release description. (#5553, #5554)
 - Dev: The timer for `StreamerMode` is now destroyed on the correct thread. (#5571)
+- Dev: Cleanup some parts of the `magic_enum` adaptation for Qt. (#5587)
 
 ## 2.5.1
 

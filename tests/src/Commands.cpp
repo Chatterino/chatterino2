@@ -55,11 +55,11 @@ public:
         return &this->chatLogger;
     }
 
+    mock::EmptyLogging chatLogger;
     AccountController accounts;
     CommandController commands;
     mock::MockTwitchIrcServer twitch;
     Emotes emotes;
-    mock::EmptyLogging chatLogger;
 };
 
 }  // namespace

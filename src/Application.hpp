@@ -56,6 +56,9 @@ class SeventvEventAPI;
 class ILinkResolver;
 class IStreamerMode;
 class ITwitchUsers;
+namespace pronouns {
+    class Pronouns;
+}  // namespace pronouns
 
 class IApplication
 {
@@ -110,6 +113,7 @@ public:
     virtual ILinkResolver *getLinkResolver() = 0;
     virtual IStreamerMode *getStreamerMode() = 0;
     virtual ITwitchUsers *getTwitchUsers() = 0;
+    virtual pronouns::Pronouns *getPronouns() = 0;
 };
 
 class Application : public IApplication
@@ -145,6 +149,7 @@ public:
 private:
     std::unique_ptr<Theme> themes;
     std::unique_ptr<Fonts> fonts;
+    const std::unique_ptr<Logging> logging;
     std::unique_ptr<Emotes> emotes;
     std::unique_ptr<AccountController> accounts;
     std::unique_ptr<HotkeyController> hotkeys;
@@ -172,10 +177,10 @@ private:
     std::unique_ptr<FfzEmotes> ffzEmotes;
     std::unique_ptr<SeventvEmotes> seventvEmotes;
     std::unique_ptr<SeventvEventAPI> seventvEventAPI;
-    const std::unique_ptr<Logging> logging;
     std::unique_ptr<ILinkResolver> linkResolver;
     std::unique_ptr<IStreamerMode> streamerMode;
     std::unique_ptr<ITwitchUsers> twitchUsers;
+    std::unique_ptr<pronouns::Pronouns> pronouns;
 #ifdef CHATTERINO_HAVE_PLUGINS
     std::unique_ptr<PluginController> plugins;
 #endif
@@ -225,6 +230,7 @@ public:
     FfzEmotes *getFfzEmotes() override;
     SeventvEmotes *getSeventvEmotes() override;
     SeventvEventAPI *getSeventvEventAPI() override;
+    pronouns::Pronouns *getPronouns() override;
 
     ILinkResolver *getLinkResolver() override;
     IStreamerMode *getStreamerMode() override;
@@ -242,5 +248,8 @@ private:
 };
 
 IApplication *getApp();
+
+/// Might return `nullptr` if the app is being destroyed
+IApplication *tryGetApp();
 
 }  // namespace chatterino

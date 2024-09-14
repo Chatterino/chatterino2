@@ -1223,7 +1223,10 @@ void SplitInput::clearInput()
     this->currMsg_ = "";
     this->ui_.textEdit->setText("");
     this->ui_.textEdit->moveCursor(QTextCursor::Start);
-    this->clearReplyTarget();
+    if (this->enableInlineReplying_)
+    {
+        this->clearReplyTarget();
+    }
 }
 
 void SplitInput::clearReplyTarget()

@@ -18,6 +18,10 @@ public:
                 (const QString &channelName, MessagePtr message,
                  const QString &platformName, const QString &streamID),
                 (override));
+
+    MOCK_METHOD(void, closeChannel,
+                (const QString &channelName, const QString &platformName),
+                (override));
 };
 
 class EmptyLogging : public ILogging
@@ -29,6 +33,12 @@ public:
     void addMessage(const QString &channelName, MessagePtr message,
                     const QString &platformName,
                     const QString &streamID) override
+    {
+        //
+    }
+
+    void closeChannel(const QString &channelName,
+                      const QString &platformName) override
     {
         //
     }

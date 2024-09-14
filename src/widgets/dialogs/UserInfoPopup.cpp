@@ -12,6 +12,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
+#include "providers/pronouns/Pronouns.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -25,6 +26,7 @@
 #include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
+#include "util/PostToThread.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/InvisibleSizeGrip.hpp"
@@ -50,6 +52,9 @@ constexpr QStringView TEXT_CREATED = u"Created: %1";
 constexpr QStringView TEXT_TITLE = u"%1's Usercard - #%2";
 constexpr QStringView TEXT_USER_ID = u"ID: ";
 constexpr QStringView TEXT_UNAVAILABLE = u"(not available)";
+constexpr QStringView TEXT_PRONOUNS = u"Pronouns: %1";
+constexpr QStringView TEXT_UNSPECIFIED = u"(unspecified)";
+constexpr QStringView TEXT_LOADING = u"(loading...)";
 
 using namespace chatterino;
 
@@ -410,6 +415,11 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
             }
 
             // items on the left
+            if (getSettings()->showPronouns)
+            {
+                vbox.emplace<Label>(TEXT_PRONOUNS.arg(TEXT_LOADING))
+                    .assign(&this->ui_.pronounsLabel);
+            }
             vbox.emplace<Label>(TEXT_FOLLOWERS.arg(""))
                 .assign(&this->ui_.followerCountLabel);
             vbox.emplace<Label>(TEXT_CREATED.arg(""))
@@ -989,6 +999,43 @@ void UserInfoPopup::updateUserData()
                 }
             },
             [] {});
+
+        // get pronouns
+        if (getSettings()->showPronouns)
+        {
+            getApp()->getPronouns()->getUserPronoun(
+                user.login,
+                [this, hack](const auto userPronoun) {
+                    runInGuiThread([this, hack,
+                                    userPronoun = std::move(userPronoun)]() {
+                        if (!hack.lock() || this->ui_.pronounsLabel == nullptr)
+                        {
+                            return;
+                        }
+                        if (!userPronoun.isUnspecified())
+                        {
+                            this->ui_.pronounsLabel->setText(
+                                TEXT_PRONOUNS.arg(userPronoun.format()));
+                        }
+                        else
+                        {
+                            this->ui_.pronounsLabel->setText(
+                                TEXT_PRONOUNS.arg(TEXT_UNSPECIFIED));
+                        }
+                    });
+                },
+                [this, hack]() {
+                    runInGuiThread([this, hack]() {
+                        qCWarning(chatterinoTwitch) << "Error getting pronouns";
+                        if (!hack.lock())
+                        {
+                            return;
+                        }
+                        this->ui_.pronounsLabel->setText(
+                            TEXT_PRONOUNS.arg(TEXT_UNSPECIFIED));
+                    });
+                });
+        }
     };
 
     if (!this->userId_.isEmpty())
