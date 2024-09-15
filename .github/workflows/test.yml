@@ -62,7 +62,7 @@ jobs:
             -DCHATTERINO_GENERATE_COVERAGE=On \
             -DCMAKE_BUILD_TYPE=Debug \
             ..
-          cmake --build .
+          cmake --build . -j $(nproc)
         working-directory: build-test
 
       - name: Download and extract Twitch PubSub Server Test
