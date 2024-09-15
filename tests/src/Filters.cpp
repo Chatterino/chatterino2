@@ -8,6 +8,7 @@
 #include "mocks/Channel.hpp"
 #include "mocks/ChatterinoBadges.hpp"
 #include "mocks/EmptyApplication.hpp"
+#include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "mocks/UserData.hpp"
 #include "providers/ffz/FfzBadges.hpp"
@@ -22,8 +23,6 @@
 using namespace chatterino;
 using namespace chatterino::filters;
 using chatterino::mock::MockChannel;
-
-TypingContext typingContext = MESSAGE_TYPING_CONTEXT;
 
 namespace {
 
@@ -75,6 +74,12 @@ public:
         return &this->highlights;
     }
 
+    ILogging *getChatLogger() override
+    {
+        return &this->logging;
+    }
+
+    mock::EmptyLogging logging;
     AccountController accounts;
     Emotes emotes;
     mock::UserDataController userData;
@@ -181,7 +186,8 @@ TEST(Filters, TypeSynthesis)
         T type = filter.returnType();
         EXPECT_EQ(type, expected)
             << "Filter{ " << input << " } has type " << type << " instead of "
-            << expected << ".\nDebug: " << filter.debugString(typingContext);
+            << expected
+            << ".\nDebug: " << filter.debugString(MESSAGE_TYPING_CONTEXT);
     }
 }
 
@@ -258,7 +264,7 @@ TEST(Filters, Evaluation)
         EXPECT_EQ(result, expected)
             << "Filter{ " << input << " } evaluated to " << result.toString()
             << " instead of " << expected.toString()
-            << ".\nDebug: " << filter.debugString(typingContext);
+            << ".\nDebug: " << filter.debugString(MESSAGE_TYPING_CONTEXT);
     }
 }
 
@@ -361,7 +367,8 @@ TEST_F(FiltersF, ExpressionDebug)
         EXPECT_NE(filter, nullptr) << "Filter::fromString(" << input
                                    << ") did not build a proper filter";
 
-        const auto actualDebugString = filter->debugString(typingContext);
+        const auto actualDebugString =
+            filter->debugString(MESSAGE_TYPING_CONTEXT);
         EXPECT_EQ(actualDebugString, debugString)
             << "filter->debugString() on '" << input << "' should be '"
             << debugString << "', but got '" << actualDebugString << "'";

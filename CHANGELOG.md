@@ -48,6 +48,7 @@
 - Bugfix: Fixed tab visibility being controllable in the emote popup. (#5530)
 - Bugfix: Fixed account switch not being saved if no other settings were changed. (#5558)
 - Bugfix: Fixed some tooltips not being readable. (#5578)
+- Bugfix: Fixed log files being locked longer than needed. (#5592)
 - Dev: Update Windows build from Qt 6.5.0 to Qt 6.7.1. (#5420)
 - Dev: Update vcpkg build Qt from 6.5.0 to 6.7.0, boost from 1.83.0 to 1.85.0, openssl from 3.1.3 to 3.3.0. (#5422)
 - Dev: Unsingletonize `ISoundController`. (#5462)
@@ -83,9 +84,10 @@
 - Dev: Moved some responsibility away from Application into WindowManager. (#5551)
 - Dev: Fixed benchmarks segfaulting on run. (#5559)
 - Dev: Refactored `MessageBuilder` to be a single class. (#5548)
-- Dev: Recent changes are now shown in the nightly release description. (#5553, #5554)
+- Dev: Recent changes are now shown in the nightly release description. (#5553, #5554, #5593)
 - Dev: The timer for `StreamerMode` is now destroyed on the correct thread. (#5571)
 - Dev: Cleanup some parts of the `magic_enum` adaptation for Qt. (#5587)
+- Dev: Refactored `static`s in headers to only be present once in the final app. (#5588)
 
 ## 2.5.1
 

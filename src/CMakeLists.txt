@@ -403,6 +403,8 @@ set(SOURCE_FILES
         providers/twitch/TwitchBadges.hpp
         providers/twitch/TwitchChannel.cpp
         providers/twitch/TwitchChannel.hpp
+        providers/twitch/TwitchCommon.cpp
+        providers/twitch/TwitchCommon.hpp
         providers/twitch/TwitchEmotes.cpp
         providers/twitch/TwitchEmotes.hpp
         providers/twitch/TwitchHelpers.cpp

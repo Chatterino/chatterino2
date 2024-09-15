@@ -100,7 +100,7 @@ ChannelFilterEditorDialog::ValueSpecifier::ValueSpecifier()
     this->typeCombo_->insertItems(
         0, {"Constant Text", "Constant Number", "Variable"});
 
-    this->varCombo_->insertItems(0, filters::validIdentifiersMap.values());
+    this->varCombo_->insertItems(0, filters::VALID_IDENTIFIERS_MAP.values());
 
     this->layout_->addWidget(this->typeCombo_);
     this->layout_->addWidget(this->varCombo_, 1);
@@ -142,7 +142,7 @@ void ChannelFilterEditorDialog::ValueSpecifier::setValue(const QString &value)
     if (this->typeCombo_->currentIndex() == 2)
     {
         this->varCombo_->setCurrentText(
-            filters::validIdentifiersMap.value(value));
+            filters::VALID_IDENTIFIERS_MAP.value(value));
     }
     else
     {
@@ -165,7 +165,7 @@ QString ChannelFilterEditorDialog::ValueSpecifier::expressionText()
         case 1:  // number
             return this->valueInput_->text();
         case 2:  // variable
-            return filters::validIdentifiersMap.key(
+            return filters::VALID_IDENTIFIERS_MAP.key(
                 this->varCombo_->currentText());
         default:
             return "";
