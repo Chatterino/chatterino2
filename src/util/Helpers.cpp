@@ -9,12 +9,20 @@
 
 namespace {
 
-const QString ZERO_WIDTH_JOINER = QStringLiteral("\u200D");
+// This is for compatibility with older Chatterino versions. Twitch didn't use
+// to allow ZERO WIDTH JOINER unicode character, so Chatterino used ESCAPE_TAG
+// instead.
+// See https://github.com/Chatterino/chatterino2/issues/3384 and
+// https://mm2pl.github.io/emoji_rfc.pdf for more details
+const QString ZERO_WIDTH_JOINER = QString(QChar(0x200D));
 
-// Note: \U requires /utf-8 for MSVC
-// See https://mm2pl.github.io/emoji_rfc.pdf
+// Here be MSVC: Do NOT replace with "\U" literal, it will fail silently.
+const QChar ESCAPE_TAG_CHARS[2] = {QChar::highSurrogate(0xE0002),  // NOLINT
+                                   QChar::lowSurrogate(0xE0002)};
+const QString ESCAPE_TAG = QString(ESCAPE_TAG_CHARS, 2);
+
 const QRegularExpression ESCAPE_TAG_REGEX(
-    QStringLiteral("(?<!\U000E0002)\U000E0002"),
+    QString("(?<!%1)%1").arg(ESCAPE_TAG),
     QRegularExpression::UseUnicodePropertiesOption);
 
 }  // namespace
