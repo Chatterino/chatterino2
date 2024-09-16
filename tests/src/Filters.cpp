@@ -285,9 +285,9 @@ TEST_F(FiltersF, TypingContextChecks)
 
     QString originalMessage = privmsg->content();
 
-    MessageBuilder builder(&channel, privmsg, MessageParseArgs{});
+    auto [msg, alert] = MessageBuilder::makeIrcMessage(
+        &channel, privmsg, MessageParseArgs{}, originalMessage, false, 0);
 
-    auto msg = builder.build();
     EXPECT_NE(msg.get(), nullptr);
 
     auto contextMap = buildContextMap(msg, &channel);
