@@ -1,0 +1,122 @@
+{
+    "input": "@badge-info=subscriber/80;badges=broadcaster/1,subscriber/3072,partner/1;color=#CC44FF;display-name=pajlada;emote-only=1;emotes=25:0-4;first-msg=0;flags=;id=90ef1e46-8baa-4bf2-9c54-272f39d6fa11;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662206235860;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada :\u0001ACTION Kappa\u0001",
+    "output": {
+        "badgeInfos": {
+            "subscriber": "80"
+        },
+        "badges": [
+            "broadcaster",
+            "subscriber",
+            "partner"
+        ],
+        "channelName": "pajlada",
+        "count": 1,
+        "displayName": "pajlada",
+        "elements": [
+            {
+                "color": "System",
+                "flags": "ChannelName",
+                "link": {
+                    "type": "JumpToChannel",
+                    "value": "pajlada"
+                },
+                "style": "ChatMedium",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "TextElement",
+                "words": [
+                    "#pajlada"
+                ]
+            },
+            {
+                "element": {
+                    "color": "System",
+                    "flags": "Timestamp",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "13:57"
+                    ]
+                },
+                "flags": "Timestamp",
+                "format": "",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "time": "13:57:15",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "TimestampElement"
+            },
+            {
+                "color": "#ffcc44ff",
+                "flags": "Username",
+                "link": {
+                    "type": "UserInfo",
+                    "value": "pajlada"
+                },
+                "style": "ChatMediumBold",
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "TextElement",
+                "words": [
+                    "pajlada"
+                ]
+            },
+            {
+                "emote": "Kappa",
+                "flags": "TwitchEmoteImage|TwitchEmoteText",
+                "link": {
+                    "type": "None",
+                    "value": ""
+                },
+                "text": {
+                    "color": "#ffcc44ff",
+                    "flags": "Misc",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "Kappa"
+                    ]
+                },
+                "tooltip": "Kappa<br>Twitch Emote",
+                "trailingSpace": true,
+                "type": "EmoteElement"
+            },
+            {
+                "background": "#ffa0a0a4",
+                "flags": "ReplyButton",
+                "link": {
+                    "type": "ReplyToMessage",
+                    "value": "90ef1e46-8baa-4bf2-9c54-272f39d6fa11"
+                },
+                "padding": 2,
+                "tooltip": "",
+                "trailingSpace": true,
+                "type": "CircularImageElement",
+                "url": ""
+            }
+        ],
+        "flags": "Collapsed|Action",
+        "id": "90ef1e46-8baa-4bf2-9c54-272f39d6fa11",
+        "localizedName": "",
+        "loginName": "pajlada",
+        "messageText": "Kappa",
+        "searchText": "pajlada  pajlada: Kappa ",
+        "timeoutUser": "",
+        "usernameColor": "#ffcc44ff"
+    }
+}

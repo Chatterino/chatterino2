@@ -1,8 +1,10 @@
 #include "messages/MessageBuilder.hpp"
 
+#include "common/Literals.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
+#include "messages/Message.hpp"
 #include "mocks/BaseApplication.hpp"
 #include "mocks/Channel.hpp"
 #include "mocks/ChatterinoBadges.hpp"
@@ -13,21 +15,37 @@
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
+#include "providers/twitch/TwitchBadges.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Emotes.hpp"
 #include "Test.hpp"
 #include "util/IrcHelpers.hpp"
 
 #include <IrcConnection>
 #include <QDebug>
+#include <QDir>
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
 #include <QString>
 
+#include <set>
 #include <unordered_map>
 #include <vector>
 
 using namespace chatterino;
+using namespace literals;
 using chatterino::mock::MockChannel;
 
 namespace {
+
+constexpr bool UPDATE_FIXTURES = false;
+
+constexpr std::array IRC_FIXTURES{
+    "action", "emote-emoji", "emote", "emotes", "simple",
+};
 
 class MockApplication : public mock::BaseApplication
 {
@@ -97,6 +115,11 @@ public:
         return &this->logging;
     }
 
+    TwitchBadges *getTwitchBadges() override
+    {
+        return &this->twitchBadges;
+    }
+
     mock::EmptyLogging logging;
     AccountController accounts;
     Emotes emotes;
@@ -109,7 +132,182 @@ public:
     BttvEmotes bttvEmotes;
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;
+    TwitchBadges twitchBadges;
 };
+
+struct Fixture {
+    QString category;
+    QString name;
+    QByteArray input;
+    QJsonValue output;
+
+    static QDir baseDir(const QString &category);
+    static QString filePath(const QString &category, const QString &name);
+
+    static bool verifyIntegrity(const QString &category, const auto &values);
+
+    static Fixture read(QString category, QString name);
+
+    void write(const QJsonValue &got) const;
+    bool check(const QJsonValue &got) const;
+};
+
+bool compareJson(const QJsonValue &expected, const QJsonValue &got,
+                 const QString &context)
+{
+    if (expected == got)
+    {
+        return true;
+    }
+    if (expected.type() != got.type())
+    {
+        qWarning() << context
+                   << "- mismatching type - expected:" << expected.type()
+                   << "got:" << got.type();
+        return false;
+    }
+    switch (expected.type())
+    {
+        case QJsonValue::Array: {
+            auto expArr = expected.toArray();
+            auto gotArr = got.toArray();
+            if (expArr.size() != gotArr.size())
+            {
+                qWarning() << context << "- Mismatching array size - expected:"
+                           << expArr.size() << "got:" << gotArr.size();
+                return false;
+            }
+            for (QJsonArray::size_type i = 0; i < expArr.size(); i++)
+            {
+                if (!compareJson(expArr[i], gotArr[i],
+                                 context % '[' % QString::number(i) % ']'))
+                {
+                    return false;
+                }
+            }
+        }
+        break;  // unreachable
+        case QJsonValue::Object: {
+            auto expObj = expected.toObject();
+            auto gotObj = got.toObject();
+            if (expObj.size() != gotObj.size())
+            {
+                qWarning() << context << "- Mismatching object size - expected:"
+                           << expObj.size() << "got:" << gotObj.size();
+                return false;
+            }
+            for (auto it = expObj.constBegin(); it != expObj.constEnd(); it++)
+            {
+                if (!gotObj.contains(it.key()))
+                {
+                    qWarning() << context << "- Object doesn't contain key"
+                               << it.key();
+                    return false;
+                }
+                if (!compareJson(it.value(), gotObj[it.key()],
+                                 context % '.' % it.key()))
+                {
+                    return false;
+                }
+            }
+        }
+        break;
+        case QJsonValue::Null:
+        case QJsonValue::Bool:
+        case QJsonValue::Double:
+        case QJsonValue::String:
+        case QJsonValue::Undefined:
+            break;
+    }
+
+    qWarning() << context << "- expected:" << expected << "got:" << got;
+    return false;
+}
+
+QDir Fixture::baseDir(const QString &category)
+{
+    QDir fixtureDir(QStringLiteral(__FILE__));
+    fixtureDir.cd("../../fixtures/MessageBuilder");
+    fixtureDir.cd(category);
+    return fixtureDir;
+}
+
+QString Fixture::filePath(const QString &category, const QString &name)
+{
+    return Fixture::baseDir(category).filePath(name);
+}
+
+bool Fixture::verifyIntegrity(const QString &category, const auto &values)
+{
+    auto files = Fixture::baseDir(category).entryList(QDir::NoDotAndDotDot |
+                                                      QDir::Files);
+    bool ok = true;
+    if (static_cast<size_t>(files.size()) != values.size())
+    {
+        qWarning() << "Mismatching size!";
+        ok = false;
+    }
+
+    // check that all files have some value (not the other way around)
+    std::set<QString> valueSet;
+    for (const auto &value : values)
+    {
+        valueSet.emplace(value);
+    }
+    for (const auto &file : files)
+    {
+        if (!file.endsWith(u".json"_s))
+        {
+            qWarning() << "Bad file:" << file;
+            ok = false;
+            continue;
+        }
+        if (!valueSet.contains(file.mid(0, file.length() - 5)))
+        {
+            qWarning() << file << "exists but isn't present in tests";
+            ok = false;
+        }
+    }
+    return ok;
+}
+
+Fixture Fixture::read(QString category, QString name)
+{
+    QFile file(Fixture::filePath(category, name));
+    if (!file.open(QFile::ReadOnly))
+    {
+        throw std::runtime_error("Failed to open file");
+    }
+    auto content = file.readAll();
+    file.close();
+    const auto doc = QJsonDocument::fromJson(content).object();
+    return {
+        .category = std::move(category),
+        .name = std::move(name),
+        .input = doc["input"].toString().toUtf8(),
+        .output = doc["output"],
+    };
+}
+
+void Fixture::write(const QJsonValue &got) const
+{
+    QFile file(Fixture::filePath(this->category, this->name));
+    if (!file.open(QFile::WriteOnly))
+    {
+        throw std::runtime_error("Failed to open file");
+    }
+    file.write(QJsonDocument{
+        {
+            {"input", QString::fromUtf8(this->input)},
+            {"output", got},
+        }}.toJson());
+    file.close();
+}
+
+bool Fixture::check(const QJsonValue &got) const
+{
+    return compareJson(this->output, got, QStringLiteral("<root>"));
+}
 
 }  // namespace
 
@@ -626,4 +824,59 @@ TEST_F(TestMessageBuilder, IgnoresReplace)
             << "Twitch emotes not equal for input '" << test.input
             << "' and output '" << message << "'";
     }
+}
+
+class TestMessageBuilderP : public ::testing::TestWithParam<const char *>
+{
+public:
+    void SetUp() override
+    {
+        this->mockApplication = std::make_unique<MockApplication>();
+    }
+
+    void TearDown() override
+    {
+        this->mockApplication.reset();
+    }
+
+    std::unique_ptr<MockApplication> mockApplication;
+};
+
+TEST_P(TestMessageBuilderP, Run)
+{
+    std::shared_ptr<TwitchChannel> channel =
+        std::make_shared<TwitchChannel>("pajlada");
+    const auto *param = std::remove_pointer_t<decltype(this)>::GetParam();
+
+    auto fixture = Fixture::read("IRC", param % QStringView(u".json"));
+    auto *ircMessage = Communi::IrcMessage::fromData(fixture.input, nullptr);
+    ASSERT_NE(ircMessage, nullptr);
+
+    auto *privMsg = dynamic_cast<Communi::IrcPrivateMessage *>(ircMessage);
+    ASSERT_NE(privMsg, nullptr);  // other types not yet supported
+    MessageBuilder builder(channel.get(), privMsg, MessageParseArgs{});
+
+    auto msg = builder.build();
+
+    QJsonValue got = msg ? msg->toJson() : QJsonValue{};
+
+    if (UPDATE_FIXTURES)
+    {
+        fixture.write(got);
+    }
+    else
+    {
+        ASSERT_TRUE(fixture.check(got));
+    }
+
+    delete ircMessage;
+}
+
+INSTANTIATE_TEST_SUITE_P(IrcMessage, TestMessageBuilderP,
+                         testing::ValuesIn(IRC_FIXTURES));
+
+TEST(TestMessageBuilderP, Integrity)
+{
+    ASSERT_TRUE(Fixture::verifyIntegrity(u"IRC"_s, IRC_FIXTURES));
+    ASSERT_FALSE(UPDATE_FIXTURES);  // make sure fixtures are actually tested
 }

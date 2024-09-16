@@ -7,6 +7,7 @@
 #include "providers/links/LinkInfo.hpp"
 #include "singletons/Fonts.hpp"
 
+#include <magic_enum/magic_enum.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QRect>
 #include <QString>
@@ -15,6 +16,8 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+
+class QJsonObject;
 
 namespace chatterino {
 class Channel;
@@ -183,9 +186,13 @@ public:
     virtual void addToContainer(MessageLayoutContainer &container,
                                 MessageElementFlags flags) = 0;
 
+    virtual QJsonObject toJson() const = 0;
+
 protected:
     MessageElement(MessageElementFlags flags);
     bool trailingSpace = true;
+
+    QJsonObject jsonBase() const;
 
 private:
     Link link_;
@@ -202,6 +209,8 @@ public:
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
 
+    QJsonObject toJson() const override;
+
 private:
     ImagePtr image_;
 };
@@ -215,6 +224,8 @@ public:
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
+
+    QJsonObject toJson() const override;
 
 private:
     ImagePtr image_;
@@ -234,6 +245,8 @@ public:
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
 
+    QJsonObject toJson() const override;
+
 protected:
     QStringList words_;
 
@@ -252,6 +265,8 @@ public:
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
+
+    QJsonObject toJson() const override;
 
 private:
     MessageColor color_;
@@ -294,6 +309,8 @@ public:
         return &this->linkInfo_;
     }
 
+    QJsonObject toJson() const override;
+
 private:
     LinkInfo linkInfo_;
     // these are implicitly shared
@@ -328,6 +345,8 @@ public:
     MessageElement *setLink(const Link &link) override;
     Link getLink() const override;
 
+    QJsonObject toJson() const override;
+
 private:
     /**
      * The color of the element in case the "Colorize @usernames" is disabled
@@ -354,6 +373,8 @@ public:
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags_) override;
     EmotePtr getEmote() const;
+
+    QJsonObject toJson() const override;
 
 protected:
     virtual MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
@@ -390,6 +411,8 @@ public:
     std::vector<Emote> getUniqueEmotes() const;
     const std::vector<QString> &getEmoteTooltips() const;
 
+    QJsonObject toJson() const override;
+
 private:
     MessageLayoutElement *makeImageLayoutElement(
         const std::vector<ImagePtr> &image, const std::vector<QSize> &sizes,
@@ -416,6 +439,8 @@ public:
 
     EmotePtr getEmote() const;
 
+    QJsonObject toJson() const override;
+
 protected:
     virtual MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
                                                          const QSize &size);
@@ -429,6 +454,8 @@ class ModBadgeElement : public BadgeElement
 public:
     ModBadgeElement(const EmotePtr &data, MessageElementFlags flags_);
 
+    QJsonObject toJson() const override;
+
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
                                                  const QSize &size) override;
@@ -438,6 +465,8 @@ class VipBadgeElement : public BadgeElement
 {
 public:
     VipBadgeElement(const EmotePtr &data, MessageElementFlags flags_);
+
+    QJsonObject toJson() const override;
 
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
@@ -450,6 +479,8 @@ public:
     FfzBadgeElement(const EmotePtr &data, MessageElementFlags flags_,
                     QColor color_);
 
+    QJsonObject toJson() const override;
+
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
                                                  const QSize &size) override;
@@ -460,13 +491,16 @@ protected:
 class TimestampElement : public MessageElement
 {
 public:
-    TimestampElement(QTime time_ = QTime::currentTime());
+    TimestampElement();
+    TimestampElement(QTime time_);
     ~TimestampElement() override = default;
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
 
     TextElement *formatTime(const QTime &time);
+
+    QJsonObject toJson() const override;
 
 private:
     QTime time_;
@@ -483,6 +517,8 @@ public:
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
+
+    QJsonObject toJson() const override;
 };
 
 // Forces a linebreak
@@ -493,6 +529,8 @@ public:
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
+
+    QJsonObject toJson() const override;
 };
 
 // Image element which will pick the quality of the image based on ui scale
@@ -503,6 +541,8 @@ public:
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
+
+    QJsonObject toJson() const override;
 
 private:
     ImageSet images_;
@@ -515,6 +555,13 @@ public:
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
+
+    QJsonObject toJson() const override;
 };
 
 }  // namespace chatterino
+
+template <>
+struct magic_enum::customize::enum_range<chatterino::MessageElementFlag> {
+    static constexpr bool is_flags = true;
+};
