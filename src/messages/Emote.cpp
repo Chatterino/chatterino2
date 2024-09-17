@@ -2,6 +2,8 @@
 
 #include "common/Literals.hpp"
 
+#include <QJsonObject>
+
 #include <unordered_map>
 
 namespace chatterino {
