@@ -93,9 +93,6 @@ QJsonObject Message::toJson() const
 {
     QJsonObject msg{
         {"flags"_L1, qmagicenum::enumFlagsName(this->flags.value())},
-        // missing: parseTime, serverReceivedTime
-        // {"parseTime"_L1, this->parseTime.toString(Qt::ISODate)},
-        // {"serverReceivedTime"_L1, this->serverReceivedTime.toString(Qt::ISODate)},
         {"id"_L1, this->id},
         {"searchText"_L1, this->searchText},
         {"messageText"_L1, this->messageText},
@@ -106,6 +103,10 @@ QJsonObject Message::toJson() const
         {"channelName"_L1, this->channelName},
         {"usernameColor"_L1, this->usernameColor.name(QColor::HexArgb)},
         {"count"_L1, static_cast<qint64>(this->count)},
+
+        // {"parseTime"_L1, this->parseTime.toString(Qt::ISODate)},
+        {"serverReceivedTime"_L1,
+         this->serverReceivedTime.toString(Qt::ISODate)},
     };
 
     QJsonArray badges;

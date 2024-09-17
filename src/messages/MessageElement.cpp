@@ -234,7 +234,7 @@ QJsonObject EmoteElement::toJson() const
 {
     auto base = this->jsonBase();
     base["type"_L1] = u"EmoteElement"_s;
-    base["emote"_L1] = this->emote_->name.string;
+    base["emote"_L1] = this->emote_->toJson();
     if (this->textElement_)
     {
         base["text"_L1] = this->textElement_->toJson();
@@ -416,7 +416,7 @@ QJsonObject LayeredEmoteElement::toJson() const
     {
         emotes.append({{
             {"flags"_L1, qmagicenum::enumFlagsName(emote.flags.value())},
-            {"name"_L1, emote.ptr->name.string},
+            {"emote"_L1, emote.ptr->toJson()},
         }});
     }
     base["emotes"_L1] = emotes;
@@ -482,7 +482,7 @@ QJsonObject BadgeElement::toJson() const
 {
     auto base = this->jsonBase();
     base["type"_L1] = u"BadgeElement"_s;
-    base["1x"_L1] = this->emote_->images.getImage1()->url().string;
+    base["emote"_L1] = this->emote_->toJson();
 
     return base;
 }

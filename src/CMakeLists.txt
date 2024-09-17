@@ -965,6 +965,7 @@ target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     IRC_STATIC
     IRC_NAMESPACE=Communi
     $<$<BOOL:${WIN32}>:_WIN32_WINNT=0x0A00> # Windows 10
+    $<$<BOOL:${BUILD_TESTS}>:CHATTERINO_WITH_TESTS>
     )
 
 if (USE_SYSTEM_QTKEYCHAIN)

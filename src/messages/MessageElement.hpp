@@ -563,5 +563,5 @@ public:
 
 template <>
 struct magic_enum::customize::enum_range<chatterino::MessageElementFlag> {
-    static constexpr bool is_flags = true;
+    static constexpr bool is_flags = true;  // NOLINT(readability-identifier-*)
 };

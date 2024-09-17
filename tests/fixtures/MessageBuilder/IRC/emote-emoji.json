@@ -71,7 +71,15 @@
                 ]
             },
             {
-                "emote": "Kappa",
+                "emote": {
+                    "images": {
+                        "1x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/1.0",
+                        "2x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/2.0",
+                        "3x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/3.0"
+                    },
+                    "name": "Kappa",
+                    "tooltip": "Kappa<br>Twitch Emote"
+                },
                 "flags": "TwitchEmoteImage|TwitchEmoteText",
                 "link": {
                     "type": "None",
@@ -97,7 +105,13 @@
                 "type": "EmoteElement"
             },
             {
-                "emote": "😂",
+                "emote": {
+                    "images": {
+                        "1x": "https://pajbot.com/static/emoji-v2/img/twitter/64/1f602.png"
+                    },
+                    "name": "😂",
+                    "tooltip": ":joy:<br/>Emoji"
+                },
                 "flags": "EmojiImage|EmojiText",
                 "link": {
                     "type": "None",
@@ -123,7 +137,15 @@
                 "type": "EmoteElement"
             },
             {
-                "emote": "Kappa",
+                "emote": {
+                    "images": {
+                        "1x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/1.0",
+                        "2x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/2.0",
+                        "3x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/3.0"
+                    },
+                    "name": "Kappa",
+                    "tooltip": "Kappa<br>Twitch Emote"
+                },
                 "flags": "TwitchEmoteImage|TwitchEmoteText",
                 "link": {
                     "type": "None",
@@ -168,6 +190,7 @@
         "loginName": "pajlada",
         "messageText": "Kappa 😂 Kappa",
         "searchText": "pajlada  pajlada: Kappa 😂 Kappa ",
+        "serverReceivedTime": "2022-09-03T13:27:03+00:00",
         "timeoutUser": "",
         "usernameColor": "#ffcc44ff"
     }

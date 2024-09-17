@@ -80,7 +80,15 @@
                 ]
             },
             {
-                "emote": "Kappa",
+                "emote": {
+                    "images": {
+                        "1x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/1.0",
+                        "2x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/2.0",
+                        "3x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/3.0"
+                    },
+                    "name": "Kappa",
+                    "tooltip": "Kappa<br>Twitch Emote"
+                },
                 "flags": "TwitchEmoteImage|TwitchEmoteText",
                 "link": {
                     "type": "None",
@@ -125,6 +133,7 @@
         "loginName": "jammehcow",
         "messageText": "Kappa",
         "searchText": "jammehcow  jammehcow: Kappa ",
+        "serverReceivedTime": "2022-09-03T12:31:33+00:00",
         "timeoutUser": "",
         "usernameColor": "#ffeba2c0"
     }

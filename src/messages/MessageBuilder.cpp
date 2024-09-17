@@ -49,6 +49,7 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QFileInfo>
+#include <QTimeZone>
 
 #include <chrono>
 #include <unordered_set>
@@ -1332,6 +1333,12 @@ MessagePtr MessageBuilder::build()
 
     // timestamp
     this->message().serverReceivedTime = calculateMessageTime(this->ircMessage);
+#ifdef CHATTERINO_WITH_TESTS
+    if (getApp()->isTest())
+    {
+        this->message().serverReceivedTime.setTimeZone(QTimeZone::utc());
+    }
+#endif
     this->emplace<TimestampElement>(this->message().serverReceivedTime.time());
 
     if (this->shouldAddModerationElements())
