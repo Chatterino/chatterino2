@@ -332,9 +332,9 @@ using EmoteMapPtr = std::shared_ptr<const EmoteMap>;
 
 EmoteMapPtr makeEmotes(auto &&...emotes)
 {
-    return std::make_shared<const EmoteMap>(
-        std::initializer_list<std::pair<const EmoteName, EmotePtr>>{
-            makeEmote(std::forward<decltype(emotes)>(emotes))...});
+    auto map = std::make_shared<EmoteMap>();
+    ((map->emplace(makeEmote(std::forward<decltype(emotes)>(emotes)))), ...);
+    return map;
 }
 
 QT_WARNING_PUSH
