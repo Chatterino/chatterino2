@@ -4,7 +4,6 @@
 
 #include <unordered_map>
 
-
 namespace chatterino {
 
 using namespace literals;
