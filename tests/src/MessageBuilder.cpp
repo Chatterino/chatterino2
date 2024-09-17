@@ -4,6 +4,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
+#include "messages/Emote.hpp"
 #include "messages/Message.hpp"
 #include "mocks/BaseApplication.hpp"
 #include "mocks/Channel.hpp"
@@ -44,7 +45,8 @@ namespace {
 constexpr bool UPDATE_FIXTURES = false;
 
 constexpr std::array IRC_FIXTURES{
-    "action", "emote-emoji", "emote", "emotes", "simple",
+    "action",  "emote-emoji", "emote",  "emotes",
+    "emotes2", "rm-deleted",  "simple",
 };
 
 class MockApplication : public mock::BaseApplication
@@ -313,6 +315,98 @@ bool Fixture::run(const QJsonValue &got) const
     }
 
     return compareJson(this->output, got, QStringLiteral("output"));
+}
+
+std::pair<const EmoteName, EmotePtr> makeEmote(Emote &&emote)
+{
+    auto ptr = std::make_shared<Emote>(std::move(emote));
+    ptr->homePage = {u"https://chatterino.com/" % ptr->name.string};
+    ptr->tooltip = {ptr->name.string % u" Tooltip"_s};
+    ptr->author = {u"Chatterino"_s};
+    ptr->images = {
+        Url{u"https://chatterino.com/" % ptr->name.string % u".png"}};
+    return {ptr->name, ptr};
+}
+
+using EmoteMapPtr = std::shared_ptr<const EmoteMap>;
+
+EmoteMapPtr makeEmotes(auto &&...emotes)
+{
+    return std::make_shared<const EmoteMap>(
+        std::initializer_list<std::pair<const EmoteName, EmotePtr>>{
+            makeEmote(std::forward<decltype(emotes)>(emotes))...});
+}
+
+QT_WARNING_PUSH
+QT_WARNING_DISABLE_CLANG("-Wmissing-field-initializers")
+
+struct MockEmotes {
+    EmoteMapPtr seventv;
+    EmoteMapPtr bttv;
+    EmoteMapPtr ffz;
+
+    static MockEmotes channel()
+    {
+        return {
+            .seventv = makeEmotes(
+                Emote{
+                    .name = {u"7TVEmote"_s},
+                    .id = {u"1"_s},
+                },
+                Emote{
+                    .name = {u"7TVEmote0w"_s},
+                    .zeroWidth = true,
+                    .id = {u"2"_s},
+                    .baseName = EmoteName{u"ZeroWidth"_s},
+                },
+                Emote{
+                    .name = {u"PogChamp"_s},
+                    .id = {u"3"_s},
+                }),
+            .bttv = makeEmotes(
+                Emote{
+                    .name = {u"BTTVEmote"_s},
+                },
+                Emote{
+                    .name = {u"Kappa"_s},
+                }),
+            .ffz = makeEmotes(
+                Emote{
+                    .name = {u"FFZEmote"_s},
+                },
+                Emote{
+                    .name = {u"Keepo"_s},
+                }),
+        };
+    }
+
+    static MockEmotes global()
+    {
+        return {
+            .seventv = makeEmotes(Emote{
+                .name = {u"7TVGlobal"_s},
+                .id = {u"G1"_s},
+            }),
+            .bttv = makeEmotes(Emote{
+                .name = {u"BTTVGlobal"_s},
+            }),
+            .ffz = makeEmotes(Emote{
+                .name = {u"FFZGlobal"_s},
+            }),
+        };
+    }
+};
+
+QT_WARNING_POP
+
+std::shared_ptr<TwitchChannel> makeMockTwitchChannel(const QString &name)
+{
+    auto chan = std::make_shared<TwitchChannel>(name);
+    auto mocks = MockEmotes::channel();
+    chan->setSeventvEmotes(std::move(mocks.seventv));
+    chan->setBttvEmotes(std::move(mocks.bttv));
+    chan->setFfzEmotes(std::move(mocks.ffz));
+    return chan;
 }
 
 }  // namespace
@@ -838,6 +932,10 @@ public:
     void SetUp() override
     {
         this->mockApplication = std::make_unique<MockApplication>();
+        auto mocks = MockEmotes::global();
+        this->mockApplication->seventvEmotes.setGlobalEmotes(mocks.seventv);
+        this->mockApplication->bttvEmotes.setEmotes(mocks.bttv);
+        this->mockApplication->ffzEmotes.setEmotes(mocks.ffz);
     }
 
     void TearDown() override
@@ -850,11 +948,10 @@ public:
 
 TEST_P(TestMessageBuilderP, Run)
 {
-    std::shared_ptr<TwitchChannel> channel =
-        std::make_shared<TwitchChannel>("pajlada");
+    auto channel = makeMockTwitchChannel(u"pajlada"_s);
     const auto *param = std::remove_pointer_t<decltype(this)>::GetParam();
 
-    auto fixture = Fixture::read("IRC", param % QStringView(u".json"));
+    auto fixture = Fixture::read(u"IRC"_s, param % QStringView(u".json"));
     auto *ircMessage = Communi::IrcMessage::fromData(fixture.input, nullptr);
     ASSERT_NE(ircMessage, nullptr);
 
