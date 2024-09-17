@@ -149,7 +149,7 @@ struct Fixture {
     static Fixture read(QString category, QString name);
 
     void write(const QJsonValue &got) const;
-    bool check(const QJsonValue &got) const;
+    bool run(const QJsonValue &got) const;
 };
 
 bool compareJson(const QJsonValue &expected, const QJsonValue &got,
@@ -304,9 +304,15 @@ void Fixture::write(const QJsonValue &got) const
     file.close();
 }
 
-bool Fixture::check(const QJsonValue &got) const
+bool Fixture::run(const QJsonValue &got) const
 {
-    return compareJson(this->output, got, QStringLiteral("<root>"));
+    if (UPDATE_FIXTURES)
+    {
+        this->write(got);
+        return true;
+    }
+
+    return compareJson(this->output, got, QStringLiteral("output"));
 }
 
 }  // namespace
@@ -860,14 +866,7 @@ TEST_P(TestMessageBuilderP, Run)
 
     QJsonValue got = msg ? msg->toJson() : QJsonValue{};
 
-    if (UPDATE_FIXTURES)
-    {
-        fixture.write(got);
-    }
-    else
-    {
-        ASSERT_TRUE(fixture.check(got));
-    }
+    ASSERT_TRUE(fixture.run(got));
 
     delete ircMessage;
 }
