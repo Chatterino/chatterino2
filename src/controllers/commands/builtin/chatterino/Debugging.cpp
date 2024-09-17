@@ -9,6 +9,7 @@
 #include "messages/MessageElement.hpp"
 #include "singletons/Theme.hpp"
 #include "util/PostToThread.hpp"
+#include "widgets/dialogs/FontPicker.hpp"
 
 #include <QApplication>
 #include <QLoggingCategory>
@@ -140,6 +141,10 @@ QString debugTest(const CommandContext &ctx)
     }
 
     ctx.channel->addSystemMessage("debug-test called");
+
+    FontPicker *fontPicker = new FontPicker;
+
+    fontPicker->show();
 
     return "";
 }

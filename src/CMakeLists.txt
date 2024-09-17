@@ -570,6 +570,8 @@ set(SOURCE_FILES
         widgets/dialogs/EditHotkeyDialog.hpp
         widgets/dialogs/EmotePopup.cpp
         widgets/dialogs/EmotePopup.hpp
+        widgets/dialogs/FontPicker.cpp
+        widgets/dialogs/FontPicker.hpp
         widgets/dialogs/LastRunCrashDialog.cpp
         widgets/dialogs/LastRunCrashDialog.hpp
         widgets/dialogs/LoginDialog.cpp
