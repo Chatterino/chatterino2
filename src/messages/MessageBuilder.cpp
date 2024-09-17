@@ -1336,7 +1336,8 @@ MessagePtr MessageBuilder::build()
 #ifdef CHATTERINO_WITH_TESTS
     if (getApp()->isTest())
     {
-        this->message().serverReceivedTime.setTimeZone(QTimeZone::utc());
+        this->message().serverReceivedTime =
+            this->message().serverReceivedTime.toUTC();
     }
 #endif
     this->emplace<TimestampElement>(this->message().serverReceivedTime.time());

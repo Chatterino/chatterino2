@@ -38,7 +38,7 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "12:31"
+                        "10:31"
                     ]
                 },
                 "flags": "Timestamp",
@@ -47,7 +47,7 @@
                     "type": "None",
                     "value": ""
                 },
-                "time": "12:31:42",
+                "time": "10:31:42",
                 "tooltip": "",
                 "trailingSpace": true,
                 "type": "TimestampElement"
@@ -199,7 +199,7 @@
         "loginName": "mm2pl",
         "messageText": "Kappa Keepo PogChamp",
         "searchText": "mm2pl  mm2pl: Kappa Keepo PogChamp ",
-        "serverReceivedTime": "2022-09-03T12:31:42+00:00",
+        "serverReceivedTime": "2022-09-03T10:31:42Z",
         "timeoutUser": "",
         "usernameColor": "#ffdaa520"
     }

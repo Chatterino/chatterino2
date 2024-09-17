@@ -41,7 +41,7 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "13:27"
+                        "11:27"
                     ]
                 },
                 "flags": "Timestamp",
@@ -50,7 +50,7 @@
                     "type": "None",
                     "value": ""
                 },
-                "time": "13:27:03",
+                "time": "11:27:03",
                 "tooltip": "",
                 "trailingSpace": true,
                 "type": "TimestampElement"
@@ -190,7 +190,7 @@
         "loginName": "pajlada",
         "messageText": "Kappa 😂 Kappa",
         "searchText": "pajlada  pajlada: Kappa 😂 Kappa ",
-        "serverReceivedTime": "2022-09-03T13:27:03+00:00",
+        "serverReceivedTime": "2022-09-03T11:27:03Z",
         "timeoutUser": "",
         "usernameColor": "#ffcc44ff"
     }
