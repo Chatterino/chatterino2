@@ -1,17 +1,16 @@
 {
-    "input": "@badge-info=subscriber/17;badges=subscriber/12,no_audio/1;color=#EBA2C0;display-name=jammehcow;emote-only=1;emotes=25:0-4;first-msg=0;flags=;id=9c2dd916-5a6d-4c1f-9fe7-a081b62a9c6b;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662201093248;turbo=0;user-id=82674227;user-type= :jammehcow!jammehcow@jammehcow.tmi.twitch.tv PRIVMSG #pajlada :Kappa",
+    "input": "@tmi-sent-ts=1726662938032;subscriber=1;id=87af876f-5591-4a63-924f-46f465ecd3c4;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes=;custom-reward-id=31a2344e-0fce-4229-9453-fb2e8b6dd02c :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :reward 1",
     "output": [
         {
             "badgeInfos": {
-                "subscriber": "17"
+                "subscriber": "27"
             },
             "badges": [
-                "subscriber",
-                "no_audio"
+                "subscriber"
             ],
             "channelName": "pajlada",
             "count": 1,
-            "displayName": "jammehcow",
+            "displayName": "nerixyz",
             "elements": [
                 {
                     "color": "System",
@@ -41,7 +40,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "10:31"
+                            "12:35"
                         ]
                     },
                     "flags": "Timestamp",
@@ -50,7 +49,7 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "10:31:33",
+                    "time": "12:35:38",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
@@ -66,60 +65,56 @@
                     "type": "TwitchModerationElement"
                 },
                 {
-                    "color": "#ffeba2c0",
+                    "color": "#ffff0000",
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
-                        "value": "jammehcow"
+                        "value": "nerixyz"
                     },
                     "style": "ChatMediumBold",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "jammehcow:"
+                        "nerixyz:"
                     ]
                 },
                 {
-                    "emote": {
-                        "images": {
-                            "1x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/1.0",
-                            "2x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/2.0",
-                            "3x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/3.0"
-                        },
-                        "name": "Kappa",
-                        "tooltip": "Kappa<br>Twitch Emote"
-                    },
-                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "color": "Text",
+                    "flags": "Text",
                     "link": {
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "Kappa"
-                        ]
-                    },
-                    "tooltip": "Kappa<br>Twitch Emote",
+                    "style": "ChatMedium",
+                    "tooltip": "",
                     "trailingSpace": true,
-                    "type": "EmoteElement"
+                    "type": "TextElement",
+                    "words": [
+                        "reward"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "1"
+                    ]
                 },
                 {
                     "background": "#ffa0a0a4",
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",
-                        "value": "9c2dd916-5a6d-4c1f-9fe7-a081b62a9c6b"
+                        "value": "87af876f-5591-4a63-924f-46f465ecd3c4"
                     },
                     "padding": 2,
                     "tooltip": "",
@@ -129,14 +124,14 @@
                 }
             ],
             "flags": "Collapsed",
-            "id": "9c2dd916-5a6d-4c1f-9fe7-a081b62a9c6b",
+            "id": "87af876f-5591-4a63-924f-46f465ecd3c4",
             "localizedName": "",
-            "loginName": "jammehcow",
-            "messageText": "Kappa",
-            "searchText": "jammehcow  jammehcow: Kappa ",
-            "serverReceivedTime": "2022-09-03T10:31:33Z",
+            "loginName": "nerixyz",
+            "messageText": "reward 1",
+            "searchText": "nerixyz  nerixyz: reward 1 ",
+            "serverReceivedTime": "2024-09-18T12:35:38Z",
             "timeoutUser": "",
-            "usernameColor": "#ffeba2c0"
+            "usernameColor": "#ffff0000"
         }
     ]
 }

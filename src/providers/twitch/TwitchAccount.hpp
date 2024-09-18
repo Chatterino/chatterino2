@@ -71,6 +71,8 @@ public:
                      std::function<void()> onSuccess,
                      std::function<void()> onFailure);
 
+    void blockUserLocally(const QString &userID);
+
     [[nodiscard]] const std::unordered_set<TwitchUser> &blocks() const;
     [[nodiscard]] const std::unordered_set<QString> &blockedUserIds() const;
 

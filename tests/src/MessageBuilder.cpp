@@ -9,12 +9,15 @@
 #include "mocks/BaseApplication.hpp"
 #include "mocks/Channel.hpp"
 #include "mocks/ChatterinoBadges.hpp"
-#include "mocks/DisabledStreamerMode.hpp"
+#include "mocks/LinkResolver.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "mocks/UserData.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
+#include "providers/twitch/ChannelPointReward.hpp"
+#include "providers/twitch/IrcMessageHandler.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -42,12 +45,40 @@ using chatterino::mock::MockChannel;
 
 namespace {
 
+/// Set this to `true` to write the current output to the fixtures.
 constexpr bool UPDATE_FIXTURES = false;
 
+// clang-format off
+/// The following entries should be sorted
 constexpr std::array IRC_FIXTURES{
-    "action",  "emote-emoji", "emote",  "emotes",
-    "emotes2", "rm-deleted",  "simple",
+    "action",
+    "all-usernames",
+    "blocked-user",
+    "emote-emoji",
+    "emote",
+    "emotes",
+    "emotes2",
+    "highlighted",
+    "ignore-block1",
+    "ignore-block2",
+    "ignore-replace",
+    "links",
+    "mentions",
+    "reply-action",
+    "reply-block",
+    "reply-blocked-user",
+    "reply-child",
+    "reply-ignore",
+    "reply-no-prev",
+    "reply-root",
+    "reply-single",
+    "reward-empty",
+    "reward-known",
+    "reward-unknown",
+    "rm-deleted",
+    "simple",
 };
+// clang-format on
 
 class MockApplication : public mock::BaseApplication
 {
@@ -122,6 +153,11 @@ public:
         return &this->twitchBadges;
     }
 
+    ILinkResolver *getLinkResolver() override
+    {
+        return &this->linkResolver;
+    }
+
     mock::EmptyLogging logging;
     AccountController accounts;
     Emotes emotes;
@@ -135,12 +171,15 @@ public:
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;
     TwitchBadges twitchBadges;
+    mock::EmptyLinkResolver linkResolver;
 };
 
 struct Fixture {
     QString category;
     QString name;
     QByteArray input;
+    /// Additional configuration (might be empty)
+    const QJsonObject params;
     QJsonValue output;
 
     static QDir baseDir(const QString &category);
@@ -287,6 +326,7 @@ Fixture Fixture::read(QString category, QString name)
         .category = std::move(category),
         .name = std::move(name),
         .input = doc["input"].toString().toUtf8(),
+        .params = doc["params"].toObject(),
         .output = doc["output"],
     };
 }
@@ -298,11 +338,17 @@ void Fixture::write(const QJsonValue &got) const
     {
         throw std::runtime_error("Failed to open file");
     }
-    file.write(QJsonDocument{
-        {
-            {"input", QString::fromUtf8(this->input)},
-            {"output", got},
-        }}.toJson());
+
+    QJsonObject obj{
+        {"input"_L1, QString::fromUtf8(this->input)},
+        {"output"_L1, got},
+    };
+    if (!this->params.isEmpty())
+    {
+        obj.insert("params"_L1, this->params);
+    }
+
+    file.write(QJsonDocument{obj}.toJson());
     file.close();
 }
 
@@ -406,6 +452,44 @@ std::shared_ptr<TwitchChannel> makeMockTwitchChannel(const QString &name)
     chan->setSeventvEmotes(std::move(mocks.seventv));
     chan->setBttvEmotes(std::move(mocks.bttv));
     chan->setFfzEmotes(std::move(mocks.ffz));
+
+    QJsonObject defaultImage{
+        {u"url_1x"_s, u"https://chatterino.com/reward1x.png"_s},
+        {u"url_2x"_s, u"https://chatterino.com/reward2x.png"_s},
+        {u"url_4x"_s, u"https://chatterino.com/reward4x.png"_s},
+    };
+    chan->addKnownChannelPointReward({{
+        {u"channel_id"_s, u"11148817"_s},
+        {u"id"_s, u"unused"_s},
+        {u"reward"_s,
+         {{
+             {u"channel_id"_s, u"11148817"_s},
+             {u"cost"_s, 1},
+             {u"id"_s, u"31a2344e-0fce-4229-9453-fb2e8b6dd02c"_s},
+             {u"is_user_input_required"_s, true},
+             {u"title"_s, u"my reward"_s},
+             {u"image"_s, defaultImage},
+         }}},
+    }});
+    chan->addKnownChannelPointReward({{
+        {u"channel_id"_s, u"11148817"_s},
+        {u"id"_s, u"unused"_s},
+        {u"reward"_s,
+         {{
+             {u"channel_id"_s, u"11148817"_s},
+             {u"cost"_s, 1},
+             {u"id"_s, u"dc8d1dac-256e-42b9-b7ba-40b32e5294e2"_s},
+             {u"is_user_input_required"_s, false},
+             {u"title"_s, u"test"_s},
+             {u"image"_s, defaultImage},
+         }}},
+    }});
+
+    chan->setUserColor("UserColor", {1, 2, 3, 4});
+    chan->setUserColor("UserColor2", {5, 6, 7, 8});
+    chan->addRecentChatter("UserChatter");
+    chan->addRecentChatter("UserColor");
+
     return chan;
 }
 
@@ -706,7 +790,7 @@ TEST_F(TestMessageBuilder, ParseTwitchEmotes)
 
     for (const auto &test : testCases)
     {
-        auto *privmsg = static_cast<Communi::IrcPrivateMessage *>(
+        auto *privmsg = dynamic_cast<Communi::IrcPrivateMessage *>(
             Communi::IrcPrivateMessage::fromData(test.input, nullptr));
         QString originalMessage = privmsg->content();
 
@@ -925,7 +1009,6 @@ TEST_F(TestMessageBuilder, IgnoresReplace)
             << "' and output '" << message << "'";
     }
 }
-
 class TestMessageBuilderP : public ::testing::TestWithParam<const char *>
 {
 public:
@@ -936,6 +1019,23 @@ public:
         this->mockApplication->seventvEmotes.setGlobalEmotes(mocks.seventv);
         this->mockApplication->bttvEmotes.setEmotes(mocks.bttv);
         this->mockApplication->ffzEmotes.setEmotes(mocks.ffz);
+        this->mockApplication->getUserData()->setUserColor(u"117691339"_s,
+                                                           u"#DAA521"_s);
+
+        auto addPhrase = [](auto &&...args) {
+            getSettings()->ignoredMessages.append(
+                IgnorePhrase(std::forward<decltype(args)>(args)...));
+        };
+
+        addPhrase(u"ignore"_s, false, false, u"replace"_s, false);
+        addPhrase(u"CaseSensitive"_s, false, false, u"casesensitivE"_s, true);
+        addPhrase(u"&f(o+)(\\d+)"_s, true, false, u"&baz1[\\1+\\2]"_s, false);
+        addPhrase(u"BLOCK"_s, false, true, u"?"_s, true);
+        addPhrase(u"block!{2,}"_s, true, true, u"?"_s, true);
+
+        this->mockApplication->getAccounts()
+            ->twitch.getCurrent()
+            ->blockUserLocally(u"12345"_s);
     }
 
     void TearDown() override
@@ -946,22 +1046,60 @@ public:
     std::unique_ptr<MockApplication> mockApplication;
 };
 
+/// This tests the process of parsing IRC messages and emitting `MessagePtr`s.
+///
+/// Even though it's in the message builder category, this uses
+/// `IrcMesssageHandler` to ensure the correct (or: "real") arguments to build
+/// messages.
+///
+/// Tests are contained in `tests/fixtures/MessageBuilder/IRC`. Each test must
+/// be registered in `IRC_FIXTURES` (at the top of this file). Fixtures consist
+/// of an object with the keys `input`, `output`, and `params` (optional).
+///
+/// `UPDATE_FIXTURES` (top) controls whether the `output` will be generated or
+/// checked.
+///
+/// `params` is an optional object with the following keys:
+/// - `prevMessages`: An array of past messages (used for replies)
+/// - `findAllUsernames`: A boolean controlling the equally named setting
+///   (default: false)
 TEST_P(TestMessageBuilderP, Run)
 {
-    auto channel = makeMockTwitchChannel(u"pajlada"_s);
     const auto *param = std::remove_pointer_t<decltype(this)>::GetParam();
-
     auto fixture = Fixture::read(u"IRC"_s, param % QStringView(u".json"));
+
+    getSettings()->findAllUsernames =
+        fixture.params["findAllUsernames"_L1].toBool();
+
+    auto channel = makeMockTwitchChannel(u"pajlada"_s);
+
+    std::vector<MessagePtr> prevMessages;
+
+    for (auto prevInput : fixture.params["prevMessages"_L1].toArray())
+    {
+        auto *ircMessage = Communi::IrcMessage::fromData(
+            prevInput.toString().toUtf8(), nullptr);
+        ASSERT_NE(ircMessage, nullptr);
+        auto builtMessages = IrcMessageHandler::parseMessageWithReply(
+            channel.get(), ircMessage, prevMessages);
+        for (const auto &builtMessage : builtMessages)
+        {
+            prevMessages.emplace_back(builtMessage);
+        }
+        delete ircMessage;
+    }
+
     auto *ircMessage = Communi::IrcMessage::fromData(fixture.input, nullptr);
     ASSERT_NE(ircMessage, nullptr);
 
-    auto *privMsg = dynamic_cast<Communi::IrcPrivateMessage *>(ircMessage);
-    ASSERT_NE(privMsg, nullptr);  // other types not yet supported
-    MessageBuilder builder(channel.get(), privMsg, MessageParseArgs{});
+    auto builtMessages = IrcMessageHandler::parseMessageWithReply(
+        channel.get(), ircMessage, prevMessages);
 
-    auto msg = builder.build();
-
-    QJsonValue got = msg ? msg->toJson() : QJsonValue{};
+    QJsonArray got;
+    for (const auto &msg : builtMessages)
+    {
+        got.append(msg->toJson());
+    }
 
     ASSERT_TRUE(fixture.run(got));
 

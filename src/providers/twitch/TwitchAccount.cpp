@@ -174,6 +174,16 @@ void TwitchAccount::unblockUser(const QString &userId, const QObject *caller,
         std::move(onFailure));
 }
 
+void TwitchAccount::blockUserLocally(const QString &userID)
+{
+    assertInGuiThread();
+
+    TwitchUser blockedUser;
+    blockedUser.id = userID;
+    this->ignores_.insert(blockedUser);
+    this->ignoresUserIds_.insert(blockedUser.id);
+}
+
 const std::unordered_set<TwitchUser> &TwitchAccount::blocks() const
 {
     assertInGuiThread();

@@ -261,6 +261,10 @@ public:
      * This will look at queued up partial messages, and if one is found it will add the queued up partial messages fully hydrated.
      **/
     void addChannelPointReward(const ChannelPointReward &reward);
+    /// Adds @a reward to the known rewards
+    ///
+    /// Unlike in #addChannelPointReward(), no message will be sent.
+    void addKnownChannelPointReward(const ChannelPointReward &reward);
     bool isChannelPointRewardKnown(const QString &rewardId);
     std::optional<ChannelPointReward> channelPointReward(
         const QString &rewardId) const;

@@ -462,6 +462,12 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
     }
 }
 
+void TwitchChannel::addKnownChannelPointReward(const ChannelPointReward &reward)
+{
+    auto channelPointRewards = this->channelPointRewards_.access();
+    channelPointRewards->try_emplace(reward.id, reward);
+}
+
 bool TwitchChannel::isChannelPointRewardKnown(const QString &rewardId)
 {
     const auto &pointRewards = this->channelPointRewards_.accessConst();
