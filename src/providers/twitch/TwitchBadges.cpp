@@ -79,38 +79,44 @@ void TwitchBadges::loadTwitchBadges()
                 break;
             }
             qCWarning(chatterinoTwitch) << errorMessage;
-            QFile file(":/twitch-badges.json");
-            if (!file.open(QFile::ReadOnly))
-            {
-                // Despite erroring out, we still want to reach the same point
-                // Loaded should still be set to true to not build up an endless queue, and the quuee should still be flushed.
-                qCWarning(chatterinoTwitch)
-                    << "Error loading Twitch Badges from the local backup file";
-                this->loaded();
-                return;
-            }
-            auto bytes = file.readAll();
-            auto doc = QJsonDocument::fromJson(bytes);
-
-            this->parseTwitchBadges(doc.object());
-
-            this->loaded();
+            this->loadLocalBadges();
         });
 }
 
-void TwitchBadges::parseTwitchBadges(QJsonObject root)
+void TwitchBadges::loadLocalBadges()
+{
+    QFile file(":/twitch-badges.json");
+    if (!file.open(QFile::ReadOnly))
+    {
+        // Despite erroring out, we still want to reach the same point
+        // Loaded should still be set to true to not build up an endless queue, and the quuee should still be flushed.
+        qCWarning(chatterinoTwitch)
+            << "Error loading Twitch Badges from the local backup file";
+        this->loaded();
+        return;
+    }
+    auto bytes = file.readAll();
+    auto doc = QJsonDocument::fromJson(bytes);
+
+    this->parseTwitchBadges(doc.object());
+
+    this->loaded();
+}
+
+void TwitchBadges::parseTwitchBadges(const QJsonObject &root)
 {
     auto badgeSets = this->badgeSets_.access();
 
-    auto jsonSets = root.value("badge_sets").toObject();
-    for (auto sIt = jsonSets.begin(); sIt != jsonSets.end(); ++sIt)
+    auto jsonSets = root.value("data").toArray();
+    for (auto setValue : jsonSets)
     {
-        auto key = sIt.key();
-        auto versions = sIt.value().toObject().value("versions").toObject();
+        const auto set = setValue.toObject();
+        auto key = set["set_id"].toString();
 
-        for (auto vIt = versions.begin(); vIt != versions.end(); ++vIt)
+        for (auto versionValue : set["versions"].toArray())
         {
-            auto versionObj = vIt.value().toObject();
+            const auto versionObj = versionValue.toObject();
+            auto id = versionObj["id"].toString();
             auto emote = Emote{
                 .name = {""},
                 .images =
@@ -129,7 +135,7 @@ void TwitchBadges::parseTwitchBadges(QJsonObject root)
                 .homePage = Url{versionObj.value("click_url").toString()},
             };
 
-            (*badgeSets)[key][vIt.key()] = std::make_shared<Emote>(emote);
+            (*badgeSets)[key][id] = std::make_shared<Emote>(emote);
         }
     }
 }

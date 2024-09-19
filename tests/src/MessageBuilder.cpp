@@ -15,6 +15,7 @@
 #include "mocks/UserData.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -46,24 +47,35 @@ using chatterino::mock::MockChannel;
 namespace {
 
 /// Set this to `true` to write the current output to the fixtures.
-constexpr bool UPDATE_FIXTURES = false;
+constexpr bool UPDATE_FIXTURES = true;
 
 // clang-format off
 /// The following entries should be sorted
 constexpr std::array IRC_FIXTURES{
     "action",
     "all-usernames",
+    "badges",
     "blocked-user",
+    "cheer1",
+    "cheer2",
+    "cheer3",
+    "cheer4",
     "emote-emoji",
     "emote",
     "emotes",
     "emotes2",
+    "emotes3",
+    "first-msg",
     "highlighted",
+    "hype-chat0",
+    "hype-chat1",
+    "hype-chat2",
     "ignore-block1",
     "ignore-block2",
     "ignore-replace",
     "links",
     "mentions",
+    "mod",
     "reply-action",
     "reply-block",
     "reply-blocked-user",
@@ -445,6 +457,58 @@ struct MockEmotes {
 
 QT_WARNING_POP
 
+const QByteArray CHEERMOTE_JSON = R"({
+    "prefix": "Cheer",
+    "tiers": [
+    {
+        "min_bits": 1,
+        "id": "1",
+        "color": "#979797",
+        "images": {
+        "dark": {
+            "animated": {
+            "1": "https://chatterino.com/bits/1.gif",
+            "2": "https://chatterino.com/bits/2.gif",
+            "4": "https://chatterino.com/bits/4.gif"
+            },
+            "static": {
+            "1": "https://chatterino.com/bits/1.png",
+            "2": "https://chatterino.com/bits/2.png",
+            "4": "https://chatterino.com/bits/4.png"
+            }
+        }
+        },
+        "can_cheer": true,
+        "show_in_bits_card": true
+    },
+    {
+        "min_bits": 100,
+        "id": "100",
+        "color": "#9c3ee8",
+        "images": {
+        "dark": {
+            "animated": {
+            "1": "https://chatterino.com/bits/1.gif",
+            "2": "https://chatterino.com/bits/2.gif",
+            "4": "https://chatterino.com/bits/4.gif"
+            },
+            "static": {
+            "1": "https://chatterino.com/bits/1.png",
+            "2": "https://chatterino.com/bits/2.png",
+            "4": "https://chatterino.com/bits/4.png"
+            }
+        }
+        },
+        "can_cheer": true,
+        "show_in_bits_card": true
+    }
+    ],
+    "type": "global_first_party",
+    "order": 1,
+    "last_updated": "2018-05-22T00:06:04Z",
+    "is_charitable": false
+})"_ba;
+
 std::shared_ptr<TwitchChannel> makeMockTwitchChannel(const QString &name)
 {
     auto chan = std::make_shared<TwitchChannel>(name);
@@ -489,6 +553,12 @@ std::shared_ptr<TwitchChannel> makeMockTwitchChannel(const QString &name)
     chan->setUserColor("UserColor2", {5, 6, 7, 8});
     chan->addRecentChatter("UserChatter");
     chan->addRecentChatter("UserColor");
+
+    chan->setCheerEmoteSets({
+        HelixCheermoteSet{QJsonDocument::fromJson(CHEERMOTE_JSON).object()},
+    });
+
+    chan->setFfzChannelBadges({{u"123456"_s, {3, 4}}});
 
     return chan;
 }
@@ -1036,6 +1106,63 @@ public:
         this->mockApplication->getAccounts()
             ->twitch.getCurrent()
             ->blockUserLocally(u"12345"_s);
+
+        auto makeBadge = [](QStringView platform) {
+            return std::make_shared<Emote>(Emote{
+                .name = {},
+                .images = {Url{u"https://chatterino.com/" % platform %
+                               u".png"}},
+                .tooltip = {platform % u" badge"},
+                .homePage = {},
+                .zeroWidth = false,
+                .id = {},
+                .author = {},
+                .baseName = {},
+            });
+        };
+
+        // Chatterino
+        this->mockApplication->chatterinoBadges.setBadge(
+            {u"123456"_s}, makeBadge(u"Chatterino"));
+
+        // FFZ
+        this->mockApplication->ffzBadges.registerBadge(
+            1, {.emote = makeBadge(u"FFZ1"), .color = {9, 10, 11, 12}});
+        this->mockApplication->ffzBadges.registerBadge(
+            2, {.emote = makeBadge(u"FFZ2"), .color = {13, 14, 15, 16}});
+        this->mockApplication->ffzBadges.registerBadge(
+            3, {.emote = makeBadge(u"FFZ2"), .color = {17, 18, 19, 20}});
+        this->mockApplication->ffzBadges.registerBadge(
+            4, {.emote = makeBadge(u"FFZ2"), .color = {21, 22, 23, 24}});
+        this->mockApplication->getFfzBadges()->assignBadgeToUser({u"123456"_s},
+                                                                 1);
+        this->mockApplication->getFfzBadges()->assignBadgeToUser({u"123456"_s},
+                                                                 2);
+
+        // 7TV
+        this->mockApplication->getSeventvBadges()->registerBadge({
+            {u"id"_s, u"1"_s},
+            {u"tooltip"_s, u"7TV badge"_s},
+            {
+                u"host"_s,
+                {{
+                    {u"url"_s, u"//chatterino.com/7tv/"_s},
+                    {u"files"_s,
+                     QJsonArray{
+                         {{
+                             {u"name"_s, u"1x"_s},
+                             {u"format"_s, u"WEBP"_s},
+                             {u"width"_s, 16},
+                         }},
+                     }},
+                }},
+            },
+        });
+        this->mockApplication->getSeventvBadges()->assignBadgeToUser(
+            u"1"_s, {u"123456"_s});
+
+        // Twitch
+        this->mockApplication->getTwitchBadges()->loadLocalBadges();
     }
 
     void TearDown() override
@@ -1070,6 +1197,7 @@ TEST_P(TestMessageBuilderP, Run)
 
     getSettings()->findAllUsernames =
         fixture.params["findAllUsernames"_L1].toBool();
+    getSettings()->stackBits = fixture.params["stackBits"_L1].toBool();
 
     auto channel = makeMockTwitchChannel(u"pajlada"_s);
 

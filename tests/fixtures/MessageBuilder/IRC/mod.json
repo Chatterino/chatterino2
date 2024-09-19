@@ -1,15 +1,17 @@
 {
-    "input": "@badge-info=;badges=no_audio/1;color=#DAA520;display-name=Mm2PL;emote-only=1;emotes=25:0-4/1902:6-10/305954156:12-19;first-msg=0;flags=;id=7be87072-bf24-4fa3-b3df-0ea6fa5f1474;mod=0;returning-chatter=0;room-id=11148817;subscriber=0;tmi-sent-ts=1662201102276;turbo=0;user-id=117691339;user-type= :mm2pl!mm2pl@mm2pl.tmi.twitch.tv PRIVMSG #pajlada :Kappa Keepo PogChamp",
+    "input": "@badge-info=subscriber/34;badges=moderator/1,subscriber/24;color=#FF0000;display-name=테스트계정420;emotes=41:6-13,16-23;flags=;id=97c28382-e8d2-45a0-bb5d-2305fc4ef139;mod=1;room-id=11148817;subscriber=1;tmi-sent-ts=1590922036771;turbo=0;user-id=117166826;user-type=mod :testaccount_420!testaccount_420@testaccount_420.tmi.twitch.tv PRIVMSG #pajlada :-tags Kreygasm, Kreygasm",
     "output": [
         {
             "badgeInfos": {
+                "subscriber": "34"
             },
             "badges": [
-                "no_audio"
+                "moderator",
+                "subscriber"
             ],
             "channelName": "pajlada",
             "count": 1,
-            "displayName": "Mm2PL",
+            "displayName": "testaccount_420",
             "elements": [
                 {
                     "color": "System",
@@ -39,7 +41,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "10:31"
+                            "10:47"
                         ]
                     },
                     "flags": "Timestamp",
@@ -48,64 +50,69 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "10:31:42",
+                    "time": "10:47:16",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
                 },
                 {
-                    "flags": "ModeratorTools",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TwitchModerationElement"
-                },
-                {
                     "emote": {
                         "images": {
-                            "1x": "https://static-cdn.jtvnw.net/badges/v1/aef2cd08-f29b-45a1-8c12-d44d7fd5e6f0/1",
-                            "2x": "https://static-cdn.jtvnw.net/badges/v1/aef2cd08-f29b-45a1-8c12-d44d7fd5e6f0/2",
-                            "3x": "https://static-cdn.jtvnw.net/badges/v1/aef2cd08-f29b-45a1-8c12-d44d7fd5e6f0/3"
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/3"
                         },
                         "name": "",
-                        "tooltip": "Watching without audio"
+                        "tooltip": "Moderator"
                     },
-                    "flags": "BadgeVanity",
+                    "flags": "BadgeChannelAuthority",
                     "link": {
                         "type": "None",
                         "value": ""
                     },
-                    "tooltip": "Watching without audio",
+                    "tooltip": "Moderator",
                     "trailingSpace": true,
                     "type": "BadgeElement"
                 },
                 {
-                    "color": "#ffdaa521",
+                    "color": "#ffff0000",
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
-                        "value": "Mm2PL"
+                        "value": "testaccount_420"
                     },
                     "style": "ChatMediumBold",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "Mm2PL:"
+                        "testaccount_420(테스트계정420):"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "-tags"
                     ]
                 },
                 {
                     "emote": {
                         "images": {
-                            "1x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/1.0",
-                            "2x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/2.0",
-                            "3x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/3.0"
+                            "1x": "https://static-cdn.jtvnw.net/emoticons/v2/41/default/dark/1.0",
+                            "2x": "https://static-cdn.jtvnw.net/emoticons/v2/41/default/dark/2.0",
+                            "3x": "https://static-cdn.jtvnw.net/emoticons/v2/41/default/dark/3.0"
                         },
-                        "name": "Kappa",
-                        "tooltip": "Kappa<br>Twitch Emote"
+                        "name": "Kreygasm",
+                        "tooltip": "Kreygasm<br>Twitch Emote"
                     },
                     "flags": "TwitchEmoteImage|TwitchEmoteText",
                     "link": {
@@ -124,22 +131,37 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "Kappa"
+                            "Kreygasm"
                         ]
                     },
-                    "tooltip": "Kappa<br>Twitch Emote",
-                    "trailingSpace": true,
+                    "tooltip": "Kreygasm<br>Twitch Emote",
+                    "trailingSpace": false,
                     "type": "EmoteElement"
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        ","
+                    ]
                 },
                 {
                     "emote": {
                         "images": {
-                            "1x": "https://static-cdn.jtvnw.net/emoticons/v2/1902/default/dark/1.0",
-                            "2x": "https://static-cdn.jtvnw.net/emoticons/v2/1902/default/dark/2.0",
-                            "3x": "https://static-cdn.jtvnw.net/emoticons/v2/1902/default/dark/3.0"
+                            "1x": "https://static-cdn.jtvnw.net/emoticons/v2/41/default/dark/1.0",
+                            "2x": "https://static-cdn.jtvnw.net/emoticons/v2/41/default/dark/2.0",
+                            "3x": "https://static-cdn.jtvnw.net/emoticons/v2/41/default/dark/3.0"
                         },
-                        "name": "Keepo",
-                        "tooltip": "Keepo<br>Twitch Emote"
+                        "name": "Kreygasm",
+                        "tooltip": "Kreygasm<br>Twitch Emote"
                     },
                     "flags": "TwitchEmoteImage|TwitchEmoteText",
                     "link": {
@@ -158,44 +180,10 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "Keepo"
+                            "Kreygasm"
                         ]
                     },
-                    "tooltip": "Keepo<br>Twitch Emote",
-                    "trailingSpace": true,
-                    "type": "EmoteElement"
-                },
-                {
-                    "emote": {
-                        "images": {
-                            "1x": "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/1.0",
-                            "2x": "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/2.0",
-                            "3x": "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/3.0"
-                        },
-                        "name": "PogChamp",
-                        "tooltip": "PogChamp<br>Twitch Emote"
-                    },
-                    "flags": "TwitchEmoteImage|TwitchEmoteText",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "PogChamp"
-                        ]
-                    },
-                    "tooltip": "PogChamp<br>Twitch Emote",
+                    "tooltip": "Kreygasm<br>Twitch Emote",
                     "trailingSpace": true,
                     "type": "EmoteElement"
                 },
@@ -204,7 +192,7 @@
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",
-                        "value": "7be87072-bf24-4fa3-b3df-0ea6fa5f1474"
+                        "value": "97c28382-e8d2-45a0-bb5d-2305fc4ef139"
                     },
                     "padding": 2,
                     "tooltip": "",
@@ -214,14 +202,14 @@
                 }
             ],
             "flags": "Collapsed",
-            "id": "7be87072-bf24-4fa3-b3df-0ea6fa5f1474",
-            "localizedName": "",
-            "loginName": "mm2pl",
-            "messageText": "Kappa Keepo PogChamp",
-            "searchText": "mm2pl  mm2pl: Kappa Keepo PogChamp ",
-            "serverReceivedTime": "2022-09-03T10:31:42Z",
+            "id": "97c28382-e8d2-45a0-bb5d-2305fc4ef139",
+            "localizedName": "테스트계정420",
+            "loginName": "testaccount_420",
+            "messageText": "-tags Kreygasm, Kreygasm",
+            "searchText": "testaccount_420(테스트계정420) 테스트계정420 testaccount_420: -tags Kreygasm, Kreygasm ",
+            "serverReceivedTime": "2020-05-31T10:47:16Z",
             "timeoutUser": "",
-            "usernameColor": "#ff000000"
+            "usernameColor": "#ffff0000"
         }
     ]
 }

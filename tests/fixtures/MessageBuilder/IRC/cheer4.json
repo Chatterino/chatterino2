@@ -1,17 +1,15 @@
 {
-    "input": "@badge-info=subscriber/17;badges=subscriber/12,no_audio/1;color=#EBA2C0;display-name=jammehcow;emote-only=1;emotes=25:0-4;first-msg=0;flags=;id=9c2dd916-5a6d-4c1f-9fe7-a081b62a9c6b;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662201093248;turbo=0;user-id=82674227;user-type= :jammehcow!jammehcow@jammehcow.tmi.twitch.tv PRIVMSG #pajlada :Kappa",
+    "input": "@badge-info=;badges=bits/1;bits=10;color=#00FF7F;display-name=EXDE_HUN;emotes=;flags=;id=60d8835b-23fa-418c-96ca-5874e5d5e8ba;mod=0;room-id=111448817;subscriber=0;tmi-sent-ts=1566654664248;turbo=0;user-id=129793695;user-type= :exde_hun!exde_hun@exde_hun.tmi.twitch.tv PRIVMSG #pajlada :PogChamp10",
     "output": [
         {
             "badgeInfos": {
-                "subscriber": "17"
             },
             "badges": [
-                "subscriber",
-                "no_audio"
+                "bits"
             ],
             "channelName": "pajlada",
             "count": 1,
-            "displayName": "jammehcow",
+            "displayName": "EXDE_HUN",
             "elements": [
                 {
                     "color": "System",
@@ -41,7 +39,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "10:31"
+                            "13:51"
                         ]
                     },
                     "flags": "Timestamp",
@@ -50,7 +48,7 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "10:31:33",
+                    "time": "13:51:04",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
@@ -67,78 +65,60 @@
                 },
                 {
                     "emote": {
+                        "homePage": "https://bits.twitch.tv",
                         "images": {
-                            "1x": "https://static-cdn.jtvnw.net/badges/v1/aef2cd08-f29b-45a1-8c12-d44d7fd5e6f0/1",
-                            "2x": "https://static-cdn.jtvnw.net/badges/v1/aef2cd08-f29b-45a1-8c12-d44d7fd5e6f0/2",
-                            "3x": "https://static-cdn.jtvnw.net/badges/v1/aef2cd08-f29b-45a1-8c12-d44d7fd5e6f0/3"
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/73b5c3fb-24f9-4a82-a852-2f475b59411c/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/73b5c3fb-24f9-4a82-a852-2f475b59411c/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/73b5c3fb-24f9-4a82-a852-2f475b59411c/3"
                         },
                         "name": "",
-                        "tooltip": "Watching without audio"
+                        "tooltip": "cheer 1"
                     },
                     "flags": "BadgeVanity",
                     "link": {
                         "type": "None",
                         "value": ""
                     },
-                    "tooltip": "Watching without audio",
+                    "tooltip": "Twitch cheer 1",
                     "trailingSpace": true,
                     "type": "BadgeElement"
                 },
                 {
-                    "color": "#ffeba2c0",
+                    "color": "#ff00ff7f",
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
-                        "value": "jammehcow"
+                        "value": "EXDE_HUN"
                     },
                     "style": "ChatMediumBold",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "jammehcow:"
+                        "EXDE_HUN:"
                     ]
                 },
                 {
-                    "emote": {
-                        "images": {
-                            "1x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/1.0",
-                            "2x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/2.0",
-                            "3x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/3.0"
-                        },
-                        "name": "Kappa",
-                        "tooltip": "Kappa<br>Twitch Emote"
-                    },
-                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "color": "Text",
+                    "flags": "Text",
                     "link": {
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "Kappa"
-                        ]
-                    },
-                    "tooltip": "Kappa<br>Twitch Emote",
+                    "style": "ChatMedium",
+                    "tooltip": "",
                     "trailingSpace": true,
-                    "type": "EmoteElement"
+                    "type": "TextElement",
+                    "words": [
+                        "PogChamp10"
+                    ]
                 },
                 {
                     "background": "#ffa0a0a4",
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",
-                        "value": "9c2dd916-5a6d-4c1f-9fe7-a081b62a9c6b"
+                        "value": "60d8835b-23fa-418c-96ca-5874e5d5e8ba"
                     },
                     "padding": 2,
                     "tooltip": "",
@@ -147,15 +127,15 @@
                     "url": ""
                 }
             ],
-            "flags": "Collapsed",
-            "id": "9c2dd916-5a6d-4c1f-9fe7-a081b62a9c6b",
+            "flags": "Collapsed|CheerMessage",
+            "id": "60d8835b-23fa-418c-96ca-5874e5d5e8ba",
             "localizedName": "",
-            "loginName": "jammehcow",
-            "messageText": "Kappa",
-            "searchText": "jammehcow  jammehcow: Kappa ",
-            "serverReceivedTime": "2022-09-03T10:31:33Z",
+            "loginName": "exde_hun",
+            "messageText": "PogChamp10",
+            "searchText": "exde_hun  exde_hun: PogChamp10 ",
+            "serverReceivedTime": "2019-08-24T13:51:04Z",
             "timeoutUser": "",
-            "usernameColor": "#ffeba2c0"
+            "usernameColor": "#ff00ff7f"
         }
     ]
 }

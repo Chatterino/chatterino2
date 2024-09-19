@@ -1,5 +1,5 @@
 {
-    "input": "@tmi-sent-ts=1726677572248;subscriber=1;id=2932e250-1f49-4587-8783-7a13d9f99f6b;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes=;custom-reward-id=dc8d1dac-256e-42b9-b7ba-40b32e5294e2 :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :empty",
+    "input": "@tmi-sent-ts=1726764056444;subscriber=1;id=546c42a6-21d0-4f3d-a6a0-c77f78d7b131;room-id=11148817;user-id=123456;display-name=badgy;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes= :badgy!badgy@badgy.tmi.twitch.tv PRIVMSG #pajlada :badge",
     "output": [
         {
             "badgeInfos": {
@@ -10,106 +10,8 @@
             ],
             "channelName": "pajlada",
             "count": 1,
-            "displayName": "nerixyz",
+            "displayName": "badgy",
             "elements": [
-                {
-                    "element": {
-                        "color": "System",
-                        "flags": "Timestamp",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "0:00"
-                        ]
-                    },
-                    "flags": "Timestamp",
-                    "format": "",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "time": "00:00:00",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TimestampElement"
-                },
-                {
-                    "color": "Text",
-                    "flags": "ChannelPointReward",
-                    "link": {
-                        "type": "UserInfo",
-                        "value": ""
-                    },
-                    "style": "ChatMediumBold",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
-                        ""
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "ChannelPointReward",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
-                        "redeemed"
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "ChannelPointReward",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMediumBold",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
-                        "test"
-                    ]
-                },
-                {
-                    "flags": "TwitchEmoteImage|ChannelPointReward",
-                    "image": "https://chatterino.com/reward1x.png",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "ScalingImageElement"
-                },
-                {
-                    "color": "Text",
-                    "flags": "ChannelPointReward",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMediumBold",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
-                        "1"
-                    ]
-                },
                 {
                     "color": "System",
                     "flags": "ChannelName",
@@ -138,7 +40,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "16:39"
+                            "16:40"
                         ]
                     },
                     "flags": "Timestamp",
@@ -147,7 +49,7 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "16:39:32",
+                    "time": "16:40:56",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
@@ -163,18 +65,125 @@
                     "type": "TwitchModerationElement"
                 },
                 {
+                    "emote": {
+                        "images": {
+                            "1x": "https://chatterino.com/Chatterino.png"
+                        },
+                        "name": "",
+                        "tooltip": "Chatterino badge"
+                    },
+                    "flags": "BadgeChatterino",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Chatterino badge",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "color": "#0c090a0b",
+                    "emote": {
+                        "images": {
+                            "1x": "https://chatterino.com/FFZ1.png"
+                        },
+                        "name": "",
+                        "tooltip": "FFZ1 badge"
+                    },
+                    "flags": "BadgeFfz",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "FFZ1 badge",
+                    "trailingSpace": true,
+                    "type": "FfzBadgeElement"
+                },
+                {
+                    "color": "#100d0e0f",
+                    "emote": {
+                        "images": {
+                            "1x": "https://chatterino.com/FFZ2.png"
+                        },
+                        "name": "",
+                        "tooltip": "FFZ2 badge"
+                    },
+                    "flags": "BadgeFfz",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "FFZ2 badge",
+                    "trailingSpace": true,
+                    "type": "FfzBadgeElement"
+                },
+                {
+                    "color": "#14111213",
+                    "emote": {
+                        "images": {
+                            "1x": "https://chatterino.com/FFZ2.png"
+                        },
+                        "name": "",
+                        "tooltip": "FFZ2 badge"
+                    },
+                    "flags": "BadgeFfz",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "FFZ2 badge",
+                    "trailingSpace": true,
+                    "type": "FfzBadgeElement"
+                },
+                {
+                    "color": "#18151617",
+                    "emote": {
+                        "images": {
+                            "1x": "https://chatterino.com/FFZ2.png"
+                        },
+                        "name": "",
+                        "tooltip": "FFZ2 badge"
+                    },
+                    "flags": "BadgeFfz",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "FFZ2 badge",
+                    "trailingSpace": true,
+                    "type": "FfzBadgeElement"
+                },
+                {
+                    "emote": {
+                        "id": "1",
+                        "images": {
+                            "1x": "https://chatterino.com/7tv//1x"
+                        },
+                        "name": "",
+                        "tooltip": "7TV badge"
+                    },
+                    "flags": "BadgeSevenTV",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "7TV badge",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
                     "color": "#ffff0000",
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
-                        "value": "nerixyz"
+                        "value": "badgy"
                     },
                     "style": "ChatMediumBold",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "nerixyz:"
+                        "badgy:"
                     ]
                 },
                 {
@@ -189,7 +198,7 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "empty"
+                        "badge"
                     ]
                 },
                 {
@@ -197,7 +206,7 @@
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",
-                        "value": "2932e250-1f49-4587-8783-7a13d9f99f6b"
+                        "value": "546c42a6-21d0-4f3d-a6a0-c77f78d7b131"
                     },
                     "padding": 2,
                     "tooltip": "",
@@ -206,14 +215,13 @@
                     "url": ""
                 }
             ],
-            "flags": "Collapsed|RedeemedChannelPointReward",
-            "id": "2932e250-1f49-4587-8783-7a13d9f99f6b",
+            "flags": "Collapsed",
+            "id": "546c42a6-21d0-4f3d-a6a0-c77f78d7b131",
             "localizedName": "",
-            "loginName": "nerixyz",
-            "messageText": "empty",
-            "reward": "dc8d1dac-256e-42b9-b7ba-40b32e5294e2",
-            "searchText": "nerixyz  nerixyz: empty  redeemed test 1",
-            "serverReceivedTime": "2024-09-18T16:39:32Z",
+            "loginName": "badgy",
+            "messageText": "badge",
+            "searchText": "badgy  badgy: badge ",
+            "serverReceivedTime": "2024-09-19T16:40:56Z",
             "timeoutUser": "",
             "usernameColor": "#ffff0000"
         }

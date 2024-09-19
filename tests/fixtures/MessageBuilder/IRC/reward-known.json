@@ -13,6 +13,100 @@
             "displayName": "nerixyz",
             "elements": [
                 {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "0:00"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "00:00:00",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "color": "Text",
+                    "flags": "ChannelPointReward",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "Redeemed"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "ChannelPointReward",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "my",
+                        "reward"
+                    ]
+                },
+                {
+                    "flags": "TwitchEmoteImage|ChannelPointReward",
+                    "image": "https://chatterino.com/reward1x.png",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "ScalingImageElement"
+                },
+                {
+                    "color": "Text",
+                    "flags": "ChannelPointReward",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "1"
+                    ]
+                },
+                {
+                    "flags": "ChannelPointReward",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "LinebreakElement"
+                },
+                {
                     "color": "System",
                     "flags": "ChannelName",
                     "link": {
@@ -123,12 +217,13 @@
                     "url": ""
                 }
             ],
-            "flags": "Collapsed",
+            "flags": "Collapsed|RedeemedChannelPointReward",
             "id": "87af876f-5591-4a63-924f-46f465ecd3c4",
             "localizedName": "",
             "loginName": "nerixyz",
             "messageText": "reward 1",
-            "searchText": "nerixyz  nerixyz: reward 1 ",
+            "reward": "31a2344e-0fce-4229-9453-fb2e8b6dd02c",
+            "searchText": "nerixyz  nerixyz: reward 1 Redeemed my reward 1",
             "serverReceivedTime": "2024-09-18T12:35:38Z",
             "timeoutUser": "",
             "usernameColor": "#ffff0000"

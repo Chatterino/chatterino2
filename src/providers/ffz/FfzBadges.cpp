@@ -109,4 +109,26 @@ void FfzBadges::load()
         .execute();
 }
 
+void FfzBadges::registerBadge(int badgeID, Badge badge)
+{
+    std::unique_lock lock(this->mutex_);
+
+    this->badges.emplace(badgeID, std::move(badge));
+}
+
+void FfzBadges::assignBadgeToUser(const UserId &userID, int badgeID)
+{
+    std::unique_lock lock(this->mutex_);
+
+    auto it = this->userBadges.find(userID.string);
+    if (it != this->userBadges.end())
+    {
+        it->second.emplace(badgeID);
+    }
+    else
+    {
+        this->userBadges.emplace(userID.string, std::set{badgeID});
+    }
+}
+
 }  // namespace chatterino

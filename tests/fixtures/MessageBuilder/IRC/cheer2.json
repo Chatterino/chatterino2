@@ -1,15 +1,15 @@
 {
-    "input": "@badge-info=;badges=no_audio/1;color=#DAA520;display-name=Mm2PL;emote-only=1;emotes=25:0-4/1902:6-10/305954156:12-19;first-msg=0;flags=;id=7be87072-bf24-4fa3-b3df-0ea6fa5f1474;mod=0;returning-chatter=0;room-id=11148817;subscriber=0;tmi-sent-ts=1662201102276;turbo=0;user-id=117691339;user-type= :mm2pl!mm2pl@mm2pl.tmi.twitch.tv PRIVMSG #pajlada :Kappa Keepo PogChamp",
+    "input": "@badge-info=;badges=bits-leader/3;bits=5;color=;display-name=slyckity;emotes=;flags=;id=fd6c5507-3a4e-4d24-8f6e-fadf07f520d3;mod=0;room-id=111448817;subscriber=0;tmi-sent-ts=1567824273752;turbo=0;user-id=143114011;user-type= :slyckity!slyckity@slyckity.tmi.twitch.tv PRIVMSG #pajlada :Cheer1 a Cheer1 Cheer1 Cheer1 Cheer1 b c",
     "output": [
         {
             "badgeInfos": {
             },
             "badges": [
-                "no_audio"
+                "bits-leader"
             ],
             "channelName": "pajlada",
             "count": 1,
-            "displayName": "Mm2PL",
+            "displayName": "slyckity",
             "elements": [
                 {
                     "color": "System",
@@ -39,7 +39,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "10:31"
+                            "2:44"
                         ]
                     },
                     "flags": "Timestamp",
@@ -48,7 +48,7 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "10:31:42",
+                    "time": "02:44:33",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
@@ -65,49 +65,50 @@
                 },
                 {
                     "emote": {
+                        "homePage": "https://bits.twitch.tv",
                         "images": {
-                            "1x": "https://static-cdn.jtvnw.net/badges/v1/aef2cd08-f29b-45a1-8c12-d44d7fd5e6f0/1",
-                            "2x": "https://static-cdn.jtvnw.net/badges/v1/aef2cd08-f29b-45a1-8c12-d44d7fd5e6f0/2",
-                            "3x": "https://static-cdn.jtvnw.net/badges/v1/aef2cd08-f29b-45a1-8c12-d44d7fd5e6f0/3"
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/f1d2aab6-b647-47af-965b-84909cf303aa/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/f1d2aab6-b647-47af-965b-84909cf303aa/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/f1d2aab6-b647-47af-965b-84909cf303aa/3"
                         },
                         "name": "",
-                        "tooltip": "Watching without audio"
+                        "tooltip": "Bits Leader 3"
                     },
                     "flags": "BadgeVanity",
                     "link": {
                         "type": "None",
                         "value": ""
                     },
-                    "tooltip": "Watching without audio",
+                    "tooltip": "Bits Leader 3",
                     "trailingSpace": true,
                     "type": "BadgeElement"
                 },
                 {
-                    "color": "#ffdaa521",
+                    "color": "#ff0000ff",
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
-                        "value": "Mm2PL"
+                        "value": "slyckity"
                     },
                     "style": "ChatMediumBold",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "Mm2PL:"
+                        "slyckity:"
                     ]
                 },
                 {
                     "emote": {
                         "images": {
-                            "1x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/1.0",
-                            "2x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/2.0",
-                            "3x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/3.0"
+                            "1x": "https://chatterino.com/bits/1.png",
+                            "2x": "https://chatterino.com/bits/2.png",
+                            "3x": "https://chatterino.com/bits/4.png"
                         },
-                        "name": "Kappa",
-                        "tooltip": "Kappa<br>Twitch Emote"
+                        "name": "cheer emote",
+                        "tooltip": "Cheer1<br>Twitch Cheer Emote"
                     },
-                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "flags": "BitsStatic",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -124,24 +125,25 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "Kappa"
+                            "cheer",
+                            "emote"
                         ]
                     },
-                    "tooltip": "Kappa<br>Twitch Emote",
+                    "tooltip": "Cheer1<br>Twitch Cheer Emote",
                     "trailingSpace": true,
                     "type": "EmoteElement"
                 },
                 {
                     "emote": {
                         "images": {
-                            "1x": "https://static-cdn.jtvnw.net/emoticons/v2/1902/default/dark/1.0",
-                            "2x": "https://static-cdn.jtvnw.net/emoticons/v2/1902/default/dark/2.0",
-                            "3x": "https://static-cdn.jtvnw.net/emoticons/v2/1902/default/dark/3.0"
+                            "1x": "https://chatterino.com/bits/1.gif",
+                            "2x": "https://chatterino.com/bits/2.gif",
+                            "3x": "https://chatterino.com/bits/4.gif"
                         },
-                        "name": "Keepo",
-                        "tooltip": "Keepo<br>Twitch Emote"
+                        "name": "cheer emote",
+                        "tooltip": "Cheer1<br>Twitch Cheer Emote"
                     },
-                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "flags": "BitsAnimated",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -158,53 +160,80 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "Keepo"
+                            "cheer",
+                            "emote"
                         ]
                     },
-                    "tooltip": "Keepo<br>Twitch Emote",
+                    "tooltip": "Cheer1<br>Twitch Cheer Emote",
                     "trailingSpace": true,
                     "type": "EmoteElement"
                 },
                 {
-                    "emote": {
-                        "images": {
-                            "1x": "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/1.0",
-                            "2x": "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/2.0",
-                            "3x": "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/3.0"
-                        },
-                        "name": "PogChamp",
-                        "tooltip": "PogChamp<br>Twitch Emote"
-                    },
-                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "color": "#ff979797",
+                    "flags": "BitsAmount",
                     "link": {
                         "type": "None",
                         "value": ""
                     },
-                    "text": {
-                        "color": "Text",
-                        "flags": "Misc",
-                        "link": {
-                            "type": "None",
-                            "value": ""
-                        },
-                        "style": "ChatMedium",
-                        "tooltip": "",
-                        "trailingSpace": true,
-                        "type": "TextElement",
-                        "words": [
-                            "PogChamp"
-                        ]
-                    },
-                    "tooltip": "PogChamp<br>Twitch Emote",
+                    "style": "ChatMedium",
+                    "tooltip": "",
                     "trailingSpace": true,
-                    "type": "EmoteElement"
+                    "type": "TextElement",
+                    "words": [
+                        "5"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "a"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "b"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "c"
+                    ]
                 },
                 {
                     "background": "#ffa0a0a4",
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",
-                        "value": "7be87072-bf24-4fa3-b3df-0ea6fa5f1474"
+                        "value": "fd6c5507-3a4e-4d24-8f6e-fadf07f520d3"
                     },
                     "padding": 2,
                     "tooltip": "",
@@ -213,15 +242,18 @@
                     "url": ""
                 }
             ],
-            "flags": "Collapsed",
-            "id": "7be87072-bf24-4fa3-b3df-0ea6fa5f1474",
+            "flags": "Collapsed|CheerMessage",
+            "id": "fd6c5507-3a4e-4d24-8f6e-fadf07f520d3",
             "localizedName": "",
-            "loginName": "mm2pl",
-            "messageText": "Kappa Keepo PogChamp",
-            "searchText": "mm2pl  mm2pl: Kappa Keepo PogChamp ",
-            "serverReceivedTime": "2022-09-03T10:31:42Z",
+            "loginName": "slyckity",
+            "messageText": "Cheer1 a Cheer1 Cheer1 Cheer1 Cheer1 b c",
+            "searchText": "slyckity  slyckity: Cheer1 a Cheer1 Cheer1 Cheer1 Cheer1 b c ",
+            "serverReceivedTime": "2019-09-07T02:44:33Z",
             "timeoutUser": "",
-            "usernameColor": "#ff000000"
+            "usernameColor": "#ff0000ff"
         }
-    ]
+    ],
+    "params": {
+        "stackBits": true
+    }
 }

@@ -69,6 +69,7 @@ struct ChannelPointReward;
 class MessageThread;
 struct CheerEmoteSet;
 struct HelixStream;
+struct HelixCheermoteSet;
 
 class TwitchIrcServer;
 
@@ -213,9 +214,11 @@ public:
      * Returns a list of channel-specific FrankerFaceZ badges for the given user
      */
     std::vector<FfzBadges::Badge> ffzChannelBadges(const QString &userID) const;
+    void setFfzChannelBadges(FfzChannelBadgeMap map);
 
     // Cheers
     std::optional<CheerEmote> cheerEmote(const QString &string);
+    void setCheerEmoteSets(const std::vector<HelixCheermoteSet> &cheermoteSets);
 
     // Replies
     /**
