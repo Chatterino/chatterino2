@@ -47,7 +47,7 @@ using chatterino::mock::MockChannel;
 namespace {
 
 /// Set this to `true` to write the current output to the fixtures.
-constexpr bool UPDATE_FIXTURES = true;
+constexpr bool UPDATE_FIXTURES = false;
 
 // clang-format off
 /// The following entries should be sorted
