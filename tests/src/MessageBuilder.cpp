@@ -4,6 +4,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
+#include "controllers/sound/NullBackend.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Message.hpp"
 #include "mocks/BaseApplication.hpp"
@@ -54,6 +55,7 @@ constexpr bool UPDATE_FIXTURES = false;
 constexpr std::array IRC_FIXTURES{
     "action",
     "all-usernames",
+    "badges-invalid",
     "badges",
     "blocked-user",
     "cheer1",
@@ -66,16 +68,22 @@ constexpr std::array IRC_FIXTURES{
     "emotes2",
     "emotes3",
     "first-msg",
-    "highlighted",
+    "highlight1",
+    "highlight2",
+    "highlight3",
     "hype-chat0",
     "hype-chat1",
     "hype-chat2",
     "ignore-block1",
     "ignore-block2",
+    "ignore-infinite",
     "ignore-replace",
     "links",
     "mentions",
     "mod",
+    "no-nick",
+    "no-tags",
+    "redeemed-highlight",
     "reply-action",
     "reply-block",
     "reply-blocked-user",
@@ -84,6 +92,7 @@ constexpr std::array IRC_FIXTURES{
     "reply-no-prev",
     "reply-root",
     "reply-single",
+    "reward-bits",
     "reward-empty",
     "reward-known",
     "reward-unknown",
@@ -97,6 +106,12 @@ class MockApplication : public mock::BaseApplication
 public:
     MockApplication()
         : highlights(this->settings, &this->accounts)
+    {
+    }
+
+    MockApplication(const QString &settingsData)
+        : mock::BaseApplication(settingsData)
+        , highlights(this->settings, &this->accounts)
     {
     }
 
@@ -170,6 +185,11 @@ public:
         return &this->linkResolver;
     }
 
+    ISoundController *getSound() override
+    {
+        return &this->sound;
+    }
+
     mock::EmptyLogging logging;
     AccountController accounts;
     Emotes emotes;
@@ -184,6 +204,7 @@ public:
     SeventvEmotes seventvEmotes;
     TwitchBadges twitchBadges;
     mock::EmptyLinkResolver linkResolver;
+    NullBackend sound;
 };
 
 struct Fixture {
@@ -509,6 +530,49 @@ const QByteArray CHEERMOTE_JSON = R"({
     "is_charitable": false
 })"_ba;
 
+const QString SETTINGS_DEFAULT = uR"(
+{
+    "accounts": {
+        "uid117166826": {
+            "username": "testaccount_420",
+            "userID": "117166826",
+            "clientID": "abc",
+            "oauthToken": "def"
+        },
+        "current": "testaccount_420"
+    },
+    "highlighting": {
+        "blacklist": [
+            {
+                "pattern": "ignoreduser",
+                "regex": false
+            }
+        ],
+        "highlights": [
+            {
+                "pattern": "my-highlight",
+                "showInMentions": true,
+                "alert": false,
+                "sound": true,
+                "regex": false,
+                "case": false,
+                "soundUrl": "",
+                "color": "#7f7f3f49"
+            },
+            {
+                "pattern": "no-mention-highlight",
+                "showInMentions": false,
+                "alert": false,
+                "sound": true,
+                "regex": false,
+                "case": false,
+                "soundUrl": "",
+                "color": "#48ae812f"
+            }
+        ]
+    }
+})"_s;
+
 std::shared_ptr<TwitchChannel> makeMockTwitchChannel(const QString &name)
 {
     auto chan = std::make_shared<TwitchChannel>(name);
@@ -547,6 +611,33 @@ std::shared_ptr<TwitchChannel> makeMockTwitchChannel(const QString &name)
              {u"title"_s, u"test"_s},
              {u"image"_s, defaultImage},
          }}},
+    }});
+    chan->addKnownChannelPointReward({{
+        {u"channel_id"_s, u"11148817"_s},
+        {u"id"_s, u"unused"_s},
+        {u"reward"_s,
+         {{
+             {u"channel_id"_s, u"11148817"_s},
+             {u"cost"_s, 1},
+             {u"default_bits_cost"_s, 2},
+             {u"bits_cost"_s, 0},
+             {u"pricing_type"_s, u"BITS"_s},
+             {u"reward_type"_s, u"CELEBRATION"_s},
+             {u"is_user_input_required"_s, false},
+             {u"title"_s, u"BitReward"_s},
+             {u"image"_s, defaultImage},
+         }}},
+        {u"redemption_metadata"_s,
+         QJsonObject{
+             {u"celebration_emote_metadata"_s,
+              QJsonObject{
+                  {u"emote"_s,
+                   {{
+                       {u"id"_s, u"42"_s},
+                       {u"token"_s, u"MyBitsEmote"_s},
+                   }}},
+              }},
+         }},
     }});
 
     chan->setUserColor("UserColor", {1, 2, 3, 4});
@@ -1084,7 +1175,8 @@ class TestMessageBuilderP : public ::testing::TestWithParam<const char *>
 public:
     void SetUp() override
     {
-        this->mockApplication = std::make_unique<MockApplication>();
+        this->mockApplication =
+            std::make_unique<MockApplication>(SETTINGS_DEFAULT);
         auto mocks = MockEmotes::global();
         this->mockApplication->seventvEmotes.setGlobalEmotes(mocks.seventv);
         this->mockApplication->bttvEmotes.setEmotes(mocks.bttv);
@@ -1102,6 +1194,13 @@ public:
         addPhrase(u"&f(o+)(\\d+)"_s, true, false, u"&baz1[\\1+\\2]"_s, false);
         addPhrase(u"BLOCK"_s, false, true, u"?"_s, true);
         addPhrase(u"block!{2,}"_s, true, true, u"?"_s, true);
+        // empty
+        addPhrase(u""_s, false, false, u"empty"_s, true);
+        // invalid regex
+        addPhrase(u"("_s, true, false, u"invalid"_s, true);
+        // too many iterations
+        addPhrase(u"(?<=infinite-loop)$"_s, true, false, u"infinite-loop"_s,
+                  true);
 
         this->mockApplication->getAccounts()
             ->twitch.getCurrent()

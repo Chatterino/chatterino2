@@ -1,5 +1,5 @@
 {
-    "input": "@tmi-sent-ts=1726603573366;subscriber=1;id=56844e02-5541-4b9f-982b-640e6b36f1a9;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes=1902:58-62/25:10-14/305954156:39-46 :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :BTTVEmote Kappa 7TVEmote 7TVEmote0w 😂😂 PogChamp 7TVGlobal Keepo FFZEmote FFZGlobal",
+    "input": "@tmi-sent-ts=1726868573676;subscriber=1;id=23c8b81c-7c73-44e4-84f1-7d37e99714e4;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes=25:10-14/305954156:50-57/1902:69-73 :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :BTTVEmote Kappa 7TVEmote 7TVEmote0w 7TVEmote0w 😂😂 PogChamp 7TVGlobal Keepo FFZEmote FFZGlobal",
     "output": [
         {
             "badgeInfos": {
@@ -40,7 +40,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "20:06"
+                            "21:42"
                         ]
                     },
                     "flags": "Timestamp",
@@ -49,7 +49,7 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "20:06:13",
+                    "time": "21:42:53",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
@@ -176,6 +176,21 @@
                                 "zeroWidth": true
                             },
                             "flags": "SevenTVEmoteImage|SevenTVEmoteText"
+                        },
+                        {
+                            "emote": {
+                                "author": "Chatterino",
+                                "baseName": "ZeroWidth",
+                                "homePage": "https://chatterino.com/7TVEmote0w",
+                                "id": "2",
+                                "images": {
+                                    "1x": "https://chatterino.com/7TVEmote0w.png"
+                                },
+                                "name": "7TVEmote0w",
+                                "tooltip": "7TVEmote0w Tooltip",
+                                "zeroWidth": true
+                            },
+                            "flags": "SevenTVEmoteImage|SevenTVEmoteText"
                         }
                     ],
                     "flags": "SevenTVEmoteImage|SevenTVEmoteText",
@@ -196,11 +211,12 @@
                         "type": "TextElement",
                         "words": [
                             "7TVEmote",
+                            "7TVEmote0w",
                             "7TVEmote0w"
                         ]
                     },
                     "textElementColor": "Text",
-                    "tooltip": "7TVEmote 7TVEmote0w",
+                    "tooltip": "7TVEmote 7TVEmote0w 7TVEmote0w",
                     "tooltips": [
                     ],
                     "trailingSpace": true,
@@ -446,7 +462,7 @@
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",
-                        "value": "56844e02-5541-4b9f-982b-640e6b36f1a9"
+                        "value": "23c8b81c-7c73-44e4-84f1-7d37e99714e4"
                     },
                     "padding": 2,
                     "tooltip": "",
@@ -456,12 +472,12 @@
                 }
             ],
             "flags": "Collapsed",
-            "id": "56844e02-5541-4b9f-982b-640e6b36f1a9",
+            "id": "23c8b81c-7c73-44e4-84f1-7d37e99714e4",
             "localizedName": "",
             "loginName": "nerixyz",
-            "messageText": "BTTVEmote Kappa 7TVEmote 7TVEmote0w 😂😂 PogChamp 7TVGlobal Keepo FFZEmote FFZGlobal",
-            "searchText": "nerixyz  nerixyz: BTTVEmote Kappa 7TVEmote 7TVEmote0w 😂😂 PogChamp 7TVGlobal Keepo FFZEmote FFZGlobal ",
-            "serverReceivedTime": "2024-09-17T20:06:13Z",
+            "messageText": "BTTVEmote Kappa 7TVEmote 7TVEmote0w 7TVEmote0w 😂😂 PogChamp 7TVGlobal Keepo FFZEmote FFZGlobal",
+            "searchText": "nerixyz  nerixyz: BTTVEmote Kappa 7TVEmote 7TVEmote0w 7TVEmote0w 😂😂 PogChamp 7TVGlobal Keepo FFZEmote FFZGlobal ",
+            "serverReceivedTime": "2024-09-20T21:42:53Z",
             "timeoutUser": "",
             "usernameColor": "#ffff0000"
         }
