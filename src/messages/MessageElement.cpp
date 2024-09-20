@@ -852,7 +852,7 @@ Link LinkElement::getLink() const
 
 QJsonObject LinkElement::toJson() const
 {
-    auto base = MessageElement::toJson();
+    auto base = TextElement::toJson();
     base["type"_L1] = u"LinkElement"_s;
     base["link"_L1] = this->linkInfo_.originalUrl();
     base["lowercase"_L1] = QJsonArray::fromStringList(this->lowercase_);
