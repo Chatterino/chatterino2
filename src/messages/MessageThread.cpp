@@ -5,7 +5,9 @@
 #include "util/DebugCount.hpp"
 #include "util/QMagicEnum.hpp"
 
+#include <QJsonArray>
 #include <QJsonObject>
+#include <QJsonValue>
 
 #include <utility>
 
