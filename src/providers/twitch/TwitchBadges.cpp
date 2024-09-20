@@ -107,32 +107,27 @@ void TwitchBadges::parseTwitchBadges(const QJsonObject &root)
 {
     auto badgeSets = this->badgeSets_.access();
 
-    auto jsonSets = root.value("data").toArray();
-    for (auto setValue : jsonSets)
+    for (auto setIt = root.begin(); setIt != root.end(); setIt++)
     {
-        const auto set = setValue.toObject();
-        auto key = set["set_id"].toString();
+        auto key = setIt.key();
 
-        for (auto versionValue : set["versions"].toArray())
+        for (auto versionValue : setIt.value().toArray())
         {
             const auto versionObj = versionValue.toObject();
             auto id = versionObj["id"].toString();
+            auto baseImage = versionObj["image"].toString();
             auto emote = Emote{
-                .name = {""},
+                .name = {},
                 .images =
                     ImageSet{
-                        Image::fromUrl(
-                            {versionObj.value("image_url_1x").toString()}, 1,
-                            BADGE_BASE_SIZE),
-                        Image::fromUrl(
-                            {versionObj.value("image_url_2x").toString()}, .5,
-                            BADGE_BASE_SIZE * 2),
-                        Image::fromUrl(
-                            {versionObj.value("image_url_4x").toString()}, .25,
-                            BADGE_BASE_SIZE * 4),
+                        Image::fromUrl({baseImage + '1'}, 1, BADGE_BASE_SIZE),
+                        Image::fromUrl({baseImage + '2'}, .5,
+                                       BADGE_BASE_SIZE * 2),
+                        Image::fromUrl({baseImage + '3'}, .25,
+                                       BADGE_BASE_SIZE * 4),
                     },
-                .tooltip = Tooltip{versionObj.value("title").toString()},
-                .homePage = Url{versionObj.value("click_url").toString()},
+                .tooltip = Tooltip{versionObj["title"].toString()},
+                .homePage = Url{versionObj["url"].toString()},
             };
 
             (*badgeSets)[key][id] = std::make_shared<Emote>(emote);

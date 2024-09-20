@@ -44,6 +44,8 @@ public:
                        BadgeIconCallback callback);
 
     void loadTwitchBadges();
+
+    /// Loads the badges shipped with Chatterino (twitch-badges.json)
     void loadLocalBadges();
 
 private:
