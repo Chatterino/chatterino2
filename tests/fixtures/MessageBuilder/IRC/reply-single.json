@@ -78,7 +78,7 @@
                     "style": "ChatMediumSmall",
                     "tooltip": "",
                     "trailingSpace": true,
-                    "type": "TextElement",
+                    "type": "SingleLineTextElement",
                     "words": [
                         "a",
                         "Kappa",
@@ -289,7 +289,13 @@
             "loginName": "nerixyz",
             "messageText": "c Keepo FFZEmote 😭 d",
             "replyParent": "d95d04a6-5c6a-476a-8dbd-7c6d3b3c277f",
-            "replyThread": "d95d04a6-5c6a-476a-8dbd-7c6d3b3c277f",
+            "replyThread": {
+                "replies": [
+                    "5e5f526a-5d60-4d81-800b-3b81b8a34c2c"
+                ],
+                "rootId": "d95d04a6-5c6a-476a-8dbd-7c6d3b3c277f",
+                "subscription": "None"
+            },
             "searchText": "nerixyz  nerixyz: c Keepo FFZEmote 😭 d ",
             "serverReceivedTime": "2024-09-18T20:16:33Z",
             "timeoutUser": "",

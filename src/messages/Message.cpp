@@ -1,5 +1,6 @@
 #include "messages/Message.hpp"
 
+#include "Application.hpp"
 #include "common/Literals.hpp"
 #include "messages/MessageThread.hpp"
 #include "providers/colors/ColorProvider.hpp"
@@ -103,8 +104,6 @@ QJsonObject Message::toJson() const
         {"channelName"_L1, this->channelName},
         {"usernameColor"_L1, this->usernameColor.name(QColor::HexArgb)},
         {"count"_L1, static_cast<qint64>(this->count)},
-
-        // {"parseTime"_L1, this->parseTime.toString(Qt::ISODate)},
         {"serverReceivedTime"_L1,
          this->serverReceivedTime.toString(Qt::ISODate)},
     };
@@ -130,7 +129,7 @@ QJsonObject Message::toJson() const
 
     if (this->replyThread)
     {
-        msg["replyThread"_L1] = this->replyThread->rootId();
+        msg["replyThread"_L1] = this->replyThread->toJson();
     }
 
     if (this->replyParent)
@@ -140,7 +139,13 @@ QJsonObject Message::toJson() const
 
     if (this->reward)
     {
-        msg["reward"_L1] = this->reward->id;
+        msg["reward"_L1] = this->reward->toJson();
+    }
+
+    // XXX: figure out if we can add this in tests
+    if (!getApp()->isTest())
+    {
+        msg["parseTime"_L1] = this->parseTime.toString(Qt::ISODate);
     }
 
     QJsonArray elements;

@@ -78,7 +78,7 @@
                     "style": "ChatMediumSmall",
                     "tooltip": "",
                     "trailingSpace": true,
-                    "type": "TextElement",
+                    "type": "SingleLineTextElement",
                     "words": [
                         "a"
                     ]
@@ -169,7 +169,14 @@
             "localizedName": "",
             "loginName": "nerixyz",
             "messageText": "c",
-            "replyThread": "72d76cb2-f34d-4a93-8005-61bf244456ee",
+            "replyThread": {
+                "replies": [
+                    "474f19ab-a1b0-410a-877a-5b0e2ae8be6d",
+                    "997cb8fa-4d24-411b-a5cd-433e515a5b72"
+                ],
+                "rootId": "72d76cb2-f34d-4a93-8005-61bf244456ee",
+                "subscription": "None"
+            },
             "searchText": "nerixyz  nerixyz: c ",
             "serverReceivedTime": "2024-09-18T20:18:51Z",
             "timeoutUser": "",

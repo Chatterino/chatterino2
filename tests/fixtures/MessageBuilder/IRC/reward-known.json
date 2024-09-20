@@ -222,7 +222,26 @@
             "localizedName": "",
             "loginName": "nerixyz",
             "messageText": "reward 1",
-            "reward": "31a2344e-0fce-4229-9453-fb2e8b6dd02c",
+            "reward": {
+                "channelId": "11148817",
+                "cost": 1,
+                "emoteId": "",
+                "emoteName": "",
+                "id": "31a2344e-0fce-4229-9453-fb2e8b6dd02c",
+                "image": {
+                    "1x": "https://chatterino.com/reward1x.png",
+                    "2x": "https://chatterino.com/reward2x.png",
+                    "3x": "https://chatterino.com/reward4x.png"
+                },
+                "isBits": false,
+                "isUserInputRequired": true,
+                "title": "my reward",
+                "user": {
+                    "displayName": "",
+                    "id": "",
+                    "login": ""
+                }
+            },
             "searchText": "nerixyz  nerixyz: reward 1 Redeemed my reward 1",
             "serverReceivedTime": "2024-09-18T12:35:38Z",
             "timeoutUser": "",

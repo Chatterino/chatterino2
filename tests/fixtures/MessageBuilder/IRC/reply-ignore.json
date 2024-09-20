@@ -78,7 +78,7 @@
                     "style": "ChatMediumSmall",
                     "tooltip": "",
                     "trailingSpace": true,
-                    "type": "TextElement",
+                    "type": "SingleLineTextElement",
                     "words": [
                         "replace"
                     ]
@@ -170,7 +170,13 @@
             "loginName": "nerixyz",
             "messageText": "casesensitivE",
             "replyParent": "68a68ef7-0ee3-4584-8937-6d20ff0a7a8a",
-            "replyThread": "68a68ef7-0ee3-4584-8937-6d20ff0a7a8a",
+            "replyThread": {
+                "replies": [
+                    "89c8f200-ae37-4279-909d-5ff4f9ed10a0"
+                ],
+                "rootId": "68a68ef7-0ee3-4584-8937-6d20ff0a7a8a",
+                "subscription": "None"
+            },
             "searchText": "nerixyz  nerixyz: casesensitivE ",
             "serverReceivedTime": "2024-09-18T20:48:12Z",
             "timeoutUser": "",

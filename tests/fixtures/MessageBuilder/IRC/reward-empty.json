@@ -211,7 +211,26 @@
             "localizedName": "",
             "loginName": "nerixyz",
             "messageText": "empty",
-            "reward": "dc8d1dac-256e-42b9-b7ba-40b32e5294e2",
+            "reward": {
+                "channelId": "11148817",
+                "cost": 1,
+                "emoteId": "",
+                "emoteName": "",
+                "id": "dc8d1dac-256e-42b9-b7ba-40b32e5294e2",
+                "image": {
+                    "1x": "https://chatterino.com/reward1x.png",
+                    "2x": "https://chatterino.com/reward2x.png",
+                    "3x": "https://chatterino.com/reward4x.png"
+                },
+                "isBits": false,
+                "isUserInputRequired": false,
+                "title": "test",
+                "user": {
+                    "displayName": "",
+                    "id": "",
+                    "login": ""
+                }
+            },
             "searchText": "nerixyz  nerixyz: empty  redeemed test 1",
             "serverReceivedTime": "2024-09-18T16:39:32Z",
             "timeoutUser": "",

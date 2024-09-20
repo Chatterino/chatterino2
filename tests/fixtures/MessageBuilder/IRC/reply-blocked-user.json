@@ -63,7 +63,7 @@
                     "style": "ChatMediumSmall",
                     "tooltip": "",
                     "trailingSpace": true,
-                    "type": "TextElement",
+                    "type": "SingleLineTextElement",
                     "words": [
                         "[Blocked",
                         "user]"
