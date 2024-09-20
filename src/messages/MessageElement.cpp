@@ -1,6 +1,7 @@
 #include "messages/MessageElement.hpp"
 
 #include "Application.hpp"
+#include "common/Literals.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/Emote.hpp"
@@ -14,7 +15,13 @@
 #include "util/DebugCount.hpp"
 #include "util/Variant.hpp"
 
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QJsonValue>
+
 namespace chatterino {
+
+using namespace literals;
 
 namespace {
 
@@ -88,6 +95,22 @@ void MessageElement::addFlags(MessageElementFlags flags)
     this->flags_.set(flags);
 }
 
+QJsonObject MessageElement::jsonBase() const
+{
+    return {
+        {"trailingSpace"_L1, this->trailingSpace},
+        {
+            "link"_L1,
+            {{
+                {"type"_L1, qmagicenum::enumNameString(this->link_.type)},
+                {"value"_L1, this->link_.value},
+            }},
+        },
+        {"tooltip"_L1, this->tooltip_},
+        {"flags"_L1, qmagicenum::enumFlagsName(this->flags_.value())},
+    };
+}
+
 // IMAGE
 ImageElement::ImageElement(ImagePtr image, MessageElementFlags flags)
     : MessageElement(flags)
@@ -106,6 +129,15 @@ void ImageElement::addToContainer(MessageLayoutContainer &container,
         container.addElement(
             (new ImageLayoutElement(*this, this->image_, size)));
     }
+}
+
+QJsonObject ImageElement::toJson() const
+{
+    auto base = this->jsonBase();
+    base["type"_L1] = u"ImageElement"_s;
+    base["url"_L1] = this->image_->url().string;
+
+    return base;
 }
 
 CircularImageElement::CircularImageElement(ImagePtr image, int padding,
@@ -129,6 +161,17 @@ void CircularImageElement::addToContainer(MessageLayoutContainer &container,
         container.addElement(new ImageWithCircleBackgroundLayoutElement(
             *this, this->image_, imgSize, this->background_, this->padding_));
     }
+}
+
+QJsonObject CircularImageElement::toJson() const
+{
+    auto base = this->jsonBase();
+    base["type"_L1] = u"CircularImageElement"_s;
+    base["url"_L1] = this->image_->url().string;
+    base["padding"_L1] = this->padding_;
+    base["background"_L1] = this->background_.name(QColor::HexArgb);
+
+    return base;
 }
 
 // EMOTE
@@ -185,6 +228,19 @@ MessageLayoutElement *EmoteElement::makeImageLayoutElement(
     const ImagePtr &image, const QSize &size)
 {
     return new ImageLayoutElement(*this, image, size);
+}
+
+QJsonObject EmoteElement::toJson() const
+{
+    auto base = this->jsonBase();
+    base["type"_L1] = u"EmoteElement"_s;
+    base["emote"_L1] = this->emote_->toJson();
+    if (this->textElement_)
+    {
+        base["text"_L1] = this->textElement_->toJson();
+    }
+
+    return base;
 }
 
 LayeredEmoteElement::LayeredEmoteElement(
@@ -350,6 +406,38 @@ std::vector<LayeredEmoteElement::Emote> LayeredEmoteElement::getUniqueEmotes()
     return unique;
 }
 
+QJsonObject LayeredEmoteElement::toJson() const
+{
+    auto base = this->jsonBase();
+    base["type"_L1] = u"LayeredEmoteElement"_s;
+
+    QJsonArray emotes;
+    for (const auto &emote : this->emotes_)
+    {
+        emotes.append({{
+            {"flags"_L1, qmagicenum::enumFlagsName(emote.flags.value())},
+            {"emote"_L1, emote.ptr->toJson()},
+        }});
+    }
+    base["emotes"_L1] = emotes;
+
+    QJsonArray tooltips;
+    for (const auto &tooltip : this->emoteTooltips_)
+    {
+        emotes.append(tooltip);
+    }
+    base["tooltips"_L1] = tooltips;
+
+    if (this->textElement_)
+    {
+        base["text"_L1] = this->textElement_->toJson();
+    }
+
+    base["textElementColor"_L1] = this->textElementColor_.toString();
+
+    return base;
+}
+
 // BADGE
 BadgeElement::BadgeElement(const EmotePtr &emote, MessageElementFlags flags)
     : MessageElement(flags)
@@ -390,6 +478,15 @@ MessageLayoutElement *BadgeElement::makeImageLayoutElement(
     return element;
 }
 
+QJsonObject BadgeElement::toJson() const
+{
+    auto base = this->jsonBase();
+    base["type"_L1] = u"BadgeElement"_s;
+    base["emote"_L1] = this->emote_->toJson();
+
+    return base;
+}
+
 // MOD BADGE
 ModBadgeElement::ModBadgeElement(const EmotePtr &data,
                                  MessageElementFlags flags_)
@@ -408,6 +505,14 @@ MessageLayoutElement *ModBadgeElement::makeImageLayoutElement(
     return element;
 }
 
+QJsonObject ModBadgeElement::toJson() const
+{
+    auto base = BadgeElement::toJson();
+    base["type"_L1] = u"ModBadgeElement"_s;
+
+    return base;
+}
+
 // VIP BADGE
 VipBadgeElement::VipBadgeElement(const EmotePtr &data,
                                  MessageElementFlags flags_)
@@ -421,6 +526,14 @@ MessageLayoutElement *VipBadgeElement::makeImageLayoutElement(
     auto *element = new ImageLayoutElement(*this, image, size);
 
     return element;
+}
+
+QJsonObject VipBadgeElement::toJson() const
+{
+    auto base = BadgeElement::toJson();
+    base["type"_L1] = u"VipBadgeElement"_s;
+
+    return base;
 }
 
 // FFZ Badge
@@ -438,6 +551,15 @@ MessageLayoutElement *FfzBadgeElement::makeImageLayoutElement(
         new ImageWithBackgroundLayoutElement(*this, image, size, this->color);
 
     return element;
+}
+
+QJsonObject FfzBadgeElement::toJson() const
+{
+    auto base = BadgeElement::toJson();
+    base["type"_L1] = u"FfzBadgeElement"_s;
+    base["color"_L1] = this->color.name(QColor::HexArgb);
+
+    return base;
 }
 
 // TEXT
@@ -547,6 +669,17 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                 word.mid(wordStart), width, this->hasTrailingSpace()));
         }
     }
+}
+
+QJsonObject TextElement::toJson() const
+{
+    auto base = this->jsonBase();
+    base["type"_L1] = u"TextElement"_s;
+    base["words"_L1] = QJsonArray::fromStringList(this->words_);
+    base["color"_L1] = this->color_.toString();
+    base["style"_L1] = qmagicenum::enumNameString(this->style_);
+
+    return base;
 }
 
 SingleLineTextElement::SingleLineTextElement(const QString &text,
@@ -677,6 +810,22 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
+QJsonObject SingleLineTextElement::toJson() const
+{
+    auto base = this->jsonBase();
+    base["type"_L1] = u"TextElement"_s;
+    QJsonArray words;
+    for (const auto &word : this->words_)
+    {
+        words.append(word.text);
+    }
+    base["words"_L1] = words;
+    base["color"_L1] = this->color_.toString();
+    base["style"_L1] = qmagicenum::enumNameString(this->style_);
+
+    return base;
+}
+
 LinkElement::LinkElement(const Parsed &parsed, const QString &fullUrl,
                          MessageElementFlags flags, const MessageColor &color,
                          FontStyle style)
@@ -699,6 +848,17 @@ void LinkElement::addToContainer(MessageLayoutContainer &container,
 Link LinkElement::getLink() const
 {
     return {Link::Url, this->linkInfo_.url()};
+}
+
+QJsonObject LinkElement::toJson() const
+{
+    auto base = TextElement::toJson();
+    base["type"_L1] = u"LinkElement"_s;
+    base["link"_L1] = this->linkInfo_.originalUrl();
+    base["lowercase"_L1] = QJsonArray::fromStringList(this->lowercase_);
+    base["original"_L1] = QJsonArray::fromStringList(this->original_);
+
+    return base;
 }
 
 MentionElement::MentionElement(const QString &displayName, QString loginName_,
@@ -756,7 +916,24 @@ Link MentionElement::getLink() const
     return {Link::UserInfo, this->userLoginName};
 }
 
+QJsonObject MentionElement::toJson() const
+{
+    auto base = TextElement::toJson();
+    base["type"_L1] = u"MentionElement"_s;
+    base["fallbackColor"_L1] = this->fallbackColor.toString();
+    base["userColor"_L1] = this->userColor.toString();
+    base["userLoginName"_L1] = this->userLoginName;
+
+    return base;
+}
+
 // TIMESTAMP
+TimestampElement::TimestampElement()
+    : TimestampElement(getApp()->isTest() ? QTime::fromMSecsSinceStartOfDay(0)
+                                          : QTime::currentTime())
+{
+}
+
 TimestampElement::TimestampElement(QTime time)
     : MessageElement(MessageElementFlag::Timestamp)
     , time_(time)
@@ -788,6 +965,17 @@ TextElement *TimestampElement::formatTime(const QTime &time)
 
     return new TextElement(format, MessageElementFlag::Timestamp,
                            MessageColor::System, FontStyle::ChatMedium);
+}
+
+QJsonObject TimestampElement::toJson() const
+{
+    auto base = this->jsonBase();
+    base["type"_L1] = u"TimestampElement"_s;
+    base["time"_L1] = this->time_.toString(Qt::ISODate);
+    base["element"_L1] = this->element_->toJson();
+    base["format"_L1] = this->format_;
+
+    return base;
 }
 
 // TWITCH MODERATION
@@ -824,6 +1012,14 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
+QJsonObject TwitchModerationElement::toJson() const
+{
+    auto base = this->jsonBase();
+    base["type"_L1] = u"TwitchModerationElement"_s;
+
+    return base;
+}
+
 LinebreakElement::LinebreakElement(MessageElementFlags flags)
     : MessageElement(flags)
 {
@@ -836,6 +1032,14 @@ void LinebreakElement::addToContainer(MessageLayoutContainer &container,
     {
         container.breakLine();
     }
+}
+
+QJsonObject LinebreakElement::toJson() const
+{
+    auto base = this->jsonBase();
+    base["type"_L1] = u"LinebreakElement"_s;
+
+    return base;
 }
 
 ScalingImageElement::ScalingImageElement(ImageSet images,
@@ -864,6 +1068,15 @@ void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
+QJsonObject ScalingImageElement::toJson() const
+{
+    auto base = this->jsonBase();
+    base["type"_L1] = u"ScalingImageElement"_s;
+    base["image"_L1] = this->images_.getImage1()->url().string;
+
+    return base;
+}
+
 ReplyCurveElement::ReplyCurveElement()
     : MessageElement(MessageElementFlag::RepliedMessage)
 {
@@ -884,6 +1097,14 @@ void ReplyCurveElement::addToContainer(MessageLayoutContainer &container,
             new ReplyCurveLayoutElement(*this, width * scale, thickness * scale,
                                         radius * scale, margin * scale));
     }
+}
+
+QJsonObject ReplyCurveElement::toJson() const
+{
+    auto base = this->jsonBase();
+    base["type"_L1] = u"ReplyCurveElement"_s;
+
+    return base;
 }
 
 }  // namespace chatterino
