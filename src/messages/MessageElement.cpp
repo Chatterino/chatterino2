@@ -95,7 +95,7 @@ void MessageElement::addFlags(MessageElementFlags flags)
     this->flags_.set(flags);
 }
 
-QJsonObject MessageElement::jsonBase() const
+QJsonObject MessageElement::toJson() const
 {
     return {
         {"trailingSpace"_L1, this->trailingSpace},
@@ -133,7 +133,7 @@ void ImageElement::addToContainer(MessageLayoutContainer &container,
 
 QJsonObject ImageElement::toJson() const
 {
-    auto base = this->jsonBase();
+    auto base = MessageElement::toJson();
     base["type"_L1] = u"ImageElement"_s;
     base["url"_L1] = this->image_->url().string;
 
@@ -165,7 +165,7 @@ void CircularImageElement::addToContainer(MessageLayoutContainer &container,
 
 QJsonObject CircularImageElement::toJson() const
 {
-    auto base = this->jsonBase();
+    auto base = MessageElement::toJson();
     base["type"_L1] = u"CircularImageElement"_s;
     base["url"_L1] = this->image_->url().string;
     base["padding"_L1] = this->padding_;
@@ -232,7 +232,7 @@ MessageLayoutElement *EmoteElement::makeImageLayoutElement(
 
 QJsonObject EmoteElement::toJson() const
 {
-    auto base = this->jsonBase();
+    auto base = MessageElement::toJson();
     base["type"_L1] = u"EmoteElement"_s;
     base["emote"_L1] = this->emote_->toJson();
     if (this->textElement_)
@@ -408,7 +408,7 @@ std::vector<LayeredEmoteElement::Emote> LayeredEmoteElement::getUniqueEmotes()
 
 QJsonObject LayeredEmoteElement::toJson() const
 {
-    auto base = this->jsonBase();
+    auto base = MessageElement::toJson();
     base["type"_L1] = u"LayeredEmoteElement"_s;
 
     QJsonArray emotes;
@@ -480,7 +480,7 @@ MessageLayoutElement *BadgeElement::makeImageLayoutElement(
 
 QJsonObject BadgeElement::toJson() const
 {
-    auto base = this->jsonBase();
+    auto base = MessageElement::toJson();
     base["type"_L1] = u"BadgeElement"_s;
     base["emote"_L1] = this->emote_->toJson();
 
@@ -673,7 +673,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
 
 QJsonObject TextElement::toJson() const
 {
-    auto base = this->jsonBase();
+    auto base = MessageElement::toJson();
     base["type"_L1] = u"TextElement"_s;
     base["words"_L1] = QJsonArray::fromStringList(this->words_);
     base["color"_L1] = this->color_.toString();
@@ -812,8 +812,8 @@ void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
 
 QJsonObject SingleLineTextElement::toJson() const
 {
-    auto base = this->jsonBase();
-    base["type"_L1] = u"TextElement"_s;
+    auto base = MessageElement::toJson();
+    base["type"_L1] = u"SingleLineTextElement"_s;
     QJsonArray words;
     for (const auto &word : this->words_)
     {
@@ -852,7 +852,7 @@ Link LinkElement::getLink() const
 
 QJsonObject LinkElement::toJson() const
 {
-    auto base = TextElement::toJson();
+    auto base = MessageElement::toJson();
     base["type"_L1] = u"LinkElement"_s;
     base["link"_L1] = this->linkInfo_.originalUrl();
     base["lowercase"_L1] = QJsonArray::fromStringList(this->lowercase_);
@@ -969,7 +969,7 @@ TextElement *TimestampElement::formatTime(const QTime &time)
 
 QJsonObject TimestampElement::toJson() const
 {
-    auto base = this->jsonBase();
+    auto base = MessageElement::toJson();
     base["type"_L1] = u"TimestampElement"_s;
     base["time"_L1] = this->time_.toString(Qt::ISODate);
     base["element"_L1] = this->element_->toJson();
@@ -1014,7 +1014,7 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
 
 QJsonObject TwitchModerationElement::toJson() const
 {
-    auto base = this->jsonBase();
+    auto base = MessageElement::toJson();
     base["type"_L1] = u"TwitchModerationElement"_s;
 
     return base;
@@ -1036,7 +1036,7 @@ void LinebreakElement::addToContainer(MessageLayoutContainer &container,
 
 QJsonObject LinebreakElement::toJson() const
 {
-    auto base = this->jsonBase();
+    auto base = MessageElement::toJson();
     base["type"_L1] = u"LinebreakElement"_s;
 
     return base;
@@ -1070,7 +1070,7 @@ void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
 
 QJsonObject ScalingImageElement::toJson() const
 {
-    auto base = this->jsonBase();
+    auto base = MessageElement::toJson();
     base["type"_L1] = u"ScalingImageElement"_s;
     base["image"_L1] = this->images_.getImage1()->url().string;
 
@@ -1101,7 +1101,7 @@ void ReplyCurveElement::addToContainer(MessageLayoutContainer &container,
 
 QJsonObject ReplyCurveElement::toJson() const
 {
-    auto base = this->jsonBase();
+    auto base = MessageElement::toJson();
     base["type"_L1] = u"ReplyCurveElement"_s;
 
     return base;

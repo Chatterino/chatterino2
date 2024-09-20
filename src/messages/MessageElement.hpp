@@ -186,13 +186,11 @@ public:
     virtual void addToContainer(MessageLayoutContainer &container,
                                 MessageElementFlags flags) = 0;
 
-    virtual QJsonObject toJson() const = 0;
+    virtual QJsonObject toJson() const;
 
 protected:
     MessageElement(MessageElementFlags flags);
     bool trailingSpace = true;
-
-    QJsonObject jsonBase() const;
 
 private:
     Link link_;
