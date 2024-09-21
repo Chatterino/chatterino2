@@ -1566,7 +1566,7 @@ void TwitchChannel::refreshBadges()
     getHelix()->getChannelBadges(
         this->roomId(),
         // successCallback
-        [this, weak = weakOf<Channel>(this)](auto channelBadges) {
+        [this, weak = weakOf<Channel>(this)](const auto &channelBadges) {
             auto shared = weak.lock();
             if (!shared)
             {
@@ -1574,31 +1574,7 @@ void TwitchChannel::refreshBadges()
                 return;
             }
 
-            auto badgeSets = this->badgeSets_.access();
-
-            for (const auto &badgeSet : channelBadges.badgeSets)
-            {
-                const auto &setID = badgeSet.setID;
-                for (const auto &version : badgeSet.versions)
-                {
-                    auto emote = Emote{
-                        .name = EmoteName{},
-                        .images =
-                            ImageSet{
-                                Image::fromUrl(version.imageURL1x, 1,
-                                               BASE_BADGE_SIZE),
-                                Image::fromUrl(version.imageURL2x, .5,
-                                               BASE_BADGE_SIZE * 2),
-                                Image::fromUrl(version.imageURL4x, .25,
-                                               BASE_BADGE_SIZE * 4),
-                            },
-                        .tooltip = Tooltip{version.title},
-                        .homePage = version.clickURL,
-                    };
-                    (*badgeSets)[setID][version.id] =
-                        std::make_shared<Emote>(emote);
-                }
-            }
+            this->addTwitchBadgeSets(channelBadges);
         },
         // failureCallback
         [this, weak = weakOf<Channel>(this)](auto error, auto message) {
@@ -1627,6 +1603,33 @@ void TwitchChannel::refreshBadges()
 
             this->addSystemMessage(errorMessage);
         });
+}
+
+void TwitchChannel::addTwitchBadgeSets(const HelixChannelBadges &channelBadges)
+{
+    auto badgeSets = this->badgeSets_.access();
+
+    for (const auto &badgeSet : channelBadges.badgeSets)
+    {
+        const auto &setID = badgeSet.setID;
+        for (const auto &version : badgeSet.versions)
+        {
+            auto emote = Emote{
+                .name = EmoteName{},
+                .images =
+                    ImageSet{
+                        Image::fromUrl(version.imageURL1x, 1, BASE_BADGE_SIZE),
+                        Image::fromUrl(version.imageURL2x, .5,
+                                       BASE_BADGE_SIZE * 2),
+                        Image::fromUrl(version.imageURL4x, .25,
+                                       BASE_BADGE_SIZE * 4),
+                    },
+                .tooltip = Tooltip{version.title},
+                .homePage = version.clickURL,
+            };
+            (*badgeSets)[setID][version.id] = std::make_shared<Emote>(emote);
+        }
+    }
 }
 
 void TwitchChannel::refreshCheerEmotes()
@@ -1880,6 +1883,16 @@ std::optional<EmotePtr> TwitchChannel::ffzCustomModBadge() const
 std::optional<EmotePtr> TwitchChannel::ffzCustomVipBadge() const
 {
     return this->ffzCustomVipBadge_.get();
+}
+
+void TwitchChannel::setFfzCustomModBadge(std::optional<EmotePtr> badge)
+{
+    this->ffzCustomModBadge_.set(std::move(badge));
+}
+
+void TwitchChannel::setFfzCustomVipBadge(std::optional<EmotePtr> badge)
+{
+    this->ffzCustomVipBadge_.set(std::move(badge));
 }
 
 std::optional<CheerEmote> TwitchChannel::cheerEmote(const QString &string)

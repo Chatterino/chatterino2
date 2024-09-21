@@ -1828,7 +1828,15 @@ MessagePtr MessageBuilder::buildHypeChatMessage(
 
     // actualAmount = amount * 10^(-exponent)
     double actualAmount = std::pow(10.0, double(-exponent)) * double(amount);
-    subtitle += QLocale::system().toCurrencyString(actualAmount, currency);
+
+    auto locale = QLocale::system();
+#ifdef CHATTERINO_WITH_TESTS
+    if (getApp()->isTest())
+    {
+        locale = QLocale(QLocale::English);
+    }
+#endif
+    subtitle += locale.toCurrencyString(actualAmount, currency);
 
     MessageBuilder builder(systemMessage, parseTagString(subtitle),
                            calculateMessageTime(message).time());

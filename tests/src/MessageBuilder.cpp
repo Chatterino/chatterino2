@@ -9,7 +9,6 @@
 #include "messages/Emote.hpp"
 #include "messages/Message.hpp"
 #include "mocks/BaseApplication.hpp"
-#include "mocks/Channel.hpp"
 #include "mocks/ChatterinoBadges.hpp"
 #include "mocks/LinkResolver.hpp"
 #include "mocks/Logging.hpp"
@@ -38,13 +37,11 @@
 #include <QJsonValue>
 #include <QString>
 
-#include <set>
 #include <unordered_map>
 #include <vector>
 
 using namespace chatterino;
 using namespace literals;
-using chatterino::mock::MockChannel;
 
 namespace {
 
@@ -64,6 +61,10 @@ const QString IRC_CATEGORY = u"MessageBuilder/IRC"_s;
 constexpr std::array IRC_SNAPSHOTS{
     "action",
     "all-usernames",
+    "bad-emotes",
+    "bad-emotes2",
+    "bad-emotes3",
+    "bad-emotes4",
     "badges-invalid",
     "badges",
     "blocked-user",
@@ -71,15 +72,20 @@ constexpr std::array IRC_SNAPSHOTS{
     "cheer2",
     "cheer3",
     "cheer4",
+    "custom-mod",
+    "custom-vip",
     "emote-emoji",
     "emote",
     "emotes",
     "emotes2",
     "emotes3",
+    "emotes4",
+    "emotes5",
     "first-msg",
     "highlight1",
     "highlight2",
     "highlight3",
+    "hype-chat-invalid",
     "hype-chat0",
     "hype-chat1",
     "hype-chat2",
@@ -87,9 +93,11 @@ constexpr std::array IRC_SNAPSHOTS{
     "ignore-block2",
     "ignore-infinite",
     "ignore-replace",
+    "justinfan",
     "links",
     "mentions",
     "mod",
+    "nickname",
     "no-nick",
     "no-tags",
     "redeemed-highlight",
@@ -107,6 +115,10 @@ constexpr std::array IRC_SNAPSHOTS{
     "reward-unknown",
     "rm-deleted",
     "simple",
+    "username-localized",
+    "username-localized2",
+    "username",
+    "vip",
 };
 // clang-format on
 
@@ -243,6 +255,7 @@ struct MockEmotes {
     EmoteMapPtr seventv;
     EmoteMapPtr bttv;
     EmoteMapPtr ffz;
+    EmoteMapPtr twitchAccount;
 
     static MockEmotes channel()
     {
@@ -292,11 +305,13 @@ struct MockEmotes {
             .ffz = makeEmotes(Emote{
                 .name = {u"FFZGlobal"_s},
             }),
+            .twitchAccount = makeEmotes(Emote{
+                .name = {u"MyCoolTwitchEmote"_s},
+                .id = {u"5678"_s},
+            }),
         };
     }
 };
-
-QT_WARNING_POP
 
 const QByteArray CHEERMOTE_JSON{R"({
     "prefix": "Cheer",
@@ -350,17 +365,27 @@ const QByteArray CHEERMOTE_JSON{R"({
     "is_charitable": false
 })"_ba};
 
+const QByteArray LOCAL_BADGE_JSON{R"({
+    "data": [
+        {
+            "set_id": "subscriber",
+            "versions": [
+                {
+                "click_url": null,
+                "description": "Subscriber",
+                "id": "80",
+                "image_url_1x": "https://chatterino.com/tb-1",
+                "image_url_2x": "https://chatterino.com/tb-2",
+                "image_url_4x": "https://chatterino.com/tb-3",
+                "title": "Subscriber"
+                }
+            ]
+        }
+    ]
+})"_ba};
+
 const QString SETTINGS_DEFAULT{uR"(
 {
-    "accounts": {
-        "uid117166826": {
-            "username": "testaccount_420",
-            "userID": "117166826",
-            "clientID": "abc",
-            "oauthToken": "def"
-        },
-        "current": "testaccount_420"
-    },
     "highlighting": {
         "blacklist": [
             {
@@ -390,10 +415,19 @@ const QString SETTINGS_DEFAULT{uR"(
                 "color": "#48ae812f"
             }
         ]
-    }
+    },
+    "nicknames": [
+        {
+            "name": "nickname",
+            "replace": "replacement",
+            "isRegex": false,
+            "isCaseSensitive": false
+        }
+    ]
 })"_s};
 
-std::shared_ptr<TwitchChannel> makeMockTwitchChannel(const QString &name)
+std::shared_ptr<TwitchChannel> makeMockTwitchChannel(
+    const QString &name, const testlib::Snapshot &snapshot)
 {
     auto chan = std::make_shared<TwitchChannel>(name);
     auto mocks = MockEmotes::channel();
@@ -471,8 +505,33 @@ std::shared_ptr<TwitchChannel> makeMockTwitchChannel(const QString &name)
 
     chan->setFfzChannelBadges({{u"123456"_s, {3, 4}}});
 
+    chan->addTwitchBadgeSets(HelixChannelBadges{
+        QJsonDocument::fromJson(LOCAL_BADGE_JSON).object(),
+    });
+
+    if (snapshot.param("ffzCustomVipBadge").toBool())
+    {
+        chan->setFfzCustomVipBadge(std::make_shared<Emote>(Emote{
+            .name = {},
+            .images = {Url{"https://chatterino.com/ffz-vip1x.png"}},
+            .tooltip = {"VIP"},
+            .homePage = {},
+        }));
+    }
+    if (snapshot.param("ffzCustomModBadge").toBool())
+    {
+        chan->setFfzCustomModBadge(std::make_shared<Emote>(Emote{
+            .name = {},
+            .images = {Url{"https://chatterino.com/ffz-mod1x.png"}},
+            .tooltip = {"Moderator"},
+            .homePage = {},
+        }));
+    }
+
     return chan;
 }
+
+QT_WARNING_POP
 
 }  // namespace
 
@@ -786,73 +845,6 @@ TEST_F(TestMessageBuilder, ParseTwitchEmotes)
     }
 }
 
-TEST_F(TestMessageBuilder, ParseMessage)
-{
-    MockChannel channel("pajlada");
-
-    struct TestCase {
-        QByteArray input;
-    };
-
-    std::vector<TestCase> testCases{
-        {
-            // action /me message
-            R"(@badge-info=subscriber/80;badges=broadcaster/1,subscriber/3072,partner/1;color=#CC44FF;display-name=pajlada;emote-only=1;emotes=25:0-4;first-msg=0;flags=;id=90ef1e46-8baa-4bf2-9c54-272f39d6fa11;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662206235860;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada :ACTION Kappa)",
-        },
-        {
-            R"(@badge-info=subscriber/17;badges=subscriber/12,no_audio/1;color=#EBA2C0;display-name=jammehcow;emote-only=1;emotes=25:0-4;first-msg=0;flags=;id=9c2dd916-5a6d-4c1f-9fe7-a081b62a9c6b;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662201093248;turbo=0;user-id=82674227;user-type= :jammehcow!jammehcow@jammehcow.tmi.twitch.tv PRIVMSG #pajlada :Kappa)",
-        },
-        {
-            R"(@badge-info=;badges=no_audio/1;color=#DAA520;display-name=Mm2PL;emote-only=1;emotes=1902:0-4;first-msg=0;flags=;id=9b1c3cb9-7817-47ea-add1-f9d4a9b4f846;mod=0;returning-chatter=0;room-id=11148817;subscriber=0;tmi-sent-ts=1662201095690;turbo=0;user-id=117691339;user-type= :mm2pl!mm2pl@mm2pl.tmi.twitch.tv PRIVMSG #pajlada :Keepo)",
-        },
-        {
-            R"(@badge-info=;badges=no_audio/1;color=#DAA520;display-name=Mm2PL;emote-only=1;emotes=25:0-4/1902:6-10/305954156:12-19;first-msg=0;flags=;id=7be87072-bf24-4fa3-b3df-0ea6fa5f1474;mod=0;returning-chatter=0;room-id=11148817;subscriber=0;tmi-sent-ts=1662201102276;turbo=0;user-id=117691339;user-type= :mm2pl!mm2pl@mm2pl.tmi.twitch.tv PRIVMSG #pajlada :Kappa Keepo PogChamp)",
-        },
-        {
-            R"(@badge-info=subscriber/80;badges=broadcaster/1,subscriber/3072,partner/1;color=#CC44FF;display-name=pajlada;emote-only=1;emotes=25:0-4,6-10;first-msg=0;flags=;id=f7516287-e5d1-43ca-974e-fe0cff84400b;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662204375009;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada :Kappa Kappa)",
-        },
-        {
-            R"(@badge-info=subscriber/80;badges=broadcaster/1,subscriber/3072,partner/1;color=#CC44FF;display-name=pajlada;emotes=25:0-4,8-12;first-msg=0;flags=;id=44f85d39-b5fb-475d-8555-f4244f2f7e82;mod=0;returning-chatter=0;room-id=11148817;subscriber=1;tmi-sent-ts=1662204423418;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada :Kappa 😂 Kappa)",
-        },
-        {
-            // start out of range
-            R"(@emotes=84608:9-10 :test!test@test.tmi.twitch.tv PRIVMSG #pajlada :foo bar)",
-        },
-        {
-            // one character emote
-            R"(@emotes=84608:0-0 :test!test@test.tmi.twitch.tv PRIVMSG #pajlada :foo bar)",
-        },
-        {
-            // two character emote
-            R"(@emotes=84609:0-1 :test!test@test.tmi.twitch.tv PRIVMSG #pajlada :foo bar)",
-        },
-        {
-            // end out of range
-            R"(@emotes=84608:0-15 :test!test@test.tmi.twitch.tv PRIVMSG #pajlada :foo bar)",
-        },
-        {
-            // range bad (end character before start)
-            R"(@emotes=84608:15-2 :test!test@test.tmi.twitch.tv PRIVMSG #pajlada :foo bar)",
-        },
-    };
-
-    for (const auto &test : testCases)
-    {
-        auto *privmsg = dynamic_cast<Communi::IrcPrivateMessage *>(
-            Communi::IrcPrivateMessage::fromData(test.input, nullptr));
-        EXPECT_NE(privmsg, nullptr);
-
-        QString originalMessage = privmsg->content();
-
-        MessageBuilder builder(&channel, privmsg, MessageParseArgs{});
-
-        auto msg = builder.build();
-        EXPECT_NE(msg.get(), nullptr);
-
-        delete privmsg;
-    }
-}
-
 TEST_F(TestMessageBuilder, IgnoresReplace)
 {
     struct TestCase {
@@ -1001,6 +993,8 @@ public:
         this->mockApplication->seventvEmotes.setGlobalEmotes(mocks.seventv);
         this->mockApplication->bttvEmotes.setEmotes(mocks.bttv);
         this->mockApplication->ffzEmotes.setEmotes(mocks.ffz);
+        this->mockApplication->getAccounts()->twitch.getCurrent()->setEmotes(
+            mocks.twitchAccount);
         this->mockApplication->getUserData()->setUserColor(u"117691339"_s,
                                                            u"#DAA521"_s);
 
@@ -1011,7 +1005,15 @@ public:
 
         addPhrase(u"ignore"_s, false, false, u"replace"_s, false);
         addPhrase(u"CaseSensitive"_s, false, false, u"casesensitivE"_s, true);
+        addPhrase(u"summon-emote"_s, false, false,
+                  u"woah-> MyCoolTwitchEmote"_s, true);
         addPhrase(u"&f(o+)(\\d+)"_s, true, false, u"&baz1[\\1+\\2]"_s, false);
+        addPhrase(u"&b(?:o+)(\\d+)"_s, true, false, u"&baz2[\\1+\\2]"_s, false);
+        addPhrase(u"&b(?:a+)(\\d+)"_s, true, false, u"&baz3[\\1+\\42]"_s,
+                  false);
+        addPhrase(u"&b(i)(i)(i)(i)(i)(i)(i)(i)(i)(i)(\\d+)"_s, true, false,
+                  u"&baz4[\\10+\\11+\\1]"_s, false);
+        addPhrase(u"&\\[ (\\w+) \\]&"_s, true, false, u"{ \\1 }"_s, false);
         addPhrase(u"BLOCK"_s, false, true, u"?"_s, true);
         addPhrase(u"block!{2,}"_s, true, true, u"?"_s, true);
         // empty
@@ -1112,17 +1114,21 @@ public:
 TEST_P(TestMessageBuilderP, Run)
 {
     const auto *param = std::remove_pointer_t<decltype(this)>::GetParam();
-    auto fixture = testlib::Snapshot::read(IRC_CATEGORY, param);
+    auto snapshot = testlib::Snapshot::read(IRC_CATEGORY, param);
 
     getSettings()->findAllUsernames =
-        fixture.param("findAllUsernames").toBool();
-    getSettings()->stackBits = fixture.param("stackBits").toBool();
+        snapshot.param("findAllUsernames").toBool();
+    getSettings()->stackBits = snapshot.param("stackBits").toBool();
+    getSettings()->usernameDisplayMode =
+        qmagicenum::enumCast<UsernameDisplayMode>(
+            snapshot.param("usernameDisplayMode").toString())
+            .value_or(UsernameDisplayMode::UsernameAndLocalizedName);
 
-    auto channel = makeMockTwitchChannel(u"pajlada"_s);
+    auto channel = makeMockTwitchChannel(u"pajlada"_s, snapshot);
 
     std::vector<MessagePtr> prevMessages;
 
-    for (auto prevInput : fixture.param("prevMessages").toArray())
+    for (auto prevInput : snapshot.param("prevMessages").toArray())
     {
         auto *ircMessage = Communi::IrcMessage::fromData(
             prevInput.toString().toUtf8(), nullptr);
@@ -1137,7 +1143,7 @@ TEST_P(TestMessageBuilderP, Run)
     }
 
     auto *ircMessage =
-        Communi::IrcMessage::fromData(fixture.inputUtf8(), nullptr);
+        Communi::IrcMessage::fromData(snapshot.inputUtf8(), nullptr);
     ASSERT_NE(ircMessage, nullptr);
 
     auto builtMessages = IrcMessageHandler::parseMessageWithReply(
@@ -1151,7 +1157,7 @@ TEST_P(TestMessageBuilderP, Run)
 
     delete ircMessage;
 
-    ASSERT_TRUE(fixture.run(got, UPDATE_SNAPSHOTS));
+    ASSERT_TRUE(snapshot.run(got, UPDATE_SNAPSHOTS));
 }
 
 INSTANTIATE_TEST_SUITE_P(IrcMessage, TestMessageBuilderP,

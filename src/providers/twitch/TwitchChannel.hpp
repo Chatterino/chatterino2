@@ -70,6 +70,8 @@ class MessageThread;
 struct CheerEmoteSet;
 struct HelixStream;
 struct HelixCheermoteSet;
+struct HelixGlobalBadges;
+using HelixChannelBadges = HelixGlobalBadges;
 
 class TwitchIrcServer;
 
@@ -215,6 +217,10 @@ public:
      */
     std::vector<FfzBadges::Badge> ffzChannelBadges(const QString &userID) const;
     void setFfzChannelBadges(FfzChannelBadgeMap map);
+    void setFfzCustomModBadge(std::optional<EmotePtr> badge);
+    void setFfzCustomVipBadge(std::optional<EmotePtr> badge);
+
+    void addTwitchBadgeSets(const HelixChannelBadges &channelBadges);
 
     // Cheers
     std::optional<CheerEmote> cheerEmote(const QString &string);

@@ -346,6 +346,12 @@ SharedAccessGuard<std::shared_ptr<const EmoteMap>> TwitchAccount::accessEmotes()
     return this->emotes_.accessConst();
 }
 
+void TwitchAccount::setEmotes(std::shared_ptr<const EmoteMap> emotes)
+{
+    assert(getApp()->isTest());
+    *this->emotes_.access() = std::move(emotes);
+}
+
 std::optional<EmotePtr> TwitchAccount::twitchEmote(const EmoteName &name) const
 {
     auto emotes = this->emotes_.accessConst();

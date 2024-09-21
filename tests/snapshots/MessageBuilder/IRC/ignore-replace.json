@@ -1,5 +1,5 @@
 {
-    "input": "@tmi-sent-ts=1726692531193;subscriber=1;id=615327fe-c981-4c5e-946b-79620be7a4b8;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes=1902:31-35/305954156:0-7/25:16-20 :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :PogChamp ignore Kappa &fooo123 Keepo",
+    "input": "@tmi-sent-ts=1726925714864;subscriber=1;id=2199102c-31ae-49b1-9d2c-a33bb3a02021;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes=305954156:0-7/25:16-20,92-96/1902:31-35 :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :PogChamp ignore Kappa &fooo123 Keepo &boo1 &baa1 &bi1 &biii1 &biiiiiiiiii420 &foo123&fo2 &[ Kappa ]& summon-emote",
     "output": [
         {
             "badgeInfos": {
@@ -40,7 +40,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "20:48"
+                            "13:35"
                         ]
                     },
                     "flags": "Timestamp",
@@ -49,7 +49,7 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "20:48:51",
+                    "time": "13:35:14",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
@@ -212,11 +212,215 @@
                     "type": "EmoteElement"
                 },
                 {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "&baz2[1+\\2]"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "&baz3[1+\\42]"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "&bi1"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "&biii1"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "&baz4[i+420+i]"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "&baz1[oo+123]&baz1[o+2]"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "{"
+                    ]
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/1.0",
+                            "2x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/2.0",
+                            "3x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/3.0"
+                        },
+                        "name": "Kappa",
+                        "tooltip": "Kappa<br>Twitch Emote"
+                    },
+                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "text": {
+                        "color": "Text",
+                        "flags": "Misc",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "Kappa"
+                        ]
+                    },
+                    "tooltip": "Kappa<br>Twitch Emote",
+                    "trailingSpace": true,
+                    "type": "EmoteElement"
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "}"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "woah->"
+                    ]
+                },
+                {
+                    "emote": {
+                        "author": "Chatterino",
+                        "homePage": "https://chatterino.com/MyCoolTwitchEmote",
+                        "id": "5678",
+                        "images": {
+                            "1x": "https://chatterino.com/MyCoolTwitchEmote.png"
+                        },
+                        "name": "MyCoolTwitchEmote",
+                        "tooltip": "MyCoolTwitchEmote Tooltip"
+                    },
+                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "text": {
+                        "color": "Text",
+                        "flags": "Misc",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "MyCoolTwitchEmote"
+                        ]
+                    },
+                    "tooltip": "MyCoolTwitchEmote Tooltip",
+                    "trailingSpace": true,
+                    "type": "EmoteElement"
+                },
+                {
                     "background": "#ffa0a0a4",
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",
-                        "value": "615327fe-c981-4c5e-946b-79620be7a4b8"
+                        "value": "2199102c-31ae-49b1-9d2c-a33bb3a02021"
                     },
                     "padding": 2,
                     "tooltip": "",
@@ -226,12 +430,12 @@
                 }
             ],
             "flags": "Collapsed",
-            "id": "615327fe-c981-4c5e-946b-79620be7a4b8",
+            "id": "2199102c-31ae-49b1-9d2c-a33bb3a02021",
             "localizedName": "",
             "loginName": "nerixyz",
-            "messageText": "PogChamp replace Kappa &baz1[ooo+123] Keepo",
-            "searchText": "nerixyz  nerixyz: PogChamp replace Kappa &baz1[ooo+123] Keepo ",
-            "serverReceivedTime": "2024-09-18T20:48:51Z",
+            "messageText": "PogChamp replace Kappa &baz1[ooo+123] Keepo &baz2[1+\\2] &baz3[1+\\42] &bi1 &biii1 &baz4[i+420+i] &baz1[oo+123]&baz1[o+2] { Kappa } woah-> MyCoolTwitchEmote",
+            "searchText": "nerixyz  nerixyz: PogChamp replace Kappa &baz1[ooo+123] Keepo &baz2[1+\\2] &baz3[1+\\42] &bi1 &biii1 &baz4[i+420+i] &baz1[oo+123]&baz1[o+2] { Kappa } woah-> MyCoolTwitchEmote ",
+            "serverReceivedTime": "2024-09-21T13:35:14Z",
             "timeoutUser": "",
             "usernameColor": "#ffff0000"
         }

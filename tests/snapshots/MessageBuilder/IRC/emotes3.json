@@ -1,5 +1,5 @@
 {
-    "input": "@tmi-sent-ts=1726761013541;subscriber=1;id=aea562cc-1adf-47de-b656-0aaa245f1030;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes=25:1-5 :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :😂Kappa😂 a  b",
+    "input": "@tmi-sent-ts=1726761013541;subscriber=1;id=aea562cc-1adf-47de-b656-0aaa245f1030;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes=25:1-5/25:9-13 :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :😂Kappa😂 &Kappa a  b",
     "output": [
         {
             "badgeInfos": {
@@ -189,6 +189,55 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
+                        "&"
+                    ]
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/1.0",
+                            "2x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/2.0",
+                            "3x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/3.0"
+                        },
+                        "name": "Kappa",
+                        "tooltip": "Kappa<br>Twitch Emote"
+                    },
+                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "text": {
+                        "color": "Text",
+                        "flags": "Misc",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "Kappa"
+                        ]
+                    },
+                    "tooltip": "Kappa<br>Twitch Emote",
+                    "trailingSpace": true,
+                    "type": "EmoteElement"
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
                         "a"
                     ]
                 },
@@ -225,8 +274,8 @@
             "id": "aea562cc-1adf-47de-b656-0aaa245f1030",
             "localizedName": "",
             "loginName": "nerixyz",
-            "messageText": "😂Kappa😂 a  b",
-            "searchText": "nerixyz  nerixyz: 😂Kappa😂 a  b ",
+            "messageText": "😂Kappa😂 &Kappa a  b",
+            "searchText": "nerixyz  nerixyz: 😂Kappa😂 &Kappa a  b ",
             "serverReceivedTime": "2024-09-19T15:50:13Z",
             "timeoutUser": "",
             "usernameColor": "#ffff0000"
