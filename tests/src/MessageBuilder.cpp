@@ -5,6 +5,7 @@
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "controllers/sound/NullBackend.hpp"
+#include "lib/Snapshot.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Message.hpp"
 #include "mocks/BaseApplication.hpp"
@@ -47,12 +48,20 @@ using chatterino::mock::MockChannel;
 
 namespace {
 
-/// Set this to `true` to write the current output to the fixtures.
-constexpr bool UPDATE_FIXTURES = false;
+/// Controls whether snapshots will be updated (true) or verified (false)
+///
+/// In CI, all snapshots must be verified, thus the integrity tests checks for
+/// this constant.
+///
+/// When adding a test, start with `{ "input": "..." }` and set this to `true`
+/// to generate an initial snapshot. Make sure to verify the output!
+constexpr bool UPDATE_SNAPSHOTS = false;
+
+const QString IRC_CATEGORY = u"MessageBuilder/IRC"_s;
 
 // clang-format off
 /// The following entries should be sorted
-constexpr std::array IRC_FIXTURES{
+constexpr std::array IRC_SNAPSHOTS{
     "action",
     "all-usernames",
     "badges-invalid",
@@ -207,195 +216,6 @@ public:
     NullBackend sound;
 };
 
-struct Fixture {
-    QString category;
-    QString name;
-    QByteArray input;
-    /// Additional configuration (might be empty)
-    const QJsonObject params;
-    QJsonValue output;
-
-    static QDir baseDir(const QString &category);
-    static QString filePath(const QString &category, const QString &name);
-
-    static bool verifyIntegrity(const QString &category, const auto &values);
-
-    static Fixture read(QString category, QString name);
-
-    void write(const QJsonValue &got) const;
-    bool run(const QJsonValue &got) const;
-};
-
-bool compareJson(const QJsonValue &expected, const QJsonValue &got,
-                 const QString &context)
-{
-    if (expected == got)
-    {
-        return true;
-    }
-    if (expected.type() != got.type())
-    {
-        qWarning() << context
-                   << "- mismatching type - expected:" << expected.type()
-                   << "got:" << got.type();
-        return false;
-    }
-    switch (expected.type())
-    {
-        case QJsonValue::Array: {
-            auto expArr = expected.toArray();
-            auto gotArr = got.toArray();
-            if (expArr.size() != gotArr.size())
-            {
-                qWarning() << context << "- Mismatching array size - expected:"
-                           << expArr.size() << "got:" << gotArr.size();
-                return false;
-            }
-            for (QJsonArray::size_type i = 0; i < expArr.size(); i++)
-            {
-                if (!compareJson(expArr[i], gotArr[i],
-                                 context % '[' % QString::number(i) % ']'))
-                {
-                    return false;
-                }
-            }
-        }
-        break;  // unreachable
-        case QJsonValue::Object: {
-            auto expObj = expected.toObject();
-            auto gotObj = got.toObject();
-            if (expObj.size() != gotObj.size())
-            {
-                qWarning() << context << "- Mismatching object size - expected:"
-                           << expObj.size() << "got:" << gotObj.size();
-                return false;
-            }
-            for (auto it = expObj.constBegin(); it != expObj.constEnd(); it++)
-            {
-                if (!gotObj.contains(it.key()))
-                {
-                    qWarning() << context << "- Object doesn't contain key"
-                               << it.key();
-                    return false;
-                }
-                if (!compareJson(it.value(), gotObj[it.key()],
-                                 context % '.' % it.key()))
-                {
-                    return false;
-                }
-            }
-        }
-        break;
-        case QJsonValue::Null:
-        case QJsonValue::Bool:
-        case QJsonValue::Double:
-        case QJsonValue::String:
-        case QJsonValue::Undefined:
-            break;
-    }
-
-    qWarning() << context << "- expected:" << expected << "got:" << got;
-    return false;
-}
-
-QDir Fixture::baseDir(const QString &category)
-{
-    QDir fixtureDir(QStringLiteral(__FILE__));
-    fixtureDir.cd("../../fixtures/MessageBuilder");
-    fixtureDir.cd(category);
-    return fixtureDir;
-}
-
-QString Fixture::filePath(const QString &category, const QString &name)
-{
-    return Fixture::baseDir(category).filePath(name);
-}
-
-bool Fixture::verifyIntegrity(const QString &category, const auto &values)
-{
-    auto files = Fixture::baseDir(category).entryList(QDir::NoDotAndDotDot |
-                                                      QDir::Files);
-    bool ok = true;
-    if (static_cast<size_t>(files.size()) != values.size())
-    {
-        qWarning() << "Mismatching size!";
-        ok = false;
-    }
-
-    // check that all files have some value (not the other way around)
-    std::set<QString> valueSet;
-    for (const auto &value : values)
-    {
-        valueSet.emplace(value);
-    }
-    for (const auto &file : files)
-    {
-        if (!file.endsWith(u".json"_s))
-        {
-            qWarning() << "Bad file:" << file;
-            ok = false;
-            continue;
-        }
-        if (!valueSet.contains(file.mid(0, file.length() - 5)))
-        {
-            qWarning() << file << "exists but isn't present in tests";
-            ok = false;
-        }
-    }
-    return ok;
-}
-
-Fixture Fixture::read(QString category, QString name)
-{
-    QFile file(Fixture::filePath(category, name));
-    if (!file.open(QFile::ReadOnly))
-    {
-        throw std::runtime_error("Failed to open file");
-    }
-    auto content = file.readAll();
-    file.close();
-    const auto doc = QJsonDocument::fromJson(content).object();
-    return {
-        .category = std::move(category),
-        .name = std::move(name),
-        .input = doc["input"].toString().toUtf8(),
-        .params = doc["params"].toObject(),
-        .output = doc["output"],
-    };
-}
-
-void Fixture::write(const QJsonValue &got) const
-{
-    QFile file(Fixture::filePath(this->category, this->name));
-    if (!file.open(QFile::WriteOnly))
-    {
-        throw std::runtime_error("Failed to open file");
-    }
-
-    QJsonObject obj{
-        {"input"_L1, QString::fromUtf8(this->input)},
-        {"output"_L1, got},
-    };
-    if (!this->params.isEmpty())
-    {
-        obj.insert("params"_L1, this->params);
-    }
-
-    file.write(QJsonDocument{obj}.toJson());
-    file.close();
-}
-
-bool Fixture::run(const QJsonValue &got) const
-{
-    if (UPDATE_FIXTURES)
-    {
-        this->write(got);
-        return true;
-    }
-
-    return compareJson(this->output, got, QStringLiteral("output"));
-}
-
 std::pair<const EmoteName, EmotePtr> makeEmote(Emote &&emote)
 {
     auto ptr = std::make_shared<Emote>(std::move(emote));
@@ -478,7 +298,7 @@ struct MockEmotes {
 
 QT_WARNING_POP
 
-const QByteArray CHEERMOTE_JSON = R"({
+const QByteArray CHEERMOTE_JSON{R"({
     "prefix": "Cheer",
     "tiers": [
     {
@@ -528,9 +348,9 @@ const QByteArray CHEERMOTE_JSON = R"({
     "order": 1,
     "last_updated": "2018-05-22T00:06:04Z",
     "is_charitable": false
-})"_ba;
+})"_ba};
 
-const QString SETTINGS_DEFAULT = uR"(
+const QString SETTINGS_DEFAULT{uR"(
 {
     "accounts": {
         "uid117166826": {
@@ -571,7 +391,7 @@ const QString SETTINGS_DEFAULT = uR"(
             }
         ]
     }
-})"_s;
+})"_s};
 
 std::shared_ptr<TwitchChannel> makeMockTwitchChannel(const QString &name)
 {
@@ -1278,11 +1098,11 @@ public:
 /// `IrcMesssageHandler` to ensure the correct (or: "real") arguments to build
 /// messages.
 ///
-/// Tests are contained in `tests/fixtures/MessageBuilder/IRC`. Each test must
-/// be registered in `IRC_FIXTURES` (at the top of this file). Fixtures consist
+/// Tests are contained in `tests/snapshots/MessageBuilder/IRC`. Each test must
+/// be registered in `IRC_SNAPSHOTS` (at the top of this file). Fixtures consist
 /// of an object with the keys `input`, `output`, and `params` (optional).
 ///
-/// `UPDATE_FIXTURES` (top) controls whether the `output` will be generated or
+/// `UPDATE_SNAPSHOTS` (top) controls whether the `output` will be generated or
 /// checked.
 ///
 /// `params` is an optional object with the following keys:
@@ -1292,17 +1112,17 @@ public:
 TEST_P(TestMessageBuilderP, Run)
 {
     const auto *param = std::remove_pointer_t<decltype(this)>::GetParam();
-    auto fixture = Fixture::read(u"IRC"_s, param % QStringView(u".json"));
+    auto fixture = testlib::Snapshot::read(IRC_CATEGORY, param);
 
     getSettings()->findAllUsernames =
-        fixture.params["findAllUsernames"_L1].toBool();
-    getSettings()->stackBits = fixture.params["stackBits"_L1].toBool();
+        fixture.param("findAllUsernames").toBool();
+    getSettings()->stackBits = fixture.param("stackBits").toBool();
 
     auto channel = makeMockTwitchChannel(u"pajlada"_s);
 
     std::vector<MessagePtr> prevMessages;
 
-    for (auto prevInput : fixture.params["prevMessages"_L1].toArray())
+    for (auto prevInput : fixture.param("prevMessages").toArray())
     {
         auto *ircMessage = Communi::IrcMessage::fromData(
             prevInput.toString().toUtf8(), nullptr);
@@ -1316,7 +1136,8 @@ TEST_P(TestMessageBuilderP, Run)
         delete ircMessage;
     }
 
-    auto *ircMessage = Communi::IrcMessage::fromData(fixture.input, nullptr);
+    auto *ircMessage =
+        Communi::IrcMessage::fromData(fixture.inputUtf8(), nullptr);
     ASSERT_NE(ircMessage, nullptr);
 
     auto builtMessages = IrcMessageHandler::parseMessageWithReply(
@@ -1328,16 +1149,17 @@ TEST_P(TestMessageBuilderP, Run)
         got.append(msg->toJson());
     }
 
-    ASSERT_TRUE(fixture.run(got));
-
     delete ircMessage;
+
+    ASSERT_TRUE(fixture.run(got, UPDATE_SNAPSHOTS));
 }
 
 INSTANTIATE_TEST_SUITE_P(IrcMessage, TestMessageBuilderP,
-                         testing::ValuesIn(IRC_FIXTURES));
+                         testing::ValuesIn(IRC_SNAPSHOTS));
 
 TEST(TestMessageBuilderP, Integrity)
 {
-    ASSERT_TRUE(Fixture::verifyIntegrity(u"IRC"_s, IRC_FIXTURES));
-    ASSERT_FALSE(UPDATE_FIXTURES);  // make sure fixtures are actually tested
+    ASSERT_TRUE(
+        testlib::Snapshot::verifyIntegrity(IRC_CATEGORY, IRC_SNAPSHOTS));
+    ASSERT_FALSE(UPDATE_SNAPSHOTS);  // make sure fixtures are actually tested
 }
