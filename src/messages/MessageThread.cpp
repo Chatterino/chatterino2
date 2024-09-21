@@ -11,7 +11,6 @@
 
 #include <utility>
 
-
 namespace chatterino {
 
 using namespace literals;
