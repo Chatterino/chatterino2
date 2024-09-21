@@ -1838,8 +1838,14 @@ MessagePtr MessageBuilder::buildHypeChatMessage(
 #endif
     subtitle += locale.toCurrencyString(actualAmount, currency);
 
-    MessageBuilder builder(systemMessage, parseTagString(subtitle),
-                           calculateMessageTime(message).time());
+    auto dt = calculateMessageTime(message);
+#ifdef CHATTERINO_WITH_TESTS
+    if (getApp()->isTest())
+    {
+        dt = dt.toUTC();
+    }
+#endif
+    MessageBuilder builder(systemMessage, parseTagString(subtitle), dt.time());
     builder->flags.set(MessageFlag::ElevatedMessage);
     return builder.release();
 }

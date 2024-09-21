@@ -270,7 +270,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "18:43"
+                            "16:43"
                         ]
                     },
                     "flags": "Timestamp",
@@ -279,7 +279,7 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "18:43:54",
+                    "time": "16:43:54",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
