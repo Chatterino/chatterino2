@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QStringBuilder>
 
 #include <set>
 
