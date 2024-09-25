@@ -164,6 +164,7 @@ private:
         addEmote(*bttvEmotes, ":-)");
         addEmote(*bttvEmotes, "B-)");
         addEmote(*bttvEmotes, "Clap");
+        addEmote(*bttvEmotes, ":tf:");
         this->mockApplication->bttvEmotes.setEmotes(std::move(bttvEmotes));
 
         auto ffzEmotes = std::make_shared<EmoteMap>();
@@ -328,7 +329,15 @@ TEST_F(InputCompletionTest, ClassicTabCompletionEmote)
 
 TEST_F(InputCompletionTest, ClassicTabCompletionEmoji)
 {
-    auto completion = queryClassicTabCompletion(":cla", false);
+    auto completion = queryClassicTabCompletion(":tf", false);
+    ASSERT_EQ(completion.size(), 1);
+    ASSERT_EQ(completion[0], ":tf: ");
+
+    completion = queryClassicTabCompletion(":)", false);
+    ASSERT_EQ(completion.size(), 1);
+    ASSERT_EQ(completion[0], ":) ");
+
+    completion = queryClassicTabCompletion(":cla", false);
     ASSERT_EQ(completion.size(), 8);
     ASSERT_EQ(completion[0], ":clap: ");
     ASSERT_EQ(completion[1], ":clap_tone1: ");
