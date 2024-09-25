@@ -230,9 +230,9 @@ TEST_F(InputCompletionTest, ClassicEmoteNameFiltering)
     auto completion = queryClassicEmoteCompletion(":feels");
     ASSERT_EQ(completion.size(), 3);
     // all these matches are BTTV global emotes
-    ASSERT_EQ(completion[0].displayName, "FeelsBirthdayMan");
-    ASSERT_EQ(completion[1].displayName, "FeelsBadMan");
-    ASSERT_EQ(completion[2].displayName, "FeelsGoodMan");
+    // these are in no specific order
+    containsRoughly(completion,
+                    {"FeelsBirthdayMan", "FeelsBadMan", "FeelsGoodMan"});
 
     completion = queryClassicEmoteCompletion(":)");
     ASSERT_EQ(completion.size(), 3);
