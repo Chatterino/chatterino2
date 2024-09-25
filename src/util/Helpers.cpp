@@ -113,7 +113,7 @@ namespace helpers::detail {
 }  // namespace helpers::detail
 using namespace helpers::detail;
 
-bool startsWithOrContains(const QString &str1, const QString &str2,
+bool startsWithOrContains(QStringView str1, QStringView str2,
                           Qt::CaseSensitivity caseSensitivity, bool startsWith)
 {
     if (startsWith)
