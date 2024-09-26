@@ -98,3 +98,12 @@ jobs:
           plugin: gcov
           fail_ci_if_error: true
           verbose: true
+
+      - name: zip gcov
+        run: find build-test -iname '*.gcov' -print0 | xargs -0 zip gcovs.zip
+
+      - name: Upload gcov
+        uses: actions/upload-artifact@v4
+        with:
+          name: gcovs.zip
+          path: gcovs.zip
