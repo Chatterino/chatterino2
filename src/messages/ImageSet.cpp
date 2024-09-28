@@ -3,6 +3,8 @@
 #include "messages/Image.hpp"
 #include "singletons/Settings.hpp"
 
+#include <QJsonObject>
+
 namespace chatterino {
 
 ImageSet::ImageSet()
@@ -133,6 +135,24 @@ bool ImageSet::operator==(const ImageSet &other) const
 bool ImageSet::operator!=(const ImageSet &other) const
 {
     return !this->operator==(other);
+}
+
+QJsonObject ImageSet::toJson() const
+{
+    QJsonObject obj;
+    if (!this->imageX1_->isEmpty())
+    {
+        obj[u"1x"] = this->imageX1_->url().string;
+    }
+    if (!this->imageX2_->isEmpty())
+    {
+        obj[u"2x"] = this->imageX2_->url().string;
+    }
+    if (!this->imageX3_->isEmpty())
+    {
+        obj[u"3x"] = this->imageX3_->url().string;
+    }
+    return obj;
 }
 
 }  // namespace chatterino
