@@ -9,6 +9,7 @@
 
 #include <magic_enum/magic_enum.hpp>
 #include <QJsonDocument>
+#include <QStringBuilder>
 
 namespace {
 
