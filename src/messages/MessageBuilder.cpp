@@ -2677,6 +2677,22 @@ void MessageBuilder::parseRoomID()
         {
             this->twitchChannel->setRoomId(this->roomID_);
         }
+
+        if (auto it = this->tags.find("source-room-id"); it != this->tags.end())
+        {
+            auto sourceRoom = it.value().toString();
+            if (this->roomID_ != sourceRoom)
+            {
+                auto sourceChan =
+                    getApp()->getTwitch()->getChannelOrEmptyByID(sourceRoom);
+                if (sourceChan)
+                {
+                    // avoid duplicate pings
+                    this->message().flags.set(
+                        MessageFlag::DoNotTriggerNotification);
+                }
+            }
+        }
     }
 }
 
