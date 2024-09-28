@@ -49,7 +49,6 @@ public:
     void loadLocalBadges();
 
 private:
-    void parseTwitchBadges(const QJsonObject &root);
     void loaded();
     void loadEmoteImage(const QString &name, const ImagePtr &image,
                         BadgeIconCallback &&callback);
