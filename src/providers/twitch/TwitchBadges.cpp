@@ -98,41 +98,40 @@ void TwitchBadges::loadLocalBadges()
     auto bytes = file.readAll();
     auto doc = QJsonDocument::fromJson(bytes);
 
-    this->parseTwitchBadges(doc.object());
-
-    this->loaded();
-}
-
-void TwitchBadges::parseTwitchBadges(const QJsonObject &root)
-{
-    auto badgeSets = this->badgeSets_.access();
-
-    for (auto setIt = root.begin(); setIt != root.end(); setIt++)
     {
-        auto key = setIt.key();
+        const auto &root = doc.object();
+        auto badgeSets = this->badgeSets_.access();
 
-        for (auto versionValue : setIt.value().toArray())
+        for (auto setIt = root.begin(); setIt != root.end(); setIt++)
         {
-            const auto versionObj = versionValue.toObject();
-            auto id = versionObj["id"].toString();
-            auto baseImage = versionObj["image"].toString();
-            auto emote = Emote{
-                .name = {},
-                .images =
-                    ImageSet{
-                        Image::fromUrl({baseImage + '1'}, 1, BADGE_BASE_SIZE),
-                        Image::fromUrl({baseImage + '2'}, .5,
-                                       BADGE_BASE_SIZE * 2),
-                        Image::fromUrl({baseImage + '3'}, .25,
-                                       BADGE_BASE_SIZE * 4),
-                    },
-                .tooltip = Tooltip{versionObj["title"].toString()},
-                .homePage = Url{versionObj["url"].toString()},
-            };
+            auto key = setIt.key();
 
-            (*badgeSets)[key][id] = std::make_shared<Emote>(emote);
+            for (auto versionValue : setIt.value().toArray())
+            {
+                const auto versionObj = versionValue.toObject();
+                auto id = versionObj["id"].toString();
+                auto baseImage = versionObj["image"].toString();
+                auto emote = Emote{
+                    .name = {},
+                    .images =
+                        ImageSet{
+                            Image::fromUrl({baseImage + '1'}, 1,
+                                           BADGE_BASE_SIZE),
+                            Image::fromUrl({baseImage + '2'}, .5,
+                                           BADGE_BASE_SIZE * 2),
+                            Image::fromUrl({baseImage + '3'}, .25,
+                                           BADGE_BASE_SIZE * 4),
+                        },
+                    .tooltip = Tooltip{versionObj["title"].toString()},
+                    .homePage = Url{versionObj["url"].toString()},
+                };
+
+                (*badgeSets)[key][id] = std::make_shared<Emote>(emote);
+            }
         }
     }
+
+    this->loaded();
 }
 
 void TwitchBadges::loaded()
