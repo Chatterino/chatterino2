@@ -471,6 +471,12 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
         }
     }
 
+    if (mirrored && msgType != "announcement")
+    {
+        // avoid confusing broadcasters with user payments to other channels
+        return {};
+    }
+
     QString content;
     if (parameters.size() >= 2)
     {
@@ -500,7 +506,6 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
             builder->flags.unset(MessageFlag::Highlighted);
             if (mirrored)
             {
-                builder->flags.set(MessageFlag::Disabled);
                 builder->flags.set(MessageFlag::SharedMessage);
             }
             builtMessages.emplace_back(builder.build());
@@ -568,7 +573,6 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
         b->flags.set(MessageFlag::Subscription);
         if (mirrored)
         {
-            b->flags.set(MessageFlag::Disabled);
             b->flags.set(MessageFlag::SharedMessage);
         }
         auto newMessage = b.release();
