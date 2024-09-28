@@ -90,6 +90,7 @@
 - Dev: The timer for `StreamerMode` is now destroyed on the correct thread. (#5571)
 - Dev: Cleanup some parts of the `magic_enum` adaptation for Qt. (#5587)
 - Dev: Refactored `static`s in headers to only be present once in the final app. (#5588)
+- Dev: Refactored legacy Unicode zero-width-joiner replacement. (#5594)
 - Dev: The JSON output when copying a message (<kbd>SHIFT</kbd> + right-click) is now more extensive. (#5600)
 
 ## 2.5.1
