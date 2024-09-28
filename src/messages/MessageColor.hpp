@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QColor>
+#include <QString>
 
 namespace chatterino {
 class Theme;
@@ -12,6 +13,8 @@ struct MessageColor {
     MessageColor(Type type_ = Text);
 
     const QColor &getColor(Theme &themeManager) const;
+
+    QString toString() const;
 
 private:
     Type type_;
