@@ -141,6 +141,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
         {"flags.automod", m->flags.has(MessageFlag::AutoMod)},
         {"flags.restricted", m->flags.has(MessageFlag::RestrictedMessage)},
         {"flags.monitored", m->flags.has(MessageFlag::MonitoredMessage)},
+        {"flags.shared", m->flags.has(MessageFlag::SharedMessage)},
 
         {"message.content", m->messageText},
         {"message.length", m->messageText.length()},

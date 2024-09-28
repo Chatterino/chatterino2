@@ -2683,6 +2683,8 @@ void MessageBuilder::parseRoomID()
             auto sourceRoom = it.value().toString();
             if (this->roomID_ != sourceRoom)
             {
+                this->message().flags.set(MessageFlag::SharedMessage);
+
                 auto sourceChan =
                     getApp()->getTwitch()->getChannelOrEmptyByID(sourceRoom);
                 if (sourceChan)

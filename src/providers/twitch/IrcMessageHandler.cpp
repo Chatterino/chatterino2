@@ -501,6 +501,7 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
             if (mirrored)
             {
                 builder->flags.set(MessageFlag::Disabled);
+                builder->flags.set(MessageFlag::SharedMessage);
             }
             builtMessages.emplace_back(builder.build());
         }
@@ -568,6 +569,7 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
         if (mirrored)
         {
             b->flags.set(MessageFlag::Disabled);
+            b->flags.set(MessageFlag::SharedMessage);
         }
         auto newMessage = b.release();
         builtMessages.emplace_back(newMessage);
