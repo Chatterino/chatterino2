@@ -92,6 +92,7 @@
 - Dev: Refactored `static`s in headers to only be present once in the final app. (#5588)
 - Dev: Refactored legacy Unicode zero-width-joiner replacement. (#5594)
 - Dev: The JSON output when copying a message (<kbd>SHIFT</kbd> + right-click) is now more extensive. (#5600)
+- Dev: Twitch messages are now sent using Twitch's Helix API instead of IRC by default. (#5607)
 
 ## 2.5.1
 
