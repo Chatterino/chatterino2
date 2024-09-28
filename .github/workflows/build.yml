@@ -110,14 +110,14 @@ jobs:
           path: build/Chatterino-${{ matrix.os }}-x86_64.deb
 
   build:
-    name: "Build ${{ matrix.os }}${{ matrix.arch && format(' ({0})', matrix.arch) || ''}}, Qt ${{ matrix.qt-version }} (LTO:${{ matrix.force-lto }}, crashpad:${{ matrix.skip-crashpad && 'off' || 'on' }})"
+    name: "Build ${{ matrix.os }}, Qt ${{ matrix.qt-version }} (LTO:${{ matrix.force-lto }}, crashpad:${{ matrix.skip-crashpad && 'off' || 'on' }})"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
           # Windows
           - os: windows-latest
-            qt-version: 6.7.1
+            qt-version: 6.7.3
             force-lto: false
             plugins: true
             skip-artifact: false
@@ -125,15 +125,6 @@ jobs:
           # macOS (ARM)
           - os: macos-latest
             qt-version: 6.7.1
-            arch: arm64
-            force-lto: false
-            plugins: true
-            skip-artifact: false
-            skip-crashpad: false
-          # macOS (x86)
-          - os: macos-13
-            qt-version: 6.7.1
-            arch: x86_64
             force-lto: false
             plugins: true
             skip-artifact: false
@@ -289,7 +280,10 @@ jobs:
       - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-          brew install boost openssl rapidjson p7zip create-dmg cmake tree
+          # binary dependencies
+          ./.CI/SetupHomebrewDeps.sh boost openssl@3
+          # build and header-only dependencies
+          brew install rapidjson p7zip create-dmg cmake tree
         shell: bash
 
       - name: Build (MacOS)
@@ -300,13 +294,12 @@ jobs:
           cmake \
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 \
-              -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
               -DUSE_PRECOMPILED_HEADERS=OFF \
               -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
               -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
               -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
               -DCHATTERINO_NO_AVIF_PLUGIN=On \
-              -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
+              -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
         shell: bash
@@ -314,7 +307,7 @@ jobs:
       - name: Package (MacOS)
         if: startsWith(matrix.os, 'macos')
         env:
-          OUTPUT_DMG_PATH: chatterino-macos-Qt-${{ matrix.qt-version}}-${{ matrix.arch }}.dmg
+          OUTPUT_DMG_PATH: chatterino-macos-Qt-${{ matrix.qt-version}}-universal.dmg
         run: |
           ls -la
           pwd
@@ -327,6 +320,27 @@ jobs:
           curl -SsfLo kimg.zip "https://github.com/nerixyz/kimageformats-binaries/releases/download/cont/kimageformats-macos-13-${{ matrix.qt-version}}.zip"
 
           ./../.CI/MacDeploy.sh
+
+          # Copy dynamic library dependencies into the Frameworks directory
+          cp /opt/universal-lib/libcrypto.dylib chatterino.app/Contents/Frameworks/libcrypto.3.dylib
+          cp /opt/universal-lib/libssl.dylib chatterino.app/Contents/Frameworks/libssl.3.dylib
+
+          # Fix the library IDs to match their new location
+          install_name_tool -id @executable_path/../Frameworks/libssl.3.dylib chatterino.app/Contents/Frameworks/libssl.3.dylib
+          install_name_tool -id @executable_path/../Frameworks/libcrypto.3.dylib chatterino.app/Contents/Frameworks/libcrypto.3.dylib
+
+          # Fix the search path for libcrypto in libssl
+          otool -L chatterino.app/Contents/Frameworks/libssl.3.dylib \
+            | grep libcrypto.3.dylib \
+            | cut -d" " -f1 \
+            | cut -f2 \
+            | while read input_crypto_dylib; do \
+                install_name_tool -change \
+                  "$input_crypto_dylib" \
+                  @executable_path/../Frameworks/libcrypto.3.dylib \
+                  chatterino.app/Contents/Frameworks/libssl.3.dylib; \
+              done
+
           ./../.CI/CreateDMG.sh
         shell: bash
 
@@ -334,8 +348,9 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         uses: actions/upload-artifact@v4
         with:
-          name: chatterino-macos-Qt-${{ matrix.qt-version }}-${{ matrix.arch }}.dmg
-          path: build/chatterino-macos-Qt-${{ matrix.qt-version }}-${{ matrix.arch }}.dmg
+          name: chatterino-macos-Qt-${{ matrix.qt-version }}-universal.dmg
+          path: build/chatterino-macos-Qt-${{ matrix.qt-version }}-universal.dmg
+
   create-release:
     needs: [build-ubuntu-docker, build]
     runs-on: ubuntu-latest
@@ -348,15 +363,15 @@ jobs:
 
       # Windows
       - uses: actions/download-artifact@v4
-        name: Windows Qt6.7.1
+        name: Windows Qt6.7.3
         with:
-          name: chatterino-windows-x86-64-Qt-6.7.1.zip
+          name: chatterino-windows-x86-64-Qt-6.7.3.zip
           path: release-artifacts/
 
       - uses: actions/download-artifact@v4
-        name: Windows Qt6.7.1 symbols
+        name: Windows Qt6.7.3 symbols
         with:
-          name: chatterino-windows-x86-64-Qt-6.7.1-symbols.pdb.7z
+          name: chatterino-windows-x86-64-Qt-6.7.3-symbols.pdb.7z
           path: release-artifacts/
 
       # Linux
@@ -380,23 +395,16 @@ jobs:
 
       # macOS
       - uses: actions/download-artifact@v4
-        name: macOS x86_64 Qt6.7.1 x86 dmg
+        name: macOS Qt6.7.1 dmg
         with:
-          name: chatterino-macos-Qt-6.7.1-x86_64.dmg
-          path: release-artifacts/
-
-      - uses: actions/download-artifact@v4
-        name: macOS x86_64 Qt6.7.1 ARM dmg
-        with:
-          name: chatterino-macos-Qt-6.7.1-arm64.dmg
+          name: chatterino-macos-Qt-6.7.1-universal.dmg
           path: release-artifacts/
 
       - name: Rename artifacts
         run: |
           ls -l
           # Rename the macos build to indicate that it's for macOS 12.0 users
-          mv chatterino-macos-Qt-6.7.1-x86_64.dmg Chatterino-macOS-12.0-x86_64.dmg
-          mv chatterino-macos-Qt-6.7.1-arm64.dmg Chatterino-macOS-12.0-arm64.dmg
+          mv chatterino-macos-Qt-6.7.1-universal.dmg Chatterino-macOS-12.0-universal.dmg
         working-directory: release-artifacts
         shell: bash
 
