@@ -456,6 +456,21 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
     auto parameters = message->parameters();
 
     QString msgType = tags.value("msg-id").toString();
+    bool mirrored = msgType == "sharedchatnotice";
+    if (mirrored)
+    {
+        msgType = tags.value("source-msg-id").toString();
+    }
+    else
+    {
+        auto rIt = tags.find("room-id");
+        auto sIt = tags.find("source-room-id");
+        if (rIt != tags.end() && sIt != tags.end())
+        {
+            mirrored = rIt.value().toString() != sIt.value().toString();
+        }
+    }
+
     QString content;
     if (parameters.size() >= 2)
     {
@@ -483,6 +498,10 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
             MessageBuilder builder(channel, message, args, content, false);
             builder->flags.set(MessageFlag::Subscription);
             builder->flags.unset(MessageFlag::Highlighted);
+            if (mirrored)
+            {
+                builder->flags.set(MessageFlag::Disabled);
+            }
             builtMessages.emplace_back(builder.build());
         }
     }
@@ -546,6 +565,10 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
                                 calculateMessageTime(message).time());
 
         b->flags.set(MessageFlag::Subscription);
+        if (mirrored)
+        {
+            b->flags.set(MessageFlag::Disabled);
+        }
         auto newMessage = b.release();
         builtMessages.emplace_back(newMessage);
     }
