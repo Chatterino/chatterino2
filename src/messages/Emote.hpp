@@ -9,6 +9,8 @@
 #include <optional>
 #include <unordered_map>
 
+class QJsonObject;
+
 namespace chatterino {
 
 struct Emote {
@@ -30,6 +32,8 @@ struct Emote {
     {
         return name.string;
     }
+
+    QJsonObject toJson() const;
 };
 
 bool operator==(const Emote &a, const Emote &b);
