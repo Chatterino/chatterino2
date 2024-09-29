@@ -30,6 +30,8 @@ public:
 
     void setOverrideCursor(const QCursor &cursor);
 
+    bool isInert() const;
+    void setInert(bool inert);
     void toggleInertia();
 
 protected:
@@ -58,8 +60,6 @@ private:
     void startInteraction();
     void startShortInteraction();
     void endInteraction();
-
-    void setInert(bool inert);
 
     void applyTheme();
 

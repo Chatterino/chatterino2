@@ -6,6 +6,7 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "singletons/WindowManager.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/InvisibleSizeGrip.hpp"
@@ -18,6 +19,7 @@
 #include <QGridLayout>
 #include <QKeySequence>
 #include <QSizeGrip>
+
 
 #ifdef Q_OS_WIN
 #    include <Windows.h>
@@ -35,7 +37,7 @@ using namespace chatterino;
 using namespace literals;
 
 /// Progress the user has made in exploring the overlay
-enum class Knowledge : std::int32_t {
+enum class Knowledge : std::int32_t {  // NOLINT(performance-enum-size)
     None = 0,
     // User opened the overlay at least once
     Activation = 1 << 0,
@@ -57,22 +59,26 @@ void acquireKnowledge(Knowledge knowledge)
         static_cast<std::underlying_type_t<Knowledge>>(current.value());
 }
 
-QKeySequence toggleIntertiaShortcut()
+/// Returns [seq?, toggleAllOverlays]
+std::pair<QKeySequence, bool> toggleIntertiaShortcut()
 {
     auto seq = getApp()->getHotkeys()->getDisplaySequence(
         HotkeyCategory::Split, u"togglePopupInertia"_s, {{u"this"_s}});
     if (!seq.isEmpty())
     {
-        return seq;
+        return {seq, false};
     }
     seq = getApp()->getHotkeys()->getDisplaySequence(
         HotkeyCategory::Split, u"togglePopupInertia"_s, {{u"thisOrAll"_s}});
     if (!seq.isEmpty())
     {
-        return seq;
+        return {seq, false};
     }
-    return getApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Split,
-                                                      u"togglePopupInertia"_s);
+    return {
+        getApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Split,
+                                                   u"togglePopupInertia"_s),
+        true,
+    };
 }
 
 }  // namespace
@@ -242,6 +248,11 @@ void OverlayWindow::setOverrideCursor(const QCursor &cursor)
 {
     this->channelView_.setCursor(cursor);
     this->setCursor(cursor);
+}
+
+bool OverlayWindow::isInert() const
+{
+    return this->inert_;
 }
 
 void OverlayWindow::toggleInertia()
@@ -416,7 +427,7 @@ void OverlayWindow::triggerFirstActivation()
         "<br><br>"
         "By default, the overlay is interactive. ";
 
-    auto actualShortcut = toggleIntertiaShortcut();
+    auto [actualShortcut, allOverlays] = toggleIntertiaShortcut();
     if (actualShortcut.isEmpty())
     {
         welcomeText +=
@@ -446,15 +457,24 @@ void OverlayWindow::triggerFirstActivation()
 
 void OverlayWindow::addShortcuts()
 {
-    auto seq = toggleIntertiaShortcut();
+    auto [seq, allOverlays] = toggleIntertiaShortcut();
     if (seq.isEmpty())
     {
         return;
     }
 
     auto *shortcut = new QShortcut(seq, this);
-    QObject::connect(shortcut, &QShortcut::activated, this,
-                     &OverlayWindow::toggleInertia);
+    if (allOverlays)
+    {
+        QObject::connect(shortcut, &QShortcut::activated, this, [] {
+            getApp()->getWindows()->toggleAllOverlayInertia();
+        });
+    }
+    else
+    {
+        QObject::connect(shortcut, &QShortcut::activated, this,
+                         &OverlayWindow::toggleInertia);
+    }
 }
 
 void OverlayWindow::startInteraction()
@@ -502,7 +522,10 @@ void OverlayWindow::setInert(bool inert)
 
     if (inert)
     {
-        this->channelView_.scrollbar()->scrollToBottom();
+        if (this->channelView_.scrollbar()->isVisible())
+        {
+            this->channelView_.scrollbar()->scrollToBottom();
+        }
         this->interaction_.hide();
     }
     else

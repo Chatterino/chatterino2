@@ -796,13 +796,13 @@ void Split::addShortcuts()
                  }
                  else
                  {
-                     getApp()->getWindows()->toggleAllPopupInertia();
+                     getApp()->getWindows()->toggleAllOverlayInertia();
                  }
                  return {};
              }
              if (arg == "all")
              {
-                 getApp()->getWindows()->toggleAllPopupInertia();
+                 getApp()->getWindows()->toggleAllOverlayInertia();
                  return {};
              }
              return {};

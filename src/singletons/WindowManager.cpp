@@ -545,15 +545,32 @@ void WindowManager::queueSave()
     this->saveTimer->start(10s);
 }
 
-void WindowManager::toggleAllPopupInertia()
+void WindowManager::toggleAllOverlayInertia()
 {
+    // check if any window is not inert
+    bool anyNonInert = false;
+    for (auto *window : this->windows_)
+    {
+        if (anyNonInert)
+        {
+            break;
+        }
+        window->getNotebook().forEachSplit([&](auto *split) {
+            auto *overlay = split->overlayWindow();
+            if (overlay)
+            {
+                anyNonInert = anyNonInert || !overlay->isInert();
+            }
+        });
+    }
+
     for (auto *window : this->windows_)
     {
         window->getNotebook().forEachSplit([&](auto *split) {
             auto *overlay = split->overlayWindow();
             if (overlay)
             {
-                overlay->toggleInertia();
+                overlay->setInert(anyNonInert);
             }
         });
     }
