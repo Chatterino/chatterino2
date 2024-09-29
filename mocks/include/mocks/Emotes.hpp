@@ -10,7 +10,7 @@ public:
     Emotes()
     {
         this->emojis.load();
-        // don't initialize gif-timer
+        // don't initialize GIFTimer
     }
 
     ITwitchEmotes *getTwitchEmotes() override
