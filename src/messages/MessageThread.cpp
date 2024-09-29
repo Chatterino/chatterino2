@@ -1,11 +1,19 @@
 #include "messages/MessageThread.hpp"
 
+#include "common/Literals.hpp"
 #include "messages/Message.hpp"
 #include "util/DebugCount.hpp"
+#include "util/QMagicEnum.hpp"
+
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QJsonValue>
 
 #include <utility>
 
 namespace chatterino {
+
+using namespace literals;
 
 MessageThread::MessageThread(std::shared_ptr<const Message> rootMessage)
     : rootMessageId_(rootMessage->id)
@@ -78,6 +86,31 @@ void MessageThread::markUnsubscribed()
 
     this->subscription_ = Subscription::Unsubscribed;
     this->subscriptionUpdated();
+}
+
+QJsonObject MessageThread::toJson() const
+{
+    QJsonObject obj{
+        {"rootId"_L1, this->rootMessageId_},
+        {"subscription"_L1, qmagicenum::enumNameString(this->subscription_)},
+    };
+
+    QJsonArray replies;
+    for (const auto &msg : this->replies_)
+    {
+        auto locked = msg.lock();
+        if (locked)
+        {
+            replies.append(locked->id);
+        }
+        else
+        {
+            replies.append(QJsonValue::Null);
+        }
+    }
+    obj["replies"_L1] = replies;
+
+    return obj;
 }
 
 }  // namespace chatterino

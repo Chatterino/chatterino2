@@ -1,5 +1,6 @@
 #include "providers/twitch/ChannelPointReward.hpp"
 
+#include "common/Literals.hpp"
 #include "messages/Image.hpp"
 
 #include <QStringBuilder>
@@ -14,6 +15,8 @@ QString twitchChannelPointRewardUrl(const QString &file)
 }  // namespace
 
 namespace chatterino {
+
+using namespace literals;
 
 ChannelPointReward::ChannelPointReward(const QJsonObject &redemption)
 {
@@ -111,6 +114,27 @@ ChannelPointReward::ChannelPointReward(const QJsonObject &redemption)
                            baseSize * 4)};
         this->image = defaultImage;
     }
+}
+
+QJsonObject ChannelPointReward::toJson() const
+{
+    return {
+        {"id"_L1, this->id},
+        {"channelId"_L1, this->channelId},
+        {"title"_L1, this->title},
+        {"cost"_L1, this->cost},
+        {"image"_L1, this->image.toJson()},
+        {"isUserInputRequired"_L1, this->isUserInputRequired},
+        {"isBits"_L1, this->isBits},
+        {"emoteId"_L1, this->emoteId},
+        {"emoteName"_L1, this->emoteName},
+        {"user"_L1,
+         {{
+             {"id"_L1, this->user.id},
+             {"login"_L1, this->user.login},
+             {"displayName"_L1, this->user.displayName},
+         }}},
+    };
 }
 
 }  // namespace chatterino

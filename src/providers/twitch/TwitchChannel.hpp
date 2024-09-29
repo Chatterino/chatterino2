@@ -27,24 +27,6 @@
 
 namespace chatterino {
 
-// This is for compatibility with older Chatterino versions. Twitch didn't use
-// to allow ZERO WIDTH JOINER unicode character, so Chatterino used ESCAPE_TAG
-// instead.
-// See https://github.com/Chatterino/chatterino2/issues/3384 and
-// https://mm2pl.github.io/emoji_rfc.pdf for more details
-const QString ZERO_WIDTH_JOINER = QString(QChar(0x200D));
-
-// Here be MSVC: Do NOT replace with "\U" literal, it will fail silently.
-namespace {
-    const QChar ESCAPE_TAG_CHARS[2] = {QChar::highSurrogate(0xE0002),
-                                       QChar::lowSurrogate(0xE0002)};
-}
-const QString ESCAPE_TAG = QString(ESCAPE_TAG_CHARS, 2);
-
-const static QRegularExpression COMBINED_FIXER(
-    QString("(?<!%1)%1").arg(ESCAPE_TAG),
-    QRegularExpression::UseUnicodePropertiesOption);
-
 enum class HighlightState;
 
 struct Emote;
