@@ -388,7 +388,8 @@ ChannelView::ChannelView(InternalCtor /*tag*/, QWidget *parent, Split *split,
                          this->queueUpdate();
                      });
 
-    this->messageColors_.applyTheme(getTheme());
+    this->messageColors_.applyTheme(getTheme(), this->isOverlay_,
+                                    getSettings()->overlayBackgroundOpacity);
     this->messagePreferences_.connectSettings(getSettings(),
                                               this->signalHolder_);
 }
@@ -605,11 +606,8 @@ void ChannelView::themeChangedEvent()
 
     this->setupHighlightAnimationColors();
     this->queueLayout();
-    this->messageColors_.applyTheme(getTheme());
-    if (this->colorVisitor_)
-    {
-        this->colorVisitor_(this->messageColors_, getTheme());
-    }
+    this->messageColors_.applyTheme(getTheme(), this->isOverlay_,
+                                    getSettings()->overlayBackgroundOpacity);
 }
 
 void ChannelView::updateColorTheme()
@@ -617,13 +615,10 @@ void ChannelView::updateColorTheme()
     this->themeChangedEvent();
 }
 
-void ChannelView::setColorVisitor(
-    const std::function<void(MessageColors &, Theme *)> &visitor)
+void ChannelView::setIsOverlay(bool isOverlay)
 {
-    assert(this->colorVisitor_ == nullptr &&
-           "The color visitor should only be set once.");
-    this->colorVisitor_ = visitor;
-    this->updateColorTheme();
+    this->isOverlay_ = isOverlay;
+    this->themeChangedEvent();
 }
 
 void ChannelView::setupHighlightAnimationColors()

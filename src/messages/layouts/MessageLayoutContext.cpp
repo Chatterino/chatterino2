@@ -7,37 +7,34 @@
 
 namespace chatterino {
 
-void MessageColors::applyTheme(Theme *theme)
+void MessageColors::applyTheme(Theme *theme, bool isOverlay,
+                               int backgroundOpacity)
 {
-    this->channelBackground = theme->splits.background;
+    auto applyColors = [this](const auto &src) {
+        this->regular = src.backgrounds.regular;
+        this->alternate = src.backgrounds.alternate;
 
-    this->regular = theme->messages.backgrounds.regular;
-    this->alternate = theme->messages.backgrounds.alternate;
+        this->disabled = src.disabled;
+        this->selection = src.selection;
+        this->system = src.textColors.system;
+    };
 
-    this->disabled = theme->messages.disabled;
-    this->selection = theme->messages.selection;
-    this->system = theme->messages.textColors.system;
+    if (isOverlay)
+    {
+        this->channelBackground = theme->overlayMessages.background;
+        this->channelBackground.setAlpha(std::clamp(backgroundOpacity, 0, 255));
+        applyColors(theme->overlayMessages);
+    }
+    else
+    {
+        this->channelBackground = theme->splits.background;
+        applyColors(theme->messages);
+    }
 
     this->messageSeperator = theme->splits.messageSeperator;
 
     this->focusedLastMessageLine = theme->tabs.selected.backgrounds.regular;
     this->unfocusedLastMessageLine = theme->tabs.selected.backgrounds.unfocused;
-
-    this->hasTransparency =
-        this->regular.alpha() != 255 || this->alternate.alpha() != 255;
-}
-
-void MessageColors::applyOverlay(Theme *theme, int backgroundOpacity)
-{
-    this->channelBackground = theme->overlayMessages.background;
-    this->channelBackground.setAlpha(std::clamp(backgroundOpacity, 0, 255));
-
-    this->regular = theme->overlayMessages.backgrounds.regular;
-    this->alternate = theme->overlayMessages.backgrounds.alternate;
-
-    this->disabled = theme->overlayMessages.disabled;
-    this->selection = theme->overlayMessages.selection;
-    this->system = theme->overlayMessages.textColors.system;
 
     this->hasTransparency =
         this->regular.alpha() != 255 || this->alternate.alpha() != 255;

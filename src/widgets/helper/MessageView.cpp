@@ -97,7 +97,7 @@ void MessageView::paintEvent(QPaintEvent * /*event*/)
 
 void MessageView::themeChangedEvent()
 {
-    this->messageColors_.applyTheme(getTheme());
+    this->messageColors_.applyTheme(getTheme(), false, 255);
     this->messageColors_.regular = getTheme()->splits.input.background;
     if (this->messageLayout_)
     {

@@ -203,8 +203,12 @@ public:
     bool mayContainMessage(const MessagePtr &message);
 
     void updateColorTheme();
-    void setColorVisitor(
-        const std::function<void(MessageColors &, Theme *)> &visitor);
+
+    /// @brief Adjusts the colors this view uses
+    ///
+    /// If @a isOverlay is true, the overlay colors (as specified in the theme)
+    /// will be used. Otherwise, regular message-colors will be used.
+    void setIsOverlay(bool isOverlay);
 
     Scrollbar *scrollbar();
 
@@ -383,6 +387,8 @@ private:
 
     bool onlyUpdateEmotes_ = false;
 
+    bool isOverlay_ = false;
+
     // Mouse event variables
     bool isLeftMouseDown_ = false;
     bool isRightMouseDown_ = false;
@@ -425,8 +431,6 @@ private:
 
     MessageColors messageColors_;
     MessagePreferences messagePreferences_;
-
-    std::function<void(MessageColors &, Theme *)> colorVisitor_;
 
     void scrollUpdateRequested();
 

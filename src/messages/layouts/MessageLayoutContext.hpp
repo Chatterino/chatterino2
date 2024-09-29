@@ -32,8 +32,7 @@ struct MessageColors {
     QColor focusedLastMessageLine;
     QColor unfocusedLastMessageLine;
 
-    void applyTheme(Theme *theme);
-    void applyOverlay(Theme *theme, int backgroundOpacity);
+    void applyTheme(Theme *theme, bool isOverlay, int backgroundOpacity);
 };
 
 // TODO: Explore if we can let settings own this

@@ -20,7 +20,6 @@
 #include <QKeySequence>
 #include <QSizeGrip>
 
-
 #ifdef Q_OS_WIN
 #    include <Windows.h>
 #    include <windowsx.h>
@@ -119,9 +118,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel)
 
     this->channelView_.installEventFilter(this);
     this->channelView_.setChannel(this->channel_.get());
-    this->channelView_.setColorVisitor([](MessageColors &colors, Theme *theme) {
-        colors.applyOverlay(theme, getSettings()->overlayBackgroundOpacity);
-    });
+    this->channelView_.setIsOverlay(true);  // use overlay colors
     this->channelView_.setAttribute(Qt::WA_TranslucentBackground);
     this->holder_.managedConnect(this->channel_.getChannelChanged(), [this]() {
         this->channelView_.setChannel(this->channel_.get());
