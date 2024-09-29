@@ -8,6 +8,7 @@
 #include "messages/Emote.hpp"
 #include "mocks/BaseApplication.hpp"
 #include "mocks/Channel.hpp"
+#include "mocks/Emotes.hpp"
 #include "mocks/Helix.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
@@ -79,7 +80,7 @@ public:
     mock::EmptyLogging logging;
     AccountController accounts;
     mock::MockTwitchIrcServer twitch;
-    Emotes emotes;
+    mock::Emotes emotes;
     BttvEmotes bttvEmotes;
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;
