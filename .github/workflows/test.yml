@@ -91,6 +91,12 @@ jobs:
           ctest --repeat until-pass:4 --output-on-failure
         working-directory: build-test
 
+      - name: Run benchmark
+        timeout-minutes: 2
+        run: |
+          ./bin/chatterino-benchmark --benchmark_min_time=1x
+        working-directory: build-test
+
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4.5.0
         with:
