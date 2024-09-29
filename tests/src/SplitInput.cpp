@@ -62,7 +62,7 @@ public:
     WindowManager windowManager;
     AccountController accounts;
     CommandController commands;
-    mocks::Emotes emotes;
+    mock::Emotes emotes;
 };
 
 class SplitInputTest
