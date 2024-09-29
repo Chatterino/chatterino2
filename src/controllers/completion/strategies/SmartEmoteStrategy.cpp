@@ -25,8 +25,7 @@ namespace {
      * @return How different the emote is from query. Values in the range [-10,
      * \infty].
      */
-    int costOfEmote(QStringView query, const QString &emote,
-                    bool prioritizeUpper)
+    int costOfEmote(QStringView query, QStringView emote, bool prioritizeUpper)
     {
         int score = 0;
 
