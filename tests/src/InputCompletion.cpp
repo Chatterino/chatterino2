@@ -8,6 +8,7 @@
 #include "messages/Emote.hpp"
 #include "mocks/BaseApplication.hpp"
 #include "mocks/Channel.hpp"
+#include "mocks/Emotes.hpp"
 #include "mocks/Helix.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
@@ -79,7 +80,7 @@ public:
     mock::EmptyLogging logging;
     AccountController accounts;
     mock::MockTwitchIrcServer twitch;
-    Emotes emotes;
+    mock::Emotes emotes;
     BttvEmotes bttvEmotes;
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;
@@ -537,12 +538,12 @@ TEST_F(InputCompletionTest, SmartTabCompletionEmote)
 TEST_F(InputCompletionTest, SmartTabCompletionEmoji)
 {
     auto completion = querySmartTabCompletion(":tf", false);
-    ASSERT_EQ(completion.size(), 0);
-    // ASSERT_EQ(completion[0], ":tf: ");
+    ASSERT_EQ(completion.size(), 1);
+    ASSERT_EQ(completion[0], ":tf: ");
 
     completion = querySmartTabCompletion(":)", false);
-    ASSERT_EQ(completion.size(), 0);
-    // ASSERT_EQ(completion[0], ":) ");
+    ASSERT_EQ(completion.size(), 1);
+    ASSERT_EQ(completion[0], ":) ");
 
     completion = querySmartTabCompletion(":cla", false);
     ASSERT_EQ(completion.size(), 8);
