@@ -94,5 +94,5 @@ jobs:
           cd ../pubsub-server-test
           ./server 127.0.0.1:9050 &
           cd ../build-test
-          ctest --repeat until-pass:4 --output-on-failure --exclude-regex ClassicEmoteNameFiltering
+          ctest --repeat until-pass:4 --output-on-failure
         working-directory: build-test
