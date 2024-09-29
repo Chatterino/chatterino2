@@ -160,10 +160,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel)
     settings->overlayShadowOffsetY.connect(applyIt, this->holder_, false);
     settings->overlayShadowOpacity.connect(applyIt, this->holder_, false);
     settings->overlayShadowRadius.connect(applyIt, this->holder_, false);
-
-    this->holder_.managedConnect(getTheme()->updated, [this] {
-        this->applyTheme();
-    });
+    settings->overlayShadowColor.connect(applyIt, this->holder_, false);
 
     this->addShortcuts();
     this->triggerFirstActivation();
@@ -183,7 +180,7 @@ void OverlayWindow::applyTheme()
 
     if (this->dropShadow_)
     {
-        auto shadowColor = theme->overlayMessages.shadow.color;
+        QColor shadowColor(settings->overlayShadowColor.getValue());
         shadowColor.setAlpha(
             std::clamp(settings->overlayShadowOpacity.getValue(), 0, 255));
         this->dropShadow_->setColor(shadowColor);

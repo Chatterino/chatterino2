@@ -167,13 +167,6 @@ void parseOverlayMessages(const QJsonObject &overlayMessages,
     parseColor(theme, overlayMessages, disabled);
     parseColor(theme, overlayMessages, selection);
     parseColor(theme, overlayMessages, background);
-
-    {
-        const auto shadow = overlayMessages["shadow"_L1].toObject();
-        const auto shadowFallback =
-            overlayMessagesFallback["shadow"_L1].toObject();
-        parseColor(theme.overlayMessages, shadow, color);
-    }
 }
 
 void parseScrollbars(const QJsonObject &scrollbars,

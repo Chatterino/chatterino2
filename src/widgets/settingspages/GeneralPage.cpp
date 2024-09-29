@@ -982,6 +982,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        1,
                        "Controls the opacity of the added drop shadow. 255 "
                        "corresponds to a fully opaque shadow.");
+    layout.addColorButton("Shadow color",
+                          QColor(getSettings()->overlayShadowColor.getValue()),
+                          getSettings()->overlayShadowColor);
     layout
         .addIntInput("Shadow radius", s.overlayShadowRadius, 0, 40, 1,
                      "Controls how far the shadow is spread (the blur "

@@ -297,17 +297,6 @@
             "background": {
               "$ref": "#/definitions/qt-color",
               "description": "Note: The alpha value is ignored (set through the settings)"
-            },
-            "shadow": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "color": {
-                  "$ref": "#/definitions/qt-color",
-                  "description": "Note: The alpha value is ignored (set through the settings)"
-                }
-              },
-              "required": ["color"]
             }
           },
           "required": [
@@ -315,8 +304,7 @@
             "disabled",
             "selection",
             "textColors",
-            "background",
-            "shadow"
+            "background"
           ]
         },
         "scrollbars": {

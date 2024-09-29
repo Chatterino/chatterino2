@@ -114,10 +114,6 @@ public:
         QColor disabled;
         QColor selection;
         QColor background;
-
-        struct {
-            QColor color;
-        } shadow;
     } overlayMessages;
 
     /// SCROLLBAR

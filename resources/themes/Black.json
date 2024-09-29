@@ -36,10 +36,7 @@
         "regular": "#ffffff",
         "system": "#8c7f7f"
       },
-      "background": "#000",
-      "shadow": {
-        "color": "#000"
-      }
+      "background": "#000"
     },
     "scrollbars": {
       "background": "#00000000",
