@@ -9,6 +9,7 @@
 
 #include <magic_enum/magic_enum.hpp>
 #include <QJsonDocument>
+#include <QStringBuilder>
 
 namespace {
 
@@ -3015,8 +3016,13 @@ void Helix::sendChatMessage(
             }
 
             const auto obj = result.parseJson();
-            auto message =
-                obj["message"].toString(u"Twitch internal server error"_s);
+            auto message = obj["message"].toString();
+
+            if (message.isEmpty())
+            {
+                message = u"Twitch internal server error (" %
+                          result.formatError() % ')';
+            }
 
             switch (*result.status())
             {

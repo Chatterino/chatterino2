@@ -24,6 +24,8 @@ struct ChannelPointReward {
         QString login;
         QString displayName;
     } user;
+
+    QJsonObject toJson() const;
 };
 
 }  // namespace chatterino

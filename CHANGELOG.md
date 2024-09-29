@@ -49,6 +49,7 @@
 - Bugfix: Fixed account switch not being saved if no other settings were changed. (#5558)
 - Bugfix: Fixed some tooltips not being readable. (#5578)
 - Bugfix: Fixed log files being locked longer than needed. (#5592)
+- Bugfix: Fixed global badges not showing in anonymous mode. (#5599)
 - Bugfix: Fixed grammar in the user highlight page. (#5602)
 - Bugfix: Fixed emotes starting with ":" not tab-completing. (#5603)
 - Dev: Update Windows build from Qt 6.5.0 to Qt 6.7.1. (#5420)
@@ -90,6 +91,10 @@
 - Dev: The timer for `StreamerMode` is now destroyed on the correct thread. (#5571)
 - Dev: Cleanup some parts of the `magic_enum` adaptation for Qt. (#5587)
 - Dev: Refactored `static`s in headers to only be present once in the final app. (#5588)
+- Dev: Added more tests for input completion. (#5604)
+- Dev: Refactored legacy Unicode zero-width-joiner replacement. (#5594)
+- Dev: The JSON output when copying a message (<kbd>SHIFT</kbd> + right-click) is now more extensive. (#5600)
+- Dev: Twitch messages are now sent using Twitch's Helix API instead of IRC by default. (#5607)
 
 ## 2.5.1
 
