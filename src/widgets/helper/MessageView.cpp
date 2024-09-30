@@ -98,7 +98,7 @@ void MessageView::paintEvent(QPaintEvent * /*event*/)
 void MessageView::themeChangedEvent()
 {
     this->messageColors_.applyTheme(getTheme(), false, 255);
-    this->messageColors_.regular = getTheme()->splits.input.background;
+    this->messageColors_.regularBg = getTheme()->splits.input.background;
     if (this->messageLayout_)
     {
         this->messageLayout_->invalidateBuffer();
@@ -120,9 +120,15 @@ void MessageView::layoutMessage()
     }
 
     bool updateRequired = this->messageLayout_->layout(
-        this->width_, this->scale(),
-        this->scale() * static_cast<float>(this->devicePixelRatio()),
-        MESSAGE_FLAGS, false);
+        {
+            .messageColors = this->messageColors_,
+            .flags = MESSAGE_FLAGS,
+            .width = this->width_,
+            .scale = this->scale(),
+            .imageScale =
+                this->scale() * static_cast<float>(this->devicePixelRatio()),
+        },
+        false);
 
     if (updateRequired)
     {

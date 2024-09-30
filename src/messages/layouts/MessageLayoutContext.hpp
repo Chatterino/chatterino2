@@ -1,5 +1,7 @@
 #pragma once
 
+#include "messages/MessageElement.hpp"
+
 #include <QColor>
 #include <QPainter>
 
@@ -21,11 +23,15 @@ struct MessageColors {
     // true if any of the background colors have transparency
     bool hasTransparency = false;
 
-    QColor regular;
-    QColor alternate;
+    QColor regularBg;
+    QColor alternateBg;
+
     QColor disabled;
     QColor selection;
-    QColor system;
+
+    QColor regularText;
+    QColor linkText;
+    QColor systemText;
 
     QColor messageSeperator;
 
@@ -75,6 +81,15 @@ struct MessagePaintContext {
     size_t messageIndex{};
 
     bool isLastReadMessage{};
+};
+
+struct MessageLayoutContext {
+    const MessageColors &messageColors;
+    MessageElementFlags flags;
+
+    int width = 1;
+    float scale = 1;
+    float imageScale = 1;
 };
 
 }  // namespace chatterino

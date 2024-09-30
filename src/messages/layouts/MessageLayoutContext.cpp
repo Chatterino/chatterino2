@@ -11,12 +11,15 @@ void MessageColors::applyTheme(Theme *theme, bool isOverlay,
                                int backgroundOpacity)
 {
     auto applyColors = [this](const auto &src) {
-        this->regular = src.backgrounds.regular;
-        this->alternate = src.backgrounds.alternate;
+        this->regularBg = src.backgrounds.regular;
+        this->alternateBg = src.backgrounds.alternate;
 
         this->disabled = src.disabled;
         this->selection = src.selection;
-        this->system = src.textColors.system;
+
+        this->regularText = src.textColors.regular;
+        this->linkText = src.textColors.link;
+        this->systemText = src.textColors.system;
     };
 
     if (isOverlay)
@@ -37,7 +40,7 @@ void MessageColors::applyTheme(Theme *theme, bool isOverlay,
     this->unfocusedLastMessageLine = theme->tabs.selected.backgrounds.unfocused;
 
     this->hasTransparency =
-        this->regular.alpha() != 255 || this->alternate.alpha() != 255;
+        this->regularBg.alpha() != 255 || this->alternateBg.alpha() != 255;
 }
 
 void MessagePreferences::connectSettings(Settings *settings,

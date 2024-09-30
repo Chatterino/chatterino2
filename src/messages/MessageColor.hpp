@@ -4,7 +4,8 @@
 #include <QString>
 
 namespace chatterino {
-class Theme;
+
+struct MessageColors;
 
 struct MessageColor {
     enum Type { Custom, Text, Link, System };
@@ -12,7 +13,7 @@ struct MessageColor {
     MessageColor(const QColor &color);
     MessageColor(Type type_ = Text);
 
-    const QColor &getColor(Theme &themeManager) const;
+    const QColor &getColor(const MessageColors &colors) const;
 
     QString toString() const;
 

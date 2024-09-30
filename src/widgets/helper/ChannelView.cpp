@@ -698,9 +698,15 @@ void ChannelView::layoutVisibleMessages(
             const auto &message = messages[i];
 
             redrawRequired |= message->layout(
-                layoutWidth, this->scale(),
-                this->scale() * static_cast<float>(this->devicePixelRatio()),
-                flags, this->bufferInvalidationQueued_);
+                {
+                    .messageColors = this->messageColors_,
+                    .flags = flags,
+                    .width = layoutWidth,
+                    .scale = this->scale(),
+                    .imageScale = this->scale() *
+                                  static_cast<float>(this->devicePixelRatio()),
+                },
+                this->bufferInvalidationQueued_);
 
             y += message->getHeight();
         }
@@ -735,8 +741,14 @@ void ChannelView::updateScrollbar(
         auto *message = messages[i].get();
 
         message->layout(
-            layoutWidth, this->scale(),
-            this->scale() * static_cast<float>(this->devicePixelRatio()), flags,
+            {
+                .messageColors = this->messageColors_,
+                .flags = flags,
+                .width = layoutWidth,
+                .scale = this->scale(),
+                .imageScale = this->scale() *
+                              static_cast<float>(this->devicePixelRatio()),
+            },
             false);
 
         h -= message->getHeight();
@@ -1723,10 +1735,16 @@ void ChannelView::wheelEvent(QWheelEvent *event)
                 else
                 {
                     snapshot[i - 1]->layout(
-                        this->getLayoutWidth(), this->scale(),
-                        this->scale() *
-                            static_cast<float>(this->devicePixelRatio()),
-                        this->getFlags(), false);
+                        {
+                            .messageColors = this->messageColors_,
+                            .flags = this->getFlags(),
+                            .width = this->getLayoutWidth(),
+                            .scale = this->scale(),
+                            .imageScale =
+                                this->scale() *
+                                static_cast<float>(this->devicePixelRatio()),
+                        },
+                        false);
                     scrollFactor = 1;
                     currentScrollLeft = snapshot[i - 1]->getHeight();
                 }
@@ -1760,10 +1778,16 @@ void ChannelView::wheelEvent(QWheelEvent *event)
                 else
                 {
                     snapshot[i + 1]->layout(
-                        this->getLayoutWidth(), this->scale(),
-                        this->scale() *
-                            static_cast<float>(this->devicePixelRatio()),
-                        this->getFlags(), false);
+                        {
+                            .messageColors = this->messageColors_,
+                            .flags = this->getFlags(),
+                            .width = this->getLayoutWidth(),
+                            .scale = this->scale(),
+                            .imageScale =
+                                this->scale() *
+                                static_cast<float>(this->devicePixelRatio()),
+                        },
+                        false);
 
                     scrollFactor = 1;
                     currentScrollLeft = snapshot[i + 1]->getHeight();

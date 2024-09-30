@@ -24,19 +24,19 @@
     },
     "overlayMessages": {
       "backgrounds": {
-        "alternate": "#32ffffff",
+        "alternate": "#32000000",
         "regular": "transparent"
       },
-      "disabled": "#64ffffff",
+      "disabled": "#64000000",
       "selection": "#40ffffff",
       "textColors": {
-        "caret": "#000000",
-        "chatPlaceholder": "#af9f9f",
+        "caret": "#ffffff",
+        "chatPlaceholder": "#5d5555",
         "link": "#4286f4",
-        "regular": "#000000",
+        "regular": "#ffffff",
         "system": "#8c7f7f"
       },
-      "background": "#fff"
+      "background": "#333"
     },
     "scrollbars": {
       "background": "#00000000",
