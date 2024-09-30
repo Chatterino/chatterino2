@@ -108,7 +108,6 @@ public:
     } messages;
 
     struct {
-        TextColors textColors;
         MessageBackgrounds backgrounds;
 
         QColor disabled;

@@ -29,13 +29,6 @@
       },
       "disabled": "#64ffffff",
       "selection": "#40ffffff",
-      "textColors": {
-        "caret": "#000000",
-        "chatPlaceholder": "#af9f9f",
-        "link": "#4286f4",
-        "regular": "#000000",
-        "system": "#8c7f7f"
-      },
       "background": "#fff"
     },
     "scrollbars": {
