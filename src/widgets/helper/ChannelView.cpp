@@ -256,40 +256,14 @@ void addHiddenContextMenuItems(QMenu *menu,
                         });
     }
 
-    const auto *message = layout->getMessage();
+    auto message = layout->getMessagePtr();
 
-    if (message != nullptr)
+    if (message)
     {
-        QJsonDocument jsonDocument;
-
-        QJsonObject jsonObject;
-
-        jsonObject["id"] = message->id;
-        jsonObject["searchText"] = message->searchText;
-        jsonObject["messageText"] = message->messageText;
-        jsonObject["flags"] = qmagicenum::enumFlagsName(message->flags.value());
-        if (message->reward)
-        {
-            QJsonObject reward;
-            reward["id"] = message->reward->id;
-            reward["title"] = message->reward->title;
-            reward["cost"] = message->reward->cost;
-            reward["isUserInputRequired"] =
-                message->reward->isUserInputRequired;
-            jsonObject["reward"] = reward;
-        }
-        else
-        {
-            jsonObject["reward"] = QJsonValue();
-        }
-
-        jsonDocument.setObject(jsonObject);
-
-        auto jsonString =
-            jsonDocument.toJson(QJsonDocument::JsonFormat::Indented);
-
-        menu->addAction("Copy message &JSON", [jsonString] {
-            crossPlatformCopy(jsonString);
+        menu->addAction("Copy message &JSON", [message] {
+            auto jsonString = QJsonDocument{message->toJson()}.toJson(
+                QJsonDocument::Indented);
+            crossPlatformCopy(QString::fromUtf8(jsonString));
         });
     }
 }

@@ -8,13 +8,14 @@
 
 namespace chatterino {
 
-constexpr QStringView LINK_CHATTERINO_WIKI = u"https://wiki.chatterino.com";
-constexpr QStringView LINK_CHATTERINO_DISCORD =
+inline constexpr QStringView LINK_CHATTERINO_WIKI =
+    u"https://wiki.chatterino.com";
+inline constexpr QStringView LINK_CHATTERINO_DISCORD =
     u"https://discord.gg/7Y5AYhAK4z";
-constexpr QStringView LINK_CHATTERINO_SOURCE =
+inline constexpr QStringView LINK_CHATTERINO_SOURCE =
     u"https://github.com/Chatterino/chatterino2";
 
-constexpr QStringView TWITCH_PLAYER_URL =
+inline constexpr QStringView TWITCH_PLAYER_URL =
     u"https://player.twitch.tv/?channel=%1&parent=twitch.tv";
 
 enum class HighlightState {
@@ -23,14 +24,14 @@ enum class HighlightState {
     NewMessage,
 };
 
-constexpr Qt::KeyboardModifiers SHOW_SPLIT_OVERLAY_MODIFIERS =
+inline constexpr Qt::KeyboardModifiers SHOW_SPLIT_OVERLAY_MODIFIERS =
     Qt::ControlModifier | Qt::AltModifier;
-constexpr Qt::KeyboardModifiers SHOW_ADD_SPLIT_REGIONS =
+inline constexpr Qt::KeyboardModifiers SHOW_ADD_SPLIT_REGIONS =
     Qt::ControlModifier | Qt::AltModifier;
-constexpr Qt::KeyboardModifiers SHOW_RESIZE_HANDLES_MODIFIERS =
+inline constexpr Qt::KeyboardModifiers SHOW_RESIZE_HANDLES_MODIFIERS =
     Qt::ControlModifier;
 
-constexpr const char *ANONYMOUS_USERNAME_LABEL = " - anonymous - ";
+inline constexpr const char *ANONYMOUS_USERNAME_LABEL = " - anonymous - ";
 
 template <typename T>
 std::weak_ptr<T> weakOf(T *element)

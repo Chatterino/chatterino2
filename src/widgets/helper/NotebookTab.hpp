@@ -11,7 +11,7 @@
 
 namespace chatterino {
 
-constexpr int NOTEBOOK_TAB_HEIGHT = 28;
+inline constexpr int NOTEBOOK_TAB_HEIGHT = 28;
 
 class SplitContainer;
 

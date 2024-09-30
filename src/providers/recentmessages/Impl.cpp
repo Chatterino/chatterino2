@@ -1,21 +1,12 @@
 #include "providers/recentmessages/Impl.hpp"
 
 #include "common/Env.hpp"
-#include "common/QLogging.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
-#include "util/FormatTime.hpp"
+#include "util/Helpers.hpp"
 
 #include <QJsonArray>
 #include <QUrlQuery>
-
-namespace {
-
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-const auto &LOG = chatterinoRecentMessages;
-
-}  // namespace
 
 namespace chatterino::recentmessages::detail {
 
@@ -33,11 +24,7 @@ std::vector<Communi::IrcMessage *> parseRecentMessages(
 
     for (const auto &jsonMessage : jsonMessages)
     {
-        auto content = jsonMessage.toString();
-
-        // For explanation of why this exists, see src/providers/twitch/TwitchChannel.hpp,
-        // where these constants are defined
-        content.replace(COMBINED_FIXER, ZERO_WIDTH_JOINER);
+        auto content = unescapeZeroWidthJoiner(jsonMessage.toString());
 
         auto *message =
             Communi::IrcMessage::fromData(content.toUtf8(), nullptr);

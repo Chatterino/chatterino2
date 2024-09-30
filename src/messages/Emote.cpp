@@ -1,8 +1,14 @@
 #include "messages/Emote.hpp"
 
+#include "common/Literals.hpp"
+
+#include <QJsonObject>
+
 #include <unordered_map>
 
 namespace chatterino {
+
+using namespace literals;
 
 bool operator==(const Emote &a, const Emote &b)
 {
@@ -13,6 +19,37 @@ bool operator==(const Emote &a, const Emote &b)
 bool operator!=(const Emote &a, const Emote &b)
 {
     return !(a == b);
+}
+
+QJsonObject Emote::toJson() const
+{
+    QJsonObject obj{
+        {"name"_L1, this->name.string},
+        {"images"_L1, this->images.toJson()},
+        {"tooltip"_L1, this->tooltip.string},
+    };
+    if (!this->homePage.string.isEmpty())
+    {
+        obj["homePage"_L1] = this->homePage.string;
+    }
+    if (this->zeroWidth)
+    {
+        obj["zeroWidth"_L1] = this->zeroWidth;
+    }
+    if (!this->id.string.isEmpty())
+    {
+        obj["id"_L1] = this->id.string;
+    }
+    if (!this->author.string.isEmpty())
+    {
+        obj["author"_L1] = this->author.string;
+    }
+    if (this->baseName)
+    {
+        obj["baseName"_L1] = this->baseName->string;
+    }
+
+    return obj;
 }
 
 EmotePtr cachedOrMakeEmotePtr(Emote &&emote, const EmoteMap &cache)

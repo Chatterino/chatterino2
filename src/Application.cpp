@@ -149,6 +149,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , args_(_args)
     , themes(new Theme(paths))
     , fonts(new Fonts(_settings))
+    , logging(new Logging(_settings))
     , emotes(new Emotes)
     , accounts(new AccountController)
     , hotkeys(new HotkeyController)
@@ -175,7 +176,6 @@ Application::Application(Settings &_settings, const Paths &paths,
     , ffzEmotes(new FfzEmotes)
     , seventvEmotes(new SeventvEmotes)
     , seventvEventAPI(makeSeventvEventAPI(_settings))
-    , logging(new Logging(_settings))
     , linkResolver(new LinkResolver)
     , streamerMode(new StreamerMode)
     , twitchUsers(new TwitchUsers)
@@ -503,6 +503,7 @@ PubSub *Application::getTwitchPubSub()
 ILogging *Application::getChatLogger()
 {
     assertInGuiThread();
+    assert(this->logging);
 
     return this->logging.get();
 }
@@ -694,6 +695,11 @@ IApplication *getApp()
 {
     assert(INSTANCE != nullptr);
 
+    return INSTANCE;
+}
+
+IApplication *tryGetApp()
+{
     return INSTANCE;
 }
 

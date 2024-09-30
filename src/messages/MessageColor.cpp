@@ -33,4 +33,21 @@ const QColor &MessageColor::getColor(Theme &themeManager) const
     return _default;
 }
 
+QString MessageColor::toString() const
+{
+    switch (this->type_)
+    {
+        case Type::Custom:
+            return this->customColor_.name(QColor::HexArgb);
+        case Type::Text:
+            return QStringLiteral("Text");
+        case Type::System:
+            return QStringLiteral("System");
+        case Type::Link:
+            return QStringLiteral("Link");
+        default:
+            return {};
+    }
+}
+
 }  // namespace chatterino
