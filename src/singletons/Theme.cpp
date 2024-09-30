@@ -157,6 +157,9 @@ void parseOverlayMessages(const QJsonObject &overlayMessages,
                           const QJsonObject &overlayMessagesFallback,
                           chatterino::Theme &theme)
 {
+    parseTextColors(overlayMessages["textColors"_L1].toObject(),
+                    overlayMessagesFallback["textColors"_L1].toObject(),
+                    theme.overlayMessages);
     parseMessageBackgrounds(
         overlayMessages["backgrounds"_L1].toObject(),
         overlayMessagesFallback["backgrounds"_L1].toObject(),

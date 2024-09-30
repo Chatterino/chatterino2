@@ -293,12 +293,19 @@
             "backgrounds": { "$ref": "#/definitions/message-backgrounds" },
             "disabled": { "$ref": "#/definitions/qt-color" },
             "selection": { "$ref": "#/definitions/qt-color" },
+            "textColors": { "$ref": "#/definitions/text-colors" },
             "background": {
               "$ref": "#/definitions/qt-color",
               "description": "Note: The alpha value is ignored (set through the settings)"
             }
           },
-          "required": ["backgrounds", "disabled", "selection", "background"]
+          "required": [
+            "backgrounds",
+            "disabled",
+            "selection",
+            "textColors",
+            "background"
+          ]
         },
         "scrollbars": {
           "type": "object",
