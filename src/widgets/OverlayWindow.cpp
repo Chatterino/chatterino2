@@ -5,7 +5,6 @@
 #include "common/Literals.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "singletons/Settings.hpp"
-#include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/helper/ChannelView.hpp"
@@ -175,7 +174,6 @@ OverlayWindow::~OverlayWindow()
 
 void OverlayWindow::applyTheme()
 {
-    auto *theme = getTheme();
     auto *settings = getSettings();
 
     if (this->dropShadow_)
