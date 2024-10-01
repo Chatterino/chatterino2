@@ -196,7 +196,7 @@ def write_func(path: Path, line: int, comments: list[str], out: TextIOWrapper):
     if not comments[0].startswith("@"):
         out.write(f"--- {comments[0]}\n---\n")
         comments = comments[1:]
-    params = []
+    params: list[str] = []
     for comment in comments[:-1]:
         if not comment.startswith("@lua"):
             panic(path, line, f"Invalid function specification - got '{comment}'")
@@ -209,7 +209,7 @@ def write_func(path: Path, line: int, comments: list[str], out: TextIOWrapper):
         panic(path, line, f"Invalid function exposure - got '{comments[-1]}'")
     name = comments[-1].split(" ", 1)[1]
     printmsg(path, line, f"function {name}")
-    lua_params = ", ".join(params)
+    lua_params = ", ".join(p.removesuffix("?") for p in params)
     out.write(f"function {name}({lua_params}) end\n\n")
 
 
