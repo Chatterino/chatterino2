@@ -51,6 +51,7 @@
 - Bugfix: Fixed log files being locked longer than needed. (#5592)
 - Bugfix: Fixed global badges not showing in anonymous mode. (#5599)
 - Bugfix: Fixed grammar in the user highlight page. (#5602)
+- Bugfix: Fixed double-click selection not working when clicking outside a message. (#5617)
 - Dev: Update Windows build from Qt 6.5.0 to Qt 6.7.1. (#5420)
 - Dev: Update vcpkg build Qt from 6.5.0 to 6.7.0, boost from 1.83.0 to 1.85.0, openssl from 3.1.3 to 3.3.0. (#5422)
 - Dev: Unsingletonize `ISoundController`. (#5462)
