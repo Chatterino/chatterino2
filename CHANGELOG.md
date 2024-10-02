@@ -30,6 +30,7 @@
 - Minor: Removed experimental IRC support. (#5547)
 - Minor: Moderators can now see which mods start and cancel raids. (#5563)
 - Minor: The emote popup now reloads when Twitch emotes are reloaded. (#5580)
+- Minor: When blocking a followed channel, Chatterino will now warn you about unfollowing that channel. (#5615)
 - Bugfix: Fixed tab move animation occasionally failing to start after closing a tab. (#5426)
 - Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
 - Bugfix: Fixed restricted users usernames not being clickable. (#5405)
