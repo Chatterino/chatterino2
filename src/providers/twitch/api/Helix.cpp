@@ -3138,7 +3138,7 @@ void Helix::getUserEmotes(
 }
 
 void Helix::getFollowedChannel(
-    QString userID, QString broadcasterID,
+    QString userID, QString broadcasterID, const QObject *caller,
     ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
     FailureCallback<QString> failureCallback)
 {
@@ -3147,6 +3147,7 @@ void Helix::getFollowedChannel(
                       {u"user_id"_s, userID},
                       {u"broadcaster_id"_s, broadcasterID},
                   })
+        .caller(caller)
         .onSuccess([successCallback](auto result) {
             if (result.status() != 200)
             {

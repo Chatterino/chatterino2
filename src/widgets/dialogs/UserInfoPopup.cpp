@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
+#include "common/Literals.hpp"
 #include "common/network/NetworkRequest.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -37,6 +38,8 @@
 
 #include <QCheckBox>
 #include <QDesktopServices>
+#include <QMessageBox>
+#include <QMetaEnum>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QPointer>
@@ -140,6 +143,8 @@ int calculateTimeoutDuration(TimeoutButton timeout)
 }  // namespace
 
 namespace chatterino {
+
+using namespace literals;
 
 UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
     : DraggablePopup(closeAutomatically, split)
@@ -621,38 +626,33 @@ void UserInfoPopup::installEvents()
                 return;
             }
 
-            switch (newState)
+            if (newState == Qt::Unchecked)
             {
-                case Qt::CheckState::Unchecked: {
-                    this->ui_.block->setEnabled(false);
+                this->ui_.block->setEnabled(false);
 
-                    getApp()->getAccounts()->twitch.getCurrent()->unblockUser(
-                        this->userId_, this,
-                        [this, reenableBlockCheckbox, currentUser] {
-                            this->channel_->addSystemMessage(
-                                QString("You successfully unblocked user %1")
-                                    .arg(this->userName_));
-                            reenableBlockCheckbox();
-                        },
-                        [this, reenableBlockCheckbox] {
-                            this->channel_->addSystemMessage(
-                                QString(
-                                    "User %1 couldn't be unblocked, an unknown "
+                getApp()->getAccounts()->twitch.getCurrent()->unblockUser(
+                    this->userId_, this,
+                    [this, reenableBlockCheckbox, currentUser] {
+                        this->channel_->addSystemMessage(
+                            QString("You successfully unblocked user %1")
+                                .arg(this->userName_));
+                        reenableBlockCheckbox();
+                    },
+                    [this, reenableBlockCheckbox] {
+                        this->channel_->addSystemMessage(
+                            QString("User %1 couldn't be unblocked, an unknown "
                                     "error occurred!")
-                                    .arg(this->userName_));
-                            reenableBlockCheckbox();
-                        });
-                }
-                break;
+                                .arg(this->userName_));
+                        reenableBlockCheckbox();
+                    });
+                return;
+            }
 
-                case Qt::CheckState::PartiallyChecked: {
-                    // We deliberately ignore this state
-                }
-                break;
-
-                case Qt::CheckState::Checked: {
-                    this->ui_.block->setEnabled(false);
-
+            if (newState == Qt::Checked)
+            {
+                this->ui_.block->setEnabled(false);
+                auto blockThisUser = [this, reenableBlockCheckbox,
+                                      currentUser] {
                     getApp()->getAccounts()->twitch.getCurrent()->blockUser(
                         this->userId_, this,
                         [this, reenableBlockCheckbox, currentUser] {
@@ -663,15 +663,74 @@ void UserInfoPopup::installEvents()
                         },
                         [this, reenableBlockCheckbox] {
                             this->channel_->addSystemMessage(
-                                QString(
-                                    "User %1 couldn't be blocked, an unknown "
-                                    "error occurred!")
+                                QString("User %1 couldn't be blocked, an "
+                                        "unknown error occurred!")
                                     .arg(this->userName_));
                             reenableBlockCheckbox();
                         });
-                }
-                break;
+                };
+                getHelix()->getFollowedChannel(
+                    getApp()->getAccounts()->twitch.getCurrent()->getUserId(),
+                    this->userId_, this,
+                    [this, blockThisUser,
+                     reenableBlockCheckbox](const auto &followStatus) {
+                        if (!followStatus)
+                        {
+                            blockThisUser();
+                            return;
+                        }
+                        bool wasPinned = this->ensurePinned();
+                        auto btn = QMessageBox::warning(
+                            this, u"Blocking " % this->userName_,
+                            u"You're following %1 since %2.\n"_s
+                            "Blocking %1 will unfollow them!\n\n"
+                            "Are you sure you want to unfollow and block %1?"
+                                .arg(this->userName_,
+                                     followStatus->followedAt.toString()),
+                            QMessageBox::Yes | QMessageBox::Cancel,
+                            QMessageBox::Cancel);
+                        if (wasPinned)
+                        {
+                            this->togglePinned();
+                        }
+                        if (btn != QMessageBox::Yes)
+                        {
+                            reenableBlockCheckbox();
+                            return;
+                        }
+                        blockThisUser();
+                    },
+                    [this, blockThisUser,
+                     reenableBlockCheckbox](const auto &error) {
+                        bool wasPinned = this->ensurePinned();
+                        auto btn = QMessageBox::warning(
+                            this, u"Blocking " % this->userName_,
+                            u"Failed to get following status for %1 (error: %2).\n"_s
+                            "Blocking a followed channel will automatically "
+                            "unfollow them.\n\n"
+                            "Are you sure you want to block %1?".arg(
+                                this->userName_, error),
+                            QMessageBox::Yes | QMessageBox::Cancel,
+                            QMessageBox::Cancel);
+                        if (wasPinned)
+                        {
+                            this->togglePinned();
+                        }
+                        if (btn == QMessageBox::Yes)
+                        {
+                            blockThisUser();
+                        }
+                        else
+                        {
+                            reenableBlockCheckbox();
+                        }
+                    });
+                return;
             }
+
+            qCWarning(chatterinoWidget)
+                << "Unexpected check-state when blocking" << this->userName_
+                << QMetaEnum::fromType<Qt::CheckState>().valueToKey(newState);
         });
 
     // ignore highlights

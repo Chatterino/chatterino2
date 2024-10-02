@@ -1143,7 +1143,7 @@ public:
     /// https://dev.twitch.tv/docs/api/reference/#get-followed-channels
     /// (non paginated)
     virtual void getFollowedChannel(
-        QString userID, QString broadcasterID,
+        QString userID, QString broadcasterID, const QObject *caller,
         ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
         FailureCallback<QString> failureCallback) = 0;
 
@@ -1486,7 +1486,7 @@ public:
     /// https://dev.twitch.tv/docs/api/reference/#get-followed-channels
     /// (non paginated)
     void getFollowedChannel(
-        QString userID, QString broadcasterID,
+        QString userID, QString broadcasterID, const QObject *caller,
         ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
         FailureCallback<QString> failureCallback) final;
 
