@@ -132,14 +132,14 @@ bool shouldSendHelixChat()
 {
     switch (getSettings()->chatSendProtocol)
     {
+        case ChatSendProtocol::Default:
         case ChatSendProtocol::Helix:
             return true;
-        case ChatSendProtocol::Default:
         case ChatSendProtocol::IRC:
             return false;
         default:
             assert(false && "Invalid chat protocol value");
-            return false;
+            return true;
     }
 }
 

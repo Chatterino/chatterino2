@@ -7,13 +7,13 @@
 #include "mocks/Channel.hpp"
 #include "mocks/ChatterinoBadges.hpp"
 #include "mocks/DisabledStreamerMode.hpp"
+#include "mocks/Emotes.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "mocks/UserData.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
-#include "singletons/Emotes.hpp"
 #include "Test.hpp"
 #include "util/IrcHelpers.hpp"
 
@@ -99,7 +99,7 @@ public:
 
     mock::EmptyLogging logging;
     AccountController accounts;
-    Emotes emotes;
+    mock::Emotes emotes;
     mock::UserDataController userData;
     mock::MockTwitchIrcServer twitch;
     mock::ChatterinoBadges chatterinoBadges;

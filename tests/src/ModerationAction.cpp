@@ -2,7 +2,7 @@
 
 #include "messages/Image.hpp"
 #include "mocks/BaseApplication.hpp"
-#include "singletons/Emotes.hpp"
+#include "mocks/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "Test.hpp"
 
@@ -24,7 +24,7 @@ public:
         return &this->emotes;
     }
 
-    Emotes emotes;
+    mock::Emotes emotes;
 };
 
 class ModerationActionTest : public ::testing::Test

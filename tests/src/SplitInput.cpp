@@ -6,7 +6,7 @@
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "mocks/BaseApplication.hpp"
-#include "singletons/Emotes.hpp"
+#include "mocks/Emotes.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
@@ -62,7 +62,7 @@ public:
     WindowManager windowManager;
     AccountController accounts;
     CommandController commands;
-    Emotes emotes;
+    mock::Emotes emotes;
 };
 
 class SplitInputTest

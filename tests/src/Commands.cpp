@@ -4,12 +4,12 @@
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/commands/common/ChannelAction.hpp"
 #include "mocks/BaseApplication.hpp"
+#include "mocks/Emotes.hpp"
 #include "mocks/Helix.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "Test.hpp"
 
@@ -59,7 +59,7 @@ public:
     AccountController accounts;
     CommandController commands;
     mock::MockTwitchIrcServer twitch;
-    Emotes emotes;
+    mock::Emotes emotes;
 };
 
 }  // namespace

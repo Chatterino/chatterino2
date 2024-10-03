@@ -53,7 +53,8 @@
 - Bugfix: Fixed log files being locked longer than needed. (#5592)
 - Bugfix: Fixed global badges not showing in anonymous mode. (#5599)
 - Bugfix: Fixed grammar in the user highlight page. (#5602)
-- Bugfix: Fixed duplicate message pings when joined to all channels in a Shared Chat session. (#5606)
+- Bugfix: Fixed double-click selection not working when clicking outside a message. (#5617)
+- Bugfix: Fixed duplicate message pings if joined to all channels in a Shared Chat session. (#5606)
 - Dev: Update Windows build from Qt 6.5.0 to Qt 6.7.1. (#5420)
 - Dev: Update vcpkg build Qt from 6.5.0 to 6.7.0, boost from 1.83.0 to 1.85.0, openssl from 3.1.3 to 3.3.0. (#5422)
 - Dev: Unsingletonize `ISoundController`. (#5462)
@@ -93,8 +94,12 @@
 - Dev: The timer for `StreamerMode` is now destroyed on the correct thread. (#5571)
 - Dev: Cleanup some parts of the `magic_enum` adaptation for Qt. (#5587)
 - Dev: Refactored `static`s in headers to only be present once in the final app. (#5588)
+- Dev: Run benchmarks in CI. (#5610)
+- Dev: Added more tests for input completion. (#5604)
 - Dev: Refactored legacy Unicode zero-width-joiner replacement. (#5594)
 - Dev: The JSON output when copying a message (<kbd>SHIFT</kbd> + right-click) is now more extensive. (#5600)
+- Dev: Twitch messages are now sent using Twitch's Helix API instead of IRC by default. (#5607)
+- Dev: `GIFTimer` is no longer initialized in tests. (#5608)
 
 ## 2.5.1
 
