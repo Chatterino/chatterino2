@@ -4,6 +4,7 @@
 #include "common/Literals.hpp"
 #include "singletons/Theme.hpp"
 
+#include <private/qpixmapfilter_p.h>
 #include <QLabel>
 #include <QPainter>
 
@@ -12,9 +13,11 @@ namespace chatterino {
 using namespace literals;
 
 QPixmap Paint::getPixmap(const QString &text, const QFont &font,
-                         QColor userColor, QSize size, float scale) const
+                         QColor userColor, QSize size, float scale,
+                         float dpr) const
 {
-    QPixmap pixmap(size);
+    QPixmap pixmap(size * dpr);
+    pixmap.setDevicePixelRatio(dpr);
     pixmap.fill(Qt::transparent);
 
     QPainter pixmapPainter(&pixmap);
@@ -44,30 +47,29 @@ QPixmap Paint::getPixmap(const QString &text, const QFont &font,
                            QTextOption(Qt::AlignLeft | Qt::AlignTop));
     pixmapPainter.end();
 
-    for (const auto &shadow : this->getDropShadows())
+    if (!this->getDropShadows().empty())
     {
-        if (!shadow.isValid())
+        QPixmap outMap(size * dpr);
+        outMap.setDevicePixelRatio(dpr);
+        for (const auto &shadow : this->getDropShadows())
         {
-            continue;
+            if (!shadow.isValid())
+            {
+                continue;
+            }
+            outMap.fill(Qt::transparent);
+
+            {
+                QPainter outPainter(&outMap);
+                auto scaled = shadow.scaled(
+                    scale / static_cast<float>(outMap.devicePixelRatio()));
+
+                QPixmapDropShadowFilter filter;
+                scaled.apply(filter);
+                filter.draw(&outPainter, {0, 0}, pixmap);
+            }
+            outMap.swap(pixmap);
         }
-
-        // HACK: create a QLabel from the pixmap to apply drop shadows
-        QLabel label;
-
-        auto scaledShadow = shadow.scaled(
-            scale / static_cast<float>(label.devicePixelRatioF()));
-
-        // NOTE: avoid scaling issues on high DPI displays
-        pixmap.setDevicePixelRatio(label.devicePixelRatioF());
-
-        label.setPixmap(pixmap);
-
-        QGraphicsDropShadowEffect dropShadow;
-        scaledShadow.apply(dropShadow);
-        label.setGraphicsEffect(&dropShadow);
-
-        pixmap = label.grab();
-        pixmap.setDevicePixelRatio(1);
     }
 
     if (drawColon)
@@ -92,12 +94,12 @@ QColor Paint::overlayColors(QColor background, QColor foreground)
 {
     auto alpha = foreground.alphaF();
 
-    auto r = (1 - alpha) * static_cast<float>(background.red()) +
-             alpha * static_cast<float>(foreground.red());
-    auto g = (1 - alpha) * static_cast<float>(background.green()) +
-             alpha * static_cast<float>(foreground.green());
-    auto b = (1 - alpha) * static_cast<float>(background.blue()) +
-             alpha * static_cast<float>(foreground.blue());
+    auto r = ((1 - alpha) * static_cast<float>(background.red())) +
+             (alpha * static_cast<float>(foreground.red()));
+    auto g = ((1 - alpha) * static_cast<float>(background.green())) +
+             (alpha * static_cast<float>(foreground.green()));
+    auto b = ((1 - alpha) * static_cast<float>(background.blue())) +
+             (alpha * static_cast<float>(foreground.blue()));
 
     return {static_cast<int>(r), static_cast<int>(g), static_cast<int>(b)};
 }

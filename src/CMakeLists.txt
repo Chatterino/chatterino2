@@ -783,6 +783,7 @@ target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
         Qt${MAJOR_QT_VERSION}::Core
         Qt${MAJOR_QT_VERSION}::Widgets
+        Qt${MAJOR_QT_VERSION}::WidgetsPrivate # for pixmap filters (paints)
         Qt${MAJOR_QT_VERSION}::Gui
         Qt${MAJOR_QT_VERSION}::Network
         Qt${MAJOR_QT_VERSION}::Svg

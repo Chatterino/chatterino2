@@ -1,5 +1,7 @@
 #include "providers/seventv/paints/PaintDropShadow.hpp"
 
+#include <private/qpixmapfilter_p.h>
+
 namespace chatterino {
 
 PaintDropShadow::PaintDropShadow(float xOffset, float yOffset, float radius,
@@ -22,11 +24,9 @@ PaintDropShadow PaintDropShadow::scaled(float scale) const
             this->radius_ * scale, this->color_};
 }
 
-void PaintDropShadow::apply(QGraphicsDropShadowEffect &effect) const
+void PaintDropShadow::apply(QPixmapDropShadowFilter &effect) const
 {
-    // We can't move here
-    effect.setXOffset(this->xOffset_);
-    effect.setYOffset(this->yOffset_);
+    effect.setOffset({this->xOffset_, this->yOffset_});
     effect.setBlurRadius(this->radius_);
     effect.setColor(this->color_);
 }

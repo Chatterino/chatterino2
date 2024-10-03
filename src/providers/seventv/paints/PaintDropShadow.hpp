@@ -1,6 +1,8 @@
 #pragma once
 
-#include <QGraphicsDropShadowEffect>
+#include <QColor>
+
+class QPixmapDropShadowFilter;
 
 namespace chatterino {
 
@@ -11,7 +13,7 @@ public:
 
     bool isValid() const;
     PaintDropShadow scaled(float scale) const;
-    void apply(QGraphicsDropShadowEffect &effect) const;
+    void apply(QPixmapDropShadowFilter &effect) const;
 
 private:
     const float xOffset_;

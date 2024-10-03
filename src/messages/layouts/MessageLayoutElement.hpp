@@ -171,7 +171,8 @@ class TextLayoutElement : public MessageLayoutElement
 public:
     TextLayoutElement(MessageElement &creator_, QString &text,
                       const QSize &size, QColor color_, FontStyle style_,
-                      MessageColor::Type messageColor, float scale_);
+                      MessageColor::Type messageColor, float scale_,
+                      float dpr = 1.0F);
 
 protected:
     void addCopyTextToString(QString &str, uint32_t from = 0,
@@ -188,6 +189,7 @@ protected:
     // space (fits in the padding of `style_`)
     MessageColor::Type messageColor_;
     float scale_;
+    float dpr_ = 1.0F;  // for 7tv paints
 };
 
 // TEXT ICON

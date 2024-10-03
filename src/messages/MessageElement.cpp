@@ -573,7 +573,8 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
 
                 auto *e = new TextLayoutElement(
                     *this, text, QSize(width, metrics.height()), color,
-                    this->style_, this->color_.type(), container.getScale());
+                    this->style_, this->color_.type(), container.getScale(),
+                    container.getImageScale() / container.getScale());
                 e->setTrailingSpace(hasTrailingSpace);
                 e->setText(text);
                 e->setWordId(wordId);

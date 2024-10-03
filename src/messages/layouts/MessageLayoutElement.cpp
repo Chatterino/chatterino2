@@ -421,12 +421,13 @@ TextLayoutElement::TextLayoutElement(MessageElement &_creator, QString &_text,
                                      const QSize &_size, QColor _color,
                                      FontStyle _style,
                                      MessageColor::Type messageColor,
-                                     float _scale)
+                                     float _scale, float dpr)
     : MessageLayoutElement(_creator, _size)
     , color_(_color)
     , style_(_style)
     , messageColor_(messageColor)
     , scale_(_scale)
+    , dpr_(dpr)
 {
     this->setText(_text);
 }
@@ -476,11 +477,9 @@ void TextLayoutElement::paint(QPainter &painter,
 
         auto paintPixmap =
             paint->getPixmap(this->getText(), font, this->color_,
-                             this->getRect().size(), this->scale_);
+                             this->getRect().size(), this->scale_, this->dpr_);
 
-        painter.drawPixmap(QRect(this->getRect().x(), this->getRect().y(),
-                                 paintPixmap.width(), paintPixmap.height()),
-                           paintPixmap);
+        painter.drawPixmap(this->getRect().topLeft(), paintPixmap);
     }
     else
     {
@@ -516,7 +515,7 @@ bool TextLayoutElement::paintAnimated(QPainter &painter, const int yOffset)
 
         const auto paintPixmap =
             paint->getPixmap(this->getText(), font, this->color_,
-                             this->getRect().size(), this->scale_);
+                             this->getRect().size(), this->scale_, this->dpr_);
 
         auto rect = this->getRect();
         rect.moveTop(rect.y() + yOffset);
