@@ -30,18 +30,13 @@ c2.EventType = {}
 -- Begin src/common/Channel.hpp
 
 ---@alias c2.ChannelType integer
----@type { None: c2.ChannelType, Direct: c2.ChannelType, Twitch: c2.ChannelType, TwitchWhispers: c2.ChannelType, TwitchWatching: c2.ChannelType, TwitchMentions: c2.ChannelType, TwitchLive: c2.ChannelType, TwitchAutomod: c2.ChannelType, TwitchEnd: c2.ChannelType, Irc: c2.ChannelType, Misc: c2.ChannelType }
+---@type { None: c2.ChannelType, Direct: c2.ChannelType, Twitch: c2.ChannelType, TwitchWhispers: c2.ChannelType, TwitchWatching: c2.ChannelType, TwitchMentions: c2.ChannelType, TwitchLive: c2.ChannelType, TwitchAutomod: c2.ChannelType, TwitchEnd: c2.ChannelType, Misc: c2.ChannelType }
 c2.ChannelType = {}
 
 -- End src/common/Channel.hpp
 
 -- Begin src/controllers/plugins/api/ChannelRef.hpp
 
----@alias c2.Platform integer
---- This enum describes a platform for the purpose of searching for a channel.
---- Currently only Twitch is supported because identifying IRC channels is tricky.
----@type { Twitch: c2.Platform }
-c2.Platform = {}
 
 ---@class c2.Channel
 c2.Channel = {}
@@ -131,9 +126,8 @@ function c2.Channel:__tostring() end
 --- - /automod
 ---
 ---@param name string Which channel are you looking for?
----@param platform c2.Platform Where to search for the channel?
 ---@return c2.Channel?
-function c2.Channel.by_name(name, platform) end
+function c2.Channel.by_name(name) end
 
 --- Finds a channel by the Twitch user ID of its owner.
 ---

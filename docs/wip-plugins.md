@@ -219,15 +219,6 @@ c2.register_callback(
 )
 ```
 
-#### `Platform` enum
-
-This table describes platforms that can be accessed. Chatterino supports IRC
-however plugins do not yet have explicit access to get IRC channels objects.
-The values behind the names may change, do not count on them. It has the
-following keys:
-
-- `Twitch`
-
 #### `ChannelType` enum
 
 This table describes channel types Chatterino supports. The values behind the
@@ -260,9 +251,9 @@ used on non-Twitch channels. Special channels while marked as
 is an actual Twitch chatroom use `Channel:get_type()` instead of
 `Channel:is_twitch_channel()`.
 
-##### `Channel:by_name(name, platform)`
+##### `Channel:by_name(name)`
 
-Finds a channel given by `name` on `platform` (see [`Platform` enum](#Platform-enum)). Returns the channel or `nil` if not open.
+Finds a channel given by `name`. Returns the channel or `nil` if not open.
 
 Some miscellaneous channels are marked as if they are specifically Twitch channels:
 
@@ -275,7 +266,7 @@ Some miscellaneous channels are marked as if they are specifically Twitch channe
 Example:
 
 ```lua
-local pajladas = c2.Channel.by_name("pajlada", c2.Platform.Twitch)
+local pajladas = c2.Channel.by_name("pajlada")
 ```
 
 ##### `Channel:by_twitch_id(id)`

@@ -168,9 +168,6 @@ void PluginController::openLibrariesFor(Plugin *plugin, const QDir &pluginDir)
     lua::pushEnumTable<lua::api::EventType>(L);
     lua_setfield(L, c2libIdx, "EventType");
 
-    lua::pushEnumTable<lua::api::LPlatform>(L);
-    lua_setfield(L, c2libIdx, "Platform");
-
     lua::pushEnumTable<Channel::Type>(L);
     lua_setfield(L, c2libIdx, "ChannelType");
 
