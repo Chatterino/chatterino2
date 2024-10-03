@@ -117,6 +117,7 @@ void PluginController::openLibrariesFor(Plugin *plugin, const QDir &pluginDir)
 {
     auto *L = plugin->state_;
     lua::StackGuard guard(L);
+    sol::state_view lua(L);
     // Stuff to change, remove or hide behind a permission system:
     static const std::vector<luaL_Reg> loadedlibs = {
         luaL_Reg{LUA_GNAME, luaopen_base},
@@ -174,9 +175,6 @@ void PluginController::openLibrariesFor(Plugin *plugin, const QDir &pluginDir)
     // Initialize metatables for objects
     lua::api::HTTPRequest::createMetatable(L);
     lua_setfield(L, c2libIdx, "HTTPRequest");
-
-    lua::api::HTTPResponse::createMetatable(L);
-    lua_setfield(L, c2libIdx, "HTTPResponse");
 
     lua_setfield(L, gtable, "c2");
 
@@ -287,7 +285,6 @@ void PluginController::openLibrariesFor(Plugin *plugin, const QDir &pluginDir)
     lua_pushnil(L);
     lua_setfield(L, LUA_REGISTRYINDEX, "_IO_output");
 
-    sol::state_view lua(L);
     PluginController::initSol(lua, plugin);
 }
 
@@ -301,6 +298,7 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
                         return plugin->registerCommand(name, std::move(cb));
                     });
     lua::api::ChannelRef::createUserType(c2);
+    lua::api::HTTPResponse::createUserType(c2);
     c2["ChannelType"] = lua::createEnumTable<Channel::Type>(lua);
 }
 

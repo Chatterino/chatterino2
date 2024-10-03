@@ -14,6 +14,9 @@
 #    include <lua.h>
 #    include <QRandomGenerator>
 #    include <QUrl>
+#    include <sol/state_view.hpp>
+#    include <sol/table.hpp>
+#    include <sol/types.hpp>
 
 #    include <memory>
 #    include <utility>
@@ -335,18 +338,16 @@ int HTTPRequest::execute(lua_State *L)
             lua::StackGuard guard(L);
             auto *thread = lua_newthread(L);
 
-            auto priv = shared->pushPrivate(thread);
-            lua_getfield(thread, priv, "success");
-            auto cb = lua_gettop(thread);
-            if (lua_isfunction(thread, cb))
             {
-                lua::push(thread, std::make_shared<HTTPResponse>(res));
-                // one arg, no return, no msgh
-                lua_pcall(thread, 1, 0, 0);
-            }
-            else
-            {
-                lua_pop(thread, 1);  // remove callback
+                sol::state_view lua(thread);
+                auto privid = shared->pushPrivate(thread);
+                sol::table priv(thread, privid);
+                auto cb = priv["success"];
+                if (cb.get_type() == sol::type::function)
+                {
+                    cb(HTTPResponse(res));
+                }
+                priv.pop();
             }
             lua_closethread(thread, nullptr);
             lua_pop(L, 1);  // remove thread from L
@@ -355,18 +356,16 @@ int HTTPRequest::execute(lua_State *L)
             lua::StackGuard guard(L);
             auto *thread = lua_newthread(L);
 
-            auto priv = shared->pushPrivate(thread);
-            lua_getfield(thread, priv, "error");
-            auto cb = lua_gettop(thread);
-            if (lua_isfunction(thread, cb))
             {
-                lua::push(thread, std::make_shared<HTTPResponse>(res));
-                // one arg, no return, no msgh
-                lua_pcall(thread, 1, 0, 0);
-            }
-            else
-            {
-                lua_pop(thread, 1);  // remove callback
+                sol::state_view lua(thread);
+                auto privid = shared->pushPrivate(thread);
+                sol::table priv(thread, privid);
+                auto cb = priv["error"];
+                if (cb.get_type() == sol::type::function)
+                {
+                    cb(HTTPResponse(res));
+                }
+                priv.pop();
             }
             lua_closethread(thread, nullptr);
             lua_pop(L, 1);  // remove thread from L
@@ -375,22 +374,20 @@ int HTTPRequest::execute(lua_State *L)
             lua::StackGuard guard(L);
             auto *thread = lua_newthread(L);
 
-            auto priv = shared->pushPrivate(thread);
-            lua_getfield(thread, priv, "finally");
-            auto cb = lua_gettop(thread);
-            if (lua_isfunction(thread, cb))
             {
-                // no args, no return, no msgh
-                lua_pcall(thread, 0, 0, 0);
+                sol::state_view lua(thread);
+                auto privid = shared->pushPrivate(thread);
+                sol::table priv(thread, privid);
+                auto cb = priv["finally"];
+                if (cb.get_type() == sol::type::function)
+                {
+                    cb();
+                }
+                priv.pop();
+                // remove our private data
+
+                lua.registry()[shared->privateKey.toStdString()] = sol::nil;
             }
-            else
-            {
-                lua_pop(thread, 1);  // remove callback
-            }
-            // remove our private data
-            lua_pushnil(thread);
-            lua_setfield(thread, LUA_REGISTRYINDEX,
-                         shared->privateKey.toStdString().c_str());
             lua_closethread(thread, nullptr);
             lua_pop(L, 1);  // remove thread from L
 
