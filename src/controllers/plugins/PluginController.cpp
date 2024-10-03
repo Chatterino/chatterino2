@@ -168,16 +168,10 @@ void PluginController::openLibrariesFor(Plugin *plugin, const QDir &pluginDir)
     lua::pushEnumTable<lua::api::EventType>(L);
     lua_setfield(L, c2libIdx, "EventType");
 
-    lua::pushEnumTable<Channel::Type>(L);
-    lua_setfield(L, c2libIdx, "ChannelType");
-
     lua::pushEnumTable<NetworkRequestType>(L);
     lua_setfield(L, c2libIdx, "HTTPMethod");
 
     // Initialize metatables for objects
-    lua::api::ChannelRef::createMetatable(L);
-    lua_setfield(L, c2libIdx, "Channel");
-
     lua::api::HTTPRequest::createMetatable(L);
     lua_setfield(L, c2libIdx, "HTTPRequest");
 
@@ -306,6 +300,8 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
                     [plugin](const QString &name, sol::protected_function cb) {
                         return plugin->registerCommand(name, std::move(cb));
                     });
+    lua::api::ChannelRef::createUserType(c2);
+    c2["ChannelType"] = lua::createEnumTable<Channel::Type>(lua);
 }
 
 void PluginController::load(const QFileInfo &index, const QDir &pluginDir,

@@ -37,6 +37,22 @@ c2.ChannelType = {}
 
 -- Begin src/controllers/plugins/api/ChannelRef.hpp
 
+-- Begin src/providers/twitch/TwitchChannel.hpp
+
+---@class StreamStatus
+---@field live boolean
+---@field viewer_count number
+---@field title string Stream title or last stream title
+---@field game_name string
+---@field game_id string
+---@field uptime number Seconds since the stream started.
+
+---@class RoomModes
+---@field subscriber_only boolean
+---@field unique_chat boolean You might know this as r9kbeta or robot9000.
+---@field emotes_only boolean Whether or not text is allowed in messages. Note that "emotes" here only means Twitch emotes, not Unicode emoji, nor 3rd party text-based emotes
+
+-- End src/providers/twitch/TwitchChannel.hpp
 
 ---@class c2.Channel
 c2.Channel = {}
@@ -67,7 +83,7 @@ function c2.Channel:get_display_name() end
 --- Note that this does not execute client-commands.
 ---
 ---@param message string
----@param execute_commands boolean Should commands be run on the text?
+---@param execute_commands? boolean Should commands be run on the text?
 function c2.Channel:send_message(message, execute_commands) end
 
 --- Adds a system message client-side
@@ -134,21 +150,6 @@ function c2.Channel.by_name(name) end
 ---@param id string ID of the owner of the channel.
 ---@return c2.Channel?
 function c2.Channel.by_twitch_id(id) end
-
----@class RoomModes
----@field unique_chat boolean You might know this as r9kbeta or robot9000.
----@field subscriber_only boolean
----@field emotes_only boolean Whether or not text is allowed in messages. Note that "emotes" here only means Twitch emotes, not Unicode emoji, nor 3rd party text-based emotes
----@field follower_only number? Time in minutes you need to follow to chat or nil.
----@field slow_mode number? Time in seconds you need to wait before sending messages or nil.
-
----@class StreamStatus
----@field live boolean
----@field viewer_count number
----@field uptime number Seconds since the stream started.
----@field title string Stream title or last stream title
----@field game_name string
----@field game_id string
 
 -- End src/controllers/plugins/api/ChannelRef.hpp
 
