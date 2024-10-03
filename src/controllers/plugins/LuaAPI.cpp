@@ -284,7 +284,7 @@ int searcherAbsolute(lua_State *L)
 int searcherRelative(lua_State *L)
 {
     lua_Debug dbg;
-    lua_getstack(L, 1, &dbg);
+    lua_getstack(L, 2, &dbg);
     lua_getinfo(L, "S", &dbg);
     auto currentFile = QString::fromUtf8(dbg.source, dbg.srclen);
     if (currentFile.startsWith("@"))
