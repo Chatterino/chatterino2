@@ -60,7 +60,6 @@ StackIdx pushEmptyArray(lua_State *L, int countArray);
  */
 StackIdx pushEmptyTable(lua_State *L, int countProperties);
 
-StackIdx push(lua_State *L, const CommandContext &ctx);
 StackIdx push(lua_State *L, const QString &str);
 StackIdx push(lua_State *L, const std::string &str);
 StackIdx push(lua_State *L, const bool &b);

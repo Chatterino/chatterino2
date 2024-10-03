@@ -2,6 +2,7 @@
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "Application.hpp"
+#    include "common/Common.hpp"
 #    include "common/network/NetworkCommon.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
@@ -11,6 +12,7 @@
 #    include <QString>
 #    include <QUrl>
 #    include <semver/semver.hpp>
+#    include <sol/forward.hpp>
 
 #    include <unordered_map>
 #    include <unordered_set>
@@ -75,13 +77,18 @@ public:
 
     ~Plugin();
 
+    Plugin(const Plugin &) = delete;
+    Plugin(Plugin &&) = delete;
+    Plugin &operator=(const Plugin &) = delete;
+    Plugin &operator=(Plugin &&) = delete;
+
     /**
      * @brief Perform all necessary tasks to bind a command name to this plugin
      * @param name name of the command to create
-     * @param functionName name of the function that should be called when the command is executed
+     * @param function the function that should be called when the command is executed
      * @return true if addition succeeded, false otherwise (for example because the command name is already taken)
      */
-    bool registerCommand(const QString &name, const QString &functionName);
+    bool registerCommand(const QString &name, sol::protected_function function);
 
     /**
      * @brief Get names of all commands belonging to this plugin
@@ -149,8 +156,8 @@ private:
 
     QString error_;
 
-    // maps command name -> function name
-    std::unordered_map<QString, QString> ownedCommands;
+    // maps command name -> function
+    std::unordered_map<QString, sol::protected_function> ownedCommands;
     std::vector<QTimer *> activeTimeouts;
     int lastTimerId = 0;
 

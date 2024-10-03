@@ -114,20 +114,6 @@ StackIdx push(lua_State *L, const std::string &str)
     return lua_gettop(L);
 }
 
-StackIdx push(lua_State *L, const CommandContext &ctx)
-{
-    StackGuard guard(L, 1);
-    auto outIdx = pushEmptyTable(L, 2);
-
-    push(L, ctx.words);
-    lua_setfield(L, outIdx, "words");
-
-    push(L, ctx.channel);
-    lua_setfield(L, outIdx, "channel");
-
-    return outIdx;
-}
-
 StackIdx push(lua_State *L, const bool &b)
 {
     lua_pushboolean(L, int(b));

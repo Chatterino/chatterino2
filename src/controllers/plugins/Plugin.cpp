@@ -13,6 +13,7 @@
 #    include <QJsonObject>
 #    include <QLoggingCategory>
 #    include <QUrl>
+#    include <sol/sol.hpp>
 
 #    include <algorithm>
 #    include <unordered_map>
@@ -188,7 +189,8 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     }
 }
 
-bool Plugin::registerCommand(const QString &name, const QString &functionName)
+bool Plugin::registerCommand(const QString &name,
+                             sol::protected_function function)
 {
     if (this->ownedCommands.find(name) != this->ownedCommands.end())
     {
@@ -200,7 +202,7 @@ bool Plugin::registerCommand(const QString &name, const QString &functionName)
     {
         return false;
     }
-    this->ownedCommands.insert({name, functionName});
+    this->ownedCommands.emplace(name, std::move(function));
     return true;
 }
 
@@ -227,6 +229,8 @@ Plugin::~Plugin()
     this->activeTimeouts.clear();
     if (this->state_ != nullptr)
     {
+        // clearing this after the state is gone is not safe to do
+        this->ownedCommands.clear();
         lua_close(this->state_);
     }
 }

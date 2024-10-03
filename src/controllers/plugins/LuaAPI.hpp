@@ -3,8 +3,6 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 
 #    include <lua.h>
-#    include "controllers/plugins/LuaUtilities.hpp"
-
 #    include <QString>
 
 #    include <cassert>
@@ -93,7 +91,6 @@ struct CompletionEvent {
  * @lua@return boolean ok  Returns `true` if everything went ok, `false` if a command with this name exists.
  * @exposed c2.register_command
  */
-int c2_register_command(lua_State *L);
 
 /**
  * Registers a callback to be invoked when completions for a term are requested.

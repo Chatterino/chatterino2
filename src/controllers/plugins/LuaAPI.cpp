@@ -61,40 +61,6 @@ QDebug qdebugStreamForLogLevel(lua::api::LogLevel lvl)
 // luaL_error is a c-style vararg function, this makes clang-tidy not dislike it so much
 namespace chatterino::lua::api {
 
-int c2_register_command(lua_State *L)
-{
-    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
-    if (pl == nullptr)
-    {
-        luaL_error(L, "internal error: no plugin");
-        return 0;
-    }
-
-    QString name;
-    if (!lua::peek(L, &name, 1))
-    {
-        luaL_error(L, "cannot get command name (1st arg of register_command, "
-                      "expected a string)");
-        return 0;
-    }
-    if (lua_isnoneornil(L, 2))
-    {
-        luaL_error(L, "missing argument for register_command: function "
-                      "\"pointer\"");
-        return 0;
-    }
-
-    auto callbackSavedName = QString("c2commandcb-%1").arg(name);
-    lua_setfield(L, LUA_REGISTRYINDEX, callbackSavedName.toStdString().c_str());
-    auto ok = pl->registerCommand(name, callbackSavedName);
-
-    // delete both name and callback
-    lua_pop(L, 2);
-
-    lua::push(L, ok);
-    return 1;
-}
-
 int c2_register_callback(lua_State *L)
 {
     auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
