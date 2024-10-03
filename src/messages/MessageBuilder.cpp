@@ -2689,6 +2689,8 @@ void MessageBuilder::parseRoomID()
                     getApp()->getTwitch()->getChannelOrEmptyByID(sourceRoom);
                 if (sourceChan)
                 {
+                    this->sourceChannel =
+                        dynamic_cast<TwitchChannel *>(sourceChan.get());
                     // avoid duplicate pings
                     this->message().flags.set(
                         MessageFlag::DoNotTriggerNotification);
@@ -2931,17 +2933,17 @@ Outcome MessageBuilder::tryAppendEmote(const EmoteName &name)
     //  - FrankerFaceZ Global
     //  - BetterTTV Global
     //  - 7TV Global
-    if (this->twitchChannel && (emote = this->twitchChannel->ffzEmote(name)))
+    auto *chan = this->sourceChannel != nullptr ? this->sourceChannel
+                                                : this->twitchChannel;
+    if (chan != nullptr && (emote = chan->ffzEmote(name)))
     {
         flags = MessageElementFlag::FfzEmote;
     }
-    else if (this->twitchChannel &&
-             (emote = this->twitchChannel->bttvEmote(name)))
+    else if (chan != nullptr && (emote = chan->bttvEmote(name)))
     {
         flags = MessageElementFlag::BttvEmote;
     }
-    else if (this->twitchChannel != nullptr &&
-             (emote = this->twitchChannel->seventvEmote(name)))
+    else if (chan != nullptr && (emote = chan->seventvEmote(name)))
     {
         flags = MessageElementFlag::SevenTVEmote;
         zeroWidth = emote.value()->zeroWidth;
@@ -3146,7 +3148,9 @@ Outcome MessageBuilder::tryParseCheermote(const QString &string)
         return Failure;
     }
 
-    auto cheerOpt = this->twitchChannel->cheerEmote(string);
+    auto *chan = this->sourceChannel != nullptr ? this->sourceChannel
+                                                : this->twitchChannel;
+    auto cheerOpt = chan->cheerEmote(string);
 
     if (!cheerOpt)
     {

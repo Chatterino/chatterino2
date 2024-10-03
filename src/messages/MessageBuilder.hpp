@@ -165,6 +165,7 @@ public:
     QString userName;
 
     TwitchChannel *twitchChannel = nullptr;
+    TwitchChannel *sourceChannel = nullptr;
 
     Message *operator->();
     Message &message();
