@@ -308,6 +308,7 @@ bool pop(lua_State *L, T *out, StackIdx idx = -1)
  * Values in this table may change.
  *
  * @returns stack index of newly created table
+ * @deprecated
  */
 template <typename T>
 StackIdx pushEnumTable(lua_State *L)
@@ -322,6 +323,29 @@ StackIdx pushEnumTable(lua_State *L)
 
         lua::push(L, str);
         lua_setfield(L, out, str.c_str());
+    }
+    return out;
+}
+
+/**
+ * @brief Creates a table mapping enum names to unique values.
+ *
+ * Values in this table may change.
+ *
+ * @returns Sol reference to the table
+ */
+template <typename T>
+    requires std::is_enum_v<T>
+sol::table createEnumTable(sol::state_view &lua)
+{
+    constexpr auto values = magic_enum::enum_values<T>();
+    auto out = lua.create_table(0, values.size());
+    for (const T v : values)
+    {
+        std::string_view name = magic_enum::enum_name<T>(v);
+        std::string str(name);
+
+        out.raw_set(str, v);
     }
     return out;
 }
