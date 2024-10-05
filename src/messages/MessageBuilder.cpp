@@ -2688,7 +2688,7 @@ void MessageBuilder::parseRoomID()
 
                 auto sourceChan =
                     getApp()->getTwitch()->getChannelOrEmptyByID(sourceRoom);
-                if (sourceChan)
+                if (sourceChan && !sourceChan->isEmpty())
                 {
                     this->sourceChannel =
                         dynamic_cast<TwitchChannel *>(sourceChan.get());
