@@ -2707,6 +2707,10 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
 
     if (hoverLayoutElement == nullptr)
     {
+        // XXX: this is duplicate work
+        auto idx = layout->getSelectionIndex(relativePos);
+        SelectionItem item(messageIndex, idx);
+        this->doubleClickSelection_ = {item, item};
         return;
     }
 
