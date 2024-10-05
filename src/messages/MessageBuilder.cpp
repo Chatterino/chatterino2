@@ -1857,6 +1857,7 @@ std::pair<MessagePtr, MessagePtr> MessageBuilder::makeAutomodMessage(
 
     //
     // Builder for AutoMod message with explanation
+    builder.message().id = "automod_" + action.msgID;
     builder.message().loginName = "automod";
     builder.message().channelName = channelName;
     builder.message().flags.set(MessageFlag::PubSub);

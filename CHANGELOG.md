@@ -31,7 +31,7 @@
 - Minor: Removed experimental IRC support. (#5547)
 - Minor: Moderators can now see which mods start and cancel raids. (#5563)
 - Minor: The emote popup now reloads when Twitch emotes are reloaded. (#5580)
-- Bugfix: Fixed tab move animation occasionally failing to start after closing a tab. (#5426)
+- Bugfix: Fixed tab move animation occasionally failing to start after closing a tab. (#5426, #5612)
 - Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
 - Bugfix: Fixed restricted users usernames not being clickable. (#5405)
 - Bugfix: Fixed a crash that could occur when logging was enabled in IRC servers that were removed. (#5419)
@@ -52,6 +52,7 @@
 - Bugfix: Fixed log files being locked longer than needed. (#5592)
 - Bugfix: Fixed global badges not showing in anonymous mode. (#5599)
 - Bugfix: Fixed grammar in the user highlight page. (#5602)
+- Bugfix: Fixed incorrect message being disabled in some cases upon approving or denying an automod caught message. (#5611)
 - Bugfix: Fixed double-click selection not working when clicking outside a message. (#5617)
 - Dev: Update Windows build from Qt 6.5.0 to Qt 6.7.1. (#5420)
 - Dev: Update vcpkg build Qt from 6.5.0 to 6.7.0, boost from 1.83.0 to 1.85.0, openssl from 3.1.3 to 3.3.0. (#5422)
@@ -99,6 +100,7 @@
 - Dev: Added more tests for message building. (#5598)
 - Dev: Twitch messages are now sent using Twitch's Helix API instead of IRC by default. (#5607)
 - Dev: `GIFTimer` is no longer initialized in tests. (#5608)
+- Dev: Emojis now use flags instead of a set of strings for capabilities. (#5616)
 
 ## 2.5.1
 
