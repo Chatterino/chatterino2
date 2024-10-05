@@ -43,6 +43,7 @@ const QMap<QString, QString> VALID_IDENTIFIERS_MAP{
     {"flags.automod", "automod message?"},
     {"flags.restricted", "restricted message?"},
     {"flags.monitored", "monitored message?"},
+    {"flags.shared", "shared message?"},
     {"message.content", "message text"},
     {"message.length", "message length"},
     {"reward.title", "point reward title"},
