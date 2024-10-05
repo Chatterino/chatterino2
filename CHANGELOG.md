@@ -91,7 +91,7 @@
 - Dev: Fixed benchmarks segfaulting on run. (#5559)
 - Dev: Refactored `MessageBuilder` to be a single class. (#5548)
 - Dev: Recent changes are now shown in the nightly release description. (#5553, #5554, #5593)
-- Dev: The timer for `StreamerMode` is now destroyed on the correct thread. (#5571)
+- Dev: The timer for `StreamerMode` is now destroyed on the correct thread. (#5571, #5624)
 - Dev: Cleanup some parts of the `magic_enum` adaptation for Qt. (#5587)
 - Dev: Refactored `static`s in headers to only be present once in the final app. (#5588)
 - Dev: Run benchmarks in CI. (#5610)

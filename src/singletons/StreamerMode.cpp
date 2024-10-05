@@ -281,24 +281,27 @@ void StreamerModePrivate::settingChanged(StreamerModeSetting value)
     }
     this->currentSetting_ = value;
 
+    // in all cases: timer_ must be invoked from the correct thread
     switch (this->currentSetting_)
     {
         case StreamerModeSetting::Disabled: {
             this->setEnabled(false);
-            this->timer_->stop();
+            QMetaObject::invokeMethod(this->timer_, &QTimer::stop);
         }
         break;
         case StreamerModeSetting::Enabled: {
             this->setEnabled(true);
-            this->timer_->stop();
+            QMetaObject::invokeMethod(this->timer_, &QTimer::stop);
         }
         break;
         case StreamerModeSetting::DetectStreamingSoftware: {
-            if (!this->timer_->isActive())
-            {
-                this->timer_->start(20s);
-                this->check();
-            }
+            QMetaObject::invokeMethod(this->timer_, [this] {
+                if (!this->timer_->isActive())
+                {
+                    this->timer_->start(20s);
+                    this->check();
+                }
+            });
         }
         break;
         default:
