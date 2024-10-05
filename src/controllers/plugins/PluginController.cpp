@@ -349,14 +349,8 @@ bool PluginController::reload(const QString &id)
     {
         getApp()->getCommands()->unregisterPluginCommand(cmd);
     }
-    it->second->ownedCommands.clear();
-
-    if (it->second->state_ != nullptr)
-    {
-        lua_close(it->second->state_);
-        it->second->state_ = nullptr;
-    }
     QDir loadDir = it->second->loadDirectory_;
+    // Since Plugin owns the state, it will clean up everything related to it
     this->plugins_.erase(id);
     this->tryLoadFromDir(loadDir);
     return true;
