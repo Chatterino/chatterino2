@@ -4,6 +4,7 @@
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "singletons/Settings.hpp"
+#include "util/QMagicEnum.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 #include <boost/variant.hpp>
@@ -62,19 +63,19 @@ void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
 
     if (capabilities.apple)
     {
-        emojiData->capabilities.insert("Apple");
+        emojiData->capabilities.set(EmojiData::Capability::Apple);
     }
     if (capabilities.google)
     {
-        emojiData->capabilities.insert("Google");
+        emojiData->capabilities.set(EmojiData::Capability::Google);
     }
     if (capabilities.twitter)
     {
-        emojiData->capabilities.insert("Twitter");
+        emojiData->capabilities.set(EmojiData::Capability::Twitter);
     }
     if (capabilities.facebook)
     {
-        emojiData->capabilities.insert("Facebook");
+        emojiData->capabilities.set(EmojiData::Capability::Facebook);
     }
 
     QStringList unicodeCharacters = emojiData->unifiedCode.toLower().split('-');
@@ -244,6 +245,10 @@ void Emojis::sortEmojis()
 void Emojis::loadEmojiSet()
 {
     getSettings()->emojiSet.connect([this](const auto &emojiSet) {
+        EmojiData::Capability setCapability =
+            qmagicenum::enumCast<EmojiData::Capability>(emojiSet).value_or(
+                EmojiData::Capability::Google);
+
         for (const auto &emoji : this->emojis)
         {
             QString emojiSetToUse = emojiSet;
@@ -271,9 +276,9 @@ void Emojis::loadEmojiSet()
             // clang-format on
 
             // As of emoji-data v15.1.1, google is the only source missing no images.
-            if (!emoji->capabilities.contains(emojiSetToUse))
+            if (!emoji->capabilities.has(setCapability))
             {
-                emojiSetToUse = "Google";
+                emojiSetToUse = QStringLiteral("Google");
             }
 
             QString code = emoji->unifiedCode.toLower();

@@ -99,6 +99,7 @@
 - Dev: The JSON output when copying a message (<kbd>SHIFT</kbd> + right-click) is now more extensive. (#5600)
 - Dev: Twitch messages are now sent using Twitch's Helix API instead of IRC by default. (#5607)
 - Dev: `GIFTimer` is no longer initialized in tests. (#5608)
+- Dev: Emojis now use flags instead of a set of strings for capabilities. (#5616)
 
 ## 2.5.1
 
