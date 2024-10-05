@@ -6,7 +6,7 @@
 - Major: Release plugins alpha. (#5288)
 - Major: Improve high-DPI support on Windows. (#4868, #5391)
 - Minor: Removed the Ctrl+Shift+L hotkey for toggling the "live only" tab visibility state. (#5530)
-- Minor: Add support for Shared Chat messages. Shared chat messages can be filtered with the `flags.shared` filter variable, or with search using `is:shared`. Some messages like subscriptions are filtered on purpose to avoid confusion for the broadcaster. If you have both channels participating in Shared Chat open, only one of the message triggering your highlight will trigger. (#5606)
+- Minor: Add support for Shared Chat messages. Shared chat messages can be filtered with the `flags.shared` filter variable, or with search using `is:shared`. Some messages like subscriptions are filtered on purpose to avoid confusion for the broadcaster. If you have both channels participating in Shared Chat open, only one of the message triggering your highlight will trigger. (#5606, #5625)
 - Minor: Moved tab visibility control to a submenu, without any toggle actions. (#5530)
 - Minor: Add option to customise Moderation buttons with images. (#5369)
 - Minor: Colored usernames now update on the fly when changing the "Color @usernames" setting. (#5300)
