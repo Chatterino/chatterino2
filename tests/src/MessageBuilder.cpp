@@ -10,6 +10,8 @@
 #include "messages/Message.hpp"
 #include "mocks/BaseApplication.hpp"
 #include "mocks/ChatterinoBadges.hpp"
+#include "mocks/DisabledStreamerMode.hpp"
+#include "mocks/Emotes.hpp"
 #include "mocks/LinkResolver.hpp"
 #include "mocks/Logging.hpp"
 #include "mocks/TwitchIrcServer.hpp"
@@ -213,7 +215,7 @@ public:
 
     mock::EmptyLogging logging;
     AccountController accounts;
-    Emotes emotes;
+    mock::Emotes emotes;
     mock::UserDataController userData;
     mock::MockTwitchIrcServer twitch;
     mock::ChatterinoBadges chatterinoBadges;

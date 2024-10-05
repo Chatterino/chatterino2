@@ -456,6 +456,27 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
     auto parameters = message->parameters();
 
     QString msgType = tags.value("msg-id").toString();
+    bool mirrored = msgType == "sharedchatnotice";
+    if (mirrored)
+    {
+        msgType = tags.value("source-msg-id").toString();
+    }
+    else
+    {
+        auto rIt = tags.find("room-id");
+        auto sIt = tags.find("source-room-id");
+        if (rIt != tags.end() && sIt != tags.end())
+        {
+            mirrored = rIt.value().toString() != sIt.value().toString();
+        }
+    }
+
+    if (mirrored && msgType != "announcement")
+    {
+        // avoid confusing broadcasters with user payments to other channels
+        return {};
+    }
+
     QString content;
     if (parameters.size() >= 2)
     {
@@ -483,6 +504,10 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
             MessageBuilder builder(channel, message, args, content, false);
             builder->flags.set(MessageFlag::Subscription);
             builder->flags.unset(MessageFlag::Highlighted);
+            if (mirrored)
+            {
+                builder->flags.set(MessageFlag::SharedMessage);
+            }
             builtMessages.emplace_back(builder.build());
         }
     }
@@ -546,6 +571,10 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
                                 calculateMessageTime(message).time());
 
         b->flags.set(MessageFlag::Subscription);
+        if (mirrored)
+        {
+            b->flags.set(MessageFlag::SharedMessage);
+        }
         auto newMessage = b.release();
         builtMessages.emplace_back(newMessage);
     }
@@ -959,6 +988,27 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
 
     auto target = parameters[0];
     QString msgType = tags.value("msg-id").toString();
+    bool mirrored = msgType == "sharedchatnotice";
+    if (mirrored)
+    {
+        msgType = tags.value("source-msg-id").toString();
+    }
+    else
+    {
+        auto rIt = tags.find("room-id");
+        auto sIt = tags.find("source-room-id");
+        if (rIt != tags.end() && sIt != tags.end())
+        {
+            mirrored = rIt.value().toString() != sIt.value().toString();
+        }
+    }
+
+    if (mirrored && msgType != "announcement")
+    {
+        // avoid confusing broadcasters with user payments to other channels
+        return;
+    }
+
     QString content;
     if (parameters.size() >= 2)
     {
@@ -1044,6 +1094,10 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
                                 calculateMessageTime(message).time());
 
         b->flags.set(MessageFlag::Subscription);
+        if (mirrored)
+        {
+            b->flags.set(MessageFlag::SharedMessage);
+        }
         auto newMessage = b.release();
 
         QString channelName;

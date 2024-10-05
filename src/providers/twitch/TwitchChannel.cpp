@@ -1895,7 +1895,7 @@ void TwitchChannel::setFfzCustomVipBadge(std::optional<EmotePtr> badge)
     this->ffzCustomVipBadge_.set(std::move(badge));
 }
 
-std::optional<CheerEmote> TwitchChannel::cheerEmote(const QString &string)
+std::optional<CheerEmote> TwitchChannel::cheerEmote(const QString &string) const
 {
     auto sets = this->cheerEmoteSets_.access();
     for (const auto &set : *sets)

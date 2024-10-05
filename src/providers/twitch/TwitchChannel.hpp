@@ -205,7 +205,7 @@ public:
     void addTwitchBadgeSets(const HelixChannelBadges &channelBadges);
 
     // Cheers
-    std::optional<CheerEmote> cheerEmote(const QString &string);
+    std::optional<CheerEmote> cheerEmote(const QString &string) const;
     void setCheerEmoteSets(const std::vector<HelixCheermoteSet> &cheermoteSets);
 
     // Replies
