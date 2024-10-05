@@ -2914,18 +2914,19 @@ void MessageBuilder::appendUsername()
     }
 }
 
-Outcome MessageBuilder::tryAppendEmote(const EmoteName &name)
+const TwitchChannel *MessageBuilder::getSourceChannel() const
 {
-    auto *app = getApp();
+    if (this->sourceChannel != nullptr)
+    {
+        return this->sourceChannel;
+    }
 
-    const auto *globalBttvEmotes = app->getBttvEmotes();
-    const auto *globalFfzEmotes = app->getFfzEmotes();
-    const auto *globalSeventvEmotes = app->getSeventvEmotes();
+    return this->twitchChannel;
+}
 
-    auto flags = MessageElementFlags();
-    auto emote = std::optional<EmotePtr>{};
-    bool zeroWidth = false;
-
+std::tuple<std::optional<EmotePtr>, MessageElementFlags, bool>
+    MessageBuilder::parseEmote(const EmoteName &name) const
+{
     // Emote order:
     //  - FrankerFaceZ Channel
     //  - BetterTTV Channel
@@ -2933,35 +2934,92 @@ Outcome MessageBuilder::tryAppendEmote(const EmoteName &name)
     //  - FrankerFaceZ Global
     //  - BetterTTV Global
     //  - 7TV Global
-    auto *chan = this->sourceChannel != nullptr ? this->sourceChannel
-                                                : this->twitchChannel;
-    if (chan != nullptr && (emote = chan->ffzEmote(name)))
+
+    const auto *globalFfzEmotes = getApp()->getFfzEmotes();
+    const auto *globalBttvEmotes = getApp()->getBttvEmotes();
+    const auto *globalSeventvEmotes = getApp()->getSeventvEmotes();
+
+    const auto *sourceChannel = this->getSourceChannel();
+
+    std::optional<EmotePtr> emote{};
+
+    if (sourceChannel != nullptr)
     {
-        flags = MessageElementFlag::FfzEmote;
+        // Check for channel emotes
+
+        emote = sourceChannel->ffzEmote(name);
+        if (emote)
+        {
+            return {
+                emote,
+                MessageElementFlag::FfzEmote,
+                false,
+            };
+        }
+
+        emote = sourceChannel->bttvEmote(name);
+        if (emote)
+        {
+            return {
+                emote,
+                MessageElementFlag::BttvEmote,
+                false,
+            };
+        }
+
+        emote = sourceChannel->seventvEmote(name);
+        if (emote)
+        {
+            return {
+                emote,
+                MessageElementFlag::SevenTVEmote,
+                emote.value()->zeroWidth,
+            };
+        }
     }
-    else if (chan != nullptr && (emote = chan->bttvEmote(name)))
+
+    // Check for global emotes
+
+    emote = globalFfzEmotes->emote(name);
+    if (emote)
     {
-        flags = MessageElementFlag::BttvEmote;
+        return {
+            emote,
+            MessageElementFlag::FfzEmote,
+            false,
+        };
     }
-    else if (chan != nullptr && (emote = chan->seventvEmote(name)))
+
+    emote = globalBttvEmotes->emote(name);
+    if (emote)
     {
-        flags = MessageElementFlag::SevenTVEmote;
-        zeroWidth = emote.value()->zeroWidth;
+        return {
+            emote,
+            MessageElementFlag::BttvEmote,
+            zeroWidthEmotes.contains(name.string),
+        };
     }
-    else if ((emote = globalFfzEmotes->emote(name)))
+
+    emote = globalSeventvEmotes->globalEmote(name);
+    if (emote)
     {
-        flags = MessageElementFlag::FfzEmote;
+        return {
+            emote,
+            MessageElementFlag::SevenTVEmote,
+            emote.value()->zeroWidth,
+        };
     }
-    else if ((emote = globalBttvEmotes->emote(name)))
-    {
-        flags = MessageElementFlag::BttvEmote;
-        zeroWidth = zeroWidthEmotes.contains(name.string);
-    }
-    else if ((emote = globalSeventvEmotes->globalEmote(name)))
-    {
-        flags = MessageElementFlag::SevenTVEmote;
-        zeroWidth = emote.value()->zeroWidth;
-    }
+
+    return {
+        {},
+        {},
+        false,
+    };
+}
+
+Outcome MessageBuilder::tryAppendEmote(const EmoteName &name)
+{
+    const auto [emote, flags, zeroWidth] = this->parseEmote(name);
 
     if (emote)
     {
