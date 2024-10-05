@@ -165,7 +165,9 @@ public:
 
     QString userName;
 
+    /// The Twitch Channel the message was received in
     TwitchChannel *twitchChannel = nullptr;
+    /// The Twitch Channel the message was sent in, according to the Shared Chat feature
     TwitchChannel *sourceChannel = nullptr;
 
     Message *operator->();
