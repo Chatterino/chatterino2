@@ -197,7 +197,7 @@ public:
     std::vector<FfzBadges::Badge> ffzChannelBadges(const QString &userID) const;
 
     // Cheers
-    std::optional<CheerEmote> cheerEmote(const QString &string);
+    std::optional<CheerEmote> cheerEmote(const QString &string) const;
 
     // Replies
     /**
