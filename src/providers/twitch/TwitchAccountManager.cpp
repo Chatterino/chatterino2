@@ -146,7 +146,8 @@ void TwitchAccountManager::reloadUsers()
 
 void TwitchAccountManager::load()
 {
-    if (getApp()->getArgs().initialLogin.has_value()) {
+    if (getApp()->getArgs().initialLogin.has_value())
+    {
         this->currentUsername = getApp()->getArgs().initialLogin.value();
     }
 
