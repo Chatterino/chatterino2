@@ -3206,8 +3206,7 @@ Outcome MessageBuilder::tryParseCheermote(const QString &string)
         return Failure;
     }
 
-    auto *chan = this->sourceChannel != nullptr ? this->sourceChannel
-                                                : this->twitchChannel;
+    const auto *chan = this->getSourceChannel();
     auto cheerOpt = chan->cheerEmote(string);
 
     if (!cheerOpt)
