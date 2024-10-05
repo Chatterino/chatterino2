@@ -77,6 +77,25 @@
                 },
                 {
                     "emote": {
+                        "images": {
+                            "1x": "https://chatterino.com/tb-1",
+                            "2x": "https://chatterino.com/tb-2",
+                            "3x": "https://chatterino.com/tb-3"
+                        },
+                        "name": "",
+                        "tooltip": "Subscriber"
+                    },
+                    "flags": "BadgeSubscription",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Subscriber (Tier 3, 80 months)",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "emote": {
                         "homePage": "https://blog.twitch.tv/2017/04/24/the-verified-badge-is-here-13381bc05735",
                         "images": {
                             "1x": "https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/1",

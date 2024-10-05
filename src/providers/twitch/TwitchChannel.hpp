@@ -25,6 +25,8 @@
 #include <optional>
 #include <unordered_map>
 
+class TestMessageBuilderP;
+
 namespace chatterino {
 
 enum class HighlightState;
@@ -462,6 +464,7 @@ private:
     friend class MessageBuilder;
     friend class IrcMessageHandler;
     friend class Commands_E2E_Test;
+    friend class ::TestMessageBuilderP;
 };
 
 }  // namespace chatterino

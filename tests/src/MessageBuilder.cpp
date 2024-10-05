@@ -112,10 +112,14 @@ constexpr std::array IRC_SNAPSHOTS{
     "reply-root",
     "reply-single",
     "reward-bits",
+    "reward-blocked-user",
     "reward-empty",
     "reward-known",
     "reward-unknown",
     "rm-deleted",
+    "shared-chat-known",
+    "shared-chat-same-channel",
+    "shared-chat-unknown",
     "simple",
     "username-localized",
     "username-localized2",
@@ -375,7 +379,7 @@ const QByteArray LOCAL_BADGE_JSON{R"({
                 {
                 "click_url": null,
                 "description": "Subscriber",
-                "id": "80",
+                "id": "3072",
                 "image_url_1x": "https://chatterino.com/tb-1",
                 "image_url_2x": "https://chatterino.com/tb-2",
                 "image_url_4x": "https://chatterino.com/tb-3",
@@ -1086,13 +1090,20 @@ public:
 
         // Twitch
         this->mockApplication->getTwitchBadges()->loadLocalBadges();
+
+        this->twitchdevChannel = std::make_shared<TwitchChannel>("twitchdev");
+        this->twitchdevChannel->setRoomId("141981764");
+        this->mockApplication->twitch.mockChannels.emplace(
+            "twitchdev", this->twitchdevChannel);
     }
 
     void TearDown() override
     {
+        this->twitchdevChannel.reset();
         this->mockApplication.reset();
     }
 
+    std::shared_ptr<TwitchChannel> twitchdevChannel;
     std::unique_ptr<MockApplication> mockApplication;
 };
 
