@@ -391,6 +391,9 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         "Popup", this->split_, &Split::popup,
         h->getDisplaySequence(HotkeyCategory::Window, "popup", {{"split"}}));
     menu->addAction(
+        "Popup overlay", this->split_, &Split::showOverlayWindow,
+        h->getDisplaySequence(HotkeyCategory::Split, "popupOverlay"));
+    menu->addAction(
         "Search", this->split_,
         [this] {
             this->split_->showSearch(true);

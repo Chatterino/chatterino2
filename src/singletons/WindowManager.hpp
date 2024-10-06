@@ -128,6 +128,9 @@ public:
     // again
     void queueSave();
 
+    /// Toggles the inertia in all open overlay windows
+    void toggleAllOverlayInertia();
+
     /// Signals
     pajlada::Signals::NoArgSignal gifRepaintRequested;
 

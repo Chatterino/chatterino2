@@ -969,6 +969,40 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Use custom FrankerFaceZ VIP badges",
                        s.useCustomFfzVipBadges);
 
+    layout.addSubtitle("Overlay");
+    layout.addIntInput(
+        "Background opacity (0-255)", s.overlayBackgroundOpacity, 0, 255, 1,
+        "Controls the opacity of the (possibly alternating) background behind "
+        "messages. The color is set through the current theme. 255 corresponds "
+        "to a fully opaque background.");
+    layout.addCheckbox("Enable Shadow", s.enableOverlayShadow, false,
+                       "Enables a drop shadow on the overlay. This will use "
+                       "more processing power.");
+    layout.addIntInput("Shadow opacity (0-255)", s.overlayShadowOpacity, 0, 255,
+                       1,
+                       "Controls the opacity of the added drop shadow. 255 "
+                       "corresponds to a fully opaque shadow.");
+    layout.addColorButton("Shadow color",
+                          QColor(getSettings()->overlayShadowColor.getValue()),
+                          getSettings()->overlayShadowColor);
+    layout
+        .addIntInput("Shadow radius", s.overlayShadowRadius, 0, 40, 1,
+                     "Controls how far the shadow is spread (the blur "
+                     "radius) in device-independent pixels.")
+        ->setSuffix("dp");
+    layout
+        .addIntInput("Shadow offset x", s.overlayShadowOffsetX, -20, 20, 1,
+                     "Controls how far the shadow is offset on the x axis in "
+                     "device-independent pixels. A negative value offsets to "
+                     "the left and a positive to the right.")
+        ->setSuffix("dp");
+    layout
+        .addIntInput("Shadow offset y", s.overlayShadowOffsetY, -20, 20, 1,
+                     "Controls how far the shadow is offset on the y axis in "
+                     "device-independent pixels. A negative value offsets to "
+                     "the top and a positive to the bottom.")
+        ->setSuffix("dp");
+
     layout.addSubtitle("Miscellaneous");
 
     if (supportsIncognitoLinks())

@@ -2,6 +2,7 @@
 
 #include "common/Literals.hpp"
 #include "messages/Emote.hpp"
+#include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
@@ -107,16 +108,25 @@ TEST_P(MessageLayoutContainerTest, RtlReordering)
 {
     auto [inputText, expected, expectedDirection] = GetParam();
     MessageLayoutContainer container;
-    container.beginLayout(10000, 1.0F, 1.0F, {MessageFlag::Collapsed});
+    MessageLayoutContext ctx{
+        .messageColors = {},
+        .flags =
+            {
+                MessageElementFlag::Text,
+                MessageElementFlag::Username,
+                MessageElementFlag::TwitchEmote,
+            },
+        .width = 10000,
+        .scale = 1.0F,
+        .imageScale = 1.0F,
+    };
+    container.beginLayout(ctx.width, ctx.scale, ctx.imageScale,
+                          {MessageFlag::Collapsed});
 
     auto elements = makeElements(inputText);
     for (const auto &element : elements)
     {
-        element->addToContainer(container, {
-                                               MessageElementFlag::Text,
-                                               MessageElementFlag::Username,
-                                               MessageElementFlag::TwitchEmote,
-                                           });
+        element->addToContainer(container, ctx);
     }
     container.endLayout();
     ASSERT_EQ(container.line_, 1) << "unexpected linebreak";
