@@ -22,6 +22,7 @@
 #    include <lua.h>
 #    include <lualib.h>
 #    include <QJsonDocument>
+#    include <sol/forward.hpp>
 #    include <sol/sol.hpp>
 
 #    include <memory>
@@ -150,7 +151,6 @@ void PluginController::openLibrariesFor(Plugin *plugin, const QDir &pluginDir)
 
     // NOLINTNEXTLINE(*-avoid-c-arrays)
     static const luaL_Reg c2Lib[] = {
-        {"register_callback", lua::api::c2_register_callback},
         {"log", lua::api::c2_log},
         {"later", lua::api::c2_later},
         {nullptr, nullptr},
@@ -165,9 +165,6 @@ void PluginController::openLibrariesFor(Plugin *plugin, const QDir &pluginDir)
 
     lua::pushEnumTable<lua::api::LogLevel>(L);
     lua_setfield(L, c2libIdx, "LogLevel");
-
-    lua::pushEnumTable<lua::api::EventType>(L);
-    lua_setfield(L, c2libIdx, "EventType");
 
     lua_setfield(L, gtable, "c2");
 
@@ -290,11 +287,17 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
                     [plugin](const QString &name, sol::protected_function cb) {
                         return plugin->registerCommand(name, std::move(cb));
                     });
+    c2.set_function("register_callback", [plugin](lua::api::EventType ev,
+                                                  sol::protected_function cb) {
+        lua::api::c2_register_callback(plugin, ev, std::move(cb));
+    });
+
     lua::api::ChannelRef::createUserType(c2);
     lua::api::HTTPResponse::createUserType(c2);
     lua::api::HTTPRequest::createUserType(plugin->state_, c2);
     c2["ChannelType"] = lua::createEnumTable<Channel::Type>(lua);
     c2["HTTPMethod"] = lua::createEnumTable<NetworkRequestType>(lua);
+    c2["EventType"] = lua::createEnumTable<lua::api::EventType>(lua);
 }
 
 void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
@@ -438,32 +441,31 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
             continue;
         }
 
-        lua::StackGuard guard(pl->state_);
-
         auto opt = pl->getCompletionCallback();
         if (opt)
         {
             qCDebug(chatterinoLua)
                 << "Processing custom completions from plugin" << name;
             auto &cb = *opt;
-            auto errOrList = cb(lua::api::CompletionEvent{
-                .query = query,
-                .full_text_content = fullTextContent,
-                .cursor_position = cursorPosition,
-                .is_first_word = isFirstWord,
-            });
-            if (std::holds_alternative<int>(errOrList))
+            sol::state_view view(pl->state_);
+            auto errOrList = lua::tryCall<sol::table>(
+                cb,
+                toTable(pl->state_, lua::api::CompletionEvent{
+                                        .query = query,
+                                        .full_text_content = fullTextContent,
+                                        .cursor_position = cursorPosition,
+                                        .is_first_word = isFirstWord,
+                                    }));
+            if (!errOrList.has_value())
             {
-                guard.handled();
-                int err = std::get<int>(errOrList);
                 qCDebug(chatterinoLua)
                     << "Got error from plugin " << pl->meta.name
                     << " while refreshing tab completion: "
-                    << lua::humanErrorText(pl->state_, err);
+                    << errOrList.get_unexpected().error();
                 continue;
             }
 
-            auto list = std::get<lua::api::CompletionList>(errOrList);
+            auto list = lua::api::CompletionList(*errOrList);
             if (list.hideOthers)
             {
                 results = QStringList(list.values.begin(), list.values.end());

@@ -231,6 +231,7 @@ Plugin::~Plugin()
     {
         // clearing this after the state is gone is not safe to do
         this->ownedCommands.clear();
+        this->callbacks.clear();
         lua_close(this->state_);
     }
 }

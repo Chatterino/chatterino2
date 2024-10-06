@@ -3,19 +3,22 @@
 
 #    include "Application.hpp"
 #    include "common/QLogging.hpp"
-#    include "controllers/commands/CommandController.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/PluginController.hpp"
-#    include "messages/MessageBuilder.hpp"
-#    include "providers/twitch/TwitchIrcServer.hpp"
+#    include "controllers/plugins/SolTypes.hpp"  // for lua operations on QString{,List} for CompletionList
 
 #    include <lauxlib.h>
 #    include <lua.h>
 #    include <lualib.h>
 #    include <QFileInfo>
+#    include <QList>
 #    include <QLoggingCategory>
 #    include <QTextCodec>
 #    include <QUrl>
+#    include <sol/forward.hpp>
+#    include <sol/state_view.hpp>
+
+#    include <utility>
 
 namespace {
 using namespace chatterino;
@@ -61,38 +64,26 @@ QDebug qdebugStreamForLogLevel(lua::api::LogLevel lvl)
 // luaL_error is a c-style vararg function, this makes clang-tidy not dislike it so much
 namespace chatterino::lua::api {
 
-int c2_register_callback(lua_State *L)
+CompletionList::CompletionList(const sol::table &table)
+    : values(table.get<QStringList>("values"))
+    , hideOthers(table["hide_others"])
 {
-    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
-    if (pl == nullptr)
-    {
-        luaL_error(L, "internal error: no plugin");
-        return 0;
-    }
-    EventType evtType{};
-    if (!lua::peek(L, &evtType, 1))
-    {
-        luaL_error(L, "cannot get event name (1st arg of register_callback, "
-                      "expected a string)");
-        return 0;
-    }
-    if (lua_isnoneornil(L, 2))
-    {
-        luaL_error(L, "missing argument for register_callback: function "
-                      "\"pointer\"");
-        return 0;
-    }
+}
 
-    auto typeName = magic_enum::enum_name(evtType);
-    std::string callbackSavedName;
-    callbackSavedName.reserve(5 + typeName.size());
-    callbackSavedName += "c2cb-";
-    callbackSavedName += typeName;
-    lua_setfield(L, LUA_REGISTRYINDEX, callbackSavedName.c_str());
+sol::table toTable(lua_State *L, const CompletionEvent &ev)
+{
+    return sol::state_view(L).create_table_with(
+        "query", ev.query,                          //
+        "full_text_content", ev.full_text_content,  //
+        "cursor_position", ev.cursor_position,      //
+        "is_first_word", ev.is_first_word           //
+    );
+}
 
-    lua_pop(L, 2);
-
-    return 0;
+void c2_register_callback(Plugin *pl, EventType evtType,
+                          sol::protected_function callback)
+{
+    pl->callbacks[evtType] = std::move(callback);
 }
 
 int c2_log(lua_State *L)

@@ -2,8 +2,6 @@
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "Application.hpp"
-#    include "common/Common.hpp"
-#    include "common/network/NetworkCommon.hpp"
 #    include "controllers/plugins/api/EventType.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/PluginPermission.hpp"
@@ -14,6 +12,7 @@
 #    include <semver/semver.hpp>
 #    include <sol/forward.hpp>
 
+#    include <optional>
 #    include <unordered_map>
 #    include <unordered_set>
 #    include <vector>
@@ -105,35 +104,19 @@ public:
         return this->loadDirectory_.absoluteFilePath("data");
     }
 
-    // Note: The CallbackFunction object's destructor will remove the function from the lua stack
-    using LuaCompletionCallback =
-        lua::CallbackFunction<lua::api::CompletionList,
-                              lua::api::CompletionEvent>;
-    std::optional<LuaCompletionCallback> getCompletionCallback()
+    std::optional<sol::protected_function> getCompletionCallback()
     {
         if (this->state_ == nullptr || !this->error_.isNull())
         {
             return {};
         }
-        // this uses magic enum to help automatic tooling find usages
-        auto typeName =
-            magic_enum::enum_name(lua::api::EventType::CompletionRequested);
-        std::string cbName;
-        cbName.reserve(5 + typeName.size());
-        cbName += "c2cb-";
-        cbName += typeName;
-        auto typ =
-            lua_getfield(this->state_, LUA_REGISTRYINDEX, cbName.c_str());
-        if (typ != LUA_TFUNCTION)
+        auto it =
+            this->callbacks.find(lua::api::EventType::CompletionRequested);
+        if (it == this->callbacks.end())
         {
-            lua_pop(this->state_, 1);
             return {};
         }
-
-        // move
-        return std::make_optional<lua::CallbackFunction<
-            lua::api::CompletionList, lua::api::CompletionEvent>>(
-            this->state_, lua_gettop(this->state_));
+        return it->second;
     }
 
     /**
@@ -149,6 +132,8 @@ public:
 
     bool hasFSPermissionFor(bool write, const QString &path);
     bool hasHTTPPermissionFor(const QUrl &url);
+
+    std::map<lua::api::EventType, sol::protected_function> callbacks;
 
 private:
     QDir loadDirectory_;

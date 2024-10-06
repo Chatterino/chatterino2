@@ -1,13 +1,16 @@
 #pragma once
 
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include "controllers/plugins/api/ChannelRef.hpp"
+#    include "controllers/plugins/Plugin.hpp"
 
 #    include <lua.h>
+#    include <QList>
 #    include <QString>
+#    include <sol/table.hpp>
 
 #    include <cassert>
 #    include <memory>
-#    include <vector>
 
 struct lua_State;
 namespace chatterino::lua::api {
@@ -39,10 +42,12 @@ enum class LogLevel { Debug, Info, Warning, Critical };
  * @lua@class CompletionList
  */
 struct CompletionList {
+    CompletionList(const sol::table &);
+
     /**
      * @lua@field values string[] The completions
      */
-    std::vector<QString> values{};
+    QStringList values;
 
     /**
      * @lua@field hide_others boolean Whether other completions from Chatterino should be hidden/ignored.
@@ -72,6 +77,8 @@ struct CompletionEvent {
     bool is_first_word{};
 };
 
+sol::table toTable(lua_State *L, const CompletionEvent &ev);
+
 /**
  * @includefile common/Channel.hpp
  * @includefile controllers/plugins/api/ChannelRef.hpp
@@ -96,7 +103,8 @@ struct CompletionEvent {
  * @lua@param func fun(event: CompletionEvent): CompletionList The callback to be invoked.
  * @exposed c2.register_callback
  */
-int c2_register_callback(lua_State *L);
+void c2_register_callback(Plugin *pl, EventType evtType,
+                          sol::protected_function callback);
 
 /**
  * Writes a message to the Chatterino log.

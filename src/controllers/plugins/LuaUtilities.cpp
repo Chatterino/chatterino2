@@ -227,23 +227,6 @@ bool peek(lua_State *L, std::string *out, StackIdx idx)
     return true;
 }
 
-bool peek(lua_State *L, api::CompletionList *out, StackIdx idx)
-{
-    StackGuard guard(L);
-    int typ = lua_getfield(L, idx, "values");
-    if (typ != LUA_TTABLE)
-    {
-        lua_pop(L, 1);
-        return false;
-    }
-    if (!lua::pop(L, &out->values, -1))
-    {
-        return false;
-    }
-    lua_getfield(L, idx, "hide_others");
-    return lua::pop(L, &out->hideOthers);
-}
-
 QString toString(lua_State *L, StackIdx idx)
 {
     size_t len{};
