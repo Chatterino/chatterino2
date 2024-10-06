@@ -15,6 +15,7 @@
 #include <ctime>
 #include <memory>
 #include <optional>
+#include <tuple>
 #include <unordered_map>
 #include <utility>
 
@@ -164,7 +165,10 @@ public:
 
     QString userName;
 
+    /// The Twitch Channel the message was received in
     TwitchChannel *twitchChannel = nullptr;
+    /// The Twitch Channel the message was sent in, according to the Shared Chat feature
+    TwitchChannel *sourceChannel = nullptr;
 
     Message *operator->();
     Message &message();
@@ -278,6 +282,15 @@ protected:
     void appendChannelName();
     void appendUsername();
 
+    /// Return the Twitch Channel this message originated from
+    ///
+    /// Useful to handle messages from the "Shared Chat" feature
+    ///
+    /// Can return nullptr
+    const TwitchChannel *getSourceChannel() const;
+
+    std::tuple<std::optional<EmotePtr>, MessageElementFlags, bool> parseEmote(
+        const EmoteName &name) const;
     Outcome tryAppendEmote(const EmoteName &name);
 
     void addWords(const QStringList &words,

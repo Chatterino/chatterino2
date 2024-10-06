@@ -580,8 +580,12 @@ void TwitchIrcServer::initialize()
                             }
                         });
                     }
-                    // "ALLOWED" and "DENIED" statuses remain unimplemented
-                    // They are versions of automod_message_(denied|approved) but for mods.
+                    else
+                    {
+                        // Gray out approve/deny button upon "ALLOWED" and "DENIED" statuses
+                        // They are versions of automod_message_(denied|approved) but for mods.
+                        chan->deleteMessage("automod_" + msg.messageID);
+                    }
                 }
                 break;
 
@@ -629,7 +633,6 @@ void TwitchIrcServer::initialize()
             postToThread([chan, msg] {
                 chan->addMessage(msg, MessageContext::Original);
             });
-            chan->deleteMessage(msg->id);
         });
 
     this->connections_.managedConnect(
