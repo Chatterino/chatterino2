@@ -684,7 +684,8 @@ void Window::addShortcuts()
          }},
         {"toggleGlobalNotificationSuppression",
          [](const std::vector<QString> &) -> QString {
-             getSettings()->globallySuppressNotifications = true;
+             getSettings()->globallySuppressNotifications =
+                 !getSettings()->globallySuppressNotifications;
              return "";
          }}};
 
