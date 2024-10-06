@@ -771,12 +771,12 @@ void Split::addShortcuts()
              this->showOverlayWindow();
              return {};
          }},
-        {"togglePopupInertia",
+        {"toggleOverlayInertia",
          [this](const auto &args) -> QString {
              if (args.empty())
              {
-                 return "No arguments provided to togglePopupInertia (expected "
-                        "one)";
+                 return "No arguments provided to toggleOverlayInertia "
+                        "(expected one)";
              }
              const auto &arg = args.front();
 

@@ -61,20 +61,20 @@ void acquireKnowledge(Knowledge knowledge)
 std::pair<QKeySequence, bool> toggleIntertiaShortcut()
 {
     auto seq = getApp()->getHotkeys()->getDisplaySequence(
-        HotkeyCategory::Split, u"togglePopupInertia"_s, {{u"this"_s}});
+        HotkeyCategory::Split, u"toggleOverlayInertia"_s, {{u"this"_s}});
     if (!seq.isEmpty())
     {
         return {seq, false};
     }
     seq = getApp()->getHotkeys()->getDisplaySequence(
-        HotkeyCategory::Split, u"togglePopupInertia"_s, {{u"thisOrAll"_s}});
+        HotkeyCategory::Split, u"toggleOverlayInertia"_s, {{u"thisOrAll"_s}});
     if (!seq.isEmpty())
     {
         return {seq, false};
     }
     return {
         getApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Split,
-                                                   u"togglePopupInertia"_s),
+                                                   u"toggleOverlayInertia"_s),
         true,
     };
 }
