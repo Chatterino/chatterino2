@@ -234,6 +234,12 @@ Plugin::~Plugin()
         this->callbacks.clear();
         lua_close(this->state_);
     }
+    assert(this->ownedCommands.empty() &&
+           "This must be empty or destructor of sol::protected_function would "
+           "explode malloc structures later");
+    assert(this->callbacks.empty() &&
+           "This must be empty or destructor of sol::protected_function would "
+           "explode malloc structures later");
 }
 int Plugin::addTimeout(QTimer *timer)
 {
