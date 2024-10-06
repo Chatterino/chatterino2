@@ -2,10 +2,10 @@
 
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QList>
 #include <QString>
 
 #include <memory>
-#include <span>
 
 namespace chatterino::testlib {
 
@@ -15,9 +15,14 @@ namespace chatterino::testlib {
 /// Additionally, users can provide @a params. There isn't any rule on what goes
 /// into @a input vs. @a params - a rule of thumb is to put everything that's
 /// not directly an input to the target function into @a params (like settings).
+/// Similarly, settings can be specified in "settings". These can be merged with
+/// existing settings (the base) in mergedSettings().
 ///
 /// Snapshots are stored in `tests/snapshots/{category}/{name}.json`.
 /// `category` can consist of multiple directories (e.g. `foo/bar`).
+///
+/// Note that when using CTest, added snapshots are only discovered when
+/// reloading the tests.
 ///
 /// @par A minimal example
 ///
@@ -31,9 +36,8 @@ namespace chatterino::testlib {
 /// namespace testlib = chatterino::testlib;
 ///
 /// constexpr bool UPDATE_SNAPSHOTS = false;
-/// constexpr std::array SNAPSHOTS{ "foo", "bar" };
 ///
-/// class ExampleTest : public ::testing::TestWithParam<const char *> {};
+/// class ExampleTest : public ::testing::TestWithParam<QString> {};
 ///
 /// TEST_P(ExampleTest, Run) {
 ///     auto fixture = testlib::Snapshot::read("category", GetParam());
@@ -43,11 +47,10 @@ namespace chatterino::testlib {
 /// }
 ///
 /// INSTANTIATE_TEST_SUITE_P(ExampleInstance, ExampleTest,
-///                          testing::ValuesIn(SNAPSHOTS));
+///                          testing::ValuesIn(testlib::Snapshot::discover("category")));
 ///
 /// // verify that all snapshots are included
 /// TEST(ExampleTest, Integrity) {
-///     ASSERT_TRUE(testlib::Snapshot::verifyIntegrity("category", SNAPSHOTS));
 ///     ASSERT_FALSE(UPDATE_SNAPSHOTS);  // make sure fixtures are actually tested
 /// }
 /// ```
@@ -64,9 +67,8 @@ public:
     /// Read a snapshot
     static std::unique_ptr<Snapshot> read(QString category, QString name);
 
-    /// Verifies that all snapshots are included in @a names
-    static bool verifyIntegrity(const QString &category,
-                                std::span<const char *const> names);
+    /// Finds all tests in @a category
+    static QStringList discover(const QString &category);
 
     /// @brief Runs the snapshot test
     ///

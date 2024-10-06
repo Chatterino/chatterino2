@@ -54,79 +54,9 @@ namespace {
 ///
 /// When adding a test, start with `{ "input": "..." }` and set this to `true`
 /// to generate an initial snapshot. Make sure to verify the output!
-constexpr bool UPDATE_SNAPSHOTS = true;
+constexpr bool UPDATE_SNAPSHOTS = false;
 
 const QString IRC_CATEGORY = u"MessageBuilder/IRC"_s;
-
-// clang-format off
-/// The following entries should be sorted
-constexpr std::array IRC_SNAPSHOTS{
-    "action",
-    "all-usernames",
-    "bad-emotes",
-    "bad-emotes2",
-    "bad-emotes3",
-    "bad-emotes4",
-    "badges-invalid",
-    "badges",
-    "blocked-user",
-    "cheer1",
-    "cheer2",
-    "cheer3",
-    "cheer4",
-    "custom-mod",
-    "custom-vip",
-    "emote-emoji",
-    "emote",
-    "emotes",
-    "emotes2",
-    "emotes3",
-    "emotes4",
-    "emotes5",
-    "first-msg",
-    "highlight1",
-    "highlight2",
-    "highlight3",
-    "hype-chat-invalid",
-    "hype-chat0",
-    "hype-chat1",
-    "hype-chat2",
-    "ignore-block1",
-    "ignore-block2",
-    "ignore-infinite",
-    "ignore-replace",
-    "justinfan",
-    "links",
-    "mentions",
-    "mod",
-    "nickname",
-    "no-nick",
-    "no-tags",
-    "redeemed-highlight",
-    "reply-action",
-    "reply-block",
-    "reply-blocked-user",
-    "reply-child",
-    "reply-ignore",
-    "reply-no-prev",
-    "reply-root",
-    "reply-single",
-    "reward-bits",
-    "reward-blocked-user",
-    "reward-empty",
-    "reward-known",
-    "reward-unknown",
-    "rm-deleted",
-    "shared-chat-known",
-    "shared-chat-same-channel",
-    "shared-chat-unknown",
-    "simple",
-    "username-localized",
-    "username-localized2",
-    "username",
-    "vip",
-};
-// clang-format on
 
 class MockApplication : public mock::BaseApplication
 {
@@ -989,12 +919,12 @@ TEST_F(TestMessageBuilder, IgnoresReplace)
     }
 }
 
-class TestMessageBuilderP : public ::testing::TestWithParam<const char *>
+class TestMessageBuilderP : public ::testing::TestWithParam<QString>
 {
 public:
     void SetUp() override
     {
-        const auto *param = TestMessageBuilderP::GetParam();
+        auto param = TestMessageBuilderP::GetParam();
         this->snapshot = testlib::Snapshot::read(IRC_CATEGORY, param);
 
         this->mockApplication =
@@ -1120,9 +1050,9 @@ public:
 /// `IrcMesssageHandler` to ensure the correct (or: "real") arguments to build
 /// messages.
 ///
-/// Tests are contained in `tests/snapshots/MessageBuilder/IRC`. Each test must
-/// be registered in `IRC_SNAPSHOTS` (at the top of this file). Fixtures consist
-/// of an object with the keys `input`, `output`, and `params` (optional).
+/// Tests are contained in `tests/snapshots/MessageBuilder/IRC`. Fixtures
+/// consist of an object with the keys `input`, `output`, `settings` (optional),
+/// and `params` (optional).
 ///
 /// `UPDATE_SNAPSHOTS` (top) controls whether the `output` will be generated or
 /// checked.
@@ -1169,12 +1099,11 @@ TEST_P(TestMessageBuilderP, Run)
     ASSERT_TRUE(snapshot->run(got, UPDATE_SNAPSHOTS));
 }
 
-INSTANTIATE_TEST_SUITE_P(IrcMessage, TestMessageBuilderP,
-                         testing::ValuesIn(IRC_SNAPSHOTS));
+INSTANTIATE_TEST_SUITE_P(
+    IrcMessage, TestMessageBuilderP,
+    testing::ValuesIn(testlib::Snapshot::discover(IRC_CATEGORY)));
 
 TEST(TestMessageBuilderP, Integrity)
 {
-    ASSERT_TRUE(
-        testlib::Snapshot::verifyIntegrity(IRC_CATEGORY, IRC_SNAPSHOTS));
     ASSERT_FALSE(UPDATE_SNAPSHOTS);  // make sure fixtures are actually tested
 }

@@ -8,8 +8,6 @@
 #include <QJsonDocument>
 #include <QStringBuilder>
 
-#include <set>
-
 namespace {
 
 using namespace chatterino::literals;
@@ -166,39 +164,15 @@ std::unique_ptr<Snapshot> Snapshot::read(QString category, QString name)
         new Snapshot(std::move(category), std::move(name), doc));
 }
 
-bool Snapshot::verifyIntegrity(const QString &category,
-                               std::span<const char *const> names)
+QStringList Snapshot::discover(const QString &category)
 {
     auto files =
         baseDir(category).entryList(QDir::NoDotAndDotDot | QDir::Files);
-    bool ok = true;
-    if (static_cast<size_t>(files.size()) != names.size())
+    for (auto &file : files)
     {
-        qWarning() << "Mismatching size!";
-        ok = false;
+        file.remove(".json");
     }
-
-    // check that all files have some value (not the other way around)
-    std::set<QString> valueSet;
-    for (const auto &value : names)
-    {
-        valueSet.emplace(value);
-    }
-    for (const auto &file : files)
-    {
-        if (!file.endsWith(u".json"_s))
-        {
-            qWarning() << "Bad file:" << file;
-            ok = false;
-            continue;
-        }
-        if (!valueSet.contains(file.mid(0, file.length() - 5)))
-        {
-            qWarning() << file << "exists but isn't present in tests";
-            ok = false;
-        }
-    }
-    return ok;
+    return files;
 }
 
 bool Snapshot::run(const QJsonValue &got, bool updateSnapshots) const
