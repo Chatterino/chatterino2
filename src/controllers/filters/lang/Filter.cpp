@@ -10,13 +10,46 @@
 
 namespace chatterino::filters {
 
+const QMap<QString, Type> MESSAGE_TYPING_CONTEXT{
+    {"author.badges", Type::StringList},
+    {"author.color", Type::Color},
+    {"author.name", Type::String},
+    {"author.no_color", Type::Bool},
+    {"author.subbed", Type::Bool},
+    {"author.sub_length", Type::Int},
+    {"channel.name", Type::String},
+    {"channel.watching", Type::Bool},
+    {"channel.live", Type::Bool},
+    {"flags.action", Type::Bool},
+    {"flags.highlighted", Type::Bool},
+    {"flags.points_redeemed", Type::Bool},
+    {"flags.sub_message", Type::Bool},
+    {"flags.system_message", Type::Bool},
+    {"flags.reward_message", Type::Bool},
+    {"flags.first_message", Type::Bool},
+    {"flags.elevated_message", Type::Bool},
+    {"flags.hype_chat", Type::Bool},
+    {"flags.cheer_message", Type::Bool},
+    {"flags.whisper", Type::Bool},
+    {"flags.reply", Type::Bool},
+    {"flags.automod", Type::Bool},
+    {"flags.restricted", Type::Bool},
+    {"flags.monitored", Type::Bool},
+    {"flags.shared", Type::Bool},
+    {"message.content", Type::String},
+    {"message.length", Type::Int},
+    {"reward.title", Type::String},
+    {"reward.cost", Type::Int},
+    {"reward.id", Type::String},
+};
+
 ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
 {
     auto watchingChannel = getApp()->getTwitch()->getWatchingChannel().get();
 
     /* 
      * Looking to add a new identifier to filters? Here's what to do: 
-     *  1. Update validIdentifiersMap in Tokenizer.hpp
+     *  1. Update validIdentifiersMap in Tokenizer.cpp
      *  2. Add the identifier to the list below
      *  3. Add the type of the identifier to MESSAGE_TYPING_CONTEXT in Filter.hpp
      *  4. Add the value for the identifier to the ContextMap returned by this function
@@ -46,6 +79,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
      * flags.automod
      * flags.restricted
      * flags.monitored
+     * flags.shared
      *
      * message.content
      * message.length
@@ -109,6 +143,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
         {"flags.automod", m->flags.has(MessageFlag::AutoMod)},
         {"flags.restricted", m->flags.has(MessageFlag::RestrictedMessage)},
         {"flags.monitored", m->flags.has(MessageFlag::MonitoredMessage)},
+        {"flags.shared", m->flags.has(MessageFlag::SharedMessage)},
 
         {"message.content", m->messageText},
         {"message.length", m->messageText.length()},

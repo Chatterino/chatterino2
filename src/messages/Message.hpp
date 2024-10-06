@@ -13,6 +13,8 @@
 #include <unordered_map>
 #include <vector>
 
+class QJsonObject;
+
 namespace chatterino {
 class MessageElement;
 class MessageThread;
@@ -72,6 +74,8 @@ struct Message {
      */
     std::shared_ptr<const Message> cloneWith(
         const std::function<void(Message &)> &fn) const;
+
+    QJsonObject toJson() const;
 };
 
 }  // namespace chatterino

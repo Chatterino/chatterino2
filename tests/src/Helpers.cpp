@@ -2,6 +2,8 @@
 
 #include "Test.hpp"
 
+#include <span>
+
 using namespace chatterino;
 using namespace helpers::detail;
 
@@ -498,5 +500,59 @@ TEST(Helpers, parseDurationToSeconds)
         EXPECT_EQ(actual, c.output)
             << actual << " (" << c.input << ") did not match expected value "
             << c.output;
+    }
+}
+
+TEST(Helpers, unescapeZeroWidthJoiner)
+{
+    struct TestCase {
+        QStringView input;
+        QStringView output;
+    };
+
+    std::vector<TestCase> tests{
+        {u"foo bar", u"foo bar"},
+        {u"", u""},
+        {u"a", u"a"},
+        {u"\U000E0002", u"\u200D"},
+        {u"foo\U000E0002bar", u"foo\u200Dbar"},
+        {u"foo \U000E0002 bar", u"foo \u200D bar"},
+        {u"\U0001F468\U000E0002\U0001F33E", u"\U0001F468\u200D\U0001F33E"},
+        // don't replace ZWJ
+        {u"\U0001F468\u200D\U0001F33E", u"\U0001F468\u200D\U0001F33E"},
+        // only replace the first escape tag in sequences
+        {
+            u"\U0001F468\U000E0002\U000E0002\U0001F33E",
+            u"\U0001F468\u200D\U000E0002\U0001F33E",
+        },
+        {
+            u"\U0001F468\U000E0002\U000E0002\U000E0002\U0001F33E",
+            u"\U0001F468\u200D\U000E0002\U000E0002\U0001F33E",
+        },
+    };
+
+    // sanity check that the compiler supports unicode string literals
+    static_assert(
+        [] {
+            constexpr std::span zwj = u"\u200D";
+            static_assert(zwj.size() == 2);
+            static_assert(zwj[0] == u'\x200D');
+            static_assert(zwj[1] == u'\0');
+
+            constexpr std::span escapeTag = u"\U000E0002";
+            static_assert(escapeTag.size() == 3);
+            static_assert(escapeTag[0] == u'\xDB40');
+            static_assert(escapeTag[1] == u'\xDC02');
+            static_assert(escapeTag[2] == u'\0');
+
+            return true;
+        }(),
+        "The compiler must support Unicode string literals");
+
+    for (const auto &c : tests)
+    {
+        const auto actual = unescapeZeroWidthJoiner(c.input.toString());
+
+        EXPECT_EQ(actual, c.output);
     }
 }

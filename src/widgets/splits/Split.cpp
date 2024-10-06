@@ -33,6 +33,7 @@
 #include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/helper/SearchPopup.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/OverlayWindow.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/splits/DraggedSplit.hpp"
 #include "widgets/splits/SplitContainer.hpp"
@@ -765,6 +766,47 @@ void Split::addShortcuts()
              }
              return "";
          }},
+        {"popupOverlay",
+         [this](const auto &) -> QString {
+             this->showOverlayWindow();
+             return {};
+         }},
+        {"toggleOverlayInertia",
+         [this](const auto &args) -> QString {
+             if (args.empty())
+             {
+                 return "No arguments provided to toggleOverlayInertia "
+                        "(expected one)";
+             }
+             const auto &arg = args.front();
+
+             if (arg == "this")
+             {
+                 if (this->overlayWindow_)
+                 {
+                     this->overlayWindow_->toggleInertia();
+                 }
+                 return {};
+             }
+             if (arg == "thisOrAll")
+             {
+                 if (this->overlayWindow_)
+                 {
+                     this->overlayWindow_->toggleInertia();
+                 }
+                 else
+                 {
+                     getApp()->getWindows()->toggleAllOverlayInertia();
+                 }
+                 return {};
+             }
+             if (arg == "all")
+             {
+                 getApp()->getWindows()->toggleAllOverlayInertia();
+                 return {};
+             }
+             return {};
+         }},
     };
 
     this->shortcuts_ = getApp()->getHotkeys()->shortcutsForCategory(
@@ -1102,6 +1144,20 @@ void Split::popup()
 
     window.getNotebook().getOrAddSelectedPage()->insertSplit(split);
     window.show();
+}
+
+OverlayWindow *Split::overlayWindow()
+{
+    return this->overlayWindow_.data();
+}
+
+void Split::showOverlayWindow()
+{
+    if (!this->overlayWindow_)
+    {
+        this->overlayWindow_ = new OverlayWindow(this->getIndirectChannel());
+    }
+    this->overlayWindow_->show();
 }
 
 void Split::clear()

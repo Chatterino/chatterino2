@@ -1872,7 +1872,7 @@ std::optional<EmotePtr> TwitchChannel::ffzCustomVipBadge() const
     return this->ffzCustomVipBadge_.get();
 }
 
-std::optional<CheerEmote> TwitchChannel::cheerEmote(const QString &string)
+std::optional<CheerEmote> TwitchChannel::cheerEmote(const QString &string) const
 {
     auto sets = this->cheerEmoteSets_.access();
     for (const auto &set : *sets)

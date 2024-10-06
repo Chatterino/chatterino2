@@ -256,40 +256,14 @@ void addHiddenContextMenuItems(QMenu *menu,
                         });
     }
 
-    const auto *message = layout->getMessage();
+    auto message = layout->getMessagePtr();
 
-    if (message != nullptr)
+    if (message)
     {
-        QJsonDocument jsonDocument;
-
-        QJsonObject jsonObject;
-
-        jsonObject["id"] = message->id;
-        jsonObject["searchText"] = message->searchText;
-        jsonObject["messageText"] = message->messageText;
-        jsonObject["flags"] = qmagicenum::enumFlagsName(message->flags.value());
-        if (message->reward)
-        {
-            QJsonObject reward;
-            reward["id"] = message->reward->id;
-            reward["title"] = message->reward->title;
-            reward["cost"] = message->reward->cost;
-            reward["isUserInputRequired"] =
-                message->reward->isUserInputRequired;
-            jsonObject["reward"] = reward;
-        }
-        else
-        {
-            jsonObject["reward"] = QJsonValue();
-        }
-
-        jsonDocument.setObject(jsonObject);
-
-        auto jsonString =
-            jsonDocument.toJson(QJsonDocument::JsonFormat::Indented);
-
-        menu->addAction("Copy message &JSON", [jsonString] {
-            crossPlatformCopy(jsonString);
+        menu->addAction("Copy message &JSON", [message] {
+            auto jsonString = QJsonDocument{message->toJson()}.toJson(
+                QJsonDocument::Indented);
+            crossPlatformCopy(QString::fromUtf8(jsonString));
         });
     }
 }
@@ -388,7 +362,8 @@ ChannelView::ChannelView(InternalCtor /*tag*/, QWidget *parent, Split *split,
                          this->queueUpdate();
                      });
 
-    this->messageColors_.applyTheme(getTheme());
+    this->messageColors_.applyTheme(getTheme(), this->isOverlay_,
+                                    getSettings()->overlayBackgroundOpacity);
     this->messagePreferences_.connectSettings(getSettings(),
                                               this->signalHolder_);
 }
@@ -474,6 +449,11 @@ void ChannelView::initializeSignals()
                                        [this] {
                                            this->queueLayout();
                                        });
+}
+
+Scrollbar *ChannelView::scrollbar()
+{
+    return this->scrollBar_;
 }
 
 bool ChannelView::pausable() const
@@ -600,7 +580,19 @@ void ChannelView::themeChangedEvent()
 
     this->setupHighlightAnimationColors();
     this->queueLayout();
-    this->messageColors_.applyTheme(getTheme());
+    this->messageColors_.applyTheme(getTheme(), this->isOverlay_,
+                                    getSettings()->overlayBackgroundOpacity);
+}
+
+void ChannelView::updateColorTheme()
+{
+    this->themeChangedEvent();
+}
+
+void ChannelView::setIsOverlay(bool isOverlay)
+{
+    this->isOverlay_ = isOverlay;
+    this->themeChangedEvent();
 }
 
 void ChannelView::setupHighlightAnimationColors()
@@ -706,9 +698,15 @@ void ChannelView::layoutVisibleMessages(
             const auto &message = messages[i];
 
             redrawRequired |= message->layout(
-                layoutWidth, this->scale(),
-                this->scale() * static_cast<float>(this->devicePixelRatio()),
-                flags, this->bufferInvalidationQueued_);
+                {
+                    .messageColors = this->messageColors_,
+                    .flags = flags,
+                    .width = layoutWidth,
+                    .scale = this->scale(),
+                    .imageScale = this->scale() *
+                                  static_cast<float>(this->devicePixelRatio()),
+                },
+                this->bufferInvalidationQueued_);
 
             y += message->getHeight();
         }
@@ -743,8 +741,14 @@ void ChannelView::updateScrollbar(
         auto *message = messages[i].get();
 
         message->layout(
-            layoutWidth, this->scale(),
-            this->scale() * static_cast<float>(this->devicePixelRatio()), flags,
+            {
+                .messageColors = this->messageColors_,
+                .flags = flags,
+                .width = layoutWidth,
+                .scale = this->scale(),
+                .imageScale = this->scale() *
+                              static_cast<float>(this->devicePixelRatio()),
+            },
             false);
 
         h -= message->getHeight();
@@ -1512,7 +1516,7 @@ void ChannelView::paintEvent(QPaintEvent *event)
 
     QPainter painter(this);
 
-    painter.fillRect(rect(), this->theme->splits.background);
+    painter.fillRect(rect(), this->messageColors_.channelBackground);
 
     // draw messages
     this->drawMessages(painter, event->rect());
@@ -1731,10 +1735,16 @@ void ChannelView::wheelEvent(QWheelEvent *event)
                 else
                 {
                     snapshot[i - 1]->layout(
-                        this->getLayoutWidth(), this->scale(),
-                        this->scale() *
-                            static_cast<float>(this->devicePixelRatio()),
-                        this->getFlags(), false);
+                        {
+                            .messageColors = this->messageColors_,
+                            .flags = this->getFlags(),
+                            .width = this->getLayoutWidth(),
+                            .scale = this->scale(),
+                            .imageScale =
+                                this->scale() *
+                                static_cast<float>(this->devicePixelRatio()),
+                        },
+                        false);
                     scrollFactor = 1;
                     currentScrollLeft = snapshot[i - 1]->getHeight();
                 }
@@ -1768,10 +1778,16 @@ void ChannelView::wheelEvent(QWheelEvent *event)
                 else
                 {
                     snapshot[i + 1]->layout(
-                        this->getLayoutWidth(), this->scale(),
-                        this->scale() *
-                            static_cast<float>(this->devicePixelRatio()),
-                        this->getFlags(), false);
+                        {
+                            .messageColors = this->messageColors_,
+                            .flags = this->getFlags(),
+                            .width = this->getLayoutWidth(),
+                            .scale = this->scale(),
+                            .imageScale =
+                                this->scale() *
+                                static_cast<float>(this->devicePixelRatio()),
+                        },
+                        false);
 
                     scrollFactor = 1;
                     currentScrollLeft = snapshot[i + 1]->getHeight();
@@ -2733,6 +2749,10 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
 
     if (hoverLayoutElement == nullptr)
     {
+        // XXX: this is duplicate work
+        auto idx = layout->getSelectionIndex(relativePos);
+        SelectionItem item(messageIndex, idx);
+        this->doubleClickSelection_ = {item, item};
         return;
     }
 

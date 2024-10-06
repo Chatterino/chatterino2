@@ -3,21 +3,44 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 
+#include <algorithm>
+
 namespace chatterino {
 
-void MessageColors::applyTheme(Theme *theme)
+void MessageColors::applyTheme(Theme *theme, bool isOverlay,
+                               int backgroundOpacity)
 {
-    this->regular = theme->messages.backgrounds.regular;
-    this->alternate = theme->messages.backgrounds.alternate;
+    auto applyColors = [this](const auto &src) {
+        this->regularBg = src.backgrounds.regular;
+        this->alternateBg = src.backgrounds.alternate;
 
-    this->disabled = theme->messages.disabled;
-    this->selection = theme->messages.selection;
-    this->system = theme->messages.textColors.system;
+        this->disabled = src.disabled;
+        this->selection = src.selection;
+
+        this->regularText = src.textColors.regular;
+        this->linkText = src.textColors.link;
+        this->systemText = src.textColors.system;
+    };
+
+    if (isOverlay)
+    {
+        this->channelBackground = theme->overlayMessages.background;
+        this->channelBackground.setAlpha(std::clamp(backgroundOpacity, 0, 255));
+        applyColors(theme->overlayMessages);
+    }
+    else
+    {
+        this->channelBackground = theme->splits.background;
+        applyColors(theme->messages);
+    }
 
     this->messageSeperator = theme->splits.messageSeperator;
 
     this->focusedLastMessageLine = theme->tabs.selected.backgrounds.regular;
     this->unfocusedLastMessageLine = theme->tabs.selected.backgrounds.unfocused;
+
+    this->hasTransparency =
+        this->regularBg.alpha() != 255 || this->alternateBg.alpha() != 255;
 }
 
 void MessagePreferences::connectSettings(Settings *settings,

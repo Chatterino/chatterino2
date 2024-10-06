@@ -184,6 +184,18 @@ public:
     // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame",
     // false};
 
+    IntSetting overlayBackgroundOpacity = {
+        "/appearance/overlay/backgroundOpacity", 50};
+    BoolSetting enableOverlayShadow = {"/appearance/overlay/shadow", true};
+    IntSetting overlayShadowOpacity = {"/appearance/overlay/shadowOpacity",
+                                       255};
+    QStringSetting overlayShadowColor = {"/appearance/overlay/shadowColor",
+                                         "#000"};
+    // These should be floats, but there's no good input UI for them
+    IntSetting overlayShadowOffsetX = {"/appearance/overlay/shadowOffsetX", 2};
+    IntSetting overlayShadowOffsetY = {"/appearance/overlay/shadowOffsetY", 2};
+    IntSetting overlayShadowRadius = {"/appearance/overlay/shadowRadius", 8};
+
     // Badges
     BoolSetting showBadgesGlobalAuthority = {
         "/appearance/badges/GlobalAuthority", true};
@@ -534,6 +546,7 @@ public:
 
     IntSetting startUpNotification = {"/misc/startUpNotification", 0};
     QStringSetting currentVersion = {"/misc/currentVersion", ""};
+    IntSetting overlayKnowledgeLevel = {"/misc/overlayKnowledgeLevel", 0};
 
     BoolSetting loadTwitchMessageHistoryOnConnect = {
         "/misc/twitch/loadMessageHistoryOnConnect", true};

@@ -215,6 +215,47 @@
         "text": { "$ref": "#/definitions/qt-color" }
       },
       "required": ["backgrounds", "line", "text"]
+    },
+    "text-colors": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "caret": { "$ref": "#/definitions/qt-color" },
+        "chatPlaceholder": { "$ref": "#/definitions/qt-color" },
+        "link": { "$ref": "#/definitions/qt-color" },
+        "regular": { "$ref": "#/definitions/qt-color" },
+        "system": { "$ref": "#/definitions/qt-color" }
+      },
+      "required": ["caret", "chatPlaceholder", "link", "regular", "system"]
+    },
+    "message-backgrounds": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "alternate": { "$ref": "#/definitions/qt-color" },
+        "regular": { "$ref": "#/definitions/qt-color" }
+      },
+      "required": ["alternate", "regular"]
+    },
+    "message-colors": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "backgrounds": { "$ref": "#/definitions/message-backgrounds" },
+        "disabled": { "$ref": "#/definitions/qt-color" },
+        "highlightAnimationEnd": { "$ref": "#/definitions/qt-color" },
+        "highlightAnimationStart": { "$ref": "#/definitions/qt-color" },
+        "selection": { "$ref": "#/definitions/qt-color" },
+        "textColors": { "$ref": "#/definitions/text-colors" }
+      },
+      "required": [
+        "backgrounds",
+        "disabled",
+        "highlightAnimationEnd",
+        "highlightAnimationStart",
+        "selection",
+        "textColors"
+      ]
     }
   },
   "type": "object",
@@ -229,37 +270,12 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "backgrounds": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "alternate": { "$ref": "#/definitions/qt-color" },
-                "regular": { "$ref": "#/definitions/qt-color" }
-              },
-              "required": ["alternate", "regular"]
-            },
+            "backgrounds": { "$ref": "#/definitions/message-backgrounds" },
             "disabled": { "$ref": "#/definitions/qt-color" },
             "highlightAnimationEnd": { "$ref": "#/definitions/qt-color" },
             "highlightAnimationStart": { "$ref": "#/definitions/qt-color" },
             "selection": { "$ref": "#/definitions/qt-color" },
-            "textColors": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "caret": { "$ref": "#/definitions/qt-color" },
-                "chatPlaceholder": { "$ref": "#/definitions/qt-color" },
-                "link": { "$ref": "#/definitions/qt-color" },
-                "regular": { "$ref": "#/definitions/qt-color" },
-                "system": { "$ref": "#/definitions/qt-color" }
-              },
-              "required": [
-                "caret",
-                "chatPlaceholder",
-                "link",
-                "regular",
-                "system"
-              ]
-            }
+            "textColors": { "$ref": "#/definitions/text-colors" }
           },
           "required": [
             "backgrounds",
@@ -268,6 +284,27 @@
             "highlightAnimationStart",
             "selection",
             "textColors"
+          ]
+        },
+        "overlayMessages": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "backgrounds": { "$ref": "#/definitions/message-backgrounds" },
+            "disabled": { "$ref": "#/definitions/qt-color" },
+            "selection": { "$ref": "#/definitions/qt-color" },
+            "textColors": { "$ref": "#/definitions/text-colors" },
+            "background": {
+              "$ref": "#/definitions/qt-color",
+              "description": "Note: The alpha value is ignored (set through the settings)"
+            }
+          },
+          "required": [
+            "backgrounds",
+            "disabled",
+            "selection",
+            "textColors",
+            "background"
           ]
         },
         "scrollbars": {
@@ -376,6 +413,7 @@
       "required": [
         "accent",
         "messages",
+        "overlayMessages",
         "scrollbars",
         "splits",
         "tabs",

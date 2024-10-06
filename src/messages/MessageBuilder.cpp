@@ -1836,6 +1836,7 @@ std::pair<MessagePtr, MessagePtr> MessageBuilder::makeAutomodMessage(
 
     //
     // Builder for AutoMod message with explanation
+    builder.message().id = "automod_" + action.msgID;
     builder.message().loginName = "automod";
     builder.message().channelName = channelName;
     builder.message().flags.set(MessageFlag::PubSub);
@@ -2678,6 +2679,26 @@ void MessageBuilder::parseRoomID()
         {
             this->twitchChannel->setRoomId(this->roomID_);
         }
+
+        if (auto it = this->tags.find("source-room-id"); it != this->tags.end())
+        {
+            auto sourceRoom = it.value().toString();
+            if (this->roomID_ != sourceRoom)
+            {
+                this->message().flags.set(MessageFlag::SharedMessage);
+
+                auto sourceChan =
+                    getApp()->getTwitch()->getChannelOrEmptyByID(sourceRoom);
+                if (sourceChan && !sourceChan->isEmpty())
+                {
+                    this->sourceChannel =
+                        dynamic_cast<TwitchChannel *>(sourceChan.get());
+                    // avoid duplicate pings
+                    this->message().flags.set(
+                        MessageFlag::DoNotTriggerNotification);
+                }
+            }
+        }
     }
 }
 
@@ -2895,18 +2916,19 @@ void MessageBuilder::appendUsername()
     }
 }
 
-Outcome MessageBuilder::tryAppendEmote(const EmoteName &name)
+const TwitchChannel *MessageBuilder::getSourceChannel() const
 {
-    auto *app = getApp();
+    if (this->sourceChannel != nullptr)
+    {
+        return this->sourceChannel;
+    }
 
-    const auto *globalBttvEmotes = app->getBttvEmotes();
-    const auto *globalFfzEmotes = app->getFfzEmotes();
-    const auto *globalSeventvEmotes = app->getSeventvEmotes();
+    return this->twitchChannel;
+}
 
-    auto flags = MessageElementFlags();
-    auto emote = std::optional<EmotePtr>{};
-    bool zeroWidth = false;
-
+std::tuple<std::optional<EmotePtr>, MessageElementFlags, bool>
+    MessageBuilder::parseEmote(const EmoteName &name) const
+{
     // Emote order:
     //  - 7TV Personal
     //  - FrankerFaceZ Channel
@@ -2915,42 +2937,102 @@ Outcome MessageBuilder::tryAppendEmote(const EmoteName &name)
     //  - FrankerFaceZ Global
     //  - BetterTTV Global
     //  - 7TV Global
-    if (this->twitchChannel != nullptr &&
-        (emote = app->getSeventvPersonalEmotes()->getEmoteForUser(this->userId_,
-                                                                  name)))
+
+    const auto *globalFfzEmotes = getApp()->getFfzEmotes();
+    const auto *globalBttvEmotes = getApp()->getBttvEmotes();
+    const auto *globalSeventvEmotes = getApp()->getSeventvEmotes();
+
+    const auto *sourceChannel = this->getSourceChannel();
+
+    std::optional<EmotePtr> emote{};
+
+    if (sourceChannel != nullptr)
     {
-        flags = MessageElementFlag::SevenTVEmote;
+        // Check for channel emotes
+        emote = getApp()->getSeventvPersonalEmotes()->getEmoteForUser(
+            this->userId_, name);
+        if (emote)
+        {
+            return {
+                emote,
+                MessageElementFlag::SevenTVEmote,
+                emote.value()->zeroWidth,
+            };
+        }
+
+        emote = sourceChannel->ffzEmote(name);
+        if (emote)
+        {
+            return {
+                emote,
+                MessageElementFlag::FfzEmote,
+                false,
+            };
+        }
+
+        emote = sourceChannel->bttvEmote(name);
+        if (emote)
+        {
+            return {
+                emote,
+                MessageElementFlag::BttvEmote,
+                false,
+            };
+        }
+
+        emote = sourceChannel->seventvEmote(name);
+        if (emote)
+        {
+            return {
+                emote,
+                MessageElementFlag::SevenTVEmote,
+                emote.value()->zeroWidth,
+            };
+        }
     }
-    else if (this->twitchChannel &&
-             (emote = this->twitchChannel->ffzEmote(name)))
+
+    // Check for global emotes
+
+    emote = globalFfzEmotes->emote(name);
+    if (emote)
     {
-        flags = MessageElementFlag::FfzEmote;
+        return {
+            emote,
+            MessageElementFlag::FfzEmote,
+            false,
+        };
     }
-    else if (this->twitchChannel &&
-             (emote = this->twitchChannel->bttvEmote(name)))
+
+    emote = globalBttvEmotes->emote(name);
+    if (emote)
     {
-        flags = MessageElementFlag::BttvEmote;
+        return {
+            emote,
+            MessageElementFlag::BttvEmote,
+            zeroWidthEmotes.contains(name.string),
+        };
     }
-    else if (this->twitchChannel != nullptr &&
-             (emote = this->twitchChannel->seventvEmote(name)))
+
+    emote = globalSeventvEmotes->globalEmote(name);
+    if (emote)
     {
-        flags = MessageElementFlag::SevenTVEmote;
-        zeroWidth = emote.value()->zeroWidth;
+        return {
+            emote,
+            MessageElementFlag::SevenTVEmote,
+            emote.value()->zeroWidth,
+        };
     }
-    else if ((emote = globalFfzEmotes->emote(name)))
-    {
-        flags = MessageElementFlag::FfzEmote;
-    }
-    else if ((emote = globalBttvEmotes->emote(name)))
-    {
-        flags = MessageElementFlag::BttvEmote;
-        zeroWidth = zeroWidthEmotes.contains(name.string);
-    }
-    else if ((emote = globalSeventvEmotes->globalEmote(name)))
-    {
-        flags = MessageElementFlag::SevenTVEmote;
-        zeroWidth = emote.value()->zeroWidth;
-    }
+
+    return {
+        {},
+        {},
+        false,
+    };
+}
+
+Outcome MessageBuilder::tryAppendEmote(const EmoteName &name)
+{
+    const auto [emote, flags, zeroWidth] = this->parseEmote(name);
 
     if (emote)
     {
@@ -3137,7 +3219,8 @@ Outcome MessageBuilder::tryParseCheermote(const QString &string)
         return Failure;
     }
 
-    auto cheerOpt = this->twitchChannel->cheerEmote(string);
+    const auto *chan = this->getSourceChannel();
+    auto cheerOpt = chan->cheerEmote(string);
 
     if (!cheerOpt)
     {

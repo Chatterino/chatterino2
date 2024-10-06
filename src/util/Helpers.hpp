@@ -59,7 +59,7 @@ namespace helpers::detail {
  * @brief startsWithOrContains is a wrapper for checking
  * whether str1 starts with or contains str2 within itself
  **/
-bool startsWithOrContains(const QString &str1, const QString &str2,
+bool startsWithOrContains(QStringView str1, QStringView str2,
                           Qt::CaseSensitivity caseSensitivity, bool startsWith);
 
 /**
@@ -181,5 +181,12 @@ constexpr std::optional<std::decay_t<T>> makeConditionedOptional(bool condition,
 
     return std::nullopt;
 }
+
+/// @brief Unescapes zero width joiners (ZWJ; U+200D) from Twitch messages
+///
+/// Older Chatterino versions escape ZWJ with an ESCAPE TAG (U+E0002), following
+/// https://mm2pl.github.io/emoji_rfc.pdf. This function unescapes all tags with
+/// a ZWJ. See also: https://github.com/Chatterino/chatterino2/issues/3384.
+QString unescapeZeroWidthJoiner(QString escaped);
 
 }  // namespace chatterino

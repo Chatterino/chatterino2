@@ -1,6 +1,6 @@
 #include "messages/MessageColor.hpp"
 
-#include "singletons/Theme.hpp"
+#include "messages/layouts/MessageLayoutContext.hpp"
 
 namespace chatterino {
 
@@ -15,22 +15,39 @@ MessageColor::MessageColor(Type type)
 {
 }
 
-const QColor &MessageColor::getColor(Theme &themeManager) const
+const QColor &MessageColor::getColor(const MessageColors &colors) const
 {
     switch (this->type_)
     {
         case Type::Custom:
             return this->customColor_;
         case Type::Text:
-            return themeManager.messages.textColors.regular;
+            return colors.regularText;
         case Type::System:
-            return themeManager.messages.textColors.system;
+            return colors.systemText;
         case Type::Link:
-            return themeManager.messages.textColors.link;
+            return colors.linkText;
     }
 
     static QColor _default;
     return _default;
+}
+
+QString MessageColor::toString() const
+{
+    switch (this->type_)
+    {
+        case Type::Custom:
+            return this->customColor_.name(QColor::HexArgb);
+        case Type::Text:
+            return QStringLiteral("Text");
+        case Type::System:
+            return QStringLiteral("System");
+        case Type::Link:
+            return QStringLiteral("Link");
+        default:
+            return {};
+    }
 }
 
 }  // namespace chatterino

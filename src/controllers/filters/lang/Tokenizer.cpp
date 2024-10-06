@@ -2,7 +2,54 @@
 
 #include "common/QLogging.hpp"
 
+namespace {
+
+const QRegularExpression TOKEN_REGEX(
+    "((r|ri)?\\\")((\\\\\")|[^\\\"])*\\\"|"  // String/Regex literal
+    "[\\w\\.]+|"                             // Identifier or reserved keyword
+    "(<=?|>=?|!=?|==|\\|\\||&&|\\+|-|\\*|\\/|%)+|"  // Operator
+    "[\\(\\)]|"                                     // Parentheses
+    "[{},]"                                         // List
+);
+
+}  // namespace
+
 namespace chatterino::filters {
+
+const QMap<QString, QString> VALID_IDENTIFIERS_MAP{
+    {"author.badges", "author badges"},
+    {"author.color", "author color"},
+    {"author.name", "author name"},
+    {"author.no_color", "author has no color?"},
+    {"author.subbed", "author subscribed?"},
+    {"author.sub_length", "author sub length"},
+    {"channel.name", "channel name"},
+    {"channel.watching", "/watching channel?"},
+    {"channel.live", "channel live?"},
+    {"flags.action", "action/me message?"},
+    {"flags.highlighted", "highlighted?"},
+    {"flags.points_redeemed", "redeemed points?"},
+    {"flags.sub_message", "sub/resub message?"},
+    {"flags.system_message", "system message?"},
+    {"flags.reward_message", "channel point reward message?"},
+    {"flags.first_message", "first message?"},
+    {"flags.elevated_message", "hype chat message?"},
+    // Ideally these values are unique, because ChannelFilterEditorDialog::ValueSpecifier::expressionText depends on
+    // std::map layout in Qt 6 and internal implementation in Qt 5.
+    {"flags.hype_chat", "hype chat message?"},
+    {"flags.cheer_message", "cheer message?"},
+    {"flags.whisper", "whisper message?"},
+    {"flags.reply", "reply message?"},
+    {"flags.automod", "automod message?"},
+    {"flags.restricted", "restricted message?"},
+    {"flags.monitored", "monitored message?"},
+    {"flags.shared", "shared message?"},
+    {"message.content", "message text"},
+    {"message.length", "message length"},
+    {"reward.title", "point reward title"},
+    {"reward.cost", "point reward cost"},
+    {"reward.id", "point reward id"},
+};
 
 QString tokenTypeToInfoString(TokenType type)
 {
@@ -77,7 +124,7 @@ QString tokenTypeToInfoString(TokenType type)
 
 Tokenizer::Tokenizer(const QString &text)
 {
-    QRegularExpressionMatchIterator i = tokenRegex.globalMatch(text);
+    QRegularExpressionMatchIterator i = TOKEN_REGEX.globalMatch(text);
     while (i.hasNext())
     {
         auto capturedText = i.next().captured();
@@ -278,7 +325,7 @@ TokenType Tokenizer::tokenize(const QString &text)
             return TokenType::STRING;
         }
 
-        if (validIdentifiersMap.keys().contains(text))
+        if (VALID_IDENTIFIERS_MAP.keys().contains(text))
         {
             return TokenType::IDENTIFIER;
         }

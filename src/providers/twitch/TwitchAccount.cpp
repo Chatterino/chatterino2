@@ -406,7 +406,7 @@ void TwitchAccount::reloadEmotes(void *caller)
         auto meta = getTwitchEmoteSetMeta(emote);
 
         auto emotePtr = twitchEmotes->getOrCreateEmote(id, name);
-        if (!emoteMap->try_emplace(name, emotePtr).second)
+        if (!emoteMap->try_emplace(emotePtr->name, emotePtr).second)
         {
             // if the emote already exists, we don't want to add it to a set as
             // those are assumed to be disjoint
