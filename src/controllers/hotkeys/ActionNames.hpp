@@ -355,6 +355,9 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               .argumentsPromptHover = "Should the tabs be enabled, disabled, "
                                       "toggled, or live-only.",
           }},
+         // TODO(jupjohn): allow passing a toggle arg to this
+         {"toggleGlobalNotificationSuppression",
+          ActionDefinition{"Toggle notification suppression"}},
      }},
 };
 
