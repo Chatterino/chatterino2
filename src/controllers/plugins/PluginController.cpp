@@ -126,8 +126,6 @@ void PluginController::openLibrariesFor(Plugin *plugin, const QDir &pluginDir)
 
         luaL_Reg{LUA_COLIBNAME, luaopen_coroutine},
         luaL_Reg{LUA_TABLIBNAME, luaopen_table},
-        // luaL_Reg{LUA_IOLIBNAME, luaopen_io},
-        // - explicit fs access, needs wrapper with permissions, no usage ideas yet
         // luaL_Reg{LUA_OSLIBNAME, luaopen_os},
         // - fs access
         // - environ access
