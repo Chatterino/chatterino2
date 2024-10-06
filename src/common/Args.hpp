@@ -60,6 +60,7 @@ public:
     bool dontLoadMainWindow{};
     std::optional<WindowLayout> customChannelLayout;
     std::optional<Channel> activateChannel;
+    std::optional<QString> initialLogin;
     bool verbose{};
     bool safeMode{};
 
