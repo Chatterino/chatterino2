@@ -487,6 +487,9 @@ public:
     BoolSetting suppressInitialLiveNotification = {
         "/notifications/suppressInitialLive", false};
 
+    BoolSetting globallySuppressNotifications = {
+        "/notifications/globalSuppression", false};
+
     BoolSetting notificationToast = {"/notifications/enableToast", false};
     IntSetting openFromToast = {"/notifications/openFromToast",
                                 static_cast<int>(ToastReaction::OpenInBrowser)};
