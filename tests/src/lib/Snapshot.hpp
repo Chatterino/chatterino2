@@ -4,6 +4,7 @@
 #include <QJsonValue>
 #include <QString>
 
+#include <memory>
 #include <span>
 
 namespace chatterino::testlib {
@@ -61,7 +62,7 @@ public:
     ~Snapshot() = default;
 
     /// Read a snapshot
-    static Snapshot read(QString category, QString name);
+    static std::unique_ptr<Snapshot> read(QString category, QString name);
 
     /// Verifies that all snapshots are included in @a names
     static bool verifyIntegrity(const QString &category,
@@ -109,6 +110,8 @@ public:
         return this->param(QLatin1String{name});
     }
 
+    QByteArray mergedSettings(const QByteArray &base) const;
+
     QJsonValue output() const
     {
         return this->output_;
@@ -123,6 +126,7 @@ private:
     QString name_;
     QJsonValue input_;
     QJsonObject params_;
+    QJsonObject settings_;
     QJsonValue output_;
 };
 

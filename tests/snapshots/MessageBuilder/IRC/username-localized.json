@@ -109,7 +109,11 @@
             "usernameColor": "#ffff0000"
         }
     ],
-    "params": {
-        "usernameDisplayMode": "LocalizedName"
+    "settings": {
+        "appearance": {
+            "messages": {
+                "usernameDisplayMode": 2
+            }
+        }
     }
 }

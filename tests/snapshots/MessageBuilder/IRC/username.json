@@ -109,7 +109,11 @@
             "usernameColor": "#ffff0000"
         }
     ],
-    "params": {
-        "usernameDisplayMode": "Username"
+    "settings": {
+        "appearance": {
+            "messages": {
+                "usernameDisplayMode": 1
+            }
+        }
     }
 }

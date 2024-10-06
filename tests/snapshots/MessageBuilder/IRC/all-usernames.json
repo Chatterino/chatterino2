@@ -305,7 +305,11 @@
             "usernameColor": "#ffff0000"
         }
     ],
-    "params": {
-        "findAllUsernames": true
+    "settings": {
+        "appearance": {
+            "messages": {
+                "findAllUsernames": true
+            }
+        }
     }
 }

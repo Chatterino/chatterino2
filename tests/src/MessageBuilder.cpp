@@ -54,7 +54,7 @@ namespace {
 ///
 /// When adding a test, start with `{ "input": "..." }` and set this to `true`
 /// to generate an initial snapshot. Make sure to verify the output!
-constexpr bool UPDATE_SNAPSHOTS = false;
+constexpr bool UPDATE_SNAPSHOTS = true;
 
 const QString IRC_CATEGORY = u"MessageBuilder/IRC"_s;
 
@@ -327,18 +327,18 @@ const QByteArray CHEERMOTE_JSON{R"({
         "id": "1",
         "color": "#979797",
         "images": {
-        "dark": {
-            "animated": {
-            "1": "https://chatterino.com/bits/1.gif",
-            "2": "https://chatterino.com/bits/2.gif",
-            "4": "https://chatterino.com/bits/4.gif"
-            },
-            "static": {
-            "1": "https://chatterino.com/bits/1.png",
-            "2": "https://chatterino.com/bits/2.png",
-            "4": "https://chatterino.com/bits/4.png"
+            "dark": {
+                "animated": {
+                    "1": "https://chatterino.com/bits/1.gif",
+                    "2": "https://chatterino.com/bits/2.gif",
+                    "4": "https://chatterino.com/bits/4.gif"
+                },
+                "static": {
+                    "1": "https://chatterino.com/bits/1.png",
+                    "2": "https://chatterino.com/bits/2.png",
+                    "4": "https://chatterino.com/bits/4.png"
+                }
             }
-        }
         },
         "can_cheer": true,
         "show_in_bits_card": true
@@ -348,18 +348,18 @@ const QByteArray CHEERMOTE_JSON{R"({
         "id": "100",
         "color": "#9c3ee8",
         "images": {
-        "dark": {
-            "animated": {
-            "1": "https://chatterino.com/bits/1.gif",
-            "2": "https://chatterino.com/bits/2.gif",
-            "4": "https://chatterino.com/bits/4.gif"
-            },
-            "static": {
-            "1": "https://chatterino.com/bits/1.png",
-            "2": "https://chatterino.com/bits/2.png",
-            "4": "https://chatterino.com/bits/4.png"
+            "dark": {
+                "animated": {
+                    "1": "https://chatterino.com/bits/1.gif",
+                    "2": "https://chatterino.com/bits/2.gif",
+                    "4": "https://chatterino.com/bits/4.gif"
+                },
+                "static": {
+                    "1": "https://chatterino.com/bits/1.png",
+                    "2": "https://chatterino.com/bits/2.png",
+                    "4": "https://chatterino.com/bits/4.png"
+                }
             }
-        }
         },
         "can_cheer": true,
         "show_in_bits_card": true
@@ -390,7 +390,7 @@ const QByteArray LOCAL_BADGE_JSON{R"({
     ]
 })"_ba};
 
-const QString SETTINGS_DEFAULT{uR"(
+const QByteArray SETTINGS_DEFAULT{R"(
 {
     "highlighting": {
         "blacklist": [
@@ -430,7 +430,7 @@ const QString SETTINGS_DEFAULT{uR"(
             "isCaseSensitive": false
         }
     ]
-})"_s};
+})"_ba};
 
 std::shared_ptr<TwitchChannel> makeMockTwitchChannel(
     const QString &name, const testlib::Snapshot &snapshot)
@@ -988,13 +988,18 @@ TEST_F(TestMessageBuilder, IgnoresReplace)
             << "' and output '" << message << "'";
     }
 }
+
 class TestMessageBuilderP : public ::testing::TestWithParam<const char *>
 {
 public:
     void SetUp() override
     {
+        const auto *param = TestMessageBuilderP::GetParam();
+        this->snapshot = testlib::Snapshot::read(IRC_CATEGORY, param);
+
         this->mockApplication =
-            std::make_unique<MockApplication>(SETTINGS_DEFAULT);
+            std::make_unique<MockApplication>(QString::fromUtf8(
+                this->snapshot->mergedSettings(SETTINGS_DEFAULT)));
         auto mocks = MockEmotes::global();
         this->mockApplication->seventvEmotes.setGlobalEmotes(mocks.seventv);
         this->mockApplication->bttvEmotes.setEmotes(mocks.bttv);
@@ -1101,10 +1106,12 @@ public:
     {
         this->twitchdevChannel.reset();
         this->mockApplication.reset();
+        this->snapshot.reset();
     }
 
     std::shared_ptr<TwitchChannel> twitchdevChannel;
     std::unique_ptr<MockApplication> mockApplication;
+    std::unique_ptr<testlib::Snapshot> snapshot;
 };
 
 /// This tests the process of parsing IRC messages and emitting `MessagePtr`s.
@@ -1126,22 +1133,11 @@ public:
 ///   (default: false)
 TEST_P(TestMessageBuilderP, Run)
 {
-    const auto *param = std::remove_pointer_t<decltype(this)>::GetParam();
-    auto snapshot = testlib::Snapshot::read(IRC_CATEGORY, param);
-
-    getSettings()->findAllUsernames =
-        snapshot.param("findAllUsernames").toBool();
-    getSettings()->stackBits = snapshot.param("stackBits").toBool();
-    getSettings()->usernameDisplayMode =
-        qmagicenum::enumCast<UsernameDisplayMode>(
-            snapshot.param("usernameDisplayMode").toString())
-            .value_or(UsernameDisplayMode::UsernameAndLocalizedName);
-
-    auto channel = makeMockTwitchChannel(u"pajlada"_s, snapshot);
+    auto channel = makeMockTwitchChannel(u"pajlada"_s, *snapshot);
 
     std::vector<MessagePtr> prevMessages;
 
-    for (auto prevInput : snapshot.param("prevMessages").toArray())
+    for (auto prevInput : snapshot->param("prevMessages").toArray())
     {
         auto *ircMessage = Communi::IrcMessage::fromData(
             prevInput.toString().toUtf8(), nullptr);
@@ -1156,7 +1152,7 @@ TEST_P(TestMessageBuilderP, Run)
     }
 
     auto *ircMessage =
-        Communi::IrcMessage::fromData(snapshot.inputUtf8(), nullptr);
+        Communi::IrcMessage::fromData(snapshot->inputUtf8(), nullptr);
     ASSERT_NE(ircMessage, nullptr);
 
     auto builtMessages = IrcMessageHandler::parseMessageWithReply(
@@ -1170,7 +1166,7 @@ TEST_P(TestMessageBuilderP, Run)
 
     delete ircMessage;
 
-    ASSERT_TRUE(snapshot.run(got, UPDATE_SNAPSHOTS));
+    ASSERT_TRUE(snapshot->run(got, UPDATE_SNAPSHOTS));
 }
 
 INSTANTIATE_TEST_SUITE_P(IrcMessage, TestMessageBuilderP,

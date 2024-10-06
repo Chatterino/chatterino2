@@ -253,7 +253,9 @@
             "usernameColor": "#ff0000ff"
         }
     ],
-    "params": {
-        "stackBits": true
+    "settings": {
+        "emotes": {
+            "stackBits": true
+        }
     }
 }

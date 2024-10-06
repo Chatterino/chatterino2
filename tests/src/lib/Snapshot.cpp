@@ -87,6 +87,48 @@ bool compareJson(const QJsonValue &expected, const QJsonValue &got,
     return false;
 }
 
+void mergeJson(QJsonObject &base, const QJsonObject &additional)
+{
+    for (auto it = additional.begin(); it != additional.end(); it++)
+    {
+        auto ref = base[it.key()];
+
+        if (ref.isArray())
+        {
+            // there's no way of pushing to the array without detaching first
+            auto arr = ref.toArray();
+            if (!it->isArray())
+            {
+                throw std::runtime_error("Mismatched types");
+            }
+
+            // append all additional values
+            auto addArr = it->toArray();
+            for (auto v : addArr)
+            {
+                arr.append(v);
+            }
+            ref = arr;
+            continue;
+        }
+
+        if (ref.isObject())
+        {
+            // same here, detach first and overwrite
+            auto obj = ref.toObject();
+            if (!it->isObject())
+            {
+                throw std::runtime_error("Mismatched types");
+            }
+            mergeJson(obj, it->toObject());
+            ref = obj;
+            continue;
+        }
+
+        ref = it.value();  // overwrite for simple types/non-existent keys
+    }
+}
+
 QDir baseDir(const QString &category)
 {
     QDir snapshotDir(QStringLiteral(__FILE__));
@@ -104,7 +146,7 @@ QString filePath(const QString &category, const QString &name)
 
 namespace chatterino::testlib {
 
-Snapshot Snapshot::read(QString category, QString name)
+std::unique_ptr<Snapshot> Snapshot::read(QString category, QString name)
 {
     if (!name.endsWith(u".json"))
     {
@@ -120,7 +162,8 @@ Snapshot Snapshot::read(QString category, QString name)
     file.close();
     const auto doc = QJsonDocument::fromJson(content).object();
 
-    return {std::move(category), std::move(name), doc};
+    return std::unique_ptr<Snapshot>(
+        new Snapshot(std::move(category), std::move(name), doc));
 }
 
 bool Snapshot::verifyIntegrity(const QString &category,
@@ -174,6 +217,7 @@ Snapshot::Snapshot(QString category, QString name, const QJsonObject &root)
     , name_(std::move(name))
     , input_(root["input"_L1])
     , params_(root["params"_L1].toObject())
+    , settings_(root["settings"_L1].toObject())
     , output_(root["output"_L1])
 {
 }
@@ -194,9 +238,27 @@ void Snapshot::write(const QJsonValue &got) const
     {
         obj.insert("params"_L1, this->params_);
     }
+    if (!this->settings_.isEmpty())
+    {
+        obj.insert("settings"_L1, this->settings_);
+    }
 
     file.write(QJsonDocument{obj}.toJson());
     file.close();
+}
+
+QByteArray Snapshot::mergedSettings(const QByteArray &base) const
+{
+    auto baseDoc = QJsonDocument::fromJson(base);
+    if (!baseDoc.isObject())
+    {
+        throw std::runtime_error("Invalid base settings");
+    }
+    auto baseObj = baseDoc.object();
+    mergeJson(baseObj, this->settings_);
+
+    baseDoc.setObject(baseObj);
+    return baseDoc.toJson(QJsonDocument::Compact);
 }
 
 }  // namespace chatterino::testlib
