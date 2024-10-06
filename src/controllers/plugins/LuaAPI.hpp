@@ -26,11 +26,8 @@ namespace chatterino::lua::api {
 enum class LogLevel { Debug, Info, Warning, Critical };
 
 /**
- * @exposeenum c2.EventType
+ * @includefile controllers/plugins/api/EventType.hpp
  */
-enum class EventType {
-    CompletionRequested,
-};
 
 /**
  * @lua@class CommandContext

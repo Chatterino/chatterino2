@@ -9,9 +9,13 @@ c2 = {}
 ---@type { Debug: c2.LogLevel, Info: c2.LogLevel, Warning: c2.LogLevel, Critical: c2.LogLevel }
 c2.LogLevel = {}
 
+-- Begin src/controllers/plugins/api/EventType.hpp
+
 ---@alias c2.EventType integer
 ---@type { CompletionRequested: c2.EventType }
 c2.EventType = {}
+
+-- End src/controllers/plugins/api/EventType.hpp
 
 ---@class CommandContext
 ---@field words string[] The words typed when executing the command. For example `/foo bar baz` will result in `{"/foo", "bar", "baz"}`.

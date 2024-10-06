@@ -4,7 +4,7 @@
 #    include "Application.hpp"
 #    include "common/Common.hpp"
 #    include "common/network/NetworkCommon.hpp"
-#    include "controllers/plugins/LuaAPI.hpp"
+#    include "controllers/plugins/api/EventType.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/PluginPermission.hpp"
 
