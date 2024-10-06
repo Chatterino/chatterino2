@@ -651,79 +651,40 @@ void UserInfoPopup::installEvents()
             if (newState == Qt::Checked)
             {
                 this->ui_.block->setEnabled(false);
-                auto blockThisUser = [this, reenableBlockCheckbox,
-                                      currentUser] {
-                    getApp()->getAccounts()->twitch.getCurrent()->blockUser(
-                        this->userId_, this,
-                        [this, reenableBlockCheckbox, currentUser] {
-                            this->channel_->addSystemMessage(
-                                QString("You successfully blocked user %1")
-                                    .arg(this->userName_));
-                            reenableBlockCheckbox();
-                        },
-                        [this, reenableBlockCheckbox] {
-                            this->channel_->addSystemMessage(
-                                QString("User %1 couldn't be blocked, an "
-                                        "unknown error occurred!")
-                                    .arg(this->userName_));
-                            reenableBlockCheckbox();
-                        });
-                };
-                getHelix()->getFollowedChannel(
-                    getApp()->getAccounts()->twitch.getCurrent()->getUserId(),
+
+                bool wasPinned = this->ensurePinned();
+                auto btn = QMessageBox::warning(
+                    this, u"Blocking " % this->userName_,
+                    u"Blocking %1 can cause unintended side-effects like unfollowing.\n\n"_s
+                    "Are you sure you want to block %1?".arg(this->userName_),
+                    QMessageBox::Yes | QMessageBox::Cancel,
+                    QMessageBox::Cancel);
+                if (wasPinned)
+                {
+                    this->togglePinned();
+                }
+                if (btn != QMessageBox::Yes)
+                {
+                    reenableBlockCheckbox();
+                    QSignalBlocker blocker(this->ui_.block);
+                    this->ui_.block->setCheckState(Qt::Unchecked);
+                    return;
+                }
+
+                getApp()->getAccounts()->twitch.getCurrent()->blockUser(
                     this->userId_, this,
-                    [this, blockThisUser,
-                     reenableBlockCheckbox](const auto &followStatus) {
-                        if (!followStatus)
-                        {
-                            blockThisUser();
-                            return;
-                        }
-                        bool wasPinned = this->ensurePinned();
-                        auto btn = QMessageBox::warning(
-                            this, u"Blocking " % this->userName_,
-                            u"You're following %1 since %2.\n"_s
-                            "Blocking %1 will unfollow them!\n\n"
-                            "Are you sure you want to unfollow and block %1?"
-                                .arg(this->userName_,
-                                     followStatus->followedAt.toString()),
-                            QMessageBox::Yes | QMessageBox::Cancel,
-                            QMessageBox::Cancel);
-                        if (wasPinned)
-                        {
-                            this->togglePinned();
-                        }
-                        if (btn != QMessageBox::Yes)
-                        {
-                            reenableBlockCheckbox();
-                            return;
-                        }
-                        blockThisUser();
+                    [this, reenableBlockCheckbox, currentUser] {
+                        this->channel_->addSystemMessage(
+                            QString("You successfully blocked user %1")
+                                .arg(this->userName_));
+                        reenableBlockCheckbox();
                     },
-                    [this, blockThisUser,
-                     reenableBlockCheckbox](const auto &error) {
-                        bool wasPinned = this->ensurePinned();
-                        auto btn = QMessageBox::warning(
-                            this, u"Blocking " % this->userName_,
-                            u"Failed to get following status for %1 (error: %2).\n"_s
-                            "Blocking a followed channel will automatically "
-                            "unfollow them.\n\n"
-                            "Are you sure you want to block %1?".arg(
-                                this->userName_, error),
-                            QMessageBox::Yes | QMessageBox::Cancel,
-                            QMessageBox::Cancel);
-                        if (wasPinned)
-                        {
-                            this->togglePinned();
-                        }
-                        if (btn == QMessageBox::Yes)
-                        {
-                            blockThisUser();
-                        }
-                        else
-                        {
-                            reenableBlockCheckbox();
-                        }
+                    [this, reenableBlockCheckbox] {
+                        this->channel_->addSystemMessage(
+                            QString("User %1 couldn't be blocked, an "
+                                    "unknown error occurred!")
+                                .arg(this->userName_));
+                        reenableBlockCheckbox();
                     });
                 return;
             }
