@@ -149,6 +149,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel)
     settings->overlayBackgroundOpacity.connect(
         [this] {
             this->channelView_.updateColorTheme();
+            this->update();
         },
         this->holder_, false);
 
