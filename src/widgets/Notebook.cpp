@@ -1633,4 +1633,20 @@ void SplitNotebook::select(QWidget *page, bool focusPage)
     this->Notebook::select(page, focusPage);
 }
 
+void SplitNotebook::forEachSplit(const std::function<void(Split *)> &cb)
+{
+    for (const auto &item : this->items())
+    {
+        auto *page = dynamic_cast<SplitContainer *>(item.page);
+        if (!page)
+        {
+            continue;
+        }
+        for (auto *split : page->getSplits())
+        {
+            cb(split);
+        }
+    }
+}
+
 }  // namespace chatterino

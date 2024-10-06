@@ -7,6 +7,7 @@
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/layouts/MessageLayoutContainer.hpp"
+#include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "providers/emoji/Emojis.hpp"
 #include "singletons/Emotes.hpp"
@@ -119,9 +120,9 @@ ImageElement::ImageElement(ImagePtr image, MessageElementFlags flags)
 }
 
 void ImageElement::addToContainer(MessageLayoutContainer &container,
-                                  MessageElementFlags flags)
+                                  const MessageLayoutContext &ctx)
 {
-    if (flags.hasAny(this->getFlags()))
+    if (ctx.flags.hasAny(this->getFlags()))
     {
         auto size = QSize(this->image_->width() * container.getScale(),
                           this->image_->height() * container.getScale());
@@ -151,9 +152,9 @@ CircularImageElement::CircularImageElement(ImagePtr image, int padding,
 }
 
 void CircularImageElement::addToContainer(MessageLayoutContainer &container,
-                                          MessageElementFlags flags)
+                                          const MessageLayoutContext &ctx)
 {
-    if (flags.hasAny(this->getFlags()))
+    if (ctx.flags.hasAny(this->getFlags()))
     {
         auto imgSize = QSize(this->image_->width(), this->image_->height()) *
                        container.getScale();
@@ -192,11 +193,11 @@ EmotePtr EmoteElement::getEmote() const
 }
 
 void EmoteElement::addToContainer(MessageLayoutContainer &container,
-                                  MessageElementFlags flags)
+                                  const MessageLayoutContext &ctx)
 {
-    if (flags.hasAny(this->getFlags()))
+    if (ctx.flags.hasAny(this->getFlags()))
     {
-        if (flags.has(MessageElementFlag::EmoteImages))
+        if (ctx.flags.has(MessageElementFlag::EmoteImages))
         {
             auto image = this->emote_->images.getImageOrLoaded(
                 container.getImageScale());
@@ -217,8 +218,9 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
         {
             if (this->textElement_)
             {
-                this->textElement_->addToContainer(container,
-                                                   MessageElementFlag::Misc);
+                auto textCtx = ctx;
+                textCtx.flags = MessageElementFlag::Misc;
+                this->textElement_->addToContainer(container, textCtx);
             }
         }
     }
@@ -260,11 +262,11 @@ void LayeredEmoteElement::addEmoteLayer(const LayeredEmoteElement::Emote &emote)
 }
 
 void LayeredEmoteElement::addToContainer(MessageLayoutContainer &container,
-                                         MessageElementFlags flags)
+                                         const MessageLayoutContext &ctx)
 {
-    if (flags.hasAny(this->getFlags()))
+    if (ctx.flags.hasAny(this->getFlags()))
     {
-        if (flags.has(MessageElementFlag::EmoteImages))
+        if (ctx.flags.has(MessageElementFlag::EmoteImages))
         {
             auto images = this->getLoadedImages(container.getImageScale());
             if (images.empty())
@@ -291,8 +293,9 @@ void LayeredEmoteElement::addToContainer(MessageLayoutContainer &container,
         {
             if (this->textElement_)
             {
-                this->textElement_->addToContainer(container,
-                                                   MessageElementFlag::Misc);
+                auto textCtx = ctx;
+                textCtx.flags = MessageElementFlag::Misc;
+                this->textElement_->addToContainer(container, textCtx);
             }
         }
     }
@@ -447,9 +450,9 @@ BadgeElement::BadgeElement(const EmotePtr &emote, MessageElementFlags flags)
 }
 
 void BadgeElement::addToContainer(MessageLayoutContainer &container,
-                                  MessageElementFlags flags)
+                                  const MessageLayoutContext &ctx)
 {
-    if (flags.hasAny(this->getFlags()))
+    if (ctx.flags.hasAny(this->getFlags()))
     {
         auto image =
             this->emote_->images.getImageOrLoaded(container.getImageScale());
@@ -574,11 +577,11 @@ TextElement::TextElement(const QString &text, MessageElementFlags flags,
 }
 
 void TextElement::addToContainer(MessageLayoutContainer &container,
-                                 MessageElementFlags flags)
+                                 const MessageLayoutContext &ctx)
 {
     auto *app = getApp();
 
-    if (flags.hasAny(this->getFlags()))
+    if (ctx.flags.hasAny(this->getFlags()))
     {
         QFontMetrics metrics =
             app->getFonts()->getFontMetrics(this->style_, container.getScale());
@@ -589,7 +592,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
 
             auto getTextLayoutElement = [&](QString text, int width,
                                             bool hasTrailingSpace) {
-                auto color = this->color_.getColor(*app->getThemes());
+                auto color = this->color_.getColor(ctx.messageColors);
                 app->getThemes()->normalizeColor(color);
 
                 auto *e = new TextLayoutElement(
@@ -697,18 +700,18 @@ SingleLineTextElement::SingleLineTextElement(const QString &text,
 }
 
 void SingleLineTextElement::addToContainer(MessageLayoutContainer &container,
-                                           MessageElementFlags flags)
+                                           const MessageLayoutContext &ctx)
 {
     auto *app = getApp();
 
-    if (flags.hasAny(this->getFlags()))
+    if (ctx.flags.hasAny(this->getFlags()))
     {
         QFontMetrics metrics =
             app->getFonts()->getFontMetrics(this->style_, container.getScale());
 
         auto getTextLayoutElement = [&](QString text, int width,
                                         bool hasTrailingSpace) {
-            auto color = this->color_.getColor(*app->getThemes());
+            auto color = this->color_.getColor(ctx.messageColors);
             app->getThemes()->normalizeColor(color);
 
             auto *e = new TextLayoutElement(
@@ -838,11 +841,11 @@ LinkElement::LinkElement(const Parsed &parsed, const QString &fullUrl,
 }
 
 void LinkElement::addToContainer(MessageLayoutContainer &container,
-                                 MessageElementFlags flags)
+                                 const MessageLayoutContext &ctx)
 {
     this->words_ =
         getSettings()->lowercaseDomains ? this->lowercase_ : this->original_;
-    TextElement::addToContainer(container, flags);
+    TextElement::addToContainer(container, ctx);
 }
 
 Link LinkElement::getLink() const
@@ -873,7 +876,7 @@ MentionElement::MentionElement(const QString &displayName, QString loginName_,
 }
 
 void MentionElement::addToContainer(MessageLayoutContainer &container,
-                                    MessageElementFlags flags)
+                                    const MessageLayoutContext &ctx)
 {
     if (getSettings()->colorUsernames)
     {
@@ -893,7 +896,7 @@ void MentionElement::addToContainer(MessageLayoutContainer &container,
         this->style_ = FontStyle::ChatMedium;
     }
 
-    TextElement::addToContainer(container, flags);
+    TextElement::addToContainer(container, ctx);
 }
 
 MessageElement *MentionElement::setLink(const Link &link)
@@ -943,9 +946,9 @@ TimestampElement::TimestampElement(QTime time)
 }
 
 void TimestampElement::addToContainer(MessageLayoutContainer &container,
-                                      MessageElementFlags flags)
+                                      const MessageLayoutContext &ctx)
 {
-    if (flags.hasAny(this->getFlags()))
+    if (ctx.flags.hasAny(this->getFlags()))
     {
         if (getSettings()->timestampFormat != this->format_)
         {
@@ -953,7 +956,7 @@ void TimestampElement::addToContainer(MessageLayoutContainer &container,
             this->element_.reset(this->formatTime(this->time_));
         }
 
-        this->element_->addToContainer(container, flags);
+        this->element_->addToContainer(container, ctx);
     }
 }
 
@@ -985,9 +988,9 @@ TwitchModerationElement::TwitchModerationElement()
 }
 
 void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
-                                             MessageElementFlags flags)
+                                             const MessageLayoutContext &ctx)
 {
-    if (flags.has(MessageElementFlag::ModeratorTools))
+    if (ctx.flags.has(MessageElementFlag::ModeratorTools))
     {
         QSize size(int(container.getScale() * 16),
                    int(container.getScale() * 16));
@@ -1026,9 +1029,9 @@ LinebreakElement::LinebreakElement(MessageElementFlags flags)
 }
 
 void LinebreakElement::addToContainer(MessageLayoutContainer &container,
-                                      MessageElementFlags flags)
+                                      const MessageLayoutContext &ctx)
 {
-    if (flags.hasAny(this->getFlags()))
+    if (ctx.flags.hasAny(this->getFlags()))
     {
         container.breakLine();
     }
@@ -1050,9 +1053,9 @@ ScalingImageElement::ScalingImageElement(ImageSet images,
 }
 
 void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
-                                         MessageElementFlags flags)
+                                         const MessageLayoutContext &ctx)
 {
-    if (flags.hasAny(this->getFlags()))
+    if (ctx.flags.hasAny(this->getFlags()))
     {
         const auto &image =
             this->images_.getImageOrLoaded(container.getImageScale());
@@ -1083,14 +1086,14 @@ ReplyCurveElement::ReplyCurveElement()
 }
 
 void ReplyCurveElement::addToContainer(MessageLayoutContainer &container,
-                                       MessageElementFlags flags)
+                                       const MessageLayoutContext &ctx)
 {
     static const int width = 18;         // Overall width
     static const float thickness = 1.5;  // Pen width
     static const int radius = 6;         // Radius of the top left corner
     static const int margin = 2;         // Top/Left/Bottom margin
 
-    if (flags.hasAny(this->getFlags()))
+    if (ctx.flags.hasAny(this->getFlags()))
     {
         float scale = container.getScale();
         container.addElement(

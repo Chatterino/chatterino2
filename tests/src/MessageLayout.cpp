@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "messages/layouts/MessageLayoutContext.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
 #include "mocks/BaseApplication.hpp"
@@ -55,7 +56,16 @@ public:
         builder.append(
             std::make_unique<TextElement>(text, MessageElementFlag::Text));
         this->layout = std::make_unique<MessageLayout>(builder.release());
-        this->layout->layout(WIDTH, 1, 1, MessageElementFlag::Text, false);
+        MessageColors colors;
+        this->layout->layout(
+            {
+                .messageColors = colors,
+                .flags = MessageElementFlag::Text,
+                .width = WIDTH,
+                .scale = 1,
+                .imageScale = 1,
+            },
+            false);
     }
 
     MockApplication mockApplication;

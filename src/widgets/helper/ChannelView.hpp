@@ -202,6 +202,16 @@ public:
      */
     bool mayContainMessage(const MessagePtr &message);
 
+    void updateColorTheme();
+
+    /// @brief Adjusts the colors this view uses
+    ///
+    /// If @a isOverlay is true, the overlay colors (as specified in the theme)
+    /// will be used. Otherwise, regular message-colors will be used.
+    void setIsOverlay(bool isOverlay);
+
+    Scrollbar *scrollbar();
+
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
     pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
@@ -376,6 +386,8 @@ private:
     bool enableScrollingToBottom_ = true;
 
     bool onlyUpdateEmotes_ = false;
+
+    bool isOverlay_ = false;
 
     // Mouse event variables
     bool isLeftMouseDown_ = false;
