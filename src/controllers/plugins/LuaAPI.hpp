@@ -113,7 +113,8 @@ void c2_register_callback(Plugin *pl, EventType evtType,
  * @lua@param ... any Values to log. Should be convertible to a string with `tostring()`.
  * @exposed c2.log
  */
-int c2_log(lua_State *L);
+void c2_log(sol::this_state L, Plugin *pl, LogLevel lvl,
+            sol::variadic_args args);
 
 /**
  * Calls callback around msec milliseconds later. Does not freeze Chatterino.
@@ -126,7 +127,7 @@ int c2_later(lua_State *L);
 
 // These ones are global
 int g_load(lua_State *L);
-int g_print(lua_State *L);
+void g_print(sol::this_state L, Plugin *pl, sol::variadic_args args);
 // NOLINTEND(readability-identifier-naming)
 
 // This is for require() exposed as an element of package.searchers

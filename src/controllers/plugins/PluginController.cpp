@@ -24,6 +24,7 @@
 #    include <QJsonDocument>
 #    include <sol/forward.hpp>
 #    include <sol/sol.hpp>
+#    include <sol/variadic_args.hpp>
 
 #    include <memory>
 #    include <utility>
@@ -149,7 +150,6 @@ void PluginController::openLibrariesFor(Plugin *plugin, const QDir &pluginDir)
 
     // NOLINTNEXTLINE(*-avoid-c-arrays)
     static const luaL_Reg c2Lib[] = {
-        {"log", lua::api::c2_log},
         {"later", lua::api::c2_later},
         {nullptr, nullptr},
     };
@@ -160,9 +160,6 @@ void PluginController::openLibrariesFor(Plugin *plugin, const QDir &pluginDir)
     auto c2libIdx = lua::pushEmptyTable(L, 8);
 
     luaL_setfuncs(L, c2Lib, 0);
-
-    lua::pushEnumTable<lua::api::LogLevel>(L);
-    lua_setfield(L, c2libIdx, "LogLevel");
 
     lua_setfield(L, gtable, "c2");
 
@@ -179,7 +176,6 @@ void PluginController::openLibrariesFor(Plugin *plugin, const QDir &pluginDir)
     // NOLINTNEXTLINE(*-avoid-c-arrays)
     static const luaL_Reg replacementFuncs[] = {
         {"load", lua::api::g_load},
-        {"print", lua::api::g_print},
         {nullptr, nullptr},
     };
     luaL_setfuncs(L, replacementFuncs, 0);
@@ -280,7 +276,14 @@ void PluginController::openLibrariesFor(Plugin *plugin, const QDir &pluginDir)
 // especially in cases when the plugin is errored.
 void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
 {
-    sol::table c2 = lua.globals()["c2"];
+    auto g = lua.globals();
+    // Do not capture plugin->state_ in lambdas, this makes the functions unusable in callbacks
+    g.set_function("print",
+                   [plugin](sol::this_state s, sol::variadic_args args) {
+                       lua::api::g_print(s, plugin, args);
+                   });
+
+    sol::table c2 = g["c2"];
     c2.set_function("register_command",
                     [plugin](const QString &name, sol::protected_function cb) {
                         return plugin->registerCommand(name, std::move(cb));
@@ -289,6 +292,10 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
                                                   sol::protected_function cb) {
         lua::api::c2_register_callback(plugin, ev, std::move(cb));
     });
+    c2.set_function("log", [plugin](sol::this_state s, lua::api::LogLevel lvl,
+                                    sol::variadic_args args) {
+        lua::api::c2_log(s, plugin, lvl, args);
+    });
 
     lua::api::ChannelRef::createUserType(c2);
     lua::api::HTTPResponse::createUserType(c2);
@@ -296,6 +303,7 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     c2["ChannelType"] = lua::createEnumTable<Channel::Type>(lua);
     c2["HTTPMethod"] = lua::createEnumTable<NetworkRequestType>(lua);
     c2["EventType"] = lua::createEnumTable<lua::api::EventType>(lua);
+    c2["LogLevel"] = lua::createEnumTable<lua::api::LogLevel>(lua);
 }
 
 void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
