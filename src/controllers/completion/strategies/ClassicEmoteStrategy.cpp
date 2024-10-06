@@ -52,25 +52,36 @@ void ClassicTabEmoteStrategy::apply(const std::vector<EmoteItem> &items,
                                     std::vector<EmoteItem> &output,
                                     const QString &query) const
 {
-    bool emojiOnly = false;
-    QString normalizedQuery = query;
-    if (normalizedQuery.startsWith(':'))
+    bool colonStart = query.startsWith(':');
+    QStringView normalizedQuery = query;
+    if (colonStart)
     {
+        // TODO(Qt6): use sliced
         normalizedQuery = normalizedQuery.mid(1);
-        // tab completion with : prefix should do emojis only
-        emojiOnly = true;
     }
 
     std::set<EmoteItem, CompletionEmoteOrder> emotes;
 
     for (const auto &item : items)
     {
-        if (emojiOnly ^ item.isEmoji)
+        QStringView itemQuery;
+        if (item.isEmoji)
         {
-            continue;
+            if (colonStart)
+            {
+                itemQuery = normalizedQuery;
+            }
+            else
+            {
+                continue;  // ignore emojis when not completing with ':'
+            }
+        }
+        else
+        {
+            itemQuery = query;
         }
 
-        if (startsWithOrContains(item.searchName, normalizedQuery,
+        if (startsWithOrContains(item.searchName, itemQuery,
                                  Qt::CaseInsensitive,
                                  getSettings()->prefixOnlyEmoteCompletion))
         {

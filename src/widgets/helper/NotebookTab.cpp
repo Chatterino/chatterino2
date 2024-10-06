@@ -412,11 +412,6 @@ void NotebookTab::moveAnimated(QPoint targetPos, bool animated)
 {
     this->positionAnimationDesiredPoint_ = targetPos;
 
-    if (this->pos() == targetPos)
-    {
-        return;
-    }
-
     if (!animated || !this->notebook_->isVisible())
     {
         this->move(targetPos);
