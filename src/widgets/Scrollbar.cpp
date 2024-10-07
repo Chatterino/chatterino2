@@ -285,18 +285,21 @@ void Scrollbar::paintEvent(QPaintEvent * /*event*/)
     bool enableElevatedMessageHighlights =
         getSettings()->enableElevatedMessageHighlight;
 
-    this->thumbRect_.setX(xOffset);
+    if (this->showThumb_)
+    {
+        this->thumbRect_.setX(xOffset);
 
-    // mouse over thumb
-    if (this->mouseDownLocation_ == MouseLocation::InsideThumb)
-    {
-        painter.fillRect(this->thumbRect_,
-                         this->theme->scrollbars.thumbSelected);
-    }
-    // mouse not over thumb
-    else
-    {
-        painter.fillRect(this->thumbRect_, this->theme->scrollbars.thumb);
+        // mouse over thumb
+        if (this->mouseDownLocation_ == MouseLocation::InsideThumb)
+        {
+            painter.fillRect(this->thumbRect_,
+                             this->theme->scrollbars.thumbSelected);
+        }
+        // mouse not over thumb
+        else
+        {
+            painter.fillRect(this->thumbRect_, this->theme->scrollbars.thumb);
+        }
     }
 
     // draw highlights
@@ -446,6 +449,17 @@ void Scrollbar::updateScroll()
               static_cast<int>(this->pageSize_ / div * this->trackHeight_) +
                   MIN_THUMB_HEIGHT);
 
+    this->update();
+}
+
+void Scrollbar::setShowThumb(bool showThumb)
+{
+    if (this->showThumb_ == showThumb)
+    {
+        return;
+    }
+
+    this->showThumb_ = showThumb;
     this->update();
 }
 

@@ -555,7 +555,7 @@ void TextIconLayoutElement::paint(QPainter &painter,
 
     QFont font = app->getFonts()->getFont(FontStyle::Tiny, this->scale);
 
-    painter.setPen(messageColors.system);
+    painter.setPen(messageColors.systemText);
     painter.setFont(font);
 
     QTextOption option;

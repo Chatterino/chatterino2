@@ -551,6 +551,8 @@ set(SOURCE_FILES
         widgets/Label.hpp
         widgets/Notebook.cpp
         widgets/Notebook.hpp
+        widgets/OverlayWindow.cpp
+        widgets/OverlayWindow.hpp
         widgets/Scrollbar.cpp
         widgets/Scrollbar.hpp
         widgets/TooltipEntryWidget.cpp
@@ -638,6 +640,8 @@ set(SOURCE_FILES
         widgets/helper/NotebookButton.hpp
         widgets/helper/NotebookTab.cpp
         widgets/helper/NotebookTab.hpp
+        widgets/helper/OverlayInteraction.cpp
+        widgets/helper/OverlayInteraction.hpp
         widgets/helper/RegExpItemDelegate.cpp
         widgets/helper/RegExpItemDelegate.hpp
         widgets/helper/ResizingTextEdit.cpp

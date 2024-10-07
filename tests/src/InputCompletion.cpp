@@ -387,10 +387,12 @@ TEST_F(InputCompletionTest, ClassicTabCompletionEmote)
 TEST_F(InputCompletionTest, ClassicTabCompletionEmoji)
 {
     auto completion = queryClassicTabCompletion(":tf", false);
-    ASSERT_EQ(completion.size(), 0);
+    ASSERT_EQ(completion.size(), 1);
+    ASSERT_EQ(completion[0], ":tf: ");
 
     completion = queryClassicTabCompletion(":)", false);
-    ASSERT_EQ(completion.size(), 0);
+    ASSERT_EQ(completion.size(), 1);
+    ASSERT_EQ(completion[0], ":) ");
 
     completion = queryClassicTabCompletion(":cla", false);
     ASSERT_EQ(completion.size(), 8);
@@ -536,12 +538,12 @@ TEST_F(InputCompletionTest, SmartTabCompletionEmote)
 TEST_F(InputCompletionTest, SmartTabCompletionEmoji)
 {
     auto completion = querySmartTabCompletion(":tf", false);
-    ASSERT_EQ(completion.size(), 0);
-    // ASSERT_EQ(completion[0], ":tf: ");
+    ASSERT_EQ(completion.size(), 1);
+    ASSERT_EQ(completion[0], ":tf: ");
 
     completion = querySmartTabCompletion(":)", false);
-    ASSERT_EQ(completion.size(), 0);
-    // ASSERT_EQ(completion[0], ":) ");
+    ASSERT_EQ(completion.size(), 1);
+    ASSERT_EQ(completion[0], ":) ");
 
     completion = querySmartTabCompletion(":cla", false);
     ASSERT_EQ(completion.size(), 8);

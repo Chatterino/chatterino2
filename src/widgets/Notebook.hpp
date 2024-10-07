@@ -18,6 +18,7 @@ class UpdateDialog;
 class NotebookButton;
 class NotebookTab;
 class SplitContainer;
+class Split;
 
 enum NotebookTabLocation { Top = 0, Left = 1, Right = 2, Bottom = 3 };
 
@@ -228,6 +229,8 @@ public:
     void themeChangedEvent() override;
 
     void addNotebookActionsToMenu(QMenu *menu) override;
+
+    void forEachSplit(const std::function<void(Split *)> &cb);
 
     /**
      * Toggles between the "Show all tabs" and "Hide all tabs" tab visibility states
