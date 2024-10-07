@@ -11,7 +11,6 @@ namespace chatterino::lua::api {
 // These functions are exposed as `_G.io`, they are wrappers for native Lua functionality.
 
 const char *const REG_REAL_IO_NAME = "real_lua_io_lib";
-const char *const REG_C2_IO_NAME = "c2io";
 
 /**
  * Opens a file.

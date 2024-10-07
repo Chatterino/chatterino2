@@ -151,95 +151,52 @@ void PluginController::openLibrariesFor(Plugin *plugin, const QDir &pluginDir)
     luaL_requiref(L, LUA_IOLIBNAME, luaopen_io, int(false));
     lua_setfield(L, LUA_REGISTRYINDEX, lua::api::REG_REAL_IO_NAME);
 
-    lua_pushglobaltable(L);
-    auto gtable = lua_gettop(L);
-
-    // count of elements in C2LIB + LogLevel + EventType
-    auto c2libIdx = lua::pushEmptyTable(L, 8);
-
-    lua_setfield(L, gtable, "c2");
+    auto r = lua.registry();
+    auto g = lua.globals();
+    auto c2 = lua.create_table();
+    g["c2"] = c2;
 
     // ban functions
     // Note: this might not be fully secure? some kind of metatable fuckery might come up?
 
-    // possibly randomize this name at runtime to prevent some attacks?
-
 #    ifndef NDEBUG
     lua.registry()["real_load"] = lua.globals()["load"];
 #    endif
+    // See chatterino::lua::api::g_load implementation
 
-    lua_pushnil(L);
-    lua_setfield(L, gtable, "loadfile");
-
-    lua_pushnil(L);
-    lua_setfield(L, gtable, "dofile");
+    g["loadfile"] = sol::nil;
+    g["dofile"] = sol::nil;
 
     // set up package lib
-    lua_getfield(L, gtable, "package");
-
-    auto package = lua_gettop(L);
-    lua_pushstring(L, "");
-    lua_setfield(L, package, "cpath");
-
-    // we don't use path
-    lua_pushstring(L, "");
-    lua_setfield(L, package, "path");
-
     {
-        lua_getfield(L, gtable, "table");
-        auto table = lua_gettop(L);
-        lua_getfield(L, -1, "remove");
-        lua_remove(L, table);
-    }
-    auto remove = lua_gettop(L);
+        auto package = g["package"];
+        package["cpath"] = "";
+        package["path"] = "";
 
-    // remove searcher_Croot, searcher_C and searcher_Lua leaving only searcher_preload
-    for (int i = 0; i < 3; i++)
+        sol::protected_function tbremove = g["table"]["remove"];
+
+        // remove searcher_Croot, searcher_C and searcher_Lua leaving only searcher_preload
+        sol::table searchers = package["searchers"];
+        for (int i = 0; i < 3; i++)
+        {
+            tbremove(searchers);
+        }
+        searchers.add(&lua::api::searcherRelative);
+        searchers.add(&lua::api::searcherAbsolute);
+    }
+    // set up io lib
     {
-        lua_pushvalue(L, remove);
-        lua_getfield(L, package, "searchers");
-        lua_pcall(L, 1, 0, 0);
+        auto c2io = lua.create_table();
+        auto realio = r[lua::api::REG_REAL_IO_NAME];
+        c2io["type"] = realio["type"];
+        g["io"] = c2io;
+        // prevent plugins getting direct access to realio
+        r[LUA_LOADED_TABLE]["io"] = c2io;
+
+        // Don't give plugins the option to shit into our stdio
+        r["_IO_input"] = sol::nil;
+        r["_IO_output"] = sol::nil;
     }
-    lua_pop(L, 1);  // get rid of remove
-
-    lua_getfield(L, package, "searchers");
-    lua_pushcclosure(L, lua::api::searcherRelative, 0);
-    lua_seti(L, -2, 2);
-
-    lua::push(L, QString(pluginDir.absolutePath()));
-    lua_pushcclosure(L, lua::api::searcherAbsolute, 1);
-    lua_seti(L, -2, 3);
-    lua_pop(L, 2);  // remove package, package.searchers
-
-    auto iolibIdx = lua::pushEmptyTable(L, 1);
-
-    // set ourio.type = realio.type
-    lua_pushvalue(L, iolibIdx);
-    lua_getfield(L, LUA_REGISTRYINDEX, lua::api::REG_REAL_IO_NAME);
-    lua_getfield(L, -1, "type");
-    lua_remove(L, -2);  // remove realio
-    lua_setfield(L, iolibIdx, "type");
-    lua_pop(L, 1);  // still have iolib on top of stack
-
-    lua_pushvalue(L, iolibIdx);
-    lua_setfield(L, gtable, "io");
-
-    lua_pushvalue(L, iolibIdx);
-    lua_setfield(L, LUA_REGISTRYINDEX, lua::api::REG_C2_IO_NAME);
-
-    luaL_getsubtable(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
-    lua_pushvalue(L, iolibIdx);
-    lua_setfield(L, -2, "io");
-
-    lua_pop(L, 3);  // remove gtable, iolib, LOADED
-
-    // Don't give plugins the option to shit into our stdio
-    lua_pushnil(L);
-    lua_setfield(L, LUA_REGISTRYINDEX, "_IO_input");
-
-    lua_pushnil(L);
-    lua_setfield(L, LUA_REGISTRYINDEX, "_IO_output");
-
     PluginController::initSol(lua, plugin);
 }
 
