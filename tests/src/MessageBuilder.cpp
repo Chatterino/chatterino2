@@ -320,47 +320,7 @@ const QByteArray LOCAL_BADGE_JSON{R"({
     ]
 })"_ba};
 
-const QByteArray SETTINGS_DEFAULT{R"(
-{
-    "highlighting": {
-        "blacklist": [
-            {
-                "pattern": "ignoreduser",
-                "regex": false
-            }
-        ],
-        "highlights": [
-            {
-                "pattern": "my-highlight",
-                "showInMentions": true,
-                "alert": false,
-                "sound": true,
-                "regex": false,
-                "case": false,
-                "soundUrl": "",
-                "color": "#7f7f3f49"
-            },
-            {
-                "pattern": "no-mention-highlight",
-                "showInMentions": false,
-                "alert": false,
-                "sound": true,
-                "regex": false,
-                "case": false,
-                "soundUrl": "",
-                "color": "#48ae812f"
-            }
-        ]
-    },
-    "nicknames": [
-        {
-            "name": "nickname",
-            "replace": "replacement",
-            "isRegex": false,
-            "isCaseSensitive": false
-        }
-    ]
-})"_ba};
+const QByteArray SETTINGS_DEFAULT{"{}"_ba};
 
 std::shared_ptr<TwitchChannel> makeMockTwitchChannel(
     const QString &name, const testlib::Snapshot &snapshot)

@@ -149,5 +149,31 @@
             "timeoutUser": "",
             "usernameColor": "#ffff0000"
         }
-    ]
+    ],
+    "settings": {
+        "highlighting": {
+            "highlights": [
+                {
+                    "alert": false,
+                    "case": false,
+                    "color": "#7f7f3f49",
+                    "pattern": "my-highlight",
+                    "regex": false,
+                    "showInMentions": true,
+                    "sound": true,
+                    "soundUrl": ""
+                },
+                {
+                    "alert": false,
+                    "case": false,
+                    "color": "#48ae812f",
+                    "pattern": "no-mention-highlight",
+                    "regex": false,
+                    "showInMentions": false,
+                    "sound": true,
+                    "soundUrl": ""
+                }
+            ]
+        }
+    }
 }

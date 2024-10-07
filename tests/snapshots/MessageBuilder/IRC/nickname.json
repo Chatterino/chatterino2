@@ -118,5 +118,15 @@
             "timeoutUser": "",
             "usernameColor": "#ffff0000"
         }
-    ]
+    ],
+    "settings": {
+        "nicknames": [
+            {
+                "isCaseSensitive": false,
+                "isRegex": false,
+                "name": "nickname",
+                "replace": "replacement"
+            }
+        ]
+    }
 }
