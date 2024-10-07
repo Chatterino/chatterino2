@@ -37,6 +37,9 @@ constexpr int ERROR_BAD_PEEK = LUA_OK - 1;
  */
 void stackDump(lua_State *L, const QString &tag);
 
+// This is for calling stackDump out of gdb as it's not easy to create a QString there
+const QString GDB_DUMMY = "GDB_DUMMY";
+
 /**
  * @brief Converts a lua error code and potentially string on top of the stack into a human readable message
  */
