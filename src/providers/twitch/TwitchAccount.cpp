@@ -177,6 +177,7 @@ void TwitchAccount::unblockUser(const QString &userId, const QObject *caller,
 void TwitchAccount::blockUserLocally(const QString &userID)
 {
     assertInGuiThread();
+    assert(getApp()->isTest());
 
     TwitchUser blockedUser;
     blockedUser.id = userID;

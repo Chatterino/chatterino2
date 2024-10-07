@@ -464,6 +464,8 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
 
 void TwitchChannel::addKnownChannelPointReward(const ChannelPointReward &reward)
 {
+    assert(getApp()->isTest());
+
     auto channelPointRewards = this->channelPointRewards_.access();
     channelPointRewards->try_emplace(reward.id, reward);
 }
