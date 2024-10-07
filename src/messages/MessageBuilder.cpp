@@ -1333,13 +1333,6 @@ MessagePtr MessageBuilder::build()
 
     // timestamp
     this->message().serverReceivedTime = calculateMessageTime(this->ircMessage);
-#ifdef CHATTERINO_WITH_TESTS
-    if (getApp()->isTest())
-    {
-        this->message().serverReceivedTime =
-            this->message().serverReceivedTime.toUTC();
-    }
-#endif
     this->emplace<TimestampElement>(this->message().serverReceivedTime.time());
 
     if (this->shouldAddModerationElements())
@@ -1829,22 +1822,10 @@ MessagePtr MessageBuilder::buildHypeChatMessage(
     // actualAmount = amount * 10^(-exponent)
     double actualAmount = std::pow(10.0, double(-exponent)) * double(amount);
 
-    auto locale = QLocale::system();
-#ifdef CHATTERINO_WITH_TESTS
-    if (getApp()->isTest())
-    {
-        locale = QLocale(QLocale::English);
-    }
-#endif
+    auto locale = getSystemLocale();
     subtitle += locale.toCurrencyString(actualAmount, currency);
 
     auto dt = calculateMessageTime(message);
-#ifdef CHATTERINO_WITH_TESTS
-    if (getApp()->isTest())
-    {
-        dt = dt.toUTC();
-    }
-#endif
     MessageBuilder builder(systemMessage, parseTagString(subtitle), dt.time());
     builder->flags.set(MessageFlag::ElevatedMessage);
     return builder.release();

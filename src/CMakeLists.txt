@@ -497,6 +497,8 @@ set(SOURCE_FILES
         util/InitUpdateButton.hpp
         util/IpcQueue.cpp
         util/IpcQueue.hpp
+        util/IrcHelpers.cpp
+        util/IrcHelpers.hpp
         util/LayoutHelper.cpp
         util/LayoutHelper.hpp
         util/LoadPixmap.cpp
