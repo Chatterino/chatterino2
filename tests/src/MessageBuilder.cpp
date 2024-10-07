@@ -228,6 +228,22 @@ struct MockEmotes {
         };
     }
 
+    static MockEmotes twitchdev()
+    {
+        return {
+            .seventv = makeEmotes(Emote{
+                .name = {u"7TVTwitchDev"_s},
+                .id = {u"t5"_s},
+            }),
+            .bttv = makeEmotes(Emote{
+                .name = {u"BTTVTwitchDev"_s},
+            }),
+            .ffz = makeEmotes(Emote{
+                .name = {u"FFZTwitchDev"_s},
+            }),
+        };
+    }
+
     static MockEmotes global()
     {
         return {
@@ -962,6 +978,12 @@ public:
 
         this->twitchdevChannel = std::make_shared<TwitchChannel>("twitchdev");
         this->twitchdevChannel->setRoomId("141981764");
+
+        auto tdMocks = MockEmotes::twitchdev();
+        this->twitchdevChannel->setSeventvEmotes(std::move(tdMocks.seventv));
+        this->twitchdevChannel->setBttvEmotes(std::move(tdMocks.bttv));
+        this->twitchdevChannel->setFfzEmotes(std::move(tdMocks.ffz));
+
         this->mockApplication->twitch.mockChannels.emplace(
             "twitchdev", this->twitchdevChannel);
     }
