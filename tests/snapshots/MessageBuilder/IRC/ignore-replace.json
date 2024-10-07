@@ -439,5 +439,102 @@
             "timeoutUser": "",
             "usernameColor": "#ffff0000"
         }
-    ]
+    ],
+    "settings": {
+        "ignore": {
+            "phrases": [
+                {
+                    "caseSensitive": false,
+                    "isBlock": false,
+                    "pattern": "ignore",
+                    "regex": false,
+                    "replaceWith": "replace"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": false,
+                    "pattern": "CaseSensitive",
+                    "regex": false,
+                    "replaceWith": "casesensitivE"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": false,
+                    "pattern": "summon-emote",
+                    "regex": false,
+                    "replaceWith": "woah-> MyCoolTwitchEmote"
+                },
+                {
+                    "caseSensitive": false,
+                    "isBlock": false,
+                    "pattern": "&f(o+)(\\d+)",
+                    "regex": true,
+                    "replaceWith": "&baz1[\\1+\\2]"
+                },
+                {
+                    "caseSensitive": false,
+                    "isBlock": false,
+                    "pattern": "&b(?:o+)(\\d+)",
+                    "regex": true,
+                    "replaceWith": "&baz2[\\1+\\2]"
+                },
+                {
+                    "caseSensitive": false,
+                    "isBlock": false,
+                    "pattern": "&b(?:a+)(\\d+)",
+                    "regex": true,
+                    "replaceWith": "&baz3[\\1+\\42]"
+                },
+                {
+                    "caseSensitive": false,
+                    "isBlock": false,
+                    "pattern": "&b(i)(i)(i)(i)(i)(i)(i)(i)(i)(i)(\\d+)",
+                    "regex": true,
+                    "replaceWith": "&baz4[\\10+\\11+\\1]"
+                },
+                {
+                    "caseSensitive": false,
+                    "isBlock": false,
+                    "pattern": "&\\[ (\\w+) \\]&",
+                    "regex": true,
+                    "replaceWith": "{ \\1 }"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": true,
+                    "pattern": "BLOCK",
+                    "regex": false,
+                    "replaceWith": "?"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": true,
+                    "pattern": "block!{2,}",
+                    "regex": true,
+                    "replaceWith": "?"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": false,
+                    "pattern": "",
+                    "regex": false,
+                    "replaceWith": "empty"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": false,
+                    "pattern": "(",
+                    "regex": true,
+                    "replaceWith": "invalid"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": false,
+                    "pattern": "(?<=infinite-loop)$",
+                    "regex": true,
+                    "replaceWith": "infinite-loop"
+                }
+            ]
+        }
+    }
 }

@@ -118,5 +118,46 @@
             "timeoutUser": "",
             "usernameColor": "#ffff0000"
         }
-    ]
+    ],
+    "settings": {
+        "ignore": {
+            "phrases": [
+                {
+                    "caseSensitive": false,
+                    "isBlock": false,
+                    "pattern": "ignore",
+                    "regex": false,
+                    "replaceWith": "replace"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": true,
+                    "pattern": "BLOCK",
+                    "regex": false,
+                    "replaceWith": "?"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": true,
+                    "pattern": "block!{2,}",
+                    "regex": true,
+                    "replaceWith": "?"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": true,
+                    "pattern": "",
+                    "regex": false,
+                    "replaceWith": "empty"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": true,
+                    "pattern": "(",
+                    "regex": true,
+                    "replaceWith": "invalid"
+                }
+            ]
+        }
+    }
 }

@@ -179,5 +179,39 @@
         "prevMessages": [
             "@tmi-sent-ts=1726692469188;subscriber=1;id=4d2af478-c471-4b3a-8c6f-568a54d2fe7a;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes= :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :BLOCK"
         ]
+    },
+    "settings": {
+        "ignore": {
+            "phrases": [
+                {
+                    "caseSensitive": false,
+                    "isBlock": false,
+                    "pattern": "ignore",
+                    "regex": false,
+                    "replaceWith": "replace"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": false,
+                    "pattern": "CaseSensitive",
+                    "regex": false,
+                    "replaceWith": "casesensitivE"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": true,
+                    "pattern": "BLOCK",
+                    "regex": false,
+                    "replaceWith": "?"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": true,
+                    "pattern": "block!{2,}",
+                    "regex": true,
+                    "replaceWith": "replace"
+                }
+            ]
+        }
     }
 }

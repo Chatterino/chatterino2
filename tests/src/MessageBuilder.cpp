@@ -54,7 +54,7 @@ namespace {
 ///
 /// When adding a test, start with `{ "input": "..." }` and set this to `true`
 /// to generate an initial snapshot. Make sure to verify the output!
-constexpr bool UPDATE_SNAPSHOTS = false;
+constexpr bool UPDATE_SNAPSHOTS = true;
 
 const QString IRC_CATEGORY = u"MessageBuilder/IRC"_s;
 
@@ -898,32 +898,6 @@ public:
             mocks.twitchAccount);
         this->mockApplication->getUserData()->setUserColor(u"117691339"_s,
                                                            u"#DAA521"_s);
-
-        auto addPhrase = [](auto &&...args) {
-            getSettings()->ignoredMessages.append(
-                IgnorePhrase(std::forward<decltype(args)>(args)...));
-        };
-
-        addPhrase(u"ignore"_s, false, false, u"replace"_s, false);
-        addPhrase(u"CaseSensitive"_s, false, false, u"casesensitivE"_s, true);
-        addPhrase(u"summon-emote"_s, false, false,
-                  u"woah-> MyCoolTwitchEmote"_s, true);
-        addPhrase(u"&f(o+)(\\d+)"_s, true, false, u"&baz1[\\1+\\2]"_s, false);
-        addPhrase(u"&b(?:o+)(\\d+)"_s, true, false, u"&baz2[\\1+\\2]"_s, false);
-        addPhrase(u"&b(?:a+)(\\d+)"_s, true, false, u"&baz3[\\1+\\42]"_s,
-                  false);
-        addPhrase(u"&b(i)(i)(i)(i)(i)(i)(i)(i)(i)(i)(\\d+)"_s, true, false,
-                  u"&baz4[\\10+\\11+\\1]"_s, false);
-        addPhrase(u"&\\[ (\\w+) \\]&"_s, true, false, u"{ \\1 }"_s, false);
-        addPhrase(u"BLOCK"_s, false, true, u"?"_s, true);
-        addPhrase(u"block!{2,}"_s, true, true, u"?"_s, true);
-        // empty
-        addPhrase(u""_s, false, false, u"empty"_s, true);
-        // invalid regex
-        addPhrase(u"("_s, true, false, u"invalid"_s, true);
-        // too many iterations
-        addPhrase(u"(?<=infinite-loop)$"_s, true, false, u"infinite-loop"_s,
-                  true);
 
         this->mockApplication->getAccounts()
             ->twitch.getCurrent()

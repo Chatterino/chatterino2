@@ -208,5 +208,18 @@
             "timeoutUser": "",
             "usernameColor": "#ffff0000"
         }
-    ]
+    ],
+    "settings": {
+        "ignore": {
+            "phrases": [
+                {
+                    "caseSensitive": true,
+                    "isBlock": false,
+                    "pattern": "(?<=infinite-loop)$",
+                    "regex": true,
+                    "replaceWith": "infinite-loop"
+                }
+            ]
+        }
+    }
 }
