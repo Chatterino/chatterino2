@@ -212,6 +212,7 @@ endif()
 if (CHATTERINO_PLUGINS)
     set(LUA_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lib/lua/src")
     add_subdirectory(lib/lua)
+    add_definitions(-DSOL_ALL_SAFETIES_ON=1)
 
     find_package(Sol2 REQUIRED)
 endif()
