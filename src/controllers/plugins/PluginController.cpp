@@ -151,18 +151,11 @@ void PluginController::openLibrariesFor(Plugin *plugin, const QDir &pluginDir)
     luaL_requiref(L, LUA_IOLIBNAME, luaopen_io, int(false));
     lua_setfield(L, LUA_REGISTRYINDEX, lua::api::REG_REAL_IO_NAME);
 
-    // NOLINTNEXTLINE(*-avoid-c-arrays)
-    static const luaL_Reg c2Lib[] = {
-        {"later", lua::api::c2_later},
-        {nullptr, nullptr},
-    };
     lua_pushglobaltable(L);
     auto gtable = lua_gettop(L);
 
     // count of elements in C2LIB + LogLevel + EventType
     auto c2libIdx = lua::pushEmptyTable(L, 8);
-
-    luaL_setfuncs(L, c2Lib, 0);
 
     lua_setfield(L, gtable, "c2");
 
@@ -275,6 +268,7 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
                                     sol::variadic_args args) {
         lua::api::c2_log(s, plugin, lvl, args);
     });
+    c2.set_function("later", &lua::api::c2_later);
 
     lua::api::ChannelRef::createUserType(c2);
     lua::api::HTTPResponse::createUserType(c2);

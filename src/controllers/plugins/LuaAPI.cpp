@@ -16,6 +16,8 @@
 #    include <QTextCodec>
 #    include <QUrl>
 #    include <sol/forward.hpp>
+#    include <sol/protected_function_result.hpp>
+#    include <sol/stack.hpp>
 #    include <sol/state_view.hpp>
 #    include <sol/types.hpp>
 #    include <sol/variadic_args.hpp>
@@ -102,58 +104,36 @@ void c2_log(sol::this_state L, Plugin *pl, LogLevel lvl,
     }
 }
 
-int c2_later(lua_State *L)
+int c2_later(sol::this_state L, sol::protected_function callback, int time)
 {
     auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
     if (pl == nullptr)
     {
         return luaL_error(L, "c2.later: internal error: no plugin?");
     }
-    if (lua_gettop(L) != 2)
-    {
-        return luaL_error(
-            L, "c2.later expects two arguments (a callback that takes no "
-               "arguments and returns nothing and a number the time in "
-               "milliseconds to wait)\n");
-    }
-    int time{};
-    if (!lua::pop(L, &time))
-    {
-        return luaL_error(L, "cannot get time (2nd arg of c2.later, "
-                             "expected a number)");
-    }
-
-    if (!lua_isfunction(L, lua_gettop(L)))
-    {
-        return luaL_error(L, "cannot get callback (1st arg of c2.later, "
-                             "expected a function)");
-    }
+    sol::state_view lua(L);
 
     auto *timer = new QTimer();
     timer->setInterval(time);
     auto id = pl->addTimeout(timer);
     auto name = QString("timeout_%1").arg(id);
-    auto *coro = lua_newthread(L);
+    //auto *coro = lua_newthread(L);
 
-    QObject::connect(timer, &QTimer::timeout, [pl, coro, name, timer]() {
+    QObject::connect(timer, &QTimer::timeout, [pl, name, timer, callback]() {
         timer->deleteLater();
         pl->removeTimeout(timer);
-        int nres{};
-        lua_resume(coro, nullptr, 0, &nres);
+        sol::state_view lua(callback.lua_state());
+        sol::protected_function_result res = callback();
 
-        lua_pushnil(coro);
-        lua_setfield(coro, LUA_REGISTRYINDEX, name.toStdString().c_str());
-        if (lua_gettop(coro) != 0)
+        if (res.return_count() != 0)
         {
-            stackDump(coro,
+            stackDump(lua.lua_state(),
                       pl->id +
                           ": timer returned a value, this shouldn't happen "
                           "and is probably a plugin bug");
         }
+        lua.registry()[name.toStdString()] = sol::nil;
     });
-    stackDump(L, "before setfield");
-    lua_setfield(L, LUA_REGISTRYINDEX, name.toStdString().c_str());
-    lua_xmove(L, coro, 1);  // move function to thread
     timer->start();
 
     return 0;
