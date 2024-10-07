@@ -24,7 +24,9 @@
 #    include <QJsonDocument>
 #    include <sol/forward.hpp>
 #    include <sol/sol.hpp>
+#    include <sol/types.hpp>
 #    include <sol/variadic_args.hpp>
+#    include <sol/variadic_results.hpp>
 
 #    include <memory>
 #    include <utility>
@@ -169,16 +171,8 @@ void PluginController::openLibrariesFor(Plugin *plugin, const QDir &pluginDir)
     // possibly randomize this name at runtime to prevent some attacks?
 
 #    ifndef NDEBUG
-    lua_getfield(L, gtable, "load");
-    lua_setfield(L, LUA_REGISTRYINDEX, "real_load");
+    lua.registry()["real_load"] = lua.globals()["load"];
 #    endif
-
-    // NOLINTNEXTLINE(*-avoid-c-arrays)
-    static const luaL_Reg replacementFuncs[] = {
-        {"load", lua::api::g_load},
-        {nullptr, nullptr},
-    };
-    luaL_setfuncs(L, replacementFuncs, 0);
 
     lua_pushnil(L);
     lua_setfield(L, gtable, "loadfile");
@@ -282,6 +276,7 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
                    [plugin](sol::this_state s, sol::variadic_args args) {
                        lua::api::g_print(s, plugin, args);
                    });
+    g.set_function("load", &lua::api::g_load);
 
     sol::table c2 = g["c2"];
     c2.set_function("register_command",

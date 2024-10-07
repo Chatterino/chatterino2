@@ -126,7 +126,7 @@ void c2_log(sol::this_state L, Plugin *pl, LogLevel lvl,
 int c2_later(lua_State *L);
 
 // These ones are global
-int g_load(lua_State *L);
+sol::variadic_results g_load(sol::this_state s, sol::object data);
 void g_print(sol::this_state L, Plugin *pl, sol::variadic_args args);
 // NOLINTEND(readability-identifier-naming)
 

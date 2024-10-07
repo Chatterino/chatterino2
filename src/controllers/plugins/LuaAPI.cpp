@@ -17,8 +17,11 @@
 #    include <QUrl>
 #    include <sol/forward.hpp>
 #    include <sol/state_view.hpp>
+#    include <sol/types.hpp>
 #    include <sol/variadic_args.hpp>
+#    include <sol/variadic_results.hpp>
 
+#    include <string>
 #    include <utility>
 
 namespace {
@@ -156,49 +159,18 @@ int c2_later(lua_State *L)
     return 0;
 }
 
-int g_load(lua_State *L)
+sol::variadic_results g_load(sol::this_state s, sol::object data)
 {
 #    ifdef NDEBUG
-    luaL_error(L, "load() is only usable in debug mode");
-    return 0;
+    throw std::runtime_error("load() is only usable in debug mode");
 #    else
-    auto countArgs = lua_gettop(L);
-    QByteArray data;
-    if (lua::peek(L, &data, 1))
-    {
-        auto *utf8 = QTextCodec::codecForName("UTF-8");
-        QTextCodec::ConverterState state;
-        utf8->toUnicode(data.constData(), data.size(), &state);
-        if (state.invalidChars != 0)
-        {
-            luaL_error(L, "invalid utf-8 in load() is not allowed");
-            return 0;
-        }
-    }
-    else
-    {
-        luaL_error(L, "using reader function in load() is not allowed");
-        return 0;
-    }
 
-    for (int i = 0; i < countArgs; i++)
-    {
-        lua_seti(L, LUA_REGISTRYINDEX, i);
-    }
-
-    // fetch load and call it
-    lua_getfield(L, LUA_REGISTRYINDEX, "real_load");
-
-    for (int i = 0; i < countArgs; i++)
-    {
-        lua_geti(L, LUA_REGISTRYINDEX, i);
-        lua_pushnil(L);
-        lua_seti(L, LUA_REGISTRYINDEX, i);
-    }
-
-    lua_call(L, countArgs, LUA_MULTRET);
-
-    return lua_gettop(L);
+    // If you're modifying this PLEASE verify it works, Sol is very annoying about serialization
+    // - Mm2PL
+    sol::state_view lua(s);
+    auto load = lua.registry()["real_load"];
+    sol::protected_function_result ret = load(data, "=(load)", "t");
+    return ret;
 #    endif
 }
 
