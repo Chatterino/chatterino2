@@ -23,6 +23,7 @@
 #    include <lualib.h>
 #    include <QJsonDocument>
 #    include <sol/forward.hpp>
+#    include <sol/overload.hpp>
 #    include <sol/sol.hpp>
 #    include <sol/types.hpp>
 #    include <sol/variadic_args.hpp>
@@ -217,24 +218,7 @@ void PluginController::openLibrariesFor(Plugin *plugin, const QDir &pluginDir)
     lua_seti(L, -2, 3);
     lua_pop(L, 2);  // remove package, package.searchers
 
-    // NOLINTNEXTLINE(*-avoid-c-arrays)
-    static const luaL_Reg ioLib[] = {
-        {"close", lua::api::io_close},
-        {"flush", lua::api::io_flush},
-        {"input", lua::api::io_input},
-        {"lines", lua::api::io_lines},
-        {"open", lua::api::io_open},
-        {"output", lua::api::io_output},
-        {"popen", lua::api::io_popen},  // stub
-        {"read", lua::api::io_read},
-        {"tmpfile", lua::api::io_tmpfile},  // stub
-        {"write", lua::api::io_write},
-        // type = realio.type
-        {nullptr, nullptr},
-    };
-    // TODO: io.popen stub
     auto iolibIdx = lua::pushEmptyTable(L, 1);
-    luaL_setfuncs(L, ioLib, 0);
 
     // set ourio.type = realio.type
     lua_pushvalue(L, iolibIdx);
@@ -299,6 +283,26 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     c2["HTTPMethod"] = lua::createEnumTable<NetworkRequestType>(lua);
     c2["EventType"] = lua::createEnumTable<lua::api::EventType>(lua);
     c2["LogLevel"] = lua::createEnumTable<lua::api::LogLevel>(lua);
+
+    sol::table io = g["io"];
+    io.set_function(
+        "open", sol::overload(&lua::api::io_open, &lua::api::io_open_modeless));
+    io.set_function("lines", sol::overload(&lua::api::io_lines,
+                                           &lua::api::io_lines_noargs));
+    io.set_function("input", sol::overload(&lua::api::io_input_argless,
+                                           &lua::api::io_input_name,
+                                           &lua::api::io_input_file));
+    io.set_function("output", sol::overload(&lua::api::io_output_argless,
+                                            &lua::api::io_output_name,
+                                            &lua::api::io_output_file));
+    io.set_function("close", sol::overload(&lua::api::io_close_argless,
+                                           &lua::api::io_close_file));
+    io.set_function("flush", sol::overload(&lua::api::io_flush_argless,
+                                           &lua::api::io_flush_file));
+    io.set_function("read", &lua::api::io_read);
+    io.set_function("write", &lua::api::io_write);
+    io.set_function("popen", &lua::api::io_popen);
+    io.set_function("tmpfile", &lua::api::io_tmpfile);
 }
 
 void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
