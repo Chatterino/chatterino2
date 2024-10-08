@@ -1,7 +1,6 @@
 #pragma once
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "common/network/NetworkResult.hpp"
-#    include "controllers/plugins/LuaUtilities.hpp"
 
 #    include <lua.h>
 
@@ -16,7 +15,7 @@ namespace chatterino::lua::api {
 /**
  * @lua@class HTTPResponse
  */
-class HTTPResponse : public std::enable_shared_from_this<HTTPResponse>
+class HTTPResponse
 {
     NetworkResult result_;
 
