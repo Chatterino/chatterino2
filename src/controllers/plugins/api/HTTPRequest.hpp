@@ -2,12 +2,15 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "common/network/NetworkRequest.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
-#    include "controllers/plugins/PluginController.hpp"
 
 #    include <sol/forward.hpp>
 #    include <sol/types.hpp>
 
 #    include <memory>
+
+namespace chatterino {
+class PluginController;
+}  // namespace chatterino
 
 namespace chatterino::lua::api {
 // NOLINTBEGIN(readability-identifier-naming)
@@ -110,6 +113,11 @@ public:
      * @exposed HTTPRequest:execute
      */
     void execute(sol::this_state L);
+    /**
+     * @lua@return string
+     * @exposed HTTPRequest:__tostring
+     */
+    QString to_string();
 
     /**
      * Static functions

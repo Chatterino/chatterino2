@@ -31,8 +31,9 @@ namespace chatterino::lua::api {
 
 void HTTPRequest::createUserType(sol::table &c2)
 {
-    c2.new_usertype<HTTPRequest>(            //
-        "HTTPRequest", sol::no_constructor,  //
+    c2.new_usertype<HTTPRequest>(                              //
+        "HTTPRequest", sol::no_constructor,                    //
+        sol::meta_method::to_string, &HTTPRequest::to_string,  //
 
         "on_success", &HTTPRequest::on_success,  //
         "on_error", &HTTPRequest::on_error,      //
@@ -170,6 +171,11 @@ HTTPRequest::~HTTPRequest()
     DebugCount::decrease("lua::api::HTTPRequest");
     // We might leak a Lua function or two here if the request isn't executed
     // but that's better than accessing a possibly invalid lua_State pointer.
+}
+
+QString HTTPRequest::to_string()
+{
+    return "<HTTPRequest>";
 }
 
 }  // namespace chatterino::lua::api
