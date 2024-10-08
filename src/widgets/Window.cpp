@@ -702,8 +702,11 @@ void Window::addShortcuts()
              else
              {
                  qCWarning(chatterinoHotkeys)
-                     << "Invalid argument for toggleGlobalNotificationSuppression hotkey: " << arg;
-                 return QString("Invalid argument for toggleGlobalNotificationSuppression hotkey: "
+                     << "Invalid argument for "
+                        "toggleGlobalNotificationSuppression hotkey: "
+                     << arg;
+                 return QString("Invalid argument for "
+                                "toggleGlobalNotificationSuppression hotkey: "
                                 "%1. Use \"on\", \"off\", or \"toggle\".")
                      .arg(arg);
              }
