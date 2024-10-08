@@ -5,6 +5,7 @@
 #    include "controllers/plugins/PluginController.hpp"
 
 #    include <sol/forward.hpp>
+#    include <sol/types.hpp>
 
 #    include <memory>
 
@@ -18,15 +19,14 @@ namespace chatterino::lua::api {
 /**
  * @lua@class HTTPRequest
  */
-class HTTPRequest
+class HTTPRequest : public std::enable_shared_from_this<HTTPRequest>
 {
     // This type is private to prevent the accidental construction of HTTPRequest without a shared pointer
     struct ConstructorAccessTag {
     };
 
 public:
-    HTTPRequest(HTTPRequest::ConstructorAccessTag, NetworkRequest req,
-                lua_State *state);
+    HTTPRequest(HTTPRequest::ConstructorAccessTag, NetworkRequest req);
     HTTPRequest(HTTPRequest &&other) = default;
     HTTPRequest &operator=(HTTPRequest &&) = default;
     HTTPRequest &operator=(HTTPRequest &) = delete;
@@ -36,7 +36,7 @@ public:
 private:
     NetworkRequest req_;
 
-    static void createUserType(lua_State *L, sol::table &c2);
+    static void createUserType(sol::table &c2);
     friend class chatterino::PluginController;
 
     // This is the key in the registry the private table it held at (if it exists)
@@ -44,7 +44,6 @@ private:
     // the table wasn't created yet.
     int timeout_ = 10'000;
     bool done = false;
-    lua_State *state_;
 
     std::optional<sol::protected_function> cbSuccess;
     std::optional<sol::protected_function> cbError;
@@ -110,7 +109,7 @@ public:
      *
      * @exposed HTTPRequest:execute
      */
-    void execute();
+    void execute(sol::this_state L);
 
     /**
      * Static functions
@@ -125,8 +124,9 @@ public:
      * @lua@return HTTPRequest
      * @exposed HTTPRequest.create
      */
-    static HTTPRequest create(lua_State *L, NetworkRequestType method,
-                              QString url);
+    static std::shared_ptr<HTTPRequest> create(sol::this_state L,
+                                               NetworkRequestType method,
+                                               QString url);
 };
 
 // NOLINTEND(readability-identifier-naming)

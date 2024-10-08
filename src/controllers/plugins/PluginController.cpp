@@ -229,7 +229,7 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
 
     lua::api::ChannelRef::createUserType(c2);
     lua::api::HTTPResponse::createUserType(c2);
-    lua::api::HTTPRequest::createUserType(plugin->state_, c2);
+    lua::api::HTTPRequest::createUserType(c2);
     c2["ChannelType"] = lua::createEnumTable<Channel::Type>(lua);
     c2["HTTPMethod"] = lua::createEnumTable<NetworkRequestType>(lua);
     c2["EventType"] = lua::createEnumTable<lua::api::EventType>(lua);

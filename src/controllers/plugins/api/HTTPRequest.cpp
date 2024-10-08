@@ -5,13 +5,16 @@
 #    include "common/network/NetworkCommon.hpp"
 #    include "common/network/NetworkRequest.hpp"
 #    include "common/network/NetworkResult.hpp"
+#    include "common/QLogging.hpp"
 #    include "controllers/plugins/api/HTTPResponse.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
+#    include "controllers/plugins/SolTypes.hpp"
 #    include "util/DebugCount.hpp"
 
 #    include <lauxlib.h>
 #    include <lua.h>
 #    include <QChar>
+#    include <QLoggingCategory>
 #    include <QRandomGenerator>
 #    include <QUrl>
 #    include <sol/forward.hpp>
@@ -26,7 +29,7 @@
 
 namespace chatterino::lua::api {
 
-void HTTPRequest::createUserType(lua_State *L, sol::table &c2)
+void HTTPRequest::createUserType(sol::table &c2)
 {
     c2.new_usertype<HTTPRequest>(            //
         "HTTPRequest", sol::no_constructor,  //
@@ -38,21 +41,20 @@ void HTTPRequest::createUserType(lua_State *L, sol::table &c2)
         "set_timeout", &HTTPRequest::set_timeout,  //
         "set_payload", &HTTPRequest::set_payload,  //
         "set_header", &HTTPRequest::set_header,    //
+        "execute", &HTTPRequest::execute,          //
 
-        "execute", &HTTPRequest::execute,  //
-        "create", [L](NetworkRequestType method, const std::string &url) {
-            return HTTPRequest::create(L, method, QString::fromStdString(url));
-        });
+        "create", &HTTPRequest::create  //
+    );
 }
 
 void HTTPRequest::on_success(sol::protected_function func)
 {
-    this->cbSuccess = {func};
+    this->cbSuccess = std::make_optional(func);
 }
 
 void HTTPRequest::on_error(sol::protected_function func)
 {
-    this->cbError = {func};
+    this->cbError = std::make_optional(func);
 }
 
 void HTTPRequest::set_timeout(int timeout)
@@ -62,7 +64,7 @@ void HTTPRequest::set_timeout(int timeout)
 
 void HTTPRequest::finally(sol::protected_function func)
 {
-    this->cbFinally = {func};
+    this->cbFinally = std::make_optional(func);
 }
 
 void HTTPRequest::set_payload(const std::string &payload)
@@ -79,8 +81,9 @@ void HTTPRequest::set_header(std::string name, std::string value)
                              QByteArray::fromStdString(value));
 }
 
-HTTPRequest HTTPRequest::create(lua_State *L, NetworkRequestType method,
-                                QString url)
+std::shared_ptr<HTTPRequest> HTTPRequest::create(sol::this_state L,
+                                                 NetworkRequestType method,
+                                                 QString url)
 {
     auto parsedurl = QUrl(url);
     if (!parsedurl.isValid())
@@ -97,46 +100,54 @@ HTTPRequest HTTPRequest::create(lua_State *L, NetworkRequestType method,
             "to this URL");
     }
     NetworkRequest r(parsedurl, method);
-    return {ConstructorAccessTag{}, std::move(r), L};
+    return std::make_shared<HTTPRequest>(ConstructorAccessTag{}, std::move(r));
 }
 
-void HTTPRequest::execute()
+void HTTPRequest::execute(sol::this_state L)
 {
+    if (this->done)
+    {
+        throw std::runtime_error(
+            "Cannot execute this c2.HTTPRequest, it was executed already!");
+    }
     this->done = true;
+
+    // this keeps the object alive even if Lua were to forget about it,
+    auto keepalive = this->shared_from_this();
     std::move(this->req_)
-        .onSuccess([this](const NetworkResult &res) {
+        .onSuccess([this, L, keepalive](const NetworkResult &res) {
             if (!this->cbSuccess.has_value())
             {
                 return;
             }
-            lua::StackGuard guard(this->state_);
-            sol::state_view mainState(this->state_);
+            lua::StackGuard guard(L);
+            sol::state_view mainState(L);
             sol::thread thread = sol::thread::create(mainState);
             sol::state_view threadstate = thread.state();
             sol::protected_function cb(threadstate, *this->cbSuccess);
             cb(HTTPResponse(res));
             this->cbSuccess = std::nullopt;
         })
-        .onError([this](const NetworkResult &res) {
+        .onError([this, L, keepalive](const NetworkResult &res) {
             if (!this->cbError.has_value())
             {
                 return;
             }
-            lua::StackGuard guard(this->state_);
-            sol::state_view mainState(this->state_);
+            lua::StackGuard guard(L);
+            sol::state_view mainState(L);
             sol::thread thread = sol::thread::create(mainState);
             sol::state_view threadstate = thread.state();
             sol::protected_function cb(threadstate, *this->cbError);
             cb(HTTPResponse(res));
             this->cbError = std::nullopt;
         })
-        .finally([this]() {
+        .finally([this, L, keepalive]() {
             if (!this->cbFinally.has_value())
             {
                 return;
             }
-            lua::StackGuard guard(this->state_);
-            sol::state_view mainState(this->state_);
+            lua::StackGuard guard(L);
+            sol::state_view mainState(L);
             sol::thread thread = sol::thread::create(mainState);
             sol::state_view threadstate = thread.state();
             sol::protected_function cb(threadstate, *this->cbFinally);
@@ -148,9 +159,8 @@ void HTTPRequest::execute()
 }
 
 HTTPRequest::HTTPRequest(HTTPRequest::ConstructorAccessTag /*ignored*/,
-                         NetworkRequest req, lua_State *state)
+                         NetworkRequest req)
     : req_(std::move(req))
-    , state_(state)
 {
     DebugCount::increase("lua::api::HTTPRequest");
 }
