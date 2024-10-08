@@ -223,6 +223,7 @@ Plugin::~Plugin()
         QObject::disconnect(timer, nullptr, nullptr, nullptr);
         timer->deleteLater();
     }
+    this->httpRequests.clear();
     qCDebug(chatterinoLua) << "Destroyed" << this->activeTimeouts.size()
                            << "timers for plugin" << this->id
                            << "while destroying the object";

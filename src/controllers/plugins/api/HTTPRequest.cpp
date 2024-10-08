@@ -5,9 +5,9 @@
 #    include "common/network/NetworkCommon.hpp"
 #    include "common/network/NetworkRequest.hpp"
 #    include "common/network/NetworkResult.hpp"
-#    include "common/QLogging.hpp"
 #    include "controllers/plugins/api/HTTPResponse.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
+#    include "controllers/plugins/PluginController.hpp"
 #    include "controllers/plugins/SolTypes.hpp"
 #    include "util/DebugCount.hpp"
 
@@ -26,6 +26,7 @@
 #    include <optional>
 #    include <stdexcept>
 #    include <utility>
+#    include <vector>
 
 namespace chatterino::lua::api {
 
@@ -114,9 +115,16 @@ void HTTPRequest::execute(sol::this_state L)
     this->done = true;
 
     // this keeps the object alive even if Lua were to forget about it,
-    auto keepalive = this->shared_from_this();
+    auto hack = this->weak_from_this();
+    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
+    pl->httpRequests.push_back(this->shared_from_this());
+
     std::move(this->req_)
-        .onSuccess([this, L, keepalive](const NetworkResult &res) {
+        .onSuccess([this, L, hack](const NetworkResult &res) {
+            if (hack.expired())
+            {
+                return;
+            }
             if (!this->cbSuccess.has_value())
             {
                 return;
@@ -129,7 +137,11 @@ void HTTPRequest::execute(sol::this_state L)
             cb(HTTPResponse(res));
             this->cbSuccess = std::nullopt;
         })
-        .onError([this, L, keepalive](const NetworkResult &res) {
+        .onError([this, L, hack](const NetworkResult &res) {
+            if (hack.expired())
+            {
+                return;
+            }
             if (!this->cbError.has_value())
             {
                 return;
@@ -142,7 +154,24 @@ void HTTPRequest::execute(sol::this_state L)
             cb(HTTPResponse(res));
             this->cbError = std::nullopt;
         })
-        .finally([this, L, keepalive]() {
+        .finally([this, L, hack]() {
+            if (hack.expired())
+            {
+                // this could happen if the plugin was deleted
+                return;
+            }
+            auto strong = hack.lock();
+            auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
+            for (auto it = pl->httpRequests.begin();
+                 it < pl->httpRequests.end(); it++)
+            {
+                if (*it == strong)
+                {
+                    pl->httpRequests.erase(it);
+                    break;
+                }
+            }
+
             if (!this->cbFinally.has_value())
             {
                 return;

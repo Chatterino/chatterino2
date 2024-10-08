@@ -3,6 +3,7 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "Application.hpp"
 #    include "controllers/plugins/api/EventType.hpp"
+#    include "controllers/plugins/api/HTTPRequest.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/PluginPermission.hpp"
 
@@ -12,6 +13,7 @@
 #    include <semver/semver.hpp>
 #    include <sol/forward.hpp>
 
+#    include <memory>
 #    include <optional>
 #    include <unordered_map>
 #    include <unordered_set>
@@ -134,6 +136,10 @@ public:
     bool hasHTTPPermissionFor(const QUrl &url);
 
     std::map<lua::api::EventType, sol::protected_function> callbacks;
+
+    // In-flight HTTP Requests
+    // This is a lifetime hack to ensure they get deleted with the plugin. This relies on the Plugin getting deleted on reload!
+    std::vector<std::shared_ptr<lua::api::HTTPRequest>> httpRequests;
 
 private:
     QDir loadDirectory_;
