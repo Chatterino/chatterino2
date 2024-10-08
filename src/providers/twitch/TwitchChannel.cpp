@@ -1687,13 +1687,13 @@ void TwitchChannel::setCheerEmoteSets(
                 };
             };
             cheerEmote.animatedEmote = std::make_shared<Emote>(Emote{
-                .name = EmoteName{"cheer emote"},
+                .name = EmoteName{u"cheer emote"_s},
                 .images = makeImageSet(tier.darkAnimated),
                 .tooltip = Tooltip{emoteTooltip},
                 .homePage = Url{},
             });
             cheerEmote.staticEmote = std::make_shared<Emote>(Emote{
-                .name = EmoteName{"cheer emote"},
+                .name = EmoteName{u"cheer emote"_s},
                 .images = makeImageSet(tier.darkStatic),
                 .tooltip = Tooltip{emoteTooltip},
                 .homePage = Url{},
