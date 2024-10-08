@@ -17,7 +17,8 @@ void HTTPResponse::createUserType(sol::table &c2)
     c2.new_usertype<HTTPResponse>(  //
         "HTTPResponse", sol::no_constructor,
         // metamethods
-        // TODO: add a __tostring
+        sol::meta_method::to_string, &HTTPResponse::to_string,  //
+
         "data", &HTTPResponse::data,      //
         "status", &HTTPResponse::status,  //
         "error", &HTTPResponse::error     //
@@ -47,6 +48,15 @@ std::optional<int> HTTPResponse::status()
 QString HTTPResponse::error()
 {
     return this->result_.formatError();
+}
+
+QString HTTPResponse::to_string()
+{
+    if (this->status().has_value())
+    {
+        return QStringView(u"<c2.HTTPResponse status %1>").arg(*this->status());
+    }
+    return "<c2.HTTPResponse no status>";
 }
 
 }  // namespace chatterino::lua::api

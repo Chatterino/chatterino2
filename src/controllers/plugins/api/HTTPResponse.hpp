@@ -11,6 +11,7 @@ class PluginController;
 }  // namespace chatterino
 
 namespace chatterino::lua::api {
+// NOLINTBEGIN(readability-identifier-naming)
 
 /**
  * @lua@class HTTPResponse
@@ -52,7 +53,14 @@ public:
      * @exposed HTTPResponse:error
      */
     QString error();
+
+    /**
+     * @lua@return string
+     * @exposed HTTPResponse:__tostring
+     */
+    QString to_string();
 };
 
+// NOLINTEND(readability-identifier-naming)
 }  // namespace chatterino::lua::api
 #endif
