@@ -122,17 +122,19 @@ int c2_later(sol::this_state L, sol::protected_function callback, int time)
     QObject::connect(timer, &QTimer::timeout, [pl, name, timer, callback]() {
         timer->deleteLater();
         pl->removeTimeout(timer);
-        sol::state_view lua(callback.lua_state());
-        sol::protected_function_result res = callback();
+        sol::state_view main(callback.lua_state());
+        sol::thread thread = sol::thread::create(main);
+        sol::protected_function cb(thread.state(), callback);
+        sol::protected_function_result res = cb();
 
         if (res.return_count() != 0)
         {
-            stackDump(lua.lua_state(),
+            stackDump(thread.lua_state(),
                       pl->id +
                           ": timer returned a value, this shouldn't happen "
                           "and is probably a plugin bug");
         }
-        lua.registry()[name.toStdString()] = sol::nil;
+        main.registry()[name.toStdString()] = sol::nil;
     });
     timer->start();
 
