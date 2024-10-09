@@ -44,7 +44,7 @@
 - Bugfix: Fixed tooltips and input completion popups not working after moving a split. (#5541, #5576)
 - Bugfix: Fixed rare issue on shutdown where the client would hang. (#5557)
 - Bugfix: Fixed `/clearmessages` not working with more than one window. (#5489)
-- Bugfix: Fixed splits staying paused after unfocusing Chatterino in certain configurations. (#5504)
+- Bugfix: Fixed splits staying paused after unfocusing Chatterino in certain configurations. (#5504, #5637)
 - Bugfix: Links with invalid characters in the domain are no longer detected. (#5509)
 - Bugfix: Fixed janky selection for messages with RTL segments (selection is still wrong, but consistently wrong). (#5525)
 - Bugfix: Fixed event emotes not showing up in autocomplete and popups. (#5239, #5580, #5582)
