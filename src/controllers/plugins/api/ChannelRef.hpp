@@ -3,6 +3,8 @@
 #    include "common/Channel.hpp"
 #    include "providers/twitch/TwitchChannel.hpp"
 
+#    include <sol/forward.hpp>
+
 namespace chatterino::lua::api {
 // NOLINTBEGIN(readability-identifier-naming)
 

@@ -2,6 +2,7 @@
 #    include "controllers/plugins/api/HTTPResponse.hpp"
 
 #    include "common/network/NetworkResult.hpp"
+#    include "controllers/plugins/SolTypes.hpp"
 #    include "util/DebugCount.hpp"
 
 #    include <lauxlib.h>

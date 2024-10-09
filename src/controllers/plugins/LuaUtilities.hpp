@@ -6,6 +6,7 @@
 #    include <lualib.h>
 #    include <magic_enum/magic_enum.hpp>
 #    include <QList>
+#    include <sol/state_view.hpp>
 
 #    include <cassert>
 #    include <string>
