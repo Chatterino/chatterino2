@@ -69,18 +69,15 @@ void HTTPRequest::finally(sol::protected_function func)
     this->cbFinally = std::make_optional(func);
 }
 
-void HTTPRequest::set_payload(const std::string &payload)
+void HTTPRequest::set_payload(QByteArray payload)
 {
-    this->req_ =
-        std::move(this->req_).payload(QByteArray::fromStdString(payload));
+    this->req_ = std::move(this->req_).payload(payload);
 }
 
 // name and value may be random bytes
-void HTTPRequest::set_header(std::string name, std::string value)
+void HTTPRequest::set_header(QByteArray name, QByteArray value)
 {
-    this->req_ = std::move(this->req_)
-                     .header(QByteArray::fromStdString(name),
-                             QByteArray::fromStdString(value));
+    this->req_ = std::move(this->req_).header(name, value);
 }
 
 std::shared_ptr<HTTPRequest> HTTPRequest::create(sol::this_state L,

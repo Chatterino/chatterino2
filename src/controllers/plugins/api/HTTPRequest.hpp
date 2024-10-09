@@ -96,7 +96,7 @@ public:
      * @lua@param data string
      * @exposed HTTPRequest:set_payload
      */
-    void set_payload(const std::string &payload);
+    void set_payload(QByteArray payload);
 
     /**
      * Sets a header in the request
@@ -105,7 +105,7 @@ public:
      * @lua@param value string
      * @exposed HTTPRequest:set_header
      */
-    void set_header(std::string name, std::string value);
+    void set_header(QByteArray name, QByteArray value);
 
     /**
      * Executes the HTTP request
