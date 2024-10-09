@@ -59,6 +59,8 @@ struct PluginMeta {
     }
 
     explicit PluginMeta(const QJsonObject &obj);
+    // This is for tests
+    PluginMeta() = default;
 };
 
 class Plugin
@@ -153,6 +155,7 @@ private:
     int lastTimerId = 0;
 
     friend class PluginController;
+    friend class PluginControllerAccess;  // this is for tests
 };
 }  // namespace chatterino
 #endif
