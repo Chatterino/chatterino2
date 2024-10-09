@@ -75,9 +75,8 @@ Window::Window(WindowType type, QWidget *parent)
     }
     else
     {
-        this->resize(int(getSettings()->lastPopupWidth.getValue() * this->scale()),
-                     int(getSettings()->lastPopupHeight.getValue() * this->scale())
-                     );
+        auto lastPopup = getSettings()->lastPopupSetting.getValue();
+        this->resize(lastPopup.width(), lastPopup.height());
     }
 
     this->signalHolder_.managedConnect(getApp()->getHotkeys()->onItemsUpdated,
@@ -153,8 +152,9 @@ void Window::closeEvent(QCloseEvent *)
     else
     {
         QRect rect = this->getBounds();
-        getSettings()->lastPopupWidth.setValue(rect.width());
-        getSettings()->lastPopupHeight.setValue(rect.height());
+        auto lastPopup = getSettings()->lastPopupSetting.getValue();
+        lastPopup.setWidth(rect.width());
+        lastPopup.setHeight(rect.height());
     }
     // Ensure selectedWindow_ is never an invalid pointer.
     // WindowManager will return the main window if no window is pointed to by

@@ -212,8 +212,8 @@ public:
     BoolSetting useCustomFfzVipBadges = {
         "/appearance/badges/useCustomFfzVipBadges", true};
     BoolSetting showBadgesSevenTV = {"/appearance/badges/seventv", true};
-    IntSetting lastPopupWidth = {"/appearance/popup/lastWidth", 300};
-    IntSetting lastPopupHeight = {"/appearance/popup/lastHeight", 500};
+    ChatterinoSetting<QSize> lastPopupSetting = {"/appearance/lastPopup",
+                                                 {300, 500}};
 
     /// Behaviour
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",
