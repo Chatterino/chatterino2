@@ -118,7 +118,7 @@ bool PluginController::tryLoadFromDir(const QDir &pluginDir)
     return true;
 }
 
-void PluginController::openLibrariesFor(Plugin *plugin, const QDir &pluginDir)
+void PluginController::openLibrariesFor(Plugin *plugin)
 {
     auto *L = plugin->state_;
     lua::StackGuard guard(L);
@@ -272,7 +272,7 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
                                  << " because safe mode is enabled.";
         return;
     }
-    PluginController::openLibrariesFor(temp, pluginDir);
+    PluginController::openLibrariesFor(temp);
 
     if (!PluginController::isPluginEnabled(pluginName) ||
         !getSettings()->pluginsEnabled)

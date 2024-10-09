@@ -67,7 +67,7 @@ private:
               const PluginMeta &meta);
 
     // This function adds lua standard libraries into the state
-    static void openLibrariesFor(Plugin *plugin, const QDir &pluginDir);
+    static void openLibrariesFor(Plugin *plugin);
 
     static void initSol(sol::state_view &lua, Plugin *plugin);
 
