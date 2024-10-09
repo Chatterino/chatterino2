@@ -1,6 +1,8 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/SolTypes.hpp"
 
+#    include <QObject>
+
 // NOLINTBEGIN(readability-named-parameter)
 // QString
 bool sol_lua_check(sol::types<QString>, lua_State *L, int index,
@@ -52,6 +54,27 @@ int sol_lua_push(sol::types<QStringList>, lua_State *L,
         table.add(str);
     }
     return sol::stack::push(L, table);
+}
+
+// QByteArray
+bool sol_lua_check(sol::types<QByteArray>, lua_State *L, int index,
+                   std::function<sol::check_handler_type> handler,
+                   sol::stack::record &tracking)
+{
+    return sol::stack::check<const char *>(L, index, handler, tracking);
+}
+
+QByteArray sol_lua_get(sol::types<QByteArray>, lua_State *L, int index,
+                       sol::stack::record &tracking)
+{
+    auto str = sol::stack::get<std::string_view>(L, index, tracking);
+    return QByteArray::fromRawData(str.data(), str.length());
+}
+
+int sol_lua_push(sol::types<QByteArray>, lua_State *L, const QByteArray &value)
+{
+    return sol::stack::push(L,
+                            std::string_view(value.constData(), value.size()));
 }
 // NOLINTEND(readability-named-parameter)
 

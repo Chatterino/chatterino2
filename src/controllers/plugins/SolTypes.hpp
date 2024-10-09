@@ -1,10 +1,10 @@
 #pragma once
 #ifdef CHATTERINO_HAVE_PLUGINS
-
 #    include "util/QMagicEnum.hpp"
 #    include "util/TypeName.hpp"
 
 #    include <nonstd/expected.hpp>
+#    include <QObject>
 #    include <QString>
 #    include <QStringBuilder>
 #    include <QStringList>
@@ -105,6 +105,7 @@ inline nonstd::expected_lite::expected<T, QString> tryCall(
 
 SOL_STACK_FUNCTIONS(QString)
 SOL_STACK_FUNCTIONS(QStringList)
+SOL_STACK_FUNCTIONS(QByteArray)
 
 #    undef SOL_STACK_FUNCTIONS
 
