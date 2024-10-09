@@ -55,7 +55,8 @@ QString HTTPResponse::to_string()
 {
     if (this->status().has_value())
     {
-        return QStringView(u"<c2.HTTPResponse status %1>").arg(*this->status());
+        return QStringView(u"<c2.HTTPResponse status %1>")
+            .arg(QString::number(*this->status()));
     }
     return "<c2.HTTPResponse no status>";
 }
