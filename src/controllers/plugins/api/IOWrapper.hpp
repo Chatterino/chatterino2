@@ -1,8 +1,9 @@
 #pragma once
-#include <sol/types.hpp>
-#include <sol/variadic_args.hpp>
-#include <sol/variadic_results.hpp>
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include <QString>
+#    include <sol/types.hpp>
+#    include <sol/variadic_args.hpp>
+#    include <sol/variadic_results.hpp>
 
 struct lua_State;
 

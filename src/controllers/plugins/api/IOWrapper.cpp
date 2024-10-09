@@ -7,6 +7,7 @@
 
 #    include <lauxlib.h>
 #    include <lua.h>
+#    include <QString>
 #    include <sol/forward.hpp>
 #    include <sol/in_place.hpp>
 #    include <sol/object.hpp>
