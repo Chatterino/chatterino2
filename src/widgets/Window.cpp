@@ -115,19 +115,17 @@ bool Window::event(QEvent *event)
         case QEvent::WindowDeactivate: {
             auto *page = this->notebook_->getSelectedPage();
 
-            if (!page)
+            if (page != nullptr)
             {
-                break;
-            }
+                std::vector<Split *> splits = page->getSplits();
+                for (Split *split : splits)
+                {
+                    split->unpause();
+                    split->updateLastReadMessage();
+                }
 
-            std::vector<Split *> splits = page->getSplits();
-            for (Split *split : splits)
-            {
-                split->unpause();
-                split->updateLastReadMessage();
+                page->hideResizeHandles();
             }
-
-            page->hideResizeHandles();
         }
         break;
 
