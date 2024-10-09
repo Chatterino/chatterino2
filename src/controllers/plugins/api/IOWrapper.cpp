@@ -172,9 +172,8 @@ sol::variadic_results io_lines(sol::this_state L, QString filename,
     bool ok = pl->hasFSPermissionFor(false, abs);
     if (!ok)
     {
-        return ioError(L,
-                       "Plugin does not have permissions to access given file.",
-                       EACCES);
+        throw std::runtime_error(
+            "Plugin does not have permissions to access given file.");
     }
 
     auto lines = lua.registry()[REG_REAL_IO_NAME]["lines"];
