@@ -171,7 +171,7 @@ function cmd_words(ctx)
     -- ctx contains:
     -- words - table of words supplied to the command including the trigger
     -- channel - the channel the command is being run in
-    channel:add_system_message("Words are: " .. table.concat(ctx.words, " "))
+    ctx.channel:add_system_message("Words are: " .. table.concat(ctx.words, " "))
 end
 
 c2.register_command("/words", cmd_words)
@@ -183,7 +183,7 @@ Limitations/known issues:
   rebuilding the window content caused by reloading another plugin will solve this.
 - Spaces in command names aren't handled very well (https://github.com/Chatterino/chatterino2/issues/1517).
 
-#### `register_callback("CompletionRequested", handler)`
+#### `register_callback(c2.EventType.CompletionRequested, handler)`
 
 Registers a callback (`handler`) to process completions. The callback takes a single table with the following entries:
 
@@ -207,7 +207,7 @@ function string.startswith(s, other)
 end
 
 c2.register_callback(
-    "CompletionRequested",
+    c2.EventType.CompletionRequested,
     function(event)
         if ("!join"):startswith(event.query) then
             ---@type CompletionList
@@ -354,7 +354,7 @@ pajladas:add_system_message("Hello, world!")
 
 Returns `true` if the channel is a Twitch channel, that is its type name has
 the `Twitch` prefix. This returns `true` for special channels like Mentions.
-You might want `Channel:get_type() == "Twitch"` if you want to use
+You might want `Channel:get_type() == c2.ChannelType.Twitch` if you want to use
 Twitch-specific functions.
 
 ##### `Channel:get_twitch_id()`
