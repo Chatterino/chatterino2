@@ -17,6 +17,7 @@
 #    include <QUrl>
 #    include <sol/forward.hpp>
 #    include <sol/protected_function_result.hpp>
+#    include <sol/reference.hpp>
 #    include <sol/stack.hpp>
 #    include <sol/state_view.hpp>
 #    include <sol/types.hpp>
@@ -118,25 +119,28 @@ void c2_later(sol::this_state L, sol::protected_function callback, int time)
     timer->setInterval(time);
     auto id = pl->addTimeout(timer);
     auto name = QString("timeout_%1").arg(id);
-    //auto *coro = lua_newthread(L);
 
-    QObject::connect(timer, &QTimer::timeout, [pl, name, timer, callback]() {
-        timer->deleteLater();
-        pl->removeTimeout(timer);
-        sol::state_view main(callback.lua_state());
-        sol::thread thread = sol::thread::create(main);
-        sol::protected_function cb(thread.state(), callback);
-        sol::protected_function_result res = cb();
+    sol::state_view main = sol::main_thread(L);
 
-        if (res.return_count() != 0)
-        {
-            stackDump(thread.lua_state(),
-                      pl->id +
-                          ": timer returned a value, this shouldn't happen "
-                          "and is probably a plugin bug");
-        }
-        main.registry()[name.toStdString()] = sol::nil;
-    });
+    sol::thread thread = sol::thread::create(main);
+    main.registry()[name.toStdString()] = thread;
+
+    QObject::connect(
+        timer, &QTimer::timeout, [pl, name, timer, callback, thread, main]() {
+            timer->deleteLater();
+            pl->removeTimeout(timer);
+            sol::protected_function cb(thread.state(), callback);
+            sol::protected_function_result res = cb();
+
+            if (res.return_count() != 0)
+            {
+                stackDump(thread.lua_state(),
+                          pl->id +
+                              ": timer returned a value, this shouldn't happen "
+                              "and is probably a plugin bug");
+            }
+            main.registry()[name.toStdString()] = sol::nil;
+        });
     timer->start();
 }
 
