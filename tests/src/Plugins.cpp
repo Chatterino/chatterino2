@@ -547,4 +547,28 @@ TEST_F(PluginTest, requireNoData)
     )lua"));
 }
 
+TEST_F(PluginTest, testTimerRec)
+{
+    configure();
+
+    RequestWaiter waiter;
+    lua->set("done", [&] {
+        waiter.requestDone();
+    });
+
+    sol::protected_function fn = lua->script(R"lua(
+        local i = 0
+        f = function()
+            i = i + 1
+            c2.log(c2.LogLevel.Debug, "cb", i)
+            if i < 1024 then
+                c2.later(f, 1)
+            else
+                done()
+            end
+        end
+        c2.later(f, 1)
+    )lua");
+    waiter.waitForRequest();
+}
 #endif
