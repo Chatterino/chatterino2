@@ -11,6 +11,7 @@
 #include "widgets/TooltipWidget.hpp"
 
 #include <pajlada/signals/signal.hpp>
+#include <QColor>
 #include <QGestureEvent>
 #include <QMenu>
 #include <QPaintEvent>
@@ -21,6 +22,7 @@
 #include <QWheelEvent>
 #include <QWidget>
 
+#include <memory>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -214,7 +216,8 @@ public:
 
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
-    pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
+    pajlada::Signals::Signal<HighlightState, std::shared_ptr<QColor>>
+        tabHighlightRequested;
     pajlada::Signals::NoArgSignal liveStatusChanged;
     pajlada::Signals::Signal<const Link &> linkClicked;
     pajlada::Signals::Signal<QString, FromTwitchLinkOpenChannelIn>
