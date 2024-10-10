@@ -4,6 +4,7 @@
 
 #include <pajlada/settings.hpp>
 #include <QString>
+#include <QSize>
 
 namespace chatterino {
 
@@ -55,6 +56,7 @@ using DoubleSetting = ChatterinoSetting<double>;
 using IntSetting = ChatterinoSetting<int>;
 using StringSetting = ChatterinoSetting<std::string>;
 using QStringSetting = ChatterinoSetting<QString>;
+using QSizeSetting = ChatterinoSetting<QSize>;
 
 template <typename Enum>
 class EnumSetting

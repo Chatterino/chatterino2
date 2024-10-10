@@ -212,6 +212,8 @@ public:
     BoolSetting useCustomFfzVipBadges = {
         "/appearance/badges/useCustomFfzVipBadges", true};
     BoolSetting showBadgesSevenTV = {"/appearance/badges/seventv", true};
+    ChatterinoSetting<QSize> lastPopupSetting = {"/appearance/lastPopup",
+                                                 {300, 500}};
 
     /// Behaviour
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",
