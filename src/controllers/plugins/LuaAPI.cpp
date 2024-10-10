@@ -123,13 +123,13 @@ void c2_later(sol::this_state L, sol::protected_function callback, int time)
     sol::state_view main = sol::main_thread(L);
 
     sol::thread thread = sol::thread::create(main);
+    sol::protected_function cb(thread.state(), callback);
     main.registry()[name.toStdString()] = thread;
 
     QObject::connect(
-        timer, &QTimer::timeout, [pl, name, timer, callback, thread, main]() {
+        timer, &QTimer::timeout, [pl, name, timer, cb, thread, main]() {
             timer->deleteLater();
             pl->removeTimeout(timer);
-            sol::protected_function cb(thread.state(), callback);
             sol::protected_function_result res = cb();
 
             if (res.return_count() != 0)
