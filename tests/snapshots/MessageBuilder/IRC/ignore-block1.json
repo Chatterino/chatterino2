@@ -1,0 +1,163 @@
+{
+    "input": "@tmi-sent-ts=1726692539140;subscriber=1;id=c34a372b-d59e-4a36-9ad8-d964098526e4;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes= :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :block!",
+    "output": [
+        {
+            "badgeInfos": {
+                "subscriber": "27"
+            },
+            "badges": [
+                "subscriber"
+            ],
+            "channelName": "pajlada",
+            "count": 1,
+            "displayName": "nerixyz",
+            "elements": [
+                {
+                    "color": "System",
+                    "flags": "ChannelName",
+                    "link": {
+                        "type": "JumpToChannel",
+                        "value": "pajlada"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "#pajlada"
+                    ]
+                },
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "20:48"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "20:48:59",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "flags": "ModeratorTools",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TwitchModerationElement"
+                },
+                {
+                    "color": "#ffff0000",
+                    "flags": "Username",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "nerixyz"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "nerixyz:"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "block!"
+                    ]
+                },
+                {
+                    "background": "#ffa0a0a4",
+                    "flags": "ReplyButton",
+                    "link": {
+                        "type": "ReplyToMessage",
+                        "value": "c34a372b-d59e-4a36-9ad8-d964098526e4"
+                    },
+                    "padding": 2,
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "CircularImageElement",
+                    "url": ""
+                }
+            ],
+            "flags": "Collapsed",
+            "id": "c34a372b-d59e-4a36-9ad8-d964098526e4",
+            "localizedName": "",
+            "loginName": "nerixyz",
+            "messageText": "block!",
+            "searchText": "nerixyz  nerixyz: block! ",
+            "serverReceivedTime": "2024-09-18T20:48:59Z",
+            "timeoutUser": "",
+            "usernameColor": "#ffff0000"
+        }
+    ],
+    "settings": {
+        "ignore": {
+            "phrases": [
+                {
+                    "caseSensitive": false,
+                    "isBlock": false,
+                    "pattern": "ignore",
+                    "regex": false,
+                    "replaceWith": "replace"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": true,
+                    "pattern": "BLOCK",
+                    "regex": false,
+                    "replaceWith": "?"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": true,
+                    "pattern": "block!{2,}",
+                    "regex": true,
+                    "replaceWith": "?"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": true,
+                    "pattern": "",
+                    "regex": false,
+                    "replaceWith": "empty"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": true,
+                    "pattern": "(",
+                    "regex": true,
+                    "replaceWith": "invalid"
+                }
+            ]
+        }
+    }
+}

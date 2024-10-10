@@ -1,0 +1,5 @@
+{
+    "input": "@tmi-sent-ts=1728127030336;subscriber=1;id=d09d1034-4f73-422c-b239-29d463a47973;room-id=11148817;user-id=12345;display-name=blocked;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes=25:11-15;custom-reward-id=47cc9d27-f771-47d9-8fb9-893b8524ccb3 :blocked!blocked@blocked.tmi.twitch.tv PRIVMSG #pajlada :test TESTS Kappa",
+    "output": [
+    ]
+}

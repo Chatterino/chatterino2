@@ -1,5 +1,6 @@
 #include "util/Helpers.hpp"
 
+#include "Application.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 
 #include <QDirIterator>
@@ -299,6 +300,18 @@ QString unescapeZeroWidthJoiner(QString escaped)
 {
     escaped.replace(ESCAPE_TAG_REGEX, ZERO_WIDTH_JOINER);
     return escaped;
+}
+
+QLocale getSystemLocale()
+{
+#ifdef CHATTERINO_WITH_TESTS
+    if (getApp()->isTest())
+    {
+        return {QLocale::English};
+    }
+#endif
+
+    return QLocale::system();
 }
 
 }  // namespace chatterino

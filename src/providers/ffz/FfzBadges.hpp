@@ -30,6 +30,9 @@ public:
     std::vector<Badge> getUserBadges(const UserId &id);
     std::optional<Badge> getBadge(int badgeID) const;
 
+    void registerBadge(int badgeID, Badge badge);
+    void assignBadgeToUser(const UserId &userID, int badgeID);
+
     void load();
 
 private:

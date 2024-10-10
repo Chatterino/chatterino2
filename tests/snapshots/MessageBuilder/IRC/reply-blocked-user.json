@@ -1,0 +1,187 @@
+{
+    "input": "@tmi-sent-ts=1726694327762;subscriber=1;id=e5b84adf-b62d-47ff-8534-2cc57e24a5fb;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes=;reply-parent-msg-body=a;reply-thread-parent-user-login=blocked;reply-thread-parent-user-id=12345;reply-parent-user-login=blocked;reply-thread-parent-display-name=blocked;reply-parent-msg-id=ff82c584-5d20-459f-b2d5-dcacbb693559;reply-thread-parent-msg-id=ff82c584-5d20-459f-b2d5-dcacbb693559;reply-parent-display-name=blocked;reply-parent-user-id=12345 :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :@nerixyz reply",
+    "output": [
+        {
+            "badgeInfos": {
+                "subscriber": "27"
+            },
+            "badges": [
+                "subscriber"
+            ],
+            "channelName": "pajlada",
+            "count": 1,
+            "displayName": "nerixyz",
+            "elements": [
+                {
+                    "color": "System",
+                    "flags": "ChannelName",
+                    "link": {
+                        "type": "JumpToChannel",
+                        "value": "pajlada"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "#pajlada"
+                    ]
+                },
+                {
+                    "flags": "RepliedMessage",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "ReplyCurveElement"
+                },
+                {
+                    "color": "System",
+                    "flags": "RepliedMessage",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMediumSmall",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "Replying",
+                        "to"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text|RepliedMessage",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMediumSmall",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "SingleLineTextElement",
+                    "words": [
+                        "[Blocked",
+                        "user]"
+                    ]
+                },
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "21:18"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "21:18:47",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "flags": "ModeratorTools",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TwitchModerationElement"
+                },
+                {
+                    "color": "#ffff0000",
+                    "flags": "Username",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "nerixyz"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "nerixyz:"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "fallbackColor": "Text",
+                    "flags": "Text|Mention",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "MentionElement",
+                    "userColor": "#ffff0000",
+                    "userLoginName": "nerixyz",
+                    "words": [
+                        "@nerixyz"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "reply"
+                    ]
+                },
+                {
+                    "background": "#ffa0a0a4",
+                    "flags": "ReplyButton",
+                    "link": {
+                        "type": "ReplyToMessage",
+                        "value": "e5b84adf-b62d-47ff-8534-2cc57e24a5fb"
+                    },
+                    "padding": 2,
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "CircularImageElement",
+                    "url": ""
+                }
+            ],
+            "flags": "Collapsed",
+            "id": "e5b84adf-b62d-47ff-8534-2cc57e24a5fb",
+            "localizedName": "",
+            "loginName": "nerixyz",
+            "messageText": "@nerixyz reply",
+            "searchText": "nerixyz  nerixyz: @nerixyz reply ",
+            "serverReceivedTime": "2024-09-18T21:18:47Z",
+            "timeoutUser": "",
+            "usernameColor": "#ffff0000"
+        }
+    ],
+    "params": {
+        "prevMessages": [
+            "@tmi-sent-ts=1726692855226;subscriber=1;id=ff82c584-5d20-459f-b2d5-dcacbb693559;room-id=11148817;user-id=12345;display-name=blocked;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes= :blocked!blocked@blocked.tmi.twitch.tv PRIVMSG #pajlada :a"
+        ]
+    }
+}

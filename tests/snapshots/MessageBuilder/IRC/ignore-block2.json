@@ -1,0 +1,32 @@
+{
+    "input": "@tmi-sent-ts=1726692555236;subscriber=1;id=38a32590-81c6-460b-a49d-fcf2bec0f788;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes= :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :somethingblock!!something",
+    "output": [
+    ],
+    "settings": {
+        "ignore": {
+            "phrases": [
+                {
+                    "caseSensitive": false,
+                    "isBlock": false,
+                    "pattern": "ignore",
+                    "regex": false,
+                    "replaceWith": "replace"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": true,
+                    "pattern": "block!{2,}",
+                    "regex": true,
+                    "replaceWith": "?"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": true,
+                    "pattern": "",
+                    "regex": false,
+                    "replaceWith": "empty"
+                }
+            ]
+        }
+    }
+}

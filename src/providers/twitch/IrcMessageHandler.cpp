@@ -601,15 +601,6 @@ std::vector<MessagePtr> parsePrivMessage(Channel *channel,
         builder.triggerHighlights();
     }
 
-    if (message->tags().contains(u"pinned-chat-paid-amount"_s))
-    {
-        auto ptr = MessageBuilder::buildHypeChatMessage(message);
-        if (ptr)
-        {
-            builtMessages.emplace_back(std::move(ptr));
-        }
-    }
-
     return builtMessages;
 }
 
@@ -645,6 +636,11 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
         QString content = privMsg->content();
         int messageOffset = stripLeadingReplyMention(privMsg->tags(), content);
         MessageParseArgs args;
+        auto tags = privMsg->tags();
+        if (const auto it = tags.find("custom-reward-id"); it != tags.end())
+        {
+            args.channelPointRewardId = it.value().toString();
+        }
         MessageBuilder builder(channel, message, args, content,
                                privMsg->isAction());
         builder.setMessageOffset(messageOffset);
@@ -655,6 +651,15 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
         {
             builtMessages.emplace_back(builder.build());
             builder.triggerHighlights();
+        }
+
+        if (message->tags().contains(u"pinned-chat-paid-amount"_s))
+        {
+            auto ptr = MessageBuilder::buildHypeChatMessage(privMsg);
+            if (ptr)
+            {
+                builtMessages.emplace_back(std::move(ptr));
+            }
         }
 
         return builtMessages;

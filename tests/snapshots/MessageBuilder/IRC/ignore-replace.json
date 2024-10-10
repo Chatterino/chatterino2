@@ -1,0 +1,540 @@
+{
+    "input": "@tmi-sent-ts=1726925714864;subscriber=1;id=2199102c-31ae-49b1-9d2c-a33bb3a02021;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes=305954156:0-7/25:16-20,92-96/1902:31-35 :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :PogChamp ignore Kappa &fooo123 Keepo &boo1 &baa1 &bi1 &biii1 &biiiiiiiiii420 &foo123&fo2 &[ Kappa ]& summon-emote",
+    "output": [
+        {
+            "badgeInfos": {
+                "subscriber": "27"
+            },
+            "badges": [
+                "subscriber"
+            ],
+            "channelName": "pajlada",
+            "count": 1,
+            "displayName": "nerixyz",
+            "elements": [
+                {
+                    "color": "System",
+                    "flags": "ChannelName",
+                    "link": {
+                        "type": "JumpToChannel",
+                        "value": "pajlada"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "#pajlada"
+                    ]
+                },
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "13:35"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "13:35:14",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "flags": "ModeratorTools",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TwitchModerationElement"
+                },
+                {
+                    "color": "#ffff0000",
+                    "flags": "Username",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "nerixyz"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "nerixyz:"
+                    ]
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/1.0",
+                            "2x": "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/2.0",
+                            "3x": "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/3.0"
+                        },
+                        "name": "PogChamp",
+                        "tooltip": "PogChamp<br>Twitch Emote"
+                    },
+                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "text": {
+                        "color": "Text",
+                        "flags": "Misc",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "PogChamp"
+                        ]
+                    },
+                    "tooltip": "PogChamp<br>Twitch Emote",
+                    "trailingSpace": true,
+                    "type": "EmoteElement"
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "replace"
+                    ]
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/1.0",
+                            "2x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/2.0",
+                            "3x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/3.0"
+                        },
+                        "name": "Kappa",
+                        "tooltip": "Kappa<br>Twitch Emote"
+                    },
+                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "text": {
+                        "color": "Text",
+                        "flags": "Misc",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "Kappa"
+                        ]
+                    },
+                    "tooltip": "Kappa<br>Twitch Emote",
+                    "trailingSpace": true,
+                    "type": "EmoteElement"
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "&baz1[ooo+123]"
+                    ]
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/emoticons/v2/1902/default/dark/1.0",
+                            "2x": "https://static-cdn.jtvnw.net/emoticons/v2/1902/default/dark/2.0",
+                            "3x": "https://static-cdn.jtvnw.net/emoticons/v2/1902/default/dark/3.0"
+                        },
+                        "name": "Keepo",
+                        "tooltip": "Keepo<br>Twitch Emote"
+                    },
+                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "text": {
+                        "color": "Text",
+                        "flags": "Misc",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "Keepo"
+                        ]
+                    },
+                    "tooltip": "Keepo<br>Twitch Emote",
+                    "trailingSpace": true,
+                    "type": "EmoteElement"
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "&baz2[1+\\2]"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "&baz3[1+\\42]"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "&bi1"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "&biii1"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "&baz4[i+420+i]"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "&baz1[oo+123]&baz1[o+2]"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "{"
+                    ]
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/1.0",
+                            "2x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/2.0",
+                            "3x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/3.0"
+                        },
+                        "name": "Kappa",
+                        "tooltip": "Kappa<br>Twitch Emote"
+                    },
+                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "text": {
+                        "color": "Text",
+                        "flags": "Misc",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "Kappa"
+                        ]
+                    },
+                    "tooltip": "Kappa<br>Twitch Emote",
+                    "trailingSpace": true,
+                    "type": "EmoteElement"
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "}"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "woah->"
+                    ]
+                },
+                {
+                    "emote": {
+                        "author": "Chatterino",
+                        "homePage": "https://chatterino.com/MyCoolTwitchEmote",
+                        "id": "5678",
+                        "images": {
+                            "1x": "https://chatterino.com/MyCoolTwitchEmote.png"
+                        },
+                        "name": "MyCoolTwitchEmote",
+                        "tooltip": "MyCoolTwitchEmote Tooltip"
+                    },
+                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "text": {
+                        "color": "Text",
+                        "flags": "Misc",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "MyCoolTwitchEmote"
+                        ]
+                    },
+                    "tooltip": "MyCoolTwitchEmote Tooltip",
+                    "trailingSpace": true,
+                    "type": "EmoteElement"
+                },
+                {
+                    "background": "#ffa0a0a4",
+                    "flags": "ReplyButton",
+                    "link": {
+                        "type": "ReplyToMessage",
+                        "value": "2199102c-31ae-49b1-9d2c-a33bb3a02021"
+                    },
+                    "padding": 2,
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "CircularImageElement",
+                    "url": ""
+                }
+            ],
+            "flags": "Collapsed",
+            "id": "2199102c-31ae-49b1-9d2c-a33bb3a02021",
+            "localizedName": "",
+            "loginName": "nerixyz",
+            "messageText": "PogChamp replace Kappa &baz1[ooo+123] Keepo &baz2[1+\\2] &baz3[1+\\42] &bi1 &biii1 &baz4[i+420+i] &baz1[oo+123]&baz1[o+2] { Kappa } woah-> MyCoolTwitchEmote",
+            "searchText": "nerixyz  nerixyz: PogChamp replace Kappa &baz1[ooo+123] Keepo &baz2[1+\\2] &baz3[1+\\42] &bi1 &biii1 &baz4[i+420+i] &baz1[oo+123]&baz1[o+2] { Kappa } woah-> MyCoolTwitchEmote ",
+            "serverReceivedTime": "2024-09-21T13:35:14Z",
+            "timeoutUser": "",
+            "usernameColor": "#ffff0000"
+        }
+    ],
+    "settings": {
+        "ignore": {
+            "phrases": [
+                {
+                    "caseSensitive": false,
+                    "isBlock": false,
+                    "pattern": "ignore",
+                    "regex": false,
+                    "replaceWith": "replace"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": false,
+                    "pattern": "CaseSensitive",
+                    "regex": false,
+                    "replaceWith": "casesensitivE"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": false,
+                    "pattern": "summon-emote",
+                    "regex": false,
+                    "replaceWith": "woah-> MyCoolTwitchEmote"
+                },
+                {
+                    "caseSensitive": false,
+                    "isBlock": false,
+                    "pattern": "&f(o+)(\\d+)",
+                    "regex": true,
+                    "replaceWith": "&baz1[\\1+\\2]"
+                },
+                {
+                    "caseSensitive": false,
+                    "isBlock": false,
+                    "pattern": "&b(?:o+)(\\d+)",
+                    "regex": true,
+                    "replaceWith": "&baz2[\\1+\\2]"
+                },
+                {
+                    "caseSensitive": false,
+                    "isBlock": false,
+                    "pattern": "&b(?:a+)(\\d+)",
+                    "regex": true,
+                    "replaceWith": "&baz3[\\1+\\42]"
+                },
+                {
+                    "caseSensitive": false,
+                    "isBlock": false,
+                    "pattern": "&b(i)(i)(i)(i)(i)(i)(i)(i)(i)(i)(\\d+)",
+                    "regex": true,
+                    "replaceWith": "&baz4[\\10+\\11+\\1]"
+                },
+                {
+                    "caseSensitive": false,
+                    "isBlock": false,
+                    "pattern": "&\\[ (\\w+) \\]&",
+                    "regex": true,
+                    "replaceWith": "{ \\1 }"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": true,
+                    "pattern": "BLOCK",
+                    "regex": false,
+                    "replaceWith": "?"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": true,
+                    "pattern": "block!{2,}",
+                    "regex": true,
+                    "replaceWith": "?"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": false,
+                    "pattern": "",
+                    "regex": false,
+                    "replaceWith": "empty"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": false,
+                    "pattern": "(",
+                    "regex": true,
+                    "replaceWith": "invalid"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": false,
+                    "pattern": "(?<=infinite-loop)$",
+                    "regex": true,
+                    "replaceWith": "infinite-loop"
+                }
+            ]
+        }
+    }
+}

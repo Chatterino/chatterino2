@@ -1,0 +1,485 @@
+{
+    "input": "@tmi-sent-ts=1726868573676;subscriber=1;id=23c8b81c-7c73-44e4-84f1-7d37e99714e4;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes=25:10-14/305954156:50-57/1902:69-73 :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :BTTVEmote Kappa 7TVEmote 7TVEmote0w 7TVEmote0w 😂😂 PogChamp 7TVGlobal Keepo FFZEmote FFZGlobal",
+    "output": [
+        {
+            "badgeInfos": {
+                "subscriber": "27"
+            },
+            "badges": [
+                "subscriber"
+            ],
+            "channelName": "pajlada",
+            "count": 1,
+            "displayName": "nerixyz",
+            "elements": [
+                {
+                    "color": "System",
+                    "flags": "ChannelName",
+                    "link": {
+                        "type": "JumpToChannel",
+                        "value": "pajlada"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "#pajlada"
+                    ]
+                },
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "21:42"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "21:42:53",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "flags": "ModeratorTools",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TwitchModerationElement"
+                },
+                {
+                    "color": "#ffff0000",
+                    "flags": "Username",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "nerixyz"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "nerixyz:"
+                    ]
+                },
+                {
+                    "emote": {
+                        "author": "Chatterino",
+                        "homePage": "https://chatterino.com/BTTVEmote",
+                        "images": {
+                            "1x": "https://chatterino.com/BTTVEmote.png"
+                        },
+                        "name": "BTTVEmote",
+                        "tooltip": "BTTVEmote Tooltip"
+                    },
+                    "flags": "BttvEmoteImage|BttvEmoteText",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "text": {
+                        "color": "Text",
+                        "flags": "Misc",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "BTTVEmote"
+                        ]
+                    },
+                    "tooltip": "BTTVEmote Tooltip",
+                    "trailingSpace": true,
+                    "type": "EmoteElement"
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/1.0",
+                            "2x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/2.0",
+                            "3x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/3.0"
+                        },
+                        "name": "Kappa",
+                        "tooltip": "Kappa<br>Twitch Emote"
+                    },
+                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "text": {
+                        "color": "Text",
+                        "flags": "Misc",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "Kappa"
+                        ]
+                    },
+                    "tooltip": "Kappa<br>Twitch Emote",
+                    "trailingSpace": true,
+                    "type": "EmoteElement"
+                },
+                {
+                    "emotes": [
+                        {
+                            "emote": {
+                                "author": "Chatterino",
+                                "homePage": "https://chatterino.com/7TVEmote",
+                                "id": "1",
+                                "images": {
+                                    "1x": "https://chatterino.com/7TVEmote.png"
+                                },
+                                "name": "7TVEmote",
+                                "tooltip": "7TVEmote Tooltip"
+                            },
+                            "flags": "SevenTVEmoteImage|SevenTVEmoteText"
+                        },
+                        {
+                            "emote": {
+                                "author": "Chatterino",
+                                "baseName": "ZeroWidth",
+                                "homePage": "https://chatterino.com/7TVEmote0w",
+                                "id": "2",
+                                "images": {
+                                    "1x": "https://chatterino.com/7TVEmote0w.png"
+                                },
+                                "name": "7TVEmote0w",
+                                "tooltip": "7TVEmote0w Tooltip",
+                                "zeroWidth": true
+                            },
+                            "flags": "SevenTVEmoteImage|SevenTVEmoteText"
+                        },
+                        {
+                            "emote": {
+                                "author": "Chatterino",
+                                "baseName": "ZeroWidth",
+                                "homePage": "https://chatterino.com/7TVEmote0w",
+                                "id": "2",
+                                "images": {
+                                    "1x": "https://chatterino.com/7TVEmote0w.png"
+                                },
+                                "name": "7TVEmote0w",
+                                "tooltip": "7TVEmote0w Tooltip",
+                                "zeroWidth": true
+                            },
+                            "flags": "SevenTVEmoteImage|SevenTVEmoteText"
+                        }
+                    ],
+                    "flags": "SevenTVEmoteImage|SevenTVEmoteText",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "text": {
+                        "color": "Text",
+                        "flags": "Misc",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "7TVEmote",
+                            "7TVEmote0w",
+                            "7TVEmote0w"
+                        ]
+                    },
+                    "textElementColor": "Text",
+                    "tooltip": "7TVEmote 7TVEmote0w 7TVEmote0w",
+                    "tooltips": [
+                    ],
+                    "trailingSpace": true,
+                    "type": "LayeredEmoteElement"
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://pajbot.com/static/emoji-v2/img/twitter/64/1f602.png"
+                        },
+                        "name": "😂",
+                        "tooltip": ":joy:<br/>Emoji"
+                    },
+                    "flags": "EmojiImage|EmojiText",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "text": {
+                        "color": "Text",
+                        "flags": "Misc",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "😂"
+                        ]
+                    },
+                    "tooltip": ":joy:<br/>Emoji",
+                    "trailingSpace": true,
+                    "type": "EmoteElement"
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://pajbot.com/static/emoji-v2/img/twitter/64/1f602.png"
+                        },
+                        "name": "😂",
+                        "tooltip": ":joy:<br/>Emoji"
+                    },
+                    "flags": "EmojiImage|EmojiText",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "text": {
+                        "color": "Text",
+                        "flags": "Misc",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "😂"
+                        ]
+                    },
+                    "tooltip": ":joy:<br/>Emoji",
+                    "trailingSpace": true,
+                    "type": "EmoteElement"
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/1.0",
+                            "2x": "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/2.0",
+                            "3x": "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/3.0"
+                        },
+                        "name": "PogChamp",
+                        "tooltip": "PogChamp<br>Twitch Emote"
+                    },
+                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "text": {
+                        "color": "Text",
+                        "flags": "Misc",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "PogChamp"
+                        ]
+                    },
+                    "tooltip": "PogChamp<br>Twitch Emote",
+                    "trailingSpace": true,
+                    "type": "EmoteElement"
+                },
+                {
+                    "emote": {
+                        "author": "Chatterino",
+                        "homePage": "https://chatterino.com/7TVGlobal",
+                        "id": "G1",
+                        "images": {
+                            "1x": "https://chatterino.com/7TVGlobal.png"
+                        },
+                        "name": "7TVGlobal",
+                        "tooltip": "7TVGlobal Tooltip"
+                    },
+                    "flags": "SevenTVEmoteImage|SevenTVEmoteText",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "text": {
+                        "color": "Text",
+                        "flags": "Misc",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "7TVGlobal"
+                        ]
+                    },
+                    "tooltip": "7TVGlobal Tooltip",
+                    "trailingSpace": true,
+                    "type": "EmoteElement"
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/emoticons/v2/1902/default/dark/1.0",
+                            "2x": "https://static-cdn.jtvnw.net/emoticons/v2/1902/default/dark/2.0",
+                            "3x": "https://static-cdn.jtvnw.net/emoticons/v2/1902/default/dark/3.0"
+                        },
+                        "name": "Keepo",
+                        "tooltip": "Keepo<br>Twitch Emote"
+                    },
+                    "flags": "TwitchEmoteImage|TwitchEmoteText",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "text": {
+                        "color": "Text",
+                        "flags": "Misc",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "Keepo"
+                        ]
+                    },
+                    "tooltip": "Keepo<br>Twitch Emote",
+                    "trailingSpace": true,
+                    "type": "EmoteElement"
+                },
+                {
+                    "emote": {
+                        "author": "Chatterino",
+                        "homePage": "https://chatterino.com/FFZEmote",
+                        "images": {
+                            "1x": "https://chatterino.com/FFZEmote.png"
+                        },
+                        "name": "FFZEmote",
+                        "tooltip": "FFZEmote Tooltip"
+                    },
+                    "flags": "FfzEmoteImage|FfzEmoteText",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "text": {
+                        "color": "Text",
+                        "flags": "Misc",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "FFZEmote"
+                        ]
+                    },
+                    "tooltip": "FFZEmote Tooltip",
+                    "trailingSpace": true,
+                    "type": "EmoteElement"
+                },
+                {
+                    "emote": {
+                        "author": "Chatterino",
+                        "homePage": "https://chatterino.com/FFZGlobal",
+                        "images": {
+                            "1x": "https://chatterino.com/FFZGlobal.png"
+                        },
+                        "name": "FFZGlobal",
+                        "tooltip": "FFZGlobal Tooltip"
+                    },
+                    "flags": "FfzEmoteImage|FfzEmoteText",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "text": {
+                        "color": "Text",
+                        "flags": "Misc",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "FFZGlobal"
+                        ]
+                    },
+                    "tooltip": "FFZGlobal Tooltip",
+                    "trailingSpace": true,
+                    "type": "EmoteElement"
+                },
+                {
+                    "background": "#ffa0a0a4",
+                    "flags": "ReplyButton",
+                    "link": {
+                        "type": "ReplyToMessage",
+                        "value": "23c8b81c-7c73-44e4-84f1-7d37e99714e4"
+                    },
+                    "padding": 2,
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "CircularImageElement",
+                    "url": ""
+                }
+            ],
+            "flags": "Collapsed",
+            "id": "23c8b81c-7c73-44e4-84f1-7d37e99714e4",
+            "localizedName": "",
+            "loginName": "nerixyz",
+            "messageText": "BTTVEmote Kappa 7TVEmote 7TVEmote0w 7TVEmote0w 😂😂 PogChamp 7TVGlobal Keepo FFZEmote FFZGlobal",
+            "searchText": "nerixyz  nerixyz: BTTVEmote Kappa 7TVEmote 7TVEmote0w 7TVEmote0w 😂😂 PogChamp 7TVGlobal Keepo FFZEmote FFZGlobal ",
+            "serverReceivedTime": "2024-09-20T21:42:53Z",
+            "timeoutUser": "",
+            "usernameColor": "#ffff0000"
+        }
+    ]
+}

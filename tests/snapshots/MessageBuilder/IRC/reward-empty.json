@@ -1,0 +1,240 @@
+{
+    "input": "@tmi-sent-ts=1726677572248;subscriber=1;id=2932e250-1f49-4587-8783-7a13d9f99f6b;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes=;custom-reward-id=dc8d1dac-256e-42b9-b7ba-40b32e5294e2 :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :empty",
+    "output": [
+        {
+            "badgeInfos": {
+                "subscriber": "27"
+            },
+            "badges": [
+                "subscriber"
+            ],
+            "channelName": "pajlada",
+            "count": 1,
+            "displayName": "nerixyz",
+            "elements": [
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "0:00"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "00:00:00",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "color": "Text",
+                    "flags": "ChannelPointReward",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": ""
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        ""
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "ChannelPointReward",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "redeemed"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "ChannelPointReward",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "test"
+                    ]
+                },
+                {
+                    "flags": "TwitchEmoteImage|ChannelPointReward",
+                    "image": "https://chatterino.com/reward1x.png",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "ScalingImageElement"
+                },
+                {
+                    "color": "Text",
+                    "flags": "ChannelPointReward",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "1"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "ChannelName",
+                    "link": {
+                        "type": "JumpToChannel",
+                        "value": "pajlada"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "#pajlada"
+                    ]
+                },
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "16:39"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "16:39:32",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "flags": "ModeratorTools",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TwitchModerationElement"
+                },
+                {
+                    "color": "#ffff0000",
+                    "flags": "Username",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "nerixyz"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "nerixyz:"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "empty"
+                    ]
+                },
+                {
+                    "background": "#ffa0a0a4",
+                    "flags": "ReplyButton",
+                    "link": {
+                        "type": "ReplyToMessage",
+                        "value": "2932e250-1f49-4587-8783-7a13d9f99f6b"
+                    },
+                    "padding": 2,
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "CircularImageElement",
+                    "url": ""
+                }
+            ],
+            "flags": "Collapsed|RedeemedChannelPointReward",
+            "id": "2932e250-1f49-4587-8783-7a13d9f99f6b",
+            "localizedName": "",
+            "loginName": "nerixyz",
+            "messageText": "empty",
+            "reward": {
+                "channelId": "11148817",
+                "cost": 1,
+                "emoteId": "",
+                "emoteName": "",
+                "id": "dc8d1dac-256e-42b9-b7ba-40b32e5294e2",
+                "image": {
+                    "1x": "https://chatterino.com/reward1x.png",
+                    "2x": "https://chatterino.com/reward2x.png",
+                    "3x": "https://chatterino.com/reward4x.png"
+                },
+                "isBits": false,
+                "isUserInputRequired": false,
+                "title": "test",
+                "user": {
+                    "displayName": "",
+                    "id": "",
+                    "login": ""
+                }
+            },
+            "searchText": "nerixyz  nerixyz: empty  redeemed test 1",
+            "serverReceivedTime": "2024-09-18T16:39:32Z",
+            "timeoutUser": "",
+            "usernameColor": "#ffff0000"
+        }
+    ]
+}

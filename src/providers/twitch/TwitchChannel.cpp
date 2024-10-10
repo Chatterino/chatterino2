@@ -462,6 +462,14 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
     }
 }
 
+void TwitchChannel::addKnownChannelPointReward(const ChannelPointReward &reward)
+{
+    assert(getApp()->isTest());
+
+    auto channelPointRewards = this->channelPointRewards_.access();
+    channelPointRewards->try_emplace(reward.id, reward);
+}
+
 bool TwitchChannel::isChannelPointRewardKnown(const QString &rewardId)
 {
     const auto &pointRewards = this->channelPointRewards_.accessConst();
@@ -1560,7 +1568,7 @@ void TwitchChannel::refreshBadges()
     getHelix()->getChannelBadges(
         this->roomId(),
         // successCallback
-        [this, weak = weakOf<Channel>(this)](auto channelBadges) {
+        [this, weak = weakOf<Channel>(this)](const auto &channelBadges) {
             auto shared = weak.lock();
             if (!shared)
             {
@@ -1568,31 +1576,7 @@ void TwitchChannel::refreshBadges()
                 return;
             }
 
-            auto badgeSets = this->badgeSets_.access();
-
-            for (const auto &badgeSet : channelBadges.badgeSets)
-            {
-                const auto &setID = badgeSet.setID;
-                for (const auto &version : badgeSet.versions)
-                {
-                    auto emote = Emote{
-                        .name = EmoteName{},
-                        .images =
-                            ImageSet{
-                                Image::fromUrl(version.imageURL1x, 1,
-                                               BASE_BADGE_SIZE),
-                                Image::fromUrl(version.imageURL2x, .5,
-                                               BASE_BADGE_SIZE * 2),
-                                Image::fromUrl(version.imageURL4x, .25,
-                                               BASE_BADGE_SIZE * 4),
-                            },
-                        .tooltip = Tooltip{version.title},
-                        .homePage = version.clickURL,
-                    };
-                    (*badgeSets)[setID][version.id] =
-                        std::make_shared<Emote>(emote);
-                }
-            }
+            this->addTwitchBadgeSets(channelBadges);
         },
         // failureCallback
         [this, weak = weakOf<Channel>(this)](auto error, auto message) {
@@ -1623,6 +1607,33 @@ void TwitchChannel::refreshBadges()
         });
 }
 
+void TwitchChannel::addTwitchBadgeSets(const HelixChannelBadges &channelBadges)
+{
+    auto badgeSets = this->badgeSets_.access();
+
+    for (const auto &badgeSet : channelBadges.badgeSets)
+    {
+        const auto &setID = badgeSet.setID;
+        for (const auto &version : badgeSet.versions)
+        {
+            auto emote = Emote{
+                .name = EmoteName{},
+                .images =
+                    ImageSet{
+                        Image::fromUrl(version.imageURL1x, 1, BASE_BADGE_SIZE),
+                        Image::fromUrl(version.imageURL2x, .5,
+                                       BASE_BADGE_SIZE * 2),
+                        Image::fromUrl(version.imageURL4x, .25,
+                                       BASE_BADGE_SIZE * 4),
+                    },
+                .tooltip = Tooltip{version.title},
+                .homePage = version.clickURL,
+            };
+            (*badgeSets)[setID][version.id] = std::make_shared<Emote>(emote);
+        }
+    }
+}
+
 void TwitchChannel::refreshCheerEmotes()
 {
     getHelix()->getCheermotes(
@@ -1635,72 +1646,73 @@ void TwitchChannel::refreshCheerEmotes()
                 return;
             }
 
-            std::vector<CheerEmoteSet> emoteSets;
-
-            for (const auto &set : cheermoteSets)
-            {
-                auto cheerEmoteSet = CheerEmoteSet();
-                cheerEmoteSet.regex = QRegularExpression(
-                    "^" + set.prefix + "([1-9][0-9]*)$",
-                    QRegularExpression::CaseInsensitiveOption);
-
-                for (const auto &tier : set.tiers)
-                {
-                    CheerEmote cheerEmote;
-
-                    cheerEmote.color = QColor(tier.color);
-                    cheerEmote.minBits = tier.minBits;
-                    cheerEmote.regex = cheerEmoteSet.regex;
-
-                    // TODO(pajlada): We currently hardcode dark here :|
-                    // We will continue to do so for now since we haven't had to
-                    // solve that anywhere else
-
-                    // Combine the prefix (e.g. BibleThump) with the tier (1, 100 etc.)
-                    auto emoteTooltip =
-                        set.prefix + tier.id + "<br>Twitch Cheer Emote";
-                    auto makeImageSet = [](const HelixCheermoteImage &image) {
-                        return ImageSet{
-                            Image::fromUrl(image.imageURL1x, 1.0,
-                                           BASE_BADGE_SIZE),
-                            Image::fromUrl(image.imageURL2x, 0.5,
-                                           BASE_BADGE_SIZE * 2),
-                            Image::fromUrl(image.imageURL4x, 0.25,
-                                           BASE_BADGE_SIZE * 4),
-                        };
-                    };
-                    cheerEmote.animatedEmote = std::make_shared<Emote>(Emote{
-                        .name = EmoteName{"cheer emote"},
-                        .images = makeImageSet(tier.darkAnimated),
-                        .tooltip = Tooltip{emoteTooltip},
-                        .homePage = Url{},
-                    });
-                    cheerEmote.staticEmote = std::make_shared<Emote>(Emote{
-                        .name = EmoteName{"cheer emote"},
-                        .images = makeImageSet(tier.darkStatic),
-                        .tooltip = Tooltip{emoteTooltip},
-                        .homePage = Url{},
-                    });
-
-                    cheerEmoteSet.cheerEmotes.emplace_back(
-                        std::move(cheerEmote));
-                }
-
-                // Sort cheermotes by cost
-                std::sort(cheerEmoteSet.cheerEmotes.begin(),
-                          cheerEmoteSet.cheerEmotes.end(),
-                          [](const auto &lhs, const auto &rhs) {
-                              return lhs.minBits > rhs.minBits;
-                          });
-
-                emoteSets.emplace_back(std::move(cheerEmoteSet));
-            }
-
-            *this->cheerEmoteSets_.access() = std::move(emoteSets);
+            this->setCheerEmoteSets(cheermoteSets);
         },
         [] {
             // Failure
         });
+}
+
+void TwitchChannel::setCheerEmoteSets(
+    const std::vector<HelixCheermoteSet> &cheermoteSets)
+{
+    std::vector<CheerEmoteSet> emoteSets;
+
+    for (const auto &set : cheermoteSets)
+    {
+        auto cheerEmoteSet = CheerEmoteSet();
+        cheerEmoteSet.regex =
+            QRegularExpression("^" + set.prefix + "([1-9][0-9]*)$",
+                               QRegularExpression::CaseInsensitiveOption);
+
+        for (const auto &tier : set.tiers)
+        {
+            CheerEmote cheerEmote;
+
+            cheerEmote.color = QColor(tier.color);
+            cheerEmote.minBits = tier.minBits;
+            cheerEmote.regex = cheerEmoteSet.regex;
+
+            // TODO(pajlada): We currently hardcode dark here :|
+            // We will continue to do so for now since we haven't had to
+            // solve that anywhere else
+
+            // Combine the prefix (e.g. BibleThump) with the tier (1, 100 etc.)
+            auto emoteTooltip = set.prefix + tier.id + "<br>Twitch Cheer Emote";
+            auto makeImageSet = [](const HelixCheermoteImage &image) {
+                return ImageSet{
+                    Image::fromUrl(image.imageURL1x, 1.0, BASE_BADGE_SIZE),
+                    Image::fromUrl(image.imageURL2x, 0.5, BASE_BADGE_SIZE * 2),
+                    Image::fromUrl(image.imageURL4x, 0.25, BASE_BADGE_SIZE * 4),
+                };
+            };
+            cheerEmote.animatedEmote = std::make_shared<Emote>(Emote{
+                .name = EmoteName{u"cheer emote"_s},
+                .images = makeImageSet(tier.darkAnimated),
+                .tooltip = Tooltip{emoteTooltip},
+                .homePage = Url{},
+            });
+            cheerEmote.staticEmote = std::make_shared<Emote>(Emote{
+                .name = EmoteName{u"cheer emote"_s},
+                .images = makeImageSet(tier.darkStatic),
+                .tooltip = Tooltip{emoteTooltip},
+                .homePage = Url{},
+            });
+
+            cheerEmoteSet.cheerEmotes.emplace_back(std::move(cheerEmote));
+        }
+
+        // Sort cheermotes by cost
+        std::sort(cheerEmoteSet.cheerEmotes.begin(),
+                  cheerEmoteSet.cheerEmotes.end(),
+                  [](const auto &lhs, const auto &rhs) {
+                      return lhs.minBits > rhs.minBits;
+                  });
+
+        emoteSets.emplace_back(std::move(cheerEmoteSet));
+    }
+
+    *this->cheerEmoteSets_.access() = std::move(emoteSets);
 }
 
 void TwitchChannel::createClip()
@@ -1859,6 +1871,12 @@ std::vector<FfzBadges::Badge> TwitchChannel::ffzChannelBadges(
     return badges;
 }
 
+void TwitchChannel::setFfzChannelBadges(FfzChannelBadgeMap map)
+{
+    this->tgFfzChannelBadges_.guard();
+    this->ffzChannelBadges_ = std::move(map);
+}
+
 std::optional<EmotePtr> TwitchChannel::ffzCustomModBadge() const
 {
     return this->ffzCustomModBadge_.get();
@@ -1867,6 +1885,16 @@ std::optional<EmotePtr> TwitchChannel::ffzCustomModBadge() const
 std::optional<EmotePtr> TwitchChannel::ffzCustomVipBadge() const
 {
     return this->ffzCustomVipBadge_.get();
+}
+
+void TwitchChannel::setFfzCustomModBadge(std::optional<EmotePtr> badge)
+{
+    this->ffzCustomModBadge_.set(std::move(badge));
+}
+
+void TwitchChannel::setFfzCustomVipBadge(std::optional<EmotePtr> badge)
+{
+    this->ffzCustomVipBadge_.set(std::move(badge));
 }
 
 std::optional<CheerEmote> TwitchChannel::cheerEmote(const QString &string) const
