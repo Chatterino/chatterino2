@@ -355,6 +355,22 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               .argumentsPromptHover = "Should the tabs be enabled, disabled, "
                                       "toggled, or live-only.",
           }},
+         {"toggleGlobalNotificationSuppression",
+          ActionDefinition{
+              .displayName = "Toggle notification suppression",
+              .argumentDescription =
+              "[on, off, or toggle. default: toggle]",
+              .minCountArguments = 0,
+              .maxCountArguments = 1,
+              .possibleArguments{
+                  {"Toggle", {}},
+                  {"Enable notification muting", {"on"}},
+                  {"Disable notification muting", {"off"}}
+              },
+              .argumentsPrompt = "New value:",
+              .argumentsPromptHover = "Should all highlight notifications be "
+                                      "enabled, disabled, or toggled.",
+              }},
      }},
 };
 
