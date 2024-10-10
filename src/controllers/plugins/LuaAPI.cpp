@@ -23,6 +23,7 @@
 #    include <sol/variadic_args.hpp>
 #    include <sol/variadic_results.hpp>
 
+#    include <stdexcept>
 #    include <string>
 #    include <utility>
 
@@ -104,12 +105,12 @@ void c2_log(sol::this_state L, Plugin *pl, LogLevel lvl,
     }
 }
 
-int c2_later(sol::this_state L, sol::protected_function callback, int time)
+void c2_later(sol::this_state L, sol::protected_function callback, int time)
 {
     auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
     if (pl == nullptr)
     {
-        return luaL_error(L, "c2.later: internal error: no plugin?");
+        throw std::runtime_error("c2.later: internal error: no plugin?");
     }
     sol::state_view lua(L);
 
@@ -137,8 +138,6 @@ int c2_later(sol::this_state L, sol::protected_function callback, int time)
         main.registry()[name.toStdString()] = sol::nil;
     });
     timer->start();
-
-    return 0;
 }
 
 sol::variadic_results g_load(sol::this_state s, sol::object data)

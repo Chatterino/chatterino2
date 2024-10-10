@@ -8,14 +8,7 @@
 #    include <lauxlib.h>
 #    include <lua.h>
 #    include <QString>
-#    include <sol/forward.hpp>
-#    include <sol/in_place.hpp>
-#    include <sol/object.hpp>
-#    include <sol/protected_function_result.hpp>
-#    include <sol/state_view.hpp>
-#    include <sol/types.hpp>
-#    include <sol/variadic_args.hpp>
-#    include <sol/variadic_results.hpp>
+#    include <sol/sol.hpp>
 
 #    include <cerrno>
 #    include <stdexcept>

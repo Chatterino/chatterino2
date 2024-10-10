@@ -3,6 +3,7 @@
 #    include "common/network/NetworkResult.hpp"
 
 #    include <lua.h>
+#    include <sol/sol.hpp>
 
 #    include <memory>
 

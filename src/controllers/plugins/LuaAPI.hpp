@@ -123,7 +123,7 @@ void c2_log(sol::this_state L, Plugin *pl, LogLevel lvl,
  * @lua@param msec number How long to wait.
  * @exposed c2.later
  */
-int c2_later(sol::this_state L, sol::protected_function callback, int time);
+void c2_later(sol::this_state L, sol::protected_function callback, int time);
 
 // These ones are global
 sol::variadic_results g_load(sol::this_state s, sol::object data);
