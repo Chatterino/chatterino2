@@ -18,6 +18,7 @@
 #include "singletons/Updates.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/InitUpdateButton.hpp"
+#include "util/RapidJsonSerializeQSize.hpp"
 #include "widgets/AccountSwitchPopup.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/switcher/QuickSwitcherPopup.hpp"
@@ -152,9 +153,8 @@ void Window::closeEvent(QCloseEvent *)
     else
     {
         QRect rect = this->getBounds();
-        auto lastPopup = getSettings()->lastPopupSetting.getValue();
-        lastPopup.setWidth(rect.width());
-        lastPopup.setHeight(rect.height());
+        QSize newSize(rect.width(), rect.height());
+        getSettings()->lastPopupSetting.setValue(newSize);
     }
     // Ensure selectedWindow_ is never an invalid pointer.
     // WindowManager will return the main window if no window is pointed to by

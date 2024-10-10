@@ -21,7 +21,7 @@ struct Serialize<QSize> {
 
 template <>
 struct Deserialize<QSize> {
-    static QSize get(const rapidjson::Value &value, bool *error)
+    static QSize get(const rapidjson::Value &value, bool *error = nullptr)
     {
         if (!value.IsObject())
         {
