@@ -7,14 +7,13 @@
 #    include "controllers/plugins/PluginPermission.hpp"
 #    include "util/QMagicEnum.hpp"
 
-extern "C" {
 #    include <lua.h>
-}
 #    include <magic_enum/magic_enum.hpp>
 #    include <QJsonArray>
 #    include <QJsonObject>
 #    include <QLoggingCategory>
 #    include <QUrl>
+#    include <sol/sol.hpp>
 
 #    include <algorithm>
 #    include <unordered_map>
@@ -190,7 +189,8 @@ PluginMeta::PluginMeta(const QJsonObject &obj)
     }
 }
 
-bool Plugin::registerCommand(const QString &name, const QString &functionName)
+bool Plugin::registerCommand(const QString &name,
+                             sol::protected_function function)
 {
     if (this->ownedCommands.find(name) != this->ownedCommands.end())
     {
@@ -202,7 +202,7 @@ bool Plugin::registerCommand(const QString &name, const QString &functionName)
     {
         return false;
     }
-    this->ownedCommands.insert({name, functionName});
+    this->ownedCommands.emplace(name, std::move(function));
     return true;
 }
 
@@ -223,14 +223,24 @@ Plugin::~Plugin()
         QObject::disconnect(timer, nullptr, nullptr, nullptr);
         timer->deleteLater();
     }
+    this->httpRequests.clear();
     qCDebug(chatterinoLua) << "Destroyed" << this->activeTimeouts.size()
                            << "timers for plugin" << this->id
                            << "while destroying the object";
     this->activeTimeouts.clear();
     if (this->state_ != nullptr)
     {
+        // clearing this after the state is gone is not safe to do
+        this->ownedCommands.clear();
+        this->callbacks.clear();
         lua_close(this->state_);
     }
+    assert(this->ownedCommands.empty() &&
+           "This must be empty or destructor of sol::protected_function would "
+           "explode malloc structures later");
+    assert(this->callbacks.empty() &&
+           "This must be empty or destructor of sol::protected_function would "
+           "explode malloc structures later");
 }
 int Plugin::addTimeout(QTimer *timer)
 {

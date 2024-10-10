@@ -9,9 +9,13 @@ c2 = {}
 ---@type { Debug: c2.LogLevel, Info: c2.LogLevel, Warning: c2.LogLevel, Critical: c2.LogLevel }
 c2.LogLevel = {}
 
+-- Begin src/controllers/plugins/api/EventType.hpp
+
 ---@alias c2.EventType integer
 ---@type { CompletionRequested: c2.EventType }
 c2.EventType = {}
+
+-- End src/controllers/plugins/api/EventType.hpp
 
 ---@class CommandContext
 ---@field words string[] The words typed when executing the command. For example `/foo bar baz` will result in `{"/foo", "bar", "baz"}`.
@@ -30,18 +34,29 @@ c2.EventType = {}
 -- Begin src/common/Channel.hpp
 
 ---@alias c2.ChannelType integer
----@type { None: c2.ChannelType, Direct: c2.ChannelType, Twitch: c2.ChannelType, TwitchWhispers: c2.ChannelType, TwitchWatching: c2.ChannelType, TwitchMentions: c2.ChannelType, TwitchLive: c2.ChannelType, TwitchAutomod: c2.ChannelType, TwitchEnd: c2.ChannelType, Irc: c2.ChannelType, Misc: c2.ChannelType }
+---@type { None: c2.ChannelType, Direct: c2.ChannelType, Twitch: c2.ChannelType, TwitchWhispers: c2.ChannelType, TwitchWatching: c2.ChannelType, TwitchMentions: c2.ChannelType, TwitchLive: c2.ChannelType, TwitchAutomod: c2.ChannelType, TwitchEnd: c2.ChannelType, Misc: c2.ChannelType }
 c2.ChannelType = {}
 
 -- End src/common/Channel.hpp
 
 -- Begin src/controllers/plugins/api/ChannelRef.hpp
 
----@alias c2.Platform integer
---- This enum describes a platform for the purpose of searching for a channel.
---- Currently only Twitch is supported because identifying IRC channels is tricky.
----@type { Twitch: c2.Platform }
-c2.Platform = {}
+-- Begin src/providers/twitch/TwitchChannel.hpp
+
+---@class StreamStatus
+---@field live boolean
+---@field viewer_count number
+---@field title string Stream title or last stream title
+---@field game_name string
+---@field game_id string
+---@field uptime number Seconds since the stream started.
+
+---@class RoomModes
+---@field subscriber_only boolean
+---@field unique_chat boolean You might know this as r9kbeta or robot9000.
+---@field emotes_only boolean Whether or not text is allowed in messages. Note that "emotes" here only means Twitch emotes, not Unicode emoji, nor 3rd party text-based emotes
+
+-- End src/providers/twitch/TwitchChannel.hpp
 
 ---@class c2.Channel
 c2.Channel = {}
@@ -72,7 +87,7 @@ function c2.Channel:get_display_name() end
 --- Note that this does not execute client-commands.
 ---
 ---@param message string
----@param execute_commands boolean Should commands be run on the text?
+---@param execute_commands? boolean Should commands be run on the text?
 function c2.Channel:send_message(message, execute_commands) end
 
 --- Adds a system message client-side
@@ -131,30 +146,14 @@ function c2.Channel:__tostring() end
 --- - /automod
 ---
 ---@param name string Which channel are you looking for?
----@param platform c2.Platform Where to search for the channel?
 ---@return c2.Channel?
-function c2.Channel.by_name(name, platform) end
+function c2.Channel.by_name(name) end
 
 --- Finds a channel by the Twitch user ID of its owner.
 ---
 ---@param id string ID of the owner of the channel.
 ---@return c2.Channel?
 function c2.Channel.by_twitch_id(id) end
-
----@class RoomModes
----@field unique_chat boolean You might know this as r9kbeta or robot9000.
----@field subscriber_only boolean
----@field emotes_only boolean Whether or not text is allowed in messages. Note that "emotes" here only means Twitch emotes, not Unicode emoji, nor 3rd party text-based emotes
----@field follower_only number? Time in minutes you need to follow to chat or nil.
----@field slow_mode number? Time in seconds you need to wait before sending messages or nil.
-
----@class StreamStatus
----@field live boolean
----@field viewer_count number
----@field uptime number Seconds since the stream started.
----@field title string Stream title or last stream title
----@field game_name string
----@field game_id string
 
 -- End src/controllers/plugins/api/ChannelRef.hpp
 

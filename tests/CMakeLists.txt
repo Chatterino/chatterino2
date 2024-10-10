@@ -48,6 +48,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/FlagsEnum.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/MessageLayoutContainer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/CancellationToken.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Plugins.cpp
     # Add your new file above this line!
     )
 

@@ -2,8 +2,8 @@
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "Application.hpp"
-#    include "common/network/NetworkCommon.hpp"
-#    include "controllers/plugins/LuaAPI.hpp"
+#    include "controllers/plugins/api/EventType.hpp"
+#    include "controllers/plugins/api/HTTPRequest.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/PluginPermission.hpp"
 
@@ -11,7 +11,10 @@
 #    include <QString>
 #    include <QUrl>
 #    include <semver/semver.hpp>
+#    include <sol/forward.hpp>
 
+#    include <memory>
+#    include <optional>
 #    include <unordered_map>
 #    include <unordered_set>
 #    include <vector>
@@ -56,6 +59,8 @@ struct PluginMeta {
     }
 
     explicit PluginMeta(const QJsonObject &obj);
+    // This is for tests
+    PluginMeta() = default;
 };
 
 class Plugin
@@ -75,13 +80,18 @@ public:
 
     ~Plugin();
 
+    Plugin(const Plugin &) = delete;
+    Plugin(Plugin &&) = delete;
+    Plugin &operator=(const Plugin &) = delete;
+    Plugin &operator=(Plugin &&) = delete;
+
     /**
      * @brief Perform all necessary tasks to bind a command name to this plugin
      * @param name name of the command to create
-     * @param functionName name of the function that should be called when the command is executed
+     * @param function the function that should be called when the command is executed
      * @return true if addition succeeded, false otherwise (for example because the command name is already taken)
      */
-    bool registerCommand(const QString &name, const QString &functionName);
+    bool registerCommand(const QString &name, sol::protected_function function);
 
     /**
      * @brief Get names of all commands belonging to this plugin
@@ -98,35 +108,19 @@ public:
         return this->loadDirectory_.absoluteFilePath("data");
     }
 
-    // Note: The CallbackFunction object's destructor will remove the function from the lua stack
-    using LuaCompletionCallback =
-        lua::CallbackFunction<lua::api::CompletionList,
-                              lua::api::CompletionEvent>;
-    std::optional<LuaCompletionCallback> getCompletionCallback()
+    std::optional<sol::protected_function> getCompletionCallback()
     {
         if (this->state_ == nullptr || !this->error_.isNull())
         {
             return {};
         }
-        // this uses magic enum to help automatic tooling find usages
-        auto typeName =
-            magic_enum::enum_name(lua::api::EventType::CompletionRequested);
-        std::string cbName;
-        cbName.reserve(5 + typeName.size());
-        cbName += "c2cb-";
-        cbName += typeName;
-        auto typ =
-            lua_getfield(this->state_, LUA_REGISTRYINDEX, cbName.c_str());
-        if (typ != LUA_TFUNCTION)
+        auto it =
+            this->callbacks.find(lua::api::EventType::CompletionRequested);
+        if (it == this->callbacks.end())
         {
-            lua_pop(this->state_, 1);
             return {};
         }
-
-        // move
-        return std::make_optional<lua::CallbackFunction<
-            lua::api::CompletionList, lua::api::CompletionEvent>>(
-            this->state_, lua_gettop(this->state_));
+        return it->second;
     }
 
     /**
@@ -143,18 +137,25 @@ public:
     bool hasFSPermissionFor(bool write, const QString &path);
     bool hasHTTPPermissionFor(const QUrl &url);
 
+    std::map<lua::api::EventType, sol::protected_function> callbacks;
+
+    // In-flight HTTP Requests
+    // This is a lifetime hack to ensure they get deleted with the plugin. This relies on the Plugin getting deleted on reload!
+    std::vector<std::shared_ptr<lua::api::HTTPRequest>> httpRequests;
+
 private:
     QDir loadDirectory_;
     lua_State *state_;
 
     QString error_;
 
-    // maps command name -> function name
-    std::unordered_map<QString, QString> ownedCommands;
+    // maps command name -> function
+    std::unordered_map<QString, sol::protected_function> ownedCommands;
     std::vector<QTimer *> activeTimeouts;
     int lastTimerId = 0;
 
     friend class PluginController;
+    friend class PluginControllerAccess;  // this is for tests
 };
 }  // namespace chatterino
 #endif

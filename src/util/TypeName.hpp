@@ -28,6 +28,15 @@ constexpr auto type_name()
     name.remove_prefix(prefix.size());
     name.remove_suffix(suffix.size());
 
+    if (name.starts_with("class "))
+    {
+        name.remove_prefix(6);
+    }
+    if (name.starts_with("struct "))
+    {
+        name.remove_prefix(7);
+    }
+
     return name;
 }
 

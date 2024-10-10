@@ -103,6 +103,7 @@
 - Dev: Twitch messages are now sent using Twitch's Helix API instead of IRC by default. (#5607)
 - Dev: `GIFTimer` is no longer initialized in tests. (#5608)
 - Dev: Emojis now use flags instead of a set of strings for capabilities. (#5616)
+- Dev: Move plugins to Sol2. (#5622)
 
 ## 2.5.1
 
