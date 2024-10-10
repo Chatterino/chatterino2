@@ -422,7 +422,7 @@ public:
     // get followed channel
     MOCK_METHOD(
         void, getFollowedChannel,
-        (QString userID, QString broadcasterID,
+        (QString userID, QString broadcasterID, const QObject *caller,
          ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
          FailureCallback<QString> failureCallback),
         (override));
