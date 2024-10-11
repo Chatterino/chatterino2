@@ -362,8 +362,8 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               .minCountArguments = 0,
               .maxCountArguments = 1,
               .possibleArguments{{"Toggle", {}},
-                                 {"Enable notification muting", {"on"}},
-                                 {"Disable notification muting", {"off"}}},
+                                 {"Mute notifications", {"on"}},
+                                 {"Unmute notifications", {"off"}}},
               .argumentsPrompt = "New value:",
               .argumentsPromptHover = "Should all highlight notifications be "
                                       "enabled, disabled, or toggled.",
