@@ -210,6 +210,7 @@ private:
 
     QAction *lockNotebookLayoutAction_;
     QAction *toggleTopMostAction_;
+    QAction *toggleNotificationSuppression_;
 
     // This filter, if set, is used to figure out the visibility of
     // the tabs in this notebook.
