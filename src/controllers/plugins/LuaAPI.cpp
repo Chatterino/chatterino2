@@ -113,6 +113,11 @@ void c2_later(sol::this_state L, sol::protected_function callback, int time)
     {
         throw std::runtime_error("c2.later: internal error: no plugin?");
     }
+    if (time <= 0)
+    {
+        throw std::runtime_error(
+            "c2.later time must be strictly greater than zero.");
+    }
     sol::state_view lua(L);
 
     auto *timer = new QTimer();
