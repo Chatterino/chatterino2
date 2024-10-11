@@ -686,7 +686,7 @@ void Window::addShortcuts()
          [](const std::vector<QString> &arguments) -> QString {
              QString arg = arguments.empty() ? "toggle" : arguments.front();
 
-             bool desiredValue;
+             bool desiredValue = false;
              if (arg == "toggle")
              {
                  desiredValue = !getSettings()->globallySuppressNotifications;
