@@ -79,7 +79,7 @@ Notebook::Notebook(QWidget *parent)
     }
 
     this->toggleNotificationSuppression_ =
-        new QAction("Suppress all notifications", this);
+        new QAction("Mute all notifications", this);
     this->toggleNotificationSuppression_->setCheckable(true);
     this->toggleNotificationSuppression_->setChecked(
         getSettings()->globallySuppressNotifications);

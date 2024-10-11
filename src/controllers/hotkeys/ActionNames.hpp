@@ -357,7 +357,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
           }},
          {"toggleGlobalNotificationSuppression",
           ActionDefinition{
-              .displayName = "Toggle notification suppression",
+              .displayName = "Toggle muting of all notifications",
               .argumentDescription = "[on, off, or toggle. default: toggle]",
               .minCountArguments = 0,
               .maxCountArguments = 1,
