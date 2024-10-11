@@ -162,6 +162,12 @@ void actuallyTriggerHighlights(const QString &channelName, bool playSound,
         return;
     }
 
+    if (getSettings()->globallySuppressNotifications)
+    {
+        // Notifications are globally suppressed, ignore it.
+        return;
+    }
+
     const bool hasFocus = (QApplication::focusWidget() != nullptr);
     const bool resolveFocus =
         !hasFocus || getSettings()->highlightAlwaysPlaySound;

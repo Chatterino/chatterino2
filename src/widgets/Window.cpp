@@ -668,7 +668,38 @@ void Window::addShortcuts()
 
              return "";
          }},
-    };
+        {"toggleGlobalNotificationSuppression",
+         [](const std::vector<QString> &arguments) -> QString {
+             QString arg = arguments.empty() ? "toggle" : arguments.front();
+
+             bool desiredValue = false;
+             if (arg == "toggle")
+             {
+                 desiredValue = !getSettings()->globallySuppressNotifications;
+             }
+             else if (arg == "on")
+             {
+                 desiredValue = true;
+             }
+             else if (arg == "off")
+             {
+                 desiredValue = false;
+             }
+             else
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "Invalid argument for "
+                        "toggleGlobalNotificationSuppression hotkey: "
+                     << arg;
+                 return QString("Invalid argument for "
+                                "toggleGlobalNotificationSuppression hotkey: "
+                                "%1. Use \"on\", \"off\", or \"toggle\".")
+                     .arg(arg);
+             }
+
+             getSettings()->globallySuppressNotifications = desiredValue;
+             return "";
+         }}};
 
     this->addDebugStuff(actions);
 

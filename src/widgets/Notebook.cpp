@@ -78,6 +78,25 @@ Notebook::Notebook(QWidget *parent)
             << "Notebook must be created within a BaseWindow";
     }
 
+    this->toggleNotificationSuppression_ =
+        new QAction("Mute all notifications", this);
+    this->toggleNotificationSuppression_->setCheckable(true);
+    this->toggleNotificationSuppression_->setChecked(
+        getSettings()->globallySuppressNotifications);
+    this->toggleNotificationSuppression_->setShortcut(
+        getApp()->getHotkeys()->getDisplaySequence(
+            HotkeyCategory::Window, "toggleGlobalNotificationSuppression"));
+
+    QObject::connect(this->toggleNotificationSuppression_, &QAction::triggered,
+                     [] {
+                         getSettings()->globallySuppressNotifications =
+                             !getSettings()->globallySuppressNotifications;
+                     });
+    getSettings()->globallySuppressNotifications.connect(
+        [this](const bool &value) {
+            this->toggleNotificationSuppression_->setChecked(value);
+        });
+
     // Manually resize the add button so the initial paint uses the correct
     // width when computing the maximum width occupied per column in vertical
     // tab rendering.
@@ -1241,8 +1260,8 @@ void Notebook::setLockNotebookLayout(bool value)
 void Notebook::addNotebookActionsToMenu(QMenu *menu)
 {
     menu->addAction(this->lockNotebookLayoutAction_);
-
     menu->addAction(this->toggleTopMostAction_);
+    menu->addAction(this->toggleNotificationSuppression_);
 }
 
 NotebookButton *Notebook::getAddButton()
