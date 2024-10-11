@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Minor: Add muting of all application notifications via keybind/window menu. (#5629)
+
 ## 2.5.2-beta.1
 
 - Major: Add option to show pronouns in user card. (#5442, #5583)
