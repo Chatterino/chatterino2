@@ -83,6 +83,9 @@ Notebook::Notebook(QWidget *parent)
     this->toggleNotificationSuppression_->setCheckable(true);
     this->toggleNotificationSuppression_->setChecked(
         getSettings()->globallySuppressNotifications);
+    this->toggleNotificationSuppression_->setShortcut(
+        getApp()->getHotkeys()->getDisplaySequence(
+            HotkeyCategory::Window, "toggleGlobalNotificationSuppression"));
 
     QObject::connect(this->toggleNotificationSuppression_, &QAction::triggered,
                      [] {
