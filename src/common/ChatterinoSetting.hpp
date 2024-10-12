@@ -3,8 +3,8 @@
 #include "util/QMagicEnum.hpp"
 
 #include <pajlada/settings.hpp>
-#include <QString>
 #include <QSize>
+#include <QString>
 
 namespace chatterino {
 
