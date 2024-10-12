@@ -6,7 +6,6 @@
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/PluginController.hpp"
 #    include "controllers/plugins/SolTypes.hpp"  // for lua operations on QString{,List} for CompletionList
-#    include "controllers/plugins/ThisPluginState.hpp"
 
 #    include <lauxlib.h>
 #    include <lua.h>
