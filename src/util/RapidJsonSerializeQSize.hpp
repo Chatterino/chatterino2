@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/RapidjsonHelpers.hpp"
+
 #include <pajlada/serialize.hpp>
 #include <QSize>
 
