@@ -242,13 +242,21 @@ def read_file(path: Path, out: TextIOWrapper):
                 )
             name = header[0].split(" ", 1)[1]
             printmsg(path, reader.line_no(), f"enum {name}")
-            out.write(f"---@alias {name} integer\n")
+            variants = reader.read_enum_variants()
+
+            vtypes = []
+            for variant in variants:
+                vtype = f'{name}.{variant}'
+                vtypes.append(vtype)
+                out.write(f'---@alias {vtype} "{vtype}"\n')
+
+            out.write(f"---@alias {name} {'|'.join(vtypes)}\n")
             if header_comment:
                 out.write(f"--- {header_comment}\n")
             out.write("---@type { ")
             out.write(
                 ", ".join(
-                    [f"{variant}: {name}" for variant in reader.read_enum_variants()]
+                    [f"{variant}: {typ}" for variant, typ in zip(variants,vtypes)]
                 )
             )
             out.write(" }\n")

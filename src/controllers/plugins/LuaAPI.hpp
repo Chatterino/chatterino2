@@ -100,7 +100,7 @@ sol::table toTable(lua_State *L, const CompletionEvent &ev);
 /**
  * Registers a callback to be invoked when completions for a term are requested.
  *
- * @lua@param type "CompletionRequested"
+ * @lua@param type c2.EventType.CompletionRequested
  * @lua@param func fun(event: CompletionEvent): CompletionList The callback to be invoked.
  * @exposed c2.register_callback
  */
