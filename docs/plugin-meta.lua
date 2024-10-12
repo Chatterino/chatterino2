@@ -5,14 +5,19 @@
 -- Add the folder this file is in to "Lua.workspace.library".
 
 c2 = {}
----@alias c2.LogLevel integer
----@type { Debug: c2.LogLevel, Info: c2.LogLevel, Warning: c2.LogLevel, Critical: c2.LogLevel }
+---@alias c2.LogLevel.Debug "c2.LogLevel.Debug"
+---@alias c2.LogLevel.Info "c2.LogLevel.Info"
+---@alias c2.LogLevel.Warning "c2.LogLevel.Warning"
+---@alias c2.LogLevel.Critical "c2.LogLevel.Critical"
+---@alias c2.LogLevel c2.LogLevel.Debug|c2.LogLevel.Info|c2.LogLevel.Warning|c2.LogLevel.Critical
+---@type { Debug: c2.LogLevel.Debug, Info: c2.LogLevel.Info, Warning: c2.LogLevel.Warning, Critical: c2.LogLevel.Critical }
 c2.LogLevel = {}
 
 -- Begin src/controllers/plugins/api/EventType.hpp
 
----@alias c2.EventType integer
----@type { CompletionRequested: c2.EventType }
+---@alias c2.EventType.CompletionRequested "c2.EventType.CompletionRequested"
+---@alias c2.EventType c2.EventType.CompletionRequested
+---@type { CompletionRequested: c2.EventType.CompletionRequested }
 c2.EventType = {}
 
 -- End src/controllers/plugins/api/EventType.hpp
@@ -33,8 +38,18 @@ c2.EventType = {}
 
 -- Begin src/common/Channel.hpp
 
----@alias c2.ChannelType integer
----@type { None: c2.ChannelType, Direct: c2.ChannelType, Twitch: c2.ChannelType, TwitchWhispers: c2.ChannelType, TwitchWatching: c2.ChannelType, TwitchMentions: c2.ChannelType, TwitchLive: c2.ChannelType, TwitchAutomod: c2.ChannelType, TwitchEnd: c2.ChannelType, Misc: c2.ChannelType }
+---@alias c2.ChannelType.None "c2.ChannelType.None"
+---@alias c2.ChannelType.Direct "c2.ChannelType.Direct"
+---@alias c2.ChannelType.Twitch "c2.ChannelType.Twitch"
+---@alias c2.ChannelType.TwitchWhispers "c2.ChannelType.TwitchWhispers"
+---@alias c2.ChannelType.TwitchWatching "c2.ChannelType.TwitchWatching"
+---@alias c2.ChannelType.TwitchMentions "c2.ChannelType.TwitchMentions"
+---@alias c2.ChannelType.TwitchLive "c2.ChannelType.TwitchLive"
+---@alias c2.ChannelType.TwitchAutomod "c2.ChannelType.TwitchAutomod"
+---@alias c2.ChannelType.TwitchEnd "c2.ChannelType.TwitchEnd"
+---@alias c2.ChannelType.Misc "c2.ChannelType.Misc"
+---@alias c2.ChannelType c2.ChannelType.None|c2.ChannelType.Direct|c2.ChannelType.Twitch|c2.ChannelType.TwitchWhispers|c2.ChannelType.TwitchWatching|c2.ChannelType.TwitchMentions|c2.ChannelType.TwitchLive|c2.ChannelType.TwitchAutomod|c2.ChannelType.TwitchEnd|c2.ChannelType.Misc
+---@type { None: c2.ChannelType.None, Direct: c2.ChannelType.Direct, Twitch: c2.ChannelType.Twitch, TwitchWhispers: c2.ChannelType.TwitchWhispers, TwitchWatching: c2.ChannelType.TwitchWatching, TwitchMentions: c2.ChannelType.TwitchMentions, TwitchLive: c2.ChannelType.TwitchLive, TwitchAutomod: c2.ChannelType.TwitchAutomod, TwitchEnd: c2.ChannelType.TwitchEnd, Misc: c2.ChannelType.Misc }
 c2.ChannelType = {}
 
 -- End src/common/Channel.hpp
@@ -175,6 +190,9 @@ function HTTPResponse:status() end
 ---
 function HTTPResponse:error() end
 
+---@return string
+function HTTPResponse:__tostring() end
+
 -- End src/controllers/plugins/api/HTTPResponse.hpp
 
 -- Begin src/controllers/plugins/api/HTTPRequest.hpp
@@ -218,6 +236,9 @@ function HTTPRequest:set_header(name, value) end
 ---
 function HTTPRequest:execute() end
 
+---@return string
+function HTTPRequest:__tostring() end
+
 --- Creates a new HTTPRequest
 ---
 ---@param method HTTPMethod Method to use
@@ -229,8 +250,13 @@ function HTTPRequest.create(method, url) end
 
 -- Begin src/common/network/NetworkCommon.hpp
 
----@alias HTTPMethod integer
----@type { Get: HTTPMethod, Post: HTTPMethod, Put: HTTPMethod, Delete: HTTPMethod, Patch: HTTPMethod }
+---@alias HTTPMethod.Get "HTTPMethod.Get"
+---@alias HTTPMethod.Post "HTTPMethod.Post"
+---@alias HTTPMethod.Put "HTTPMethod.Put"
+---@alias HTTPMethod.Delete "HTTPMethod.Delete"
+---@alias HTTPMethod.Patch "HTTPMethod.Patch"
+---@alias HTTPMethod HTTPMethod.Get|HTTPMethod.Post|HTTPMethod.Put|HTTPMethod.Delete|HTTPMethod.Patch
+---@type { Get: HTTPMethod.Get, Post: HTTPMethod.Post, Put: HTTPMethod.Put, Delete: HTTPMethod.Delete, Patch: HTTPMethod.Patch }
 HTTPMethod = {}
 
 -- End src/common/network/NetworkCommon.hpp
@@ -244,7 +270,7 @@ function c2.register_command(name, handler) end
 
 --- Registers a callback to be invoked when completions for a term are requested.
 ---
----@param type "CompletionRequested"
+---@param type c2.EventType.CompletionRequested
 ---@param func fun(event: CompletionEvent): CompletionList The callback to be invoked.
 function c2.register_callback(type, func) end
 
