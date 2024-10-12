@@ -104,7 +104,7 @@ sol::table toTable(lua_State *L, const CompletionEvent &ev);
  * @lua@param func fun(event: CompletionEvent): CompletionList The callback to be invoked.
  * @exposed c2.register_callback
  */
-void c2_register_callback(Plugin *pl, EventType evtType,
+void c2_register_callback(ThisPluginState L, EventType evtType,
                           sol::protected_function callback);
 
 /**
@@ -114,8 +114,7 @@ void c2_register_callback(Plugin *pl, EventType evtType,
  * @lua@param ... any Values to log. Should be convertible to a string with `tostring()`.
  * @exposed c2.log
  */
-void c2_log(sol::this_state L, Plugin *pl, LogLevel lvl,
-            sol::variadic_args args);
+void c2_log(ThisPluginState L, LogLevel lvl, sol::variadic_args args);
 
 /**
  * Calls callback around msec milliseconds later. Does not freeze Chatterino.
@@ -124,11 +123,11 @@ void c2_log(sol::this_state L, Plugin *pl, LogLevel lvl,
  * @lua@param msec number How long to wait.
  * @exposed c2.later
  */
-void c2_later(sol::this_state L, sol::protected_function callback, int time);
+void c2_later(ThisPluginState L, sol::protected_function callback, int time);
 
 // These ones are global
-sol::variadic_results g_load(sol::this_state s, sol::object data);
-void g_print(sol::this_state L, Plugin *pl, sol::variadic_args args);
+sol::variadic_results g_load(ThisPluginState s, sol::object data);
+void g_print(ThisPluginState L, sol::variadic_args args);
 // NOLINTEND(readability-identifier-naming)
 
 // This is for require() exposed as an element of package.searchers

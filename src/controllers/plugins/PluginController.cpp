@@ -205,10 +205,7 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
 {
     auto g = lua.globals();
     // Do not capture plugin->state_ in lambdas, this makes the functions unusable in callbacks
-    g.set_function("print",
-                   [plugin](sol::this_state s, sol::variadic_args args) {
-                       lua::api::g_print(s, plugin, args);
-                   });
+    g.set_function("print", &lua::api::g_print);
     g.set_function("load", &lua::api::g_load);
 
     sol::table c2 = g["c2"];
@@ -216,14 +213,8 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
                     [plugin](const QString &name, sol::protected_function cb) {
                         return plugin->registerCommand(name, std::move(cb));
                     });
-    c2.set_function("register_callback", [plugin](lua::api::EventType ev,
-                                                  sol::protected_function cb) {
-        lua::api::c2_register_callback(plugin, ev, std::move(cb));
-    });
-    c2.set_function("log", [plugin](sol::this_state s, lua::api::LogLevel lvl,
-                                    sol::variadic_args args) {
-        lua::api::c2_log(s, plugin, lvl, args);
-    });
+    c2.set_function("register_callback", &lua::api::c2_register_callback);
+    c2.set_function("log", &lua::api::c2_log);
     c2.set_function("later", &lua::api::c2_later);
 
     lua::api::ChannelRef::createUserType(c2);

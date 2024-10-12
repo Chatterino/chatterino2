@@ -6,6 +6,7 @@
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/PluginController.hpp"
 #    include "controllers/plugins/SolTypes.hpp"  // for lua operations on QString{,List} for CompletionList
+#    include "controllers/plugins/ThisPluginState.hpp"
 
 #    include <lauxlib.h>
 #    include <lua.h>
@@ -90,29 +91,23 @@ sol::table toTable(lua_State *L, const CompletionEvent &ev)
     );
 }
 
-void c2_register_callback(Plugin *pl, EventType evtType,
+void c2_register_callback(ThisPluginState L, EventType evtType,
                           sol::protected_function callback)
 {
-    pl->callbacks[evtType] = std::move(callback);
+    L.plugin()->callbacks[evtType] = std::move(callback);
 }
 
-void c2_log(sol::this_state L, Plugin *pl, LogLevel lvl,
-            sol::variadic_args args)
+void c2_log(ThisPluginState L, LogLevel lvl, sol::variadic_args args)
 {
     lua::StackGuard guard(L);
     {
         QDebug stream = qdebugStreamForLogLevel(lvl);
-        logHelper(L, pl, stream, args);
+        logHelper(L, L.plugin(), stream, args);
     }
 }
 
-void c2_later(sol::this_state L, sol::protected_function callback, int time)
+void c2_later(ThisPluginState L, sol::protected_function callback, int time)
 {
-    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
-    if (pl == nullptr)
-    {
-        throw std::runtime_error("c2.later: internal error: no plugin?");
-    }
     if (time <= 0)
     {
         throw std::runtime_error(
@@ -122,7 +117,7 @@ void c2_later(sol::this_state L, sol::protected_function callback, int time)
 
     auto *timer = new QTimer();
     timer->setInterval(time);
-    auto id = pl->addTimeout(timer);
+    auto id = L.plugin()->addTimeout(timer);
     auto name = QString("timeout_%1").arg(id);
 
     sol::state_view main = sol::main_thread(L);
@@ -132,7 +127,8 @@ void c2_later(sol::this_state L, sol::protected_function callback, int time)
     main.registry()[name.toStdString()] = thread;
 
     QObject::connect(
-        timer, &QTimer::timeout, [pl, name, timer, cb, thread, main]() {
+        timer, &QTimer::timeout,
+        [pl = L.plugin(), name, timer, cb, thread, main]() {
             timer->deleteLater();
             pl->removeTimeout(timer);
             sol::protected_function_result res = cb();
@@ -149,7 +145,7 @@ void c2_later(sol::this_state L, sol::protected_function callback, int time)
     timer->start();
 }
 
-sol::variadic_results g_load(sol::this_state s, sol::object data)
+sol::variadic_results g_load(ThisPluginState s, sol::object data)
 {
 #    ifdef NDEBUG
     (void)data;
@@ -257,14 +253,14 @@ int searcherRelative(lua_State *L)
     return loadfile(L, filename);
 }
 
-void g_print(sol::this_state L, Plugin *pl, sol::variadic_args args)
+void g_print(ThisPluginState L, sol::variadic_args args)
 {
     // This is almost the expansion of qCDebug() macro, actual thing is wrapped in a for loop
     auto stream =
         (QMessageLogger(QT_MESSAGELOG_FILE, QT_MESSAGELOG_LINE,
                         QT_MESSAGELOG_FUNC, chatterinoLua().categoryName())
              .debug());
-    logHelper(L, pl, stream, args);
+    logHelper(L, L.plugin(), stream, args);
 }
 
 }  // namespace chatterino::lua::api
