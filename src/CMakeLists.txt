@@ -225,23 +225,24 @@ set(SOURCE_FILES
         controllers/pings/MutedChannelModel.cpp
         controllers/pings/MutedChannelModel.hpp
 
+
         controllers/plugins/api/ChannelRef.cpp
         controllers/plugins/api/ChannelRef.hpp
-        controllers/plugins/api/IOWrapper.cpp
-        controllers/plugins/api/IOWrapper.hpp
+        controllers/plugins/api/EventType.hpp
         controllers/plugins/api/HTTPRequest.cpp
         controllers/plugins/api/HTTPRequest.hpp
         controllers/plugins/api/HTTPResponse.cpp
         controllers/plugins/api/HTTPResponse.hpp
-        controllers/plugins/api/EventType.hpp
+        controllers/plugins/api/IOWrapper.cpp
+        controllers/plugins/api/IOWrapper.hpp
         controllers/plugins/LuaAPI.cpp
         controllers/plugins/LuaAPI.hpp
         controllers/plugins/LuaUtilities.cpp
         controllers/plugins/LuaUtilities.hpp
+        controllers/plugins/PluginController.cpp
+        controllers/plugins/PluginController.hpp
         controllers/plugins/Plugin.cpp
         controllers/plugins/Plugin.hpp
-        controllers/plugins/PluginController.hpp
-        controllers/plugins/PluginController.cpp
         controllers/plugins/PluginPermission.cpp
         controllers/plugins/PluginPermission.hpp
         controllers/plugins/SolTypes.cpp

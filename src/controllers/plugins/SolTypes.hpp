@@ -21,7 +21,43 @@ constexpr bool IsOptional<std::optional<T>> = true;
 
 }  // namespace chatterino::detail
 
+namespace chatterino {
+
+class Plugin;
+
+}  // namespace chatterino
+
 namespace chatterino::lua {
+
+class ThisPluginState
+{
+public:
+    ThisPluginState(lua_State *Ls)
+        : plugptr_(nullptr)
+        , state_(Ls)
+    {
+    }
+
+    operator lua_State *() const noexcept
+    {
+        return this->state_;
+    }
+
+    lua_State *operator->() const noexcept
+    {
+        return this->state_;
+    }
+    lua_State *state() const noexcept
+    {
+        return this->state_;
+    }
+
+    Plugin *plugin();
+
+private:
+    Plugin *plugptr_;
+    lua_State *state_;
+};
 
 /// @brief Attempts to call @a function with @a args
 ///
@@ -106,6 +142,7 @@ inline nonstd::expected_lite::expected<T, QString> tryCall(
 SOL_STACK_FUNCTIONS(QString)
 SOL_STACK_FUNCTIONS(QStringList)
 SOL_STACK_FUNCTIONS(QByteArray)
+SOL_STACK_FUNCTIONS(chatterino::lua::ThisPluginState)
 
 #    undef SOL_STACK_FUNCTIONS
 

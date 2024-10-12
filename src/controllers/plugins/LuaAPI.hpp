@@ -3,6 +3,7 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/api/ChannelRef.hpp"
 #    include "controllers/plugins/Plugin.hpp"
+#    include "controllers/plugins/SolTypes.hpp"
 
 #    include <lua.h>
 #    include <QList>

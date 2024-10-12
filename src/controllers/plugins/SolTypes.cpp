@@ -1,7 +1,28 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/SolTypes.hpp"
 
+#    include "controllers/plugins/PluginController.hpp"
+
 #    include <QObject>
+#    include <sol/thread.hpp>
+namespace chatterino::lua {
+
+Plugin *ThisPluginState::plugin()
+{
+    if (this->plugptr_ != nullptr)
+    {
+        return this->plugptr_;
+    }
+    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(this->state_);
+    if (pl == nullptr)
+    {
+        throw std::runtime_error("internal error: missing plugin");
+    }
+    this->plugptr_ = pl;
+    return pl;
+}
+
+}  // namespace chatterino::lua
 
 // NOLINTBEGIN(readability-named-parameter)
 // QString
@@ -76,6 +97,30 @@ int sol_lua_push(sol::types<QByteArray>, lua_State *L, const QByteArray &value)
     return sol::stack::push(L,
                             std::string_view(value.constData(), value.size()));
 }
+
+// ThisPluginState
+
+bool sol_lua_check(sol::types<chatterino::lua::ThisPluginState>, lua_State *L,
+                   int index, std::function<sol::check_handler_type> handler,
+                   sol::stack::record &tracking)
+{
+    return true;
+}
+
+chatterino::lua::ThisPluginState sol_lua_get(
+    sol::types<chatterino::lua::ThisPluginState>, lua_State *L, int index,
+    sol::stack::record &tracking)
+{
+    tracking.use(0);
+    return {L};
+}
+
+int sol_lua_push(sol::types<chatterino::lua::ThisPluginState>, lua_State *L,
+                 const chatterino::lua::ThisPluginState &value)
+{
+    return sol::stack::push(L, sol::thread(L, value));
+}
+
 // NOLINTEND(readability-named-parameter)
 
 #endif
