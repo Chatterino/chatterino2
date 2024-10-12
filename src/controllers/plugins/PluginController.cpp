@@ -330,11 +330,12 @@ QString PluginController::tryExecPluginCommand(const QString &commandName,
                 return {};
             }
 
-            if (!*result)
+            auto opt = result.value();
+            if (!opt)
             {
                 return {};
             }
-            return **result;
+            return *opt;
         }
     }
     qCCritical(chatterinoLua)
