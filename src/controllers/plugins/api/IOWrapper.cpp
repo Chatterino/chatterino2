@@ -329,7 +329,5 @@ void io_tmpfile()
     throw std::runtime_error("io.tmpfile: This function is a stub!");
 }
 
-// NOLINTEND(*vararg)
-
 }  // namespace chatterino::lua::api
 #endif
