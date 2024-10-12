@@ -212,7 +212,7 @@ public:
     BoolSetting useCustomFfzVipBadges = {
         "/appearance/badges/useCustomFfzVipBadges", true};
     BoolSetting showBadgesSevenTV = {"/appearance/badges/seventv", true};
-    ChatterinoSetting<QSize> lastPopupSetting = {
+    QSizeSetting lastPopupSetting = {
         "/appearance/lastPopup/size",
         {300, 500},
     };
