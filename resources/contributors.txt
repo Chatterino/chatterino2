@@ -35,7 +35,7 @@ Confuseh | https://github.com/Confuseh |
 ch-ems | https://github.com/ch-ems |
 Bur0k | https://github.com/Bur0k |
 nuuls | https://github.com/nuuls |
-Chronophylos | https://github.com/Chronophylos | 
+Chronophylos | https://github.com/Chronophylos |
 Ckath | https://github.com/Ckath |
 matijakevic | https://github.com/matijakevic |
 nforro | https://github.com/nforro |
@@ -79,6 +79,7 @@ KleberPF | https://github.com/KleberPF |
 nealxm | https://github.com/nealxm | :/avatars/nealxm.png
 Niller2005 | https://github.com/Niller2005 | :/avatars/niller2005.png
 JakeRYW | https://github.com/JakeRYW | :/avatars/jakeryw.png
+maliByatzes | https://github.com/maliByatzes | :/avatars/maliByatzes.png
 
 # If you are a contributor add yourself above this line
 
