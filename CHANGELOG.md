@@ -30,6 +30,7 @@
 - Minor: Links can now have prefixes and suffixes such as parentheses. (#5486, #5515)
 - Minor: Added support for scrolling in splits with touchscreen panning gestures. (#5524)
 - Minor: Removed experimental IRC support. (#5547)
+- Minor: Remember last popup size for next popup. (#5635)
 - Minor: Moderators can now see which mods start and cancel raids. (#5563)
 - Minor: The emote popup now reloads when Twitch emotes are reloaded. (#5580)
 - Minor: Added `--login <username>` CLI argument to specify which account to start logged in as. (#5626)
