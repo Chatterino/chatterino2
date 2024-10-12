@@ -118,7 +118,7 @@ void HTTPRequest::execute(sol::this_state L)
 
     std::move(this->req_)
         .onSuccess([this, L, hack](const NetworkResult &res) {
-            if (hack.expired())
+            if (!hack.lock())
             {
                 return;
             }
@@ -135,7 +135,7 @@ void HTTPRequest::execute(sol::this_state L)
             this->cbSuccess = std::nullopt;
         })
         .onError([this, L, hack](const NetworkResult &res) {
-            if (hack.expired())
+            if (!hack.lock())
             {
                 return;
             }
@@ -152,7 +152,7 @@ void HTTPRequest::execute(sol::this_state L)
             this->cbError = std::nullopt;
         })
         .finally([this, L, hack]() {
-            if (hack.expired())
+            if (!hack.lock())
             {
                 // this could happen if the plugin was deleted
                 return;
