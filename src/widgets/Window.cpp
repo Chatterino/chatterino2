@@ -77,6 +77,11 @@ Window::Window(WindowType type, QWidget *parent)
     else
     {
         auto lastPopup = getSettings()->lastPopupSetting.getValue();
+        if (lastPopup.isEmpty())
+        {
+            // The size in the setting was invalid, use the default value
+            lastPopup = getSettings()->lastPopupSetting.getDefaultValue();
+        }
         this->resize(lastPopup.width(), lastPopup.height());
     }
 
