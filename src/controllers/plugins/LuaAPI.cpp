@@ -152,6 +152,8 @@ void c2_later(sol::this_state L, sol::protected_function callback, int time)
 sol::variadic_results g_load(sol::this_state s, sol::object data)
 {
 #    ifdef NDEBUG
+    (void)data;
+    (void)s;
     throw std::runtime_error("load() is only usable in debug mode");
 #    else
 
