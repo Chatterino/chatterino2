@@ -29,11 +29,19 @@ struct Deserialize<QSize> {
             return QSize{};
         }
 
-        int width;
-        int height;
+        int width{};
+        int height{};
 
-        chatterino::rj::getSafe(value, "width", width);
-        chatterino::rj::getSafe(value, "height", height);
+        if (!chatterino::rj::getSafe(value, "width", width))
+        {
+            PAJLADA_REPORT_ERROR(error);
+            return {};
+        }
+        if (!chatterino::rj::getSafe(value, "height", height))
+        {
+            PAJLADA_REPORT_ERROR(error);
+            return {};
+        }
 
         return QSize(width, height);
     }
