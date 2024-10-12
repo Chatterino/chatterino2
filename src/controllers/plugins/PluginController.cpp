@@ -22,7 +22,6 @@
 #    include <lua.h>
 #    include <lualib.h>
 #    include <QJsonDocument>
-#    include <sol/forward.hpp>
 #    include <sol/overload.hpp>
 #    include <sol/sol.hpp>
 #    include <sol/types.hpp>
