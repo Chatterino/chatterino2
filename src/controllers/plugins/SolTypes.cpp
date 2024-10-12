@@ -100,15 +100,16 @@ int sol_lua_push(sol::types<QByteArray>, lua_State *L, const QByteArray &value)
 
 // ThisPluginState
 
-bool sol_lua_check(sol::types<chatterino::lua::ThisPluginState>, lua_State *L,
-                   int index, std::function<sol::check_handler_type> handler,
-                   sol::stack::record &tracking)
+bool sol_lua_check(sol::types<chatterino::lua::ThisPluginState>,
+                   lua_State * /*L*/, int /* index*/,
+                   std::function<sol::check_handler_type> /* handler*/,
+                   sol::stack::record & /*tracking*/)
 {
     return true;
 }
 
 chatterino::lua::ThisPluginState sol_lua_get(
-    sol::types<chatterino::lua::ThisPluginState>, lua_State *L, int index,
+    sol::types<chatterino::lua::ThisPluginState>, lua_State *L, int /*index*/,
     sol::stack::record &tracking)
 {
     tracking.use(0);
