@@ -10,6 +10,7 @@ concurrency:
 
 jobs:
   review:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-clang-tidy') }}
     name: "clang-tidy ${{ matrix.os }}, Qt ${{ matrix.qt-version }})"
     runs-on: ${{ matrix.os }}
     strategy:
