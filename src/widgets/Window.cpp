@@ -76,11 +76,11 @@ Window::Window(WindowType type, QWidget *parent)
     }
     else
     {
-        auto lastPopup = getSettings()->lastPopupSetting.getValue();
+        auto lastPopup = getSettings()->lastPopupSize.getValue();
         if (lastPopup.isEmpty())
         {
             // The size in the setting was invalid, use the default value
-            lastPopup = getSettings()->lastPopupSetting.getDefaultValue();
+            lastPopup = getSettings()->lastPopupSize.getDefaultValue();
         }
         this->resize(lastPopup.width(), lastPopup.height());
     }
@@ -159,7 +159,7 @@ void Window::closeEvent(QCloseEvent *)
     {
         QRect rect = this->getBounds();
         QSize newSize(rect.width(), rect.height());
-        getSettings()->lastPopupSetting.setValue(newSize);
+        getSettings()->lastPopupSize.setValue(newSize);
     }
     // Ensure selectedWindow_ is never an invalid pointer.
     // WindowManager will return the main window if no window is pointed to by
