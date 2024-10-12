@@ -28,7 +28,7 @@ struct Deserialize<QSize> {
         if (!value.IsObject())
         {
             PAJLADA_REPORT_ERROR(error);
-            return QSize{};
+            return {};
         }
 
         int width{};
@@ -45,7 +45,7 @@ struct Deserialize<QSize> {
             return {};
         }
 
-        return QSize(width, height);
+        return {width, height};
     }
 };
 
