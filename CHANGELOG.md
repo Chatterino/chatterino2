@@ -49,7 +49,7 @@
 - Bugfix: Fixed splits staying paused after unfocusing Chatterino in certain configurations. (#5504, #5637)
 - Bugfix: Links with invalid characters in the domain are no longer detected. (#5509)
 - Bugfix: Fixed janky selection for messages with RTL segments (selection is still wrong, but consistently wrong). (#5525)
-- Bugfix: Fixed event emotes not showing up in autocomplete and popups. (#5239, #5580, #5582)
+- Bugfix: Fixed event emotes not showing up in autocomplete and popups. (#5239, #5580, #5582, #5632)
 - Bugfix: Fixed tab visibility being controllable in the emote popup. (#5530)
 - Bugfix: Fixed account switch not being saved if no other settings were changed. (#5558)
 - Bugfix: Fixed some tooltips not being readable. (#5578)
