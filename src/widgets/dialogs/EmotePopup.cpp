@@ -155,7 +155,7 @@ void addTwitchEmoteSets(const std::shared_ptr<const EmoteMap> &local,
     }
 
     std::ranges::sort(sortedSets, [](const auto &a, const auto &b) {
-        return a.first < b.first;
+        return a.first.compare(b.first, Qt::CaseInsensitive) < 0;
     });
 
     for (const auto &[title, set] : sortedSets)
