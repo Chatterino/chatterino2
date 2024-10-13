@@ -150,7 +150,7 @@ void addTwitchEmoteSets(const std::shared_ptr<const EmoteMap> &local,
         }
         else
         {
-            sortedSets.emplace_back(set.title(), set);
+            sortedSets.emplace_back(set.title(), std::cref(set));
         }
     }
 
