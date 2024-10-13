@@ -21,7 +21,7 @@ class OverlayWindow : public QWidget
 {
     Q_OBJECT
 public:
-    OverlayWindow(IndirectChannel channel);
+    OverlayWindow(IndirectChannel channel, const QList<QUuid> &filterIDs);
     ~OverlayWindow() override;
     OverlayWindow(const OverlayWindow &) = delete;
     OverlayWindow(OverlayWindow &&) = delete;

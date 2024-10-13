@@ -85,7 +85,8 @@ namespace chatterino {
 
 using namespace std::chrono_literals;
 
-OverlayWindow::OverlayWindow(IndirectChannel channel)
+OverlayWindow::OverlayWindow(IndirectChannel channel,
+                             const QList<QUuid> &filterIDs)
     : QWidget(nullptr,
               Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)
 #ifdef Q_OS_WIN
@@ -116,6 +117,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel)
     });
 
     this->channelView_.installEventFilter(this);
+    this->channelView_.setFilters(filterIDs);
     this->channelView_.setChannel(this->channel_.get());
     this->channelView_.setIsOverlay(true);  // use overlay colors
     this->channelView_.setAttribute(Qt::WA_TranslucentBackground);

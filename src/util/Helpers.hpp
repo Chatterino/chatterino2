@@ -189,4 +189,6 @@ constexpr std::optional<std::decay_t<T>> makeConditionedOptional(bool condition,
 /// a ZWJ. See also: https://github.com/Chatterino/chatterino2/issues/3384.
 QString unescapeZeroWidthJoiner(QString escaped);
 
+QLocale getSystemLocale();
+
 }  // namespace chatterino

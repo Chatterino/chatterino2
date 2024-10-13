@@ -1,0 +1,228 @@
+{
+    "input": "@tmi-sent-ts=1726764056444;subscriber=1;id=546c42a6-21d0-4f3d-a6a0-c77f78d7b131;room-id=11148817;user-id=123456;display-name=badgy;badges=subscriber24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes= :badgy!badgy@badgy.tmi.twitch.tv PRIVMSG #pajlada :badge",
+    "output": [
+        {
+            "badgeInfos": {
+                "subscriber": "27"
+            },
+            "badges": [
+            ],
+            "channelName": "pajlada",
+            "count": 1,
+            "displayName": "badgy",
+            "elements": [
+                {
+                    "color": "System",
+                    "flags": "ChannelName",
+                    "link": {
+                        "type": "JumpToChannel",
+                        "value": "pajlada"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "#pajlada"
+                    ]
+                },
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "16:40"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "16:40:56",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "flags": "ModeratorTools",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TwitchModerationElement"
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://chatterino.com/Chatterino.png"
+                        },
+                        "name": "",
+                        "tooltip": "Chatterino badge"
+                    },
+                    "flags": "BadgeChatterino",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Chatterino badge",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "color": "#0c090a0b",
+                    "emote": {
+                        "images": {
+                            "1x": "https://chatterino.com/FFZ1.png"
+                        },
+                        "name": "",
+                        "tooltip": "FFZ1 badge"
+                    },
+                    "flags": "BadgeFfz",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "FFZ1 badge",
+                    "trailingSpace": true,
+                    "type": "FfzBadgeElement"
+                },
+                {
+                    "color": "#100d0e0f",
+                    "emote": {
+                        "images": {
+                            "1x": "https://chatterino.com/FFZ2.png"
+                        },
+                        "name": "",
+                        "tooltip": "FFZ2 badge"
+                    },
+                    "flags": "BadgeFfz",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "FFZ2 badge",
+                    "trailingSpace": true,
+                    "type": "FfzBadgeElement"
+                },
+                {
+                    "color": "#14111213",
+                    "emote": {
+                        "images": {
+                            "1x": "https://chatterino.com/FFZ2.png"
+                        },
+                        "name": "",
+                        "tooltip": "FFZ2 badge"
+                    },
+                    "flags": "BadgeFfz",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "FFZ2 badge",
+                    "trailingSpace": true,
+                    "type": "FfzBadgeElement"
+                },
+                {
+                    "color": "#18151617",
+                    "emote": {
+                        "images": {
+                            "1x": "https://chatterino.com/FFZ2.png"
+                        },
+                        "name": "",
+                        "tooltip": "FFZ2 badge"
+                    },
+                    "flags": "BadgeFfz",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "FFZ2 badge",
+                    "trailingSpace": true,
+                    "type": "FfzBadgeElement"
+                },
+                {
+                    "emote": {
+                        "id": "1",
+                        "images": {
+                            "1x": "https://chatterino.com/7tv//1x"
+                        },
+                        "name": "",
+                        "tooltip": "7TV badge"
+                    },
+                    "flags": "BadgeSevenTV",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "7TV badge",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "color": "#ffff0000",
+                    "flags": "Username",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "badgy"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "badgy:"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "badge"
+                    ]
+                },
+                {
+                    "background": "#ffa0a0a4",
+                    "flags": "ReplyButton",
+                    "link": {
+                        "type": "ReplyToMessage",
+                        "value": "546c42a6-21d0-4f3d-a6a0-c77f78d7b131"
+                    },
+                    "padding": 2,
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "CircularImageElement",
+                    "url": ""
+                }
+            ],
+            "flags": "Collapsed",
+            "id": "546c42a6-21d0-4f3d-a6a0-c77f78d7b131",
+            "localizedName": "",
+            "loginName": "badgy",
+            "messageText": "badge",
+            "searchText": "badgy  badgy: badge ",
+            "serverReceivedTime": "2024-09-19T16:40:56Z",
+            "timeoutUser": "",
+            "usernameColor": "#ffff0000"
+        }
+    ]
+}
