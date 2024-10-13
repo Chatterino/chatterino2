@@ -176,6 +176,17 @@ void TwitchAccount::unblockUser(const QString &userId, const QObject *caller,
         std::move(onFailure));
 }
 
+void TwitchAccount::blockUserLocally(const QString &userID)
+{
+    assertInGuiThread();
+    assert(getApp()->isTest());
+
+    TwitchUser blockedUser;
+    blockedUser.id = userID;
+    this->ignores_.insert(blockedUser);
+    this->ignoresUserIds_.insert(blockedUser.id);
+}
+
 const std::unordered_set<TwitchUser> &TwitchAccount::blocks() const
 {
     assertInGuiThread();
@@ -369,6 +380,12 @@ SharedAccessGuard<std::shared_ptr<const EmoteMap>> TwitchAccount::accessEmotes()
     const
 {
     return this->emotes_.accessConst();
+}
+
+void TwitchAccount::setEmotes(std::shared_ptr<const EmoteMap> emotes)
+{
+    assert(getApp()->isTest());
+    *this->emotes_.access() = std::move(emotes);
 }
 
 std::optional<EmotePtr> TwitchAccount::twitchEmote(const EmoteName &name) const

@@ -566,6 +566,37 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
                 }
             }
         }
+        else if (msgType == "sub" || msgType == "resub")
+        {
+            if (auto tenure = tags.find("msg-param-multimonth-tenure");
+                tenure != tags.end() && tenure.value().toInt() == 0)
+            {
+                int months =
+                    tags.value("msg-param-multimonth-duration").toInt();
+                if (months > 1)
+                {
+                    int tier = tags.value("msg-param-sub-plan").toInt() / 1000;
+                    messageText =
+                        QString(
+                            "%1 subscribed at Tier %2 for %3 months in advance")
+                            .arg(tags.value("display-name").toString(),
+                                 QString::number(tier),
+                                 QString::number(months));
+                    if (msgType == "resub")
+                    {
+                        int cumulative =
+                            tags.value("msg-param-cumulative-months").toInt();
+                        messageText +=
+                            QString(", reaching %1 months cumulatively so far!")
+                                .arg(QString::number(cumulative));
+                    }
+                    else
+                    {
+                        messageText += "!";
+                    }
+                }
+            }
+        }
 
         auto b = MessageBuilder(systemMessage, parseTagString(messageText),
                                 calculateMessageTime(message).time());
@@ -599,15 +630,6 @@ std::vector<MessagePtr> parsePrivMessage(Channel *channel,
     {
         builtMessages.emplace_back(builder.build());
         builder.triggerHighlights();
-    }
-
-    if (message->tags().contains(u"pinned-chat-paid-amount"_s))
-    {
-        auto ptr = MessageBuilder::buildHypeChatMessage(message);
-        if (ptr)
-        {
-            builtMessages.emplace_back(std::move(ptr));
-        }
     }
 
     return builtMessages;
@@ -645,6 +667,11 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
         QString content = privMsg->content();
         int messageOffset = stripLeadingReplyMention(privMsg->tags(), content);
         MessageParseArgs args;
+        auto tags = privMsg->tags();
+        if (const auto it = tags.find("custom-reward-id"); it != tags.end())
+        {
+            args.channelPointRewardId = it.value().toString();
+        }
         MessageBuilder builder(channel, message, args, content,
                                privMsg->isAction());
         builder.setMessageOffset(messageOffset);
@@ -655,6 +682,15 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
         {
             builtMessages.emplace_back(builder.build());
             builder.triggerHighlights();
+        }
+
+        if (message->tags().contains(u"pinned-chat-paid-amount"_s))
+        {
+            auto ptr = MessageBuilder::buildHypeChatMessage(privMsg);
+            if (ptr)
+            {
+                builtMessages.emplace_back(std::move(ptr));
+            }
         }
 
         return builtMessages;
@@ -1080,6 +1116,37 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
                                     " They've gifted %1 months in the channel.")
                                     .arg(QString::number(count));
                         }
+                    }
+                }
+            }
+        }
+        else if (msgType == "sub" || msgType == "resub")
+        {
+            if (auto tenure = tags.find("msg-param-multimonth-tenure");
+                tenure != tags.end() && tenure.value().toInt() == 0)
+            {
+                int months =
+                    tags.value("msg-param-multimonth-duration").toInt();
+                if (months > 1)
+                {
+                    int tier = tags.value("msg-param-sub-plan").toInt() / 1000;
+                    messageText =
+                        QString(
+                            "%1 subscribed at Tier %2 for %3 months in advance")
+                            .arg(tags.value("display-name").toString(),
+                                 QString::number(tier),
+                                 QString::number(months));
+                    if (msgType == "resub")
+                    {
+                        int cumulative =
+                            tags.value("msg-param-cumulative-months").toInt();
+                        messageText +=
+                            QString(", reaching %1 months cumulatively so far!")
+                                .arg(QString::number(cumulative));
+                    }
+                    else
+                    {
+                        messageText += "!";
                     }
                 }
             }

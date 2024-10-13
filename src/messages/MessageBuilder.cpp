@@ -50,6 +50,7 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QFileInfo>
+#include <QTimeZone>
 
 #include <chrono>
 #include <unordered_set>
@@ -1821,10 +1822,12 @@ MessagePtr MessageBuilder::buildHypeChatMessage(
 
     // actualAmount = amount * 10^(-exponent)
     double actualAmount = std::pow(10.0, double(-exponent)) * double(amount);
-    subtitle += QLocale::system().toCurrencyString(actualAmount, currency);
 
-    MessageBuilder builder(systemMessage, parseTagString(subtitle),
-                           calculateMessageTime(message).time());
+    auto locale = getSystemLocale();
+    subtitle += locale.toCurrencyString(actualAmount, currency);
+
+    auto dt = calculateMessageTime(message);
+    MessageBuilder builder(systemMessage, parseTagString(subtitle), dt.time());
     builder->flags.set(MessageFlag::ElevatedMessage);
     return builder.release();
 }
