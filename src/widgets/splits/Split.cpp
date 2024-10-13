@@ -1155,7 +1155,8 @@ void Split::showOverlayWindow()
 {
     if (!this->overlayWindow_)
     {
-        this->overlayWindow_ = new OverlayWindow(this->getIndirectChannel());
+        this->overlayWindow_ =
+            new OverlayWindow(this->getIndirectChannel(), this->getFilters());
     }
     this->overlayWindow_->show();
 }
