@@ -25,6 +25,8 @@
 #include <optional>
 #include <unordered_map>
 
+class TestMessageBuilderP;
+
 namespace chatterino {
 
 enum class HighlightState;
@@ -51,6 +53,9 @@ struct ChannelPointReward;
 class MessageThread;
 struct CheerEmoteSet;
 struct HelixStream;
+struct HelixCheermoteSet;
+struct HelixGlobalBadges;
+using HelixChannelBadges = HelixGlobalBadges;
 
 class TwitchIrcServer;
 
@@ -195,9 +200,15 @@ public:
      * Returns a list of channel-specific FrankerFaceZ badges for the given user
      */
     std::vector<FfzBadges::Badge> ffzChannelBadges(const QString &userID) const;
+    void setFfzChannelBadges(FfzChannelBadgeMap map);
+    void setFfzCustomModBadge(std::optional<EmotePtr> badge);
+    void setFfzCustomVipBadge(std::optional<EmotePtr> badge);
+
+    void addTwitchBadgeSets(const HelixChannelBadges &channelBadges);
 
     // Cheers
     std::optional<CheerEmote> cheerEmote(const QString &string) const;
+    void setCheerEmoteSets(const std::vector<HelixCheermoteSet> &cheermoteSets);
 
     // Replies
     /**
@@ -243,6 +254,10 @@ public:
      * This will look at queued up partial messages, and if one is found it will add the queued up partial messages fully hydrated.
      **/
     void addChannelPointReward(const ChannelPointReward &reward);
+    /// Adds @a reward to the known rewards
+    ///
+    /// Unlike in #addChannelPointReward(), no message will be sent.
+    void addKnownChannelPointReward(const ChannelPointReward &reward);
     bool isChannelPointRewardKnown(const QString &rewardId);
     std::optional<ChannelPointReward> channelPointReward(
         const QString &rewardId) const;
@@ -449,6 +464,7 @@ private:
     friend class MessageBuilder;
     friend class IrcMessageHandler;
     friend class Commands_E2E_Test;
+    friend class ::TestMessageBuilderP;
 };
 
 }  // namespace chatterino

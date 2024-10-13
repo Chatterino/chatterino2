@@ -1,0 +1,239 @@
+{
+    "input": "@tmi-sent-ts=1726678491958;subscriber=1;id=84b6f44a-c8eb-4abe-8a78-cf736642f695;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes= :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :https://chatterino.com (chatterino.com chatterino.com) (chatterino.com)",
+    "output": [
+        {
+            "badgeInfos": {
+                "subscriber": "27"
+            },
+            "badges": [
+                "subscriber"
+            ],
+            "channelName": "pajlada",
+            "count": 1,
+            "displayName": "nerixyz",
+            "elements": [
+                {
+                    "color": "System",
+                    "flags": "ChannelName",
+                    "link": {
+                        "type": "JumpToChannel",
+                        "value": "pajlada"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "#pajlada"
+                    ]
+                },
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "16:54"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "16:54:51",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "flags": "ModeratorTools",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TwitchModerationElement"
+                },
+                {
+                    "color": "#ffff0000",
+                    "flags": "Username",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "nerixyz"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "nerixyz:"
+                    ]
+                },
+                {
+                    "color": "Link",
+                    "flags": "Text",
+                    "link": "https://chatterino.com",
+                    "lowercase": [
+                        "https://chatterino.com"
+                    ],
+                    "original": [
+                        "https://chatterino.com"
+                    ],
+                    "style": "ChatMedium",
+                    "tooltip": "https://chatterino.com",
+                    "trailingSpace": true,
+                    "type": "LinkElement",
+                    "words": [
+                        ""
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": false,
+                    "type": "TextElement",
+                    "words": [
+                        "("
+                    ]
+                },
+                {
+                    "color": "Link",
+                    "flags": "Text",
+                    "link": "http://chatterino.com",
+                    "lowercase": [
+                        "chatterino.com"
+                    ],
+                    "original": [
+                        "chatterino.com"
+                    ],
+                    "style": "ChatMedium",
+                    "tooltip": "chatterino.com",
+                    "trailingSpace": true,
+                    "type": "LinkElement",
+                    "words": [
+                        ""
+                    ]
+                },
+                {
+                    "color": "Link",
+                    "flags": "Text",
+                    "link": "http://chatterino.com",
+                    "lowercase": [
+                        "chatterino.com"
+                    ],
+                    "original": [
+                        "chatterino.com"
+                    ],
+                    "style": "ChatMedium",
+                    "tooltip": "chatterino.com",
+                    "trailingSpace": false,
+                    "type": "LinkElement",
+                    "words": [
+                        ""
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        ")"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": false,
+                    "type": "TextElement",
+                    "words": [
+                        "("
+                    ]
+                },
+                {
+                    "color": "Link",
+                    "flags": "Text",
+                    "link": "http://chatterino.com",
+                    "lowercase": [
+                        "chatterino.com"
+                    ],
+                    "original": [
+                        "chatterino.com"
+                    ],
+                    "style": "ChatMedium",
+                    "tooltip": "chatterino.com",
+                    "trailingSpace": false,
+                    "type": "LinkElement",
+                    "words": [
+                        ""
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        ")"
+                    ]
+                },
+                {
+                    "background": "#ffa0a0a4",
+                    "flags": "ReplyButton",
+                    "link": {
+                        "type": "ReplyToMessage",
+                        "value": "84b6f44a-c8eb-4abe-8a78-cf736642f695"
+                    },
+                    "padding": 2,
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "CircularImageElement",
+                    "url": ""
+                }
+            ],
+            "flags": "Collapsed",
+            "id": "84b6f44a-c8eb-4abe-8a78-cf736642f695",
+            "localizedName": "",
+            "loginName": "nerixyz",
+            "messageText": "https://chatterino.com (chatterino.com chatterino.com) (chatterino.com)",
+            "searchText": "nerixyz  nerixyz: https://chatterino.com (chatterino.com chatterino.com) (chatterino.com) ",
+            "serverReceivedTime": "2024-09-18T16:54:51Z",
+            "timeoutUser": "",
+            "usernameColor": "#ffff0000"
+        }
+    ]
+}

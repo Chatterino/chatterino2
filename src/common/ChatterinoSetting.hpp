@@ -73,7 +73,6 @@ public:
         _registerSetting(this->getData());
     }
 
-    template <typename T2>
     EnumSetting<Enum> &operator=(Enum newValue)
     {
         this->setValue(Underlying(newValue));
