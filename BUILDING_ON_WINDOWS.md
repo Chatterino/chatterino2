@@ -170,9 +170,10 @@ To automatically format your code, do the following:
 
 1. Download [LLVM 16.0.6](https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/LLVM-16.0.6-win64.exe)
 2. During the installation, make sure to add it to your path
-3. In Qt Creator, Select `Tools` > `Options` > `Beautifier`
-4. Under `General` select `Tool: ClangFormat` and enable `Automatic Formatting on File Save`
-5. Under `Clang Format` select `Use predefined style: File` and `Fallback style: None`
+3. Enable Beautifier under `Extensions` on the left (check "Load on start" and restart)
+4. In Qt Creator, Select `Tools` > `Options` > `Beautifier`
+5. Under `General` select `Tool: ClangFormat` and enable `Automatic Formatting on File Save`
+6. Under `Clang Format` select `Use predefined style: File` and `Fallback style: None`
 
 ### Building on MSVC with AddressSanitizer
 
