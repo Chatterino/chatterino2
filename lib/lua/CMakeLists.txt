@@ -52,4 +52,5 @@ set_target_properties(${liblua} PROPERTIES
     CXX_STANDARD 98
     CXX_EXTENSIONS TRUE
 )
+target_compile_options(lua PRIVATE -w)  # this makes clang shut up about c-as-c++
 set_source_files_properties(${LUA_SRC} PROPERTIES LANGUAGE CXX)
