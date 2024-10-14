@@ -2,6 +2,7 @@
 resources/*.json
 benchmarks/resources/*.json
 tests/resources/*.json
+tests/snapshots/**/*.json
 # ...themes should be prettified for readability.
 !resources/themes/*.json
 

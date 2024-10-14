@@ -494,17 +494,14 @@ TwitchEmoteSetMeta getTwitchEmoteSetMeta(const HelixChannelEmote &emote)
             return u"x-c2-globals"_s;
         }
 
-        if (!emote.setID.isEmpty())
+        // some bit emote-sets have an id, but we want to combine them into a
+        // single set
+        if (isBits)
         {
-            return emote.setID;
+            return TWITCH_BIT_EMOTE_SET_PREFIX % emote.ownerID;
         }
-
-        if (isSub)
-        {
-            return TWITCH_SUB_EMOTE_SET_PREFIX % emote.ownerID;
-        }
-        // isBits
-        return TWITCH_BIT_EMOTE_SET_PREFIX % emote.ownerID;
+        // isSub
+        return TWITCH_SUB_EMOTE_SET_PREFIX % emote.ownerID;
     }();
 
     return {

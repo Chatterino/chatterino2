@@ -1,0 +1,225 @@
+{
+    "input": "@tmi-sent-ts=1726692492710;subscriber=1;id=89c8f200-ae37-4279-909d-5ff4f9ed10a0;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes=;reply-parent-user-id=129546453;reply-parent-msg-body=ignore;reply-parent-display-name=nerixyz;reply-thread-parent-user-login=nerixyz;reply-parent-user-login=nerixyz;reply-thread-parent-display-name=nerixyz;reply-thread-parent-msg-id=68a68ef7-0ee3-4584-8937-6d20ff0a7a8a;reply-thread-parent-user-id=129546453;reply-parent-msg-id=68a68ef7-0ee3-4584-8937-6d20ff0a7a8a :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :@nerixyz CaseSensitive",
+    "output": [
+        {
+            "badgeInfos": {
+                "subscriber": "27"
+            },
+            "badges": [
+                "subscriber"
+            ],
+            "channelName": "pajlada",
+            "count": 1,
+            "displayName": "nerixyz",
+            "elements": [
+                {
+                    "color": "System",
+                    "flags": "ChannelName",
+                    "link": {
+                        "type": "JumpToChannel",
+                        "value": "pajlada"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "#pajlada"
+                    ]
+                },
+                {
+                    "flags": "RepliedMessage",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "ReplyCurveElement"
+                },
+                {
+                    "color": "System",
+                    "flags": "RepliedMessage",
+                    "link": {
+                        "type": "ViewThread",
+                        "value": "68a68ef7-0ee3-4584-8937-6d20ff0a7a8a"
+                    },
+                    "style": "ChatMediumSmall",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "Replying",
+                        "to"
+                    ]
+                },
+                {
+                    "color": "#ffff0000",
+                    "flags": "RepliedMessage",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "nerixyz"
+                    },
+                    "style": "ChatMediumSmall",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "@nerixyz:"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text|RepliedMessage",
+                    "link": {
+                        "type": "ViewThread",
+                        "value": "68a68ef7-0ee3-4584-8937-6d20ff0a7a8a"
+                    },
+                    "style": "ChatMediumSmall",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "SingleLineTextElement",
+                    "words": [
+                        "replace"
+                    ]
+                },
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "20:48"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "20:48:12",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "flags": "ModeratorTools",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TwitchModerationElement"
+                },
+                {
+                    "color": "#ffff0000",
+                    "flags": "Username",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "nerixyz"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "nerixyz:"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "casesensitivE"
+                    ]
+                },
+                {
+                    "background": "#ffa0a0a4",
+                    "flags": "ReplyButton",
+                    "link": {
+                        "type": "ViewThread",
+                        "value": "68a68ef7-0ee3-4584-8937-6d20ff0a7a8a"
+                    },
+                    "padding": 2,
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "CircularImageElement",
+                    "url": ""
+                }
+            ],
+            "flags": "Collapsed|ReplyMessage",
+            "id": "89c8f200-ae37-4279-909d-5ff4f9ed10a0",
+            "localizedName": "",
+            "loginName": "nerixyz",
+            "messageText": "casesensitivE",
+            "replyParent": "68a68ef7-0ee3-4584-8937-6d20ff0a7a8a",
+            "replyThread": {
+                "replies": [
+                    "89c8f200-ae37-4279-909d-5ff4f9ed10a0"
+                ],
+                "rootId": "68a68ef7-0ee3-4584-8937-6d20ff0a7a8a",
+                "subscription": "None"
+            },
+            "searchText": "nerixyz  nerixyz: casesensitivE ",
+            "serverReceivedTime": "2024-09-18T20:48:12Z",
+            "timeoutUser": "",
+            "usernameColor": "#ffff0000"
+        }
+    ],
+    "params": {
+        "prevMessages": [
+            "@tmi-sent-ts=1726692478291;subscriber=1;id=68a68ef7-0ee3-4584-8937-6d20ff0a7a8a;room-id=11148817;user-id=129546453;display-name=nerixyz;badges=subscriber/24;badge-info=subscriber/27;color=#FF0000;flags=;user-type=;emotes= :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada :ignore"
+        ]
+    },
+    "settings": {
+        "ignore": {
+            "phrases": [
+                {
+                    "caseSensitive": false,
+                    "isBlock": false,
+                    "pattern": "ignore",
+                    "regex": false,
+                    "replaceWith": "replace"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": false,
+                    "pattern": "CaseSensitive",
+                    "regex": false,
+                    "replaceWith": "casesensitivE"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": true,
+                    "pattern": "BLOCK",
+                    "regex": false,
+                    "replaceWith": "?"
+                },
+                {
+                    "caseSensitive": true,
+                    "isBlock": true,
+                    "pattern": "block!{2,}",
+                    "regex": true,
+                    "replaceWith": "replace"
+                }
+            ]
+        }
+    }
+}

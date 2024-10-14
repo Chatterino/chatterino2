@@ -7,7 +7,10 @@
 #include "providers/seventv/eventapi/Dispatch.hpp"
 #include "providers/seventv/eventapi/Message.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+
+#include <unordered_map>
 
 namespace chatterino::mock {
 
@@ -67,7 +70,30 @@ public:
     std::shared_ptr<Channel> getChannelOrEmptyByID(
         const QString &channelID) override
     {
-        return {};
+        // XXX: this is the same as in TwitchIrcServer::getChannelOrEmptyByID
+        for (const auto &[name, weakChannel] : this->mockChannels)
+        {
+            auto channel = weakChannel.lock();
+            if (!channel)
+            {
+                continue;
+            }
+
+            auto twitchChannel =
+                std::dynamic_pointer_cast<TwitchChannel>(channel);
+            if (!twitchChannel)
+            {
+                continue;
+            }
+
+            if (twitchChannel->roomId() == channelID &&
+                twitchChannel->getName().count(':') < 2)
+            {
+                return channel;
+            }
+        }
+
+        return Channel::getEmpty();
     }
 
     void dropSeventvChannel(const QString &userID,
@@ -123,6 +149,8 @@ public:
     ChannelPtr liveChannel;
     ChannelPtr automodChannel;
     QString lastUserThatWhisperedMe{"forsen"};
+
+    std::unordered_map<QString, std::weak_ptr<Channel>> mockChannels;
 };
 
 }  // namespace chatterino::mock

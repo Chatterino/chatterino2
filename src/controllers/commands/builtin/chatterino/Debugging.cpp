@@ -79,6 +79,7 @@ QString listEnvironmentVariables(const CommandContext &ctx)
     QStringList debugMessages{
         "recentMessagesApiUrl: " + env.recentMessagesApiUrl,
         "linkResolverUrl: " + env.linkResolverUrl,
+        "proxyUrl: " + env.proxyUrl.value_or("N/A"),
         "twitchServerHost: " + env.twitchServerHost,
         "twitchServerPort: " + QString::number(env.twitchServerPort),
         "twitchServerSecure: " + QString::number(env.twitchServerSecure),

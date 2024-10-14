@@ -1,0 +1,254 @@
+{
+    "input": "@badge-info=subscriber/3;badges=subscriber/0,bits-charity/1;color=#0000FF;display-name=SnoopyTheBot;emotes=;first-msg=0;flags=;id=8779a9e5-cf1b-47b3-b9fe-67a5b1b605f6;mod=0;pinned-chat-paid-amount=500;pinned-chat-paid-canonical-amount=5;pinned-chat-paid-currency=USD;pinned-chat-paid-exponent=2;returning-chatter=0;room-id=36340781;subscriber=1;tmi-sent-ts=1664505974154;turbo=0;user-id=136881249;user-type= :snoopythebot!snoopythebot@snoopythebot.tmi.twitch.tv PRIVMSG #pajlada :-$5",
+    "output": [
+        {
+            "badgeInfos": {
+                "subscriber": "3"
+            },
+            "badges": [
+                "subscriber",
+                "bits-charity"
+            ],
+            "channelName": "pajlada",
+            "count": 1,
+            "displayName": "SnoopyTheBot",
+            "elements": [
+                {
+                    "color": "System",
+                    "flags": "ChannelName",
+                    "link": {
+                        "type": "JumpToChannel",
+                        "value": "pajlada"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "#pajlada"
+                    ]
+                },
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "2:46"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "02:46:14",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "flags": "ModeratorTools",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TwitchModerationElement"
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/5d9f2208-5dd8-11e7-8513-2ff4adfae661/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/5d9f2208-5dd8-11e7-8513-2ff4adfae661/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/5d9f2208-5dd8-11e7-8513-2ff4adfae661/3"
+                        },
+                        "name": "",
+                        "tooltip": "Subscriber"
+                    },
+                    "flags": "BadgeSubscription",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Subscriber (3 months)",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "emote": {
+                        "homePage": "https://link.twitch.tv/blizzardofbits",
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/a539dc18-ae19-49b0-98c4-8391a594332b/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/a539dc18-ae19-49b0-98c4-8391a594332b/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/a539dc18-ae19-49b0-98c4-8391a594332b/3"
+                        },
+                        "name": "",
+                        "tooltip": "Direct Relief - Charity 2018"
+                    },
+                    "flags": "BadgeVanity",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Direct Relief - Charity 2018",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "color": "#ff0000ff",
+                    "flags": "Username",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "SnoopyTheBot"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "SnoopyTheBot:"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "-$5"
+                    ]
+                },
+                {
+                    "background": "#ffa0a0a4",
+                    "flags": "ReplyButton",
+                    "link": {
+                        "type": "ReplyToMessage",
+                        "value": "8779a9e5-cf1b-47b3-b9fe-67a5b1b605f6"
+                    },
+                    "padding": 2,
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "CircularImageElement",
+                    "url": ""
+                }
+            ],
+            "flags": "Collapsed|ElevatedMessage",
+            "id": "8779a9e5-cf1b-47b3-b9fe-67a5b1b605f6",
+            "localizedName": "",
+            "loginName": "snoopythebot",
+            "messageText": "-$5",
+            "searchText": "snoopythebot  snoopythebot: -$5 ",
+            "serverReceivedTime": "2022-09-30T02:46:14Z",
+            "timeoutUser": "",
+            "usernameColor": "#ff0000ff"
+        },
+        {
+            "badgeInfos": {
+            },
+            "badges": [
+            ],
+            "channelName": "",
+            "count": 1,
+            "displayName": "",
+            "elements": [
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "2:46"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "02:46:14",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "Hype"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "Chat"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "USD5.00"
+                    ]
+                }
+            ],
+            "flags": "System|DoNotTriggerNotification|ElevatedMessage",
+            "id": "",
+            "localizedName": "",
+            "loginName": "",
+            "messageText": "Hype Chat USD5.00",
+            "searchText": "Hype Chat USD5.00",
+            "serverReceivedTime": "",
+            "timeoutUser": "",
+            "usernameColor": "#ff000000"
+        }
+    ]
+}
