@@ -20,6 +20,7 @@
 #    include <gtest/gtest.h>
 #    include <lauxlib.h>
 #    include <sol/state_view.hpp>
+#    include <sol/table.hpp>
 
 #    include <memory>
 #    include <optional>
@@ -570,5 +571,91 @@ TEST_F(PluginTest, testTimerRec)
         c2.later(f, 1)
     )lua");
     waiter.waitForRequest();
+}
+
+TEST_F(PluginTest, tryCallTest)
+{
+    configure();
+    lua->script(R"lua(
+        function return_table()
+            return {
+                a="b"
+            }
+        end
+        function return_nothing()
+        end
+        function return_nil()
+            return nil
+        end
+        function return_nothing_and_error()
+            error("I failed :)")
+        end
+    )lua");
+
+    using func = sol::protected_function;
+
+    func returnTable = lua->get<func>("return_table");
+    func returnNil = lua->get<func>("return_nil");
+    func returnNothing = lua->get<func>("return_nothing");
+    func returnNothingAndError = lua->get<func>("return_nothing_and_error");
+
+    // happy paths
+    {
+        auto res = lua::tryCall<sol::table>(returnTable);
+        EXPECT_TRUE(res.has_value());
+        auto t = res.value();
+        EXPECT_EQ(t.get<QString>("a"), "b");
+    }
+    {
+        // valid void return
+        auto res = lua::tryCall<void>(returnNil);
+        EXPECT_TRUE(res.has_value());
+    }
+    {
+        // valid void return
+        auto res = lua::tryCall<void>(returnNothing);
+        EXPECT_TRUE(res.has_value());
+    }
+    {
+        auto res = lua::tryCall<sol::table>(returnNothingAndError);
+        EXPECT_FALSE(res.has_value());
+        EXPECT_EQ(res.error(), "[string \"...\"]:13: I failed :)");
+    }
+    {
+        auto res = lua::tryCall<std::optional<int>>(returnNil);
+        EXPECT_TRUE(res.has_value());  // no error
+        auto opt = *res;
+        EXPECT_FALSE(opt.has_value());  // but also no false
+    }
+
+    // unhappy paths
+    {
+        // wrong return type
+        auto res = lua::tryCall<int>(returnTable);
+        EXPECT_FALSE(res.has_value());
+        EXPECT_EQ(res.error(),
+                  "Expected int to be returned but table was returned");
+    }
+    {
+        // optional but bad return type
+        auto res = lua::tryCall<std::optional<int>>(returnTable);
+        EXPECT_FALSE(res.has_value());
+        EXPECT_EQ(res.error(), "Expected std::optional<int> to be returned but "
+                               "table was returned");
+    }
+    {
+        // no return
+        auto res = lua::tryCall<int>(returnNothing);
+        EXPECT_FALSE(res.has_value());
+        EXPECT_EQ(res.error(),
+                  "Expected int to be returned but none was returned");
+    }
+    {
+        // nil return
+        auto res = lua::tryCall<int>(returnNil);
+        EXPECT_FALSE(res.has_value());
+        EXPECT_EQ(res.error(),
+                  "Expected int to be returned but lua_nil was returned");
+    }
 }
 #endif
