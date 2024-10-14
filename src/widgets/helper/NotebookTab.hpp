@@ -14,6 +14,7 @@ namespace chatterino {
 inline constexpr int NOTEBOOK_TAB_HEIGHT = 28;
 
 class SplitContainer;
+class ChannelView;
 
 class NotebookTab : public Button
 {
@@ -60,6 +61,8 @@ public:
     bool isLive() const;
 
     void setHighlightState(HighlightState style);
+    void setHighlightState(HighlightState style, ChannelView &channelViewSource,
+                           MessagePtr message);
     HighlightState highlightState() const;
 
     void setHighlightsEnabled(const bool &newVal);

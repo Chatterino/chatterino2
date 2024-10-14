@@ -10,8 +10,10 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
+#include "widgets/helper/ChannelView.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/DraggedSplit.hpp"
+#include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
 #include <boost/bind/bind.hpp>
@@ -375,6 +377,65 @@ void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
         this->highlightState_ == HighlightState::Highlighted)
     {
         return;
+    }
+
+    this->highlightState_ = newHighlightStyle;
+    this->update();
+}
+
+void NotebookTab::setHighlightState(HighlightState newHighlightStyle,
+                                    ChannelView &channelViewSource,
+                                    MessagePtr message)
+{
+    if (this->isSelected())
+    {
+        return;
+    }
+
+    if (!this->highlightEnabled_ &&
+        newHighlightStyle == HighlightState::NewMessage)
+    {
+        return;
+    }
+
+    if (this->highlightState_ == newHighlightStyle ||
+        this->highlightState_ == HighlightState::Highlighted)
+    {
+        return;
+    }
+
+    auto splitContainer =
+        dynamic_cast<SplitContainer *>(this->notebook_->getSelectedPage());
+    if (splitContainer != nullptr)
+    {
+        const auto &splits = splitContainer->getSplits();
+        for (const auto &split : splits)
+        {
+            auto &&filterIdsSource = channelViewSource.getFilterIds();
+            auto uniqueFilterIdsSource =
+                QSet(filterIdsSource.cbegin(), filterIdsSource.cend());
+            auto &&filterIdsSplit = split->getChannelView().getFilterIds();
+            auto uniqueFilterIdsSplit =
+                QSet(filterIdsSplit.cbegin(), filterIdsSplit.cend());
+
+            auto isSubset = []<typename T>(QSet<T> sub, QSet<T> super) {
+                for (auto &&subItem : sub)
+                {
+                    if (!super.contains(subItem))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            };
+
+            if (channelViewSource.underlyingChannel() == split->getChannel() &&
+                split->getChannelView().shouldIncludeMessage(message) &&
+                isSubset(uniqueFilterIdsSource, uniqueFilterIdsSplit))
+            {
+                return;
+            }
+        }
     }
 
     this->highlightState_ = newHighlightStyle;
