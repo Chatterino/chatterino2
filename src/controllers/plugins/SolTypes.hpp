@@ -64,7 +64,8 @@ private:
 /// @a T is expected to be returned.
 /// If `void` is specified, the returned values
 /// are ignored.
-/// `std::optional` signifies zero or one returned values.
+/// `std::optional<T>` means nil|LuaEquiv<T> (or zero returns)
+/// A return type that doesn't match returns an error
 template <typename T, typename... Args>
 inline nonstd::expected_lite::expected<T, QString> tryCall(
     const sol::protected_function &function, Args &&...args)
@@ -82,50 +83,69 @@ inline nonstd::expected_lite::expected<T, QString> tryCall(
     {
         return {};
     }
-    if constexpr (detail::IsOptional<T>)
+    else
     {
-        if (result.return_count() == 0)
-        {
-            return {};
-        }
-    }
-
-    if (result.return_count() > 1)
-    {
-        return nonstd::expected_lite::make_unexpected(
-            u"Expected one value to be returned but " %
-            QString::number(result.return_count()) % u" values were returned");
-    }
-
-    try
-    {
-        // XXX: this has weird failure modes,
-        // std::optional<T> means this is fallible, but we want nil|LuaFor<T>
         if constexpr (detail::IsOptional<T>)
         {
-            return result.get<T>();
-        }
-        else
-        {
-            auto ret = result.get<std::optional<T>>();
-
-            if (!ret)
+            if (result.return_count() == 0)
             {
-                auto t = type_name<T>();
-                return nonstd::expected_lite::make_unexpected(
-                    u"Expected " % QLatin1String(t.data(), t.size()) %
-                    u" to be returned but " %
-                    qmagicenum::enumName(result.get_type()) % u" was returned");
+                return {};
             }
-            return *ret;
         }
+        if (result.return_count() > 1)
+        {
+            return nonstd::expected_lite::make_unexpected(
+                u"Expected one value to be returned but " %
+                QString::number(result.return_count()) %
+                u" values were returned");
+        }
+
+        try
+        {
+            if constexpr (detail::IsOptional<T>)
+            {
+                // we want to error on anything that is not nil|T,
+                // std::optional<T> in sol means "give me a T or if it does not match nullopt"
+                if (result.get_type() == sol::type::nil)
+                {
+                    return {};
+                }
+                auto ret = result.get<T>();
+
+                if (!ret)
+                {
+                    auto t = type_name<T>();
+                    return nonstd::expected_lite::make_unexpected(
+                        u"Expected " % QLatin1String(t.data(), t.size()) %
+                        u" to be returned but " %
+                        qmagicenum::enumName(result.get_type()) %
+                        u" was returned");
+                }
+                return *ret;
+            }
+            else
+            {
+                auto ret = result.get<std::optional<T>>();
+
+                if (!ret)
+                {
+                    auto t = type_name<T>();
+                    return nonstd::expected_lite::make_unexpected(
+                        u"Expected " % QLatin1String(t.data(), t.size()) %
+                        u" to be returned but " %
+                        qmagicenum::enumName(result.get_type()) %
+                        u" was returned");
+                }
+                return *ret;
+            }
+        }
+        catch (std::runtime_error &e)
+        {
+            return nonstd::expected_lite::make_unexpected(
+                QString::fromUtf8(e.what()));
+        }
+        // non other exceptions we let it explode
     }
-    catch (std::runtime_error &e)
-    {
-        return nonstd::expected_lite::make_unexpected(
-            QString::fromUtf8(e.what()));
-    }
-    // non other exceptions we let it explode
 }
 
 }  // namespace chatterino::lua
