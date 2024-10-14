@@ -98,6 +98,8 @@ int sol_lua_push(sol::types<QByteArray>, lua_State *L, const QByteArray &value)
                             std::string_view(value.constData(), value.size()));
 }
 
+namespace chatterino::lua {
+
 // ThisPluginState
 
 bool sol_lua_check(sol::types<chatterino::lua::ThisPluginState>,
@@ -121,6 +123,8 @@ int sol_lua_push(sol::types<chatterino::lua::ThisPluginState>, lua_State *L,
 {
     return sol::stack::push(L, sol::thread(L, value));
 }
+
+}  // namespace chatterino::lua
 
 // NOLINTEND(readability-named-parameter)
 

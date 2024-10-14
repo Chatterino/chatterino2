@@ -148,8 +148,6 @@ inline nonstd::expected_lite::expected<T, QString> tryCall(
     }
 }
 
-}  // namespace chatterino::lua
-
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #    define SOL_STACK_FUNCTIONS(TYPE)                                      \
         bool sol_lua_check(sol::types<TYPE>, lua_State *L, int index,      \
@@ -159,10 +157,13 @@ inline nonstd::expected_lite::expected<T, QString> tryCall(
                          sol::stack::record &tracking);                    \
         int sol_lua_push(sol::types<TYPE>, lua_State *L, const TYPE &value);
 
+SOL_STACK_FUNCTIONS(chatterino::lua::ThisPluginState)
+
+}  // namespace chatterino::lua
+
 SOL_STACK_FUNCTIONS(QString)
 SOL_STACK_FUNCTIONS(QStringList)
 SOL_STACK_FUNCTIONS(QByteArray)
-SOL_STACK_FUNCTIONS(chatterino::lua::ThisPluginState)
 
 #    undef SOL_STACK_FUNCTIONS
 
