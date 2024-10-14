@@ -62,7 +62,7 @@ public:
 
     void setHighlightState(HighlightState style);
     void setHighlightState(HighlightState style, ChannelView &channelViewSource,
-                           MessagePtr message);
+                           const MessagePtr &message);
     HighlightState highlightState() const;
 
     void setHighlightsEnabled(const bool &newVal);

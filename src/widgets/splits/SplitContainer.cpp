@@ -219,7 +219,7 @@ void SplitContainer::addSplit(Split *split)
                              if (this->tab_ != nullptr)
                              {
                                  this->tab_->setHighlightState(
-                                     state, channelView, message);
+                                     state, channelView, std::move(message));
                              }
                          });
 

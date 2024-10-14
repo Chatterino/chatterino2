@@ -385,7 +385,7 @@ void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
 
 void NotebookTab::setHighlightState(HighlightState newHighlightStyle,
                                     ChannelView &channelViewSource,
-                                    MessagePtr message)
+                                    const MessagePtr &message)
 {
     if (this->isSelected())
     {
@@ -404,7 +404,7 @@ void NotebookTab::setHighlightState(HighlightState newHighlightStyle,
         return;
     }
 
-    auto splitContainer =
+    auto *splitContainer =
         dynamic_cast<SplitContainer *>(this->notebook_->getSelectedPage());
     if (splitContainer != nullptr)
     {
@@ -419,14 +419,9 @@ void NotebookTab::setHighlightState(HighlightState newHighlightStyle,
                 QSet(filterIdsSplit.cbegin(), filterIdsSplit.cend());
 
             auto isSubset = []<typename T>(QSet<T> sub, QSet<T> super) {
-                for (auto &&subItem : sub)
-                {
-                    if (!super.contains(subItem))
-                    {
-                        return false;
-                    }
-                }
-                return true;
+                return std::ranges::none_of(sub, [&super](const auto &subItem) {
+                    return !super.contains(subItem);
+                });
             };
 
             if (channelViewSource.underlyingChannel() == split->getChannel() &&
