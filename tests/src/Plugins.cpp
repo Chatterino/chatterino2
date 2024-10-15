@@ -405,8 +405,13 @@ TEST_F(PluginTest, testHttp)
     std::vector<RequestCase> cases{
         {"/status/200", true, false, 200, "200"},
         {"/delay/2", false, true, 0, "TimeoutError"},
+#    ifdef CHATTERINO_TEST_USE_PUBLIC_HTTPBIN
+#        warning \
+            "Cannot test data returned from httpbin. The public one does not return data verbatim."
+#    else
         {"/post", true, false, 200, "200", NetworkRequestType::Post,
          "Example data"},
+#    endif
     };
 
     for (const auto &c : cases)
