@@ -2,22 +2,22 @@
 #    include "Application.hpp"
 #    include "common/Channel.hpp"
 #    include "common/network/NetworkCommon.hpp"
-#    include "controllers/commands/Command.hpp"  // IT IS USED
+#    include "controllers/commands/Command.hpp"  // IWYU pragma: keep
 #    include "controllers/commands/CommandController.hpp"
 #    include "controllers/plugins/api/ChannelRef.hpp"
 #    include "controllers/plugins/Plugin.hpp"
 #    include "controllers/plugins/PluginController.hpp"
 #    include "controllers/plugins/PluginPermission.hpp"
-#    include "controllers/plugins/SolTypes.hpp"  // IT IS USE
+#    include "controllers/plugins/SolTypes.hpp"  // IWYU pragma: keep
 #    include "mocks/BaseApplication.hpp"
 #    include "mocks/Channel.hpp"
 #    include "mocks/Emotes.hpp"
 #    include "mocks/Logging.hpp"
 #    include "mocks/TwitchIrcServer.hpp"
+#    include "NetworkHelpers.hpp"
 #    include "singletons/Logging.hpp"
 #    include "Test.hpp"
 
-#    include <gtest/gtest.h>
 #    include <lauxlib.h>
 #    include <sol/state_view.hpp>
 #    include <sol/table.hpp>
@@ -307,53 +307,6 @@ TEST_F(PluginTest, testChannel)
     EXPECT_ANY_THROW(lua->script(R"lua( return chn:get_twitch_id() )lua"));
 }
 
-#    ifdef CHATTERINO_TEST_USE_PUBLIC_HTTPBIN
-// Not using httpbin.org, since it can be really slow and cause timeouts.
-// postman-echo has the same API.
-const char *const HTTPBIN_BASE_URL = "https://postman-echo.com";
-#    else
-const char *const HTTPBIN_BASE_URL = "http://127.0.0.1:9051";
-#    endif
-
-class RequestWaiter
-{
-public:
-    void requestDone()
-    {
-        {
-            std::unique_lock lck(this->mutex_);
-            ASSERT_FALSE(this->requestDone_);
-            this->requestDone_ = true;
-        }
-        this->condition_.notify_one();
-    }
-
-    void waitForRequest()
-    {
-        using namespace std::chrono_literals;
-
-        while (true)
-        {
-            {
-                std::unique_lock lck(this->mutex_);
-                bool done = this->condition_.wait_for(lck, 10ms, [this] {
-                    return this->requestDone_;
-                });
-                if (done)
-                {
-                    break;
-                }
-            }
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
-            QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
-        }
-    }
-
-private:
-    std::mutex mutex_;
-    std::condition_variable condition_;
-    bool requestDone_ = false;
-};
 TEST_F(PluginTest, testHttp)
 {
     {
