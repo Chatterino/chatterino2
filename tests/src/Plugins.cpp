@@ -167,7 +167,7 @@ protected:
 
         // XXX: this skips PluginController::load()
         PluginControllerAccess::openLibrariesFor(rawpl);
-        this->lua = {PluginControllerAccess::state(rawpl)};
+        this->lua = new sol::state_view(PluginControllerAccess::state(rawpl));
 
         this->channel = app->twitch.mm2pl;
         this->rawpl->dataDirectory().mkpath(".");
@@ -176,7 +176,8 @@ protected:
     void TearDown() override
     {
         // perform safe destruction of the plugin
-        this->lua = std::nullopt;
+        delete this->lua;
+        this->lua = nullptr;
         PluginControllerAccess::plugins().clear();
         this->rawpl = nullptr;
         this->app.reset();
@@ -184,7 +185,7 @@ protected:
 
     Plugin *rawpl = nullptr;
     std::unique_ptr<MockApplication> app;
-    std::optional<sol::state_view> lua;
+    sol::state_view *lua;
     ChannelPtr channel;
 };
 
