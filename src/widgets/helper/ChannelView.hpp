@@ -217,7 +217,8 @@ public:
 
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
-    pajlada::Signals::Signal<HighlightState, MessagePtr> tabHighlightRequested;
+    pajlada::Signals::Signal<HighlightState, const MessagePtr &>
+        tabHighlightRequested;
     pajlada::Signals::NoArgSignal liveStatusChanged;
     pajlada::Signals::Signal<const Link &> linkClicked;
     pajlada::Signals::Signal<QString, FromTwitchLinkOpenChannelIn>

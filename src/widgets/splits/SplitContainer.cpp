@@ -215,11 +215,11 @@ void SplitContainer::addSplit(Split *split)
 
     conns.managedConnect(split->getChannelView().tabHighlightRequested,
                          [this, &channelView = split->getChannelView()](
-                             HighlightState state, MessagePtr message) {
+                             HighlightState state, const MessagePtr &message) {
                              if (this->tab_ != nullptr)
                              {
                                  this->tab_->setHighlightState(
-                                     state, channelView, std::move(message));
+                                     state, channelView, message);
                              }
                          });
 
