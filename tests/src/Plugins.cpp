@@ -30,6 +30,7 @@ using namespace chatterino;
 using chatterino::mock::MockChannel;
 
 namespace {
+
 const QString TEST_SETTINGS = R"(
 {
     "plugins": {
@@ -111,6 +112,7 @@ public:
 }  // namespace
 
 namespace chatterino {
+
 class PluginControllerAccess
 {
 public:
@@ -134,6 +136,7 @@ public:
         return pl->state_;
     }
 };
+
 }  // namespace chatterino
 
 class PluginTest : public ::testing::Test
@@ -406,6 +409,7 @@ TEST_F(PluginTest, testHttp)
         }
     }
 }
+
 const QByteArray TEST_FILE_DATA = "Test file data\nWith a new line.\n";
 
 TEST_F(PluginTest, ioTest)
@@ -619,4 +623,5 @@ TEST_F(PluginTest, tryCallTest)
                   "Expected int to be returned but lua_nil was returned");
     }
 }
+
 #endif
