@@ -411,16 +411,12 @@ void NotebookTab::setHighlightState(HighlightState newHighlightStyle,
         const auto &splits = splitContainer->getSplits();
         for (const auto &split : splits)
         {
-            auto &&filterIdsSource = channelViewSource.getFilterIds();
-            auto uniqueFilterIdsSource =
-                QSet(filterIdsSource.cbegin(), filterIdsSource.cend());
-            auto &&filterIdsSplit = split->getChannelView().getFilterIds();
-            auto uniqueFilterIdsSplit =
-                QSet(filterIdsSplit.cbegin(), filterIdsSplit.cend());
+            auto filterIdsSource = channelViewSource.getFilterIds();
+            auto filterIdsSplit = split->getChannelView().getFilterIds();
 
-            auto isSubset = []<typename T>(QSet<T> sub, QSet<T> super) {
-                return std::ranges::none_of(sub, [&super](const auto &subItem) {
-                    return !super.contains(subItem);
+            auto isSubset = []<typename T>(const QList<T> &sub, const QList<T> &super) {
+                return std::ranges::all_of(sub, [&super](const auto &subItem) {
+                    return super.contains(subItem);
                 });
             };
 
