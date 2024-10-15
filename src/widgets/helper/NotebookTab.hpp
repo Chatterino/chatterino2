@@ -61,7 +61,8 @@ public:
     bool isLive() const;
 
     void setHighlightState(HighlightState style);
-    void setHighlightState(HighlightState style, ChannelView &channelViewSource,
+    void setHighlightState(HighlightState style,
+                           const ChannelView &channelViewSource,
                            const MessagePtr &message);
     HighlightState highlightState() const;
 

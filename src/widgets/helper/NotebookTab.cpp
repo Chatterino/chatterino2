@@ -384,7 +384,7 @@ void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
 }
 
 void NotebookTab::setHighlightState(HighlightState newHighlightStyle,
-                                    ChannelView &channelViewSource,
+                                    const ChannelView &channelViewSource,
                                     const MessagePtr &message)
 {
     if (this->isSelected())
@@ -404,25 +404,27 @@ void NotebookTab::setHighlightState(HighlightState newHighlightStyle,
         return;
     }
 
-    auto *splitContainer =
+    auto *visibleSplitContainer =
         dynamic_cast<SplitContainer *>(this->notebook_->getSelectedPage());
-    if (splitContainer != nullptr)
+    if (visibleSplitContainer != nullptr)
     {
-        const auto &splits = splitContainer->getSplits();
-        for (const auto &split : splits)
+        const auto &visibleSplits = visibleSplitContainer->getSplits();
+        for (const auto &visibleSplit : visibleSplits)
         {
             auto filterIdsSource = channelViewSource.getFilterIds();
-            auto filterIdsSplit = split->getChannelView().getFilterIds();
+            auto filterIdsSplit = visibleSplit->getChannelView().getFilterIds();
 
-            auto isSubset = []<typename T>(const QList<T> &sub, const QList<T> &super) {
+            auto isSubset = []<typename T>(const QList<T> &sub,
+                                           const QList<T> &super) {
                 return std::ranges::all_of(sub, [&super](const auto &subItem) {
                     return super.contains(subItem);
                 });
             };
 
-            if (channelViewSource.underlyingChannel() == split->getChannel() &&
-                split->getChannelView().shouldIncludeMessage(message) &&
-                isSubset(uniqueFilterIdsSource, uniqueFilterIdsSplit))
+            if (channelViewSource.underlyingChannel() ==
+                    visibleSplit->getChannel() &&
+                visibleSplit->getChannelView().shouldIncludeMessage(message) &&
+                isSubset(filterIdsSource, filterIdsSplit))
             {
                 return;
             }
