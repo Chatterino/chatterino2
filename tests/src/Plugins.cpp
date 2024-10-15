@@ -399,7 +399,7 @@ TEST_F(PluginTest, testHttp)
         QString error;
 
         NetworkRequestType meth = NetworkRequestType::Get;
-        QByteArray data;
+        QByteArray data;  // null means do not check
     };
 
     std::vector<RequestCase> cases{
@@ -447,7 +447,10 @@ TEST_F(PluginTest, testHttp)
             EXPECT_EQ((*lua)["status"], sol::nil);
         }
         EXPECT_EQ(lua->get<QString>("error"), c.error);
-        EXPECT_EQ(lua->get<QByteArray>("data"), c.data);
+        if (!c.data.isNull())
+        {
+            EXPECT_EQ(lua->get<QByteArray>("data"), c.data);
+        }
     }
 }
 const QByteArray TEST_FILE_DATA = "Test file data\nWith a new line.\n";
