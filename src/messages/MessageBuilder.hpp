@@ -52,6 +52,8 @@ namespace linkparser {
 
 struct SystemMessageTag {
 };
+struct RaidEntryMessageTag {
+};
 struct TimeoutMessageTag {
 };
 struct LiveUpdatesUpdateEmoteMessageTag {
@@ -66,6 +68,7 @@ struct ImageUploaderResultTag {
 };
 
 const SystemMessageTag systemMessage{};
+const RaidEntryMessageTag raidEntryMessage{};
 const TimeoutMessageTag timeoutMessage{};
 const LiveUpdatesUpdateEmoteMessageTag liveUpdatesUpdateEmoteMessage{};
 const LiveUpdatesRemoveEmoteMessageTag liveUpdatesRemoveEmoteMessage{};
@@ -121,6 +124,9 @@ public:
 
     MessageBuilder(SystemMessageTag, const QString &text,
                    const QTime &time = QTime::currentTime());
+    MessageBuilder(RaidEntryMessageTag, const QString &text,
+                   const QString &loginName, const QString &displayName,
+                   const MessageColor &userColor, const QTime &time);
     MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
                    const QString &sourceUser, const QString &systemMessageText,
                    int times, const QTime &time = QTime::currentTime());

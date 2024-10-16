@@ -512,6 +512,18 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
         }
     }
 
+    auto buildAndEmplaceMessage = [&builtMessages,
+                                   mirrored](MessageBuilder &builder) {
+        builder->flags.set(MessageFlag::Subscription);
+        if (mirrored)
+        {
+            builder->flags.set(MessageFlag::SharedMessage);
+        }
+
+        auto newMessage = builder.release();
+        builtMessages.emplace_back(newMessage);
+    };
+
     auto it = tags.find("system-msg");
 
     if (it != tags.end())
@@ -530,6 +542,29 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
         else if (msgType == "announcement")
         {
             messageText = "Announcement";
+        }
+        else if (msgType == "raid")
+        {
+            auto loginTag = tags.find("login");
+            auto displayNameTag = tags.find("msg-param-displayName");
+            if (loginTag != tags.end() && displayNameTag != tags.end())
+            {
+                auto login = loginTag.value().toString();
+                MessageColor color = MessageColor::System;
+                if (auto colorTag = tags.find("color"); colorTag != tags.end())
+                {
+                    // Blindly trust that it's a valid hex code
+                    color = MessageColor(QColor{colorTag.value().toString()});
+                }
+
+                auto displayName = displayNameTag.value().toString();
+                auto b = MessageBuilder(
+                    raidEntryMessage, parseTagString(messageText), login,
+                    displayName, color, calculateMessageTime(message).time());
+
+                buildAndEmplaceMessage(b);
+                return builtMessages;
+            }
         }
         else if (msgType == "subgift")
         {
@@ -600,14 +635,7 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
 
         auto b = MessageBuilder(systemMessage, parseTagString(messageText),
                                 calculateMessageTime(message).time());
-
-        b->flags.set(MessageFlag::Subscription);
-        if (mirrored)
-        {
-            b->flags.set(MessageFlag::SharedMessage);
-        }
-        auto newMessage = b.release();
-        builtMessages.emplace_back(newMessage);
+        buildAndEmplaceMessage(b);
     }
 
     return builtMessages;
