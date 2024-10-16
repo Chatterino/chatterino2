@@ -645,6 +645,36 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
     this->message().searchText = text;
 }
 
+MessageBuilder::MessageBuilder(RaidEntryMessageTag, const QString &text,
+                               const QString &loginName,
+                               const QString &displayName,
+                               const MessageColor &userColor, const QTime &time)
+    : MessageBuilder()
+{
+    this->emplace<TimestampElement>(time);
+
+    const QStringList textFragments =
+        text.split(QRegularExpression("\\s"), Qt::SkipEmptyParts);
+    for (const auto &word : textFragments)
+    {
+        if (word == displayName)
+        {
+            this->emplace<MentionElement>(displayName, loginName,
+                                          MessageColor::System,
+                                          userColor);
+            continue;
+        }
+
+        this->emplace<TextElement>(word, MessageElementFlag::Text,
+                                   MessageColor::System);
+    }
+
+    this->message().flags.set(MessageFlag::System);
+    this->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    this->message().messageText = text;
+    this->message().searchText = text;
+}
+
 MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
                                const QString &sourceUser,
                                const QString &systemMessageText, int times,
