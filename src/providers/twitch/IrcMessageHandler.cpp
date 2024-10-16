@@ -531,6 +531,40 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
         {
             messageText = "Announcement";
         }
+        else if (msgType == "raid")
+        {
+            auto loginTag = tags.find("login");
+            auto displayNameTag = tags.find("msg-param-displayName");
+            if (loginTag != tags.end() && displayNameTag != tags.end())
+            {
+                auto login = loginTag.value().toString();
+                MessageColor color = MessageColor::System;
+                if (auto *tc = dynamic_cast<TwitchChannel *>(channel))
+                {
+                    if (auto userColor = tc->getUserColor(login);
+                        userColor.isValid())
+                    {
+                        color = MessageColor(userColor);
+                    }
+                }
+
+                auto displayName = displayNameTag.value().toString();
+                auto b = MessageBuilder(raidEntryMessage,
+                                        parseTagString(messageText),
+                                        login, displayName, color,
+                                        calculateMessageTime(message).time());
+
+                b->flags.set(MessageFlag::Subscription);
+                if (mirrored)
+                {
+                    b->flags.set(MessageFlag::SharedMessage);
+                }
+
+                auto newMessage = b.release();
+                builtMessages.emplace_back(newMessage);
+                return builtMessages;
+            }
+        }
         else if (msgType == "subgift")
         {
             if (auto monthsIt = tags.find("msg-param-gift-months");
