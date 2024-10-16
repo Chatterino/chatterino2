@@ -512,6 +512,18 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
         }
     }
 
+    auto buildAndEmplaceMessage = [&builtMessages, mirrored](MessageBuilder &builder)
+    {
+       builder->flags.set(MessageFlag::Subscription);
+       if (mirrored)
+       {
+           builder->flags.set(MessageFlag::SharedMessage);
+       }
+
+       auto newMessage = builder.release();
+       builtMessages.emplace_back(newMessage);
+    };
+
     auto it = tags.find("system-msg");
 
     if (it != tags.end())
@@ -554,14 +566,7 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
                                         login, displayName, color,
                                         calculateMessageTime(message).time());
 
-                b->flags.set(MessageFlag::Subscription);
-                if (mirrored)
-                {
-                    b->flags.set(MessageFlag::SharedMessage);
-                }
-
-                auto newMessage = b.release();
-                builtMessages.emplace_back(newMessage);
+                buildAndEmplaceMessage(b);
                 return builtMessages;
             }
         }
@@ -634,14 +639,7 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
 
         auto b = MessageBuilder(systemMessage, parseTagString(messageText),
                                 calculateMessageTime(message).time());
-
-        b->flags.set(MessageFlag::Subscription);
-        if (mirrored)
-        {
-            b->flags.set(MessageFlag::SharedMessage);
-        }
-        auto newMessage = b.release();
-        builtMessages.emplace_back(newMessage);
+        buildAndEmplaceMessage(b);
     }
 
     return builtMessages;
