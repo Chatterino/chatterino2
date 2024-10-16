@@ -551,13 +551,11 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
             {
                 auto login = loginTag.value().toString();
                 MessageColor color = MessageColor::System;
-                if (auto *tc = dynamic_cast<TwitchChannel *>(channel))
+                if (auto colorTag = tags.find("color");
+                    colorTag != tags.end())
                 {
-                    if (auto userColor = tc->getUserColor(login);
-                        userColor.isValid())
-                    {
-                        color = MessageColor(userColor);
-                    }
+                    // Blindly trust that it's a valid hex code
+                    color = MessageColor(QColor{colorTag.value().toString()});
                 }
 
                 auto displayName = displayNameTag.value().toString();
