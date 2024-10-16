@@ -660,8 +660,7 @@ MessageBuilder::MessageBuilder(RaidEntryMessageTag, const QString &text,
         if (word == displayName)
         {
             this->emplace<MentionElement>(displayName, loginName,
-                                          MessageColor::System,
-                                          userColor);
+                                          MessageColor::System, userColor);
             continue;
         }
 

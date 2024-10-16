@@ -512,16 +512,16 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
         }
     }
 
-    auto buildAndEmplaceMessage = [&builtMessages, mirrored](MessageBuilder &builder)
-    {
-       builder->flags.set(MessageFlag::Subscription);
-       if (mirrored)
-       {
-           builder->flags.set(MessageFlag::SharedMessage);
-       }
+    auto buildAndEmplaceMessage = [&builtMessages,
+                                   mirrored](MessageBuilder &builder) {
+        builder->flags.set(MessageFlag::Subscription);
+        if (mirrored)
+        {
+            builder->flags.set(MessageFlag::SharedMessage);
+        }
 
-       auto newMessage = builder.release();
-       builtMessages.emplace_back(newMessage);
+        auto newMessage = builder.release();
+        builtMessages.emplace_back(newMessage);
     };
 
     auto it = tags.find("system-msg");
@@ -551,18 +551,16 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
             {
                 auto login = loginTag.value().toString();
                 MessageColor color = MessageColor::System;
-                if (auto colorTag = tags.find("color");
-                    colorTag != tags.end())
+                if (auto colorTag = tags.find("color"); colorTag != tags.end())
                 {
                     // Blindly trust that it's a valid hex code
                     color = MessageColor(QColor{colorTag.value().toString()});
                 }
 
                 auto displayName = displayNameTag.value().toString();
-                auto b = MessageBuilder(raidEntryMessage,
-                                        parseTagString(messageText),
-                                        login, displayName, color,
-                                        calculateMessageTime(message).time());
+                auto b = MessageBuilder(
+                    raidEntryMessage, parseTagString(messageText), login,
+                    displayName, color, calculateMessageTime(message).time());
 
                 buildAndEmplaceMessage(b);
                 return builtMessages;
