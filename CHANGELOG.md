@@ -36,6 +36,7 @@
 - Minor: Added `--login <username>` CLI argument to specify which account to start logged in as. (#5626)
 - Minor: Indicate when subscriptions and resubscriptions are for multiple months. (#5642)
 - Minor: Proxy URL information is now included in the `/debug-env` command. (#5648)
+- Minor: Make raid entry message usernames clickable. (#5651)
 - Bugfix: Fixed tab move animation occasionally failing to start after closing a tab. (#5426, #5612)
 - Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
 - Bugfix: Fixed restricted users usernames not being clickable. (#5405)
