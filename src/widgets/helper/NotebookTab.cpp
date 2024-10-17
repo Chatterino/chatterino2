@@ -305,18 +305,39 @@ bool NotebookTab::isSelected() const
 }
 
 void NotebookTab::updateHighlightSources(
-    const std::unordered_map<ChannelPtr, HighlightEvent>
-        &removedHighlightSources)
+    const HighlightSources &removedHighlightSources)
 {
-    for (const auto &[otherChannel, otherEvent] : removedHighlightSources)
+    for (const auto &source : removedHighlightSources.newMessageSource)
     {
-        this->highlightSources_.erase(otherChannel);
+        this->highlightSources_.newMessageSource.erase(source);
     }
 
-    if (this->highlightSources_.empty())
+    for (const auto &source : removedHighlightSources.highlightedSource)
     {
-        this->highlightState_ = HighlightState::None;
-        this->update();
+        this->highlightSources_.highlightedSource.erase(source);
+    }
+
+    if (!this->highlightSources_.highlightedSource.empty())
+    {
+        // keep HighlightState::Highlighted
+        return;
+    }
+
+    if (!this->highlightSources_.newMessageSource.empty())
+    {
+        if (this->highlightState_ != HighlightState::NewMessage)
+        {
+            this->highlightState_ = HighlightState::NewMessage;
+            this->update();
+        }
+    }
+    else
+    {
+        if (this->highlightState_ != HighlightState::None)
+        {
+            this->highlightState_ = HighlightState::None;
+            this->update();
+        }
     }
 }
 
@@ -437,11 +458,30 @@ void NotebookTab::setHighlightState(HighlightState newHighlightStyle,
         return;
     }
 
-    if (!this->highlightSources_.contains(
-            channelViewSource.underlyingChannel()))
+    auto underlyingChannel = channelViewSource.underlyingChannel();
+
+    switch (newHighlightStyle)
     {
-        this->highlightSources_.emplace(channelViewSource.underlyingChannel(),
-                                        HighlightEvent{});
+        case HighlightState::Highlighted: {
+            if (!this->highlightSources_.highlightedSource.contains(
+                    underlyingChannel))
+            {
+                this->highlightSources_.highlightedSource.insert(
+                    underlyingChannel);
+            }
+            break;
+        }
+        case HighlightState::NewMessage: {
+            if (!this->highlightSources_.newMessageSource.contains(
+                    underlyingChannel))
+            {
+                this->highlightSources_.newMessageSource.insert(
+                    underlyingChannel);
+            }
+            break;
+        }
+        case HighlightState::None:
+            break;
     }
 
     if (!this->highlightEnabled_ &&

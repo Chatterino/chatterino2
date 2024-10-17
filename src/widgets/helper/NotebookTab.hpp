@@ -114,12 +114,20 @@ private:
     bool shouldMessageHighlight(const ChannelView &channelViewSource,
                                 const MessagePtr &message) const;
 
-    struct HighlightEvent {
-    };
+    struct HighlightSources {
+        std::unordered_set<ChannelPtr> newMessageSource;
+        std::unordered_set<ChannelPtr> highlightedSource;
+
+        void clear()
+        {
+            this->newMessageSource.clear();
+            this->highlightedSource.clear();
+        }
+
+    } highlightSources_;
 
     void updateHighlightSources(
-        const std::unordered_map<ChannelPtr, HighlightEvent>
-            &removedHighlightSources);
+        const HighlightSources &removedHighlightSources);
 
     QPropertyAnimation positionChangedAnimation_;
     QPoint positionAnimationDesiredPoint_;
@@ -148,8 +156,6 @@ private:
     int growWidth_ = 0;
 
     QMenu menu_;
-
-    std::unordered_map<ChannelPtr, HighlightEvent> highlightSources_;
 
     pajlada::Signals::SignalHolder managedConnections_;
 };
