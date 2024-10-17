@@ -111,6 +111,15 @@ private:
 
     int normalTabWidthForHeight(int height) const;
 
+    bool shouldMessageHighlight(const ChannelView &channelViewSource,
+                                const MessagePtr &message) const;
+
+    struct HighlightEvent {
+    };
+
+    void updateHighlightSources(
+        const QHash<ChannelPtr, HighlightEvent> &removedHighlightSources);
+
     QPropertyAnimation positionChangedAnimation_;
     QPoint positionAnimationDesiredPoint_;
 
@@ -138,6 +147,8 @@ private:
     int growWidth_ = 0;
 
     QMenu menu_;
+
+    QHash<ChannelPtr, HighlightEvent> highlightSources_;
 
     pajlada::Signals::SignalHolder managedConnections_;
 };
