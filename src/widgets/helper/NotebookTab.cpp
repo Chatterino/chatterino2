@@ -318,7 +318,7 @@ void NotebookTab::removeHighlightSources(const HighlightSources &toRemove)
 
     if (!this->highlightSources_.highlightedSource.empty())
     {
-        // keep HighlightState::Highlighted
+        assert(this->highlightState_ == HighlightState::Highlighted);
         return;
     }
 
@@ -338,6 +338,8 @@ void NotebookTab::removeHighlightSources(const HighlightSources &toRemove)
             this->update();
         }
     }
+
+    assert(this->highlightState_ != HighlightState::Highlighted);
 }
 
 void NotebookTab::copyHighlightStateAndSourcesFrom(const NotebookTab *sourceTab)
