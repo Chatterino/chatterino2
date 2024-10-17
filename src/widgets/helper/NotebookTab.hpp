@@ -60,12 +60,10 @@ public:
      **/
     bool isLive() const;
 
-    void setHighlightState(HighlightState style);
     void setHighlightState(HighlightState style,
                            const ChannelView &channelViewSource,
                            const MessagePtr &message);
-    HighlightState highlightState() const;
-
+    void copyHighlightStateAndSourcesFrom(const NotebookTab *sourceTab);
     void setHighlightsEnabled(const bool &newVal);
     bool hasHighlightsEnabled() const;
 
@@ -126,8 +124,7 @@ private:
 
     } highlightSources_;
 
-    void updateHighlightSources(
-        const HighlightSources &removedHighlightSources);
+    void removeHighlightSources(const HighlightSources &toRemove);
 
     QPropertyAnimation positionChangedAnimation_;
     QPoint positionAnimationDesiredPoint_;

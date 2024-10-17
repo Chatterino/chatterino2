@@ -304,15 +304,14 @@ bool NotebookTab::isSelected() const
     return this->selected_;
 }
 
-void NotebookTab::updateHighlightSources(
-    const HighlightSources &removedHighlightSources)
+void NotebookTab::removeHighlightSources(const HighlightSources &toRemove)
 {
-    for (const auto &source : removedHighlightSources.newMessageSource)
+    for (const auto &source : toRemove.newMessageSource)
     {
         this->highlightSources_.newMessageSource.erase(source);
     }
 
-    for (const auto &source : removedHighlightSources.highlightedSource)
+    for (const auto &source : toRemove.highlightedSource)
     {
         this->highlightSources_.highlightedSource.erase(source);
     }
@@ -341,6 +340,31 @@ void NotebookTab::updateHighlightSources(
     }
 }
 
+void NotebookTab::copyHighlightStateAndSourcesFrom(const NotebookTab *sourceTab)
+{
+    if (this->isSelected())
+    {
+        return;
+    }
+
+    this->highlightSources_ = sourceTab->highlightSources_;
+
+    if (!this->highlightEnabled_ &&
+        sourceTab->highlightState_ == HighlightState::NewMessage)
+    {
+        return;
+    }
+
+    if (this->highlightState_ == sourceTab->highlightState_ ||
+        this->highlightState_ == HighlightState::Highlighted)
+    {
+        return;
+    }
+
+    this->highlightState_ = sourceTab->highlightState_;
+    this->update();
+}
+
 void NotebookTab::setSelected(bool value)
 {
     this->selected_ = value;
@@ -359,7 +383,7 @@ void NotebookTab::setSelected(bool value)
                     auto *tab = splitContainer->getTab();
                     if (tab && tab != this)
                     {
-                        tab->updateHighlightSources(this->highlightSources_);
+                        tab->removeHighlightSources(this->highlightSources_);
                     }
                 }
             }
@@ -418,30 +442,6 @@ bool NotebookTab::setLive(bool isLive)
 bool NotebookTab::isLive() const
 {
     return this->isLive_;
-}
-
-void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
-{
-    // change this to "copy" highlight state, its used by duplicating a tab
-    if (this->isSelected())
-    {
-        return;
-    }
-
-    if (!this->highlightEnabled_ &&
-        newHighlightStyle == HighlightState::NewMessage)
-    {
-        return;
-    }
-
-    if (this->highlightState_ == newHighlightStyle ||
-        this->highlightState_ == HighlightState::Highlighted)
-    {
-        return;
-    }
-
-    this->highlightState_ = newHighlightStyle;
-    this->update();
 }
 
 void NotebookTab::setHighlightState(HighlightState newHighlightStyle,
@@ -531,11 +531,6 @@ bool NotebookTab::shouldMessageHighlight(const ChannelView &channelViewSource,
     }
 
     return true;
-}
-
-HighlightState NotebookTab::highlightState() const
-{
-    return this->highlightState_;
 }
 
 void NotebookTab::setHighlightsEnabled(const bool &newVal)
