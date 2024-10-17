@@ -14,6 +14,7 @@ namespace chatterino {
 inline constexpr int NOTEBOOK_TAB_HEIGHT = 28;
 
 class SplitContainer;
+class ChannelView;
 
 class NotebookTab : public Button
 {
@@ -59,11 +60,24 @@ public:
      **/
     bool isLive() const;
 
+    /**
+     * @brief Sets the highlight state of this tab clearing highlight sources
+     *
+     * Obeys the HighlightsEnabled setting and highlight states hierarchy
+     */
     void setHighlightState(HighlightState style);
-    HighlightState highlightState() const;
-
+    /**
+     * @brief Updates the highlight state and highlight sources of this tab
+     *
+     * Obeys the HighlightsEnabled setting and the highlight state hierarchy and tracks the highlight state update sources
+     */
+    void updateHighlightState(HighlightState style,
+                              const ChannelView &channelViewSource,
+                              const MessagePtr &message);
+    void copyHighlightStateAndSourcesFrom(const NotebookTab *sourceTab);
     void setHighlightsEnabled(const bool &newVal);
     bool hasHighlightsEnabled() const;
+    HighlightState highlightState() const;
 
     void moveAnimated(QPoint targetPos, bool animated = true);
 
@@ -106,6 +120,23 @@ private:
     void titleUpdated();
 
     int normalTabWidthForHeight(int height) const;
+
+    bool shouldMessageHighlight(const ChannelView &channelViewSource,
+                                const MessagePtr &message) const;
+
+    struct HighlightSources {
+        std::unordered_set<ChannelPtr> newMessageSource;
+        std::unordered_set<ChannelPtr> highlightedSource;
+
+        void clear()
+        {
+            this->newMessageSource.clear();
+            this->highlightedSource.clear();
+        }
+
+    } highlightSources_;
+
+    void removeHighlightSources(const HighlightSources &toRemove);
 
     QPropertyAnimation positionChangedAnimation_;
     QPoint positionAnimationDesiredPoint_;
