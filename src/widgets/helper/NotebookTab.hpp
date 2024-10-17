@@ -60,12 +60,30 @@ public:
      **/
     bool isLive() const;
 
-    void setHighlightState(HighlightState style,
-                           const ChannelView &channelViewSource,
-                           const MessagePtr &message);
+    /**
+     * @brief Sets the highlight state of this tab clearing out highlight sources
+     *
+     * Obeys the HighlightsEnabled setting and highlight states hierarchy
+     */
+    void setHighlightState(HighlightState style);
+    /**
+     * @brief Forces the highlight state of this tab
+     *
+     * Does NOT obey the HighlightsEnabled setting and the highlight states hierarchy
+     */
+    void forceHighlightState(HighlightState style);
+    /**
+     * @brief Updates the highlight state and highlight sources of this tab
+     *
+     * Obeys the HighlightsEnabled setting and the highlight state hierarchy and tracks the highlight state update sources
+     */
+    void updateHighlightState(HighlightState style,
+                              const ChannelView &channelViewSource,
+                              const MessagePtr &message);
     void copyHighlightStateAndSourcesFrom(const NotebookTab *sourceTab);
     void setHighlightsEnabled(const bool &newVal);
     bool hasHighlightsEnabled() const;
+    HighlightState highlightState() const;
 
     void moveAnimated(QPoint targetPos, bool animated = true);
 

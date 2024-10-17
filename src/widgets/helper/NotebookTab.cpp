@@ -444,9 +444,43 @@ bool NotebookTab::isLive() const
     return this->isLive_;
 }
 
-void NotebookTab::setHighlightState(HighlightState newHighlightStyle,
-                                    const ChannelView &channelViewSource,
-                                    const MessagePtr &message)
+HighlightState NotebookTab::highlightState() const
+{
+    return this->highlightState_;
+}
+
+void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
+{
+    if (this->isSelected())
+    {
+        return;
+    }
+
+    if (!this->highlightEnabled_ &&
+        newHighlightStyle == HighlightState::NewMessage)
+    {
+        return;
+    }
+
+    if (this->highlightState_ == newHighlightStyle ||
+        this->highlightState_ == HighlightState::Highlighted)
+    {
+        return;
+    }
+
+    this->highlightState_ = newHighlightStyle;
+    this->update();
+}
+
+void NotebookTab::forceHighlightState(HighlightState newHighlightStyle)
+{
+    this->highlightState_ = newHighlightStyle;
+    this->update();
+}
+
+void NotebookTab::updateHighlightState(HighlightState newHighlightStyle,
+                                       const ChannelView &channelViewSource,
+                                       const MessagePtr &message)
 {
     if (this->isSelected())
     {

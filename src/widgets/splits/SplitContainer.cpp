@@ -218,7 +218,7 @@ void SplitContainer::addSplit(Split *split)
                              HighlightState state, const MessagePtr &message) {
                              if (this->tab_ != nullptr)
                              {
-                                 this->tab_->setHighlightState(
+                                 this->tab_->updateHighlightState(
                                      state, channelView, message);
                              }
                          });
