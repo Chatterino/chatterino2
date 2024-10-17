@@ -307,11 +307,20 @@ bool NotebookTab::isSelected() const
 void NotebookTab::updateHighlightSources(
     const QHash<ChannelPtr, HighlightEvent> &removedHighlightSources)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
     for (const auto &[otherChannel, otherEvent] :
          removedHighlightSources.asKeyValueRange())
     {
         this->highlightSources_.remove(otherChannel);
     }
+#else
+    for (auto it = removedHighlightSources.cbegin(),
+              end = removedHighlightSources.cend();
+         it != end; ++it)
+    {
+        this->highlightSources_.remove(it.key());
+    }
+#endif
 
     if (this->highlightSources_.empty())
     {
@@ -324,7 +333,7 @@ void NotebookTab::setSelected(bool value)
 {
     this->selected_ = value;
 
-    if (value == true)
+    if (value)
     {
         auto *splitNotebook = dynamic_cast<SplitNotebook *>(this->notebook_);
         if (splitNotebook)
