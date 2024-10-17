@@ -2,6 +2,8 @@
 
 #include <QString>
 
+#include <vector>
+
 namespace chatterino {
 
 class IgnorePhrase;
