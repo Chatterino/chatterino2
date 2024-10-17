@@ -2,15 +2,17 @@
 #    include "controllers/plugins/api/IOWrapper.hpp"
 
 #    include "Application.hpp"
-#    include "controllers/plugins/LuaUtilities.hpp"
+#    include "common/QLogging.hpp"
 #    include "controllers/plugins/PluginController.hpp"
 
-extern "C" {
 #    include <lauxlib.h>
 #    include <lua.h>
-}
+#    include <QString>
+#    include <sol/sol.hpp>
 
 #    include <cerrno>
+#    include <stdexcept>
+#    include <utility>
 
 namespace chatterino::lua::api {
 
@@ -91,45 +93,28 @@ struct LuaFileMode {
     }
 };
 
-int ioError(lua_State *L, const QString &value, int errnoequiv)
+sol::variadic_results ioError(lua_State *L, const QString &value,
+                              int errnoequiv)
 {
-    lua_pushnil(L);
-    lua::push(L, value);
-    lua::push(L, errnoequiv);
-    return 3;
+    sol::variadic_results out;
+    out.push_back(sol::nil);
+    out.push_back(sol::make_object(L, value.toStdString()));
+    out.push_back({L, sol::in_place_type<int>, errnoequiv});
+    return out;
 }
 
-// NOLINTBEGIN(*vararg)
-int io_open(lua_State *L)
+sol::variadic_results io_open(sol::this_state L, QString filename,
+                              QString strmode)
 {
     auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
     if (pl == nullptr)
     {
-        luaL_error(L, "internal error: no plugin");
-        return 0;
+        throw std::runtime_error("internal error: no plugin");
     }
-    LuaFileMode mode;
-    if (lua_gettop(L) == 2)
+    LuaFileMode mode(strmode);
+    if (!mode.error.isEmpty())
     {
-        // we have a mode
-        QString smode;
-        if (!lua::pop(L, &smode))
-        {
-            return luaL_error(
-                L,
-                "io.open mode (2nd argument) must be a string or not present");
-        }
-        mode = LuaFileMode(smode);
-        if (!mode.error.isEmpty())
-        {
-            return luaL_error(L, mode.error.toStdString().c_str());
-        }
-    }
-    QString filename;
-    if (!lua::pop(L, &filename))
-    {
-        return luaL_error(L,
-                          "io.open filename (1st argument) must be a string");
+        throw std::runtime_error(mode.error.toStdString());
     }
     QFileInfo file(pl->dataDirectory().filePath(filename));
     auto abs = file.absoluteFilePath();
@@ -144,39 +129,35 @@ int io_open(lua_State *L)
                        "Plugin does not have permissions to access given file.",
                        EACCES);
     }
-    lua_getfield(L, LUA_REGISTRYINDEX, REG_REAL_IO_NAME);
-    lua_getfield(L, -1, "open");
-    lua_remove(L, -2);  // remove LUA_REGISTRYINDEX[REAL_IO_NAME]
-    lua::push(L, abs);
-    lua::push(L, mode.toString());
-    lua_call(L, 2, 3);
-    return 3;
+
+    sol::state_view lua(L);
+    auto open = lua.registry()[REG_REAL_IO_NAME]["open"];
+    sol::protected_function_result res =
+        open(abs.toStdString(), mode.toString().toStdString());
+    return res;
+}
+sol::variadic_results io_open_modeless(sol::this_state L, QString filename)
+{
+    return io_open(L, std::move(filename), "r");
 }
 
-int io_lines(lua_State *L)
+sol::variadic_results io_lines_noargs(sol::this_state L)
+{
+    sol::state_view lua(L);
+    auto lines = lua.registry()[REG_REAL_IO_NAME]["lines"];
+    sol::protected_function_result res = lines();
+    return res;
+}
+
+sol::variadic_results io_lines(sol::this_state L, QString filename,
+                               sol::variadic_args args)
 {
     auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
     if (pl == nullptr)
     {
-        luaL_error(L, "internal error: no plugin");
-        return 0;
+        throw std::runtime_error("internal error: no plugin");
     }
-    if (lua_gettop(L) == 0)
-    {
-        // io.lines() case, just call realio.lines
-        lua_getfield(L, LUA_REGISTRYINDEX, REG_REAL_IO_NAME);
-        lua_getfield(L, -1, "lines");
-        lua_remove(L, -2);  // remove LUA_REGISTRYINDEX[REAL_IO_NAME]
-        lua_call(L, 0, 1);
-        return 1;
-    }
-    QString filename;
-    if (!lua::pop(L, &filename))
-    {
-        return luaL_error(
-            L,
-            "io.lines filename (1st argument) must be a string or not present");
-    }
+    sol::state_view lua(L);
     QFileInfo file(pl->dataDirectory().filePath(filename));
     auto abs = file.absoluteFilePath();
     qCDebug(chatterinoLua) << "[" << pl->id << ":" << pl->meta.name
@@ -185,191 +166,168 @@ int io_lines(lua_State *L)
     bool ok = pl->hasFSPermissionFor(false, abs);
     if (!ok)
     {
-        return ioError(L,
-                       "Plugin does not have permissions to access given file.",
-                       EACCES);
+        throw std::runtime_error(
+            "Plugin does not have permissions to access given file.");
     }
-    // Our stack looks like this:
-    // - {...}[1]
-    // - {...}[2]
-    // ...
-    // We want:
-    // - REG[REG_REAL_IO_NAME].lines
-    // - absolute file path
-    // - {...}[1]
-    // - {...}[2]
-    // ...
 
-    lua_getfield(L, LUA_REGISTRYINDEX, REG_REAL_IO_NAME);
-    lua_getfield(L, -1, "lines");
-    lua_remove(L, -2);  // remove LUA_REGISTRYINDEX[REAL_IO_NAME]
-    lua_insert(L, 1);   // move function to start of stack
-    lua::push(L, abs);
-    lua_insert(L, 2);  // move file name just after the function
-    lua_call(L, lua_gettop(L) - 1, LUA_MULTRET);
-    return lua_gettop(L);
+    auto lines = lua.registry()[REG_REAL_IO_NAME]["lines"];
+    sol::protected_function_result res = lines(abs.toStdString(), args);
+    return res;
 }
 
-namespace {
-
-    // This is the code for both io.input and io.output
-    int globalFileCommon(lua_State *L, bool output)
+sol::variadic_results io_input_argless(sol::this_state L)
+{
+    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
+    if (pl == nullptr)
     {
-        auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
-        if (pl == nullptr)
-        {
-            luaL_error(L, "internal error: no plugin");
-            return 0;
-        }
-        // Three signature cases:
-        // io.input()
-        // io.input(file)
-        // io.input(name)
-        if (lua_gettop(L) == 0)
-        {
-            // We have no arguments, call realio.input()
-            lua_getfield(L, LUA_REGISTRYINDEX, REG_REAL_IO_NAME);
-            if (output)
-            {
-                lua_getfield(L, -1, "output");
-            }
-            else
-            {
-                lua_getfield(L, -1, "input");
-            }
-            lua_remove(L, -2);  // remove LUA_REGISTRYINDEX[REAL_IO_NAME]
-            lua_call(L, 0, 1);
-            return 1;
-        }
-        if (lua_gettop(L) != 1)
-        {
-            return luaL_error(L, "Too many arguments given to io.input().");
-        }
-        // Now check if we have a file or name
-        auto *p = luaL_testudata(L, 1, LUA_FILEHANDLE);
-        if (p == nullptr)
-        {
-            // this is not a file handle, send it to open
-            luaL_getsubtable(L, LUA_REGISTRYINDEX, REG_C2_IO_NAME);
-            lua_getfield(L, -1, "open");
-            lua_remove(L, -2);  // remove io
-
-            lua_pushvalue(L, 1);  // dupe arg
-            if (output)
-            {
-                lua_pushstring(L, "w");
-            }
-            else
-            {
-                lua_pushstring(L, "r");
-            }
-            lua_call(L, 2, 1);  // call ourio.open(arg1, 'r'|'w')
-            // if this isn't a string ourio.open errors
-
-            // this leaves us with:
-            // 1. arg
-            // 2. new_file
-            lua_remove(L, 1);  // remove arg, replacing it with new_file
-        }
-
-        // file handle, pass it off to realio.input
-        lua_getfield(L, LUA_REGISTRYINDEX, REG_REAL_IO_NAME);
-        if (output)
-        {
-            lua_getfield(L, -1, "output");
-        }
-        else
-        {
-            lua_getfield(L, -1, "input");
-        }
-        lua_remove(L, -2);    // remove LUA_REGISTRYINDEX[REAL_IO_NAME]
-        lua_pushvalue(L, 1);  // duplicate arg
-        lua_call(L, 1, 1);
-        return 1;
+        throw std::runtime_error("internal error: no plugin");
     }
+    sol::state_view lua(L);
 
-}  // namespace
-
-int io_input(lua_State *L)
-{
-    return globalFileCommon(L, false);
+    auto func = lua.registry()[REG_REAL_IO_NAME]["input"];
+    sol::protected_function_result res = func();
+    return res;
 }
-
-int io_output(lua_State *L)
+sol::variadic_results io_input_file(sol::this_state L, sol::userdata file)
 {
-    return globalFileCommon(L, true);
-}
-
-int io_close(lua_State *L)
-{
-    if (lua_gettop(L) > 1)
+    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
+    if (pl == nullptr)
     {
-        return luaL_error(
-            L, "Too many arguments for io.close. Expected one or zero.");
+        throw std::runtime_error("internal error: no plugin");
     }
-    if (lua_gettop(L) == 0)
+    sol::state_view lua(L);
+
+    auto func = lua.registry()[REG_REAL_IO_NAME]["input"];
+    sol::protected_function_result res = func(file);
+    return res;
+}
+sol::variadic_results io_input_name(sol::this_state L, QString filename)
+{
+    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
+    if (pl == nullptr)
     {
-        lua_getfield(L, LUA_REGISTRYINDEX, "_IO_output");
+        throw std::runtime_error("internal error: no plugin");
     }
-    lua_getfield(L, -1, "close");
-    lua_pushvalue(L, -2);
-    lua_call(L, 1, 0);
-    return 0;
-}
-
-int io_flush(lua_State *L)
-{
-    if (lua_gettop(L) > 1)
+    sol::state_view lua(L);
+    auto res = io_open(L, std::move(filename), "r");
+    if (res.size() != 1)
     {
-        return luaL_error(
-            L, "Too many arguments for io.flush. Expected one or zero.");
+        throw std::runtime_error(res.at(1).as<std::string>());
     }
-    lua_getfield(L, LUA_REGISTRYINDEX, "_IO_output");
-    lua_getfield(L, -1, "flush");
-    lua_pushvalue(L, -2);
-    lua_call(L, 1, 0);
-    return 0;
-}
-
-int io_read(lua_State *L)
-{
-    if (lua_gettop(L) > 1)
+    auto obj = res.at(0);
+    if (obj.get_type() != sol::type::userdata)
     {
-        return luaL_error(
-            L, "Too many arguments for io.read. Expected one or zero.");
+        throw std::runtime_error("a file must be a userdata.");
     }
-    lua_getfield(L, LUA_REGISTRYINDEX, "_IO_input");
-    lua_getfield(L, -1, "read");
-    lua_insert(L, 1);
-    lua_insert(L, 2);
-    lua_call(L, lua_gettop(L) - 1, 1);
-    return 1;
+    return io_input_file(L, obj);
 }
 
-int io_write(lua_State *L)
+sol::variadic_results io_output_argless(sol::this_state L)
 {
-    lua_getfield(L, LUA_REGISTRYINDEX, "_IO_output");
-    lua_getfield(L, -1, "write");
-    lua_insert(L, 1);
-    lua_insert(L, 2);
-    // (input)
-    // (input).read
-    // args
-    lua_call(L, lua_gettop(L) - 1, 1);
-    return 1;
-}
+    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
+    if (pl == nullptr)
+    {
+        throw std::runtime_error("internal error: no plugin");
+    }
+    sol::state_view lua(L);
 
-int io_popen(lua_State *L)
+    auto func = lua.registry()[REG_REAL_IO_NAME]["output"];
+    sol::protected_function_result res = func();
+    return res;
+}
+sol::variadic_results io_output_file(sol::this_state L, sol::userdata file)
 {
-    return luaL_error(L, "io.popen: This function is a stub!");
-}
+    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
+    if (pl == nullptr)
+    {
+        throw std::runtime_error("internal error: no plugin");
+    }
+    sol::state_view lua(L);
 
-int io_tmpfile(lua_State *L)
+    auto func = lua.registry()[REG_REAL_IO_NAME]["output"];
+    sol::protected_function_result res = func(file);
+    return res;
+}
+sol::variadic_results io_output_name(sol::this_state L, QString filename)
 {
-    return luaL_error(L, "io.tmpfile: This function is a stub!");
+    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
+    if (pl == nullptr)
+    {
+        throw std::runtime_error("internal error: no plugin");
+    }
+    sol::state_view lua(L);
+    auto res = io_open(L, std::move(filename), "w");
+    if (res.size() != 1)
+    {
+        throw std::runtime_error(res.at(1).as<std::string>());
+    }
+    auto obj = res.at(0);
+    if (obj.get_type() != sol::type::userdata)
+    {
+        throw std::runtime_error("internal error: a file must be a userdata.");
+    }
+    return io_output_file(L, obj);
 }
 
-// NOLINTEND(*vararg)
+bool io_close_argless(sol::this_state L)
+{
+    sol::state_view lua(L);
+    auto out = lua.registry()["_IO_output"];
+    return io_close_file(L, out);
+}
+
+bool io_close_file(sol::this_state L, sol::userdata file)
+{
+    sol::state_view lua(L);
+    return file["close"](file);
+}
+
+void io_flush_argless(sol::this_state L)
+{
+    sol::state_view lua(L);
+    auto out = lua.registry()["_IO_output"];
+    io_flush_file(L, out);
+}
+
+void io_flush_file(sol::this_state L, sol::userdata file)
+{
+    sol::state_view lua(L);
+    file["flush"](file);
+}
+
+sol::variadic_results io_read(sol::this_state L, sol::variadic_args args)
+{
+    sol::state_view lua(L);
+    auto inp = lua.registry()["_IO_input"];
+    if (!inp.is<sol::userdata>())
+    {
+        throw std::runtime_error("Input not set to a file");
+    }
+    sol::protected_function read = inp["read"];
+    return read(inp, args);
+}
+
+sol::variadic_results io_write(sol::this_state L, sol::variadic_args args)
+{
+    sol::state_view lua(L);
+    auto out = lua.registry()["_IO_output"];
+    if (!out.is<sol::userdata>())
+    {
+        throw std::runtime_error("Output not set to a file");
+    }
+    sol::protected_function write = out["write"];
+    return write(out, args);
+}
+
+void io_popen()
+{
+    throw std::runtime_error("io.popen: This function is a stub!");
+}
+
+void io_tmpfile()
+{
+    throw std::runtime_error("io.tmpfile: This function is a stub!");
+}
 
 }  // namespace chatterino::lua::api
 #endif
