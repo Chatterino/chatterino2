@@ -50,6 +50,10 @@ namespace linkparser {
     struct Parsed;
 }  // namespace linkparser
 
+namespace twitchirc {
+    struct EmoteOccurrence;
+}  // namespace twitchirc
+
 struct SystemMessageTag {
 };
 struct TimeoutMessageTag {
@@ -87,19 +91,6 @@ struct MessageParseArgs {
     bool isStaffOrBroadcaster = false;
     bool isSubscriptionMessage = false;
     QString channelPointRewardId = "";
-};
-
-struct TwitchEmoteOccurrence {
-    int start;
-    int end;
-    EmotePtr ptr;
-    EmoteName name;
-
-    bool operator==(const TwitchEmoteOccurrence &other) const
-    {
-        return std::tie(this->start, this->end, this->ptr, this->name) ==
-               std::tie(other.start, other.end, other.ptr, other.name);
-    }
 };
 
 class MessageBuilder
@@ -237,20 +228,6 @@ public:
     static MessagePtr makeLowTrustUpdateMessage(
         const PubSubLowTrustUsersMessage &action);
 
-    static std::unordered_map<QString, QString> parseBadgeInfoTag(
-        const QVariantMap &tags);
-
-    // Parses "badges" tag which contains a comma separated list of key-value elements
-    static std::vector<Badge> parseBadgeTag(const QVariantMap &tags);
-
-    static std::vector<TwitchEmoteOccurrence> parseTwitchEmotes(
-        const QVariantMap &tags, const QString &originalMessage,
-        int messageOffset);
-
-    static void processIgnorePhrases(
-        const std::vector<IgnorePhrase> &phrases, QString &originalMessage,
-        std::vector<TwitchEmoteOccurrence> &twitchEmotes);
-
 protected:
     void addTextOrEmoji(EmotePtr emote);
     void addTextOrEmoji(const QString &string_);
@@ -294,7 +271,7 @@ protected:
     Outcome tryAppendEmote(const EmoteName &name);
 
     void addWords(const QStringList &words,
-                  const std::vector<TwitchEmoteOccurrence> &twitchEmotes);
+                  const std::vector<twitchirc::EmoteOccurrence> &twitchEmotes);
 
     void appendTwitchBadges();
     void appendChatterinoBadges();
