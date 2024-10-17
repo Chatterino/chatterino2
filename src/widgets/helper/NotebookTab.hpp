@@ -61,17 +61,11 @@ public:
     bool isLive() const;
 
     /**
-     * @brief Sets the highlight state of this tab clearing out highlight sources
+     * @brief Sets the highlight state of this tab clearing highlight sources
      *
      * Obeys the HighlightsEnabled setting and highlight states hierarchy
      */
     void setHighlightState(HighlightState style);
-    /**
-     * @brief Forces the highlight state of this tab
-     *
-     * Does NOT obey the HighlightsEnabled setting and the highlight states hierarchy
-     */
-    void forceHighlightState(HighlightState style);
     /**
      * @brief Updates the highlight state and highlight sources of this tab
      *

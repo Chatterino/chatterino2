@@ -344,6 +344,9 @@ void NotebookTab::copyHighlightStateAndSourcesFrom(const NotebookTab *sourceTab)
 {
     if (this->isSelected())
     {
+        assert(this->highlightSources_.highlightedSource.empty());
+        assert(this->highlightSources_.newMessageSource.empty());
+        assert(this->highlightState_ == HighlightState::None);
         return;
     }
 
@@ -391,7 +394,6 @@ void NotebookTab::setSelected(bool value)
     }
 
     this->highlightSources_.clear();
-
     this->highlightState_ = HighlightState::None;
 
     this->update();
@@ -453,8 +455,13 @@ void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
 {
     if (this->isSelected())
     {
+        assert(this->highlightSources_.highlightedSource.empty());
+        assert(this->highlightSources_.newMessageSource.empty());
+        assert(this->highlightState_ == HighlightState::None);
         return;
     }
+
+    this->highlightSources_.clear();
 
     if (!this->highlightEnabled_ &&
         newHighlightStyle == HighlightState::NewMessage)
@@ -472,18 +479,15 @@ void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
     this->update();
 }
 
-void NotebookTab::forceHighlightState(HighlightState newHighlightStyle)
-{
-    this->highlightState_ = newHighlightStyle;
-    this->update();
-}
-
 void NotebookTab::updateHighlightState(HighlightState newHighlightStyle,
                                        const ChannelView &channelViewSource,
                                        const MessagePtr &message)
 {
     if (this->isSelected())
     {
+        assert(this->highlightSources_.highlightedSource.empty());
+        assert(this->highlightSources_.newMessageSource.empty());
+        assert(this->highlightState_ == HighlightState::None);
         return;
     }
 
