@@ -118,7 +118,8 @@ private:
     };
 
     void updateHighlightSources(
-        const QHash<ChannelPtr, HighlightEvent> &removedHighlightSources);
+        const std::unordered_map<ChannelPtr, HighlightEvent>
+            &removedHighlightSources);
 
     QPropertyAnimation positionChangedAnimation_;
     QPoint positionAnimationDesiredPoint_;
@@ -148,7 +149,7 @@ private:
 
     QMenu menu_;
 
-    QHash<ChannelPtr, HighlightEvent> highlightSources_;
+    std::unordered_map<ChannelPtr, HighlightEvent> highlightSources_;
 
     pajlada::Signals::SignalHolder managedConnections_;
 };

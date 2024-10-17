@@ -305,22 +305,13 @@ bool NotebookTab::isSelected() const
 }
 
 void NotebookTab::updateHighlightSources(
-    const QHash<ChannelPtr, HighlightEvent> &removedHighlightSources)
+    const std::unordered_map<ChannelPtr, HighlightEvent>
+        &removedHighlightSources)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
-    for (const auto &[otherChannel, otherEvent] :
-         removedHighlightSources.asKeyValueRange())
+    for (const auto &[otherChannel, otherEvent] : removedHighlightSources)
     {
-        this->highlightSources_.remove(otherChannel);
+        this->highlightSources_.erase(otherChannel);
     }
-#else
-    for (auto it = removedHighlightSources.cbegin(),
-              end = removedHighlightSources.cend();
-         it != end; ++it)
-    {
-        this->highlightSources_.remove(it.key());
-    }
-#endif
 
     if (this->highlightSources_.empty())
     {
@@ -446,8 +437,12 @@ void NotebookTab::setHighlightState(HighlightState newHighlightStyle,
         return;
     }
 
-    this->highlightSources_.insert(channelViewSource.underlyingChannel(),
-                                   HighlightEvent{});
+    if (!this->highlightSources_.contains(
+            channelViewSource.underlyingChannel()))
+    {
+        this->highlightSources_.emplace(channelViewSource.underlyingChannel(),
+                                        HighlightEvent{});
+    }
 
     if (!this->highlightEnabled_ &&
         newHighlightStyle == HighlightState::NewMessage)
