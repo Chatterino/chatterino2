@@ -304,18 +304,59 @@ bool NotebookTab::isSelected() const
     return this->selected_;
 }
 
-void NotebookTab::removeHighlightSources(const HighlightSources &toRemove)
+void NotebookTab::removeNewMessageSource(const ChannelPtr &source)
+{
+    this->highlightSources_.newMessageSource.erase(source);
+}
+
+void NotebookTab::removeHighlightedSource(const ChannelPtr &source)
+{
+    this->highlightSources_.highlightedSource.erase(source);
+}
+
+void NotebookTab::removeHighlightStateChangeSources(
+    const HighlightSources &toRemove)
 {
     for (const auto &source : toRemove.newMessageSource)
     {
-        this->highlightSources_.newMessageSource.erase(source);
+        this->removeNewMessageSource(source);
     }
 
     for (const auto &source : toRemove.highlightedSource)
     {
-        this->highlightSources_.highlightedSource.erase(source);
+        this->removeHighlightedSource(source);
     }
+}
 
+void NotebookTab::newHighlightSourceAdded(const ChannelPtr &source)
+{
+    this->removeHighlightedSource(source);
+    this->removeNewMessageSource(source);
+    this->updateHighlightStateDueSourcesChange();
+
+    auto *splitNotebook = dynamic_cast<SplitNotebook *>(this->notebook_);
+    if (splitNotebook)
+    {
+        for (int i = 0; i < splitNotebook->getPageCount(); ++i)
+        {
+            auto *splitContainer =
+                dynamic_cast<SplitContainer *>(splitNotebook->getPageAt(i));
+            if (splitContainer)
+            {
+                auto *tab = splitContainer->getTab();
+                if (tab && tab != this)
+                {
+                    tab->removeHighlightedSource(source);
+                    tab->removeNewMessageSource(source);
+                    tab->updateHighlightStateDueSourcesChange();
+                }
+            }
+        }
+    }
+}
+
+void NotebookTab::updateHighlightStateDueSourcesChange()
+{
     if (!this->highlightSources_.highlightedSource.empty())
     {
         assert(this->highlightState_ == HighlightState::Highlighted);
@@ -388,7 +429,9 @@ void NotebookTab::setSelected(bool value)
                     auto *tab = splitContainer->getTab();
                     if (tab && tab != this)
                     {
-                        tab->removeHighlightSources(this->highlightSources_);
+                        tab->removeHighlightStateChangeSources(
+                            this->highlightSources_);
+                        tab->updateHighlightStateDueSourcesChange();
                     }
                 }
             }

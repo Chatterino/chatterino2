@@ -76,6 +76,7 @@ public:
                               const MessagePtr &message);
     void copyHighlightStateAndSourcesFrom(const NotebookTab *sourceTab);
     void setHighlightsEnabled(const bool &newVal);
+    void newHighlightSourceAdded(const ChannelPtr &source);
     bool hasHighlightsEnabled() const;
     HighlightState highlightState() const;
 
@@ -136,7 +137,10 @@ private:
 
     } highlightSources_;
 
-    void removeHighlightSources(const HighlightSources &toRemove);
+    void removeHighlightStateChangeSources(const HighlightSources &toRemove);
+    void removeNewMessageSource(const ChannelPtr &source);
+    void removeHighlightedSource(const ChannelPtr &source);
+    void updateHighlightStateDueSourcesChange();
 
     QPropertyAnimation positionChangedAnimation_;
     QPoint positionAnimationDesiredPoint_;
