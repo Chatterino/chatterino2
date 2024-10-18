@@ -52,15 +52,15 @@ TEST_F(TestIgnoreController, processIgnorePhrases)
     struct TestCase {
         std::vector<IgnorePhrase> phrases;
         QString input;
-        std::vector<twitchirc::EmoteOccurrence> twitchEmotes;
+        std::vector<TwitchEmoteOccurrence> twitchEmotes;
         QString expectedMessage;
-        std::vector<twitchirc::EmoteOccurrence> expectedTwitchEmotes;
+        std::vector<TwitchEmoteOccurrence> expectedTwitchEmotes;
     };
 
     auto *twitchEmotes = this->mockApplication->getEmotes()->getTwitchEmotes();
 
     auto emoteAt = [&](int at, const QString &name) {
-        return twitchirc::EmoteOccurrence{
+        return TwitchEmoteOccurrence{
             .start = at,
             .end = static_cast<int>(at + name.size() - 1),
             .ptr =

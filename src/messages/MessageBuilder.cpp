@@ -352,9 +352,8 @@ void appendBadges(MessageBuilder *builder, const std::vector<Badge> &badges,
 
 bool doesWordContainATwitchEmote(
     int cursor, const QString &word,
-    const std::vector<twitchirc::EmoteOccurrence> &twitchEmotes,
-    std::vector<twitchirc::EmoteOccurrence>::const_iterator
-        &currentTwitchEmoteIt)
+    const std::vector<TwitchEmoteOccurrence> &twitchEmotes,
+    std::vector<TwitchEmoteOccurrence>::const_iterator &currentTwitchEmoteIt)
 {
     if (currentTwitchEmoteIt == twitchEmotes.end())
     {
@@ -1175,8 +1174,8 @@ MessagePtr MessageBuilder::build()
     }
 
     // Twitch emotes
-    auto twitchEmotes = twitchirc::parseTwitchEmotes(
-        this->tags, this->originalMessage_, this->messageOffset_);
+    auto twitchEmotes = parseTwitchEmotes(this->tags, this->originalMessage_,
+                                          this->messageOffset_);
 
     // This runs through all ignored phrases and runs its replacements on this->originalMessage_
     processIgnorePhrases(*getSettings()->ignoredMessages.readOnly(),
@@ -2360,7 +2359,7 @@ void MessageBuilder::parseHighlights()
         return;
     }
 
-    auto badges = twitchirc::parseBadgeTag(this->tags);
+    auto badges = parseBadgeTag(this->tags);
     auto [highlighted, highlightResult] = getApp()->getHighlights()->check(
         this->args, badges, this->message().loginName, this->originalMessage_,
         this->message().flags);
@@ -2622,7 +2621,7 @@ Outcome MessageBuilder::tryAppendEmote(const EmoteName &name)
 
 void MessageBuilder::addWords(
     const QStringList &words,
-    const std::vector<twitchirc::EmoteOccurrence> &twitchEmotes)
+    const std::vector<TwitchEmoteOccurrence> &twitchEmotes)
 {
     // cursor currently indicates what character index we're currently operating in the full list of words
     int cursor = 0;
@@ -2713,8 +2712,8 @@ void MessageBuilder::appendTwitchBadges()
         return;
     }
 
-    auto badgeInfos = twitchirc::parseBadgeInfoTag(this->tags);
-    auto badges = twitchirc::parseBadgeTag(this->tags);
+    auto badgeInfos = parseBadgeInfoTag(this->tags);
+    auto badges = parseBadgeTag(this->tags);
     appendBadges(this, badges, badgeInfos, this->twitchChannel);
 }
 

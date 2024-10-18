@@ -189,7 +189,7 @@ bool isIgnoredMessage(IgnoredMessageParameters &&params)
 
 void processIgnorePhrases(const std::vector<IgnorePhrase> &phrases,
                           QString &content,
-                          std::vector<twitchirc::EmoteOccurrence> &twitchEmotes)
+                          std::vector<TwitchEmoteOccurrence> &twitchEmotes)
 {
     using SizeType = QString::size_type;
 
@@ -202,8 +202,8 @@ void processIgnorePhrases(const std::vector<IgnorePhrase> &phrases,
                 // returns true for emotes outside the range
                 return !((item.start >= pos) && item.start < (pos + len));
             });
-        std::vector<twitchirc::EmoteOccurrence> emotesInRange(
-            it, twitchEmotes.end());
+        std::vector<TwitchEmoteOccurrence> emotesInRange(it,
+                                                         twitchEmotes.end());
         twitchEmotes.erase(it, twitchEmotes.end());
         return emotesInRange;
     };
@@ -245,7 +245,7 @@ void processIgnorePhrases(const std::vector<IgnorePhrase> &phrases,
                         qCDebug(chatterinoTwitch)
                             << "emote null" << emote.first.string;
                     }
-                    twitchEmotes.push_back(twitchirc::EmoteOccurrence{
+                    twitchEmotes.push_back(TwitchEmoteOccurrence{
                         static_cast<int>(startIndex + pos),
                         static_cast<int>(startIndex + pos +
                                          emote.first.string.length()),

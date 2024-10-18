@@ -45,14 +45,11 @@ struct HelixVip;
 using HelixModerator = HelixVip;
 struct ChannelPointReward;
 struct DeleteAction;
+struct TwitchEmoteOccurrence;
 
 namespace linkparser {
     struct Parsed;
 }  // namespace linkparser
-
-namespace twitchirc {
-    struct EmoteOccurrence;
-}  // namespace twitchirc
 
 struct SystemMessageTag {
 };
@@ -271,7 +268,7 @@ protected:
     Outcome tryAppendEmote(const EmoteName &name);
 
     void addWords(const QStringList &words,
-                  const std::vector<twitchirc::EmoteOccurrence> &twitchEmotes);
+                  const std::vector<TwitchEmoteOccurrence> &twitchEmotes);
 
     void appendTwitchBadges();
     void appendChatterinoBadges();

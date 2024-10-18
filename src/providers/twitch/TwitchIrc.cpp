@@ -9,10 +9,9 @@
 namespace {
 
 using namespace chatterino;
-using namespace chatterino::twitchirc;
 
 void appendTwitchEmoteOccurrences(const QString &emote,
-                                  std::vector<EmoteOccurrence> &vec,
+                                  std::vector<TwitchEmoteOccurrence> &vec,
                                   const std::vector<int> &correctPositions,
                                   const QString &originalMessage,
                                   int messageOffset)
@@ -67,7 +66,7 @@ void appendTwitchEmoteOccurrences(const QString &emote,
         }
 
         auto name = EmoteName{originalMessage.mid(start, end - start + 1)};
-        EmoteOccurrence emoteOccurrence{
+        TwitchEmoteOccurrence emoteOccurrence{
             start,
             end,
             app->getEmotes()->getTwitchEmotes()->getOrCreateEmote(id, name),
@@ -84,7 +83,7 @@ void appendTwitchEmoteOccurrences(const QString &emote,
 
 }  // namespace
 
-namespace chatterino::twitchirc {
+namespace chatterino {
 
 std::unordered_map<QString, QString> parseBadgeInfoTag(const QVariantMap &tags)
 {
@@ -132,12 +131,12 @@ std::vector<Badge> parseBadgeTag(const QVariantMap &tags)
     return b;
 }
 
-std::vector<EmoteOccurrence> parseTwitchEmotes(const QVariantMap &tags,
-                                               const QString &content,
-                                               int messageOffset)
+std::vector<TwitchEmoteOccurrence> parseTwitchEmotes(const QVariantMap &tags,
+                                                     const QString &content,
+                                                     int messageOffset)
 {
     // Twitch emotes
-    std::vector<EmoteOccurrence> twitchEmotes;
+    std::vector<TwitchEmoteOccurrence> twitchEmotes;
 
     auto emotesTag = tags.find("emotes");
 
@@ -164,4 +163,4 @@ std::vector<EmoteOccurrence> parseTwitchEmotes(const QVariantMap &tags,
     return twitchEmotes;
 }
 
-}  // namespace chatterino::twitchirc
+}  // namespace chatterino

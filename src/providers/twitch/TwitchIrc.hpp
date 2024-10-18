@@ -8,15 +8,15 @@
 
 #include <unordered_map>
 
-namespace chatterino::twitchirc {
+namespace chatterino {
 
-struct EmoteOccurrence {
+struct TwitchEmoteOccurrence {
     int start;
     int end;
     EmotePtr ptr;
     EmoteName name;
 
-    bool operator==(const EmoteOccurrence &other) const
+    bool operator==(const TwitchEmoteOccurrence &other) const
     {
         return std::tie(this->start, this->end, this->ptr, this->name) ==
                std::tie(other.start, other.end, other.ptr, other.name);
@@ -60,8 +60,8 @@ std::vector<Badge> parseBadgeTag(const QVariantMap &tags);
 ///                      original message (`@a foo` (original message) -> `foo`
 ///                      (content)).
 /// @returns A list of emotes and their positions
-std::vector<EmoteOccurrence> parseTwitchEmotes(const QVariantMap &tags,
-                                               const QString &content,
-                                               int messageOffset);
+std::vector<TwitchEmoteOccurrence> parseTwitchEmotes(const QVariantMap &tags,
+                                                     const QString &content,
+                                                     int messageOffset);
 
-}  // namespace chatterino::twitchirc
+}  // namespace chatterino

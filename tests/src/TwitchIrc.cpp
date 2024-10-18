@@ -144,11 +144,11 @@ TEST(TwitchIrc, BadgeInfoParsing)
         auto *privmsg =
             Communi::IrcPrivateMessage::fromData(test.input, nullptr);
 
-        auto outputBadgeInfo = twitchirc::parseBadgeInfoTag(privmsg->tags());
+        auto outputBadgeInfo = parseBadgeInfoTag(privmsg->tags());
         EXPECT_EQ(outputBadgeInfo, test.expectedBadgeInfo)
             << "Input for badgeInfo " << test.input << " failed";
 
-        auto outputBadges = twitchirc::parseBadgeTag(privmsg->tags());
+        auto outputBadges = parseBadgeTag(privmsg->tags());
         EXPECT_EQ(outputBadges, test.expectedBadges)
             << "Input for badges " << test.input << " failed";
 
@@ -160,7 +160,7 @@ TEST_F(TestTwitchIrc, ParseTwitchEmotes)
 {
     struct TestCase {
         QByteArray input;
-        std::vector<twitchirc::EmoteOccurrence> expectedTwitchEmotes;
+        std::vector<TwitchEmoteOccurrence> expectedTwitchEmotes;
     };
 
     auto *twitchEmotes = this->mockApplication->getEmotes()->getTwitchEmotes();
@@ -321,11 +321,12 @@ TEST_F(TestTwitchIrc, ParseTwitchEmotes)
     {
         auto *privmsg = dynamic_cast<Communi::IrcPrivateMessage *>(
             Communi::IrcPrivateMessage::fromData(test.input, nullptr));
+        ASSERT_NE(privmsg, nullptr);
         QString originalMessage = privmsg->content();
 
         // TODO: Add tests with replies
         auto actualTwitchEmotes =
-            twitchirc::parseTwitchEmotes(privmsg->tags(), originalMessage, 0);
+            parseTwitchEmotes(privmsg->tags(), originalMessage, 0);
 
         EXPECT_EQ(actualTwitchEmotes, test.expectedTwitchEmotes)
             << "Input for twitch emotes " << test.input << " failed";

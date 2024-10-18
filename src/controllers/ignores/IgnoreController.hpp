@@ -7,10 +7,7 @@
 namespace chatterino {
 
 class IgnorePhrase;
-
-namespace twitchirc {
-    struct EmoteOccurrence;
-}  // namespace twitchirc
+struct TwitchEmoteOccurrence;
 
 enum class ShowIgnoredUsersMessages { Never, IfModerator, IfBroadcaster };
 
@@ -33,8 +30,8 @@ bool isIgnoredMessage(IgnoredMessageParameters &&params);
 ///                     that have been removed from the message will also be
 ///                     removed in this list. Similarly, if new emotes are added
 ///                     from a replacement, this list gets updated as well.
-void processIgnorePhrases(
-    const std::vector<IgnorePhrase> &phrases, QString &content,
-    std::vector<twitchirc::EmoteOccurrence> &twitchEmotes);
+void processIgnorePhrases(const std::vector<IgnorePhrase> &phrases,
+                          QString &content,
+                          std::vector<TwitchEmoteOccurrence> &twitchEmotes);
 
 }  // namespace chatterino
