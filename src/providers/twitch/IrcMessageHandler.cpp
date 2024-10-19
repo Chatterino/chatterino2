@@ -533,11 +533,12 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
         }
         else if (msgType == "raid")
         {
-            auto loginTag = tags.find("login");
-            auto displayNameTag = tags.find("msg-param-displayName");
-            if (loginTag != tags.end() && displayNameTag != tags.end())
+            auto login = tags.value("login").toString();
+            auto displayName = tags.value("msg-param-displayName").toString();
+
+            // TODO(jupjohn): un-nest
+            if (!login.isEmpty() && !displayName.isEmpty())
             {
-                auto login = loginTag.value().toString();
                 MessageColor color = MessageColor::System;
                 if (auto colorTag = tags.value("color").value<QColor>();
                     colorTag.isValid())
@@ -545,7 +546,6 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
                     color = MessageColor(colorTag);
                 }
 
-                auto displayName = displayNameTag.value().toString();
                 auto b = MessageBuilder(
                     raidEntryMessage, parseTagString(messageText), login,
                     displayName, color, calculateMessageTime(message).time());
