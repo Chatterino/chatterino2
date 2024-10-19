@@ -128,11 +128,7 @@ void HTTPRequest::execute(sol::this_state L)
                 return;
             }
             lua::StackGuard guard(L);
-            sol::state_view mainState(L);
-            sol::thread thread = sol::thread::create(mainState);
-            sol::state_view threadstate = thread.state();
-            sol::protected_function cb(threadstate, *self->cbSuccess);
-            cb(HTTPResponse(res));
+            (*self->cbSuccess)(HTTPResponse(res));
             self->cbSuccess = std::nullopt;
         })
         .onError([L, hack](const NetworkResult &res) {
@@ -146,11 +142,7 @@ void HTTPRequest::execute(sol::this_state L)
                 return;
             }
             lua::StackGuard guard(L);
-            sol::state_view mainState(L);
-            sol::thread thread = sol::thread::create(mainState);
-            sol::state_view threadstate = thread.state();
-            sol::protected_function cb(threadstate, *self->cbError);
-            cb(HTTPResponse(res));
+            (*self->cbError)(HTTPResponse(res));
             self->cbError = std::nullopt;
         })
         .finally([L, hack]() {
@@ -177,11 +169,7 @@ void HTTPRequest::execute(sol::this_state L)
                 return;
             }
             lua::StackGuard guard(L);
-            sol::state_view mainState(L);
-            sol::thread thread = sol::thread::create(mainState);
-            sol::state_view threadstate = thread.state();
-            sol::protected_function cb(threadstate, *self->cbFinally);
-            cb();
+            (*self->cbFinally)();
             self->cbFinally = std::nullopt;
         })
         .timeout(this->timeout_)
