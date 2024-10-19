@@ -108,6 +108,7 @@
 - Dev: `GIFTimer` is no longer initialized in tests. (#5608)
 - Dev: Emojis now use flags instead of a set of strings for capabilities. (#5616)
 - Dev: Refactored static `MessageBuilder` helpers to standalone functions. (#5652)
+- Dev: Decoupled reply parsing from `MessageBuilder`. (#5660)
 
 ## 2.5.1
 
