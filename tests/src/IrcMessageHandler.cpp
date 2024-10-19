@@ -1,4 +1,4 @@
-#include "messages/MessageBuilder.hpp"
+#include "providers/twitch/IrcMessageHandler.hpp"
 
 #include "common/Literals.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -20,7 +20,6 @@
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
-#include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
@@ -56,7 +55,7 @@ namespace {
 /// to generate an initial snapshot. Make sure to verify the output!
 constexpr bool UPDATE_SNAPSHOTS = false;
 
-const QString IRC_CATEGORY = u"MessageBuilder/IRC"_s;
+const QString IRC_CATEGORY = u"IrcMessageHandler"_s;
 
 class MockApplication : public mock::BaseApplication
 {
@@ -447,12 +446,12 @@ QT_WARNING_POP
 
 }  // namespace
 
-class TestMessageBuilderP : public ::testing::TestWithParam<QString>
+class TestIrcMessageHandlerP : public ::testing::TestWithParam<QString>
 {
 public:
     void SetUp() override
     {
-        auto param = TestMessageBuilderP::GetParam();
+        auto param = TestIrcMessageHandlerP::GetParam();
         this->snapshot = testlib::Snapshot::read(IRC_CATEGORY, param);
 
         this->mockApplication =
@@ -558,7 +557,7 @@ public:
 /// `IrcMesssageHandler` to ensure the correct (or: "real") arguments to build
 /// messages.
 ///
-/// Tests are contained in `tests/snapshots/MessageBuilder/IRC`. Fixtures
+/// Tests are contained in `tests/snapshots/IrcMessageHandler`. Fixtures
 /// consist of an object with the keys `input`, `output`, `settings` (optional),
 /// and `params` (optional).
 ///
@@ -569,7 +568,7 @@ public:
 /// - `prevMessages`: An array of past messages (used for replies)
 /// - `findAllUsernames`: A boolean controlling the equally named setting
 ///   (default: false)
-TEST_P(TestMessageBuilderP, Run)
+TEST_P(TestIrcMessageHandlerP, Run)
 {
     auto channel = makeMockTwitchChannel(u"pajlada"_s, *snapshot);
 
@@ -608,10 +607,10 @@ TEST_P(TestMessageBuilderP, Run)
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    IrcMessage, TestMessageBuilderP,
+    IrcMessage, TestIrcMessageHandlerP,
     testing::ValuesIn(testlib::Snapshot::discover(IRC_CATEGORY)));
 
-TEST(TestMessageBuilderP, Integrity)
+TEST(TestIrcMessageHandlerP, Integrity)
 {
     ASSERT_FALSE(UPDATE_SNAPSHOTS);  // make sure fixtures are actually tested
 }
