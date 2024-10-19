@@ -305,10 +305,22 @@ TEST_F(PluginTest, testChannel)
         true);
 
     // this is not a TwitchChannel
-    EXPECT_ANY_THROW(lua->script(R"lua( return chn:is_broadcaster() )lua"));
-    EXPECT_ANY_THROW(lua->script(R"lua( return chn:is_mod() )lua"));
-    EXPECT_ANY_THROW(lua->script(R"lua( return chn:is_vip() )lua"));
-    EXPECT_ANY_THROW(lua->script(R"lua( return chn:get_twitch_id() )lua"));
+    const auto *shouldThrow1 = R"lua(
+        return chn:is_broadcaster()
+    )lua";
+    EXPECT_ANY_THROW(lua->script(shouldThrow1));
+    const auto *shouldThrow2 = R"lua(
+        return chn:is_mod()
+    )lua";
+    EXPECT_ANY_THROW(lua->script(shouldThrow2));
+    const auto *shouldThrow3 = R"lua(
+        return chn:is_vip()
+    )lua";
+    EXPECT_ANY_THROW(lua->script(shouldThrow3));
+    const auto *shouldThrow4 = R"lua(
+        return chn:get_twitch_id()
+    )lua";
+    EXPECT_ANY_THROW(lua->script(shouldThrow4));
 }
 
 TEST_F(PluginTest, testHttp)
@@ -443,12 +455,14 @@ TEST_F(PluginTest, ioTest)
     )lua");
     EXPECT_EQ(lua->get<QByteArray>("out"), TEST_FILE_DATA);
 
-    EXPECT_ANY_THROW(lua->script(R"lua(
+    const auto *shouldThrow1 = R"lua(
         io.popen("/bin/sh", "-c", "notify-send \"This should not execute.\"")
-    )lua"));
-    EXPECT_ANY_THROW(lua->script(R"lua(
+    )lua";
+    EXPECT_ANY_THROW(lua->script(shouldThrow1));
+    const auto *shouldThrow2 = R"lua(
         io.tmpfile()
-    )lua"));
+    )lua";
+    EXPECT_ANY_THROW(lua->script(shouldThrow2));
 }
 
 TEST_F(PluginTest, ioNoPerms)
@@ -470,9 +484,10 @@ TEST_F(PluginTest, ioNoPerms)
         // clang-format on
     );
 
-    EXPECT_ANY_THROW(lua->script(R"lua(
+    const auto *shouldThrow1 = R"lua(
         io.input("testfile")
-    )lua"));
+    )lua";
+    EXPECT_ANY_THROW(lua->script(shouldThrow1));
 
     EXPECT_EQ(
         // clang-format off
@@ -484,13 +499,15 @@ TEST_F(PluginTest, ioNoPerms)
         // clang-format on
     );
 
-    EXPECT_ANY_THROW(lua->script(R"lua(
+    const auto *shouldThrow2 = R"lua(
         io.output("testfile")
-    )lua"));
+    )lua";
+    EXPECT_ANY_THROW(lua->script(shouldThrow2));
 
-    EXPECT_ANY_THROW(lua->script(R"lua(
+    const auto *shouldThrow3 = R"lua(
         io.lines("testfile")
-    )lua"));
+    )lua";
+    EXPECT_ANY_THROW(lua->script(shouldThrow3));
 }
 
 TEST_F(PluginTest, requireNoData)
@@ -509,9 +526,10 @@ TEST_F(PluginTest, requireNoData)
     f.write(R"lua(print("Data was executed"))lua");
     f.close();
 
-    EXPECT_ANY_THROW(lua->script(R"lua(
+    const auto *shouldThrow1 = R"lua(
         require("data.thisiscode")
-    )lua"));
+    )lua";
+    EXPECT_ANY_THROW(lua->script(shouldThrow1));
 }
 
 TEST_F(PluginTest, testTimerRec)
