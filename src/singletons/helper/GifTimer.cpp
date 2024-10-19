@@ -26,6 +26,7 @@ void GIFTimer::initialize()
 
     QObject::connect(&this->timer, &QTimer::timeout, [this] {
         if (getSettings()->animationsWhenFocused &&
+            this->openOverlayWindows_ == 0 &&
             QApplication::activeWindow() == nullptr)
         {
             return;

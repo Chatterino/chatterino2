@@ -1,0 +1,5 @@
+{
+    "input": "@user-id=818265505;source-room-id=39317849;mod=0;subscriber=1;msg-param-was-gifted=false;vip=0;msg-param-months=0;tmi-sent-ts=1729257926126;msg-param-streak-months=4;msg-param-cumulative-months=6;badge-info=subscriber/6;flags=;id=5fca3f42-9eb6-46c2-a321-57ad9508b976;source-msg-id=resub;badges=subscriber/6;login=gulgarius;system-msg=Gulgarius\\ssubscribed\\sat\\sTier\\s1.\\sThey've\\ssubscribed\\sfor\\s6\\smonths,\\scurrently\\son\\sa\\s4\\smonth\\sstreak!;display-name=Gulgarius;msg-param-sub-plan-name=Join\\sthe\\sLowkoTV\\sfamily!\\s;rm-received-ts=1729257926266;source-id=5fca3f42-9eb6-46c2-a321-57ad9508b976;msg-param-sub-plan=1000;user-type=;msg-param-multimonth-duration=4;room-id=11148817;msg-param-should-share-streak=1;msg-param-multimonth-tenure=3;source-badge-info=subscriber/6;source-badges=subscriber/6;msg-id=resub;emotes=;color=;historical=1 :tmi.twitch.tv USERNOTICE #pajlada",
+    "output": [
+    ]
+}
