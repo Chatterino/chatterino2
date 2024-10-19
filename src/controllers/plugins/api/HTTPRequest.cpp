@@ -117,29 +117,13 @@ void HTTPRequest::execute(sol::this_state L)
     pl->httpRequests.push_back(this->shared_from_this());
 
     std::move(this->req_)
-        .onSuccess([this, L, hack](const NetworkResult &res) {
-            if (!hack.lock())
+        .onSuccess([L, hack](const NetworkResult &res) {
+            auto self = hack.lock();
+            if (!self)
             {
                 return;
             }
-            if (!this->cbSuccess.has_value())
-            {
-                return;
-            }
-            lua::StackGuard guard(L);
-            sol::state_view mainState(L);
-            sol::thread thread = sol::thread::create(mainState);
-            sol::state_view threadstate = thread.state();
-            sol::protected_function cb(threadstate, *this->cbSuccess);
-            cb(HTTPResponse(res));
-            this->cbSuccess = std::nullopt;
-        })
-        .onError([this, L, hack](const NetworkResult &res) {
-            if (!hack.lock())
-            {
-                return;
-            }
-            if (!this->cbError.has_value())
+            if (!self->cbSuccess.has_value())
             {
                 return;
             }
@@ -147,12 +131,31 @@ void HTTPRequest::execute(sol::this_state L)
             sol::state_view mainState(L);
             sol::thread thread = sol::thread::create(mainState);
             sol::state_view threadstate = thread.state();
-            sol::protected_function cb(threadstate, *this->cbError);
+            sol::protected_function cb(threadstate, *self->cbSuccess);
             cb(HTTPResponse(res));
-            this->cbError = std::nullopt;
+            self->cbSuccess = std::nullopt;
         })
-        .finally([this, L, hack]() {
-            if (!hack.lock())
+        .onError([L, hack](const NetworkResult &res) {
+            auto self = hack.lock();
+            if (!self)
+            {
+                return;
+            }
+            if (!self->cbError.has_value())
+            {
+                return;
+            }
+            lua::StackGuard guard(L);
+            sol::state_view mainState(L);
+            sol::thread thread = sol::thread::create(mainState);
+            sol::state_view threadstate = thread.state();
+            sol::protected_function cb(threadstate, *self->cbError);
+            cb(HTTPResponse(res));
+            self->cbError = std::nullopt;
+        })
+        .finally([L, hack]() {
+            auto self = hack.lock();
+            if (!self)
             {
                 // this could happen if the plugin was deleted
                 return;
@@ -169,7 +172,7 @@ void HTTPRequest::execute(sol::this_state L)
                 }
             }
 
-            if (!this->cbFinally.has_value())
+            if (!self->cbFinally.has_value())
             {
                 return;
             }
@@ -177,9 +180,9 @@ void HTTPRequest::execute(sol::this_state L)
             sol::state_view mainState(L);
             sol::thread thread = sol::thread::create(mainState);
             sol::state_view threadstate = thread.state();
-            sol::protected_function cb(threadstate, *this->cbFinally);
+            sol::protected_function cb(threadstate, *self->cbFinally);
             cb();
-            this->cbFinally = std::nullopt;
+            self->cbFinally = std::nullopt;
         })
         .timeout(this->timeout_)
         .execute();
