@@ -53,8 +53,12 @@ public:
     std::optional<QString> getOrPopulateChannelCache(
         const QString &channelId) override
     {
-        assert(false &&
-               "unimplemented getOrPopulateChannelCache in mock irc server");
+        if (channelId == "11148817")
+            return "pajlada";
+        if (channelId == "141981764")
+            return "twitchdev";
+        if (channelId == "1025594235")
+            return "shared_chat_test_01";
         return {};
     }
 
