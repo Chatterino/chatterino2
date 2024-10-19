@@ -157,6 +157,7 @@ public:
     TwitchChannel *twitchChannel = nullptr;
     /// The Twitch Channel the message was sent in, according to the Shared Chat feature
     TwitchChannel *sourceChannel = nullptr;
+    std::optional<QString> sourceName = std::nullopt;
 
     Message *operator->();
     Message &message();

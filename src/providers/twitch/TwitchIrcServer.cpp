@@ -153,6 +153,7 @@ TwitchIrcServer::TwitchIrcServer()
     , liveChannel(new Channel("/live", Channel::Type::TwitchLive))
     , automodChannel(new Channel("/automod", Channel::Type::TwitchAutomod))
     , watchingChannel(Channel::getEmpty(), Channel::Type::TwitchWatching)
+    , channelNamesById_(512)
 {
     // Initialize the connections
     // XXX: don't create write connection if there is no separate write connection.
@@ -1126,6 +1127,38 @@ std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
     }
 
     return Channel::getEmpty();
+}
+
+std::optional<QString> TwitchIrcServer::getOrPopulateChannelCache(
+    const QString &channelId)
+{
+    {
+        const auto cache = this->channelNamesById_.access();
+        if (cache->exists(channelId))
+        {
+            return cache->get(channelId);
+        }
+
+        // prevent multiple helix requests for single user
+        cache->put(channelId, "");
+    }
+
+    getHelix()->getUserById(
+        channelId,
+        [this](const HelixUser &user) {
+            const auto cache = this->channelNamesById_.access();
+            cache->put(user.id, user.login);
+        },
+        [this, &channelId] {
+            const auto cache = this->channelNamesById_.access();
+            if (cache->exists(channelId) && cache->get(channelId).isEmpty())
+            {
+                // invalidate cache so another helix request can be attempted
+                cache->remove(channelId);
+            }
+        });
+
+    return {};
 }
 
 QString TwitchIrcServer::cleanChannelName(const QString &dirtyChannelName)

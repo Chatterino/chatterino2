@@ -3,10 +3,12 @@
 #include "common/Atomic.hpp"
 #include "common/Channel.hpp"
 #include "common/Common.hpp"
+#include "common/UniqueAccess.hpp"
 #include "providers/irc/IrcConnection2.hpp"
 #include "util/RatelimitBucket.hpp"
 
 #include <IrcMessage>
+#include <lrucache/lrucache.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
 
@@ -42,6 +44,9 @@ public:
 
     virtual ChannelPtr getOrAddChannel(const QString &dirtyChannelName) = 0;
     virtual ChannelPtr getChannelOrEmpty(const QString &dirtyChannelName) = 0;
+
+    virtual std::optional<QString> getOrPopulateChannelCache(
+        const QString &channelId) = 0;
 
     virtual void addFakeMessage(const QString &data) = 0;
 
@@ -94,6 +99,9 @@ public:
 
     std::shared_ptr<Channel> getChannelOrEmptyByID(
         const QString &channelID) override;
+
+    std::optional<QString> getOrPopulateChannelCache(
+        const QString &channelId) override;
 
     void reloadAllBTTVChannelEmotes();
     void reloadAllFFZChannelEmotes();
@@ -189,6 +197,9 @@ private:
     // Our rate limiting bucket for the Twitch join rate limits
     // https://dev.twitch.tv/docs/irc/guide#rate-limits
     QObjectPtr<RatelimitBucket> joinBucket_;
+
+    // cached channel id => name for resolving Shared Chat members
+    UniqueAccess<cache::lru_cache<QString, QString>> channelNamesById_;
 
     QTimer reconnectTimer_;
     int falloffCounter_ = 1;

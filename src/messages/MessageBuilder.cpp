@@ -384,6 +384,17 @@ EmotePtr makeAutoModBadge()
         Url{"https://dashboard.twitch.tv/settings/moderation/automod"}});
 }
 
+EmotePtr makeSharedChatBadge(const QString &sourceName)
+{
+    return std::make_shared<Emote>(
+        Emote{"SharedChat_" + sourceName,
+              ImageSet{Image::fromResourcePixmap(
+                  getResources().twitch.sharedChat, 0.25)},
+              Tooltip{"Shared Message" +
+                      (sourceName.isEmpty() ? "" : " from " + sourceName)},
+              Url{"https://link.twitch.tv/SharedChatViewer"}});
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -1154,6 +1165,14 @@ MessagePtr MessageBuilder::build()
     if (this->shouldAddModerationElements())
     {
         this->emplace<TwitchModerationElement>();
+    }
+
+    if (this->sourceName.has_value())
+    {
+        this->emplace<BadgeElement>(
+                makeSharedChatBadge(this->sourceName.value()),
+                MessageElementFlag::BadgeSharedChannel)
+            ->setLink({Link::UserInfo, sourceName.value()});
     }
 
     this->appendTwitchBadges();
@@ -2242,15 +2261,22 @@ void MessageBuilder::parseRoomID()
             {
                 this->message().flags.set(MessageFlag::SharedMessage);
 
-                auto sourceChan =
-                    getApp()->getTwitch()->getChannelOrEmptyByID(sourceRoom);
+                auto *twitch = getApp()->getTwitch();
+                auto sourceChan = twitch->getChannelOrEmptyByID(sourceRoom);
                 if (sourceChan && !sourceChan->isEmpty())
                 {
+                    this->sourceName = sourceChan->getName();
                     this->sourceChannel =
                         dynamic_cast<TwitchChannel *>(sourceChan.get());
+
                     // avoid duplicate pings
                     this->message().flags.set(
                         MessageFlag::DoNotTriggerNotification);
+                }
+                else
+                {
+                    this->sourceName =
+                        twitch->getOrPopulateChannelCache(sourceRoom);
                 }
             }
         }
