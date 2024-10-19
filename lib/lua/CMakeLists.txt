@@ -52,5 +52,8 @@ set_target_properties(${liblua} PROPERTIES
     CXX_STANDARD 98
     CXX_EXTENSIONS TRUE
 )
-target_compile_options(lua PRIVATE -w)  # this makes clang shut up about c-as-c++
+target_compile_options(lua PRIVATE
+    -w # this makes clang shut up about c-as-c++
+    $<$<AND:$<BOOL:${MSVC}>,$<CXX_COMPILER_ID:Clang>>:/EHsc> # enable exceptions in clang-cl
+)
 set_source_files_properties(${LUA_SRC} PROPERTIES LANGUAGE CXX)
