@@ -44,6 +44,8 @@ public:
             QCoreApplication::processEvents(QEventLoop::AllEvents);
             QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
         }
+
+        ASSERT_TRUE(this->requestDone_);
     }
 
 private:
