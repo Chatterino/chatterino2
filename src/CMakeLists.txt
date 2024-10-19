@@ -413,6 +413,8 @@ set(SOURCE_FILES
         providers/twitch/TwitchEmotes.hpp
         providers/twitch/TwitchHelpers.cpp
         providers/twitch/TwitchHelpers.hpp
+        providers/twitch/TwitchIrc.cpp
+        providers/twitch/TwitchIrc.hpp
         providers/twitch/TwitchIrcServer.cpp
         providers/twitch/TwitchIrcServer.hpp
         providers/twitch/TwitchUser.cpp
