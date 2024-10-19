@@ -538,7 +538,6 @@ TEST_F(PluginTest, testTimerRec)
 
     RequestWaiter waiter;
     lua->set("done", [&] {
-        qInfo() << "Called Done!";
         waiter.requestDone();
     });
 
