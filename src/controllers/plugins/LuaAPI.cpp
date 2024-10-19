@@ -116,6 +116,7 @@ void c2_later(ThisPluginState L, sol::protected_function callback, int time)
 
     auto *timer = new QTimer();
     timer->setInterval(time);
+    timer->setSingleShot(true);
     auto id = L.plugin()->addTimeout(timer);
     auto name = QString("timeout_%1").arg(id);
 
