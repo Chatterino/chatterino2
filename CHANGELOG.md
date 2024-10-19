@@ -110,6 +110,7 @@
 - Dev: Emojis now use flags instead of a set of strings for capabilities. (#5616)
 - Dev: Refactored static `MessageBuilder` helpers to standalone functions. (#5652)
 - Dev: Decoupled reply parsing from `MessageBuilder`. (#5660)
+- Dev: Refactored IRC message building. (#5663)
 
 ## 2.5.1
 
