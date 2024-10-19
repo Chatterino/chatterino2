@@ -1114,6 +1114,53 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
         {
             messageText = "Announcement";
         }
+        else if (msgType == "raid")
+        {
+            auto login = tags.value("login").toString();
+            auto displayName = tags.value("msg-param-displayName").toString();
+
+            if (!login.isEmpty() && !displayName.isEmpty())
+            {
+                MessageColor color = MessageColor::System;
+                if (auto colorTag = tags.value("color").value<QColor>();
+                    colorTag.isValid())
+                {
+                    color = MessageColor(colorTag);
+                }
+
+                auto b = MessageBuilder(
+                    raidEntryMessage, parseTagString(messageText), login,
+                    displayName, color, calculateMessageTime(message).time());
+
+                b->flags.set(MessageFlag::Subscription);
+                if (mirrored)
+                {
+                    b->flags.set(MessageFlag::SharedMessage);
+                }
+                auto newMessage = b.release();
+
+                QString channelName;
+
+                if (message->parameters().size() < 1)
+                {
+                    return;
+                }
+
+                if (!trimChannelName(message->parameter(0), channelName))
+                {
+                    return;
+                }
+
+                auto chan = twitchServer.getChannelOrEmpty(channelName);
+
+                if (!chan->isEmpty())
+                {
+                    chan->addMessage(newMessage, MessageContext::Original);
+                }
+
+                return;
+            }
+        }
         else if (msgType == "subgift")
         {
             if (auto monthsIt = tags.find("msg-param-gift-months");
