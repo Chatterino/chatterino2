@@ -26,6 +26,7 @@ public:
         , mentionsChannel(std::shared_ptr<Channel>(new MockChannel("forsen3")))
         , liveChannel(std::shared_ptr<Channel>(new MockChannel("forsen")))
         , automodChannel(std::shared_ptr<Channel>(new MockChannel("forsen2")))
+        , channelNamesById_(1)
     {
     }
 
@@ -46,6 +47,14 @@ public:
     ChannelPtr getChannelOrEmpty(const QString &dirtyChannelName) override
     {
         assert(false && "unimplemented getChannelOrEmpty in mock irc server");
+        return {};
+    }
+
+    std::optional<QString> getOrPopulateChannelCache(
+        const QString &channelId) override
+    {
+        assert(false &&
+               "unimplemented getOrPopulateChannelCache in mock irc server");
         return {};
     }
 
@@ -148,6 +157,7 @@ public:
     ChannelPtr mentionsChannel;
     ChannelPtr liveChannel;
     ChannelPtr automodChannel;
+    UniqueAccess<cache::lru_cache<QString, QString>> channelNamesById_;
     QString lastUserThatWhisperedMe{"forsen"};
 
     std::unordered_map<QString, std::weak_ptr<Channel>> mockChannels;
