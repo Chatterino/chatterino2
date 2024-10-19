@@ -293,7 +293,7 @@ jobs:
           cd build
           cmake \
               -DCMAKE_BUILD_TYPE=Release \
-              -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 \
               -DUSE_PRECOMPILED_HEADERS=OFF \
               -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
               -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
@@ -416,8 +416,8 @@ jobs:
       - name: Rename artifacts
         run: |
           ls -l
-          # Rename the macos build to indicate that it's for macOS 12.0 users
-          mv chatterino-macos-Qt-6.7.1-universal.dmg Chatterino-macOS-12.0-universal.dmg
+          # Rename the macos build to indicate that it's for macOS 13.0 users
+          mv chatterino-macos-Qt-6.7.1-universal.dmg Chatterino-macOS-13.0-universal.dmg
         working-directory: release-artifacts
         shell: bash
 

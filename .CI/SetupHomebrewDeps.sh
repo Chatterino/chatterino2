@@ -69,8 +69,8 @@ brew install "$@"
 echo "Installing x86_64 dependencies"
 for dep in "$@"
 do
-    arch -x86_64 "$x86_64_homebrew_dir/bin/brew" fetch --force --bottle-tag=x86_64_monterey "$dep"
-    arch -x86_64 "$x86_64_homebrew_dir/bin/brew" install $(arch -x86_64 "$x86_64_homebrew_dir/bin/brew" --cache --bottle-tag=x86_64_monterey "$dep")
+    arch -x86_64 "$x86_64_homebrew_dir/bin/brew" fetch --force --bottle-tag=x86_64_ventura "$dep"
+    arch -x86_64 "$x86_64_homebrew_dir/bin/brew" install $(arch -x86_64 "$x86_64_homebrew_dir/bin/brew" --cache --bottle-tag=x86_64_ventura "$dep")
 done
 
 echo "Relinking boost libraries"
