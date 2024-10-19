@@ -45,12 +45,15 @@ struct HelixVip;
 using HelixModerator = HelixVip;
 struct ChannelPointReward;
 struct DeleteAction;
+struct TwitchEmoteOccurrence;
 
 namespace linkparser {
     struct Parsed;
 }  // namespace linkparser
 
 struct SystemMessageTag {
+};
+struct RaidEntryMessageTag {
 };
 struct TimeoutMessageTag {
 };
@@ -66,6 +69,7 @@ struct ImageUploaderResultTag {
 };
 
 const SystemMessageTag systemMessage{};
+const RaidEntryMessageTag raidEntryMessage{};
 const TimeoutMessageTag timeoutMessage{};
 const LiveUpdatesUpdateEmoteMessageTag liveUpdatesUpdateEmoteMessage{};
 const LiveUpdatesRemoveEmoteMessageTag liveUpdatesRemoveEmoteMessage{};
@@ -89,19 +93,6 @@ struct MessageParseArgs {
     QString channelPointRewardId = "";
 };
 
-struct TwitchEmoteOccurrence {
-    int start;
-    int end;
-    EmotePtr ptr;
-    EmoteName name;
-
-    bool operator==(const TwitchEmoteOccurrence &other) const
-    {
-        return std::tie(this->start, this->end, this->ptr, this->name) ==
-               std::tie(other.start, other.end, other.ptr, other.name);
-    }
-};
-
 class MessageBuilder
 {
 public:
@@ -121,6 +112,9 @@ public:
 
     MessageBuilder(SystemMessageTag, const QString &text,
                    const QTime &time = QTime::currentTime());
+    MessageBuilder(RaidEntryMessageTag, const QString &text,
+                   const QString &loginName, const QString &displayName,
+                   const MessageColor &userColor, const QTime &time);
     MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
                    const QString &sourceUser, const QString &systemMessageText,
                    int times, const QTime &time = QTime::currentTime());
@@ -236,20 +230,6 @@ public:
         const TwitchChannel *twitchChannel);
     static MessagePtr makeLowTrustUpdateMessage(
         const PubSubLowTrustUsersMessage &action);
-
-    static std::unordered_map<QString, QString> parseBadgeInfoTag(
-        const QVariantMap &tags);
-
-    // Parses "badges" tag which contains a comma separated list of key-value elements
-    static std::vector<Badge> parseBadgeTag(const QVariantMap &tags);
-
-    static std::vector<TwitchEmoteOccurrence> parseTwitchEmotes(
-        const QVariantMap &tags, const QString &originalMessage,
-        int messageOffset);
-
-    static void processIgnorePhrases(
-        const std::vector<IgnorePhrase> &phrases, QString &originalMessage,
-        std::vector<TwitchEmoteOccurrence> &twitchEmotes);
 
 protected:
     void addTextOrEmoji(EmotePtr emote);
