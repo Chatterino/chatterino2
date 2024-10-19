@@ -539,10 +539,10 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
             {
                 auto login = loginTag.value().toString();
                 MessageColor color = MessageColor::System;
-                if (auto colorTag = tags.find("color"); colorTag != tags.end())
+                if (auto colorTag = tags.value("color").value<QColor>();
+                    colorTag.isValid())
                 {
-                    // Blindly trust that it's a valid hex code
-                    color = MessageColor(QColor{colorTag.value().toString()});
+                    color = MessageColor(colorTag);
                 }
 
                 auto displayName = displayNameTag.value().toString();
