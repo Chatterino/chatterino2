@@ -5,9 +5,8 @@
 namespace chatterino {
 
 #ifdef CHATTERINO_TEST_USE_PUBLIC_HTTPBIN
-// Not using httpbin.org, since it can be really slow and cause timeouts.
-// postman-echo has the same API.
-const char *const HTTPBIN_BASE_URL = "https://postman-echo.com";
+// Using our self-hosted version of httpbox https://github.com/kevinastone/httpbox
+const char *const HTTPBIN_BASE_URL = "https://braize.pajlada.com/httpbox";
 #else
 const char *const HTTPBIN_BASE_URL = "http://127.0.0.1:9051";
 #endif
