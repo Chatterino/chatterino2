@@ -8,3 +8,4 @@
 - Dev(Windows): Updated `libavif` to 1.0.4, `boost` to 1.85, and `openssl` to 3.2.2 (330d05d50ffd296b34744dbcc97290534e8cf704)
 - Dev(macOS): A single universal app is now released for macOS (#274, #279)
 - Dev: Refactored paints to avoid creation of intermediate widgets (#277)
+- Dev(macOS): The minimum required macOS version is now 13.0 Ventura (5e4a9c54e1ef369bb033ab32759019d324c03c85)
