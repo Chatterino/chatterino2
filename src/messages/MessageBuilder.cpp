@@ -2010,7 +2010,7 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
     return {builder.release(), highlight};
 }
 
-void MessageBuilder::addEmoji(EmotePtr emote)
+void MessageBuilder::addEmoji(const EmotePtr &emote)
 {
     this->emplace<EmoteElement>(emote, MessageElementFlag::EmojiAll);
 }
@@ -2667,11 +2667,12 @@ void MessageBuilder::addWords(
                  getApp()->getEmotes()->getEmojis()->parse(preText))
             {
                 boost::apply_visitor(variant::Overloaded{
-                                         [&](EmotePtr emote) {
-                                             this->addEmoji(std::move(emote));
+                                         [&](const EmotePtr &emote) {
+                                             this->addEmoji(emote);
                                          },
-                                         [&](const QString &text) {
-                                             this->addTextOrEmote(state, text);
+                                         [&](QString text) {
+                                             this->addTextOrEmote(
+                                                 state, std::move(text));
                                          },
                                      },
                                      variant);
@@ -2691,8 +2692,8 @@ void MessageBuilder::addWords(
         for (auto variant : getApp()->getEmotes()->getEmojis()->parse(word))
         {
             boost::apply_visitor(variant::Overloaded{
-                                     [&](EmotePtr emote) {
-                                         this->addEmoji(std::move(emote));
+                                     [&](const EmotePtr &emote) {
+                                         this->addEmoji(emote);
                                      },
                                      [&](QString text) {
                                          this->addTextOrEmote(state,

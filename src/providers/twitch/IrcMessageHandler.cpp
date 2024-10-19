@@ -663,8 +663,9 @@ std::vector<MessagePtr> parsePrivMessage(Channel *channel,
 
     std::vector<MessagePtr> builtMessages;
     MessageParseArgs args;
-    auto [built, alert] = MessageBuilder::makeIrcMessage(
-        channel, message, args, message->content(), message->isAction(), 0);
+    args.isAction = message->isAction();
+    auto [built, alert] = MessageBuilder::makeIrcMessage(channel, message, args,
+                                                         message->content(), 0);
     if (built)
     {
         builtMessages.emplace_back(std::move(built));
@@ -1019,7 +1020,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
 
     auto [message, alert] = MessageBuilder::makeIrcMessage(
         c, ircMessage, args, unescapeZeroWidthJoiner(ircMessage->parameter(1)),
-        false, 0);
+        0);
     if (!message)
     {
         return;

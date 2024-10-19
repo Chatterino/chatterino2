@@ -260,7 +260,7 @@ private:
         bool bitsStacked = false;
         int bitsLeft = 0;
     };
-    void addEmoji(EmotePtr emote);
+    void addEmoji(const EmotePtr &emote);
     void addTextOrEmote(TextState &state, QString string);
 
     Outcome tryAppendCheermote(TextState &state, const QString &string);
