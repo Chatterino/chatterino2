@@ -545,7 +545,7 @@ TEST_F(PluginTest, testTimerRec)
         local i = 0
         f = function()
             i = i + 1
-            c2.log(c2.LogLevel.Debug, "cb", i)
+            c2.log(c2.LogLevel.Info, "cb", i)
             if i < 1024 then
                 c2.later(f, 1)
             else
