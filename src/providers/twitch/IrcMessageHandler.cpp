@@ -536,7 +536,6 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
             auto login = tags.value("login").toString();
             auto displayName = tags.value("msg-param-displayName").toString();
 
-            // TODO(jupjohn): un-nest
             if (!login.isEmpty() && !displayName.isEmpty())
             {
                 MessageColor color = MessageColor::System;
