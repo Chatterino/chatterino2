@@ -145,6 +145,7 @@ void c2_later(ThisPluginState L, sol::protected_function callback, int time)
     timer->start();
 }
 
+// TODO: Add tests for this once we run tests in debug mode
 sol::variadic_results g_load(ThisPluginState s, sol::object data)
 {
 #    ifdef NDEBUG
