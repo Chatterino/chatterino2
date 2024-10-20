@@ -3,34 +3,45 @@
 
 #    include "Application.hpp"
 #    include "common/QLogging.hpp"
-#    include "controllers/commands/CommandController.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/PluginController.hpp"
-#    include "messages/MessageBuilder.hpp"
-#    include "providers/twitch/TwitchIrcServer.hpp"
+#    include "controllers/plugins/SolTypes.hpp"  // for lua operations on QString{,List} for CompletionList
 
-extern "C" {
 #    include <lauxlib.h>
 #    include <lua.h>
 #    include <lualib.h>
-}
 #    include <QFileInfo>
+#    include <QList>
 #    include <QLoggingCategory>
 #    include <QTextCodec>
 #    include <QUrl>
+#    include <sol/forward.hpp>
+#    include <sol/protected_function_result.hpp>
+#    include <sol/reference.hpp>
+#    include <sol/stack.hpp>
+#    include <sol/state_view.hpp>
+#    include <sol/types.hpp>
+#    include <sol/variadic_args.hpp>
+#    include <sol/variadic_results.hpp>
+
+#    include <stdexcept>
+#    include <string>
+#    include <utility>
 
 namespace {
 using namespace chatterino;
 
-void logHelper(lua_State *L, Plugin *pl, QDebug stream, int argc)
+void logHelper(lua_State *L, Plugin *pl, QDebug stream,
+               const sol::variadic_args &args)
 {
     stream.noquote();
     stream << "[" + pl->id + ":" + pl->meta.name + "]";
-    for (int i = 1; i <= argc; i++)
+    for (const auto &arg : args)
     {
-        stream << lua::toString(L, i);
+        stream << lua::toString(L, arg.stack_index());
+        // Remove this from our stack
+        lua_pop(L, 1);
     }
-    lua_pop(L, argc);
 }
 
 QDebug qdebugStreamForLogLevel(lua::api::LogLevel lvl)
@@ -63,195 +74,92 @@ QDebug qdebugStreamForLogLevel(lua::api::LogLevel lvl)
 // luaL_error is a c-style vararg function, this makes clang-tidy not dislike it so much
 namespace chatterino::lua::api {
 
-int c2_register_command(lua_State *L)
+CompletionList::CompletionList(const sol::table &table)
+    : values(table.get<QStringList>("values"))
+    , hideOthers(table["hide_others"])
 {
-    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
-    if (pl == nullptr)
-    {
-        luaL_error(L, "internal error: no plugin");
-        return 0;
-    }
-
-    QString name;
-    if (!lua::peek(L, &name, 1))
-    {
-        luaL_error(L, "cannot get command name (1st arg of register_command, "
-                      "expected a string)");
-        return 0;
-    }
-    if (lua_isnoneornil(L, 2))
-    {
-        luaL_error(L, "missing argument for register_command: function "
-                      "\"pointer\"");
-        return 0;
-    }
-
-    auto callbackSavedName = QString("c2commandcb-%1").arg(name);
-    lua_setfield(L, LUA_REGISTRYINDEX, callbackSavedName.toStdString().c_str());
-    auto ok = pl->registerCommand(name, callbackSavedName);
-
-    // delete both name and callback
-    lua_pop(L, 2);
-
-    lua::push(L, ok);
-    return 1;
 }
 
-int c2_register_callback(lua_State *L)
+sol::table toTable(lua_State *L, const CompletionEvent &ev)
 {
-    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
-    if (pl == nullptr)
-    {
-        luaL_error(L, "internal error: no plugin");
-        return 0;
-    }
-    EventType evtType{};
-    if (!lua::peek(L, &evtType, 1))
-    {
-        luaL_error(L, "cannot get event name (1st arg of register_callback, "
-                      "expected a string)");
-        return 0;
-    }
-    if (lua_isnoneornil(L, 2))
-    {
-        luaL_error(L, "missing argument for register_callback: function "
-                      "\"pointer\"");
-        return 0;
-    }
-
-    auto typeName = magic_enum::enum_name(evtType);
-    std::string callbackSavedName;
-    callbackSavedName.reserve(5 + typeName.size());
-    callbackSavedName += "c2cb-";
-    callbackSavedName += typeName;
-    lua_setfield(L, LUA_REGISTRYINDEX, callbackSavedName.c_str());
-
-    lua_pop(L, 2);
-
-    return 0;
+    return sol::state_view(L).create_table_with(
+        "query", ev.query,                          //
+        "full_text_content", ev.full_text_content,  //
+        "cursor_position", ev.cursor_position,      //
+        "is_first_word", ev.is_first_word           //
+    );
 }
 
-int c2_log(lua_State *L)
+void c2_register_callback(ThisPluginState L, EventType evtType,
+                          sol::protected_function callback)
 {
-    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
-    if (pl == nullptr)
-    {
-        luaL_error(L, "c2_log: internal error: no plugin?");
-        return 0;
-    }
-    auto logc = lua_gettop(L) - 1;
-    // This is almost the expansion of qCDebug() macro, actual thing is wrapped in a for loop
-    LogLevel lvl{};
-    if (!lua::pop(L, &lvl, 1))
-    {
-        luaL_error(L, "Invalid log level, use one from c2.LogLevel.");
-        return 0;
-    }
-    QDebug stream = qdebugStreamForLogLevel(lvl);
-    logHelper(L, pl, stream, logc);
-    return 0;
+    L.plugin()->callbacks[evtType] = std::move(callback);
 }
 
-int c2_later(lua_State *L)
+void c2_log(ThisPluginState L, LogLevel lvl, sol::variadic_args args)
 {
-    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
-    if (pl == nullptr)
+    lua::StackGuard guard(L);
     {
-        return luaL_error(L, "c2.later: internal error: no plugin?");
+        QDebug stream = qdebugStreamForLogLevel(lvl);
+        logHelper(L, L.plugin(), stream, args);
     }
-    if (lua_gettop(L) != 2)
-    {
-        return luaL_error(
-            L, "c2.later expects two arguments (a callback that takes no "
-               "arguments and returns nothing and a number the time in "
-               "milliseconds to wait)\n");
-    }
-    int time{};
-    if (!lua::pop(L, &time))
-    {
-        return luaL_error(L, "cannot get time (2nd arg of c2.later, "
-                             "expected a number)");
-    }
+}
 
-    if (!lua_isfunction(L, lua_gettop(L)))
+void c2_later(ThisPluginState L, sol::protected_function callback, int time)
+{
+    if (time <= 0)
     {
-        return luaL_error(L, "cannot get callback (1st arg of c2.later, "
-                             "expected a function)");
+        throw std::runtime_error(
+            "c2.later time must be strictly greater than zero.");
     }
+    sol::state_view lua(L);
 
     auto *timer = new QTimer();
     timer->setInterval(time);
-    auto id = pl->addTimeout(timer);
+    timer->setSingleShot(true);
+    auto id = L.plugin()->addTimeout(timer);
     auto name = QString("timeout_%1").arg(id);
-    auto *coro = lua_newthread(L);
 
-    QObject::connect(timer, &QTimer::timeout, [pl, coro, name, timer]() {
-        timer->deleteLater();
-        pl->removeTimeout(timer);
-        int nres{};
-        lua_resume(coro, nullptr, 0, &nres);
+    sol::state_view main = sol::main_thread(L);
 
-        lua_pushnil(coro);
-        lua_setfield(coro, LUA_REGISTRYINDEX, name.toStdString().c_str());
-        if (lua_gettop(coro) != 0)
-        {
-            stackDump(coro,
-                      pl->id +
-                          ": timer returned a value, this shouldn't happen "
-                          "and is probably a plugin bug");
-        }
-    });
-    stackDump(L, "before setfield");
-    lua_setfield(L, LUA_REGISTRYINDEX, name.toStdString().c_str());
-    lua_xmove(L, coro, 1);  // move function to thread
+    sol::thread thread = sol::thread::create(main);
+    sol::protected_function cb(thread.state(), callback);
+    main.registry()[name.toStdString()] = thread;
+
+    QObject::connect(
+        timer, &QTimer::timeout,
+        [pl = L.plugin(), name, timer, cb, thread, main]() {
+            timer->deleteLater();
+            pl->removeTimeout(timer);
+            sol::protected_function_result res = cb();
+
+            if (res.return_count() != 0)
+            {
+                stackDump(thread.lua_state(),
+                          pl->id +
+                              ": timer returned a value, this shouldn't happen "
+                              "and is probably a plugin bug");
+            }
+            main.registry()[name.toStdString()] = sol::nil;
+        });
     timer->start();
-
-    return 0;
 }
 
-int g_load(lua_State *L)
+// TODO: Add tests for this once we run tests in debug mode
+sol::variadic_results g_load(ThisPluginState s, sol::object data)
 {
 #    ifdef NDEBUG
-    luaL_error(L, "load() is only usable in debug mode");
-    return 0;
+    (void)data;
+    (void)s;
+    throw std::runtime_error("load() is only usable in debug mode");
 #    else
-    auto countArgs = lua_gettop(L);
-    QByteArray data;
-    if (lua::peek(L, &data, 1))
-    {
-        auto *utf8 = QTextCodec::codecForName("UTF-8");
-        QTextCodec::ConverterState state;
-        utf8->toUnicode(data.constData(), data.size(), &state);
-        if (state.invalidChars != 0)
-        {
-            luaL_error(L, "invalid utf-8 in load() is not allowed");
-            return 0;
-        }
-    }
-    else
-    {
-        luaL_error(L, "using reader function in load() is not allowed");
-        return 0;
-    }
 
-    for (int i = 0; i < countArgs; i++)
-    {
-        lua_seti(L, LUA_REGISTRYINDEX, i);
-    }
-
-    // fetch load and call it
-    lua_getfield(L, LUA_REGISTRYINDEX, "real_load");
-
-    for (int i = 0; i < countArgs; i++)
-    {
-        lua_geti(L, LUA_REGISTRYINDEX, i);
-        lua_pushnil(L);
-        lua_seti(L, LUA_REGISTRYINDEX, i);
-    }
-
-    lua_call(L, countArgs, LUA_MULTRET);
-
-    return lua_gettop(L);
+    // If you're modifying this PLEASE verify it works, Sol is very annoying about serialization
+    // - Mm2PL
+    sol::state_view lua(s);
+    auto load = lua.registry()["real_load"];
+    sol::protected_function_result ret = load(data, "=(load)", "t");
+    return ret;
 #    endif
 }
 
@@ -320,7 +228,7 @@ int searcherAbsolute(lua_State *L)
 int searcherRelative(lua_State *L)
 {
     lua_Debug dbg;
-    lua_getstack(L, 1, &dbg);
+    lua_getstack(L, 2, &dbg);
     lua_getinfo(L, "S", &dbg);
     auto currentFile = QString::fromUtf8(dbg.source, dbg.srclen);
     if (currentFile.startsWith("@"))
@@ -346,22 +254,14 @@ int searcherRelative(lua_State *L)
     return loadfile(L, filename);
 }
 
-int g_print(lua_State *L)
+void g_print(ThisPluginState L, sol::variadic_args args)
 {
-    auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
-    if (pl == nullptr)
-    {
-        luaL_error(L, "c2_print: internal error: no plugin?");
-        return 0;
-    }
-    auto argc = lua_gettop(L);
     // This is almost the expansion of qCDebug() macro, actual thing is wrapped in a for loop
     auto stream =
         (QMessageLogger(QT_MESSAGELOG_FILE, QT_MESSAGELOG_LINE,
                         QT_MESSAGELOG_FUNC, chatterinoLua().categoryName())
              .debug());
-    logHelper(L, pl, stream, argc);
-    return 0;
+    logHelper(L, L.plugin(), stream, args);
 }
 
 }  // namespace chatterino::lua::api
