@@ -1,17 +1,17 @@
 #pragma once
 
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include "controllers/plugins/api/ChannelRef.hpp"
+#    include "controllers/plugins/Plugin.hpp"
+#    include "controllers/plugins/SolTypes.hpp"
 
-extern "C" {
 #    include <lua.h>
-}
-#    include "controllers/plugins/LuaUtilities.hpp"
-
+#    include <QList>
 #    include <QString>
+#    include <sol/table.hpp>
 
 #    include <cassert>
 #    include <memory>
-#    include <vector>
 
 struct lua_State;
 namespace chatterino::lua::api {
@@ -30,11 +30,8 @@ namespace chatterino::lua::api {
 enum class LogLevel { Debug, Info, Warning, Critical };
 
 /**
- * @exposeenum c2.EventType
+ * @includefile controllers/plugins/api/EventType.hpp
  */
-enum class EventType {
-    CompletionRequested,
-};
 
 /**
  * @lua@class CommandContext
@@ -46,10 +43,12 @@ enum class EventType {
  * @lua@class CompletionList
  */
 struct CompletionList {
+    CompletionList(const sol::table &);
+
     /**
      * @lua@field values string[] The completions
      */
-    std::vector<QString> values{};
+    QStringList values;
 
     /**
      * @lua@field hide_others boolean Whether other completions from Chatterino should be hidden/ignored.
@@ -79,6 +78,8 @@ struct CompletionEvent {
     bool is_first_word{};
 };
 
+sol::table toTable(lua_State *L, const CompletionEvent &ev);
+
 /**
  * @includefile common/Channel.hpp
  * @includefile controllers/plugins/api/ChannelRef.hpp
@@ -95,16 +96,16 @@ struct CompletionEvent {
  * @lua@return boolean ok  Returns `true` if everything went ok, `false` if a command with this name exists.
  * @exposed c2.register_command
  */
-int c2_register_command(lua_State *L);
 
 /**
  * Registers a callback to be invoked when completions for a term are requested.
  *
- * @lua@param type "CompletionRequested"
+ * @lua@param type c2.EventType.CompletionRequested
  * @lua@param func fun(event: CompletionEvent): CompletionList The callback to be invoked.
  * @exposed c2.register_callback
  */
-int c2_register_callback(lua_State *L);
+void c2_register_callback(ThisPluginState L, EventType evtType,
+                          sol::protected_function callback);
 
 /**
  * Writes a message to the Chatterino log.
@@ -113,7 +114,7 @@ int c2_register_callback(lua_State *L);
  * @lua@param ... any Values to log. Should be convertible to a string with `tostring()`.
  * @exposed c2.log
  */
-int c2_log(lua_State *L);
+void c2_log(ThisPluginState L, LogLevel lvl, sol::variadic_args args);
 
 /**
  * Calls callback around msec milliseconds later. Does not freeze Chatterino.
@@ -122,11 +123,11 @@ int c2_log(lua_State *L);
  * @lua@param msec number How long to wait.
  * @exposed c2.later
  */
-int c2_later(lua_State *L);
+void c2_later(ThisPluginState L, sol::protected_function callback, int time);
 
 // These ones are global
-int g_load(lua_State *L);
-int g_print(lua_State *L);
+sol::variadic_results g_load(ThisPluginState s, sol::object data);
+void g_print(ThisPluginState L, sol::variadic_args args);
 // NOLINTEND(readability-identifier-naming)
 
 // This is for require() exposed as an element of package.searchers

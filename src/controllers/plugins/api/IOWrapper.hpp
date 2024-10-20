@@ -1,5 +1,9 @@
 #pragma once
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include <QString>
+#    include <sol/types.hpp>
+#    include <sol/variadic_args.hpp>
+#    include <sol/variadic_results.hpp>
 
 struct lua_State;
 
@@ -8,7 +12,6 @@ namespace chatterino::lua::api {
 // These functions are exposed as `_G.io`, they are wrappers for native Lua functionality.
 
 const char *const REG_REAL_IO_NAME = "real_lua_io_lib";
-const char *const REG_C2_IO_NAME = "c2io";
 
 /**
  * Opens a file.
@@ -20,7 +23,9 @@ const char *const REG_C2_IO_NAME = "c2io";
  * @lua@param mode nil|"r"|"w"|"a"|"r+"|"w+"|"a+"
  * @exposed io.open
  */
-int io_open(lua_State *L);
+sol::variadic_results io_open(sol::this_state L, QString filename,
+                              QString strmode);
+sol::variadic_results io_open_modeless(sol::this_state L, QString filename);
 
 /**
  * Equivalent to io.input():lines("l") or a specific iterator over given file
@@ -32,7 +37,9 @@ int io_open(lua_State *L);
  * @lua@param ...
  * @exposed io.lines
  */
-int io_lines(lua_State *L);
+sol::variadic_results io_lines(sol::this_state L, QString filename,
+                               sol::variadic_args args);
+sol::variadic_results io_lines_noargs(sol::this_state L);
 
 /**
  * Opens a file and sets it as default input or if given no arguments returns the default input.
@@ -42,7 +49,9 @@ int io_lines(lua_State *L);
  * @lua@return nil|FILE*
  * @exposed io.input
  */
-int io_input(lua_State *L);
+sol::variadic_results io_input_argless(sol::this_state L);
+sol::variadic_results io_input_file(sol::this_state L, sol::userdata file);
+sol::variadic_results io_input_name(sol::this_state L, QString filename);
 
 /**
  * Opens a file and sets it as default output or if given no arguments returns the default output
@@ -52,7 +61,9 @@ int io_input(lua_State *L);
  * @lua@return nil|FILE*
  * @exposed io.output
  */
-int io_output(lua_State *L);
+sol::variadic_results io_output_argless(sol::this_state L);
+sol::variadic_results io_output_file(sol::this_state L, sol::userdata file);
+sol::variadic_results io_output_name(sol::this_state L, QString filename);
 
 /**
  * Closes given file or io.output() if not given.
@@ -61,7 +72,8 @@ int io_output(lua_State *L);
  * @lua@param nil|FILE*
  * @exposed io.close
  */
-int io_close(lua_State *L);
+bool io_close_argless(sol::this_state L);
+bool io_close_file(sol::this_state L, sol::userdata file);
 
 /**
  * Flushes the buffer for given file or io.output() if not given.
@@ -70,7 +82,8 @@ int io_close(lua_State *L);
  * @lua@param nil|FILE*
  * @exposed io.flush
  */
-int io_flush(lua_State *L);
+void io_flush_argless(sol::this_state L);
+void io_flush_file(sol::this_state L, sol::userdata file);
 
 /**
  * Reads some data from the default input file
@@ -79,7 +92,7 @@ int io_flush(lua_State *L);
  * @lua@param nil|string
  * @exposed io.read
  */
-int io_read(lua_State *L);
+sol::variadic_results io_read(sol::this_state L, sol::variadic_args args);
 
 /**
  * Writes some data to the default output file
@@ -88,10 +101,10 @@ int io_read(lua_State *L);
  * @lua@param nil|string
  * @exposed io.write
  */
-int io_write(lua_State *L);
+sol::variadic_results io_write(sol::this_state L, sol::variadic_args args);
 
-int io_popen(lua_State *L);
-int io_tmpfile(lua_State *L);
+void io_popen();
+void io_tmpfile();
 
 // NOLINTEND(readability-identifier-naming)
 }  // namespace chatterino::lua::api

@@ -129,6 +129,10 @@
 #    include <unordered_set>
 #    include <vector>
 
+#    ifdef CHATTERINO_HAVE_PLUGINS
+#        include <sol/sol.hpp>
+#    endif
+
 #    ifndef UNUSED
 #        define UNUSED(x) (void)(x)
 #    endif
