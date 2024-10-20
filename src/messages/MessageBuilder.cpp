@@ -2326,7 +2326,7 @@ QString MessageBuilder::parseRoomID(const QVariantMap &tags,
                 qCWarning(chatterinoTwitch)
                     << "The room-ID of the received message doesn't match the "
                        "room-ID of the channel - received:"
-                    << roomID << "chanel:" << twitchChannel->roomId();
+                    << roomID << "channel:" << twitchChannel->roomId();
             }
         }
         return roomID;
