@@ -4,8 +4,8 @@
 
 - Major: Add option to show pronouns in user card. (#5442, #5583)
 - Major: Release plugins alpha. (#5288)
-- Major: Improve high-DPI support on Windows. (#4868, #5391)
-- Major: Added transparent overlay window (default keybind: <kbd>CTRL</kbd> + <kbd>ALT</kbd> + <kbd>N</kbd>). (#4746, #5643)
+- Major: Improve high-DPI support on Windows. (#4868, #5391, #5664)
+- Major: Added transparent overlay window (default keybind: <kbd>CTRL</kbd> + <kbd>ALT</kbd> + <kbd>N</kbd>). (#4746, #5643, #5659)
 - Minor: Removed the Ctrl+Shift+L hotkey for toggling the "live only" tab visibility state. (#5530)
 - Minor: Add support for Shared Chat messages. Shared chat messages can be filtered with the `flags.shared` filter variable, or with search using `is:shared`. Some messages like subscriptions are filtered on purpose to avoid confusion for the broadcaster. If you have both channels participating in Shared Chat open, only one of the message triggering your highlight will trigger. (#5606, #5625)
 - Minor: Moved tab visibility control to a submenu, without any toggle actions. (#5530)
@@ -36,6 +36,7 @@
 - Minor: Added `--login <username>` CLI argument to specify which account to start logged in as. (#5626)
 - Minor: Indicate when subscriptions and resubscriptions are for multiple months. (#5642)
 - Minor: Proxy URL information is now included in the `/debug-env` command. (#5648)
+- Minor: Make raid entry message usernames clickable. (#5651)
 - Bugfix: Fixed tab move animation occasionally failing to start after closing a tab. (#5426, #5612)
 - Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
 - Bugfix: Fixed restricted users usernames not being clickable. (#5405)
@@ -103,12 +104,13 @@
 - Dev: Added more tests for input completion. (#5604)
 - Dev: Refactored legacy Unicode zero-width-joiner replacement. (#5594)
 - Dev: The JSON output when copying a message (<kbd>SHIFT</kbd> + right-click) is now more extensive. (#5600)
-- Dev: Added more tests for message building. (#5598, #5654)
+- Dev: Added more tests for message building. (#5598, #5654, #5656)
 - Dev: Twitch messages are now sent using Twitch's Helix API instead of IRC by default. (#5607)
 - Dev: `GIFTimer` is no longer initialized in tests. (#5608)
 - Dev: Emojis now use flags instead of a set of strings for capabilities. (#5616)
 - Dev: Move plugins to Sol2. (#5622)
 - Dev: Refactored static `MessageBuilder` helpers to standalone functions. (#5652)
+- Dev: Decoupled reply parsing from `MessageBuilder`. (#5660)
 
 ## 2.5.1
 
