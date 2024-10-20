@@ -245,7 +245,9 @@ public:
     ///               not need to be the `thread`s root. If this message isn't
     ///               replying to anything, this is an empty `shared_ptr`.
     ///
-    /// @returns The built message and a highlight result.
+    /// @returns The built message and a highlight result. If the message is
+    ///          ignored (e.g. from a blocked user), then the returned pointer
+    ///          will be en empty `shared_ptr`.
     static std::pair<MessagePtrMut, HighlightAlert> makeIrcMessage(
         Channel *channel, const Communi::IrcMessage *ircMessage,
         const MessageParseArgs &args, QString content,
