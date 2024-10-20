@@ -628,20 +628,10 @@ bool NotebookTab::shouldMessageHighlight(const ChannelView &channelViewSource,
         const auto &visibleSplits = visibleSplitContainer->getSplits();
         for (const auto &visibleSplit : visibleSplits)
         {
-            auto filterIdsSource = channelViewSource.getFilterIds();
-            auto filterIdsSplit = visibleSplit->getChannelView().getFilterIds();
-
-            auto isSubset = []<typename T>(const QList<T> &sub,
-                                           const QList<T> &super) {
-                return std::ranges::all_of(sub, [&super](const auto &subItem) {
-                    return super.contains(subItem);
-                });
-            };
-
             if (channelViewSource.underlyingChannel() ==
                     visibleSplit->getChannel() &&
                 visibleSplit->getChannelView().shouldIncludeMessage(message) &&
-                isSubset(filterIdsSource, filterIdsSplit))
+                channelViewSource.shouldIncludeMessage(message))
             {
                 // all filters in unvisible source are found in visible split
                 // therefore the unvisible split is more generic than the visible one
