@@ -876,6 +876,14 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
         }
         break;
 
+        case WM_DPICHANGED: {
+            // wait for Qt to process this message
+            postToThread([] {
+                getApp()->getWindows()->invalidateChannelViewBuffers();
+            });
+        }
+        break;
+
         case WM_NCLBUTTONDOWN:
         case WM_NCLBUTTONUP: {
             // WM_NCLBUTTON{DOWN, UP} gets called when the left mouse button
