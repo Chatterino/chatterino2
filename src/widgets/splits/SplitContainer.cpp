@@ -224,12 +224,9 @@ void SplitContainer::addSplit(Split *split)
         });
 
     conns.managedConnect(split->channelChanged, [this, split] {
-        qDebug() << "Changing Channel"
-                 << split->getChannelView().underlyingChannel()->getName();
         if (this->tab_ != nullptr)
         {
-            this->tab_->newHighlightSourceAdded(
-                split->getChannelView().underlyingChannel());
+            this->tab_->newHighlightSourceAdded(split->getChannelView());
         }
     });
 

@@ -2,6 +2,7 @@
 
 #include "common/Common.hpp"
 #include "widgets/helper/Button.hpp"
+#include "widgets/helper/ChannelView.hpp"
 #include "widgets/Notebook.hpp"
 
 #include <pajlada/settings/setting.hpp>
@@ -14,7 +15,6 @@ namespace chatterino {
 inline constexpr int NOTEBOOK_TAB_HEIGHT = 28;
 
 class SplitContainer;
-class ChannelView;
 
 class NotebookTab : public Button
 {
@@ -76,7 +76,7 @@ public:
                               const MessagePtr &message);
     void copyHighlightStateAndSourcesFrom(const NotebookTab *sourceTab);
     void setHighlightsEnabled(const bool &newVal);
-    void newHighlightSourceAdded(const ChannelPtr &source);
+    void newHighlightSourceAdded(const ChannelView &channelViewSource);
     bool hasHighlightsEnabled() const;
     HighlightState highlightState() const;
 
@@ -126,8 +126,26 @@ private:
                                 const MessagePtr &message) const;
 
     struct HighlightSources {
-        std::unordered_set<ChannelPtr> newMessageSource;
-        std::unordered_set<ChannelPtr> highlightedSource;
+        struct ChannelViewProxy {
+            const ChannelView *channelView;
+        };
+
+        struct ChannelViewProxyHash {
+            using is_transparent = void;
+            std::size_t operator()(const ChannelViewProxy &cp) const noexcept;
+        };
+
+        struct ChannelViewProxyEqual {
+            bool operator()(const ChannelViewProxy &l,
+                            const ChannelViewProxy &r) const;
+        };
+
+        std::unordered_set<ChannelViewProxy, ChannelViewProxyHash,
+                           ChannelViewProxyEqual>
+            newMessageSource;
+        std::unordered_set<ChannelViewProxy, ChannelViewProxyHash,
+                           ChannelViewProxyEqual>
+            highlightedSource;
 
         void clear()
         {
@@ -138,8 +156,10 @@ private:
     } highlightSources_;
 
     void removeHighlightStateChangeSources(const HighlightSources &toRemove);
-    void removeNewMessageSource(const ChannelPtr &source);
-    void removeHighlightedSource(const ChannelPtr &source);
+    void removeNewMessageSource(
+        const HighlightSources::ChannelViewProxy &source);
+    void removeHighlightedSource(
+        const HighlightSources::ChannelViewProxy &source);
     void updateHighlightStateDueSourcesChange();
 
     QPropertyAnimation positionChangedAnimation_;

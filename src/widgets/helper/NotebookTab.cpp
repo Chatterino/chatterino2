@@ -1,6 +1,7 @@
 #include "widgets/helper/NotebookTab.hpp"
 
 #include "Application.hpp"
+#include "common/Channel.hpp"
 #include "common/Common.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
@@ -10,7 +11,6 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
-#include "widgets/helper/ChannelView.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/DraggedSplit.hpp"
 #include "widgets/splits/Split.hpp"
@@ -54,6 +54,27 @@ namespace {
         }
     }
 }  // namespace
+
+std::size_t NotebookTab::HighlightSources::ChannelViewProxyHash::operator()(
+    const ChannelViewProxy &cp) const noexcept
+{
+    std::size_t seed = 0;
+    auto first = qHash(cp.channelView->underlyingChannel()->getName());
+    auto second = qHash(cp.channelView->getFilterIds());
+
+    boost::hash_combine(seed, first);
+    boost::hash_combine(seed, second);
+
+    return seed;
+}
+
+bool NotebookTab::HighlightSources::ChannelViewProxyEqual::operator()(
+    const ChannelViewProxy &lp, const ChannelViewProxy &rp) const
+{
+    return lp.channelView->underlyingChannel() ==
+               rp.channelView->underlyingChannel() &&
+           lp.channelView->getFilterIds() == rp.channelView->getFilterIds();
+}
 
 NotebookTab::NotebookTab(Notebook *notebook)
     : Button(notebook)
@@ -304,12 +325,14 @@ bool NotebookTab::isSelected() const
     return this->selected_;
 }
 
-void NotebookTab::removeNewMessageSource(const ChannelPtr &source)
+void NotebookTab::removeNewMessageSource(
+    const HighlightSources::ChannelViewProxy &source)
 {
     this->highlightSources_.newMessageSource.erase(source);
 }
 
-void NotebookTab::removeHighlightedSource(const ChannelPtr &source)
+void NotebookTab::removeHighlightedSource(
+    const HighlightSources::ChannelViewProxy &source)
 {
     this->highlightSources_.highlightedSource.erase(source);
 }
@@ -328,10 +351,13 @@ void NotebookTab::removeHighlightStateChangeSources(
     }
 }
 
-void NotebookTab::newHighlightSourceAdded(const ChannelPtr &source)
+void NotebookTab::newHighlightSourceAdded(const ChannelView &channelViewSource)
 {
-    this->removeHighlightedSource(source);
-    this->removeNewMessageSource(source);
+    auto channelViewProxy =
+        HighlightSources::ChannelViewProxy{&channelViewSource};
+    auto sourceChannel = channelViewSource.underlyingChannel();
+    this->removeHighlightedSource(channelViewProxy);
+    this->removeNewMessageSource(channelViewProxy);
     this->updateHighlightStateDueSourcesChange();
 
     auto *splitNotebook = dynamic_cast<SplitNotebook *>(this->notebook_);
@@ -346,8 +372,8 @@ void NotebookTab::newHighlightSourceAdded(const ChannelPtr &source)
                 auto *tab = splitContainer->getTab();
                 if (tab && tab != this)
                 {
-                    tab->removeHighlightedSource(source);
-                    tab->removeNewMessageSource(source);
+                    tab->removeHighlightedSource(channelViewProxy);
+                    tab->removeNewMessageSource(channelViewProxy);
                     tab->updateHighlightStateDueSourcesChange();
                 }
             }
@@ -541,25 +567,34 @@ void NotebookTab::updateHighlightState(HighlightState newHighlightStyle,
         return;
     }
 
+    // message is highlighting unvisible tab
+
     auto underlyingChannel = channelViewSource.underlyingChannel();
+    auto newFilters = channelViewSource.getFilterIds();
+    auto channelViewProxy =
+        HighlightSources::ChannelViewProxy{&channelViewSource};
+
+    // the unvisible tab should unhighlight other tabs iff
+    // the other tab's filters are more generic therefore
+    // the other tab's filter set is subset of the unvisible tab
 
     switch (newHighlightStyle)
     {
         case HighlightState::Highlighted: {
             if (!this->highlightSources_.highlightedSource.contains(
-                    underlyingChannel))
+                    channelViewProxy))
             {
                 this->highlightSources_.highlightedSource.insert(
-                    underlyingChannel);
+                    channelViewProxy);
             }
             break;
         }
         case HighlightState::NewMessage: {
             if (!this->highlightSources_.newMessageSource.contains(
-                    underlyingChannel))
+                    channelViewProxy))
             {
                 this->highlightSources_.newMessageSource.insert(
-                    underlyingChannel);
+                    channelViewProxy);
             }
             break;
         }
@@ -608,6 +643,10 @@ bool NotebookTab::shouldMessageHighlight(const ChannelView &channelViewSource,
                 visibleSplit->getChannelView().shouldIncludeMessage(message) &&
                 isSubset(filterIdsSource, filterIdsSplit))
             {
+                // all filters in unvisible source are found in visible split
+                // therefore the unvisible split is more generic than the visible one
+                // and the visible one is showing current message
+                // so no highlight of unvisible tab needed
                 return false;
             }
         }
