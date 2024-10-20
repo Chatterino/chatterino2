@@ -25,7 +25,7 @@
 #include <optional>
 #include <unordered_map>
 
-class TestMessageBuilderP;
+class TestIrcMessageHandlerP;
 
 namespace chatterino {
 
@@ -64,22 +64,55 @@ const int MAX_QUEUED_REDEMPTIONS = 16;
 class TwitchChannel final : public Channel, public ChannelChatters
 {
 public:
+    /**
+     * @lua@class StreamStatus
+     */
     struct StreamStatus {
+        /**
+         * @lua@field live boolean
+         */
         bool live = false;
         bool rerun = false;
+        /**
+         * @lua@field viewer_count number
+         */
         unsigned viewerCount = 0;
+        /**
+         * @lua@field title string Stream title or last stream title
+         */
         QString title;
+        /**
+         * @lua@field game_name string
+         */
         QString game;
+        /**
+         * @lua@field game_id string
+         */
         QString gameId;
         QString uptime;
+        /**
+         * @lua@field uptime number Seconds since the stream started.
+         */
         int uptimeSeconds = 0;
         QString streamType;
         QString streamId;
     };
 
+    /**
+     * @lua@class RoomModes
+     */
     struct RoomModes {
+        /**
+         * @lua@field subscriber_only boolean
+         */
         bool submode = false;
+        /**
+         * @lua@field unique_chat boolean You might know this as r9kbeta or robot9000.
+         */
         bool r9k = false;
+        /**
+         * @lua@field emotes_only boolean Whether or not text is allowed in messages. Note that "emotes" here only means Twitch emotes, not Unicode emoji, nor 3rd party text-based emotes
+         */
         bool emoteOnly = false;
 
         /**
@@ -88,6 +121,8 @@ public:
          * Special cases:
          * -1 = follower mode off
          *  0 = follower mode on, no time requirement
+         *
+         * @lua@field follower_only number? Time in minutes you need to follow to chat or nil.
          **/
         int followerOnly = -1;
 
@@ -95,6 +130,8 @@ public:
          * @brief Number of seconds required to wait before typing emotes
          *
          * 0 = slow mode off
+         *
+         * @lua@field slow_mode number? Time in seconds you need to wait before sending messages or nil.
          **/
         int slowMode = 0;
     };
@@ -464,7 +501,7 @@ private:
     friend class MessageBuilder;
     friend class IrcMessageHandler;
     friend class Commands_E2E_Test;
-    friend class ::TestMessageBuilderP;
+    friend class ::TestIrcMessageHandlerP;
 };
 
 }  // namespace chatterino

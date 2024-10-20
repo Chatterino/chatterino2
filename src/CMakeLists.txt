@@ -225,24 +225,28 @@ set(SOURCE_FILES
         controllers/pings/MutedChannelModel.cpp
         controllers/pings/MutedChannelModel.hpp
 
+
         controllers/plugins/api/ChannelRef.cpp
         controllers/plugins/api/ChannelRef.hpp
-        controllers/plugins/api/IOWrapper.cpp
-        controllers/plugins/api/IOWrapper.hpp
+        controllers/plugins/api/EventType.hpp
         controllers/plugins/api/HTTPRequest.cpp
         controllers/plugins/api/HTTPRequest.hpp
         controllers/plugins/api/HTTPResponse.cpp
         controllers/plugins/api/HTTPResponse.hpp
+        controllers/plugins/api/IOWrapper.cpp
+        controllers/plugins/api/IOWrapper.hpp
         controllers/plugins/LuaAPI.cpp
         controllers/plugins/LuaAPI.hpp
-        controllers/plugins/PluginPermission.cpp
-        controllers/plugins/PluginPermission.hpp
-        controllers/plugins/Plugin.cpp
-        controllers/plugins/Plugin.hpp
-        controllers/plugins/PluginController.hpp
-        controllers/plugins/PluginController.cpp
         controllers/plugins/LuaUtilities.cpp
         controllers/plugins/LuaUtilities.hpp
+        controllers/plugins/PluginController.cpp
+        controllers/plugins/PluginController.hpp
+        controllers/plugins/Plugin.cpp
+        controllers/plugins/Plugin.hpp
+        controllers/plugins/PluginPermission.cpp
+        controllers/plugins/PluginPermission.hpp
+        controllers/plugins/SolTypes.cpp
+        controllers/plugins/SolTypes.hpp
 
         controllers/sound/ISoundController.hpp
         controllers/sound/MiniaudioBackend.cpp
@@ -409,6 +413,8 @@ set(SOURCE_FILES
         providers/twitch/TwitchEmotes.hpp
         providers/twitch/TwitchHelpers.cpp
         providers/twitch/TwitchHelpers.hpp
+        providers/twitch/TwitchIrc.cpp
+        providers/twitch/TwitchIrc.hpp
         providers/twitch/TwitchIrcServer.cpp
         providers/twitch/TwitchIrcServer.hpp
         providers/twitch/TwitchUser.cpp
@@ -789,7 +795,7 @@ target_link_libraries(${LIBRARY_PROJECT}
         $<$<BOOL:${WIN32}>:Wtsapi32>
         )
 if (CHATTERINO_PLUGINS)
-    target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua)
+    target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua sol2::sol2)
 endif()
 
 if (BUILD_WITH_QTKEYCHAIN)

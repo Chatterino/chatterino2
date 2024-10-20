@@ -4,6 +4,7 @@
 #include "common/FlagsEnum.hpp"
 #include "common/Literals.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/BaseWidget.hpp"
@@ -166,6 +167,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel,
 
     this->addShortcuts();
     this->triggerFirstActivation();
+    getApp()->getEmotes()->getGIFTimer().registerOpenOverlayWindow();
 }
 
 OverlayWindow::~OverlayWindow()
@@ -173,6 +175,7 @@ OverlayWindow::~OverlayWindow()
 #ifdef Q_OS_WIN
     ::DestroyCursor(this->sizeAllCursor_);
 #endif
+    getApp()->getEmotes()->getGIFTimer().unregisterOpenOverlayWindow();
 }
 
 void OverlayWindow::applyTheme()

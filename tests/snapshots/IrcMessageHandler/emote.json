@@ -1,5 +1,5 @@
 {
-    "input": "@badge-info=;badges=no_audio/1;color=#DAA520;display-name=Mm2PL;emote-only=1;emotes=25:04;first-msg=0;flags=;id=7be87072-bf24-4fa3-b3df-0ea6fa5f1474;mod=0;returning-chatter=0;room-id=11148817;subscriber=0;tmi-sent-ts=1662201102276;turbo=0;user-id=117691339;user-type= :mm2pl!mm2pl@mm2pl.tmi.twitch.tv PRIVMSG #pajlada :Kappa",
+    "input": "@badge-info=;badges=no_audio/1;color=#DAA520;display-name=Mm2PL;emote-only=1;emotes=1902:0-4;first-msg=0;flags=;id=9b1c3cb9-7817-47ea-add1-f9d4a9b4f846;mod=0;returning-chatter=0;room-id=11148817;subscriber=0;tmi-sent-ts=1662201095690;turbo=0;user-id=117691339;user-type= :mm2pl!mm2pl@mm2pl.tmi.twitch.tv PRIVMSG #pajlada :Keepo",
     "output": [
         {
             "badgeInfos": {
@@ -48,7 +48,7 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "10:31:42",
+                    "time": "10:31:35",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
@@ -99,15 +99,15 @@
                 },
                 {
                     "emote": {
-                        "author": "Chatterino",
-                        "homePage": "https://chatterino.com/Kappa",
                         "images": {
-                            "1x": "https://chatterino.com/Kappa.png"
+                            "1x": "https://static-cdn.jtvnw.net/emoticons/v2/1902/default/dark/1.0",
+                            "2x": "https://static-cdn.jtvnw.net/emoticons/v2/1902/default/dark/2.0",
+                            "3x": "https://static-cdn.jtvnw.net/emoticons/v2/1902/default/dark/3.0"
                         },
-                        "name": "Kappa",
-                        "tooltip": "Kappa Tooltip"
+                        "name": "Keepo",
+                        "tooltip": "Keepo<br>Twitch Emote"
                     },
-                    "flags": "BttvEmoteImage|BttvEmoteText",
+                    "flags": "TwitchEmoteImage|TwitchEmoteText",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -124,10 +124,10 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "Kappa"
+                            "Keepo"
                         ]
                     },
-                    "tooltip": "Kappa Tooltip",
+                    "tooltip": "Keepo<br>Twitch Emote",
                     "trailingSpace": true,
                     "type": "EmoteElement"
                 },
@@ -136,7 +136,7 @@
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",
-                        "value": "7be87072-bf24-4fa3-b3df-0ea6fa5f1474"
+                        "value": "9b1c3cb9-7817-47ea-add1-f9d4a9b4f846"
                     },
                     "padding": 2,
                     "tooltip": "",
@@ -146,14 +146,14 @@
                 }
             ],
             "flags": "Collapsed",
-            "id": "7be87072-bf24-4fa3-b3df-0ea6fa5f1474",
+            "id": "9b1c3cb9-7817-47ea-add1-f9d4a9b4f846",
             "localizedName": "",
             "loginName": "mm2pl",
-            "messageText": "Kappa",
-            "searchText": "mm2pl  mm2pl: Kappa ",
-            "serverReceivedTime": "2022-09-03T10:31:42Z",
+            "messageText": "Keepo",
+            "searchText": "mm2pl  mm2pl: Keepo ",
+            "serverReceivedTime": "2022-09-03T10:31:35Z",
             "timeoutUser": "",
-            "usernameColor": "#ff000000"
+            "usernameColor": "#ffdaa521"
         }
     ]
 }
