@@ -2601,8 +2601,6 @@ void MessageBuilder::appendUsername(const QVariantMap &tags,
 Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
                                        const EmoteName &name)
 {
-    auto *app = getApp();
-
     auto [emote, flags, zeroWidth] = parseEmote(twitchChannel, name);
 
     if (!emote)
