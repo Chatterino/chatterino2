@@ -239,13 +239,13 @@ public:
     ///                         content = "there"
     ///                         messageOffset_ = 4
     ///                      The index 6 would resolve to 6 - 4 = 2 => 'e'
-    /// @param thread The reply thred this message is part of. If there's no
+    /// @param thread The reply thread this message is part of. If there's no
     ///               thread, this is an empty `shared_ptr`.
     /// @param parent The direct parent this message is replying to. This does
     ///               not need to be the `thread`s root. If this message isn't
     ///               replying to anything, this is an empty `shared_ptr`.
     ///
-    /// @returns The built messagae and a highlight result.
+    /// @returns The built message and a highlight result.
     static std::pair<MessagePtrMut, HighlightAlert> makeIrcMessage(
         Channel *channel, const Communi::IrcMessage *ircMessage,
         const MessageParseArgs &args, QString content,
