@@ -512,13 +512,16 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
 
             auto [built, highlight] = MessageBuilder::makeIrcMessage(
                 channel, message, args, content, 0);
-            built->flags.set(MessageFlag::Subscription);
-            built->flags.unset(MessageFlag::Highlighted);
-            if (mirrored)
+            if (built)
             {
-                built->flags.set(MessageFlag::SharedMessage);
+                built->flags.set(MessageFlag::Subscription);
+                built->flags.unset(MessageFlag::Highlighted);
+                if (mirrored)
+                {
+                    built->flags.set(MessageFlag::SharedMessage);
+                }
+                builtMessages.emplace_back(std::move(built));
             }
-            builtMessages.emplace_back(std::move(built));
         }
     }
 
