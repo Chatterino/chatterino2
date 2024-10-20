@@ -152,12 +152,11 @@ void HTTPRequest::execute(sol::this_state L)
                 // this could happen if the plugin was deleted
                 return;
             }
-            auto strong = hack.lock();
             auto *pl = getApp()->getPlugins()->getPluginByStatePtr(L);
             for (auto it = pl->httpRequests.begin();
                  it < pl->httpRequests.end(); it++)
             {
-                if (*it == strong)
+                if (*it == self)
                 {
                     pl->httpRequests.erase(it);
                     break;
