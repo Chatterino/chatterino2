@@ -17,6 +17,7 @@
 #include "widgets/splits/SplitContainer.hpp"
 
 #include <boost/bind/bind.hpp>
+#include <boost/container_hash/hash.hpp>
 #include <QAbstractAnimation>
 #include <QApplication>
 #include <QDebug>
