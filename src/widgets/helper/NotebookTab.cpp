@@ -631,12 +631,9 @@ bool NotebookTab::shouldMessageHighlight(const ChannelView &channelViewSource,
             if (channelViewSource.underlyingChannel() ==
                     visibleSplit->getChannel() &&
                 visibleSplit->getChannelView().shouldIncludeMessage(message) &&
-                channelViewSource.shouldIncludeMessage(message))
+                channelViewSource.shouldIncludeMessage(message) &&
+                channelViewSource.getFilterIds().empty())
             {
-                // all filters in unvisible source are found in visible split
-                // therefore the unvisible split is more generic than the visible one
-                // and the visible one is showing current message
-                // so no highlight of unvisible tab needed
                 return false;
             }
         }
