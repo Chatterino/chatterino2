@@ -380,6 +380,97 @@ EmotePtr makeAutoModBadge()
         Url{"https://dashboard.twitch.tv/settings/moderation/automod"}});
 }
 
+std::tuple<std::optional<EmotePtr>, MessageElementFlags, bool> parseEmote(
+    TwitchChannel *twitchChannel, const EmoteName &name)
+{
+    // Emote order:
+    //  - FrankerFaceZ Channel
+    //  - BetterTTV Channel
+    //  - 7TV Channel
+    //  - FrankerFaceZ Global
+    //  - BetterTTV Global
+    //  - 7TV Global
+
+    const auto *globalFfzEmotes = getApp()->getFfzEmotes();
+    const auto *globalBttvEmotes = getApp()->getBttvEmotes();
+    const auto *globalSeventvEmotes = getApp()->getSeventvEmotes();
+
+    std::optional<EmotePtr> emote{};
+
+    if (twitchChannel != nullptr)
+    {
+        // Check for channel emotes
+
+        emote = twitchChannel->ffzEmote(name);
+        if (emote)
+        {
+            return {
+                emote,
+                MessageElementFlag::FfzEmote,
+                false,
+            };
+        }
+
+        emote = twitchChannel->bttvEmote(name);
+        if (emote)
+        {
+            return {
+                emote,
+                MessageElementFlag::BttvEmote,
+                false,
+            };
+        }
+
+        emote = twitchChannel->seventvEmote(name);
+        if (emote)
+        {
+            return {
+                emote,
+                MessageElementFlag::SevenTVEmote,
+                emote.value()->zeroWidth,
+            };
+        }
+    }
+
+    // Check for global emotes
+
+    emote = globalFfzEmotes->emote(name);
+    if (emote)
+    {
+        return {
+            emote,
+            MessageElementFlag::FfzEmote,
+            false,
+        };
+    }
+
+    emote = globalBttvEmotes->emote(name);
+    if (emote)
+    {
+        return {
+            emote,
+            MessageElementFlag::BttvEmote,
+            zeroWidthEmotes.contains(name.string),
+        };
+    }
+
+    emote = globalSeventvEmotes->globalEmote(name);
+    if (emote)
+    {
+        return {
+            emote,
+            MessageElementFlag::SevenTVEmote,
+            emote.value()->zeroWidth,
+        };
+    }
+
+    return {
+        {},
+        {},
+        false,
+    };
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -2512,70 +2603,12 @@ Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
 {
     auto *app = getApp();
 
-    auto flags = MessageElementFlags();
-    auto emote = std::optional<EmotePtr>{};
-
-    // Emote order:
-    //  - FrankerFaceZ Channel
-    //  - BetterTTV Channel
-    //  - 7TV Channel
-    //  - FrankerFaceZ Global
-    //  - BetterTTV Global
-    //  - 7TV Global
-    [&] {
-        if (twitchChannel)
-        {
-            emote = twitchChannel->ffzEmote(name);
-            if (emote)
-            {
-                flags = MessageElementFlag::FfzEmote;
-                return;
-            }
-
-            emote = twitchChannel->bttvEmote(name);
-            if (emote)
-            {
-                flags = MessageElementFlag::BttvEmote;
-                return;
-            }
-
-            emote = twitchChannel->seventvEmote(name);
-            if (emote)
-            {
-                flags = MessageElementFlag::SevenTVEmote;
-                return;
-            }
-        }
-
-        // check for global emotes
-        emote = app->getFfzEmotes()->emote(name);
-        if (emote)
-        {
-            flags = MessageElementFlag::FfzEmote;
-            return;
-        }
-
-        emote = app->getBttvEmotes()->emote(name);
-        if (emote)
-        {
-            flags = MessageElementFlag::BttvEmote;
-            return;
-        }
-
-        emote = app->getSeventvEmotes()->globalEmote(name);
-        if (emote)
-        {
-            flags = MessageElementFlag::SevenTVEmote;
-            return;
-        }
-    }();
+    auto [emote, flags, zeroWidth] = parseEmote(twitchChannel, name);
 
     if (!emote)
     {
         return Failure;
     }
-
-    bool zeroWidth = emote.value()->zeroWidth;
 
     if (zeroWidth && getSettings()->enableZeroWidthEmotes && !this->isEmpty())
     {
