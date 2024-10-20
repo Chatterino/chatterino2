@@ -44,3 +44,6 @@
 [submodule "lib/expected-lite"]
 	path = lib/expected-lite
 	url = https://github.com/martinmoene/expected-lite
+[submodule "lib/sol2"]
+	path = lib/sol2
+	url = https://github.com/ThePhD/sol2.git
