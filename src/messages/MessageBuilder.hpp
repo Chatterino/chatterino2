@@ -14,8 +14,6 @@
 
 #include <ctime>
 #include <memory>
-#include <optional>
-#include <tuple>
 #include <unordered_map>
 #include <utility>
 
@@ -31,6 +29,7 @@ struct AutomodUserAction;
 struct AutomodInfoAction;
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
+using MessagePtrMut = std::shared_ptr<Message>;
 
 class MessageElement;
 class TextElement;
@@ -68,6 +67,7 @@ struct LiveUpdatesUpdateEmoteSetMessageTag {
 struct ImageUploaderResultTag {
 };
 
+// NOLINTBEGIN(readability-identifier-naming)
 const SystemMessageTag systemMessage{};
 const RaidEntryMessageTag raidEntryMessage{};
 const TimeoutMessageTag timeoutMessage{};
@@ -79,6 +79,7 @@ const LiveUpdatesUpdateEmoteSetMessageTag liveUpdatesUpdateEmoteSetMessage{};
 // This signifies that you want to construct a message containing the result of
 // a successful image upload.
 const ImageUploaderResultTag imageUploaderResultMessage{};
+// NOLINTEND(readability-identifier-naming)
 
 MessagePtr makeSystemMessage(const QString &text);
 MessagePtr makeSystemMessage(const QString &text, const QTime &time);
@@ -90,25 +91,21 @@ struct MessageParseArgs {
     bool trimSubscriberUsername = false;
     bool isStaffOrBroadcaster = false;
     bool isSubscriptionMessage = false;
+    bool allowIgnore = true;
+    bool isAction = false;
     QString channelPointRewardId = "";
 };
 
+struct HighlightAlert {
+    QUrl customSound;
+    bool playSound = false;
+    bool windowAlert = false;
+};
 class MessageBuilder
 {
 public:
     /// Build a message without a base IRC message.
     MessageBuilder();
-
-    /// Build a message based on an incoming IRC PRIVMSG
-    explicit MessageBuilder(Channel *_channel,
-                            const Communi::IrcPrivateMessage *_ircMessage,
-                            const MessageParseArgs &_args);
-
-    /// Build a message based on an incoming IRC message (e.g. notice)
-    explicit MessageBuilder(Channel *_channel,
-                            const Communi::IrcMessage *_ircMessage,
-                            const MessageParseArgs &_args, QString content,
-                            bool isAction);
 
     MessageBuilder(SystemMessageTag, const QString &text,
                    const QTime &time = QTime::currentTime());
@@ -157,17 +154,10 @@ public:
 
     ~MessageBuilder() = default;
 
-    QString userName;
-
-    /// The Twitch Channel the message was received in
-    TwitchChannel *twitchChannel = nullptr;
-    /// The Twitch Channel the message was sent in, according to the Shared Chat feature
-    TwitchChannel *sourceChannel = nullptr;
-
     Message *operator->();
     Message &message();
-    MessagePtr release();
-    std::weak_ptr<Message> weakOf();
+    MessagePtrMut release();
+    std::weak_ptr<const Message> weakOf();
 
     void append(std::unique_ptr<MessageElement> element);
     void addLink(const linkparser::Parsed &parsedLink, const QString &source);
@@ -184,14 +174,8 @@ public:
         return pointer;
     }
 
-    [[nodiscard]] bool isIgnored() const;
-    bool isIgnoredReply() const;
-    void triggerHighlights();
-    MessagePtr build();
-
-    void setThread(std::shared_ptr<MessageThread> thread);
-    void setParent(MessagePtr parent);
-    void setMessageOffset(int offset);
+    static void triggerHighlights(const Channel *channel,
+                                  const HighlightAlert &alert);
 
     void appendChannelPointRewardMessage(const ChannelPointReward &reward,
                                          bool isMod, bool isBroadcaster);
@@ -231,15 +215,62 @@ public:
     static MessagePtr makeLowTrustUpdateMessage(
         const PubSubLowTrustUsersMessage &action);
 
-protected:
-    void addTextOrEmoji(EmotePtr emote);
-    void addTextOrEmoji(const QString &string_);
+    /// @brief Builds a message out of an `ircMessage`.
+    ///
+    /// Building a message won't cause highlights to be triggered. They will
+    /// only be parsed. To trigger highlights (play sound etc.), use
+    /// triggerHighlights().
+    ///
+    /// @param channel The channel this message was sent to. Must not be
+    ///                `nullptr`.
+    /// @param ircMessage The original message. This can be any message
+    ///                   (PRIVMSG, USERNOTICE, etc.). Its content is not
+    ///                   accessed through this parameter but through `content`,
+    ///                   as the content might be inside a tag (e.g. gifts in a
+    ///                   USERNOTICE).
+    /// @param args Arguments from parsing a chat message.
+    /// @param content The message text. This isn't always the entire text. In
+    ///                replies, the leading mention can be cut off.
+    ///                See `messageOffset`.
+    /// @param messageOffset Starting offset to be used on index-based
+    ///                      operations on `content` such as parsing emotes.
+    ///                      For example:
+    ///                         ircMessage = "@hi there"
+    ///                         content = "there"
+    ///                         messageOffset_ = 4
+    ///                      The index 6 would resolve to 6 - 4 = 2 => 'e'
+    /// @param thread The reply thread this message is part of. If there's no
+    ///               thread, this is an empty `shared_ptr`.
+    /// @param parent The direct parent this message is replying to. This does
+    ///               not need to be the `thread`s root. If this message isn't
+    ///               replying to anything, this is an empty `shared_ptr`.
+    ///
+    /// @returns The built message and a highlight result. If the message is
+    ///          ignored (e.g. from a blocked user), then the returned pointer
+    ///          will be en empty `shared_ptr`.
+    static std::pair<MessagePtrMut, HighlightAlert> makeIrcMessage(
+        Channel *channel, const Communi::IrcMessage *ircMessage,
+        const MessageParseArgs &args, QString content,
+        QString::size_type messageOffset,
+        const std::shared_ptr<MessageThread> &thread = {},
+        const MessagePtr &parent = {});
+
+private:
+    struct TextState {
+        TwitchChannel *twitchChannel = nullptr;
+        bool hasBits = false;
+        bool bitsStacked = false;
+        int bitsLeft = 0;
+    };
+    void addEmoji(const EmotePtr &emote);
+    void addTextOrEmote(TextState &state, QString string);
+
+    Outcome tryAppendCheermote(TextState &state, const QString &string);
+    Outcome tryAppendEmote(TwitchChannel *twitchChannel, const EmoteName &name);
 
     bool isEmpty() const;
     MessageElement &back();
     std::unique_ptr<MessageElement> releaseBack();
-
-    MessageColor textColor_ = MessageColor::Text;
 
     // Helper method that emplaces some text stylized as system text
     // and then appends that text to the QString parameter "toUpdate".
@@ -247,80 +278,61 @@ protected:
     TextElement *emplaceSystemTextAndUpdate(const QString &text,
                                             QString &toUpdate);
 
-    std::shared_ptr<Message> message_;
-
     void parse();
-    void parseUsernameColor();
-    void parseUsername();
-    void parseMessageID();
-    void parseRoomID();
+    void parseUsernameColor(const QVariantMap &tags, const QString &userID);
+    void parseUsername(const Communi::IrcMessage *ircMessage,
+                       TwitchChannel *twitchChannel,
+                       bool trimSubscriberUsername);
+    void parseMessageID(const QVariantMap &tags);
+
+    /// Parses the room-ID this message was received in
+    ///
+    /// @returns The room-ID
+    static QString parseRoomID(const QVariantMap &tags,
+                               TwitchChannel *twitchChannel);
+
+    /// Parses the shared-chat information from this message.
+    ///
+    /// @param tags The tags of the received message
+    /// @param twitchChannel The channel this message was received in
+    /// @returns The source channel - the channel this message originated from.
+    ///          If there's no channel currently open, @a twitchChannel is
+    ///          returned.
+    TwitchChannel *parseSharedChatInfo(const QVariantMap &tags,
+                                       TwitchChannel *twitchChannel);
+
     // Parse & build thread information into the message
     // Will read information from thread_ or from IRC tags
-    void parseThread();
+    void parseThread(const QString &messageContent, const QVariantMap &tags,
+                     const Channel *channel,
+                     const std::shared_ptr<MessageThread> &thread,
+                     const MessagePtr &parent);
     // parseHighlights only updates the visual state of the message, but leaves the playing of alerts and sounds to the triggerHighlights function
-    void parseHighlights();
-    void appendChannelName();
-    void appendUsername();
+    HighlightAlert parseHighlights(const QVariantMap &tags,
+                                   const QString &originalMessage,
+                                   const MessageParseArgs &args);
 
-    /// Return the Twitch Channel this message originated from
-    ///
-    /// Useful to handle messages from the "Shared Chat" feature
-    ///
-    /// Can return nullptr
-    const TwitchChannel *getSourceChannel() const;
-
-    std::tuple<std::optional<EmotePtr>, MessageElementFlags, bool> parseEmote(
-        const EmoteName &name) const;
-    Outcome tryAppendEmote(const EmoteName &name);
+    void appendChannelName(const Channel *channel);
+    void appendUsername(const QVariantMap &tags, const MessageParseArgs &args);
 
     void addWords(const QStringList &words,
-                  const std::vector<TwitchEmoteOccurrence> &twitchEmotes);
+                  const std::vector<TwitchEmoteOccurrence> &twitchEmotes,
+                  TextState &state);
 
-    void appendTwitchBadges();
-    void appendChatterinoBadges();
-    void appendFfzBadges();
-    void appendSeventvBadges();
-    Outcome tryParseCheermote(const QString &string);
+    void appendTwitchBadges(const QVariantMap &tags,
+                            TwitchChannel *twitchChannel);
+    void appendChatterinoBadges(const QString &userID);
+    void appendFfzBadges(TwitchChannel *twitchChannel, const QString &userID);
+    void appendSeventvBadges(const QString &userID);
 
-    bool shouldAddModerationElements() const;
+    [[nodiscard]] static bool isIgnored(const QString &originalMessage,
+                                        const QString &userID,
+                                        const Channel *channel);
 
-    QString roomID_;
-    bool hasBits_ = false;
-    QString bits;
-    int bitsLeft{};
-    bool bitsStacked = false;
-    bool historicalMessage_ = false;
-    std::shared_ptr<MessageThread> thread_;
-    MessagePtr parent_;
-
-    /**
-     * Starting offset to be used on index-based operations on `originalMessage_`.
-     *
-     * For example:
-     * originalMessage_ = "there"
-     * messageOffset_ = 4
-     * (the irc message is "hey there")
-     *
-     * then the index 6 would resolve to 6 - 4 = 2 => 'e'
-     */
-    int messageOffset_ = 0;
-
-    QString userId_;
-    bool senderIsBroadcaster{};
-
-    Channel *channel = nullptr;
-    const Communi::IrcMessage *ircMessage;
-    MessageParseArgs args;
-    const QVariantMap tags;
-    QString originalMessage_;
-
-    const bool action_{};
+    std::shared_ptr<Message> message_;
+    MessageColor textColor_ = MessageColor::Text;
 
     QColor usernameColor_ = {153, 153, 153};
-
-    bool highlightAlert_ = false;
-    bool highlightSound_ = false;
-    std::optional<QUrl> highlightSoundCustomUrl_{};
 };
 
 }  // namespace chatterino

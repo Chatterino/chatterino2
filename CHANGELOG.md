@@ -111,6 +111,7 @@
 - Dev: Move plugins to Sol2. (#5622)
 - Dev: Refactored static `MessageBuilder` helpers to standalone functions. (#5652)
 - Dev: Decoupled reply parsing from `MessageBuilder`. (#5660)
+- Dev: Refactored IRC message building. (#5663)
 
 ## 2.5.1
 

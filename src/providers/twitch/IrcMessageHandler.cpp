@@ -508,15 +508,20 @@ std::vector<MessagePtr> parseUserNoticeMessage(Channel *channel,
         {
             MessageParseArgs args;
             args.trimSubscriberUsername = true;
+            args.allowIgnore = false;
 
-            MessageBuilder builder(channel, message, args, content, false);
-            builder->flags.set(MessageFlag::Subscription);
-            builder->flags.unset(MessageFlag::Highlighted);
-            if (mirrored)
+            auto [built, highlight] = MessageBuilder::makeIrcMessage(
+                channel, message, args, content, 0);
+            if (built)
             {
-                builder->flags.set(MessageFlag::SharedMessage);
+                built->flags.set(MessageFlag::Subscription);
+                built->flags.unset(MessageFlag::Highlighted);
+                if (mirrored)
+                {
+                    built->flags.set(MessageFlag::SharedMessage);
+                }
+                builtMessages.emplace_back(std::move(built));
             }
-            builtMessages.emplace_back(builder.build());
         }
     }
 
@@ -661,12 +666,13 @@ std::vector<MessagePtr> parsePrivMessage(Channel *channel,
 
     std::vector<MessagePtr> builtMessages;
     MessageParseArgs args;
-    MessageBuilder builder(channel, message, args, message->content(),
-                           message->isAction());
-    if (!builder.isIgnored())
+    args.isAction = message->isAction();
+    auto [built, alert] = MessageBuilder::makeIrcMessage(channel, message, args,
+                                                         message->content(), 0);
+    if (built)
     {
-        builtMessages.emplace_back(builder.build());
-        builder.triggerHighlights();
+        builtMessages.emplace_back(std::move(built));
+        MessageBuilder::triggerHighlights(channel, alert);
     }
 
     return builtMessages;
@@ -709,22 +715,21 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
         {
             args.channelPointRewardId = it.value().toString();
         }
-        MessageBuilder builder(channel, message, args, content,
-                               privMsg->isAction());
-        builder.setMessageOffset(messageOffset);
+        args.isAction = privMsg->isAction();
 
         auto replyCtx = getReplyContext(tc, message, otherLoaded);
-        builder.setThread(std::move(replyCtx.thread));
-        builder.setParent(std::move(replyCtx.parent));
-        if (replyCtx.highlight)
-        {
-            builder.message().flags.set(MessageFlag::SubscribedThread);
-        }
+        auto [built, alert] = MessageBuilder::makeIrcMessage(
+            channel, message, args, content, messageOffset, replyCtx.thread,
+            replyCtx.parent);
 
-        if (!builder.isIgnored())
+        if (built)
         {
-            builtMessages.emplace_back(builder.build());
-            builder.triggerHighlights();
+            if (replyCtx.highlight)
+            {
+                built->flags.set(MessageFlag::SubscribedThread);
+            }
+            builtMessages.emplace_back(built);
+            MessageBuilder::triggerHighlights(channel, alert);
         }
 
         if (message->tags().contains(u"pinned-chat-paid-amount"_s))
@@ -1016,20 +1021,18 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *ircMessage)
 
     auto *c = getApp()->getTwitch()->getWhispersChannel().get();
 
-    MessageBuilder builder(c, ircMessage, args,
-                           unescapeZeroWidthJoiner(ircMessage->parameter(1)),
-                           false);
-
-    if (builder.isIgnored())
+    auto [message, alert] = MessageBuilder::makeIrcMessage(
+        c, ircMessage, args, unescapeZeroWidthJoiner(ircMessage->parameter(1)),
+        0);
+    if (!message)
     {
         return;
     }
 
-    builder->flags.set(MessageFlag::Whisper);
-    MessagePtr message = builder.build();
-    builder.triggerHighlights();
+    message->flags.set(MessageFlag::Whisper);
+    MessageBuilder::triggerHighlights(c, alert);
 
-    getApp()->getTwitch()->setLastUserThatWhisperedMe(builder.userName);
+    getApp()->getTwitch()->setLastUserThatWhisperedMe(message->loginName);
 
     if (message->flags.has(MessageFlag::ShowInMentions))
     {
@@ -1504,6 +1507,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
     {
         args.isStaffOrBroadcaster = true;
     }
+    args.isAction = isAction;
 
     auto *channel = dynamic_cast<TwitchChannel *>(chan.get());
 
@@ -1605,24 +1609,22 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
         }
     }
 
-    MessageBuilder builder(channel, message, args, content, isAction);
-    builder.setMessageOffset(messageOffset);
+    args.allowIgnore = !isSub;
+    auto [msg, alert] = MessageBuilder::makeIrcMessage(
+        channel, message, args, content, messageOffset, replyCtx.thread,
+        replyCtx.parent);
 
-    builder.setThread(std::move(replyCtx.thread));
-    builder.setParent(std::move(replyCtx.parent));
-    if (replyCtx.highlight)
-    {
-        builder.message().flags.set(MessageFlag::SubscribedThread);
-    }
-
-    if (isSub || !builder.isIgnored())
+    if (msg)
     {
         if (isSub)
         {
-            builder->flags.set(MessageFlag::Subscription);
-            builder->flags.unset(MessageFlag::Highlighted);
+            msg->flags.set(MessageFlag::Subscription);
+            msg->flags.unset(MessageFlag::Highlighted);
         }
-        auto msg = builder.build();
+        if (replyCtx.highlight)
+        {
+            msg->flags.set(MessageFlag::SubscribedThread);
+        }
 
         IrcMessageHandler::setSimilarityFlags(msg, chan);
 
@@ -1630,7 +1632,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
             (!getSettings()->hideSimilar &&
              getSettings()->shownSimilarTriggerHighlights))
         {
-            builder.triggerHighlights();
+            MessageBuilder::triggerHighlights(channel, alert);
         }
 
         const auto highlighted = msg->flags.has(MessageFlag::Highlighted);
