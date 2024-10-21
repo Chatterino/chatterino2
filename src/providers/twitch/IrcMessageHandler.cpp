@@ -123,47 +123,34 @@ int stripLeadingReplyMention(const QVariantMap &tags, QString &content)
     return 0;
 }
 
-[[nodiscard]] bool shouldHighlightReplyThread(
-    const QVariantMap &tags, const QString &senderLogin,
-    std::shared_ptr<MessageThread> &thread, bool isNew)
+void checkThreadSubscription(const QVariantMap &tags,
+                             const QString &senderLogin,
+                             std::shared_ptr<MessageThread> &thread)
 {
-    const auto &currentLogin =
-        getApp()->getAccounts()->twitch.getCurrent()->getUserName();
-
-    if (thread->subscribed())
+    if (thread->subscribed() || thread->unsubscribed())
     {
-        return true;
-    }
-
-    if (thread->unsubscribed())
-    {
-        return false;
+        return;
     }
 
     if (getSettings()->autoSubToParticipatedThreads)
     {
-        if (isNew)
-        {
-            if (const auto it = tags.find("reply-parent-user-login");
-                it != tags.end())
-            {
-                auto name = it.value().toString();
-                if (name == currentLogin)
-                {
-                    thread->markSubscribed();
-                    return true;  // already marked as participated
-                }
-            }
-        }
+        const auto &currentLogin =
+            getApp()->getAccounts()->twitch.getCurrent()->getUserName();
 
         if (senderLogin == currentLogin)
         {
             thread->markSubscribed();
-            // don't set the highlight here
+        }
+        else if (const auto it = tags.find("reply-parent-user-login");
+                 it != tags.end())
+        {
+            auto name = it.value().toString();
+            if (name == currentLogin)
+            {
+                thread->markSubscribed();
+            }
         }
     }
-
-    return false;
 }
 
 ChannelPtr channelOrEmptyByTarget(const QString &target,
@@ -243,7 +230,6 @@ QMap<QString, QString> parseBadges(const QString &badgesString)
 struct ReplyContext {
     std::shared_ptr<MessageThread> thread;
     MessagePtr parent;
-    bool highlight = false;
 };
 
 [[nodiscard]] ReplyContext getReplyContext(
@@ -265,8 +251,7 @@ struct ReplyContext {
             if (owned)
             {
                 // Thread already exists (has a reply)
-                ctx.highlight = shouldHighlightReplyThread(
-                    tags, message->nick(), owned, false);
+                checkThreadSubscription(tags, message->nick(), owned);
                 ctx.thread = owned;
                 rootThread = owned;
             }
@@ -301,8 +286,7 @@ struct ReplyContext {
             {
                 std::shared_ptr<MessageThread> newThread =
                     std::make_shared<MessageThread>(foundMessage);
-                ctx.highlight = shouldHighlightReplyThread(
-                    tags, message->nick(), newThread, true);
+                checkThreadSubscription(tags, message->nick(), newThread);
 
                 ctx.thread = newThread;
                 rootThread = newThread;
@@ -724,10 +708,6 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessageWithReply(
 
         if (built)
         {
-            if (replyCtx.highlight)
-            {
-                built->flags.set(MessageFlag::SubscribedThread);
-            }
             builtMessages.emplace_back(built);
             MessageBuilder::triggerHighlights(channel, alert);
         }
@@ -1552,8 +1532,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
         {
             // Thread already exists (has a reply)
             auto thread = threadIt->second.lock();
-            replyCtx.highlight = shouldHighlightReplyThread(
-                tags, message->nick(), thread, false);
+            checkThreadSubscription(tags, message->nick(), thread);
             replyCtx.thread = thread;
             rootThread = thread;
         }
@@ -1565,8 +1544,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
             {
                 // Found root reply message
                 auto newThread = std::make_shared<MessageThread>(root);
-                replyCtx.highlight = shouldHighlightReplyThread(
-                    tags, message->nick(), newThread, true);
+                checkThreadSubscription(tags, message->nick(), newThread);
 
                 replyCtx.thread = newThread;
                 rootThread = newThread;
@@ -1620,10 +1598,6 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
         {
             msg->flags.set(MessageFlag::Subscription);
             msg->flags.unset(MessageFlag::Highlighted);
-        }
-        if (replyCtx.highlight)
-        {
-            msg->flags.set(MessageFlag::SubscribedThread);
         }
 
         IrcMessageHandler::setSimilarityFlags(msg, chan);
