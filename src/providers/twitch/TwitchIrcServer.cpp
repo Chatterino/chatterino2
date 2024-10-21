@@ -1147,7 +1147,7 @@ std::optional<QString> TwitchIrcServer::getOrPopulateChannelCache(
         channelId,
         [this](const HelixUser &user) {
             const auto cache = this->channelNamesById_.access();
-            cache->put(user.id, user.login);
+            cache->put(user.id, user.displayName);
         },
         [this, &channelId] {
             const auto cache = this->channelNamesById_.access();

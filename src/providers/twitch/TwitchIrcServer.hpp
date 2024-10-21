@@ -101,7 +101,7 @@ public:
         const QString &channelID) override;
 
     /**
-     * Obtains the channel login name associated with the passed ID,
+     * Obtains the channel display name associated with the passed ID,
      * so that Shared Chat messages can provide source channel context.
      * Can yield an empty string if a helix request is already in-flight.
      */

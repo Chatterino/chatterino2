@@ -2779,7 +2779,7 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
                 MessageElementFlag::BadgeSharedChannel);
             if (!name.isEmpty())
             {
-                badge->setLink({Link::UserInfo, name});
+                badge->setLink({Link::UserInfo, "id:" + sourceId});
             }
         }
     }
