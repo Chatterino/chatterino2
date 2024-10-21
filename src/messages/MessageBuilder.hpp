@@ -258,6 +258,7 @@ public:
 private:
     struct TextState {
         TwitchChannel *twitchChannel = nullptr;
+        QString userID;  // 7TV: used for personal emotes
         bool hasBits = false;
         bool bitsStacked = false;
         int bitsLeft = 0;
@@ -266,7 +267,8 @@ private:
     void addTextOrEmote(TextState &state, QString string);
 
     Outcome tryAppendCheermote(TextState &state, const QString &string);
-    Outcome tryAppendEmote(TwitchChannel *twitchChannel, const EmoteName &name);
+    Outcome tryAppendEmote(TwitchChannel *twitchChannel, const QString &userID,
+                           const EmoteName &name);
 
     bool isEmpty() const;
     MessageElement &back();

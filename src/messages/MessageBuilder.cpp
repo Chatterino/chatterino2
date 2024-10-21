@@ -382,9 +382,10 @@ EmotePtr makeAutoModBadge()
 }
 
 std::tuple<std::optional<EmotePtr>, MessageElementFlags, bool> parseEmote(
-    TwitchChannel *twitchChannel, const EmoteName &name)
+    TwitchChannel *twitchChannel, const QString &userID, const EmoteName &name)
 {
     // Emote order:
+    //  - 7TV Personal Emotes
     //  - FrankerFaceZ Channel
     //  - BetterTTV Channel
     //  - 7TV Channel
@@ -401,8 +402,8 @@ std::tuple<std::optional<EmotePtr>, MessageElementFlags, bool> parseEmote(
     if (twitchChannel != nullptr)
     {
         // Check for channel emotes
-        emote = getApp()->getSeventvPersonalEmotes()->getEmoteForUser(
-            this->userId_, name);
+        emote =
+            getApp()->getSeventvPersonalEmotes()->getEmoteForUser(userID, name);
         if (emote)
         {
             return {
@@ -2033,7 +2034,7 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
 
     builder.appendUsername(tags, args);
 
-    TextState textState{.twitchChannel = twitchChannel};
+    TextState textState{.twitchChannel = twitchChannel, .userID = userID};
     QString bits;
 
     auto iterator = tags.find("bits");
@@ -2130,7 +2131,7 @@ void MessageBuilder::addTextOrEmote(TextState &state, QString string)
     // Emote name: "forsenPuke" - if string in ignoredEmotes
     // Will match emote regardless of source (i.e. bttv, ffz)
     // Emote source + name: "bttv:nyanPls"
-    if (this->tryAppendEmote(state.twitchChannel, {string}))
+    if (this->tryAppendEmote(state.twitchChannel, state.userID, {string}))
     {
         // Successfully appended an emote
         return;
@@ -2615,9 +2616,10 @@ void MessageBuilder::appendUsername(const QVariantMap &tags,
 }
 
 Outcome MessageBuilder::tryAppendEmote(TwitchChannel *twitchChannel,
+                                       const QString &userID,
                                        const EmoteName &name)
 {
-    auto [emote, flags, zeroWidth] = parseEmote(twitchChannel, name);
+    auto [emote, flags, zeroWidth] = parseEmote(twitchChannel, userID, name);
 
     if (!emote)
     {
