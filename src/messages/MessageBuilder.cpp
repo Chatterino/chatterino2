@@ -383,13 +383,14 @@ EmotePtr makeAutoModBadge()
 
 EmotePtr makeSharedChatBadge(const QString &sourceName)
 {
-    return std::make_shared<Emote>(
-        Emote{EmoteName{},
-              ImageSet{Image::fromResourcePixmap(
-                  getResources().twitch.sharedChat, 0.25)},
-              Tooltip{"Shared Message" +
-                      (sourceName.isEmpty() ? "" : " from " + sourceName)},
-              Url{"https://link.twitch.tv/SharedChatViewer"}});
+    return std::make_shared<Emote>(Emote{
+        .name = EmoteName{},
+        .images = ImageSet{Image::fromResourcePixmap(
+            getResources().twitch.sharedChat, 0.25)},
+        .tooltip = Tooltip{"Shared Message" +
+                           (sourceName.isEmpty() ? "" : " from " + sourceName)},
+        .homePage = Url{"https://link.twitch.tv/SharedChatViewer"},
+    });
 }
 
 std::tuple<std::optional<EmotePtr>, MessageElementFlags, bool> parseEmote(
