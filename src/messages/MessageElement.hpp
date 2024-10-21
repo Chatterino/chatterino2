@@ -66,6 +66,10 @@ enum class MessageElementFlag : int64_t {
     BitsStatic = (1LL << 11),
     BitsAnimated = (1LL << 12),
 
+    // Slot 0: Twitch
+    // - Shared Channel indicator badge
+    BadgeSharedChannel = (1LL << 37),
+
     // Slot 1: Twitch
     // - Staff badge
     // - Admin badge
@@ -119,7 +123,7 @@ enum class MessageElementFlag : int64_t {
 
     Badges = BadgeGlobalAuthority | BadgePredictions | BadgeChannelAuthority |
              BadgeSubscription | BadgeVanity | BadgeChatterino | BadgeSevenTV |
-             BadgeFfz,
+             BadgeFfz | BadgeSharedChannel,
 
     ChannelName = (1LL << 20),
 

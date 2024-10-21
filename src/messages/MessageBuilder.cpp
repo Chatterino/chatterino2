@@ -380,6 +380,17 @@ EmotePtr makeAutoModBadge()
         Url{"https://dashboard.twitch.tv/settings/moderation/automod"}});
 }
 
+EmotePtr makeSharedChatBadge(const QString &sourceName)
+{
+    return std::make_shared<Emote>(
+        Emote{"SharedChat_" + sourceName,
+              ImageSet{Image::fromResourcePixmap(
+                  getResources().twitch.sharedChat, 0.25)},
+              Tooltip{"Shared Message" +
+                      (sourceName.isEmpty() ? "" : " from " + sourceName)},
+              Url{"https://link.twitch.tv/SharedChatViewer"}});
+}
+
 std::tuple<std::optional<EmotePtr>, MessageElementFlags, bool> parseEmote(
     TwitchChannel *twitchChannel, const EmoteName &name)
 {
@@ -2749,6 +2760,27 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
     if (twitchChannel == nullptr)
     {
         return;
+    }
+
+    if (this->message().flags.has(MessageFlag::SharedMessage))
+    {
+        const QString sourceId = tags["source-room-id"].toString();
+        std::optional<QString> sourceName;
+        if (twitchChannel->roomId() == sourceId)
+        {
+            sourceName = twitchChannel->getName();
+        }
+        else
+        {
+            sourceName =
+                getApp()->getTwitch()->getOrPopulateChannelCache(sourceId);
+        }
+
+        if (sourceName.has_value())
+        {
+            this->emplace<BadgeElement>(makeSharedChatBadge(sourceName.value()),
+                                        MessageElementFlag::BadgeSharedChannel);
+        }
     }
 
     auto badgeInfos = parseBadgeInfoTag(tags);

@@ -195,6 +195,7 @@ void WindowManager::updateWordTypeMask()
     flags.set(settings->animateEmotes ? MEF::BitsAnimated : MEF::BitsStatic);
 
     // badges
+    flags.set(MEF::BadgeSharedChannel);
     flags.set(settings->showBadgesGlobalAuthority ? MEF::BadgeGlobalAuthority
                                                   : MEF::None);
     flags.set(settings->showBadgesPredictions ? MEF::BadgePredictions
