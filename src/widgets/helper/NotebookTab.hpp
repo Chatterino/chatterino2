@@ -6,6 +6,7 @@
 
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/signals/signalholder.hpp>
+#include <QColor>
 #include <QMenu>
 #include <QPropertyAnimation>
 
@@ -64,6 +65,7 @@ public:
 
     void setHighlightsEnabled(const bool &newVal);
     bool hasHighlightsEnabled() const;
+    void setHighlightColor(std::shared_ptr<QColor> color);
 
     void moveAnimated(QPoint targetPos, bool animated = true);
 
@@ -127,6 +129,7 @@ private:
     HighlightState highlightState_ = HighlightState::None;
     bool highlightEnabled_ = true;
     QAction *highlightNewMessagesAction_;
+    std::shared_ptr<QColor> highlightColor_;
 
     bool isLive_{};
     bool isRerun_{};

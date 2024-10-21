@@ -9,6 +9,8 @@ namespace {
 
 }  // namespace
 
+// change made but removed in merge conflict
+// QColor HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR = QColor(238, 97, 102, 65);
 QColor HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR = QColor(127, 63, 73, 127);
 QColor HighlightPhrase::FALLBACK_SELF_MESSAGE_HIGHLIGHT_COLOR =
     QColor(0, 118, 221, 115);
