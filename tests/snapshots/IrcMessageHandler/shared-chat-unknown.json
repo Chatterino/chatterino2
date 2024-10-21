@@ -70,7 +70,7 @@
                         "images": {
                             "1x": ""
                         },
-                        "name": "SharedChat_",
+                        "name": "",
                         "tooltip": "Shared Message"
                     },
                     "flags": "BadgeSharedChannel",

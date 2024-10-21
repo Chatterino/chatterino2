@@ -384,7 +384,7 @@ EmotePtr makeAutoModBadge()
 EmotePtr makeSharedChatBadge(const QString &sourceName)
 {
     return std::make_shared<Emote>(
-        Emote{"SharedChat_" + sourceName,
+        Emote{EmoteName{},
               ImageSet{Image::fromResourcePixmap(
                   getResources().twitch.sharedChat, 0.25)},
               Tooltip{"Shared Message" +
