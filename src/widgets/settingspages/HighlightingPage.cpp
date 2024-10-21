@@ -72,34 +72,32 @@ HighlightingPage::HighlightingPage()
                 auto *model =
                     (new HighlightModel(nullptr))
                         ->initialized(&getSettings()->highlightedMessages);
-                auto *view = highlights.emplace<QScrollArea>(this).getElement();
-                view->setHorizontalScrollBarPolicy(
+                auto *scrollArea =
+                    highlights.emplace<QScrollArea>(this).getElement();
+                scrollArea->setHorizontalScrollBarPolicy(
                     Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
-                view->setVerticalScrollBarPolicy(
+                scrollArea->setVerticalScrollBarPolicy(
                     Qt::ScrollBarPolicy::ScrollBarAlwaysOn);
-                auto *box = new QVBoxLayout;
-                view->setLayout(box);
+                scrollArea->setWidgetResizable(true);
+                auto *layout = new QVBoxLayout;
+                auto *layoutWidget = new QWidget;
+                scrollArea->setWidget(layoutWidget);
+                layoutWidget->setLayout(layout);
 
-                box->setSizeConstraint(
-                    QLayout::SizeConstraint::SetMinAndMaxSize);
+                layout->setSizeConstraint(
+                    QLayout::SizeConstraint::SetMaximumSize);
                 QStringList data{
-                    "1",  "2",  "3",  "4",  "5",  "6",  "7",  "8",  "9",
-                    "10", "11", "12", "13", "14", "15", "16", "17", "18",
-                    "19", "20", "21", "22", "23", "24", "25", "26", "27",
-                    "19", "20", "21", "22", "23", "24", "25", "26", "27",
-                    "19", "20", "21", "22", "23", "24", "25", "26", "27",
-                    "19", "20", "21", "22", "23", "24", "25", "26", "27",
+                    "1", "2", "3", "4", "5", "6", "7", "8", "9",
                 };
-                for (const auto &xd : data)
+                auto values = getSettings()->highlightedMessages.readOnly();
+                for (const auto &xd : *values)
                 {
-                    // auto *w = new TestWidget(this);
+                    auto *w = new TestWidget2(this, xd);
                     // w->setMinimumHeight(50);
-                    auto *w = new QPushButton("xd");
-                    /*
+                    // auto *w = new QPushButton("xd");
                     w->setSizePolicy(
-                        {QSizePolicy::Maximum, QSizePolicy::Minimum});
-                        */
-                    box->addWidget(w, 1);
+                        {QSizePolicy::Minimum, QSizePolicy::Minimum});
+                    layout->addWidget(w, 1);
                 }
             }
 
@@ -118,7 +116,7 @@ HighlightingPage::HighlightingPage()
                     [view, model](const QModelIndex &index) {
                         qInfo() << "XXX: ITEM CLICKED?"
                                 << index.data(Qt::UserRole + 1).type();
-                        view->openPersistentEditor(index);
+                        // view->openPersistentEditor(index);
                         if (index.data(Qt::UserRole + 1).value<bool>())
                         {
                             auto res =
@@ -144,7 +142,7 @@ HighlightingPage::HighlightingPage()
                 view->setModel(model);
                 view->setHorizontalScrollBarPolicy(
                     Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
-                view->setItemDelegate(new TestDelegate(this));
+                view->setItemDelegate(new TestDelegate(view));
             }
 
             // HIGHLIGHTS
