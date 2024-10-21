@@ -2759,7 +2759,7 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
 
     if (this->message().flags.has(MessageFlag::SharedMessage))
     {
-        QString sourceId = tags["source-room-id"].toString();
+        const QString sourceId = tags["source-room-id"].toString();
         std::optional<QString> sourceName;
         if (twitchChannel->roomId() == sourceId)
         {

@@ -100,6 +100,11 @@ public:
     std::shared_ptr<Channel> getChannelOrEmptyByID(
         const QString &channelID) override;
 
+    /**
+     * Obtains the channel login name associated with the passed ID,
+     * so that Shared Chat messages can provide source channel context.
+     * Can yield an empty string if a helix request is already in-flight.
+     */
     std::optional<QString> getOrPopulateChannelCache(
         const QString &channelId) override;
 
