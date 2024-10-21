@@ -2393,6 +2393,11 @@ void MessageBuilder::parseThread(const QString &messageContent,
         this->message().replyParent = parent;
         thread->addToThread(std::weak_ptr{this->message_});
 
+        if (thread->subscribed())
+        {
+            this->message().flags.set(MessageFlag::SubscribedThread);
+        }
+
         // enable reply flag
         this->message().flags.set(MessageFlag::ReplyMessage);
 
