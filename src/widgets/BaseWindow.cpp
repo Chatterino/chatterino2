@@ -877,10 +877,13 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
         break;
 
         case WM_DPICHANGED: {
-            // wait for Qt to process this message
-            postToThread([] {
-                getApp()->getWindows()->invalidateChannelViewBuffers();
-            });
+            if (this->flags_.has(ClearBuffersOnDpiChange))
+            {
+                // wait for Qt to process this message
+                postToThread([] {
+                    getApp()->getWindows()->invalidateChannelViewBuffers();
+                });
+            }
         }
         break;
 
