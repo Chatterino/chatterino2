@@ -1,5 +1,7 @@
 #pragma once
 
+#include "controllers/highlights/HighlightPhrase.hpp"
+
 #include <QByteArray>
 #include <QItemEditorFactory>
 #include <QObject>
@@ -35,6 +37,14 @@ public:
     {
         return "data";
     }
+};
+
+class TestWidget2 : public QWidget
+{
+    Q_OBJECT
+
+public:
+    TestWidget2(QWidget *parent, const HighlightPhrase &data);
 };
 
 }  // namespace chatterino
