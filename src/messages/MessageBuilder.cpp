@@ -2778,14 +2778,8 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
 
         if (sourceName.has_value())
         {
-            const auto &name = sourceName.value();
-            auto *badge = this->emplace<BadgeElement>(
-                makeSharedChatBadge(name),
-                MessageElementFlag::BadgeSharedChannel);
-            if (!name.isEmpty())
-            {
-                badge->setLink({Link::UserInfo, "id:" + sourceId});
-            }
+            this->emplace<BadgeElement>(makeSharedChatBadge(sourceName.value()),
+                                        MessageElementFlag::BadgeSharedChannel);
         }
     }
 
