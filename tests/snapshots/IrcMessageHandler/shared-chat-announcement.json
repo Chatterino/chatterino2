@@ -75,8 +75,8 @@
                     },
                     "flags": "BadgeSharedChannel",
                     "link": {
-                        "type": "UserInfo",
-                        "value": "shared_chat_test_01"
+                        "type": "None",
+                        "value": ""
                     },
                     "tooltip": "Shared Message from shared_chat_test_01",
                     "trailingSpace": true,
