@@ -17,6 +17,11 @@ TestDelegate::TestDelegate(QObject *parent)
     auto *factory = new TestWidgetCreator();
     this->setItemEditorFactory(factory);
     this->btn = new QPushButton("xd");
+    QObject::connect(this->btn, &QPushButton::clicked, [this] {
+        qInfo() << "XXX: btn press";
+        this->commitData(this->btn);
+        //
+    });
 }
 
 TestDelegate::~TestDelegate()
@@ -101,12 +106,14 @@ void TestDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
     }
 
     painter->restore();
+    this->btn->render(painter);
     // return QStyledItemDelegate::paint(painter, option, index);
 }
 
 void TestDelegate::setEditorData(QWidget *editor,
                                  const QModelIndex &index) const
 {
+    qInfo() << "XXX: setEditorData" << index;
     auto *realEditor = dynamic_cast<TestWidget *>(editor);
     realEditor->update(index.data().value<QString>());
     assert(realEditor);
@@ -117,7 +124,8 @@ bool TestDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
                                const QModelIndex &index)
 {
     auto *view = qobject_cast<QListView *>(this->parent());
-    view->openPersistentEditor(index);
+    qInfo() << "XXX: editor event" << event << view;
+    // view->openPersistentEditor(index);
     return QStyledItemDelegate::editorEvent(event, model, option, index);
 }
 
