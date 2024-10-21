@@ -70,15 +70,15 @@
                         "images": {
                             "1x": ""
                         },
-                        "name": "SharedChat_shared_chat_test_01",
-                        "tooltip": "Shared Message from shared_chat_test_01"
+                        "name": "SharedChat_",
+                        "tooltip": "Shared Message"
                     },
                     "flags": "BadgeSharedChannel",
                     "link": {
                         "type": "None",
                         "value": ""
                     },
-                    "tooltip": "Shared Message from shared_chat_test_01",
+                    "tooltip": "Shared Message",
                     "trailingSpace": true,
                     "type": "BadgeElement"
                 },

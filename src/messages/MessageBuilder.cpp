@@ -32,6 +32,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrc.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "providers/twitch/TwitchUsers.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
@@ -2765,22 +2766,23 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
     if (this->message().flags.has(MessageFlag::SharedMessage))
     {
         const QString sourceId = tags["source-room-id"].toString();
-        std::optional<QString> sourceName;
-        if (twitchChannel->roomId() == sourceId)
+        QString sourceName;
+        if (sourceId.isEmpty())
+        {
+            sourceName = "";
+        }
+        else if (twitchChannel->roomId() == sourceId)
         {
             sourceName = twitchChannel->getName();
         }
         else
         {
             sourceName =
-                getApp()->getTwitch()->getOrPopulateChannelCache(sourceId);
+                getApp()->getTwitchUsers()->resolveID({sourceId})->displayName;
         }
 
-        if (sourceName.has_value())
-        {
-            this->emplace<BadgeElement>(makeSharedChatBadge(sourceName.value()),
-                                        MessageElementFlag::BadgeSharedChannel);
-        }
+        this->emplace<BadgeElement>(makeSharedChatBadge(sourceName),
+                                    MessageElementFlag::BadgeSharedChannel);
     }
 
     auto badgeInfos = parseBadgeInfoTag(tags);
