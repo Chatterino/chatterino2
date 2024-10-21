@@ -2,6 +2,7 @@
 
 #include "common/Common.hpp"
 #include "widgets/helper/Button.hpp"
+#include "widgets/helper/ChannelView.hpp"
 #include "widgets/Notebook.hpp"
 
 #include <pajlada/settings/setting.hpp>
@@ -59,11 +60,25 @@ public:
      **/
     bool isLive() const;
 
+    /**
+     * @brief Sets the highlight state of this tab clearing highlight sources
+     *
+     * Obeys the HighlightsEnabled setting and highlight states hierarchy
+     */
     void setHighlightState(HighlightState style);
-    HighlightState highlightState() const;
-
+    /**
+     * @brief Updates the highlight state and highlight sources of this tab
+     *
+     * Obeys the HighlightsEnabled setting and the highlight state hierarchy and tracks the highlight state update sources
+     */
+    void updateHighlightState(HighlightState style,
+                              const ChannelView &channelViewSource,
+                              const MessagePtr &message);
+    void copyHighlightStateAndSourcesFrom(const NotebookTab *sourceTab);
     void setHighlightsEnabled(const bool &newVal);
+    void newHighlightSourceAdded(const ChannelView &channelViewSource);
     bool hasHighlightsEnabled() const;
+    HighlightState highlightState() const;
 
     void moveAnimated(QPoint targetPos, bool animated = true);
 
@@ -106,6 +121,46 @@ private:
     void titleUpdated();
 
     int normalTabWidthForHeight(int height) const;
+
+    bool shouldMessageHighlight(const ChannelView &channelViewSource,
+                                const MessagePtr &message) const;
+
+    struct HighlightSources {
+        struct ChannelViewProxy {
+            const ChannelView *channelView;
+        };
+
+        struct ChannelViewProxyHash {
+            using is_transparent = void;
+            std::size_t operator()(const ChannelViewProxy &cp) const noexcept;
+        };
+
+        struct ChannelViewProxyEqual {
+            bool operator()(const ChannelViewProxy &l,
+                            const ChannelViewProxy &r) const;
+        };
+
+        std::unordered_set<ChannelViewProxy, ChannelViewProxyHash,
+                           ChannelViewProxyEqual>
+            newMessageSource;
+        std::unordered_set<ChannelViewProxy, ChannelViewProxyHash,
+                           ChannelViewProxyEqual>
+            highlightedSource;
+
+        void clear()
+        {
+            this->newMessageSource.clear();
+            this->highlightedSource.clear();
+        }
+
+    } highlightSources_;
+
+    void removeHighlightStateChangeSources(const HighlightSources &toRemove);
+    void removeNewMessageSource(
+        const HighlightSources::ChannelViewProxy &source);
+    void removeHighlightedSource(
+        const HighlightSources::ChannelViewProxy &source);
+    void updateHighlightStateDueSourcesChange();
 
     QPropertyAnimation positionChangedAnimation_;
     QPoint positionAnimationDesiredPoint_;
