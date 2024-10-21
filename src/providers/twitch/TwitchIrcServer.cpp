@@ -1149,7 +1149,7 @@ std::optional<QString> TwitchIrcServer::getOrPopulateChannelCache(
             const auto cache = this->channelNamesById_.access();
             cache->put(user.id, user.displayName);
         },
-        [this, &channelId] {
+        [this, channelId] {
             const auto cache = this->channelNamesById_.access();
             if (cache->exists(channelId) && cache->get(channelId).isEmpty())
             {
