@@ -37,6 +37,7 @@ public:
         Dialog = 1 << 6,
         DisableLayoutSave = 1 << 7,
         BoundsCheckOnShow = 1 << 8,
+        ClearBuffersOnDpiChange = 1 << 9,
     };
 
     enum ActionOnFocusLoss { Nothing, Delete, Close, Hide };
