@@ -7,6 +7,7 @@
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/PostToThread.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/InvisibleSizeGrip.hpp"
@@ -312,6 +313,13 @@ bool OverlayWindow::nativeEvent(const QByteArray &eventType, void *message,
         }
         break;
 #    endif
+        case WM_DPICHANGED: {
+            // wait for Qt to process this message, same as in BaseWindow
+            postToThread([] {
+                getApp()->getWindows()->invalidateChannelViewBuffers();
+            });
+        }
+        break;
 
         default:
             return QWidget::nativeEvent(eventType, message, result);
