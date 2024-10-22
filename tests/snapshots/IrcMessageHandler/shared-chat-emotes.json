@@ -65,6 +65,24 @@
                     "type": "TwitchModerationElement"
                 },
                 {
+                    "emote": {
+                        "homePage": "https://link.twitch.tv/SharedChatViewer",
+                        "images": {
+                            "1x": ""
+                        },
+                        "name": "",
+                        "tooltip": "Shared Message from twitchdev"
+                    },
+                    "flags": "BadgeSharedChannel",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Shared Message from twitchdev",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
                     "color": "#ffff0000",
                     "flags": "Username",
                     "link": {

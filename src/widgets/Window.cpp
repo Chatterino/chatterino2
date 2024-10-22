@@ -52,7 +52,9 @@
 namespace chatterino {
 
 Window::Window(WindowType type, QWidget *parent)
-    : BaseWindow(BaseWindow::EnableCustomFrame, parent)
+    : BaseWindow(
+          {BaseWindow::EnableCustomFrame, BaseWindow::ClearBuffersOnDpiChange},
+          parent)
     , type_(type)
     , notebook_(new SplitNotebook(this))
 {

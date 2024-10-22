@@ -5,7 +5,6 @@ set(benchmark_SOURCES
     resources/bench.qrc
 
     src/Emojis.cpp
-    src/Highlights.cpp
     src/FormatTime.cpp
     src/Helpers.cpp
     src/LimitedQueue.cpp
