@@ -56,27 +56,6 @@ namespace {
     }
 }  // namespace
 
-std::size_t NotebookTab::HighlightSources::ChannelViewProxyHash::operator()(
-    const ChannelViewProxy &cp) const noexcept
-{
-    std::size_t seed = 0;
-    auto first = qHash(cp.channelView->underlyingChannel()->getName());
-    auto second = qHash(cp.channelView->getFilterIds());
-
-    boost::hash_combine(seed, first);
-    boost::hash_combine(seed, second);
-
-    return seed;
-}
-
-bool NotebookTab::HighlightSources::ChannelViewProxyEqual::operator()(
-    const ChannelViewProxy &lp, const ChannelViewProxy &rp) const
-{
-    return lp.channelView->underlyingChannel() ==
-               rp.channelView->underlyingChannel() &&
-           lp.channelView->getFilterIds() == rp.channelView->getFilterIds();
-}
-
 NotebookTab::NotebookTab(Notebook *notebook)
     : Button(notebook)
     , positionChangedAnimation_(this, "pos")
@@ -327,13 +306,13 @@ bool NotebookTab::isSelected() const
 }
 
 void NotebookTab::removeNewMessageSource(
-    const HighlightSources::ChannelViewProxy &source)
+    const HighlightSources::ChannelViewId &source)
 {
     this->highlightSources_.newMessageSource.erase(source);
 }
 
 void NotebookTab::removeHighlightedSource(
-    const HighlightSources::ChannelViewProxy &source)
+    const HighlightSources::ChannelViewId &source)
 {
     this->highlightSources_.highlightedSource.erase(source);
 }
@@ -354,10 +333,12 @@ void NotebookTab::removeHighlightStateChangeSources(
 
 void NotebookTab::newHighlightSourceAdded(const ChannelView &channelViewSource)
 {
-    auto channelViewProxy =
-        HighlightSources::ChannelViewProxy{&channelViewSource};
-    this->removeHighlightedSource(channelViewProxy);
-    this->removeNewMessageSource(channelViewProxy);
+    const auto &channelName = channelViewSource.underlyingChannel()->getName();
+    const auto &channelFilterIds = channelViewSource.getFilterIds();
+    auto channelViewId =
+        HighlightSources::GetChannelViewId(channelName, channelFilterIds);
+    this->removeHighlightedSource(channelViewId);
+    this->removeNewMessageSource(channelViewId);
     this->updateHighlightStateDueSourcesChange();
 
     auto *splitNotebook = dynamic_cast<SplitNotebook *>(this->notebook_);
@@ -372,8 +353,8 @@ void NotebookTab::newHighlightSourceAdded(const ChannelView &channelViewSource)
                 auto *tab = splitContainer->getTab();
                 if (tab && tab != this)
                 {
-                    tab->removeHighlightedSource(channelViewProxy);
-                    tab->removeNewMessageSource(channelViewProxy);
+                    tab->removeHighlightedSource(channelViewId);
+                    tab->removeNewMessageSource(channelViewId);
                     tab->updateHighlightStateDueSourcesChange();
                 }
             }
@@ -575,28 +556,26 @@ void NotebookTab::updateHighlightState(HighlightState newHighlightStyle,
 
     // message is highlighting unvisible tab
 
-    auto underlyingChannel = channelViewSource.underlyingChannel();
-    auto newFilters = channelViewSource.getFilterIds();
-    auto channelViewProxy =
-        HighlightSources::ChannelViewProxy{&channelViewSource};
+    const auto &channelName = channelViewSource.underlyingChannel()->getName();
+    const auto &channelFilterIds = channelViewSource.getFilterIds();
+    auto channelViewId =
+        HighlightSources::GetChannelViewId(channelName, channelFilterIds);
 
     switch (newHighlightStyle)
     {
         case HighlightState::Highlighted: {
             if (!this->highlightSources_.highlightedSource.contains(
-                    channelViewProxy))
+                    channelViewId))
             {
-                this->highlightSources_.highlightedSource.insert(
-                    channelViewProxy);
+                this->highlightSources_.highlightedSource.insert(channelViewId);
             }
             break;
         }
         case HighlightState::NewMessage: {
             if (!this->highlightSources_.newMessageSource.contains(
-                    channelViewProxy))
+                    channelViewId))
             {
-                this->highlightSources_.newMessageSource.insert(
-                    channelViewProxy);
+                this->highlightSources_.newMessageSource.insert(channelViewId);
             }
             break;
         }

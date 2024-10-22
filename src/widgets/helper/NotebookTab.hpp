@@ -126,40 +126,34 @@ private:
                                 const MessagePtr &message) const;
 
     struct HighlightSources {
-        struct ChannelViewProxy {
-            const ChannelView *channelView;
-        };
+        using ChannelViewId = std::size_t;
 
-        struct ChannelViewProxyHash {
-            using is_transparent = void;
-            std::size_t operator()(const ChannelViewProxy &cp) const noexcept;
-        };
+        static ChannelViewId GetChannelViewId(
+            const QString &channelName, const QList<QUuid> &channelFilterIds)
+        {
+            std::size_t seed = 0;
+            auto first = qHash(channelName);
+            auto second = qHash(channelFilterIds);
 
-        struct ChannelViewProxyEqual {
-            bool operator()(const ChannelViewProxy &l,
-                            const ChannelViewProxy &r) const;
-        };
+            boost::hash_combine(seed, first);
+            boost::hash_combine(seed, second);
 
-        std::unordered_set<ChannelViewProxy, ChannelViewProxyHash,
-                           ChannelViewProxyEqual>
-            newMessageSource;
-        std::unordered_set<ChannelViewProxy, ChannelViewProxyHash,
-                           ChannelViewProxyEqual>
-            highlightedSource;
+            return seed;
+        }
+
+        std::unordered_set<ChannelViewId> newMessageSource;
+        std::unordered_set<ChannelViewId> highlightedSource;
 
         void clear()
         {
             this->newMessageSource.clear();
             this->highlightedSource.clear();
         }
-
     } highlightSources_;
 
     void removeHighlightStateChangeSources(const HighlightSources &toRemove);
-    void removeNewMessageSource(
-        const HighlightSources::ChannelViewProxy &source);
-    void removeHighlightedSource(
-        const HighlightSources::ChannelViewProxy &source);
+    void removeNewMessageSource(const HighlightSources::ChannelViewId &source);
+    void removeHighlightedSource(const HighlightSources::ChannelViewId &source);
     void updateHighlightStateDueSourcesChange();
 
     QPropertyAnimation positionChangedAnimation_;
