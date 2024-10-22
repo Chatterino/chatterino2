@@ -2,7 +2,6 @@
 
 #include "widgets/BaseWidget.hpp"
 
-#include <ForwardDecl.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
 #include <QList>

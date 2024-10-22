@@ -356,7 +356,6 @@ void NotebookTab::newHighlightSourceAdded(const ChannelView &channelViewSource)
 {
     auto channelViewProxy =
         HighlightSources::ChannelViewProxy{&channelViewSource};
-    auto sourceChannel = channelViewSource.underlyingChannel();
     this->removeHighlightedSource(channelViewProxy);
     this->removeNewMessageSource(channelViewProxy);
     this->updateHighlightStateDueSourcesChange();
@@ -580,10 +579,6 @@ void NotebookTab::updateHighlightState(HighlightState newHighlightStyle,
     auto newFilters = channelViewSource.getFilterIds();
     auto channelViewProxy =
         HighlightSources::ChannelViewProxy{&channelViewSource};
-
-    // the unvisible tab should unhighlight other tabs iff
-    // the other tab's filters are more generic therefore
-    // the other tab's filter set is subset of the unvisible tab
 
     switch (newHighlightStyle)
     {
