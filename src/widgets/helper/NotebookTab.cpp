@@ -568,6 +568,12 @@ void NotebookTab::updateHighlightState(HighlightState newHighlightStyle,
         return;
     }
 
+    if (!this->highlightEnabled_ &&
+        newHighlightStyle == HighlightState::NewMessage)
+    {
+        return;
+    }
+
     // message is highlighting unvisible tab
 
     auto underlyingChannel = channelViewSource.underlyingChannel();
@@ -601,12 +607,6 @@ void NotebookTab::updateHighlightState(HighlightState newHighlightStyle,
         }
         case HighlightState::None:
             break;
-    }
-
-    if (!this->highlightEnabled_ &&
-        newHighlightStyle == HighlightState::NewMessage)
-    {
-        return;
     }
 
     if (this->highlightState_ == newHighlightStyle ||
