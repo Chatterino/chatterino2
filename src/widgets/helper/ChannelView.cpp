@@ -2408,6 +2408,11 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                                 return;
                             }
 
+                            if (link.value.startsWith("id:"))
+                            {
+                                return;
+                            }
+
                             // Insert @username into split input
                             const bool commaMention =
                                 getSettings()->mentionUsersWithComma;

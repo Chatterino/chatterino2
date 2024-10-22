@@ -1,0 +1,5 @@
+{
+    "input": "@color=#FF0000;emotes=;subscriber=0;msg-id=sharedchatnotice;historical=1;msg-param-profileImageURL=https://static-cdn.jtvnw.net/jtv_user_pictures/e065218b-49df-459d-afd3-c6557870f551-profile_image-%s.png;tmi-sent-ts=1729627237027;rm-received-ts=1729627237138;msg-param-displayName=nerixyz;id=c585cb3e-cb4f-4a48-a251-b568d217587e;display-name=nerixyz;badges=;user-id=129546453;source-id=d86cdfb2-e138-48e2-985f-5b8efb765ba4;source-room-id=955766119;room-id=11148817;user-type=;msg-param-login=nerixyz;flags=;source-badge-info=;mod=0;vip=0;system-msg=2\\sraiders\\sfrom\\snerixyz\\shave\\sjoined!;login=nerixyz;msg-param-viewerCount=2;source-badges=;source-msg-id=raid;badge-info= :tmi.twitch.tv USERNOTICE #pajlada",
+    "output": [
+    ]
+}
