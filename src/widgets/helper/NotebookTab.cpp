@@ -306,13 +306,13 @@ bool NotebookTab::isSelected() const
 }
 
 void NotebookTab::removeNewMessageSource(
-    const HighlightSources::ChannelViewId &source)
+    const ChannelView::ChannelViewID &source)
 {
     this->highlightSources_.newMessageSource.erase(source);
 }
 
 void NotebookTab::removeHighlightedSource(
-    const HighlightSources::ChannelViewId &source)
+    const ChannelView::ChannelViewID &source)
 {
     this->highlightSources_.highlightedSource.erase(source);
 }
@@ -333,10 +333,7 @@ void NotebookTab::removeHighlightStateChangeSources(
 
 void NotebookTab::newHighlightSourceAdded(const ChannelView &channelViewSource)
 {
-    const auto &channelName = channelViewSource.underlyingChannel()->getName();
-    const auto &channelFilterIds = channelViewSource.getFilterIds();
-    auto channelViewId =
-        HighlightSources::GetChannelViewId(channelName, channelFilterIds);
+    auto channelViewId = channelViewSource.getID();
     this->removeHighlightedSource(channelViewId);
     this->removeNewMessageSource(channelViewId);
     this->updateHighlightStateDueSourcesChange();
@@ -556,10 +553,7 @@ void NotebookTab::updateHighlightState(HighlightState newHighlightStyle,
 
     // message is highlighting unvisible tab
 
-    const auto &channelName = channelViewSource.underlyingChannel()->getName();
-    const auto &channelFilterIds = channelViewSource.getFilterIds();
-    auto channelViewId =
-        HighlightSources::GetChannelViewId(channelName, channelFilterIds);
+    auto channelViewId = channelViewSource.getID();
 
     switch (newHighlightStyle)
     {

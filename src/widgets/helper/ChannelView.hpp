@@ -215,6 +215,9 @@ public:
 
     Scrollbar *scrollbar();
 
+    using ChannelViewID = std::size_t;
+    ChannelViewID getID() const;
+
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
     pajlada::Signals::Signal<HighlightState, const MessagePtr &>
@@ -317,6 +320,9 @@ private:
     void setInputReply(const MessagePtr &message);
     void showReplyThreadPopup(const MessagePtr &message);
     bool canReplyToMessages() const;
+
+    void updateID();
+    ChannelViewID id_{};
 
     bool layoutQueued_ = false;
     bool bufferInvalidationQueued_ = false;

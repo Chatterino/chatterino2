@@ -126,23 +126,8 @@ private:
                                 const MessagePtr &message) const;
 
     struct HighlightSources {
-        using ChannelViewId = std::size_t;
-
-        static ChannelViewId GetChannelViewId(
-            const QString &channelName, const QList<QUuid> &channelFilterIds)
-        {
-            std::size_t seed = 0;
-            auto first = qHash(channelName);
-            auto second = qHash(channelFilterIds);
-
-            boost::hash_combine(seed, first);
-            boost::hash_combine(seed, second);
-
-            return seed;
-        }
-
-        std::unordered_set<ChannelViewId> newMessageSource;
-        std::unordered_set<ChannelViewId> highlightedSource;
+        std::unordered_set<ChannelView::ChannelViewID> newMessageSource;
+        std::unordered_set<ChannelView::ChannelViewID> highlightedSource;
 
         void clear()
         {
@@ -152,8 +137,8 @@ private:
     } highlightSources_;
 
     void removeHighlightStateChangeSources(const HighlightSources &toRemove);
-    void removeNewMessageSource(const HighlightSources::ChannelViewId &source);
-    void removeHighlightedSource(const HighlightSources::ChannelViewId &source);
+    void removeNewMessageSource(const ChannelView::ChannelViewID &source);
+    void removeHighlightedSource(const ChannelView::ChannelViewID &source);
     void updateHighlightStateDueSourcesChange();
 
     QPropertyAnimation positionChangedAnimation_;
