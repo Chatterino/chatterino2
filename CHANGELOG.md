@@ -112,6 +112,7 @@
 - Dev: Refactored static `MessageBuilder` helpers to standalone functions. (#5652)
 - Dev: Decoupled reply parsing from `MessageBuilder`. (#5660, #5668)
 - Dev: Refactored IRC message building. (#5663)
+- Dev: Fixed some compiler warnings. (#5672)
 
 ## 2.5.1
 
