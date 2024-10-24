@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Minor: Added setting to disable animated 7TV badges (3bbcc9f4a01a015f93f7855be36312e56968ac5f)
 - Bugfix: Paints are no longer rendered in system messages (b55e723fcea9520f47b1a6bf786a52011ffc7289)
 - Dev(macOS): Changed CFBundleIdentifier from `com.chatterino` to `app.7tv.chatterino7` (fec0dbdf558b1e6e358971a256f5540d34bb6a8d)
 - Dev: Updated Conan version used in CI to 2.4 (330d05d50ffd296b34744dbcc97290534e8cf704)
