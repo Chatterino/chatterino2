@@ -79,7 +79,7 @@ void EditHotkeyDialog::setFromHotkey(std::shared_ptr<Hotkey> hotkey)
         this->ui_->easyArgsLabel->setText(def->argumentsPrompt);
         this->ui_->easyArgsLabel->setToolTip(def->argumentsPromptHover);
         int matchIdx = -1;
-        for (int i = 0; i < def->possibleArguments.size(); i++)
+        for (size_t i = 0; i < def->possibleArguments.size(); i++)
         {
             const auto &[displayText, argData] = def->possibleArguments.at(i);
             this->ui_->easyArgsPicker->addItem(displayText);
@@ -90,7 +90,7 @@ void EditHotkeyDialog::setFromHotkey(std::shared_ptr<Hotkey> hotkey)
                 continue;
             }
             bool matches = true;
-            for (int j = 0; j < argData.size(); j++)
+            for (size_t j = 0; j < argData.size(); j++)
             {
                 if (argData.at(j) != hotkey->arguments().at(j))
                 {
@@ -100,7 +100,7 @@ void EditHotkeyDialog::setFromHotkey(std::shared_ptr<Hotkey> hotkey)
             }
             if (matches)
             {
-                matchIdx = i;
+                matchIdx = static_cast<int>(i);
             }
         }
         if (matchIdx != -1)

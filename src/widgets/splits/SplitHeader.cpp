@@ -42,7 +42,7 @@ namespace {
 using namespace chatterino;
 
 // 5 minutes
-constexpr const uint64_t THUMBNAIL_MAX_AGE_MS = 5ULL * 60 * 1000;
+constexpr const qint64 THUMBNAIL_MAX_AGE_MS = 5LL * 60 * 1000;
 
 auto formatRoomModeUnclean(
     const SharedAccessGuard<const TwitchChannel::RoomModes> &modes) -> QString

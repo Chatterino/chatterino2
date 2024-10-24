@@ -2204,8 +2204,8 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         {
             this->isDoubleClick_ = false;
             // Was actually not a wanted triple-click
-            if (fabsf(distanceBetweenPoints(this->lastDoubleClickPosition_,
-                                            event->screenPos())) > 10.F)
+            if (std::abs(distanceBetweenPoints(this->lastDoubleClickPosition_,
+                                               event->screenPos())) > 10.F)
             {
                 this->clickTimer_.stop();
                 return;
@@ -2215,16 +2215,16 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         {
             this->isLeftMouseDown_ = false;
 
-            if (fabsf(distanceBetweenPoints(this->lastLeftPressPosition_,
-                                            event->screenPos())) > 15.F)
+            if (std::abs(distanceBetweenPoints(this->lastLeftPressPosition_,
+                                               event->screenPos())) > 15.F)
             {
                 return;
             }
 
             // Triple-clicking a message selects the whole message
             if (foundElement && this->clickTimer_.isActive() &&
-                (fabsf(distanceBetweenPoints(this->lastDoubleClickPosition_,
-                                             event->screenPos())) < 10.F))
+                (std::abs(distanceBetweenPoints(this->lastDoubleClickPosition_,
+                                                event->screenPos())) < 10.F))
             {
                 this->selectWholeMessage(layout.get(), messageIndex);
                 return;
@@ -2241,8 +2241,8 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         {
             this->isRightMouseDown_ = false;
 
-            if (fabsf(distanceBetweenPoints(this->lastRightPressPosition_,
-                                            event->screenPos())) > 15.F)
+            if (std::abs(distanceBetweenPoints(this->lastRightPressPosition_,
+                                               event->screenPos())) > 15.F)
             {
                 return;
             }

@@ -196,12 +196,12 @@ public:
         std::unique_lock lock(this->mutex_);
 
         Equals eq;
-        for (int i = 0; i < this->buffer_.size(); ++i)
+        for (size_t i = 0; i < this->buffer_.size(); ++i)
         {
             if (eq(this->buffer_[i], needle))
             {
                 this->buffer_[i] = replacement;
-                return i;
+                return static_cast<int>(i);
             }
         }
         return -1;

@@ -37,7 +37,7 @@ void UnifiedSource::addToListModel(GenericListModel &model,
         source->addToListModel(model, maxCount - used);
         // Calculate how many items have been added so far
         used = model.rowCount() - startingSize;
-        if (used >= maxCount)
+        if (used >= static_cast<int>(maxCount))
         {
             // Used up all of limit
             break;
@@ -58,15 +58,15 @@ void UnifiedSource::addToStringList(QStringList &list, size_t maxCount,
     }
 
     // Make sure to only add maxCount elements in total.
-    int startingSize = list.size();
-    int used = 0;
+    auto startingSize = list.size();
+    QStringList::size_type used = 0;
 
     for (const auto &source : this->sources_)
     {
         source->addToStringList(list, maxCount - used, isFirstWord);
         // Calculate how many items have been added so far
         used = list.size() - startingSize;
-        if (used >= maxCount)
+        if (used >= static_cast<QStringList::size_type>(maxCount))
         {
             // Used up all of limit
             break;

@@ -1411,7 +1411,7 @@ float IrcMessageHandler::similarity(
     float similarityPercent = 0.0F;
     int checked = 0;
 
-    for (int i = 1; i <= messages.size(); ++i)
+    for (size_t i = 1; i <= messages.size(); ++i)
     {
         if (checked >= getSettings()->hideSimilarMaxMessagesToCheck)
         {

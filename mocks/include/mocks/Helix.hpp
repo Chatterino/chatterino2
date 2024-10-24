@@ -350,7 +350,7 @@ public:
     // contains a comma
     MOCK_METHOD(
         void, getChatters,
-        (QString broadcasterID, QString moderatorID, int maxChattersToFetch,
+        (QString broadcasterID, QString moderatorID, size_t maxChattersToFetch,
          ResultCallback<HelixChatters> successCallback,
          (FailureCallback<HelixGetChattersError, QString> failureCallback)),
         (override));  // getChatters

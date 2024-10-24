@@ -43,7 +43,7 @@ public:
             }
             // get row index
             int index = this->getModelIndexFromVectorIndex(args.index);
-            assert(index >= 0 && index <= this->rows_.size());
+            assert(index >= 0 && index <= static_cast<int>(this->rows_.size()));
 
             // get row items
             std::vector<QStandardItem *> row = this->createRow();
@@ -75,7 +75,7 @@ public:
             }
 
             int row = this->getModelIndexFromVectorIndex(args.index);
-            assert(row >= 0 && row <= this->rows_.size());
+            assert(row >= 0 && row <= static_cast<int>(this->rows_.size()));
 
             // remove row
             std::vector<QStandardItem *> items = this->rows_[row].items;
@@ -130,7 +130,8 @@ public:
     {
         int row = index.row();
         int column = index.column();
-        if (row < 0 || column < 0 || row >= this->rows_.size() ||
+        if (row < 0 || column < 0 ||
+            row >= static_cast<int>(this->rows_.size()) ||
             column >= this->columnCount_)
         {
             return QVariant();
@@ -144,7 +145,8 @@ public:
     {
         int row = index.row();
         int column = index.column();
-        if (row < 0 || column < 0 || row >= this->rows_.size() ||
+        if (row < 0 || column < 0 ||
+            row >= static_cast<int>(this->rows_.size()) ||
             column >= this->columnCount_)
         {
             return false;
@@ -152,7 +154,7 @@ public:
 
         Row &rowItem = this->rows_[row];
 
-        assert(this->columnCount_ == rowItem.items.size());
+        assert(this->columnCount_ == static_cast<int>(rowItem.items.size()));
 
         auto &cell = rowItem.items[column];
 
@@ -167,7 +169,7 @@ public:
             int vecRow = this->getVectorIndexFromModelIndex(row);
             // TODO: This is only a safety-thing for when we modify data that's being modified right now.
             // It should not be necessary, but it would require some rethinking about this surrounding logic
-            if (vecRow >= this->vector_->readOnly()->size())
+            if (vecRow >= static_cast<int>(this->vector_->readOnly()->size()))
             {
                 return false;
             }
@@ -224,18 +226,19 @@ public:
     {
         int row = index.row(), column = index.column();
 
-        if (row < 0 || column < 0 || row >= this->rows_.size() ||
+        if (row < 0 || column < 0 ||
+            row >= static_cast<int>(this->rows_.size()) ||
             column >= this->columnCount_)
         {
             return Qt::NoItemFlags;
         }
 
-        assert(row >= 0 && row < this->rows_.size() && column >= 0 &&
-               column < this->columnCount_);
+        assert(row >= 0 && row < static_cast<int>(this->rows_.size()) &&
+               column >= 0 && column < this->columnCount_);
 
         const auto &rowItem = this->rows_[row];
 
-        assert(this->columnCount_ == rowItem.items.size());
+        assert(this->columnCount_ == static_cast<int>(rowItem.items.size()));
 
         return rowItem.items[column]->flags();
     }
@@ -267,7 +270,8 @@ public:
             return false;
         }
 
-        assert(sourceRow >= 0 && sourceRow < this->rows_.size());
+        assert(sourceRow >= 0 &&
+               sourceRow < static_cast<int>(this->rows_.size()));
 
         int signalVectorRow = this->getVectorIndexFromModelIndex(sourceRow);
         this->beginMoveRows(sourceParent, sourceRow, sourceRow,
@@ -294,7 +298,7 @@ public:
             return false;
         }
 
-        assert(row >= 0 && row < this->rows_.size());
+        assert(row >= 0 && row < static_cast<int>(this->rows_.size()));
 
         int signalVectorRow = this->getVectorIndexFromModelIndex(row);
         this->vector_->removeAt(signalVectorRow);
@@ -337,8 +341,10 @@ public:
             int from = data->data("chatterino_row_id").toInt();
             int to = parent.row();
 
-            int vectorFrom = this->getVectorIndexFromModelIndex(from);
-            int vectorTo = this->getVectorIndexFromModelIndex(to);
+            auto vectorFrom =
+                static_cast<size_t>(this->getVectorIndexFromModelIndex(from));
+            auto vectorTo =
+                static_cast<size_t>(this->getVectorIndexFromModelIndex(to));
 
             if (vectorFrom < 0 || vectorFrom > this->vector_->raw().size() ||
                 vectorTo < 0 || vectorTo > this->vector_->raw().size())
@@ -402,7 +408,7 @@ protected:
 
     void insertCustomRow(std::vector<QStandardItem *> row, int index)
     {
-        assert(index >= 0 && index <= this->rows_.size());
+        assert(index >= 0 && index <= static_cast<int>(this->rows_.size()));
 
         this->beginInsertRows(QModelIndex(), index, index);
         this->rows_.insert(this->rows_.begin() + index,
@@ -412,7 +418,7 @@ protected:
 
     void removeCustomRow(int index)
     {
-        assert(index >= 0 && index <= this->rows_.size());
+        assert(index >= 0 && index <= static_cast<int>(this->rows_.size()));
         assert(this->rows_[index].isCustomRow);
 
         this->beginRemoveRows(QModelIndex(), index, index);
