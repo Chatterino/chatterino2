@@ -142,7 +142,7 @@ CreateEmoteResult createEmote(const QJsonObject &activeEmote,
             ? createAliasedTooltip(emoteName.string, baseEmoteName.string,
                                    author.string, kind)
             : createTooltip(emoteName.string, author.string, kind);
-    auto imageSet = SeventvEmotes::createImageSet(emoteData);
+    auto imageSet = SeventvEmotes::createImageSet(emoteData, false);
 
     auto emote = Emote({
         emoteName,

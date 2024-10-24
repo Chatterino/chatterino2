@@ -213,6 +213,8 @@ public:
     BoolSetting useCustomFfzVipBadges = {
         "/appearance/badges/useCustomFfzVipBadges", true};
     BoolSetting showBadgesSevenTV = {"/appearance/badges/seventv", true};
+    BoolSetting animateSevenTVBadges = {"/appearance/badges/animateSeventv",
+                                        true};
     QSizeSetting lastPopupSize = {
         "/appearance/lastPopup/size",
         {300, 500},

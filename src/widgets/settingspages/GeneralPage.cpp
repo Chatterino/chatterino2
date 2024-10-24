@@ -974,6 +974,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.useCustomFfzModeratorBadges);
     layout.addCheckbox("Use custom FrankerFaceZ VIP badges",
                        s.useCustomFfzVipBadges);
+    layout.addCheckbox("Animate 7TV badges", s.animateSevenTVBadges);
 
     layout.addSubtitle("Overlay");
     layout.addIntInput(
