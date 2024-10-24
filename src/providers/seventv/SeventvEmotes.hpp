@@ -156,8 +156,10 @@ public:
      * Creates an image set from a 7TV emote or badge.
      *
      * @param emoteData { host: { files: [], url } }
+     * @param useStatic use static version if possible
      */
-    static ImageSet createImageSet(const QJsonObject &emoteData);
+    static ImageSet createImageSet(const QJsonObject &emoteData,
+                                   bool useStatic);
 
 private:
     Atomic<std::shared_ptr<const EmoteMap>> global_;
