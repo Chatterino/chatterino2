@@ -179,6 +179,9 @@ public:
 
     LimitedQueueSnapshot<MessageLayoutPtr> &getMessagesSnapshot();
 
+    // Returns true if message should be included
+    bool shouldIncludeMessage(const MessagePtr &m) const;
+
     void queueLayout();
     void invalidateBuffers();
 
@@ -212,9 +215,13 @@ public:
 
     Scrollbar *scrollbar();
 
+    using ChannelViewID = std::size_t;
+    ChannelViewID getID() const;
+
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
-    pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
+    pajlada::Signals::Signal<HighlightState, const MessagePtr &>
+        tabHighlightRequested;
     pajlada::Signals::NoArgSignal liveStatusChanged;
     pajlada::Signals::Signal<const Link &> linkClicked;
     pajlada::Signals::Signal<QString, FromTwitchLinkOpenChannelIn>
@@ -314,6 +321,9 @@ private:
     void showReplyThreadPopup(const MessagePtr &message);
     bool canReplyToMessages() const;
 
+    void updateID();
+    ChannelViewID id_{};
+
     bool layoutQueued_ = false;
     bool bufferInvalidationQueued_ = false;
 
@@ -373,9 +383,6 @@ private:
     bool showScrollBar_ = false;
 
     FilterSetPtr channelFilters_;
-
-    // Returns true if message should be included
-    bool shouldIncludeMessage(const MessagePtr &m) const;
 
     // Returns whether the scrollbar should have highlights
     bool showScrollbarHighlights() const;
