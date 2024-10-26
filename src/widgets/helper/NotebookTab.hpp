@@ -125,25 +125,12 @@ private:
     bool shouldMessageHighlight(const ChannelView &channelViewSource,
                                 const MessagePtr &message) const;
 
-    struct HighlightSources {
-        // Source of the update to the highlight status is the split
-        // in which a message that causes the update appears.
-        // This message can be just a plain message causing the
-        // HighlightState::NewMessage state, or a message that pings the user
-        // causing the HighlightState::Highlighted state
-        std::unordered_set<ChannelView::ChannelViewID> newMessageSource;
-        std::unordered_set<ChannelView::ChannelViewID> highlightedSource;
-
-        void clear()
-        {
-            this->newMessageSource.clear();
-            this->highlightedSource.clear();
-        }
-    } highlightSources_;
+    using HighlightSources =
+        std::unordered_map<ChannelView::ChannelViewID, HighlightState>;
+    HighlightSources highlightSources_;
 
     void removeHighlightStateChangeSources(const HighlightSources &toRemove);
-    void removeNewMessageSource(const ChannelView::ChannelViewID &source);
-    void removeHighlightedSource(const ChannelView::ChannelViewID &source);
+    void removeHighlightSource(const ChannelView::ChannelViewID &source);
     void updateHighlightStateDueSourcesChange();
 
     QPropertyAnimation positionChangedAnimation_;

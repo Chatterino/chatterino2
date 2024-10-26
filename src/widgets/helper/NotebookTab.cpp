@@ -305,37 +305,25 @@ bool NotebookTab::isSelected() const
     return this->selected_;
 }
 
-void NotebookTab::removeNewMessageSource(
-    const ChannelView::ChannelViewID &source)
-{
-    this->highlightSources_.newMessageSource.erase(source);
-}
-
-void NotebookTab::removeHighlightedSource(
-    const ChannelView::ChannelViewID &source)
-{
-    this->highlightSources_.highlightedSource.erase(source);
-}
-
 void NotebookTab::removeHighlightStateChangeSources(
     const HighlightSources &toRemove)
 {
-    for (const auto &source : toRemove.newMessageSource)
+    for (const auto &[source, _] : toRemove)
     {
-        this->removeNewMessageSource(source);
+        this->removeHighlightSource(source);
     }
+}
 
-    for (const auto &source : toRemove.highlightedSource)
-    {
-        this->removeHighlightedSource(source);
-    }
+void NotebookTab::removeHighlightSource(
+    const ChannelView::ChannelViewID &source)
+{
+    this->highlightSources_.erase(source);
 }
 
 void NotebookTab::newHighlightSourceAdded(const ChannelView &channelViewSource)
 {
     auto channelViewId = channelViewSource.getID();
-    this->removeHighlightedSource(channelViewId);
-    this->removeNewMessageSource(channelViewId);
+    this->removeHighlightSource(channelViewId);
     this->updateHighlightStateDueSourcesChange();
 
     auto *splitNotebook = dynamic_cast<SplitNotebook *>(this->notebook_);
@@ -350,8 +338,7 @@ void NotebookTab::newHighlightSourceAdded(const ChannelView &channelViewSource)
                 auto *tab = splitContainer->getTab();
                 if (tab && tab != this)
                 {
-                    tab->removeHighlightedSource(channelViewId);
-                    tab->removeNewMessageSource(channelViewId);
+                    tab->removeHighlightSource(channelViewId);
                     tab->updateHighlightStateDueSourcesChange();
                 }
             }
@@ -361,13 +348,17 @@ void NotebookTab::newHighlightSourceAdded(const ChannelView &channelViewSource)
 
 void NotebookTab::updateHighlightStateDueSourcesChange()
 {
-    if (!this->highlightSources_.highlightedSource.empty())
+    if (std::ranges::any_of(this->highlightSources_, [](const auto &keyval) {
+            return keyval.second == HighlightState::Highlighted;
+        }))
     {
         assert(this->highlightState_ == HighlightState::Highlighted);
         return;
     }
 
-    if (!this->highlightSources_.newMessageSource.empty())
+    if (std::ranges::any_of(this->highlightSources_, [](const auto &keyval) {
+            return keyval.second == HighlightState::NewMessage;
+        }))
     {
         if (this->highlightState_ != HighlightState::NewMessage)
         {
@@ -391,8 +382,7 @@ void NotebookTab::copyHighlightStateAndSourcesFrom(const NotebookTab *sourceTab)
 {
     if (this->isSelected())
     {
-        assert(this->highlightSources_.highlightedSource.empty());
-        assert(this->highlightSources_.newMessageSource.empty());
+        assert(this->highlightSources_.empty());
         assert(this->highlightState_ == HighlightState::None);
         return;
     }
@@ -504,8 +494,7 @@ void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
 {
     if (this->isSelected())
     {
-        assert(this->highlightSources_.highlightedSource.empty());
-        assert(this->highlightSources_.newMessageSource.empty());
+        assert(this->highlightSources_.empty());
         assert(this->highlightState_ == HighlightState::None);
         return;
     }
@@ -534,8 +523,7 @@ void NotebookTab::updateHighlightState(HighlightState newHighlightStyle,
 {
     if (this->isSelected())
     {
-        assert(this->highlightSources_.highlightedSource.empty());
-        assert(this->highlightSources_.newMessageSource.empty());
+        assert(this->highlightSources_.empty());
         assert(this->highlightState_ == HighlightState::None);
         return;
     }
@@ -557,19 +545,16 @@ void NotebookTab::updateHighlightState(HighlightState newHighlightStyle,
 
     switch (newHighlightStyle)
     {
-        case HighlightState::Highlighted: {
-            if (!this->highlightSources_.highlightedSource.contains(
-                    channelViewId))
-            {
-                this->highlightSources_.highlightedSource.insert(channelViewId);
-            }
-            break;
-        }
+        case HighlightState::Highlighted:
+            // override lower states
+            this->highlightSources_.insert_or_assign(channelViewId,
+                                                     newHighlightStyle);
         case HighlightState::NewMessage: {
-            if (!this->highlightSources_.newMessageSource.contains(
-                    channelViewId))
+            // only insert if no state already there to avoid overriding
+            if (!this->highlightSources_.contains(channelViewId))
             {
-                this->highlightSources_.newMessageSource.insert(channelViewId);
+                this->highlightSources_.emplace(channelViewId,
+                                                newHighlightStyle);
             }
             break;
         }
