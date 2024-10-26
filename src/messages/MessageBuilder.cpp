@@ -32,6 +32,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrc.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "providers/twitch/TwitchUsers.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
@@ -378,6 +379,18 @@ EmotePtr makeAutoModBadge()
         ImageSet{Image::fromResourcePixmap(getResources().twitch.automod)},
         Tooltip{"AutoMod"},
         Url{"https://dashboard.twitch.tv/settings/moderation/automod"}});
+}
+
+EmotePtr makeSharedChatBadge(const QString &sourceName)
+{
+    return std::make_shared<Emote>(Emote{
+        .name = EmoteName{},
+        .images = ImageSet{Image::fromResourcePixmap(
+            getResources().twitch.sharedChat, 0.25)},
+        .tooltip = Tooltip{"Shared Message" +
+                           (sourceName.isEmpty() ? "" : " from " + sourceName)},
+        .homePage = Url{"https://link.twitch.tv/SharedChatViewer"},
+    });
 }
 
 std::tuple<std::optional<EmotePtr>, MessageElementFlags, bool> parseEmote(
@@ -2382,6 +2395,11 @@ void MessageBuilder::parseThread(const QString &messageContent,
         this->message().replyParent = parent;
         thread->addToThread(std::weak_ptr{this->message_});
 
+        if (thread->subscribed())
+        {
+            this->message().flags.set(MessageFlag::SubscribedThread);
+        }
+
         // enable reply flag
         this->message().flags.set(MessageFlag::ReplyMessage);
 
@@ -2744,6 +2762,28 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
     if (twitchChannel == nullptr)
     {
         return;
+    }
+
+    if (this->message().flags.has(MessageFlag::SharedMessage))
+    {
+        const QString sourceId = tags["source-room-id"].toString();
+        QString sourceName;
+        if (sourceId.isEmpty())
+        {
+            sourceName = "";
+        }
+        else if (twitchChannel->roomId() == sourceId)
+        {
+            sourceName = twitchChannel->getName();
+        }
+        else
+        {
+            sourceName =
+                getApp()->getTwitchUsers()->resolveID({sourceId})->displayName;
+        }
+
+        this->emplace<BadgeElement>(makeSharedChatBadge(sourceName),
+                                    MessageElementFlag::BadgeSharedChannel);
     }
 
     auto badgeInfos = parseBadgeInfoTag(tags);

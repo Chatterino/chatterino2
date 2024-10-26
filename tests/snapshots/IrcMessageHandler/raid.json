@@ -1,0 +1,145 @@
+{
+    "input": "@badges=subscriber/24;login=nerixyz;msg-param-displayName=nerixyz;user-type=;tmi-sent-ts=1729626466361;system-msg=2\\sraiders\\sfrom\\snerixyz\\shave\\sjoined!;room-id=11148817;user-id=129546453;display-name=nerixyz;subscriber=1;historical=1;rm-received-ts=1729626466492;msg-id=raid;vip=0;id=7299b7bc-61ce-423c-85ce-8d651b56cce4;msg-param-login=nerixyz;color=#FF0000;mod=0;msg-param-viewerCount=2;flags=;msg-param-profileImageURL=https://static-cdn.jtvnw.net/jtv_user_pictures/e065218b-49df-459d-afd3-c6557870f551-profile_image-%s.png;emotes=;badge-info=subscriber/28 :tmi.twitch.tv USERNOTICE #pajlada",
+    "output": [
+        {
+            "badgeInfos": {
+            },
+            "badges": [
+            ],
+            "channelName": "",
+            "count": 1,
+            "displayName": "",
+            "elements": [
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "19:47"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "19:47:46",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "2"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "raiders"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "from"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "fallbackColor": "System",
+                    "flags": "Text|Mention",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "MentionElement",
+                    "userColor": "#ffff0000",
+                    "userLoginName": "nerixyz",
+                    "words": [
+                        "nerixyz"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "have"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "joined!"
+                    ]
+                }
+            ],
+            "flags": "System|DoNotTriggerNotification|Subscription",
+            "id": "",
+            "localizedName": "",
+            "loginName": "",
+            "messageText": "2 raiders from nerixyz have joined!",
+            "searchText": "2 raiders from nerixyz have joined!",
+            "serverReceivedTime": "",
+            "timeoutUser": "",
+            "usernameColor": "#ff000000"
+        }
+    ]
+}
