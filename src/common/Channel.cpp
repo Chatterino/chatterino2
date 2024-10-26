@@ -3,7 +3,9 @@
 #include "Application.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "messages/MessageSimilarity.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/Settings.hpp"
@@ -121,10 +123,10 @@ void Channel::addSystemMessage(const QString &contents)
     this->addMessage(msg, MessageContext::Original);
 }
 
-void Channel::addOrReplaceTimeout(MessagePtr message)
+void Channel::addOrReplaceTimeout(MessagePtr message, QTime now)
 {
     addOrReplaceChannelTimeout(
-        this->getMessageSnapshot(), std::move(message), QTime::currentTime(),
+        this->getMessageSnapshot(), std::move(message), now,
         [this](auto /*idx*/, auto msg, auto replacement) {
             this->replaceMessage(msg, replacement);
         },
@@ -288,9 +290,14 @@ void Channel::clearMessages()
 
 MessagePtr Channel::findMessage(QString messageID)
 {
+    return this->findMessageByID(messageID);
+}
+
+MessagePtr Channel::findMessageByID(QStringView messageID)
+{
     MessagePtr res;
 
-    if (auto msg = this->messages_.rfind([&messageID](const MessagePtr &msg) {
+    if (auto msg = this->messages_.rfind([messageID](const MessagePtr &msg) {
             return msg->id == messageID;
         });
         msg)
@@ -299,6 +306,19 @@ MessagePtr Channel::findMessage(QString messageID)
     }
 
     return res;
+}
+
+void Channel::applySimilarityFilters(const MessagePtr &message) const
+{
+    setSimilarityFlags(message, this->messages_.getSnapshot());
+}
+
+MessageSinkTraits Channel::sinkTraits() const
+{
+    return {
+        MessageSinkTrait::AddMentionsToGlobalChannel,
+        MessageSinkTrait::RequiresKnownChannelPointReward,
+    };
 }
 
 bool Channel::canSendMessage() const

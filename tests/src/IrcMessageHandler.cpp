@@ -27,6 +27,7 @@
 #include "singletons/Emotes.hpp"
 #include "Test.hpp"
 #include "util/IrcHelpers.hpp"
+#include "util/VectorMessageSink.hpp"
 
 #include <IrcConnection>
 #include <QDebug>
@@ -53,7 +54,7 @@ namespace {
 ///
 /// When adding a test, start with `{ "input": "..." }` and set this to `true`
 /// to generate an initial snapshot. Make sure to verify the output!
-constexpr bool UPDATE_SNAPSHOTS = false;
+constexpr bool UPDATE_SNAPSHOTS = true;
 
 const QString IRC_CATEGORY = u"IrcMessageHandler"_s;
 
@@ -572,19 +573,14 @@ TEST_P(TestIrcMessageHandlerP, Run)
 {
     auto channel = makeMockTwitchChannel(u"pajlada"_s, *snapshot);
 
-    std::vector<MessagePtr> prevMessages;
+    VectorMessageSink sink;
 
     for (auto prevInput : snapshot->param("prevMessages").toArray())
     {
         auto *ircMessage = Communi::IrcMessage::fromData(
             prevInput.toString().toUtf8(), nullptr);
         ASSERT_NE(ircMessage, nullptr);
-        auto builtMessages = IrcMessageHandler::parseMessageWithReply(
-            channel.get(), ircMessage, prevMessages);
-        for (const auto &builtMessage : builtMessages)
-        {
-            prevMessages.emplace_back(builtMessage);
-        }
+        IrcMessageHandler::parseMessageInto(ircMessage, sink, channel.get());
         delete ircMessage;
     }
 
@@ -592,13 +588,13 @@ TEST_P(TestIrcMessageHandlerP, Run)
         Communi::IrcMessage::fromData(snapshot->inputUtf8(), nullptr);
     ASSERT_NE(ircMessage, nullptr);
 
-    auto builtMessages = IrcMessageHandler::parseMessageWithReply(
-        channel.get(), ircMessage, prevMessages);
+    auto firstAddedMsg = sink.messages().size();
+    IrcMessageHandler::parseMessageInto(ircMessage, sink, channel.get());
 
     QJsonArray got;
-    for (const auto &msg : builtMessages)
+    for (auto i = firstAddedMsg; i < sink.messages().size(); i++)
     {
-        got.append(msg->toJson());
+        got.append(sink.messages()[i]->toJson());
     }
 
     delete ircMessage;

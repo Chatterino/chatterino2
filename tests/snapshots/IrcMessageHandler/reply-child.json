@@ -80,7 +80,7 @@
                     "trailingSpace": true,
                     "type": "SingleLineTextElement",
                     "words": [
-                        "a"
+                        "b"
                     ]
                 },
                 {
@@ -169,6 +169,7 @@
             "localizedName": "",
             "loginName": "nerixyz",
             "messageText": "c",
+            "replyParent": "474f19ab-a1b0-410a-877a-5b0e2ae8be6d",
             "replyThread": {
                 "replies": [
                     "474f19ab-a1b0-410a-877a-5b0e2ae8be6d",
