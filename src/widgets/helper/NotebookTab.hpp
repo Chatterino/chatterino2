@@ -126,6 +126,11 @@ private:
                                 const MessagePtr &message) const;
 
     struct HighlightSources {
+        // Source of the update to the highlight status is the split
+        // in which a message that causes the update appears.
+        // This message can be just a plain message causing the
+        // HighlightState::NewMessage state, or a message that pings the user
+        // causing the HighlightState::Highlighted state
         std::unordered_set<ChannelView::ChannelViewID> newMessageSource;
         std::unordered_set<ChannelView::ChannelViewID> highlightedSource;
 

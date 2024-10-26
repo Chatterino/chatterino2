@@ -180,7 +180,7 @@ public:
     LimitedQueueSnapshot<MessageLayoutPtr> &getMessagesSnapshot();
 
     // Returns true if message should be included
-    bool shouldIncludeMessage(const MessagePtr &m) const;
+    bool shouldIncludeMessage(const MessagePtr &message) const;
 
     void queueLayout();
     void invalidateBuffers();
@@ -216,6 +216,11 @@ public:
     Scrollbar *scrollbar();
 
     using ChannelViewID = std::size_t;
+    ///
+    /// \brief Get the ID of this ChannelView
+    ///
+    /// The ID is made of the underlying channel's name
+    /// combined with the filter set IDs
     ChannelViewID getID() const;
 
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;

@@ -597,11 +597,10 @@ bool NotebookTab::shouldMessageHighlight(const ChannelView &channelViewSource,
         const auto &visibleSplits = visibleSplitContainer->getSplits();
         for (const auto &visibleSplit : visibleSplits)
         {
-            if (channelViewSource.underlyingChannel() ==
-                    visibleSplit->getChannel() &&
+            if (channelViewSource.getID() ==
+                    visibleSplit->getChannelView().getID() &&
                 visibleSplit->getChannelView().shouldIncludeMessage(message) &&
-                channelViewSource.shouldIncludeMessage(message) &&
-                channelViewSource.getFilterIds().empty())
+                channelViewSource.shouldIncludeMessage(message))
             {
                 return false;
             }
