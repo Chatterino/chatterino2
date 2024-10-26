@@ -10,7 +10,7 @@ namespace chatterino {
 VectorMessageSink::VectorMessageSink(MessageSinkTraits traits,
                                      MessageFlags additionalFlags)
     : additionalFlags(additionalFlags)
-    , traits(traits) {};
+    , traits(traits){};
 VectorMessageSink::~VectorMessageSink() = default;
 
 void VectorMessageSink::addMessage(MessagePtr message, MessageContext ctx,
