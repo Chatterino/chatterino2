@@ -54,7 +54,7 @@ namespace {
 ///
 /// When adding a test, start with `{ "input": "..." }` and set this to `true`
 /// to generate an initial snapshot. Make sure to verify the output!
-constexpr bool UPDATE_SNAPSHOTS = true;
+constexpr bool UPDATE_SNAPSHOTS = false;
 
 const QString IRC_CATEGORY = u"IrcMessageHandler"_s;
 
