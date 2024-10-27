@@ -1356,8 +1356,6 @@ void TwitchChannel::loadRecentMessages()
                 {
                     msgs.push_back(msg);
                 }
-
-                tc->addRecentChatter(msg->displayName);
             }
 
             getApp()->getTwitch()->getMentionsChannel()->fillInMissingMessages(

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/enums/MessageContext.hpp"
+#include "common/FlagsEnum.hpp"
 #include "messages/MessageFlag.hpp"
 
 #include <memory>
@@ -15,7 +16,14 @@ using MessagePtr = std::shared_ptr<const Message>;
 
 enum class MessageSinkTrait : uint8_t {
     None = 0,
+
+    /// Messages with the `Highlighted` and `ShowInMentions` flags should be
+    /// added to the global mentions channel when encountered.
     AddMentionsToGlobalChannel = 1 << 0,
+
+    /// A channel-point redemption whose reward is not yet known should not be
+    /// added to this sink, but queued in the corresponding TwitchChannel
+    /// (`addQueuedRedemption`).
     RequiresKnownChannelPointReward = 1 << 1,
 };
 using MessageSinkTraits = FlagsEnum<MessageSinkTrait>;
@@ -51,7 +59,7 @@ public:
     /// If there is no message found, an empty shared-pointer is returned.
     virtual MessagePtr findMessageByID(QStringView id) = 0;
 
-    ///
+    /// Behaviour to be exercised when parsing/building messages for this sink.
     virtual MessageSinkTraits sinkTraits() const = 0;
 };
 

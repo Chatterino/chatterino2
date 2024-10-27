@@ -1,9 +1,17 @@
 #include "messages/MessageSimilarity.hpp"
 
+#include "Application.hpp"
+#include "controllers/accounts/AccountController.hpp"
+#include "messages/LimitedQueueSnapshot.hpp"  // IWYU pragma: keep
+#include "providers/twitch/TwitchAccount.hpp"
+#include "singletons/Settings.hpp"
+
 #include <algorithm>
 #include <vector>
 
-namespace chatterino::similarity::detail {
+namespace {
+
+using namespace chatterino;
 
 float relativeSimilarity(QStringView str1, QStringView str2)
 {
@@ -48,4 +56,66 @@ float relativeSimilarity(QStringView str1, QStringView str2)
     return float(z) / float(div);
 }
 
-}  // namespace chatterino::similarity::detail
+template <std::ranges::bidirectional_range T>
+float inMessages(const MessagePtr &msg, const T &messages)
+{
+    float similarityPercent = 0.0F;
+
+    for (const auto &prevMsg :
+         messages | std::views::reverse |
+             std::views::take(getSettings()->hideSimilarMaxMessagesToCheck))
+    {
+        if (prevMsg->parseTime.secsTo(QTime::currentTime()) >=
+            getSettings()->hideSimilarMaxDelay)
+        {
+            break;
+        }
+        if (getSettings()->hideSimilarBySameUser &&
+            msg->loginName != prevMsg->loginName)
+        {
+            continue;
+        }
+        similarityPercent = std::max(
+            similarityPercent,
+            relativeSimilarity(msg->messageText, prevMsg->messageText));
+    }
+
+    return similarityPercent;
+}
+
+}  // namespace
+
+namespace chatterino {
+
+template <std::ranges::bidirectional_range T>
+void setSimilarityFlags(const MessagePtr &message, const T &messages)
+{
+    if (getSettings()->similarityEnabled)
+    {
+        bool isMyself =
+            message->loginName ==
+            getApp()->getAccounts()->twitch.getCurrent()->getUserName();
+        bool hideMyself = getSettings()->hideSimilarMyself;
+
+        if (isMyself && !hideMyself)
+        {
+            return;
+        }
+
+        if (inMessages(message, messages) > getSettings()->similarityPercentage)
+        {
+            message->flags.set(MessageFlag::Similar);
+            if (getSettings()->colorSimilarDisabled)
+            {
+                message->flags.set(MessageFlag::Disabled);
+            }
+        }
+    }
+}
+
+template void setSimilarityFlags<std::vector<MessagePtr>>(
+    const MessagePtr &msg, const std::vector<MessagePtr> &messages);
+template void setSimilarityFlags<LimitedQueueSnapshot<MessagePtr>>(
+    const MessagePtr &msg, const LimitedQueueSnapshot<MessagePtr> &messages);
+
+}  // namespace chatterino
