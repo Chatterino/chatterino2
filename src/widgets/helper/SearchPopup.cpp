@@ -241,7 +241,6 @@ LimitedQueueSnapshot<MessagePtr> SearchPopup::buildSnapshot()
         const LimitedQueueSnapshot<MessagePtr> &snapshot =
             sharedView.channel()->getMessageSnapshot();
 
-        // TODO: implement iterator on LimitedQueueSnapshot?
         for (const auto &message : snapshot)
         {
             if (filterSet && !filterSet->filter(message, sharedView.channel()))
