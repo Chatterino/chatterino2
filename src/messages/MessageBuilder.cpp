@@ -117,7 +117,7 @@ QString formatUpdatedEmoteList(const QString &platform,
         text += QString(" %1 %2 emotes ").arg(emoteNames.size()).arg(platform);
     }
 
-    auto i = 0;
+    size_t i = 0;
     for (const auto &emoteName : emoteNames)
     {
         i++;
