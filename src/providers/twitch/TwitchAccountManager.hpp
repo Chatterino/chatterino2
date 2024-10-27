@@ -35,7 +35,8 @@ class TwitchAccountManager
 
 public:
     struct UserData;
-    using UserCallback = std::function<void(const std::shared_ptr<TwitchAccount>&)>;
+    using UserCallback =
+        std::function<void(const std::shared_ptr<TwitchAccount> &)>;
 
     // Returns the current twitchUsers, or the anonymous user if we're not
     // currently logged in
