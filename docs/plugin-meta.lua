@@ -5,20 +5,20 @@
 -- Add the folder this file is in to "Lua.workspace.library".
 
 c2 = {}
----@alias c2.LogLevel.Debug "c2.LogLevel.Debug"
----@alias c2.LogLevel.Info "c2.LogLevel.Info"
----@alias c2.LogLevel.Warning "c2.LogLevel.Warning"
----@alias c2.LogLevel.Critical "c2.LogLevel.Critical"
----@alias c2.LogLevel c2.LogLevel.Debug|c2.LogLevel.Info|c2.LogLevel.Warning|c2.LogLevel.Critical
----@type { Debug: c2.LogLevel.Debug, Info: c2.LogLevel.Info, Warning: c2.LogLevel.Warning, Critical: c2.LogLevel.Critical }
-c2.LogLevel = {}
+---@enum c2.LogLevel
+c2.LogLevel = {
+    Debug = {}, ---@type c2.LogLevel.Debug
+    Info = {}, ---@type c2.LogLevel.Info
+    Warning = {}, ---@type c2.LogLevel.Warning
+    Critical = {}, ---@type c2.LogLevel.Critical
+}
 
 -- Begin src/controllers/plugins/api/EventType.hpp
 
----@alias c2.EventType.CompletionRequested "c2.EventType.CompletionRequested"
----@alias c2.EventType c2.EventType.CompletionRequested
----@type { CompletionRequested: c2.EventType.CompletionRequested }
-c2.EventType = {}
+---@enum c2.EventType
+c2.EventType = {
+    CompletionRequested = {}, ---@type c2.EventType.CompletionRequested
+}
 
 -- End src/controllers/plugins/api/EventType.hpp
 
@@ -38,19 +38,19 @@ c2.EventType = {}
 
 -- Begin src/common/Channel.hpp
 
----@alias c2.ChannelType.None "c2.ChannelType.None"
----@alias c2.ChannelType.Direct "c2.ChannelType.Direct"
----@alias c2.ChannelType.Twitch "c2.ChannelType.Twitch"
----@alias c2.ChannelType.TwitchWhispers "c2.ChannelType.TwitchWhispers"
----@alias c2.ChannelType.TwitchWatching "c2.ChannelType.TwitchWatching"
----@alias c2.ChannelType.TwitchMentions "c2.ChannelType.TwitchMentions"
----@alias c2.ChannelType.TwitchLive "c2.ChannelType.TwitchLive"
----@alias c2.ChannelType.TwitchAutomod "c2.ChannelType.TwitchAutomod"
----@alias c2.ChannelType.TwitchEnd "c2.ChannelType.TwitchEnd"
----@alias c2.ChannelType.Misc "c2.ChannelType.Misc"
----@alias c2.ChannelType c2.ChannelType.None|c2.ChannelType.Direct|c2.ChannelType.Twitch|c2.ChannelType.TwitchWhispers|c2.ChannelType.TwitchWatching|c2.ChannelType.TwitchMentions|c2.ChannelType.TwitchLive|c2.ChannelType.TwitchAutomod|c2.ChannelType.TwitchEnd|c2.ChannelType.Misc
----@type { None: c2.ChannelType.None, Direct: c2.ChannelType.Direct, Twitch: c2.ChannelType.Twitch, TwitchWhispers: c2.ChannelType.TwitchWhispers, TwitchWatching: c2.ChannelType.TwitchWatching, TwitchMentions: c2.ChannelType.TwitchMentions, TwitchLive: c2.ChannelType.TwitchLive, TwitchAutomod: c2.ChannelType.TwitchAutomod, TwitchEnd: c2.ChannelType.TwitchEnd, Misc: c2.ChannelType.Misc }
-c2.ChannelType = {}
+---@enum c2.ChannelType
+c2.ChannelType = {
+    None = {}, ---@type c2.ChannelType.None
+    Direct = {}, ---@type c2.ChannelType.Direct
+    Twitch = {}, ---@type c2.ChannelType.Twitch
+    TwitchWhispers = {}, ---@type c2.ChannelType.TwitchWhispers
+    TwitchWatching = {}, ---@type c2.ChannelType.TwitchWatching
+    TwitchMentions = {}, ---@type c2.ChannelType.TwitchMentions
+    TwitchLive = {}, ---@type c2.ChannelType.TwitchLive
+    TwitchAutomod = {}, ---@type c2.ChannelType.TwitchAutomod
+    TwitchEnd = {}, ---@type c2.ChannelType.TwitchEnd
+    Misc = {}, ---@type c2.ChannelType.Misc
+}
 
 -- End src/common/Channel.hpp
 
@@ -250,14 +250,14 @@ function HTTPRequest.create(method, url) end
 
 -- Begin src/common/network/NetworkCommon.hpp
 
----@alias HTTPMethod.Get "HTTPMethod.Get"
----@alias HTTPMethod.Post "HTTPMethod.Post"
----@alias HTTPMethod.Put "HTTPMethod.Put"
----@alias HTTPMethod.Delete "HTTPMethod.Delete"
----@alias HTTPMethod.Patch "HTTPMethod.Patch"
----@alias HTTPMethod HTTPMethod.Get|HTTPMethod.Post|HTTPMethod.Put|HTTPMethod.Delete|HTTPMethod.Patch
----@type { Get: HTTPMethod.Get, Post: HTTPMethod.Post, Put: HTTPMethod.Put, Delete: HTTPMethod.Delete, Patch: HTTPMethod.Patch }
-HTTPMethod = {}
+---@enum HTTPMethod
+HTTPMethod = {
+    Get = {}, ---@type HTTPMethod.Get
+    Post = {}, ---@type HTTPMethod.Post
+    Put = {}, ---@type HTTPMethod.Put
+    Delete = {}, ---@type HTTPMethod.Delete
+    Patch = {}, ---@type HTTPMethod.Patch
+}
 
 -- End src/common/network/NetworkCommon.hpp
 
