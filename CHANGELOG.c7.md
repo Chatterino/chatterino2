@@ -10,3 +10,4 @@
 - Dev(macOS): A single universal app is now released for macOS (#274, #279)
 - Dev: Refactored paints to avoid creation of intermediate widgets (#277)
 - Dev(macOS): The minimum required macOS version is now 13.0 Ventura (5e4a9c54e1ef369bb033ab32759019d324c03c85)
+- Dev: The client version is now sent through URL parameters to the 7TV EventAPI - previously, this was only sent in the `User-Agent` (1ad27c58fa4745cabf0358055df11be05cfe659a)
