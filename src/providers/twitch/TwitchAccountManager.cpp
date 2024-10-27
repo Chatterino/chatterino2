@@ -14,6 +14,8 @@
 #include "providers/twitch/TwitchUser.hpp"
 #include "util/SharedPtrElementLess.hpp"
 
+#include <QStringBuilder>
+
 namespace chatterino {
 
 using namespace literals;

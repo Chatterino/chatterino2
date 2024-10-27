@@ -12,6 +12,7 @@
 #include <boost/unordered/unordered_flat_map_fwd.hpp>
 #include <pajlada/signals.hpp>
 #include <QColor>
+#include <QDateTime>
 #include <QElapsedTimer>
 #include <QObject>
 #include <QString>
