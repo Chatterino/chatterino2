@@ -219,11 +219,13 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
 
                  const auto &timeoutButtons =
                      getSettings()->timeoutButtons.getValue();
-                 if (timeoutButtons.size() < buttonNum || 0 >= buttonNum)
+                 if (static_cast<int>(timeoutButtons.size()) < buttonNum ||
+                     0 >= buttonNum)
                  {
                      return QString("Invalid argument for execModeratorAction: "
                                     "%1. Integer out of usable range: [1, %2]")
-                         .arg(buttonNum, timeoutButtons.size() - 1);
+                         .arg(buttonNum,
+                              static_cast<int>(timeoutButtons.size()) - 1);
                  }
                  const auto &button = timeoutButtons.at(buttonNum - 1);
                  msg = QString("/timeout %1 %2")
@@ -690,9 +692,10 @@ void UserInfoPopup::installEvents()
             {
                 const auto &vector = getSettings()->blacklistedUsers.raw();
 
-                for (int i = 0; i < vector.size(); i++)
+                for (int i = 0; i < static_cast<int>(vector.size()); i++)
                 {
-                    if (this->userName_ == vector[i].getPattern())
+                    if (this->userName_ ==
+                        vector[static_cast<size_t>(i)].getPattern())
                     {
                         getSettings()->blacklistedUsers.removeAt(i);
                         i--;
@@ -899,9 +902,9 @@ void UserInfoPopup::updateUserData()
         // get ignoreHighlights state
         bool isIgnoringHighlights = false;
         const auto &vector = getSettings()->blacklistedUsers.raw();
-        for (int i = 0; i < vector.size(); i++)
+        for (const auto &user : vector)
         {
-            if (this->userName_ == vector[i].getPattern())
+            if (this->userName_ == user.getPattern())
             {
                 isIgnoringHighlights = true;
                 break;
