@@ -174,89 +174,96 @@ function c2.Channel.by_twitch_id(id) end
 
 -- Begin src/controllers/plugins/api/HTTPResponse.hpp
 
----@class HTTPResponse
-HTTPResponse = {}
+---@class c2.HTTPResponse
+c2.HTTPResponse = {}
 
 --- Returns the data. This is not guaranteed to be encoded using any
 --- particular encoding scheme. It's just the bytes the server returned.
 ---
-function HTTPResponse:data() end
+---@return string
+---@nodiscard
+function c2.HTTPResponse:data() end
 
 --- Returns the status code.
 ---
-function HTTPResponse:status() end
+---@return number|nil
+---@nodiscard
+function c2.HTTPResponse:status() end
 
 --- A somewhat human readable description of an error if such happened
 ---
-function HTTPResponse:error() end
+---@return string
+---@nodiscard
+function c2.HTTPResponse:error() end
 
 ---@return string
-function HTTPResponse:__tostring() end
+---@nodiscard
+function c2.HTTPResponse:__tostring() end
 
 -- End src/controllers/plugins/api/HTTPResponse.hpp
 
 -- Begin src/controllers/plugins/api/HTTPRequest.hpp
 
----@alias HTTPCallback fun(result: HTTPResponse): nil
----@class HTTPRequest
-HTTPRequest = {}
+---@alias c2.HTTPCallback fun(result: c2.HTTPResponse): nil
+---@class c2.HTTPRequest
+c2.HTTPRequest = {}
 
 --- Sets the success callback
 ---
----@param callback HTTPCallback Function to call when the HTTP request succeeds
-function HTTPRequest:on_success(callback) end
+---@param callback c2.HTTPCallback Function to call when the HTTP request succeeds
+function c2.HTTPRequest:on_success(callback) end
 
 --- Sets the failure callback
 ---
----@param callback HTTPCallback Function to call when the HTTP request fails or returns a non-ok status
-function HTTPRequest:on_error(callback) end
+---@param callback c2.HTTPCallback Function to call when the HTTP request fails or returns a non-ok status
+function c2.HTTPRequest:on_error(callback) end
 
 --- Sets the finally callback
 ---
 ---@param callback fun(): nil Function to call when the HTTP request finishes
-function HTTPRequest:finally(callback) end
+function c2.HTTPRequest:finally(callback) end
 
 --- Sets the timeout
 ---
 ---@param timeout integer How long in milliseconds until the times out
-function HTTPRequest:set_timeout(timeout) end
+function c2.HTTPRequest:set_timeout(timeout) end
 
 --- Sets the request payload
 ---
 ---@param data string
-function HTTPRequest:set_payload(data) end
+function c2.HTTPRequest:set_payload(data) end
 
 --- Sets a header in the request
 ---
 ---@param name string
 ---@param value string
-function HTTPRequest:set_header(name, value) end
+function c2.HTTPRequest:set_header(name, value) end
 
 --- Executes the HTTP request
 ---
-function HTTPRequest:execute() end
+function c2.HTTPRequest:execute() end
 
 ---@return string
-function HTTPRequest:__tostring() end
+function c2.HTTPRequest:__tostring() end
 
 --- Creates a new HTTPRequest
 ---
----@param method HTTPMethod Method to use
+---@param method c2.HTTPMethod Method to use
 ---@param url string Where to send the request to
----@return HTTPRequest
-function HTTPRequest.create(method, url) end
+---@return c2.HTTPRequest
+function c2.HTTPRequest.create(method, url) end
 
 -- End src/controllers/plugins/api/HTTPRequest.hpp
 
 -- Begin src/common/network/NetworkCommon.hpp
 
----@enum HTTPMethod
-HTTPMethod = {
-    Get = {}, ---@type HTTPMethod.Get
-    Post = {}, ---@type HTTPMethod.Post
-    Put = {}, ---@type HTTPMethod.Put
-    Delete = {}, ---@type HTTPMethod.Delete
-    Patch = {}, ---@type HTTPMethod.Patch
+---@enum c2.HTTPMethod
+c2.HTTPMethod = {
+    Get = {}, ---@type c2.HTTPMethod.Get
+    Post = {}, ---@type c2.HTTPMethod.Post
+    Put = {}, ---@type c2.HTTPMethod.Put
+    Delete = {}, ---@type c2.HTTPMethod.Delete
+    Patch = {}, ---@type c2.HTTPMethod.Patch
 }
 
 -- End src/common/network/NetworkCommon.hpp
