@@ -179,9 +179,6 @@ public:
 
     LimitedQueueSnapshot<MessageLayoutPtr> &getMessagesSnapshot();
 
-    // Returns true if message should be included
-    bool shouldIncludeMessage(const MessagePtr &message) const;
-
     void queueLayout();
     void invalidateBuffers();
 
@@ -387,6 +384,9 @@ private:
     bool showScrollBar_ = false;
 
     FilterSetPtr channelFilters_;
+
+    // Returns true if message should be included
+    bool shouldIncludeMessage(const MessagePtr &message) const;
 
     // Returns whether the scrollbar should have highlights
     bool showScrollbarHighlights() const;
