@@ -63,6 +63,7 @@
 - Bugfix: Fixed incorrect message being disabled in some cases upon approving or denying an automod caught message. (#5611)
 - Bugfix: Fixed double-click selection not working when clicking outside a message. (#5617)
 - Bugfix: Fixed emotes starting with ":" not tab-completing. (#5603)
+- Bugfix: Fixed 7TV emotes messing with Qt's HTML. (#5677)
 - Dev: Update Windows build from Qt 6.5.0 to Qt 6.7.1. (#5420)
 - Dev: Update vcpkg build Qt from 6.5.0 to 6.7.0, boost from 1.83.0 to 1.85.0, openssl from 3.1.3 to 3.3.0. (#5422)
 - Dev: Unsingletonize `ISoundController`. (#5462)
@@ -114,6 +115,7 @@
 - Dev: Refactored static `MessageBuilder` helpers to standalone functions. (#5652)
 - Dev: Decoupled reply parsing from `MessageBuilder`. (#5660, #5668)
 - Dev: Refactored IRC message building. (#5663)
+- Dev: Fixed some compiler warnings. (#5672)
 
 ## 2.5.1
 
