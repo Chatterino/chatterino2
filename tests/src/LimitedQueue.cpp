@@ -135,14 +135,14 @@ TEST(LimitedQueue, ReplaceItem)
     EXPECT_FALSE(res);
 
     // correct hint
-    EXPECT_EQ(queue.replaceItem(3ULL, 4, 11), 3);
+    EXPECT_EQ(queue.replaceItem(3, 4, 11), 3);
     // incorrect hints
-    EXPECT_EQ(queue.replaceItem(5ULL, 11, 12), 3);
-    EXPECT_EQ(queue.replaceItem(0ULL, 12, 13), 3);
+    EXPECT_EQ(queue.replaceItem(5, 11, 12), 3);
+    EXPECT_EQ(queue.replaceItem(0, 12, 13), 3);
     // oob hint
-    EXPECT_EQ(queue.replaceItem(42ULL, 13, 14), 3);
+    EXPECT_EQ(queue.replaceItem(42, 13, 14), 3);
     // bad needle
-    EXPECT_EQ(queue.replaceItem(0ULL, 15, 16), -1);
+    EXPECT_EQ(queue.replaceItem(0, 15, 16), -1);
 
     SNAPSHOT_EQUALS(queue.getSnapshot(), {9, 10, 3, 14, 5, 6},
                     "first snapshot");
@@ -198,6 +198,7 @@ TEST(LimitedQueue, Find)
                      })
                      .has_value());
 
+    using Pair = std::pair<size_t, int>;
     // with hint
     EXPECT_FALSE(queue
                      .find(0,
@@ -212,14 +213,14 @@ TEST(LimitedQueue, Find)
                             return i == 1;
                         })
                   .value(),
-              (std::pair{0ULL, 1}));
+              (Pair{0, 1}));
     EXPECT_EQ(queue
                   .find(1,
                         [](int i) {
                             return i == 2;
                         })
                   .value(),
-              (std::pair{1ULL, 2}));
+              (Pair{1, 2}));
     // incorrect hint
     EXPECT_EQ(queue
                   .find(1,
@@ -227,14 +228,14 @@ TEST(LimitedQueue, Find)
                             return i == 1;
                         })
                   .value(),
-              (std::pair{0ULL, 1}));
+              (Pair{0, 1}));
     EXPECT_EQ(queue
                   .find(5,
                         [](int i) {
                             return i == 6;
                         })
                   .value(),
-              (std::pair{5ULL, 6}));
+              (Pair{5, 6}));
     // oob hint
     EXPECT_EQ(queue
                   .find(6,
@@ -242,7 +243,7 @@ TEST(LimitedQueue, Find)
                             return i == 3;
                         })
                   .value(),
-              (std::pair{2ULL, 3}));
+              (Pair{2, 3}));
     // non-existent items
     EXPECT_FALSE(queue
                      .find(42,
