@@ -72,8 +72,7 @@ public:
      * Obeys the HighlightsEnabled setting and the highlight state hierarchy and tracks the highlight state update sources
      */
     void updateHighlightState(HighlightState style,
-                              const ChannelView &channelViewSource,
-                              const MessagePtr &message);
+                              const ChannelView &channelViewSource);
     void copyHighlightStateAndSourcesFrom(const NotebookTab *sourceTab);
     void setHighlightsEnabled(const bool &newVal);
     void newHighlightSourceAdded(const ChannelView &channelViewSource);
@@ -122,8 +121,7 @@ private:
 
     int normalTabWidthForHeight(int height) const;
 
-    bool shouldMessageHighlight(const ChannelView &channelViewSource,
-                                const MessagePtr &message) const;
+    bool shouldMessageHighlight(const ChannelView &channelViewSource) const;
 
     using HighlightSources =
         std::unordered_map<ChannelView::ChannelViewID, HighlightState>;

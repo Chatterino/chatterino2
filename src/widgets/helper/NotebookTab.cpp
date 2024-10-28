@@ -518,8 +518,7 @@ void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
 }
 
 void NotebookTab::updateHighlightState(HighlightState newHighlightStyle,
-                                       const ChannelView &channelViewSource,
-                                       const MessagePtr &message)
+                                       const ChannelView &channelViewSource)
 {
     if (this->isSelected())
     {
@@ -528,7 +527,7 @@ void NotebookTab::updateHighlightState(HighlightState newHighlightStyle,
         return;
     }
 
-    if (!this->shouldMessageHighlight(channelViewSource, message))
+    if (!this->shouldMessageHighlight(channelViewSource))
     {
         return;
     }
@@ -572,8 +571,8 @@ void NotebookTab::updateHighlightState(HighlightState newHighlightStyle,
     this->update();
 }
 
-bool NotebookTab::shouldMessageHighlight(const ChannelView &channelViewSource,
-                                         const MessagePtr &message) const
+bool NotebookTab::shouldMessageHighlight(
+    const ChannelView &channelViewSource) const
 {
     auto *visibleSplitContainer =
         dynamic_cast<SplitContainer *>(this->notebook_->getSelectedPage());
@@ -583,9 +582,7 @@ bool NotebookTab::shouldMessageHighlight(const ChannelView &channelViewSource,
         for (const auto &visibleSplit : visibleSplits)
         {
             if (channelViewSource.getID() ==
-                    visibleSplit->getChannelView().getID() &&
-                visibleSplit->getChannelView().shouldIncludeMessage(message) &&
-                channelViewSource.shouldIncludeMessage(message))
+                visibleSplit->getChannelView().getID())
             {
                 return false;
             }
