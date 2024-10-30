@@ -506,17 +506,18 @@ ImageSet SeventvEmotes::createImageSet(const QJsonObject &emoteData,
         {
             return u"WEBP"_s;
         }
-        // Look at the first two images and guess the target format.
-        auto first = files[0]["format"_L1].toString();
-        if (files.size() < 2)
+
+        // The fifth image is usually AVIF
+        if (files.size() >= 5 && files[4]["format"_L1].toString() == u"AVIF"_s)
         {
-            return first;
-        }
-        auto second = files[1]["format"_L1].toString();
-        if (first == u"AVIF"_s || second == u"AVIF"_s)
-        {
-            // prefer avif
             return u"AVIF"_s;
+        }
+        for (auto f : files)
+        {
+            if (f["format"_L1].toString() == u"AVIF"_s)
+            {
+                return u"AVIF"_s;
+            }
         }
         // fallback
         return u"WEBP"_s;
