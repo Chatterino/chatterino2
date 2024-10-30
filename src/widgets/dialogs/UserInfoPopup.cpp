@@ -1123,7 +1123,10 @@ void UserInfoPopup::loadSevenTVAvatar(const HelixUser &user)
             {
                 return;
             }
-            url.prepend("https:");
+            if (!url.startsWith(u"https:"))
+            {
+                url.prepend(u"https:");
+            }
 
             // We're implementing custom caching here,
             // because we need the cached file path.
