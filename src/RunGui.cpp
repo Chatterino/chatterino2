@@ -11,6 +11,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Updates.hpp"
 #include "util/CombinePath.hpp"
+#include "util/SelfCheck.hpp"
 #include "util/UnixSignalHandler.hpp"
 #include "widgets/dialogs/LastRunCrashDialog.hpp"
 
@@ -256,6 +257,8 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
         showLastCrashDialog(args, paths);
     }
 #endif
+
+    selfcheck::checkWebp();
 
     updates.deleteOldFiles();
 
