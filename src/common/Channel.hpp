@@ -98,8 +98,8 @@ public:
     /// Removes all messages from this channel and invokes #messagesCleared
     void clearMessages();
 
-    [[deprecated("Use findMessageByID instead")]]
-    MessagePtr findMessage(QString messageID);
+    [[deprecated("Use findMessageByID instead")]] MessagePtr findMessage(
+        QString messageID);
     MessagePtr findMessageByID(QStringView messageID) final;
 
     bool hasMessages() const;
