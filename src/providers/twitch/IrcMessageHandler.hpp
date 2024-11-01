@@ -61,8 +61,8 @@ public:
 
     static void addMessage(Communi::IrcMessage *message, MessageSink &sink,
                            TwitchChannel *channel,
-                           const QString &originalContent, bool isSub,
-                           bool isAction);
+                           const QString &originalContent,
+                           ITwitchIrcServer &twitch, bool isSub, bool isAction);
 
 private:
     static float similarity(const MessagePtr &msg,

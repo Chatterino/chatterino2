@@ -453,7 +453,7 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
                 {
                     IrcMessageHandler::instance().addMessage(
                         msg.message.get(), *this, this, msg.originalContent,
-                        false, false);
+                        *server, false, false);
                     return true;
                 }
                 return false;

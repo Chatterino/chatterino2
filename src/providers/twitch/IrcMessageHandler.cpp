@@ -369,8 +369,8 @@ void IrcMessageHandler::parsePrivMessageInto(
     }
 
     addMessage(message, sink, channel,
-               unescapeZeroWidthJoiner(message->content()), false,
-               message->isAction());
+               unescapeZeroWidthJoiner(message->content()),
+               *getApp()->getTwitch(), false, message->isAction());
 
     if (message->tags().contains(u"pinned-chat-paid-amount"_s))
     {
@@ -675,7 +675,8 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
         // Messages are not required, so they might be empty
         if (!content.isEmpty())
         {
-            addMessage(message, sink, channel, content, true, false);
+            addMessage(message, sink, channel, content, *getApp()->getTwitch(),
+                       true, false);
         }
     }
 
@@ -956,7 +957,8 @@ void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
                                    MessageSink &sink, TwitchChannel *channel,
-                                   const QString &originalContent, bool isSub,
+                                   const QString &originalContent,
+                                   ITwitchIrcServer &twitch, bool isSub,
                                    bool isAction)
 {
     assert(channel);
@@ -1101,8 +1103,8 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
         if (highlighted && showInMentions &&
             sink.sinkTraits().has(MessageSinkTrait::AddMentionsToGlobalChannel))
         {
-            getApp()->getTwitch()->getMentionsChannel()->addMessage(
-                msg, MessageContext::Original);
+            twitch.getMentionsChannel()->addMessage(msg,
+                                                    MessageContext::Original);
         }
 
         sink.addMessage(msg, MessageContext::Original);

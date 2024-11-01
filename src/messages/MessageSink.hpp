@@ -5,6 +5,7 @@
 #include "messages/MessageFlag.hpp"
 
 #include <memory>
+#include <optional>
 
 class QStringView;
 class QTime;
