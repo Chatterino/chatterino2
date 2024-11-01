@@ -956,12 +956,12 @@ void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
 }
 
 void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
-                                   MessageSink &sink, TwitchChannel *channel,
+                                   MessageSink &sink, TwitchChannel *chan,
                                    const QString &originalContent,
                                    ITwitchIrcServer &twitch, bool isSub,
                                    bool isAction)
 {
-    assert(channel);
+    assert(chan);
 
     MessageParseArgs args;
     if (isSub)
@@ -970,7 +970,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
         args.trimSubscriberUsername = true;
     }
 
-    if (channel->isBroadcaster())
+    if (chan->isBroadcaster())
     {
         args.isStaffOrBroadcaster = true;
     }
@@ -994,13 +994,13 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
     if (!rewardId.isEmpty() &&
         sink.sinkTraits().has(
             MessageSinkTrait::RequiresKnownChannelPointReward) &&
-        !channel->isChannelPointRewardKnown(rewardId))
+        !chan->isChannelPointRewardKnown(rewardId))
     {
         // Need to wait for pubsub reward notification
         qCDebug(chatterinoTwitch) << "TwitchChannel reward added ADD "
                                      "callback since reward is not known:"
                                   << rewardId;
-        channel->addQueuedRedemption(rewardId, originalContent, message);
+        chan->addQueuedRedemption(rewardId, originalContent, message);
         return;
     }
     args.channelPointRewardId = rewardId;
@@ -1014,9 +1014,9 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
         it != tags.end())
     {
         const QString replyID = it.value().toString();
-        auto threadIt = channel->threads().find(replyID);
+        auto threadIt = chan->threads().find(replyID);
         std::shared_ptr<MessageThread> rootThread;
-        if (threadIt != channel->threads().end() && !threadIt->second.expired())
+        if (threadIt != chan->threads().end() && !threadIt->second.expired())
         {
             // Thread already exists (has a reply)
             auto thread = threadIt->second.lock();
@@ -1037,7 +1037,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
                 replyCtx.thread = newThread;
                 rootThread = newThread;
                 // Store weak reference to thread in channel
-                channel->addReplyThread(newThread);
+                chan->addReplyThread(newThread);
             }
         }
 
@@ -1054,8 +1054,8 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
             }
             else
             {
-                auto parentThreadIt = channel->threads().find(parentID);
-                if (parentThreadIt != channel->threads().end())
+                auto parentThreadIt = chan->threads().find(parentID);
+                if (parentThreadIt != chan->threads().end())
                 {
                     auto thread = parentThreadIt->second.lock();
                     if (thread)
@@ -1077,7 +1077,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
 
     args.allowIgnore = !isSub;
     auto [msg, alert] = MessageBuilder::makeIrcMessage(
-        channel, message, args, content, messageOffset, replyCtx.thread,
+        chan, message, args, content, messageOffset, replyCtx.thread,
         replyCtx.parent);
 
     if (msg)
@@ -1094,7 +1094,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
             (!getSettings()->hideSimilar &&
              getSettings()->shownSimilarTriggerHighlights))
         {
-            MessageBuilder::triggerHighlights(channel, alert);
+            MessageBuilder::triggerHighlights(chan, alert);
         }
 
         const auto highlighted = msg->flags.has(MessageFlag::Highlighted);
@@ -1108,7 +1108,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
         }
 
         sink.addMessage(msg, MessageContext::Original);
-        channel->addRecentChatter(msg->displayName);
+        chan->addRecentChatter(msg->displayName);
     }
 }
 

@@ -60,8 +60,7 @@ public:
     void handlePartMessage(Communi::IrcMessage *message);
 
     static void addMessage(Communi::IrcMessage *message, MessageSink &sink,
-                           TwitchChannel *channel,
-                           const QString &originalContent,
+                           TwitchChannel *chan, const QString &originalContent,
                            ITwitchIrcServer &twitch, bool isSub, bool isAction);
 
 private:
