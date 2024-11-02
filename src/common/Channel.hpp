@@ -66,7 +66,9 @@ public:
     pajlada::Signals::Signal<MessagePtr &, std::optional<MessageFlags>>
         messageAppended;
     pajlada::Signals::Signal<std::vector<MessagePtr> &> messagesAddedAtStart;
-    pajlada::Signals::Signal<size_t, MessagePtr &> messageReplaced;
+    /// (index, prev-message, replacement)
+    pajlada::Signals::Signal<size_t, const MessagePtr &, const MessagePtr &>
+        messageReplaced;
     /// Invoked when some number of messages were filled in using time received
     pajlada::Signals::Signal<const std::vector<MessagePtr> &> filledInMessages;
     pajlada::Signals::NoArgSignal destroyed;
@@ -96,8 +98,11 @@ public:
 
     void addOrReplaceTimeout(MessagePtr message);
     void disableAllMessages();
-    void replaceMessage(MessagePtr message, MessagePtr replacement);
-    void replaceMessage(size_t index, MessagePtr replacement);
+    void replaceMessage(const MessagePtr &message,
+                        const MessagePtr &replacement);
+    void replaceMessage(size_t index, const MessagePtr &replacement);
+    void replaceMessage(size_t hint, const MessagePtr &message,
+                        const MessagePtr &replacement);
     void deleteMessage(QString messageID);
 
     /// Removes all messages from this channel and invokes #messagesCleared
