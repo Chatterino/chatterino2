@@ -967,10 +967,10 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
 
     this->channelConnections_.managedConnect(
         underlyingChannel->messageReplaced,
-        [this](auto index, const auto &replacement) {
+        [this](auto index, const auto &prev, const auto &replacement) {
             if (this->shouldIncludeMessage(replacement))
             {
-                this->channel_->replaceMessage(index, replacement);
+                this->channel_->replaceMessage(index, prev, replacement);
             }
         });
 
@@ -1051,8 +1051,9 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
     // on message replaced
     this->channelConnections_.managedConnect(
         this->channel_->messageReplaced,
-        [this](size_t index, MessagePtr replacement) {
-            this->messageReplaced(index, replacement);
+        [this](size_t index, const MessagePtr &prev,
+               const MessagePtr &replacement) {
+            this->messageReplaced(index, prev, replacement);
         });
 
     // on messages filled in
@@ -1262,19 +1263,21 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
     this->queueLayout();
 }
 
-void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
+void ChannelView::messageReplaced(size_t hint, const MessagePtr &prev,
+                                  const MessagePtr &replacement)
 {
-    auto oMessage = this->messages_.get(index);
-    if (!oMessage)
+    auto optItem = this->messages_.find(hint, [&](const auto &it) {
+        return it->getMessagePtr() == prev;
+    });
+    if (!optItem)
     {
         return;
     }
-
-    auto message = *oMessage;
+    const auto &[index, oldItem] = *optItem;
 
     auto newItem = std::make_shared<MessageLayout>(replacement);
 
-    if (message->flags.has(MessageLayoutFlag::AlternateBackground))
+    if (oldItem->flags.has(MessageLayoutFlag::AlternateBackground))
     {
         newItem->flags.set(MessageLayoutFlag::AlternateBackground);
     }
@@ -1282,7 +1285,7 @@ void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
     this->scrollBar_->replaceHighlight(index,
                                        replacement->getScrollBarHighlight());
 
-    this->messages_.replaceItem(message, newItem);
+    this->messages_.replaceItem(index, newItem);
     this->queueLayout();
 }
 

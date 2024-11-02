@@ -312,7 +312,7 @@ void TwitchIrcServer::initialize()
             postToThread([chan, action] {
                 MessageBuilder msg(action);
                 msg->flags.set(MessageFlag::PubSub);
-                chan->addOrReplaceTimeout(msg.release());
+                chan->addOrReplaceTimeout(msg.release(), QTime::currentTime());
             });
         });
 

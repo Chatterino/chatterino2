@@ -40,6 +40,7 @@ set(SOURCE_FILES
         common/WindowDescriptors.cpp
         common/WindowDescriptors.hpp
 
+        common/enums/MessageContext.hpp
         common/enums/MessageOverflow.hpp
 
         common/network/NetworkCommon.cpp
@@ -282,6 +283,9 @@ set(SOURCE_FILES
         messages/MessageElement.cpp
         messages/MessageElement.hpp
         messages/MessageFlag.hpp
+        messages/MessageSimilarity.cpp
+        messages/MessageSimilarity.hpp
+        messages/MessageSink.hpp
         messages/MessageThread.cpp
         messages/MessageThread.hpp
 
@@ -527,6 +531,8 @@ set(SOURCE_FILES
         util/Twitch.hpp
         util/TypeName.hpp
         util/Variant.hpp
+        util/VectorMessageSink.cpp
+        util/VectorMessageSink.hpp
         util/WidgetHelpers.cpp
         util/WidgetHelpers.hpp
         util/WindowsHelper.cpp

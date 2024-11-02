@@ -276,7 +276,8 @@ private:
                          std::optional<MessageFlags> overridingFlags);
     void messageAddedAtStart(std::vector<MessagePtr> &messages);
     void messageRemoveFromStart(MessagePtr &message);
-    void messageReplaced(size_t index, MessagePtr &replacement);
+    void messageReplaced(size_t hint, const MessagePtr &prev,
+                         const MessagePtr &replacement);
     void messagesUpdated();
 
     void performLayout(bool causedByScrollbar = false,
