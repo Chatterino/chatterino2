@@ -15,7 +15,7 @@ namespace chatterino::lua::api {
 // NOLINTBEGIN(readability-identifier-naming)
 
 /**
- * @lua@class HTTPResponse
+ * @lua@class c2.HTTPResponse
  */
 class HTTPResponse
 {
@@ -38,26 +38,34 @@ public:
      * Returns the data. This is not guaranteed to be encoded using any
      * particular encoding scheme. It's just the bytes the server returned.
      * 
-     * @exposed HTTPResponse:data
+     * @lua@return string
+     * @lua@nodiscard
+     * @exposed c2.HTTPResponse:data
      */
     QByteArray data();
 
     /**
      * Returns the status code.
      *
-     * @exposed HTTPResponse:status
+     * @lua@return number|nil
+     * @lua@nodiscard
+     * @exposed c2.HTTPResponse:status
      */
     std::optional<int> status();
 
     /**
      * A somewhat human readable description of an error if such happened
-     * @exposed HTTPResponse:error
+     *
+     * @lua@return string
+     * @lua@nodiscard
+     * @exposed c2.HTTPResponse:error
      */
     QString error();
 
     /**
      * @lua@return string
-     * @exposed HTTPResponse:__tostring
+     * @lua@nodiscard
+     * @exposed c2.HTTPResponse:__tostring
      */
     QString to_string();
 };

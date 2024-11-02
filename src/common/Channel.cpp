@@ -255,21 +255,33 @@ void Channel::fillInMissingMessages(const std::vector<MessagePtr> &messages)
     }
 }
 
-void Channel::replaceMessage(MessagePtr message, MessagePtr replacement)
+void Channel::replaceMessage(const MessagePtr &message,
+                             const MessagePtr &replacement)
 {
     int index = this->messages_.replaceItem(message, replacement);
 
     if (index >= 0)
     {
-        this->messageReplaced.invoke((size_t)index, replacement);
+        this->messageReplaced.invoke((size_t)index, message, replacement);
     }
 }
 
-void Channel::replaceMessage(size_t index, MessagePtr replacement)
+void Channel::replaceMessage(size_t index, const MessagePtr &replacement)
 {
-    if (this->messages_.replaceItem(index, replacement))
+    MessagePtr prev;
+    if (this->messages_.replaceItem(index, replacement, &prev))
     {
-        this->messageReplaced.invoke(index, replacement);
+        this->messageReplaced.invoke(index, prev, replacement);
+    }
+}
+
+void Channel::replaceMessage(size_t hint, const MessagePtr &message,
+                             const MessagePtr &replacement)
+{
+    auto index = this->messages_.replaceItem(hint, message, replacement);
+    if (index >= 0)
+    {
+        this->messageReplaced.invoke(hint, message, replacement);
     }
 }
 
