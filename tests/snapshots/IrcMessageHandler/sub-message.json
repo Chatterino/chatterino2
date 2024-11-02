@@ -243,6 +243,7 @@
                 }
             ],
             "flags": "Collapsed|Subscription",
+            "highlightColor": "#64c466ff",
             "id": "db25007f-7a18-43eb-9379-80131e44d633",
             "localizedName": "",
             "loginName": "ronni",
