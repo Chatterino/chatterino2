@@ -357,7 +357,7 @@ public:
      * @brief Find an item with a hint
      *
      * @param hint A hint on where the needle _might_ be
-     * @param needle The item to search for
+     * @param predicate that will used to find the item
      * @return the item and its index or none if it's not found
      */
     std::optional<std::pair<size_t, T>> find(size_t hint, auto &&predicate)
