@@ -37,6 +37,7 @@
 - Minor: Indicate when subscriptions and resubscriptions are for multiple months. (#5642)
 - Minor: Proxy URL information is now included in the `/debug-env` command. (#5648)
 - Minor: Make raid entry message usernames clickable. (#5651)
+- Minor: Tabs unhighlight when their content is read in other tabs. (#5649)
 - Bugfix: Fixed tab move animation occasionally failing to start after closing a tab. (#5426, #5612)
 - Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
 - Bugfix: Fixed restricted users usernames not being clickable. (#5405)
@@ -63,6 +64,7 @@
 - Bugfix: Fixed double-click selection not working when clicking outside a message. (#5617)
 - Bugfix: Fixed emotes starting with ":" not tab-completing. (#5603)
 - Bugfix: Fixed 7TV emotes messing with Qt's HTML. (#5677)
+- Bugfix: Fixed incorrect messages getting replaced visually. (#5683)
 - Dev: Update Windows build from Qt 6.5.0 to Qt 6.7.1. (#5420)
 - Dev: Update vcpkg build Qt from 6.5.0 to 6.7.0, boost from 1.83.0 to 1.85.0, openssl from 3.1.3 to 3.3.0. (#5422)
 - Dev: Unsingletonize `ISoundController`. (#5462)
@@ -75,7 +77,7 @@
 - Dev: Removed unused timegate settings. (#5361)
 - Dev: Add `Channel::addSystemMessage` helper function, allowing us to avoid the common `channel->addMessage(makeSystemMessage(...));` pattern. (#5500)
 - Dev: Unsingletonize `Resources2`. (#5460)
-- Dev: All Lua globals now show in the `c2` global in the LuaLS metadata. (#5385)
+- Dev: All Lua globals now show in the `c2` global in the LuaLS metadata. (#5385, #5682)
 - Dev: Images are now loaded in worker threads. (#5431)
 - Dev: Fixed broken `SignalVector::operator[]` implementation. (#5556)
 - Dev: Qt Creator now auto-configures Conan when loading the project and skips vcpkg. (#5305)
@@ -110,11 +112,12 @@
 - Dev: Twitch messages are now sent using Twitch's Helix API instead of IRC by default. (#5607)
 - Dev: `GIFTimer` is no longer initialized in tests. (#5608)
 - Dev: Emojis now use flags instead of a set of strings for capabilities. (#5616)
-- Dev: Move plugins to Sol2. (#5622)
+- Dev: Move plugins to Sol2. (#5622, #5682)
 - Dev: Refactored static `MessageBuilder` helpers to standalone functions. (#5652)
 - Dev: Decoupled reply parsing from `MessageBuilder`. (#5660, #5668)
 - Dev: Refactored IRC message building. (#5663)
 - Dev: Fixed some compiler warnings. (#5672)
+- Dev: Unified parsing of historic and live IRC messages. (#5678)
 
 ## 2.5.1
 

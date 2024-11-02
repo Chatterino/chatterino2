@@ -180,6 +180,7 @@
                 }
             ],
             "flags": "Collapsed|Subscription",
+            "highlightColor": "#64c466ff",
             "id": "8c26e1ab-b50c-4d9d-bc11-3fd57a941d90",
             "localizedName": "",
             "loginName": "supinic",
