@@ -1064,6 +1064,8 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
 
     this->underlyingChannel_ = underlyingChannel;
 
+    this->updateID();
+
     this->performLayout();
     this->queueUpdate();
 
@@ -1082,6 +1084,8 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
 void ChannelView::setFilters(const QList<QUuid> &ids)
 {
     this->channelFilters_ = std::make_shared<FilterSet>(ids);
+
+    this->updateID();
 }
 
 QList<QUuid> ChannelView::getFilterIds() const
@@ -3241,6 +3245,29 @@ void ChannelView::pendingLinkInfoStateChanged()
     }
     this->setLinkInfoTooltip(this->pendingLinkInfo_.data());
     this->tooltipWidget_->applyLastBoundsCheck();
+}
+
+void ChannelView::updateID()
+{
+    if (!this->underlyingChannel_)
+    {
+        // cannot update
+        return;
+    }
+
+    std::size_t seed = 0;
+    auto first = qHash(this->underlyingChannel_->getName());
+    auto second = qHash(this->getFilterIds());
+
+    boost::hash_combine(seed, first);
+    boost::hash_combine(seed, second);
+
+    this->id_ = seed;
+}
+
+ChannelView::ChannelViewID ChannelView::getID() const
+{
+    return this->id_;
 }
 
 }  // namespace chatterino
