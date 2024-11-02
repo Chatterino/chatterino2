@@ -118,6 +118,7 @@
 - Dev: Refactored IRC message building. (#5663)
 - Dev: Fixed some compiler warnings. (#5672)
 - Dev: Unified parsing of historic and live IRC messages. (#5678)
+- Dev: 7TV's `entitlement.reset` is now explicitly ignored. (#5685)
 
 ## 2.5.1
 
