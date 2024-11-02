@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 This script generates docs/plugin-meta.lua. It accepts no arguments
 
