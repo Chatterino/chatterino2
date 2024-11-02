@@ -368,9 +368,9 @@ void IrcMessageHandler::parsePrivMessageInto(
         }
     }
 
-    addMessage(message, sink, channel,
-               unescapeZeroWidthJoiner(message->content()),
-               *getApp()->getTwitch(), false, message->isAction());
+    IrcMessageHandler::addMessage(
+        message, sink, channel, unescapeZeroWidthJoiner(message->content()),
+        *getApp()->getTwitch(), false, message->isAction());
 
     if (message->tags().contains(u"pinned-chat-paid-amount"_s))
     {
