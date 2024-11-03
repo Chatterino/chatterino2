@@ -26,6 +26,7 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/PubSubActions.hpp"
+#include "providers/twitch/pubsubmessages/AutoMod.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
@@ -1636,6 +1637,12 @@ std::pair<MessagePtr, MessagePtr> MessageBuilder::makeAutomodMessage(
     const AutomodAction &action, const QString &channelName)
 {
     MessageBuilder builder, builder2;
+
+    if (action.reasonCode == PubSubAutoModQueueMessage::Reason::BlockedTerm)
+    {
+        builder.message().flags.set(MessageFlag::AutoModBlockedTerm);
+        builder2.message().flags.set(MessageFlag::AutoModBlockedTerm);
+    }
 
     //
     // Builder for AutoMod message with explanation

@@ -141,6 +141,9 @@ void MessageLayout::actuallyLayout(const MessageLayoutContext &ctx)
 
     bool hideModerated = getSettings()->hideModerated;
     bool hideModerationActions = getSettings()->hideModerationActions;
+    bool hideBlockedTermAutomodMessages =
+        getSettings()->showBlockedTermAutomodMessages.getEnum() ==
+        ShowModerationState::Never;
     bool hideSimilar = getSettings()->hideSimilar;
     bool hideReplies = !ctx.flags.has(MessageElementFlag::RepliedMessage);
 
@@ -150,6 +153,12 @@ void MessageLayout::actuallyLayout(const MessageLayoutContext &ctx)
     for (const auto &element : this->message_->elements)
     {
         if (hideModerated && this->message_->flags.has(MessageFlag::Disabled))
+        {
+            continue;
+        }
+
+        if (hideBlockedTermAutomodMessages &&
+            this->message_->flags.has(MessageFlag::AutoModBlockedTerm))
         {
             continue;
         }

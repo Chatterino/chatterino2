@@ -494,6 +494,7 @@ void TwitchIrcServer::initialize()
 
                         action.msgID = msg.messageID;
                         action.message = msg.messageText;
+                        action.reasonCode = msg.reason;
 
                         // this message also contains per-word automod data, which could be implemented
 
