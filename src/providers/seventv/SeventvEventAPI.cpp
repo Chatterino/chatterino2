@@ -233,6 +233,10 @@ void SeventvEventAPI::handleDispatch(const Dispatch &dispatch)
             }
         }
         break;
+        case SubscriptionType::ResetEntitlement: {
+            // unhandled (not clear what we'd do here yet)
+        }
+        break;
         default: {
             qCDebug(chatterinoSeventvEventAPI)
                 << "Unknown subscription type:"
