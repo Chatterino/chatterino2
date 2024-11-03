@@ -56,6 +56,7 @@
 - Bugfix: Fixed event emotes not showing up in autocomplete and popups. (#5239, #5580, #5582, #5632)
 - Bugfix: Fixed tab visibility being controllable in the emote popup. (#5530)
 - Bugfix: Fixed account switch not being saved if no other settings were changed. (#5558)
+- Bugfix: Fixed a crash that could occur when handling the quick switcher popup really quickly. (#5687)
 - Bugfix: Fixed 7TV badges being inadvertently animated. (#5674)
 - Bugfix: Fixed some tooltips not being readable. (#5578)
 - Bugfix: Fixed log files being locked longer than needed. (#5592)
