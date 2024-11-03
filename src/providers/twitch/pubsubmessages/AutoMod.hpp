@@ -30,7 +30,7 @@ struct PubSubAutoModQueueMessage {
     QString status;
 
     QString contentCategory;
-    int contentLevel;
+    int contentLevel{};
 
     QString messageID;
     QString messageText;
