@@ -119,9 +119,9 @@ void TooltipWidget::set(const std::vector<TooltipEntry> &entries,
 
     this->setVisibleEntries(entries.size());
 
-    for (int i = 0; i < entries.size(); ++i)
+    for (size_t i = 0; i < entries.size(); ++i)
     {
-        if (auto *entryWidget = this->entryAt(i))
+        if (auto *entryWidget = this->entryAt(static_cast<int>(i)))
         {
             const auto &entry = entries[i];
             entryWidget->setImage(entry.image);

@@ -79,7 +79,8 @@ bool isZeroWidthRecommended(const QJsonObject &emoteData)
 Tooltip createTooltip(const QString &name, const QString &author, bool isGlobal)
 {
     return Tooltip{QString("%1<br>%2 7TV Emote<br>By: %3")
-                       .arg(name, isGlobal ? "Global" : "Channel",
+                       .arg(name.toHtmlEscaped(),
+                            isGlobal ? "Global" : "Channel",
                             author.isEmpty() ? "<deleted>" : author)};
 }
 
@@ -87,7 +88,8 @@ Tooltip createAliasedTooltip(const QString &name, const QString &baseName,
                              const QString &author, bool isGlobal)
 {
     return Tooltip{QString("%1<br>Alias of %2<br>%3 7TV Emote<br>By: %4")
-                       .arg(name, baseName, isGlobal ? "Global" : "Channel",
+                       .arg(name.toHtmlEscaped(), baseName.toHtmlEscaped(),
+                            isGlobal ? "Global" : "Channel",
                             author.isEmpty() ? "<deleted>" : author)};
 }
 
@@ -106,12 +108,18 @@ CreateEmoteResult createEmote(const QJsonObject &activeEmote,
             ? createAliasedTooltip(emoteName.string, baseEmoteName.string,
                                    author.string, isGlobal)
             : createTooltip(emoteName.string, author.string, isGlobal);
-    auto imageSet = SeventvEmotes::createImageSet(emoteData);
+    auto imageSet = SeventvEmotes::createImageSet(emoteData, false);
 
-    auto emote =
-        Emote({emoteName, imageSet, tooltip,
-               Url{EMOTE_LINK_FORMAT.arg(emoteId.string)}, zeroWidth, emoteId,
-               author, makeConditionedOptional(aliasedName, baseEmoteName)});
+    auto emote = Emote({
+        emoteName,
+        imageSet,
+        tooltip,
+        Url{EMOTE_LINK_FORMAT.arg(emoteId.string)},
+        zeroWidth,
+        emoteId,
+        author,
+        makeConditionedOptional(aliasedName, baseEmoteName),
+    });
 
     return {emote, emoteId, emoteName, !emote.images.getImage1()->isEmpty()};
 }
@@ -427,7 +435,8 @@ void SeventvEmotes::getEmoteSet(
         });
 }
 
-ImageSet SeventvEmotes::createImageSet(const QJsonObject &emoteData)
+ImageSet SeventvEmotes::createImageSet(const QJsonObject &emoteData,
+                                       bool useStatic)
 {
     auto host = emoteData["host"].toObject();
     // "//cdn.7tv[...]"
@@ -463,9 +472,21 @@ ImageSet SeventvEmotes::createImageSet(const QJsonObject &emoteData)
             baseWidth = width;
         }
 
-        auto image = Image::fromUrl(
-            {QString("https:%1/%2").arg(baseUrl, file["name"].toString())},
-            scale, {static_cast<int>(width), file["height"].toInt(16)});
+        auto name = [&] {
+            if (useStatic)
+            {
+                auto staticName = file["static_name"].toString();
+                if (!staticName.isEmpty())
+                {
+                    return staticName;
+                }
+            }
+            return file["name"].toString();
+        }();
+
+        auto image =
+            Image::fromUrl({QString("https:%1/%2").arg(baseUrl, name)}, scale,
+                           {static_cast<int>(width), file["height"].toInt(16)});
 
         sizes.at(nextSize) = image;
         nextSize++;

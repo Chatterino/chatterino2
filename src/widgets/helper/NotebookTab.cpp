@@ -1,6 +1,7 @@
 #include "widgets/helper/NotebookTab.hpp"
 
 #include "Application.hpp"
+#include "common/Channel.hpp"
 #include "common/Common.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
@@ -12,9 +13,11 @@
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/DraggedSplit.hpp"
+#include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
 #include <boost/bind/bind.hpp>
+#include <boost/container_hash/hash.hpp>
 #include <QAbstractAnimation>
 #include <QApplication>
 #include <QDebug>
@@ -302,10 +305,134 @@ bool NotebookTab::isSelected() const
     return this->selected_;
 }
 
+void NotebookTab::removeHighlightStateChangeSources(
+    const HighlightSources &toRemove)
+{
+    for (const auto &[source, _] : toRemove)
+    {
+        this->removeHighlightSource(source);
+    }
+}
+
+void NotebookTab::removeHighlightSource(
+    const ChannelView::ChannelViewID &source)
+{
+    this->highlightSources_.erase(source);
+}
+
+void NotebookTab::newHighlightSourceAdded(const ChannelView &channelViewSource)
+{
+    auto channelViewId = channelViewSource.getID();
+    this->removeHighlightSource(channelViewId);
+    this->updateHighlightStateDueSourcesChange();
+
+    auto *splitNotebook = dynamic_cast<SplitNotebook *>(this->notebook_);
+    if (splitNotebook)
+    {
+        for (int i = 0; i < splitNotebook->getPageCount(); ++i)
+        {
+            auto *splitContainer =
+                dynamic_cast<SplitContainer *>(splitNotebook->getPageAt(i));
+            if (splitContainer)
+            {
+                auto *tab = splitContainer->getTab();
+                if (tab && tab != this)
+                {
+                    tab->removeHighlightSource(channelViewId);
+                    tab->updateHighlightStateDueSourcesChange();
+                }
+            }
+        }
+    }
+}
+
+void NotebookTab::updateHighlightStateDueSourcesChange()
+{
+    if (std::ranges::any_of(this->highlightSources_, [](const auto &keyval) {
+            return keyval.second == HighlightState::Highlighted;
+        }))
+    {
+        assert(this->highlightState_ == HighlightState::Highlighted);
+        return;
+    }
+
+    if (std::ranges::any_of(this->highlightSources_, [](const auto &keyval) {
+            return keyval.second == HighlightState::NewMessage;
+        }))
+    {
+        if (this->highlightState_ != HighlightState::NewMessage)
+        {
+            this->highlightState_ = HighlightState::NewMessage;
+            this->update();
+        }
+    }
+    else
+    {
+        if (this->highlightState_ != HighlightState::None)
+        {
+            this->highlightState_ = HighlightState::None;
+            this->update();
+        }
+    }
+
+    assert(this->highlightState_ != HighlightState::Highlighted);
+}
+
+void NotebookTab::copyHighlightStateAndSourcesFrom(const NotebookTab *sourceTab)
+{
+    if (this->isSelected())
+    {
+        assert(this->highlightSources_.empty());
+        assert(this->highlightState_ == HighlightState::None);
+        return;
+    }
+
+    this->highlightSources_ = sourceTab->highlightSources_;
+
+    if (!this->highlightEnabled_ &&
+        sourceTab->highlightState_ == HighlightState::NewMessage)
+    {
+        return;
+    }
+
+    if (this->highlightState_ == sourceTab->highlightState_ ||
+        this->highlightState_ == HighlightState::Highlighted)
+    {
+        return;
+    }
+
+    this->highlightState_ = sourceTab->highlightState_;
+    this->update();
+}
+
 void NotebookTab::setSelected(bool value)
 {
     this->selected_ = value;
 
+    if (value)
+    {
+        auto *splitNotebook = dynamic_cast<SplitNotebook *>(this->notebook_);
+        if (splitNotebook)
+        {
+            for (int i = 0; i < splitNotebook->getPageCount(); ++i)
+            {
+                auto *splitContainer =
+                    dynamic_cast<SplitContainer *>(splitNotebook->getPageAt(i));
+                if (splitContainer)
+                {
+                    auto *tab = splitContainer->getTab();
+                    if (tab && tab != this)
+                    {
+                        tab->removeHighlightStateChangeSources(
+                            this->highlightSources_);
+                        tab->updateHighlightStateDueSourcesChange();
+                    }
+                }
+            }
+        }
+    }
+
+    this->highlightSources_.clear();
     this->highlightState_ = HighlightState::None;
 
     this->update();
@@ -358,12 +485,21 @@ bool NotebookTab::isLive() const
     return this->isLive_;
 }
 
+HighlightState NotebookTab::highlightState() const
+{
+    return this->highlightState_;
+}
+
 void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
 {
     if (this->isSelected())
     {
+        assert(this->highlightSources_.empty());
+        assert(this->highlightState_ == HighlightState::None);
         return;
     }
+
+    this->highlightSources_.clear();
 
     if (!this->highlightEnabled_ &&
         newHighlightStyle == HighlightState::NewMessage)
@@ -381,9 +517,79 @@ void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
     this->update();
 }
 
-HighlightState NotebookTab::highlightState() const
+void NotebookTab::updateHighlightState(HighlightState newHighlightStyle,
+                                       const ChannelView &channelViewSource)
 {
-    return this->highlightState_;
+    if (this->isSelected())
+    {
+        assert(this->highlightSources_.empty());
+        assert(this->highlightState_ == HighlightState::None);
+        return;
+    }
+
+    if (!this->shouldMessageHighlight(channelViewSource))
+    {
+        return;
+    }
+
+    if (!this->highlightEnabled_ &&
+        newHighlightStyle == HighlightState::NewMessage)
+    {
+        return;
+    }
+
+    // message is highlighting unvisible tab
+
+    auto channelViewId = channelViewSource.getID();
+
+    switch (newHighlightStyle)
+    {
+        case HighlightState::Highlighted:
+            // override lower states
+            this->highlightSources_.insert_or_assign(channelViewId,
+                                                     newHighlightStyle);
+        case HighlightState::NewMessage: {
+            // only insert if no state already there to avoid overriding
+            if (!this->highlightSources_.contains(channelViewId))
+            {
+                this->highlightSources_.emplace(channelViewId,
+                                                newHighlightStyle);
+            }
+            break;
+        }
+        case HighlightState::None:
+            break;
+    }
+
+    if (this->highlightState_ == newHighlightStyle ||
+        this->highlightState_ == HighlightState::Highlighted)
+    {
+        return;
+    }
+
+    this->highlightState_ = newHighlightStyle;
+    this->update();
+}
+
+bool NotebookTab::shouldMessageHighlight(
+    const ChannelView &channelViewSource) const
+{
+    auto *visibleSplitContainer =
+        dynamic_cast<SplitContainer *>(this->notebook_->getSelectedPage());
+    if (visibleSplitContainer != nullptr)
+    {
+        const auto &visibleSplits = visibleSplitContainer->getSplits();
+        for (const auto &visibleSplit : visibleSplits)
+        {
+            if (channelViewSource.getID() ==
+                visibleSplit->getChannelView().getID())
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 void NotebookTab::setHighlightsEnabled(const bool &newVal)

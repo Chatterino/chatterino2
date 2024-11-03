@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0087 NEW) # evaluates generator expressions in `install(CODE/SCRIPT)`
 cmake_policy(SET CMP0091 NEW) # select MSVC runtime library through `CMAKE_MSVC_RUNTIME_LIBRARY`
+if (POLICY CMP0167)
+    cmake_policy(SET CMP0167 NEW) # find Boost's own CMake config file
+endif ()
 include(FeatureSummary)
 
 list(APPEND CMAKE_MODULE_PATH
@@ -212,6 +215,8 @@ endif()
 if (CHATTERINO_PLUGINS)
     set(LUA_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lib/lua/src")
     add_subdirectory(lib/lua)
+
+    find_package(Sol2 REQUIRED)
 endif()
 
 if (BUILD_WITH_CRASHPAD)

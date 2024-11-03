@@ -1,0 +1,179 @@
+{
+    "input": "@badge-info=;flags=;room-id=11148817;color=;client-nonce=0d1632f37b6baee51576859d5dbaf325;emotes=;subscriber=0;tmi-sent-ts=1727395701680;id=19ee1663-c14d-41cd-a4a2-30a4bb609c5a;turbo=1;badges=staff/1,turbo/1;source-badges=staff/1,moderator/1,bits-leader/1;source-badge-info=;display-name=creativewind;source-room-id=141981764;source-id=b97eea45-f9dc-4f0c-8744-f8256c3ed950;user-type=staff;user-id=106940612;mod=0 :creativewind!creativewind@creativewind.tmi.twitch.tv PRIVMSG #pajlada :Guy",
+    "output": [
+        {
+            "badgeInfos": {
+            },
+            "badges": [
+                "staff",
+                "turbo"
+            ],
+            "channelName": "pajlada",
+            "count": 1,
+            "displayName": "creativewind",
+            "elements": [
+                {
+                    "color": "System",
+                    "flags": "ChannelName",
+                    "link": {
+                        "type": "JumpToChannel",
+                        "value": "pajlada"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "#pajlada"
+                    ]
+                },
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "0:08"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "00:08:21",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "flags": "ModeratorTools",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TwitchModerationElement"
+                },
+                {
+                    "emote": {
+                        "homePage": "https://link.twitch.tv/SharedChatViewer",
+                        "images": {
+                            "1x": ""
+                        },
+                        "name": "",
+                        "tooltip": "Shared Message from twitchdev"
+                    },
+                    "flags": "BadgeSharedChannel",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Shared Message from twitchdev",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "emote": {
+                        "homePage": "https://www.twitch.tv/jobs?ref=chat_badge",
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/3"
+                        },
+                        "name": "",
+                        "tooltip": "Staff"
+                    },
+                    "flags": "BadgeGlobalAuthority",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Staff",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/bd444ec6-8f34-4bf9-91f4-af1e3428d80f/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/bd444ec6-8f34-4bf9-91f4-af1e3428d80f/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/bd444ec6-8f34-4bf9-91f4-af1e3428d80f/3"
+                        },
+                        "name": "",
+                        "tooltip": "Turbo"
+                    },
+                    "flags": "BadgeVanity",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Turbo",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "color": "#ff00ff00",
+                    "flags": "Username",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "creativewind"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "creativewind:"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "Guy"
+                    ]
+                },
+                {
+                    "background": "#ffa0a0a4",
+                    "flags": "ReplyButton",
+                    "link": {
+                        "type": "ReplyToMessage",
+                        "value": "19ee1663-c14d-41cd-a4a2-30a4bb609c5a"
+                    },
+                    "padding": 2,
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "CircularImageElement",
+                    "url": ""
+                }
+            ],
+            "flags": "DoNotTriggerNotification|Collapsed|SharedMessage",
+            "id": "19ee1663-c14d-41cd-a4a2-30a4bb609c5a",
+            "localizedName": "",
+            "loginName": "creativewind",
+            "messageText": "Guy",
+            "searchText": "creativewind  creativewind: Guy ",
+            "serverReceivedTime": "2024-09-27T00:08:21Z",
+            "timeoutUser": "",
+            "usernameColor": "#ff00ff00"
+        }
+    ]
+}

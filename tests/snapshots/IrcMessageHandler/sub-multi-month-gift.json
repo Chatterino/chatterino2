@@ -1,0 +1,238 @@
+{
+    "input": "@user-id=35759863;msg-param-origin-id=2862055070165643340;display-name=Lucidfoxx;id=eeb3cdb8-337c-413a-9521-3a884ff78754;msg-param-gift-months=12;msg-param-sub-plan=1000;vip=0;emotes=;badges=broadcaster/1,subscriber/3042,partner/1;msg-param-recipient-user-name=ogprodigy;msg-param-recipient-id=53888434;badge-info=subscriber/71;room-id=35759863;msg-param-recipient-display-name=OGprodigy;msg-param-sub-plan-name=Silver\\sPackage;subscriber=1;system-msg=Lucidfoxx\\sgifted\\sa\\sTier\\s1\\ssub\\sto\\sOGprodigy!;login=lucidfoxx;msg-param-sender-count=0;user-type=;mod=0;flags=;rm-received-ts=1712803947891;color=#EB078D;msg-param-months=15;tmi-sent-ts=1712803947773;msg-id=subgift :tmi.twitch.tv USERNOTICE #pajlada",
+    "output": [
+        {
+            "badgeInfos": {
+            },
+            "badges": [
+            ],
+            "channelName": "",
+            "count": 1,
+            "displayName": "",
+            "elements": [
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "2:52"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "02:52:27",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "color": "Text",
+                    "fallbackColor": "System",
+                    "flags": "Text|Mention",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "MentionElement",
+                    "userColor": "#ffeb078d",
+                    "userLoginName": "lucidfoxx",
+                    "words": [
+                        "Lucidfoxx"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "gifted"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "12"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "months"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "of"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "a"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "Tier"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "1"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "sub"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "to"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "fallbackColor": "System",
+                    "flags": "Text|Mention",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": false,
+                    "type": "MentionElement",
+                    "userColor": "System",
+                    "userLoginName": "ogprodigy",
+                    "words": [
+                        "OGprodigy"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "!"
+                    ]
+                }
+            ],
+            "flags": "System|DoNotTriggerNotification|Subscription",
+            "id": "",
+            "localizedName": "",
+            "loginName": "",
+            "messageText": "Lucidfoxx gifted 12 months of a Tier 1 sub to OGprodigy!",
+            "searchText": "Lucidfoxx gifted 12 months of a Tier 1 sub to OGprodigy!",
+            "serverReceivedTime": "",
+            "timeoutUser": "",
+            "usernameColor": "#ff000000"
+        }
+    ]
+}

@@ -22,7 +22,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/UtilTwitch.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/IrcHelpers.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/TwitchPubSubClient.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/MessageBuilder.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/IrcMessageHandler.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/HighlightController.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/FormatTime.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/LimitedQueue.cpp
@@ -48,6 +48,11 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/FlagsEnum.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/MessageLayoutContainer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/CancellationToken.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Plugins.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/TwitchIrc.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/IgnoreController.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/lib/Snapshot.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/lib/Snapshot.hpp
     # Add your new file above this line!
     )
 
@@ -58,6 +63,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE chatterino-lib)
 target_link_libraries(${PROJECT_NAME} PRIVATE chatterino-mocks)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE gtest gmock)
+
+target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_LIST_DIR}/src")
 
 set_target_properties(${PROJECT_NAME}
     PROPERTIES

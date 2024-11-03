@@ -87,7 +87,8 @@ public:
             }
             else
             {
-                assert(index >= 0 && index <= this->items_.size());
+                assert(index >= 0 &&
+                       index <= static_cast<int>(this->items_.size()));
             }
 
             this->items_.insert(this->items_.begin() + index, item);
@@ -116,7 +117,7 @@ public:
     void removeAt(int index, void *caller = nullptr)
     {
         assertInGuiThread();
-        assert(index >= 0 && index < int(this->items_.size()));
+        assert(index >= 0 && index < static_cast<int>(this->items_.size()));
 
         T item = this->items_[index];
         this->items_.erase(this->items_.begin() + index);
@@ -132,13 +133,14 @@ public:
     {
         assertInGuiThread();
 
-        for (int index = 0; index < this->items_.size(); ++index)
+        for (size_t index = 0; index < this->items_.size(); ++index)
         {
             T item = this->items_[index];
             if (matcher(item))
             {
                 this->items_.erase(this->items_.begin() + index);
-                SignalVectorItemEvent<T> args{item, index, caller};
+                SignalVectorItemEvent<T> args{item, static_cast<int>(index),
+                                              caller};
                 this->itemRemoved.invoke(args);
                 this->itemsChanged_();
                 return true;

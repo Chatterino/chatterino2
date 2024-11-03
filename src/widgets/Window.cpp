@@ -18,6 +18,7 @@
 #include "singletons/Updates.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/InitUpdateButton.hpp"
+#include "util/RapidJsonSerializeQSize.hpp"
 #include "widgets/AccountSwitchPopup.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/switcher/QuickSwitcherPopup.hpp"
@@ -51,7 +52,9 @@
 namespace chatterino {
 
 Window::Window(WindowType type, QWidget *parent)
-    : BaseWindow(BaseWindow::EnableCustomFrame, parent)
+    : BaseWindow(
+          {BaseWindow::EnableCustomFrame, BaseWindow::ClearBuffersOnDpiChange},
+          parent)
     , type_(type)
     , notebook_(new SplitNotebook(this))
 {
@@ -75,7 +78,13 @@ Window::Window(WindowType type, QWidget *parent)
     }
     else
     {
-        this->resize(int(300 * this->scale()), int(500 * this->scale()));
+        auto lastPopup = getSettings()->lastPopupSize.getValue();
+        if (lastPopup.isEmpty())
+        {
+            // The size in the setting was invalid, use the default value
+            lastPopup = getSettings()->lastPopupSize.getDefaultValue();
+        }
+        this->resize(lastPopup.width(), lastPopup.height());
     }
 
     this->signalHolder_.managedConnect(getApp()->getHotkeys()->onItemsUpdated,
@@ -113,20 +122,14 @@ bool Window::event(QEvent *event)
         }
 
         case QEvent::WindowDeactivate: {
-            for (const auto &split :
-                 this->notebook_->getSelectedPage()->getSplits())
-            {
-                split->unpause();
-            }
-
             auto *page = this->notebook_->getSelectedPage();
 
             if (page != nullptr)
             {
                 std::vector<Split *> splits = page->getSplits();
-
                 for (Split *split : splits)
                 {
+                    split->unpause();
                     split->updateLastReadMessage();
                 }
 
@@ -148,7 +151,12 @@ void Window::closeEvent(QCloseEvent *)
         getApp()->getWindows()->save();
         getApp()->getWindows()->closeAll();
     }
-
+    else
+    {
+        QRect rect = this->getBounds();
+        QSize newSize(rect.width(), rect.height());
+        getSettings()->lastPopupSize.setValue(newSize);
+    }
     // Ensure selectedWindow_ is never an invalid pointer.
     // WindowManager will return the main window if no window is pointed to by
     // `selectedWindow_`.

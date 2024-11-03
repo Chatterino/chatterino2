@@ -4,8 +4,10 @@
 #include "common/FlagsEnum.hpp"
 #include "common/Literals.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/PostToThread.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/InvisibleSizeGrip.hpp"
@@ -85,7 +87,8 @@ namespace chatterino {
 
 using namespace std::chrono_literals;
 
-OverlayWindow::OverlayWindow(IndirectChannel channel)
+OverlayWindow::OverlayWindow(IndirectChannel channel,
+                             const QList<QUuid> &filterIDs)
     : QWidget(nullptr,
               Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)
 #ifdef Q_OS_WIN
@@ -116,6 +119,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel)
     });
 
     this->channelView_.installEventFilter(this);
+    this->channelView_.setFilters(filterIDs);
     this->channelView_.setChannel(this->channel_.get());
     this->channelView_.setIsOverlay(true);  // use overlay colors
     this->channelView_.setAttribute(Qt::WA_TranslucentBackground);
@@ -164,6 +168,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel)
 
     this->addShortcuts();
     this->triggerFirstActivation();
+    getApp()->getEmotes()->getGIFTimer().registerOpenOverlayWindow();
 }
 
 OverlayWindow::~OverlayWindow()
@@ -171,6 +176,7 @@ OverlayWindow::~OverlayWindow()
 #ifdef Q_OS_WIN
     ::DestroyCursor(this->sizeAllCursor_);
 #endif
+    getApp()->getEmotes()->getGIFTimer().unregisterOpenOverlayWindow();
 }
 
 void OverlayWindow::applyTheme()
@@ -307,6 +313,13 @@ bool OverlayWindow::nativeEvent(const QByteArray &eventType, void *message,
         }
         break;
 #    endif
+        case WM_DPICHANGED: {
+            // wait for Qt to process this message, same as in BaseWindow
+            postToThread([] {
+                getApp()->getWindows()->invalidateChannelViewBuffers();
+            });
+        }
+        break;
 
         default:
             return QWidget::nativeEvent(eventType, message, result);

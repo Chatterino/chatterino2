@@ -214,12 +214,20 @@ void SplitContainer::addSplit(Split *split)
     auto &&conns = this->connectionsPerSplit_[split];
 
     conns.managedConnect(split->getChannelView().tabHighlightRequested,
-                         [this](HighlightState state) {
+                         [this, split](HighlightState state) {
                              if (this->tab_ != nullptr)
                              {
-                                 this->tab_->setHighlightState(state);
+                                 this->tab_->updateHighlightState(
+                                     state, split->getChannelView());
                              }
                          });
+
+    conns.managedConnect(split->channelChanged, [this, split] {
+        if (this->tab_ != nullptr)
+        {
+            this->tab_->newHighlightSourceAdded(split->getChannelView());
+        }
+    });
 
     conns.managedConnect(split->getChannelView().liveStatusChanged, [this]() {
         this->refreshTabLiveStatus();
@@ -805,6 +813,32 @@ void SplitContainer::popup()
     window.show();
 }
 
+QString channelTypeToString(Channel::Type value) noexcept
+{
+    using Type = chatterino::Channel::Type;
+    switch (value)
+    {
+        default:
+            assert(false && "value cannot be serialized");
+            return "never";
+
+        case Type::Twitch:
+            return "twitch";
+        case Type::TwitchWhispers:
+            return "whispers";
+        case Type::TwitchWatching:
+            return "watching";
+        case Type::TwitchMentions:
+            return "mentions";
+        case Type::TwitchLive:
+            return "live";
+        case Type::TwitchAutomod:
+            return "automod";
+        case Type::Misc:
+            return "misc";
+    }
+}
+
 NodeDescriptor SplitContainer::buildDescriptorRecursively(
     const Node *currentNode) const
 {
@@ -814,7 +848,7 @@ NodeDescriptor SplitContainer::buildDescriptorRecursively(
             currentNode->split_->getIndirectChannel().getType();
 
         SplitNodeDescriptor result;
-        result.type_ = qmagicenum::enumNameString(channelType);
+        result.type_ = channelTypeToString(channelType);
         result.channelName_ = currentNode->split_->getChannel()->getName();
         result.filters_ = currentNode->split_->getFilters();
         return result;

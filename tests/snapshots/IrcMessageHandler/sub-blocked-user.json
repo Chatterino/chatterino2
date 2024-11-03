@@ -1,0 +1,5 @@
+{
+    "input": "@badges=subscriber/0,premium/1;color=#0000FF;display-name=blocked;emotes=;id=fe390424-ab89-4c33-bb5a-53c6e5214b9f;login=blocked;mod=0;msg-id=sub;msg-param-months=0;msg-param-sub-plan-name=Dakotaz;msg-param-sub-plan=Prime;room-id=39298218;subscriber=0;system-msg=byebyeheart\\sjust\\ssubscribed\\swith\\sTwitch\\sPrime!;tmi-sent-ts=1528190963670;turbo=0;user-id=12345;user-type= :tmi.twitch.tv USERNOTICE #pajlada",
+    "output": [
+    ]
+}

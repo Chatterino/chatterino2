@@ -18,9 +18,21 @@ public:
         return this->position_;
     }
 
+    void registerOpenOverlayWindow()
+    {
+        this->openOverlayWindows_++;
+    }
+
+    void unregisterOpenOverlayWindow()
+    {
+        assert(this->openOverlayWindows_ >= 1);
+        this->openOverlayWindows_--;
+    }
+
 private:
     QTimer timer;
     long unsigned position_{};
+    size_t openOverlayWindows_ = 0;
 };
 
 }  // namespace chatterino

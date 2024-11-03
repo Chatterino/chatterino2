@@ -3,7 +3,9 @@
 #include "common/Env.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 #include "util/Helpers.hpp"
+#include "util/VectorMessageSink.hpp"
 
 #include <QJsonArray>
 #include <QUrlQuery>
@@ -40,7 +42,13 @@ std::vector<Communi::IrcMessage *> parseRecentMessages(
 std::vector<MessagePtr> buildRecentMessages(
     std::vector<Communi::IrcMessage *> &messages, Channel *channel)
 {
-    std::vector<MessagePtr> allBuiltMessages;
+    VectorMessageSink sink({}, MessageFlag::RecentMessage);
+
+    auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel);
+    if (!twitchChannel)
+    {
+        return {};
+    }
 
     for (auto *message : messages)
     {
@@ -58,24 +66,16 @@ std::vector<MessagePtr> buildRecentMessages(
                 auto msg = makeSystemMessage(
                     QLocale().toString(msgDate, QLocale::LongFormat),
                     QTime(0, 0));
-                msg->flags.set(MessageFlag::RecentMessage);
-                allBuiltMessages.emplace_back(msg);
+                sink.addMessage(msg, MessageContext::Original);
             }
         }
 
-        auto builtMessages = IrcMessageHandler::parseMessageWithReply(
-            channel, message, allBuiltMessages);
-
-        for (const auto &builtMessage : builtMessages)
-        {
-            builtMessage->flags.set(MessageFlag::RecentMessage);
-            allBuiltMessages.emplace_back(builtMessage);
-        }
+        IrcMessageHandler::parseMessageInto(message, sink, twitchChannel);
 
         message->deleteLater();
     }
 
-    return allBuiltMessages;
+    return std::move(sink).takeMessages();
 }
 
 // Returns the URL to be used for querying the Recent Messages API for the

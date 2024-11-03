@@ -8,6 +8,7 @@ on:
 
 env:
   TWITCH_PUBSUB_SERVER_TAG: v1.0.7
+  HTTPBOX_TAG: v0.2.1
   QT_QPA_PLATFORM: minimal
   HOMEBREW_NO_AUTO_UPDATE: 1
   HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
@@ -24,7 +25,7 @@ jobs:
       matrix:
         os: [macos-13]
         qt-version: [5.15.2, 6.7.1]
-        plugins: [false]
+        plugins: [true]
       fail-fast: false
     env:
       C2_BUILD_WITH_QT6: ${{ startsWith(matrix.qt-version, '6.') && 'ON' || 'OFF' }}
@@ -58,6 +59,13 @@ jobs:
         run: |
           brew install boost openssl rapidjson p7zip create-dmg cmake
 
+      - name: Install httpbox
+        run: |
+          curl -L -o httpbox.tar.xz "https://github.com/Chatterino/httpbox/releases/download/${{ env.HTTPBOX_TAG }}/httpbox-x86_64-apple-darwin.tar.xz"
+          tar -xJf httpbox.tar.xz
+          mv ./httpbox-x86_64-apple-darwin/httpbox /usr/local/bin
+        working-directory: /tmp
+
       - name: Build
         run: |
           mkdir build-test
@@ -82,10 +90,6 @@ jobs:
           curl -L -o server.crt "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.crt"
           curl -L -o server.key "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.key"
           cd ..
-
-      - name: Cargo Install httpbox
-        run: |
-          cargo install --git https://github.com/kevinastone/httpbox --rev 89b971f
 
       - name: Test
         timeout-minutes: 30
