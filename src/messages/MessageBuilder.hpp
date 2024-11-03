@@ -52,8 +52,6 @@ namespace linkparser {
 
 struct SystemMessageTag {
 };
-struct RaidEntryMessageTag {
-};
 struct TimeoutMessageTag {
 };
 struct LiveUpdatesUpdateEmoteMessageTag {
@@ -69,7 +67,6 @@ struct ImageUploaderResultTag {
 
 // NOLINTBEGIN(readability-identifier-naming)
 const SystemMessageTag systemMessage{};
-const RaidEntryMessageTag raidEntryMessage{};
 const TimeoutMessageTag timeoutMessage{};
 const LiveUpdatesUpdateEmoteMessageTag liveUpdatesUpdateEmoteMessage{};
 const LiveUpdatesRemoveEmoteMessageTag liveUpdatesRemoveEmoteMessage{};
