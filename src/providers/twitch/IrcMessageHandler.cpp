@@ -699,35 +699,6 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
         {
             messageText = "Announcement";
         }
-        else if (msgType == "raid")
-        {
-            auto login = tags.value("login").toString();
-            auto displayName = tags.value("msg-param-displayName").toString();
-
-            if (!login.isEmpty() && !displayName.isEmpty())
-            {
-                MessageColor color = MessageColor::System;
-                if (auto colorTag = tags.value("color").value<QColor>();
-                    colorTag.isValid())
-                {
-                    color = MessageColor(colorTag);
-                }
-
-                auto b = MessageBuilder(
-                    raidEntryMessage, parseTagString(messageText), login,
-                    displayName, color, calculateMessageTime(message).time());
-
-                b->flags.set(MessageFlag::Subscription);
-                if (mirrored)
-                {
-                    b->flags.set(MessageFlag::SharedMessage);
-                }
-                auto newMessage = b.release();
-
-                sink.addMessage(newMessage, MessageContext::Original);
-                return;
-            }
-        }
         else if (msgType == "subgift")
         {
             if (auto monthsIt = tags.find("msg-param-gift-months");
@@ -762,6 +733,20 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
                     }
                 }
             }
+
+            // subgifts are special because they include two users
+            auto msg = MessageBuilder::makeSubgiftMessage(
+                parseTagString(messageText), tags,
+                calculateMessageTime(message).time());
+
+            msg->flags.set(MessageFlag::Subscription);
+            if (mirrored)
+            {
+                msg->flags.set(MessageFlag::SharedMessage);
+            }
+
+            sink.addMessage(msg, MessageContext::Original);
+            return;
         }
         else if (msgType == "sub" || msgType == "resub")
         {
@@ -795,17 +780,37 @@ void IrcMessageHandler::parseUserNoticeMessageInto(Communi::IrcMessage *message,
             }
         }
 
-        auto b = MessageBuilder(systemMessage, parseTagString(messageText),
-                                calculateMessageTime(message).time());
+        auto displayName = [&] {
+            if (msgType == u"raid")
+            {
+                return tags.value("msg-param-displayName").toString();
+            }
+            return tags.value("display-name").toString();
+        }();
+        auto login = tags.value("login").toString();
+        if (displayName.isEmpty())
+        {
+            displayName = login;
+        }
 
-        b->flags.set(MessageFlag::Subscription);
+        MessageColor userColor = MessageColor::System;
+        if (auto colorTag = tags.value("color").value<QColor>();
+            colorTag.isValid())
+        {
+            userColor = MessageColor(colorTag);
+        }
+
+        auto msg = MessageBuilder::makeSystemMessageWithUser(
+            parseTagString(messageText), login, displayName, userColor,
+            calculateMessageTime(message).time());
+
+        msg->flags.set(MessageFlag::Subscription);
         if (mirrored)
         {
-            b->flags.set(MessageFlag::SharedMessage);
+            msg->flags.set(MessageFlag::SharedMessage);
         }
-        auto newMessage = b.release();
 
-        sink.addMessage(newMessage, MessageContext::Original);
+        sink.addMessage(msg, MessageContext::Original);
     }
 }
 

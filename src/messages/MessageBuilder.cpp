@@ -75,6 +75,8 @@ const QRegularExpression mentionRegex("^@" + regexHelpString);
 // if findAllUsernames setting is enabled, matches strings like in the examples above, but without @ symbol at the beginning
 const QRegularExpression allUsernamesMentionRegex("^" + regexHelpString);
 
+const QRegularExpression SPACE_REGEX("\\s");
+
 const QSet<QString> zeroWidthEmotes{
     "SoSnowy",  "IceCold",   "SantaHat", "TopHat",
     "ReinDeer", "CandyCane", "cvMask",   "cvHazmat",
@@ -512,7 +514,7 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
     // check system message for links
     // (e.g. needed for sub ticket message in sub only mode)
     const QStringList textFragments =
-        text.split(QRegularExpression("\\s"), Qt::SkipEmptyParts);
+        text.split(SPACE_REGEX, Qt::SkipEmptyParts);
     for (const auto &word : textFragments)
     {
         auto link = linkparser::parse(word);
@@ -531,33 +533,100 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
     this->message().searchText = text;
 }
 
-MessageBuilder::MessageBuilder(RaidEntryMessageTag, const QString &text,
-                               const QString &loginName,
-                               const QString &displayName,
-                               const MessageColor &userColor, const QTime &time)
-    : MessageBuilder()
+MessagePtrMut MessageBuilder::makeSystemMessageWithUser(
+    const QString &text, const QString &loginName, const QString &displayName,
+    const MessageColor &userColor, const QTime &time)
 {
-    this->emplace<TimestampElement>(time);
+    MessageBuilder builder;
+    builder.emplace<TimestampElement>(time);
 
-    const QStringList textFragments =
-        text.split(QRegularExpression("\\s"), Qt::SkipEmptyParts);
+    const auto textFragments = text.split(SPACE_REGEX, Qt::SkipEmptyParts);
     for (const auto &word : textFragments)
     {
         if (word == displayName)
         {
-            this->emplace<MentionElement>(displayName, loginName,
-                                          MessageColor::System, userColor);
+            builder.emplace<MentionElement>(displayName, loginName,
+                                            MessageColor::System, userColor);
             continue;
         }
 
-        this->emplace<TextElement>(word, MessageElementFlag::Text,
-                                   MessageColor::System);
+        builder.emplace<TextElement>(word, MessageElementFlag::Text,
+                                     MessageColor::System);
     }
 
-    this->message().flags.set(MessageFlag::System);
-    this->message().flags.set(MessageFlag::DoNotTriggerNotification);
-    this->message().messageText = text;
-    this->message().searchText = text;
+    builder->flags.set(MessageFlag::System);
+    builder->flags.set(MessageFlag::DoNotTriggerNotification);
+    builder->messageText = text;
+    builder->searchText = text;
+
+    return builder.release();
+}
+
+MessagePtrMut MessageBuilder::makeSubgiftMessage(const QString &text,
+                                                 const QVariantMap &tags,
+                                                 const QTime &time)
+{
+    MessageBuilder builder;
+    builder.emplace<TimestampElement>(time);
+
+    auto gifterLogin = tags.value("login").toString();
+    auto gifterDisplayName = tags.value("display-name").toString();
+    if (gifterDisplayName.isEmpty())
+    {
+        gifterDisplayName = gifterLogin;
+    }
+    MessageColor gifterColor = MessageColor::System;
+    if (auto colorTag = tags.value("color").value<QColor>(); colorTag.isValid())
+    {
+        gifterColor = MessageColor(colorTag);
+    }
+
+    auto recipientLogin =
+        tags.value("msg-param-recipient-user-name").toString();
+    if (recipientLogin.isEmpty())
+    {
+        recipientLogin = tags.value("msg-param-recipient-name").toString();
+    }
+    auto recipientDisplayName =
+        tags.value("msg-param-recipient-display-name").toString();
+    if (recipientDisplayName.isEmpty())
+    {
+        recipientDisplayName = recipientLogin;
+    }
+
+    const auto textFragments = text.split(SPACE_REGEX, Qt::SkipEmptyParts);
+    for (const auto &word : textFragments)
+    {
+        if (word == gifterDisplayName)
+        {
+            builder.emplace<MentionElement>(gifterDisplayName, gifterLogin,
+                                            MessageColor::System, gifterColor);
+            continue;
+        }
+        if (word.endsWith('!') &&
+            word.size() == recipientDisplayName.size() + 1 &&
+            word.startsWith(recipientDisplayName))
+        {
+            builder
+                .emplace<MentionElement>(recipientDisplayName, recipientLogin,
+                                         MessageColor::System,
+                                         MessageColor::System)
+                ->setTrailingSpace(false);
+            builder.emplace<TextElement>(u"!"_s, MessageElementFlag::Text,
+                                         MessageColor::System);
+            continue;
+        }
+
+        builder.emplace<TextElement>(word, MessageElementFlag::Text,
+                                     MessageColor::System);
+    }
+
+    builder->flags.set(MessageFlag::System);
+    builder->flags.set(MessageFlag::DoNotTriggerNotification);
+    builder->messageText = text;
+    builder->searchText = text;
+
+    return builder.release();
 }
 
 MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
