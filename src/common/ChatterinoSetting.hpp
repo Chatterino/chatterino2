@@ -6,6 +6,10 @@
 #include <QSize>
 #include <QString>
 
+#include <memory>
+#include <string>
+#include <type_traits>
+
 namespace chatterino {
 
 void _registerSetting(std::weak_ptr<pajlada::Settings::SettingData> setting);
