@@ -34,6 +34,7 @@
 - Minor: Moderators can now see which mods start and cancel raids. (#5563)
 - Minor: The emote popup now reloads when Twitch emotes are reloaded. (#5580)
 - Minor: Added `--login <username>` CLI argument to specify which account to start logged in as. (#5626)
+- Minor: When blocking a channel, Chatterino will now warn you about that action. (#5615)
 - Minor: Indicate when subscriptions and resubscriptions are for multiple months. (#5642)
 - Minor: Proxy URL information is now included in the `/debug-env` command. (#5648)
 - Minor: Make raid entry message usernames clickable. (#5651)

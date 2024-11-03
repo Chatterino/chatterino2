@@ -274,7 +274,7 @@ void TwitchChannel::refreshTwitchChannelEmotes(bool manualRefresh)
 
     getHelix()->getFollowedChannel(
         getApp()->getAccounts()->twitch.getCurrent()->getUserId(),
-        this->roomId(),
+        this->roomId(), nullptr,
         [weak{this->weak_from_this()}, makeEmotes](const auto &chan) {
             auto self = std::dynamic_pointer_cast<TwitchChannel>(weak.lock());
             if (!self || !chan)
