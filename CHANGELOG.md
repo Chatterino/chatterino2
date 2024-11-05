@@ -120,7 +120,7 @@
 - Dev: Emojis now use flags instead of a set of strings for capabilities. (#5616)
 - Dev: Move plugins to Sol2. (#5622, #5682)
 - Dev: Clarified our Lua dependency's version. (#5693)
-- Dev: Specified qtkeychain dependency version. (#5695)
+- Dev: Specified qtkeychain dependency version. (#5695, #5697)
 - Dev: Refactored static `MessageBuilder` helpers to standalone functions. (#5652)
 - Dev: Decoupled reply parsing from `MessageBuilder`. (#5660, #5668)
 - Dev: Refactored IRC message building. (#5663)
