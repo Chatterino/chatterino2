@@ -618,8 +618,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Show BTTV channel emotes", s.enableBTTVChannelEmotes);
     layout.addCheckbox("Enable BTTV live emote updates (requires restart)",
                        s.enableBTTVLiveUpdates);
-    layout.addCheckbox("Show FFZ global emotes", s.enableFFZGlobalEmotes);
-    layout.addCheckbox("Show FFZ channel emotes", s.enableFFZChannelEmotes);
+    layout.addCheckbox("Show FrankerFaceZ global emotes", s.enableFFZGlobalEmotes);
+    layout.addCheckbox("Show FrankerFaceZ channel emotes", s.enableFFZChannelEmotes);
     layout.addCheckbox("Show 7TV global emotes", s.enableSevenTVGlobalEmotes);
     layout.addCheckbox("Show 7TV channel emotes", s.enableSevenTVChannelEmotes);
     layout.addCheckbox("Enable 7TV live emote updates (requires restart)",
