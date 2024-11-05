@@ -675,6 +675,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox(
         "Hide moderation actions", s.streamerModeHideModActions, false,
         "Hide bans, timeouts, and automod messages from appearing in chat.");
+    layout.addCheckbox(
+        "Hide blocked terms", s.streamerModeHideBlockedTermText, false,
+        "Hide blocked terms from showing up in places like AutoMod messages. "
+        "This can be useful in case you have some blocked terms that you don't "
+        "want to show on stream.");
     layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions, false,
                        "Mute your ping sound from playing.");
     layout.addCheckbox(

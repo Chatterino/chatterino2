@@ -4,6 +4,7 @@
 #include "common/Channel.hpp"
 #include "common/Common.hpp"
 #include "common/Env.hpp"
+#include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
@@ -32,6 +33,7 @@
 #include <pajlada/signals/signalholder.hpp>
 #include <QCoreApplication>
 #include <QMetaEnum>
+#include <QStringBuilder>
 
 #include <cassert>
 #include <functional>
@@ -488,9 +490,52 @@ void TwitchIrcServer::initialize()
                     if (msg.status == "PENDING")
                     {
                         AutomodAction action(msg.data, channelID);
-                        action.reason = QString("%1 level %2")
-                                            .arg(msg.contentCategory)
-                                            .arg(msg.contentLevel);
+                        if (msg.reason ==
+                            PubSubAutoModQueueMessage::Reason::BlockedTerm)
+                        {
+                            auto numBlockedTermsMatched =
+                                msg.blockedTermsFound.count();
+                            auto hideBlockedTerms =
+                                getSettings()
+                                    ->streamerModeHideBlockedTermText &&
+                                getApp()->getStreamerMode()->isEnabled();
+                            if (!msg.blockedTermsFound.isEmpty())
+                            {
+                                if (hideBlockedTerms)
+                                {
+                                    action.reason =
+                                        u"matched " %
+                                        QString::number(
+                                            numBlockedTermsMatched) %
+                                        u" blocked term" %
+                                        (numBlockedTermsMatched > 1 ? u"s"
+                                                                    : u"");
+                                }
+                                else
+                                {
+                                    action.reason =
+                                        u"matched " %
+                                        QString::number(
+                                            numBlockedTermsMatched) %
+                                        u" blocked term" %
+                                        (numBlockedTermsMatched > 1 ? u"s"
+                                                                    : u"") %
+                                        u": \"" %
+                                        msg.blockedTermsFound.join(u"\", \"") %
+                                        u"\"";
+                                }
+                            }
+                            else
+                            {
+                                action.reason = "blocked term usage";
+                            }
+                        }
+                        else
+                        {
+                            action.reason = QString("%1 level %2")
+                                                .arg(msg.contentCategory)
+                                                .arg(msg.contentLevel);
+                        }
 
                         action.msgID = msg.messageID;
                         action.message = msg.messageText;
