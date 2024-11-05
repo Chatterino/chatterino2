@@ -614,12 +614,16 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                            "Google",
                        },
                        s.emojiSet);
-    layout.addCheckbox("Show BetterTTV global emotes", s.enableBTTVGlobalEmotes);
-    layout.addCheckbox("Show BetterTTV channel emotes", s.enableBTTVChannelEmotes);
+    layout.addCheckbox("Show BetterTTV global emotes",
+                       s.enableBTTVGlobalEmotes);
+    layout.addCheckbox("Show BetterTTV channel emotes",
+                       s.enableBTTVChannelEmotes);
     layout.addCheckbox("Enable BetterTTV live emote updates (requires restart)",
                        s.enableBTTVLiveUpdates);
-    layout.addCheckbox("Show FrankerFaceZ global emotes", s.enableFFZGlobalEmotes);
-    layout.addCheckbox("Show FrankerFaceZ channel emotes", s.enableFFZChannelEmotes);
+    layout.addCheckbox("Show FrankerFaceZ global emotes",
+                       s.enableFFZGlobalEmotes);
+    layout.addCheckbox("Show FrankerFaceZ channel emotes",
+                       s.enableFFZChannelEmotes);
     layout.addCheckbox("Show 7TV global emotes", s.enableSevenTVGlobalEmotes);
     layout.addCheckbox("Show 7TV channel emotes", s.enableSevenTVChannelEmotes);
     layout.addCheckbox("Enable 7TV live emote updates (requires restart)",
