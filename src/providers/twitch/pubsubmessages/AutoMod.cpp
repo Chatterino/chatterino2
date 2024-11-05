@@ -15,6 +15,10 @@ PubSubAutoModQueueMessage::PubSubAutoModQueueMessage(const QJsonObject &root)
         this->type = oType.value();
     }
 
+    this->reason =
+        qmagicenum::enumCast<Reason>(data.value("reason_code").toString())
+            .value_or(Reason::INVALID);
+
     auto contentClassification =
         data.value("content_classification").toObject();
 

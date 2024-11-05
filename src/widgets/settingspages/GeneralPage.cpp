@@ -1171,6 +1171,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addIntInput("Usercard scrollback limit (requires restart)",
                        s.scrollbackUsercardLimit, 100, 100000, 100);
 
+    layout.addDropdownEnumClass<ShowModerationState>(
+        "Show blocked term automod messages",
+        qmagicenum::enumNames<ShowModerationState>(),
+        s.showBlockedTermAutomodMessages,
+        "Show messages that are blocked by AutoMod for containing a public "
+        "blocked term in the current channel.",
+        {});
+
     layout.addDropdown<int>(
         "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
         s.timeoutStackStyle,

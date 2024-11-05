@@ -141,6 +141,9 @@ void MessageLayout::actuallyLayout(const MessageLayoutContext &ctx)
 
     bool hideModerated = getSettings()->hideModerated;
     bool hideModerationActions = getSettings()->hideModerationActions;
+    bool hideBlockedTermAutomodMessages =
+        getSettings()->showBlockedTermAutomodMessages.getEnum() ==
+        ShowModerationState::Never;
     bool hideSimilar = getSettings()->hideSimilar;
     bool hideReplies = !ctx.flags.has(MessageElementFlag::RepliedMessage);
 
@@ -154,9 +157,21 @@ void MessageLayout::actuallyLayout(const MessageLayoutContext &ctx)
             continue;
         }
 
+        if (hideBlockedTermAutomodMessages &&
+            this->message_->flags.has(MessageFlag::AutoModBlockedTerm))
+        {
+            // NOTE: This hides the message but it will make the message re-appear if moderation message hiding is no longer active, and the layout is re-laid-out.
+            // This is only the case for the moderation messages that don't get filtered during creation.
+            // We should decide which is the correct method & apply that everywhere
+            continue;
+        }
+
         if (this->message_->flags.has(MessageFlag::Timeout) ||
             this->message_->flags.has(MessageFlag::Untimeout))
         {
+            // NOTE: This hides the message but it will make the message re-appear if moderation message hiding is no longer active, and the layout is re-laid-out.
+            // This is only the case for the moderation messages that don't get filtered during creation.
+            // We should decide which is the correct method & apply that everywhere
             if (hideModerationActions ||
                 (getSettings()->streamerModeHideModActions &&
                  getApp()->getStreamerMode()->isEnabled()))

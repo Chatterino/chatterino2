@@ -13,15 +13,24 @@ struct PubSubAutoModQueueMessage {
 
         INVALID,
     };
+
+    enum class Reason {
+        AutoMod,
+        BlockedTerm,
+
+        INVALID,
+    };
+
     QString typeString;
     Type type = Type::INVALID;
+    Reason reason = Reason::INVALID;
 
     QJsonObject data;
 
     QString status;
 
     QString contentCategory;
-    int contentLevel;
+    int contentLevel{};
 
     QString messageID;
     QString messageText;
@@ -46,6 +55,23 @@ constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<
     {
         case chatterino::PubSubAutoModQueueMessage::Type::AutoModCaughtMessage:
             return "automod_caught_message";
+
+        default:
+            return default_tag;
+    }
+}
+
+template <>
+constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<
+    chatterino::PubSubAutoModQueueMessage::Reason>(
+    chatterino::PubSubAutoModQueueMessage::Reason value) noexcept
+{
+    switch (value)
+    {
+        case chatterino::PubSubAutoModQueueMessage::Reason::AutoMod:
+            return "AutoModCaughtMessageReason";
+        case chatterino::PubSubAutoModQueueMessage::Reason::BlockedTerm:
+            return "BlockedTermCaughtMessageReason";
 
         default:
             return default_tag;

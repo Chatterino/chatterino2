@@ -36,6 +36,7 @@
 - Minor: Added `--login <username>` CLI argument to specify which account to start logged in as. (#5626)
 - Minor: When blocking a channel, Chatterino will now warn you about that action. (#5615)
 - Minor: Indicate when subscriptions and resubscriptions are for multiple months. (#5642)
+- Minor: Added a setting to control whether or not to show "Blocked Term" automod messages. (#5690)
 - Minor: Proxy URL information is now included in the `/debug-env` command. (#5648)
 - Minor: Make raid entry message usernames clickable. (#5651)
 - Minor: Tabs unhighlight when their content is read in other tabs. (#5649)

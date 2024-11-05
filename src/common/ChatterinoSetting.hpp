@@ -6,6 +6,10 @@
 #include <QSize>
 #include <QString>
 
+#include <memory>
+#include <string>
+#include <type_traits>
+
 namespace chatterino {
 
 void _registerSetting(std::weak_ptr<pajlada::Settings::SettingData> setting);
@@ -147,6 +151,9 @@ struct IsChatterinoSettingT : std::false_type {
 };
 template <typename T>
 struct IsChatterinoSettingT<ChatterinoSetting<T>> : std::true_type {
+};
+template <typename T>
+struct IsChatterinoSettingT<EnumStringSetting<T>> : std::true_type {
 };
 
 template <typename T>
