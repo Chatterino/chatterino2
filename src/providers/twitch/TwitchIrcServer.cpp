@@ -33,7 +33,6 @@
 #include <pajlada/signals/signalholder.hpp>
 #include <QCoreApplication>
 #include <QMetaEnum>
-#include <QStringBuilder>
 
 #include <cassert>
 #include <functional>
