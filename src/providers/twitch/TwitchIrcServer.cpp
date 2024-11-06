@@ -507,7 +507,7 @@ void TwitchIrcServer::initialize()
                                     action.reason =
                                         u"matches %1 blocked term%2"_s.arg(
                                             numBlockedTermsMatched,
-                                            numBlockedTermsMatched > 1 ? 's'
+                                            numBlockedTermsMatched > 1 ? u"s"
                                                                        : "");
                                 }
                                 else
@@ -516,7 +516,7 @@ void TwitchIrcServer::initialize()
                                         u"matches %1 blocked term%2 \"%3\""_s
                                             .arg(numBlockedTermsMatched,
                                                  numBlockedTermsMatched > 1
-                                                     ? 's'
+                                                     ? u"s"
                                                      : "",
                                                  msg.blockedTermsFound.join(
                                                      u"\", \""));
