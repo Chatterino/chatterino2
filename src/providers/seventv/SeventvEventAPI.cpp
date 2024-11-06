@@ -237,6 +237,10 @@ void SeventvEventAPI::handleDispatch(const Dispatch &dispatch)
             // unhandled (not clear what we'd do here yet)
         }
         break;
+        case SubscriptionType::CreateEmoteSet: {
+            // unhandled (c2 does not support custom emote sets)
+        }
+        break;
         default: {
             qCDebug(chatterinoSeventvEventAPI)
                 << "Unknown subscription type:"
