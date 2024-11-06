@@ -149,6 +149,8 @@ bool shouldSendHelixChat()
 
 namespace chatterino {
 
+using namespace literals;
+
 TwitchIrcServer::TwitchIrcServer()
     : whispersChannel(new Channel("/whispers", Channel::Type::TwitchWhispers))
     , mentionsChannel(new Channel("/mentions", Channel::Type::TwitchMentions))
@@ -504,25 +506,21 @@ void TwitchIrcServer::initialize()
                                 if (hideBlockedTerms)
                                 {
                                     action.reason =
-                                        u"matched " %
-                                        QString::number(
-                                            numBlockedTermsMatched) %
-                                        u" blocked term" %
-                                        (numBlockedTermsMatched > 1 ? u"s"
-                                                                    : u"");
+                                        u"matches %1 blocked term%2"_s.arg(
+                                            numBlockedTermsMatched,
+                                            numBlockedTermsMatched > 1 ? 's'
+                                                                       : "");
                                 }
                                 else
                                 {
                                     action.reason =
-                                        u"matched " %
-                                        QString::number(
-                                            numBlockedTermsMatched) %
-                                        u" blocked term" %
-                                        (numBlockedTermsMatched > 1 ? u"s"
-                                                                    : u"") %
-                                        u": \"" %
-                                        msg.blockedTermsFound.join(u"\", \"") %
-                                        u"\"";
+                                        u"matches %1 blocked term%2 \"%3\""_s
+                                            .arg(numBlockedTermsMatched,
+                                                 numBlockedTermsMatched > 1
+                                                     ? 's'
+                                                     : "",
+                                                 msg.blockedTermsFound.join(
+                                                     u"\", \""));
                                 }
                             }
                             else
