@@ -505,21 +505,22 @@ void TwitchIrcServer::initialize()
                                 if (hideBlockedTerms)
                                 {
                                     action.reason =
-                                        u"matches %1 blocked term%2"_s.arg(
-                                            numBlockedTermsMatched,
-                                            numBlockedTermsMatched > 1 ? u"s"
-                                                                       : "");
+                                        u"matches %1 blocked term%2"_s
+                                            .arg(numBlockedTermsMatched)
+                                            .arg(numBlockedTermsMatched > 1
+                                                     ? u"s"
+                                                     : u"");
                                 }
                                 else
                                 {
                                     action.reason =
                                         u"matches %1 blocked term%2 \"%3\""_s
-                                            .arg(numBlockedTermsMatched,
-                                                 numBlockedTermsMatched > 1
+                                            .arg(numBlockedTermsMatched)
+                                            .arg(numBlockedTermsMatched > 1
                                                      ? u"s"
-                                                     : "",
-                                                 msg.blockedTermsFound.join(
-                                                     u"\", \""));
+                                                     : u"")
+                                            .arg(msg.blockedTermsFound.join(
+                                                u"\", \""));
                                 }
                             }
                             else
