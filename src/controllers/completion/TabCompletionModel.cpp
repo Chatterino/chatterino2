@@ -43,11 +43,15 @@ void TabCompletionModel::updateResults(const QString &query,
                 query, fullTextContent, cursorPosition, isFirstWord);
         if (done)
         {
+            auto uniqueResults = std::unique(results.begin(), results.end());
+            results.erase(uniqueResults, results.end());
             this->setStringList(results);
             return;
         }
 #endif
         this->source_->addToStringList(results, 0, isFirstWord);
+        auto uniqueResults = std::unique(results.begin(), results.end());
+        results.erase(uniqueResults, results.end());
         this->setStringList(results);
     }
 }
