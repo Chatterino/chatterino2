@@ -57,7 +57,7 @@ bool logInWithImplicitGrantCredentials(QWidget *parent, const QString &userID,
         errors.append("Missing OAuth Token");
     }
 
-    if (errors.length() > 0)
+    if (!errors.empty())
     {
         QMessageBox messageBox(parent);
         messageBox.setWindowTitle("Invalid account credentials");
