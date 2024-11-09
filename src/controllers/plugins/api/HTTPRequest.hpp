@@ -16,11 +16,11 @@ namespace chatterino::lua::api {
 // NOLINTBEGIN(readability-identifier-naming)
 
 /**
- * @lua@alias HTTPCallback fun(result: HTTPResponse): nil
+ * @lua@alias c2.HTTPCallback fun(result: c2.HTTPResponse): nil
  */
 
 /**
- * @lua@class HTTPRequest
+ * @lua@class c2.HTTPRequest
  */
 class HTTPRequest : public std::enable_shared_from_this<HTTPRequest>
 {
@@ -61,16 +61,16 @@ public:
     /**
      * Sets the success callback
      *
-     * @lua@param callback HTTPCallback Function to call when the HTTP request succeeds
-     * @exposed HTTPRequest:on_success
+     * @lua@param callback c2.HTTPCallback Function to call when the HTTP request succeeds
+     * @exposed c2.HTTPRequest:on_success
      */
     void on_success(sol::protected_function func);
 
     /**
      * Sets the failure callback
      *
-     * @lua@param callback HTTPCallback Function to call when the HTTP request fails or returns a non-ok status
-     * @exposed HTTPRequest:on_error
+     * @lua@param callback c2.HTTPCallback Function to call when the HTTP request fails or returns a non-ok status
+     * @exposed c2.HTTPRequest:on_error
      */
     void on_error(sol::protected_function func);
 
@@ -78,7 +78,7 @@ public:
      * Sets the finally callback
      *
      * @lua@param callback fun(): nil Function to call when the HTTP request finishes
-     * @exposed HTTPRequest:finally
+     * @exposed c2.HTTPRequest:finally
      */
     void finally(sol::protected_function func);
 
@@ -86,7 +86,7 @@ public:
      * Sets the timeout
      *
      * @lua@param timeout integer How long in milliseconds until the times out
-     * @exposed HTTPRequest:set_timeout
+     * @exposed c2.HTTPRequest:set_timeout
      */
     void set_timeout(int timeout);
 
@@ -94,7 +94,7 @@ public:
      * Sets the request payload
      *
      * @lua@param data string
-     * @exposed HTTPRequest:set_payload
+     * @exposed c2.HTTPRequest:set_payload
      */
     void set_payload(QByteArray payload);
 
@@ -103,19 +103,19 @@ public:
      *
      * @lua@param name string
      * @lua@param value string
-     * @exposed HTTPRequest:set_header
+     * @exposed c2.HTTPRequest:set_header
      */
     void set_header(QByteArray name, QByteArray value);
 
     /**
      * Executes the HTTP request
      *
-     * @exposed HTTPRequest:execute
+     * @exposed c2.HTTPRequest:execute
      */
     void execute(sol::this_state L);
     /**
      * @lua@return string
-     * @exposed HTTPRequest:__tostring
+     * @exposed c2.HTTPRequest:__tostring
      */
     QString to_string();
 
@@ -126,11 +126,11 @@ public:
     /**
      * Creates a new HTTPRequest
      *
-     * @lua@param method HTTPMethod Method to use
+     * @lua@param method c2.HTTPMethod Method to use
      * @lua@param url string Where to send the request to
      *
-     * @lua@return HTTPRequest
-     * @exposed HTTPRequest.create
+     * @lua@return c2.HTTPRequest
+     * @exposed c2.HTTPRequest.create
      */
     static std::shared_ptr<HTTPRequest> create(sol::this_state L,
                                                NetworkRequestType method,
