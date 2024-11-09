@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Minor: Added setting to disable animated 7TV badges (3bbcc9f4a01a015f93f7855be36312e56968ac5f)
+- Minor: Added setting to disable 7TV paint shadows (689235b28af59e950987ede595c29bc26f8c8776)
 - Bugfix: Paints are no longer rendered in system messages (b55e723fcea9520f47b1a6bf786a52011ffc7289)
 - Bugfix: Emotes now properly use the AVIF version if it's available and supported (9776bb03d9adb0021d452eb468379f3ee27d9bd9)
 - Bugfix: Fixed 7TV avatars not loading in the usercard (f9a18c1b812cb8e036fe918cdf00eb4876114f4d)
