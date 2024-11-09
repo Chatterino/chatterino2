@@ -53,6 +53,7 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QFileInfo>
+#include <QStringBuilder>
 #include <QTimeZone>
 
 #include <algorithm>
