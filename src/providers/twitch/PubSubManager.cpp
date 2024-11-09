@@ -349,40 +349,6 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         this->moderation.raidCanceled.invoke(action);
     };
 
-    /*
-    // This handler is no longer required as we use the automod-queue topic now
-    this->moderationActionHandlers["automod_rejected"] =
-        [this](const auto &data, const auto &roomID) {
-            AutomodAction action(data, roomID);
-
-            action.source.id = data.value("created_by_user_id").toString();
-            action.source.login = data.value("created_by").toString();
-
-            action.target.id = data.value("target_user_id").toString();
-
-            const auto args = data.value("args").toArray();
-
-            if (args.isEmpty())
-            {
-                return;
-            }
-
-            action.msgID = data.value("msg_id").toString();
-
-            if (action.msgID.isEmpty())
-            {
-                // Missing required msg_id parameter
-                return;
-            }
-
-            action.target.login = args[0].toString();
-            action.message = args[1].toString();  // May be omitted
-            action.reason = args[2].toString();   // May be omitted
-
-            this->moderation.autoModMessageBlocked.invoke(action);
-        };
-    */
-
     this->moderationActionHandlers["automod_message_rejected"] =
         [this](const auto &data, const auto &roomID) {
             AutomodInfoAction action(data, roomID);

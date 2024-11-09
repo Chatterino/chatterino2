@@ -52,8 +52,6 @@ namespace linkparser {
 
 struct SystemMessageTag {
 };
-struct RaidEntryMessageTag {
-};
 struct TimeoutMessageTag {
 };
 struct LiveUpdatesUpdateEmoteMessageTag {
@@ -69,7 +67,6 @@ struct ImageUploaderResultTag {
 
 // NOLINTBEGIN(readability-identifier-naming)
 const SystemMessageTag systemMessage{};
-const RaidEntryMessageTag raidEntryMessage{};
 const TimeoutMessageTag timeoutMessage{};
 const LiveUpdatesUpdateEmoteMessageTag liveUpdatesUpdateEmoteMessage{};
 const LiveUpdatesRemoveEmoteMessageTag liveUpdatesRemoveEmoteMessage{};
@@ -109,9 +106,6 @@ public:
 
     MessageBuilder(SystemMessageTag, const QString &text,
                    const QTime &time = QTime::currentTime());
-    MessageBuilder(RaidEntryMessageTag, const QString &text,
-                   const QString &loginName, const QString &displayName,
-                   const MessageColor &userColor, const QTime &time);
     MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
                    const QString &sourceUser, const QString &systemMessageText,
                    int times, const QTime &time = QTime::currentTime());
@@ -254,6 +248,15 @@ public:
         QString::size_type messageOffset,
         const std::shared_ptr<MessageThread> &thread = {},
         const MessagePtr &parent = {});
+
+    static MessagePtrMut makeSystemMessageWithUser(
+        const QString &text, const QString &loginName,
+        const QString &displayName, const MessageColor &userColor,
+        const QTime &time);
+
+    static MessagePtrMut makeSubgiftMessage(const QString &text,
+                                            const QVariantMap &tags,
+                                            const QTime &time);
 
 private:
     struct TextState {

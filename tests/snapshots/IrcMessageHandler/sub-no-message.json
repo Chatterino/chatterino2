@@ -38,8 +38,9 @@
                     "type": "TimestampElement"
                 },
                 {
-                    "color": "System",
-                    "flags": "Text",
+                    "color": "Text",
+                    "fallbackColor": "System",
+                    "flags": "Text|Mention",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -47,7 +48,9 @@
                     "style": "ChatMedium",
                     "tooltip": "",
                     "trailingSpace": true,
-                    "type": "TextElement",
+                    "type": "MentionElement",
+                    "userColor": "#ffcc00c2",
+                    "userLoginName": "cspice",
                     "words": [
                         "cspice"
                     ]
@@ -158,8 +161,9 @@
                     ]
                 },
                 {
-                    "color": "System",
-                    "flags": "Text",
+                    "color": "Text",
+                    "fallbackColor": "System",
+                    "flags": "Text|Mention",
                     "link": {
                         "type": "None",
                         "value": ""
@@ -167,7 +171,9 @@
                     "style": "ChatMedium",
                     "tooltip": "",
                     "trailingSpace": true,
-                    "type": "TextElement",
+                    "type": "MentionElement",
+                    "userColor": "#ffcc00c2",
+                    "userLoginName": "cspice",
                     "words": [
                         "cspice"
                     ]

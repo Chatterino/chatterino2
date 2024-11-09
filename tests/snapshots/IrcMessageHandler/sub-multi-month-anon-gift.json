@@ -218,6 +218,24 @@
                     ]
                 },
                 {
+                    "color": "Text",
+                    "fallbackColor": "System",
+                    "flags": "Text|Mention",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": false,
+                    "type": "MentionElement",
+                    "userColor": "System",
+                    "userLoginName": "mohammadrezadh",
+                    "words": [
+                        "MohammadrezaDH"
+                    ]
+                },
+                {
                     "color": "System",
                     "flags": "Text",
                     "link": {
@@ -229,7 +247,7 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "MohammadrezaDH!"
+                        "!"
                     ]
                 }
             ],

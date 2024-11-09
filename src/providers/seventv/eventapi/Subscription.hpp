@@ -27,6 +27,7 @@ enum class SubscriptionType {
     CreateEntitlement,
     UpdateEntitlement,
     DeleteEntitlement,
+    ResetEntitlement,
 
     INVALID,
 };
@@ -119,6 +120,8 @@ constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<
             return "entitlement.update";
         case SubscriptionType::DeleteEntitlement:
             return "entitlement.delete";
+        case SubscriptionType::ResetEntitlement:
+            return "entitlement.reset";
 
         default:
             return default_tag;
