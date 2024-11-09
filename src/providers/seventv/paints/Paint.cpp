@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Literals.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 
 #include <private/qpixmapfilter_p.h>
@@ -47,7 +48,8 @@ QPixmap Paint::getPixmap(const QString &text, const QFont &font,
                            QTextOption(Qt::AlignLeft | Qt::AlignTop));
     pixmapPainter.end();
 
-    if (!this->getDropShadows().empty())
+    if (!this->getDropShadows().empty() &&
+        getSettings()->displaySevenTVPaintShadows)
     {
         QPixmap outMap(size * dpr);
         outMap.setDevicePixelRatio(dpr);

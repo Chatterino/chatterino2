@@ -1077,6 +1077,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Automatically close reply thread popup when it loses focus",
         s.autoCloseThreadPopup);
     layout.addCheckbox("Display 7TV Paints", s.displaySevenTVPaints);
+    layout.addCheckbox("Display 7TV Paint Shadows",
+                       s.displaySevenTVPaintShadows);
     layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains,
                        false,
                        "Make all clickable links lowercase to deter "
