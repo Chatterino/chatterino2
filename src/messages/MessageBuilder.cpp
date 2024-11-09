@@ -1987,6 +1987,29 @@ MessagePtr MessageBuilder::makeLowTrustUpdateMessage(
     return builder.release();
 }
 
+MessagePtrMut MessageBuilder::makeAccountExpiredMessage(
+    const QString &expirationText)
+{
+    auto loginPromptText = u"Try adding your account again."_s;
+
+    MessageBuilder builder;
+    auto text = expirationText % ' ' % loginPromptText;
+    builder->messageText = text;
+    builder->searchText = text;
+    builder->flags.set(MessageFlag::System,
+                       MessageFlag::DoNotTriggerNotification);
+
+    builder.emplace<TimestampElement>();
+    builder.emplace<TextElement>(expirationText, MessageElementFlag::Text,
+                                 MessageColor::System);
+    builder
+        .emplace<TextElement>(loginPromptText, MessageElementFlag::Text,
+                              MessageColor::Link)
+        ->setLink({Link::OpenAccountsPage, {}});
+
+    return builder.release();
+}
+
 std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
     /* mutable */ Channel *channel, const Communi::IrcMessage *ircMessage,
     const MessageParseArgs &args, /* mutable */ QString content,

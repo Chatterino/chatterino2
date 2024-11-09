@@ -258,6 +258,9 @@ public:
                                             const QVariantMap &tags,
                                             const QTime &time);
 
+    static MessagePtrMut makeAccountExpiredMessage(
+        const QString &expirationText);
+
 private:
     struct TextState {
         TwitchChannel *twitchChannel = nullptr;

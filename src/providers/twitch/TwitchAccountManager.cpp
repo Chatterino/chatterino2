@@ -7,6 +7,7 @@
 #include "common/network/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
@@ -411,20 +412,28 @@ void TwitchAccountManager::refreshAccounts(bool emitChanged)
             })
             .onError([this, account](const auto &res) {
                 auto json = res.parseJson();
-                QString message =
-                    u"Failed to refresh OAuth token for " %
-                    account->getUserName() % u" error: " % res.formatError() %
-                    u" - " % json["message"_L1].toString(u"(no message)"_s);
+                QString message = u"Failed to refresh OAuth token for " %
+                                  account->getUserName() % u" (" %
+                                  res.formatError() % u" - " %
+                                  json["message"_L1].toString(u"no message"_s) %
+                                  u").";
                 qCWarning(chatterinoTwitch) << message;
 
                 if (account == this->getCurrent())
                 {
                     if (res.status().value_or(0) == 400)  // invalid token
                     {
-                        message +=
-                            QStringView(u". Consider re-adding your account.");
+                        auto msg =
+                            MessageBuilder::makeAccountExpiredMessage(message);
+                        getApp()->getTwitch()->forEachChannel(
+                            [msg](const auto &chan) {
+                                chan->addMessage(msg, MessageContext::Original);
+                            });
                     }
-                    getApp()->getTwitch()->addGlobalSystemMessage(message);
+                    else
+                    {
+                        getApp()->getTwitch()->addGlobalSystemMessage(message);
+                    }
                 }
             })
             .finally(tryFlush)
