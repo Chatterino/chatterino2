@@ -88,7 +88,7 @@ if (WIN32)
     list(APPEND RES_AUTOGEN_FILES "${CMAKE_BINARY_DIR}/autogen/windows.rc")
 endif ()
 
-set(WINDOWS_ARGUMENTS "@Invalid()") # empy QVariant() in QSettings
+set(WINDOWS_ARGUMENTS "@Invalid()") # empty QVariant() in QSettings
 if (CHATTERINO_USE_GDI_FONTENGINE AND Qt${MAJOR_QT_VERSION}_VERSION GREATER_EQUAL "6.8.0")
     message(STATUS "Using legacy GDI fontengine")
     set(WINDOWS_ARGUMENTS "fontengine=gdi")
