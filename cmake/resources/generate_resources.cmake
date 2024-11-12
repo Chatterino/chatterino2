@@ -89,7 +89,7 @@ if (WIN32)
 endif ()
 
 set(WINDOWS_ARGUMENTS "@Invalid()") # empty QVariant() in QSettings
-if (CHATTERINO_USE_GDI_FONTENGINE AND Qt${MAJOR_QT_VERSION}_VERSION GREATER_EQUAL "6.8.0")
+if (CHATTERINO_USE_GDI_FONTENGINE AND Qt${MAJOR_QT_VERSION}_VERSION VERSION_GREATER_EQUAL "6.8.0")
     message(STATUS "Using legacy GDI fontengine")
     set(WINDOWS_ARGUMENTS "fontengine=gdi")
 endif ()
