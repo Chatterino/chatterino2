@@ -1,0 +1,2 @@
+[Platforms]
+WindowsArguments = ${WINDOWS_ARGUMENTS}

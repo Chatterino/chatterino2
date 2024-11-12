@@ -129,6 +129,7 @@
 - Dev: Fixed some compiler warnings. (#5672)
 - Dev: Unified parsing of historic and live IRC messages. (#5678)
 - Dev: 7TV's `entitlement.reset` is now explicitly ignored. (#5685)
+- Dev: Qt 6.8 and later now default to the GDI fontengine. (#5710)
 
 ## 2.5.1
 
