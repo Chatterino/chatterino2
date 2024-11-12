@@ -6,4 +6,7 @@
   <qresource prefix="/">
 @RES_RESOURCES_CONTENT@
   </qresource>
+  <qresource prefix="/qt/etc">
+    <file>qt.conf</file>
+  </qresource>
 </RCC>
