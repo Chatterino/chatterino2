@@ -101,6 +101,6 @@ jobs:
         uses: codecov/codecov-action@v5.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          plugin: gcov
+          plugins: gcov
           fail_ci_if_error: true
           verbose: true
