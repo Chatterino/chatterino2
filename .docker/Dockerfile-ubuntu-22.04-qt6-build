@@ -3,7 +3,6 @@ ARG UBUNTU_VERSION=22.04
 FROM ubuntu:$UBUNTU_VERSION
 
 ARG QT_VERSION=6.2.4
-ARG BUILD_WITH_QT6=ON
 
 ENV TZ=UTC
 ENV OPENSSL_VER=1.1.1w
@@ -62,7 +61,6 @@ RUN mkdir /src/build
 # cmake
 RUN cd /src/build && \
         OPENSSL_ROOT_DIR=/usr/local/ssl CXXFLAGS=-fno-sized-deallocation cmake \
-        -DBUILD_WITH_QT6=$BUILD_WITH_QT6 \
         -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
         -DCMAKE_PREFIX_PATH=/opt/qt/$QT_VERSION/gcc_64/lib/cmake \
         -DBUILD_WITH_QTKEYCHAIN=OFF \

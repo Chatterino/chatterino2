@@ -474,6 +474,8 @@ bool ChannelView::paused() const
 
 void ChannelView::pause(PauseReason reason, std::optional<uint> msecs)
 {
+    bool wasUnpaused = !this->paused();
+
     if (msecs)
     {
         /// Msecs has a value
@@ -504,6 +506,11 @@ void ChannelView::pause(PauseReason reason, std::optional<uint> msecs)
     }
 
     this->updatePauses();
+
+    if (wasUnpaused)
+    {
+        this->update();
+    }
 }
 
 void ChannelView::unpause(PauseReason reason)

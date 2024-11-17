@@ -759,8 +759,6 @@ set(SOURCE_FILES
         widgets/splits/SplitInput.hpp
         widgets/splits/SplitOverlay.cpp
         widgets/splits/SplitOverlay.hpp
-
-        ${CMAKE_SOURCE_DIR}/resources/resources.qrc
         )
 
 if (APPLE)

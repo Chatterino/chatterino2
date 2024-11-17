@@ -20,7 +20,6 @@ task:
         -DUSE_SYSTEM_QTKEYCHAIN="ON" \
         -DCMAKE_BUILD_TYPE="release" \
         -DCMAKE_EXPORT_COMPILE_COMMANDS="ON" \
-        -DBUILD_WITH_QT6="ON" \
         ..
     cat compile_commands.json
     make -j $(getconf _NPROCESSORS_ONLN)
