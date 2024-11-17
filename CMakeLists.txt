@@ -21,11 +21,7 @@ option(BUILD_WITH_QTKEYCHAIN "Build Chatterino with support for your system key 
 option(USE_SYSTEM_MINIAUDIO "Build Chatterino with your system miniaudio" OFF)
 option(BUILD_WITH_CRASHPAD "Build chatterino with crashpad" OFF)
 option(USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
-if(WIN32)
-    option(BUILD_WITH_QT6 "Build with Qt6, default on for Windows" On)
-else()
-    option(BUILD_WITH_QT6 "Use Qt6 instead of default Qt5" OFF)
-endif()
+option(BUILD_WITH_QT6 "Build with Qt6" On)
 option(CHATTERINO_GENERATE_COVERAGE "Generate coverage files" OFF)
 # We don't use translations, and we don't want qtkeychain to build translations
 option(BUILD_TRANSLATIONS "" OFF)

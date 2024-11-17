@@ -19,7 +19,6 @@ cmake -S. -Bbuild-clang-tidy \
     -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
     -DCHATTERINO_LTO=Off \
     -DCHATTERINO_PLUGINS=On \
-    -DBUILD_WITH_QT6=On \
     -DBUILD_TESTS=On \
     -DBUILD_BENCHMARKS=On
 
