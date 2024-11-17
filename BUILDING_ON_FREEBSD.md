@@ -17,7 +17,7 @@ FreeBSD 15.0-SNAP.
    ```
 1. Generate build files. To enable Lua plugins in your build add `-DCHATTERINO_PLUGINS=ON` to this command.
    ```sh
-   cmake -DBUILD_WITH_QT6=ON ..
+   cmake ..
    ```
 1. Build the project
    ```sh
