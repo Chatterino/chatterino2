@@ -13,6 +13,7 @@
 
 #include <pajlada/signals/signal.hpp>
 #include <QJsonObject>
+#include <QScopeGuard>
 #include <QString>
 #include <QStringBuilder>
 #include <websocketpp/client.hpp>

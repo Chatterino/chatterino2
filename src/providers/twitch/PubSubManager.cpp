@@ -15,6 +15,7 @@
 #include "util/RenameThread.hpp"
 
 #include <QJsonArray>
+#include <QScopeGuard>
 
 #include <algorithm>
 #include <exception>
