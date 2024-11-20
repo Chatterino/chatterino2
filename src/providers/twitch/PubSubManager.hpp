@@ -3,6 +3,7 @@
 #include "providers/twitch/PubSubClientOptions.hpp"
 #include "providers/twitch/PubSubWebsocket.hpp"
 #include "util/ExponentialBackoff.hpp"
+#include "util/OnceFlag.hpp"
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ssl/context.hpp>
@@ -266,6 +267,8 @@ private:
 
     const QString host_;
     const PubSubClientOptions clientOptions_;
+
+    OnceFlag stoppedFlag_;
 
     bool stopping_{false};
 
