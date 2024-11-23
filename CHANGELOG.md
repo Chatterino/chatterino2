@@ -67,7 +67,9 @@
 - Bugfix: Fixed global badges not showing in anonymous mode. (#5599)
 - Bugfix: Fixed grammar in the user highlight page. (#5602)
 - Bugfix: Fixed incorrect message being disabled in some cases upon approving or denying an automod caught message. (#5611)
+- Bugfix: Fixed network requests timing out despite them not being in flight for that long, for Qt 6.3+ where we have the technology. (#5729)
 - Bugfix: Fixed double-click selection not working when clicking outside a message. (#5617)
+- Bugfix: Fixed a potential rare crash that could occur on Windows if a toast was about to fire just as we were shutting down. (#5728)
 - Bugfix: Fixed emotes starting with ":" not tab-completing. (#5603)
 - Bugfix: Fixed 7TV emotes messing with Qt's HTML. (#5677)
 - Bugfix: Fixed incorrect messages getting replaced visually. (#5683)
@@ -128,9 +130,11 @@
 - Dev: Decoupled reply parsing from `MessageBuilder`. (#5660, #5668)
 - Dev: Refactored IRC message building. (#5663)
 - Dev: Fixed some compiler warnings. (#5672)
+- Dev: Explicitly print output from `--version` to `stdout`. (#5727)
 - Dev: Unified parsing of historic and live IRC messages. (#5678)
 - Dev: 7TV's `entitlement.reset` is now explicitly ignored. (#5685)
 - Dev: Qt 6.8 and later now default to the GDI fontengine. (#5710)
+- Dev: Moved to condition variables when shutting down worker threads. (#5721)
 
 ## 2.5.1
 

@@ -49,13 +49,16 @@ int main(int argc, char **argv)
         QMessageBox box;
         if (Modes::instance().isPortable)
         {
-            box.setText(
+            auto errorMessage =
                 error.what() +
                 QStringLiteral(
                     "\n\nInfo: Portable mode requires the application to "
                     "be in a writeable location. If you don't want "
                     "portable mode reinstall the application. "
-                    "https://chatterino.com."));
+                    "https://chatterino.com.");
+            std::cerr << errorMessage.toLocal8Bit().constData() << '\n';
+            std::cerr.flush();
+            box.setText(errorMessage);
         }
         else
         {
@@ -82,12 +85,14 @@ int main(int argc, char **argv)
         attachToConsole();
 
         auto version = Version::instance();
-        qInfo().noquote() << QString("%1 (commit %2%3)")
-                                 .arg(version.fullVersion())
-                                 .arg(version.commitHash())
-                                 .arg(Modes::instance().isNightly
-                                          ? ", " + version.dateOfBuild()
-                                          : "");
+        auto versionMessage =
+            QString("%1 (commit %2%3)")
+                .arg(version.fullVersion())
+                .arg(version.commitHash())
+                .arg(Modes::instance().isNightly ? ", " + version.dateOfBuild()
+                                                 : "");
+        std::cout << versionMessage.toLocal8Bit().constData() << '\n';
+        std::cout.flush();
     }
     else
     {
