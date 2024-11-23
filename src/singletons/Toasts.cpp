@@ -65,6 +65,13 @@ signals:
 
 namespace chatterino {
 
+Toasts::~Toasts()
+{
+#ifdef Q_OS_WIN
+    WinToast::instance()->clear();
+#endif
+}
+
 #ifdef Q_OS_WIN
 using WinToastLib::WinToast;
 using WinToastLib::WinToastTemplate;

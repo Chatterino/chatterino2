@@ -3,6 +3,8 @@
 #include <pajlada/settings/setting.hpp>
 #include <QString>
 
+#include <cstdint>
+
 namespace chatterino {
 
 enum class Platform : uint8_t;
@@ -17,6 +19,8 @@ enum class ToastReaction {
 class Toasts final
 {
 public:
+    ~Toasts();
+
     void sendChannelNotification(const QString &channelName,
                                  const QString &channelTitle, Platform p);
     static QString findStringFromReaction(const ToastReaction &reaction);
