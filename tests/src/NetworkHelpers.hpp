@@ -1,7 +1,15 @@
 #pragma once
+
 #include "Test.hpp"
 
 #include <QCoreApplication>
+#include <QEvent>
+#include <QEventLoop>
+
+#include <chrono>
+#include <condition_variable>
+#include <mutex>
+
 namespace chatterino {
 
 #ifdef CHATTERINO_TEST_USE_PUBLIC_HTTPBIN
@@ -52,4 +60,5 @@ private:
     std::condition_variable condition_;
     bool requestDone_ = false;
 };
+
 }  // namespace chatterino
