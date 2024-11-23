@@ -237,6 +237,7 @@ TEST(NetworkRequest, FinallyCallbackOnTimeout)
 /// We need to ensure all requests are "executed" before we start waiting for them
 TEST(NetworkRequest, BatchedTimeouts)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 3, 0)
     // roughly num network manager worker threads * 2
     static const auto numRequests = 10;
 
@@ -274,4 +275,5 @@ TEST(NetworkRequest, BatchedTimeouts)
         state->waiter.waitForRequest();
         EXPECT_FALSE(state->errored);
     }
+#endif
 }
