@@ -69,6 +69,7 @@
 - Bugfix: Fixed incorrect message being disabled in some cases upon approving or denying an automod caught message. (#5611)
 - Bugfix: Fixed network requests timing out despite them not being in flight for that long, for Qt 6.3+ where we have the technology. (#5729)
 - Bugfix: Fixed double-click selection not working when clicking outside a message. (#5617)
+- Bugfix: Fixed a potential rare crash that could occur on Windows if a toast was about to fire just as we were shutting down. (#5728)
 - Bugfix: Fixed emotes starting with ":" not tab-completing. (#5603)
 - Bugfix: Fixed 7TV emotes messing with Qt's HTML. (#5677)
 - Bugfix: Fixed incorrect messages getting replaced visually. (#5683)
