@@ -44,13 +44,16 @@ int main(int argc, char **argv)
         QMessageBox box;
         if (Modes::instance().isPortable)
         {
-            box.setText(
+            auto errorMessage =
                 error.what() +
                 QStringLiteral(
                     "\n\nInfo: Portable mode requires the application to "
                     "be in a writeable location. If you don't want "
                     "portable mode reinstall the application. "
-                    "https://chatterino.com."));
+                    "https://chatterino.com.");
+            std::cerr << errorMessage.toLocal8Bit().constData() << '\n';
+            std::cerr.flush();
+            box.setText(errorMessage);
         }
         else
         {
