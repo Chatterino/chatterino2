@@ -77,12 +77,14 @@ int main(int argc, char **argv)
         attachToConsole();
 
         auto version = Version::instance();
-        qInfo().noquote() << QString("%1 (commit %2%3)")
-                                 .arg(version.fullVersion())
-                                 .arg(version.commitHash())
-                                 .arg(Modes::instance().isNightly
-                                          ? ", " + version.dateOfBuild()
-                                          : "");
+        auto versionMessage =
+            QString("%1 (commit %2%3)")
+                .arg(version.fullVersion())
+                .arg(version.commitHash())
+                .arg(Modes::instance().isNightly ? ", " + version.dateOfBuild()
+                                                 : "");
+        std::cout << versionMessage.toLocal8Bit().constData() << '\n';
+        std::cout.flush();
     }
     else
     {
