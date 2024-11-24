@@ -292,7 +292,7 @@ void Scrollbar::paintEvent(QPaintEvent * /*event*/)
     bool enableElevatedMessageHighlights =
         getSettings()->enableElevatedMessageHighlight;
 
-    if (!this->shouldHideThumb())
+    if (this->shouldShowThumb())
     {
         this->thumbRect_.setX(xOffset);
 
@@ -485,14 +485,14 @@ void Scrollbar::setHideThumb(bool hideThumb)
     this->update();
 }
 
-bool Scrollbar::shouldHideThumb() const
+bool Scrollbar::shouldShowThumb() const
 {
-    return this->hideThumb || this->settingHideThumb;
+    return !(this->hideThumb || this->settingHideThumb);
 }
 
 bool Scrollbar::shouldHandleMouseEvents() const
 {
-    return !this->shouldHideThumb();
+    return this->shouldShowThumb();
 }
 
 Scrollbar::MouseLocation Scrollbar::locationOfMouseEvent(

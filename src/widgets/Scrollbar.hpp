@@ -130,8 +130,8 @@ public:
 
     void setHideThumb(bool hideThumb);
 
-    /// Returns true if we should skip painting the thumb
-    bool shouldHideThumb() const;
+    /// Returns true if we should show the thumb (the handle you can drag)
+    bool shouldShowThumb() const;
 
     bool shouldHandleMouseEvents() const;
 
