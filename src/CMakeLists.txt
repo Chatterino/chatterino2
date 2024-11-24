@@ -514,6 +514,8 @@ set(SOURCE_FILES
         util/LayoutHelper.hpp
         util/LoadPixmap.cpp
         util/LoadPixmap.hpp
+        util/OnceFlag.cpp
+        util/OnceFlag.hpp
         util/RapidjsonHelpers.cpp
         util/RapidjsonHelpers.hpp
         util/RatelimitBucket.cpp
@@ -740,8 +742,6 @@ set(SOURCE_FILES
         widgets/splits/SplitInput.hpp
         widgets/splits/SplitOverlay.cpp
         widgets/splits/SplitOverlay.hpp
-
-        ${CMAKE_SOURCE_DIR}/resources/resources.qrc
         )
 
 if (APPLE)

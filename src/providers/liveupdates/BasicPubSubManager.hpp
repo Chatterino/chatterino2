@@ -8,10 +8,12 @@
 #include "providers/twitch/PubSubHelpers.hpp"
 #include "util/DebugCount.hpp"
 #include "util/ExponentialBackoff.hpp"
+#include "util/OnceFlag.hpp"
 #include "util/RenameThread.hpp"
 
 #include <pajlada/signals/signal.hpp>
 #include <QJsonObject>
+#include <QScopeGuard>
 #include <QString>
 #include <QStringBuilder>
 #include <websocketpp/client.hpp>
@@ -120,6 +122,11 @@ public:
         this->work_ = std::make_shared<boost::asio::io_service::work>(
             this->websocketClient_.get_io_service());
         this->mainThread_.reset(new std::thread([this] {
+            // make sure we set in any case, even exceptions
+            auto guard = qScopeGuard([&] {
+                this->stoppedFlag_.set();
+            });
+
             runThread();
         }));
 
@@ -142,22 +149,34 @@ public:
 
         this->work_.reset();
 
-        if (this->mainThread_->joinable())
+        if (!this->mainThread_->joinable())
         {
-            // NOTE: We spawn a new thread to join the websocket thread.
-            // There is a case where a new client was initiated but not added to the clients list.
-            // We just don't join the thread & let the operating system nuke the thread if joining fails
-            // within 1s.
-            auto joiner = std::async(std::launch::async, &std::thread::join,
-                                     this->mainThread_.get());
-            if (joiner.wait_for(std::chrono::seconds(1)) ==
-                std::future_status::timeout)
-            {
-                qCWarning(chatterinoLiveupdates)
-                    << "Thread didn't join within 1 second, rip it out";
-                this->websocketClient_.stop();
-            }
+            return;
         }
+
+        // NOTE:
+        // There is a case where a new client was initiated but not added to the clients list.
+        // We just don't join the thread & let the operating system nuke the thread if joining fails
+        // within 1s.
+        if (this->stoppedFlag_.waitFor(std::chrono::seconds{1}))
+        {
+            this->mainThread_->join();
+            return;
+        }
+
+        qCWarning(chatterinoLiveupdates)
+            << "Thread didn't finish within 1 second, force-stop the client";
+        this->websocketClient_.stop();
+        if (this->stoppedFlag_.waitFor(std::chrono::milliseconds{100}))
+        {
+            this->mainThread_->join();
+            return;
+        }
+
+        qCWarning(chatterinoLiveupdates)
+            << "Thread didn't finish after stopping, discard it";
+        // detach the thread so the destructor doesn't attempt any joining
+        this->mainThread_->detach();
     }
 
 protected:
@@ -394,6 +413,7 @@ private:
 
     liveupdates::WebsocketClient websocketClient_;
     std::unique_ptr<std::thread> mainThread_;
+    OnceFlag stoppedFlag_;
 
     const QString host_;
 

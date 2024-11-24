@@ -62,7 +62,6 @@ jobs:
       C2_ENABLE_LTO: ${{ matrix.force-lto }}
       C2_PLUGINS: ${{ matrix.plugins }}
       C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
-      C2_BUILD_WITH_QT6: ${{ startsWith(matrix.qt-version, '6.') }}
 
     steps:
       - uses: actions/checkout@v4
@@ -87,7 +86,6 @@ jobs:
             -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
             -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
             -DCMAKE_PREFIX_PATH="$Qt6_DIR/lib/cmake" \
-            -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
             -DCHATTERINO_STATIC_QT_BUILD=On \
             ..
           make -j"$(nproc)"
@@ -163,7 +161,7 @@ jobs:
 
       - name: Install Qt5
         if: startsWith(matrix.qt-version, '5.')
-        uses: jurplel/install-qt-action@v4.0.0
+        uses: jurplel/install-qt-action@v4.1.1
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -171,7 +169,7 @@ jobs:
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v4.0.0
+        uses: jurplel/install-qt-action@v4.1.1
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
