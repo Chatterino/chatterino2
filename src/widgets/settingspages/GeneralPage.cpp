@@ -458,6 +458,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         false);
 
+    layout.addCheckbox(
+        "Hide scrollbar thumb", s.hideScrollbarThumb, false,
+        "Hiding the scrollbar thumb (the handle you can drag) will disable "
+        "all mouse interaction in the scrollbar.");
+
     layout.addTitle("Messages");
     layout.addCheckbox(
         "Separate with lines", s.separateMessages, false,
