@@ -133,6 +133,9 @@ public:
     /// Returns true if we should show the thumb (the handle you can drag)
     bool shouldShowThumb() const;
 
+    /// Returns true if we should show the highlights
+    bool shouldShowHighlights() const;
+
     bool shouldHandleMouseEvents() const;
 
     // offset the desired value without breaking smooth scolling
@@ -180,6 +183,9 @@ private:
     bool hideThumb{false};
     /// Controlled by the "Hide scrollbar thumb" setting
     bool settingHideThumb{false};
+
+    /// Controlled by the "Hide scrollbar highlights" setting
+    bool settingHideHighlights{false};
 
     MouseLocation mouseOverLocation_ = MouseLocation::Outside;
     MouseLocation mouseDownLocation_ = MouseLocation::Outside;
