@@ -494,6 +494,7 @@ set(SOURCE_FILES
         util/DisplayBadge.cpp
         util/DisplayBadge.hpp
         util/Expected.hpp
+        util/FilesystemHelpers.hpp
         util/FormatTime.cpp
         util/FormatTime.hpp
         util/FunctionEventFilter.cpp
