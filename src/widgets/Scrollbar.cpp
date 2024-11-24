@@ -48,6 +48,13 @@ Scrollbar::Scrollbar(size_t messagesLimit, ChannelView *parent)
             this->update();
         },
         this->signalHolder);
+
+    getSettings()->hideScrollbarHighlights.connect(
+        [this](bool newValue) {
+            this->settingHideHighlights = newValue;
+            this->update();
+        },
+        this->signalHolder);
 }
 
 boost::circular_buffer<ScrollbarHighlight> Scrollbar::getHighlights() const
@@ -309,62 +316,60 @@ void Scrollbar::paintEvent(QPaintEvent * /*event*/)
         }
     }
 
-    // draw highlights
-    if (this->highlights_.empty())
+    if (this->shouldShowHighlights() && !this->highlights_.empty())
     {
-        return;
-    }
+        size_t nHighlights = this->highlights_.size();
+        int w = this->width();
+        float dY = static_cast<float>(this->height()) /
+                   static_cast<float>(nHighlights);
+        int highlightHeight =
+            static_cast<int>(std::ceil(std::max(this->scale() * 2.0F, dY)));
 
-    size_t nHighlights = this->highlights_.size();
-    int w = this->width();
-    float dY =
-        static_cast<float>(this->height()) / static_cast<float>(nHighlights);
-    int highlightHeight =
-        static_cast<int>(std::ceil(std::max(this->scale() * 2.0F, dY)));
-
-    for (size_t i = 0; i < nHighlights; i++)
-    {
-        const auto &highlight = this->highlights_[i];
-
-        if (highlight.isNull())
+        for (size_t i = 0; i < nHighlights; i++)
         {
-            continue;
-        }
+            const auto &highlight = this->highlights_[i];
 
-        if (highlight.isRedeemedHighlight() && !enableRedeemedHighlights)
-        {
-            continue;
-        }
-
-        if (highlight.isFirstMessageHighlight() &&
-            !enableFirstMessageHighlights)
-        {
-            continue;
-        }
-
-        if (highlight.isElevatedMessageHighlight() &&
-            !enableElevatedMessageHighlights)
-        {
-            continue;
-        }
-
-        QColor color = highlight.getColor();
-        color.setAlpha(255);
-
-        int y = static_cast<int>(dY * static_cast<float>(i));
-        switch (highlight.getStyle())
-        {
-            case ScrollbarHighlight::Default: {
-                painter.fillRect(w / 8 * 3, y, w / 4, highlightHeight, color);
+            if (highlight.isNull())
+            {
+                continue;
             }
-            break;
 
-            case ScrollbarHighlight::Line: {
-                painter.fillRect(0, y, w, 1, color);
+            if (highlight.isRedeemedHighlight() && !enableRedeemedHighlights)
+            {
+                continue;
             }
-            break;
 
-            case ScrollbarHighlight::None:;
+            if (highlight.isFirstMessageHighlight() &&
+                !enableFirstMessageHighlights)
+            {
+                continue;
+            }
+
+            if (highlight.isElevatedMessageHighlight() &&
+                !enableElevatedMessageHighlights)
+            {
+                continue;
+            }
+
+            QColor color = highlight.getColor();
+            color.setAlpha(255);
+
+            int y = static_cast<int>(dY * static_cast<float>(i));
+            switch (highlight.getStyle())
+            {
+                case ScrollbarHighlight::Default: {
+                    painter.fillRect(w / 8 * 3, y, w / 4, highlightHeight,
+                                     color);
+                }
+                break;
+
+                case ScrollbarHighlight::Line: {
+                    painter.fillRect(0, y, w, 1, color);
+                }
+                break;
+
+                case ScrollbarHighlight::None:;
+            }
         }
     }
 }
@@ -488,6 +493,11 @@ void Scrollbar::setHideThumb(bool hideThumb)
 bool Scrollbar::shouldShowThumb() const
 {
     return !(this->hideThumb || this->settingHideThumb);
+}
+
+bool Scrollbar::shouldShowHighlights() const
+{
+    return !this->settingHideHighlights;
 }
 
 bool Scrollbar::shouldHandleMouseEvents() const
