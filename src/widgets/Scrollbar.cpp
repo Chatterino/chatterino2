@@ -41,6 +41,13 @@ Scrollbar::Scrollbar(size_t messagesLimit, ChannelView *parent)
             &Scrollbar::resetBounds);
 
     this->setMouseTracking(true);
+
+    getSettings()->hideScrollbarThumb.connect(
+        [this](bool newValue) {
+            this->settingHideThumb = newValue;
+            this->update();
+        },
+        this->signalHolder);
 }
 
 boost::circular_buffer<ScrollbarHighlight> Scrollbar::getHighlights() const
@@ -285,7 +292,7 @@ void Scrollbar::paintEvent(QPaintEvent * /*event*/)
     bool enableElevatedMessageHighlights =
         getSettings()->enableElevatedMessageHighlight;
 
-    if (this->showThumb_)
+    if (!this->shouldHideThumb())
     {
         this->thumbRect_.setX(xOffset);
 
@@ -369,6 +376,11 @@ void Scrollbar::resizeEvent(QResizeEvent * /*event*/)
 
 void Scrollbar::mouseMoveEvent(QMouseEvent *event)
 {
+    if (!this->shouldHandleMouseEvents())
+    {
+        return;
+    }
+
     if (this->mouseDownLocation_ == MouseLocation::Outside)
     {
         auto moveLocation = this->locationOfMouseEvent(event);
@@ -394,12 +406,22 @@ void Scrollbar::mouseMoveEvent(QMouseEvent *event)
 
 void Scrollbar::mousePressEvent(QMouseEvent *event)
 {
+    if (!this->shouldHandleMouseEvents())
+    {
+        return;
+    }
+
     this->mouseDownLocation_ = this->locationOfMouseEvent(event);
     this->update();
 }
 
 void Scrollbar::mouseReleaseEvent(QMouseEvent *event)
 {
+    if (!this->shouldHandleMouseEvents())
+    {
+        return;
+    }
+
     auto releaseLocation = this->locationOfMouseEvent(event);
     if (this->mouseDownLocation_ != releaseLocation)
     {
@@ -452,15 +474,25 @@ void Scrollbar::updateScroll()
     this->update();
 }
 
-void Scrollbar::setShowThumb(bool showThumb)
+void Scrollbar::setHideThumb(bool hideThumb)
 {
-    if (this->showThumb_ == showThumb)
+    if (this->hideThumb == hideThumb)
     {
         return;
     }
 
-    this->showThumb_ = showThumb;
+    this->hideThumb = hideThumb;
     this->update();
+}
+
+bool Scrollbar::shouldHideThumb() const
+{
+    return this->hideThumb || this->settingHideThumb;
+}
+
+bool Scrollbar::shouldHandleMouseEvents() const
+{
+    return !this->shouldHideThumb();
 }
 
 Scrollbar::MouseLocation Scrollbar::locationOfMouseEvent(

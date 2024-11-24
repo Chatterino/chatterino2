@@ -5,6 +5,7 @@
 
 #include <boost/circular_buffer.hpp>
 #include <pajlada/signals/signal.hpp>
+#include <pajlada/signals/signalholder.hpp>
 #include <QPropertyAnimation>
 #include <QWidget>
 
@@ -127,7 +128,12 @@ public:
     /// unaffected by simultaneous shifts of minimum and maximum.
     qreal getRelativeCurrentValue() const;
 
-    void setShowThumb(bool showthumb);
+    void setHideThumb(bool hideThumb);
+
+    /// Returns true if we should skip painting the thumb
+    bool shouldHideThumb() const;
+
+    bool shouldHandleMouseEvents() const;
 
     // offset the desired value without breaking smooth scolling
     void offset(qreal value);
@@ -171,7 +177,9 @@ private:
     boost::circular_buffer<ScrollbarHighlight> highlights_;
 
     bool atBottom_{false};
-    bool showThumb_ = true;
+    bool hideThumb{false};
+    /// Controlled by the "Hide scrollbar thumb" setting
+    bool settingHideThumb{false};
 
     MouseLocation mouseOverLocation_ = MouseLocation::Outside;
     MouseLocation mouseDownLocation_ = MouseLocation::Outside;
@@ -189,6 +197,8 @@ private:
 
     pajlada::Signals::NoArgSignal currentValueChanged_;
     pajlada::Signals::NoArgSignal desiredValueChanged_;
+
+    pajlada::Signals::SignalHolder signalHolder;
 };
 
 }  // namespace chatterino
