@@ -274,7 +274,7 @@ void TwitchChannel::refreshTwitchChannelEmotes(bool manualRefresh)
 
     getHelix()->getFollowedChannel(
         getApp()->getAccounts()->twitch.getCurrent()->getUserId(),
-        this->roomId(),
+        this->roomId(), nullptr,
         [weak{this->weak_from_this()}, makeEmotes](const auto &chan) {
             auto self = std::dynamic_pointer_cast<TwitchChannel>(weak.lock());
             if (!self || !chan)
@@ -452,8 +452,8 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
                 if (reward.id == msg.rewardID)
                 {
                     IrcMessageHandler::instance().addMessage(
-                        msg.message.get(), shared_from_this(),
-                        msg.originalContent, *server, false, false);
+                        msg.message.get(), *this, this, msg.originalContent,
+                        *server, false, false);
                     return true;
                 }
                 return false;
@@ -1356,8 +1356,6 @@ void TwitchChannel::loadRecentMessages()
                 {
                     msgs.push_back(msg);
                 }
-
-                tc->addRecentChatter(msg->displayName);
             }
 
             getApp()->getTwitch()->getMentionsChannel()->fillInMissingMessages(

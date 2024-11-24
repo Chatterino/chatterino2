@@ -212,7 +212,8 @@ void MessageLayoutContainer::breakLine()
     this->lineStart_ = this->elements_.size();
     //    this->currentX = (int)(this->scale * 8);
 
-    if (this->canCollapse() && this->line_ + 1 >= maxUncollapsedLines())
+    if (this->canCollapse() &&
+        static_cast<int>(this->line_ + 1) >= maxUncollapsedLines())
     {
         this->canAddMessages_ = false;
         return;
@@ -853,6 +854,18 @@ std::optional<size_t> MessageLayoutContainer::paintSelectionStart(
 {
     const auto selectionColor = getTheme()->messages.selection;
 
+    auto paintRemainingLines = [&](size_t startIndex) {
+        for (size_t i = startIndex; i < this->lines_.size(); i++)
+        {
+            const auto &line = this->lines_[i];
+            auto left = this->elements_[line.startIndex]->getRect().left();
+            auto right = this->elements_[line.endIndex - 1]->getRect().right();
+
+            this->paintSelectionRect(painter, line, left, right, yOffset,
+                                     selectionColor);
+        }
+    };
+
     // The selection starts in this message
     for (size_t lineIndex = 0; lineIndex < this->lines_.size(); lineIndex++)
     {
@@ -873,7 +886,17 @@ std::optional<size_t> MessageLayoutContainer::paintSelectionStart(
             auto right = this->elements_[line.endIndex - 1]->getRect().right();
             this->paintSelectionRect(painter, line, right, right, yOffset,
                                      selectionColor);
-            return std::nullopt;
+
+            if (selection.selectionMax.messageIndex != messageIndex)
+            {
+                // The selection does not end in this message
+                paintRemainingLines(lineIndex + 1);
+
+                return std::nullopt;
+            }
+
+            // The selection starts in this line, but ends in some next line or message
+            return {lineIndex + 1};
         }
 
         int x = this->elements_[line.startIndex]->getRect().left();
@@ -922,21 +945,9 @@ std::optional<size_t> MessageLayoutContainer::paintSelectionStart(
             if (selection.selectionMax.messageIndex != messageIndex)
             {
                 // The selection does not end in this message
-                for (size_t lineIndex2 = lineIndex + 1;
-                     lineIndex2 < this->lines_.size(); lineIndex2++)
-                {
-                    const auto &line2 = this->lines_[lineIndex2];
-                    auto left =
-                        this->elements_[line2.startIndex]->getRect().left();
-                    auto right =
-                        this->elements_[line2.endIndex - 1]->getRect().right();
-
-                    this->paintSelectionRect(painter, line2, left, right,
-                                             yOffset, selectionColor);
-                }
-
                 this->paintSelectionRect(painter, line, x, r, yOffset,
                                          selectionColor);
+                paintRemainingLines(lineIndex + 1);
 
                 return std::nullopt;
             }

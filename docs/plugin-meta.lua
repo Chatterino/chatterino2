@@ -5,13 +5,22 @@
 -- Add the folder this file is in to "Lua.workspace.library".
 
 c2 = {}
----@alias c2.LogLevel integer
----@type { Debug: c2.LogLevel, Info: c2.LogLevel, Warning: c2.LogLevel, Critical: c2.LogLevel }
-c2.LogLevel = {}
+---@enum c2.LogLevel
+c2.LogLevel = {
+    Debug = {}, ---@type c2.LogLevel.Debug
+    Info = {}, ---@type c2.LogLevel.Info
+    Warning = {}, ---@type c2.LogLevel.Warning
+    Critical = {}, ---@type c2.LogLevel.Critical
+}
 
----@alias c2.EventType integer
----@type { CompletionRequested: c2.EventType }
-c2.EventType = {}
+-- Begin src/controllers/plugins/api/EventType.hpp
+
+---@enum c2.EventType
+c2.EventType = {
+    CompletionRequested = {}, ---@type c2.EventType.CompletionRequested
+}
+
+-- End src/controllers/plugins/api/EventType.hpp
 
 ---@class CommandContext
 ---@field words string[] The words typed when executing the command. For example `/foo bar baz` will result in `{"/foo", "bar", "baz"}`.
@@ -29,19 +38,40 @@ c2.EventType = {}
 
 -- Begin src/common/Channel.hpp
 
----@alias c2.ChannelType integer
----@type { None: c2.ChannelType, Direct: c2.ChannelType, Twitch: c2.ChannelType, TwitchWhispers: c2.ChannelType, TwitchWatching: c2.ChannelType, TwitchMentions: c2.ChannelType, TwitchLive: c2.ChannelType, TwitchAutomod: c2.ChannelType, TwitchEnd: c2.ChannelType, Irc: c2.ChannelType, Misc: c2.ChannelType }
-c2.ChannelType = {}
+---@enum c2.ChannelType
+c2.ChannelType = {
+    None = {}, ---@type c2.ChannelType.None
+    Direct = {}, ---@type c2.ChannelType.Direct
+    Twitch = {}, ---@type c2.ChannelType.Twitch
+    TwitchWhispers = {}, ---@type c2.ChannelType.TwitchWhispers
+    TwitchWatching = {}, ---@type c2.ChannelType.TwitchWatching
+    TwitchMentions = {}, ---@type c2.ChannelType.TwitchMentions
+    TwitchLive = {}, ---@type c2.ChannelType.TwitchLive
+    TwitchAutomod = {}, ---@type c2.ChannelType.TwitchAutomod
+    TwitchEnd = {}, ---@type c2.ChannelType.TwitchEnd
+    Misc = {}, ---@type c2.ChannelType.Misc
+}
 
 -- End src/common/Channel.hpp
 
 -- Begin src/controllers/plugins/api/ChannelRef.hpp
 
----@alias c2.Platform integer
---- This enum describes a platform for the purpose of searching for a channel.
---- Currently only Twitch is supported because identifying IRC channels is tricky.
----@type { Twitch: c2.Platform }
-c2.Platform = {}
+-- Begin src/providers/twitch/TwitchChannel.hpp
+
+---@class StreamStatus
+---@field live boolean
+---@field viewer_count number
+---@field title string Stream title or last stream title
+---@field game_name string
+---@field game_id string
+---@field uptime number Seconds since the stream started.
+
+---@class RoomModes
+---@field subscriber_only boolean
+---@field unique_chat boolean You might know this as r9kbeta or robot9000.
+---@field emotes_only boolean Whether or not text is allowed in messages. Note that "emotes" here only means Twitch emotes, not Unicode emoji, nor 3rd party text-based emotes
+
+-- End src/providers/twitch/TwitchChannel.hpp
 
 ---@class c2.Channel
 c2.Channel = {}
@@ -72,7 +102,7 @@ function c2.Channel:get_display_name() end
 --- Note that this does not execute client-commands.
 ---
 ---@param message string
----@param execute_commands boolean Should commands be run on the text?
+---@param execute_commands? boolean Should commands be run on the text?
 function c2.Channel:send_message(message, execute_commands) end
 
 --- Adds a system message client-side
@@ -131,9 +161,8 @@ function c2.Channel:__tostring() end
 --- - /automod
 ---
 ---@param name string Which channel are you looking for?
----@param platform c2.Platform Where to search for the channel?
 ---@return c2.Channel?
-function c2.Channel.by_name(name, platform) end
+function c2.Channel.by_name(name) end
 
 --- Finds a channel by the Twitch user ID of its owner.
 ---
@@ -141,98 +170,101 @@ function c2.Channel.by_name(name, platform) end
 ---@return c2.Channel?
 function c2.Channel.by_twitch_id(id) end
 
----@class RoomModes
----@field unique_chat boolean You might know this as r9kbeta or robot9000.
----@field subscriber_only boolean
----@field emotes_only boolean Whether or not text is allowed in messages. Note that "emotes" here only means Twitch emotes, not Unicode emoji, nor 3rd party text-based emotes
----@field follower_only number? Time in minutes you need to follow to chat or nil.
----@field slow_mode number? Time in seconds you need to wait before sending messages or nil.
-
----@class StreamStatus
----@field live boolean
----@field viewer_count number
----@field uptime number Seconds since the stream started.
----@field title string Stream title or last stream title
----@field game_name string
----@field game_id string
-
 -- End src/controllers/plugins/api/ChannelRef.hpp
 
 -- Begin src/controllers/plugins/api/HTTPResponse.hpp
 
----@class HTTPResponse
-HTTPResponse = {}
+---@class c2.HTTPResponse
+c2.HTTPResponse = {}
 
 --- Returns the data. This is not guaranteed to be encoded using any
 --- particular encoding scheme. It's just the bytes the server returned.
 ---
-function HTTPResponse:data() end
+---@return string
+---@nodiscard
+function c2.HTTPResponse:data() end
 
 --- Returns the status code.
 ---
-function HTTPResponse:status() end
+---@return number|nil
+---@nodiscard
+function c2.HTTPResponse:status() end
 
 --- A somewhat human readable description of an error if such happened
 ---
-function HTTPResponse:error() end
+---@return string
+---@nodiscard
+function c2.HTTPResponse:error() end
+
+---@return string
+---@nodiscard
+function c2.HTTPResponse:__tostring() end
 
 -- End src/controllers/plugins/api/HTTPResponse.hpp
 
 -- Begin src/controllers/plugins/api/HTTPRequest.hpp
 
----@alias HTTPCallback fun(result: HTTPResponse): nil
----@class HTTPRequest
-HTTPRequest = {}
+---@alias c2.HTTPCallback fun(result: c2.HTTPResponse): nil
+---@class c2.HTTPRequest
+c2.HTTPRequest = {}
 
 --- Sets the success callback
 ---
----@param callback HTTPCallback Function to call when the HTTP request succeeds
-function HTTPRequest:on_success(callback) end
+---@param callback c2.HTTPCallback Function to call when the HTTP request succeeds
+function c2.HTTPRequest:on_success(callback) end
 
 --- Sets the failure callback
 ---
----@param callback HTTPCallback Function to call when the HTTP request fails or returns a non-ok status
-function HTTPRequest:on_error(callback) end
+---@param callback c2.HTTPCallback Function to call when the HTTP request fails or returns a non-ok status
+function c2.HTTPRequest:on_error(callback) end
 
 --- Sets the finally callback
 ---
 ---@param callback fun(): nil Function to call when the HTTP request finishes
-function HTTPRequest:finally(callback) end
+function c2.HTTPRequest:finally(callback) end
 
 --- Sets the timeout
 ---
 ---@param timeout integer How long in milliseconds until the times out
-function HTTPRequest:set_timeout(timeout) end
+function c2.HTTPRequest:set_timeout(timeout) end
 
 --- Sets the request payload
 ---
 ---@param data string
-function HTTPRequest:set_payload(data) end
+function c2.HTTPRequest:set_payload(data) end
 
 --- Sets a header in the request
 ---
 ---@param name string
 ---@param value string
-function HTTPRequest:set_header(name, value) end
+function c2.HTTPRequest:set_header(name, value) end
 
 --- Executes the HTTP request
 ---
-function HTTPRequest:execute() end
+function c2.HTTPRequest:execute() end
+
+---@return string
+function c2.HTTPRequest:__tostring() end
 
 --- Creates a new HTTPRequest
 ---
----@param method HTTPMethod Method to use
+---@param method c2.HTTPMethod Method to use
 ---@param url string Where to send the request to
----@return HTTPRequest
-function HTTPRequest.create(method, url) end
+---@return c2.HTTPRequest
+function c2.HTTPRequest.create(method, url) end
 
 -- End src/controllers/plugins/api/HTTPRequest.hpp
 
 -- Begin src/common/network/NetworkCommon.hpp
 
----@alias HTTPMethod integer
----@type { Get: HTTPMethod, Post: HTTPMethod, Put: HTTPMethod, Delete: HTTPMethod, Patch: HTTPMethod }
-HTTPMethod = {}
+---@enum c2.HTTPMethod
+c2.HTTPMethod = {
+    Get = {}, ---@type c2.HTTPMethod.Get
+    Post = {}, ---@type c2.HTTPMethod.Post
+    Put = {}, ---@type c2.HTTPMethod.Put
+    Delete = {}, ---@type c2.HTTPMethod.Delete
+    Patch = {}, ---@type c2.HTTPMethod.Patch
+}
 
 -- End src/common/network/NetworkCommon.hpp
 
@@ -245,7 +277,7 @@ function c2.register_command(name, handler) end
 
 --- Registers a callback to be invoked when completions for a term are requested.
 ---
----@param type "CompletionRequested"
+---@param type c2.EventType.CompletionRequested
 ---@param func fun(event: CompletionEvent): CompletionList The callback to be invoked.
 function c2.register_callback(type, func) end
 

@@ -33,7 +33,6 @@ jobs:
       fail-fast: false
     env:
       C2_PLUGINS: ${{ matrix.plugins }}
-      C2_BUILD_WITH_QT6: ${{ startsWith(matrix.qt-version, '6.') }}
 
     steps:
       - uses: actions/checkout@v4
@@ -57,7 +56,6 @@ jobs:
             -DBUILD_APP=OFF \
             -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
             -DCMAKE_PREFIX_PATH="$Qt6_DIR/lib/cmake" \
-            -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
             -DCHATTERINO_STATIC_QT_BUILD=On \
             -DCHATTERINO_GENERATE_COVERAGE=On \
             -DCMAKE_BUILD_TYPE=Debug \
@@ -98,9 +96,9 @@ jobs:
         working-directory: build-test
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4.6.0
+        uses: codecov/codecov-action@v5.0.7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          plugin: gcov
+          plugins: gcov
           fail_ci_if_error: true
           verbose: true

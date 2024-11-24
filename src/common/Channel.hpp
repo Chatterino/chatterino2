@@ -1,8 +1,10 @@
 #pragma once
 
+#include "common/enums/MessageContext.hpp"
 #include "controllers/completion/TabCompletionModel.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/MessageFlag.hpp"
+#include "messages/MessageSink.hpp"
 
 #include <magic_enum/magic_enum.hpp>
 #include <pajlada/signals/signal.hpp>
@@ -26,15 +28,7 @@ enum class TimeoutStackStyle : int {
     Default = DontStackBeyondUserMessage,
 };
 
-/// Context of the message being added to a channel
-enum class MessageContext {
-    /// This message is the original
-    Original,
-    /// This message is a repost of a message that has already been added in a channel
-    Repost,
-};
-
-class Channel : public std::enable_shared_from_this<Channel>
+class Channel : public std::enable_shared_from_this<Channel>, public MessageSink
 {
 public:
     // This is for Lua. See scripts/make_luals_meta.py
@@ -55,7 +49,7 @@ public:
     };
 
     explicit Channel(const QString &name, Type type);
-    virtual ~Channel();
+    ~Channel() override;
 
     // SIGNALS
     pajlada::Signals::Signal<const QString &, const QString &, bool &>
@@ -66,7 +60,9 @@ public:
     pajlada::Signals::Signal<MessagePtr &, std::optional<MessageFlags>>
         messageAppended;
     pajlada::Signals::Signal<std::vector<MessagePtr> &> messagesAddedAtStart;
-    pajlada::Signals::Signal<size_t, MessagePtr &> messageReplaced;
+    /// (index, prev-message, replacement)
+    pajlada::Signals::Signal<size_t, const MessagePtr &, const MessagePtr &>
+        messageReplaced;
     /// Invoked when some number of messages were filled in using time received
     pajlada::Signals::Signal<const std::vector<MessagePtr> &> filledInMessages;
     pajlada::Signals::NoArgSignal destroyed;
@@ -85,8 +81,9 @@ public:
     // overridingFlags can be filled in with flags that should be used instead
     // of the message's flags. This is useful in case a flag is specific to a
     // type of split
-    void addMessage(MessagePtr message, MessageContext context,
-                    std::optional<MessageFlags> overridingFlags = std::nullopt);
+    void addMessage(
+        MessagePtr message, MessageContext context,
+        std::optional<MessageFlags> overridingFlags = std::nullopt) final;
     void addMessagesAtStart(const std::vector<MessagePtr> &messages_);
 
     void addSystemMessage(const QString &contents);
@@ -94,18 +91,27 @@ public:
     /// Inserts the given messages in order by Message::serverReceivedTime.
     void fillInMissingMessages(const std::vector<MessagePtr> &messages);
 
-    void addOrReplaceTimeout(MessagePtr message);
-    void disableAllMessages();
-    void replaceMessage(MessagePtr message, MessagePtr replacement);
-    void replaceMessage(size_t index, MessagePtr replacement);
+    void addOrReplaceTimeout(MessagePtr message, QTime now) final;
+    void disableAllMessages() final;
+    void replaceMessage(const MessagePtr &message,
+                        const MessagePtr &replacement);
+    void replaceMessage(size_t index, const MessagePtr &replacement);
+    void replaceMessage(size_t hint, const MessagePtr &message,
+                        const MessagePtr &replacement);
     void deleteMessage(QString messageID);
 
     /// Removes all messages from this channel and invokes #messagesCleared
     void clearMessages();
 
-    MessagePtr findMessage(QString messageID);
+    [[deprecated("Use findMessageByID instead")]] MessagePtr findMessage(
+        QString messageID);
+    MessagePtr findMessageByID(QStringView messageID) final;
 
     bool hasMessages() const;
+
+    void applySimilarityFilters(const MessagePtr &message) const final;
+
+    MessageSinkTraits sinkTraits() const final;
 
     // CHANNEL INFO
     virtual bool canSendMessage() const;
@@ -165,30 +171,3 @@ private:
 };
 
 }  // namespace chatterino
-
-template <>
-constexpr magic_enum::customize::customize_t
-    magic_enum::customize::enum_name<chatterino::Channel::Type>(
-        chatterino::Channel::Type value) noexcept
-{
-    using Type = chatterino::Channel::Type;
-    switch (value)
-    {
-        case Type::Twitch:
-            return "twitch";
-        case Type::TwitchWhispers:
-            return "whispers";
-        case Type::TwitchWatching:
-            return "watching";
-        case Type::TwitchMentions:
-            return "mentions";
-        case Type::TwitchLive:
-            return "live";
-        case Type::TwitchAutomod:
-            return "automod";
-        case Type::Misc:
-            return "misc";
-        default:
-            return default_tag;
-    }
-}

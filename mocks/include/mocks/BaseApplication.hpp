@@ -3,6 +3,7 @@
 #include "common/Args.hpp"
 #include "mocks/DisabledStreamerMode.hpp"
 #include "mocks/EmptyApplication.hpp"
+#include "mocks/TwitchUsers.hpp"
 #include "providers/bttv/BttvLiveUpdates.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
@@ -55,6 +56,11 @@ public:
         return &this->fonts;
     }
 
+    ITwitchUsers *getTwitchUsers() override
+    {
+        return &this->twitchUsers;
+    }
+
     BttvLiveUpdates *getBttvLiveUpdates() override
     {
         return nullptr;
@@ -71,6 +77,7 @@ public:
     DisabledStreamerMode streamerMode;
     Theme theme;
     Fonts fonts;
+    TwitchUsers twitchUsers;
 };
 
 }  // namespace chatterino::mock

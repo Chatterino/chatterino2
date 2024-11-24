@@ -474,6 +474,8 @@ bool ChannelView::paused() const
 
 void ChannelView::pause(PauseReason reason, std::optional<uint> msecs)
 {
+    bool wasUnpaused = !this->paused();
+
     if (msecs)
     {
         /// Msecs has a value
@@ -504,6 +506,11 @@ void ChannelView::pause(PauseReason reason, std::optional<uint> msecs)
     }
 
     this->updatePauses();
+
+    if (wasUnpaused)
+    {
+        this->update();
+    }
 }
 
 void ChannelView::unpause(PauseReason reason)
@@ -967,10 +974,10 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
 
     this->channelConnections_.managedConnect(
         underlyingChannel->messageReplaced,
-        [this](auto index, const auto &replacement) {
+        [this](auto index, const auto &prev, const auto &replacement) {
             if (this->shouldIncludeMessage(replacement))
             {
-                this->channel_->replaceMessage(index, replacement);
+                this->channel_->replaceMessage(index, prev, replacement);
             }
         });
 
@@ -1051,8 +1058,9 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
     // on message replaced
     this->channelConnections_.managedConnect(
         this->channel_->messageReplaced,
-        [this](size_t index, MessagePtr replacement) {
-            this->messageReplaced(index, replacement);
+        [this](size_t index, const MessagePtr &prev,
+               const MessagePtr &replacement) {
+            this->messageReplaced(index, prev, replacement);
         });
 
     // on messages filled in
@@ -1062,6 +1070,8 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
                                              });
 
     this->underlyingChannel_ = underlyingChannel;
+
+    this->updateID();
 
     this->performLayout();
     this->queueUpdate();
@@ -1081,6 +1091,8 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
 void ChannelView::setFilters(const QList<QUuid> &ids)
 {
     this->channelFilters_ = std::make_shared<FilterSet>(ids);
+
+    this->updateID();
 }
 
 QList<QUuid> ChannelView::getFilterIds() const
@@ -1258,19 +1270,21 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
     this->queueLayout();
 }
 
-void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
+void ChannelView::messageReplaced(size_t hint, const MessagePtr &prev,
+                                  const MessagePtr &replacement)
 {
-    auto oMessage = this->messages_.get(index);
-    if (!oMessage)
+    auto optItem = this->messages_.find(hint, [&](const auto &it) {
+        return it->getMessagePtr() == prev;
+    });
+    if (!optItem)
     {
         return;
     }
-
-    auto message = *oMessage;
+    const auto &[index, oldItem] = *optItem;
 
     auto newItem = std::make_shared<MessageLayout>(replacement);
 
-    if (message->flags.has(MessageLayoutFlag::AlternateBackground))
+    if (oldItem->flags.has(MessageLayoutFlag::AlternateBackground))
     {
         newItem->flags.set(MessageLayoutFlag::AlternateBackground);
     }
@@ -1278,7 +1292,7 @@ void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
     this->scrollBar_->replaceHighlight(index,
                                        replacement->getScrollBarHighlight());
 
-    this->messages_.replaceItem(message, newItem);
+    this->messages_.replaceItem(index, newItem);
     this->queueLayout();
 }
 
@@ -2204,8 +2218,8 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         {
             this->isDoubleClick_ = false;
             // Was actually not a wanted triple-click
-            if (fabsf(distanceBetweenPoints(this->lastDoubleClickPosition_,
-                                            event->screenPos())) > 10.F)
+            if (std::abs(distanceBetweenPoints(this->lastDoubleClickPosition_,
+                                               event->screenPos())) > 10.F)
             {
                 this->clickTimer_.stop();
                 return;
@@ -2215,16 +2229,16 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         {
             this->isLeftMouseDown_ = false;
 
-            if (fabsf(distanceBetweenPoints(this->lastLeftPressPosition_,
-                                            event->screenPos())) > 15.F)
+            if (std::abs(distanceBetweenPoints(this->lastLeftPressPosition_,
+                                               event->screenPos())) > 15.F)
             {
                 return;
             }
 
             // Triple-clicking a message selects the whole message
             if (foundElement && this->clickTimer_.isActive() &&
-                (fabsf(distanceBetweenPoints(this->lastDoubleClickPosition_,
-                                             event->screenPos())) < 10.F))
+                (std::abs(distanceBetweenPoints(this->lastDoubleClickPosition_,
+                                                event->screenPos())) < 10.F))
             {
                 this->selectWholeMessage(layout.get(), messageIndex);
                 return;
@@ -2241,8 +2255,8 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         {
             this->isRightMouseDown_ = false;
 
-            if (fabsf(distanceBetweenPoints(this->lastRightPressPosition_,
-                                            event->screenPos())) > 15.F)
+            if (std::abs(distanceBetweenPoints(this->lastRightPressPosition_,
+                                               event->screenPos())) > 15.F)
             {
                 return;
             }
@@ -2404,6 +2418,11 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                     {
                         case UsernameRightClickBehavior::Mention: {
                             if (split == nullptr)
+                            {
+                                return;
+                            }
+
+                            if (link.value.startsWith("id:"))
                             {
                                 return;
                             }
@@ -3233,6 +3252,29 @@ void ChannelView::pendingLinkInfoStateChanged()
     }
     this->setLinkInfoTooltip(this->pendingLinkInfo_.data());
     this->tooltipWidget_->applyLastBoundsCheck();
+}
+
+void ChannelView::updateID()
+{
+    if (!this->underlyingChannel_)
+    {
+        // cannot update
+        return;
+    }
+
+    std::size_t seed = 0;
+    auto first = qHash(this->underlyingChannel_->getName());
+    auto second = qHash(this->getFilterIds());
+
+    boost::hash_combine(seed, first);
+    boost::hash_combine(seed, second);
+
+    this->id_ = seed;
+}
+
+ChannelView::ChannelViewID ChannelView::getID() const
+{
+    return this->id_;
 }
 
 }  // namespace chatterino

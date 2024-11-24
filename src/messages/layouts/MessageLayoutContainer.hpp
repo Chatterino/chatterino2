@@ -283,7 +283,12 @@ private:
     /**
      * Paint the selection start
      *
-     * Returns a line index if this message should also paint the selection end
+     * @returns A line index if the selection ends within this message but start
+     *          and end are on different lines. The returned index is the index 
+     *          of the first line where the selection starts at the beginning of
+     *          the line. This index should be passed to paintSelectionEnd().
+     *          If `std::nullopt` is returned, no further call to 
+     *          paintSelectionEnd() is necessary.
      */
     std::optional<size_t> paintSelectionStart(QPainter &painter,
                                               size_t messageIndex,

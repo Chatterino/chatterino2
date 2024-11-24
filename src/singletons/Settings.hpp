@@ -69,6 +69,13 @@ enum class ChatSendProtocol : int {
     Helix = 2,
 };
 
+enum class ShowModerationState : int {
+    // Always show this moderation-related item
+    Always = 0,
+    // Never show this moderation-related item
+    Never = 1,
+};
+
 enum StreamerModeSetting {
     Disabled = 0,
     Enabled = 1,
@@ -217,6 +224,12 @@ public:
         {300, 500},
     };
 
+    // Scrollbar
+    BoolSetting hideScrollbarThumb = {
+        "/appearance/scrollbar/hideThumb",
+        false,
+    };
+
     /// Behaviour
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",
                                           true};
@@ -345,6 +358,10 @@ public:
     IntSetting timeoutStackStyle = {
         "/moderation/timeoutStackStyle",
         static_cast<int>(TimeoutStackStyle::Default)};
+    EnumStringSetting<ShowModerationState> showBlockedTermAutomodMessages = {
+        "/moderation/showBlockedTermAutomodMessages",
+        ShowModerationState::Always,
+    };
 
     /// Highlighting
     //    BoolSetting enableHighlights = {"/highlighting/enabled", true};

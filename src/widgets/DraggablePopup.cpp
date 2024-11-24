@@ -36,11 +36,12 @@ namespace {
 
 DraggablePopup::DraggablePopup(bool closeAutomatically, QWidget *parent)
     : BaseWindow(
-          closeAutomatically
-              ? popupFlagsCloseAutomatically | BaseWindow::DisableLayoutSave
-              : popupFlags | BaseWindow::DisableLayoutSave,
+          (closeAutomatically ? popupFlagsCloseAutomatically : popupFlags) |
+              BaseWindow::DisableLayoutSave |
+              BaseWindow::ClearBuffersOnDpiChange,
           parent)
     , lifetimeHack_(std::make_shared<bool>(false))
+    , closeAutomatically_(closeAutomatically)
     , dragTimer_(this)
 
 {
@@ -126,6 +127,16 @@ Button *DraggablePopup::createPinButton()
     QObject::connect(this->pinButton_, &Button::leftClicked, this,
                      &DraggablePopup::togglePinned);
     return this->pinButton_;
+}
+
+bool DraggablePopup::ensurePinned()
+{
+    if (this->closeAutomatically_ && !this->isPinned_)
+    {
+        this->togglePinned();
+        return true;
+    }
+    return false;
 }
 
 }  // namespace chatterino

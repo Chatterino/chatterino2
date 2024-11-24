@@ -1,5 +1,5 @@
 {
-    "input": "@badge-info=;flags=;room-id=11148817;color=;client-nonce=0d1632f37b6baee51576859d5dbaf325;emotes=;subscriber=0;tmi-sent-ts=1727395701680;id=19ee1663-c14d-41cd-a4a2-30a4bb609c5a;turbo=1;badges=staff/1,turbo/1;source-badges=staff/1,moderator/1,bits-leader/1;source-badge-info=;display-name=creativewind;source-room-id=1025594235;source-id=b97eea45-f9dc-4f0c-8744-f8256c3ed950;user-type=staff;user-id=106940612;mod=0 :creativewind!creativewind@creativewind.tmi.twitch.tv PRIVMSG #pajlada :Guys",
+    "input": "@badge-info=;flags=;room-id=11148817;color=;client-nonce=0d1632f37b6baee51576859d5dbaf325;emotes=;subscriber=0;tmi-sent-ts=1727395701680;id=19ee1663-c14d-41cd-a4a2-30a4bb609c5a;turbo=1;badges=staff/1,turbo/1;source-badges=staff/1,moderator/1,bits-leader/1;source-badge-info=;display-name=creativewind;source-room-id=141981764;source-id=b97eea45-f9dc-4f0c-8744-f8256c3ed950;user-type=staff;user-id=106940612;mod=0 :creativewind!creativewind@creativewind.tmi.twitch.tv PRIVMSG #pajlada :Guy",
     "output": [
         {
             "badgeInfos": {
@@ -63,6 +63,24 @@
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TwitchModerationElement"
+                },
+                {
+                    "emote": {
+                        "homePage": "https://link.twitch.tv/SharedChatViewer",
+                        "images": {
+                            "1x": ""
+                        },
+                        "name": "",
+                        "tooltip": "Shared Message from twitchdev"
+                    },
+                    "flags": "BadgeSharedChannel",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Shared Message from twitchdev",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
                 },
                 {
                     "emote": {
@@ -130,7 +148,7 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "Guys"
+                        "Guy"
                     ]
                 },
                 {
@@ -147,12 +165,12 @@
                     "url": ""
                 }
             ],
-            "flags": "Collapsed|SharedMessage",
+            "flags": "DoNotTriggerNotification|Collapsed|SharedMessage",
             "id": "19ee1663-c14d-41cd-a4a2-30a4bb609c5a",
             "localizedName": "",
             "loginName": "creativewind",
-            "messageText": "Guys",
-            "searchText": "creativewind  creativewind: Guys ",
+            "messageText": "Guy",
+            "searchText": "creativewind  creativewind: Guy ",
             "serverReceivedTime": "2024-09-27T00:08:21Z",
             "timeoutUser": "",
             "usernameColor": "#ff00ff00"

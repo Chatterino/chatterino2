@@ -8,6 +8,7 @@ on:
 
 env:
   TWITCH_PUBSUB_SERVER_TAG: v1.0.7
+  HTTPBOX_TAG: v0.2.1
   QT_QPA_PLATFORM: minimal
   # Last known good conan version
   # 2.0.3 has a bug on Windows (conan-io/conan#13606)
@@ -25,7 +26,7 @@ jobs:
       matrix:
         os: [windows-latest]
         qt-version: [5.15.2, 6.7.1]
-        plugins: [false]
+        plugins: [true]
         skip-artifact: [false]
         skip-crashpad: [false]
       fail-fast: false
@@ -57,7 +58,7 @@ jobs:
           fetch-depth: 0 # allows for tags access
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v4.0.0
+        uses: jurplel/install-qt-action@v4.1.1
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -111,6 +112,13 @@ jobs:
           mkdir -Force build-test/bin
           cp "$((ls $Env:VCToolsRedistDir/onecore/x64 -Filter '*.CRT')[0].FullName)/*" build-test/bin
 
+      - name: Install httpbox
+        run: |
+          mkdir httpbox
+          Invoke-WebRequest -Uri "https://github.com/Chatterino/httpbox/releases/download/${{ env.HTTPBOX_TAG }}/httpbox-x86_64-pc-windows-msvc.zip" -outfile "httpbox.zip"
+          Expand-Archive httpbox.zip -DestinationPath httpbox
+          rm httpbox.zip
+
       - name: Build
         run: |
           cmake `
@@ -139,14 +147,10 @@ jobs:
           Invoke-WebRequest -Uri "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.key" -outfile "server.key"
           cd ..
 
-      - name: Cargo Install httpbox
-        run: |
-          cargo install --git https://github.com/kevinastone/httpbox --rev 89b971f
-
       - name: Test
         timeout-minutes: 30
         run: |
-          httpbox --port 9051 &
+          ..\httpbox\httpbox.exe --port 9051 &
           cd ..\pubsub-server-test
           .\server.exe 127.0.0.1:9050 &
           cd ..\build-test

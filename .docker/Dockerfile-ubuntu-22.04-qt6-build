@@ -3,7 +3,6 @@ ARG UBUNTU_VERSION=22.04
 FROM ubuntu:$UBUNTU_VERSION
 
 ARG QT_VERSION=6.2.4
-ARG BUILD_WITH_QT6=ON
 
 ENV TZ=UTC
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -48,7 +47,6 @@ RUN mkdir /src/build
 # cmake
 RUN cd /src/build && \
         CXXFLAGS=-fno-sized-deallocation cmake \
-        -DBUILD_WITH_QT6=$BUILD_WITH_QT6 \
         -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
         -DCMAKE_PREFIX_PATH=/opt/qt/$QT_VERSION/gcc_64/lib/cmake \
         -DBUILD_WITH_QTKEYCHAIN=OFF \

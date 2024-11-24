@@ -350,7 +350,7 @@ public:
     // contains a comma
     MOCK_METHOD(
         void, getChatters,
-        (QString broadcasterID, QString moderatorID, int maxChattersToFetch,
+        (QString broadcasterID, QString moderatorID, size_t maxChattersToFetch,
          ResultCallback<HelixChatters> successCallback,
          (FailureCallback<HelixGetChattersError, QString> failureCallback)),
         (override));  // getChatters
@@ -422,7 +422,7 @@ public:
     // get followed channel
     MOCK_METHOD(
         void, getFollowedChannel,
-        (QString userID, QString broadcasterID,
+        (QString userID, QString broadcasterID, const QObject *caller,
          ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
          FailureCallback<QString> failureCallback),
         (override));

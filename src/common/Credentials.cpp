@@ -24,7 +24,7 @@
 #            include "qt5keychain/keychain.h"
 #        endif
 #    else
-#        include "keychain.h"
+#        include <qtkeychain/keychain.h>
 #    endif
 #endif
 

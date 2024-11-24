@@ -142,6 +142,8 @@ WindowManager::WindowManager(const Paths &paths, Settings &settings,
     this->forceLayoutChannelViewsListener.add(settings.enableRedeemedHighlight);
     this->forceLayoutChannelViewsListener.add(settings.colorUsernames);
     this->forceLayoutChannelViewsListener.add(settings.boldUsernames);
+    this->forceLayoutChannelViewsListener.add(
+        settings.showBlockedTermAutomodMessages);
 
     this->layoutChannelViewsListener.add(settings.timestampFormat);
     this->layoutChannelViewsListener.add(fonts.fontChanged);
@@ -197,6 +199,7 @@ void WindowManager::updateWordTypeMask()
     flags.set(settings->animateEmotes ? MEF::BitsAnimated : MEF::BitsStatic);
 
     // badges
+    flags.set(MEF::BadgeSharedChannel);
     flags.set(settings->showBadgesGlobalAuthority ? MEF::BadgeGlobalAuthority
                                                   : MEF::None);
     flags.set(settings->showBadgesPredictions ? MEF::BadgePredictions

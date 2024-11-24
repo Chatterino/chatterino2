@@ -4,8 +4,10 @@
 #include "common/FlagsEnum.hpp"
 #include "common/Literals.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/PostToThread.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/InvisibleSizeGrip.hpp"
@@ -124,7 +126,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel,
     this->holder_.managedConnect(this->channel_.getChannelChanged(), [this]() {
         this->channelView_.setChannel(this->channel_.get());
     });
-    this->channelView_.scrollbar()->setShowThumb(false);
+    this->channelView_.scrollbar()->setHideThumb(true);
 
     this->setAutoFillBackground(false);
     this->resize(300, 500);
@@ -166,6 +168,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel,
 
     this->addShortcuts();
     this->triggerFirstActivation();
+    getApp()->getEmotes()->getGIFTimer().registerOpenOverlayWindow();
 }
 
 OverlayWindow::~OverlayWindow()
@@ -173,6 +176,7 @@ OverlayWindow::~OverlayWindow()
 #ifdef Q_OS_WIN
     ::DestroyCursor(this->sizeAllCursor_);
 #endif
+    getApp()->getEmotes()->getGIFTimer().unregisterOpenOverlayWindow();
 }
 
 void OverlayWindow::applyTheme()
@@ -309,6 +313,13 @@ bool OverlayWindow::nativeEvent(const QByteArray &eventType, void *message,
         }
         break;
 #    endif
+        case WM_DPICHANGED: {
+            // wait for Qt to process this message, same as in BaseWindow
+            postToThread([] {
+                getApp()->getWindows()->invalidateChannelViewBuffers();
+            });
+        }
+        break;
 
         default:
             return QWidget::nativeEvent(eventType, message, result);

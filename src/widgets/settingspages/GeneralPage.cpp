@@ -458,6 +458,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         false);
 
+    layout.addCheckbox(
+        "Hide scrollbar thumb", s.hideScrollbarThumb, false,
+        "Hiding the scrollbar thumb (the handle you can drag) will disable "
+        "all mouse interaction in the scrollbar.");
+
     layout.addTitle("Messages");
     layout.addCheckbox(
         "Separate with lines", s.separateMessages, false,
@@ -614,12 +619,16 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                            "Google",
                        },
                        s.emojiSet);
-    layout.addCheckbox("Show BTTV global emotes", s.enableBTTVGlobalEmotes);
-    layout.addCheckbox("Show BTTV channel emotes", s.enableBTTVChannelEmotes);
-    layout.addCheckbox("Enable BTTV live emote updates (requires restart)",
+    layout.addCheckbox("Show BetterTTV global emotes",
+                       s.enableBTTVGlobalEmotes);
+    layout.addCheckbox("Show BetterTTV channel emotes",
+                       s.enableBTTVChannelEmotes);
+    layout.addCheckbox("Enable BetterTTV live emote updates (requires restart)",
                        s.enableBTTVLiveUpdates);
-    layout.addCheckbox("Show FFZ global emotes", s.enableFFZGlobalEmotes);
-    layout.addCheckbox("Show FFZ channel emotes", s.enableFFZChannelEmotes);
+    layout.addCheckbox("Show FrankerFaceZ global emotes",
+                       s.enableFFZGlobalEmotes);
+    layout.addCheckbox("Show FrankerFaceZ channel emotes",
+                       s.enableFFZChannelEmotes);
     layout.addCheckbox("Show 7TV global emotes", s.enableSevenTVGlobalEmotes);
     layout.addCheckbox("Show 7TV channel emotes", s.enableSevenTVChannelEmotes);
     layout.addCheckbox("Enable 7TV live emote updates (requires restart)",
@@ -1166,6 +1175,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.scrollbackSplitLimit, 100, 100000, 100);
     layout.addIntInput("Usercard scrollback limit (requires restart)",
                        s.scrollbackUsercardLimit, 100, 100000, 100);
+
+    layout.addDropdownEnumClass<ShowModerationState>(
+        "Show blocked term automod messages",
+        qmagicenum::enumNames<ShowModerationState>(),
+        s.showBlockedTermAutomodMessages,
+        "Show messages that are blocked by AutoMod for containing a public "
+        "blocked term in the current channel.",
+        {});
 
     layout.addDropdown<int>(
         "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},

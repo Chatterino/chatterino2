@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0087 NEW) # evaluates generator expressions in `install(CODE/SCRIPT)`
 cmake_policy(SET CMP0091 NEW) # select MSVC runtime library through `CMAKE_MSVC_RUNTIME_LIBRARY`
+if (POLICY CMP0167)
+    cmake_policy(SET CMP0167 NEW) # find Boost's own CMake config file
+endif ()
 include(FeatureSummary)
 
 list(APPEND CMAKE_MODULE_PATH
@@ -18,17 +21,14 @@ option(BUILD_WITH_QTKEYCHAIN "Build Chatterino with support for your system key 
 option(USE_SYSTEM_MINIAUDIO "Build Chatterino with your system miniaudio" OFF)
 option(BUILD_WITH_CRASHPAD "Build chatterino with crashpad" OFF)
 option(USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
-if(WIN32)
-    option(BUILD_WITH_QT6 "Build with Qt6, default on for Windows" On)
-else()
-    option(BUILD_WITH_QT6 "Use Qt6 instead of default Qt5" OFF)
-endif()
+option(BUILD_WITH_QT6 "Build with Qt6" On)
 option(CHATTERINO_GENERATE_COVERAGE "Generate coverage files" OFF)
 # We don't use translations, and we don't want qtkeychain to build translations
 option(BUILD_TRANSLATIONS "" OFF)
 option(BUILD_SHARED_LIBS "" OFF)
 option(CHATTERINO_LTO "Enable LTO for all targets" OFF)
 option(CHATTERINO_PLUGINS "Enable ALPHA plugin support in Chatterino" OFF)
+option(CHATTERINO_USE_GDI_FONTENGINE "Use the legacy GDI fontengine instead of the new DirectWrite one on Windows (Qt 6.8.0 and later)" ON)
 
 option(CHATTERINO_UPDATER "Enable update checks" ON)
 mark_as_advanced(CHATTERINO_UPDATER)
@@ -157,9 +157,18 @@ if (BUILD_WITH_QTKEYCHAIN)
             message(FATAL_ERROR "Submodules probably not loaded, unable to find lib/qtkeychain/CMakeLists.txt")
         endif()
 
+        set(_prev_testing ${BUILD_TESTING})
+        set(BUILD_TESTING Off)
         add_subdirectory("${QTKEYCHAIN_ROOT_LIB_FOLDER}" EXCLUDE_FROM_ALL)
+        set(BUILD_TESTING ${_prev_testing})
+
         if (NOT TARGET qt${MAJOR_QT_VERSION}keychain)
             message(FATAL_ERROR "qt${MAJOR_QT_VERSION}keychain target was not created :@")
+        endif()
+        if (MSVC AND "${MAJOR_QT_VERSION}" STREQUAL "5")
+            target_compile_definitions(qt5keychain PRIVATE UNICODE)
+            target_compile_options(qt5keychain PRIVATE /utf-8)
+            set_target_properties(qt5keychain PROPERTIES CXX_STANDARD 17)
         endif()
     endif()
 endif()
@@ -212,6 +221,8 @@ endif()
 if (CHATTERINO_PLUGINS)
     set(LUA_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lib/lua/src")
     add_subdirectory(lib/lua)
+
+    find_package(Sol2 REQUIRED)
 endif()
 
 if (BUILD_WITH_CRASHPAD)

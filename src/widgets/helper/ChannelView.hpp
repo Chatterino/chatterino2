@@ -212,6 +212,14 @@ public:
 
     Scrollbar *scrollbar();
 
+    using ChannelViewID = std::size_t;
+    ///
+    /// \brief Get the ID of this ChannelView
+    ///
+    /// The ID is made of the underlying channel's name
+    /// combined with the filter set IDs
+    ChannelViewID getID() const;
+
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
     pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
@@ -268,7 +276,8 @@ private:
                          std::optional<MessageFlags> overridingFlags);
     void messageAddedAtStart(std::vector<MessagePtr> &messages);
     void messageRemoveFromStart(MessagePtr &message);
-    void messageReplaced(size_t index, MessagePtr &replacement);
+    void messageReplaced(size_t hint, const MessagePtr &prev,
+                         const MessagePtr &replacement);
     void messagesUpdated();
 
     void performLayout(bool causedByScrollbar = false,
@@ -313,6 +322,9 @@ private:
     void setInputReply(const MessagePtr &message);
     void showReplyThreadPopup(const MessagePtr &message);
     bool canReplyToMessages() const;
+
+    void updateID();
+    ChannelViewID id_{};
 
     bool layoutQueued_ = false;
     bool bufferInvalidationQueued_ = false;
@@ -375,7 +387,7 @@ private:
     FilterSetPtr channelFilters_;
 
     // Returns true if message should be included
-    bool shouldIncludeMessage(const MessagePtr &m) const;
+    bool shouldIncludeMessage(const MessagePtr &message) const;
 
     // Returns whether the scrollbar should have highlights
     bool showScrollbarHighlights() const;

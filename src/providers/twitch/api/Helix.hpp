@@ -1073,7 +1073,7 @@ public:
     // This will follow the returned cursor and return up to `maxChattersToFetch` chatters
     // https://dev.twitch.tv/docs/api/reference#get-chatters
     virtual void getChatters(
-        QString broadcasterID, QString moderatorID, int maxChattersToFetch,
+        QString broadcasterID, QString moderatorID, size_t maxChattersToFetch,
         ResultCallback<HelixChatters> successCallback,
         FailureCallback<HelixGetChattersError, QString> failureCallback) = 0;
 
@@ -1143,7 +1143,7 @@ public:
     /// https://dev.twitch.tv/docs/api/reference/#get-followed-channels
     /// (non paginated)
     virtual void getFollowedChannel(
-        QString userID, QString broadcasterID,
+        QString userID, QString broadcasterID, const QObject *caller,
         ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
         FailureCallback<QString> failureCallback) = 0;
 
@@ -1417,7 +1417,7 @@ public:
     // This will follow the returned cursor and return up to `maxChattersToFetch` chatters
     // https://dev.twitch.tv/docs/api/reference#get-chatters
     void getChatters(
-        QString broadcasterID, QString moderatorID, int maxChattersToFetch,
+        QString broadcasterID, QString moderatorID, size_t maxChattersToFetch,
         ResultCallback<HelixChatters> successCallback,
         FailureCallback<HelixGetChattersError, QString> failureCallback) final;
 
@@ -1486,7 +1486,7 @@ public:
     /// https://dev.twitch.tv/docs/api/reference/#get-followed-channels
     /// (non paginated)
     void getFollowedChannel(
-        QString userID, QString broadcasterID,
+        QString userID, QString broadcasterID, const QObject *caller,
         ResultCallback<std::optional<HelixFollowedChannel>> successCallback,
         FailureCallback<QString> failureCallback) final;
 
@@ -1505,7 +1505,7 @@ protected:
     // Recursive boy
     void onFetchChattersSuccess(
         std::shared_ptr<HelixChatters> finalChatters, QString broadcasterID,
-        QString moderatorID, int maxChattersToFetch,
+        QString moderatorID, size_t maxChattersToFetch,
         ResultCallback<HelixChatters> successCallback,
         FailureCallback<HelixGetChattersError, QString> failureCallback,
         HelixChatters chatters);
@@ -1520,7 +1520,7 @@ protected:
     // Recursive boy
     void onFetchModeratorsSuccess(
         std::shared_ptr<std::vector<HelixModerator>> finalModerators,
-        QString broadcasterID, int maxModeratorsToFetch,
+        QString broadcasterID, size_t maxModeratorsToFetch,
         ResultCallback<std::vector<HelixModerator>> successCallback,
         FailureCallback<HelixGetModeratorsError, QString> failureCallback,
         HelixModerators moderators);

@@ -2,6 +2,7 @@
 
 #include "common/network/NetworkManager.hpp"
 #include "common/network/NetworkResult.hpp"
+#include "NetworkHelpers.hpp"
 #include "Test.hpp"
 
 #include <QCoreApplication>
@@ -9,14 +10,6 @@
 using namespace chatterino;
 
 namespace {
-
-#ifdef CHATTERINO_TEST_USE_PUBLIC_HTTPBIN
-// Not using httpbin.org, since it can be really slow and cause timeouts.
-// postman-echo has the same API.
-const char *const HTTPBIN_BASE_URL = "https://postman-echo.com";
-#else
-const char *const HTTPBIN_BASE_URL = "http://127.0.0.1:9051";
-#endif
 
 QString getStatusURL(int code)
 {
@@ -27,46 +20,6 @@ QString getDelayURL(int delay)
 {
     return QString("%1/delay/%2").arg(HTTPBIN_BASE_URL).arg(delay);
 }
-
-class RequestWaiter
-{
-public:
-    void requestDone()
-    {
-        {
-            std::unique_lock lck(this->mutex_);
-            ASSERT_FALSE(this->requestDone_);
-            this->requestDone_ = true;
-        }
-        this->condition_.notify_one();
-    }
-
-    void waitForRequest()
-    {
-        using namespace std::chrono_literals;
-
-        while (true)
-        {
-            {
-                std::unique_lock lck(this->mutex_);
-                bool done = this->condition_.wait_for(lck, 10ms, [this] {
-                    return this->requestDone_;
-                });
-                if (done)
-                {
-                    break;
-                }
-            }
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
-            QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
-        }
-    }
-
-private:
-    std::mutex mutex_;
-    std::condition_variable condition_;
-    bool requestDone_ = false;
-};
 
 }  // namespace
 
@@ -277,4 +230,50 @@ TEST(NetworkRequest, FinallyCallbackOnTimeout)
     EXPECT_TRUE(onErrorCalled);
     EXPECT_FALSE(onSuccessCalled);
     EXPECT_TRUE(NetworkManager::workerThread->isRunning());
+}
+
+/// Ensure timeouts don't expire early just because their request took a bit longer to actually fire
+///
+/// We need to ensure all requests are "executed" before we start waiting for them
+TEST(NetworkRequest, BatchedTimeouts)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 3, 0)
+    // roughly num network manager worker threads * 2
+    static const auto numRequests = 10;
+
+    struct RequestState {
+        RequestWaiter waiter;
+        bool errored = false;
+    };
+
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
+
+    std::vector<std::shared_ptr<RequestState>> states;
+
+    for (auto i = 1; i <= numRequests; ++i)
+    {
+        auto state = std::make_shared<RequestState>();
+
+        auto url = getDelayURL(1);
+
+        NetworkRequest(url)
+            .timeout(1500)
+            .onError([=](const NetworkResult &result) {
+                (void)result;
+                state->errored = true;
+            })
+            .finally([=] {
+                state->waiter.requestDone();
+            })
+            .execute();
+
+        states.emplace_back(state);
+    }
+
+    for (const auto &state : states)
+    {
+        state->waiter.waitForRequest();
+        EXPECT_FALSE(state->errored);
+    }
+#endif
 }

@@ -15,10 +15,10 @@
 #include "util/RenameThread.hpp"
 
 #include <QJsonArray>
+#include <QScopeGuard>
 
 #include <algorithm>
 #include <exception>
-#include <future>
 #include <iostream>
 #include <memory>
 #include <thread>
@@ -349,40 +349,6 @@ PubSub::PubSub(const QString &host, std::chrono::seconds pingInterval)
         this->moderation.raidCanceled.invoke(action);
     };
 
-    /*
-    // This handler is no longer required as we use the automod-queue topic now
-    this->moderationActionHandlers["automod_rejected"] =
-        [this](const auto &data, const auto &roomID) {
-            AutomodAction action(data, roomID);
-
-            action.source.id = data.value("created_by_user_id").toString();
-            action.source.login = data.value("created_by").toString();
-
-            action.target.id = data.value("target_user_id").toString();
-
-            const auto args = data.value("args").toArray();
-
-            if (args.isEmpty())
-            {
-                return;
-            }
-
-            action.msgID = data.value("msg_id").toString();
-
-            if (action.msgID.isEmpty())
-            {
-                // Missing required msg_id parameter
-                return;
-            }
-
-            action.target.login = args[0].toString();
-            action.message = args[1].toString();  // May be omitted
-            action.reason = args[2].toString();   // May be omitted
-
-            this->moderation.autoModMessageBlocked.invoke(action);
-        };
-    */
-
     this->moderationActionHandlers["automod_message_rejected"] =
         [this](const auto &data, const auto &roomID) {
             AutomodInfoAction action(data, roomID);
@@ -594,6 +560,11 @@ void PubSub::start()
     this->work = std::make_shared<boost::asio::io_service::work>(
         this->websocketClient.get_io_service());
     this->thread = std::make_unique<std::thread>([this] {
+        // make sure we set in any case, even exceptions
+        auto guard = qScopeGuard([&] {
+            this->stoppedFlag_.set();
+        });
+
         runThread();
     });
     renameThread(*this->thread, "PubSub");
@@ -612,23 +583,36 @@ void PubSub::stop()
 
     this->work.reset();
 
-    if (this->thread->joinable())
+    if (!this->thread->joinable())
     {
-        // NOTE: We spawn a new thread to join the websocket thread.
-        // There is a case where a new client was initiated but not added to the clients list.
-        // We just don't join the thread & let the operating system nuke the thread if joining fails
-        // within 1s.
-        // We could fix the underlying bug, but this is easier & we realistically won't use this exact code
-        // for super much longer.
-        auto joiner = std::async(std::launch::async, &std::thread::join,
-                                 this->thread.get());
-        if (joiner.wait_for(1s) == std::future_status::timeout)
-        {
-            qCWarning(chatterinoPubSub)
-                << "Thread didn't join within 1 second, rip it out";
-            this->websocketClient.stop();
-        }
+        return;
     }
+
+    // NOTE:
+    // There is a case where a new client was initiated but not added to the clients list.
+    // We just don't join the thread & let the operating system nuke the thread if joining fails
+    // within 1s.
+    // We could fix the underlying bug, but this is easier & we realistically won't use this exact code
+    // for super much longer.
+    if (this->stoppedFlag_.waitFor(std::chrono::seconds{1}))
+    {
+        this->thread->join();
+        return;
+    }
+
+    qCWarning(chatterinoLiveupdates)
+        << "Thread didn't finish within 1 second, force-stop the client";
+    this->websocketClient.stop();
+    if (this->stoppedFlag_.waitFor(std::chrono::milliseconds{100}))
+    {
+        this->thread->join();
+        return;
+    }
+
+    qCWarning(chatterinoLiveupdates)
+        << "Thread didn't finish after stopping, discard it";
+    // detach the thread so the destructor doesn't attempt any joining
+    this->thread->detach();
 }
 
 bool PubSub::listenToWhispers()
