@@ -1073,7 +1073,7 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
 
     this->updateID();
 
-    this->performLayout();
+    this->queueLayout();
     this->queueUpdate();
 
     // Notifications
