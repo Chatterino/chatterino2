@@ -123,7 +123,6 @@
 - Dev: Refactored legacy Unicode zero-width-joiner replacement. (#5594)
 - Dev: The JSON output when copying a message (<kbd>SHIFT</kbd> + right-click) is now more extensive. (#5600)
 - Dev: Added more tests for message building. (#5598, #5654, #5656, #5671)
-- Dev: Twitch messages are now sent using Twitch's Helix API instead of IRC by default. (#5607)
 - Dev: `GIFTimer` is no longer initialized in tests. (#5608)
 - Dev: Emojis now use flags instead of a set of strings for capabilities. (#5616)
 - Dev: Move plugins to Sol2. (#5622, #5682)
