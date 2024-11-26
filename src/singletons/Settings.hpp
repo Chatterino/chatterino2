@@ -224,6 +224,16 @@ public:
         {300, 500},
     };
 
+    // Scrollbar
+    BoolSetting hideScrollbarThumb = {
+        "/appearance/scrollbar/hideThumb",
+        false,
+    };
+    BoolSetting hideScrollbarHighlights = {
+        "/appearance/scrollbar/hideHighlights",
+        false,
+    };
+
     /// Behaviour
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",
                                           true};

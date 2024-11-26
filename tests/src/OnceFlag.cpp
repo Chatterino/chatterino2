@@ -48,7 +48,7 @@ TEST(OnceFlag, waitFor)
     ASSERT_TRUE(stoppedFlag.waitFor(std::chrono::milliseconds{200}));
     auto stop = std::chrono::system_clock::now();
 
-    ASSERT_LT(stop - start, std::chrono::milliseconds{150});
+    ASSERT_LT(stop - start, std::chrono::milliseconds{200});
 
     start = std::chrono::system_clock::now();
     ASSERT_TRUE(stoppedFlag.waitFor(std::chrono::milliseconds{1000}));

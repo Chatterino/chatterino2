@@ -231,3 +231,49 @@ TEST(NetworkRequest, FinallyCallbackOnTimeout)
     EXPECT_FALSE(onSuccessCalled);
     EXPECT_TRUE(NetworkManager::workerThread->isRunning());
 }
+
+/// Ensure timeouts don't expire early just because their request took a bit longer to actually fire
+///
+/// We need to ensure all requests are "executed" before we start waiting for them
+TEST(NetworkRequest, BatchedTimeouts)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 3, 0)
+    // roughly num network manager worker threads * 2
+    static const auto numRequests = 10;
+
+    struct RequestState {
+        RequestWaiter waiter;
+        bool errored = false;
+    };
+
+    EXPECT_TRUE(NetworkManager::workerThread->isRunning());
+
+    std::vector<std::shared_ptr<RequestState>> states;
+
+    for (auto i = 1; i <= numRequests; ++i)
+    {
+        auto state = std::make_shared<RequestState>();
+
+        auto url = getDelayURL(1);
+
+        NetworkRequest(url)
+            .timeout(1500)
+            .onError([=](const NetworkResult &result) {
+                (void)result;
+                state->errored = true;
+            })
+            .finally([=] {
+                state->waiter.requestDone();
+            })
+            .execute();
+
+        states.emplace_back(state);
+    }
+
+    for (const auto &state : states)
+    {
+        state->waiter.waitForRequest();
+        EXPECT_FALSE(state->errored);
+    }
+#endif
+}
