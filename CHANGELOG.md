@@ -138,6 +138,7 @@
 - Dev: 7TV's `entitlement.reset` is now explicitly ignored. (#5685)
 - Dev: Qt 6.8 and later now default to the GDI fontengine. (#5710)
 - Dev: Moved to condition variables when shutting down worker threads. (#5721, #5733)
+- Dev: Reduced layouts in channel views when setting a channel. (#5737)
 
 ## 2.5.1
 
