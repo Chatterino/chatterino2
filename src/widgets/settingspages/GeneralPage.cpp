@@ -575,7 +575,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.removeSpacesBetweenEmotes, false,
                        "When enabled, adjacent emotes will no longer have an "
                        "added space seperating them.");
-    layout.addCheckbox("Show unlisted 7TV emotes", s.showUnlistedSevenTVEmotes);
+    SettingWidget::checkbox("Show unlisted 7TV emotes",
+                            s.showUnlistedSevenTVEmotes)
+        ->addKeywords({"seventv"})
+        ->addTo(layout);
     // TODO: Add a tooltip explaining what an unlisted 7TV emote is
     // but wait until https://github.com/Chatterino/wiki/pull/255 is resolved,
     // as an official description from 7TV devs is best
@@ -998,15 +1001,23 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        "e.g. prime, bits, sub gifter");
     layout.addCheckbox("Chatterino", s.showBadgesChatterino, false,
                        "e.g. Chatterino Supporter/Contributor/Developer");
-    layout.addCheckbox("FrankerFaceZ", s.showBadgesFfz, false,
-                       "e.g. Bot, FFZ supporter, FFZ developer");
-    layout.addCheckbox("7TV", s.showBadgesSevenTV, false,
-                       "Badges for 7TV admins, developers, and supporters");
+    SettingWidget::checkbox("FrankerFaceZ", s.showBadgesFfz)
+        ->addKeywords({"ffz"})
+        ->setTooltip("e.g. Bot, FrankerFaceZ supporter, FrankerFaceZ developer")
+        ->addTo(layout);
+    SettingWidget::checkbox("7TV", s.showBadgesSevenTV)
+        ->addKeywords({"seventv"})
+        ->setTooltip("Badges for 7TV admins, developers, and supporters")
+        ->addTo(layout);
     layout.addSeperator();
-    layout.addCheckbox("Use custom FrankerFaceZ moderator badges",
-                       s.useCustomFfzModeratorBadges);
-    layout.addCheckbox("Use custom FrankerFaceZ VIP badges",
-                       s.useCustomFfzVipBadges);
+    SettingWidget::checkbox("Use custom FrankerFaceZ moderator badges",
+                            s.useCustomFfzModeratorBadges)
+        ->addKeywords({"ffz"})
+        ->addTo(layout);
+    SettingWidget::checkbox("Use custom FrankerFaceZ VIP badges",
+                            s.useCustomFfzVipBadges)
+        ->addKeywords({"ffz"})
+        ->addTo(layout);
 
     layout.addSubtitle("Overlay");
     layout.addIntInput(
