@@ -21,7 +21,6 @@ class QScrollArea;
 namespace chatterino {
 
 class ColorButton;
-class SettingWidget;
 
 class Space : public QLabel
 {
