@@ -53,6 +53,7 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QFileInfo>
+#include <QStringBuilder>
 #include <QTimeZone>
 
 #include <algorithm>
@@ -1983,6 +1984,29 @@ MessagePtr MessageBuilder::makeLowTrustUpdateMessage(
                                       << action.treatmentString;
             break;
     }
+
+    return builder.release();
+}
+
+MessagePtrMut MessageBuilder::makeAccountExpiredMessage(
+    const QString &expirationText)
+{
+    auto loginPromptText = u"Try adding your account again."_s;
+
+    MessageBuilder builder;
+    auto text = expirationText % ' ' % loginPromptText;
+    builder->messageText = text;
+    builder->searchText = text;
+    builder->flags.set(MessageFlag::System,
+                       MessageFlag::DoNotTriggerNotification);
+
+    builder.emplace<TimestampElement>();
+    builder.emplace<TextElement>(expirationText, MessageElementFlag::Text,
+                                 MessageColor::System);
+    builder
+        .emplace<TextElement>(loginPromptText, MessageElementFlag::Text,
+                              MessageColor::Link)
+        ->setLink({Link::OpenAccountsPage, {}});
 
     return builder.release();
 }
