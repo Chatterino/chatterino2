@@ -229,6 +229,10 @@ public:
         "/appearance/scrollbar/hideThumb",
         false,
     };
+    BoolSetting hideScrollbarHighlights = {
+        "/appearance/scrollbar/hideHighlights",
+        false,
+    };
 
     /// Behaviour
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",

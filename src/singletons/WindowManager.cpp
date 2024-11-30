@@ -10,6 +10,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/CombinePath.hpp"
+#include "util/FilesystemHelpers.hpp"
 #include "util/SignalListener.hpp"
 #include "widgets/AccountSwitchPopup.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
@@ -21,6 +22,7 @@
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/Window.hpp"
 
+#include <pajlada/settings/backup.hpp>
 #include <QDebug>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -516,19 +518,33 @@ void WindowManager::save()
     document.setObject(obj);
 
     // save file
-    QSaveFile file(this->windowLayoutFilePath);
-    file.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    std::error_code ec;
+    pajlada::Settings::Backup::saveWithBackup(
+        qStringToStdPath(this->windowLayoutFilePath),
+        {.enabled = true, .numSlots = 9},
+        [&](const auto &path, auto &ec) {
+            QSaveFile file(stdPathToQString(path));
+            if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+            {
+                ec = std::make_error_code(std::errc::io_error);
+                return;
+            }
 
-    QJsonDocument::JsonFormat format =
-#ifdef _DEBUG
-        QJsonDocument::JsonFormat::Compact
-#else
-        (QJsonDocument::JsonFormat)0
-#endif
-        ;
+            file.write(document.toJson(QJsonDocument::Indented));
+            if (!file.commit() || file.error() != QFile::NoError)
+            {
+                ec = std::make_error_code(std::errc::io_error);
+            }
+        },
+        ec);
 
-    file.write(document.toJson(format));
-    file.commit();
+    if (ec)
+    {
+        // TODO(Qt 6.5): drop fromStdString
+        qCWarning(chatterinoWindowmanager)
+            << "Failed to save windowlayout"
+            << QString::fromStdString(ec.message());
+    }
 }
 
 void WindowManager::sendAlert()
