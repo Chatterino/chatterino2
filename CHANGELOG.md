@@ -43,6 +43,9 @@
 - Minor: Made usernames in bits and sub messages clickable. (#5686)
 - Minor: Mentions of FrankerFaceZ and BetterTTV in settings are standardized as such. (#5698)
 - Minor: Emote names are no longer duplicated when using smarter emote completion. (#5705)
+- Minor: Added a setting to hide the scrollbar thumb (the handle you can drag). Hiding the scrollbar thumb will disable mouse click & drag interactions in the scrollbar. (#5731)
+- Minor: Added a setting to hide the scrollbar highlights. (#5732)
+- Minor: The window layout is now backed up like the other settings. (#5647)
 - Bugfix: Fixed tab move animation occasionally failing to start after closing a tab. (#5426, #5612)
 - Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
 - Bugfix: Fixed restricted users usernames not being clickable. (#5405)
@@ -75,6 +78,7 @@
 - Bugfix: Fixed incorrect messages getting replaced visually. (#5683)
 - Bugfix: Fixed rendering of multi-line selection that starts at a trailing space. (#5691)
 - Bugfix: Fixed pause indicator not appearing in certain cases. (#5707)
+- Bugfix: Fixed usercards not showing the login name in specific cases. (#5738)
 - Dev: Default build with Qt6 on all platforms. (#5716)
 - Dev: Update Windows build from Qt 6.5.0 to Qt 6.7.1. (#5420)
 - Dev: Update vcpkg build Qt from 6.5.0 to 6.7.0, boost from 1.83.0 to 1.85.0, openssl from 3.1.3 to 3.3.0. (#5422)
@@ -120,7 +124,6 @@
 - Dev: Refactored legacy Unicode zero-width-joiner replacement. (#5594)
 - Dev: The JSON output when copying a message (<kbd>SHIFT</kbd> + right-click) is now more extensive. (#5600)
 - Dev: Added more tests for message building. (#5598, #5654, #5656, #5671)
-- Dev: Twitch messages are now sent using Twitch's Helix API instead of IRC by default. (#5607)
 - Dev: `GIFTimer` is no longer initialized in tests. (#5608)
 - Dev: Emojis now use flags instead of a set of strings for capabilities. (#5616)
 - Dev: Move plugins to Sol2. (#5622, #5682)
@@ -134,7 +137,8 @@
 - Dev: Unified parsing of historic and live IRC messages. (#5678)
 - Dev: 7TV's `entitlement.reset` is now explicitly ignored. (#5685)
 - Dev: Qt 6.8 and later now default to the GDI fontengine. (#5710)
-- Dev: Moved to condition variables when shutting down worker threads. (#5721)
+- Dev: Moved to condition variables when shutting down worker threads. (#5721, #5733)
+- Dev: Reduced layouts in channel views when setting a channel. (#5737)
 
 ## 2.5.1
 
