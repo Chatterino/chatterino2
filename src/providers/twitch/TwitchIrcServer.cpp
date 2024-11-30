@@ -4,6 +4,7 @@
 #include "common/Channel.hpp"
 #include "common/Common.hpp"
 #include "common/Env.hpp"
+#include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
@@ -146,6 +147,8 @@ bool shouldSendHelixChat()
 }  // namespace
 
 namespace chatterino {
+
+using namespace literals;
 
 TwitchIrcServer::TwitchIrcServer()
     : whispersChannel(new Channel("/whispers", Channel::Type::TwitchWhispers))
@@ -488,9 +491,49 @@ void TwitchIrcServer::initialize()
                     if (msg.status == "PENDING")
                     {
                         AutomodAction action(msg.data, channelID);
-                        action.reason = QString("%1 level %2")
-                                            .arg(msg.contentCategory)
-                                            .arg(msg.contentLevel);
+                        if (msg.reason ==
+                            PubSubAutoModQueueMessage::Reason::BlockedTerm)
+                        {
+                            auto numBlockedTermsMatched =
+                                msg.blockedTermsFound.count();
+                            auto hideBlockedTerms =
+                                getSettings()
+                                    ->streamerModeHideBlockedTermText &&
+                                getApp()->getStreamerMode()->isEnabled();
+                            if (!msg.blockedTermsFound.isEmpty())
+                            {
+                                if (hideBlockedTerms)
+                                {
+                                    action.reason =
+                                        u"matches %1 blocked term%2"_s
+                                            .arg(numBlockedTermsMatched)
+                                            .arg(numBlockedTermsMatched > 1
+                                                     ? u"s"
+                                                     : u"");
+                                }
+                                else
+                                {
+                                    action.reason =
+                                        u"matches %1 blocked term%2 \"%3\""_s
+                                            .arg(numBlockedTermsMatched)
+                                            .arg(numBlockedTermsMatched > 1
+                                                     ? u"s"
+                                                     : u"")
+                                            .arg(msg.blockedTermsFound.join(
+                                                u"\", \""));
+                                }
+                            }
+                            else
+                            {
+                                action.reason = "blocked term usage";
+                            }
+                        }
+                        else
+                        {
+                            action.reason = QString("%1 level %2")
+                                                .arg(msg.contentCategory)
+                                                .arg(msg.contentLevel);
+                        }
 
                         action.msgID = msg.messageID;
                         action.message = msg.messageText;
