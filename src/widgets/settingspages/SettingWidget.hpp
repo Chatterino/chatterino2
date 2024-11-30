@@ -10,6 +10,7 @@
 #include <QLabel>
 #include <QObject>
 #include <QString>
+#include <QStringBuilder>
 #include <QStringList>
 #include <QtContainerFwd>
 #include <QWidget>
