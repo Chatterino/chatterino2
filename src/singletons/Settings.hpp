@@ -295,9 +295,6 @@ public:
     BoolSetting mentionUsersWithComma = {"/behaviour/mentionUsersWithComma",
                                          true};
 
-    /// Commands
-    BoolSetting allowCommandsAtEnd = {"/commands/allowCommandsAtEnd", false};
-
     /// Emotes
     BoolSetting scaleEmotesByLineHeight = {"/emotes/scaleEmotesByLineHeight",
                                            false};
