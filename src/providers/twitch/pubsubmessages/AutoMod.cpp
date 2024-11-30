@@ -11,7 +11,6 @@ PubSubAutoModQueueMessage::PubSubAutoModQueueMessage(const QJsonObject &root)
     , data(root.value("data").toObject())
     , status(this->data.value("status").toString())
 {
-    qInfo() << "XXX: automod message over pubsub:" << root;
     auto oType = qmagicenum::enumCast<Type>(this->typeString);
     if (oType.has_value())
     {
