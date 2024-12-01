@@ -969,7 +969,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             return QString::number(val);
         },
         [](auto args) {
-            return fuzzyToFloat(args.value, 0.9f);
+            return fuzzyToFloat(args.value, 0.9F);
         },
         true,
         "A value of 0.9 means the messages need to be 90% similar to be marked "
