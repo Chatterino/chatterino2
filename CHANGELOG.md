@@ -47,6 +47,7 @@
 - Minor: Added a setting to hide the scrollbar thumb (the handle you can drag). Hiding the scrollbar thumb will disable mouse click & drag interactions in the scrollbar. (#5731)
 - Minor: Added a setting to hide the scrollbar highlights. (#5732)
 - Minor: The window layout is now backed up like the other settings. (#5647)
+- Minor: Added `flags.similar` filter variable, allowing you to filter messages filtered by the R9K feature. (#5747)
 - Bugfix: Fixed tab move animation occasionally failing to start after closing a tab. (#5426, #5612)
 - Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
 - Bugfix: Fixed restricted users usernames not being clickable. (#5405)
