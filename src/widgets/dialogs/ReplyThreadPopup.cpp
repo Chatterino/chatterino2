@@ -237,9 +237,6 @@ void ReplyThreadPopup::addMessagesFromThread()
             sourceChannel->getName(), Channel::Type::None);
     }
 
-    this->ui_.threadView->setChannel(this->virtualChannel_);
-    this->ui_.threadView->setSourceChannel(sourceChannel);
-
     auto rootOverrideFlags =
         std::optional<MessageFlags>(this->thread_->root()->flags);
     rootOverrideFlags->set(MessageFlag::DoNotLog);
@@ -257,6 +254,9 @@ void ReplyThreadPopup::addMessagesFromThread()
                                               overrideFlags);
         }
     }
+
+    this->ui_.threadView->setChannel(this->virtualChannel_);
+    this->ui_.threadView->setSourceChannel(sourceChannel);
 
     this->messageConnection_ =
         std::make_unique<pajlada::Signals::ScopedConnection>(
