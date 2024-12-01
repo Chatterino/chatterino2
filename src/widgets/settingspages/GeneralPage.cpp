@@ -945,13 +945,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         toggleLocalr9kShortcut = toggleLocalr9kSeq.toString(
             QKeySequence::SequenceFormat::NativeText);
     }
-    layout.addDescription("Hide similar messages. Toggle hidden "
-                          "messages by pressing " +
-                          toggleLocalr9kShortcut + ".");
-    layout.addCheckbox("Hide similar messages", s.similarityEnabled);
+    layout.addDescription(
+        "Hide similar messages to those previously seen. Toggle hidden "
+        "messages by pressing " +
+        toggleLocalr9kShortcut + ".");
+    layout.addCheckbox("Enable similarity checks", s.similarityEnabled);
     //layout.addCheckbox("Gray out matches", s.colorSimilarDisabled);
     layout.addCheckbox(
-        "By the same user", s.hideSimilarBySameUser, false,
+        "Only if by the same user", s.hideSimilarBySameUser, false,
         "When checked, messages that are very similar to each other can still "
         "be shown as long as they're sent by different users.");
     layout.addCheckbox("Hide my own messages", s.hideSimilarMyself);
@@ -993,7 +994,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         [](auto args) {
             return fuzzyToInt(args.value, 3);
-        });
+        },
+        true,
+        "How many messages in the history should be compared to a new one to "
+        "establish its similarity rating. Messages in the history will be "
+        "compared to only if they are new enough.");
 
     layout.addSubtitle("Visible badges");
     layout.addCheckbox("Authority", s.showBadgesGlobalAuthority, false,
