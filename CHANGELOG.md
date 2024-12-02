@@ -13,7 +13,7 @@
 - Minor: Colored usernames now update on the fly when changing the "Color @usernames" setting. (#5300)
 - Minor: Added `flags.action` filter variable, allowing you to filter on `/me` messages. (#5397)
 - Minor: Added the ability for `/ban`, `/timeout`, `/unban`, and `/untimeout` to specify multiple channels to duplicate the action to. Example: `/timeout --channel id:11148817 --channel testaccount_420 forsen 7m game complaining`. (#5402)
-- Minor: The size of the emote popup is now saved. (#5415)
+- Minor: The size of the emote popup is now saved. (#5415, #5751)
 - Minor: Added the ability to duplicate tabs. (#5277)
 - Minor: Improved error messages for channel update commands. (#5429)
 - Minor: Moderators can now see when users are warned. (#5441)
