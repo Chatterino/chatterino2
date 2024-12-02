@@ -639,7 +639,11 @@ void EmotePopup::filterEmotes(const QString &searchText)
 
 void EmotePopup::saveBounds() const
 {
-    getApp()->getWindows()->setEmotePopupBounds(this->getBounds());
+    auto bounds = this->getBounds();
+    if (!bounds.isNull())
+    {
+        getApp()->getWindows()->setEmotePopupBounds(bounds);
+    }
 }
 
 void EmotePopup::resizeEvent(QResizeEvent *event)
