@@ -11,6 +11,7 @@
 #    include "controllers/plugins/api/HTTPRequest.hpp"
 #    include "controllers/plugins/api/HTTPResponse.hpp"
 #    include "controllers/plugins/api/IOWrapper.hpp"
+#    include "controllers/plugins/api/Message.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/SolTypes.hpp"
@@ -220,10 +221,29 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     lua::api::ChannelRef::createUserType(c2);
     lua::api::HTTPResponse::createUserType(c2);
     lua::api::HTTPRequest::createUserType(c2);
+    lua::api::message::createUserType(c2);
     c2["ChannelType"] = lua::createEnumTable<Channel::Type>(lua);
     c2["HTTPMethod"] = lua::createEnumTable<NetworkRequestType>(lua);
     c2["EventType"] = lua::createEnumTable<lua::api::EventType>(lua);
     c2["LogLevel"] = lua::createEnumTable<lua::api::LogLevel>(lua);
+    c2["MessageFlag"] =
+        lua::createEnumTable<MessageFlag, MessageFlag::None>(lua);
+    c2["MessageElementFlag"] =
+        lua::createEnumTable<MessageElementFlag,                           //
+                             MessageElementFlag::None,                     //
+                             MessageElementFlag::TwitchEmote,              //
+                             MessageElementFlag::BttvEmote,                //
+                             MessageElementFlag::ChannelPointRewardImage,  //
+                             MessageElementFlag::FfzEmote,                 //
+                             MessageElementFlag::SevenTVEmote,             //
+                             MessageElementFlag::EmoteImages,              //
+                             MessageElementFlag::EmoteText,                //
+                             MessageElementFlag::Badges,                   //
+                             MessageElementFlag::EmojiAll,                 //
+                             MessageElementFlag::Default                   //
+                             >(lua);
+    c2["FontStyle"] = lua::createEnumTable<FontStyle>(lua);
+    c2["MessageContext"] = lua::createEnumTable<MessageContext>(lua);
 
     sol::table io = g["io"];
     io.set_function(

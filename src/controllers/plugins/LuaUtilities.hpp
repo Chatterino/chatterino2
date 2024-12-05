@@ -111,19 +111,18 @@ public:
  *
  * @returns Sol reference to the table
  */
-template <typename T>
+template <typename T, T... Additional>
     requires std::is_enum_v<T>
 sol::table createEnumTable(sol::state_view &lua)
 {
     constexpr auto values = magic_enum::enum_values<T>();
-    auto out = lua.create_table(0, values.size());
+    auto out = lua.create_table(0, values.size() + sizeof...(Additional));
     for (const T v : values)
     {
-        std::string_view name = magic_enum::enum_name<T>(v);
-        std::string str(name);
-
-        out.raw_set(str, v);
+        out.raw_set(magic_enum::enum_name<T>(v), v);
     }
+    (out.raw_set(magic_enum::enum_name<Additional>(), Additional), ...);
+
     return out;
 }
 
