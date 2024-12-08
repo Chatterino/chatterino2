@@ -33,7 +33,7 @@ Alternatively you can use the [chatterino2-git](https://aur.archlinux.org/packag
 _Most likely works the same for other Red Hat-like distros. Substitute `dnf` with `yum`._
 
 ```sh
-sudo dnf install qt6-qtbase-devel qt6-qtimageformats qt6-qtsvg-devel qt6-qt5compat-devel g++ git openssl-devel boost-devel cmake
+sudo dnf install qt6-qtbase-devel qt6-qtimageformats qt6-qtsvg-devel qt6-qtbase-private-devel qt6-qt5compat-devel g++ git openssl-devel boost-devel cmake
 ```
 
 ### NixOS 18.09+
