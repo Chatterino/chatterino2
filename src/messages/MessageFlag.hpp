@@ -6,6 +6,7 @@
 
 namespace chatterino {
 
+/** @exposeenum c2.MessageFlag [flags] */
 enum class MessageFlag : std::int64_t {
     None = 0LL,
     System = (1LL << 0),

@@ -14,6 +14,7 @@ namespace chatterino {
 class Settings;
 class Paths;
 
+/** @exposeenum c2.FontStyle */
 enum class FontStyle : uint8_t {
     Tiny,
     ChatSmall,
