@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+## 2.5.2-beta.1
+
 - Major: Add option to show pronouns in user card. (#5442, #5583)
 - Major: Release plugins alpha. (#5288)
 - Major: Improve high-DPI support on Windows. (#4868, #5391, #5664, #5666)
