@@ -650,7 +650,7 @@ TEST_F(PluginTest, MessageElementFlag)
         for k, v in pairs(c2.MessageElementFlag) do
             table.insert(values, ("%s=0x%x"):format(k, v))
         end
-        table.sort(values)
+        table.sort(values, function(a, b) return a:lower() > b:lower() end)
         out = table.concat(values, ",")
     )lua");
 
@@ -660,11 +660,11 @@ TEST_F(PluginTest, MessageElementFlag)
                          "BadgeFfz=0x80000,"
                          "BadgeGlobalAuthority=0x2000,"
                          "BadgePredictions=0x4000,"
+                         "Badges=0x30000fe000,"
                          "BadgeSevenTV=0x1000000000,"
                          "BadgeSharedChannel=0x2000000000,"
                          "BadgeSubscription=0x10000,"
                          "BadgeVanity=0x20000,"
-                         "Badges=0x30000fe000,"
                          "BitsAmount=0x200000,"
                          "BitsAnimated=0x1000,"
                          "BitsStatic=0x800,"
