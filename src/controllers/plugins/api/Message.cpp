@@ -1,5 +1,6 @@
 #include "controllers/plugins/api/Message.hpp"
 
+#include "Application.hpp"
 #include "messages/MessageElement.hpp"
 
 #ifdef CHATTERINO_HAVE_PLUGINS
@@ -12,6 +13,20 @@
 namespace {
 
 using namespace chatterino;
+
+QDateTime datetimeFromOffset(qint64 offset)
+{
+    auto dt = QDateTime::fromMSecsSinceEpoch(offset);
+
+#    ifdef CHATTERINO_WITH_TESTS
+    if (getApp()->isTest())
+    {
+        return dt.toUTC();
+    }
+#    endif
+
+    return dt;
+}
 
 MessageColor tryMakeMessageColor(const QString &name,
                                  MessageColor fallback = MessageColor::Text)
@@ -70,7 +85,7 @@ std::unique_ptr<TimestampElement> timestampElementFromTable(
     if (time)
     {
         return std::make_unique<TimestampElement>(
-            QDateTime::fromMSecsSinceEpoch(*time).time());
+            datetimeFromOffset(*time).time());
     }
     return std::make_unique<TimestampElement>();
 }
@@ -147,7 +162,7 @@ std::shared_ptr<Message> messageFromTable(const sol::table &tbl)
     auto parseTime = tbl.get<std::optional<qint64>>("parse_time");
     if (parseTime)
     {
-        msg->parseTime = QDateTime::fromMSecsSinceEpoch(*parseTime).time();
+        msg->parseTime = datetimeFromOffset(*parseTime).time();
     }
 
     msg->id = tbl.get_or("id", QString{});
@@ -169,8 +184,7 @@ std::shared_ptr<Message> messageFromTable(const sol::table &tbl)
         tbl.get<std::optional<qint64>>("server_received_time");
     if (serverReceivedTime)
     {
-        msg->serverReceivedTime =
-            QDateTime::fromMSecsSinceEpoch(*serverReceivedTime);
+        msg->serverReceivedTime = datetimeFromOffset(*serverReceivedTime);
     }
 
     // missing: badges

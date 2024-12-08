@@ -51,7 +51,7 @@
         "loginName": "login",
         "messageText": "message",
         "searchText": "search",
-        "serverReceivedTime": "1970-01-01T01:20:30",
+        "serverReceivedTime": "1970-01-01T00:20:30Z",
         "timeoutUser": "",
         "usernameColor": "#ff0000ff"
     }
