@@ -179,7 +179,7 @@ private:
 
     boost::circular_buffer<ScrollbarHighlight> highlights_;
 
-    bool atBottom_{false};
+    bool atBottom_{true};
     bool hideThumb{false};
     /// Controlled by the "Hide scrollbar thumb" setting
     bool settingHideThumb{false};

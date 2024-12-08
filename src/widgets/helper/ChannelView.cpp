@@ -1074,6 +1074,13 @@ void ChannelView::setChannel(const ChannelPtr &underlyingChannel)
     this->updateID();
 
     this->queueLayout();
+    if (!this->isVisible() && !this->scrollBar_->isVisible())
+    {
+        // If we're not visible and the scrollbar is not (yet) visible,
+        // we need to make sure that it's at the bottom when this view is laid
+        // out later.
+        this->scrollBar_->scrollToBottom();
+    }
     this->queueUpdate();
 
     // Notifications

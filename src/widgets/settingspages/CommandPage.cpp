@@ -123,10 +123,6 @@ CommandPage::CommandPage()
         });
     }
 
-    layout.append(
-        this->createCheckBox("Also match the trigger at the end of the message",
-                             getSettings()->allowCommandsAtEnd));
-
     QLabel *text = layout.emplace<QLabel>(HELP_TEXT).getElement();
     text->setWordWrap(true);
     text->setStyleSheet("color: #bbb");
