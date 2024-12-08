@@ -72,6 +72,16 @@ public:
     void add_system_message(QString text);
 
     /**
+     * Adds a message client-side
+     *
+     * @lua@param message c2.Message
+     * @lua@param context? c2.MessageContext The context of the message being added
+     * @lua@param override_flags? c2.MessageFlag|nil Flags to override the message's flags (some splits might filter for this)
+     * @exposed c2.Channel:add_message
+     */
+    void add_message(std::shared_ptr<Message> &message, sol::variadic_args va);
+
+    /**
      * Returns true for twitch channels.
      * Compares the channel Type. Note that enum values aren't guaranteed, just
      * that they are equal to the exposed enum.
