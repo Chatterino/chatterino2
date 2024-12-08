@@ -650,7 +650,7 @@ TEST_F(PluginTest, MessageElementFlag)
         for k, v in pairs(c2.MessageElementFlag) do
             table.insert(values, ("%s=0x%x"):format(k, v))
         end
-        table.sort(values, function(a, b) return a:lower() > b:lower() end)
+        table.sort(values, function(a, b) return a:lower() < b:lower() end)
         out = table.concat(values, ",")
     )lua");
 
