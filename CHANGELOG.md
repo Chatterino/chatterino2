@@ -37,7 +37,7 @@
 - Minor: When blocking a channel, Chatterino will now warn you about that action. (#5615)
 - Minor: Indicate when subscriptions and resubscriptions are for multiple months. (#5642)
 - Minor: Added a setting to control whether or not to show "Blocked Term" automod messages. (#5690)
-- Minor: Improved AutoMod messaging when messages are blocked due to containing blocked terms. (#5699)
+- Minor: Improved AutoMod messaging when messages are blocked due to containing blocked terms. (#5699, #5759)
 - Minor: Proxy URL information is now included in the `/debug-env` command. (#5648)
 - Minor: Make raid entry message usernames clickable. (#5651)
 - Minor: Tabs unhighlight when their content is read in other tabs. (#5649)
@@ -142,7 +142,7 @@
 - Dev: 7TV's `entitlement.reset` is now explicitly ignored. (#5685)
 - Dev: Qt 6.8 and later now default to the GDI fontengine. (#5710)
 - Dev: Moved to condition variables when shutting down worker threads. (#5721, #5733)
-- Dev: Reduced layouts in channel views when setting a channel. (#5737, #5748)
+- Dev: Reduced layouts in channel views when setting a channel. (#5737, #5748, #5757)
 
 ## 2.5.1
 
