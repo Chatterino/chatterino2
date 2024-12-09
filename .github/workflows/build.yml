@@ -122,9 +122,16 @@ jobs:
     strategy:
       matrix:
         include:
-          # macOS
-          - os: macos-13
-            qt-version: 5.15.2
+          # macOS (for 10.15)
+          - os: macos-latest
+            qt-version: 6.4.3
+            force-lto: false
+            plugins: true
+            skip-artifact: false
+            skip-crashpad: false
+          # macOS (for newer versions)
+          - os: macos-latest
+            qt-version: 6.7.0
             force-lto: false
             plugins: true
             skip-artifact: false
@@ -294,7 +301,10 @@ jobs:
       - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-          brew install boost openssl rapidjson p7zip create-dmg cmake tree
+          # binary dependencies
+          ./.CI/SetupHomebrewDeps.sh boost openssl@3
+          # build and header-only dependencies
+          brew install rapidjson p7zip create-dmg cmake tree
         shell: bash
 
       - name: Build (MacOS)
@@ -305,11 +315,11 @@ jobs:
           cmake \
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
-              -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
               -DUSE_PRECOMPILED_HEADERS=OFF \
               -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
               -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
               -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
+              -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
         shell: bash
@@ -323,6 +333,9 @@ jobs:
           pwd
           ls -la build || true
           cd build
+          export MACOS_CODESIGN_CERTIFICATE="-"
+          echo "cert: '$MACOS_CODESIGN_CERTIFICATE'"
+
           ./../.CI/MacDeploy.sh
           ./../.CI/CreateDMG.sh
         shell: bash
@@ -388,6 +401,19 @@ jobs:
           name: Chatterino-ubuntu-24.04-Qt-6.7.2.deb
           path: release-artifacts/
 
+      # macOS
+      - uses: actions/download-artifact@v4
+        name: macOS Qt 6.4.3
+        with:
+          name: chatterino-macos-Qt-6.4.3.dmg
+          path: release-artifacts/
+
+      - uses: actions/download-artifact@v4
+        name: macOS Qt 6.7.0
+        with:
+          name: chatterino-macos-Qt-6.7.0.dmg
+          path: release-artifacts/
+
       - name: Copy flatpakref
         run: |
           cp .CI/chatterino-nightly.flatpakref release-artifacts/
@@ -399,6 +425,10 @@ jobs:
 
           # Mark all Windows Qt5 builds as old
           mv chatterino-windows-x86-64-Qt-5.15.2.zip chatterino-windows-old-x86-64-Qt-5.15.2.zip
+
+          # Mark Qt 6.4 macos build as old
+          mv chatterino-macos-Qt-6.4.3.dmg Chatterino-10.15.dmg
+          mv chatterino-macos-Qt-6.7.0.dmg Chatterino.dmg
         working-directory: release-artifacts
         shell: bash
 

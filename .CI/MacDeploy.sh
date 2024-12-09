@@ -37,3 +37,37 @@ if [ -n "$MACOS_CODESIGN_CERTIFICATE" ]; then
     # Validate that chatterino.app was codesigned correctly
     codesign -v chatterino.app
 fi
+
+# Copy dynamic library dependencies into the Frameworks directory
+cp /opt/universal-lib/libcrypto.dylib chatterino.app/Contents/Frameworks/libcrypto.3.dylib
+cp /opt/universal-lib/libssl.dylib chatterino.app/Contents/Frameworks/libssl.3.dylib
+
+# Fix the library IDs to match their new location
+install_name_tool -id @executable_path/../Frameworks/libssl.3.dylib chatterino.app/Contents/Frameworks/libssl.3.dylib
+install_name_tool -id @executable_path/../Frameworks/libcrypto.3.dylib chatterino.app/Contents/Frameworks/libcrypto.3.dylib
+
+otool -L chatterino.app/Contents/Frameworks/libssl.3.dylib
+# Fix the search path for libcrypto in libssl
+otool -L chatterino.app/Contents/Frameworks/libssl.3.dylib \
+    | grep libcrypto.3.dylib \
+    | cut -d" " -f1 \
+    | cut -f2 \
+    | while read input_crypto_dylib; do \
+        install_name_tool -change \
+            "$input_crypto_dylib" \
+            @executable_path/../Frameworks/libcrypto.3.dylib \
+            chatterino.app/Contents/Frameworks/libssl.3.dylib; \
+    done
+# Fix the search path for lib{crypto,ssl} in chatterino
+otool -L chatterino.app/Contents/MacOS/chatterino \
+    | grep /opt \
+    | cut -d" " -f1 \
+    | cut -f2 \
+    | while read og_entry; do \
+        echo $og_entry; \
+        install_name_tool -change \
+            "$og_entry" \
+            @executable_path/../Frameworks/$(echo $og_entry | sed -E 's/.*(libssl|libcrypto)/\1/') \
+            chatterino.app/Contents/MacOS/chatterino; \
+        done
+
