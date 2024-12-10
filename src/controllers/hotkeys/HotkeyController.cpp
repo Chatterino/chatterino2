@@ -516,7 +516,7 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
                             std::vector<QString>(), "reopen split");
 
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
-                            QKeySequence("Ctrl+H"), "toggleLocalR9K",
+                            QKeySequence("Ctrl+."), "toggleLocalR9K",
                             std::vector<QString>(), "toggle local r9k");
 
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
