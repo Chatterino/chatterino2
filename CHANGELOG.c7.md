@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 7.5.2-beta.1
+
 - Minor: Added setting to disable animated 7TV badges (3bbcc9f4a01a015f93f7855be36312e56968ac5f)
 - Minor: Added setting to disable 7TV paint shadows (689235b28af59e950987ede595c29bc26f8c8776)
 - Bugfix: Paints are no longer rendered in system messages (b55e723fcea9520f47b1a6bf786a52011ffc7289)
