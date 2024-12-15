@@ -1,13 +1,17 @@
 #include "providers/seventv/SeventvPersonalEmotes.hpp"
 
+#include "common/Literals.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "singletons/Settings.hpp"
+#include "util/DebugCount.hpp"
 
 #include <memory>
 #include <mutex>
 #include <optional>
 
 namespace chatterino {
+
+using namespace literals;
 
 SeventvPersonalEmotes::SeventvPersonalEmotes()
 {
@@ -24,6 +28,7 @@ void SeventvPersonalEmotes::createEmoteSet(const QString &id)
     std::unique_lock<std::shared_mutex> lock(this->mutex_);
     if (!this->emoteSets_.contains(id))
     {
+        DebugCount::increase(u"7TV Personal Emote Sets"_s);
         this->emoteSets_.emplace(id, std::make_shared<const EmoteMap>());
     }
 }
@@ -41,6 +46,7 @@ std::optional<std::shared_ptr<const EmoteMap>>
         return std::nullopt;
     }
     list.append(emoteSetID);
+    DebugCount::increase(u"7TV Personal Emote Assignments"_s);
 
     auto set = this->emoteSets_.find(emoteSetID);
     if (set == this->emoteSets_.end())
@@ -94,9 +100,16 @@ void SeventvPersonalEmotes::addEmoteSetForUser(const QString &emoteSetID,
                                                const QString &userTwitchID)
 {
     std::unique_lock<std::shared_mutex> lock(this->mutex_);
-    this->emoteSets_.emplace(emoteSetID,
-                             std::make_shared<const EmoteMap>(std::move(map)));
+    bool added = this->emoteSets_
+                     .emplace(emoteSetID,
+                              std::make_shared<const EmoteMap>(std::move(map)))
+                     .second;
+    if (added)
+    {
+        DebugCount::increase(u"7TV Personal Emote Sets"_s);
+    }
     this->userEmoteSets_[userTwitchID].append(emoteSetID);
+    DebugCount::increase(u"7TV Personal Emote Assignments"_s);
 }
 
 bool SeventvPersonalEmotes::hasEmoteSet(const QString &id) const

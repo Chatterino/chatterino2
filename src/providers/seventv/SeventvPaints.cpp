@@ -1,6 +1,7 @@
 #include "providers/seventv/SeventvPaints.hpp"
 
 #include "Application.hpp"
+#include "common/Literals.hpp"
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
 #include "common/Outcome.hpp"
@@ -10,12 +11,14 @@
 #include "providers/seventv/paints/RadialGradientPaint.hpp"
 #include "providers/seventv/paints/UrlPaint.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
 
 #include <QUrlQuery>
 
 namespace {
 using namespace chatterino;
+using namespace literals;
 
 QColor rgbaToQColor(const uint32_t color)
 {
@@ -130,10 +133,7 @@ std::optional<std::shared_ptr<Paint>> parsePaint(const QJsonObject &paintJson)
 
 namespace chatterino {
 
-SeventvPaints::SeventvPaints()
-{
-    this->loadSeventvPaints();
-}
+SeventvPaints::SeventvPaints() = default;
 
 std::optional<std::shared_ptr<Paint>> SeventvPaints::getPaint(
     const QString &userName) const
@@ -165,6 +165,7 @@ void SeventvPaints::addPaint(const QJsonObject &paintJson)
         return;
     }
 
+    DebugCount::increase(u"7TV Paints"_s);
     this->knownPaints_[paintID] = *paint;
 }
 
@@ -181,6 +182,7 @@ void SeventvPaints::assignPaintToUser(const QString &paintID,
         if (it == this->paintMap_.end())
         {
             this->paintMap_.emplace(userName.string, paintIt->second);
+            DebugCount::increase(u"7TV Paint Assignments"_s);
             changed = true;
         }
         else if (it->second != paintIt->second)
@@ -207,7 +209,8 @@ void SeventvPaints::clearPaintFromUser(const QString &paintID,
     if (it != this->paintMap_.end() && it->second->id == paintID)
     {
         this->paintMap_.erase(userName.string);
-                }
+        DebugCount::decrease(u"7TV Paint Assignments"_s);
+    }
 }
 
 }  // namespace chatterino
