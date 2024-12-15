@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: Fixed a crash in the 7TV EventApi when closing Chatterino. (#5768)
+
 ## 2.5.2-beta.1
 
 - Major: Add option to show pronouns in user card. (#5442, #5583)
