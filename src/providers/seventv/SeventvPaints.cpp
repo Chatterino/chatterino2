@@ -207,47 +207,7 @@ void SeventvPaints::clearPaintFromUser(const QString &paintID,
     if (it != this->paintMap_.end() && it->second->id == paintID)
     {
         this->paintMap_.erase(userName.string);
-    }
-}
-
-void SeventvPaints::loadSeventvPaints()
-{
-    static QUrl url("https://7tv.io/v2/cosmetics");
-
-    static QUrlQuery urlQuery;
-    // valid user_identifier values: "object_id", "twitch_id", "login"
-    urlQuery.addQueryItem("user_identifier", "login");
-
-    url.setQuery(urlQuery);
-
-    NetworkRequest(url)
-        .onSuccess([this](const auto &result) -> Outcome {
-            auto root = result.parseJson();
-
-            std::unique_lock lock(this->mutex_);
-
-            for (const auto paintValueRef : root.value("paints").toArray())
-            {
-                const auto paintJson = paintValueRef.toObject();
-
-                std::optional<std::shared_ptr<Paint>> paint =
-                    parsePaint(paintJson);
-                if (!paint)
-                {
-                    continue;
                 }
-
-                this->knownPaints_[paintJson["id"].toString()] = *paint;
-
-                for (const auto userJson : paintJson["users"].toArray())
-                {
-                    this->paintMap_[userJson.toString()] = *paint;
-                }
-            }
-
-            return Success;
-        })
-        .execute();
 }
 
 }  // namespace chatterino

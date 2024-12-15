@@ -25,8 +25,6 @@ public:
         const QString &userName) const;
 
 private:
-    void loadSeventvPaints();
-
     // Mutex for both `paintMap_` and `knownPaints_`
     mutable std::shared_mutex mutex_;
 
