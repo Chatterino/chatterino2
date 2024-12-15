@@ -1,5 +1,6 @@
 #include "providers/seventv/eventapi/Dispatch.hpp"
 
+#include "providers/seventv/SeventvEmotes.hpp"
 #include "util/QMagicEnum.hpp"
 
 #include <QJsonArray>
@@ -136,7 +137,11 @@ bool EntitlementCreateDeleteDispatch::validate() const
 
 EmoteSetCreateDispatch::EmoteSetCreateDispatch(const QJsonObject &emoteSet)
     : emoteSetID(emoteSet["id"].toString())
-    , isPersonal((emoteSet["flags"].toInt() & 4) != 0)
+    , isPersonalOrCommercial(SeventvEmoteSetFlags{
+          static_cast<SeventvEmoteSetFlag>(emoteSet["flags"].toInt()),
+      }
+                                 .hasAny(SeventvEmoteSetFlag::Personal,
+                                         SeventvEmoteSetFlag::Commercial))
 {
 }
 

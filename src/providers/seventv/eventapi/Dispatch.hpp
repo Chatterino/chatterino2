@@ -92,7 +92,7 @@ struct EntitlementCreateDeleteDispatch {
 
 struct EmoteSetCreateDispatch {
     QString emoteSetID;
-    bool isPersonal;
+    bool isPersonalOrCommercial;
 
     EmoteSetCreateDispatch(const QJsonObject &emoteSet);
 

@@ -498,12 +498,19 @@ void SeventvEventAPI::onEmoteSetCreate(const Dispatch &dispatch)
         return;
     }
 
-    if (createDispatch.isPersonal)
+    // other flags are "immutable" and "privileged"
+    if (createDispatch.isPersonalOrCommercial)
     {
         qCDebug(chatterinoSeventvEventAPI)
             << "Create emote set" << createDispatch.emoteSetID;
         getApp()->getSeventvPersonalEmotes()->createEmoteSet(
             createDispatch.emoteSetID);
+    }
+    else
+    {
+        qCDebug(chatterinoSeventvEventAPI)
+            << "Ignoring emote set" << createDispatch.emoteSetID
+            << "because it doesn't have the expected flags";
     }
 }
 // NOLINTEND(readability-convert-member-functions-to-static)
