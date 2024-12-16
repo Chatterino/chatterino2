@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: Fixed scrollbar highlights being visible in overlay windows. (#5769)
+
 ## 2.5.2-beta.1
 
 - Major: Add option to show pronouns in user card. (#5442, #5583)
