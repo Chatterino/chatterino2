@@ -210,6 +210,7 @@ private:
 
     QAction *lockNotebookLayoutAction_;
     QAction *toggleTopMostAction_;
+    QAction *toggleNotificationSuppression_;
 
     // This filter, if set, is used to figure out the visibility of
     // the tabs in this notebook.
@@ -252,6 +253,9 @@ private:
     // Main window on Windows has basically a duplicate of this in Window
     NotebookButton *streamerModeIcon_{};
     void updateStreamerModeIcon();
+
+    NotebookButton *doNotDisturbIcon_{};
+    void updateDoNotDisturbIcon();
 };
 
 }  // namespace chatterino

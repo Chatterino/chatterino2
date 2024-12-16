@@ -222,6 +222,17 @@ void Window::addCustomTitlebarButtons()
     QObject::connect(getApp()->getStreamerMode(), &IStreamerMode::changed, this,
                      &Window::updateStreamerModeIcon);
 
+    // do not disturb
+    this->doNotDisturbTitlebarIcon_ =
+        this->addTitleBarButton(TitleBarButtonStyle::DoNotDisturb, [this] {
+            getSettings()->globallySuppressNotifications = false;
+        });
+    getSettings()->globallySuppressNotifications.connect(
+        [this] {
+            this->updateDoNotDisturbIcon();
+        },
+        this->signalHolder_);
+
     // Update initial state
     this->updateStreamerModeIcon();
 }
@@ -249,6 +260,38 @@ void Window::updateStreamerModeIcon()
     }
     this->streamerModeTitlebarIcon_->setVisible(
         getApp()->getStreamerMode()->isEnabled());
+#else
+    // clang-format off
+    assert(false && "Streamer mode TitleBar icon should not exist on non-Windows OSes");
+    // clang-format on
+#endif
+}
+
+void Window::updateDoNotDisturbIcon()
+{
+    // TODO(jupjohn): add custom icon for this
+
+    // A duplicate of this code is in SplitNotebook class (in Notebook.{c,h}pp)
+    // That one is the one near splits (on linux and mac or non-main windows on Windows)
+    // This copy handles the TitleBar icon in Window (main window on Windows)
+    if (this->doNotDisturbTitlebarIcon_ == nullptr)
+    {
+        return;
+    }
+#ifdef Q_OS_WIN
+    assert(this->getType() == WindowType::Main);
+    if (getTheme()->isLightTheme())
+    {
+        this->doNotDisturbIcon_->setPixmap(
+            getResources().buttons.streamerModeEnabledLight);
+    }
+    else
+    {
+        this->doNotDisturbIcon_->setPixmap(
+            getResources().buttons.streamerModeEnabledDark);
+    }
+    this->doNotDisturbIcon_->setVisible(
+        getSettings()->globallySuppressNotifications);
 #else
     // clang-format off
     assert(false && "Streamer mode TitleBar icon should not exist on non-Windows OSes");
@@ -682,7 +725,38 @@ void Window::addShortcuts()
 
              return "";
          }},
-    };
+        {"toggleGlobalNotificationSuppression",
+         [](const std::vector<QString> &arguments) -> QString {
+             QString arg = arguments.empty() ? "toggle" : arguments.front();
+
+             bool desiredValue = false;
+             if (arg == "toggle")
+             {
+                 desiredValue = !getSettings()->globallySuppressNotifications;
+             }
+             else if (arg == "on")
+             {
+                 desiredValue = true;
+             }
+             else if (arg == "off")
+             {
+                 desiredValue = false;
+             }
+             else
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "Invalid argument for "
+                        "toggleGlobalNotificationSuppression hotkey: "
+                     << arg;
+                 return QString("Invalid argument for "
+                                "toggleGlobalNotificationSuppression hotkey: "
+                                "%1. Use \"on\", \"off\", or \"toggle\".")
+                     .arg(arg);
+             }
+
+             getSettings()->globallySuppressNotifications = desiredValue;
+             return "";
+         }}};
 
     this->addDebugStuff(actions);
 

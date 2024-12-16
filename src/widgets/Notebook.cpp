@@ -78,6 +78,26 @@ Notebook::Notebook(QWidget *parent)
             << "Notebook must be created within a BaseWindow";
     }
 
+    this->toggleNotificationSuppression_ =
+        new QAction("Mute all notifications", this);
+    this->toggleNotificationSuppression_->setCheckable(true);
+    this->toggleNotificationSuppression_->setChecked(
+        getSettings()->globallySuppressNotifications);
+    this->toggleNotificationSuppression_->setShortcut(
+        getApp()->getHotkeys()->getDisplaySequence(
+            HotkeyCategory::Window, "toggleGlobalNotificationSuppression"));
+
+    QObject::connect(this->toggleNotificationSuppression_, &QAction::triggered,
+                     [] {
+                         getSettings()->globallySuppressNotifications =
+                             !getSettings()->globallySuppressNotifications;
+                     });
+    getSettings()->globallySuppressNotifications.connect(
+        [this](const bool &value) {
+            this->toggleNotificationSuppression_->setChecked(value);
+        },
+        this->signalHolder_);
+
     // Manually resize the add button so the initial paint uses the correct
     // width when computing the maximum width occupied per column in vertical
     // tab rendering.
@@ -1241,8 +1261,8 @@ void Notebook::setLockNotebookLayout(bool value)
 void Notebook::addNotebookActionsToMenu(QMenu *menu)
 {
     menu->addAction(this->lockNotebookLayoutAction_);
-
     menu->addAction(this->toggleTopMostAction_);
+    menu->addAction(this->toggleNotificationSuppression_);
 }
 
 NotebookButton *Notebook::getAddButton()
@@ -1558,6 +1578,19 @@ void SplitNotebook::addCustomButtons()
                      });
     QObject::connect(getApp()->getStreamerMode(), &IStreamerMode::changed, this,
                      &SplitNotebook::updateStreamerModeIcon);
+
+    // do not disturb
+    this->doNotDisturbIcon_ = this->addCustomButton();
+    QObject::connect(this->doNotDisturbIcon_, &NotebookButton::leftClicked,
+                     [this] {
+                         getSettings()->globallySuppressNotifications = false;
+                     });
+    getSettings()->globallySuppressNotifications.connect(
+        [this] {
+            this->updateDoNotDisturbIcon();
+        },
+        this->signalHolder_);
+
     this->updateStreamerModeIcon();
 }
 
@@ -1582,6 +1615,31 @@ void SplitNotebook::updateStreamerModeIcon()
     }
     this->streamerModeIcon_->setVisible(
         getApp()->getStreamerMode()->isEnabled());
+}
+
+void SplitNotebook::updateDoNotDisturbIcon()
+{
+    // TODO(jupjohn): add custom icon for this
+    if (this->doNotDisturbIcon_ == nullptr)
+    {
+        return;
+    }
+
+    // A duplicate of this code is in Window class
+    // That copy handles the TitleBar icon in Window (main window on Windows)
+    // This one is the one near splits (on linux and mac or non-main windows on Windows)
+    if (getTheme()->isLightTheme())
+    {
+        this->doNotDisturbIcon_->setPixmap(
+            getResources().buttons.streamerModeEnabledLight);
+    }
+    else
+    {
+        this->doNotDisturbIcon_->setPixmap(
+            getResources().buttons.streamerModeEnabledDark);
+    }
+    this->doNotDisturbIcon_->setVisible(
+        getSettings()->globallySuppressNotifications);
 }
 
 void SplitNotebook::themeChangedEvent()

@@ -56,6 +56,9 @@ private:
     TitleBarButton *streamerModeTitlebarIcon_ = nullptr;
     void updateStreamerModeIcon();
 
+    TitleBarButton *doNotDisturbTitlebarIcon_ = nullptr;
+    void updateDoNotDisturbIcon();
+
     friend class Notebook;
 };
 
