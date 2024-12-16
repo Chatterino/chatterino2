@@ -13,6 +13,7 @@ enum class TitleBarButtonStyle {
     User = 16,
     Settings = 32,
     StreamerMode = 64,
+    DoNotDisturb = 128,
 };
 
 class TitleBarButton : public Button

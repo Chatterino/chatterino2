@@ -253,6 +253,9 @@ private:
     // Main window on Windows has basically a duplicate of this in Window
     NotebookButton *streamerModeIcon_{};
     void updateStreamerModeIcon();
+
+    NotebookButton *doNotDisturbIcon_{};
+    void updateDoNotDisturbIcon();
 };
 
 }  // namespace chatterino

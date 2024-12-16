@@ -1578,6 +1578,19 @@ void SplitNotebook::addCustomButtons()
                      });
     QObject::connect(getApp()->getStreamerMode(), &IStreamerMode::changed, this,
                      &SplitNotebook::updateStreamerModeIcon);
+
+    // do not disturb
+    this->doNotDisturbIcon_ = this->addCustomButton();
+    QObject::connect(this->doNotDisturbIcon_, &NotebookButton::leftClicked,
+                     [this] {
+                         getSettings()->globallySuppressNotifications = false;
+                     });
+    getSettings()->globallySuppressNotifications.connect(
+        [this] {
+            this->updateDoNotDisturbIcon();
+        },
+        this->signalHolder_);
+
     this->updateStreamerModeIcon();
 }
 
@@ -1602,6 +1615,31 @@ void SplitNotebook::updateStreamerModeIcon()
     }
     this->streamerModeIcon_->setVisible(
         getApp()->getStreamerMode()->isEnabled());
+}
+
+void SplitNotebook::updateDoNotDisturbIcon()
+{
+    // TODO(jupjohn): add custom icon for this
+    if (this->doNotDisturbIcon_ == nullptr)
+    {
+        return;
+    }
+
+    // A duplicate of this code is in Window class
+    // That copy handles the TitleBar icon in Window (main window on Windows)
+    // This one is the one near splits (on linux and mac or non-main windows on Windows)
+    if (getTheme()->isLightTheme())
+    {
+        this->doNotDisturbIcon_->setPixmap(
+            getResources().buttons.streamerModeEnabledLight);
+    }
+    else
+    {
+        this->doNotDisturbIcon_->setPixmap(
+            getResources().buttons.streamerModeEnabledDark);
+    }
+    this->doNotDisturbIcon_->setVisible(
+        getSettings()->globallySuppressNotifications);
 }
 
 void SplitNotebook::themeChangedEvent()
