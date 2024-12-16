@@ -95,7 +95,8 @@ Notebook::Notebook(QWidget *parent)
     getSettings()->globallySuppressNotifications.connect(
         [this](const bool &value) {
             this->toggleNotificationSuppression_->setChecked(value);
-        });
+        },
+        this->signalHolder_);
 
     // Manually resize the add button so the initial paint uses the correct
     // width when computing the maximum width occupied per column in vertical
