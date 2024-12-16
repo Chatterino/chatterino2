@@ -227,9 +227,11 @@ void Window::addCustomTitlebarButtons()
         this->addTitleBarButton(TitleBarButtonStyle::DoNotDisturb, [this] {
             getSettings()->globallySuppressNotifications = false;
         });
-    getSettings()->globallySuppressNotifications.connect([this] {
-        this->updateDoNotDisturbIcon();
-    }, this->signalHolder_);
+    getSettings()->globallySuppressNotifications.connect(
+        [this] {
+            this->updateDoNotDisturbIcon();
+        },
+        this->signalHolder_);
 
     // Update initial state
     this->updateStreamerModeIcon();
