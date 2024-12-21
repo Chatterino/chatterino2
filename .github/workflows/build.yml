@@ -297,8 +297,8 @@ jobs:
           brew install openssl rapidjson p7zip create-dmg cmake tree
           brew tap-new gh/local-boost
           brew tap homebrew/core --force
-          brew extract --version=1.86.0 boost gh/local-boost
-          brew install boost@1.86.0
+          brew extract --version=1.86.0_2 boost gh/local-boost
+          brew install boost@1.86.0_2
         shell: bash
 
       - name: Build (MacOS)
