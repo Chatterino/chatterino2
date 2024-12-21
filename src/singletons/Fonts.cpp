@@ -140,12 +140,42 @@ Fonts::FontData Fonts::createFontData(FontStyle type, float scale)
     // normal Ui font (use pt size)
     {
         static std::unordered_map<FontStyle, UiFontData> defaultSize{
-            {FontStyle::Tiny, {8, "Monospace", false, QFont::Normal}},
-            {FontStyle::UiMedium,
-             {9, DEFAULT_FONT_FAMILY, false, QFont::Normal}},
-            {FontStyle::UiMediumBold,
-             {9, DEFAULT_FONT_FAMILY, false, QFont::Bold}},
-            {FontStyle::UiTabs, {9, DEFAULT_FONT_FAMILY, false, QFont::Normal}},
+            {
+                FontStyle::Tiny,
+                {
+                    8,
+                    "Monospace",
+                    false,
+                    QFont::Normal,
+                },
+            },
+            {
+                FontStyle::UiMedium,
+                {
+                    9,
+                    DEFAULT_FONT_FAMILY,
+                    false,
+                    QFont::Normal,
+                },
+            },
+            {
+                FontStyle::UiMediumBold,
+                {
+                    9,
+                    DEFAULT_FONT_FAMILY,
+                    false,
+                    QFont::Bold,
+                },
+            },
+            {
+                FontStyle::UiTabs,
+                {
+                    9,
+                    DEFAULT_FONT_FAMILY,
+                    false,
+                    QFont::Normal,
+                },
+            },
         };
 
         UiFontData &data = defaultSize[type];
