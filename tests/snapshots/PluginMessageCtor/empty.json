@@ -1,0 +1,23 @@
+{
+    "input": "msg = {}",
+    "output": {
+        "badgeInfos": {
+        },
+        "badges": [
+        ],
+        "channelName": "",
+        "count": 1,
+        "displayName": "",
+        "elements": [
+        ],
+        "flags": "",
+        "id": "",
+        "localizedName": "",
+        "loginName": "",
+        "messageText": "",
+        "searchText": "",
+        "serverReceivedTime": "",
+        "timeoutUser": "",
+        "usernameColor": "#ff000000"
+    }
+}
