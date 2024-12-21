@@ -294,7 +294,11 @@ jobs:
       - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-          brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/88c7f83c8086f258f3ec25541b135c79e619a716/Formula/b/boost.rb openssl rapidjson p7zip create-dmg cmake tree
+          brew install openssl rapidjson p7zip create-dmg cmake tree
+          brew tap-new gh/local-boost
+          brew tap homebrew/core --force
+          brew extract --version=1.86.0 boost gh/local-boost
+          brew install boost@1.86.0
         shell: bash
 
       - name: Build (MacOS)
