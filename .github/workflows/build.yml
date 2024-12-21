@@ -313,6 +313,9 @@ jobs:
               -DBOOST_ROOT="/opt/homebrew/opt/boost@1.85" \
               -DBoost_ROOT="/opt/homebrew/opt/boost@1.85" \
               -DBOOSTROOT="/opt/homebrew/opt/boost@1.85" \
+              -DBOOST_DIR="/opt/homebrew/opt/boost@1.85" \
+              -DBoost_DIR="/opt/homebrew/opt/boost@1.85" \
+              -DBOOSTDIR="/opt/homebrew/opt/boost@1.85" \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
         shell: bash
