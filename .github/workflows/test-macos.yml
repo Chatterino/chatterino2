@@ -57,7 +57,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install boost openssl rapidjson p7zip create-dmg cmake
+          brew install openssl rapidjson p7zip create-dmg cmake
+          brew tap-new gh/local-boost
+          brew tap homebrew/core --force
+          brew extract --version=1.86.0 boost gh/local-boost
+          brew install boost@1.86.0
 
       - name: Install httpbox
         run: |
