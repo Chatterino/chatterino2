@@ -58,6 +58,8 @@ private:
     void saveCacheAvatar(const QByteArray &avatar,
                          const QString &filename) const;
 
+    void updateAvatarUrl();
+
     bool isMod_{};
     bool isBroadcaster_{};
 
@@ -66,6 +68,8 @@ private:
     QString userName_;
     QString userId_;
     QString avatarUrl_;
+    QString helixAvatarUrl_;
+    QString seventvAvatarUrl_;
 
     // The channel the popup was opened from (e.g. /mentions or #forsen). Can be a special channel.
     ChannelPtr channel_;

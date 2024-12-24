@@ -383,6 +383,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                     this->seventvAvatar_->start();
                     this->ui_.switchAvatars->getLabel().setText("Show Twitch");
                 }
+                this->updateAvatarUrl();
             });
 
         auto vbox = head.emplace<QVBoxLayout>();
@@ -910,7 +911,8 @@ void UserInfoPopup::updateUserData()
         }
 
         this->userId_ = user.id;
-        this->avatarUrl_ = user.profileImageUrl;
+        this->helixAvatarUrl_ = user.profileImageUrl;
+        this->updateAvatarUrl();
 
         // copyable button for login name of users with a localized username
         if (user.displayName.toLower() != user.login)
@@ -1119,7 +1121,8 @@ void UserInfoPopup::loadAvatar(const HelixUser &user)
                          });
     }
 
-    this->avatarUrl_ = user.profileImageUrl;
+    this->helixAvatarUrl_ = user.profileImageUrl;
+    this->updateAvatarUrl();
 
     if (getSettings()->displaySevenTVAnimatedProfile)
     {
@@ -1158,7 +1161,7 @@ void UserInfoPopup::loadSevenTVAvatar(const HelixUser &user)
             QFile cacheFile(filename);
             if (cacheFile.exists())
             {
-                this->avatarUrl_ = url;
+                this->seventvAvatarUrl_ = url;
                 this->setSevenTVAvatar(filename);
                 return;
             }
@@ -1174,7 +1177,7 @@ void UserInfoPopup::loadSevenTVAvatar(const HelixUser &user)
                              [this, reply, url, filename] {
                                  if (reply->error() == QNetworkReply::NoError)
                                  {
-                                     this->avatarUrl_ = url;
+                                     this->seventvAvatarUrl_ = url;
                                      this->saveCacheAvatar(reply->readAll(),
                                                            filename);
                                      this->setSevenTVAvatar(filename);
@@ -1211,6 +1214,7 @@ void UserInfoPopup::setSevenTVAvatar(const QString &filename)
     this->ui_.switchAvatars->show();
     this->ui_.switchAvatars->getLabel().setText("Show Twitch");
     this->isTwitchAvatarShown_ = false;
+    this->updateAvatarUrl();
 }
 
 void UserInfoPopup::saveCacheAvatar(const QByteArray &avatar,
@@ -1344,6 +1348,18 @@ void UserInfoPopup::TimeoutWidget::paintEvent(QPaintEvent *)
 
     //    painter.drawLine(0, this->height() / 2, this->width(), this->height()
     //    / 2);
+}
+
+void UserInfoPopup::updateAvatarUrl()
+{
+    if (this->isTwitchAvatarShown_)
+    {
+        this->avatarUrl_ = this->helixAvatarUrl_;
+    }
+    else
+    {
+        this->avatarUrl_ = this->seventvAvatarUrl_;
+    }
 }
 
 }  // namespace chatterino
