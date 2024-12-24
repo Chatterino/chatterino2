@@ -16,6 +16,7 @@
 #include "providers/recentmessages/Impl.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
+#include "providers/seventv/SeventvPersonalEmotes.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Resources.hpp"
@@ -116,6 +117,11 @@ public:
         return &this->logging;
     }
 
+    SeventvPersonalEmotes *getSeventvPersonalEmotes() override
+    {
+        return &this->seventvPersonalEmotes;
+    }
+
     mock::EmptyLogging logging;
     AccountController accounts;
     mock::Emotes emotes;
@@ -131,6 +137,7 @@ public:
     FfzEmotes ffzEmotes;
     SeventvEmotes seventvEmotes;
     DisabledStreamerMode streamerMode;
+    SeventvPersonalEmotes seventvPersonalEmotes;
 };
 
 std::optional<QJsonDocument> tryReadJsonFile(const QString &path)
