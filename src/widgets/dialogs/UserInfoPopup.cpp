@@ -1152,6 +1152,24 @@ void UserInfoPopup::loadSevenTVAvatar(const HelixUser &user)
             {
                 url.prepend(u"https:");
             }
+            this->seventvAvatarUrl_ = url;
+            if (this->helixAvatarUrl_ == this->seventvAvatarUrl_)
+            {
+                return;
+            }
+
+            auto dotIdx = url.lastIndexOf('.') + 1;
+            QByteArray format;
+            if (dotIdx > 0)
+            {
+                auto end = url.size();
+                auto queryIdx = url.lastIndexOf('?');
+                if (queryIdx > dotIdx)
+                {
+                    end = queryIdx;
+                }
+                format = QStringView(url).sliced(dotIdx, end - dotIdx).toUtf8();
+            }
 
             // We're implementing custom caching here,
             // because we need the cached file path.
@@ -1161,8 +1179,7 @@ void UserInfoPopup::loadSevenTVAvatar(const HelixUser &user)
             QFile cacheFile(filename);
             if (cacheFile.exists())
             {
-                this->seventvAvatarUrl_ = url;
-                this->setSevenTVAvatar(filename);
+                this->setSevenTVAvatar(filename, format);
                 return;
             }
 
@@ -1174,13 +1191,12 @@ void UserInfoPopup::loadSevenTVAvatar(const HelixUser &user)
             auto *reply = manager->get(req);
 
             QObject::connect(reply, &QNetworkReply::finished, this,
-                             [this, reply, url, filename] {
+                             [this, reply, url, filename, format] {
                                  if (reply->error() == QNetworkReply::NoError)
                                  {
-                                     this->seventvAvatarUrl_ = url;
                                      this->saveCacheAvatar(reply->readAll(),
                                                            filename);
-                                     this->setSevenTVAvatar(filename);
+                                     this->setSevenTVAvatar(filename, format);
                                  }
                                  else
                                  {
@@ -1195,9 +1211,10 @@ void UserInfoPopup::loadSevenTVAvatar(const HelixUser &user)
         .execute();
 }
 
-void UserInfoPopup::setSevenTVAvatar(const QString &filename)
+void UserInfoPopup::setSevenTVAvatar(const QString &filename,
+                                     const QByteArray &format)
 {
-    auto *movie = new QMovie(filename, {}, this);
+    auto *movie = new QMovie(filename, format, this);
     if (!movie->isValid())
     {
         qCWarning(chatterinoSeventv)

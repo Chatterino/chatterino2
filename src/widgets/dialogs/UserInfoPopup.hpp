@@ -53,7 +53,7 @@ private:
     void loadAvatar(const HelixUser &user);
 
     void loadSevenTVAvatar(const HelixUser &user);
-    void setSevenTVAvatar(const QString &filename);
+    void setSevenTVAvatar(const QString &filename, const QByteArray &format);
 
     void saveCacheAvatar(const QByteArray &avatar,
                          const QString &filename) const;
