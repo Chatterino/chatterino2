@@ -177,7 +177,7 @@ if (BUILD_WITH_QTKEYCHAIN)
     endif()
 endif()
 
-find_package(RapidJSON REQUIRED)
+find_package(RapidJSON MODULE REQUIRED)
 
 find_package(Websocketpp REQUIRED)
 

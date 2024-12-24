@@ -12,6 +12,7 @@ env:
   QT_QPA_PLATFORM: minimal
   HOMEBREW_NO_AUTO_UPDATE: 1
   HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+  CONAN_VERSION: 2.11.0
 
 concurrency:
   group: test-macos-${{ github.ref }}
@@ -23,7 +24,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-13]
+        os: [macos-latest]
         qt-version: [6.7.1]
         plugins: [true]
       fail-fast: false
@@ -55,13 +56,24 @@ jobs:
           modules: ${{ env.QT_MODULES }}
           version: ${{ matrix.qt-version }}
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
       - name: Install dependencies
         run: |
-          brew install openssl rapidjson p7zip create-dmg cmake
-          brew tap-new gh/local-boost
-          brew tap homebrew/core --force
-          brew extract --version=1.86.0 boost gh/local-boost
-          brew install boost@1.86.0
+          brew install openssl rapidjson p7zip create-dmg cmake ninja
+
+          pip install conan==${{env.CONAN_VERSION}}
+          conan --version
+          conan profile detect -f
+          mkdir build-test
+          cd build-test
+          conan install .. \
+              -s build_type=RelWithDebInfo \
+              -c tools.cmake.cmaketoolchain:generator="Ninja" \
+              -b missing \
+              --output-folder=.
 
       - name: Install httpbox
         run: |
@@ -72,10 +84,11 @@ jobs:
 
       - name: Build
         run: |
-          mkdir build-test
+          mkdir -p build-test
           cd build-test
           cmake \
               -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+              -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" \
               -DBUILD_TESTS=On \
               -DBUILD_APP=OFF \
               -DUSE_PRECOMPILED_HEADERS=OFF \

@@ -73,8 +73,8 @@ do
     arch -x86_64 "$x86_64_homebrew_dir/bin/brew" install $(arch -x86_64 "$x86_64_homebrew_dir/bin/brew" --cache --bottle-tag=x86_64_ventura "$dep")
 done
 
-echo "Relinking boost libraries"
-c2-make-universal-dylib lib/libboost_random-mt.dylib
+# echo "Relinking boost libraries"
+# c2-make-universal-dylib lib/libboost_random-mt.dylib
 
 echo "Relinking OpenSSL 3 libcrypto"
 c2-make-universal-dylib lib/libcrypto.dylib
