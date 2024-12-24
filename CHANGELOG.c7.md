@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Bugfix: Fixed special 7TV emote sets not being applied and not showing in chat (5cc89d3ba9c11b9e0d36be9ac6f14f852b8713dc)
+- Bugfix: Opening the avatar of a user from a usercard in the browser now opens the correct URL (c8a096c868864e0a51911640534d3e3283298bda)
 
 ## 7.5.2-beta.1
 
