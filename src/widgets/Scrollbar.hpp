@@ -133,6 +133,8 @@ public:
     /// Returns true if we should show the thumb (the handle you can drag)
     bool shouldShowThumb() const;
 
+    void setHideHighlights(bool hideHighlights);
+
     /// Returns true if we should show the highlights
     bool shouldShowHighlights() const;
 
@@ -180,10 +182,13 @@ private:
     boost::circular_buffer<ScrollbarHighlight> highlights_;
 
     bool atBottom_{true};
+    /// This takes precedence over `settingHideThumb`
     bool hideThumb{false};
     /// Controlled by the "Hide scrollbar thumb" setting
     bool settingHideThumb{false};
 
+    /// This takes precedence over `settingHideHighlights`
+    bool hideHighlights = false;
     /// Controlled by the "Hide scrollbar highlights" setting
     bool settingHideHighlights{false};
 
