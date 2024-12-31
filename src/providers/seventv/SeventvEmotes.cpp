@@ -115,7 +115,8 @@ Tooltip createTooltip(const QString &name, const QString &author,
 {
     return Tooltip{QString("%1<br>%2 7TV Emote<br>By: %3")
                        .arg(name.toHtmlEscaped(), kindToString(kind),
-                            author.isEmpty() ? "<deleted>" : author)};
+                            author.isEmpty() ? "&lt;deleted&gt;"
+                                             : author.toHtmlEscaped())};
 }
 
 Tooltip createAliasedTooltip(const QString &name, const QString &baseName,
@@ -124,7 +125,8 @@ Tooltip createAliasedTooltip(const QString &name, const QString &baseName,
     return Tooltip{QString("%1<br>Alias of %2<br>%3 7TV Emote<br>By: %4")
                        .arg(name.toHtmlEscaped(), baseName.toHtmlEscaped(),
                             kindToString(kind),
-                            author.isEmpty() ? "<deleted>" : author)};
+                            author.isEmpty() ? "&lt;deleted&gt;"
+                                             : author.toHtmlEscaped())};
 }
 
 CreateEmoteResult createEmote(const QJsonObject &activeEmote,
