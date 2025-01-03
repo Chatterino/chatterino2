@@ -7,6 +7,7 @@
 - Bugfix: Fixed 7TV usernames messing with Qt's HTML (#5780)
 - Bugfix: Fixed BTTV emotes occasionally showing the wrong author. (#5783)
 - Dev: Hard-code Boost 1.86.0 in macos CI builders. (#5774)
+- Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
 
 ## 2.5.2-beta.1
 
