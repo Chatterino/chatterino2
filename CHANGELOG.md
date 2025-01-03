@@ -6,6 +6,7 @@
 - Bugfix: Make macos fonts look the same as v2.5.1. (#5775)
 - Bugfix: Fixed 7TV usernames messing with Qt's HTML (#5780)
 - Bugfix: Fixed BTTV emotes occasionally showing the wrong author. (#5783)
+- Bugfix: Fixed some Twitch emotes containing HTML entities. (#5786)
 - Dev: Hard-code Boost 1.86.0 in macos CI builders. (#5774)
 
 ## 2.5.2-beta.1
