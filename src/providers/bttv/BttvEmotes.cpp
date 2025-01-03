@@ -92,6 +92,10 @@ CreateEmoteResult createChannelEmote(const QString &channelDisplayName,
     auto name = EmoteName{jsonEmote.value("code").toString()};
     auto author = EmoteAuthor{
         jsonEmote.value("user").toObject().value("displayName").toString()};
+    if (author.string.isEmpty())
+    {
+        author.string = jsonEmote["channel"].toString();
+    }
 
     auto emote = Emote({
         name,
