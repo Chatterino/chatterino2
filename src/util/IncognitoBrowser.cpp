@@ -5,13 +5,13 @@
 #    include "util/XDGHelper.hpp"
 #endif
 
+#include <QFileInfo>
 #include <QProcess>
 #include <QVariant>
-#include <QFileInfo>
-
-namespace chatterino {
 
 namespace {
+
+using namespace chatterino;
 
 constexpr bool isWindows()
 {
@@ -21,7 +21,6 @@ constexpr bool isWindows()
     return false;
 #endif
 }
-
 
 QString getExecutable()
 {
@@ -98,6 +97,8 @@ QString getPrivateArg(const QString &browserPath)
 
 }  // namespace
 
+namespace chatterino {
+
 bool supportsIncognitoLinks()
 {
     QString browserExe = getExecutable();
@@ -113,10 +114,10 @@ bool supportsIncognitoLinks()
 
 bool openLinkIncognito(const QString &link)
 {
-    QString browserExe = getExecutable();
-    QString browserArg = getPrivateArg(browserExe);
+    QString exe = getExecutable();
+    QString arg = getPrivateArg(browserExe);
 
-    return QProcess::startDetached(browserExe, {browserArg, link});
+    return QProcess::startDetached(exe, {arg, link});
 }
 
 }  // namespace chatterino
