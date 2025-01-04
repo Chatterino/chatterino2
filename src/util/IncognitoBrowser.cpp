@@ -45,7 +45,6 @@ QString getExecutable()
     if (desktopFile.has_value())
     {
         auto entries = desktopFile->getEntries("Desktop Entry");
-
         auto exec = entries.find("Exec");
         if (exec != entries.end())
             return parseDesktopExecProgram(exec->second.trimmed());
@@ -77,7 +76,7 @@ QString getPrivateArg(const QString &browserPath)
     }};
 
     // may return null string if path is '/'
-    QString exeFilename = QFileInfo(browserPath).fileName();
+    QString exeFilename = QFileInfo(browserPath).fileName().toLower();
 
     if (!exeFilename.isNull())
     {
@@ -115,7 +114,7 @@ bool supportsIncognitoLinks()
 bool openLinkIncognito(const QString &link)
 {
     QString exe = getExecutable();
-    QString arg = getPrivateArg(browserExe);
+    QString arg = getPrivateArg(exe);
 
     return QProcess::startDetached(exe, {arg, link});
 }
