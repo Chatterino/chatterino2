@@ -54,7 +54,7 @@ static QString getExecutable()
     return {};
 }
 
-static QString getPrivateArg(const QString &exec)
+static QString getPrivateArg(const QString &browserPath)
 {
     // list of command line arguments to turn on private browsing
     static std::vector<std::pair<QString, QString>> argTable = {{
@@ -69,26 +69,26 @@ static QString getPrivateArg(const QString &exec)
         {"opera\\launcher", "--private"},
         {"iexplore", "-private"},
         {"msedge", "-inprivate"},
-        {"firefox-esr", "-private-window"},
         {"chromium", "-incognito"},
         {"brave", "-incognito"},
-        {"firefox-devedition", "-private-window"},
-        {"firefox-developer-edition", "-private-window"},
-        {"firefox-beta", "-private-window"},
-        {"firefox-nightly", "-private-window"},
     }};
 
-    // compare case-insensitively
-    QString lcExec = exec.toLower();
+    // may return null string if path is '/'
+    QString exeFilename = QFileInfo(browserPath).fileName();
 
-    if (isWindows() && lcExec.endsWith(".exe"))
-        lcExec.chop(4);
+    if (!exeFilename.isNull())
+    {
+        // mozilla distributes many firefox variants with different endings so
+        // catch them all here, and be future proof at the same time :)
+        if (exeFilename.startsWith("firefox-"))
+            return "-private-window";
 
-    for (const auto &pair : argTable)
-        if (lcExec.endsWith(pair.first))
-            return pair.second;
+        for (const auto &pair : argTable)
+            if (exeFilename == pair.first)
+                return pair.second;
+    }
 
-    // unsupported browser
+    // unsupported or invalid browser
     return {};
 }
 
