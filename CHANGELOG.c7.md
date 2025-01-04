@@ -5,6 +5,7 @@
 - Bugfix: Fixed special 7TV emote sets not being applied and not showing in chat (5cc89d3ba9c11b9e0d36be9ac6f14f852b8713dc)
 - Bugfix: Opening the avatar of a user from a usercard in the browser now opens the correct URL (c8a096c868864e0a51911640534d3e3283298bda)
 - Bugfix: If a user never set their 7TV avatar, the usercard will no longer show a button to switch between Twitch and 7TV (519a2c3174a96fc19cf59a87005dda07c344b04a)
+- Bugfix: Fixed mentions becoming unclickable when a user updated/announced their personal emotes (7ed952b61073e3081ab1377d1429f554f71b6a07)
 
 ## 7.5.2-beta.1
 
