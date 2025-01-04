@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Bugfix: Fixed a crash in the 7TV EventApi when closing Chatterino. (#5768)
 - Bugfix: Fixed scrollbar highlights being visible in overlay windows. (#5769)
 - Bugfix: Make macos fonts look the same as v2.5.1. (#5775)
 - Bugfix: Fixed 7TV usernames messing with Qt's HTML (#5780)
