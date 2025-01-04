@@ -400,7 +400,13 @@ void SeventvEventAPI::onUserUpdate(const Dispatch &dispatch)
 // NOLINTBEGIN(readability-convert-member-functions-to-static)
 void SeventvEventAPI::onCosmeticCreate(const CosmeticCreateDispatch &cosmetic)
 {
-    auto *badges = getApp()->getSeventvBadges();
+    auto *app = tryGetApp();
+    if (!app)
+    {
+        return;  // shutting down
+    }
+
+    auto *badges = app->getSeventvBadges();
     switch (cosmetic.kind)
     {
         case CosmeticKind::Badge: {
@@ -419,7 +425,13 @@ void SeventvEventAPI::onCosmeticCreate(const CosmeticCreateDispatch &cosmetic)
 void SeventvEventAPI::onEntitlementCreate(
     const EntitlementCreateDeleteDispatch &entitlement)
 {
-    auto *badges = getApp()->getSeventvBadges();
+    auto *app = tryGetApp();
+    if (!app)
+    {
+        return;  // shutting down
+    }
+
+    auto *badges = app->getSeventvBadges();
     switch (entitlement.kind)
     {
         case CosmeticKind::Badge: {
@@ -468,7 +480,13 @@ void SeventvEventAPI::onEntitlementCreate(
 void SeventvEventAPI::onEntitlementDelete(
     const EntitlementCreateDeleteDispatch &entitlement)
 {
-    auto *badges = getApp()->getSeventvBadges();
+    auto *app = tryGetApp();
+    if (!app)
+    {
+        return;  // shutting down
+    }
+
+    auto *badges = app->getSeventvBadges();
     switch (entitlement.kind)
     {
         case CosmeticKind::Badge: {

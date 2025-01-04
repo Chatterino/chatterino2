@@ -426,8 +426,8 @@ QString TwitchEmotes::cleanUpEmoteCode(const QString &dirtyEmoteCode)
     cleanCode.detach();
 
     static QMap<QString, QString> emoteNameReplacements{
-        {"[oO](_|\\.)[oO]", "O_o"}, {"\\&gt\\;\\(", "&gt;("},
-        {"\\&lt\\;3", "&lt;3"},     {"\\:-?(o|O)", ":O"},
+        {"[oO](_|\\.)[oO]", "O_o"}, {"\\&gt\\;\\(", ">("},
+        {"\\&lt\\;3", "<3"},        {"\\:-?(o|O)", ":O"},
         {"\\:-?(p|P)", ":P"},       {"\\:-?[\\\\/]", ":/"},
         {"\\:-?[z|Z|\\|]", ":Z"},   {"\\:-?\\(", ":("},
         {"\\:-?\\)", ":)"},         {"\\:-?D", ":D"},
