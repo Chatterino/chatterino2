@@ -7,6 +7,11 @@
 
 #include <QProcess>
 #include <QVariant>
+#include <QFileInfo>
+
+namespace chatterino {
+
+namespace {
 
 constexpr bool isWindows()
 {
@@ -17,9 +22,8 @@ constexpr bool isWindows()
 #endif
 }
 
-namespace chatterino {
 
-static QString getExecutable()
+QString getExecutable()
 {
 #ifdef USEWINSDK
 
@@ -54,7 +58,7 @@ static QString getExecutable()
     return {};
 }
 
-static QString getPrivateArg(const QString &browserPath)
+QString getPrivateArg(const QString &browserPath)
 {
     // list of command line arguments to turn on private browsing
     static std::vector<std::pair<QString, QString>> argTable = {{
@@ -91,6 +95,8 @@ static QString getPrivateArg(const QString &browserPath)
     // unsupported or invalid browser
     return {};
 }
+
+}  // namespace
 
 bool supportsIncognitoLinks()
 {
