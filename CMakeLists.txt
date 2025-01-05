@@ -40,7 +40,7 @@ if(BUILD_BENCHMARKS)
     list(APPEND VCPKG_MANIFEST_FEATURES "benchmarks")
 endif()
 
-project(chatterino 
+project(chatterino
     VERSION 2.5.2
     DESCRIPTION "Chat client for twitch.tv"
     HOMEPAGE_URL "https://chatterino.com/"
