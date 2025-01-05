@@ -8,13 +8,10 @@ declare module c2 {
     Critical,
   }
   class CommandContext {
-    words: String[];
+    words: string[];
     channel: Channel;
   }
 
-  enum Platform {
-    Twitch,
-  }
   enum ChannelType {
     None,
     Direct,
@@ -24,7 +21,6 @@ declare module c2 {
     TwitchMentions,
     TwitchLive,
     TwitchAutomod,
-    Irc,
     Misc,
   }
 
@@ -55,7 +51,10 @@ declare module c2 {
     get_name(): string;
     get_type(): ChannelType;
     get_display_name(): string;
+
     send_message(message: string, execute_commands: boolean): void;
+    send_message(message: string): void;
+
     add_system_message(message: string): void;
 
     is_twitch_channel(): boolean;
@@ -67,7 +66,7 @@ declare module c2 {
     is_mod(): boolean;
     is_vip(): boolean;
 
-    static by_name(name: string, platform: Platform): null | Channel;
+    static by_name(name: string): null | Channel;
     static by_twitch_id(id: string): null | Channel;
   }
 
@@ -103,7 +102,7 @@ declare module c2 {
 
   function log(level: LogLevel, ...data: any[]): void;
   function register_command(
-    name: String,
+    name: string,
     handler: (ctx: CommandContext) => void
   ): boolean;
 
@@ -115,7 +114,7 @@ declare module c2 {
   }
 
   class CompletionList {
-    values: String[];
+    values: string[];
     hide_others: boolean;
   }
 
