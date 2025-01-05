@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: Fixed tabs not scaling to the default scale when changing the scale from a non-default value. (#5794)
+
 ## 2.5.2
 
 - Bugfix: Fixed a crash in the 7TV EventApi when closing Chatterino. (#5768)
