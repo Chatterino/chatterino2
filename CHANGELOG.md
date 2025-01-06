@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
+
 ## 2.5.2
 
 - Bugfix: Fixed a crash in the 7TV EventApi when closing Chatterino. (#5768)
