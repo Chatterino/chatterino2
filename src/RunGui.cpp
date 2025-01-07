@@ -80,8 +80,6 @@ namespace {
     void initQt()
     {
         // set up the QApplication flags
-        QApplication::setAttribute(Qt::AA_Use96Dpi, true);
-
 #ifdef Q_OS_WIN32
         // Avoid promoting child widgets to child windows
         // This causes bugs with frameless windows as not all child events
