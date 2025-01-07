@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
 - Bugfix: Fixed UI scaling issues in certain monitor configurations. (#5802)
 
 ## 2.5.2
