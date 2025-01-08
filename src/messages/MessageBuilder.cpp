@@ -1986,6 +1986,46 @@ MessagePtr MessageBuilder::makeLowTrustUpdateMessage(
     return builder.release();
 }
 
+MessagePtrMut MessageBuilder::makeClearChatMessage(QTime now,
+                                                   const QString &actor,
+                                                   uint32_t count)
+{
+    MessageBuilder builder;
+    builder.emplace<TimestampElement>(now);
+    builder->count = count;
+    builder->parseTime = now;
+    builder.message().flags.set(MessageFlag::System,
+                                MessageFlag::DoNotTriggerNotification,
+                                MessageFlag::ClearChat);
+
+    QString messageText;
+    if (actor.isEmpty())
+    {
+        builder.emplaceSystemTextAndUpdate(
+            "Chat has been cleared by a moderator.", messageText);
+    }
+    else
+    {
+        builder.message().flags.set(MessageFlag::PubSub);
+        builder.emplace<MentionElement>(actor, actor, MessageColor::System,
+                                        MessageColor::System);
+        messageText = actor + ' ';
+        builder.emplaceSystemTextAndUpdate("cleared the chat.", messageText);
+        builder->timeoutUser = actor;
+    }
+
+    if (count > 1)
+    {
+        builder.emplaceSystemTextAndUpdate(
+            '(' % QString::number(count) % u" times)", messageText);
+    }
+
+    builder->messageText = messageText;
+    builder->searchText = messageText;
+
+    return builder.release();
+}
+
 std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
     /* mutable */ Channel *channel, const Communi::IrcMessage *ircMessage,
     const MessageParseArgs &args, /* mutable */ QString content,
