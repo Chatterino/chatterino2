@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: `/clear` messages are now stacked like timeouts. (#5806)
 - Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
 
 ## 2.5.2
