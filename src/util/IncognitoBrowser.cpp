@@ -5,6 +5,7 @@
 #    include "util/XDGHelper.hpp"
 #endif
 
+#include <QFileInfo>
 #include <QProcess>
 #include <QVariant>
 
@@ -12,11 +13,14 @@ namespace {
 
 using namespace chatterino;
 
-QString getPrivateSwitch(const QString &browserExecutable)
+QString getPrivateArg(const QString &exePath)
 {
-    // list of command line switches to turn on private browsing in browsers
-    static auto switches = std::vector<std::pair<QString, QString>>{
-        {"firefox", "-private-window"},
+    struct Entry {
+        QString exe{};
+        QString arg{};
+    };
+
+    static std::vector<Entry> lut{
         {"librewolf", "-private-window"},
         {"waterfox", "-private-window"},
         {"icecat", "-private-window"},
@@ -30,28 +34,27 @@ QString getPrivateSwitch(const QString &browserExecutable)
         {"firefox-esr", "-private-window"},
         {"chromium", "-incognito"},
         {"brave", "-incognito"},
-        {"firefox-devedition", "-private-window"},
-        {"firefox-developer-edition", "-private-window"},
-        {"firefox-beta", "-private-window"},
-        {"firefox-nightly", "-private-window"},
     };
 
-    // compare case-insensitively
-    auto lowercasedBrowserExecutable = browserExecutable.toLower();
+    QString exe = QFileInfo(exePath).baseName().toLower();
 
 #ifdef Q_OS_WINDOWS
-    if (lowercasedBrowserExecutable.endsWith(".exe"))
+    if (exe.endsWith(".exe"))
     {
-        lowercasedBrowserExecutable.chop(4);
+        exe.chop(4);
     }
 #endif
 
-    for (const auto &switch_ : switches)
+    for (const auto &entry : lut)
     {
-        if (lowercasedBrowserExecutable.endsWith(switch_.first))
-        {
-            return switch_.second;
-        }
+        if (exe == entry.exe)
+            return entry.arg;
+    }
+
+    // catch all mozilla distributed variants
+    if (exe.startsWith("firefox"))
+    {
+        return "-private-window";
     }
 
     // couldn't match any browser -> unknown browser
@@ -108,14 +111,14 @@ namespace chatterino {
 bool supportsIncognitoLinks()
 {
     auto browserExe = getDefaultBrowserExecutable();
-    return !browserExe.isNull() && !getPrivateSwitch(browserExe).isNull();
+    return !browserExe.isNull() && !getPrivateArg(browserExe).isNull();
 }
 
 bool openLinkIncognito(const QString &link)
 {
     auto browserExe = getDefaultBrowserExecutable();
     return QProcess::startDetached(browserExe,
-                                   {getPrivateSwitch(browserExe), link});
+                                   {getPrivateArg(browserExe), link});
 }
 
 }  // namespace chatterino
