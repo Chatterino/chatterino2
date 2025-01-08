@@ -16,8 +16,8 @@ using namespace chatterino;
 QString getPrivateArg(const QString &exePath)
 {
     struct Entry {
-        QString exe{};
-        QString arg{};
+        QString exe;
+        QString arg;
     };
 
     static std::vector<Entry> lut{
@@ -48,7 +48,9 @@ QString getPrivateArg(const QString &exePath)
     for (const auto &entry : lut)
     {
         if (exe == entry.exe)
+        {
             return entry.arg;
+        }
     }
 
     // catch all mozilla distributed variants
