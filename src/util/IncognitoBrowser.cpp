@@ -13,14 +13,9 @@ namespace {
 
 using namespace chatterino;
 
-QString getPrivateArg(const QString &exePath)
+QString getPrivateSwitch(const QString &browserExecutable)
 {
-    struct Entry {
-        QString exe;
-        QString arg;
-    };
-
-    static std::vector<Entry> lut{
+    static auto switches = std::vector<std::pair<QString, QString>>{
         {"librewolf", "-private-window"},
         {"waterfox", "-private-window"},
         {"icecat", "-private-window"},
@@ -35,25 +30,28 @@ QString getPrivateArg(const QString &exePath)
         {"brave", "-incognito"},
     };
 
-    QString exe = QFileInfo(exePath).baseName().toLower();
+    // the browser executable may be a full path, strip it to its basename and
+    // compare case insensitively
+    auto lowercasedExecutable =
+        QFileInfo(browserExecutable).baseName().toLower();
 
 #ifdef Q_OS_WINDOWS
-    if (exe.endsWith(".exe"))
+    if (lowercasedExecutable.endsWith(".exe"))
     {
-        exe.chop(4);
+        lowercasedExecutable.chop(4);
     }
 #endif
 
-    for (const auto &entry : lut)
+    for (const auto &switch_ : switches)
     {
-        if (exe == entry.exe)
+        if (lowercasedExecutable == switch_.first)
         {
-            return entry.arg;
+            return switch_.second;
         }
     }
 
     // catch all mozilla distributed variants
-    if (exe.startsWith("firefox"))
+    if (lowercasedExecutable.startsWith("firefox"))
     {
         return "-private-window";
     }
@@ -112,14 +110,14 @@ namespace chatterino {
 bool supportsIncognitoLinks()
 {
     auto browserExe = getDefaultBrowserExecutable();
-    return !browserExe.isNull() && !getPrivateArg(browserExe).isNull();
+    return !browserExe.isNull() && !getPrivateSwitch(browserExe).isNull();
 }
 
 bool openLinkIncognito(const QString &link)
 {
     auto browserExe = getDefaultBrowserExecutable();
     return QProcess::startDetached(browserExe,
-                                   {getPrivateArg(browserExe), link});
+                                   {getPrivateSwitch(browserExe), link});
 }
 
 }  // namespace chatterino
