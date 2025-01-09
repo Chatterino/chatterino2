@@ -31,7 +31,6 @@ QString getPrivateArg(const QString &exePath)
         {"opera\\launcher", "--private"},
         {"iexplore", "-private"},
         {"msedge", "-inprivate"},
-        {"firefox-esr", "-private-window"},
         {"chromium", "-incognito"},
         {"brave", "-incognito"},
     };
