@@ -6,6 +6,8 @@
 #include <QString>
 #include <QStringList>
 
+#include <set>
+
 namespace chatterino {
 
 struct PubSubAutoModQueueMessage {
@@ -41,7 +43,7 @@ struct PubSubAutoModQueueMessage {
     QString senderUserDisplayName;
     QColor senderUserChatColor;
 
-    QStringList blockedTermsFound;
+    std::set<QString> blockedTermsFound;
 
     PubSubAutoModQueueMessage() = default;
     explicit PubSubAutoModQueueMessage(const QJsonObject &root);
