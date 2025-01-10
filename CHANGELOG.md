@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
+- Dev: Updated Conan dependencies. (#5776)
 
 ## 2.5.2
 
@@ -14,7 +15,6 @@
 - Bugfix: Fixed some Twitch emotes containing HTML entities. (#5786)
 - Bugfix: Fixed the same blocked term showing up more than once. (#5789)
 - Dev: Hard-code Boost 1.86.0 in macos CI builders. (#5774)
-- Dev: Updated Conan dependencies. (#5776)
 
 ## 2.5.2-beta.1
 
