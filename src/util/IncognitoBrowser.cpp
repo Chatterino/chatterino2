@@ -71,7 +71,6 @@ QString getPrivateSwitch(const QString &browserExecutable)
         {"google-chrome-stable", "-incognito"},
         {"vivaldi", "-incognito"},
         {"opera", "-newprivatetab"},
-        {"iexplore", "-private"},
         {"msedge", "-inprivate"},
         {"chromium", "-incognito"},
         {"brave", "-incognito"},
