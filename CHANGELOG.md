@@ -3,7 +3,10 @@
 ## Unversioned
 
 - Minor: `/clear` messages are now stacked like timeouts. (#5806)
+- Minor: Treat all browsers starting with `firefox` as a Firefox browser. (#5805)
+- Minor: Remove incognito browser support for `opera/launcher` (this should no longer be a thing). (#5805)
 - Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
+- Dev: Updated Conan dependencies. (#5776)
 
 ## 2.5.2
 

@@ -19,9 +19,7 @@ env:
   C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/bugfix-release/') || startsWith(github.ref, 'refs/heads/release/') }}
   CHATTERINO_REQUIRE_CLEAN_GIT: On
   C2_BUILD_WITH_QT6: Off
-  # Last known good conan version
-  # 2.0.3 has a bug on Windows (conan-io/conan#13606)
-  CONAN_VERSION: 2.0.2
+  CONAN_VERSION: 2.11.0
 
 jobs:
   build-ubuntu-docker:
