@@ -21,6 +21,8 @@
 - [ ] Tag the release
 - [ ] Manually run the [create-installer](https://github.com/Chatterino/chatterino2/actions/workflows/create-installer.yml) workflow.  
        This is only necessary if the tag was created after the CI in the main branch finished.
+- [ ] If the winget releaser action doesn't work as expected, you can run this manually using [Komac](https://github.com/russellbanks/Komac), replacing `v2.5.2` with the current release:  
+       `komac update ChatterinoTeam.Chatterino --version 2.5.2 --urls https://github.com/Chatterino/chatterino2/releases/download/v2.5.2/Chatterino.Installer.exe`
 
 ## After the binaries have been uploaded to fourtf's bucket
 
