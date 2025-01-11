@@ -32,26 +32,26 @@ QString getPrivateSwitch(const QString &browserExecutable)
 
     // the browser executable may be a full path, strip it to its basename and
     // compare case insensitively
-    auto lowercasedExecutable =
+    auto lowercasedBrowserExecutable =
         QFileInfo(browserExecutable).baseName().toLower();
 
 #ifdef Q_OS_WINDOWS
-    if (lowercasedExecutable.endsWith(".exe"))
+    if (lowercasedBrowserExecutable.endsWith(".exe"))
     {
-        lowercasedExecutable.chop(4);
+        lowercasedBrowserExecutable.chop(4);
     }
 #endif
 
     for (const auto &switch_ : switches)
     {
-        if (lowercasedExecutable == switch_.first)
+        if (lowercasedBrowserExecutable == switch_.first)
         {
             return switch_.second;
         }
     }
 
     // catch all mozilla distributed variants
-    if (lowercasedExecutable.startsWith("firefox"))
+    if (lowercasedBrowserExecutable.startsWith("firefox"))
     {
         return "-private-window";
     }
