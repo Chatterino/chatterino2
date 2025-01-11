@@ -4,6 +4,7 @@
 
 - Minor: Treat all browsers starting with `firefox` as a Firefox browser (#5805)
 - Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
+- Dev: Updated Conan dependencies. (#5776)
 
 ## 2.5.2
 
