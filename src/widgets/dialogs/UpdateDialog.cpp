@@ -19,7 +19,8 @@ UpdateDialog::UpdateDialog()
         LayoutCreator<UpdateDialog>(this).setLayoutType<QVBoxLayout>();
 
     layout.emplace<Label>("You shouldn't be seeing this dialog.")
-        .assign(&this->ui_.label);
+        .assign(&this->ui_.label)
+        ->setWordWrap(true);
 
     auto buttons = layout.emplace<QDialogButtonBox>();
     auto *install = buttons->addButton("Install", QDialogButtonBox::AcceptRole);
@@ -55,9 +56,9 @@ void UpdateDialog::updateStatusChanged(Updates::Status status)
             this->ui_.label->setText((
                 getApp()->getUpdates().isDowngrade()
                     ? QString(
-                          "The version online (%1) seems to be\nlower than the "
+                          "The version online (%1) seems to be lower than the "
                           "current (%2).\nEither a version was reverted or "
-                          "you are\nrunning a newer build.\n\nDo you want to "
+                          "you are running a newer build.\n\nDo you want to "
                           "download and install it?")
                           .arg(getApp()->getUpdates().getOnlineVersion(),
                                getApp()->getUpdates().getCurrentVersion())
@@ -76,7 +77,7 @@ void UpdateDialog::updateStatusChanged(Updates::Status status)
         case Updates::Downloading: {
             this->ui_.label->setText(
                 "Downloading updates.\n\nChatterino will restart "
-                "automatically\nwhen the download is done.");
+                "automatically when the download is done.");
         }
         break;
 
