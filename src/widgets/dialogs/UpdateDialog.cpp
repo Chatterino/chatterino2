@@ -53,8 +53,8 @@ void UpdateDialog::updateStatusChanged(Updates::Status status)
     switch (status)
     {
         case Updates::UpdateAvailable: {
-             this->ui_.label->setText((
-                 getApp()->getUpdates().isDowngrade()
+            this->ui_.label->setText(
+                (getApp()->getUpdates().isDowngrade()
                      ? QString(
                            "The version online (%1) seems to be lower than the "
                            "current (%2).\nEither a version was reverted or "
