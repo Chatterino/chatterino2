@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
+- Dev: Updated Conan dependencies. (#5776)
 
 ## 2.5.2
 
