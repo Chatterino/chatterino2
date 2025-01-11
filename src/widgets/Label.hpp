@@ -27,8 +27,8 @@ public:
     bool getHasOffset() const;
     void setHasOffset(bool hasOffset);
 
-	bool getWordWrap() const;
-	void setWordWrap(bool wrap);
+    bool getWordWrap() const;
+    void setWordWrap(bool wrap);
 
 protected:
     void scaleChangedEvent(float scale_) override;
@@ -46,7 +46,7 @@ private:
     QSize preferedSize_;
     bool centered_ = false;
     bool hasOffset_ = true;
-	bool wordWrap_ = false;
+    bool wordWrap_ = false;
 
     pajlada::Signals::SignalHolder connections_;
 };
