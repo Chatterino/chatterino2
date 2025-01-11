@@ -102,7 +102,6 @@ jobs:
               -c tools.cmake.cmaketoolchain:generator="NMake Makefiles" `
               -b missing `
               --output-folder=. `
-              -c user.openssl:windows_use_jom=True `
               -o with_openssl3="$Env:C2_USE_OPENSSL3"
 
       # The Windows runners currently use an older version of the CRT
