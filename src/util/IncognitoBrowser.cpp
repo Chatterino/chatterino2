@@ -13,6 +13,54 @@ namespace {
 
 using namespace chatterino;
 
+QString getDefaultBrowserExecutable()
+{
+#ifdef USEWINSDK
+    // get default browser start command, by protocol if possible, falling back to extension if not
+    QString command =
+        getAssociatedExecutable(AssociationQueryType::Protocol, L"http");
+
+    if (command.isNull())
+    {
+        // failed to fetch default browser by protocol, try by file extension instead
+        command = getAssociatedExecutable(AssociationQueryType::FileExtension,
+                                          L".html");
+    }
+
+    if (command.isNull())
+    {
+        // also try the equivalent .htm extension
+        command = getAssociatedExecutable(AssociationQueryType::FileExtension,
+                                          L".htm");
+    }
+
+    return command;
+#elif defined(Q_OS_UNIX) && !defined(Q_OS_DARWIN)
+    static QString defaultBrowser = []() -> QString {
+        auto desktopFile = getDefaultBrowserDesktopFile();
+        if (desktopFile.has_value())
+        {
+            auto entry = desktopFile->getEntries("Desktop Entry");
+            auto exec = entry.find("Exec");
+            if (exec != entry.end())
+            {
+                return parseDesktopExecProgram(exec->second.trimmed());
+            }
+        }
+        return {};
+    }();
+
+    return defaultBrowser;
+#else
+    return {};
+#endif
+}
+
+}  // namespace
+//
+
+namespace chatterino::incognitobrowser::detail {
+
 QString getPrivateSwitch(const QString &browserExecutable)
 {
     static auto switches = std::vector<std::pair<QString, QString>>{
@@ -60,52 +108,11 @@ QString getPrivateSwitch(const QString &browserExecutable)
     return {};
 }
 
-QString getDefaultBrowserExecutable()
-{
-#ifdef USEWINSDK
-    // get default browser start command, by protocol if possible, falling back to extension if not
-    QString command =
-        getAssociatedExecutable(AssociationQueryType::Protocol, L"http");
-
-    if (command.isNull())
-    {
-        // failed to fetch default browser by protocol, try by file extension instead
-        command = getAssociatedExecutable(AssociationQueryType::FileExtension,
-                                          L".html");
-    }
-
-    if (command.isNull())
-    {
-        // also try the equivalent .htm extension
-        command = getAssociatedExecutable(AssociationQueryType::FileExtension,
-                                          L".htm");
-    }
-
-    return command;
-#elif defined(Q_OS_UNIX) && !defined(Q_OS_DARWIN)
-    static QString defaultBrowser = []() -> QString {
-        auto desktopFile = getDefaultBrowserDesktopFile();
-        if (desktopFile.has_value())
-        {
-            auto entry = desktopFile->getEntries("Desktop Entry");
-            auto exec = entry.find("Exec");
-            if (exec != entry.end())
-            {
-                return parseDesktopExecProgram(exec->second.trimmed());
-            }
-        }
-        return {};
-    }();
-
-    return defaultBrowser;
-#else
-    return {};
-#endif
-}
-
-}  // namespace
+}  // namespace chatterino::incognitobrowser::detail
 
 namespace chatterino {
+
+using namespace chatterino::incognitobrowser::detail;
 
 bool supportsIncognitoLinks()
 {
