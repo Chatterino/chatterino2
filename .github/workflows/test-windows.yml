@@ -10,9 +10,7 @@ env:
   TWITCH_PUBSUB_SERVER_TAG: v1.0.7
   HTTPBOX_TAG: v0.2.1
   QT_QPA_PLATFORM: minimal
-  # Last known good conan version
-  # 2.0.3 has a bug on Windows (conan-io/conan#13606)
-  CONAN_VERSION: 2.4.0
+  CONAN_VERSION: 2.11.0
 
 concurrency:
   group: test-windows-${{ github.ref }}

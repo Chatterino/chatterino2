@@ -48,6 +48,11 @@ public:
     virtual void addOrReplaceTimeout(MessagePtr clearchatMessage,
                                      QTime now) = 0;
 
+    /// Adds a clear chat message (for the entire chat) or merges it into an
+    /// existing one
+    virtual void addOrReplaceClearChat(MessagePtr clearchatMessage,
+                                       QTime now) = 0;
+
     /// Flags all messages as `Disabled`
     virtual void disableAllMessages() = 0;
 

@@ -38,6 +38,20 @@ void VectorMessageSink::addOrReplaceTimeout(MessagePtr clearchatMessage,
         false);
 }
 
+void VectorMessageSink::addOrReplaceClearChat(MessagePtr clearchatMessage,
+                                              QTime now)
+{
+    addOrReplaceChannelClear(
+        this->messages_, std::move(clearchatMessage), now,
+        [&](auto idx, auto /*msg*/, auto &&replacement) {
+            replacement->flags.set(this->additionalFlags);
+            this->messages_[idx] = replacement;
+        },
+        [&](auto &&msg) {
+            this->messages_.emplace_back(msg);
+        });
+}
+
 void VectorMessageSink::disableAllMessages()
 {
     if (this->additionalFlags.has(MessageFlag::RecentMessage))
