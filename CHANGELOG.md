@@ -10,6 +10,7 @@
 - Bugfix: Fixed a crash that could occur on Linux and macOS when clicking "Install" from the update prompt. (#5818)
 - Bugfix: Fixed missing word wrap in update popup. (#5811)
 - Bugfix: Fixed tabs not scaling to the default scale when changing the scale from a non-default value. (#5794)
+- Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
 - Dev: Updated Conan dependencies. (#5776)
 
 ## 2.5.2
@@ -22,7 +23,6 @@
 - Bugfix: Fixed some Twitch emotes containing HTML entities. (#5786)
 - Bugfix: Fixed the same blocked term showing up more than once. (#5789)
 - Dev: Hard-code Boost 1.86.0 in macos CI builders. (#5774)
-- Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
 
 ## 2.5.2-beta.1
 
