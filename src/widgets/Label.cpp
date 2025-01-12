@@ -64,6 +64,18 @@ void Label::setHasOffset(bool hasOffset)
     this->hasOffset_ = hasOffset;
     this->updateSize();
 }
+
+bool Label::getWordWrap() const
+{
+    return this->wordWrap_;
+}
+
+void Label::setWordWrap(bool wrap)
+{
+    this->wordWrap_ = wrap;
+    this->update();
+}
+
 void Label::setFontStyle(FontStyle style)
 {
     this->fontStyle_ = style;
@@ -107,7 +119,14 @@ void Label::paintEvent(QPaintEvent *)
     painter.setBrush(this->palette().windowText());
 
     QTextOption option(alignment);
-    option.setWrapMode(QTextOption::NoWrap);
+    if (this->wordWrap_)
+    {
+        option.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+    }
+    else
+    {
+        option.setWrapMode(QTextOption::NoWrap);
+    }
     painter.drawText(textRect, this->text_, option);
 
 #if 0
