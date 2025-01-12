@@ -247,11 +247,10 @@ void TwitchIrcServer::initialize()
                 return;
             }
 
-            QString text =
-                QString("%1 cleared the chat.").arg(action.source.login);
-
-            postToThread([chan, text] {
-                chan->addSystemMessage(text);
+            postToThread([chan, actor{action.source.login}] {
+                auto now = QTime::currentTime();
+                chan->addOrReplaceClearChat(
+                    MessageBuilder::makeClearChatMessage(now, actor), now);
             });
         });
 
@@ -495,12 +494,12 @@ void TwitchIrcServer::initialize()
                             PubSubAutoModQueueMessage::Reason::BlockedTerm)
                         {
                             auto numBlockedTermsMatched =
-                                msg.blockedTermsFound.count();
+                                msg.blockedTermsFound.size();
                             auto hideBlockedTerms =
                                 getSettings()
                                     ->streamerModeHideBlockedTermText &&
                                 getApp()->getStreamerMode()->isEnabled();
-                            if (!msg.blockedTermsFound.isEmpty())
+                            if (!msg.blockedTermsFound.empty())
                             {
                                 if (hideBlockedTerms)
                                 {
@@ -513,14 +512,16 @@ void TwitchIrcServer::initialize()
                                 }
                                 else
                                 {
+                                    QStringList blockedTerms(
+                                        msg.blockedTermsFound.begin(),
+                                        msg.blockedTermsFound.end());
                                     action.reason =
                                         u"matches %1 blocked term%2 \"%3\""_s
                                             .arg(numBlockedTermsMatched)
                                             .arg(numBlockedTermsMatched > 1
                                                      ? u"s"
                                                      : u"")
-                                            .arg(msg.blockedTermsFound.join(
-                                                u"\", \""));
+                                            .arg(blockedTerms.join(u"\", \""));
                                 }
                             }
                             else

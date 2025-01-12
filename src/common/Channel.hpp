@@ -92,6 +92,7 @@ public:
     void fillInMissingMessages(const std::vector<MessagePtr> &messages);
 
     void addOrReplaceTimeout(MessagePtr message, QTime now) final;
+    void addOrReplaceClearChat(MessagePtr message, QTime now) final;
     void disableAllMessages() final;
     void replaceMessage(const MessagePtr &message,
                         const MessagePtr &replacement);

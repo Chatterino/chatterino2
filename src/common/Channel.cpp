@@ -139,6 +139,18 @@ void Channel::addOrReplaceTimeout(MessagePtr message, QTime now)
     // WindowManager::instance().repaintVisibleChatWidgets(this);
 }
 
+void Channel::addOrReplaceClearChat(MessagePtr message, QTime now)
+{
+    addOrReplaceChannelClear(
+        this->getMessageSnapshot(), std::move(message), now,
+        [this](auto /*idx*/, auto msg, auto replacement) {
+            this->replaceMessage(msg, replacement);
+        },
+        [this](auto msg) {
+            this->addMessage(msg, MessageContext::Original);
+        });
+}
+
 void Channel::disableAllMessages()
 {
     LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
