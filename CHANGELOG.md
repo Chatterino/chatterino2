@@ -7,6 +7,7 @@
 - Minor: Remove incognito browser support for `iexplore`, because internet explorer is EOL. (#5810)
 - Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
 - Bugfix: Fixed a crash that could occur on Linux and macOS when clicking "Install" from the update prompt. (#5818)
+- Bugfix: Fixed missing word wrap in update popup. (#5811)
 - Dev: Updated Conan dependencies. (#5776)
 
 ## 2.5.2

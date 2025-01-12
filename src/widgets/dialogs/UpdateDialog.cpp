@@ -19,7 +19,8 @@ UpdateDialog::UpdateDialog()
         LayoutCreator<UpdateDialog>(this).setLayoutType<QVBoxLayout>();
 
     layout.emplace<Label>("You shouldn't be seeing this dialog.")
-        .assign(&this->ui_.label);
+        .assign(&this->ui_.label)
+        ->setWordWrap(true);
 
     auto buttons = layout.emplace<QDialogButtonBox>();
     auto *install = buttons->addButton("Install", QDialogButtonBox::AcceptRole);
@@ -52,18 +53,18 @@ void UpdateDialog::updateStatusChanged(Updates::Status status)
     switch (status)
     {
         case Updates::UpdateAvailable: {
-            this->ui_.label->setText((
-                getApp()->getUpdates().isDowngrade()
-                    ? QString(
-                          "The version online (%1) seems to be\nlower than the "
-                          "current (%2).\nEither a version was reverted or "
-                          "you are\nrunning a newer build.\n\nDo you want to "
-                          "download and install it?")
-                          .arg(getApp()->getUpdates().getOnlineVersion(),
-                               getApp()->getUpdates().getCurrentVersion())
-                    : QString("An update (%1) is available.\n\nDo you want to "
-                              "download and install it?")
-                          .arg(getApp()->getUpdates().getOnlineVersion())));
+            this->ui_.label->setText(
+                (getApp()->getUpdates().isDowngrade()
+                     ? QString(
+                           "The version online (%1) seems to be lower than the "
+                           "current (%2).\nEither a version was reverted or "
+                           "you are running a newer build.\n\nDo you want to "
+                           "download and install it?")
+                           .arg(getApp()->getUpdates().getOnlineVersion(),
+                                getApp()->getUpdates().getCurrentVersion())
+                     : QString("An update (%1) is available.\n\nDo you want to "
+                               "download and install it?")
+                           .arg(getApp()->getUpdates().getOnlineVersion())));
             this->updateGeometry();
         }
         break;
