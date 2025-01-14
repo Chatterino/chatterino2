@@ -12,6 +12,7 @@
 - Bugfix: Fixed tabs not scaling to the default scale when changing the scale from a non-default value. (#5794)
 - Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
 - Dev: Updated Conan dependencies. (#5776)
+- Dev: Replaced usage of `parseTime` with `serverReceivedTime` for clearchat messages. (#5824)
 
 ## 2.5.2
 
