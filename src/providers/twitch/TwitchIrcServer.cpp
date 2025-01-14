@@ -248,7 +248,7 @@ void TwitchIrcServer::initialize()
             }
 
             postToThread([chan, actor{action.source.login}] {
-                auto now = QTime::currentTime();
+                auto now = QDateTime::currentDateTime();
                 chan->addOrReplaceClearChat(
                     MessageBuilder::makeClearChatMessage(now, actor), now);
             });
@@ -314,7 +314,8 @@ void TwitchIrcServer::initialize()
             postToThread([chan, action] {
                 MessageBuilder msg(action);
                 msg->flags.set(MessageFlag::PubSub);
-                chan->addOrReplaceTimeout(msg.release(), QTime::currentTime());
+                chan->addOrReplaceTimeout(msg.release(),
+                                          QDateTime::currentDateTime());
             });
         });
 
