@@ -8,7 +8,7 @@
 #include <optional>
 
 class QStringView;
-class QTime;
+class QDateTime;
 
 namespace chatterino {
 
