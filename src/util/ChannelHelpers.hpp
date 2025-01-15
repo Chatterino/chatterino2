@@ -82,7 +82,7 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
 
             MessageBuilder replacement(timeoutMessage, message->timeoutUser,
                                        message->loginName, message->searchText,
-                                       count);
+                                       count, message->serverReceivedTime);
 
             replacement->timeoutUser = message->timeoutUser;
             replacement->count = count;

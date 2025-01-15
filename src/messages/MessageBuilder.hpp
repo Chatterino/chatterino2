@@ -108,11 +108,10 @@ public:
                    const QTime &time = QTime::currentTime());
     MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
                    const QString &sourceUser, const QString &systemMessageText,
-                   int times,
-                   const QDateTime &time = QDateTime::currentDateTime());
+                   int times, const QDateTime &time);
     MessageBuilder(TimeoutMessageTag, const QString &username,
                    const QString &durationInSeconds, bool multipleTimes,
-                   const QDateTime &time = QDateTime::currentDateTime());
+                   const QDateTime &time);
     MessageBuilder(const BanAction &action, uint32_t count = 1);
     MessageBuilder(const UnbanAction &action);
     MessageBuilder(const WarnAction &action);
