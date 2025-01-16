@@ -143,6 +143,7 @@ private:
     const QString name_;
     LimitedQueue<MessagePtr> messages_;
     Type type_;
+    bool anythingLogged_ = false;
     QTimer clearCompletionModelTimer_;
 };
 

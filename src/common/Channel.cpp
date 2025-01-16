@@ -41,7 +41,7 @@ Channel::Channel(const QString &name, Type type)
 Channel::~Channel()
 {
     auto *app = tryGetApp();
-    if (app)
+    if (app && this->anythingLogged_)
     {
         app->getChatLogger()->closeChannel(this->name_, this->platform_);
     }
@@ -106,6 +106,7 @@ void Channel::addMessage(MessagePtr message, MessageContext context,
             getApp()->getChatLogger()->addMessage(this->name_, message,
                                                   this->platform_,
                                                   this->getCurrentStreamID());
+            this->anythingLogged_ = true;
         }
     }
 
