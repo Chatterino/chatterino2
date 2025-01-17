@@ -54,8 +54,8 @@ protected:
     pajlada::Signals::SignalHolder signalHolder_;
 
 private:
-    float scale_{1.f};
     std::optional<float> overrideScale_;
+    float scale_{1.f};
     QSize scaleIndependantSize_;
 
     std::vector<BaseWidget *> widgets_;
