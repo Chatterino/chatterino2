@@ -515,15 +515,15 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
                             QKeySequence("Ctrl+G"), "reopenSplit",
                             std::vector<QString>(), "reopen split");
 
-        #ifdef Q_OS_MACOS
-            this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
-                                QKeySequence("Ctrl+."), "toggleLocalR9K",
-                                std::vector<QString>(), "toggle local r9k");
-        #else
-            this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
-                                QKeySequence("Ctrl+H"), "toggleLocalR9K",
-                                std::vector<QString>(), "toggle local r9k");
-        #endif
+#ifdef Q_OS_MACOS
+        this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
+                            QKeySequence("Ctrl+."), "toggleLocalR9K",
+                            std::vector<QString>(), "toggle local r9k");
+#else
+        this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
+                            QKeySequence("Ctrl+H"), "toggleLocalR9K",
+                            std::vector<QString>(), "toggle local r9k");
+#endif
 
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
                             QKeySequence("Ctrl+K"), "openQuickSwitcher",
