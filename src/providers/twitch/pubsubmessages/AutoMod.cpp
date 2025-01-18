@@ -60,7 +60,7 @@ PubSubAutoModQueueMessage::PubSubAutoModQueueMessage(const QJsonObject &root)
             const auto termText = term.value("text").toString();
             if (!termText.isEmpty())
             {
-                this->blockedTermsFound.push_back(termText);
+                this->blockedTermsFound.insert(termText);
             }
         }
     }

@@ -15,6 +15,7 @@ public:
         MessagePtr message, MessageContext ctx,
         std::optional<MessageFlags> overridingFlags = std::nullopt) override;
     void addOrReplaceTimeout(MessagePtr clearchatMessage, QTime now) override;
+    void addOrReplaceClearChat(MessagePtr clearchatMessage, QTime now) override;
 
     void disableAllMessages() override;
 

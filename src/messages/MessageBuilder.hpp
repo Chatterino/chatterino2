@@ -258,6 +258,12 @@ public:
                                             const QVariantMap &tags,
                                             const QTime &time);
 
+    /// "Chat has been cleared by a moderator." or "{actor} cleared the chat."
+    /// @param actor The user who cleared the chat (empty if unknown)
+    /// @param count How many times this message has been received already
+    static MessagePtrMut makeClearChatMessage(QTime now, const QString &actor,
+                                              uint32_t count = 1);
+
 private:
     struct TextState {
         TwitchChannel *twitchChannel = nullptr;

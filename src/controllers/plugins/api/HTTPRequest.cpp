@@ -49,12 +49,12 @@ void HTTPRequest::createUserType(sol::table &c2)
     );
 }
 
-void HTTPRequest::on_success(sol::protected_function func)
+void HTTPRequest::on_success(sol::main_protected_function func)
 {
     this->cbSuccess = std::make_optional(func);
 }
 
-void HTTPRequest::on_error(sol::protected_function func)
+void HTTPRequest::on_error(sol::main_protected_function func)
 {
     this->cbError = std::make_optional(func);
 }
@@ -64,7 +64,7 @@ void HTTPRequest::set_timeout(int timeout)
     this->timeout_ = timeout;
 }
 
-void HTTPRequest::finally(sol::protected_function func)
+void HTTPRequest::finally(sol::main_protected_function func)
 {
     this->cbFinally = std::make_optional(func);
 }
