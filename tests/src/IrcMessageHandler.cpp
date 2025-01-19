@@ -605,8 +605,7 @@ TEST_P(TestIrcMessageHandlerP, Run)
 
     ASSERT_TRUE(snapshot->run(got, UPDATE_SNAPSHOTS))
         << "Snapshot " << snapshot->name() << " failed. Expected JSON to be\n"
-        << QJsonDocument::fromVariant(snapshot->output().toVariant()).toJson()
-        << "\nbut got\n"
+        << QJsonDocument(snapshot->output().toArray()).toJson() << "\nbut got\n"
         << QJsonDocument(got).toJson() << "\ninstead.";
 }
 
