@@ -634,7 +634,7 @@ MessagePtrMut MessageBuilder::makeSubgiftMessage(const QString &text,
 MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
                                const QString &sourceUser,
                                const QString &systemMessageText, int times,
-                               const QTime &time)
+                               const QDateTime &time)
     : MessageBuilder()
 {
     QString usernameText = systemMessageText.split(" ").at(0);
@@ -643,7 +643,7 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
         usernameText == "You" || timeoutUser == usernameText;
     QString messageText;
 
-    this->emplace<TimestampElement>(time);
+    this->emplace<TimestampElement>(time.time());
     this->emplaceSystemTextAndUpdate(usernameText, messageText)
         ->setLink(
             {Link::UserInfo, timeoutUserIsFirst ? timeoutUser : sourceUser});
@@ -670,17 +670,18 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
 
     this->message().messageText = messageText;
     this->message().searchText = messageText;
+    this->message().serverReceivedTime = time;
 }
 
 MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
                                const QString &durationInSeconds,
-                               bool multipleTimes, const QTime &time)
+                               bool multipleTimes, const QDateTime &time)
     : MessageBuilder()
 {
     QString fullText;
     QString text;
 
-    this->emplace<TimestampElement>(time);
+    this->emplace<TimestampElement>(time.time());
     this->emplaceSystemTextAndUpdate(username, fullText)
         ->setLink({Link::UserInfo, username});
 
@@ -718,6 +719,7 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
     this->emplaceSystemTextAndUpdate(text, fullText);
     this->message().messageText = fullText;
     this->message().searchText = fullText;
+    this->message().serverReceivedTime = time;
 }
 
 MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
@@ -1987,14 +1989,14 @@ MessagePtr MessageBuilder::makeLowTrustUpdateMessage(
     return builder.release();
 }
 
-MessagePtrMut MessageBuilder::makeClearChatMessage(QTime now,
+MessagePtrMut MessageBuilder::makeClearChatMessage(const QDateTime &now,
                                                    const QString &actor,
                                                    uint32_t count)
 {
     MessageBuilder builder;
-    builder.emplace<TimestampElement>(now);
+    builder.emplace<TimestampElement>(now.time());
     builder->count = count;
-    builder->parseTime = now;
+    builder->serverReceivedTime = now;
     builder.message().flags.set(MessageFlag::System,
                                 MessageFlag::DoNotTriggerNotification,
                                 MessageFlag::ClearChat);

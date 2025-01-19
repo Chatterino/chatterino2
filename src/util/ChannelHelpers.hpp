@@ -16,7 +16,7 @@ namespace chatterino {
 /// @param disableUserMessages If set, disables all message by the timed out user.
 template <typename Buf, typename Replace, typename Add>
 void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
-                                QTime now, Replace replaceMessage,
+                                const QDateTime &now, Replace replaceMessage,
                                 Add addMessage, bool disableUserMessages)
 {
     // NOTE: This function uses the messages PARSE time to figure out whether they should be replaced
@@ -30,7 +30,7 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
 
     bool shouldAddMessage = true;
 
-    QTime minimumTime = now.addSecs(-5);
+    QDateTime minimumTime = now.addSecs(-5);
 
     auto timeoutStackStyle = static_cast<TimeoutStackStyle>(
         getSettings()->timeoutStackStyle.getValue());
@@ -39,7 +39,7 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
     {
         const MessagePtr &s = buffer[i];
 
-        if (s->parseTime < minimumTime)
+        if (s->serverReceivedTime < minimumTime)
         {
             break;
         }
@@ -82,7 +82,7 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
 
             MessageBuilder replacement(timeoutMessage, message->timeoutUser,
                                        message->loginName, message->searchText,
-                                       count);
+                                       count, message->serverReceivedTime);
 
             replacement->timeoutUser = message->timeoutUser;
             replacement->count = count;
@@ -126,7 +126,8 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
 ///                   - adds the `message`.
 template <typename Buffer, typename Replace, typename Add>
 void addOrReplaceChannelClear(const Buffer &buffer, MessagePtr message,
-                              QTime now, Replace replaceMessage, Add addMessage)
+                              const QDateTime &now, Replace replaceMessage,
+                              Add addMessage)
 {
     // NOTE: This function uses the messages PARSE time to figure out whether they should be replaced
     // This works as expected for incoming messages, but not for historic messages.
@@ -135,7 +136,7 @@ void addOrReplaceChannelClear(const Buffer &buffer, MessagePtr message,
     auto snapshotLength = static_cast<qsizetype>(buffer.size());
     auto end = std::max<qsizetype>(0, snapshotLength - 20);
     bool shouldAddMessage = true;
-    QTime minimumTime = now.addSecs(-5);
+    QDateTime minimumTime = now.addSecs(-5);
     auto timeoutStackStyle = static_cast<TimeoutStackStyle>(
         getSettings()->timeoutStackStyle.getValue());
 
@@ -149,7 +150,7 @@ void addOrReplaceChannelClear(const Buffer &buffer, MessagePtr message,
     {
         const MessagePtr &s = buffer[i];
 
-        if (s->parseTime < minimumTime)
+        if (s->serverReceivedTime < minimumTime)
         {
             break;
         }
@@ -180,7 +181,7 @@ void addOrReplaceChannelClear(const Buffer &buffer, MessagePtr message,
         uint32_t count = s->count + 1;
 
         auto replacement = MessageBuilder::makeClearChatMessage(
-            message->parseTime, message->timeoutUser, count);
+            message->serverReceivedTime, message->timeoutUser, count);
         replacement->flags = message->flags;
 
         replaceMessage(i, s, replacement);
