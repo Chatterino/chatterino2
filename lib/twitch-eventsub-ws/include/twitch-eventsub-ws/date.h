@@ -4228,7 +4228,7 @@ inline
 std::basic_ostream<CharT, Traits>&
 operator<<(std::basic_ostream<CharT, Traits>& os, const local_time<Duration>& ut)
 {
-    return (date::operator<<(os, sys_time<Duration>{ut.time_since_epoch()}));
+    return (os << sys_time<Duration>{ut.time_since_epoch()});
 }
 
 namespace detail
@@ -6351,10 +6351,7 @@ read_signed(std::basic_istream<CharT, Traits>& is, unsigned m = 1, unsigned M = 
         if (('0' <= c && c <= '9') || c == '-' || c == '+')
         {
             if (c == '-' || c == '+')
-            {
                 (void)is.get();
-                --M;
-            }
             auto x = static_cast<int>(read_unsigned(is, std::max(m, 1u), M));
             if (!is.fail())
             {
@@ -6527,14 +6524,7 @@ read(std::basic_istream<CharT, Traits>& is, int a0, Args&& ...args)
             *e++ = static_cast<CharT>(CharT(u % 10) + CharT{'0'});
             u /= 10;
         } while (u > 0);
-#if defined(__GNUC__) && __GNUC__ >= 11
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wstringop-overflow"
-#endif
         std::reverse(buf, e);
-#if defined(__GNUC__) && __GNUC__ >= 11
-#pragma GCC diagnostic pop
-#endif
         for (auto p = buf; p != e && is.rdstate() == std::ios::goodbit; ++p)
             read(is, *p);
     }
@@ -6600,7 +6590,7 @@ from_stream(std::basic_istream<CharT, Traits>& is, const CharT* fmt,
 
         CONSTDATA int not_a_year = numeric_limits<short>::min();
         CONSTDATA int not_a_2digit_year = 100;
-        CONSTDATA int not_a_century = numeric_limits<int>::min();
+        CONSTDATA int not_a_century = not_a_year / 100;
         CONSTDATA int not_a_month = 0;
         CONSTDATA int not_a_day = 0;
         CONSTDATA int not_a_hour = numeric_limits<int>::min();
@@ -7527,12 +7517,7 @@ from_stream(std::basic_istream<CharT, Traits>& is, const CharT* fmt,
                     {
                         auto c = static_cast<char>(Traits::to_char_type(ic));
                         if (c == '-')
-                        {
                             neg = true;
-                            (void)is.get();
-                        }
-                        else if (c == '+')
-                            (void)is.get();
                     }
                     if (modified == CharT{})
                     {
@@ -7748,7 +7733,9 @@ from_stream(std::basic_istream<CharT, Traits>& is, const CharT* fmt,
                 year_month_day ymd_trial = sys_days(year{Y}/January/Sunday[1]) +
                                            weeks{U-1} +
                                            (weekday{static_cast<unsigned>(wd)} - Sunday);
-                if (year{Y} != ymd_trial.year())
+                if (Y == not_a_year)
+                    Y = static_cast<int>(ymd_trial.year());
+                else if (year{Y} != ymd_trial.year())
                     goto broken;
                 if (m == not_a_month)
                     m = static_cast<int>(static_cast<unsigned>(ymd_trial.month()));
@@ -7765,7 +7752,9 @@ from_stream(std::basic_istream<CharT, Traits>& is, const CharT* fmt,
                 year_month_day ymd_trial = sys_days(year{Y}/January/Monday[1]) +
                                            weeks{W-1} +
                                            (weekday{static_cast<unsigned>(wd)} - Monday);
-                if (year{Y} != ymd_trial.year())
+                if (Y == not_a_year)
+                    Y = static_cast<int>(ymd_trial.year());
+                else if (year{Y} != ymd_trial.year())
                     goto broken;
                 if (m == not_a_month)
                     m = static_cast<int>(static_cast<unsigned>(ymd_trial.month()));
@@ -8117,8 +8106,6 @@ public:
 #endif  // HAS_STRING_VIEW
 };
 
-#ifdef _MSC_VER
-
 template <class Parsable, class CharT, class Traits, class Alloc>
 std::basic_istream<CharT, Traits>&
 operator>>(std::basic_istream<CharT, Traits>& is,
@@ -8221,113 +8208,6 @@ parse(const CharT* format, Parsable& tp,
 {
     return {format, tp, &abbrev, &offset};
 }
-
-#else  // !defined _MSC_VER
-
-template <class Parsable, class CharT, class Traits, class Alloc>
-std::basic_istream<CharT, Traits>&
-operator>>(std::basic_istream<CharT, Traits>& is,
-           const parse_manip<Parsable, CharT, Traits, Alloc>& x)
-{
-    return from_stream(is, x.format_.c_str(), x.tp_, x.abbrev_, x.offset_);
-}
-
-template <class Parsable, class CharT, class Traits, class Alloc>
-inline
-auto
-parse(const std::basic_string<CharT, Traits, Alloc>& format, Parsable& tp)
-    -> decltype(from_stream(std::declval<std::basic_istream<CharT, Traits>&>(),
-                            format.c_str(), tp),
-                parse_manip<Parsable, CharT, Traits, Alloc>{format, tp})
-{
-    return {format, tp};
-}
-
-template <class Parsable, class CharT, class Traits, class Alloc>
-inline
-auto
-parse(const std::basic_string<CharT, Traits, Alloc>& format, Parsable& tp,
-      std::basic_string<CharT, Traits, Alloc>& abbrev)
-    -> decltype(from_stream(std::declval<std::basic_istream<CharT, Traits>&>(),
-                            format.c_str(), tp, &abbrev),
-                parse_manip<Parsable, CharT, Traits, Alloc>{format, tp, &abbrev})
-{
-    return {format, tp, &abbrev};
-}
-
-template <class Parsable, class CharT, class Traits, class Alloc>
-inline
-auto
-parse(const std::basic_string<CharT, Traits, Alloc>& format, Parsable& tp,
-      std::chrono::minutes& offset)
-    -> decltype(from_stream(std::declval<std::basic_istream<CharT, Traits>&>(),
-                            format.c_str(), tp,
-                            std::declval<std::basic_string<CharT, Traits, Alloc>*>(),
-                            &offset),
-                parse_manip<Parsable, CharT, Traits, Alloc>{format, tp, nullptr, &offset})
-{
-    return {format, tp, nullptr, &offset};
-}
-
-template <class Parsable, class CharT, class Traits, class Alloc>
-inline
-auto
-parse(const std::basic_string<CharT, Traits, Alloc>& format, Parsable& tp,
-      std::basic_string<CharT, Traits, Alloc>& abbrev, std::chrono::minutes& offset)
-    -> decltype(from_stream(std::declval<std::basic_istream<CharT, Traits>&>(),
-                            format.c_str(), tp, &abbrev, &offset),
-                parse_manip<Parsable, CharT, Traits, Alloc>{format, tp, &abbrev, &offset})
-{
-    return {format, tp, &abbrev, &offset};
-}
-
-// const CharT* formats
-
-template <class Parsable, class CharT>
-inline
-auto
-parse(const CharT* format, Parsable& tp)
-    -> decltype(from_stream(std::declval<std::basic_istream<CharT>&>(), format, tp),
-                parse_manip<Parsable, CharT>{format, tp})
-{
-    return {format, tp};
-}
-
-template <class Parsable, class CharT, class Traits, class Alloc>
-inline
-auto
-parse(const CharT* format, Parsable& tp, std::basic_string<CharT, Traits, Alloc>& abbrev)
-    -> decltype(from_stream(std::declval<std::basic_istream<CharT, Traits>&>(), format,
-                            tp, &abbrev),
-                parse_manip<Parsable, CharT, Traits, Alloc>{format, tp, &abbrev})
-{
-    return {format, tp, &abbrev};
-}
-
-template <class Parsable, class CharT>
-inline
-auto
-parse(const CharT* format, Parsable& tp, std::chrono::minutes& offset)
-    -> decltype(from_stream(std::declval<std::basic_istream<CharT>&>(), format,
-                            tp, std::declval<std::basic_string<CharT>*>(), &offset),
-                parse_manip<Parsable, CharT>{format, tp, nullptr, &offset})
-{
-    return {format, tp, nullptr, &offset};
-}
-
-template <class Parsable, class CharT, class Traits, class Alloc>
-inline
-auto
-parse(const CharT* format, Parsable& tp,
-      std::basic_string<CharT, Traits, Alloc>& abbrev, std::chrono::minutes& offset)
-    -> decltype(from_stream(std::declval<std::basic_istream<CharT, Traits>&>(), format,
-                            tp, &abbrev, &offset),
-                parse_manip<Parsable, CharT, Traits, Alloc>{format, tp, &abbrev, &offset})
-{
-    return {format, tp, &abbrev, &offset};
-}
-
-#endif  // !defined _MSC_VER
 
 // duration streaming
 

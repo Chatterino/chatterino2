@@ -1,7 +1,5 @@
 #pragma once
 
-#include "twitch-eventsub-ws/date.h"
-
 #include <boost/json.hpp>
 
 #include <chrono>
