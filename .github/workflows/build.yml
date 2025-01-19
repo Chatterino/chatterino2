@@ -277,7 +277,7 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         run: |
           # binary dependencies
-          ./.CI/SetupHomebrewDeps.sh openssl@3 boost
+          ./.CI/SetupHomebrewDeps.sh boost openssl@3
           # build and header-only dependencies
           brew install rapidjson p7zip create-dmg cmake tree
         shell: bash
@@ -352,6 +352,9 @@ jobs:
 
           ./../.CI/CreateDMG.sh
         shell: bash
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
 
       - name: Upload artifact (MacOS)
         if: startsWith(matrix.os, 'macos')
