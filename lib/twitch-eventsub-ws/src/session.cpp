@@ -42,158 +42,161 @@ using MessageHandlers = std::unordered_map<
 
 namespace {
 
-// Report a failure
-void fail(beast::error_code ec, char const *what)
-{
-    std::cerr << what << ": " << ec.message() << "\n";
-}
-
-template <class T>
-std::optional<T> parsePayload(const boost::json::value &jv)
-{
-    auto result = boost::json::try_value_to<T>(jv);
-    if (!result.has_value())
+    // Report a failure
+    void fail(beast::error_code ec, char const *what)
     {
-        fail(result.error(), "parsing payload");
-        return std::nullopt;
+        std::cerr << what << ": " << ec.message() << "\n";
     }
 
-    return result.value();
-}
+    template <class T>
+    std::optional<T> parsePayload(const boost::json::value &jv)
+    {
+        auto result = boost::json::try_value_to<T>(jv);
+        if (!result.has_value())
+        {
+            fail(result.error(), "parsing payload");
+            return std::nullopt;
+        }
 
-// Subscription types
-const NotificationHandlers NOTIFICATION_HANDLERS{
-    {
-        {"channel.ban", "1"},
-        [](const auto &metadata, const auto &jv, auto &listener) {
-            auto oPayload =
-                parsePayload<eventsub::payload::channel_ban::v1::Payload>(jv);
-            if (!oPayload)
-            {
-                return;
-            }
-            listener->onChannelBan(metadata, *oPayload);
+        return result.value();
+    }
+
+    // Subscription types
+    const NotificationHandlers NOTIFICATION_HANDLERS{
+        {
+            {"channel.ban", "1"},
+            [](const auto &metadata, const auto &jv, auto &listener) {
+                auto oPayload =
+                    parsePayload<eventsub::payload::channel_ban::v1::Payload>(
+                        jv);
+                if (!oPayload)
+                {
+                    return;
+                }
+                listener->onChannelBan(metadata, *oPayload);
+            },
         },
-    },
-    {
-        {"stream.online", "1"},
-        [](const auto &metadata, const auto &jv, auto &listener) {
-            auto oPayload =
-                parsePayload<eventsub::payload::stream_online::v1::Payload>(jv);
-            if (!oPayload)
-            {
-                return;
-            }
-            listener->onStreamOnline(metadata, *oPayload);
+        {
+            {"stream.online", "1"},
+            [](const auto &metadata, const auto &jv, auto &listener) {
+                auto oPayload =
+                    parsePayload<eventsub::payload::stream_online::v1::Payload>(
+                        jv);
+                if (!oPayload)
+                {
+                    return;
+                }
+                listener->onStreamOnline(metadata, *oPayload);
+            },
         },
-    },
-    {
-        {"stream.offline", "1"},
-        [](const auto &metadata, const auto &jv, auto &listener) {
-            auto oPayload =
-                parsePayload<eventsub::payload::stream_offline::v1::Payload>(
+        {
+            {"stream.offline", "1"},
+            [](const auto &metadata, const auto &jv, auto &listener) {
+                auto oPayload = parsePayload<
+                    eventsub::payload::stream_offline::v1::Payload>(jv);
+                if (!oPayload)
+                {
+                    return;
+                }
+                listener->onStreamOffline(metadata, *oPayload);
+            },
+        },
+        {
+            {"channel.chat.notification", "1"},
+            [](const auto &metadata, const auto &jv, auto &listener) {
+                auto oPayload = parsePayload<
+                    eventsub::payload::channel_chat_notification::v1::Payload>(
                     jv);
-            if (!oPayload)
-            {
-                return;
-            }
-            listener->onStreamOffline(metadata, *oPayload);
+                if (!oPayload)
+                {
+                    return;
+                }
+                listener->onChannelChatNotification(metadata, *oPayload);
+            },
         },
-    },
-    {
-        {"channel.chat.notification", "1"},
-        [](const auto &metadata, const auto &jv, auto &listener) {
-            auto oPayload = parsePayload<
-                eventsub::payload::channel_chat_notification::v1::Payload>(jv);
-            if (!oPayload)
-            {
-                return;
-            }
-            listener->onChannelChatNotification(metadata, *oPayload);
+        {
+            {"channel.update", "1"},
+            [](const auto &metadata, const auto &jv, auto &listener) {
+                auto oPayload = parsePayload<
+                    eventsub::payload::channel_update::v1::Payload>(jv);
+                if (!oPayload)
+                {
+                    return;
+                }
+                listener->onChannelUpdate(metadata, *oPayload);
+            },
         },
-    },
-    {
-        {"channel.update", "1"},
-        [](const auto &metadata, const auto &jv, auto &listener) {
-            auto oPayload =
-                parsePayload<eventsub::payload::channel_update::v1::Payload>(
-                    jv);
-            if (!oPayload)
-            {
-                return;
-            }
-            listener->onChannelUpdate(metadata, *oPayload);
+        {
+            {"channel.chat.message", "1"},
+            [](const auto &metadata, const auto &jv, auto &listener) {
+                auto oPayload = parsePayload<
+                    eventsub::payload::channel_chat_message::v1::Payload>(jv);
+                if (!oPayload)
+                {
+                    return;
+                }
+                listener->onChannelChatMessage(metadata, *oPayload);
+            },
         },
-    },
-    {
-        {"channel.chat.message", "1"},
-        [](const auto &metadata, const auto &jv, auto &listener) {
-            auto oPayload = parsePayload<
-                eventsub::payload::channel_chat_message::v1::Payload>(jv);
-            if (!oPayload)
-            {
-                return;
-            }
-            listener->onChannelChatMessage(metadata, *oPayload);
-        },
-    },
-    // Add your new subscription types above this line
-};
+        // Add your new subscription types above this line
+    };
 
-const MessageHandlers MESSAGE_HANDLERS{
-    {
-        "session_welcome",
-        [](const auto &metadata, const auto &jv, auto &listener,
-           const auto & /*notificationHandlers*/) {
-            auto oPayload = parsePayload<payload::session_welcome::Payload>(jv);
-            if (!oPayload)
-            {
-                // TODO: error handling
-                return;
-            }
-            const auto &payload = *oPayload;
+    const MessageHandlers MESSAGE_HANDLERS{
+        {
+            "session_welcome",
+            [](const auto &metadata, const auto &jv, auto &listener,
+               const auto & /*notificationHandlers*/) {
+                auto oPayload =
+                    parsePayload<payload::session_welcome::Payload>(jv);
+                if (!oPayload)
+                {
+                    // TODO: error handling
+                    return;
+                }
+                const auto &payload = *oPayload;
 
-            listener->onSessionWelcome(metadata, payload);
+                listener->onSessionWelcome(metadata, payload);
+            },
         },
-    },
-    {
-        "session_keepalive",
-        [](const auto &metadata, const auto &jv, auto &listener,
-           const auto &notificationHandlers) {
-            // TODO: should we do something here?
+        {
+            "session_keepalive",
+            [](const auto &metadata, const auto &jv, auto &listener,
+               const auto &notificationHandlers) {
+                // TODO: should we do something here?
+            },
         },
-    },
-    {
-        "notification",
-        [](const auto &metadata, const auto &jv, auto &listener,
-           const auto &notificationHandlers) {
-            listener->onNotification(metadata, jv);
+        {
+            "notification",
+            [](const auto &metadata, const auto &jv, auto &listener,
+               const auto &notificationHandlers) {
+                listener->onNotification(metadata, jv);
 
-            if (!metadata.subscriptionType || !metadata.subscriptionVersion)
-            {
-                // TODO: error handling
-                return;
-            }
+                if (!metadata.subscriptionType || !metadata.subscriptionVersion)
+                {
+                    // TODO: error handling
+                    return;
+                }
 
-            auto it = notificationHandlers.find(
-                {*metadata.subscriptionType, *metadata.subscriptionVersion});
-            if (it == notificationHandlers.end())
-            {
-                // TODO: error handling
-                return;
-            }
+                auto it =
+                    notificationHandlers.find({*metadata.subscriptionType,
+                                               *metadata.subscriptionVersion});
+                if (it == notificationHandlers.end())
+                {
+                    // TODO: error handling
+                    return;
+                }
 
-            it->second(metadata, jv, listener);
+                it->second(metadata, jv, listener);
+            },
         },
-    },
-};
+    };
 
 }  // namespace
 
-boost::json::error_code handleMessage(std::unique_ptr<Listener> &listener,
-                                      const beast::flat_buffer &buffer)
+boost::system::error_code handleMessage(std::unique_ptr<Listener> &listener,
+                                        const beast::flat_buffer &buffer)
 {
-    boost::json::error_code parseError;
+    boost::system::error_code parseError;
     auto jv =
         boost::json::parse(beast::buffers_to_string(buffer.data()), parseError);
     if (parseError)

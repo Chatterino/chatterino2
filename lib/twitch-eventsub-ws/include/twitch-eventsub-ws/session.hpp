@@ -18,8 +18,9 @@ class Listener;
  * This is called from the Session, and is only provided if you are interested
  * in building your own boost asio framework thing
  **/
-boost::json::error_code handleMessage(std::unique_ptr<Listener> &listener,
-                                      const boost::beast::flat_buffer &buffer);
+boost::system::error_code handleMessage(
+    std::unique_ptr<Listener> &listener,
+    const boost::beast::flat_buffer &buffer);
 
 // Sends a WebSocket message and prints the response
 class Session : public std::enable_shared_from_this<Session>
