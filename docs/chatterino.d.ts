@@ -1,133 +1,132 @@
 /** @noSelfInFile */
 
 declare module c2 {
-  enum LogLevel {
-    Debug,
-    Info,
-    Warning,
-    Critical,
-  }
-  class CommandContext {
-    words: String[];
-    channel: Channel;
-  }
+    enum LogLevel {
+        Debug,
+        Info,
+        Warning,
+        Critical,
+    }
+    class CommandContext {
+        words: string[];
+        channel: Channel;
+    }
 
-  enum Platform {
-    Twitch,
-  }
-  enum ChannelType {
-    None,
-    Direct,
-    Twitch,
-    TwitchWhispers,
-    TwitchWatching,
-    TwitchMentions,
-    TwitchLive,
-    TwitchAutomod,
-    Irc,
-    Misc,
-  }
+    enum ChannelType {
+        None,
+        Direct,
+        Twitch,
+        TwitchWhispers,
+        TwitchWatching,
+        TwitchMentions,
+        TwitchLive,
+        TwitchAutomod,
+        Misc,
+    }
 
-  interface IWeakResource {
-    is_valid(): boolean;
-  }
+    interface IWeakResource {
+        is_valid(): boolean;
+    }
 
-  interface ISharedResource {}
+    interface ISharedResource {}
 
-  class RoomModes {
-    unique_chat: boolean;
-    subscriber_only: boolean;
-    emotes_only: boolean;
-    follower_only: null | number;
-    slow_mode: null | number;
-  }
-  class StreamStatus {
-    live: boolean;
-    viewer_count: number;
-    uptime: number;
-    title: string;
-    game_name: string;
-    game_id: string;
-  }
+    class RoomModes {
+        unique_chat: boolean;
+        subscriber_only: boolean;
+        emotes_only: boolean;
+        follower_only: null | number;
+        slow_mode: null | number;
+    }
+    class StreamStatus {
+        live: boolean;
+        viewer_count: number;
+        uptime: number;
+        title: string;
+        game_name: string;
+        game_id: string;
+    }
 
-  class Channel implements IWeakResource {
-    is_valid(): boolean;
-    get_name(): string;
-    get_type(): ChannelType;
-    get_display_name(): string;
-    send_message(message: string, execute_commands: boolean): void;
-    add_system_message(message: string): void;
+    class Channel implements IWeakResource {
+        is_valid(): boolean;
+        get_name(): string;
+        get_type(): ChannelType;
+        get_display_name(): string;
 
-    is_twitch_channel(): boolean;
+        send_message(message: string, execute_commands: boolean): void;
+        send_message(message: string): void;
 
-    get_room_modes(): RoomModes;
-    get_stream_status(): StreamStatus;
-    get_twitch_id(): string;
-    is_broadcaster(): boolean;
-    is_mod(): boolean;
-    is_vip(): boolean;
+        add_system_message(message: string): void;
 
-    static by_name(name: string, platform: Platform): null | Channel;
-    static by_twitch_id(id: string): null | Channel;
-  }
+        is_twitch_channel(): boolean;
 
-  enum HTTPMethod {
-    Get,
-    Post,
-    Put,
-    Delete,
-    Patch,
-  }
+        get_room_modes(): RoomModes;
+        get_stream_status(): StreamStatus;
+        get_twitch_id(): string;
+        is_broadcaster(): boolean;
+        is_mod(): boolean;
+        is_vip(): boolean;
 
-  class HTTPResponse implements ISharedResource {
-    data(): string;
-    status(): number | null;
-    error(): string;
-  }
+        static by_name(name: string): null | Channel;
+        static by_twitch_id(id: string): null | Channel;
+    }
 
-  type HTTPCallback = (res: HTTPResponse) => void;
-  class HTTPRequest implements ISharedResource {
-    on_success(callback: HTTPCallback): void;
-    on_error(callback: HTTPCallback): void;
-    finally(callback: () => void): void;
+    enum HTTPMethod {
+        Get,
+        Post,
+        Put,
+        Delete,
+        Patch,
+    }
 
-    set_timeout(millis: number): void;
-    set_payload(data: string): void;
-    set_header(name: string, value: string): void;
+    class HTTPResponse implements ISharedResource {
+        data(): string;
+        status(): number | null;
+        error(): string;
+    }
 
-    execute(): void;
+    type HTTPCallback = (res: HTTPResponse) => void;
+    class HTTPRequest implements ISharedResource {
+        on_success(callback: HTTPCallback): void;
+        on_error(callback: HTTPCallback): void;
+        finally(callback: () => void): void;
 
-    // might error
-    static create(method: HTTPMethod, url: string): HTTPRequest;
-  }
+        set_timeout(millis: number): void;
+        set_payload(data: string): void;
+        set_header(name: string, value: string): void;
 
-  function log(level: LogLevel, ...data: any[]): void;
-  function register_command(
-    name: String,
-    handler: (ctx: CommandContext) => void
-  ): boolean;
+        execute(): void;
 
-  class CompletionEvent {
-    query: string;
-    full_text_content: string;
-    cursor_position: number;
-    is_first_word: boolean;
-  }
+        // might error
+        static create(method: HTTPMethod, url: string): HTTPRequest;
+    }
 
-  class CompletionList {
-    values: String[];
-    hide_others: boolean;
-  }
+    function log(level: LogLevel, ...data: any[]): void;
+    function register_command(
+        name: string,
+        handler: (ctx: CommandContext) => void
+    ): boolean;
 
-  enum EventType {
-    CompletionRequested = "CompletionRequested",
-  }
+    class CompletionEvent {
+        query: string;
+        full_text_content: string;
+        cursor_position: number;
+        is_first_word: boolean;
+    }
 
-  type CbFuncCompletionsRequested = (ev: CompletionEvent) => CompletionList;
-  type CbFunc<T> = T extends EventType.CompletionRequested
-    ? CbFuncCompletionsRequested
-    : never;
+    class CompletionList {
+        values: string[];
+        hide_others: boolean;
+    }
 
-  function register_callback<T>(type: T, func: CbFunc<T>): void;
-  function later(callback: () => void, msec: number): void;
+    enum EventType {
+        CompletionRequested = "CompletionRequested",
+    }
+
+    type CbFuncCompletionsRequested = (ev: CompletionEvent) => CompletionList;
+    type CbFunc<T> = T extends EventType.CompletionRequested
+        ? CbFuncCompletionsRequested
+        : never;
+
+    function register_callback<T>(type: T, func: CbFunc<T>): void;
+    function later(callback: () => void, msec: number): void;
 }
