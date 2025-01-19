@@ -198,7 +198,7 @@ std::optional<ClearChatMessage> parseClearChatMessage(
     {
         return ClearChatMessage{
             .message = MessageBuilder::makeClearChatMessage(
-                calculateMessageTime(message).time(), {}),
+                calculateMessageTime(message), {}),
             .disableAllMessages = true,
         };
     }
@@ -214,7 +214,7 @@ std::optional<ClearChatMessage> parseClearChatMessage(
 
     auto timeoutMsg =
         MessageBuilder(timeoutMessage, username, durationInSeconds, false,
-                       calculateMessageTime(message).time())
+                       calculateMessageTime(message))
             .release();
 
     return ClearChatMessage{.message = timeoutMsg, .disableAllMessages = false};
@@ -319,7 +319,7 @@ void IrcMessageHandler::parseMessageInto(Communi::IrcMessage *message,
             return;
         }
         auto &clearChat = *cc;
-        auto time = calculateMessageTime(message).time();
+        auto time = calculateMessageTime(message);
         if (clearChat.disableAllMessages)
         {
             sink.addOrReplaceClearChat(std::move(clearChat.message), time);
@@ -462,7 +462,7 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
         return;
     }
 
-    auto time = calculateMessageTime(message).time();
+    auto time = calculateMessageTime(message);
     // chat has been cleared by a moderator
     if (clearChat.disableAllMessages)
     {

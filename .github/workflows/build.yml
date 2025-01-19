@@ -182,27 +182,27 @@ jobs:
           key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.py') }}${{ env.C2_CONAN_CACHE_SUFFIX }}
           path: ~/.conan2/
 
-      - name: Setup Python (Windows/macOS)
+      - name: Setup Python (Windows)
         uses: actions/setup-python@v5
-        if: startsWith(matrix.os, 'windows') || startsWith(matrix.os, 'macos')
+        if: startsWith(matrix.os, 'windows')
         with:
           python-version: "3.13"
 
-      - name: Install and Setup Conan (Windows/macOS)
-        if: startsWith(matrix.os, 'windows') || startsWith(matrix.os, 'macos')
+      - name: Install and Setup Conan (Windows)
+        if: startsWith(matrix.os, 'windows')
         run: |
           pip install conan==${{env.CONAN_VERSION}}
           conan --version
           conan profile detect -f
         shell: bash
 
-      - name: Install dependencies (Windows/macOS)
-        if: startsWith(matrix.os, 'windows') || startsWith(matrix.os, 'macos')
+      - name: Install dependencies (Windows)
+        if: startsWith(matrix.os, 'windows')
         run: |
           mkdir build
           cd build
           conan install .. \
-              -s build_type=${{startsWith(matrix.os, 'macos') && 'Release' || 'RelWithDebInfo'}} \
+              -s build_type=RelWithDebInfo \
               -c tools.cmake.cmaketoolchain:generator="Ninja" \
               -b missing \
               --output-folder=. \
@@ -277,7 +277,7 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         run: |
           # binary dependencies
-          ./.CI/SetupHomebrewDeps.sh openssl@3
+          ./.CI/SetupHomebrewDeps.sh openssl@3 boost
           # build and header-only dependencies
           brew install rapidjson p7zip create-dmg cmake tree
         shell: bash
@@ -289,7 +289,6 @@ jobs:
           cd build
           cmake \
               -DCMAKE_BUILD_TYPE=Release \
-              -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" \
               -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 \
               -DUSE_PRECOMPILED_HEADERS=OFF \
               -DCHATTERINO_LTO="$C2_ENABLE_LTO" \

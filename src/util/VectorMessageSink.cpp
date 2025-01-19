@@ -24,7 +24,7 @@ void VectorMessageSink::addMessage(MessagePtr message, MessageContext ctx,
 }
 
 void VectorMessageSink::addOrReplaceTimeout(MessagePtr clearchatMessage,
-                                            QTime now)
+                                            const QDateTime &now)
 {
     addOrReplaceChannelTimeout(
         this->messages_, std::move(clearchatMessage), now,
@@ -39,7 +39,7 @@ void VectorMessageSink::addOrReplaceTimeout(MessagePtr clearchatMessage,
 }
 
 void VectorMessageSink::addOrReplaceClearChat(MessagePtr clearchatMessage,
-                                              QTime now)
+                                              const QDateTime &now)
 {
     addOrReplaceChannelClear(
         this->messages_, std::move(clearchatMessage), now,

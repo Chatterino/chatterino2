@@ -108,10 +108,10 @@ public:
                    const QTime &time = QTime::currentTime());
     MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
                    const QString &sourceUser, const QString &systemMessageText,
-                   int times, const QTime &time = QTime::currentTime());
+                   int times, const QDateTime &time);
     MessageBuilder(TimeoutMessageTag, const QString &username,
                    const QString &durationInSeconds, bool multipleTimes,
-                   const QTime &time = QTime::currentTime());
+                   const QDateTime &time);
     MessageBuilder(const BanAction &action, uint32_t count = 1);
     MessageBuilder(const UnbanAction &action);
     MessageBuilder(const WarnAction &action);
@@ -261,7 +261,8 @@ public:
     /// "Chat has been cleared by a moderator." or "{actor} cleared the chat."
     /// @param actor The user who cleared the chat (empty if unknown)
     /// @param count How many times this message has been received already
-    static MessagePtrMut makeClearChatMessage(QTime now, const QString &actor,
+    static MessagePtrMut makeClearChatMessage(const QDateTime &now,
+                                              const QString &actor,
                                               uint32_t count = 1);
 
 private:

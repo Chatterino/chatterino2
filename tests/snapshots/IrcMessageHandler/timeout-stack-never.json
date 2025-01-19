@@ -1,5 +1,5 @@
 {
-    "input": "@tmi-sent-ts=1736678514028;room-id=11148817;badges=;badge-info=;flags=;user-type=;emotes= :tmi.twitch.tv CLEARCHAT #pajlada",
+    "input": "@target-user-id=141981764;ban-duration=600;historical=1;room-id=111448817;rm-received-ts=1736968967915;tmi-sent-ts=1736968967813 :tmi.twitch.tv CLEARCHAT #pajlada twitchdev",
     "output": [
         {
             "badgeInfos": {
@@ -7,7 +7,7 @@
             "badges": [
             ],
             "channelName": "",
-            "count": 4,
+            "count": 3,
             "displayName": "",
             "elements": [
                 {
@@ -23,7 +23,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "10:41"
+                            "19:22"
                         ]
                     },
                     "flags": "Timestamp",
@@ -32,7 +32,7 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "10:41:54",
+                    "time": "19:22:47",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
@@ -41,21 +41,15 @@
                     "color": "System",
                     "flags": "Text",
                     "link": {
-                        "type": "None",
-                        "value": ""
+                        "type": "UserInfo",
+                        "value": "twitchdev"
                     },
                     "style": "ChatMedium",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "Chat",
-                        "has",
-                        "been",
-                        "cleared",
-                        "by",
-                        "a",
-                        "moderator."
+                        "twitchdev"
                     ]
                 },
                 {
@@ -70,33 +64,35 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "(4",
+                        "has",
+                        "been",
+                        "timed",
+                        "out",
+                        "for",
+                        "10m.",
+                        "(3",
                         "times)"
                     ]
                 }
             ],
-            "flags": "System|DoNotTriggerNotification|ClearChat",
+            "flags": "System|Timeout|DoNotTriggerNotification",
             "id": "",
             "localizedName": "",
             "loginName": "",
-            "messageText": "Chat has been cleared by a moderator. (4 times) ",
-            "searchText": "Chat has been cleared by a moderator. (4 times) ",
-            "serverReceivedTime": "2025-01-12T10:41:54Z",
-            "timeoutUser": "",
+            "messageText": "twitchdev has been timed out for 10m. (3 times) ",
+            "searchText": "twitchdev has been timed out for 10m. (3 times) ",
+            "serverReceivedTime": "2025-01-15T19:22:47Z",
+            "timeoutUser": "twitchdev",
             "usernameColor": "#ff000000"
         },
         {
             "badgeInfos": {
-                "subscriber": "108"
             },
             "badges": [
-                "broadcaster",
-                "subscriber",
-                "partner"
             ],
             "channelName": "pajlada",
             "count": 1,
-            "displayName": "pajlada",
+            "displayName": "TwitchDev",
             "elements": [
                 {
                     "color": "System",
@@ -126,7 +122,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "10:41"
+                            "19:22"
                         ]
                     },
                     "flags": "Timestamp",
@@ -135,82 +131,34 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "10:41:52",
+                    "time": "19:22:45",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
                 },
                 {
-                    "emote": {
-                        "images": {
-                            "1x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/1",
-                            "2x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/2",
-                            "3x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/3"
-                        },
-                        "name": "",
-                        "tooltip": "Broadcaster"
-                    },
-                    "flags": "BadgeChannelAuthority",
+                    "flags": "ModeratorTools",
                     "link": {
                         "type": "None",
                         "value": ""
                     },
-                    "tooltip": "Broadcaster",
+                    "tooltip": "",
                     "trailingSpace": true,
-                    "type": "BadgeElement"
+                    "type": "TwitchModerationElement"
                 },
                 {
-                    "emote": {
-                        "images": {
-                            "1x": "https://chatterino.com/tb-1",
-                            "2x": "https://chatterino.com/tb-2",
-                            "3x": "https://chatterino.com/tb-3"
-                        },
-                        "name": "",
-                        "tooltip": "Subscriber"
-                    },
-                    "flags": "BadgeSubscription",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "tooltip": "Subscriber (Tier 3, 108 months)",
-                    "trailingSpace": true,
-                    "type": "BadgeElement"
-                },
-                {
-                    "emote": {
-                        "homePage": "https://blog.twitch.tv/2017/04/24/the-verified-badge-is-here-13381bc05735",
-                        "images": {
-                            "1x": "https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/1",
-                            "2x": "https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/2",
-                            "3x": "https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/3"
-                        },
-                        "name": "",
-                        "tooltip": "Verified"
-                    },
-                    "flags": "BadgeVanity",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "tooltip": "Verified",
-                    "trailingSpace": true,
-                    "type": "BadgeElement"
-                },
-                {
-                    "color": "#ffcc44ff",
+                    "color": "#ffff0000",
                     "flags": "Username",
                     "link": {
                         "type": "UserInfo",
-                        "value": "pajlada"
+                        "value": "TwitchDev"
                     },
                     "style": "ChatMediumBold",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "pajlada:"
+                        "TwitchDev:"
                     ]
                 },
                 {
@@ -225,7 +173,7 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "asd"
+                        "1"
                     ]
                 },
                 {
@@ -233,7 +181,7 @@
                     "flags": "ReplyButton",
                     "link": {
                         "type": "ReplyToMessage",
-                        "value": "b4f3ac1d-6335-4567-bb8d-e76dfd83f7e3"
+                        "value": "aa1baade-c9c7-4932-b518-07c6b0226914"
                     },
                     "padding": 2,
                     "tooltip": "",
@@ -243,28 +191,27 @@
                 }
             ],
             "flags": "Collapsed",
-            "id": "b4f3ac1d-6335-4567-bb8d-e76dfd83f7e3",
+            "id": "aa1baade-c9c7-4932-b518-07c6b0226914",
             "localizedName": "",
-            "loginName": "pajlada",
-            "messageText": "asd",
-            "searchText": "pajlada  pajlada: asd ",
-            "serverReceivedTime": "2025-01-12T10:41:52Z",
+            "loginName": "twitchdev",
+            "messageText": "1",
+            "searchText": "twitchdev  twitchdev: 1 ",
+            "serverReceivedTime": "2025-01-15T19:22:45Z",
             "timeoutUser": "",
-            "usernameColor": "#ffcc44ff"
+            "usernameColor": "#ffff0000"
         }
     ],
     "params": {
         "nAdditional": 2,
         "prevMessages": [
-            "@tmi-sent-ts=1736678508224;room-id=11148817;badges=;badge-info=;flags=;user-type=;emotes= :tmi.twitch.tv CLEARCHAT #pajlada",
-            "@tmi-sent-ts=1736678509397;room-id=11148817;badges=;badge-info=;flags=;user-type=;emotes= :tmi.twitch.tv CLEARCHAT #pajlada",
-            "@tmi-sent-ts=1736678511185;room-id=11148817;badges=;badge-info=;flags=;user-type=;emotes= :tmi.twitch.tv CLEARCHAT #pajlada",
-            "@tmi-sent-ts=1736678512806;subscriber=1;id=b4f3ac1d-6335-4567-bb8d-e76dfd83f7e3;room-id=11148817;user-id=11148817;display-name=pajlada;badges=broadcaster/1,subscriber/3072,partner/1;badge-info=subscriber/108;color=#CC44FF;flags=;user-type=;emotes= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada :asd"
+            "@historical=1;rm-received-ts=1736968964054;room-id=111448817;target-user-id=141981764;ban-duration=600;tmi-sent-ts=1736968963960 :tmi.twitch.tv CLEARCHAT #pajlada twitchdev",
+            "@turbo=0;rm-received-ts=1736968965148;mod=0;color=#FF0000;badges=;id=aa1baade-c9c7-4932-b518-07c6b0226914;badge-info=;tmi-sent-ts=1736968965009;display-name=TwitchDev;first-msg=0;emotes=;user-id=141981764;room-id=111448817;returning-chatter=0;historical=1;user-type=;subscriber=0;flags= :twitchdev!twitchdev@twitchdev.tmi.twitch.tv PRIVMSG #pajlada 1",
+            "@historical=1;room-id=111448817;ban-duration=600;rm-received-ts=1736968967016;target-user-id=141981764;tmi-sent-ts=1736968966819 :tmi.twitch.tv CLEARCHAT #pajlada twitchdev"
         ]
     },
     "settings": {
         "moderation": {
-            "timeoutStackStyle": 0
+            "timeoutStackStyle": 2
         }
     }
 }
