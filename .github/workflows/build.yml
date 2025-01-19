@@ -292,11 +292,7 @@ jobs:
       - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-          brew install openssl rapidjson p7zip create-dmg cmake tree
-          brew tap-new gh/local-boost
-          brew tap homebrew/core --force
-          brew extract --version=1.86.0 boost gh/local-boost
-          brew install boost@1.86.0
+          brew install openssl rapidjson p7zip create-dmg cmake tree boost
         shell: bash
 
       - name: Build (MacOS)
