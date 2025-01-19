@@ -1,0 +1,311 @@
+{
+  ...,
+  "event": {
+    "broadcaster_user_id": "117166826",
+    "broadcaster_user_login": "testaccount_420",
+    "broadcaster_user_name": "테스트계정420",
+    "chatter_user_id": "100135110",
+    "chatter_user_login": "streamelements",
+    "chatter_user_name": "StreamElements",
+    "message_id": "7732e85c-4543-464f-9d84-533e73f71459",
+    "message": {
+      "text": "https://youtu.be/v515yo0Ad_M",
+      "fragments": [
+        {
+          "type": "text",
+          "text": "https://youtu.be/v515yo0Ad_M",
+          "cheermote": null,
+          "emote": null,
+          "mention": null
+        }
+      ]
+    },
+    "color": "#5B99FF",
+    "badges": [
+      {
+        "set_id": "moderator",
+        "id": "1",
+        "info": ""
+      },
+      {
+        "set_id": "partner",
+        "id": "1",
+        "info": ""
+      }
+    ],
+    "message_type": "text",
+    "cheer": null,
+    "reply": null,
+    "channel_points_custom_reward_id": null
+  }
+}
+
+
+{
+  ...,
+  "event": {
+    "broadcaster_user_id": "11148817",
+    "broadcaster_user_login": "pajlada",
+    "broadcaster_user_name": "pajlada",
+    "chatter_user_id": "11148817",
+    "chatter_user_login": "pajlada",
+    "chatter_user_name": "pajlada",
+    "message_id": "218fe138-adb5-483b-87a6-dce3eaea7281",
+    "message": {
+      "text": "xD",
+      "fragments": [
+        {
+          "type": "text",
+          "text": "xD",
+          "cheermote": null,
+          "emote": null,
+          "mention": null
+        }
+      ]
+    },
+    "color": "#CC44FF",
+    "badges": [
+      {
+        "set_id": "broadcaster",
+        "id": "1",
+        "info": ""
+      },
+      {
+        "set_id": "subscriber",
+        "id": "3072",
+        "info": "94"
+      },
+      {
+        "set_id": "partner",
+        "id": "1",
+        "info": ""
+      }
+    ],
+    "message_type": "text",
+    "cheer": null,
+    "reply": null,
+    "channel_points_custom_reward_id": "1ed437f5-9dc3-4510-8a3f-abcad67985e1"
+  }
+}
+
+{
+  ...,
+  "event": {
+    "broadcaster_user_id": "11148817",
+    "broadcaster_user_login": "pajlada",
+    "broadcaster_user_name": "pajlada",
+    "chatter_user_id": "11148817",
+    "chatter_user_login": "pajlada",
+    "chatter_user_name": "pajlada",
+    "message_id": "5859155d-1f77-44fe-9718-088add4ac870",
+    "message": {
+      "text": "@pajbot xD",
+      "fragments": [
+        {
+          "type": "mention",
+          "text": "@pajbot",
+          "cheermote": null,
+          "emote": null,
+          "mention": {
+            "user_id": "82008718",
+            "user_login": "pajbot",
+            "user_name": "pajbot"
+          }
+        },
+        {
+          "type": "text",
+          "text": " xD",
+          "cheermote": null,
+          "emote": null,
+          "mention": null
+        }
+      ]
+    },
+    "color": "#CC44FF",
+    "badges": [
+      {
+        "set_id": "broadcaster",
+        "id": "1",
+        "info": ""
+      },
+      {
+        "set_id": "subscriber",
+        "id": "3072",
+        "info": "94"
+      },
+      {
+        "set_id": "partner",
+        "id": "1",
+        "info": ""
+      }
+    ],
+    "message_type": "text",
+    "cheer": null,
+    "reply": {
+      "parent_message_id": "83ce13ca-09f4-42c1-ab48-742b264d5af3",
+      "parent_message_body": "xD",
+      "parent_user_id": "82008718",
+      "parent_user_name": "pajbot",
+      "parent_user_login": "pajbot",
+      "thread_message_id": "83ce13ca-09f4-42c1-ab48-742b264d5af3",
+      "thread_user_id": "82008718",
+      "thread_user_name": "pajbot",
+      "thread_user_login": "pajbot"
+    },
+    "channel_points_custom_reward_id": null
+  }
+}
+
+{
+  ...,
+  "event": {
+    "broadcaster_user_id": "11148817",
+    "broadcaster_user_login": "pajlada",
+    "broadcaster_user_name": "pajlada",
+    "chatter_user_id": "11148817",
+    "chatter_user_login": "pajlada",
+    "chatter_user_name": "pajlada",
+    "message_id": "436eacbd-4bfd-4023-afb3-655d3d85d408",
+    "message": {
+      "text": "giraffe lover @brian6932",
+      "fragments": [
+        {
+          "type": "text",
+          "text": "giraffe lover ",
+          "cheermote": null,
+          "emote": null,
+          "mention": null
+        },
+        {
+          "type": "mention",
+          "text": "@brian6932",
+          "cheermote": null,
+          "emote": null,
+          "mention": {
+            "user_id": "84180052",
+            "user_login": "brian6932",
+            "user_name": "brian6932"
+          }
+        }
+      ]
+    },
+    "color": "#CC44FF",
+    "badges": [
+      {
+        "set_id": "broadcaster",
+        "id": "1",
+        "info": ""
+      },
+      {
+        "set_id": "subscriber",
+        "id": "3072",
+        "info": "94"
+      },
+      {
+        "set_id": "partner",
+        "id": "1",
+        "info": ""
+      }
+    ],
+    "message_type": "text",
+    "cheer": null,
+    "reply": null,
+    "channel_points_custom_reward_id": null
+  }
+}
+
+{
+  ...,
+  "event": {
+    "broadcaster_user_id": "14824099",
+    "broadcaster_user_login": "trizze",
+    "broadcaster_user_name": "Trizze",
+    "chatter_user_id": "11148817",
+    "chatter_user_login": "pajlada",
+    "chatter_user_name": "pajlada",
+    "message_id": "3c200693-176d-4589-93a6-0ea9f3024f57",
+    "message": {
+      "text": "test Cheer1  xD forsenE asd trizzeCheer1  xD",
+      "fragments": [
+        {
+          "type": "text",
+          "text": "test ",
+          "cheermote": null,
+          "emote": null,
+          "mention": null
+        },
+        {
+          "type": "cheermote",
+          "text": "Cheer1",
+          "cheermote": {
+            "prefix": "cheer",
+            "bits": 1,
+            "tier": 1
+          },
+          "emote": null,
+          "mention": null
+        },
+        {
+          "type": "text",
+          "text": "  xD ",
+          "cheermote": null,
+          "emote": null,
+          "mention": null
+        },
+        {
+          "type": "emote",
+          "text": "forsenE",
+          "cheermote": null,
+          "emote": {
+            "id": "521050",
+            "emote_set_id": "4236",
+            "owner_id": "22484632",
+            "format": [
+              "static"
+            ]
+          },
+          "mention": null
+        },
+        {
+          "type": "text",
+          "text": " asd ",
+          "cheermote": null,
+          "emote": null,
+          "mention": null
+        },
+        {
+          "type": "cheermote",
+          "text": "trizzeCheer1",
+          "cheermote": {
+            "prefix": "trizzecheer",
+            "bits": 1,
+            "tier": 1
+          },
+          "emote": null,
+          "mention": null
+        },
+        {
+          "type": "text",
+          "text": "  xD",
+          "cheermote": null,
+          "emote": null,
+          "mention": null
+        }
+      ]
+    },
+    "color": "#CC44FF",
+    "badges": [
+      {
+        "set_id": "partner",
+        "id": "1",
+        "info": ""
+      }
+    ],
+    "message_type": "text",
+    "cheer": {
+      "bits": 2
+    },
+    "reply": null,
+    "channel_points_custom_reward_id": null
+  }
+}

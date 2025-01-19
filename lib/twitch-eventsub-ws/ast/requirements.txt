@@ -1,0 +1,6 @@
+clang==15.0.7
+Jinja2==3.1.2
+jinja2-workarounds==0.1.0
+clang-format==16.0.4
+colorama==0.4.6
+pytest==7.3.1

@@ -1,0 +1,90 @@
+---
+name: Python
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+concurrency:
+  group: python-test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: "Test ${{ matrix.os }}, Python ${{ matrix.python-version }}"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+        clang-version: ["15.0"]
+        os: ["windows-latest", "macos-latest", "ubuntu-20.04", "ubuntu-22.04"]
+
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        id: setup-python
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Set environment variables for macOS
+        if: (startsWith(matrix.os , 'macos'))
+        run: |
+          echo "LIBCLANG_LIBRARY_PATH=${{ runner.temp }}/llvm/lib" >> "$GITHUB_ENV"
+          echo "SDKROOT=$(xcrun --sdk macosx --show-sdk-path)" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Set environment variables for Windows
+        if: (startsWith(matrix.os , 'windows'))
+        run: |
+          echo "LIBCLANG_LIBRARY_PATH=${{ runner.temp }}/llvm/bin" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Cache Clang
+        id: cache-llvm
+        uses: actions/cache@v3
+        with:
+          path: ${{ runner.temp }}/llvm
+          key: clang-${{ matrix.os }}-${{ matrix.clang-version }}
+
+      - name: Install Clang
+        uses: KyleMayes/install-llvm-action@v1
+        with:
+          version: ${{ matrix.clang-version }}
+          directory: ${{ runner.temp }}/llvm
+          cached: ${{ steps.cache-llvm.outputs.cache-hit }}
+
+      - name: Create virtual environment
+        run: |
+          python3 -m venv venv
+        shell: bash
+        working-directory: ast
+
+      - name: Activate virtual environment (macOS & Ubuntu)
+        if: (!startsWith(matrix.os , 'windows'))
+        run: |
+          source venv/bin/activate
+          echo "PATH=$PATH" >> "$GITHUB_ENV"
+        shell: bash
+        working-directory: ast
+
+      - name: Activate virtual environment (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          source venv/Scripts/activate
+          echo "PATH=$PATH" >> "$GITHUB_ENV"
+        shell: bash
+        working-directory: ast
+
+      - name: Install Python dependencies
+        run: pip3 install -r requirements.txt
+        shell: bash
+        working-directory: ast
+
+      - name: Run tests
+        run: pytest -rP
+        shell: bash
+        working-directory: ast
