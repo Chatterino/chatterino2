@@ -10,6 +10,7 @@
 - Bugfix: Fixed a crash that could occur on Linux and macOS when clicking "Install" from the update prompt. (#5818)
 - Bugfix: Fixed missing word wrap in update popup. (#5811)
 - Bugfix: Fixed tabs not scaling to the default scale when changing the scale from a non-default value. (#5794, #5833)
+- Bugfix: Fixed a thick border on Windows 11. (#5836)
 - Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
 - Dev: Updated Conan dependencies. (#5776)
 - Dev: Support Boost 1.87. (#5832)
