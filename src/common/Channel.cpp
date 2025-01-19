@@ -41,7 +41,7 @@ Channel::Channel(const QString &name, Type type)
 Channel::~Channel()
 {
     auto *app = tryGetApp();
-    if (app)
+    if (app && this->anythingLogged_)
     {
         app->getChatLogger()->closeChannel(this->name_, this->platform_);
     }
@@ -106,6 +106,7 @@ void Channel::addMessage(MessagePtr message, MessageContext context,
             getApp()->getChatLogger()->addMessage(this->name_, message,
                                                   this->platform_,
                                                   this->getCurrentStreamID());
+            this->anythingLogged_ = true;
         }
     }
 
@@ -123,7 +124,7 @@ void Channel::addSystemMessage(const QString &contents)
     this->addMessage(msg, MessageContext::Original);
 }
 
-void Channel::addOrReplaceTimeout(MessagePtr message, QTime now)
+void Channel::addOrReplaceTimeout(MessagePtr message, const QDateTime &now)
 {
     addOrReplaceChannelTimeout(
         this->getMessageSnapshot(), std::move(message), now,
@@ -139,7 +140,7 @@ void Channel::addOrReplaceTimeout(MessagePtr message, QTime now)
     // WindowManager::instance().repaintVisibleChatWidgets(this);
 }
 
-void Channel::addOrReplaceClearChat(MessagePtr message, QTime now)
+void Channel::addOrReplaceClearChat(MessagePtr message, const QDateTime &now)
 {
     addOrReplaceChannelClear(
         this->getMessageSnapshot(), std::move(message), now,
