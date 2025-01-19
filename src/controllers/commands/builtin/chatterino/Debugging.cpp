@@ -1,5 +1,6 @@
 #include "controllers/commands/builtin/chatterino/Debugging.hpp"
 
+#include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/Env.hpp"
 #include "common/Literals.hpp"
@@ -7,6 +8,7 @@
 #include "messages/Image.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
+#include "providers/twitch/EventSub.hpp"
 #include "singletons/Theme.hpp"
 #include "util/PostToThread.hpp"
 
@@ -141,6 +143,15 @@ QString debugTest(const CommandContext &ctx)
     }
 
     ctx.channel->addSystemMessage("debug-test called");
+
+    return "";
+}
+
+QString debugEventSub(const CommandContext &ctx)
+{
+    (void)ctx;
+
+    getApp()->getEventSub()->start();
 
     return "";
 }
