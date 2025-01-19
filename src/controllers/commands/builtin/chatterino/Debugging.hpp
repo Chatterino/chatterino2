@@ -24,4 +24,6 @@ QString forceImageUnload(const CommandContext &ctx);
 
 QString debugTest(const CommandContext &ctx);
 
+QString debugEventSub(const CommandContext &ctx);
+
 }  // namespace chatterino::commands

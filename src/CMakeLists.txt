@@ -806,6 +806,7 @@ target_link_libraries(${LIBRARY_PROJECT}
         MagicEnum
         $<$<BOOL:${WIN32}>:Wtsapi32>
         twitch-eventsub-ws
+        BoostCertify
         )
 if (CHATTERINO_PLUGINS)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua sol2::sol2)

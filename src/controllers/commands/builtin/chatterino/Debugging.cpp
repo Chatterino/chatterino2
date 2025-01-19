@@ -9,6 +9,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
+#include "providers/twitch/EventSub.hpp"
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -185,6 +186,15 @@ QString debugTest(const CommandContext &ctx)
         ctx.channel->addSystemMessage(
             QString("debug-test called with command: '%1'").arg(command));
     }
+
+    return "";
+}
+
+QString debugEventSub(const CommandContext &ctx)
+{
+    (void)ctx;
+
+    getApp()->getEventSub()->start();
 
     return "";
 }
