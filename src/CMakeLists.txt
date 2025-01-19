@@ -803,6 +803,7 @@ target_link_libraries(${LIBRARY_PROJECT}
         LRUCache
         MagicEnum
         $<$<BOOL:${WIN32}>:Wtsapi32>
+        twitch-eventsub-ws
         )
 if (CHATTERINO_PLUGINS)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua sol2::sol2)

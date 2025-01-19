@@ -1,0 +1,159 @@
+---
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: "Build ${{ matrix.os }}, Python ${{ matrix.python-version }}"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-20.04, ubuntu-22.04]
+        python-version: ["3.11"]
+
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0 # allows for tags access
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # WINDOWS
+      - name: Enable Developer Command Prompt (Windows)
+        if: startsWith(matrix.os, 'windows')
+        uses: ilammy/msvc-dev-cmd@v1.12.1
+
+      - name: Cache conan packages (Windows)
+        if: startsWith(matrix.os, 'windows')
+        uses: actions/cache@v3
+        with:
+          key: ${{ runner.os }}-conan-user-${{ hashFiles('**/conanfile.py') }}${{ env.C2_CONAN_CACHE_SUFFIX }}
+          path: ~/.conan2/
+
+      - name: Install Conan (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          python3 -c "import site; import sys; print(f'{site.USER_BASE}\\Python{sys.version_info.major}{sys.version_info.minor}\\Scripts')" >> "$GITHUB_PATH"
+          pip3 install --user "conan"
+        shell: powershell
+
+      - name: Setup Conan (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          conan --version
+          conan profile detect -f
+        shell: powershell
+
+      - name: Install dependencies (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          mkdir build
+          cd build
+          conan install .. `
+              -s build_type=RelWithDebInfo `
+              -c tools.cmake.cmaketoolchain:generator="NMake Makefiles" `
+              -b missing `
+              --output-folder=.
+        shell: powershell
+
+      - name: Build (Windows)
+        if: startsWith(matrix.os, 'windows')
+        shell: pwsh
+        run: |
+          cd build
+          cmake `
+              -G"NMake Makefiles" `
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo `
+              -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
+              -DEVENTSUB_BUILD_EXAMPLE=On `
+              ../example
+          set cl=/MP
+          nmake /S /NOLOGO
+
+      - name: Clean Conan cache
+        if: startsWith(matrix.os, 'windows')
+        run: conan cache clean --source --build --download "*"
+        shell: bash
+
+      # LINUX
+      - name: Install dependencies (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install \
+              cmake \
+              virtualenv \
+              libssl-dev \
+              build-essential
+
+      # LINUX
+      - name: Install boost (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: MarkusJx/install-boost@v2.4.4
+        id: install-boost
+        with:
+          # REQUIRED: Specify the required boost version
+          # A list of supported versions can be found here:
+          # https://github.com/MarkusJx/prebuilt-boost/blob/main/versions-manifest.json
+          boost_version: 1.83.0
+
+      - name: Set up Clang (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: egor-tensin/setup-clang@v1
+        with:
+          version: "15"
+          platform: x64
+
+      - name: Build (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          mkdir build
+          cd build
+          clang --version
+          CXXFLAGS=-fno-sized-deallocation cmake \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DEVENTSUB_BUILD_EXAMPLE=On \
+            ../example
+          make -j"$(nproc)"
+        shell: bash
+        env:
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+          CC: "clang"
+          CXX: "clang++"
+
+      # MACOS
+      - name: Install dependencies (MacOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          brew update
+          brew install boost openssl cmake tree
+        shell: bash
+
+      - name: Build (MacOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          mkdir build
+          cd build
+          cmake \
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
+              -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
+              -DEVENTSUB_BUILD_EXAMPLE=On \
+              ../example
+          make -j"$(sysctl -n hw.logicalcpu)"
+        shell: bash
