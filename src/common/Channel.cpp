@@ -123,7 +123,7 @@ void Channel::addSystemMessage(const QString &contents)
     this->addMessage(msg, MessageContext::Original);
 }
 
-void Channel::addOrReplaceTimeout(MessagePtr message, QTime now)
+void Channel::addOrReplaceTimeout(MessagePtr message, const QDateTime &now)
 {
     addOrReplaceChannelTimeout(
         this->getMessageSnapshot(), std::move(message), now,
@@ -139,7 +139,7 @@ void Channel::addOrReplaceTimeout(MessagePtr message, QTime now)
     // WindowManager::instance().repaintVisibleChatWidgets(this);
 }
 
-void Channel::addOrReplaceClearChat(MessagePtr message, QTime now)
+void Channel::addOrReplaceClearChat(MessagePtr message, const QDateTime &now)
 {
     addOrReplaceChannelClear(
         this->getMessageSnapshot(), std::move(message), now,
