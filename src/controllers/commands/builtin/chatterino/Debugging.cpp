@@ -151,7 +151,7 @@ QString debugEventSub(const CommandContext &ctx)
 {
     (void)ctx;
 
-    getApp()->getEventSub()->start();
+    getApp()->getEventSub()->createConnection();
 
     return "";
 }
