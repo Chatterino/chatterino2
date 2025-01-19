@@ -1,5 +1,9 @@
 #include "twitch-eventsub-ws/chrono.hpp"
 
+#include "twitch-eventsub-ws/date.h"
+
+#include <sstream>
+
 namespace eventsub {
 
 boost::json::result_for<std::chrono::system_clock::time_point,
@@ -14,8 +18,8 @@ boost::json::result_for<std::chrono::system_clock::time_point,
         return raw.error();
     }
 
-    std::istringstream in{*raw};
     std::chrono::system_clock::time_point tp;
+    std::istringstream in{*raw};
     in >> date::parse("%FT%TZ", tp);
 
     return tp;
