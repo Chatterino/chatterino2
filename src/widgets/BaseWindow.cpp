@@ -351,7 +351,7 @@ void BaseWindow::init()
         this->ui_.layoutBase = new BaseWidget(this);
         if (isWindows11OrGreater())
         {
-            this->ui_.layoutBase->setContentsMargins(0, 0, 0, 1);
+            this->ui_.layoutBase->setContentsMargins(0, 0, 0, 0);
         }
         else
         {
