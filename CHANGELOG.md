@@ -11,8 +11,11 @@
 - Bugfix: Fixed missing word wrap in update popup. (#5811)
 - Bugfix: Fixed tabs not scaling to the default scale when changing the scale from a non-default value. (#5794)
 - Bugfix: Closing a usercard will no longer cause stop-logging messages to be generated in channel logs. (#5828)
+- Bugfix: Fixed tabs not scaling to the default scale when changing the scale from a non-default value. (#5794, #5833)
 - Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
 - Dev: Updated Conan dependencies. (#5776)
+- Dev: Replaced usage of `parseTime` with `serverReceivedTime` for clearchat messages. (#5824)
+- Dev: Support Boost 1.87. (#5832)
 
 ## 2.5.2
 
