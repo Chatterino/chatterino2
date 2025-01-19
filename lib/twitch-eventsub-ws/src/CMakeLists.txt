@@ -35,6 +35,11 @@ target_link_libraries(${PROJECT_NAME}
         OpenSSL::Crypto
         )
 
+target_compile_definitions(${PROJECT_NAME} PUBLIC
+    $<$<BOOL:${MSVC}>:BOOST_JSON_NO_LIB>
+    $<$<BOOL:${MSVC}>:BOOST_CONTAINER_NO_LIB>
+)
+
 # Hack to get the include directories from Python
 get_target_property(_inc_dirs ${PROJECT_NAME} INCLUDE_DIRECTORIES)
 list(APPEND _inc_dirs ${Boost_INCLUDE_DIRS})
