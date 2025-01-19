@@ -2,6 +2,23 @@
 
 ## Unversioned
 
+- Minor: `/clear` messages are now stacked like timeouts. (#5806)
+- Minor: Treat all browsers starting with `firefox` as a Firefox browser. (#5805)
+- Minor: Remove incognito browser support for `opera/launcher` (this should no longer be a thing). (#5805)
+- Minor: Remove incognito browser support for `iexplore`, because internet explorer is EOL. (#5810)
+- Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
+- Bugfix: Fixed a crash that could occur on Linux and macOS when clicking "Install" from the update prompt. (#5818)
+- Bugfix: Fixed missing word wrap in update popup. (#5811)
+- Bugfix: Fixed tabs not scaling to the default scale when changing the scale from a non-default value. (#5794)
+- Bugfix: Closing a usercard will no longer cause stop-logging messages to be generated in channel logs. (#5828)
+- Bugfix: Fixed tabs not scaling to the default scale when changing the scale from a non-default value. (#5794, #5833)
+- Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
+- Dev: Updated Conan dependencies. (#5776)
+- Dev: Replaced usage of `parseTime` with `serverReceivedTime` for clearchat messages. (#5824)
+- Dev: Support Boost 1.87. (#5832)
+
+## 2.5.2
+
 - Bugfix: Fixed a crash in the 7TV EventApi when closing Chatterino. (#5768)
 - Bugfix: Fixed scrollbar highlights being visible in overlay windows. (#5769)
 - Bugfix: Make macos fonts look the same as v2.5.1. (#5775)

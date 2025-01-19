@@ -24,7 +24,7 @@ void VectorMessageSink::addMessage(MessagePtr message, MessageContext ctx,
 }
 
 void VectorMessageSink::addOrReplaceTimeout(MessagePtr clearchatMessage,
-                                            QTime now)
+                                            const QDateTime &now)
 {
     addOrReplaceChannelTimeout(
         this->messages_, std::move(clearchatMessage), now,
@@ -36,6 +36,20 @@ void VectorMessageSink::addOrReplaceTimeout(MessagePtr clearchatMessage,
             this->messages_.emplace_back(msg);
         },
         false);
+}
+
+void VectorMessageSink::addOrReplaceClearChat(MessagePtr clearchatMessage,
+                                              const QDateTime &now)
+{
+    addOrReplaceChannelClear(
+        this->messages_, std::move(clearchatMessage), now,
+        [&](auto idx, auto /*msg*/, auto &&replacement) {
+            replacement->flags.set(this->additionalFlags);
+            this->messages_[idx] = replacement;
+        },
+        [&](auto &&msg) {
+            this->messages_.emplace_back(msg);
+        });
 }
 
 void VectorMessageSink::disableAllMessages()

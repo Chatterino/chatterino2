@@ -1,11 +1,13 @@
 #include "controllers/highlights/HighlightPhrase.hpp"
 
+#include <QStringBuilder>
+
 namespace chatterino {
 
 namespace {
 
-    const QString REGEX_START_BOUNDARY("(\\b|\\s|^)");
-    const QString REGEX_END_BOUNDARY("(\\b|\\s|$)");
+    constexpr QStringView REGEX_START_BOUNDARY(u"(?:\\b|\\s|^)");
+    constexpr QStringView REGEX_END_BOUNDARY(u"(?:\\b|\\s|$)");
 
 }  // namespace
 
@@ -46,7 +48,7 @@ HighlightPhrase::HighlightPhrase(const QString &pattern, bool showInMentions,
     , soundUrl_(soundUrl)
     , regex_(isRegex_
                  ? pattern
-                 : REGEX_START_BOUNDARY + QRegularExpression::escape(pattern) +
+                 : REGEX_START_BOUNDARY % QRegularExpression::escape(pattern) %
                        REGEX_END_BOUNDARY,
              QRegularExpression::UseUnicodePropertiesOption |
                  (isCaseSensitive_ ? QRegularExpression::NoPatternOption
@@ -69,7 +71,7 @@ HighlightPhrase::HighlightPhrase(const QString &pattern, bool showInMentions,
     , color_(std::move(color))
     , regex_(isRegex_
                  ? pattern
-                 : REGEX_START_BOUNDARY + QRegularExpression::escape(pattern) +
+                 : REGEX_START_BOUNDARY % QRegularExpression::escape(pattern) %
                        REGEX_END_BOUNDARY,
              QRegularExpression::UseUnicodePropertiesOption |
                  (isCaseSensitive_ ? QRegularExpression::NoPatternOption

@@ -8,7 +8,7 @@
 #include <optional>
 
 class QStringView;
-class QTime;
+class QDateTime;
 
 namespace chatterino {
 
@@ -46,7 +46,12 @@ public:
 
     /// Adds a timeout message or merges it into an existing one
     virtual void addOrReplaceTimeout(MessagePtr clearchatMessage,
-                                     QTime now) = 0;
+                                     const QDateTime &now) = 0;
+
+    /// Adds a clear chat message (for the entire chat) or merges it into an
+    /// existing one
+    virtual void addOrReplaceClearChat(MessagePtr clearchatMessage,
+                                       const QDateTime &now) = 0;
 
     /// Flags all messages as `Disabled`
     virtual void disableAllMessages() = 0;

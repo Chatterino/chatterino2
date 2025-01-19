@@ -197,9 +197,8 @@ std::optional<ClearChatMessage> parseClearChatMessage(
     if (message->parameters().length() == 1)
     {
         return ClearChatMessage{
-            .message =
-                makeSystemMessage("Chat has been cleared by a moderator.",
-                                  calculateMessageTime(message).time()),
+            .message = MessageBuilder::makeClearChatMessage(
+                calculateMessageTime(message), {}),
             .disableAllMessages = true,
         };
     }
@@ -215,7 +214,7 @@ std::optional<ClearChatMessage> parseClearChatMessage(
 
     auto timeoutMsg =
         MessageBuilder(timeoutMessage, username, durationInSeconds, false,
-                       calculateMessageTime(message).time())
+                       calculateMessageTime(message))
             .release();
 
     return ClearChatMessage{.message = timeoutMsg, .disableAllMessages = false};
@@ -320,15 +319,14 @@ void IrcMessageHandler::parseMessageInto(Communi::IrcMessage *message,
             return;
         }
         auto &clearChat = *cc;
+        auto time = calculateMessageTime(message);
         if (clearChat.disableAllMessages)
         {
-            sink.addMessage(std::move(clearChat.message),
-                            MessageContext::Original);
+            sink.addOrReplaceClearChat(std::move(clearChat.message), time);
         }
         else
         {
-            sink.addOrReplaceTimeout(std::move(clearChat.message),
-                                     calculateMessageTime(message).time());
+            sink.addOrReplaceTimeout(std::move(clearChat.message), time);
         }
     }
 }
@@ -464,18 +462,16 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
         return;
     }
 
+    auto time = calculateMessageTime(message);
     // chat has been cleared by a moderator
     if (clearChat.disableAllMessages)
     {
         chan->disableAllMessages();
-        chan->addMessage(std::move(clearChat.message),
-                         MessageContext::Original);
-
+        chan->addOrReplaceClearChat(std::move(clearChat.message), time);
         return;
     }
 
-    chan->addOrReplaceTimeout(std::move(clearChat.message),
-                              calculateMessageTime(message).time());
+    chan->addOrReplaceTimeout(std::move(clearChat.message), time);
 
     // refresh all
     getApp()->getWindows()->repaintVisibleChatWidgets(chan.get());

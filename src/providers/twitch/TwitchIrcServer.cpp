@@ -247,11 +247,10 @@ void TwitchIrcServer::initialize()
                 return;
             }
 
-            QString text =
-                QString("%1 cleared the chat.").arg(action.source.login);
-
-            postToThread([chan, text] {
-                chan->addSystemMessage(text);
+            postToThread([chan, actor{action.source.login}] {
+                auto now = QDateTime::currentDateTime();
+                chan->addOrReplaceClearChat(
+                    MessageBuilder::makeClearChatMessage(now, actor), now);
             });
         });
 
@@ -315,7 +314,8 @@ void TwitchIrcServer::initialize()
             postToThread([chan, action] {
                 MessageBuilder msg(action);
                 msg->flags.set(MessageFlag::PubSub);
-                chan->addOrReplaceTimeout(msg.release(), QTime::currentTime());
+                chan->addOrReplaceTimeout(msg.release(),
+                                          QDateTime::currentDateTime());
             });
         });
 
