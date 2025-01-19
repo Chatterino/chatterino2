@@ -12,6 +12,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "util/PostToThread.hpp"
+#include "util/RenameThread.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ssl.hpp>
@@ -175,7 +176,33 @@ public:
     }
 };
 
-void EventSub::start()
+EventSub::EventSub()
+    : ioContext(1)
+    , work(boost::asio::make_work_guard(this->ioContext))
+{
+    this->thread = std::make_unique<std::thread>([this] {
+        this->ioContext.run();
+    });
+    renameThread(*this->thread, "C2EventSub");
+}
+
+EventSub::~EventSub()
+{
+    this->work.reset();
+
+    // TODO: Close down existing sessions
+
+    if (this->thread->joinable())
+    {
+        this->thread->join();
+    }
+    else
+    {
+        qCWarning(LOG) << "Thread not joinable";
+    }
+}
+
+void EventSub::createConnection()
 {
     const auto userAgent = QStringLiteral("chatterino/%1 (%2)")
                                .arg(Version::instance().version(),
@@ -185,44 +212,31 @@ void EventSub::start()
 
     auto eventSubHost = getEventSubHost();
 
-    if (this->mainThread)
+    try
     {
-        qCWarning(LOG)
-            << "EventSub start called when it had already been started";
+        auto [host, port, path] = eventSubHost;
+
+        boost::asio::ssl::context sslContext{
+            boost::asio::ssl::context::tlsv12_client};
+
+        if constexpr (!LOCAL_EVENTSUB)
+        {
+            sslContext.set_verify_mode(
+                boost::asio::ssl::verify_peer |
+                boost::asio::ssl::verify_fail_if_no_peer_cert);
+            sslContext.set_default_verify_paths();
+
+            boost::certify::enable_native_https_server_verification(sslContext);
+        }
+
+        std::make_shared<eventsub::Session>(this->ioContext, sslContext,
+                                            std::make_unique<MyListener>())
+            ->run(host, port, path, userAgent);
     }
-
-    this->mainThread = std::make_unique<std::thread>([=] {
-        try
-        {
-            auto [host, port, path] = eventSubHost;
-
-            boost::asio::io_context ctx(1);
-
-            boost::asio::ssl::context sslContext{
-                boost::asio::ssl::context::tlsv12_client};
-
-            if constexpr (!LOCAL_EVENTSUB)
-            {
-                sslContext.set_verify_mode(
-                    boost::asio::ssl::verify_peer |
-                    boost::asio::ssl::verify_fail_if_no_peer_cert);
-                sslContext.set_default_verify_paths();
-
-                boost::certify::enable_native_https_server_verification(
-                    sslContext);
-            }
-
-            std::make_shared<eventsub::Session>(ctx, sslContext,
-                                                std::make_unique<MyListener>())
-                ->run(host, port, path, userAgent);
-
-            ctx.run();
-        }
-        catch (std::exception &e)
-        {
-            qCWarning(LOG) << "Error in EventSub run thread" << e.what();
-        }
-    });
+    catch (std::exception &e)
+    {
+        qCWarning(LOG) << "Error in EventSub run thread" << e.what();
+    }
 }
 
 }  // namespace chatterino
