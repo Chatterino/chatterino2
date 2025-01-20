@@ -523,6 +523,13 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
         chan->addMessage(MessageBuilder::makeDeletionMessageFromIRC(msg),
                          MessageContext::Original);
     }
+
+    if (getSettings()->hideModerated && !tags.contains("historical"))
+    {
+        // XXX: This is expensive. We could use a layout request if the layout
+        //      would store the previous message flags.
+        getApp()->getWindows()->forceLayoutChannelViews();
+    }
 }
 
 void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
