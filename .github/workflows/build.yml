@@ -277,7 +277,7 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         run: |
           # binary dependencies
-          ./.CI/SetupHomebrewDeps.sh openssl@3 boost
+          ./.CI/SetupHomebrewDeps.sh boost openssl@3
           # build and header-only dependencies
           brew install rapidjson p7zip create-dmg cmake tree
         shell: bash

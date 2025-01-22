@@ -74,7 +74,7 @@ do
 done
 
 echo "Relinking boost libraries"
-c2-make-universal-dylib lib/libboost_random-mt.dylib
+c2-make-universal-dylib lib/libboost_random.dylib
 
 echo "Relinking OpenSSL 3 libcrypto"
 c2-make-universal-dylib lib/libcrypto.dylib
