@@ -692,7 +692,7 @@ void TextElement::appendText(QStringView text)
     for (auto word : text.tokenize(u' '))
 #endif
     {
-        this->words_.emplace_back(word.toString());
+        this->words_.append(word.toString());
     }
 }
 
