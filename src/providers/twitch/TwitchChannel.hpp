@@ -116,23 +116,25 @@ public:
         bool emoteOnly = false;
 
         /**
+         * @lua@field follower_only number? Time in minutes you need to follow to chat or nil.
+         */
+        /**
          * @brief Number of minutes required for users to be followed before typing in chat
          *
          * Special cases:
          * -1 = follower mode off
          *  0 = follower mode on, no time requirement
-         *
-         * @lua@field follower_only number? Time in minutes you need to follow to chat or nil.
-         **/
+         */
         int followerOnly = -1;
 
+        /**
+         * @lua@field slow_mode number? Time in seconds you need to wait before sending messages or nil.
+         */
         /**
          * @brief Number of seconds required to wait before typing emotes
          *
          * 0 = slow mode off
-         *
-         * @lua@field slow_mode number? Time in seconds you need to wait before sending messages or nil.
-         **/
+         */
         int slowMode = 0;
     };
 

@@ -165,7 +165,7 @@ jobs:
 
       - name: Setup sccache (Windows)
         # sccache v0.7.4
-        uses: hendrikmuhs/ccache-action@v1.2.14
+        uses: hendrikmuhs/ccache-action@v1.2.16
         if: startsWith(matrix.os, 'windows')
         with:
           variant: sccache
@@ -434,7 +434,7 @@ jobs:
         shell: bash
 
       - name: Create release
-        uses: ncipollo/release-action@v1.14.0
+        uses: ncipollo/release-action@v1.15.0
         with:
           replacesArtifacts: true
           allowUpdates: true
