@@ -91,21 +91,7 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "foo"
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
+                        "foo",
                         "no-mention-highlight"
                     ]
                 },

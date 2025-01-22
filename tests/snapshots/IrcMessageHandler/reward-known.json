@@ -185,21 +185,7 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "reward"
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
+                        "reward",
                         "1"
                     ]
                 },

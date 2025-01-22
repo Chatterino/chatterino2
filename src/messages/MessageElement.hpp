@@ -250,6 +250,12 @@ public:
 
     QJsonObject toJson() const override;
 
+    const MessageColor &color() const noexcept;
+    FontStyle fontStyle() const noexcept;
+
+    void appendText(QStringView text);
+    void appendText(const QString &text);
+
 protected:
     QStringList words_;
 
