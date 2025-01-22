@@ -17,6 +17,7 @@
 - Dev: Updated Conan dependencies. (#5776)
 - Dev: Replaced usage of `parseTime` with `serverReceivedTime` for clearchat messages. (#5824)
 - Dev: Support Boost 1.87. (#5832)
+- Dev: Words from `TextElement`s are now combined where possible. (#5847)
 
 ## 2.5.2
 

@@ -168,6 +168,10 @@ public:
         return pointer;
     }
 
+    void appendOrEmplaceText(const QString &text, MessageColor color);
+    void appendOrEmplaceSystemTextAndUpdate(const QString &text,
+                                            QString &toUpdate);
+
     static void triggerHighlights(const Channel *channel,
                                   const HighlightAlert &alert);
 
