@@ -244,6 +244,9 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     io.set_function("write", &lua::api::io_write);
     io.set_function("popen", &lua::api::io_popen);
     io.set_function("tmpfile", &lua::api::io_tmpfile);
+
+    sol::table package = g["package"];
+    package.set_function("loadlib", &lua::api::package_loadlib);
 }
 
 void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
