@@ -27,9 +27,6 @@
 #include "singletons/WindowManager.hpp"
 #include "util/PostToThread.hpp"
 #include "util/RatelimitBucket.hpp"
-#include "widgets/splits/Split.hpp"
-#include "widgets/splits/SplitContainer.hpp"
-#include "widgets/Window.hpp"
 
 #include <IrcCommand>
 #include <IrcMessage>
@@ -954,25 +951,11 @@ void TwitchIrcServer::onReadConnected(IrcConnection *connection)
         }
     }
 
-    // get the selected channels
-    std::set<Channel *> selected;
-    for (auto *window : getApp()->getWindows()->allWindows())
-    {
-        auto *page = window->getNotebook().getSelectedPage();
-        if (!page)
-        {
-            continue;
-        }
+    // put the visible channels first
+    auto visible = getApp()->getWindows()->getVisibleChannelNames();
 
-        for (auto *split : page->getSplits())
-        {
-            selected.emplace(split->getChannel().get());
-        }
-    }
-
-    // put the selected channels first
-    std::ranges::partition(activeChannels, [&](const auto &chan) {
-        return selected.contains(chan.get());
+    std::ranges::stable_partition(activeChannels, [&](const auto &chan) {
+        return visible.contains(chan->getName());
     });
 
     // join channels

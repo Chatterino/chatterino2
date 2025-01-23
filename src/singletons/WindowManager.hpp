@@ -9,7 +9,7 @@
 #include <QTimer>
 
 #include <memory>
-#include <span>
+#include <set>
 
 namespace chatterino {
 
@@ -132,7 +132,7 @@ public:
     /// Toggles the inertia in all open overlay windows
     void toggleAllOverlayInertia();
 
-    std::span<Window *const> allWindows() const;
+    std::set<QString> getVisibleChannelNames() const;
 
     /// Signals
     pajlada::Signals::NoArgSignal gifRepaintRequested;

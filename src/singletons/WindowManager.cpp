@@ -595,9 +595,24 @@ void WindowManager::toggleAllOverlayInertia()
     }
 }
 
-std::span<Window *const> WindowManager::allWindows() const
+std::set<QString> WindowManager::getVisibleChannelNames() const
 {
-    return std::span<Window *const>{this->windows_};
+    std::set<QString> visible;
+    for (auto *window : this->windows_)
+    {
+        auto *page = window->getNotebook().getSelectedPage();
+        if (!page)
+        {
+            continue;
+        }
+
+        for (auto *split : page->getSplits())
+        {
+            visible.emplace(split->getChannel()->getName());
+        }
+    }
+
+    return visible;
 }
 
 void WindowManager::encodeTab(SplitContainer *tab, bool isSelected,
