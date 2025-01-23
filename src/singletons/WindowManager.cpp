@@ -595,6 +595,11 @@ void WindowManager::toggleAllOverlayInertia()
     }
 }
 
+std::span<Window *const> WindowManager::allWindows() const
+{
+    return std::span<Window *const>{this->windows_};
+}
+
 void WindowManager::encodeTab(SplitContainer *tab, bool isSelected,
                               QJsonObject &obj)
 {
