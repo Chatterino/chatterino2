@@ -38,7 +38,6 @@
 #include <cassert>
 #include <functional>
 #include <mutex>
-#include <set>
 
 using namespace std::chrono_literals;
 
