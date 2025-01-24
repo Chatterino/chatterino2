@@ -323,6 +323,12 @@ void TwitchIrcServer::initialize()
                 msg->flags.set(MessageFlag::PubSub);
                 chan->addOrReplaceTimeout(msg.release(),
                                           QDateTime::currentDateTime());
+                if (getSettings()->hideModerated)
+                {
+                    // XXX: This is expensive. We could use a layout request if the layout
+                    //      would store the previous message flags.
+                    getApp()->getWindows()->forceLayoutChannelViews();
+                }
             });
         });
 
