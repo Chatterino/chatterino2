@@ -12,7 +12,7 @@ from .walker import Walker
 log = logging.getLogger(__name__)
 
 
-def build_structs(filename: str, build_commands: Optional[str] = None) -> List[Struct]:
+def build_structs(filename: str, additional_includes: list[str] = []) -> List[Struct]:
     if not os.path.isfile(filename):
         raise ValueError(f"Path {filename} is not a file. cwd: {os.getcwd()}")
 
@@ -34,7 +34,7 @@ def build_structs(filename: str, build_commands: Optional[str] = None) -> List[S
     for include_dir in extra_includes:
         parse_args.append(f"-I{include_dir}")
 
-    for dir in get_cmake_include_dirs():
+    for dir in additional_includes:
         parse_args.append("-I")
         parse_args.append(dir)
 
