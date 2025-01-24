@@ -4,21 +4,9 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageSimilarity.hpp"
-#include "providers/twitch/IrcMessageHandler.hpp"
-#include "providers/twitch/TwitchIrcServer.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/Settings.hpp"
-#include "singletons/WindowManager.hpp"
 #include "util/ChannelHelpers.hpp"
-
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonValue>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QNetworkRequest>
 
 namespace chatterino {
 
