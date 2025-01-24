@@ -28,4 +28,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(src)
 
+include(cmake/GenerateJson.cmake)
+
+generate_json_impls(SRC_TARGET twitch-eventsub-ws GEN_TARGET twitch-eventsub-ws-gen)
+
 feature_summary(WHAT ALL)
