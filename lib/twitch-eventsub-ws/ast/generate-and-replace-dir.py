@@ -20,6 +20,11 @@ def main():
         log.error(f"usage: {sys.argv[0]} <path-to-dir>")
         sys.exit(1)
 
+    additional_includes = []
+    if len(sys.argv) >= 4 and sys.argv[2] == "--includes":
+        additional_includes = sys.argv[3].split(";")
+        log.debug(f"additional includes: {additional_includes}")
+
     dir = realpath(sys.argv[1])
     log.debug(f"Searching for header files in {dir}")
 
@@ -40,7 +45,7 @@ def main():
 
         log.debug(f"Found header & source {header_path} / {source_path}")
 
-        (definition, implementation) = generate(header_path)
+        (definition, implementation) = generate(header_path, additional_includes)
 
         replace_in_file(header_path, definition_markers, definition)
         replace_in_file(source_path, implementation_markers, implementation)

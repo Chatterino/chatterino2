@@ -11,8 +11,8 @@ from .logging import init_logging
 log = logging.getLogger(__name__)
 
 
-def generate(header_path: str) -> Tuple[str, str]:
-    structs = build_structs(header_path)
+def generate(header_path: str, additional_includes: list[str] = []) -> Tuple[str, str]:
+    structs = build_structs(header_path, additional_includes)
 
     log.debug("Generate & format definitions")
     definitions = format_code("\n\n".join([struct.try_value_to_definition(env) for struct in structs]))
