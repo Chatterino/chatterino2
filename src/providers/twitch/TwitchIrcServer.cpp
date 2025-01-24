@@ -24,6 +24,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/PostToThread.hpp"
 #include "util/RatelimitBucket.hpp"
 
@@ -935,15 +936,31 @@ void TwitchIrcServer::onReadConnected(IrcConnection *connection)
 {
     (void)connection;
 
-    std::lock_guard lock(this->channelMutex);
+    std::vector<ChannelPtr> activeChannels;
+    {
+        std::lock_guard lock(this->channelMutex);
+
+        activeChannels.reserve(this->channels.size());
+        for (const auto &weak : this->channels)
+        {
+            if (auto channel = weak.lock())
+            {
+                activeChannels.push_back(channel);
+            }
+        }
+    }
+
+    // put the visible channels first
+    auto visible = getApp()->getWindows()->getVisibleChannelNames();
+
+    std::ranges::stable_partition(activeChannels, [&](const auto &chan) {
+        return visible.contains(chan->getName());
+    });
 
     // join channels
-    for (auto &&weak : this->channels)
+    for (const auto &channel : activeChannels)
     {
-        if (auto channel = weak.lock())
-        {
-            this->joinBucket_->send(channel->getName());
-        }
+        this->joinBucket_->send(channel->getName());
     }
 
     // connected/disconnected message
@@ -952,14 +969,8 @@ void TwitchIrcServer::onReadConnected(IrcConnection *connection)
     auto reconnected = makeSystemMessage("reconnected");
     reconnected->flags.set(MessageFlag::ConnectedMessage);
 
-    for (std::weak_ptr<Channel> &weak : this->channels.values())
+    for (const auto &chan : activeChannels)
     {
-        std::shared_ptr<Channel> chan = weak.lock();
-        if (!chan)
-        {
-            continue;
-        }
-
         LimitedQueueSnapshot<MessagePtr> snapshot = chan->getMessageSnapshot();
 
         bool replaceMessage =

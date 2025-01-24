@@ -55,21 +55,7 @@
                         "cleared",
                         "by",
                         "a",
-                        "moderator."
-                    ]
-                },
-                {
-                    "color": "System",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
+                        "moderator.",
                         "(4",
                         "times)"
                     ]
