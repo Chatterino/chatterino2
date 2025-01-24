@@ -135,9 +135,6 @@ void Channel::addOrReplaceTimeout(MessagePtr message, const QDateTime &now)
             this->addMessage(msg, MessageContext::Original);
         },
         true);
-
-    // XXX: Might need the following line
-    // WindowManager::instance().repaintVisibleChatWidgets(this);
 }
 
 void Channel::addOrReplaceClearChat(MessagePtr message, const QDateTime &now)
