@@ -319,7 +319,9 @@ void TwitchIrcServer::initialize()
             }
 
             postToThread([chan, action] {
-                MessageBuilder msg(action);
+                // TODO: Can we utilize some pubsub time field? maybe not worth
+                auto time = QDateTime::currentDateTime();
+                MessageBuilder msg(action, time);
                 msg->flags.set(MessageFlag::PubSub);
                 chan->addOrReplaceTimeout(msg.release(),
                                           QDateTime::currentDateTime());
@@ -399,7 +401,9 @@ void TwitchIrcServer::initialize()
                 return;
             }
 
-            auto msg = MessageBuilder(action).release();
+            // TODO: Can we utilize some pubsub time field? maybe not worth
+            auto time = QDateTime::currentDateTime();
+            auto msg = MessageBuilder(action, time).release();
 
             postToThread([chan, msg] {
                 chan->addMessage(msg, MessageContext::Original);
