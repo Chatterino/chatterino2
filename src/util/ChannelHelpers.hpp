@@ -5,6 +5,8 @@
 #include "messages/MessageBuilder.hpp"
 #include "singletons/Settings.hpp"
 
+#include <QDateTime>
+
 namespace chatterino {
 
 /// Adds a timeout or replaces a previous one sent in the last 20 messages and in the last 5s.
