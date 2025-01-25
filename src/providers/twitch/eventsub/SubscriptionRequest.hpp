@@ -20,12 +20,10 @@ struct SubscriptionRequest {
 
     /// Optional list of conditions for the subscription
     std::vector<std::pair<QString, QString>> conditions;
-
-    auto operator<=>(const SubscriptionRequest &) const = default;
 };
 
-// bool operator==(const SubscriptionRequest &lhs, const SubscriptionRequest &rhs);
-// bool operator!=(const SubscriptionRequest &lhs, const SubscriptionRequest &rhs);
+bool operator==(const SubscriptionRequest &lhs, const SubscriptionRequest &rhs);
+bool operator!=(const SubscriptionRequest &lhs, const SubscriptionRequest &rhs);
 
 }  // namespace chatterino
 
