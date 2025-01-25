@@ -256,9 +256,6 @@ public:
                 FontStyle style = FontStyle::ChatMedium);
     ~TextElement() override = default;
 
-    MessageColor color() const;
-    FontStyle style() const;
-
     QStringList words() const;
 
     void addToContainer(MessageLayoutContainer &container,
@@ -267,6 +264,12 @@ public:
     QJsonObject toJson() const override;
 
     std::unique_ptr<MessageElement> clone() const override;
+
+    const MessageColor &color() const noexcept;
+    FontStyle fontStyle() const noexcept;
+
+    void appendText(QStringView text);
+    void appendText(const QString &text);
 
 protected:
     QStringList words_;

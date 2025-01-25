@@ -662,16 +662,6 @@ TextElement::TextElement(QStringList &&words, MessageElementFlags flags,
 {
 }
 
-MessageColor TextElement::color() const
-{
-    return this->color_;
-}
-
-FontStyle TextElement::style() const
-{
-    return this->style_;
-}
-
 QStringList TextElement::words() const
 {
     return this->words_;
@@ -783,6 +773,49 @@ std::unique_ptr<MessageElement> TextElement::clone() const
     el->words_ = this->words_;
     el->cloneFrom(*this);
     return el;
+}
+
+const MessageColor &TextElement::color() const noexcept
+{
+    return this->color_;
+}
+
+FontStyle TextElement::fontStyle() const noexcept
+{
+    return this->style_;
+}
+
+void TextElement::appendText(QStringView text)
+{
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    for (auto word : text.split(' '))  // creates a QList
+#else
+    for (auto word : text.tokenize(u' '))
+#endif
+    {
+        this->words_.append(word.toString());
+    }
+}
+
+void TextElement::appendText(const QString &text)
+{
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    this->appendText(QStringView{text});
+#else
+    qsizetype firstSpace = text.indexOf(u' ');
+    if (firstSpace == -1)
+    {
+        // reuse (ref) `text`
+        this->words_.emplace_back(text);
+        return;
+    }
+
+    this->words_.emplace_back(text.sliced(0, firstSpace));
+    for (auto word : QStringView{text}.sliced(firstSpace + 1).tokenize(u' '))
+    {
+        this->words_.emplace_back(word.toString());
+    }
+#endif
 }
 
 QJsonObject TextElement::toJson() const
@@ -981,7 +1014,7 @@ std::unique_ptr<MessageElement> LinkElement::clone() const
             .original = this->original_.at(0),
         },
         this->linkInfo_.originalUrl(), this->getFlags(), this->color(),
-        this->style());
+        this->fontStyle());
     el->cloneFrom(*this);
     return el;
 }

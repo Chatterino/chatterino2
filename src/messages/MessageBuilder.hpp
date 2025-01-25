@@ -112,8 +112,9 @@ public:
     MessageBuilder(TimeoutMessageTag, const QString &username,
                    const QString &durationInSeconds, bool multipleTimes,
                    const QDateTime &time);
-    MessageBuilder(const BanAction &action, uint32_t count = 1);
-    MessageBuilder(const UnbanAction &action);
+    MessageBuilder(const BanAction &action, const QDateTime &time,
+                   uint32_t count = 1);
+    MessageBuilder(const UnbanAction &action, const QDateTime &time);
     MessageBuilder(const WarnAction &action);
     MessageBuilder(const RaidAction &action);
     MessageBuilder(const UnraidAction &action);
@@ -167,6 +168,10 @@ public:
         this->append(std::move(unique));
         return pointer;
     }
+
+    void appendOrEmplaceText(const QString &text, MessageColor color);
+    void appendOrEmplaceSystemTextAndUpdate(const QString &text,
+                                            QString &toUpdate);
 
     static void triggerHighlights(const Channel *channel,
                                   const HighlightAlert &alert);

@@ -6,6 +6,7 @@
 - Minor: Treat all browsers starting with `firefox` as a Firefox browser. (#5805)
 - Minor: Remove incognito browser support for `opera/launcher` (this should no longer be a thing). (#5805)
 - Minor: Remove incognito browser support for `iexplore`, because internet explorer is EOL. (#5810)
+- Minor: When (re-)connecting, visible channels are now joined first. (#5850)
 - Bugfix: Fixed a potential way to escape the Lua Plugin sandbox. (#5846)
 - Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
 - Bugfix: Fixed a crash that could occur on Linux and macOS when clicking "Install" from the update prompt. (#5818)
@@ -13,10 +14,12 @@
 - Bugfix: Fixed tabs not scaling to the default scale when changing the scale from a non-default value. (#5794)
 - Bugfix: Closing a usercard will no longer cause stop-logging messages to be generated in channel logs. (#5828)
 - Bugfix: Fixed tabs not scaling to the default scale when changing the scale from a non-default value. (#5794, #5833)
+- Bugfix: Fixed deleted messages not immediately disappearing when "Hide deleted messages" is enabled. (#5844, #5854)
 - Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
 - Dev: Updated Conan dependencies. (#5776)
-- Dev: Replaced usage of `parseTime` with `serverReceivedTime` for clearchat messages. (#5824)
+- Dev: Replaced usage of `parseTime` with `serverReceivedTime` for clearchat messages. (#5824, #5855)
 - Dev: Support Boost 1.87. (#5832)
+- Dev: Words from `TextElement`s are now combined where possible. (#5847)
 
 ## 2.5.2
 
