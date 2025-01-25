@@ -7,7 +7,7 @@
 #include <utility>
 #include <vector>
 
-namespace chatterino {
+namespace chatterino::eventsub {
 
 struct SubscriptionRequest {
     /// e.g. "channel.ban"
@@ -25,13 +25,13 @@ struct SubscriptionRequest {
 bool operator==(const SubscriptionRequest &lhs, const SubscriptionRequest &rhs);
 bool operator!=(const SubscriptionRequest &lhs, const SubscriptionRequest &rhs);
 
-}  // namespace chatterino
+}  // namespace chatterino::eventsub
 
 namespace std {
 
 template <>
-struct hash<chatterino::SubscriptionRequest> {
-    size_t operator()(const chatterino::SubscriptionRequest &v) const
+struct hash<chatterino::eventsub::SubscriptionRequest> {
+    size_t operator()(const chatterino::eventsub::SubscriptionRequest &v) const
     {
         size_t seed = 0;
 

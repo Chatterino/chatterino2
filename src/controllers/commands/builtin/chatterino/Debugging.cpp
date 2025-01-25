@@ -9,7 +9,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
-#include "providers/twitch/EventSub.hpp"
+#include "providers/twitch/eventsub/Controller.hpp"
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -202,7 +202,7 @@ QString debugEventSub(const CommandContext &ctx)
     // purposefully subscribe multiple times to ensure we can't sub too many times
     // or create too many connections
 
-    getApp()->getEventSub()->subscribe(SubscriptionRequest{
+    getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
         .subscriptionType = "channel.ban",
         .subscriptionVersion = "1",
         .conditions =
@@ -213,7 +213,7 @@ QString debugEventSub(const CommandContext &ctx)
                 },
             },
     });
-    getApp()->getEventSub()->subscribe(SubscriptionRequest{
+    getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
         .subscriptionType = "channel.ban",
         .subscriptionVersion = "1",
         .conditions =
@@ -224,7 +224,7 @@ QString debugEventSub(const CommandContext &ctx)
                 },
             },
     });
-    getApp()->getEventSub()->subscribe(SubscriptionRequest{
+    getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
         .subscriptionType = "channel.ban",
         .subscriptionVersion = "1",
         .conditions =

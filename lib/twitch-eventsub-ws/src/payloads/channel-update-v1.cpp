@@ -4,7 +4,7 @@
 
 #include <boost/json.hpp>
 
-namespace eventsub::payload::channel_update::v1 {
+namespace chatterino::eventsub::lib::payload::channel_update::v1 {
 
 // DESERIALIZATION IMPLEMENTATION START
 boost::json::result_for<Event, boost::json::value>::type tag_invoke(
@@ -214,4 +214,4 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
 }
 // DESERIALIZATION IMPLEMENTATION END
 
-}  // namespace eventsub::payload::channel_update::v1
+}  // namespace chatterino::eventsub::lib::payload::channel_update::v1

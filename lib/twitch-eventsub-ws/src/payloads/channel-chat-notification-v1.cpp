@@ -4,7 +4,7 @@
 
 #include <boost/json.hpp>
 
-namespace eventsub::payload::channel_chat_notification::v1 {
+namespace chatterino::eventsub::lib::payload::channel_chat_notification::v1 {
 
 // DESERIALIZATION IMPLEMENTATION START
 boost::json::result_for<Badge, boost::json::value>::type tag_invoke(
@@ -317,14 +317,12 @@ boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
         return text.error();
     }
 
-    std::optional<eventsub::payload::channel_chat_notification::v1::Cheermote>
-        cheermote = std::nullopt;
+    std::optional<Cheermote> cheermote = std::nullopt;
     const auto *jvcheermote = root.if_contains("cheermote");
     if (jvcheermote != nullptr && !jvcheermote->is_null())
     {
-        const auto tcheermote = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::v1::Cheermote>(
-            *jvcheermote);
+        const auto tcheermote =
+            boost::json::try_value_to<Cheermote>(*jvcheermote);
 
         if (tcheermote.has_error())
         {
@@ -333,13 +331,11 @@ boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
         cheermote = tcheermote.value();
     }
 
-    std::optional<eventsub::payload::channel_chat_notification::v1::Emote>
-        emote = std::nullopt;
+    std::optional<Emote> emote = std::nullopt;
     const auto *jvemote = root.if_contains("emote");
     if (jvemote != nullptr && !jvemote->is_null())
     {
-        const auto temote = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::v1::Emote>(*jvemote);
+        const auto temote = boost::json::try_value_to<Emote>(*jvemote);
 
         if (temote.has_error())
         {
@@ -348,14 +344,11 @@ boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
         emote = temote.value();
     }
 
-    std::optional<eventsub::payload::channel_chat_notification::v1::Mention>
-        mention = std::nullopt;
+    std::optional<Mention> mention = std::nullopt;
     const auto *jvmention = root.if_contains("mention");
     if (jvmention != nullptr && !jvmention->is_null())
     {
-        const auto tmention = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::v1::Mention>(
-            *jvmention);
+        const auto tmention = boost::json::try_value_to<Mention>(*jvmention);
 
         if (tmention.has_error())
         {
@@ -1372,9 +1365,8 @@ boost::json::result_for<Message, boost::json::value>::type tag_invoke(
             error_missing_field_fragments{"Missing required key fragments"};
         return boost::system::error_code{129, error_missing_field_fragments};
     }
-    const auto fragments = boost::json::try_value_to<std::vector<
-        eventsub::payload::channel_chat_notification::v1::MessageFragment>>(
-        *jvfragments);
+    const auto fragments =
+        boost::json::try_value_to<std::vector<MessageFragment>>(*jvfragments);
     if (fragments.has_error())
     {
         return fragments.error();
@@ -1547,9 +1539,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             "Missing required key badges"};
         return boost::system::error_code{129, error_missing_field_badges};
     }
-    const auto badges = boost::json::try_value_to<
-        std::vector<eventsub::payload::channel_chat_notification::v1::Badge>>(
-        *jvbadges);
+    const auto badges =
+        boost::json::try_value_to<std::vector<Badge>>(*jvbadges);
     if (badges.has_error())
     {
         return badges.error();
@@ -1619,14 +1610,11 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return noticeType.error();
     }
 
-    std::optional<eventsub::payload::channel_chat_notification::v1::Subcription>
-        sub = std::nullopt;
+    std::optional<Subcription> sub = std::nullopt;
     const auto *jvsub = root.if_contains("sub");
     if (jvsub != nullptr && !jvsub->is_null())
     {
-        const auto tsub = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::v1::Subcription>(
-            *jvsub);
+        const auto tsub = boost::json::try_value_to<Subcription>(*jvsub);
 
         if (tsub.has_error())
         {
@@ -1635,15 +1623,11 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         sub = tsub.value();
     }
 
-    std::optional<
-        eventsub::payload::channel_chat_notification::v1::Resubscription>
-        resub = std::nullopt;
+    std::optional<Resubscription> resub = std::nullopt;
     const auto *jvresub = root.if_contains("resub");
     if (jvresub != nullptr && !jvresub->is_null())
     {
-        const auto tresub = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::v1::Resubscription>(
-            *jvresub);
+        const auto tresub = boost::json::try_value_to<Resubscription>(*jvresub);
 
         if (tresub.has_error())
         {
@@ -1652,15 +1636,12 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         resub = tresub.value();
     }
 
-    std::optional<
-        eventsub::payload::channel_chat_notification::v1::GiftSubscription>
-        subGift = std::nullopt;
+    std::optional<GiftSubscription> subGift = std::nullopt;
     const auto *jvsubGift = root.if_contains("sub_gift");
     if (jvsubGift != nullptr && !jvsubGift->is_null())
     {
-        const auto tsubGift = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::v1::GiftSubscription>(
-            *jvsubGift);
+        const auto tsubGift =
+            boost::json::try_value_to<GiftSubscription>(*jvsubGift);
 
         if (tsubGift.has_error())
         {
@@ -1669,15 +1650,13 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         subGift = tsubGift.value();
     }
 
-    std::optional<eventsub::payload::channel_chat_notification::v1::
-                      CommunityGiftSubscription>
-        communitySubGift = std::nullopt;
+    std::optional<CommunityGiftSubscription> communitySubGift = std::nullopt;
     const auto *jvcommunitySubGift = root.if_contains("community_sub_gift");
     if (jvcommunitySubGift != nullptr && !jvcommunitySubGift->is_null())
     {
-        const auto tcommunitySubGift = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::v1::
-                CommunityGiftSubscription>(*jvcommunitySubGift);
+        const auto tcommunitySubGift =
+            boost::json::try_value_to<CommunityGiftSubscription>(
+                *jvcommunitySubGift);
 
         if (tcommunitySubGift.has_error())
         {
@@ -1686,15 +1665,12 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         communitySubGift = tcommunitySubGift.value();
     }
 
-    std::optional<
-        eventsub::payload::channel_chat_notification::v1::GiftPaidUpgrade>
-        giftPaidUpgrade = std::nullopt;
+    std::optional<GiftPaidUpgrade> giftPaidUpgrade = std::nullopt;
     const auto *jvgiftPaidUpgrade = root.if_contains("gift_paid_upgrade");
     if (jvgiftPaidUpgrade != nullptr && !jvgiftPaidUpgrade->is_null())
     {
-        const auto tgiftPaidUpgrade = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::v1::GiftPaidUpgrade>(
-            *jvgiftPaidUpgrade);
+        const auto tgiftPaidUpgrade =
+            boost::json::try_value_to<GiftPaidUpgrade>(*jvgiftPaidUpgrade);
 
         if (tgiftPaidUpgrade.has_error())
         {
@@ -1703,15 +1679,12 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         giftPaidUpgrade = tgiftPaidUpgrade.value();
     }
 
-    std::optional<
-        eventsub::payload::channel_chat_notification::v1::PrimePaidUpgrade>
-        primePaidUpgrade = std::nullopt;
+    std::optional<PrimePaidUpgrade> primePaidUpgrade = std::nullopt;
     const auto *jvprimePaidUpgrade = root.if_contains("prime_paid_upgrade");
     if (jvprimePaidUpgrade != nullptr && !jvprimePaidUpgrade->is_null())
     {
-        const auto tprimePaidUpgrade = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::v1::PrimePaidUpgrade>(
-            *jvprimePaidUpgrade);
+        const auto tprimePaidUpgrade =
+            boost::json::try_value_to<PrimePaidUpgrade>(*jvprimePaidUpgrade);
 
         if (tprimePaidUpgrade.has_error())
         {
@@ -1720,13 +1693,11 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         primePaidUpgrade = tprimePaidUpgrade.value();
     }
 
-    std::optional<eventsub::payload::channel_chat_notification::v1::Raid> raid =
-        std::nullopt;
+    std::optional<Raid> raid = std::nullopt;
     const auto *jvraid = root.if_contains("raid");
     if (jvraid != nullptr && !jvraid->is_null())
     {
-        const auto traid = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::v1::Raid>(*jvraid);
+        const auto traid = boost::json::try_value_to<Raid>(*jvraid);
 
         if (traid.has_error())
         {
@@ -1735,14 +1706,11 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         raid = traid.value();
     }
 
-    std::optional<eventsub::payload::channel_chat_notification::v1::Unraid>
-        unraid = std::nullopt;
+    std::optional<Unraid> unraid = std::nullopt;
     const auto *jvunraid = root.if_contains("unraid");
     if (jvunraid != nullptr && !jvunraid->is_null())
     {
-        const auto tunraid = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::v1::Unraid>(
-            *jvunraid);
+        const auto tunraid = boost::json::try_value_to<Unraid>(*jvunraid);
 
         if (tunraid.has_error())
         {
@@ -1751,15 +1719,12 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         unraid = tunraid.value();
     }
 
-    std::optional<
-        eventsub::payload::channel_chat_notification::v1::PayItForward>
-        payItForward = std::nullopt;
+    std::optional<PayItForward> payItForward = std::nullopt;
     const auto *jvpayItForward = root.if_contains("pay_it_forward");
     if (jvpayItForward != nullptr && !jvpayItForward->is_null())
     {
-        const auto tpayItForward = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::v1::PayItForward>(
-            *jvpayItForward);
+        const auto tpayItForward =
+            boost::json::try_value_to<PayItForward>(*jvpayItForward);
 
         if (tpayItForward.has_error())
         {
@@ -1768,15 +1733,12 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         payItForward = tpayItForward.value();
     }
 
-    std::optional<
-        eventsub::payload::channel_chat_notification::v1::Announcement>
-        announcement = std::nullopt;
+    std::optional<Announcement> announcement = std::nullopt;
     const auto *jvannouncement = root.if_contains("announcement");
     if (jvannouncement != nullptr && !jvannouncement->is_null())
     {
-        const auto tannouncement = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::v1::Announcement>(
-            *jvannouncement);
+        const auto tannouncement =
+            boost::json::try_value_to<Announcement>(*jvannouncement);
 
         if (tannouncement.has_error())
         {
@@ -1785,15 +1747,12 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         announcement = tannouncement.value();
     }
 
-    std::optional<
-        eventsub::payload::channel_chat_notification::v1::CharityDonation>
-        charityDonation = std::nullopt;
+    std::optional<CharityDonation> charityDonation = std::nullopt;
     const auto *jvcharityDonation = root.if_contains("charity_donation");
     if (jvcharityDonation != nullptr && !jvcharityDonation->is_null())
     {
-        const auto tcharityDonation = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::v1::CharityDonation>(
-            *jvcharityDonation);
+        const auto tcharityDonation =
+            boost::json::try_value_to<CharityDonation>(*jvcharityDonation);
 
         if (tcharityDonation.has_error())
         {
@@ -1802,15 +1761,12 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         charityDonation = tcharityDonation.value();
     }
 
-    std::optional<
-        eventsub::payload::channel_chat_notification::v1::BitsBadgeTier>
-        bitsBadgeTier = std::nullopt;
+    std::optional<BitsBadgeTier> bitsBadgeTier = std::nullopt;
     const auto *jvbitsBadgeTier = root.if_contains("bits_badge_tier");
     if (jvbitsBadgeTier != nullptr && !jvbitsBadgeTier->is_null())
     {
-        const auto tbitsBadgeTier = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::v1::BitsBadgeTier>(
-            *jvbitsBadgeTier);
+        const auto tbitsBadgeTier =
+            boost::json::try_value_to<BitsBadgeTier>(*jvbitsBadgeTier);
 
         if (tbitsBadgeTier.has_error())
         {
@@ -1898,4 +1854,4 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
 }
 // DESERIALIZATION IMPLEMENTATION END
 
-}  // namespace eventsub::payload::channel_chat_notification::v1
+}  // namespace chatterino::eventsub::lib::payload::channel_chat_notification::v1

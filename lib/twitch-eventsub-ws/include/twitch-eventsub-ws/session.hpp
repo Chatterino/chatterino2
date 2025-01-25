@@ -7,7 +7,7 @@
 #include <boost/beast/websocket/ssl.hpp>
 #include <boost/json.hpp>
 
-namespace eventsub {
+namespace chatterino::eventsub::lib {
 
 class Listener;
 
@@ -65,4 +65,4 @@ private:
     void onClose(boost::beast::error_code ec);
 };
 
-}  // namespace eventsub
+}  // namespace chatterino::eventsub::lib

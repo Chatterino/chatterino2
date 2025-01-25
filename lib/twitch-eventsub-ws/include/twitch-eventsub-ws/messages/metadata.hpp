@@ -7,7 +7,7 @@
 #include <optional>
 #include <string>
 
-namespace eventsub::messages {
+namespace chatterino::eventsub::lib::messages {
 
 /*
 {
@@ -38,4 +38,4 @@ boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<Metadata>, const boost::json::value &jvRoot);
 // DESERIALIZATION DEFINITION END
 
-}  // namespace eventsub::messages
+}  // namespace chatterino::eventsub::lib::messages

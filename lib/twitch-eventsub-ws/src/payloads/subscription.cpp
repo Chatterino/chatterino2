@@ -4,7 +4,7 @@
 
 #include <boost/json.hpp>
 
-namespace eventsub::payload::subscription {
+namespace chatterino::eventsub::lib::payload::subscription {
 
 // DESERIALIZATION IMPLEMENTATION START
 boost::json::result_for<Transport, boost::json::value>::type tag_invoke(
@@ -183,4 +183,4 @@ boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
 }
 // DESERIALIZATION IMPLEMENTATION END
 
-}  // namespace eventsub::payload::subscription
+}  // namespace chatterino::eventsub::lib::payload::subscription

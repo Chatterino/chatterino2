@@ -18,7 +18,7 @@
 #include "providers/pronouns/Pronouns.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
-#include "providers/twitch/EventSub.hpp"
+#include "providers/twitch/eventsub/Controller.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "singletons/ImageUploader.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
@@ -181,7 +181,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , streamerMode(new StreamerMode)
     , twitchUsers(new TwitchUsers)
     , pronouns(new pronouns::Pronouns)
-    , eventSub(new EventSub)
+    , eventSub(new eventsub::Controller)
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(new PluginController(paths))
 #endif
@@ -578,7 +578,7 @@ pronouns::Pronouns *Application::getPronouns()
     return this->pronouns.get();
 }
 
-EventSub *Application::getEventSub()
+eventsub::Controller *Application::getEventSub()
 {
     assertInGuiThread();
     assert(this->eventSub);

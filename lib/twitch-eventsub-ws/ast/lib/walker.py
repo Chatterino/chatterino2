@@ -18,6 +18,7 @@ class Walker:
         self.filename = filename
         self.real_filepath = os.path.realpath(self.filename)
         self.structs: List[Struct] = []
+        self.namespace: List[str] = []
 
     def handle_node(self, node: clang.cindex.Cursor, struct: Optional[Struct]) -> bool:
         match node.kind:
@@ -44,11 +45,12 @@ class Walker:
 
                 # log.debug(f"{struct}: {type.spelling} {node.spelling} ({type.kind})")
                 if struct:
-                    member = Member.from_field(node)
+                    member = Member.from_field(node, self.namespace)
                     member.apply_comment_commands(struct.comment_commands)
                     struct.members.append(member)
 
             case CursorKind.NAMESPACE:
+                self.namespace.append(node.spelling)
                 # Ignore namespaces
                 pass
 

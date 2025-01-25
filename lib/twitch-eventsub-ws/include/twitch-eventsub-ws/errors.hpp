@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace error {
+namespace chatterino::eventsub::lib::error {
 
 class ApplicationErrorCategory final : public boost::system::error_category
 {
@@ -34,4 +34,4 @@ public:
 const ApplicationErrorCategory EXPECTED_OBJECT{"Expected object"};
 const ApplicationErrorCategory MISSING_KEY{"Missing key"};
 
-}  // namespace error
+}  // namespace chatterino::eventsub::lib::error

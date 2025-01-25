@@ -4,7 +4,7 @@
 
 #include <boost/json.hpp>
 
-namespace eventsub::messages {
+namespace chatterino::eventsub::lib::messages {
 
 // DESERIALIZATION IMPLEMENTATION START
 boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
@@ -107,4 +107,4 @@ boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
 }
 // DESERIALIZATION IMPLEMENTATION END
 
-}  // namespace eventsub::messages
+}  // namespace chatterino::eventsub::lib::messages

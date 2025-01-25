@@ -4,7 +4,7 @@
 
 #include <sstream>
 
-namespace eventsub {
+namespace chatterino::eventsub::lib {
 
 boost::json::result_for<std::chrono::system_clock::time_point,
                         boost::json::value>::type
@@ -24,4 +24,4 @@ boost::json::result_for<std::chrono::system_clock::time_point,
 
     return tp;
 }
-}  // namespace eventsub
+}  // namespace chatterino::eventsub::lib
