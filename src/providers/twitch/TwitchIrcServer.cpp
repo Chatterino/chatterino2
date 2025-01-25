@@ -252,6 +252,12 @@ void TwitchIrcServer::initialize()
                 auto now = QDateTime::currentDateTime();
                 chan->addOrReplaceClearChat(
                     MessageBuilder::makeClearChatMessage(now, actor), now);
+                if (getSettings()->hideModerated)
+                {
+                    // XXX: This is expensive. We could use a layout request if the layout
+                    //      would store the previous message flags.
+                    getApp()->getWindows()->forceLayoutChannelViews();
+                }
             });
         });
 
@@ -317,6 +323,12 @@ void TwitchIrcServer::initialize()
                 msg->flags.set(MessageFlag::PubSub);
                 chan->addOrReplaceTimeout(msg.release(),
                                           QDateTime::currentDateTime());
+                if (getSettings()->hideModerated)
+                {
+                    // XXX: This is expensive. We could use a layout request if the layout
+                    //      would store the previous message flags.
+                    getApp()->getWindows()->forceLayoutChannelViews();
+                }
             });
         });
 

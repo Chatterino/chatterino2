@@ -468,15 +468,16 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     {
         chan->disableAllMessages();
         chan->addOrReplaceClearChat(std::move(clearChat.message), time);
-        return;
+    }
+    else
+    {
+        chan->addOrReplaceTimeout(std::move(clearChat.message), time);
     }
 
-    chan->addOrReplaceTimeout(std::move(clearChat.message), time);
-
-    // refresh all
-    getApp()->getWindows()->repaintVisibleChatWidgets(chan.get());
     if (getSettings()->hideModerated)
     {
+        // XXX: This is expensive. We could use a layout request if the layout
+        //      would store the previous message flags.
         getApp()->getWindows()->forceLayoutChannelViews();
     }
 }

@@ -14,7 +14,7 @@
 - Bugfix: Fixed tabs not scaling to the default scale when changing the scale from a non-default value. (#5794)
 - Bugfix: Closing a usercard will no longer cause stop-logging messages to be generated in channel logs. (#5828)
 - Bugfix: Fixed tabs not scaling to the default scale when changing the scale from a non-default value. (#5794, #5833)
-- Bugfix: Fixed deleted messages not disappearing when "Hide deleted messages" is enabled. (#5844)
+- Bugfix: Fixed deleted messages not immediately disappearing when "Hide deleted messages" is enabled. (#5844, #5854)
 - Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
 - Dev: Updated Conan dependencies. (#5776)
 - Dev: Replaced usage of `parseTime` with `serverReceivedTime` for clearchat messages. (#5824)

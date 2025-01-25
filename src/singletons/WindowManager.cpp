@@ -144,6 +144,9 @@ WindowManager::WindowManager(const Paths &paths, Settings &settings,
     this->forceLayoutChannelViewsListener.add(settings.boldUsernames);
     this->forceLayoutChannelViewsListener.add(
         settings.showBlockedTermAutomodMessages);
+    this->forceLayoutChannelViewsListener.add(settings.hideModerated);
+    this->forceLayoutChannelViewsListener.add(
+        settings.streamerModeHideModActions);
 
     this->layoutChannelViewsListener.add(settings.timestampFormat);
     this->layoutChannelViewsListener.add(fonts.fontChanged);
