@@ -104,7 +104,8 @@ void EventSubClient::onChannelBan(
     auto chan = getApp()->getTwitch()->getChannelOrEmptyByID(roomID);
 
     runInGuiThread([action{std::move(action)}, chan{std::move(chan)}] {
-        MessageBuilder msg(action);
+        auto time = QDateTime::currentDateTime();
+        MessageBuilder msg(action, time);
         msg->flags.set(MessageFlag::PubSub);
         chan->addOrReplaceTimeout(msg.release(), QDateTime::currentDateTime());
     });
