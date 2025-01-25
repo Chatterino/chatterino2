@@ -1,28 +1,19 @@
 #include "providers/twitch/eventsub/Controller.hpp"
 
-#include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "messages/Message.hpp"
-#include "messages/MessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
-#include "providers/twitch/PubSubActions.hpp"
-#include "providers/twitch/TwitchIrcServer.hpp"
-#include "util/PostToThread.hpp"
+#include "providers/twitch/eventsub/Connection.hpp"
 #include "util/RenameThread.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/asio/ssl/verify_mode.hpp>
 #include <boost/certify/https_verification.hpp>
-#include <boost/json.hpp>
-#include <twitch-eventsub-ws/listener.hpp>
 #include <twitch-eventsub-ws/session.hpp>
 
-#include <chrono>
 #include <memory>
-
-using namespace std::literals::chrono_literals;
 
 namespace {
 
@@ -46,116 +37,6 @@ const auto &LOG = chatterinoTwitchEventSub;
 }  // namespace
 
 namespace chatterino::eventsub {
-
-void EventSubClient::onSessionWelcome(
-    lib::messages::Metadata metadata,
-    lib::payload::session_welcome::Payload payload)
-{
-    (void)metadata;
-    qCDebug(LOG) << "On session welcome:" << payload.id.c_str();
-
-    this->sessionID = QString::fromStdString(payload.id);
-}
-
-void EventSubClient::onNotification(lib::messages::Metadata metadata,
-                                    const boost::json::value &jv)
-{
-    (void)metadata;
-    auto jsonString = boost::json::serialize(jv);
-    qCDebug(LOG) << "on notification: " << jsonString.c_str();
-}
-
-void EventSubClient::onChannelBan(
-    lib::messages::Metadata metadata,
-    lib::payload::channel_ban::v1::Payload payload)
-{
-    (void)metadata;
-
-    auto roomID = QString::fromStdString(payload.event.broadcasterUserID);
-
-    BanAction action{};
-
-    action.timestamp = std::chrono::steady_clock::now();
-    action.roomID = roomID;
-    action.source = ActionUser{
-        .id = QString::fromStdString(payload.event.moderatorUserID),
-        .login = QString::fromStdString(payload.event.moderatorUserLogin),
-        .displayName = QString::fromStdString(payload.event.moderatorUserName),
-    };
-    action.target = ActionUser{
-        .id = QString::fromStdString(payload.event.userID),
-        .login = QString::fromStdString(payload.event.userLogin),
-        .displayName = QString::fromStdString(payload.event.userName),
-    };
-    action.reason = QString::fromStdString(payload.event.reason);
-    if (payload.event.isPermanent)
-    {
-        action.duration = 0;
-    }
-    else
-    {
-        auto timeoutDuration = payload.event.timeoutDuration();
-        auto timeoutDurationInSeconds =
-            std::chrono::duration_cast<std::chrono::seconds>(timeoutDuration)
-                .count();
-        action.duration = timeoutDurationInSeconds;
-    }
-
-    auto chan = getApp()->getTwitch()->getChannelOrEmptyByID(roomID);
-
-    runInGuiThread([action{std::move(action)}, chan{std::move(chan)}] {
-        auto time = QDateTime::currentDateTime();
-        MessageBuilder msg(action, time);
-        msg->flags.set(MessageFlag::PubSub);
-        chan->addOrReplaceTimeout(msg.release(), QDateTime::currentDateTime());
-    });
-}
-
-void EventSubClient::onStreamOnline(
-    lib::messages::Metadata metadata,
-    lib::payload::stream_online::v1::Payload payload)
-{
-    (void)metadata;
-    qCDebug(LOG) << "On stream online event for channel"
-                 << payload.event.broadcasterUserLogin.c_str();
-}
-
-void EventSubClient::onStreamOffline(
-    lib::messages::Metadata metadata,
-    lib::payload::stream_offline::v1::Payload payload)
-{
-    (void)metadata;
-    qCDebug(LOG) << "On stream offline event for channel"
-                 << payload.event.broadcasterUserLogin.c_str();
-}
-
-void EventSubClient::onChannelChatNotification(
-    lib::messages::Metadata metadata,
-    lib::payload::channel_chat_notification::v1::Payload payload)
-{
-    (void)metadata;
-    qCDebug(LOG) << "On channel chat notification for"
-                 << payload.event.broadcasterUserLogin.c_str();
-}
-
-void EventSubClient::onChannelUpdate(
-    lib::messages::Metadata metadata,
-    lib::payload::channel_update::v1::Payload payload)
-{
-    (void)metadata;
-    qCDebug(LOG) << "On channel update for"
-                 << payload.event.broadcasterUserLogin.c_str();
-}
-
-void EventSubClient::onChannelChatMessage(
-    lib::messages::Metadata metadata,
-    lib::payload::channel_chat_message::v1::Payload payload)
-{
-    (void)metadata;
-
-    qCDebug(LOG) << "Channel chat message event for"
-                 << payload.event.broadcasterUserLogin.c_str();
-}
 
 Controller::Controller()
     : userAgent(QStringLiteral("chatterino/%1 (%2)")
@@ -221,7 +102,7 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isQueued)
             }
 
             auto *listener =
-                dynamic_cast<EventSubClient *>(connection->getListener());
+                dynamic_cast<Connection *>(connection->getListener());
 
             if (listener == nullptr)
             {
@@ -288,7 +169,7 @@ void Controller::createConnection()
         }
 
         auto connection = std::make_shared<lib::Session>(
-            this->ioContext, sslContext, std::make_unique<EventSubClient>());
+            this->ioContext, sslContext, std::make_unique<Connection>());
 
         this->registerConnection(connection);
 
