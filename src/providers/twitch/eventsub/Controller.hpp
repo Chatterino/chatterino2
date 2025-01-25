@@ -14,42 +14,40 @@
 #include <string>
 #include <thread>
 
-namespace chatterino {
+namespace chatterino::eventsub {
 
-class EventSubClient final : public eventsub::Listener
+class EventSubClient final : public lib::Listener
 {
 public:
     void onSessionWelcome(
-        eventsub::messages::Metadata metadata,
-        eventsub::payload::session_welcome::Payload payload) override;
+        lib::messages::Metadata metadata,
+        lib::payload::session_welcome::Payload payload) override;
 
-    void onNotification(eventsub::messages::Metadata metadata,
+    void onNotification(lib::messages::Metadata metadata,
                         const boost::json::value &jv) override;
 
-    void onChannelBan(
-        eventsub::messages::Metadata metadata,
-        eventsub::payload::channel_ban::v1::Payload payload) override;
+    void onChannelBan(lib::messages::Metadata metadata,
+                      lib::payload::channel_ban::v1::Payload payload) override;
 
     void onStreamOnline(
-        eventsub::messages::Metadata metadata,
-        eventsub::payload::stream_online::v1::Payload payload) override;
+        lib::messages::Metadata metadata,
+        lib::payload::stream_online::v1::Payload payload) override;
 
     void onStreamOffline(
-        eventsub::messages::Metadata metadata,
-        eventsub::payload::stream_offline::v1::Payload payload) override;
+        lib::messages::Metadata metadata,
+        lib::payload::stream_offline::v1::Payload payload) override;
 
     void onChannelChatNotification(
-        eventsub::messages::Metadata metadata,
-        eventsub::payload::channel_chat_notification::v1::Payload payload)
-        override;
+        lib::messages::Metadata metadata,
+        lib::payload::channel_chat_notification::v1::Payload payload) override;
 
     void onChannelUpdate(
-        eventsub::messages::Metadata metadata,
-        eventsub::payload::channel_update::v1::Payload payload) override;
+        lib::messages::Metadata metadata,
+        lib::payload::channel_update::v1::Payload payload) override;
 
     void onChannelChatMessage(
-        eventsub::messages::Metadata metadata,
-        eventsub::payload::channel_chat_message::v1::Payload payload) override;
+        lib::messages::Metadata metadata,
+        lib::payload::channel_chat_message::v1::Payload payload) override;
 
     QString getSessionID() const
     {
@@ -60,11 +58,11 @@ private:
     QString sessionID;
 };
 
-class EventSub
+class Controller
 {
 public:
-    EventSub();
-    ~EventSub();
+    Controller();
+    ~Controller();
 
     /// Subscribe will make a request to each open connection and ask them to
     /// add this subscription.
@@ -81,7 +79,7 @@ public:
 
 private:
     void createConnection();
-    void registerConnection(std::weak_ptr<eventsub::Session> &&connection);
+    void registerConnection(std::weak_ptr<lib::Session> &&connection);
 
     const std::string userAgent;
 
@@ -94,11 +92,11 @@ private:
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
         work;
 
-    std::vector<std::weak_ptr<eventsub::Session>> connections;
+    std::vector<std::weak_ptr<lib::Session>> connections;
 
     std::unordered_map<SubscriptionRequest,
                        std::unique_ptr<boost::asio::deadline_timer>>
         queuedSubscriptions;
 };
 
-}  // namespace chatterino
+}  // namespace chatterino::eventsub

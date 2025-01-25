@@ -9,7 +9,7 @@
 #include "twitch-eventsub-ws/payloads/stream-offline-v1.hpp"
 #include "twitch-eventsub-ws/payloads/stream-online-v1.hpp"
 
-namespace eventsub {
+namespace chatterino::eventsub::lib {
 
 class Listener
 {
@@ -50,4 +50,4 @@ public:
     // Add your new subscription types above this line
 };
 
-}  // namespace eventsub
+}  // namespace chatterino::eventsub::lib

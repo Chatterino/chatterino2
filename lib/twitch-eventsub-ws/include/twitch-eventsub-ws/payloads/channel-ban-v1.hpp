@@ -7,7 +7,7 @@
 #include <chrono>
 #include <string>
 
-namespace eventsub::payload::channel_ban::v1 {
+namespace chatterino::eventsub::lib::payload::channel_ban::v1 {
 
 /*
 {
@@ -105,4 +105,4 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<Payload>, const boost::json::value &jvRoot);
 // DESERIALIZATION DEFINITION END
 
-}  // namespace eventsub::payload::channel_ban::v1
+}  // namespace chatterino::eventsub::lib::payload::channel_ban::v1

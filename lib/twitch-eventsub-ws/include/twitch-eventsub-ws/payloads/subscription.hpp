@@ -6,7 +6,7 @@
 
 #include <string>
 
-namespace eventsub::payload::subscription {
+namespace chatterino::eventsub::lib::payload::subscription {
 
 /*
 {
@@ -63,4 +63,4 @@ boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
     const boost::json::value &jvRoot);
 // DESERIALIZATION DEFINITION END
 
-}  // namespace eventsub::payload::subscription
+}  // namespace chatterino::eventsub::lib::payload::subscription

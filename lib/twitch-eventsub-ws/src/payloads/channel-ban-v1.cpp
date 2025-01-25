@@ -5,7 +5,7 @@
 
 #include <boost/json.hpp>
 
-namespace eventsub::payload::channel_ban::v1 {
+namespace chatterino::eventsub::lib::payload::channel_ban::v1 {
 
 std::chrono::system_clock::duration Event::timeoutDuration() const
 {
@@ -314,4 +314,4 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
 }
 // DESERIALIZATION IMPLEMENTATION END
 
-}  // namespace eventsub::payload::channel_ban::v1
+}  // namespace chatterino::eventsub::lib::payload::channel_ban::v1

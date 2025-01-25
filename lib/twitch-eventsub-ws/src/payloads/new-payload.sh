@@ -40,7 +40,7 @@ cat > "$SCRIPT_DIR/../../include/twitch-eventsub-ws/payloads/$header_file_name" 
 
 #include <string>
 
-namespace eventsub::payload::$underscored_subscription_name::$subscription_version {
+namespace chatterino::eventsub::lib::payload::$underscored_subscription_name::$subscription_version {
 
 /// json_transform=snake_case
 struct Event {
@@ -56,7 +56,7 @@ struct Payload {
 // DESERIALIZATION DEFINITION START
 // DESERIALIZATION DEFINITION END
 
-}  // namespace eventsub::payload::$underscored_subscription_name::$subscription_version
+}  // namespace chatterino::eventsub::lib::payload::$underscored_subscription_name::$subscription_version
 EOF
 
 # Write the source file
@@ -67,12 +67,12 @@ cat > "$SCRIPT_DIR/$source_file_name" << EOF
 
 #include <boost/json.hpp>
 
-namespace eventsub::payload::$underscored_subscription_name::$subscription_version {
+namespace chatterino::eventsub::lib::payload::$underscored_subscription_name::$subscription_version {
 
 // DESERIALIZATION IMPLEMENTATION START
 // DESERIALIZATION IMPLEMENTATION END
 
-}  // namespace eventsub::payload::$underscored_subscription_name::$subscription_version
+}  // namespace chatterino::eventsub::lib::payload::$underscored_subscription_name::$subscription_version
 EOF
 
 echo "Steps that are left for you:"

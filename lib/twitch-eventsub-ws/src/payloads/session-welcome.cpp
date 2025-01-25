@@ -4,7 +4,7 @@
 
 #include <boost/json.hpp>
 
-namespace eventsub::payload::session_welcome {
+namespace chatterino::eventsub::lib::payload::session_welcome {
 
 // DESERIALIZATION IMPLEMENTATION START
 boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
@@ -54,4 +54,4 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
 }
 // DESERIALIZATION IMPLEMENTATION END
 
-}  // namespace eventsub::payload::session_welcome
+}  // namespace chatterino::eventsub::lib::payload::session_welcome

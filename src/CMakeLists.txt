@@ -390,10 +390,6 @@ set(SOURCE_FILES
 
         providers/twitch/ChannelPointReward.cpp
         providers/twitch/ChannelPointReward.hpp
-        providers/twitch/eventsub/SubscriptionRequest.cpp
-        providers/twitch/eventsub/SubscriptionRequest.hpp
-        providers/twitch/EventSub.cpp
-        providers/twitch/EventSub.hpp
         providers/twitch/IrcMessageHandler.cpp
         providers/twitch/IrcMessageHandler.hpp
         providers/twitch/PubSubActions.cpp
@@ -430,6 +426,11 @@ set(SOURCE_FILES
         providers/twitch/TwitchUser.hpp
         providers/twitch/TwitchUsers.cpp
         providers/twitch/TwitchUsers.hpp
+
+        providers/twitch/eventsub/Controller.cpp
+        providers/twitch/eventsub/Controller.hpp
+        providers/twitch/eventsub/SubscriptionRequest.cpp
+        providers/twitch/eventsub/SubscriptionRequest.hpp
 
         providers/twitch/pubsubmessages/AutoMod.cpp
         providers/twitch/pubsubmessages/AutoMod.hpp

@@ -6,7 +6,7 @@
 
 #include <string>
 
-namespace eventsub::payload::session_welcome {
+namespace chatterino::eventsub::lib::payload::session_welcome {
 
 /*
 {
@@ -33,4 +33,4 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<Payload>, const boost::json::value &jvRoot);
 // DESERIALIZATION DEFINITION END
 
-}  // namespace eventsub::payload::session_welcome
+}  // namespace chatterino::eventsub::lib::payload::session_welcome

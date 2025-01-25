@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, List
 
 import logging
 
@@ -13,11 +13,17 @@ from .membertype import MemberType
 log = logging.getLogger(__name__)
 
 
-def get_type_name(type: clang.cindex.Type) -> str:
+def get_type_name(type: clang.cindex.Type, namespace: List[str]) -> str:
+    if namespace:
+        namespace_str = f"{'::'.join(namespace)}::"
+    else:
+        namespace_str = ""
     type_name = type.spelling
 
     if type.is_const_qualified():
         type_name = type_name.replace("const", "").strip()
+
+    type_name = type_name.removeprefix(namespace_str)
 
     return type_name
 
@@ -62,12 +68,12 @@ class Member:
                     log.warning(f"Unknown comment command found: {other} with value {value}")
 
     @staticmethod
-    def from_field(node: clang.cindex.Cursor) -> Member:
+    def from_field(node: clang.cindex.Cursor, namespace: List[str]) -> Member:
         assert node.type is not None
 
         name = node.spelling
         member_type = MemberType.BASIC
-        type_name = get_type_name(node.type)
+        type_name = get_type_name(node.type, namespace)
 
         log.debug(f"{node.spelling} - {type_name} - {node.type.is_const_qualified()}")
 
@@ -80,7 +86,9 @@ class Member:
             # log.debug(node.type.get_template_argument_type(0).get_named_type().spelling)
             # log.debug(node.type.get_template_argument_type(0).get_class_type().spelling)
 
-            type_name = get_type_name(node.type.get_template_argument_type(0))
+            type_name = get_type_name(
+                node.type.get_template_argument_type(0), namespace
+            )
 
             for xd in node.get_children():
                 match xd.kind:
@@ -110,7 +118,7 @@ class Member:
                                 log.warning(f"Unhandled template type: {other}")
 
                     case CursorKind.TYPE_REF:
-                        type_name = get_type_name(xd.type)
+                        type_name = get_type_name(xd.type, namespace)
 
                     case other:
                         log.debug(f"Unhandled child kind type: {other}")

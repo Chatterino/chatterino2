@@ -1,6 +1,6 @@
 #include "providers/twitch/eventsub/SubscriptionRequest.hpp"
 
-namespace chatterino {
+namespace chatterino::eventsub {
 
 bool operator==(const SubscriptionRequest &lhs, const SubscriptionRequest &rhs)
 {
@@ -15,4 +15,4 @@ bool operator!=(const SubscriptionRequest &lhs, const SubscriptionRequest &rhs)
     return !(lhs == rhs);
 }
 
-}  // namespace chatterino
+}  // namespace chatterino::eventsub

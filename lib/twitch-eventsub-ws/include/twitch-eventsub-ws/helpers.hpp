@@ -6,7 +6,7 @@
 #include <optional>
 #include <string_view>
 
-namespace eventsub {
+namespace chatterino::eventsub::lib {
 
 template <typename T>
 std::optional<T> readMember(const boost::json::object &obj,
@@ -32,4 +32,4 @@ std::optional<T> readMember(const boost::json::object &obj,
     return result.value();
 }
 
-}  // namespace eventsub
+}  // namespace chatterino::eventsub::lib

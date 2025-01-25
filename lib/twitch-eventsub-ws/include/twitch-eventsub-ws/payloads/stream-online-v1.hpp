@@ -6,7 +6,7 @@
 
 #include <string>
 
-namespace eventsub::payload::stream_online::v1 {
+namespace chatterino::eventsub::lib::payload::stream_online::v1 {
 
 /// json_transform=snake_case
 struct Event {
@@ -42,4 +42,4 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<Payload>, const boost::json::value &jvRoot);
 // DESERIALIZATION DEFINITION END
 
-}  // namespace eventsub::payload::stream_online::v1
+}  // namespace chatterino::eventsub::lib::payload::stream_online::v1

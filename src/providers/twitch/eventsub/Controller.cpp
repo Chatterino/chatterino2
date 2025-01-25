@@ -1,4 +1,4 @@
-#include "providers/twitch/EventSub.hpp"
+#include "providers/twitch/eventsub/Controller.hpp"
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
@@ -45,11 +45,11 @@ const auto &LOG = chatterinoTwitchEventSub;
 
 }  // namespace
 
-namespace chatterino {
+namespace chatterino::eventsub {
 
 void EventSubClient::onSessionWelcome(
-    eventsub::messages::Metadata metadata,
-    eventsub::payload::session_welcome::Payload payload)
+    lib::messages::Metadata metadata,
+    lib::payload::session_welcome::Payload payload)
 {
     (void)metadata;
     qCDebug(LOG) << "On session welcome:" << payload.id.c_str();
@@ -57,7 +57,7 @@ void EventSubClient::onSessionWelcome(
     this->sessionID = QString::fromStdString(payload.id);
 }
 
-void EventSubClient::onNotification(eventsub::messages::Metadata metadata,
+void EventSubClient::onNotification(lib::messages::Metadata metadata,
                                     const boost::json::value &jv)
 {
     (void)metadata;
@@ -66,8 +66,8 @@ void EventSubClient::onNotification(eventsub::messages::Metadata metadata,
 }
 
 void EventSubClient::onChannelBan(
-    eventsub::messages::Metadata metadata,
-    eventsub::payload::channel_ban::v1::Payload payload)
+    lib::messages::Metadata metadata,
+    lib::payload::channel_ban::v1::Payload payload)
 {
     (void)metadata;
 
@@ -112,8 +112,8 @@ void EventSubClient::onChannelBan(
 }
 
 void EventSubClient::onStreamOnline(
-    eventsub::messages::Metadata metadata,
-    eventsub::payload::stream_online::v1::Payload payload)
+    lib::messages::Metadata metadata,
+    lib::payload::stream_online::v1::Payload payload)
 {
     (void)metadata;
     qCDebug(LOG) << "On stream online event for channel"
@@ -121,8 +121,8 @@ void EventSubClient::onStreamOnline(
 }
 
 void EventSubClient::onStreamOffline(
-    eventsub::messages::Metadata metadata,
-    eventsub::payload::stream_offline::v1::Payload payload)
+    lib::messages::Metadata metadata,
+    lib::payload::stream_offline::v1::Payload payload)
 {
     (void)metadata;
     qCDebug(LOG) << "On stream offline event for channel"
@@ -130,8 +130,8 @@ void EventSubClient::onStreamOffline(
 }
 
 void EventSubClient::onChannelChatNotification(
-    eventsub::messages::Metadata metadata,
-    eventsub::payload::channel_chat_notification::v1::Payload payload)
+    lib::messages::Metadata metadata,
+    lib::payload::channel_chat_notification::v1::Payload payload)
 {
     (void)metadata;
     qCDebug(LOG) << "On channel chat notification for"
@@ -139,8 +139,8 @@ void EventSubClient::onChannelChatNotification(
 }
 
 void EventSubClient::onChannelUpdate(
-    eventsub::messages::Metadata metadata,
-    eventsub::payload::channel_update::v1::Payload payload)
+    lib::messages::Metadata metadata,
+    lib::payload::channel_update::v1::Payload payload)
 {
     (void)metadata;
     qCDebug(LOG) << "On channel update for"
@@ -148,8 +148,8 @@ void EventSubClient::onChannelUpdate(
 }
 
 void EventSubClient::onChannelChatMessage(
-    eventsub::messages::Metadata metadata,
-    eventsub::payload::channel_chat_message::v1::Payload payload)
+    lib::messages::Metadata metadata,
+    lib::payload::channel_chat_message::v1::Payload payload)
 {
     (void)metadata;
 
@@ -157,7 +157,7 @@ void EventSubClient::onChannelChatMessage(
                  << payload.event.broadcasterUserLogin.c_str();
 }
 
-EventSub::EventSub()
+Controller::Controller()
     : userAgent(QStringLiteral("chatterino/%1 (%2)")
                     .arg(Version::instance().version(),
                          Version::instance().commitHash())
@@ -174,7 +174,7 @@ EventSub::EventSub()
     renameThread(*this->thread, "C2EventSub");
 }
 
-EventSub::~EventSub()
+Controller::~Controller()
 {
     this->work.reset();
 
@@ -190,7 +190,7 @@ EventSub::~EventSub()
     }
 }
 
-void EventSub::subscribe(const SubscriptionRequest &request, bool isQueued)
+void Controller::subscribe(const SubscriptionRequest &request, bool isQueued)
 {
     qCInfo(LOG) << "Subscribe request for" << request.subscriptionType;
     boost::asio::post(this->ioContext, [this, request, isQueued] {
@@ -270,7 +270,7 @@ void EventSub::subscribe(const SubscriptionRequest &request, bool isQueued)
     });
 }
 
-void EventSub::createConnection()
+void Controller::createConnection()
 {
     try
     {
@@ -287,7 +287,7 @@ void EventSub::createConnection()
             boost::certify::enable_native_https_server_verification(sslContext);
         }
 
-        auto connection = std::make_shared<eventsub::Session>(
+        auto connection = std::make_shared<lib::Session>(
             this->ioContext, sslContext, std::make_unique<EventSubClient>());
 
         this->registerConnection(connection);
@@ -301,9 +301,9 @@ void EventSub::createConnection()
     }
 }
 
-void EventSub::registerConnection(std::weak_ptr<eventsub::Session> &&connection)
+void Controller::registerConnection(std::weak_ptr<lib::Session> &&connection)
 {
     this->connections.emplace_back(std::move(connection));
 }
 
-}  // namespace chatterino
+}  // namespace chatterino::eventsub

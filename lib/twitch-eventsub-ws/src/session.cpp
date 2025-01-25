@@ -24,7 +24,7 @@ namespace beast = boost::beast;
 namespace http = beast::http;
 namespace websocket = beast::websocket;
 
-namespace eventsub {
+namespace chatterino::eventsub::lib {
 
 // Subscription Type + Subscription Version
 using EventSubSubscription = std::pair<std::string, std::string>;
@@ -67,8 +67,7 @@ namespace {
             {"channel.ban", "1"},
             [](const auto &metadata, const auto &jv, auto &listener) {
                 auto oPayload =
-                    parsePayload<eventsub::payload::channel_ban::v1::Payload>(
-                        jv);
+                    parsePayload<payload::channel_ban::v1::Payload>(jv);
                 if (!oPayload)
                 {
                     return;
@@ -80,8 +79,7 @@ namespace {
             {"stream.online", "1"},
             [](const auto &metadata, const auto &jv, auto &listener) {
                 auto oPayload =
-                    parsePayload<eventsub::payload::stream_online::v1::Payload>(
-                        jv);
+                    parsePayload<payload::stream_online::v1::Payload>(jv);
                 if (!oPayload)
                 {
                     return;
@@ -92,8 +90,8 @@ namespace {
         {
             {"stream.offline", "1"},
             [](const auto &metadata, const auto &jv, auto &listener) {
-                auto oPayload = parsePayload<
-                    eventsub::payload::stream_offline::v1::Payload>(jv);
+                auto oPayload =
+                    parsePayload<payload::stream_offline::v1::Payload>(jv);
                 if (!oPayload)
                 {
                     return;
@@ -105,8 +103,7 @@ namespace {
             {"channel.chat.notification", "1"},
             [](const auto &metadata, const auto &jv, auto &listener) {
                 auto oPayload = parsePayload<
-                    eventsub::payload::channel_chat_notification::v1::Payload>(
-                    jv);
+                    payload::channel_chat_notification::v1::Payload>(jv);
                 if (!oPayload)
                 {
                     return;
@@ -117,8 +114,8 @@ namespace {
         {
             {"channel.update", "1"},
             [](const auto &metadata, const auto &jv, auto &listener) {
-                auto oPayload = parsePayload<
-                    eventsub::payload::channel_update::v1::Payload>(jv);
+                auto oPayload =
+                    parsePayload<payload::channel_update::v1::Payload>(jv);
                 if (!oPayload)
                 {
                     return;
@@ -129,8 +126,9 @@ namespace {
         {
             {"channel.chat.message", "1"},
             [](const auto &metadata, const auto &jv, auto &listener) {
-                auto oPayload = parsePayload<
-                    eventsub::payload::channel_chat_message::v1::Payload>(jv);
+                auto oPayload =
+                    parsePayload<payload::channel_chat_message::v1::Payload>(
+                        jv);
                 if (!oPayload)
                 {
                     return;
@@ -415,4 +413,4 @@ void Session::onClose(beast::error_code ec)
     std::cout << beast::make_printable(buffer.data()) << std::endl;
 }
 
-}  // namespace eventsub
+}  // namespace chatterino::eventsub::lib
