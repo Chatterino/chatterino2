@@ -2037,7 +2037,7 @@ void TwitchChannel::upsertPersonalSeventvEmotes(
         const auto flush = [&]() {
             elements.emplace_back(std::make_unique<TextElement>(
                 std::move(words), textElement->getFlags(), textElement->color(),
-                textElement->style()));
+                textElement->fontStyle()));
             words.clear();
         };
 
