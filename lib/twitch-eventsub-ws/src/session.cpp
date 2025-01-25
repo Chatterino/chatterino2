@@ -283,6 +283,11 @@ void Session::run(std::string _host, std::string _port, std::string _path,
         beast::bind_front_handler(&Session::onResolve, shared_from_this()));
 }
 
+Listener *Session::getListener()
+{
+    return this->listener.get();
+}
+
 void Session::onResolve(beast::error_code ec,
                         boost::asio::ip::tcp::resolver::results_type results)
 {
