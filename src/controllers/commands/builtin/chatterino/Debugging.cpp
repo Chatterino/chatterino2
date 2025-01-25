@@ -194,7 +194,47 @@ QString debugEventSub(const CommandContext &ctx)
 {
     (void)ctx;
 
-    getApp()->getEventSub()->createConnection();
+    if (ctx.twitchChannel == nullptr)
+    {
+        return "";
+    }
+
+    // purposefully subscribe multiple times to ensure we can't sub too many times
+    // or create too many connections
+
+    getApp()->getEventSub()->subscribe(SubscriptionRequest{
+        .subscriptionType = "channel.ban",
+        .subscriptionVersion = "1",
+        .conditions =
+            {
+                {
+                    "broadcaster_user_id",
+                    ctx.twitchChannel->roomId(),
+                },
+            },
+    });
+    getApp()->getEventSub()->subscribe(SubscriptionRequest{
+        .subscriptionType = "channel.ban",
+        .subscriptionVersion = "1",
+        .conditions =
+            {
+                {
+                    "broadcaster_user_id",
+                    ctx.twitchChannel->roomId(),
+                },
+            },
+    });
+    getApp()->getEventSub()->subscribe(SubscriptionRequest{
+        .subscriptionType = "channel.ban",
+        .subscriptionVersion = "1",
+        .conditions =
+            {
+                {
+                    "broadcaster_user_id",
+                    ctx.twitchChannel->roomId(),
+                },
+            },
+    });
 
     return "";
 }

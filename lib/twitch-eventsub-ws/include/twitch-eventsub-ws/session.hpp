@@ -46,6 +46,8 @@ public:
     void run(std::string _host, std::string _port, std::string _path,
              std::string _userAgent);
 
+    Listener *getListener();
+
 private:
     void onResolve(boost::beast::error_code ec,
                    boost::asio::ip::tcp::resolver::results_type results);
