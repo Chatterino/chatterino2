@@ -17,7 +17,7 @@
 - Bugfix: Fixed deleted messages not immediately disappearing when "Hide deleted messages" is enabled. (#5844, #5854)
 - Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
 - Dev: Updated Conan dependencies. (#5776)
-- Dev: Replaced usage of `parseTime` with `serverReceivedTime` for clearchat messages. (#5824)
+- Dev: Replaced usage of `parseTime` with `serverReceivedTime` for clearchat messages. (#5824, #5855)
 - Dev: Support Boost 1.87. (#5832)
 - Dev: Words from `TextElement`s are now combined where possible. (#5847)
 
