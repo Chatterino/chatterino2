@@ -29,6 +29,7 @@
 #include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
+#include "providers/twitch/eventsub/Controller.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -1464,6 +1465,22 @@ void TwitchChannel::refreshPubSub()
     {
         getApp()->getTwitchPubSub()->listenToAutomod(roomId);
         getApp()->getTwitchPubSub()->listenToLowTrustUsers(roomId);
+        this->eventSubChannelBanHandle =
+            getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
+                .subscriptionType = "channel.ban",
+                .subscriptionVersion = "1",
+                .conditions =
+                    {
+                        {
+                            "broadcaster_user_id",
+                            roomId,
+                        },
+                    },
+            });
+    }
+    else
+    {
+        this->eventSubChannelBanHandle.reset();
     }
     getApp()->getTwitchPubSub()->listenToChannelPointRewards(roomId);
 }

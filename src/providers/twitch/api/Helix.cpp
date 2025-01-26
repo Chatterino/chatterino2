@@ -3189,17 +3189,22 @@ void Helix::getFollowedChannel(
 }
 
 void Helix::createEventSubSubscription(
-    const QString &type, const QString &version, const QString &sessionID,
-    const QJsonObject &condition,
+    const eventsub::SubscriptionRequest &request, const QString &sessionID,
     ResultCallback<HelixCreateEventSubSubscriptionResponse> successCallback,
     FailureCallback<HelixCreateEventSubSubscriptionError, QString>
         failureCallback)
 {
     using Error = HelixCreateEventSubSubscriptionError;
 
+    QJsonObject condition;
+    for (const auto &[conditionKey, conditionValue] : request.conditions)
+    {
+        condition.insert(conditionKey, conditionValue);
+    }
+
     QJsonObject body;
-    body.insert("type", type);
-    body.insert("version", version);
+    body.insert("type", request.subscriptionType);
+    body.insert("version", request.subscriptionVersion);
     body.insert("condition", condition);
 
     QJsonObject transport;
@@ -3247,6 +3252,10 @@ void Helix::createEventSubSubscription(
 
                 case 403: {
                     failureCallback(Error::Forbidden, message);
+                }
+                break;
+                case 409: {
+                    failureCallback(Error::Conflict, message);
                 }
                 break;
 
