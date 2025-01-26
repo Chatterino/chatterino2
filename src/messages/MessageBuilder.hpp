@@ -261,6 +261,8 @@ public:
     static MessagePtrMut makeAccountExpiredMessage(
         const QString &expirationText);
 
+    static MessagePtrMut makeMissingScopesMessage(const QString &missingScopes);
+
 private:
     struct TextState {
         TwitchChannel *twitchChannel = nullptr;

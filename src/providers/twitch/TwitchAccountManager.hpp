@@ -26,7 +26,7 @@ class TwitchAccount;
 struct TwitchAccountData;
 class AccountController;
 
-extern const QString DEVICE_AUTH_SCOPES;
+extern const std::vector<QStringView> DEVICE_AUTH_SCOPES;
 extern const QString DEVICE_AUTH_CLIENT_ID;
 
 class TwitchAccountManager

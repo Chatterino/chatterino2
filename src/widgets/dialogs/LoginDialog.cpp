@@ -105,6 +105,7 @@ private:
     QString verificationUri_;
     QString userCode_;
     QString deviceCode_;
+    QString scopes_;
 };
 
 DeviceLoginWidget::DeviceLoginWidget()
@@ -147,11 +148,21 @@ void DeviceLoginWidget::reset(const QString &prevError)
     layout->addWidget(titleLabel, 1, Qt::AlignCenter);
     layout->addWidget(this->detailLabel, 0, Qt::AlignCenter);
 
+    this->scopes_ = {};
+    for (auto scope : DEVICE_AUTH_SCOPES)
+    {
+        if (!this->scopes_.isEmpty())
+        {
+            this->scopes_.append(' ');
+        }
+        this->scopes_.append(scope);
+    }
+
     auto *startButton = new QPushButton(u"Start"_s);
     connect(startButton, &QPushButton::clicked, this, [this] {
         QUrlQuery query{
             {u"client_id"_s, DEVICE_AUTH_CLIENT_ID},
-            {u"scopes"_s, DEVICE_AUTH_SCOPES},
+            {u"scopes"_s, this->scopes_},
         };
         NetworkRequest(u"https://id.twitch.tv/oauth2/device"_s,
                        NetworkRequestType::Post)
@@ -304,7 +315,7 @@ void DeviceLoginWidget::ping()
 {
     QUrlQuery query{
         {u"client_id"_s, DEVICE_AUTH_CLIENT_ID},
-        {u"scope"_s, DEVICE_AUTH_SCOPES},
+        {u"scope"_s, this->scopes_},
         {u"device_code"_s, this->deviceCode_},
         {u"grant_type"_s, u"urn:ietf:params:oauth:grant-type:device_code"_s},
     };
