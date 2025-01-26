@@ -20,6 +20,7 @@
 #include <boost/container_hash/hash.hpp>
 #include <QAbstractAnimation>
 #include <QApplication>
+#include <QDebug>
 #include <QDialogButtonBox>
 #include <QLabel>
 #include <QLinearGradient>
