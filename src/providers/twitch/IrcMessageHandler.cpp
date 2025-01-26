@@ -1094,7 +1094,11 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
         if (isSub)
         {
             msg->flags.set(MessageFlag::Subscription);
-            msg->flags.unset(MessageFlag::Highlighted);
+
+            if (tags.value("msg-id") != "announcement")
+            {
+                msg->flags.unset(MessageFlag::Highlighted);
+            }
         }
 
         sink.applySimilarityFilters(msg);
