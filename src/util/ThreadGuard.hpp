@@ -14,6 +14,13 @@ struct ThreadGuard {
     mutable std::optional<std::thread::id> threadID;
 #endif
 
+    ThreadGuard() = default;
+
+    explicit ThreadGuard(std::thread::id threadID_)
+        : threadID(threadID_)
+    {
+    }
+
     inline void guard() const
     {
 #ifndef NDEBUG
