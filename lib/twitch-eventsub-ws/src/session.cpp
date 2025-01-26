@@ -281,6 +281,16 @@ void Session::run(std::string _host, std::string _port, std::string _path,
         beast::bind_front_handler(&Session::onResolve, shared_from_this()));
 }
 
+void Session::close()
+{
+    boost::beast::websocket::close_reason closeReason("Shutting down");
+
+    // TODO: Test this with a misbehaving eventsub server that doesn't respond to our close
+    this->ws.async_close(
+        closeReason,
+        beast::bind_front_handler(&Session::onClose, shared_from_this()));
+}
+
 Listener *Session::getListener()
 {
     return this->listener.get();

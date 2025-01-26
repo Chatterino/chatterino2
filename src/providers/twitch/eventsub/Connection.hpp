@@ -1,9 +1,13 @@
 #pragma once
 
+#include "providers/twitch/eventsub/SubscriptionRequest.hpp"
 #include "twitch-eventsub-ws/listener.hpp"
 #include "twitch-eventsub-ws/session.hpp"
 
+#include <boost/date_time.hpp>
 #include <QString>
+
+#include <unordered_set>
 
 namespace chatterino::eventsub {
 
@@ -40,13 +44,16 @@ public:
         lib::messages::Metadata metadata,
         lib::payload::channel_chat_message::v1::Payload payload) override;
 
-    QString getSessionID() const
-    {
-        return this->sessionID;
-    }
+    QString getSessionID() const;
+
+    bool isSubscribedTo(const SubscriptionRequest &request) const;
+    void markRequestSubscribed(const SubscriptionRequest &request);
+    // TODO: Add an "markRequestUnsubscribed" method
 
 private:
     QString sessionID;
+
+    std::unordered_set<SubscriptionRequest> subscriptions;
 };
 
 }  // namespace chatterino::eventsub

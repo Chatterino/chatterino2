@@ -2,6 +2,7 @@
 
 #include "common/Aliases.hpp"
 #include "common/network/NetworkRequest.hpp"
+#include "providers/twitch/eventsub/SubscriptionRequest.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/Helpers.hpp"
 #include "util/QStringHash.hpp"
@@ -1208,8 +1209,7 @@ public:
 
     // https://dev.twitch.tv/docs/api/reference/#create-eventsub-subscription
     virtual void createEventSubSubscription(
-        const QString &type, const QString &version, const QString &sessionID,
-        const QJsonObject &condition,
+        const eventsub::SubscriptionRequest &request, const QString &sessionID,
         ResultCallback<HelixCreateEventSubSubscriptionResponse> successCallback,
         FailureCallback<HelixCreateEventSubSubscriptionError, QString>
             failureCallback) = 0;
@@ -1559,8 +1559,7 @@ public:
 
     // https://dev.twitch.tv/docs/api/reference/#create-eventsub-subscription
     void createEventSubSubscription(
-        const QString &type, const QString &version, const QString &sessionID,
-        const QJsonObject &condition,
+        const eventsub::SubscriptionRequest &request, const QString &sessionID,
         ResultCallback<HelixCreateEventSubSubscriptionResponse> successCallback,
         FailureCallback<HelixCreateEventSubSubscriptionError, QString>
             failureCallback) final;

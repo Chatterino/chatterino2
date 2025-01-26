@@ -132,4 +132,19 @@ void Connection::onChannelChatMessage(
                  << payload.event.broadcasterUserLogin.c_str();
 }
 
+QString Connection::getSessionID() const
+{
+    return this->sessionID;
+}
+
+bool Connection::isSubscribedTo(const SubscriptionRequest &request) const
+{
+    return this->subscriptions.contains(request);
+}
+
+void Connection::markRequestSubscribed(const SubscriptionRequest &request)
+{
+    this->subscriptions.emplace(request);
+}
+
 }  // namespace chatterino::eventsub

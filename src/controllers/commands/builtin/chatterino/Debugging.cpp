@@ -202,7 +202,9 @@ QString debugEventSub(const CommandContext &ctx)
     // purposefully subscribe multiple times to ensure we can't sub too many times
     // or create too many connections
 
-    getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
+    static eventsub::SubscriptionHandle handle1;
+
+    handle1 = getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
         .subscriptionType = "channel.ban",
         .subscriptionVersion = "1",
         .conditions =
@@ -213,28 +215,30 @@ QString debugEventSub(const CommandContext &ctx)
                 },
             },
     });
-    getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
-        .subscriptionType = "channel.ban",
-        .subscriptionVersion = "1",
-        .conditions =
-            {
+    auto handle2 =
+        getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
+            .subscriptionType = "channel.ban",
+            .subscriptionVersion = "1",
+            .conditions =
                 {
-                    "broadcaster_user_id",
-                    ctx.twitchChannel->roomId(),
+                    {
+                        "broadcaster_user_id",
+                        ctx.twitchChannel->roomId(),
+                    },
                 },
-            },
-    });
-    getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
-        .subscriptionType = "channel.ban",
-        .subscriptionVersion = "1",
-        .conditions =
-            {
+        });
+    auto handle3 =
+        getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
+            .subscriptionType = "channel.ban",
+            .subscriptionVersion = "1",
+            .conditions =
                 {
-                    "broadcaster_user_id",
-                    ctx.twitchChannel->roomId(),
+                    {
+                        "broadcaster_user_id",
+                        ctx.twitchChannel->roomId(),
+                    },
                 },
-            },
-    });
+        });
 
     return "";
 }

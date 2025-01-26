@@ -20,6 +20,8 @@ struct SubscriptionRequest {
 
     /// Optional list of conditions for the subscription
     std::vector<std::pair<QString, QString>> conditions;
+
+    friend QDebug &operator<<(QDebug &dbg, const SubscriptionRequest &v);
 };
 
 bool operator==(const SubscriptionRequest &lhs, const SubscriptionRequest &rhs);

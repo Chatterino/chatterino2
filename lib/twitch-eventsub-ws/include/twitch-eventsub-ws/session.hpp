@@ -46,6 +46,8 @@ public:
     void run(std::string _host, std::string _port, std::string _path,
              std::string _userAgent);
 
+    void close();
+
     Listener *getListener();
 
 private:

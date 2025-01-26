@@ -431,6 +431,8 @@ set(SOURCE_FILES
         providers/twitch/eventsub/Connection.hpp
         providers/twitch/eventsub/Controller.cpp
         providers/twitch/eventsub/Controller.hpp
+        providers/twitch/eventsub/SubscriptionHandle.cpp
+        providers/twitch/eventsub/SubscriptionHandle.hpp
         providers/twitch/eventsub/SubscriptionRequest.cpp
         providers/twitch/eventsub/SubscriptionRequest.hpp
 

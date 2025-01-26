@@ -428,8 +428,8 @@ public:
         (override));
 
     MOCK_METHOD(void, createEventSubSubscription,
-                (const QString &type, const QString &version,
-                 const QString &sessionID, const QJsonObject &condition,
+                (const eventsub::SubscriptionRequest &request,
+                 const QString &sessionID,
                  ResultCallback<HelixCreateEventSubSubscriptionResponse>
                      successCallback,
                  (FailureCallback<HelixCreateEventSubSubscriptionError, QString>
