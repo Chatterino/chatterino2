@@ -144,6 +144,9 @@ WindowManager::WindowManager(const Paths &paths, Settings &settings,
     this->forceLayoutChannelViewsListener.add(settings.boldUsernames);
     this->forceLayoutChannelViewsListener.add(
         settings.showBlockedTermAutomodMessages);
+    this->forceLayoutChannelViewsListener.add(settings.hideModerated);
+    this->forceLayoutChannelViewsListener.add(
+        settings.streamerModeHideModActions);
 
     this->layoutChannelViewsListener.add(settings.timestampFormat);
     this->layoutChannelViewsListener.add(fonts.fontChanged);
@@ -593,6 +596,26 @@ void WindowManager::toggleAllOverlayInertia()
             }
         });
     }
+}
+
+std::set<QString> WindowManager::getVisibleChannelNames() const
+{
+    std::set<QString> visible;
+    for (auto *window : this->windows_)
+    {
+        auto *page = window->getNotebook().getSelectedPage();
+        if (!page)
+        {
+            continue;
+        }
+
+        for (auto *split : page->getSplits())
+        {
+            visible.emplace(split->getChannel()->getName());
+        }
+    }
+
+    return visible;
 }
 
 void WindowManager::encodeTab(SplitContainer *tab, bool isSelected,

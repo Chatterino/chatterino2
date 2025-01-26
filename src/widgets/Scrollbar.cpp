@@ -495,9 +495,20 @@ bool Scrollbar::shouldShowThumb() const
     return !(this->hideThumb || this->settingHideThumb);
 }
 
+void Scrollbar::setHideHighlights(bool hideHighlights)
+{
+    if (this->hideHighlights == hideHighlights)
+    {
+        return;
+    }
+
+    this->hideHighlights = hideHighlights;
+    this->update();
+}
+
 bool Scrollbar::shouldShowHighlights() const
 {
-    return !this->settingHideHighlights;
+    return !(this->hideHighlights || this->settingHideHighlights);
 }
 
 bool Scrollbar::shouldHandleMouseEvents() const

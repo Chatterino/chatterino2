@@ -295,9 +295,6 @@ public:
     BoolSetting mentionUsersWithComma = {"/behaviour/mentionUsersWithComma",
                                          true};
 
-    /// Commands
-    BoolSetting allowCommandsAtEnd = {"/commands/allowCommandsAtEnd", false};
-
     /// Emotes
     BoolSetting scaleEmotesByLineHeight = {"/emotes/scaleEmotesByLineHeight",
                                            false};
@@ -347,6 +344,10 @@ public:
         "/streamerMode/supressLiveNotifications", false};
     BoolSetting streamerModeSuppressInlineWhispers = {
         "/streamerMode/suppressInlineWhispers", true};
+    BoolSetting streamerModeHideBlockedTermText = {
+        "/streamerMode/hideBlockedTermText",
+        true,
+    };
 
     /// Ignored Phrases
     QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace",

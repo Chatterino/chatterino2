@@ -557,8 +557,9 @@ void PubSub::addClient()
 
 void PubSub::start()
 {
-    this->work = std::make_shared<boost::asio::io_service::work>(
-        this->websocketClient.get_io_service());
+    this->work = std::make_shared<boost::asio::executor_work_guard<
+        boost::asio::io_context::executor_type>>(
+        this->websocketClient.get_io_service().get_executor());
     this->thread = std::make_unique<std::thread>([this] {
         // make sure we set in any case, even exceptions
         auto guard = qScopeGuard([&] {

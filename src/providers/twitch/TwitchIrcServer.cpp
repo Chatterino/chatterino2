@@ -4,6 +4,7 @@
 #include "common/Channel.hpp"
 #include "common/Common.hpp"
 #include "common/Env.hpp"
+#include "common/Literals.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
@@ -23,6 +24,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/PostToThread.hpp"
 #include "util/RatelimitBucket.hpp"
 
@@ -147,6 +149,8 @@ bool shouldSendHelixChat()
 
 namespace chatterino {
 
+using namespace literals;
+
 TwitchIrcServer::TwitchIrcServer()
     : whispersChannel(new Channel("/whispers", Channel::Type::TwitchWhispers))
     , mentionsChannel(new Channel("/mentions", Channel::Type::TwitchMentions))
@@ -257,11 +261,16 @@ void TwitchIrcServer::initialize()
                 return;
             }
 
-            QString text =
-                QString("%1 cleared the chat.").arg(action.source.login);
-
-            postToThread([chan, text] {
-                chan->addSystemMessage(text);
+            postToThread([chan, actor{action.source.login}] {
+                auto now = QDateTime::currentDateTime();
+                chan->addOrReplaceClearChat(
+                    MessageBuilder::makeClearChatMessage(now, actor), now);
+                if (getSettings()->hideModerated)
+                {
+                    // XXX: This is expensive. We could use a layout request if the layout
+                    //      would store the previous message flags.
+                    getApp()->getWindows()->forceLayoutChannelViews();
+                }
             });
         });
 
@@ -323,9 +332,18 @@ void TwitchIrcServer::initialize()
             }
 
             postToThread([chan, action] {
-                MessageBuilder msg(action);
+                // TODO: Can we utilize some pubsub time field? maybe not worth
+                auto time = QDateTime::currentDateTime();
+                MessageBuilder msg(action, time);
                 msg->flags.set(MessageFlag::PubSub);
-                chan->addOrReplaceTimeout(msg.release(), QTime::currentTime());
+                chan->addOrReplaceTimeout(msg.release(),
+                                          QDateTime::currentDateTime());
+                if (getSettings()->hideModerated)
+                {
+                    // XXX: This is expensive. We could use a layout request if the layout
+                    //      would store the previous message flags.
+                    getApp()->getWindows()->forceLayoutChannelViews();
+                }
             });
         });
 
@@ -396,7 +414,9 @@ void TwitchIrcServer::initialize()
                 return;
             }
 
-            auto msg = MessageBuilder(action).release();
+            // TODO: Can we utilize some pubsub time field? maybe not worth
+            auto time = QDateTime::currentDateTime();
+            auto msg = MessageBuilder(action, time).release();
 
             postToThread([chan, msg] {
                 chan->addMessage(msg, MessageContext::Original);
@@ -501,9 +521,51 @@ void TwitchIrcServer::initialize()
                     if (msg.status == "PENDING")
                     {
                         AutomodAction action(msg.data, channelID);
-                        action.reason = QString("%1 level %2")
-                                            .arg(msg.contentCategory)
-                                            .arg(msg.contentLevel);
+                        if (msg.reason ==
+                            PubSubAutoModQueueMessage::Reason::BlockedTerm)
+                        {
+                            auto numBlockedTermsMatched =
+                                msg.blockedTermsFound.size();
+                            auto hideBlockedTerms =
+                                getSettings()
+                                    ->streamerModeHideBlockedTermText &&
+                                getApp()->getStreamerMode()->isEnabled();
+                            if (!msg.blockedTermsFound.empty())
+                            {
+                                if (hideBlockedTerms)
+                                {
+                                    action.reason =
+                                        u"matches %1 blocked term%2"_s
+                                            .arg(numBlockedTermsMatched)
+                                            .arg(numBlockedTermsMatched > 1
+                                                     ? u"s"
+                                                     : u"");
+                                }
+                                else
+                                {
+                                    QStringList blockedTerms(
+                                        msg.blockedTermsFound.begin(),
+                                        msg.blockedTermsFound.end());
+                                    action.reason =
+                                        u"matches %1 blocked term%2 \"%3\""_s
+                                            .arg(numBlockedTermsMatched)
+                                            .arg(numBlockedTermsMatched > 1
+                                                     ? u"s"
+                                                     : u"")
+                                            .arg(blockedTerms.join(u"\", \""));
+                                }
+                            }
+                            else
+                            {
+                                action.reason = "blocked term usage";
+                            }
+                        }
+                        else
+                        {
+                            action.reason = QString("%1 level %2")
+                                                .arg(msg.contentCategory)
+                                                .arg(msg.contentLevel);
+                        }
 
                         action.msgID = msg.messageID;
                         action.message = msg.messageText;
@@ -904,15 +966,31 @@ void TwitchIrcServer::onReadConnected(IrcConnection *connection)
 {
     (void)connection;
 
-    std::lock_guard lock(this->channelMutex);
+    std::vector<ChannelPtr> activeChannels;
+    {
+        std::lock_guard lock(this->channelMutex);
+
+        activeChannels.reserve(this->channels.size());
+        for (const auto &weak : this->channels)
+        {
+            if (auto channel = weak.lock())
+            {
+                activeChannels.push_back(channel);
+            }
+        }
+    }
+
+    // put the visible channels first
+    auto visible = getApp()->getWindows()->getVisibleChannelNames();
+
+    std::ranges::stable_partition(activeChannels, [&](const auto &chan) {
+        return visible.contains(chan->getName());
+    });
 
     // join channels
-    for (auto &&weak : this->channels)
+    for (const auto &channel : activeChannels)
     {
-        if (auto channel = weak.lock())
-        {
-            this->joinBucket_->send(channel->getName());
-        }
+        this->joinBucket_->send(channel->getName());
     }
 
     // connected/disconnected message
@@ -921,14 +999,8 @@ void TwitchIrcServer::onReadConnected(IrcConnection *connection)
     auto reconnected = makeSystemMessage("reconnected");
     reconnected->flags.set(MessageFlag::ConnectedMessage);
 
-    for (std::weak_ptr<Channel> &weak : this->channels.values())
+    for (const auto &chan : activeChannels)
     {
-        std::shared_ptr<Channel> chan = weak.lock();
-        if (!chan)
-        {
-            continue;
-        }
-
         LimitedQueueSnapshot<MessagePtr> snapshot = chan->getMessageSnapshot();
 
         bool replaceMessage =

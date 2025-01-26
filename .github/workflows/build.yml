@@ -19,9 +19,7 @@ env:
   C2_ENABLE_LTO: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/bugfix-release/') || startsWith(github.ref, 'refs/heads/release/') }}
   CHATTERINO_REQUIRE_CLEAN_GIT: On
   C2_BUILD_WITH_QT6: Off
-  # Last known good conan version
-  # 2.0.3 has a bug on Windows (conan-io/conan#13606)
-  CONAN_VERSION: 2.0.2
+  CONAN_VERSION: 2.11.0
 
 jobs:
   build-ubuntu-docker:
@@ -183,7 +181,7 @@ jobs:
 
       - name: Setup sccache (Windows)
         # sccache v0.7.4
-        uses: hendrikmuhs/ccache-action@v1.2.14
+        uses: hendrikmuhs/ccache-action@v1.2.16
         if: startsWith(matrix.os, 'windows')
         with:
           variant: sccache
@@ -294,7 +292,7 @@ jobs:
       - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-          brew install boost openssl rapidjson p7zip create-dmg cmake tree
+          brew install openssl rapidjson p7zip create-dmg cmake tree boost
         shell: bash
 
       - name: Build (MacOS)
@@ -419,7 +417,7 @@ jobs:
         shell: bash
 
       - name: Create release
-        uses: ncipollo/release-action@v1.14.0
+        uses: ncipollo/release-action@v1.15.0
         with:
           replacesArtifacts: true
           allowUpdates: true

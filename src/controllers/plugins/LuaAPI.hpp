@@ -128,6 +128,8 @@ void c2_later(ThisPluginState L, sol::protected_function callback, int time);
 // These ones are global
 sol::variadic_results g_load(ThisPluginState s, sol::object data);
 void g_print(ThisPluginState L, sol::variadic_args args);
+
+void package_loadlib(sol::variadic_args args);
 // NOLINTEND(readability-identifier-naming)
 
 // This is for require() exposed as an element of package.searchers

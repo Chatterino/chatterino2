@@ -73,7 +73,10 @@ using WinToastLib::WinToastTemplate;
 Toasts::~Toasts()
 {
 #ifdef Q_OS_WIN
-    WinToast::instance()->clear();
+    if (this->initialized_)
+    {
+        WinToast::instance()->clear();
+    }
 #endif
 }
 

@@ -20,6 +20,7 @@
 #include "util/IncognitoBrowser.hpp"
 #include "widgets/BaseWindow.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
+#include "widgets/settingspages/SettingWidget.hpp"
 
 #include <magic_enum/magic_enum.hpp>
 #include <QDesktopServices>
@@ -265,10 +266,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         false, "Choose which tabs are visible in the notebook");
 
-    layout.addCheckbox(
-        "Show message reply context", s.hideReplyContext, true,
-        "This setting will only affect how messages are shown. You can reply "
-        "to a message regardless of this setting.");
+    SettingWidget::inverseCheckbox("Show message reply context",
+                                   s.hideReplyContext)
+        ->setTooltip(
+            "This setting will only affect how messages are shown. You can "
+            "reply to a message regardless of this setting.")
+        ->addTo(layout);
+
     layout.addCheckbox("Show message reply button", s.showReplyButton, false,
                        "Show a reply button next to every chat message");
 
@@ -571,7 +575,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.removeSpacesBetweenEmotes, false,
                        "When enabled, adjacent emotes will no longer have an "
                        "added space seperating them.");
-    layout.addCheckbox("Show unlisted 7TV emotes", s.showUnlistedSevenTVEmotes);
+    SettingWidget::checkbox("Show unlisted 7TV emotes",
+                            s.showUnlistedSevenTVEmotes)
+        ->addKeywords({"seventv"})
+        ->addTo(layout);
     // TODO: Add a tooltip explaining what an unlisted 7TV emote is
     // but wait until https://github.com/Chatterino/wiki/pull/255 is resolved,
     // as an official description from 7TV devs is best
@@ -622,25 +629,48 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                            "Google",
                        },
                        s.emojiSet);
-    layout.addCheckbox("Show BetterTTV global emotes",
-                       s.enableBTTVGlobalEmotes);
-    layout.addCheckbox("Show BetterTTV channel emotes",
-                       s.enableBTTVChannelEmotes);
-    layout.addCheckbox("Enable BetterTTV live emote updates (requires restart)",
-                       s.enableBTTVLiveUpdates);
-    layout.addCheckbox("Show FrankerFaceZ global emotes",
-                       s.enableFFZGlobalEmotes);
-    layout.addCheckbox("Show FrankerFaceZ channel emotes",
-                       s.enableFFZChannelEmotes);
-    layout.addCheckbox("Show 7TV global emotes", s.enableSevenTVGlobalEmotes);
-    layout.addCheckbox("Show 7TV channel emotes", s.enableSevenTVChannelEmotes);
-    layout.addCheckbox("Enable 7TV live emote updates (requires restart)",
-                       s.enableSevenTVEventAPI);
-    layout.addCheckbox("Send activity to 7TV", s.sendSevenTVActivity, false,
-                       "When enabled, Chatterino will signal an activity to "
-                       "7TV when you send a chat mesage. This is used for "
-                       "badges, paints, and personal emotes. When disabled, no "
-                       "activity is sent and others won't see your cosmetics.");
+    SettingWidget::checkbox("Show BetterTTV global emotes",
+                            s.enableBTTVGlobalEmotes)
+        ->addKeywords({"bttv"})
+        ->addTo(layout);
+    SettingWidget::checkbox("Show BetterTTV channel emotes",
+                            s.enableBTTVChannelEmotes)
+        ->addKeywords({"bttv"})
+        ->addTo(layout);
+    SettingWidget::checkbox(
+        "Enable BetterTTV live emote updates (requires restart)",
+        s.enableBTTVLiveUpdates)
+        ->addKeywords({"bttv"})
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Show FrankerFaceZ global emotes",
+                            s.enableFFZGlobalEmotes)
+        ->addKeywords({"ffz"})
+        ->addTo(layout);
+    SettingWidget::checkbox("Show FrankerFaceZ channel emotes",
+                            s.enableFFZChannelEmotes)
+        ->addKeywords({"ffz"})
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Show 7TV global emotes",
+                            s.enableSevenTVGlobalEmotes)
+        ->addKeywords({"seventv"})
+        ->addTo(layout);
+    SettingWidget::checkbox("Show 7TV channel emotes",
+                            s.enableSevenTVChannelEmotes)
+        ->addKeywords({"seventv"})
+        ->addTo(layout);
+    SettingWidget::checkbox("Enable 7TV live emote updates (requires restart)",
+                            s.enableSevenTVEventAPI)
+        ->addKeywords({"seventv"})
+        ->addTo(layout);
+    SettingWidget::checkbox("Send activity to 7TV", s.sendSevenTVActivity)
+        ->setTooltip("When enabled, Chatterino will signal an activity to 7TV "
+                     "when you send a chat mesage. This is used for badges, "
+                     "paints, and personal emotes. When disabled, no activity "
+                     "is sent and others won't see your cosmetics.")
+        ->addKeywords({"seventv"})
+        ->addTo(layout);
 
     layout.addTitle("Streamer Mode");
     layout.addDescription(
@@ -675,6 +705,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox(
         "Hide moderation actions", s.streamerModeHideModActions, false,
         "Hide bans, timeouts, and automod messages from appearing in chat.");
+    layout.addCheckbox(
+        "Hide blocked terms", s.streamerModeHideBlockedTermText, false,
+        "Hide blocked terms from showing up in places like AutoMod messages. "
+        "This can be useful in case you have some blocked terms that you don't "
+        "want to show on stream.");
     layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions, false,
                        "Mute your ping sound from playing.");
     layout.addCheckbox(
@@ -910,13 +945,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         toggleLocalr9kShortcut = toggleLocalr9kSeq.toString(
             QKeySequence::SequenceFormat::NativeText);
     }
-    layout.addDescription("Hide similar messages. Toggle hidden "
-                          "messages by pressing " +
-                          toggleLocalr9kShortcut + ".");
-    layout.addCheckbox("Hide similar messages", s.similarityEnabled);
+    layout.addDescription(
+        "Hide similar messages to those previously seen. Toggle hidden "
+        "messages by pressing " +
+        toggleLocalr9kShortcut + ".");
+    layout.addCheckbox("Enable similarity checks", s.similarityEnabled);
     //layout.addCheckbox("Gray out matches", s.colorSimilarDisabled);
     layout.addCheckbox(
-        "By the same user", s.hideSimilarBySameUser, false,
+        "Only if by the same user", s.hideSimilarBySameUser, false,
         "When checked, messages that are very similar to each other can still "
         "be shown as long as they're sent by different users.");
     layout.addCheckbox("Hide my own messages", s.hideSimilarMyself);
@@ -933,7 +969,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             return QString::number(val);
         },
         [](auto args) {
-            return fuzzyToFloat(args.value, 0.9f);
+            return fuzzyToFloat(args.value, 0.9F);
         },
         true,
         "A value of 0.9 means the messages need to be 90% similar to be marked "
@@ -958,7 +994,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         [](auto args) {
             return fuzzyToInt(args.value, 3);
-        });
+        },
+        true,
+        "How many messages in the history should be compared to a new one to "
+        "establish its similarity rating. Messages in the history will be "
+        "compared to only if they are new enough.");
 
     layout.addSubtitle("Visible badges");
     layout.addCheckbox("Authority", s.showBadgesGlobalAuthority, false,
@@ -971,15 +1011,23 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        "e.g. prime, bits, sub gifter");
     layout.addCheckbox("Chatterino", s.showBadgesChatterino, false,
                        "e.g. Chatterino Supporter/Contributor/Developer");
-    layout.addCheckbox("FrankerFaceZ", s.showBadgesFfz, false,
-                       "e.g. Bot, FFZ supporter, FFZ developer");
-    layout.addCheckbox("7TV", s.showBadgesSevenTV, false,
-                       "Badges for 7TV admins, developers, and supporters");
+    SettingWidget::checkbox("FrankerFaceZ", s.showBadgesFfz)
+        ->addKeywords({"ffz"})
+        ->setTooltip("e.g. Bot, FrankerFaceZ supporter, FrankerFaceZ developer")
+        ->addTo(layout);
+    SettingWidget::checkbox("7TV", s.showBadgesSevenTV)
+        ->addKeywords({"seventv"})
+        ->setTooltip("Badges for 7TV admins, developers, and supporters")
+        ->addTo(layout);
     layout.addSeperator();
-    layout.addCheckbox("Use custom FrankerFaceZ moderator badges",
-                       s.useCustomFfzModeratorBadges);
-    layout.addCheckbox("Use custom FrankerFaceZ VIP badges",
-                       s.useCustomFfzVipBadges);
+    SettingWidget::checkbox("Use custom FrankerFaceZ moderator badges",
+                            s.useCustomFfzModeratorBadges)
+        ->addKeywords({"ffz"})
+        ->addTo(layout);
+    SettingWidget::checkbox("Use custom FrankerFaceZ VIP badges",
+                            s.useCustomFfzVipBadges)
+        ->addKeywords({"ffz"})
+        ->addTo(layout);
 
     layout.addSubtitle("Overlay");
     layout.addIntInput(
@@ -1075,10 +1123,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        false,
                        "Make all clickable links lowercase to deter "
                        "phishing attempts.");
-    layout.addCheckbox(
-        "Show user's pronouns in user card", s.showPronouns, false,
-        "Shows users' pronouns in their user card. "
-        "Pronouns are retrieved from alejo.io when the user card is opened.");
+    SettingWidget::checkbox("Show user's pronouns in user card", s.showPronouns)
+        ->setDescription(
+            R"(Pronouns are retrieved from <a href="https://pr.alejo.io">pr.alejo.io</a> when a user card is opened.)")
+        ->addTo(layout);
+
     layout.addCheckbox("Bold @usernames", s.boldUsernames, false,
                        "Bold @mentions to make them more noticable.");
     layout.addCheckbox("Color @usernames", s.colorUsernames, false,
@@ -1179,13 +1228,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addIntInput("Usercard scrollback limit (requires restart)",
                        s.scrollbackUsercardLimit, 100, 100000, 100);
 
-    layout.addDropdownEnumClass<ShowModerationState>(
-        "Show blocked term automod messages",
-        qmagicenum::enumNames<ShowModerationState>(),
-        s.showBlockedTermAutomodMessages,
-        "Show messages that are blocked by AutoMod for containing a public "
-        "blocked term in the current channel.",
-        {});
+    SettingWidget::dropdown("Show blocked term automod messages",
+                            s.showBlockedTermAutomodMessages)
+        ->setTooltip("Show messages that are blocked by AutoMod for containing "
+                     "a public blocked term in the current channel.")
+        ->addTo(layout);
 
     layout.addDropdown<int>(
         "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
@@ -1211,25 +1258,20 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "@mention for the related thread. If the reply context is hidden, "
         "these mentions will never be stripped.");
 
-    layout.addDropdownEnumClass<ChatSendProtocol>(
-        "Chat send protocol", qmagicenum::enumNames<ChatSendProtocol>(),
-        s.chatSendProtocol,
-        "'Helix' will use Twitch's Helix API to send message. 'IRC' will use "
-        "IRC to send messages.",
-        {});
+    SettingWidget::dropdown("Chat send protocol", s.chatSendProtocol)
+        ->setTooltip("'Helix' will use Twitch's Helix API to send message. "
+                     "'IRC' will use IRC to send messages.")
+        ->addTo(layout);
 
-    layout.addCheckbox(
-        "Show send message button", s.showSendButton, false,
-        "Show a Send button next to each split input that can be "
-        "clicked to send the message");
+    SettingWidget::checkbox("Show send message button", s.showSendButton)
+        ->setTooltip("Show a Send button next to each split input that can be "
+                     "clicked to send the message")
+        ->addTo(layout);
 
-    auto *soundBackend = layout.addDropdownEnumClass<SoundBackend>(
-        "Sound backend (requires restart)",
-        qmagicenum::enumNames<SoundBackend>(), s.soundBackend,
-        "Change this only if you're noticing issues with sound playback on "
-        "your system",
-        {});
-    soundBackend->setMinimumWidth(soundBackend->minimumSizeHint().width());
+    SettingWidget::dropdown("Sound backend (requires restart)", s.soundBackend)
+        ->setTooltip("Change this only if you're noticing issues "
+                     "with sound playback on your system")
+        ->addTo(layout);
 
     layout.addStretch();
 

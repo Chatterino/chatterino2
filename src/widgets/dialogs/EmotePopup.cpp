@@ -168,10 +168,11 @@ void addTwitchEmoteSets(const std::shared_ptr<const EmoteMap> &local,
 void loadEmojis(ChannelView &view, const std::vector<EmojiPtr> &emojiMap)
 {
     ChannelPtr emojiChannel(new Channel("", Channel::Type::None));
+    // set the channel first to make sure the scrollbar is at the top
+    view.setChannel(emojiChannel);
+
     emojiChannel->addMessage(makeEmojiMessage(emojiMap),
                              MessageContext::Original);
-
-    view.setChannel(emojiChannel);
 }
 
 void loadEmojis(Channel &channel, const std::vector<EmojiPtr> &emojiMap,
@@ -639,7 +640,11 @@ void EmotePopup::filterEmotes(const QString &searchText)
 
 void EmotePopup::saveBounds() const
 {
-    getApp()->getWindows()->setEmotePopupBounds(this->getBounds());
+    auto bounds = this->getBounds();
+    if (!bounds.isNull())
+    {
+        getApp()->getWindows()->setEmotePopupBounds(bounds);
+    }
 }
 
 void EmotePopup::resizeEvent(QResizeEvent *event)

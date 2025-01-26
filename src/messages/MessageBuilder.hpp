@@ -108,12 +108,13 @@ public:
                    const QTime &time = QTime::currentTime());
     MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
                    const QString &sourceUser, const QString &systemMessageText,
-                   int times, const QTime &time = QTime::currentTime());
+                   int times, const QDateTime &time);
     MessageBuilder(TimeoutMessageTag, const QString &username,
                    const QString &durationInSeconds, bool multipleTimes,
-                   const QTime &time = QTime::currentTime());
-    MessageBuilder(const BanAction &action, uint32_t count = 1);
-    MessageBuilder(const UnbanAction &action);
+                   const QDateTime &time);
+    MessageBuilder(const BanAction &action, const QDateTime &time,
+                   uint32_t count = 1);
+    MessageBuilder(const UnbanAction &action, const QDateTime &time);
     MessageBuilder(const WarnAction &action);
     MessageBuilder(const RaidAction &action);
     MessageBuilder(const UnraidAction &action);
@@ -167,6 +168,10 @@ public:
         this->append(std::move(unique));
         return pointer;
     }
+
+    void appendOrEmplaceText(const QString &text, MessageColor color);
+    void appendOrEmplaceSystemTextAndUpdate(const QString &text,
+                                            QString &toUpdate);
 
     static void triggerHighlights(const Channel *channel,
                                   const HighlightAlert &alert);
@@ -262,6 +267,13 @@ public:
         const QString &expirationText);
 
     static MessagePtrMut makeMissingScopesMessage(const QString &missingScopes);
+
+    /// "Chat has been cleared by a moderator." or "{actor} cleared the chat."
+    /// @param actor The user who cleared the chat (empty if unknown)
+    /// @param count How many times this message has been received already
+    static MessagePtrMut makeClearChatMessage(const QDateTime &now,
+                                              const QString &actor,
+                                              uint32_t count = 1);
 
 private:
     struct TextState {

@@ -127,6 +127,7 @@ OverlayWindow::OverlayWindow(IndirectChannel channel,
         this->channelView_.setChannel(this->channel_.get());
     });
     this->channelView_.scrollbar()->setHideThumb(true);
+    this->channelView_.scrollbar()->setHideHighlights(true);
 
     this->setAutoFillBackground(false);
     this->resize(300, 500);

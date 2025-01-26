@@ -273,7 +273,7 @@ void MiniaudioBackend::play(const QUrl &sound)
                 << "Failed to play default ping" << result;
         }
 
-        this->sleepTimer.expires_from_now(STOP_AFTER_DURATION);
+        this->sleepTimer.expires_after(STOP_AFTER_DURATION);
         this->sleepTimer.async_wait([this](const auto &ec) {
             if (ec)
             {

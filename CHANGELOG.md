@@ -2,6 +2,39 @@
 
 ## Unversioned
 
+- Minor: `/clear` messages are now stacked like timeouts. (#5806)
+- Minor: Treat all browsers starting with `firefox` as a Firefox browser. (#5805)
+- Minor: Remove incognito browser support for `opera/launcher` (this should no longer be a thing). (#5805)
+- Minor: Remove incognito browser support for `iexplore`, because internet explorer is EOL. (#5810)
+- Minor: When (re-)connecting, visible channels are now joined first. (#5850)
+- Minor: Added support for the "Device code grant flow" for authentication. (#5680)
+- Bugfix: Fixed a potential way to escape the Lua Plugin sandbox. (#5846)
+- Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
+- Bugfix: Fixed a crash that could occur on Linux and macOS when clicking "Install" from the update prompt. (#5818)
+- Bugfix: Fixed missing word wrap in update popup. (#5811)
+- Bugfix: Fixed tabs not scaling to the default scale when changing the scale from a non-default value. (#5794)
+- Bugfix: Closing a usercard will no longer cause stop-logging messages to be generated in channel logs. (#5828)
+- Bugfix: Fixed tabs not scaling to the default scale when changing the scale from a non-default value. (#5794, #5833)
+- Bugfix: Fixed deleted messages not immediately disappearing when "Hide deleted messages" is enabled. (#5844, #5854)
+- Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
+- Dev: Updated Conan dependencies. (#5776)
+- Dev: Replaced usage of `parseTime` with `serverReceivedTime` for clearchat messages. (#5824, #5855)
+- Dev: Support Boost 1.87. (#5832)
+- Dev: Words from `TextElement`s are now combined where possible. (#5847)
+
+## 2.5.2
+
+- Bugfix: Fixed a crash in the 7TV EventApi when closing Chatterino. (#5768)
+- Bugfix: Fixed scrollbar highlights being visible in overlay windows. (#5769)
+- Bugfix: Make macos fonts look the same as v2.5.1. (#5775)
+- Bugfix: Fixed 7TV usernames messing with Qt's HTML (#5780)
+- Bugfix: Fixed BTTV emotes occasionally showing the wrong author. (#5783)
+- Bugfix: Fixed some Twitch emotes containing HTML entities. (#5786)
+- Bugfix: Fixed the same blocked term showing up more than once. (#5789)
+- Dev: Hard-code Boost 1.86.0 in macos CI builders. (#5774)
+
+## 2.5.2-beta.1
+
 - Major: Add option to show pronouns in user card. (#5442, #5583)
 - Major: Release plugins alpha. (#5288)
 - Major: Improve high-DPI support on Windows. (#4868, #5391, #5664, #5666)
@@ -13,7 +46,7 @@
 - Minor: Colored usernames now update on the fly when changing the "Color @usernames" setting. (#5300)
 - Minor: Added `flags.action` filter variable, allowing you to filter on `/me` messages. (#5397)
 - Minor: Added the ability for `/ban`, `/timeout`, `/unban`, and `/untimeout` to specify multiple channels to duplicate the action to. Example: `/timeout --channel id:11148817 --channel testaccount_420 forsen 7m game complaining`. (#5402)
-- Minor: The size of the emote popup is now saved. (#5415)
+- Minor: The size of the emote popup is now saved. (#5415, #5751)
 - Minor: Added the ability to duplicate tabs. (#5277)
 - Minor: Improved error messages for channel update commands. (#5429)
 - Minor: Moderators can now see when users are warned. (#5441)
@@ -37,6 +70,7 @@
 - Minor: When blocking a channel, Chatterino will now warn you about that action. (#5615)
 - Minor: Indicate when subscriptions and resubscriptions are for multiple months. (#5642)
 - Minor: Added a setting to control whether or not to show "Blocked Term" automod messages. (#5690)
+- Minor: Improved AutoMod messaging when messages are blocked due to containing blocked terms. (#5699, #5759)
 - Minor: Proxy URL information is now included in the `/debug-env` command. (#5648)
 - Minor: Make raid entry message usernames clickable. (#5651)
 - Minor: Tabs unhighlight when their content is read in other tabs. (#5649)
@@ -46,7 +80,7 @@
 - Minor: Added a setting to hide the scrollbar thumb (the handle you can drag). Hiding the scrollbar thumb will disable mouse click & drag interactions in the scrollbar. (#5731)
 - Minor: Added a setting to hide the scrollbar highlights. (#5732)
 - Minor: The window layout is now backed up like the other settings. (#5647)
-- Minor: Added support for the "Device code grant flow" for authentication. (#5680)
+- Minor: Added `flags.similar` filter variable, allowing you to filter messages filtered by the R9K feature. (#5747)
 - Bugfix: Fixed tab move animation occasionally failing to start after closing a tab. (#5426, #5612)
 - Bugfix: If a network request errors with 200 OK, Qt's error code is now reported instead of the HTTP status. (#5378)
 - Bugfix: Fixed restricted users usernames not being clickable. (#5405)
@@ -73,7 +107,7 @@
 - Bugfix: Fixed incorrect message being disabled in some cases upon approving or denying an automod caught message. (#5611)
 - Bugfix: Fixed network requests timing out despite them not being in flight for that long, for Qt 6.3+ where we have the technology. (#5729)
 - Bugfix: Fixed double-click selection not working when clicking outside a message. (#5617)
-- Bugfix: Fixed a potential rare crash that could occur on Windows if a toast was about to fire just as we were shutting down. (#5728)
+- Bugfix: Fixed a rare crash that could occur on Windows if a toast was about to fire just as we were shutting down. (#5728, #5752)
 - Bugfix: Fixed emotes starting with ":" not tab-completing. (#5603)
 - Bugfix: Fixed 7TV emotes messing with Qt's HTML. (#5677)
 - Bugfix: Fixed incorrect messages getting replaced visually. (#5683)
@@ -85,11 +119,13 @@
 - Dev: Update vcpkg build Qt from 6.5.0 to 6.7.0, boost from 1.83.0 to 1.85.0, openssl from 3.1.3 to 3.3.0. (#5422)
 - Dev: Unsingletonize `ISoundController`. (#5462)
 - Dev: Use Qt's high DPI scaling. (#4868, #5400)
+- Dev: Removed cosmetic "Also match the trigger at the end of the message" setting. (#5745)
 - Dev: Add doxygen build target. (#5377)
 - Dev: Make printing of strings in tests easier. (#5379)
 - Dev: Refactor and document `Scrollbar`. (#5334, #5393)
 - Dev: Refactor `TwitchIrcServer`, making it abstracted. (#5421, #5435)
 - Dev: Reduced the amount of scale events. (#5404, #5406)
+- Dev: Refactored settings widget creation. (#5585)
 - Dev: Removed unused timegate settings. (#5361)
 - Dev: Add `Channel::addSystemMessage` helper function, allowing us to avoid the common `channel->addMessage(makeSystemMessage(...));` pattern. (#5500)
 - Dev: Unsingletonize `Resources2`. (#5460)
@@ -139,7 +175,7 @@
 - Dev: 7TV's `entitlement.reset` is now explicitly ignored. (#5685)
 - Dev: Qt 6.8 and later now default to the GDI fontengine. (#5710)
 - Dev: Moved to condition variables when shutting down worker threads. (#5721, #5733)
-- Dev: Reduced layouts in channel views when setting a channel. (#5737)
+- Dev: Reduced layouts in channel views when setting a channel. (#5737, #5748, #5757)
 
 ## 2.5.1
 

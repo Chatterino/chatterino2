@@ -7,7 +7,7 @@ jobs:
     runs-on: windows-latest
     if: ${{ startsWith(github.event.release.tag_name, 'v') }}
     steps:
-      - uses: vedantmgoyal2009/winget-releaser@v2
+      - uses: vedantmgoyal9/winget-releaser@main
         with:
           identifier: ChatterinoTeam.Chatterino
           installers-regex: ^Chatterino.Installer.exe$

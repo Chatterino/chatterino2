@@ -91,7 +91,8 @@ public:
     /// Inserts the given messages in order by Message::serverReceivedTime.
     void fillInMissingMessages(const std::vector<MessagePtr> &messages);
 
-    void addOrReplaceTimeout(MessagePtr message, QTime now) final;
+    void addOrReplaceTimeout(MessagePtr message, const QDateTime &now) final;
+    void addOrReplaceClearChat(MessagePtr message, const QDateTime &now) final;
     void disableAllMessages() final;
     void replaceMessage(const MessagePtr &message,
                         const MessagePtr &replacement);
@@ -142,6 +143,7 @@ private:
     const QString name_;
     LimitedQueue<MessagePtr> messages_;
     Type type_;
+    bool anythingLogged_ = false;
     QTimer clearCompletionModelTimer_;
 };
 
