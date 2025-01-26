@@ -1097,6 +1097,8 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
 
             if (tags.value("msg-id") != "announcement")
             {
+                // Announcements are currently tagged as subscriptions,
+                // but we want them to be able to show up in mentions
                 msg->flags.unset(MessageFlag::Highlighted);
             }
         }
