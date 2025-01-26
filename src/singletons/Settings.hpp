@@ -677,11 +677,10 @@ public:
     bool isMutedChannel(const QString &channelName);
     bool toggleMutedChannel(const QString &channelName);
     std::optional<QString> matchNickname(const QString &username);
+    void unmute(const QString &channelName);
 
 private:
     void mute(const QString &channelName);
-    void unmute(const QString &channelName);
-
     void updateModerationActions();
 
     std::unique_ptr<rapidjson::Document> snapshot_;
