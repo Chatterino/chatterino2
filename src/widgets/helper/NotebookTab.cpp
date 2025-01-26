@@ -67,11 +67,15 @@ NotebookTab::NotebookTab(Notebook *notebook)
     this->positionChangedAnimation_.setEasingCurve(
         QEasingCurve(QEasingCurve::InCubic));
 
-    getSettings()->showTabCloseButton.connectSimple(
-        boost::bind(&NotebookTab::tabSizeChanged, this),
+    getSettings()->showTabCloseButton.connect(
+        [this] {
+            tabSizeChanged();
+        },
         this->managedConnections_);
-    getSettings()->compactTabs.connectSimple(
-        boost::bind(&NotebookTab::tabSizeChanged, this),
+    getSettings()->compactTabs.connect(
+        [this] {
+            tabSizeChanged();
+        },
         this->managedConnections_);
     getSettings()->showTabLive.connect(
         [this](auto, auto) {
