@@ -20,7 +20,6 @@
 #include <boost/container_hash/hash.hpp>
 #include <QAbstractAnimation>
 #include <QApplication>
-#include <QDebug>
 #include <QDialogButtonBox>
 #include <QLabel>
 #include <QLinearGradient>
@@ -68,7 +67,10 @@ NotebookTab::NotebookTab(Notebook *notebook)
         QEasingCurve(QEasingCurve::InCubic));
 
     getSettings()->showTabCloseButton.connectSimple(
-        boost::bind(&NotebookTab::hideTabXChanged, this),
+        boost::bind(&NotebookTab::tabSizeChanged, this),
+        this->managedConnections_);
+    getSettings()->compactTabs.connectSimple(
+        boost::bind(&NotebookTab::tabSizeChanged, this),
         this->managedConnections_);
     getSettings()->showTabLive.connect(
         [this](auto, auto) {
@@ -204,13 +206,16 @@ int NotebookTab::normalTabWidthForHeight(int height) const
     QFontMetrics metrics =
         getApp()->getFonts()->getFontMetrics(FontStyle::UiTabs, scale);
 
+    float compactDivider = getSettings()->compactTabs ? 1.5 : 1;
     if (this->hasXButton())
     {
-        width = (metrics.horizontalAdvance(this->getTitle()) + int(32 * scale));
+        width = (metrics.horizontalAdvance(this->getTitle()) +
+                 int(32 / compactDivider * scale));
     }
     else
     {
-        width = (metrics.horizontalAdvance(this->getTitle()) + int(16 * scale));
+        width = (metrics.horizontalAdvance(this->getTitle()) +
+                 int(16 / compactDivider * scale));
     }
 
     if (static_cast<float>(height) > 150 * scale)
@@ -608,7 +613,7 @@ QRect NotebookTab::getDesiredRect() const
     return QRect(this->positionAnimationDesiredPoint_, size());
 }
 
-void NotebookTab::hideTabXChanged()
+void NotebookTab::tabSizeChanged()
 {
     this->updateSize();
     this->update();
@@ -760,12 +765,15 @@ void NotebookTab::paintEvent(QPaintEvent *)
     // set the pen color
     painter.setPen(colors.text);
 
+    float compactDivider = getSettings()->compactTabs ? 1.5 : 1;
     // set area for text
-    int rectW = (!getSettings()->showTabCloseButton ? 0 : int(16 * scale));
+    int rectW =
+        (!getSettings()->showTabCloseButton ? 0
+                                            : int(16 * scale / compactDivider));
     QRect rect(0, 0, this->width() - rectW, height);
 
     // draw text
-    int offset = int(scale * 8);
+    int offset = int(scale * 4 / compactDivider);
     QRect textRect(offset, 0, this->width() - offset - offset, height);
     translateRectForLocation(textRect, this->tabLocation_,
                              this->selected_ ? -1 : -2);
@@ -1044,7 +1052,9 @@ QRect NotebookTab::getXRect() const
                                ? (size / 3)   // slightly off true center
                                : (size / 2);  // true center
 
-    QRect xRect(rect.right() - static_cast<int>(20 * s),
+    //float compactDivider = getSettings()->compactTabs ? 1.22 : 1;
+    float compactReducer = getSettings()->compactTabs ? 4 : 0;
+    QRect xRect(rect.right() - static_cast<int>((20 - compactReducer) * s),
                 rect.center().y() - centerAdjustment, size, size);
 
     if (this->selected_)
