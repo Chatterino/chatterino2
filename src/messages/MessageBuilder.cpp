@@ -2245,23 +2245,26 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
             ColorProvider::instance().color(ColorType::Whisper);
     }
 
-    if (thread)
+    if (!args.isReceivedWhisper && tags.value("msg-id") != "announcement")
     {
-        auto &img = getResources().buttons.replyThreadDark;
-        builder
-            .emplace<CircularImageElement>(Image::fromResourcePixmap(img, 0.15),
-                                           2, Qt::gray,
-                                           MessageElementFlag::ReplyButton)
-            ->setLink({Link::ViewThread, thread->rootId()});
-    }
-    else
-    {
-        auto &img = getResources().buttons.replyDark;
-        builder
-            .emplace<CircularImageElement>(Image::fromResourcePixmap(img, 0.15),
-                                           2, Qt::gray,
-                                           MessageElementFlag::ReplyButton)
-            ->setLink({Link::ReplyToMessage, builder->id});
+        if (thread)
+        {
+            auto &img = getResources().buttons.replyThreadDark;
+            builder
+                .emplace<CircularImageElement>(
+                    Image::fromResourcePixmap(img, 0.15), 2, Qt::gray,
+                    MessageElementFlag::ReplyButton)
+                ->setLink({Link::ViewThread, thread->rootId()});
+        }
+        else
+        {
+            auto &img = getResources().buttons.replyDark;
+            builder
+                .emplace<CircularImageElement>(
+                    Image::fromResourcePixmap(img, 0.15), 2, Qt::gray,
+                    MessageElementFlag::ReplyButton)
+                ->setLink({Link::ReplyToMessage, builder->id});
+        }
     }
 
     return {builder.release(), highlight};
