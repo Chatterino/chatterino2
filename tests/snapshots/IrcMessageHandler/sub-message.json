@@ -173,7 +173,7 @@
                 }
             ],
             "flags": "Collapsed|Subscription",
-            "highlightColor": "#64c466ff",
+            "highlightColor": "#64ffd641",
             "id": "db25007f-7a18-43eb-9379-80131e44d633",
             "localizedName": "",
             "loginName": "ronni",
@@ -181,6 +181,7 @@
             "searchText": "ronni  ronni: Great stream -- keep it up! ",
             "serverReceivedTime": "2017-10-05T23:36:12Z",
             "timeoutUser": "",
+            "userID": "1337",
             "usernameColor": "#ff008000"
         },
         {
@@ -265,6 +266,7 @@
             "searchText": "ronni has subscribed for 6 months!",
             "serverReceivedTime": "",
             "timeoutUser": "",
+            "userID": "",
             "usernameColor": "#ff000000"
         }
     ]

@@ -172,7 +172,7 @@
                 }
             ],
             "flags": "Collapsed|Subscription|SharedMessage",
-            "highlightColor": "#64c466ff",
+            "highlightColor": "#64ffd641",
             "id": "01cd601f-bc3f-49d5-ab4b-136fa9d6ec22",
             "localizedName": "",
             "loginName": "lahoooo",
@@ -180,6 +180,7 @@
             "searchText": "lahoooo  lahoooo: hi this is an announcement from 1 ",
             "serverReceivedTime": "2024-09-12T05:19:38Z",
             "timeoutUser": "",
+            "userID": "612865661",
             "usernameColor": "#ffdaa520"
         },
         {
@@ -242,6 +243,7 @@
             "searchText": "Announcement",
             "serverReceivedTime": "",
             "timeoutUser": "",
+            "userID": "",
             "usernameColor": "#ff000000"
         }
     ]

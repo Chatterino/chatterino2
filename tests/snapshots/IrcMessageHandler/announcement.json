@@ -152,7 +152,7 @@
                 }
             ],
             "flags": "Highlighted|Collapsed|Subscription",
-            "highlightColor": "#64c466ff",
+            "highlightColor": "#64ffd641",
             "id": "8c26e1ab-b50c-4d9d-bc11-3fd57a941d90",
             "localizedName": "",
             "loginName": "supinic",
@@ -160,6 +160,7 @@
             "searchText": "supinic  supinic: mm test lol ",
             "serverReceivedTime": "2022-03-31T21:30:19Z",
             "timeoutUser": "",
+            "userID": "31400525",
             "usernameColor": "#ffff0000"
         },
         {
@@ -222,6 +223,7 @@
             "searchText": "Announcement",
             "serverReceivedTime": "",
             "timeoutUser": "",
+            "userID": "",
             "usernameColor": "#ff000000"
         }
     ]
