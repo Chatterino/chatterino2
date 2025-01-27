@@ -1,5 +1,7 @@
 To run tests, you'll first need to enable the test flag in cmake. You can do this by adding the `-DBUILD_TESTS=On` flag to your cmake setup call. (e.g. `mkdir build && cd build && cmake -DBUILD_TESTS=On ..`)
 
+After you've built Chatterino, you can now run the tests with `ctest` or by manually running the newly created `chatterino-test` executable
+
 # Pre-requisites to running tests
 
 - Download & run [httpbox](https://github.com/Chatterino/httpbox/releases/latest)  
