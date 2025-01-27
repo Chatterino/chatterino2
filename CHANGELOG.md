@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Add `Set highlight sounds` and `Open subscription page` split hotkeys. (#5856)
 - Minor: `/clear` messages are now stacked like timeouts. (#5806)
 - Minor: Treat all browsers starting with `firefox` as a Firefox browser. (#5805)
 - Minor: Remove incognito browser support for `opera/launcher` (this should no longer be a thing). (#5805)
