@@ -13,7 +13,7 @@
 If you make a change that has to do with message building, there's a big chance that some of the snapshot tests will fail.
 If this happens, you might want to:
 
-1. Set the `UPDATE_SNAPSHOTS` boolean at the top of the [TwitchIrcMessage.cpp](./src/TwitchIrcMessage.cpp) test file to `true`
+1. Set the `UPDATE_SNAPSHOTS` boolean at the top of the [IrcMessageHandler.cpp](./src/IrcMessageHandler.cpp) test file to `true`
 1. Re-run the tests (this will update the snapshots to match your new reality)
 1. Reset `UPDATE_SNAPSHOTS` to `false` again
 1. Then run the tests a final time.
