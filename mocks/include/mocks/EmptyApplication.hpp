@@ -271,6 +271,13 @@ public:
         return nullptr;
     }
 
+    eventsub::Controller *getEventSub() override
+    {
+        assert(false && "EmptyApplication::getEventSub was called without "
+                        "being initialized");
+        return nullptr;
+    }
+
     QTemporaryDir settingsDir;
     Paths paths_;
     Args args_;

@@ -207,6 +207,7 @@ find_package(PajladaSignals REQUIRED)
 find_package(LRUCache REQUIRED)
 find_package(MagicEnum REQUIRED)
 find_package(Doxygen)
+find_package(BoostCertify REQUIRED)
 
 if (USE_SYSTEM_PAJLADA_SETTINGS)
     find_package(PajladaSettings REQUIRED)
@@ -228,6 +229,8 @@ endif()
 if (BUILD_WITH_CRASHPAD)
     add_subdirectory("${CMAKE_SOURCE_DIR}/tools/crash-handler")
 endif()
+
+add_subdirectory(lib/twitch-eventsub-ws EXCLUDE_FROM_ALL)
 
 # Used to provide a date of build in the About page (for nightly builds). Getting the actual time of
 # compilation in CMake is a more involved, as documented in https://stackoverflow.com/q/24292898.
