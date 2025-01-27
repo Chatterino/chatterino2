@@ -100,6 +100,7 @@ QJsonObject Message::toJson() const
         {"loginName"_L1, this->loginName},
         {"displayName"_L1, this->displayName},
         {"localizedName"_L1, this->localizedName},
+        {"userID"_L1, this->userID},
         {"timeoutUser"_L1, this->timeoutUser},
         {"channelName"_L1, this->channelName},
         {"usernameColor"_L1, this->usernameColor.name(QColor::HexArgb)},
