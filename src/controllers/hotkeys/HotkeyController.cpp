@@ -428,11 +428,12 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
 
             this->tryAddDefault(addedHotkeys, HotkeyCategory::SplitInput,
                                 QKeySequence("Shift+Return"), "sendMessage",
-                                std::vector<QString>(), "send message");
+                                std::vector<QString>(),
+                                "send message (with shift)");
             this->tryAddDefault(addedHotkeys, HotkeyCategory::SplitInput,
                                 QKeySequence("Ctrl+Shift+Return"),
                                 "sendMessage", {"keepInput"},
-                                "send message and keep text");
+                                "send message and keep text (with shift)");
         }
 
         this->tryAddDefault(addedHotkeys, HotkeyCategory::SplitInput,

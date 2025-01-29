@@ -17,6 +17,7 @@
 - Bugfix: Fixed deleted messages not immediately disappearing when "Hide deleted messages" is enabled. (#5844, #5854)
 - Bugfix: Fixed announcements not showing up in mentions tab. (#5857)
 - Bugfix: Fixed suspicious user treatment update messages not being searchable. (#5865)
+- BugFix: Shift+Return and Ctrl+Shift+Return are now bound with default hotkeys. (#5868)
 - Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
 - Dev: Updated Conan dependencies. (#5776)
 - Dev: Replaced usage of `parseTime` with `serverReceivedTime` for clearchat messages. (#5824, #5855)
