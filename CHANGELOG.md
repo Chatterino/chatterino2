@@ -22,6 +22,7 @@
 - Dev: Replaced usage of `parseTime` with `serverReceivedTime` for clearchat messages. (#5824, #5855)
 - Dev: Support Boost 1.87. (#5832)
 - Dev: Words from `TextElement`s are now combined where possible. (#5847)
+- Dev: Fixed assertion failure when closing the edit-hotkey dialog. (#5869)
 
 ## 2.5.2
 
