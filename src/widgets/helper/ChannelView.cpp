@@ -1402,6 +1402,13 @@ MessageElementFlags ChannelView::getFlags() const
         {
             split = dynamic_cast<Split *>(searchPopup->parentWidget());
         }
+
+        auto *userInfoPopup = dynamic_cast<UserInfoPopup *>(
+            this->parentWidget()->parentWidget()->parentWidget());
+        if (userInfoPopup != nullptr)
+        {
+            split = userInfoPopup->getSplit();
+        }
     }
 
     if (split != nullptr)

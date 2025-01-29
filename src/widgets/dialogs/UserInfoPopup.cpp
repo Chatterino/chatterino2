@@ -791,6 +791,11 @@ void UserInfoPopup::setData(const QString &name,
     }
 }
 
+Split *UserInfoPopup::getSplit()
+{
+    return this->split_;
+}
+
 void UserInfoPopup::updateLatestMessages()
 {
     auto filteredChannel =

@@ -32,6 +32,7 @@ public:
     void setData(const QString &name, const ChannelPtr &channel);
     void setData(const QString &name, const ChannelPtr &contextChannel,
                  const ChannelPtr &openingChannel);
+    Split *getSplit();
 
 protected:
     void themeChangedEvent() override;
