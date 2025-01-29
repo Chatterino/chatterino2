@@ -90,12 +90,15 @@ public:
 
 private:
     void reset(const QString &prevError = {});
-    void tryInitSession(const QJsonObject &response);
+    void tryInitSession(QJsonObject response);
     void displayError(const QString &error);
 
     void ping();
 
     void updateCurrentWidget(QWidget *next);
+
+    void saveSession(const QJsonObject &response);
+    void tryRestoreSession();
 
     QHBoxLayout layout;
     QLabel *detailLabel = nullptr;
@@ -132,6 +135,30 @@ void DeviceLoginWidget::updateCurrentWidget(QWidget *next)
 
     // insert the item
     this->layout.addWidget(next, 1, Qt::AlignCenter);
+}
+
+void DeviceLoginWidget::saveSession(const QJsonObject &response)
+{
+    auto *sessionRoot = this->window()->parent();
+    if (!sessionRoot)
+    {
+        return;
+    }
+    sessionRoot->setProperty("x-c2-device-session", response);
+}
+
+void DeviceLoginWidget::tryRestoreSession()
+{
+    auto *sessionRoot = this->window()->parent();
+    if (!sessionRoot)
+    {
+        return;
+    }
+    auto session = sessionRoot->property("x-c2-device-session").toJsonObject();
+    if (!session.isEmpty())
+    {
+        this->tryInitSession(session);
+    }
 }
 
 void DeviceLoginWidget::reset(const QString &prevError)
@@ -185,8 +212,31 @@ void DeviceLoginWidget::reset(const QString &prevError)
     this->updateCurrentWidget(wrap);
 }
 
-void DeviceLoginWidget::tryInitSession(const QJsonObject &response)
+void DeviceLoginWidget::tryInitSession(QJsonObject responseMut)
 {
+    // get/set the expiry time if not added yet
+    auto expiry = [&] {
+        auto key = "x-c2-expiry"_L1;
+        if (responseMut.contains(key))
+        {
+            return QDateTime::fromMSecsSinceEpoch(
+                responseMut.value(key).toInteger());
+        }
+        auto value = QDateTime::currentDateTime().addSecs(
+            responseMut.value("expires_in"_L1).toInt(1800));
+        responseMut.insert(key, value.toMSecsSinceEpoch());
+        return value;
+    }();
+    auto remainingTime = expiry - QDateTime::currentDateTime();
+    if (remainingTime.count() < 0)
+    {
+        this->reset();
+        return;
+    }
+
+    // make sure we don't accidentally detatch and deep-copy
+    const auto &response = responseMut;
+
     auto getString = [&](auto key, QString &dest) {
         const auto val = response[key];
         if (!val.isString())
@@ -212,13 +262,7 @@ void DeviceLoginWidget::tryInitSession(const QJsonObject &response)
             u"Failed to initialize: missing 'verification_uri'"_s);
         return;
     }
-    const auto expiry = response["expires_in"_L1];
-    if (!expiry.isDouble())
-    {
-        this->displayError(u"Failed to initialize: missing 'expires_in'"_s);
-        return;
-    }
-    this->expiryTimer_.start(expiry.toInt(1800) * 1000);
+    this->expiryTimer_.start(remainingTime);
     this->pingTimer_.start(response["interval"_L1].toInt(5) * 1000);
 
     auto *wrap = new QWidget;
