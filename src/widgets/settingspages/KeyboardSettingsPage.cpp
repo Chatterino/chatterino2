@@ -79,7 +79,10 @@ KeyboardSettingsPage::KeyboardSettingsPage()
                      });
 
     auto *keySequenceInput = new QKeySequenceEdit(this);
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
     keySequenceInput->setClearButtonEnabled(true);
+#endif
     auto *searchText = new QLabel("Search keybind:", this);
 
     QObject::connect(keySequenceInput, &QKeySequenceEdit::keySequenceChanged,
