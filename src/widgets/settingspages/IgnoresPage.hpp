@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util/LayoutCreator.hpp"
 #include "widgets/settingspages/SettingsPage.hpp"
 
 #include <QStringListModel>
@@ -8,6 +9,8 @@ class QVBoxLayout;
 
 namespace chatterino {
 
+class EditableModelView;
+
 class IgnoresPage : public SettingsPage
 {
 public:
@@ -15,8 +18,14 @@ public:
 
     void onShow() final;
 
+    bool filterElements(const QString &query) override;
+
 private:
     QStringListModel userListModel_;
+    QTabWidget *tabsWidget_;
+    EditableModelView *viewMessages_;
+
+    void addPhrasesTab(LayoutCreator<QVBoxLayout> layout);
 };
 
 }  // namespace chatterino

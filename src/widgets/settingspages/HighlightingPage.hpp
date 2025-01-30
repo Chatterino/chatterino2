@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util/LayoutCreator.hpp"
 #include "widgets/settingspages/SettingsPage.hpp"
 
 #include <QAbstractTableModel>
@@ -16,9 +17,16 @@ class HighlightingPage : public SettingsPage
 {
 public:
     HighlightingPage();
+    bool filterElements(const QString &query) override;
 
 private:
     enum HighlightTab { Messages = 0, Users = 1, Badges = 2, Blacklist = 3 };
+
+    QTabWidget *tabsWidget_;
+    EditableModelView *viewMessages_;
+    EditableModelView *viewUsers_;
+    EditableModelView *viewBadges_;
+    EditableModelView *viewBlacklistedUsers_;
 
     QTimer disabledUsersChangedTimer_;
 

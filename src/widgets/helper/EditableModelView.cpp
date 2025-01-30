@@ -150,26 +150,37 @@ void EditableModelView::addRegexHelpLink()
     this->addCustomButton(regexHelpLabel);
 }
 
-void EditableModelView::filterSearchResults(QString *query,
-                                            std::vector<int> *columnSelect)
+bool EditableModelView::filterSearchResults(const QString &query,
+                                            std::vector<int> &columnSelect)
 {
+    bool searchFoundSomething = false;
     auto rowAmount = this->model_->rowCount();
+
+    // make sure to show the page even if the table is empty,
+    // but only if we aren't search something
+    if (rowAmount == 0 && query.isEmpty())
+    {
+        return true;
+    }
+
     for (int i = 0; i < rowAmount; i++)
     {
-        tableView_->showRow(i);
+        tableView_->hideRow(i);
     }
-    for (int j : *columnSelect)
+    for (int j : columnSelect)
     {
         for (int i = 0; i < rowAmount; i++)
         {
             QModelIndex idx = model_->index(i, j);
             QVariant a = model_->data(idx);
-            if (!a.toString().contains(*query, Qt::CaseInsensitive))
+            if (a.toString().contains(query, Qt::CaseInsensitive))
             {
-                tableView_->hideRow(i);
+                tableView_->showRow(i);
+                searchFoundSomething = true;
             }
         }
     }
+    return searchFoundSomething;
 }
 
 void EditableModelView::filterSearchResultsHotkey(

@@ -26,7 +26,8 @@ public:
     void addCustomButton(QWidget *widget);
     void addRegexHelpLink();
 
-    void filterSearchResults(QString *query, std::vector<int> *columnSelect);
+    bool filterSearchResults(const QString &query,
+                             std::vector<int> &columnSelect);
     void filterSearchResultsHotkey(const QKeySequence *keySequenceQuery);
 
 private:
