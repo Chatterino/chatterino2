@@ -14,6 +14,7 @@ const QMap<QString, Type> MESSAGE_TYPING_CONTEXT{
     {"author.badges", Type::StringList},
     {"author.color", Type::Color},
     {"author.name", Type::String},
+    {"author.user_id", Type::String},
     {"author.no_color", Type::Bool},
     {"author.subbed", Type::Bool},
     {"author.sub_length", Type::Int},
@@ -60,6 +61,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
      * author.badges
      * author.color
      * author.name
+     * author.user_id
      * author.no_color
      * author.subbed
      * author.sub_length
@@ -121,6 +123,7 @@ ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
         {"author.badges", std::move(badges)},
         {"author.color", m->usernameColor},
         {"author.name", m->displayName},
+        {"author.user_id", m->userID},
         {"author.no_color", !m->usernameColor.isValid()},
         {"author.subbed", subscribed},
         {"author.sub_length", subLength},

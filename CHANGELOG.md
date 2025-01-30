@@ -7,6 +7,7 @@
 - Minor: Remove incognito browser support for `opera/launcher` (this should no longer be a thing). (#5805)
 - Minor: Remove incognito browser support for `iexplore`, because internet explorer is EOL. (#5810)
 - Minor: When (re-)connecting, visible channels are now joined first. (#5850)
+- Minor: Added the ability to filter on messages by the author's user ID (example: `author.user_id == "22484632"`). (#5862)
 - Bugfix: Fixed a potential way to escape the Lua Plugin sandbox. (#5846)
 - Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
 - Bugfix: Fixed a crash that could occur on Linux and macOS when clicking "Install" from the update prompt. (#5818)

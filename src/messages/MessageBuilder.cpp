@@ -2102,6 +2102,7 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
 
     MessageBuilder builder;
     builder.parseUsernameColor(tags, userID);
+    builder->userID = userID;
 
     if (args.isAction)
     {

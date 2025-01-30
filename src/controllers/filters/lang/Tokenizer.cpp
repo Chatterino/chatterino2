@@ -20,6 +20,7 @@ const QMap<QString, QString> VALID_IDENTIFIERS_MAP{
     {"author.badges", "author badges"},
     {"author.color", "author color"},
     {"author.name", "author name"},
+    {"author.user_id", "author user id"},
     {"author.no_color", "author has no color?"},
     {"author.subbed", "author subscribed?"},
     {"author.sub_length", "author sub length"},
