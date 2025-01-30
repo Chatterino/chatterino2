@@ -19,7 +19,7 @@
 	url = https://github.com/Tencent/rapidjson
 [submodule "lib/qtkeychain"]
 	path = lib/qtkeychain
-	url = https://github.com/Chatterino/qtkeychain
+	url = https://github.com/frankosterfeld/qtkeychain
 [submodule "lib/websocketpp"]
 	path = lib/websocketpp
 	url = https://github.com/Chatterino/websocketpp

@@ -23,6 +23,7 @@
 - Dev: Support Boost 1.87. (#5832)
 - Dev: Words from `TextElement`s are now combined where possible. (#5847)
 - Dev: Fixed assertion failure when closing the edit-hotkey dialog. (#5869)
+- Dev: Updated `qtkeychain` to 0.15.0. (#5871)
 
 ## 2.5.2
 
