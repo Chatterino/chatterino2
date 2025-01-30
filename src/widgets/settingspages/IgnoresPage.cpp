@@ -33,8 +33,8 @@ IgnoresPage::IgnoresPage()
     LayoutCreator<IgnoresPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
-    tabsWidget_ = new QTabWidget();
-    auto tabs = layout.append(tabsWidget_);
+    this->tabWidget_ = new QTabWidget();
+    auto tabs = layout.append(this->tabWidget_);
 
     addPhrasesTab(tabs.appendTab(new QVBoxLayout, "Messages"));
     addUsersTab(*this, tabs.appendTab(new QVBoxLayout, "Users"),
@@ -145,7 +145,7 @@ bool IgnoresPage::filterElements(const QString &query)
     auto *fields = new std::vector<int>{0, 4};
 
     bool matchMessages = viewMessages_->filterSearchResults(query, *fields);
-    tabsWidget_->setTabVisible(0, matchMessages);
+    this->tabWidget_->setTabVisible(0, matchMessages);
 
     return matchMessages;
 }

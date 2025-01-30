@@ -24,22 +24,21 @@ AccountsPage::AccountsPage()
     LayoutCreator<AccountsPage> layoutCreator(this);
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
-    EditableModelView *view =
-        layout
-            .emplace<EditableModelView>(
-                app->getAccounts()->createModel(nullptr), false)
-            .getElement();
+    this->view_ = layout
+                      .emplace<EditableModelView>(
+                          app->getAccounts()->createModel(nullptr), false)
+                      .getElement();
 
-    view->getTableView()->horizontalHeader()->setVisible(false);
-    view->getTableView()->horizontalHeader()->setStretchLastSection(true);
+    view_->getTableView()->horizontalHeader()->setVisible(false);
+    view_->getTableView()->horizontalHeader()->setStretchLastSection(true);
 
     // We can safely ignore this signal connection since we own the view
-    std::ignore = view->addButtonPressed.connect([this] {
+    std::ignore = view_->addButtonPressed.connect([this] {
         LoginDialog d(this);
         d.exec();
     });
 
-    view->getTableView()->setStyleSheet("background: #333");
+    view_->getTableView()->setStyleSheet("background: #333");
 
     //    auto buttons = layout.emplace<QDialogButtonBox>();
     //    {
@@ -65,6 +64,13 @@ AccountsPage::AccountsPage()
 
     //        getApp()->getAccounts()->Twitch.removeUser(selectedUser);
     //    });
+}
+
+bool AccountsPage::filterElements(const QString &query)
+{
+    auto *fields = new std::vector<int>{0, 1};
+
+    return view_->filterSearchResults(query, *fields);
 }
 
 }  // namespace chatterino

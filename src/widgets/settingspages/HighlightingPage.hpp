@@ -22,7 +22,7 @@ public:
 private:
     enum HighlightTab { Messages = 0, Users = 1, Badges = 2, Blacklist = 3 };
 
-    QTabWidget *tabsWidget_;
+    QTabWidget *tabWidget_;
     EditableModelView *viewMessages_;
     EditableModelView *viewUsers_;
     EditableModelView *viewBadges_;

@@ -94,27 +94,26 @@ NotificationPage::NotificationPage()
                     "These are the channels for which you will be informed "
                     "when they go live:");
 
-                EditableModelView *view =
-                    twitchChannels
-                        .emplace<EditableModelView>(
-                            getApp()->getNotifications()->createModel(
-                                nullptr, Platform::Twitch))
-                        .getElement();
-                view->setTitles({"Twitch channels"});
-                view->setValidationRegexp(twitchUserNameRegexp());
+                this->view_ = twitchChannels
+                                  .emplace<EditableModelView>(
+                                      getApp()->getNotifications()->createModel(
+                                          nullptr, Platform::Twitch))
+                                  .getElement();
+                view_->setTitles({"Twitch channels"});
+                view_->setValidationRegexp(twitchUserNameRegexp());
 
-                view->getTableView()->horizontalHeader()->setSectionResizeMode(
+                view_->getTableView()->horizontalHeader()->setSectionResizeMode(
                     QHeaderView::Fixed);
-                view->getTableView()->horizontalHeader()->setSectionResizeMode(
+                view_->getTableView()->horizontalHeader()->setSectionResizeMode(
                     0, QHeaderView::Stretch);
 
-                QTimer::singleShot(1, [view] {
-                    view->getTableView()->resizeColumnsToContents();
-                    view->getTableView()->setColumnWidth(0, 200);
+                QTimer::singleShot(1, [this] {
+                    view_->getTableView()->resizeColumnsToContents();
+                    view_->getTableView()->setColumnWidth(0, 200);
                 });
 
-                // We can safely ignore this signal connection since we own the view
-                std::ignore = view->addButtonPressed.connect([] {
+                // We can safely ignore this signal connection since we own the view_
+                std::ignore = view_->addButtonPressed.connect([] {
                     getApp()->getNotifications()->addChannelNotification(
                         "channel", Platform::Twitch);
                 });
@@ -148,4 +147,12 @@ QComboBox *NotificationPage::createToastReactionComboBox()
 
     return toastReactionOptions;
 }
+
+bool NotificationPage::filterElements(const QString &query)
+{
+    auto *fields = new std::vector<int>{0, 1};
+
+    return view_->filterSearchResults(query, *fields);
+}
+
 }  // namespace chatterino
