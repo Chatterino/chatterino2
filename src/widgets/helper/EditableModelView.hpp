@@ -1,6 +1,7 @@
 #pragma once
 
 #include <pajlada/signals/signal.hpp>
+#include <QKeySequence>
 #include <QWidget>
 
 class QAbstractTableModel;
@@ -24,6 +25,9 @@ public:
 
     void addCustomButton(QWidget *widget);
     void addRegexHelpLink();
+
+    void filterSearchResults(QString *query, std::vector<int> *columnSelect);
+    void filterSearchResultsHotkey(const QKeySequence *keySequenceQuery);
 
 private:
     QTableView *tableView_{};

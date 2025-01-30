@@ -11,6 +11,7 @@
 
 #include <QFormLayout>
 #include <QHeaderView>
+#include <QKeySequenceEdit>
 #include <QLabel>
 #include <QMessageBox>
 #include <QTableView>
@@ -77,6 +78,17 @@ KeyboardSettingsPage::KeyboardSettingsPage()
                      [view, model](const QModelIndex &clicked) {
                          tableCellClicked(clicked, view, model);
                      });
+
+    auto *keySequenceInput = new QKeySequenceEdit(this);
+    keySequenceInput->setClearButtonEnabled(true);
+    auto *searchText = new QLabel("Search keybind:", this);
+
+    QObject::connect(keySequenceInput, &QKeySequenceEdit::keySequenceChanged,
+                     [view](const QKeySequence &keySequence) {
+                         view->filterSearchResultsHotkey(&keySequence);
+                     });
+    view->addCustomButton(searchText);
+    view->addCustomButton(keySequenceInput);
 
     auto *resetEverything = new QPushButton("Reset to defaults");
     QObject::connect(resetEverything, &QPushButton::clicked, [this]() {

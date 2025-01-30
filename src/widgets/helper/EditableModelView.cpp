@@ -150,6 +150,51 @@ void EditableModelView::addRegexHelpLink()
     this->addCustomButton(regexHelpLabel);
 }
 
+void EditableModelView::filterSearchResults(QString *query,
+                                            std::vector<int> *columnSelect)
+{
+    auto rowAmount = this->model_->rowCount();
+    for (int i = 0; i < rowAmount; i++)
+    {
+        tableView_->showRow(i);
+    }
+    for (int j : *columnSelect)
+    {
+        for (int i = 0; i < rowAmount; i++)
+        {
+            QModelIndex idx = model_->index(i, j);
+            QVariant a = model_->data(idx);
+            if (!a.toString().contains(*query, Qt::CaseInsensitive))
+            {
+                tableView_->hideRow(i);
+            }
+        }
+    }
+}
+
+void EditableModelView::filterSearchResultsHotkey(
+    const QKeySequence *keySequenceQuery)
+{
+    auto rowAmount = this->model_->rowCount();
+    for (int i = 0; i < rowAmount; i++)
+    {
+        tableView_->hideRow(i);
+    }
+    for (int i = 0; i < rowAmount; i++)
+    {
+        QModelIndex idx = model_->index(i, 1);
+        QVariant a = model_->data(idx);
+        auto seq = qvariant_cast<QKeySequence>(a);
+
+        // todo: Make this fuzzy match, right now only exact matches happen
+        // so ctrl+f won't match ctrl+shift+f shortcuts
+        if (keySequenceQuery->matches(seq) != QKeySequence::NoMatch)
+        {
+            tableView_->showRow(i);
+        }
+    }
+}
+
 void EditableModelView::moveRow(int dir)
 {
     auto selected = this->getTableView()->selectionModel()->selectedRows(0);
