@@ -67,6 +67,7 @@
             "searchText": "This room is now in emote-only mode.",
             "serverReceivedTime": "",
             "timeoutUser": "",
+            "userID": "",
             "usernameColor": "#ff000000"
         }
     ]

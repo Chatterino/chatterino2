@@ -204,6 +204,10 @@ public:
     {
     }
 
+    void toastActivated(const char *response) const override
+    {
+    }
+
     void toastFailed() const override
     {
     }
