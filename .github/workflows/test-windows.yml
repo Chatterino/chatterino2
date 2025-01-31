@@ -7,7 +7,7 @@ on:
   merge_group:
 
 env:
-  TWITCH_PUBSUB_SERVER_TAG: v1.0.7
+  TWITCH_PUBSUB_SERVER_TAG: v1.0.8
   HTTPBOX_TAG: v0.2.1
   QT_QPA_PLATFORM: minimal
   CONAN_VERSION: 2.11.0
@@ -141,8 +141,6 @@ jobs:
           Expand-Archive pubsub-server.zip -DestinationPath pubsub-server-test
           rm pubsub-server.zip
           cd pubsub-server-test
-          Invoke-WebRequest -Uri "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.crt" -outfile "server.crt"
-          Invoke-WebRequest -Uri "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.key" -outfile "server.key"
           cd ..
 
       - name: Test

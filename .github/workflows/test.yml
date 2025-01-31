@@ -11,7 +11,7 @@ on:
       - main
 
 env:
-  TWITCH_PUBSUB_SERVER_TAG: v1.0.7
+  TWITCH_PUBSUB_SERVER_TAG: v1.0.8
   QT_QPA_PLATFORM: minimal
 
 concurrency:
@@ -70,8 +70,6 @@ jobs:
           tar -xzf pubsub-server.tar.gz -C pubsub-server-test
           rm pubsub-server.tar.gz
           cd pubsub-server-test
-          curl -L -o server.crt "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.crt"
-          curl -L -o server.key "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.key"
           cd ..
 
       - uses: dtolnay/rust-toolchain@stable
