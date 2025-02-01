@@ -83,42 +83,53 @@ bool logInWithImplicitGrantCredentials(QWidget *parent, const QString &userID,
     return true;
 }
 
+class DeviceLoginJob;
 class DeviceLoginWidget : public QWidget
 {
 public:
     DeviceLoginWidget();
 
-private:
     void reset(const QString &prevError = {});
-    void tryInitSession(QJsonObject response);
     void displayError(const QString &error);
 
-    void ping();
+private:
+    void tryInitSession(const QJsonObject &response);
 
     void updateCurrentWidget(QWidget *next);
-
-    void saveSession(const QJsonObject &response);
-    void tryRestoreSession();
 
     QHBoxLayout layout;
     QLabel *detailLabel = nullptr;
 
-    QTimer expiryTimer_;
-    QTimer pingTimer_;
     QString verificationUri_;
     QString userCode_;
-    QString deviceCode_;
     QString scopes_;
+
+    DeviceLoginJob *job_ = nullptr;
+};
+
+class DeviceLoginJob : public QObject
+{
+public:
+    struct Session {
+        QString deviceCode;
+        QString scopes;
+        std::chrono::milliseconds expiry;
+        std::chrono::milliseconds interval;
+    };
+
+    DeviceLoginJob(Session session);
+
+private:
+    void ping();
+
+    QPointer<DeviceLoginWidget> ui;
+    QTimer expiryTimer_;
+    QTimer pingTimer_;
+    Session session_;
 };
 
 DeviceLoginWidget::DeviceLoginWidget()
 {
-    QObject::connect(&this->pingTimer_, &QTimer::timeout, [this] {
-        this->ping();
-    });
-    QObject::connect(&this->expiryTimer_, &QTimer::timeout, [this] {
-        this->reset(u"The code expired."_s);
-    });
     this->setLayout(&this->layout);
     this->reset();
 }
@@ -137,34 +148,13 @@ void DeviceLoginWidget::updateCurrentWidget(QWidget *next)
     this->layout.addWidget(next, 1, Qt::AlignCenter);
 }
 
-void DeviceLoginWidget::saveSession(const QJsonObject &response)
-{
-    auto *sessionRoot = this->window()->parent();
-    if (!sessionRoot)
-    {
-        return;
-    }
-    sessionRoot->setProperty("x-c2-device-session", response);
-}
-
-void DeviceLoginWidget::tryRestoreSession()
-{
-    auto *sessionRoot = this->window()->parent();
-    if (!sessionRoot)
-    {
-        return;
-    }
-    auto session = sessionRoot->property("x-c2-device-session").toJsonObject();
-    if (!session.isEmpty())
-    {
-        this->tryInitSession(session);
-    }
-}
-
 void DeviceLoginWidget::reset(const QString &prevError)
 {
-    this->expiryTimer_.stop();
-    this->pingTimer_.stop();
+    if (this->job_)
+    {
+        this->job_->deleteLater();
+        assert(this->job_ == nullptr);
+    }
 
     auto *wrap = new QWidget;
     auto *layout = new QVBoxLayout(wrap);
@@ -212,31 +202,8 @@ void DeviceLoginWidget::reset(const QString &prevError)
     this->updateCurrentWidget(wrap);
 }
 
-void DeviceLoginWidget::tryInitSession(QJsonObject responseMut)
+void DeviceLoginWidget::tryInitSession(const QJsonObject &response)
 {
-    // get/set the expiry time if not added yet
-    auto expiry = [&] {
-        auto key = "x-c2-expiry"_L1;
-        if (responseMut.contains(key))
-        {
-            return QDateTime::fromMSecsSinceEpoch(
-                responseMut.value(key).toInteger());
-        }
-        auto value = QDateTime::currentDateTime().addSecs(
-            responseMut.value("expires_in"_L1).toInt(1800));
-        responseMut.insert(key, value.toMSecsSinceEpoch());
-        return value;
-    }();
-    auto remainingTime = expiry - QDateTime::currentDateTime();
-    if (remainingTime.count() < 0)
-    {
-        this->reset();
-        return;
-    }
-
-    // make sure we don't accidentally detatch and deep-copy
-    const auto &response = responseMut;
-
     auto getString = [&](auto key, QString &dest) {
         const auto val = response[key];
         if (!val.isString())
@@ -246,7 +213,8 @@ void DeviceLoginWidget::tryInitSession(QJsonObject responseMut)
         dest = val.toString();
         return true;
     };
-    if (!getString("device_code"_L1, this->deviceCode_))
+    QString deviceCode;
+    if (!getString("device_code"_L1, deviceCode))
     {
         this->displayError(u"Failed to initialize: missing 'device_code'"_s);
         return;
@@ -262,8 +230,21 @@ void DeviceLoginWidget::tryInitSession(QJsonObject responseMut)
             u"Failed to initialize: missing 'verification_uri'"_s);
         return;
     }
-    this->expiryTimer_.start(remainingTime);
-    this->pingTimer_.start(response["interval"_L1].toInt(5) * 1000);
+
+    if (this->job_)
+    {
+        assert(false && "There shouldn't be any job at this point");
+        this->job_->deleteLater();
+    }
+    this->job_ = new DeviceLoginJob({
+        .deviceCode = deviceCode,
+        .scopes = this->scopes_,
+        .expiry = std::chrono::seconds(response["expires_in"_L1].toInt(1800)),
+        .interval = std::chrono::seconds(response["interval"_L1].toInt(5)),
+    });
+    QObject::connect(this->job_, &QObject::destroyed, this, [this] {
+        this->job_ = nullptr;
+    });
 
     auto *wrap = new QWidget;
     auto *layout = new QVBoxLayout(wrap);
@@ -317,7 +298,7 @@ void DeviceLoginWidget::tryInitSession(QJsonObject responseMut)
     {
         auto *hbox = new QHBoxLayout;
 
-        auto addButton = [&](auto text, auto handler) {
+        auto addButton = [&](const auto &text, auto handler) {
             auto *button = new QPushButton(text);
             connect(button, &QPushButton::clicked, handler);
             hbox->addWidget(button, 1);
@@ -355,12 +336,24 @@ void DeviceLoginWidget::displayError(const QString &error)
     }
 }
 
-void DeviceLoginWidget::ping()
+DeviceLoginJob::DeviceLoginJob(Session session)
+    : session_(std::move(session))
+{
+    QObject::connect(&this->expiryTimer_, &QTimer::timeout, this,
+                     &QObject::deleteLater);
+    QObject::connect(&this->pingTimer_, &QTimer::timeout, this,
+                     &DeviceLoginJob::ping);
+
+    this->expiryTimer_.start(session.expiry);
+    this->pingTimer_.start(session.interval);
+};
+
+void DeviceLoginJob::ping()
 {
     QUrlQuery query{
         {u"client_id"_s, DEVICE_AUTH_CLIENT_ID},
-        {u"scope"_s, this->scopes_},
-        {u"device_code"_s, this->deviceCode_},
+        {u"scope"_s, this->session_.scopes},
+        {u"device_code"_s, this->session_.deviceCode},
         {u"grant_type"_s, u"urn:ietf:params:oauth:grant-type:device_code"_s},
     };
 
@@ -377,7 +370,10 @@ void DeviceLoginWidget::ping()
             if (accessToken.isEmpty() || refreshToken.isEmpty() ||
                 expiresIn <= 0)
             {
-                this->displayError("Received malformed response");
+                if (this->ui)
+                {
+                    this->ui->displayError("Received malformed response");
+                }
                 return;
             }
             auto expiresAt =
@@ -391,9 +387,10 @@ void DeviceLoginWidget::ping()
                  expiresAt](const auto &res) {
                     if (res.empty())
                     {
-                        if (self)
+                        if (self && self->ui)
                         {
-                            self->displayError("No user associated with token");
+                            self->ui->displayError(
+                                "No user associated with token");
                         }
                         return;
                     }
@@ -414,13 +411,17 @@ void DeviceLoginWidget::ping()
 
                     if (self)
                     {
-                        self->window()->close();
+                        if (self->ui)
+                        {
+                            self->ui->window()->close();
+                        }
+                        self->deleteLater();
                     }
                 },
-                [self]() {
-                    if (self)
+                [ui{this->ui}]() {
+                    if (ui)
                     {
-                        self->displayError(
+                        ui->displayError(
                             u"Failed to fetch authenticated user"_s);
                     }
                 });
@@ -428,9 +429,9 @@ void DeviceLoginWidget::ping()
         .onError([this](const auto &res) {
             auto json = res.parseJson();
             auto message = json["message"_L1].toString(u"(no message)"_s);
-            if (message != u"authorization_pending"_s)
+            if (message != u"authorization_pending"_s && this->ui)
             {
-                this->displayError(res.formatError() + u" - "_s + message);
+                this->ui->displayError(res.formatError() + u" - "_s + message);
             }
         })
         .execute();
