@@ -52,18 +52,19 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     auto layout = layoutCreator.emplace<QVBoxLayout>();
 
     auto *model = getApp()->getHotkeys()->createModel(nullptr);
-    view_ = layout.emplace<EditableModelView>(model).getElement();
+    this->view_ = layout.emplace<EditableModelView>(model).getElement();
 
-    view_->setTitles({"Hotkey name", "Keybinding"});
-    view_->getTableView()->horizontalHeader()->setVisible(true);
-    view_->getTableView()->horizontalHeader()->setStretchLastSection(false);
-    view_->getTableView()->horizontalHeader()->setSectionResizeMode(
+    this->view_->setTitles({"Hotkey name", "Keybinding"});
+    this->view_->getTableView()->horizontalHeader()->setVisible(true);
+    this->view_->getTableView()->horizontalHeader()->setStretchLastSection(
+        false);
+    this->view_->getTableView()->horizontalHeader()->setSectionResizeMode(
         QHeaderView::ResizeToContents);
-    view_->getTableView()->horizontalHeader()->setSectionResizeMode(
+    this->view_->getTableView()->horizontalHeader()->setSectionResizeMode(
         1, QHeaderView::Stretch);
 
-    // We can safely ignore this signal connection since we own the view_
-    std::ignore = view_->addButtonPressed.connect([] {
+    // We can safely ignore this signal connection since we own the this->view_
+    std::ignore = this->view_->addButtonPressed.connect([] {
         EditHotkeyDialog dialog(nullptr);
         bool wasAccepted = dialog.exec() == 1;
 
@@ -77,7 +78,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
 
     QObject::connect(view_->getTableView(), &QTableView::doubleClicked,
                      [this, model](const QModelIndex &clicked) {
-                         tableCellClicked(clicked, view_, model);
+                         tableCellClicked(clicked, this->view_, model);
                      });
 
     auto *keySequenceInput = new QKeySequenceEdit(this);
@@ -89,10 +90,10 @@ KeyboardSettingsPage::KeyboardSettingsPage()
 
     QObject::connect(keySequenceInput, &QKeySequenceEdit::keySequenceChanged,
                      [this](const QKeySequence &keySequence) {
-                         view_->filterSearchResultsHotkey(keySequence);
+                         this->view_->filterSearchResultsHotkey(keySequence);
                      });
-    view_->addCustomButton(searchText);
-    view_->addCustomButton(keySequenceInput);
+    this->view_->addCustomButton(searchText);
+    this->view_->addCustomButton(keySequenceInput);
 
     auto *resetEverything = new QPushButton("Reset to defaults");
     QObject::connect(resetEverything, &QPushButton::clicked, [this]() {
@@ -106,7 +107,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
             getApp()->getHotkeys()->resetToDefaults();
         }
     });
-    view_->addCustomButton(resetEverything);
+    this->view_->addCustomButton(resetEverything);
 
     // We only check this once since a user *should* not have the ability to create a new hotkey with a deprecated or removed action
     // However, we also don't update this after the user has deleted a hotkey. This is a big lift that should probably be solved on the model level rather
@@ -149,7 +150,7 @@ bool KeyboardSettingsPage::filterElements(const QString &query)
 {
     std::array fields{0, 1};
 
-    return view_->filterSearchResults(query, fields);
+    return this->view_->filterSearchResults(query, fields);
 }
 
 }  // namespace chatterino

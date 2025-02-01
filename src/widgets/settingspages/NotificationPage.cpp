@@ -99,21 +99,23 @@ NotificationPage::NotificationPage()
                                       getApp()->getNotifications()->createModel(
                                           nullptr, Platform::Twitch))
                                   .getElement();
-                view_->setTitles({"Twitch channels"});
-                view_->setValidationRegexp(twitchUserNameRegexp());
+                this->view_->setTitles({"Twitch channels"});
+                this->view_->setValidationRegexp(twitchUserNameRegexp());
 
-                view_->getTableView()->horizontalHeader()->setSectionResizeMode(
-                    QHeaderView::Fixed);
-                view_->getTableView()->horizontalHeader()->setSectionResizeMode(
-                    0, QHeaderView::Stretch);
+                this->view_->getTableView()
+                    ->horizontalHeader()
+                    ->setSectionResizeMode(QHeaderView::Fixed);
+                this->view_->getTableView()
+                    ->horizontalHeader()
+                    ->setSectionResizeMode(0, QHeaderView::Stretch);
 
                 QTimer::singleShot(1, [this] {
-                    view_->getTableView()->resizeColumnsToContents();
-                    view_->getTableView()->setColumnWidth(0, 200);
+                    this->view_->getTableView()->resizeColumnsToContents();
+                    this->view_->getTableView()->setColumnWidth(0, 200);
                 });
 
-                // We can safely ignore this signal connection since we own the view_
-                std::ignore = view_->addButtonPressed.connect([] {
+                // We can safely ignore this signal connection since we own the this->view_
+                std::ignore = this->view_->addButtonPressed.connect([] {
                     getApp()->getNotifications()->addChannelNotification(
                         "channel", Platform::Twitch);
                 });
@@ -152,7 +154,7 @@ bool NotificationPage::filterElements(const QString &query)
 {
     std::array fields{0, 1};
 
-    return view_->filterSearchResults(query, fields);
+    return this->view_->filterSearchResults(query, fields);
 }
 
 }  // namespace chatterino

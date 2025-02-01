@@ -29,16 +29,17 @@ AccountsPage::AccountsPage()
                           app->getAccounts()->createModel(nullptr), false)
                       .getElement();
 
-    view_->getTableView()->horizontalHeader()->setVisible(false);
-    view_->getTableView()->horizontalHeader()->setStretchLastSection(true);
+    this->view_->getTableView()->horizontalHeader()->setVisible(false);
+    this->view_->getTableView()->horizontalHeader()->setStretchLastSection(
+        true);
 
     // We can safely ignore this signal connection since we own the view
-    std::ignore = view_->addButtonPressed.connect([this] {
+    std::ignore = this->view_->addButtonPressed.connect([this] {
         LoginDialog d(this);
         d.exec();
     });
 
-    view_->getTableView()->setStyleSheet("background: #333");
+    this->view_->getTableView()->setStyleSheet("background: #333");
 
     //    auto buttons = layout.emplace<QDialogButtonBox>();
     //    {
@@ -70,7 +71,7 @@ bool AccountsPage::filterElements(const QString &query)
 {
     std::array fields{0, 1};
 
-    return view_->filterSearchResults(query, fields);
+    return this->view_->filterSearchResults(query, fields);
 }
 
 }  // namespace chatterino

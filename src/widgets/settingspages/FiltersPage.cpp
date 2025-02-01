@@ -25,26 +25,26 @@ FiltersPage::FiltersPage()
     layout.emplace<QLabel>(
         "Selectively display messages in Splits using channel filters. Set "
         "filters under a Split menu.");
-    view_ = layout
-                .emplace<EditableModelView>(
-                    (new FilterModel(nullptr))
-                        ->initialized(&getSettings()->filterRecords))
-                .getElement();
+    this->view_ = layout
+                      .emplace<EditableModelView>(
+                          (new FilterModel(nullptr))
+                              ->initialized(&getSettings()->filterRecords))
+                      .getElement();
 
-    view_->setTitles({"Name", "Filter", "Valid"});
-    view_->getTableView()->horizontalHeader()->setSectionResizeMode(
+    this->view_->setTitles({"Name", "Filter", "Valid"});
+    this->view_->getTableView()->horizontalHeader()->setSectionResizeMode(
         QHeaderView::Interactive);
-    view_->getTableView()->horizontalHeader()->setSectionResizeMode(
+    this->view_->getTableView()->horizontalHeader()->setSectionResizeMode(
         1, QHeaderView::Stretch);
 
     QTimer::singleShot(1, [this] {
-        view_->getTableView()->resizeColumnsToContents();
-        view_->getTableView()->setColumnWidth(0, 150);
-        view_->getTableView()->setColumnWidth(2, 125);
+        this->view_->getTableView()->resizeColumnsToContents();
+        this->view_->getTableView()->setColumnWidth(0, 150);
+        this->view_->getTableView()->setColumnWidth(2, 125);
     });
 
-    // We can safely ignore this signal connection since we own the view_
-    std::ignore = view_->addButtonPressed.connect([this] {
+    // We can safely ignore this signal connection since we own the this->view_
+    std::ignore = this->view_->addButtonPressed.connect([this] {
         ChannelFilterEditorDialog d(this->window());
         if (d.exec() == QDialog::Accepted)
         {
@@ -58,11 +58,11 @@ FiltersPage::FiltersPage()
         getSettings()->filterRecords.append(std::make_shared<FilterRecord>(
             "My filter", "message.content contains \"hello\""));
     });
-    view_->addCustomButton(quickAddButton);
+    this->view_->addCustomButton(quickAddButton);
 
     QObject::connect(view_->getTableView(), &QTableView::clicked,
                      [this](const QModelIndex &clicked) {
-                         this->tableCellClicked(clicked, view_);
+                         this->tableCellClicked(clicked, this->view_);
                      });
 
     auto *filterHelpLabel =
@@ -70,7 +70,7 @@ FiltersPage::FiltersPage()
                                "style='color:#99f'>filter info</span></a>")
                        .arg(FILTERS_DOCUMENTATION));
     filterHelpLabel->setOpenExternalLinks(true);
-    view_->addCustomButton(filterHelpLabel);
+    this->view_->addCustomButton(filterHelpLabel);
 
     layout.append(
         this->createCheckBox("Do not filter my own messages",
@@ -90,8 +90,9 @@ void FiltersPage::tableCellClicked(const QModelIndex &clicked,
     {
         QMessageBox popup(this->window());
 
-        auto filterText =
-            view_->getModel()->data(clicked.siblingAtColumn(1)).toString();
+        auto filterText = this->view_->getModel()
+                              ->data(clicked.siblingAtColumn(1))
+                              .toString();
         auto filterResult = filters::Filter::fromString(filterText);
 
         if (std::holds_alternative<filters::Filter>(filterResult))
@@ -133,7 +134,7 @@ bool FiltersPage::filterElements(const QString &query)
 {
     std::array fields{0, 1};
 
-    return view_->filterSearchResults(query, fields);
+    return this->view_->filterSearchResults(query, fields);
 }
 
 }  // namespace chatterino

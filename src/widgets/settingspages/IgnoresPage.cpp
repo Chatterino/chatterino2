@@ -45,26 +45,29 @@ IgnoresPage::IgnoresPage()
 void IgnoresPage::addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
 {
     layout.emplace<QLabel>("Ignore messages based certain patterns.");
-    viewMessages_ = layout
-                        .emplace<EditableModelView>(
-                            (new IgnoreModel(nullptr))
-                                ->initialized(&getSettings()->ignoredMessages))
-                        .getElement();
-    viewMessages_->setTitles(
+    this->viewMessages_ =
+        layout
+            .emplace<EditableModelView>(
+                (new IgnoreModel(nullptr))
+                    ->initialized(&getSettings()->ignoredMessages))
+            .getElement();
+    this->viewMessages_->setTitles(
         {"Pattern", "Regex", "Case-sensitive", "Block", "Replacement"});
-    viewMessages_->getTableView()->horizontalHeader()->setSectionResizeMode(
-        QHeaderView::Fixed);
-    viewMessages_->getTableView()->horizontalHeader()->setSectionResizeMode(
-        0, QHeaderView::Stretch);
-    viewMessages_->addRegexHelpLink();
+    this->viewMessages_->getTableView()
+        ->horizontalHeader()
+        ->setSectionResizeMode(QHeaderView::Fixed);
+    this->viewMessages_->getTableView()
+        ->horizontalHeader()
+        ->setSectionResizeMode(0, QHeaderView::Stretch);
+    this->viewMessages_->addRegexHelpLink();
 
     QTimer::singleShot(1, [this] {
-        viewMessages_->getTableView()->resizeColumnsToContents();
-        viewMessages_->getTableView()->setColumnWidth(0, 200);
+        this->viewMessages_->getTableView()->resizeColumnsToContents();
+        this->viewMessages_->getTableView()->setColumnWidth(0, 200);
     });
 
-    // We can safely ignore this signal connection since we own the viewMessages_
-    std::ignore = viewMessages_->addButtonPressed.connect([] {
+    // We can safely ignore this signal connection since we own thethis->viewMessages_
+    std::ignore = this->viewMessages_->addButtonPressed.connect([] {
         getSettings()->ignoredMessages.append(
             IgnorePhrase{"my pattern", false, false,
                          getSettings()->ignoredPhraseReplace.getValue(), true});
@@ -144,7 +147,8 @@ bool IgnoresPage::filterElements(const QString &query)
 {
     std::array fields{0, 4};
 
-    bool matchMessages = viewMessages_->filterSearchResults(query, fields);
+    bool matchMessages =
+        this->viewMessages_->filterSearchResults(query, fields);
     this->tabWidget_->setTabVisible(0, matchMessages);
 
     return matchMessages;
