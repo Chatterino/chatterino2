@@ -310,6 +310,8 @@ enum class Action : uint8_t {
     Unraid,
     /// json_rename=delete
     DeleteMessage,
+    /// clangd currently "inherits" all future comments to all future enum constants
+    /// so after using something like json_rename we need to ensure it doesn't spread
     Unvip,
     Vip,
     Raid,
@@ -379,6 +381,9 @@ struct Payload {
 };
 
 // DESERIALIZATION DEFINITION START
+boost::json::result_for<Action, boost::json::value>::type tag_invoke(
+    boost::json::try_value_to_tag<Action>, const boost::json::value &jvRoot);
+
 boost::json::result_for<Followers, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<Followers>, const boost::json::value &jvRoot);
 

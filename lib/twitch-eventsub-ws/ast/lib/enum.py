@@ -40,7 +40,7 @@ class Enum:
         return f"enum class {self.name} {{\n  {pretty_constants}\n}}"
 
     def try_value_to_implementation(self, env: Environment) -> str:
-        return env.get_template("enum-implementation.tmpl").render(struct=self)
+        return env.get_template("enum-implementation.tmpl").render(enum=self)
 
     def try_value_to_definition(self, env: Environment) -> str:
         return env.get_template("enum-definition.tmpl").render(enum=self)

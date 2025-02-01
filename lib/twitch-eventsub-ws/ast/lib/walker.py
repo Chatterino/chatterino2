@@ -60,8 +60,10 @@ class Walker:
                 return True
 
             case CursorKind.ENUM_CONSTANT_DECL:
-                log.warning(f"enum constant decl {node.spelling} - {struct} - {enum}")
                 if enum:
+                    # log.warning(
+                    #     f"enum constant decl {node.spelling} - enum comments: {enum.comment_commands} - node comments: {node.raw_comment}"
+                    # )
                     constant = EnumConstant.from_field(node, self.namespace)
                     constant.apply_comment_commands(enum.comment_commands)
                     enum.constants.append(constant)

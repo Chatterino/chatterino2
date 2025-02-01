@@ -6,26 +6,20 @@ boost::json::result_for<{{enum.full_name}}, boost::json::value>::type tag_invoke
         static const error::ApplicationErrorCategory errorMustBeString{"{{enum.full_name}} must be a string"};
         return boost::system::error_code{129, errorMustBeString};
     }
-    const auto &eString = jvRoot.get_string();
+    std::string_view eString(jvRoot.get_string());
 
-    static std::unordered_map<std::string, {{enum.full_name}}> values{
-{% for constant in enum.constants %}
-{
-    {
-        "{{constant.json_name}}"
-    },
-    {
-        {{enum.full_name}}::{{constant.name}}
-    },
-},
-{% endfor %}
-    };
+    using namespace std::string_view_literals;
 
-    auto it = values.find(eString);
-    if (it == values.end()) {
+    {% set ns = namespace(first=true) %}
+{%- for constant in enum.constants %}
+    {%- if ns.first == false -%}else {% endif -%}if (eString == "{{constant.json_name}}"sv) {
+        return {{enum.full_name}}::{{constant.name}};
+    }
+    {% set ns.first = false %}
+{%- endfor %}
+
+// TODO: Can we make this return a better error
         static const error::ApplicationErrorCategory errorEnumNameDidNotExist{"{{enum.full_name}} did not match this string value that I would like to have in this error message but this is a static error so I don't know if I can do that hmm"};
         return boost::system::error_code{129, errorEnumNameDidNotExist};
-    }
 
-    return *it;
 }

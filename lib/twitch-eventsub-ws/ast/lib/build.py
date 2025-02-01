@@ -7,12 +7,15 @@ import clang.cindex
 
 from .helpers import get_clang_builtin_include_dirs, get_cmake_include_dirs
 from .struct import Struct
+from .enum import Enum
 from .walker import Walker
 
 log = logging.getLogger(__name__)
 
 
-def build_structs(filename: str, build_commands: Optional[str] = None) -> List[Struct]:
+def build_structs(
+    filename: str, build_commands: Optional[str] = None
+) -> List[Struct | Enum]:
     if not os.path.isfile(filename):
         raise ValueError(f"Path {filename} is not a file. cwd: {os.getcwd()}")
 
@@ -23,7 +26,8 @@ def build_structs(filename: str, build_commands: Optional[str] = None) -> List[S
     ]
 
     parse_options = (
-        clang.cindex.TranslationUnit.PARSE_INCOMPLETE | clang.cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES
+        clang.cindex.TranslationUnit.PARSE_INCOMPLETE
+        | clang.cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES
     )
 
     extra_includes, system_includes = get_clang_builtin_include_dirs()
@@ -43,7 +47,9 @@ def build_structs(filename: str, build_commands: Optional[str] = None) -> List[S
     file_dir = os.path.dirname(os.path.realpath(filename))
     parse_args.append(f"-I{file_dir}")
     # - Append project include dir
-    file_subdir = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(filename)), "../.."))
+    file_subdir = os.path.realpath(
+        os.path.join(os.path.dirname(os.path.realpath(filename)), "../..")
+    )
     parse_args.append(f"-I{file_subdir}")
 
     # TODO: Use build_commands if available
@@ -63,4 +69,4 @@ def build_structs(filename: str, build_commands: Optional[str] = None) -> List[S
     walker = Walker(filename)
     walker.walk(root)
 
-    return walker.structs
+    return walker.enums + walker.structs

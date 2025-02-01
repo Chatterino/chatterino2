@@ -4,9 +4,348 @@
 
 #include <boost/json.hpp>
 
+#include <unordered_map>
+
 namespace chatterino::eventsub::lib::payload::channel_moderate::v2 {
 
 // DESERIALIZATION IMPLEMENTATION START
+boost::json::result_for<Action, boost::json::value>::type tag_invoke(
+    boost::json::try_value_to_tag<Action>, const boost::json::value &jvRoot)
+{
+    if (!jvRoot.is_string())
+    {
+        static const error::ApplicationErrorCategory errorMustBeString{
+            "Action must be a string"};
+        return boost::system::error_code{129, errorMustBeString};
+    }
+    std::string_view eString(jvRoot.get_string());
+
+    using namespace std::string_view_literals;
+
+    if (eString == "ban"sv)
+    {
+        return Action::Ban;
+    }
+    else if (eString == "timeout"sv)
+    {
+        return Action::Timeout;
+    }
+    else if (eString == "unban"sv)
+    {
+        return Action::Unban;
+    }
+    else if (eString == "untimeout"sv)
+    {
+        return Action::Untimeout;
+    }
+    else if (eString == "clear"sv)
+    {
+        return Action::Clear;
+    }
+    else if (eString == "emoteonly"sv)
+    {
+        return Action::Emoteonly;
+    }
+    else if (eString == "emoteonlyoff"sv)
+    {
+        return Action::Emoteonlyoff;
+    }
+    else if (eString == "followers"sv)
+    {
+        return Action::Followers;
+    }
+    else if (eString == "followersoff"sv)
+    {
+        return Action::Followersoff;
+    }
+    else if (eString == "uniquechat"sv)
+    {
+        return Action::Uniquechat;
+    }
+    else if (eString == "uniquechatoff"sv)
+    {
+        return Action::Uniquechatoff;
+    }
+    else if (eString == "slow"sv)
+    {
+        return Action::Slow;
+    }
+    else if (eString == "slowoff"sv)
+    {
+        return Action::Slowoff;
+    }
+    else if (eString == "subscribers"sv)
+    {
+        return Action::Subscribers;
+    }
+    else if (eString == "subscribersoff"sv)
+    {
+        return Action::Subscribersoff;
+    }
+    else if (eString == "unraid"sv)
+    {
+        return Action::Unraid;
+    }
+    else if (eString == "delete"sv)
+    {
+        return Action::DeleteMessage;
+    }
+    else if (eString == "unvip"sv)
+    {
+        return Action::Unvip;
+    }
+    else if (eString == "vip"sv)
+    {
+        return Action::Vip;
+    }
+    else if (eString == "raid"sv)
+    {
+        return Action::Raid;
+    }
+    else if (eString == "add_blocked_term"sv)
+    {
+        return Action::AddBlockedTerm;
+    }
+    else if (eString == "add_permitted_term"sv)
+    {
+        return Action::AddPermittedTerm;
+    }
+    else if (eString == "remove_blocked_term"sv)
+    {
+        return Action::RemoveBlockedTerm;
+    }
+    else if (eString == "remove_permitted_term"sv)
+    {
+        return Action::RemovePermittedTerm;
+    }
+    else if (eString == "mod"sv)
+    {
+        return Action::Mod;
+    }
+    else if (eString == "unmod"sv)
+    {
+        return Action::Unmod;
+    }
+    else if (eString == "approve_unban_request"sv)
+    {
+        return Action::ApproveUnbanRequest;
+    }
+    else if (eString == "deny_unban_request"sv)
+    {
+        return Action::DenyUnbanRequest;
+    }
+    else if (eString == "warn"sv)
+    {
+        return Action::Warn;
+    }
+    else if (eString == "shared_chat_ban"sv)
+    {
+        return Action::SharedChatBan;
+    }
+    else if (eString == "shared_chat_timeout"sv)
+    {
+        return Action::SharedChatTimeout;
+    }
+    else if (eString == "shared_chat_unban"sv)
+    {
+        return Action::SharedChatUnban;
+    }
+    else if (eString == "shared_chat_untimeout"sv)
+    {
+        return Action::SharedChatUntimeout;
+    }
+    else if (eString == "shared_chat_delete"sv)
+    {
+        return Action::SharedChatDelete;
+    }
+
+    static std::unordered_map<std::string, Action> values{
+
+        {
+            {"ban"},
+            {Action::Ban},
+        },
+
+        {
+            {"timeout"},
+            {Action::Timeout},
+        },
+
+        {
+            {"unban"},
+            {Action::Unban},
+        },
+
+        {
+            {"untimeout"},
+            {Action::Untimeout},
+        },
+
+        {
+            {"clear"},
+            {Action::Clear},
+        },
+
+        {
+            {"emoteonly"},
+            {Action::Emoteonly},
+        },
+
+        {
+            {"emoteonlyoff"},
+            {Action::Emoteonlyoff},
+        },
+
+        {
+            {"followers"},
+            {Action::Followers},
+        },
+
+        {
+            {"followersoff"},
+            {Action::Followersoff},
+        },
+
+        {
+            {"uniquechat"},
+            {Action::Uniquechat},
+        },
+
+        {
+            {"uniquechatoff"},
+            {Action::Uniquechatoff},
+        },
+
+        {
+            {"slow"},
+            {Action::Slow},
+        },
+
+        {
+            {"slowoff"},
+            {Action::Slowoff},
+        },
+
+        {
+            {"subscribers"},
+            {Action::Subscribers},
+        },
+
+        {
+            {"subscribersoff"},
+            {Action::Subscribersoff},
+        },
+
+        {
+            {"unraid"},
+            {Action::Unraid},
+        },
+
+        {
+            {"delete"},
+            {Action::DeleteMessage},
+        },
+
+        {
+            {"unvip"},
+            {Action::Unvip},
+        },
+
+        {
+            {"vip"},
+            {Action::Vip},
+        },
+
+        {
+            {"raid"},
+            {Action::Raid},
+        },
+
+        {
+            {"add_blocked_term"},
+            {Action::AddBlockedTerm},
+        },
+
+        {
+            {"add_permitted_term"},
+            {Action::AddPermittedTerm},
+        },
+
+        {
+            {"remove_blocked_term"},
+            {Action::RemoveBlockedTerm},
+        },
+
+        {
+            {"remove_permitted_term"},
+            {Action::RemovePermittedTerm},
+        },
+
+        {
+            {"mod"},
+            {Action::Mod},
+        },
+
+        {
+            {"unmod"},
+            {Action::Unmod},
+        },
+
+        {
+            {"approve_unban_request"},
+            {Action::ApproveUnbanRequest},
+        },
+
+        {
+            {"deny_unban_request"},
+            {Action::DenyUnbanRequest},
+        },
+
+        {
+            {"warn"},
+            {Action::Warn},
+        },
+
+        {
+            {"shared_chat_ban"},
+            {Action::SharedChatBan},
+        },
+
+        {
+            {"shared_chat_timeout"},
+            {Action::SharedChatTimeout},
+        },
+
+        {
+            {"shared_chat_unban"},
+            {Action::SharedChatUnban},
+        },
+
+        {
+            {"shared_chat_untimeout"},
+            {Action::SharedChatUntimeout},
+        },
+
+        {
+            {"shared_chat_delete"},
+            {Action::SharedChatDelete},
+        },
+
+    };
+
+    auto it = values.find(eString);
+    if (it == values.end())
+    {
+        static const error::ApplicationErrorCategory errorEnumNameDidNotExist{
+            "Action did not match this string value that I would like to have "
+            "in this error message but this is a static error so I don't know "
+            "if I can do that hmm"};
+        return boost::system::error_code{129, errorEnumNameDidNotExist};
+    }
+
+    return *it;
+}
+
 boost::json::result_for<Followers, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<Followers>, const boost::json::value &jvRoot)
 {
