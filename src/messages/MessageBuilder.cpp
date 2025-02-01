@@ -1967,6 +1967,7 @@ MessagePtr MessageBuilder::makeLowTrustUpdateMessage(
                               MessageColor::System, FontStyle::ChatMediumBold)
         ->setLink({Link::UserInfo, action.updatedByUserLogin});
 
+    QString text;
     assert(action.treatment != PubSubLowTrustUsersMessage::Treatment::INVALID);
     switch (action.treatment)
     {
@@ -1982,6 +1983,9 @@ MessagePtr MessageBuilder::makeLowTrustUpdateMessage(
             builder.emplace<TextElement>("from the suspicious user list.",
                                          MessageElementFlag::Text,
                                          MessageColor::System);
+            text = QString("%1 removed %2 from the suspicious user list.")
+                       .arg(action.updatedByUserDisplayName,
+                            action.suspiciousUserDisplayName);
         }
         break;
 
@@ -1997,6 +2001,9 @@ MessagePtr MessageBuilder::makeLowTrustUpdateMessage(
             builder.emplace<TextElement>("as a monitored suspicious chatter.",
                                          MessageElementFlag::Text,
                                          MessageColor::System);
+            text = QString("%1 added %2 as a monitored suspicious chatter.")
+                       .arg(action.updatedByUserDisplayName,
+                            action.suspiciousUserDisplayName);
         }
         break;
 
@@ -2012,6 +2019,9 @@ MessagePtr MessageBuilder::makeLowTrustUpdateMessage(
             builder.emplace<TextElement>("as a restricted suspicious chatter.",
                                          MessageElementFlag::Text,
                                          MessageColor::System);
+            text = QString("%1 added %2 as a restricted suspicious chatter.")
+                       .arg(action.updatedByUserDisplayName,
+                            action.suspiciousUserDisplayName);
         }
         break;
 
@@ -2021,6 +2031,8 @@ MessagePtr MessageBuilder::makeLowTrustUpdateMessage(
             break;
     }
 
+    builder->messageText = text;
+    builder->searchText = text;
     return builder.release();
 }
 
@@ -2139,6 +2151,7 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
 
     MessageBuilder builder;
     builder.parseUsernameColor(tags, userID);
+    builder->userID = userID;
 
     if (args.isAction)
     {
@@ -2294,23 +2307,26 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
             ColorProvider::instance().color(ColorType::Whisper);
     }
 
-    if (thread)
+    if (!args.isReceivedWhisper && tags.value("msg-id") != "announcement")
     {
-        auto &img = getResources().buttons.replyThreadDark;
-        builder
-            .emplace<CircularImageElement>(Image::fromResourcePixmap(img, 0.15),
-                                           2, Qt::gray,
-                                           MessageElementFlag::ReplyButton)
-            ->setLink({Link::ViewThread, thread->rootId()});
-    }
-    else
-    {
-        auto &img = getResources().buttons.replyDark;
-        builder
-            .emplace<CircularImageElement>(Image::fromResourcePixmap(img, 0.15),
-                                           2, Qt::gray,
-                                           MessageElementFlag::ReplyButton)
-            ->setLink({Link::ReplyToMessage, builder->id});
+        if (thread)
+        {
+            auto &img = getResources().buttons.replyThreadDark;
+            builder
+                .emplace<CircularImageElement>(
+                    Image::fromResourcePixmap(img, 0.15), 2, Qt::gray,
+                    MessageElementFlag::ReplyButton)
+                ->setLink({Link::ViewThread, thread->rootId()});
+        }
+        else
+        {
+            auto &img = getResources().buttons.replyDark;
+            builder
+                .emplace<CircularImageElement>(
+                    Image::fromResourcePixmap(img, 0.15), 2, Qt::gray,
+                    MessageElementFlag::ReplyButton)
+                ->setLink({Link::ReplyToMessage, builder->id});
+        }
     }
 
     return {builder.release(), highlight};
