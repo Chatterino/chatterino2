@@ -142,9 +142,9 @@ void IgnoresPage::onShow()
 
 bool IgnoresPage::filterElements(const QString &query)
 {
-    auto *fields = new std::vector<int>{0, 4};
+    std::array fields{0, 4};
 
-    bool matchMessages = viewMessages_->filterSearchResults(query, *fields);
+    bool matchMessages = viewMessages_->filterSearchResults(query, fields);
     this->tabWidget_->setTabVisible(0, matchMessages);
 
     return matchMessages;

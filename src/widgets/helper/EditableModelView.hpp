@@ -27,8 +27,8 @@ public:
     void addRegexHelpLink();
 
     bool filterSearchResults(const QString &query,
-                             std::vector<int> &columnSelect);
-    void filterSearchResultsHotkey(const QKeySequence *keySequenceQuery);
+                             std::span<const int> columnSelect);
+    void filterSearchResultsHotkey(const QKeySequence &keySequenceQuery);
 
 private:
     QTableView *tableView_{};

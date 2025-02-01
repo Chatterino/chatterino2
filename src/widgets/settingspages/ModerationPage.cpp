@@ -380,13 +380,13 @@ void ModerationPage::selectModerationActions()
 
 bool ModerationPage::filterElements(const QString &query)
 {
-    auto *fields = new std::vector<int>{0};
+    std::array fields{0};
 
-    bool matchLogs = viewLogs_->filterSearchResults(query, *fields);
+    bool matchLogs = viewLogs_->filterSearchResults(query, fields);
     tabWidget_->setTabVisible(0, matchLogs);
 
     bool matchModerationButtons =
-        viewModerationButtons_->filterSearchResults(query, *fields);
+        viewModerationButtons_->filterSearchResults(query, fields);
     tabWidget_->setTabVisible(1, matchModerationButtons);
 
     return matchLogs || matchModerationButtons;

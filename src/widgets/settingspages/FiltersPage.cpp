@@ -131,9 +131,9 @@ void FiltersPage::tableCellClicked(const QModelIndex &clicked,
 
 bool FiltersPage::filterElements(const QString &query)
 {
-    auto *fields = new std::vector<int>{0, 1};
+    std::array fields{0, 1};
 
-    return view_->filterSearchResults(query, *fields);
+    return view_->filterSearchResults(query, fields);
 }
 
 }  // namespace chatterino

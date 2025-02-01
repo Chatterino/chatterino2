@@ -151,7 +151,7 @@ void EditableModelView::addRegexHelpLink()
 }
 
 bool EditableModelView::filterSearchResults(const QString &query,
-                                            std::vector<int> &columnSelect)
+                                            std::span<const int> columnSelect)
 {
     bool searchFoundSomething = false;
     auto rowAmount = this->model_->rowCount();
@@ -184,7 +184,7 @@ bool EditableModelView::filterSearchResults(const QString &query,
 }
 
 void EditableModelView::filterSearchResultsHotkey(
-    const QKeySequence *keySequenceQuery)
+    const QKeySequence &keySequenceQuery)
 {
     auto rowAmount = this->model_->rowCount();
     for (int i = 0; i < rowAmount; i++)
@@ -199,7 +199,7 @@ void EditableModelView::filterSearchResultsHotkey(
 
         // todo: Make this fuzzy match, right now only exact matches happen
         // so ctrl+f won't match ctrl+shift+f shortcuts
-        if (keySequenceQuery->matches(seq) != QKeySequence::NoMatch)
+        if (keySequenceQuery.matches(seq) != QKeySequence::NoMatch)
         {
             tableView_->showRow(i);
         }

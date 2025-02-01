@@ -53,8 +53,8 @@ HighlightingPage::HighlightingPage()
         // getSettings()->enableHighlights));
 
         // TABS
-        this->tabWidget_ = new QTabWidget();
-        auto tabs = layout.append(tabWidget_);
+        auto tabs = layout.emplace<QTabWidget>();
+        this->tabWidget_ = &*tabs;
         {
             // HIGHLIGHTS
             auto highlights = tabs.appendTab(new QVBoxLayout, "Messages");
@@ -413,19 +413,19 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
 
 bool HighlightingPage::filterElements(const QString &query)
 {
-    auto *fields = new std::vector<int>{0};
+    std::array fields{0};
 
-    bool matchMessages = viewMessages_->filterSearchResults(query, *fields);
+    bool matchMessages = viewMessages_->filterSearchResults(query, fields);
     this->tabWidget_->setTabVisible(0, matchMessages);
 
-    bool matchUsers = viewUsers_->filterSearchResults(query, *fields);
+    bool matchUsers = viewUsers_->filterSearchResults(query, fields);
     this->tabWidget_->setTabVisible(1, matchUsers);
 
-    bool matchBadges = viewBadges_->filterSearchResults(query, *fields);
+    bool matchBadges = viewBadges_->filterSearchResults(query, fields);
     this->tabWidget_->setTabVisible(2, matchBadges);
 
     bool matchBlacklistedUsers =
-        viewBlacklistedUsers_->filterSearchResults(query, *fields);
+        viewBlacklistedUsers_->filterSearchResults(query, fields);
     this->tabWidget_->setTabVisible(3, matchBlacklistedUsers);
 
     return matchMessages || matchUsers || matchBadges || matchBlacklistedUsers;

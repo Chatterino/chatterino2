@@ -33,17 +33,17 @@ QString c1settingsPath()
     return combinePath(qgetenv("appdata"), "Chatterino\\Custom\\Commands.txt");
 }
 
-void checkCommandDuplicates(EditableModelView *view_, QLabel *duplicateWarning)
+void checkCommandDuplicates(EditableModelView *view, QLabel *duplicateWarning)
 {
     bool foundDuplicateTrigger = false;
 
     // Maps command triggers to model row indices
     std::unordered_map<QString, std::vector<int>> commands;
 
-    for (int i = 0; i < view_->getModel()->rowCount(); i++)
+    for (int i = 0; i < view->getModel()->rowCount(); i++)
     {
         QString commandTrigger =
-            view_->getModel()->index(i, 0).data().toString();
+            view->getModel()->index(i, 0).data().toString();
         commands[commandTrigger].push_back(i);
     }
 
@@ -57,16 +57,14 @@ void checkCommandDuplicates(EditableModelView *view_, QLabel *duplicateWarning)
 
             for (const auto &rowIndex : rowIndices)
             {
-                view_->getModel()->setData(
-                    view_->getModel()->index(rowIndex, 0), QColor("yellow"),
-                    Qt::ForegroundRole);
+                view->getModel()->setData(view->getModel()->index(rowIndex, 0),
+                                          QColor("yellow"), Qt::ForegroundRole);
             }
         }
         else
         {
-            view_->getModel()->setData(
-                view_->getModel()->index(rowIndices[0], 0), QColor("white"),
-                Qt::ForegroundRole);
+            view->getModel()->setData(view->getModel()->index(rowIndices[0], 0),
+                                      QColor("white"), Qt::ForegroundRole);
         }
     }
 
@@ -169,9 +167,9 @@ CommandPage::CommandPage()
 
 bool CommandPage::filterElements(const QString &query)
 {
-    auto *fields = new std::vector<int>{0, 1};
+    std::array fields{0, 1};
 
-    return view_->filterSearchResults(query, *fields);
+    return view_->filterSearchResults(query, fields);
 }
 
 }  // namespace chatterino
