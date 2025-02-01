@@ -59,8 +59,8 @@ private:
     void queueSubscription(const SubscriptionRequest &request,
                            boost::posix_time::time_duration delay);
 
-    void markRequestSubscribed(const QString &sessionID,
-                               const SubscriptionRequest &request);
+    void markRequestSubscribed(const SubscriptionRequest &request,
+                               std::weak_ptr<lib::Session> connection);
 
     const std::string userAgent;
 
@@ -77,8 +77,8 @@ private:
     std::vector<std::weak_ptr<lib::Session>> connections;
 
     struct XD {
-        std::atomic<int32_t> refCount = 0;
-        std::weak_ptr<lib::Session> *connection;
+        int32_t refCount = 0;
+        std::weak_ptr<lib::Session> connection;
     };
 
     std::mutex subscriptionsMutex;

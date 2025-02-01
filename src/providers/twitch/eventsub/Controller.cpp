@@ -13,6 +13,7 @@
 #include <twitch-eventsub-ws/session.hpp>
 
 #include <memory>
+#include <utility>
 
 namespace {
 
@@ -73,8 +74,6 @@ Controller::~Controller()
     }
 
     this->work.reset();
-
-    // TODO: Close down existing sessions
 
     if (this->thread->joinable())
     {
@@ -186,12 +185,14 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isQueued)
             // TODO: Don't hardcode the subscription version
             getHelix()->createEventSubSubscription(
                 request, listener->getSessionID(),
-                [this, request, connection](const auto &res) {
+                [this, request, connection,
+                 weakConnection{weakConnection}](const auto &res) {
                     qInfo(LOG) << "success" << res;
                     boost::asio::post(
                         this->ioContext,
-                        [this, request, sessionID{res.subscriptionSessionID}] {
-                            this->markRequestSubscribed(sessionID, request);
+                        [this, request, weakConnection{weakConnection}] {
+                            this->markRequestSubscribed(request,
+                                                        weakConnection);
                         });
                     /*
                     */
@@ -313,34 +314,12 @@ void Controller::queueSubscription(const SubscriptionRequest &request,
     this->queuedSubscriptions.emplace(request, std::move(resubTimer));
 }
 
-void Controller::markRequestSubscribed(const QString &sessionID,
-                                       const SubscriptionRequest &request)
+void Controller::markRequestSubscribed(const SubscriptionRequest &request,
+                                       std::weak_ptr<lib::Session> connection)
 {
-    this->threadGuard->guard();
+    std::lock_guard lock(this->subscriptionsMutex);
 
-    for (const auto &weakConnection : this->connections)
-    {
-        auto connection = weakConnection.lock();
-        if (!connection)
-        {
-            continue;
-        }
-
-        auto *listener = dynamic_cast<Connection *>(connection->getListener());
-
-        if (listener != nullptr)
-        {
-            if (listener->getSessionID() == sessionID)
-            {
-                listener->markRequestSubscribed(request);
-                return;
-            }
-        }
-    }
-
-    qCWarning(LOG) << "No listener active which registered this subscription, "
-                      "try to make a new request";
-    this->queueSubscription(request, boost::posix_time::seconds(1));
+    this->activeSubscriptions[request].connection = std::move(connection);
 }
 
 }  // namespace chatterino::eventsub
