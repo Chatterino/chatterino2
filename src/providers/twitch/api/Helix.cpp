@@ -351,10 +351,10 @@ void Helix::getGameById(QString gameId,
         failureCallback);
 }
 
-void Helix::createClip(QString channelId,
-                       ResultCallback<HelixClip> successCallback,
-                       std::function<void(HelixClipError)> failureCallback,
-                       std::function<void()> finallyCallback)
+void Helix::createClip(
+    QString channelId, ResultCallback<HelixClip> successCallback,
+    std::function<void(HelixClipError, QString)> failureCallback,
+    std::function<void()> finallyCallback)
 {
     QUrlQuery urlQuery;
     urlQuery.addQueryItem("broadcaster_id", channelId);
@@ -367,7 +367,7 @@ void Helix::createClip(QString channelId,
 
             if (!data.isArray())
             {
-                failureCallback(HelixClipError::Unknown);
+                failureCallback(HelixClipError::Unknown, "No clip was created");
                 return;
             }
 
@@ -376,17 +376,45 @@ void Helix::createClip(QString channelId,
             successCallback(clip);
         })
         .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
             switch (result.status().value_or(0))
             {
                 case 503: {
-                    // Channel has disabled clip-creation, or channel has made cliops only creatable by followers and the user is not a follower (or subscriber)
-                    failureCallback(HelixClipError::ClipsDisabled);
+                    // We should not necessarily handle this, so the error messaging will use `message` if it exists
+                    failureCallback(HelixClipError::ClipsUnavailable, message);
                 }
                 break;
 
                 case 401: {
                     // User does not have the required scope to be able to create clips, user must reauthenticate
-                    failureCallback(HelixClipError::UserNotAuthenticated);
+                    failureCallback(HelixClipError::UserNotAuthenticated,
+                                    message);
+                }
+                break;
+
+                case 403: {
+                    if (message.contains("restricted for this channel"))
+                    {
+                        failureCallback(HelixClipError::ClipsDisabled, message);
+                    }
+                    else if (message.contains("User does not have permissions"))
+                    {
+                        failureCallback(HelixClipError::ClipsRestricted,
+                                        message);
+                    }
+                    else if (message.contains("restricted for this category"))
+                    {
+                        failureCallback(HelixClipError::ClipsRestrictedCategory,
+                                        message);
+                    }
+                    else
+                    {
+                        qCDebug(chatterinoTwitch)
+                            << "Failed to create a clip: "
+                            << result.formatError() << result.getData();
+                        failureCallback(HelixClipError::Unknown, message);
+                    }
                 }
                 break;
 
@@ -394,7 +422,7 @@ void Helix::createClip(QString channelId,
                     qCDebug(chatterinoTwitch)
                         << "Failed to create a clip: " << result.formatError()
                         << result.getData();
-                    failureCallback(HelixClipError::Unknown);
+                    failureCallback(HelixClipError::Unknown, message);
                 }
                 break;
             }
