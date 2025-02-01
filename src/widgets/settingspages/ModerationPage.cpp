@@ -266,7 +266,7 @@ ModerationPage::ModerationPage()
                                         return;
                                     }
 
-                                    viewModerationButtons_->getModel()->setData(
+                                    viewModerationButtons->getModel()->setData(
                                         clicked, pixmap, Qt::DecorationRole);
                                 });
                             });
