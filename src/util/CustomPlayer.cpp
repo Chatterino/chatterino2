@@ -3,8 +3,10 @@
 #include "common/QLogging.hpp"
 #include "singletons/Settings.hpp"
 
+#include <QDesktopServices>
 #include <QStringBuilder>
 #include <QStringView>
+#include <QUrl>
 
 namespace chatterino {
 
