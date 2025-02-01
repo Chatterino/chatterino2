@@ -33,8 +33,8 @@ IgnoresPage::IgnoresPage()
     LayoutCreator<IgnoresPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
-    this->tabWidget_ = new QTabWidget();
-    auto tabs = layout.append(this->tabWidget_);
+    auto tabs = layout.emplace<QTabWidget>();
+    this->tabWidget_ = &*tabs;
 
     addPhrasesTab(tabs.appendTab(new QVBoxLayout, "Messages"));
     addUsersTab(*this, tabs.appendTab(new QVBoxLayout, "Users"),
