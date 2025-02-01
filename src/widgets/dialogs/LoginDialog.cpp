@@ -344,8 +344,8 @@ DeviceLoginJob::DeviceLoginJob(Session session)
     QObject::connect(&this->pingTimer_, &QTimer::timeout, this,
                      &DeviceLoginJob::ping);
 
-    this->expiryTimer_.start(session.expiry);
-    this->pingTimer_.start(session.interval);
+    this->expiryTimer_.start(this->session_.expiry);
+    this->pingTimer_.start(this->session_.interval);
 };
 
 void DeviceLoginJob::ping()
