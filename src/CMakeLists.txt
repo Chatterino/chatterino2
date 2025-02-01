@@ -489,6 +489,8 @@ set(SOURCE_FILES
         util/ChannelHelpers.hpp
         util/Clipboard.cpp
         util/Clipboard.hpp
+        util/CustomPlayer.cpp
+        util/CustomPlayer.hpp
         util/DebugCount.cpp
         util/DebugCount.hpp
         util/DisplayBadge.cpp
