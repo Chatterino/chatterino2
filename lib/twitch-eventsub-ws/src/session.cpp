@@ -136,6 +136,18 @@ namespace {
                 listener->onChannelChatMessage(metadata, *oPayload);
             },
         },
+        {
+            {"channel.moderate", "2"},
+            [](const auto &metadata, const auto &jv, auto &listener) {
+                auto oPayload =
+                    parsePayload<payload::channel_moderate::v2::Payload>(jv);
+                if (!oPayload)
+                {
+                    return;
+                }
+                listener->onChannelModerate(metadata, *oPayload);
+            },
+        },
         // Add your new subscription types above this line
     };
 

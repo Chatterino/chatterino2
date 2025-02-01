@@ -82,6 +82,15 @@ public:
         std::cout << "Channel chat message event!\n";
     }
 
+    void onChannelModerate(
+        messages::Metadata metadata,
+        payload::channel_moderate::v2::Payload payload) override
+    {
+        (void)metadata;
+        (void)payload;
+        std::cout << "Channel moderate event!\n";
+    }
+
     // Add your new subscription types above this line
 };
 

@@ -4,6 +4,7 @@
 #include "twitch-eventsub-ws/payloads/channel-ban-v1.hpp"
 #include "twitch-eventsub-ws/payloads/channel-chat-message-v1.hpp"
 #include "twitch-eventsub-ws/payloads/channel-chat-notification-v1.hpp"
+#include "twitch-eventsub-ws/payloads/channel-moderate-v2.hpp"
 #include "twitch-eventsub-ws/payloads/channel-update-v1.hpp"
 #include "twitch-eventsub-ws/payloads/session-welcome.hpp"
 #include "twitch-eventsub-ws/payloads/stream-offline-v1.hpp"
@@ -46,6 +47,10 @@ public:
     virtual void onChannelChatMessage(
         messages::Metadata metadata,
         payload::channel_chat_message::v1::Payload payload) = 0;
+
+    virtual void onChannelModerate(
+        messages::Metadata metadata,
+        payload::channel_moderate::v2::Payload payload) = 0;
 
     // Add your new subscription types above this line
 };

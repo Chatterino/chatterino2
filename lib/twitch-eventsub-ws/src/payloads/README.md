@@ -6,18 +6,18 @@ The example will use `channel.update` on version `1`.
 
 Replace `channel-update`/`channel_update` with your dashed & underscored subscription names
 
-Header file `src/payloads/channel-update-v1.hpp`:
+Header file `include/twitch-eventsub-ws/payloads/channel-update-v1.hpp`:
 
 ```c++
 #pragma once
 
-#include "payloads/subscription.hpp"
+#include "twitch-eventsub-ws/payloads/subscription.hpp"
 
 #include <boost/json.hpp>
 
 #include <string>
 
-namespace eventsub::payload::channel_update::v1 {
+namespace chatterino::eventsub::lib::payload::channel_update::v1 {
 
 /// json_transform=snake_case
 struct Event {
@@ -33,24 +33,24 @@ struct Payload {
 // DESERIALIZATION DEFINITION START
 // DESERIALIZATION DEFINITION END
 
-}  // namespace eventsub::payload::channel_update::v1
+}  // namespace chatterino::eventsub::lib::payload::channel_update::v1
 ```
 
 Source file:
 
 ```c++
-#include "payloads/channel-update-v1.hpp"
+#include "twitch-eventsub-ws/payloads/channel-update-v1.hpp"
 
-#include "errors.hpp"
+#include "twitch-eventsub-ws/errors.hpp"
 
 #include <boost/json.hpp>
 
-namespace eventsub::payload::channel_update::v1 {
+namespace chatterino::eventsub::lib::payload::channel_update::v1 {
 
 // DESERIALIZATION IMPLEMENTATION START
 // DESERIALIZATION IMPLEMENTATION END
 
-}  // namespace eventsub::payload::channel_update::v1
+}  // namespace chatterino::eventsub::lib::payload::channel_update::v1
 ```
 
 ## Run the generation script
@@ -66,7 +66,7 @@ Look for the `# Add your new subscription type source file above this line` comm
 In my example, I added the following line:  
 `payloads/channel-update-v1.cpp`
 
-## Add a virtual method to the Listener class in `src/listener.hpp`
+## Add a virtual method to the Listener class in `include/twitch-eventsub-ws/listener.hpp`
 
 Look for the `// Add your new subscription types above this line` comment and add your definition above that line.
 
@@ -83,7 +83,7 @@ You also need to add an include to your header file
 In my example, I added the following code at the top of the file:
 
 ```c++
-#include "payloads/channel-update-v1.hpp"
+#include "twitch-eventsub-ws/payloads/channel-update-v1.hpp"
 ```
 
 ## Add a handler for the subscription type in `src/session.cpp`
@@ -108,7 +108,7 @@ In my example, I added the following code:
     },
 ```
 
-## Make the test code work in `src/main.cpp`
+## Make the test code work in `example/main.cpp`
 
 Look for the `// Add your new subscription types above this line` comment and add your code above that line.
 

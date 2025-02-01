@@ -6,7 +6,14 @@ import re
 import sys
 from os.path import realpath
 
-from lib import definition_markers, generate, implementation_markers, init_clang_cindex, init_logging, replace_in_file
+from lib import (
+    definition_markers,
+    generate,
+    implementation_markers,
+    init_clang_cindex,
+    init_logging,
+    replace_in_file,
+)
 
 log = logging.getLogger("generate-and-replace-dir")
 
@@ -30,12 +37,19 @@ def main():
         if not path.name.endswith(".hpp"):
             continue
 
+        if "channel-moderate" not in path.name:
+            continue
+
         header_path = path.path
         source_path = re.sub(r"\.hpp$", ".cpp", header_path)
-        source_path = re.sub(r"include[/\\]twitch-eventsub-ws[/\\]", "src/", source_path)
+        source_path = re.sub(
+            r"include[/\\]twitch-eventsub-ws[/\\]", "src/", source_path
+        )
 
         if not os.path.isfile(source_path):
-            log.warning(f"Header file {header_path} did not have a matching source file at {source_path}")
+            log.warning(
+                f"Header file {header_path} did not have a matching source file at {source_path}"
+            )
             continue
 
         log.debug(f"Found header & source {header_path} / {source_path}")

@@ -15,6 +15,7 @@ set(SOURCE_FILES
     payloads/channel-update-v1.cpp
     payloads/channel-chat-notification-v1.cpp
     payloads/channel-chat-message-v1.cpp
+    payloads/channel-moderate-v2.cpp
     # Add your new subscription type source file above this line
 
     messages/metadata.cpp
