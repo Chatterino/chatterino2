@@ -256,12 +256,12 @@ ModerationPage::ModerationPage()
 
                         loadPixmapFromUrl(
                             {fileUrl.toString()},
-                            [clicked, viewModerationButtons_ =
-                                          viewModerationButtonsTemp](
+                            [clicked,
+                             viewModerationButtons = viewModerationButtonsTemp](
                                 const QPixmap &pixmap) {
-                                postToThread([clicked, viewModerationButtons_,
+                                postToThread([clicked, viewModerationButtons,
                                               pixmap]() {
-                                    if (viewModerationButtons_.isNull())
+                                    if (viewModerationButtons.isNull())
                                     {
                                         return;
                                     }
