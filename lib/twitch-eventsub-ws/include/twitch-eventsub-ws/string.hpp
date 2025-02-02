@@ -15,7 +15,7 @@ namespace chatterino::eventsub::lib {
 /// the `qt` function to convert the backing string to a QString,
 /// while we ensure the conversion is only done once.
 struct String {
-    explicit String(std::string v)
+    explicit String(std::string &&v)
         : backingString(std::move(v))
     {
     }
