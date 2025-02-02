@@ -64,7 +64,7 @@ class Walker:
                     # log.warning(
                     #     f"enum constant decl {node.spelling} - enum comments: {enum.comment_commands} - node comments: {node.raw_comment}"
                     # )
-                    constant = EnumConstant.from_field(node, self.namespace)
+                    constant = EnumConstant.from_node(node)
                     constant.apply_comment_commands(enum.comment_commands)
                     enum.constants.append(constant)
 
