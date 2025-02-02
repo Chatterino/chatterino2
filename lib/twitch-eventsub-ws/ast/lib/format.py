@@ -1,8 +1,6 @@
 import logging
 import subprocess
 
-import clang.cindex
-
 log = logging.getLogger(__name__)
 
 
