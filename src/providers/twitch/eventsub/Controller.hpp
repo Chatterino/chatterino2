@@ -17,13 +17,12 @@
 
 namespace chatterino::eventsub {
 
-class Controller
+class IController
 {
 public:
-    Controller();
-    ~Controller();
+    virtual ~IController() = default;
 
-    void removeRef(const SubscriptionRequest &request);
+    virtual void removeRef(const SubscriptionRequest &request) = 0;
 
     /// Subscribe will make a request to each open connection and ask them to
     /// add this subscription.
@@ -36,8 +35,20 @@ public:
     /// TODO: Return a SubscriptionHandle that handles unsubscriptions
     /// Dupe subscriptions should return shared subscription handles
     /// So no more owners of the subscription handle means we send an unsubscribe request
+    [[nodiscard]] virtual SubscriptionHandle subscribe(
+        const SubscriptionRequest &request) = 0;
+};
+
+class Controller : public IController
+{
+public:
+    Controller();
+    ~Controller() override;
+
+    void removeRef(const SubscriptionRequest &request) override;
+
     [[nodiscard]] SubscriptionHandle subscribe(
-        const SubscriptionRequest &request);
+        const SubscriptionRequest &request) override;
 
 private:
     void subscribe(const SubscriptionRequest &request, bool isQueued);
@@ -76,6 +87,24 @@ private:
     std::unordered_map<SubscriptionRequest,
                        std::unique_ptr<boost::asio::deadline_timer>>
         queuedSubscriptions;
+};
+
+class DummyController : public IController
+{
+public:
+    ~DummyController() override = default;
+
+    void removeRef(const SubscriptionRequest &request) override
+    {
+        (void)request;
+    };
+
+    [[nodiscard]] SubscriptionHandle subscribe(
+        const SubscriptionRequest &request) override
+    {
+        (void)request;
+        return {};
+    };
 };
 
 }  // namespace chatterino::eventsub

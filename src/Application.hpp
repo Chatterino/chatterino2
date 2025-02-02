@@ -58,7 +58,7 @@ namespace pronouns {
     class Pronouns;
 }  // namespace pronouns
 namespace eventsub {
-    class Controller;
+    class IController;
 }  // namespace eventsub
 
 class IApplication
@@ -112,7 +112,7 @@ public:
     virtual IStreamerMode *getStreamerMode() = 0;
     virtual ITwitchUsers *getTwitchUsers() = 0;
     virtual pronouns::Pronouns *getPronouns() = 0;
-    virtual eventsub::Controller *getEventSub() = 0;
+    virtual eventsub::IController *getEventSub() = 0;
 };
 
 class Application : public IApplication
@@ -178,7 +178,7 @@ private:
     std::unique_ptr<IStreamerMode> streamerMode;
     std::unique_ptr<ITwitchUsers> twitchUsers;
     std::unique_ptr<pronouns::Pronouns> pronouns;
-    std::unique_ptr<eventsub::Controller> eventSub;
+    std::unique_ptr<eventsub::IController> eventSub;
 #ifdef CHATTERINO_HAVE_PLUGINS
     std::unique_ptr<PluginController> plugins;
 #endif
@@ -226,7 +226,7 @@ public:
     SeventvEmotes *getSeventvEmotes() override;
     SeventvEventAPI *getSeventvEventAPI() override;
     pronouns::Pronouns *getPronouns() override;
-    eventsub::Controller *getEventSub() override;
+    eventsub::IController *getEventSub() override;
 
     ILinkResolver *getLinkResolver() override;
     IStreamerMode *getStreamerMode() override;
