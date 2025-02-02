@@ -14,6 +14,7 @@
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
 #include <QFile>
+#include <QScopeGuard>
 
 #include <limits>
 #include <memory>
