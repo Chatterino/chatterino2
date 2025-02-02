@@ -5,6 +5,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/twitch/eventsub/MessageBuilder.hpp"
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -135,55 +136,6 @@ void Connection::onChannelChatMessage(
                  << payload.event.broadcasterUserLogin.c_str();
 }
 
-struct StringXd {
-    std::string lol;
-    QString lol2;
-
-    std::variant<std::string, QString> lol3;
-
-    QString qt()
-    {
-        if (this->lol2.isNull())
-        {
-            this->lol2 = QString::fromStdString(this->lol);
-        }
-        return this->lol2;
-    }
-};
-
-// <BROADCASTER> has added <USER> as a VIP of this channel.
-MessagePtr makeVipMessage(
-    TwitchChannel *channel, const QDateTime &time,
-    const lib::payload::channel_moderate::v2::Event &event,
-    const lib::payload::channel_moderate::v2::Vip &action)
-{
-    MessageBuilder builder;
-
-    QString text;
-
-    builder.emplace<TimestampElement>();
-    builder->flags.set(MessageFlag::System);
-    builder->flags.set(MessageFlag::Timeout);
-    builder->loginName = QString::fromStdString(event.moderatorUserLogin);
-
-    auto clr1 = MessageColor::System;
-    auto clr2 = MessageColor::System;
-
-    auto xd2 = std::string("foo");
-
-    builder.emplace<MentionElement>(
-        QString::fromStdString(event.moderatorUserName),
-        QString::fromStdString(event.moderatorUserLogin), clr1, clr2);
-    text.append(QString::fromStdString(event.moderatorUserLogin));
-
-    builder.message().messageText = text;
-    builder.message().searchText = text;
-
-    builder.message().serverReceivedTime = time;
-
-    return builder.release();
-}
-
 void Connection::onChannelModerate(
     lib::messages::Metadata metadata,
     lib::payload::channel_moderate::v2::Payload payload)
@@ -193,24 +145,21 @@ void Connection::onChannelModerate(
     using lib::payload::channel_moderate::v2::Action;
 
     auto channelPtr = getApp()->getTwitch()->getChannelOrEmpty(
-        QString::fromStdString(payload.event.broadcasterUserLogin));
+        payload.event.broadcasterUserLogin.qt());
     if (channelPtr->isEmpty())
     {
         qCDebug(LOG)
             << "Channel moderate event for broadcaster we're not interested in"
-            << payload.event.broadcasterUserLogin.c_str();
+            << payload.event.broadcasterUserLogin.qt();
         return;
     }
-
-    qCDebug(LOG) << "Channel moderate event for"
-                 << payload.event.broadcasterUserLogin.c_str();
 
     auto *channel = dynamic_cast<TwitchChannel *>(channelPtr.get());
     if (channel == nullptr)
     {
         qCDebug(LOG)
-            << "Channel moderate event for broadcaster we're not interested in"
-            << payload.event.broadcasterUserLogin.c_str();
+            << "Channel moderate event for broadcaster is not a Twitch channel?"
+            << payload.event.broadcasterUserLogin.qt();
         return;
     }
 
@@ -228,6 +177,25 @@ void Connection::onChannelModerate(
             }
             auto msg =
                 makeVipMessage(channel, now, payload.event, oAction.value());
+            runInGuiThread([channel, msg] {
+                channel->addMessage(msg, MessageContext::Original);
+            });
+        }
+        break;
+
+        case Action::Unvip: {
+            const auto &oAction = payload.event.unvip;
+
+            if (!oAction.has_value())
+            {
+                qCWarning(LOG) << "UnVIP action type had no UnVIP action body";
+                return;
+            }
+            auto msg =
+                makeUnvipMessage(channel, now, payload.event, oAction.value());
+            runInGuiThread([channel, msg] {
+                channel->addMessage(msg, MessageContext::Original);
+            });
         }
         break;
 
@@ -248,7 +216,6 @@ void Connection::onChannelModerate(
         case Action::Subscribersoff:
         case Action::Unraid:
         case Action::DeleteMessage:
-        case Action::Unvip:
         case Action::Raid:
         case Action::AddBlockedTerm:
         case Action::AddPermittedTerm:
