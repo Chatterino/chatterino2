@@ -42,9 +42,6 @@ def main():
         if not path.name.endswith(".hpp"):
             continue
 
-        if "channel-moderate" not in path.name:
-            continue
-
         header_path = path.path
         source_path = re.sub(r"\.hpp$", ".cpp", header_path)
         source_path = re.sub(r"include[/\\]twitch-eventsub-ws[/\\]", "src/", source_path)
