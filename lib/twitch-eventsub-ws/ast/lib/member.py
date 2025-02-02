@@ -86,9 +86,7 @@ class Member:
             # log.debug(node.type.get_template_argument_type(0).get_named_type().spelling)
             # log.debug(node.type.get_template_argument_type(0).get_class_type().spelling)
 
-            type_name = get_type_name(
-                node.type.get_template_argument_type(0), namespace
-            )
+            type_name = get_type_name(node.type.get_template_argument_type(0), namespace)
 
             for xd in node.get_children():
                 match xd.kind:
