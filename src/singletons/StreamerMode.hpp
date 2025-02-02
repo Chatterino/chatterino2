@@ -22,7 +22,7 @@ public:
 
     virtual void start() = 0;
 
-signals:
+Q_SIGNALS:
     void changed(bool enabled);
 };
 
