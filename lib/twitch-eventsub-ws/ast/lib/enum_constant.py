@@ -8,7 +8,6 @@ import clang.cindex
 from clang.cindex import CursorKind
 
 from .comment_commands import CommentCommands, json_transform, parse_comment_commands
-from .membertype import MemberType
 
 log = logging.getLogger(__name__)
 
