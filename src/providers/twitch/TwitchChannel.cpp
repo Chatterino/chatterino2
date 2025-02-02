@@ -1473,18 +1473,6 @@ void TwitchChannel::refreshPubSub()
     {
         getApp()->getTwitchPubSub()->listenToAutomod(roomId);
         getApp()->getTwitchPubSub()->listenToLowTrustUsers(roomId);
-        this->eventSubChannelBanHandle =
-            getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
-                .subscriptionType = "channel.ban",
-                .subscriptionVersion = "1",
-                .conditions =
-                    {
-                        {
-                            "broadcaster_user_id",
-                            roomId,
-                        },
-                    },
-            });
 
         this->eventSubChannelModerateHandle =
             getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
@@ -1505,7 +1493,7 @@ void TwitchChannel::refreshPubSub()
     }
     else
     {
-        this->eventSubChannelBanHandle.reset();
+        this->eventSubChannelModerateHandle.reset();
     }
     getApp()->getTwitchPubSub()->listenToChannelPointRewards(roomId);
 }
