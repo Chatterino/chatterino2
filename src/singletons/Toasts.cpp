@@ -57,7 +57,7 @@ private:
     QFile file_;
     QNetworkReply *reply_{};
 
-signals:
+Q_SIGNALS:
     void downloadComplete();
 };
 
@@ -314,7 +314,7 @@ AvatarDownloader::AvatarDownloader(const QString &avatarURL,
         {
             this->file_.close();
         }
-        emit downloadComplete();
+        downloadComplete();
         this->deleteLater();
     });
 }

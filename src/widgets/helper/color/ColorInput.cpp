@@ -162,7 +162,7 @@ void ColorInput::emitUpdate()
 {
     this->updateComponents();
     // our components triggered this update, emit the new color
-    emit this->colorChanged(this->currentColor_);
+    this->colorChanged(this->currentColor_);
 }
 
 }  // namespace chatterino

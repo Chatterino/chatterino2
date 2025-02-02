@@ -182,7 +182,7 @@ public:
 
             QVector<int> roles = QVector<int>();
             roles.append(role);
-            emit dataChanged(index, index, roles);
+            this->dataChanged(index, index, roles);
         }
 
         return true;
@@ -218,7 +218,7 @@ public:
 
         this->headerData_[section][role] = value;
 
-        emit this->headerDataChanged(Qt::Horizontal, section, section);
+        this->headerDataChanged(Qt::Horizontal, section, section);
         return true;
     }
 
