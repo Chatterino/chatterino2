@@ -83,16 +83,15 @@ void FiltersPage::onShow()
 }
 
 void FiltersPage::tableCellClicked(const QModelIndex &clicked,
-                                   EditableModelView *view_)
+                                   EditableModelView *view)
 {
     // valid column
     if (clicked.column() == 2)
     {
         QMessageBox popup(this->window());
 
-        auto filterText = this->view_->getModel()
-                              ->data(clicked.siblingAtColumn(1))
-                              .toString();
+        auto filterText =
+            view->getModel()->data(clicked.siblingAtColumn(1)).toString();
         auto filterResult = filters::Filter::fromString(filterText);
 
         if (std::holds_alternative<filters::Filter>(filterResult))
