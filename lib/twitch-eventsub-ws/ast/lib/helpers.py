@@ -4,7 +4,6 @@ import contextlib
 import logging
 import os
 import subprocess
-import sys
 from io import TextIOWrapper
 from tempfile import mkstemp
 
