@@ -148,7 +148,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
 
 bool KeyboardSettingsPage::filterElements(const QString &query)
 {
-    std::array fields{0, 1};
+    std::array fields{0};
 
     return this->view_->filterSearchResults(query, fields);
 }
