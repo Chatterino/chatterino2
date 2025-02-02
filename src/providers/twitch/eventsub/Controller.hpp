@@ -31,10 +31,6 @@ public:
     ///
     /// If no open connection has room for this subscription, this function will
     /// create a new connection and queue up the subscription to run again after X seconds.
-    ///
-    /// TODO: Return a SubscriptionHandle that handles unsubscriptions
-    /// Dupe subscriptions should return shared subscription handles
-    /// So no more owners of the subscription handle means we send an unsubscribe request
     [[nodiscard]] virtual SubscriptionHandle subscribe(
         const SubscriptionRequest &request) = 0;
 };

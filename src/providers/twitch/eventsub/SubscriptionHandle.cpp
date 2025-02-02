@@ -8,7 +8,7 @@ namespace chatterino::eventsub {
 RawSubscriptionHandle::RawSubscriptionHandle(SubscriptionRequest request_)
     : request(std::move(request_))
 {
-    // getApp()->getEventSub()->addRef(request);
+    // The reference is added by the EventSub controller
 }
 
 RawSubscriptionHandle::~RawSubscriptionHandle()
