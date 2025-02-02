@@ -461,6 +461,8 @@ CommandController::CommandController(const Paths &paths)
 
     this->registerCommand("/debug-test", &commands::debugTest);
 
+    this->registerCommand("/debug-eventsub", &commands::debugEventSub);
+
     this->registerCommand("/shield", &commands::shieldModeOn);
     this->registerCommand("/shieldoff", &commands::shieldModeOff);
 
