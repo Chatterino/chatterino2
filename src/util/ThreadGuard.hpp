@@ -17,7 +17,9 @@ struct ThreadGuard {
     ThreadGuard() = default;
 
     explicit ThreadGuard(std::thread::id threadID_)
+#ifndef NDEBUG
         : threadID(threadID_)
+#endif
     {
     }
 
