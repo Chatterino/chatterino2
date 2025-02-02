@@ -4,9 +4,9 @@ if (jv{{field.name}} == nullptr)
     {% include 'error-missing-field.tmpl' indent content %}
 }
 {% if field.tag %}
-const auto {{field.name}} = boost::json::try_value_to<{{field.type_name}}>(*jv{{field.name}}, {{field.tag}}());
+auto {{field.name}} = boost::json::try_value_to<{{field.type_name}}>(*jv{{field.name}}, {{field.tag}}());
 {% else %}
-const auto {{field.name}} = boost::json::try_value_to<{{field.type_name}}>(*jv{{field.name}});
+auto {{field.name}} = boost::json::try_value_to<{{field.type_name}}>(*jv{{field.name}});
 {% endif %}
 if ({{field.name}}.has_error())
 {
