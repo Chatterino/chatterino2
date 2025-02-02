@@ -97,12 +97,6 @@ struct Payload {
     const Event event;
 };
 
-// DESERIALIZATION DEFINITION START
-boost::json::result_for<Event, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Event>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Payload>, const boost::json::value &jvRoot);
-// DESERIALIZATION DEFINITION END
+#include "twitch-eventsub-ws/payloads/channel-ban-v1.inc"
 
 }  // namespace chatterino::eventsub::lib::payload::channel_ban::v1

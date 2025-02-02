@@ -13,12 +13,13 @@ log = logging.getLogger(__name__)
 
 
 class Enum:
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, namespace: tuple[str, ...]) -> None:
         self.name = name
         self.constants: List[EnumConstant] = []
         self.parent: str = ""
         self.comment_commands: CommentCommands = []
         self.inner_root: str = ""
+        self.namespace = namespace
 
     @property
     def full_name(self) -> str:

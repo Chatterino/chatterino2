@@ -13,12 +13,13 @@ log = logging.getLogger(__name__)
 
 
 class Struct:
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, namespace: tuple[str, ...]) -> None:
         self.name = name
         self.members: List[Member] = []
         self.parent: str = ""
         self.comment_commands: CommentCommands = []
         self.inner_root: str = ""
+        self.namespace = namespace
 
     @property
     def full_name(self) -> str:

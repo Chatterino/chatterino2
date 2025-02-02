@@ -1,21 +1,12 @@
 ## Available scripts
 
-- `generate-and-replace-dir.py`  
-  Usage: `./generate-and-replace-dir.py <path-to-dir-containing-header-files>`  
-  Will find all header files in that directory (it won't search recursively), and if they also have a matching source file, generate json deserialize definition & implementations for them, and replacing the markers in the given file.
-
-- `get-builtin-include-dirs.py`  
-  Usage: `./get-builtin-include-dirs.py`  
+- `get-builtin-include-dirs.py`
+  Usage: `./get-builtin-include-dirs.py`
   Prints what builtin include dirs will be used for any of the other scripts.
 
 - `generate.py`  
-  Usage: `./generate.py <path-to-header-file>`  
-  Generates definitions & implementations for the given header file and write them to temporary files.
-
-- `replace-in-file.py`  
-  Usage: `./replace-in-file.py <path-to-header-file> <path-to-source-file>`
-  Reads sdin for two file paths containing the definition & implementations.  
-  Can be used in tandem with `generate.py`, but realistically it's only there because I used it at some point.
+  Usage: `./generate.py [--includes INCLUDES] [--timestamp path] header_path`
+  Generates definitions & implementations for the given header file and writes them to the appropriate files.
 
 ## Environment variables
 

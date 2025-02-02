@@ -13,7 +13,7 @@ from .membertype import MemberType
 log = logging.getLogger(__name__)
 
 
-def get_type_name(type: clang.cindex.Type, namespace: List[str]) -> str:
+def get_type_name(type: clang.cindex.Type, namespace: tuple[str, ...]) -> str:
     if namespace:
         namespace_str = f"{'::'.join(namespace)}::"
     else:
@@ -68,7 +68,7 @@ class Member:
                     log.warning(f"Unknown comment command found: {other} with value {value}")
 
     @staticmethod
-    def from_field(node: clang.cindex.Cursor, namespace: List[str]) -> Member:
+    def from_field(node: clang.cindex.Cursor, namespace: tuple[str, ...]) -> Member:
         assert node.type is not None
 
         name = node.spelling

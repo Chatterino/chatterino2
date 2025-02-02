@@ -19,6 +19,7 @@ def build_structs(filename: str, additional_includes: list[str] = []) -> List[St
 
     parse_args = [
         "-std=c++17",
+        "-Werror=implicit-int",
         # Uncomment this if you need to debug where it tries to find headers
         # "-H",
     ]

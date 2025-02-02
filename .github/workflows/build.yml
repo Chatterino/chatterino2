@@ -71,6 +71,16 @@ jobs:
         run: |
           git config --global --add safe.directory '*'
 
+      - name: Install Python and libclang (24.04)
+        if: matrix.os == 'ubuntu-24.04'
+        run: |
+          sudo apt update
+          sudo DEBIAN_FRONTEND=noninteractive apt -y --no-install-recommends install \
+            python3 python3-venv clang-18 clang-format-18 libclang-18-dev
+          echo "LIBCLANG_LIBRARY_FILE=/usr/lib/x86_64-linux-gnu/libclang-18.so" >> "$GITHUB_ENV"
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 42
+          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-18 42
+
       - name: Build
         run: |
           mkdir build
@@ -85,6 +95,7 @@ jobs:
             -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
             -DCMAKE_PREFIX_PATH="$Qt6_DIR/lib/cmake" \
             -DCHATTERINO_STATIC_QT_BUILD=On \
+            -DFORCE_JSON_GENERATION=${{matrix.os == 'ubuntu-24.04' && 'On' || 'Off'}} \
             ..
           make -j"$(nproc)"
 
@@ -174,6 +185,11 @@ jobs:
           modules: qt5compat qtimageformats
           version: ${{ matrix.qt-version }}
 
+      - name: Setup Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
       # WINDOWS
       - name: Enable Developer Command Prompt (Windows)
         if: startsWith(matrix.os, 'windows')
@@ -239,6 +255,7 @@ jobs:
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
               -DCHATTERINO_PLUGINS="$Env:C2_PLUGINS" `
               -DBUILD_WITH_QT6="$Env:C2_BUILD_WITH_QT6" `
+              -DFORCE_JSON_GENERATION=On `
               ..
           set cl=/MP
           nmake /S /NOLOGO
@@ -308,6 +325,7 @@ jobs:
               -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
               -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
               -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
+              -DFORCE_JSON_GENERATION=Off \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
         shell: bash
