@@ -3,47 +3,13 @@
 #include <boost/json.hpp>
 #include <QString>
 
-#include <cassert>
 #include <string>
 #include <variant>
 
 namespace chatterino::eventsub::lib {
 
-// Adapted from: https://stackoverflow.com/a/56766138.
-// NOTE: Relies on the "magic" prefixes and suffixes. There are implementations
-// that attempt to manually detect these (linked in the SO answer above) but
-// they seemed too complex for the scope we have here.
-template <typename T>
-constexpr auto type_name()
-{
-    std::string_view name, prefix, suffix;
-#ifdef __clang__
-    name = __PRETTY_FUNCTION__;
-    prefix = "auto chatterino::type_name() [T = ";
-    suffix = "]";
-#elif defined(__GNUC__)
-    name = __PRETTY_FUNCTION__;
-    prefix = "constexpr auto chatterino::type_name() [with T = ";
-    suffix = "]";
-#elif defined(_MSC_VER)
-    name = __FUNCSIG__;
-    prefix = "auto __cdecl chatterino::type_name<";
-    suffix = ">(void)";
-#endif
-    name.remove_prefix(prefix.size());
-    name.remove_suffix(suffix.size());
-
-    if (name.starts_with("class "))
-    {
-        name.remove_prefix(6);
-    }
-    if (name.starts_with("struct "))
-    {
-        name.remove_prefix(7);
-    }
-
-    return name;
-}
+template <class>
+constexpr bool DEPENDENT_FALSE = false;  // workaround before CWG2518/P2593R1
 
 /// String is a struct that holds either an std::string or a QString
 ///
@@ -84,11 +50,8 @@ struct String {
                 }
                 else
                 {
-                    static_assert(!type_name<T>().data(),
+                    static_assert(DEPENDENT_FALSE<T>,
                                   "unknown type in variant");
-                    static_assert(type_name<T>().data(),
-                                  "unknown type in variant");
-                    static_assert(false, "unknown type in variant");
                 }
             },
             this->backingString);
