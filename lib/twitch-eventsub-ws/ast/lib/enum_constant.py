@@ -62,9 +62,7 @@ class EnumConstant:
                     log.debug(f"Applied json tag on {self.json_name}: {value}")
                     self.tag = value
                 case other:
-                    log.warning(
-                        f"Unknown comment command found: {other} with value {value}"
-                    )
+                    log.warning(f"Unknown comment command found: {other} with value {value}")
 
     @staticmethod
     def from_field(node: clang.cindex.Cursor, namespace: List[str]) -> EnumConstant:
@@ -77,9 +75,7 @@ class EnumConstant:
 
         ntargs = node.type.get_num_template_arguments()
         if ntargs > 0:
-            type_name = get_type_name(
-                node.type.get_template_argument_type(0), namespace
-            )
+            type_name = get_type_name(node.type.get_template_argument_type(0), namespace)
 
             for xd in node.get_children():
                 match xd.kind:
