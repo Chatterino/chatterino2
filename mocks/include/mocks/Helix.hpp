@@ -78,7 +78,7 @@ public:
 
     MOCK_METHOD(void, createClip,
                 (QString channelId, ResultCallback<HelixClip> successCallback,
-                 std::function<void(HelixClipError)> failureCallback,
+                 std::function<void(HelixClipError, QString)> failureCallback,
                  std::function<void()> finallyCallback),
                 (override));
 

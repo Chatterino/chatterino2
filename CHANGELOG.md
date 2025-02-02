@@ -7,6 +7,8 @@
 - Minor: Remove incognito browser support for `opera/launcher` (this should no longer be a thing). (#5805)
 - Minor: Remove incognito browser support for `iexplore`, because internet explorer is EOL. (#5810)
 - Minor: When (re-)connecting, visible channels are now joined first. (#5850)
+- Minor: Added the ability to filter on messages by the author's user ID (example: `author.user_id == "22484632"`). (#5862)
+- Minor: Improved error messaging of the `/clip` command. (#5879)
 - Bugfix: Fixed a potential way to escape the Lua Plugin sandbox. (#5846)
 - Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
 - Bugfix: Fixed a crash that could occur on Linux and macOS when clicking "Install" from the update prompt. (#5818)
@@ -15,11 +17,16 @@
 - Bugfix: Closing a usercard will no longer cause stop-logging messages to be generated in channel logs. (#5828)
 - Bugfix: Fixed tabs not scaling to the default scale when changing the scale from a non-default value. (#5794, #5833)
 - Bugfix: Fixed deleted messages not immediately disappearing when "Hide deleted messages" is enabled. (#5844, #5854)
+- Bugfix: Fixed announcements not showing up in mentions tab. (#5857)
+- Bugfix: Fixed the reply button showing for inline whispers and announcements. (#5863)
+- Bugfix: Fixed suspicious user treatment update messages not being searchable. (#5865)
 - Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
 - Dev: Updated Conan dependencies. (#5776)
 - Dev: Replaced usage of `parseTime` with `serverReceivedTime` for clearchat messages. (#5824, #5855)
 - Dev: Support Boost 1.87. (#5832)
 - Dev: Words from `TextElement`s are now combined where possible. (#5847)
+- Dev: Fixed assertion failure when closing the edit-hotkey dialog. (#5869)
+- Dev: Updated `qtkeychain` to 0.15.0. (#5871)
 
 ## 2.5.2
 

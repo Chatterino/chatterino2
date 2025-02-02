@@ -7,7 +7,7 @@ on:
   merge_group:
 
 env:
-  TWITCH_PUBSUB_SERVER_TAG: v1.0.7
+  TWITCH_PUBSUB_SERVER_TAG: v1.0.8
   HTTPBOX_TAG: v0.2.1
   QT_QPA_PLATFORM: minimal
   HOMEBREW_NO_AUTO_UPDATE: 1
@@ -92,8 +92,6 @@ jobs:
           tar -xzf pubsub-server.tar.gz -C pubsub-server-test
           rm pubsub-server.tar.gz
           cd pubsub-server-test
-          curl -L -o server.crt "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.crt"
-          curl -L -o server.key "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.key"
           cd ..
 
       - name: Test

@@ -474,7 +474,10 @@ enum class HelixAnnouncementColor {
 
 enum class HelixClipError {
     Unknown,
+    ClipsUnavailable,
     ClipsDisabled,
+    ClipsRestricted,
+    ClipsRestrictedCategory,
     UserNotAuthenticated,
 };
 
@@ -864,10 +867,10 @@ public:
                              HelixFailureCallback failureCallback) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#create-clip
-    virtual void createClip(QString channelId,
-                            ResultCallback<HelixClip> successCallback,
-                            std::function<void(HelixClipError)> failureCallback,
-                            std::function<void()> finallyCallback) = 0;
+    virtual void createClip(
+        QString channelId, ResultCallback<HelixClip> successCallback,
+        std::function<void(HelixClipError, QString)> failureCallback,
+        std::function<void()> finallyCallback) = 0;
 
     // https://dev.twitch.tv/docs/api/reference#get-channel-information
     virtual void fetchChannels(
@@ -1207,10 +1210,10 @@ public:
                      HelixFailureCallback failureCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference#create-clip
-    void createClip(QString channelId,
-                    ResultCallback<HelixClip> successCallback,
-                    std::function<void(HelixClipError)> failureCallback,
-                    std::function<void()> finallyCallback) final;
+    void createClip(
+        QString channelId, ResultCallback<HelixClip> successCallback,
+        std::function<void(HelixClipError, QString)> failureCallback,
+        std::function<void()> finallyCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference#get-channel-information
     void fetchChannels(

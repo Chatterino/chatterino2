@@ -70,13 +70,21 @@ namespace {
 #endif
     constexpr int CLIP_CREATION_COOLDOWN = 5000;
     const QString CLIPS_LINK("https://clips.twitch.tv/%1");
+    const QString CLIPS_FAILURE_CLIPS_UNAVAILABLE_TEXT(
+        "Failed to create a clip - clips are temporarily unavailable: %1");
     const QString CLIPS_FAILURE_CLIPS_DISABLED_TEXT(
-        "Failed to create a clip - the streamer has clips disabled entirely or "
-        "requires a certain subscriber or follower status to create clips.");
+        "Failed to create a clip - the streamer has clips disabled in their "
+        "channel.");
+    const QString CLIPS_FAILURE_CLIPS_RESTRICTED_TEXT(
+        "Failed to create a clip - the streamer has restricted clip creation "
+        "to subscribers, or followers of an unknown duration.");
+    const QString CLIPS_FAILURE_CLIPS_RESTRICTED_CATEGORY_TEXT(
+        "Failed to create a clip - the streamer has disabled clips while in "
+        "this category.");
     const QString CLIPS_FAILURE_NOT_AUTHENTICATED_TEXT(
         "Failed to create a clip - you need to re-authenticate.");
     const QString CLIPS_FAILURE_UNKNOWN_ERROR_TEXT(
-        "Failed to create a clip - an unknown error occurred.");
+        "Failed to create a clip: %1");
     const QString LOGIN_PROMPT_TEXT("Click here to add your account again.");
     const Link ACCOUNTS_LINK(Link::OpenAccountsPage, QString());
 
@@ -1774,7 +1782,7 @@ void TwitchChannel::createClip()
             this->addMessage(builder.release(), MessageContext::Original);
         },
         // failureCallback
-        [this](auto error) {
+        [this](auto error, auto errorMessage) {
             MessageBuilder builder;
             QString text;
             builder.message().flags.set(MessageFlag::System);
@@ -1783,11 +1791,36 @@ void TwitchChannel::createClip()
 
             switch (error)
             {
+                case HelixClipError::ClipsUnavailable: {
+                    builder.emplace<TextElement>(
+                        CLIPS_FAILURE_CLIPS_UNAVAILABLE_TEXT.arg(errorMessage),
+                        MessageElementFlag::Text, MessageColor::System);
+                    text =
+                        CLIPS_FAILURE_CLIPS_UNAVAILABLE_TEXT.arg(errorMessage);
+                }
+                break;
+
                 case HelixClipError::ClipsDisabled: {
                     builder.emplace<TextElement>(
                         CLIPS_FAILURE_CLIPS_DISABLED_TEXT,
                         MessageElementFlag::Text, MessageColor::System);
                     text = CLIPS_FAILURE_CLIPS_DISABLED_TEXT;
+                }
+                break;
+
+                case HelixClipError::ClipsRestricted: {
+                    builder.emplace<TextElement>(
+                        CLIPS_FAILURE_CLIPS_RESTRICTED_TEXT,
+                        MessageElementFlag::Text, MessageColor::System);
+                    text = CLIPS_FAILURE_CLIPS_RESTRICTED_TEXT;
+                }
+                break;
+
+                case HelixClipError::ClipsRestrictedCategory: {
+                    builder.emplace<TextElement>(
+                        CLIPS_FAILURE_CLIPS_RESTRICTED_CATEGORY_TEXT,
+                        MessageElementFlag::Text, MessageColor::System);
+                    text = CLIPS_FAILURE_CLIPS_RESTRICTED_CATEGORY_TEXT;
                 }
                 break;
 
@@ -1810,9 +1843,9 @@ void TwitchChannel::createClip()
                 case HelixClipError::Unknown:
                 default: {
                     builder.emplace<TextElement>(
-                        CLIPS_FAILURE_UNKNOWN_ERROR_TEXT,
+                        CLIPS_FAILURE_UNKNOWN_ERROR_TEXT.arg(errorMessage),
                         MessageElementFlag::Text, MessageColor::System);
-                    text = CLIPS_FAILURE_UNKNOWN_ERROR_TEXT;
+                    text = CLIPS_FAILURE_UNKNOWN_ERROR_TEXT.arg(errorMessage);
                 }
                 break;
             }

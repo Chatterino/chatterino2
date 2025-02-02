@@ -48,6 +48,7 @@ struct Message {
     QString loginName;
     QString displayName;
     QString localizedName;
+    QString userID;
     QString timeoutUser;
     QString channelName;
     QColor usernameColor;

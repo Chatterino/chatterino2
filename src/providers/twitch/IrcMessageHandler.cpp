@@ -1094,7 +1094,13 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
         if (isSub)
         {
             msg->flags.set(MessageFlag::Subscription);
-            msg->flags.unset(MessageFlag::Highlighted);
+
+            if (tags.value("msg-id") != "announcement")
+            {
+                // Announcements are currently tagged as subscriptions,
+                // but we want them to be able to show up in mentions
+                msg->flags.unset(MessageFlag::Highlighted);
+            }
         }
 
         sink.applySimilarityFilters(msg);
