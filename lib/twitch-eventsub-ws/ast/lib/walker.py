@@ -23,16 +23,12 @@ class Walker:
         self.enums: List[Enum] = []
         self.namespace: List[str] = []
 
-    def handle_node(
-        self, node: clang.cindex.Cursor, struct: Optional[Struct], enum: Optional[Enum]
-    ) -> bool:
+    def handle_node(self, node: clang.cindex.Cursor, struct: Optional[Struct], enum: Optional[Enum]) -> bool:
         match node.kind:
             case CursorKind.STRUCT_DECL:
                 new_struct = Struct(node.spelling)
                 if node.raw_comment is not None:
-                    new_struct.comment_commands = parse_comment_commands(
-                        node.raw_comment
-                    )
+                    new_struct.comment_commands = parse_comment_commands(node.raw_comment)
                     new_struct.apply_comment_commands(new_struct.comment_commands)
                 if struct is not None:
                     new_struct.parent = struct.full_name
@@ -96,12 +92,7 @@ class Walker:
         return False
 
     def walk(self, node: clang.cindex.Cursor) -> None:
-        if (
-            node.location.file
-            and not clang.cindex.Config().lib.clang_Location_isFromMainFile(
-                node.location
-            )
-        ):
+        if node.location.file and not clang.cindex.Config().lib.clang_Location_isFromMainFile(node.location):
             return
 
         handled = self.handle_node(node, None, None)
