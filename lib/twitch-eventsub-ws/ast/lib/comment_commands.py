@@ -11,8 +11,8 @@ log = logging.getLogger(__name__)
 def parse_comment_commands(raw_comment: str) -> CommentCommands:
     comment_commands: CommentCommands = []
 
-    def clean_comment_line(l: str) -> str:
-        return l.replace("/", "").replace("*", "").strip()
+    def clean_comment_line(line: str) -> str:
+        return line.replace("/", "").replace("*", "").strip()
 
     comment_lines = [line for line in map(clean_comment_line, raw_comment.splitlines()) if line != ""]
 
