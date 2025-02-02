@@ -108,8 +108,8 @@ int main(int argc, char **argv)
 
     lib::String a("foo");
 
-    qDebug() << "xd1:"
-             << QString::fromStdString(std::get<std::string>(a.backingString));
+    // qDebug() << "xd1:"
+    //          << QString::fromStdString(std::get<std::string>(a.backingString));
     qDebug() << "xd2:" << a.qt();
     qDebug() << "xd3:" << a.qt();
 

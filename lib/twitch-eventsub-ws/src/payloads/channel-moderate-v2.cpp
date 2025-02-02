@@ -185,7 +185,7 @@ boost::json::result_for<Followers, boost::json::value>::type tag_invoke(
             129, error_missing_field_followDurationMinutes};
     }
 
-    const auto followDurationMinutes =
+    auto followDurationMinutes =
         boost::json::try_value_to<int>(*jvfollowDurationMinutes);
 
     if (followDurationMinutes.has_error())
@@ -194,7 +194,7 @@ boost::json::result_for<Followers, boost::json::value>::type tag_invoke(
     }
 
     return Followers{
-        .followDurationMinutes = followDurationMinutes.value(),
+        .followDurationMinutes = std::move(followDurationMinutes.value()),
     };
 }
 
@@ -219,8 +219,7 @@ boost::json::result_for<Slow, boost::json::value>::type tag_invoke(
                                          error_missing_field_waitTimeSeconds};
     }
 
-    const auto waitTimeSeconds =
-        boost::json::try_value_to<int>(*jvwaitTimeSeconds);
+    auto waitTimeSeconds = boost::json::try_value_to<int>(*jvwaitTimeSeconds);
 
     if (waitTimeSeconds.has_error())
     {
@@ -228,7 +227,7 @@ boost::json::result_for<Slow, boost::json::value>::type tag_invoke(
     }
 
     return Slow{
-        .waitTimeSeconds = waitTimeSeconds.value(),
+        .waitTimeSeconds = std::move(waitTimeSeconds.value()),
     };
 }
 
@@ -251,7 +250,7 @@ boost::json::result_for<Vip, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userID};
     }
 
-    const auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -266,7 +265,7 @@ boost::json::result_for<Vip, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userLogin};
     }
 
-    const auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -281,7 +280,7 @@ boost::json::result_for<Vip, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userName};
     }
 
-    const auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<String>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -289,9 +288,9 @@ boost::json::result_for<Vip, boost::json::value>::type tag_invoke(
     }
 
     return Vip{
-        .userID = userID.value(),
-        .userLogin = userLogin.value(),
-        .userName = userName.value(),
+        .userID = std::move(userID.value()),
+        .userLogin = std::move(userLogin.value()),
+        .userName = std::move(userName.value()),
     };
 }
 
@@ -314,7 +313,7 @@ boost::json::result_for<Unvip, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userID};
     }
 
-    const auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -329,7 +328,7 @@ boost::json::result_for<Unvip, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userLogin};
     }
 
-    const auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -344,7 +343,7 @@ boost::json::result_for<Unvip, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userName};
     }
 
-    const auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<String>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -352,9 +351,9 @@ boost::json::result_for<Unvip, boost::json::value>::type tag_invoke(
     }
 
     return Unvip{
-        .userID = userID.value(),
-        .userLogin = userLogin.value(),
-        .userName = userName.value(),
+        .userID = std::move(userID.value()),
+        .userLogin = std::move(userLogin.value()),
+        .userName = std::move(userName.value()),
     };
 }
 
@@ -377,7 +376,7 @@ boost::json::result_for<Mod, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userID};
     }
 
-    const auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -392,7 +391,7 @@ boost::json::result_for<Mod, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userLogin};
     }
 
-    const auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -407,7 +406,7 @@ boost::json::result_for<Mod, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userName};
     }
 
-    const auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -415,9 +414,9 @@ boost::json::result_for<Mod, boost::json::value>::type tag_invoke(
     }
 
     return Mod{
-        .userID = userID.value(),
-        .userLogin = userLogin.value(),
-        .userName = userName.value(),
+        .userID = std::move(userID.value()),
+        .userLogin = std::move(userLogin.value()),
+        .userName = std::move(userName.value()),
     };
 }
 
@@ -440,7 +439,7 @@ boost::json::result_for<Unmod, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userID};
     }
 
-    const auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -455,7 +454,7 @@ boost::json::result_for<Unmod, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userLogin};
     }
 
-    const auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -470,7 +469,7 @@ boost::json::result_for<Unmod, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userName};
     }
 
-    const auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -478,9 +477,9 @@ boost::json::result_for<Unmod, boost::json::value>::type tag_invoke(
     }
 
     return Unmod{
-        .userID = userID.value(),
-        .userLogin = userLogin.value(),
-        .userName = userName.value(),
+        .userID = std::move(userID.value()),
+        .userLogin = std::move(userLogin.value()),
+        .userName = std::move(userName.value()),
     };
 }
 
@@ -503,7 +502,7 @@ boost::json::result_for<Ban, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userID};
     }
 
-    const auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -518,7 +517,7 @@ boost::json::result_for<Ban, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userLogin};
     }
 
-    const auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -533,7 +532,7 @@ boost::json::result_for<Ban, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userName};
     }
 
-    const auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -548,7 +547,7 @@ boost::json::result_for<Ban, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_reason};
     }
 
-    const auto reason = boost::json::try_value_to<std::string>(*jvreason);
+    auto reason = boost::json::try_value_to<std::string>(*jvreason);
 
     if (reason.has_error())
     {
@@ -556,10 +555,10 @@ boost::json::result_for<Ban, boost::json::value>::type tag_invoke(
     }
 
     return Ban{
-        .userID = userID.value(),
-        .userLogin = userLogin.value(),
-        .userName = userName.value(),
-        .reason = reason.value(),
+        .userID = std::move(userID.value()),
+        .userLogin = std::move(userLogin.value()),
+        .userName = std::move(userName.value()),
+        .reason = std::move(reason.value()),
     };
 }
 
@@ -582,7 +581,7 @@ boost::json::result_for<Unban, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userID};
     }
 
-    const auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -597,7 +596,7 @@ boost::json::result_for<Unban, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userLogin};
     }
 
-    const auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -612,7 +611,7 @@ boost::json::result_for<Unban, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userName};
     }
 
-    const auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -620,9 +619,9 @@ boost::json::result_for<Unban, boost::json::value>::type tag_invoke(
     }
 
     return Unban{
-        .userID = userID.value(),
-        .userLogin = userLogin.value(),
-        .userName = userName.value(),
+        .userID = std::move(userID.value()),
+        .userLogin = std::move(userLogin.value()),
+        .userName = std::move(userName.value()),
     };
 }
 
@@ -645,7 +644,7 @@ boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userID};
     }
 
-    const auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -660,7 +659,7 @@ boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userLogin};
     }
 
-    const auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -675,7 +674,7 @@ boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userName};
     }
 
-    const auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -690,7 +689,7 @@ boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_reason};
     }
 
-    const auto reason = boost::json::try_value_to<std::string>(*jvreason);
+    auto reason = boost::json::try_value_to<std::string>(*jvreason);
 
     if (reason.has_error())
     {
@@ -705,7 +704,7 @@ boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_expiresAt};
     }
 
-    const auto expiresAt = boost::json::try_value_to<std::string>(*jvexpiresAt);
+    auto expiresAt = boost::json::try_value_to<std::string>(*jvexpiresAt);
 
     if (expiresAt.has_error())
     {
@@ -713,11 +712,11 @@ boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
     }
 
     return Timeout{
-        .userID = userID.value(),
-        .userLogin = userLogin.value(),
-        .userName = userName.value(),
-        .reason = reason.value(),
-        .expiresAt = expiresAt.value(),
+        .userID = std::move(userID.value()),
+        .userLogin = std::move(userLogin.value()),
+        .userName = std::move(userName.value()),
+        .reason = std::move(reason.value()),
+        .expiresAt = std::move(expiresAt.value()),
     };
 }
 
@@ -740,7 +739,7 @@ boost::json::result_for<Untimeout, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userID};
     }
 
-    const auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -755,7 +754,7 @@ boost::json::result_for<Untimeout, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userLogin};
     }
 
-    const auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -770,7 +769,7 @@ boost::json::result_for<Untimeout, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userName};
     }
 
-    const auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -778,9 +777,9 @@ boost::json::result_for<Untimeout, boost::json::value>::type tag_invoke(
     }
 
     return Untimeout{
-        .userID = userID.value(),
-        .userLogin = userLogin.value(),
-        .userName = userName.value(),
+        .userID = std::move(userID.value()),
+        .userLogin = std::move(userLogin.value()),
+        .userName = std::move(userName.value()),
     };
 }
 
@@ -803,7 +802,7 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userID};
     }
 
-    const auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -818,7 +817,7 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userLogin};
     }
 
-    const auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -833,7 +832,7 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userName};
     }
 
-    const auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -849,7 +848,7 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_viewerCount};
     }
 
-    const auto viewerCount = boost::json::try_value_to<int>(*jvviewerCount);
+    auto viewerCount = boost::json::try_value_to<int>(*jvviewerCount);
 
     if (viewerCount.has_error())
     {
@@ -857,10 +856,10 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
     }
 
     return Raid{
-        .userID = userID.value(),
-        .userLogin = userLogin.value(),
-        .userName = userName.value(),
-        .viewerCount = viewerCount.value(),
+        .userID = std::move(userID.value()),
+        .userLogin = std::move(userLogin.value()),
+        .userName = std::move(userName.value()),
+        .viewerCount = std::move(viewerCount.value()),
     };
 }
 
@@ -883,7 +882,7 @@ boost::json::result_for<Unraid, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userID};
     }
 
-    const auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -898,7 +897,7 @@ boost::json::result_for<Unraid, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userLogin};
     }
 
-    const auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -913,7 +912,7 @@ boost::json::result_for<Unraid, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userName};
     }
 
-    const auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -921,9 +920,9 @@ boost::json::result_for<Unraid, boost::json::value>::type tag_invoke(
     }
 
     return Unraid{
-        .userID = userID.value(),
-        .userLogin = userLogin.value(),
-        .userName = userName.value(),
+        .userID = std::move(userID.value()),
+        .userLogin = std::move(userLogin.value()),
+        .userName = std::move(userName.value()),
     };
 }
 
@@ -946,7 +945,7 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userID};
     }
 
-    const auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -961,7 +960,7 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userLogin};
     }
 
-    const auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -976,7 +975,7 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userName};
     }
 
-    const auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -991,7 +990,7 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_messageID};
     }
 
-    const auto messageID = boost::json::try_value_to<std::string>(*jvmessageID);
+    auto messageID = boost::json::try_value_to<std::string>(*jvmessageID);
 
     if (messageID.has_error())
     {
@@ -1007,8 +1006,7 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_messageBody};
     }
 
-    const auto messageBody =
-        boost::json::try_value_to<std::string>(*jvmessageBody);
+    auto messageBody = boost::json::try_value_to<std::string>(*jvmessageBody);
 
     if (messageBody.has_error())
     {
@@ -1016,11 +1014,11 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
     }
 
     return Delete{
-        .userID = userID.value(),
-        .userLogin = userLogin.value(),
-        .userName = userName.value(),
-        .messageID = messageID.value(),
-        .messageBody = messageBody.value(),
+        .userID = std::move(userID.value()),
+        .userLogin = std::move(userLogin.value()),
+        .userName = std::move(userName.value()),
+        .messageID = std::move(messageID.value()),
+        .messageBody = std::move(messageBody.value()),
     };
 }
 
@@ -1044,7 +1042,7 @@ boost::json::result_for<AutomodTerms, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_action};
     }
 
-    const auto action = boost::json::try_value_to<std::string>(*jvaction);
+    auto action = boost::json::try_value_to<std::string>(*jvaction);
 
     if (action.has_error())
     {
@@ -1059,7 +1057,7 @@ boost::json::result_for<AutomodTerms, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_list};
     }
 
-    const auto list = boost::json::try_value_to<std::string>(*jvlist);
+    auto list = boost::json::try_value_to<std::string>(*jvlist);
 
     if (list.has_error())
     {
@@ -1089,7 +1087,7 @@ boost::json::result_for<AutomodTerms, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_fromAutomod};
     }
 
-    const auto fromAutomod = boost::json::try_value_to<bool>(*jvfromAutomod);
+    auto fromAutomod = boost::json::try_value_to<bool>(*jvfromAutomod);
 
     if (fromAutomod.has_error())
     {
@@ -1097,10 +1095,10 @@ boost::json::result_for<AutomodTerms, boost::json::value>::type tag_invoke(
     }
 
     return AutomodTerms{
-        .action = action.value(),
-        .list = list.value(),
+        .action = std::move(action.value()),
+        .list = std::move(list.value()),
         .terms = terms.value(),
-        .fromAutomod = fromAutomod.value(),
+        .fromAutomod = std::move(fromAutomod.value()),
     };
 }
 
@@ -1124,7 +1122,7 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_isApproved};
     }
 
-    const auto isApproved = boost::json::try_value_to<bool>(*jvisApproved);
+    auto isApproved = boost::json::try_value_to<bool>(*jvisApproved);
 
     if (isApproved.has_error())
     {
@@ -1139,7 +1137,7 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userID};
     }
 
-    const auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -1154,7 +1152,7 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userLogin};
     }
 
-    const auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -1169,7 +1167,7 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userName};
     }
 
-    const auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -1186,7 +1184,7 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
                                          error_missing_field_moderatorMessage};
     }
 
-    const auto moderatorMessage =
+    auto moderatorMessage =
         boost::json::try_value_to<std::string>(*jvmoderatorMessage);
 
     if (moderatorMessage.has_error())
@@ -1195,11 +1193,11 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
     }
 
     return UnbanRequest{
-        .isApproved = isApproved.value(),
-        .userID = userID.value(),
-        .userLogin = userLogin.value(),
-        .userName = userName.value(),
-        .moderatorMessage = moderatorMessage.value(),
+        .isApproved = std::move(isApproved.value()),
+        .userID = std::move(userID.value()),
+        .userLogin = std::move(userLogin.value()),
+        .userName = std::move(userName.value()),
+        .moderatorMessage = std::move(moderatorMessage.value()),
     };
 }
 
@@ -1222,7 +1220,7 @@ boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userID};
     }
 
-    const auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -1237,7 +1235,7 @@ boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userLogin};
     }
 
-    const auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -1252,7 +1250,7 @@ boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userName};
     }
 
-    const auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -1267,7 +1265,7 @@ boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_reason};
     }
 
-    const auto reason = boost::json::try_value_to<std::string>(*jvreason);
+    auto reason = boost::json::try_value_to<std::string>(*jvreason);
 
     if (reason.has_error())
     {
@@ -1291,10 +1289,10 @@ boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
     }
 
     return Warn{
-        .userID = userID.value(),
-        .userLogin = userLogin.value(),
-        .userName = userName.value(),
-        .reason = reason.value(),
+        .userID = std::move(userID.value()),
+        .userLogin = std::move(userLogin.value()),
+        .userName = std::move(userName.value()),
+        .reason = std::move(reason.value()),
         .chatRulesCited = chatRulesCited.value(),
     };
 }
@@ -1320,8 +1318,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
                                          error_missing_field_broadcasterUserID};
     }
 
-    const auto broadcasterUserID =
-        boost::json::try_value_to<std::string>(*jvbroadcasterUserID);
+    auto broadcasterUserID =
+        boost::json::try_value_to<String>(*jvbroadcasterUserID);
 
     if (broadcasterUserID.has_error())
     {
@@ -1339,8 +1337,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             129, error_missing_field_broadcasterUserLogin};
     }
 
-    const auto broadcasterUserLogin =
-        boost::json::try_value_to<std::string>(*jvbroadcasterUserLogin);
+    auto broadcasterUserLogin =
+        boost::json::try_value_to<String>(*jvbroadcasterUserLogin);
 
     if (broadcasterUserLogin.has_error())
     {
@@ -1358,8 +1356,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             129, error_missing_field_broadcasterUserName};
     }
 
-    const auto broadcasterUserName =
-        boost::json::try_value_to<std::string>(*jvbroadcasterUserName);
+    auto broadcasterUserName =
+        boost::json::try_value_to<String>(*jvbroadcasterUserName);
 
     if (broadcasterUserName.has_error())
     {
@@ -1372,14 +1370,14 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     if (jvsourceBroadcasterUserID != nullptr &&
         !jvsourceBroadcasterUserID->is_null())
     {
-        const auto tsourceBroadcasterUserID =
+        auto tsourceBroadcasterUserID =
             boost::json::try_value_to<std::string>(*jvsourceBroadcasterUserID);
 
         if (tsourceBroadcasterUserID.has_error())
         {
             return tsourceBroadcasterUserID.error();
         }
-        sourceBroadcasterUserID = tsourceBroadcasterUserID.value();
+        sourceBroadcasterUserID = std::move(tsourceBroadcasterUserID.value());
     }
 
     std::optional<std::string> sourceBroadcasterUserLogin = std::nullopt;
@@ -1388,7 +1386,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     if (jvsourceBroadcasterUserLogin != nullptr &&
         !jvsourceBroadcasterUserLogin->is_null())
     {
-        const auto tsourceBroadcasterUserLogin =
+        auto tsourceBroadcasterUserLogin =
             boost::json::try_value_to<std::string>(
                 *jvsourceBroadcasterUserLogin);
 
@@ -1396,7 +1394,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         {
             return tsourceBroadcasterUserLogin.error();
         }
-        sourceBroadcasterUserLogin = tsourceBroadcasterUserLogin.value();
+        sourceBroadcasterUserLogin =
+            std::move(tsourceBroadcasterUserLogin.value());
     }
 
     std::optional<std::string> sourceBroadcasterUserName = std::nullopt;
@@ -1405,7 +1404,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     if (jvsourceBroadcasterUserName != nullptr &&
         !jvsourceBroadcasterUserName->is_null())
     {
-        const auto tsourceBroadcasterUserName =
+        auto tsourceBroadcasterUserName =
             boost::json::try_value_to<std::string>(
                 *jvsourceBroadcasterUserName);
 
@@ -1413,7 +1412,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         {
             return tsourceBroadcasterUserName.error();
         }
-        sourceBroadcasterUserName = tsourceBroadcasterUserName.value();
+        sourceBroadcasterUserName =
+            std::move(tsourceBroadcasterUserName.value());
     }
 
     const auto *jvmoderatorUserID = root.if_contains("moderator_user_id");
@@ -1426,8 +1426,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
                                          error_missing_field_moderatorUserID};
     }
 
-    const auto moderatorUserID =
-        boost::json::try_value_to<std::string>(*jvmoderatorUserID);
+    auto moderatorUserID =
+        boost::json::try_value_to<String>(*jvmoderatorUserID);
 
     if (moderatorUserID.has_error())
     {
@@ -1444,8 +1444,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             129, error_missing_field_moderatorUserLogin};
     }
 
-    const auto moderatorUserLogin =
-        boost::json::try_value_to<std::string>(*jvmoderatorUserLogin);
+    auto moderatorUserLogin =
+        boost::json::try_value_to<String>(*jvmoderatorUserLogin);
 
     if (moderatorUserLogin.has_error())
     {
@@ -1462,8 +1462,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
                                          error_missing_field_moderatorUserName};
     }
 
-    const auto moderatorUserName =
-        boost::json::try_value_to<std::string>(*jvmoderatorUserName);
+    auto moderatorUserName =
+        boost::json::try_value_to<String>(*jvmoderatorUserName);
 
     if (moderatorUserName.has_error())
     {
@@ -1478,7 +1478,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_action};
     }
 
-    const auto action = boost::json::try_value_to<Action>(*jvaction);
+    auto action = boost::json::try_value_to<Action>(*jvaction);
 
     if (action.has_error())
     {
@@ -1489,242 +1489,239 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     const auto *jvfollowers = root.if_contains("followers");
     if (jvfollowers != nullptr && !jvfollowers->is_null())
     {
-        const auto tfollowers =
-            boost::json::try_value_to<Followers>(*jvfollowers);
+        auto tfollowers = boost::json::try_value_to<Followers>(*jvfollowers);
 
         if (tfollowers.has_error())
         {
             return tfollowers.error();
         }
-        followers = tfollowers.value();
+        followers = std::move(tfollowers.value());
     }
 
     std::optional<Slow> slow = std::nullopt;
     const auto *jvslow = root.if_contains("slow");
     if (jvslow != nullptr && !jvslow->is_null())
     {
-        const auto tslow = boost::json::try_value_to<Slow>(*jvslow);
+        auto tslow = boost::json::try_value_to<Slow>(*jvslow);
 
         if (tslow.has_error())
         {
             return tslow.error();
         }
-        slow = tslow.value();
+        slow = std::move(tslow.value());
     }
 
     std::optional<Vip> vip = std::nullopt;
     const auto *jvvip = root.if_contains("vip");
     if (jvvip != nullptr && !jvvip->is_null())
     {
-        const auto tvip = boost::json::try_value_to<Vip>(*jvvip);
+        auto tvip = boost::json::try_value_to<Vip>(*jvvip);
 
         if (tvip.has_error())
         {
             return tvip.error();
         }
-        vip = tvip.value();
+        vip = std::move(tvip.value());
     }
 
     std::optional<Unvip> unvip = std::nullopt;
     const auto *jvunvip = root.if_contains("unvip");
     if (jvunvip != nullptr && !jvunvip->is_null())
     {
-        const auto tunvip = boost::json::try_value_to<Unvip>(*jvunvip);
+        auto tunvip = boost::json::try_value_to<Unvip>(*jvunvip);
 
         if (tunvip.has_error())
         {
             return tunvip.error();
         }
-        unvip = tunvip.value();
+        unvip = std::move(tunvip.value());
     }
 
     std::optional<Unmod> unmod = std::nullopt;
     const auto *jvunmod = root.if_contains("unmod");
     if (jvunmod != nullptr && !jvunmod->is_null())
     {
-        const auto tunmod = boost::json::try_value_to<Unmod>(*jvunmod);
+        auto tunmod = boost::json::try_value_to<Unmod>(*jvunmod);
 
         if (tunmod.has_error())
         {
             return tunmod.error();
         }
-        unmod = tunmod.value();
+        unmod = std::move(tunmod.value());
     }
 
     std::optional<Ban> ban = std::nullopt;
     const auto *jvban = root.if_contains("ban");
     if (jvban != nullptr && !jvban->is_null())
     {
-        const auto tban = boost::json::try_value_to<Ban>(*jvban);
+        auto tban = boost::json::try_value_to<Ban>(*jvban);
 
         if (tban.has_error())
         {
             return tban.error();
         }
-        ban = tban.value();
+        ban = std::move(tban.value());
     }
 
     std::optional<Unban> unban = std::nullopt;
     const auto *jvunban = root.if_contains("unban");
     if (jvunban != nullptr && !jvunban->is_null())
     {
-        const auto tunban = boost::json::try_value_to<Unban>(*jvunban);
+        auto tunban = boost::json::try_value_to<Unban>(*jvunban);
 
         if (tunban.has_error())
         {
             return tunban.error();
         }
-        unban = tunban.value();
+        unban = std::move(tunban.value());
     }
 
     std::optional<Timeout> timeout = std::nullopt;
     const auto *jvtimeout = root.if_contains("timeout");
     if (jvtimeout != nullptr && !jvtimeout->is_null())
     {
-        const auto ttimeout = boost::json::try_value_to<Timeout>(*jvtimeout);
+        auto ttimeout = boost::json::try_value_to<Timeout>(*jvtimeout);
 
         if (ttimeout.has_error())
         {
             return ttimeout.error();
         }
-        timeout = ttimeout.value();
+        timeout = std::move(ttimeout.value());
     }
 
     std::optional<Untimeout> untimeout = std::nullopt;
     const auto *jvuntimeout = root.if_contains("untimeout");
     if (jvuntimeout != nullptr && !jvuntimeout->is_null())
     {
-        const auto tuntimeout =
-            boost::json::try_value_to<Untimeout>(*jvuntimeout);
+        auto tuntimeout = boost::json::try_value_to<Untimeout>(*jvuntimeout);
 
         if (tuntimeout.has_error())
         {
             return tuntimeout.error();
         }
-        untimeout = tuntimeout.value();
+        untimeout = std::move(tuntimeout.value());
     }
 
     std::optional<Raid> raid = std::nullopt;
     const auto *jvraid = root.if_contains("raid");
     if (jvraid != nullptr && !jvraid->is_null())
     {
-        const auto traid = boost::json::try_value_to<Raid>(*jvraid);
+        auto traid = boost::json::try_value_to<Raid>(*jvraid);
 
         if (traid.has_error())
         {
             return traid.error();
         }
-        raid = traid.value();
+        raid = std::move(traid.value());
     }
 
     std::optional<Unraid> unraid = std::nullopt;
     const auto *jvunraid = root.if_contains("unraid");
     if (jvunraid != nullptr && !jvunraid->is_null())
     {
-        const auto tunraid = boost::json::try_value_to<Unraid>(*jvunraid);
+        auto tunraid = boost::json::try_value_to<Unraid>(*jvunraid);
 
         if (tunraid.has_error())
         {
             return tunraid.error();
         }
-        unraid = tunraid.value();
+        unraid = std::move(tunraid.value());
     }
 
     std::optional<Delete> deleteMessage = std::nullopt;
     const auto *jvdeleteMessage = root.if_contains("delete");
     if (jvdeleteMessage != nullptr && !jvdeleteMessage->is_null())
     {
-        const auto tdeleteMessage =
+        auto tdeleteMessage =
             boost::json::try_value_to<Delete>(*jvdeleteMessage);
 
         if (tdeleteMessage.has_error())
         {
             return tdeleteMessage.error();
         }
-        deleteMessage = tdeleteMessage.value();
+        deleteMessage = std::move(tdeleteMessage.value());
     }
 
     std::optional<AutomodTerms> automodTerms = std::nullopt;
     const auto *jvautomodTerms = root.if_contains("automod_terms");
     if (jvautomodTerms != nullptr && !jvautomodTerms->is_null())
     {
-        const auto tautomodTerms =
+        auto tautomodTerms =
             boost::json::try_value_to<AutomodTerms>(*jvautomodTerms);
 
         if (tautomodTerms.has_error())
         {
             return tautomodTerms.error();
         }
-        automodTerms = tautomodTerms.value();
+        automodTerms = std::move(tautomodTerms.value());
     }
 
     std::optional<UnbanRequest> unbanRequest = std::nullopt;
     const auto *jvunbanRequest = root.if_contains("unban_request");
     if (jvunbanRequest != nullptr && !jvunbanRequest->is_null())
     {
-        const auto tunbanRequest =
+        auto tunbanRequest =
             boost::json::try_value_to<UnbanRequest>(*jvunbanRequest);
 
         if (tunbanRequest.has_error())
         {
             return tunbanRequest.error();
         }
-        unbanRequest = tunbanRequest.value();
+        unbanRequest = std::move(tunbanRequest.value());
     }
 
     std::optional<Warn> warn = std::nullopt;
     const auto *jvwarn = root.if_contains("warn");
     if (jvwarn != nullptr && !jvwarn->is_null())
     {
-        const auto twarn = boost::json::try_value_to<Warn>(*jvwarn);
+        auto twarn = boost::json::try_value_to<Warn>(*jvwarn);
 
         if (twarn.has_error())
         {
             return twarn.error();
         }
-        warn = twarn.value();
+        warn = std::move(twarn.value());
     }
 
     std::optional<Ban> sharedChatBan = std::nullopt;
     const auto *jvsharedChatBan = root.if_contains("shared_chat_ban");
     if (jvsharedChatBan != nullptr && !jvsharedChatBan->is_null())
     {
-        const auto tsharedChatBan =
-            boost::json::try_value_to<Ban>(*jvsharedChatBan);
+        auto tsharedChatBan = boost::json::try_value_to<Ban>(*jvsharedChatBan);
 
         if (tsharedChatBan.has_error())
         {
             return tsharedChatBan.error();
         }
-        sharedChatBan = tsharedChatBan.value();
+        sharedChatBan = std::move(tsharedChatBan.value());
     }
 
     std::optional<Unban> sharedChatUnban = std::nullopt;
     const auto *jvsharedChatUnban = root.if_contains("shared_chat_unban");
     if (jvsharedChatUnban != nullptr && !jvsharedChatUnban->is_null())
     {
-        const auto tsharedChatUnban =
+        auto tsharedChatUnban =
             boost::json::try_value_to<Unban>(*jvsharedChatUnban);
 
         if (tsharedChatUnban.has_error())
         {
             return tsharedChatUnban.error();
         }
-        sharedChatUnban = tsharedChatUnban.value();
+        sharedChatUnban = std::move(tsharedChatUnban.value());
     }
 
     std::optional<Timeout> sharedChatTimeout = std::nullopt;
     const auto *jvsharedChatTimeout = root.if_contains("shared_chat_timeout");
     if (jvsharedChatTimeout != nullptr && !jvsharedChatTimeout->is_null())
     {
-        const auto tsharedChatTimeout =
+        auto tsharedChatTimeout =
             boost::json::try_value_to<Timeout>(*jvsharedChatTimeout);
 
         if (tsharedChatTimeout.has_error())
         {
             return tsharedChatTimeout.error();
         }
-        sharedChatTimeout = tsharedChatTimeout.value();
+        sharedChatTimeout = std::move(tsharedChatTimeout.value());
     }
 
     std::optional<Untimeout> sharedChatUntimeout = std::nullopt;
@@ -1732,61 +1729,61 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         root.if_contains("shared_chat_untimeout");
     if (jvsharedChatUntimeout != nullptr && !jvsharedChatUntimeout->is_null())
     {
-        const auto tsharedChatUntimeout =
+        auto tsharedChatUntimeout =
             boost::json::try_value_to<Untimeout>(*jvsharedChatUntimeout);
 
         if (tsharedChatUntimeout.has_error())
         {
             return tsharedChatUntimeout.error();
         }
-        sharedChatUntimeout = tsharedChatUntimeout.value();
+        sharedChatUntimeout = std::move(tsharedChatUntimeout.value());
     }
 
     std::optional<Delete> sharedChatDelete = std::nullopt;
     const auto *jvsharedChatDelete = root.if_contains("shared_chat_delete");
     if (jvsharedChatDelete != nullptr && !jvsharedChatDelete->is_null())
     {
-        const auto tsharedChatDelete =
+        auto tsharedChatDelete =
             boost::json::try_value_to<Delete>(*jvsharedChatDelete);
 
         if (tsharedChatDelete.has_error())
         {
             return tsharedChatDelete.error();
         }
-        sharedChatDelete = tsharedChatDelete.value();
+        sharedChatDelete = std::move(tsharedChatDelete.value());
     }
 
     return Event{
-        .broadcasterUserID = broadcasterUserID.value(),
-        .broadcasterUserLogin = broadcasterUserLogin.value(),
-        .broadcasterUserName = broadcasterUserName.value(),
-        .sourceBroadcasterUserID = sourceBroadcasterUserID,
-        .sourceBroadcasterUserLogin = sourceBroadcasterUserLogin,
-        .sourceBroadcasterUserName = sourceBroadcasterUserName,
-        .moderatorUserID = moderatorUserID.value(),
-        .moderatorUserLogin = moderatorUserLogin.value(),
-        .moderatorUserName = moderatorUserName.value(),
-        .action = action.value(),
-        .followers = followers,
-        .slow = slow,
-        .vip = vip,
-        .unvip = unvip,
-        .unmod = unmod,
-        .ban = ban,
-        .unban = unban,
-        .timeout = timeout,
-        .untimeout = untimeout,
-        .raid = raid,
-        .unraid = unraid,
-        .deleteMessage = deleteMessage,
-        .automodTerms = automodTerms,
-        .unbanRequest = unbanRequest,
-        .warn = warn,
-        .sharedChatBan = sharedChatBan,
-        .sharedChatUnban = sharedChatUnban,
-        .sharedChatTimeout = sharedChatTimeout,
-        .sharedChatUntimeout = sharedChatUntimeout,
-        .sharedChatDelete = sharedChatDelete,
+        .broadcasterUserID = std::move(broadcasterUserID.value()),
+        .broadcasterUserLogin = std::move(broadcasterUserLogin.value()),
+        .broadcasterUserName = std::move(broadcasterUserName.value()),
+        .sourceBroadcasterUserID = std::move(sourceBroadcasterUserID),
+        .sourceBroadcasterUserLogin = std::move(sourceBroadcasterUserLogin),
+        .sourceBroadcasterUserName = std::move(sourceBroadcasterUserName),
+        .moderatorUserID = std::move(moderatorUserID.value()),
+        .moderatorUserLogin = std::move(moderatorUserLogin.value()),
+        .moderatorUserName = std::move(moderatorUserName.value()),
+        .action = std::move(action.value()),
+        .followers = std::move(followers),
+        .slow = std::move(slow),
+        .vip = std::move(vip),
+        .unvip = std::move(unvip),
+        .unmod = std::move(unmod),
+        .ban = std::move(ban),
+        .unban = std::move(unban),
+        .timeout = std::move(timeout),
+        .untimeout = std::move(untimeout),
+        .raid = std::move(raid),
+        .unraid = std::move(unraid),
+        .deleteMessage = std::move(deleteMessage),
+        .automodTerms = std::move(automodTerms),
+        .unbanRequest = std::move(unbanRequest),
+        .warn = std::move(warn),
+        .sharedChatBan = std::move(sharedChatBan),
+        .sharedChatUnban = std::move(sharedChatUnban),
+        .sharedChatTimeout = std::move(sharedChatTimeout),
+        .sharedChatUntimeout = std::move(sharedChatUntimeout),
+        .sharedChatDelete = std::move(sharedChatDelete),
     };
 }
 
@@ -1810,7 +1807,7 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_subscription};
     }
 
-    const auto subscription =
+    auto subscription =
         boost::json::try_value_to<subscription::Subscription>(*jvsubscription);
 
     if (subscription.has_error())
@@ -1826,7 +1823,7 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_event};
     }
 
-    const auto event = boost::json::try_value_to<Event>(*jvevent);
+    auto event = boost::json::try_value_to<Event>(*jvevent);
 
     if (event.has_error())
     {
@@ -1834,8 +1831,8 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
     }
 
     return Payload{
-        .subscription = subscription.value(),
-        .event = event.value(),
+        .subscription = std::move(subscription.value()),
+        .event = std::move(event.value()),
     };
 }
 // DESERIALIZATION IMPLEMENTATION END

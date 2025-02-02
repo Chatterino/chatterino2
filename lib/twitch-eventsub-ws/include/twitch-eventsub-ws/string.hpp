@@ -3,17 +3,23 @@
 #include <boost/json.hpp>
 #include <QString>
 
-#include <iostream>
 #include <string>
 #include <variant>
 
 namespace chatterino::eventsub::lib {
 
+/// String is a struct that holds either an std::string or a QString
+///
+/// The intended use is for it to receive an std::string that has been built by
+/// boost::json, and once it's been passed into a GUI appliciaton, it can use
+/// the `qt` function to convert the backing string to a QString,
+/// while we ensure the conversion is only done once.
 struct String {
     explicit String(std::string v)
         : backingString(std::move(v))
     {
     }
+
     ~String() = default;
 
     String(const String &s) = delete;
@@ -22,14 +28,15 @@ struct String {
     String &operator=(const String &) = delete;
     String &operator=(String &&) = default;
 
-    QString qt()
+    /// Returns the string as a QString, modifying the backing string to ensure
+    /// the copy only happens once.
+    QString qt() const
     {
         return std::visit(
             [this](auto &&arg) -> QString {
                 using T = std::decay_t<decltype(arg)>;
                 if constexpr (std::is_same_v<T, std::string>)
                 {
-                    std::cerr << "COPYING\n";
                     auto qtString = QString::fromStdString(arg);
                     this->backingString = qtString;
                     return qtString;
@@ -40,14 +47,14 @@ struct String {
                 }
                 else
                 {
-                    static_assert(false, "unknown type in variant xd");
+                    static_assert(false, "unknown type in variant");
                 }
             },
             this->backingString);
     }
 
-    // private:
-    std::variant<std::string, QString> backingString;
+private:
+    mutable std::variant<std::string, QString> backingString;
 };
 
 boost::json::result_for<String, boost::json::value>::type tag_invoke(

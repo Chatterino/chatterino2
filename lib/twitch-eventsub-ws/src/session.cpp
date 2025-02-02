@@ -58,7 +58,7 @@ namespace {
             return std::nullopt;
         }
 
-        return result.value();
+        return std::move(result.value());
     }
 
     // Subscription types
@@ -145,7 +145,7 @@ namespace {
                 {
                     return;
                 }
-                listener->onChannelModerate(metadata, *oPayload);
+                listener->onChannelModerate(metadata, std::move(*oPayload));
             },
         },
         // Add your new subscription types above this line

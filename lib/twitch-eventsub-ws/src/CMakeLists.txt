@@ -4,6 +4,7 @@ set(SOURCE_FILES
     chrono.cpp
 
     json.cpp
+    string.cpp
 
     payloads/subscription.cpp
     payloads/session-welcome.cpp

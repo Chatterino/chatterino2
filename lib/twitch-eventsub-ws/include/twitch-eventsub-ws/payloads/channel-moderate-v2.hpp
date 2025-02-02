@@ -1,6 +1,7 @@
 #pragma once
 
 #include "twitch-eventsub-ws/payloads/subscription.hpp"
+#include "twitch-eventsub-ws/string.hpp"
 
 #include <boost/json.hpp>
 
@@ -98,9 +99,9 @@ struct Slow {
 
 /// json_transform=snake_case
 struct Vip {
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
+    String userID;
+    String userLogin;
+    String userName;
 };
 
 /* user is unvipped
@@ -109,9 +110,9 @@ struct Vip {
 
 /// json_transform=snake_case
 struct Unvip {
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
+    String userID;
+    String userLogin;
+    String userName;
 };
 
 /* user is modded
@@ -334,11 +335,11 @@ enum class Action : uint8_t {
 /// json_transform=snake_case
 struct Event {
     /// User ID (e.g. 117166826) of the user who's channel the event took place in
-    std::string broadcasterUserID;
+    String broadcasterUserID;
     /// User Login (e.g. testaccount_420) of the user who's channel the event took place in
-    std::string broadcasterUserLogin;
+    String broadcasterUserLogin;
     /// User Name (e.g. 테스트계정420) of the user who's channel the event took place in
-    std::string broadcasterUserName;
+    String broadcasterUserName;
 
     /// For Shared Chat events, the user ID (e.g. 117166826) of the user who's channel the event took place in
     std::optional<std::string> sourceBroadcasterUserID;
@@ -348,11 +349,11 @@ struct Event {
     std::optional<std::string> sourceBroadcasterUserName;
 
     /// User ID (e.g. 117166826) of the user who took the action
-    std::string moderatorUserID;
+    String moderatorUserID;
     /// User Login (e.g. testaccount_420) of the user who took the action
-    std::string moderatorUserLogin;
+    String moderatorUserLogin;
     /// User Name (e.g. 테스트계정420) of the user who took the action
-    std::string moderatorUserName;
+    String moderatorUserName;
 
     // TODO: enum?
     /// The action that took place (e.g. "warn" or "ban")
@@ -382,9 +383,9 @@ struct Event {
 };
 
 struct Payload {
-    const subscription::Subscription subscription;
+    subscription::Subscription subscription;
 
-    const Event event;
+    Event event;
 };
 
 // DESERIALIZATION DEFINITION START
