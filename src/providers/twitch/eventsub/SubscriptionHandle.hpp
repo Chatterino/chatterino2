@@ -14,6 +14,10 @@ struct RawSubscriptionHandle {
     ~RawSubscriptionHandle();
 };
 
+/// Keeps a reference count of a specific subscription
+///
+/// If no more references exist of a specific subscription, we send an
+/// unsubscription request
 using SubscriptionHandle = std::unique_ptr<RawSubscriptionHandle>;
 
 }  // namespace chatterino::eventsub
