@@ -49,17 +49,15 @@ class Enum:
         for command, value in comment_commands:
             match command:
                 case "json_rename":
-                    # Do nothing on structs
+                    # Do nothing on enums
                     pass
                 case "json_dont_fail_on_deserialization":
-                    # Do nothing on structs
+                    # Do nothing on enums
                     pass
                 case "json_transform":
-                    # Do nothing on structs
+                    # Do nothing on enums
                     pass
                 case "json_inner":
                     self.inner_root = value
                 case other:
-                    log.warning(
-                        f"Unknown comment command found: {other} with value {value}"
-                    )
+                    log.warning(f"Unknown comment command found: {other} with value {value}")
