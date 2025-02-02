@@ -4,6 +4,8 @@
 #include <QKeySequence>
 #include <QWidget>
 
+#include <span>
+
 class QAbstractTableModel;
 class QTableView;
 class QHBoxLayout;
