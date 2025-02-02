@@ -34,7 +34,7 @@ struct String {
     {
         return std::visit(
             [this](auto &&arg) -> QString {
-                using T = std::decay_t<decltype(arg)>;
+                using T = std::decay_t<std::remove_cvref_t<decltype(arg)>>;
                 if constexpr (std::is_same_v<T, std::string>)
                 {
                     auto qtString = QString::fromStdString(arg);
