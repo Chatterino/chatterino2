@@ -271,7 +271,7 @@ public:
         return nullptr;
     }
 
-    eventsub::Controller *getEventSub() override
+    eventsub::IController *getEventSub() override
     {
         assert(false && "EmptyApplication::getEventSub was called without "
                         "being initialized");
