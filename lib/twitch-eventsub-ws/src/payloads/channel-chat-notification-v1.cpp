@@ -26,7 +26,7 @@ boost::json::result_for<Badge, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_setID};
     }
 
-    const auto setID = boost::json::try_value_to<std::string>(*jvsetID);
+    auto setID = boost::json::try_value_to<std::string>(*jvsetID);
 
     if (setID.has_error())
     {
@@ -41,7 +41,7 @@ boost::json::result_for<Badge, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_id};
     }
 
-    const auto id = boost::json::try_value_to<std::string>(*jvid);
+    auto id = boost::json::try_value_to<std::string>(*jvid);
 
     if (id.has_error())
     {
@@ -56,7 +56,7 @@ boost::json::result_for<Badge, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_info};
     }
 
-    const auto info = boost::json::try_value_to<std::string>(*jvinfo);
+    auto info = boost::json::try_value_to<std::string>(*jvinfo);
 
     if (info.has_error())
     {
@@ -64,9 +64,9 @@ boost::json::result_for<Badge, boost::json::value>::type tag_invoke(
     }
 
     return Badge{
-        .setID = setID.value(),
-        .id = id.value(),
-        .info = info.value(),
+        .setID = std::move(setID.value()),
+        .id = std::move(id.value()),
+        .info = std::move(info.value()),
     };
 }
 
@@ -89,7 +89,7 @@ boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_prefix};
     }
 
-    const auto prefix = boost::json::try_value_to<std::string>(*jvprefix);
+    auto prefix = boost::json::try_value_to<std::string>(*jvprefix);
 
     if (prefix.has_error())
     {
@@ -104,7 +104,7 @@ boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_bits};
     }
 
-    const auto bits = boost::json::try_value_to<int>(*jvbits);
+    auto bits = boost::json::try_value_to<int>(*jvbits);
 
     if (bits.has_error())
     {
@@ -119,7 +119,7 @@ boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_tier};
     }
 
-    const auto tier = boost::json::try_value_to<int>(*jvtier);
+    auto tier = boost::json::try_value_to<int>(*jvtier);
 
     if (tier.has_error())
     {
@@ -127,9 +127,9 @@ boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
     }
 
     return Cheermote{
-        .prefix = prefix.value(),
-        .bits = bits.value(),
-        .tier = tier.value(),
+        .prefix = std::move(prefix.value()),
+        .bits = std::move(bits.value()),
+        .tier = std::move(tier.value()),
     };
 }
 
@@ -152,7 +152,7 @@ boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_id};
     }
 
-    const auto id = boost::json::try_value_to<std::string>(*jvid);
+    auto id = boost::json::try_value_to<std::string>(*jvid);
 
     if (id.has_error())
     {
@@ -167,8 +167,7 @@ boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_emoteSetID};
     }
 
-    const auto emoteSetID =
-        boost::json::try_value_to<std::string>(*jvemoteSetID);
+    auto emoteSetID = boost::json::try_value_to<std::string>(*jvemoteSetID);
 
     if (emoteSetID.has_error())
     {
@@ -183,7 +182,7 @@ boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_ownerID};
     }
 
-    const auto ownerID = boost::json::try_value_to<std::string>(*jvownerID);
+    auto ownerID = boost::json::try_value_to<std::string>(*jvownerID);
 
     if (ownerID.has_error())
     {
@@ -205,9 +204,9 @@ boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
     }
 
     return Emote{
-        .id = id.value(),
-        .emoteSetID = emoteSetID.value(),
-        .ownerID = ownerID.value(),
+        .id = std::move(id.value()),
+        .emoteSetID = std::move(emoteSetID.value()),
+        .ownerID = std::move(ownerID.value()),
         .format = format.value(),
     };
 }
@@ -231,7 +230,7 @@ boost::json::result_for<Mention, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userID};
     }
 
-    const auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -246,7 +245,7 @@ boost::json::result_for<Mention, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userName};
     }
 
-    const auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -261,7 +260,7 @@ boost::json::result_for<Mention, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userLogin};
     }
 
-    const auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -269,9 +268,9 @@ boost::json::result_for<Mention, boost::json::value>::type tag_invoke(
     }
 
     return Mention{
-        .userID = userID.value(),
-        .userName = userName.value(),
-        .userLogin = userLogin.value(),
+        .userID = std::move(userID.value()),
+        .userName = std::move(userName.value()),
+        .userLogin = std::move(userLogin.value()),
     };
 }
 
@@ -295,7 +294,7 @@ boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_type};
     }
 
-    const auto type = boost::json::try_value_to<std::string>(*jvtype);
+    auto type = boost::json::try_value_to<std::string>(*jvtype);
 
     if (type.has_error())
     {
@@ -310,7 +309,7 @@ boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_text};
     }
 
-    const auto text = boost::json::try_value_to<std::string>(*jvtext);
+    auto text = boost::json::try_value_to<std::string>(*jvtext);
 
     if (text.has_error())
     {
@@ -321,48 +320,47 @@ boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
     const auto *jvcheermote = root.if_contains("cheermote");
     if (jvcheermote != nullptr && !jvcheermote->is_null())
     {
-        const auto tcheermote =
-            boost::json::try_value_to<Cheermote>(*jvcheermote);
+        auto tcheermote = boost::json::try_value_to<Cheermote>(*jvcheermote);
 
         if (tcheermote.has_error())
         {
             return tcheermote.error();
         }
-        cheermote = tcheermote.value();
+        cheermote = std::move(tcheermote.value());
     }
 
     std::optional<Emote> emote = std::nullopt;
     const auto *jvemote = root.if_contains("emote");
     if (jvemote != nullptr && !jvemote->is_null())
     {
-        const auto temote = boost::json::try_value_to<Emote>(*jvemote);
+        auto temote = boost::json::try_value_to<Emote>(*jvemote);
 
         if (temote.has_error())
         {
             return temote.error();
         }
-        emote = temote.value();
+        emote = std::move(temote.value());
     }
 
     std::optional<Mention> mention = std::nullopt;
     const auto *jvmention = root.if_contains("mention");
     if (jvmention != nullptr && !jvmention->is_null())
     {
-        const auto tmention = boost::json::try_value_to<Mention>(*jvmention);
+        auto tmention = boost::json::try_value_to<Mention>(*jvmention);
 
         if (tmention.has_error())
         {
             return tmention.error();
         }
-        mention = tmention.value();
+        mention = std::move(tmention.value());
     }
 
     return MessageFragment{
-        .type = type.value(),
-        .text = text.value(),
-        .cheermote = cheermote,
-        .emote = emote,
-        .mention = mention,
+        .type = std::move(type.value()),
+        .text = std::move(text.value()),
+        .cheermote = std::move(cheermote),
+        .emote = std::move(emote),
+        .mention = std::move(mention),
     };
 }
 
@@ -386,7 +384,7 @@ boost::json::result_for<Subcription, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_subTier};
     }
 
-    const auto subTier = boost::json::try_value_to<std::string>(*jvsubTier);
+    auto subTier = boost::json::try_value_to<std::string>(*jvsubTier);
 
     if (subTier.has_error())
     {
@@ -401,7 +399,7 @@ boost::json::result_for<Subcription, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_isPrime};
     }
 
-    const auto isPrime = boost::json::try_value_to<bool>(*jvisPrime);
+    auto isPrime = boost::json::try_value_to<bool>(*jvisPrime);
 
     if (isPrime.has_error())
     {
@@ -418,8 +416,7 @@ boost::json::result_for<Subcription, boost::json::value>::type tag_invoke(
                                          error_missing_field_durationMonths};
     }
 
-    const auto durationMonths =
-        boost::json::try_value_to<int>(*jvdurationMonths);
+    auto durationMonths = boost::json::try_value_to<int>(*jvdurationMonths);
 
     if (durationMonths.has_error())
     {
@@ -427,9 +424,9 @@ boost::json::result_for<Subcription, boost::json::value>::type tag_invoke(
     }
 
     return Subcription{
-        .subTier = subTier.value(),
-        .isPrime = isPrime.value(),
-        .durationMonths = durationMonths.value(),
+        .subTier = std::move(subTier.value()),
+        .isPrime = std::move(isPrime.value()),
+        .durationMonths = std::move(durationMonths.value()),
     };
 }
 
@@ -455,8 +452,7 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
                                          error_missing_field_cumulativeMonths};
     }
 
-    const auto cumulativeMonths =
-        boost::json::try_value_to<int>(*jvcumulativeMonths);
+    auto cumulativeMonths = boost::json::try_value_to<int>(*jvcumulativeMonths);
 
     if (cumulativeMonths.has_error())
     {
@@ -473,8 +469,7 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
                                          error_missing_field_durationMonths};
     }
 
-    const auto durationMonths =
-        boost::json::try_value_to<int>(*jvdurationMonths);
+    auto durationMonths = boost::json::try_value_to<int>(*jvdurationMonths);
 
     if (durationMonths.has_error())
     {
@@ -485,14 +480,13 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
     const auto *jvstreakMonths = root.if_contains("streak_months");
     if (jvstreakMonths != nullptr && !jvstreakMonths->is_null())
     {
-        const auto tstreakMonths =
-            boost::json::try_value_to<int>(*jvstreakMonths);
+        auto tstreakMonths = boost::json::try_value_to<int>(*jvstreakMonths);
 
         if (tstreakMonths.has_error())
         {
             return tstreakMonths.error();
         }
-        streakMonths = tstreakMonths.value();
+        streakMonths = std::move(tstreakMonths.value());
     }
 
     const auto *jvsubTier = root.if_contains("sub_tier");
@@ -503,7 +497,7 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_subTier};
     }
 
-    const auto subTier = boost::json::try_value_to<std::string>(*jvsubTier);
+    auto subTier = boost::json::try_value_to<std::string>(*jvsubTier);
 
     if (subTier.has_error())
     {
@@ -518,7 +512,7 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_isPrime};
     }
 
-    const auto isPrime = boost::json::try_value_to<bool>(*jvisPrime);
+    auto isPrime = boost::json::try_value_to<bool>(*jvisPrime);
 
     if (isPrime.has_error())
     {
@@ -533,7 +527,7 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_isGift};
     }
 
-    const auto isGift = boost::json::try_value_to<bool>(*jvisGift);
+    auto isGift = boost::json::try_value_to<bool>(*jvisGift);
 
     if (isGift.has_error())
     {
@@ -550,7 +544,7 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
                                          error_missing_field_gifterIsAnonymous};
     }
 
-    const auto gifterIsAnonymous =
+    auto gifterIsAnonymous =
         boost::json::try_value_to<bool>(*jvgifterIsAnonymous);
 
     if (gifterIsAnonymous.has_error())
@@ -562,55 +556,55 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
     const auto *jvgifterUserID = root.if_contains("gifter_user_id");
     if (jvgifterUserID != nullptr && !jvgifterUserID->is_null())
     {
-        const auto tgifterUserID =
+        auto tgifterUserID =
             boost::json::try_value_to<std::string>(*jvgifterUserID);
 
         if (tgifterUserID.has_error())
         {
             return tgifterUserID.error();
         }
-        gifterUserID = tgifterUserID.value();
+        gifterUserID = std::move(tgifterUserID.value());
     }
 
     std::optional<std::string> gifterUserName = std::nullopt;
     const auto *jvgifterUserName = root.if_contains("gifter_user_name");
     if (jvgifterUserName != nullptr && !jvgifterUserName->is_null())
     {
-        const auto tgifterUserName =
+        auto tgifterUserName =
             boost::json::try_value_to<std::string>(*jvgifterUserName);
 
         if (tgifterUserName.has_error())
         {
             return tgifterUserName.error();
         }
-        gifterUserName = tgifterUserName.value();
+        gifterUserName = std::move(tgifterUserName.value());
     }
 
     std::optional<std::string> gifterUserLogin = std::nullopt;
     const auto *jvgifterUserLogin = root.if_contains("gifter_user_login");
     if (jvgifterUserLogin != nullptr && !jvgifterUserLogin->is_null())
     {
-        const auto tgifterUserLogin =
+        auto tgifterUserLogin =
             boost::json::try_value_to<std::string>(*jvgifterUserLogin);
 
         if (tgifterUserLogin.has_error())
         {
             return tgifterUserLogin.error();
         }
-        gifterUserLogin = tgifterUserLogin.value();
+        gifterUserLogin = std::move(tgifterUserLogin.value());
     }
 
     return Resubscription{
-        .cumulativeMonths = cumulativeMonths.value(),
-        .durationMonths = durationMonths.value(),
-        .streakMonths = streakMonths,
-        .subTier = subTier.value(),
-        .isPrime = isPrime.value(),
-        .isGift = isGift.value(),
-        .gifterIsAnonymous = gifterIsAnonymous.value(),
-        .gifterUserID = gifterUserID,
-        .gifterUserName = gifterUserName,
-        .gifterUserLogin = gifterUserLogin,
+        .cumulativeMonths = std::move(cumulativeMonths.value()),
+        .durationMonths = std::move(durationMonths.value()),
+        .streakMonths = std::move(streakMonths),
+        .subTier = std::move(subTier.value()),
+        .isPrime = std::move(isPrime.value()),
+        .isGift = std::move(isGift.value()),
+        .gifterIsAnonymous = std::move(gifterIsAnonymous.value()),
+        .gifterUserID = std::move(gifterUserID),
+        .gifterUserName = std::move(gifterUserName),
+        .gifterUserLogin = std::move(gifterUserLogin),
     };
 }
 
@@ -636,8 +630,7 @@ boost::json::result_for<GiftSubscription, boost::json::value>::type tag_invoke(
                                          error_missing_field_durationMonths};
     }
 
-    const auto durationMonths =
-        boost::json::try_value_to<int>(*jvdurationMonths);
+    auto durationMonths = boost::json::try_value_to<int>(*jvdurationMonths);
 
     if (durationMonths.has_error())
     {
@@ -648,28 +641,27 @@ boost::json::result_for<GiftSubscription, boost::json::value>::type tag_invoke(
     const auto *jvcumulativeTotal = root.if_contains("cumulative_total");
     if (jvcumulativeTotal != nullptr && !jvcumulativeTotal->is_null())
     {
-        const auto tcumulativeTotal =
+        auto tcumulativeTotal =
             boost::json::try_value_to<int>(*jvcumulativeTotal);
 
         if (tcumulativeTotal.has_error())
         {
             return tcumulativeTotal.error();
         }
-        cumulativeTotal = tcumulativeTotal.value();
+        cumulativeTotal = std::move(tcumulativeTotal.value());
     }
 
     std::optional<int> streakMonths = std::nullopt;
     const auto *jvstreakMonths = root.if_contains("streak_months");
     if (jvstreakMonths != nullptr && !jvstreakMonths->is_null())
     {
-        const auto tstreakMonths =
-            boost::json::try_value_to<int>(*jvstreakMonths);
+        auto tstreakMonths = boost::json::try_value_to<int>(*jvstreakMonths);
 
         if (tstreakMonths.has_error())
         {
             return tstreakMonths.error();
         }
-        streakMonths = tstreakMonths.value();
+        streakMonths = std::move(tstreakMonths.value());
     }
 
     const auto *jvrecipientUserID = root.if_contains("recipient_user_id");
@@ -682,7 +674,7 @@ boost::json::result_for<GiftSubscription, boost::json::value>::type tag_invoke(
                                          error_missing_field_recipientUserID};
     }
 
-    const auto recipientUserID =
+    auto recipientUserID =
         boost::json::try_value_to<std::string>(*jvrecipientUserID);
 
     if (recipientUserID.has_error())
@@ -700,7 +692,7 @@ boost::json::result_for<GiftSubscription, boost::json::value>::type tag_invoke(
                                          error_missing_field_recipientUserName};
     }
 
-    const auto recipientUserName =
+    auto recipientUserName =
         boost::json::try_value_to<std::string>(*jvrecipientUserName);
 
     if (recipientUserName.has_error())
@@ -718,7 +710,7 @@ boost::json::result_for<GiftSubscription, boost::json::value>::type tag_invoke(
             129, error_missing_field_recipientUserLogin};
     }
 
-    const auto recipientUserLogin =
+    auto recipientUserLogin =
         boost::json::try_value_to<std::string>(*jvrecipientUserLogin);
 
     if (recipientUserLogin.has_error())
@@ -734,7 +726,7 @@ boost::json::result_for<GiftSubscription, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_subTier};
     }
 
-    const auto subTier = boost::json::try_value_to<std::string>(*jvsubTier);
+    auto subTier = boost::json::try_value_to<std::string>(*jvsubTier);
 
     if (subTier.has_error())
     {
@@ -745,25 +737,25 @@ boost::json::result_for<GiftSubscription, boost::json::value>::type tag_invoke(
     const auto *jvcommunityGiftID = root.if_contains("community_gift_id");
     if (jvcommunityGiftID != nullptr && !jvcommunityGiftID->is_null())
     {
-        const auto tcommunityGiftID =
+        auto tcommunityGiftID =
             boost::json::try_value_to<std::string>(*jvcommunityGiftID);
 
         if (tcommunityGiftID.has_error())
         {
             return tcommunityGiftID.error();
         }
-        communityGiftID = tcommunityGiftID.value();
+        communityGiftID = std::move(tcommunityGiftID.value());
     }
 
     return GiftSubscription{
-        .durationMonths = durationMonths.value(),
-        .cumulativeTotal = cumulativeTotal,
-        .streakMonths = streakMonths,
-        .recipientUserID = recipientUserID.value(),
-        .recipientUserName = recipientUserName.value(),
-        .recipientUserLogin = recipientUserLogin.value(),
-        .subTier = subTier.value(),
-        .communityGiftID = communityGiftID,
+        .durationMonths = std::move(durationMonths.value()),
+        .cumulativeTotal = std::move(cumulativeTotal),
+        .streakMonths = std::move(streakMonths),
+        .recipientUserID = std::move(recipientUserID.value()),
+        .recipientUserName = std::move(recipientUserName.value()),
+        .recipientUserLogin = std::move(recipientUserLogin.value()),
+        .subTier = std::move(subTier.value()),
+        .communityGiftID = std::move(communityGiftID),
     };
 }
 
@@ -787,7 +779,7 @@ boost::json::result_for<CommunityGiftSubscription, boost::json::value>::type
         return boost::system::error_code{129, error_missing_field_id};
     }
 
-    const auto id = boost::json::try_value_to<std::string>(*jvid);
+    auto id = boost::json::try_value_to<std::string>(*jvid);
 
     if (id.has_error())
     {
@@ -802,7 +794,7 @@ boost::json::result_for<CommunityGiftSubscription, boost::json::value>::type
         return boost::system::error_code{129, error_missing_field_total};
     }
 
-    const auto total = boost::json::try_value_to<int>(*jvtotal);
+    auto total = boost::json::try_value_to<int>(*jvtotal);
 
     if (total.has_error())
     {
@@ -817,7 +809,7 @@ boost::json::result_for<CommunityGiftSubscription, boost::json::value>::type
         return boost::system::error_code{129, error_missing_field_subTier};
     }
 
-    const auto subTier = boost::json::try_value_to<std::string>(*jvsubTier);
+    auto subTier = boost::json::try_value_to<std::string>(*jvsubTier);
 
     if (subTier.has_error())
     {
@@ -828,21 +820,21 @@ boost::json::result_for<CommunityGiftSubscription, boost::json::value>::type
     const auto *jvcumulativeTotal = root.if_contains("cumulative_total");
     if (jvcumulativeTotal != nullptr && !jvcumulativeTotal->is_null())
     {
-        const auto tcumulativeTotal =
+        auto tcumulativeTotal =
             boost::json::try_value_to<int>(*jvcumulativeTotal);
 
         if (tcumulativeTotal.has_error())
         {
             return tcumulativeTotal.error();
         }
-        cumulativeTotal = tcumulativeTotal.value();
+        cumulativeTotal = std::move(tcumulativeTotal.value());
     }
 
     return CommunityGiftSubscription{
-        .id = id.value(),
-        .total = total.value(),
-        .subTier = subTier.value(),
-        .cumulativeTotal = cumulativeTotal,
+        .id = std::move(id.value()),
+        .total = std::move(total.value()),
+        .subTier = std::move(subTier.value()),
+        .cumulativeTotal = std::move(cumulativeTotal),
     };
 }
 
@@ -868,7 +860,7 @@ boost::json::result_for<GiftPaidUpgrade, boost::json::value>::type tag_invoke(
                                          error_missing_field_gifterIsAnonymous};
     }
 
-    const auto gifterIsAnonymous =
+    auto gifterIsAnonymous =
         boost::json::try_value_to<bool>(*jvgifterIsAnonymous);
 
     if (gifterIsAnonymous.has_error())
@@ -880,49 +872,49 @@ boost::json::result_for<GiftPaidUpgrade, boost::json::value>::type tag_invoke(
     const auto *jvgifterUserID = root.if_contains("gifter_user_id");
     if (jvgifterUserID != nullptr && !jvgifterUserID->is_null())
     {
-        const auto tgifterUserID =
+        auto tgifterUserID =
             boost::json::try_value_to<std::string>(*jvgifterUserID);
 
         if (tgifterUserID.has_error())
         {
             return tgifterUserID.error();
         }
-        gifterUserID = tgifterUserID.value();
+        gifterUserID = std::move(tgifterUserID.value());
     }
 
     std::optional<std::string> gifterUserName = std::nullopt;
     const auto *jvgifterUserName = root.if_contains("gifter_user_name");
     if (jvgifterUserName != nullptr && !jvgifterUserName->is_null())
     {
-        const auto tgifterUserName =
+        auto tgifterUserName =
             boost::json::try_value_to<std::string>(*jvgifterUserName);
 
         if (tgifterUserName.has_error())
         {
             return tgifterUserName.error();
         }
-        gifterUserName = tgifterUserName.value();
+        gifterUserName = std::move(tgifterUserName.value());
     }
 
     std::optional<std::string> gifterUserLogin = std::nullopt;
     const auto *jvgifterUserLogin = root.if_contains("gifter_user_login");
     if (jvgifterUserLogin != nullptr && !jvgifterUserLogin->is_null())
     {
-        const auto tgifterUserLogin =
+        auto tgifterUserLogin =
             boost::json::try_value_to<std::string>(*jvgifterUserLogin);
 
         if (tgifterUserLogin.has_error())
         {
             return tgifterUserLogin.error();
         }
-        gifterUserLogin = tgifterUserLogin.value();
+        gifterUserLogin = std::move(tgifterUserLogin.value());
     }
 
     return GiftPaidUpgrade{
-        .gifterIsAnonymous = gifterIsAnonymous.value(),
-        .gifterUserID = gifterUserID,
-        .gifterUserName = gifterUserName,
-        .gifterUserLogin = gifterUserLogin,
+        .gifterIsAnonymous = std::move(gifterIsAnonymous.value()),
+        .gifterUserID = std::move(gifterUserID),
+        .gifterUserName = std::move(gifterUserName),
+        .gifterUserLogin = std::move(gifterUserLogin),
     };
 }
 
@@ -946,7 +938,7 @@ boost::json::result_for<PrimePaidUpgrade, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_subTier};
     }
 
-    const auto subTier = boost::json::try_value_to<std::string>(*jvsubTier);
+    auto subTier = boost::json::try_value_to<std::string>(*jvsubTier);
 
     if (subTier.has_error())
     {
@@ -954,7 +946,7 @@ boost::json::result_for<PrimePaidUpgrade, boost::json::value>::type tag_invoke(
     }
 
     return PrimePaidUpgrade{
-        .subTier = subTier.value(),
+        .subTier = std::move(subTier.value()),
     };
 }
 
@@ -977,7 +969,7 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userID};
     }
 
-    const auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -992,7 +984,7 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userName};
     }
 
-    const auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -1007,7 +999,7 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userLogin};
     }
 
-    const auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -1023,7 +1015,7 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_viewerCount};
     }
 
-    const auto viewerCount = boost::json::try_value_to<int>(*jvviewerCount);
+    auto viewerCount = boost::json::try_value_to<int>(*jvviewerCount);
 
     if (viewerCount.has_error())
     {
@@ -1040,7 +1032,7 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
                                          error_missing_field_profileImageURL};
     }
 
-    const auto profileImageURL =
+    auto profileImageURL =
         boost::json::try_value_to<std::string>(*jvprofileImageURL);
 
     if (profileImageURL.has_error())
@@ -1049,11 +1041,11 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
     }
 
     return Raid{
-        .userID = userID.value(),
-        .userName = userName.value(),
-        .userLogin = userLogin.value(),
-        .viewerCount = viewerCount.value(),
-        .profileImageURL = profileImageURL.value(),
+        .userID = std::move(userID.value()),
+        .userName = std::move(userName.value()),
+        .userLogin = std::move(userLogin.value()),
+        .viewerCount = std::move(viewerCount.value()),
+        .profileImageURL = std::move(profileImageURL.value()),
     };
 }
 
@@ -1093,7 +1085,7 @@ boost::json::result_for<PayItForward, boost::json::value>::type tag_invoke(
                                          error_missing_field_gifterIsAnonymous};
     }
 
-    const auto gifterIsAnonymous =
+    auto gifterIsAnonymous =
         boost::json::try_value_to<bool>(*jvgifterIsAnonymous);
 
     if (gifterIsAnonymous.has_error())
@@ -1105,49 +1097,49 @@ boost::json::result_for<PayItForward, boost::json::value>::type tag_invoke(
     const auto *jvgifterUserID = root.if_contains("gifter_user_id");
     if (jvgifterUserID != nullptr && !jvgifterUserID->is_null())
     {
-        const auto tgifterUserID =
+        auto tgifterUserID =
             boost::json::try_value_to<std::string>(*jvgifterUserID);
 
         if (tgifterUserID.has_error())
         {
             return tgifterUserID.error();
         }
-        gifterUserID = tgifterUserID.value();
+        gifterUserID = std::move(tgifterUserID.value());
     }
 
     std::optional<std::string> gifterUserName = std::nullopt;
     const auto *jvgifterUserName = root.if_contains("gifter_user_name");
     if (jvgifterUserName != nullptr && !jvgifterUserName->is_null())
     {
-        const auto tgifterUserName =
+        auto tgifterUserName =
             boost::json::try_value_to<std::string>(*jvgifterUserName);
 
         if (tgifterUserName.has_error())
         {
             return tgifterUserName.error();
         }
-        gifterUserName = tgifterUserName.value();
+        gifterUserName = std::move(tgifterUserName.value());
     }
 
     std::optional<std::string> gifterUserLogin = std::nullopt;
     const auto *jvgifterUserLogin = root.if_contains("gifter_user_login");
     if (jvgifterUserLogin != nullptr && !jvgifterUserLogin->is_null())
     {
-        const auto tgifterUserLogin =
+        auto tgifterUserLogin =
             boost::json::try_value_to<std::string>(*jvgifterUserLogin);
 
         if (tgifterUserLogin.has_error())
         {
             return tgifterUserLogin.error();
         }
-        gifterUserLogin = tgifterUserLogin.value();
+        gifterUserLogin = std::move(tgifterUserLogin.value());
     }
 
     return PayItForward{
-        .gifterIsAnonymous = gifterIsAnonymous.value(),
-        .gifterUserID = gifterUserID,
-        .gifterUserName = gifterUserName,
-        .gifterUserLogin = gifterUserLogin,
+        .gifterIsAnonymous = std::move(gifterIsAnonymous.value()),
+        .gifterUserID = std::move(gifterUserID),
+        .gifterUserName = std::move(gifterUserName),
+        .gifterUserLogin = std::move(gifterUserLogin),
     };
 }
 
@@ -1171,7 +1163,7 @@ boost::json::result_for<Announcement, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_color};
     }
 
-    const auto color = boost::json::try_value_to<std::string>(*jvcolor);
+    auto color = boost::json::try_value_to<std::string>(*jvcolor);
 
     if (color.has_error())
     {
@@ -1179,7 +1171,7 @@ boost::json::result_for<Announcement, boost::json::value>::type tag_invoke(
     }
 
     return Announcement{
-        .color = color.value(),
+        .color = std::move(color.value()),
     };
 }
 
@@ -1203,7 +1195,7 @@ boost::json::result_for<CharityDonationAmount, boost::json::value>::type
         return boost::system::error_code{129, error_missing_field_value};
     }
 
-    const auto value = boost::json::try_value_to<int>(*jvvalue);
+    auto value = boost::json::try_value_to<int>(*jvvalue);
 
     if (value.has_error())
     {
@@ -1220,7 +1212,7 @@ boost::json::result_for<CharityDonationAmount, boost::json::value>::type
                                          error_missing_field_decimalPlaces};
     }
 
-    const auto decimalPlaces = boost::json::try_value_to<int>(*jvdecimalPlaces);
+    auto decimalPlaces = boost::json::try_value_to<int>(*jvdecimalPlaces);
 
     if (decimalPlaces.has_error())
     {
@@ -1235,7 +1227,7 @@ boost::json::result_for<CharityDonationAmount, boost::json::value>::type
         return boost::system::error_code{129, error_missing_field_currency};
     }
 
-    const auto currency = boost::json::try_value_to<std::string>(*jvcurrency);
+    auto currency = boost::json::try_value_to<std::string>(*jvcurrency);
 
     if (currency.has_error())
     {
@@ -1243,9 +1235,9 @@ boost::json::result_for<CharityDonationAmount, boost::json::value>::type
     }
 
     return CharityDonationAmount{
-        .value = value.value(),
-        .decimalPlaces = decimalPlaces.value(),
-        .currency = currency.value(),
+        .value = std::move(value.value()),
+        .decimalPlaces = std::move(decimalPlaces.value()),
+        .currency = std::move(currency.value()),
     };
 }
 
@@ -1270,8 +1262,7 @@ boost::json::result_for<CharityDonation, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_charityName};
     }
 
-    const auto charityName =
-        boost::json::try_value_to<std::string>(*jvcharityName);
+    auto charityName = boost::json::try_value_to<std::string>(*jvcharityName);
 
     if (charityName.has_error())
     {
@@ -1286,8 +1277,7 @@ boost::json::result_for<CharityDonation, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_amount};
     }
 
-    const auto amount =
-        boost::json::try_value_to<CharityDonationAmount>(*jvamount);
+    auto amount = boost::json::try_value_to<CharityDonationAmount>(*jvamount);
 
     if (amount.has_error())
     {
@@ -1295,8 +1285,8 @@ boost::json::result_for<CharityDonation, boost::json::value>::type tag_invoke(
     }
 
     return CharityDonation{
-        .charityName = charityName.value(),
-        .amount = amount.value(),
+        .charityName = std::move(charityName.value()),
+        .amount = std::move(amount.value()),
     };
 }
 
@@ -1320,7 +1310,7 @@ boost::json::result_for<BitsBadgeTier, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_tier};
     }
 
-    const auto tier = boost::json::try_value_to<int>(*jvtier);
+    auto tier = boost::json::try_value_to<int>(*jvtier);
 
     if (tier.has_error())
     {
@@ -1328,7 +1318,7 @@ boost::json::result_for<BitsBadgeTier, boost::json::value>::type tag_invoke(
     }
 
     return BitsBadgeTier{
-        .tier = tier.value(),
+        .tier = std::move(tier.value()),
     };
 }
 
@@ -1351,7 +1341,7 @@ boost::json::result_for<Message, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_text};
     }
 
-    const auto text = boost::json::try_value_to<std::string>(*jvtext);
+    auto text = boost::json::try_value_to<std::string>(*jvtext);
 
     if (text.has_error())
     {
@@ -1373,7 +1363,7 @@ boost::json::result_for<Message, boost::json::value>::type tag_invoke(
     }
 
     return Message{
-        .text = text.value(),
+        .text = std::move(text.value()),
         .fragments = fragments.value(),
     };
 }
@@ -1399,7 +1389,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
                                          error_missing_field_broadcasterUserID};
     }
 
-    const auto broadcasterUserID =
+    auto broadcasterUserID =
         boost::json::try_value_to<std::string>(*jvbroadcasterUserID);
 
     if (broadcasterUserID.has_error())
@@ -1418,7 +1408,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             129, error_missing_field_broadcasterUserLogin};
     }
 
-    const auto broadcasterUserLogin =
+    auto broadcasterUserLogin =
         boost::json::try_value_to<std::string>(*jvbroadcasterUserLogin);
 
     if (broadcasterUserLogin.has_error())
@@ -1437,7 +1427,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             129, error_missing_field_broadcasterUserName};
     }
 
-    const auto broadcasterUserName =
+    auto broadcasterUserName =
         boost::json::try_value_to<std::string>(*jvbroadcasterUserName);
 
     if (broadcasterUserName.has_error())
@@ -1455,7 +1445,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
                                          error_missing_field_chatterUserID};
     }
 
-    const auto chatterUserID =
+    auto chatterUserID =
         boost::json::try_value_to<std::string>(*jvchatterUserID);
 
     if (chatterUserID.has_error())
@@ -1473,7 +1463,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
                                          error_missing_field_chatterUserLogin};
     }
 
-    const auto chatterUserLogin =
+    auto chatterUserLogin =
         boost::json::try_value_to<std::string>(*jvchatterUserLogin);
 
     if (chatterUserLogin.has_error())
@@ -1491,7 +1481,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
                                          error_missing_field_chatterUserName};
     }
 
-    const auto chatterUserName =
+    auto chatterUserName =
         boost::json::try_value_to<std::string>(*jvchatterUserName);
 
     if (chatterUserName.has_error())
@@ -1509,7 +1499,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             129, error_missing_field_chatterIsAnonymous};
     }
 
-    const auto chatterIsAnonymous =
+    auto chatterIsAnonymous =
         boost::json::try_value_to<bool>(*jvchatterIsAnonymous);
 
     if (chatterIsAnonymous.has_error())
@@ -1525,7 +1515,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_color};
     }
 
-    const auto color = boost::json::try_value_to<std::string>(*jvcolor);
+    auto color = boost::json::try_value_to<std::string>(*jvcolor);
 
     if (color.has_error())
     {
@@ -1556,7 +1546,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
                                          error_missing_field_systemMessage};
     }
 
-    const auto systemMessage =
+    auto systemMessage =
         boost::json::try_value_to<std::string>(*jvsystemMessage);
 
     if (systemMessage.has_error())
@@ -1572,7 +1562,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_messageID};
     }
 
-    const auto messageID = boost::json::try_value_to<std::string>(*jvmessageID);
+    auto messageID = boost::json::try_value_to<std::string>(*jvmessageID);
 
     if (messageID.has_error())
     {
@@ -1587,7 +1577,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_message};
     }
 
-    const auto message = boost::json::try_value_to<Message>(*jvmessage);
+    auto message = boost::json::try_value_to<Message>(*jvmessage);
 
     if (message.has_error())
     {
@@ -1602,8 +1592,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_noticeType};
     }
 
-    const auto noticeType =
-        boost::json::try_value_to<std::string>(*jvnoticeType);
+    auto noticeType = boost::json::try_value_to<std::string>(*jvnoticeType);
 
     if (noticeType.has_error())
     {
@@ -1614,47 +1603,46 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     const auto *jvsub = root.if_contains("sub");
     if (jvsub != nullptr && !jvsub->is_null())
     {
-        const auto tsub = boost::json::try_value_to<Subcription>(*jvsub);
+        auto tsub = boost::json::try_value_to<Subcription>(*jvsub);
 
         if (tsub.has_error())
         {
             return tsub.error();
         }
-        sub = tsub.value();
+        sub = std::move(tsub.value());
     }
 
     std::optional<Resubscription> resub = std::nullopt;
     const auto *jvresub = root.if_contains("resub");
     if (jvresub != nullptr && !jvresub->is_null())
     {
-        const auto tresub = boost::json::try_value_to<Resubscription>(*jvresub);
+        auto tresub = boost::json::try_value_to<Resubscription>(*jvresub);
 
         if (tresub.has_error())
         {
             return tresub.error();
         }
-        resub = tresub.value();
+        resub = std::move(tresub.value());
     }
 
     std::optional<GiftSubscription> subGift = std::nullopt;
     const auto *jvsubGift = root.if_contains("sub_gift");
     if (jvsubGift != nullptr && !jvsubGift->is_null())
     {
-        const auto tsubGift =
-            boost::json::try_value_to<GiftSubscription>(*jvsubGift);
+        auto tsubGift = boost::json::try_value_to<GiftSubscription>(*jvsubGift);
 
         if (tsubGift.has_error())
         {
             return tsubGift.error();
         }
-        subGift = tsubGift.value();
+        subGift = std::move(tsubGift.value());
     }
 
     std::optional<CommunityGiftSubscription> communitySubGift = std::nullopt;
     const auto *jvcommunitySubGift = root.if_contains("community_sub_gift");
     if (jvcommunitySubGift != nullptr && !jvcommunitySubGift->is_null())
     {
-        const auto tcommunitySubGift =
+        auto tcommunitySubGift =
             boost::json::try_value_to<CommunityGiftSubscription>(
                 *jvcommunitySubGift);
 
@@ -1662,145 +1650,145 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         {
             return tcommunitySubGift.error();
         }
-        communitySubGift = tcommunitySubGift.value();
+        communitySubGift = std::move(tcommunitySubGift.value());
     }
 
     std::optional<GiftPaidUpgrade> giftPaidUpgrade = std::nullopt;
     const auto *jvgiftPaidUpgrade = root.if_contains("gift_paid_upgrade");
     if (jvgiftPaidUpgrade != nullptr && !jvgiftPaidUpgrade->is_null())
     {
-        const auto tgiftPaidUpgrade =
+        auto tgiftPaidUpgrade =
             boost::json::try_value_to<GiftPaidUpgrade>(*jvgiftPaidUpgrade);
 
         if (tgiftPaidUpgrade.has_error())
         {
             return tgiftPaidUpgrade.error();
         }
-        giftPaidUpgrade = tgiftPaidUpgrade.value();
+        giftPaidUpgrade = std::move(tgiftPaidUpgrade.value());
     }
 
     std::optional<PrimePaidUpgrade> primePaidUpgrade = std::nullopt;
     const auto *jvprimePaidUpgrade = root.if_contains("prime_paid_upgrade");
     if (jvprimePaidUpgrade != nullptr && !jvprimePaidUpgrade->is_null())
     {
-        const auto tprimePaidUpgrade =
+        auto tprimePaidUpgrade =
             boost::json::try_value_to<PrimePaidUpgrade>(*jvprimePaidUpgrade);
 
         if (tprimePaidUpgrade.has_error())
         {
             return tprimePaidUpgrade.error();
         }
-        primePaidUpgrade = tprimePaidUpgrade.value();
+        primePaidUpgrade = std::move(tprimePaidUpgrade.value());
     }
 
     std::optional<Raid> raid = std::nullopt;
     const auto *jvraid = root.if_contains("raid");
     if (jvraid != nullptr && !jvraid->is_null())
     {
-        const auto traid = boost::json::try_value_to<Raid>(*jvraid);
+        auto traid = boost::json::try_value_to<Raid>(*jvraid);
 
         if (traid.has_error())
         {
             return traid.error();
         }
-        raid = traid.value();
+        raid = std::move(traid.value());
     }
 
     std::optional<Unraid> unraid = std::nullopt;
     const auto *jvunraid = root.if_contains("unraid");
     if (jvunraid != nullptr && !jvunraid->is_null())
     {
-        const auto tunraid = boost::json::try_value_to<Unraid>(*jvunraid);
+        auto tunraid = boost::json::try_value_to<Unraid>(*jvunraid);
 
         if (tunraid.has_error())
         {
             return tunraid.error();
         }
-        unraid = tunraid.value();
+        unraid = std::move(tunraid.value());
     }
 
     std::optional<PayItForward> payItForward = std::nullopt;
     const auto *jvpayItForward = root.if_contains("pay_it_forward");
     if (jvpayItForward != nullptr && !jvpayItForward->is_null())
     {
-        const auto tpayItForward =
+        auto tpayItForward =
             boost::json::try_value_to<PayItForward>(*jvpayItForward);
 
         if (tpayItForward.has_error())
         {
             return tpayItForward.error();
         }
-        payItForward = tpayItForward.value();
+        payItForward = std::move(tpayItForward.value());
     }
 
     std::optional<Announcement> announcement = std::nullopt;
     const auto *jvannouncement = root.if_contains("announcement");
     if (jvannouncement != nullptr && !jvannouncement->is_null())
     {
-        const auto tannouncement =
+        auto tannouncement =
             boost::json::try_value_to<Announcement>(*jvannouncement);
 
         if (tannouncement.has_error())
         {
             return tannouncement.error();
         }
-        announcement = tannouncement.value();
+        announcement = std::move(tannouncement.value());
     }
 
     std::optional<CharityDonation> charityDonation = std::nullopt;
     const auto *jvcharityDonation = root.if_contains("charity_donation");
     if (jvcharityDonation != nullptr && !jvcharityDonation->is_null())
     {
-        const auto tcharityDonation =
+        auto tcharityDonation =
             boost::json::try_value_to<CharityDonation>(*jvcharityDonation);
 
         if (tcharityDonation.has_error())
         {
             return tcharityDonation.error();
         }
-        charityDonation = tcharityDonation.value();
+        charityDonation = std::move(tcharityDonation.value());
     }
 
     std::optional<BitsBadgeTier> bitsBadgeTier = std::nullopt;
     const auto *jvbitsBadgeTier = root.if_contains("bits_badge_tier");
     if (jvbitsBadgeTier != nullptr && !jvbitsBadgeTier->is_null())
     {
-        const auto tbitsBadgeTier =
+        auto tbitsBadgeTier =
             boost::json::try_value_to<BitsBadgeTier>(*jvbitsBadgeTier);
 
         if (tbitsBadgeTier.has_error())
         {
             return tbitsBadgeTier.error();
         }
-        bitsBadgeTier = tbitsBadgeTier.value();
+        bitsBadgeTier = std::move(tbitsBadgeTier.value());
     }
 
     return Event{
-        .broadcasterUserID = broadcasterUserID.value(),
-        .broadcasterUserLogin = broadcasterUserLogin.value(),
-        .broadcasterUserName = broadcasterUserName.value(),
-        .chatterUserID = chatterUserID.value(),
-        .chatterUserLogin = chatterUserLogin.value(),
-        .chatterUserName = chatterUserName.value(),
-        .chatterIsAnonymous = chatterIsAnonymous.value(),
-        .color = color.value(),
+        .broadcasterUserID = std::move(broadcasterUserID.value()),
+        .broadcasterUserLogin = std::move(broadcasterUserLogin.value()),
+        .broadcasterUserName = std::move(broadcasterUserName.value()),
+        .chatterUserID = std::move(chatterUserID.value()),
+        .chatterUserLogin = std::move(chatterUserLogin.value()),
+        .chatterUserName = std::move(chatterUserName.value()),
+        .chatterIsAnonymous = std::move(chatterIsAnonymous.value()),
+        .color = std::move(color.value()),
         .badges = badges.value(),
-        .systemMessage = systemMessage.value(),
-        .messageID = messageID.value(),
-        .message = message.value(),
-        .noticeType = noticeType.value(),
-        .sub = sub,
-        .resub = resub,
-        .subGift = subGift,
-        .communitySubGift = communitySubGift,
-        .giftPaidUpgrade = giftPaidUpgrade,
-        .primePaidUpgrade = primePaidUpgrade,
-        .raid = raid,
-        .unraid = unraid,
-        .payItForward = payItForward,
-        .announcement = announcement,
-        .charityDonation = charityDonation,
-        .bitsBadgeTier = bitsBadgeTier,
+        .systemMessage = std::move(systemMessage.value()),
+        .messageID = std::move(messageID.value()),
+        .message = std::move(message.value()),
+        .noticeType = std::move(noticeType.value()),
+        .sub = std::move(sub),
+        .resub = std::move(resub),
+        .subGift = std::move(subGift),
+        .communitySubGift = std::move(communitySubGift),
+        .giftPaidUpgrade = std::move(giftPaidUpgrade),
+        .primePaidUpgrade = std::move(primePaidUpgrade),
+        .raid = std::move(raid),
+        .unraid = std::move(unraid),
+        .payItForward = std::move(payItForward),
+        .announcement = std::move(announcement),
+        .charityDonation = std::move(charityDonation),
+        .bitsBadgeTier = std::move(bitsBadgeTier),
     };
 }
 
@@ -1824,7 +1812,7 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_subscription};
     }
 
-    const auto subscription =
+    auto subscription =
         boost::json::try_value_to<subscription::Subscription>(*jvsubscription);
 
     if (subscription.has_error())
@@ -1840,7 +1828,7 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_event};
     }
 
-    const auto event = boost::json::try_value_to<Event>(*jvevent);
+    auto event = boost::json::try_value_to<Event>(*jvevent);
 
     if (event.has_error())
     {
@@ -1848,8 +1836,8 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
     }
 
     return Payload{
-        .subscription = subscription.value(),
-        .event = event.value(),
+        .subscription = std::move(subscription.value()),
+        .event = std::move(event.value()),
     };
 }
 // DESERIALIZATION IMPLEMENTATION END

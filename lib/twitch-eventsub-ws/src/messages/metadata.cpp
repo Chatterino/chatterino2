@@ -26,7 +26,7 @@ boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_messageID};
     }
 
-    const auto messageID = boost::json::try_value_to<std::string>(*jvmessageID);
+    auto messageID = boost::json::try_value_to<std::string>(*jvmessageID);
 
     if (messageID.has_error())
     {
@@ -42,8 +42,7 @@ boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_messageType};
     }
 
-    const auto messageType =
-        boost::json::try_value_to<std::string>(*jvmessageType);
+    auto messageType = boost::json::try_value_to<std::string>(*jvmessageType);
 
     if (messageType.has_error())
     {
@@ -60,7 +59,7 @@ boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
                                          error_missing_field_messageTimestamp};
     }
 
-    const auto messageTimestamp =
+    auto messageTimestamp =
         boost::json::try_value_to<std::string>(*jvmessageTimestamp);
 
     if (messageTimestamp.has_error())
@@ -72,14 +71,14 @@ boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
     const auto *jvsubscriptionType = root.if_contains("subscription_type");
     if (jvsubscriptionType != nullptr && !jvsubscriptionType->is_null())
     {
-        const auto tsubscriptionType =
+        auto tsubscriptionType =
             boost::json::try_value_to<std::string>(*jvsubscriptionType);
 
         if (tsubscriptionType.has_error())
         {
             return tsubscriptionType.error();
         }
-        subscriptionType = tsubscriptionType.value();
+        subscriptionType = std::move(tsubscriptionType.value());
     }
 
     std::optional<std::string> subscriptionVersion = std::nullopt;
@@ -87,22 +86,22 @@ boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
         root.if_contains("subscription_version");
     if (jvsubscriptionVersion != nullptr && !jvsubscriptionVersion->is_null())
     {
-        const auto tsubscriptionVersion =
+        auto tsubscriptionVersion =
             boost::json::try_value_to<std::string>(*jvsubscriptionVersion);
 
         if (tsubscriptionVersion.has_error())
         {
             return tsubscriptionVersion.error();
         }
-        subscriptionVersion = tsubscriptionVersion.value();
+        subscriptionVersion = std::move(tsubscriptionVersion.value());
     }
 
     return Metadata{
-        .messageID = messageID.value(),
-        .messageType = messageType.value(),
-        .messageTimestamp = messageTimestamp.value(),
-        .subscriptionType = subscriptionType,
-        .subscriptionVersion = subscriptionVersion,
+        .messageID = std::move(messageID.value()),
+        .messageType = std::move(messageType.value()),
+        .messageTimestamp = std::move(messageTimestamp.value()),
+        .subscriptionType = std::move(subscriptionType),
+        .subscriptionVersion = std::move(subscriptionVersion),
     };
 }
 // DESERIALIZATION IMPLEMENTATION END

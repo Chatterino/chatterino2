@@ -28,7 +28,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
                                          error_missing_field_broadcasterUserID};
     }
 
-    const auto broadcasterUserID =
+    auto broadcasterUserID =
         boost::json::try_value_to<std::string>(*jvbroadcasterUserID);
 
     if (broadcasterUserID.has_error())
@@ -47,7 +47,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             129, error_missing_field_broadcasterUserLogin};
     }
 
-    const auto broadcasterUserLogin =
+    auto broadcasterUserLogin =
         boost::json::try_value_to<std::string>(*jvbroadcasterUserLogin);
 
     if (broadcasterUserLogin.has_error())
@@ -66,7 +66,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             129, error_missing_field_broadcasterUserName};
     }
 
-    const auto broadcasterUserName =
+    auto broadcasterUserName =
         boost::json::try_value_to<std::string>(*jvbroadcasterUserName);
 
     if (broadcasterUserName.has_error())
@@ -82,7 +82,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_title};
     }
 
-    const auto title = boost::json::try_value_to<std::string>(*jvtitle);
+    auto title = boost::json::try_value_to<std::string>(*jvtitle);
 
     if (title.has_error())
     {
@@ -97,7 +97,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_language};
     }
 
-    const auto language = boost::json::try_value_to<std::string>(*jvlanguage);
+    auto language = boost::json::try_value_to<std::string>(*jvlanguage);
 
     if (language.has_error())
     {
@@ -112,8 +112,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_categoryID};
     }
 
-    const auto categoryID =
-        boost::json::try_value_to<std::string>(*jvcategoryID);
+    auto categoryID = boost::json::try_value_to<std::string>(*jvcategoryID);
 
     if (categoryID.has_error())
     {
@@ -129,8 +128,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_categoryName};
     }
 
-    const auto categoryName =
-        boost::json::try_value_to<std::string>(*jvcategoryName);
+    auto categoryName = boost::json::try_value_to<std::string>(*jvcategoryName);
 
     if (categoryName.has_error())
     {
@@ -145,7 +143,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_isMature};
     }
 
-    const auto isMature = boost::json::try_value_to<bool>(*jvisMature);
+    auto isMature = boost::json::try_value_to<bool>(*jvisMature);
 
     if (isMature.has_error())
     {
@@ -153,14 +151,14 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     return Event{
-        .broadcasterUserID = broadcasterUserID.value(),
-        .broadcasterUserLogin = broadcasterUserLogin.value(),
-        .broadcasterUserName = broadcasterUserName.value(),
-        .title = title.value(),
-        .language = language.value(),
-        .categoryID = categoryID.value(),
-        .categoryName = categoryName.value(),
-        .isMature = isMature.value(),
+        .broadcasterUserID = std::move(broadcasterUserID.value()),
+        .broadcasterUserLogin = std::move(broadcasterUserLogin.value()),
+        .broadcasterUserName = std::move(broadcasterUserName.value()),
+        .title = std::move(title.value()),
+        .language = std::move(language.value()),
+        .categoryID = std::move(categoryID.value()),
+        .categoryName = std::move(categoryName.value()),
+        .isMature = std::move(isMature.value()),
     };
 }
 
@@ -184,7 +182,7 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_subscription};
     }
 
-    const auto subscription =
+    auto subscription =
         boost::json::try_value_to<subscription::Subscription>(*jvsubscription);
 
     if (subscription.has_error())
@@ -200,7 +198,7 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_event};
     }
 
-    const auto event = boost::json::try_value_to<Event>(*jvevent);
+    auto event = boost::json::try_value_to<Event>(*jvevent);
 
     if (event.has_error())
     {
@@ -208,8 +206,8 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
     }
 
     return Payload{
-        .subscription = subscription.value(),
-        .event = event.value(),
+        .subscription = std::move(subscription.value()),
+        .event = std::move(event.value()),
     };
 }
 // DESERIALIZATION IMPLEMENTATION END

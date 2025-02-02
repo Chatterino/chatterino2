@@ -26,7 +26,7 @@ boost::json::result_for<Transport, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_method};
     }
 
-    const auto method = boost::json::try_value_to<std::string>(*jvmethod);
+    auto method = boost::json::try_value_to<std::string>(*jvmethod);
 
     if (method.has_error())
     {
@@ -41,7 +41,7 @@ boost::json::result_for<Transport, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_sessionID};
     }
 
-    const auto sessionID = boost::json::try_value_to<std::string>(*jvsessionID);
+    auto sessionID = boost::json::try_value_to<std::string>(*jvsessionID);
 
     if (sessionID.has_error())
     {
@@ -49,8 +49,8 @@ boost::json::result_for<Transport, boost::json::value>::type tag_invoke(
     }
 
     return Transport{
-        .method = method.value(),
-        .sessionID = sessionID.value(),
+        .method = std::move(method.value()),
+        .sessionID = std::move(sessionID.value()),
     };
 }
 
@@ -74,7 +74,7 @@ boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_id};
     }
 
-    const auto id = boost::json::try_value_to<std::string>(*jvid);
+    auto id = boost::json::try_value_to<std::string>(*jvid);
 
     if (id.has_error())
     {
@@ -89,7 +89,7 @@ boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_status};
     }
 
-    const auto status = boost::json::try_value_to<std::string>(*jvstatus);
+    auto status = boost::json::try_value_to<std::string>(*jvstatus);
 
     if (status.has_error())
     {
@@ -104,7 +104,7 @@ boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_type};
     }
 
-    const auto type = boost::json::try_value_to<std::string>(*jvtype);
+    auto type = boost::json::try_value_to<std::string>(*jvtype);
 
     if (type.has_error())
     {
@@ -119,7 +119,7 @@ boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_version};
     }
 
-    const auto version = boost::json::try_value_to<std::string>(*jvversion);
+    auto version = boost::json::try_value_to<std::string>(*jvversion);
 
     if (version.has_error())
     {
@@ -134,7 +134,7 @@ boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_transport};
     }
 
-    const auto transport = boost::json::try_value_to<Transport>(*jvtransport);
+    auto transport = boost::json::try_value_to<Transport>(*jvtransport);
 
     if (transport.has_error())
     {
@@ -149,7 +149,7 @@ boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_createdAt};
     }
 
-    const auto createdAt = boost::json::try_value_to<std::string>(*jvcreatedAt);
+    auto createdAt = boost::json::try_value_to<std::string>(*jvcreatedAt);
 
     if (createdAt.has_error())
     {
@@ -164,7 +164,7 @@ boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_cost};
     }
 
-    const auto cost = boost::json::try_value_to<int>(*jvcost);
+    auto cost = boost::json::try_value_to<int>(*jvcost);
 
     if (cost.has_error())
     {
@@ -172,13 +172,13 @@ boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
     }
 
     return Subscription{
-        .id = id.value(),
-        .status = status.value(),
-        .type = type.value(),
-        .version = version.value(),
-        .transport = transport.value(),
-        .createdAt = createdAt.value(),
-        .cost = cost.value(),
+        .id = std::move(id.value()),
+        .status = std::move(status.value()),
+        .type = std::move(type.value()),
+        .version = std::move(version.value()),
+        .transport = std::move(transport.value()),
+        .createdAt = std::move(createdAt.value()),
+        .cost = std::move(cost.value()),
     };
 }
 // DESERIALIZATION IMPLEMENTATION END

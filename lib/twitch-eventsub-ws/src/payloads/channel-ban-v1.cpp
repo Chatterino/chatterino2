@@ -39,7 +39,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
                                          error_missing_field_broadcasterUserID};
     }
 
-    const auto broadcasterUserID =
+    auto broadcasterUserID =
         boost::json::try_value_to<std::string>(*jvbroadcasterUserID);
 
     if (broadcasterUserID.has_error())
@@ -58,7 +58,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             129, error_missing_field_broadcasterUserLogin};
     }
 
-    const auto broadcasterUserLogin =
+    auto broadcasterUserLogin =
         boost::json::try_value_to<std::string>(*jvbroadcasterUserLogin);
 
     if (broadcasterUserLogin.has_error())
@@ -77,7 +77,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             129, error_missing_field_broadcasterUserName};
     }
 
-    const auto broadcasterUserName =
+    auto broadcasterUserName =
         boost::json::try_value_to<std::string>(*jvbroadcasterUserName);
 
     if (broadcasterUserName.has_error())
@@ -95,7 +95,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
                                          error_missing_field_moderatorUserID};
     }
 
-    const auto moderatorUserID =
+    auto moderatorUserID =
         boost::json::try_value_to<std::string>(*jvmoderatorUserID);
 
     if (moderatorUserID.has_error())
@@ -113,7 +113,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             129, error_missing_field_moderatorUserLogin};
     }
 
-    const auto moderatorUserLogin =
+    auto moderatorUserLogin =
         boost::json::try_value_to<std::string>(*jvmoderatorUserLogin);
 
     if (moderatorUserLogin.has_error())
@@ -131,7 +131,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
                                          error_missing_field_moderatorUserName};
     }
 
-    const auto moderatorUserName =
+    auto moderatorUserName =
         boost::json::try_value_to<std::string>(*jvmoderatorUserName);
 
     if (moderatorUserName.has_error())
@@ -147,7 +147,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userID};
     }
 
-    const auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -162,7 +162,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userLogin};
     }
 
-    const auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -177,7 +177,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userName};
     }
 
-    const auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -192,7 +192,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_reason};
     }
 
-    const auto reason = boost::json::try_value_to<std::string>(*jvreason);
+    auto reason = boost::json::try_value_to<std::string>(*jvreason);
 
     if (reason.has_error())
     {
@@ -208,7 +208,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_isPermanent};
     }
 
-    const auto isPermanent = boost::json::try_value_to<bool>(*jvisPermanent);
+    auto isPermanent = boost::json::try_value_to<bool>(*jvisPermanent);
 
     if (isPermanent.has_error())
     {
@@ -223,7 +223,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_bannedAt};
     }
 
-    const auto bannedAt =
+    auto bannedAt =
         boost::json::try_value_to<std::chrono::system_clock::time_point>(
             *jvbannedAt, AsISO8601());
 
@@ -236,7 +236,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     const auto *jvendsAt = root.if_contains("ends_at");
     if (jvendsAt != nullptr && !jvendsAt->is_null())
     {
-        const auto tendsAt =
+        auto tendsAt =
             boost::json::try_value_to<std::chrono::system_clock::time_point>(
                 *jvendsAt, AsISO8601());
 
@@ -244,23 +244,23 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         {
             return tendsAt.error();
         }
-        endsAt = tendsAt.value();
+        endsAt = std::move(tendsAt.value());
     }
 
     return Event{
-        .broadcasterUserID = broadcasterUserID.value(),
-        .broadcasterUserLogin = broadcasterUserLogin.value(),
-        .broadcasterUserName = broadcasterUserName.value(),
-        .moderatorUserID = moderatorUserID.value(),
-        .moderatorUserLogin = moderatorUserLogin.value(),
-        .moderatorUserName = moderatorUserName.value(),
-        .userID = userID.value(),
-        .userLogin = userLogin.value(),
-        .userName = userName.value(),
-        .reason = reason.value(),
-        .isPermanent = isPermanent.value(),
-        .bannedAt = bannedAt.value(),
-        .endsAt = endsAt,
+        .broadcasterUserID = std::move(broadcasterUserID.value()),
+        .broadcasterUserLogin = std::move(broadcasterUserLogin.value()),
+        .broadcasterUserName = std::move(broadcasterUserName.value()),
+        .moderatorUserID = std::move(moderatorUserID.value()),
+        .moderatorUserLogin = std::move(moderatorUserLogin.value()),
+        .moderatorUserName = std::move(moderatorUserName.value()),
+        .userID = std::move(userID.value()),
+        .userLogin = std::move(userLogin.value()),
+        .userName = std::move(userName.value()),
+        .reason = std::move(reason.value()),
+        .isPermanent = std::move(isPermanent.value()),
+        .bannedAt = std::move(bannedAt.value()),
+        .endsAt = std::move(endsAt),
     };
 }
 
@@ -284,7 +284,7 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_subscription};
     }
 
-    const auto subscription =
+    auto subscription =
         boost::json::try_value_to<subscription::Subscription>(*jvsubscription);
 
     if (subscription.has_error())
@@ -300,7 +300,7 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_event};
     }
 
-    const auto event = boost::json::try_value_to<Event>(*jvevent);
+    auto event = boost::json::try_value_to<Event>(*jvevent);
 
     if (event.has_error())
     {
@@ -308,8 +308,8 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
     }
 
     return Payload{
-        .subscription = subscription.value(),
-        .event = event.value(),
+        .subscription = std::move(subscription.value()),
+        .event = std::move(event.value()),
     };
 }
 // DESERIALIZATION IMPLEMENTATION END

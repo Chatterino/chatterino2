@@ -41,7 +41,7 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_id};
     }
 
-    const auto id = boost::json::try_value_to<std::string>(*jvid);
+    auto id = boost::json::try_value_to<std::string>(*jvid);
 
     if (id.has_error())
     {
@@ -49,7 +49,7 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
     }
 
     return Payload{
-        .id = id.value(),
+        .id = std::move(id.value()),
     };
 }
 // DESERIALIZATION IMPLEMENTATION END

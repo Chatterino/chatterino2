@@ -26,7 +26,7 @@ boost::json::result_for<Badge, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_setID};
     }
 
-    const auto setID = boost::json::try_value_to<std::string>(*jvsetID);
+    auto setID = boost::json::try_value_to<std::string>(*jvsetID);
 
     if (setID.has_error())
     {
@@ -41,7 +41,7 @@ boost::json::result_for<Badge, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_id};
     }
 
-    const auto id = boost::json::try_value_to<std::string>(*jvid);
+    auto id = boost::json::try_value_to<std::string>(*jvid);
 
     if (id.has_error())
     {
@@ -56,7 +56,7 @@ boost::json::result_for<Badge, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_info};
     }
 
-    const auto info = boost::json::try_value_to<std::string>(*jvinfo);
+    auto info = boost::json::try_value_to<std::string>(*jvinfo);
 
     if (info.has_error())
     {
@@ -64,9 +64,9 @@ boost::json::result_for<Badge, boost::json::value>::type tag_invoke(
     }
 
     return Badge{
-        .setID = setID.value(),
-        .id = id.value(),
-        .info = info.value(),
+        .setID = std::move(setID.value()),
+        .id = std::move(id.value()),
+        .info = std::move(info.value()),
     };
 }
 
@@ -89,7 +89,7 @@ boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_prefix};
     }
 
-    const auto prefix = boost::json::try_value_to<std::string>(*jvprefix);
+    auto prefix = boost::json::try_value_to<std::string>(*jvprefix);
 
     if (prefix.has_error())
     {
@@ -104,7 +104,7 @@ boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_bits};
     }
 
-    const auto bits = boost::json::try_value_to<int>(*jvbits);
+    auto bits = boost::json::try_value_to<int>(*jvbits);
 
     if (bits.has_error())
     {
@@ -119,7 +119,7 @@ boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_tier};
     }
 
-    const auto tier = boost::json::try_value_to<int>(*jvtier);
+    auto tier = boost::json::try_value_to<int>(*jvtier);
 
     if (tier.has_error())
     {
@@ -127,9 +127,9 @@ boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
     }
 
     return Cheermote{
-        .prefix = prefix.value(),
-        .bits = bits.value(),
-        .tier = tier.value(),
+        .prefix = std::move(prefix.value()),
+        .bits = std::move(bits.value()),
+        .tier = std::move(tier.value()),
     };
 }
 
@@ -152,7 +152,7 @@ boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_id};
     }
 
-    const auto id = boost::json::try_value_to<std::string>(*jvid);
+    auto id = boost::json::try_value_to<std::string>(*jvid);
 
     if (id.has_error())
     {
@@ -167,8 +167,7 @@ boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_emoteSetID};
     }
 
-    const auto emoteSetID =
-        boost::json::try_value_to<std::string>(*jvemoteSetID);
+    auto emoteSetID = boost::json::try_value_to<std::string>(*jvemoteSetID);
 
     if (emoteSetID.has_error())
     {
@@ -183,7 +182,7 @@ boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_ownerID};
     }
 
-    const auto ownerID = boost::json::try_value_to<std::string>(*jvownerID);
+    auto ownerID = boost::json::try_value_to<std::string>(*jvownerID);
 
     if (ownerID.has_error())
     {
@@ -205,9 +204,9 @@ boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
     }
 
     return Emote{
-        .id = id.value(),
-        .emoteSetID = emoteSetID.value(),
-        .ownerID = ownerID.value(),
+        .id = std::move(id.value()),
+        .emoteSetID = std::move(emoteSetID.value()),
+        .ownerID = std::move(ownerID.value()),
         .format = format.value(),
     };
 }
@@ -231,7 +230,7 @@ boost::json::result_for<Mention, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userID};
     }
 
-    const auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -246,7 +245,7 @@ boost::json::result_for<Mention, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userName};
     }
 
-    const auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -261,7 +260,7 @@ boost::json::result_for<Mention, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_userLogin};
     }
 
-    const auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -269,9 +268,9 @@ boost::json::result_for<Mention, boost::json::value>::type tag_invoke(
     }
 
     return Mention{
-        .userID = userID.value(),
-        .userName = userName.value(),
-        .userLogin = userLogin.value(),
+        .userID = std::move(userID.value()),
+        .userName = std::move(userName.value()),
+        .userLogin = std::move(userLogin.value()),
     };
 }
 
@@ -295,7 +294,7 @@ boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_type};
     }
 
-    const auto type = boost::json::try_value_to<std::string>(*jvtype);
+    auto type = boost::json::try_value_to<std::string>(*jvtype);
 
     if (type.has_error())
     {
@@ -310,7 +309,7 @@ boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_text};
     }
 
-    const auto text = boost::json::try_value_to<std::string>(*jvtext);
+    auto text = boost::json::try_value_to<std::string>(*jvtext);
 
     if (text.has_error())
     {
@@ -321,48 +320,47 @@ boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
     const auto *jvcheermote = root.if_contains("cheermote");
     if (jvcheermote != nullptr && !jvcheermote->is_null())
     {
-        const auto tcheermote =
-            boost::json::try_value_to<Cheermote>(*jvcheermote);
+        auto tcheermote = boost::json::try_value_to<Cheermote>(*jvcheermote);
 
         if (tcheermote.has_error())
         {
             return tcheermote.error();
         }
-        cheermote = tcheermote.value();
+        cheermote = std::move(tcheermote.value());
     }
 
     std::optional<Emote> emote = std::nullopt;
     const auto *jvemote = root.if_contains("emote");
     if (jvemote != nullptr && !jvemote->is_null())
     {
-        const auto temote = boost::json::try_value_to<Emote>(*jvemote);
+        auto temote = boost::json::try_value_to<Emote>(*jvemote);
 
         if (temote.has_error())
         {
             return temote.error();
         }
-        emote = temote.value();
+        emote = std::move(temote.value());
     }
 
     std::optional<Mention> mention = std::nullopt;
     const auto *jvmention = root.if_contains("mention");
     if (jvmention != nullptr && !jvmention->is_null())
     {
-        const auto tmention = boost::json::try_value_to<Mention>(*jvmention);
+        auto tmention = boost::json::try_value_to<Mention>(*jvmention);
 
         if (tmention.has_error())
         {
             return tmention.error();
         }
-        mention = tmention.value();
+        mention = std::move(tmention.value());
     }
 
     return MessageFragment{
-        .type = type.value(),
-        .text = text.value(),
-        .cheermote = cheermote,
-        .emote = emote,
-        .mention = mention,
+        .type = std::move(type.value()),
+        .text = std::move(text.value()),
+        .cheermote = std::move(cheermote),
+        .emote = std::move(emote),
+        .mention = std::move(mention),
     };
 }
 
@@ -385,7 +383,7 @@ boost::json::result_for<Message, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_text};
     }
 
-    const auto text = boost::json::try_value_to<std::string>(*jvtext);
+    auto text = boost::json::try_value_to<std::string>(*jvtext);
 
     if (text.has_error())
     {
@@ -407,7 +405,7 @@ boost::json::result_for<Message, boost::json::value>::type tag_invoke(
     }
 
     return Message{
-        .text = text.value(),
+        .text = std::move(text.value()),
         .fragments = fragments.value(),
     };
 }
@@ -431,7 +429,7 @@ boost::json::result_for<Cheer, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_bits};
     }
 
-    const auto bits = boost::json::try_value_to<int>(*jvbits);
+    auto bits = boost::json::try_value_to<int>(*jvbits);
 
     if (bits.has_error())
     {
@@ -439,7 +437,7 @@ boost::json::result_for<Cheer, boost::json::value>::type tag_invoke(
     }
 
     return Cheer{
-        .bits = bits.value(),
+        .bits = std::move(bits.value()),
     };
 }
 
@@ -464,7 +462,7 @@ boost::json::result_for<Reply, boost::json::value>::type tag_invoke(
                                          error_missing_field_parentMessageID};
     }
 
-    const auto parentMessageID =
+    auto parentMessageID =
         boost::json::try_value_to<std::string>(*jvparentMessageID);
 
     if (parentMessageID.has_error())
@@ -481,8 +479,7 @@ boost::json::result_for<Reply, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_parentUserID};
     }
 
-    const auto parentUserID =
-        boost::json::try_value_to<std::string>(*jvparentUserID);
+    auto parentUserID = boost::json::try_value_to<std::string>(*jvparentUserID);
 
     if (parentUserID.has_error())
     {
@@ -499,7 +496,7 @@ boost::json::result_for<Reply, boost::json::value>::type tag_invoke(
                                          error_missing_field_parentUserLogin};
     }
 
-    const auto parentUserLogin =
+    auto parentUserLogin =
         boost::json::try_value_to<std::string>(*jvparentUserLogin);
 
     if (parentUserLogin.has_error())
@@ -517,7 +514,7 @@ boost::json::result_for<Reply, boost::json::value>::type tag_invoke(
                                          error_missing_field_parentUserName};
     }
 
-    const auto parentUserName =
+    auto parentUserName =
         boost::json::try_value_to<std::string>(*jvparentUserName);
 
     if (parentUserName.has_error())
@@ -535,7 +532,7 @@ boost::json::result_for<Reply, boost::json::value>::type tag_invoke(
                                          error_missing_field_parentMessageBody};
     }
 
-    const auto parentMessageBody =
+    auto parentMessageBody =
         boost::json::try_value_to<std::string>(*jvparentMessageBody);
 
     if (parentMessageBody.has_error())
@@ -553,7 +550,7 @@ boost::json::result_for<Reply, boost::json::value>::type tag_invoke(
                                          error_missing_field_threadMessageID};
     }
 
-    const auto threadMessageID =
+    auto threadMessageID =
         boost::json::try_value_to<std::string>(*jvthreadMessageID);
 
     if (threadMessageID.has_error())
@@ -570,8 +567,7 @@ boost::json::result_for<Reply, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_threadUserID};
     }
 
-    const auto threadUserID =
-        boost::json::try_value_to<std::string>(*jvthreadUserID);
+    auto threadUserID = boost::json::try_value_to<std::string>(*jvthreadUserID);
 
     if (threadUserID.has_error())
     {
@@ -588,7 +584,7 @@ boost::json::result_for<Reply, boost::json::value>::type tag_invoke(
                                          error_missing_field_threadUserLogin};
     }
 
-    const auto threadUserLogin =
+    auto threadUserLogin =
         boost::json::try_value_to<std::string>(*jvthreadUserLogin);
 
     if (threadUserLogin.has_error())
@@ -606,7 +602,7 @@ boost::json::result_for<Reply, boost::json::value>::type tag_invoke(
                                          error_missing_field_threadUserName};
     }
 
-    const auto threadUserName =
+    auto threadUserName =
         boost::json::try_value_to<std::string>(*jvthreadUserName);
 
     if (threadUserName.has_error())
@@ -615,15 +611,15 @@ boost::json::result_for<Reply, boost::json::value>::type tag_invoke(
     }
 
     return Reply{
-        .parentMessageID = parentMessageID.value(),
-        .parentUserID = parentUserID.value(),
-        .parentUserLogin = parentUserLogin.value(),
-        .parentUserName = parentUserName.value(),
-        .parentMessageBody = parentMessageBody.value(),
-        .threadMessageID = threadMessageID.value(),
-        .threadUserID = threadUserID.value(),
-        .threadUserLogin = threadUserLogin.value(),
-        .threadUserName = threadUserName.value(),
+        .parentMessageID = std::move(parentMessageID.value()),
+        .parentUserID = std::move(parentUserID.value()),
+        .parentUserLogin = std::move(parentUserLogin.value()),
+        .parentUserName = std::move(parentUserName.value()),
+        .parentMessageBody = std::move(parentMessageBody.value()),
+        .threadMessageID = std::move(threadMessageID.value()),
+        .threadUserID = std::move(threadUserID.value()),
+        .threadUserLogin = std::move(threadUserLogin.value()),
+        .threadUserName = std::move(threadUserName.value()),
     };
 }
 
@@ -648,7 +644,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
                                          error_missing_field_broadcasterUserID};
     }
 
-    const auto broadcasterUserID =
+    auto broadcasterUserID =
         boost::json::try_value_to<std::string>(*jvbroadcasterUserID);
 
     if (broadcasterUserID.has_error())
@@ -667,7 +663,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             129, error_missing_field_broadcasterUserLogin};
     }
 
-    const auto broadcasterUserLogin =
+    auto broadcasterUserLogin =
         boost::json::try_value_to<std::string>(*jvbroadcasterUserLogin);
 
     if (broadcasterUserLogin.has_error())
@@ -686,7 +682,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             129, error_missing_field_broadcasterUserName};
     }
 
-    const auto broadcasterUserName =
+    auto broadcasterUserName =
         boost::json::try_value_to<std::string>(*jvbroadcasterUserName);
 
     if (broadcasterUserName.has_error())
@@ -704,7 +700,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
                                          error_missing_field_chatterUserID};
     }
 
-    const auto chatterUserID =
+    auto chatterUserID =
         boost::json::try_value_to<std::string>(*jvchatterUserID);
 
     if (chatterUserID.has_error())
@@ -722,7 +718,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
                                          error_missing_field_chatterUserLogin};
     }
 
-    const auto chatterUserLogin =
+    auto chatterUserLogin =
         boost::json::try_value_to<std::string>(*jvchatterUserLogin);
 
     if (chatterUserLogin.has_error())
@@ -740,7 +736,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
                                          error_missing_field_chatterUserName};
     }
 
-    const auto chatterUserName =
+    auto chatterUserName =
         boost::json::try_value_to<std::string>(*jvchatterUserName);
 
     if (chatterUserName.has_error())
@@ -756,7 +752,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_color};
     }
 
-    const auto color = boost::json::try_value_to<std::string>(*jvcolor);
+    auto color = boost::json::try_value_to<std::string>(*jvcolor);
 
     if (color.has_error())
     {
@@ -785,7 +781,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_messageID};
     }
 
-    const auto messageID = boost::json::try_value_to<std::string>(*jvmessageID);
+    auto messageID = boost::json::try_value_to<std::string>(*jvmessageID);
 
     if (messageID.has_error())
     {
@@ -801,8 +797,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_messageType};
     }
 
-    const auto messageType =
-        boost::json::try_value_to<std::string>(*jvmessageType);
+    auto messageType = boost::json::try_value_to<std::string>(*jvmessageType);
 
     if (messageType.has_error())
     {
@@ -817,7 +812,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_message};
     }
 
-    const auto message = boost::json::try_value_to<Message>(*jvmessage);
+    auto message = boost::json::try_value_to<Message>(*jvmessage);
 
     if (message.has_error())
     {
@@ -828,26 +823,26 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     const auto *jvcheer = root.if_contains("cheer");
     if (jvcheer != nullptr && !jvcheer->is_null())
     {
-        const auto tcheer = boost::json::try_value_to<Cheer>(*jvcheer);
+        auto tcheer = boost::json::try_value_to<Cheer>(*jvcheer);
 
         if (tcheer.has_error())
         {
             return tcheer.error();
         }
-        cheer = tcheer.value();
+        cheer = std::move(tcheer.value());
     }
 
     std::optional<Reply> reply = std::nullopt;
     const auto *jvreply = root.if_contains("reply");
     if (jvreply != nullptr && !jvreply->is_null())
     {
-        const auto treply = boost::json::try_value_to<Reply>(*jvreply);
+        auto treply = boost::json::try_value_to<Reply>(*jvreply);
 
         if (treply.has_error())
         {
             return treply.error();
         }
-        reply = treply.value();
+        reply = std::move(treply.value());
     }
 
     std::optional<std::string> channelPointsCustomRewardID = std::nullopt;
@@ -856,7 +851,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     if (jvchannelPointsCustomRewardID != nullptr &&
         !jvchannelPointsCustomRewardID->is_null())
     {
-        const auto tchannelPointsCustomRewardID =
+        auto tchannelPointsCustomRewardID =
             boost::json::try_value_to<std::string>(
                 *jvchannelPointsCustomRewardID);
 
@@ -864,24 +859,25 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         {
             return tchannelPointsCustomRewardID.error();
         }
-        channelPointsCustomRewardID = tchannelPointsCustomRewardID.value();
+        channelPointsCustomRewardID =
+            std::move(tchannelPointsCustomRewardID.value());
     }
 
     return Event{
-        .broadcasterUserID = broadcasterUserID.value(),
-        .broadcasterUserLogin = broadcasterUserLogin.value(),
-        .broadcasterUserName = broadcasterUserName.value(),
-        .chatterUserID = chatterUserID.value(),
-        .chatterUserLogin = chatterUserLogin.value(),
-        .chatterUserName = chatterUserName.value(),
-        .color = color.value(),
+        .broadcasterUserID = std::move(broadcasterUserID.value()),
+        .broadcasterUserLogin = std::move(broadcasterUserLogin.value()),
+        .broadcasterUserName = std::move(broadcasterUserName.value()),
+        .chatterUserID = std::move(chatterUserID.value()),
+        .chatterUserLogin = std::move(chatterUserLogin.value()),
+        .chatterUserName = std::move(chatterUserName.value()),
+        .color = std::move(color.value()),
         .badges = badges.value(),
-        .messageID = messageID.value(),
-        .messageType = messageType.value(),
-        .message = message.value(),
-        .cheer = cheer,
-        .reply = reply,
-        .channelPointsCustomRewardID = channelPointsCustomRewardID,
+        .messageID = std::move(messageID.value()),
+        .messageType = std::move(messageType.value()),
+        .message = std::move(message.value()),
+        .cheer = std::move(cheer),
+        .reply = std::move(reply),
+        .channelPointsCustomRewardID = std::move(channelPointsCustomRewardID),
     };
 }
 
@@ -905,7 +901,7 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_subscription};
     }
 
-    const auto subscription =
+    auto subscription =
         boost::json::try_value_to<subscription::Subscription>(*jvsubscription);
 
     if (subscription.has_error())
@@ -921,7 +917,7 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_event};
     }
 
-    const auto event = boost::json::try_value_to<Event>(*jvevent);
+    auto event = boost::json::try_value_to<Event>(*jvevent);
 
     if (event.has_error())
     {
@@ -929,8 +925,8 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
     }
 
     return Payload{
-        .subscription = subscription.value(),
-        .event = event.value(),
+        .subscription = std::move(subscription.value()),
+        .event = std::move(event.value()),
     };
 }
 // DESERIALIZATION IMPLEMENTATION END
