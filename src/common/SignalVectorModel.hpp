@@ -182,7 +182,7 @@ public:
 
             QVector<int> roles = QVector<int>();
             roles.append(role);
-            dataChanged(index, index, roles);
+            this->dataChanged(index, index, roles);
         }
 
         return true;
