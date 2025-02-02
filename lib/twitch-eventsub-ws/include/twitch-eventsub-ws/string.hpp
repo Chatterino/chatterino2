@@ -86,6 +86,8 @@ struct String {
                 {
                     static_assert(!type_name<T>().data(),
                                   "unknown type in variant");
+                    static_assert(type_name<T>().data(),
+                                  "unknown type in variant");
                     static_assert(false, "unknown type in variant");
                 }
             },
