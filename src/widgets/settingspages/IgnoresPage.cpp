@@ -32,7 +32,9 @@ IgnoresPage::IgnoresPage()
 {
     LayoutCreator<IgnoresPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
+
     auto tabs = layout.emplace<QTabWidget>();
+    this->tabWidget_ = &*tabs;
 
     addPhrasesTab(tabs.appendTab(new QVBoxLayout, "Messages"));
     addUsersTab(*this, tabs.appendTab(new QVBoxLayout, "Users"),
@@ -40,30 +42,32 @@ IgnoresPage::IgnoresPage()
     this->onShow();
 }
 
-void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
+void IgnoresPage::addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
 {
     layout.emplace<QLabel>("Ignore messages based certain patterns.");
-    EditableModelView *view =
+    this->viewMessages_ =
         layout
             .emplace<EditableModelView>(
                 (new IgnoreModel(nullptr))
                     ->initialized(&getSettings()->ignoredMessages))
             .getElement();
-    view->setTitles(
+    this->viewMessages_->setTitles(
         {"Pattern", "Regex", "Case-sensitive", "Block", "Replacement"});
-    view->getTableView()->horizontalHeader()->setSectionResizeMode(
-        QHeaderView::Fixed);
-    view->getTableView()->horizontalHeader()->setSectionResizeMode(
-        0, QHeaderView::Stretch);
-    view->addRegexHelpLink();
+    this->viewMessages_->getTableView()
+        ->horizontalHeader()
+        ->setSectionResizeMode(QHeaderView::Fixed);
+    this->viewMessages_->getTableView()
+        ->horizontalHeader()
+        ->setSectionResizeMode(0, QHeaderView::Stretch);
+    this->viewMessages_->addRegexHelpLink();
 
-    QTimer::singleShot(1, [view] {
-        view->getTableView()->resizeColumnsToContents();
-        view->getTableView()->setColumnWidth(0, 200);
+    QTimer::singleShot(1, [this] {
+        this->viewMessages_->getTableView()->resizeColumnsToContents();
+        this->viewMessages_->getTableView()->setColumnWidth(0, 200);
     });
 
-    // We can safely ignore this signal connection since we own the view
-    std::ignore = view->addButtonPressed.connect([] {
+    // We can safely ignore this signal connection since we own thethis->viewMessages_
+    std::ignore = this->viewMessages_->addButtonPressed.connect([] {
         getSettings()->ignoredMessages.append(
             IgnorePhrase{"my pattern", false, false,
                          getSettings()->ignoredPhraseReplace.getValue(), true});
@@ -137,6 +141,17 @@ void IgnoresPage::onShow()
     }
     users.sort(Qt::CaseInsensitive);
     this->userListModel_.setStringList(users);
+}
+
+bool IgnoresPage::filterElements(const QString &query)
+{
+    std::array fields{0, 4};
+
+    bool matchMessages =
+        this->viewMessages_->filterSearchResults(query, fields);
+    this->tabWidget_->setTabVisible(0, matchMessages);
+
+    return matchMessages;
 }
 
 }  // namespace chatterino
