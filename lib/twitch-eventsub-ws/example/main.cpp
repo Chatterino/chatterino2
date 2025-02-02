@@ -1,34 +1,38 @@
 #include "twitch-eventsub-ws/listener.hpp"
 #include "twitch-eventsub-ws/session.hpp"
+#include "twitch-eventsub-ws/string.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/json.hpp>
+#include <qdebug.h>
+#include <qlogging.h>
 
 #include <iostream>
 #include <memory>
 
-using namespace eventsub;
+using namespace chatterino::eventsub;
 
-class MyListener final : public Listener
+class MyListener final : public lib::Listener
 {
 public:
-    void onSessionWelcome(messages::Metadata metadata,
-                          payload::session_welcome::Payload payload) override
+    void onSessionWelcome(
+        lib::messages::Metadata metadata,
+        lib::payload::session_welcome::Payload payload) override
     {
         (void)metadata;
         std::cout << "ON session welcome " << payload.id << " XD\n";
     }
 
-    void onNotification(messages::Metadata metadata,
+    void onNotification(lib::messages::Metadata metadata,
                         const boost::json::value &jv) override
     {
         (void)metadata;
         std::cout << "on notification: " << jv << '\n';
     }
 
-    void onChannelBan(messages::Metadata metadata,
-                      payload::channel_ban::v1::Payload payload) override
+    void onChannelBan(lib::messages::Metadata metadata,
+                      lib::payload::channel_ban::v1::Payload payload) override
     {
         (void)metadata;
         std::cout << "Channel ban occured in "
@@ -40,16 +44,18 @@ public:
                   << '\n';
     }
 
-    void onStreamOnline(messages::Metadata metadata,
-                        payload::stream_online::v1::Payload payload) override
+    void onStreamOnline(
+        lib::messages::Metadata metadata,
+        lib::payload::stream_online::v1::Payload payload) override
     {
         (void)metadata;
         (void)payload;
         std::cout << "ON STREAM ONLINE XD\n";
     }
 
-    void onStreamOffline(messages::Metadata metadata,
-                         payload::stream_offline::v1::Payload payload) override
+    void onStreamOffline(
+        lib::messages::Metadata metadata,
+        lib::payload::stream_offline::v1::Payload payload) override
     {
         (void)metadata;
         (void)payload;
@@ -57,16 +63,17 @@ public:
     }
 
     void onChannelChatNotification(
-        messages::Metadata metadata,
-        payload::channel_chat_notification::v1::Payload payload) override
+        lib::messages::Metadata metadata,
+        lib::payload::channel_chat_notification::v1::Payload payload) override
     {
         (void)metadata;
         (void)payload;
         std::cout << "Received channel.chat.notification v1\n";
     }
 
-    void onChannelUpdate(messages::Metadata metadata,
-                         payload::channel_update::v1::Payload payload) override
+    void onChannelUpdate(
+        lib::messages::Metadata metadata,
+        lib::payload::channel_update::v1::Payload payload) override
     {
         (void)metadata;
         (void)payload;
@@ -74,8 +81,8 @@ public:
     }
 
     void onChannelChatMessage(
-        messages::Metadata metadata,
-        payload::channel_chat_message::v1::Payload payload) override
+        lib::messages::Metadata metadata,
+        lib::payload::channel_chat_message::v1::Payload payload) override
     {
         (void)metadata;
         (void)payload;
@@ -83,8 +90,8 @@ public:
     }
 
     void onChannelModerate(
-        messages::Metadata metadata,
-        payload::channel_moderate::v2::Payload payload) override
+        lib::messages::Metadata metadata,
+        lib::payload::channel_moderate::v2::Payload payload) override
     {
         (void)metadata;
         (void)payload;
@@ -98,6 +105,13 @@ int main(int argc, char **argv)
 {
     (void)argc;
     (void)argv;
+
+    lib::String a("foo");
+
+    qDebug() << "xd1:"
+             << QString::fromStdString(std::get<std::string>(a.backingString));
+    qDebug() << "xd2:" << a.qt();
+    qDebug() << "xd3:" << a.qt();
 
     std::string userAgent{"chatterino-eventsub-testing"};
 
@@ -125,8 +139,8 @@ int main(int argc, char **argv)
 
         // TODO: Load certificates into SSL context
 
-        std::make_shared<Session>(ctx, sslContext,
-                                  std::make_unique<MyListener>())
+        std::make_shared<lib::Session>(ctx, sslContext,
+                                       std::make_unique<MyListener>())
             ->run(host, port, path, userAgent);
 
         ctx.run();

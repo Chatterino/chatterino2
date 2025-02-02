@@ -340,6 +340,13 @@ struct Event {
     /// User Name (e.g. 테스트계정420) of the user who's channel the event took place in
     std::string broadcasterUserName;
 
+    /// For Shared Chat events, the user ID (e.g. 117166826) of the user who's channel the event took place in
+    std::optional<std::string> sourceBroadcasterUserID;
+    /// For Shared Chat events, the user Login (e.g. testaccount_420) of the user who's channel the event took place in
+    std::optional<std::string> sourceBroadcasterUserLogin;
+    /// For Shared Chat events, the user Name (e.g. 테스트계정420) of the user who's channel the event took place in
+    std::optional<std::string> sourceBroadcasterUserName;
+
     /// User ID (e.g. 117166826) of the user who took the action
     std::string moderatorUserID;
     /// User Login (e.g. testaccount_420) of the user who took the action

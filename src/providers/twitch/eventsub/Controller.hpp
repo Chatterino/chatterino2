@@ -40,17 +40,6 @@ public:
         const SubscriptionRequest &request);
 
 private:
-    /// Subscribe will make a request to each open connection and ask them to
-    /// add this subscription.
-    ///
-    /// If this subscription already exists, this call is a no-op.
-    ///
-    /// If no open connection has room for this subscription, this function will
-    /// create a new connection and queue up the subscription to run again after X seconds.
-    ///
-    /// TODO: Return a SubscriptionHandle that handles unsubscriptions
-    /// Dupe subscriptions should return shared subscription handles
-    /// So no more owners of the subscription handle means we send an unsubscribe request
     void subscribe(const SubscriptionRequest &request, bool isQueued);
 
     void createConnection();

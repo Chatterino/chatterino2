@@ -44,6 +44,10 @@ public:
         lib::messages::Metadata metadata,
         lib::payload::channel_chat_message::v1::Payload payload) override;
 
+    void onChannelModerate(
+        lib::messages::Metadata metadata,
+        lib::payload::channel_moderate::v2::Payload payload) override;
+
     QString getSessionID() const;
 
     bool isSubscribedTo(const SubscriptionRequest &request) const;

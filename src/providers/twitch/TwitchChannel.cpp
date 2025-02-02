@@ -1477,6 +1477,23 @@ void TwitchChannel::refreshPubSub()
                         },
                     },
             });
+
+        this->eventSubChannelModerateHandle =
+            getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
+                .subscriptionType = "channel.moderate",
+                .subscriptionVersion = "2",
+                .conditions =
+                    {
+                        {
+                            "broadcaster_user_id",
+                            roomId,
+                        },
+                        {
+                            "moderator_user_id",
+                            currentAccount->getUserId(),
+                        },
+                    },
+            });
     }
     else
     {

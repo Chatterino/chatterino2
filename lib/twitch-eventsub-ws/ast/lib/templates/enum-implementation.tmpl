@@ -10,16 +10,12 @@ boost::json::result_for<{{enum.full_name}}, boost::json::value>::type tag_invoke
 
     using namespace std::string_view_literals;
 
-    {% set ns = namespace(first=true) %}
 {%- for constant in enum.constants %}
-    {%- if ns.first == false -%}else {% endif -%}if (eString == "{{constant.json_name}}"sv) {
+    if (eString == "{{constant.json_name}}"sv) {
         return {{enum.full_name}}::{{constant.name}};
     }
-    {% set ns.first = false %}
 {%- endfor %}
 
-// TODO: Can we make this return a better error
-        static const error::ApplicationErrorCategory errorEnumNameDidNotExist{"{{enum.full_name}} did not match this string value that I would like to have in this error message but this is a static error so I don't know if I can do that hmm"};
-        return boost::system::error_code{129, errorEnumNameDidNotExist};
-
+    static const error::ApplicationErrorCategory errorEnumNameDidNotExist{"{{enum.full_name}} did not have a constant that matched this string"};
+    return boost::system::error_code{129, errorEnumNameDidNotExist};
 }

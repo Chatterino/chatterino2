@@ -187,15 +187,8 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isQueued)
                 request, listener->getSessionID(),
                 [this, request, connection,
                  weakConnection{weakConnection}](const auto &res) {
-                    qInfo(LOG) << "success" << res;
-                    boost::asio::post(
-                        this->ioContext,
-                        [this, request, weakConnection{weakConnection}] {
-                            this->markRequestSubscribed(request,
-                                                        weakConnection);
-                        });
-                    /*
-                    */
+                    qCInfo(LOG) << "success" << res;
+                    this->markRequestSubscribed(request, weakConnection);
                 },
                 [this, request](const auto &error, const auto &errorString) {
                     using Error = HelixCreateEventSubSubscriptionError;

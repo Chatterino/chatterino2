@@ -3218,7 +3218,7 @@ void Helix::createEventSubSubscription(
         .onSuccess([successCallback](const auto &result) {
             if (result.status() != 202)
             {
-                qCWarning(chatterinoTwitch)
+                qCWarning(chatterinoTwitchEventSub)
                     << "Success result for creating eventsub subscription was "
                     << result.formatError() << "but we expected it to be 202";
             }
@@ -3278,7 +3278,7 @@ void Helix::createEventSubSubscription(
                 break;
 
                 default: {
-                    qCWarning(chatterinoTwitch)
+                    qCWarning(chatterinoTwitchEventSub)
                         << "Helix Create EventSub Subscription, unhandled "
                            "error data:"
                         << result.formatError() << result.getData() << obj;

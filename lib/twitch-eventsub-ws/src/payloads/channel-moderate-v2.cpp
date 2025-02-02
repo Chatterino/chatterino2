@@ -21,329 +21,146 @@ boost::json::result_for<Action, boost::json::value>::type tag_invoke(
     std::string_view eString(jvRoot.get_string());
 
     using namespace std::string_view_literals;
-
     if (eString == "ban"sv)
     {
         return Action::Ban;
     }
-    else if (eString == "timeout"sv)
+    if (eString == "timeout"sv)
     {
         return Action::Timeout;
     }
-    else if (eString == "unban"sv)
+    if (eString == "unban"sv)
     {
         return Action::Unban;
     }
-    else if (eString == "untimeout"sv)
+    if (eString == "untimeout"sv)
     {
         return Action::Untimeout;
     }
-    else if (eString == "clear"sv)
+    if (eString == "clear"sv)
     {
         return Action::Clear;
     }
-    else if (eString == "emoteonly"sv)
+    if (eString == "emoteonly"sv)
     {
         return Action::Emoteonly;
     }
-    else if (eString == "emoteonlyoff"sv)
+    if (eString == "emoteonlyoff"sv)
     {
         return Action::Emoteonlyoff;
     }
-    else if (eString == "followers"sv)
+    if (eString == "followers"sv)
     {
         return Action::Followers;
     }
-    else if (eString == "followersoff"sv)
+    if (eString == "followersoff"sv)
     {
         return Action::Followersoff;
     }
-    else if (eString == "uniquechat"sv)
+    if (eString == "uniquechat"sv)
     {
         return Action::Uniquechat;
     }
-    else if (eString == "uniquechatoff"sv)
+    if (eString == "uniquechatoff"sv)
     {
         return Action::Uniquechatoff;
     }
-    else if (eString == "slow"sv)
+    if (eString == "slow"sv)
     {
         return Action::Slow;
     }
-    else if (eString == "slowoff"sv)
+    if (eString == "slowoff"sv)
     {
         return Action::Slowoff;
     }
-    else if (eString == "subscribers"sv)
+    if (eString == "subscribers"sv)
     {
         return Action::Subscribers;
     }
-    else if (eString == "subscribersoff"sv)
+    if (eString == "subscribersoff"sv)
     {
         return Action::Subscribersoff;
     }
-    else if (eString == "unraid"sv)
+    if (eString == "unraid"sv)
     {
         return Action::Unraid;
     }
-    else if (eString == "delete"sv)
+    if (eString == "delete"sv)
     {
         return Action::DeleteMessage;
     }
-    else if (eString == "unvip"sv)
+    if (eString == "unvip"sv)
     {
         return Action::Unvip;
     }
-    else if (eString == "vip"sv)
+    if (eString == "vip"sv)
     {
         return Action::Vip;
     }
-    else if (eString == "raid"sv)
+    if (eString == "raid"sv)
     {
         return Action::Raid;
     }
-    else if (eString == "add_blocked_term"sv)
+    if (eString == "add_blocked_term"sv)
     {
         return Action::AddBlockedTerm;
     }
-    else if (eString == "add_permitted_term"sv)
+    if (eString == "add_permitted_term"sv)
     {
         return Action::AddPermittedTerm;
     }
-    else if (eString == "remove_blocked_term"sv)
+    if (eString == "remove_blocked_term"sv)
     {
         return Action::RemoveBlockedTerm;
     }
-    else if (eString == "remove_permitted_term"sv)
+    if (eString == "remove_permitted_term"sv)
     {
         return Action::RemovePermittedTerm;
     }
-    else if (eString == "mod"sv)
+    if (eString == "mod"sv)
     {
         return Action::Mod;
     }
-    else if (eString == "unmod"sv)
+    if (eString == "unmod"sv)
     {
         return Action::Unmod;
     }
-    else if (eString == "approve_unban_request"sv)
+    if (eString == "approve_unban_request"sv)
     {
         return Action::ApproveUnbanRequest;
     }
-    else if (eString == "deny_unban_request"sv)
+    if (eString == "deny_unban_request"sv)
     {
         return Action::DenyUnbanRequest;
     }
-    else if (eString == "warn"sv)
+    if (eString == "warn"sv)
     {
         return Action::Warn;
     }
-    else if (eString == "shared_chat_ban"sv)
+    if (eString == "shared_chat_ban"sv)
     {
         return Action::SharedChatBan;
     }
-    else if (eString == "shared_chat_timeout"sv)
+    if (eString == "shared_chat_timeout"sv)
     {
         return Action::SharedChatTimeout;
     }
-    else if (eString == "shared_chat_unban"sv)
+    if (eString == "shared_chat_unban"sv)
     {
         return Action::SharedChatUnban;
     }
-    else if (eString == "shared_chat_untimeout"sv)
+    if (eString == "shared_chat_untimeout"sv)
     {
         return Action::SharedChatUntimeout;
     }
-    else if (eString == "shared_chat_delete"sv)
+    if (eString == "shared_chat_delete"sv)
     {
         return Action::SharedChatDelete;
     }
 
-    static std::unordered_map<std::string, Action> values{
-
-        {
-            {"ban"},
-            {Action::Ban},
-        },
-
-        {
-            {"timeout"},
-            {Action::Timeout},
-        },
-
-        {
-            {"unban"},
-            {Action::Unban},
-        },
-
-        {
-            {"untimeout"},
-            {Action::Untimeout},
-        },
-
-        {
-            {"clear"},
-            {Action::Clear},
-        },
-
-        {
-            {"emoteonly"},
-            {Action::Emoteonly},
-        },
-
-        {
-            {"emoteonlyoff"},
-            {Action::Emoteonlyoff},
-        },
-
-        {
-            {"followers"},
-            {Action::Followers},
-        },
-
-        {
-            {"followersoff"},
-            {Action::Followersoff},
-        },
-
-        {
-            {"uniquechat"},
-            {Action::Uniquechat},
-        },
-
-        {
-            {"uniquechatoff"},
-            {Action::Uniquechatoff},
-        },
-
-        {
-            {"slow"},
-            {Action::Slow},
-        },
-
-        {
-            {"slowoff"},
-            {Action::Slowoff},
-        },
-
-        {
-            {"subscribers"},
-            {Action::Subscribers},
-        },
-
-        {
-            {"subscribersoff"},
-            {Action::Subscribersoff},
-        },
-
-        {
-            {"unraid"},
-            {Action::Unraid},
-        },
-
-        {
-            {"delete"},
-            {Action::DeleteMessage},
-        },
-
-        {
-            {"unvip"},
-            {Action::Unvip},
-        },
-
-        {
-            {"vip"},
-            {Action::Vip},
-        },
-
-        {
-            {"raid"},
-            {Action::Raid},
-        },
-
-        {
-            {"add_blocked_term"},
-            {Action::AddBlockedTerm},
-        },
-
-        {
-            {"add_permitted_term"},
-            {Action::AddPermittedTerm},
-        },
-
-        {
-            {"remove_blocked_term"},
-            {Action::RemoveBlockedTerm},
-        },
-
-        {
-            {"remove_permitted_term"},
-            {Action::RemovePermittedTerm},
-        },
-
-        {
-            {"mod"},
-            {Action::Mod},
-        },
-
-        {
-            {"unmod"},
-            {Action::Unmod},
-        },
-
-        {
-            {"approve_unban_request"},
-            {Action::ApproveUnbanRequest},
-        },
-
-        {
-            {"deny_unban_request"},
-            {Action::DenyUnbanRequest},
-        },
-
-        {
-            {"warn"},
-            {Action::Warn},
-        },
-
-        {
-            {"shared_chat_ban"},
-            {Action::SharedChatBan},
-        },
-
-        {
-            {"shared_chat_timeout"},
-            {Action::SharedChatTimeout},
-        },
-
-        {
-            {"shared_chat_unban"},
-            {Action::SharedChatUnban},
-        },
-
-        {
-            {"shared_chat_untimeout"},
-            {Action::SharedChatUntimeout},
-        },
-
-        {
-            {"shared_chat_delete"},
-            {Action::SharedChatDelete},
-        },
-
-    };
-
-    auto it = values.find(eString);
-    if (it == values.end())
-    {
-        static const error::ApplicationErrorCategory errorEnumNameDidNotExist{
-            "Action did not match this string value that I would like to have "
-            "in this error message but this is a static error so I don't know "
-            "if I can do that hmm"};
-        return boost::system::error_code{129, errorEnumNameDidNotExist};
-    }
-
-    return *it;
+    static const error::ApplicationErrorCategory errorEnumNameDidNotExist{
+        "Action did not have a constant that matched this string"};
+    return boost::system::error_code{129, errorEnumNameDidNotExist};
 }
 
 boost::json::result_for<Followers, boost::json::value>::type tag_invoke(
@@ -1549,6 +1366,56 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return broadcasterUserName.error();
     }
 
+    std::optional<std::string> sourceBroadcasterUserID = std::nullopt;
+    const auto *jvsourceBroadcasterUserID =
+        root.if_contains("source_broadcaster_user_id");
+    if (jvsourceBroadcasterUserID != nullptr &&
+        !jvsourceBroadcasterUserID->is_null())
+    {
+        const auto tsourceBroadcasterUserID =
+            boost::json::try_value_to<std::string>(*jvsourceBroadcasterUserID);
+
+        if (tsourceBroadcasterUserID.has_error())
+        {
+            return tsourceBroadcasterUserID.error();
+        }
+        sourceBroadcasterUserID = tsourceBroadcasterUserID.value();
+    }
+
+    std::optional<std::string> sourceBroadcasterUserLogin = std::nullopt;
+    const auto *jvsourceBroadcasterUserLogin =
+        root.if_contains("source_broadcaster_user_login");
+    if (jvsourceBroadcasterUserLogin != nullptr &&
+        !jvsourceBroadcasterUserLogin->is_null())
+    {
+        const auto tsourceBroadcasterUserLogin =
+            boost::json::try_value_to<std::string>(
+                *jvsourceBroadcasterUserLogin);
+
+        if (tsourceBroadcasterUserLogin.has_error())
+        {
+            return tsourceBroadcasterUserLogin.error();
+        }
+        sourceBroadcasterUserLogin = tsourceBroadcasterUserLogin.value();
+    }
+
+    std::optional<std::string> sourceBroadcasterUserName = std::nullopt;
+    const auto *jvsourceBroadcasterUserName =
+        root.if_contains("source_broadcaster_user_name");
+    if (jvsourceBroadcasterUserName != nullptr &&
+        !jvsourceBroadcasterUserName->is_null())
+    {
+        const auto tsourceBroadcasterUserName =
+            boost::json::try_value_to<std::string>(
+                *jvsourceBroadcasterUserName);
+
+        if (tsourceBroadcasterUserName.has_error())
+        {
+            return tsourceBroadcasterUserName.error();
+        }
+        sourceBroadcasterUserName = tsourceBroadcasterUserName.value();
+    }
+
     const auto *jvmoderatorUserID = root.if_contains("moderator_user_id");
     if (jvmoderatorUserID == nullptr)
     {
@@ -1893,6 +1760,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         .broadcasterUserID = broadcasterUserID.value(),
         .broadcasterUserLogin = broadcasterUserLogin.value(),
         .broadcasterUserName = broadcasterUserName.value(),
+        .sourceBroadcasterUserID = sourceBroadcasterUserID,
+        .sourceBroadcasterUserLogin = sourceBroadcasterUserLogin,
+        .sourceBroadcasterUserName = sourceBroadcasterUserName,
         .moderatorUserID = moderatorUserID.value(),
         .moderatorUserLogin = moderatorUserLogin.value(),
         .moderatorUserName = moderatorUserName.value(),

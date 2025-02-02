@@ -15,6 +15,14 @@ find_package(Boost REQUIRED OPTIONAL_COMPONENTS json)
 # Find OpenSSL on the system
 find_package(OpenSSL REQUIRED)
 
+option(BUILD_WITH_QT6 "Build with Qt6" On)
+if (BUILD_WITH_QT6)
+    set(MAJOR_QT_VERSION "6")
+else()
+    set(MAJOR_QT_VERSION "5")
+endif()
+find_package(Qt${MAJOR_QT_VERSION} REQUIRED COMPONENTS Core)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
