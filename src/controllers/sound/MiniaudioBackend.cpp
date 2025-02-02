@@ -192,6 +192,10 @@ MiniaudioBackend::MiniaudioBackend()
     });
 
     this->audioThread = std::make_unique<std::thread>([this] {
+        auto guard = qScopeGuard([&] {
+            this->stoppedFlag.set();
+        });
+
         this->ioContext.run();
     });
     renameThread(*this->audioThread, "C2Miniaudio");
@@ -218,14 +222,20 @@ MiniaudioBackend::~MiniaudioBackend()
         this->workGuard.reset();
     });
 
-    if (this->audioThread->joinable())
-    {
-        this->audioThread->join();
-    }
-    else
+    if (!this->audioThread->joinable())
     {
         qCWarning(chatterinoSound) << "Audio thread not joinable";
+        return;
     }
+
+    if (this->stoppedFlag.waitFor(std::chrono::seconds{1}))
+    {
+        this->audioThread->join();
+        return;
+    }
+
+    qCWarning(chatterinoSound) << "Audio thread did not stop within 1 second";
+    this->audioThread->detach();
 }
 
 void MiniaudioBackend::play(const QUrl &sound)
