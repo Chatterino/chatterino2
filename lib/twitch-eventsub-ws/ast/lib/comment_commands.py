@@ -31,7 +31,6 @@ def parse_comment_commands(raw_comment: str) -> CommentCommands:
 def json_transform(input_str: str, transformation: str) -> str:
     match transformation:
         case "snake_case":
-            # TODO: IMPLEMENT
             return re.sub(r"(?<![A-Z])\B[A-Z]", r"_\g<0>", input_str).lower()
         case other:
             log.warning(f"Unknown transformation '{other}', ignoring")
