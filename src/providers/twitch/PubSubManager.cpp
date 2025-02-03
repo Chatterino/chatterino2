@@ -616,30 +616,6 @@ void PubSub::stop()
     this->thread->detach();
 }
 
-bool PubSub::listenToWhispers()
-{
-    if (this->userID_.isEmpty())
-    {
-        qCDebug(chatterinoPubSub)
-            << "Unable to listen to whispers topic, no user logged in";
-        return false;
-    }
-
-    static const QString topicFormat("whispers.%1");
-    auto topic = topicFormat.arg(this->userID_);
-
-    qCDebug(chatterinoPubSub) << "Listen to whispers" << topic;
-
-    this->listenToTopic(topic);
-
-    return true;
-}
-
-void PubSub::unlistenWhispers()
-{
-    this->unlistenPrefix("whispers.");
-}
-
 void PubSub::listenToChannelModerationActions(const QString &channelID)
 {
     if (this->userID_.isEmpty())
@@ -1108,39 +1084,7 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
 {
     QString topic = message.topic;
 
-    if (topic.startsWith("whispers."))
-    {
-        auto oInnerMessage = message.toInner<PubSubWhisperMessage>();
-        if (!oInnerMessage)
-        {
-            return;
-        }
-        auto whisperMessage = *oInnerMessage;
-
-        switch (whisperMessage.type)
-        {
-            case PubSubWhisperMessage::Type::WhisperReceived: {
-                this->whisper.received.invoke(whisperMessage);
-            }
-            break;
-            case PubSubWhisperMessage::Type::WhisperSent: {
-                this->whisper.sent.invoke(whisperMessage);
-            }
-            break;
-            case PubSubWhisperMessage::Type::Thread: {
-                // Handle thread?
-            }
-            break;
-
-            case PubSubWhisperMessage::Type::INVALID:
-            default: {
-                qCDebug(chatterinoPubSub)
-                    << "Invalid whisper type:" << whisperMessage.typeString;
-            }
-            break;
-        }
-    }
-    else if (topic.startsWith("chat_moderator_actions."))
+    if (topic.startsWith("chat_moderator_actions."))
     {
         auto oInnerMessage =
             message.toInner<PubSubChatModeratorActionMessage>();

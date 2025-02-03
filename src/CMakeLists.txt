@@ -454,8 +454,6 @@ set(SOURCE_FILES
         providers/twitch/pubsubmessages/Message.hpp
         providers/twitch/pubsubmessages/Unlisten.cpp
         providers/twitch/pubsubmessages/Unlisten.hpp
-        providers/twitch/pubsubmessages/Whisper.cpp
-        providers/twitch/pubsubmessages/Whisper.hpp
 
         providers/twitch/api/Helix.cpp
         providers/twitch/api/Helix.hpp
