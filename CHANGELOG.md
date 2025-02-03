@@ -23,7 +23,7 @@
 - Bugfix: Ensure miniaudio backend exits even if it doesn't exit cleanly. (#5896)
 - Dev: Add initial experimental EventSub support. (#5837, #5895)
 - Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
-- Dev: Removed unused PubSub whisper code. (#5798)
+- Dev: Removed unused PubSub whisper code. (#5898)
 - Dev: Updated Conan dependencies. (#5776)
 - Dev: Disable QT keywords (i.e. `emit`, `slots`, and `signals`). (#5882)
 - Dev: Replaced usage of `parseTime` with `serverReceivedTime` for clearchat messages. (#5824, #5855)
