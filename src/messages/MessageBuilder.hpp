@@ -173,6 +173,12 @@ public:
     void appendOrEmplaceSystemTextAndUpdate(const QString &text,
                                             QString &toUpdate);
 
+    // Helper method that emplaces some text stylized as system text
+    // and then appends that text to the QString parameter "toUpdate".
+    // Returns the TextElement that was emplaced.
+    TextElement *emplaceSystemTextAndUpdate(const QString &text,
+                                            QString &toUpdate);
+
     static void triggerHighlights(const Channel *channel,
                                   const HighlightAlert &alert);
 
@@ -288,12 +294,6 @@ private:
     bool isEmpty() const;
     MessageElement &back();
     std::unique_ptr<MessageElement> releaseBack();
-
-    // Helper method that emplaces some text stylized as system text
-    // and then appends that text to the QString parameter "toUpdate".
-    // Returns the TextElement that was emplaced.
-    TextElement *emplaceSystemTextAndUpdate(const QString &text,
-                                            QString &toUpdate);
 
     void parse();
     void parseUsernameColor(const QVariantMap &tags, const QString &userID);

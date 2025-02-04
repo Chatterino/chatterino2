@@ -1,0 +1,2 @@
+static const error::ApplicationErrorCategory error_missing_field_{{field.name}}{"Missing required key {{field.json_name}}"};
+return boost::system::error_code{129, error_missing_field_{{field.name}}};

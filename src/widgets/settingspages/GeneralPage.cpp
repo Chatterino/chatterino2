@@ -1291,6 +1291,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                      "with sound playback on your system")
         ->addTo(layout);
 
+    layout.addCheckbox(
+        "Enable experimental Twitch EventSub support (requires restart)",
+        s.enableExperimentalEventSub);
+
     layout.addStretch();
 
     // invisible element for width

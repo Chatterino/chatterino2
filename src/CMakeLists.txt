@@ -447,6 +447,17 @@ set(SOURCE_FILES
         providers/twitch/TwitchUsers.cpp
         providers/twitch/TwitchUsers.hpp
 
+        providers/twitch/eventsub/Connection.cpp
+        providers/twitch/eventsub/Connection.hpp
+        providers/twitch/eventsub/Controller.cpp
+        providers/twitch/eventsub/Controller.hpp
+        providers/twitch/eventsub/MessageBuilder.cpp
+        providers/twitch/eventsub/MessageBuilder.hpp
+        providers/twitch/eventsub/SubscriptionHandle.cpp
+        providers/twitch/eventsub/SubscriptionHandle.hpp
+        providers/twitch/eventsub/SubscriptionRequest.cpp
+        providers/twitch/eventsub/SubscriptionRequest.hpp
+
         providers/twitch/pubsubmessages/AutoMod.cpp
         providers/twitch/pubsubmessages/AutoMod.hpp
         providers/twitch/pubsubmessages/Base.cpp
@@ -462,8 +473,6 @@ set(SOURCE_FILES
         providers/twitch/pubsubmessages/Message.hpp
         providers/twitch/pubsubmessages/Unlisten.cpp
         providers/twitch/pubsubmessages/Unlisten.hpp
-        providers/twitch/pubsubmessages/Whisper.cpp
-        providers/twitch/pubsubmessages/Whisper.hpp
 
         providers/twitch/api/Helix.cpp
         providers/twitch/api/Helix.hpp
@@ -824,6 +833,8 @@ target_link_libraries(${LIBRARY_PROJECT}
         LRUCache
         MagicEnum
         $<$<BOOL:${WIN32}>:Wtsapi32>
+        twitch-eventsub-ws
+        BoostCertify
         )
 if (CHATTERINO_PLUGINS)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua sol2::sol2)

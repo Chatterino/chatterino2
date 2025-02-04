@@ -30,6 +30,7 @@
 #include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
+#include "providers/twitch/eventsub/Controller.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -1475,6 +1476,27 @@ void TwitchChannel::refreshPubSub()
     {
         getApp()->getTwitchPubSub()->listenToAutomod(roomId);
         getApp()->getTwitchPubSub()->listenToLowTrustUsers(roomId);
+
+        this->eventSubChannelModerateHandle =
+            getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
+                .subscriptionType = "channel.moderate",
+                .subscriptionVersion = "2",
+                .conditions =
+                    {
+                        {
+                            "broadcaster_user_id",
+                            roomId,
+                        },
+                        {
+                            "moderator_user_id",
+                            currentAccount->getUserId(),
+                        },
+                    },
+            });
+    }
+    else
+    {
+        this->eventSubChannelModerateHandle.reset();
     }
     getApp()->getTwitchPubSub()->listenToChannelPointRewards(roomId);
 }

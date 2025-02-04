@@ -655,6 +655,10 @@ public:
         "/sound/backend",
         SoundBackend::Miniaudio,
     };
+    BoolSetting enableExperimentalEventSub = {
+        "/eventsub/enableExperimental",
+        false,
+    };
 
 private:
     ChatterinoSetting<std::vector<HighlightPhrase>> highlightedMessagesSetting =

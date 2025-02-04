@@ -52,3 +52,6 @@
 [submodule "lib/sol2"]
 	path = lib/sol2
 	url = https://github.com/ThePhD/sol2.git
+[submodule "lib/certify"]
+	path = lib/certify
+	url = https://github.com/Chatterino/certify

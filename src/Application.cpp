@@ -18,6 +18,7 @@
 #include "providers/pronouns/Pronouns.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
+#include "providers/twitch/eventsub/Controller.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "singletons/ImageUploader.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
@@ -125,6 +126,18 @@ SeventvEventAPI *makeSeventvEventAPI(Settings &settings)
     return nullptr;
 }
 
+eventsub::IController *makeEventSubController(Settings &settings)
+{
+    bool enabled = settings.enableExperimentalEventSub;
+
+    if (enabled)
+    {
+        return new eventsub::Controller();
+    }
+
+    return new eventsub::DummyController();
+}
+
 const QString TWITCH_PUBSUB_URL = "wss://pubsub-edge.twitch.tv";
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
@@ -187,6 +200,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , streamerMode(new StreamerMode)
     , twitchUsers(new TwitchUsers)
     , pronouns(new pronouns::Pronouns)
+    , eventSub(makeEventSubController(_settings))
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(new PluginController(paths))
 #endif
@@ -631,6 +645,14 @@ pronouns::Pronouns *Application::getPronouns()
     assert(this->pronouns);
 
     return this->pronouns.get();
+}
+
+eventsub::IController *Application::getEventSub()
+{
+    assertInGuiThread();
+    assert(this->eventSub);
+
+    return this->eventSub.get();
 }
 
 void Application::save()
