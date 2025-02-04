@@ -60,9 +60,9 @@ endfunction()
 
 function(_setup_and_check_venv)
     cmake_parse_arguments(PARSE_ARGV 0 arg
-        "" "OUT_PYTHON_EXE;OUT_CHECK" ""
+        "" "INCLUDES;OUT_PYTHON_EXE;OUT_CHECK" ""
     )
-    _validate_all_args_are_parsed(arg OUT_PYTHON_EXE OUT_CHECK)
+    _validate_all_args_are_parsed(arg OUT_PYTHON_EXE OUT_CHECK INCLUDES)
     _make_and_use_venv(
         VENV_PATH "${CMAKE_CURRENT_BINARY_DIR}/eventsub-venv"
         REQUIREMENTS "${_eventsub_lib_root}/ast/requirements.txt"
@@ -74,7 +74,7 @@ function(_setup_and_check_venv)
 
     cmake_path(SET _check_script NORMALIZE "${_eventsub_lib_root}/ast/check-clang.py")
     execute_process(
-        COMMAND "${_python3_path}" "${_check_script}"
+        COMMAND "${_python3_path}" "${_check_script}" "${arg_INCLUDES}"
         OUTPUT_VARIABLE _check_output
         ERROR_VARIABLE _check_output
         RESULT_VARIABLE _check_result
@@ -118,30 +118,6 @@ function(generate_json_impls)
         message(FATAL_ERROR "Missing python3")
     endif()
 
-    if(Python3_EXECUTABLE)
-        _setup_and_check_venv(
-            OUT_PYTHON_EXE _python3_path
-            OUT_CHECK _check_output
-        )
-
-        if(NOT _check_output AND _python3_path)
-            set(_generation_supported On)
-        else()
-            set(_generation_supported Off)
-            if (arg_FORCE)
-                message(FATAL_ERROR "Generation of JSON implementation not supported, because libclang could not be found:\n${_check_output}")
-            endif()
-        endif()
-    else()
-        set(_generation_supported Off)
-    endif()
-
-    if(_generation_supported)
-        message(STATUS "Generation of JSON implementation is supported")
-    else()
-        message(STATUS "Generation of JSON implementation is not supported either because Python or libclang wasn't found")
-    endif()
-
     # get includes
     get_target_property(_qt_inc_dirs Qt${MAJOR_QT_VERSION}::Core INCLUDE_DIRECTORIES)
     get_target_property(_qt_iinc_dirs Qt${MAJOR_QT_VERSION}::Core INTERFACE_INCLUDE_DIRECTORIES)
@@ -151,6 +127,32 @@ function(generate_json_impls)
     list(APPEND _inc_dirs ${Boost_INCLUDE_DIRS})
     list(APPEND _inc_dirs ${OPENSSL_INCLUDE_DIR})
     list(JOIN _inc_dirs ";" _inc_dir)
+
+    # setup venv (<build>/lib/twitch-eventsub-ws/eventsub-venv)
+    if(Python3_EXECUTABLE)
+        _setup_and_check_venv(
+            INCLUDES "${_inc_dirs}"
+            OUT_PYTHON_EXE _python3_path
+            OUT_CHECK _check_output
+        )
+
+        if(NOT _check_output AND _python3_path)
+            set(_generation_supported On)
+        else()
+            set(_generation_supported Off)
+            if (arg_FORCE)
+                message(FATAL_ERROR "Generation of JSON implementation not supported, because the parser can't parse a simple TU:\n${_check_output}")
+            endif()
+        endif()
+    else()
+        set(_generation_supported Off)
+    endif()
+
+    if(_generation_supported)
+        message(STATUS "Generation of JSON implementation is supported")
+    else()
+        message(STATUS "Generation of JSON implementation is not supported (use FORCE_JSON_GENERATION=On to get more information)")
+    endif()
 
     # get all dependencies
     file(GLOB _gen_deps "${_eventsub_lib_root}/ast/lib/*.py")

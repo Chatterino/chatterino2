@@ -16,8 +16,7 @@ find_package(Boost REQUIRED OPTIONAL_COMPONENTS json)
 find_package(OpenSSL REQUIRED)
 
 option(BUILD_WITH_QT6 "Build with Qt6" On)
-
-option(FORCE_JSON_GENERATION "Make sure JSON implementations are generated at build time" OFF)
+option(FORCE_JSON_GENERATION "Make sure JSON implementations are generated at build time" Off)
 
 if (BUILD_WITH_QT6)
     set(MAJOR_QT_VERSION "6")

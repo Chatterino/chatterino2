@@ -19,7 +19,7 @@ log = logging.getLogger("generate")
 
 def _logging_level():
     def to_bool(v: str | None) -> bool:
-        return bool(v) and v.lower() in ("false", "0", "off", "no")
+        return bool(v) and v.lower() not in ("false", "0", "off", "no")
 
     return (
         logging.DEBUG
