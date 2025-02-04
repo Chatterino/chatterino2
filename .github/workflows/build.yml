@@ -185,11 +185,6 @@ jobs:
           modules: qt5compat qtimageformats
           version: ${{ matrix.qt-version }}
 
-      - name: Setup Python 3.13
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-
       # WINDOWS
       - name: Enable Developer Command Prompt (Windows)
         if: startsWith(matrix.os, 'windows')
