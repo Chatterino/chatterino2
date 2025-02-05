@@ -213,7 +213,7 @@ void GenericListView::focusPreviousCompletion()
 
 void GenericListView::requestClose()
 {
-    emit this->closeRequested();
+    this->closeRequested();
 }
 
 }  // namespace chatterino

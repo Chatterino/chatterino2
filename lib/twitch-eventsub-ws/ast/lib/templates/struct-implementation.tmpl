@@ -1,0 +1,58 @@
+boost::json::result_for<{{struct.full_name}}, boost::json::value>::type tag_invoke(
+    boost::json::try_value_to_tag<{{struct.full_name}}>, const boost::json::value &jvRoot)
+{
+    {% if struct.inner_root %}
+    if (!jvRoot.is_object())
+    {
+        static const error::ApplicationErrorCategory errorMustBeObject{"{{struct.full_name}} must be an object"};
+        return boost::system::error_code{129, errorMustBeObject};
+    }
+    const auto &outerRoot = jvRoot.get_object();
+
+    const auto *jvInnerRoot = outerRoot.if_contains("{{struct.inner_root}}");
+    if (jvInnerRoot == nullptr)
+    {
+        static const error::ApplicationErrorCategory errorMissing{"{{struct.full_name}}'s key {{struct.inner_root}} is missing"};
+        return boost::system::error_code{129, errorMissing};
+    }
+    if (!jvInnerRoot->is_object())
+    {
+        static const error::ApplicationErrorCategory errorMustBeObject{"{{struct.full_name}}'s {{struct.inner_root}} must be an object"};
+        return boost::system::error_code{129, errorMustBeObject};
+    }
+    const auto &root = jvInnerRoot->get_object();
+    {% else %}
+    if (!jvRoot.is_object())
+    {
+        static const error::ApplicationErrorCategory errorMustBeObject{"{{struct.full_name}} must be an object"};
+        return boost::system::error_code{129, errorMustBeObject};
+    }
+    const auto &root = jvRoot.get_object();
+    {% endif %}
+
+{% for field in struct.members %}
+    {% if field.member_type == MemberType.BASIC -%}
+    {% include 'field-basic.tmpl' indent content %}
+    {%- elif field.member_type == MemberType.VECTOR -%}
+    {% include 'field-vector.tmpl' indent content %}
+    {%- elif field.member_type == MemberType.OPTIONAL -%}
+    {% include 'field-optional.tmpl' indent content %}
+    {%- elif field.member_type == MemberType.OPTIONAL_VECTOR -%}
+    {% include 'field-optional-vector.tmpl' indent content %}
+    {%- endif -%}
+{% endfor %}
+
+    return {{struct.full_name}}{
+{%- for field in struct.members %}
+        {% if field.member_type == MemberType.BASIC -%}
+        {% include 'initializer-basic.tmpl' indent content %}
+        {%- elif field.member_type == MemberType.VECTOR -%}
+        {% include 'initializer-vector.tmpl' indent content %}
+        {%- elif field.member_type == MemberType.OPTIONAL -%}
+        {% include 'initializer-optional.tmpl' indent content %}
+        {%- elif field.member_type == MemberType.OPTIONAL_VECTOR -%}
+        {% include 'initializer-optional-vector.tmpl' indent content %}
+        {%- endif -%}
+{% endfor %}
+    };
+}

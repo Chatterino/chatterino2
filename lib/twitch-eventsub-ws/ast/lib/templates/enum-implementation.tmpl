@@ -1,0 +1,21 @@
+boost::json::result_for<{{enum.full_name}}, boost::json::value>::type tag_invoke(
+    boost::json::try_value_to_tag<{{enum.full_name}}>, const boost::json::value &jvRoot)
+{
+    if (!jvRoot.is_string())
+    {
+        static const error::ApplicationErrorCategory errorMustBeString{"{{enum.full_name}} must be a string"};
+        return boost::system::error_code{129, errorMustBeString};
+    }
+    std::string_view eString(jvRoot.get_string());
+
+    using namespace std::string_view_literals;
+
+{%- for constant in enum.constants %}
+    if (eString == "{{constant.json_name}}"sv) {
+        return {{enum.full_name}}::{{constant.name}};
+    }
+{%- endfor %}
+
+    static const error::ApplicationErrorCategory errorEnumNameDidNotExist{"{{enum.full_name}} did not have a constant that matched this string"};
+    return boost::system::error_code{129, errorEnumNameDidNotExist};
+}
