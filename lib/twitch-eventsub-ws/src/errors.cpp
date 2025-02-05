@@ -13,31 +13,16 @@ std::string ApplicationErrorCategory::message(int ev) const
 
     switch (kind)
     {
-        case Kind::FieldMissing: {
-            auto msg = "Missing required key "s;
-            msg += this->argument;
-            return msg;
-        }
-        case Kind::ExpectedObject: {
-            std::string msg(this->argument);
-            msg += " must be an object";
-            return msg;
-        }
-        case Kind::ExpectedString: {
-            std::string msg(this->argument);
-            msg += " must be a string";
-            return msg;
-        }
-        case Kind::UnknownEnumValue: {
-            auto msg = "No constant found to match "s;
-            msg += this->argument;
-            return msg;
-        }
-        case Kind::InnerRootMissing: {
-            auto msg = "Missing inner root object "s;
-            msg += this->argument;
-            return msg;
-        }
+        case Kind::FieldMissing:
+            return "Missing required key"s;
+        case Kind::ExpectedObject:
+            return "Expected an object"s;
+        case Kind::ExpectedString:
+            return "Expected a string"s;
+        case Kind::UnknownEnumValue:
+            return "Unknown enum value"s;
+        case Kind::InnerRootMissing:
+            return "Missing inner root"s;
         case Kind::NoMessageHandler:
             return "No message handler found"s;
     }

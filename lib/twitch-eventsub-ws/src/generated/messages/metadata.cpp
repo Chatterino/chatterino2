@@ -13,14 +13,14 @@ boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Metadata">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvmessageID = root.if_contains("message_id");
     if (jvmessageID == nullptr)
     {
-        return error::detail::fieldMissing<"messageID">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto messageID = boost::json::try_value_to<std::string>(*jvmessageID);
@@ -33,7 +33,7 @@ boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
     const auto *jvmessageType = root.if_contains("message_type");
     if (jvmessageType == nullptr)
     {
-        return error::detail::fieldMissing<"messageType">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto messageType = boost::json::try_value_to<std::string>(*jvmessageType);
@@ -46,7 +46,7 @@ boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
     const auto *jvmessageTimestamp = root.if_contains("message_timestamp");
     if (jvmessageTimestamp == nullptr)
     {
-        return error::detail::fieldMissing<"messageTimestamp">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto messageTimestamp =

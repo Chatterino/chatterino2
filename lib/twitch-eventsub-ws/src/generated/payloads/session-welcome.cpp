@@ -13,25 +13,25 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Payload">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &outerRoot = jvRoot.get_object();
 
     const auto *jvInnerRoot = outerRoot.if_contains("session");
     if (jvInnerRoot == nullptr)
     {
-        return error::detail::innerRootMissing<"Payload/session">();
+        EVENTSUB_BAIL_HERE(error::Kind::InnerRootMissing);
     }
     if (!jvInnerRoot->is_object())
     {
-        return error::detail::expectedObject<"Payload/session">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvInnerRoot->get_object();
 
     const auto *jvid = root.if_contains("id");
     if (jvid == nullptr)
     {
-        return error::detail::fieldMissing<"id">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto id = boost::json::try_value_to<std::string>(*jvid);

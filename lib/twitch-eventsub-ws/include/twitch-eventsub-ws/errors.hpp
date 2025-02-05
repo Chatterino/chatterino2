@@ -4,55 +4,22 @@
 
 #include <string>
 
-namespace chatterino::eventsub::lib::error::detail {
-
-template <size_t N>
-struct StaticString {
-    static_assert(N > 0);
-
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
-    consteval StaticString(const char (&arr)[N])
-    {
-        for (size_t i = 0; i < N; i++)
-        {
-            data[i] = arr[i];
-        }
-    }
-
-    consteval operator std::string_view() const
-    {
-        return {this->data, N - 1};
-    }
-
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
-    char data[N]{};
-};
-
-}  // namespace chatterino::eventsub::lib::error::detail
-
 namespace chatterino::eventsub::lib::error {
 
-/// boost::system::error_code doesn't support string arguments, so we're using
-/// the error_category to store strings. All strings are statically allocated.
+// NOLINTNEXTLINE(performance-enum-size)
+enum class Kind : int {
+    FieldMissing = 1,
+    ExpectedObject,
+    ExpectedString,
+    UnknownEnumValue,
+    InnerRootMissing,
+    NoMessageHandler
+};
+
 class ApplicationErrorCategory final : public boost::system::error_category
 {
-    std::string_view argument;
-
 public:
-    // NOLINTNEXTLINE(performance-enum-size)
-    enum class Kind : int {
-        FieldMissing = 1,
-        ExpectedObject,
-        ExpectedString,
-        UnknownEnumValue,
-        InnerRootMissing,
-        NoMessageHandler
-    };
-
-    consteval ApplicationErrorCategory(std::string_view argument)
-        : argument(argument)
-    {
-    }
+    consteval ApplicationErrorCategory() = default;
 
     const char *name() const noexcept override
     {
@@ -61,5 +28,13 @@ public:
 
     std::string message(int ev) const override;
 };
+
+inline constexpr ApplicationErrorCategory CATEGORY;
+
+inline boost::system::error_code makeCode(Kind kind,
+                                          const boost::source_location *loc)
+{
+    return {static_cast<int>(kind), CATEGORY, loc};
+}
 
 }  // namespace chatterino::eventsub::lib::error

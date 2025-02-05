@@ -3,7 +3,7 @@ boost::json::result_for<{{enum.full_name}}, boost::json::value>::type tag_invoke
 {
     if (!jvRoot.is_string())
     {
-        return error::detail::expectedString<"{{enum.full_name}}">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedString);
     }
     std::string_view eString(jvRoot.get_string());
 
@@ -15,5 +15,5 @@ boost::json::result_for<{{enum.full_name}}, boost::json::value>::type tag_invoke
     }
 {%- endfor %}
 
-    return error::detail::unknownEnumValue<"{{enum.full_name}}">();
+    EVENTSUB_BAIL_HERE(error::Kind::UnknownEnumValue);
 }

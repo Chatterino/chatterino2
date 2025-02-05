@@ -4,24 +4,24 @@ boost::json::result_for<{{struct.full_name}}, boost::json::value>::type tag_invo
     {% if struct.inner_root %}
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"{{struct.full_name}}">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &outerRoot = jvRoot.get_object();
 
     const auto *jvInnerRoot = outerRoot.if_contains("{{struct.inner_root}}");
     if (jvInnerRoot == nullptr)
     {
-        return error::detail::innerRootMissing<"{{struct.full_name}}/{{struct.inner_root}}">();
+        EVENTSUB_BAIL_HERE(error::Kind::InnerRootMissing);
     }
     if (!jvInnerRoot->is_object())
     {
-        return error::detail::expectedObject<"{{struct.full_name}}/{{struct.inner_root}}">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvInnerRoot->get_object();
     {% else %}
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"{{struct.full_name}}">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
     {% endif %}

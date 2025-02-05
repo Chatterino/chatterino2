@@ -13,7 +13,7 @@ boost::json::result_for<Action, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_string())
     {
-        return error::detail::expectedString<"Action">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedString);
     }
     std::string_view eString(jvRoot.get_string());
 
@@ -155,7 +155,7 @@ boost::json::result_for<Action, boost::json::value>::type tag_invoke(
         return Action::SharedChatDelete;
     }
 
-    return error::detail::unknownEnumValue<"Action">();
+    EVENTSUB_BAIL_HERE(error::Kind::UnknownEnumValue);
 }
 
 boost::json::result_for<Followers, boost::json::value>::type tag_invoke(
@@ -163,7 +163,7 @@ boost::json::result_for<Followers, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Followers">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
@@ -171,7 +171,7 @@ boost::json::result_for<Followers, boost::json::value>::type tag_invoke(
         root.if_contains("follow_duration_minutes");
     if (jvfollowDurationMinutes == nullptr)
     {
-        return error::detail::fieldMissing<"followDurationMinutes">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto followDurationMinutes =
@@ -192,14 +192,14 @@ boost::json::result_for<Slow, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Slow">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvwaitTimeSeconds = root.if_contains("wait_time_seconds");
     if (jvwaitTimeSeconds == nullptr)
     {
-        return error::detail::fieldMissing<"waitTimeSeconds">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto waitTimeSeconds = boost::json::try_value_to<int>(*jvwaitTimeSeconds);
@@ -219,14 +219,14 @@ boost::json::result_for<Vip, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Vip">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvuserID = root.if_contains("user_id");
     if (jvuserID == nullptr)
     {
-        return error::detail::fieldMissing<"userID">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userID = boost::json::try_value_to<String>(*jvuserID);
@@ -239,7 +239,7 @@ boost::json::result_for<Vip, boost::json::value>::type tag_invoke(
     const auto *jvuserLogin = root.if_contains("user_login");
     if (jvuserLogin == nullptr)
     {
-        return error::detail::fieldMissing<"userLogin">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
@@ -252,7 +252,7 @@ boost::json::result_for<Vip, boost::json::value>::type tag_invoke(
     const auto *jvuserName = root.if_contains("user_name");
     if (jvuserName == nullptr)
     {
-        return error::detail::fieldMissing<"userName">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userName = boost::json::try_value_to<String>(*jvuserName);
@@ -274,14 +274,14 @@ boost::json::result_for<Unvip, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Unvip">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvuserID = root.if_contains("user_id");
     if (jvuserID == nullptr)
     {
-        return error::detail::fieldMissing<"userID">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userID = boost::json::try_value_to<String>(*jvuserID);
@@ -294,7 +294,7 @@ boost::json::result_for<Unvip, boost::json::value>::type tag_invoke(
     const auto *jvuserLogin = root.if_contains("user_login");
     if (jvuserLogin == nullptr)
     {
-        return error::detail::fieldMissing<"userLogin">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
@@ -307,7 +307,7 @@ boost::json::result_for<Unvip, boost::json::value>::type tag_invoke(
     const auto *jvuserName = root.if_contains("user_name");
     if (jvuserName == nullptr)
     {
-        return error::detail::fieldMissing<"userName">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userName = boost::json::try_value_to<String>(*jvuserName);
@@ -329,14 +329,14 @@ boost::json::result_for<Mod, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Mod">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvuserID = root.if_contains("user_id");
     if (jvuserID == nullptr)
     {
-        return error::detail::fieldMissing<"userID">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userID = boost::json::try_value_to<std::string>(*jvuserID);
@@ -349,7 +349,7 @@ boost::json::result_for<Mod, boost::json::value>::type tag_invoke(
     const auto *jvuserLogin = root.if_contains("user_login");
     if (jvuserLogin == nullptr)
     {
-        return error::detail::fieldMissing<"userLogin">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
@@ -362,7 +362,7 @@ boost::json::result_for<Mod, boost::json::value>::type tag_invoke(
     const auto *jvuserName = root.if_contains("user_name");
     if (jvuserName == nullptr)
     {
-        return error::detail::fieldMissing<"userName">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userName = boost::json::try_value_to<std::string>(*jvuserName);
@@ -384,14 +384,14 @@ boost::json::result_for<Unmod, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Unmod">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvuserID = root.if_contains("user_id");
     if (jvuserID == nullptr)
     {
-        return error::detail::fieldMissing<"userID">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userID = boost::json::try_value_to<std::string>(*jvuserID);
@@ -404,7 +404,7 @@ boost::json::result_for<Unmod, boost::json::value>::type tag_invoke(
     const auto *jvuserLogin = root.if_contains("user_login");
     if (jvuserLogin == nullptr)
     {
-        return error::detail::fieldMissing<"userLogin">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
@@ -417,7 +417,7 @@ boost::json::result_for<Unmod, boost::json::value>::type tag_invoke(
     const auto *jvuserName = root.if_contains("user_name");
     if (jvuserName == nullptr)
     {
-        return error::detail::fieldMissing<"userName">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userName = boost::json::try_value_to<std::string>(*jvuserName);
@@ -439,14 +439,14 @@ boost::json::result_for<Ban, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Ban">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvuserID = root.if_contains("user_id");
     if (jvuserID == nullptr)
     {
-        return error::detail::fieldMissing<"userID">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userID = boost::json::try_value_to<std::string>(*jvuserID);
@@ -459,7 +459,7 @@ boost::json::result_for<Ban, boost::json::value>::type tag_invoke(
     const auto *jvuserLogin = root.if_contains("user_login");
     if (jvuserLogin == nullptr)
     {
-        return error::detail::fieldMissing<"userLogin">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
@@ -472,7 +472,7 @@ boost::json::result_for<Ban, boost::json::value>::type tag_invoke(
     const auto *jvuserName = root.if_contains("user_name");
     if (jvuserName == nullptr)
     {
-        return error::detail::fieldMissing<"userName">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userName = boost::json::try_value_to<std::string>(*jvuserName);
@@ -485,7 +485,7 @@ boost::json::result_for<Ban, boost::json::value>::type tag_invoke(
     const auto *jvreason = root.if_contains("reason");
     if (jvreason == nullptr)
     {
-        return error::detail::fieldMissing<"reason">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto reason = boost::json::try_value_to<std::string>(*jvreason);
@@ -508,14 +508,14 @@ boost::json::result_for<Unban, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Unban">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvuserID = root.if_contains("user_id");
     if (jvuserID == nullptr)
     {
-        return error::detail::fieldMissing<"userID">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userID = boost::json::try_value_to<std::string>(*jvuserID);
@@ -528,7 +528,7 @@ boost::json::result_for<Unban, boost::json::value>::type tag_invoke(
     const auto *jvuserLogin = root.if_contains("user_login");
     if (jvuserLogin == nullptr)
     {
-        return error::detail::fieldMissing<"userLogin">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
@@ -541,7 +541,7 @@ boost::json::result_for<Unban, boost::json::value>::type tag_invoke(
     const auto *jvuserName = root.if_contains("user_name");
     if (jvuserName == nullptr)
     {
-        return error::detail::fieldMissing<"userName">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userName = boost::json::try_value_to<std::string>(*jvuserName);
@@ -563,14 +563,14 @@ boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Timeout">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvuserID = root.if_contains("user_id");
     if (jvuserID == nullptr)
     {
-        return error::detail::fieldMissing<"userID">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userID = boost::json::try_value_to<std::string>(*jvuserID);
@@ -583,7 +583,7 @@ boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
     const auto *jvuserLogin = root.if_contains("user_login");
     if (jvuserLogin == nullptr)
     {
-        return error::detail::fieldMissing<"userLogin">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
@@ -596,7 +596,7 @@ boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
     const auto *jvuserName = root.if_contains("user_name");
     if (jvuserName == nullptr)
     {
-        return error::detail::fieldMissing<"userName">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userName = boost::json::try_value_to<std::string>(*jvuserName);
@@ -609,7 +609,7 @@ boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
     const auto *jvreason = root.if_contains("reason");
     if (jvreason == nullptr)
     {
-        return error::detail::fieldMissing<"reason">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto reason = boost::json::try_value_to<std::string>(*jvreason);
@@ -622,7 +622,7 @@ boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
     const auto *jvexpiresAt = root.if_contains("expires_at");
     if (jvexpiresAt == nullptr)
     {
-        return error::detail::fieldMissing<"expiresAt">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto expiresAt = boost::json::try_value_to<std::string>(*jvexpiresAt);
@@ -646,14 +646,14 @@ boost::json::result_for<Untimeout, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Untimeout">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvuserID = root.if_contains("user_id");
     if (jvuserID == nullptr)
     {
-        return error::detail::fieldMissing<"userID">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userID = boost::json::try_value_to<std::string>(*jvuserID);
@@ -666,7 +666,7 @@ boost::json::result_for<Untimeout, boost::json::value>::type tag_invoke(
     const auto *jvuserLogin = root.if_contains("user_login");
     if (jvuserLogin == nullptr)
     {
-        return error::detail::fieldMissing<"userLogin">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
@@ -679,7 +679,7 @@ boost::json::result_for<Untimeout, boost::json::value>::type tag_invoke(
     const auto *jvuserName = root.if_contains("user_name");
     if (jvuserName == nullptr)
     {
-        return error::detail::fieldMissing<"userName">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userName = boost::json::try_value_to<std::string>(*jvuserName);
@@ -701,14 +701,14 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Raid">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvuserID = root.if_contains("user_id");
     if (jvuserID == nullptr)
     {
-        return error::detail::fieldMissing<"userID">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userID = boost::json::try_value_to<std::string>(*jvuserID);
@@ -721,7 +721,7 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
     const auto *jvuserLogin = root.if_contains("user_login");
     if (jvuserLogin == nullptr)
     {
-        return error::detail::fieldMissing<"userLogin">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
@@ -734,7 +734,7 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
     const auto *jvuserName = root.if_contains("user_name");
     if (jvuserName == nullptr)
     {
-        return error::detail::fieldMissing<"userName">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userName = boost::json::try_value_to<std::string>(*jvuserName);
@@ -747,7 +747,7 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
     const auto *jvviewerCount = root.if_contains("viewer_count");
     if (jvviewerCount == nullptr)
     {
-        return error::detail::fieldMissing<"viewerCount">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto viewerCount = boost::json::try_value_to<int>(*jvviewerCount);
@@ -770,14 +770,14 @@ boost::json::result_for<Unraid, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Unraid">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvuserID = root.if_contains("user_id");
     if (jvuserID == nullptr)
     {
-        return error::detail::fieldMissing<"userID">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userID = boost::json::try_value_to<std::string>(*jvuserID);
@@ -790,7 +790,7 @@ boost::json::result_for<Unraid, boost::json::value>::type tag_invoke(
     const auto *jvuserLogin = root.if_contains("user_login");
     if (jvuserLogin == nullptr)
     {
-        return error::detail::fieldMissing<"userLogin">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
@@ -803,7 +803,7 @@ boost::json::result_for<Unraid, boost::json::value>::type tag_invoke(
     const auto *jvuserName = root.if_contains("user_name");
     if (jvuserName == nullptr)
     {
-        return error::detail::fieldMissing<"userName">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userName = boost::json::try_value_to<std::string>(*jvuserName);
@@ -825,14 +825,14 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Delete">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvuserID = root.if_contains("user_id");
     if (jvuserID == nullptr)
     {
-        return error::detail::fieldMissing<"userID">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userID = boost::json::try_value_to<std::string>(*jvuserID);
@@ -845,7 +845,7 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
     const auto *jvuserLogin = root.if_contains("user_login");
     if (jvuserLogin == nullptr)
     {
-        return error::detail::fieldMissing<"userLogin">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
@@ -858,7 +858,7 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
     const auto *jvuserName = root.if_contains("user_name");
     if (jvuserName == nullptr)
     {
-        return error::detail::fieldMissing<"userName">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userName = boost::json::try_value_to<std::string>(*jvuserName);
@@ -871,7 +871,7 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
     const auto *jvmessageID = root.if_contains("message_id");
     if (jvmessageID == nullptr)
     {
-        return error::detail::fieldMissing<"messageID">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto messageID = boost::json::try_value_to<std::string>(*jvmessageID);
@@ -884,7 +884,7 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
     const auto *jvmessageBody = root.if_contains("message_body");
     if (jvmessageBody == nullptr)
     {
-        return error::detail::fieldMissing<"messageBody">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto messageBody = boost::json::try_value_to<std::string>(*jvmessageBody);
@@ -909,14 +909,14 @@ boost::json::result_for<AutomodTerms, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"AutomodTerms">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvaction = root.if_contains("action");
     if (jvaction == nullptr)
     {
-        return error::detail::fieldMissing<"action">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto action = boost::json::try_value_to<std::string>(*jvaction);
@@ -929,7 +929,7 @@ boost::json::result_for<AutomodTerms, boost::json::value>::type tag_invoke(
     const auto *jvlist = root.if_contains("list");
     if (jvlist == nullptr)
     {
-        return error::detail::fieldMissing<"list">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto list = boost::json::try_value_to<std::string>(*jvlist);
@@ -942,7 +942,7 @@ boost::json::result_for<AutomodTerms, boost::json::value>::type tag_invoke(
     const auto *jvterms = root.if_contains("terms");
     if (jvterms == nullptr)
     {
-        return error::detail::fieldMissing<"terms">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
     const auto terms =
         boost::json::try_value_to<std::vector<std::string>>(*jvterms);
@@ -954,7 +954,7 @@ boost::json::result_for<AutomodTerms, boost::json::value>::type tag_invoke(
     const auto *jvfromAutomod = root.if_contains("from_automod");
     if (jvfromAutomod == nullptr)
     {
-        return error::detail::fieldMissing<"fromAutomod">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto fromAutomod = boost::json::try_value_to<bool>(*jvfromAutomod);
@@ -978,14 +978,14 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"UnbanRequest">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvisApproved = root.if_contains("is_approved");
     if (jvisApproved == nullptr)
     {
-        return error::detail::fieldMissing<"isApproved">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto isApproved = boost::json::try_value_to<bool>(*jvisApproved);
@@ -998,7 +998,7 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
     const auto *jvuserID = root.if_contains("user_id");
     if (jvuserID == nullptr)
     {
-        return error::detail::fieldMissing<"userID">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userID = boost::json::try_value_to<std::string>(*jvuserID);
@@ -1011,7 +1011,7 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
     const auto *jvuserLogin = root.if_contains("user_login");
     if (jvuserLogin == nullptr)
     {
-        return error::detail::fieldMissing<"userLogin">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
@@ -1024,7 +1024,7 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
     const auto *jvuserName = root.if_contains("user_name");
     if (jvuserName == nullptr)
     {
-        return error::detail::fieldMissing<"userName">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userName = boost::json::try_value_to<std::string>(*jvuserName);
@@ -1037,7 +1037,7 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
     const auto *jvmoderatorMessage = root.if_contains("moderator_message");
     if (jvmoderatorMessage == nullptr)
     {
-        return error::detail::fieldMissing<"moderatorMessage">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto moderatorMessage =
@@ -1062,14 +1062,14 @@ boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Warn">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvuserID = root.if_contains("user_id");
     if (jvuserID == nullptr)
     {
-        return error::detail::fieldMissing<"userID">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userID = boost::json::try_value_to<std::string>(*jvuserID);
@@ -1082,7 +1082,7 @@ boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
     const auto *jvuserLogin = root.if_contains("user_login");
     if (jvuserLogin == nullptr)
     {
-        return error::detail::fieldMissing<"userLogin">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
@@ -1095,7 +1095,7 @@ boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
     const auto *jvuserName = root.if_contains("user_name");
     if (jvuserName == nullptr)
     {
-        return error::detail::fieldMissing<"userName">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto userName = boost::json::try_value_to<std::string>(*jvuserName);
@@ -1108,7 +1108,7 @@ boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
     const auto *jvreason = root.if_contains("reason");
     if (jvreason == nullptr)
     {
-        return error::detail::fieldMissing<"reason">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto reason = boost::json::try_value_to<std::string>(*jvreason);
@@ -1121,7 +1121,7 @@ boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
     const auto *jvchatRulesCited = root.if_contains("chat_rules_cited");
     if (jvchatRulesCited == nullptr)
     {
-        return error::detail::fieldMissing<"chatRulesCited">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
     const auto chatRulesCited =
         boost::json::try_value_to<std::vector<std::string>>(*jvchatRulesCited);
@@ -1144,14 +1144,14 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Event">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvbroadcasterUserID = root.if_contains("broadcaster_user_id");
     if (jvbroadcasterUserID == nullptr)
     {
-        return error::detail::fieldMissing<"broadcasterUserID">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto broadcasterUserID =
@@ -1166,7 +1166,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         root.if_contains("broadcaster_user_login");
     if (jvbroadcasterUserLogin == nullptr)
     {
-        return error::detail::fieldMissing<"broadcasterUserLogin">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto broadcasterUserLogin =
@@ -1181,7 +1181,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         root.if_contains("broadcaster_user_name");
     if (jvbroadcasterUserName == nullptr)
     {
-        return error::detail::fieldMissing<"broadcasterUserName">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto broadcasterUserName =
@@ -1247,7 +1247,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     const auto *jvmoderatorUserID = root.if_contains("moderator_user_id");
     if (jvmoderatorUserID == nullptr)
     {
-        return error::detail::fieldMissing<"moderatorUserID">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto moderatorUserID =
@@ -1261,7 +1261,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     const auto *jvmoderatorUserLogin = root.if_contains("moderator_user_login");
     if (jvmoderatorUserLogin == nullptr)
     {
-        return error::detail::fieldMissing<"moderatorUserLogin">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto moderatorUserLogin =
@@ -1275,7 +1275,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     const auto *jvmoderatorUserName = root.if_contains("moderator_user_name");
     if (jvmoderatorUserName == nullptr)
     {
-        return error::detail::fieldMissing<"moderatorUserName">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto moderatorUserName =
@@ -1289,7 +1289,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     const auto *jvaction = root.if_contains("action");
     if (jvaction == nullptr)
     {
-        return error::detail::fieldMissing<"action">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto action = boost::json::try_value_to<Action>(*jvaction);
@@ -1606,14 +1606,14 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Payload">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvsubscription = root.if_contains("subscription");
     if (jvsubscription == nullptr)
     {
-        return error::detail::fieldMissing<"subscription">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto subscription =
@@ -1627,7 +1627,7 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
     const auto *jvevent = root.if_contains("event");
     if (jvevent == nullptr)
     {
-        return error::detail::fieldMissing<"event">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto event = boost::json::try_value_to<Event>(*jvevent);

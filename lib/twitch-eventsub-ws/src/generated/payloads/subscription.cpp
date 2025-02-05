@@ -13,14 +13,14 @@ boost::json::result_for<Transport, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Transport">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvmethod = root.if_contains("method");
     if (jvmethod == nullptr)
     {
-        return error::detail::fieldMissing<"method">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto method = boost::json::try_value_to<std::string>(*jvmethod);
@@ -33,7 +33,7 @@ boost::json::result_for<Transport, boost::json::value>::type tag_invoke(
     const auto *jvsessionID = root.if_contains("session_id");
     if (jvsessionID == nullptr)
     {
-        return error::detail::fieldMissing<"sessionID">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto sessionID = boost::json::try_value_to<std::string>(*jvsessionID);
@@ -55,14 +55,14 @@ boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Subscription">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvid = root.if_contains("id");
     if (jvid == nullptr)
     {
-        return error::detail::fieldMissing<"id">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto id = boost::json::try_value_to<std::string>(*jvid);
@@ -75,7 +75,7 @@ boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
     const auto *jvstatus = root.if_contains("status");
     if (jvstatus == nullptr)
     {
-        return error::detail::fieldMissing<"status">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto status = boost::json::try_value_to<std::string>(*jvstatus);
@@ -88,7 +88,7 @@ boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
     const auto *jvtype = root.if_contains("type");
     if (jvtype == nullptr)
     {
-        return error::detail::fieldMissing<"type">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto type = boost::json::try_value_to<std::string>(*jvtype);
@@ -101,7 +101,7 @@ boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
     const auto *jvversion = root.if_contains("version");
     if (jvversion == nullptr)
     {
-        return error::detail::fieldMissing<"version">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto version = boost::json::try_value_to<std::string>(*jvversion);
@@ -114,7 +114,7 @@ boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
     const auto *jvtransport = root.if_contains("transport");
     if (jvtransport == nullptr)
     {
-        return error::detail::fieldMissing<"transport">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto transport = boost::json::try_value_to<Transport>(*jvtransport);
@@ -127,7 +127,7 @@ boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
     const auto *jvcreatedAt = root.if_contains("created_at");
     if (jvcreatedAt == nullptr)
     {
-        return error::detail::fieldMissing<"createdAt">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto createdAt = boost::json::try_value_to<std::string>(*jvcreatedAt);
@@ -140,7 +140,7 @@ boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
     const auto *jvcost = root.if_contains("cost");
     if (jvcost == nullptr)
     {
-        return error::detail::fieldMissing<"cost">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto cost = boost::json::try_value_to<int>(*jvcost);

@@ -46,7 +46,8 @@ namespace {
     // Report a failure
     void fail(beast::error_code ec, char const *what)
     {
-        std::cerr << what << ": " << ec.message() << "\n";
+        std::cerr << what << ": " << ec.message() << " (" << ec.location()
+                  << ")\n";
     }
 
     template <class T>
@@ -219,13 +220,13 @@ boost::system::error_code handleMessage(std::unique_ptr<Listener> &listener,
     const auto *jvObject = jv.if_object();
     if (jvObject == nullptr)
     {
-        return error::detail::expectedObject<"Payload">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
 
     const auto *metadataV = jvObject->if_contains("metadata");
     if (metadataV == nullptr)
     {
-        return error::detail::fieldMissing<"metadata">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
     auto metadataResult =
         boost::json::try_value_to<messages::Metadata>(*metadataV);
@@ -241,13 +242,13 @@ boost::system::error_code handleMessage(std::unique_ptr<Listener> &listener,
 
     if (handler == MESSAGE_HANDLERS.end())
     {
-        return error::detail::noMessageHandler();
+        EVENTSUB_BAIL_HERE(error::Kind::NoMessageHandler);
     }
 
     const auto *payloadV = jvObject->if_contains("payload");
     if (payloadV == nullptr)
     {
-        return error::detail::fieldMissing<"payload">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     handler->second(metadata, *payloadV, listener, NOTIFICATION_HANDLERS);

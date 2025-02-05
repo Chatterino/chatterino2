@@ -13,14 +13,14 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Event">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvbroadcasterUserID = root.if_contains("broadcaster_user_id");
     if (jvbroadcasterUserID == nullptr)
     {
-        return error::detail::fieldMissing<"broadcasterUserID">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto broadcasterUserID =
@@ -35,7 +35,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         root.if_contains("broadcaster_user_login");
     if (jvbroadcasterUserLogin == nullptr)
     {
-        return error::detail::fieldMissing<"broadcasterUserLogin">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto broadcasterUserLogin =
@@ -50,7 +50,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         root.if_contains("broadcaster_user_name");
     if (jvbroadcasterUserName == nullptr)
     {
-        return error::detail::fieldMissing<"broadcasterUserName">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto broadcasterUserName =
@@ -73,14 +73,14 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return error::detail::expectedObject<"Payload">();
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
 
     const auto *jvsubscription = root.if_contains("subscription");
     if (jvsubscription == nullptr)
     {
-        return error::detail::fieldMissing<"subscription">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto subscription =
@@ -94,7 +94,7 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
     const auto *jvevent = root.if_contains("event");
     if (jvevent == nullptr)
     {
-        return error::detail::fieldMissing<"event">();
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     auto event = boost::json::try_value_to<Event>(*jvevent);
