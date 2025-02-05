@@ -23,6 +23,7 @@ set(SOURCE_FILES
 
     json.cpp
     string.cpp
+    errors.cpp
 
     # Subscription types (only additional functions)
     payloads/channel-ban-v1.cpp

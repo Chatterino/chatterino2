@@ -4,28 +4,24 @@ boost::json::result_for<{{struct.full_name}}, boost::json::value>::type tag_invo
     {% if struct.inner_root %}
     if (!jvRoot.is_object())
     {
-        static const error::ApplicationErrorCategory errorMustBeObject{"{{struct.full_name}} must be an object"};
-        return boost::system::error_code{129, errorMustBeObject};
+        return error::detail::expectedObject<"{{struct.full_name}}">();
     }
     const auto &outerRoot = jvRoot.get_object();
 
     const auto *jvInnerRoot = outerRoot.if_contains("{{struct.inner_root}}");
     if (jvInnerRoot == nullptr)
     {
-        static const error::ApplicationErrorCategory errorMissing{"{{struct.full_name}}'s key {{struct.inner_root}} is missing"};
-        return boost::system::error_code{129, errorMissing};
+        return error::detail::innerRootMissing<"{{struct.full_name}}/{{struct.inner_root}}">();
     }
     if (!jvInnerRoot->is_object())
     {
-        static const error::ApplicationErrorCategory errorMustBeObject{"{{struct.full_name}}'s {{struct.inner_root}} must be an object"};
-        return boost::system::error_code{129, errorMustBeObject};
+        return error::detail::expectedObject<"{{struct.full_name}}/{{struct.inner_root}}">();
     }
     const auto &root = jvInnerRoot->get_object();
     {% else %}
     if (!jvRoot.is_object())
     {
-        static const error::ApplicationErrorCategory errorMustBeObject{"{{struct.full_name}} must be an object"};
-        return boost::system::error_code{129, errorMustBeObject};
+        return error::detail::expectedObject<"{{struct.full_name}}">();
     }
     const auto &root = jvRoot.get_object();
     {% endif %}

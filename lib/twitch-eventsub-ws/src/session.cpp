@@ -1,6 +1,6 @@
 #include "twitch-eventsub-ws/session.hpp"
 
-#include "twitch-eventsub-ws/errors.hpp"
+#include "twitch-eventsub-ws/detail/errors.hpp"
 #include "twitch-eventsub-ws/listener.hpp"
 #include "twitch-eventsub-ws/messages/metadata.hpp"
 #include "twitch-eventsub-ws/payloads/channel-ban-v1.hpp"
@@ -219,18 +219,13 @@ boost::system::error_code handleMessage(std::unique_ptr<Listener> &listener,
     const auto *jvObject = jv.if_object();
     if (jvObject == nullptr)
     {
-        static const error::ApplicationErrorCategory errorRootMustBeObject{
-            "Payload root must be an object"};
-        return boost::system::error_code{129, errorRootMustBeObject};
+        return error::detail::expectedObject<"Payload">();
     }
 
     const auto *metadataV = jvObject->if_contains("metadata");
     if (metadataV == nullptr)
     {
-        static const error::ApplicationErrorCategory
-            errorRootMustContainMetadata{
-                "Payload root must contain a metadata field"};
-        return boost::system::error_code{129, errorRootMustContainMetadata};
+        return error::detail::fieldMissing<"metadata">();
     }
     auto metadataResult =
         boost::json::try_value_to<messages::Metadata>(*metadataV);
@@ -246,22 +241,13 @@ boost::system::error_code handleMessage(std::unique_ptr<Listener> &listener,
 
     if (handler == MESSAGE_HANDLERS.end())
     {
-        std::stringstream ss;
-        ss << "No message handler found for message type: ";
-        ss << metadata.messageType;
-        error::ApplicationErrorCategory errorNoMessageHandlerForMessageType{
-            ss.str()};
-        return boost::system::error_code{129,
-                                         errorNoMessageHandlerForMessageType};
+        return error::detail::noMessageHandler();
     }
 
     const auto *payloadV = jvObject->if_contains("payload");
     if (payloadV == nullptr)
     {
-        static const error::ApplicationErrorCategory
-            errorRootMustContainPayload{
-                "Payload root must contain a payload field"};
-        return boost::system::error_code{129, errorRootMustContainPayload};
+        return error::detail::fieldMissing<"payload">();
     }
 
     handler->second(metadata, *payloadV, listener, NOTIFICATION_HANDLERS);

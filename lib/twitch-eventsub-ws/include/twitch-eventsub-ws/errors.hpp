@@ -4,34 +4,62 @@
 
 #include <string>
 
-namespace chatterino::eventsub::lib::error {
+namespace chatterino::eventsub::lib::error::detail {
 
-class ApplicationErrorCategory final : public boost::system::error_category
-{
-    const std::string innerMessage;
+template <size_t N>
+struct StaticString {
+    static_assert(N > 0);
 
-public:
-    ApplicationErrorCategory(const char *_innerMessage)
-        : innerMessage(_innerMessage)
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
+    consteval StaticString(const char (&arr)[N])
     {
+        for (size_t i = 0; i < N; i++)
+        {
+            data[i] = arr[i];
+        }
     }
 
-    explicit ApplicationErrorCategory(std::string _innerMessage)
-        : innerMessage(std::move(_innerMessage))
+    consteval operator std::string_view() const
+    {
+        return {this->data, N - 1};
+    }
+
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
+    char data[N]{};
+};
+
+}  // namespace chatterino::eventsub::lib::error::detail
+
+namespace chatterino::eventsub::lib::error {
+
+/// boost::system::error_code doesn't support string arguments, so we're using
+/// the error_category to store strings. All strings are statically allocated.
+class ApplicationErrorCategory final : public boost::system::error_category
+{
+    std::string_view argument;
+
+public:
+    // NOLINTNEXTLINE(performance-enum-size)
+    enum class Kind : int {
+        FieldMissing = 1,
+        ExpectedObject,
+        ExpectedString,
+        UnknownEnumValue,
+        InnerRootMissing,
+        NoMessageHandler
+    };
+
+    consteval ApplicationErrorCategory(std::string_view argument)
+        : argument(argument)
     {
     }
 
     const char *name() const noexcept override
     {
-        return "Application JSON error";
+        return "JSON deserialization error";
     }
-    std::string message(int /*ev*/) const override
-    {
-        return this->innerMessage;
-    }
-};
 
-const ApplicationErrorCategory EXPECTED_OBJECT{"Expected object"};
-const ApplicationErrorCategory MISSING_KEY{"Missing key"};
+    std::string message(int ev) const override;
+};
 
 }  // namespace chatterino::eventsub::lib::error
