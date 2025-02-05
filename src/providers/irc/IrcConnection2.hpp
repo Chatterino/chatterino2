@@ -33,7 +33,7 @@ public:
     virtual void open();
     virtual void close();
 
-signals:
+Q_SIGNALS:
     /// Emitted when this connection intends to be connected.
     /// The server should initialize this connection an open it.
     void connectAndInitializeRequested();
