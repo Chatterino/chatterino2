@@ -99,6 +99,12 @@ jobs:
             ..
           make -j"$(nproc)"
 
+      - name: Check generated sources
+        if: matrix.os == 'ubuntu-24.04'
+        run: |
+          git add -N lib/twitch-eventsub-ws/include lib/twitch-eventsub-ws/src
+          git --no-pager diff --exit-code lib/twitch-eventsub-ws/include lib/twitch-eventsub-ws/src
+
       - name: Package - AppImage (Ubuntu)
         if: matrix.build-appimage
         run: |

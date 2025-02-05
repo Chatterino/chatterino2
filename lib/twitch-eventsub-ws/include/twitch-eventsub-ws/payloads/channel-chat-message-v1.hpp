@@ -141,6 +141,7 @@ struct Event {
     std::optional<Cheer> cheer;
     std::optional<Reply> reply;
     std::optional<std::string> channelPointsCustomRewardID;
+    int aliens;
 };
 
 struct Payload {
