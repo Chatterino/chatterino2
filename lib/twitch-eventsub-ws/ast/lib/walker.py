@@ -21,12 +21,12 @@ class Walker:
         self.real_filepath = os.path.realpath(self.filename)
         self.structs: List[Struct] = []
         self.enums: List[Enum] = []
-        self.namespace: List[str] = []
+        self.namespace: tuple[str, ...] = ()
 
     def handle_node(self, node: clang.cindex.Cursor, struct: Optional[Struct], enum: Optional[Enum]) -> bool:
         match node.kind:
             case CursorKind.STRUCT_DECL:
-                new_struct = Struct(node.spelling)
+                new_struct = Struct(node.spelling, self.namespace)
                 if node.raw_comment is not None:
                     new_struct.comment_commands = parse_comment_commands(node.raw_comment)
                     new_struct.apply_comment_commands(new_struct.comment_commands)
@@ -41,7 +41,7 @@ class Walker:
                 return True
 
             case CursorKind.ENUM_DECL:
-                new_enum = Enum(node.spelling)
+                new_enum = Enum(node.spelling, self.namespace)
                 if node.raw_comment is not None:
                     new_enum.comment_commands = parse_comment_commands(node.raw_comment)
                     new_enum.apply_comment_commands(new_enum.comment_commands)
@@ -77,9 +77,11 @@ class Walker:
                     struct.members.append(member)
 
             case CursorKind.NAMESPACE:
-                self.namespace.append(node.spelling)
-                # Ignore namespaces
-                pass
+                self.namespace += (node.spelling,)
+                for child in node.get_children():
+                    self.walk(child)
+                self.namespace = self.namespace[:-1]
+                return True
 
             case CursorKind.FUNCTION_DECL:
                 # Ignore function declarations

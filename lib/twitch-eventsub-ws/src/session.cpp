@@ -1,5 +1,6 @@
 #include "twitch-eventsub-ws/session.hpp"
 
+#include "twitch-eventsub-ws/errors.hpp"
 #include "twitch-eventsub-ws/listener.hpp"
 #include "twitch-eventsub-ws/messages/metadata.hpp"
 #include "twitch-eventsub-ws/payloads/channel-ban-v1.hpp"

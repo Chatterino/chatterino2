@@ -1,7 +1,5 @@
 #pragma once
 
-#include "twitch-eventsub-ws/errors.hpp"
-
 #include <boost/json.hpp>
 
 #include <string>
@@ -28,9 +26,6 @@ struct Payload {
     const std::string id;
 };
 
-// DESERIALIZATION DEFINITION START
-boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Payload>, const boost::json::value &jvRoot);
-// DESERIALIZATION DEFINITION END
+#include "twitch-eventsub-ws/payloads/session-welcome.inc"
 
 }  // namespace chatterino::eventsub::lib::payload::session_welcome
