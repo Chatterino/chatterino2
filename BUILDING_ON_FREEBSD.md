@@ -15,7 +15,7 @@ FreeBSD 15.0-SNAP.
    mkdir build
    cd build
    ```
-1. Generate build files. To enable Lua plugins in your build add `-DCHATTERINO_PLUGINS=ON` to this command.
+1. Generate build files. To enable Lua plugins in your build add `-DCHATTERINO_PLUGINS=ON` to this command. Generating JSON implementation of EventSub blobs is slow (something to do with Python), if you're impatient you can enable the `-DSKIP_JSON_GENERATION=On` option.
    ```sh
    cmake ..
    ```
