@@ -2,6 +2,7 @@ generate_json_impls(
     OUTPUT_SOURCES eventsub_generated_sources
     BASE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/.."
     FORCE ${FORCE_JSON_GENERATION}
+    SKIP ${SKIP_JSON_GENERATION}
     HEADERS
         include/twitch-eventsub-ws/messages/metadata.hpp
 
