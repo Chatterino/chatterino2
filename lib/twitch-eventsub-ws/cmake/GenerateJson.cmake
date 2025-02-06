@@ -91,6 +91,7 @@ endfunction()
 #   [OUTPUT_SOURCES <out-var>]
 #   [BASE_DIRECTORY <path>]
 #   [FORCE <force>]
+#   [SKIP <skip>]
 #   HEADERS <header>...
 # )
 #
@@ -101,11 +102,13 @@ endfunction()
 #   they're relative to the directory of the calling file.
 # `FORCE`
 #   Always generate sources and error if it's not possible.
+# `SKIP`
+#   Never try to generate sources.
 # `HEADERS`
 #   A list of header files for which implmenetations will be generated.
 function(generate_json_impls)
     cmake_parse_arguments(PARSE_ARGV 0 arg
-        "" "OUTPUT_SOURCES;BASE_DIRECTORY;FORCE" "HEADERS"
+        "" "OUTPUT_SOURCES;BASE_DIRECTORY;FORCE;SKIP" "HEADERS"
     )
     _validate_all_args_are_parsed(arg HEADERS)
     if(NOT DEFINED arg_BASE_DIRECTORY)
@@ -113,10 +116,6 @@ function(generate_json_impls)
     endif()
 
     cmake_path(SET _gen_script NORMALIZE "${_eventsub_lib_root}/ast/generate.py")
-
-    if(arg_FORCE AND NOT Python3_EXECUTABLE)
-        message(FATAL_ERROR "Missing python3")
-    endif()
 
     # get includes
     get_target_property(_qt_inc_dirs Qt${MAJOR_QT_VERSION}::Core INCLUDE_DIRECTORIES)
@@ -128,30 +127,39 @@ function(generate_json_impls)
     list(APPEND _inc_dirs ${OPENSSL_INCLUDE_DIR})
     list(JOIN _inc_dirs ";" _inc_dir)
 
-    # setup venv (<build>/lib/twitch-eventsub-ws/eventsub-venv)
-    if(Python3_EXECUTABLE)
-        _setup_and_check_venv(
-            INCLUDES "${_inc_dirs}"
-            OUT_PYTHON_EXE _python3_path
-            OUT_CHECK _check_output
-        )
+    if(NOT arg_SKIP)
+        if(arg_FORCE AND NOT Python3_EXECUTABLE)
+            message(FATAL_ERROR "Missing python3")
+        endif()
 
-        if(NOT _check_output AND _python3_path)
-            set(_generation_supported On)
+        # setup venv (<build>/lib/twitch-eventsub-ws/eventsub-venv)
+        if(Python3_EXECUTABLE)
+            _setup_and_check_venv(
+                INCLUDES "${_inc_dirs}"
+                OUT_PYTHON_EXE _python3_path
+                OUT_CHECK _check_output
+            )
+
+            if(NOT _check_output AND _python3_path)
+                set(_generation_supported On)
+            else()
+                set(_generation_supported Off)
+                if (arg_FORCE)
+                    message(FATAL_ERROR "Generation of JSON implementation not supported, because the parser can't parse a simple TU:\n${_check_output}")
+                endif()
+            endif()
         else()
             set(_generation_supported Off)
-            if (arg_FORCE)
-                message(FATAL_ERROR "Generation of JSON implementation not supported, because the parser can't parse a simple TU:\n${_check_output}")
-            endif()
+        endif()
+
+        if(_generation_supported)
+            message(STATUS "Generation of JSON implementation is supported")
+        else()
+            message(STATUS "Generation of JSON implementation is not supported (use FORCE_JSON_GENERATION=On to get more information)")
         endif()
     else()
+        message(STATUS "Generation of JSON implementation is skipped because the SKIP_JSON_GENERATION option is On")
         set(_generation_supported Off)
-    endif()
-
-    if(_generation_supported)
-        message(STATUS "Generation of JSON implementation is supported")
-    else()
-        message(STATUS "Generation of JSON implementation is not supported (use FORCE_JSON_GENERATION=On to get more information)")
     endif()
 
     # get all dependencies

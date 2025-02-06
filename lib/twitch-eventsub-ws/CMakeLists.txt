@@ -17,6 +17,7 @@ find_package(OpenSSL REQUIRED)
 
 option(BUILD_WITH_QT6 "Build with Qt6" On)
 option(FORCE_JSON_GENERATION "Make sure JSON implementations are generated at build time" Off)
+option(SKIP_JSON_GENERATION "Skip JSON implementations generation at build time" Off)
 
 if (BUILD_WITH_QT6)
     set(MAJOR_QT_VERSION "6")
