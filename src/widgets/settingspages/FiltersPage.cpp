@@ -25,26 +25,27 @@ FiltersPage::FiltersPage()
     layout.emplace<QLabel>(
         "Selectively display messages in Splits using channel filters. Set "
         "filters under a Split menu.");
-    this->view_ = layout
-                      .emplace<EditableModelView>(
-                          (new FilterModel(nullptr))
-                              ->initialized(&getSettings()->filterRecords))
-                      .getElement();
+    auto *view = layout
+                     .emplace<EditableModelView>(
+                         (new FilterModel(nullptr))
+                             ->initialized(&getSettings()->filterRecords))
+                     .getElement();
+    this->view_ = view;
 
-    this->view_->setTitles({"Name", "Filter", "Valid"});
-    this->view_->getTableView()->horizontalHeader()->setSectionResizeMode(
+    view->setTitles({"Name", "Filter", "Valid"});
+    view->getTableView()->horizontalHeader()->setSectionResizeMode(
         QHeaderView::Interactive);
-    this->view_->getTableView()->horizontalHeader()->setSectionResizeMode(
+    view->getTableView()->horizontalHeader()->setSectionResizeMode(
         1, QHeaderView::Stretch);
 
-    QTimer::singleShot(1, [this] {
-        this->view_->getTableView()->resizeColumnsToContents();
-        this->view_->getTableView()->setColumnWidth(0, 150);
-        this->view_->getTableView()->setColumnWidth(2, 125);
+    QTimer::singleShot(1, [view] {
+        view->getTableView()->resizeColumnsToContents();
+        view->getTableView()->setColumnWidth(0, 150);
+        view->getTableView()->setColumnWidth(2, 125);
     });
 
-    // We can safely ignore this signal connection since we own the this->view_
-    std::ignore = this->view_->addButtonPressed.connect([this] {
+    // We can safely ignore this signal connection since we own the view
+    std::ignore = view->addButtonPressed.connect([this] {
         ChannelFilterEditorDialog d(this->window());
         if (d.exec() == QDialog::Accepted)
         {
@@ -58,11 +59,11 @@ FiltersPage::FiltersPage()
         getSettings()->filterRecords.append(std::make_shared<FilterRecord>(
             "My filter", "message.content contains \"hello\""));
     });
-    this->view_->addCustomButton(quickAddButton);
+    view->addCustomButton(quickAddButton);
 
     QObject::connect(view_->getTableView(), &QTableView::clicked,
-                     [this](const QModelIndex &clicked) {
-                         this->tableCellClicked(clicked, this->view_);
+                     [this, view](const QModelIndex &clicked) {
+                         this->tableCellClicked(clicked, view);
                      });
 
     auto *filterHelpLabel =
@@ -70,7 +71,7 @@ FiltersPage::FiltersPage()
                                "style='color:#99f'>filter info</span></a>")
                        .arg(FILTERS_DOCUMENTATION));
     filterHelpLabel->setOpenExternalLinks(true);
-    this->view_->addCustomButton(filterHelpLabel);
+    view->addCustomButton(filterHelpLabel);
 
     layout.append(
         this->createCheckBox("Do not filter my own messages",
