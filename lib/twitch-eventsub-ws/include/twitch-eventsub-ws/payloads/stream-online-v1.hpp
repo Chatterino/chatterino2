@@ -8,7 +8,6 @@
 
 namespace chatterino::eventsub::lib::payload::stream_online::v1 {
 
-/// json_transform=snake_case
 struct Event {
     // The ID of the stream
     const std::string id;

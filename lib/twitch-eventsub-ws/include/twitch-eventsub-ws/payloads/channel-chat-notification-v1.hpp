@@ -10,21 +10,18 @@
 
 namespace chatterino::eventsub::lib::payload::channel_chat_notification::v1 {
 
-/// json_transform=snake_case
 struct Badge {
     std::string setID;
     std::string id;
     std::string info;
 };
 
-/// json_transform=snake_case
 struct Cheermote {
     std::string prefix;
     int bits;
     int tier;
 };
 
-/// json_transform=snake_case
 struct Emote {
     std::string id;
     std::string emoteSetID;
@@ -32,14 +29,12 @@ struct Emote {
     std::vector<std::string> format;
 };
 
-/// json_transform=snake_case
 struct Mention {
     std::string userID;
     std::string userName;
     std::string userLogin;
 };
 
-/// json_transform=snake_case
 struct MessageFragment {
     std::string type;
     std::string text;
@@ -48,14 +43,12 @@ struct MessageFragment {
     std::optional<Mention> mention;
 };
 
-/// json_transform=snake_case
 struct Subcription {
     std::string subTier;
     bool isPrime;
     int durationMonths;
 };
 
-/// json_transform=snake_case
 struct Resubscription {
     int cumulativeMonths;
     int durationMonths;
@@ -69,7 +62,6 @@ struct Resubscription {
     std::optional<std::string> gifterUserLogin;
 };
 
-/// json_transform=snake_case
 struct GiftSubscription {
     int durationMonths;
     std::optional<int> cumulativeTotal;
@@ -81,7 +73,6 @@ struct GiftSubscription {
     std::optional<std::string> communityGiftID;
 };
 
-/// json_transform=snake_case
 struct CommunityGiftSubscription {
     std::string id;
     int total;
@@ -89,7 +80,6 @@ struct CommunityGiftSubscription {
     std::optional<int> cumulativeTotal;
 };
 
-/// json_transform=snake_case
 struct GiftPaidUpgrade {
     bool gifterIsAnonymous;
     std::optional<std::string> gifterUserID;
@@ -97,12 +87,10 @@ struct GiftPaidUpgrade {
     std::optional<std::string> gifterUserLogin;
 };
 
-/// json_transform=snake_case
 struct PrimePaidUpgrade {
     std::string subTier;
 };
 
-/// json_transform=snake_case
 struct Raid {
     std::string userID;
     std::string userName;
@@ -111,11 +99,9 @@ struct Raid {
     std::string profileImageURL;
 };
 
-/// json_transform=snake_case
 struct Unraid {
 };
 
-/// json_transform=snake_case
 struct PayItForward {
     bool gifterIsAnonymous;
     std::optional<std::string> gifterUserID;
@@ -123,36 +109,30 @@ struct PayItForward {
     std::optional<std::string> gifterUserLogin;
 };
 
-/// json_transform=snake_case
 struct Announcement {
     std::string color;
 };
 
-/// json_transform=snake_case
 struct CharityDonationAmount {
     int value;
     int decimalPlaces;
     std::string currency;
 };
 
-/// json_transform=snake_case
 struct CharityDonation {
     std::string charityName;
     CharityDonationAmount amount;
 };
 
-/// json_transform=snake_case
 struct BitsBadgeTier {
     int tier;
 };
 
-/// json_transform=snake_case
 struct Message {
     std::string text;
     std::vector<MessageFragment> fragments;
 };
 
-/// json_transform=snake_case
 struct Event {
     std::string broadcasterUserID;
     std::string broadcasterUserLogin;

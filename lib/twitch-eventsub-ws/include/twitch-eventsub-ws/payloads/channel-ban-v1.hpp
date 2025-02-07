@@ -47,7 +47,6 @@ namespace chatterino::eventsub::lib::payload::channel_ban::v1 {
 }
 */
 
-/// json_transform=snake_case
 struct Event {
     // User ID (e.g. 117166826) of the user who's channel the event took place in
     std::string broadcasterUserID;
