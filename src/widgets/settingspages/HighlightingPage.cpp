@@ -83,8 +83,7 @@ HighlightingPage::HighlightingPage()
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     0, QHeaderView::Stretch);
                 view->getTableView()->setItemDelegateForColumn(
-                    HighlightModel::Column::Color,
-                    new ColorItemDelegate(viewMessages_));
+                    HighlightModel::Column::Color, new ColorItemDelegate(view));
 
                 // fourtf: make class extrend BaseWidget and add this to
                 // dpiChanged
@@ -140,7 +139,7 @@ HighlightingPage::HighlightingPage()
                     0, QHeaderView::Stretch);
                 view->getTableView()->setItemDelegateForColumn(
                     UserHighlightModel::Column::Color,
-                    new ColorItemDelegate(viewUsers_));
+                    new ColorItemDelegate(view));
 
                 // fourtf: make class extrend BaseWidget and add this to
                 // dpiChanged
@@ -187,7 +186,7 @@ HighlightingPage::HighlightingPage()
                     0, QHeaderView::Stretch);
                 view->getTableView()->setItemDelegateForColumn(
                     BadgeHighlightModel::Column::Color,
-                    new ColorItemDelegate(viewBadges_));
+                    new ColorItemDelegate(view));
 
                 // fourtf: make class extrend BaseWidget and add this to
                 // dpiChanged
