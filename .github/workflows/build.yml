@@ -23,6 +23,10 @@ env:
 
 jobs:
   build-ubuntu-docker:
+    # Our Ubuntu builds are built using Docker images that have been pre-published.
+    # This speeds up builds for us since we do some pre-building of packages that takes a long time
+    # However, this means if you need to add a dependency to the build, you'll need to do that
+    # in the https://github.com/Chatterino/docker repository first.
     name: "Build Ubuntu in Docker"
     runs-on: ubuntu-latest
     container: ${{ matrix.container }}

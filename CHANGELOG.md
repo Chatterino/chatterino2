@@ -21,7 +21,7 @@
 - Bugfix: Fixed the reply button showing for inline whispers and announcements. (#5863)
 - Bugfix: Fixed suspicious user treatment update messages not being searchable. (#5865)
 - Bugfix: Ensure miniaudio backend exits even if it doesn't exit cleanly. (#5896)
-- Dev: Add initial experimental EventSub support. (#5837, #5895, #5897, #5903)
+- Dev: Add initial experimental EventSub support. (#5837, #5895, #5897, #5904, #5910, #5903)
 - Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
 - Dev: Removed unused PubSub whisper code. (#5898)
 - Dev: Updated Conan dependencies. (#5776)
