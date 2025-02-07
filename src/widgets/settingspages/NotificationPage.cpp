@@ -46,9 +46,11 @@ NotificationPage::NotificationPage()
                 settings.append(this->createCheckBox(
                     "Suppress live notifications on startup",
                     getSettings()->suppressInitialLiveNotification));
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN) || defined(CHATTERINO_WITH_LIBNOTIFY)
                 settings.append(this->createCheckBox(
                     "Show notification", getSettings()->notificationToast));
+#endif
+#ifdef Q_OS_WIN
                 auto openIn = settings.emplace<QHBoxLayout>().withoutMargin();
                 {
                     openIn
