@@ -122,8 +122,8 @@ jobs:
       - name: Setup virtual environment
         run: |
           python3 -m venv venv
-          pip3 install -r requirements.txt
-          pip3 install -r requirements-dev.txt
+          ./venv/bin/pip3 install -r requirements.txt
+          ./venv/bin/pip3 install -r requirements-dev.txt
         working-directory: lib/twitch-eventsub-ws/ast
 
       - name: Run pytest
