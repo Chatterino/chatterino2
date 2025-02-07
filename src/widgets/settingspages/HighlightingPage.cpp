@@ -158,7 +158,7 @@ HighlightingPage::HighlightingPage()
                 });
 
                 QObject::connect(view->getTableView(), &QTableView::clicked,
-                                 [this](const QModelIndex &clicked) {
+                                 [this, view](const QModelIndex &clicked) {
                                      this->tableCellClicked(
                                          clicked, view, HighlightTab::Users);
                                  });
@@ -218,7 +218,7 @@ HighlightingPage::HighlightingPage()
                 });
 
                 QObject::connect(view->getTableView(), &QTableView::clicked,
-                                 [this](const QModelIndex &clicked) {
+                                 [this, view](const QModelIndex &clicked) {
                                      this->tableCellClicked(
                                          clicked, view, HighlightTab::Badges);
                                  });
