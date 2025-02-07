@@ -56,7 +56,11 @@ def _is_trivially_copyable(type: clang.cindex.Type) -> bool:
 
 class Member:
     def __init__(
-        self, name: str, member_type: MemberType = MemberType.BASIC, type_name: str = "?", trivial: bool = False
+        self,
+        name: str,
+        member_type: MemberType = MemberType.BASIC,
+        type_name: str = "?",
+        trivial: bool = False,
     ) -> None:
         self.name = name
         self.json_name = name
