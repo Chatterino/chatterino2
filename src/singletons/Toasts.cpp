@@ -120,8 +120,8 @@ void Toasts::sendChannelNotification(const QString &channelName,
                                      const QString &channelTitle)
 {
 #ifdef Q_OS_WIN
-    auto sendChannelNotification = [this, channelName, channelTitle, p] {
-        this->sendWindowsNotification(channelName, channelTitle, p);
+    auto sendChannelNotification = [this, channelName, channelTitle] {
+        this->sendWindowsNotification(channelName, channelTitle);
     };
 #else
     (void)channelTitle;
