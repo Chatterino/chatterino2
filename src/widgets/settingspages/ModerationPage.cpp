@@ -174,22 +174,21 @@ ModerationPage::ModerationPage()
                     getSettings()->enableLogging);
             });
 
-        this->viewLogs_ =
+        EditableModelView *view =
             logs.emplace<EditableModelView>(
                     (new ChannelLoggingModel(nullptr))
                         ->initialized(&getSettings()->loggedChannels))
                 .getElement();
+        this->viewLogs_ = view;
 
-        this->viewLogs_->setTitles({"Twitch channels"});
-        this->viewLogs_->getTableView()
-            ->horizontalHeader()
-            ->setSectionResizeMode(QHeaderView::Fixed);
-        this->viewLogs_->getTableView()
-            ->horizontalHeader()
-            ->setSectionResizeMode(0, QHeaderView::Stretch);
+        view->setTitles({"Twitch channels"});
+        view->getTableView()->horizontalHeader()->setSectionResizeMode(
+            QHeaderView::Fixed);
+        view->getTableView()->horizontalHeader()->setSectionResizeMode(
+            0, QHeaderView::Stretch);
 
         // We can safely ignore this signal connection since we own the view
-        std::ignore = this->viewLogs_->addButtonPressed.connect([] {
+        std::ignore = view->addButtonPressed.connect([] {
             getSettings()->loggedChannels.append(ChannelLog("channel"));
         });
 
@@ -216,46 +215,44 @@ ModerationPage::ModerationPage()
         //                         getSettings()->timeoutAction));
         //        }
 
-        this->viewModerationButtons_ =
+        EditableModelView *view =
             modMode
                 .emplace<EditableModelView>(
                     (new ModerationActionModel(nullptr))
                         ->initialized(&getSettings()->moderationActions))
                 .getElement();
+        this->viewModerationButtons_ = view;
 
-        this->viewModerationButtons_->setTitles({"Action", "Icon"});
-        this->viewModerationButtons_->getTableView()
-            ->horizontalHeader()
-            ->setSectionResizeMode(QHeaderView::Fixed);
-        this->viewModerationButtons_->getTableView()
-            ->horizontalHeader()
-            ->setSectionResizeMode(0, QHeaderView::Stretch);
-        this->viewModerationButtons_->getTableView()->setItemDelegateForColumn(
+        view->setTitles({"Action", "Icon"});
+        view->getTableView()->horizontalHeader()->setSectionResizeMode(
+            QHeaderView::Fixed);
+        view->getTableView()->horizontalHeader()->setSectionResizeMode(
+            0, QHeaderView::Stretch);
+        view->getTableView()->setItemDelegateForColumn(
             ModerationActionModel::Column::Icon,
             new IconDelegate(viewModerationButtons_));
         QObject::connect(
-            this->viewModerationButtons_->getTableView(), &QTableView::clicked,
-            [this](const QModelIndex &clicked) {
+            view->getTableView(), &QTableView::clicked,
+            [this, view](const QModelIndex &clicked) {
                 if (clicked.column() == ModerationActionModel::Column::Icon)
                 {
                     auto fileUrl = QFileDialog::getOpenFileUrl(
                         this, "Open Image", QUrl(),
                         "Image Files (*.png *.jpg *.jpeg)");
-                    this->viewModerationButtons_->getModel()->setData(
-                        clicked, fileUrl, Qt::UserRole);
-                    this->viewModerationButtons_->getModel()->setData(
-                        clicked, fileUrl.fileName(), Qt::DisplayRole);
+                    view->getModel()->setData(clicked, fileUrl, Qt::UserRole);
+                    view->getModel()->setData(clicked, fileUrl.fileName(),
+                                              Qt::DisplayRole);
                     // Clear the icon if the user canceled the dialog
                     if (fileUrl.isEmpty())
                     {
-                        this->viewModerationButtons_->getModel()->setData(
-                            clicked, QVariant(), Qt::DecorationRole);
+                        view->getModel()->setData(clicked, QVariant(),
+                                                  Qt::DecorationRole);
                     }
                     else
                     {
-                        // QPointer will be cleared whenthis->viewModerationButtons_ is destroyed
+                        // QPointer will be cleared whenview is destroyed
                         QPointer<EditableModelView> viewModerationButtonsTemp =
-                            this->viewModerationButtons_;
+                            view;
 
                         loadPixmapFromUrl(
                             {fileUrl.toString()},
@@ -277,12 +274,11 @@ ModerationPage::ModerationPage()
                 }
             });
 
-        // We can safely ignore this signal connection since we own thethis->viewModerationButtons_
-        std::ignore =
-            this->viewModerationButtons_->addButtonPressed.connect([] {
-                getSettings()->moderationActions.append(
-                    ModerationAction("/timeout {user.name} 300"));
-            });
+        // We can safely ignore this signal connection since we own theview
+        std::ignore = view->addButtonPressed.connect([] {
+            getSettings()->moderationActions.append(
+                ModerationAction("/timeout {user.name} 300"));
+        });
     }
 
     this->addModerationButtonSettings(tabs.getElement());
