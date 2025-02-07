@@ -23,7 +23,7 @@ public:
 private:
     QStringListModel userListModel_;
     QTabWidget *tabWidget_;
-    EditableModelView *viewMessages_;
+    EditableModelView *view_;
 
     void addPhrasesTab(LayoutCreator<QVBoxLayout> layout);
 };

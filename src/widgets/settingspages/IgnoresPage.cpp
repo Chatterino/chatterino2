@@ -45,29 +45,28 @@ IgnoresPage::IgnoresPage()
 void IgnoresPage::addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
 {
     layout.emplace<QLabel>("Ignore messages based certain patterns.");
-    this->viewMessages_ =
+    EditableModelView *view =
         layout
             .emplace<EditableModelView>(
                 (new IgnoreModel(nullptr))
                     ->initialized(&getSettings()->ignoredMessages))
             .getElement();
-    this->viewMessages_->setTitles(
+    this->view_ = view;
+    view->setTitles(
         {"Pattern", "Regex", "Case-sensitive", "Block", "Replacement"});
-    this->viewMessages_->getTableView()
-        ->horizontalHeader()
-        ->setSectionResizeMode(QHeaderView::Fixed);
-    this->viewMessages_->getTableView()
-        ->horizontalHeader()
-        ->setSectionResizeMode(0, QHeaderView::Stretch);
-    this->viewMessages_->addRegexHelpLink();
+    view->getTableView()->horizontalHeader()->setSectionResizeMode(
+        QHeaderView::Fixed);
+    view->getTableView()->horizontalHeader()->setSectionResizeMode(
+        0, QHeaderView::Stretch);
+    view->addRegexHelpLink();
 
-    QTimer::singleShot(1, [this] {
-        this->viewMessages_->getTableView()->resizeColumnsToContents();
-        this->viewMessages_->getTableView()->setColumnWidth(0, 200);
+    QTimer::singleShot(1, [view] {
+        view->getTableView()->resizeColumnsToContents();
+        view->getTableView()->setColumnWidth(0, 200);
     });
 
-    // We can safely ignore this signal connection since we own thethis->viewMessages_
-    std::ignore = this->viewMessages_->addButtonPressed.connect([] {
+    // We can safely ignore this signal connection since we own theview
+    std::ignore = view->addButtonPressed.connect([] {
         getSettings()->ignoredMessages.append(
             IgnorePhrase{"my pattern", false, false,
                          getSettings()->ignoredPhraseReplace.getValue(), true});
@@ -147,8 +146,7 @@ bool IgnoresPage::filterElements(const QString &query)
 {
     std::array fields{0, 4};
 
-    bool matchMessages =
-        this->viewMessages_->filterSearchResults(query, fields);
+    bool matchMessages = this->view_->filterSearchResults(query, fields);
     this->tabWidget_->setTabVisible(0, matchMessages);
 
     return matchMessages;
