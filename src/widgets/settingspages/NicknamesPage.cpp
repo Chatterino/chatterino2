@@ -22,30 +22,31 @@ NicknamesPage::NicknamesPage()
         "filters."
         "\nWith those features you will still need to use the user's original "
         "name.");
-    this->view_ = layout
-                      .emplace<EditableModelView>(
-                          (new NicknamesModel(nullptr))
-                              ->initialized(&getSettings()->nicknames))
-                      .getElement();
+    EditableModelView *view =
+        layout
+            .emplace<EditableModelView>(
+                (new NicknamesModel(nullptr))
+                    ->initialized(&getSettings()->nicknames))
+            .getElement();
+    this->view_ = view;
 
-    this->view_->setTitles(
-        {"Username", "Nickname", "Enable regex", "Case-sensitive"});
-    this->view_->getTableView()->horizontalHeader()->setSectionResizeMode(
+    view->setTitles({"Username", "Nickname", "Enable regex", "Case-sensitive"});
+    view->getTableView()->horizontalHeader()->setSectionResizeMode(
         QHeaderView::Fixed);
-    this->view_->getTableView()->horizontalHeader()->setSectionResizeMode(
+    view->getTableView()->horizontalHeader()->setSectionResizeMode(
         0, QHeaderView::Stretch);
-    this->view_->getTableView()->horizontalHeader()->setSectionResizeMode(
+    view->getTableView()->horizontalHeader()->setSectionResizeMode(
         1, QHeaderView::Stretch);
 
-    // We can safely ignore this signal connection since we own the this->view_
-    std::ignore = this->view_->addButtonPressed.connect([] {
+    // We can safely ignore this signal connection since we own the view
+    std::ignore = view->addButtonPressed.connect([] {
         getSettings()->nicknames.append(
             Nickname{"Username", "Nickname", false, false});
     });
 
-    QTimer::singleShot(1, [this] {
-        this->view_->getTableView()->resizeColumnsToContents();
-        this->view_->getTableView()->setColumnWidth(0, 200);
+    QTimer::singleShot(1, [view] {
+        view->getTableView()->resizeColumnsToContents();
+        view->getTableView()->setColumnWidth(0, 200);
     });
 }
 
