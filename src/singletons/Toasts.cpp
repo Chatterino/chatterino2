@@ -260,7 +260,7 @@ void Toasts::sendWindowsNotification(const QString &channelName,
     }
 
     WinToast::WinToastError error = WinToast::NoError;
-    WinToast::instance()->showToast(templ, new CustomHandler(channelName, p),
+    WinToast::instance()->showToast(templ, new CustomHandler(channelName),
                                     &error);
     if (error != WinToast::NoError)
     {
