@@ -25,11 +25,12 @@ FiltersPage::FiltersPage()
     layout.emplace<QLabel>(
         "Selectively display messages in Splits using channel filters. Set "
         "filters under a Split menu.");
-    auto *view = layout
-                     .emplace<EditableModelView>(
-                         (new FilterModel(nullptr))
-                             ->initialized(&getSettings()->filterRecords))
-                     .getElement();
+    EditableModelView *view =
+        layout
+            .emplace<EditableModelView>(
+                (new FilterModel(nullptr))
+                    ->initialized(&getSettings()->filterRecords))
+            .getElement();
     this->view_ = view;
 
     view->setTitles({"Name", "Filter", "Valid"});
@@ -61,7 +62,7 @@ FiltersPage::FiltersPage()
     });
     view->addCustomButton(quickAddButton);
 
-    QObject::connect(view_->getTableView(), &QTableView::clicked,
+    QObject::connect(view->getTableView(), &QTableView::clicked,
                      [this, view](const QModelIndex &clicked) {
                          this->tableCellClicked(clicked, view);
                      });
