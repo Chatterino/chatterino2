@@ -117,7 +117,7 @@ QString Toasts::findStringFromReaction(
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Toasts::sendChannelNotification(const QString &channelName,
-                                     const QString &channelTitle, Platform p)
+                                     const QString &channelTitle)
 {
 #ifdef Q_OS_WIN
     auto sendChannelNotification = [this, channelName, channelTitle, p] {
@@ -130,28 +130,25 @@ void Toasts::sendChannelNotification(const QString &channelName,
     };
 #endif
     // Fetch user profile avatar
-    if (p == Platform::Twitch)
+    if (hasAvatarForChannel(channelName))
     {
-        if (hasAvatarForChannel(channelName))
-        {
-            sendChannelNotification();
-        }
-        else
-        {
-            getHelix()->getUserByName(
-                channelName,
-                [channelName, sendChannelNotification](const auto &user) {
-                    // gets deleted when finished
-                    auto *downloader =
-                        new AvatarDownloader(user.profileImageUrl, channelName);
-                    QObject::connect(downloader,
-                                     &AvatarDownloader::downloadComplete,
-                                     sendChannelNotification);
-                },
-                [] {
-                    // on failure
-                });
-        }
+        sendChannelNotification();
+    }
+    else
+    {
+        getHelix()->getUserByName(
+            channelName,
+            [channelName, sendChannelNotification](const auto &user) {
+                // gets deleted when finished
+                auto *downloader =
+                    new AvatarDownloader(user.profileImageUrl, channelName);
+                QObject::connect(downloader,
+                                 &AvatarDownloader::downloadComplete,
+                                 sendChannelNotification);
+            },
+            [] {
+                // on failure
+            });
     }
 }
 
@@ -161,12 +158,10 @@ class CustomHandler : public WinToastLib::IWinToastHandler
 {
 private:
     QString channelName_;
-    Platform platform_;
 
 public:
-    CustomHandler(QString channelName, Platform p)
+    CustomHandler(QString channelName)
         : channelName_(std::move(channelName))
-        , platform_(p)
     {
     }
     void toastActivated() const override
@@ -177,18 +172,12 @@ public:
         switch (toastReaction)
         {
             case ToastReaction::OpenInBrowser:
-                if (platform_ == Platform::Twitch)
-                {
-                    QDesktopServices::openUrl(
-                        QUrl(u"https://www.twitch.tv/" % channelName_));
-                }
+                QDesktopServices::openUrl(
+                    QUrl(u"https://www.twitch.tv/" % channelName_));
                 break;
             case ToastReaction::OpenInPlayer:
-                if (platform_ == Platform::Twitch)
-                {
-                    QDesktopServices::openUrl(
-                        QUrl(TWITCH_PLAYER_URL.arg(channelName_)));
-                }
+                QDesktopServices::openUrl(
+                    QUrl(TWITCH_PLAYER_URL.arg(channelName_)));
                 break;
             case ToastReaction::OpenInStreamlink: {
                 openStreamlinkForChannel(channelName_);
@@ -242,7 +231,7 @@ void Toasts::ensureInitialized()
 }
 
 void Toasts::sendWindowsNotification(const QString &channelName,
-                                     const QString &channelTitle, Platform p)
+                                     const QString &channelTitle)
 {
     this->ensureInitialized();
 
@@ -263,10 +252,7 @@ void Toasts::sendWindowsNotification(const QString &channelName,
     }
 
     QString avatarPath;
-    if (p == Platform::Twitch)
-    {
-        avatarPath = avatarFilePath(channelName);
-    }
+    avatarPath = avatarFilePath(channelName);
     templ.setImagePath(avatarPath.toStdWString());
     if (getSettings()->notificationPlaySound)
     {
