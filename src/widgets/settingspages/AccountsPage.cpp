@@ -24,22 +24,23 @@ AccountsPage::AccountsPage()
     LayoutCreator<AccountsPage> layoutCreator(this);
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
-    this->view_ = layout
-                      .emplace<EditableModelView>(
-                          app->getAccounts()->createModel(nullptr), false)
-                      .getElement();
+    EditableModelView *view =
+        layout
+            .emplace<EditableModelView>(
+                app->getAccounts()->createModel(nullptr), false)
+            .getElement();
+    this->view_ = view;
 
-    this->view_->getTableView()->horizontalHeader()->setVisible(false);
-    this->view_->getTableView()->horizontalHeader()->setStretchLastSection(
-        true);
+    view->getTableView()->horizontalHeader()->setVisible(false);
+    view->getTableView()->horizontalHeader()->setStretchLastSection(true);
 
     // We can safely ignore this signal connection since we own the view
-    std::ignore = this->view_->addButtonPressed.connect([this] {
+    std::ignore = view->addButtonPressed.connect([this] {
         LoginDialog d(this);
         d.exec();
     });
 
-    this->view_->getTableView()->setStyleSheet("background: #333");
+    view->getTableView()->setStyleSheet("background: #333");
 
     //    auto buttons = layout.emplace<QDialogButtonBox>();
     //    {
