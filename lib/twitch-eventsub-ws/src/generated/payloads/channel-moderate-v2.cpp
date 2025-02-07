@@ -1307,7 +1307,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto actionTagRes = jvactionTag->try_as_string();
+    auto actionTagRes =
+        boost::json::try_value_to<boost::json::string>(*jvactionTag);
     if (actionTagRes.has_error())
     {
         return actionTagRes.error();
@@ -1316,8 +1317,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     decltype(std::declval<Event>().action) action;
     if (actionTag == Ban::TAG)
     {
-        auto actionVal = root.try_at(detail::fieldFor<Ban>());
-        if (actionVal.has_error())
+        const auto *actionVal = root.if_contains(detail::fieldFor<Ban>());
+        if (!actionVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1330,8 +1331,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (actionTag == Timeout::TAG)
     {
-        auto actionVal = root.try_at(detail::fieldFor<Timeout>());
-        if (actionVal.has_error())
+        const auto *actionVal = root.if_contains(detail::fieldFor<Timeout>());
+        if (!actionVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1344,8 +1345,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (actionTag == Unban::TAG)
     {
-        auto actionVal = root.try_at(detail::fieldFor<Unban>());
-        if (actionVal.has_error())
+        const auto *actionVal = root.if_contains(detail::fieldFor<Unban>());
+        if (!actionVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1358,8 +1359,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (actionTag == Untimeout::TAG)
     {
-        auto actionVal = root.try_at(detail::fieldFor<Untimeout>());
-        if (actionVal.has_error())
+        const auto *actionVal = root.if_contains(detail::fieldFor<Untimeout>());
+        if (!actionVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1384,8 +1385,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (actionTag == Followers::TAG)
     {
-        auto actionVal = root.try_at(detail::fieldFor<Followers>());
-        if (actionVal.has_error())
+        const auto *actionVal = root.if_contains(detail::fieldFor<Followers>());
+        if (!actionVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1410,8 +1411,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (actionTag == Slow::TAG)
     {
-        auto actionVal = root.try_at(detail::fieldFor<Slow>());
-        if (actionVal.has_error())
+        const auto *actionVal = root.if_contains(detail::fieldFor<Slow>());
+        if (!actionVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1436,8 +1437,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (actionTag == Unraid::TAG)
     {
-        auto actionVal = root.try_at(detail::fieldFor<Unraid>());
-        if (actionVal.has_error())
+        const auto *actionVal = root.if_contains(detail::fieldFor<Unraid>());
+        if (!actionVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1450,8 +1451,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (actionTag == Delete::TAG)
     {
-        auto actionVal = root.try_at(detail::fieldFor<Delete>());
-        if (actionVal.has_error())
+        const auto *actionVal = root.if_contains(detail::fieldFor<Delete>());
+        if (!actionVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1464,8 +1465,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (actionTag == Unvip::TAG)
     {
-        auto actionVal = root.try_at(detail::fieldFor<Unvip>());
-        if (actionVal.has_error())
+        const auto *actionVal = root.if_contains(detail::fieldFor<Unvip>());
+        if (!actionVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1478,8 +1479,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (actionTag == Vip::TAG)
     {
-        auto actionVal = root.try_at(detail::fieldFor<Vip>());
-        if (actionVal.has_error())
+        const auto *actionVal = root.if_contains(detail::fieldFor<Vip>());
+        if (!actionVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1492,8 +1493,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (actionTag == Raid::TAG)
     {
-        auto actionVal = root.try_at(detail::fieldFor<Raid>());
-        if (actionVal.has_error())
+        const auto *actionVal = root.if_contains(detail::fieldFor<Raid>());
+        if (!actionVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1522,8 +1523,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (actionTag == Mod::TAG)
     {
-        auto actionVal = root.try_at(detail::fieldFor<Mod>());
-        if (actionVal.has_error())
+        const auto *actionVal = root.if_contains(detail::fieldFor<Mod>());
+        if (!actionVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1536,8 +1537,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (actionTag == Unmod::TAG)
     {
-        auto actionVal = root.try_at(detail::fieldFor<Unmod>());
-        if (actionVal.has_error())
+        const auto *actionVal = root.if_contains(detail::fieldFor<Unmod>());
+        if (!actionVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1558,8 +1559,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (actionTag == Warn::TAG)
     {
-        auto actionVal = root.try_at(detail::fieldFor<Warn>());
-        if (actionVal.has_error())
+        const auto *actionVal = root.if_contains(detail::fieldFor<Warn>());
+        if (!actionVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }

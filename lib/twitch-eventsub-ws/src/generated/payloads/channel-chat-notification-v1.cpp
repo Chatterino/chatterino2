@@ -1446,7 +1446,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto innerTagRes = jvinnerTag->try_as_string();
+    auto innerTagRes =
+        boost::json::try_value_to<boost::json::string>(*jvinnerTag);
     if (innerTagRes.has_error())
     {
         return innerTagRes.error();
@@ -1455,8 +1456,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     decltype(std::declval<Event>().inner) inner;
     if (innerTag == Subcription::TAG)
     {
-        auto innerVal = root.try_at(detail::fieldFor<Subcription>());
-        if (innerVal.has_error())
+        const auto *innerVal =
+            root.if_contains(detail::fieldFor<Subcription>());
+        if (!innerVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1470,8 +1472,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (innerTag == Resubscription::TAG)
     {
-        auto innerVal = root.try_at(detail::fieldFor<Resubscription>());
-        if (innerVal.has_error())
+        const auto *innerVal =
+            root.if_contains(detail::fieldFor<Resubscription>());
+        if (!innerVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1485,8 +1488,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (innerTag == GiftSubscription::TAG)
     {
-        auto innerVal = root.try_at(detail::fieldFor<GiftSubscription>());
-        if (innerVal.has_error())
+        const auto *innerVal =
+            root.if_contains(detail::fieldFor<GiftSubscription>());
+        if (!innerVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1501,9 +1505,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (innerTag == CommunityGiftSubscription::TAG)
     {
-        auto innerVal =
-            root.try_at(detail::fieldFor<CommunityGiftSubscription>());
-        if (innerVal.has_error())
+        const auto *innerVal =
+            root.if_contains(detail::fieldFor<CommunityGiftSubscription>());
+        if (!innerVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1518,8 +1522,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (innerTag == GiftPaidUpgrade::TAG)
     {
-        auto innerVal = root.try_at(detail::fieldFor<GiftPaidUpgrade>());
-        if (innerVal.has_error())
+        const auto *innerVal =
+            root.if_contains(detail::fieldFor<GiftPaidUpgrade>());
+        if (!innerVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1533,8 +1538,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (innerTag == PrimePaidUpgrade::TAG)
     {
-        auto innerVal = root.try_at(detail::fieldFor<PrimePaidUpgrade>());
-        if (innerVal.has_error())
+        const auto *innerVal =
+            root.if_contains(detail::fieldFor<PrimePaidUpgrade>());
+        if (!innerVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1549,8 +1555,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (innerTag == Raid::TAG)
     {
-        auto innerVal = root.try_at(detail::fieldFor<Raid>());
-        if (innerVal.has_error())
+        const auto *innerVal = root.if_contains(detail::fieldFor<Raid>());
+        if (!innerVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1567,8 +1573,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (innerTag == PayItForward::TAG)
     {
-        auto innerVal = root.try_at(detail::fieldFor<PayItForward>());
-        if (innerVal.has_error())
+        const auto *innerVal =
+            root.if_contains(detail::fieldFor<PayItForward>());
+        if (!innerVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1582,8 +1589,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (innerTag == Announcement::TAG)
     {
-        auto innerVal = root.try_at(detail::fieldFor<Announcement>());
-        if (innerVal.has_error())
+        const auto *innerVal =
+            root.if_contains(detail::fieldFor<Announcement>());
+        if (!innerVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1597,8 +1605,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (innerTag == CharityDonation::TAG)
     {
-        auto innerVal = root.try_at(detail::fieldFor<CharityDonation>());
-        if (innerVal.has_error())
+        const auto *innerVal =
+            root.if_contains(detail::fieldFor<CharityDonation>());
+        if (!innerVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }
@@ -1612,8 +1621,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (innerTag == BitsBadgeTier::TAG)
     {
-        auto innerVal = root.try_at(detail::fieldFor<BitsBadgeTier>());
-        if (innerVal.has_error())
+        const auto *innerVal =
+            root.if_contains(detail::fieldFor<BitsBadgeTier>());
+        if (!innerVal)
         {
             EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
         }

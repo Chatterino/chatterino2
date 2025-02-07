@@ -7,7 +7,7 @@ if (jv{{field.name}}Tag == nullptr)
     EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
 }
 
-auto {{field.name}}TagRes = jv{{field.name}}Tag->try_as_string();
+auto {{field.name}}TagRes = boost::json::try_value_to<boost::json::string>(*jv{{field.name}}Tag);
 if ({{field.name}}TagRes.has_error())
 {
     return {{field.name}}TagRes.error();
@@ -21,8 +21,8 @@ decltype(std::declval<{{struct.full_name}}>().{{field.name}}) {{field.name}};
 {%- if type.empty -%}
     {{field.name}}.emplace<{{type.name}}>();
 {%- else -%}
-    auto {{field.name}}Val = root.try_at(detail::fieldFor<{{type.name}}>());
-    if ({{field.name}}Val.has_error())
+    const auto *{{field.name}}Val = root.if_contains(detail::fieldFor<{{type.name}}>());
+    if (!{{field.name}}Val)
     {
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
