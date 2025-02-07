@@ -1,5 +1,5 @@
 boost::json::result_for<{{struct.full_name}}, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<{{struct.full_name}}>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<{{struct.full_name}}> /* tag */, const boost::json::value &jvRoot)
 {
     {% if struct.inner_root %}
     if (!jvRoot.is_object())
@@ -18,7 +18,7 @@ boost::json::result_for<{{struct.full_name}}, boost::json::value>::type tag_invo
         EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvInnerRoot->get_object();
-    {% else %}
+    {% elif struct.members|length %}
     if (!jvRoot.is_object())
     {
         EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
@@ -27,6 +27,9 @@ boost::json::result_for<{{struct.full_name}}, boost::json::value>::type tag_invo
     {% endif %}
 
 {% for field in struct.members %}
+    {% if field.trivial -%}
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<decltype(std::declval<{{struct.full_name}}>().{{field.name}})>>);
+    {%- endif -%}
     {% if field.member_type == MemberType.BASIC -%}
     {% include 'field-basic.tmpl' indent content %}
     {%- elif field.member_type == MemberType.VECTOR -%}

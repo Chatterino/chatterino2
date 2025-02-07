@@ -28,18 +28,42 @@ def get_type_name(type: clang.cindex.Type, namespace: tuple[str, ...]) -> str:
     return type_name
 
 
+def _get_template_name(type: clang.cindex.Type) -> str:
+    type = type.get_canonical()
+    if type.get_num_template_arguments() < 1:
+        return type.spelling
+    name: str = type.spelling
+    if type.is_const_qualified():
+        name.removeprefix("const ")
+    return name[: name.index("<")]
+
+
+def _is_chrono_like_type(type: clang.cindex.Type) -> bool:
+    return _get_template_name(type) in ("std::chrono::time_point", "std::chrono::duration")
+
+
+# clang's C API doesn't expose this, so we emulate it
+def _is_trivially_copyable(type: clang.cindex.Type) -> bool:
+    # remove optional wrapper(s)
+    type = type.get_canonical()
+    while type.get_num_template_arguments() and _get_template_name(type) == "std::optional":
+        type = type.get_template_argument_type(0).get_canonical()
+
+    if type.is_pod():
+        return True
+    return _is_chrono_like_type(type)
+
+
 class Member:
     def __init__(
-        self,
-        name: str,
-        member_type: MemberType = MemberType.BASIC,
-        type_name: str = "?",
+        self, name: str, member_type: MemberType = MemberType.BASIC, type_name: str = "?", trivial: bool = False
     ) -> None:
         self.name = name
         self.json_name = name
         self.member_type = member_type
         self.type_name = type_name
         self.tag: Optional[str] = None
+        self.trivial = trivial
 
         self.dont_fail_on_deserialization: bool = False
 
@@ -124,7 +148,7 @@ class Member:
                 if overwrite_member_type is not None:
                     member_type = overwrite_member_type
 
-        member = Member(name, member_type, type_name)
+        member = Member(name, member_type, type_name, _is_trivially_copyable(node.type))
 
         if node.raw_comment is not None:
             comment_commands = parse_comment_commands(node.raw_comment)

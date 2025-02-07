@@ -8,7 +8,8 @@
 namespace chatterino::eventsub::lib::payload::channel_moderate::v2 {
 
 boost::json::result_for<Action, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Action>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Action> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_string())
     {
@@ -158,7 +159,8 @@ boost::json::result_for<Action, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<Followers, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Followers>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Followers> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -166,6 +168,9 @@ boost::json::result_for<Followers, boost::json::value>::type tag_invoke(
     }
     const auto &root = jvRoot.get_object();
 
+    static_assert(
+        std::is_trivially_copyable_v<std::remove_reference_t<
+            decltype(std::declval<Followers>().followDurationMinutes)>>);
     const auto *jvfollowDurationMinutes =
         root.if_contains("follow_duration_minutes");
     if (jvfollowDurationMinutes == nullptr)
@@ -182,12 +187,13 @@ boost::json::result_for<Followers, boost::json::value>::type tag_invoke(
     }
 
     return Followers{
-        .followDurationMinutes = std::move(followDurationMinutes.value()),
+        .followDurationMinutes = followDurationMinutes.value(),
     };
 }
 
 boost::json::result_for<Slow, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Slow>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Slow> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -195,6 +201,8 @@ boost::json::result_for<Slow, boost::json::value>::type tag_invoke(
     }
     const auto &root = jvRoot.get_object();
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<Slow>().waitTimeSeconds)>>);
     const auto *jvwaitTimeSeconds = root.if_contains("wait_time_seconds");
     if (jvwaitTimeSeconds == nullptr)
     {
@@ -209,12 +217,13 @@ boost::json::result_for<Slow, boost::json::value>::type tag_invoke(
     }
 
     return Slow{
-        .waitTimeSeconds = std::move(waitTimeSeconds.value()),
+        .waitTimeSeconds = waitTimeSeconds.value(),
     };
 }
 
 boost::json::result_for<Vip, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Vip>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Vip> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -269,7 +278,8 @@ boost::json::result_for<Vip, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<Unvip, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Unvip>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Unvip> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -324,7 +334,8 @@ boost::json::result_for<Unvip, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<Mod, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Mod>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Mod> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -379,7 +390,8 @@ boost::json::result_for<Mod, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<Unmod, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Unmod>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Unmod> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -434,7 +446,8 @@ boost::json::result_for<Unmod, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<Ban, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Ban>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Ban> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -503,7 +516,8 @@ boost::json::result_for<Ban, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<Unban, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Unban>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Unban> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -558,7 +572,8 @@ boost::json::result_for<Unban, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Timeout>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Timeout> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -641,7 +656,8 @@ boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<Untimeout, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Untimeout>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Untimeout> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -696,7 +712,8 @@ boost::json::result_for<Untimeout, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Raid>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Raid> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -743,6 +760,8 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
         return userName.error();
     }
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<Raid>().viewerCount)>>);
     const auto *jvviewerCount = root.if_contains("viewer_count");
     if (jvviewerCount == nullptr)
     {
@@ -760,12 +779,13 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
         .userID = std::move(userID.value()),
         .userLogin = std::move(userLogin.value()),
         .userName = std::move(userName.value()),
-        .viewerCount = std::move(viewerCount.value()),
+        .viewerCount = viewerCount.value(),
     };
 }
 
 boost::json::result_for<Unraid, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Unraid>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Unraid> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -820,7 +840,8 @@ boost::json::result_for<Unraid, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Delete>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Delete> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -903,7 +924,7 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<AutomodTerms, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<AutomodTerms>,
+    boost::json::try_value_to_tag<AutomodTerms> /* tag */,
     const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
@@ -943,13 +964,14 @@ boost::json::result_for<AutomodTerms, boost::json::value>::type tag_invoke(
     {
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
-    const auto terms =
-        boost::json::try_value_to<std::vector<std::string>>(*jvterms);
+    auto terms = boost::json::try_value_to<std::vector<std::string>>(*jvterms);
     if (terms.has_error())
     {
         return terms.error();
     }
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<AutomodTerms>().fromAutomod)>>);
     const auto *jvfromAutomod = root.if_contains("from_automod");
     if (jvfromAutomod == nullptr)
     {
@@ -966,13 +988,13 @@ boost::json::result_for<AutomodTerms, boost::json::value>::type tag_invoke(
     return AutomodTerms{
         .action = std::move(action.value()),
         .list = std::move(list.value()),
-        .terms = terms.value(),
-        .fromAutomod = std::move(fromAutomod.value()),
+        .terms = std::move(terms.value()),
+        .fromAutomod = fromAutomod.value(),
     };
 }
 
 boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<UnbanRequest>,
+    boost::json::try_value_to_tag<UnbanRequest> /* tag */,
     const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
@@ -981,6 +1003,8 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
     }
     const auto &root = jvRoot.get_object();
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<UnbanRequest>().isApproved)>>);
     const auto *jvisApproved = root.if_contains("is_approved");
     if (jvisApproved == nullptr)
     {
@@ -1048,7 +1072,7 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
     }
 
     return UnbanRequest{
-        .isApproved = std::move(isApproved.value()),
+        .isApproved = isApproved.value(),
         .userID = std::move(userID.value()),
         .userLogin = std::move(userLogin.value()),
         .userName = std::move(userName.value()),
@@ -1057,7 +1081,8 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Warn>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Warn> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -1122,7 +1147,7 @@ boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
     {
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
-    const auto chatRulesCited =
+    auto chatRulesCited =
         boost::json::try_value_to<std::vector<std::string>>(*jvchatRulesCited);
     if (chatRulesCited.has_error())
     {
@@ -1134,12 +1159,13 @@ boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
         .userLogin = std::move(userLogin.value()),
         .userName = std::move(userName.value()),
         .reason = std::move(reason.value()),
-        .chatRulesCited = chatRulesCited.value(),
+        .chatRulesCited = std::move(chatRulesCited.value()),
     };
 }
 
 boost::json::result_for<Event, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Event>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Event> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -1285,6 +1311,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return moderatorUserName.error();
     }
 
+    static_assert(
+        std::is_trivially_copyable_v<
+            std::remove_reference_t<decltype(std::declval<Event>().action)>>);
     const auto *jvaction = root.if_contains("action");
     if (jvaction == nullptr)
     {
@@ -1298,6 +1327,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return action.error();
     }
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<Event>().followers)>>);
     std::optional<Followers> followers = std::nullopt;
     const auto *jvfollowers = root.if_contains("followers");
     if (jvfollowers != nullptr && !jvfollowers->is_null())
@@ -1308,9 +1339,12 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         {
             return tfollowers.error();
         }
-        followers = std::move(tfollowers.value());
+        followers = tfollowers.value();
     }
 
+    static_assert(
+        std::is_trivially_copyable_v<
+            std::remove_reference_t<decltype(std::declval<Event>().slow)>>);
     std::optional<Slow> slow = std::nullopt;
     const auto *jvslow = root.if_contains("slow");
     if (jvslow != nullptr && !jvslow->is_null())
@@ -1321,7 +1355,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         {
             return tslow.error();
         }
-        slow = std::move(tslow.value());
+        slow = tslow.value();
     }
 
     std::optional<Vip> vip = std::nullopt;
@@ -1576,9 +1610,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         .moderatorUserID = std::move(moderatorUserID.value()),
         .moderatorUserLogin = std::move(moderatorUserLogin.value()),
         .moderatorUserName = std::move(moderatorUserName.value()),
-        .action = std::move(action.value()),
-        .followers = std::move(followers),
-        .slow = std::move(slow),
+        .action = action.value(),
+        .followers = followers,
+        .slow = slow,
         .vip = std::move(vip),
         .unvip = std::move(unvip),
         .unmod = std::move(unmod),
@@ -1601,7 +1635,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Payload>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Payload> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {

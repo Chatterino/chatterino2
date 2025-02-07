@@ -8,7 +8,8 @@
 namespace chatterino::eventsub::lib::payload::channel_ban::v1 {
 
 boost::json::result_for<Event, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Event>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Event> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -154,6 +155,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return reason.error();
     }
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<Event>().isPermanent)>>);
     const auto *jvisPermanent = root.if_contains("is_permanent");
     if (jvisPermanent == nullptr)
     {
@@ -167,6 +170,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return isPermanent.error();
     }
 
+    static_assert(
+        std::is_trivially_copyable_v<
+            std::remove_reference_t<decltype(std::declval<Event>().bannedAt)>>);
     const auto *jvbannedAt = root.if_contains("banned_at");
     if (jvbannedAt == nullptr)
     {
@@ -182,6 +188,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return bannedAt.error();
     }
 
+    static_assert(
+        std::is_trivially_copyable_v<
+            std::remove_reference_t<decltype(std::declval<Event>().endsAt)>>);
     std::optional<std::chrono::system_clock::time_point> endsAt = std::nullopt;
     const auto *jvendsAt = root.if_contains("ends_at");
     if (jvendsAt != nullptr && !jvendsAt->is_null())
@@ -194,7 +203,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         {
             return tendsAt.error();
         }
-        endsAt = std::move(tendsAt.value());
+        endsAt = tendsAt.value();
     }
 
     return Event{
@@ -208,14 +217,15 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         .userLogin = std::move(userLogin.value()),
         .userName = std::move(userName.value()),
         .reason = std::move(reason.value()),
-        .isPermanent = std::move(isPermanent.value()),
-        .bannedAt = std::move(bannedAt.value()),
-        .endsAt = std::move(endsAt),
+        .isPermanent = isPermanent.value(),
+        .bannedAt = bannedAt.value(),
+        .endsAt = endsAt,
     };
 }
 
 boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Payload>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Payload> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {

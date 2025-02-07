@@ -8,7 +8,8 @@
 namespace chatterino::eventsub::lib::payload::channel_chat_message::v1 {
 
 boost::json::result_for<Badge, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Badge>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Badge> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -63,7 +64,8 @@ boost::json::result_for<Badge, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Cheermote>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Cheermote> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -84,6 +86,9 @@ boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
         return prefix.error();
     }
 
+    static_assert(
+        std::is_trivially_copyable_v<
+            std::remove_reference_t<decltype(std::declval<Cheermote>().bits)>>);
     const auto *jvbits = root.if_contains("bits");
     if (jvbits == nullptr)
     {
@@ -97,6 +102,9 @@ boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
         return bits.error();
     }
 
+    static_assert(
+        std::is_trivially_copyable_v<
+            std::remove_reference_t<decltype(std::declval<Cheermote>().tier)>>);
     const auto *jvtier = root.if_contains("tier");
     if (jvtier == nullptr)
     {
@@ -112,13 +120,14 @@ boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
 
     return Cheermote{
         .prefix = std::move(prefix.value()),
-        .bits = std::move(bits.value()),
-        .tier = std::move(tier.value()),
+        .bits = bits.value(),
+        .tier = tier.value(),
     };
 }
 
 boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Emote>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Emote> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -170,7 +179,7 @@ boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
     {
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
-    const auto format =
+    auto format =
         boost::json::try_value_to<std::vector<std::string>>(*jvformat);
     if (format.has_error())
     {
@@ -181,12 +190,13 @@ boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
         .id = std::move(id.value()),
         .emoteSetID = std::move(emoteSetID.value()),
         .ownerID = std::move(ownerID.value()),
-        .format = format.value(),
+        .format = std::move(format.value()),
     };
 }
 
 boost::json::result_for<Mention, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Mention>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Mention> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -241,7 +251,7 @@ boost::json::result_for<Mention, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<MessageFragment>,
+    boost::json::try_value_to_tag<MessageFragment> /* tag */,
     const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
@@ -325,7 +335,8 @@ boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<Message, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Message>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Message> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -351,7 +362,7 @@ boost::json::result_for<Message, boost::json::value>::type tag_invoke(
     {
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
-    const auto fragments =
+    auto fragments =
         boost::json::try_value_to<std::vector<MessageFragment>>(*jvfragments);
     if (fragments.has_error())
     {
@@ -360,12 +371,13 @@ boost::json::result_for<Message, boost::json::value>::type tag_invoke(
 
     return Message{
         .text = std::move(text.value()),
-        .fragments = fragments.value(),
+        .fragments = std::move(fragments.value()),
     };
 }
 
 boost::json::result_for<Cheer, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Cheer>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Cheer> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -373,6 +385,9 @@ boost::json::result_for<Cheer, boost::json::value>::type tag_invoke(
     }
     const auto &root = jvRoot.get_object();
 
+    static_assert(
+        std::is_trivially_copyable_v<
+            std::remove_reference_t<decltype(std::declval<Cheer>().bits)>>);
     const auto *jvbits = root.if_contains("bits");
     if (jvbits == nullptr)
     {
@@ -387,12 +402,13 @@ boost::json::result_for<Cheer, boost::json::value>::type tag_invoke(
     }
 
     return Cheer{
-        .bits = std::move(bits.value()),
+        .bits = bits.value(),
     };
 }
 
 boost::json::result_for<Reply, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Reply>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Reply> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -538,7 +554,8 @@ boost::json::result_for<Reply, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<Event, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Event>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Event> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -650,8 +667,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     {
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
-    const auto badges =
-        boost::json::try_value_to<std::vector<Badge>>(*jvbadges);
+    auto badges = boost::json::try_value_to<std::vector<Badge>>(*jvbadges);
     if (badges.has_error())
     {
         return badges.error();
@@ -696,6 +712,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return message.error();
     }
 
+    static_assert(
+        std::is_trivially_copyable_v<
+            std::remove_reference_t<decltype(std::declval<Event>().cheer)>>);
     std::optional<Cheer> cheer = std::nullopt;
     const auto *jvcheer = root.if_contains("cheer");
     if (jvcheer != nullptr && !jvcheer->is_null())
@@ -706,7 +725,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         {
             return tcheer.error();
         }
-        cheer = std::move(tcheer.value());
+        cheer = tcheer.value();
     }
 
     std::optional<Reply> reply = std::nullopt;
@@ -748,18 +767,19 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         .chatterUserLogin = std::move(chatterUserLogin.value()),
         .chatterUserName = std::move(chatterUserName.value()),
         .color = std::move(color.value()),
-        .badges = badges.value(),
+        .badges = std::move(badges.value()),
         .messageID = std::move(messageID.value()),
         .messageType = std::move(messageType.value()),
         .message = std::move(message.value()),
-        .cheer = std::move(cheer),
+        .cheer = cheer,
         .reply = std::move(reply),
         .channelPointsCustomRewardID = std::move(channelPointsCustomRewardID),
     };
 }
 
 boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Payload>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Payload> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {

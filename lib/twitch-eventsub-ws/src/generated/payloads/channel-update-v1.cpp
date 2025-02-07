@@ -8,7 +8,8 @@
 namespace chatterino::eventsub::lib::payload::channel_update::v1 {
 
 boost::json::result_for<Event, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Event>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Event> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -112,6 +113,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return categoryName.error();
     }
 
+    static_assert(
+        std::is_trivially_copyable_v<
+            std::remove_reference_t<decltype(std::declval<Event>().isMature)>>);
     const auto *jvisMature = root.if_contains("is_mature");
     if (jvisMature == nullptr)
     {
@@ -133,12 +137,13 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         .language = std::move(language.value()),
         .categoryID = std::move(categoryID.value()),
         .categoryName = std::move(categoryName.value()),
-        .isMature = std::move(isMature.value()),
+        .isMature = isMature.value(),
     };
 }
 
 boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Payload>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Payload> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {

@@ -8,7 +8,8 @@
 namespace chatterino::eventsub::lib::payload::subscription {
 
 boost::json::result_for<Transport, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Transport>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Transport> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -49,7 +50,7 @@ boost::json::result_for<Transport, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Subscription>,
+    boost::json::try_value_to_tag<Subscription> /* tag */,
     const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
@@ -136,6 +137,8 @@ boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
         return createdAt.error();
     }
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<Subscription>().cost)>>);
     const auto *jvcost = root.if_contains("cost");
     if (jvcost == nullptr)
     {
@@ -156,7 +159,7 @@ boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
         .version = std::move(version.value()),
         .transport = std::move(transport.value()),
         .createdAt = std::move(createdAt.value()),
-        .cost = std::move(cost.value()),
+        .cost = cost.value(),
     };
 }
 
