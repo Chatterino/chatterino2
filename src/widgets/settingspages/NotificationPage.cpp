@@ -94,28 +94,29 @@ NotificationPage::NotificationPage()
                     "These are the channels for which you will be informed "
                     "when they go live:");
 
-                this->view_ = twitchChannels
-                                  .emplace<EditableModelView>(
-                                      getApp()->getNotifications()->createModel(
-                                          nullptr, Platform::Twitch))
-                                  .getElement();
-                this->view_->setTitles({"Twitch channels"});
-                this->view_->setValidationRegexp(twitchUserNameRegexp());
+                EditableModelView *view =
+                    twitchChannels
+                        .emplace<EditableModelView>(
+                            getApp()->getNotifications()->createModel(
+                                nullptr, Platform::Twitch))
+                        .getElement();
+                this->view_ = view;
 
-                this->view_->getTableView()
-                    ->horizontalHeader()
-                    ->setSectionResizeMode(QHeaderView::Fixed);
-                this->view_->getTableView()
-                    ->horizontalHeader()
-                    ->setSectionResizeMode(0, QHeaderView::Stretch);
+                view->setTitles({"Twitch channels"});
+                view->setValidationRegexp(twitchUserNameRegexp());
 
-                QTimer::singleShot(1, [this] {
-                    this->view_->getTableView()->resizeColumnsToContents();
-                    this->view_->getTableView()->setColumnWidth(0, 200);
+                view->getTableView()->horizontalHeader()->setSectionResizeMode(
+                    QHeaderView::Fixed);
+                view->getTableView()->horizontalHeader()->setSectionResizeMode(
+                    0, QHeaderView::Stretch);
+
+                QTimer::singleShot(1, [view] {
+                    view->getTableView()->resizeColumnsToContents();
+                    view->getTableView()->setColumnWidth(0, 200);
                 });
 
-                // We can safely ignore this signal connection since we own the this->view_
-                std::ignore = this->view_->addButtonPressed.connect([] {
+                // We can safely ignore this signal connection since we own the view
+                std::ignore = view->addButtonPressed.connect([] {
                     getApp()->getNotifications()->addChannelNotification(
                         "channel", Platform::Twitch);
                 });
