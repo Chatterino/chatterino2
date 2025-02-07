@@ -124,9 +124,9 @@ jobs:
           python3 -m venv venv
           pip3 install -r requirements.txt
           pip3 install -r requirements-dev.txt
-        working-directory: lib/twitch-eventsub/ws/ast
+        working-directory: lib/twitch-eventsub-ws/ast
 
       - name: Run pytest
         run: |
           ./venv/bin/pytest
-        working-directory: lib/twitch-eventsub/ws/ast
+        working-directory: lib/twitch-eventsub-ws/ast
