@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from typing import Optional, List
+from typing import Optional
 
 import logging
 
 import clang.cindex
 from clang.cindex import CursorKind
 
-from .comment_commands import CommentCommands, json_transform, parse_comment_commands
+from .comment_commands import CommentCommands
 from .membertype import MemberType
 
 log = logging.getLogger(__name__)
@@ -72,31 +72,16 @@ class Member:
         self.dont_fail_on_deserialization: bool = False
 
     def apply_comment_commands(self, comment_commands: CommentCommands) -> None:
-        for command, value in comment_commands:
-            match command:
-                case "json_rename":
-                    # Rename the key that this field will use in json terms
-                    log.debug(f"Rename json key from {self.json_name} to {value}")
-                    self.json_name = value
-                case "json_dont_fail_on_deserialization":
-                    # Don't fail when an optional object exists and its data is bad
-                    log.debug(f"Don't fail on deserialization for {self.name}")
-                    self.dont_fail_on_deserialization = bool(value.lower() == "true")
-                case "json_transform":
-                    # Transform the key from whatever-case to case specified by `value`
-                    self.json_name = json_transform(self.json_name, value)
-                case "json_inner":
-                    # Do nothing on members
-                    pass
-                case "json_tag":
-                    # Rename the key that this field will use in json terms
-                    log.debug(f"Applied json tag on {self.json_name}: {value}")
-                    self.tag = value
-                case other:
-                    log.warning(f"Unknown comment command found: {other} with value {value}")
+        self.json_name = comment_commands.apply_name_transform(self.json_name)
+        self.tag = comment_commands.tag
+        self.dont_fail_on_deserialization = comment_commands.dont_fail_on_deserialization
 
     @staticmethod
-    def from_field(node: clang.cindex.Cursor, namespace: tuple[str, ...]) -> Member:
+    def from_field(
+        node: clang.cindex.Cursor,
+        comment_commands: CommentCommands,
+        namespace: tuple[str, ...],
+    ) -> Member:
         assert node.type is not None
 
         name = node.spelling
@@ -155,8 +140,9 @@ class Member:
         member = Member(name, member_type, type_name, _is_trivially_copyable(node.type))
 
         if node.raw_comment is not None:
-            comment_commands = parse_comment_commands(node.raw_comment)
-            member.apply_comment_commands(comment_commands)
+            comment_commands.parse(node.raw_comment)
+
+        member.apply_comment_commands(comment_commands)
 
         return member
 
