@@ -1,5 +1,5 @@
 boost::json::result_for<{{struct.full_name}}, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<{{struct.full_name}}> /* tag */, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<{{struct.full_name}}> /* tag */, const boost::json::value &{%- if struct.members|length -%}jvRoot{%- else -%}/* jvRoot */{%- endif -%})
 {
     {% if struct.inner_root %}
     if (!jvRoot.is_object())
@@ -38,6 +38,8 @@ boost::json::result_for<{{struct.full_name}}, boost::json::value>::type tag_invo
     {% include 'field-optional.tmpl' indent content %}
     {%- elif field.member_type == MemberType.OPTIONAL_VECTOR -%}
     {% include 'field-optional-vector.tmpl' indent content %}
+    {%- elif field.member_type == MemberType.VARIANT -%}
+    {% include 'field-variant.tmpl' indent content %}
     {%- endif -%}
 {% endfor %}
 
@@ -51,6 +53,8 @@ boost::json::result_for<{{struct.full_name}}, boost::json::value>::type tag_invo
         {% include 'initializer-optional.tmpl' indent content %}
         {%- elif field.member_type == MemberType.OPTIONAL_VECTOR -%}
         {% include 'initializer-optional-vector.tmpl' indent content %}
+        {%- elif field.member_type == MemberType.VARIANT -%}
+        {% include 'initializer-variant.tmpl' indent content %}
         {%- endif -%}
 {% endfor %}
     };

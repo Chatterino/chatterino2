@@ -22,7 +22,13 @@ namespace chatterino::eventsub::lib::payload::channel_moderate::v2 {
 */
 
 struct Followers {
+    static constexpr std::string_view TAG = "followers";
+
     int followDurationMinutes;
+};
+
+struct FollowersOff {
+    static constexpr std::string_view TAG = "followersoff";
 };
 
 /* slow mode set to 30s
@@ -34,7 +40,13 @@ struct Followers {
 */
 
 struct Slow {
+    static constexpr std::string_view TAG = "slow";
+
     int waitTimeSeconds;
+};
+
+struct SlowOff {
+    static constexpr std::string_view TAG = "slowoff";
 };
 
 /* User is VIP'ed
@@ -96,6 +108,8 @@ struct Slow {
 */
 
 struct Vip {
+    static constexpr std::string_view TAG = "vip";
+
     String userID;
     String userLogin;
     String userName;
@@ -106,6 +120,8 @@ struct Vip {
 */
 
 struct Unvip {
+    static constexpr std::string_view TAG = "unvip";
+
     String userID;
     String userLogin;
     String userName;
@@ -116,6 +132,8 @@ struct Unvip {
 */
 
 struct Mod {
+    static constexpr std::string_view TAG = "mod";
+
     std::string userID;
     std::string userLogin;
     std::string userName;
@@ -126,6 +144,8 @@ struct Mod {
 */
 
 struct Unmod {
+    static constexpr std::string_view TAG = "unmod";
+
     std::string userID;
     std::string userLogin;
     std::string userName;
@@ -140,11 +160,17 @@ struct Unmod {
 */
 
 struct Ban {
+    static constexpr std::string_view TAG = "ban";
+    static constexpr std::string_view FIELD = "ban";
+
     std::string userID;
     std::string userLogin;
     std::string userName;
     // TODO: Verify that we handle null here
     std::string reason;
+};
+struct SharedChatBan : public Ban {
+    static constexpr std::string_view TAG = "shared_chat_ban";
 };
 
 /* user is unbanned
@@ -152,9 +178,15 @@ struct Ban {
 */
 
 struct Unban {
+    static constexpr std::string_view TAG = "unban";
+    static constexpr std::string_view FIELD = "unban";
+
     std::string userID;
     std::string userLogin;
     std::string userName;
+};
+struct SharedChatUnban : public Ban {
+    static constexpr std::string_view TAG = "shared_chat_unban";
 };
 
 /* user is timed out without reason
@@ -166,6 +198,9 @@ struct Unban {
 */
 
 struct Timeout {
+    static constexpr std::string_view TAG = "timeout";
+    static constexpr std::string_view FIELD = "timeout";
+
     std::string userID;
     std::string userLogin;
     std::string userName;
@@ -174,15 +209,24 @@ struct Timeout {
     // TODO: This should be a timestamp?
     std::string expiresAt;
 };
+struct SharedChatTimeout : public Ban {
+    static constexpr std::string_view TAG = "shared_chat_timeout";
+};
 
 /* user is untimeouted
 {"subscription":{"id":"86d99e53-2837-40cf-bc6e-c6e00698919c","status":"enabled","type":"channel.moderate","version":"2","condition":{"broadcaster_user_id":"11148817","moderator_user_id":"117166826"},"transport":{"method":"websocket","session_id":"AgoQZgfnyKxXQ32hpzCWF4aCGBIGY2VsbC1j"},"created_at":"2025-02-01T12:02:16.005321321Z","cost":0},"event":{"broadcaster_user_id":"11148817","broadcaster_user_login":"pajlada","broadcaster_user_name":"pajlada","source_broadcaster_user_id":null,"source_broadcaster_user_login":null,"source_broadcaster_user_name":null,"moderator_user_id":"11148817","moderator_user_login":"pajlada","moderator_user_name":"pajlada","action":"untimeout","followers":null,"slow":null,"vip":null,"unvip":null,"mod":null,"unmod":null,"ban":null,"unban":null,"timeout":null,"untimeout":{"user_id":"70948394","user_login":"weeb123","user_name":"WEEB123"},"raid":null,"unraid":null,"delete":null,"automod_terms":null,"unban_request":null,"warn":null,"shared_chat_ban":null,"shared_chat_unban":null,"shared_chat_timeout":null,"shared_chat_untimeout":null,"shared_chat_delete":null}}
 */
 
 struct Untimeout {
+    static constexpr std::string_view TAG = "untimeout";
+    static constexpr std::string_view FIELD = "untimeout";
+
     std::string userID;
     std::string userLogin;
     std::string userName;
+};
+struct SharedChatUntimeout : public Ban {
+    static constexpr std::string_view TAG = "shared_chat_untimeout";
 };
 
 /* channel is raided (from bajlada to pajlada)
@@ -190,6 +234,8 @@ struct Untimeout {
 */
 
 struct Raid {
+    static constexpr std::string_view TAG = "raid";
+
     std::string userID;
     std::string userLogin;
     std::string userName;
@@ -202,6 +248,8 @@ struct Raid {
 */
 
 struct Unraid {
+    static constexpr std::string_view TAG = "unraid";
+
     std::string userID;
     std::string userLogin;
     std::string userName;
@@ -212,11 +260,17 @@ struct Unraid {
 */
 
 struct Delete {
+    static constexpr std::string_view TAG = "delete";
+    static constexpr std::string_view FIELD = "delete";
+
     std::string userID;
     std::string userLogin;
     std::string userName;
     std::string messageID;
     std::string messageBody;
+};
+struct SharedChatDelete : public Ban {
+    static constexpr std::string_view TAG = "shared_chat_delete";
 };
 
 /* automodded message approved
@@ -230,6 +284,8 @@ struct Delete {
 */
 
 struct AutomodTerms {
+    static constexpr std::string_view FIELD = "automod_terms";
+
     // either add or remove
     std::string action;
     // either blocked or permitted
@@ -237,6 +293,19 @@ struct AutomodTerms {
 
     std::vector<std::string> terms;
     bool fromAutomod;
+};
+
+struct AddBlockedTerm : public AutomodTerms {
+    static constexpr std::string_view TAG = "add_blocked_term";
+};
+struct AddPermittedTerm : public AutomodTerms {
+    static constexpr std::string_view TAG = "add_permitted_term";
+};
+struct RemoveBlockedTerm : public AutomodTerms {
+    static constexpr std::string_view TAG = "remove_blocked_term";
+};
+struct RemovePermittedTerm : public AutomodTerms {
+    static constexpr std::string_view TAG = "remove_permitted_term";
 };
 
 /* unban request approved
@@ -248,6 +317,8 @@ struct AutomodTerms {
 */
 
 struct UnbanRequest {
+    static constexpr std::string_view FIELD = "unban_request";
+
     bool isApproved;
 
     std::string userID;
@@ -255,6 +326,13 @@ struct UnbanRequest {
     std::string userName;
 
     std::string moderatorMessage;
+};
+
+struct ApproveUnbanRequest : public UnbanRequest {
+    static constexpr std::string_view TAG = "approve_unban_request";
+};
+struct DenyUnbanRequest : public UnbanRequest {
+    static constexpr std::string_view TAG = "deny_unban_request";
 };
 
 /* freetext warn from chatterino
@@ -266,6 +344,8 @@ struct UnbanRequest {
 */
 
 struct Warn {
+    static constexpr std::string_view TAG = "warn";
+
     std::string userID;
     std::string userLogin;
     std::string userName;
@@ -275,44 +355,29 @@ struct Warn {
     std::vector<std::string> chatRulesCited;
 };
 
-enum class Action : uint8_t {
-    Ban,
-    Timeout,
-    Unban,
-    Untimeout,
-    Clear,
-    Emoteonly,
-    Emoteonlyoff,
-    Followers,
-    Followersoff,
-    Uniquechat,
-    Uniquechatoff,
-    Slow,
-    Slowoff,
-    Subscribers,
-    Subscribersoff,
-    Unraid,
-    /// json_rename=delete
-    DeleteMessage,
-    /// clangd currently "inherits" all future comments to all future enum constants
-    /// so after using something like json_rename we need to ensure it doesn't spread
-    Unvip,
-    Vip,
-    Raid,
-    AddBlockedTerm,
-    AddPermittedTerm,
-    RemoveBlockedTerm,
-    RemovePermittedTerm,
-    Mod,
-    Unmod,
-    ApproveUnbanRequest,
-    DenyUnbanRequest,
-    Warn,
-    SharedChatBan,
-    SharedChatTimeout,
-    SharedChatUnban,
-    SharedChatUntimeout,
-    SharedChatDelete,
+struct Clear {
+    static constexpr std::string_view TAG = "clear";
+};
+
+struct EmoteOnly {
+    static constexpr std::string_view TAG = "emoteonly";
+};
+struct EmoteOnlyOff {
+    static constexpr std::string_view TAG = "emoteonlyoff";
+};
+
+struct Uniquechat {
+    static constexpr std::string_view TAG = "uniquechat";
+};
+struct UniquechatOff {
+    static constexpr std::string_view TAG = "uniquechatoff";
+};
+
+struct Subscribers {
+    static constexpr std::string_view TAG = "subscribers";
+};
+struct SubscribersOff {
+    static constexpr std::string_view TAG = "subscribersoff";
 };
 
 struct Event {
@@ -337,31 +402,43 @@ struct Event {
     /// User Name (e.g. 테스트계정420) of the user who took the action
     String moderatorUserName;
 
-    // TODO: enum?
-    /// The action that took place (e.g. "warn" or "ban")
-    Action action;
-
-    std::optional<Followers> followers;
-    std::optional<Slow> slow;
-    std::optional<Vip> vip;
-    std::optional<Unvip> unvip;
-    std::optional<Unmod> unmod;
-    std::optional<Ban> ban;
-    std::optional<Unban> unban;
-    std::optional<Timeout> timeout;
-    std::optional<Untimeout> untimeout;
-    std::optional<Raid> raid;
-    std::optional<Unraid> unraid;
-    /// json_rename=delete
-    std::optional<Delete> deleteMessage;
-    std::optional<AutomodTerms> automodTerms;
-    std::optional<UnbanRequest> unbanRequest;
-    std::optional<Warn> warn;
-    std::optional<Ban> sharedChatBan;
-    std::optional<Unban> sharedChatUnban;
-    std::optional<Timeout> sharedChatTimeout;
-    std::optional<Untimeout> sharedChatUntimeout;
-    std::optional<Delete> sharedChatDelete;
+    /// json_tag=action
+    std::variant<Ban,                  //
+                 Timeout,              //
+                 Unban,                //
+                 Untimeout,            //
+                 Clear,                //
+                 EmoteOnly,            //
+                 EmoteOnlyOff,         //
+                 Followers,            //
+                 FollowersOff,         //
+                 Uniquechat,           //
+                 UniquechatOff,        //
+                 Slow,                 //
+                 SlowOff,              //
+                 Subscribers,          //
+                 SubscribersOff,       //
+                 Unraid,               //
+                 Delete,               //
+                 Unvip,                //
+                 Vip,                  //
+                 Raid,                 //
+                 AddBlockedTerm,       //
+                 AddPermittedTerm,     //
+                 RemoveBlockedTerm,    //
+                 RemovePermittedTerm,  //
+                 Mod,                  //
+                 Unmod,                //
+                 ApproveUnbanRequest,  //
+                 DenyUnbanRequest,     //
+                 Warn,                 //
+                 SharedChatBan,        //
+                 SharedChatTimeout,    //
+                 SharedChatUnban,      //
+                 SharedChatUntimeout,  //
+                 SharedChatDelete,     //
+                 std::string>
+        action;
 };
 
 struct Payload {
