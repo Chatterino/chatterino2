@@ -8,7 +8,8 @@
 namespace chatterino::eventsub::lib::payload::channel_chat_notification::v1 {
 
 boost::json::result_for<Badge, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Badge>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Badge> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -63,7 +64,8 @@ boost::json::result_for<Badge, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Cheermote>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Cheermote> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -84,6 +86,9 @@ boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
         return prefix.error();
     }
 
+    static_assert(
+        std::is_trivially_copyable_v<
+            std::remove_reference_t<decltype(std::declval<Cheermote>().bits)>>);
     const auto *jvbits = root.if_contains("bits");
     if (jvbits == nullptr)
     {
@@ -97,6 +102,9 @@ boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
         return bits.error();
     }
 
+    static_assert(
+        std::is_trivially_copyable_v<
+            std::remove_reference_t<decltype(std::declval<Cheermote>().tier)>>);
     const auto *jvtier = root.if_contains("tier");
     if (jvtier == nullptr)
     {
@@ -112,13 +120,14 @@ boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
 
     return Cheermote{
         .prefix = std::move(prefix.value()),
-        .bits = std::move(bits.value()),
-        .tier = std::move(tier.value()),
+        .bits = bits.value(),
+        .tier = tier.value(),
     };
 }
 
 boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Emote>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Emote> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -170,7 +179,7 @@ boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
     {
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
-    const auto format =
+    auto format =
         boost::json::try_value_to<std::vector<std::string>>(*jvformat);
     if (format.has_error())
     {
@@ -181,12 +190,13 @@ boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
         .id = std::move(id.value()),
         .emoteSetID = std::move(emoteSetID.value()),
         .ownerID = std::move(ownerID.value()),
-        .format = format.value(),
+        .format = std::move(format.value()),
     };
 }
 
 boost::json::result_for<Mention, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Mention>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Mention> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -241,7 +251,7 @@ boost::json::result_for<Mention, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<MessageFragment>,
+    boost::json::try_value_to_tag<MessageFragment> /* tag */,
     const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
@@ -325,7 +335,7 @@ boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<Subcription, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Subcription>,
+    boost::json::try_value_to_tag<Subcription> /* tag */,
     const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
@@ -347,6 +357,8 @@ boost::json::result_for<Subcription, boost::json::value>::type tag_invoke(
         return subTier.error();
     }
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<Subcription>().isPrime)>>);
     const auto *jvisPrime = root.if_contains("is_prime");
     if (jvisPrime == nullptr)
     {
@@ -360,6 +372,8 @@ boost::json::result_for<Subcription, boost::json::value>::type tag_invoke(
         return isPrime.error();
     }
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<Subcription>().durationMonths)>>);
     const auto *jvdurationMonths = root.if_contains("duration_months");
     if (jvdurationMonths == nullptr)
     {
@@ -375,13 +389,13 @@ boost::json::result_for<Subcription, boost::json::value>::type tag_invoke(
 
     return Subcription{
         .subTier = std::move(subTier.value()),
-        .isPrime = std::move(isPrime.value()),
-        .durationMonths = std::move(durationMonths.value()),
+        .isPrime = isPrime.value(),
+        .durationMonths = durationMonths.value(),
     };
 }
 
 boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Resubscription>,
+    boost::json::try_value_to_tag<Resubscription> /* tag */,
     const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
@@ -390,6 +404,9 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
     }
     const auto &root = jvRoot.get_object();
 
+    static_assert(
+        std::is_trivially_copyable_v<std::remove_reference_t<
+            decltype(std::declval<Resubscription>().cumulativeMonths)>>);
     const auto *jvcumulativeMonths = root.if_contains("cumulative_months");
     if (jvcumulativeMonths == nullptr)
     {
@@ -403,6 +420,9 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
         return cumulativeMonths.error();
     }
 
+    static_assert(
+        std::is_trivially_copyable_v<std::remove_reference_t<
+            decltype(std::declval<Resubscription>().durationMonths)>>);
     const auto *jvdurationMonths = root.if_contains("duration_months");
     if (jvdurationMonths == nullptr)
     {
@@ -416,6 +436,8 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
         return durationMonths.error();
     }
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<Resubscription>().streakMonths)>>);
     std::optional<int> streakMonths = std::nullopt;
     const auto *jvstreakMonths = root.if_contains("streak_months");
     if (jvstreakMonths != nullptr && !jvstreakMonths->is_null())
@@ -426,7 +448,7 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
         {
             return tstreakMonths.error();
         }
-        streakMonths = std::move(tstreakMonths.value());
+        streakMonths = tstreakMonths.value();
     }
 
     const auto *jvsubTier = root.if_contains("sub_tier");
@@ -442,6 +464,8 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
         return subTier.error();
     }
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<Resubscription>().isPrime)>>);
     const auto *jvisPrime = root.if_contains("is_prime");
     if (jvisPrime == nullptr)
     {
@@ -455,6 +479,8 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
         return isPrime.error();
     }
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<Resubscription>().isGift)>>);
     const auto *jvisGift = root.if_contains("is_gift");
     if (jvisGift == nullptr)
     {
@@ -468,6 +494,9 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
         return isGift.error();
     }
 
+    static_assert(
+        std::is_trivially_copyable_v<std::remove_reference_t<
+            decltype(std::declval<Resubscription>().gifterIsAnonymous)>>);
     const auto *jvgifterIsAnonymous = root.if_contains("gifter_is_anonymous");
     if (jvgifterIsAnonymous == nullptr)
     {
@@ -525,13 +554,13 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
     }
 
     return Resubscription{
-        .cumulativeMonths = std::move(cumulativeMonths.value()),
-        .durationMonths = std::move(durationMonths.value()),
-        .streakMonths = std::move(streakMonths),
+        .cumulativeMonths = cumulativeMonths.value(),
+        .durationMonths = durationMonths.value(),
+        .streakMonths = streakMonths,
         .subTier = std::move(subTier.value()),
-        .isPrime = std::move(isPrime.value()),
-        .isGift = std::move(isGift.value()),
-        .gifterIsAnonymous = std::move(gifterIsAnonymous.value()),
+        .isPrime = isPrime.value(),
+        .isGift = isGift.value(),
+        .gifterIsAnonymous = gifterIsAnonymous.value(),
         .gifterUserID = std::move(gifterUserID),
         .gifterUserName = std::move(gifterUserName),
         .gifterUserLogin = std::move(gifterUserLogin),
@@ -539,7 +568,7 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<GiftSubscription, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<GiftSubscription>,
+    boost::json::try_value_to_tag<GiftSubscription> /* tag */,
     const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
@@ -548,6 +577,9 @@ boost::json::result_for<GiftSubscription, boost::json::value>::type tag_invoke(
     }
     const auto &root = jvRoot.get_object();
 
+    static_assert(
+        std::is_trivially_copyable_v<std::remove_reference_t<
+            decltype(std::declval<GiftSubscription>().durationMonths)>>);
     const auto *jvdurationMonths = root.if_contains("duration_months");
     if (jvdurationMonths == nullptr)
     {
@@ -561,6 +593,9 @@ boost::json::result_for<GiftSubscription, boost::json::value>::type tag_invoke(
         return durationMonths.error();
     }
 
+    static_assert(
+        std::is_trivially_copyable_v<std::remove_reference_t<
+            decltype(std::declval<GiftSubscription>().cumulativeTotal)>>);
     std::optional<int> cumulativeTotal = std::nullopt;
     const auto *jvcumulativeTotal = root.if_contains("cumulative_total");
     if (jvcumulativeTotal != nullptr && !jvcumulativeTotal->is_null())
@@ -572,9 +607,12 @@ boost::json::result_for<GiftSubscription, boost::json::value>::type tag_invoke(
         {
             return tcumulativeTotal.error();
         }
-        cumulativeTotal = std::move(tcumulativeTotal.value());
+        cumulativeTotal = tcumulativeTotal.value();
     }
 
+    static_assert(
+        std::is_trivially_copyable_v<std::remove_reference_t<
+            decltype(std::declval<GiftSubscription>().streakMonths)>>);
     std::optional<int> streakMonths = std::nullopt;
     const auto *jvstreakMonths = root.if_contains("streak_months");
     if (jvstreakMonths != nullptr && !jvstreakMonths->is_null())
@@ -585,7 +623,7 @@ boost::json::result_for<GiftSubscription, boost::json::value>::type tag_invoke(
         {
             return tstreakMonths.error();
         }
-        streakMonths = std::move(tstreakMonths.value());
+        streakMonths = tstreakMonths.value();
     }
 
     const auto *jvrecipientUserID = root.if_contains("recipient_user_id");
@@ -658,9 +696,9 @@ boost::json::result_for<GiftSubscription, boost::json::value>::type tag_invoke(
     }
 
     return GiftSubscription{
-        .durationMonths = std::move(durationMonths.value()),
-        .cumulativeTotal = std::move(cumulativeTotal),
-        .streakMonths = std::move(streakMonths),
+        .durationMonths = durationMonths.value(),
+        .cumulativeTotal = cumulativeTotal,
+        .streakMonths = streakMonths,
         .recipientUserID = std::move(recipientUserID.value()),
         .recipientUserName = std::move(recipientUserName.value()),
         .recipientUserLogin = std::move(recipientUserLogin.value()),
@@ -670,8 +708,9 @@ boost::json::result_for<GiftSubscription, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<CommunityGiftSubscription, boost::json::value>::type
-    tag_invoke(boost::json::try_value_to_tag<CommunityGiftSubscription>,
-               const boost::json::value &jvRoot)
+    tag_invoke(
+        boost::json::try_value_to_tag<CommunityGiftSubscription> /* tag */,
+        const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -692,6 +731,9 @@ boost::json::result_for<CommunityGiftSubscription, boost::json::value>::type
         return id.error();
     }
 
+    static_assert(
+        std::is_trivially_copyable_v<std::remove_reference_t<
+            decltype(std::declval<CommunityGiftSubscription>().total)>>);
     const auto *jvtotal = root.if_contains("total");
     if (jvtotal == nullptr)
     {
@@ -718,6 +760,9 @@ boost::json::result_for<CommunityGiftSubscription, boost::json::value>::type
         return subTier.error();
     }
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<CommunityGiftSubscription>()
+                                   .cumulativeTotal)>>);
     std::optional<int> cumulativeTotal = std::nullopt;
     const auto *jvcumulativeTotal = root.if_contains("cumulative_total");
     if (jvcumulativeTotal != nullptr && !jvcumulativeTotal->is_null())
@@ -729,19 +774,19 @@ boost::json::result_for<CommunityGiftSubscription, boost::json::value>::type
         {
             return tcumulativeTotal.error();
         }
-        cumulativeTotal = std::move(tcumulativeTotal.value());
+        cumulativeTotal = tcumulativeTotal.value();
     }
 
     return CommunityGiftSubscription{
         .id = std::move(id.value()),
-        .total = std::move(total.value()),
+        .total = total.value(),
         .subTier = std::move(subTier.value()),
-        .cumulativeTotal = std::move(cumulativeTotal),
+        .cumulativeTotal = cumulativeTotal,
     };
 }
 
 boost::json::result_for<GiftPaidUpgrade, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<GiftPaidUpgrade>,
+    boost::json::try_value_to_tag<GiftPaidUpgrade> /* tag */,
     const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
@@ -750,6 +795,9 @@ boost::json::result_for<GiftPaidUpgrade, boost::json::value>::type tag_invoke(
     }
     const auto &root = jvRoot.get_object();
 
+    static_assert(
+        std::is_trivially_copyable_v<std::remove_reference_t<
+            decltype(std::declval<GiftPaidUpgrade>().gifterIsAnonymous)>>);
     const auto *jvgifterIsAnonymous = root.if_contains("gifter_is_anonymous");
     if (jvgifterIsAnonymous == nullptr)
     {
@@ -807,7 +855,7 @@ boost::json::result_for<GiftPaidUpgrade, boost::json::value>::type tag_invoke(
     }
 
     return GiftPaidUpgrade{
-        .gifterIsAnonymous = std::move(gifterIsAnonymous.value()),
+        .gifterIsAnonymous = gifterIsAnonymous.value(),
         .gifterUserID = std::move(gifterUserID),
         .gifterUserName = std::move(gifterUserName),
         .gifterUserLogin = std::move(gifterUserLogin),
@@ -815,7 +863,7 @@ boost::json::result_for<GiftPaidUpgrade, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<PrimePaidUpgrade, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<PrimePaidUpgrade>,
+    boost::json::try_value_to_tag<PrimePaidUpgrade> /* tag */,
     const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
@@ -843,7 +891,8 @@ boost::json::result_for<PrimePaidUpgrade, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Raid>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Raid> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -890,6 +939,8 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
         return userLogin.error();
     }
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<Raid>().viewerCount)>>);
     const auto *jvviewerCount = root.if_contains("viewer_count");
     if (jvviewerCount == nullptr)
     {
@@ -921,25 +972,20 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
         .userID = std::move(userID.value()),
         .userName = std::move(userName.value()),
         .userLogin = std::move(userLogin.value()),
-        .viewerCount = std::move(viewerCount.value()),
+        .viewerCount = viewerCount.value(),
         .profileImageURL = std::move(profileImageURL.value()),
     };
 }
 
 boost::json::result_for<Unraid, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Unraid>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Unraid> /* tag */,
+    const boost::json::value &jvRoot)
 {
-    if (!jvRoot.is_object())
-    {
-        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
-    }
-    const auto &root = jvRoot.get_object();
-
     return Unraid{};
 }
 
 boost::json::result_for<PayItForward, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<PayItForward>,
+    boost::json::try_value_to_tag<PayItForward> /* tag */,
     const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
@@ -948,6 +994,9 @@ boost::json::result_for<PayItForward, boost::json::value>::type tag_invoke(
     }
     const auto &root = jvRoot.get_object();
 
+    static_assert(
+        std::is_trivially_copyable_v<std::remove_reference_t<
+            decltype(std::declval<PayItForward>().gifterIsAnonymous)>>);
     const auto *jvgifterIsAnonymous = root.if_contains("gifter_is_anonymous");
     if (jvgifterIsAnonymous == nullptr)
     {
@@ -1005,7 +1054,7 @@ boost::json::result_for<PayItForward, boost::json::value>::type tag_invoke(
     }
 
     return PayItForward{
-        .gifterIsAnonymous = std::move(gifterIsAnonymous.value()),
+        .gifterIsAnonymous = gifterIsAnonymous.value(),
         .gifterUserID = std::move(gifterUserID),
         .gifterUserName = std::move(gifterUserName),
         .gifterUserLogin = std::move(gifterUserLogin),
@@ -1013,7 +1062,7 @@ boost::json::result_for<PayItForward, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<Announcement, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Announcement>,
+    boost::json::try_value_to_tag<Announcement> /* tag */,
     const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
@@ -1041,7 +1090,7 @@ boost::json::result_for<Announcement, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<CharityDonationAmount, boost::json::value>::type
-    tag_invoke(boost::json::try_value_to_tag<CharityDonationAmount>,
+    tag_invoke(boost::json::try_value_to_tag<CharityDonationAmount> /* tag */,
                const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
@@ -1050,6 +1099,8 @@ boost::json::result_for<CharityDonationAmount, boost::json::value>::type
     }
     const auto &root = jvRoot.get_object();
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<CharityDonationAmount>().value)>>);
     const auto *jvvalue = root.if_contains("value");
     if (jvvalue == nullptr)
     {
@@ -1063,6 +1114,9 @@ boost::json::result_for<CharityDonationAmount, boost::json::value>::type
         return value.error();
     }
 
+    static_assert(
+        std::is_trivially_copyable_v<std::remove_reference_t<
+            decltype(std::declval<CharityDonationAmount>().decimalPlaces)>>);
     const auto *jvdecimalPlaces = root.if_contains("decimal_places");
     if (jvdecimalPlaces == nullptr)
     {
@@ -1090,14 +1144,14 @@ boost::json::result_for<CharityDonationAmount, boost::json::value>::type
     }
 
     return CharityDonationAmount{
-        .value = std::move(value.value()),
-        .decimalPlaces = std::move(decimalPlaces.value()),
+        .value = value.value(),
+        .decimalPlaces = decimalPlaces.value(),
         .currency = std::move(currency.value()),
     };
 }
 
 boost::json::result_for<CharityDonation, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<CharityDonation>,
+    boost::json::try_value_to_tag<CharityDonation> /* tag */,
     const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
@@ -1139,7 +1193,7 @@ boost::json::result_for<CharityDonation, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<BitsBadgeTier, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<BitsBadgeTier>,
+    boost::json::try_value_to_tag<BitsBadgeTier> /* tag */,
     const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
@@ -1148,6 +1202,8 @@ boost::json::result_for<BitsBadgeTier, boost::json::value>::type tag_invoke(
     }
     const auto &root = jvRoot.get_object();
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<BitsBadgeTier>().tier)>>);
     const auto *jvtier = root.if_contains("tier");
     if (jvtier == nullptr)
     {
@@ -1162,12 +1218,13 @@ boost::json::result_for<BitsBadgeTier, boost::json::value>::type tag_invoke(
     }
 
     return BitsBadgeTier{
-        .tier = std::move(tier.value()),
+        .tier = tier.value(),
     };
 }
 
 boost::json::result_for<Message, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Message>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Message> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -1193,7 +1250,7 @@ boost::json::result_for<Message, boost::json::value>::type tag_invoke(
     {
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
-    const auto fragments =
+    auto fragments =
         boost::json::try_value_to<std::vector<MessageFragment>>(*jvfragments);
     if (fragments.has_error())
     {
@@ -1202,12 +1259,13 @@ boost::json::result_for<Message, boost::json::value>::type tag_invoke(
 
     return Message{
         .text = std::move(text.value()),
-        .fragments = fragments.value(),
+        .fragments = std::move(fragments.value()),
     };
 }
 
 boost::json::result_for<Event, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Event>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Event> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -1301,6 +1359,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return chatterUserName.error();
     }
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<Event>().chatterIsAnonymous)>>);
     const auto *jvchatterIsAnonymous = root.if_contains("chatter_is_anonymous");
     if (jvchatterIsAnonymous == nullptr)
     {
@@ -1333,8 +1393,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     {
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
-    const auto badges =
-        boost::json::try_value_to<std::vector<Badge>>(*jvbadges);
+    auto badges = boost::json::try_value_to<std::vector<Badge>>(*jvbadges);
     if (badges.has_error())
     {
         return badges.error();
@@ -1488,6 +1547,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         raid = std::move(traid.value());
     }
 
+    static_assert(
+        std::is_trivially_copyable_v<
+            std::remove_reference_t<decltype(std::declval<Event>().unraid)>>);
     std::optional<Unraid> unraid = std::nullopt;
     const auto *jvunraid = root.if_contains("unraid");
     if (jvunraid != nullptr && !jvunraid->is_null())
@@ -1498,7 +1560,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         {
             return tunraid.error();
         }
-        unraid = std::move(tunraid.value());
+        unraid = tunraid.value();
     }
 
     std::optional<PayItForward> payItForward = std::nullopt;
@@ -1543,6 +1605,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         charityDonation = std::move(tcharityDonation.value());
     }
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<Event>().bitsBadgeTier)>>);
     std::optional<BitsBadgeTier> bitsBadgeTier = std::nullopt;
     const auto *jvbitsBadgeTier = root.if_contains("bits_badge_tier");
     if (jvbitsBadgeTier != nullptr && !jvbitsBadgeTier->is_null())
@@ -1554,7 +1618,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         {
             return tbitsBadgeTier.error();
         }
-        bitsBadgeTier = std::move(tbitsBadgeTier.value());
+        bitsBadgeTier = tbitsBadgeTier.value();
     }
 
     return Event{
@@ -1564,9 +1628,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         .chatterUserID = std::move(chatterUserID.value()),
         .chatterUserLogin = std::move(chatterUserLogin.value()),
         .chatterUserName = std::move(chatterUserName.value()),
-        .chatterIsAnonymous = std::move(chatterIsAnonymous.value()),
+        .chatterIsAnonymous = chatterIsAnonymous.value(),
         .color = std::move(color.value()),
-        .badges = badges.value(),
+        .badges = std::move(badges.value()),
         .systemMessage = std::move(systemMessage.value()),
         .messageID = std::move(messageID.value()),
         .message = std::move(message.value()),
@@ -1578,16 +1642,17 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         .giftPaidUpgrade = std::move(giftPaidUpgrade),
         .primePaidUpgrade = std::move(primePaidUpgrade),
         .raid = std::move(raid),
-        .unraid = std::move(unraid),
+        .unraid = unraid,
         .payItForward = std::move(payItForward),
         .announcement = std::move(announcement),
         .charityDonation = std::move(charityDonation),
-        .bitsBadgeTier = std::move(bitsBadgeTier),
+        .bitsBadgeTier = bitsBadgeTier,
     };
 }
 
 boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Payload>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Payload> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {

@@ -8,7 +8,8 @@
 namespace chatterino::eventsub::lib::payload::stream_online::v1 {
 
 boost::json::result_for<Event, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Event>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Event> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
@@ -110,7 +111,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
 }
 
 boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Payload>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<Payload> /* tag */,
+    const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_object())
     {
