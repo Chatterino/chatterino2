@@ -58,6 +58,7 @@ endif()
 if (BUILD_WITH_QT6)
     set(MAJOR_QT_VERSION "6")
 else()
+    message(WARNING "Qt5 is not supported, continue building at your own risk")
     set(MAJOR_QT_VERSION "5")
 endif()
 

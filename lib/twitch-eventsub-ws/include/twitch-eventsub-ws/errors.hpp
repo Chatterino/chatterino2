@@ -13,7 +13,8 @@ enum class Kind : int {
     ExpectedString,
     UnknownEnumValue,
     InnerRootMissing,
-    NoMessageHandler
+    NoMessageHandler,
+    UnknownVariant,
 };
 
 class ApplicationErrorCategory final : public boost::system::error_category
