@@ -17,6 +17,8 @@ RUN apt-get update && apt-get -y install --no-install-recommends \
         libxcb-randr0-dev \
         libboost-system-dev \
         libboost-filesystem-dev \
+        libnotify4 \
+        libnotify-dev \
         libpulse-dev \
         libxkbcommon-x11-0 \
         build-essential \
