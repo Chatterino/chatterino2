@@ -11,6 +11,7 @@
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
+#include "util/CustomPlayer.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/helper/CommonTexts.hpp"
 
@@ -102,6 +103,9 @@ QString Toasts::findStringFromReaction(const ToastReaction &reaction)
         case ToastReaction::OpenInStreamlink:
             return OPEN_IN_STREAMLINK;
         case ToastReaction::DontOpen:
+            return DONT_OPEN;
+        case ToastReaction::OpenInCustomPlayer:
+            return OPEN_IN_CUSTOM_PLAYER;
         default:
             return DONT_OPEN;
     }
@@ -192,6 +196,10 @@ public:
                 break;
             case ToastReaction::OpenInStreamlink: {
                 openStreamlinkForChannel(channelName_);
+                break;
+            }
+            case ToastReaction::OpenInCustomPlayer: {
+                openInCustomPlayer(channelName_);
                 break;
             }
             case ToastReaction::DontOpen:

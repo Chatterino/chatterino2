@@ -13,7 +13,8 @@ enum class ToastReaction {
     OpenInBrowser = 0,
     OpenInPlayer = 1,
     OpenInStreamlink = 2,
-    DontOpen = 3
+    DontOpen = 3,
+    OpenInCustomPlayer = 4,
 };
 
 class Toasts final
