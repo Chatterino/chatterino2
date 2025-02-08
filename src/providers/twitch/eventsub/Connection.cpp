@@ -184,6 +184,15 @@ void Connection::onChannelModerate(
                     channel->addMessage(msg, MessageContext::Original);
                 });
             }
+            else if constexpr (std::is_same_v<
+                                   Action,
+                                   lib::payload::channel_moderate::v2::Warn>)
+            {
+                auto msg = makeWarnMessage(channel, now, payload.event, action);
+                runInGuiThread([channel, msg] {
+                    channel->addMessage(msg, MessageContext::Original);
+                });
+            }
         },
         payload.event.action);
 }

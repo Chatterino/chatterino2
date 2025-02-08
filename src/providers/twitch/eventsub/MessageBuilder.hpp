@@ -20,4 +20,10 @@ MessagePtr makeUnvipMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Unvip &action);
 
+/// <MODERATOR> has warned <USER>: <REASON>
+MessagePtr makeWarnMessage(
+    TwitchChannel *channel, const QDateTime &time,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Warn &action);
+
 }  // namespace chatterino::eventsub
