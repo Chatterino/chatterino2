@@ -49,10 +49,13 @@ function(_make_and_use_venv)
     message(STATUS "Installing requirements from ${arg_REQUIREMENTS}")
     execute_process(
         COMMAND "${Python3_EXECUTABLE}" -m pip install -r "${arg_REQUIREMENTS}"
-        COMMAND_ERROR_IS_FATAL ANY
+        RESULT_VARIABLE _pip_output
         OUTPUT_QUIET
         ERROR_QUIET
     )
+    if(NOT _pip_output EQUAL 0)
+        return()
+    endif()
     set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${arg_REQUIREMENTS}")
 
     set(${arg_OUT_PYTHON_EXE} "${Python3_EXECUTABLE}" PARENT_SCOPE)
