@@ -8,7 +8,6 @@
 
 namespace chatterino::eventsub::lib::payload::stream_offline::v1 {
 
-/// json_transform=snake_case
 struct Event {
     // The broadcaster's user ID
     const std::string broadcasterUserID;

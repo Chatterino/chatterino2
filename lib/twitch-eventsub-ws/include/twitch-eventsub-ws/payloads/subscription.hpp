@@ -32,13 +32,11 @@ namespace chatterino::eventsub::lib::payload::subscription {
 }
 */
 
-/// json_transform=snake_case
 struct Transport {
     const std::string method;
     const std::string sessionID;
 };
 
-/// json_transform=snake_case
 struct Subscription {
     const std::string id;
     const std::string status;

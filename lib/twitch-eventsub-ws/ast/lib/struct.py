@@ -17,7 +17,7 @@ class Struct:
         self.name = name
         self.members: List[Member] = []
         self.parent: str = ""
-        self.comment_commands: CommentCommands = []
+        self.comment_commands = CommentCommands()
         self.inner_root: str = ""
         self.namespace = namespace
 
@@ -47,18 +47,4 @@ class Struct:
         return env.get_template("struct-definition.tmpl").render(struct=self)
 
     def apply_comment_commands(self, comment_commands: CommentCommands) -> None:
-        for command, value in comment_commands:
-            match command:
-                case "json_rename":
-                    # Do nothing on structs
-                    pass
-                case "json_dont_fail_on_deserialization":
-                    # Do nothing on structs
-                    pass
-                case "json_transform":
-                    # Do nothing on structs
-                    pass
-                case "json_inner":
-                    self.inner_root = value
-                case other:
-                    log.warning(f"Unknown comment command found: {other} with value {value}")
+        self.inner_root = comment_commands.inner_root

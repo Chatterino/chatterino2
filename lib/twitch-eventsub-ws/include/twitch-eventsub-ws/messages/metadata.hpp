@@ -20,7 +20,6 @@ namespace chatterino::eventsub::lib::messages {
 }
 */
 
-/// json_transform=snake_case
 struct Metadata {
     const std::string messageID;
     const std::string messageType;

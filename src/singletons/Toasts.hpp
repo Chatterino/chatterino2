@@ -32,6 +32,11 @@ private:
                                  const QString &channelTitle);
 
     bool initialized_ = false;
+#elif defined(CHATTERINO_WITH_LIBNOTIFY)
+    void ensureInitialized();
+    void sendLibnotify(const QString &channelName, const QString &channelTitle);
+
+    bool initialized_ = false;
 #endif
 };
 }  // namespace chatterino
