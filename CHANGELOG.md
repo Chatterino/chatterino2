@@ -29,6 +29,7 @@
 - Dev: Replaced usage of `parseTime` with `serverReceivedTime` for clearchat messages. (#5824, #5855)
 - Dev: Support Boost 1.87. (#5832)
 - Dev: Stopped building Qt5 builds in CI. (#5933)
+- Dev: Updated CI macOS versions from 13 to 14. (#5934)
 - Dev: Words from `TextElement`s are now combined where possible. (#5847)
 - Dev: Fixed assertion failure when closing the edit-hotkey dialog. (#5869)
 - Dev: Updated `qtkeychain` to 0.15.0. (#5871)
