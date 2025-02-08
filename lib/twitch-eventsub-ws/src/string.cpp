@@ -1,9 +1,9 @@
 #include "twitch-eventsub-ws/string.hpp"
 
+#include "twitch-eventsub-ws/errors.hpp"
+
 #include <boost/json.hpp>
 #include <QString>
-
-#include <string>
 
 namespace chatterino::eventsub::lib {
 
@@ -14,16 +14,17 @@ boost::json::result_for<String, boost::json::value>::type tag_invoke(
     if (jvRoot.is_null())
     {
         // We treat null "strings" as empty strings
-        return String("");
+        return String();
     }
 
-    auto v = boost::json::try_value_to<std::string>(jvRoot);
-    if (v.has_error())
+    if (!jvRoot.is_string())
     {
-        return v.error();
+        // we don't need a source_location - it doesn't tell us much
+        return lib::error::makeCode(error::Kind::ExpectedString, nullptr);
     }
 
-    return String(std::move(v.value()));
+    const auto &str = jvRoot.get_string();
+    return String(str);
 }
 
 }  // namespace chatterino::eventsub::lib
