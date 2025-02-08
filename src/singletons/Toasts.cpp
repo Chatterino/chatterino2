@@ -16,6 +16,8 @@
 
 #ifdef Q_OS_WIN
 #    include <wintoastlib.h>
+#elif defined(CHATTERINO_WITH_LIBNOTIFY)
+#    include <libnotify/notify.h>
 #endif
 
 #include <QDesktopServices>
@@ -77,18 +79,25 @@ Toasts::~Toasts()
     {
         WinToast::instance()->clear();
     }
+#elif defined(CHATTERINO_WITH_LIBNOTIFY)
+    if (this->initialized_)
+    {
+        notify_uninit();
+    }
 #endif
 }
 
 bool Toasts::isEnabled()
 {
+    auto enabled = getSettings()->notificationToast &&
+                   !(getApp()->getStreamerMode()->isEnabled() &&
+                     getSettings()->streamerModeSuppressLiveNotifications);
+
 #ifdef Q_OS_WIN
-    return WinToast::isCompatible() && getSettings()->notificationToast &&
-           !(getApp()->getStreamerMode()->isEnabled() &&
-             getSettings()->streamerModeSuppressLiveNotifications);
-#else
-    return false;
+    enabled = enabled && WinToast::isCompatible();
 #endif
+
+    return enabled;
 }
 
 QString Toasts::findStringFromReaction(const ToastReaction &reaction)
@@ -123,10 +132,14 @@ void Toasts::sendChannelNotification(const QString &channelName,
     auto sendChannelNotification = [this, channelName, channelTitle, p] {
         this->sendWindowsNotification(channelName, channelTitle, p);
     };
+#elif defined(CHATTERINO_WITH_LIBNOTIFY)
+    auto sendChannelNotification = [this, channelName, channelTitle] {
+        this->sendLibnotify(channelName, channelTitle);
+    };
 #else
     (void)channelTitle;
     auto sendChannelNotification = [] {
-        // Unimplemented for macOS and Linux
+        // Unimplemented for macOS
     };
 #endif
     // Fetch user profile avatar
@@ -282,6 +295,38 @@ void Toasts::sendWindowsNotification(const QString &channelName,
     }
 }
 
+#elif defined(CHATTERINO_WITH_LIBNOTIFY)
+
+void Toasts::ensureInitialized()
+{
+    if (this->initialized_)
+    {
+        return;
+    }
+    auto result = notify_init("chatterino2");
+
+    if (result == 0)
+    {
+        qCWarning(chatterinoNotification) << "Failed to initialize libnotify";
+    }
+    this->initialized_ = true;
+}
+
+void Toasts::sendLibnotify(const QString &channelName,
+                           const QString &channelTitle)
+{
+    this->ensureInitialized();
+
+    qCDebug(chatterinoNotification) << "sending to libnotify";
+
+    QString str = channelName % u" is live!";
+
+    NotifyNotification *notif = notify_notification_new(
+        str.toUtf8().constData(), channelTitle.toUtf8().constData(), nullptr);
+
+    notify_notification_show(notif, nullptr);
+    g_object_unref(notif);
+}
 #endif
 
 }  // namespace chatterino
