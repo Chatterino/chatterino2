@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Optional
+from dataclasses import dataclass
 
 import logging
 
@@ -54,6 +55,19 @@ def _is_trivially_copyable(type: clang.cindex.Type) -> bool:
     return _is_chrono_like_type(type)
 
 
+def _has_no_fields(type: clang.cindex.Type) -> bool:
+    for _ in type.get_fields():
+        return False
+    return True
+
+
+@dataclass
+class VariantType:
+    name: str
+    trivial: bool
+    empty: bool
+
+
 class Member:
     def __init__(
         self,
@@ -68,6 +82,8 @@ class Member:
         self.type_name = type_name
         self.tag: Optional[str] = None
         self.trivial = trivial
+        self.variant_types: list[VariantType] | None = None
+        self.variant_fallback: str | None = None
 
         self.dont_fail_on_deserialization: bool = False
 
@@ -124,7 +140,8 @@ class Member:
                                         overwrite_member_type = MemberType.OPTIONAL_VECTOR
                                     case other:
                                         log.warning(f"Vector cannot be added on top of other member type: {other}")
-
+                            case "variant":
+                                overwrite_member_type = MemberType.VARIANT
                             case other:
                                 log.warning(f"Unhandled template type: {other}")
 
@@ -144,7 +161,27 @@ class Member:
 
         member.apply_comment_commands(comment_commands)
 
+        if member.member_type == MemberType.VARIANT:
+            member.apply_variant(node.type, namespace)
+
         return member
+
+    def apply_variant(self, type: clang.cindex.Type, namespace: tuple[str, ...]):
+        self.variant_types = []
+        for idx in range(type.get_num_template_arguments()):
+            inner = type.get_template_argument_type(idx)
+            name = get_type_name(inner, namespace)
+            if name == "std::string" or name == "String":
+                assert not self.variant_fallback
+                self.variant_fallback = name
+                continue
+            self.variant_types.append(
+                VariantType(
+                    name=name,
+                    trivial=_is_trivially_copyable(inner),
+                    empty=_has_no_fields(inner),
+                )
+            )
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, self.__class__):

@@ -68,6 +68,8 @@ class Walker:
                 if type is None:
                     # Skip nodes without a type
                     return False
+                if node.storage_class == clang.cindex.StorageClass.STATIC:
+                    return False
 
                 # log.debug(f"{struct}: {type.spelling} {node.spelling} ({type.kind})")
                 if struct:
