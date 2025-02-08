@@ -164,12 +164,12 @@ void Connection::onChannelModerate(
     const auto now = QDateTime::currentDateTime();
 
     std::visit(
-        [&](auto &&oAction) {
-            using Action = std::remove_cvref_t<decltype(oAction)>;
+        [&](auto &&action) {
+            using Action = std::remove_cvref_t<decltype(action)>;
             if constexpr (std::is_same_v<
                               Action, lib::payload::channel_moderate::v2::Vip>)
             {
-                auto msg = makeVipMessage(channel, now, payload.event, oAction);
+                auto msg = makeVipMessage(channel, now, payload.event, action);
                 runInGuiThread([channel, msg] {
                     channel->addMessage(msg, MessageContext::Original);
                 });
@@ -179,7 +179,7 @@ void Connection::onChannelModerate(
                                    lib::payload::channel_moderate::v2::Unvip>)
             {
                 auto msg =
-                    makeUnvipMessage(channel, now, payload.event, oAction);
+                    makeUnvipMessage(channel, now, payload.event, action);
                 runInGuiThread([channel, msg] {
                     channel->addMessage(msg, MessageContext::Original);
                 });
