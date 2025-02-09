@@ -3334,6 +3334,46 @@ QDebug &operator<<(QDebug &dbg,
     return dbg;
 }
 
+void Helix::deleteEventSubSubscription(const QString &subscriptionID,
+                                       ResultCallback<> successCallback,
+                                       FailureCallback<QString> failureCallback)
+{
+    QUrlQuery query;
+    query.addQueryItem("id", subscriptionID);
+
+    this->makeDelete("eventsub/subscriptions", query)
+        .onSuccess([successCallback](const auto &result) {
+            if (result.status() != 204)
+            {
+                qCWarning(chatterinoTwitchEventSub)
+                    << "Success result for deleting eventsub subscription was "
+                    << result.formatError() << "but we expected it to be 204";
+            }
+
+            successCallback();
+        })
+        .onError([failureCallback](const NetworkResult &result) {
+            if (!result.status())
+            {
+                failureCallback(result.formatError());
+                return;
+            }
+
+            const auto obj = result.parseJson();
+            auto message = obj["message"].toString();
+
+            if (message.isEmpty())
+            {
+                failureCallback("Twitch internal server error");
+            }
+            else
+            {
+                failureCallback(message);
+            }
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(const QString &url, const QUrlQuery &urlQuery,
                                   NetworkRequestType type)
 {

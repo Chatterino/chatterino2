@@ -436,6 +436,11 @@ public:
                       failureCallback)),
                 (override));
 
+    MOCK_METHOD(void, deleteEventSubSubscription,
+                (const QString &request, ResultCallback<> successCallback,
+                 (FailureCallback<QString> failureCallback)),
+                (override));
+
     MOCK_METHOD(void, update, (QString clientId, QString oauthToken),
                 (override));
 
