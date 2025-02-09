@@ -22,8 +22,8 @@
 - Bugfix: Fixed the reply button showing for inline whispers and announcements. (#5863)
 - Bugfix: Fixed suspicious user treatment update messages not being searchable. (#5865)
 - Bugfix: Ensure miniaudio backend exits even if it doesn't exit cleanly. (#5896)
+- Dev: Add initial experimental EventSub support. (#5837, #5895, #5897, #5904, #5910, #5903, #5915, #5916, #5930, #5935, #5932)
 - Dev: Remove unneeded platform specifier for toasts. (#5914)
-- Dev: Add initial experimental EventSub support. (#5837, #5895, #5897, #5904, #5910, #5903, #5915, #5916, #5930, #5935)
 - Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
 - Dev: Removed unused PubSub whisper code. (#5898)
 - Dev: Updated Conan dependencies. (#5776)
@@ -35,6 +35,7 @@
 - Dev: Words from `TextElement`s are now combined where possible. (#5847)
 - Dev: Fixed assertion failure when closing the edit-hotkey dialog. (#5869)
 - Dev: Updated `qtkeychain` to 0.15.0. (#5871)
+- Dev: Updated `googletest` to 1.16.0. (#5942)
 - Dev: Fixed duplicate CMake configure in clean builds. (#5940)
 
 ## 2.5.2

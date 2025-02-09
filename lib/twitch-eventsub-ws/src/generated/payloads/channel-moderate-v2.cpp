@@ -858,17 +858,21 @@ boost::json::result_for<AutomodTerms, boost::json::value>::type tag_invoke(
         return list.error();
     }
 
+    std::vector<std::string> vterms;
     const auto *jvterms = root.if_contains("terms");
-    if (jvterms == nullptr)
+    if (jvterms != nullptr && !jvterms->is_null())
     {
-        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
+        auto terms =
+            boost::json::try_value_to<std::vector<std::string>>(*jvterms);
+        if (terms.has_error())
+        {
+            return terms.error();
+        }
+        else
+        {
+            vterms = std::move(terms.value());
+        }
     }
-    auto terms = boost::json::try_value_to<std::vector<std::string>>(*jvterms);
-    if (terms.has_error())
-    {
-        return terms.error();
-    }
-
     static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
                       decltype(std::declval<AutomodTerms>().fromAutomod)>>);
     const auto *jvfromAutomod = root.if_contains("from_automod");
@@ -887,7 +891,7 @@ boost::json::result_for<AutomodTerms, boost::json::value>::type tag_invoke(
     return AutomodTerms{
         .action = std::move(action.value()),
         .list = std::move(list.value()),
-        .terms = std::move(terms.value()),
+        .terms = std::move(vterms),
         .fromAutomod = fromAutomod.value(),
     };
 }
@@ -1037,7 +1041,7 @@ boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -1050,7 +1054,7 @@ boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -1063,7 +1067,7 @@ boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<String>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -1076,23 +1080,27 @@ boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto reason = boost::json::try_value_to<std::string>(*jvreason);
+    auto reason = boost::json::try_value_to<String>(*jvreason);
 
     if (reason.has_error())
     {
         return reason.error();
     }
 
+    std::vector<chatterino::eventsub::lib::String> vchatRulesCited;
     const auto *jvchatRulesCited = root.if_contains("chat_rules_cited");
-    if (jvchatRulesCited == nullptr)
+    if (jvchatRulesCited != nullptr && !jvchatRulesCited->is_null())
     {
-        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
-    }
-    auto chatRulesCited =
-        boost::json::try_value_to<std::vector<std::string>>(*jvchatRulesCited);
-    if (chatRulesCited.has_error())
-    {
-        return chatRulesCited.error();
+        auto chatRulesCited = boost::json::try_value_to<
+            std::vector<chatterino::eventsub::lib::String>>(*jvchatRulesCited);
+        if (chatRulesCited.has_error())
+        {
+            return chatRulesCited.error();
+        }
+        else
+        {
+            vchatRulesCited = std::move(chatRulesCited.value());
+        }
     }
 
     return Warn{
@@ -1100,7 +1108,7 @@ boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
         .userLogin = std::move(userLogin.value()),
         .userName = std::move(userName.value()),
         .reason = std::move(reason.value()),
-        .chatRulesCited = std::move(chatRulesCited.value()),
+        .chatRulesCited = std::move(vchatRulesCited),
     };
 }
 
