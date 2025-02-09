@@ -72,7 +72,7 @@ Controller::~Controller()
         connection->close();
     }
 
-    this->activeSubscriptions.clear();
+    this->subscriptions.clear();
 
     this->work.reset();
 
@@ -92,9 +92,9 @@ void Controller::removeRef(const SubscriptionRequest &request)
 {
     std::lock_guard lock(this->subscriptionsMutex);
 
-    assert(this->activeSubscriptions.contains(request));
+    assert(this->subscriptions.contains(request));
 
-    auto &subscription = this->activeSubscriptions[request];
+    auto &subscription = this->subscriptions[request];
     subscription.refCount--;
     qCInfo(LOG) << "Removed ref for" << request << subscription.refCount;
 
@@ -131,7 +131,7 @@ SubscriptionHandle Controller::subscribe(const SubscriptionRequest &request)
     {
         std::lock_guard lock(this->subscriptionsMutex);
 
-        auto &subscription = this->activeSubscriptions[request];
+        auto &subscription = this->subscriptions[request];
         if (subscription.refCount == 0)
         {
             needToSubscribe = true;
@@ -161,7 +161,7 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
 
         {
             std::lock_guard lock(this->subscriptionsMutex);
-            auto &subscription = this->activeSubscriptions[request];
+            auto &subscription = this->subscriptions[request];
             if (isRetry)
             {
                 qCInfo(LOG) << "Removing subscription from queued list";
@@ -327,7 +327,7 @@ void Controller::retrySubscription(const SubscriptionRequest &request,
 {
     std::lock_guard lock(this->subscriptionsMutex);
 
-    auto &connection = this->activeSubscriptions[request];
+    auto &connection = this->subscriptions[request];
 
     if (connection.retryAttempts <= 0)
     {
@@ -364,7 +364,7 @@ void Controller::markRequestSubscribed(const SubscriptionRequest &request,
 {
     std::lock_guard lock(this->subscriptionsMutex);
 
-    auto &subscription = this->activeSubscriptions[request];
+    auto &subscription = this->subscriptions[request];
 
     subscription.connection = std::move(connection);
     subscription.subscriptionID = subscriptionID;

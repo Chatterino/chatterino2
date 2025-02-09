@@ -90,7 +90,7 @@ private:
     };
 
     std::mutex subscriptionsMutex;
-    std::unordered_map<SubscriptionRequest, Subscription> activeSubscriptions;
+    std::unordered_map<SubscriptionRequest, Subscription> subscriptions;
 };
 
 class DummyController : public IController
