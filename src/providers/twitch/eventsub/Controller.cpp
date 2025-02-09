@@ -93,13 +93,13 @@ void Controller::removeRef(const SubscriptionRequest &request)
 
     assert(this->activeSubscriptions.contains(request));
 
-    auto &xd = this->activeSubscriptions[request];
-    xd.refCount--;
-    qCInfo(LOG) << "Removed ref for" << request << xd.refCount;
+    auto &subscription = this->activeSubscriptions[request];
+    subscription.refCount--;
+    qCInfo(LOG) << "Removed ref for" << request << subscription.refCount;
 
-    if (xd.refCount <= 0)
+    if (subscription.refCount <= 0)
     {
-        if (xd.subscriptionID.isEmpty())
+        if (subscription.subscriptionID.isEmpty())
         {
             qCWarning(LOG) << "Refcount fell to zero for" << request
                            << "but we had no subscription ID attached - was a "
@@ -109,7 +109,7 @@ void Controller::removeRef(const SubscriptionRequest &request)
 
         qCInfo(LOG) << "Unsubscribing from" << request;
         getHelix()->deleteEventSubSubscription(
-            xd.subscriptionID,
+            subscription.subscriptionID,
             [request] {
                 qCInfo(LOG) << "Successfully unsubscribed from" << request;
             },
@@ -119,7 +119,7 @@ void Controller::removeRef(const SubscriptionRequest &request)
                     << request << errorMessage;
             });
 
-        xd.subscriptionID.clear();
+        subscription.subscriptionID.clear();
     }
 }
 
@@ -130,13 +130,13 @@ SubscriptionHandle Controller::subscribe(const SubscriptionRequest &request)
     {
         std::lock_guard lock(this->subscriptionsMutex);
 
-        auto &xd = this->activeSubscriptions[request];
-        if (xd.refCount == 0)
+        auto &subscription = this->activeSubscriptions[request];
+        if (subscription.refCount == 0)
         {
             needToSubscribe = true;
         }
-        xd.refCount++;
-        qCInfo(LOG) << "Add ref for" << request << xd.refCount;
+        subscription.refCount++;
+        qCInfo(LOG) << "Added ref for" << request << subscription.refCount;
     }
 
     auto handle = std::make_unique<RawSubscriptionHandle>(request);
