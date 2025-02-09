@@ -73,7 +73,7 @@ private:
 
     std::vector<std::weak_ptr<lib::Session>> connections;
 
-    struct XD {
+    struct Subscription {
         int32_t refCount = 0;
         std::weak_ptr<lib::Session> connection;
 
@@ -82,7 +82,7 @@ private:
     };
 
     std::mutex subscriptionsMutex;
-    std::unordered_map<SubscriptionRequest, XD> activeSubscriptions;
+    std::unordered_map<SubscriptionRequest, Subscription> activeSubscriptions;
 
     std::unordered_map<SubscriptionRequest,
                        std::unique_ptr<boost::asio::deadline_timer>>
