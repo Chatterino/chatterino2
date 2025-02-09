@@ -56,7 +56,8 @@ private:
                            boost::posix_time::time_duration delay);
 
     void markRequestSubscribed(const SubscriptionRequest &request,
-                               std::weak_ptr<lib::Session> connection);
+                               std::weak_ptr<lib::Session> connection,
+                               const QString &subscriptionID);
 
     const std::string userAgent;
 
@@ -75,6 +76,9 @@ private:
     struct XD {
         int32_t refCount = 0;
         std::weak_ptr<lib::Session> connection;
+
+        /// The ID of the subscription the Twitch Helix API has given us
+        QString subscriptionID;
     };
 
     std::mutex subscriptionsMutex;

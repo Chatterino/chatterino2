@@ -95,11 +95,31 @@ void Controller::removeRef(const SubscriptionRequest &request)
 
     auto &xd = this->activeSubscriptions[request];
     xd.refCount--;
-    qCInfo(LOG) << "Remove ref for" << request << xd.refCount;
-    // todo use actual atomic things here to be smart
+    qCInfo(LOG) << "Removed ref for" << request << xd.refCount;
+
     if (xd.refCount <= 0)
     {
-        qCInfo(LOG) << "TODO: Unsubscribe from" << request;
+        if (xd.subscriptionID.isEmpty())
+        {
+            qCWarning(LOG) << "Refcount fell to zero for" << request
+                           << "but we had no subscription ID attached - was a "
+                              "successful subscription never made?";
+            return;
+        }
+
+        qCInfo(LOG) << "Unsubscribing from" << request;
+        getHelix()->deleteEventSubSubscription(
+            xd.subscriptionID,
+            [request] {
+                qCInfo(LOG) << "Successfully unsubscribed from" << request;
+            },
+            [request](const auto &errorMessage) {
+                qCInfo(LOG)
+                    << "An error occurred while attempting to unsubscribe from"
+                    << request << errorMessage;
+            });
+
+        xd.subscriptionID.clear();
     }
 }
 
@@ -188,7 +208,8 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isQueued)
                 [this, request, connection,
                  weakConnection{weakConnection}](const auto &res) {
                     qCInfo(LOG) << "success" << res;
-                    this->markRequestSubscribed(request, weakConnection);
+                    this->markRequestSubscribed(request, weakConnection,
+                                                res.subscriptionID);
                 },
                 [this, request](const auto &error, const auto &errorString) {
                     using Error = HelixCreateEventSubSubscriptionError;
@@ -308,11 +329,15 @@ void Controller::queueSubscription(const SubscriptionRequest &request,
 }
 
 void Controller::markRequestSubscribed(const SubscriptionRequest &request,
-                                       std::weak_ptr<lib::Session> connection)
+                                       std::weak_ptr<lib::Session> connection,
+                                       const QString &subscriptionID)
 {
     std::lock_guard lock(this->subscriptionsMutex);
 
-    this->activeSubscriptions[request].connection = std::move(connection);
+    auto &subscription = this->activeSubscriptions[request];
+
+    subscription.connection = std::move(connection);
+    subscription.subscriptionID = subscriptionID;
 }
 
 }  // namespace chatterino::eventsub
