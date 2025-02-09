@@ -1573,7 +1573,7 @@ public:
             failureCallback) final;
 
     // https://dev.twitch.tv/docs/api/reference/#delete-eventsub-subscription
-    virtual void deleteEventSubSubscription(
+    void deleteEventSubSubscription(
         const QString &subscriptionID, ResultCallback<> successCallback,
         FailureCallback<QString> failureCallback) final;
 
