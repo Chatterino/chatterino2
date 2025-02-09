@@ -22,6 +22,9 @@ class IController
 public:
     virtual ~IController() = default;
 
+    /// Removes one reference for the given subscription request
+    ///
+    /// Should realistically only be called in the dtor of SubscriptionHandle
     virtual void removeRef(const SubscriptionRequest &request) = 0;
 
     /// Subscribe will make a request to each open connection and ask them to
@@ -47,13 +50,14 @@ public:
         const SubscriptionRequest &request) override;
 
 private:
-    void subscribe(const SubscriptionRequest &request, bool isQueued);
+    void subscribe(const SubscriptionRequest &request, bool isRetry);
 
     void createConnection();
     void registerConnection(std::weak_ptr<lib::Session> &&connection);
 
-    void queueSubscription(const SubscriptionRequest &request,
-                           boost::posix_time::time_duration delay);
+    void retrySubscription(const SubscriptionRequest &request,
+                           boost::posix_time::time_duration delay,
+                           int32_t maxAttempts);
 
     void markRequestSubscribed(const SubscriptionRequest &request,
                                std::weak_ptr<lib::Session> connection,
@@ -79,14 +83,14 @@ private:
 
         /// The ID of the subscription the Twitch Helix API has given us
         QString subscriptionID;
+
+        /// The timer, if any, for retrying the subscription creation
+        std::unique_ptr<boost::asio::deadline_timer> retryTimer;
+        int32_t retryAttempts = 0;
     };
 
     std::mutex subscriptionsMutex;
     std::unordered_map<SubscriptionRequest, Subscription> activeSubscriptions;
-
-    std::unordered_map<SubscriptionRequest,
-                       std::unique_ptr<boost::asio::deadline_timer>>
-        queuedSubscriptions;
 };
 
 class DummyController : public IController
