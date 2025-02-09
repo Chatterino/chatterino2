@@ -1062,6 +1062,13 @@ if (UNIX)
         message(STATUS "Linking with CMake DL libs: '${CMAKE_DL_LIBS}'")
         target_link_libraries(${LIBRARY_PROJECT} PUBLIC ${CMAKE_DL_LIBS})
     endif ()
+
+    if (NOT APPLE AND BUILD_WITH_LIBNOTIFY)
+        find_package(PkgConfig REQUIRED)
+        pkg_check_modules(LIBNOTIFY REQUIRED IMPORTED_TARGET libnotify)
+        target_link_libraries(${LIBRARY_PROJECT} PRIVATE PkgConfig::LIBNOTIFY)
+        target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_WITH_LIBNOTIFY)
+    endif ()
 endif ()
 
 if (WIN32)
