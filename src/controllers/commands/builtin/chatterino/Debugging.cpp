@@ -187,7 +187,7 @@ QString debugTest(const CommandContext &ctx)
         auto title = ctx.twitchChannel->accessStreamStatus()->title;
 
         getApp()->getToasts()->sendChannelNotification(
-            ctx.twitchChannel->getName(), title, Platform::Twitch);
+            ctx.twitchChannel->getName(), title);
         ctx.channel->addSystemMessage(
             QString("debug-test sent desktop notification"));
     }
