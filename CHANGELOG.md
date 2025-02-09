@@ -35,6 +35,7 @@
 - Dev: Fixed assertion failure when closing the edit-hotkey dialog. (#5869)
 - Dev: Updated `qtkeychain` to 0.15.0. (#5871)
 - Dev: Updated `googletest` to 1.16.0. (#5942)
+- Dev: Fixed duplicate CMake configure in clean builds. (#5940)
 
 ## 2.5.2
 
