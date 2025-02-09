@@ -175,23 +175,27 @@ boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
         return ownerID.error();
     }
 
+    std::vector<std::string> vformat;
     const auto *jvformat = root.if_contains("format");
-    if (jvformat == nullptr)
+    if (jvformat != nullptr && !jvformat->is_null())
     {
-        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
-    }
-    auto format =
-        boost::json::try_value_to<std::vector<std::string>>(*jvformat);
-    if (format.has_error())
-    {
-        return format.error();
+        auto format =
+            boost::json::try_value_to<std::vector<std::string>>(*jvformat);
+        if (format.has_error())
+        {
+            return format.error();
+        }
+        else
+        {
+            vformat = std::move(format.value());
+        }
     }
 
     return Emote{
         .id = std::move(id.value()),
         .emoteSetID = std::move(emoteSetID.value()),
         .ownerID = std::move(ownerID.value()),
-        .format = std::move(format.value()),
+        .format = std::move(vformat),
     };
 }
 
@@ -358,21 +362,26 @@ boost::json::result_for<Message, boost::json::value>::type tag_invoke(
         return text.error();
     }
 
+    std::vector<MessageFragment> vfragments;
     const auto *jvfragments = root.if_contains("fragments");
-    if (jvfragments == nullptr)
+    if (jvfragments != nullptr && !jvfragments->is_null())
     {
-        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
-    }
-    auto fragments =
-        boost::json::try_value_to<std::vector<MessageFragment>>(*jvfragments);
-    if (fragments.has_error())
-    {
-        return fragments.error();
+        auto fragments =
+            boost::json::try_value_to<std::vector<MessageFragment>>(
+                *jvfragments);
+        if (fragments.has_error())
+        {
+            return fragments.error();
+        }
+        else
+        {
+            vfragments = std::move(fragments.value());
+        }
     }
 
     return Message{
         .text = std::move(text.value()),
-        .fragments = std::move(fragments.value()),
+        .fragments = std::move(vfragments),
     };
 }
 
@@ -663,17 +672,20 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return color.error();
     }
 
+    std::vector<Badge> vbadges;
     const auto *jvbadges = root.if_contains("badges");
-    if (jvbadges == nullptr)
+    if (jvbadges != nullptr && !jvbadges->is_null())
     {
-        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
+        auto badges = boost::json::try_value_to<std::vector<Badge>>(*jvbadges);
+        if (badges.has_error())
+        {
+            return badges.error();
+        }
+        else
+        {
+            vbadges = std::move(badges.value());
+        }
     }
-    auto badges = boost::json::try_value_to<std::vector<Badge>>(*jvbadges);
-    if (badges.has_error())
-    {
-        return badges.error();
-    }
-
     const auto *jvmessageID = root.if_contains("message_id");
     if (jvmessageID == nullptr)
     {
@@ -768,7 +780,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         .chatterUserLogin = std::move(chatterUserLogin.value()),
         .chatterUserName = std::move(chatterUserName.value()),
         .color = std::move(color.value()),
-        .badges = std::move(badges.value()),
+        .badges = std::move(vbadges),
         .messageID = std::move(messageID.value()),
         .messageType = std::move(messageType.value()),
         .message = std::move(message.value()),

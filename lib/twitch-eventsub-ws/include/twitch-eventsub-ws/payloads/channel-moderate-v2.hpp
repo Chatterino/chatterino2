@@ -346,13 +346,13 @@ struct DenyUnbanRequest : public UnbanRequest {
 struct Warn {
     static constexpr std::string_view TAG = "warn";
 
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
-    std::string reason;
+    String userID;
+    String userLogin;
+    String userName;
+    String reason;
 
     // TODO: Verify we handle null for this as an empty vector
-    std::vector<std::string> chatRulesCited;
+    std::vector<String> chatRulesCited;
 };
 
 struct Clear {
