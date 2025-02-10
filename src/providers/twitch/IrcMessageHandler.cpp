@@ -1010,7 +1010,6 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
                                      "callback since reward is not known:"
                                   << rewardId;
         chan->addQueuedRedemption(rewardId, originalContent, message);
-        return;
     }
     args.channelPointRewardId = rewardId;
 
