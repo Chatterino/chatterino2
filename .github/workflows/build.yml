@@ -302,7 +302,6 @@ jobs:
               -DUSE_PRECOMPILED_HEADERS=OFF \
               -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
               -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
-              -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
               -DCHATTERINO_NO_AVIF_PLUGIN=On \
               -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
               -DFORCE_JSON_GENERATION=Off \
