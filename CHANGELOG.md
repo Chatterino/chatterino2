@@ -36,6 +36,7 @@
 - Dev: Updated CI macOS versions from 13 to 14. (#5934)
 - Dev: Words from `TextElement`s are now combined where possible. (#5847)
 - Dev: Fixed assertion failure when closing the edit-hotkey dialog. (#5869)
+- Dev: Bumped FreeBSD CI image from 14.0 to 14.2. (#5949)
 - Dev: Updated `qtkeychain` to 0.15.0. (#5871)
 - Dev: Updated `googletest` to 1.16.0. (#5942)
 - Dev: Fixed duplicate CMake configure in clean builds. (#5940)
