@@ -1243,7 +1243,10 @@ void PubSub::runThread()
 void PubSub::listenToTopic(const QString &topic)
 {
     PubSubListenMessage msg({topic});
-    msg.setToken(this->token_);
+    if (!topic.startsWith("community-points-channel-v1."))
+    {
+        msg.setToken(this->token_);
+    }
 
     this->listen(std::move(msg));
 }
