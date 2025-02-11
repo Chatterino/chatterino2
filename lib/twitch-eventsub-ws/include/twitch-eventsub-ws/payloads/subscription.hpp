@@ -32,13 +32,11 @@ namespace chatterino::eventsub::lib::payload::subscription {
 }
 */
 
-/// json_transform=snake_case
 struct Transport {
     const std::string method;
     const std::string sessionID;
 };
 
-/// json_transform=snake_case
 struct Subscription {
     const std::string id;
     const std::string status;
@@ -54,13 +52,6 @@ struct Subscription {
     const int cost;
 };
 
-// DESERIALIZATION DEFINITION START
-boost::json::result_for<Transport, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Transport>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Subscription>,
-    const boost::json::value &jvRoot);
-// DESERIALIZATION DEFINITION END
+#include "twitch-eventsub-ws/payloads/subscription.inc"
 
 }  // namespace chatterino::eventsub::lib::payload::subscription

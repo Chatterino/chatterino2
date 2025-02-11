@@ -6,32 +6,36 @@
 
 namespace chatterino::eventsub::lib::error {
 
+// NOLINTNEXTLINE(performance-enum-size)
+enum class Kind : int {
+    FieldMissing = 1,
+    ExpectedObject,
+    ExpectedString,
+    UnknownEnumValue,
+    InnerRootMissing,
+    NoMessageHandler,
+    UnknownVariant,
+};
+
 class ApplicationErrorCategory final : public boost::system::error_category
 {
-    const std::string innerMessage;
-
 public:
-    ApplicationErrorCategory(const char *_innerMessage)
-        : innerMessage(_innerMessage)
-    {
-    }
-
-    explicit ApplicationErrorCategory(std::string _innerMessage)
-        : innerMessage(std::move(_innerMessage))
-    {
-    }
+    consteval ApplicationErrorCategory() = default;
 
     const char *name() const noexcept override
     {
-        return "Application JSON error";
+        return "JSON deserialization error";
     }
-    std::string message(int /*ev*/) const override
-    {
-        return this->innerMessage;
-    }
+
+    std::string message(int ev) const override;
 };
 
-const ApplicationErrorCategory EXPECTED_OBJECT{"Expected object"};
-const ApplicationErrorCategory MISSING_KEY{"Missing key"};
+inline constexpr ApplicationErrorCategory CATEGORY;
+
+inline boost::system::error_code makeCode(Kind kind,
+                                          const boost::source_location *loc)
+{
+    return {static_cast<int>(kind), CATEGORY, loc};
+}
 
 }  // namespace chatterino::eventsub::lib::error

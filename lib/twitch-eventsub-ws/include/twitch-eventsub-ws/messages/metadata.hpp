@@ -1,7 +1,5 @@
 #pragma once
 
-#include "twitch-eventsub-ws/errors.hpp"
-
 #include <boost/json.hpp>
 
 #include <optional>
@@ -22,7 +20,6 @@ namespace chatterino::eventsub::lib::messages {
 }
 */
 
-/// json_transform=snake_case
 struct Metadata {
     const std::string messageID;
     const std::string messageType;
@@ -33,9 +30,6 @@ struct Metadata {
     const std::optional<std::string> subscriptionVersion;
 };
 
-// DESERIALIZATION DEFINITION START
-boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Metadata>, const boost::json::value &jvRoot);
-// DESERIALIZATION DEFINITION END
+#include "twitch-eventsub-ws/messages/metadata.inc"
 
 }  // namespace chatterino::eventsub::lib::messages

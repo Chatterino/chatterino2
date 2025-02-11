@@ -21,9 +21,14 @@ namespace chatterino::eventsub::lib::payload::channel_moderate::v2 {
 {"subscription":{"id":"86d99e53-2837-40cf-bc6e-c6e00698919c","status":"enabled","type":"channel.moderate","version":"2","condition":{"broadcaster_user_id":"11148817","moderator_user_id":"117166826"},"transport":{"method":"websocket","session_id":"AgoQZgfnyKxXQ32hpzCWF4aCGBIGY2VsbC1j"},"created_at":"2025-02-01T12:02:16.005321321Z","cost":0},"event":{"broadcaster_user_id":"11148817","broadcaster_user_login":"pajlada","broadcaster_user_name":"pajlada","source_broadcaster_user_id":null,"source_broadcaster_user_login":null,"source_broadcaster_user_name":null,"moderator_user_id":"11148817","moderator_user_login":"pajlada","moderator_user_name":"pajlada","action":"followers","followers":{"follow_duration_minutes":10080},"slow":null,"vip":null,"unvip":null,"mod":null,"unmod":null,"ban":null,"unban":null,"timeout":null,"untimeout":null,"raid":null,"unraid":null,"delete":null,"automod_terms":null,"unban_request":null,"warn":null,"shared_chat_ban":null,"shared_chat_unban":null,"shared_chat_timeout":null,"shared_chat_untimeout":null,"shared_chat_delete":null}}
 */
 
-/// json_transform=snake_case
 struct Followers {
+    static constexpr std::string_view TAG = "followers";
+
     int followDurationMinutes;
+};
+
+struct FollowersOff {
+    static constexpr std::string_view TAG = "followersoff";
 };
 
 /* slow mode set to 30s
@@ -34,9 +39,14 @@ struct Followers {
 {"subscription":{"id":"86d99e53-2837-40cf-bc6e-c6e00698919c","status":"enabled","type":"channel.moderate","version":"2","condition":{"broadcaster_user_id":"11148817","moderator_user_id":"117166826"},"transport":{"method":"websocket","session_id":"AgoQZgfnyKxXQ32hpzCWF4aCGBIGY2VsbC1j"},"created_at":"2025-02-01T12:02:16.005321321Z","cost":0},"event":{"broadcaster_user_id":"11148817","broadcaster_user_login":"pajlada","broadcaster_user_name":"pajlada","source_broadcaster_user_id":null,"source_broadcaster_user_login":null,"source_broadcaster_user_name":null,"moderator_user_id":"11148817","moderator_user_login":"pajlada","moderator_user_name":"pajlada","action":"slowoff","followers":null,"slow":null,"vip":null,"unvip":null,"mod":null,"unmod":null,"ban":null,"unban":null,"timeout":null,"untimeout":null,"raid":null,"unraid":null,"delete":null,"automod_terms":null,"unban_request":null,"warn":null,"shared_chat_ban":null,"shared_chat_unban":null,"shared_chat_timeout":null,"shared_chat_untimeout":null,"shared_chat_delete":null}}
 */
 
-/// json_transform=snake_case
 struct Slow {
+    static constexpr std::string_view TAG = "slow";
+
     int waitTimeSeconds;
+};
+
+struct SlowOff {
+    static constexpr std::string_view TAG = "slowoff";
 };
 
 /* User is VIP'ed
@@ -97,8 +107,9 @@ struct Slow {
 }
 */
 
-/// json_transform=snake_case
 struct Vip {
+    static constexpr std::string_view TAG = "vip";
+
     String userID;
     String userLogin;
     String userName;
@@ -108,8 +119,9 @@ struct Vip {
 {"subscription":{"id":"86d99e53-2837-40cf-bc6e-c6e00698919c","status":"enabled","type":"channel.moderate","version":"2","condition":{"broadcaster_user_id":"11148817","moderator_user_id":"117166826"},"transport":{"method":"websocket","session_id":"AgoQZgfnyKxXQ32hpzCWF4aCGBIGY2VsbC1j"},"created_at":"2025-02-01T12:02:16.005321321Z","cost":0},"event":{"broadcaster_user_id":"11148817","broadcaster_user_login":"pajlada","broadcaster_user_name":"pajlada","source_broadcaster_user_id":null,"source_broadcaster_user_login":null,"source_broadcaster_user_name":null,"moderator_user_id":"11148817","moderator_user_login":"pajlada","moderator_user_name":"pajlada","action":"unvip","followers":null,"slow":null,"vip":null,"unvip":{"user_id":"159849156","user_login":"bajlada","user_name":"BajLada"},"mod":null,"unmod":null,"ban":null,"unban":null,"timeout":null,"untimeout":null,"raid":null,"unraid":null,"delete":null,"automod_terms":null,"unban_request":null,"warn":null,"shared_chat_ban":null,"shared_chat_unban":null,"shared_chat_timeout":null,"shared_chat_untimeout":null,"shared_chat_delete":null}}
 */
 
-/// json_transform=snake_case
 struct Unvip {
+    static constexpr std::string_view TAG = "unvip";
+
     String userID;
     String userLogin;
     String userName;
@@ -119,8 +131,9 @@ struct Unvip {
 {"subscription":{"id":"86d99e53-2837-40cf-bc6e-c6e00698919c","status":"enabled","type":"channel.moderate","version":"2","condition":{"broadcaster_user_id":"11148817","moderator_user_id":"117166826"},"transport":{"method":"websocket","session_id":"AgoQZgfnyKxXQ32hpzCWF4aCGBIGY2VsbC1j"},"created_at":"2025-02-01T12:02:16.005321321Z","cost":0},"event":{"broadcaster_user_id":"11148817","broadcaster_user_login":"pajlada","broadcaster_user_name":"pajlada","source_broadcaster_user_id":null,"source_broadcaster_user_login":null,"source_broadcaster_user_name":null,"moderator_user_id":"11148817","moderator_user_login":"pajlada","moderator_user_name":"pajlada","action":"mod","followers":null,"slow":null,"vip":null,"unvip":null,"mod":{"user_id":"159849156","user_login":"bajlada","user_name":"BajLada"},"unmod":null,"ban":null,"unban":null,"timeout":null,"untimeout":null,"raid":null,"unraid":null,"delete":null,"automod_terms":null,"unban_request":null,"warn":null,"shared_chat_ban":null,"shared_chat_unban":null,"shared_chat_timeout":null,"shared_chat_untimeout":null,"shared_chat_delete":null}}
 */
 
-/// json_transform=snake_case
 struct Mod {
+    static constexpr std::string_view TAG = "mod";
+
     std::string userID;
     std::string userLogin;
     std::string userName;
@@ -130,8 +143,9 @@ struct Mod {
 {"subscription":{"id":"86d99e53-2837-40cf-bc6e-c6e00698919c","status":"enabled","type":"channel.moderate","version":"2","condition":{"broadcaster_user_id":"11148817","moderator_user_id":"117166826"},"transport":{"method":"websocket","session_id":"AgoQZgfnyKxXQ32hpzCWF4aCGBIGY2VsbC1j"},"created_at":"2025-02-01T12:02:16.005321321Z","cost":0},"event":{"broadcaster_user_id":"11148817","broadcaster_user_login":"pajlada","broadcaster_user_name":"pajlada","source_broadcaster_user_id":null,"source_broadcaster_user_login":null,"source_broadcaster_user_name":null,"moderator_user_id":"11148817","moderator_user_login":"pajlada","moderator_user_name":"pajlada","action":"unmod","followers":null,"slow":null,"vip":null,"unvip":null,"mod":null,"unmod":{"user_id":"159849156","user_login":"bajlada","user_name":"BajLada"},"ban":null,"unban":null,"timeout":null,"untimeout":null,"raid":null,"unraid":null,"delete":null,"automod_terms":null,"unban_request":null,"warn":null,"shared_chat_ban":null,"shared_chat_unban":null,"shared_chat_timeout":null,"shared_chat_untimeout":null,"shared_chat_delete":null}}
 */
 
-/// json_transform=snake_case
 struct Unmod {
+    static constexpr std::string_view TAG = "unmod";
+
     std::string userID;
     std::string userLogin;
     std::string userName;
@@ -145,24 +159,34 @@ struct Unmod {
 {"subscription":{"id":"86d99e53-2837-40cf-bc6e-c6e00698919c","status":"enabled","type":"channel.moderate","version":"2","condition":{"broadcaster_user_id":"11148817","moderator_user_id":"117166826"},"transport":{"method":"websocket","session_id":"AgoQZgfnyKxXQ32hpzCWF4aCGBIGY2VsbC1j"},"created_at":"2025-02-01T12:02:16.005321321Z","cost":0},"event":{"broadcaster_user_id":"11148817","broadcaster_user_login":"pajlada","broadcaster_user_name":"pajlada","source_broadcaster_user_id":null,"source_broadcaster_user_login":null,"source_broadcaster_user_name":null,"moderator_user_id":"11148817","moderator_user_login":"pajlada","moderator_user_name":"pajlada","action":"ban","followers":null,"slow":null,"vip":null,"unvip":null,"mod":null,"unmod":null,"ban":{"user_id":"70948394","user_login":"weeb123","user_name":"WEEB123","reason":""},"unban":null,"timeout":null,"untimeout":null,"raid":null,"unraid":null,"delete":null,"automod_terms":null,"unban_request":null,"warn":null,"shared_chat_ban":null,"shared_chat_unban":null,"shared_chat_timeout":null,"shared_chat_untimeout":null,"shared_chat_delete":null}}
 */
 
-/// json_transform=snake_case
 struct Ban {
+    static constexpr std::string_view TAG = "ban";
+    static constexpr std::string_view FIELD = "ban";
+
     std::string userID;
     std::string userLogin;
     std::string userName;
     // TODO: Verify that we handle null here
     std::string reason;
 };
+struct SharedChatBan : public Ban {
+    static constexpr std::string_view TAG = "shared_chat_ban";
+};
 
 /* user is unbanned
 {"subscription":{"id":"86d99e53-2837-40cf-bc6e-c6e00698919c","status":"enabled","type":"channel.moderate","version":"2","condition":{"broadcaster_user_id":"11148817","moderator_user_id":"117166826"},"transport":{"method":"websocket","session_id":"AgoQZgfnyKxXQ32hpzCWF4aCGBIGY2VsbC1j"},"created_at":"2025-02-01T12:02:16.005321321Z","cost":0},"event":{"broadcaster_user_id":"11148817","broadcaster_user_login":"pajlada","broadcaster_user_name":"pajlada","source_broadcaster_user_id":null,"source_broadcaster_user_login":null,"source_broadcaster_user_name":null,"moderator_user_id":"11148817","moderator_user_login":"pajlada","moderator_user_name":"pajlada","action":"unban","followers":null,"slow":null,"vip":null,"unvip":null,"mod":null,"unmod":null,"ban":null,"unban":{"user_id":"70948394","user_login":"weeb123","user_name":"WEEB123"},"timeout":null,"untimeout":null,"raid":null,"unraid":null,"delete":null,"automod_terms":null,"unban_request":null,"warn":null,"shared_chat_ban":null,"shared_chat_unban":null,"shared_chat_timeout":null,"shared_chat_untimeout":null,"shared_chat_delete":null}}
 */
 
-/// json_transform=snake_case
 struct Unban {
+    static constexpr std::string_view TAG = "unban";
+    static constexpr std::string_view FIELD = "unban";
+
     std::string userID;
     std::string userLogin;
     std::string userName;
+};
+struct SharedChatUnban : public Ban {
+    static constexpr std::string_view TAG = "shared_chat_unban";
 };
 
 /* user is timed out without reason
@@ -173,8 +197,10 @@ struct Unban {
 {"subscription":{"id":"86d99e53-2837-40cf-bc6e-c6e00698919c","status":"enabled","type":"channel.moderate","version":"2","condition":{"broadcaster_user_id":"11148817","moderator_user_id":"117166826"},"transport":{"method":"websocket","session_id":"AgoQZgfnyKxXQ32hpzCWF4aCGBIGY2VsbC1j"},"created_at":"2025-02-01T12:02:16.005321321Z","cost":0},"event":{"broadcaster_user_id":"11148817","broadcaster_user_login":"pajlada","broadcaster_user_name":"pajlada","source_broadcaster_user_id":null,"source_broadcaster_user_login":null,"source_broadcaster_user_name":null,"moderator_user_id":"11148817","moderator_user_login":"pajlada","moderator_user_name":"pajlada","action":"timeout","followers":null,"slow":null,"vip":null,"unvip":null,"mod":null,"unmod":null,"ban":null,"unban":null,"timeout":{"user_id":"70948394","user_login":"weeb123","user_name":"WEEB123","reason":"this is the reason","expires_at":"2025-02-01T12:11:15.859552916Z"},"untimeout":null,"raid":null,"unraid":null,"delete":null,"automod_terms":null,"unban_request":null,"warn":null,"shared_chat_ban":null,"shared_chat_unban":null,"shared_chat_timeout":null,"shared_chat_untimeout":null,"shared_chat_delete":null}}
 */
 
-/// json_transform=snake_case
 struct Timeout {
+    static constexpr std::string_view TAG = "timeout";
+    static constexpr std::string_view FIELD = "timeout";
+
     std::string userID;
     std::string userLogin;
     std::string userName;
@@ -183,24 +209,33 @@ struct Timeout {
     // TODO: This should be a timestamp?
     std::string expiresAt;
 };
+struct SharedChatTimeout : public Ban {
+    static constexpr std::string_view TAG = "shared_chat_timeout";
+};
 
 /* user is untimeouted
 {"subscription":{"id":"86d99e53-2837-40cf-bc6e-c6e00698919c","status":"enabled","type":"channel.moderate","version":"2","condition":{"broadcaster_user_id":"11148817","moderator_user_id":"117166826"},"transport":{"method":"websocket","session_id":"AgoQZgfnyKxXQ32hpzCWF4aCGBIGY2VsbC1j"},"created_at":"2025-02-01T12:02:16.005321321Z","cost":0},"event":{"broadcaster_user_id":"11148817","broadcaster_user_login":"pajlada","broadcaster_user_name":"pajlada","source_broadcaster_user_id":null,"source_broadcaster_user_login":null,"source_broadcaster_user_name":null,"moderator_user_id":"11148817","moderator_user_login":"pajlada","moderator_user_name":"pajlada","action":"untimeout","followers":null,"slow":null,"vip":null,"unvip":null,"mod":null,"unmod":null,"ban":null,"unban":null,"timeout":null,"untimeout":{"user_id":"70948394","user_login":"weeb123","user_name":"WEEB123"},"raid":null,"unraid":null,"delete":null,"automod_terms":null,"unban_request":null,"warn":null,"shared_chat_ban":null,"shared_chat_unban":null,"shared_chat_timeout":null,"shared_chat_untimeout":null,"shared_chat_delete":null}}
 */
 
-/// json_transform=snake_case
 struct Untimeout {
+    static constexpr std::string_view TAG = "untimeout";
+    static constexpr std::string_view FIELD = "untimeout";
+
     std::string userID;
     std::string userLogin;
     std::string userName;
+};
+struct SharedChatUntimeout : public Ban {
+    static constexpr std::string_view TAG = "shared_chat_untimeout";
 };
 
 /* channel is raided (from bajlada to pajlada)
 {"subscription":{"id":"e7b45c7a-9b4d-4101-8d7d-92e8945c26fa","status":"enabled","type":"channel.moderate","version":"2","condition":{"broadcaster_user_id":"159849156","moderator_user_id":"159849156"},"transport":{"method":"websocket","session_id":"AgoQEPRIfB3SQTCSkJM2zznvNxIGY2VsbC1j"},"created_at":"2025-02-01T12:12:45.685831769Z","cost":0},"event":{"broadcaster_user_id":"159849156","broadcaster_user_login":"bajlada","broadcaster_user_name":"BajLada","source_broadcaster_user_id":null,"source_broadcaster_user_login":null,"source_broadcaster_user_name":null,"moderator_user_id":"159849156","moderator_user_login":"bajlada","moderator_user_name":"BajLada","action":"raid","followers":null,"slow":null,"vip":null,"unvip":null,"mod":null,"unmod":null,"ban":null,"unban":null,"timeout":null,"untimeout":null,"raid":{"user_id":"11148817","user_login":"pajlada","user_name":"pajlada","viewer_count":0},"unraid":null,"delete":null,"automod_terms":null,"unban_request":null,"warn":null,"shared_chat_ban":null,"shared_chat_unban":null,"shared_chat_timeout":null,"shared_chat_untimeout":null,"shared_chat_delete":null}}
 */
 
-/// json_transform=snake_case
 struct Raid {
+    static constexpr std::string_view TAG = "raid";
+
     std::string userID;
     std::string userLogin;
     std::string userName;
@@ -212,8 +247,9 @@ struct Raid {
 {"subscription":{"id":"e7b45c7a-9b4d-4101-8d7d-92e8945c26fa","status":"enabled","type":"channel.moderate","version":"2","condition":{"broadcaster_user_id":"159849156","moderator_user_id":"159849156"},"transport":{"method":"websocket","session_id":"AgoQEPRIfB3SQTCSkJM2zznvNxIGY2VsbC1j"},"created_at":"2025-02-01T12:12:45.685831769Z","cost":0},"event":{"broadcaster_user_id":"159849156","broadcaster_user_login":"bajlada","broadcaster_user_name":"BajLada","source_broadcaster_user_id":null,"source_broadcaster_user_login":null,"source_broadcaster_user_name":null,"moderator_user_id":"159849156","moderator_user_login":"bajlada","moderator_user_name":"BajLada","action":"unraid","followers":null,"slow":null,"vip":null,"unvip":null,"mod":null,"unmod":null,"ban":null,"unban":null,"timeout":null,"untimeout":null,"raid":null,"unraid":{"user_id":"11148817","user_login":"pajlada","user_name":"pajlada"},"delete":null,"automod_terms":null,"unban_request":null,"warn":null,"shared_chat_ban":null,"shared_chat_unban":null,"shared_chat_timeout":null,"shared_chat_untimeout":null,"shared_chat_delete":null}}
 */
 
-/// json_transform=snake_case
 struct Unraid {
+    static constexpr std::string_view TAG = "unraid";
+
     std::string userID;
     std::string userLogin;
     std::string userName;
@@ -223,13 +259,18 @@ struct Unraid {
 {"subscription":{"id":"4284c08c-402a-43a8-8537-1e75f38f562c","status":"enabled","type":"channel.moderate","version":"2","condition":{"broadcaster_user_id":"11148817","moderator_user_id":"117166826"},"transport":{"method":"websocket","session_id":"AgoQfS3RYz3MSqOophais4HEjxIGY2VsbC1j"},"created_at":"2025-02-01T12:15:13.083098352Z","cost":0},"event":{"broadcaster_user_id":"11148817","broadcaster_user_login":"pajlada","broadcaster_user_name":"pajlada","source_broadcaster_user_id":null,"source_broadcaster_user_login":null,"source_broadcaster_user_name":null,"moderator_user_id":"11148817","moderator_user_login":"pajlada","moderator_user_name":"pajlada","action":"delete","followers":null,"slow":null,"vip":null,"unvip":null,"mod":null,"unmod":null,"ban":null,"unban":null,"timeout":null,"untimeout":null,"raid":null,"unraid":null,"delete":{"user_id":"232490245","user_login":"namtheweebs","user_name":"NaMTheWeebs","message_id":"6c9bd28b-779b-4607-b66f-5c336e1ae29e","message_body":"bajlada raid NomNom"},"automod_terms":null,"unban_request":null,"warn":null,"shared_chat_ban":null,"shared_chat_unban":null,"shared_chat_timeout":null,"shared_chat_untimeout":null,"shared_chat_delete":null}}
 */
 
-/// json_transform=snake_case
 struct Delete {
+    static constexpr std::string_view TAG = "delete";
+    static constexpr std::string_view FIELD = "delete";
+
     std::string userID;
     std::string userLogin;
     std::string userName;
     std::string messageID;
     std::string messageBody;
+};
+struct SharedChatDelete : public Ban {
+    static constexpr std::string_view TAG = "shared_chat_delete";
 };
 
 /* automodded message approved
@@ -242,8 +283,9 @@ struct Delete {
 {"subscription":{"id":"0ccc8f11-7e77-40cf-84a9-25ab934c30fb","status":"enabled","type":"channel.moderate","version":"2","condition":{"broadcaster_user_id":"117166826","moderator_user_id":"117166826"},"transport":{"method":"websocket","session_id":"AgoQfS3RYz3MSqOophais4HEjxIGY2VsbC1j"},"created_at":"2025-02-01T12:15:13.092673205Z","cost":0},"event":{"broadcaster_user_id":"117166826","broadcaster_user_login":"testaccount_420","broadcaster_user_name":"테스트계정420","source_broadcaster_user_id":null,"source_broadcaster_user_login":null,"source_broadcaster_user_name":null,"moderator_user_id":"117166826","moderator_user_login":"testaccount_420","moderator_user_name":"테스트계정420","action":"add_blocked_term","followers":null,"slow":null,"vip":null,"unvip":null,"mod":null,"unmod":null,"ban":null,"unban":null,"timeout":null,"untimeout":null,"raid":null,"unraid":null,"delete":null,"automod_terms":{"action":"add","list":"blocked","terms":["cock cock cock penis sex cock penis penis cock"],"from_automod":true},"unban_request":null,"warn":null,"shared_chat_ban":null,"shared_chat_unban":null,"shared_chat_timeout":null,"shared_chat_untimeout":null,"shared_chat_delete":null}}
 */
 
-/// json_transform=snake_case
 struct AutomodTerms {
+    static constexpr std::string_view FIELD = "automod_terms";
+
     // either add or remove
     std::string action;
     // either blocked or permitted
@@ -251,6 +293,19 @@ struct AutomodTerms {
 
     std::vector<std::string> terms;
     bool fromAutomod;
+};
+
+struct AddBlockedTerm : public AutomodTerms {
+    static constexpr std::string_view TAG = "add_blocked_term";
+};
+struct AddPermittedTerm : public AutomodTerms {
+    static constexpr std::string_view TAG = "add_permitted_term";
+};
+struct RemoveBlockedTerm : public AutomodTerms {
+    static constexpr std::string_view TAG = "remove_blocked_term";
+};
+struct RemovePermittedTerm : public AutomodTerms {
+    static constexpr std::string_view TAG = "remove_permitted_term";
 };
 
 /* unban request approved
@@ -261,8 +316,9 @@ struct AutomodTerms {
 {"subscription":{"id":"4284c08c-402a-43a8-8537-1e75f38f562c","status":"enabled","type":"channel.moderate","version":"2","condition":{"broadcaster_user_id":"11148817","moderator_user_id":"117166826"},"transport":{"method":"websocket","session_id":"AgoQfS3RYz3MSqOophais4HEjxIGY2VsbC1j"},"created_at":"2025-02-01T12:15:13.083098352Z","cost":0},"event":{"broadcaster_user_id":"11148817","broadcaster_user_login":"pajlada","broadcaster_user_name":"pajlada","source_broadcaster_user_id":null,"source_broadcaster_user_login":null,"source_broadcaster_user_name":null,"moderator_user_id":"11148817","moderator_user_login":"pajlada","moderator_user_name":"pajlada","action":"deny_unban_request","followers":null,"slow":null,"vip":null,"unvip":null,"mod":null,"unmod":null,"ban":null,"unban":null,"timeout":null,"untimeout":null,"raid":null,"unraid":null,"delete":null,"automod_terms":null,"unban_request":{"is_approved":false,"user_id":"975285839","user_login":"selenatormapguy","user_name":"selenatormapguy","moderator_message":""},"warn":null,"shared_chat_ban":null,"shared_chat_unban":null,"shared_chat_timeout":null,"shared_chat_untimeout":null,"shared_chat_delete":null}}
 */
 
-/// json_transform=snake_case
 struct UnbanRequest {
+    static constexpr std::string_view FIELD = "unban_request";
+
     bool isApproved;
 
     std::string userID;
@@ -270,6 +326,13 @@ struct UnbanRequest {
     std::string userName;
 
     std::string moderatorMessage;
+};
+
+struct ApproveUnbanRequest : public UnbanRequest {
+    static constexpr std::string_view TAG = "approve_unban_request";
+};
+struct DenyUnbanRequest : public UnbanRequest {
+    static constexpr std::string_view TAG = "deny_unban_request";
 };
 
 /* freetext warn from chatterino
@@ -280,59 +343,43 @@ struct UnbanRequest {
 {"subscription":{"id":"4284c08c-402a-43a8-8537-1e75f38f562c","status":"enabled","type":"channel.moderate","version":"2","condition":{"broadcaster_user_id":"11148817","moderator_user_id":"117166826"},"transport":{"method":"websocket","session_id":"AgoQfS3RYz3MSqOophais4HEjxIGY2VsbC1j"},"created_at":"2025-02-01T12:15:13.083098352Z","cost":0},"event":{"broadcaster_user_id":"11148817","broadcaster_user_login":"pajlada","broadcaster_user_name":"pajlada","source_broadcaster_user_id":null,"source_broadcaster_user_login":null,"source_broadcaster_user_name":null,"moderator_user_id":"11148817","moderator_user_login":"pajlada","moderator_user_name":"pajlada","action":"warn","followers":null,"slow":null,"vip":null,"unvip":null,"mod":null,"unmod":null,"ban":null,"unban":null,"timeout":null,"untimeout":null,"raid":null,"unraid":null,"delete":null,"automod_terms":null,"unban_request":null,"warn":{"user_id":"159849156","user_login":"bajlada","user_name":"BajLada","reason":"and a custom reason","chat_rules_cited":["Rule 2"]},"shared_chat_ban":null,"shared_chat_unban":null,"shared_chat_timeout":null,"shared_chat_untimeout":null,"shared_chat_delete":null}}
 */
 
-/// json_transform=snake_case
 struct Warn {
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
-    std::string reason;
+    static constexpr std::string_view TAG = "warn";
+
+    String userID;
+    String userLogin;
+    String userName;
+    String reason;
 
     // TODO: Verify we handle null for this as an empty vector
-    std::vector<std::string> chatRulesCited;
+    std::vector<String> chatRulesCited;
 };
 
-/// json_transform=snake_case
-enum class Action : uint8_t {
-    Ban,
-    Timeout,
-    Unban,
-    Untimeout,
-    Clear,
-    Emoteonly,
-    Emoteonlyoff,
-    Followers,
-    Followersoff,
-    Uniquechat,
-    Uniquechatoff,
-    Slow,
-    Slowoff,
-    Subscribers,
-    Subscribersoff,
-    Unraid,
-    /// json_rename=delete
-    DeleteMessage,
-    /// clangd currently "inherits" all future comments to all future enum constants
-    /// so after using something like json_rename we need to ensure it doesn't spread
-    Unvip,
-    Vip,
-    Raid,
-    AddBlockedTerm,
-    AddPermittedTerm,
-    RemoveBlockedTerm,
-    RemovePermittedTerm,
-    Mod,
-    Unmod,
-    ApproveUnbanRequest,
-    DenyUnbanRequest,
-    Warn,
-    SharedChatBan,
-    SharedChatTimeout,
-    SharedChatUnban,
-    SharedChatUntimeout,
-    SharedChatDelete,
+struct Clear {
+    static constexpr std::string_view TAG = "clear";
 };
 
-/// json_transform=snake_case
+struct EmoteOnly {
+    static constexpr std::string_view TAG = "emoteonly";
+};
+struct EmoteOnlyOff {
+    static constexpr std::string_view TAG = "emoteonlyoff";
+};
+
+struct Uniquechat {
+    static constexpr std::string_view TAG = "uniquechat";
+};
+struct UniquechatOff {
+    static constexpr std::string_view TAG = "uniquechatoff";
+};
+
+struct Subscribers {
+    static constexpr std::string_view TAG = "subscribers";
+};
+struct SubscribersOff {
+    static constexpr std::string_view TAG = "subscribersoff";
+};
+
 struct Event {
     /// User ID (e.g. 117166826) of the user who's channel the event took place in
     String broadcasterUserID;
@@ -355,31 +402,43 @@ struct Event {
     /// User Name (e.g. 테스트계정420) of the user who took the action
     String moderatorUserName;
 
-    // TODO: enum?
-    /// The action that took place (e.g. "warn" or "ban")
-    Action action;
-
-    std::optional<Followers> followers;
-    std::optional<Slow> slow;
-    std::optional<Vip> vip;
-    std::optional<Unvip> unvip;
-    std::optional<Unmod> unmod;
-    std::optional<Ban> ban;
-    std::optional<Unban> unban;
-    std::optional<Timeout> timeout;
-    std::optional<Untimeout> untimeout;
-    std::optional<Raid> raid;
-    std::optional<Unraid> unraid;
-    /// json_rename=delete
-    std::optional<Delete> deleteMessage;
-    std::optional<AutomodTerms> automodTerms;
-    std::optional<UnbanRequest> unbanRequest;
-    std::optional<Warn> warn;
-    std::optional<Ban> sharedChatBan;
-    std::optional<Unban> sharedChatUnban;
-    std::optional<Timeout> sharedChatTimeout;
-    std::optional<Untimeout> sharedChatUntimeout;
-    std::optional<Delete> sharedChatDelete;
+    /// json_tag=action
+    std::variant<Ban,                  //
+                 Timeout,              //
+                 Unban,                //
+                 Untimeout,            //
+                 Clear,                //
+                 EmoteOnly,            //
+                 EmoteOnlyOff,         //
+                 Followers,            //
+                 FollowersOff,         //
+                 Uniquechat,           //
+                 UniquechatOff,        //
+                 Slow,                 //
+                 SlowOff,              //
+                 Subscribers,          //
+                 SubscribersOff,       //
+                 Unraid,               //
+                 Delete,               //
+                 Unvip,                //
+                 Vip,                  //
+                 Raid,                 //
+                 AddBlockedTerm,       //
+                 AddPermittedTerm,     //
+                 RemoveBlockedTerm,    //
+                 RemovePermittedTerm,  //
+                 Mod,                  //
+                 Unmod,                //
+                 ApproveUnbanRequest,  //
+                 DenyUnbanRequest,     //
+                 Warn,                 //
+                 SharedChatBan,        //
+                 SharedChatTimeout,    //
+                 SharedChatUnban,      //
+                 SharedChatUntimeout,  //
+                 SharedChatDelete,     //
+                 std::string>
+        action;
 };
 
 struct Payload {
@@ -388,65 +447,6 @@ struct Payload {
     Event event;
 };
 
-// DESERIALIZATION DEFINITION START
-boost::json::result_for<Action, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Action>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Followers, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Followers>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Slow, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Slow>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Vip, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Vip>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Unvip, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Unvip>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Mod, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Mod>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Unmod, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Unmod>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Ban, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Ban>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Unban, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Unban>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Timeout>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Untimeout, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Untimeout>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Raid>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Unraid, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Unraid>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Delete>, const boost::json::value &jvRoot);
-
-boost::json::result_for<AutomodTerms, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<AutomodTerms>,
-    const boost::json::value &jvRoot);
-
-boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<UnbanRequest>,
-    const boost::json::value &jvRoot);
-
-boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Warn>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Event, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Event>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Payload>, const boost::json::value &jvRoot);
-// DESERIALIZATION DEFINITION END
+#include "twitch-eventsub-ws/payloads/channel-moderate-v2.inc"
 
 }  // namespace chatterino::eventsub::lib::payload::channel_moderate::v2

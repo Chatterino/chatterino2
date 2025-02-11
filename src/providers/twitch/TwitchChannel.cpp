@@ -45,6 +45,7 @@
 #include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
 #include "util/QStringHash.hpp"
+#include "util/VectorMessageSink.hpp"
 #include "widgets/Window.hpp"
 
 #include <IrcConnection>
@@ -463,9 +464,24 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
             [&](const QueuedRedemption &msg) {
                 if (reward.id == msg.rewardID)
                 {
+                    VectorMessageSink sink(
+                        MessageSinkTrait::AddMentionsToGlobalChannel);
                     IrcMessageHandler::instance().addMessage(
-                        msg.message.get(), *this, this, msg.originalContent,
+                        msg.message.get(), sink, this, msg.originalContent,
                         *server, false, false);
+                    if (sink.messages().empty())
+                    {
+                        return true;
+                    }
+                    MessagePtr next = sink.messages().back();
+                    auto prev = this->findMessageByID(next->id);
+                    if (!prev)
+                    {
+                        // message gone
+                        this->addMessage(next, MessageContext::Repost);
+                        return true;
+                    }
+                    this->replaceMessage(prev, next);
                     return true;
                 }
                 return false;

@@ -431,6 +431,8 @@ void EmotePopup::loadChannel(ChannelPtr channel)
         std::make_shared<Channel>("", Channel::Type::None));
     this->channelEmotesView_->setChannel(
         std::make_shared<Channel>("", Channel::Type::None));
+    this->searchView_->setChannel(
+        std::make_shared<Channel>("", Channel::Type::None));
 
     this->reloadEmotes();
 }
@@ -627,7 +629,8 @@ void EmotePopup::filterEmotes(const QString &searchText)
 
         return;
     }
-    auto searchChannel = std::make_shared<Channel>("", Channel::Type::None);
+    auto searchChannel = this->searchView_->underlyingChannel();
+    searchChannel->clearMessages();
 
     // true in special channels like /mentions
     if (this->channel_->isTwitchChannel())
@@ -652,8 +655,6 @@ void EmotePopup::filterEmotes(const QString &searchText)
     {
         loadEmojis(*searchChannel, filteredEmojis, "Emojis");
     }
-
-    this->searchView_->setChannel(searchChannel);
 
     this->notebook_->hide();
     this->searchView_->show();

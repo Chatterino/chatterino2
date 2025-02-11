@@ -2147,6 +2147,7 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
             builder.appendChannelPointRewardMessage(*reward, channel->isMod(),
                                                     channel->isBroadcaster());
         }
+        builder->flags.set(MessageFlag::RedeemedChannelPointReward);
     }
 
     builder.appendChannelName(channel);

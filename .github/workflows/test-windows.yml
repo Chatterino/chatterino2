@@ -29,7 +29,6 @@ jobs:
         skip-crashpad: [false]
       fail-fast: false
     env:
-      C2_BUILD_WITH_QT6: ${{ startsWith(matrix.qt-version, '6.') && 'ON' || 'OFF' }}
       QT_MODULES: ${{ startsWith(matrix.qt-version, '6.') && 'qt5compat qtimageformats' || '' }}
       C2_USE_OPENSSL3: ${{ startsWith(matrix.qt-version, '6.') && 'True' || 'False' }}
       C2_CONAN_CACHE_SUFFIX: ${{ startsWith(matrix.qt-version, '6.') && '-QT6' || '' }}
@@ -44,11 +43,6 @@ jobs:
         if: matrix.skip-crashpad == false
         run: |
           echo "C2_ENABLE_CRASHPAD=ON" >> "$Env:GITHUB_ENV"
-
-      - name: Set BUILD_WITH_QT6
-        if: startsWith(matrix.qt-version, '6.')
-        run: |
-          echo "C2_BUILD_WITH_QT6=ON" >> "$Env:GITHUB_ENV"
 
       - uses: actions/checkout@v4
         with:
@@ -128,7 +122,6 @@ jobs:
               -DUSE_PRECOMPILED_HEADERS=On `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_PLUGINS="$Env:C2_PLUGINS" `
-              -DBUILD_WITH_QT6="$Env:C2_BUILD_WITH_QT6" `
               ..
           set cl=/MP
           nmake /S /NOLOGO

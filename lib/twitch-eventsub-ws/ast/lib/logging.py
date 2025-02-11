@@ -4,12 +4,12 @@ import sys
 from colorama import Fore, Style
 
 
-def init_logging() -> None:
+def init_logging(level=logging.DEBUG) -> None:
     root = logging.getLogger()
-    root.setLevel(logging.DEBUG)
+    root.setLevel(level)
 
     handler = logging.StreamHandler(sys.stderr)
-    handler.setLevel(logging.DEBUG)
+    handler.setLevel(level)
 
     colors = {
         "WARNING": Fore.YELLOW,

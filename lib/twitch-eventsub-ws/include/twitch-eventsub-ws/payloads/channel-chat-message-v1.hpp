@@ -54,21 +54,18 @@
 
 namespace chatterino::eventsub::lib::payload::channel_chat_message::v1 {
 
-/// json_transform=snake_case
 struct Badge {
     std::string setID;
     std::string id;
     std::string info;
 };
 
-/// json_transform=snake_case
 struct Cheermote {
     std::string prefix;
     int bits;
     int tier;
 };
 
-/// json_transform=snake_case
 struct Emote {
     std::string id;
     std::string emoteSetID;
@@ -76,14 +73,12 @@ struct Emote {
     std::vector<std::string> format;
 };
 
-/// json_transform=snake_case
 struct Mention {
     std::string userID;
     std::string userName;
     std::string userLogin;
 };
 
-/// json_transform=snake_case
 struct MessageFragment {
     std::string type;
     std::string text;
@@ -92,18 +87,15 @@ struct MessageFragment {
     std::optional<Mention> mention;
 };
 
-/// json_transform=snake_case
 struct Message {
     std::string text;
     std::vector<MessageFragment> fragments;
 };
 
-/// json_transform=snake_case
 struct Cheer {
     int bits;
 };
 
-/// json_transform=snake_case
 struct Reply {
     std::string parentMessageID;
     std::string parentUserID;
@@ -117,7 +109,6 @@ struct Reply {
     std::string threadUserName;
 };
 
-/// json_transform=snake_case
 struct Event {
     // Broadcaster of the channel the message was sent in
     std::string broadcasterUserID;
@@ -149,37 +140,6 @@ struct Payload {
     const Event event;
 };
 
-// DESERIALIZATION DEFINITION START
-boost::json::result_for<Badge, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Badge>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Cheermote>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Emote>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Mention, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Mention>, const boost::json::value &jvRoot);
-
-boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<MessageFragment>,
-    const boost::json::value &jvRoot);
-
-boost::json::result_for<Message, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Message>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Cheer, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Cheer>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Reply, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Reply>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Event, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Event>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Payload>, const boost::json::value &jvRoot);
-// DESERIALIZATION DEFINITION END
+#include "twitch-eventsub-ws/payloads/channel-chat-message-v1.inc"
 
 }  // namespace chatterino::eventsub::lib::payload::channel_chat_message::v1

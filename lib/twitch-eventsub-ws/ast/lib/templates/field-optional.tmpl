@@ -21,7 +21,11 @@ if (jv{{field.name}} != nullptr && !jv{{field.name}}->is_null())
     {
         return t{{field.name}}.error();
     }
+    {% if field.trivial -%}
+    {{field.name}} = t{{field.name}}.value();
+    {%- else -%}
     {{field.name}} = std::move(t{{field.name}}.value());
+    {%- endif %}
     {% endif %}
 }
 

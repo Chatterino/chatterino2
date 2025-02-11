@@ -1,5 +1,6 @@
 #include "twitch-eventsub-ws/session.hpp"
 
+#include "twitch-eventsub-ws/detail/errors.hpp"
 #include "twitch-eventsub-ws/listener.hpp"
 #include "twitch-eventsub-ws/messages/metadata.hpp"
 #include "twitch-eventsub-ws/payloads/channel-ban-v1.hpp"
@@ -45,7 +46,8 @@ namespace {
     // Report a failure
     void fail(beast::error_code ec, char const *what)
     {
-        std::cerr << what << ": " << ec.message() << "\n";
+        std::cerr << what << ": " << ec.message() << " (" << ec.location()
+                  << ")\n";
     }
 
     template <class T>
@@ -218,18 +220,13 @@ boost::system::error_code handleMessage(std::unique_ptr<Listener> &listener,
     const auto *jvObject = jv.if_object();
     if (jvObject == nullptr)
     {
-        static const error::ApplicationErrorCategory errorRootMustBeObject{
-            "Payload root must be an object"};
-        return boost::system::error_code{129, errorRootMustBeObject};
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
 
     const auto *metadataV = jvObject->if_contains("metadata");
     if (metadataV == nullptr)
     {
-        static const error::ApplicationErrorCategory
-            errorRootMustContainMetadata{
-                "Payload root must contain a metadata field"};
-        return boost::system::error_code{129, errorRootMustContainMetadata};
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
     auto metadataResult =
         boost::json::try_value_to<messages::Metadata>(*metadataV);
@@ -245,22 +242,13 @@ boost::system::error_code handleMessage(std::unique_ptr<Listener> &listener,
 
     if (handler == MESSAGE_HANDLERS.end())
     {
-        std::stringstream ss;
-        ss << "No message handler found for message type: ";
-        ss << metadata.messageType;
-        error::ApplicationErrorCategory errorNoMessageHandlerForMessageType{
-            ss.str()};
-        return boost::system::error_code{129,
-                                         errorNoMessageHandlerForMessageType};
+        EVENTSUB_BAIL_HERE(error::Kind::NoMessageHandler);
     }
 
     const auto *payloadV = jvObject->if_contains("payload");
     if (payloadV == nullptr)
     {
-        static const error::ApplicationErrorCategory
-            errorRootMustContainPayload{
-                "Payload root must contain a payload field"};
-        return boost::system::error_code{129, errorRootMustContainPayload};
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
     handler->second(metadata, *payloadV, listener, NOTIFICATION_HANDLERS);

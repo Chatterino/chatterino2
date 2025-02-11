@@ -142,8 +142,6 @@ void Connection::onChannelModerate(
 {
     (void)metadata;
 
-    using lib::payload::channel_moderate::v2::Action;
-
     auto channelPtr = getApp()->getTwitch()->getChannelOrEmpty(
         payload.event.broadcasterUserLogin.qt());
     if (channelPtr->isEmpty())
@@ -165,74 +163,38 @@ void Connection::onChannelModerate(
 
     const auto now = QDateTime::currentDateTime();
 
-    switch (payload.event.action)
-    {
-        case Action::Vip: {
-            const auto &oAction = payload.event.vip;
-
-            if (!oAction.has_value())
+    std::visit(
+        [&](auto &&action) {
+            using Action = std::remove_cvref_t<decltype(action)>;
+            if constexpr (std::is_same_v<
+                              Action, lib::payload::channel_moderate::v2::Vip>)
             {
-                qCWarning(LOG) << "VIP action type had no VIP action body";
-                return;
+                auto msg = makeVipMessage(channel, now, payload.event, action);
+                runInGuiThread([channel, msg] {
+                    channel->addMessage(msg, MessageContext::Original);
+                });
             }
-            auto msg =
-                makeVipMessage(channel, now, payload.event, oAction.value());
-            runInGuiThread([channel, msg] {
-                channel->addMessage(msg, MessageContext::Original);
-            });
-        }
-        break;
-
-        case Action::Unvip: {
-            const auto &oAction = payload.event.unvip;
-
-            if (!oAction.has_value())
+            else if constexpr (std::is_same_v<
+                                   Action,
+                                   lib::payload::channel_moderate::v2::Unvip>)
             {
-                qCWarning(LOG) << "UnVIP action type had no UnVIP action body";
-                return;
+                auto msg =
+                    makeUnvipMessage(channel, now, payload.event, action);
+                runInGuiThread([channel, msg] {
+                    channel->addMessage(msg, MessageContext::Original);
+                });
             }
-            auto msg =
-                makeUnvipMessage(channel, now, payload.event, oAction.value());
-            runInGuiThread([channel, msg] {
-                channel->addMessage(msg, MessageContext::Original);
-            });
-        }
-        break;
-
-        case Action::Ban:
-        case Action::Timeout:
-        case Action::Unban:
-        case Action::Untimeout:
-        case Action::Clear:
-        case Action::Emoteonly:
-        case Action::Emoteonlyoff:
-        case Action::Followers:
-        case Action::Followersoff:
-        case Action::Uniquechat:
-        case Action::Uniquechatoff:
-        case Action::Slow:
-        case Action::Slowoff:
-        case Action::Subscribers:
-        case Action::Subscribersoff:
-        case Action::Unraid:
-        case Action::DeleteMessage:
-        case Action::Raid:
-        case Action::AddBlockedTerm:
-        case Action::AddPermittedTerm:
-        case Action::RemoveBlockedTerm:
-        case Action::RemovePermittedTerm:
-        case Action::Mod:
-        case Action::Unmod:
-        case Action::ApproveUnbanRequest:
-        case Action::DenyUnbanRequest:
-        case Action::Warn:
-        case Action::SharedChatBan:
-        case Action::SharedChatTimeout:
-        case Action::SharedChatUnban:
-        case Action::SharedChatUntimeout:
-        case Action::SharedChatDelete:
-            break;
-    }
+            else if constexpr (std::is_same_v<
+                                   Action,
+                                   lib::payload::channel_moderate::v2::Warn>)
+            {
+                auto msg = makeWarnMessage(channel, now, payload.event, action);
+                runInGuiThread([channel, msg] {
+                    channel->addMessage(msg, MessageContext::Original);
+                });
+            }
+        },
+        payload.event.action);
 }
 
 QString Connection::getSessionID() const

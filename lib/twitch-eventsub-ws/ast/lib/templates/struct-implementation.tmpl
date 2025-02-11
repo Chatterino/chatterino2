@@ -1,36 +1,35 @@
 boost::json::result_for<{{struct.full_name}}, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<{{struct.full_name}}>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<{{struct.full_name}}> /* tag */, const boost::json::value &{%- if struct.members|length -%}jvRoot{%- else -%}/* jvRoot */{%- endif -%})
 {
     {% if struct.inner_root %}
     if (!jvRoot.is_object())
     {
-        static const error::ApplicationErrorCategory errorMustBeObject{"{{struct.full_name}} must be an object"};
-        return boost::system::error_code{129, errorMustBeObject};
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &outerRoot = jvRoot.get_object();
 
     const auto *jvInnerRoot = outerRoot.if_contains("{{struct.inner_root}}");
     if (jvInnerRoot == nullptr)
     {
-        static const error::ApplicationErrorCategory errorMissing{"{{struct.full_name}}'s key {{struct.inner_root}} is missing"};
-        return boost::system::error_code{129, errorMissing};
+        EVENTSUB_BAIL_HERE(error::Kind::InnerRootMissing);
     }
     if (!jvInnerRoot->is_object())
     {
-        static const error::ApplicationErrorCategory errorMustBeObject{"{{struct.full_name}}'s {{struct.inner_root}} must be an object"};
-        return boost::system::error_code{129, errorMustBeObject};
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvInnerRoot->get_object();
-    {% else %}
+    {% elif struct.members|length %}
     if (!jvRoot.is_object())
     {
-        static const error::ApplicationErrorCategory errorMustBeObject{"{{struct.full_name}} must be an object"};
-        return boost::system::error_code{129, errorMustBeObject};
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
     {% endif %}
 
 {% for field in struct.members %}
+    {% if field.trivial -%}
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<decltype(std::declval<{{struct.full_name}}>().{{field.name}})>>);
+    {%- endif -%}
     {% if field.member_type == MemberType.BASIC -%}
     {% include 'field-basic.tmpl' indent content %}
     {%- elif field.member_type == MemberType.VECTOR -%}
@@ -39,6 +38,8 @@ boost::json::result_for<{{struct.full_name}}, boost::json::value>::type tag_invo
     {% include 'field-optional.tmpl' indent content %}
     {%- elif field.member_type == MemberType.OPTIONAL_VECTOR -%}
     {% include 'field-optional-vector.tmpl' indent content %}
+    {%- elif field.member_type == MemberType.VARIANT -%}
+    {% include 'field-variant.tmpl' indent content %}
     {%- endif -%}
 {% endfor %}
 
@@ -52,6 +53,8 @@ boost::json::result_for<{{struct.full_name}}, boost::json::value>::type tag_invo
         {% include 'initializer-optional.tmpl' indent content %}
         {%- elif field.member_type == MemberType.OPTIONAL_VECTOR -%}
         {% include 'initializer-optional-vector.tmpl' indent content %}
+        {%- elif field.member_type == MemberType.VARIANT -%}
+        {% include 'initializer-variant.tmpl' indent content %}
         {%- endif -%}
 {% endfor %}
     };

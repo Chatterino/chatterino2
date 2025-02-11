@@ -1,19 +1,20 @@
 from __future__ import annotations
 
-from typing import Optional, List
+from typing import Optional
+from dataclasses import dataclass
 
 import logging
 
 import clang.cindex
 from clang.cindex import CursorKind
 
-from .comment_commands import CommentCommands, json_transform, parse_comment_commands
+from .comment_commands import CommentCommands
 from .membertype import MemberType
 
 log = logging.getLogger(__name__)
 
 
-def get_type_name(type: clang.cindex.Type, namespace: List[str]) -> str:
+def get_type_name(type: clang.cindex.Type, namespace: tuple[str, ...]) -> str:
     if namespace:
         namespace_str = f"{'::'.join(namespace)}::"
     else:
@@ -28,47 +29,75 @@ def get_type_name(type: clang.cindex.Type, namespace: List[str]) -> str:
     return type_name
 
 
+def _get_template_name(type: clang.cindex.Type) -> str:
+    type = type.get_canonical()
+    if type.get_num_template_arguments() < 1:
+        return type.spelling
+    name: str = type.spelling
+    if type.is_const_qualified():
+        name.removeprefix("const ")
+    return name[: name.index("<")]
+
+
+def _is_chrono_like_type(type: clang.cindex.Type) -> bool:
+    return _get_template_name(type) in ("std::chrono::time_point", "std::chrono::duration")
+
+
+# clang's C API doesn't expose this, so we emulate it
+def _is_trivially_copyable(type: clang.cindex.Type) -> bool:
+    # remove optional wrapper(s)
+    type = type.get_canonical()
+    while type.get_num_template_arguments() and _get_template_name(type) == "std::optional":
+        type = type.get_template_argument_type(0).get_canonical()
+
+    if type.is_pod():
+        return True
+    return _is_chrono_like_type(type)
+
+
+def _has_no_fields(type: clang.cindex.Type) -> bool:
+    for _ in type.get_fields():
+        return False
+    return True
+
+
+@dataclass
+class VariantType:
+    name: str
+    trivial: bool
+    empty: bool
+
+
 class Member:
     def __init__(
         self,
         name: str,
         member_type: MemberType = MemberType.BASIC,
         type_name: str = "?",
+        trivial: bool = False,
     ) -> None:
         self.name = name
         self.json_name = name
         self.member_type = member_type
         self.type_name = type_name
         self.tag: Optional[str] = None
+        self.trivial = trivial
+        self.variant_types: list[VariantType] | None = None
+        self.variant_fallback: str | None = None
 
         self.dont_fail_on_deserialization: bool = False
 
     def apply_comment_commands(self, comment_commands: CommentCommands) -> None:
-        for command, value in comment_commands:
-            match command:
-                case "json_rename":
-                    # Rename the key that this field will use in json terms
-                    log.debug(f"Rename json key from {self.json_name} to {value}")
-                    self.json_name = value
-                case "json_dont_fail_on_deserialization":
-                    # Don't fail when an optional object exists and its data is bad
-                    log.debug(f"Don't fail on deserialization for {self.name}")
-                    self.dont_fail_on_deserialization = bool(value.lower() == "true")
-                case "json_transform":
-                    # Transform the key from whatever-case to case specified by `value`
-                    self.json_name = json_transform(self.json_name, value)
-                case "json_inner":
-                    # Do nothing on members
-                    pass
-                case "json_tag":
-                    # Rename the key that this field will use in json terms
-                    log.debug(f"Applied json tag on {self.json_name}: {value}")
-                    self.tag = value
-                case other:
-                    log.warning(f"Unknown comment command found: {other} with value {value}")
+        self.json_name = comment_commands.apply_name_transform(self.json_name)
+        self.tag = comment_commands.tag
+        self.dont_fail_on_deserialization = comment_commands.dont_fail_on_deserialization
 
     @staticmethod
-    def from_field(node: clang.cindex.Cursor, namespace: List[str]) -> Member:
+    def from_field(
+        node: clang.cindex.Cursor,
+        comment_commands: CommentCommands,
+        namespace: tuple[str, ...],
+    ) -> Member:
         assert node.type is not None
 
         name = node.spelling
@@ -111,7 +140,8 @@ class Member:
                                         overwrite_member_type = MemberType.OPTIONAL_VECTOR
                                     case other:
                                         log.warning(f"Vector cannot be added on top of other member type: {other}")
-
+                            case "variant":
+                                overwrite_member_type = MemberType.VARIANT
                             case other:
                                 log.warning(f"Unhandled template type: {other}")
 
@@ -124,13 +154,34 @@ class Member:
                 if overwrite_member_type is not None:
                     member_type = overwrite_member_type
 
-        member = Member(name, member_type, type_name)
+        member = Member(name, member_type, type_name, _is_trivially_copyable(node.type))
 
         if node.raw_comment is not None:
-            comment_commands = parse_comment_commands(node.raw_comment)
-            member.apply_comment_commands(comment_commands)
+            comment_commands.parse(node.raw_comment)
+
+        member.apply_comment_commands(comment_commands)
+
+        if member.member_type == MemberType.VARIANT:
+            member.apply_variant(node.type, namespace)
 
         return member
+
+    def apply_variant(self, type: clang.cindex.Type, namespace: tuple[str, ...]):
+        self.variant_types = []
+        for idx in range(type.get_num_template_arguments()):
+            inner = type.get_template_argument_type(idx)
+            name = get_type_name(inner, namespace)
+            if name == "std::string" or name == "String":
+                assert not self.variant_fallback
+                self.variant_fallback = name
+                continue
+            self.variant_types.append(
+                VariantType(
+                    name=name,
+                    trivial=_is_trivially_copyable(inner),
+                    empty=_has_no_fields(inner),
+                )
+            )
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, self.__class__):

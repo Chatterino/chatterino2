@@ -60,7 +60,6 @@ Controller::Controller()
 Controller::~Controller()
 {
     qCInfo(LOG) << "Controller dtor start";
-    this->queuedSubscriptions.clear();
 
     for (const auto &weakConnection : this->connections)
     {
@@ -72,6 +71,8 @@ Controller::~Controller()
 
         connection->close();
     }
+
+    this->subscriptions.clear();
 
     this->work.reset();
 
@@ -91,15 +92,35 @@ void Controller::removeRef(const SubscriptionRequest &request)
 {
     std::lock_guard lock(this->subscriptionsMutex);
 
-    assert(this->activeSubscriptions.contains(request));
+    assert(this->subscriptions.contains(request));
 
-    auto &xd = this->activeSubscriptions[request];
-    xd.refCount--;
-    qCInfo(LOG) << "Remove ref for" << request << xd.refCount;
-    // todo use actual atomic things here to be smart
-    if (xd.refCount <= 0)
+    auto &subscription = this->subscriptions[request];
+    subscription.refCount--;
+    qCInfo(LOG) << "Removed ref for" << request << subscription.refCount;
+
+    if (subscription.refCount <= 0)
     {
-        qCInfo(LOG) << "TODO: Unsubscribe from" << request;
+        if (subscription.subscriptionID.isEmpty())
+        {
+            qCWarning(LOG) << "Refcount fell to zero for" << request
+                           << "but we had no subscription ID attached - was a "
+                              "successful subscription never made?";
+            return;
+        }
+
+        qCInfo(LOG) << "Unsubscribing from" << request;
+        getHelix()->deleteEventSubSubscription(
+            subscription.subscriptionID,
+            [request] {
+                qCInfo(LOG) << "Successfully unsubscribed from" << request;
+            },
+            [request](const auto &errorMessage) {
+                qCInfo(LOG)
+                    << "An error occurred while attempting to unsubscribe from"
+                    << request << errorMessage;
+            });
+
+        subscription.subscriptionID.clear();
     }
 }
 
@@ -110,13 +131,13 @@ SubscriptionHandle Controller::subscribe(const SubscriptionRequest &request)
     {
         std::lock_guard lock(this->subscriptionsMutex);
 
-        auto &xd = this->activeSubscriptions[request];
-        if (xd.refCount == 0)
+        auto &subscription = this->subscriptions[request];
+        if (subscription.refCount == 0)
         {
             needToSubscribe = true;
         }
-        xd.refCount++;
-        qCInfo(LOG) << "Add ref for" << request << xd.refCount;
+        subscription.refCount++;
+        qCInfo(LOG) << "Added ref for" << request << subscription.refCount;
     }
 
     auto handle = std::make_unique<RawSubscriptionHandle>(request);
@@ -131,24 +152,29 @@ SubscriptionHandle Controller::subscribe(const SubscriptionRequest &request)
     return handle;
 }
 
-void Controller::subscribe(const SubscriptionRequest &request, bool isQueued)
+void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
 {
     qCInfo(LOG) << "Subscribe request for" << request.subscriptionType;
-    boost::asio::post(this->ioContext, [this, request, isQueued] {
+    boost::asio::post(this->ioContext, [this, request, isRetry] {
         // 1. Flush dead connections (maybe this should not be done here)
         // TODO: implement
 
-        if (isQueued)
         {
-            qCInfo(LOG) << "Removing subscription from queued list";
-            this->queuedSubscriptions.erase(request);
-        }
+            std::lock_guard lock(this->subscriptionsMutex);
+            auto &subscription = this->subscriptions[request];
+            if (isRetry)
+            {
+                qCInfo(LOG) << "Removing subscription from queued list";
 
-        if (this->queuedSubscriptions.contains(request))
-        {
-            qCWarning(LOG) << "We already have a queued subscription for this, "
-                              "let's chill :)";
-            return;
+                subscription.retryTimer.reset();
+            }
+            else if (subscription.retryTimer)
+            {
+                qCWarning(LOG)
+                    << "We already have a queued subscription for this, "
+                       "let's chill :)";
+                return;
+            }
         }
 
         uint32_t openButNotReadyConnections = 0;
@@ -188,7 +214,8 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isQueued)
                 [this, request, connection,
                  weakConnection{weakConnection}](const auto &res) {
                     qCInfo(LOG) << "success" << res;
-                    this->markRequestSubscribed(request, weakConnection);
+                    this->markRequestSubscribed(request, weakConnection,
+                                                res.subscriptionID);
                 },
                 [this, request](const auto &error, const auto &errorString) {
                     using Error = HelixCreateEventSubSubscriptionError;
@@ -204,6 +231,10 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isQueued)
 
                         case Error::Forbidden:
                             qCWarning(LOG) << "Forbidden" << errorString;
+                            boost::asio::post(this->ioContext, [this, request] {
+                                this->retrySubscription(
+                                    request, boost::posix_time::seconds(2), 5);
+                            });
                             break;
 
                         case Error::Conflict:
@@ -221,8 +252,8 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isQueued)
                                 << "Unhandled error, retrying subscription"
                                 << errorString;
                             boost::asio::post(this->ioContext, [this, request] {
-                                this->queueSubscription(
-                                    request, boost::posix_time::seconds(2));
+                                this->retrySubscription(
+                                    request, boost::posix_time::seconds(2), 5);
                             });
                             break;
                     }
@@ -234,18 +265,20 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isQueued)
         {
             // No connection was available to handle this subscription request, create a new connection
             this->createConnection();
-            this->queueSubscription(request, boost::posix_time::millisec(500));
+            this->retrySubscription(request, boost::posix_time::millisec(500),
+                                    10);
         }
         else
         {
             if (openButNotReadyConnections > 1)
             {
                 qCWarning(LOG) << "We have" << openButNotReadyConnections
-                               << "open but not ready connections, hmmm";
+                               << "open but no ready connections, hmmm";
             }
 
             // At least one connection is open, but it has not gotten the welcome message yet
-            this->queueSubscription(request, boost::posix_time::millisec(250));
+            this->retrySubscription(request, boost::posix_time::millisec(250),
+                                    10);
         }
     });
 }
@@ -288,15 +321,30 @@ void Controller::registerConnection(std::weak_ptr<lib::Session> &&connection)
     this->connections.emplace_back(std::move(connection));
 }
 
-void Controller::queueSubscription(const SubscriptionRequest &request,
-                                   boost::posix_time::time_duration delay)
+void Controller::retrySubscription(const SubscriptionRequest &request,
+                                   boost::posix_time::time_duration delay,
+                                   int32_t maxAttempts)
 {
-    this->threadGuard->guard();
+    std::lock_guard lock(this->subscriptionsMutex);
 
-    auto resubTimer =
+    auto &connection = this->subscriptions[request];
+
+    if (connection.retryAttempts <= 0)
+    {
+        connection.retryAttempts = maxAttempts;
+    }
+    else if (--connection.retryAttempts == 0)
+    {
+        qCWarning(LOG) << "Reached max amount of retries for" << request;
+        return;
+    }
+
+    qCInfo(LOG) << "Retrying subscription" << request << " - attempt"
+                << connection.retryAttempts;
+    auto retryTimer =
         std::make_unique<boost::asio::deadline_timer>(this->ioContext);
-    resubTimer->expires_from_now(delay);
-    resubTimer->async_wait([this, request](const auto &ec) {
+    retryTimer->expires_from_now(delay);
+    retryTimer->async_wait([this, request](const auto &ec) {
         if (!ec)
         {
             // The timer passed naturally
@@ -304,15 +352,22 @@ void Controller::queueSubscription(const SubscriptionRequest &request,
         }
     });
 
-    this->queuedSubscriptions.emplace(request, std::move(resubTimer));
+    assert(connection.retryTimer == nullptr &&
+           "Timer should not already be set");
+
+    connection.retryTimer = std::move(retryTimer);
 }
 
 void Controller::markRequestSubscribed(const SubscriptionRequest &request,
-                                       std::weak_ptr<lib::Session> connection)
+                                       std::weak_ptr<lib::Session> connection,
+                                       const QString &subscriptionID)
 {
     std::lock_guard lock(this->subscriptionsMutex);
 
-    this->activeSubscriptions[request].connection = std::move(connection);
+    auto &subscription = this->subscriptions[request];
+
+    subscription.connection = std::move(connection);
+    subscription.subscriptionID = subscriptionID;
 }
 
 }  // namespace chatterino::eventsub

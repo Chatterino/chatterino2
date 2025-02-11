@@ -29,7 +29,6 @@ jobs:
         plugins: [true]
       fail-fast: false
     env:
-      C2_BUILD_WITH_QT6: ${{ startsWith(matrix.qt-version, '6.') && 'ON' || 'OFF' }}
       QT_MODULES: ${{ startsWith(matrix.qt-version, '6.') && 'qt5compat qtimageformats' || '' }}
 
     steps:
@@ -37,11 +36,6 @@ jobs:
         if: matrix.plugins
         run: |
           echo "C2_PLUGINS=ON" >> "$GITHUB_ENV"
-
-      - name: Set BUILD_WITH_QT6
-        if: startsWith(matrix.qt-version, '6.')
-        run: |
-          echo "C2_BUILD_WITH_QT6=ON" >> "$GITHUB_ENV"
 
       - uses: actions/checkout@v4
         with:
@@ -81,7 +75,6 @@ jobs:
               -DBUILD_APP=OFF \
               -DUSE_PRECOMPILED_HEADERS=OFF \
               -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
-              -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
 

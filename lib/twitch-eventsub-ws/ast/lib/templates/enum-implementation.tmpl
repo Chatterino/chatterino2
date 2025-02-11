@@ -1,10 +1,9 @@
 boost::json::result_for<{{enum.full_name}}, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<{{enum.full_name}}>, const boost::json::value &jvRoot)
+    boost::json::try_value_to_tag<{{enum.full_name}}> /* tag */, const boost::json::value &jvRoot)
 {
     if (!jvRoot.is_string())
     {
-        static const error::ApplicationErrorCategory errorMustBeString{"{{enum.full_name}} must be a string"};
-        return boost::system::error_code{129, errorMustBeString};
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedString);
     }
     std::string_view eString(jvRoot.get_string());
 
@@ -16,6 +15,5 @@ boost::json::result_for<{{enum.full_name}}, boost::json::value>::type tag_invoke
     }
 {%- endfor %}
 
-    static const error::ApplicationErrorCategory errorEnumNameDidNotExist{"{{enum.full_name}} did not have a constant that matched this string"};
-    return boost::system::error_code{129, errorEnumNameDidNotExist};
+    EVENTSUB_BAIL_HERE(error::Kind::UnknownEnumValue);
 }

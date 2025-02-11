@@ -1217,6 +1217,11 @@ public:
         FailureCallback<HelixCreateEventSubSubscriptionError, QString>
             failureCallback) = 0;
 
+    // https://dev.twitch.tv/docs/api/reference/#delete-eventsub-subscription
+    virtual void deleteEventSubSubscription(
+        const QString &subscriptionID, ResultCallback<> successCallback,
+        FailureCallback<QString> failureCallback) = 0;
+
     virtual void update(QString clientId, QString oauthToken) = 0;
 
 protected:
@@ -1566,6 +1571,11 @@ public:
         ResultCallback<HelixCreateEventSubSubscriptionResponse> successCallback,
         FailureCallback<HelixCreateEventSubSubscriptionError, QString>
             failureCallback) final;
+
+    // https://dev.twitch.tv/docs/api/reference/#delete-eventsub-subscription
+    void deleteEventSubSubscription(
+        const QString &subscriptionID, ResultCallback<> successCallback,
+        FailureCallback<QString> failureCallback) final;
 
     void update(QString clientId, QString oauthToken) final;
 
