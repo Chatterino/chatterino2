@@ -15,7 +15,7 @@ using namespace chatterino::eventsub::lib;
 std::filesystem::path baseDir()
 {
     std::filesystem::path snapshotDir(__FILE__);
-    return snapshotDir / ".." / ".." / "resources" / "messages";
+    return snapshotDir.parent_path().parent_path() / "resources" / "messages";
 }
 
 std::filesystem::path filePath(std::string_view name)
