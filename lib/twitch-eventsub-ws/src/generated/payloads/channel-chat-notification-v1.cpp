@@ -471,17 +471,17 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
 
     static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
                       decltype(std::declval<Resubscription>().isPrime)>>);
+    std::optional<bool> isPrime = std::nullopt;
     const auto *jvisPrime = root.if_contains("is_prime");
-    if (jvisPrime == nullptr)
+    if (jvisPrime != nullptr && !jvisPrime->is_null())
     {
-        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
-    }
+        auto tisPrime = boost::json::try_value_to<bool>(*jvisPrime);
 
-    auto isPrime = boost::json::try_value_to<bool>(*jvisPrime);
-
-    if (isPrime.has_error())
-    {
-        return isPrime.error();
+        if (tisPrime.has_error())
+        {
+            return tisPrime.error();
+        }
+        isPrime = tisPrime.value();
     }
 
     static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
@@ -502,18 +502,18 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
     static_assert(
         std::is_trivially_copyable_v<std::remove_reference_t<
             decltype(std::declval<Resubscription>().gifterIsAnonymous)>>);
+    std::optional<bool> gifterIsAnonymous = std::nullopt;
     const auto *jvgifterIsAnonymous = root.if_contains("gifter_is_anonymous");
-    if (jvgifterIsAnonymous == nullptr)
+    if (jvgifterIsAnonymous != nullptr && !jvgifterIsAnonymous->is_null())
     {
-        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
-    }
+        auto tgifterIsAnonymous =
+            boost::json::try_value_to<bool>(*jvgifterIsAnonymous);
 
-    auto gifterIsAnonymous =
-        boost::json::try_value_to<bool>(*jvgifterIsAnonymous);
-
-    if (gifterIsAnonymous.has_error())
-    {
-        return gifterIsAnonymous.error();
+        if (tgifterIsAnonymous.has_error())
+        {
+            return tgifterIsAnonymous.error();
+        }
+        gifterIsAnonymous = tgifterIsAnonymous.value();
     }
 
     std::optional<std::string> gifterUserID = std::nullopt;
@@ -563,9 +563,9 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
         .durationMonths = durationMonths.value(),
         .streakMonths = streakMonths,
         .subTier = std::move(subTier.value()),
-        .isPrime = isPrime.value(),
+        .isPrime = isPrime,
         .isGift = isGift.value(),
-        .gifterIsAnonymous = gifterIsAnonymous.value(),
+        .gifterIsAnonymous = gifterIsAnonymous,
         .gifterUserID = std::move(gifterUserID),
         .gifterUserName = std::move(gifterUserName),
         .gifterUserLogin = std::move(gifterUserLogin),
@@ -1327,46 +1327,46 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return broadcasterUserName.error();
     }
 
+    std::optional<std::string> chatterUserID = std::nullopt;
     const auto *jvchatterUserID = root.if_contains("chatter_user_id");
-    if (jvchatterUserID == nullptr)
+    if (jvchatterUserID != nullptr && !jvchatterUserID->is_null())
     {
-        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
+        auto tchatterUserID =
+            boost::json::try_value_to<std::string>(*jvchatterUserID);
+
+        if (tchatterUserID.has_error())
+        {
+            return tchatterUserID.error();
+        }
+        chatterUserID = std::move(tchatterUserID.value());
     }
 
-    auto chatterUserID =
-        boost::json::try_value_to<std::string>(*jvchatterUserID);
-
-    if (chatterUserID.has_error())
-    {
-        return chatterUserID.error();
-    }
-
+    std::optional<std::string> chatterUserLogin = std::nullopt;
     const auto *jvchatterUserLogin = root.if_contains("chatter_user_login");
-    if (jvchatterUserLogin == nullptr)
+    if (jvchatterUserLogin != nullptr && !jvchatterUserLogin->is_null())
     {
-        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
+        auto tchatterUserLogin =
+            boost::json::try_value_to<std::string>(*jvchatterUserLogin);
+
+        if (tchatterUserLogin.has_error())
+        {
+            return tchatterUserLogin.error();
+        }
+        chatterUserLogin = std::move(tchatterUserLogin.value());
     }
 
-    auto chatterUserLogin =
-        boost::json::try_value_to<std::string>(*jvchatterUserLogin);
-
-    if (chatterUserLogin.has_error())
-    {
-        return chatterUserLogin.error();
-    }
-
+    std::optional<std::string> chatterUserName = std::nullopt;
     const auto *jvchatterUserName = root.if_contains("chatter_user_name");
-    if (jvchatterUserName == nullptr)
+    if (jvchatterUserName != nullptr && !jvchatterUserName->is_null())
     {
-        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
-    }
+        auto tchatterUserName =
+            boost::json::try_value_to<std::string>(*jvchatterUserName);
 
-    auto chatterUserName =
-        boost::json::try_value_to<std::string>(*jvchatterUserName);
-
-    if (chatterUserName.has_error())
-    {
-        return chatterUserName.error();
+        if (tchatterUserName.has_error())
+        {
+            return tchatterUserName.error();
+        }
+        chatterUserName = std::move(tchatterUserName.value());
     }
 
     static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
@@ -1656,9 +1656,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         .broadcasterUserID = std::move(broadcasterUserID.value()),
         .broadcasterUserLogin = std::move(broadcasterUserLogin.value()),
         .broadcasterUserName = std::move(broadcasterUserName.value()),
-        .chatterUserID = std::move(chatterUserID.value()),
-        .chatterUserLogin = std::move(chatterUserLogin.value()),
-        .chatterUserName = std::move(chatterUserName.value()),
+        .chatterUserID = std::move(chatterUserID),
+        .chatterUserLogin = std::move(chatterUserLogin),
+        .chatterUserName = std::move(chatterUserName),
         .chatterIsAnonymous = chatterIsAnonymous.value(),
         .color = std::move(color.value()),
         .badges = std::move(vbadges),
