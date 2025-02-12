@@ -232,7 +232,7 @@ if (BUILD_WITH_CRASHPAD)
     add_subdirectory("${CMAKE_SOURCE_DIR}/tools/crash-handler")
 endif()
 
-add_subdirectory(lib/twitch-eventsub-ws EXCLUDE_FROM_ALL)
+add_subdirectory(lib/twitch-eventsub-ws)
 
 # Used to provide a date of build in the About page (for nightly builds). Getting the actual time of
 # compilation in CMake is a more involved, as documented in https://stackoverflow.com/q/24292898.
