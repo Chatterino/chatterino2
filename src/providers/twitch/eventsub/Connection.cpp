@@ -28,8 +28,8 @@ const auto &LOG = chatterinoTwitchEventSub;
 namespace chatterino::eventsub {
 
 void Connection::onSessionWelcome(
-    lib::messages::Metadata metadata,
-    lib::payload::session_welcome::Payload payload)
+    const lib::messages::Metadata &metadata,
+    const lib::payload::session_welcome::Payload &payload)
 {
     (void)metadata;
     qCDebug(LOG) << "On session welcome:" << payload.id.c_str();
@@ -37,7 +37,7 @@ void Connection::onSessionWelcome(
     this->sessionID = QString::fromStdString(payload.id);
 }
 
-void Connection::onNotification(lib::messages::Metadata metadata,
+void Connection::onNotification(const lib::messages::Metadata &metadata,
                                 const boost::json::value &jv)
 {
     (void)metadata;
@@ -45,8 +45,9 @@ void Connection::onNotification(lib::messages::Metadata metadata,
     qCDebug(LOG) << "on notification: " << jsonString.c_str();
 }
 
-void Connection::onChannelBan(lib::messages::Metadata metadata,
-                              lib::payload::channel_ban::v1::Payload payload)
+void Connection::onChannelBan(
+    const lib::messages::Metadata &metadata,
+    const lib::payload::channel_ban::v1::Payload &payload)
 {
     (void)metadata;
 
@@ -91,8 +92,8 @@ void Connection::onChannelBan(lib::messages::Metadata metadata,
 }
 
 void Connection::onStreamOnline(
-    lib::messages::Metadata metadata,
-    lib::payload::stream_online::v1::Payload payload)
+    const lib::messages::Metadata &metadata,
+    const lib::payload::stream_online::v1::Payload &payload)
 {
     (void)metadata;
     qCDebug(LOG) << "On stream online event for channel"
@@ -100,8 +101,8 @@ void Connection::onStreamOnline(
 }
 
 void Connection::onStreamOffline(
-    lib::messages::Metadata metadata,
-    lib::payload::stream_offline::v1::Payload payload)
+    const lib::messages::Metadata &metadata,
+    const lib::payload::stream_offline::v1::Payload &payload)
 {
     (void)metadata;
     qCDebug(LOG) << "On stream offline event for channel"
@@ -109,8 +110,8 @@ void Connection::onStreamOffline(
 }
 
 void Connection::onChannelChatNotification(
-    lib::messages::Metadata metadata,
-    lib::payload::channel_chat_notification::v1::Payload payload)
+    const lib::messages::Metadata &metadata,
+    const lib::payload::channel_chat_notification::v1::Payload &payload)
 {
     (void)metadata;
     qCDebug(LOG) << "On channel chat notification for"
@@ -118,8 +119,8 @@ void Connection::onChannelChatNotification(
 }
 
 void Connection::onChannelUpdate(
-    lib::messages::Metadata metadata,
-    lib::payload::channel_update::v1::Payload payload)
+    const lib::messages::Metadata &metadata,
+    const lib::payload::channel_update::v1::Payload &payload)
 {
     (void)metadata;
     qCDebug(LOG) << "On channel update for"
@@ -127,8 +128,8 @@ void Connection::onChannelUpdate(
 }
 
 void Connection::onChannelChatMessage(
-    lib::messages::Metadata metadata,
-    lib::payload::channel_chat_message::v1::Payload payload)
+    const lib::messages::Metadata &metadata,
+    const lib::payload::channel_chat_message::v1::Payload &payload)
 {
     (void)metadata;
 
@@ -137,8 +138,8 @@ void Connection::onChannelChatMessage(
 }
 
 void Connection::onChannelModerate(
-    lib::messages::Metadata metadata,
-    lib::payload::channel_moderate::v2::Payload payload)
+    const lib::messages::Metadata &metadata,
+    const lib::payload::channel_moderate::v2::Payload &payload)
 {
     (void)metadata;
 

@@ -10,27 +10,27 @@ namespace chatterino::eventsub::lib::payload::stream_online::v1 {
 
 struct Event {
     // The ID of the stream
-    const std::string id;
+    std::string id;
 
     // The broadcaster's user ID
-    const std::string broadcasterUserID;
+    std::string broadcasterUserID;
     // The broadcaster's user login
-    const std::string broadcasterUserLogin;
+    std::string broadcasterUserLogin;
     // The broadcaster's user display name
-    const std::string broadcasterUserName;
+    std::string broadcasterUserName;
 
     // The stream type (e.g. live, playlist, watch_party)
-    const std::string type;
+    std::string type;
 
     // The timestamp at which the stream went online
     // TODO: chronofy?
-    const std::string startedAt;
+    std::string startedAt;
 };
 
 struct Payload {
-    const subscription::Subscription subscription;
+    subscription::Subscription subscription;
 
-    const Event event;
+    Event event;
 };
 
 #include "twitch-eventsub-ws/payloads/stream-online-v1.inc"

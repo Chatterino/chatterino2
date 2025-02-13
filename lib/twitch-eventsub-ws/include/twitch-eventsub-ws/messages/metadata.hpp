@@ -21,13 +21,13 @@ namespace chatterino::eventsub::lib::messages {
 */
 
 struct Metadata {
-    const std::string messageID;
-    const std::string messageType;
+    std::string messageID;
+    std::string messageType;
     // TODO: should this be chronofied?
-    const std::string messageTimestamp;
+    std::string messageTimestamp;
 
-    const std::optional<std::string> subscriptionType;
-    const std::optional<std::string> subscriptionVersion;
+    std::optional<std::string> subscriptionType;
+    std::optional<std::string> subscriptionVersion;
 };
 
 #include "twitch-eventsub-ws/messages/metadata.inc"

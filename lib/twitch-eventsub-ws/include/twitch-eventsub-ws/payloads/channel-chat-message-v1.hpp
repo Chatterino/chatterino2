@@ -135,9 +135,9 @@ struct Event {
 };
 
 struct Payload {
-    const subscription::Subscription subscription;
+    subscription::Subscription subscription;
 
-    const Event event;
+    Event event;
 };
 
 #include "twitch-eventsub-ws/payloads/channel-chat-message-v1.inc"

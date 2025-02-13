@@ -55,51 +55,55 @@ boost::beast::flat_buffer readToFlatBuffer(const std::filesystem::path &path)
 
 class NoOpListener : public chatterino::eventsub::lib::Listener
 {
-    void onSessionWelcome(messages::Metadata metadata,
-                          payload::session_welcome::Payload payload) override
+    void onSessionWelcome(
+        const messages::Metadata &metadata,
+        const payload::session_welcome::Payload &payload) override
     {
     }
 
-    void onNotification(messages::Metadata metadata,
+    void onNotification(const messages::Metadata &metadata,
                         const boost::json::value &jv) override
     {
     }
 
-    void onChannelBan(messages::Metadata metadata,
-                      payload::channel_ban::v1::Payload payload) override
+    void onChannelBan(const messages::Metadata &metadata,
+                      const payload::channel_ban::v1::Payload &payload) override
     {
     }
 
-    void onStreamOnline(messages::Metadata metadata,
-                        payload::stream_online::v1::Payload payload) override
+    void onStreamOnline(
+        const messages::Metadata &metadata,
+        const payload::stream_online::v1::Payload &payload) override
     {
     }
 
-    void onStreamOffline(messages::Metadata metadata,
-                         payload::stream_offline::v1::Payload payload) override
+    void onStreamOffline(
+        const messages::Metadata &metadata,
+        const payload::stream_offline::v1::Payload &payload) override
     {
     }
 
     void onChannelChatNotification(
-        messages::Metadata metadata,
-        payload::channel_chat_notification::v1::Payload payload) override
+        const messages::Metadata &metadata,
+        const payload::channel_chat_notification::v1::Payload &payload) override
     {
     }
 
-    void onChannelUpdate(messages::Metadata metadata,
-                         payload::channel_update::v1::Payload payload) override
+    void onChannelUpdate(
+        const messages::Metadata &metadata,
+        const payload::channel_update::v1::Payload &payload) override
     {
     }
 
     void onChannelChatMessage(
-        messages::Metadata metadata,
-        payload::channel_chat_message::v1::Payload payload) override
+        const messages::Metadata &metadata,
+        const payload::channel_chat_message::v1::Payload &payload) override
     {
     }
 
     void onChannelModerate(
-        messages::Metadata metadata,
-        payload::channel_moderate::v2::Payload payload) override
+        const messages::Metadata &metadata,
+        const payload::channel_moderate::v2::Payload &payload) override
     {
     }
 };
