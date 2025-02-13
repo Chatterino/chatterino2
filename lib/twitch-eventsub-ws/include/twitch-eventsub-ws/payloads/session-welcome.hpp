@@ -23,7 +23,7 @@ namespace chatterino::eventsub::lib::payload::session_welcome {
 
 /// json_inner=session
 struct Payload {
-    const std::string id;
+    std::string id;
 };
 
 #include "twitch-eventsub-ws/payloads/session-welcome.inc"

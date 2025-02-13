@@ -33,23 +33,23 @@ namespace chatterino::eventsub::lib::payload::subscription {
 */
 
 struct Transport {
-    const std::string method;
-    const std::string sessionID;
+    std::string method;
+    std::string sessionID;
 };
 
 struct Subscription {
-    const std::string id;
-    const std::string status;
-    const std::string type;
-    const std::string version;
+    std::string id;
+    std::string status;
+    std::string type;
+    std::string version;
 
     // TODO: How do we map condition here? vector of key/value pairs?
 
-    const Transport transport;
+    Transport transport;
 
     // TODO: chronofy?
-    const std::string createdAt;
-    const int cost;
+    std::string createdAt;
+    int cost;
 };
 
 #include "twitch-eventsub-ws/payloads/subscription.inc"

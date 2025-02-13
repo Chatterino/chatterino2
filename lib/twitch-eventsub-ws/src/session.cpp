@@ -32,15 +32,16 @@ using EventSubSubscription = std::pair<std::string, std::string>;
 
 using NotificationHandlers = std::unordered_map<
     EventSubSubscription,
-    std::function<boost::system::error_code(
-        messages::Metadata, boost::json::value, std::unique_ptr<Listener> &)>,
+    std::function<boost::system::error_code(const messages::Metadata &,
+                                            const boost::json::value &,
+                                            std::unique_ptr<Listener> &)>,
     boost::hash<EventSubSubscription>>;
 
-using MessageHandlers =
-    std::unordered_map<std::string, std::function<boost::system::error_code(
-                                        messages::Metadata, boost::json::value,
-                                        std::unique_ptr<Listener> &,
-                                        const NotificationHandlers &)>>;
+using MessageHandlers = std::unordered_map<
+    std::string,
+    std::function<boost::system::error_code(
+        const messages::Metadata &, const boost::json::value &,
+        std::unique_ptr<Listener> &, const NotificationHandlers &)>>;
 
 namespace {
 
@@ -153,7 +154,7 @@ namespace {
                 {
                     return oPayload.error();
                 }
-                listener->onChannelModerate(metadata, std::move(*oPayload));
+                listener->onChannelModerate(metadata, *oPayload);
                 return boost::system::error_code{};
             },
         },

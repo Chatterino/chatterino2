@@ -10,31 +10,31 @@ namespace chatterino::eventsub::lib::payload::channel_update::v1 {
 
 struct Event {
     // The broadcaster's user ID
-    const std::string broadcasterUserID;
+    std::string broadcasterUserID;
     // The broadcaster's user login
-    const std::string broadcasterUserLogin;
+    std::string broadcasterUserLogin;
     // The broadcaster's user display name
-    const std::string broadcasterUserName;
+    std::string broadcasterUserName;
 
     // The channel's stream title
-    const std::string title;
+    std::string title;
 
     // The channel's broadcast language
-    const std::string language;
+    std::string language;
 
     // The channels category ID
-    const std::string categoryID;
+    std::string categoryID;
     // The category name
-    const std::string categoryName;
+    std::string categoryName;
 
     // A boolean identifying whether the channel is flagged as mature
-    const bool isMature;
+    bool isMature;
 };
 
 struct Payload {
-    const subscription::Subscription subscription;
+    subscription::Subscription subscription;
 
-    const Event event;
+    Event event;
 };
 
 #include "twitch-eventsub-ws/payloads/channel-update-v1.inc"
