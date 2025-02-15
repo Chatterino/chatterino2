@@ -99,7 +99,7 @@ public:
     void replaceMessage(size_t index, const MessagePtr &replacement);
     void replaceMessage(size_t hint, const MessagePtr &message,
                         const MessagePtr &replacement);
-    void deleteMessage(QString messageID);
+    void disableMessage(QString messageID);
 
     /// Removes all messages from this channel and invokes #messagesCleared
     void clearMessages();

@@ -59,6 +59,7 @@ struct HelixGlobalBadges;
 using HelixChannelBadges = HelixGlobalBadges;
 
 class TwitchIrcServer;
+class TwitchAccount;
 
 const int MAX_QUEUED_REDEMPTIONS = 16;
 
@@ -163,6 +164,12 @@ public:
     void reconnect() override;
     QString getCurrentStreamID() const override;
     void createClip();
+
+    /// Delete the message with the specified ID as a moderator.
+    ///
+    /// If the ID is empty, all messages will be deleted, effectively clearing
+    /// the chat.
+    void deleteMessagesAs(const QString &messageID, TwitchAccount *moderator);
 
     // Data
     const QString &subscriptionUrl();
