@@ -647,7 +647,7 @@ void TwitchIrcServer::initialize()
                     {
                         // Gray out approve/deny button upon "ALLOWED" and "DENIED" statuses
                         // They are versions of automod_message_(denied|approved) but for mods.
-                        chan->deleteMessage("automod_" + msg.messageID);
+                        chan->disableMessage("automod_" + msg.messageID);
                     }
                 }
                 break;
