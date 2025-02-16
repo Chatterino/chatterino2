@@ -25,6 +25,7 @@
 - Bugfix: Ensure miniaudio backend exits even if it doesn't exit cleanly. (#5896)
 - Bugfix: Fixed search in emote popup not always working correctly. (#5946)
 - Bugfix: Fixed channel point redemptions with messages not showing up if PubSub is disconnected. (#5948)
+- Bugfix: Fixed the input font not immediately updating when zooming in/out. (#5960)
 - Dev: Subscriptions to PubSub channel points redemption topics now use no auth token, making it continue to work during PubSub shutdown. (#5947)
 - Dev: Add initial experimental EventSub support. (#5837, #5895, #5897, #5904, #5910, #5903, #5915, #5916, #5930, #5935, #5932, #5943, #5952, #5953)
 - Dev: Remove unneeded platform specifier for toasts. (#5914)
@@ -42,6 +43,7 @@
 - Dev: Updated `qtkeychain` to 0.15.0. (#5871)
 - Dev: Updated `googletest` to 1.16.0. (#5942)
 - Dev: Fixed duplicate CMake configure in clean builds. (#5940)
+- Dev: BTTV emotes are now loaded as WEBP. (#5957)
 
 ## 2.5.2
 
