@@ -32,3 +32,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(cmake/GenerateJson.cmake)
 
 add_subdirectory(src)
+
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
+
+if(BUILD_BENCHMARKS)
+    add_subdirectory(benchmarks)
+endif()

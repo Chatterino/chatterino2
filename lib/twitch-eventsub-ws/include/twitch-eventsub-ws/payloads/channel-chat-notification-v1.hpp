@@ -58,9 +58,9 @@ struct Resubscription {
     int durationMonths;
     std::optional<int> streakMonths;
     std::string subTier;
-    bool isPrime;
+    std::optional<bool> isPrime;
     bool isGift;
-    bool gifterIsAnonymous;
+    std::optional<bool> gifterIsAnonymous;
     std::optional<std::string> gifterUserID;
     std::optional<std::string> gifterUserName;
     std::optional<std::string> gifterUserLogin;
@@ -162,9 +162,9 @@ struct Event {
     std::string broadcasterUserID;
     std::string broadcasterUserLogin;
     std::string broadcasterUserName;
-    std::string chatterUserID;
-    std::string chatterUserLogin;
-    std::string chatterUserName;
+    std::optional<std::string> chatterUserID;
+    std::optional<std::string> chatterUserLogin;
+    std::optional<std::string> chatterUserName;
     bool chatterIsAnonymous;
     std::string color;
     std::vector<Badge> badges;
@@ -190,9 +190,9 @@ struct Event {
 };
 
 struct Payload {
-    const subscription::Subscription subscription;
+    subscription::Subscription subscription;
 
-    const Event event;
+    Event event;
 };
 
 #include "twitch-eventsub-ws/payloads/channel-chat-notification-v1.inc"
