@@ -235,6 +235,7 @@ void SplitInput::scaleChangedEvent(float scale)
     }
     this->ui_.textEdit->setFont(
         app->getFonts()->getFont(FontStyle::ChatMedium, scale));
+    this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
     this->ui_.textEditLength->setFont(
         app->getFonts()->getFont(FontStyle::ChatMedium, scale));
     this->ui_.replyLabel->setFont(
