@@ -8,6 +8,7 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
+#include "singletons/Settings.hpp"
 
 #ifdef USEWINSDK
 #    include <Windows.h>
