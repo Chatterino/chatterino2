@@ -962,7 +962,8 @@ void UserInfoPopup::updateUserData()
                     {
                         QDateTime followedAt = QDateTime::fromString(
                             subageInfo.followingSince, Qt::ISODate);
-                        QString followingSince = followedAt.toString("yyyy-MM-dd");
+                        QString followingSince =
+                            followedAt.toString("yyyy-MM-dd");
                         this->ui_.followageLabel->setText("❤ Following since " +
                                                           followingSince);
                     }
