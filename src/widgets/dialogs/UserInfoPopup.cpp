@@ -945,9 +945,9 @@ void UserInfoPopup::updateUserData()
         this->ui_.block->setEnabled(true);
         this->ui_.ignoreHighlights->setChecked(isIgnoringHighlights);
 
-        auto type = this->channel_->getType();
+        auto type = this->underlyingChannel_->getType();
 
-        if (type != Channel::Type::TwitchLive)
+        if (type == Channel::Type::Twitch)
         {
             // get followage and subage
             getIvr()->getSubage(
