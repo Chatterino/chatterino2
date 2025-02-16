@@ -15,6 +15,11 @@ void IvrApi::getSubage(QString userName, QString channelName,
 {
     assert(!userName.isEmpty() && !channelName.isEmpty());
 
+    if (channelName == "/live")
+    {
+        channelName = userName;
+    }
+
     this->makeRequest(
             QString("twitch/subage/%1/%2").arg(userName).arg(channelName), {})
         .onSuccess([successCallback, failureCallback](auto result) {
