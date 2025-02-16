@@ -2,7 +2,7 @@
 
 #include "common/ChatterinoSetting.hpp"
 #include "common/SignalVector.hpp"
-#include "util/QCompareCaseInsensitive.hpp"
+#include "util/QCompareTransparent.hpp"
 
 #include <QTimer>
 
