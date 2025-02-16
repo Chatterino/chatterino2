@@ -68,6 +68,7 @@ namespace {
 
         getApp()->getAccounts()->twitch.reloadUsers();
         getApp()->getAccounts()->twitch.currentUsername = username;
+        getSettings()->requestSave();
         return true;
     }
 
