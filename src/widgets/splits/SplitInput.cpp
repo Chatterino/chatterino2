@@ -235,6 +235,14 @@ void SplitInput::scaleChangedEvent(float scale)
     }
     this->ui_.textEdit->setFont(
         app->getFonts()->getFont(FontStyle::ChatMedium, scale));
+
+    QPalette placeholderPalette;
+    placeholderPalette.setColor(
+        QPalette::PlaceholderText,
+        this->theme->messages.textColors.chatPlaceholder);
+
+    this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
+    this->ui_.textEdit->setPalette(placeholderPalette);
     this->ui_.textEditLength->setFont(
         app->getFonts()->getFont(FontStyle::ChatMedium, scale));
     this->ui_.replyLabel->setFont(
