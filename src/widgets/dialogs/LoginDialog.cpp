@@ -6,9 +6,9 @@
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
+#include "singletons/Settings.hpp"
 #include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
-#include "singletons/Settings.hpp"
 
 #ifdef USEWINSDK
 #    include <Windows.h>
