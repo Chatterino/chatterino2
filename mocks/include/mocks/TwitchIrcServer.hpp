@@ -45,8 +45,27 @@ public:
 
     ChannelPtr getChannelOrEmpty(const QString &dirtyChannelName) override
     {
-        assert(false && "unimplemented getChannelOrEmpty in mock irc server");
-        return {};
+        QString query;
+        if (dirtyChannelName.startsWith('#'))
+        {
+            query = dirtyChannelName.mid(1).toLower();
+        }
+        else
+        {
+            query = dirtyChannelName.toLower();
+        }
+
+        auto it = this->mockChannels.find(query);
+        if (it == this->mockChannels.end())
+        {
+            return Channel::getEmpty();
+        }
+        auto chan = it->second.lock();
+        if (!chan)
+        {
+            return Channel::getEmpty();
+        }
+        return chan;
     }
 
     void addFakeMessage(const QString &data) override
