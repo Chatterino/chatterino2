@@ -792,7 +792,7 @@ if (CHATTERINO_GENERATE_COVERAGE)
         NAME coverage
         EXECUTABLE ctest
         EXCLUDE "/usr/include/*"
-        EXCLUDE "build-*/*"
+        EXCLUDE "build*/*"
         # EXCLUDE "lib/*"
         EXCLUDE "lib/certify/*"
         EXCLUDE "lib/expected-lite/*"
