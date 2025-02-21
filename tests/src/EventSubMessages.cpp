@@ -23,11 +23,11 @@ namespace {
 ///
 /// When adding a test, start with `{ "input": {...} }` and set this to `true`
 /// to generate an initial snapshot. Make sure to verify the output!
-constexpr bool UPDATE_SNAPSHOTS = true;
+constexpr bool UPDATE_SNAPSHOTS = false;
 
 const QString CATEGORY = u"EventSub"_s;
 
-// subscriptions
+/// JSON for the `subscription` object in `payload`
 const std::map<QString, std::string_view, QCompareCaseInsensitive>
     SUBSCRIPTIONS{
         {
@@ -47,6 +47,19 @@ const std::map<QString, std::string_view, QCompareCaseInsensitive>
                 "session_id": "AgoQUlB8aB2SSsavWVfcs5ljnBIGY2VsbC1j"
             },
             "created_at": "2024-02-23T21:12:33.771005262Z"
+        })",
+        },
+        {
+            "channel-ban",
+            R"({
+            "id": "4aa632e0-fca3-590b-e981-bbd12abdb3fe",
+            "status": "enabled",
+            "type": "channel.ban",
+            "version": "1",
+            "condition": { "broadcaster_user_id": "11148817" },
+            "transport": { "method": "websocket", "session_id": "38de428e_b11f07be" },
+            "created_at": "2023-05-20T12:30:55.518375571Z",
+            "cost": 0
         })",
         },
     };
@@ -149,7 +162,7 @@ public:
 TEST_P(TestEventSubMessagesP, Run)
 {
     QStringView subcategory(snapshot->name());
-    subcategory.slice(0, subcategory.indexOf('/'));
+    subcategory = subcategory.sliced(0, subcategory.indexOf('/'));
     auto subscription = SUBSCRIPTIONS.find(subcategory);
     ASSERT_NE(subscription, SUBSCRIPTIONS.end()) << subcategory;
 

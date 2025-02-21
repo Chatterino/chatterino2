@@ -190,7 +190,7 @@ QStringList Snapshot::discoverNested(const QString &category)
             QStringView view(file);
             if (view.endsWith(u".json"))
             {
-                view.chop(view.size() - 4);
+                view = view.sliced(0, view.size() - 5);
             }
             all.append(dir % u'/' % view);
         }
