@@ -9,6 +9,7 @@
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "util/Twitch.hpp"
 
 #include <unordered_map>
 
@@ -45,15 +46,7 @@ public:
 
     ChannelPtr getChannelOrEmpty(const QString &dirtyChannelName) override
     {
-        QString query;
-        if (dirtyChannelName.startsWith('#'))
-        {
-            query = dirtyChannelName.mid(1).toLower();
-        }
-        else
-        {
-            query = dirtyChannelName.toLower();
-        }
+        QString query = cleanChannelName(dirtyChannelName);
 
         auto it = this->mockChannels.find(query);
         if (it == this->mockChannels.end())

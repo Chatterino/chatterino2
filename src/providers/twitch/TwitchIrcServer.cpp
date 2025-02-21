@@ -27,6 +27,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/PostToThread.hpp"
 #include "util/RatelimitBucket.hpp"
+#include "util/Twitch.hpp"
 
 #include <IrcCommand>
 #include <IrcMessage>
@@ -1201,18 +1202,6 @@ std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
     return Channel::getEmpty();
 }
 
-QString TwitchIrcServer::cleanChannelName(const QString &dirtyChannelName)
-{
-    if (dirtyChannelName.startsWith('#'))
-    {
-        return dirtyChannelName.mid(1).toLower();
-    }
-    else
-    {
-        return dirtyChannelName.toLower();
-    }
-}
-
 bool TwitchIrcServer::prepareToSend(
     const std::shared_ptr<TwitchChannel> &channel)
 {
@@ -1544,7 +1533,7 @@ void TwitchIrcServer::sendRawMessage(const QString &rawMessage)
 
 ChannelPtr TwitchIrcServer::getOrAddChannel(const QString &dirtyChannelName)
 {
-    auto channelName = this->cleanChannelName(dirtyChannelName);
+    auto channelName = cleanChannelName(dirtyChannelName);
 
     // try get channel
     ChannelPtr chan = this->getChannelOrEmpty(channelName);
@@ -1594,7 +1583,7 @@ ChannelPtr TwitchIrcServer::getOrAddChannel(const QString &dirtyChannelName)
 
 ChannelPtr TwitchIrcServer::getChannelOrEmpty(const QString &dirtyChannelName)
 {
-    auto channelName = this->cleanChannelName(dirtyChannelName);
+    auto channelName = cleanChannelName(dirtyChannelName);
 
     std::lock_guard<std::mutex> lock(this->channelMutex);
 

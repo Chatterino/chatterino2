@@ -55,7 +55,10 @@ void Connection::onChannelBan(
 
     BanAction action{};
 
-    action.timestamp = std::chrono::steady_clock::now();
+    if (!getApp()->isTest())
+    {
+        action.timestamp = std::chrono::steady_clock::now();
+    }
     action.roomID = roomID;
     action.source = ActionUser{
         .id = QString::fromStdString(payload.event.moderatorUserID),
@@ -85,6 +88,10 @@ void Connection::onChannelBan(
 
     runInGuiThread([action{std::move(action)}, chan{std::move(chan)}] {
         auto time = QDateTime::currentDateTime();
+        if (getApp()->isTest())
+        {
+            time = QDateTime::fromSecsSinceEpoch(0);
+        }
         MessageBuilder msg(action, time);
         msg->flags.set(MessageFlag::PubSub);
         chan->addOrReplaceTimeout(msg.release(), QDateTime::currentDateTime());
@@ -162,7 +169,11 @@ void Connection::onChannelModerate(
         return;
     }
 
-    const auto now = QDateTime::currentDateTime();
+    auto now = QDateTime::currentDateTime();
+    if (getApp()->isTest())
+    {
+        now = QDateTime::fromSecsSinceEpoch(0);
+    }
 
     std::visit(
         [&](auto &&action) {
