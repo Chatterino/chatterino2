@@ -90,7 +90,7 @@ void Connection::onChannelBan(
         auto time = QDateTime::currentDateTime();
         if (getApp()->isTest())
         {
-            time = QDateTime::fromSecsSinceEpoch(0);
+            time = QDateTime::fromSecsSinceEpoch(0).toUTC();
         }
         MessageBuilder msg(action, time);
         msg->flags.set(MessageFlag::PubSub);
@@ -172,7 +172,7 @@ void Connection::onChannelModerate(
     auto now = QDateTime::currentDateTime();
     if (getApp()->isTest())
     {
-        now = QDateTime::fromSecsSinceEpoch(0);
+        now = QDateTime::fromSecsSinceEpoch(0).toUTC();
     }
 
     std::visit(

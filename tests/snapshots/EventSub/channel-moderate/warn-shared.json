@@ -165,7 +165,7 @@
             "loginName": "quotrok",
             "messageText": "quotrok has warned twitchdev: cut it out ",
             "searchText": "quotrok has warned twitchdev: cut it out ",
-            "serverReceivedTime": "1970-01-01T01:00:00",
+            "serverReceivedTime": "1970-01-01T00:00:00Z",
             "timeoutUser": "",
             "userID": "",
             "usernameColor": "#ff000000"

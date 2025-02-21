@@ -45,6 +45,7 @@
 - Dev: Updated `googletest` to 1.16.0. (#5942)
 - Dev: Fixed duplicate CMake configure in clean builds. (#5940)
 - Dev: BTTV emotes are now loaded as WEBP. (#5957)
+- Dev: Added snapshot tests for EventSub. (#5965)
 
 ## 2.5.2
 

@@ -122,7 +122,7 @@
             "loginName": "CLIModerator",
             "messageText": "CLIModerator banned testFromUser: \"This is a test event\". ",
             "searchText": "CLIModerator banned testFromUser: \"This is a test event\". ",
-            "serverReceivedTime": "1970-01-01T01:00:00",
+            "serverReceivedTime": "1970-01-01T00:00:00Z",
             "timeoutUser": "testFromUser",
             "userID": "",
             "usernameColor": "#ff000000"
