@@ -316,7 +316,8 @@ void Toasts::sendLibnotify(const QString &channelName,
             avatarFilePath(channelName).toUtf8().constData(), nullptr);
         if (img == nullptr)
         {
-            qWarning(chatterinoNotification) << "Failed to load user avatar image";
+            qWarning(chatterinoNotification)
+                << "Failed to load user avatar image";
         }
         else
         {
