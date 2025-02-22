@@ -41,9 +41,9 @@ namespace chatterino::testlib {
 ///
 /// TEST_P(ExampleTest, Run) {
 ///     auto fixture = testlib::Snapshot::read("category", GetParam());
-///     auto output = functionToTest(fixture.input()); // or input{String,Utf8}
+///     auto output = functionToTest(fixture->input()); // or input{String,Utf8}
 ///     // if snapshots are supposed to be updated, this will write the output
-///     ASSERT_TRUE(fixture.run(output, UPDATE_SNAPSHOTS));
+///     ASSERT_TRUE(fixture->run(output, UPDATE_SNAPSHOTS));
 /// }
 ///
 /// INSTANTIATE_TEST_SUITE_P(ExampleInstance, ExampleTest,
