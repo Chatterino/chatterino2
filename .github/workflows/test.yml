@@ -12,6 +12,7 @@ on:
 
 env:
   TWITCH_PUBSUB_SERVER_TAG: v1.0.8
+  HTTPBOX_TAG: v0.2.1
   QT_QPA_PLATFORM: minimal
 
 concurrency:
@@ -20,7 +21,7 @@ concurrency:
 
 jobs:
   test:
-    name: "${{ matrix.os }}"
+    name: "Test ${{ matrix.os }}, Qt ${{ matrix.qt-version }}"
     runs-on: ubuntu-latest
     container: ${{ matrix.container }}
     strategy:
@@ -48,6 +49,13 @@ jobs:
           sudo DEBIAN_FRONTEND=noninteractive apt -y --no-install-recommends install \
             libbenchmark-dev gcovr gnupg
 
+      - name: Install httpbox
+        run: |
+          curl -L -o httpbox.tar.xz "https://github.com/Chatterino/httpbox/releases/download/${{ env.HTTPBOX_TAG }}/httpbox-x86_64-unknown-linux-gnu.tar.xz"
+          tar -xJf httpbox.tar.xz
+          mv ./httpbox-x86_64-unknown-linux-gnu/httpbox /usr/local/bin
+        working-directory: /tmp
+
       - name: Build (Ubuntu)
         run: |
           cmake \
@@ -71,11 +79,6 @@ jobs:
           rm pubsub-server.tar.gz
           cd pubsub-server-test
           cd ..
-
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Cargo Install httpbox
-        run: |
-          cargo install --git https://github.com/kevinastone/httpbox --rev 89b971f
 
       - name: Test
         timeout-minutes: 30

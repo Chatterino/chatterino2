@@ -2,6 +2,7 @@ project(twitch-eventsub-ws-test)
 
 set(SOURCES
     src/parse.cpp
+    src/string.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
