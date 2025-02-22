@@ -3,6 +3,7 @@
 #include "common/Channel.hpp"
 #include "common/ChatterinoSetting.hpp"
 #include "common/enums/MessageOverflow.hpp"
+#include "common/Modes.hpp"
 #include "common/SignalVector.hpp"
 #include "controllers/filters/FilterRecord.hpp"
 #include "controllers/highlights/HighlightBadge.hpp"
@@ -526,6 +527,9 @@ public:
         "/notifications/suppressInitialLive", false};
 
     BoolSetting notificationToast = {"/notifications/enableToast", false};
+    BoolSetting createShortcutForToasts = {
+        "/notifications/createShortcutForToasts",
+        Modes::instance().isPortable ? false : true};
     IntSetting openFromToast = {"/notifications/openFromToast",
                                 static_cast<int>(ToastReaction::OpenInBrowser)};
 
