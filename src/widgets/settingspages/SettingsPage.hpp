@@ -57,7 +57,7 @@ public:
     void setTab(SettingsDialogTab *tab);
 
     QCheckBox *createCheckBox(const QString &text,
-                              pajlada::Settings::Setting<bool> &setting),
+                              pajlada::Settings::Setting<bool> &setting,
                               const QString &toolTipText = {});
     QComboBox *createComboBox(const QStringList &items,
                               pajlada::Settings::Setting<QString> &setting);

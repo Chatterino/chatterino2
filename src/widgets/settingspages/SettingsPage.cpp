@@ -88,7 +88,7 @@ void SettingsPage::setTab(SettingsDialogTab *tab)
 }
 
 QCheckBox *SettingsPage::createCheckBox(
-    const QString &text, pajlada::Settings::Setting<bool> &setting),
+    const QString &text, pajlada::Settings::Setting<bool> &setting,
     const QString &toolTipText)
 {
     QCheckBox *checkbox = new SCheckBox(text);
