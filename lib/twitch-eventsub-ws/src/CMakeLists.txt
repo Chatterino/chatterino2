@@ -71,6 +71,11 @@ if (MSVC)
     # Use the function inlining level from 'Release' mode (2).
     string(REPLACE "/Ob1" "/Ob2" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
 
+    # Add nativs to PDB
+    set(_natvis_path "${CMAKE_CURRENT_LIST_DIR}/../docs/twitch-eventsub-ws.natvis")
+    cmake_path(ABSOLUTE_PATH _natvis_path NORMALIZE)
+    target_link_options(${PROJECT_NAME} INTERFACE "/NATVIS:${_natvis_path}")
+
     # Configure warnings
 
     # Someone adds /W3 before we add /W4.
