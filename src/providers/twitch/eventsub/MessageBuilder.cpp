@@ -2,41 +2,6 @@
 
 #include "messages/MessageBuilder.hpp"
 
-namespace {
-
-using namespace chatterino;
-
-void appendSystemUser(MessageBuilder &builder, QString &text,
-                      TwitchChannel *channel, const QString &userName,
-                      const QString &userLogin, bool trailingSpace = true)
-{
-    auto *el = builder.emplace<MentionElement>(
-        userName, userLogin, MessageColor::System,
-        channel->getUserColor(userLogin));
-    text.append(userLogin);
-
-    if (trailingSpace)
-    {
-        text.append(' ');
-    }
-    else
-    {
-        el->setTrailingSpace(false);
-    }
-}
-
-void appendSystemUser(MessageBuilder &builder, QString &text,
-                      TwitchChannel *channel,
-                      const eventsub::lib::String &userName,
-                      const eventsub::lib::String &userLogin,
-                      bool trailingSpace = true)
-{
-    appendSystemUser(builder, text, channel, userName.qt(), userLogin.qt(),
-                     trailingSpace);
-}
-
-}  // namespace
-
 namespace chatterino::eventsub {
 
 MessagePtr makeVipMessage(
@@ -53,25 +18,20 @@ MessagePtr makeVipMessage(
     builder->flags.set(MessageFlag::Timeout);
     builder->loginName = event.moderatorUserLogin.qt();
 
-    appendSystemUser(builder, text, channel, event.moderatorUserName,
-                     event.moderatorUserLogin);
+    builder.emplace<MentionElement>(
+        event.moderatorUserName.qt(), event.moderatorUserLogin.qt(),
+        MessageColor::System,
+        channel->getUserColor(event.moderatorUserLogin.qt()));
+    text.append(event.moderatorUserLogin.qt() + " ");
 
     builder.emplaceSystemTextAndUpdate("has added", text);
-    appendSystemUser(builder, text, channel, action.userName, action.userLogin);
 
-    builder.emplaceSystemTextAndUpdate("as a VIP of", text);
+    builder.emplace<MentionElement>(
+        action.userName.qt(), action.userLogin.qt(), MessageColor::System,
+        channel->getUserColor(action.userLogin.qt()));
+    text.append(action.userLogin.qt() + " ");
 
-    if (event.isFromSharedChat())
-    {
-        appendSystemUser(builder, text, channel,
-                         *event.sourceBroadcasterUserName,
-                         *event.sourceBroadcasterUserLogin, false);
-        builder.emplaceSystemTextAndUpdate(".", text);
-    }
-    else
-    {
-        builder.emplaceSystemTextAndUpdate("this channel.", text);
-    }
+    builder.emplaceSystemTextAndUpdate("as a VIP of this channel.", text);
 
     builder.message().messageText = text;
     builder.message().searchText = text;
@@ -95,26 +55,20 @@ MessagePtr makeUnvipMessage(
     builder->flags.set(MessageFlag::Timeout);
     builder->loginName = event.moderatorUserLogin.qt();
 
-    appendSystemUser(builder, text, channel, event.moderatorUserName,
-                     event.moderatorUserLogin);
+    builder.emplace<MentionElement>(
+        event.moderatorUserName.qt(), event.moderatorUserLogin.qt(),
+        MessageColor::System,
+        channel->getUserColor(event.moderatorUserLogin.qt()));
+    text.append(event.moderatorUserLogin.qt() + " ");
 
     builder.emplaceSystemTextAndUpdate("has removed", text);
 
-    appendSystemUser(builder, text, channel, action.userName, action.userLogin);
+    builder.emplace<MentionElement>(
+        action.userName.qt(), action.userLogin.qt(), MessageColor::System,
+        channel->getUserColor(action.userLogin.qt()));
+    text.append(action.userLogin.qt() + " ");
 
-    builder.emplaceSystemTextAndUpdate("as a VIP of", text);
-
-    if (event.isFromSharedChat())
-    {
-        appendSystemUser(builder, text, channel,
-                         *event.sourceBroadcasterUserName,
-                         *event.sourceBroadcasterUserLogin, false);
-        builder.emplaceSystemTextAndUpdate(".", text);
-    }
-    else
-    {
-        builder.emplaceSystemTextAndUpdate("this channel.", text);
-    }
+    builder.emplaceSystemTextAndUpdate("as a VIP of this channel.", text);
 
     builder.message().messageText = text;
     builder.message().searchText = text;
@@ -138,22 +92,20 @@ MessagePtr makeWarnMessage(
     builder->flags.set(MessageFlag::Timeout);
     builder->loginName = event.moderatorUserLogin.qt();
 
-    appendSystemUser(builder, text, channel, event.moderatorUserName,
-                     event.moderatorUserLogin);
+    builder.emplace<MentionElement>(
+        event.moderatorUserName.qt(), event.moderatorUserLogin.qt(),
+        MessageColor::System,
+        channel->getUserColor(event.moderatorUserLogin.qt()));
+    text.append(event.moderatorUserLogin.qt() + " ");
 
     builder.emplaceSystemTextAndUpdate("has warned", text);
 
-    bool isShared = event.isFromSharedChat();
-    appendSystemUser(builder, text, channel, action.userName, action.userLogin,
-                     isShared);
-
-    if (isShared)
-    {
-        builder.emplaceSystemTextAndUpdate("in", text);
-        appendSystemUser(builder, text, channel,
-                         *event.sourceBroadcasterUserName,
-                         *event.sourceBroadcasterUserLogin, false);
-    }
+    builder
+        .emplace<MentionElement>(action.userName.qt(), action.userLogin.qt(),
+                                 MessageColor::System,
+                                 channel->getUserColor(action.userLogin.qt()))
+        ->setTrailingSpace(false);
+    text.append(action.userLogin.qt());
 
     QStringList reasons;
 
