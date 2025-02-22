@@ -63,6 +63,47 @@ Q_SIGNALS:
     void downloadComplete();
 };
 
+#ifdef CHATTERINO_WITH_LIBNOTIFY
+void onAction(NotifyNotification *notif, const char *action, void *user_data)
+{
+    auto *channelName = static_cast<QString *>(user_data);
+    auto toastReaction =
+        static_cast<ToastReaction>(getSettings()->openFromToast.getValue());
+
+    switch (toastReaction)
+    {
+        case ToastReaction::OpenInBrowser:
+            QDesktopServices::openUrl(
+                QUrl(u"https://www.twitch.tv/" % *channelName));
+            break;
+        case ToastReaction::OpenInPlayer:
+            QDesktopServices::openUrl(
+                QUrl(TWITCH_PLAYER_URL.arg(*channelName)));
+            break;
+        case ToastReaction::OpenInStreamlink: {
+            openStreamlinkForChannel(*channelName);
+            break;
+        }
+        case ToastReaction::DontOpen:
+            // nothing should happen
+            break;
+    }
+
+    notify_notification_close(notif, nullptr);
+}
+
+void onActionClosed(NotifyNotification *notif, void * /*user_data*/)
+{
+    g_object_unref(notif);
+}
+
+void onActionDestroyed(void *data)
+{
+    auto *channelNameHeap = static_cast<QString *>(data);
+    delete channelNameHeap;
+}
+#endif
+
 }  // namespace
 
 namespace chatterino {
@@ -310,6 +351,19 @@ void Toasts::sendLibnotify(const QString &channelName,
     NotifyNotification *notif = notify_notification_new(
         str.toUtf8().constData(), channelTitle.toUtf8().constData(), nullptr);
 
+    auto toastReaction =
+        static_cast<ToastReaction>(getSettings()->openFromToast.getValue());
+
+    if (toastReaction != ToastReaction::DontOpen)
+    {
+        auto *channelNameHeap = new QString(channelName);
+
+        notify_notification_add_action(
+            notif, "default",
+            Toasts::findStringFromReaction(toastReaction).toUtf8().constData(),
+            (NotifyActionCallback)onAction, channelNameHeap, onActionDestroyed);
+    }
+
     GdkPixbuf *img = gdk_pixbuf_new_from_file(
         avatarFilePath(channelName).toUtf8().constData(), nullptr);
     if (img == nullptr)
@@ -322,8 +376,9 @@ void Toasts::sendLibnotify(const QString &channelName,
         g_object_unref(img);
     }
 
+    g_signal_connect(notif, "closed", (GCallback)onActionClosed, nullptr);
+
     notify_notification_show(notif, nullptr);
-    g_object_unref(notif);
 }
 #endif
 
