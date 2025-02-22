@@ -515,3 +515,55 @@ TEST(String, QtLifetime)
     }
     ASSERT_TRUE(qt.isDetached());
 }
+
+TEST(String, Equals)
+{
+    String empty;
+
+    // This is using ASSERT_TRUE instead of ASSERT_EQ to be able to view/go to
+    // the chosen operator== in editors (with clangd for example).
+    ASSERT_TRUE(empty == empty);
+    ASSERT_TRUE(empty == "");
+    ASSERT_TRUE(empty == u"");
+    ASSERT_TRUE(empty == std::string_view{});
+    ASSERT_TRUE(empty == QAnyStringView());
+    ASSERT_TRUE(empty == String());
+    ASSERT_TRUE("" == empty);
+    ASSERT_TRUE(u"" == empty);
+
+    String longestSso(LONGEST_SSO);
+    String longestSsoQt(LONGEST_SSO);
+    ASSERT_EQ(longestSsoQt.qt(), LONGEST_SSO);
+
+    ASSERT_TRUE(longestSso == longestSso);
+    ASSERT_TRUE(longestSsoQt == longestSsoQt);
+    ASSERT_TRUE(longestSso == longestSsoQt);
+    ASSERT_TRUE(longestSso == LONGEST_SSO);
+    ASSERT_TRUE(longestSsoQt == LONGEST_SSO);
+    ASSERT_TRUE(longestSso == String(LONGEST_SSO));
+    ASSERT_TRUE(longestSsoQt == String(LONGEST_SSO));
+
+    String tooLong(TOO_LONG);
+    String tooLongQt(TOO_LONG);
+    ASSERT_EQ(tooLongQt.qt(), TOO_LONG);
+
+    ASSERT_TRUE(tooLong == tooLong);
+    ASSERT_TRUE(tooLongQt == tooLongQt);
+    ASSERT_TRUE(tooLong == tooLongQt);
+    ASSERT_TRUE(tooLong == TOO_LONG);
+    ASSERT_TRUE(tooLongQt == TOO_LONG);
+    ASSERT_TRUE(tooLong == String(TOO_LONG));
+    ASSERT_TRUE(tooLongQt == String(TOO_LONG));
+
+    String reallyLong(REALLY_LONG);
+    String reallyLongQt(REALLY_LONG);
+    ASSERT_EQ(reallyLongQt.qt(), REALLY_LONG);
+
+    ASSERT_TRUE(reallyLong == reallyLong);
+    ASSERT_TRUE(reallyLongQt == reallyLongQt);
+    ASSERT_TRUE(reallyLong == reallyLongQt);
+    ASSERT_TRUE(reallyLong == REALLY_LONG);
+    ASSERT_TRUE(reallyLongQt == REALLY_LONG);
+    ASSERT_TRUE(reallyLong == String(REALLY_LONG));
+    ASSERT_TRUE(reallyLongQt == String(REALLY_LONG));
+}

@@ -150,6 +150,13 @@ void Connection::onChannelModerate(
 {
     (void)metadata;
 
+    if (payload.event.sourceBroadcasterUserID &&
+        *payload.event.sourceBroadcasterUserID !=
+            payload.event.broadcasterUserID)
+    {
+        return;  // ignore moderation events from shared chat
+    }
+
     auto channelPtr = getApp()->getTwitch()->getChannelOrEmpty(
         payload.event.broadcasterUserLogin.qt());
     if (channelPtr->isEmpty())

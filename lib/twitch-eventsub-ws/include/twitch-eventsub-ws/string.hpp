@@ -152,6 +152,24 @@ struct String {
         return (this->flags & (ALLOC_BIT | QT_BIT)) == 0;
     }
 
+    // note: because we're using C++ 20, the reversed operator
+    // (e.g. QAnyStringView == String) is automatically "synthesized".
+    constexpr bool operator==(const QAnyStringView &other) const noexcept
+    {
+        return this->view() == other;
+    }
+
+    constexpr bool operator==(const String &other) const noexcept
+    {
+        return this->view() == other.view();
+    }
+
+    template <typename = void>  // weak overload
+    constexpr bool operator==(const std::string_view &other) const noexcept
+    {
+        return this->view() == other;
+    }
+
 private:
     static constexpr size_t QT_BIT = 1ULL << (sizeof(size_t) * 8 - 1);
     static constexpr size_t ALLOC_BIT = 1ULL << (sizeof(size_t) * 8 - 2);
