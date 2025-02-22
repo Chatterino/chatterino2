@@ -24,19 +24,22 @@ namespace chatterino::eventsub::lib {
 /// is **not** null-terminated.
 struct String {
     constexpr String() noexcept = default;
-    constexpr String(std::string_view sv)
+    String(std::string_view sv)
         : flags(sv.length() & LENGTH_MASK)
     {
-        if (sv.length() <= SSO_CAPACITY)
+        char *data = this->storage.inPlace;
+
+        if (sv.length() > SSO_CAPACITY)
         {
-            std::memcpy(this->storage.inPlace, sv.data(), sv.length());
-            return;
+            data = new char[sv.length()];
+            this->flags |= ALLOC_BIT;
+            this->storage.data = data;
         }
 
-        this->flags |= ALLOC_BIT;
-        auto *data = new char[sv.length()];
-        std::memcpy(data, sv.data(), sv.length());
-        this->storage.data = data;
+        for (size_t i = 0; i < sv.length(); i++)
+        {
+            data[i] = sv[i];
+        }
     }
 
     ~String()
@@ -117,7 +120,7 @@ struct String {
         return this->storage.qt;
     }
 
-    QAnyStringView view() const noexcept
+    constexpr QAnyStringView view() const noexcept
     {
         if (this->isQt())
         {
@@ -158,15 +161,6 @@ private:
     static_assert((LENGTH_MASK & ALLOC_BIT) == 0);
     static_assert((LENGTH_MASK & QT_BIT) == 0);
 
-    constexpr size_t length() const noexcept
-    {
-        if ((this->flags & QT_BIT) != 0)
-        {
-            return this->storage.qt.length();
-        }
-        return this->flags & LENGTH_MASK;
-    }
-
     mutable union Storage {
         constexpr Storage() noexcept
         {
@@ -177,9 +171,6 @@ private:
 
         Storage(const Storage &) = delete;
         Storage &operator=(const Storage &) = delete;
-
-        // we can memcpy QStrings as they're relocatable
-        static_assert(QTypeInfo<QString>::isRelocatable != 0);
 
         Storage(Storage &&other) noexcept
         {
@@ -198,10 +189,18 @@ private:
     private:
         static void move(Storage *from, Storage *to)
         {
+            // we can memcpy QStrings as they're relocatable
+            static_assert(QTypeInfo<QString>::isRelocatable != 0);
+
             // copy `from` -> `to`
-            std::memcpy(to, from, sizeof(Storage));
-            // clear `from`
-            std::memset(from, 0, sizeof(Storage));
+            std::memcpy(static_cast<void *>(to), from, sizeof(Storage));
+#ifndef NDEBUG
+            // Mark `from` as unused.
+            // Because the parent `String` sets the flags to 0,
+            // we don't _need_ to overwrite the data. In debug mode we write a
+            // tombstone value here.
+            std::memset(static_cast<void *>(from), 0xff, sizeof(Storage));
+#endif
         }
     } storage;
     static_assert(sizeof(Storage) == sizeof(QString));
