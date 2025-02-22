@@ -11,6 +11,7 @@
 - Minor: Improved error messaging of the `/clip` command. (#5879)
 - Minor: Added Linux support for Live Notifications toasts. (#5881)
 - Minor: Messages can now be deleted from the context menu in a channel. (#5956)
+- Minor: Show user avatar in Live Nofications on Linux. (#5971)
 - Bugfix: Fixed a potential way to escape the Lua Plugin sandbox. (#5846)
 - Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
 - Bugfix: Fixed a crash that could occur on Linux and macOS when clicking "Install" from the update prompt. (#5818)
