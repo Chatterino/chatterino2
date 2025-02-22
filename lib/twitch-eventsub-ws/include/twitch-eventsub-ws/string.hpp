@@ -154,18 +154,18 @@ struct String {
 
     // note: because we're using C++ 20, the reversed operator
     // (e.g. QAnyStringView == String) is automatically "synthesized".
-    constexpr bool operator==(const QAnyStringView &other) const noexcept
+    bool operator==(const QAnyStringView &other) const noexcept
     {
         return this->view() == other;
     }
 
-    constexpr bool operator==(const String &other) const noexcept
+    bool operator==(const String &other) const noexcept
     {
         return this->view() == other.view();
     }
 
     template <typename = void>  // weak overload
-    constexpr bool operator==(const std::string_view &other) const noexcept
+    bool operator==(const std::string_view &other) const noexcept
     {
         return this->view() == other;
     }
