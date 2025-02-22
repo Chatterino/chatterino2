@@ -1215,14 +1215,16 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return broadcasterUserName.error();
     }
 
-    std::optional<std::string> sourceBroadcasterUserID = std::nullopt;
+    std::optional<chatterino::eventsub::lib::String> sourceBroadcasterUserID =
+        std::nullopt;
     const auto *jvsourceBroadcasterUserID =
         root.if_contains("source_broadcaster_user_id");
     if (jvsourceBroadcasterUserID != nullptr &&
         !jvsourceBroadcasterUserID->is_null())
     {
         auto tsourceBroadcasterUserID =
-            boost::json::try_value_to<std::string>(*jvsourceBroadcasterUserID);
+            boost::json::try_value_to<chatterino::eventsub::lib::String>(
+                *jvsourceBroadcasterUserID);
 
         if (tsourceBroadcasterUserID.has_error())
         {
@@ -1231,14 +1233,15 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         sourceBroadcasterUserID = std::move(tsourceBroadcasterUserID.value());
     }
 
-    std::optional<std::string> sourceBroadcasterUserLogin = std::nullopt;
+    std::optional<chatterino::eventsub::lib::String>
+        sourceBroadcasterUserLogin = std::nullopt;
     const auto *jvsourceBroadcasterUserLogin =
         root.if_contains("source_broadcaster_user_login");
     if (jvsourceBroadcasterUserLogin != nullptr &&
         !jvsourceBroadcasterUserLogin->is_null())
     {
         auto tsourceBroadcasterUserLogin =
-            boost::json::try_value_to<std::string>(
+            boost::json::try_value_to<chatterino::eventsub::lib::String>(
                 *jvsourceBroadcasterUserLogin);
 
         if (tsourceBroadcasterUserLogin.has_error())
@@ -1249,14 +1252,15 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             std::move(tsourceBroadcasterUserLogin.value());
     }
 
-    std::optional<std::string> sourceBroadcasterUserName = std::nullopt;
+    std::optional<chatterino::eventsub::lib::String> sourceBroadcasterUserName =
+        std::nullopt;
     const auto *jvsourceBroadcasterUserName =
         root.if_contains("source_broadcaster_user_name");
     if (jvsourceBroadcasterUserName != nullptr &&
         !jvsourceBroadcasterUserName->is_null())
     {
         auto tsourceBroadcasterUserName =
-            boost::json::try_value_to<std::string>(
+            boost::json::try_value_to<chatterino::eventsub::lib::String>(
                 *jvsourceBroadcasterUserName);
 
         if (tsourceBroadcasterUserName.has_error())

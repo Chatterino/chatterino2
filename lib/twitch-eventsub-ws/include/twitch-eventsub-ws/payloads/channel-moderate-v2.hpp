@@ -389,11 +389,11 @@ struct Event {
     String broadcasterUserName;
 
     /// For Shared Chat events, the user ID (e.g. 117166826) of the user who's channel the event took place in
-    std::optional<std::string> sourceBroadcasterUserID;
+    std::optional<String> sourceBroadcasterUserID;
     /// For Shared Chat events, the user Login (e.g. testaccount_420) of the user who's channel the event took place in
-    std::optional<std::string> sourceBroadcasterUserLogin;
+    std::optional<String> sourceBroadcasterUserLogin;
     /// For Shared Chat events, the user Name (e.g. 테스트계정420) of the user who's channel the event took place in
-    std::optional<std::string> sourceBroadcasterUserName;
+    std::optional<String> sourceBroadcasterUserName;
 
     /// User ID (e.g. 117166826) of the user who took the action
     String moderatorUserID;
@@ -439,6 +439,8 @@ struct Event {
                  SharedChatDelete,     //
                  std::string>
         action;
+
+    bool isFromSharedChat() const noexcept;
 };
 
 struct Payload {

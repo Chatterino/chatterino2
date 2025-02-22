@@ -28,6 +28,7 @@ set(SOURCE_FILES
 
     # Subscription types (only additional functions)
     payloads/channel-ban-v1.cpp
+    payloads/channel-moderate-v2.cpp
     # Add your new subscription type source file above this line
 
     ${eventsub_generated_sources}
