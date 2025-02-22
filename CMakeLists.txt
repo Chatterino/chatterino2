@@ -47,6 +47,16 @@ project(chatterino
     HOMEPAGE_URL "https://chatterino.com/"
 )
 
+if(CHATTERINO_GENERATE_COVERAGE)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        add_compile_options(-fprofile-instr-generate -fcoverage-mapping)
+        add_link_options(-fprofile-instr-generate -fcoverage-mapping)
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+        add_compile_options(-coverage)
+        add_link_options(-coverage)
+    endif()
+endif()
+
 if(CHATTERINO_LTO)
     include(CheckIPOSupported)
     check_ipo_supported(RESULT CHATTERINO_ENABLE_LTO OUTPUT IPO_ERROR)

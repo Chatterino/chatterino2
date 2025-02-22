@@ -425,6 +425,55 @@ TEST(String, MoveAssign)
         ASSERT_TRUE(u.isEmpty());
         ASSERT_EQ(u.view(), "");
     }
+    {
+        String u(REALLY_LONG);
+        ASSERT_FALSE(u.isQt());
+        ASSERT_TRUE(u.isAlloc());
+        ASSERT_FALSE(u.isEmpty());
+        ASSERT_EQ(u.qt(), REALLY_LONG);
+        ASSERT_TRUE(u.isQt());
+        ASSERT_FALSE(u.isAlloc());
+        ASSERT_FALSE(u.isEmpty());
+        String v(REALLY_LONG);
+        ASSERT_FALSE(v.isQt());
+        ASSERT_TRUE(v.isAlloc());
+        ASSERT_FALSE(v.isEmpty());
+        v = std::move(u);
+        ASSERT_TRUE(v.isQt());
+        ASSERT_FALSE(v.isAlloc());
+        ASSERT_FALSE(v.isEmpty());
+        ASSERT_EQ(v.view(), REALLY_LONG);
+        ASSERT_FALSE(u.isQt());
+        ASSERT_FALSE(u.isAlloc());
+        ASSERT_TRUE(u.isEmpty());
+        ASSERT_EQ(u.view(), "");
+    }
+    {
+        String u(REALLY_LONG);
+        ASSERT_FALSE(u.isQt());
+        ASSERT_TRUE(u.isAlloc());
+        ASSERT_FALSE(u.isEmpty());
+        ASSERT_EQ(u.qt(), REALLY_LONG);
+        ASSERT_TRUE(u.isQt());
+        ASSERT_FALSE(u.isAlloc());
+        ASSERT_FALSE(u.isEmpty());
+        String v(REALLY_LONG);
+        ASSERT_FALSE(v.isQt());
+        ASSERT_TRUE(v.isAlloc());
+        ASSERT_FALSE(v.isEmpty());
+        ASSERT_EQ(v.qt(), REALLY_LONG);
+        ASSERT_TRUE(v.isQt());
+        ASSERT_FALSE(v.isAlloc());
+        v = std::move(u);
+        ASSERT_TRUE(v.isQt());
+        ASSERT_FALSE(v.isAlloc());
+        ASSERT_FALSE(v.isEmpty());
+        ASSERT_EQ(v.view(), REALLY_LONG);
+        ASSERT_FALSE(u.isQt());
+        ASSERT_FALSE(u.isAlloc());
+        ASSERT_TRUE(u.isEmpty());
+        ASSERT_EQ(u.view(), "");
+    }
 }
 
 TEST(String, QtLifetime)
