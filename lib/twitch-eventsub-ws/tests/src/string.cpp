@@ -430,10 +430,39 @@ TEST(String, MoveAssign)
 TEST(String, QtLifetime)
 {
     QString qt;
+
     {
         String s(REALLY_LONG);
         qt = s.qt();
-        ASSERT_TRUE(!qt.isDetached());  // s holds the string too
+        ASSERT_FALSE(qt.isDetached());  // s holds the string too
+    }
+    ASSERT_TRUE(qt.isDetached());
+
+    // move assignments
+    {
+        String s(REALLY_LONG);
+        qt = s.qt();
+        ASSERT_FALSE(qt.isDetached());
+        s = {};
+        ASSERT_TRUE(qt.isDetached());
+    }
+    ASSERT_TRUE(qt.isDetached());
+
+    {
+        String s(REALLY_LONG);
+        qt = s.qt();
+        ASSERT_FALSE(qt.isDetached());
+        s = {LONGEST_SSO};
+        ASSERT_TRUE(qt.isDetached());
+    }
+    ASSERT_TRUE(qt.isDetached());
+
+    {
+        String s(REALLY_LONG);
+        qt = s.qt();
+        ASSERT_FALSE(qt.isDetached());
+        s = {REALLY_LONG};
+        ASSERT_TRUE(qt.isDetached());
     }
     ASSERT_TRUE(qt.isDetached());
 }
