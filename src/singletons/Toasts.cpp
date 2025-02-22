@@ -310,6 +310,18 @@ void Toasts::sendLibnotify(const QString &channelName,
     NotifyNotification *notif = notify_notification_new(
         str.toUtf8().constData(), channelTitle.toUtf8().constData(), nullptr);
 
+    GdkPixbuf *img = gdk_pixbuf_new_from_file(
+        avatarFilePath(channelName).toUtf8().constData(), nullptr);
+    if (img == nullptr)
+    {
+        qWarning(chatterinoNotification) << "Failed to load user avatar image";
+    }
+    else
+    {
+        notify_notification_set_image_from_pixbuf(notif, img);
+        g_object_unref(img);
+    }
+
     notify_notification_show(notif, nullptr);
     g_object_unref(notif);
 }
