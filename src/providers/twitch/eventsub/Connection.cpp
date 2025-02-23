@@ -6,9 +6,12 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/eventsub/MessageBuilder.hpp"
+#include "providers/twitch/eventsub/MessageHandlers.hpp"
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "singletons/Settings.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/PostToThread.hpp"
 
 #include <boost/json.hpp>
@@ -20,8 +23,28 @@
 
 namespace {
 
+using namespace chatterino;
+using namespace chatterino::eventsub;
+
+namespace channel_moderate = lib::payload::channel_moderate::v2;
+
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 const auto &LOG = chatterinoTwitchEventSub;
+
+template <typename Action>
+concept CanMakeModMessage = requires(
+    EventSubMessageBuilder &builder, const channel_moderate::Event &event,
+    const std::remove_cvref_t<Action> &action) {
+    makeModerateMessage(builder, event, action);
+};
+
+template <typename Action>
+concept CanHandleModMessage =
+    requires(TwitchChannel *channel, const QDateTime &time,
+             const channel_moderate::Event &event,
+             const std::remove_cvref_t<Action> &action) {
+        handleModerateMessage(channel, time, event, action);
+    };
 
 }  // namespace
 
@@ -178,32 +201,20 @@ void Connection::onChannelModerate(
     std::visit(
         [&](auto &&action) {
             using Action = std::remove_cvref_t<decltype(action)>;
-            if constexpr (std::is_same_v<
-                              Action, lib::payload::channel_moderate::v2::Vip>)
+            if constexpr (CanMakeModMessage<Action>)
             {
-                auto msg = makeVipMessage(channel, now, payload.event, action);
+                EventSubMessageBuilder builder(channel, now);
+                builder->loginName = payload.event.moderatorUserLogin.qt();
+                makeModerateMessage(builder, payload.event, action);
+                auto msg = builder.release();
                 runInGuiThread([channel, msg] {
                     channel->addMessage(msg, MessageContext::Original);
                 });
             }
-            else if constexpr (std::is_same_v<
-                                   Action,
-                                   lib::payload::channel_moderate::v2::Unvip>)
+
+            if constexpr (CanHandleModMessage<Action>)
             {
-                auto msg =
-                    makeUnvipMessage(channel, now, payload.event, action);
-                runInGuiThread([channel, msg] {
-                    channel->addMessage(msg, MessageContext::Original);
-                });
-            }
-            else if constexpr (std::is_same_v<
-                                   Action,
-                                   lib::payload::channel_moderate::v2::Warn>)
-            {
-                auto msg = makeWarnMessage(channel, now, payload.event, action);
-                runInGuiThread([channel, msg] {
-                    channel->addMessage(msg, MessageContext::Original);
-                });
+                handleModerateMessage(channel, now, payload.event, action);
             }
         },
         payload.event.action);

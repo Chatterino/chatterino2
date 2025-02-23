@@ -1,111 +1,82 @@
 #include "providers/twitch/eventsub/MessageBuilder.hpp"
 
+#include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 
 namespace chatterino::eventsub {
 
-MessagePtr makeVipMessage(
-    TwitchChannel *channel, const QDateTime &time,
-    const lib::payload::channel_moderate::v2::Event &event,
-    const lib::payload::channel_moderate::v2::Vip &action)
+EventSubMessageBuilder::EventSubMessageBuilder(TwitchChannel *channel,
+                                               const QDateTime &time)
+    : channel(channel)
 {
-    MessageBuilder builder;
+    this->emplace<TimestampElement>();
+    this->message().flags.set(MessageFlag::System);
+    this->message().flags.set(MessageFlag::Timeout);  // do we need this?
+    this->message().serverReceivedTime = time;
+}
 
+EventSubMessageBuilder::~EventSubMessageBuilder() = default;
+
+void EventSubMessageBuilder::appendUser(const lib::String &userName,
+                                        const lib::String &userLogin,
+                                        QString &text, bool trailingSpace)
+{
+    auto login = userLogin.qt();
+    auto *el = this->emplace<MentionElement>(userName.qt(), login,
+                                             MessageColor::System,
+                                             channel->getUserColor(login));
+    text.append(login);
+
+    if (trailingSpace)
+    {
+        text.append(u' ');
+    }
+    else
+    {
+        el->setTrailingSpace(false);
+    }
+}
+
+void makeModerateMessage(EventSubMessageBuilder &builder,
+                         const lib::payload::channel_moderate::v2::Event &event,
+                         const lib::payload::channel_moderate::v2::Vip &action)
+{
     QString text;
 
-    builder.emplace<TimestampElement>();
-    builder->flags.set(MessageFlag::System);
-    builder->flags.set(MessageFlag::Timeout);
-    builder->loginName = event.moderatorUserLogin.qt();
-
-    builder.emplace<MentionElement>(
-        event.moderatorUserName.qt(), event.moderatorUserLogin.qt(),
-        MessageColor::System,
-        channel->getUserColor(event.moderatorUserLogin.qt()));
-    text.append(event.moderatorUserLogin.qt() + " ");
-
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
     builder.emplaceSystemTextAndUpdate("has added", text);
-
-    builder.emplace<MentionElement>(
-        action.userName.qt(), action.userLogin.qt(), MessageColor::System,
-        channel->getUserColor(action.userLogin.qt()));
-    text.append(action.userLogin.qt() + " ");
-
+    builder.appendUser(action.userName, action.userLogin, text);
     builder.emplaceSystemTextAndUpdate("as a VIP of this channel.", text);
 
     builder.message().messageText = text;
     builder.message().searchText = text;
-
-    builder.message().serverReceivedTime = time;
-
-    return builder.release();
 }
 
-MessagePtr makeUnvipMessage(
-    TwitchChannel *channel, const QDateTime &time,
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Unvip &action)
 {
-    MessageBuilder builder;
-
     QString text;
 
-    builder.emplace<TimestampElement>();
-    builder->flags.set(MessageFlag::System);
-    builder->flags.set(MessageFlag::Timeout);
-    builder->loginName = event.moderatorUserLogin.qt();
-
-    builder.emplace<MentionElement>(
-        event.moderatorUserName.qt(), event.moderatorUserLogin.qt(),
-        MessageColor::System,
-        channel->getUserColor(event.moderatorUserLogin.qt()));
-    text.append(event.moderatorUserLogin.qt() + " ");
-
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
     builder.emplaceSystemTextAndUpdate("has removed", text);
-
-    builder.emplace<MentionElement>(
-        action.userName.qt(), action.userLogin.qt(), MessageColor::System,
-        channel->getUserColor(action.userLogin.qt()));
-    text.append(action.userLogin.qt() + " ");
-
+    builder.appendUser(action.userName, action.userLogin, text);
     builder.emplaceSystemTextAndUpdate("as a VIP of this channel.", text);
 
     builder.message().messageText = text;
     builder.message().searchText = text;
-
-    builder.message().serverReceivedTime = time;
-
-    return builder.release();
 }
 
-MessagePtr makeWarnMessage(
-    TwitchChannel *channel, const QDateTime &time,
-    const lib::payload::channel_moderate::v2::Event &event,
-    const lib::payload::channel_moderate::v2::Warn &action)
+void makeModerateMessage(EventSubMessageBuilder &builder,
+                         const lib::payload::channel_moderate::v2::Event &event,
+                         const lib::payload::channel_moderate::v2::Warn &action)
 {
-    MessageBuilder builder;
-
     QString text;
 
-    builder.emplace<TimestampElement>();
-    builder->flags.set(MessageFlag::System);
-    builder->flags.set(MessageFlag::Timeout);
-    builder->loginName = event.moderatorUserLogin.qt();
-
-    builder.emplace<MentionElement>(
-        event.moderatorUserName.qt(), event.moderatorUserLogin.qt(),
-        MessageColor::System,
-        channel->getUserColor(event.moderatorUserLogin.qt()));
-    text.append(event.moderatorUserLogin.qt() + " ");
-
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
     builder.emplaceSystemTextAndUpdate("has warned", text);
-
-    builder
-        .emplace<MentionElement>(action.userName.qt(), action.userLogin.qt(),
-                                 MessageColor::System,
-                                 channel->getUserColor(action.userLogin.qt()))
-        ->setTrailingSpace(false);
-    text.append(action.userLogin.qt());
+    builder.appendUser(action.userName, action.userLogin, text, false);
 
     QStringList reasons;
 
@@ -134,10 +105,6 @@ MessagePtr makeWarnMessage(
 
     builder.message().messageText = text;
     builder.message().searchText = text;
-
-    builder.message().serverReceivedTime = time;
-
-    return builder.release();
 }
 
 }  // namespace chatterino::eventsub
