@@ -413,7 +413,11 @@ void Toasts::sendLibnotify(const QString &channelName,
 
     g_signal_connect(notif, "closed", (GCallback)onActionClosed, nullptr);
 
-    notify_notification_show(notif, nullptr);
+    gboolean success = notify_notification_show(notif, nullptr);
+    if (success == 0)
+    {
+        g_object_unref(notif);
+    }
 }
 #endif
 
