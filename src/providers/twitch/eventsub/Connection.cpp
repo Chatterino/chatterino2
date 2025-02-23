@@ -6,6 +6,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/eventsub/MessageBuilder.hpp"
+#include "providers/twitch/eventsub/MessageHandlers.hpp"
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -29,23 +30,6 @@ namespace channel_moderate = lib::payload::channel_moderate::v2;
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 const auto &LOG = chatterinoTwitchEventSub;
-
-void handleModerateMessage(
-    TwitchChannel *chan, [[maybe_unused]] const QDateTime &time,
-    const channel_moderate::Event &event,
-    [[maybe_unused]] const channel_moderate::Clear &action)
-{
-    runInGuiThread([chan, actor{event.moderatorUserLogin.qt()}, time] {
-        chan->addOrReplaceClearChat(
-            MessageBuilder::makeClearChatMessage(time, actor), time);
-        if (getSettings()->hideModerated)
-        {
-            // XXX: This is expensive. We could use a layout request if the layout
-            //      would store the previous message flags.
-            getApp()->getWindows()->forceLayoutChannelViews();
-        }
-    });
-}
 
 template <typename Action>
 concept CanMakeModMessage = requires(

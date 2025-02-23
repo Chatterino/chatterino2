@@ -434,6 +434,8 @@ set(SOURCE_FILES
         providers/twitch/eventsub/Controller.hpp
         providers/twitch/eventsub/MessageBuilder.cpp
         providers/twitch/eventsub/MessageBuilder.hpp
+        providers/twitch/eventsub/MessageHandlers.cpp
+        providers/twitch/eventsub/MessageHandlers.hpp
         providers/twitch/eventsub/SubscriptionHandle.cpp
         providers/twitch/eventsub/SubscriptionHandle.hpp
         providers/twitch/eventsub/SubscriptionRequest.cpp
