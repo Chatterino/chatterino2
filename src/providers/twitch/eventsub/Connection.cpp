@@ -39,6 +39,13 @@ concept CanMakeModMessage = requires(
 };
 
 template <typename Action>
+concept CanAddModMessage =
+    requires(TwitchChannel *channel, MessagePtr message, const QDateTime &time,
+             const std::remove_cvref_t<Action> &action) {
+        addModerateMessage(channel, message, time, action);
+    };
+
+template <typename Action>
 concept CanHandleModMessage =
     requires(TwitchChannel *channel, const QDateTime &time,
              const channel_moderate::Event &event,
@@ -73,52 +80,8 @@ void Connection::onChannelBan(
     const lib::payload::channel_ban::v1::Payload &payload)
 {
     (void)metadata;
-
-    auto roomID = QString::fromStdString(payload.event.broadcasterUserID);
-
-    BanAction action{};
-
-    if (!getApp()->isTest())
-    {
-        action.timestamp = std::chrono::steady_clock::now();
-    }
-    action.roomID = roomID;
-    action.source = ActionUser{
-        .id = QString::fromStdString(payload.event.moderatorUserID),
-        .login = QString::fromStdString(payload.event.moderatorUserLogin),
-        .displayName = QString::fromStdString(payload.event.moderatorUserName),
-    };
-    action.target = ActionUser{
-        .id = QString::fromStdString(payload.event.userID),
-        .login = QString::fromStdString(payload.event.userLogin),
-        .displayName = QString::fromStdString(payload.event.userName),
-    };
-    action.reason = QString::fromStdString(payload.event.reason);
-    if (payload.event.isPermanent)
-    {
-        action.duration = 0;
-    }
-    else
-    {
-        auto timeoutDuration = payload.event.timeoutDuration();
-        auto timeoutDurationInSeconds =
-            std::chrono::duration_cast<std::chrono::seconds>(timeoutDuration)
-                .count();
-        action.duration = timeoutDurationInSeconds;
-    }
-
-    auto chan = getApp()->getTwitch()->getChannelOrEmptyByID(roomID);
-
-    runInGuiThread([action{std::move(action)}, chan{std::move(chan)}] {
-        auto time = QDateTime::currentDateTime();
-        if (getApp()->isTest())
-        {
-            time = QDateTime::fromSecsSinceEpoch(0).toUTC();
-        }
-        MessageBuilder msg(action, time);
-        msg->flags.set(MessageFlag::PubSub);
-        chan->addOrReplaceTimeout(msg.release(), QDateTime::currentDateTime());
-    });
+    qCDebug(LOG) << "On channel ban event for channel"
+                 << payload.event.broadcasterUserLogin.c_str();
 }
 
 void Connection::onStreamOnline(
@@ -207,9 +170,16 @@ void Connection::onChannelModerate(
                 builder->loginName = payload.event.moderatorUserLogin.qt();
                 makeModerateMessage(builder, payload.event, action);
                 auto msg = builder.release();
-                runInGuiThread([channel, msg] {
-                    channel->addMessage(msg, MessageContext::Original);
-                });
+                if constexpr (CanAddModMessage<Action>)
+                {
+                    addModerateMessage(channel, msg, now, action);
+                }
+                else
+                {
+                    runInGuiThread([channel, msg] {
+                        channel->addMessage(msg, MessageContext::Original);
+                    });
+                }
             }
 
             if constexpr (CanHandleModMessage<Action>)

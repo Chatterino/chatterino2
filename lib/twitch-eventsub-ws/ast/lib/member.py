@@ -55,12 +55,6 @@ def _is_trivially_copyable(type: clang.cindex.Type) -> bool:
     return _is_chrono_like_type(type)
 
 
-def _has_no_fields(type: clang.cindex.Type) -> bool:
-    for _ in type.get_fields():
-        return False
-    return True
-
-
 @dataclass
 class VariantType:
     name: str
@@ -179,7 +173,7 @@ class Member:
                 VariantType(
                     name=name,
                     trivial=_is_trivially_copyable(inner),
-                    empty=_has_no_fields(inner),
+                    empty=inner.get_size() <= 1,
                 )
             )
 

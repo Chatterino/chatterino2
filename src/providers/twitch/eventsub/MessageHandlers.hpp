@@ -2,10 +2,17 @@
 
 #include "twitch-eventsub-ws/payloads/channel-moderate-v2.hpp"
 
+#include <memory>
+
 class QDateTime;
 
 namespace chatterino {
+
 class TwitchChannel;
+
+struct Message;
+using MessagePtr = std::shared_ptr<const Message>;
+
 }  // namespace chatterino
 
 namespace chatterino::eventsub {
