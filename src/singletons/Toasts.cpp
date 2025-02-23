@@ -64,11 +64,27 @@ Q_SIGNALS:
 };
 
 #ifdef CHATTERINO_WITH_LIBNOTIFY
-void onAction(NotifyNotification *notif, const char *action, void *user_data)
+void onAction(NotifyNotification *notif, const char *actionRaw, void *user_data)
 {
+    QString action(actionRaw);
     auto *channelName = static_cast<QString *>(user_data);
+
+    // by default we perform the action that is specified in the settings
     auto toastReaction =
         static_cast<ToastReaction>(getSettings()->openFromToast.getValue());
+
+    if (action == OPEN_IN_BROWSER)
+    {
+        toastReaction = ToastReaction::OpenInBrowser;
+    }
+    else if (action == OPEN_PLAYER_IN_BROWSER)
+    {
+        toastReaction = ToastReaction::OpenInPlayer;
+    }
+    else if (action == OPEN_IN_STREAMLINK)
+    {
+        toastReaction = ToastReaction::OpenInStreamlink;
+    }
 
     switch (toastReaction)
     {
@@ -351,17 +367,36 @@ void Toasts::sendLibnotify(const QString &channelName,
     NotifyNotification *notif = notify_notification_new(
         str.toUtf8().constData(), channelTitle.toUtf8().constData(), nullptr);
 
-    auto toastReaction =
+    // this will be freed in onActionDestroyed
+    auto *channelNameHeap = new QString(channelName);
+
+    // we only set onActionDestroyed as free_func in the first action because
+    // all free_funcs will be called once the action is destroyed which would
+    // cause a double-free otherwise
+    notify_notification_add_action(notif, OPEN_IN_BROWSER.toUtf8().constData(),
+                                   OPEN_IN_BROWSER.toUtf8().constData(),
+                                   (NotifyActionCallback)onAction,
+                                   channelNameHeap, onActionDestroyed);
+    notify_notification_add_action(
+        notif, OPEN_PLAYER_IN_BROWSER.toUtf8().constData(),
+        OPEN_PLAYER_IN_BROWSER.toUtf8().constData(),
+        (NotifyActionCallback)onAction, channelNameHeap, nullptr);
+    notify_notification_add_action(
+        notif, OPEN_IN_STREAMLINK.toUtf8().constData(),
+        OPEN_IN_STREAMLINK.toUtf8().constData(), (NotifyActionCallback)onAction,
+        channelNameHeap, nullptr);
+
+    auto defaultToastReaction =
         static_cast<ToastReaction>(getSettings()->openFromToast.getValue());
 
-    if (toastReaction != ToastReaction::DontOpen)
+    if (defaultToastReaction != ToastReaction::DontOpen)
     {
-        auto *channelNameHeap = new QString(channelName);
-
         notify_notification_add_action(
             notif, "default",
-            Toasts::findStringFromReaction(toastReaction).toUtf8().constData(),
-            (NotifyActionCallback)onAction, channelNameHeap, onActionDestroyed);
+            Toasts::findStringFromReaction(defaultToastReaction)
+                .toUtf8()
+                .constData(),
+            (NotifyActionCallback)onAction, channelNameHeap, nullptr);
     }
 
     GdkPixbuf *img = gdk_pixbuf_new_from_file(
