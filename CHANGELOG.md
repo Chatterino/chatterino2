@@ -9,7 +9,7 @@
 - Minor: When (re-)connecting, visible channels are now joined first. (#5850)
 - Minor: Added the ability to filter on messages by the author's user ID (example: `author.user_id == "22484632"`). (#5862)
 - Minor: Improved error messaging of the `/clip` command. (#5879)
-- Minor: Added Linux support for Live Notifications toasts. (#5881, #5971)
+- Minor: Added Linux support for Live Notifications toasts. (#5881, #5971, #5976)
 - Minor: Messages can now be deleted from the context menu in a channel. (#5956)
 - Bugfix: Fixed a potential way to escape the Lua Plugin sandbox. (#5846)
 - Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
