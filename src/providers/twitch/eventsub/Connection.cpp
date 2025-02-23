@@ -20,8 +20,19 @@
 
 namespace {
 
+using namespace chatterino;
+using namespace chatterino::eventsub;
+
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 const auto &LOG = chatterinoTwitchEventSub;
+
+template <typename Action>
+concept CanMakeModMessage =
+    requires(EventSubMessageBuilder &builder,
+             const lib::payload::channel_moderate::v2::Event &event,
+             const std::remove_cvref_t<Action> &action) {
+        makeModerateMessage(builder, event, action);
+    };
 
 }  // namespace
 
@@ -178,29 +189,12 @@ void Connection::onChannelModerate(
     std::visit(
         [&](auto &&action) {
             using Action = std::remove_cvref_t<decltype(action)>;
-            if constexpr (std::is_same_v<
-                              Action, lib::payload::channel_moderate::v2::Vip>)
+            if constexpr (CanMakeModMessage<Action>)
             {
-                auto msg = makeVipMessage(channel, now, payload.event, action);
-                runInGuiThread([channel, msg] {
-                    channel->addMessage(msg, MessageContext::Original);
-                });
-            }
-            else if constexpr (std::is_same_v<
-                                   Action,
-                                   lib::payload::channel_moderate::v2::Unvip>)
-            {
-                auto msg =
-                    makeUnvipMessage(channel, now, payload.event, action);
-                runInGuiThread([channel, msg] {
-                    channel->addMessage(msg, MessageContext::Original);
-                });
-            }
-            else if constexpr (std::is_same_v<
-                                   Action,
-                                   lib::payload::channel_moderate::v2::Warn>)
-            {
-                auto msg = makeWarnMessage(channel, now, payload.event, action);
+                EventSubMessageBuilder builder(channel, now);
+                builder->loginName = payload.event.moderatorUserLogin.qt();
+                makeModerateMessage(builder, payload.event, action);
+                auto msg = builder.release();
                 runInGuiThread([channel, msg] {
                     channel->addMessage(msg, MessageContext::Original);
                 });
