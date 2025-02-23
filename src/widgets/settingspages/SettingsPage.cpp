@@ -93,7 +93,7 @@ QCheckBox *SettingsPage::createCheckBox(
 {
     QCheckBox *checkbox = new SCheckBox(text);
     checkbox->setToolTip(toolTipText);
-    
+
     // update when setting changes
     setting.connect(
         [checkbox](const bool &value, auto) {
