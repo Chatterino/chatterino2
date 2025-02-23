@@ -359,8 +359,8 @@ void Toasts::sendLibnotify(const QString &channelName,
     auto *channelNameHeap = new QString(channelName);
 
     // we only set onActionDestroyed as free_func in the first action because
-    // all free_funcs will be called once the action is destroyed which would
-    // cause a double-free otherwise
+    // all free_funcs will be called once the notification is destroyed which
+    // would cause a double-free otherwise
     notify_notification_add_action(notif, OPEN_IN_BROWSER.toUtf8().constData(),
                                    OPEN_IN_BROWSER.toUtf8().constData(),
                                    (NotifyActionCallback)onAction,
