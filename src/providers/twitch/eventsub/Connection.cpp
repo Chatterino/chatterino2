@@ -6,9 +6,12 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/eventsub/MessageBuilder.hpp"
+#include "providers/twitch/eventsub/MessageHandlers.hpp"
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "singletons/Settings.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/PostToThread.hpp"
 
 #include <boost/json.hpp>
@@ -23,15 +26,24 @@ namespace {
 using namespace chatterino;
 using namespace chatterino::eventsub;
 
+namespace channel_moderate = lib::payload::channel_moderate::v2;
+
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 const auto &LOG = chatterinoTwitchEventSub;
 
 template <typename Action>
-concept CanMakeModMessage =
-    requires(EventSubMessageBuilder &builder,
-             const lib::payload::channel_moderate::v2::Event &event,
+concept CanMakeModMessage = requires(
+    EventSubMessageBuilder &builder, const channel_moderate::Event &event,
+    const std::remove_cvref_t<Action> &action) {
+    makeModerateMessage(builder, event, action);
+};
+
+template <typename Action>
+concept CanHandleModMessage =
+    requires(TwitchChannel *channel, const QDateTime &time,
+             const channel_moderate::Event &event,
              const std::remove_cvref_t<Action> &action) {
-        makeModerateMessage(builder, event, action);
+        handleModerateMessage(channel, time, event, action);
     };
 
 }  // namespace
@@ -198,6 +210,11 @@ void Connection::onChannelModerate(
                 runInGuiThread([channel, msg] {
                     channel->addMessage(msg, MessageContext::Original);
                 });
+            }
+
+            if constexpr (CanHandleModMessage<Action>)
+            {
+                handleModerateMessage(channel, now, payload.event, action);
             }
         },
         payload.event.action);
