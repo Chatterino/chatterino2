@@ -28,6 +28,7 @@
 - Bugfix: Fixed search in emote popup not always working correctly. (#5946)
 - Bugfix: Fixed channel point redemptions with messages not showing up if PubSub is disconnected. (#5948)
 - Bugfix: Fixed the input font not immediately updating when zooming in/out. (#5960)
+- Bugfix: Fixed color input thinking blue is also red. (#5982)
 - Dev: Subscriptions to PubSub channel points redemption topics now use no auth token, making it continue to work during PubSub shutdown. (#5947)
 - Dev: Add initial experimental EventSub support. (#5837, #5895, #5897, #5904, #5910, #5903, #5915, #5916, #5930, #5935, #5932, #5943, #5952, #5953, #5968, #5973, #5974, #5980, #5981)
 - Dev: Remove unneeded platform specifier for toasts. (#5914)
