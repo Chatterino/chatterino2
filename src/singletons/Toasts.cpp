@@ -86,24 +86,7 @@ void onAction(NotifyNotification *notif, const char *actionRaw, void *userData)
         toastReaction = ToastReaction::OpenInStreamlink;
     }
 
-    switch (toastReaction)
-    {
-        case ToastReaction::OpenInBrowser:
-            QDesktopServices::openUrl(
-                QUrl(u"https://www.twitch.tv/" % *channelName));
-            break;
-        case ToastReaction::OpenInPlayer:
-            QDesktopServices::openUrl(
-                QUrl(TWITCH_PLAYER_URL.arg(*channelName)));
-            break;
-        case ToastReaction::OpenInStreamlink: {
-            openStreamlinkForChannel(*channelName);
-            break;
-        }
-        case ToastReaction::DontOpen:
-            // nothing should happen
-            break;
-    }
+    Toasts::performReaction(toastReaction, *channelName);
 
     notify_notification_close(notif, nullptr);
 }
@@ -181,6 +164,28 @@ QString Toasts::findStringFromReaction(
     return Toasts::findStringFromReaction(static_cast<ToastReaction>(value));
 }
 
+void Toasts::performReaction(const ToastReaction &reaction,
+                             const QString &channelName)
+{
+    switch (reaction)
+    {
+        case ToastReaction::OpenInBrowser:
+            QDesktopServices::openUrl(
+                QUrl(u"https://www.twitch.tv/" % channelName));
+            break;
+        case ToastReaction::OpenInPlayer:
+            QDesktopServices::openUrl(QUrl(TWITCH_PLAYER_URL.arg(channelName)));
+            break;
+        case ToastReaction::OpenInStreamlink: {
+            openStreamlinkForChannel(channelName);
+            break;
+        }
+        case ToastReaction::DontOpen:
+            // nothing should happen
+            break;
+    }
+}
+
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Toasts::sendChannelNotification(const QString &channelName,
                                      const QString &channelTitle)
@@ -239,24 +244,7 @@ public:
         auto toastReaction =
             static_cast<ToastReaction>(getSettings()->openFromToast.getValue());
 
-        switch (toastReaction)
-        {
-            case ToastReaction::OpenInBrowser:
-                QDesktopServices::openUrl(
-                    QUrl(u"https://www.twitch.tv/" % channelName_));
-                break;
-            case ToastReaction::OpenInPlayer:
-                QDesktopServices::openUrl(
-                    QUrl(TWITCH_PLAYER_URL.arg(channelName_)));
-                break;
-            case ToastReaction::OpenInStreamlink: {
-                openStreamlinkForChannel(channelName_);
-                break;
-            }
-            case ToastReaction::DontOpen:
-                // nothing should happen
-                break;
-        }
+        Toasts::performReaction(toastReaction, channelName_);
     }
 
     void toastActivated(int actionIndex) const override
