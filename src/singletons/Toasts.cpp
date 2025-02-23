@@ -64,10 +64,10 @@ Q_SIGNALS:
 };
 
 #ifdef CHATTERINO_WITH_LIBNOTIFY
-void onAction(NotifyNotification *notif, const char *actionRaw, void *user_data)
+void onAction(NotifyNotification *notif, const char *actionRaw, void *userData)
 {
     QString action(actionRaw);
-    auto *channelName = static_cast<QString *>(user_data);
+    auto *channelName = static_cast<QString *>(userData);
 
     // by default we perform the action that is specified in the settings
     auto toastReaction =
@@ -108,7 +108,7 @@ void onAction(NotifyNotification *notif, const char *actionRaw, void *user_data)
     notify_notification_close(notif, nullptr);
 }
 
-void onActionClosed(NotifyNotification *notif, void * /*user_data*/)
+void onActionClosed(NotifyNotification *notif, void * /*userData*/)
 {
     g_object_unref(notif);
 }
