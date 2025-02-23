@@ -228,7 +228,7 @@ void Toasts::ensureInitialized()
     this->initialized_ = true;
 
     auto *instance = WinToast::instance();
-    instance->setAppName(L"Chatterino2");
+    instance->setAppName(L"Chatterino");
     instance->setAppUserModelId(
         WinToast::configureAUMI(L"", L"Chatterino 2", L"",
                                 Version::instance().version().toStdWString()));
