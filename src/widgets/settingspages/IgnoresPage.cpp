@@ -32,7 +32,9 @@ IgnoresPage::IgnoresPage()
 {
     LayoutCreator<IgnoresPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
+
     auto tabs = layout.emplace<QTabWidget>();
+    this->tabWidget_ = &*tabs;
 
     addPhrasesTab(tabs.appendTab(new QVBoxLayout, "Messages"));
     addUsersTab(*this, tabs.appendTab(new QVBoxLayout, "Users"),
@@ -40,7 +42,7 @@ IgnoresPage::IgnoresPage()
     this->onShow();
 }
 
-void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
+void IgnoresPage::addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
 {
     layout.emplace<QLabel>("Ignore messages based certain patterns.");
     EditableModelView *view =
@@ -49,6 +51,7 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
                 (new IgnoreModel(nullptr))
                     ->initialized(&getSettings()->ignoredMessages))
             .getElement();
+    this->view_ = view;
     view->setTitles(
         {"Pattern", "Regex", "Case-sensitive", "Block", "Replacement"});
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -62,7 +65,7 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
         view->getTableView()->setColumnWidth(0, 200);
     });
 
-    // We can safely ignore this signal connection since we own the view
+    // We can safely ignore this signal connection since we own theview
     std::ignore = view->addButtonPressed.connect([] {
         getSettings()->ignoredMessages.append(
             IgnorePhrase{"my pattern", false, false,
@@ -137,6 +140,16 @@ void IgnoresPage::onShow()
     }
     users.sort(Qt::CaseInsensitive);
     this->userListModel_.setStringList(users);
+}
+
+bool IgnoresPage::filterElements(const QString &query)
+{
+    std::array fields{0, 4};
+
+    bool matchMessages = this->view_->filterSearchResults(query, fields);
+    this->tabWidget_->setTabVisible(0, matchMessages);
+
+    return matchMessages;
 }
 
 }  // namespace chatterino
