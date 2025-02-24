@@ -54,6 +54,7 @@ HighlightingPage::HighlightingPage()
 
         // TABS
         auto tabs = layout.emplace<QTabWidget>();
+        this->tabWidget_ = &*tabs;
         {
             // HIGHLIGHTS
             auto highlights = tabs.appendTab(new QVBoxLayout, "Messages");
@@ -64,13 +65,14 @@ HighlightingPage::HighlightingPage()
                     "Message highlights are prioritized over badge highlights "
                     "and user highlights.");
 
-                auto *view =
+                EditableModelView *view =
                     highlights
                         .emplace<EditableModelView>(
                             (new HighlightModel(nullptr))
                                 ->initialized(
                                     &getSettings()->highlightedMessages))
                         .getElement();
+                this->viewMessages_ = view;
                 view->addRegexHelpLink();
                 view->setTitles({"Pattern", "Show in\nMentions",
                                  "Flash\ntaskbar", "Enable\nregex",
@@ -118,6 +120,7 @@ HighlightingPage::HighlightingPage()
                             (new UserHighlightModel(nullptr))
                                 ->initialized(&getSettings()->highlightedUsers))
                         .getElement();
+                this->viewUsers_ = view;
 
                 view->addRegexHelpLink();
                 view->getTableView()->horizontalHeader()->hideSection(
@@ -167,12 +170,14 @@ HighlightingPage::HighlightingPage()
                     "user badges.\n"
                     "Badge highlights are prioritzed under user and message "
                     "highlights.");
-                auto *view = badgeHighlights
-                                 .emplace<EditableModelView>(
-                                     (new BadgeHighlightModel(nullptr))
-                                         ->initialized(
-                                             &getSettings()->highlightedBadges))
-                                 .getElement();
+                EditableModelView *view =
+                    badgeHighlights
+                        .emplace<EditableModelView>(
+                            (new BadgeHighlightModel(nullptr))
+                                ->initialized(
+                                    &getSettings()->highlightedBadges))
+                        .getElement();
+                this->viewBadges_ = view;
                 view->setTitles({"Name", "Show In\nMentions", "Flash\ntaskbar",
                                  "Play\nsound", "Custom\nsound", "Color"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -230,6 +235,7 @@ HighlightingPage::HighlightingPage()
                             (new HighlightBlacklistModel(nullptr))
                                 ->initialized(&getSettings()->blacklistedUsers))
                         .getElement();
+                this->viewBlacklistedUsers_ = view;
 
                 view->addRegexHelpLink();
                 view->setTitles({"Username", "Enable\nregex"});
@@ -390,6 +396,27 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
         }
         break;
     }
+}
+
+bool HighlightingPage::filterElements(const QString &query)
+{
+    std::array fields{0};
+
+    bool matchMessages =
+        this->viewMessages_->filterSearchResults(query, fields);
+    this->tabWidget_->setTabVisible(0, matchMessages);
+
+    bool matchUsers = this->viewUsers_->filterSearchResults(query, fields);
+    this->tabWidget_->setTabVisible(1, matchUsers);
+
+    bool matchBadges = this->viewBadges_->filterSearchResults(query, fields);
+    this->tabWidget_->setTabVisible(2, matchBadges);
+
+    bool matchBlacklistedUsers =
+        this->viewBlacklistedUsers_->filterSearchResults(query, fields);
+    this->tabWidget_->setTabVisible(3, matchBlacklistedUsers);
+
+    return matchMessages || matchUsers || matchBadges || matchBlacklistedUsers;
 }
 
 }  // namespace chatterino
