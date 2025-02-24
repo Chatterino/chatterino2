@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List
+from typing import List, Optional
 
 import logging
 
@@ -20,6 +20,7 @@ class Struct:
         self.comment_commands = CommentCommands()
         self.inner_root: str = ""
         self.namespace = namespace
+        self.base: Optional[str] = None
 
     @property
     def full_name(self) -> str:
@@ -48,3 +49,8 @@ class Struct:
 
     def apply_comment_commands(self, comment_commands: CommentCommands) -> None:
         self.inner_root = comment_commands.inner_root
+
+    def validate(self) -> None:
+        assert not (self.base and self.members), (
+            f"Unsupported: Struct {self.name} has both a base class as well as additional members"
+        )

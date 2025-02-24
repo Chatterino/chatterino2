@@ -1,6 +1,7 @@
 #include "providers/twitch/eventsub/MessageHandlers.hpp"
 
 #include "Application.hpp"
+#include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
@@ -17,6 +18,21 @@ void handleModerateMessage(
     runInGuiThread([chan, actor{event.moderatorUserLogin.qt()}, time] {
         chan->addOrReplaceClearChat(
             MessageBuilder::makeClearChatMessage(time, actor), time);
+        if (getSettings()->hideModerated)
+        {
+            // XXX: This is expensive. We could use a layout request if the layout
+            //      would store the previous message flags.
+            getApp()->getWindows()->forceLayoutChannelViews();
+        }
+    });
+}
+
+void addModerateMessage(
+    TwitchChannel *channel, MessagePtr message, const QDateTime &time,
+    const lib::payload::channel_moderate::v2::Ban & /*action*/)
+{
+    runInGuiThread([channel, msg{std::move(message)}, time] {
+        channel->addOrReplaceTimeout(msg, time);
         if (getSettings()->hideModerated)
         {
             // XXX: This is expensive. We could use a layout request if the layout
