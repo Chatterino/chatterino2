@@ -29,6 +29,7 @@ AccountsPage::AccountsPage()
             .emplace<EditableModelView>(
                 app->getAccounts()->createModel(nullptr), false)
             .getElement();
+    this->view_ = view;
 
     view->getTableView()->horizontalHeader()->setVisible(false);
     view->getTableView()->horizontalHeader()->setStretchLastSection(true);
@@ -65,6 +66,13 @@ AccountsPage::AccountsPage()
 
     //        getApp()->getAccounts()->Twitch.removeUser(selectedUser);
     //    });
+}
+
+bool AccountsPage::filterElements(const QString &query)
+{
+    std::array fields{0, 1};
+
+    return this->view_->filterSearchResults(query, fields);
 }
 
 }  // namespace chatterino
