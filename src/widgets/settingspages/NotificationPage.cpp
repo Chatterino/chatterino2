@@ -102,6 +102,8 @@ NotificationPage::NotificationPage()
                             getApp()->getNotifications()->createModel(
                                 nullptr, Platform::Twitch))
                         .getElement();
+                this->view_ = view;
+
                 view->setTitles({"Twitch channels"});
                 view->setValidationRegexp(twitchUserNameRegexp());
 
@@ -150,4 +152,12 @@ QComboBox *NotificationPage::createToastReactionComboBox()
 
     return toastReactionOptions;
 }
+
+bool NotificationPage::filterElements(const QString &query)
+{
+    std::array fields{0, 1};
+
+    return this->view_->filterSearchResults(query, fields);
+}
+
 }  // namespace chatterino
