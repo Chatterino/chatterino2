@@ -33,7 +33,7 @@ constexpr QStringView EMOTE_LINK_FORMAT = u"https://betterttv.com/emotes/%1";
 ///
 /// %2 being the emote size (e.g. 3x)
 constexpr QStringView EMOTE_CDN_FORMAT =
-    u"https://cdn.betterttv.net/emote/%1/%2";
+    u"https://cdn.betterttv.net/emote/%1/%2.webp";
 
 // BTTV doesn't provide any data on the size, so we assume an emote is 28x28
 constexpr QSize EMOTE_BASE_SIZE(28, 28);

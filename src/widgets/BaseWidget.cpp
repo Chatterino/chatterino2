@@ -20,6 +20,12 @@ BaseWidget::BaseWidget(QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
     , theme(getApp()->getThemes())
 {
+    auto *baseWidget = dynamic_cast<BaseWidget *>(this->window());
+    if (baseWidget && baseWidget != this)
+    {
+        this->scale_ = baseWidget->scale_;
+    }
+
     this->signalHolder_.managedConnect(this->theme->updated, [this]() {
         this->themeChangedEvent();
 

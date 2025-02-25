@@ -89,7 +89,7 @@ public:
 
     static bool supportsCustomWindowFrame();
 
-signals:
+Q_SIGNALS:
     void topMostChanged(bool topMost);
 
 protected:

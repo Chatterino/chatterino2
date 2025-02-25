@@ -51,7 +51,7 @@ public:
 
     void setMenu(std::unique_ptr<QMenu> menu);
 
-signals:
+Q_SIGNALS:
     void leftClicked();
     void clicked(Qt::MouseButton button);
     void leftMousePress();

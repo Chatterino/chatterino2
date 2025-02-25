@@ -5,7 +5,7 @@
 #include "util/ExponentialBackoff.hpp"
 #include "util/OnceFlag.hpp"
 
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
 #include <boost/asio/ssl/context.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <QJsonObject>
@@ -130,24 +130,8 @@ public:
     } moderation;
 
     struct {
-        // Parsing should be done in PubSubManager as well,
-        // but for now we just send the raw data
-        Signal<const PubSubWhisperMessage &> received;
-        Signal<const PubSubWhisperMessage &> sent;
-    } whisper;
-
-    struct {
         Signal<const QJsonObject &> redeemed;
     } pointReward;
-
-    /**
-     * Listen to incoming whispers for the currently logged in user.
-     * This topic is relevant for everyone.
-     *
-     * PubSub topic: whispers.{currentUserID}
-     */
-    bool listenToWhispers();
-    void unlistenWhispers();
 
     /**
      * Listen to moderation actions in the given channel.
@@ -263,7 +247,9 @@ private:
 
     void runThread();
 
-    std::shared_ptr<boost::asio::io_service::work> work{nullptr};
+    std::shared_ptr<boost::asio::executor_work_guard<
+        boost::asio::io_context::executor_type>>
+        work{nullptr};
 
     const QString host_;
     const PubSubClientOptions clientOptions_;

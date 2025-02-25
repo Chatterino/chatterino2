@@ -250,6 +250,12 @@ public:
 
     QJsonObject toJson() const override;
 
+    const MessageColor &color() const noexcept;
+    FontStyle fontStyle() const noexcept;
+
+    void appendText(QStringView text);
+    void appendText(const QString &text);
+
 protected:
     QStringList words_;
 
@@ -334,8 +340,15 @@ private:
 class MentionElement : public TextElement
 {
 public:
-    MentionElement(const QString &displayName, QString loginName_,
-                   MessageColor fallbackColor_, MessageColor userColor_);
+    explicit MentionElement(const QString &displayName, QString loginName_,
+                            MessageColor fallbackColor_,
+                            MessageColor userColor_);
+    /// Deprioritized ctor allowing us to pass through a potentially invalid userColor_
+    ///
+    /// If the userColor_ is invalid, we fall back to the fallbackColor_
+    template <typename = void>
+    explicit MentionElement(const QString &displayName, QString loginName_,
+                            MessageColor fallbackColor_, QColor userColor_);
     ~MentionElement() override = default;
     MentionElement(const MentionElement &) = delete;
     MentionElement(MentionElement &&) = delete;
