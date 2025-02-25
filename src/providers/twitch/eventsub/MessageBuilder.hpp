@@ -48,4 +48,10 @@ void makeModerateMessage(EventSubMessageBuilder &builder,
                          const lib::payload::channel_moderate::v2::Event &event,
                          const lib::payload::channel_moderate::v2::Ban &action);
 
+/// <MODERATOR> unbanned <USER>[ in <CHANNEL>].
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Unban &action);
+
 }  // namespace chatterino::eventsub
