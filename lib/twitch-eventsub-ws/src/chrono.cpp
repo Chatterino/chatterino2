@@ -20,7 +20,7 @@ boost::json::result_for<std::chrono::system_clock::time_point,
 
     std::chrono::system_clock::time_point tp;
     std::istringstream in{*raw};
-    in >> date::parse("%FT%TZ", tp);
+    in >> date::parse("%FT%H:%M:%12SZ", tp);
 
     return tp;
 }

@@ -18,39 +18,40 @@ public:
     virtual ~Listener() = default;
 
     virtual void onSessionWelcome(
-        messages::Metadata metadata,
-        payload::session_welcome::Payload payload) = 0;
+        const messages::Metadata &metadata,
+        const payload::session_welcome::Payload &payload) = 0;
 
-    virtual void onNotification(messages::Metadata metadata,
+    virtual void onNotification(const messages::Metadata &metadata,
                                 const boost::json::value &jv) = 0;
 
     // Subscription types
-    virtual void onChannelBan(messages::Metadata metadata,
-                              payload::channel_ban::v1::Payload payload) = 0;
+    virtual void onChannelBan(
+        const messages::Metadata &metadata,
+        const payload::channel_ban::v1::Payload &payload) = 0;
 
     virtual void onStreamOnline(
-        messages::Metadata metadata,
-        payload::stream_online::v1::Payload payload) = 0;
+        const messages::Metadata &metadata,
+        const payload::stream_online::v1::Payload &payload) = 0;
 
     virtual void onStreamOffline(
-        messages::Metadata metadata,
-        payload::stream_offline::v1::Payload payload) = 0;
+        const messages::Metadata &metadata,
+        const payload::stream_offline::v1::Payload &payload) = 0;
 
     virtual void onChannelChatNotification(
-        messages::Metadata metadata,
-        payload::channel_chat_notification::v1::Payload payload) = 0;
+        const messages::Metadata &metadata,
+        const payload::channel_chat_notification::v1::Payload &payload) = 0;
 
     virtual void onChannelUpdate(
-        messages::Metadata metadata,
-        payload::channel_update::v1::Payload payload) = 0;
+        const messages::Metadata &metadata,
+        const payload::channel_update::v1::Payload &payload) = 0;
 
     virtual void onChannelChatMessage(
-        messages::Metadata metadata,
-        payload::channel_chat_message::v1::Payload payload) = 0;
+        const messages::Metadata &metadata,
+        const payload::channel_chat_message::v1::Payload &payload) = 0;
 
     virtual void onChannelModerate(
-        messages::Metadata metadata,
-        payload::channel_moderate::v2::Payload payload) = 0;
+        const messages::Metadata &metadata,
+        const payload::channel_moderate::v2::Payload &payload) = 0;
 
     // Add your new subscription types above this line
 };

@@ -44,6 +44,7 @@
 #include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
 #include "util/QStringHash.hpp"
+#include "util/VectorMessageSink.hpp"
 #include "widgets/Window.hpp"
 
 #include <IrcConnection>
@@ -477,9 +478,24 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
             [&](const QueuedRedemption &msg) {
                 if (reward.id == msg.rewardID)
                 {
+                    VectorMessageSink sink(
+                        MessageSinkTrait::AddMentionsToGlobalChannel);
                     IrcMessageHandler::instance().addMessage(
-                        msg.message.get(), *this, this, msg.originalContent,
+                        msg.message.get(), sink, this, msg.originalContent,
                         *server, false, false);
+                    if (sink.messages().empty())
+                    {
+                        return true;
+                    }
+                    MessagePtr next = sink.messages().back();
+                    auto prev = this->findMessageByID(next->id);
+                    if (!prev)
+                    {
+                        // message gone
+                        this->addMessage(next, MessageContext::Repost);
+                        return true;
+                    }
+                    this->replaceMessage(prev, next);
                     return true;
                 }
                 return false;
@@ -1895,6 +1911,71 @@ void TwitchChannel::createClip()
         [this] {
             this->clipCreationTimer_.restart();
             this->isClipCreationInProgress = false;
+        });
+}
+
+void TwitchChannel::deleteMessagesAs(const QString &messageID,
+                                     TwitchAccount *moderator)
+{
+    getHelix()->deleteChatMessages(
+        this->roomId(), moderator->getUserId(), messageID,
+        []() {
+            // Success handling, we do nothing: IRC/pubsub will dispatch the correct
+            // events to update state for us.
+        },
+        [lifetime{this->weak_from_this()}, messageID](auto error,
+                                                      const auto &message) {
+            auto self =
+                std::dynamic_pointer_cast<TwitchChannel>(lifetime.lock());
+            if (!self)
+            {
+                return;
+            }
+
+            QString errorMessage = QString("Failed to delete chat messages - ");
+
+            switch (error)
+            {
+                case HelixDeleteChatMessagesError::UserMissingScope: {
+                    errorMessage +=
+                        "Missing required scope. Re-login with your "
+                        "account and try again.";
+                }
+                break;
+
+                case HelixDeleteChatMessagesError::UserNotAuthorized: {
+                    errorMessage +=
+                        "you don't have permission to perform that action.";
+                }
+                break;
+
+                case HelixDeleteChatMessagesError::MessageUnavailable: {
+                    // Override default message prefix to match with IRC message format
+                    errorMessage =
+                        QString("The message %1 does not exist, was deleted, "
+                                "or is too old to be deleted.")
+                            .arg(messageID);
+                }
+                break;
+
+                case HelixDeleteChatMessagesError::UserNotAuthenticated: {
+                    errorMessage += "you need to re-authenticate.";
+                }
+                break;
+
+                case HelixDeleteChatMessagesError::Forwarded: {
+                    errorMessage += message;
+                }
+                break;
+
+                case HelixDeleteChatMessagesError::Unknown:
+                default: {
+                    errorMessage += "An unknown error has occurred.";
+                }
+                break;
+            }
+
+            self->addSystemMessage(errorMessage);
         });
 }
 

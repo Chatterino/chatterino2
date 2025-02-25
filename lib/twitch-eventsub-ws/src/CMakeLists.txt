@@ -1,3 +1,22 @@
+generate_json_impls(
+    OUTPUT_SOURCES eventsub_generated_sources
+    BASE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/.."
+    FORCE ${FORCE_JSON_GENERATION}
+    SKIP ${SKIP_JSON_GENERATION}
+    HEADERS
+        include/twitch-eventsub-ws/messages/metadata.hpp
+
+        include/twitch-eventsub-ws/payloads/channel-ban-v1.hpp
+        include/twitch-eventsub-ws/payloads/channel-chat-message-v1.hpp
+        include/twitch-eventsub-ws/payloads/channel-chat-notification-v1.hpp
+        include/twitch-eventsub-ws/payloads/channel-moderate-v2.hpp
+        include/twitch-eventsub-ws/payloads/channel-update-v1.hpp
+        include/twitch-eventsub-ws/payloads/session-welcome.hpp
+        include/twitch-eventsub-ws/payloads/stream-offline-v1.hpp
+        include/twitch-eventsub-ws/payloads/stream-online-v1.hpp
+        include/twitch-eventsub-ws/payloads/subscription.hpp
+)
+
 set(SOURCE_FILES
     session.cpp
 
@@ -5,21 +24,14 @@ set(SOURCE_FILES
 
     json.cpp
     string.cpp
+    errors.cpp
 
-    payloads/subscription.cpp
-    payloads/session-welcome.cpp
-
-    # Subscription types
+    # Subscription types (only additional functions)
     payloads/channel-ban-v1.cpp
-    payloads/stream-online-v1.cpp
-    payloads/stream-offline-v1.cpp
-    payloads/channel-update-v1.cpp
-    payloads/channel-chat-notification-v1.cpp
-    payloads/channel-chat-message-v1.cpp
     payloads/channel-moderate-v2.cpp
     # Add your new subscription type source file above this line
 
-    messages/metadata.cpp
+    ${eventsub_generated_sources}
     )
 
 add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES})
@@ -43,13 +55,6 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
     $<$<BOOL:${MSVC}>:BOOST_CONTAINER_NO_LIB>
 )
 
-# Hack to get the include directories from Python
-get_target_property(_inc_dirs ${PROJECT_NAME} INCLUDE_DIRECTORIES)
-list(APPEND _inc_dirs ${Boost_INCLUDE_DIRS})
-list(APPEND _inc_dirs ${OPENSSL_INCLUDE_DIR})
-list(JOIN _inc_dirs ";" _inc_dir)
-add_custom_target(_ast_includes echo "@@INCLUDE_DIRS=${_inc_dir}")
-
 if (MSVC)
     # Add bigobj
     target_compile_options(${PROJECT_NAME} PRIVATE /EHsc /bigobj)
@@ -66,6 +71,11 @@ if (MSVC)
 
     # Use the function inlining level from 'Release' mode (2).
     string(REPLACE "/Ob1" "/Ob2" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+
+    # Add nativs to PDB
+    set(_natvis_path "${CMAKE_CURRENT_LIST_DIR}/../docs/twitch-eventsub-ws.natvis")
+    cmake_path(ABSOLUTE_PATH _natvis_path NORMALIZE)
+    target_link_options(${PROJECT_NAME} INTERFACE "/NATVIS:${_natvis_path}")
 
     # Configure warnings
 

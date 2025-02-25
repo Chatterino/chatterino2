@@ -434,6 +434,8 @@ set(SOURCE_FILES
         providers/twitch/eventsub/Controller.hpp
         providers/twitch/eventsub/MessageBuilder.cpp
         providers/twitch/eventsub/MessageBuilder.hpp
+        providers/twitch/eventsub/MessageHandlers.cpp
+        providers/twitch/eventsub/MessageHandlers.hpp
         providers/twitch/eventsub/SubscriptionHandle.cpp
         providers/twitch/eventsub/SubscriptionHandle.hpp
         providers/twitch/eventsub/SubscriptionRequest.cpp
@@ -781,14 +783,34 @@ endif()
 
 if (CHATTERINO_GENERATE_COVERAGE)
     include(CodeCoverage)
-    append_coverage_compiler_flags_to_target(${LIBRARY_PROJECT})
+    if(NOT CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
+        append_coverage_compiler_flags_to_target(${LIBRARY_PROJECT})
+    endif()
     message(STATUS "project source dir: ${PROJECT_SOURCE_DIR}/src")
     setup_target_for_coverage_gcovr_html(
         NAME coverage
         EXECUTABLE ctest
         EXCLUDE "/usr/include/*"
-        EXCLUDE "build-*/*"
-        EXCLUDE "lib/*"
+        EXCLUDE "build*/*"
+        # EXCLUDE "lib/*"
+        EXCLUDE "lib/certify/*"
+        EXCLUDE "lib/expected-lite/*"
+        EXCLUDE "lib/googletest/*"
+        EXCLUDE "lib/libcommuni/*"
+        EXCLUDE "lib/lrucache/*"
+        EXCLUDE "lib/lua/*"
+        EXCLUDE "lib/magic_enum/*"
+        EXCLUDE "lib/miniaudio/*"
+        EXCLUDE "lib/qtkeychain/*"
+        EXCLUDE "lib/rapidjson/*"
+        EXCLUDE "lib/semver/*"
+        EXCLUDE "lib/serialize/*"
+        EXCLUDE "lib/settings/*"
+        EXCLUDE "lib/signals/*"
+        EXCLUDE "lib/sol2/*"
+        EXCLUDE "lib/websocketpp/*"
+        EXCLUDE "lib/WinToast/*"
+
         EXCLUDE "*/ui_*.h"
         EXCLUDE "*/moc_*.cpp"
         )
@@ -1061,6 +1083,13 @@ if (UNIX)
         # libdl is a requirement for miniaudio on Linux
         message(STATUS "Linking with CMake DL libs: '${CMAKE_DL_LIBS}'")
         target_link_libraries(${LIBRARY_PROJECT} PUBLIC ${CMAKE_DL_LIBS})
+    endif ()
+
+    if (NOT APPLE AND BUILD_WITH_LIBNOTIFY)
+        find_package(PkgConfig REQUIRED)
+        pkg_check_modules(LIBNOTIFY REQUIRED IMPORTED_TARGET libnotify)
+        target_link_libraries(${LIBRARY_PROJECT} PRIVATE PkgConfig::LIBNOTIFY)
+        target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_WITH_LIBNOTIFY)
     endif ()
 endif ()
 

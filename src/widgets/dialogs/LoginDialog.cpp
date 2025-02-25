@@ -10,6 +10,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
 #include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
@@ -80,6 +81,7 @@ bool logInWithImplicitGrantCredentials(QWidget *parent, const QString &userID,
 
     getApp()->getAccounts()->twitch.reloadUsers();
     getApp()->getAccounts()->twitch.currentUsername = username;
+    getSettings()->requestSave();
     return true;
 }
 
@@ -408,6 +410,7 @@ void DeviceLoginJob::ping()
                     getApp()->getAccounts()->twitch.reloadUsers();
                     getApp()->getAccounts()->twitch.currentUsername =
                         user.login;
+                    getSettings()->requestSave();
 
                     if (self)
                     {

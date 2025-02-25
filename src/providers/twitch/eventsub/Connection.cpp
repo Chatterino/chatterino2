@@ -6,9 +6,12 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/eventsub/MessageBuilder.hpp"
+#include "providers/twitch/eventsub/MessageHandlers.hpp"
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "singletons/Settings.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/PostToThread.hpp"
 
 #include <boost/json.hpp>
@@ -20,16 +23,36 @@
 
 namespace {
 
+using namespace chatterino;
+using namespace chatterino::eventsub;
+
+namespace channel_moderate = lib::payload::channel_moderate::v2;
+
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 const auto &LOG = chatterinoTwitchEventSub;
+
+template <typename Action>
+concept CanMakeModMessage = requires(
+    EventSubMessageBuilder &builder, const channel_moderate::Event &event,
+    const std::remove_cvref_t<Action> &action) {
+    makeModerateMessage(builder, event, action);
+};
+
+template <typename Action>
+concept CanHandleModMessage =
+    requires(TwitchChannel *channel, const QDateTime &time,
+             const channel_moderate::Event &event,
+             const std::remove_cvref_t<Action> &action) {
+        handleModerateMessage(channel, time, event, action);
+    };
 
 }  // namespace
 
 namespace chatterino::eventsub {
 
 void Connection::onSessionWelcome(
-    lib::messages::Metadata metadata,
-    lib::payload::session_welcome::Payload payload)
+    const lib::messages::Metadata &metadata,
+    const lib::payload::session_welcome::Payload &payload)
 {
     (void)metadata;
     qCDebug(LOG) << "On session welcome:" << payload.id.c_str();
@@ -37,7 +60,7 @@ void Connection::onSessionWelcome(
     this->sessionID = QString::fromStdString(payload.id);
 }
 
-void Connection::onNotification(lib::messages::Metadata metadata,
+void Connection::onNotification(const lib::messages::Metadata &metadata,
                                 const boost::json::value &jv)
 {
     (void)metadata;
@@ -45,8 +68,9 @@ void Connection::onNotification(lib::messages::Metadata metadata,
     qCDebug(LOG) << "on notification: " << jsonString.c_str();
 }
 
-void Connection::onChannelBan(lib::messages::Metadata metadata,
-                              lib::payload::channel_ban::v1::Payload payload)
+void Connection::onChannelBan(
+    const lib::messages::Metadata &metadata,
+    const lib::payload::channel_ban::v1::Payload &payload)
 {
     (void)metadata;
 
@@ -54,7 +78,10 @@ void Connection::onChannelBan(lib::messages::Metadata metadata,
 
     BanAction action{};
 
-    action.timestamp = std::chrono::steady_clock::now();
+    if (!getApp()->isTest())
+    {
+        action.timestamp = std::chrono::steady_clock::now();
+    }
     action.roomID = roomID;
     action.source = ActionUser{
         .id = QString::fromStdString(payload.event.moderatorUserID),
@@ -84,6 +111,10 @@ void Connection::onChannelBan(lib::messages::Metadata metadata,
 
     runInGuiThread([action{std::move(action)}, chan{std::move(chan)}] {
         auto time = QDateTime::currentDateTime();
+        if (getApp()->isTest())
+        {
+            time = QDateTime::fromSecsSinceEpoch(0).toUTC();
+        }
         MessageBuilder msg(action, time);
         msg->flags.set(MessageFlag::PubSub);
         chan->addOrReplaceTimeout(msg.release(), QDateTime::currentDateTime());
@@ -91,8 +122,8 @@ void Connection::onChannelBan(lib::messages::Metadata metadata,
 }
 
 void Connection::onStreamOnline(
-    lib::messages::Metadata metadata,
-    lib::payload::stream_online::v1::Payload payload)
+    const lib::messages::Metadata &metadata,
+    const lib::payload::stream_online::v1::Payload &payload)
 {
     (void)metadata;
     qCDebug(LOG) << "On stream online event for channel"
@@ -100,8 +131,8 @@ void Connection::onStreamOnline(
 }
 
 void Connection::onStreamOffline(
-    lib::messages::Metadata metadata,
-    lib::payload::stream_offline::v1::Payload payload)
+    const lib::messages::Metadata &metadata,
+    const lib::payload::stream_offline::v1::Payload &payload)
 {
     (void)metadata;
     qCDebug(LOG) << "On stream offline event for channel"
@@ -109,8 +140,8 @@ void Connection::onStreamOffline(
 }
 
 void Connection::onChannelChatNotification(
-    lib::messages::Metadata metadata,
-    lib::payload::channel_chat_notification::v1::Payload payload)
+    const lib::messages::Metadata &metadata,
+    const lib::payload::channel_chat_notification::v1::Payload &payload)
 {
     (void)metadata;
     qCDebug(LOG) << "On channel chat notification for"
@@ -118,8 +149,8 @@ void Connection::onChannelChatNotification(
 }
 
 void Connection::onChannelUpdate(
-    lib::messages::Metadata metadata,
-    lib::payload::channel_update::v1::Payload payload)
+    const lib::messages::Metadata &metadata,
+    const lib::payload::channel_update::v1::Payload &payload)
 {
     (void)metadata;
     qCDebug(LOG) << "On channel update for"
@@ -127,8 +158,8 @@ void Connection::onChannelUpdate(
 }
 
 void Connection::onChannelChatMessage(
-    lib::messages::Metadata metadata,
-    lib::payload::channel_chat_message::v1::Payload payload)
+    const lib::messages::Metadata &metadata,
+    const lib::payload::channel_chat_message::v1::Payload &payload)
 {
     (void)metadata;
 
@@ -137,12 +168,10 @@ void Connection::onChannelChatMessage(
 }
 
 void Connection::onChannelModerate(
-    lib::messages::Metadata metadata,
-    lib::payload::channel_moderate::v2::Payload payload)
+    const lib::messages::Metadata &metadata,
+    const lib::payload::channel_moderate::v2::Payload &payload)
 {
     (void)metadata;
-
-    using lib::payload::channel_moderate::v2::Action;
 
     auto channelPtr = getApp()->getTwitch()->getChannelOrEmpty(
         payload.event.broadcasterUserLogin.qt());
@@ -163,76 +192,32 @@ void Connection::onChannelModerate(
         return;
     }
 
-    const auto now = QDateTime::currentDateTime();
-
-    switch (payload.event.action)
+    auto now = QDateTime::currentDateTime();
+    if (getApp()->isTest())
     {
-        case Action::Vip: {
-            const auto &oAction = payload.event.vip;
-
-            if (!oAction.has_value())
-            {
-                qCWarning(LOG) << "VIP action type had no VIP action body";
-                return;
-            }
-            auto msg =
-                makeVipMessage(channel, now, payload.event, oAction.value());
-            runInGuiThread([channel, msg] {
-                channel->addMessage(msg, MessageContext::Original);
-            });
-        }
-        break;
-
-        case Action::Unvip: {
-            const auto &oAction = payload.event.unvip;
-
-            if (!oAction.has_value())
-            {
-                qCWarning(LOG) << "UnVIP action type had no UnVIP action body";
-                return;
-            }
-            auto msg =
-                makeUnvipMessage(channel, now, payload.event, oAction.value());
-            runInGuiThread([channel, msg] {
-                channel->addMessage(msg, MessageContext::Original);
-            });
-        }
-        break;
-
-        case Action::Ban:
-        case Action::Timeout:
-        case Action::Unban:
-        case Action::Untimeout:
-        case Action::Clear:
-        case Action::Emoteonly:
-        case Action::Emoteonlyoff:
-        case Action::Followers:
-        case Action::Followersoff:
-        case Action::Uniquechat:
-        case Action::Uniquechatoff:
-        case Action::Slow:
-        case Action::Slowoff:
-        case Action::Subscribers:
-        case Action::Subscribersoff:
-        case Action::Unraid:
-        case Action::DeleteMessage:
-        case Action::Raid:
-        case Action::AddBlockedTerm:
-        case Action::AddPermittedTerm:
-        case Action::RemoveBlockedTerm:
-        case Action::RemovePermittedTerm:
-        case Action::Mod:
-        case Action::Unmod:
-        case Action::ApproveUnbanRequest:
-        case Action::DenyUnbanRequest:
-        case Action::Warn:
-        case Action::SharedChatBan:
-        case Action::SharedChatTimeout:
-        case Action::SharedChatUnban:
-        case Action::SharedChatUntimeout:
-        case Action::SharedChatDelete:
-            break;
+        now = QDateTime::fromSecsSinceEpoch(0).toUTC();
     }
+
+    std::visit(
+        [&](auto &&action) {
+            using Action = std::remove_cvref_t<decltype(action)>;
+            if constexpr (CanMakeModMessage<Action>)
+            {
+                EventSubMessageBuilder builder(channel, now);
+                builder->loginName = payload.event.moderatorUserLogin.qt();
+                makeModerateMessage(builder, payload.event, action);
+                auto msg = builder.release();
+                runInGuiThread([channel, msg] {
+                    channel->addMessage(msg, MessageContext::Original);
+                });
+            }
+
+            if constexpr (CanHandleModMessage<Action>)
+            {
+                handleModerateMessage(channel, now, payload.event, action);
+            }
+        },
+        payload.event.action);
 }
 
 QString Connection::getSessionID() const

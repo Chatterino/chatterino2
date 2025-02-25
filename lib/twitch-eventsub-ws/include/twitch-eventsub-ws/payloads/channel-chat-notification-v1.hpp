@@ -10,21 +10,18 @@
 
 namespace chatterino::eventsub::lib::payload::channel_chat_notification::v1 {
 
-/// json_transform=snake_case
 struct Badge {
     std::string setID;
     std::string id;
     std::string info;
 };
 
-/// json_transform=snake_case
 struct Cheermote {
     std::string prefix;
     int bits;
     int tier;
 };
 
-/// json_transform=snake_case
 struct Emote {
     std::string id;
     std::string emoteSetID;
@@ -32,14 +29,12 @@ struct Emote {
     std::vector<std::string> format;
 };
 
-/// json_transform=snake_case
 struct Mention {
     std::string userID;
     std::string userName;
     std::string userLogin;
 };
 
-/// json_transform=snake_case
 struct MessageFragment {
     std::string type;
     std::string text;
@@ -48,29 +43,32 @@ struct MessageFragment {
     std::optional<Mention> mention;
 };
 
-/// json_transform=snake_case
 struct Subcription {
+    static constexpr std::string_view TAG = "sub";
+
     std::string subTier;
     bool isPrime;
     int durationMonths;
 };
 
-/// json_transform=snake_case
 struct Resubscription {
+    static constexpr std::string_view TAG = "resub";
+
     int cumulativeMonths;
     int durationMonths;
     std::optional<int> streakMonths;
     std::string subTier;
-    bool isPrime;
+    std::optional<bool> isPrime;
     bool isGift;
-    bool gifterIsAnonymous;
+    std::optional<bool> gifterIsAnonymous;
     std::optional<std::string> gifterUserID;
     std::optional<std::string> gifterUserName;
     std::optional<std::string> gifterUserLogin;
 };
 
-/// json_transform=snake_case
 struct GiftSubscription {
+    static constexpr std::string_view TAG = "sub_gift";
+
     int durationMonths;
     std::optional<int> cumulativeTotal;
     std::optional<int> streakMonths;
@@ -81,29 +79,33 @@ struct GiftSubscription {
     std::optional<std::string> communityGiftID;
 };
 
-/// json_transform=snake_case
 struct CommunityGiftSubscription {
+    static constexpr std::string_view TAG = "community_sub_gift";
+
     std::string id;
     int total;
     std::string subTier;
     std::optional<int> cumulativeTotal;
 };
 
-/// json_transform=snake_case
 struct GiftPaidUpgrade {
+    static constexpr std::string_view TAG = "gift_paid_upgrade";
+
     bool gifterIsAnonymous;
     std::optional<std::string> gifterUserID;
     std::optional<std::string> gifterUserName;
     std::optional<std::string> gifterUserLogin;
 };
 
-/// json_transform=snake_case
 struct PrimePaidUpgrade {
+    static constexpr std::string_view TAG = "prime_paid_upgrade";
+
     std::string subTier;
 };
 
-/// json_transform=snake_case
 struct Raid {
+    static constexpr std::string_view TAG = "raid";
+
     std::string userID;
     std::string userName;
     std::string userLogin;
@@ -111,157 +113,88 @@ struct Raid {
     std::string profileImageURL;
 };
 
-/// json_transform=snake_case
 struct Unraid {
+    static constexpr std::string_view TAG = "unraid";
 };
 
-/// json_transform=snake_case
 struct PayItForward {
+    static constexpr std::string_view TAG = "pay_it_forward";
+
     bool gifterIsAnonymous;
     std::optional<std::string> gifterUserID;
     std::optional<std::string> gifterUserName;
     std::optional<std::string> gifterUserLogin;
 };
 
-/// json_transform=snake_case
 struct Announcement {
+    static constexpr std::string_view TAG = "announcement";
+
     std::string color;
 };
 
-/// json_transform=snake_case
 struct CharityDonationAmount {
+    static constexpr std::string_view TAG = "charity_donation_amount";
+
     int value;
     int decimalPlaces;
     std::string currency;
 };
 
-/// json_transform=snake_case
 struct CharityDonation {
+    static constexpr std::string_view TAG = "charity_donation";
+
     std::string charityName;
     CharityDonationAmount amount;
 };
 
-/// json_transform=snake_case
 struct BitsBadgeTier {
+    static constexpr std::string_view TAG = "bits_badge_tier";
+
     int tier;
 };
 
-/// json_transform=snake_case
 struct Message {
     std::string text;
     std::vector<MessageFragment> fragments;
 };
 
-/// json_transform=snake_case
 struct Event {
     std::string broadcasterUserID;
     std::string broadcasterUserLogin;
     std::string broadcasterUserName;
-    std::string chatterUserID;
-    std::string chatterUserLogin;
-    std::string chatterUserName;
+    std::optional<std::string> chatterUserID;
+    std::optional<std::string> chatterUserLogin;
+    std::optional<std::string> chatterUserName;
     bool chatterIsAnonymous;
     std::string color;
     std::vector<Badge> badges;
     std::string systemMessage;
     std::string messageID;
     Message message;
-    std::string noticeType;
-    std::optional<Subcription> sub;
-    std::optional<Resubscription> resub;
-    std::optional<GiftSubscription> subGift;
-    std::optional<CommunityGiftSubscription> communitySubGift;
-    std::optional<GiftPaidUpgrade> giftPaidUpgrade;
-    std::optional<PrimePaidUpgrade> primePaidUpgrade;
-    std::optional<Raid> raid;
-    std::optional<Unraid> unraid;
-    std::optional<PayItForward> payItForward;
-    std::optional<Announcement> announcement;
-    std::optional<CharityDonation> charityDonation;
-    std::optional<BitsBadgeTier> bitsBadgeTier;
+    /// json_tag=notice_type
+    std::variant<Subcription,                //
+                 Resubscription,             //
+                 GiftSubscription,           //
+                 CommunityGiftSubscription,  //
+                 GiftPaidUpgrade,            //
+                 PrimePaidUpgrade,           //
+                 Raid,                       //
+                 Unraid,                     //
+                 PayItForward,               //
+                 Announcement,               //
+                 CharityDonation,            //
+                 BitsBadgeTier,              //
+                 std::string                 //
+                 >
+        inner;
 };
 
 struct Payload {
-    const subscription::Subscription subscription;
+    subscription::Subscription subscription;
 
-    const Event event;
+    Event event;
 };
 
-// DESERIALIZATION DEFINITION START
-boost::json::result_for<Badge, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Badge>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Cheermote>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Emote>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Mention, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Mention>, const boost::json::value &jvRoot);
-
-boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<MessageFragment>,
-    const boost::json::value &jvRoot);
-
-boost::json::result_for<Subcription, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Subcription>,
-    const boost::json::value &jvRoot);
-
-boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Resubscription>,
-    const boost::json::value &jvRoot);
-
-boost::json::result_for<GiftSubscription, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<GiftSubscription>,
-    const boost::json::value &jvRoot);
-
-boost::json::result_for<CommunityGiftSubscription, boost::json::value>::type
-    tag_invoke(boost::json::try_value_to_tag<CommunityGiftSubscription>,
-               const boost::json::value &jvRoot);
-
-boost::json::result_for<GiftPaidUpgrade, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<GiftPaidUpgrade>,
-    const boost::json::value &jvRoot);
-
-boost::json::result_for<PrimePaidUpgrade, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<PrimePaidUpgrade>,
-    const boost::json::value &jvRoot);
-
-boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Raid>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Unraid, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Unraid>, const boost::json::value &jvRoot);
-
-boost::json::result_for<PayItForward, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<PayItForward>,
-    const boost::json::value &jvRoot);
-
-boost::json::result_for<Announcement, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Announcement>,
-    const boost::json::value &jvRoot);
-
-boost::json::result_for<CharityDonationAmount, boost::json::value>::type
-    tag_invoke(boost::json::try_value_to_tag<CharityDonationAmount>,
-               const boost::json::value &jvRoot);
-
-boost::json::result_for<CharityDonation, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<CharityDonation>,
-    const boost::json::value &jvRoot);
-
-boost::json::result_for<BitsBadgeTier, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<BitsBadgeTier>,
-    const boost::json::value &jvRoot);
-
-boost::json::result_for<Message, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Message>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Event, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Event>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Payload>, const boost::json::value &jvRoot);
-// DESERIALIZATION DEFINITION END
+#include "twitch-eventsub-ws/payloads/channel-chat-notification-v1.inc"
 
 }  // namespace chatterino::eventsub::lib::payload::channel_chat_notification::v1

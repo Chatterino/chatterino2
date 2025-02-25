@@ -6,7 +6,7 @@ import os
 import clang.cindex
 from clang.cindex import CursorKind
 
-from .comment_commands import parse_comment_commands
+from .comment_commands import CommentCommands
 from .member import Member
 from .enum_constant import EnumConstant
 from .struct import Struct
@@ -21,14 +21,14 @@ class Walker:
         self.real_filepath = os.path.realpath(self.filename)
         self.structs: List[Struct] = []
         self.enums: List[Enum] = []
-        self.namespace: List[str] = []
+        self.namespace: tuple[str, ...] = ()
 
     def handle_node(self, node: clang.cindex.Cursor, struct: Optional[Struct], enum: Optional[Enum]) -> bool:
         match node.kind:
             case CursorKind.STRUCT_DECL:
-                new_struct = Struct(node.spelling)
+                new_struct = Struct(node.spelling, self.namespace)
                 if node.raw_comment is not None:
-                    new_struct.comment_commands = parse_comment_commands(node.raw_comment)
+                    new_struct.comment_commands.parse(node.raw_comment)
                     new_struct.apply_comment_commands(new_struct.comment_commands)
                 if struct is not None:
                     new_struct.parent = struct.full_name
@@ -41,9 +41,9 @@ class Walker:
                 return True
 
             case CursorKind.ENUM_DECL:
-                new_enum = Enum(node.spelling)
+                new_enum = Enum(node.spelling, self.namespace)
                 if node.raw_comment is not None:
-                    new_enum.comment_commands = parse_comment_commands(node.raw_comment)
+                    new_enum.comment_commands.parse(node.raw_comment)
                     new_enum.apply_comment_commands(new_enum.comment_commands)
                 if struct is not None:
                     new_enum.parent = struct.full_name
@@ -60,8 +60,7 @@ class Walker:
                     # log.warning(
                     #     f"enum constant decl {node.spelling} - enum comments: {enum.comment_commands} - node comments: {node.raw_comment}"
                     # )
-                    constant = EnumConstant.from_node(node)
-                    constant.apply_comment_commands(enum.comment_commands)
+                    constant = EnumConstant.from_node(node, CommentCommands(enum.comment_commands))
                     enum.constants.append(constant)
 
             case CursorKind.FIELD_DECL:
@@ -69,17 +68,20 @@ class Walker:
                 if type is None:
                     # Skip nodes without a type
                     return False
+                if node.storage_class == clang.cindex.StorageClass.STATIC:
+                    return False
 
                 # log.debug(f"{struct}: {type.spelling} {node.spelling} ({type.kind})")
                 if struct:
-                    member = Member.from_field(node, self.namespace)
-                    member.apply_comment_commands(struct.comment_commands)
+                    member = Member.from_field(node, CommentCommands(struct.comment_commands), self.namespace)
                     struct.members.append(member)
 
             case CursorKind.NAMESPACE:
-                self.namespace.append(node.spelling)
-                # Ignore namespaces
-                pass
+                self.namespace += (node.spelling,)
+                for child in node.get_children():
+                    self.walk(child)
+                self.namespace = self.namespace[:-1]
+                return True
 
             case CursorKind.FUNCTION_DECL:
                 # Ignore function declarations

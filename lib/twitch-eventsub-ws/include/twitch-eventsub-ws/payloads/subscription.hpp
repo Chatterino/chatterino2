@@ -32,35 +32,26 @@ namespace chatterino::eventsub::lib::payload::subscription {
 }
 */
 
-/// json_transform=snake_case
 struct Transport {
-    const std::string method;
-    const std::string sessionID;
+    std::string method;
+    std::string sessionID;
 };
 
-/// json_transform=snake_case
 struct Subscription {
-    const std::string id;
-    const std::string status;
-    const std::string type;
-    const std::string version;
+    std::string id;
+    std::string status;
+    std::string type;
+    std::string version;
 
     // TODO: How do we map condition here? vector of key/value pairs?
 
-    const Transport transport;
+    Transport transport;
 
     // TODO: chronofy?
-    const std::string createdAt;
-    const int cost;
+    std::string createdAt;
+    int cost;
 };
 
-// DESERIALIZATION DEFINITION START
-boost::json::result_for<Transport, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Transport>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Subscription>,
-    const boost::json::value &jvRoot);
-// DESERIALIZATION DEFINITION END
+#include "twitch-eventsub-ws/payloads/subscription.inc"
 
 }  // namespace chatterino::eventsub::lib::payload::subscription
