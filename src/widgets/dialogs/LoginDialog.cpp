@@ -119,7 +119,7 @@ public:
         std::chrono::milliseconds interval;
     };
 
-    DeviceLoginJob(Session session);
+    DeviceLoginJob(DeviceLoginWidget *ui, Session session);
 
 private:
     void ping();
@@ -238,12 +238,15 @@ void DeviceLoginWidget::tryInitSession(const QJsonObject &response)
         assert(false && "There shouldn't be any job at this point");
         this->job_->deleteLater();
     }
-    this->job_ = new DeviceLoginJob({
-        .deviceCode = deviceCode,
-        .scopes = this->scopes_,
-        .expiry = std::chrono::seconds(response["expires_in"_L1].toInt(1800)),
-        .interval = std::chrono::seconds(response["interval"_L1].toInt(5)),
-    });
+    this->job_ = new DeviceLoginJob(
+        this,
+        {
+            .deviceCode = deviceCode,
+            .scopes = this->scopes_,
+            .expiry =
+                std::chrono::seconds(response["expires_in"_L1].toInt(1800)),
+            .interval = std::chrono::seconds(response["interval"_L1].toInt(5)),
+        });
     QObject::connect(this->job_, &QObject::destroyed, this, [this] {
         this->job_ = nullptr;
     });
@@ -338,8 +341,9 @@ void DeviceLoginWidget::displayError(const QString &error)
     }
 }
 
-DeviceLoginJob::DeviceLoginJob(Session session)
-    : session_(std::move(session))
+DeviceLoginJob::DeviceLoginJob(DeviceLoginWidget *ui, Session session)
+    : ui(ui)
+    , session_(std::move(session))
 {
     QObject::connect(&this->expiryTimer_, &QTimer::timeout, this,
                      &QObject::deleteLater);
