@@ -145,9 +145,6 @@ void makeModerateMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Unban &action)
 {
-    // unrelated to test our compilers lol
-    static_assert(
-        std::chrono::utc_clock::time_point{}.time_since_epoch().count() == 0);
     QString text;
     bool isShared = event.isFromSharedChat();
 
