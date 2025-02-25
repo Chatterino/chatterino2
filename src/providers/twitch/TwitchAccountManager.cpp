@@ -156,6 +156,14 @@ const std::vector<QStringView> DEVICE_AUTH_SCOPES{
 
     // https://dev.twitch.tv/docs/api/reference/#get-followed-channels
     u"user:read:follows",  // for determining if the current user follows a streamer
+
+    u"moderator:manage:blocked_terms",  // for channel.moderate eventsub topic
+
+    u"moderator:manage:unban_requests",  // for channel.moderate eventsub topic
+
+    u"moderator:read:moderators",  // for channel.moderate eventsub topic
+
+    u"moderator:read:vips",  // for channel.moderate eventsub topic
 };
 
 TwitchAccountManager::TwitchAccountManager()
