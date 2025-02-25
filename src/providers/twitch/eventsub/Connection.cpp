@@ -39,13 +39,6 @@ concept CanMakeModMessage = requires(
 };
 
 template <typename Action>
-concept CanAddModMessage =
-    requires(TwitchChannel *channel, MessagePtr message, const QDateTime &time,
-             const std::remove_cvref_t<Action> &action) {
-        addModerateMessage(channel, message, time, action);
-    };
-
-template <typename Action>
 concept CanHandleModMessage =
     requires(TwitchChannel *channel, const QDateTime &time,
              const channel_moderate::Event &event,
@@ -170,16 +163,9 @@ void Connection::onChannelModerate(
                 builder->loginName = payload.event.moderatorUserLogin.qt();
                 makeModerateMessage(builder, payload.event, action);
                 auto msg = builder.release();
-                if constexpr (CanAddModMessage<Action>)
-                {
-                    addModerateMessage(channel, msg, now, action);
-                }
-                else
-                {
-                    runInGuiThread([channel, msg] {
-                        channel->addMessage(msg, MessageContext::Original);
-                    });
-                }
+                runInGuiThread([channel, msg] {
+                    channel->addMessage(msg, MessageContext::Original);
+                });
             }
 
             if constexpr (CanHandleModMessage<Action>)
