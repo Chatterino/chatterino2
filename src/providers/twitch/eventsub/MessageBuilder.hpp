@@ -43,4 +43,9 @@ void makeModerateMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Warn &action);
 
+/// <MODERATOR> banned <USER>[ in <CHANNEL>]: <REASON>
+void makeModerateMessage(EventSubMessageBuilder &builder,
+                         const lib::payload::channel_moderate::v2::Event &event,
+                         const lib::payload::channel_moderate::v2::Ban &action);
+
 }  // namespace chatterino::eventsub

@@ -107,4 +107,37 @@ void makeModerateMessage(EventSubMessageBuilder &builder,
     builder.message().searchText = text;
 }
 
+void makeModerateMessage(EventSubMessageBuilder &builder,
+                         const lib::payload::channel_moderate::v2::Event &event,
+                         const lib::payload::channel_moderate::v2::Ban &action)
+{
+    QString text;
+    bool isShared = event.isFromSharedChat();
+
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
+    builder.emplaceSystemTextAndUpdate("banned", text);
+    builder.appendUser(action.userName, action.userLogin, text, isShared);
+
+    if (isShared)
+    {
+        builder.emplaceSystemTextAndUpdate("in", text);
+        builder.appendUser(*event.sourceBroadcasterUserName,
+                           *event.sourceBroadcasterUserLogin, text, false);
+    }
+
+    if (action.reason.view().empty())
+    {
+        builder.emplaceSystemTextAndUpdate(".", text);
+    }
+    else
+    {
+        builder.emplaceSystemTextAndUpdate(":", text);
+        builder.emplaceSystemTextAndUpdate(action.reason.qt(), text);
+    }
+
+    builder->messageText = text;
+    builder->searchText = text;
+    builder->timeoutUser = action.userLogin.qt();
+}
+
 }  // namespace chatterino::eventsub

@@ -161,13 +161,11 @@ struct Unmod {
 
 struct Ban {
     static constexpr std::string_view TAG = "ban";
-    static constexpr std::string_view FIELD = "ban";
 
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
-    // TODO: Verify that we handle null here
-    std::string reason;
+    String userID;
+    String userLogin;
+    String userName;
+    String reason;
 };
 struct SharedChatBan : public Ban {
     static constexpr std::string_view TAG = "shared_chat_ban";
@@ -179,7 +177,6 @@ struct SharedChatBan : public Ban {
 
 struct Unban {
     static constexpr std::string_view TAG = "unban";
-    static constexpr std::string_view FIELD = "unban";
 
     std::string userID;
     std::string userLogin;
@@ -199,7 +196,6 @@ struct SharedChatUnban : public Ban {
 
 struct Timeout {
     static constexpr std::string_view TAG = "timeout";
-    static constexpr std::string_view FIELD = "timeout";
 
     std::string userID;
     std::string userLogin;
@@ -219,7 +215,6 @@ struct SharedChatTimeout : public Ban {
 
 struct Untimeout {
     static constexpr std::string_view TAG = "untimeout";
-    static constexpr std::string_view FIELD = "untimeout";
 
     std::string userID;
     std::string userLogin;
@@ -261,7 +256,6 @@ struct Unraid {
 
 struct Delete {
     static constexpr std::string_view TAG = "delete";
-    static constexpr std::string_view FIELD = "delete";
 
     std::string userID;
     std::string userLogin;
