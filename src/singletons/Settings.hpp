@@ -643,6 +643,8 @@ public:
         false,
     };
 
+    QStringSetting additionalExtensionIDs = {"/nativeMessaging/additionalExtensionIDs", ""};
+
 private:
     ChatterinoSetting<std::vector<HighlightPhrase>> highlightedMessagesSetting =
         {"/highlighting/highlights"};

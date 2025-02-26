@@ -60,6 +60,18 @@ void registerNmHost(const Paths &paths)
         auto obj = getBaseDocument();
         QJsonArray allowedOriginsArr = {
             u"chrome-extension://%1/"_s.arg(EXTENSION_ID)};
+
+        // Parse additional extension IDs from settings
+        QString additionalIDs = getSettings()->additionalExtensionIDs.getValue();
+        if (!additionalIDs.isEmpty())
+        {
+            QStringList idList = additionalIDs.split(';');
+            for (const QString &id : idList)
+            {
+                allowedOriginsArr.append(u"chrome-extension://%1/"_s.arg(id));
+            }
+        }
+
         obj.insert("allowed_origins", allowedOriginsArr);
 
         registerNmManifest(paths, "/native-messaging-manifest-chrome.json",
@@ -72,6 +84,18 @@ void registerNmHost(const Paths &paths)
     {
         auto obj = getBaseDocument();
         QJsonArray allowedExtensions = {"chatterino_native@chatterino.com"};
+
+        // Parse additional extension IDs from settings
+        QString additionalIDs = getSettings()->additionalExtensionIDs.getValue();
+        if (!additionalIDs.isEmpty())
+        {
+            QStringList idList = additionalIDs.split(';');
+            for (const QString &id : idList)
+            {
+                allowedExtensions.append(id);
+            }
+        }
+
         obj.insert("allowed_extensions", allowedExtensions);
 
         registerNmManifest(paths, "/native-messaging-manifest-firefox.json",
