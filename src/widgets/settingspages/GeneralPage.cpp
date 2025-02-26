@@ -860,7 +860,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.attachExtensionToAnyProcess, false,
         "Attempt to force the Chatterino Browser Extension to work in certain "
         "browsers that do not work automatically.\ne.g. Librewolf");
-    layout.addSubtitle("Additional extension IDs");
     layout
         .addDescription("A semicolon-separated list of Chrome or Firefox "
                         "extension IDs that are allowed to interact with "
