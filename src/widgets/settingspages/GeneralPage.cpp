@@ -860,6 +860,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.attachExtensionToAnyProcess, false,
         "Attempt to force the Chatterino Browser Extension to work in certain "
         "browsers that do not work automatically.\ne.g. Librewolf");
+
+    // Add input field for additional extension IDs
+    layout.addDescription("Specify additional extension IDs separated by semicolons.");
+    layout.addRow("Additional Extension IDs:", this->createLineEdit(s.additionalExtensionIDs));
 #endif
 
     layout.addTitle("AppData & Cache");

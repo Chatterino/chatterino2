@@ -1,4 +1,5 @@
 #include "singletons/NativeMessaging.hpp"
+#include "singletons/Settings.hpp"
 
 #include "Application.hpp"
 #include "common/Literals.hpp"
@@ -55,11 +56,23 @@ void registerNmHost(const Paths &paths)
         };
     };
 
+    // Retrieve additional extension IDs from settings
+    QStringList extensionIDs = getSettings()->additionalExtensionIDs.get().split(';', QString::SkipEmptyParts);
+
     // chrome
     {
         auto obj = getBaseDocument();
         QJsonArray allowedOriginsArr = {
             u"chrome-extension://%1/"_s.arg(EXTENSION_ID)};
+        
+        // Append additional extension IDs to allowedOriginsArr
+        for (const auto &id : extensionIDs) {
+            QString trimmedID = id.trimmed();
+            if (!trimmedID.isEmpty()) {
+                allowedOriginsArr.append(u"chrome-extension://%1/"_s.arg(trimmedID));
+            }
+        }
+
         obj.insert("allowed_origins", allowedOriginsArr);
 
         registerNmManifest(paths, "/native-messaging-manifest-chrome.json",
@@ -72,6 +85,15 @@ void registerNmHost(const Paths &paths)
     {
         auto obj = getBaseDocument();
         QJsonArray allowedExtensions = {"chatterino_native@chatterino.com"};
+        
+        // Append additional extension IDs to allowedExtensions
+        for (const auto &id : extensionIDs) {
+            QString trimmedID = id.trimmed();
+            if (!trimmedID.isEmpty()) {
+                allowedExtensions.append(trimmedID);
+            }
+        }
+
         obj.insert("allowed_extensions", allowedExtensions);
 
         registerNmManifest(paths, "/native-messaging-manifest-firefox.json",
