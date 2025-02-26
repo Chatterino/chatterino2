@@ -1,4 +1,5 @@
 #include "singletons/NativeMessaging.hpp"
+#include "singletons/Settings.hpp"
 
 #include "Application.hpp"
 #include "common/Literals.hpp"
@@ -68,7 +69,11 @@ void registerNmHost(const Paths &paths)
             QStringList idList = additionalIDs.split(';');
             for (const QString &id : idList)
             {
-                allowedOriginsArr.append(u"chrome-extension://%1/"_s.arg(id));
+                QString trimmedId = id.trimmed();
+                if (!trimmedId.isEmpty())
+                {
+                    allowedOriginsArr.append(u"chrome-extension://%1/"_s.arg(trimmedId));
+                }
             }
         }
 
@@ -92,7 +97,11 @@ void registerNmHost(const Paths &paths)
             QStringList idList = additionalIDs.split(';');
             for (const QString &id : idList)
             {
-                allowedExtensions.append(id);
+                QString trimmedId = id.trimmed();
+                if (!trimmedId.isEmpty())
+                {
+                    allowedExtensions.append(trimmedId);
+                }
             }
         }
 
