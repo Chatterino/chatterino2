@@ -34,8 +34,12 @@ void handleModerateMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Timeout &action)
 {
-    auto duration = std::chrono::round<std::chrono::seconds>(
-        action.expiresAt - time.toStdSysMilliseconds());
+    // Not all compilers support QDateTime::toStdSysMilliseconds
+    std::chrono::system_clock::time_point chronoTime{
+        std::chrono::milliseconds{time.toMSecsSinceEpoch()}};
+
+    auto duration =
+        std::chrono::round<std::chrono::seconds>(action.expiresAt - chronoTime);
 
     EventSubMessageBuilder builder(chan, time);
     builder->loginName = event.moderatorUserLogin.qt();
