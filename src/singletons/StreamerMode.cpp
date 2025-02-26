@@ -143,7 +143,7 @@ bool isBroadcasterSoftwareActive()
     }
 
 #else
-#    warning Unsupported OS: Broadcasting software can't be detected
+#    warning Unsupported OS: Broadcasting software can\'t be detected
 #endif
     return false;
 }
