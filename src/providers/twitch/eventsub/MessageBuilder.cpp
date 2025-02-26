@@ -1,7 +1,39 @@
 #include "providers/twitch/eventsub/MessageBuilder.hpp"
 
+#include "common/Literals.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+
+namespace {
+
+using namespace chatterino;
+using namespace chatterino::eventsub;
+using namespace chatterino::literals;
+
+/// <MODERATOR> turned {on/off} <MODE> mode. [<DURATION>]
+void makeModeMessage(EventSubMessageBuilder &builder,
+                     const lib::payload::channel_moderate::v2::Event &event,
+                     const QString &mode, bool on, const QString &duration = {})
+{
+    QString text;
+
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
+    builder.emplaceSystemTextAndUpdate(u"turned"_s, text);
+    QString op = on ? u"on"_s : u"off"_s;
+    builder.emplaceSystemTextAndUpdate(op, text);
+    builder.emplaceSystemTextAndUpdate(mode, text);
+    builder.emplaceSystemTextAndUpdate(u"mode."_s, text);
+
+    if (!duration.isEmpty())
+    {
+        builder.emplaceSystemTextAndUpdate(duration, text);
+    }
+
+    builder.message().messageText = text;
+    builder.message().searchText = text;
+}
+
+}  // namespace
 
 namespace chatterino::eventsub {
 
@@ -164,6 +196,86 @@ void makeModerateMessage(
     builder->messageText = text;
     builder->searchText = text;
     builder->timeoutUser = action.userLogin.qt();
+}
+
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Followers &action)
+{
+    QString duration;
+    if (action.followDurationMinutes > 0)
+    {
+        duration = u"(%1 minutes)"_s.arg(action.followDurationMinutes);
+    }
+    makeModeMessage(builder, event, u"followers-only"_s, true, duration);
+}
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::FollowersOff & /*action*/)
+{
+    makeModeMessage(builder, event, u"followers-only"_s, false);
+}
+
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::EmoteOnly & /*action*/)
+{
+    makeModeMessage(builder, event, u"emote-only"_s, true);
+}
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::EmoteOnlyOff & /*action*/)
+{
+    makeModeMessage(builder, event, u"emote-only"_s, false);
+}
+
+void makeModerateMessage(EventSubMessageBuilder &builder,
+                         const lib::payload::channel_moderate::v2::Event &event,
+                         const lib::payload::channel_moderate::v2::Slow &action)
+{
+    makeModeMessage(builder, event, u"slow"_s, true,
+                    u"(%1 seconds)"_s.arg(action.waitTimeSeconds));
+}
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::SlowOff & /*action*/)
+{
+    makeModeMessage(builder, event, u"slow"_s, false);
+}
+
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Subscribers & /*action*/)
+{
+    makeModeMessage(builder, event, u"subscribers-only"_s, true);
+}
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::SubscribersOff & /*action*/)
+{
+    makeModeMessage(builder, event, u"subscribers-only"_s, false);
+}
+
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Uniquechat & /*action*/)
+{
+    makeModeMessage(builder, event, u"unique-chat"_s, true);
+}
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::UniquechatOff & /*action*/)
+{
+    makeModeMessage(builder, event, u"unique-chat"_s, false);
 }
 
 }  // namespace chatterino::eventsub
