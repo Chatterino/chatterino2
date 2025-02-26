@@ -201,6 +201,53 @@ void makeModerateMessage(
 void makeModerateMessage(
     EventSubMessageBuilder &builder,
     const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Delete &action)
+{
+    builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
+
+    QString text;
+    bool isShared = event.isFromSharedChat();
+
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
+    builder.emplaceSystemTextAndUpdate("deleted message from", text);
+    builder.appendUser(action.userName, action.userLogin, text);
+
+    if (isShared)
+    {
+        builder.emplaceSystemTextAndUpdate("in", text);
+        builder.appendUser(*event.sourceBroadcasterUserName,
+                           *event.sourceBroadcasterUserLogin, text);
+    }
+
+    builder.emplaceSystemTextAndUpdate("saying:", text);
+
+    if (action.messageBody.view().length() > 50)
+    {
+        builder
+            .emplace<TextElement>(action.messageBody.qt().left(50) + "…",
+                                  MessageElementFlag::Text, MessageColor::Text)
+            ->setLink({Link::JumpToMessage, action.messageID.qt()});
+
+        text.append(action.messageBody.qt().left(50) + "…");
+    }
+    else
+    {
+        builder
+            .emplace<TextElement>(action.messageBody.qt(),
+                                  MessageElementFlag::Text, MessageColor::Text)
+            ->setLink({Link::JumpToMessage, action.messageID.qt()});
+
+        text.append(action.messageBody.qt());
+    }
+
+    builder->messageText = text;
+    builder->searchText = text;
+    builder->timeoutUser = action.userLogin.qt();
+}
+
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Followers &action)
 {
     QString duration;

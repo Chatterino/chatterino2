@@ -257,13 +257,14 @@ struct Unraid {
 struct Delete {
     static constexpr std::string_view TAG = "delete";
 
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
-    std::string messageID;
-    std::string messageBody;
+    String userID;
+    String userLogin;
+    String userName;
+    String messageID;
+    String messageBody;
 };
-struct SharedChatDelete : public Ban {
+
+struct SharedChatDelete : public Delete {
     static constexpr std::string_view TAG = "shared_chat_delete";
 };
 
