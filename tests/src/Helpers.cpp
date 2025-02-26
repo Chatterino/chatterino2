@@ -1,6 +1,10 @@
 #include "util/Helpers.hpp"
 
+#include "mocks/BaseApplication.hpp"
 #include "Test.hpp"
+
+#include <QDateTime>
+#include <QTimeZone>
 
 #include <span>
 
@@ -555,4 +559,22 @@ TEST(Helpers, unescapeZeroWidthJoiner)
 
         EXPECT_EQ(actual, c.output);
     }
+}
+
+TEST(Helpers, chronoToQDateTime)
+{
+    mock::BaseApplication app;
+
+    auto epoch = chronoToQDateTime({});
+    ASSERT_EQ(epoch.timeZone(), QTimeZone::utc());
+    ASSERT_EQ(epoch.toMSecsSinceEpoch(), 0);
+
+    std::chrono::milliseconds somePointSinceEpoch{1740574189131};
+    auto qPointSinceEpoch = chronoToQDateTime(
+        std::chrono::system_clock::time_point{somePointSinceEpoch});
+    ASSERT_EQ(qPointSinceEpoch.timeZone(), QTimeZone::utc());
+    ASSERT_EQ(qPointSinceEpoch.toMSecsSinceEpoch(),
+              somePointSinceEpoch.count());
+    ASSERT_EQ(qPointSinceEpoch.toString(Qt::ISODateWithMs),
+              "2025-02-26T12:49:49.131Z");
 }
