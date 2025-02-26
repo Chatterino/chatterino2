@@ -203,8 +203,12 @@ void makeModerateMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Followers &action)
 {
-    makeModeMessage(builder, event, u"followers-only"_s, true,
-                    u"(%1 minutes)"_s.arg(action.followDurationMinutes));
+    QString duration;
+    if (action.followDurationMinutes > 0)
+    {
+        duration = u"(%1 minutes)"_s.arg(action.followDurationMinutes);
+    }
+    makeModeMessage(builder, event, u"followers-only"_s, true, duration);
 }
 void makeModerateMessage(
     EventSubMessageBuilder &builder,
