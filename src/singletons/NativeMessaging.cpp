@@ -171,7 +171,7 @@ NativeMessagingServer::~NativeMessagingServer()
     }
     this->thread.requestInterruption();
     this->thread.quit();
-
+    // Most likely, the receiver thread will still wait for a message
     if (!this->thread.wait(250))
     {
         this->thread.terminate();
