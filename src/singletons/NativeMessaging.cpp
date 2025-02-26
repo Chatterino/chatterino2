@@ -56,8 +56,10 @@ void registerNmHost(const Paths &paths)
         };
     };
 
-    // Retrieve additional extension IDs from settings
-    QStringList extensionIDs = getSettings()->additionalExtensionIDs.getValue().split(';', Qt::SkipEmptyParts);
+    QStringList extensionIDs =
+        getSettings()->additionalExtensionIDs.getValue().split(
+            ';',
+            Qt::SkipEmptyParts);
 
     // chrome
     {
@@ -65,11 +67,13 @@ void registerNmHost(const Paths &paths)
         QJsonArray allowedOriginsArr = {
             u"chrome-extension://%1/"_s.arg(EXTENSION_ID)};
         
-        // Append additional extension IDs to allowedOriginsArr
-        for (const auto &id : extensionIDs) {
+        for (const auto &id : extensionIDs)
+        {
             QString trimmedID = id.trimmed();
-            if (!trimmedID.isEmpty()) {
-                allowedOriginsArr.append(u"chrome-extension://%1/"_s.arg(trimmedID));
+            if (!trimmedID.isEmpty())
+            {
+                allowedOriginsArr.append(
+                    u"chrome-extension://%1/"_s.arg(trimmedID));
             }
         }
 
@@ -85,11 +89,12 @@ void registerNmHost(const Paths &paths)
     {
         auto obj = getBaseDocument();
         QJsonArray allowedExtensions = {"chatterino_native@chatterino.com"};
-        
-        // Append additional extension IDs to allowedExtensions
-        for (const auto &id : extensionIDs) {
+
+        for (const auto &id : extensionIDs)
+        {
             QString trimmedID = id.trimmed();
-            if (!trimmedID.isEmpty()) {
+            if (!trimmedID.isEmpty())
+            {
                 allowedExtensions.append(trimmedID);
             }
         }
@@ -167,7 +172,7 @@ NativeMessagingServer::~NativeMessagingServer()
     }
     this->thread.requestInterruption();
     this->thread.quit();
-    // Most likely, the receiver thread will still wait for a message
+
     if (!this->thread.wait(250))
     {
         this->thread.terminate();

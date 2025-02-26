@@ -643,8 +643,8 @@ public:
         false,
     };
 
-    // New setting for additional extension IDs
-    QStringSetting additionalExtensionIDs{"/appearance/additionalExtensionIDs", ""};
+    QStringSetting additionalExtensionIDs{"/appearance/additionalExtensionIDs",
+                                          ""};
 
 private:
     ChatterinoSetting<std::vector<HighlightPhrase>> highlightedMessagesSetting =
