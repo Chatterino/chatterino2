@@ -44,6 +44,8 @@ boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
         return messageType.error();
     }
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<Metadata>().messageTimestamp)>>);
     const auto *jvmessageTimestamp = root.if_contains("message_timestamp");
     if (jvmessageTimestamp == nullptr)
     {
@@ -51,7 +53,8 @@ boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
     }
 
     auto messageTimestamp =
-        boost::json::try_value_to<std::string>(*jvmessageTimestamp);
+        boost::json::try_value_to<std::chrono::system_clock::time_point>(
+            *jvmessageTimestamp, AsISO8601());
 
     if (messageTimestamp.has_error())
     {
@@ -90,7 +93,7 @@ boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
     return Metadata{
         .messageID = std::move(messageID.value()),
         .messageType = std::move(messageType.value()),
-        .messageTimestamp = std::move(messageTimestamp.value()),
+        .messageTimestamp = messageTimestamp.value(),
         .subscriptionType = std::move(subscriptionType),
         .subscriptionVersion = std::move(subscriptionVersion),
     };

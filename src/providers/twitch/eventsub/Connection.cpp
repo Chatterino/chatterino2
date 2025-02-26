@@ -12,6 +12,7 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
 
 #include <boost/json.hpp>
@@ -148,11 +149,7 @@ void Connection::onChannelModerate(
         return;
     }
 
-    auto now = QDateTime::currentDateTime();
-    if (getApp()->isTest())
-    {
-        now = QDateTime::fromSecsSinceEpoch(0).toUTC();
-    }
+    auto now = chronoToQDateTime(metadata.messageTimestamp);
 
     std::visit(
         [&](auto &&action) {

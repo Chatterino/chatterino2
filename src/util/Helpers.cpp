@@ -3,9 +3,11 @@
 #include "Application.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 
+#include <QDateTime>
 #include <QDirIterator>
 #include <QLocale>
 #include <QRegularExpression>
+#include <QTimeZone>
 #include <QUuid>
 
 namespace {
@@ -312,6 +314,23 @@ QLocale getSystemLocale()
 #endif
 
     return QLocale::system();
+}
+
+QDateTime chronoToQDateTime(std::chrono::system_clock::time_point time)
+{
+    auto msSinceEpoch =
+        std::chrono::time_point_cast<std::chrono::milliseconds>(time)
+            .time_since_epoch();
+    auto dt = QDateTime::fromMSecsSinceEpoch(msSinceEpoch.count());
+
+#if CHATTERINO_WITH_TESTS
+    if (getApp()->isTest())
+    {
+        dt = dt.toUTC();
+    }
+#endif
+
+    return dt;
 }
 
 }  // namespace chatterino
