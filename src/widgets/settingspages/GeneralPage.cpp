@@ -869,8 +869,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                      "that specifying multiple extension IDs for different"
                      "browsers might cause issues."
     {
-        auto *edit =
-            this->createLineEdit(getSettings()->additionalExtensionIDs);
+        auto *edit = this->createLineEdit(s.additionalExtensionIDs);
         edit->setPlaceholderText("Additional; extension; IDs...");
         layout.addWidget(edit);
     }
