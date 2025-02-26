@@ -268,14 +268,14 @@ void makeModerateMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Uniquechat & /*action*/)
 {
-    makeModeMessage(builder, event, u"r9k"_s, true);
+    makeModeMessage(builder, event, u"unique-chat"_s, true);
 }
 void makeModerateMessage(
     EventSubMessageBuilder &builder,
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::UniquechatOff & /*action*/)
 {
-    makeModeMessage(builder, event, u"r9k"_s, false);
+    makeModeMessage(builder, event, u"unique-chat"_s, false);
 }
 
 }  // namespace chatterino::eventsub
