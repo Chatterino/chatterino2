@@ -148,11 +148,9 @@ void Connection::onChannelModerate(
         return;
     }
 
-    auto now = QDateTime::currentDateTime();
-    if (getApp()->isTest())
-    {
-        now = QDateTime::fromSecsSinceEpoch(0).toUTC();
-    }
+    auto now = QDateTime::fromStdTimePoint(
+        std::chrono::time_point_cast<std::chrono::milliseconds>(
+            metadata.messageTimestamp));
 
     std::visit(
         [&](auto &&action) {

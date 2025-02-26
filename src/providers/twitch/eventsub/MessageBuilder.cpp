@@ -41,8 +41,8 @@ EventSubMessageBuilder::EventSubMessageBuilder(TwitchChannel *channel,
                                                const QDateTime &time)
     : channel(channel)
 {
-    this->emplace<TimestampElement>();
-    this->message().flags.set(MessageFlag::System);
+    this->emplace<TimestampElement>(time.time());
+    this->message().flags.set(MessageFlag::System, MessageFlag::EventSub);
     this->message().flags.set(MessageFlag::Timeout);  // do we need this?
     this->message().serverReceivedTime = time;
 }
