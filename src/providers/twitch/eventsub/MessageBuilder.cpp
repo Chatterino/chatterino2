@@ -140,4 +140,30 @@ void makeModerateMessage(EventSubMessageBuilder &builder,
     builder->timeoutUser = action.userLogin.qt();
 }
 
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Unban &action)
+{
+    QString text;
+    bool isShared = event.isFromSharedChat();
+
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
+    builder.emplaceSystemTextAndUpdate("unbanned", text);
+    builder.appendUser(action.userName, action.userLogin, text, isShared);
+
+    if (isShared)
+    {
+        builder.emplaceSystemTextAndUpdate("in", text);
+        builder.appendUser(*event.sourceBroadcasterUserName,
+                           *event.sourceBroadcasterUserLogin, text, false);
+    }
+
+    builder.emplaceSystemTextAndUpdate(".", text);
+
+    builder->messageText = text;
+    builder->searchText = text;
+    builder->timeoutUser = action.userLogin.qt();
+}
+
 }  // namespace chatterino::eventsub

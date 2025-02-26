@@ -408,7 +408,7 @@ boost::json::result_for<Unban, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -421,7 +421,7 @@ boost::json::result_for<Unban, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -434,7 +434,7 @@ boost::json::result_for<Unban, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<String>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -452,7 +452,7 @@ boost::json::result_for<SharedChatUnban, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<SharedChatUnban> /* tag */,
     const boost::json::value &jvRoot)
 {
-    auto base = boost::json::try_value_to<Ban>(jvRoot);
+    auto base = boost::json::try_value_to<Unban>(jvRoot);
     if (base.has_error())
     {
         return base.error();

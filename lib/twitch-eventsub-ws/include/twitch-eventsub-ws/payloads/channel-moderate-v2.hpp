@@ -178,11 +178,11 @@ struct SharedChatBan : public Ban {
 struct Unban {
     static constexpr std::string_view TAG = "unban";
 
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
+    String userID;
+    String userLogin;
+    String userName;
 };
-struct SharedChatUnban : public Ban {
+struct SharedChatUnban : public Unban {
     static constexpr std::string_view TAG = "shared_chat_unban";
 };
 
