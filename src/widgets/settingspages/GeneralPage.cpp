@@ -863,7 +863,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     // Add input field for additional extension IDs
     layout.addDescription("Specify additional extension IDs separated by semicolons.");
-    layout.addRow("Additional Extension IDs:", this->createLineEdit(s.additionalExtensionIDs));
+    layout.addWidget(
+        this->createLineEdit(getSettings()->additionalExtensionIDs)
+    );
 #endif
 
     layout.addTitle("AppData & Cache");
