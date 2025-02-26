@@ -57,7 +57,7 @@ void registerNmHost(const Paths &paths)
     };
 
     // Retrieve additional extension IDs from settings
-    QStringList extensionIDs = getSettings()->additionalExtensionIDs.get().split(';', QString::SkipEmptyParts);
+    QStringList extensionIDs = getSettings()->additionalExtensionIDs.getValue().split(';', Qt::SkipEmptyParts);
 
     // chrome
     {
