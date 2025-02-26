@@ -5,6 +5,7 @@
 
 #include <boost/json.hpp>
 
+#include <chrono>
 #include <string>
 
 namespace chatterino::eventsub::lib::payload::channel_moderate::v2 {
@@ -197,15 +198,14 @@ struct SharedChatUnban : public Unban {
 struct Timeout {
     static constexpr std::string_view TAG = "timeout";
 
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
-    // TODO: Verify that we handle null here
-    std::string reason;
-    // TODO: This should be a timestamp?
-    std::string expiresAt;
+    String userID;
+    String userLogin;
+    String userName;
+    String reason;
+    /// json_tag=AsISO8601
+    std::chrono::system_clock::time_point expiresAt;
 };
-struct SharedChatTimeout : public Ban {
+struct SharedChatTimeout : public Timeout {
     static constexpr std::string_view TAG = "shared_chat_timeout";
 };
 
@@ -220,7 +220,7 @@ struct Untimeout {
     std::string userLogin;
     std::string userName;
 };
-struct SharedChatUntimeout : public Ban {
+struct SharedChatUntimeout : public Untimeout {
     static constexpr std::string_view TAG = "shared_chat_untimeout";
 };
 

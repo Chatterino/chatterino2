@@ -2,6 +2,7 @@
 
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "twitch-eventsub-ws/messages/metadata.hpp"
 #include "twitch-eventsub-ws/payloads/channel-moderate-v2.hpp"
 
 #include <QDateTime>
@@ -109,5 +110,11 @@ void makeModerateMessage(
     EventSubMessageBuilder &builder,
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::UniquechatOff &action);
+
+/// <MODERATOR> timed out <USER> for <DURATION>.
+void makeModerateMessage(
+    EventSubMessageBuilder &builder, const lib::messages::Metadata &meta,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Timeout &action);
 
 }  // namespace chatterino::eventsub

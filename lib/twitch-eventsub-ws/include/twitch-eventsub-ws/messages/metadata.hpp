@@ -2,6 +2,7 @@
 
 #include <boost/json.hpp>
 
+#include <chrono>
 #include <optional>
 #include <string>
 
@@ -23,8 +24,8 @@ namespace chatterino::eventsub::lib::messages {
 struct Metadata {
     std::string messageID;
     std::string messageType;
-    // TODO: should this be chronofied?
-    std::string messageTimestamp;
+    /// json_tag=AsISO8601
+    std::chrono::system_clock::time_point messageTimestamp;
 
     std::optional<std::string> subscriptionType;
     std::optional<std::string> subscriptionVersion;

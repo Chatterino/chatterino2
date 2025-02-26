@@ -59,7 +59,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "0:00"
+                            "12:31"
                         ]
                     },
                     "flags": "Timestamp",
@@ -68,7 +68,7 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "00:00:00",
+                    "time": "12:31:47",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
@@ -140,13 +140,13 @@
                     ]
                 }
             ],
-            "flags": "System|Timeout",
+            "flags": "System|Timeout|EventSub",
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",
             "messageText": "nerixyz unbanned uint128. ",
             "searchText": "nerixyz unbanned uint128. ",
-            "serverReceivedTime": "1970-01-01T00:00:00Z",
+            "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "uint128",
             "userID": "",
             "usernameColor": "#ff000000"
