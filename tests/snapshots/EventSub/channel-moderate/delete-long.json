@@ -61,7 +61,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "0:00"
+                            "12:31"
                         ]
                     },
                     "flags": "Timestamp",
@@ -70,7 +70,7 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "00:00:00",
+                    "time": "12:31:47",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
@@ -159,13 +159,13 @@
                     ]
                 }
             ],
-            "flags": "System|Timeout|DoNotTriggerNotification",
+            "flags": "System|Timeout|DoNotTriggerNotification|EventSub",
             "id": "",
             "localizedName": "",
             "loginName": "testaccount_420",
             "messageText": "testaccount_420 deleted message from testaccount_420 saying: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…",
             "searchText": "testaccount_420 deleted message from testaccount_420 saying: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…",
-            "serverReceivedTime": "1970-01-01T00:00:00Z",
+            "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "testaccount_420",
             "userID": "",
             "usernameColor": "#ff000000"
