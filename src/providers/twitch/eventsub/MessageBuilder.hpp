@@ -2,7 +2,6 @@
 
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "twitch-eventsub-ws/messages/metadata.hpp"
 #include "twitch-eventsub-ws/payloads/channel-moderate-v2.hpp"
 
 #include <QDateTime>
