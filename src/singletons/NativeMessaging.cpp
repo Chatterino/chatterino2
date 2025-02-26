@@ -1,5 +1,4 @@
 #include "singletons/NativeMessaging.hpp"
-#include "singletons/Settings.hpp"
 
 #include "Application.hpp"
 #include "common/Literals.hpp"
@@ -8,6 +7,7 @@
 #include "debug/AssertInGuiThread.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 #include "util/IpcQueue.hpp"
 #include "util/PostToThread.hpp"
 
@@ -58,15 +58,14 @@ void registerNmHost(const Paths &paths)
 
     QStringList extensionIDs =
         getSettings()->additionalExtensionIDs.getValue().split(
-            ';',
-            Qt::SkipEmptyParts);
+            ';', Qt::SkipEmptyParts);
 
     // chrome
     {
         auto obj = getBaseDocument();
         QJsonArray allowedOriginsArr = {
             u"chrome-extension://%1/"_s.arg(EXTENSION_ID)};
-        
+
         for (const auto &id : extensionIDs)
         {
             QString trimmedID = id.trimmed();
