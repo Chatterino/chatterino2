@@ -862,7 +862,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "browsers that do not work automatically.\ne.g. Librewolf");
     layout.addSubtitle("Additional extension IDs");
     layout
-        .addDescription("A semicolon separated list of Chrome or Firefox "
+        .addDescription("A semicolon-separated list of Chrome or Firefox "
                         "extension IDs that are allowed to interact with "
                         "Chatterino's browser integration (requires restart):"
         ->setToolTip("Chatterino does not provide strong API guarantees.\nNote "
