@@ -775,7 +775,7 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -788,7 +788,7 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -801,7 +801,7 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<String>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -814,7 +814,7 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto messageID = boost::json::try_value_to<std::string>(*jvmessageID);
+    auto messageID = boost::json::try_value_to<String>(*jvmessageID);
 
     if (messageID.has_error())
     {
@@ -827,7 +827,7 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto messageBody = boost::json::try_value_to<std::string>(*jvmessageBody);
+    auto messageBody = boost::json::try_value_to<String>(*jvmessageBody);
 
     if (messageBody.has_error())
     {
@@ -847,7 +847,7 @@ boost::json::result_for<SharedChatDelete, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<SharedChatDelete> /* tag */,
     const boost::json::value &jvRoot)
 {
-    auto base = boost::json::try_value_to<Ban>(jvRoot);
+    auto base = boost::json::try_value_to<Delete>(jvRoot);
     if (base.has_error())
     {
         return base.error();

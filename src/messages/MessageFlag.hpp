@@ -56,7 +56,7 @@ enum class MessageFlag : std::int64_t {
     AutoModBlockedTerm = (1LL << 38),
     /// The message is a full clear chat message (/clear)
     ClearChat = (1LL << 39),
-    /// The message is from EventSub
+    /// The message is built from EventSub
     EventSub = (1LL << 40),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;

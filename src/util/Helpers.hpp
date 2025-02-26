@@ -4,10 +4,13 @@
 #include <QLocale>
 #include <QString>
 
+#include <chrono>
 #include <cmath>
 #include <optional>
 #include <utility>
 #include <vector>
+
+class QDateTime;
 
 namespace chatterino {
 
@@ -190,5 +193,10 @@ constexpr std::optional<std::decay_t<T>> makeConditionedOptional(bool condition,
 QString unescapeZeroWidthJoiner(QString escaped);
 
 QLocale getSystemLocale();
+
+/// @brief Converts `time` to a QDateTime in a local time zone
+///
+/// Note: When running tests, this will always return a date-time in UTC.
+QDateTime chronoToQDateTime(std::chrono::system_clock::time_point time);
 
 }  // namespace chatterino
