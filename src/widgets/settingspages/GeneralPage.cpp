@@ -309,8 +309,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                            .arg(settingsSeq.toString(
                                QKeySequence::SequenceFormat::NativeText));
         }
-        layout.addCheckbox("Show preferences button" + shortcut,
-                           s.hidePreferencesButton, true);
+
+        SettingWidget::inverseCheckbox("Show preferences button" + shortcut,
+                                       s.hidePreferencesButton)
+            ->addTo(layout);
 
         SettingWidget::inverseCheckbox("Show user button", s.hideUserButton)
             ->addTo(layout);
