@@ -869,8 +869,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     auto *note = new QLabel(
         "A semicolon-separated list of Chrome or Firefox extension IDs allowed "
-        "to interact with Chatterino's browser integration (requires restart).\n\n"
-        "Using multiple extension IDs from different browsers may cause issues.");
+        "to interact with Chatterino's browser integration (requires "
+        "restart).\n\n"
+        "Using multiple extension IDs from different browsers may cause "
+        "issues.");
     note->setWordWrap(true);
     note->setStyleSheet("color: #bbb");
 
