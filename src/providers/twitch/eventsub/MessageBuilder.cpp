@@ -325,4 +325,67 @@ void makeModerateMessage(
     makeModeMessage(builder, event, u"unique-chat"_s, false);
 }
 
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::AutomodTerms &action)
+{
+    QString text;
+
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
+    if (action.action == "add")
+    {
+        builder.emplaceSystemTextAndUpdate(u"added"_s, text);
+    }
+    else
+    {
+        builder.emplaceSystemTextAndUpdate(u"removed"_s, text);
+    }
+
+    QString terms;
+    for (size_t i = 0; i < action.terms.size(); i++)
+    {
+        if (i != 0)
+        {
+            if (i == action.terms.size() - 1)
+            {
+                if (action.terms.size() == 2)
+                {
+                    terms.append(u" and ");
+                }
+                else
+                {
+                    terms.append(u", and ");
+                }
+            }
+            else
+            {
+                terms.append(u", ");
+            }
+        }
+        terms.append(u'"');
+        terms.append(action.terms[i].qt());
+        terms.append(u'"');
+    }
+    builder.emplaceSystemTextAndUpdate(terms, text);
+    builder.emplaceSystemTextAndUpdate(u"as"_s, text);
+    if (action.terms.size() == 1)
+    {
+        builder.emplaceSystemTextAndUpdate(u"a"_s, text);
+    }
+    builder.emplaceSystemTextAndUpdate(action.list.qt(), text);
+    if (action.terms.size() == 1)
+    {
+        builder.emplaceSystemTextAndUpdate(u"term"_s, text);
+    }
+    else
+    {
+        builder.emplaceSystemTextAndUpdate(u"terms"_s, text);
+    }
+    builder.emplaceSystemTextAndUpdate(u"on AutoMod."_s, text);
+
+    builder.message().messageText = text;
+    builder.message().searchText = text;
+}
+
 }  // namespace chatterino::eventsub

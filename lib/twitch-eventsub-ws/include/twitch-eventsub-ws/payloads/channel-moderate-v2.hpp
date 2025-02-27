@@ -282,11 +282,11 @@ struct AutomodTerms {
     static constexpr std::string_view FIELD = "automod_terms";
 
     // either add or remove
-    std::string action;
+    String action;
     // either blocked or permitted
-    std::string list;
+    String list;
 
-    std::vector<std::string> terms;
+    std::vector<String> terms;
     bool fromAutomod;
 };
 
