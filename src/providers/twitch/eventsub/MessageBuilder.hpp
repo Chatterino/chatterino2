@@ -133,4 +133,16 @@ void makeModerateMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Unmod &action);
 
+/// <MODERATOR> initiated a raid to <CHANNEL>.
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Raid &action);
+
+/// <MODERATOR> canceled the raid to <CHANNEL>.
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Unraid &action);
+
 }  // namespace chatterino::eventsub

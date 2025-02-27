@@ -231,9 +231,9 @@ struct SharedChatUntimeout : public Untimeout {
 struct Raid {
     static constexpr std::string_view TAG = "raid";
 
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
+    String userID;
+    String userLogin;
+    String userName;
 
     int viewerCount;
 };
@@ -245,9 +245,9 @@ struct Raid {
 struct Unraid {
     static constexpr std::string_view TAG = "unraid";
 
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
+    String userID;
+    String userLogin;
+    String userName;
 };
 
 /* message deleted
