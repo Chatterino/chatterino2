@@ -179,6 +179,7 @@ ModerationPage::ModerationPage()
                     (new ChannelLoggingModel(nullptr))
                         ->initialized(&getSettings()->loggedChannels))
                 .getElement();
+        this->viewLogs_ = view;
 
         view->setTitles({"Twitch channels"});
         view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -220,6 +221,7 @@ ModerationPage::ModerationPage()
                     (new ModerationActionModel(nullptr))
                         ->initialized(&getSettings()->moderationActions))
                 .getElement();
+        this->viewModerationButtons_ = view;
 
         view->setTitles({"Action", "Icon"});
         view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -227,7 +229,8 @@ ModerationPage::ModerationPage()
         view->getTableView()->horizontalHeader()->setSectionResizeMode(
             0, QHeaderView::Stretch);
         view->getTableView()->setItemDelegateForColumn(
-            ModerationActionModel::Column::Icon, new IconDelegate(view));
+            ModerationActionModel::Column::Icon,
+            new IconDelegate(viewModerationButtons_));
         QObject::connect(
             view->getTableView(), &QTableView::clicked,
             [this, view](const QModelIndex &clicked) {
@@ -247,19 +250,23 @@ ModerationPage::ModerationPage()
                     }
                     else
                     {
-                        // QPointer will be cleared when view is destroyed
-                        QPointer<EditableModelView> viewtemp = view;
+                        // QPointer will be cleared whenview is destroyed
+                        QPointer<EditableModelView> viewModerationButtonsTemp =
+                            view;
 
                         loadPixmapFromUrl(
                             {fileUrl.toString()},
-                            [clicked, view = viewtemp](const QPixmap &pixmap) {
-                                postToThread([clicked, view, pixmap]() {
-                                    if (view.isNull())
+                            [clicked,
+                             viewModerationButtons = viewModerationButtonsTemp](
+                                const QPixmap &pixmap) {
+                                postToThread([clicked, viewModerationButtons,
+                                              pixmap]() {
+                                    if (viewModerationButtons.isNull())
                                     {
                                         return;
                                     }
 
-                                    view->getModel()->setData(
+                                    viewModerationButtons->getModel()->setData(
                                         clicked, pixmap, Qt::DecorationRole);
                                 });
                             });
@@ -267,7 +274,7 @@ ModerationPage::ModerationPage()
                 }
             });
 
-        // We can safely ignore this signal connection since we own the view
+        // We can safely ignore this signal connection since we own theview
         std::ignore = view->addButtonPressed.connect([] {
             getSettings()->moderationActions.append(
                 ModerationAction("/timeout {user.name} 300"));
@@ -369,6 +376,20 @@ void ModerationPage::addModerationButtonSettings(QTabWidget *tabs)
 void ModerationPage::selectModerationActions()
 {
     this->tabWidget_->setCurrentIndex(1);
+}
+
+bool ModerationPage::filterElements(const QString &query)
+{
+    std::array fields{0};
+
+    bool matchLogs = this->viewLogs_->filterSearchResults(query, fields);
+    tabWidget_->setTabVisible(0, matchLogs);
+
+    bool matchModerationButtons =
+        this->viewModerationButtons_->filterSearchResults(query, fields);
+    tabWidget_->setTabVisible(1, matchModerationButtons);
+
+    return matchLogs || matchModerationButtons;
 }
 
 }  // namespace chatterino
