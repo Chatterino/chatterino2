@@ -1,6 +1,7 @@
 #include "widgets/settingspages/GeneralPageView.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "util/LayoutHelper.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 #include "widgets/dialogs/ColorPickerDialog.hpp"
@@ -113,6 +114,12 @@ QCheckBox *GeneralPageView::addCheckbox(const QString &text,
                                         BoolSetting &setting, bool inverse,
                                         QString toolTipText)
 {
+    if (inverse)
+    {
+        qCWarning(chatterinoWidget)
+            << "use SettingWidget::inverseCheckbox instead";
+    }
+
     auto *check = new QCheckBox(text);
     this->addToolTip(*check, toolTipText);
 
