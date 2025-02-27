@@ -549,9 +549,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             }
         },
         false);
-    layout.addColorButton("Line color",
-                          QColor(getSettings()->lastMessageColor.getValue()),
-                          getSettings()->lastMessageColor);
+
+    SettingWidget::colorButton("Line color", s.lastMessageColor)->addTo(layout);
 
     layout.addTitle("Emotes");
     layout.addCheckbox("Enable", s.enableEmoteImages);
