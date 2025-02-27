@@ -482,9 +482,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "Adds a line between each message to help better tell them apart.")
         ->addTo(layout);
 
-    layout.addCheckbox("Alternate background color", s.alternateMessages, false,
-                       "Slightly change the background behind every other "
-                       "message to help better tell them apart.");
+    SettingWidget::checkbox("Alternate background color", s.alternateMessages)
+        ->setTooltip("Slightly change the background behind every other "
+                     "message to help better tell them apart.")
+        ->addTo(layout);
+
     layout.addCheckbox("Hide deleted messages", s.hideModerated, false,
                        "When enabled, messages deleted by moderators will "
                        "be hidden.");
