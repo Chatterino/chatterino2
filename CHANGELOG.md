@@ -30,7 +30,7 @@
 - Bugfix: Fixed the input font not immediately updating when zooming in/out. (#5960)
 - Bugfix: Fixed color input thinking blue is also red. (#5982)
 - Dev: Subscriptions to PubSub channel points redemption topics now use no auth token, making it continue to work during PubSub shutdown. (#5947)
-- Dev: Add initial experimental EventSub support. (#5837, #5895, #5897, #5904, #5910, #5903, #5915, #5916, #5930, #5935, #5932, #5943, #5952, #5953, #5968, #5973, #5974, #5980, #5981, #5985, #5990, #5992, #5993, #5996, #5995, #6000)
+- Dev: Add initial experimental EventSub support. (#5837, #5895, #5897, #5904, #5910, #5903, #5915, #5916, #5930, #5935, #5932, #5943, #5952, #5953, #5968, #5973, #5974, #5980, #5981, #5985, #5990, #5992, #5993, #5996, #5995, #6000, #6002)
 - Dev: Remove unneeded platform specifier for toasts. (#5914)
 - Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
 - Dev: Removed unused PubSub whisper code. (#5898)

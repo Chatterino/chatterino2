@@ -388,4 +388,35 @@ void makeModerateMessage(
     builder.message().searchText = text;
 }
 
+void makeModerateMessage(EventSubMessageBuilder &builder,
+                         const lib::payload::channel_moderate::v2::Event &event,
+                         const lib::payload::channel_moderate::v2::Raid &action)
+{
+    QString text;
+
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
+    builder.emplaceSystemTextAndUpdate("initiated a raid to", text);
+    builder.appendUser(action.userName, action.userLogin, text, false);
+    builder.emplaceSystemTextAndUpdate(".", text);
+
+    builder.message().messageText = text;
+    builder.message().searchText = text;
+}
+
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Unraid &action)
+{
+    QString text;
+
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
+    builder.emplaceSystemTextAndUpdate("canceled the raid to", text);
+    builder.appendUser(action.userName, action.userLogin, text, false);
+    builder.emplaceSystemTextAndUpdate(".", text);
+
+    builder.message().messageText = text;
+    builder.message().searchText = text;
+}
+
 }  // namespace chatterino::eventsub
