@@ -122,6 +122,17 @@ void makeModerateMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::AutomodTerms &action);
 
+/// <BROADCASTER> modded <MODERATOR>.
+void makeModerateMessage(EventSubMessageBuilder &builder,
+                         const lib::payload::channel_moderate::v2::Event &event,
+                         const lib::payload::channel_moderate::v2::Mod &action);
+
+/// <BROADCASTER> unmodded <MODERATOR>.
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Unmod &action);
+
 /// <MODERATOR> initiated a raid to <CHANNEL>.
 void makeModerateMessage(
     EventSubMessageBuilder &builder,

@@ -135,9 +135,9 @@ struct Unvip {
 struct Mod {
     static constexpr std::string_view TAG = "mod";
 
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
+    String userID;
+    String userLogin;
+    String userName;
 };
 
 /* user is unmodded
@@ -147,9 +147,9 @@ struct Mod {
 struct Unmod {
     static constexpr std::string_view TAG = "unmod";
 
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
+    String userID;
+    String userLogin;
+    String userName;
 };
 
 /* user is banned with reason
