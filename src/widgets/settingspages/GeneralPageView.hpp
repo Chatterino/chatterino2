@@ -120,9 +120,6 @@ public:
     ComboBox *addDropdown(const QString &text, const QStringList &items,
                           pajlada::Settings::Setting<QString> &setting,
                           bool editable = false, QString toolTipText = {});
-    ColorButton *addColorButton(const QString &text, const QColor &color,
-                                pajlada::Settings::Setting<QString> &setting,
-                                QString toolTipText = {});
     QSpinBox *addIntInput(const QString &text, IntSetting &setting, int min,
                           int max, int step, QString toolTipText = {});
     void addNavigationSpacing();

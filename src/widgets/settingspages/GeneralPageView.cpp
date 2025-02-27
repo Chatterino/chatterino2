@@ -262,43 +262,6 @@ ComboBox *GeneralPageView::addDropdown(
     return combo;
 }
 
-ColorButton *GeneralPageView::addColorButton(
-    const QString &text, const QColor &color,
-    pajlada::Settings::Setting<QString> &setting, QString toolTipText)
-{
-    auto *colorButton = new ColorButton(color);
-    auto *layout = new QHBoxLayout();
-    auto *label = new QLabel(text + ":");
-
-    layout->addWidget(label);
-    layout->addStretch(1);
-    layout->addWidget(colorButton);
-
-    this->addToolTip(*label, toolTipText);
-    this->addLayout(layout);
-
-    QObject::connect(
-        colorButton, &ColorButton::clicked, [this, &setting, colorButton]() {
-            auto *dialog = new ColorPickerDialog(QColor(setting), this);
-            // colorButton & setting are never deleted and the signal is deleted
-            // once the dialog is closed
-            QObject::connect(dialog, &ColorPickerDialog::colorConfirmed, this,
-                             [&setting, colorButton](auto selected) {
-                                 if (selected.isValid())
-                                 {
-                                     setting = selected.name(QColor::HexArgb);
-                                     colorButton->setColor(selected);
-                                 }
-                             });
-            dialog->show();
-        });
-
-    this->groups_.back().widgets.push_back({label, {text}});
-    this->groups_.back().widgets.push_back({colorButton, {text}});
-
-    return colorButton;
-}
-
 QSpinBox *GeneralPageView::addIntInput(const QString &text, IntSetting &setting,
                                        int min, int max, int step,
                                        QString toolTipText)
