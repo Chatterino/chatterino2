@@ -173,6 +173,41 @@ void Connection::onChannelModerate(
         payload.event.action);
 }
 
+void Connection::onAutomodMessageHold(
+    const lib::messages::Metadata &metadata,
+    const lib::payload::automod_message_hold::v2::Payload &payload)
+{
+    (void)metadata;
+    qCDebug(LOG) << "On automod message hold for"
+                 << payload.event.broadcasterUserLogin.c_str();
+}
+void Connection::onAutomodMessageUpdate(
+    const lib::messages::Metadata &metadata,
+    const lib::payload::automod_message_update::v2::Payload &payload)
+{
+    (void)metadata;
+    qCDebug(LOG) << "On automod message update for"
+                 << payload.event.broadcasterUserLogin.c_str();
+}
+
+void Connection::onChannelSuspiciousUserMessage(
+    const lib::messages::Metadata &metadata,
+    const lib::payload::channel_suspicious_user_message::v1::Payload &payload)
+{
+    (void)metadata;
+    qCDebug(LOG) << "On channel suspicious user message for"
+                 << payload.event.broadcasterUserLogin.c_str();
+}
+
+void Connection::onChannelSuspiciousUserUpdate(
+    const lib::messages::Metadata &metadata,
+    const lib::payload::channel_suspicious_user_update::v1::Payload &payload)
+{
+    (void)metadata;
+    qCDebug(LOG) << "On channel suspicious user update for"
+                 << payload.event.broadcasterUserLogin.c_str();
+}
+
 QString Connection::getSessionID() const
 {
     return this->sessionID;
