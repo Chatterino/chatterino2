@@ -81,6 +81,8 @@ public:
 
         return widget;
     }
+    static SettingWidget *colorButton(const QString &label,
+                                      QStringSetting &setting);
 
     SettingWidget *setTooltip(QString tooltip);
     SettingWidget *setDescription(const QString &text);
