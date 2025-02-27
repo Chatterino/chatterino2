@@ -311,7 +311,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         }
         layout.addCheckbox("Show preferences button" + shortcut,
                            s.hidePreferencesButton, true);
-        layout.addCheckbox("Show user button", s.hideUserButton, true);
+
+        SettingWidget::inverseCheckbox("Show user button", s.hideUserButton)
+            ->addTo(layout);
     }
     layout.addCheckbox("Mark tabs with live channels", s.showTabLive, false,
                        "Shows a red dot in the top right corner of a tab to "
