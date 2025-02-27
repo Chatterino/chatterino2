@@ -87,10 +87,12 @@ CommandPage::CommandPage()
     LayoutCreator<CommandPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
-    auto *view = layout
-                     .emplace<EditableModelView>(
-                         getApp()->getCommands()->createModel(nullptr))
-                     .getElement();
+    EditableModelView *view =
+        layout
+            .emplace<EditableModelView>(
+                getApp()->getCommands()->createModel(nullptr))
+            .getElement();
+    this->view_ = view;
 
     view->setTitles({"Trigger", "Command", "Show In\nMessage Menu"});
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -137,32 +139,39 @@ CommandPage::CommandPage()
 
     // NOTE: These signals mean that the duplicate check happens in the middle of a row being moved, where he index can be wrong.
     // This should be reconsidered, or potentially changed in the signalvectormodel. Or maybe we rely on a SignalVectorModel signal instead
-    QObject::connect(view->getModel(), &QAbstractItemModel::rowsInserted, this,
-                     [view, duplicateWarning]() {
-                         checkCommandDuplicates(view, duplicateWarning);
+    QObject::connect(view_->getModel(), &QAbstractItemModel::rowsInserted, this,
+                     [this, duplicateWarning]() {
+                         checkCommandDuplicates(view_, duplicateWarning);
                      });
 
-    QObject::connect(view->getModel(), &QAbstractItemModel::rowsRemoved, this,
-                     [view, duplicateWarning]() {
-                         checkCommandDuplicates(view, duplicateWarning);
+    QObject::connect(view_->getModel(), &QAbstractItemModel::rowsRemoved, this,
+                     [this, duplicateWarning]() {
+                         checkCommandDuplicates(view_, duplicateWarning);
                      });
 
-    QObject::connect(view->getModel(), &QAbstractItemModel::dataChanged, this,
-                     [view, duplicateWarning](const QModelIndex &topLeft,
+    QObject::connect(view_->getModel(), &QAbstractItemModel::dataChanged, this,
+                     [this, duplicateWarning](const QModelIndex &topLeft,
                                               const QModelIndex &bottomRight,
                                               const QVector<int> &roles) {
                          (void)topLeft;
                          (void)bottomRight;
                          if (roles.contains(Qt::EditRole))
                          {
-                             checkCommandDuplicates(view, duplicateWarning);
+                             checkCommandDuplicates(view_, duplicateWarning);
                          }
                      });
 
-    checkCommandDuplicates(view, duplicateWarning);
+    checkCommandDuplicates(view_, duplicateWarning);
 
     // ---- end of layout
     this->commandsEditTimer_.setSingleShot(true);
+}
+
+bool CommandPage::filterElements(const QString &query)
+{
+    std::array fields{0, 1};
+
+    return this->view_->filterSearchResults(query, fields);
 }
 
 }  // namespace chatterino
