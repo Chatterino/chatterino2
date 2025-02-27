@@ -158,6 +158,60 @@ namespace {
                 return boost::system::error_code{};
             },
         },
+        {
+            {"automod.message.hold", "2"},
+            [](const auto &metadata, const auto &jv, auto &listener) {
+                auto oPayload =
+                    parsePayload<payload::automod_message_hold::v2::Payload>(
+                        jv);
+                if (!oPayload)
+                {
+                    return oPayload.error();
+                }
+                listener->onAutomodMessageHold(metadata, *oPayload);
+                return boost::system::error_code{};
+            },
+        },
+        {
+            {"automod.message.update", "2"},
+            [](const auto &metadata, const auto &jv, auto &listener) {
+                auto oPayload =
+                    parsePayload<payload::automod_message_update::v2::Payload>(
+                        jv);
+                if (!oPayload)
+                {
+                    return oPayload.error();
+                }
+                listener->onAutomodMessageUpdate(metadata, *oPayload);
+                return boost::system::error_code{};
+            },
+        },
+        {
+            {"channel.suspicious_user.message", "1"},
+            [](const auto &metadata, const auto &jv, auto &listener) {
+                auto oPayload = parsePayload<
+                    payload::channel_suspicious_user_message::v1::Payload>(jv);
+                if (!oPayload)
+                {
+                    return oPayload.error();
+                }
+                listener->onChannelSuspiciousUserMessage(metadata, *oPayload);
+                return boost::system::error_code{};
+            },
+        },
+        {
+            {"channel.suspicious_user.update", "1"},
+            [](const auto &metadata, const auto &jv, auto &listener) {
+                auto oPayload = parsePayload<
+                    payload::channel_suspicious_user_update::v1::Payload>(jv);
+                if (!oPayload)
+                {
+                    return oPayload.error();
+                }
+                listener->onChannelSuspiciousUserUpdate(metadata, *oPayload);
+                return boost::system::error_code{};
+            },
+        },
         // Add your new subscription types above this line
     };
 

@@ -106,6 +106,29 @@ class NoOpListener : public chatterino::eventsub::lib::Listener
         const payload::channel_moderate::v2::Payload &payload) override
     {
     }
+
+    void onAutomodMessageHold(
+        const messages::Metadata &metadata,
+        const payload::automod_message_hold::v2::Payload &payload) override
+    {
+    }
+    void onAutomodMessageUpdate(
+        const messages::Metadata &metadata,
+        const payload::automod_message_update::v2::Payload &payload) override
+    {
+    }
+    void onChannelSuspiciousUserMessage(
+        const messages::Metadata &metadata,
+        const payload::channel_suspicious_user_message::v1::Payload &payload)
+        override
+    {
+    }
+    void onChannelSuspiciousUserUpdate(
+        const messages::Metadata &metadata,
+        const payload::channel_suspicious_user_update::v1::Payload &payload)
+        override
+    {
+    }
 };
 
 }  // namespace
