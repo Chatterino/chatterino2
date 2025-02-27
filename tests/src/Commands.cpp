@@ -873,9 +873,15 @@ TEST(Commands, E2E)
     EXPECT_CALL(mockHelix, update).Times(1);
     EXPECT_CALL(mockHelix, loadBlocks).Times(1);
 
-    auto account = std::make_shared<TwitchAccount>(
-        testaccount420["login"].toString(), "token", "oauthclient",
-        testaccount420["id"].toString());
+    auto account = std::make_shared<TwitchAccount>(TwitchAccountData{
+        .username = testaccount420["login"].toString(),
+        .userID = testaccount420["id"].toString(),
+        .clientID = "oauthclient",
+        .oauthToken = "token",
+        .ty = TwitchAccount::Type::ImplicitGrant,
+        .refreshToken = {},
+        .expiresAt = {},
+    });
     getApp()->getAccounts()->twitch.accounts.append(account);
     getApp()->getAccounts()->twitch.currentUsername =
         testaccount420["login"].toString();

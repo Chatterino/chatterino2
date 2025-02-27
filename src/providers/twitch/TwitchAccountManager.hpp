@@ -8,6 +8,7 @@
 
 #include <boost/signals2.hpp>
 #include <QString>
+#include <QTimer>
 
 #include <memory>
 #include <mutex>
@@ -22,23 +23,29 @@
 namespace chatterino {
 
 class TwitchAccount;
+struct TwitchAccountData;
 class AccountController;
+
+extern const std::vector<QStringView> DEVICE_AUTH_SCOPES;
+extern const QString DEVICE_AUTH_CLIENT_ID;
 
 class TwitchAccountManager
 {
     TwitchAccountManager();
 
 public:
-    struct UserData {
-        QString username;
-        QString userID;
-        QString clientID;
-        QString oauthToken;
-    };
+    struct UserData;
+    using UserCallback =
+        std::function<void(const std::shared_ptr<TwitchAccount> &)>;
 
     // Returns the current twitchUsers, or the anonymous user if we're not
     // currently logged in
     std::shared_ptr<TwitchAccount> getCurrent();
+
+    void requestCurrent(UserCallback cb);
+    void requestCurrentChecked(UserCallback cb);
+
+    void recheckRefresher();
 
     std::vector<QString> getUsernames() const;
 
@@ -69,8 +76,13 @@ private:
         UserValuesUpdated,
         UserAdded,
     };
-    AddUserResponse addUser(const UserData &data);
+    AddUserResponse addUser(const TwitchAccountData &data);
     bool removeUser(TwitchAccount *account);
+    void refreshAccounts(bool emitChanged);
+
+    bool isRefreshing_ = false;
+    std::vector<UserCallback> pendingUserConsumers_;
+    QTimer refreshTask_;
 
     std::shared_ptr<TwitchAccount> currentUser_;
 
