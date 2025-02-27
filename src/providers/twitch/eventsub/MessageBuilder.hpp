@@ -116,4 +116,10 @@ void makeModerateMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::UniquechatOff &action);
 
+/// <MODERATOR> {added/removed} <TERMS...> as (a) {blocked/permitted} term(s) on AutoMod.
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::AutomodTerms &action);
+
 }  // namespace chatterino::eventsub
