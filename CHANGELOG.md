@@ -13,6 +13,7 @@
 - Minor: Messages can now be deleted from the context menu in a channel. (#5956)
 - Bugfix: Fixed a potential way to escape the Lua Plugin sandbox. (#5846)
 - Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
+- Bugfix: Fixed UI scaling issues in certain monitor configurations. (#5802)
 - Bugfix: Fixed a crash that could occur on Linux and macOS when clicking "Install" from the update prompt. (#5818)
 - Bugfix: Fixed missing word wrap in update popup. (#5811)
 - Bugfix: Fixed tabs not scaling to the default scale when changing the scale from a non-default value. (#5794)
