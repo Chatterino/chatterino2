@@ -1117,9 +1117,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     }
 #endif
 
-    layout.addCheckbox(
-        "Show moderation messages", s.hideModerationActions, true,
-        "Show messages for timeouts, bans, and other moderator actions.");
+    SettingWidget::inverseCheckbox("Show moderation messages",
+                                   s.hideModerationActions)
+        ->setTooltip(
+            "Show messages for timeouts, bans, and other moderator actions.")
+        ->addTo(layout);
+
     layout.addCheckbox("Show deletions of single messages",
                        s.hideDeletionActions, true,
                        "Show when a single message is deleted.\ne.g. A message "
