@@ -861,11 +861,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Attempt to force the Chatterino Browser Extension to work in certain "
         "browsers that do not work automatically.\ne.g. Librewolf");
 
-    layout.addDescription("Extra extension IDs:");
-
     auto *extraIDs = this->createLineEdit(s.additionalExtensionIDs);
     extraIDs->setPlaceholderText("Extension;IDs;separated;by;semicolons");
-    layout.addWidget(extraIDs);
+    layout->addRow("Extra extension IDs:", extraIDs);
 
     auto *note = new QLabel(
         "A semicolon-separated list of Chrome or Firefox extension IDs allowed "
