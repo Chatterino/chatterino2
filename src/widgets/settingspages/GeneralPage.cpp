@@ -470,8 +470,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addKeywords({"scroll bar"})
         ->addTo(layout);
 
-    layout.addCheckbox("Hide scrollbar highlights", s.hideScrollbarHighlights,
-                       false);
+    SettingWidget::checkbox("Hide scrollbar highlights",
+                            s.hideScrollbarHighlights)
+        ->addKeywords({"scroll bar"})
+        ->addTo(layout);
 
     layout.addTitle("Messages");
     layout.addCheckbox(
