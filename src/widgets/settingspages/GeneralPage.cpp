@@ -487,9 +487,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                      "message to help better tell them apart.")
         ->addTo(layout);
 
-    layout.addCheckbox("Hide deleted messages", s.hideModerated, false,
-                       "When enabled, messages deleted by moderators will "
-                       "be hidden.");
+    SettingWidget::checkbox("Hide deleted messages", s.hideModerated)
+        ->setTooltip(
+            "When enabled, messages deleted by moderators will be hidden.")
+        ->addTo(layout);
+
     layout.addDropdown<QString>(
         "Timestamp format",
         {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
