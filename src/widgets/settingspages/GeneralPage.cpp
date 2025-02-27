@@ -476,9 +476,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addTo(layout);
 
     layout.addTitle("Messages");
-    layout.addCheckbox(
-        "Separate with lines", s.separateMessages, false,
-        "Adds a line between each message to help better tell them apart.");
+
+    SettingWidget::checkbox("Separate with lines", s.separateMessages)
+        ->setTooltip(
+            "Adds a line between each message to help better tell them apart.")
+        ->addTo(layout);
+
     layout.addCheckbox("Alternate background color", s.alternateMessages, false,
                        "Slightly change the background behind every other "
                        "message to help better tell them apart.");
