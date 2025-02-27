@@ -643,7 +643,7 @@ public:
         false,
     };
 
-    QStringSetting additionalExtensionIDs{"/appearance/additionalExtensionIDs",
+    QStringSetting additionalExtensionIDs{"/misc/additionalExtensionIDs",
                                           ""};
 
 private:
