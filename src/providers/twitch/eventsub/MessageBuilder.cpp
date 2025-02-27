@@ -388,4 +388,35 @@ void makeModerateMessage(
     builder.message().searchText = text;
 }
 
+void makeModerateMessage(EventSubMessageBuilder &builder,
+                         const lib::payload::channel_moderate::v2::Event &event,
+                         const lib::payload::channel_moderate::v2::Mod &action)
+{
+    QString text;
+
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
+    builder.emplaceSystemTextAndUpdate(u"modded"_s, text);
+    builder.appendUser(action.userName, action.userLogin, text, false);
+    builder.emplaceSystemTextAndUpdate(u"."_s, text);
+
+    builder.message().messageText = text;
+    builder.message().searchText = text;
+}
+
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Unmod &action)
+{
+    QString text;
+
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
+    builder.emplaceSystemTextAndUpdate(u"unmodded"_s, text);
+    builder.appendUser(action.userName, action.userLogin, text, false);
+    builder.emplaceSystemTextAndUpdate(u"."_s, text);
+
+    builder.message().messageText = text;
+    builder.message().searchText = text;
+}
+
 }  // namespace chatterino::eventsub
