@@ -561,7 +561,7 @@ MessagePtr makeAutomodHoldMessageHeader(
 {
     EventSubMessageBuilder builder(channel);
     builder->serverReceivedTime = time;
-    builder->id = u"automod_" + event.messageID.qt();
+    builder->id = u"automod_" % event.messageID.qt();
     builder->loginName = u"automod"_s;
     builder->channelName = event.broadcasterUserLogin.qt();
     builder->flags.set(MessageFlag::PubSub, MessageFlag::Timeout,
