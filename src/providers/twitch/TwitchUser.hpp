@@ -18,6 +18,7 @@ struct TwitchUser {
     QString id;
     mutable QString name;
     mutable QString displayName;
+    mutable QString profilePictureUrl;
 
     void update(const TwitchUser &other) const
     {
@@ -25,6 +26,7 @@ struct TwitchUser {
 
         this->name = other.name;
         this->displayName = other.displayName;
+        this->profilePictureUrl = other.profilePictureUrl;
     }
 
     void update(const HelixUser &user) const;
