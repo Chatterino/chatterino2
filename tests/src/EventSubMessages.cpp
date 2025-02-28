@@ -1,5 +1,6 @@
 #include "common/Literals.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/highlights/HighlightController.hpp"
 #include "lib/Snapshot.hpp"
 #include "messages/Message.hpp"
 #include "mocks/BaseApplication.hpp"
@@ -62,12 +63,34 @@ const std::map<QString, std::string_view, QCompareCaseInsensitive>
             "cost": 0
         })",
         },
+        {
+            "automod-message-hold",
+            R"({
+            "id": "a3122e32-6498-4847-8675-109b9b94f29c",
+            "status": "enabled",
+            "type": "automod.message.hold",
+            "version": "2",
+            "condition": {
+                "broadcaster_user_id": "489584266",
+                "moderator_user_id": "489584266"
+            },
+            "transport": {
+                "method":"websocket",
+                "session_id":"AgoQ59RRLw0mS6S000QtK8f54BIGY2VsbC1j"
+            },
+            "created_at": "2025-02-28T15:55:37.85489173Z",
+            "cost": 0
+        })",
+        },
     };
 
 class MockApplication : public mock::BaseApplication
 {
 public:
-    MockApplication() = default;
+    MockApplication()
+        : highlights(this->settings, &this->accounts)
+    {
+    }
 
     ILogging *getChatLogger() override
     {
@@ -84,9 +107,15 @@ public:
         return &this->accounts;
     }
 
+    HighlightController *getHighlights() override
+    {
+        return &this->highlights;
+    }
+
     mock::EmptyLogging logging;
     mock::MockTwitchIrcServer twitch;
     AccountController accounts;
+    HighlightController highlights;
 };
 
 std::shared_ptr<TwitchChannel> makeMockTwitchChannel(const QString &name)

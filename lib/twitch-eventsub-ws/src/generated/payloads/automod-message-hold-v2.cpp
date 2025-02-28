@@ -25,7 +25,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto broadcasterUserID =
-        boost::json::try_value_to<std::string>(*jvbroadcasterUserID);
+        boost::json::try_value_to<String>(*jvbroadcasterUserID);
 
     if (broadcasterUserID.has_error())
     {
@@ -40,7 +40,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto broadcasterUserLogin =
-        boost::json::try_value_to<std::string>(*jvbroadcasterUserLogin);
+        boost::json::try_value_to<String>(*jvbroadcasterUserLogin);
 
     if (broadcasterUserLogin.has_error())
     {
@@ -55,7 +55,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto broadcasterUserName =
-        boost::json::try_value_to<std::string>(*jvbroadcasterUserName);
+        boost::json::try_value_to<String>(*jvbroadcasterUserName);
 
     if (broadcasterUserName.has_error())
     {
@@ -68,7 +68,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -81,7 +81,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -94,7 +94,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<String>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -107,7 +107,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto messageID = boost::json::try_value_to<std::string>(*jvmessageID);
+    auto messageID = boost::json::try_value_to<String>(*jvmessageID);
 
     if (messageID.has_error())
     {
