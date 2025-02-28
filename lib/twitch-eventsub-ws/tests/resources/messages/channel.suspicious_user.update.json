@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "message_id": "bf6e248f-a523-4bf8-b215-ea1822e60223",
+    "message_type": "notification",
+    "message_timestamp": "2024-05-14T12:31:47.995298776Z",
+    "subscription_type": "channel.suspicious_user.update",
+    "subscription_version": "1"
+  },
+  "payload": {
+    "subscription": {
+      "id": "f1c2a387-161a-49f9-a165-0f21d7a4e1c4",
+      "type": "channel.suspicious_user.update",
+      "version": "1",
+      "status": "enabled",
+      "cost": 0,
+      "condition": {
+        "broadcaster_user_id": "1050263435",
+        "moderator_user_id": "1050263436"
+      },
+      "transport": { "method": "websocket", "session_id": "38de428e_b11f07be" },
+      "created_at": "2023-04-11T10:11:12.123Z"
+    },
+    "event": {
+      "broadcaster_user_id": "1050263435",
+      "broadcaster_user_name": "77f111cbb75341449f5",
+      "broadcaster_user_login": "77f111cbb75341449f5",
+      "moderator_user_id": "1050263436",
+      "moderator_user_name": "29087e59dfc441968f6",
+      "moderator_user_login": "29087e59dfc441968f6",
+      "user_id": "1050263437",
+      "user_name": "06fbcc75952245c5a87",
+      "user_login": "06fbcc75952245c5a87",
+      "low_trust_status": "restricted"
+    }
+  }
+}

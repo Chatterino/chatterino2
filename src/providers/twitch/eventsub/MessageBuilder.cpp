@@ -1,7 +1,39 @@
 #include "providers/twitch/eventsub/MessageBuilder.hpp"
 
+#include "common/Literals.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+
+namespace {
+
+using namespace chatterino;
+using namespace chatterino::eventsub;
+using namespace chatterino::literals;
+
+/// <MODERATOR> turned {on/off} <MODE> mode. [<DURATION>]
+void makeModeMessage(EventSubMessageBuilder &builder,
+                     const lib::payload::channel_moderate::v2::Event &event,
+                     const QString &mode, bool on, const QString &duration = {})
+{
+    QString text;
+
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
+    builder.emplaceSystemTextAndUpdate(u"turned"_s, text);
+    QString op = on ? u"on"_s : u"off"_s;
+    builder.emplaceSystemTextAndUpdate(op, text);
+    builder.emplaceSystemTextAndUpdate(mode, text);
+    builder.emplaceSystemTextAndUpdate(u"mode."_s, text);
+
+    if (!duration.isEmpty())
+    {
+        builder.emplaceSystemTextAndUpdate(duration, text);
+    }
+
+    builder.message().messageText = text;
+    builder.message().searchText = text;
+}
+
+}  // namespace
 
 namespace chatterino::eventsub {
 
@@ -9,8 +41,8 @@ EventSubMessageBuilder::EventSubMessageBuilder(TwitchChannel *channel,
                                                const QDateTime &time)
     : channel(channel)
 {
-    this->emplace<TimestampElement>();
-    this->message().flags.set(MessageFlag::System);
+    this->emplace<TimestampElement>(time.time());
+    this->message().flags.set(MessageFlag::System, MessageFlag::EventSub);
     this->message().flags.set(MessageFlag::Timeout);  // do we need this?
     this->message().serverReceivedTime = time;
 }
@@ -102,6 +134,317 @@ void makeModerateMessage(EventSubMessageBuilder &builder,
         builder.emplaceSystemTextAndUpdate(":", text);
         builder.emplaceSystemTextAndUpdate(reasons.join(", "), text);
     }
+
+    builder.message().messageText = text;
+    builder.message().searchText = text;
+}
+
+void makeModerateMessage(EventSubMessageBuilder &builder,
+                         const lib::payload::channel_moderate::v2::Event &event,
+                         const lib::payload::channel_moderate::v2::Ban &action)
+{
+    QString text;
+    bool isShared = event.isFromSharedChat();
+
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
+    builder.emplaceSystemTextAndUpdate("banned", text);
+    builder.appendUser(action.userName, action.userLogin, text, isShared);
+
+    if (isShared)
+    {
+        builder.emplaceSystemTextAndUpdate("in", text);
+        builder.appendUser(*event.sourceBroadcasterUserName,
+                           *event.sourceBroadcasterUserLogin, text, false);
+    }
+
+    if (action.reason.view().empty())
+    {
+        builder.emplaceSystemTextAndUpdate(".", text);
+    }
+    else
+    {
+        builder.emplaceSystemTextAndUpdate(":", text);
+        builder.emplaceSystemTextAndUpdate(action.reason.qt(), text);
+    }
+
+    builder->messageText = text;
+    builder->searchText = text;
+    builder->timeoutUser = action.userLogin.qt();
+}
+
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Unban &action)
+{
+    QString text;
+    bool isShared = event.isFromSharedChat();
+
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
+    builder.emplaceSystemTextAndUpdate("unbanned", text);
+    builder.appendUser(action.userName, action.userLogin, text, isShared);
+
+    if (isShared)
+    {
+        builder.emplaceSystemTextAndUpdate("in", text);
+        builder.appendUser(*event.sourceBroadcasterUserName,
+                           *event.sourceBroadcasterUserLogin, text, false);
+    }
+
+    builder.emplaceSystemTextAndUpdate(".", text);
+
+    builder->messageText = text;
+    builder->searchText = text;
+    builder->timeoutUser = action.userLogin.qt();
+}
+
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Delete &action)
+{
+    builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
+
+    QString text;
+    bool isShared = event.isFromSharedChat();
+
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
+    builder.emplaceSystemTextAndUpdate("deleted message from", text);
+    builder.appendUser(action.userName, action.userLogin, text);
+
+    if (isShared)
+    {
+        builder.emplaceSystemTextAndUpdate("in", text);
+        builder.appendUser(*event.sourceBroadcasterUserName,
+                           *event.sourceBroadcasterUserLogin, text);
+    }
+
+    builder.emplaceSystemTextAndUpdate("saying:", text);
+
+    if (action.messageBody.view().length() > 50)
+    {
+        builder
+            .emplace<TextElement>(action.messageBody.qt().left(50) + "…",
+                                  MessageElementFlag::Text, MessageColor::Text)
+            ->setLink({Link::JumpToMessage, action.messageID.qt()});
+
+        text.append(action.messageBody.qt().left(50) + "…");
+    }
+    else
+    {
+        builder
+            .emplace<TextElement>(action.messageBody.qt(),
+                                  MessageElementFlag::Text, MessageColor::Text)
+            ->setLink({Link::JumpToMessage, action.messageID.qt()});
+
+        text.append(action.messageBody.qt());
+    }
+
+    builder->messageText = text;
+    builder->searchText = text;
+    builder->timeoutUser = action.userLogin.qt();
+}
+
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Followers &action)
+{
+    QString duration;
+    if (action.followDurationMinutes > 0)
+    {
+        duration = u"(%1 minutes)"_s.arg(action.followDurationMinutes);
+    }
+    makeModeMessage(builder, event, u"followers-only"_s, true, duration);
+}
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::FollowersOff & /*action*/)
+{
+    makeModeMessage(builder, event, u"followers-only"_s, false);
+}
+
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::EmoteOnly & /*action*/)
+{
+    makeModeMessage(builder, event, u"emote-only"_s, true);
+}
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::EmoteOnlyOff & /*action*/)
+{
+    makeModeMessage(builder, event, u"emote-only"_s, false);
+}
+
+void makeModerateMessage(EventSubMessageBuilder &builder,
+                         const lib::payload::channel_moderate::v2::Event &event,
+                         const lib::payload::channel_moderate::v2::Slow &action)
+{
+    makeModeMessage(builder, event, u"slow"_s, true,
+                    u"(%1 seconds)"_s.arg(action.waitTimeSeconds));
+}
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::SlowOff & /*action*/)
+{
+    makeModeMessage(builder, event, u"slow"_s, false);
+}
+
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Subscribers & /*action*/)
+{
+    makeModeMessage(builder, event, u"subscribers-only"_s, true);
+}
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::SubscribersOff & /*action*/)
+{
+    makeModeMessage(builder, event, u"subscribers-only"_s, false);
+}
+
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Uniquechat & /*action*/)
+{
+    makeModeMessage(builder, event, u"unique-chat"_s, true);
+}
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::UniquechatOff & /*action*/)
+{
+    makeModeMessage(builder, event, u"unique-chat"_s, false);
+}
+
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::AutomodTerms &action)
+{
+    QString text;
+
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
+    if (action.action == "add")
+    {
+        builder.emplaceSystemTextAndUpdate(u"added"_s, text);
+    }
+    else
+    {
+        builder.emplaceSystemTextAndUpdate(u"removed"_s, text);
+    }
+
+    QString terms;
+    for (size_t i = 0; i < action.terms.size(); i++)
+    {
+        if (i != 0)
+        {
+            if (i == action.terms.size() - 1)
+            {
+                if (action.terms.size() == 2)
+                {
+                    terms.append(u" and ");
+                }
+                else
+                {
+                    terms.append(u", and ");
+                }
+            }
+            else
+            {
+                terms.append(u", ");
+            }
+        }
+        terms.append(u'"');
+        terms.append(action.terms[i].qt());
+        terms.append(u'"');
+    }
+    builder.emplaceSystemTextAndUpdate(terms, text);
+    builder.emplaceSystemTextAndUpdate(u"as"_s, text);
+    if (action.terms.size() == 1)
+    {
+        builder.emplaceSystemTextAndUpdate(u"a"_s, text);
+    }
+    builder.emplaceSystemTextAndUpdate(action.list.qt(), text);
+    if (action.terms.size() == 1)
+    {
+        builder.emplaceSystemTextAndUpdate(u"term"_s, text);
+    }
+    else
+    {
+        builder.emplaceSystemTextAndUpdate(u"terms"_s, text);
+    }
+    builder.emplaceSystemTextAndUpdate(u"on AutoMod."_s, text);
+
+    builder.message().messageText = text;
+    builder.message().searchText = text;
+}
+
+void makeModerateMessage(EventSubMessageBuilder &builder,
+                         const lib::payload::channel_moderate::v2::Event &event,
+                         const lib::payload::channel_moderate::v2::Mod &action)
+{
+    QString text;
+
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
+    builder.emplaceSystemTextAndUpdate(u"modded"_s, text);
+    builder.appendUser(action.userName, action.userLogin, text, false);
+    builder.emplaceSystemTextAndUpdate(u"."_s, text);
+
+    builder.message().messageText = text;
+    builder.message().searchText = text;
+}
+
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Unmod &action)
+{
+    QString text;
+
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
+    builder.emplaceSystemTextAndUpdate(u"unmodded"_s, text);
+    builder.appendUser(action.userName, action.userLogin, text, false);
+    builder.emplaceSystemTextAndUpdate(u"."_s, text);
+
+    builder.message().messageText = text;
+    builder.message().searchText = text;
+}
+
+void makeModerateMessage(EventSubMessageBuilder &builder,
+                         const lib::payload::channel_moderate::v2::Event &event,
+                         const lib::payload::channel_moderate::v2::Raid &action)
+{
+    QString text;
+
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
+    builder.emplaceSystemTextAndUpdate("initiated a raid to", text);
+    builder.appendUser(action.userName, action.userLogin, text, false);
+    builder.emplaceSystemTextAndUpdate(".", text);
+
+    builder.message().messageText = text;
+    builder.message().searchText = text;
+}
+
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Unraid &action)
+{
+    QString text;
+
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
+    builder.emplaceSystemTextAndUpdate("canceled the raid to", text);
+    builder.appendUser(action.userName, action.userLogin, text, false);
+    builder.emplaceSystemTextAndUpdate(".", text);
 
     builder.message().messageText = text;
     builder.message().searchText = text;

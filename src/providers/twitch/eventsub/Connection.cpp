@@ -12,6 +12,7 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
 
 #include <boost/json.hpp>
@@ -73,52 +74,8 @@ void Connection::onChannelBan(
     const lib::payload::channel_ban::v1::Payload &payload)
 {
     (void)metadata;
-
-    auto roomID = QString::fromStdString(payload.event.broadcasterUserID);
-
-    BanAction action{};
-
-    if (!getApp()->isTest())
-    {
-        action.timestamp = std::chrono::steady_clock::now();
-    }
-    action.roomID = roomID;
-    action.source = ActionUser{
-        .id = QString::fromStdString(payload.event.moderatorUserID),
-        .login = QString::fromStdString(payload.event.moderatorUserLogin),
-        .displayName = QString::fromStdString(payload.event.moderatorUserName),
-    };
-    action.target = ActionUser{
-        .id = QString::fromStdString(payload.event.userID),
-        .login = QString::fromStdString(payload.event.userLogin),
-        .displayName = QString::fromStdString(payload.event.userName),
-    };
-    action.reason = QString::fromStdString(payload.event.reason);
-    if (payload.event.isPermanent)
-    {
-        action.duration = 0;
-    }
-    else
-    {
-        auto timeoutDuration = payload.event.timeoutDuration();
-        auto timeoutDurationInSeconds =
-            std::chrono::duration_cast<std::chrono::seconds>(timeoutDuration)
-                .count();
-        action.duration = timeoutDurationInSeconds;
-    }
-
-    auto chan = getApp()->getTwitch()->getChannelOrEmptyByID(roomID);
-
-    runInGuiThread([action{std::move(action)}, chan{std::move(chan)}] {
-        auto time = QDateTime::currentDateTime();
-        if (getApp()->isTest())
-        {
-            time = QDateTime::fromSecsSinceEpoch(0).toUTC();
-        }
-        MessageBuilder msg(action, time);
-        msg->flags.set(MessageFlag::PubSub);
-        chan->addOrReplaceTimeout(msg.release(), QDateTime::currentDateTime());
-    });
+    qCDebug(LOG) << "On channel ban event for channel"
+                 << payload.event.broadcasterUserLogin.c_str();
 }
 
 void Connection::onStreamOnline(
@@ -192,11 +149,7 @@ void Connection::onChannelModerate(
         return;
     }
 
-    auto now = QDateTime::currentDateTime();
-    if (getApp()->isTest())
-    {
-        now = QDateTime::fromSecsSinceEpoch(0).toUTC();
-    }
+    auto now = chronoToQDateTime(metadata.messageTimestamp);
 
     std::visit(
         [&](auto &&action) {
@@ -218,6 +171,41 @@ void Connection::onChannelModerate(
             }
         },
         payload.event.action);
+}
+
+void Connection::onAutomodMessageHold(
+    const lib::messages::Metadata &metadata,
+    const lib::payload::automod_message_hold::v2::Payload &payload)
+{
+    (void)metadata;
+    qCDebug(LOG) << "On automod message hold for"
+                 << payload.event.broadcasterUserLogin.c_str();
+}
+void Connection::onAutomodMessageUpdate(
+    const lib::messages::Metadata &metadata,
+    const lib::payload::automod_message_update::v2::Payload &payload)
+{
+    (void)metadata;
+    qCDebug(LOG) << "On automod message update for"
+                 << payload.event.broadcasterUserLogin.c_str();
+}
+
+void Connection::onChannelSuspiciousUserMessage(
+    const lib::messages::Metadata &metadata,
+    const lib::payload::channel_suspicious_user_message::v1::Payload &payload)
+{
+    (void)metadata;
+    qCDebug(LOG) << "On channel suspicious user message for"
+                 << payload.event.broadcasterUserLogin.c_str();
+}
+
+void Connection::onChannelSuspiciousUserUpdate(
+    const lib::messages::Metadata &metadata,
+    const lib::payload::channel_suspicious_user_update::v1::Payload &payload)
+{
+    (void)metadata;
+    qCDebug(LOG) << "On channel suspicious user update for"
+                 << payload.event.broadcasterUserLogin.c_str();
 }
 
 QString Connection::getSessionID() const

@@ -213,7 +213,7 @@ boost::json::result_for<Mod, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -226,7 +226,7 @@ boost::json::result_for<Mod, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -239,7 +239,7 @@ boost::json::result_for<Mod, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<String>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -269,7 +269,7 @@ boost::json::result_for<Unmod, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -282,7 +282,7 @@ boost::json::result_for<Unmod, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -295,7 +295,7 @@ boost::json::result_for<Unmod, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<String>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -325,7 +325,7 @@ boost::json::result_for<Ban, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -338,7 +338,7 @@ boost::json::result_for<Ban, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -351,7 +351,7 @@ boost::json::result_for<Ban, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<String>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -364,7 +364,7 @@ boost::json::result_for<Ban, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto reason = boost::json::try_value_to<std::string>(*jvreason);
+    auto reason = boost::json::try_value_to<String>(*jvreason);
 
     if (reason.has_error())
     {
@@ -381,9 +381,15 @@ boost::json::result_for<Ban, boost::json::value>::type tag_invoke(
 
 boost::json::result_for<SharedChatBan, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<SharedChatBan> /* tag */,
-    const boost::json::value & /* jvRoot */)
+    const boost::json::value &jvRoot)
 {
-    return SharedChatBan{};
+    auto base = boost::json::try_value_to<Ban>(jvRoot);
+    if (base.has_error())
+    {
+        return base.error();
+    }
+
+    return SharedChatBan{std::move(*base)};
 }
 
 boost::json::result_for<Unban, boost::json::value>::type tag_invoke(
@@ -402,7 +408,7 @@ boost::json::result_for<Unban, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -415,7 +421,7 @@ boost::json::result_for<Unban, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -428,7 +434,7 @@ boost::json::result_for<Unban, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<String>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -444,9 +450,15 @@ boost::json::result_for<Unban, boost::json::value>::type tag_invoke(
 
 boost::json::result_for<SharedChatUnban, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<SharedChatUnban> /* tag */,
-    const boost::json::value & /* jvRoot */)
+    const boost::json::value &jvRoot)
 {
-    return SharedChatUnban{};
+    auto base = boost::json::try_value_to<Unban>(jvRoot);
+    if (base.has_error())
+    {
+        return base.error();
+    }
+
+    return SharedChatUnban{std::move(*base)};
 }
 
 boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
@@ -465,7 +477,7 @@ boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -478,7 +490,7 @@ boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -491,7 +503,7 @@ boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<String>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -504,20 +516,24 @@ boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto reason = boost::json::try_value_to<std::string>(*jvreason);
+    auto reason = boost::json::try_value_to<String>(*jvreason);
 
     if (reason.has_error())
     {
         return reason.error();
     }
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<Timeout>().expiresAt)>>);
     const auto *jvexpiresAt = root.if_contains("expires_at");
     if (jvexpiresAt == nullptr)
     {
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto expiresAt = boost::json::try_value_to<std::string>(*jvexpiresAt);
+    auto expiresAt =
+        boost::json::try_value_to<std::chrono::system_clock::time_point>(
+            *jvexpiresAt, AsISO8601());
 
     if (expiresAt.has_error())
     {
@@ -529,15 +545,21 @@ boost::json::result_for<Timeout, boost::json::value>::type tag_invoke(
         .userLogin = std::move(userLogin.value()),
         .userName = std::move(userName.value()),
         .reason = std::move(reason.value()),
-        .expiresAt = std::move(expiresAt.value()),
+        .expiresAt = expiresAt.value(),
     };
 }
 
 boost::json::result_for<SharedChatTimeout, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<SharedChatTimeout> /* tag */,
-    const boost::json::value & /* jvRoot */)
+    const boost::json::value &jvRoot)
 {
-    return SharedChatTimeout{};
+    auto base = boost::json::try_value_to<Timeout>(jvRoot);
+    if (base.has_error())
+    {
+        return base.error();
+    }
+
+    return SharedChatTimeout{std::move(*base)};
 }
 
 boost::json::result_for<Untimeout, boost::json::value>::type tag_invoke(
@@ -598,9 +620,15 @@ boost::json::result_for<Untimeout, boost::json::value>::type tag_invoke(
 
 boost::json::result_for<SharedChatUntimeout, boost::json::value>::type
     tag_invoke(boost::json::try_value_to_tag<SharedChatUntimeout> /* tag */,
-               const boost::json::value & /* jvRoot */)
+               const boost::json::value &jvRoot)
 {
-    return SharedChatUntimeout{};
+    auto base = boost::json::try_value_to<Untimeout>(jvRoot);
+    if (base.has_error())
+    {
+        return base.error();
+    }
+
+    return SharedChatUntimeout{std::move(*base)};
 }
 
 boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
@@ -619,7 +647,7 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -632,7 +660,7 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -645,7 +673,7 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<String>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -691,7 +719,7 @@ boost::json::result_for<Unraid, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -704,7 +732,7 @@ boost::json::result_for<Unraid, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -717,7 +745,7 @@ boost::json::result_for<Unraid, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<String>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -747,7 +775,7 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -760,7 +788,7 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -773,7 +801,7 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<String>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -786,7 +814,7 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto messageID = boost::json::try_value_to<std::string>(*jvmessageID);
+    auto messageID = boost::json::try_value_to<String>(*jvmessageID);
 
     if (messageID.has_error())
     {
@@ -799,7 +827,7 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto messageBody = boost::json::try_value_to<std::string>(*jvmessageBody);
+    auto messageBody = boost::json::try_value_to<String>(*jvmessageBody);
 
     if (messageBody.has_error())
     {
@@ -817,9 +845,15 @@ boost::json::result_for<Delete, boost::json::value>::type tag_invoke(
 
 boost::json::result_for<SharedChatDelete, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<SharedChatDelete> /* tag */,
-    const boost::json::value & /* jvRoot */)
+    const boost::json::value &jvRoot)
 {
-    return SharedChatDelete{};
+    auto base = boost::json::try_value_to<Delete>(jvRoot);
+    if (base.has_error())
+    {
+        return base.error();
+    }
+
+    return SharedChatDelete{std::move(*base)};
 }
 
 boost::json::result_for<AutomodTerms, boost::json::value>::type tag_invoke(
@@ -838,7 +872,7 @@ boost::json::result_for<AutomodTerms, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto action = boost::json::try_value_to<std::string>(*jvaction);
+    auto action = boost::json::try_value_to<String>(*jvaction);
 
     if (action.has_error())
     {
@@ -851,19 +885,19 @@ boost::json::result_for<AutomodTerms, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto list = boost::json::try_value_to<std::string>(*jvlist);
+    auto list = boost::json::try_value_to<String>(*jvlist);
 
     if (list.has_error())
     {
         return list.error();
     }
 
-    std::vector<std::string> vterms;
+    std::vector<chatterino::eventsub::lib::String> vterms;
     const auto *jvterms = root.if_contains("terms");
     if (jvterms != nullptr && !jvterms->is_null())
     {
-        auto terms =
-            boost::json::try_value_to<std::vector<std::string>>(*jvterms);
+        auto terms = boost::json::try_value_to<
+            std::vector<chatterino::eventsub::lib::String>>(*jvterms);
         if (terms.has_error())
         {
             return terms.error();
@@ -898,30 +932,54 @@ boost::json::result_for<AutomodTerms, boost::json::value>::type tag_invoke(
 
 boost::json::result_for<AddBlockedTerm, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<AddBlockedTerm> /* tag */,
-    const boost::json::value & /* jvRoot */)
+    const boost::json::value &jvRoot)
 {
-    return AddBlockedTerm{};
+    auto base = boost::json::try_value_to<AutomodTerms>(jvRoot);
+    if (base.has_error())
+    {
+        return base.error();
+    }
+
+    return AddBlockedTerm{std::move(*base)};
 }
 
 boost::json::result_for<AddPermittedTerm, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<AddPermittedTerm> /* tag */,
-    const boost::json::value & /* jvRoot */)
+    const boost::json::value &jvRoot)
 {
-    return AddPermittedTerm{};
+    auto base = boost::json::try_value_to<AutomodTerms>(jvRoot);
+    if (base.has_error())
+    {
+        return base.error();
+    }
+
+    return AddPermittedTerm{std::move(*base)};
 }
 
 boost::json::result_for<RemoveBlockedTerm, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<RemoveBlockedTerm> /* tag */,
-    const boost::json::value & /* jvRoot */)
+    const boost::json::value &jvRoot)
 {
-    return RemoveBlockedTerm{};
+    auto base = boost::json::try_value_to<AutomodTerms>(jvRoot);
+    if (base.has_error())
+    {
+        return base.error();
+    }
+
+    return RemoveBlockedTerm{std::move(*base)};
 }
 
 boost::json::result_for<RemovePermittedTerm, boost::json::value>::type
     tag_invoke(boost::json::try_value_to_tag<RemovePermittedTerm> /* tag */,
-               const boost::json::value & /* jvRoot */)
+               const boost::json::value &jvRoot)
 {
-    return RemovePermittedTerm{};
+    auto base = boost::json::try_value_to<AutomodTerms>(jvRoot);
+    if (base.has_error())
+    {
+        return base.error();
+    }
+
+    return RemovePermittedTerm{std::move(*base)};
 }
 
 boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
@@ -1013,16 +1071,28 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
 
 boost::json::result_for<ApproveUnbanRequest, boost::json::value>::type
     tag_invoke(boost::json::try_value_to_tag<ApproveUnbanRequest> /* tag */,
-               const boost::json::value & /* jvRoot */)
+               const boost::json::value &jvRoot)
 {
-    return ApproveUnbanRequest{};
+    auto base = boost::json::try_value_to<UnbanRequest>(jvRoot);
+    if (base.has_error())
+    {
+        return base.error();
+    }
+
+    return ApproveUnbanRequest{std::move(*base)};
 }
 
 boost::json::result_for<DenyUnbanRequest, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<DenyUnbanRequest> /* tag */,
-    const boost::json::value & /* jvRoot */)
+    const boost::json::value &jvRoot)
 {
-    return DenyUnbanRequest{};
+    auto base = boost::json::try_value_to<UnbanRequest>(jvRoot);
+    if (base.has_error())
+    {
+        return base.error();
+    }
+
+    return DenyUnbanRequest{std::move(*base)};
 }
 
 boost::json::result_for<Warn, boost::json::value>::type tag_invoke(
@@ -1519,19 +1589,70 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (actionTag == AddBlockedTerm::TAG)
     {
-        action.emplace<AddBlockedTerm>();
+        const auto *actionVal =
+            root.if_contains(detail::fieldFor<AddBlockedTerm>());
+        if (!actionVal)
+        {
+            EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
+        }
+        auto actionAddBlockedTerm =
+            boost::json::try_value_to<AddBlockedTerm>(*actionVal);
+        if (actionAddBlockedTerm.has_error())
+        {
+            return actionAddBlockedTerm.error();
+        }
+        action.emplace<AddBlockedTerm>(std::move(actionAddBlockedTerm.value()));
     }
     else if (actionTag == AddPermittedTerm::TAG)
     {
-        action.emplace<AddPermittedTerm>();
+        const auto *actionVal =
+            root.if_contains(detail::fieldFor<AddPermittedTerm>());
+        if (!actionVal)
+        {
+            EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
+        }
+        auto actionAddPermittedTerm =
+            boost::json::try_value_to<AddPermittedTerm>(*actionVal);
+        if (actionAddPermittedTerm.has_error())
+        {
+            return actionAddPermittedTerm.error();
+        }
+        action.emplace<AddPermittedTerm>(
+            std::move(actionAddPermittedTerm.value()));
     }
     else if (actionTag == RemoveBlockedTerm::TAG)
     {
-        action.emplace<RemoveBlockedTerm>();
+        const auto *actionVal =
+            root.if_contains(detail::fieldFor<RemoveBlockedTerm>());
+        if (!actionVal)
+        {
+            EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
+        }
+        auto actionRemoveBlockedTerm =
+            boost::json::try_value_to<RemoveBlockedTerm>(*actionVal);
+        if (actionRemoveBlockedTerm.has_error())
+        {
+            return actionRemoveBlockedTerm.error();
+        }
+        action.emplace<RemoveBlockedTerm>(
+            std::move(actionRemoveBlockedTerm.value()));
     }
     else if (actionTag == RemovePermittedTerm::TAG)
     {
-        action.emplace<RemovePermittedTerm>();
+        const auto *actionVal =
+            root.if_contains(detail::fieldFor<RemovePermittedTerm>());
+        if (!actionVal)
+        {
+            EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
+        }
+        auto actionRemovePermittedTerm =
+            boost::json::try_value_to<RemovePermittedTerm>(*actionVal);
+        if (actionRemovePermittedTerm.has_error())
+        {
+            return actionRemovePermittedTerm.error();
+        }
+        action.emplace<RemovePermittedTerm>(
+            std::move(actionRemovePermittedTerm.value()));
     }
     else if (actionTag == Mod::TAG)
     {
@@ -1563,11 +1684,37 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (actionTag == ApproveUnbanRequest::TAG)
     {
-        action.emplace<ApproveUnbanRequest>();
+        const auto *actionVal =
+            root.if_contains(detail::fieldFor<ApproveUnbanRequest>());
+        if (!actionVal)
+        {
+            EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
+        }
+        auto actionApproveUnbanRequest =
+            boost::json::try_value_to<ApproveUnbanRequest>(*actionVal);
+        if (actionApproveUnbanRequest.has_error())
+        {
+            return actionApproveUnbanRequest.error();
+        }
+        action.emplace<ApproveUnbanRequest>(
+            std::move(actionApproveUnbanRequest.value()));
     }
     else if (actionTag == DenyUnbanRequest::TAG)
     {
-        action.emplace<DenyUnbanRequest>();
+        const auto *actionVal =
+            root.if_contains(detail::fieldFor<DenyUnbanRequest>());
+        if (!actionVal)
+        {
+            EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
+        }
+        auto actionDenyUnbanRequest =
+            boost::json::try_value_to<DenyUnbanRequest>(*actionVal);
+        if (actionDenyUnbanRequest.has_error())
+        {
+            return actionDenyUnbanRequest.error();
+        }
+        action.emplace<DenyUnbanRequest>(
+            std::move(actionDenyUnbanRequest.value()));
     }
     else if (actionTag == Warn::TAG)
     {
@@ -1585,23 +1732,87 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
     else if (actionTag == SharedChatBan::TAG)
     {
-        action.emplace<SharedChatBan>();
+        const auto *actionVal =
+            root.if_contains(detail::fieldFor<SharedChatBan>());
+        if (!actionVal)
+        {
+            EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
+        }
+        auto actionSharedChatBan =
+            boost::json::try_value_to<SharedChatBan>(*actionVal);
+        if (actionSharedChatBan.has_error())
+        {
+            return actionSharedChatBan.error();
+        }
+        action.emplace<SharedChatBan>(std::move(actionSharedChatBan.value()));
     }
     else if (actionTag == SharedChatTimeout::TAG)
     {
-        action.emplace<SharedChatTimeout>();
+        const auto *actionVal =
+            root.if_contains(detail::fieldFor<SharedChatTimeout>());
+        if (!actionVal)
+        {
+            EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
+        }
+        auto actionSharedChatTimeout =
+            boost::json::try_value_to<SharedChatTimeout>(*actionVal);
+        if (actionSharedChatTimeout.has_error())
+        {
+            return actionSharedChatTimeout.error();
+        }
+        action.emplace<SharedChatTimeout>(
+            std::move(actionSharedChatTimeout.value()));
     }
     else if (actionTag == SharedChatUnban::TAG)
     {
-        action.emplace<SharedChatUnban>();
+        const auto *actionVal =
+            root.if_contains(detail::fieldFor<SharedChatUnban>());
+        if (!actionVal)
+        {
+            EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
+        }
+        auto actionSharedChatUnban =
+            boost::json::try_value_to<SharedChatUnban>(*actionVal);
+        if (actionSharedChatUnban.has_error())
+        {
+            return actionSharedChatUnban.error();
+        }
+        action.emplace<SharedChatUnban>(
+            std::move(actionSharedChatUnban.value()));
     }
     else if (actionTag == SharedChatUntimeout::TAG)
     {
-        action.emplace<SharedChatUntimeout>();
+        const auto *actionVal =
+            root.if_contains(detail::fieldFor<SharedChatUntimeout>());
+        if (!actionVal)
+        {
+            EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
+        }
+        auto actionSharedChatUntimeout =
+            boost::json::try_value_to<SharedChatUntimeout>(*actionVal);
+        if (actionSharedChatUntimeout.has_error())
+        {
+            return actionSharedChatUntimeout.error();
+        }
+        action.emplace<SharedChatUntimeout>(
+            std::move(actionSharedChatUntimeout.value()));
     }
     else if (actionTag == SharedChatDelete::TAG)
     {
-        action.emplace<SharedChatDelete>();
+        const auto *actionVal =
+            root.if_contains(detail::fieldFor<SharedChatDelete>());
+        if (!actionVal)
+        {
+            EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
+        }
+        auto actionSharedChatDelete =
+            boost::json::try_value_to<SharedChatDelete>(*actionVal);
+        if (actionSharedChatDelete.has_error())
+        {
+            return actionSharedChatDelete.error();
+        }
+        action.emplace<SharedChatDelete>(
+            std::move(actionSharedChatDelete.value()));
     }
     else
     {

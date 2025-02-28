@@ -96,17 +96,25 @@ std::shared_ptr<TwitchChannel> makeMockTwitchChannel(const QString &name)
 }
 
 boost::beast::flat_buffer makePayload(std::string_view subJson,
-                                      const QJsonObject &event)
+                                      QJsonObject event)
 {
     auto subscription =
         QJsonDocument::fromJson(
             QByteArray::fromRawData(subJson.data(),
                                     static_cast<qsizetype>(subJson.size())))
             .object();
+
+    QString timestamp = "2024-05-14T12:31:47.995298776Z";
+    if (event.contains("__timestamp"))
+    {
+        timestamp = event["__timestamp"].toString();
+        event.remove("__timestamp");
+    }
+
     QJsonObject metadata{
         {"message_id", "e8edc592-5550-4aa5-bba6-39e31a2be435"},
         {"message_type", "notification"},
-        {"message_timestamp", "2024-05-14T12:31:47.995298776Z"},
+        {"message_timestamp", timestamp},
         {"subscription_type", subscription["type"]},
         {"subscription_version", subscription["version"]},
     };

@@ -6,6 +6,15 @@
 
 #include <QDateTime>
 
+#include <concepts>
+
+namespace chatterino::eventsub::detail {
+
+template <typename T, typename... Types>
+concept AnyOf = (std::same_as<T, Types> || ...);
+
+}  // namespace chatterino::eventsub::detail
+
 namespace chatterino::eventsub {
 
 class EventSubMessageBuilder : public MessageBuilder
@@ -42,5 +51,98 @@ void makeModerateMessage(
     EventSubMessageBuilder &builder,
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Warn &action);
+
+/// <MODERATOR> banned <USER>[ in <CHANNEL>]: <REASON>
+void makeModerateMessage(EventSubMessageBuilder &builder,
+                         const lib::payload::channel_moderate::v2::Event &event,
+                         const lib::payload::channel_moderate::v2::Ban &action);
+
+/// <MODERATOR> unbanned <USER>[ in <CHANNEL>].
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Unban &action);
+
+/// <MODERATOR> deleted message from <USER>[ in <CHANNEL>] saying: <MESSAGE>
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Delete &action);
+
+// mode changes
+
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Followers &action);
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::FollowersOff &action);
+
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::EmoteOnly &action);
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::EmoteOnlyOff &action);
+
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Slow &action);
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::SlowOff &action);
+
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Subscribers &action);
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::SubscribersOff &action);
+
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Uniquechat &action);
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::UniquechatOff &action);
+
+/// <MODERATOR> {added/removed} <TERMS...> as (a) {blocked/permitted} term(s) on AutoMod.
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::AutomodTerms &action);
+
+/// <BROADCASTER> modded <MODERATOR>.
+void makeModerateMessage(EventSubMessageBuilder &builder,
+                         const lib::payload::channel_moderate::v2::Event &event,
+                         const lib::payload::channel_moderate::v2::Mod &action);
+
+/// <BROADCASTER> unmodded <MODERATOR>.
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Unmod &action);
+
+/// <MODERATOR> initiated a raid to <CHANNEL>.
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Raid &action);
+
+/// <MODERATOR> canceled the raid to <CHANNEL>.
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Unraid &action);
 
 }  // namespace chatterino::eventsub

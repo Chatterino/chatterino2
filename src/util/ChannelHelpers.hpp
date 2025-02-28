@@ -52,6 +52,11 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
             break;
         }
 
+        if (s->flags.has(MessageFlag::EventSub))
+        {
+            continue;  // TODO: implement stacking for eventsub
+        }
+
         if (timeoutStackStyle == TimeoutStackStyle::DontStackBeyondUserMessage)
         {
             if (s->loginName == message->timeoutUser &&

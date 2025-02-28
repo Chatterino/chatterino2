@@ -1,5 +1,6 @@
 #pragma once
 
+#include "twitch-eventsub-ws/payloads/structured-message.hpp"
 #include "twitch-eventsub-ws/payloads/subscription.hpp"
 
 #include <boost/json.hpp>
@@ -14,33 +15,6 @@ struct Badge {
     std::string setID;
     std::string id;
     std::string info;
-};
-
-struct Cheermote {
-    std::string prefix;
-    int bits;
-    int tier;
-};
-
-struct Emote {
-    std::string id;
-    std::string emoteSetID;
-    std::string ownerID;
-    std::vector<std::string> format;
-};
-
-struct Mention {
-    std::string userID;
-    std::string userName;
-    std::string userLogin;
-};
-
-struct MessageFragment {
-    std::string type;
-    std::string text;
-    std::optional<Cheermote> cheermote;
-    std::optional<Emote> emote;
-    std::optional<Mention> mention;
 };
 
 struct Subcription {
@@ -153,11 +127,6 @@ struct BitsBadgeTier {
     int tier;
 };
 
-struct Message {
-    std::string text;
-    std::vector<MessageFragment> fragments;
-};
-
 struct Event {
     std::string broadcasterUserID;
     std::string broadcasterUserLogin;
@@ -170,7 +139,7 @@ struct Event {
     std::vector<Badge> badges;
     std::string systemMessage;
     std::string messageID;
-    Message message;
+    chat::Message message;
     /// json_tag=notice_type
     std::variant<Subcription,                //
                  Resubscription,             //
