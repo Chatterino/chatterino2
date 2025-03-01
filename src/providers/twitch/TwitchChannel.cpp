@@ -1522,10 +1522,27 @@ void TwitchChannel::refreshPubSub()
                         },
                     },
             });
+        this->eventSubSuspiciousUserMessageHandle =
+            getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
+                .subscriptionType = "channel.suspicious_user.message",
+                .subscriptionVersion = "1",
+                .conditions =
+                    {
+                        {
+                            "broadcaster_user_id",
+                            roomId,
+                        },
+                        {
+                            "moderator_user_id",
+                            currentAccount->getUserId(),
+                        },
+                    },
+            });
     }
     else
     {
         this->eventSubChannelModerateHandle.reset();
+        this->eventSubSuspiciousUserMessageHandle.reset();
     }
     getApp()->getTwitchPubSub()->listenToChannelPointRewards(roomId);
 }

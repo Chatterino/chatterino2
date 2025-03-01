@@ -4,6 +4,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "twitch-eventsub-ws/payloads/automod-message-hold-v2.hpp"
 #include "twitch-eventsub-ws/payloads/channel-moderate-v2.hpp"
+#include "twitch-eventsub-ws/payloads/channel-suspicious-user-message-v1.hpp"
 
 #include <QDateTime>
 
@@ -155,5 +156,13 @@ MessagePtr makeAutomodHoldMessageHeader(
 MessagePtr makeAutomodHoldMessageBody(
     TwitchChannel *channel, const QDateTime &time,
     const lib::payload::automod_message_hold::v2::Event &event);
+
+MessagePtr makeSuspiciousUserMessageHeader(
+    TwitchChannel *channel, const QDateTime &time,
+    const lib::payload::channel_suspicious_user_message::v1::Event &event);
+
+MessagePtr makeSuspiciousUserMessageBody(
+    TwitchChannel *channel, const QDateTime &time,
+    const lib::payload::channel_suspicious_user_message::v1::Event &event);
 
 }  // namespace chatterino::eventsub

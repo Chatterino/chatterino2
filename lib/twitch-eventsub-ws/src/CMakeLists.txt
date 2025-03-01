@@ -21,6 +21,7 @@ generate_json_impls(
         include/twitch-eventsub-ws/payloads/stream-online-v1.hpp
         include/twitch-eventsub-ws/payloads/structured-message.hpp
         include/twitch-eventsub-ws/payloads/subscription.hpp
+        include/twitch-eventsub-ws/payloads/suspicious-users.hpp
 )
 
 set(SOURCE_FILES

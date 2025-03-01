@@ -26,7 +26,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto broadcasterUserID =
-        boost::json::try_value_to<std::string>(*jvbroadcasterUserID);
+        boost::json::try_value_to<String>(*jvbroadcasterUserID);
 
     if (broadcasterUserID.has_error())
     {
@@ -41,7 +41,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto broadcasterUserLogin =
-        boost::json::try_value_to<std::string>(*jvbroadcasterUserLogin);
+        boost::json::try_value_to<String>(*jvbroadcasterUserLogin);
 
     if (broadcasterUserLogin.has_error())
     {
@@ -56,7 +56,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto broadcasterUserName =
-        boost::json::try_value_to<std::string>(*jvbroadcasterUserName);
+        boost::json::try_value_to<String>(*jvbroadcasterUserName);
 
     if (broadcasterUserName.has_error())
     {
@@ -69,7 +69,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -82,7 +82,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -95,7 +95,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<String>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -109,7 +109,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto moderatorUserID =
-        boost::json::try_value_to<std::string>(*jvmoderatorUserID);
+        boost::json::try_value_to<String>(*jvmoderatorUserID);
 
     if (moderatorUserID.has_error())
     {
@@ -123,7 +123,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto moderatorUserLogin =
-        boost::json::try_value_to<std::string>(*jvmoderatorUserLogin);
+        boost::json::try_value_to<String>(*jvmoderatorUserLogin);
 
     if (moderatorUserLogin.has_error())
     {
@@ -137,13 +137,15 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto moderatorUserName =
-        boost::json::try_value_to<std::string>(*jvmoderatorUserName);
+        boost::json::try_value_to<String>(*jvmoderatorUserName);
 
     if (moderatorUserName.has_error())
     {
         return moderatorUserName.error();
     }
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<Event>().lowTrustStatus)>>);
     const auto *jvlowTrustStatus = root.if_contains("low_trust_status");
     if (jvlowTrustStatus == nullptr)
     {
@@ -151,7 +153,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto lowTrustStatus =
-        boost::json::try_value_to<std::string>(*jvlowTrustStatus);
+        boost::json::try_value_to<suspicious_users::Status>(*jvlowTrustStatus);
 
     if (lowTrustStatus.has_error())
     {
@@ -168,7 +170,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         .moderatorUserID = std::move(moderatorUserID.value()),
         .moderatorUserLogin = std::move(moderatorUserLogin.value()),
         .moderatorUserName = std::move(moderatorUserName.value()),
-        .lowTrustStatus = std::move(lowTrustStatus.value()),
+        .lowTrustStatus = lowTrustStatus.value(),
     };
 }
 

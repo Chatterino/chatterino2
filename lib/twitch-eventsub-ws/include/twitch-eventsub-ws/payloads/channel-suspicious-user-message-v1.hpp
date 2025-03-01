@@ -2,35 +2,31 @@
 
 #include "twitch-eventsub-ws/payloads/structured-message.hpp"
 #include "twitch-eventsub-ws/payloads/subscription.hpp"
+#include "twitch-eventsub-ws/payloads/suspicious-users.hpp"
 
 #include <boost/json.hpp>
-
-#include <string>
 
 namespace chatterino::eventsub::lib::payload::channel_suspicious_user_message::
     v1 {
 
 struct Event {
     // Broadcaster of the channel the message was sent in
-    std::string broadcasterUserID;
-    std::string broadcasterUserLogin;
-    std::string broadcasterUserName;
+    String broadcasterUserID;
+    String broadcasterUserLogin;
+    String broadcasterUserName;
 
     // User who sent the message
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
+    String userID;
+    String userLogin;
+    String userName;
 
-    // "none", "active_monitoring", "restricted"
-    std::string lowTrustStatus;
+    suspicious_users::Status lowTrustStatus;
 
-    std::vector<std::string> sharedBanChannelIds;
+    std::vector<String> sharedBanChannelIds;
 
-    // "manual", "ban_evader_detector", or "shared_channel_ban"
-    std::vector<std::string> types;
+    std::vector<suspicious_users::Type> types;
 
-    // "unknown", "possible", "likely"
-    std::string banEvasionEvaluation;
+    suspicious_users::BanEvasionEvaluation banEvasionEvaluation;
     // this event also has the ID in this message (hopefully we don't need it)
     chat::Message message;
 };
