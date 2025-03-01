@@ -1,32 +1,31 @@
 #pragma once
 
 #include "twitch-eventsub-ws/payloads/subscription.hpp"
+#include "twitch-eventsub-ws/payloads/suspicious-users.hpp"
+#include "twitch-eventsub-ws/string.hpp"
 
 #include <boost/json.hpp>
-
-#include <string>
 
 namespace chatterino::eventsub::lib::payload::channel_suspicious_user_update::
     v1 {
 
 struct Event {
     // Broadcaster of the channel
-    std::string broadcasterUserID;
-    std::string broadcasterUserLogin;
-    std::string broadcasterUserName;
+    String broadcasterUserID;
+    String broadcasterUserLogin;
+    String broadcasterUserName;
 
     // Affected user
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
+    String userID;
+    String userLogin;
+    String userName;
 
     // Moderator who updated the user
-    std::string moderatorUserID;
-    std::string moderatorUserLogin;
-    std::string moderatorUserName;
+    String moderatorUserID;
+    String moderatorUserLogin;
+    String moderatorUserName;
 
-    // "none", "active_monitoring", or "restricted"
-    std::string lowTrustStatus;
+    suspicious_users::Status lowTrustStatus;
 };
 
 struct Payload {

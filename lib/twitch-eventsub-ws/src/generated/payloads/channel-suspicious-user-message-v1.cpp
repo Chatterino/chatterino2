@@ -26,7 +26,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto broadcasterUserID =
-        boost::json::try_value_to<std::string>(*jvbroadcasterUserID);
+        boost::json::try_value_to<String>(*jvbroadcasterUserID);
 
     if (broadcasterUserID.has_error())
     {
@@ -41,7 +41,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto broadcasterUserLogin =
-        boost::json::try_value_to<std::string>(*jvbroadcasterUserLogin);
+        boost::json::try_value_to<String>(*jvbroadcasterUserLogin);
 
     if (broadcasterUserLogin.has_error())
     {
@@ -56,7 +56,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto broadcasterUserName =
-        boost::json::try_value_to<std::string>(*jvbroadcasterUserName);
+        boost::json::try_value_to<String>(*jvbroadcasterUserName);
 
     if (broadcasterUserName.has_error())
     {
@@ -69,7 +69,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -82,7 +82,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -95,13 +95,15 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<String>(*jvuserName);
 
     if (userName.has_error())
     {
         return userName.error();
     }
 
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<Event>().lowTrustStatus)>>);
     const auto *jvlowTrustStatus = root.if_contains("low_trust_status");
     if (jvlowTrustStatus == nullptr)
     {
@@ -109,21 +111,21 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto lowTrustStatus =
-        boost::json::try_value_to<std::string>(*jvlowTrustStatus);
+        boost::json::try_value_to<suspicious_users::Status>(*jvlowTrustStatus);
 
     if (lowTrustStatus.has_error())
     {
         return lowTrustStatus.error();
     }
 
-    std::vector<std::string> vsharedBanChannelIds;
+    std::vector<chatterino::eventsub::lib::String> vsharedBanChannelIds;
     const auto *jvsharedBanChannelIds =
         root.if_contains("shared_ban_channel_ids");
     if (jvsharedBanChannelIds != nullptr && !jvsharedBanChannelIds->is_null())
     {
-        auto sharedBanChannelIds =
-            boost::json::try_value_to<std::vector<std::string>>(
-                *jvsharedBanChannelIds);
+        auto sharedBanChannelIds = boost::json::try_value_to<
+            std::vector<chatterino::eventsub::lib::String>>(
+            *jvsharedBanChannelIds);
         if (sharedBanChannelIds.has_error())
         {
             return sharedBanChannelIds.error();
@@ -134,12 +136,13 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         }
     }
 
-    std::vector<std::string> vtypes;
+    std::vector<chatterino::eventsub::lib::suspicious_users::Type> vtypes;
     const auto *jvtypes = root.if_contains("types");
     if (jvtypes != nullptr && !jvtypes->is_null())
     {
-        auto types =
-            boost::json::try_value_to<std::vector<std::string>>(*jvtypes);
+        auto types = boost::json::try_value_to<
+            std::vector<chatterino::eventsub::lib::suspicious_users::Type>>(
+            *jvtypes);
         if (types.has_error())
         {
             return types.error();
@@ -149,6 +152,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             vtypes = std::move(types.value());
         }
     }
+    static_assert(std::is_trivially_copyable_v<std::remove_reference_t<
+                      decltype(std::declval<Event>().banEvasionEvaluation)>>);
     const auto *jvbanEvasionEvaluation =
         root.if_contains("ban_evasion_evaluation");
     if (jvbanEvasionEvaluation == nullptr)
@@ -157,7 +162,8 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto banEvasionEvaluation =
-        boost::json::try_value_to<std::string>(*jvbanEvasionEvaluation);
+        boost::json::try_value_to<suspicious_users::BanEvasionEvaluation>(
+            *jvbanEvasionEvaluation);
 
     if (banEvasionEvaluation.has_error())
     {
@@ -184,10 +190,10 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         .userID = std::move(userID.value()),
         .userLogin = std::move(userLogin.value()),
         .userName = std::move(userName.value()),
-        .lowTrustStatus = std::move(lowTrustStatus.value()),
+        .lowTrustStatus = lowTrustStatus.value(),
         .sharedBanChannelIds = std::move(vsharedBanChannelIds),
         .types = std::move(vtypes),
-        .banEvasionEvaluation = std::move(banEvasionEvaluation.value()),
+        .banEvasionEvaluation = banEvasionEvaluation.value(),
         .message = std::move(message.value()),
     };
 }

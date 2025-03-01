@@ -637,11 +637,121 @@ MessagePtr makeAutomodHoldMessageBody(
         displayName + ':', event.userLogin.qt(), MessageColor::Text,
         channel->getUserColor(event.userLogin.qt()));
     // sender's message caught by AutoMod
+    // XXX: add the structured message here
     builder.emplace<TextElement>(event.message.text.qt(),
                                  MessageElementFlag::Text, MessageColor::Text);
     auto text = displayName % u": " % event.message.text.qt();
     builder->messageText = text;
     builder->searchText = text;
+
+    return builder.release();
+}
+
+MessagePtr makeSuspiciousUserMessageHeader(
+    TwitchChannel *channel, const QDateTime &time,
+    const lib::payload::channel_suspicious_user_message::v1::Event &event)
+{
+    EventSubMessageBuilder builder(channel);
+
+    // Builder for low trust user message with explanation
+    builder->channelName = event.broadcasterUserLogin.qt();
+    builder->serverReceivedTime = time;
+    builder->flags.set(MessageFlag::LowTrustUsers);
+
+    // AutoMod shield badge
+    builder.emplace<BadgeElement>(makeAutoModBadge(),
+                                  MessageElementFlag::BadgeChannelAuthority);
+
+    // Suspicious user header message
+    QString prefix = u"Suspicious User:"_s;
+    builder.emplace<TextElement>(prefix, MessageElementFlag::Text,
+                                 MessageColor(QColor(0, 0, 255)),
+                                 FontStyle::ChatMediumBold);
+
+    QString headerMessage;
+    if (event.lowTrustStatus == lib::suspicious_users::Status::Restricted)
+    {
+        headerMessage = u"Restricted"_s;
+    }
+    else
+    {
+        headerMessage = u"Monitored"_s;
+    }
+
+    auto hasType = [&](lib::suspicious_users::Type type) {
+        return std::ranges::find(event.types, type) != event.types.end();
+    };
+
+    if (hasType(lib::suspicious_users::Type::BanEvaderDetector))
+    {
+        QString evader;
+        if (event.banEvasionEvaluation ==
+            lib::suspicious_users::BanEvasionEvaluation::Likely)
+        {
+            evader = u"likely"_s;
+        }
+        else
+        {
+            evader = u"possible"_s;
+        }
+
+        headerMessage += u". Detected as " % evader % " ban evader";
+    }
+
+    if (hasType(lib::suspicious_users::Type::SharedChannelBan))
+    {
+        headerMessage += u". Banned in " %
+                         QString::number(event.sharedBanChannelIds.size()) %
+                         u" shared channels";
+    }
+
+    builder.emplace<TextElement>(headerMessage, MessageElementFlag::Text,
+                                 MessageColor::Text);
+    builder->messageText = prefix % u" " % headerMessage;
+    builder->searchText = prefix % u" " % headerMessage;
+
+    return builder.release();
+}
+
+MessagePtr makeSuspiciousUserMessageBody(
+    TwitchChannel *channel, const QDateTime &time,
+    const lib::payload::channel_suspicious_user_message::v1::Event &event)
+{
+    EventSubMessageBuilder builder(channel);
+    builder->channelName = event.broadcasterUserLogin.qt();
+    builder->serverReceivedTime = time;
+    if (event.lowTrustStatus == lib::suspicious_users::Status::Restricted)
+    {
+        builder->flags.set(MessageFlag::RestrictedMessage);
+    }
+    else
+    {
+        builder->flags.set(MessageFlag::MonitoredMessage);
+    }
+
+    builder
+        .emplace<TextElement>(u'#' + event.broadcasterUserLogin.qt(),
+                              MessageElementFlag::ChannelName,
+                              MessageColor::System)
+        ->setLink({Link::JumpToChannel, event.broadcasterUserLogin.qt()});
+    builder.emplace<TimestampElement>(time.time());
+    builder.emplace<TwitchModerationElement>();
+    builder->loginName = event.userLogin.qt();
+    builder->flags.set(MessageFlag::PubSub, MessageFlag::LowTrustUsers);
+
+    // sender username
+    builder.emplace<MentionElement>(
+        event.userName.qt() + ":", event.userLogin.qt(), MessageColor::Text,
+        channel->getUserColor(event.userLogin.qt()));
+
+    // sender's message caught by AutoMod
+    // XXX: add the structured message here
+    builder.emplace<TextElement>(event.message.text.qt(),
+                                 MessageElementFlag::Text, MessageColor::Text);
+
+    auto text = event.userName.qt() % u": " % event.message.text.qt();
+    builder.message().messageText = text;
+    builder.message().searchText = text;
 
     return builder.release();
 }

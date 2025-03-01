@@ -12,6 +12,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
@@ -243,9 +244,40 @@ void Connection::onChannelSuspiciousUserMessage(
     const lib::messages::Metadata &metadata,
     const lib::payload::channel_suspicious_user_message::v1::Payload &payload)
 {
-    (void)metadata;
-    qCDebug(LOG) << "On channel suspicious user message for"
-                 << payload.event.broadcasterUserLogin.c_str();
+    // monitored chats are received over irc; in the future, we will use eventsub instead
+    if (payload.event.lowTrustStatus !=
+        lib::suspicious_users::Status::Restricted)
+    {
+        return;
+    }
+
+    if (getSettings()->streamerModeHideModActions &&
+        getApp()->getStreamerMode()->isEnabled())
+    {
+        return;
+    }
+
+    auto *channel = dynamic_cast<TwitchChannel *>(
+        getApp()
+            ->getTwitch()
+            ->getChannelOrEmpty(payload.event.broadcasterUserLogin.qt())
+            .get());
+    if (!channel || channel->isEmpty())
+    {
+        qCDebug(LOG)
+            << "Suspicious message for broadcaster we're not interested in"
+            << payload.event.broadcasterUserLogin.qt();
+        return;
+    }
+
+    auto time = chronoToQDateTime(metadata.messageTimestamp);
+    auto header = makeSuspiciousUserMessageHeader(channel, time, payload.event);
+    auto body = makeSuspiciousUserMessageBody(channel, time, payload.event);
+
+    runInGuiThread([channel, header, body] {
+        channel->addMessage(header, MessageContext::Original);
+        channel->addMessage(body, MessageContext::Original);
+    });
 }
 
 void Connection::onChannelSuspiciousUserUpdate(
@@ -254,7 +286,7 @@ void Connection::onChannelSuspiciousUserUpdate(
 {
     (void)metadata;
     qCDebug(LOG) << "On channel suspicious user update for"
-                 << payload.event.broadcasterUserLogin.c_str();
+                 << payload.event.broadcasterUserLogin.qt();
 }
 
 QString Connection::getSessionID() const
