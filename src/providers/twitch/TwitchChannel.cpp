@@ -1542,6 +1542,7 @@ void TwitchChannel::refreshPubSub()
     else
     {
         this->eventSubChannelModerateHandle.reset();
+        this->eventSubSuspiciousUserMessageHandle.reset();
     }
     getApp()->getTwitchPubSub()->listenToChannelPointRewards(roomId);
 }
