@@ -139,6 +139,25 @@ const std::map<QString, std::string_view, QCompareCaseInsensitive>
             "cost": 0
         })",
         },
+        {
+            "channel-chat-user-message-update",
+            R"({
+            "id": "a3122e32-6498-4847-8675-109b9b94f29c",
+            "status": "enabled",
+            "type": "channel.chat.user_message_update",
+            "version": "1",
+            "condition": {
+                "broadcaster_user_id": "11148817",
+                "moderator_user_id": "489584266"
+            },
+            "transport": {
+                "method":"websocket",
+                "session_id":"AgoQ59RRLw0mS6S000QtK8f54BIGY2VsbC1j"
+            },
+            "created_at": "2025-02-28T15:55:37.85489173Z",
+            "cost": 0
+        })",
+        },
     };
 
 class MockApplication : public mock::BaseApplication

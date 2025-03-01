@@ -135,6 +135,12 @@ class NoOpListener : public chatterino::eventsub::lib::Listener
         override
     {
     }
+    void onChannelChatUserMessageUpdate(
+        const messages::Metadata &metadata,
+        const payload::channel_chat_user_message_update::v1::Payload &payload)
+        override
+    {
+    }
 };
 
 }  // namespace

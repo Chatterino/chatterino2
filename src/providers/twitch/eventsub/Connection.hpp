@@ -76,6 +76,11 @@ public:
         const lib::payload::channel_chat_user_message_hold::v1::Payload
             &payload) override;
 
+    void onChannelChatUserMessageUpdate(
+        const lib::messages::Metadata &metadata,
+        const lib::payload::channel_chat_user_message_update::v1::Payload
+            &payload) override;
+
     QString getSessionID() const;
 
     bool isSubscribedTo(const SubscriptionRequest &request) const;
