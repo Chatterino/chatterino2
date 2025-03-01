@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/json.hpp>
+
 #include <cstdint>
 
 namespace chatterino::eventsub::lib::suspicious_users {
