@@ -232,12 +232,28 @@ void Connection::onAutomodMessageHold(
     });
 }
 void Connection::onAutomodMessageUpdate(
-    const lib::messages::Metadata &metadata,
+    const lib::messages::Metadata & /*metadata*/,
     const lib::payload::automod_message_update::v2::Payload &payload)
 {
-    (void)metadata;
-    qCDebug(LOG) << "On automod message update for"
-                 << payload.event.broadcasterUserLogin.c_str();
+    auto *channel = dynamic_cast<TwitchChannel *>(
+        getApp()
+            ->getTwitch()
+            ->getChannelOrEmpty(payload.event.broadcasterUserLogin.qt())
+            .get());
+    if (!channel || channel->isEmpty())
+    {
+        qCDebug(LOG)
+            << "Automod message hold for broadcaster we're not interested in"
+            << payload.event.broadcasterUserLogin.qt();
+        return;
+    }
+
+    // Gray out approve/deny button upon "ALLOWED" and "DENIED" statuses
+    // They are versions of automod_message_(denied|approved) but for mods.
+    auto id = "automod_" + payload.event.messageID.qt();
+    runInGuiThread([channel, id] {
+        channel->disableMessage(id);
+    });
 }
 
 void Connection::onChannelSuspiciousUserMessage(

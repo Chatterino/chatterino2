@@ -83,6 +83,25 @@ const std::map<QString, std::string_view, QCompareCaseInsensitive>
         })",
         },
         {
+            "automod-message-update",
+            R"({
+            "id": "a3122e32-6498-4847-8675-109b9b94f29c",
+            "status": "enabled",
+            "type": "automod.message.update",
+            "version": "2",
+            "condition": {
+                "broadcaster_user_id": "489584266",
+                "moderator_user_id": "489584266"
+            },
+            "transport": {
+                "method":"websocket",
+                "session_id":"AgoQ59RRLw0mS6S000QtK8f54BIGY2VsbC1j"
+            },
+            "created_at": "2025-02-28T15:55:37.85489173Z",
+            "cost": 0
+        })",
+        },
+        {
             "channel-suspicious-user-message",
             R"({
             "id": "a3122e32-6498-4847-8675-109b9b94f29c",
@@ -222,13 +241,35 @@ TEST_P(TestEventSubMessagesP, Run)
     auto subscription = SUBSCRIPTIONS.find(subcategory);
     ASSERT_NE(subscription, SUBSCRIPTIONS.end()) << subcategory;
 
-    auto json = makePayload(subscription->second, snapshot->input().toObject());
+    QJsonArray input{snapshot->input()};
+    if (snapshot->input().isArray())
+    {
+        input = snapshot->input().toArray();
+    }
 
-    std::unique_ptr<eventsub::lib::Listener> listener =
-        std::make_unique<eventsub::Connection>();
-    auto ec = eventsub::lib::handleMessage(listener, json);
-    ASSERT_FALSE(ec.failed())
-        << ec.what() << ec.message() << ec.location().to_string();
+    for (const auto inputRef : input)
+    {
+        auto inputObj = inputRef.toObject();
+
+        // "__subscription" overrides the subscription type the message is built
+        // as. By default, the subcategory (directory) name is used.
+        auto eventSubscription = subscription;
+        if (inputObj.contains(u"__subscription"))
+        {
+            eventSubscription =
+                SUBSCRIPTIONS.find(inputObj[u"__subscription"].toString());
+            ASSERT_NE(eventSubscription, SUBSCRIPTIONS.end());
+            inputObj.remove("__subscription");
+        }
+
+        auto json = makePayload(eventSubscription->second, inputObj);
+
+        std::unique_ptr<eventsub::lib::Listener> listener =
+            std::make_unique<eventsub::Connection>();
+        auto ec = eventsub::lib::handleMessage(listener, json);
+        ASSERT_FALSE(ec.failed())
+            << ec.what() << ec.message() << ec.location().to_string();
+    }
 
     auto messages = mainChannel->getMessageSnapshot();
     QJsonArray output;
