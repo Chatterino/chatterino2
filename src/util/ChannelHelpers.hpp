@@ -52,11 +52,6 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
             break;
         }
 
-        if (s->flags.has(MessageFlag::EventSub))
-        {
-            continue;  // TODO: implement stacking for eventsub
-        }
-
         if (timeoutStackStyle == TimeoutStackStyle::DontStackBeyondUserMessage)
         {
             if (s->loginName == message->timeoutUser &&
@@ -65,6 +60,14 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
             {
                 break;
             }
+        }
+
+        bool newIsShared = message->flags.has(MessageFlag::SharedMessage);
+        bool oldIsShared = s->flags.has(MessageFlag::SharedMessage);
+        if (newIsShared != oldIsShared ||
+            (newIsShared && message->channelName != s->channelName))
+        {
+            continue;
         }
 
         if (s->flags.has(MessageFlag::Timeout) &&
@@ -88,10 +91,12 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
             uint32_t count = s->count + 1;
 
             MessageBuilder replacement(timeoutMessage, message->timeoutUser,
-                                       message->loginName, message->searchText,
-                                       count, message->serverReceivedTime);
+                                       message->loginName, message->channelName,
+                                       message->searchText, count,
+                                       message->serverReceivedTime);
 
             replacement->timeoutUser = message->timeoutUser;
+            replacement->channelName = message->channelName;
             replacement->count = count;
             replacement->flags = message->flags;
 
