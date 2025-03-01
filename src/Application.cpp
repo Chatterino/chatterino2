@@ -598,7 +598,6 @@ eventsub::IController *Application::getEventSub()
 
 void Application::save()
 {
-    this->commands->save();
     this->hotkeys->save();
     this->windows->save();
 }
