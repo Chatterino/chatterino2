@@ -1506,6 +1506,22 @@ void TwitchChannel::refreshPubSub()
                         },
                     },
             });
+        this->eventSubAutomodMessageHoldHandle =
+            getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
+                .subscriptionType = "automod.message.hold",
+                .subscriptionVersion = "2",
+                .conditions =
+                    {
+                        {
+                            "broadcaster_user_id",
+                            roomId,
+                        },
+                        {
+                            "moderator_user_id",
+                            currentAccount->getUserId(),
+                        },
+                    },
+            });
     }
     else
     {

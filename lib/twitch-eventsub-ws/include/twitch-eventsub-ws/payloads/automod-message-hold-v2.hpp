@@ -12,16 +12,16 @@ namespace chatterino::eventsub::lib::payload::automod_message_hold::v2 {
 
 struct Event {
     // Broadcaster of the channel the message was sent in
-    std::string broadcasterUserID;
-    std::string broadcasterUserLogin;
-    std::string broadcasterUserName;
+    String broadcasterUserID;
+    String broadcasterUserLogin;
+    String broadcasterUserName;
 
     // User who sent the message
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
+    String userID;
+    String userLogin;
+    String userName;
 
-    std::string messageID;
+    String messageID;
     chat::Message message;
 
     // TODO: use chrono?

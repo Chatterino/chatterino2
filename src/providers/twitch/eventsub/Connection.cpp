@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/highlights/HighlightController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/eventsub/MessageBuilder.hpp"
@@ -177,9 +178,57 @@ void Connection::onAutomodMessageHold(
     const lib::messages::Metadata &metadata,
     const lib::payload::automod_message_hold::v2::Payload &payload)
 {
-    (void)metadata;
-    qCDebug(LOG) << "On automod message hold for"
-                 << payload.event.broadcasterUserLogin.c_str();
+    auto *channel = dynamic_cast<TwitchChannel *>(
+        getApp()
+            ->getTwitch()
+            ->getChannelOrEmpty(payload.event.broadcasterUserLogin.qt())
+            .get());
+    if (!channel || channel->isEmpty())
+    {
+        qCDebug(LOG)
+            << "Automod message hold for broadcaster we're not interested in"
+            << payload.event.broadcasterUserLogin.qt();
+        return;
+    }
+
+    auto time = chronoToQDateTime(metadata.messageTimestamp);
+    auto header = makeAutomodHoldMessageHeader(channel, time, payload.event);
+    auto body = makeAutomodHoldMessageBody(channel, time, payload.event);
+
+    auto messageText = payload.event.message.text.qt();
+    auto userLogin = payload.event.userLogin.qt();
+
+    runInGuiThread([channel, messageText, userLogin, header, body] {
+        auto [highlighted, highlightResult] = getApp()->getHighlights()->check(
+            {}, {}, userLogin, messageText, body->flags);
+        if (highlighted)
+        {
+            MessageBuilder::triggerHighlights(
+                channel,
+                {
+                    .customSound =
+                        highlightResult.customSoundUrl.value_or<QUrl>({}),
+                    .playSound = highlightResult.playSound,
+                    .windowAlert = highlightResult.alert,
+                });
+        }
+
+        channel->addMessage(header, MessageContext::Original);
+        channel->addMessage(body, MessageContext::Original);
+
+        getApp()->getTwitch()->getAutomodChannel()->addMessage(
+            header, MessageContext::Original);
+        getApp()->getTwitch()->getAutomodChannel()->addMessage(
+            body, MessageContext::Original);
+
+        if (getSettings()->showAutomodInMentions)
+        {
+            getApp()->getTwitch()->getMentionsChannel()->addMessage(
+                header, MessageContext::Original);
+            getApp()->getTwitch()->getMentionsChannel()->addMessage(
+                body, MessageContext::Original);
+        }
+    });
 }
 void Connection::onAutomodMessageUpdate(
     const lib::messages::Metadata &metadata,

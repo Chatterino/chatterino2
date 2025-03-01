@@ -199,4 +199,13 @@ QLocale getSystemLocale();
 /// Note: When running tests, this will always return a date-time in UTC.
 QDateTime chronoToQDateTime(std::chrono::system_clock::time_point time);
 
+/// Slices a string based on codepoint indices.
+///
+/// If the specified range is outside the string, an empty string view is
+/// returned.
+///
+/// @param begin Start index (inclusive, in codepoints)
+/// @param end End index (exclusive, in codepoints)
+QStringView codepointSlice(QStringView str, qsizetype begin, qsizetype end);
+
 }  // namespace chatterino
