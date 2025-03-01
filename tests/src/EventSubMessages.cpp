@@ -24,7 +24,7 @@ namespace {
 ///
 /// When adding a test, start with `{ "input": {...} }` and set this to `true`
 /// to generate an initial snapshot. Make sure to verify the output!
-constexpr bool UPDATE_SNAPSHOTS = false;
+constexpr bool UPDATE_SNAPSHOTS = true;
 
 const QString CATEGORY = u"EventSub"_s;
 
