@@ -2,6 +2,7 @@
 
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "twitch-eventsub-ws/payloads/automod-message-hold-v2.hpp"
 #include "twitch-eventsub-ws/payloads/channel-moderate-v2.hpp"
 
 #include <QDateTime>
@@ -20,7 +21,9 @@ namespace chatterino::eventsub {
 class EventSubMessageBuilder : public MessageBuilder
 {
 public:
+    // builds a system message and adds a timestamp element
     EventSubMessageBuilder(TwitchChannel *channel, const QDateTime &time);
+    EventSubMessageBuilder(TwitchChannel *channel);
     ~EventSubMessageBuilder();
 
     EventSubMessageBuilder(const EventSubMessageBuilder &) = delete;
@@ -144,5 +147,13 @@ void makeModerateMessage(
     EventSubMessageBuilder &builder,
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Unraid &action);
+
+MessagePtr makeAutomodHoldMessageHeader(
+    TwitchChannel *channel, const QDateTime &time,
+    const lib::payload::automod_message_hold::v2::Event &event);
+
+MessagePtr makeAutomodHoldMessageBody(
+    TwitchChannel *channel, const QDateTime &time,
+    const lib::payload::automod_message_hold::v2::Event &event);
 
 }  // namespace chatterino::eventsub

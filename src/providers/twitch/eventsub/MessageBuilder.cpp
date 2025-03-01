@@ -1,8 +1,14 @@
 #include "providers/twitch/eventsub/MessageBuilder.hpp"
 
+#include "Application.hpp"
 #include "common/Literals.hpp"
+#include "messages/Emote.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "singletons/Resources.hpp"
+#include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
+#include "util/Helpers.hpp"
 
 namespace {
 
@@ -33,6 +39,99 @@ void makeModeMessage(EventSubMessageBuilder &builder,
     builder.message().searchText = text;
 }
 
+QString stringifyAutomodReason(const lib::automod::AutomodReason &reason,
+                               QStringView /* message */)
+{
+    return reason.category.qt() % u" level " % QString::number(reason.level);
+}
+
+QString stringifyAutomodReason(const lib::automod::BlockedTermReason &reason,
+                               QStringView message)
+{
+    if (reason.termsFound.empty())
+    {
+        return u"blocked term usage"_s;
+    }
+
+    QString msg = [&] {
+        if (reason.termsFound.size() == 1)
+        {
+            return u"matches 1 blocked term"_s;
+        }
+        return u"matches %1 blocked terms"_s.arg(reason.termsFound.size());
+    }();
+
+    if (getSettings()->streamerModeHideBlockedTermText &&
+        getApp()->getStreamerMode()->isEnabled())
+    {
+        return msg;
+    }
+
+    for (size_t i = 0; i < reason.termsFound.size(); i++)
+    {
+        if (i == 0)
+        {
+            msg.append(u" \"");
+        }
+        else
+        {
+            msg.append(u"\", \"");
+        }
+        msg.append(codepointSlice(message,
+                                  reason.termsFound[i].boundary.startPos,
+                                  reason.termsFound[i].boundary.endPos + 1));
+    }
+    msg.append(u'"');
+
+    return msg;
+}
+
+// XXX: this is a duplicate from messages/MessageBuilder.cpp
+EmotePtr makeAutoModBadge()
+{
+    return std::make_shared<Emote>(Emote{
+        .name = EmoteName{},
+        .images =
+            ImageSet{Image::fromResourcePixmap(getResources().twitch.automod)},
+        .tooltip = Tooltip{"AutoMod"},
+        .homePage =
+            Url{"https://dashboard.twitch.tv/settings/moderation/automod"},
+    });
+}
+
+QString localizedDisplayName(
+    const lib::payload::automod_message_hold::v2::Event &event)
+{
+    QString displayName = event.userName.qt();
+    bool hasLocalizedName =
+        displayName.compare(event.userLogin.qt(), Qt::CaseInsensitive) != 0;
+
+    switch (getSettings()->usernameDisplayMode.getValue())
+    {
+        case UsernameDisplayMode::Username: {
+            if (hasLocalizedName)
+            {
+                displayName = event.userLogin.qt();
+            }
+            break;
+        }
+        case UsernameDisplayMode::LocalizedName: {
+            break;
+        }
+        case UsernameDisplayMode::UsernameAndLocalizedName: {
+            if (hasLocalizedName)
+            {
+                displayName =
+                    event.userLogin.qt() % '(' % event.userName.qt() % ')';
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    return displayName;
+}
+
 }  // namespace
 
 namespace chatterino::eventsub {
@@ -45,6 +144,12 @@ EventSubMessageBuilder::EventSubMessageBuilder(TwitchChannel *channel,
     this->message().flags.set(MessageFlag::System, MessageFlag::EventSub);
     this->message().flags.set(MessageFlag::Timeout);  // do we need this?
     this->message().serverReceivedTime = time;
+}
+
+EventSubMessageBuilder::EventSubMessageBuilder(TwitchChannel *channel)
+    : channel(channel)
+{
+    this->message().flags.set(MessageFlag::EventSub);
 }
 
 EventSubMessageBuilder::~EventSubMessageBuilder() = default;
@@ -448,6 +553,97 @@ void makeModerateMessage(
 
     builder.message().messageText = text;
     builder.message().searchText = text;
+}
+
+MessagePtr makeAutomodHoldMessageHeader(
+    TwitchChannel *channel, const QDateTime &time,
+    const lib::payload::automod_message_hold::v2::Event &event)
+{
+    EventSubMessageBuilder builder(channel);
+    builder->serverReceivedTime = time;
+    builder->id = u"automod_" % event.messageID.qt();
+    builder->loginName = u"automod"_s;
+    builder->channelName = event.broadcasterUserLogin.qt();
+    builder->flags.set(MessageFlag::PubSub, MessageFlag::Timeout,
+                       MessageFlag::AutoMod,
+                       MessageFlag::AutoModOffendingMessageHeader);
+    builder->flags.set(
+        MessageFlag::AutoModBlockedTerm,
+        std::holds_alternative<lib::automod::BlockedTermReason>(event.reason));
+
+    // AutoMod shield badge
+    builder.emplace<BadgeElement>(makeAutoModBadge(),
+                                  MessageElementFlag::BadgeChannelAuthority);
+    // AutoMod "username"
+    builder.emplace<TextElement>("AutoMod:", MessageElementFlag::Text,
+                                 QColor(0, 0, 255), FontStyle::ChatMediumBold);
+    // AutoMod header message
+    auto reason = std::visit(
+        [&](const auto &r) {
+            return stringifyAutomodReason(r, event.message.text.qt());
+        },
+        event.reason);
+    builder.emplace<TextElement>(u"Held a message for reason: " % reason %
+                                     u". Allow will post it in chat. ",
+                                 MessageElementFlag::Text, MessageColor::Text);
+    // Allow link button
+    builder
+        .emplace<TextElement>("Allow", MessageElementFlag::Text,
+                              MessageColor(QColor(0, 255, 0)),
+                              FontStyle::ChatMediumBold)
+        ->setLink({Link::AutoModAllow, event.messageID.qt()});
+    // Deny link button
+    builder
+        .emplace<TextElement>(" Deny", MessageElementFlag::Text,
+                              MessageColor(QColor(255, 0, 0)),
+                              FontStyle::ChatMediumBold)
+        ->setLink({Link::AutoModDeny, event.messageID.qt()});
+    auto text = u"AutoMod: Held a message for reason: " % reason %
+                u". Allow will post "
+                "it in chat. Allow Deny";
+    builder->messageText = text;
+    builder->searchText = text;
+
+    return builder.release();
+}
+
+MessagePtr makeAutomodHoldMessageBody(
+    TwitchChannel *channel, const QDateTime &time,
+    const lib::payload::automod_message_hold::v2::Event &event)
+{
+    EventSubMessageBuilder builder(channel);
+    builder->serverReceivedTime = time;
+    builder->flags.set(MessageFlag::PubSub, MessageFlag::Timeout,
+                       MessageFlag::AutoMod,
+                       MessageFlag::AutoModOffendingMessage);
+    builder->flags.set(
+        MessageFlag::AutoModBlockedTerm,
+        std::holds_alternative<lib::automod::BlockedTermReason>(event.reason));
+
+    // Builder for offender's message
+    builder->channelName = event.broadcasterUserLogin.qt();
+    builder
+        .emplace<TextElement>(u'#' + event.broadcasterUserLogin.qt(),
+                              MessageElementFlag::ChannelName,
+                              MessageColor::System)
+        ->setLink({Link::JumpToChannel, event.broadcasterUserLogin.qt()});
+    builder.emplace<TimestampElement>(time.time());
+    builder.emplace<TwitchModerationElement>();
+    builder->loginName = event.userLogin.qt();
+
+    auto displayName = localizedDisplayName(event);
+    // sender username
+    builder.emplace<MentionElement>(
+        displayName + ':', event.userLogin.qt(), MessageColor::Text,
+        channel->getUserColor(event.userLogin.qt()));
+    // sender's message caught by AutoMod
+    builder.emplace<TextElement>(event.message.text.qt(),
+                                 MessageElementFlag::Text, MessageColor::Text);
+    auto text = displayName % u": " % event.message.text.qt();
+    builder->messageText = text;
+    builder->searchText = text;
+
+    return builder.release();
 }
 
 }  // namespace chatterino::eventsub
