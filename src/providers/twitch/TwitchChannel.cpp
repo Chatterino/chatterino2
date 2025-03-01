@@ -1554,6 +1554,9 @@ void TwitchChannel::refreshPubSub()
                         },
                     },
             });
+
+        this->eventSubChannelChatUserMessageHoldHandle.reset();
+        this->eventSubChannelChatUserMessageUpdateHandle.reset();
     }
     else
     {
@@ -1561,7 +1564,42 @@ void TwitchChannel::refreshPubSub()
         this->eventSubAutomodMessageHoldHandle.reset();
         this->eventSubAutomodMessageUpdateHandle.reset();
         this->eventSubSuspiciousUserMessageHandle.reset();
+
+        this->eventSubChannelChatUserMessageHoldHandle =
+            getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
+                .subscriptionType = "channel.chat.user_message_hold",
+                .subscriptionVersion = "1",
+                .conditions =
+                    {
+                        {
+                            "broadcaster_user_id",
+                            roomId,
+                        },
+                        {
+                            "user_id",
+                            currentAccount->getUserId(),
+                        },
+                    },
+            });
+
+        this->eventSubChannelChatUserMessageUpdateHandle =
+            getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
+                .subscriptionType = "channel.chat.user_message_update",
+                .subscriptionVersion = "1",
+                .conditions =
+                    {
+                        {
+                            "broadcaster_user_id",
+                            roomId,
+                        },
+                        {
+                            "user_id",
+                            currentAccount->getUserId(),
+                        },
+                    },
+            });
     }
+
     getApp()->getTwitchPubSub()->listenToChannelPointRewards(roomId);
 }
 

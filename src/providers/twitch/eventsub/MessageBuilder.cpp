@@ -756,4 +756,86 @@ MessagePtr makeSuspiciousUserMessageBody(
     return builder.release();
 }
 
+MessagePtr makeUserMessageHeldMessage(
+    TwitchChannel *channel, const QDateTime &time,
+    const lib::payload::channel_chat_user_message_hold::v1::Event &event)
+{
+    QString text("AutoMod: Hey! Your message is being checked by mods and has "
+                 "not been sent.");
+    EventSubMessageBuilder builder(channel);
+    builder->serverReceivedTime = time;
+    builder->id = u"automod_" % event.messageID.qt();
+    builder->loginName = u"automod"_s;
+    builder->channelName = event.broadcasterUserLogin.qt();
+    builder->flags.set(MessageFlag::PubSub, MessageFlag::Timeout,
+                       MessageFlag::AutoMod);
+
+    // AutoMod shield badge
+    builder.emplace<BadgeElement>(makeAutoModBadge(),
+                                  MessageElementFlag::BadgeChannelAuthority);
+    // AutoMod "username"
+    builder.emplace<TextElement>("AutoMod:", MessageElementFlag::Text,
+                                 QColor(0, 0, 255), FontStyle::ChatMediumBold);
+    builder.emplace<TextElement>(
+        "Hey! Your message is being checked by mods and has not been sent.",
+        MessageElementFlag::Text, MessageColor::Text);
+
+    builder->messageText = text;
+    builder->searchText = text;
+
+    return builder.release();
+}
+
+MessagePtr makeUserMessageUpdateMessage(
+    TwitchChannel *channel, const QDateTime &time,
+    const lib::payload::channel_chat_user_message_update::v1::Event &event)
+{
+    using lib::payload::channel_chat_user_message_update::v1::Status;
+
+    QString text("AutoMod: ");
+    EventSubMessageBuilder builder(channel);
+    builder->serverReceivedTime = time;
+    builder->id = u"automod_" % event.messageID.qt();
+    builder->loginName = u"automod"_s;
+    builder->channelName = event.broadcasterUserLogin.qt();
+    builder->flags.set(MessageFlag::PubSub, MessageFlag::Timeout,
+                       MessageFlag::AutoMod);
+
+    // AutoMod shield badge
+    builder.emplace<BadgeElement>(makeAutoModBadge(),
+                                  MessageElementFlag::BadgeChannelAuthority);
+    // AutoMod "username"
+    builder.emplace<TextElement>("AutoMod:", MessageElementFlag::Text,
+                                 QColor(0, 0, 255), FontStyle::ChatMediumBold);
+
+    switch (event.status)
+    {
+        case Status::Approved:
+            text += "Mods have accepted your message.";
+            builder.emplace<TextElement>("Mods have accepted your message.",
+                                         MessageElementFlag::Text,
+                                         MessageColor::Text);
+            break;
+
+        case Status::Denied:
+            text += "Mods have denied your message.";
+            builder.emplace<TextElement>("Mods have denied your message.",
+                                         MessageElementFlag::Text,
+                                         MessageColor::Text);
+            break;
+
+        case Status::Invalid:
+            text += "Your message was lost in the void.";
+            builder.emplace<TextElement>("Your message was lost in the void.",
+                                         MessageElementFlag::Text,
+                                         MessageColor::Text);
+            break;
+    }
+
+    builder->messageText = text;
+    builder->searchText = text;
+
+    return builder.release();
+}
+
 }  // namespace chatterino::eventsub
