@@ -756,6 +756,50 @@ MessagePtr makeSuspiciousUserMessageBody(
     return builder.release();
 }
 
+MessagePtr makeSuspiciousUserUpdate(
+    TwitchChannel *channel, const QDateTime &time,
+    const lib::payload::channel_suspicious_user_update::v1::Event &event)
+{
+    EventSubMessageBuilder builder(channel, time);
+    builder->flags.set(MessageFlag::DoNotTriggerNotification);
+    builder->loginName = event.moderatorUserLogin.qt();
+
+    QString text;
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
+
+    switch (event.lowTrustStatus)
+    {
+        case lib::suspicious_users::Status::None: {
+            builder.emplaceSystemTextAndUpdate(u"removed"_s, text);
+            builder.appendUser(event.userName, event.userLogin, text);
+            builder.emplaceSystemTextAndUpdate(
+                u"from the suspicious user list."_s, text);
+        }
+        break;
+
+        case lib::suspicious_users::Status::ActiveMonitoring: {
+            builder.emplaceSystemTextAndUpdate(u"added"_s, text);
+            builder.appendUser(event.userName, event.userLogin, text);
+            builder.emplaceSystemTextAndUpdate(
+                u"as a monitored suspicious chatter."_s, text);
+        }
+        break;
+
+        case lib::suspicious_users::Status::Restricted: {
+            builder.emplaceSystemTextAndUpdate(u"added"_s, text);
+            builder.appendUser(event.userName, event.userLogin, text);
+            builder.emplaceSystemTextAndUpdate(
+                u"as a restricted suspicious chatter."_s, text);
+        }
+        break;
+    }
+
+    builder->messageText = text;
+    builder->searchText = text;
+
+    return builder.release();
+}
+
 MessagePtr makeUserMessageHeldMessage(
     TwitchChannel *channel, const QDateTime &time,
     const lib::payload::channel_chat_user_message_hold::v1::Event &event)

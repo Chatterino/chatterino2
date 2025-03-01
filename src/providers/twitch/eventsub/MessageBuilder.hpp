@@ -7,6 +7,7 @@
 #include "twitch-eventsub-ws/payloads/channel-chat-user-message-update-v1.hpp"
 #include "twitch-eventsub-ws/payloads/channel-moderate-v2.hpp"
 #include "twitch-eventsub-ws/payloads/channel-suspicious-user-message-v1.hpp"
+#include "twitch-eventsub-ws/payloads/channel-suspicious-user-update-v1.hpp"
 
 #include <QDateTime>
 
@@ -166,6 +167,10 @@ MessagePtr makeSuspiciousUserMessageHeader(
 MessagePtr makeSuspiciousUserMessageBody(
     TwitchChannel *channel, const QDateTime &time,
     const lib::payload::channel_suspicious_user_message::v1::Event &event);
+
+MessagePtr makeSuspiciousUserUpdate(
+    TwitchChannel *channel, const QDateTime &time,
+    const lib::payload::channel_suspicious_user_update::v1::Event &event);
 
 MessagePtr makeUserMessageHeldMessage(
     TwitchChannel *channel, const QDateTime &time,
