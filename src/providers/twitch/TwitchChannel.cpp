@@ -1581,6 +1581,7 @@ void TwitchChannel::refreshPubSub()
                     },
             });
     }
+
     getApp()->getTwitchPubSub()->listenToChannelPointRewards(roomId);
 }
 
