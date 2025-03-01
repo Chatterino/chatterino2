@@ -512,6 +512,7 @@ private:
     eventsub::SubscriptionHandle eventSubAutomodMessageHoldHandle;
     eventsub::SubscriptionHandle eventSubAutomodMessageUpdateHandle;
     eventsub::SubscriptionHandle eventSubSuspiciousUserMessageHandle;
+    eventsub::SubscriptionHandle eventSubChannelChatUserMessageHoldHandle;
 
     friend class TwitchIrcServer;
     friend class MessageBuilder;

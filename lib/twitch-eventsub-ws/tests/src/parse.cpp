@@ -129,6 +129,12 @@ class NoOpListener : public chatterino::eventsub::lib::Listener
         override
     {
     }
+    void onChannelChatUserMessageHold(
+        const messages::Metadata &metadata,
+        const payload::channel_chat_user_message_hold::v1::Payload &payload)
+        override
+    {
+    }
 };
 
 }  // namespace

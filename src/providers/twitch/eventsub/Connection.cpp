@@ -305,6 +305,31 @@ void Connection::onChannelSuspiciousUserUpdate(
                  << payload.event.broadcasterUserLogin.qt();
 }
 
+void Connection::onChannelChatUserMessageHold(
+    const lib::messages::Metadata &metadata,
+    const lib::payload::channel_chat_user_message_hold::v1::Payload &payload)
+{
+    auto *channel = dynamic_cast<TwitchChannel *>(
+        getApp()
+            ->getTwitch()
+            ->getChannelOrEmpty(payload.event.broadcasterUserLogin.qt())
+            .get());
+    if (!channel || channel->isEmpty())
+    {
+        qCDebug(LOG) << "Channel Chat User Message Hold for broadcaster we're "
+                        "not interested in"
+                     << payload.event.broadcasterUserLogin.qt();
+        return;
+    }
+
+    auto time = chronoToQDateTime(metadata.messageTimestamp);
+    auto message = makeUserMessageHeldMessage(channel, time, payload.event);
+
+    runInGuiThread([channel, message] {
+        channel->addMessage(message, MessageContext::Original);
+    });
+}
+
 QString Connection::getSessionID() const
 {
     return this->sessionID;

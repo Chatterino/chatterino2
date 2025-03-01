@@ -212,6 +212,19 @@ namespace {
                 return boost::system::error_code{};
             },
         },
+        {
+            {"channel.chat.user_message_hold", "1"},
+            [](const auto &metadata, const auto &jv, auto &listener) {
+                auto oPayload = parsePayload<
+                    payload::channel_chat_user_message_hold::v1::Payload>(jv);
+                if (!oPayload)
+                {
+                    return oPayload.error();
+                }
+                listener->onChannelChatUserMessageHold(metadata, *oPayload);
+                return boost::system::error_code{};
+            },
+        },
         // Add your new subscription types above this line
     };
 

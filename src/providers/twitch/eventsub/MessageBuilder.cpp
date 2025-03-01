@@ -756,4 +756,34 @@ MessagePtr makeSuspiciousUserMessageBody(
     return builder.release();
 }
 
+MessagePtr makeUserMessageHeldMessage(
+    TwitchChannel *channel, const QDateTime &time,
+    const lib::payload::channel_chat_user_message_hold::v1::Event &event)
+{
+    QString text("AutoMod: Hey! Your message is being checked by mods and has "
+                 "not been sent.");
+    EventSubMessageBuilder builder(channel);
+    builder->serverReceivedTime = time;
+    builder->id = u"automod_" % event.messageID.qt();
+    builder->loginName = u"automod"_s;
+    builder->channelName = event.broadcasterUserLogin.qt();
+    builder->flags.set(MessageFlag::PubSub, MessageFlag::Timeout,
+                       MessageFlag::AutoMod);
+
+    // AutoMod shield badge
+    builder.emplace<BadgeElement>(makeAutoModBadge(),
+                                  MessageElementFlag::BadgeChannelAuthority);
+    // AutoMod "username"
+    builder.emplace<TextElement>("AutoMod:", MessageElementFlag::Text,
+                                 QColor(0, 0, 255), FontStyle::ChatMediumBold);
+    builder.emplace<TextElement>(
+        "Hey! Your message is being checked by mods and has not been sent.",
+        MessageElementFlag::Text, MessageColor::Text);
+
+    builder->messageText = text;
+    builder->searchText = text;
+
+    return builder.release();
+}
+
 }  // namespace chatterino::eventsub
