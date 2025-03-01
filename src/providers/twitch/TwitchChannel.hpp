@@ -512,6 +512,7 @@ private:
     eventsub::SubscriptionHandle eventSubAutomodMessageHoldHandle;
     eventsub::SubscriptionHandle eventSubAutomodMessageUpdateHandle;
     eventsub::SubscriptionHandle eventSubSuspiciousUserMessageHandle;
+    eventsub::SubscriptionHandle eventSubSuspiciousUserUpdateHandle;
     eventsub::SubscriptionHandle eventSubChannelChatUserMessageHoldHandle;
     eventsub::SubscriptionHandle eventSubChannelChatUserMessageUpdateHandle;
 

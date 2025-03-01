@@ -1554,6 +1554,22 @@ void TwitchChannel::refreshPubSub()
                         },
                     },
             });
+        this->eventSubSuspiciousUserUpdateHandle =
+            getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
+                .subscriptionType = "channel.suspicious_user.update",
+                .subscriptionVersion = "1",
+                .conditions =
+                    {
+                        {
+                            "broadcaster_user_id",
+                            roomId,
+                        },
+                        {
+                            "moderator_user_id",
+                            currentAccount->getUserId(),
+                        },
+                    },
+            });
 
         this->eventSubChannelChatUserMessageHoldHandle.reset();
         this->eventSubChannelChatUserMessageUpdateHandle.reset();
@@ -1564,6 +1580,7 @@ void TwitchChannel::refreshPubSub()
         this->eventSubAutomodMessageHoldHandle.reset();
         this->eventSubAutomodMessageUpdateHandle.reset();
         this->eventSubSuspiciousUserMessageHandle.reset();
+        this->eventSubSuspiciousUserUpdateHandle.reset();
 
         this->eventSubChannelChatUserMessageHoldHandle =
             getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{

@@ -300,9 +300,25 @@ void Connection::onChannelSuspiciousUserUpdate(
     const lib::messages::Metadata &metadata,
     const lib::payload::channel_suspicious_user_update::v1::Payload &payload)
 {
-    (void)metadata;
-    qCDebug(LOG) << "On channel suspicious user update for"
-                 << payload.event.broadcasterUserLogin.qt();
+    auto *channel = dynamic_cast<TwitchChannel *>(
+        getApp()
+            ->getTwitch()
+            ->getChannelOrEmpty(payload.event.broadcasterUserLogin.qt())
+            .get());
+    if (!channel || channel->isEmpty())
+    {
+        qCDebug(LOG) << "Channel Suspicious User Update for broadcaster we're "
+                        "not interested in"
+                     << payload.event.broadcasterUserLogin.qt();
+        return;
+    }
+
+    auto time = chronoToQDateTime(metadata.messageTimestamp);
+    auto message = makeSuspiciousUserUpdate(channel, time, payload.event);
+
+    runInGuiThread([channel, message] {
+        channel->addMessage(message, MessageContext::Original);
+    });
 }
 
 void Connection::onChannelChatUserMessageHold(
