@@ -77,19 +77,16 @@
                     "type": "TimestampElement"
                 },
                 {
-                    "color": "Text",
-                    "fallbackColor": "System",
-                    "flags": "Text|Mention",
+                    "color": "System",
+                    "flags": "Text",
                     "link": {
-                        "type": "None",
-                        "value": ""
+                        "type": "UserInfo",
+                        "value": "nerixyz"
                     },
                     "style": "ChatMedium",
                     "tooltip": "",
                     "trailingSpace": true,
-                    "type": "MentionElement",
-                    "userColor": "System",
-                    "userLoginName": "nerixyz",
+                    "type": "TextElement",
                     "words": [
                         "nerixyz"
                     ]
@@ -111,21 +108,18 @@
                     ]
                 },
                 {
-                    "color": "Text",
-                    "fallbackColor": "System",
-                    "flags": "Text|Mention",
+                    "color": "System",
+                    "flags": "Text",
                     "link": {
-                        "type": "None",
-                        "value": ""
+                        "type": "UserInfo",
+                        "value": "twitchdev"
                     },
                     "style": "ChatMedium",
                     "tooltip": "",
                     "trailingSpace": true,
-                    "type": "MentionElement",
-                    "userColor": "System",
-                    "userLoginName": "twitchdev",
+                    "type": "TextElement",
                     "words": [
-                        "TwitchDev"
+                        "twitchdev"
                     ]
                 },
                 {
@@ -189,12 +183,12 @@
                     ]
                 }
             ],
-            "flags": "System|Timeout|EventSub",
+            "flags": "System|Timeout|PubSub|EventSub",
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",
-            "messageText": "nerixyz timed out twitchdev for 1s : test ",
-            "searchText": "nerixyz timed out twitchdev for 1s : test ",
+            "messageText": "nerixyz timed out twitchdev for 1s: test ",
+            "searchText": "nerixyz timed out twitchdev for 1s: test ",
             "serverReceivedTime": "2025-02-22T17:53:49Z",
             "timeoutUser": "twitchdev",
             "userID": "",
