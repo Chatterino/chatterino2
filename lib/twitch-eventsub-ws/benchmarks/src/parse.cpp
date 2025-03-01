@@ -145,6 +145,24 @@ public:
         benchmark::DoNotOptimize(&metadata);
         benchmark::DoNotOptimize(&payload);
     }
+
+    void onChannelChatUserMessageHold(
+        const messages::Metadata &metadata,
+        const payload::channel_chat_user_message_hold::v1::Payload &payload)
+        override
+    {
+        benchmark::DoNotOptimize(&metadata);
+        benchmark::DoNotOptimize(&payload);
+    }
+
+    void onChannelChatUserMessageUpdate(
+        const messages::Metadata &metadata,
+        const payload::channel_chat_user_message_update::v1::Payload &payload)
+        override
+    {
+        benchmark::DoNotOptimize(&metadata);
+        benchmark::DoNotOptimize(&payload);
+    }
     // NOLINTEND(cppcoreguidelines-pro-type-const-cast)
 };
 
