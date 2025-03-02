@@ -89,6 +89,26 @@ SettingWidget *SettingWidget::inverseCheckbox(const QString &label,
     return widget;
 }
 
+SettingWidget *SettingWidget::customCheckbox(
+    const QString &label, bool initialValue,
+    const std::function<void(bool)> &save)
+{
+    auto *widget = new SettingWidget(label);
+
+    auto *check = new QCheckBox(label);
+
+    widget->hLayout->addWidget(check);
+
+    check->setChecked(initialValue);
+
+    QObject::connect(check, &QCheckBox::toggled, widget, save);
+
+    widget->actionWidget = check;
+    widget->label = check;
+
+    return widget;
+}
+
 SettingWidget *SettingWidget::colorButton(const QString &label,
                                           QStringSetting &setting)
 {

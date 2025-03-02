@@ -35,6 +35,10 @@ public:
     static SettingWidget *checkbox(const QString &label, BoolSetting &setting);
     static SettingWidget *inverseCheckbox(const QString &label,
                                           BoolSetting &setting);
+    static SettingWidget *customCheckbox(const QString &label,
+                                         bool initialValue,
+                                         const std::function<void(bool)> &save);
+
     template <typename T>
     static SettingWidget *dropdown(const QString &label,
                                    EnumStringSetting<T> &setting)
