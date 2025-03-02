@@ -596,16 +596,16 @@ void PubSub::stop()
     // within 1s.
     // We could fix the underlying bug, but this is easier & we realistically won't use this exact code
     // for super much longer.
-    if (this->stoppedFlag_.waitFor(std::chrono::seconds{1}))
+    if (this->stoppedFlag_.waitFor(std::chrono::milliseconds{100}))
     {
         this->thread->join();
         return;
     }
 
     qCWarning(chatterinoLiveupdates)
-        << "Thread didn't finish within 1 second, force-stop the client";
+        << "Thread didn't finish within 100ms, force-stop the client";
     this->websocketClient.stop();
-    if (this->stoppedFlag_.waitFor(std::chrono::milliseconds{100}))
+    if (this->stoppedFlag_.waitFor(std::chrono::milliseconds{20}))
     {
         this->thread->join();
         return;
