@@ -26,30 +26,67 @@ namespace chatterino {
 
 GeneralPageView::GeneralPageView(QWidget *parent)
     : QWidget(parent)
+    , contentScrollArea_(new QScrollArea)
+    , contentLayout_(new QVBoxLayout)
 {
-    auto *scrollArea = this->contentScrollArea_ =
-        makeScrollArea(this->contentLayout_ = new QVBoxLayout);
-    scrollArea->setObjectName("generalSettingsScrollContent");
+    auto *contentWidget = new QWidget;
+    contentWidget->setLayout(this->contentLayout_);
+    this->contentScrollArea_->setWidget(contentWidget);
+    this->contentScrollArea_->setObjectName("generalSettingsScrollContent");
+    this->contentScrollArea_->setWidgetResizable(true);
+}
+
+GeneralPageView *GeneralPageView::withoutNavigation(QWidget *parent)
+{
+    auto *view = new GeneralPageView(parent);
+
+    view->setLayout(makeLayout<QHBoxLayout>({
+        view->contentScrollArea_,
+    }));
+
+    return view;
+}
+
+GeneralPageView *GeneralPageView::withNavigation(QWidget *parent)
+{
+    auto *view = new GeneralPageView(parent);
 
     auto *navigation =
-        wrapLayout(this->navigationLayout_ = makeLayout<QVBoxLayout>({}));
+        wrapLayout(view->navigationLayout_ = makeLayout<QVBoxLayout>({}));
     navigation->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Minimum);
-    this->navigationLayout_->setAlignment(Qt::AlignTop);
-    this->navigationLayout_->addSpacing(6);
+    view->navigationLayout_->setAlignment(Qt::AlignTop);
+    view->navigationLayout_->addSpacing(6);
 
-    this->setLayout(makeLayout<QHBoxLayout>(
-        {scrollArea, new QSpacerItem(16, 1), navigation}));
+    view->setLayout(makeLayout<QHBoxLayout>({
+        view->contentScrollArea_,
+        new QSpacerItem(16, 1),
+        navigation,
+    }));
 
-    QObject::connect(scrollArea->verticalScrollBar(), &QScrollBar::valueChanged,
-                     this, [this] {
-                         this->updateNavigationHighlighting();
+    QObject::connect(view->contentScrollArea_->verticalScrollBar(),
+                     &QScrollBar::valueChanged, view, [view] {
+                         view->updateNavigationHighlighting();
                      });
+
+    return view;
 }
 
 void GeneralPageView::addWidget(QWidget *widget, QStringList keywords)
 {
     this->contentLayout_->addWidget(widget);
-    if (!keywords.isEmpty())
+    if (!this->groups_.empty())
+    {
+        this->groups_.back().widgets.push_back({
+            .element = widget,
+            .keywords = keywords,
+        });
+    }
+}
+
+void GeneralPageView::registerWidget(QWidget *widget,
+                                     const QStringList &keywords)
+{
+    if (!this->groups_.empty())
     {
         this->groups_.back().widgets.push_back({
             .element = widget,
@@ -80,14 +117,21 @@ TitleLabel *GeneralPageView::addTitle(const QString &title)
     auto *label = new TitleLabel(title + ":");
     this->addWidget(label);
 
-    // navigation item
-    auto *navLabel = new NavigationLabel(title);
-    navLabel->setCursor(Qt::PointingHandCursor);
-    this->navigationLayout_->addWidget(navLabel);
+    NavigationLabel *navLabel = nullptr;
 
-    QObject::connect(navLabel, &NavigationLabel::leftMouseUp, label, [=, this] {
-        this->contentScrollArea_->verticalScrollBar()->setValue(label->y());
-    });
+    // navigation item
+    if (this->navigationLayout_ != nullptr)
+    {
+        navLabel = new NavigationLabel(title);
+        navLabel->setCursor(Qt::PointingHandCursor);
+        this->navigationLayout_->addWidget(navLabel);
+
+        QObject::connect(
+            navLabel, &NavigationLabel::leftMouseUp, label, [=, this] {
+                this->contentScrollArea_->verticalScrollBar()->setValue(
+                    label->y());
+            });
+    }
 
     // groups
     this->groups_.push_back(Group{title, label, navLabel, nullptr, {}});
@@ -296,6 +340,9 @@ QSpinBox *GeneralPageView::addIntInput(const QString &text, IntSetting &setting,
 
 void GeneralPageView::addNavigationSpacing()
 {
+    assert(this->navigationLayout_ != nullptr &&
+           "addNavigationSpacing used without navigation");
+
     this->navigationLayout_->addSpacing(24);
 }
 
@@ -351,7 +398,10 @@ bool GeneralPageView::filterElements(const QString &query)
             }
 
             group.title->show();
-            group.navigationLink->show();
+            if (group.navigationLink != nullptr)
+            {
+                group.navigationLink->show();
+            }
             any = true;
         }
         // check if any match
@@ -409,7 +459,10 @@ bool GeneralPageView::filterElements(const QString &query)
             }
 
             group.title->setVisible(groupAny);
-            group.navigationLink->setVisible(groupAny);
+            if (group.navigationLink != nullptr)
+            {
+                group.navigationLink->setVisible(groupAny);
+            }
             any |= groupAny;
         }
     }
@@ -419,6 +472,11 @@ bool GeneralPageView::filterElements(const QString &query)
 
 void GeneralPageView::updateNavigationHighlighting()
 {
+    if (this->navigationLayout_ == nullptr)
+    {
+        return;
+    }
+
     auto scrollY = this->contentScrollArea_->verticalScrollBar()->value();
     auto first = true;
 

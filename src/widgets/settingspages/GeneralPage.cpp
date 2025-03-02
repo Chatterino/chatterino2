@@ -95,7 +95,7 @@ GeneralPage::GeneralPage()
 {
     auto *y = new QVBoxLayout;
     auto *x = new QHBoxLayout;
-    auto *view = new GeneralPageView;
+    auto *view = GeneralPageView::withNavigation(this);
     this->view_ = view;
     x->addWidget(view);
     auto *z = new QFrame;

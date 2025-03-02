@@ -7,7 +7,9 @@
 
 #include <QBoxLayout>
 #include <QCheckBox>
+#include <QFormLayout>
 #include <QLabel>
+#include <QLineEdit>
 
 namespace {
 
@@ -196,6 +198,38 @@ SettingWidget *SettingWidget::colorButton(const QString &label,
     return widget;
 }
 
+SettingWidget *SettingWidget::lineEdit(const QString &label,
+                                       QStringSetting &setting,
+                                       const QString &placeholderText)
+{
+    QColor color(setting.getValue());
+    auto *widget = new SettingWidget(label);
+
+    auto *lbl = new QLabel(label + ":");
+
+    auto *edit = new QLineEdit;
+    edit->setText(setting);
+    if (!placeholderText.isEmpty())
+    {
+        edit->setPlaceholderText(placeholderText);
+    }
+
+    widget->hLayout->addWidget(lbl);
+    // widget->hLayout->addStretch(1);
+    widget->hLayout->addWidget(edit);
+
+    // update when setting changes
+    QObject::connect(edit, &QLineEdit::textChanged,
+                     [&setting](const QString &newValue) {
+                         setting = newValue;
+                     });
+
+    widget->actionWidget = edit;
+    widget->label = lbl;
+
+    return widget;
+}
+
 SettingWidget *SettingWidget::setTooltip(QString tooltip)
 {
     assert(!tooltip.isEmpty());
@@ -246,9 +280,27 @@ SettingWidget *SettingWidget::addKeywords(const QStringList &newKeywords)
     return this;
 }
 
+SettingWidget *SettingWidget::conditionallyEnabledBy(BoolSetting &setting)
+{
+    setting.connect(
+        [this](const auto &value, const auto &) {
+            this->actionWidget->setEnabled(value);
+        },
+        this->managedConnections);
+
+    return this;
+}
+
 void SettingWidget::addTo(GeneralPageView &view)
 {
     view.addWidget(this, this->keywords);
+}
+
+void SettingWidget::addTo(GeneralPageView &view, QFormLayout *formLayout)
+{
+    view.registerWidget(this, this->keywords);
+
+    formLayout->addRow(this->label, this->actionWidget);
 }
 
 }  // namespace chatterino

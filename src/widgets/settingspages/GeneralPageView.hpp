@@ -91,11 +91,17 @@ struct DropdownArgs {
 class GeneralPageView : public QWidget
 {
     Q_OBJECT
-
-public:
     GeneralPageView(QWidget *parent = nullptr);
 
+public:
+    static GeneralPageView *withNavigation(QWidget *parent);
+    static GeneralPageView *withoutNavigation(QWidget *parent);
+
     void addWidget(QWidget *widget, QStringList keywords = {});
+
+    /// Register the widget with the given keywords.
+    /// This assumes that the widget is being held by a layout that has been added previously
+    void registerWidget(QWidget *widget, const QStringList &keywords);
     void addLayout(QLayout *layout);
     void addStretch();
 
@@ -311,9 +317,9 @@ private:
         std::vector<Widget> widgets;
     };
 
-    QScrollArea *contentScrollArea_;
-    QVBoxLayout *contentLayout_;
-    QVBoxLayout *navigationLayout_;
+    QScrollArea *contentScrollArea_ = nullptr;
+    QVBoxLayout *contentLayout_ = nullptr;
+    QVBoxLayout *navigationLayout_ = nullptr;
 
     std::vector<Group> groups_;
     pajlada::Signals::SignalHolder managedConnections_;
