@@ -141,7 +141,7 @@ public:
     void removeRef(const SubscriptionRequest &request) override
     {
         (void)request;
-    };
+    }
 
     void setQuitting() override
     {
@@ -153,7 +153,7 @@ public:
     {
         (void)request;
         return {};
-    };
+    }
 };
 
 }  // namespace chatterino::eventsub
