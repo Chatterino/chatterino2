@@ -111,6 +111,58 @@ public:
         benchmark::DoNotOptimize(&metadata);
         benchmark::DoNotOptimize(&payload);
     }
+
+    void onAutomodMessageHold(
+        const messages::Metadata &metadata,
+        const payload::automod_message_hold::v2::Payload &payload) override
+    {
+        benchmark::DoNotOptimize(&metadata);
+        benchmark::DoNotOptimize(&payload);
+    }
+
+    void onAutomodMessageUpdate(
+        const messages::Metadata &metadata,
+        const payload::automod_message_update::v2::Payload &payload) override
+    {
+        benchmark::DoNotOptimize(&metadata);
+        benchmark::DoNotOptimize(&payload);
+    }
+
+    void onChannelSuspiciousUserMessage(
+        const messages::Metadata &metadata,
+        const payload::channel_suspicious_user_message::v1::Payload &payload)
+        override
+    {
+        benchmark::DoNotOptimize(&metadata);
+        benchmark::DoNotOptimize(&payload);
+    }
+
+    void onChannelSuspiciousUserUpdate(
+        const messages::Metadata &metadata,
+        const payload::channel_suspicious_user_update::v1::Payload &payload)
+        override
+    {
+        benchmark::DoNotOptimize(&metadata);
+        benchmark::DoNotOptimize(&payload);
+    }
+
+    void onChannelChatUserMessageHold(
+        const messages::Metadata &metadata,
+        const payload::channel_chat_user_message_hold::v1::Payload &payload)
+        override
+    {
+        benchmark::DoNotOptimize(&metadata);
+        benchmark::DoNotOptimize(&payload);
+    }
+
+    void onChannelChatUserMessageUpdate(
+        const messages::Metadata &metadata,
+        const payload::channel_chat_user_message_update::v1::Payload &payload)
+        override
+    {
+        benchmark::DoNotOptimize(&metadata);
+        benchmark::DoNotOptimize(&payload);
+    }
     // NOLINTEND(cppcoreguidelines-pro-type-const-cast)
 };
 

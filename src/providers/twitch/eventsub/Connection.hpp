@@ -51,6 +51,36 @@ public:
         const lib::messages::Metadata &metadata,
         const lib::payload::channel_moderate::v2::Payload &payload) override;
 
+    void onAutomodMessageHold(
+        const lib::messages::Metadata &metadata,
+        const lib::payload::automod_message_hold::v2::Payload &payload)
+        override;
+
+    void onAutomodMessageUpdate(
+        const lib::messages::Metadata &metadata,
+        const lib::payload::automod_message_update::v2::Payload &payload)
+        override;
+
+    void onChannelSuspiciousUserMessage(
+        const lib::messages::Metadata &metadata,
+        const lib::payload::channel_suspicious_user_message::v1::Payload
+            &payload) override;
+
+    void onChannelSuspiciousUserUpdate(
+        const lib::messages::Metadata &metadata,
+        const lib::payload::channel_suspicious_user_update::v1::Payload
+            &payload) override;
+
+    void onChannelChatUserMessageHold(
+        const lib::messages::Metadata &metadata,
+        const lib::payload::channel_chat_user_message_hold::v1::Payload
+            &payload) override;
+
+    void onChannelChatUserMessageUpdate(
+        const lib::messages::Metadata &metadata,
+        const lib::payload::channel_chat_user_message_update::v1::Payload
+            &payload) override;
+
     QString getSessionID() const;
 
     bool isSubscribedTo(const SubscriptionRequest &request) const;

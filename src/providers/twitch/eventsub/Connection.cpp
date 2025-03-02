@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/highlights/HighlightController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/eventsub/MessageBuilder.hpp"
@@ -11,7 +12,9 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
 
 #include <boost/json.hpp>
@@ -73,52 +76,8 @@ void Connection::onChannelBan(
     const lib::payload::channel_ban::v1::Payload &payload)
 {
     (void)metadata;
-
-    auto roomID = QString::fromStdString(payload.event.broadcasterUserID);
-
-    BanAction action{};
-
-    if (!getApp()->isTest())
-    {
-        action.timestamp = std::chrono::steady_clock::now();
-    }
-    action.roomID = roomID;
-    action.source = ActionUser{
-        .id = QString::fromStdString(payload.event.moderatorUserID),
-        .login = QString::fromStdString(payload.event.moderatorUserLogin),
-        .displayName = QString::fromStdString(payload.event.moderatorUserName),
-    };
-    action.target = ActionUser{
-        .id = QString::fromStdString(payload.event.userID),
-        .login = QString::fromStdString(payload.event.userLogin),
-        .displayName = QString::fromStdString(payload.event.userName),
-    };
-    action.reason = QString::fromStdString(payload.event.reason);
-    if (payload.event.isPermanent)
-    {
-        action.duration = 0;
-    }
-    else
-    {
-        auto timeoutDuration = payload.event.timeoutDuration();
-        auto timeoutDurationInSeconds =
-            std::chrono::duration_cast<std::chrono::seconds>(timeoutDuration)
-                .count();
-        action.duration = timeoutDurationInSeconds;
-    }
-
-    auto chan = getApp()->getTwitch()->getChannelOrEmptyByID(roomID);
-
-    runInGuiThread([action{std::move(action)}, chan{std::move(chan)}] {
-        auto time = QDateTime::currentDateTime();
-        if (getApp()->isTest())
-        {
-            time = QDateTime::fromSecsSinceEpoch(0).toUTC();
-        }
-        MessageBuilder msg(action, time);
-        msg->flags.set(MessageFlag::PubSub);
-        chan->addOrReplaceTimeout(msg.release(), QDateTime::currentDateTime());
-    });
+    qCDebug(LOG) << "On channel ban event for channel"
+                 << payload.event.broadcasterUserLogin.c_str();
 }
 
 void Connection::onStreamOnline(
@@ -192,11 +151,7 @@ void Connection::onChannelModerate(
         return;
     }
 
-    auto now = QDateTime::currentDateTime();
-    if (getApp()->isTest())
-    {
-        now = QDateTime::fromSecsSinceEpoch(0).toUTC();
-    }
+    auto now = chronoToQDateTime(metadata.messageTimestamp);
 
     std::visit(
         [&](auto &&action) {
@@ -218,6 +173,203 @@ void Connection::onChannelModerate(
             }
         },
         payload.event.action);
+}
+
+void Connection::onAutomodMessageHold(
+    const lib::messages::Metadata &metadata,
+    const lib::payload::automod_message_hold::v2::Payload &payload)
+{
+    auto *channel = dynamic_cast<TwitchChannel *>(
+        getApp()
+            ->getTwitch()
+            ->getChannelOrEmpty(payload.event.broadcasterUserLogin.qt())
+            .get());
+    if (!channel || channel->isEmpty())
+    {
+        qCDebug(LOG)
+            << "Automod message hold for broadcaster we're not interested in"
+            << payload.event.broadcasterUserLogin.qt();
+        return;
+    }
+
+    auto time = chronoToQDateTime(metadata.messageTimestamp);
+    auto header = makeAutomodHoldMessageHeader(channel, time, payload.event);
+    auto body = makeAutomodHoldMessageBody(channel, time, payload.event);
+
+    auto messageText = payload.event.message.text.qt();
+    auto userLogin = payload.event.userLogin.qt();
+
+    runInGuiThread([channel, messageText, userLogin, header, body] {
+        auto [highlighted, highlightResult] = getApp()->getHighlights()->check(
+            {}, {}, userLogin, messageText, body->flags);
+        if (highlighted)
+        {
+            MessageBuilder::triggerHighlights(
+                channel,
+                {
+                    .customSound =
+                        highlightResult.customSoundUrl.value_or<QUrl>({}),
+                    .playSound = highlightResult.playSound,
+                    .windowAlert = highlightResult.alert,
+                });
+        }
+
+        channel->addMessage(header, MessageContext::Original);
+        channel->addMessage(body, MessageContext::Original);
+
+        getApp()->getTwitch()->getAutomodChannel()->addMessage(
+            header, MessageContext::Original);
+        getApp()->getTwitch()->getAutomodChannel()->addMessage(
+            body, MessageContext::Original);
+
+        if (getSettings()->showAutomodInMentions)
+        {
+            getApp()->getTwitch()->getMentionsChannel()->addMessage(
+                header, MessageContext::Original);
+            getApp()->getTwitch()->getMentionsChannel()->addMessage(
+                body, MessageContext::Original);
+        }
+    });
+}
+void Connection::onAutomodMessageUpdate(
+    const lib::messages::Metadata & /*metadata*/,
+    const lib::payload::automod_message_update::v2::Payload &payload)
+{
+    auto *channel = dynamic_cast<TwitchChannel *>(
+        getApp()
+            ->getTwitch()
+            ->getChannelOrEmpty(payload.event.broadcasterUserLogin.qt())
+            .get());
+    if (!channel || channel->isEmpty())
+    {
+        qCDebug(LOG)
+            << "Automod message hold for broadcaster we're not interested in"
+            << payload.event.broadcasterUserLogin.qt();
+        return;
+    }
+
+    // Gray out approve/deny button upon "ALLOWED" and "DENIED" statuses
+    // They are versions of automod_message_(denied|approved) but for mods.
+    auto id = "automod_" + payload.event.messageID.qt();
+    runInGuiThread([channel, id] {
+        channel->disableMessage(id);
+    });
+}
+
+void Connection::onChannelSuspiciousUserMessage(
+    const lib::messages::Metadata &metadata,
+    const lib::payload::channel_suspicious_user_message::v1::Payload &payload)
+{
+    // monitored chats are received over irc; in the future, we will use eventsub instead
+    if (payload.event.lowTrustStatus !=
+        lib::suspicious_users::Status::Restricted)
+    {
+        return;
+    }
+
+    if (getSettings()->streamerModeHideModActions &&
+        getApp()->getStreamerMode()->isEnabled())
+    {
+        return;
+    }
+
+    auto *channel = dynamic_cast<TwitchChannel *>(
+        getApp()
+            ->getTwitch()
+            ->getChannelOrEmpty(payload.event.broadcasterUserLogin.qt())
+            .get());
+    if (!channel || channel->isEmpty())
+    {
+        qCDebug(LOG)
+            << "Suspicious message for broadcaster we're not interested in"
+            << payload.event.broadcasterUserLogin.qt();
+        return;
+    }
+
+    auto time = chronoToQDateTime(metadata.messageTimestamp);
+    auto header = makeSuspiciousUserMessageHeader(channel, time, payload.event);
+    auto body = makeSuspiciousUserMessageBody(channel, time, payload.event);
+
+    runInGuiThread([channel, header, body] {
+        channel->addMessage(header, MessageContext::Original);
+        channel->addMessage(body, MessageContext::Original);
+    });
+}
+
+void Connection::onChannelSuspiciousUserUpdate(
+    const lib::messages::Metadata &metadata,
+    const lib::payload::channel_suspicious_user_update::v1::Payload &payload)
+{
+    auto *channel = dynamic_cast<TwitchChannel *>(
+        getApp()
+            ->getTwitch()
+            ->getChannelOrEmpty(payload.event.broadcasterUserLogin.qt())
+            .get());
+    if (!channel || channel->isEmpty())
+    {
+        qCDebug(LOG) << "Channel Suspicious User Update for broadcaster we're "
+                        "not interested in"
+                     << payload.event.broadcasterUserLogin.qt();
+        return;
+    }
+
+    auto time = chronoToQDateTime(metadata.messageTimestamp);
+    auto message = makeSuspiciousUserUpdate(channel, time, payload.event);
+
+    runInGuiThread([channel, message] {
+        channel->addMessage(message, MessageContext::Original);
+    });
+}
+
+void Connection::onChannelChatUserMessageHold(
+    const lib::messages::Metadata &metadata,
+    const lib::payload::channel_chat_user_message_hold::v1::Payload &payload)
+{
+    auto *channel = dynamic_cast<TwitchChannel *>(
+        getApp()
+            ->getTwitch()
+            ->getChannelOrEmpty(payload.event.broadcasterUserLogin.qt())
+            .get());
+    if (!channel || channel->isEmpty())
+    {
+        qCDebug(LOG) << "Channel Chat User Message Hold for broadcaster we're "
+                        "not interested in"
+                     << payload.event.broadcasterUserLogin.qt();
+        return;
+    }
+
+    auto time = chronoToQDateTime(metadata.messageTimestamp);
+    auto message = makeUserMessageHeldMessage(channel, time, payload.event);
+
+    runInGuiThread([channel, message] {
+        channel->addMessage(message, MessageContext::Original);
+    });
+}
+
+void Connection::onChannelChatUserMessageUpdate(
+    const lib::messages::Metadata &metadata,
+    const lib::payload::channel_chat_user_message_update::v1::Payload &payload)
+{
+    auto *channel = dynamic_cast<TwitchChannel *>(
+        getApp()
+            ->getTwitch()
+            ->getChannelOrEmpty(payload.event.broadcasterUserLogin.qt())
+            .get());
+    if (!channel || channel->isEmpty())
+    {
+        qCDebug(LOG)
+            << "Channel Chat User Message Update for broadcaster we're "
+               "not interested in"
+            << payload.event.broadcasterUserLogin.qt();
+        return;
+    }
+
+    auto time = chronoToQDateTime(metadata.messageTimestamp);
+    auto message = makeUserMessageUpdateMessage(channel, time, payload.event);
+
+    runInGuiThread([channel, message] {
+        channel->addMessage(message, MessageContext::Original);
+    });
 }
 
 QString Connection::getSessionID() const

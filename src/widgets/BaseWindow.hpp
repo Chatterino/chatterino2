@@ -121,6 +121,8 @@ protected:
     QPointF movingRelativePos;
     bool moving{};
 
+    /// @returns The scale this window wants to be at.
+    virtual float desiredScale() const;
     void updateScale();
 
     std::optional<QColor> overrideBackgroundColor_;

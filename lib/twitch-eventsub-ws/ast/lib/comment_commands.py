@@ -25,6 +25,8 @@ class CommentCommands:
 
     inner_root: str = ""
 
+    default: Optional[str] = None
+
     def __init__(self, parent: Optional["CommentCommands"] = None) -> None:
         if parent is not None:
             self.name_transform = parent.name_transform
@@ -59,6 +61,8 @@ class CommentCommands:
                     pass
                 case "json_tag":
                     self.tag = value
+                case "default":
+                    self.default = value
                 case other:
                     log.warning(f"Unknown comment command found: {other} with value {value}")
 

@@ -630,7 +630,8 @@ MessagePtrMut MessageBuilder::makeSubgiftMessage(const QString &text,
 
 MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
                                const QString &sourceUser,
-                               const QString &systemMessageText, int times,
+                               const QString &channel,
+                               const QString &systemMessageText, uint32_t times,
                                const QDateTime &time)
     : MessageBuilder()
 {
@@ -645,20 +646,38 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
         ->setLink(
             {Link::UserInfo, timeoutUserIsFirst ? timeoutUser : sourceUser});
 
+    auto appendUser = [&](const QString &name) {
+        auto pos = remainder.indexOf(name);
+        if (pos > 0)
+        {
+            QString start = remainder.mid(0, pos - 1);
+            remainder = remainder.mid(pos + name.length());
+
+            this->emplaceSystemTextAndUpdate(start, messageText);
+            auto *el = this->emplaceSystemTextAndUpdate(name, messageText)
+                           ->setLink({Link::UserInfo, name});
+            if (remainder.startsWith(' '))
+            {
+                remainder.removeFirst();
+            }
+            else
+            {
+                assert(messageText.endsWith(' '));
+                messageText.removeLast();
+                el->setTrailingSpace(false);
+            }
+        }
+    };
+
     if (!sourceUser.isEmpty())
     {
         // the second username in the message
-        const auto &targetUsername =
-            timeoutUserIsFirst ? sourceUser : timeoutUser;
-        int userPos = remainder.indexOf(targetUsername);
+        appendUser(timeoutUserIsFirst ? sourceUser : timeoutUser);
+    }
 
-        QString mid = remainder.mid(0, userPos - 1);
-        QString username = remainder.mid(userPos, targetUsername.length());
-        remainder = remainder.mid(userPos + targetUsername.length() + 1);
-
-        this->emplaceSystemTextAndUpdate(mid, messageText);
-        this->emplaceSystemTextAndUpdate(username, messageText)
-            ->setLink({Link::UserInfo, username});
+    if (!channel.isEmpty())
+    {
+        appendUser(channel);
     }
 
     this->emplaceSystemTextAndUpdate(

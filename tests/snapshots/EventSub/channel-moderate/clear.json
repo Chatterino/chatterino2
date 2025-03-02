@@ -55,7 +55,7 @@
                         "trailingSpace": true,
                         "type": "TextElement",
                         "words": [
-                            "0:00"
+                            "12:31"
                         ]
                     },
                     "flags": "Timestamp",
@@ -64,7 +64,7 @@
                         "type": "None",
                         "value": ""
                     },
-                    "time": "00:00:00",
+                    "time": "12:31:47",
                     "tooltip": "",
                     "trailingSpace": true,
                     "type": "TimestampElement"
@@ -111,7 +111,7 @@
             "loginName": "",
             "messageText": "nerixyz cleared the chat. ",
             "searchText": "nerixyz cleared the chat. ",
-            "serverReceivedTime": "1970-01-01T00:00:00Z",
+            "serverReceivedTime": "2024-05-14T12:31:47Z",
             "timeoutUser": "nerixyz",
             "userID": "",
             "usernameColor": "#ff000000"

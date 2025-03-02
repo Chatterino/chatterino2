@@ -9,6 +9,7 @@
 #include "providers/twitch/PubSubHelpers.hpp"
 #include "providers/twitch/PubSubMessages.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
+#include "singletons/Settings.hpp"
 #include "util/DebugCount.hpp"
 #include "util/Helpers.hpp"
 #include "util/RapidjsonHelpers.hpp"
@@ -618,6 +619,11 @@ void PubSub::stop()
 
 void PubSub::listenToChannelModerationActions(const QString &channelID)
 {
+    if (getSettings()->enableExperimentalEventSub)
+    {
+        return;
+    }
+
     if (this->userID_.isEmpty())
     {
         qCDebug(chatterinoPubSub) << "Unable to listen to moderation actions "
@@ -647,6 +653,11 @@ void PubSub::unlistenChannelModerationActions()
 
 void PubSub::listenToAutomod(const QString &channelID)
 {
+    if (getSettings()->enableExperimentalEventSub)
+    {
+        return;
+    }
+
     if (this->userID_.isEmpty())
     {
         qCDebug(chatterinoPubSub)
@@ -676,6 +687,11 @@ void PubSub::unlistenAutomod()
 
 void PubSub::listenToLowTrustUsers(const QString &channelID)
 {
+    if (getSettings()->enableExperimentalEventSub)
+    {
+        return;
+    }
+
     if (this->userID_.isEmpty())
     {
         qCDebug(chatterinoPubSub)
