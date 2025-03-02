@@ -97,7 +97,7 @@ public:
     static GeneralPageView *withNavigation(QWidget *parent);
     static GeneralPageView *withoutNavigation(QWidget *parent);
 
-    void addWidget(QWidget *widget, QStringList keywords = {});
+    void addWidget(QWidget *widget, const QStringList &keywords = {});
 
     /// Register the widget with the given keywords.
     /// This assumes that the widget is being held by a layout that has been added previously

@@ -71,7 +71,7 @@ GeneralPageView *GeneralPageView::withNavigation(QWidget *parent)
     return view;
 }
 
-void GeneralPageView::addWidget(QWidget *widget, QStringList keywords)
+void GeneralPageView::addWidget(QWidget *widget, const QStringList &keywords)
 {
     this->contentLayout_->addWidget(widget);
     if (!this->groups_.empty())
