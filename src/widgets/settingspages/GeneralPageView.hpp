@@ -101,7 +101,8 @@ public:
 
     /// Register the widget with the given keywords.
     /// This assumes that the widget is being held by a layout that has been added previously
-    void registerWidget(QWidget *widget, const QStringList &keywords);
+    void registerWidget(QWidget *widget, const QStringList &keywords,
+                        QWidget *parentElement);
 
     /// Pushes the widget into the current layout
     void pushWidget(QWidget *widget);
@@ -302,8 +303,13 @@ private:
     void addToolTip(QWidget &widget, QString text) const;
 
     struct Widget {
-        QWidget *element;
+        /// The element of the register widget
+        /// This can point to the label of the widget, or the action widget (e.g. the spinbox)
+        QWidget *element{};
         QStringList keywords;
+
+        /// The optional parent element of the widget (usually pointing at a SettingWidget)
+        QWidget *parentElement{};
     };
 
     struct Group {

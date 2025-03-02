@@ -297,18 +297,18 @@ void SettingWidget::addTo(GeneralPageView &view)
 
     if (this->label != nullptr)
     {
-        view.registerWidget(this->label, this->keywords);
+        view.registerWidget(this->label, this->keywords, this);
     }
-    view.registerWidget(this->actionWidget, this->keywords);
+    view.registerWidget(this->actionWidget, this->keywords, this);
 }
 
 void SettingWidget::addTo(GeneralPageView &view, QFormLayout *formLayout)
 {
     if (this->label != nullptr)
     {
-        view.registerWidget(this->label, this->keywords);
+        view.registerWidget(this->label, this->keywords, this);
     }
-    view.registerWidget(this->actionWidget, this->keywords);
+    view.registerWidget(this->actionWidget, this->keywords, this);
 
     formLayout->addRow(this->label, this->actionWidget);
 }

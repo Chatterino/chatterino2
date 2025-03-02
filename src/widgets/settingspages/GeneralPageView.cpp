@@ -82,13 +82,15 @@ void GeneralPageView::addWidget(QWidget *widget, const QStringList &keywords)
 }
 
 void GeneralPageView::registerWidget(QWidget *widget,
-                                     const QStringList &keywords)
+                                     const QStringList &keywords,
+                                     QWidget *parentElement)
 {
     if (!this->groups_.empty())
     {
         this->groups_.back().widgets.push_back({
             .element = widget,
             .keywords = keywords,
+            .parentElement = parentElement,
         });
     }
 }
@@ -339,6 +341,10 @@ bool GeneralPageView::filterElements(const QString &query)
             for (auto &&widget : group.widgets)
             {
                 widget.element->show();
+                if (widget.parentElement != nullptr)
+                {
+                    widget.parentElement->show();
+                }
             }
 
             group.title->show();
@@ -384,11 +390,19 @@ bool GeneralPageView::filterElements(const QString &query)
                     {
                         currentSubtitleVisible = true;
                         widget.element->show();
+                        if (widget.parentElement != nullptr)
+                        {
+                            widget.parentElement->show();
+                        }
                         groupAny = true;
                         break;
                     }
 
                     widget.element->hide();
+                    if (widget.parentElement != nullptr)
+                    {
+                        widget.parentElement->hide();
+                    }
                 }
             }
 
