@@ -1061,11 +1061,20 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         true,
         "The final scale of the messages in the overlay is computed by "
         "multiplying this zoom factor with the global zoom level.");
-    layout.addIntInput(
-        "Background opacity (0-255)", s.overlayBackgroundOpacity, 0, 255, 1,
-        "Controls the opacity of the (possibly alternating) background behind "
-        "messages. The color is set through the current theme. 255 corresponds "
-        "to a fully opaque background.");
+
+    SettingWidget::intInput("Background opacity (0-255)",
+                            s.overlayBackgroundOpacity,
+                            {
+                                .min = 0,
+                                .max = 255,
+                                .singleStep = 1,
+                            })
+        ->setTooltip(
+            "Controls the opacity of the (possibly alternating) background "
+            "behind messages. The color is set through the current theme. 255 "
+            "corresponds to a fully opaque background.")
+        ->addTo(layout);
+
     layout.addCheckbox("Enable Shadow", s.enableOverlayShadow, false,
                        "Enables a drop shadow on the overlay. This will use "
                        "more processing power.");
