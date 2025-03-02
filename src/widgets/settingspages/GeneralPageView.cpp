@@ -132,7 +132,7 @@ TitleLabel *GeneralPageView::addTitle(const QString &title)
         this->navigationLayout_->addWidget(navLabel);
 
         QObject::connect(
-            navLabel, &NavigationLabel::leftMouseUp, label, [=, this] {
+            navLabel, &NavigationLabel::leftMouseUp, label, [this, label] {
                 this->contentScrollArea_->verticalScrollBar()->setValue(
                     label->y());
             });
