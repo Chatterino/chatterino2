@@ -263,7 +263,6 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
              weakConnection{std::weak_ptr<lib::Session>(connection)}](
                 const auto &res) {
                 qCDebug(LOG) << "Subscription success" << request;
-                // TODO: Move marathon stick in here
                 this->markRequestSubscribed(request, weakConnection,
                                             res.subscriptionID);
             },
