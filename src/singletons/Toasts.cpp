@@ -63,6 +63,67 @@ Q_SIGNALS:
     void downloadComplete();
 };
 
+void performReaction(const ToastReaction &reaction, const QString &channelName)
+{
+    switch (reaction)
+    {
+        case ToastReaction::OpenInBrowser:
+            QDesktopServices::openUrl(
+                QUrl(u"https://www.twitch.tv/" % channelName));
+            break;
+        case ToastReaction::OpenInPlayer:
+            QDesktopServices::openUrl(QUrl(TWITCH_PLAYER_URL.arg(channelName)));
+            break;
+        case ToastReaction::OpenInStreamlink: {
+            openStreamlinkForChannel(channelName);
+            break;
+        }
+        case ToastReaction::DontOpen:
+            // nothing should happen
+            break;
+    }
+}
+
+#ifdef CHATTERINO_WITH_LIBNOTIFY
+void onAction(NotifyNotification *notif, const char *actionRaw, void *userData)
+{
+    QString action(actionRaw);
+    auto *channelName = static_cast<QString *>(userData);
+
+    // by default we perform the action that is specified in the settings
+    auto toastReaction =
+        static_cast<ToastReaction>(getSettings()->openFromToast.getValue());
+
+    if (action == OPEN_IN_BROWSER)
+    {
+        toastReaction = ToastReaction::OpenInBrowser;
+    }
+    else if (action == OPEN_PLAYER_IN_BROWSER)
+    {
+        toastReaction = ToastReaction::OpenInPlayer;
+    }
+    else if (action == OPEN_IN_STREAMLINK)
+    {
+        toastReaction = ToastReaction::OpenInStreamlink;
+    }
+
+    performReaction(toastReaction, *channelName);
+
+    notify_notification_close(notif, nullptr);
+}
+
+void onActionClosed(NotifyNotification *notif, void * /*userData*/)
+{
+    g_object_unref(notif);
+}
+
+void onNotificationDestroyed(void *data)
+{
+    auto *channelNameHeap = static_cast<QString *>(data);
+    delete channelNameHeap;
+}
+#endif
+
 }  // namespace
 
 namespace chatterino {
@@ -182,24 +243,7 @@ public:
         auto toastReaction =
             static_cast<ToastReaction>(getSettings()->openFromToast.getValue());
 
-        switch (toastReaction)
-        {
-            case ToastReaction::OpenInBrowser:
-                QDesktopServices::openUrl(
-                    QUrl(u"https://www.twitch.tv/" % channelName_));
-                break;
-            case ToastReaction::OpenInPlayer:
-                QDesktopServices::openUrl(
-                    QUrl(TWITCH_PLAYER_URL.arg(channelName_)));
-                break;
-            case ToastReaction::OpenInStreamlink: {
-                openStreamlinkForChannel(channelName_);
-                break;
-            }
-            case ToastReaction::DontOpen:
-                // nothing should happen
-                break;
-        }
+        performReaction(toastReaction, channelName_);
     }
 
     void toastActivated(int actionIndex) const override
@@ -310,6 +354,38 @@ void Toasts::sendLibnotify(const QString &channelName,
     NotifyNotification *notif = notify_notification_new(
         str.toUtf8().constData(), channelTitle.toUtf8().constData(), nullptr);
 
+    // this will be freed in onNotificationDestroyed
+    auto *channelNameHeap = new QString(channelName);
+
+    // we only set onNotificationDestroyed as free_func in the first action
+    // because all free_funcs will be called once the notification is destroyed
+    // which would cause a double-free otherwise
+    notify_notification_add_action(notif, OPEN_IN_BROWSER.toUtf8().constData(),
+                                   OPEN_IN_BROWSER.toUtf8().constData(),
+                                   (NotifyActionCallback)onAction,
+                                   channelNameHeap, onNotificationDestroyed);
+    notify_notification_add_action(
+        notif, OPEN_PLAYER_IN_BROWSER.toUtf8().constData(),
+        OPEN_PLAYER_IN_BROWSER.toUtf8().constData(),
+        (NotifyActionCallback)onAction, channelNameHeap, nullptr);
+    notify_notification_add_action(
+        notif, OPEN_IN_STREAMLINK.toUtf8().constData(),
+        OPEN_IN_STREAMLINK.toUtf8().constData(), (NotifyActionCallback)onAction,
+        channelNameHeap, nullptr);
+
+    auto defaultToastReaction =
+        static_cast<ToastReaction>(getSettings()->openFromToast.getValue());
+
+    if (defaultToastReaction != ToastReaction::DontOpen)
+    {
+        notify_notification_add_action(
+            notif, "default",
+            Toasts::findStringFromReaction(defaultToastReaction)
+                .toUtf8()
+                .constData(),
+            (NotifyActionCallback)onAction, channelNameHeap, nullptr);
+    }
+
     GdkPixbuf *img = gdk_pixbuf_new_from_file(
         avatarFilePath(channelName).toUtf8().constData(), nullptr);
     if (img == nullptr)
@@ -322,8 +398,13 @@ void Toasts::sendLibnotify(const QString &channelName,
         g_object_unref(img);
     }
 
-    notify_notification_show(notif, nullptr);
-    g_object_unref(notif);
+    g_signal_connect(notif, "closed", (GCallback)onActionClosed, nullptr);
+
+    gboolean success = notify_notification_show(notif, nullptr);
+    if (success == 0)
+    {
+        g_object_unref(notif);
+    }
 }
 #endif
 

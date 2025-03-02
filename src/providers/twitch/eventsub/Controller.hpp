@@ -11,7 +11,10 @@
 #include <QJsonObject>
 #include <QString>
 
+#include <atomic>
+#include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <thread>
 
@@ -26,6 +29,11 @@ public:
     ///
     /// Should realistically only be called in the dtor of SubscriptionHandle
     virtual void removeRef(const SubscriptionRequest &request) = 0;
+
+    /// Mark the controller as quitting
+    ///
+    /// This lets us simplify some logic with unsubscriptions (i.e. we ignore it instead)
+    virtual void setQuitting() = 0;
 
     /// Subscribe will make a request to each open connection and ask them to
     /// add this subscription.
@@ -46,6 +54,8 @@ public:
 
     void removeRef(const SubscriptionRequest &request) override;
 
+    void setQuitting() override;
+
     [[nodiscard]] SubscriptionHandle subscribe(
         const SubscriptionRequest &request) override;
 
@@ -63,6 +73,10 @@ private:
                                std::weak_ptr<lib::Session> connection,
                                const QString &subscriptionID);
 
+    void markRequestFailed(const SubscriptionRequest &request);
+
+    void markRequestUnsubscribed(const SubscriptionRequest &request);
+
     const std::string userAgent;
 
     std::string eventSubHost;
@@ -77,7 +91,31 @@ private:
 
     std::vector<std::weak_ptr<lib::Session>> connections;
 
+    [[nodiscard]] std::optional<std::shared_ptr<lib::Session>>
+        getViableConnection(uint32_t &openButNotReadyConnections);
+
     struct Subscription {
+        enum class State : uint8_t {
+            /// No subscription attempt has been made, or we have unsubscribed after all references
+            /// were released
+            Unsubscribed,
+
+            /// The subscription attempt failed, maxing out our retry attempts
+            Failed,
+
+            /// The initial subscription is currently in progress
+            Subscribing,
+
+            /// A retry is currently in progress
+            Retrying,
+
+            /// The subscription has been established
+            Subscribed,
+
+            /// We've lost interested in this subscription - currently unsubscribing
+            Unsubscribing,
+        } state = State::Unsubscribed;
+
         int32_t refCount = 0;
         std::weak_ptr<lib::Session> connection;
 
@@ -91,6 +129,8 @@ private:
 
     std::mutex subscriptionsMutex;
     std::unordered_map<SubscriptionRequest, Subscription> subscriptions;
+
+    std::atomic<bool> quitting = false;
 };
 
 class DummyController : public IController
@@ -101,14 +141,19 @@ public:
     void removeRef(const SubscriptionRequest &request) override
     {
         (void)request;
-    };
+    }
+
+    void setQuitting() override
+    {
+        //
+    }
 
     [[nodiscard]] SubscriptionHandle subscribe(
         const SubscriptionRequest &request) override
     {
         (void)request;
         return {};
-    };
+    }
 };
 
 }  // namespace chatterino::eventsub
