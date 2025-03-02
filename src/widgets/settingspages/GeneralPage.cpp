@@ -1103,15 +1103,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                            s.openLinksIncognito);
     }
 
-    layout.addCustomCheckbox(
+    SettingWidget::customCheckbox(
         "Restart on crash (requires restart)",
-        [] {
-            return getApp()->getCrashHandler()->shouldRecover();
-        },
+        getApp()->getCrashHandler()->shouldRecover(),
         [](bool on) {
-            return getApp()->getCrashHandler()->saveShouldRecover(on);
-        },
-        "When possible, restart Chatterino if the program crashes");
+            getApp()->getCrashHandler()->saveShouldRecover(on);
+        })
+        ->setTooltip("When possible, restart Chatterino if the program crashes")
+        ->addTo(layout);
 
 #if defined(Q_OS_LINUX) && !defined(NO_QTKEYCHAIN)
     if (!getApp()->getPaths().isPortable())
