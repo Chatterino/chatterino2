@@ -255,6 +255,9 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
         const auto &connection = *viableConnection;
         auto *listener = dynamic_cast<Connection *>(connection->getListener());
 
+        assert(listener != nullptr && "Something goofy has gone wrong, Session "
+                                      "listener must be our Connection type");
+
         qCDebug(LOG) << "Make helix request for" << request;
         getHelix()->createEventSubSubscription(
             request, listener->getSessionID(),
