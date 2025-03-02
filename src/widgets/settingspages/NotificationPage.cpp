@@ -49,8 +49,7 @@ NotificationPage::NotificationPage()
 #if defined(Q_OS_WIN) || defined(CHATTERINO_WITH_LIBNOTIFY)
                 settings.append(this->createCheckBox(
                     "Show notification", getSettings()->notificationToast));
-#endif
-#ifdef Q_OS_WIN
+
                 auto openIn = settings.emplace<QHBoxLayout>().withoutMargin();
                 {
                     openIn
