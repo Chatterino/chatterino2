@@ -481,7 +481,12 @@ void Controller::retrySubscription(const SubscriptionRequest &request,
         else
         {
             qCDebug(LOG) << "Retry timer for" << request << "was cancelled";
-            this->markRequestUnsubscribed(request);
+            // If we mark the request as unsubscribed here, and we had to actually unsubscribe,
+            // if an actual unsubscribe happens then it'll go from Unsubscribed -> ACTUALLY unsubscribed
+            //
+            // We might still need to update the state here, but we might want some new state for that
+            // e.g. RetryCancelled or something
+            // this->markRequestUnsubscribed(request);
         }
     });
 
