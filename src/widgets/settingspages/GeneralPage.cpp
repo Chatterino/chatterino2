@@ -275,8 +275,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "reply to a message regardless of this setting.")
         ->addTo(layout);
 
-    layout.addCheckbox("Show message reply button", s.showReplyButton, false,
-                       "Show a reply button next to every chat message");
+    SettingWidget::checkbox("Show message reply button", s.showReplyButton)
+        ->setTooltip("Show a reply button next to every chat message")
+        ->addTo(layout);
 
     auto removeTabSeq = getApp()->getHotkeys()->getDisplaySequence(
         HotkeyCategory::Window, "removeTab");
