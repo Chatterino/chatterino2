@@ -165,6 +165,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , logging(new Logging(_settings))
     , emotes(new Emotes)
     , accounts(new AccountController)
+    , eventSub(makeEventSubController(_settings))
     , hotkeys(new HotkeyController)
     , windows(new WindowManager(paths, _settings, *this->themes, *this->fonts))
     , toasts(new Toasts)
@@ -193,7 +194,6 @@ Application::Application(Settings &_settings, const Paths &paths,
     , streamerMode(new StreamerMode)
     , twitchUsers(new TwitchUsers)
     , pronouns(new pronouns::Pronouns)
-    , eventSub(makeEventSubController(_settings))
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(new PluginController(paths))
 #endif
