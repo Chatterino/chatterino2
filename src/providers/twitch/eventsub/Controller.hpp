@@ -12,7 +12,9 @@
 #include <QString>
 
 #include <atomic>
+#include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <thread>
 
@@ -71,6 +73,10 @@ private:
                                std::weak_ptr<lib::Session> connection,
                                const QString &subscriptionID);
 
+    void markRequestFailed(const SubscriptionRequest &request);
+
+    void markRequestUnsubscribed(const SubscriptionRequest &request);
+
     const std::string userAgent;
 
     std::string eventSubHost;
@@ -85,7 +91,31 @@ private:
 
     std::vector<std::weak_ptr<lib::Session>> connections;
 
+    [[nodiscard]] std::optional<std::shared_ptr<lib::Session>>
+        getViableConnection(uint32_t &openButNotReadyConnections);
+
     struct Subscription {
+        enum class State : uint8_t {
+            /// No subscription attempt has been made, or we have unsubscribed after all references
+            /// were released
+            Unsubscribed,
+
+            /// The subscription attempt failed, maxing out our retry attempts
+            Failed,
+
+            /// The initial subscription is currently in progress
+            Subscribing,
+
+            /// A retry is currently in progress
+            Retrying,
+
+            /// The subscription has been established
+            Subscribed,
+
+            /// We've lost interested in this subscription - currently unsubscribing
+            Unsubscribing,
+        } state = State::Unsubscribed;
+
         int32_t refCount = 0;
         std::weak_ptr<lib::Session> connection;
 
