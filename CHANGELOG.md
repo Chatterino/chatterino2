@@ -52,6 +52,7 @@
 - Dev: BTTV emotes are now loaded as WEBP. (#5957)
 - Dev: Reduced time we wait for PubSub connections to cleanly exit from 1s to 100ms. (#6019)
 - Dev: Added snapshot tests for EventSub. (#5965)
+- Dev: Removed dead code and some MSVC warnings. (#6024)
 
 ## 2.5.2
 
