@@ -26,6 +26,12 @@ class SettingWidget : QWidget
     explicit SettingWidget(const QString &mainKeyword);
 
 public:
+    struct IntInputParams {
+        std::optional<int> min;
+        std::optional<int> max;
+        std::optional<int> singleStep;
+    };
+
     ~SettingWidget() override = default;
     SettingWidget &operator=(const SettingWidget &) = delete;
     SettingWidget &operator=(SettingWidget &&) = delete;
@@ -38,6 +44,9 @@ public:
     static SettingWidget *customCheckbox(const QString &label,
                                          bool initialValue,
                                          const std::function<void(bool)> &save);
+
+    static SettingWidget *intInput(const QString &label, IntSetting &setting,
+                                   IntInputParams params);
 
     template <typename T>
     static SettingWidget *dropdown(const QString &label,

@@ -109,6 +109,51 @@ SettingWidget *SettingWidget::customCheckbox(
     return widget;
 }
 
+SettingWidget *SettingWidget::intInput(const QString &label,
+                                       IntSetting &setting,
+                                       IntInputParams params)
+{
+    auto *widget = new SettingWidget(label);
+
+    auto *lbl = new QLabel(label + ":");
+
+    auto *input = new QSpinBox;
+    if (params.min.has_value())
+    {
+        input->setMinimum(params.min.value());
+    }
+    if (params.max.has_value())
+    {
+        input->setMaximum(params.max.value());
+    }
+    if (params.singleStep.has_value())
+    {
+        input->setSingleStep(params.singleStep.value());
+    }
+
+    widget->hLayout->addWidget(lbl);
+    widget->hLayout->addStretch(1);
+    widget->hLayout->addWidget(input);
+
+    // update when setting changes
+    setting.connect(
+        [input](const int &value, const auto &) {
+            input->setValue(value);
+        },
+        widget->managedConnections);
+
+    // update setting on value changed
+    QObject::connect(input, QOverload<int>::of(&QSpinBox::valueChanged), widget,
+                     [&setting](int newValue) {
+                         setting = newValue;
+                     });
+
+    widget->actionWidget = input;
+    widget->label = lbl;
+
+    return widget;
+}
+
 SettingWidget *SettingWidget::colorButton(const QString &label,
                                           QStringSetting &setting)
 {
