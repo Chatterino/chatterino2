@@ -222,7 +222,6 @@ SubscriptionHandle Controller::subscribe(const SubscriptionRequest &request)
 
 void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
 {
-    // boost::asio::post(this->ioContext, [this, request, isRetry] {
     // 1. Flush dead connections (maybe this should not be done here)
     // TODO: implement
 
@@ -335,7 +334,6 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
         // At least one connection is open, but it has not gotten the welcome message yet
         this->retrySubscription(request, boost::posix_time::millisec(250), 10);
     }
-    // });
 }
 
 std::optional<std::shared_ptr<lib::Session>> Controller::getViableConnection(
