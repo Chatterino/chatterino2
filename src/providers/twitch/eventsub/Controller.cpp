@@ -353,12 +353,8 @@ std::optional<std::shared_ptr<lib::Session>> Controller::getViableConnection(
 
         auto *listener = dynamic_cast<Connection *>(connection->getListener());
 
-        if (listener == nullptr)
-        {
-            // something really goofy is going on
-            qCWarning(LOG) << "listener was not the correct type";
-            continue;
-        }
+        assert(listener != nullptr && "Something goofy has gone wrong, Session "
+                                      "listener must be our Connection type");
 
         if (listener->getSessionID().isEmpty())
         {
