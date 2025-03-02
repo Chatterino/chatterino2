@@ -285,6 +285,16 @@ void Settings::setClampedUiScale(float value)
     this->uiScale.setValue(std::clamp(value, 0.2F, 10.F));
 }
 
+float Settings::getClampedOverlayScale() const
+{
+    return std::clamp(this->overlayScaleFactor.getValue(), 0.2F, 10.F);
+}
+
+void Settings::setClampedOverlayScale(float value)
+{
+    this->overlayScaleFactor.setValue(std::clamp(value, 0.2F, 10.F));
+}
+
 Settings &Settings::instance()
 {
     assert(instance_ != nullptr);
