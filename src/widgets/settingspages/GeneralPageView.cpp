@@ -4,8 +4,6 @@
 #include "common/QLogging.hpp"
 #include "util/LayoutHelper.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
-#include "widgets/dialogs/ColorPickerDialog.hpp"
-#include "widgets/helper/color/ColorButton.hpp"
 #include "widgets/helper/Line.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
 
