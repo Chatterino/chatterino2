@@ -2,12 +2,10 @@
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
-#include "common/network/NetworkResult.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 
@@ -91,7 +89,7 @@ QString deleteOneMessage(const CommandContext &ctx)
         return "";
     }
 
-    auto msg = ctx.channel->findMessage(messageID);
+    auto msg = ctx.channel->findMessageByID(messageID);
     if (msg != nullptr)
     {
         if (msg->loginName == ctx.channel->getName() &&

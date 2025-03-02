@@ -99,13 +99,11 @@ public:
     void replaceMessage(size_t index, const MessagePtr &replacement);
     void replaceMessage(size_t hint, const MessagePtr &message,
                         const MessagePtr &replacement);
-    void disableMessage(QString messageID);
+    void disableMessage(const QString &messageID);
 
     /// Removes all messages from this channel and invokes #messagesCleared
     void clearMessages();
 
-    [[deprecated("Use findMessageByID instead")]] MessagePtr findMessage(
-        QString messageID);
     MessagePtr findMessageByID(QStringView messageID) final;
 
     bool hasMessages() const;
