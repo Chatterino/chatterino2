@@ -25,9 +25,6 @@ public:
 
     static bool isEnabled();
 
-    static void performReaction(const ToastReaction &reaction,
-                                const QString &channelName);
-
 private:
 #ifdef Q_OS_WIN
     void ensureInitialized();

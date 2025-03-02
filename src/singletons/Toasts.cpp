@@ -63,6 +63,27 @@ Q_SIGNALS:
     void downloadComplete();
 };
 
+void performReaction(const ToastReaction &reaction, const QString &channelName)
+{
+    switch (reaction)
+    {
+        case ToastReaction::OpenInBrowser:
+            QDesktopServices::openUrl(
+                QUrl(u"https://www.twitch.tv/" % channelName));
+            break;
+        case ToastReaction::OpenInPlayer:
+            QDesktopServices::openUrl(QUrl(TWITCH_PLAYER_URL.arg(channelName)));
+            break;
+        case ToastReaction::OpenInStreamlink: {
+            openStreamlinkForChannel(channelName);
+            break;
+        }
+        case ToastReaction::DontOpen:
+            // nothing should happen
+            break;
+    }
+}
+
 #ifdef CHATTERINO_WITH_LIBNOTIFY
 void onAction(NotifyNotification *notif, const char *actionRaw, void *userData)
 {
@@ -86,7 +107,7 @@ void onAction(NotifyNotification *notif, const char *actionRaw, void *userData)
         toastReaction = ToastReaction::OpenInStreamlink;
     }
 
-    Toasts::performReaction(toastReaction, *channelName);
+    performReaction(toastReaction, *channelName);
 
     notify_notification_close(notif, nullptr);
 }
@@ -164,28 +185,6 @@ QString Toasts::findStringFromReaction(
     return Toasts::findStringFromReaction(static_cast<ToastReaction>(value));
 }
 
-void Toasts::performReaction(const ToastReaction &reaction,
-                             const QString &channelName)
-{
-    switch (reaction)
-    {
-        case ToastReaction::OpenInBrowser:
-            QDesktopServices::openUrl(
-                QUrl(u"https://www.twitch.tv/" % channelName));
-            break;
-        case ToastReaction::OpenInPlayer:
-            QDesktopServices::openUrl(QUrl(TWITCH_PLAYER_URL.arg(channelName)));
-            break;
-        case ToastReaction::OpenInStreamlink: {
-            openStreamlinkForChannel(channelName);
-            break;
-        }
-        case ToastReaction::DontOpen:
-            // nothing should happen
-            break;
-    }
-}
-
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Toasts::sendChannelNotification(const QString &channelName,
                                      const QString &channelTitle)
@@ -244,7 +243,7 @@ public:
         auto toastReaction =
             static_cast<ToastReaction>(getSettings()->openFromToast.getValue());
 
-        Toasts::performReaction(toastReaction, channelName_);
+        performReaction(toastReaction, channelName_);
     }
 
     void toastActivated(int actionIndex) const override
