@@ -110,10 +110,6 @@ public:
     /// @param inverse Inverses true to false and vice versa
     QCheckBox *addCheckbox(const QString &text, BoolSetting &setting,
                            bool inverse = false, QString toolTipText = {});
-    QCheckBox *addCustomCheckbox(const QString &text,
-                                 const std::function<bool()> &load,
-                                 std::function<void(bool)> save,
-                                 const QString &toolTipText = {});
 
     ComboBox *addDropdown(const QString &text, const QStringList &items,
                           QString toolTipText = {});
