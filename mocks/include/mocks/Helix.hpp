@@ -7,6 +7,7 @@
 #include <QString>
 #include <QStringList>
 
+#include <functional>
 #include <vector>
 
 namespace chatterino::mock {
