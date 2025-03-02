@@ -102,6 +102,10 @@ public:
     /// Register the widget with the given keywords.
     /// This assumes that the widget is being held by a layout that has been added previously
     void registerWidget(QWidget *widget, const QStringList &keywords);
+
+    /// Pushes the widget into the current layout
+    void pushWidget(QWidget *widget);
+
     void addLayout(QLayout *layout);
     void addStretch();
 

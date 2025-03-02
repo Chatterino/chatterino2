@@ -95,6 +95,11 @@ void GeneralPageView::registerWidget(QWidget *widget,
     }
 }
 
+void GeneralPageView::pushWidget(QWidget *widget)
+{
+    this->contentLayout_->addWidget(widget);
+}
+
 void GeneralPageView::addLayout(QLayout *layout)
 {
     this->contentLayout_->addLayout(layout);

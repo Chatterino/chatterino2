@@ -293,12 +293,22 @@ SettingWidget *SettingWidget::conditionallyEnabledBy(BoolSetting &setting)
 
 void SettingWidget::addTo(GeneralPageView &view)
 {
-    view.addWidget(this, this->keywords);
+    view.pushWidget(this);
+
+    if (this->label != nullptr)
+    {
+        view.registerWidget(this->label, this->keywords);
+    }
+    view.registerWidget(this->actionWidget, this->keywords);
 }
 
 void SettingWidget::addTo(GeneralPageView &view, QFormLayout *formLayout)
 {
-    view.registerWidget(this, this->keywords);
+    if (this->label != nullptr)
+    {
+        view.registerWidget(this->label, this->keywords);
+    }
+    view.registerWidget(this->actionWidget, this->keywords);
 
     formLayout->addRow(this->label, this->actionWidget);
 }
