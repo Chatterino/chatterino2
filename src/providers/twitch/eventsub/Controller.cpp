@@ -59,6 +59,9 @@ Controller::Controller()
 
 Controller::~Controller()
 {
+    assert(this->quitting && "Application should call setQuitting() before "
+                             "destroying the controller");
+
     qCInfo(LOG) << "Controller dtor start";
 
     for (const auto &weakConnection : this->connections)
@@ -90,6 +93,12 @@ Controller::~Controller()
 
 void Controller::removeRef(const SubscriptionRequest &request)
 {
+    if (this->quitting)
+    {
+        // We're quitting - we don't care to unsub
+        return;
+    }
+
     std::lock_guard lock(this->subscriptionsMutex);
 
     assert(this->subscriptions.contains(request));
@@ -122,6 +131,11 @@ void Controller::removeRef(const SubscriptionRequest &request)
 
         subscription.subscriptionID.clear();
     }
+}
+
+void Controller::setQuitting()
+{
+    this->quitting = true;
 }
 
 SubscriptionHandle Controller::subscribe(const SubscriptionRequest &request)

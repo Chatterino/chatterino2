@@ -203,6 +203,8 @@ Application::Application(Settings &_settings, const Paths &paths,
 
 Application::~Application()
 {
+    this->eventSub->setQuitting();
+
     // we do this early to ensure getApp isn't used in any dtors
     INSTANCE = nullptr;
 }

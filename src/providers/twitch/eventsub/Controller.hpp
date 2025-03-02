@@ -11,6 +11,7 @@
 #include <QJsonObject>
 #include <QString>
 
+#include <atomic>
 #include <memory>
 #include <string>
 #include <thread>
@@ -26,6 +27,11 @@ public:
     ///
     /// Should realistically only be called in the dtor of SubscriptionHandle
     virtual void removeRef(const SubscriptionRequest &request) = 0;
+
+    /// Mark the controller as quitting
+    ///
+    /// This lets us simplify some logic with unsubscriptions (i.e. we ignore it instead)
+    virtual void setQuitting() = 0;
 
     /// Subscribe will make a request to each open connection and ask them to
     /// add this subscription.
@@ -45,6 +51,8 @@ public:
     ~Controller() override;
 
     void removeRef(const SubscriptionRequest &request) override;
+
+    void setQuitting() override;
 
     [[nodiscard]] SubscriptionHandle subscribe(
         const SubscriptionRequest &request) override;
@@ -91,6 +99,8 @@ private:
 
     std::mutex subscriptionsMutex;
     std::unordered_map<SubscriptionRequest, Subscription> subscriptions;
+
+    std::atomic<bool> quitting = false;
 };
 
 class DummyController : public IController
@@ -102,6 +112,11 @@ public:
     {
         (void)request;
     };
+
+    void setQuitting() override
+    {
+        //
+    }
 
     [[nodiscard]] SubscriptionHandle subscribe(
         const SubscriptionRequest &request) override
