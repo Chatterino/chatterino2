@@ -29,6 +29,7 @@
 - Bugfix: Fixed search in emote popup not always working correctly. (#5946)
 - Bugfix: Fixed channel point redemptions with messages not showing up if PubSub is disconnected. (#5948)
 - Bugfix: Fixed the input font not immediately updating when zooming in/out. (#5960)
+- Bugfix: Fixed missing special shortcut for Windows live notifications. (#5975)
 - Bugfix: Fixed color input thinking blue is also red. (#5982)
 - Bugfix: Fixed an issue where commands would sometimes reset if Chatterino was improperly shut down. (#6011)
 - Dev: Subscriptions to PubSub channel points redemption topics now use no auth token, making it continue to work during PubSub shutdown. (#5947)
