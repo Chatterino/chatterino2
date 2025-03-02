@@ -163,6 +163,8 @@ SubscriptionHandle Controller::subscribe(const SubscriptionRequest &request)
     bool needToSubscribe = false;
 
     {
+        // TODO: Investigate if this scope can be done in boost::asio::post instead
+        // Basically, if the SubscriptionHandle can be built & returned entirely without waiting for the subscriptionsMutex lock
         std::lock_guard lock(this->subscriptionsMutex);
 
         auto &subscription = this->subscriptions[request];
