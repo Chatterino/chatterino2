@@ -2,7 +2,6 @@
 #include "providers/twitch/PubSubClient.hpp"
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/pubsubmessages/AutoMod.hpp"
-#include "providers/twitch/pubsubmessages/Whisper.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "Test.hpp"
 
@@ -22,7 +21,6 @@ using namespace std::chrono_literals;
  * Server sends RECONNECT message to us, we should reconnect (INCOMPLETE, leaving for now since if we just ignore it and Twitch disconnects us we should already handle it properly)
  * Listen that required authentication, but authentication is missing (COMPLETE)
  * Listen that required authentication, but authentication is wrong (COMPLETE)
- * Incoming Whisper message (COMPLETE)
  * Incoming AutoMod message
  * Incoming ChannelPoints message
  * Incoming ChatModeratorAction message (COMPLETE)
@@ -257,42 +255,6 @@ TEST(TwitchPubSubClient, ExceedTopicLimitSingleStep)
 
     ASSERT_EQ(pubSub.diag.connectionsOpened, 2);
     ASSERT_EQ(pubSub.diag.connectionsClosed, 2);
-    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
-}
-
-TEST(TwitchPubSubClient, ReceivedWhisper)
-{
-    FTest pubSub("/receive-whisper", 1s);
-
-    pubSub.start();
-
-    ReceivedMessage<PubSubWhisperMessage> aReceivedWhisper;
-
-    std::ignore = pubSub.whisper.received.connect(
-        [&aReceivedWhisper](const auto &whisperMessage) {
-            aReceivedWhisper = whisperMessage;
-        });
-
-    pubSub.listenToWhispers();
-
-    std::this_thread::sleep_for(150ms);
-
-    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub.diag.connectionsClosed, 0);
-    ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
-    ASSERT_EQ(pubSub.diag.messagesReceived, 3);
-    ASSERT_EQ(pubSub.diag.listenResponses, 1);
-
-    ASSERT_TRUE(aReceivedWhisper);
-
-    ASSERT_EQ(aReceivedWhisper->body, QString("me Kappa"));
-    ASSERT_EQ(aReceivedWhisper->fromUserLogin, QString("pajbot"));
-    ASSERT_EQ(aReceivedWhisper->fromUserID, QString("82008718"));
-
-    pubSub.stop();
-
-    ASSERT_EQ(pubSub.diag.connectionsOpened, 1);
-    ASSERT_EQ(pubSub.diag.connectionsClosed, 1);
     ASSERT_EQ(pubSub.diag.connectionsFailed, 0);
 }
 

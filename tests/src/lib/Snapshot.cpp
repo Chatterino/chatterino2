@@ -175,6 +175,29 @@ QStringList Snapshot::discover(const QString &category)
     return files;
 }
 
+QStringList Snapshot::discoverNested(const QString &category)
+{
+    auto directories =
+        baseDir(category).entryList(QDir::NoDotAndDotDot | QDir::Dirs);
+    QStringList all;
+    for (const auto &dir : directories)
+    {
+        auto d = baseDir(category);
+        d.cd(dir);
+        auto files = d.entryList(QDir::NoDotAndDotDot | QDir::Files);
+        for (const auto &file : files)
+        {
+            QStringView view(file);
+            if (view.endsWith(u".json"))
+            {
+                view = view.sliced(0, view.size() - 5);
+            }
+            all.append(dir % u'/' % view);
+        }
+    }
+    return all;
+}
+
 bool Snapshot::run(const QJsonValue &got, bool updateSnapshots) const
 {
     if (updateSnapshots)

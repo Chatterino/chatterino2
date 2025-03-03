@@ -45,6 +45,11 @@ const QString META_KEY = u"Windows"_s;
 const QString META_KEY = u"Meta"_s;
 #endif
 
+const QStringList ZOOM_LEVELS = {
+    "0.5x", "0.6x", "0.7x", "0.8x",  "0.9x",  "Default", "1.2x", "1.4x",
+    "1.6x", "1.8x", "2x",   "2.33x", "2.66x", "3x",      "3.5x", "4x",
+};
+
 void addKeyboardModifierSetting(GeneralPageView &layout, const QString &title,
                                 EnumSetting<Qt::KeyboardModifier> &setting)
 {
@@ -184,10 +189,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             return fuzzyToInt(args.value, 10);
         });
     layout.addDropdown<float>(
-        "Zoom",
-        {"0.5x", "0.6x", "0.7x", "0.8x", "0.9x", "Default", "1.2x", "1.4x",
-         "1.6x", "1.8x", "2x", "2.33x", "2.66x", "3x", "3.5x", "4x"},
-        s.uiScale,
+        "Zoom", ZOOM_LEVELS, s.uiScale,
         [](auto val) {
             if (val == 1)
             {
@@ -1030,6 +1032,21 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addTo(layout);
 
     layout.addSubtitle("Overlay");
+    layout.addDropdown<float>(
+        "Zoom factor", ZOOM_LEVELS, s.overlayScaleFactor,
+        [](auto val) {
+            if (val == 1)
+            {
+                return u"Default"_s;
+            }
+            return QString::number(val) + 'x';
+        },
+        [](const auto &args) {
+            return fuzzyToFloat(args.value, 1.F);
+        },
+        true,
+        "The final scale of the messages in the overlay is computed by "
+        "multiplying this zoom factor with the global zoom level.");
     layout.addIntInput(
         "Background opacity (0-255)", s.overlayBackgroundOpacity, 0, 255, 1,
         "Controls the opacity of the (possibly alternating) background behind "
@@ -1272,6 +1289,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->setTooltip("Change this only if you're noticing issues "
                      "with sound playback on your system")
         ->addTo(layout);
+
+    layout.addCheckbox(
+        "Enable experimental Twitch EventSub support (requires restart)",
+        s.enableExperimentalEventSub);
 
     layout.addStretch();
 

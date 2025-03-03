@@ -62,6 +62,14 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
             }
         }
 
+        bool newIsShared = message->flags.has(MessageFlag::SharedMessage);
+        bool oldIsShared = s->flags.has(MessageFlag::SharedMessage);
+        if (newIsShared != oldIsShared ||
+            (newIsShared && message->channelName != s->channelName))
+        {
+            continue;
+        }
+
         if (s->flags.has(MessageFlag::Timeout) &&
             s->timeoutUser == message->timeoutUser)
         {
@@ -83,10 +91,12 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
             uint32_t count = s->count + 1;
 
             MessageBuilder replacement(timeoutMessage, message->timeoutUser,
-                                       message->loginName, message->searchText,
-                                       count, message->serverReceivedTime);
+                                       message->loginName, message->channelName,
+                                       message->searchText, count,
+                                       message->serverReceivedTime);
 
             replacement->timeoutUser = message->timeoutUser;
+            replacement->channelName = message->channelName;
             replacement->count = count;
             replacement->flags = message->flags;
 
