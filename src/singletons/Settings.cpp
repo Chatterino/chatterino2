@@ -109,7 +109,10 @@ std::optional<QString> Settings::matchNickname(const QString &usernameText)
 
 void Settings::mute(const QString &channelName)
 {
-    mutedChannels.append(channelName);
+    if (!this->isMutedChannel(channelName))
+    {
+        this->mutedChannels.append(channelName);
+    }
 }
 
 void Settings::unmute(const QString &channelName)
@@ -134,7 +137,7 @@ bool Settings::toggleMutedChannel(const QString &channelName)
     }
     else
     {
-        mute(channelName);
+        this->mutedChannels.append(channelName);
         return true;
     }
 }

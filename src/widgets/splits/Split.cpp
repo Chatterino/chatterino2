@@ -838,10 +838,7 @@ void Split::addShortcuts()
              switch (mode)
              {
                  case 0:
-                     if (!getSettings()->isMutedChannel(channel))
-                     {
-                         getSettings()->mutedChannels.append(channel);
-                     }
+                     getSettings()->mute(channel);
                      break;
                  case 1:
                      getSettings()->unmute(channel);
@@ -851,7 +848,8 @@ void Split::addShortcuts()
              }
              return "";
          }},
-        {"openSubscriptionPage", [this](const auto &) -> QString {
+        {"openSubscriptionPage",
+         [this](const auto &) -> QString {
              if (!this->getChannel()->isTwitchChannel())
              {
                  return "Cannot subscribe to a non-Twitch "
@@ -860,7 +858,8 @@ void Split::addShortcuts()
 
              this->openSubPage();
              return "";
-         }}};
+         }},
+    };
 
     this->shortcuts_ = getApp()->getHotkeys()->shortcutsForCategory(
         HotkeyCategory::Split, actions, this);

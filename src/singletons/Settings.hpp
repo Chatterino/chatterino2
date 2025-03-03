@@ -678,6 +678,7 @@ private:
         {"/moderation/actions"};
     ChatterinoSetting<std::vector<ChannelLog>> loggedChannelsSetting = {
         "/logging/channels"};
+    SignalVector<QString> mutedChannels;
 
 public:
     SignalVector<HighlightPhrase> highlightedMessages;
@@ -685,7 +686,6 @@ public:
     SignalVector<HighlightBadge> highlightedBadges;
     SignalVector<HighlightBlacklistUser> blacklistedUsers;
     SignalVector<IgnorePhrase> ignoredMessages;
-    SignalVector<QString> mutedChannels;
     SignalVector<FilterRecordPtr> filterRecords;
     SignalVector<Nickname> nicknames;
     SignalVector<ModerationAction> moderationActions;
@@ -696,10 +696,10 @@ public:
     bool isMutedChannel(const QString &channelName);
     bool toggleMutedChannel(const QString &channelName);
     std::optional<QString> matchNickname(const QString &username);
+    void mute(const QString &channelName);
     void unmute(const QString &channelName);
 
 private:
-    void mute(const QString &channelName);
     void updateModerationActions();
 
     std::unique_ptr<rapidjson::Document> snapshot_;
