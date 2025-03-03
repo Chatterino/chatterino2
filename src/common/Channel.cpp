@@ -283,9 +283,9 @@ void Channel::replaceMessage(size_t hint, const MessagePtr &message,
     }
 }
 
-void Channel::disableMessage(QString messageID)
+void Channel::disableMessage(const QString &messageID)
 {
-    auto msg = this->findMessage(messageID);
+    auto msg = this->findMessageByID(messageID);
     if (msg != nullptr)
     {
         msg->flags.set(MessageFlag::Disabled);
@@ -296,11 +296,6 @@ void Channel::clearMessages()
 {
     this->messages_.clear();
     this->messagesCleared.invoke();
-}
-
-MessagePtr Channel::findMessage(QString messageID)
-{
-    return this->findMessageByID(messageID);
 }
 
 MessagePtr Channel::findMessageByID(QStringView messageID)
