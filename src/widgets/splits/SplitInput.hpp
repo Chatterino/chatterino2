@@ -168,7 +168,7 @@ protected:
     // set the height of the split input to 0 if we're supposed to be hidden instead
     bool hidden{false};
 
-private slots:
+private Q_SLOTS:
     void editTextChanged();
 
     friend class Split;

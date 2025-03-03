@@ -1,0 +1,31 @@
+std::optional<{{field.type_name}}> {{field.name}} = std::nullopt;
+const auto *jv{{field.name}} = root.if_contains("{{field.json_name}}");
+if (jv{{field.name}} != nullptr && !jv{{field.name}}->is_null())
+{
+    {% if field.tag %}
+    auto t{{field.name}} = boost::json::try_value_to<{{field.type_name}}>(*jv{{field.name}}, {{field.tag}}());
+    {% else %}
+    auto t{{field.name}} = boost::json::try_value_to<{{field.type_name}}>(*jv{{field.name}});
+    {% endif %}
+    {% if field.dont_fail_on_deserialization %}
+    if (t{{field.name}}.has_error())
+    {
+        // TODO: report error in some way?
+    }
+    else
+    {
+        {{field.name}} = t{{field.name}}.value();
+    }
+    {% else %}
+    if (t{{field.name}}.has_error())
+    {
+        return t{{field.name}}.error();
+    }
+    {% if field.trivial -%}
+    {{field.name}} = t{{field.name}}.value();
+    {%- else -%}
+    {{field.name}} = std::move(t{{field.name}}.value());
+    {%- endif %}
+    {% endif %}
+}
+

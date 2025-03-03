@@ -3,9 +3,11 @@
 #include "Application.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 
+#include <QDateTime>
 #include <QDirIterator>
 #include <QLocale>
 #include <QRegularExpression>
+#include <QTimeZone>
 #include <QUuid>
 
 namespace {
@@ -312,6 +314,58 @@ QLocale getSystemLocale()
 #endif
 
     return QLocale::system();
+}
+
+QDateTime chronoToQDateTime(std::chrono::system_clock::time_point time)
+{
+    auto msSinceEpoch =
+        std::chrono::time_point_cast<std::chrono::milliseconds>(time)
+            .time_since_epoch();
+    auto dt = QDateTime::fromMSecsSinceEpoch(msSinceEpoch.count());
+
+#if CHATTERINO_WITH_TESTS
+    if (getApp()->isTest())
+    {
+        dt = dt.toUTC();
+    }
+#endif
+
+    return dt;
+}
+
+QStringView codepointSlice(QStringView str, qsizetype begin, qsizetype end)
+{
+    if (end <= begin || begin < 0)
+    {
+        return {};
+    }
+
+    qsizetype n = 0;
+    const QChar *pos = str.begin();
+    const QChar *endPos = str.end();
+
+    const QChar *sliceBegin = nullptr;
+    while (n < end)
+    {
+        if (pos >= endPos)
+        {
+            return {};
+        }
+        if (n == begin)
+        {
+            sliceBegin = pos;
+        }
+
+        QChar cur = *pos++;
+        if (cur.isHighSurrogate() && pos < endPos && pos->isLowSurrogate())
+        {
+            pos++;
+        }
+        n++;
+    }
+    assert(pos <= endPos);
+
+    return {sliceBegin, pos};
 }
 
 }  // namespace chatterino

@@ -130,24 +130,8 @@ public:
     } moderation;
 
     struct {
-        // Parsing should be done in PubSubManager as well,
-        // but for now we just send the raw data
-        Signal<const PubSubWhisperMessage &> received;
-        Signal<const PubSubWhisperMessage &> sent;
-    } whisper;
-
-    struct {
         Signal<const QJsonObject &> redeemed;
     } pointReward;
-
-    /**
-     * Listen to incoming whispers for the currently logged in user.
-     * This topic is relevant for everyone.
-     *
-     * PubSub topic: whispers.{currentUserID}
-     */
-    bool listenToWhispers();
-    void unlistenWhispers();
 
     /**
      * Listen to moderation actions in the given channel.

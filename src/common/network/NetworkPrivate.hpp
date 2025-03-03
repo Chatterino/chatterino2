@@ -21,7 +21,7 @@ class NetworkRequester : public QObject
 {
     Q_OBJECT
 
-signals:
+Q_SIGNALS:
     void requestUrl();
 };
 
