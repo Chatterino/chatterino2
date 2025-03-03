@@ -28,6 +28,7 @@ NicknamesPage::NicknamesPage()
                 (new NicknamesModel(nullptr))
                     ->initialized(&getSettings()->nicknames))
             .getElement();
+    this->view_ = view;
 
     view->setTitles({"Username", "Nickname", "Enable regex", "Case-sensitive"});
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -47,6 +48,13 @@ NicknamesPage::NicknamesPage()
         view->getTableView()->resizeColumnsToContents();
         view->getTableView()->setColumnWidth(0, 200);
     });
+}
+
+bool NicknamesPage::filterElements(const QString &query)
+{
+    std::array fields{0, 1};
+
+    return this->view_->filterSearchResults(query, fields);
 }
 
 }  // namespace chatterino
