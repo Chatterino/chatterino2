@@ -187,10 +187,7 @@ void EditableModelView::filterSearchResultsHotkey(
     const QKeySequence &keySequenceQuery)
 {
     auto rowAmount = this->model_->rowCount();
-    for (int i = 0; i < rowAmount; i++)
-    {
-        tableView_->hideRow(i);
-    }
+
     for (int i = 0; i < rowAmount; i++)
     {
         QModelIndex idx = model_->index(i, 1);
@@ -202,6 +199,10 @@ void EditableModelView::filterSearchResultsHotkey(
         if (keySequenceQuery.matches(seq) != QKeySequence::NoMatch)
         {
             tableView_->showRow(i);
+        }
+        else
+        {
+            tableView_->hideRow(i);
         }
     }
 }
