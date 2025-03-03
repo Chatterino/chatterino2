@@ -512,7 +512,7 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
 
     QString targetID = tags.value("target-msg-id").toString();
 
-    auto msg = chan->findMessage(targetID);
+    auto msg = chan->findMessageByID(targetID);
     if (msg == nullptr)
     {
         return;
