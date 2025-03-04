@@ -11,6 +11,7 @@
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
+#include "util/CustomPlayer.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/helper/CommonTexts.hpp"
 
@@ -78,6 +79,10 @@ void performReaction(const ToastReaction &reaction, const QString &channelName)
             openStreamlinkForChannel(channelName);
             break;
         }
+        case ToastReaction::OpenInCustomPlayer: {
+            openInCustomPlayer(channelName);
+            break;
+        }
         case ToastReaction::DontOpen:
             // nothing should happen
             break;
@@ -105,6 +110,10 @@ void onAction(NotifyNotification *notif, const char *actionRaw, void *userData)
     else if (action == OPEN_IN_STREAMLINK)
     {
         toastReaction = ToastReaction::OpenInStreamlink;
+    }
+    else if (action == OPEN_IN_CUSTOM_PLAYER)
+    {
+        toastReaction = ToastReaction::OpenInCustomPlayer;
     }
 
     performReaction(toastReaction, *channelName);
@@ -172,6 +181,9 @@ QString Toasts::findStringFromReaction(const ToastReaction &reaction)
         case ToastReaction::OpenInStreamlink:
             return OPEN_IN_STREAMLINK;
         case ToastReaction::DontOpen:
+            return DONT_OPEN;
+        case ToastReaction::OpenInCustomPlayer:
+            return OPEN_IN_CUSTOM_PLAYER;
         default:
             return DONT_OPEN;
     }
