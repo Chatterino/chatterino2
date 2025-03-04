@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added an option to allow multiple user-selected extensions to interact with Chatterino. (#5997)
 - Minor: Add `Set highlight sounds` and `Open subscription page` split hotkeys. (#5856)
 - Minor: `/clear` messages are now stacked like timeouts. (#5806)
 - Minor: Treat all browsers starting with `firefox` as a Firefox browser. (#5805)
