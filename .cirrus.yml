@@ -1,9 +1,9 @@
 freebsd_instance:
-  image_family: freebsd-14-0
+  image_family: freebsd-14-2
 
 task:
   install_script:
-    - pkg install -y boost-libs git qt6-base qt6-svg qt6-5compat qt6-imageformats qtkeychain-qt6 cmake
+    - pkg install -y boost-libs git libnotify qt6-base qt6-svg qt6-5compat qt6-imageformats qtkeychain-qt6 cmake pkgconf
   script: |
     git submodule init
     git submodule update
@@ -20,6 +20,7 @@ task:
         -DUSE_SYSTEM_QTKEYCHAIN="ON" \
         -DCMAKE_BUILD_TYPE="release" \
         -DCMAKE_EXPORT_COMPILE_COMMANDS="ON" \
+        -DSKIP_JSON_GENERATION="ON" \
         ..
     cat compile_commands.json
     make -j $(getconf _NPROCESSORS_ONLN)

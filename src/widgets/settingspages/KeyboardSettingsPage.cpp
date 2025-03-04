@@ -11,9 +11,12 @@
 
 #include <QFormLayout>
 #include <QHeaderView>
+#include <QKeySequenceEdit>
 #include <QLabel>
 #include <QMessageBox>
 #include <QTableView>
+
+#include <array>
 
 namespace {
 
@@ -51,6 +54,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     auto *model = getApp()->getHotkeys()->createModel(nullptr);
     EditableModelView *view =
         layout.emplace<EditableModelView>(model).getElement();
+    this->view_ = view;
 
     view->setTitles({"Hotkey name", "Keybinding"});
     view->getTableView()->horizontalHeader()->setVisible(true);
@@ -73,10 +77,24 @@ KeyboardSettingsPage::KeyboardSettingsPage()
         }
     });
 
-    QObject::connect(view->getTableView(), &QTableView::doubleClicked,
+    QObject::connect(view_->getTableView(), &QTableView::doubleClicked,
                      [view, model](const QModelIndex &clicked) {
                          tableCellClicked(clicked, view, model);
                      });
+
+    auto *keySequenceInput = new QKeySequenceEdit(this);
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
+    keySequenceInput->setClearButtonEnabled(true);
+#endif
+    auto *searchText = new QLabel("Search keybind:", this);
+
+    QObject::connect(keySequenceInput, &QKeySequenceEdit::keySequenceChanged,
+                     [view](const QKeySequence &keySequence) {
+                         view->filterSearchResultsHotkey(keySequence);
+                     });
+    view->addCustomButton(searchText);
+    view->addCustomButton(keySequenceInput);
 
     auto *resetEverything = new QPushButton("Reset to defaults");
     QObject::connect(resetEverything, &QPushButton::clicked, [this]() {
@@ -127,6 +145,13 @@ KeyboardSettingsPage::KeyboardSettingsPage()
             "above-mentioned hotkeys.");
         deprecatedWarning2->setStyleSheet("color: yellow");
     }
+}
+
+bool KeyboardSettingsPage::filterElements(const QString &query)
+{
+    std::array fields{0};
+
+    return this->view_->filterSearchResults(query, fields);
 }
 
 }  // namespace chatterino
