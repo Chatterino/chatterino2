@@ -26,6 +26,8 @@
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QFontDialog>
+#include <QFormLayout>
+#include <QGroupBox>
 #include <QLabel>
 #include <QScrollArea>
 
@@ -862,7 +864,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "browsers that do not work automatically.\ne.g. Librewolf");
 
     {
-        auto group = layout.emplace<QGroupBox>("Extra Extension IDs");
+        auto group = LayoutCreator<QGroupBox>(new QGroupBox("Extra Extension IDs", this));
         auto groupLayout = group.setLayoutType<QFormLayout>();
 
         auto *note = new QLabel(
