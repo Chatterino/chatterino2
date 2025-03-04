@@ -85,9 +85,18 @@ class Member:
 
         self.dont_fail_on_deserialization: bool = False
 
+        self._infer_tags()
+
+    def _infer_tags(self) -> None:
+        match self.type_name:
+            case "std::chrono::system_clock::time_point":
+                assert self.tag is None
+                self.tag = "AsISO8601"
+
     def apply_comment_commands(self, comment_commands: CommentCommands) -> None:
         self.json_name = comment_commands.apply_name_transform(self.json_name)
-        self.tag = comment_commands.tag
+        if comment_commands.tag is not None:
+            self.tag = comment_commands.tag
         self.dont_fail_on_deserialization = comment_commands.dont_fail_on_deserialization
 
     @staticmethod
