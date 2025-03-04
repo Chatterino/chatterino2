@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Add `Set highlight sounds` and `Open subscription page` split hotkeys. (#5856)
 - Minor: `/clear` messages are now stacked like timeouts. (#5806)
 - Minor: Treat all browsers starting with `firefox` as a Firefox browser. (#5805)
 - Minor: Remove incognito browser support for `opera/launcher` (this should no longer be a thing). (#5805)
@@ -9,6 +10,7 @@
 - Minor: When (re-)connecting, visible channels are now joined first. (#5850)
 - Minor: Added the ability to filter on messages by the author's user ID (example: `author.user_id == "22484632"`). (#5862)
 - Minor: Improved error messaging of the `/clip` command. (#5879)
+- Minor: Added searchable hotkeys to global search and make keybinds searchable in the Hotkeys settings. (#5884)
 - Minor: Added Linux support for Live Notifications toasts. (#5881, #5971, #5976)
 - Minor: Messages can now be deleted from the context menu in a channel. (#5956)
 - Minor: Overlay windows now inherit the global zoom level and can be zoomed independently. (#6016)
@@ -51,8 +53,10 @@
 - Dev: Fixed duplicate CMake configure in clean builds. (#5940)
 - Dev: BTTV emotes are now loaded as WEBP. (#5957)
 - Dev: Reduced time we wait for PubSub connections to cleanly exit from 1s to 100ms. (#6019)
+- Dev: Refactored some settings styles/APIs. (#6023)
 - Dev: Added snapshot tests for EventSub. (#5965)
 - Dev: Updated crashpad. (#6026)
+- Dev: Removed dead code and some MSVC warnings. (#6024)
 
 ## 2.5.2
 
