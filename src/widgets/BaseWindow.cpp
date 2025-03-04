@@ -365,7 +365,14 @@ void BaseWindow::init()
         }
 
         this->ui_.layoutBase = new BaseWidget(this);
-        this->ui_.layoutBase->setContentsMargins(1, 0, 1, 1);
+        if (isWindows11OrGreater())
+        {
+            this->ui_.layoutBase->setContentsMargins(0, 0, 0, 0);
+        }
+        else
+        {
+            this->ui_.layoutBase->setContentsMargins(1, 0, 1, 1);
+        }
         layout->addWidget(this->ui_.layoutBase);
     }
 #endif
@@ -1069,8 +1076,17 @@ void BaseWindow::drawCustomWindowFrame(QPainter &painter)
             {
                 painter.setTransform(QTransform::fromScale(1 / dpr, 1 / dpr));
             }
-            painter.fillRect(1, 1, this->realBounds_.width() - 2,
-                             this->realBounds_.height() - 2, bg);
+
+            if (isWindows11OrGreater())
+            {
+                painter.fillRect(0, 0, this->realBounds_.width() - 1,
+                                 this->realBounds_.height() - 1, bg);
+            }
+            else
+            {
+                painter.fillRect(1, 1, this->realBounds_.width() - 2,
+                                 this->realBounds_.height() - 2, bg);
+            }
         }
     }
 #endif
