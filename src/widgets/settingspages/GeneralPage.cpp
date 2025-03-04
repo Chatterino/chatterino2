@@ -878,7 +878,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         note->setStyleSheet("color: #bbb");
 
         groupLayout->setWidget(0, QFormLayout::SpanningRole, note);
-        auto *extraIDs = this->createLineEdit(s.additionalExtensionIDs)
+        auto *extraIDs = this->createLineEdit(s.additionalExtensionIDs);
         extraIDs->setPlaceholderText("Extension;IDs;separated;by;semicolons");
 
         groupLayout->addRow(
