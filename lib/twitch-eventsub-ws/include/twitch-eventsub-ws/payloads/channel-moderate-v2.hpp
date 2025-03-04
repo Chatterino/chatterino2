@@ -215,9 +215,9 @@ struct SharedChatTimeout : public Timeout {
 struct Untimeout {
     static constexpr std::string_view TAG = "untimeout";
 
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
+    String userID;
+    String userLogin;
+    String userName;
 };
 struct SharedChatUntimeout : public Untimeout {
     static constexpr std::string_view TAG = "shared_chat_untimeout";
