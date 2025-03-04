@@ -165,6 +165,7 @@ Application::Application(Settings &_settings, const Paths &paths,
     , logging(new Logging(_settings))
     , emotes(new Emotes)
     , accounts(new AccountController)
+    , eventSub(makeEventSubController(_settings))
     , hotkeys(new HotkeyController)
     , windows(new WindowManager(paths, _settings, *this->themes, *this->fonts))
     , toasts(new Toasts)
@@ -193,7 +194,6 @@ Application::Application(Settings &_settings, const Paths &paths,
     , streamerMode(new StreamerMode)
     , twitchUsers(new TwitchUsers)
     , pronouns(new pronouns::Pronouns)
-    , eventSub(makeEventSubController(_settings))
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(new PluginController(paths))
 #endif
@@ -203,6 +203,8 @@ Application::Application(Settings &_settings, const Paths &paths,
 
 Application::~Application()
 {
+    this->eventSub->setQuitting();
+
     // we do this early to ensure getApp isn't used in any dtors
     INSTANCE = nullptr;
 }
@@ -598,7 +600,6 @@ eventsub::IController *Application::getEventSub()
 
 void Application::save()
 {
-    this->commands->save();
     this->hotkeys->save();
     this->windows->save();
 }

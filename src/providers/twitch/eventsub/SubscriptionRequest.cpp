@@ -4,20 +4,29 @@
 
 namespace chatterino::eventsub {
 
-QDebug &operator<<(QDebug &dbg, const SubscriptionRequest &v)
+QDebug operator<<(QDebug dbg, const SubscriptionRequest &v)
 {
-    dbg << "eventsub::SubscriptionRequest{ type:" << v.subscriptionType
-        << "version:" << v.subscriptionVersion;
+    QDebugStateSaver saver(dbg);
+
+    dbg.nospace().noquote()
+        << "eventsub::SubscriptionRequest[" << v.subscriptionType << '.'
+        << v.subscriptionVersion << "]{";
+    bool first = true;
     if (!v.conditions.empty())
     {
-        dbg << "conditions:[";
         for (const auto &[conditionKey, conditionValue] : v.conditions)
         {
-            dbg << conditionKey << "=" << conditionValue << ',';
+            if (!first)
+            {
+                dbg.nospace() << ", ";
+            }
+            dbg.nospace().noquote() << conditionKey << "=" << conditionValue;
+
+            first = false;
         }
-        dbg << ']';
     }
-    dbg << '}';
+    dbg.nospace() << "} ";
+
     return dbg;
 }
 

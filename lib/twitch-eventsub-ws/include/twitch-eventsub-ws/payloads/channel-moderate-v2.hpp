@@ -5,6 +5,7 @@
 
 #include <boost/json.hpp>
 
+#include <chrono>
 #include <string>
 
 namespace chatterino::eventsub::lib::payload::channel_moderate::v2 {
@@ -134,9 +135,9 @@ struct Unvip {
 struct Mod {
     static constexpr std::string_view TAG = "mod";
 
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
+    String userID;
+    String userLogin;
+    String userName;
 };
 
 /* user is unmodded
@@ -146,9 +147,9 @@ struct Mod {
 struct Unmod {
     static constexpr std::string_view TAG = "unmod";
 
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
+    String userID;
+    String userLogin;
+    String userName;
 };
 
 /* user is banned with reason
@@ -197,15 +198,14 @@ struct SharedChatUnban : public Unban {
 struct Timeout {
     static constexpr std::string_view TAG = "timeout";
 
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
-    // TODO: Verify that we handle null here
-    std::string reason;
-    // TODO: This should be a timestamp?
-    std::string expiresAt;
+    String userID;
+    String userLogin;
+    String userName;
+    String reason;
+    /// json_tag=AsISO8601
+    std::chrono::system_clock::time_point expiresAt;
 };
-struct SharedChatTimeout : public Ban {
+struct SharedChatTimeout : public Timeout {
     static constexpr std::string_view TAG = "shared_chat_timeout";
 };
 
@@ -220,7 +220,7 @@ struct Untimeout {
     std::string userLogin;
     std::string userName;
 };
-struct SharedChatUntimeout : public Ban {
+struct SharedChatUntimeout : public Untimeout {
     static constexpr std::string_view TAG = "shared_chat_untimeout";
 };
 
@@ -231,9 +231,9 @@ struct SharedChatUntimeout : public Ban {
 struct Raid {
     static constexpr std::string_view TAG = "raid";
 
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
+    String userID;
+    String userLogin;
+    String userName;
 
     int viewerCount;
 };
@@ -245,9 +245,9 @@ struct Raid {
 struct Unraid {
     static constexpr std::string_view TAG = "unraid";
 
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
+    String userID;
+    String userLogin;
+    String userName;
 };
 
 /* message deleted
@@ -282,11 +282,11 @@ struct AutomodTerms {
     static constexpr std::string_view FIELD = "automod_terms";
 
     // either add or remove
-    std::string action;
+    String action;
     // either blocked or permitted
-    std::string list;
+    String list;
 
-    std::vector<std::string> terms;
+    std::vector<String> terms;
     bool fromAutomod;
 };
 

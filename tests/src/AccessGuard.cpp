@@ -42,8 +42,6 @@ TEST(AccessGuardLocker, ConcurrentUsage)
     std::shared_mutex m;
     int e = 0;
 
-    auto startTime = std::chrono::steady_clock::now();
-
     auto w = [&e, &m] {
         std::mt19937_64 eng{std::random_device{}()};
         std::uniform_int_distribution<> dist{1, 4};
@@ -58,7 +56,8 @@ TEST(AccessGuardLocker, ConcurrentUsage)
         {
             SharedAccessGuard<int> guard(e, m);
             std::this_thread::sleep_for(std::chrono::milliseconds{dist(eng)});
-            int hehe = *guard;
+            volatile int hehe = *guard;
+            (void)hehe;
         }
     };
 

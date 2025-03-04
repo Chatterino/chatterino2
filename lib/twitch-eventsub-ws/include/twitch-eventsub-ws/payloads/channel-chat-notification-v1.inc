@@ -1,19 +1,6 @@
 boost::json::result_for<Badge, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<Badge>, const boost::json::value &jvRoot);
 
-boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Cheermote>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Emote>, const boost::json::value &jvRoot);
-
-boost::json::result_for<Mention, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Mention>, const boost::json::value &jvRoot);
-
-boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<MessageFragment>,
-    const boost::json::value &jvRoot);
-
 boost::json::result_for<Subcription, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<Subcription>,
     const boost::json::value &jvRoot);
@@ -63,9 +50,6 @@ boost::json::result_for<CharityDonation, boost::json::value>::type tag_invoke(
 boost::json::result_for<BitsBadgeTier, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<BitsBadgeTier>,
     const boost::json::value &jvRoot);
-
-boost::json::result_for<Message, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Message>, const boost::json::value &jvRoot);
 
 boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<Event>, const boost::json::value &jvRoot);

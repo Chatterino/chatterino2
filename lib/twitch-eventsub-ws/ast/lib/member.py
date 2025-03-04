@@ -61,6 +61,10 @@ class VariantType:
     trivial: bool
     empty: bool
 
+    @property
+    def id(self) -> str:
+        return self.name.replace(":", "")
+
 
 class Member:
     def __init__(

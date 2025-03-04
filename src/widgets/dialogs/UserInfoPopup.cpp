@@ -924,9 +924,9 @@ void UserInfoPopup::updateUserData()
         // get ignoreHighlights state
         bool isIgnoringHighlights = false;
         const auto &vector = getSettings()->blacklistedUsers.raw();
-        for (const auto &user : vector)
+        for (const auto &blockedUser : vector)
         {
-            if (this->userName_ == user.getPattern())
+            if (this->userName_ == blockedUser.getPattern())
             {
                 isIgnoringHighlights = true;
                 break;
