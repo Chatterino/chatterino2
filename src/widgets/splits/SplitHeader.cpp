@@ -537,7 +537,9 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                 h->getDisplaySequence(HotkeyCategory::Split, "openViewerList"));
         }
 
-        moreMenu->addAction("Subscribe", this->split_, &Split::openSubPage);
+        moreMenu->addAction("Subscribe", this->split_, &Split::openSubPage,
+                            h->getDisplaySequence(HotkeyCategory::Split,
+                                                  "openSubscriptionPage"));
 
         auto *action = new QAction(this);
         action->setText("Notify when live");
@@ -569,8 +571,18 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     if (twitchChannel)
     {
         auto *action = new QAction(this);
-        action->setText("Mute highlight sound");
+        action->setText("Mute highlight sounds");
         action->setCheckable(true);
+
+        auto notifySeq = h->getDisplaySequence(
+            HotkeyCategory::Split, "setHighlightSounds", {{"toggle"}});
+        if (notifySeq.isEmpty())
+        {
+            notifySeq = h->getDisplaySequence(HotkeyCategory::Split,
+                                              "setHighlightSounds",
+                                              {std::vector<QString>()});
+        }
+        action->setShortcut(notifySeq);
 
         QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
             action->setChecked(getSettings()->isMutedChannel(

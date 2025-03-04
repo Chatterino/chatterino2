@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Add `Set highlight sounds` and `Open subscription page` split hotkeys. (#5856)
 - Minor: `/clear` messages are now stacked like timeouts. (#5806)
 - Minor: Treat all browsers starting with `firefox` as a Firefox browser. (#5805)
 - Minor: Remove incognito browser support for `opera/launcher` (this should no longer be a thing). (#5805)
@@ -52,6 +53,7 @@
 - Dev: Fixed duplicate CMake configure in clean builds. (#5940)
 - Dev: BTTV emotes are now loaded as WEBP. (#5957)
 - Dev: Reduced time we wait for PubSub connections to cleanly exit from 1s to 100ms. (#6019)
+- Dev: Refactored some settings styles/APIs. (#6023)
 - Dev: Added snapshot tests for EventSub. (#5965)
 - Dev: Removed dead code and some MSVC warnings. (#6024)
 
