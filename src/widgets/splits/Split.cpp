@@ -612,7 +612,7 @@ void Split::addShortcuts()
                  type != Channel::Type::Twitch &&
                  type != Channel::Type::TwitchWatching)
              {
-                 return "Cannot create clip it non-twitch channel.";
+                 return "Cannot create clips in a non-Twitch channel.";
              }
 
              auto *twitchChannel =
@@ -652,7 +652,8 @@ void Split::addShortcuts()
          [this](std::vector<QString> arguments) -> QString {
              if (!this->getChannel()->isTwitchChannel())
              {
-                 return "Cannot set moderation mode in non-twitch channel.";
+                 return "Cannot set moderation mode in a non-Twitch "
+                        "channel.";
              }
              auto mode = 2;
              // 0 is off
@@ -726,7 +727,7 @@ void Split::addShortcuts()
          [this](std::vector<QString> arguments) -> QString {
              if (!this->getChannel()->isTwitchChannel())
              {
-                 return "Cannot set channel notifications for non-twitch "
+                 return "Cannot set channel notifications for a non-Twitch "
                         "channel.";
              }
              auto mode = 2;
@@ -807,6 +808,57 @@ void Split::addShortcuts()
                  return {};
              }
              return {};
+         }},
+        {"setHighlightSounds",
+         [this](std::vector<QString> arguments) -> QString {
+             if (!this->getChannel()->isTwitchChannel())
+             {
+                 return "Cannot set highlight sounds in a non-Twitch "
+                        "channel.";
+             }
+
+             auto mode = 2;
+             // 0 is off
+             // 1 is on
+             // 2 is toggle
+             if (!arguments.empty())
+             {
+                 auto arg = arguments.at(0);
+                 if (arg == "off")
+                 {
+                     mode = 0;
+                 }
+                 else if (arg == "on")
+                 {
+                     mode = 1;
+                 }
+             }
+
+             const QString channel = this->getChannel()->getName();
+
+             switch (mode)
+             {
+                 case 0:
+                     getSettings()->mute(channel);
+                     break;
+                 case 1:
+                     getSettings()->unmute(channel);
+                     break;
+                 default:
+                     getSettings()->toggleMutedChannel(channel);
+             }
+             return "";
+         }},
+        {"openSubscriptionPage",
+         [this](const auto &) -> QString {
+             if (!this->getChannel()->isTwitchChannel())
+             {
+                 return "Cannot subscribe to a non-Twitch "
+                        "channel.";
+             }
+
+             this->openSubPage();
+             return "";
          }},
     };
 
@@ -1619,8 +1671,8 @@ void Split::drag()
     auto *container = dynamic_cast<SplitContainer *>(this->parentWidget());
     if (!container)
     {
-        qCWarning(chatterinoWidget)
-            << "Attempted to initiate split drag without a container parent";
+        qCWarning(chatterinoWidget) << "Attempted to initiate split drag "
+                                       "without a container parent";
         return;
     }
 
