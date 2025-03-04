@@ -26,6 +26,7 @@
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QFontDialog>
+#include <QFormLayout>
 #include <QLabel>
 #include <QScrollArea>
 
@@ -876,6 +877,26 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.attachExtensionToAnyProcess, false,
         "Attempt to force the Chatterino Browser Extension to work in certain "
         "browsers that do not work automatically.\ne.g. Librewolf");
+
+    {
+        auto *note = new QLabel(
+            "A semicolon-separated list of Chrome or Firefox extension IDs"
+            "allowed to interact with Chatterino's browser integration "
+            "(requires restart).\n"
+            "Using multiple extension IDs from different browsers may cause "
+            "issues.");
+        note->setWordWrap(true);
+        note->setStyleSheet("color: #bbb");
+
+        layout.addWidget(note);
+        auto *extraIDs = this->createLineEdit(s.additionalExtensionIDs);
+        extraIDs->setPlaceholderText("Extension;IDs;separated;by;semicolons");
+
+        auto form = new QFormLayout();
+        form->addRow("Extra extension IDs:", extraIDs);
+
+        layout.addLayout(form);
+    }
 #endif
 
     layout.addTitle("AppData & Cache");

@@ -7,6 +7,7 @@
 #include "debug/AssertInGuiThread.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 #include "util/IpcQueue.hpp"
 #include "util/PostToThread.hpp"
 
@@ -55,11 +56,26 @@ void registerNmHost(const Paths &paths)
         };
     };
 
+    QStringList extensionIDs =
+        getSettings()->additionalExtensionIDs.getValue().split(
+            ';', Qt::SkipEmptyParts);
+
     // chrome
     {
         auto obj = getBaseDocument();
         QJsonArray allowedOriginsArr = {
             u"chrome-extension://%1/"_s.arg(EXTENSION_ID)};
+
+        for (const auto &id : extensionIDs)
+        {
+            QString trimmedID = id.trimmed();
+            if (!trimmedID.isEmpty())
+            {
+                allowedOriginsArr.append(
+                    u"chrome-extension://%1/"_s.arg(trimmedID));
+            }
+        }
+
         obj.insert("allowed_origins", allowedOriginsArr);
 
         registerNmManifest(paths, "/native-messaging-manifest-chrome.json",
@@ -72,6 +88,16 @@ void registerNmHost(const Paths &paths)
     {
         auto obj = getBaseDocument();
         QJsonArray allowedExtensions = {"chatterino_native@chatterino.com"};
+
+        for (const auto &id : extensionIDs)
+        {
+            QString trimmedID = id.trimmed();
+            if (!trimmedID.isEmpty())
+            {
+                allowedExtensions.append(trimmedID);
+            }
+        }
+
         obj.insert("allowed_extensions", allowedExtensions);
 
         registerNmManifest(paths, "/native-messaging-manifest-firefox.json",
