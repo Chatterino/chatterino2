@@ -202,7 +202,6 @@ struct Timeout {
     String userLogin;
     String userName;
     String reason;
-    /// json_tag=AsISO8601
     std::chrono::system_clock::time_point expiresAt;
 };
 struct SharedChatTimeout : public Timeout {
