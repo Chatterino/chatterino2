@@ -876,10 +876,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         auto *extraIDs = this->createLineEdit(s.additionalExtensionIDs);
         extraIDs->setPlaceholderText("Extension;IDs;separated;by;semicolons");
 
-        auto form = layout.emplace<QFormLayout>();
+        auto form = new QFormLayout();
         form->addRow(
             "Extra extension IDs:",
             extraIDs);
+        
+        layout.addLayout(form);
     }
 #endif
 
