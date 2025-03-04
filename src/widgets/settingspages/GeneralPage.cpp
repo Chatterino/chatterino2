@@ -18,6 +18,7 @@
 #include "util/FuzzyConvert.hpp"
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
+#include "util/LayoutCreator.hpp"
 #include "widgets/BaseWindow.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
@@ -877,11 +878,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         note->setStyleSheet("color: #bbb");
 
         groupLayout->setWidget(0, QFormLayout::SpanningRole, note);
-
+        auto *extraIDs = this->createLineEdit(s.additionalExtensionIDs)
         extraIDs->setPlaceholderText("Extension;IDs;separated;by;semicolons");
+
         groupLayout->addRow(
             "Extra extension IDs:",
-            this->createLineEdit(s.additionalExtensionIDs));
+            extraIDs);
 
     }
 #endif
