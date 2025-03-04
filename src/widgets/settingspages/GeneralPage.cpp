@@ -18,7 +18,6 @@
 #include "util/FuzzyConvert.hpp"
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
-#include "util/LayoutCreator.hpp"
 #include "widgets/BaseWindow.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
@@ -28,7 +27,6 @@
 #include <QFileDialog>
 #include <QFontDialog>
 #include <QFormLayout>
-#include <QGroupBox>
 #include <QLabel>
 #include <QScrollArea>
 
@@ -865,9 +863,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "browsers that do not work automatically.\ne.g. Librewolf");
 
     {
-        auto group = LayoutCreator<QGroupBox>(new QGroupBox("Extra Extension IDs", this));
-        auto groupLayout = group.setLayoutType<QFormLayout>();
-
         auto *note = new QLabel(
             "A semicolon-separated list of Chrome or Firefox extension IDs allowed "
             "to interact with Chatterino's browser integration (requires "
@@ -877,14 +872,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         note->setWordWrap(true);
         note->setStyleSheet("color: #bbb");
 
-        groupLayout->setWidget(0, QFormLayout::SpanningRole, note);
+        layout.addWidget(note);
         auto *extraIDs = this->createLineEdit(s.additionalExtensionIDs);
         extraIDs->setPlaceholderText("Extension;IDs;separated;by;semicolons");
 
-        groupLayout->addRow(
+        auto form = layout.emplace<QFormLayout>();
+        form->addRow(
             "Extra extension IDs:",
             extraIDs);
-
     }
 #endif
 
