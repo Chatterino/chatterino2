@@ -17,6 +17,7 @@
 - Minor: Overlay windows now inherit the global zoom level and can be zoomed independently. (#6016)
 - Bugfix: Fixed a potential way to escape the Lua Plugin sandbox. (#5846)
 - Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
+- Bugfix: Fixed UI scaling issues in certain monitor configurations. (#5802)
 - Bugfix: Fixed a crash that could occur on Linux and macOS when clicking "Install" from the update prompt. (#5818)
 - Bugfix: Fixed a crash related to image loading that could occur when closing Chatterino. (#6018)
 - Bugfix: Fixed missing word wrap in update popup. (#5811)
