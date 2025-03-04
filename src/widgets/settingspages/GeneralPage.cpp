@@ -894,7 +894,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
         auto form = new QFormLayout();
         form->addRow("Extra extension IDs:", extraIDs);
-        
+
         layout.addLayout(form);
     }
 #endif
