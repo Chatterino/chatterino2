@@ -861,20 +861,27 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Attempt to force the Chatterino Browser Extension to work in certain "
         "browsers that do not work automatically.\ne.g. Librewolf");
 
-    auto *extraIDs = this->createLineEdit(s.additionalExtensionIDs);
-    extraIDs->setPlaceholderText("Extension;IDs;separated;by;semicolons");
-    layout->addRow("Extra extension IDs:", extraIDs);
+    {
+        auto group = layout.emplace<QGroupBox>("Extra Extension IDs");
+        auto groupLayout = group.setLayoutType<QFormLayout>();
 
-    auto *note = new QLabel(
-        "A semicolon-separated list of Chrome or Firefox extension IDs allowed "
-        "to interact with Chatterino's browser integration (requires "
-        "restart).\n\n"
-        "Using multiple extension IDs from different browsers may cause "
-        "issues.");
-    note->setWordWrap(true);
-    note->setStyleSheet("color: #bbb");
+        auto *note = new QLabel(
+            "A semicolon-separated list of Chrome or Firefox extension IDs allowed "
+            "to interact with Chatterino's browser integration (requires "
+            "restart).\n\n"
+            "Using multiple extension IDs from different browsers may cause "
+            "issues.");
+        note->setWordWrap(true);
+        note->setStyleSheet("color: #bbb");
 
-    layout.addWidget(note);
+        groupLayout->setWidget(0, QFormLayout::SpanningRole, note);
+
+        extraIDs->setPlaceholderText("Extension;IDs;separated;by;semicolons");
+        groupLayout->addRow(
+            "Extra extension IDs:",
+            this->createLineEdit(s.additionalExtensionIDs));
+
+    }
 #endif
 
     layout.addTitle("AppData & Cache");
