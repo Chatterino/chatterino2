@@ -674,8 +674,10 @@ void Split::addShortcuts()
              switch (mode)
              {
                  case 0:
+                     this->setModerationMode(false);
+                     break;
                  case 1:
-                     this->setModerationMode((bool)mode);
+                     this->setModerationMode(true);
                      break;
                  default:
                      this->setModerationMode(!this->getModerationMode());
