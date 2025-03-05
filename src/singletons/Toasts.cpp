@@ -384,6 +384,13 @@ void Toasts::sendLibnotify(const QString &channelName,
         notif, OPEN_IN_STREAMLINK.toUtf8().constData(),
         OPEN_IN_STREAMLINK.toUtf8().constData(), (NotifyActionCallback)onAction,
         channelNameHeap, nullptr);
+    if (!getSettings()->customURIScheme.getValue().isEmpty())
+    {
+        notify_notification_add_action(
+            notif, OPEN_IN_CUSTOM_PLAYER.toUtf8().constData(),
+            OPEN_IN_CUSTOM_PLAYER.toUtf8().constData(),
+            (NotifyActionCallback)onAction, channelNameHeap, nullptr);
+    }
 
     auto defaultToastReaction =
         static_cast<ToastReaction>(getSettings()->openFromToast.getValue());
