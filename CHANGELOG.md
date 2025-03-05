@@ -2,7 +2,8 @@
 
 ## Unversioned
 
-- Minor: Add `Set highlight sounds` and `Open subscription page` split hotkeys. (#5856)
+- Minor: Added an option to allow multiple user-selected extensions to interact with Chatterino. (#5997)
+- Minor: Add `Set highlight sounds` and `Open subscription page` split hotkeys. (#5856, #6030)
 - Minor: `/clear` messages are now stacked like timeouts. (#5806)
 - Minor: Treat all browsers starting with `firefox` as a Firefox browser. (#5805)
 - Minor: Remove incognito browser support for `opera/launcher` (this should no longer be a thing). (#5805)
@@ -36,7 +37,7 @@
 - Bugfix: Fixed color input thinking blue is also red. (#5982)
 - Bugfix: Fixed an issue where commands would sometimes reset if Chatterino was improperly shut down. (#6011)
 - Dev: Subscriptions to PubSub channel points redemption topics now use no auth token, making it continue to work during PubSub shutdown. (#5947)
-- Dev: Add initial experimental EventSub support. (#5837, #5895, #5897, #5904, #5910, #5903, #5915, #5916, #5930, #5935, #5932, #5943, #5952, #5953, #5968, #5973, #5974, #5980, #5981, #5985, #5990, #5992, #5993, #5996, #5995, #6000, #6001, #6002, #6003, #6005, #6007, #6010, #6008, #6012, #6013, #6015, #6017)
+- Dev: Add initial experimental EventSub support. (#5837, #5895, #5897, #5904, #5910, #5903, #5915, #5916, #5930, #5935, #5932, #5943, #5952, #5953, #5968, #5973, #5974, #5980, #5981, #5985, #5990, #5992, #5993, #5996, #5995, #6000, #6001, #6002, #6003, #6005, #6007, #6010, #6008, #6012, #6013, #6015, #6017, #6027, #6028)
 - Dev: Remove unneeded platform specifier for toasts. (#5914)
 - Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
 - Dev: Removed unused PubSub whisper code. (#5898)
@@ -56,6 +57,7 @@
 - Dev: Reduced time we wait for PubSub connections to cleanly exit from 1s to 100ms. (#6019)
 - Dev: Refactored some settings styles/APIs. (#6023)
 - Dev: Added snapshot tests for EventSub. (#5965)
+- Dev: Updated crashpad. (#6026)
 - Dev: Removed dead code and some MSVC warnings. (#6024)
 
 ## 2.5.2

@@ -202,7 +202,6 @@ struct Timeout {
     String userLogin;
     String userName;
     String reason;
-    /// json_tag=AsISO8601
     std::chrono::system_clock::time_point expiresAt;
 };
 struct SharedChatTimeout : public Timeout {
@@ -216,9 +215,9 @@ struct SharedChatTimeout : public Timeout {
 struct Untimeout {
     static constexpr std::string_view TAG = "untimeout";
 
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
+    String userID;
+    String userLogin;
+    String userName;
 };
 struct SharedChatUntimeout : public Untimeout {
     static constexpr std::string_view TAG = "shared_chat_untimeout";

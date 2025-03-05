@@ -70,6 +70,12 @@ void makeModerateMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Unban &action);
 
+/// <MODERATOR> untimedout <USER>[ in <CHANNEL>].
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Untimeout &action);
+
 /// <MODERATOR> deleted message from <USER>[ in <CHANNEL>] saying: <MESSAGE>
 void makeModerateMessage(
     EventSubMessageBuilder &builder,
