@@ -12,6 +12,7 @@
 #include "util/PostToThread.hpp"
 
 #include <QCoreApplication>
+#include <QDir>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
