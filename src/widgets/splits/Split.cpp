@@ -21,6 +21,7 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
+#include "util/CustomPlayer.hpp"
 #include "util/Helpers.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
@@ -1252,19 +1253,11 @@ void Split::openInStreamlink()
 
 void Split::openWithCustomScheme()
 {
-    QString scheme = getSettings()->customURIScheme.getValue();
-    if (scheme.isEmpty())
-    {
-        return;
-    }
-
     auto *const channel = this->getChannel().get();
 
     if (auto *const twitchChannel = dynamic_cast<TwitchChannel *>(channel))
     {
-        QDesktopServices::openUrl(QString("%1https://twitch.tv/%2")
-                                      .arg(scheme)
-                                      .arg(twitchChannel->getName()));
+        openInCustomPlayer(twitchChannel->getName());
     }
 }
 
