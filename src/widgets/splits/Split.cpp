@@ -740,7 +740,7 @@ void Split::addShortcuts()
                  }
              }
 
-             auto notifications = getApp()->getNotifications();
+             auto *notifications = getApp()->getNotifications();
              QString channelName = this->getChannel()->getName();
              switch (mode)
              {
