@@ -464,32 +464,32 @@ void Split::addShortcuts()
 {
     HotkeyController::HotkeyMap actions{
         {"delete",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &) -> QString {
              this->deleteFromContainer();
              return "";
          }},
         {"changeChannel",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &) -> QString {
              this->changeChannel();
              return "";
          }},
         {"showSearch",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &) -> QString {
              this->showSearch(true);
              return "";
          }},
         {"showGlobalSearch",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &) -> QString {
              this->showSearch(false);
              return "";
          }},
         {"reconnect",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &) -> QString {
              this->reconnect();
              return "";
          }},
         {"debug",
-         [](std::vector<QString>) -> QString {
+         [](const std::vector<QString> &) -> QString {
              auto *popup = new DebugPopup;
              popup->setAttribute(Qt::WA_DeleteOnClose);
              popup->setWindowTitle("Chatterino - Debug popup");
@@ -497,7 +497,7 @@ void Split::addShortcuts()
              return "";
          }},
         {"focus",
-         [this](std::vector<QString> arguments) -> QString {
+         [this](const std::vector<QString> &arguments) -> QString {
              if (arguments.empty())
              {
                  return "focus action requires only one argument: the "
@@ -530,19 +530,19 @@ void Split::addShortcuts()
              return "";
          }},
         {"scrollToBottom",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &) -> QString {
              this->getChannelView().getScrollBar().scrollToBottom(
                  getSettings()->enableSmoothScrollingNewMessages.getValue());
              return "";
          }},
         {"scrollToTop",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &) -> QString {
              this->getChannelView().getScrollBar().scrollToTop(
                  getSettings()->enableSmoothScrollingNewMessages.getValue());
              return "";
          }},
         {"scrollPage",
-         [this](std::vector<QString> arguments) -> QString {
+         [this](const std::vector<QString> &arguments) -> QString {
              if (arguments.empty())
              {
                  qCWarning(chatterinoHotkeys)
@@ -567,12 +567,12 @@ void Split::addShortcuts()
              return "";
          }},
         {"pickFilters",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &) -> QString {
              this->setFiltersDialog();
              return "";
          }},
         {"openInBrowser",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &) -> QString {
              if (this->getChannel()->getType() == Channel::Type::TwitchWhispers)
              {
                  this->openWhispersInBrowser();
@@ -585,27 +585,27 @@ void Split::addShortcuts()
              return "";
          }},
         {"openInStreamlink",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &) -> QString {
              this->openInStreamlink();
              return "";
          }},
         {"openInCustomPlayer",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &) -> QString {
              this->openWithCustomScheme();
              return "";
          }},
         {"openPlayerInBrowser",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &) -> QString {
              this->openBrowserPlayer();
              return "";
          }},
         {"openModView",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &) -> QString {
              this->openModViewInBrowser();
              return "";
          }},
         {"createClip",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &) -> QString {
              // Alt+X: create clip LUL
              if (const auto type = this->getChannel()->getType();
                  type != Channel::Type::Twitch &&
@@ -621,7 +621,7 @@ void Split::addShortcuts()
              return "";
          }},
         {"reloadEmotes",
-         [this](std::vector<QString> arguments) -> QString {
+         [this](const std::vector<QString> &arguments) -> QString {
              auto reloadChannel = true;
              auto reloadSubscriber = true;
              if (!arguments.empty())
@@ -648,7 +648,7 @@ void Split::addShortcuts()
              return "";
          }},
         {"setModerationMode",
-         [this](std::vector<QString> arguments) -> QString {
+         [this](const std::vector<QString> &arguments) -> QString {
              if (!this->getChannel()->isTwitchChannel())
              {
                  return "Cannot set moderation mode in a non-Twitch "
@@ -686,24 +686,24 @@ void Split::addShortcuts()
              return "";
          }},
         {"openViewerList",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &) -> QString {
              this->showChatterList();
              return "";
          }},
         {"clearMessages",
-         [this](std::vector<QString>) -> QString {
+         [this](const std::vector<QString> &) -> QString {
              this->clear();
              return "";
          }},
         {"runCommand",
-         [this](std::vector<QString> arguments) -> QString {
+         [this](const std::vector<QString> &arguments) -> QString {
              if (arguments.empty())
              {
                  qCWarning(chatterinoHotkeys)
                      << "runCommand hotkey called without arguments!";
                  return "runCommand hotkey called without arguments!";
              }
-             QString requestedText = arguments.at(0).replace('\n', ' ');
+             QString requestedText = QString(arguments[0]).replace('\n', ' ');
 
              QString inputText = this->getInput().getInputText();
              QString message = getApp()->getCommands()->execCustomCommand(
@@ -719,7 +719,7 @@ void Split::addShortcuts()
              return "";
          }},
         {"setChannelNotification",
-         [this](std::vector<QString> arguments) -> QString {
+         [this](const std::vector<QString> &arguments) -> QString {
              if (!this->getChannel()->isTwitchChannel())
              {
                  return "Cannot set channel notifications for a non-Twitch "
@@ -743,7 +743,7 @@ void Split::addShortcuts()
              }
 
              auto *notifications = getApp()->getNotifications();
-             QString channelName = this->getChannel()->getName();
+             const QString channelName = this->getChannel()->getName();
              switch (mode)
              {
                  case 0:
@@ -802,7 +802,7 @@ void Split::addShortcuts()
              return {};
          }},
         {"setHighlightSounds",
-         [this](std::vector<QString> arguments) -> QString {
+         [this](const std::vector<QString> &arguments) -> QString {
              if (!this->getChannel()->isTwitchChannel())
              {
                  return "Cannot set highlight sounds in a non-Twitch "
@@ -927,7 +927,7 @@ void Split::openChannelInBrowserPlayer(ChannelPtr channel)
     }
 }
 
-void Split::openChannelInStreamlink(QString channelName)
+void Split::openChannelInStreamlink(const QString channelName)
 {
     try
     {
@@ -1511,7 +1511,7 @@ void Split::showChatterList()
 
     HotkeyController::HotkeyMap actions{
         {"delete",
-         [chatterDock](std::vector<QString>) -> QString {
+         [chatterDock](const std::vector<QString> &) -> QString {
              chatterDock->close();
              return "";
          }},
@@ -1520,7 +1520,7 @@ void Split::showChatterList()
         {"scrollPage", nullptr},
         {"openTab", nullptr},
         {"search",
-         [searchBar](std::vector<QString>) -> QString {
+         [searchBar](const std::vector<QString> &) -> QString {
              searchBar->setFocus();
              searchBar->selectAll();
              return "";
