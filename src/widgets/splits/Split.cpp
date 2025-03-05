@@ -498,7 +498,7 @@ void Split::addShortcuts()
          }},
         {"focus",
          [this](std::vector<QString> arguments) -> QString {
-             if (arguments.size() == 0)
+             if (arguments.empty())
              {
                  return "focus action requires only one argument: the "
                         "focus direction Use \"up\", \"above\", \"down\", "
@@ -543,7 +543,7 @@ void Split::addShortcuts()
          }},
         {"scrollPage",
          [this](std::vector<QString> arguments) -> QString {
-             if (arguments.size() == 0)
+             if (arguments.empty())
              {
                  qCWarning(chatterinoHotkeys)
                      << "scrollPage hotkey called without arguments!";
@@ -624,7 +624,7 @@ void Split::addShortcuts()
          [this](std::vector<QString> arguments) -> QString {
              auto reloadChannel = true;
              auto reloadSubscriber = true;
-             if (arguments.size() != 0)
+             if (!arguments.empty())
              {
                  auto arg = arguments.at(0);
                  if (arg == "channel")
@@ -658,7 +658,7 @@ void Split::addShortcuts()
              // 0 is off
              // 1 is on
              // 2 is toggle
-             if (arguments.size() != 0)
+             if (!arguments.empty())
              {
                  auto arg = arguments.at(0);
                  if (arg == "off")
@@ -669,24 +669,18 @@ void Split::addShortcuts()
                  {
                      mode = 1;
                  }
-                 else
-                 {
-                     mode = 2;
-                 }
              }
 
-             if (mode == 0)
+             switch (mode)
              {
-                 this->setModerationMode(false);
+                 case 0:
+                 case 1:
+                     this->setModerationMode((bool)mode);
+                     break;
+                 default:
+                     this->setModerationMode(!this->getModerationMode());
              }
-             else if (mode == 1)
-             {
-                 this->setModerationMode(true);
-             }
-             else
-             {
-                 this->setModerationMode(!this->getModerationMode());
-             }
+
              return "";
          }},
         {"openViewerList",
@@ -733,7 +727,7 @@ void Split::addShortcuts()
              // 0 is off
              // 1 is on
              // 2 is toggle
-             if (arguments.size() != 0)
+             if (!arguments.empty())
              {
                  auto arg = arguments.at(0);
                  if (arg == "off")
@@ -744,26 +738,23 @@ void Split::addShortcuts()
                  {
                      mode = 1;
                  }
-                 else
-                 {
-                     mode = 2;
-                 }
              }
 
-             if (mode == 0)
+             auto notifications = getApp()->getNotifications();
+             QString channelName = this->getChannel()->getName();
+             switch (mode)
              {
-                 getApp()->getNotifications()->removeChannelNotification(
-                     this->getChannel()->getName(), Platform::Twitch);
-             }
-             else if (mode == 1)
-             {
-                 getApp()->getNotifications()->addChannelNotification(
-                     this->getChannel()->getName(), Platform::Twitch);
-             }
-             else
-             {
-                 getApp()->getNotifications()->updateChannelNotification(
-                     this->getChannel()->getName(), Platform::Twitch);
+                 case 0:
+                     notifications->removeChannelNotification(channelName,
+                                                              Platform::Twitch);
+                     break;
+                 case 1:
+                     notifications->addChannelNotification(channelName,
+                                                           Platform::Twitch);
+                     break;
+                 default:
+                     notifications->updateChannelNotification(channelName,
+                                                              Platform::Twitch);
              }
              return "";
          }},
