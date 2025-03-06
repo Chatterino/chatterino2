@@ -6,6 +6,7 @@
 #include "controllers/highlights/HighlightController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/twitch/eventsub/Controller.hpp"
 #include "providers/twitch/eventsub/MessageBuilder.hpp"
 #include "providers/twitch/eventsub/MessageHandlers.hpp"
 #include "providers/twitch/PubSubActions.hpp"
@@ -18,7 +19,7 @@
 #include "util/PostToThread.hpp"
 
 #include <boost/json.hpp>
-#include <qdatetime.h>
+#include <QDateTime>
 #include <twitch-eventsub-ws/listener.hpp>
 #include <twitch-eventsub-ws/session.hpp>
 
@@ -69,6 +70,19 @@ void Connection::onNotification(const lib::messages::Metadata &metadata,
     (void)metadata;
     auto jsonString = boost::json::serialize(jv);
     qCDebug(LOG) << "on notification: " << jsonString.c_str();
+}
+
+void Connection::onClose(std::unique_ptr<lib::Listener> self,
+                         const std::optional<std::string> &reconnectURL)
+{
+    auto *app = tryGetApp();
+    if (!app)
+    {
+        return;
+    }
+
+    app->getEventSub()->reconnectConnection(std::move(self), reconnectURL,
+                                            this->subscriptions);
 }
 
 void Connection::onChannelBan(
@@ -385,6 +399,11 @@ bool Connection::isSubscribedTo(const SubscriptionRequest &request) const
 void Connection::markRequestSubscribed(const SubscriptionRequest &request)
 {
     this->subscriptions.emplace(request);
+}
+
+void Connection::markRequestUnsubscribed(const SubscriptionRequest &request)
+{
+    this->subscriptions.erase(request);
 }
 
 }  // namespace chatterino::eventsub

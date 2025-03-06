@@ -1,5 +1,7 @@
 #include "providers/twitch/eventsub/Controller.hpp"
 
+#include "Application.hpp"
+#include "common/Args.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -17,16 +19,16 @@
 
 namespace {
 
-/// Enable LOCAL_EVENTSUB when you want to debug eventsub with a local instance of the Twitch CLI
-/// twitch event websocket start-server --ssl --port 3012
-constexpr bool LOCAL_EVENTSUB = false;
+using namespace chatterino;
 
 std::tuple<std::string, std::string, std::string> getEventSubHost()
 {
-    if constexpr (LOCAL_EVENTSUB)
+#ifndef NDEBUG
+    if (getApp()->getArgs().useLocalEventsub)
     {
         return {"localhost", "3012", "/ws"};
     }
+#endif
 
     return {"eventsub.wss.twitch.tv", "443", "/ws"};
 }
@@ -222,6 +224,54 @@ SubscriptionHandle Controller::subscribe(const SubscriptionRequest &request)
     return handle;
 }
 
+void Controller::reconnectConnection(
+    std::unique_ptr<lib::Listener> connection,
+    const std::optional<std::string> &reconnectURL,
+    const std::unordered_set<SubscriptionRequest> &subs)
+{
+    this->clearConnections();
+    if (subs.empty())
+    {
+        return;
+    }
+
+    if (reconnectURL)
+    {
+        qCDebug(chatterinoTwitchEventSub) << "Using reconnect URL to reconnect";
+        // this is epic
+        QUrl url(QString::fromStdString(*reconnectURL));
+        this->createConnection(url.host(QUrl::FullyEncoded).toStdString(),
+                               std::to_string(url.port(443)),
+                               url.path(QUrl::FullyEncoded).toStdString(),
+                               std::move(connection));
+        return;
+    }
+
+    // no reconnect URL - something happened
+    // but first, clear the subscriptions
+    qCDebug(chatterinoTwitchEventSub)
+        << "Resubscribing to topics after connection failure";
+    {
+        std::lock_guard g(this->subscriptionsMutex);
+        for (const auto &sub : subs)
+        {
+            auto it = this->subscriptions.find(sub);
+            if (it != this->subscriptions.end())
+            {
+                qCDebug(chatterinoTwitchEventSub) << "Resetting" << it->first;
+                it->second.connection = {};
+                it->second.retryAttempts = 0;
+                it->second.state = Subscription::State::Subscribing;
+            }
+        }
+    }
+
+    for (const auto &sub : subs)
+    {
+        this->subscribe(sub, false);
+    }
+}
+
 void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
 {
     // 1. Flush dead connections (maybe this should not be done here)
@@ -355,8 +405,10 @@ std::optional<std::shared_ptr<lib::Session>> Controller::getViableConnection(
 
         auto *listener = dynamic_cast<Connection *>(connection->getListener());
 
-        assert(listener != nullptr && "Something goofy has gone wrong, Session "
-                                      "listener must be our Connection type");
+        if (!listener)
+        {
+            continue;  // dead connection
+        }
 
         if (listener->getSessionID().isEmpty())
         {
@@ -375,12 +427,22 @@ std::optional<std::shared_ptr<lib::Session>> Controller::getViableConnection(
 
 void Controller::createConnection()
 {
+    this->createConnection(this->eventSubHost, this->eventSubPort,
+                           this->eventSubPath, std::make_unique<Connection>());
+}
+
+void Controller::createConnection(std::string host, std::string port,
+                                  std::string path,
+                                  std::unique_ptr<lib::Listener> listener)
+{
     try
     {
         boost::asio::ssl::context sslContext{
             boost::asio::ssl::context::tlsv12_client};
 
-        if constexpr (!LOCAL_EVENTSUB)
+#ifndef NDEBUG
+        if (!getApp()->getArgs().useLocalEventsub)
+#endif
         {
             sslContext.set_verify_mode(
                 boost::asio::ssl::verify_peer |
@@ -391,12 +453,12 @@ void Controller::createConnection()
         }
 
         auto connection = std::make_shared<lib::Session>(
-            this->ioContext, sslContext, std::make_unique<Connection>());
+            this->ioContext, sslContext, std::move(listener));
 
         this->registerConnection(connection);
 
-        connection->run(this->eventSubHost, this->eventSubPort,
-                        this->eventSubPath, this->userAgent);
+        connection->run(std::move(host), std::move(port), std::move(path),
+                        this->userAgent);
     }
     catch (std::exception &e)
     {
@@ -509,6 +571,20 @@ void Controller::markRequestSubscribed(const SubscriptionRequest &request,
 
     std::lock_guard lock(this->subscriptionsMutex);
 
+    auto strong = connection.lock();
+    if (!strong)
+    {
+        // we disconnected
+        return;
+    }
+    auto *listener = dynamic_cast<Connection *>(strong->getListener());
+    if (!listener)
+    {
+        // we disconnected
+        return;
+    }
+    listener->markRequestSubscribed(request);
+
     auto &subscription = this->subscriptions[request];
 
     assert((subscription.state == Subscription::State::Subscribing ||
@@ -560,6 +636,31 @@ void Controller::markRequestUnsubscribed(const SubscriptionRequest &request)
     qCDebug(LOG) << "Set state to unsubscribed" << request;
     subscription.state = Subscription::State::Unsubscribed;
     subscription.retryAttempts = 0;
+    auto conn = subscription.connection.lock();
+    if (conn)
+    {
+        auto *listener = dynamic_cast<Connection *>(conn->getListener());
+        if (listener)
+        {
+            listener->markRequestUnsubscribed(request);
+        }
+    }
+    subscription.connection = {};
+}
+
+void Controller::clearConnections()
+{
+    std::erase_if(this->connections, [](const auto &it) {
+        auto conn = it.lock();
+        return !conn || !conn->getListener();
+    });
+}
+
+void DummyController::reconnectConnection(
+    std::unique_ptr<lib::Listener> /* connection */,
+    const std::optional<std::string> & /* reconnectURL */,
+    const std::unordered_set<SubscriptionRequest> & /* subs */)
+{
 }
 
 }  // namespace chatterino::eventsub
