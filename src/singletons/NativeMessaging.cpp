@@ -19,6 +19,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QSettings>
+#include <QStringBuilder>
 
 #ifdef Q_OS_WIN
 #    include "widgets/AttachedWindow.hpp"
