@@ -207,7 +207,7 @@ namespace nm::client {
 NativeMessagingServer::NativeMessagingServer()
     : thread(new ReceiverThread(*this))
 {
-    this->thread->setObjectName("NativeMessagingReceiver");
+    this->thread->setObjectName("C2NMReceiver");
 }
 
 NativeMessagingServer::~NativeMessagingServer()
