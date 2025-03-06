@@ -45,13 +45,6 @@ using MessageHandlers = std::unordered_map<
 
 namespace {
 
-    // Report a failure
-    void fail(beast::error_code ec, char const *what)
-    {
-        std::cerr << what << ": " << ec.message() << " (" << ec.location()
-                  << ")\n";
-    }
-
     template <class T>
     boost::system::result<T> parsePayload(const boost::json::value &jv)
     {
@@ -267,6 +260,21 @@ namespace {
                 return boost::system::error_code{};
             },
         },
+        {"session_reconnect",
+         [](const auto & /*metadata*/, const auto &jv, auto &listener,
+            const auto & /*notificationHandlers*/) {
+             auto oPayload =
+                 parsePayload<payload::session_welcome::Payload>(jv);
+             if (!oPayload)
+             {
+                 return oPayload.error();
+             }
+             const auto &payload = *oPayload;
+             auto *listenerPtr = listener.get();
+
+             listenerPtr->onClose(std::move(listener), payload.reconnectURL);
+             return boost::system::error_code{};
+         }},
         {
             "notification",
             [](const auto &metadata, const auto &jv, auto &listener,
@@ -389,7 +397,8 @@ void Session::onResolve(beast::error_code ec,
 {
     if (ec)
     {
-        return fail(ec, "resolve");
+        this->fail(ec, "resolve");
+        return;
     }
 
     // Set a timeout on the operation
@@ -407,7 +416,8 @@ void Session::onConnect(
 {
     if (ec)
     {
-        return fail(ec, "connect");
+        this->fail(ec, "connect");
+        return;
     }
 
     // Set a timeout on the operation
@@ -419,7 +429,8 @@ void Session::onConnect(
     {
         ec = beast::error_code(static_cast<int>(::ERR_get_error()),
                                boost::asio::error::get_ssl_category());
-        return fail(ec, "connect");
+        this->fail(ec, "connect");
+        return;
     }
 
     // Update the host_ string. This will provide the value of the
@@ -438,7 +449,8 @@ void Session::onSSLHandshake(beast::error_code ec)
 {
     if (ec)
     {
-        return fail(ec, "ssl_handshake");
+        this->fail(ec, "ssl_handshake");
+        return;
     }
 
     // Turn off the timeout on the tcp_stream, because
@@ -465,7 +477,8 @@ void Session::onHandshake(beast::error_code ec)
 {
     if (ec)
     {
-        return fail(ec, "handshake");
+        this->fail(ec, "handshake");
+        return;
     }
 
     this->ws.async_read(buffer, beast::bind_front_handler(&Session::onRead,
@@ -476,18 +489,30 @@ void Session::onRead(beast::error_code ec, std::size_t bytes_transferred)
 {
     boost::ignore_unused(bytes_transferred);
 
+    if (!this->listener)
+    {
+        return;
+    }
+
     if (ec)
     {
-        return fail(ec, "read");
+        this->fail(ec, "read");
+        return;
     }
 
     auto messageError = handleMessage(this->listener, this->buffer);
     if (messageError)
     {
-        fail(messageError, "handleMessage");
+        this->fail(messageError, "handleMessage");
     }
 
     this->buffer.clear();
+
+    if (!this->listener)
+    {
+        this->close();
+        return;
+    }
 
     this->ws.async_read(buffer, beast::bind_front_handler(&Session::onRead,
                                                           shared_from_this()));
@@ -502,13 +527,24 @@ void Session::onClose(beast::error_code ec)
 {
     if (ec)
     {
-        return fail(ec, "close");
+        this->fail(ec, "close");
+        return;
     }
 
     // If we get here then the connection is closed gracefully
+    if (this->listener)
+    {
+        this->listener->onClose(std::move(this->listener), {});
+    }
+}
 
-    // The make_printable() function helps print a ConstBufferSequence
-    std::cout << beast::make_printable(buffer.data()) << std::endl;
+void Session::fail(beast::error_code ec, std::string_view op)
+{
+    std::cerr << op << ": " << ec.message() << " (" << ec.location() << ")\n";
+    if (!this->ws.is_open() && this->listener)
+    {
+        this->listener->onClose(std::move(this->listener), {});
+    }
 }
 
 }  // namespace chatterino::eventsub::lib

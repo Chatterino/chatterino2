@@ -44,6 +44,11 @@ public:
     /// create a new connection and queue up the subscription to run again after X seconds.
     [[nodiscard]] virtual SubscriptionHandle subscribe(
         const SubscriptionRequest &request) = 0;
+
+    virtual void reconnectConnection(
+        std::unique_ptr<lib::Listener> connection,
+        const std::optional<std::string> &reconnectURL,
+        const std::unordered_set<SubscriptionRequest> &subs) = 0;
 };
 
 class Controller : public IController
@@ -59,10 +64,17 @@ public:
     [[nodiscard]] SubscriptionHandle subscribe(
         const SubscriptionRequest &request) override;
 
+    void reconnectConnection(
+        std::unique_ptr<lib::Listener> connection,
+        const std::optional<std::string> &reconnectURL,
+        const std::unordered_set<SubscriptionRequest> &subs) override;
+
 private:
     void subscribe(const SubscriptionRequest &request, bool isRetry);
 
     void createConnection();
+    void createConnection(std::string host, std::string port, std::string path,
+                          std::unique_ptr<lib::Listener> listener);
     void registerConnection(std::weak_ptr<lib::Session> &&connection);
 
     void retrySubscription(const SubscriptionRequest &request,
@@ -76,6 +88,8 @@ private:
     void markRequestFailed(const SubscriptionRequest &request);
 
     void markRequestUnsubscribed(const SubscriptionRequest &request);
+
+    void clearConnections();
 
     const std::string userAgent;
 
@@ -154,6 +168,11 @@ public:
         (void)request;
         return {};
     }
+
+    void reconnectConnection(
+        std::unique_ptr<lib::Listener> connection,
+        const std::optional<std::string> &reconnectURL,
+        const std::unordered_set<SubscriptionRequest> &subs) override;
 };
 
 }  // namespace chatterino::eventsub

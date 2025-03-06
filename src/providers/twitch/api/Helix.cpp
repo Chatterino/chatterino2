@@ -1,5 +1,7 @@
 #include "providers/twitch/api/Helix.hpp"
 
+#include "Application.hpp"
+#include "common/Args.hpp"
 #include "common/Literals.hpp"
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
@@ -3393,7 +3395,16 @@ NetworkRequest Helix::makeRequest(const QString &url, const QUrlQuery &urlQuery,
         // return std::nullopt;
     }
 
-    const QString baseUrl("https://api.twitch.tv/helix/");
+    QString baseUrl("https://api.twitch.tv/helix/");
+
+#ifndef NDEBUG
+    bool ignoreSslErrors =
+        getApp()->getArgs().useLocalEventsub && url == "eventsub/subscriptions";
+    if (ignoreSslErrors)
+    {
+        baseUrl = "https://127.0.0.1:3012/";
+    }
+#endif
 
     QUrl fullUrl(baseUrl + url);
 
@@ -3403,7 +3414,11 @@ NetworkRequest Helix::makeRequest(const QString &url, const QUrlQuery &urlQuery,
         .timeout(5 * 1000)
         .header("Accept", "application/json")
         .header("Client-ID", this->clientId)
-        .header("Authorization", "Bearer " + this->oauthToken);
+        .header("Authorization", "Bearer " + this->oauthToken)
+#ifndef NDEBUG
+        .ignoreSslErrors(ignoreSslErrors)
+#endif
+        ;
 }
 
 NetworkRequest Helix::makeGet(const QString &url, const QUrlQuery &urlQuery)
