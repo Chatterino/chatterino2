@@ -72,7 +72,7 @@ void writeManifestTo(QString directory, const QString &filename,
 {
     if (directory.startsWith('~'))
     {
-        directory = QDir::homePath() + QStringView{directory}.sliced(1);
+        directory = QDir::homePath() % QStringView{directory}.sliced(1);
     }
 
     QDir dir(directory);
