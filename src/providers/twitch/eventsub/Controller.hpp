@@ -17,6 +17,7 @@
 #include <optional>
 #include <string>
 #include <thread>
+#include <unordered_set>
 
 namespace chatterino::eventsub {
 
