@@ -208,4 +208,14 @@ QDateTime chronoToQDateTime(std::chrono::system_clock::time_point time);
 /// @param end End index (exclusive, in codepoints)
 QStringView codepointSlice(QStringView str, qsizetype begin, qsizetype end);
 
+/// Uses str.removeFirst if Qt >= 6.5, otherwise str.remove(0, 1)
+///
+/// @param str The Qt string we want to remove 1 character from
+void removeFirstQS(QString &str);
+
+/// Uses str.removeLast if Qt >= 6.5, otherwise str.chop(1)
+///
+/// @param str The Qt string we want to remove 1 character from
+void removeLastQS(QString &str);
+
 }  // namespace chatterino

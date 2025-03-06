@@ -38,6 +38,8 @@ public:
     void appendUser(const lib::String &userName, const lib::String &userLogin,
                     QString &text, bool trailingSpace = true);
 
+    void setMessageAndSearchText(const QString &text);
+
 private:
     TwitchChannel *channel;
 };

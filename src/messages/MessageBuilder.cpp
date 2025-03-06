@@ -658,12 +658,12 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
                            ->setLink({Link::UserInfo, name});
             if (remainder.startsWith(' '))
             {
-                remainder.removeFirst();
+                removeFirstQS(remainder);
             }
             else
             {
                 assert(messageText.endsWith(' '));
-                messageText.removeLast();
+                removeLastQS(messageText);
                 el->setTrailingSpace(false);
             }
         }

@@ -368,4 +368,22 @@ QStringView codepointSlice(QStringView str, qsizetype begin, qsizetype end)
     return {sliceBegin, pos};
 }
 
+void removeFirstQS(QString &str)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    str.removeFirst();
+#else
+    str.remove(0, 1);
+#endif
+}
+
+void removeLastQS(QString &str)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    str.removeLast();
+#else
+    str.chop(1);
+#endif
+}
+
 }  // namespace chatterino
