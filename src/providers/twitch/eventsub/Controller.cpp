@@ -191,6 +191,7 @@ SubscriptionHandle Controller::subscribe(const SubscriptionRequest &request)
             case Subscription::State::Subscribing:
             case Subscription::State::Retrying:
             case Subscription::State::Subscribed:
+            case Subscription::State::Unsubscribing:
                 break;
         }
 
@@ -200,7 +201,7 @@ SubscriptionHandle Controller::subscribe(const SubscriptionRequest &request)
             subscription.state = Subscription::State::Subscribing;
 
             // Ensure retries can work as expected since this is a fresh subscription
-            subscription.retryAttempts = 0;
+            subscription.backoff.reset();
 
             assert(subscription.retryTimer == nullptr &&
                    "A new subscription should not have a retry timer created");
@@ -260,7 +261,7 @@ void Controller::reconnectConnection(
             {
                 qCDebug(chatterinoTwitchEventSub) << "Resetting" << it->first;
                 it->second.connection = {};
-                it->second.retryAttempts = 0;
+                it->second.backoff.reset();
                 it->second.state = Subscription::State::Subscribing;
             }
         }
@@ -335,13 +336,6 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
 
                     case Error::Forbidden:
                         qCDebug(LOG) << "Forbidden" << errorString << request;
-                        boost::asio::post(this->ioContext, [this, request]() {
-                            qCDebug(LOG)
-                                << "Calling retrySubscription from Forbidden"
-                                << request;
-                            this->retrySubscription(
-                                request, boost::posix_time::seconds(2), 2);
-                        });
                         return;
 
                     case Error::Conflict:
@@ -358,11 +352,9 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
                         qCWarning(LOG) << "Unhandled error, retrying "
                                           "subscription"
                                        << errorString << request;
-                        boost::asio::post(
-                            this->ioContext, [this, request]() mutable {
-                                this->retrySubscription(
-                                    request, boost::posix_time::seconds(2), 5);
-                            });
+                        boost::asio::post(this->ioContext, [this, request] {
+                            this->retrySubscription(request);
+                        });
                         return;
                 }
 
@@ -376,19 +368,15 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
     {
         // No connection was available to handle this subscription request, create a new connection
         this->createConnection();
-        this->retrySubscription(request, boost::posix_time::millisec(500), 10);
     }
-    else
+    else if (openButNotReadyConnections > 1)
     {
-        if (openButNotReadyConnections > 1)
-        {
-            qCWarning(LOG) << "We have" << openButNotReadyConnections
-                           << "open but no ready connections, hmmm";
-        }
-
-        // At least one connection is open, but it has not gotten the welcome message yet
-        this->retrySubscription(request, boost::posix_time::millisec(250), 10);
+        // There should only ever be 0 or 1
+        qCWarning(LOG) << "We have" << openButNotReadyConnections
+                       << "open but no ready connections";
     }
+
+    this->retrySubscription(request);
 }
 
 std::optional<std::shared_ptr<lib::Session>> Controller::getViableConnection(
@@ -473,15 +461,11 @@ void Controller::registerConnection(std::weak_ptr<lib::Session> &&connection)
     this->connections.emplace_back(std::move(connection));
 }
 
-void Controller::retrySubscription(const SubscriptionRequest &request,
-                                   boost::posix_time::time_duration delay,
-                                   int32_t maxAttempts)
+void Controller::retrySubscription(const SubscriptionRequest &request)
 {
     std::lock_guard lock(this->subscriptionsMutex);
 
     auto &subscription = this->subscriptions[request];
-
-    assert(subscription.retryAttempts >= 0);
 
     if (subscription.refCount == 0)
     {
@@ -494,51 +478,23 @@ void Controller::retrySubscription(const SubscriptionRequest &request,
         return;
     }
 
-    if (subscription.retryAttempts == 0 ||
-        subscription.retryAttempts > maxAttempts)
+    if (subscription.state != Subscription::State::Retrying)
     {
-        assert((subscription.state == Subscription::State::Subscribing ||
-                subscription.state == Subscription::State::Retrying) &&
-               "new retry must start from Subscribing or Retrying state");
-
-        qCDebug(LOG) << "New retry for subscription" << request
-                     << " - max attempts" << maxAttempts << "from state"
-                     << static_cast<uint8_t>(subscription.state);
-
-        subscription.retryAttempts = maxAttempts;
-    }
-    else
-    {
-        qCDebug(LOG) << "Retrying subscription" << request << " - attempt"
-                     << subscription.retryAttempts << "of" << maxAttempts
-                     << "from state"
-                     << static_cast<uint8_t>(subscription.state);
-        assert(subscription.state == Subscription::State::Retrying &&
-               "retries must come from Retrying state");
-
-        subscription.retryAttempts -= 1;
-
-        if (subscription.retryAttempts == 0)
-        {
-            qCWarning(LOG) << "Reached max amount of retries for" << request;
-            qCDebug(LOG) << "Set state to failed" << request;
-            subscription.state = Subscription::State::Failed;
-            return;
-        }
+        qCDebug(LOG) << "Set state to retrying" << request;
+        subscription.state = Subscription::State::Retrying;
     }
 
-    qCDebug(LOG) << "Set state to retrying" << request;
-    subscription.state = Subscription::State::Retrying;
-
-    int attemptNumber = subscription.retryAttempts;
+    // we don't need a strong RNG here
+    // NOLINTNEXTLINE(cert-*)
+    std::chrono::milliseconds jitter{std::rand() % 256};
 
     auto retryTimer =
-        std::make_unique<boost::asio::deadline_timer>(this->ioContext);
-    retryTimer->expires_from_now(delay);
-    retryTimer->async_wait([this, request, attemptNumber](const auto &ec) {
+        std::make_unique<boost::asio::system_timer>(this->ioContext);
+    retryTimer->expires_after(subscription.backoff.next() + jitter);
+    retryTimer->async_wait([this, request](const auto &ec) {
         if (!ec)
         {
-            qCDebug(LOG) << "Firing retry" << request << attemptNumber;
+            qCDebug(LOG) << "Firing retry" << request;
             // The timer passed naturally
             this->subscribe(request, true);
         }
@@ -596,6 +552,7 @@ void Controller::markRequestSubscribed(const SubscriptionRequest &request,
     subscription.subscriptionID = subscriptionID;
     qCDebug(LOG) << "Set state to subscribed" << request;
     subscription.state = Subscription::State::Subscribed;
+    subscription.backoff.reset();
 }
 
 void Controller::markRequestFailed(const SubscriptionRequest &request)
@@ -635,7 +592,7 @@ void Controller::markRequestUnsubscribed(const SubscriptionRequest &request)
 
     qCDebug(LOG) << "Set state to unsubscribed" << request;
     subscription.state = Subscription::State::Unsubscribed;
-    subscription.retryAttempts = 0;
+    subscription.backoff.reset();
     auto conn = subscription.connection.lock();
     if (conn)
     {
@@ -646,6 +603,18 @@ void Controller::markRequestUnsubscribed(const SubscriptionRequest &request)
         }
     }
     subscription.connection = {};
+
+    if (subscription.refCount == 0)
+    {
+        // we could remove the subscription here
+        return;
+    }
+
+    // someone subscribed in the meantime
+    subscription.state = Subscription::State::Subscribing;
+    boost::asio::post(this->ioContext, [this, request] {
+        this->subscribe(request, false);
+    });
 }
 
 void Controller::clearConnections()
