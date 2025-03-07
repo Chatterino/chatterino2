@@ -3,6 +3,7 @@
 #include "providers/twitch/eventsub/SubscriptionHandle.hpp"
 #include "providers/twitch/eventsub/SubscriptionRequest.hpp"
 #include "twitch-eventsub-ws/session.hpp"
+#include "util/ExponentialBackoff.hpp"
 #include "util/ThreadGuard.hpp"
 
 #include <boost/asio/executor_work_guard.hpp>
@@ -78,9 +79,7 @@ private:
                           std::unique_ptr<lib::Listener> listener);
     void registerConnection(std::weak_ptr<lib::Session> &&connection);
 
-    void retrySubscription(const SubscriptionRequest &request,
-                           boost::posix_time::time_duration delay,
-                           int32_t maxAttempts);
+    void retrySubscription(const SubscriptionRequest &request);
 
     void markRequestSubscribed(const SubscriptionRequest &request,
                                std::weak_ptr<lib::Session> connection,
@@ -138,8 +137,9 @@ private:
         QString subscriptionID;
 
         /// The timer, if any, for retrying the subscription creation
-        std::unique_ptr<boost::asio::deadline_timer> retryTimer;
-        int32_t retryAttempts = 0;
+        std::unique_ptr<boost::asio::system_timer> retryTimer;
+        // 500ms to 16s backoff
+        ExponentialBackoff<6> backoff{std::chrono::milliseconds{500}};
     };
 
     std::mutex subscriptionsMutex;
