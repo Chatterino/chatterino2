@@ -189,6 +189,16 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             return fuzzyToInt(args.value, 10);
         });
+    layout.addDropdown<int>(
+        "Font weight",
+        {"100", "200", "300", "400", "500", "600", "700", "800", "900"},
+        s.chatFontWeight,
+        [](auto val) {
+            return QString::number(val);
+        },
+        [](auto args) {
+            return fuzzyToInt(args.value, 400);
+        });
     layout.addDropdown<float>(
         "Zoom", ZOOM_LEVELS, s.uiScale,
         [](auto val) {

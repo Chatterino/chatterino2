@@ -16,6 +16,7 @@
 - Minor: Added Linux support for Live Notifications toasts. (#5881, #5971, #5976)
 - Minor: Messages can now be deleted from the context menu in a channel. (#5956)
 - Minor: Overlay windows now inherit the global zoom level and can be zoomed independently. (#6016)
+- Minor: The font weight of chat messages can now be changed. (#6037)
 - Bugfix: Fixed a potential way to escape the Lua Plugin sandbox. (#5846)
 - Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
 - Bugfix: Fixed a crash that could occur on Linux and macOS when clicking "Install" from the update prompt. (#5818)
