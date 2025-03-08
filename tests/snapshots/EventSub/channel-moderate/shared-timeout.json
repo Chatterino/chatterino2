@@ -198,7 +198,7 @@
                     ]
                 }
             ],
-            "flags": "System|Timeout|PubSub|SharedMessage|EventSub",
+            "flags": "System|Timeout|PubSub|SharedMessage|EventSub|ModerationAction",
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",

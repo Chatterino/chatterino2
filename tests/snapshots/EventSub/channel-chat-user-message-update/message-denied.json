@@ -89,7 +89,7 @@
                     ]
                 }
             ],
-            "flags": "Timeout|PubSub|AutoMod|EventSub",
+            "flags": "PubSub|AutoMod|EventSub",
             "id": "automod_fc90dc3b-0634-41c3-8365-f40719f076ab",
             "localizedName": "",
             "loginName": "automod",

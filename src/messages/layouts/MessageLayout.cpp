@@ -169,9 +169,16 @@ void MessageLayout::actuallyLayout(const MessageLayoutContext &ctx)
         if (this->message_->flags.has(MessageFlag::Timeout) ||
             this->message_->flags.has(MessageFlag::Untimeout))
         {
-            // NOTE: This hides the message but it will make the message re-appear if moderation message hiding is no longer active, and the layout is re-laid-out.
-            // This is only the case for the moderation messages that don't get filtered during creation.
-            // We should decide which is the correct method & apply that everywhere
+            assert(this->message_->flags.has(MessageFlag::ModerationAction));
+            if (hideModerationActions ||
+                getApp()->getStreamerMode()->shouldHideModActions())
+            {
+                continue;
+            }
+        }
+
+        if (this->message_->flags.has(MessageFlag::ModerationAction))
+        {
             if (hideModerationActions ||
                 getApp()->getStreamerMode()->shouldHideModActions())
             {
@@ -514,7 +521,8 @@ bool MessageLayout::isReplyable() const
 
     if (this->message_->flags.hasAny(
             {MessageFlag::System, MessageFlag::Subscription,
-             MessageFlag::Timeout, MessageFlag::Whisper}))
+             MessageFlag::Timeout, MessageFlag::Whisper,
+             MessageFlag::ModerationAction}))
     {
         return false;
     }
