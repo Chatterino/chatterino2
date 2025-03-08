@@ -166,6 +166,17 @@ void MessageLayout::actuallyLayout(const MessageLayoutContext &ctx)
             continue;
         }
 
+        if (this->message_->flags.hasAny(MessageFlag::RestrictedMessage,
+                                         MessageFlag::MonitoredMessage))
+        {
+            if (getApp()->getStreamerMode()->shouldHideSuspiciousUsers())
+            {
+                // Message is being hidden because the source is a
+                // restricted or monitored user
+                continue;
+            }
+        }
+
         if (this->message_->flags.has(MessageFlag::ModerationAction))
         {
             if (hideModerationActions ||

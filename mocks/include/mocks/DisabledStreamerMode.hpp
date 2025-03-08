@@ -15,6 +15,11 @@ public:
         return false;
     }
 
+    bool shouldHideSuspiciousUsers() const override
+    {
+        return false;
+    }
+
     void start() override
     {
     }
