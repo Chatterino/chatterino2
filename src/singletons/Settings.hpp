@@ -659,7 +659,7 @@ public:
     };
     BoolSetting enableExperimentalEventSub = {
         "/eventsub/enableExperimental",
-        false,
+        true,
     };
 
     QStringSetting additionalExtensionIDs{"/misc/additionalExtensionIDs", ""};
