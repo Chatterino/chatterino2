@@ -3,6 +3,7 @@
 #include <boost/json.hpp>
 
 #include <chrono>
+#include <sstream>
 
 namespace chatterino::eventsub::lib {
 

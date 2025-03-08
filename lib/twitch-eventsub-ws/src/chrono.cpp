@@ -1,6 +1,6 @@
 #include "twitch-eventsub-ws/chrono.hpp"
 
-#include <date/date.h>
+#include "twitch-eventsub-ws/date.h"
 
 #include <sstream>
 
