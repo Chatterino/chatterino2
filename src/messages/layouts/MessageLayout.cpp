@@ -173,8 +173,7 @@ void MessageLayout::actuallyLayout(const MessageLayoutContext &ctx)
             // This is only the case for the moderation messages that don't get filtered during creation.
             // We should decide which is the correct method & apply that everywhere
             if (hideModerationActions ||
-                (getSettings()->streamerModeHideModActions &&
-                 getApp()->getStreamerMode()->isEnabled()))
+                getApp()->getStreamerMode()->shouldHideModActions())
             {
                 continue;
             }

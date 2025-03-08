@@ -10,6 +10,11 @@ public:
         return false;
     }
 
+    bool shouldHideModActions() const override
+    {
+        return false;
+    }
+
     void start() override
     {
     }
