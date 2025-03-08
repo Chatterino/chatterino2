@@ -26,6 +26,7 @@
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QFontDialog>
+#include <QFormLayout>
 #include <QLabel>
 #include <QScrollArea>
 
@@ -187,6 +188,16 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         [](auto args) {
             return fuzzyToInt(args.value, 10);
+        });
+    layout.addDropdown<int>(
+        "Font weight",
+        {"100", "200", "300", "400", "500", "600", "700", "800", "900"},
+        s.chatFontWeight,
+        [](auto val) {
+            return QString::number(val);
+        },
+        [](auto args) {
+            return fuzzyToInt(args.value, 400);
         });
     layout.addDropdown<float>(
         "Zoom", ZOOM_LEVELS, s.uiScale,
@@ -721,6 +732,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox(
         "Hide moderation actions", s.streamerModeHideModActions, false,
         "Hide bans, timeouts, and automod messages from appearing in chat.");
+
+    SettingWidget::checkbox("Hide messages from suspicious users",
+                            s.streamerModeHideSuspiciousUsers)
+        ->setTooltip("Suspicious users are users who are marked as either "
+                     "restricted or monitored by you or Twitch's AutoMod")
+        ->addTo(layout);
+
     layout.addCheckbox(
         "Hide blocked terms", s.streamerModeHideBlockedTermText, false,
         "Hide blocked terms from showing up in places like AutoMod messages. "
@@ -876,6 +894,26 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.attachExtensionToAnyProcess, false,
         "Attempt to force the Chatterino Browser Extension to work in certain "
         "browsers that do not work automatically.\ne.g. Librewolf");
+
+    {
+        auto *note = new QLabel(
+            "A semicolon-separated list of Chrome or Firefox extension IDs"
+            "allowed to interact with Chatterino's browser integration "
+            "(requires restart).\n"
+            "Using multiple extension IDs from different browsers may cause "
+            "issues.");
+        note->setWordWrap(true);
+        note->setStyleSheet("color: #bbb");
+
+        layout.addWidget(note);
+        auto *extraIDs = this->createLineEdit(s.additionalExtensionIDs);
+        extraIDs->setPlaceholderText("Extension;IDs;separated;by;semicolons");
+
+        auto form = new QFormLayout();
+        form->addRow("Extra extension IDs:", extraIDs);
+
+        layout.addLayout(form);
+    }
 #endif
 
     layout.addTitle("AppData & Cache");

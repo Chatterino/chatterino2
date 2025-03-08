@@ -8,6 +8,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/FormatTime.hpp"
+#include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
 
 namespace chatterino::eventsub {
@@ -44,7 +45,8 @@ void handleModerateMessage(
     EventSubMessageBuilder builder(chan, time);
     builder->loginName = event.moderatorUserLogin.qt();
     // pretend we're pubsub
-    builder->flags.set(MessageFlag::PubSub);
+    builder->flags.set(MessageFlag::PubSub, MessageFlag::Timeout,
+                       MessageFlag::ModerationAction);
 
     QString text;
     bool isShared = event.isFromSharedChat();
@@ -78,7 +80,7 @@ void handleModerateMessage(
     }
 
     assert(text.endsWith(' '));
-    text.removeLast();  // trailing space
+    removeLastQS(text);  // trailing space
 
     if (action.reason.view().empty())
     {

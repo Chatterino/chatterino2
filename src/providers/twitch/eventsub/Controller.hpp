@@ -3,6 +3,7 @@
 #include "providers/twitch/eventsub/SubscriptionHandle.hpp"
 #include "providers/twitch/eventsub/SubscriptionRequest.hpp"
 #include "twitch-eventsub-ws/session.hpp"
+#include "util/ExponentialBackoff.hpp"
 #include "util/ThreadGuard.hpp"
 
 #include <boost/asio/executor_work_guard.hpp>
@@ -17,6 +18,7 @@
 #include <optional>
 #include <string>
 #include <thread>
+#include <unordered_set>
 
 namespace chatterino::eventsub {
 
@@ -44,6 +46,11 @@ public:
     /// create a new connection and queue up the subscription to run again after X seconds.
     [[nodiscard]] virtual SubscriptionHandle subscribe(
         const SubscriptionRequest &request) = 0;
+
+    virtual void reconnectConnection(
+        std::unique_ptr<lib::Listener> connection,
+        const std::optional<std::string> &reconnectURL,
+        const std::unordered_set<SubscriptionRequest> &subs) = 0;
 };
 
 class Controller : public IController
@@ -59,15 +66,20 @@ public:
     [[nodiscard]] SubscriptionHandle subscribe(
         const SubscriptionRequest &request) override;
 
+    void reconnectConnection(
+        std::unique_ptr<lib::Listener> connection,
+        const std::optional<std::string> &reconnectURL,
+        const std::unordered_set<SubscriptionRequest> &subs) override;
+
 private:
     void subscribe(const SubscriptionRequest &request, bool isRetry);
 
     void createConnection();
+    void createConnection(std::string host, std::string port, std::string path,
+                          std::unique_ptr<lib::Listener> listener);
     void registerConnection(std::weak_ptr<lib::Session> &&connection);
 
-    void retrySubscription(const SubscriptionRequest &request,
-                           boost::posix_time::time_duration delay,
-                           int32_t maxAttempts);
+    void retrySubscription(const SubscriptionRequest &request);
 
     void markRequestSubscribed(const SubscriptionRequest &request,
                                std::weak_ptr<lib::Session> connection,
@@ -76,6 +88,8 @@ private:
     void markRequestFailed(const SubscriptionRequest &request);
 
     void markRequestUnsubscribed(const SubscriptionRequest &request);
+
+    void clearConnections();
 
     const std::string userAgent;
 
@@ -123,8 +137,9 @@ private:
         QString subscriptionID;
 
         /// The timer, if any, for retrying the subscription creation
-        std::unique_ptr<boost::asio::deadline_timer> retryTimer;
-        int32_t retryAttempts = 0;
+        std::unique_ptr<boost::asio::system_timer> retryTimer;
+        // 500ms to 16s backoff
+        ExponentialBackoff<6> backoff{std::chrono::milliseconds{500}};
     };
 
     std::mutex subscriptionsMutex;
@@ -154,6 +169,11 @@ public:
         (void)request;
         return {};
     }
+
+    void reconnectConnection(
+        std::unique_ptr<lib::Listener> connection,
+        const std::optional<std::string> &reconnectURL,
+        const std::unordered_set<SubscriptionRequest> &subs) override;
 };
 
 }  // namespace chatterino::eventsub

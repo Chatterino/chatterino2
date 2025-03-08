@@ -38,6 +38,8 @@ public:
     void appendUser(const lib::String &userName, const lib::String &userLogin,
                     QString &text, bool trailingSpace = true);
 
+    void setMessageAndSearchText(const QString &text);
+
 private:
     TwitchChannel *channel;
 };
@@ -69,6 +71,12 @@ void makeModerateMessage(
     EventSubMessageBuilder &builder,
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Unban &action);
+
+/// <MODERATOR> untimedout <USER>[ in <CHANNEL>].
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Untimeout &action);
 
 /// <MODERATOR> deleted message from <USER>[ in <CHANNEL>] saying: <MESSAGE>
 void makeModerateMessage(

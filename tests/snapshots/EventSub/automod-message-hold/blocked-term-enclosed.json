@@ -148,7 +148,7 @@
                     ]
                 }
             ],
-            "flags": "Timeout|PubSub|AutoMod|AutoModOffendingMessageHeader|AutoModBlockedTerm|EventSub",
+            "flags": "PubSub|AutoMod|AutoModOffendingMessageHeader|AutoModBlockedTerm|EventSub|ModerationAction",
             "id": "automod_0cbb6e48-1606-46c6-b1ac-c97626e1c5cb",
             "localizedName": "",
             "loginName": "automod",
@@ -256,7 +256,7 @@
                     ]
                 }
             ],
-            "flags": "Timeout|PubSub|AutoMod|AutoModOffendingMessage|AutoModBlockedTerm|EventSub",
+            "flags": "PubSub|AutoMod|AutoModOffendingMessage|AutoModBlockedTerm|EventSub|ModerationAction",
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",
