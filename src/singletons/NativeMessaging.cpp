@@ -12,12 +12,14 @@
 #include "util/PostToThread.hpp"
 
 #include <QCoreApplication>
+#include <QDir>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QSettings>
+#include <QStringBuilder>
 
 #ifdef Q_OS_WIN
 #    include "widgets/AttachedWindow.hpp"
@@ -25,20 +27,91 @@
 
 namespace {
 
+using namespace chatterino;
 using namespace chatterino::literals;
 
 const QString EXTENSION_ID = u"glknmaideaikkmemifbfkhnomoknepka"_s;
 constexpr const size_t MESSAGE_SIZE = 1024;
+
+struct Config {
+#ifdef Q_OS_WIN
+    QString fileName;
+    QString registryKey;
+#else
+    QString directory;
+#endif
+};
+
+const Config FIREFOX{
+#ifdef Q_OS_WIN
+    .fileName = u"native-messaging-manifest-firefox.json"_s,
+    .registryKey =
+        u"HKCU\\Software\\Mozilla\\NativeMessagingHosts\\com.chatterino.chatterino"_s,
+#elif defined(Q_OS_MACOS)
+    .directory =
+        u"~/Library/Application Support/Mozilla/NativeMessagingHosts"_s,
+#else
+    .directory = u"~/.mozilla/native-messaging-hosts"_s,
+#endif
+};
+
+const Config CHROME{
+#ifdef Q_OS_WIN
+    .fileName = u"native-messaging-manifest-chrome.json"_s,
+    .registryKey =
+        u"HKCU\\Software\\Google\\Chrome\\NativeMessagingHosts\\com.chatterino.chatterino"_s,
+#elif defined(Q_OS_MACOS)
+    .directory =
+        u"~/Library/Application Support/Google/Chrome/NativeMessagingHosts"_s,
+#else
+    .directory = u"~/.config/google-chrome/NativeMessagingHosts"_s,
+#endif
+};
+
+void writeManifestTo(QString directory, const QString &filename,
+                     const QJsonDocument &json)
+{
+    if (directory.startsWith('~'))
+    {
+        directory = QDir::homePath() % QStringView{directory}.sliced(1);
+    }
+
+    QDir dir(directory);
+    if (!dir.mkpath(u"."_s))
+    {
+        qCWarning(chatterinoNativeMessage) << "Failed to create" << directory;
+        return;
+    }
+    QFile file(dir.filePath(filename));
+    if (!file.open(QFile::WriteOnly | QFile::Truncate))
+    {
+        qCWarning(chatterinoNativeMessage)
+            << "Failed to open" << filename << "in" << directory;
+        return;
+    }
+    file.write(json.toJson());
+}
+
+void registerNmManifest([[maybe_unused]] const Paths &paths,
+                        const Config &config, const QJsonDocument &document)
+{
+#ifdef Q_OS_WIN
+    writeManifestTo(paths.miscDirectory, config.fileName, document);
+
+    QSettings registry(config.registryKey, QSettings::NativeFormat);
+    registry.setValue("Default",
+                      QString(paths.miscDirectory % u'/' % config.fileName));
+#else
+    writeManifestTo(config.directory, u"com.chatterino.chatterino.json"_s,
+                    document);
+#endif
+}
 
 }  // namespace
 
 namespace chatterino {
 
 using namespace literals;
-
-void registerNmManifest(const Paths &paths, const QString &manifestFilename,
-                        const QString &registryKeyName,
-                        const QJsonDocument &document);
 
 void registerNmHost(const Paths &paths)
 {
@@ -78,10 +151,7 @@ void registerNmHost(const Paths &paths)
 
         obj.insert("allowed_origins", allowedOriginsArr);
 
-        registerNmManifest(paths, "/native-messaging-manifest-chrome.json",
-                           "HKCU\\Software\\Google\\Chrome\\NativeMessagingHost"
-                           "s\\com.chatterino.chatterino",
-                           QJsonDocument(obj));
+        registerNmManifest(paths, CHROME, QJsonDocument{obj});
     }
 
     // firefox
@@ -100,30 +170,8 @@ void registerNmHost(const Paths &paths)
 
         obj.insert("allowed_extensions", allowedExtensions);
 
-        registerNmManifest(paths, "/native-messaging-manifest-firefox.json",
-                           "HKCU\\Software\\Mozilla\\NativeMessagingHosts\\com."
-                           "chatterino.chatterino",
-                           QJsonDocument(obj));
+        registerNmManifest(paths, FIREFOX, QJsonDocument{obj});
     }
-}
-
-void registerNmManifest(const Paths &paths, const QString &manifestFilename,
-                        const QString &registryKeyName,
-                        const QJsonDocument &document)
-{
-    (void)registryKeyName;
-
-    // save the manifest
-    QString manifestPath = paths.miscDirectory + manifestFilename;
-    QFile file(manifestPath);
-    file.open(QIODevice::WriteOnly | QIODevice::Truncate);
-    file.write(document.toJson());
-    file.flush();
-
-#ifdef Q_OS_WIN
-    QSettings registry(registryKeyName, QSettings::NativeFormat);
-    registry.setValue("Default", manifestPath);
-#endif
 }
 
 std::string &getNmQueueName(const Paths &paths)
@@ -158,9 +206,9 @@ namespace nm::client {
 
 // SERVER
 NativeMessagingServer::NativeMessagingServer()
-    : thread(*this)
+    : thread(new ReceiverThread(*this))
 {
-    this->thread.setObjectName("NativeMessagingReceiver");
+    this->thread->setObjectName("C2NMReceiver");
 }
 
 NativeMessagingServer::~NativeMessagingServer()
@@ -169,18 +217,24 @@ NativeMessagingServer::~NativeMessagingServer()
     {
         qCWarning(chatterinoNativeMessage) << "Failed to remove message queue";
     }
-    this->thread.requestInterruption();
-    this->thread.quit();
+    this->thread->requestInterruption();
+    this->thread->quit();
     // Most likely, the receiver thread will still wait for a message
-    if (!this->thread.wait(250))
+    if (!this->thread->wait(100))
     {
-        this->thread.terminate();
+        this->thread->terminate();
+
+        if (!this->thread->wait(100))
+        {
+            qCWarning(chatterinoNativeMessage)
+                << "Failed to terminate thread cleanly";
+        }
     }
 }
 
 void NativeMessagingServer::start()
 {
-    this->thread.start();
+    this->thread->start();
 }
 
 NativeMessagingServer::ReceiverThread::ReceiverThread(
