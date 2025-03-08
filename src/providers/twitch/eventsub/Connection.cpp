@@ -281,12 +281,6 @@ void Connection::onChannelSuspiciousUserMessage(
         return;
     }
 
-    if (getSettings()->streamerModeHideModActions &&
-        getApp()->getStreamerMode()->isEnabled())
-    {
-        return;
-    }
-
     auto *channel = dynamic_cast<TwitchChannel *>(
         getApp()
             ->getTwitch()

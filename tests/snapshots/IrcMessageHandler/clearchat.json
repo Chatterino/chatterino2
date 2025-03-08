@@ -59,7 +59,7 @@
                     ]
                 }
             ],
-            "flags": "System|DoNotTriggerNotification|ClearChat",
+            "flags": "System|DoNotTriggerNotification|ClearChat|ModerationAction",
             "id": "",
             "localizedName": "",
             "loginName": "",

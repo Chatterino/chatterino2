@@ -224,7 +224,7 @@
                     ]
                 }
             ],
-            "flags": "System|Timeout|PubSub|EventSub",
+            "flags": "System|Timeout|PubSub|EventSub|ModerationAction",
             "id": "",
             "localizedName": "",
             "loginName": "",
@@ -378,7 +378,7 @@
                     ]
                 }
             ],
-            "flags": "System|Timeout|PubSub|EventSub",
+            "flags": "System|Timeout|PubSub|EventSub|ModerationAction",
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",
