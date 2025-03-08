@@ -159,7 +159,7 @@
                     ]
                 }
             ],
-            "flags": "System|Timeout|DoNotTriggerNotification|EventSub",
+            "flags": "System|DoNotTriggerNotification|EventSub|ModerationAction",
             "id": "",
             "localizedName": "",
             "loginName": "testaccount_420",

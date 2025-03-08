@@ -202,6 +202,11 @@ bool StreamerMode::isEnabled() const
     return this->private_->isEnabled();
 }
 
+bool StreamerMode::shouldHideModActions() const
+{
+    return getSettings()->streamerModeHideModActions && this->isEnabled();
+}
+
 void StreamerMode::start()
 {
     this->private_->start();

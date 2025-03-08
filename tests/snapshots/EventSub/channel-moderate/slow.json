@@ -166,7 +166,7 @@
                     ]
                 }
             ],
-            "flags": "System|Timeout|EventSub",
+            "flags": "System|EventSub",
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",

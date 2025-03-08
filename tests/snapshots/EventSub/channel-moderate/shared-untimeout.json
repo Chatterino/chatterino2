@@ -173,7 +173,7 @@
                     ]
                 }
             ],
-            "flags": "System|Timeout|EventSub",
+            "flags": "System|Untimeout|EventSub|ModerationAction",
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",

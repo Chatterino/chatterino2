@@ -143,7 +143,6 @@ EventSubMessageBuilder::EventSubMessageBuilder(TwitchChannel *channel,
 {
     this->emplace<TimestampElement>(time.time());
     this->message().flags.set(MessageFlag::System, MessageFlag::EventSub);
-    this->message().flags.set(MessageFlag::Timeout);  // do we need this?
     this->message().serverReceivedTime = time;
 }
 
@@ -217,6 +216,7 @@ void makeModerateMessage(EventSubMessageBuilder &builder,
                          const lib::payload::channel_moderate::v2::Event &event,
                          const lib::payload::channel_moderate::v2::Warn &action)
 {
+    builder->flags.set(MessageFlag::ModerationAction);
     QString text;
 
     builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
@@ -255,6 +255,8 @@ void makeModerateMessage(EventSubMessageBuilder &builder,
                          const lib::payload::channel_moderate::v2::Event &event,
                          const lib::payload::channel_moderate::v2::Ban &action)
 {
+    builder->flags.set(MessageFlag::ModerationAction, MessageFlag::Timeout);
+
     QString text;
     bool isShared = event.isFromSharedChat();
 
@@ -288,6 +290,8 @@ void makeModerateMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Unban &action)
 {
+    builder->flags.set(MessageFlag::ModerationAction, MessageFlag::Untimeout);
+
     QString text;
     bool isShared = event.isFromSharedChat();
 
@@ -313,10 +317,11 @@ void makeModerateMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Untimeout &action)
 {
+    builder->flags.set(MessageFlag::ModerationAction, MessageFlag::Untimeout);
+
     QString text;
     bool isShared = event.isFromSharedChat();
 
-    builder->flags.set(MessageFlag::Timeout);
     builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
     builder.emplaceSystemTextAndUpdate("untimedout", text);
     builder.appendUser(action.userName, action.userLogin, text, isShared);
@@ -339,7 +344,8 @@ void makeModerateMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Delete &action)
 {
-    builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder->flags.set(MessageFlag::DoNotTriggerNotification,
+                       MessageFlag::ModerationAction);
 
     QString text;
     bool isShared = event.isFromSharedChat();
@@ -465,6 +471,8 @@ void makeModerateMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::AutomodTerms &action)
 {
+    builder->flags.set(MessageFlag::ModerationAction);
+
     QString text;
 
     builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
@@ -589,7 +597,7 @@ MessagePtr makeAutomodHoldMessageHeader(
     builder->id = u"automod_" % event.messageID.qt();
     builder->loginName = u"automod"_s;
     builder->channelName = event.broadcasterUserLogin.qt();
-    builder->flags.set(MessageFlag::PubSub, MessageFlag::Timeout,
+    builder->flags.set(MessageFlag::PubSub, MessageFlag::ModerationAction,
                        MessageFlag::AutoMod,
                        MessageFlag::AutoModOffendingMessageHeader);
     builder->flags.set(
@@ -637,7 +645,7 @@ MessagePtr makeAutomodHoldMessageBody(
 {
     EventSubMessageBuilder builder(channel);
     builder->serverReceivedTime = time;
-    builder->flags.set(MessageFlag::PubSub, MessageFlag::Timeout,
+    builder->flags.set(MessageFlag::PubSub, MessageFlag::ModerationAction,
                        MessageFlag::AutoMod,
                        MessageFlag::AutoModOffendingMessage);
     builder->flags.set(
@@ -784,7 +792,8 @@ MessagePtr makeSuspiciousUserUpdate(
     const lib::payload::channel_suspicious_user_update::v1::Event &event)
 {
     EventSubMessageBuilder builder(channel, time);
-    builder->flags.set(MessageFlag::DoNotTriggerNotification);
+    builder->flags.set(MessageFlag::DoNotTriggerNotification,
+                       MessageFlag::ModerationAction);
     builder->loginName = event.moderatorUserLogin.qt();
 
     QString text;
@@ -833,8 +842,7 @@ MessagePtr makeUserMessageHeldMessage(
     builder->id = u"automod_" % event.messageID.qt();
     builder->loginName = u"automod"_s;
     builder->channelName = event.broadcasterUserLogin.qt();
-    builder->flags.set(MessageFlag::PubSub, MessageFlag::Timeout,
-                       MessageFlag::AutoMod);
+    builder->flags.set(MessageFlag::PubSub, MessageFlag::AutoMod);
 
     // AutoMod shield badge
     builder.emplace<BadgeElement>(makeAutoModBadge(),
@@ -863,8 +871,7 @@ MessagePtr makeUserMessageUpdateMessage(
     builder->id = u"automod_" % event.messageID.qt();
     builder->loginName = u"automod"_s;
     builder->channelName = event.broadcasterUserLogin.qt();
-    builder->flags.set(MessageFlag::PubSub, MessageFlag::Timeout,
-                       MessageFlag::AutoMod);
+    builder->flags.set(MessageFlag::PubSub, MessageFlag::AutoMod);
 
     // AutoMod shield badge
     builder.emplace<BadgeElement>(makeAutoModBadge(),

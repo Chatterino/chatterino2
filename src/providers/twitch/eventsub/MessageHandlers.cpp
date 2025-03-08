@@ -45,7 +45,8 @@ void handleModerateMessage(
     EventSubMessageBuilder builder(chan, time);
     builder->loginName = event.moderatorUserLogin.qt();
     // pretend we're pubsub
-    builder->flags.set(MessageFlag::PubSub);
+    builder->flags.set(MessageFlag::PubSub, MessageFlag::Timeout,
+                       MessageFlag::ModerationAction);
 
     QString text;
     bool isShared = event.isFromSharedChat();

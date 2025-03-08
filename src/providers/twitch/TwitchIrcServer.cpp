@@ -431,9 +431,10 @@ void TwitchIrcServer::initialize()
                 return;
             }
 
-            if (getSettings()->streamerModeHideModActions &&
-                getApp()->getStreamerMode()->isEnabled())
+            if (getApp()->getStreamerMode()->shouldHideModActions())
             {
+                // NOTE: This completely stops the building of this action, rathern than only hiding it.
+                // If the user disabled streamer mode or the setting, there will be messages missing
                 return;
             }
 
@@ -476,9 +477,10 @@ void TwitchIrcServer::initialize()
                 return;
             }
 
-            if (getSettings()->streamerModeHideModActions &&
-                getApp()->getStreamerMode()->isEnabled())
+            if (getApp()->getStreamerMode()->shouldHideModActions())
             {
+                // NOTE: This completely stops the building of this action, rathern than only hiding it.
+                // If the user disabled streamer mode or the setting, there will be messages missing
                 return;
             }
 
@@ -680,9 +682,10 @@ void TwitchIrcServer::initialize()
     this->connections_.managedConnect(
         getApp()->getTwitchPubSub()->moderation.automodUserMessage,
         [this](const auto &action) {
-            if (getSettings()->streamerModeHideModActions &&
-                getApp()->getStreamerMode()->isEnabled())
+            if (getApp()->getStreamerMode()->shouldHideModActions())
             {
+                // NOTE: This completely stops the building of this action, rathern than only hiding it.
+                // If the user disabled streamer mode or the setting, there will be messages missing
                 return;
             }
             auto chan = this->getChannelOrEmptyByID(action.roomID);
