@@ -53,6 +53,9 @@ public:
     /// By default, there's no explicit timeout for the request.
     /// To set a timeout, use NetworkRequest's timeout method
     std::optional<std::chrono::milliseconds> timeout{};
+#ifndef NDEBUG
+    bool ignoreSslErrors = false;  // for local eventsub
+#endif
 
     QString getHash();
 

@@ -592,7 +592,6 @@ pronouns::Pronouns *Application::getPronouns()
 
 eventsub::IController *Application::getEventSub()
 {
-    assertInGuiThread();
     assert(this->eventSub);
 
     return this->eventSub.get();

@@ -167,6 +167,10 @@ public:
         "/appearance/currentFontSize",
         DEFAULT_FONT_SIZE,
     };
+    IntSetting chatFontWeight = {
+        "/appearance/currentFontWeight",
+        QFont::Normal,
+    };
     BoolSetting hideReplyContext = {"/appearance/hideReplyContext", false};
     BoolSetting showReplyButton = {"/appearance/showReplyButton", false};
     BoolSetting stripReplyMention = {"/appearance/stripReplyMention", true};
@@ -655,7 +659,7 @@ public:
     };
     BoolSetting enableExperimentalEventSub = {
         "/eventsub/enableExperimental",
-        false,
+        true,
     };
 
     QStringSetting additionalExtensionIDs{"/misc/additionalExtensionIDs", ""};

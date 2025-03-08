@@ -8,6 +8,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/FormatTime.hpp"
+#include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
 
 namespace chatterino::eventsub {
@@ -78,7 +79,7 @@ void handleModerateMessage(
     }
 
     assert(text.endsWith(' '));
-    text.removeLast();  // trailing space
+    removeLastQS(text);  // trailing space
 
     if (action.reason.view().empty())
     {
