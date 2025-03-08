@@ -1,0 +1,83 @@
+---
+name: Test Arch Linux
+
+on:
+  pull_request:
+  workflow_dispatch:
+  merge_group:
+  push:
+    branches:
+      - master
+      - main
+
+env:
+  TWITCH_PUBSUB_SERVER_TAG: v1.0.8
+  HTTPBOX_TAG: v0.2.1
+  QT_QPA_PLATFORM: minimal
+
+concurrency:
+  group: test-arch-linux-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: "Test Arch Linux"
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo pacman -Sy
+          sudo pacman -S --noconfirm 'qt6-base' 'qt6-tools' 'boost-libs' 'openssl' 'qt6-imageformats' 'qtkeychain-qt6' 'qt6-5compat' 'qt6-svg' 'libnotify'
+          sudo pacman -S --noconfirm 'git' 'boost' 'cmake' 'benchmark'
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Create build directory
+        run: mkdir build-test
+
+      - name: Install httpbox
+        run: |
+          curl -L -o httpbox.tar.xz "https://github.com/Chatterino/httpbox/releases/download/${{ env.HTTPBOX_TAG }}/httpbox-x86_64-unknown-linux-gnu.tar.xz"
+          tar -xJf httpbox.tar.xz
+          mv ./httpbox-x86_64-unknown-linux-gnu/httpbox /usr/local/bin
+        working-directory: /tmp
+
+      - name: Download and extract Twitch PubSub Server Test
+        run: |
+          mkdir pubsub-server-test
+          curl -L -o pubsub-server.tar.gz "https://github.com/Chatterino/twitch-pubsub-server-test/releases/download/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/server-${{ env.TWITCH_PUBSUB_SERVER_TAG }}-linux-amd64.tar.gz"
+          tar -xzf pubsub-server.tar.gz -C pubsub-server-test
+          cd pubsub-server-test
+          cd ..
+
+      - name: Configure
+        run: |
+          cmake \
+            -DBUILD_TESTS=On \
+            -DBUILD_BENCHMARKS=On \
+            -DBUILD_APP=OFF \
+            -DCHATTERINO_PLUGINS=On \
+            -DCMAKE_BUILD_TYPE=Debug \
+            ..
+        working-directory: build-test
+
+      - name: Build
+        run: |
+          cmake --build . -j $(nproc)
+        working-directory: build-test
+
+      - name: Test
+        timeout-minutes: 30
+        run: |
+          httpbox --port 9051 &
+          cd ../pubsub-server-test
+          ./server 127.0.0.1:9050 &
+          cd ../build-test
+          ctest --repeat until-pass:4 --output-on-failure
+        working-directory: build-test
