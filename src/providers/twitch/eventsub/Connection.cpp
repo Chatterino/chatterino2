@@ -281,13 +281,6 @@ void Connection::onChannelSuspiciousUserMessage(
         return;
     }
 
-    if (getApp()->getStreamerMode()->shouldHideModActions())
-    {
-        // NOTE: This completely stops the building of this action, rathern than only hiding it.
-        // If the user disabled streamer mode or the setting, there will be messages missing
-        return;
-    }
-
     auto *channel = dynamic_cast<TwitchChannel *>(
         getApp()
             ->getTwitch()
@@ -325,13 +318,6 @@ void Connection::onChannelSuspiciousUserUpdate(
         qCDebug(LOG) << "Channel Suspicious User Update for broadcaster we're "
                         "not interested in"
                      << payload.event.broadcasterUserLogin.qt();
-        return;
-    }
-
-    if (getApp()->getStreamerMode()->shouldHideModActions())
-    {
-        // NOTE: This completely stops the building of this action, rathern than only hiding it.
-        // If the user disabled streamer mode or the setting, there will be messages missing
         return;
     }
 
