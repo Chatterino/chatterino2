@@ -704,10 +704,12 @@ MessagePtr makeSuspiciousUserMessageHeader(
     if (event.lowTrustStatus == lib::suspicious_users::Status::Restricted)
     {
         headerMessage = u"Restricted"_s;
+        builder->flags.set(MessageFlag::RestrictedMessage);
     }
     else
     {
         headerMessage = u"Monitored"_s;
+        builder->flags.set(MessageFlag::MonitoredMessage);
     }
 
     auto hasType = [&](lib::suspicious_users::Type type) {

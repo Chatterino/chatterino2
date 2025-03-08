@@ -85,7 +85,7 @@
                     ]
                 }
             ],
-            "flags": "LowTrustUsers|EventSub",
+            "flags": "LowTrustUsers|RestrictedMessage|EventSub",
             "id": "",
             "localizedName": "",
             "loginName": "",

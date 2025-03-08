@@ -18,6 +18,7 @@
 - Minor: Overlay windows now inherit the global zoom level and can be zoomed independently. (#6016)
 - Minor: The `/watching` channel is now supported on all platforms. (#6031)
 - Minor: The font weight of chat messages can now be changed. (#6037)
+- Minor: Messages from suspicious users can now be hidden when in streamer mode. This is enabled by default. (#6042)
 - Bugfix: Fixed a potential way to escape the Lua Plugin sandbox. (#5846)
 - Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
 - Bugfix: Fixed a crash that could occur on Linux and macOS when clicking "Install" from the update prompt. (#5818)
