@@ -166,22 +166,14 @@ void MessageLayout::actuallyLayout(const MessageLayoutContext &ctx)
             continue;
         }
 
-        if (this->message_->flags.has(MessageFlag::Timeout) ||
-            this->message_->flags.has(MessageFlag::Untimeout))
-        {
-            assert(this->message_->flags.has(MessageFlag::ModerationAction));
-            if (hideModerationActions ||
-                getApp()->getStreamerMode()->shouldHideModActions())
-            {
-                continue;
-            }
-        }
-
         if (this->message_->flags.has(MessageFlag::ModerationAction))
         {
             if (hideModerationActions ||
                 getApp()->getStreamerMode()->shouldHideModActions())
             {
+                // Message is being hidden because we consider the message
+                // a moderation action (something a streamer is unlikely to
+                // want to share if they briefly show their chat on stream)
                 continue;
             }
         }
