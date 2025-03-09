@@ -15,7 +15,7 @@ public:
         return false;
     }
 
-    bool shouldHideSuspiciousUsers() const override
+    bool shouldHideRestrictedUsers() const override
     {
         return false;
     }

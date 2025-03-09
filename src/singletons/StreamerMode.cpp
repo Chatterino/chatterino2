@@ -207,9 +207,9 @@ bool StreamerMode::shouldHideModActions() const
     return getSettings()->streamerModeHideModActions && this->isEnabled();
 }
 
-bool StreamerMode::shouldHideSuspiciousUsers() const
+bool StreamerMode::shouldHideRestrictedUsers() const
 {
-    return getSettings()->streamerModeHideSuspiciousUsers && this->isEnabled();
+    return getSettings()->streamerModeHideRestrictedUsers && this->isEnabled();
 }
 
 void StreamerMode::start()
