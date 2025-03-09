@@ -505,7 +505,7 @@ boost::system::error_code Session::onSessionWelcome(
     this->keepaliveTimeout =
         std::chrono::seconds{payload.keepaliveTimeoutSeconds.value_or(60)} * 2;
     assert(!this->keepaliveTimer);
-    std::cerr << "Keepalive: " << this->keepaliveTimeout;
+    std::cerr << "Keepalive: " << this->keepaliveTimeout.count() << 's';
     this->checkKeepalive();
 
     return {};
