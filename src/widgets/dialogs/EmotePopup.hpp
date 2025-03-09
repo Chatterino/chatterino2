@@ -28,6 +28,7 @@ public:
 protected:
     void resizeEvent(QResizeEvent *event) override;
     void moveEvent(QMoveEvent *event) override;
+    void themeChangedEvent() override;
 
 private:
     ChannelView *globalEmotesView_{};
