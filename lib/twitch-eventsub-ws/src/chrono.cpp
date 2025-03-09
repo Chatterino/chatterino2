@@ -1,8 +1,12 @@
 #include "twitch-eventsub-ws/chrono.hpp"
 
-#include "twitch-eventsub-ws/date.h"
-
-#include <sstream>
+#if __cpp_lib_chrono >= 201907L
+#    include <chrono>
+using namespace std::chrono;
+#else
+#    include <date/date.h>
+using namespace date;
+#endif
 
 namespace chatterino::eventsub::lib {
 
@@ -20,8 +24,9 @@ boost::json::result_for<std::chrono::system_clock::time_point,
 
     std::chrono::system_clock::time_point tp;
     std::istringstream in{*raw};
-    in >> date::parse("%FT%H:%M:%12SZ", tp);
+    in >> parse("%FT%H:%M:%12SZ", tp);
 
     return tp;
 }
+
 }  // namespace chatterino::eventsub::lib
