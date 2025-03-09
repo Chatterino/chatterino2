@@ -279,6 +279,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         false, "Choose which tabs are visible in the notebook");
 
+    SettingWidget::dropdown("Tab style", s.tabStyle)->addTo(layout);
+
     SettingWidget::inverseCheckbox("Show message reply context",
                                    s.hideReplyContext)
         ->setTooltip(
@@ -303,8 +305,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "When disabled, the x to close a tab will be hidden.\nTabs can still "
         "be closed by right-clicking or pressing " +
             removeTabShortcut + ".");
-    layout.addCheckbox("Compact tabs", s.compactTabs, false,
-                       "When enabled, tabs will have less width than normal.");
     layout.addCheckbox("Always on top", s.windowTopMost, false,
                        "Always keep Chatterino as the top window.");
 #ifdef USEWINSDK

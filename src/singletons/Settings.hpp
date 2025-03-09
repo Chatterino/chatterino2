@@ -91,6 +91,11 @@ enum StreamerModeSetting {
     DetectStreamingSoftware = 2,
 };
 
+enum class TabStyle : std::uint8_t {
+    Normal,
+    Compact,
+};
+
 /// Settings which are availlable for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
 class Settings
@@ -181,7 +186,8 @@ public:
     FloatSetting boldScale = {"/appearance/boldScale", 63};
     BoolSetting showTabCloseButton = {"/appearance/showTabCloseButton", true};
     BoolSetting showTabLive = {"/appearance/showTabLiveButton", true};
-    BoolSetting compactTabs = {"/appearance/compactTabs", false};
+    EnumStringSetting<TabStyle> tabStyle = {"/appearance/tablStyle",
+                                            TabStyle::Normal};
     BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton",
                                          false};
     BoolSetting hideUserButton = {"/appearance/hideUserButton", false};

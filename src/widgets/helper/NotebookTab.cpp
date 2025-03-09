@@ -54,6 +54,30 @@ namespace {
                 break;
         }
     }
+
+    float getCompactDivider(TabStyle tabStyle)
+    {
+        switch (tabStyle)
+        {
+            case TabStyle::Compact:
+                return 1.5;
+            case TabStyle::Normal:
+            default:
+                return 1.0;
+        }
+    }
+
+    float getCompactReducer(TabStyle tabStyle)
+    {
+        switch (tabStyle)
+        {
+            case TabStyle::Compact:
+                return 4.0;
+            case TabStyle::Normal:
+            default:
+                return 0.0;
+        }
+    }
 }  // namespace
 
 NotebookTab::NotebookTab(Notebook *notebook)
@@ -72,7 +96,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
             tabSizeChanged();
         },
         this->managedConnections_);
-    getSettings()->compactTabs.connect(
+    getSettings()->tabStyle.connect(
         [this] {
             tabSizeChanged();
         },
@@ -211,7 +235,7 @@ int NotebookTab::normalTabWidthForHeight(int height) const
     QFontMetrics metrics =
         getApp()->getFonts()->getFontMetrics(FontStyle::UiTabs, scale);
 
-    float compactDivider = getSettings()->compactTabs ? 1.5 : 1;
+    float compactDivider = getCompactDivider(getSettings()->tabStyle);
     if (this->hasXButton())
     {
         width = (metrics.horizontalAdvance(this->getTitle()) +
@@ -770,7 +794,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
     // set the pen color
     painter.setPen(colors.text);
 
-    float compactDivider = getSettings()->compactTabs ? 1.5 : 1;
+    float compactDivider = getCompactDivider(getSettings()->tabStyle);
     // set area for text
     int rectW =
         (!getSettings()->showTabCloseButton ? 0
@@ -1057,8 +1081,7 @@ QRect NotebookTab::getXRect() const
                                ? (size / 3)   // slightly off true center
                                : (size / 2);  // true center
 
-    //float compactDivider = getSettings()->compactTabs ? 1.22 : 1;
-    float compactReducer = getSettings()->compactTabs ? 4 : 0;
+    float compactReducer = getCompactReducer(getSettings()->tabStyle);
     QRect xRect(rect.right() - static_cast<int>((20 - compactReducer) * s),
                 rect.center().y() - centerAdjustment, size, size);
 
