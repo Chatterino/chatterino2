@@ -36,6 +36,7 @@
 - Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
 - Dev: Removed unused PubSub whisper code. (#5898)
 - Dev: Updated Conan dependencies. (#5776)
+- Dev: Added the `externally-packaged` mode. (#5975)
 - Dev: Disable QT keywords (i.e. `emit`, `slots`, and `signals`). (#5882)
 - Dev: Replaced usage of `parseTime` with `serverReceivedTime` for clearchat messages. (#5824, #5855)
 - Dev: Support Boost 1.87. (#5832)

@@ -529,7 +529,9 @@ public:
     BoolSetting notificationToast = {"/notifications/enableToast", false};
     BoolSetting createShortcutForToasts = {
         "/notifications/createShortcutForToasts",
-        Modes::instance().isPortable ? false : true,
+        (Modes::instance().isPortable || Modes::instance().isExternallyPackaged)
+            ? false
+            : true,
     };
     IntSetting openFromToast = {"/notifications/openFromToast",
                                 static_cast<int>(ToastReaction::OpenInBrowser)};
