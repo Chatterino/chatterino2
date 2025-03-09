@@ -164,6 +164,8 @@ const std::vector<QStringView> DEVICE_AUTH_SCOPES{
     u"moderator:read:moderators",  // for channel.moderate eventsub topic
 
     u"moderator:read:vips",  // for channel.moderate eventsub topic
+
+    u"moderator:read:suspicious_users",  // for channel.suspicious_user.message and channel.suspicious_user.update
 };
 
 TwitchAccountManager::TwitchAccountManager()

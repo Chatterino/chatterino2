@@ -33,8 +33,6 @@ using namespace literals;
 std::optional<TwitchAccountData> TwitchAccountData::loadRaw(
     const std::string &key)
 {
-    using QStringSetting = pajlada::Settings::Setting<QString>;
-
     auto username = QStringSetting::get("/accounts/" + key + "/username");
     auto userID = QStringSetting::get("/accounts/" + key + "/userID");
     auto clientID = QStringSetting::get("/accounts/" + key + "/clientID");
