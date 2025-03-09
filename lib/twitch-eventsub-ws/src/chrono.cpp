@@ -14,9 +14,9 @@ namespace chatterino::eventsub::lib {
 
 boost::json::result_for<std::chrono::system_clock::time_point,
                         boost::json::value>::type
-    tag_invoke(
-        boost::json::try_value_to_tag<std::chrono::system_clock::time_point>,
-        const boost::json::value &jvRoot, const AsISO8601 &)
+    tag_invoke(boost::json::try_value_to_tag<
+                   std::chrono::system_clock::time_point> /*tag*/,
+               const boost::json::value &jvRoot, const AsISO8601 & /*tag*/)
 {
     const auto raw = boost::json::try_value_to<std::string>(jvRoot);
     if (raw.has_error())
