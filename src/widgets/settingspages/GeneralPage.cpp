@@ -733,10 +733,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Hide moderation actions", s.streamerModeHideModActions, false,
         "Hide bans, timeouts, and automod messages from appearing in chat.");
 
-    SettingWidget::checkbox("Hide messages from suspicious users",
-                            s.streamerModeHideSuspiciousUsers)
-        ->setTooltip("Suspicious users are users who are marked as either "
-                     "restricted or monitored by you or Twitch's AutoMod")
+    SettingWidget::checkbox("Hide messages from restricted users",
+                            s.streamerModeHideRestrictedUsers)
+        ->setTooltip("Restricted users can be marked by you, your moderators, "
+                     "or Twitch's AutoMod")
         ->addTo(layout);
 
     layout.addCheckbox(
