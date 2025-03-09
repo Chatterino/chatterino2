@@ -556,6 +556,7 @@ void Session::checkKeepalive()
         {
             this->listener->onClose(std::move(this->listener), {});
         }
+        this->close();
         return;
     }
     this->receivedMessage = false;

@@ -157,8 +157,8 @@ TEST_P(TestHandleMessageP, Run)
     boost::asio::io_context ioc;
     boost::asio::ssl::context ssl(
         boost::asio::ssl::context::method::tls_client);
-    Session sess(ioc, ssl, std::move(listener));
-    auto ec = sess.handleMessage(buf);
+    auto sess = std::make_shared<Session>(ioc, ssl, std::move(listener));
+    auto ec = sess->handleMessage(buf);
     ASSERT_FALSE(ec.failed())
         << ec.what() << ec.message() << ec.location().to_string();
 }

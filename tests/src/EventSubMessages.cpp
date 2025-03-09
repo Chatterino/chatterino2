@@ -309,7 +309,8 @@ TEST_P(TestEventSubMessagesP, Run)
     boost::asio::io_context ioc;
     boost::asio::ssl::context ssl(
         boost::asio::ssl::context::method::tls_client);
-    eventsub::lib::Session sess(ioc, ssl, std::move(listener));
+    auto sess =
+        std::make_shared<eventsub::lib::Session>(ioc, ssl, std::move(listener));
 
     for (const auto inputRef : input)
     {
@@ -328,7 +329,7 @@ TEST_P(TestEventSubMessagesP, Run)
 
         auto json = makePayload(eventSubscription->second, inputObj);
 
-        auto ec = sess.handleMessage(json);
+        auto ec = sess->handleMessage(json);
         ASSERT_FALSE(ec.failed())
             << ec.what() << ec.message() << ec.location().to_string();
     }

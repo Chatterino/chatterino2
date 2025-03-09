@@ -174,13 +174,13 @@ void BM_ParseAndHandleMessages(benchmark::State &state)
     boost::asio::io_context ioc;
     boost::asio::ssl::context ssl(
         boost::asio::ssl::context::method::tls_client);
-    Session sess(ioc, ssl, std::move(listener));
+    auto sess = std::make_shared<Session>(ioc, ssl, std::move(listener));
 
     for (auto _ : state)
     {
         for (const auto &msg : messages)
         {
-            boost::system::error_code ec = sess.handleMessage(msg);
+            boost::system::error_code ec = sess->handleMessage(msg);
             assert(!ec);
         }
     }
