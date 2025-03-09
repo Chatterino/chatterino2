@@ -299,6 +299,7 @@ ChannelView::ChannelView(QWidget *parent, Split *split, Context context,
 ChannelView::ChannelView(InternalCtor /*tag*/, QWidget *parent, Split *split,
                          Context context, size_t messagesLimit)
     : BaseWidget(parent)
+    , channel_(Channel::getEmpty())
     , split_(split)
     , scrollBar_(new Scrollbar(messagesLimit, this))
     , highlightAnimation_(this)
@@ -903,8 +904,10 @@ LimitedQueueSnapshot<MessageLayoutPtr> &ChannelView::getMessagesSnapshot()
     return this->snapshot_;
 }
 
-ChannelPtr ChannelView::channel()
+ChannelPtr ChannelView::channel() const
 {
+    assert(this->channel_ != nullptr);
+
     return this->channel_;
 }
 
@@ -3194,10 +3197,7 @@ bool ChannelView::canReplyToMessages() const
         return false;
     }
 
-    if (this->channel_ == nullptr)
-    {
-        return false;
-    }
+    assert(this->channel_ != nullptr);
 
     if (!this->channel_->isTwitchChannel())
     {
