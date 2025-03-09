@@ -1,5 +1,7 @@
 #include "twitch-eventsub-ws/chrono.hpp"
 
+#include "twitch-eventsub-ws/detail/errors.hpp"
+
 #if __cpp_lib_chrono >= 201907L
 #    include <chrono>
 using namespace std::chrono;
@@ -22,11 +24,18 @@ boost::json::result_for<std::chrono::system_clock::time_point,
         return raw.error();
     }
 
-    std::chrono::system_clock::time_point tp;
+    std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>
+        tp;
     std::istringstream in{*raw};
     in >> parse("%FT%H:%M:%12SZ", tp);
 
-    return tp;
+    if (!in.good())
+    {
+        EVENTSUB_BAIL_HERE(error::Kind::BadTimeFormat);
+    }
+
+    return std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+        tp);
 }
 
 }  // namespace chatterino::eventsub::lib
