@@ -191,6 +191,8 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     this->ui_.twitch.channel->setFocus();
 
     this->addShortcuts();
+
+    this->themeChangedEvent();
 }
 
 void SelectChannelDialog::ok()
@@ -392,16 +394,11 @@ void SelectChannelDialog::themeChangedEvent()
 {
     BaseWindow::themeChangedEvent();
 
-    if (this->theme->isLightTheme())
-    {
-        this->setStyleSheet(
-            "QRadioButton { color: #000 } QLabel { color: #000 }");
-    }
-    else
-    {
-        this->setStyleSheet(
-            "QRadioButton { color: #fff } QLabel { color: #fff }");
-    }
+    // NOTE: This currently overrides the QLineEdit's font size.
+    // If the dialog is open when the theme is changed, things will look a bit off.
+    // This can be alleviated by us using a single application-wide style sheet for these things.
+    this->ui_.twitch.channelName->setStyleSheet(
+        this->theme->splits.input.styleSheet);
 }
 
 void SelectChannelDialog::addShortcuts()
