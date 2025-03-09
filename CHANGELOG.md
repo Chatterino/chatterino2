@@ -35,6 +35,7 @@
 - Bugfix: Fixed user info popup's opened from `/live` making some network requests that always failed. (#5959)
 - Bugfix: Ensure miniaudio backend exits even if it doesn't exit cleanly. (#5896)
 - Bugfix: Fixed search in emote popup not always working correctly. (#5946)
+- Bugfix: Fixed some text inputs being dark in light themes. (#6055)
 - Bugfix: Fixed channel point redemptions with messages not showing up if PubSub is disconnected. (#5948)
 - Bugfix: Fixed the input font not immediately updating when zooming in/out. (#5960)
 - Bugfix: Fixed missing special shortcut for Windows live notifications. (#5975)
