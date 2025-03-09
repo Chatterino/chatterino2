@@ -3197,10 +3197,7 @@ bool ChannelView::canReplyToMessages() const
         return false;
     }
 
-    if (this->channel_ == nullptr)
-    {
-        return false;
-    }
+    assert(this->channel_ != nullptr);
 
     if (!this->channel_->isTwitchChannel())
     {
