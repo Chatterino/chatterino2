@@ -15,6 +15,7 @@ enum class Kind : int {
     InnerRootMissing,
     NoMessageHandler,
     UnknownVariant,
+    BadTimeFormat,
 };
 
 class ApplicationErrorCategory final : public boost::system::error_category

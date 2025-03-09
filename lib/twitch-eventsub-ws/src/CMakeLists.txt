@@ -48,8 +48,12 @@ add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES})
 # Generate source groups for use in IDEs
 # source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${SOURCE_FILES})
 
-target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../include")
-
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
+        "${CMAKE_CURRENT_SOURCE_DIR}/../include"
+    PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/../lib/date/include"
+)
 
 target_link_libraries(${PROJECT_NAME}
         PUBLIC

@@ -166,13 +166,12 @@ void MessageLayout::actuallyLayout(const MessageLayoutContext &ctx)
             continue;
         }
 
-        if (this->message_->flags.hasAny(MessageFlag::RestrictedMessage,
-                                         MessageFlag::MonitoredMessage))
+        if (this->message_->flags.has(MessageFlag::RestrictedMessage))
         {
-            if (getApp()->getStreamerMode()->shouldHideSuspiciousUsers())
+            if (getApp()->getStreamerMode()->shouldHideRestrictedUsers())
             {
                 // Message is being hidden because the source is a
-                // restricted or monitored user
+                // restricted user
                 continue;
             }
         }

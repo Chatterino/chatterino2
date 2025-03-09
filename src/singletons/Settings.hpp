@@ -363,8 +363,8 @@ public:
         "/streamerMode/hideViewerCountAndDuration", false};
     BoolSetting streamerModeHideModActions = {"/streamerMode/hideModActions",
                                               true};
-    BoolSetting streamerModeHideSuspiciousUsers = {
-        "/streamerMode/hideSuspiciousUsers",
+    BoolSetting streamerModeHideRestrictedUsers = {
+        "/streamerMode/hideRestrictedUsers",
         true,
     };
     BoolSetting streamerModeMuteMentions = {"/streamerMode/muteMentions", true};
