@@ -40,7 +40,7 @@ UnixSignalHandler::UnixSignalHandler(int signal)
     QObject::connect(this->socketNotifier, &QSocketNotifier::activated, this,
                      &UnixSignalHandler::handleSignal);
 
-    struct sigaction action{};
+    struct sigaction action;
     action.sa_handler = UnixSignalHandler::fired;
     sigemptyset(&action.sa_mask);
     action.sa_flags = 0;
