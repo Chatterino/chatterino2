@@ -133,7 +133,7 @@ private:
     /**
      * @brief Opens Twitch channel stream in streamlink app (if stream is live and streamlink is installed)
      */
-    void openChannelInStreamlink(QString channelName);
+    void openChannelInStreamlink(const QString channelName);
     /**
      * @brief Opens Twitch channel chat in a new Chatterino tab
      */

@@ -26,15 +26,15 @@ decltype(std::declval<{{struct.full_name}}>().{{field.name}}) {{field.name}};
     {
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
-    auto {{field.name}}{{type.name}} = boost::json::try_value_to<{{type.name}}>(*{{field.name}}Val);
-    if ({{field.name}}{{type.name}}.has_error())
+    auto {{field.name}}{{type.id}} = boost::json::try_value_to<{{type.name}}>(*{{field.name}}Val);
+    if ({{field.name}}{{type.id}}.has_error())
     {
-        return {{field.name}}{{type.name}}.error();
+        return {{field.name}}{{type.id}}.error();
     }
     {% if type.trivial -%}
-    {{field.name}}.emplace<{{type.name}}>({{field.name}}{{type.name}}.value());
+    {{field.name}}.emplace<{{type.name}}>({{field.name}}{{type.id}}.value());
     {%- else -%}
-    {{field.name}}.emplace<{{type.name}}>(std::move({{field.name}}{{type.name}}.value()));
+    {{field.name}}.emplace<{{type.name}}>(std::move({{field.name}}{{type.id}}.value()));
     {%- endif %}
 {%- endif -%}
 }

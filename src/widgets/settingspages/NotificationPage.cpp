@@ -49,8 +49,7 @@ NotificationPage::NotificationPage()
 #if defined(Q_OS_WIN) || defined(CHATTERINO_WITH_LIBNOTIFY)
                 settings.append(this->createCheckBox(
                     "Show notification", getSettings()->notificationToast));
-#endif
-#ifdef Q_OS_WIN
+
                 auto openIn = settings.emplace<QHBoxLayout>().withoutMargin();
                 {
                     openIn
@@ -128,7 +127,8 @@ QComboBox *NotificationPage::createToastReactionComboBox()
 {
     QComboBox *toastReactionOptions = new QComboBox();
 
-    for (int i = 0; i <= static_cast<int>(ToastReaction::DontOpen); i++)
+    for (int i = 0; i <= static_cast<int>(ToastReaction::OpenInCustomPlayer);
+         i++)
     {
         toastReactionOptions->insertItem(
             i, Toasts::findStringFromReaction(static_cast<ToastReaction>(i)));

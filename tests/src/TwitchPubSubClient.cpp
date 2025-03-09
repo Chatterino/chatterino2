@@ -1,3 +1,4 @@
+#include "mocks/BaseApplication.hpp"
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/PubSubClient.hpp"
 #include "providers/twitch/PubSubManager.hpp"
@@ -74,6 +75,14 @@ public:
     }
 };
 
+const QString TEST_SETTINGS = R"(
+{
+    "eventsub": {
+        "enableExperimental": false
+    }
+}
+)";
+
 class FTest : public PubSub
 {
 public:
@@ -94,9 +103,28 @@ public:
     }
 };
 
+class MockApplication : public mock::BaseApplication
+{
+public:
+    MockApplication(const char *path, std::chrono::seconds pingInterval,
+                    QString token = "token")
+        : mock::BaseApplication(TEST_SETTINGS)
+        , pubSub(path, pingInterval, token)
+    {
+    }
+
+    PubSub *getTwitchPubSub() override
+    {
+        return &this->pubSub;
+    }
+
+    FTest pubSub;
+};
+
 TEST(TwitchPubSubClient, ServerRespondsToPings)
 {
-    FTest pubSub("", 1s);
+    MockApplication a("", 1s);
+    auto &pubSub = a.pubSub;
 
     pubSub.start();
 
@@ -135,7 +163,8 @@ TEST(TwitchPubSubClient, ServerRespondsToPings)
 
 TEST(TwitchPubSubClient, ServerDoesntRespondToPings)
 {
-    FTest pubSub("/dont-respond-to-ping", 1s);
+    MockApplication a("/dont-respond-to-ping", 1s);
+    auto &pubSub = a.pubSub;
 
     pubSub.start();
     pubSub.listenToChannelModerationActions("123456");
@@ -164,7 +193,8 @@ TEST(TwitchPubSubClient, ServerDoesntRespondToPings)
 
 TEST(TwitchPubSubClient, DisconnectedAfter1s)
 {
-    FTest pubSub("/disconnect-client-after-1s", 10s);
+    MockApplication a("/disconnect-client-after-1s", 10s);
+    auto &pubSub = a.pubSub;
 
     pubSub.start();
 
@@ -199,7 +229,8 @@ TEST(TwitchPubSubClient, DisconnectedAfter1s)
 
 TEST(TwitchPubSubClient, ExceedTopicLimit)
 {
-    FTest pubSub("", 1s);
+    MockApplication a("", 1s);
+    auto &pubSub = a.pubSub;
 
     pubSub.start();
 
@@ -239,7 +270,8 @@ TEST(TwitchPubSubClient, ExceedTopicLimit)
 
 TEST(TwitchPubSubClient, ExceedTopicLimitSingleStep)
 {
-    FTest pubSub("", 1s);
+    MockApplication a("", 1s);
+    auto &pubSub = a.pubSub;
 
     pubSub.start();
 
@@ -268,7 +300,8 @@ TEST(TwitchPubSubClient, ExceedTopicLimitSingleStep)
 
 TEST(TwitchPubSubClient, ModeratorActionsUserBanned)
 {
-    FTest pubSub("/moderator-actions-user-banned", 1s);
+    MockApplication a("/moderator-actions-user-banned", 1s);
+    auto &pubSub = a.pubSub;
 
     pubSub.start();
 
@@ -311,7 +344,8 @@ TEST(TwitchPubSubClient, ModeratorActionsUserBanned)
 TEST(TwitchPubSubClient, MissingToken)
 {
     // The token that's required is "xD"
-    FTest pubSub("/authentication-required", 1s, "");
+    MockApplication a("/authentication-required", 1s, "");
+    auto &pubSub = a.pubSub;
 
     pubSub.start();
 
@@ -336,7 +370,8 @@ TEST(TwitchPubSubClient, MissingToken)
 TEST(TwitchPubSubClient, WrongToken)
 {
     // The token that's required is "xD"
-    FTest pubSub("/authentication-required", 1s);
+    MockApplication a("/authentication-required", 1s);
+    auto &pubSub = a.pubSub;
 
     pubSub.start();
 
@@ -361,7 +396,8 @@ TEST(TwitchPubSubClient, WrongToken)
 TEST(TwitchPubSubClient, CorrectToken)
 {
     // The token that's required is "xD"
-    FTest pubSub("/authentication-required", 1s, "xD");
+    MockApplication a("/authentication-required", 1s, "xD");
+    auto &pubSub = a.pubSub;
 
     pubSub.start();
 
@@ -385,7 +421,8 @@ TEST(TwitchPubSubClient, CorrectToken)
 
 TEST(TwitchPubSubClient, AutoModMessageHeld)
 {
-    FTest pubSub("/automod-held", 1s);
+    MockApplication a("/automod-held", 1s);
+    auto &pubSub = a.pubSub;
 
     pubSub.start();
 

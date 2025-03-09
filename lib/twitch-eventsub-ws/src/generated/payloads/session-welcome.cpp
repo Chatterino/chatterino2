@@ -42,8 +42,23 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
         return id.error();
     }
 
+    std::optional<std::string> reconnectURL = std::nullopt;
+    const auto *jvreconnectURL = root.if_contains("reconnect_url");
+    if (jvreconnectURL != nullptr && !jvreconnectURL->is_null())
+    {
+        auto treconnectURL =
+            boost::json::try_value_to<std::string>(*jvreconnectURL);
+
+        if (treconnectURL.has_error())
+        {
+            return treconnectURL.error();
+        }
+        reconnectURL = std::move(treconnectURL.value());
+    }
+
     return Payload{
         .id = std::move(id.value()),
+        .reconnectURL = std::move(reconnectURL),
     };
 }
 

@@ -15,6 +15,10 @@
 #include "util/AttachToConsole.hpp"
 #include "util/IpcQueue.hpp"
 
+#ifdef Q_OS_MACOS
+#    include "util/MacOsHelpers.h"
+#endif
+
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QMessageBox>
@@ -73,6 +77,9 @@ int main(int argc, char **argv)
     // run in gui mode or browser extension host mode
     if (args.shouldRunBrowserExtensionHost)
     {
+#ifdef Q_OS_MACOS
+        ::chatterinoSetMacOsActivationPolicyProhibited();
+#endif
         runBrowserExtensionHost();
     }
     else if (args.printVersion)

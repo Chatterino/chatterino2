@@ -107,8 +107,9 @@ public:
     MessageBuilder(SystemMessageTag, const QString &text,
                    const QTime &time = QTime::currentTime());
     MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
-                   const QString &sourceUser, const QString &systemMessageText,
-                   int times, const QDateTime &time);
+                   const QString &sourceUser, const QString &channel,
+                   const QString &systemMessageText, uint32_t times,
+                   const QDateTime &time);
     MessageBuilder(TimeoutMessageTag, const QString &username,
                    const QString &durationInSeconds, bool multipleTimes,
                    const QDateTime &time);

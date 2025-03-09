@@ -1,5 +1,6 @@
 #include "common/Literals.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/highlights/HighlightController.hpp"
 #include "lib/Snapshot.hpp"
 #include "messages/Message.hpp"
 #include "mocks/BaseApplication.hpp"
@@ -62,12 +63,129 @@ const std::map<QString, std::string_view, QCompareCaseInsensitive>
             "cost": 0
         })",
         },
+        {
+            "automod-message-hold",
+            R"({
+            "id": "a3122e32-6498-4847-8675-109b9b94f29c",
+            "status": "enabled",
+            "type": "automod.message.hold",
+            "version": "2",
+            "condition": {
+                "broadcaster_user_id": "489584266",
+                "moderator_user_id": "489584266"
+            },
+            "transport": {
+                "method":"websocket",
+                "session_id":"AgoQ59RRLw0mS6S000QtK8f54BIGY2VsbC1j"
+            },
+            "created_at": "2025-02-28T15:55:37.85489173Z",
+            "cost": 0
+        })",
+        },
+        {
+            "automod-message-update",
+            R"({
+            "id": "a3122e32-6498-4847-8675-109b9b94f29c",
+            "status": "enabled",
+            "type": "automod.message.update",
+            "version": "2",
+            "condition": {
+                "broadcaster_user_id": "489584266",
+                "moderator_user_id": "489584266"
+            },
+            "transport": {
+                "method":"websocket",
+                "session_id":"AgoQ59RRLw0mS6S000QtK8f54BIGY2VsbC1j"
+            },
+            "created_at": "2025-02-28T15:55:37.85489173Z",
+            "cost": 0
+        })",
+        },
+        {
+            "channel-suspicious-user-message",
+            R"({
+            "id": "a3122e32-6498-4847-8675-109b9b94f29c",
+            "status": "enabled",
+            "type": "channel.suspicious_user.message",
+            "version": "1",
+            "condition": {
+                "broadcaster_user_id": "489584266",
+                "moderator_user_id": "489584266"
+            },
+            "transport": {
+                "method":"websocket",
+                "session_id":"AgoQ59RRLw0mS6S000QtK8f54BIGY2VsbC1j"
+            },
+            "created_at": "2025-02-28T15:55:37.85489173Z",
+            "cost": 0
+        })",
+        },
+        {
+            "channel-suspicious-user-update",
+            R"({
+            "id": "a3122e32-6498-4847-8675-109b9b94f29c",
+            "status": "enabled",
+            "type": "channel.suspicious_user.update",
+            "version": "1",
+            "condition": {
+                "broadcaster_user_id": "489584266",
+                "moderator_user_id": "489584266"
+            },
+            "transport": {
+                "method":"websocket",
+                "session_id":"AgoQ59RRLw0mS6S000QtK8f54BIGY2VsbC1j"
+            },
+            "created_at": "2025-02-28T15:55:37.85489173Z",
+            "cost": 0
+        })",
+        },
+        {
+            "channel-chat-user-message-hold",
+            R"({
+            "id": "a3122e32-6498-4847-8675-109b9b94f29c",
+            "status": "enabled",
+            "type": "channel.chat.user_message_hold",
+            "version": "1",
+            "condition": {
+                "broadcaster_user_id": "11148817",
+                "moderator_user_id": "489584266"
+            },
+            "transport": {
+                "method":"websocket",
+                "session_id":"AgoQ59RRLw0mS6S000QtK8f54BIGY2VsbC1j"
+            },
+            "created_at": "2025-02-28T15:55:37.85489173Z",
+            "cost": 0
+        })",
+        },
+        {
+            "channel-chat-user-message-update",
+            R"({
+            "id": "a3122e32-6498-4847-8675-109b9b94f29c",
+            "status": "enabled",
+            "type": "channel.chat.user_message_update",
+            "version": "1",
+            "condition": {
+                "broadcaster_user_id": "11148817",
+                "moderator_user_id": "489584266"
+            },
+            "transport": {
+                "method":"websocket",
+                "session_id":"AgoQ59RRLw0mS6S000QtK8f54BIGY2VsbC1j"
+            },
+            "created_at": "2025-02-28T15:55:37.85489173Z",
+            "cost": 0
+        })",
+        },
     };
 
 class MockApplication : public mock::BaseApplication
 {
 public:
-    MockApplication() = default;
+    MockApplication()
+        : highlights(this->settings, &this->accounts)
+    {
+    }
 
     ILogging *getChatLogger() override
     {
@@ -84,9 +202,15 @@ public:
         return &this->accounts;
     }
 
+    HighlightController *getHighlights() override
+    {
+        return &this->highlights;
+    }
+
     mock::EmptyLogging logging;
     mock::MockTwitchIrcServer twitch;
     AccountController accounts;
+    HighlightController highlights;
 };
 
 std::shared_ptr<TwitchChannel> makeMockTwitchChannel(const QString &name)
@@ -96,17 +220,25 @@ std::shared_ptr<TwitchChannel> makeMockTwitchChannel(const QString &name)
 }
 
 boost::beast::flat_buffer makePayload(std::string_view subJson,
-                                      const QJsonObject &event)
+                                      QJsonObject event)
 {
     auto subscription =
         QJsonDocument::fromJson(
             QByteArray::fromRawData(subJson.data(),
                                     static_cast<qsizetype>(subJson.size())))
             .object();
+
+    QString timestamp = "2024-05-14T12:31:47.995298776Z";
+    if (event.contains("__timestamp"))
+    {
+        timestamp = event["__timestamp"].toString();
+        event.remove("__timestamp");
+    }
+
     QJsonObject metadata{
         {"message_id", "e8edc592-5550-4aa5-bba6-39e31a2be435"},
         {"message_type", "notification"},
-        {"message_timestamp", "2024-05-14T12:31:47.995298776Z"},
+        {"message_timestamp", timestamp},
         {"subscription_type", subscription["type"]},
         {"subscription_version", subscription["version"]},
     };
@@ -166,13 +298,35 @@ TEST_P(TestEventSubMessagesP, Run)
     auto subscription = SUBSCRIPTIONS.find(subcategory);
     ASSERT_NE(subscription, SUBSCRIPTIONS.end()) << subcategory;
 
-    auto json = makePayload(subscription->second, snapshot->input().toObject());
+    QJsonArray input{snapshot->input()};
+    if (snapshot->input().isArray())
+    {
+        input = snapshot->input().toArray();
+    }
 
-    std::unique_ptr<eventsub::lib::Listener> listener =
-        std::make_unique<eventsub::Connection>();
-    auto ec = eventsub::lib::handleMessage(listener, json);
-    ASSERT_FALSE(ec.failed())
-        << ec.what() << ec.message() << ec.location().to_string();
+    for (const auto inputRef : input)
+    {
+        auto inputObj = inputRef.toObject();
+
+        // "__subscription" overrides the subscription type the message is built
+        // as. By default, the subcategory (directory) name is used.
+        auto eventSubscription = subscription;
+        if (inputObj.contains(u"__subscription"))
+        {
+            eventSubscription =
+                SUBSCRIPTIONS.find(inputObj[u"__subscription"].toString());
+            ASSERT_NE(eventSubscription, SUBSCRIPTIONS.end());
+            inputObj.remove("__subscription");
+        }
+
+        auto json = makePayload(eventSubscription->second, inputObj);
+
+        std::unique_ptr<eventsub::lib::Listener> listener =
+            std::make_unique<eventsub::Connection>();
+        auto ec = eventsub::lib::handleMessage(listener, json);
+        ASSERT_FALSE(ec.failed())
+            << ec.what() << ec.message() << ec.location().to_string();
+    }
 
     auto messages = mainChannel->getMessageSnapshot();
     QJsonArray output;

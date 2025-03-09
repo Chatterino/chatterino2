@@ -1,0 +1,163 @@
+{
+    "input": {
+        "action": "slowoff",
+        "automod_terms": null,
+        "ban": null,
+        "broadcaster_user_id": "11148817",
+        "broadcaster_user_login": "pajlada",
+        "broadcaster_user_name": "pajlada",
+        "delete": null,
+        "followers": null,
+        "mod": null,
+        "moderator_user_id": "129546453",
+        "moderator_user_login": "nerixyz",
+        "moderator_user_name": "nerixyz",
+        "raid": null,
+        "shared_chat_ban": null,
+        "shared_chat_delete": null,
+        "shared_chat_timeout": null,
+        "shared_chat_unban": null,
+        "shared_chat_untimeout": null,
+        "slow": null,
+        "source_broadcaster_user_id": null,
+        "source_broadcaster_user_login": null,
+        "source_broadcaster_user_name": null,
+        "timeout": null,
+        "unban": null,
+        "unban_request": null,
+        "unmod": null,
+        "unraid": null,
+        "untimeout": null,
+        "unvip": null,
+        "vip": null,
+        "warn": null
+    },
+    "output": [
+        {
+            "badgeInfos": {
+            },
+            "badges": [
+            ],
+            "channelName": "",
+            "count": 1,
+            "displayName": "",
+            "elements": [
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "12:31"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "12:31:47",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "color": "Text",
+                    "fallbackColor": "System",
+                    "flags": "Text|Mention",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "MentionElement",
+                    "userColor": "System",
+                    "userLoginName": "nerixyz",
+                    "words": [
+                        "nerixyz"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "turned"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "off"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "slow"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "mode."
+                    ]
+                }
+            ],
+            "flags": "System|EventSub",
+            "id": "",
+            "localizedName": "",
+            "loginName": "nerixyz",
+            "messageText": "nerixyz turned off slow mode. ",
+            "searchText": "nerixyz turned off slow mode. ",
+            "serverReceivedTime": "2024-05-14T12:31:47Z",
+            "timeoutUser": "",
+            "userID": "",
+            "usernameColor": "#ff000000"
+        }
+    ]
+}

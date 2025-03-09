@@ -76,6 +76,10 @@ public:
     NetworkRequest json(const QJsonDocument &document) &&;
     NetworkRequest json(const QByteArray &payload) &&;
 
+#ifndef NDEBUG
+    NetworkRequest ignoreSslErrors(bool ignore) &&;
+#endif
+
     void execute();
 
 private:

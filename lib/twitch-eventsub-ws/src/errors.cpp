@@ -27,6 +27,8 @@ std::string ApplicationErrorCategory::message(int ev) const
             return "No message handler found"s;
         case Kind::UnknownVariant:
             return "Unknown variant value"s;
+        case Kind::BadTimeFormat:
+            return "Bad time format"s;
     }
 
     assert(false);

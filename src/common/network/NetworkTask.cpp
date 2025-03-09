@@ -61,6 +61,16 @@ void NetworkTask::run()
 
     QObject::connect(this->reply_, &QNetworkReply::finished, this,
                      &NetworkTask::finished);
+
+#ifndef NDEBUG
+    if (this->data_->ignoreSslErrors)
+    {
+        QObject::connect(this->reply_, &QNetworkReply::sslErrors, this,
+                         [this](const auto &errors) {
+                             this->reply_->ignoreSslErrors(errors);
+                         });
+    }
+#endif
 }
 
 QNetworkReply *NetworkTask::createReply()

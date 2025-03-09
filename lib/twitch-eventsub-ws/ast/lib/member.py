@@ -55,17 +55,15 @@ def _is_trivially_copyable(type: clang.cindex.Type) -> bool:
     return _is_chrono_like_type(type)
 
 
-def _has_no_fields(type: clang.cindex.Type) -> bool:
-    for _ in type.get_fields():
-        return False
-    return True
-
-
 @dataclass
 class VariantType:
     name: str
     trivial: bool
     empty: bool
+
+    @property
+    def id(self) -> str:
+        return self.name.replace(":", "")
 
 
 class Member:
@@ -87,9 +85,18 @@ class Member:
 
         self.dont_fail_on_deserialization: bool = False
 
+        self._infer_tags()
+
+    def _infer_tags(self) -> None:
+        match self.type_name:
+            case "std::chrono::system_clock::time_point":
+                assert self.tag is None
+                self.tag = "AsISO8601"
+
     def apply_comment_commands(self, comment_commands: CommentCommands) -> None:
         self.json_name = comment_commands.apply_name_transform(self.json_name)
-        self.tag = comment_commands.tag
+        if comment_commands.tag is not None:
+            self.tag = comment_commands.tag
         self.dont_fail_on_deserialization = comment_commands.dont_fail_on_deserialization
 
     @staticmethod
@@ -179,7 +186,7 @@ class Member:
                 VariantType(
                     name=name,
                     trivial=_is_trivially_copyable(inner),
-                    empty=_has_no_fields(inner),
+                    empty=inner.get_size() <= 1,
                 )
             )
 

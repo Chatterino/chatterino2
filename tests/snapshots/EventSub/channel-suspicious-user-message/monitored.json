@@ -1,0 +1,30 @@
+{
+    "input": {
+        "ban_evasion_evaluation": "unknown",
+        "broadcaster_user_id": "11148817",
+        "broadcaster_user_login": "pajlada",
+        "broadcaster_user_name": "pajlada",
+        "low_trust_status": "monitored",
+        "message": {
+            "fragments": [
+                {
+                    "cheermote": null,
+                    "emote": null,
+                    "text": "FeelsDankMan",
+                    "type": "text"
+                }
+            ],
+            "message_id": "4715b69c-a147-4ff8-bbb5-7c830544d809",
+            "text": "FeelsDankMan"
+        },
+        "shared_ban_channel_ids": null,
+        "types": [
+            "manually_added"
+        ],
+        "user_id": "129546453",
+        "user_login": "nerixyz",
+        "user_name": "nerixyz"
+    },
+    "output": [
+    ]
+}

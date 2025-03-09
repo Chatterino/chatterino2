@@ -78,11 +78,9 @@ struct Event {
     bool isPermanent;
 
     // Time point when the timeout or ban took place
-    /// json_tag=AsISO8601
     std::chrono::system_clock::time_point bannedAt;
 
     // Time point when the timeout will end
-    /// json_tag=AsISO8601
     std::optional<std::chrono::system_clock::time_point> endsAt;
 
     // Returns the duration of the timeout

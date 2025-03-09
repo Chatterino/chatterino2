@@ -1,0 +1,41 @@
+{
+    "input": {
+        "automod": {
+            "boundaries": [
+                {
+                    "end_pos": 2,
+                    "start_pos": 0
+                }
+            ],
+            "category": "swearing",
+            "level": 4
+        },
+        "blocked_term": null,
+        "broadcaster_user_id": "11148817",
+        "broadcaster_user_login": "pajlada",
+        "broadcaster_user_name": "pajlada",
+        "held_at": "2025-02-28T16:15:15.008668809Z",
+        "message": {
+            "fragments": [
+                {
+                    "cheermote": null,
+                    "emote": null,
+                    "text": "ass",
+                    "type": "text"
+                }
+            ],
+            "text": "ass"
+        },
+        "message_id": "19d067ff-89b5-4790-a720-97599894eb6b",
+        "moderator_user_id": "489584266",
+        "moderator_user_login": "uint128",
+        "moderator_user_name": "uint128",
+        "reason": "automod",
+        "status": "approved",
+        "user_id": "129546453",
+        "user_login": "nerixyz",
+        "user_name": "nerixyz"
+    },
+    "output": [
+    ]
+}
