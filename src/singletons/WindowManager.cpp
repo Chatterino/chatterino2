@@ -34,16 +34,35 @@
 #include <chrono>
 #include <optional>
 
-namespace chatterino {
 namespace {
 
-    std::optional<bool> &shouldMoveOutOfBoundsWindow()
+std::optional<bool> &shouldMoveOutOfBoundsWindow()
+{
+    static std::optional<bool> x;
+    return x;
+}
+
+void closeWindowsRecursive(QWidget *window)
+{
+    if (window->isWindow() && window->isVisible())
     {
-        static std::optional<bool> x;
-        return x;
+        window->close();
     }
 
+    for (auto *child : window->children())
+    {
+        if (child->isWidgetType())
+        {
+            // We check if it's a widget above
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-static-cast-downcast)
+            closeWindowsRecursive(static_cast<QWidget *>(child));
+        }
+    }
+}
+
 }  // namespace
+
+namespace chatterino {
 
 const QString WindowManager::WINDOW_LAYOUT_FILENAME(
     QStringLiteral("window-layout.json"));
@@ -782,7 +801,7 @@ void WindowManager::closeAll()
 
     for (Window *window : windows_)
     {
-        window->close();
+        closeWindowsRecursive(window);
     }
 }
 
