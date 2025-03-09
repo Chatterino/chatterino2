@@ -1,4 +1,7 @@
-#include <QtSystemDetection>
+#include <QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+#    include <QtSystemDetection>
+#endif
 
 #if defined(Q_OS_UNIX)
 
@@ -7,6 +10,7 @@
 
 #    include <QPointer>
 #    include <sys/socket.h>
+#    include <unistd.h>
 
 #    include <csignal>
 #    include <unordered_map>
