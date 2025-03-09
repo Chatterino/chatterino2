@@ -145,7 +145,7 @@ public:
     /// nor IrcChannel.
     /// It's **not** equal to the channel passed in #setChannel().
     /// @see #underlyingChannel()
-    ChannelPtr channel();
+    ChannelPtr channel() const;
 
     /// @brief The channel this view displays messages for
     ///

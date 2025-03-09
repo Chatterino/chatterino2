@@ -904,8 +904,10 @@ LimitedQueueSnapshot<MessageLayoutPtr> &ChannelView::getMessagesSnapshot()
     return this->snapshot_;
 }
 
-ChannelPtr ChannelView::channel()
+ChannelPtr ChannelView::channel() const
 {
+    assert(this->channel_ != nullptr);
+
     return this->channel_;
 }
 
