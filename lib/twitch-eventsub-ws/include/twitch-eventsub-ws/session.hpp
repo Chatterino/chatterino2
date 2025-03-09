@@ -17,17 +17,6 @@ namespace chatterino::eventsub::lib {
 
 class Listener;
 
-/**
- * handleMessage takes the incoming message in the buffer, parses it
- * as JSON then forwards it to the listener, if applicable.
- *
- * This is called from the Session, and is only provided if you are interested
- * in building your own boost asio framework thing
- **/
-boost::system::error_code handleMessage(
-    std::unique_ptr<Listener> &listener,
-    const boost::beast::flat_buffer &buffer);
-
 class Session : public std::enable_shared_from_this<Session>
 {
 public:
@@ -43,6 +32,10 @@ public:
     void close();
 
     Listener *getListener();
+
+    // public for testing
+    boost::system::error_code handleMessage(
+        const boost::beast::flat_buffer &buffer);
 
 private:
     void onResolve(boost::beast::error_code ec,
@@ -61,9 +54,6 @@ private:
     void onClose(boost::beast::error_code ec);
 
     void fail(boost::beast::error_code ec, std::string_view op);
-
-    boost::system::error_code handleMessage(
-        const boost::beast::flat_buffer &buffer);
 
     boost::system::error_code onSessionWelcome(
         const messages::Metadata &metadata, const boost::json::value &jv);
