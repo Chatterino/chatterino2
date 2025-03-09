@@ -22,10 +22,9 @@ public:
 Q_SIGNALS:
     void signalFired();
 
-private Q_SLOTS:
+private:
     void handleSignal();
 
-private:
     std::array<int, 2> fd{};
     QSocketNotifier *socketNotifier;
 };
