@@ -30,14 +30,72 @@ namespace chatterino {
 
 using namespace literals;
 
-TwitchAccount::TwitchAccount(const QString &username, const QString &oauthToken,
-                             const QString &oauthClient, const QString &userID)
+std::optional<TwitchAccountData> TwitchAccountData::loadRaw(
+    const std::string &key)
+{
+    auto username = QStringSetting::get("/accounts/" + key + "/username");
+    auto userID = QStringSetting::get("/accounts/" + key + "/userID");
+    auto clientID = QStringSetting::get("/accounts/" + key + "/clientID");
+    auto oauthToken = QStringSetting::get("/accounts/" + key + "/oauthToken");
+
+    if (username.isEmpty() || userID.isEmpty() || clientID.isEmpty() ||
+        oauthToken.isEmpty())
+    {
+        return std::nullopt;
+    }
+
+    auto accountType = EnumStringSetting<TwitchAccount::Type>::get(
+        "/accounts/" + key + "/accountType",
+        TwitchAccount::Type::ImplicitGrant);
+    auto refreshToken =
+        QStringSetting::get("/accounts/" + key + "/refreshToken");
+    auto expiresAtStr = QStringSetting::get("/accounts/" + key + "/expiresAt");
+    QDateTime expiresAt;
+    if (accountType == TwitchAccount::Type::DeviceAuth)
+    {
+        expiresAt = QDateTime::fromString(expiresAtStr, Qt::ISODate);
+    }
+
+    return TwitchAccountData{
+        .username = username.trimmed(),
+        .userID = userID.trimmed(),
+        .clientID = clientID.trimmed(),
+        .oauthToken = oauthToken.trimmed(),
+        .ty = accountType,
+        .refreshToken = refreshToken,
+        .expiresAt = expiresAt,
+    };
+}
+
+void TwitchAccountData::save() const
+{
+    using QStringSetting = pajlada::Settings::Setting<QString>;
+
+    auto basePath = "/accounts/uid" + this->userID.toStdString();
+    QStringSetting::set(basePath + "/username", this->username);
+    QStringSetting::set(basePath + "/userID", this->userID);
+    QStringSetting::set(basePath + "/clientID", this->clientID);
+    QStringSetting::set(basePath + "/oauthToken", this->oauthToken);
+    EnumStringSetting<TwitchAccount::Type>::set(basePath + "/accountType",
+                                                this->ty);
+    QStringSetting::set(basePath + "/refreshToken", this->refreshToken);
+    if (this->ty == TwitchAccount::Type::DeviceAuth)
+    {
+        QStringSetting::set(basePath + "/expiresAt",
+                            this->expiresAt.toString(Qt::ISODate));
+    }
+}
+
+TwitchAccount::TwitchAccount(const TwitchAccountData &data)
     : Account(ProviderId::Twitch)
-    , oauthClient_(oauthClient)
-    , oauthToken_(oauthToken)
-    , userName_(username)
-    , userId_(userID)
-    , isAnon_(username == ANONYMOUS_USERNAME)
+    , oauthClient_(data.clientID)
+    , oauthToken_(data.oauthToken)
+    , userName_(data.username)
+    , userId_(data.userID)
+    , type_(data.ty)
+    , refreshToken_(data.refreshToken)
+    , expiresAt_(data.expiresAt)
+    , isAnon_(data.username == ANONYMOUS_USERNAME)
     , emoteSets_(std::make_shared<TwitchEmoteSetMap>())
     , emotes_(std::make_shared<EmoteMap>())
 {
@@ -70,6 +128,21 @@ const QString &TwitchAccount::getUserId() const
     return this->userId_;
 }
 
+const QString &TwitchAccount::refreshToken() const
+{
+    return this->refreshToken_;
+}
+
+const QDateTime &TwitchAccount::expiresAt() const
+{
+    return this->expiresAt_;
+}
+
+TwitchAccount::Type TwitchAccount::type() const
+{
+    return this->type_;
+}
+
 QColor TwitchAccount::color()
 {
     return this->color_.get();
@@ -80,28 +153,39 @@ void TwitchAccount::setColor(QColor color)
     this->color_.set(std::move(color));
 }
 
-bool TwitchAccount::setOAuthClient(const QString &newClientID)
+bool TwitchAccount::setData(const TwitchAccountData &data)
 {
-    if (this->oauthClient_.compare(newClientID) == 0)
+    assert(this->userName_ == data.username && this->userId_ == data.userID);
+
+    bool anyUpdate = false;
+
+    if (this->oauthToken_ != data.oauthToken)
     {
-        return false;
+        this->oauthToken_ = data.oauthToken;
+        anyUpdate = true;
+    }
+    if (this->oauthClient_ != data.clientID)
+    {
+        this->oauthClient_ = data.clientID;
+        anyUpdate = true;
+    }
+    if (this->refreshToken_ != data.refreshToken)
+    {
+        this->refreshToken_ = data.refreshToken;
+        anyUpdate = true;
+    }
+    if (this->expiresAt_ != data.expiresAt)
+    {
+        this->expiresAt_ = data.expiresAt;
+        anyUpdate = true;
+    }
+    if (this->type_ != data.ty)
+    {
+        this->type_ = data.ty;
+        anyUpdate = true;
     }
 
-    this->oauthClient_ = newClientID;
-
-    return true;
-}
-
-bool TwitchAccount::setOAuthToken(const QString &newOAuthToken)
-{
-    if (this->oauthToken_.compare(newOAuthToken) == 0)
-    {
-        return false;
-    }
-
-    this->oauthToken_ = newOAuthToken;
-
-    return true;
+    return anyUpdate;
 }
 
 bool TwitchAccount::isAnon() const

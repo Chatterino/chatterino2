@@ -12,6 +12,7 @@
 #include <boost/unordered/unordered_flat_map_fwd.hpp>
 #include <pajlada/signals.hpp>
 #include <QColor>
+#include <QDateTime>
 #include <QElapsedTimer>
 #include <QObject>
 #include <QString>
@@ -26,11 +27,41 @@ namespace chatterino {
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 
+struct TwitchAccountData;
+
 class TwitchAccount : public Account
 {
 public:
-    TwitchAccount(const QString &username, const QString &oauthToken_,
-                  const QString &oauthClient_, const QString &_userID);
+    enum class Type : uint32_t {
+        /// Tokens as obtained from https://dev.twitch.tv/docs/authentication/getting-tokens-oauth/#implicit-grant-flow
+        ImplicitGrant,
+        /// Tokens as obtained from https://dev.twitch.tv/docs/authentication/getting-tokens-oauth/#device-code-grant-flow
+        DeviceAuth,
+    };
+    struct TwitchEmote {
+        EmoteId id;
+        EmoteName name;
+    };
+
+    struct EmoteSet {
+        QString key;
+        QString channelName;
+        QString channelID;
+        QString text;
+        bool subscriber{false};
+        bool local{false};
+        std::vector<TwitchEmote> emotes;
+    };
+
+    struct TwitchAccountEmoteData {
+        std::vector<std::shared_ptr<EmoteSet>> emoteSets;
+
+        // this EmoteMap should contain all emotes available globally
+        // excluding locally available emotes, such as follower ones
+        EmoteMap emotes;
+    };
+
+    TwitchAccount(const TwitchAccountData &data);
     ~TwitchAccount() override;
     TwitchAccount(const TwitchAccount &) = delete;
     TwitchAccount(TwitchAccount &&) = delete;
@@ -43,6 +74,9 @@ public:
     const QString &getOAuthToken() const;
     const QString &getOAuthClient() const;
     const QString &getUserId() const;
+    [[nodiscard]] const QString &refreshToken() const;
+    [[nodiscard]] const QDateTime &expiresAt() const;
+    [[nodiscard]] Type type() const;
 
     /**
      * The Seventv user-id of the current user. 
@@ -53,13 +87,10 @@ public:
     QColor color();
     void setColor(QColor color);
 
-    // Attempts to update the users OAuth Client ID
-    // Returns true if the value has changed, otherwise false
-    bool setOAuthClient(const QString &newClientID);
-
-    // Attempts to update the users OAuth Token
-    // Returns true if the value has changed, otherwise false
-    bool setOAuthToken(const QString &newOAuthToken);
+    /// Attempts to update the account data
+    /// @pre The name and userID must match this account.
+    /// @returns true if the value has changed, otherwise false
+    bool setData(const TwitchAccountData &data);
 
     bool isAnon() const;
 
@@ -112,6 +143,9 @@ private:
     QString oauthToken_;
     QString userName_;
     QString userId_;
+    Type type_ = Type::ImplicitGrant;
+    QString refreshToken_;
+    QDateTime expiresAt_;
     const bool isAnon_;
     Atomic<QColor> color_;
 
@@ -126,6 +160,19 @@ private:
     UniqueAccess<std::shared_ptr<const EmoteMap>> emotes_;
 
     QString seventvUserID_;
+};
+
+struct TwitchAccountData {
+    QString username;
+    QString userID;
+    QString clientID;
+    QString oauthToken;
+    TwitchAccount::Type ty = TwitchAccount::Type::ImplicitGrant;
+    QString refreshToken;
+    QDateTime expiresAt;
+
+    static std::optional<TwitchAccountData> loadRaw(const std::string &key);
+    void save() const;
 };
 
 }  // namespace chatterino

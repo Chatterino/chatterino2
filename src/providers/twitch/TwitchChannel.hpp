@@ -37,6 +37,7 @@ struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 class EmoteMap;
 
+class TwitchAccount;
 class TwitchBadges;
 class FfzEmotes;
 class BttvEmotes;
@@ -352,6 +353,9 @@ private:
     void loadRecentMessagesReconnect();
     void cleanUpReplyThreads();
     void showLoginMessage();
+
+    void refreshTwitchChannelEmotesFor(
+        const std::shared_ptr<TwitchAccount> &account, bool manualRefresh);
 
     /// roomIdChanged is called whenever this channel's ID has been changed
     /// This should only happen once per channel, whenever the ID goes from unset to set

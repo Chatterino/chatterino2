@@ -8,7 +8,7 @@
 #include "mocks/TwitchIrcServer.hpp"
 #include "providers/twitch/eventsub/Connection.hpp"
 #include "Test.hpp"
-#include "util/QCompareCaseInsensitive.hpp"
+#include "util/QCompareTransparent.hpp"
 
 #include <QString>
 

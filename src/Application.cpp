@@ -252,7 +252,9 @@ void Application::initialize(Settings &settings, const Paths &paths)
 
     // XXX: Loading Twitch badges after Helix has been initialized, which only happens after
     // the AccountController initialize has been called
-    this->twitchBadges->loadTwitchBadges();
+    this->accounts->twitch.requestCurrent([this](const auto &) {
+        this->twitchBadges->loadTwitchBadges();
+    });
 
 #ifdef CHATTERINO_HAVE_PLUGINS
     this->plugins->initialize(settings);
@@ -287,7 +289,9 @@ void Application::initialize(Settings &settings, const Paths &paths)
     {
         this->initNm(paths);
     }
-    this->twitchPubSub->initialize();
+    this->accounts->twitch.requestCurrent([this](const auto &) {
+        this->twitchPubSub->initialize();
+    });
 
     this->initBttvLiveUpdates();
     this->initSeventvEventAPI();
