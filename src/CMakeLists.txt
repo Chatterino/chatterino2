@@ -501,6 +501,8 @@ set(SOURCE_FILES
         util/ChannelHelpers.hpp
         util/Clipboard.cpp
         util/Clipboard.hpp
+        util/CustomPlayer.cpp
+        util/CustomPlayer.hpp
         util/DebugCount.cpp
         util/DebugCount.hpp
         util/DisplayBadge.cpp
@@ -763,6 +765,8 @@ if (APPLE)
     set(MACOS_BUNDLE_ICON_FILE "${CMAKE_SOURCE_DIR}/resources/chatterino.icns")
     list(APPEND SOURCE_FILES "${MACOS_BUNDLE_ICON_FILE}")
     set_source_files_properties(${MACOS_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+
+    list(APPEND SOURCE_FILES util/MacOsHelpers.mm)
 endif ()
 
 # Generate source groups for use in IDEs

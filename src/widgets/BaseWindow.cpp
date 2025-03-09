@@ -39,6 +39,8 @@
 
 namespace {
 
+using namespace chatterino;
+
 #ifdef USEWINSDK
 
 // From kHiddenTaskbarSize in Firefox
@@ -194,14 +196,29 @@ RECT windowBordersFor(HWND hwnd, bool isMaximized)
 
 #endif
 
+Qt::WindowFlags windowFlagsFor(FlagsEnum<BaseWindow::Flags> flags)
+{
+    Qt::WindowFlags out;
+    if (flags.has(BaseWindow::Dialog))
+    {
+        out.setFlag(Qt::Dialog);
+    }
+    else
+    {
+        out.setFlag(Qt::Window);
+    }
+    out.setFlag(Qt::WindowStaysOnTopHint, flags.has(BaseWindow::TopMost));
+    out.setFlag(Qt::FramelessWindowHint, flags.has(BaseWindow::Frameless));
+
+    return out;
+}
+
 }  // namespace
 
 namespace chatterino {
 
 BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
-    : BaseWidget(parent, (_flags.has(Dialog) ? Qt::Dialog : Qt::Window) |
-                             (_flags.has(TopMost) ? Qt::WindowStaysOnTopHint
-                                                  : Qt::WindowFlags()))
+    : BaseWidget(parent, windowFlagsFor(_flags))
     , enableCustomFrame_(_flags.has(EnableCustomFrame))
     , frameless_(_flags.has(Frameless))
     , flags_(_flags)
@@ -209,7 +226,6 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
     if (this->frameless_)
     {
         this->enableCustomFrame_ = false;
-        this->setWindowFlag(Qt::FramelessWindowHint);
     }
 
     if (_flags.has(DontFocus))
@@ -349,7 +365,14 @@ void BaseWindow::init()
         }
 
         this->ui_.layoutBase = new BaseWidget(this);
-        this->ui_.layoutBase->setContentsMargins(1, 0, 1, 1);
+        if (isWindows11OrGreater())
+        {
+            this->ui_.layoutBase->setContentsMargins(0, 0, 0, 0);
+        }
+        else
+        {
+            this->ui_.layoutBase->setContentsMargins(1, 0, 1, 1);
+        }
         layout->addWidget(this->ui_.layoutBase);
     }
 #endif
@@ -955,11 +978,15 @@ void BaseWindow::paintEvent(QPaintEvent *)
     this->drawCustomWindowFrame(painter);
 }
 
+float BaseWindow::desiredScale() const
+{
+    return getSettings()->getClampedUiScale();
+}
+
 void BaseWindow::updateScale()
 {
-    auto scale = this->flags_.has(DisableCustomScaling)
-                     ? 1
-                     : getSettings()->getClampedUiScale();
+    auto scale =
+        this->flags_.has(DisableCustomScaling) ? 1 : this->desiredScale();
 
     this->setScale(scale);
 
@@ -1049,8 +1076,17 @@ void BaseWindow::drawCustomWindowFrame(QPainter &painter)
             {
                 painter.setTransform(QTransform::fromScale(1 / dpr, 1 / dpr));
             }
-            painter.fillRect(1, 1, this->realBounds_.width() - 2,
-                             this->realBounds_.height() - 2, bg);
+
+            if (isWindows11OrGreater())
+            {
+                painter.fillRect(0, 0, this->realBounds_.width() - 1,
+                                 this->realBounds_.height() - 1, bg);
+            }
+            else
+            {
+                painter.fillRect(1, 1, this->realBounds_.width() - 2,
+                                 this->realBounds_.height() - 2, bg);
+            }
         }
     }
 #endif

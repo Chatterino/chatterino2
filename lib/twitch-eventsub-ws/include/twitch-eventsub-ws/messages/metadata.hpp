@@ -24,7 +24,6 @@ namespace chatterino::eventsub::lib::messages {
 struct Metadata {
     std::string messageID;
     std::string messageType;
-    /// json_tag=AsISO8601
     std::chrono::system_clock::time_point messageTimestamp;
 
     std::optional<std::string> subscriptionType;

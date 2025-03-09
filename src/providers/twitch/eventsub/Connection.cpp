@@ -3,20 +3,23 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/highlights/HighlightController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/twitch/eventsub/Controller.hpp"
 #include "providers/twitch/eventsub/MessageBuilder.hpp"
 #include "providers/twitch/eventsub/MessageHandlers.hpp"
 #include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/StreamerMode.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
 
 #include <boost/json.hpp>
-#include <qdatetime.h>
+#include <QDateTime>
 #include <twitch-eventsub-ws/listener.hpp>
 #include <twitch-eventsub-ws/session.hpp>
 
@@ -67,6 +70,19 @@ void Connection::onNotification(const lib::messages::Metadata &metadata,
     (void)metadata;
     auto jsonString = boost::json::serialize(jv);
     qCDebug(LOG) << "on notification: " << jsonString.c_str();
+}
+
+void Connection::onClose(std::unique_ptr<lib::Listener> self,
+                         const std::optional<std::string> &reconnectURL)
+{
+    auto *app = tryGetApp();
+    if (!app)
+    {
+        return;
+    }
+
+    app->getEventSub()->reconnectConnection(std::move(self), reconnectURL,
+                                            this->subscriptions);
 }
 
 void Connection::onChannelBan(
@@ -177,35 +193,191 @@ void Connection::onAutomodMessageHold(
     const lib::messages::Metadata &metadata,
     const lib::payload::automod_message_hold::v2::Payload &payload)
 {
-    (void)metadata;
-    qCDebug(LOG) << "On automod message hold for"
-                 << payload.event.broadcasterUserLogin.c_str();
+    auto *channel = dynamic_cast<TwitchChannel *>(
+        getApp()
+            ->getTwitch()
+            ->getChannelOrEmpty(payload.event.broadcasterUserLogin.qt())
+            .get());
+    if (!channel || channel->isEmpty())
+    {
+        qCDebug(LOG)
+            << "Automod message hold for broadcaster we're not interested in"
+            << payload.event.broadcasterUserLogin.qt();
+        return;
+    }
+
+    auto time = chronoToQDateTime(metadata.messageTimestamp);
+    auto header = makeAutomodHoldMessageHeader(channel, time, payload.event);
+    auto body = makeAutomodHoldMessageBody(channel, time, payload.event);
+
+    auto messageText = payload.event.message.text.qt();
+    auto userLogin = payload.event.userLogin.qt();
+
+    runInGuiThread([channel, messageText, userLogin, header, body] {
+        auto [highlighted, highlightResult] = getApp()->getHighlights()->check(
+            {}, {}, userLogin, messageText, body->flags);
+        if (highlighted)
+        {
+            MessageBuilder::triggerHighlights(
+                channel,
+                {
+                    .customSound =
+                        highlightResult.customSoundUrl.value_or<QUrl>({}),
+                    .playSound = highlightResult.playSound,
+                    .windowAlert = highlightResult.alert,
+                });
+        }
+
+        channel->addMessage(header, MessageContext::Original);
+        channel->addMessage(body, MessageContext::Original);
+
+        getApp()->getTwitch()->getAutomodChannel()->addMessage(
+            header, MessageContext::Original);
+        getApp()->getTwitch()->getAutomodChannel()->addMessage(
+            body, MessageContext::Original);
+
+        if (getSettings()->showAutomodInMentions)
+        {
+            getApp()->getTwitch()->getMentionsChannel()->addMessage(
+                header, MessageContext::Original);
+            getApp()->getTwitch()->getMentionsChannel()->addMessage(
+                body, MessageContext::Original);
+        }
+    });
 }
 void Connection::onAutomodMessageUpdate(
-    const lib::messages::Metadata &metadata,
+    const lib::messages::Metadata & /*metadata*/,
     const lib::payload::automod_message_update::v2::Payload &payload)
 {
-    (void)metadata;
-    qCDebug(LOG) << "On automod message update for"
-                 << payload.event.broadcasterUserLogin.c_str();
+    auto *channel = dynamic_cast<TwitchChannel *>(
+        getApp()
+            ->getTwitch()
+            ->getChannelOrEmpty(payload.event.broadcasterUserLogin.qt())
+            .get());
+    if (!channel || channel->isEmpty())
+    {
+        qCDebug(LOG)
+            << "Automod message hold for broadcaster we're not interested in"
+            << payload.event.broadcasterUserLogin.qt();
+        return;
+    }
+
+    // Gray out approve/deny button upon "ALLOWED" and "DENIED" statuses
+    // They are versions of automod_message_(denied|approved) but for mods.
+    auto id = "automod_" + payload.event.messageID.qt();
+    runInGuiThread([channel, id] {
+        channel->disableMessage(id);
+    });
 }
 
 void Connection::onChannelSuspiciousUserMessage(
     const lib::messages::Metadata &metadata,
     const lib::payload::channel_suspicious_user_message::v1::Payload &payload)
 {
-    (void)metadata;
-    qCDebug(LOG) << "On channel suspicious user message for"
-                 << payload.event.broadcasterUserLogin.c_str();
+    // monitored chats are received over irc; in the future, we will use eventsub instead
+    if (payload.event.lowTrustStatus !=
+        lib::suspicious_users::Status::Restricted)
+    {
+        return;
+    }
+
+    auto *channel = dynamic_cast<TwitchChannel *>(
+        getApp()
+            ->getTwitch()
+            ->getChannelOrEmpty(payload.event.broadcasterUserLogin.qt())
+            .get());
+    if (!channel || channel->isEmpty())
+    {
+        qCDebug(LOG)
+            << "Suspicious message for broadcaster we're not interested in"
+            << payload.event.broadcasterUserLogin.qt();
+        return;
+    }
+
+    auto time = chronoToQDateTime(metadata.messageTimestamp);
+    auto header = makeSuspiciousUserMessageHeader(channel, time, payload.event);
+    auto body = makeSuspiciousUserMessageBody(channel, time, payload.event);
+
+    runInGuiThread([channel, header, body] {
+        channel->addMessage(header, MessageContext::Original);
+        channel->addMessage(body, MessageContext::Original);
+    });
 }
 
 void Connection::onChannelSuspiciousUserUpdate(
     const lib::messages::Metadata &metadata,
     const lib::payload::channel_suspicious_user_update::v1::Payload &payload)
 {
-    (void)metadata;
-    qCDebug(LOG) << "On channel suspicious user update for"
-                 << payload.event.broadcasterUserLogin.c_str();
+    auto *channel = dynamic_cast<TwitchChannel *>(
+        getApp()
+            ->getTwitch()
+            ->getChannelOrEmpty(payload.event.broadcasterUserLogin.qt())
+            .get());
+    if (!channel || channel->isEmpty())
+    {
+        qCDebug(LOG) << "Channel Suspicious User Update for broadcaster we're "
+                        "not interested in"
+                     << payload.event.broadcasterUserLogin.qt();
+        return;
+    }
+
+    auto time = chronoToQDateTime(metadata.messageTimestamp);
+    auto message = makeSuspiciousUserUpdate(channel, time, payload.event);
+
+    runInGuiThread([channel, message] {
+        channel->addMessage(message, MessageContext::Original);
+    });
+}
+
+void Connection::onChannelChatUserMessageHold(
+    const lib::messages::Metadata &metadata,
+    const lib::payload::channel_chat_user_message_hold::v1::Payload &payload)
+{
+    auto *channel = dynamic_cast<TwitchChannel *>(
+        getApp()
+            ->getTwitch()
+            ->getChannelOrEmpty(payload.event.broadcasterUserLogin.qt())
+            .get());
+    if (!channel || channel->isEmpty())
+    {
+        qCDebug(LOG) << "Channel Chat User Message Hold for broadcaster we're "
+                        "not interested in"
+                     << payload.event.broadcasterUserLogin.qt();
+        return;
+    }
+
+    auto time = chronoToQDateTime(metadata.messageTimestamp);
+    auto message = makeUserMessageHeldMessage(channel, time, payload.event);
+
+    runInGuiThread([channel, message] {
+        channel->addMessage(message, MessageContext::Original);
+    });
+}
+
+void Connection::onChannelChatUserMessageUpdate(
+    const lib::messages::Metadata &metadata,
+    const lib::payload::channel_chat_user_message_update::v1::Payload &payload)
+{
+    auto *channel = dynamic_cast<TwitchChannel *>(
+        getApp()
+            ->getTwitch()
+            ->getChannelOrEmpty(payload.event.broadcasterUserLogin.qt())
+            .get());
+    if (!channel || channel->isEmpty())
+    {
+        qCDebug(LOG)
+            << "Channel Chat User Message Update for broadcaster we're "
+               "not interested in"
+            << payload.event.broadcasterUserLogin.qt();
+        return;
+    }
+
+    auto time = chronoToQDateTime(metadata.messageTimestamp);
+    auto message = makeUserMessageUpdateMessage(channel, time, payload.event);
+
+    runInGuiThread([channel, message] {
+        channel->addMessage(message, MessageContext::Original);
+    });
 }
 
 QString Connection::getSessionID() const
@@ -221,6 +393,11 @@ bool Connection::isSubscribedTo(const SubscriptionRequest &request) const
 void Connection::markRequestSubscribed(const SubscriptionRequest &request)
 {
     this->subscriptions.emplace(request);
+}
+
+void Connection::markRequestUnsubscribed(const SubscriptionRequest &request)
+{
+    this->subscriptions.erase(request);
 }
 
 }  // namespace chatterino::eventsub

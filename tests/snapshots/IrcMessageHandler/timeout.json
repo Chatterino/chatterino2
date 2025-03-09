@@ -73,7 +73,7 @@
                     ]
                 }
             ],
-            "flags": "System|Timeout|DoNotTriggerNotification",
+            "flags": "System|Timeout|DoNotTriggerNotification|ModerationAction",
             "id": "",
             "localizedName": "",
             "loginName": "",

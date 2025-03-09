@@ -159,16 +159,16 @@ public:
         // There is a case where a new client was initiated but not added to the clients list.
         // We just don't join the thread & let the operating system nuke the thread if joining fails
         // within 1s.
-        if (this->stoppedFlag_.waitFor(std::chrono::seconds{1}))
+        if (this->stoppedFlag_.waitFor(std::chrono::milliseconds{100}))
         {
             this->mainThread_->join();
             return;
         }
 
         qCWarning(chatterinoLiveupdates)
-            << "Thread didn't finish within 1 second, force-stop the client";
+            << "Thread didn't finish within 100ms, force-stop the client";
         this->websocketClient_.stop();
-        if (this->stoppedFlag_.waitFor(std::chrono::milliseconds{100}))
+        if (this->stoppedFlag_.waitFor(std::chrono::milliseconds{20}))
         {
             this->mainThread_->join();
             return;

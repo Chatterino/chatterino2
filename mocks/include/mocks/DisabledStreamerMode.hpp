@@ -10,6 +10,16 @@ public:
         return false;
     }
 
+    bool shouldHideModActions() const override
+    {
+        return false;
+    }
+
+    bool shouldHideSuspiciousUsers() const override
+    {
+        return false;
+    }
+
     void start() override
     {
     }

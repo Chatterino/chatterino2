@@ -333,4 +333,57 @@ QDateTime chronoToQDateTime(std::chrono::system_clock::time_point time)
     return dt;
 }
 
+QStringView codepointSlice(QStringView str, qsizetype begin, qsizetype end)
+{
+    if (end <= begin || begin < 0)
+    {
+        return {};
+    }
+
+    qsizetype n = 0;
+    const QChar *pos = str.begin();
+    const QChar *endPos = str.end();
+
+    const QChar *sliceBegin = nullptr;
+    while (n < end)
+    {
+        if (pos >= endPos)
+        {
+            return {};
+        }
+        if (n == begin)
+        {
+            sliceBegin = pos;
+        }
+
+        QChar cur = *pos++;
+        if (cur.isHighSurrogate() && pos < endPos && pos->isLowSurrogate())
+        {
+            pos++;
+        }
+        n++;
+    }
+    assert(pos <= endPos);
+
+    return {sliceBegin, pos};
+}
+
+void removeFirstQS(QString &str)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    str.removeFirst();
+#else
+    str.remove(0, 1);
+#endif
+}
+
+void removeLastQS(QString &str)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    str.removeLast();
+#else
+    str.chop(1);
+#endif
+}
+
 }  // namespace chatterino

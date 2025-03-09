@@ -2,7 +2,12 @@
 
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "twitch-eventsub-ws/payloads/automod-message-hold-v2.hpp"
+#include "twitch-eventsub-ws/payloads/channel-chat-user-message-hold-v1.hpp"
+#include "twitch-eventsub-ws/payloads/channel-chat-user-message-update-v1.hpp"
 #include "twitch-eventsub-ws/payloads/channel-moderate-v2.hpp"
+#include "twitch-eventsub-ws/payloads/channel-suspicious-user-message-v1.hpp"
+#include "twitch-eventsub-ws/payloads/channel-suspicious-user-update-v1.hpp"
 
 #include <QDateTime>
 
@@ -20,7 +25,9 @@ namespace chatterino::eventsub {
 class EventSubMessageBuilder : public MessageBuilder
 {
 public:
+    // builds a system message and adds a timestamp element
     EventSubMessageBuilder(TwitchChannel *channel, const QDateTime &time);
+    EventSubMessageBuilder(TwitchChannel *channel);
     ~EventSubMessageBuilder();
 
     EventSubMessageBuilder(const EventSubMessageBuilder &) = delete;
@@ -30,6 +37,8 @@ public:
 
     void appendUser(const lib::String &userName, const lib::String &userLogin,
                     QString &text, bool trailingSpace = true);
+
+    void setMessageAndSearchText(const QString &text);
 
 private:
     TwitchChannel *channel;
@@ -62,6 +71,12 @@ void makeModerateMessage(
     EventSubMessageBuilder &builder,
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Unban &action);
+
+/// <MODERATOR> untimedout <USER>[ in <CHANNEL>].
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Untimeout &action);
 
 /// <MODERATOR> deleted message from <USER>[ in <CHANNEL>] saying: <MESSAGE>
 void makeModerateMessage(
@@ -144,5 +159,33 @@ void makeModerateMessage(
     EventSubMessageBuilder &builder,
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Unraid &action);
+
+MessagePtr makeAutomodHoldMessageHeader(
+    TwitchChannel *channel, const QDateTime &time,
+    const lib::payload::automod_message_hold::v2::Event &event);
+
+MessagePtr makeAutomodHoldMessageBody(
+    TwitchChannel *channel, const QDateTime &time,
+    const lib::payload::automod_message_hold::v2::Event &event);
+
+MessagePtr makeSuspiciousUserMessageHeader(
+    TwitchChannel *channel, const QDateTime &time,
+    const lib::payload::channel_suspicious_user_message::v1::Event &event);
+
+MessagePtr makeSuspiciousUserMessageBody(
+    TwitchChannel *channel, const QDateTime &time,
+    const lib::payload::channel_suspicious_user_message::v1::Event &event);
+
+MessagePtr makeSuspiciousUserUpdate(
+    TwitchChannel *channel, const QDateTime &time,
+    const lib::payload::channel_suspicious_user_update::v1::Event &event);
+
+MessagePtr makeUserMessageHeldMessage(
+    TwitchChannel *channel, const QDateTime &time,
+    const lib::payload::channel_chat_user_message_hold::v1::Event &event);
+
+MessagePtr makeUserMessageUpdateMessage(
+    TwitchChannel *channel, const QDateTime &time,
+    const lib::payload::channel_chat_user_message_update::v1::Event &event);
 
 }  // namespace chatterino::eventsub

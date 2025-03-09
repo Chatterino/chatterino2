@@ -59,6 +59,7 @@ NotificationPage::NotificationPage()
                     "start menu folder if needed by live notifications."
                     "\n(On portable mode, this is disabled by "
                     "default)"));
+
                 auto openIn = settings.emplace<QHBoxLayout>().withoutMargin();
                 {
                     openIn
@@ -136,7 +137,8 @@ QComboBox *NotificationPage::createToastReactionComboBox()
 {
     QComboBox *toastReactionOptions = new QComboBox();
 
-    for (int i = 0; i <= static_cast<int>(ToastReaction::DontOpen); i++)
+    for (int i = 0; i <= static_cast<int>(ToastReaction::OpenInCustomPlayer);
+         i++)
     {
         toastReactionOptions->insertItem(
             i, Toasts::findStringFromReaction(static_cast<ToastReaction>(i)));

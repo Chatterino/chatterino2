@@ -25,7 +25,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto broadcasterUserID =
-        boost::json::try_value_to<std::string>(*jvbroadcasterUserID);
+        boost::json::try_value_to<String>(*jvbroadcasterUserID);
 
     if (broadcasterUserID.has_error())
     {
@@ -40,7 +40,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto broadcasterUserLogin =
-        boost::json::try_value_to<std::string>(*jvbroadcasterUserLogin);
+        boost::json::try_value_to<String>(*jvbroadcasterUserLogin);
 
     if (broadcasterUserLogin.has_error())
     {
@@ -55,7 +55,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     auto broadcasterUserName =
-        boost::json::try_value_to<std::string>(*jvbroadcasterUserName);
+        boost::json::try_value_to<String>(*jvbroadcasterUserName);
 
     if (broadcasterUserName.has_error())
     {
@@ -149,7 +149,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto messageID = boost::json::try_value_to<std::string>(*jvmessageID);
+    auto messageID = boost::json::try_value_to<String>(*jvmessageID);
 
     if (messageID.has_error())
     {

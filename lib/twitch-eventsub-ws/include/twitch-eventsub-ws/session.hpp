@@ -22,20 +22,8 @@ boost::system::error_code handleMessage(
     std::unique_ptr<Listener> &listener,
     const boost::beast::flat_buffer &buffer);
 
-// Sends a WebSocket message and prints the response
 class Session : public std::enable_shared_from_this<Session>
 {
-    boost::asio::ip::tcp::resolver resolver;
-    boost::beast::websocket::stream<
-        boost::beast::ssl_stream<boost::beast::tcp_stream>>
-        ws;
-    boost::beast::flat_buffer buffer;
-    std::string host;
-    std::string port;
-    std::string path;
-    std::string userAgent;
-    std::unique_ptr<Listener> listener;
-
 public:
     // Resolver and socket require an io_context
     explicit Session(boost::asio::io_context &ioc,
@@ -65,6 +53,19 @@ private:
     void onRead(boost::beast::error_code ec, std::size_t bytes_transferred);
 
     void onClose(boost::beast::error_code ec);
+
+    void fail(boost::beast::error_code ec, std::string_view op);
+
+    boost::asio::ip::tcp::resolver resolver;
+    boost::beast::websocket::stream<
+        boost::beast::ssl_stream<boost::beast::tcp_stream>>
+        ws;
+    boost::beast::flat_buffer buffer;
+    std::string host;
+    std::string port;
+    std::string path;
+    std::string userAgent;
+    std::unique_ptr<Listener> listener;
 };
 
 }  // namespace chatterino::eventsub::lib

@@ -12,6 +12,8 @@ generate_json_impls(
         include/twitch-eventsub-ws/payloads/channel-ban-v1.hpp
         include/twitch-eventsub-ws/payloads/channel-chat-message-v1.hpp
         include/twitch-eventsub-ws/payloads/channel-chat-notification-v1.hpp
+        include/twitch-eventsub-ws/payloads/channel-chat-user-message-hold-v1.hpp
+        include/twitch-eventsub-ws/payloads/channel-chat-user-message-update-v1.hpp
         include/twitch-eventsub-ws/payloads/channel-moderate-v2.hpp
         include/twitch-eventsub-ws/payloads/channel-suspicious-user-message-v1.hpp
         include/twitch-eventsub-ws/payloads/channel-suspicious-user-update-v1.hpp
@@ -21,6 +23,7 @@ generate_json_impls(
         include/twitch-eventsub-ws/payloads/stream-online-v1.hpp
         include/twitch-eventsub-ws/payloads/structured-message.hpp
         include/twitch-eventsub-ws/payloads/subscription.hpp
+        include/twitch-eventsub-ws/payloads/suspicious-users.hpp
 )
 
 set(SOURCE_FILES

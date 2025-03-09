@@ -21,6 +21,9 @@ public:
     void onNotification(const lib::messages::Metadata &metadata,
                         const boost::json::value &jv) override;
 
+    void onClose(std::unique_ptr<lib::Listener> self,
+                 const std::optional<std::string> &reconnectURL) override;
+
     void onChannelBan(
         const lib::messages::Metadata &metadata,
         const lib::payload::channel_ban::v1::Payload &payload) override;
@@ -71,11 +74,21 @@ public:
         const lib::payload::channel_suspicious_user_update::v1::Payload
             &payload) override;
 
+    void onChannelChatUserMessageHold(
+        const lib::messages::Metadata &metadata,
+        const lib::payload::channel_chat_user_message_hold::v1::Payload
+            &payload) override;
+
+    void onChannelChatUserMessageUpdate(
+        const lib::messages::Metadata &metadata,
+        const lib::payload::channel_chat_user_message_update::v1::Payload
+            &payload) override;
+
     QString getSessionID() const;
 
     bool isSubscribedTo(const SubscriptionRequest &request) const;
     void markRequestSubscribed(const SubscriptionRequest &request);
-    // TODO: Add an "markRequestUnsubscribed" method
+    void markRequestUnsubscribed(const SubscriptionRequest &request);
 
 private:
     QString sessionID;

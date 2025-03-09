@@ -6,6 +6,8 @@
 #include "twitch-eventsub-ws/payloads/channel-ban-v1.hpp"
 #include "twitch-eventsub-ws/payloads/channel-chat-message-v1.hpp"
 #include "twitch-eventsub-ws/payloads/channel-chat-notification-v1.hpp"
+#include "twitch-eventsub-ws/payloads/channel-chat-user-message-hold-v1.hpp"
+#include "twitch-eventsub-ws/payloads/channel-chat-user-message-update-v1.hpp"
 #include "twitch-eventsub-ws/payloads/channel-moderate-v2.hpp"
 #include "twitch-eventsub-ws/payloads/channel-suspicious-user-message-v1.hpp"
 #include "twitch-eventsub-ws/payloads/channel-suspicious-user-update-v1.hpp"
@@ -27,6 +29,10 @@ public:
 
     virtual void onNotification(const messages::Metadata &metadata,
                                 const boost::json::value &jv) = 0;
+
+    virtual void onClose(
+        std::unique_ptr<Listener> self,
+        const std::optional<std::string> & /* reconnectUrl */) {};
 
     // Subscription types
     virtual void onChannelBan(
@@ -73,6 +79,16 @@ public:
     virtual void onChannelSuspiciousUserUpdate(
         const messages::Metadata &metadata,
         const payload::channel_suspicious_user_update::v1::Payload
+            &payload) = 0;
+
+    virtual void onChannelChatUserMessageHold(
+        const messages::Metadata &metadata,
+        const payload::channel_chat_user_message_hold::v1::Payload
+            &payload) = 0;
+
+    virtual void onChannelChatUserMessageUpdate(
+        const messages::Metadata &metadata,
+        const payload::channel_chat_user_message_update::v1::Payload
             &payload) = 0;
     // Add your new subscription types above this line
 };
