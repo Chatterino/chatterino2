@@ -6,6 +6,7 @@
 - Minor: Add `Set highlight sounds` and `Open subscription page` split hotkeys. (#5856, #6030)
 - Minor: `/clear` messages are now stacked like timeouts. (#5806)
 - Minor: Treat all browsers starting with `firefox` as a Firefox browser. (#5805)
+- Minor: Timestamps are now monospaced. (#6062)
 - Minor: Remove incognito browser support for `opera/launcher` (this should no longer be a thing). (#5805)
 - Minor: Remove incognito browser support for `iexplore`, because internet explorer is EOL. (#5810)
 - Minor: When (re-)connecting, visible channels are now joined first. (#5850)
