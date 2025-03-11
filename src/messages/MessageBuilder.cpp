@@ -390,7 +390,6 @@ EmotePtr makeSharedChatBadge(const QString &sourceName, const QString &url)
     if (!url.isEmpty())
     {
         QString modifiedUrl = url;
-
         modifiedUrl.replace("300x300", "70x70");
 
         return std::make_shared<Emote>(Emote{
