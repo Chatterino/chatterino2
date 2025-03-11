@@ -386,12 +386,22 @@ EmotePtr makeAutoModBadge()
 }
 
 EmotePtr makeSharedChatBadge(const QString &sourceName,
-                             const QString &sourceProfileURL)
+                             const QString &sourceProfileURL,
+                             const QString &sourceLogin)
 {
     if (!sourceProfileURL.isEmpty())
     {
         QString modifiedUrl = sourceProfileURL;
         modifiedUrl.replace("300x300", "28x28");
+
+        auto badgeLink = [&] {
+            if (sourceLogin.isEmpty())
+            {
+                return Url{"https://link.twitch.tv/SharedChatViewer"};
+            }
+
+            return Url{u"https://twitch.tv/%1"_s.arg(sourceLogin)};
+        }();
 
         return std::make_shared<Emote>(Emote{
             .name = EmoteName{},
@@ -401,7 +411,7 @@ EmotePtr makeSharedChatBadge(const QString &sourceName,
             .tooltip =
                 Tooltip{"Shared Message" +
                         (sourceName.isEmpty() ? "" : " from " + sourceName)},
-            .homePage = Url{"https://link.twitch.tv/SharedChatViewer"},
+            .homePage = badgeLink,
         });
     }
 
@@ -2978,6 +2988,7 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
         const QString sourceId = tags["source-room-id"].toString();
         QString sourceName;
         QString sourceProfilePicture;
+        QString sourceLogin;
 
         if (sourceId.isEmpty())
         {
@@ -2989,16 +3000,18 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
             auto twitchUser = getApp()->getTwitchUsers()->resolveID({sourceId});
             sourceName = twitchChannel->getName();
             sourceProfilePicture = twitchUser->profilePictureUrl;
+            sourceLogin = twitchUser->name;
         }
         else
         {
             auto twitchUser = getApp()->getTwitchUsers()->resolveID({sourceId});
             sourceName = twitchUser->displayName;
             sourceProfilePicture = twitchUser->profilePictureUrl;
+            sourceLogin = twitchUser->name;
         }
 
         this->emplace<BadgeElement>(
-            makeSharedChatBadge(sourceName, sourceProfilePicture),
+            makeSharedChatBadge(sourceName, sourceProfilePicture, sourceLogin),
             MessageElementFlag::BadgeSharedChannel);
     }
 
