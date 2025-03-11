@@ -385,11 +385,12 @@ EmotePtr makeAutoModBadge()
         Url{"https://dashboard.twitch.tv/settings/moderation/automod"}});
 }
 
-EmotePtr makeSharedChatBadge(const QString &sourceName, const QString &url)
+EmotePtr makeSharedChatBadge(const QString &sourceName,
+                             const QString &sourceProfileURL)
 {
-    if (!url.isEmpty())
+    if (!sourceProfileURL.isEmpty())
     {
-        QString modifiedUrl = url;
+        QString modifiedUrl = sourceProfileURL;
         modifiedUrl.replace("300x300", "70x70");
 
         return std::make_shared<Emote>(Emote{
