@@ -391,13 +391,13 @@ EmotePtr makeSharedChatBadge(const QString &sourceName,
     if (!sourceProfileURL.isEmpty())
     {
         QString modifiedUrl = sourceProfileURL;
-        modifiedUrl.replace("300x300", "70x70");
+        modifiedUrl.replace("300x300", "28x28");
 
         return std::make_shared<Emote>(Emote{
             .name = EmoteName{},
             .images = ImageSet{Image::fromUrl(
                 Url{modifiedUrl},
-                18.F / 70.F)},  // get as close to 18x18 as possible
+                18.F / 28.F)},  // get as close to 18x18 as possible
             .tooltip =
                 Tooltip{"Shared Message" +
                         (sourceName.isEmpty() ? "" : " from " + sourceName)},
