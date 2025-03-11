@@ -2983,7 +2983,10 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
         }
         else if (twitchChannel->roomId() == sourceId)
         {
+            // We have the source channel open, but we still need to load the profile picture URL
+            auto twitchUser = getApp()->getTwitchUsers()->resolveID({sourceId});
             sourceName = twitchChannel->getName();
+            sourceProfilePicture = twitchUser->profilePictureUrl;
         }
         else
         {
