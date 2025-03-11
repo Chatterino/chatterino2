@@ -93,12 +93,12 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
     getSettings()->showTabCloseButton.connect(
         [this] {
-            tabSizeChanged();
+            this->tabSizeChanged();
         },
         this->managedConnections_);
     getSettings()->tabStyle.connect(
         [this] {
-            tabSizeChanged();
+            this->tabSizeChanged();
         },
         this->managedConnections_);
     getSettings()->showTabLive.connect(
