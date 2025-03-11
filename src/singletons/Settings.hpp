@@ -186,8 +186,10 @@ public:
     FloatSetting boldScale = {"/appearance/boldScale", 63};
     BoolSetting showTabCloseButton = {"/appearance/showTabCloseButton", true};
     BoolSetting showTabLive = {"/appearance/showTabLiveButton", true};
-    EnumStringSetting<TabStyle> tabStyle = {"/appearance/tabStyle",
-                                            TabStyle::Normal};
+    EnumStringSetting<TabStyle> tabStyle = {
+        "/appearance/tabStyle",
+        TabStyle::Normal,
+    };
     BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton",
                                          false};
     BoolSetting hideUserButton = {"/appearance/hideUserButton", false};
