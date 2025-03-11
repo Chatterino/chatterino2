@@ -304,6 +304,14 @@ TEST_P(TestEventSubMessagesP, Run)
         input = snapshot->input().toArray();
     }
 
+    std::unique_ptr<eventsub::lib::Listener> listener =
+        std::make_unique<eventsub::Connection>();
+    boost::asio::io_context ioc;
+    boost::asio::ssl::context ssl(
+        boost::asio::ssl::context::method::tls_client);
+    auto sess =
+        std::make_shared<eventsub::lib::Session>(ioc, ssl, std::move(listener));
+
     for (const auto inputRef : input)
     {
         auto inputObj = inputRef.toObject();
@@ -321,9 +329,7 @@ TEST_P(TestEventSubMessagesP, Run)
 
         auto json = makePayload(eventSubscription->second, inputObj);
 
-        std::unique_ptr<eventsub::lib::Listener> listener =
-            std::make_unique<eventsub::Connection>();
-        auto ec = eventsub::lib::handleMessage(listener, json);
+        auto ec = sess->handleMessage(json);
         ASSERT_FALSE(ec.failed())
             << ec.what() << ec.message() << ec.location().to_string();
     }

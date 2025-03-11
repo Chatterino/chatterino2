@@ -171,12 +171,16 @@ void BM_ParseAndHandleMessages(benchmark::State &state)
     auto messages = readMessages();
 
     std::unique_ptr<Listener> listener = std::make_unique<NoopListener>();
+    boost::asio::io_context ioc;
+    boost::asio::ssl::context ssl(
+        boost::asio::ssl::context::method::tls_client);
+    auto sess = std::make_shared<Session>(ioc, ssl, std::move(listener));
 
     for (auto _ : state)
     {
         for (const auto &msg : messages)
         {
-            boost::system::error_code ec = handleMessage(listener, msg);
+            boost::system::error_code ec = sess->handleMessage(msg);
             assert(!ec);
         }
     }
