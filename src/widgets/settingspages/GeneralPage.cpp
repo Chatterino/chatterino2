@@ -279,6 +279,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         false, "Choose which tabs are visible in the notebook");
 
+    SettingWidget::dropdown("Tab style", s.tabStyle)->addTo(layout);
+
     SettingWidget::inverseCheckbox("Show message reply context",
                                    s.hideReplyContext)
         ->setTooltip(
