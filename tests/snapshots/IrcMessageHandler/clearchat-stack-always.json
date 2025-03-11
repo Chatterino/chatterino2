@@ -1,0 +1,258 @@
+{
+    "input": "@tmi-sent-ts=1736678514028;room-id=11148817;badges=;badge-info=;flags=;user-type=;emotes= :tmi.twitch.tv CLEARCHAT #pajlada",
+    "output": [
+        {
+            "badgeInfos": {
+            },
+            "badges": [
+            ],
+            "channelName": "",
+            "count": 4,
+            "displayName": "",
+            "elements": [
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "10:41"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "10:41:54",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "Chat",
+                        "has",
+                        "been",
+                        "cleared",
+                        "by",
+                        "a",
+                        "moderator.",
+                        "(4",
+                        "times)"
+                    ]
+                }
+            ],
+            "flags": "System|DoNotTriggerNotification|ClearChat|ModerationAction",
+            "id": "",
+            "localizedName": "",
+            "loginName": "",
+            "messageText": "Chat has been cleared by a moderator. (4 times) ",
+            "searchText": "Chat has been cleared by a moderator. (4 times) ",
+            "serverReceivedTime": "2025-01-12T10:41:54Z",
+            "timeoutUser": "",
+            "userID": "",
+            "usernameColor": "#ff000000"
+        },
+        {
+            "badgeInfos": {
+                "subscriber": "108"
+            },
+            "badges": [
+                "broadcaster",
+                "subscriber",
+                "partner"
+            ],
+            "channelName": "pajlada",
+            "count": 1,
+            "displayName": "pajlada",
+            "elements": [
+                {
+                    "color": "System",
+                    "flags": "ChannelName",
+                    "link": {
+                        "type": "JumpToChannel",
+                        "value": "pajlada"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "#pajlada"
+                    ]
+                },
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "10:41"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "10:41:52",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/3"
+                        },
+                        "name": "",
+                        "tooltip": "Broadcaster"
+                    },
+                    "flags": "BadgeChannelAuthority",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Broadcaster",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "emote": {
+                        "images": {
+                            "1x": "https://chatterino.com/tb-1",
+                            "2x": "https://chatterino.com/tb-2",
+                            "3x": "https://chatterino.com/tb-3"
+                        },
+                        "name": "",
+                        "tooltip": "Subscriber"
+                    },
+                    "flags": "BadgeSubscription",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Subscriber (Tier 3, 108 months)",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "emote": {
+                        "homePage": "https://blog.twitch.tv/2017/04/24/the-verified-badge-is-here-13381bc05735",
+                        "images": {
+                            "1x": "https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/1",
+                            "2x": "https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/2",
+                            "3x": "https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/3"
+                        },
+                        "name": "",
+                        "tooltip": "Verified"
+                    },
+                    "flags": "BadgeVanity",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "Verified",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "color": "#ffcc44ff",
+                    "flags": "Username",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "pajlada"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "pajlada:"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "asd"
+                    ]
+                },
+                {
+                    "background": "#ffa0a0a4",
+                    "flags": "ReplyButton",
+                    "link": {
+                        "type": "ReplyToMessage",
+                        "value": "b4f3ac1d-6335-4567-bb8d-e76dfd83f7e3"
+                    },
+                    "padding": 2,
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "CircularImageElement",
+                    "url": ""
+                }
+            ],
+            "flags": "Collapsed",
+            "id": "b4f3ac1d-6335-4567-bb8d-e76dfd83f7e3",
+            "localizedName": "",
+            "loginName": "pajlada",
+            "messageText": "asd",
+            "searchText": "pajlada  pajlada: asd ",
+            "serverReceivedTime": "2025-01-12T10:41:52Z",
+            "timeoutUser": "",
+            "userID": "11148817",
+            "usernameColor": "#ffcc44ff"
+        }
+    ],
+    "params": {
+        "nAdditional": 2,
+        "prevMessages": [
+            "@tmi-sent-ts=1736678508224;room-id=11148817;badges=;badge-info=;flags=;user-type=;emotes= :tmi.twitch.tv CLEARCHAT #pajlada",
+            "@tmi-sent-ts=1736678509397;room-id=11148817;badges=;badge-info=;flags=;user-type=;emotes= :tmi.twitch.tv CLEARCHAT #pajlada",
+            "@tmi-sent-ts=1736678511185;room-id=11148817;badges=;badge-info=;flags=;user-type=;emotes= :tmi.twitch.tv CLEARCHAT #pajlada",
+            "@tmi-sent-ts=1736678512806;subscriber=1;id=b4f3ac1d-6335-4567-bb8d-e76dfd83f7e3;room-id=11148817;user-id=11148817;display-name=pajlada;badges=broadcaster/1,subscriber/3072,partner/1;badge-info=subscriber/108;color=#CC44FF;flags=;user-type=;emotes= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada :asd"
+        ]
+    },
+    "settings": {
+        "moderation": {
+            "timeoutStackStyle": 0
+        }
+    }
+}

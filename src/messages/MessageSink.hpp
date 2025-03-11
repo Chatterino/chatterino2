@@ -8,7 +8,7 @@
 #include <optional>
 
 class QStringView;
-class QTime;
+class QDateTime;
 
 namespace chatterino {
 
@@ -22,9 +22,9 @@ enum class MessageSinkTrait : uint8_t {
     /// added to the global mentions channel when encountered.
     AddMentionsToGlobalChannel = 1 << 0,
 
-    /// A channel-point redemption whose reward is not yet known should not be
-    /// added to this sink, but queued in the corresponding TwitchChannel
-    /// (`addQueuedRedemption`).
+    /// A channel-point redemption whose reward is not yet known should be
+    /// queued in the corresponding TwitchChannel (`addQueuedRedemption`) and
+    /// the message should be replaced later.
     RequiresKnownChannelPointReward = 1 << 1,
 };
 using MessageSinkTraits = FlagsEnum<MessageSinkTrait>;
@@ -46,7 +46,12 @@ public:
 
     /// Adds a timeout message or merges it into an existing one
     virtual void addOrReplaceTimeout(MessagePtr clearchatMessage,
-                                     QTime now) = 0;
+                                     const QDateTime &now) = 0;
+
+    /// Adds a clear chat message (for the entire chat) or merges it into an
+    /// existing one
+    virtual void addOrReplaceClearChat(MessagePtr clearchatMessage,
+                                       const QDateTime &now) = 0;
 
     /// Flags all messages as `Disabled`
     virtual void disableAllMessages() = 0;

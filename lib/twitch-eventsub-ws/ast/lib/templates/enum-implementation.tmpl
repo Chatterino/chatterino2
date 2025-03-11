@@ -1,0 +1,23 @@
+boost::json::result_for<{{enum.full_name}}, boost::json::value>::type tag_invoke(
+    boost::json::try_value_to_tag<{{enum.full_name}}> /* tag */, const boost::json::value &jvRoot)
+{
+    if (!jvRoot.is_string())
+    {
+        EVENTSUB_BAIL_HERE(error::Kind::ExpectedString);
+    }
+    std::string_view eString(jvRoot.get_string());
+
+    using namespace std::string_view_literals;
+
+{%- for constant in enum.constants %}
+    if (eString == "{{constant.json_name}}"sv) {
+        return {{enum.full_name}}::{{constant.name}};
+    }
+{%- endfor %}
+
+{%- if enum.default -%}
+    return {{enum.full_name}}::{{enum.default}};
+{%- else -%}
+    EVENTSUB_BAIL_HERE(error::Kind::UnknownEnumValue);
+{%- endif -%}
+}

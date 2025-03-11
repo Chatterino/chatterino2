@@ -1,0 +1,56 @@
+{
+  "metadata": {
+    "message_id": "dad488f6-ee77-472c-a113-be158651a28e",
+    "message_type": "notification",
+    "message_timestamp": "2024-05-14T12:31:47.995298776Z",
+    "subscription_type": "channel.chat.notification",
+    "subscription_version": "1"
+  },
+  "payload": {
+    "subscription": {
+      "id": "f6b57ae8-add7-4faa-a396-4d6c87cb1337",
+      "status": "enabled",
+      "type": "channel.chat.notification",
+      "version": "1",
+      "condition": { "broadcaster_user_id": "1337", "user_id": "27620241" },
+      "transport": {
+        "method": "websocket",
+        "session_id": "AgoQ_ZPE5-zrR2W3HJjkQxrFfxIGY2Vs1337"
+      },
+      "created_at": "2023-11-20T09:52:07.940291459Z",
+      "cost": 0
+    },
+    "event": {
+      "broadcaster_user_id": "1337",
+      "broadcaster_user_login": "cool_user",
+      "broadcaster_user_name": "Cool_User",
+      "chatter_user_id": null,
+      "chatter_user_login": null,
+      "chatter_user_name": null,
+      "chatter_is_anonymous": true,
+      "color": "",
+      "badges": [],
+      "system_message": "An anonymous user is gifting 1 Tier 1 Subs to Cool_User's community!",
+      "message_id": "fa2135ca-34da-413f-1337-4efa3c9a6bac",
+      "message": { "text": "", "fragments": [] },
+      "notice_type": "community_sub_gift",
+      "sub": null,
+      "resub": null,
+      "sub_gift": null,
+      "community_sub_gift": {
+        "id": "12111455614691086753",
+        "total": 1,
+        "cumulative_total": null,
+        "sub_tier": "1000"
+      },
+      "gift_paid_upgrade": null,
+      "prime_paid_upgrade": null,
+      "pay_it_forward": null,
+      "raid": null,
+      "unraid": null,
+      "announcement": null,
+      "bits_badge_tier": null,
+      "charity_donation": null
+    }
+  }
+}

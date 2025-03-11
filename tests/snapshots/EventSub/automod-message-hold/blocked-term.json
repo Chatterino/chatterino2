@@ -1,0 +1,263 @@
+{
+    "input": {
+        "automod": null,
+        "blocked_term": {
+            "terms_found": [
+                {
+                    "boundary": {
+                        "end_pos": 10,
+                        "start_pos": 0
+                    },
+                    "owner_broadcaster_user_id": "489584266",
+                    "owner_broadcaster_user_login": "uint128",
+                    "owner_broadcaster_user_name": "uint128",
+                    "term_id": "1a79a074-4aaf-4d84-ac87-eba0a65b9a26"
+                }
+            ]
+        },
+        "broadcaster_user_id": "11148817",
+        "broadcaster_user_login": "pajlada",
+        "broadcaster_user_name": "pajlada",
+        "held_at": "2025-02-28T15:55:41.953497979Z",
+        "message": {
+            "fragments": [
+                {
+                    "cheermote": null,
+                    "emote": null,
+                    "text": "blockedterm",
+                    "type": "text"
+                }
+            ],
+            "text": "blockedterm"
+        },
+        "message_id": "c0fac418-25a9-41b8-adf3-5bd637fca1e1",
+        "reason": "blocked_term",
+        "user_id": "129546453",
+        "user_login": "nerixyz",
+        "user_name": "nerixyz"
+    },
+    "output": [
+        {
+            "badgeInfos": {
+            },
+            "badges": [
+            ],
+            "channelName": "pajlada",
+            "count": 1,
+            "displayName": "",
+            "elements": [
+                {
+                    "emote": {
+                        "homePage": "https://dashboard.twitch.tv/settings/moderation/automod",
+                        "images": {
+                            "1x": ""
+                        },
+                        "name": "",
+                        "tooltip": "AutoMod"
+                    },
+                    "flags": "BadgeChannelAuthority",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "AutoMod",
+                    "trailingSpace": true,
+                    "type": "BadgeElement"
+                },
+                {
+                    "color": "#ff0000ff",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "AutoMod:"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "Held",
+                        "a",
+                        "message",
+                        "for",
+                        "reason:",
+                        "matches",
+                        "1",
+                        "blocked",
+                        "term",
+                        "\"blockedterm\".",
+                        "Allow",
+                        "will",
+                        "post",
+                        "it",
+                        "in",
+                        "chat.",
+                        ""
+                    ]
+                },
+                {
+                    "color": "#ff00ff00",
+                    "flags": "Text",
+                    "link": {
+                        "type": "AutoModAllow",
+                        "value": "c0fac418-25a9-41b8-adf3-5bd637fca1e1"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "Allow"
+                    ]
+                },
+                {
+                    "color": "#ffff0000",
+                    "flags": "Text",
+                    "link": {
+                        "type": "AutoModDeny",
+                        "value": "c0fac418-25a9-41b8-adf3-5bd637fca1e1"
+                    },
+                    "style": "ChatMediumBold",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "",
+                        "Deny"
+                    ]
+                }
+            ],
+            "flags": "PubSub|AutoMod|AutoModOffendingMessageHeader|AutoModBlockedTerm|EventSub|ModerationAction",
+            "id": "automod_c0fac418-25a9-41b8-adf3-5bd637fca1e1",
+            "localizedName": "",
+            "loginName": "automod",
+            "messageText": "AutoMod: Held a message for reason: matches 1 blocked term \"blockedterm\". Allow will post it in chat. Allow Deny",
+            "searchText": "AutoMod: Held a message for reason: matches 1 blocked term \"blockedterm\". Allow will post it in chat. Allow Deny",
+            "serverReceivedTime": "2024-05-14T12:31:47Z",
+            "timeoutUser": "",
+            "userID": "",
+            "usernameColor": "#ff000000"
+        },
+        {
+            "badgeInfos": {
+            },
+            "badges": [
+            ],
+            "channelName": "pajlada",
+            "count": 1,
+            "displayName": "",
+            "elements": [
+                {
+                    "color": "System",
+                    "flags": "ChannelName",
+                    "link": {
+                        "type": "JumpToChannel",
+                        "value": "pajlada"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "#pajlada"
+                    ]
+                },
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "12:31"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "12:31:47",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "flags": "ModeratorTools",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TwitchModerationElement"
+                },
+                {
+                    "color": "Text",
+                    "fallbackColor": "Text",
+                    "flags": "Text|Mention",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "MentionElement",
+                    "userColor": "Text",
+                    "userLoginName": "nerixyz",
+                    "words": [
+                        "nerixyz:"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "blockedterm"
+                    ]
+                }
+            ],
+            "flags": "PubSub|AutoMod|AutoModOffendingMessage|AutoModBlockedTerm|EventSub|ModerationAction",
+            "id": "",
+            "localizedName": "",
+            "loginName": "nerixyz",
+            "messageText": "nerixyz: blockedterm",
+            "searchText": "nerixyz: blockedterm",
+            "serverReceivedTime": "2024-05-14T12:31:47Z",
+            "timeoutUser": "",
+            "userID": "",
+            "usernameColor": "#ff000000"
+        }
+    ]
+}

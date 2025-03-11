@@ -14,6 +14,7 @@
 #include "messages/search/SubstringPredicate.hpp"
 #include "messages/search/SubtierPredicate.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/splits/Split.hpp"
@@ -80,6 +81,8 @@ SearchPopup::SearchPopup(QWidget *parent, Split *split)
     }
     this->resize(400, 600);
     this->addShortcuts();
+
+    this->themeChangedEvent();
 }
 
 void SearchPopup::addShortcuts()
@@ -210,6 +213,16 @@ bool SearchPopup::eventFilter(QObject *object, QEvent *event)
         }
     }
     return false;
+}
+
+void SearchPopup::themeChangedEvent()
+{
+    BasePopup::themeChangedEvent();
+
+    // NOTE: This currently overrides the QLineEdit's font size.
+    // If the dialog is open when the theme is changed, things will look a bit off.
+    // This can be alleviated by us using a single application-wide style sheet for these things.
+    this->searchInput_->setStyleSheet(this->theme->splits.input.styleSheet);
 }
 
 void SearchPopup::search()

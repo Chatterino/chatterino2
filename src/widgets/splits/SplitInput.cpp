@@ -235,6 +235,14 @@ void SplitInput::scaleChangedEvent(float scale)
     }
     this->ui_.textEdit->setFont(
         app->getFonts()->getFont(FontStyle::ChatMedium, scale));
+
+    QPalette placeholderPalette;
+    placeholderPalette.setColor(
+        QPalette::PlaceholderText,
+        this->theme->messages.textColors.chatPlaceholder);
+
+    this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
+    this->ui_.textEdit->setPalette(placeholderPalette);
     this->ui_.textEditLength->setFont(
         app->getFonts()->getFont(FontStyle::ChatMedium, scale));
     this->ui_.replyLabel->setFont(
@@ -364,36 +372,7 @@ QString SplitInput::handleSendMessage(const std::vector<QString> &arguments)
     auto *tc = dynamic_cast<TwitchChannel *>(c.get());
     if (!tc)
     {
-        // Reply to message
-        auto tc = dynamic_cast<TwitchChannel *>(c.get());
-        if (!tc)
-        {
-            // this should not fail
-            return "";
-        }
-
-        QString message = this->ui_.textEdit->toPlainText();
-
-        if (this->enableInlineReplying_)
-        {
-            // Remove @username prefix that is inserted when doing inline replies
-            message.remove(0, this->replyTarget_->displayName.length() +
-                                  1);  // remove "@username"
-
-            if (!message.isEmpty() && message.at(0) == ' ')
-            {
-                message.remove(0, 1);  // remove possible space
-            }
-        }
-
-        message = message.replace('\n', ' ');
-        QString sendMessage =
-            getApp()->getCommands()->execCommand(message, c, false);
-
-        // Reply within TwitchChannel
-        tc->sendReply(sendMessage, this->replyTarget_->id);
-
-        this->postMessageSend(message, arguments);
+        // this should not fail
         return "";
     }
 

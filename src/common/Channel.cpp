@@ -4,21 +4,9 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageSimilarity.hpp"
-#include "providers/twitch/IrcMessageHandler.hpp"
-#include "providers/twitch/TwitchIrcServer.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/Settings.hpp"
-#include "singletons/WindowManager.hpp"
 #include "util/ChannelHelpers.hpp"
-
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonValue>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QNetworkRequest>
 
 namespace chatterino {
 
@@ -41,7 +29,7 @@ Channel::Channel(const QString &name, Type type)
 Channel::~Channel()
 {
     auto *app = tryGetApp();
-    if (app)
+    if (app && this->anythingLogged_)
     {
         app->getChatLogger()->closeChannel(this->name_, this->platform_);
     }
@@ -106,6 +94,7 @@ void Channel::addMessage(MessagePtr message, MessageContext context,
             getApp()->getChatLogger()->addMessage(this->name_, message,
                                                   this->platform_,
                                                   this->getCurrentStreamID());
+            this->anythingLogged_ = true;
         }
     }
 
@@ -123,7 +112,7 @@ void Channel::addSystemMessage(const QString &contents)
     this->addMessage(msg, MessageContext::Original);
 }
 
-void Channel::addOrReplaceTimeout(MessagePtr message, QTime now)
+void Channel::addOrReplaceTimeout(MessagePtr message, const QDateTime &now)
 {
     addOrReplaceChannelTimeout(
         this->getMessageSnapshot(), std::move(message), now,
@@ -134,9 +123,18 @@ void Channel::addOrReplaceTimeout(MessagePtr message, QTime now)
             this->addMessage(msg, MessageContext::Original);
         },
         true);
+}
 
-    // XXX: Might need the following line
-    // WindowManager::instance().repaintVisibleChatWidgets(this);
+void Channel::addOrReplaceClearChat(MessagePtr message, const QDateTime &now)
+{
+    addOrReplaceChannelClear(
+        this->getMessageSnapshot(), std::move(message), now,
+        [this](auto /*idx*/, auto msg, auto replacement) {
+            this->replaceMessage(msg, replacement);
+        },
+        [this](auto msg) {
+            this->addMessage(msg, MessageContext::Original);
+        });
 }
 
 void Channel::disableAllMessages()
@@ -285,9 +283,9 @@ void Channel::replaceMessage(size_t hint, const MessagePtr &message,
     }
 }
 
-void Channel::deleteMessage(QString messageID)
+void Channel::disableMessage(const QString &messageID)
 {
-    auto msg = this->findMessage(messageID);
+    auto msg = this->findMessageByID(messageID);
     if (msg != nullptr)
     {
         msg->flags.set(MessageFlag::Disabled);
@@ -298,11 +296,6 @@ void Channel::clearMessages()
 {
     this->messages_.clear();
     this->messagesCleared.invoke();
-}
-
-MessagePtr Channel::findMessage(QString messageID)
-{
-    return this->findMessageByID(messageID);
 }
 
 MessagePtr Channel::findMessageByID(QStringView messageID)

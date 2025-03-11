@@ -20,9 +20,15 @@ public:
 
     [[nodiscard]] virtual bool isEnabled() const = 0;
 
+    /// Returns true if streamer mode is enabled & the settings to hide mod actions is enabled
+    [[nodiscard]] virtual bool shouldHideModActions() const = 0;
+
+    /// Returns true if streamer mode is enabled & the settings to hide messages from restricted users is enabled
+    [[nodiscard]] virtual bool shouldHideRestrictedUsers() const = 0;
+
     virtual void start() = 0;
 
-signals:
+Q_SIGNALS:
     void changed(bool enabled);
 };
 
@@ -38,6 +44,9 @@ public:
     StreamerMode &operator=(StreamerMode &&) = delete;
 
     bool isEnabled() const override;
+
+    bool shouldHideModActions() const override;
+    bool shouldHideRestrictedUsers() const override;
 
     void start() override;
 

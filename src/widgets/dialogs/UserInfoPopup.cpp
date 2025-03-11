@@ -924,9 +924,9 @@ void UserInfoPopup::updateUserData()
         // get ignoreHighlights state
         bool isIgnoringHighlights = false;
         const auto &vector = getSettings()->blacklistedUsers.raw();
-        for (const auto &user : vector)
+        for (const auto &blockedUser : vector)
         {
-            if (this->userName_ == user.getPattern())
+            if (this->userName_ == blockedUser.getPattern())
             {
                 isIgnoringHighlights = true;
                 break;
@@ -945,44 +945,50 @@ void UserInfoPopup::updateUserData()
         this->ui_.block->setEnabled(true);
         this->ui_.ignoreHighlights->setChecked(isIgnoringHighlights);
 
-        // get followage and subage
-        getIvr()->getSubage(
-            this->userName_, this->underlyingChannel_->getName(),
-            [this, hack](const IvrSubage &subageInfo) {
-                if (!hack.lock())
-                {
-                    return;
-                }
+        auto type = this->underlyingChannel_->getType();
 
-                if (!subageInfo.followingSince.isEmpty())
-                {
-                    QDateTime followedAt = QDateTime::fromString(
-                        subageInfo.followingSince, Qt::ISODate);
-                    QString followingSince = followedAt.toString("yyyy-MM-dd");
-                    this->ui_.followageLabel->setText("❤ Following since " +
-                                                      followingSince);
-                }
+        if (type == Channel::Type::Twitch)
+        {
+            // get followage and subage
+            getIvr()->getSubage(
+                this->userName_, this->underlyingChannel_->getName(),
+                [this, hack](const IvrSubage &subageInfo) {
+                    if (!hack.lock())
+                    {
+                        return;
+                    }
 
-                if (subageInfo.isSubHidden)
-                {
-                    this->ui_.subageLabel->setText(
-                        "Subscription status hidden");
-                }
-                else if (subageInfo.isSubbed)
-                {
-                    this->ui_.subageLabel->setText(
-                        QString("★ Tier %1 - Subscribed for %2 months")
-                            .arg(subageInfo.subTier)
-                            .arg(subageInfo.totalSubMonths));
-                }
-                else if (subageInfo.totalSubMonths)
-                {
-                    this->ui_.subageLabel->setText(
-                        QString("★ Previously subscribed for %1 months")
-                            .arg(subageInfo.totalSubMonths));
-                }
-            },
-            [] {});
+                    if (!subageInfo.followingSince.isEmpty())
+                    {
+                        QDateTime followedAt = QDateTime::fromString(
+                            subageInfo.followingSince, Qt::ISODate);
+                        QString followingSince =
+                            followedAt.toString("yyyy-MM-dd");
+                        this->ui_.followageLabel->setText("❤ Following since " +
+                                                          followingSince);
+                    }
+
+                    if (subageInfo.isSubHidden)
+                    {
+                        this->ui_.subageLabel->setText(
+                            "Subscription status hidden");
+                    }
+                    else if (subageInfo.isSubbed)
+                    {
+                        this->ui_.subageLabel->setText(
+                            QString("★ Tier %1 - Subscribed for %2 months")
+                                .arg(subageInfo.subTier)
+                                .arg(subageInfo.totalSubMonths));
+                    }
+                    else if (subageInfo.totalSubMonths)
+                    {
+                        this->ui_.subageLabel->setText(
+                            QString("★ Previously subscribed for %1 months")
+                                .arg(subageInfo.totalSubMonths));
+                    }
+                },
+                [] {});
+        }
 
         // get pronouns
         if (getSettings()->showPronouns)

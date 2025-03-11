@@ -140,6 +140,12 @@ Args::Args(const QApplication &app, const Paths &paths)
         "specified, Twitch is assumed.",
         "t:channel");
 
+#ifndef NDEBUG
+    QCommandLineOption useLocalEventsubOption(
+        "use-local-eventsub",
+        "Use the local eventsub server at 127.0.0.1:3012.");
+#endif
+
     parser.addOptions({
         {{"V", "version"}, "Displays version information."},
         crashRecoveryOption,
@@ -152,6 +158,9 @@ Args::Args(const QApplication &app, const Paths &paths)
         loginOption,
         channelLayout,
         activateOption,
+#ifndef NDEBUG
+        useLocalEventsubOption,
+#endif
     });
 
     if (!parser.parse(app.arguments()))
@@ -215,6 +224,13 @@ Args::Args(const QApplication &app, const Paths &paths)
         this->activateChannel =
             parseActivateOption(parser.value(activateOption));
     }
+
+#ifndef NDEBUG
+    if (parser.isSet(useLocalEventsubOption))
+    {
+        this->useLocalEventsub = true;
+    }
+#endif
 
     this->currentArguments_ = extractCommandLine(parser, {
                                                              verboseOption,

@@ -1,0 +1,408 @@
+{
+    "input": [
+        {
+            "__timestamp": "2025-02-22T17:54:04.523432776Z",
+            "action": "shared_chat_timeout",
+            "automod_terms": null,
+            "ban": null,
+            "broadcaster_user_id": "11148817",
+            "broadcaster_user_login": "pajlada",
+            "broadcaster_user_name": "pajlada",
+            "delete": null,
+            "followers": null,
+            "mod": null,
+            "moderator_user_id": "129546453",
+            "moderator_user_login": "nerixyz",
+            "moderator_user_name": "nerixyz",
+            "raid": null,
+            "shared_chat_ban": null,
+            "shared_chat_delete": null,
+            "shared_chat_timeout": {
+                "expires_at": "2025-02-22T18:04:04.502931622Z",
+                "reason": "",
+                "user_id": "141981764",
+                "user_login": "twitchdev",
+                "user_name": "TwitchDev"
+            },
+            "shared_chat_unban": null,
+            "shared_chat_untimeout": null,
+            "slow": null,
+            "source_broadcaster_user_id": "117166826",
+            "source_broadcaster_user_login": "testaccount_420",
+            "source_broadcaster_user_name": "테스트계정420",
+            "timeout": null,
+            "unban": null,
+            "unban_request": null,
+            "unmod": null,
+            "unraid": null,
+            "untimeout": null,
+            "unvip": null,
+            "vip": null,
+            "warn": null
+        },
+        {
+            "__timestamp": "2025-02-22T17:54:05.523432776Z",
+            "action": "shared_chat_timeout",
+            "automod_terms": null,
+            "ban": null,
+            "broadcaster_user_id": "11148817",
+            "broadcaster_user_login": "pajlada",
+            "broadcaster_user_name": "pajlada",
+            "delete": null,
+            "followers": null,
+            "mod": null,
+            "moderator_user_id": "129546453",
+            "moderator_user_login": "nerixyz",
+            "moderator_user_name": "nerixyz",
+            "raid": null,
+            "shared_chat_ban": null,
+            "shared_chat_delete": null,
+            "shared_chat_timeout": {
+                "expires_at": "2025-02-22T18:04:05.502931622Z",
+                "reason": "",
+                "user_id": "141981764",
+                "user_login": "twitchdev",
+                "user_name": "TwitchDev"
+            },
+            "shared_chat_unban": null,
+            "shared_chat_untimeout": null,
+            "slow": null,
+            "source_broadcaster_user_id": "117166826",
+            "source_broadcaster_user_login": "testaccount_420",
+            "source_broadcaster_user_name": "테스트계정420",
+            "timeout": null,
+            "unban": null,
+            "unban_request": null,
+            "unmod": null,
+            "unraid": null,
+            "untimeout": null,
+            "unvip": null,
+            "vip": null,
+            "warn": null
+        },
+        {
+            "__timestamp": "2025-02-22T17:54:06.523432776Z",
+            "action": "shared_chat_timeout",
+            "automod_terms": null,
+            "ban": null,
+            "broadcaster_user_id": "11148817",
+            "broadcaster_user_login": "pajlada",
+            "broadcaster_user_name": "pajlada",
+            "delete": null,
+            "followers": null,
+            "mod": null,
+            "moderator_user_id": "129546453",
+            "moderator_user_login": "nerixyz",
+            "moderator_user_name": "nerixyz",
+            "raid": null,
+            "shared_chat_ban": null,
+            "shared_chat_delete": null,
+            "shared_chat_timeout": {
+                "expires_at": "2025-02-22T18:04:06.502931622Z",
+                "reason": "",
+                "user_id": "141981764",
+                "user_login": "twitchdev",
+                "user_name": "TwitchDev"
+            },
+            "shared_chat_unban": null,
+            "shared_chat_untimeout": null,
+            "slow": null,
+            "source_broadcaster_user_id": null,
+            "source_broadcaster_user_login": null,
+            "source_broadcaster_user_name": null,
+            "timeout": null,
+            "unban": null,
+            "unban_request": null,
+            "unmod": null,
+            "unraid": null,
+            "untimeout": null,
+            "unvip": null,
+            "vip": null,
+            "warn": null
+        }
+    ],
+    "output": [
+        {
+            "badgeInfos": {
+            },
+            "badges": [
+            ],
+            "channelName": "testaccount_420",
+            "count": 2,
+            "displayName": "",
+            "elements": [
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "17:54"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "17:54:05",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "nerixyz"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "nerixyz"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "timed",
+                        "out"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "twitchdev"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "twitchdev"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "for",
+                        "10m",
+                        "in"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "testaccount_420"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": false,
+                    "type": "TextElement",
+                    "words": [
+                        "testaccount_420"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        ".",
+                        "(2",
+                        "times)"
+                    ]
+                }
+            ],
+            "flags": "System|Timeout|PubSub|SharedMessage|EventSub|ModerationAction",
+            "id": "",
+            "localizedName": "",
+            "loginName": "",
+            "messageText": "nerixyz timed out twitchdev for 10m in testaccount_420. (2 times) ",
+            "searchText": "nerixyz timed out twitchdev for 10m in testaccount_420. (2 times) ",
+            "serverReceivedTime": "2025-02-22T17:54:05Z",
+            "timeoutUser": "twitchdev",
+            "userID": "",
+            "usernameColor": "#ff000000"
+        },
+        {
+            "badgeInfos": {
+            },
+            "badges": [
+            ],
+            "channelName": "",
+            "count": 1,
+            "displayName": "",
+            "elements": [
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "17:54"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "17:54:06",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "nerixyz"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "nerixyz"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "timed",
+                        "out"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "twitchdev"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "twitchdev"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "for"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": false,
+                    "type": "TextElement",
+                    "words": [
+                        "10m"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "."
+                    ]
+                }
+            ],
+            "flags": "System|Timeout|PubSub|EventSub|ModerationAction",
+            "id": "",
+            "localizedName": "",
+            "loginName": "nerixyz",
+            "messageText": "nerixyz timed out twitchdev for 10m. ",
+            "searchText": "nerixyz timed out twitchdev for 10m. ",
+            "serverReceivedTime": "2025-02-22T17:54:06Z",
+            "timeoutUser": "twitchdev",
+            "userID": "",
+            "usernameColor": "#ff000000"
+        }
+    ]
+}

@@ -125,15 +125,15 @@ void Updates::installUpdates()
         QMessageBox::Information, "Chatterino Update",
         "A link will open in your browser. Download and install to update.");
     box->setAttribute(Qt::WA_DeleteOnClose);
-    box->exec();
+    box->open();
     QDesktopServices::openUrl(this->updateExe_);
 #elif defined Q_OS_LINUX
     QMessageBox *box =
         new QMessageBox(QMessageBox::Information, "Chatterino Update",
                         "Automatic updates are currently not available on "
-                        "linux. Please redownload the app to update.");
+                        "Linux. Please redownload the app to update.");
     box->setAttribute(Qt::WA_DeleteOnClose);
-    box->exec();
+    box->open();
     QDesktopServices::openUrl(this->updateGuideLink_);
 #elif defined Q_OS_WIN
     if (Modes::instance().isPortable)

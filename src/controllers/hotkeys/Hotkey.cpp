@@ -75,7 +75,7 @@ Qt::ShortcutContext Hotkey::getContext() const
     }
     qCDebug(chatterinoHotkeys)
         << "Using default shortcut context for" << this->getCategory()
-        << "and hopeing for the best.";
+        << "and hoping for the best.";
     return Qt::WidgetShortcut;
 }
 

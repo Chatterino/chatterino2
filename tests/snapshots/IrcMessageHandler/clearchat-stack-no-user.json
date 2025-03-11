@@ -1,0 +1,85 @@
+{
+    "input": "@tmi-sent-ts=1736369068441;rm-received-ts=1736369068532;historical=1;room-id=111448817 :tmi.twitch.tv CLEARCHAT #pajlada",
+    "output": [
+        {
+            "badgeInfos": {
+            },
+            "badges": [
+            ],
+            "channelName": "",
+            "count": 2,
+            "displayName": "",
+            "elements": [
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "ChatMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "20:44"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "20:44:28",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "Chat",
+                        "has",
+                        "been",
+                        "cleared",
+                        "by",
+                        "a",
+                        "moderator.",
+                        "(2",
+                        "times)"
+                    ]
+                }
+            ],
+            "flags": "System|DoNotTriggerNotification|ClearChat|ModerationAction",
+            "id": "",
+            "localizedName": "",
+            "loginName": "",
+            "messageText": "Chat has been cleared by a moderator. (2 times) ",
+            "searchText": "Chat has been cleared by a moderator. (2 times) ",
+            "serverReceivedTime": "2025-01-08T20:44:28Z",
+            "timeoutUser": "",
+            "userID": "",
+            "usernameColor": "#ff000000"
+        }
+    ],
+    "params": {
+        "nAdditional": 1,
+        "prevMessages": [
+            "@room-id=111448817;rm-received-ts=1736369059298;rm-deleted=1;tmi-sent-ts=1736369059196;historical=1 :tmi.twitch.tv CLEARCHAT #pajlada",
+            "@historical=1;tmi-sent-ts=1736369062841;room-id=111448817;rm-received-ts=1736369062932;rm-deleted=1 :tmi.twitch.tv CLEARCHAT #pajlada",
+            "@room-id=111448817;rm-deleted=1;returning-chatter=0;rm-received-ts=1736369064768;subscriber=0;tmi-sent-ts=1736369064631;color=#FF0000;flags=;turbo=0;user-type=;emotes=;id=50e33ac9-4e54-4503-9a35-a621ef114b82;mod=0;historical=1;user-id=129546453;first-msg=0;badge-info=;badges=broadcaster/1;display-name=nerixyz :nerixyz!nerixyz@nerixyz.tmi.twitch.tv PRIVMSG #pajlada def",
+            "@historical=1;room-id=111448817;rm-received-ts=1736369067491;rm-deleted=1;tmi-sent-ts=1736369067400 :tmi.twitch.tv CLEARCHAT #pajlada"
+        ]
+    }
+}

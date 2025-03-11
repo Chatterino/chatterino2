@@ -197,9 +197,8 @@ std::optional<ClearChatMessage> parseClearChatMessage(
     if (message->parameters().length() == 1)
     {
         return ClearChatMessage{
-            .message =
-                makeSystemMessage("Chat has been cleared by a moderator.",
-                                  calculateMessageTime(message).time()),
+            .message = MessageBuilder::makeClearChatMessage(
+                calculateMessageTime(message), {}),
             .disableAllMessages = true,
         };
     }
@@ -215,7 +214,7 @@ std::optional<ClearChatMessage> parseClearChatMessage(
 
     auto timeoutMsg =
         MessageBuilder(timeoutMessage, username, durationInSeconds, false,
-                       calculateMessageTime(message).time())
+                       calculateMessageTime(message))
             .release();
 
     return ClearChatMessage{.message = timeoutMsg, .disableAllMessages = false};
@@ -320,15 +319,14 @@ void IrcMessageHandler::parseMessageInto(Communi::IrcMessage *message,
             return;
         }
         auto &clearChat = *cc;
+        auto time = calculateMessageTime(message);
         if (clearChat.disableAllMessages)
         {
-            sink.addMessage(std::move(clearChat.message),
-                            MessageContext::Original);
+            sink.addOrReplaceClearChat(std::move(clearChat.message), time);
         }
         else
         {
-            sink.addOrReplaceTimeout(std::move(clearChat.message),
-                                     calculateMessageTime(message).time());
+            sink.addOrReplaceTimeout(std::move(clearChat.message), time);
         }
     }
 }
@@ -464,23 +462,22 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
         return;
     }
 
+    auto time = calculateMessageTime(message);
     // chat has been cleared by a moderator
     if (clearChat.disableAllMessages)
     {
         chan->disableAllMessages();
-        chan->addMessage(std::move(clearChat.message),
-                         MessageContext::Original);
-
-        return;
+        chan->addOrReplaceClearChat(std::move(clearChat.message), time);
+    }
+    else
+    {
+        chan->addOrReplaceTimeout(std::move(clearChat.message), time);
     }
 
-    chan->addOrReplaceTimeout(std::move(clearChat.message),
-                              calculateMessageTime(message).time());
-
-    // refresh all
-    getApp()->getWindows()->repaintVisibleChatWidgets(chan.get());
     if (getSettings()->hideModerated)
     {
+        // XXX: This is expensive. We could use a layout request if the layout
+        //      would store the previous message flags.
         getApp()->getWindows()->forceLayoutChannelViews();
     }
 }
@@ -515,7 +512,7 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
 
     QString targetID = tags.value("target-msg-id").toString();
 
-    auto msg = chan->findMessage(targetID);
+    auto msg = chan->findMessageByID(targetID);
     if (msg == nullptr)
     {
         return;
@@ -526,6 +523,13 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
     {
         chan->addMessage(MessageBuilder::makeDeletionMessageFromIRC(msg),
                          MessageContext::Original);
+    }
+
+    if (getSettings()->hideModerated && !tags.contains("historical"))
+    {
+        // XXX: This is expensive. We could use a layout request if the layout
+        //      would store the previous message flags.
+        getApp()->getWindows()->forceLayoutChannelViews();
     }
 }
 
@@ -1006,7 +1010,6 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
                                      "callback since reward is not known:"
                                   << rewardId;
         chan->addQueuedRedemption(rewardId, originalContent, message);
-        return;
     }
     args.channelPointRewardId = rewardId;
 
@@ -1090,7 +1093,13 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
         if (isSub)
         {
             msg->flags.set(MessageFlag::Subscription);
-            msg->flags.unset(MessageFlag::Highlighted);
+
+            if (tags.value("msg-id") != "announcement")
+            {
+                // Announcements are currently tagged as subscriptions,
+                // but we want them to be able to show up in mentions
+                msg->flags.unset(MessageFlag::Highlighted);
+            }
         }
 
         sink.applySimilarityFilters(msg);
