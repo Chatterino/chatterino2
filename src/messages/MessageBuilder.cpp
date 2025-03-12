@@ -934,6 +934,8 @@ MessageBuilder::MessageBuilder(const AutomodUserAction &action)
 {
     this->emplace<TimestampElement>();
     this->message().flags.set(MessageFlag::System);
+    this->message().flags.set(MessageFlag::PubSub);
+    this->message().flags.set(MessageFlag::ModerationAction);
 
     QString text;
     switch (action.type)
