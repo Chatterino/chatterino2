@@ -1985,6 +1985,7 @@ MessagePtr MessageBuilder::makeLowTrustUpdateMessage(
     builder.emplace<TimestampElement>();
     builder.message().flags.set(MessageFlag::System);
     builder.message().flags.set(MessageFlag::PubSub);
+    builder.message().flags.set(MessageFlag::ModerationAction);
     builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
 
     builder
