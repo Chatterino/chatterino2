@@ -1026,7 +1026,7 @@ TextElement *TimestampElement::formatTime(const QTime &time)
     QString format = locale.toString(time, getSettings()->timestampFormat);
 
     return new TextElement(format, MessageElementFlag::Timestamp,
-                           MessageColor::System, FontStyle::ChatMedium);
+                           MessageColor::System, FontStyle::TimestampMedium);
 }
 
 QJsonObject TimestampElement::toJson() const
