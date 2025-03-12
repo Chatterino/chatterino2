@@ -65,6 +65,7 @@
         "searchText": "",
         "serverReceivedTime": "",
         "timeoutUser": "",
+        "userID": "",
         "usernameColor": "#ff000000"
     }
 }

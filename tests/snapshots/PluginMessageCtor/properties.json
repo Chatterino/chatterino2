@@ -9,6 +9,7 @@
         "  login_name = 'login',",
         "  display_name = 'display',",
         "  localized_name = 'local',",
+        "  user_id = 'user-id',",
         "  username_color = 'blue',",
         "  server_received_time = 1230000,",
         "  highlight_color = '#12345678',",
@@ -53,6 +54,7 @@
         "searchText": "search",
         "serverReceivedTime": "1970-01-01T00:20:30Z",
         "timeoutUser": "",
+        "userID": "user-id",
         "usernameColor": "#ff0000ff"
     }
 }

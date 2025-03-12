@@ -281,6 +281,7 @@ c2.Message = {}
 ---@field login_name? string The login name of the sender
 ---@field display_name? string The display name of the sender
 ---@field localized_name? string The localized name of the sender (this is used for CJK names, otherwise it's empty)
+---@field user_id? string The ID of the user who sent the message
 ---@field channel_name? string The name of the channel this message appeared in
 ---@field username_color? string The color of the username
 ---@field server_received_time? number The time the server received the message (in milliseconds since epoch)
@@ -355,6 +356,7 @@ c2.FontStyle = {
     ChatMediumItalic = {}, ---@type c2.FontStyle.ChatMediumItalic
     ChatLarge = {}, ---@type c2.FontStyle.ChatLarge
     ChatVeryLarge = {}, ---@type c2.FontStyle.ChatVeryLarge
+    TimestampMedium = {}, ---@type c2.FontStyle.TimestampMedium
     UiMedium = {}, ---@type c2.FontStyle.UiMedium
     UiMediumBold = {}, ---@type c2.FontStyle.UiMediumBold
     UiTabs = {}, ---@type c2.FontStyle.UiTabs
@@ -463,6 +465,9 @@ c2.MessageFlag = {
     Action = 0,
     SharedMessage = 0,
     AutoModBlockedTerm = 0,
+    ClearChat = 0,
+    EventSub = 0,
+    ModerationAction = 0,
 }
 
 -- End src/messages/MessageFlag.hpp

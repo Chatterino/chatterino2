@@ -171,6 +171,7 @@ std::shared_ptr<Message> messageFromTable(const sol::table &tbl)
     msg->loginName = tbl.get_or("login_name", QString{});
     msg->displayName = tbl.get_or("display_name", QString{});
     msg->localizedName = tbl.get_or("localized_name", QString{});
+    msg->userID = tbl.get_or("user_id", QString{});
     // missing: timeoutUser
     msg->channelName = tbl.get_or("channel_name", QString{});
 
@@ -222,7 +223,8 @@ namespace chatterino::lua::api::message {
 
 void createUserType(sol::table &c2)
 {
-    c2.new_usertype<Message>("Message", sol::factories([](sol::table tbl) {
+    c2.new_usertype<Message>("Message",
+                             sol::factories([](const sol::table &tbl) {
                                  return messageFromTable(tbl);
                              }));
 }
