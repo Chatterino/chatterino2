@@ -872,6 +872,9 @@ MessageBuilder::MessageBuilder(const WarnAction &action)
 {
     this->emplace<TimestampElement>();
     this->message().flags.set(MessageFlag::System);
+    this->message().flags.set(MessageFlag::PubSub);
+    this->message().flags.set(MessageFlag::ModerationAction);
+    this->message().flags.set(MessageFlag::DoNotTriggerNotification);
 
     QString text;
 
