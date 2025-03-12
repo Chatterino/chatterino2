@@ -1,0 +1,49 @@
+{% if not field.tag -%}
+static_assert(false, "{{field.name}} doesn't have a json_tag");
+{%- endif %}
+const auto *jv{{field.name}}Tag = root.if_contains("{{field.tag}}");
+if (jv{{field.name}}Tag == nullptr)
+{
+    EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
+}
+
+auto {{field.name}}TagRes = boost::json::try_value_to<boost::json::string>(*jv{{field.name}}Tag);
+if ({{field.name}}TagRes.has_error())
+{
+    return {{field.name}}TagRes.error();
+}
+std::string_view {{field.name}}Tag = *{{field.name}}TagRes;
+decltype(std::declval<{{struct.full_name}}>().{{field.name}}) {{field.name}};
+{%- for type in field.variant_types %}
+
+{%- if not loop.first %}else{% endif %} if ({{field.name}}Tag == {{type.name}}::TAG)
+{
+{%- if type.empty -%}
+    {{field.name}}.emplace<{{type.name}}>();
+{%- else -%}
+    const auto *{{field.name}}Val = root.if_contains(detail::fieldFor<{{type.name}}>());
+    if (!{{field.name}}Val)
+    {
+        EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
+    }
+    auto {{field.name}}{{type.id}} = boost::json::try_value_to<{{type.name}}>(*{{field.name}}Val);
+    if ({{field.name}}{{type.id}}.has_error())
+    {
+        return {{field.name}}{{type.id}}.error();
+    }
+    {% if type.trivial -%}
+    {{field.name}}.emplace<{{type.name}}>({{field.name}}{{type.id}}.value());
+    {%- else -%}
+    {{field.name}}.emplace<{{type.name}}>(std::move({{field.name}}{{type.id}}.value()));
+    {%- endif %}
+{%- endif -%}
+}
+{%- endfor -%}
+else
+{
+{%- if field.variant_fallback -%}
+    {{field.name}}.emplace<{{field.variant_fallback}}>({{field.name}}Tag);
+{%- else -%}
+    EVENTSUB_BAIL_HERE(error::Kind::UnknownVariant);
+{%- endif -%}
+}

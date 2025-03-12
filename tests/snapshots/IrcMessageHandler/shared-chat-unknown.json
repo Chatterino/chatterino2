@@ -35,7 +35,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -173,6 +173,7 @@
             "searchText": "creativewind  creativewind: Guys ",
             "serverReceivedTime": "2024-09-27T00:08:21Z",
             "timeoutUser": "",
+            "userID": "106940612",
             "usernameColor": "#ff00ff00"
         }
     ]

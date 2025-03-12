@@ -20,7 +20,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -133,7 +133,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -234,6 +234,7 @@
             "searchText": "nerixyz  nerixyz: empty  redeemed test 1",
             "serverReceivedTime": "2024-09-18T16:39:32Z",
             "timeoutUser": "",
+            "userID": "129546453",
             "usernameColor": "#ffff0000"
         }
     ]

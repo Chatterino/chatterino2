@@ -34,7 +34,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -222,6 +222,7 @@
             "searchText": "badgy  badgy: badge ",
             "serverReceivedTime": "2024-09-19T16:40:56Z",
             "timeoutUser": "",
+            "userID": "123456",
             "usernameColor": "#ffff0000"
         }
     ]

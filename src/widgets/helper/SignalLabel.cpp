@@ -9,14 +9,14 @@ SignalLabel::SignalLabel(QWidget *parent, Qt::WindowFlags f)
 
 void SignalLabel::mouseDoubleClickEvent(QMouseEvent *ev)
 {
-    emit this->mouseDoubleClick(ev);
+    this->mouseDoubleClick(ev);
 }
 
 void SignalLabel::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
     {
-        emit leftMouseDown();
+        leftMouseDown();
     }
 
     event->ignore();
@@ -26,7 +26,7 @@ void SignalLabel::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
     {
-        emit leftMouseUp();
+        leftMouseUp();
     }
 
     event->ignore();
@@ -34,7 +34,7 @@ void SignalLabel::mouseReleaseEvent(QMouseEvent *event)
 
 void SignalLabel::mouseMoveEvent(QMouseEvent *event)
 {
-    emit this->mouseMove(event);
+    this->mouseMove(event);
     event->ignore();
 }
 

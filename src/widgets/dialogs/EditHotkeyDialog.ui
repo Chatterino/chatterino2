@@ -140,9 +140,6 @@ see this message :)</string>
        <property name="text">
         <string>You should never see this message :)</string>
        </property>
-       <property name="buddy">
-        <cstring>argumentsDescription</cstring>
-       </property>
       </widget>
      </item>
      <item row="6" column="1">

@@ -37,7 +37,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -185,6 +185,7 @@
             "searchText": "pajlada  pajlada: Kappa ",
             "serverReceivedTime": "2022-09-03T11:57:15Z",
             "timeoutUser": "",
+            "userID": "11148817",
             "usernameColor": "#ffcc44ff"
         }
     ]

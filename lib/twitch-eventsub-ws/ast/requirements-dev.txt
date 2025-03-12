@@ -1,0 +1,7 @@
+# Test runner - run pytest in this dir to run tests
+pytest==8.3.4
+
+black==24.3.0
+flake8==7.1.1
+mypy==1.15.0
+isort==5.12.0

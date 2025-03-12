@@ -35,7 +35,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -404,6 +404,7 @@
             "searchText": "nerixyz  nerixyz: Kappa BTTVEmote BTTVGlobal 7TVEmote 7TVGlobal FFZEmote FFZGlobal BTTVTwitchDev 7TVTwitchDev FFZTwitchDev ",
             "serverReceivedTime": "2024-10-07T14:27:15Z",
             "timeoutUser": "",
+            "userID": "129546453",
             "usernameColor": "#ffff0000"
         }
     ]

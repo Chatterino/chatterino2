@@ -35,7 +35,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -116,6 +116,7 @@
             "searchText": "replacement  nickname: nickname ",
             "serverReceivedTime": "2024-09-21T10:53:04Z",
             "timeoutUser": "",
+            "userID": "12345678",
             "usernameColor": "#ffff0000"
         }
     ],

@@ -44,6 +44,11 @@ CheckOptions:
   - key: readability-identifier-naming.FunctionIgnoredRegexp
     value: ^(TEST|MOCK_METHOD)$
 
+  - key: readability-identifier-naming.GlobalFunctionCase
+    value: camelBack
+  - key: readability-identifier-naming.GlobalFunctionIgnoredRegexp
+    value: ^(tag_invoke)$
+
   - key: readability-identifier-naming.MemberCase
     value: camelBack
   - key: readability-identifier-naming.PrivateMemberIgnoredRegexp

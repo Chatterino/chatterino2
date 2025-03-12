@@ -44,9 +44,12 @@ struct Message {
     QString id;
     QString searchText;
     QString messageText;
+    // TODO: This field is used ambiguously, it could use a comment or a name change to
+    // clarify the intent of the field
     QString loginName;
     QString displayName;
     QString localizedName;
+    QString userID;
     QString timeoutUser;
     QString channelName;
     QColor usernameColor;

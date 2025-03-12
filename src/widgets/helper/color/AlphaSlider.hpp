@@ -15,10 +15,10 @@ public:
 
     int alpha() const;
 
-signals:
+Q_SIGNALS:
     void colorChanged(QColor color) const;
 
-public slots:
+public Q_SLOTS:
     void setColor(QColor color);
 
 protected:

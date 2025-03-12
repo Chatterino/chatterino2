@@ -4,10 +4,13 @@
 #include <QLocale>
 #include <QString>
 
+#include <chrono>
 #include <cmath>
 #include <optional>
 #include <utility>
 #include <vector>
+
+class QDateTime;
 
 namespace chatterino {
 
@@ -190,5 +193,29 @@ constexpr std::optional<std::decay_t<T>> makeConditionedOptional(bool condition,
 QString unescapeZeroWidthJoiner(QString escaped);
 
 QLocale getSystemLocale();
+
+/// @brief Converts `time` to a QDateTime in a local time zone
+///
+/// Note: When running tests, this will always return a date-time in UTC.
+QDateTime chronoToQDateTime(std::chrono::system_clock::time_point time);
+
+/// Slices a string based on codepoint indices.
+///
+/// If the specified range is outside the string, an empty string view is
+/// returned.
+///
+/// @param begin Start index (inclusive, in codepoints)
+/// @param end End index (exclusive, in codepoints)
+QStringView codepointSlice(QStringView str, qsizetype begin, qsizetype end);
+
+/// Uses str.removeFirst if Qt >= 6.5, otherwise str.remove(0, 1)
+///
+/// @param str The Qt string we want to remove 1 character from
+void removeFirstQS(QString &str);
+
+/// Uses str.removeLast if Qt >= 6.5, otherwise str.chop(1)
+///
+/// @param str The Qt string we want to remove 1 character from
+void removeLastQS(QString &str);
 
 }  // namespace chatterino

@@ -290,7 +290,7 @@ void Button::mousePressEvent(QMouseEvent *event)
 
     this->mouseDown_ = true;
 
-    emit this->leftMousePress();
+    this->leftMousePress();
 
     if (this->menu_ && !this->menuVisible_)
     {
@@ -317,13 +317,13 @@ void Button::mouseReleaseEvent(QMouseEvent *event)
 
         if (isInside)
         {
-            emit leftClicked();
+            leftClicked();
         }
     }
 
     if (isInside)
     {
-        emit clicked(event->button());
+        clicked(event->button());
     }
 }
 

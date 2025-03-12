@@ -145,7 +145,7 @@ public:
     /// nor IrcChannel.
     /// It's **not** equal to the channel passed in #setChannel().
     /// @see #underlyingChannel()
-    ChannelPtr channel();
+    ChannelPtr channel() const;
 
     /// @brief The channel this view displays messages for
     ///
@@ -359,7 +359,7 @@ private:
     /// screen and will always be a @a Channel, or, it will never be a
     /// TwitchChannel or IrcChannel, however, it will have the same type and
     /// name as @a underlyingChannel_. It's not know to any registry/server.
-    ChannelPtr channel_ = nullptr;
+    ChannelPtr channel_;
 
     /// @brief The channel receiving messages
     ///

@@ -34,7 +34,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -135,6 +135,7 @@
             "searchText": "exde_hun  exde_hun: PogChamp10 ",
             "serverReceivedTime": "2019-08-24T13:51:04Z",
             "timeoutUser": "",
+            "userID": "129793695",
             "usernameColor": "#ff00ff7f"
         }
     ]

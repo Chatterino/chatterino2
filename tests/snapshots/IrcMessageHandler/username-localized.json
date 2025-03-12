@@ -35,7 +35,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -106,6 +106,7 @@
             "searchText": "display-name=테스트계정420 display-name=테스트계정420 testaccount_420: username ",
             "serverReceivedTime": "2024-09-21T10:54:17Z",
             "timeoutUser": "",
+            "userID": "117166826",
             "usernameColor": "#ffff0000"
         }
     ],

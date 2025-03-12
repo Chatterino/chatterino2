@@ -48,9 +48,9 @@ private:
     int timeout_ = 10'000;
     bool done = false;
 
-    std::optional<sol::protected_function> cbSuccess;
-    std::optional<sol::protected_function> cbError;
-    std::optional<sol::protected_function> cbFinally;
+    std::optional<sol::main_protected_function> cbSuccess;
+    std::optional<sol::main_protected_function> cbError;
+    std::optional<sol::main_protected_function> cbFinally;
 
 public:
     // These functions are wrapped so data can be accessed more easily. When a call from Lua comes in:
@@ -64,7 +64,7 @@ public:
      * @lua@param callback c2.HTTPCallback Function to call when the HTTP request succeeds
      * @exposed c2.HTTPRequest:on_success
      */
-    void on_success(sol::protected_function func);
+    void on_success(sol::main_protected_function func);
 
     /**
      * Sets the failure callback
@@ -72,7 +72,7 @@ public:
      * @lua@param callback c2.HTTPCallback Function to call when the HTTP request fails or returns a non-ok status
      * @exposed c2.HTTPRequest:on_error
      */
-    void on_error(sol::protected_function func);
+    void on_error(sol::main_protected_function func);
 
     /**
      * Sets the finally callback
@@ -80,7 +80,7 @@ public:
      * @lua@param callback fun(): nil Function to call when the HTTP request finishes
      * @exposed c2.HTTPRequest:finally
      */
-    void finally(sol::protected_function func);
+    void finally(sol::main_protected_function func);
 
     /**
      * Sets the timeout

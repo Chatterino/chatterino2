@@ -3,6 +3,7 @@
 #include "common/Channel.hpp"
 #include "common/ChatterinoSetting.hpp"
 #include "common/enums/MessageOverflow.hpp"
+#include "common/Modes.hpp"
 #include "common/SignalVector.hpp"
 #include "controllers/filters/FilterRecord.hpp"
 #include "controllers/highlights/HighlightBadge.hpp"
@@ -76,10 +77,24 @@ enum class ShowModerationState : int {
     Never = 1,
 };
 
+enum class StreamLinkPreferredQuality : std::uint8_t {
+    Choose,
+    Source,
+    High,
+    Medium,
+    Low,
+    AudioOnly,
+};
+
 enum StreamerModeSetting {
     Disabled = 0,
     Enabled = 1,
     DetectStreamingSoftware = 2,
+};
+
+enum class TabStyle : std::uint8_t {
+    Normal,
+    Compact,
 };
 
 /// Settings which are availlable for reading and writing on the gui thread.
@@ -158,6 +173,10 @@ public:
         "/appearance/currentFontSize",
         DEFAULT_FONT_SIZE,
     };
+    IntSetting chatFontWeight = {
+        "/appearance/currentFontWeight",
+        QFont::Normal,
+    };
     BoolSetting hideReplyContext = {"/appearance/hideReplyContext", false};
     BoolSetting showReplyButton = {"/appearance/showReplyButton", false};
     BoolSetting stripReplyMention = {"/appearance/stripReplyMention", true};
@@ -168,6 +187,10 @@ public:
     FloatSetting boldScale = {"/appearance/boldScale", 63};
     BoolSetting showTabCloseButton = {"/appearance/showTabCloseButton", true};
     BoolSetting showTabLive = {"/appearance/showTabLiveButton", true};
+    EnumStringSetting<TabStyle> tabStyle = {
+        "/appearance/tabStyle",
+        TabStyle::Normal,
+    };
     BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton",
                                          false};
     BoolSetting hideUserButton = {"/appearance/hideUserButton", false};
@@ -190,6 +213,7 @@ public:
     // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame",
     // false};
 
+    FloatSetting overlayScaleFactor = {"/appearance/overlay/scaleFactor", 1};
     IntSetting overlayBackgroundOpacity = {
         "/appearance/overlay/backgroundOpacity", 50};
     BoolSetting enableOverlayShadow = {"/appearance/overlay/shadow", true};
@@ -201,6 +225,9 @@ public:
     IntSetting overlayShadowOffsetX = {"/appearance/overlay/shadowOffsetX", 2};
     IntSetting overlayShadowOffsetY = {"/appearance/overlay/shadowOffsetY", 2};
     IntSetting overlayShadowRadius = {"/appearance/overlay/shadowRadius", 8};
+
+    float getClampedOverlayScale() const;
+    void setClampedOverlayScale(float value);
 
     // Badges
     BoolSetting showBadgesGlobalAuthority = {
@@ -329,6 +356,12 @@ public:
     BoolSetting lowercaseDomains = {"/links/linkLowercase", true};
 
     /// Streamer Mode
+    // TODO: Should these settings be converted to booleans that live outside of
+    // streamer mode?
+    // Something like:
+    //  - "Hide when streamer mode is enabled"
+    //  - "Always hide"
+    //  - "Don't hide"
     EnumSetting<StreamerModeSetting> enableStreamerMode = {
         "/streamerMode/enabled", StreamerModeSetting::DetectStreamingSoftware};
     BoolSetting streamerModeHideUsercardAvatars = {
@@ -339,6 +372,10 @@ public:
         "/streamerMode/hideViewerCountAndDuration", false};
     BoolSetting streamerModeHideModActions = {"/streamerMode/hideModActions",
                                               true};
+    BoolSetting streamerModeHideRestrictedUsers = {
+        "/streamerMode/hideRestrictedUsers",
+        true,
+    };
     BoolSetting streamerModeMuteMentions = {"/streamerMode/muteMentions", true};
     BoolSetting streamerModeSuppressLiveNotifications = {
         "/streamerMode/supressLiveNotifications", false};
@@ -526,6 +563,12 @@ public:
         "/notifications/suppressInitialLive", false};
 
     BoolSetting notificationToast = {"/notifications/enableToast", false};
+    BoolSetting createShortcutForToasts = {
+        "/notifications/createShortcutForToasts",
+        (Modes::instance().isPortable || Modes::instance().isExternallyPackaged)
+            ? false
+            : true,
+    };
     IntSetting openFromToast = {"/notifications/openFromToast",
                                 static_cast<int>(ToastReaction::OpenInBrowser)};
 
@@ -534,8 +577,10 @@ public:
     BoolSetting streamlinkUseCustomPath = {"/external/streamlink/useCustomPath",
                                            false};
     QStringSetting streamlinkPath = {"/external/streamlink/customPath", ""};
-    QStringSetting preferredQuality = {"/external/streamlink/quality",
-                                       "Choose"};
+    EnumStringSetting<StreamLinkPreferredQuality> preferredQuality = {
+        "/external/streamlink/quality",
+        StreamLinkPreferredQuality::Choose,
+    };
     QStringSetting streamlinkOpts = {"/external/streamlink/options", ""};
 
     // Custom URI Scheme
@@ -638,6 +683,12 @@ public:
         "/sound/backend",
         SoundBackend::Miniaudio,
     };
+    BoolSetting enableExperimentalEventSub = {
+        "/eventsub/enableExperimental",
+        true,
+    };
+
+    QStringSetting additionalExtensionIDs{"/misc/additionalExtensionIDs", ""};
 
 private:
     ChatterinoSetting<std::vector<HighlightPhrase>> highlightedMessagesSetting =
@@ -659,6 +710,7 @@ private:
         {"/moderation/actions"};
     ChatterinoSetting<std::vector<ChannelLog>> loggedChannelsSetting = {
         "/logging/channels"};
+    SignalVector<QString> mutedChannels;
 
 public:
     SignalVector<HighlightPhrase> highlightedMessages;
@@ -666,7 +718,6 @@ public:
     SignalVector<HighlightBadge> highlightedBadges;
     SignalVector<HighlightBlacklistUser> blacklistedUsers;
     SignalVector<IgnorePhrase> ignoredMessages;
-    SignalVector<QString> mutedChannels;
     SignalVector<FilterRecordPtr> filterRecords;
     SignalVector<Nickname> nicknames;
     SignalVector<ModerationAction> moderationActions;
@@ -677,11 +728,10 @@ public:
     bool isMutedChannel(const QString &channelName);
     bool toggleMutedChannel(const QString &channelName);
     std::optional<QString> matchNickname(const QString &username);
-
-private:
     void mute(const QString &channelName);
     void unmute(const QString &channelName);
 
+private:
     void updateModerationActions();
 
     std::unique_ptr<rapidjson::Document> snapshot_;
@@ -692,3 +742,26 @@ private:
 Settings *getSettings();
 
 }  // namespace chatterino
+
+template <>
+constexpr magic_enum::customize::customize_t
+    magic_enum::customize::enum_name<chatterino::StreamLinkPreferredQuality>(
+        chatterino::StreamLinkPreferredQuality value) noexcept
+{
+    using chatterino::StreamLinkPreferredQuality;
+    switch (value)
+    {
+        case chatterino::StreamLinkPreferredQuality::Choose:
+        case chatterino::StreamLinkPreferredQuality::Source:
+        case chatterino::StreamLinkPreferredQuality::High:
+        case chatterino::StreamLinkPreferredQuality::Medium:
+        case chatterino::StreamLinkPreferredQuality::Low:
+            return default_tag;
+
+        case chatterino::StreamLinkPreferredQuality::AudioOnly:
+            return "Audio only";
+
+        default:
+            return default_tag;
+    }
+}

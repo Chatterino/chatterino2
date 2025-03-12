@@ -143,7 +143,7 @@ bool isBroadcasterSoftwareActive()
     }
 
 #else
-#    warning Unsupported OS: Broadcasting software can't be detected
+#    warning Unsupported OS: Broadcasting software can\'t be detected
 #endif
     return false;
 }
@@ -200,6 +200,16 @@ void StreamerMode::updated(bool enabled)
 bool StreamerMode::isEnabled() const
 {
     return this->private_->isEnabled();
+}
+
+bool StreamerMode::shouldHideModActions() const
+{
+    return getSettings()->streamerModeHideModActions && this->isEnabled();
+}
+
+bool StreamerMode::shouldHideRestrictedUsers() const
+{
+    return getSettings()->streamerModeHideRestrictedUsers && this->isEnabled();
 }
 
 void StreamerMode::start()

@@ -569,6 +569,7 @@ public:
 /// - `prevMessages`: An array of past messages (used for replies)
 /// - `findAllUsernames`: A boolean controlling the equally named setting
 ///   (default: false)
+/// - `nAdditional`: Include n additional built messages (from `prevMessages`)
 TEST_P(TestIrcMessageHandlerP, Run)
 {
     auto channel = makeMockTwitchChannel(u"pajlada"_s, *snapshot);
@@ -588,7 +589,10 @@ TEST_P(TestIrcMessageHandlerP, Run)
         Communi::IrcMessage::fromData(snapshot->inputUtf8(), nullptr);
     ASSERT_NE(ircMessage, nullptr);
 
-    auto firstAddedMsg = sink.messages().size();
+    auto nAdditionalMessages = snapshot->param("nAdditional").toInt(0);
+    ASSERT_GE(sink.messages().size(), nAdditionalMessages);
+
+    auto firstAddedMsg = sink.messages().size() - nAdditionalMessages;
     IrcMessageHandler::parseMessageInto(ircMessage, sink, channel.get());
 
     QJsonArray got;
@@ -599,7 +603,10 @@ TEST_P(TestIrcMessageHandlerP, Run)
 
     delete ircMessage;
 
-    ASSERT_TRUE(snapshot->run(got, UPDATE_SNAPSHOTS));
+    ASSERT_TRUE(snapshot->run(got, UPDATE_SNAPSHOTS))
+        << "Snapshot " << snapshot->name() << " failed. Expected JSON to be\n"
+        << QJsonDocument(snapshot->output().toArray()).toJson() << "\nbut got\n"
+        << QJsonDocument(got).toJson() << "\ninstead.";
 }
 
 INSTANTIATE_TEST_SUITE_P(

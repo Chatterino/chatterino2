@@ -11,6 +11,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Updates.hpp"
 #include "util/CombinePath.hpp"
+#include "util/UnixSignalHandler.hpp"
 #include "widgets/dialogs/LastRunCrashDialog.hpp"
 
 #include <QApplication>
@@ -171,6 +172,21 @@ namespace {
         signalsInitTime = std::chrono::steady_clock::now();
 
         signal(SIGSEGV, handleSignal);
+#endif
+
+#if defined(Q_OS_UNIX)
+        auto *sigintHandler = new UnixSignalHandler(SIGINT);
+        QObject::connect(sigintHandler, &UnixSignalHandler::signalFired, [] {
+            qCInfo(chatterinoApp)
+                << "Received SIGINT, request application quit";
+            QApplication::quit();
+        });
+        auto *sigtermHandler = new UnixSignalHandler(SIGTERM);
+        QObject::connect(sigtermHandler, &UnixSignalHandler::signalFired, [] {
+            qCInfo(chatterinoApp)
+                << "Received SIGTERM, request application quit";
+            QApplication::quit();
+        });
 #endif
     }
 
