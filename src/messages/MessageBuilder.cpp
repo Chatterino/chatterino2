@@ -747,6 +747,7 @@ MessageBuilder::MessageBuilder(const BanAction &action, const QDateTime &time,
 
     this->emplace<TimestampElement>();
     this->message().flags.set(MessageFlag::System);
+    this->message().flags.set(MessageFlag::PubSub);
     this->message().flags.set(MessageFlag::Timeout);
     this->message().flags.set(MessageFlag::ModerationAction);
     this->message().timeoutUser = action.target.login;
@@ -848,6 +849,7 @@ MessageBuilder::MessageBuilder(const UnbanAction &action, const QDateTime &time)
 {
     this->emplace<TimestampElement>();
     this->message().flags.set(MessageFlag::System);
+    this->message().flags.set(MessageFlag::PubSub);
     this->message().flags.set(MessageFlag::Untimeout);
 
     this->message().timeoutUser = action.target.login;
