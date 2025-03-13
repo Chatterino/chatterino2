@@ -667,6 +667,22 @@ void BaseWindow::mouseMoveEvent(QMouseEvent *event)
     BaseWidget::mouseMoveEvent(event);
 }
 
+void BaseWindow::focusOutEvent(QFocusEvent *event)
+{
+    switch (this->focusOutAction)
+    {
+        case FocusOutAction::Hide:
+            this->hide();
+            break;
+
+        case FocusOutAction::None:
+        default:
+            break;
+    }
+
+    BaseWidget::focusOutEvent(event);
+}
+
 TitleBarButton *BaseWindow::addTitleBarButton(const TitleBarButtonStyle &style,
                                               std::function<void()> onClicked)
 {

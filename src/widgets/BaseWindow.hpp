@@ -96,6 +96,14 @@ Q_SIGNALS:
     void topMostChanged(bool topMost);
 
 protected:
+    enum class FocusOutAction : std::uint8_t {
+        None,
+        Hide,
+    };
+
+    /// focusOutAction is used when the `FocusOut` event is fired
+    FocusOutAction focusOutAction = FocusOutAction::None;
+
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     bool nativeEvent(const QByteArray &eventType, void *message,
                      qintptr *result) override;
@@ -121,6 +129,9 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
+
+    void focusOutEvent(QFocusEvent *event) override;
+
     QPointF movingRelativePos;
     bool moving{};
 
