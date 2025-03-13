@@ -72,6 +72,7 @@
 - Dev: Added snapshot tests for EventSub. (#5965)
 - Dev: Updated crashpad. (#6026)
 - Dev: Removed dead code and some MSVC warnings. (#6024)
+- Dev: Added check if WEBP is supported. (#6073)
 
 ## 2.5.2
 
