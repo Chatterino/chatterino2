@@ -88,19 +88,13 @@ void WindowManager::showSettingsDialog(QWidget *parent,
 
 void WindowManager::showAccountSelectPopup(QPoint point)
 {
-    //    static QWidget *lastFocusedWidget = nullptr;
-    static AccountSwitchPopup *w = new AccountSwitchPopup();
+    static auto *w = new AccountSwitchPopup;
 
     if (w->hasFocus())
     {
         w->hide();
-        //            if (lastFocusedWidget) {
-        //                lastFocusedWidget->setFocus();
-        //            }
         return;
     }
-
-    //    lastFocusedWidget = this->focusWidget();
 
     w->refresh();
 
