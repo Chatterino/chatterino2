@@ -6,6 +6,7 @@
 #include <QImageReader>
 #include <QMessageBox>
 #include <QMimeDatabase>
+#include <QStringBuilder>
 #include <QStringList>
 
 namespace {
