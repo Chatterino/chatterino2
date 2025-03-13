@@ -23,6 +23,8 @@ AccountSwitchPopup::AccountSwitchPopup(QWidget *parent)
           },
           parent)
 {
+    this->focusOutAction = FocusOutAction::Hide;
+
     this->setContentsMargins(0, 0, 0, 0);
 
     this->ui_.accountSwitchWidget = new AccountSwitchWidget(this);
@@ -91,11 +93,6 @@ void AccountSwitchPopup::themeChangedEvent()
 void AccountSwitchPopup::refresh()
 {
     this->ui_.accountSwitchWidget->refresh();
-}
-
-void AccountSwitchPopup::focusOutEvent(QFocusEvent *)
-{
-    this->hide();
 }
 
 void AccountSwitchPopup::paintEvent(QPaintEvent *)
