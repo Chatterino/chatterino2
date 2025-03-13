@@ -211,7 +211,10 @@ Qt::WindowFlags windowFlagsFor(FlagsEnum<BaseWindow::Flags> flags)
     out.setFlag(Qt::FramelessWindowHint, flags.has(BaseWindow::Frameless));
 
 #ifdef Q_OS_LINUX
-    out.setFlag(Qt::Popup, flags.has(BaseWindow::LinuxPopup));
+    if (flags.has(BaseWindow::LinuxPopup))
+    {
+        out.setFlag(Qt::Popup);
+    }
 #endif
 
     return out;
