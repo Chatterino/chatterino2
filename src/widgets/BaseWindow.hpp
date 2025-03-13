@@ -43,8 +43,6 @@ public:
         LinuxPopup = 1 << 10,
     };
 
-    enum ActionOnFocusLoss { Nothing, Delete, Close, Hide };
-
     explicit BaseWindow(FlagsEnum<Flags> flags_ = None,
                         QWidget *parent = nullptr);
     ~BaseWindow() override;
@@ -57,9 +55,6 @@ public:
     TitleBarButton *addTitleBarButton(const TitleBarButtonStyle &style,
                                       std::function<void()> onClicked);
     EffectLabel *addTitleBarLabel(std::function<void()> onClicked);
-
-    void setActionOnFocusLoss(ActionOnFocusLoss value);
-    ActionOnFocusLoss getActionOnFocusLoss() const;
 
     void moveTo(QPoint point, widgets::BoundsChecking mode);
 
@@ -104,6 +99,17 @@ protected:
     /// focusOutAction is used when the `FocusOut` event is fired
     FocusOutAction focusOutAction = FocusOutAction::None;
 
+    enum class WindowDeactivateAction : std::uint8_t {
+        Nothing,
+        Delete,
+        Close,
+        Hide,
+    };
+
+    /// This action is used when the `WindowDeactivate` event is fired
+    WindowDeactivateAction windowDeactivateAction =
+        WindowDeactivateAction::Nothing;
+
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     bool nativeEvent(const QByteArray &eventType, void *message,
                      qintptr *result) override;
@@ -146,7 +152,6 @@ private:
 
     void calcButtonsSizes();
     void drawCustomWindowFrame(QPainter &painter);
-    void onFocusLost();
 
     static void applyScaleRecursive(QObject *root, float scale);
 
@@ -162,7 +167,6 @@ private:
 #endif
 
     bool enableCustomFrame_;
-    ActionOnFocusLoss actionOnFocusLoss_ = Nothing;
     bool frameless_;
     bool shown_ = false;
     FlagsEnum<Flags> flags_;

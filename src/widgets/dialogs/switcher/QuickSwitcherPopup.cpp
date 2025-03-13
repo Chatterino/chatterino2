@@ -49,7 +49,7 @@ QuickSwitcherPopup::QuickSwitcherPopup(Window *parent)
     , window(parent)
 {
     this->setWindowFlag(Qt::Dialog);
-    this->setActionOnFocusLoss(BaseWindow::ActionOnFocusLoss::Delete);
+    this->windowDeactivateAction = WindowDeactivateAction::Delete;
     this->setMinimumSize(QuickSwitcherPopup::MINIMUM_SIZE);
 
     this->initWidgets();

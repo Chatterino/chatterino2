@@ -456,16 +456,6 @@ bool BaseWindow::isTopMost() const
     return this->isTopMost_ || this->flags_.has(TopMost);
 }
 
-void BaseWindow::setActionOnFocusLoss(ActionOnFocusLoss value)
-{
-    this->actionOnFocusLoss_ = value;
-}
-
-BaseWindow::ActionOnFocusLoss BaseWindow::getActionOnFocusLoss() const
-{
-    return this->actionOnFocusLoss_;
-}
-
 QWidget *BaseWindow::getLayoutContainer()
 {
     if (this->hasCustomWindowFrame())
@@ -528,10 +518,26 @@ void BaseWindow::themeChangedEvent()
 
 bool BaseWindow::event(QEvent *event)
 {
-    if (event->type() ==
-        QEvent::WindowDeactivate /*|| event->type() == QEvent::FocusOut*/)
+    if (event->type() == QEvent::WindowDeactivate)
     {
-        this->onFocusLost();
+        switch (this->windowDeactivateAction)
+        {
+            case WindowDeactivateAction::Delete:
+                this->deleteLater();
+                break;
+
+            case WindowDeactivateAction::Close:
+                this->close();
+                break;
+
+            case WindowDeactivateAction::Hide:
+                this->hide();
+                break;
+
+            case WindowDeactivateAction::Nothing:
+            default:
+                break;
+        }
     }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
@@ -575,29 +581,6 @@ void BaseWindow::wheelEvent(QWheelEvent *event)
             getSettings()->setClampedUiScale(
                 getSettings()->getClampedUiScale() - 0.1);
         }
-    }
-}
-
-void BaseWindow::onFocusLost()
-{
-    switch (this->getActionOnFocusLoss())
-    {
-        case Delete: {
-            this->deleteLater();
-        }
-        break;
-
-        case Close: {
-            this->close();
-        }
-        break;
-
-        case Hide: {
-            this->hide();
-        }
-        break;
-
-        default:;
     }
 }
 
