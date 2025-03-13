@@ -2057,6 +2057,32 @@ MessagePtr MessageBuilder::makeLowTrustUpdateMessage(
     return builder.release();
 }
 
+MessagePtrMut MessageBuilder::makeMissingScopesMessage(
+    const QString &missingScopes)
+{
+    auto warnText = u"Your account is missing the following permission(s): " %
+                    missingScopes %
+                    u". Some features might not work correctly.";
+    auto linkText = u"Consider re-adding your account."_s;
+
+    MessageBuilder builder;
+    auto text = warnText % ' ' % linkText;
+    builder->messageText = text;
+    builder->searchText = text;
+    builder->flags.set(MessageFlag::System,
+                       MessageFlag::DoNotTriggerNotification);
+
+    builder.emplace<TimestampElement>();
+    builder.emplace<TextElement>(warnText, MessageElementFlag::Text,
+                                 MessageColor::System);
+    builder
+        .emplace<TextElement>(linkText, MessageElementFlag::Text,
+                              MessageColor::Link)
+        ->setLink({Link::OpenAccountsPage, {}});
+
+    return builder.release();
+}
+
 MessagePtrMut MessageBuilder::makeClearChatMessage(const QDateTime &now,
                                                    const QString &actor,
                                                    uint32_t count)
