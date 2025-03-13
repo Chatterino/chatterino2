@@ -48,7 +48,8 @@ QuickSwitcherPopup::QuickSwitcherPopup(Window *parent)
     , switcherModel_(this)
     , window(parent)
 {
-    this->setWindowFlag(Qt::Dialog);
+    assert(this->windowFlags().testFlag(Qt::Dialog));
+
     this->windowDeactivateAction = WindowDeactivateAction::Delete;
     this->setMinimumSize(QuickSwitcherPopup::MINIMUM_SIZE);
 
