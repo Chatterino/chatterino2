@@ -71,6 +71,7 @@
 - Dev: Refactored some settings styles/APIs. (#6023)
 - Dev: Added snapshot tests for EventSub. (#5965)
 - Dev: Updated crashpad. (#6026)
+- Dev: Mini feature refactor of BaseWindow. (#6074)
 - Dev: Removed dead code and some MSVC warnings. (#6024)
 - Dev: Added check if WEBP is supported. (#6073)
 
