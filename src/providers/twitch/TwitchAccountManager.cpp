@@ -15,6 +15,8 @@
 #include "util/QCompareTransparent.hpp"
 #include "util/SharedPtrElementLess.hpp"
 
+#include <QStringBuilder>
+
 namespace {
 
 using namespace chatterino;
