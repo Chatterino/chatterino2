@@ -210,6 +210,10 @@ Qt::WindowFlags windowFlagsFor(FlagsEnum<BaseWindow::Flags> flags)
     out.setFlag(Qt::WindowStaysOnTopHint, flags.has(BaseWindow::TopMost));
     out.setFlag(Qt::FramelessWindowHint, flags.has(BaseWindow::Frameless));
 
+#ifdef Q_OS_LINUX
+    out.setFlag(Qt::Popup, flags.has(BaseWindow::LinuxPopup));
+#endif
+
     return out;
 }
 

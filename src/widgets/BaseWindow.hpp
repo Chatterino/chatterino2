@@ -38,6 +38,9 @@ public:
         DisableLayoutSave = 1 << 7,
         BoundsCheckOnShow = 1 << 8,
         ClearBuffersOnDpiChange = 1 << 9,
+
+        /// special flag that enables the Qt::Popup flag on Linux
+        LinuxPopup = 1 << 10,
     };
 
     enum ActionOnFocusLoss { Nothing, Delete, Close, Hide };

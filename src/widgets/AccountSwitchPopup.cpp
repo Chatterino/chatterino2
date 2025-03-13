@@ -14,14 +14,15 @@ namespace chatterino {
 using namespace literals;
 
 AccountSwitchPopup::AccountSwitchPopup(QWidget *parent)
-    : BaseWindow({BaseWindow::TopMost, BaseWindow::Frameless,
-                  BaseWindow::DisableLayoutSave},
-                 parent)
+    : BaseWindow(
+          {
+              BaseWindow::TopMost,
+              BaseWindow::Frameless,
+              BaseWindow::DisableLayoutSave,
+              BaseWindow::LinuxPopup,
+          },
+          parent)
 {
-#ifdef Q_OS_LINUX
-    this->setWindowFlag(Qt::Popup);
-#endif
-
     this->setContentsMargins(0, 0, 0, 0);
 
     this->ui_.accountSwitchWidget = new AccountSwitchWidget(this);
