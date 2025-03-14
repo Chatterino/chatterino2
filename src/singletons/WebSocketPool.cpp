@@ -1,5 +1,6 @@
 #include "singletons/WebSocketPool.hpp"
 
+#include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "util/QByteArrayBuffer.hpp"
 
@@ -544,11 +545,17 @@ WebSocketPoolPrivate::WebSocketPoolPrivate()
     , ssl(boost::asio::ssl::context::tls_client)
     , work(this->ioc.get_executor())
 {
-    this->ssl.set_verify_mode(boost::asio::ssl::verify_peer |
-                              boost::asio::ssl::verify_fail_if_no_peer_cert);
-    this->ssl.set_default_verify_paths();
+#ifdef CHATTERINO_WITH_TESTS
+    if (!getApp()->isTest())
+#endif
+    {
+        this->ssl.set_verify_mode(
+            boost::asio::ssl::verify_peer |
+            boost::asio::ssl::verify_fail_if_no_peer_cert);
+        this->ssl.set_default_verify_paths();
 
-    boost::certify::enable_native_https_server_verification(this->ssl);
+        boost::certify::enable_native_https_server_verification(this->ssl);
+    }
 
     this->ioThread = std::make_unique<std::thread>([this] {
         this->ioc.run();

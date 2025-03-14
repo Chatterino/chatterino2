@@ -89,7 +89,7 @@ QByteArray sol_lua_get(sol::types<QByteArray>, lua_State *L, int index,
                        sol::stack::record &tracking)
 {
     auto str = sol::stack::get<std::string_view>(L, index, tracking);
-    return QByteArray::fromRawData(str.data(), str.length());
+    return {str.data(), static_cast<qsizetype>(str.length())};
 }
 
 int sol_lua_push(sol::types<QByteArray>, lua_State *L, const QByteArray &value)

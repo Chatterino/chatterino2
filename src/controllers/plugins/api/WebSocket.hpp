@@ -15,10 +15,10 @@ class WebSocket
 {
 public:
     /**
-     * Creates and connects to a WebSocket server. Only TLS connections are 
-     * supported. Upon calling this, a connection is made immediately.
+     * Creates and connects to a WebSocket server. Upon calling this, a
+     * connection is made immediately.
      *
-     * @lua@param url string The URL to connect to. Must start with `wss://`.
+     * @lua@param url string The URL to connect to. Must start with `wss://` or `ws://`.
      * @lua@return c2.WebSocket
      * @lua@nodiscard
      * @exposed c2.WebSocket.new
