@@ -19,7 +19,6 @@
 #include <thread>
 #include <utility>
 
-
 namespace asio = boost::asio;
 namespace beast = boost::beast;
 
@@ -372,7 +371,8 @@ void WebSocketConnection::post(auto &&fn)
 
 void WebSocketConnection::fail(boost::system::error_code ec, QStringView op)
 {
-    qCWarning(chatterinoWebsocket) << *this << "Failed:" << op << ec.message();
+    qCWarning(chatterinoWebsocket)
+        << *this << "Failed:" << op << QUtf8StringView(ec.message());
     if (this->stream.is_open())
     {
         this->closeImpl();

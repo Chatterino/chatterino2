@@ -1,9 +1,10 @@
 #include "controllers/plugins/api/WebSocket.hpp"
 
-#include "Application.hpp"
-#include "controllers/plugins/PluginController.hpp"
-#include "controllers/plugins/SolTypes.hpp"  // IWYU pragma: keep
-#include "util/PostToThread.hpp"
+#ifdef CHATTERINO_HAVE_PLUGINS
+#    include "Application.hpp"
+#    include "controllers/plugins/PluginController.hpp"
+#    include "controllers/plugins/SolTypes.hpp"  // IWYU pragma: keep
+#    include "util/PostToThread.hpp"
 
 namespace chatterino::lua::api {
 
@@ -116,3 +117,5 @@ void WebSocketListenerProxy::onBinaryMessage(QByteArray data)
 }
 
 }  // namespace chatterino::lua::api
+
+#endif
