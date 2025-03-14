@@ -25,17 +25,11 @@ jobs:
       matrix:
         os: [macos-14]
         qt-version: [6.4.3, 6.7.1]
-        plugins: [true]
       fail-fast: false
     env:
       QT_MODULES: ${{ startsWith(matrix.qt-version, '6.') && 'qt5compat qtimageformats' || '' }}
 
     steps:
-      - name: Enable plugin support
-        if: matrix.plugins
-        run: |
-          echo "C2_PLUGINS=ON" >> "$GITHUB_ENV"
-
       - uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -69,7 +63,6 @@ jobs:
               -DBUILD_TESTS=On \
               -DBUILD_APP=OFF \
               -DUSE_PRECOMPILED_HEADERS=OFF \
-              -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
 

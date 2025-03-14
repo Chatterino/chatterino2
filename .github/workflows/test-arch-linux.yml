@@ -62,7 +62,6 @@ jobs:
             -DBUILD_TESTS=On \
             -DBUILD_BENCHMARKS=On \
             -DBUILD_APP=OFF \
-            -DCHATTERINO_PLUGINS=On \
             -DCMAKE_BUILD_TYPE=Debug \
             ..
         working-directory: build-test

@@ -14,7 +14,6 @@ void initUpdateButton(Button &button,
     // show update prompt when clicking the button
     QObject::connect(&button, &Button::leftClicked, [&button] {
         auto *dialog = new UpdateDialog();
-        dialog->setActionOnFocusLoss(BaseWindow::Delete);
 
         auto globalPoint = button.mapToGlobal(
             QPoint(int(-100 * button.scale()), button.height()));

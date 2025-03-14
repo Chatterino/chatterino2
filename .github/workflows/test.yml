@@ -30,10 +30,7 @@ jobs:
           - os: "ubuntu-22.04"
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-22.04:latest
             qt-version: 6.7.1
-            plugins: true
       fail-fast: false
-    env:
-      C2_PLUGINS: ${{ matrix.plugins }}
 
     steps:
       - uses: actions/checkout@v4
@@ -62,7 +59,6 @@ jobs:
             -DBUILD_TESTS=On \
             -DBUILD_BENCHMARKS=On \
             -DBUILD_APP=OFF \
-            -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
             -DCMAKE_PREFIX_PATH="$Qt6_DIR/lib/cmake" \
             -DCHATTERINO_STATIC_QT_BUILD=On \
             -DCHATTERINO_GENERATE_COVERAGE=On \
