@@ -28,9 +28,9 @@ void WebSocket::createUserType(sol::table &c2)
     c2.new_usertype<WebSocket>(
         "WebSocket", sol::factories([](const QString &spec) {
             QUrl url(spec);
-            if (url.scheme() != "wss")
+            if (url.scheme() != "wss" && url.scheme() != "ws")
             {
-                throw std::runtime_error("Scheme must be wss://");
+                throw std::runtime_error("Scheme must be wss:// or ws://");
             }
 
             auto self = std::make_shared<WebSocket>();

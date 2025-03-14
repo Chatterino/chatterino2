@@ -25,51 +25,31 @@ namespace beast = boost::beast;
 namespace chatterino {
 
 class WebSocketConnection
-    : public std::enable_shared_from_this<WebSocketConnection>
 {
 public:
     WebSocketConnection(WebSocketOptions options, int id,
                         std::unique_ptr<WebSocketListener> listener,
-                        WebSocketPoolPrivate *parent, asio::io_context &ioc,
-                        asio::ssl::context &ssl);
-    ~WebSocketConnection();
+                        WebSocketPoolPrivate *parent, asio::io_context &ioc);
+    virtual ~WebSocketConnection();
 
     WebSocketConnection(const WebSocketConnection &) = delete;
     WebSocketConnection(WebSocketConnection &&) = delete;
     WebSocketConnection &operator=(const WebSocketConnection &) = delete;
     WebSocketConnection &operator=(WebSocketConnection &&) = delete;
 
-    void run();
-    void close();
+    virtual void run() = 0;
+    virtual void close() = 0;
 
-    void sendText(const QByteArray &data);
-    void sendBinary(const QByteArray &data);
+    virtual void sendText(const QByteArray &data) = 0;
+    virtual void sendBinary(const QByteArray &data) = 0;
 
-    void post(auto &&fn);
-
-private:
-    void fail(boost::system::error_code ec, QStringView op);
-
-    void closeImpl();
+protected:
     void detach();
-
-    void onResolve(boost::system::error_code ec,
-                   const asio::ip::tcp::resolver::results_type &results);
-    void onTcpHandshake(boost::system::error_code ec,
-                        const asio::ip::tcp::resolver::endpoint_type &ep);
-    void onTlsHandshake(boost::system::error_code ec);
-    void onWsHandshake(boost::system::error_code ec);
-
-    void onReadDone(boost::system::error_code ec, size_t bytesRead);
-    void onWriteDone(boost::system::error_code ec, size_t bytesWritten);
-
-    void trySend();
 
     WebSocketOptions options;
     std::unique_ptr<WebSocketListener> listener;  // nullable
     WebSocketPoolPrivate *parent;                 // nullable
 
-    beast::websocket::stream<asio::ssl::stream<beast::tcp_stream>> stream;
     asio::ip::tcp::resolver resolver;
 
     std::deque<std::pair<bool, QByteArrayBuffer>> queuedMessages;
@@ -79,6 +59,88 @@ private:
     beast::flat_buffer readBuffer;
 
     friend QDebug operator<<(QDebug dbg, const WebSocketConnection &conn);
+};
+
+template <typename Derived, typename Inner>
+class WebSocketConnectionHelper : public WebSocketConnection,
+                                  public std::enable_shared_from_this<
+                                      WebSocketConnectionHelper<Derived, Inner>>
+{
+public:
+    using Stream = beast::websocket::stream<Inner>;
+
+    void post(auto &&fn);
+
+    void run() final;
+    void close() final;
+
+    void sendText(const QByteArray &data) final;
+    void sendBinary(const QByteArray &data) final;
+
+protected:
+    Derived *derived();
+
+    void fail(boost::system::error_code ec, QStringView op);
+    void doWsHandshake();
+
+    void closeImpl();
+    void trySend();
+
+    Stream stream;
+
+private:
+    WebSocketConnectionHelper(WebSocketOptions options, int id,
+                              std::unique_ptr<WebSocketListener> listener,
+                              WebSocketPoolPrivate *parent,
+                              asio::io_context &ioc, Stream stream);
+
+    void onResolve(boost::system::error_code ec,
+                   const asio::ip::tcp::resolver::results_type &results);
+    void onTcpHandshake(boost::system::error_code ec,
+                        const asio::ip::tcp::resolver::endpoint_type &ep);
+    void onWsHandshake(boost::system::error_code ec);
+
+    void onReadDone(boost::system::error_code ec, size_t bytesRead);
+    void onWriteDone(boost::system::error_code ec, size_t bytesWritten);
+
+    friend Derived;
+};
+
+class TlsWebSocketConnection
+    : public WebSocketConnectionHelper<TlsWebSocketConnection,
+                                       asio::ssl::stream<beast::tcp_stream>>
+{
+public:
+    static constexpr int DEFAULT_PORT = 443;
+
+    TlsWebSocketConnection(WebSocketOptions options, int id,
+                           std::unique_ptr<WebSocketListener> listener,
+                           WebSocketPoolPrivate *parent, asio::io_context &ioc,
+                           asio::ssl::context &ssl);
+
+protected:
+    bool setupStream(const std::string &host);
+    void afterTcpHandshake();
+
+    friend WebSocketConnectionHelper<TlsWebSocketConnection,
+                                     asio::ssl::stream<beast::tcp_stream>>;
+};
+
+class TcpWebSocketConnection
+    : public WebSocketConnectionHelper<TcpWebSocketConnection,
+                                       beast::tcp_stream>
+{
+public:
+    static constexpr int DEFAULT_PORT = 80;
+
+    TcpWebSocketConnection(WebSocketOptions options, int id,
+                           std::unique_ptr<WebSocketListener> listener,
+                           WebSocketPoolPrivate *parent, asio::io_context &ioc);
+
+protected:
+    void afterTcpHandshake();
+
+    friend WebSocketConnectionHelper<TcpWebSocketConnection, beast::tcp_stream>;
 };
 
 class WebSocketPoolPrivate
@@ -112,11 +174,10 @@ public:
 WebSocketConnection::WebSocketConnection(
     WebSocketOptions options, int id,
     std::unique_ptr<WebSocketListener> listener, WebSocketPoolPrivate *parent,
-    asio::io_context &ioc, asio::ssl::context &ssl)
+    asio::io_context &ioc)
     : options(std::move(options))
     , listener(std::move(listener))
     , parent(parent)
-    , stream(asio::make_strand(ioc), ssl)
     , resolver(asio::make_strand(ioc))
     , id(id)
 {
@@ -138,33 +199,67 @@ QDebug operator<<(QDebug dbg, const WebSocketConnection &conn)
     return dbg;
 }
 
-void WebSocketConnection::run()
+void WebSocketConnection::detach()
+{
+    if (this->listener)
+    {
+        this->listener->onClose(std::move(this->listener));
+    }
+    if (this->parent)
+    {
+        this->parent->removeConnection(this);
+        this->parent = nullptr;
+    }
+    qCDebug(chatterinoWebsocket) << *this << "Detached";
+}
+
+// MARK: WebSocketConnectionHelper
+
+template <typename Derived, typename Inner>
+WebSocketConnectionHelper<Derived, Inner>::WebSocketConnectionHelper(
+    WebSocketOptions options, int id,
+    std::unique_ptr<WebSocketListener> listener, WebSocketPoolPrivate *parent,
+    asio::io_context &ioc, Stream stream)
+    : WebSocketConnection(std::move(options), id, std::move(listener), parent,
+                          ioc)
+    , stream(std::move(stream))
+{
+}
+
+template <typename Derived, typename Inner>
+void WebSocketConnectionHelper<Derived, Inner>::post(auto &&fn)
+{
+    asio::post(this->stream.get_executor(), std::forward<decltype(fn)>(fn));
+}
+
+template <typename Derived, typename Inner>
+void WebSocketConnectionHelper<Derived, Inner>::run()
 {
     auto host = this->options.url.host(QUrl::FullyEncoded).toStdString();
-    // Set SNI Hostname (many hosts need this to handshake successfully)
-    if (::SSL_set_tlsext_host_name(this->stream.next_layer().native_handle(),
-                                   host.c_str()) == 0)
+    if constexpr (requires { this->derived()->setupStream(host); })
     {
-        this->fail({static_cast<int>(::ERR_get_error()),
-                    asio::error::get_ssl_category()},
-                   u"Setting SNI hostname");
-        return;
+        if (!this->derived()->setupStream(host))
+        {
+            return;
+        }
     }
 
     this->resolver.async_resolve(
-        host, std::to_string(this->options.url.port(443)),
-        beast::bind_front_handler(&WebSocketConnection::onResolve,
+        host, std::to_string(this->options.url.port(Derived::DEFAULT_PORT)),
+        beast::bind_front_handler(&WebSocketConnectionHelper::onResolve,
                                   this->shared_from_this()));
 }
 
-void WebSocketConnection::close()
+template <typename Derived, typename Inner>
+void WebSocketConnectionHelper<Derived, Inner>::close()
 {
     this->post([self{this->shared_from_this()}] {
         self->closeImpl();
     });
 }
 
-void WebSocketConnection::sendText(const QByteArray &data)
+template <typename Derived, typename Inner>
+void WebSocketConnectionHelper<Derived, Inner>::sendText(const QByteArray &data)
 {
     this->post([self{this->shared_from_this()}, data] {
         self->queuedMessages.emplace_back(true, data);
@@ -172,7 +267,9 @@ void WebSocketConnection::sendText(const QByteArray &data)
     });
 }
 
-void WebSocketConnection::sendBinary(const QByteArray &data)
+template <typename Derived, typename Inner>
+void WebSocketConnectionHelper<Derived, Inner>::sendBinary(
+    const QByteArray &data)
 {
     this->post([self{this->shared_from_this()}, data] {
         self->queuedMessages.emplace_back(false, data);
@@ -180,7 +277,14 @@ void WebSocketConnection::sendBinary(const QByteArray &data)
     });
 }
 
-void WebSocketConnection::onResolve(
+template <typename Derived, typename Inner>
+Derived *WebSocketConnectionHelper<Derived, Inner>::derived()
+{
+    return static_cast<Derived *>(this);
+}
+
+template <typename Derived, typename Inner>
+void WebSocketConnectionHelper<Derived, Inner>::onResolve(
     boost::system::error_code ec,
     const asio::ip::tcp::resolver::results_type &results)
 {
@@ -196,11 +300,12 @@ void WebSocketConnection::onResolve(
         .expires_after(std::chrono::seconds{30});
     beast::get_lowest_layer(this->stream)
         .async_connect(results, beast::bind_front_handler(
-                                    &WebSocketConnection::onTcpHandshake,
+                                    &WebSocketConnectionHelper::onTcpHandshake,
                                     this->shared_from_this()));
 }
 
-void WebSocketConnection::onTcpHandshake(
+template <typename Derived, typename Inner>
+void WebSocketConnectionHelper<Derived, Inner>::onTcpHandshake(
     boost::system::error_code ec,
     const asio::ip::tcp::resolver::endpoint_type &ep)
 {
@@ -211,28 +316,14 @@ void WebSocketConnection::onTcpHandshake(
     }
 
     qCDebug(chatterinoWebsocket) << *this << "TCP handshake done";
-
-    beast::get_lowest_layer(this->stream)
-        .expires_after(std::chrono::seconds{30});
     this->options.url.setPort(ep.port());
-    this->stream.next_layer().async_handshake(
-        asio::ssl::stream_base::client,
-        beast::bind_front_handler(&WebSocketConnection::onTlsHandshake,
-                                  this->shared_from_this()));
+
+    this->derived()->afterTcpHandshake();
 }
 
-void WebSocketConnection::onTlsHandshake(boost::system::error_code ec)
+template <typename Derived, typename Inner>
+void WebSocketConnectionHelper<Derived, Inner>::doWsHandshake()
 {
-    if (ec)
-    {
-        this->fail(ec, u"TLS handshake");
-        return;
-    }
-
-    qCDebug(chatterinoWebsocket)
-        << *this << "TLS handshake done, using"
-        << ::SSL_get_version(this->stream.next_layer().native_handle());
-
     beast::get_lowest_layer(this->stream).expires_never();
     this->stream.set_option(beast::websocket::stream_base::timeout::suggested(
         beast::role_type::client));
@@ -243,7 +334,7 @@ void WebSocketConnection::onTlsHandshake(boost::system::error_code ec)
     });
 
     auto host = this->options.url.host(QUrl::FullyEncoded).toStdString() + ':' +
-                std::to_string(this->options.url.port(443));
+                std::to_string(this->options.url.port(Derived::DEFAULT_PORT));
     auto path = this->options.url.path(QUrl::FullyEncoded).toStdString();
     if (path.empty())
     {
@@ -251,11 +342,13 @@ void WebSocketConnection::onTlsHandshake(boost::system::error_code ec)
     }
     this->stream.async_handshake(
         host, path,
-        beast::bind_front_handler(&WebSocketConnection::onWsHandshake,
+        beast::bind_front_handler(&WebSocketConnectionHelper::onWsHandshake,
                                   this->shared_from_this()));
 }
 
-void WebSocketConnection::onWsHandshake(boost::system::error_code ec)
+template <typename Derived, typename Inner>
+void WebSocketConnectionHelper<Derived, Inner>::onWsHandshake(
+    boost::system::error_code ec)
 {
     if (ec)
     {
@@ -268,12 +361,13 @@ void WebSocketConnection::onWsHandshake(boost::system::error_code ec)
     this->trySend();
     this->stream.async_read(
         this->readBuffer,
-        beast::bind_front_handler(&WebSocketConnection::onReadDone,
+        beast::bind_front_handler(&WebSocketConnectionHelper::onReadDone,
                                   this->shared_from_this()));
 }
 
-void WebSocketConnection::onReadDone(boost::system::error_code ec,
-                                     size_t bytesRead)
+template <typename Derived, typename Inner>
+void WebSocketConnectionHelper<Derived, Inner>::onReadDone(
+    boost::system::error_code ec, size_t bytesRead)
 {
     if (!this->listener)
     {
@@ -303,12 +397,13 @@ void WebSocketConnection::onReadDone(boost::system::error_code ec,
 
     this->stream.async_read(
         this->readBuffer,
-        beast::bind_front_handler(&WebSocketConnection::onReadDone,
+        beast::bind_front_handler(&WebSocketConnectionHelper::onReadDone,
                                   this->shared_from_this()));
 }
 
-void WebSocketConnection::onWriteDone(boost::system::error_code ec,
-                                      size_t /*bytesWritten*/)
+template <typename Derived, typename Inner>
+void WebSocketConnectionHelper<Derived, Inner>::onWriteDone(
+    boost::system::error_code ec, size_t /*bytesWritten*/)
 {
     if (!this->queuedMessages.empty())
     {
@@ -329,7 +424,8 @@ void WebSocketConnection::onWriteDone(boost::system::error_code ec,
     this->trySend();
 }
 
-void WebSocketConnection::trySend()
+template <typename Derived, typename Inner>
+void WebSocketConnectionHelper<Derived, Inner>::trySend()
 {
     if (this->queuedMessages.empty() || this->isSending ||
         !this->stream.is_open())
@@ -341,35 +437,33 @@ void WebSocketConnection::trySend()
     this->stream.text(this->queuedMessages.front().first);
     this->stream.async_write(
         this->queuedMessages.front().second,
-        beast::bind_front_handler(&WebSocketConnection::onWriteDone,
+        beast::bind_front_handler(&WebSocketConnectionHelper::onWriteDone,
                                   this->shared_from_this()));
 }
 
-void WebSocketConnection::closeImpl()
+template <typename Derived, typename Inner>
+void WebSocketConnectionHelper<Derived, Inner>::closeImpl()
 {
     qCDebug(chatterinoWebsocket) << *this << "Closing...";
     this->stream.async_close(
         beast::websocket::close_code::normal,
-        [self{this->shared_from_this()}](auto ec) {
+        [this, lifetime{this->shared_from_this()}](auto ec) {
             if (ec)
             {
-                qCWarning(chatterinoWebsocket)
-                    << *self << "Failed to close" << ec.message();
+                qCWarning(chatterinoWebsocket) << *this << "Failed to close"
+                                               << QUtf8StringView(ec.message());
             }
             else
             {
-                qCDebug(chatterinoWebsocket) << *self << "Closed";
+                qCDebug(chatterinoWebsocket) << *this << "Closed";
             }
-            self->detach();
+            this->detach();
         });
 }
 
-void WebSocketConnection::post(auto &&fn)
-{
-    asio::post(this->stream.get_executor(), std::forward<decltype(fn)>(fn));
-}
-
-void WebSocketConnection::fail(boost::system::error_code ec, QStringView op)
+template <typename Derived, typename Inner>
+void WebSocketConnectionHelper<Derived, Inner>::fail(
+    boost::system::error_code ec, QStringView op)
 {
     qCWarning(chatterinoWebsocket)
         << *this << "Failed:" << op << QUtf8StringView(ec.message());
@@ -380,18 +474,67 @@ void WebSocketConnection::fail(boost::system::error_code ec, QStringView op)
     this->detach();
 }
 
-void WebSocketConnection::detach()
+// MARK: TlsWebSocketConnection
+
+TlsWebSocketConnection::TlsWebSocketConnection(
+    WebSocketOptions options, int id,
+    std::unique_ptr<WebSocketListener> listener, WebSocketPoolPrivate *parent,
+    asio::io_context &ioc, asio::ssl::context &ssl)
+    : WebSocketConnectionHelper(std::move(options), id, std::move(listener),
+                                parent, ioc,
+                                Stream{asio::make_strand(ioc), ssl})
 {
-    if (this->listener)
+}
+
+bool TlsWebSocketConnection::setupStream(const std::string &host)
+{
+    // Set SNI Hostname (many hosts need this to handshake successfully)
+    if (::SSL_set_tlsext_host_name(this->stream.next_layer().native_handle(),
+                                   host.c_str()) == 0)
     {
-        this->listener->onClose(std::move(this->listener));
+        this->fail({static_cast<int>(::ERR_get_error()),
+                    asio::error::get_ssl_category()},
+                   u"Setting SNI hostname");
+        return false;
     }
-    if (this->parent)
-    {
-        this->parent->removeConnection(this);
-        this->parent = nullptr;
-    }
-    qCDebug(chatterinoWebsocket) << *this << "Detached";
+    return true;
+}
+
+void TlsWebSocketConnection::afterTcpHandshake()
+{
+    beast::get_lowest_layer(this->stream)
+        .expires_after(std::chrono::seconds{30});
+    this->stream.next_layer().async_handshake(
+        asio::ssl::stream_base::client,
+        [this,
+         lifetime{this->shared_from_this()}](boost::system::error_code ec) {
+            if (ec)
+            {
+                this->fail(ec, u"TLS handshake");
+                return;
+            }
+
+            qCDebug(chatterinoWebsocket)
+                << *this << "TLS handshake done, using"
+                << ::SSL_get_version(this->stream.next_layer().native_handle());
+            this->doWsHandshake();
+        });
+}
+
+// MARK: TcpWebSocketConnection
+
+TcpWebSocketConnection::TcpWebSocketConnection(
+    WebSocketOptions options, int id,
+    std::unique_ptr<WebSocketListener> listener, WebSocketPoolPrivate *parent,
+    asio::io_context &ioc)
+    : WebSocketConnectionHelper(std::move(options), id, std::move(listener),
+                                parent, ioc, Stream{asio::make_strand(ioc)})
+{
+}
+
+void TcpWebSocketConnection::afterTcpHandshake()
+{
+    this->doWsHandshake();
 }
 
 // MARK: WebSocketPoolPrivate
@@ -458,9 +601,25 @@ WebSocketHandle WebSocketPool::createSocket(
         return {{}};
     }
 
-    auto conn = std::make_shared<WebSocketConnection>(
-        std::move(options), this->data->nextID++, std::move(listener),
-        this->data.get(), this->data->ioc, this->data->ssl);
+    std::shared_ptr<WebSocketConnection> conn;
+
+    if (options.url.scheme() == "wss")
+    {
+        conn = std::make_shared<TlsWebSocketConnection>(
+            std::move(options), this->data->nextID++, std::move(listener),
+            this->data.get(), this->data->ioc, this->data->ssl);
+    }
+    else if (options.url.scheme() == "ws")
+    {
+        conn = std::make_shared<TcpWebSocketConnection>(
+            std::move(options), this->data->nextID++, std::move(listener),
+            this->data.get(), this->data->ioc);
+    }
+    else
+    {
+        qCWarning(chatterinoWebsocket) << "Invalid scheme:" << options.url;
+        return {{}};
+    }
 
     {
         std::unique_lock guard(this->data->connectionMutex);
