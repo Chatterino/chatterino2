@@ -265,10 +265,10 @@ function c2.HTTPRequest.create(method, url) end
 ---@field on_binary fun(data: string)|nil Handler called when the socket receives a binary message.
 c2.WebSocket = {}
 
---- Creates and connects to a WebSocket server. Only TLS connections are
---- supported. Upon calling this, a connection is made immediately.
+--- Creates and connects to a WebSocket server. Upon calling this, a
+--- connection is made immediately.
 ---
----@param url string The URL to connect to. Must start with `wss://`.
+---@param url string The URL to connect to. Must start with `wss://` or `ws://`.
 ---@return c2.WebSocket
 ---@nodiscard
 function c2.WebSocket.new(url) end
