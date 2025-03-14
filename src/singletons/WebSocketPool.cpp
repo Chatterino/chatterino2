@@ -15,8 +15,10 @@
 #include <boost/certify/https_verification.hpp>
 #include <QDebug>
 
+#include <deque>
 #include <thread>
 #include <utility>
+
 
 namespace asio = boost::asio;
 namespace beast = boost::beast;
@@ -32,6 +34,11 @@ public:
                         WebSocketPoolPrivate *parent, asio::io_context &ioc,
                         asio::ssl::context &ssl);
     ~WebSocketConnection();
+
+    WebSocketConnection(const WebSocketConnection &) = delete;
+    WebSocketConnection(WebSocketConnection &&) = delete;
+    WebSocketConnection &operator=(const WebSocketConnection &) = delete;
+    WebSocketConnection &operator=(WebSocketConnection &&) = delete;
 
     void run();
     void close();

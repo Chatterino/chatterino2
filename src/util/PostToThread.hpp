@@ -9,11 +9,10 @@ namespace chatterino {
 // Taken from
 // https://stackoverflow.com/questions/21646467/how-to-execute-a-functor-or-a-lambda-in-a-given-thread-in-qt-gcd-style
 // Qt 5/4 - preferred, has least allocations
-static void postToThread(auto &&fun,
-                         QObject *obj = QCoreApplication::instance())
+static void postToThread(auto &&f, QObject *obj = QCoreApplication::instance())
 {
     struct Event : public QEvent {
-        using Fun = typename std::decay_t<decltype(fun)>;
+        using Fun = typename std::decay_t<decltype(f)>;
         Fun fun;
 
         Event(decltype(fun) f)
@@ -31,8 +30,7 @@ static void postToThread(auto &&fun,
             fun();
         }
     };
-    QCoreApplication::postEvent(obj,
-                                new Event(std::forward<decltype(fun)>(fun)));
+    QCoreApplication::postEvent(obj, new Event(std::forward<decltype(f)>(f)));
 }
 
 static void runInGuiThread(auto &&fun)

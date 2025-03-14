@@ -3,7 +3,7 @@
 
 #    include "singletons/WebSocketPool.hpp"
 
-#    include <sol/forward.hpp>
+#    include <sol/protected_function.hpp>
 #    include <sol/types.hpp>
 
 namespace chatterino::lua::api {
