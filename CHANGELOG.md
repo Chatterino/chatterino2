@@ -65,6 +65,7 @@
 - Dev: Updated `qtkeychain` to 0.15.0. (#5871)
 - Dev: Updated `googletest` to 1.16.0. (#5942)
 - Dev: Fixed duplicate CMake configure in clean builds. (#5940)
+- Dev: Enable plugins in builds by default. (#6075)
 - Dev: BTTV emotes are now loaded as WEBP. (#5957)
 - Dev: Reduced time we wait for PubSub connections to cleanly exit from 1s to 100ms. (#6019)
 - Dev: Build with Qt 6.4.3 in CI. (#6032)
