@@ -76,6 +76,20 @@ void Button::setPixmap(const QPixmap &_pixmap)
     this->update();
 }
 
+void Button::setSvgResource(const QString &resourcePath)
+{
+    if (resourcePath == this->svgResourcePath)
+    {
+        // Same resource path as before - nothing changed
+        return;
+    }
+
+    this->svgRenderer = new QSvgRenderer(resourcePath, this);
+    this->svgResourcePath = resourcePath;
+
+    this->update();
+}
+
 const QPixmap &Button::getPixmap() const
 {
     return this->pixmap_;
@@ -176,7 +190,13 @@ void Button::paintButton(QPainter &painter)
 {
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    if (!this->pixmap_.isNull())
+    if (this->svgRenderer != nullptr)
+    {
+        painter.setOpacity(this->getCurrentDimAmount());
+
+        this->svgRenderer->render(&painter);
+    }
+    else if (!this->pixmap_.isNull())
     {
         painter.setOpacity(this->getCurrentDimAmount());
 
