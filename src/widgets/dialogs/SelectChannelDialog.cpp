@@ -73,8 +73,9 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     layout->addWidget(ui.whispers);
 
     ui.whispersLabel = new QLabel(
-        "Shows the whispers that you receive\nwhile Chatterino is running");
+        "Shows the whispers that you receive while Chatterino is running");
     ui.whispersLabel->setVisible(false);
+    ui.whispersLabel->setWordWrap(true);
     layout->addWidget(ui.whispersLabel);
 
     QObject::connect(ui.whispers, &AutoCheckedRadioButton::toggled, this,
@@ -90,8 +91,9 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     layout->addWidget(ui.mentions);
 
     ui.mentionsLabel = new QLabel(
-        "Shows all the messages that\nhighlight you from any channel");
+        "Shows all the messages that highlight you from any channel");
     ui.mentionsLabel->setVisible(false);
+    ui.mentionsLabel->setWordWrap(true);
     layout->addWidget(ui.mentionsLabel);
 
     QObject::connect(ui.mentions, &AutoCheckedRadioButton::toggled, this,
@@ -138,9 +140,10 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     ui.automod = new AutoCheckedRadioButton("AutoMod");
     layout->addWidget(ui.automod);
 
-    ui.automodLabel = new QLabel("Shows when AutoMod catches a message\nin "
+    ui.automodLabel = new QLabel("Shows when AutoMod catches a message in "
                                  "any channel you moderate.");
     ui.automodLabel->setVisible(false);
+    ui.automodLabel->setWordWrap(true);
     layout->addWidget(ui.automodLabel);
 
     QObject::connect(ui.automod, &AutoCheckedRadioButton::toggled, this,
