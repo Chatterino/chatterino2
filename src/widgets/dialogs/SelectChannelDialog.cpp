@@ -37,7 +37,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
     this->tabFilter_.dialog = this;
 
-    auto *layout = new QVBoxLayout;
+    auto *layout = new QVBoxLayout(this);
 
     auto &ui = this->ui_;
     // Channel
@@ -163,8 +163,6 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     QObject::connect(buttonBox, &QDialogButtonBox::rejected, [this] {
         this->close();
     });
-
-    this->setLayout(layout);
 
     this->addShortcuts();
 
