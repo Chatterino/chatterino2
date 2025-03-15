@@ -270,6 +270,8 @@ public:
                                             const QVariantMap &tags,
                                             const QTime &time);
 
+    static MessagePtrMut makeMissingScopesMessage(const QString &missingScopes);
+
     /// "Chat has been cleared by a moderator." or "{actor} cleared the chat."
     /// @param actor The user who cleared the chat (empty if unknown)
     /// @param count How many times this message has been received already
