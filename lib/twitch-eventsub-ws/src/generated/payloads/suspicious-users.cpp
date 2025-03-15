@@ -53,6 +53,10 @@ boost::json::result_for<Type, boost::json::value>::type tag_invoke(
     {
         return Type::Manual;
     }
+    if (eString == "manually_added"sv)
+    {
+        return Type::Manual;
+    }
     if (eString == "ban_evader_detector"sv)
     {
         return Type::BanEvaderDetector;

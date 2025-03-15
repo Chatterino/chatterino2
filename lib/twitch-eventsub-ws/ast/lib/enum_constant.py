@@ -18,12 +18,14 @@ class EnumConstant:
     ) -> None:
         self.name = name
         self.json_name = name
+        self.json_extra_enum_constant_names: list[str] = []
         self.tag: Optional[str] = None
 
         self.dont_fail_on_deserialization: bool = False
 
     def apply_comment_commands(self, comment_commands: CommentCommands) -> None:
         self.json_name = comment_commands.apply_name_transform(self.json_name)
+        self.json_extra_enum_constant_names = comment_commands.extra_enum_constant_names
         self.tag = comment_commands.tag
         self.dont_fail_on_deserialization = comment_commands.dont_fail_on_deserialization
 
