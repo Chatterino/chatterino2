@@ -4,6 +4,7 @@
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "util/QByteArrayBuffer.hpp"
+#include "util/RenameThread.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ssl/context.hpp>
@@ -608,6 +609,7 @@ WebSocketPoolPrivate::WebSocketPoolPrivate()
     this->ioThread = std::make_unique<std::thread>([this] {
         this->ioc.run();
     });
+    renameThread(*this->ioThread, "WebSocketPool");
 }
 
 WebSocketPoolPrivate::~WebSocketPoolPrivate()
