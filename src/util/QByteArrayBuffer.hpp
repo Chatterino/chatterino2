@@ -5,6 +5,8 @@
 
 namespace chatterino {
 
+/// A ConstBufferSequence over a single QByteArray.
+/// https://www.boost.org/doc/libs/1_87_0/doc/html/boost_asio/reference/ConstBufferSequence.html
 struct QByteArrayBuffer {
     struct QByteArrayHolder {
         QByteArray data;

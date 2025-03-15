@@ -351,8 +351,10 @@ void WebSocketConnectionHelper<Derived, Inner>::doWsHandshake()
             bool hasUa = false;
             for (const auto &[key, value] : this->options.headers)
             {
-                if (QUtf8StringView("user-agent")
-                        .compare(key, Qt::CaseInsensitive) == 0)
+                // TODO(Qt 6.5): Use QUtf8StringView
+                QLatin1StringView keyView(key.c_str());
+                if (QLatin1StringView("user-agent")
+                        .compare(keyView, Qt::CaseInsensitive) == 0)
                 {
                     hasUa = true;
                 }
