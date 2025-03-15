@@ -53,7 +53,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     layout->addWidget(ui.channelName);
 
     QObject::connect(ui.channel, &AutoCheckedRadioButton::toggled, this,
-                     [this](bool enabled) mutable {
+                     [this](bool enabled) {
                          auto &ui = this->ui_;
                          if (enabled)
                          {
@@ -78,7 +78,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     layout->addWidget(ui.whispersLabel);
 
     QObject::connect(ui.whispers, &AutoCheckedRadioButton::toggled, this,
-                     [this](bool enabled) mutable {
+                     [this](bool enabled) {
                          auto &ui = this->ui_;
                          ui.whispersLabel->setVisible(enabled);
                      });
@@ -95,7 +95,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     layout->addWidget(ui.mentionsLabel);
 
     QObject::connect(ui.mentions, &AutoCheckedRadioButton::toggled, this,
-                     [this](bool enabled) mutable {
+                     [this](bool enabled) {
                          auto &ui = this->ui_;
                          ui.mentionsLabel->setVisible(enabled);
                      });
@@ -111,7 +111,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     layout->addWidget(ui.watchingLabel);
 
     QObject::connect(ui.watching, &AutoCheckedRadioButton::toggled, this,
-                     [this](bool enabled) mutable {
+                     [this](bool enabled) {
                          auto &ui = this->ui_;
                          ui.watchingLabel->setVisible(enabled);
                      });
@@ -127,7 +127,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     layout->addWidget(ui.liveLabel);
 
     QObject::connect(ui.live, &AutoCheckedRadioButton::toggled, this,
-                     [this](bool enabled) mutable {
+                     [this](bool enabled) {
                          auto &ui = this->ui_;
                          ui.liveLabel->setVisible(enabled);
                      });
@@ -144,7 +144,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     layout->addWidget(ui.automodLabel);
 
     QObject::connect(ui.automod, &AutoCheckedRadioButton::toggled, this,
-                     [this](bool enabled) mutable {
+                     [this](bool enabled) {
                          auto &ui = this->ui_;
                          ui.automodLabel->setVisible(enabled);
                      });
