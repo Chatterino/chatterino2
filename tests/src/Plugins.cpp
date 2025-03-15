@@ -638,4 +638,140 @@ TEST_F(PluginTest, tryCallTest)
     }
 }
 
+TEST_F(PluginTest, testTcpWebSocket)
+{
+    configure({PluginPermission{{{"type", "Network"}}}});
+
+    RequestWaiter waiter;
+    std::vector<std::pair<bool, QByteArray>> messages;
+    lua->set("done", [&] {
+        waiter.requestDone();
+    });
+    lua->set("add", [&](bool isText, QByteArray data) {
+        messages.emplace_back(isText, std::move(data));
+    });
+
+    lua->script(R"lua(
+        local ws = c2.WebSocket.new("ws://127.0.0.1:9052/echo")
+        ws.on_text = function(data)
+            add(true, data)
+        end
+        local any_msg = false
+        ws.on_binary = function(data)
+            if not any_msg then
+                any_msg = true
+                ws:send_text(string.rep("a", 1 << 15))
+                ws:send_binary("wow")
+                ws:send_text("/HEADER user-agent")
+                ws:send_binary("/CLOSE")
+            end
+            add(false, data)
+        end
+        ws.on_close = function()
+            done()
+        end
+        ws:send_text("message1")
+        ws:send_text("message2")
+        ws:send_text("message3")
+        ws:send_binary("message4")
+    )lua");
+
+    waiter.waitForRequest();
+
+    ASSERT_EQ(messages.size(), 7);
+    ASSERT_EQ(messages[0].first, true);
+    ASSERT_EQ(messages[0].second, "message1");
+    ASSERT_EQ(messages[1].first, true);
+    ASSERT_EQ(messages[1].second, "message2");
+    ASSERT_EQ(messages[2].first, true);
+    ASSERT_EQ(messages[2].second, "message3");
+    ASSERT_EQ(messages[3].first, false);
+    ASSERT_EQ(messages[3].second, "message4");
+    ASSERT_EQ(messages[4].first, true);
+    ASSERT_EQ(messages[4].second, QByteArray(1 << 15, 'a'));
+    ASSERT_EQ(messages[5].first, false);
+    ASSERT_EQ(messages[5].second, "wow");
+    ASSERT_EQ(messages[6].first, true);
+    ASSERT_TRUE(messages[6].second.startsWith("Chatterino"));
+}
+
+TEST_F(PluginTest, testTlsWebSocket)
+{
+    configure({PluginPermission{{{"type", "Network"}}}});
+
+    RequestWaiter waiter;
+    std::vector<std::pair<bool, QByteArray>> messages;
+    lua->set("done", [&] {
+        waiter.requestDone();
+    });
+    lua->set("add", [&](bool isText, QByteArray data) {
+        messages.emplace_back(isText, std::move(data));
+    });
+
+    lua->script(R"lua(
+        local ws = c2.WebSocket.new("wss://127.0.0.1:9050/echo", { 
+            headers = {
+                ["User-Agent"] = "Lua",
+                ["A-Header"] = "A value",
+                ["Referer"] = "https://chatterino.com",
+            },
+        })
+        ws.on_text = function(data)
+            add(true, data)
+        end
+        local any_msg = false
+        ws.on_binary = function(data)
+            if not any_msg then
+                any_msg = true
+                ws:send_text(string.rep("a", 1 << 15))
+                ws:send_binary("wow")
+                ws:send_text("/HEADER user-agent")
+                ws:send_text("/HEADER a-header")
+                ws:send_text("/HEADER referer")
+                ws:send_binary("/CLOSE")
+            end
+            add(false, data)
+        end
+        ws.on_close = function()
+            done()
+        end
+        ws:send_text("message1")
+        ws:send_text("message2")
+        ws:send_text("message3")
+        ws:send_binary("message4")
+    )lua");
+
+    waiter.waitForRequest();
+
+    ASSERT_EQ(messages.size(), 9);
+    ASSERT_EQ(messages[0].first, true);
+    ASSERT_EQ(messages[0].second, "message1");
+    ASSERT_EQ(messages[1].first, true);
+    ASSERT_EQ(messages[1].second, "message2");
+    ASSERT_EQ(messages[2].first, true);
+    ASSERT_EQ(messages[2].second, "message3");
+    ASSERT_EQ(messages[3].first, false);
+    ASSERT_EQ(messages[3].second, "message4");
+    ASSERT_EQ(messages[4].first, true);
+    ASSERT_EQ(messages[4].second, QByteArray(1 << 15, 'a'));
+    ASSERT_EQ(messages[5].first, false);
+    ASSERT_EQ(messages[5].second, "wow");
+    ASSERT_EQ(messages[6].first, true);
+    ASSERT_EQ(messages[6].second, "Lua");
+    ASSERT_EQ(messages[7].first, true);
+    ASSERT_EQ(messages[7].second, "A value");
+    ASSERT_EQ(messages[8].first, true);
+    ASSERT_EQ(messages[8].second, "https://chatterino.com");
+}
+
+TEST_F(PluginTest, testWebSocketNoPerms)
+{
+    configure();
+
+    bool res = lua->script(R"lua(
+        return c2["WebSocket"] == nil
+    )lua");
+    ASSERT_TRUE(res);
+}
+
 #endif

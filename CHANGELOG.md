@@ -22,6 +22,7 @@
 - Minor: Messages from restricted users can now be hidden when in streamer mode. This is enabled by default. (#6042, #6049)
 - Minor: Added a tab style option allowing you to make your tabs more compact. (#5858)
 - Minor: Chatterino now warns about missing scopes when logging in. (#6072)
+- Minor: Added WebSocket API for plugins. (#6076)
 - Bugfix: Fixed a potential way to escape the Lua Plugin sandbox. (#5846)
 - Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
 - Bugfix: Fixed a crash that could occur on Linux and macOS when clicking "Install" from the update prompt. (#5818)
