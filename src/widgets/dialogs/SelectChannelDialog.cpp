@@ -283,98 +283,81 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
 
     auto &ui = this->dialog->ui_;
 
-    switch (event->type())
+    if (event->type() == QEvent::KeyPress)
     {
-        case QEvent::KeyPress: {
-            auto *keyEvent = dynamic_cast<QKeyEvent *>(event);
-            assert(keyEvent);
+        auto *keyEvent = dynamic_cast<QKeyEvent *>(event);
+        assert(keyEvent);
 
-            if ((keyEvent->key() == Qt::Key_Tab ||
-                 keyEvent->key() == Qt::Key_Down) &&
-                keyEvent->modifiers() == Qt::NoModifier)
+        if ((keyEvent->key() == Qt::Key_Tab ||
+             keyEvent->key() == Qt::Key_Down) &&
+            keyEvent->modifiers() == Qt::NoModifier)
+        {
+            // Tab has been pressed, focus next entry in list
+
+            if (widget == ui.channelName)
             {
-                // Tab has been pressed, focus next entry in list
-
-                if (widget == ui.channelName)
-                {
-                    // Special case for when current selection is the "Channel" entry's edit box since the Edit box actually has the focus
-                    ui.whispers->setFocus();
-                    return true;
-                }
-
-                if (widget == ui.automod)
-                {
-                    // Special case for when current selection is "AutoMod" (the last entry in the list), next wrap is Channel, but we need to select its edit box
-                    ui.channel->setFocus();
-                    return true;
-                }
-
-                auto *nextInFocusChain = widget->nextInFocusChain();
-                if (nextInFocusChain->focusPolicy() == Qt::FocusPolicy::NoFocus)
-                {
-                    // Make sure we're not selecting one of the labels
-                    nextInFocusChain = nextInFocusChain->nextInFocusChain();
-                }
-                nextInFocusChain->setFocus();
+                // Special case for when current selection is the "Channel" entry's edit box since the Edit box actually has the focus
+                ui.whispers->setFocus();
                 return true;
             }
 
-            if (((keyEvent->key() == Qt::Key_Tab ||
-                  keyEvent->key() == Qt::Key_Backtab) &&
-                 keyEvent->modifiers() == Qt::ShiftModifier) ||
-                ((keyEvent->key() == Qt::Key_Up) &&
-                 keyEvent->modifiers() == Qt::NoModifier))
+            if (widget == ui.automod)
             {
-                // Shift+Tab has been pressed, focus previous entry in list
-
-                if (widget == ui.channelName)
-                {
-                    // Special case for when current selection is the "Channel" entry's edit box since the Edit box actually has the focus
-                    ui.automod->setFocus();
-                    return true;
-                }
-
-                if (widget == ui.whispers)
-                {
-                    ui.channel->setFocus();
-                    return true;
-                }
-
-                auto *previousInFocusChain = widget->previousInFocusChain();
-                if (previousInFocusChain->focusPolicy() ==
-                    Qt::FocusPolicy::NoFocus)
-                {
-                    // Make sure we're not selecting one of the labels
-                    previousInFocusChain =
-                        previousInFocusChain->previousInFocusChain();
-                }
-                previousInFocusChain->setFocus();
+                // Special case for when current selection is "AutoMod" (the last entry in the list), next wrap is Channel, but we need to select its edit box
+                ui.channel->setFocus();
                 return true;
             }
 
-            if (keyEvent == QKeySequence::DeleteStartOfWord &&
-                ui.channelName->selectionLength() > 0)
+            auto *nextInFocusChain = widget->nextInFocusChain();
+            if (nextInFocusChain->focusPolicy() == Qt::FocusPolicy::NoFocus)
             {
-                ui.channelName->backspace();
-                return true;
+                // Make sure we're not selecting one of the labels
+                nextInFocusChain = nextInFocusChain->nextInFocusChain();
             }
-
-            return false;
+            nextInFocusChain->setFocus();
+            return true;
         }
-        break;
 
-        case QEvent::KeyRelease: {
-            auto *keyEvent = dynamic_cast<QKeyEvent *>(event);
-            assert(keyEvent);
+        if (((keyEvent->key() == Qt::Key_Tab ||
+              keyEvent->key() == Qt::Key_Backtab) &&
+             keyEvent->modifiers() == Qt::ShiftModifier) ||
+            ((keyEvent->key() == Qt::Key_Up) &&
+             keyEvent->modifiers() == Qt::NoModifier))
+        {
+            // Shift+Tab has been pressed, focus previous entry in list
 
-            if ((keyEvent->key() == Qt::Key_Backtab ||
-                 keyEvent->key() == Qt::Key_Down) &&
-                keyEvent->modifiers() == Qt::NoModifier)
+            if (widget == ui.channelName)
             {
+                // Special case for when current selection is the "Channel" entry's edit box since the Edit box actually has the focus
+                ui.automod->setFocus();
                 return true;
             }
+
+            if (widget == ui.whispers)
+            {
+                ui.channel->setFocus();
+                return true;
+            }
+
+            auto *previousInFocusChain = widget->previousInFocusChain();
+            if (previousInFocusChain->focusPolicy() == Qt::FocusPolicy::NoFocus)
+            {
+                // Make sure we're not selecting one of the labels
+                previousInFocusChain =
+                    previousInFocusChain->previousInFocusChain();
+            }
+            previousInFocusChain->setFocus();
+            return true;
         }
-        break;
+
+        if (keyEvent == QKeySequence::DeleteStartOfWord &&
+            ui.channelName->selectionLength() > 0)
+        {
+            ui.channelName->backspace();
+            return true;
+        }
+
+        return false;
     }
 
     return false;
