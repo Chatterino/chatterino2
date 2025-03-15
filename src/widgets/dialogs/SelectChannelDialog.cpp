@@ -37,7 +37,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
     this->tabFilter_.dialog = this;
 
-    auto *layout = new QVBoxLayout(this);
+    auto *layout = new QVBoxLayout(this->getLayoutContainer());
 
     auto &ui = this->ui_;
     // Channel
