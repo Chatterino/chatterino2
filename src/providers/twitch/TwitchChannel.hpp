@@ -465,8 +465,26 @@ private:
     bool staff_ = false;
     UniqueAccess<QString> roomID_;
 
-    // --
+    // Duplicate messages
     QString lastSentMessage_;
+    mutable int lastSentMessagePermutationIndex_{0};
+    QString createDuplicateMessageVariant(const QString &message) const;
+    QString createSpacePermutation(const QString &message,
+                                   const QVector<int> &spacePositions,
+                                   int permBits) const;
+    QString createMagicPermutation(const QString &message,
+                                   const QVector<int> &spacePositions,
+                                   int spacePermCount, int index,
+                                   int level) const;
+    void calculateMagicGroups(int spacePermCount, int &magicGroups,
+                              int &totalPermutations,
+                              int &truncatedGroupCount) const;
+    void findPermutationGroup(int permIndex, int spacePermCount,
+                              int magicGroups, int truncatedGroupCount,
+                              int &group, int &groupStart,
+                              int &localIndex) const;
+
+    // --
     QObject lifetimeGuard_;
     QTimer chattersListTimer_;
     QTimer threadClearTimer_;

@@ -67,6 +67,8 @@ namespace {
 #else
     const QString MAGIC_MESSAGE_SUFFIX = QString::fromUtf8(u8" \U000E0000");
 #endif
+    constexpr int TARGET_PERMUTATION_COUNT = 4;
+    constexpr int MAX_MAGIC_CHARACTERS = 1;
     constexpr int CLIP_CREATION_COOLDOWN = 5000;
     const QString CLIPS_LINK("https://clips.twitch.tv/%1");
     const QString CLIPS_FAILURE_CLIPS_UNAVAILABLE_TEXT(
@@ -694,6 +696,184 @@ void TwitchChannel::roomIdChanged()
         std::dynamic_pointer_cast<TwitchChannel>(shared_from_this()));
 }
 
+QString TwitchChannel::createDuplicateMessageVariant(
+    const QString &message) const
+{
+    // Collect positions of all spaces (skip first space for commands)
+    QVector<int> spacePositions;
+    bool isCommand = message.startsWith('/') || message.startsWith('.');
+    for (int i = 0; i < message.length(); ++i)
+    {
+        if (message.at(i) == ' ')
+        {
+            if (isCommand && spacePositions.isEmpty())
+                continue;
+            spacePositions.append(i);
+        }
+    }
+
+    int spaceCount = spacePositions.size();
+    // Total pure space permutations: 2^(spaceCount)
+    int spacePermCount = 1 << spaceCount;
+
+    // Calculate magic groups and total permutations
+    int magicGroups = 0;
+    int totalPermutations = spacePermCount;  // Group 0 count
+    int truncatedGroupCount = 0;  // if the last magic group is truncated
+    this->calculateMagicGroups(spacePermCount, magicGroups, totalPermutations,
+                               truncatedGroupCount);
+
+    // Pre-increment the index because the original message is the permutation with index 0
+    int permIndex =
+        (this->lastSentMessagePermutationIndex_ + 1) % totalPermutations;
+    this->lastSentMessagePermutationIndex_ = permIndex;
+
+    qCDebug(chatterinoTwitch)
+        << "Duplicate message with permIndex:" << permIndex
+        << "spaceCount:" << spaceCount << "spacePermCount:" << spacePermCount
+        << "magicGroups:" << magicGroups;
+
+    // Determine which group the permutation falls into
+    int group = 0;
+    int groupStart = 0;
+    int localIndex = 0;
+    this->findPermutationGroup(permIndex, spacePermCount, magicGroups,
+                               truncatedGroupCount, group, groupStart,
+                               localIndex);
+
+    // Generate the appropriate permutation
+    if (group == 0)
+    {
+        // Group 0: pure space permutation
+        return this->createSpacePermutation(message, spacePositions,
+                                            localIndex);
+    }
+    else
+    {
+        // Group 1+: magic character permutation
+        return this->createMagicPermutation(message, spacePositions,
+                                            spacePermCount, localIndex, group);
+    }
+}
+
+QString TwitchChannel::createSpacePermutation(
+    const QString &message, const QVector<int> &spacePositions,
+    int permBits) const
+{
+    if (permBits == 0)
+    {
+        return message;
+    }
+
+    QString result = message;
+    QVector<int> positions = spacePositions;
+
+    for (int i = 0; i < positions.size(); ++i)
+    {
+        if ((permBits >> i) & 1)
+        {
+            int pos = positions[i];
+            result.insert(pos, ' ');
+            // Adjust positions for subsequent spaces
+            for (int j = i + 1; j < positions.size(); ++j)
+            {
+                positions[j]++;
+            }
+        }
+    }
+
+    return result;
+}
+
+QString TwitchChannel::createMagicPermutation(
+    const QString &message, const QVector<int> &spacePositions,
+    int spacePermCount, int index, int level) const
+{
+    if (level == 0)
+    {
+        return this->createSpacePermutation(message, spacePositions, index);
+    }
+
+    int prevCount = spacePermCount * (level == 1 ? 1 : (1 << (level - 1)));
+
+    if (index < prevCount)
+    {
+        // First half: append MAGIC_MESSAGE_SUFFIX with no extra space
+        return this->createMagicPermutation(message, spacePositions,
+                                            spacePermCount, index, level - 1) +
+               MAGIC_MESSAGE_SUFFIX;
+    }
+    else
+    {
+        // Second half: append a space plus MAGIC_MESSAGE_SUFFIX
+        return this->createMagicPermutation(message, spacePositions,
+                                            spacePermCount, index - prevCount,
+                                            level - 1) +
+               ' ' + MAGIC_MESSAGE_SUFFIX;
+    }
+}
+
+void TwitchChannel::calculateMagicGroups(int spacePermCount, int &magicGroups,
+                                         int &totalPermutations,
+                                         int &truncatedGroupCount) const
+{
+    // Determine how many magic-character groups we need to reach TARGET_PERMUTATION_COUNT
+    // Group 0: pure space permutation.
+    // Group i (i>=1): adds one magic character appended in two ways per pure permutation.
+    magicGroups = 0;
+    totalPermutations = spacePermCount;  // Group 0 count
+    truncatedGroupCount = 0;             // if the last magic group is truncated
+
+    while (totalPermutations < TARGET_PERMUTATION_COUNT &&
+           magicGroups < MAX_MAGIC_CHARACTERS)
+    {
+        magicGroups++;
+        int groupCount = spacePermCount * (1 << magicGroups);
+
+        if (totalPermutations + groupCount > TARGET_PERMUTATION_COUNT)
+        {
+            // Truncate the group to exactly reach TARGET_PERMUTATION_COUNT
+            groupCount = TARGET_PERMUTATION_COUNT - totalPermutations;
+            totalPermutations += groupCount;
+            truncatedGroupCount = groupCount;
+            break;
+        }
+        else
+        {
+            totalPermutations += groupCount;
+        }
+    }
+}
+
+void TwitchChannel::findPermutationGroup(int permIndex, int spacePermCount,
+                                         int magicGroups,
+                                         int truncatedGroupCount, int &group,
+                                         int &groupStart, int &localIndex) const
+{
+    // Maps a global permutation index to its group and local index within that group
+    group = 0;
+    groupStart = 0;
+
+    while (true)
+    {
+        int groupCount;
+        if (group == 0)
+            groupCount = spacePermCount;
+        else if (group == magicGroups && truncatedGroupCount > 0)
+            groupCount = truncatedGroupCount;
+        else
+            groupCount = spacePermCount * (1 << group);
+
+        if (permIndex < groupStart + groupCount)
+            break;
+
+        groupStart += groupCount;
+        group++;
+    }
+
+    localIndex = permIndex - groupStart;
+}
+
 QString TwitchChannel::prepareMessage(const QString &message) const
 {
     auto *app = getApp();
@@ -707,34 +887,27 @@ QString TwitchChannel::prepareMessage(const QString &message) const
         return "";
     }
 
-    if (!this->hasHighRateLimit())
-    {
-        if (getSettings()->allowDuplicateMessages)
-        {
-            if (parsedMessage == this->lastSentMessage_)
-            {
-                auto spaceIndex = parsedMessage.indexOf(' ');
-                // If the message starts with either '/' or '.' Twitch will treat it as a command, omitting
-                // first space and only rest of the arguments treated as actual message content
-                // In cases when user sends a message like ". .a b" first character and first space are omitted as well
-                bool ignoreFirstSpace =
-                    parsedMessage.at(0) == '/' || parsedMessage.at(0) == '.';
-                if (ignoreFirstSpace)
-                {
-                    spaceIndex = parsedMessage.indexOf(' ', spaceIndex + 1);
-                }
+    // Normalize messages for comparison by removing magic suffix and simplifying
+    // necessary because this->sendMessage() sets this->lastSentMessage_
+    // to the last non-normalized permutation we generated, which won't match the user's input
+    QString normalizedParsedMessage = parsedMessage;
+    normalizedParsedMessage.replace(MAGIC_MESSAGE_SUFFIX, "");
+    normalizedParsedMessage = normalizedParsedMessage.simplified();
 
-                if (spaceIndex == -1)
-                {
-                    // no spaces found, fall back to old magic character
-                    parsedMessage.append(MAGIC_MESSAGE_SUFFIX);
-                }
-                else
-                {
-                    // replace the space we found in spaceIndex with two spaces
-                    parsedMessage.replace(spaceIndex, 1, "  ");
-                }
-            }
+    QString normalizedLastSentMessage = this->lastSentMessage_;
+    normalizedLastSentMessage.replace(MAGIC_MESSAGE_SUFFIX, "");
+    normalizedLastSentMessage = normalizedLastSentMessage.simplified();
+
+    if (!this->hasHighRateLimit() && getSettings()->allowDuplicateMessages)
+    {
+        if (normalizedParsedMessage == normalizedLastSentMessage)
+        {
+            return this->createDuplicateMessageVariant(parsedMessage);
+        }
+        else
+        {
+            // Message changed, so reset permutation index
+            this->lastSentMessagePermutationIndex_ = 0;
         }
     }
 
