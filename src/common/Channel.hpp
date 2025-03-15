@@ -164,7 +164,7 @@ public:
     ChannelPtr get() const;
     void reset(ChannelPtr channel);
     pajlada::Signals::NoArgSignal &getChannelChanged();
-    Channel::Type getType();
+    Channel::Type getType() const;
 
 private:
     std::shared_ptr<Data> data_;

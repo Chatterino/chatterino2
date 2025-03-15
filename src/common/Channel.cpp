@@ -440,16 +440,14 @@ pajlada::Signals::NoArgSignal &IndirectChannel::getChannelChanged()
     return this->data_->changed;
 }
 
-Channel::Type IndirectChannel::getType()
+Channel::Type IndirectChannel::getType() const
 {
     if (this->data_->type == Channel::Type::Direct)
     {
         return this->get()->getType();
     }
-    else
-    {
-        return this->data_->type;
-    }
+
+    return this->data_->type;
 }
 
 }  // namespace chatterino

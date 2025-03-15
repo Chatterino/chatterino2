@@ -46,6 +46,7 @@
 - Bugfix: Fixed a crash that would occurr if the user tried to open the search popup in an uninitialized split. (#6057)
 - Bugfix: Fixed an issue where commands would sometimes reset if Chatterino was improperly shut down. (#6011)
 - Bugfix: Fixed a thick border on Windows 11. (#5836)
+- Bugfix: Fixed an issue where the Select Channel Dialog did not correctly scale when your window scale was too high. (#6081)
 - Bugfix: Fixed some windows not immediately closing. (#6054)
 - Bugfix: The emote button no longer looks crunchy. (#6080)
 - Dev: Subscriptions to PubSub channel points redemption topics now use no auth token, making it continue to work during PubSub shutdown. (#5947)
