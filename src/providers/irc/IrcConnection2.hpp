@@ -12,6 +12,8 @@ namespace chatterino {
 
 class IrcConnection : public Communi::IrcConnection
 {
+    Q_OBJECT
+
 public:
     IrcConnection(QObject *parent = nullptr);
     ~IrcConnection() override;
@@ -30,6 +32,11 @@ public:
 
     virtual void open();
     virtual void close();
+
+Q_SIGNALS:
+    /// Emitted when this connection intends to be connected.
+    /// The server should initialize this connection an open it.
+    void connectAndInitializeRequested();
 
 private:
     QTimer pingTimer_;

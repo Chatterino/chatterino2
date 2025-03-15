@@ -229,29 +229,10 @@ MessagePtr parseNoticeMessage(Communi::IrcNoticeMessage *message)
 
     if (message->content().startsWith("Login auth", Qt::CaseInsensitive))
     {
-        const auto linkColor = MessageColor(MessageColor::Link);
-        const auto accountsLink = Link(Link::OpenAccountsPage, QString());
         const auto curUser = getApp()->getAccounts()->twitch.getCurrent();
-        const auto expirationText = QString("Login expired for user \"%1\"!")
-                                        .arg(curUser->getUserName());
-        const auto loginPromptText = QString("Try adding your account again.");
 
-        MessageBuilder builder;
-        auto text = QString("%1 %2").arg(expirationText, loginPromptText);
-        builder.message().messageText = text;
-        builder.message().searchText = text;
-        builder.message().flags.set(MessageFlag::System);
-        builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
-
-        builder.emplace<TimestampElement>();
-        builder.emplace<TextElement>(expirationText, MessageElementFlag::Text,
-                                     MessageColor::System);
-        builder
-            .emplace<TextElement>(loginPromptText, MessageElementFlag::Text,
-                                  linkColor)
-            ->setLink(accountsLink);
-
-        return builder.release();
+        return MessageBuilder::makeAccountExpiredMessage(
+            u"Login expired for user \"" % curUser->getUserName() % u"\"!");
     }
 
     if (message->content().startsWith("You are permanently banned "))

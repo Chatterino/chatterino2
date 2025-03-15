@@ -230,6 +230,19 @@ TwitchIrcServer::TwitchIrcServer()
     this->connections_.managedConnect(this->readConnection_->heartbeat, [this] {
         this->markChannelsConnected();
     });
+
+    QObject::connect(
+        this->writeConnection_.get(),
+        &IrcConnection::connectAndInitializeRequested, this, [this]() {
+            this->initializeConnection(this->writeConnection_.get(),
+                                       ConnectionType::Write);
+        });
+    QObject::connect(this->readConnection_.get(),
+                     &IrcConnection::connectAndInitializeRequested, this,
+                     [this]() {
+                         this->initializeConnection(this->readConnection_.get(),
+                                                    ConnectionType::Read);
+                     });
 }
 
 void TwitchIrcServer::initialize()
@@ -778,49 +791,50 @@ void TwitchIrcServer::initialize()
 void TwitchIrcServer::initializeConnection(IrcConnection *connection,
                                            ConnectionType type)
 {
-    std::shared_ptr<TwitchAccount> account =
-        getApp()->getAccounts()->twitch.getCurrent();
+    getApp()->getAccounts()->twitch.requestCurrentChecked([this, connection,
+                                                           type](const auto
+                                                                     &account) {
+        qCDebug(chatterinoTwitch) << "logging in as" << account->getUserName();
 
-    qCDebug(chatterinoTwitch) << "logging in as" << account->getUserName();
+        // twitch.tv/tags enables IRCv3 tags on messages. See https://dev.twitch.tv/docs/irc/tags
+        // twitch.tv/commands enables a bunch of miscellaneous command capabilities. See https://dev.twitch.tv/docs/irc/commands
+        // twitch.tv/membership enables the JOIN/PART/NAMES commands. See https://dev.twitch.tv/docs/irc/membership
+        // This is enabled so we receive USERSTATE messages when joining channels / typing messages, along with the other command capabilities
+        QStringList caps{"twitch.tv/tags", "twitch.tv/commands"};
+        if (type != ConnectionType::Write)
+        {
+            caps.push_back("twitch.tv/membership");
+        }
 
-    // twitch.tv/tags enables IRCv3 tags on messages. See https://dev.twitch.tv/docs/irc/tags
-    // twitch.tv/commands enables a bunch of miscellaneous command capabilities. See https://dev.twitch.tv/docs/irc/commands
-    // twitch.tv/membership enables the JOIN/PART/NAMES commands. See https://dev.twitch.tv/docs/irc/membership
-    // This is enabled so we receive USERSTATE messages when joining channels / typing messages, along with the other command capabilities
-    QStringList caps{"twitch.tv/tags", "twitch.tv/commands"};
-    if (type != ConnectionType::Write)
-    {
-        caps.push_back("twitch.tv/membership");
-    }
+        connection->network()->setSkipCapabilityValidation(true);
+        connection->network()->setRequestedCapabilities(caps);
 
-    connection->network()->setSkipCapabilityValidation(true);
-    connection->network()->setRequestedCapabilities(caps);
+        QString username = account->getUserName();
+        QString oauthToken = account->getOAuthToken();
 
-    QString username = account->getUserName();
-    QString oauthToken = account->getOAuthToken();
+        if (!oauthToken.startsWith("oauth:"))
+        {
+            oauthToken.prepend("oauth:");
+        }
 
-    if (!oauthToken.startsWith("oauth:"))
-    {
-        oauthToken.prepend("oauth:");
-    }
+        connection->setUserName(username);
+        connection->setNickName(username);
+        connection->setRealName(username);
 
-    connection->setUserName(username);
-    connection->setNickName(username);
-    connection->setRealName(username);
+        if (!account->isAnon())
+        {
+            connection->setPassword(oauthToken);
+        }
 
-    if (!account->isAnon())
-    {
-        connection->setPassword(oauthToken);
-    }
+        // https://dev.twitch.tv/docs/irc#connecting-to-the-twitch-irc-server
+        // SSL disabled: irc://irc.chat.twitch.tv:6667 (or port 80)
+        // SSL enabled: irc://irc.chat.twitch.tv:6697 (or port 443)
+        connection->setHost(Env::get().twitchServerHost);
+        connection->setPort(Env::get().twitchServerPort);
+        connection->setSecure(Env::get().twitchServerSecure);
 
-    // https://dev.twitch.tv/docs/irc#connecting-to-the-twitch-irc-server
-    // SSL disabled: irc://irc.chat.twitch.tv:6667 (or port 80)
-    // SSL enabled: irc://irc.chat.twitch.tv:6697 (or port 443)
-    connection->setHost(Env::get().twitchServerHost);
-    connection->setPort(Env::get().twitchServerPort);
-    connection->setSecure(Env::get().twitchServerSecure);
-
-    this->open(type);
+        this->open(type);
+    });
 }
 
 std::shared_ptr<Channel> TwitchIrcServer::createChannel(

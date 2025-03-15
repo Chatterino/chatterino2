@@ -110,6 +110,10 @@ TwitchChannel::TwitchChannel(const QString &name)
 
     this->bSignals_.emplace_back(
         getApp()->getAccounts()->twitch.currentUserChanged.connect([this] {
+            if (this->roomId().isEmpty())
+            {
+                return;
+            }
             this->setMod(false);
             this->refreshPubSub();
             this->refreshTwitchChannelEmotes(false);
@@ -245,6 +249,21 @@ void TwitchChannel::setLocalizedName(const QString &name)
 
 void TwitchChannel::refreshTwitchChannelEmotes(bool manualRefresh)
 {
+    // ensure the user is authenticated
+    getApp()->getAccounts()->twitch.requestCurrentChecked(
+        [weak{this->weak_from_this()}, manualRefresh](const auto &account) {
+            auto self = std::dynamic_pointer_cast<TwitchChannel>(weak.lock());
+            if (!self)
+            {
+                return;
+            }
+            self->refreshTwitchChannelEmotesFor(account, manualRefresh);
+        });
+}
+
+void TwitchChannel::refreshTwitchChannelEmotesFor(
+    const std::shared_ptr<TwitchAccount> &account, bool manualRefresh)
+{
     if (getApp()->isTest())
     {
         return;
@@ -252,15 +271,14 @@ void TwitchChannel::refreshTwitchChannelEmotes(bool manualRefresh)
 
     if (manualRefresh)
     {
-        getApp()->getAccounts()->twitch.getCurrent()->reloadEmotes(this);
+        account->reloadEmotes(this);
     }
 
     // Twitch's 'Get User Emotes' doesn't assigns a different set-ID to follower
     // emotes compared to subscriber emotes.
     QString setID = TWITCH_SUB_EMOTE_SET_PREFIX % this->roomId();
     this->localTwitchEmoteSetID_.set(setID);
-    if (getApp()->getAccounts()->twitch.getCurrent()->hasEmoteSet(
-            EmoteSetId{setID}))
+    if (account->hasEmoteSet(EmoteSetId{setID}))
     {
         this->localTwitchEmotes_.set(std::make_shared<EmoteMap>());
         return;
@@ -283,8 +301,7 @@ void TwitchChannel::refreshTwitchChannelEmotes(bool manualRefresh)
     };
 
     getHelix()->getFollowedChannel(
-        getApp()->getAccounts()->twitch.getCurrent()->getUserId(),
-        this->roomId(), nullptr,
+        account->getUserId(), this->roomId(), nullptr,
         [weak{this->weak_from_this()}, makeEmotes](const auto &chan) {
             auto self = std::dynamic_pointer_cast<TwitchChannel>(weak.lock());
             if (!self || !chan)

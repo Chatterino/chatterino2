@@ -10,6 +10,7 @@
 
 #include <chrono>
 #include <mutex>
+#include <utility>
 
 using namespace chatterino;
 using namespace std::chrono_literals;
@@ -89,8 +90,15 @@ public:
                    QString token = "token")
         : PubSub(QString("wss://127.0.0.1:9050%1").arg(path), pingInterval)
     {
-        auto account = std::make_shared<TwitchAccount>("testaccount_420", token,
-                                                       "clientid", "123456");
+        auto account = std::make_shared<TwitchAccount>(TwitchAccountData{
+            .username = "testaccount_420",
+            .userID = "123456",
+            .clientID = "clientid",
+            .oauthToken = std::move(token),
+            .ty = TwitchAccount::Type::ImplicitGrant,
+            .refreshToken = {},
+            .expiresAt = {},
+        });
         this->setAccount(account);
     }
 };
