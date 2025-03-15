@@ -288,12 +288,12 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
     switch (event->type())
     {
         case QEvent::KeyPress: {
-            auto *event_key = dynamic_cast<QKeyEvent *>(event);
-            assert(event_key);
+            auto *keyEvent = dynamic_cast<QKeyEvent *>(event);
+            assert(keyEvent);
 
-            if ((event_key->key() == Qt::Key_Tab ||
-                 event_key->key() == Qt::Key_Down) &&
-                event_key->modifiers() == Qt::NoModifier)
+            if ((keyEvent->key() == Qt::Key_Tab ||
+                 keyEvent->key() == Qt::Key_Down) &&
+                keyEvent->modifiers() == Qt::NoModifier)
             {
                 // Tab has been pressed, focus next entry in list
 
@@ -321,11 +321,11 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
                 return true;
             }
 
-            if (((event_key->key() == Qt::Key_Tab ||
-                  event_key->key() == Qt::Key_Backtab) &&
-                 event_key->modifiers() == Qt::ShiftModifier) ||
-                ((event_key->key() == Qt::Key_Up) &&
-                 event_key->modifiers() == Qt::NoModifier))
+            if (((keyEvent->key() == Qt::Key_Tab ||
+                  keyEvent->key() == Qt::Key_Backtab) &&
+                 keyEvent->modifiers() == Qt::ShiftModifier) ||
+                ((keyEvent->key() == Qt::Key_Up) &&
+                 keyEvent->modifiers() == Qt::NoModifier))
             {
                 // Shift+Tab has been pressed, focus previous entry in list
 
@@ -354,7 +354,7 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
                 return true;
             }
 
-            if (event_key == QKeySequence::DeleteStartOfWord &&
+            if (keyEvent == QKeySequence::DeleteStartOfWord &&
                 ui.channelName->selectionLength() > 0)
             {
                 ui.channelName->backspace();
@@ -366,12 +366,12 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
         break;
 
         case QEvent::KeyRelease: {
-            auto *event_key = dynamic_cast<QKeyEvent *>(event);
-            assert(event_key);
+            auto *keyEvent = dynamic_cast<QKeyEvent *>(event);
+            assert(keyEvent);
 
-            if ((event_key->key() == Qt::Key_Backtab ||
-                 event_key->key() == Qt::Key_Down) &&
-                event_key->modifiers() == Qt::NoModifier)
+            if ((keyEvent->key() == Qt::Key_Backtab ||
+                 keyEvent->key() == Qt::Key_Down) &&
+                keyEvent->modifiers() == Qt::NoModifier)
             {
                 return true;
             }
