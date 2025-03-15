@@ -278,6 +278,9 @@ void Connection::onChannelSuspiciousUserMessage(
     if (payload.event.lowTrustStatus !=
         lib::suspicious_users::Status::Restricted)
     {
+        qCInfo(LOG) << "Ignoring low trust status message from user"
+                    << payload.event.userLogin.qt() << "because status is"
+                    << static_cast<std::uint8_t>(payload.event.lowTrustStatus);
         return;
     }
 
