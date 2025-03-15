@@ -19,6 +19,7 @@ public:
      * connection is made immediately.
      *
      * @lua@param url string The URL to connect to. Must start with `wss://` or `ws://`.
+     * @lua@param options? { headers?: table<string, string> } Additional options for the connection.
      * @lua@return c2.WebSocket
      * @lua@nodiscard
      * @exposed c2.WebSocket.new

@@ -662,6 +662,7 @@ TEST_F(PluginTest, testTcpWebSocket)
                 any_msg = true
                 ws:send_text(string.rep("a", 1 << 15))
                 ws:send_binary("wow")
+                ws:send_text("/HEADER user-agent")
                 ws:send_binary("/CLOSE")
             end
             add(false, data)
@@ -677,7 +678,7 @@ TEST_F(PluginTest, testTcpWebSocket)
 
     waiter.waitForRequest();
 
-    ASSERT_EQ(messages.size(), 6);
+    ASSERT_EQ(messages.size(), 7);
     ASSERT_EQ(messages[0].first, true);
     ASSERT_EQ(messages[0].second, "message1");
     ASSERT_EQ(messages[1].first, true);
@@ -690,6 +691,8 @@ TEST_F(PluginTest, testTcpWebSocket)
     ASSERT_EQ(messages[4].second, QByteArray(1 << 15, 'a'));
     ASSERT_EQ(messages[5].first, false);
     ASSERT_EQ(messages[5].second, "wow");
+    ASSERT_EQ(messages[6].first, true);
+    ASSERT_TRUE(messages[6].second.startsWith("Chatterino"));
 }
 
 TEST_F(PluginTest, testTlsWebSocket)
@@ -706,7 +709,13 @@ TEST_F(PluginTest, testTlsWebSocket)
     });
 
     lua->script(R"lua(
-        local ws = c2.WebSocket.new("wss://127.0.0.1:9050/echo")
+        local ws = c2.WebSocket.new("wss://127.0.0.1:9050/echo", { 
+            headers = {
+                ["User-Agent"] = "Lua",
+                ["A-Header"] = "A value",
+                ["Referer"] = "https://chatterino.com",
+            },
+        })
         ws.on_text = function(data)
             add(true, data)
         end
@@ -716,6 +725,9 @@ TEST_F(PluginTest, testTlsWebSocket)
                 any_msg = true
                 ws:send_text(string.rep("a", 1 << 15))
                 ws:send_binary("wow")
+                ws:send_text("/HEADER user-agent")
+                ws:send_text("/HEADER a-header")
+                ws:send_text("/HEADER referer")
                 ws:send_binary("/CLOSE")
             end
             add(false, data)
@@ -731,7 +743,7 @@ TEST_F(PluginTest, testTlsWebSocket)
 
     waiter.waitForRequest();
 
-    ASSERT_EQ(messages.size(), 6);
+    ASSERT_EQ(messages.size(), 9);
     ASSERT_EQ(messages[0].first, true);
     ASSERT_EQ(messages[0].second, "message1");
     ASSERT_EQ(messages[1].first, true);
@@ -744,6 +756,12 @@ TEST_F(PluginTest, testTlsWebSocket)
     ASSERT_EQ(messages[4].second, QByteArray(1 << 15, 'a'));
     ASSERT_EQ(messages[5].first, false);
     ASSERT_EQ(messages[5].second, "wow");
+    ASSERT_EQ(messages[6].first, true);
+    ASSERT_EQ(messages[6].second, "Lua");
+    ASSERT_EQ(messages[7].first, true);
+    ASSERT_EQ(messages[7].second, "A value");
+    ASSERT_EQ(messages[8].first, true);
+    ASSERT_EQ(messages[8].second, "https://chatterino.com");
 }
 
 TEST_F(PluginTest, testWebSocketNoPerms)

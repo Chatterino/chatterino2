@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "common/Version.hpp"
 #include "util/QByteArrayBuffer.hpp"
 
 #include <boost/asio/io_context.hpp>
@@ -62,6 +63,18 @@ protected:
     friend QDebug operator<<(QDebug dbg, const WebSocketConnection &conn);
 };
 
+/// A CRTP helper to share code between the TLS and TCP connections.
+///
+/// `Derived` must have a `void afterTcpHandshake()` method, which is called if
+/// the TCP handshake was successful. Subclasses can call `doWsHandshake` after
+/// the intermediate handshake (i.e. TLS) is done.
+///
+/// `Derived` must have a constant `DEFAULT_PORT` which specifies the TCP port
+/// to connect to if the specified URL doesn't have one set.
+///
+/// `Derived` can contain a method `bool setupStream(const std::string&)` which
+/// is called from `run()`. The return value indicates if an error happened. An
+/// implementation must've called `fail()` in case of errors.
 template <typename Derived, typename Inner>
 class WebSocketConnectionHelper : public WebSocketConnection,
                                   public std::enable_shared_from_this<
@@ -90,6 +103,7 @@ protected:
     Stream stream;
 
 private:
+    // This is private to ensure only `Derived` can construct this class.
     WebSocketConnectionHelper(WebSocketOptions options, int id,
                               std::unique_ptr<WebSocketListener> listener,
                               WebSocketPoolPrivate *parent,
@@ -107,6 +121,7 @@ private:
     friend Derived;
 };
 
+/// A WebSocket connection over TLS (wss://).
 class TlsWebSocketConnection
     : public WebSocketConnectionHelper<TlsWebSocketConnection,
                                        asio::ssl::stream<beast::tcp_stream>>
@@ -127,6 +142,7 @@ protected:
                                      asio::ssl::stream<beast::tcp_stream>>;
 };
 
+/// A WebSocket connection over TCP (ws://).
 class TcpWebSocketConnection
     : public WebSocketConnectionHelper<TcpWebSocketConnection,
                                        beast::tcp_stream>
@@ -187,6 +203,7 @@ WebSocketConnection::WebSocketConnection(
 
 WebSocketConnection::~WebSocketConnection()
 {
+    assert(!this->listener && !this->parent);
     qCDebug(chatterinoWebsocket) << *this << "Destroyed";
 }
 
@@ -329,8 +346,39 @@ void WebSocketConnectionHelper<Derived, Inner>::doWsHandshake()
     this->stream.set_option(beast::websocket::stream_base::timeout::suggested(
         beast::role_type::client));
     this->stream.set_option(beast::websocket::stream_base::decorator{
-        [](beast::websocket::request_type &req) {
-            req.set(beast::http::field::user_agent, "Chatterino TODO");
+        [this](beast::websocket::request_type &req) {
+            bool hasUa = false;
+            for (const auto &[key, value] : this->options.headers)
+            {
+                if (QUtf8StringView("user-agent")
+                        .compare(key, Qt::CaseInsensitive) == 0)
+                {
+                    hasUa = true;
+                }
+
+                try
+                {
+                    // this can fail if the key or value exceed the maximum size
+                    req.set(key, value);
+                }
+                catch (const boost::system::system_error &err)
+                {
+                    qCWarning(chatterinoWebsocket)
+                        << "Invalid header - name:" << QUtf8StringView(key)
+                        << "value:" << QUtf8StringView(value)
+                        << "error:" << QUtf8StringView(err.what());
+                }
+            }
+
+            // default UA
+            if (!hasUa)
+            {
+                auto ua = QStringLiteral("Chatterino/%1 (%2)")
+                              .arg(Version::instance().version(),
+                                   Version::instance().commitHash())
+                              .toStdString();
+                req.set(beast::http::field::user_agent, ua);
+            }
         },
     });
 

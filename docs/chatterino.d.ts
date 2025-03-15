@@ -139,7 +139,11 @@ declare namespace c2 {
         on_binary: null | ((data: string) => void);
     }
     interface WebSocketConstructor {
-        new: (this: void, url: string) => WebSocket;
+        new: (
+            this: void,
+            url: string,
+            options?: { headers?: Record<string, string> }
+        ) => WebSocket;
     }
     var WebSocket: WebSocketConstructor;
 }

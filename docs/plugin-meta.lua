@@ -269,9 +269,10 @@ c2.WebSocket = {}
 --- connection is made immediately.
 ---
 ---@param url string The URL to connect to. Must start with `wss://` or `ws://`.
+---@param options? { headers?: table<string, string> } Additional options for the connection.
 ---@return c2.WebSocket
 ---@nodiscard
-function c2.WebSocket.new(url) end
+function c2.WebSocket.new(url, options) end
 
 --- Closes the socket.
 ---

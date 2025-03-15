@@ -59,6 +59,7 @@ struct WebSocketListener {
 
 struct WebSocketOptions {
     QUrl url;
+    std::vector<std::pair<std::string, std::string>> headers;
 };
 
 class WebSocketPool

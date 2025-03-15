@@ -26,19 +26,32 @@ WebSocket::WebSocket() = default;
 void WebSocket::createUserType(sol::table &c2)
 {
     c2.new_usertype<WebSocket>(
-        "WebSocket", sol::factories([](const QString &spec) {
+        "WebSocket",
+        sol::factories([](const QString &spec, sol::variadic_args args) {
             QUrl url(spec);
             if (url.scheme() != "wss" && url.scheme() != "ws")
             {
                 throw std::runtime_error("Scheme must be wss:// or ws://");
             }
 
+            WebSocketOptions opts{.url = url, .headers = {}};
+            if (args.size() >= 1)
+            {
+                sol::table luaOpts = args[0];
+                std::optional<sol::table> headers = luaOpts["headers"];
+                if (headers)
+                {
+                    for (const auto &[k, v] : *headers)
+                    {
+                        opts.headers.emplace_back(k.as<std::string>(),
+                                                  v.as<std::string>());
+                    }
+                }
+            }
+
             auto self = std::make_shared<WebSocket>();
             auto handle = getApp()->getPlugins()->webSocketPool().createSocket(
-                {
-                    .url = url,
-                },
-                std::make_unique<WebSocketListenerProxy>(self));
+                opts, std::make_unique<WebSocketListenerProxy>(self));
 
             self->handle = std::move(handle);
             return self;
