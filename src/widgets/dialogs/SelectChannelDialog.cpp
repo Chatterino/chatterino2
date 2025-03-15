@@ -155,10 +155,6 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
     auto *buttonBox =
         new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    for (auto *button : buttonBox->buttons())
-    {
-        button->setFocusPolicy(Qt::ClickFocus);
-    }
     layout->addWidget(buttonBox);
 
     QObject::connect(buttonBox, &QDialogButtonBox::accepted, this, [this] {
