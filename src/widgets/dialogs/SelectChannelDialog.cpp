@@ -46,7 +46,6 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
     ui.channelLabel = new QLabel("Join a Twitch channel by its channel name");
     ui.channelLabel->setVisible(false);
-    ui.channelLabel->setFocusPolicy(Qt::FocusPolicy::NoFocus);
     layout->addWidget(ui.channelLabel);
 
     ui.channelName = new QLineEdit();
@@ -76,7 +75,6 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     ui.whispersLabel = new QLabel(
         "Shows the whispers that you receive\nwhile Chatterino is running");
     ui.whispersLabel->setVisible(false);
-    ui.whispersLabel->setFocusPolicy(Qt::FocusPolicy::NoFocus);
     layout->addWidget(ui.whispersLabel);
 
     QObject::connect(ui.whispers, &AutoCheckedRadioButton::toggled, this,
@@ -94,7 +92,6 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     ui.mentionsLabel = new QLabel(
         "Shows all the messages that\nhighlight you from any channel");
     ui.mentionsLabel->setVisible(false);
-    ui.mentionsLabel->setFocusPolicy(Qt::FocusPolicy::NoFocus);
     layout->addWidget(ui.mentionsLabel);
 
     QObject::connect(ui.mentions, &AutoCheckedRadioButton::toggled, this,
