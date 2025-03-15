@@ -110,13 +110,13 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     ui.watchingLabel->setVisible(false);
     layout->addWidget(ui.watchingLabel);
 
-    ui.watching->installEventFilter(&this->tabFilter_);
-
     QObject::connect(ui.watching, &AutoCheckedRadioButton::toggled, this,
                      [this](bool enabled) mutable {
                          auto &ui = this->ui_;
                          ui.watchingLabel->setVisible(enabled);
                      });
+
+    ui.watching->installEventFilter(&this->tabFilter_);
 
     // Live
     ui.live = new AutoCheckedRadioButton("Live");
@@ -126,13 +126,13 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     ui.liveLabel->setVisible(false);
     layout->addWidget(ui.liveLabel);
 
-    ui.live->installEventFilter(&this->tabFilter_);
-
     QObject::connect(ui.live, &AutoCheckedRadioButton::toggled, this,
                      [this](bool enabled) mutable {
                          auto &ui = this->ui_;
                          ui.liveLabel->setVisible(enabled);
                      });
+
+    ui.live->installEventFilter(&this->tabFilter_);
 
     // Automod
     ui.automod = new AutoCheckedRadioButton("AutoMod");
@@ -143,13 +143,13 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     ui.automodLabel->setVisible(false);
     layout->addWidget(ui.automodLabel);
 
-    ui.automod->installEventFilter(&this->tabFilter_);
-
     QObject::connect(ui.automod, &AutoCheckedRadioButton::toggled, this,
                      [this](bool enabled) mutable {
                          auto &ui = this->ui_;
                          ui.automodLabel->setVisible(enabled);
                      });
+
+    ui.automod->installEventFilter(&this->tabFilter_);
 
     layout->addStretch(1);
 
