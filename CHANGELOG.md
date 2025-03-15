@@ -48,7 +48,7 @@
 - Bugfix: Fixed a thick border on Windows 11. (#5836)
 - Bugfix: Fixed some windows not immediately closing. (#6054)
 - Dev: Subscriptions to PubSub channel points redemption topics now use no auth token, making it continue to work during PubSub shutdown. (#5947)
-- Dev: Add initial experimental EventSub support. (#5837, #5895, #5897, #5904, #5910, #5903, #5915, #5916, #5930, #5935, #5932, #5943, #5952, #5953, #5968, #5973, #5974, #5980, #5981, #5985, #5990, #5992, #5993, #5996, #5995, #6000, #6001, #6002, #6003, #6005, #6007, #6010, #6008, #6012, #6013, #6015, #6017, #6027, #6028, #6035, #6036, #6040, #6041, #6048, #6058, #6059)
+- Dev: Add initial experimental EventSub support. (#5837, #5895, #5897, #5904, #5910, #5903, #5915, #5916, #5930, #5935, #5932, #5943, #5952, #5953, #5968, #5973, #5974, #5980, #5981, #5985, #5990, #5992, #5993, #5996, #5995, #6000, #6001, #6002, #6003, #6005, #6007, #6010, #6008, #6012, #6013, #6015, #6017, #6027, #6028, #6035, #6036, #6040, #6041, #6048, #6058, #6059, #6078, #6079)
 - Dev: Remove unneeded platform specifier for toasts. (#5914)
 - Dev: Cleanly shutdown on `SIGINT`/`SIGTERM` on Linux & macOS. (#6053)
 - Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
@@ -66,13 +66,16 @@
 - Dev: Updated `qtkeychain` to 0.15.0. (#5871)
 - Dev: Updated `googletest` to 1.16.0. (#5942)
 - Dev: Fixed duplicate CMake configure in clean builds. (#5940)
+- Dev: Enable plugins in builds by default. (#6075)
 - Dev: BTTV emotes are now loaded as WEBP. (#5957)
 - Dev: Reduced time we wait for PubSub connections to cleanly exit from 1s to 100ms. (#6019)
 - Dev: Build with Qt 6.4.3 in CI. (#6032)
 - Dev: Refactored some settings styles/APIs. (#6023)
 - Dev: Added snapshot tests for EventSub. (#5965)
 - Dev: Updated crashpad. (#6026)
+- Dev: Mini feature refactor of BaseWindow. (#6074)
 - Dev: Removed dead code and some MSVC warnings. (#6024)
+- Dev: Added check if WEBP is supported. (#6073)
 
 ## 2.5.2
 

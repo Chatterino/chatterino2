@@ -24,7 +24,6 @@ jobs:
       matrix:
         os: [windows-latest]
         qt-version: [6.7.1]
-        plugins: [true]
         skip-artifact: [false]
         skip-crashpad: [false]
       fail-fast: false
@@ -34,11 +33,6 @@ jobs:
       C2_CONAN_CACHE_SUFFIX: ${{ startsWith(matrix.qt-version, '6.') && '-QT6' || '' }}
 
     steps:
-      - name: Enable plugin support
-        if: matrix.plugins
-        run: |
-          echo "C2_PLUGINS=ON" >> "$Env:GITHUB_ENV"
-
       - name: Set Crashpad
         if: matrix.skip-crashpad == false
         run: |
@@ -121,7 +115,6 @@ jobs:
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
               -DUSE_PRECOMPILED_HEADERS=On `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
-              -DCHATTERINO_PLUGINS="$Env:C2_PLUGINS" `
               ..
           set cl=/MP
           nmake /S /NOLOGO

@@ -13,6 +13,11 @@ boost::json::result_for<{{enum.full_name}}, boost::json::value>::type tag_invoke
     if (eString == "{{constant.json_name}}"sv) {
         return {{enum.full_name}}::{{constant.name}};
     }
+{%- for extra_name in constant.json_extra_enum_constant_names -%}
+    if (eString == "{{extra_name}}"sv) {
+        return {{enum.full_name}}::{{constant.name}};
+    }
+{%- endfor -%}
 {%- endfor %}
 
 {%- if enum.default -%}

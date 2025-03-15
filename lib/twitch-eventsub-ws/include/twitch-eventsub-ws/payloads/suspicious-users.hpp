@@ -16,8 +16,12 @@ enum class Status : std::uint8_t {
 /// default=Unknown
 enum class Type : std::uint8_t {
     Unknown,
+    /// The user was marked as Low Trust by a moderator
+    /// json_extra_enum_constant_names=manually_added
     Manual,
+    /// The user was detected as a ban evader
     BanEvaderDetector,
+    /// The user is banned in a channel the channel shares bans with
     SharedChannelBan
 };
 

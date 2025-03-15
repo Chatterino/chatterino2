@@ -47,7 +47,7 @@ DraggablePopup::DraggablePopup(bool closeAutomatically, QWidget *parent)
 {
     if (closeAutomatically)
     {
-        this->setActionOnFocusLoss(BaseWindow::Delete);
+        this->windowDeactivateAction = WindowDeactivateAction::Delete;
     }
     else
     {
@@ -108,12 +108,12 @@ void DraggablePopup::togglePinned()
     this->isPinned_ = !isPinned_;
     if (isPinned_)
     {
-        this->setActionOnFocusLoss(BaseWindow::Nothing);
+        this->windowDeactivateAction = WindowDeactivateAction::Nothing;
         this->pinButton_->setPixmap(getResources().buttons.pinEnabled);
     }
     else
     {
-        this->setActionOnFocusLoss(BaseWindow::Delete);
+        this->windowDeactivateAction = WindowDeactivateAction::Delete;
         this->pinButton_->setPixmap(getTheme()->buttons.pin);
     }
 }
