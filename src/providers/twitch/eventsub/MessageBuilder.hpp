@@ -160,6 +160,12 @@ void makeModerateMessage(
     const lib::payload::channel_moderate::v2::Event &event,
     const lib::payload::channel_moderate::v2::Unraid &action);
 
+/// <MODERATOR> {approved/denied} the unban request from <USER>[: <MESSAGE>]
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::UnbanRequest &action);
+
 MessagePtr makeAutomodHoldMessageHeader(
     TwitchChannel *channel, const QDateTime &time,
     const lib::payload::automod_message_hold::v2::Event &event);

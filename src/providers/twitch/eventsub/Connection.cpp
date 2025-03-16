@@ -170,6 +170,17 @@ void Connection::onChannelModerate(
     std::visit(
         [&](auto &&action) {
             using Action = std::remove_cvref_t<decltype(action)>;
+            static_assert(CanMakeModMessage<Action> ||
+                              CanHandleModMessage<Action> ||
+                              std::is_same_v<Action, std::string>,
+                          "All actions must be handled");
+
+            if constexpr (std::is_same_v<Action, std::string>)
+            {
+                qCWarning(LOG) << "Unhandled moderation action:"
+                               << QUtf8StringView(action);
+            }
+
             if constexpr (CanMakeModMessage<Action>)
             {
                 EventSubMessageBuilder builder(channel, now);
