@@ -21,7 +21,7 @@
 - Minor: The font weight of chat messages can now be changed. (#6037)
 - Minor: Messages from restricted users can now be hidden when in streamer mode. This is enabled by default. (#6042, #6049)
 - Minor: Added a tab style option allowing you to make your tabs more compact. (#5858)
-- Minor: Chatterino now warns about missing scopes when logging in. (#6072)
+- Minor: Chatterino now warns about missing scopes when logging in. (#6072, #6083)
 - Bugfix: Fixed a potential way to escape the Lua Plugin sandbox. (#5846)
 - Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
 - Bugfix: Fixed a crash that could occur on Linux and macOS when clicking "Install" from the update prompt. (#5818)
@@ -50,7 +50,7 @@
 - Bugfix: Fixed some windows not immediately closing. (#6054)
 - Bugfix: The emote button no longer looks crunchy. (#6080, #6085)
 - Dev: Subscriptions to PubSub channel points redemption topics now use no auth token, making it continue to work during PubSub shutdown. (#5947)
-- Dev: Add initial experimental EventSub support. (#5837, #5895, #5897, #5904, #5910, #5903, #5915, #5916, #5930, #5935, #5932, #5943, #5952, #5953, #5968, #5973, #5974, #5980, #5981, #5985, #5990, #5992, #5993, #5996, #5995, #6000, #6001, #6002, #6003, #6005, #6007, #6010, #6008, #6012, #6013, #6015, #6017, #6027, #6028, #6035, #6036, #6040, #6041, #6048, #6058, #6059, #6078, #6079)
+- Dev: Add initial experimental EventSub support. (#5837, #5895, #5897, #5904, #5910, #5903, #5915, #5916, #5930, #5935, #5932, #5943, #5952, #5953, #5968, #5973, #5974, #5980, #5981, #5985, #5990, #5992, #5993, #5996, #5995, #6000, #6001, #6002, #6003, #6005, #6007, #6010, #6008, #6012, #6013, #6015, #6017, #6027, #6028, #6035, #6036, #6040, #6041, #6048, #6058, #6059, #6078, #6079, #6086)
 - Dev: Remove unneeded platform specifier for toasts. (#5914)
 - Dev: Cleanly shutdown on `SIGINT`/`SIGTERM` on Linux & macOS. (#6053)
 - Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
@@ -78,6 +78,7 @@
 - Dev: Mini feature refactor of BaseWindow. (#6074)
 - Dev: Removed dead code and some MSVC warnings. (#6024)
 - Dev: Added check if WEBP is supported. (#6073)
+- Dev: Tests won't add themselves to the autostart on Windows anymore. (#6084)
 
 ## 2.5.2
 
