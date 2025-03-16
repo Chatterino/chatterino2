@@ -194,7 +194,18 @@ void Button::paintButton(QPainter &painter)
     {
         painter.setOpacity(this->getCurrentDimAmount());
 
-        this->svgRenderer->render(&painter);
+        auto rect = this->rect();
+
+        if (this->enableMargin_)
+        {
+            auto s = this->getMargin();
+            rect.moveLeft(s);
+            rect.setRight(rect.right() - s - s);
+            rect.moveTop(s);
+            rect.setBottom(rect.bottom() - s - s);
+        }
+
+        this->svgRenderer->render(&painter, rect);
     }
     else if (!this->pixmap_.isNull())
     {
@@ -205,14 +216,14 @@ void Button::paintButton(QPainter &painter)
         resizePixmap(this->resizedPixmap_, this->pixmap_, rect.size(),
                      this->devicePixelRatio());
 
-        int margin = this->height() < 22 * this->scale() ? 3 : 6;
-
-        int s = this->enableMargin_ ? int(margin * this->scale()) : 0;
-
-        rect.moveLeft(s);
-        rect.setRight(rect.right() - s - s);
-        rect.moveTop(s);
-        rect.setBottom(rect.bottom() - s - s);
+        if (this->enableMargin_)
+        {
+            auto s = this->getMargin();
+            rect.moveLeft(s);
+            rect.setRight(rect.right() - s - s);
+            rect.moveTop(s);
+            rect.setBottom(rect.bottom() - s - s);
+        }
 
         painter.drawPixmap(rect, this->resizedPixmap_);
 
@@ -441,6 +452,15 @@ void Button::showMenu()
 
     this->menu_->popup(point);
     this->menuVisible_ = true;
+}
+
+int Button::getMargin() const
+{
+    assert(this->enableMargin_);
+
+    int baseMargin = this->height() < 22 * this->scale() ? 3 : 6;
+
+    return static_cast<int>(baseMargin * this->scale());
 }
 
 }  // namespace chatterino

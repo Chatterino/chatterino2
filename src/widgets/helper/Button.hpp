@@ -88,6 +88,8 @@ private:
     void onMouseEffectTimeout();
     void showMenu();
 
+    int getMargin() const;
+
     QColor borderColor_{};
     QPixmap pixmap_{};
     QSvgRenderer *svgRenderer{};
