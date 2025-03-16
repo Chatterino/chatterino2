@@ -199,10 +199,15 @@ void Button::paintButton(QPainter &painter)
         if (this->enableMargin_)
         {
             auto s = this->getMargin();
-            rect.moveLeft(s);
-            rect.setRight(rect.right() - s - s);
-            rect.moveTop(s);
-            rect.setBottom(rect.bottom() - s - s);
+            auto outSize = rect.size() - QSize{2 * s, 2 * s};
+            outSize = this->svgRenderer->defaultSize().scaled(
+                outSize, Qt::KeepAspectRatio);
+            auto margin = rect.size() - outSize;
+
+            rect = QRect{
+                QPoint{margin.width() / 2, margin.height() / 2},
+                outSize,
+            };
         }
 
         this->svgRenderer->render(&painter, rect);
