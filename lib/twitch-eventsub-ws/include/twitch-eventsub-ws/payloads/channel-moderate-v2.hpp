@@ -315,11 +315,11 @@ struct UnbanRequest {
 
     bool isApproved;
 
-    std::string userID;
-    std::string userLogin;
-    std::string userName;
+    String userID;
+    String userLogin;
+    String userName;
 
-    std::string moderatorMessage;
+    String moderatorMessage;
 };
 
 struct ApproveUnbanRequest : public UnbanRequest {

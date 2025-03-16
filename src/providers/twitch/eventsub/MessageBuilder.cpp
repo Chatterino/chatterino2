@@ -588,6 +588,40 @@ void makeModerateMessage(
     builder.setMessageAndSearchText(text);
 }
 
+void makeModerateMessage(
+    EventSubMessageBuilder &builder,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::UnbanRequest &action)
+{
+    builder->flags.set(MessageFlag::ModerationAction);
+
+    QString text;
+
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
+    if (action.isApproved)
+    {
+        builder.emplaceSystemTextAndUpdate("approved", text);
+    }
+    else
+    {
+        builder.emplaceSystemTextAndUpdate("denied", text);
+    }
+    builder.appendOrEmplaceSystemTextAndUpdate("the unban request from", text);
+    builder.appendUser(action.userName, action.userLogin, text, false);
+    if (action.moderatorMessage.isEmpty())
+    {
+        builder.emplaceSystemTextAndUpdate(".", text);
+    }
+    else
+    {
+        builder.emplaceSystemTextAndUpdate(":", text);
+        builder.appendOrEmplaceSystemTextAndUpdate(action.moderatorMessage.qt(),
+                                                   text);
+    }
+
+    builder.setMessageAndSearchText(text);
+}
+
 MessagePtr makeAutomodHoldMessageHeader(
     TwitchChannel *channel, const QDateTime &time,
     const lib::payload::automod_message_hold::v2::Event &event)
