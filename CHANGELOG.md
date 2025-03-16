@@ -78,6 +78,7 @@
 - Dev: Mini feature refactor of BaseWindow. (#6074)
 - Dev: Removed dead code and some MSVC warnings. (#6024)
 - Dev: Added check if WEBP is supported. (#6073)
+- Dev: Tests won't add themselves to the autostart on Windows anymore. (#6084)
 
 ## 2.5.2
 
