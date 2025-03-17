@@ -43,7 +43,7 @@
             },
             "badges": [
             ],
-            "channelName": "",
+            "channelName": "testaccount_420",
             "count": 1,
             "displayName": "",
             "elements": [
@@ -191,7 +191,7 @@
                     ]
                 }
             ],
-            "flags": "System|Timeout|EventSub|ModerationAction",
+            "flags": "System|Timeout|PubSub|SharedMessage|EventSub|ModerationAction",
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",
