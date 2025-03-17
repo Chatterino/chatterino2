@@ -323,6 +323,8 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
             },
             [this, request](const auto &error, const auto &errorString) {
                 using Error = HelixCreateEventSubSubscriptionError;
+
+                bool retry = false;
                 switch (error)
                 {
                     case Error::BadRequest:
@@ -347,18 +349,31 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
                         qCDebug(LOG) << "Ratelimited" << errorString << request;
                         break;
 
+                    case Error::NoSession:
+                        qCDebug(LOG) << "Session expired, retrying"
+                                     << errorString << request;
+                        retry = true;
+                        break;
+
                     case Error::Forwarded:
                     default:
                         qCWarning(LOG) << "Unhandled error, retrying "
                                           "subscription"
                                        << errorString << request;
-                        boost::asio::post(this->ioContext, [this, request] {
-                            this->retrySubscription(request);
-                        });
-                        return;
+                        retry = true;
+                        break;
                 }
 
-                this->markRequestFailed(request);
+                if (retry)
+                {
+                    boost::asio::post(this->ioContext, [this, request] {
+                        this->retrySubscription(request);
+                    });
+                }
+                else
+                {
+                    this->markRequestFailed(request);
+                }
             });
 
         return;
