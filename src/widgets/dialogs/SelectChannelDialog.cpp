@@ -55,14 +55,14 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     QObject::connect(ui.channel, &AutoCheckedRadioButton::toggled, this,
                      [this](bool enabled) {
                          auto &ui = this->ui_;
+                         ui.channelName->setVisible(enabled);
+                         ui.channelLabel->setVisible(enabled);
+
                          if (enabled)
                          {
                              ui.channelName->setFocus();
                              ui.channelName->selectAll();
                          }
-
-                         ui.channelName->setVisible(enabled);
-                         ui.channelLabel->setVisible(enabled);
                      });
 
     ui.channel->installEventFilter(&this->tabFilter_);
