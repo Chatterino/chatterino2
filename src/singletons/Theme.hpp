@@ -155,6 +155,8 @@ public:
         QPixmap pin;
     } buttons;
 
+    QPalette palette;
+
     void normalizeColor(QColor &color) const;
     void update();
 

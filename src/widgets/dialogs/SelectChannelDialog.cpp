@@ -375,12 +375,7 @@ void SelectChannelDialog::themeChangedEvent()
 {
     BaseWindow::themeChangedEvent();
 
-    auto &ui = this->ui_;
-
-    // NOTE: This currently overrides the QLineEdit's font size.
-    // If the dialog is open when the theme is changed, things will look a bit off.
-    // This can be alleviated by us using a single application-wide style sheet for these things.
-    ui.channelName->setStyleSheet(this->theme->splits.input.styleSheet);
+    this->setPalette(getTheme()->palette);
 }
 
 void SelectChannelDialog::scaleChangedEvent(float newScale)
