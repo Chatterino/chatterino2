@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added a setting for the "Delete message" menu option when right-clicking a message as a moderator. (#6100)
 - Bugfix: Fixed the channel name input not being focused when opening the select-channel dialog. (#6096)
 - Bugfix: Fixed inputs in dialogs not having a border around and padding in them. (#6098)
 

@@ -2576,7 +2576,8 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
     auto *twitchChannel =
         dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get());
     if (!layout->getMessage()->id.isEmpty() && twitchChannel &&
-        twitchChannel->hasModRights())
+        twitchChannel->hasModRights() &&
+        getSettings()->showDeleteMessageOptionInMessageMenu)
     {
         menu->addAction(
             "&Delete message", [twitchChannel, id = layout->getMessage()->id] {
