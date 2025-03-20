@@ -7,6 +7,7 @@
 #include <pajlada/settings/setting.hpp>
 #include <QColor>
 #include <QJsonObject>
+#include <QPalette>
 #include <QPixmap>
 #include <QString>
 #include <QTimer>
