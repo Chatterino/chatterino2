@@ -4,6 +4,7 @@
 
 - Bugfix: Fixed the channel name input not being focused when opening the select-channel dialog. (#6096)
 - Bugfix: Fixed inputs in dialogs not having a border around and padding in them. (#6098)
+- Bugfix: Change default local r9k keybinding per macOS standard (#5764)
 
 ## 2.5.3-beta.1
 
@@ -239,7 +240,6 @@
 - Dev: Qt 6.8 and later now default to the GDI fontengine. (#5710)
 - Dev: Moved to condition variables when shutting down worker threads. (#5721, #5733)
 - Dev: Reduced layouts in channel views when setting a channel. (#5737, #5748, #5757)
-- Bugfix: Change default local r9k keybinding per macOS standard (#5764)
 
 ## 2.5.1
 
