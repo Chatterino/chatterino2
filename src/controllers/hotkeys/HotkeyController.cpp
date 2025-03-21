@@ -521,7 +521,7 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
                             std::vector<QString>(), "toggle local r9k");
 #else
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
-                            QKeySequence(""), "toggleLocalR9K",
+                            QKeySequence(), "toggleLocalR9K",
                             std::vector<QString>(), "toggle local r9k");
 #endif
 
