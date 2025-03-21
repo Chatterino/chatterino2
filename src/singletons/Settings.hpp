@@ -690,11 +690,6 @@ public:
 
     QStringSetting additionalExtensionIDs{"/misc/additionalExtensionIDs", ""};
 
-    BoolSetting showDeleteMessageOptionInMessageMenu = {
-        "/moderation/showDeleteMessageOptionInMessageMenu",
-        true,
-    };
-
 private:
     ChatterinoSetting<std::vector<HighlightPhrase>> highlightedMessagesSetting =
         {"/highlighting/highlights"};

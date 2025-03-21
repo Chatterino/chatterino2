@@ -1146,13 +1146,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addSubtitle("Miscellaneous");
 
-    SettingWidget::checkbox("Show delete message option in message menu",
-                            s.showDeleteMessageOptionInMessageMenu)
-        ->setTooltip("If you have moderator permissions in the channel, this "
-                     "setting adds the \"Delete message\" option to the "
-                     "right-click menu of messages.")
-        ->addTo(layout);
-
     if (supportsIncognitoLinks())
     {
         layout.addCheckbox("Open links in incognito/private mode",
