@@ -35,7 +35,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -148,96 +148,12 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "hi"
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
-                        "this"
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
-                        "is"
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
-                        "an"
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
-                        "announcement"
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
-                        "from"
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
+                        "hi",
+                        "this",
+                        "is",
+                        "an",
+                        "announcement",
+                        "from",
                         "1"
                     ]
                 },
@@ -264,6 +180,7 @@
             "searchText": "lahoooo  lahoooo: hi this is an announcement from 1 ",
             "serverReceivedTime": "2024-09-12T05:19:38Z",
             "timeoutUser": "",
+            "userID": "612865661",
             "usernameColor": "#ffdaa520"
         },
         {
@@ -283,7 +200,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -326,6 +243,7 @@
             "searchText": "Announcement",
             "serverReceivedTime": "",
             "timeoutUser": "",
+            "userID": "",
             "usernameColor": "#ff000000"
         }
     ]

@@ -26,7 +26,7 @@ public:
 protected:
     void themeChangedEvent() override;
 
-public slots:
+public Q_SLOTS:
     void updateSuggestions(const QString &text);
 
 private:

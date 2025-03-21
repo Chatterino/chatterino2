@@ -16,6 +16,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "widgets/helper/ChannelView.hpp"
@@ -315,6 +316,8 @@ EmotePopup::EmotePopup(QWidget *parent)
             }
             this->reloadEmotes();
         });
+
+    this->themeChangedEvent();
 }
 
 void EmotePopup::addShortcuts()
@@ -429,6 +432,8 @@ void EmotePopup::loadChannel(ChannelPtr channel)
     this->subEmotesView_->setChannel(
         std::make_shared<Channel>("", Channel::Type::None));
     this->channelEmotesView_->setChannel(
+        std::make_shared<Channel>("", Channel::Type::None));
+    this->searchView_->setChannel(
         std::make_shared<Channel>("", Channel::Type::None));
 
     this->reloadEmotes();
@@ -606,7 +611,8 @@ void EmotePopup::filterEmotes(const QString &searchText)
 
         return;
     }
-    auto searchChannel = std::make_shared<Channel>("", Channel::Type::None);
+    auto searchChannel = this->searchView_->underlyingChannel();
+    searchChannel->clearMessages();
 
     // true in special channels like /mentions
     if (this->channel_->isTwitchChannel())
@@ -632,8 +638,6 @@ void EmotePopup::filterEmotes(const QString &searchText)
         loadEmojis(*searchChannel, filteredEmojis, "Emojis");
     }
 
-    this->searchView_->setChannel(searchChannel);
-
     this->notebook_->hide();
     this->searchView_->show();
 }
@@ -657,6 +661,13 @@ void EmotePopup::moveEvent(QMoveEvent *event)
 {
     this->saveBounds();
     BasePopup::moveEvent(event);
+}
+
+void EmotePopup::themeChangedEvent()
+{
+    BasePopup::themeChangedEvent();
+
+    this->setPalette(getTheme()->palette);
 }
 
 void EmotePopup::closeEvent(QCloseEvent *event)

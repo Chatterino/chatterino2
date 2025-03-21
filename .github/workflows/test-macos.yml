@@ -7,7 +7,7 @@ on:
   merge_group:
 
 env:
-  TWITCH_PUBSUB_SERVER_TAG: v1.0.7
+  TWITCH_PUBSUB_SERVER_TAG: v1.0.8
   HTTPBOX_TAG: v0.2.1
   QT_QPA_PLATFORM: minimal
   HOMEBREW_NO_AUTO_UPDATE: 1
@@ -23,25 +23,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-13]
-        qt-version: [5.15.2, 6.7.1]
-        plugins: [true]
+        os: [macos-14]
+        qt-version: [6.4.3, 6.7.1]
       fail-fast: false
     env:
-      C2_BUILD_WITH_QT6: ${{ startsWith(matrix.qt-version, '6.') && 'ON' || 'OFF' }}
       QT_MODULES: ${{ startsWith(matrix.qt-version, '6.') && 'qt5compat qtimageformats' || '' }}
 
     steps:
-      - name: Enable plugin support
-        if: matrix.plugins
-        run: |
-          echo "C2_PLUGINS=ON" >> "$GITHUB_ENV"
-
-      - name: Set BUILD_WITH_QT6
-        if: startsWith(matrix.qt-version, '6.')
-        run: |
-          echo "C2_BUILD_WITH_QT6=ON" >> "$GITHUB_ENV"
-
       - uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -57,11 +45,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install openssl rapidjson p7zip create-dmg cmake
-          brew tap-new gh/local-boost
-          brew tap homebrew/core --force
-          brew extract --version=1.86.0 boost gh/local-boost
-          brew install boost@1.86.0
+          brew install openssl rapidjson p7zip create-dmg cmake boost
 
       - name: Install httpbox
         run: |
@@ -79,8 +63,6 @@ jobs:
               -DBUILD_TESTS=On \
               -DBUILD_APP=OFF \
               -DUSE_PRECOMPILED_HEADERS=OFF \
-              -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
-              -DBUILD_WITH_QT6="$C2_BUILD_WITH_QT6" \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
 
@@ -91,8 +73,6 @@ jobs:
           tar -xzf pubsub-server.tar.gz -C pubsub-server-test
           rm pubsub-server.tar.gz
           cd pubsub-server-test
-          curl -L -o server.crt "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.crt"
-          curl -L -o server.key "https://github.com/Chatterino/twitch-pubsub-server-test/raw/${{ env.TWITCH_PUBSUB_SERVER_TAG }}/cmd/server/server.key"
           cd ..
 
       - name: Test

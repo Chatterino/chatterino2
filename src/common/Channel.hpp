@@ -91,21 +91,19 @@ public:
     /// Inserts the given messages in order by Message::serverReceivedTime.
     void fillInMissingMessages(const std::vector<MessagePtr> &messages);
 
-    void addOrReplaceTimeout(MessagePtr message, QTime now) final;
-    void addOrReplaceClearChat(MessagePtr message, QTime now) final;
+    void addOrReplaceTimeout(MessagePtr message, const QDateTime &now) final;
+    void addOrReplaceClearChat(MessagePtr message, const QDateTime &now) final;
     void disableAllMessages() final;
     void replaceMessage(const MessagePtr &message,
                         const MessagePtr &replacement);
     void replaceMessage(size_t index, const MessagePtr &replacement);
     void replaceMessage(size_t hint, const MessagePtr &message,
                         const MessagePtr &replacement);
-    void deleteMessage(QString messageID);
+    void disableMessage(const QString &messageID);
 
     /// Removes all messages from this channel and invokes #messagesCleared
     void clearMessages();
 
-    [[deprecated("Use findMessageByID instead")]] MessagePtr findMessage(
-        QString messageID);
     MessagePtr findMessageByID(QStringView messageID) final;
 
     bool hasMessages() const;
@@ -143,6 +141,7 @@ private:
     const QString name_;
     LimitedQueue<MessagePtr> messages_;
     Type type_;
+    bool anythingLogged_ = false;
     QTimer clearCompletionModelTimer_;
 };
 
@@ -165,7 +164,7 @@ public:
     ChannelPtr get() const;
     void reset(ChannelPtr channel);
     pajlada::Signals::NoArgSignal &getChannelChanged();
-    Channel::Type getType();
+    Channel::Type getType() const;
 
 private:
     std::shared_ptr<Data> data_;

@@ -116,7 +116,7 @@ public:
     /// @see #hasThumbnail(), #thumbnail()
     void setThumbnail(ImagePtr thumbnail);
 
-signals:
+Q_SIGNALS:
     /// @brief Emitted when this link's state changes
     ///
     /// @param state The new state

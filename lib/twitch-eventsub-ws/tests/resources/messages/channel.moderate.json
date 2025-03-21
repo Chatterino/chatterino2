@@ -1,0 +1,60 @@
+{
+  "metadata": {
+    "message_id": "bf6e248f-a523-4bf8-b215-ea1822e60223",
+    "message_type": "notification",
+    "message_timestamp": "2024-05-14T12:31:47.995298776Z",
+    "subscription_type": "channel.moderate",
+    "subscription_version": "2"
+  },
+  "payload": {
+    "subscription": {
+      "id": "86d99e53-2837-40cf-bc6e-c6e00698919c",
+      "status": "enabled",
+      "type": "channel.moderate",
+      "version": "2",
+      "condition": {
+        "broadcaster_user_id": "11148817",
+        "moderator_user_id": "117166826"
+      },
+      "transport": {
+        "method": "websocket",
+        "session_id": "AgoQZgfnyKxXQ32hpzCWF4aCGBIGY2VsbC1j"
+      },
+      "created_at": "2025-02-01T12:02:16.005321321Z",
+      "cost": 0
+    },
+    "event": {
+      "broadcaster_user_id": "11148817",
+      "broadcaster_user_login": "pajlada",
+      "broadcaster_user_name": "pajlada",
+      "source_broadcaster_user_id": null,
+      "source_broadcaster_user_login": null,
+      "source_broadcaster_user_name": null,
+      "moderator_user_id": "11148817",
+      "moderator_user_login": "pajlada",
+      "moderator_user_name": "pajlada",
+      "action": "followers",
+      "followers": { "follow_duration_minutes": 0 },
+      "slow": null,
+      "vip": null,
+      "unvip": null,
+      "mod": null,
+      "unmod": null,
+      "ban": null,
+      "unban": null,
+      "timeout": null,
+      "untimeout": null,
+      "raid": null,
+      "unraid": null,
+      "delete": null,
+      "automod_terms": null,
+      "unban_request": null,
+      "warn": null,
+      "shared_chat_ban": null,
+      "shared_chat_unban": null,
+      "shared_chat_timeout": null,
+      "shared_chat_untimeout": null,
+      "shared_chat_delete": null
+    }
+  }
+}

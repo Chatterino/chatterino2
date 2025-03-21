@@ -24,8 +24,10 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/StreamerMode.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/PostToThread.hpp"
 #include "util/RatelimitBucket.hpp"
+#include "util/Twitch.hpp"
 
 #include <IrcCommand>
 #include <IrcMessage>
@@ -248,9 +250,15 @@ void TwitchIrcServer::initialize()
             }
 
             postToThread([chan, actor{action.source.login}] {
-                auto now = QTime::currentTime();
+                auto now = QDateTime::currentDateTime();
                 chan->addOrReplaceClearChat(
                     MessageBuilder::makeClearChatMessage(now, actor), now);
+                if (getSettings()->hideModerated)
+                {
+                    // XXX: This is expensive. We could use a layout request if the layout
+                    //      would store the previous message flags.
+                    getApp()->getWindows()->forceLayoutChannelViews();
+                }
             });
         });
 
@@ -312,9 +320,18 @@ void TwitchIrcServer::initialize()
             }
 
             postToThread([chan, action] {
-                MessageBuilder msg(action);
+                // TODO: Can we utilize some pubsub time field? maybe not worth
+                auto time = QDateTime::currentDateTime();
+                MessageBuilder msg(action, time);
                 msg->flags.set(MessageFlag::PubSub);
-                chan->addOrReplaceTimeout(msg.release(), QTime::currentTime());
+                chan->addOrReplaceTimeout(msg.release(),
+                                          QDateTime::currentDateTime());
+                if (getSettings()->hideModerated)
+                {
+                    // XXX: This is expensive. We could use a layout request if the layout
+                    //      would store the previous message flags.
+                    getApp()->getWindows()->forceLayoutChannelViews();
+                }
             });
         });
 
@@ -385,7 +402,9 @@ void TwitchIrcServer::initialize()
                 return;
             }
 
-            auto msg = MessageBuilder(action).release();
+            // TODO: Can we utilize some pubsub time field? maybe not worth
+            auto time = QDateTime::currentDateTime();
+            auto msg = MessageBuilder(action, time).release();
 
             postToThread([chan, msg] {
                 chan->addMessage(msg, MessageContext::Original);
@@ -412,9 +431,10 @@ void TwitchIrcServer::initialize()
                 return;
             }
 
-            if (getSettings()->streamerModeHideModActions &&
-                getApp()->getStreamerMode()->isEnabled())
+            if (getApp()->getStreamerMode()->shouldHideModActions())
             {
+                // NOTE: This completely stops the building of this action, rathern than only hiding it.
+                // If the user disabled streamer mode or the setting, there will be messages missing
                 return;
             }
 
@@ -457,9 +477,10 @@ void TwitchIrcServer::initialize()
                 return;
             }
 
-            if (getSettings()->streamerModeHideModActions &&
-                getApp()->getStreamerMode()->isEnabled())
+            if (getApp()->getStreamerMode()->shouldHideModActions())
             {
+                // NOTE: This completely stops the building of this action, rathern than only hiding it.
+                // If the user disabled streamer mode or the setting, there will be messages missing
                 return;
             }
 
@@ -629,7 +650,7 @@ void TwitchIrcServer::initialize()
                     {
                         // Gray out approve/deny button upon "ALLOWED" and "DENIED" statuses
                         // They are versions of automod_message_(denied|approved) but for mods.
-                        chan->deleteMessage("automod_" + msg.messageID);
+                        chan->disableMessage("automod_" + msg.messageID);
                     }
                 }
                 break;
@@ -661,9 +682,10 @@ void TwitchIrcServer::initialize()
     this->connections_.managedConnect(
         getApp()->getTwitchPubSub()->moderation.automodUserMessage,
         [this](const auto &action) {
-            if (getSettings()->streamerModeHideModActions &&
-                getApp()->getStreamerMode()->isEnabled())
+            if (getApp()->getStreamerMode()->shouldHideModActions())
             {
+                // NOTE: This completely stops the building of this action, rathern than only hiding it.
+                // If the user disabled streamer mode or the setting, there will be messages missing
                 return;
             }
             auto chan = this->getChannelOrEmptyByID(action.roomID);
@@ -934,15 +956,31 @@ void TwitchIrcServer::onReadConnected(IrcConnection *connection)
 {
     (void)connection;
 
-    std::lock_guard lock(this->channelMutex);
+    std::vector<ChannelPtr> activeChannels;
+    {
+        std::lock_guard lock(this->channelMutex);
+
+        activeChannels.reserve(this->channels.size());
+        for (const auto &weak : this->channels)
+        {
+            if (auto channel = weak.lock())
+            {
+                activeChannels.push_back(channel);
+            }
+        }
+    }
+
+    // put the visible channels first
+    auto visible = getApp()->getWindows()->getVisibleChannelNames();
+
+    std::ranges::stable_partition(activeChannels, [&](const auto &chan) {
+        return visible.contains(chan->getName());
+    });
 
     // join channels
-    for (auto &&weak : this->channels)
+    for (const auto &channel : activeChannels)
     {
-        if (auto channel = weak.lock())
-        {
-            this->joinBucket_->send(channel->getName());
-        }
+        this->joinBucket_->send(channel->getName());
     }
 
     // connected/disconnected message
@@ -951,14 +989,8 @@ void TwitchIrcServer::onReadConnected(IrcConnection *connection)
     auto reconnected = makeSystemMessage("reconnected");
     reconnected->flags.set(MessageFlag::ConnectedMessage);
 
-    for (std::weak_ptr<Channel> &weak : this->channels.values())
+    for (const auto &chan : activeChannels)
     {
-        std::shared_ptr<Channel> chan = weak.lock();
-        if (!chan)
-        {
-            continue;
-        }
-
         LimitedQueueSnapshot<MessagePtr> snapshot = chan->getMessageSnapshot();
 
         bool replaceMessage =
@@ -1173,18 +1205,6 @@ std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
     return Channel::getEmpty();
 }
 
-QString TwitchIrcServer::cleanChannelName(const QString &dirtyChannelName)
-{
-    if (dirtyChannelName.startsWith('#'))
-    {
-        return dirtyChannelName.mid(1).toLower();
-    }
-    else
-    {
-        return dirtyChannelName.toLower();
-    }
-}
-
 bool TwitchIrcServer::prepareToSend(
     const std::shared_ptr<TwitchChannel> &channel)
 {
@@ -1286,6 +1306,8 @@ const IndirectChannel &TwitchIrcServer::getWatchingChannel() const
 
 void TwitchIrcServer::setWatchingChannel(ChannelPtr newWatchingChannel)
 {
+    assertInGuiThread();
+
     this->watchingChannel.reset(newWatchingChannel);
 }
 
@@ -1316,6 +1338,8 @@ QString TwitchIrcServer::getLastUserThatWhisperedMe() const
 
 void TwitchIrcServer::setLastUserThatWhisperedMe(const QString &user)
 {
+    assertInGuiThread();
+
     this->lastUserThatWhisperedMe.set(user);
 }
 
@@ -1434,6 +1458,8 @@ void TwitchIrcServer::markChannelsConnected()
 
 void TwitchIrcServer::addFakeMessage(const QString &data)
 {
+    assertInGuiThread();
+
     auto *fakeMessage = Communi::IrcMessage::fromData(
         data.toUtf8(), this->readConnection_.get());
 
@@ -1485,6 +1511,8 @@ void TwitchIrcServer::forEachChannel(std::function<void(ChannelPtr)> func)
 
 void TwitchIrcServer::connect()
 {
+    assertInGuiThread();
+
     this->disconnect();
 
     this->initializeConnection(this->writeConnection_.get(),
@@ -1516,7 +1544,7 @@ void TwitchIrcServer::sendRawMessage(const QString &rawMessage)
 
 ChannelPtr TwitchIrcServer::getOrAddChannel(const QString &dirtyChannelName)
 {
-    auto channelName = this->cleanChannelName(dirtyChannelName);
+    auto channelName = cleanChannelName(dirtyChannelName);
 
     // try get channel
     ChannelPtr chan = this->getChannelOrEmpty(channelName);
@@ -1566,7 +1594,7 @@ ChannelPtr TwitchIrcServer::getOrAddChannel(const QString &dirtyChannelName)
 
 ChannelPtr TwitchIrcServer::getChannelOrEmpty(const QString &dirtyChannelName)
 {
-    auto channelName = this->cleanChannelName(dirtyChannelName);
+    auto channelName = cleanChannelName(dirtyChannelName);
 
     std::lock_guard<std::mutex> lock(this->channelMutex);
 

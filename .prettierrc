@@ -1,6 +1,9 @@
 trailingComma: es5
 endOfLine: auto
 overrides:
+  - files: "*.ts"
+    options:
+      tabWidth: 4
   - files: "*.md"
     options:
       proseWrap: preserve

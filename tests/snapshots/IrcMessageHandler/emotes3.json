@@ -35,7 +35,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -238,21 +238,7 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "a"
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
+                        "a",
                         "b"
                     ]
                 },
@@ -278,6 +264,7 @@
             "searchText": "nerixyz  nerixyz: 😂Kappa😂 &Kappa a  b ",
             "serverReceivedTime": "2024-09-19T15:50:13Z",
             "timeoutUser": "",
+            "userID": "129546453",
             "usernameColor": "#ffff0000"
         }
     ]

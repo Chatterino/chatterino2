@@ -119,8 +119,9 @@ public:
 
     void start()
     {
-        this->work_ = std::make_shared<boost::asio::io_service::work>(
-            this->websocketClient_.get_io_service());
+        this->work_ = std::make_shared<boost::asio::executor_work_guard<
+            boost::asio::io_context::executor_type>>(
+            this->websocketClient_.get_io_service().get_executor());
         this->mainThread_.reset(new std::thread([this] {
             // make sure we set in any case, even exceptions
             auto guard = qScopeGuard([&] {
@@ -158,16 +159,16 @@ public:
         // There is a case where a new client was initiated but not added to the clients list.
         // We just don't join the thread & let the operating system nuke the thread if joining fails
         // within 1s.
-        if (this->stoppedFlag_.waitFor(std::chrono::seconds{1}))
+        if (this->stoppedFlag_.waitFor(std::chrono::milliseconds{100}))
         {
             this->mainThread_->join();
             return;
         }
 
         qCWarning(chatterinoLiveupdates)
-            << "Thread didn't finish within 1 second, force-stop the client";
+            << "Thread didn't finish within 100ms, force-stop the client";
         this->websocketClient_.stop();
-        if (this->stoppedFlag_.waitFor(std::chrono::milliseconds{100}))
+        if (this->stoppedFlag_.waitFor(std::chrono::milliseconds{20}))
         {
             this->mainThread_->join();
             return;
@@ -409,7 +410,9 @@ private:
     std::atomic<bool> addingClient_{false};
     ExponentialBackoff<5> connectBackoff_{std::chrono::milliseconds(1000)};
 
-    std::shared_ptr<boost::asio::io_service::work> work_{nullptr};
+    std::shared_ptr<boost::asio::executor_work_guard<
+        boost::asio::io_context::executor_type>>
+        work_{nullptr};
 
     liveupdates::WebsocketClient websocketClient_;
     std::unique_ptr<std::thread> mainThread_;

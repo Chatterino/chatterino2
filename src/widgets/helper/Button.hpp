@@ -6,6 +6,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPoint>
+#include <QSvgRenderer>
 #include <QTimer>
 #include <QWidget>
 
@@ -34,6 +35,7 @@ public:
 
     void setMouseEffectColor(std::optional<QColor> color);
     void setPixmap(const QPixmap &pixmap_);
+    void setSvgResource(const QString &resourcePath);
     const QPixmap &getPixmap() const;
 
     void setDim(Dim value);
@@ -51,7 +53,7 @@ public:
 
     void setMenu(std::unique_ptr<QMenu> menu);
 
-signals:
+Q_SIGNALS:
     void leftClicked();
     void clicked(Qt::MouseButton button);
     void leftMousePress();
@@ -86,8 +88,12 @@ private:
     void onMouseEffectTimeout();
     void showMenu();
 
+    int getMargin() const;
+
     QColor borderColor_{};
     QPixmap pixmap_{};
+    QSvgRenderer *svgRenderer{};
+    QString svgResourcePath;
     QPixmap resizedPixmap_{};
     Dim dimPixmap_{Dim::Some};
     bool enableMargin_{true};

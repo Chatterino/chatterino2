@@ -9,6 +9,7 @@
 #include "providers/twitch/PubSubHelpers.hpp"
 #include "providers/twitch/PubSubMessages.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
+#include "singletons/Settings.hpp"
 #include "util/DebugCount.hpp"
 #include "util/Helpers.hpp"
 #include "util/RapidjsonHelpers.hpp"
@@ -557,8 +558,9 @@ void PubSub::addClient()
 
 void PubSub::start()
 {
-    this->work = std::make_shared<boost::asio::io_service::work>(
-        this->websocketClient.get_io_service());
+    this->work = std::make_shared<boost::asio::executor_work_guard<
+        boost::asio::io_context::executor_type>>(
+        this->websocketClient.get_io_service().get_executor());
     this->thread = std::make_unique<std::thread>([this] {
         // make sure we set in any case, even exceptions
         auto guard = qScopeGuard([&] {
@@ -594,16 +596,16 @@ void PubSub::stop()
     // within 1s.
     // We could fix the underlying bug, but this is easier & we realistically won't use this exact code
     // for super much longer.
-    if (this->stoppedFlag_.waitFor(std::chrono::seconds{1}))
+    if (this->stoppedFlag_.waitFor(std::chrono::milliseconds{100}))
     {
         this->thread->join();
         return;
     }
 
     qCWarning(chatterinoLiveupdates)
-        << "Thread didn't finish within 1 second, force-stop the client";
+        << "Thread didn't finish within 100ms, force-stop the client";
     this->websocketClient.stop();
-    if (this->stoppedFlag_.waitFor(std::chrono::milliseconds{100}))
+    if (this->stoppedFlag_.waitFor(std::chrono::milliseconds{20}))
     {
         this->thread->join();
         return;
@@ -615,32 +617,13 @@ void PubSub::stop()
     this->thread->detach();
 }
 
-bool PubSub::listenToWhispers()
-{
-    if (this->userID_.isEmpty())
-    {
-        qCDebug(chatterinoPubSub)
-            << "Unable to listen to whispers topic, no user logged in";
-        return false;
-    }
-
-    static const QString topicFormat("whispers.%1");
-    auto topic = topicFormat.arg(this->userID_);
-
-    qCDebug(chatterinoPubSub) << "Listen to whispers" << topic;
-
-    this->listenToTopic(topic);
-
-    return true;
-}
-
-void PubSub::unlistenWhispers()
-{
-    this->unlistenPrefix("whispers.");
-}
-
 void PubSub::listenToChannelModerationActions(const QString &channelID)
 {
+    if (getSettings()->enableExperimentalEventSub)
+    {
+        return;
+    }
+
     if (this->userID_.isEmpty())
     {
         qCDebug(chatterinoPubSub) << "Unable to listen to moderation actions "
@@ -670,6 +653,11 @@ void PubSub::unlistenChannelModerationActions()
 
 void PubSub::listenToAutomod(const QString &channelID)
 {
+    if (getSettings()->enableExperimentalEventSub)
+    {
+        return;
+    }
+
     if (this->userID_.isEmpty())
     {
         qCDebug(chatterinoPubSub)
@@ -699,6 +687,11 @@ void PubSub::unlistenAutomod()
 
 void PubSub::listenToLowTrustUsers(const QString &channelID)
 {
+    if (getSettings()->enableExperimentalEventSub)
+    {
+        return;
+    }
+
     if (this->userID_.isEmpty())
     {
         qCDebug(chatterinoPubSub)
@@ -1107,39 +1100,7 @@ void PubSub::handleMessageResponse(const PubSubMessageMessage &message)
 {
     QString topic = message.topic;
 
-    if (topic.startsWith("whispers."))
-    {
-        auto oInnerMessage = message.toInner<PubSubWhisperMessage>();
-        if (!oInnerMessage)
-        {
-            return;
-        }
-        auto whisperMessage = *oInnerMessage;
-
-        switch (whisperMessage.type)
-        {
-            case PubSubWhisperMessage::Type::WhisperReceived: {
-                this->whisper.received.invoke(whisperMessage);
-            }
-            break;
-            case PubSubWhisperMessage::Type::WhisperSent: {
-                this->whisper.sent.invoke(whisperMessage);
-            }
-            break;
-            case PubSubWhisperMessage::Type::Thread: {
-                // Handle thread?
-            }
-            break;
-
-            case PubSubWhisperMessage::Type::INVALID:
-            default: {
-                qCDebug(chatterinoPubSub)
-                    << "Invalid whisper type:" << whisperMessage.typeString;
-            }
-            break;
-        }
-    }
-    else if (topic.startsWith("chat_moderator_actions."))
+    if (topic.startsWith("chat_moderator_actions."))
     {
         auto oInnerMessage =
             message.toInner<PubSubChatModeratorActionMessage>();
@@ -1298,7 +1259,10 @@ void PubSub::runThread()
 void PubSub::listenToTopic(const QString &topic)
 {
     PubSubListenMessage msg({topic});
-    msg.setToken(this->token_);
+    if (!topic.startsWith("community-points-channel-v1."))
+    {
+        msg.setToken(this->token_);
+    }
 
     this->listen(std::move(msg));
 }

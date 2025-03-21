@@ -674,6 +674,49 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
+const MessageColor &TextElement::color() const noexcept
+{
+    return this->color_;
+}
+
+FontStyle TextElement::fontStyle() const noexcept
+{
+    return this->style_;
+}
+
+void TextElement::appendText(QStringView text)
+{
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    for (auto word : text.split(' '))  // creates a QList
+#else
+    for (auto word : text.tokenize(u' '))
+#endif
+    {
+        this->words_.append(word.toString());
+    }
+}
+
+void TextElement::appendText(const QString &text)
+{
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    this->appendText(QStringView{text});
+#else
+    qsizetype firstSpace = text.indexOf(u' ');
+    if (firstSpace == -1)
+    {
+        // reuse (ref) `text`
+        this->words_.emplace_back(text);
+        return;
+    }
+
+    this->words_.emplace_back(text.sliced(0, firstSpace));
+    for (auto word : QStringView{text}.sliced(firstSpace + 1).tokenize(u' '))
+    {
+        this->words_.emplace_back(word.toString());
+    }
+#endif
+}
+
 QJsonObject TextElement::toJson() const
 {
     auto base = MessageElement::toJson();
@@ -875,6 +918,22 @@ MentionElement::MentionElement(const QString &displayName, QString loginName_,
 {
 }
 
+template <typename>
+MentionElement::MentionElement(const QString &displayName, QString loginName_,
+                               MessageColor fallbackColor_, QColor userColor_)
+    : TextElement(displayName,
+                  {MessageElementFlag::Text, MessageElementFlag::Mention})
+    , fallbackColor(fallbackColor_)
+    , userColor(userColor_.isValid() ? userColor_ : fallbackColor_)
+    , userLoginName(std::move(loginName_))
+{
+}
+
+template MentionElement::MentionElement(const QString &displayName,
+                                        QString loginName_,
+                                        MessageColor fallbackColor_,
+                                        QColor userColor_);
+
 void MentionElement::addToContainer(MessageLayoutContainer &container,
                                     const MessageLayoutContext &ctx)
 {
@@ -967,7 +1026,7 @@ TextElement *TimestampElement::formatTime(const QTime &time)
     QString format = locale.toString(time, getSettings()->timestampFormat);
 
     return new TextElement(format, MessageElementFlag::Timestamp,
-                           MessageColor::System, FontStyle::ChatMedium);
+                           MessageColor::System, FontStyle::TimestampMedium);
 }
 
 QJsonObject TimestampElement::toJson() const

@@ -53,6 +53,8 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/IgnoreController.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/OnceFlag.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/IncognitoBrowser.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/EventSubMessages.cpp
+
     ${CMAKE_CURRENT_LIST_DIR}/src/lib/Snapshot.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/lib/Snapshot.hpp
     # Add your new file above this line!

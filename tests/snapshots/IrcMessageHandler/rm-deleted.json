@@ -35,7 +35,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -160,21 +160,7 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "my7TVEmote"
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
+                        "my7TVEmote",
                         "hi"
                     ]
                 },
@@ -267,6 +253,7 @@
             "searchText": "nerixyz  nerixyz: 7TVEmote Kappa my7TVEmote hi 7TVEmote❤ ",
             "serverReceivedTime": "2024-09-17T19:17:07Z",
             "timeoutUser": "",
+            "userID": "129546453",
             "usernameColor": "#ffff0000"
         }
     ]

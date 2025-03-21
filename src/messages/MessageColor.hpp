@@ -17,6 +17,12 @@ struct MessageColor {
 
     QString toString() const;
 
+    bool operator==(const MessageColor &other) const noexcept
+    {
+        return this->type_ == other.type_ &&
+               this->customColor_ == other.customColor_;
+    }
+
 private:
     Type type_;
     QColor customColor_;

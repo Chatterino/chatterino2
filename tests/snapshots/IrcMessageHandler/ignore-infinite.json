@@ -35,7 +35,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -91,96 +91,12 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "Too"
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
-                        "many"
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
-                        "replacements"
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
-                        "-"
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
-                        "check"
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
-                        "your"
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
+                        "Too",
+                        "many",
+                        "replacements",
+                        "-",
+                        "check",
+                        "your",
                         "ignores!"
                     ]
                 },
@@ -206,6 +122,7 @@
             "searchText": "nerixyz  nerixyz: Too many replacements - check your ignores! ",
             "serverReceivedTime": "2024-09-20T20:52:42Z",
             "timeoutUser": "",
+            "userID": "129546453",
             "usernameColor": "#ffff0000"
         }
     ],

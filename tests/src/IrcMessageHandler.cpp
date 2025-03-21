@@ -603,7 +603,10 @@ TEST_P(TestIrcMessageHandlerP, Run)
 
     delete ircMessage;
 
-    ASSERT_TRUE(snapshot->run(got, UPDATE_SNAPSHOTS));
+    ASSERT_TRUE(snapshot->run(got, UPDATE_SNAPSHOTS))
+        << "Snapshot " << snapshot->name() << " failed. Expected JSON to be\n"
+        << QJsonDocument(snapshot->output().toArray()).toJson() << "\nbut got\n"
+        << QJsonDocument(got).toJson() << "\ninstead.";
 }
 
 INSTANTIATE_TEST_SUITE_P(

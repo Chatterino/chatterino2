@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "message_id": "2246f78c-ce7b-4639-836b-d3bddc3f65ef",
+    "message_type": "notification",
+    "message_timestamp": "2024-05-14T12:31:47.995298776Z",
+    "subscription_type": "channel.chat.notification",
+    "subscription_version": "1"
+  },
+  "payload": {
+    "subscription": {
+      "id": "96f9a91e-f1e0-43af-82ac-a6e934778805",
+      "status": "enabled",
+      "type": "channel.chat.notification",
+      "version": "1",
+      "condition": {
+        "broadcaster_user_id": "165080419",
+        "user_id": "27620241"
+      },
+      "transport": {
+        "method": "websocket",
+        "session_id": "AgoQUlB8aB2SSsavWVfcs5ljnBIGY2VsbC1j"
+      },
+      "created_at": "2023-11-20T16:41:22.999246448Z",
+      "cost": 0
+    },
+    "event": {
+      "broadcaster_user_id": "165080419",
+      "broadcaster_user_login": "elraenn",
+      "broadcaster_user_name": "Elraenn",
+      "chatter_user_id": "425829220",
+      "chatter_user_login": "kecogluali5",
+      "chatter_user_name": "Kecogluali5",
+      "chatter_is_anonymous": false,
+      "color": "#0000FF",
+      "badges": [{ "set_id": "subscriber", "id": "12", "info": "12" }],
+      "system_message": "Kecogluali5 is paying forward the Gift they got from CasinoZEBERUS to the community!",
+      "message_id": "573a20ff-8f88-499e-be2b-c7079eb76f6c",
+      "message": { "text": "", "fragments": [] },
+      "notice_type": "pay_it_forward",
+      "sub": null,
+      "resub": null,
+      "sub_gift": null,
+      "community_sub_gift": null,
+      "gift_paid_upgrade": null,
+      "prime_paid_upgrade": null,
+      "pay_it_forward": {
+        "recipient_user_id": null,
+        "recipient_user_name": null,
+        "recipient_user_login": null,
+        "gifter_is_anonymous": false,
+        "gifter_user_id": "967793245",
+        "gifter_user_name": "CasinoZEBERUS",
+        "gifter_user_login": "casinozeberus"
+      },
+      "raid": null,
+      "unraid": null,
+      "announcement": null,
+      "bits_badge_tier": null,
+      "charity_donation": null
+    }
+  }
+}

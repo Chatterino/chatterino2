@@ -156,7 +156,7 @@ void AlphaSlider::setAlpha(int alpha)
     this->alpha_ = alpha;
     this->color_.setAlpha(alpha);
 
-    emit this->colorChanged(this->color_);
+    this->colorChanged(this->color_);
     this->update();
 }
 

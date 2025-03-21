@@ -35,7 +35,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -116,6 +116,7 @@
             "searchText": "justinfan64537  justinfan64537: a ",
             "serverReceivedTime": "2024-09-21T11:37:23Z",
             "timeoutUser": "",
+            "userID": "64537",
             "usernameColor": "#ffff0000"
         }
     ]

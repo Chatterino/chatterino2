@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Chatterino"
-#define MyAppVersion "2.5.2"
+#define MyAppVersion "2.5.3"
 #define MyAppPublisher "Chatterino Team"
 #define MyAppURL "https://www.chatterino.com"
 #define MyAppExeName "chatterino.exe"
@@ -77,8 +77,8 @@ Source: "{#WORKING_DIR}vc_redist.x64.exe"; DestDir: "{tmp}"; Tasks: vcredist;
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; AppUserModelID: "ChatterinoTeam.Chatterino"
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; AppUserModelID: "ChatterinoTeam.Chatterino"; Tasks: desktopicon
 
 [Run]
 ; VC++ redistributable

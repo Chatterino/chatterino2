@@ -34,7 +34,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -195,36 +195,8 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "a"
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
-                        "b"
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
+                        "a",
+                        "b",
                         "c"
                     ]
                 },
@@ -250,6 +222,7 @@
             "searchText": "slyckity  slyckity: Cheer1 a Cheer1 Cheer1 Cheer1 Cheer1 b c ",
             "serverReceivedTime": "2019-09-07T02:44:33Z",
             "timeoutUser": "",
+            "userID": "143114011",
             "usernameColor": "#ff0000ff"
         }
     ],

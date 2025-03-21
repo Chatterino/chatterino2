@@ -8,6 +8,7 @@
 #include "common/UniqueAccess.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
+#include "providers/twitch/eventsub/SubscriptionHandle.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/QStringHash.hpp"
 #include "util/ThreadGuard.hpp"
@@ -26,6 +27,7 @@
 #include <unordered_map>
 
 class TestIrcMessageHandlerP;
+class TestEventSubMessagesP;
 
 namespace chatterino {
 
@@ -58,6 +60,7 @@ struct HelixGlobalBadges;
 using HelixChannelBadges = HelixGlobalBadges;
 
 class TwitchIrcServer;
+class TwitchAccount;
 
 const int MAX_QUEUED_REDEMPTIONS = 16;
 
@@ -116,23 +119,25 @@ public:
         bool emoteOnly = false;
 
         /**
+         * @lua@field follower_only number? Time in minutes you need to follow to chat or nil.
+         */
+        /**
          * @brief Number of minutes required for users to be followed before typing in chat
          *
          * Special cases:
          * -1 = follower mode off
          *  0 = follower mode on, no time requirement
-         *
-         * @lua@field follower_only number? Time in minutes you need to follow to chat or nil.
-         **/
+         */
         int followerOnly = -1;
 
+        /**
+         * @lua@field slow_mode number? Time in seconds you need to wait before sending messages or nil.
+         */
         /**
          * @brief Number of seconds required to wait before typing emotes
          *
          * 0 = slow mode off
-         *
-         * @lua@field slow_mode number? Time in seconds you need to wait before sending messages or nil.
-         **/
+         */
         int slowMode = 0;
     };
 
@@ -160,6 +165,12 @@ public:
     void reconnect() override;
     QString getCurrentStreamID() const override;
     void createClip();
+
+    /// Delete the message with the specified ID as a moderator.
+    ///
+    /// If the ID is empty, all messages will be deleted, effectively clearing
+    /// the chat.
+    void deleteMessagesAs(const QString &messageID, TwitchAccount *moderator);
 
     // Data
     const QString &subscriptionUrl();
@@ -497,11 +508,20 @@ private:
     pajlada::Signals::SignalHolder signalHolder_;
     std::vector<boost::signals2::scoped_connection> bSignals_;
 
+    eventsub::SubscriptionHandle eventSubChannelModerateHandle;
+    eventsub::SubscriptionHandle eventSubAutomodMessageHoldHandle;
+    eventsub::SubscriptionHandle eventSubAutomodMessageUpdateHandle;
+    eventsub::SubscriptionHandle eventSubSuspiciousUserMessageHandle;
+    eventsub::SubscriptionHandle eventSubSuspiciousUserUpdateHandle;
+    eventsub::SubscriptionHandle eventSubChannelChatUserMessageHoldHandle;
+    eventsub::SubscriptionHandle eventSubChannelChatUserMessageUpdateHandle;
+
     friend class TwitchIrcServer;
     friend class MessageBuilder;
     friend class IrcMessageHandler;
     friend class Commands_E2E_Test;
     friend class ::TestIrcMessageHandlerP;
+    friend class ::TestEventSubMessagesP;
 };
 
 }  // namespace chatterino

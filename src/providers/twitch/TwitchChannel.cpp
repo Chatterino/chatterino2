@@ -29,6 +29,7 @@
 #include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
+#include "providers/twitch/eventsub/Controller.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -43,6 +44,7 @@
 #include "util/Helpers.hpp"
 #include "util/PostToThread.hpp"
 #include "util/QStringHash.hpp"
+#include "util/VectorMessageSink.hpp"
 #include "widgets/Window.hpp"
 
 #include <IrcConnection>
@@ -67,13 +69,21 @@ namespace {
 #endif
     constexpr int CLIP_CREATION_COOLDOWN = 5000;
     const QString CLIPS_LINK("https://clips.twitch.tv/%1");
+    const QString CLIPS_FAILURE_CLIPS_UNAVAILABLE_TEXT(
+        "Failed to create a clip - clips are temporarily unavailable: %1");
     const QString CLIPS_FAILURE_CLIPS_DISABLED_TEXT(
-        "Failed to create a clip - the streamer has clips disabled entirely or "
-        "requires a certain subscriber or follower status to create clips.");
+        "Failed to create a clip - the streamer has clips disabled in their "
+        "channel.");
+    const QString CLIPS_FAILURE_CLIPS_RESTRICTED_TEXT(
+        "Failed to create a clip - the streamer has restricted clip creation "
+        "to subscribers, or followers of an unknown duration.");
+    const QString CLIPS_FAILURE_CLIPS_RESTRICTED_CATEGORY_TEXT(
+        "Failed to create a clip - the streamer has disabled clips while in "
+        "this category.");
     const QString CLIPS_FAILURE_NOT_AUTHENTICATED_TEXT(
         "Failed to create a clip - you need to re-authenticate.");
     const QString CLIPS_FAILURE_UNKNOWN_ERROR_TEXT(
-        "Failed to create a clip - an unknown error occurred.");
+        "Failed to create a clip: %1");
     const QString LOGIN_PROMPT_TEXT("Click here to add your account again.");
     const Link ACCOUNTS_LINK(Link::OpenAccountsPage, QString());
 
@@ -451,9 +461,24 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
             [&](const QueuedRedemption &msg) {
                 if (reward.id == msg.rewardID)
                 {
+                    VectorMessageSink sink(
+                        MessageSinkTrait::AddMentionsToGlobalChannel);
                     IrcMessageHandler::instance().addMessage(
-                        msg.message.get(), *this, this, msg.originalContent,
+                        msg.message.get(), sink, this, msg.originalContent,
                         *server, false, false);
+                    if (sink.messages().empty())
+                    {
+                        return true;
+                    }
+                    MessagePtr next = sink.messages().back();
+                    auto prev = this->findMessageByID(next->id);
+                    if (!prev)
+                    {
+                        // message gone
+                        this->addMessage(next, MessageContext::Repost);
+                        return true;
+                    }
+                    this->replaceMessage(prev, next);
                     return true;
                 }
                 return false;
@@ -1464,7 +1489,134 @@ void TwitchChannel::refreshPubSub()
     {
         getApp()->getTwitchPubSub()->listenToAutomod(roomId);
         getApp()->getTwitchPubSub()->listenToLowTrustUsers(roomId);
+
+        this->eventSubChannelModerateHandle =
+            getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
+                .subscriptionType = "channel.moderate",
+                .subscriptionVersion = "2",
+                .conditions =
+                    {
+                        {
+                            "broadcaster_user_id",
+                            roomId,
+                        },
+                        {
+                            "moderator_user_id",
+                            currentAccount->getUserId(),
+                        },
+                    },
+            });
+        this->eventSubAutomodMessageHoldHandle =
+            getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
+                .subscriptionType = "automod.message.hold",
+                .subscriptionVersion = "2",
+                .conditions =
+                    {
+                        {
+                            "broadcaster_user_id",
+                            roomId,
+                        },
+                        {
+                            "moderator_user_id",
+                            currentAccount->getUserId(),
+                        },
+                    },
+            });
+        this->eventSubAutomodMessageUpdateHandle =
+            getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
+                .subscriptionType = "automod.message.update",
+                .subscriptionVersion = "2",
+                .conditions =
+                    {
+                        {
+                            "broadcaster_user_id",
+                            roomId,
+                        },
+                        {
+                            "moderator_user_id",
+                            currentAccount->getUserId(),
+                        },
+                    },
+            });
+        this->eventSubSuspiciousUserMessageHandle =
+            getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
+                .subscriptionType = "channel.suspicious_user.message",
+                .subscriptionVersion = "1",
+                .conditions =
+                    {
+                        {
+                            "broadcaster_user_id",
+                            roomId,
+                        },
+                        {
+                            "moderator_user_id",
+                            currentAccount->getUserId(),
+                        },
+                    },
+            });
+        this->eventSubSuspiciousUserUpdateHandle =
+            getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
+                .subscriptionType = "channel.suspicious_user.update",
+                .subscriptionVersion = "1",
+                .conditions =
+                    {
+                        {
+                            "broadcaster_user_id",
+                            roomId,
+                        },
+                        {
+                            "moderator_user_id",
+                            currentAccount->getUserId(),
+                        },
+                    },
+            });
+
+        this->eventSubChannelChatUserMessageHoldHandle.reset();
+        this->eventSubChannelChatUserMessageUpdateHandle.reset();
     }
+    else
+    {
+        this->eventSubChannelModerateHandle.reset();
+        this->eventSubAutomodMessageHoldHandle.reset();
+        this->eventSubAutomodMessageUpdateHandle.reset();
+        this->eventSubSuspiciousUserMessageHandle.reset();
+        this->eventSubSuspiciousUserUpdateHandle.reset();
+
+        this->eventSubChannelChatUserMessageHoldHandle =
+            getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
+                .subscriptionType = "channel.chat.user_message_hold",
+                .subscriptionVersion = "1",
+                .conditions =
+                    {
+                        {
+                            "broadcaster_user_id",
+                            roomId,
+                        },
+                        {
+                            "user_id",
+                            currentAccount->getUserId(),
+                        },
+                    },
+            });
+
+        this->eventSubChannelChatUserMessageUpdateHandle =
+            getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
+                .subscriptionType = "channel.chat.user_message_update",
+                .subscriptionVersion = "1",
+                .conditions =
+                    {
+                        {
+                            "broadcaster_user_id",
+                            roomId,
+                        },
+                        {
+                            "user_id",
+                            currentAccount->getUserId(),
+                        },
+                    },
+            });
+    }
+
     getApp()->getTwitchPubSub()->listenToChannelPointRewards(roomId);
 }
 
@@ -1771,7 +1923,7 @@ void TwitchChannel::createClip()
             this->addMessage(builder.release(), MessageContext::Original);
         },
         // failureCallback
-        [this](auto error) {
+        [this](auto error, auto errorMessage) {
             MessageBuilder builder;
             QString text;
             builder.message().flags.set(MessageFlag::System);
@@ -1780,11 +1932,36 @@ void TwitchChannel::createClip()
 
             switch (error)
             {
+                case HelixClipError::ClipsUnavailable: {
+                    builder.emplace<TextElement>(
+                        CLIPS_FAILURE_CLIPS_UNAVAILABLE_TEXT.arg(errorMessage),
+                        MessageElementFlag::Text, MessageColor::System);
+                    text =
+                        CLIPS_FAILURE_CLIPS_UNAVAILABLE_TEXT.arg(errorMessage);
+                }
+                break;
+
                 case HelixClipError::ClipsDisabled: {
                     builder.emplace<TextElement>(
                         CLIPS_FAILURE_CLIPS_DISABLED_TEXT,
                         MessageElementFlag::Text, MessageColor::System);
                     text = CLIPS_FAILURE_CLIPS_DISABLED_TEXT;
+                }
+                break;
+
+                case HelixClipError::ClipsRestricted: {
+                    builder.emplace<TextElement>(
+                        CLIPS_FAILURE_CLIPS_RESTRICTED_TEXT,
+                        MessageElementFlag::Text, MessageColor::System);
+                    text = CLIPS_FAILURE_CLIPS_RESTRICTED_TEXT;
+                }
+                break;
+
+                case HelixClipError::ClipsRestrictedCategory: {
+                    builder.emplace<TextElement>(
+                        CLIPS_FAILURE_CLIPS_RESTRICTED_CATEGORY_TEXT,
+                        MessageElementFlag::Text, MessageColor::System);
+                    text = CLIPS_FAILURE_CLIPS_RESTRICTED_CATEGORY_TEXT;
                 }
                 break;
 
@@ -1807,9 +1984,9 @@ void TwitchChannel::createClip()
                 case HelixClipError::Unknown:
                 default: {
                     builder.emplace<TextElement>(
-                        CLIPS_FAILURE_UNKNOWN_ERROR_TEXT,
+                        CLIPS_FAILURE_UNKNOWN_ERROR_TEXT.arg(errorMessage),
                         MessageElementFlag::Text, MessageColor::System);
-                    text = CLIPS_FAILURE_UNKNOWN_ERROR_TEXT;
+                    text = CLIPS_FAILURE_UNKNOWN_ERROR_TEXT.arg(errorMessage);
                 }
                 break;
             }
@@ -1823,6 +2000,71 @@ void TwitchChannel::createClip()
         [this] {
             this->clipCreationTimer_.restart();
             this->isClipCreationInProgress = false;
+        });
+}
+
+void TwitchChannel::deleteMessagesAs(const QString &messageID,
+                                     TwitchAccount *moderator)
+{
+    getHelix()->deleteChatMessages(
+        this->roomId(), moderator->getUserId(), messageID,
+        []() {
+            // Success handling, we do nothing: IRC/pubsub will dispatch the correct
+            // events to update state for us.
+        },
+        [lifetime{this->weak_from_this()}, messageID](auto error,
+                                                      const auto &message) {
+            auto self =
+                std::dynamic_pointer_cast<TwitchChannel>(lifetime.lock());
+            if (!self)
+            {
+                return;
+            }
+
+            QString errorMessage = QString("Failed to delete chat messages - ");
+
+            switch (error)
+            {
+                case HelixDeleteChatMessagesError::UserMissingScope: {
+                    errorMessage +=
+                        "Missing required scope. Re-login with your "
+                        "account and try again.";
+                }
+                break;
+
+                case HelixDeleteChatMessagesError::UserNotAuthorized: {
+                    errorMessage +=
+                        "you don't have permission to perform that action.";
+                }
+                break;
+
+                case HelixDeleteChatMessagesError::MessageUnavailable: {
+                    // Override default message prefix to match with IRC message format
+                    errorMessage =
+                        QString("The message %1 does not exist, was deleted, "
+                                "or is too old to be deleted.")
+                            .arg(messageID);
+                }
+                break;
+
+                case HelixDeleteChatMessagesError::UserNotAuthenticated: {
+                    errorMessage += "you need to re-authenticate.";
+                }
+                break;
+
+                case HelixDeleteChatMessagesError::Forwarded: {
+                    errorMessage += message;
+                }
+                break;
+
+                case HelixDeleteChatMessagesError::Unknown:
+                default: {
+                    errorMessage += "An unknown error has occurred.";
+                }
+                break;
+            }
+
+            self->addSystemMessage(errorMessage);
         });
 }
 

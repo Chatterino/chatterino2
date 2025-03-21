@@ -1,0 +1,16 @@
+{
+  "metadata": {
+    "message_id": "faf21c17-82d3-4479-8daa-295f16b706f0",
+    "message_type": "session_welcome",
+    "message_timestamp": "2023-07-19T14:56:51.634234626Z"
+  },
+  "payload": {
+    "session": {
+      "id": "AQoQILE98gtqShGmLD7AM6yJThAB",
+      "status": "connected",
+      "connected_at": "2023-07-19T14:56:51.616329898Z",
+      "keepalive_timeout_seconds": 10,
+      "reconnect_url": null
+    }
+  }
+}

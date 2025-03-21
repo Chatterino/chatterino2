@@ -18,7 +18,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -73,14 +73,15 @@
                     ]
                 }
             ],
-            "flags": "System|Timeout|DoNotTriggerNotification",
+            "flags": "System|Timeout|DoNotTriggerNotification|ModerationAction",
             "id": "",
             "localizedName": "",
             "loginName": "",
             "messageText": "nerixyz has been timed out for 1s. ",
             "searchText": "nerixyz has been timed out for 1s. ",
-            "serverReceivedTime": "",
+            "serverReceivedTime": "2024-10-22T20:24:18Z",
             "timeoutUser": "nerixyz",
+            "userID": "",
             "usernameColor": "#ff000000"
         }
     ]

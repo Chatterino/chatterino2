@@ -35,7 +35,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -178,21 +178,7 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "!"
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
+                        "!",
                         "UserColorKappa"
                     ]
                 },
@@ -302,6 +288,7 @@
             "searchText": "nerixyz  nerixyz: @TwitchDev TwitchDev UserColor @UserColor UserColor! UserColorKappa UserChatter usercolor UserColor2 @UserColor2 ?! ",
             "serverReceivedTime": "2024-09-18T19:58:38Z",
             "timeoutUser": "",
+            "userID": "129546453",
             "usernameColor": "#ffff0000"
         }
     ],

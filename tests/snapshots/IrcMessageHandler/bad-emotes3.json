@@ -33,7 +33,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -89,21 +89,7 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "foo"
-                    ]
-                },
-                {
-                    "color": "Text",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
+                        "foo",
                         "bar"
                     ]
                 },
@@ -129,6 +115,7 @@
             "searchText": "test  test: foo bar ",
             "serverReceivedTime": "2022-09-03T10:31:42Z",
             "timeoutUser": "",
+            "userID": "",
             "usernameColor": "#ff000000"
         }
     ]

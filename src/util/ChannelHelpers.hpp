@@ -5,6 +5,8 @@
 #include "messages/MessageBuilder.hpp"
 #include "singletons/Settings.hpp"
 
+#include <QDateTime>
+
 namespace chatterino {
 
 /// Adds a timeout or replaces a previous one sent in the last 20 messages and in the last 5s.
@@ -16,7 +18,7 @@ namespace chatterino {
 /// @param disableUserMessages If set, disables all message by the timed out user.
 template <typename Buf, typename Replace, typename Add>
 void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
-                                QTime now, Replace replaceMessage,
+                                const QDateTime &now, Replace replaceMessage,
                                 Add addMessage, bool disableUserMessages)
 {
     // NOTE: This function uses the messages PARSE time to figure out whether they should be replaced
@@ -30,7 +32,7 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
 
     bool shouldAddMessage = true;
 
-    QTime minimumTime = now.addSecs(-5);
+    QDateTime minimumTime = now.addSecs(-5);
 
     auto timeoutStackStyle = static_cast<TimeoutStackStyle>(
         getSettings()->timeoutStackStyle.getValue());
@@ -39,7 +41,7 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
     {
         const MessagePtr &s = buffer[i];
 
-        if (s->parseTime < minimumTime)
+        if (s->serverReceivedTime < minimumTime)
         {
             break;
         }
@@ -53,11 +55,19 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
         if (timeoutStackStyle == TimeoutStackStyle::DontStackBeyondUserMessage)
         {
             if (s->loginName == message->timeoutUser &&
-                s->flags.hasNone({MessageFlag::Disabled, MessageFlag::Timeout,
-                                  MessageFlag::Untimeout}))
+                s->flags.hasNone(
+                    {MessageFlag::Disabled, MessageFlag::ModerationAction}))
             {
                 break;
             }
+        }
+
+        bool newIsShared = message->flags.has(MessageFlag::SharedMessage);
+        bool oldIsShared = s->flags.has(MessageFlag::SharedMessage);
+        if (newIsShared != oldIsShared ||
+            (newIsShared && message->channelName != s->channelName))
+        {
+            continue;
         }
 
         if (s->flags.has(MessageFlag::Timeout) &&
@@ -81,10 +91,12 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
             uint32_t count = s->count + 1;
 
             MessageBuilder replacement(timeoutMessage, message->timeoutUser,
-                                       message->loginName, message->searchText,
-                                       count);
+                                       message->loginName, message->channelName,
+                                       message->searchText, count,
+                                       message->serverReceivedTime);
 
             replacement->timeoutUser = message->timeoutUser;
+            replacement->channelName = message->channelName;
             replacement->count = count;
             replacement->flags = message->flags;
 
@@ -102,8 +114,8 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
         {
             auto &s = buffer[i];
             if (s->loginName == message->timeoutUser &&
-                s->flags.hasNone({MessageFlag::Timeout, MessageFlag::Untimeout,
-                                  MessageFlag::Whisper}))
+                s->flags.hasNone(
+                    {MessageFlag::ModerationAction, MessageFlag::Whisper}))
             {
                 // FOURTF: disabled for now
                 // PAJLADA: Shitty solution described in Message.hpp
@@ -126,7 +138,8 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
 ///                   - adds the `message`.
 template <typename Buffer, typename Replace, typename Add>
 void addOrReplaceChannelClear(const Buffer &buffer, MessagePtr message,
-                              QTime now, Replace replaceMessage, Add addMessage)
+                              const QDateTime &now, Replace replaceMessage,
+                              Add addMessage)
 {
     // NOTE: This function uses the messages PARSE time to figure out whether they should be replaced
     // This works as expected for incoming messages, but not for historic messages.
@@ -135,7 +148,7 @@ void addOrReplaceChannelClear(const Buffer &buffer, MessagePtr message,
     auto snapshotLength = static_cast<qsizetype>(buffer.size());
     auto end = std::max<qsizetype>(0, snapshotLength - 20);
     bool shouldAddMessage = true;
-    QTime minimumTime = now.addSecs(-5);
+    QDateTime minimumTime = now.addSecs(-5);
     auto timeoutStackStyle = static_cast<TimeoutStackStyle>(
         getSettings()->timeoutStackStyle.getValue());
 
@@ -149,7 +162,7 @@ void addOrReplaceChannelClear(const Buffer &buffer, MessagePtr message,
     {
         const MessagePtr &s = buffer[i];
 
-        if (s->parseTime < minimumTime)
+        if (s->serverReceivedTime < minimumTime)
         {
             break;
         }
@@ -180,7 +193,7 @@ void addOrReplaceChannelClear(const Buffer &buffer, MessagePtr message,
         uint32_t count = s->count + 1;
 
         auto replacement = MessageBuilder::makeClearChatMessage(
-            message->parseTime, message->timeoutUser, count);
+            message->serverReceivedTime, message->timeoutUser, count);
         replacement->flags = message->flags;
 
         replaceMessage(i, s, replacement);

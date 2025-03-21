@@ -1,7 +1,7 @@
 #define QT_NO_CAST_FROM_ASCII  // avoids unexpected implicit casts
 #include "common/LinkParser.hpp"
 
-#include "util/QCompareCaseInsensitive.hpp"
+#include "util/QCompareTransparent.hpp"
 
 #include <QFile>
 #include <QString>

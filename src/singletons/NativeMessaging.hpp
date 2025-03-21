@@ -59,7 +59,7 @@ private:
 
     void syncChannels(const QJsonArray &twitchChannels);
 
-    ReceiverThread thread;
+    ReceiverThread *thread;
 
     /// This vector contains all channels that are open the user's browser.
     /// These channels are joined to be able to switch channels more quickly.

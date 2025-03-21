@@ -34,16 +34,35 @@
 #include <chrono>
 #include <optional>
 
-namespace chatterino {
 namespace {
 
-    std::optional<bool> &shouldMoveOutOfBoundsWindow()
+std::optional<bool> &shouldMoveOutOfBoundsWindow()
+{
+    static std::optional<bool> x;
+    return x;
+}
+
+void closeWindowsRecursive(QWidget *window)
+{
+    if (window->isWindow() && window->isVisible())
     {
-        static std::optional<bool> x;
-        return x;
+        window->close();
     }
 
+    for (auto *child : window->children())
+    {
+        if (child->isWidgetType())
+        {
+            // We check if it's a widget above
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-static-cast-downcast)
+            closeWindowsRecursive(static_cast<QWidget *>(child));
+        }
+    }
+}
+
 }  // namespace
+
+namespace chatterino {
 
 const QString WindowManager::WINDOW_LAYOUT_FILENAME(
     QStringLiteral("window-layout.json"));
@@ -69,19 +88,13 @@ void WindowManager::showSettingsDialog(QWidget *parent,
 
 void WindowManager::showAccountSelectPopup(QPoint point)
 {
-    //    static QWidget *lastFocusedWidget = nullptr;
-    static AccountSwitchPopup *w = new AccountSwitchPopup();
+    static auto *w = new AccountSwitchPopup;
 
     if (w->hasFocus())
     {
         w->hide();
-        //            if (lastFocusedWidget) {
-        //                lastFocusedWidget->setFocus();
-        //            }
         return;
     }
-
-    //    lastFocusedWidget = this->focusWidget();
 
     w->refresh();
 
@@ -144,6 +157,11 @@ WindowManager::WindowManager(const Paths &paths, Settings &settings,
     this->forceLayoutChannelViewsListener.add(settings.boldUsernames);
     this->forceLayoutChannelViewsListener.add(
         settings.showBlockedTermAutomodMessages);
+    this->forceLayoutChannelViewsListener.add(settings.hideModerated);
+    this->forceLayoutChannelViewsListener.add(
+        settings.streamerModeHideModActions);
+    this->forceLayoutChannelViewsListener.add(
+        settings.streamerModeHideRestrictedUsers);
 
     this->layoutChannelViewsListener.add(settings.timestampFormat);
     this->layoutChannelViewsListener.add(fonts.fontChanged);
@@ -595,6 +613,26 @@ void WindowManager::toggleAllOverlayInertia()
     }
 }
 
+std::set<QString> WindowManager::getVisibleChannelNames() const
+{
+    std::set<QString> visible;
+    for (auto *window : this->windows_)
+    {
+        auto *page = window->getNotebook().getSelectedPage();
+        if (!page)
+        {
+            continue;
+        }
+
+        for (auto *split : page->getSplits())
+        {
+            visible.emplace(split->getChannel()->getName());
+        }
+    }
+
+    return visible;
+}
+
 void WindowManager::encodeTab(SplitContainer *tab, bool isSelected,
                               QJsonObject &obj)
 {
@@ -757,7 +795,7 @@ void WindowManager::closeAll()
 
     for (Window *window : windows_)
     {
-        window->close();
+        closeWindowsRecursive(window);
     }
 }
 

@@ -70,6 +70,8 @@ c2.ChannelType = {
 ---@field subscriber_only boolean
 ---@field unique_chat boolean You might know this as r9kbeta or robot9000.
 ---@field emotes_only boolean Whether or not text is allowed in messages. Note that "emotes" here only means Twitch emotes, not Unicode emoji, nor 3rd party text-based emotes
+---@field follower_only number? Time in minutes you need to follow to chat or nil.
+---@field slow_mode number? Time in seconds you need to wait before sending messages or nil.
 
 -- End src/providers/twitch/TwitchChannel.hpp
 

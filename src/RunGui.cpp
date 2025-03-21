@@ -11,6 +11,8 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Updates.hpp"
 #include "util/CombinePath.hpp"
+#include "util/SelfCheck.hpp"
+#include "util/UnixSignalHandler.hpp"
 #include "widgets/dialogs/LastRunCrashDialog.hpp"
 
 #include <QApplication>
@@ -172,6 +174,21 @@ namespace {
 
         signal(SIGSEGV, handleSignal);
 #endif
+
+#if defined(Q_OS_UNIX)
+        auto *sigintHandler = new UnixSignalHandler(SIGINT);
+        QObject::connect(sigintHandler, &UnixSignalHandler::signalFired, [] {
+            qCInfo(chatterinoApp)
+                << "Received SIGINT, request application quit";
+            QApplication::quit();
+        });
+        auto *sigtermHandler = new UnixSignalHandler(SIGTERM);
+        QObject::connect(sigtermHandler, &UnixSignalHandler::signalFired, [] {
+            qCInfo(chatterinoApp)
+                << "Received SIGTERM, request application quit";
+            QApplication::quit();
+        });
+#endif
     }
 
     // We delete cache files that haven't been modified in 14 days. This strategy may be
@@ -240,6 +257,8 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
         showLastCrashDialog(args, paths);
     }
 #endif
+
+    selfcheck::checkWebp();
 
     updates.deleteOldFiles();
 

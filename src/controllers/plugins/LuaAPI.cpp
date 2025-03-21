@@ -264,6 +264,11 @@ void g_print(ThisPluginState L, sol::variadic_args args)
     logHelper(L, L.plugin(), stream, args);
 }
 
+void package_loadlib(sol::variadic_args args)
+{
+    throw std::runtime_error("package.loadlib: this function is a stub!");
+}
+
 }  // namespace chatterino::lua::api
 // NOLINTEND(*vararg)
 #endif

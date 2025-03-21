@@ -25,7 +25,7 @@ public:
 
     std::shared_ptr<Hotkey> data();
 
-protected slots:
+protected Q_SLOTS:
     /**
      * @brief validates the hotkey
      *
