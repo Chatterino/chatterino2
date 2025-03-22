@@ -2578,7 +2578,11 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
     if (!layout->getMessage()->id.isEmpty() && twitchChannel &&
         twitchChannel->hasModRights())
     {
-        menu->addAction(
+        menu->addSeparator();
+        auto *moderateAction = menu->addAction("Mo&derate");
+        auto *moderateMenu = new QMenu(menu);
+        moderateAction->setMenu(moderateMenu);
+        moderateMenu->addAction(
             "&Delete message", [twitchChannel, id = layout->getMessage()->id] {
                 twitchChannel->deleteMessagesAs(
                     id, getApp()->getAccounts()->twitch.getCurrent().get());

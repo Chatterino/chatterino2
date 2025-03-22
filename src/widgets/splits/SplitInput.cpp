@@ -165,10 +165,8 @@ void SplitInput::initLayout()
         textEditLength->setAlignment(Qt::AlignRight);
 
         box->addStretch(1);
-        box.emplace<EffectLabel>().assign(&this->ui_.emoteButton);
+        box.emplace<Button>().assign(&this->ui_.emoteButton);
     }
-
-    this->ui_.emoteButton->getLabel().setTextFormat(Qt::RichText);
 
     // ---- misc
 
@@ -266,8 +264,6 @@ void SplitInput::themeChangedEvent()
     this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
     this->ui_.textEdit->setPalette(placeholderPalette);
 
-    this->ui_.emoteButton->getLabel().setStyleSheet("color: #000");
-
     if (this->theme->isLightTheme())
     {
         this->ui_.replyLabel->setStyleSheet("color: #333");
@@ -289,13 +285,18 @@ void SplitInput::updateEmoteButton()
 {
     auto scale = this->scale();
 
-    auto text =
-        QStringLiteral("<img src=':/buttons/%1.svg' width='%2' height='%2' />")
-            .arg(this->theme->isLightTheme() ? "emoteDark" : "emote")
-            .arg(int(12 * scale));
+    if (this->theme->isLightTheme())
+    {
+        this->ui_.emoteButton->setSvgResource(":/buttons/emoteDark.svg");
+    }
+    else
+    {
+        this->ui_.emoteButton->setSvgResource(":/buttons/emote.svg");
+    }
 
-    this->ui_.emoteButton->getLabel().setText(text);
     this->ui_.emoteButton->setFixedHeight(int(18 * scale));
+    // Make button slightly wider so it's easier to click
+    this->ui_.emoteButton->setFixedWidth(int(24 * scale));
 }
 
 void SplitInput::updateCancelReplyButton()

@@ -539,6 +539,8 @@ set(SOURCE_FILES
         util/RenameThread.hpp
         util/SampleData.cpp
         util/SampleData.hpp
+        util/SelfCheck.cpp
+        util/SelfCheck.hpp
         util/SharedPtrElementLess.hpp
         util/SignalListener.hpp
         util/StreamLink.cpp
@@ -980,7 +982,7 @@ if (BUILD_APP)
     endif()
 endif ()
 
-if (USE_PRECOMPILED_HEADERS)
+if (USE_PRECOMPILED_HEADERS AND NOT APPLE)
     message(STATUS "Building with precompiled headers")
     target_precompile_headers(${LIBRARY_PROJECT} PRIVATE PrecompiledHeader.hpp)
 else ()

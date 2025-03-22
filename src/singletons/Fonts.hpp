@@ -24,6 +24,8 @@ enum class FontStyle : uint8_t {
     ChatLarge,
     ChatVeryLarge,
 
+    TimestampMedium,
+
     UiMedium,
     UiMediumBold,
     UiTabs,
