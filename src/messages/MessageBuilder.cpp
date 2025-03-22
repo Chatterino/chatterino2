@@ -2994,20 +2994,21 @@ void MessageBuilder::appendTwitchBadges(const QVariantMap &tags,
         {
             sourceName = "";
         }
-        else if (twitchChannel->roomId() == sourceId)
-        {
-            // We have the source channel open, but we still need to load the profile picture URL
-            auto twitchUser = getApp()->getTwitchUsers()->resolveID({sourceId});
-            sourceName = twitchChannel->getName();
-            sourceProfilePicture = twitchUser->profilePictureUrl;
-            sourceLogin = twitchUser->name;
-        }
         else
         {
             auto twitchUser = getApp()->getTwitchUsers()->resolveID({sourceId});
-            sourceName = twitchUser->displayName;
             sourceProfilePicture = twitchUser->profilePictureUrl;
             sourceLogin = twitchUser->name;
+
+            if (twitchChannel->roomId() == sourceId)
+            {
+                // We have the source channel open, but we still need to load the profile picture URL
+                sourceName = twitchChannel->getName();
+            }
+            else
+            {
+                sourceName = twitchUser->displayName;
+            }
         }
 
         this->emplace<BadgeElement>(
