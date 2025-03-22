@@ -5,6 +5,7 @@
 - Minor: Moved the "Delete message" menu option into a "Moderate" sub-menu. (#6100)
 - Bugfix: Fixed the channel name input not being focused when opening the select-channel dialog. (#6096)
 - Bugfix: Fixed inputs in dialogs not having a border around and padding in them. (#6098)
+- Dev: Temporarily disable precompiled header support for macOS. (#6104)
 
 ## 2.5.3-beta.1
 

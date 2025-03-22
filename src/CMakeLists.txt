@@ -982,7 +982,7 @@ if (BUILD_APP)
     endif()
 endif ()
 
-if (USE_PRECOMPILED_HEADERS)
+if (USE_PRECOMPILED_HEADERS AND NOT APPLE)
     message(STATUS "Building with precompiled headers")
     target_precompile_headers(${LIBRARY_PROJECT} PRIVATE PrecompiledHeader.hpp)
 else ()
