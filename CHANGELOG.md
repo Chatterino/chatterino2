@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Shared chat messages now use the source channel's profile picture to denote it's a shared chat message. (#5760)
 - Minor: Moved the "Delete message" menu option into a "Moderate" sub-menu. (#6100)
 - Bugfix: Fixed the channel name input not being focused when opening the select-channel dialog. (#6096)
 - Bugfix: Fixed inputs in dialogs not having a border around and padding in them. (#6098)
@@ -20,7 +21,6 @@
 - Minor: Added the ability to filter on messages by the author's user ID (example: `author.user_id == "22484632"`). (#5862)
 - Minor: Improved error messaging of the `/clip` command. (#5879)
 - Minor: Clicking on a live notification can now open the channel in a custom player. (#5880)
-- Minor: Shared chat messages now use the source channel's profile picture to denote it's a shared chat message. (#5760)
 - Minor: Added searchable hotkeys to global search and make keybinds searchable in the Hotkeys settings. (#5884)
 - Minor: Added Linux support for Live Notifications toasts. (#5881, #5971, #5976)
 - Minor: Messages can now be deleted from the context menu in a channel. (#5956)
