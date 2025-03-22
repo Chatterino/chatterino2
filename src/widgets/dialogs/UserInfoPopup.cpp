@@ -401,11 +401,17 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
     auto user = layout.emplace<QHBoxLayout>().withoutMargin();
     {
         user->addStretch(1);
-
-        user.emplace<QCheckBox>("Block").assign(&this->ui_.block);
-        user.emplace<QCheckBox>("Ignore highlights")
-            .assign(&this->ui_.ignoreHighlights);
-        // visibility of this is updated in setData
+        bool isMyself =
+            QString::compare(
+                getApp()->getAccounts()->twitch.getCurrent()->getUserName(),
+                this->userName_, Qt::CaseInsensitive) == 0;
+        if (isMyself)
+        {
+            user.emplace<QCheckBox>("Block").assign(&this->ui_.block);
+            user.emplace<QCheckBox>("Ignore highlights")
+                .assign(&this->ui_.ignoreHighlights);
+            // visibility of this is updated in setData
+        }
 
         auto usercard =
             user.emplace<EffectLabel2>(this).assign(&this->ui_.usercardLabel);
@@ -494,16 +500,26 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
 
         // We can safely ignore this signal connection since this is a private signal, and
         // we only connect once
-        std::ignore =
-            this->userStateChanged_.connect([this, lineMod, timeout]() mutable {
-                TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(
-                    this->underlyingChannel_.get());
+        std::ignore = this->userStateChanged_.connect([this, lineMod,
+                                                       timeout]() mutable {
+            TwitchChannel *twitchChannel =
+                dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get());
 
-                bool hasModRights =
-                    twitchChannel ? twitchChannel->hasModRights() : false;
-                lineMod->setVisible(hasModRights);
-                timeout->setVisible(hasModRights);
-            });
+            bool visible = false;
+            if (twitchChannel)
+            {
+                const bool isMyself =
+                    QString::compare(getApp()
+                                         ->getAccounts()
+                                         ->twitch.getCurrent()
+                                         ->getUserName(),
+                                     this->userName_, Qt::CaseInsensitive) == 0;
+                const bool hasModRights = twitchChannel->hasModRights();
+                visible = hasModRights && !isMyself;
+            }
+            lineMod->setVisible(visible);
+            timeout->setVisible(visible);
+        });
 
         // We can safely ignore this signal connection since we own the button, and
         // the button will always be destroyed before the UserInfoPopup
