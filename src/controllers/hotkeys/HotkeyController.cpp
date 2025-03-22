@@ -519,10 +519,6 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
                             QKeySequence("Ctrl+H"), "toggleLocalR9K",
                             std::vector<QString>(), "toggle local r9k");
-#else
-        this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
-                            QKeySequence(), "toggleLocalR9K",
-                            std::vector<QString>(), "toggle local r9k");
 #endif
 
         this->tryAddDefault(addedHotkeys, HotkeyCategory::Window,
