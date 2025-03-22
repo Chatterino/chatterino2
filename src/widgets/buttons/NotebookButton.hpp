@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/helper/Button.hpp"
+#include "widgets/buttons/Button.hpp"
 
 #include <QWidget>
 
@@ -21,18 +21,15 @@ public:
     Icon getIcon() const;
 
 protected:
+    void paintContent(QPainter &painter) override;
+
     void themeChangedEvent() override;
-    void paintEvent(QPaintEvent *) override;
-    void mouseReleaseEvent(QMouseEvent *) override;
     void dragEnterEvent(QDragEnterEvent *) override;
     void dragLeaveEvent(QDragLeaveEvent *) override;
     void dropEvent(QDropEvent *) override;
 
     void hideEvent(QHideEvent *) override;
     void showEvent(QShowEvent *) override;
-
-Q_SIGNALS:
-    void leftClicked();
 
 private:
     Notebook *parent_ = nullptr;

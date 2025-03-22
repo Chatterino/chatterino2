@@ -27,8 +27,9 @@
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
+#include "widgets/buttons/LabelButton.hpp"
+#include "widgets/buttons/PixmapButton.hpp"
 #include "widgets/helper/ChannelView.hpp"
-#include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/InvisibleSizeGrip.hpp"
 #include "widgets/helper/Line.hpp"
 #include "widgets/Label.hpp"
@@ -59,17 +60,17 @@ constexpr QStringView TEXT_LOADING = u"(loading...)";
 using namespace chatterino;
 
 Label *addCopyableLabel(LayoutCreator<QHBoxLayout> box, const char *tooltip,
-                        Button **copyButton = nullptr)
+                        PixmapButton **copyButton = nullptr)
 {
     auto label = box.emplace<Label>();
-    auto button = box.emplace<Button>();
+    auto button = box.emplace<PixmapButton>();
     if (copyButton != nullptr)
     {
         button.assign(copyButton);
     }
     button->setPixmap(getApp()->getThemes()->buttons.copy);
     button->setScaleIndependantSize(18, 18);
-    button->setDim(Button::Dim::Lots);
+    button->setDim(DimButton::Dim::Lots);
     button->setToolTip(tooltip);
     QObject::connect(
         button.getElement(), &Button::leftClicked,
@@ -270,9 +271,9 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
     {
         // avatar
         auto avatar =
-            head.emplace<Button>(nullptr).assign(&this->ui_.avatarButton);
+            head.emplace<PixmapButton>(nullptr).assign(&this->ui_.avatarButton);
         avatar->setScaleIndependantSize(100, 100);
-        avatar->setDim(Button::Dim::None);
+        avatar->setDim(DimButton::Dim::None);
         QObject::connect(
             avatar.getElement(), &Button::clicked,
             [this](Qt::MouseButton button) {
@@ -407,19 +408,18 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
             .assign(&this->ui_.ignoreHighlights);
         // visibility of this is updated in setData
 
-        auto usercard =
-            user.emplace<EffectLabel2>(this).assign(&this->ui_.usercardLabel);
-        usercard->getLabel().setText("Usercard");
-        auto mod = user.emplace<Button>(this);
+        auto usercard = user.emplace<LabelButton>("Usercard", this)
+                            .assign(&this->ui_.usercardLabel);
+        auto mod = user.emplace<PixmapButton>(this);
         mod->setPixmap(getResources().buttons.mod);
         mod->setScaleIndependantSize(30, 30);
-        auto unmod = user.emplace<Button>(this);
+        auto unmod = user.emplace<PixmapButton>(this);
         unmod->setPixmap(getResources().buttons.unmod);
         unmod->setScaleIndependantSize(30, 30);
-        auto vip = user.emplace<Button>(this);
+        auto vip = user.emplace<PixmapButton>(this);
         vip->setPixmap(getResources().buttons.vip);
         vip->setScaleIndependantSize(30, 30);
-        auto unvip = user.emplace<Button>(this);
+        auto unvip = user.emplace<PixmapButton>(this);
         unvip->setPixmap(getResources().buttons.unvip);
         unvip->setScaleIndependantSize(30, 30);
 
@@ -1097,7 +1097,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
 
     const auto addButton = [&](Action action, const QString &title,
                                const QPixmap &pixmap) {
-        auto button = addLayout(title).emplace<Button>(nullptr);
+        auto button = addLayout(title).emplace<PixmapButton>(nullptr);
         button->setPixmap(pixmap);
         button->setScaleIndependantSize(buttonHeight, buttonHeight);
         button->setBorderColor(QColor(255, 255, 255, 127));
@@ -1113,8 +1113,9 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
 
         for (const auto &item : getSettings()->timeoutButtons.getValue())
         {
-            auto a = hbox.emplace<EffectLabel2>();
-            a->getLabel().setText(QString::number(item.second) + item.first);
+            auto a = hbox.emplace<LabelButton>();
+            a->setPadding({0, 0});
+            a->setText(QString::number(item.second) + item.first);
 
             a->setScaleIndependantSize(buttonWidth, buttonHeight);
             a->setBorderColor(borderColor);
@@ -1122,7 +1123,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
             const auto pair =
                 std::make_pair(Action::Timeout, calculateTimeoutDuration(item));
 
-            QObject::connect(a.getElement(), &EffectLabel2::leftClicked,
+            QObject::connect(a.getElement(), &LabelButton::leftClicked,
                              [this, pair] {
                                  this->buttonClicked.invoke(pair);
                              });

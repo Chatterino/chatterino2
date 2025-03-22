@@ -1,4 +1,4 @@
-#include "widgets/helper/SignalLabel.hpp"
+#include "widgets/buttons/SignalLabel.hpp"
 
 namespace chatterino {
 
