@@ -11,7 +11,7 @@
 - Bugfix: Don't set default binding for "Toggle local R9K" on macOS. Was <kbd>CTRL</kbd> + <kdb>H</kdb> before, which clashes with a system binding. (#5764)
 - Bugfix: Don't add moderation buttons to your own Usercard. (#6107)
 - Dev: Temporarily disable precompiled header support for macOS. (#6104)
-- Bugfix: Fix <kbd>CMD</kbd> + <kbd>BACKSPACE</kbd> not clearing main chat dialog input. (#6111)
+- Bugfix: Handle <kbd>CMD</kbd> + <kbd>BACKSPACE</kbd> behavior explicitly in main chat dialog input for macOS. (#6111)
 
 ## 2.5.3-beta.1
 
