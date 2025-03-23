@@ -11,8 +11,8 @@
 - [ ] Updated version code in `.CI/chatterino-installer.iss`  
        This can only be "whole versions", so if you're releasing `2.4.0-beta` you'll need to condense it to `2.4.0`
 
-- [ ] Update the changelog `## Unreleased` section to the new version `CHANGELOG.md`  
-       Make sure to leave the `## Unreleased` line unchanged for easier merges
+- [ ] Update the changelog `## Unversioned` section to the new version `CHANGELOG.md`  
+       Make sure to leave the `## Unversioned` line unchanged for easier merges
 
 - [ ] Ensure all GitHub API credentials from the `chatterino-ci` user are still valid
 
