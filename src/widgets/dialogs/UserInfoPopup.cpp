@@ -401,17 +401,11 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
     auto user = layout.emplace<QHBoxLayout>().withoutMargin();
     {
         user->addStretch(1);
-        bool isMyself =
-            QString::compare(
-                getApp()->getAccounts()->twitch.getCurrent()->getUserName(),
-                this->userName_, Qt::CaseInsensitive) == 0;
-        if (isMyself)
-        {
-            user.emplace<QCheckBox>("Block").assign(&this->ui_.block);
-            user.emplace<QCheckBox>("Ignore highlights")
-                .assign(&this->ui_.ignoreHighlights);
-            // visibility of this is updated in setData
-        }
+
+        user.emplace<QCheckBox>("Block").assign(&this->ui_.block);
+        user.emplace<QCheckBox>("Ignore highlights")
+            .assign(&this->ui_.ignoreHighlights);
+        // visibility of this is updated in setData
 
         auto usercard =
             user.emplace<EffectLabel2>(this).assign(&this->ui_.usercardLabel);
@@ -508,13 +502,13 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
             bool visible = false;
             if (twitchChannel)
             {
-                const bool isMyself =
+                bool isMyself =
                     QString::compare(getApp()
                                          ->getAccounts()
                                          ->twitch.getCurrent()
                                          ->getUserName(),
                                      this->userName_, Qt::CaseInsensitive) == 0;
-                const bool hasModRights = twitchChannel->hasModRights();
+                bool hasModRights = twitchChannel->hasModRights();
                 visible = hasModRights && !isMyself;
             }
             lineMod->setVisible(visible);
@@ -1057,6 +1051,12 @@ void UserInfoPopup::updateUserData()
 
     this->ui_.block->setEnabled(false);
     this->ui_.ignoreHighlights->setEnabled(false);
+    bool isMyself =
+        QString::compare(
+            getApp()->getAccounts()->twitch.getCurrent()->getUserName(),
+            this->userName_, Qt::CaseInsensitive) == 0;
+    this->ui_.block->setVisible(!isMyself);
+    this->ui_.ignoreHighlights->setVisible(!isMyself);
 }
 
 void UserInfoPopup::loadAvatar(const QUrl &url)
