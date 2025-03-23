@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+## 2.5.3
+
 - Minor: Shared chat messages now use the source channel's profile picture to denote it's a shared chat message. (#5760)
 - Minor: Moved the "Delete message" menu option into a "Moderate" sub-menu. (#6100)
 - Bugfix: Fixed the channel name input not being focused when opening the select-channel dialog. (#6096)
