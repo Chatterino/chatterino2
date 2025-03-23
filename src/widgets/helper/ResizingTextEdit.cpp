@@ -131,6 +131,12 @@ bool ResizingTextEdit::eventFilter(QObject *obj, QEvent *event)
 }
 void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 {
+    if ((event->modifiers() == Qt::ControlModifier) && (event->key() == Qt::Key_Backspace))
+    {
+        this->clear();
+        return;
+    }
+
     event->ignore();
 
     this->keyPressed.invoke(event);
