@@ -499,10 +499,20 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                 TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(
                     this->underlyingChannel_.get());
 
-                bool hasModRights =
-                    twitchChannel ? twitchChannel->hasModRights() : false;
-                lineMod->setVisible(hasModRights);
-                timeout->setVisible(hasModRights);
+                bool visible = false;
+                if (twitchChannel)
+                {
+                    bool isMyself =
+                        getApp()
+                            ->getAccounts()
+                            ->twitch.getCurrent()
+                            ->getUserName()
+                            .compare(this->userName_, Qt::CaseInsensitive) == 0;
+                    bool hasModRights = twitchChannel->hasModRights();
+                    visible = hasModRights && !isMyself;
+                }
+                lineMod->setVisible(visible);
+                timeout->setVisible(visible);
             });
 
         // We can safely ignore this signal connection since we own the button, and
@@ -1041,6 +1051,11 @@ void UserInfoPopup::updateUserData()
 
     this->ui_.block->setEnabled(false);
     this->ui_.ignoreHighlights->setEnabled(false);
+    bool isMyself =
+        getApp()->getAccounts()->twitch.getCurrent()->getUserName().compare(
+            this->userName_, Qt::CaseInsensitive) == 0;
+    this->ui_.block->setVisible(!isMyself);
+    this->ui_.ignoreHighlights->setVisible(!isMyself);
 }
 
 void UserInfoPopup::loadAvatar(const QUrl &url)
