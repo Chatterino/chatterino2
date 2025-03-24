@@ -295,7 +295,8 @@ void SplitInput::updateEmoteButton()
     }
 
     this->ui_.emoteButton->setFixedHeight(int(18 * scale));
-    this->ui_.emoteButton->setFixedWidth(int(18 * scale));
+    // Make button slightly wider so it's easier to click
+    this->ui_.emoteButton->setFixedWidth(int(24 * scale));
 }
 
 void SplitInput::updateCancelReplyButton()

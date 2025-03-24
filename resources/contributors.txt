@@ -82,6 +82,8 @@ JakeRYW | https://github.com/JakeRYW | :/avatars/jakeryw.png
 maliByatzes | https://github.com/maliByatzes | :/avatars/maliByatzes.png
 Zakary2841 | https://github.com/Zakary2841 | :/avatars/zakary2841.png
 MiguVT | https://github.com/MiguVT | :/avatars/miguvt.png
+jacob-thompson | https://github.com/jacob-thompson |
+Jujufrost | https://github.com/Jujufrost |
 
 # If you are a contributor add yourself above this line
 

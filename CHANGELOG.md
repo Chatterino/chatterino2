@@ -2,6 +2,20 @@
 
 ## Unversioned
 
+- Minor: Added WebSocket API for plugins. (#6076)
+
+## 2.5.3
+
+- Minor: Shared chat messages now use the source channel's profile picture to denote it's a shared chat message. (#5760)
+- Minor: Moved the "Delete message" menu option into a "Moderate" sub-menu. (#6100)
+- Bugfix: Fixed the channel name input not being focused when opening the select-channel dialog. (#6096)
+- Bugfix: Fixed inputs in dialogs not having a border around and padding in them. (#6098)
+- Bugfix: Don't set default binding for "Toggle local R9K" on macOS. Was <kbd>CTRL</kbd> + <kdb>H</kdb> before, which clashes with a system binding. (#5764)
+- Bugfix: Don't add moderation buttons to your own Usercard. (#6107)
+- Dev: Temporarily disable precompiled header support for macOS. (#6104)
+
+## 2.5.3-beta.1
+
 - Minor: Added an option to allow multiple user-selected extensions to interact with Chatterino. (#5997)
 - Minor: Add `Set highlight sounds` and `Open subscription page` split hotkeys. (#5856, #6030)
 - Minor: `/clear` messages are now stacked like timeouts. (#5806)
@@ -21,8 +35,7 @@
 - Minor: The font weight of chat messages can now be changed. (#6037)
 - Minor: Messages from restricted users can now be hidden when in streamer mode. This is enabled by default. (#6042, #6049)
 - Minor: Added a tab style option allowing you to make your tabs more compact. (#5858)
-- Minor: Chatterino now warns about missing scopes when logging in. (#6072)
-- Minor: Added WebSocket API for plugins. (#6076)
+- Minor: Chatterino now warns about missing scopes when logging in. (#6072, #6083)
 - Bugfix: Fixed a potential way to escape the Lua Plugin sandbox. (#5846)
 - Bugfix: Fixed a crash relating to Lua HTTP. (#5800)
 - Bugfix: Fixed a crash that could occur on Linux and macOS when clicking "Install" from the update prompt. (#5818)
@@ -47,10 +60,11 @@
 - Bugfix: Fixed a crash that would occurr if the user tried to open the search popup in an uninitialized split. (#6057)
 - Bugfix: Fixed an issue where commands would sometimes reset if Chatterino was improperly shut down. (#6011)
 - Bugfix: Fixed a thick border on Windows 11. (#5836)
+- Bugfix: Fixed an issue where the Select Channel Dialog did not correctly scale when your window scale was too high. (#6081)
 - Bugfix: Fixed some windows not immediately closing. (#6054)
-- Bugfix: The emote button no longer looks crunchy. (#6080)
+- Bugfix: The emote button no longer looks crunchy. (#6080, #6085)
 - Dev: Subscriptions to PubSub channel points redemption topics now use no auth token, making it continue to work during PubSub shutdown. (#5947)
-- Dev: Add initial experimental EventSub support. (#5837, #5895, #5897, #5904, #5910, #5903, #5915, #5916, #5930, #5935, #5932, #5943, #5952, #5953, #5968, #5973, #5974, #5980, #5981, #5985, #5990, #5992, #5993, #5996, #5995, #6000, #6001, #6002, #6003, #6005, #6007, #6010, #6008, #6012, #6013, #6015, #6017, #6027, #6028, #6035, #6036, #6040, #6041, #6048, #6058, #6059, #6078, #6079)
+- Dev: Add initial experimental EventSub support. (#5837, #5895, #5897, #5904, #5910, #5903, #5915, #5916, #5930, #5935, #5932, #5943, #5952, #5953, #5968, #5973, #5974, #5980, #5981, #5985, #5990, #5992, #5993, #5996, #5995, #6000, #6001, #6002, #6003, #6005, #6007, #6010, #6008, #6012, #6013, #6015, #6017, #6027, #6028, #6035, #6036, #6040, #6041, #6048, #6058, #6059, #6078, #6079, #6086, #6092, #6093)
 - Dev: Remove unneeded platform specifier for toasts. (#5914)
 - Dev: Cleanly shutdown on `SIGINT`/`SIGTERM` on Linux & macOS. (#6053)
 - Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
@@ -78,6 +92,7 @@
 - Dev: Mini feature refactor of BaseWindow. (#6074)
 - Dev: Removed dead code and some MSVC warnings. (#6024)
 - Dev: Added check if WEBP is supported. (#6073)
+- Dev: Tests won't add themselves to the autostart on Windows anymore. (#6084)
 
 ## 2.5.2
 

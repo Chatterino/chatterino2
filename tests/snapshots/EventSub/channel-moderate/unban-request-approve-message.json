@@ -1,13 +1,8 @@
 {
     "input": {
-        "action": "ban",
+        "action": "approve_unban_request",
         "automod_terms": null,
-        "ban": {
-            "reason": "my reason",
-            "user_id": "489584266",
-            "user_login": "uint128",
-            "user_name": "uint128"
-        },
+        "ban": null,
         "broadcaster_user_id": "11148817",
         "broadcaster_user_login": "pajlada",
         "broadcaster_user_name": "pajlada",
@@ -29,7 +24,13 @@
         "source_broadcaster_user_name": null,
         "timeout": null,
         "unban": null,
-        "unban_request": null,
+        "unban_request": {
+            "is_approved": true,
+            "moderator_message": "Ok you are unbanned",
+            "user_id": "489584266",
+            "user_login": "uint128",
+            "user_name": "uint128"
+        },
         "unmod": null,
         "unraid": null,
         "untimeout": null,
@@ -104,7 +105,11 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        "banned"
+                        "approved",
+                        "the",
+                        "unban",
+                        "request",
+                        "from"
                     ]
                 },
                 {
@@ -137,34 +142,22 @@
                     "trailingSpace": true,
                     "type": "TextElement",
                     "words": [
-                        ":"
-                    ]
-                },
-                {
-                    "color": "System",
-                    "flags": "Text",
-                    "link": {
-                        "type": "None",
-                        "value": ""
-                    },
-                    "style": "ChatMedium",
-                    "tooltip": "",
-                    "trailingSpace": true,
-                    "type": "TextElement",
-                    "words": [
-                        "my",
-                        "reason"
+                        ":",
+                        "Ok",
+                        "you",
+                        "are",
+                        "unbanned"
                     ]
                 }
             ],
-            "flags": "System|Timeout|PubSub|EventSub|ModerationAction",
+            "flags": "System|EventSub|ModerationAction",
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",
-            "messageText": "nerixyz banned uint128: my reason ",
-            "searchText": "nerixyz banned uint128: my reason ",
+            "messageText": "nerixyz approved the unban request from uint128: Ok you are unbanned ",
+            "searchText": "nerixyz approved the unban request from uint128: Ok you are unbanned ",
             "serverReceivedTime": "2024-05-14T12:31:47Z",
-            "timeoutUser": "uint128",
+            "timeoutUser": "",
             "userID": "",
             "usernameColor": "#ff000000"
         }
