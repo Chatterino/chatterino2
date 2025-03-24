@@ -1,5 +1,7 @@
 #include "controllers/plugins/api/WebSocket.hpp"
 
+#include <utility>
+
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "Application.hpp"
 #    include "controllers/plugins/PluginController.hpp"
@@ -56,9 +58,32 @@ void WebSocket::createUserType(sol::table &c2)
             self->handle = std::move(handle);
             return self;
         }),
-        "on_close", &WebSocket::onClose,       //
-        "on_text", &WebSocket::onText,         //
-        "on_binary", &WebSocket::onBinary,     //
+        // Note: These properties could be pointers to members, but Clang 18
+        // specifically can't compile these - see https://github.com/ThePhD/sol2/issues/1581
+        "on_close",
+        sol::property(
+            [](WebSocket &ws) {
+                return ws.onClose;
+            },
+            [](WebSocket &ws, sol::main_function fn) {
+                ws.onClose = std::move(fn);
+            }),
+        "on_text",
+        sol::property(
+            [](WebSocket &ws) {
+                return ws.onText;
+            },
+            [](WebSocket &ws, sol::main_function fn) {
+                ws.onText = std::move(fn);
+            }),
+        "on_binary",
+        sol::property(
+            [](WebSocket &ws) {
+                return ws.onBinary;
+            },
+            [](WebSocket &ws, sol::main_function fn) {
+                ws.onBinary = std::move(fn);
+            }),
         "close", &WebSocket::close,            //
         "send_text", &WebSocket::sendText,     //
         "send_binary", &WebSocket::sendBinary  //
@@ -91,9 +116,13 @@ void WebSocketListenerProxy::onClose(std::unique_ptr<WebSocketListener> self)
         auto strong = this->target.lock();
         if (strong)
         {
-            if (strong->onClose)
+            // clear our object, so we can get GC'd
+            auto cb = std::move(strong->onClose);
+            strong->onText.reset();
+            strong->onBinary.reset();
+            if (cb)
             {
-                strong->onClose();
+                cb();
             }
         }
     });

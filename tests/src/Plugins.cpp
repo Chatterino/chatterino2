@@ -5,6 +5,7 @@
 #    include "controllers/commands/Command.hpp"  // IWYU pragma: keep
 #    include "controllers/commands/CommandController.hpp"
 #    include "controllers/plugins/api/ChannelRef.hpp"
+#    include "controllers/plugins/api/WebSocket.hpp"
 #    include "controllers/plugins/Plugin.hpp"
 #    include "controllers/plugins/PluginController.hpp"
 #    include "controllers/plugins/PluginPermission.hpp"
@@ -651,7 +652,7 @@ TEST_F(PluginTest, testTcpWebSocket)
         messages.emplace_back(isText, std::move(data));
     });
 
-    lua->script(R"lua(
+    std::shared_ptr<lua::api::WebSocket> ws = lua->script(R"lua(
         local ws = c2.WebSocket.new("ws://127.0.0.1:9052/echo")
         ws.on_text = function(data)
             add(true, data)
@@ -674,7 +675,11 @@ TEST_F(PluginTest, testTcpWebSocket)
         ws:send_text("message2")
         ws:send_text("message3")
         ws:send_binary("message4")
+
+        return ws
     )lua");
+    std::weak_ptr<lua::api::WebSocket> weakWs{ws};
+    ws.reset();
 
     waiter.waitForRequest();
 
@@ -693,6 +698,10 @@ TEST_F(PluginTest, testTcpWebSocket)
     ASSERT_EQ(messages[5].second, "wow");
     ASSERT_EQ(messages[6].first, true);
     ASSERT_TRUE(messages[6].second.startsWith("Chatterino"));
+
+    ASSERT_FALSE(weakWs.expired());
+    lua->collect_garbage();
+    ASSERT_TRUE(weakWs.expired());
 }
 
 TEST_F(PluginTest, testTlsWebSocket)
@@ -708,7 +717,7 @@ TEST_F(PluginTest, testTlsWebSocket)
         messages.emplace_back(isText, std::move(data));
     });
 
-    lua->script(R"lua(
+    std::shared_ptr<lua::api::WebSocket> ws = lua->script(R"lua(
         local ws = c2.WebSocket.new("wss://127.0.0.1:9050/echo", { 
             headers = {
                 ["User-Agent"] = "Lua",
@@ -739,7 +748,11 @@ TEST_F(PluginTest, testTlsWebSocket)
         ws:send_text("message2")
         ws:send_text("message3")
         ws:send_binary("message4")
+
+        return ws
     )lua");
+    std::weak_ptr<lua::api::WebSocket> weakWs{ws};
+    ws.reset();
 
     waiter.waitForRequest();
 
@@ -762,6 +775,10 @@ TEST_F(PluginTest, testTlsWebSocket)
     ASSERT_EQ(messages[7].second, "A value");
     ASSERT_EQ(messages[8].first, true);
     ASSERT_EQ(messages[8].second, "https://chatterino.com");
+
+    ASSERT_FALSE(weakWs.expired());
+    lua->collect_garbage();
+    ASSERT_TRUE(weakWs.expired());
 }
 
 TEST_F(PluginTest, testWebSocketNoPerms)
