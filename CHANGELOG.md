@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: Handle <kbd>CMD</kbd> + <kbd>BACKSPACE</kbd> behavior explicitly in main chat dialog input for macOS. (#6111)
+
 ## 2.5.3
 
 - Minor: Shared chat messages now use the source channel's profile picture to denote it's a shared chat message. (#5760)
