@@ -35,6 +35,7 @@ public:
     void waitForRequest()
     {
         using namespace std::chrono_literals;
+        auto start = std::chrono::system_clock::now();
 
         while (true)
         {
@@ -50,6 +51,11 @@ public:
             }
             QCoreApplication::processEvents(QEventLoop::AllEvents);
             QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+
+            if (std::chrono::system_clock::now() - start > 2min)
+            {
+                throw std::runtime_error("Timeout");
+            }
         }
 
         ASSERT_TRUE(this->requestDone_);

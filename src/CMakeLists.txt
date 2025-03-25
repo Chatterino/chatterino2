@@ -238,6 +238,8 @@ set(SOURCE_FILES
         controllers/plugins/api/HTTPResponse.hpp
         controllers/plugins/api/IOWrapper.cpp
         controllers/plugins/api/IOWrapper.hpp
+        controllers/plugins/api/WebSocket.cpp
+        controllers/plugins/api/WebSocket.hpp
         controllers/plugins/LuaAPI.cpp
         controllers/plugins/LuaAPI.hpp
         controllers/plugins/LuaUtilities.cpp
@@ -488,6 +490,8 @@ set(SOURCE_FILES
         singletons/Updates.hpp
         singletons/WindowManager.cpp
         singletons/WindowManager.hpp
+        singletons/WebSocketPool.cpp
+        singletons/WebSocketPool.hpp
 
         singletons/helper/GifTimer.cpp
         singletons/helper/GifTimer.hpp
