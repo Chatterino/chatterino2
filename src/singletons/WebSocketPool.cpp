@@ -27,6 +27,9 @@ namespace beast = boost::beast;
 
 namespace chatterino {
 
+/// A base class for a WebSocket connection.
+///
+/// It's agnostic over the backing transport (TCP, TLS, proxy, etc.).
 class WebSocketConnection
 {
 public:
@@ -40,13 +43,32 @@ public:
     WebSocketConnection &operator=(const WebSocketConnection &) = delete;
     WebSocketConnection &operator=(WebSocketConnection &&) = delete;
 
+    /// Start connecting.
+    ///
+    /// Must be called from the desired executor.
     virtual void run() = 0;
+
+    /// Close this connection gracefully (if possible).
+    ///
+    /// Can be called from any thread.
     virtual void close() = 0;
 
+    /// Send or queue a text message.
+    ///
+    /// Can be called from any thread.
     virtual void sendText(const QByteArray &data) = 0;
+
+    /// Send or queue a binary message.
+    ///
+    /// Can be called from any thread.
     virtual void sendBinary(const QByteArray &data) = 0;
 
 protected:
+    /// Reset and notify the parent and listener (if possible).
+    ///
+    /// - If the listener is set, notify it about a close event.
+    /// - If the parent is set, notify it about a closed connection.
+    /// - Set the listener and parent to (the equivalent of) nullptr.
     void detach();
 
     WebSocketOptions options;

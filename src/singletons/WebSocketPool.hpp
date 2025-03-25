@@ -15,6 +15,8 @@ class WebSocketConnection;
 /// Note that even though this handle only contains a weak pointer to the actual
 /// connection, this handle controls the lifetime of the connection. Destroying
 /// this handle will close the underlying connection gracefully (if possible).
+/// It contains a weak pointer to avoid keeping the connection alive after the
+/// parent pool has been destroyed.
 class WebSocketHandle
 {
 public:

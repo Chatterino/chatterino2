@@ -10,6 +10,7 @@
 
 namespace chatterino::lua::api {
 
+/// A WebSocket listener that dispatches events on the GUI thread to the user type.
 class WebSocketListenerProxy final : public WebSocketListener
 {
 public:
