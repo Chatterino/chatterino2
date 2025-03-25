@@ -77,6 +77,15 @@ void writeManifestTo(QString directory, const QString &filename,
     }
 
     QDir dir(directory);
+
+    // check if the parent directory (i.e. the browsers directory) exists
+    // if it does not exist we abort because it means that the browser is not installed
+    QDir dirCpy = dir;
+    if (!dirCpy.cdUp())
+    {
+        return;
+    }
+
     if (!dir.mkpath(u"."_s))
     {
         qCWarning(chatterinoNativeMessage) << "Failed to create" << directory;
