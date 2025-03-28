@@ -2560,7 +2560,8 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
         if (messagePtr->replyThread != nullptr)
         {
             const auto &rootPtr = messagePtr->replyThread->root();
-            if (!rootPtr->flags.has(MessageFlag::InvalidReplyTarget)) {
+            if (!rootPtr->flags.has(MessageFlag::InvalidReplyTarget))
+            {
                 // if the root of the thread is an invalid reply target (i.e. has been deleted)
                 // the whole thread is now invalid reply target (Twitch behaviour)
                 if (!messagePtr->flags.has(MessageFlag::InvalidReplyTarget))
@@ -2570,9 +2571,10 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
                     });
                 }
 
-                menu->addAction("Reply to &original thread", [this, &messagePtr] {
-                    this->setInputReply(messagePtr->replyThread->root());
-                });
+                menu->addAction(
+                    "Reply to &original thread", [this, &messagePtr] {
+                        this->setInputReply(messagePtr->replyThread->root());
+                    });
             }
 
             menu->addAction("View &thread", [this, &messagePtr] {
