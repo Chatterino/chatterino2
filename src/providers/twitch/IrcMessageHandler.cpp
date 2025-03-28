@@ -519,6 +519,7 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
     }
 
     msg->flags.set(MessageFlag::Disabled);
+    msg->flags.set(MessageFlag::InvalidReplyTarget);
     if (!getSettings()->hideDeletionActions)
     {
         chan->addMessage(MessageBuilder::makeDeletionMessageFromIRC(msg),

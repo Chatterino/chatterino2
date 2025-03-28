@@ -2557,18 +2557,32 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
     if (this->canReplyToMessages() && layout->isReplyable())
     {
         const auto &messagePtr = layout->getMessagePtr();
-        menu->addAction("&Reply to message", [this, &messagePtr] {
-            this->setInputReply(messagePtr);
-        });
-
         if (messagePtr->replyThread != nullptr)
         {
-            menu->addAction("Reply to &original thread", [this, &messagePtr] {
-                this->setInputReply(messagePtr->replyThread->root());
-            });
+            const auto &rootPtr = messagePtr->replyThread->root();
+            if (!rootPtr->flags.has(MessageFlag::InvalidReplyTarget)) {
+                // if the root of the thread is an invalid reply target (i.e. has been deleted)
+                // the whole thread is now invalid reply target (Twitch behaviour)
+                if (!messagePtr->flags.has(MessageFlag::InvalidReplyTarget))
+                {
+                    menu->addAction("&Reply to message", [this, &messagePtr] {
+                        this->setInputReply(messagePtr);
+                    });
+                }
+
+                menu->addAction("Reply to &original thread", [this, &messagePtr] {
+                    this->setInputReply(messagePtr->replyThread->root());
+                });
+            }
 
             menu->addAction("View &thread", [this, &messagePtr] {
                 this->showReplyThreadPopup(messagePtr);
+            });
+        }
+        else if (!messagePtr->flags.has(MessageFlag::InvalidReplyTarget))
+        {
+            menu->addAction("&Reply to message", [this, &messagePtr] {
+                this->setInputReply(messagePtr);
             });
         }
     }

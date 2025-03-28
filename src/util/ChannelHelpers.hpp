@@ -120,6 +120,7 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
                 // FOURTF: disabled for now
                 // PAJLADA: Shitty solution described in Message.hpp
                 s->flags.set(MessageFlag::Disabled);
+                s->flags.set(MessageFlag::InvalidReplyTarget);
             }
         }
     }
