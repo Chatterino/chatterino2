@@ -84,7 +84,12 @@ void Button::setSvgResource(const QString &resourcePath)
         return;
     }
 
+    if (this->svgRenderer)
+    {
+        this->svgRenderer->deleteLater();
+    }
     this->svgRenderer = new QSvgRenderer(resourcePath, this);
+    this->svgRenderer->setAspectRatioMode(Qt::KeepAspectRatio);
     this->svgResourcePath = resourcePath;
 
     this->update();
@@ -199,15 +204,7 @@ void Button::paintButton(QPainter &painter)
         if (this->enableMargin_)
         {
             auto s = this->getMargin();
-            auto outSize = rect.size() - QSize{2 * s, 2 * s};
-            outSize = this->svgRenderer->defaultSize().scaled(
-                outSize, Qt::KeepAspectRatio);
-            auto margin = rect.size() - outSize;
-
-            rect = QRect{
-                QPoint{margin.width() / 2, margin.height() / 2},
-                outSize,
-            };
+            rect = {{s, s}, rect.size() - QSize{2 * s, 2 * s}};
         }
 
         this->svgRenderer->render(&painter, rect);
