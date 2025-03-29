@@ -1,7 +1,6 @@
 #pragma once
 
 #include "widgets/DraggablePopup.hpp"
-#include "widgets/helper/EffectLabel.hpp"
 
 #include <pajlada/signals/scoped-connection.hpp>
 #include <pajlada/signals/signal.hpp>
@@ -17,6 +16,8 @@ using ChannelPtr = std::shared_ptr<Channel>;
 class Label;
 class ChannelView;
 class Split;
+class LabelButton;
+class PixmapButton;
 
 class UserInfoPopup final : public DraggablePopup
 {
@@ -68,8 +69,8 @@ private:
     const bool closeAutomatically_;
 
     struct {
-        Button *avatarButton = nullptr;
-        Button *localizedNameCopyButton = nullptr;
+        PixmapButton *avatarButton = nullptr;
+        PixmapButton *localizedNameCopyButton = nullptr;
 
         Label *nameLabel = nullptr;
         Label *localizedNameLabel = nullptr;
@@ -86,7 +87,7 @@ private:
         Label *noMessagesLabel = nullptr;
         ChannelView *latestMessages = nullptr;
 
-        EffectLabel2 *usercardLabel = nullptr;
+        LabelButton *usercardLabel = nullptr;
     } ui_;
 
     class TimeoutWidget : public BaseWidget
