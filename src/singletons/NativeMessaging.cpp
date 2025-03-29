@@ -27,6 +27,7 @@
 
 namespace {
 
+using namespace chatterino::nm::detail;
 using namespace chatterino;
 using namespace chatterino::literals;
 
@@ -71,33 +72,6 @@ const Config CHROME{
 #endif
 };
 
-void writeManifestTo(QString directory, const QString &nmDirectory,
-                     const QString &filename, const QJsonDocument &json)
-{
-    if (directory.startsWith('~'))
-    {
-        directory = QDir::homePath() % QStringView{directory}.sliced(1);
-    }
-
-    QDir dir(directory);
-    if (!dir.exists(nmDirectory) && !dir.mkdir(nmDirectory))
-    {
-        qCWarning(chatterinoNativeMessage)
-            << "Failed to create" << nmDirectory << "in" << directory;
-        return;
-    }
-    dir.cd(nmDirectory);
-
-    QFile file(dir.filePath(filename));
-    if (!file.open(QFile::WriteOnly | QFile::Truncate))
-    {
-        qCWarning(chatterinoNativeMessage)
-            << "Failed to open" << filename << "in" << directory;
-        return;
-    }
-    file.write(json.toJson());
-}
-
 void registerNmManifest([[maybe_unused]] const Paths &paths,
                         const Config &config, const QJsonDocument &document)
 {
@@ -115,8 +89,43 @@ void registerNmManifest([[maybe_unused]] const Paths &paths,
 
 }  // namespace
 
+namespace chatterino::nm::detail {
+
+nonstd::expected<void, WriteManifestError> writeManifestTo(
+    QString directory, const QString &nmDirectory, const QString &filename,
+    const QJsonDocument &json)
+{
+    if (directory.startsWith('~'))
+    {
+        directory = QDir::homePath() % QStringView{directory}.sliced(1);
+    }
+
+    QDir dir(directory);
+    if (!dir.exists(nmDirectory) && !dir.mkdir(nmDirectory))
+    {
+        qCWarning(chatterinoNativeMessage)
+            << "Failed to create" << nmDirectory << "in" << directory;
+        return makeUnexpected(WriteManifestError::FailedToCreateDirectory);
+    }
+    dir.cd(nmDirectory);
+
+    QFile file(dir.filePath(filename));
+    if (!file.open(QFile::WriteOnly | QFile::Truncate))
+    {
+        qCWarning(chatterinoNativeMessage)
+            << "Failed to open" << filename << "in" << directory;
+        return makeUnexpected(WriteManifestError::FailedToCreateFile);
+    }
+    file.write(json.toJson());
+
+    return {};
+}
+
+}  // namespace chatterino::nm::detail
+
 namespace chatterino {
 
+using namespace chatterino::nm::detail;
 using namespace literals;
 
 void registerNmHost(const Paths &paths)
