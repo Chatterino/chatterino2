@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
+
 ## 2.5.3
 
 - Minor: Shared chat messages now use the source channel's profile picture to denote it's a shared chat message. (#5760)
