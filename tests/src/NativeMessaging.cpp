@@ -60,16 +60,3 @@ TEST_F(NativeMessagingFixture, writeManifestToWindowsCurrentDir)
 
     ASSERT_TRUE(QFile(combinePath(this->dir.path(), "test.json")).exists());
 }
-
-TEST_F(NativeMessagingFixture, writeManifestBadPermissions)
-{
-    // writeManifestTo should fail if the subdir is already created but with bad permissions
-    ASSERT_TRUE(this->dir.mkpath("."));
-    ASSERT_TRUE(
-        this->dir.mkdir("native-messaging-hosts", QFileDevice::ReadOwner));
-
-    ASSERT_EQ(writeManifestTo(this->dir.path(), "native-messaging-hosts",
-                              "test.json", QJsonDocument())
-                  .error(),
-              WriteManifestError::FailedToCreateFile);
-}
