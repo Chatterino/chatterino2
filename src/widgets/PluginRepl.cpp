@@ -503,14 +503,14 @@ void PluginRepl::tryRun(QString code)
     if (code.startsWith('!'))
     {
         maxItems = std::numeric_limits<size_t>::max();
-        auto v = QStringView(code).slice(1).trimmed();
+        auto v = QStringView(code).sliced(1).trimmed();
         auto nChars = v.constData() - code.constData();
-        code.slice(nChars);
+        code.remove(0, nChars);
     }
 
     if (code.startsWith(u"@ "))
     {
-        code.slice(2);
+        code.remove(0, 2);
     }
     else if (!code.startsWith(u"return "))
     {
