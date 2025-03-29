@@ -218,6 +218,8 @@ std::unordered_set<QString> Plugin::listRegisteredCommands()
 
 Plugin::~Plugin()
 {
+    this->onDestroyed_();
+
     for (auto *timer : this->activeTimeouts)
     {
         QObject::disconnect(timer, nullptr, nullptr, nullptr);
@@ -291,6 +293,46 @@ bool Plugin::hasHTTPPermissionFor(const QUrl &url)
     return std::ranges::any_of(this->meta.permissions, [](const auto &p) {
         return p.type == PluginPermission::Type::Network;
     });
+}
+
+boost::signals2::connection Plugin::onDestroyed(
+    const OnDestroyed::slot_type &slot)
+{
+    return this->onDestroyed_.connect(slot);
+}
+
+boost::signals2::connection Plugin::onLog(const OnLog::slot_type &slot)
+{
+    return this->onLog_.connect(slot);
+}
+
+void Plugin::log(lua_State *L, lua::api::LogLevel level, QDebug stream,
+                 const sol::variadic_args &args)
+{
+    stream.noquote();
+    stream << "[" + this->id + ":" + this->meta.name + "]";
+    QString fullMessage;
+    for (const auto &arg : args)
+    {
+        auto s = lua::toString(L, arg.stack_index());
+        stream << s;
+
+        if (!fullMessage.isEmpty())
+        {
+            fullMessage.append(' ');
+        }
+        fullMessage.append(s);
+
+        // Remove this from our stack
+        lua_pop(L, 1);
+    }
+
+    this->onLog_(level, fullMessage);
+}
+
+sol::state_view Plugin::state()
+{
+    return {this->state_};
 }
 
 }  // namespace chatterino
