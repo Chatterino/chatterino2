@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added interactive REPL for plugins. (#6120)
 - Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
 - Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
 
