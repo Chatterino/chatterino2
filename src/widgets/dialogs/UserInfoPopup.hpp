@@ -15,6 +15,7 @@ namespace chatterino {
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 class Label;
+class EditUserNotesDialog;
 class ChannelView;
 class Split;
 
@@ -88,6 +89,8 @@ private:
 
         EffectLabel2 *usercardLabel = nullptr;
     } ui_;
+
+    QPointer<EditUserNotesDialog> editUserNotesDialog_;
 
     class TimeoutWidget : public BaseWidget
     {

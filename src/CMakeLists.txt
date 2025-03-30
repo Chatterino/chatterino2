@@ -606,6 +606,8 @@ set(SOURCE_FILES
         widgets/dialogs/ColorPickerDialog.hpp
         widgets/dialogs/EditHotkeyDialog.cpp
         widgets/dialogs/EditHotkeyDialog.hpp
+        widgets/dialogs/EditUserNotesDialog.cpp
+        widgets/dialogs/EditUserNotesDialog.hpp
         widgets/dialogs/EmotePopup.cpp
         widgets/dialogs/EmotePopup.hpp
         widgets/dialogs/LastRunCrashDialog.cpp

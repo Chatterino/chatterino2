@@ -27,6 +27,7 @@
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
+#include "widgets/dialogs/EditUserNotesDialog.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/InvisibleSizeGrip.hpp"
@@ -742,6 +743,9 @@ void UserInfoPopup::installEvents()
                 }
             }
         });
+
+    // user notes
+    this->editUserNotesDialog_ = new EditUserNotesDialog(this);
 }
 
 void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
