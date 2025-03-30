@@ -106,6 +106,12 @@ void MessagePreferences::connectSettings(Settings *settings,
             this->lastMessagePattern = static_cast<Qt::BrushStyle>(newValue);
         },
         holder);
+
+    settings->fadeRecentMessages.connect(
+        [this](const auto &newValue) {
+            this->fadeRecentMessages = newValue;
+        },
+        holder);
 }
 
 }  // namespace chatterino

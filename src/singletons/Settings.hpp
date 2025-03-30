@@ -145,6 +145,8 @@ public:
         "/appearance/messages/messageOverflow", MessageOverflow::Highlight};
     BoolSetting separateMessages = {"/appearance/messages/separateMessages",
                                     false};
+    BoolSetting fadeRecentMessages = {"/appearance/messages/fadeRecentMessages",
+                                      true};
     BoolSetting hideModerated = {"/appearance/messages/hideModerated", false};
     BoolSetting hideModerationActions = {
         "/appearance/messages/hideModerationActions", false};
