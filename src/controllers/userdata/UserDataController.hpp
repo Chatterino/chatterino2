@@ -43,7 +43,8 @@ public:
                       const QString &colorString) override;
 
 private:
-    void update(std::unordered_map<QString, UserData> &&newUsers);
+    void update(std::unordered_map<QString, UserData> &&newUsers,
+                std::unique_lock<std::shared_mutex> usersLock);
 
     std::unordered_map<QString, UserData> getUsers() const;
 
