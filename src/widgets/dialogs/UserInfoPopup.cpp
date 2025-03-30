@@ -9,6 +9,7 @@
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "controllers/userdata/UserDataController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
@@ -56,6 +57,7 @@ constexpr QStringView TEXT_UNAVAILABLE = u"(not available)";
 constexpr QStringView TEXT_PRONOUNS = u"Pronouns: %1";
 constexpr QStringView TEXT_UNSPECIFIED = u"(unspecified)";
 constexpr QStringView TEXT_LOADING = u"(loading...)";
+constexpr qsizetype NOTES_PREVIEW_LENGTH = 80;
 
 using namespace chatterino;
 
@@ -408,6 +410,9 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
             .assign(&this->ui_.ignoreHighlights);
         // visibility of this is updated in setData
 
+        auto notesAdd =
+            user.emplace<EffectLabel2>(this).assign(&this->ui_.notesAdd);
+        notesAdd->getLabel().setText("Add notes");
         auto usercard =
             user.emplace<EffectLabel2>(this).assign(&this->ui_.usercardLabel);
         usercard->getLabel().setText("Usercard");
@@ -485,6 +490,9 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
             unvip->setVisible(visibilityModButtons);
         });
     }
+
+    auto notesPreview = layout.emplace<Label>().assign(&ui_.notesPreview);
+    notesPreview->setVisible(false);
 
     auto lineMod = layout.emplace<Line>(false);
 
@@ -745,7 +753,33 @@ void UserInfoPopup::installEvents()
         });
 
     // user notes
-    this->editUserNotesDialog_ = new EditUserNotesDialog(this);
+    QObject::connect(
+        this->ui_.notesAdd, &EffectLabel2::clicked, [this]() mutable {
+            if (this->editUserNotesDialog_.isNull())
+            {
+                this->editUserNotesDialog_ = new EditUserNotesDialog(this);
+                // ignoring since it the dialog is only used in this instance
+                std::ignore = this->editUserNotesDialog_->onOk.connect(
+                    [userId = this->userId_](const QString &newNotes) {
+                        getApp()->getUserData()->setUserNotes(userId, newNotes);
+                    });
+            }
+
+            auto userData = getApp()->getUserData()->getUser(this->userId_);
+            auto initialNotes =
+                userData.has_value() ? userData->notes : QString();
+
+            this->editUserNotesDialog_->setNotes(initialNotes);
+            this->editUserNotesDialog_->updateWindowTitle(this->userName_);
+            this->editUserNotesDialog_->show();
+        });
+
+    // user data updated
+    this->userDataUpdatedConnection_ =
+        std::make_unique<pajlada::Signals::ScopedConnection>(
+            getApp()->getUserData()->userDataUpdated().connect([this]() {
+                this->updateNotes();
+            }));
 }
 
 void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
@@ -762,6 +796,7 @@ void UserInfoPopup::setData(const QString &name,
     if (isId)
     {
         this->userId_ = name.mid(idPrefix.size());
+        updateNotes();
         this->userName_ = "";
     }
     else
@@ -883,6 +918,7 @@ void UserInfoPopup::updateUserData()
         }
 
         this->userId_ = user.id;
+        this->updateNotes();
         this->avatarUrl_ = user.profileImageUrl;
 
         // copyable button for login name of users with a localized username
@@ -1083,6 +1119,31 @@ void UserInfoPopup::loadAvatar(const QUrl &url)
             this->ui_.avatarButton->setPixmap(QPixmap());
         }
     });
+}
+
+void UserInfoPopup::updateNotes()
+{
+    static QRegularExpression onlySpaceRegex{"^\\s*$"};
+
+    auto userData = getApp()->getUserData()->getUser(this->userId_);
+    if (!userData.has_value() ||
+        onlySpaceRegex.match(userData->notes).hasMatch())
+    {
+        this->ui_.notesPreview->setText("");
+        this->ui_.notesPreview->setVisible(false);
+        return;
+    }
+
+    static QRegularExpression spaceRegex{"\\s+"};
+
+    auto previewText = "Notes: " + userData->notes.replace(spaceRegex, " ");
+    if (previewText.length() > NOTES_PREVIEW_LENGTH)
+    {
+        previewText = previewText.left(NOTES_PREVIEW_LENGTH - 3) + "...";
+    }
+
+    this->ui_.notesPreview->setText(previewText);
+    this->ui_.notesPreview->setVisible(true);
 }
 
 //
