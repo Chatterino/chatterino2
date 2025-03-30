@@ -1215,42 +1215,6 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
                              [this, pair] {
                                  this->buttonClicked.invoke(pair);
                              });
-
-            //auto addTimeouts = [&](const QString &title_,
-            //                       const std::vector<std::pair<QString, int>> &items) {
-            //    auto vbox = layout.emplace<QVBoxLayout>().withoutMargin();
-            //    {
-            //        auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
-            //        title->addStretch(1);
-            //        auto label = title.emplace<Label>(title_);
-            //        label->setStyleSheet("color: #BBB");
-            //        label->setHasOffset(false);
-            //        title->addStretch(1);
-
-            //        auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
-            //        hbox->setSpacing(0);
-
-            //        for (const auto &item : items)
-            //        {
-            //            auto a = hbox.emplace<EffectLabel2>();
-            //            a->getLabel().setText(std::get<0>(item));
-
-            //            if (std::get<0>(item).length() > 1)
-            //            {
-            //                a->setScaleIndependantSize(buttonWidth2, buttonHeight);
-            //            }
-            //            else
-            //            {
-            //                a->setScaleIndependantSize(buttonWidth, buttonHeight);
-            //            }
-            //            a->setBorderColor(color1);
-
-            //            QObject::connect(a.getElement(), &EffectLabel2::leftClicked,
-            //                             [this, timeout = std::get<1>(item)] {
-            //                                 this->buttonClicked.invoke(std::make_pair(
-            //                                     Action::Timeout, timeout));
-            //                             });
-            //        }
         }
     };
 

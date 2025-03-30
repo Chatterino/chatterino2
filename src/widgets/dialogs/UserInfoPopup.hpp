@@ -6,8 +6,6 @@
 #include <pajlada/signals/scoped-connection.hpp>
 #include <pajlada/signals/signal.hpp>
 
-#include <chrono>
-
 class QCheckBox;
 
 namespace chatterino {
