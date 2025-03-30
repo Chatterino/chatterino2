@@ -104,6 +104,29 @@ void UserDataController::update(
 
     // unlock before invoking updated signal
     usersLock.unlock();
+
+    this->updateDataUpdated_.invoke();
+}
+
+void UserDataController::setUserNotes(const QString &userID,
+                                      const QString &notes)
+{
+    if (userID.isEmpty())
+    {
+        return;
+    }
+
+    std::unique_lock lock(this->usersMutex);
+
+    auto users = this->users;
+    users[userID].notes = notes;
+
+    this->update(std::move(users), std::move(lock));
+}
+
+pajlada::Signals::NoArgSignal &UserDataController::userDataUpdated()
+{
+    return this->updateDataUpdated_;
 }
 
 }  // namespace chatterino
