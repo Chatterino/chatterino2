@@ -19,7 +19,10 @@ struct UserData {
     std::optional<QColor> color{std::nullopt};
     QString notes;
 
-    // TODO: User note?
+    bool isEmpty() const
+    {
+        return !color.has_value() && notes.isEmpty();
+    }
 };
 
 }  // namespace chatterino
