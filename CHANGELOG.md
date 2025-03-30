@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: Don't add reply buttons to messages that are invalid reply targets. (#6119)
+
 ## 2.5.3
 
 - Minor: Shared chat messages now use the source channel's profile picture to denote it's a shared chat message. (#5760)
@@ -10,7 +12,6 @@
 - Bugfix: Fixed inputs in dialogs not having a border around and padding in them. (#6098)
 - Bugfix: Don't set default binding for "Toggle local R9K" on macOS. Was <kbd>CTRL</kbd> + <kdb>H</kdb> before, which clashes with a system binding. (#5764)
 - Bugfix: Don't add moderation buttons to your own Usercard. (#6107)
-- Bugfix: Don't add reply buttons to messages that are invalid reply targets. (#6119)
 - Dev: Temporarily disable precompiled header support for macOS. (#6104)
 
 ## 2.5.3-beta.1

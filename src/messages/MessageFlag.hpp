@@ -65,13 +65,11 @@ enum class MessageFlag : std::int64_t {
     ///  - forsen added "blockedterm" as a blocked term
     ///  - Your message is being checked by mods and has not been sent
     ModerationAction = (1LL << 41),
-    /// The message is not a valid reply target
+    /// The message can't be replied to
     /// Examples:
     ///  - message was deleted via single channel chat message deletion (IRC: CLEARMSG, EVENTSUB: channel.chat.message_delete)
     ///  - message was deleted via chat clear user messages (IRC: CLEARCHAT(user), EVENTSUB: channel.chat.clear_user_messages)
-    /// However as a reply thread root does not know its own thread [The root of the thread does not have replyThread set.(Message.hpp)]
-    ///  - messages that are invalid reply targets due to the root being an invalid reply target
-    ///    are NOT marked as invalid reply targets themselves, thus it is required to check their possible reply thread roots.
+    /// Note: If this message is inside a reply thread, the root must not have the flag either.
     InvalidReplyTarget = (1LL << 42),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
