@@ -627,6 +627,15 @@ void UserInfoPopup::scaleChangedEvent(float /*scale*/)
     });
 }
 
+void UserInfoPopup::windowDeactivationEvent()
+{
+    if (this->editUserNotesDialog_.isNull() ||
+        !this->editUserNotesDialog_->isVisible())
+    {
+        BaseWindow::windowDeactivationEvent();
+    }
+}
+
 void UserInfoPopup::installEvents()
 {
     std::shared_ptr<bool> ignoreNext = std::make_shared<bool>(false);

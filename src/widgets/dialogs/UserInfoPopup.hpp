@@ -37,6 +37,7 @@ public:
 protected:
     void themeChangedEvent() override;
     void scaleChangedEvent(float scale) override;
+    void windowDeactivationEvent() override;
 
 private:
     void installEvents();
