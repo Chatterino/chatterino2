@@ -2218,7 +2218,6 @@ std::pair<MessagePtrMut, HighlightAlert> MessageBuilder::makeIrcMessage(
     if (tags.contains("rm-deleted"))
     {
         builder->flags.set(MessageFlag::Disabled);
-        builder->flags.set(MessageFlag::InvalidReplyTarget);
     }
 
     if (tags.contains("msg-id") &&
