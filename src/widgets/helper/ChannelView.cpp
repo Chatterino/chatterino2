@@ -1579,13 +1579,16 @@ void ChannelView::paintEvent(QPaintEvent *event)
             {
                 if (dx != 0 || dy != 0)
                 {
-                    painter.drawText(QRectF(textX + dx, pausedY + dy, textWidth, a), Qt::AlignLeft | Qt::AlignVCenter, text);
+                    painter.drawText(
+                        QRectF(textX + dx, pausedY + dy, textWidth, a),
+                        Qt::AlignLeft | Qt::AlignVCenter, text);
                 }
             }
         }
 
         painter.setPen(color);
-        painter.drawText(QRectF(textX, pausedY, textWidth, a), Qt::AlignLeft | Qt::AlignVCenter, text);
+        painter.drawText(QRectF(textX, pausedY, textWidth, a),
+                         Qt::AlignLeft | Qt::AlignVCenter, text);
     }
 }
 
