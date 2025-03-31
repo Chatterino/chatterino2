@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QColor>
+#include <qjsondocument.h>
 #include <QLocale>
 #include <QString>
 
@@ -191,4 +192,10 @@ QString unescapeZeroWidthJoiner(QString escaped);
 
 QLocale getSystemLocale();
 
+void writeProviderEmotesCache(const QString &id, const QString &provider,
+                              const QByteArray &bytes);
+
+bool readProviderEmotesCache(
+    const QString &id, const QString &provider,
+    const std::function<void(QJsonDocument)> &callback);
 }  // namespace chatterino

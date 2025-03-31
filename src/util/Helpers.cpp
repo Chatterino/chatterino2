@@ -1,12 +1,19 @@
 #include "util/Helpers.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
+#include "singletons/Paths.hpp"
 
 #include <QDirIterator>
+#include <qjsonobject.h>
 #include <QLocale>
+#include <qloggingcategory.h>
 #include <QRegularExpression>
+#include <qtconcurrentrun.h>
 #include <QUuid>
+
+#include <functional>
 
 namespace {
 
@@ -21,6 +28,7 @@ const QRegularExpression ESCAPE_TAG_REGEX(
 }  // namespace
 
 namespace chatterino {
+using std::function;
 
 namespace helpers::detail {
 
@@ -312,6 +320,50 @@ QLocale getSystemLocale()
 #endif
 
     return QLocale::system();
+}
+
+void writeProviderEmotesCache(const QString &id, const QString &provider,
+                              const QByteArray &bytes)
+{
+    std::ignore = QtConcurrent::run([bytes, id, provider]() {
+        QFile responseCache(getApp()->getPaths().cacheDirectory() + "/" + id +
+                            "." + provider);
+
+        if (responseCache.open(QIODevice::WriteOnly))
+        {
+            qCDebug(chatterinoCache)
+                << "Saved json response " << id << "." << provider;
+            responseCache.write(bytes);
+        }
+    });
+}
+
+bool readProviderEmotesCache(const QString &id, const QString &provider,
+                             const function<void(QJsonDocument)> &callback)
+{
+    QFile responseCache(getApp()->getPaths().cacheDirectory() + "/" + id + "." +
+                        provider);
+    if (responseCache.open(QIODevice::ReadOnly))
+    {
+        QJsonParseError parseError;
+        auto doc =
+            QJsonDocument::fromJson(responseCache.readAll(), &parseError);
+
+        if (parseError.error != QJsonParseError::NoError)
+        {
+            qCWarning(chatterinoCache)
+                << "Emote cache " << id << "." << provider
+                << " parsing failed: " << parseError.errorString();
+        }
+
+        qCDebug(chatterinoCache)
+            << "Loaded emote cache: " << id << "." << provider;
+        callback(doc);
+        return true;
+    }
+
+    // If the API call fails, we need to know if loading cached emotes was successful
+    return false;
 }
 
 }  // namespace chatterino

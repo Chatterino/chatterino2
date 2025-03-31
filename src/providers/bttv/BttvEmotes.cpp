@@ -11,8 +11,12 @@
 #include "providers/bttv/liveupdates/BttvLiveUpdateMessages.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
+#include "util/Helpers.hpp"
 
 #include <QJsonArray>
+#include <qloggingcategory.h>
+#include <qstringliteral.h>
+#include <qtconcurrentrun.h>
 #include <QThread>
 
 namespace {
@@ -218,18 +222,35 @@ void BttvEmotes::loadEmotes()
         return;
     }
 
-    NetworkRequest(QString(globalEmoteApiUrl))
-        .timeout(30000)
-        .onSuccess([this](auto result) {
-            auto emotes = this->global_.get();
-            auto pair = parseGlobalEmotes(result.parseJsonArray(), *emotes);
-            if (pair.first)
-            {
-                this->setEmotes(
-                    std::make_shared<EmoteMap>(std::move(pair.second)));
-            }
-        })
-        .execute();
+    readProviderEmotesCache("global", "bttv", [this](auto jsonDoc) {
+        auto emotes = this->global_.get();
+        auto pair = parseGlobalEmotes(jsonDoc.array(), *emotes);
+        if (pair.first)
+        {
+            this->setEmotes(std::make_shared<EmoteMap>(std::move(pair.second)));
+        }
+    });
+
+    std::ignore = QtConcurrent::run([this]() {
+        NetworkRequest(QString(globalEmoteApiUrl))
+            .timeout(30000)
+            .onSuccess([this](auto result) {
+                writeProviderEmotesCache("global", "bttv", result.getData());
+                auto emotes = this->global_.get();
+                auto pair = parseGlobalEmotes(result.parseJsonArray(), *emotes);
+                if (pair.first)
+                {
+                    this->setEmotes(
+                        std::make_shared<EmoteMap>(std::move(pair.second)));
+                }
+            })
+            .onError([](auto result) {
+                qCWarning(chatterinoBttv)
+                    << "Failed to fetch global BTTV emotes. "
+                    << result.formatError();
+            })
+            .execute();
+    });
 }
 
 void BttvEmotes::setEmotes(std::shared_ptr<const EmoteMap> emotes)
@@ -241,15 +262,16 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                              const QString &channelId,
                              const QString &channelDisplayName,
                              std::function<void(EmoteMap &&)> callback,
-                             bool manualRefresh)
+                             bool manualRefresh, bool cacheHit)
 {
     NetworkRequest(QString(bttvChannelEmoteApiUrl) + channelId)
         .timeout(20000)
-        .onSuccess([callback = std::move(callback), channel, channelDisplayName,
-                    manualRefresh](auto result) {
+        .onSuccess([callback = std::move(callback), channel, channelId,
+                    channelDisplayName, manualRefresh](auto result) {
             auto emotes =
                 parseChannelEmotes(result.parseJson(), channelDisplayName);
             bool hasEmotes = !emotes.empty();
+            writeProviderEmotesCache(channelId, "bttv", result.getData());
             callback(std::move(emotes));
 
             if (auto shared = channel.lock(); manualRefresh)
@@ -265,7 +287,7 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                 }
             }
         })
-        .onError([channelId, channel, manualRefresh](auto result) {
+        .onError([channelId, channel, manualRefresh, cacheHit](auto result) {
             auto shared = channel.lock();
             if (!shared)
             {
@@ -291,6 +313,11 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                     QStringLiteral("Failed to fetch BetterTTV channel "
                                    "emotes. (Error: %1)")
                         .arg(errorString));
+                if (cacheHit)
+                {
+                    shared->addSystemMessage(
+                        "Using cached BetterTTV emotes as fallback.");
+                }
             }
         })
         .execute();

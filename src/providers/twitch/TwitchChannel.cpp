@@ -51,9 +51,12 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QStringBuilder>
+#include <qtconcurrentrun.h>
 #include <QThread>
 #include <QTimer>
 #include <rapidjson/document.h>
+
+#include <tuple>
 
 namespace chatterino {
 
@@ -317,15 +320,30 @@ void TwitchChannel::refreshBTTVChannelEmotes(bool manualRefresh)
         return;
     }
 
-    BttvEmotes::loadChannel(
-        weakOf<Channel>(this), this->roomId(), this->getLocalizedName(),
-        [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
+    bool cacheHit = readProviderEmotesCache(
+        this->roomId(), "bttv",
+        [this, weak = weakOf<Channel>(this)](auto jsonDoc) {
             if (auto shared = weak.lock())
             {
+                auto emoteMap = bttv::detail::parseChannelEmotes(
+                    jsonDoc.object(), this->getLocalizedName());
                 this->setBttvEmotes(std::make_shared<const EmoteMap>(emoteMap));
             }
-        },
-        manualRefresh);
+        });
+
+    std::ignore = QtConcurrent::run(
+        [this, weak = weakOf<Channel>(this), manualRefresh, cacheHit]() {
+            BttvEmotes::loadChannel(
+                weakOf<Channel>(this), this->roomId(), this->getLocalizedName(),
+                [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
+                    if (auto shared = weak.lock())
+                    {
+                        this->setBttvEmotes(
+                            std::make_shared<const EmoteMap>(emoteMap));
+                    }
+                },
+                manualRefresh, cacheHit);
+        });
 }
 
 void TwitchChannel::refreshFFZChannelEmotes(bool manualRefresh)
@@ -336,37 +354,46 @@ void TwitchChannel::refreshFFZChannelEmotes(bool manualRefresh)
         return;
     }
 
-    FfzEmotes::loadChannel(
-        weakOf<Channel>(this), this->roomId(),
-        [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
-            if (auto shared = weak.lock())
-            {
-                this->setFfzEmotes(std::make_shared<const EmoteMap>(emoteMap));
-            }
-        },
-        [this, weak = weakOf<Channel>(this)](auto &&modBadge) {
-            if (auto shared = weak.lock())
-            {
-                this->ffzCustomModBadge_.set(
-                    std::forward<decltype(modBadge)>(modBadge));
-            }
-        },
-        [this, weak = weakOf<Channel>(this)](auto &&vipBadge) {
-            if (auto shared = weak.lock())
-            {
-                this->ffzCustomVipBadge_.set(
-                    std::forward<decltype(vipBadge)>(vipBadge));
-            }
-        },
-        [this, weak = weakOf<Channel>(this)](auto &&channelBadges) {
-            if (auto shared = weak.lock())
-            {
-                this->tgFfzChannelBadges_.guard();
-                this->ffzChannelBadges_ =
-                    std::forward<decltype(channelBadges)>(channelBadges);
-            }
-        },
-        manualRefresh);
+    bool cacheHit =
+        readProviderEmotesCache(this->roomId(), "ffz", [this](auto jsonDoc) {
+            auto emoteMap = ffz::detail::parseChannelEmotes(jsonDoc.object());
+            this->setFfzEmotes(std::make_shared<const EmoteMap>(emoteMap));
+        });
+
+    std::ignore = QtConcurrent::run([this, manualRefresh, cacheHit]() {
+        FfzEmotes::loadChannel(
+            weakOf<Channel>(this), this->roomId(),
+            [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
+                if (auto shared = weak.lock())
+                {
+                    this->setFfzEmotes(
+                        std::make_shared<const EmoteMap>(emoteMap));
+                }
+            },
+            [this, weak = weakOf<Channel>(this)](auto &&modBadge) {
+                if (auto shared = weak.lock())
+                {
+                    this->ffzCustomModBadge_.set(
+                        std::forward<decltype(modBadge)>(modBadge));
+                }
+            },
+            [this, weak = weakOf<Channel>(this)](auto &&vipBadge) {
+                if (auto shared = weak.lock())
+                {
+                    this->ffzCustomVipBadge_.set(
+                        std::forward<decltype(vipBadge)>(vipBadge));
+                }
+            },
+            [this, weak = weakOf<Channel>(this)](auto &&channelBadges) {
+                if (auto shared = weak.lock())
+                {
+                    this->tgFfzChannelBadges_.guard();
+                    this->ffzChannelBadges_ =
+                        std::forward<decltype(channelBadges)>(channelBadges);
+                }
+            },
+            manualRefresh, cacheHit);
+    });
 }
 
 void TwitchChannel::refreshSevenTVChannelEmotes(bool manualRefresh)
@@ -377,21 +404,32 @@ void TwitchChannel::refreshSevenTVChannelEmotes(bool manualRefresh)
         return;
     }
 
-    SeventvEmotes::loadChannelEmotes(
-        weakOf<Channel>(this), this->roomId(),
-        [this, weak = weakOf<Channel>(this)](auto &&emoteMap,
-                                             auto channelInfo) {
-            if (auto shared = weak.lock())
-            {
-                this->setSeventvEmotes(
-                    std::make_shared<const EmoteMap>(emoteMap));
-                this->updateSeventvData(channelInfo.userID,
-                                        channelInfo.emoteSetID);
-                this->seventvUserTwitchConnectionIndex_ =
-                    channelInfo.twitchConnectionIndex;
-            }
-        },
-        manualRefresh);
+    bool cacheHit = readProviderEmotesCache(
+        this->roomId(), "seventv", [this](auto jsonDoc) {
+            const auto json = jsonDoc.object();
+            const auto emoteSet = json["emote_set"].toObject();
+            const auto parsedEmotes = emoteSet["emotes"].toArray();
+            auto emoteMap = seventv::detail::parseEmotes(parsedEmotes, false);
+            this->setSeventvEmotes(std::make_shared<const EmoteMap>(emoteMap));
+        });
+
+    std::ignore = QtConcurrent::run([this, manualRefresh, cacheHit]() {
+        SeventvEmotes::loadChannelEmotes(
+            weakOf<Channel>(this), this->roomId(),
+            [this, weak = weakOf<Channel>(this)](auto &&emoteMap,
+                                                 auto channelInfo) {
+                if (auto shared = weak.lock())
+                {
+                    this->setSeventvEmotes(
+                        std::make_shared<const EmoteMap>(emoteMap));
+                    this->updateSeventvData(channelInfo.userID,
+                                            channelInfo.emoteSetID);
+                    this->seventvUserTwitchConnectionIndex_ =
+                        channelInfo.twitchConnectionIndex;
+                }
+            },
+            manualRefresh, cacheHit);
+    });
 }
 
 void TwitchChannel::setBttvEmotes(std::shared_ptr<const EmoteMap> &&map)

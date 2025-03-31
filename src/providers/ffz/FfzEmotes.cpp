@@ -9,6 +9,9 @@
 #include "providers/ffz/FfzUtil.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
+#include "util/Helpers.hpp"
+
+#include <qtconcurrentrun.h>
 
 namespace {
 
@@ -237,16 +240,30 @@ void FfzEmotes::loadEmotes()
         return;
     }
 
+    readProviderEmotesCache("global", "ffz", [this](auto jsonDoc) {
+        auto parsedSet = parseGlobalEmotes(jsonDoc.object());
+        this->setEmotes(std::make_shared<EmoteMap>(std::move(parsedSet)));
+    });
+
     QString url("https://api.frankerfacez.com/v1/set/global");
 
-    NetworkRequest(url)
+    std::ignore = QtConcurrent::run([url, this]() {
+        NetworkRequest(url)
 
-        .timeout(30000)
-        .onSuccess([this](auto result) {
-            auto parsedSet = parseGlobalEmotes(result.parseJson());
-            this->setEmotes(std::make_shared<EmoteMap>(std::move(parsedSet)));
-        })
-        .execute();
+            .timeout(30000)
+            .onSuccess([this](auto result) {
+                writeProviderEmotesCache("global", "ffz", result.getData());
+                auto parsedSet = parseGlobalEmotes(result.parseJson());
+                this->setEmotes(
+                    std::make_shared<EmoteMap>(std::move(parsedSet)));
+            })
+            .onError([](auto result) {
+                qCWarning(chatterinoFfzemotes)
+                    << "Failed to fetch global FFZ emotes. "
+                    << result.formatError();
+            })
+            .execute();
+    });
 }
 
 void FfzEmotes::setEmotes(std::shared_ptr<const EmoteMap> emotes)
@@ -260,7 +277,7 @@ void FfzEmotes::loadChannel(
     std::function<void(std::optional<EmotePtr>)> modBadgeCallback,
     std::function<void(std::optional<EmotePtr>)> vipBadgeCallback,
     std::function<void(FfzChannelBadgeMap &&)> channelBadgesCallback,
-    bool manualRefresh)
+    bool manualRefresh, bool cacheHit)
 {
     qCDebug(LOG) << "Reload FFZ Channel Emotes for channel" << channelID;
 
@@ -271,7 +288,8 @@ void FfzEmotes::loadChannel(
                     modBadgeCallback = std::move(modBadgeCallback),
                     vipBadgeCallback = std::move(vipBadgeCallback),
                     channelBadgesCallback = std::move(channelBadgesCallback),
-                    channel, manualRefresh](const auto &result) {
+                    channel, channelID, manualRefresh](const auto &result) {
+            writeProviderEmotesCache(channelID, "ffz", result.getData());
             const auto json = result.parseJson();
 
             auto emoteMap = parseChannelEmotes(json);
