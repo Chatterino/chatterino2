@@ -1549,9 +1549,43 @@ void ChannelView::paintEvent(QPaintEvent *event)
     if (this->paused())
     {
         auto a = this->scale() * 20;
-        auto brush = QBrush(QColor(127, 127, 127, 255));
-        painter.fillRect(QRectF(5, a / 4, a / 4, a), brush);
-        painter.fillRect(QRectF(15, a / 4, a / 4, a), brush);
+        auto color = QColor(127, 127, 127, 255);
+        auto brush = QBrush(color);
+
+        const auto widgetHeight = this->height();
+        const auto pausedY = widgetHeight - a - 5;
+        auto pausedX = 5;
+
+        painter.setPen(Qt::black);
+        painter.fillRect(QRectF(pausedX, pausedY, a / 4, a), brush);
+        painter.drawRect(QRectF(pausedX, pausedY, a / 4, a));
+
+        pausedX *= 3;
+        painter.fillRect(QRectF(pausedX, pausedY, a / 4, a), brush);
+        painter.drawRect(QRectF(pausedX, pausedY, a / 4, a));
+
+        QFont font = painter.font();
+        font.setPixelSize(a);
+        painter.setFont(font);
+
+        const QString text = "Chat Paused";
+        const QFontMetrics metrics(font);
+        const auto textWidth = metrics.horizontalAdvance(text);
+        const auto textX = pausedX + 10;
+
+        for (int dx = -1; dx <= 1; ++dx)
+        {
+            for (int dy = -1; dy <= 1; ++dy)
+            {
+                if (dx != 0 || dy != 0)
+                {
+                    painter.drawText(QRectF(textX + dx, pausedY + dy, textWidth, a), Qt::AlignLeft | Qt::AlignVCenter, text);
+                }
+            }
+        }
+
+        painter.setPen(color);
+        painter.drawText(QRectF(textX, pausedY, textWidth, a), Qt::AlignLeft | Qt::AlignVCenter, text);
     }
 }
 
