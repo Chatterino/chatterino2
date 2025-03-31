@@ -35,7 +35,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -339,6 +339,7 @@
             "searchText": "nerixyz  nerixyz: PogChamp replace Kappa &baz1[ooo+123] Keepo &baz2[1+\\2] &baz3[1+\\42] &bi1 &biii1 &baz4[i+420+i] &baz1[oo+123]&baz1[o+2] { Kappa } woah-> MyCoolTwitchEmote ",
             "serverReceivedTime": "2024-09-21T13:35:14Z",
             "timeoutUser": "",
+            "userID": "129546453",
             "usernameColor": "#ffff0000"
         }
     ],

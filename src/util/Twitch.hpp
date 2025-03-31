@@ -16,6 +16,9 @@ void stripUserName(QString &userName);
 // stripChannelName removes any @ prefix or , suffix to make it more suitable for command use
 void stripChannelName(QString &channelName);
 
+/// Strips a leading `#` and lowercases the name
+QString cleanChannelName(const QString &dirtyChannelName);
+
 using ParsedUserName = QString;
 using ParsedUserID = QString;
 

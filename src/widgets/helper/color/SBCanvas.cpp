@@ -186,7 +186,7 @@ void SBCanvas::emitUpdatedColor()
 {
     this->color_.setHsv(this->hue_, this->saturation_, this->brightness_,
                         this->color_.alpha());
-    emit this->colorChanged(this->color_);
+    this->colorChanged(this->color_);
 }
 
 }  // namespace chatterino

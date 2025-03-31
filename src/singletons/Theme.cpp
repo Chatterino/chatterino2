@@ -555,6 +555,29 @@ void Theme::parseFrom(const QJsonObject &root, bool isCustomTheme)
         this->buttons.copy = getResources().buttons.copyLight;
         this->buttons.pin = getResources().buttons.pinDisabledLight;
     }
+
+    // This assumes that we never update the application palette
+    auto palette = QApplication::palette();
+
+    if (this->isLightTheme())
+    {
+        palette.setColor(QPalette::Window, this->window.background);
+        palette.setColor(QPalette::Base, {0xe9, 0xe9, 0xe9});
+        palette.setColor(QPalette::AlternateBase, {0xe0, 0xe0, 0xe0});
+        palette.setColor(QPalette::Button, {0xd9, 0xd9, 0xd9});
+        palette.setColor(QPalette::Text, this->window.text);
+        palette.setColor(QPalette::WindowText, this->window.text);
+        palette.setColor(QPalette::ButtonText, this->window.text);
+        palette.setColor(QPalette::BrightText, Qt::red);
+        palette.setColor(QPalette::ToolTipBase, Qt::white);
+        palette.setColor(QPalette::ToolTipText, Qt::black);
+        palette.setColor(QPalette::Link, Qt::blue);
+        palette.setColor(QPalette::LinkVisited, Qt::magenta);
+        palette.setColor(QPalette::Highlight, {42, 130, 218});
+        palette.setColor(QPalette::HighlightedText, Qt::white);
+        palette.setColor(QPalette::PlaceholderText, {0x90, 0x90, 0x90});
+    }
+    this->palette = palette;
 }
 
 bool Theme::isAutoReloading() const

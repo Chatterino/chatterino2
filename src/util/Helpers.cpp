@@ -5,12 +5,14 @@
 #include "providers/twitch/TwitchCommon.hpp"
 #include "singletons/Paths.hpp"
 
+#include <QDateTime>
 #include <QDirIterator>
 #include <qjsonobject.h>
 #include <QLocale>
 #include <qloggingcategory.h>
 #include <QRegularExpression>
 #include <qtconcurrentrun.h>
+#include <QTimeZone>
 #include <QUuid>
 
 #include <functional>
@@ -364,6 +366,76 @@ bool readProviderEmotesCache(const QString &id, const QString &provider,
 
     // If the API call fails, we need to know if loading cached emotes was successful
     return false;
+}
+
+QDateTime chronoToQDateTime(std::chrono::system_clock::time_point time)
+{
+    auto msSinceEpoch =
+        std::chrono::time_point_cast<std::chrono::milliseconds>(time)
+            .time_since_epoch();
+    auto dt = QDateTime::fromMSecsSinceEpoch(msSinceEpoch.count());
+
+#if CHATTERINO_WITH_TESTS
+    if (getApp()->isTest())
+    {
+        dt = dt.toUTC();
+    }
+#endif
+
+    return dt;
+}
+
+QStringView codepointSlice(QStringView str, qsizetype begin, qsizetype end)
+{
+    if (end <= begin || begin < 0)
+    {
+        return {};
+    }
+
+    qsizetype n = 0;
+    const QChar *pos = str.begin();
+    const QChar *endPos = str.end();
+
+    const QChar *sliceBegin = nullptr;
+    while (n < end)
+    {
+        if (pos >= endPos)
+        {
+            return {};
+        }
+        if (n == begin)
+        {
+            sliceBegin = pos;
+        }
+
+        QChar cur = *pos++;
+        if (cur.isHighSurrogate() && pos < endPos && pos->isLowSurrogate())
+        {
+            pos++;
+        }
+        n++;
+    }
+    assert(pos <= endPos);
+
+    return {sliceBegin, pos};
+}
+
+void removeFirstQS(QString &str)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    str.removeFirst();
+#else
+    str.remove(0, 1);
+#endif
+}
+
+void removeLastQS(QString &str)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    str.removeLast();
+#else
+    str.chop(1);
+#endif
 }
 
 }  // namespace chatterino

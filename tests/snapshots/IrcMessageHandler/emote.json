@@ -34,7 +34,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -153,6 +153,7 @@
             "searchText": "mm2pl  mm2pl: Keepo ",
             "serverReceivedTime": "2022-09-03T10:31:35Z",
             "timeoutUser": "",
+            "userID": "117691339",
             "usernameColor": "#ffdaa521"
         }
     ]

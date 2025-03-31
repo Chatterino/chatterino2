@@ -46,9 +46,20 @@ NotificationPage::NotificationPage()
                 settings.append(this->createCheckBox(
                     "Suppress live notifications on startup",
                     getSettings()->suppressInitialLiveNotification));
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN) || defined(CHATTERINO_WITH_LIBNOTIFY)
                 settings.append(this->createCheckBox(
                     "Show notification", getSettings()->notificationToast));
+#endif
+#ifdef Q_OS_WIN
+                settings.append(this->createCheckBox(
+                    "Create start menu shortcut (requires "
+                    "restart)",
+                    getSettings()->createShortcutForToasts,
+                    "When enabled, a shortcut will be created inside your "
+                    "start menu folder if needed by live notifications."
+                    "\n(On portable mode, this is disabled by "
+                    "default)"));
+
                 auto openIn = settings.emplace<QHBoxLayout>().withoutMargin();
                 {
                     openIn
@@ -126,7 +137,8 @@ QComboBox *NotificationPage::createToastReactionComboBox()
 {
     QComboBox *toastReactionOptions = new QComboBox();
 
-    for (int i = 0; i <= static_cast<int>(ToastReaction::DontOpen); i++)
+    for (int i = 0; i <= static_cast<int>(ToastReaction::OpenInCustomPlayer);
+         i++)
     {
         toastReactionOptions->insertItem(
             i, Toasts::findStringFromReaction(static_cast<ToastReaction>(i)));

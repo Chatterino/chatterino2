@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/bench">
+        <file>messages.ndjson</file>
+    </qresource>
+</RCC>

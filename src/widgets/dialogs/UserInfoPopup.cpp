@@ -499,10 +499,20 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
                 TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(
                     this->underlyingChannel_.get());
 
-                bool hasModRights =
-                    twitchChannel ? twitchChannel->hasModRights() : false;
-                lineMod->setVisible(hasModRights);
-                timeout->setVisible(hasModRights);
+                bool visible = false;
+                if (twitchChannel)
+                {
+                    bool isMyself =
+                        getApp()
+                            ->getAccounts()
+                            ->twitch.getCurrent()
+                            ->getUserName()
+                            .compare(this->userName_, Qt::CaseInsensitive) == 0;
+                    bool hasModRights = twitchChannel->hasModRights();
+                    visible = hasModRights && !isMyself;
+                }
+                lineMod->setVisible(visible);
+                timeout->setVisible(visible);
             });
 
         // We can safely ignore this signal connection since we own the button, and
@@ -924,9 +934,9 @@ void UserInfoPopup::updateUserData()
         // get ignoreHighlights state
         bool isIgnoringHighlights = false;
         const auto &vector = getSettings()->blacklistedUsers.raw();
-        for (const auto &user : vector)
+        for (const auto &blockedUser : vector)
         {
-            if (this->userName_ == user.getPattern())
+            if (this->userName_ == blockedUser.getPattern())
             {
                 isIgnoringHighlights = true;
                 break;
@@ -945,44 +955,50 @@ void UserInfoPopup::updateUserData()
         this->ui_.block->setEnabled(true);
         this->ui_.ignoreHighlights->setChecked(isIgnoringHighlights);
 
-        // get followage and subage
-        getIvr()->getSubage(
-            this->userName_, this->underlyingChannel_->getName(),
-            [this, hack](const IvrSubage &subageInfo) {
-                if (!hack.lock())
-                {
-                    return;
-                }
+        auto type = this->underlyingChannel_->getType();
 
-                if (!subageInfo.followingSince.isEmpty())
-                {
-                    QDateTime followedAt = QDateTime::fromString(
-                        subageInfo.followingSince, Qt::ISODate);
-                    QString followingSince = followedAt.toString("yyyy-MM-dd");
-                    this->ui_.followageLabel->setText("❤ Following since " +
-                                                      followingSince);
-                }
+        if (type == Channel::Type::Twitch)
+        {
+            // get followage and subage
+            getIvr()->getSubage(
+                this->userName_, this->underlyingChannel_->getName(),
+                [this, hack](const IvrSubage &subageInfo) {
+                    if (!hack.lock())
+                    {
+                        return;
+                    }
 
-                if (subageInfo.isSubHidden)
-                {
-                    this->ui_.subageLabel->setText(
-                        "Subscription status hidden");
-                }
-                else if (subageInfo.isSubbed)
-                {
-                    this->ui_.subageLabel->setText(
-                        QString("★ Tier %1 - Subscribed for %2 months")
-                            .arg(subageInfo.subTier)
-                            .arg(subageInfo.totalSubMonths));
-                }
-                else if (subageInfo.totalSubMonths)
-                {
-                    this->ui_.subageLabel->setText(
-                        QString("★ Previously subscribed for %1 months")
-                            .arg(subageInfo.totalSubMonths));
-                }
-            },
-            [] {});
+                    if (!subageInfo.followingSince.isEmpty())
+                    {
+                        QDateTime followedAt = QDateTime::fromString(
+                            subageInfo.followingSince, Qt::ISODate);
+                        QString followingSince =
+                            followedAt.toString("yyyy-MM-dd");
+                        this->ui_.followageLabel->setText("❤ Following since " +
+                                                          followingSince);
+                    }
+
+                    if (subageInfo.isSubHidden)
+                    {
+                        this->ui_.subageLabel->setText(
+                            "Subscription status hidden");
+                    }
+                    else if (subageInfo.isSubbed)
+                    {
+                        this->ui_.subageLabel->setText(
+                            QString("★ Tier %1 - Subscribed for %2 months")
+                                .arg(subageInfo.subTier)
+                                .arg(subageInfo.totalSubMonths));
+                    }
+                    else if (subageInfo.totalSubMonths)
+                    {
+                        this->ui_.subageLabel->setText(
+                            QString("★ Previously subscribed for %1 months")
+                                .arg(subageInfo.totalSubMonths));
+                    }
+                },
+                [] {});
+        }
 
         // get pronouns
         if (getSettings()->showPronouns)
@@ -1035,6 +1051,11 @@ void UserInfoPopup::updateUserData()
 
     this->ui_.block->setEnabled(false);
     this->ui_.ignoreHighlights->setEnabled(false);
+    bool isMyself =
+        getApp()->getAccounts()->twitch.getCurrent()->getUserName().compare(
+            this->userName_, Qt::CaseInsensitive) == 0;
+    this->ui_.block->setVisible(!isMyself);
+    this->ui_.ignoreHighlights->setVisible(!isMyself);
 }
 
 void UserInfoPopup::loadAvatar(const QUrl &url)

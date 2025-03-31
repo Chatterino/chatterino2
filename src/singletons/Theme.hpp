@@ -7,6 +7,7 @@
 #include <pajlada/settings/setting.hpp>
 #include <QColor>
 #include <QJsonObject>
+#include <QPalette>
 #include <QPixmap>
 #include <QString>
 #include <QTimer>
@@ -154,6 +155,8 @@ public:
         QPixmap copy;
         QPixmap pin;
     } buttons;
+
+    QPalette palette;
 
     void normalizeColor(QColor &color) const;
     void update();

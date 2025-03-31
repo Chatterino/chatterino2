@@ -24,6 +24,8 @@ enum class FontStyle : uint8_t {
     ChatLarge,
     ChatVeryLarge,
 
+    TimestampMedium,
+
     UiMedium,
     UiMediumBold,
     UiTabs,
@@ -63,18 +65,17 @@ private:
     struct ChatFontData {
         float scale;
         bool italic;
-        QFont::Weight weight;
     };
 
     struct UiFontData {
         float size;
         const char *name;
         bool italic;
-        QFont::Weight weight;
+        int weight;
     };
 
     FontData &getOrCreateFontData(FontStyle type, float scale);
-    FontData createFontData(FontStyle type, float scale);
+    static FontData createFontData(FontStyle type, float scale);
 
     std::vector<std::unordered_map<float, FontData>> fontsByType_;
 

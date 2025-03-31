@@ -34,7 +34,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -205,6 +205,7 @@
             "searchText": "slyckity  slyckity: Cheer100 ",
             "serverReceivedTime": "2019-09-07T02:44:33Z",
             "timeoutUser": "",
+            "userID": "143114011",
             "usernameColor": "#ff0000ff"
         }
     ]

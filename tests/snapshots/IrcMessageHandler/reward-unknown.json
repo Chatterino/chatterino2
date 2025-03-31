@@ -35,7 +35,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -109,7 +109,7 @@
                     "url": ""
                 }
             ],
-            "flags": "Collapsed",
+            "flags": "Collapsed|RedeemedChannelPointReward",
             "id": "4d409401-f692-4dd1-9295-f21350f86860",
             "localizedName": "",
             "loginName": "nerixyz",
@@ -117,6 +117,7 @@
             "searchText": "nerixyz  nerixyz: reward 2 ",
             "serverReceivedTime": "2024-09-18T12:36:01Z",
             "timeoutUser": "",
+            "userID": "129546453",
             "usernameColor": "#ffff0000"
         }
     ]
