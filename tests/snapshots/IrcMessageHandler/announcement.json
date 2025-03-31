@@ -37,7 +37,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "TimestampMedium",
+                        "style": "ChatMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -136,6 +136,19 @@
                         "test",
                         "lol"
                     ]
+                },
+                {
+                    "background": "#ffa0a0a4",
+                    "flags": "ReplyButton",
+                    "link": {
+                        "type": "ReplyToMessage",
+                        "value": "8c26e1ab-b50c-4d9d-bc11-3fd57a941d90"
+                    },
+                    "padding": 2,
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "CircularImageElement",
+                    "url": ""
                 }
             ],
             "flags": "Highlighted|Collapsed|Subscription",
@@ -147,7 +160,6 @@
             "searchText": "supinic  supinic: mm test lol ",
             "serverReceivedTime": "2022-03-31T21:30:19Z",
             "timeoutUser": "",
-            "userID": "31400525",
             "usernameColor": "#ffff0000"
         },
         {
@@ -167,7 +179,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "TimestampMedium",
+                        "style": "ChatMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -210,7 +222,6 @@
             "searchText": "Announcement",
             "serverReceivedTime": "",
             "timeoutUser": "",
-            "userID": "",
             "usernameColor": "#ff000000"
         }
     ]

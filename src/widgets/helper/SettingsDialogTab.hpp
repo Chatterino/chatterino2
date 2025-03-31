@@ -37,7 +37,7 @@ public:
 
     const QString &name() const;
 
-Q_SIGNALS:
+signals:
     void selectedChanged(bool);
 
 private:

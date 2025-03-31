@@ -35,7 +35,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "TimestampMedium",
+                        "style": "ChatMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -119,7 +119,6 @@
             "searchText": "nerixyz  nerixyz: something my-highlight * ",
             "serverReceivedTime": "2024-09-20T21:15:16Z",
             "timeoutUser": "",
-            "userID": "129546453",
             "usernameColor": "#ffff0000"
         }
     ],

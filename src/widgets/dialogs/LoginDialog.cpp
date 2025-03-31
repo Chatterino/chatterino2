@@ -6,7 +6,6 @@
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
-#include "singletons/Settings.hpp"
 #include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
 
@@ -69,7 +68,6 @@ namespace {
 
         getApp()->getAccounts()->twitch.reloadUsers();
         getApp()->getAccounts()->twitch.currentUsername = username;
-        getSettings()->requestSave();
         return true;
     }
 

@@ -195,18 +195,6 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
               },
               .argumentsPrompt = "Target popup:",
           }},
-         {"setHighlightSounds",
-          ActionDefinition{
-              .displayName = "Set highlight sounds",
-              .argumentDescription = "[on or off. default: toggle]",
-              .minCountArguments = 0,
-              .maxCountArguments = 1,
-              .possibleArguments = HOTKEY_ARG_ON_OFF_TOGGLE,
-              .argumentsPrompt = "New value:",
-              .argumentsPromptHover =
-                  "Should highlight sounds be enabled, disabled or toggled",
-          }},
-         {"openSubscriptionPage", ActionDefinition{"Open subscription page"}},
      }},
     {HotkeyCategory::SplitInput,
      {

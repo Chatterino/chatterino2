@@ -918,22 +918,6 @@ MentionElement::MentionElement(const QString &displayName, QString loginName_,
 {
 }
 
-template <typename>
-MentionElement::MentionElement(const QString &displayName, QString loginName_,
-                               MessageColor fallbackColor_, QColor userColor_)
-    : TextElement(displayName,
-                  {MessageElementFlag::Text, MessageElementFlag::Mention})
-    , fallbackColor(fallbackColor_)
-    , userColor(userColor_.isValid() ? userColor_ : fallbackColor_)
-    , userLoginName(std::move(loginName_))
-{
-}
-
-template MentionElement::MentionElement(const QString &displayName,
-                                        QString loginName_,
-                                        MessageColor fallbackColor_,
-                                        QColor userColor_);
-
 void MentionElement::addToContainer(MessageLayoutContainer &container,
                                     const MessageLayoutContext &ctx)
 {
@@ -1026,7 +1010,7 @@ TextElement *TimestampElement::formatTime(const QTime &time)
     QString format = locale.toString(time, getSettings()->timestampFormat);
 
     return new TextElement(format, MessageElementFlag::Timestamp,
-                           MessageColor::System, FontStyle::TimestampMedium);
+                           MessageColor::System, FontStyle::ChatMedium);
 }
 
 QJsonObject TimestampElement::toJson() const

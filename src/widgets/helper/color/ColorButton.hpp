@@ -16,7 +16,7 @@ public:
     QColor color() const;
 
     // NOLINTNEXTLINE(readability-redundant-access-specifiers)
-public Q_SLOTS:
+public slots:
     void setColor(const QColor &color);
 
 protected:

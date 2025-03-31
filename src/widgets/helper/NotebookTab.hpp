@@ -82,7 +82,7 @@ public:
     void moveAnimated(QPoint targetPos, bool animated = true);
 
     QRect getDesiredRect() const;
-    void tabSizeChanged();
+    void hideTabXChanged();
 
     void growWidth(int width);
     int normalTabWidth() const;

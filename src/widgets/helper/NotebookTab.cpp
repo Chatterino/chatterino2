@@ -54,30 +54,6 @@ namespace {
                 break;
         }
     }
-
-    float getCompactDivider(TabStyle tabStyle)
-    {
-        switch (tabStyle)
-        {
-            case TabStyle::Compact:
-                return 1.5;
-            case TabStyle::Normal:
-            default:
-                return 1.0;
-        }
-    }
-
-    float getCompactReducer(TabStyle tabStyle)
-    {
-        switch (tabStyle)
-        {
-            case TabStyle::Compact:
-                return 4.0;
-            case TabStyle::Normal:
-            default:
-                return 0.0;
-        }
-    }
 }  // namespace
 
 NotebookTab::NotebookTab(Notebook *notebook)
@@ -91,15 +67,8 @@ NotebookTab::NotebookTab(Notebook *notebook)
     this->positionChangedAnimation_.setEasingCurve(
         QEasingCurve(QEasingCurve::InCubic));
 
-    getSettings()->showTabCloseButton.connect(
-        [this] {
-            this->tabSizeChanged();
-        },
-        this->managedConnections_);
-    getSettings()->tabStyle.connect(
-        [this] {
-            this->tabSizeChanged();
-        },
+    getSettings()->showTabCloseButton.connectSimple(
+        boost::bind(&NotebookTab::hideTabXChanged, this),
         this->managedConnections_);
     getSettings()->showTabLive.connect(
         [this](auto, auto) {
@@ -235,16 +204,13 @@ int NotebookTab::normalTabWidthForHeight(int height) const
     QFontMetrics metrics =
         getApp()->getFonts()->getFontMetrics(FontStyle::UiTabs, scale);
 
-    float compactDivider = getCompactDivider(getSettings()->tabStyle);
     if (this->hasXButton())
     {
-        width = (metrics.horizontalAdvance(this->getTitle()) +
-                 int(32 / compactDivider * scale));
+        width = (metrics.horizontalAdvance(this->getTitle()) + int(32 * scale));
     }
     else
     {
-        width = (metrics.horizontalAdvance(this->getTitle()) +
-                 int(16 / compactDivider * scale));
+        width = (metrics.horizontalAdvance(this->getTitle()) + int(16 * scale));
     }
 
     if (static_cast<float>(height) > 150 * scale)
@@ -642,7 +608,7 @@ QRect NotebookTab::getDesiredRect() const
     return QRect(this->positionAnimationDesiredPoint_, size());
 }
 
-void NotebookTab::tabSizeChanged()
+void NotebookTab::hideTabXChanged()
 {
     this->updateSize();
     this->update();
@@ -794,15 +760,12 @@ void NotebookTab::paintEvent(QPaintEvent *)
     // set the pen color
     painter.setPen(colors.text);
 
-    float compactDivider = getCompactDivider(getSettings()->tabStyle);
     // set area for text
-    int rectW =
-        (!getSettings()->showTabCloseButton ? 0
-                                            : int(16 * scale / compactDivider));
+    int rectW = (!getSettings()->showTabCloseButton ? 0 : int(16 * scale));
     QRect rect(0, 0, this->width() - rectW, height);
 
     // draw text
-    int offset = int(scale * 4 / compactDivider);
+    int offset = int(scale * 8);
     QRect textRect(offset, 0, this->width() - offset - offset, height);
     translateRectForLocation(textRect, this->tabLocation_,
                              this->selected_ ? -1 : -2);
@@ -1081,8 +1044,7 @@ QRect NotebookTab::getXRect() const
                                ? (size / 3)   // slightly off true center
                                : (size / 2);  // true center
 
-    float compactReducer = getCompactReducer(getSettings()->tabStyle);
-    QRect xRect(rect.right() - static_cast<int>((20 - compactReducer) * s),
+    QRect xRect(rect.right() - static_cast<int>(20 * s),
                 rect.center().y() - centerAdjustment, size, size);
 
     if (this->selected_)

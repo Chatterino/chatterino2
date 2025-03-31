@@ -14,7 +14,6 @@
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
 #include <QFile>
-#include <QScopeGuard>
 
 #include <limits>
 #include <memory>
@@ -193,10 +192,6 @@ MiniaudioBackend::MiniaudioBackend()
     });
 
     this->audioThread = std::make_unique<std::thread>([this] {
-        auto guard = qScopeGuard([&] {
-            this->stoppedFlag.set();
-        });
-
         this->ioContext.run();
     });
     renameThread(*this->audioThread, "C2Miniaudio");
@@ -223,20 +218,14 @@ MiniaudioBackend::~MiniaudioBackend()
         this->workGuard.reset();
     });
 
-    if (!this->audioThread->joinable())
-    {
-        qCWarning(chatterinoSound) << "Audio thread not joinable";
-        return;
-    }
-
-    if (this->stoppedFlag.waitFor(std::chrono::seconds{1}))
+    if (this->audioThread->joinable())
     {
         this->audioThread->join();
-        return;
     }
-
-    qCWarning(chatterinoSound) << "Audio thread did not stop within 1 second";
-    this->audioThread->detach();
+    else
+    {
+        qCWarning(chatterinoSound) << "Audio thread not joinable";
+    }
 }
 
 void MiniaudioBackend::play(const QUrl &sound)

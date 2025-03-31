@@ -15,10 +15,10 @@ public:
 
     int hue() const;
 
-Q_SIGNALS:
+signals:
     void colorChanged(QColor color) const;
 
-public Q_SLOTS:
+public slots:
     void setColor(QColor color);
 
 protected:

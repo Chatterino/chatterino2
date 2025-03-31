@@ -133,7 +133,7 @@ private:
     /**
      * @brief Opens Twitch channel stream in streamlink app (if stream is live and streamlink is installed)
      */
-    void openChannelInStreamlink(const QString channelName);
+    void openChannelInStreamlink(QString channelName);
     /**
      * @brief Opens Twitch channel chat in a new Chatterino tab
      */
@@ -177,7 +177,7 @@ private:
     pajlada::Signals::SignalHolder signalHolder_;
     std::vector<boost::signals2::scoped_connection> bSignals_;
 
-public Q_SLOTS:
+public slots:
     void addSibling();
     void deleteFromContainer();
     void changeChannel();

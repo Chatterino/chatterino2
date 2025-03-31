@@ -169,6 +169,8 @@ protected:
 
     std::shared_ptr<Channel> getCustomChannel(const QString &channelname);
 
+    QString cleanChannelName(const QString &dirtyChannelName);
+
 private:
     void onMessageSendRequested(const std::shared_ptr<TwitchChannel> &channel,
                                 const QString &message, bool &sent);

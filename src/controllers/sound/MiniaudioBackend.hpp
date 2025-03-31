@@ -1,7 +1,6 @@
 #pragma once
 
 #include "controllers/sound/ISoundController.hpp"
-#include "util/OnceFlag.hpp"
 #include "util/ThreadGuard.hpp"
 
 #include <boost/asio.hpp>
@@ -60,7 +59,6 @@ private:
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
         workGuard;
     std::unique_ptr<std::thread> audioThread;
-    OnceFlag stoppedFlag;
     boost::asio::steady_timer sleepTimer;
 
     bool initialized{false};

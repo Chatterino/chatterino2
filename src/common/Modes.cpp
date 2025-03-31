@@ -24,10 +24,6 @@ Modes::Modes()
         {
             this->isPortable = true;
         }
-        else if (line == "externally-packaged")
-        {
-            this->isExternallyPackaged = true;
-        }
     }
 }
 

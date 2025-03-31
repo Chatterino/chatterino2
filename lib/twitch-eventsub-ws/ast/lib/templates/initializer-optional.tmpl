@@ -1,5 +1,0 @@
-{%- if field.trivial -%}
-.{{field.name}} = {{field.name}},
-{%- else -%}
-.{{field.name}} = std::move({{field.name}}),
-{%- endif -%}

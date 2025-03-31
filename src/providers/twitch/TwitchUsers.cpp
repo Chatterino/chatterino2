@@ -82,7 +82,6 @@ std::shared_ptr<TwitchUser> TwitchUsersPrivate::makeUnresolved(const UserId &id)
                                     .id = id.string,
                                     .name = {},
                                     .displayName = {},
-                                    .profilePictureUrl = {},
                                 }))
                    .first->second;
     if (id.string.isEmpty())

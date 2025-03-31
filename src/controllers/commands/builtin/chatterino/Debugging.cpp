@@ -5,7 +5,6 @@
 #include "common/Env.hpp"
 #include "common/Literals.hpp"
 #include "controllers/commands/CommandContext.hpp"
-#include "controllers/notifications/NotificationController.hpp"
 #include "messages/Image.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -14,7 +13,6 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Theme.hpp"
-#include "singletons/Toasts.hpp"
 #include "util/PostToThread.hpp"
 
 #include <QApplication>
@@ -181,15 +179,6 @@ QString debugTest(const CommandContext &ctx)
                 "duration=1 :tmi.twitch.tv CLEARCHAT #testaccount_420 pajlada")
                 .arg(nowMillis);
         getApp()->getTwitch()->addFakeMessage(ircText);
-    }
-    else if (command == "desktop-notify")
-    {
-        auto title = ctx.twitchChannel->accessStreamStatus()->title;
-
-        getApp()->getToasts()->sendChannelNotification(
-            ctx.twitchChannel->getName(), title);
-        ctx.channel->addSystemMessage(
-            QString("debug-test sent desktop notification"));
     }
     else
     {

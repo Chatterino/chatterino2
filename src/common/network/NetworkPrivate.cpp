@@ -54,7 +54,7 @@ void loadUncached(std::shared_ptr<NetworkData> &&data)
     QObject::connect(&requester, &NetworkRequester::requestUrl, worker,
                      &NetworkTask::run);
 
-    requester.requestUrl();
+    emit requester.requestUrl();
 }
 
 void loadCached(std::shared_ptr<NetworkData> &&data)

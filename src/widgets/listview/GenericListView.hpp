@@ -26,7 +26,7 @@ public:
 
     void refreshTheme(const Theme &theme);
 
-Q_SIGNALS:
+signals:
     void closeRequested();
 
 private:

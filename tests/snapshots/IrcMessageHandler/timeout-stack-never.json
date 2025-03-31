@@ -18,7 +18,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "TimestampMedium",
+                        "style": "ChatMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -75,7 +75,7 @@
                     ]
                 }
             ],
-            "flags": "System|Timeout|DoNotTriggerNotification|ModerationAction",
+            "flags": "System|Timeout|DoNotTriggerNotification",
             "id": "",
             "localizedName": "",
             "loginName": "",
@@ -83,7 +83,6 @@
             "searchText": "twitchdev has been timed out for 10m. (3 times) ",
             "serverReceivedTime": "2025-01-15T19:22:47Z",
             "timeoutUser": "twitchdev",
-            "userID": "",
             "usernameColor": "#ff000000"
         },
         {
@@ -118,7 +117,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "TimestampMedium",
+                        "style": "ChatMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -199,7 +198,6 @@
             "searchText": "twitchdev  twitchdev: 1 ",
             "serverReceivedTime": "2025-01-15T19:22:45Z",
             "timeoutUser": "",
-            "userID": "141981764",
             "usernameColor": "#ffff0000"
         }
     ],

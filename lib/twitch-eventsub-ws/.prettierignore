@@ -1,5 +1,0 @@
-.pytest_cache/
-venv/
-build/
-
-compile_commands.json

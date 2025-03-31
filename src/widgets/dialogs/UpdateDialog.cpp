@@ -15,8 +15,6 @@ UpdateDialog::UpdateDialog()
     : BaseWindow({BaseWindow::Frameless, BaseWindow::TopMost,
                   BaseWindow::EnableCustomFrame, BaseWindow::DisableLayoutSave})
 {
-    this->windowDeactivateAction = WindowDeactivateAction::Delete;
-
     auto layout =
         LayoutCreator<UpdateDialog>(this).setLayoutType<QVBoxLayout>();
 

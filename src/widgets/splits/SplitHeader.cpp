@@ -537,68 +537,51 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                 h->getDisplaySequence(HotkeyCategory::Split, "openViewerList"));
         }
 
-        moreMenu->addAction("Subscribe", this->split_, &Split::openSubPage,
-                            h->getDisplaySequence(HotkeyCategory::Split,
-                                                  "openSubscriptionPage"));
+        moreMenu->addAction("Subscribe", this->split_, &Split::openSubPage);
 
+        auto *action = new QAction(this);
+        action->setText("Notify when live");
+        action->setCheckable(true);
+
+        auto notifySeq = h->getDisplaySequence(
+            HotkeyCategory::Split, "setChannelNotification", {{"toggle"}});
+        if (notifySeq.isEmpty())
         {
-            auto *action = new QAction(this);
-            action->setText("Notify when live");
-            action->setCheckable(true);
-
-            auto notifySeq = h->getDisplaySequence(
-                HotkeyCategory::Split, "setChannelNotification", {{"toggle"}});
-            if (notifySeq.isEmpty())
-            {
-                notifySeq = h->getDisplaySequence(HotkeyCategory::Split,
-                                                  "setChannelNotification",
-                                                  {std::vector<QString>()});
-                // this makes a full std::optional<> with an empty vector inside
-            }
-            action->setShortcut(notifySeq);
-
-            QObject::connect(
-                moreMenu, &QMenu::aboutToShow, this, [action, this]() {
-                    action->setChecked(
-                        getApp()->getNotifications()->isChannelNotified(
-                            this->split_->getChannel()->getName(),
-                            Platform::Twitch));
-                });
-            QObject::connect(action, &QAction::triggered, this, [this]() {
-                getApp()->getNotifications()->updateChannelNotification(
-                    this->split_->getChannel()->getName(), Platform::Twitch);
-            });
-
-            moreMenu->addAction(action);
+            notifySeq = h->getDisplaySequence(HotkeyCategory::Split,
+                                              "setChannelNotification",
+                                              {std::vector<QString>()});
+            // this makes a full std::optional<> with an empty vector inside
         }
+        action->setShortcut(notifySeq);
 
-        {
-            auto *action = new QAction(this);
-            action->setText("Mute highlight sounds");
-            action->setCheckable(true);
+        QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
+            action->setChecked(getApp()->getNotifications()->isChannelNotified(
+                this->split_->getChannel()->getName(), Platform::Twitch));
+        });
+        QObject::connect(action, &QAction::triggered, this, [this]() {
+            getApp()->getNotifications()->updateChannelNotification(
+                this->split_->getChannel()->getName(), Platform::Twitch);
+        });
 
-            auto notifySeq = h->getDisplaySequence(
-                HotkeyCategory::Split, "setHighlightSounds", {{"toggle"}});
-            if (notifySeq.isEmpty())
-            {
-                notifySeq = h->getDisplaySequence(HotkeyCategory::Split,
-                                                  "setHighlightSounds",
-                                                  {std::vector<QString>()});
-            }
-            action->setShortcut(notifySeq);
+        moreMenu->addAction(action);
+    }
 
-            QObject::connect(
-                moreMenu, &QMenu::aboutToShow, this, [action, this]() {
-                    action->setChecked(getSettings()->isMutedChannel(
-                        this->split_->getChannel()->getName()));
-                });
-            QObject::connect(action, &QAction::triggered, this, [this]() {
-                getSettings()->toggleMutedChannel(
-                    this->split_->getChannel()->getName());
-            });
+    if (twitchChannel)
+    {
+        auto *action = new QAction(this);
+        action->setText("Mute highlight sound");
+        action->setCheckable(true);
 
-            moreMenu->addAction(action);
-        }
+        QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
+            action->setChecked(getSettings()->isMutedChannel(
+                this->split_->getChannel()->getName()));
+        });
+        QObject::connect(action, &QAction::triggered, this, [this]() {
+            getSettings()->toggleMutedChannel(
+                this->split_->getChannel()->getName());
+        });
+
+        moreMenu->addAction(action);
     }
 
     moreMenu->addSeparator();

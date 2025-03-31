@@ -31,7 +31,7 @@ protected:
     void hideEvent(QHideEvent *) override;
     void showEvent(QShowEvent *) override;
 
-Q_SIGNALS:
+signals:
     void leftClicked();
 
 private:

@@ -49,9 +49,3 @@
 [submodule "lib/sol2"]
 	path = lib/sol2
 	url = https://github.com/ThePhD/sol2.git
-[submodule "lib/certify"]
-	path = lib/certify
-	url = https://github.com/Chatterino/certify
-[submodule "lib/twitch-eventsub-ws/lib/date"]
-	path = lib/twitch-eventsub-ws/lib/date
-	url = https://github.com/HowardHinnant/date.git

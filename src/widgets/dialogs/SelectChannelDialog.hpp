@@ -3,35 +3,13 @@
 #include "widgets/BaseWindow.hpp"
 
 #include <pajlada/signals/signal.hpp>
-#include <QFocusEvent>
 #include <QLabel>
 #include <QLineEdit>
 #include <QRadioButton>
 
-#include <optional>
-
-namespace chatterino::detail {
-
-/// a radio button that checks itself when it receives focus
-class AutoCheckedRadioButton : public QRadioButton
-{
-public:
-    AutoCheckedRadioButton(const QString &label)
-        : QRadioButton(label)
-    {
-    }
-
-protected:
-    void focusInEvent(QFocusEvent * /*event*/) override
-    {
-        this->setChecked(true);
-    }
-};
-
-}  // namespace chatterino::detail
-
 namespace chatterino {
 
+class Notebook;
 class EditableModelView;
 class IndirectChannel;
 class Channel;
@@ -42,16 +20,15 @@ class SelectChannelDialog final : public BaseWindow
 public:
     SelectChannelDialog(QWidget *parent = nullptr);
 
-    void setSelectedChannel(std::optional<IndirectChannel> channel_);
+    void setSelectedChannel(IndirectChannel selectedChannel_);
     IndirectChannel getSelectedChannel() const;
     bool hasSeletedChannel() const;
 
     pajlada::Signals::NoArgSignal closed;
 
 protected:
-    void closeEvent(QCloseEvent *event) override;
+    void closeEvent(QCloseEvent *) override;
     void themeChangedEvent() override;
-    void scaleChangedEvent(float newScale) override;
 
 private:
     class EventFilter : public QObject
@@ -64,25 +41,17 @@ private:
     };
 
     struct {
-        detail::AutoCheckedRadioButton *channel;
-        QLabel *channelLabel;
-        QLineEdit *channelName;
-
-        detail::AutoCheckedRadioButton *whispers;
-        QLabel *whispersLabel;
-
-        detail::AutoCheckedRadioButton *mentions;
-        QLabel *mentionsLabel;
-
-        detail::AutoCheckedRadioButton *watching;
-        QLabel *watchingLabel;
-
-        detail::AutoCheckedRadioButton *live;
-        QLabel *liveLabel;
-
-        detail::AutoCheckedRadioButton *automod;
-        QLabel *automodLabel;
-    } ui_{};
+        Notebook *notebook;
+        struct {
+            QRadioButton *channel;
+            QLineEdit *channelName;
+            QRadioButton *whispers;
+            QRadioButton *mentions;
+            QRadioButton *watching;
+            QRadioButton *live;
+            QRadioButton *automod;
+        } twitch;
+    } ui_;
 
     EventFilter tabFilter_;
 

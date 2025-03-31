@@ -3,7 +3,6 @@
 #include "Application.hpp"
 #include "common/FlagsEnum.hpp"
 #include "common/Literals.hpp"
-#include "common/QLogging.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
@@ -90,11 +89,8 @@ using namespace std::chrono_literals;
 
 OverlayWindow::OverlayWindow(IndirectChannel channel,
                              const QList<QUuid> &filterIDs)
-    : BaseWindow({
-          BaseWindow::Frameless,
-          BaseWindow::TopMost,
-          BaseWindow::DisableLayoutSave,
-      })
+    : QWidget(nullptr,
+              Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)
 #ifdef Q_OS_WIN
     , sizeAllCursor_(::LoadCursor(nullptr, IDC_SIZEALL))
 #endif
@@ -127,10 +123,9 @@ OverlayWindow::OverlayWindow(IndirectChannel channel,
     this->channelView_.setChannel(this->channel_.get());
     this->channelView_.setIsOverlay(true);  // use overlay colors
     this->channelView_.setAttribute(Qt::WA_TranslucentBackground);
-    this->signalHolder_.managedConnect(
-        this->channel_.getChannelChanged(), [this]() {
-            this->channelView_.setChannel(this->channel_.get());
-        });
+    this->holder_.managedConnect(this->channel_.getChannelChanged(), [this]() {
+        this->channelView_.setChannel(this->channel_.get());
+    });
     this->channelView_.scrollbar()->setHideThumb(true);
     this->channelView_.scrollbar()->setHideHighlights(true);
 
@@ -155,40 +150,24 @@ OverlayWindow::OverlayWindow(IndirectChannel channel,
             }
             this->applyTheme();
         },
-        this->signalHolder_);
+        this->holder_);
     settings->overlayBackgroundOpacity.connect(
         [this] {
             this->channelView_.updateColorTheme();
             this->update();
         },
-        this->signalHolder_, false);
+        this->holder_, false);
 
     auto applyIt = [this](auto /*unused*/) {
         this->applyTheme();
     };
-    settings->overlayShadowOffsetX.connect(applyIt, this->signalHolder_, false);
-    settings->overlayShadowOffsetY.connect(applyIt, this->signalHolder_, false);
-    settings->overlayShadowOpacity.connect(applyIt, this->signalHolder_, false);
-    settings->overlayShadowRadius.connect(applyIt, this->signalHolder_, false);
-    settings->overlayShadowColor.connect(applyIt, this->signalHolder_, false);
+    settings->overlayShadowOffsetX.connect(applyIt, this->holder_, false);
+    settings->overlayShadowOffsetY.connect(applyIt, this->holder_, false);
+    settings->overlayShadowOpacity.connect(applyIt, this->holder_, false);
+    settings->overlayShadowRadius.connect(applyIt, this->holder_, false);
+    settings->overlayShadowColor.connect(applyIt, this->holder_, false);
 
     this->addShortcuts();
-    this->signalHolder_.managedConnect(getApp()->getHotkeys()->onItemsUpdated,
-                                       [this]() {
-                                           this->clearShortcuts();
-                                           this->addShortcuts();
-                                       });
-
-    settings->overlayScaleFactor.connect(
-        [this] {
-            this->updateScale();
-        },
-        this->signalHolder_, false);
-    std::ignore = this->scaleChanged.connect([this](float /*scale*/) {
-        this->channelView_.queueLayout();
-    });
-    this->updateScale();
-
     this->triggerFirstActivation();
     getApp()->getEmotes()->getGIFTimer().registerOpenOverlayWindow();
 }
@@ -216,12 +195,6 @@ void OverlayWindow::applyTheme()
         this->dropShadow_->setBlurRadius(settings->overlayShadowRadius);
     }
     this->update();
-}
-
-float OverlayWindow::desiredScale() const
-{
-    return getSettings()->getClampedUiScale() *
-           getSettings()->getClampedOverlayScale();
 }
 
 bool OverlayWindow::eventFilter(QObject * /*object*/, QEvent *event)
@@ -350,8 +323,10 @@ bool OverlayWindow::nativeEvent(const QByteArray &eventType, void *message,
         break;
 
         default:
-            return BaseWindow::nativeEvent(eventType, message, result);
+            return QWidget::nativeEvent(eventType, message, result);
     }
+
+    QWidget::nativeEvent(eventType, message, result);
 
     return returnValue;
 }
@@ -489,68 +464,23 @@ void OverlayWindow::triggerFirstActivation()
 
 void OverlayWindow::addShortcuts()
 {
-    HotkeyController::HotkeyMap actions{
-        {"zoom",
-         [](const std::vector<QString> &arguments) -> QString {
-             if (arguments.size() == 0)
-             {
-                 qCWarning(chatterinoHotkeys)
-                     << "zoom shortcut called without arguments. Takes "
-                        "only "
-                        "one argument: \"in\", \"out\", or \"reset\"";
-                 return "zoom shortcut called without arguments. Takes "
-                        "only "
-                        "one argument: \"in\", \"out\", or \"reset\"";
-             }
-             auto change = 0.0F;
-             const auto &direction = arguments.at(0);
-             if (direction == "reset")
-             {
-                 getSettings()->uiScale.setValue(1);
-                 return "";
-             }
-
-             if (direction == u"in")
-             {
-                 change = 0.1F;
-             }
-             else if (direction == u"out")
-             {
-                 change = -0.1F;
-             }
-             else
-             {
-                 qCWarning(chatterinoHotkeys)
-                     << "Invalid zoom direction, use \"in\", \"out\", or "
-                        "\"reset\"";
-                 return "Invalid zoom direction, use \"in\", \"out\", or "
-                        "\"reset\"";
-             }
-             getSettings()->setClampedOverlayScale(
-                 getSettings()->getClampedOverlayScale() + change);
-             return {};
-         }},
-    };
-
-    this->shortcuts_ = getApp()->getHotkeys()->shortcutsForCategory(
-        HotkeyCategory::Window, actions, this);
-
     auto [seq, allOverlays] = toggleIntertiaShortcut();
-    if (!seq.isEmpty())
+    if (seq.isEmpty())
     {
-        auto *inertiaShortcut = new QShortcut(seq, this);
-        if (allOverlays)
-        {
-            QObject::connect(inertiaShortcut, &QShortcut::activated, this, [] {
-                getApp()->getWindows()->toggleAllOverlayInertia();
-            });
-        }
-        else
-        {
-            QObject::connect(inertiaShortcut, &QShortcut::activated, this,
-                             &OverlayWindow::toggleInertia);
-        }
-        this->shortcuts_.push_back(inertiaShortcut);
+        return;
+    }
+
+    auto *shortcut = new QShortcut(seq, this);
+    if (allOverlays)
+    {
+        QObject::connect(shortcut, &QShortcut::activated, this, [] {
+            getApp()->getWindows()->toggleAllOverlayInertia();
+        });
+    }
+    else
+    {
+        QObject::connect(shortcut, &QShortcut::activated, this,
+                         &OverlayWindow::toggleInertia);
     }
 }
 

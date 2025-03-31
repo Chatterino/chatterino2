@@ -13,11 +13,11 @@ public:
 
     QColor color() const;
 
-Q_SIGNALS:
+signals:
     void colorChanged(QColor color);
     void colorConfirmed(QColor color);
 
-public Q_SLOTS:
+public slots:
     void setColor(const QColor &color);
 
 private:

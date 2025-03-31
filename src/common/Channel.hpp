@@ -99,11 +99,13 @@ public:
     void replaceMessage(size_t index, const MessagePtr &replacement);
     void replaceMessage(size_t hint, const MessagePtr &message,
                         const MessagePtr &replacement);
-    void disableMessage(const QString &messageID);
+    void deleteMessage(QString messageID);
 
     /// Removes all messages from this channel and invokes #messagesCleared
     void clearMessages();
 
+    [[deprecated("Use findMessageByID instead")]] MessagePtr findMessage(
+        QString messageID);
     MessagePtr findMessageByID(QStringView messageID) final;
 
     bool hasMessages() const;
@@ -164,7 +166,7 @@ public:
     ChannelPtr get() const;
     void reset(ChannelPtr channel);
     pajlada::Signals::NoArgSignal &getChannelChanged();
-    Channel::Type getType() const;
+    Channel::Type getType();
 
 private:
     std::shared_ptr<Data> data_;

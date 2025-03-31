@@ -14,16 +14,13 @@ namespace chatterino {
 using namespace literals;
 
 AccountSwitchPopup::AccountSwitchPopup(QWidget *parent)
-    : BaseWindow(
-          {
-              BaseWindow::TopMost,
-              BaseWindow::Frameless,
-              BaseWindow::DisableLayoutSave,
-              BaseWindow::LinuxPopup,
-          },
-          parent)
+    : BaseWindow({BaseWindow::TopMost, BaseWindow::Frameless,
+                  BaseWindow::DisableLayoutSave},
+                 parent)
 {
-    this->focusOutAction = FocusOutAction::Hide;
+#ifdef Q_OS_LINUX
+    this->setWindowFlag(Qt::Popup);
+#endif
 
     this->setContentsMargins(0, 0, 0, 0);
 
@@ -93,6 +90,11 @@ void AccountSwitchPopup::themeChangedEvent()
 void AccountSwitchPopup::refresh()
 {
     this->ui_.accountSwitchWidget->refresh();
+}
+
+void AccountSwitchPopup::focusOutEvent(QFocusEvent *)
+{
+    this->hide();
 }
 
 void AccountSwitchPopup::paintEvent(QPaintEvent *)

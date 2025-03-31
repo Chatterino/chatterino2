@@ -24,8 +24,6 @@ namespace chatterino {
 class TwitchAccount;
 class AccountController;
 
-extern const std::vector<QStringView> AUTH_SCOPES;
-
 class TwitchAccountManager
 {
     TwitchAccountManager();

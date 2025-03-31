@@ -1,9 +1,10 @@
 #include "widgets/settingspages/GeneralPageView.hpp"
 
 #include "Application.hpp"
-#include "common/QLogging.hpp"
 #include "util/LayoutHelper.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
+#include "widgets/dialogs/ColorPickerDialog.hpp"
+#include "widgets/helper/color/ColorButton.hpp"
 #include "widgets/helper/Line.hpp"
 #include "widgets/settingspages/SettingWidget.hpp"
 
@@ -24,80 +25,36 @@ namespace chatterino {
 
 GeneralPageView::GeneralPageView(QWidget *parent)
     : QWidget(parent)
-    , contentScrollArea_(new QScrollArea)
-    , contentLayout_(new QVBoxLayout)
 {
-    auto *contentWidget = new QWidget;
-    contentWidget->setLayout(this->contentLayout_);
-    this->contentScrollArea_->setWidget(contentWidget);
-    this->contentScrollArea_->setObjectName("generalSettingsScrollContent");
-    this->contentScrollArea_->setWidgetResizable(true);
-}
-
-GeneralPageView *GeneralPageView::withoutNavigation(QWidget *parent)
-{
-    auto *view = new GeneralPageView(parent);
-
-    view->setLayout(makeLayout<QHBoxLayout>({
-        view->contentScrollArea_,
-    }));
-
-    return view;
-}
-
-GeneralPageView *GeneralPageView::withNavigation(QWidget *parent)
-{
-    auto *view = new GeneralPageView(parent);
+    auto *scrollArea = this->contentScrollArea_ =
+        makeScrollArea(this->contentLayout_ = new QVBoxLayout);
+    scrollArea->setObjectName("generalSettingsScrollContent");
 
     auto *navigation =
-        wrapLayout(view->navigationLayout_ = makeLayout<QVBoxLayout>({}));
+        wrapLayout(this->navigationLayout_ = makeLayout<QVBoxLayout>({}));
     navigation->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Minimum);
-    view->navigationLayout_->setAlignment(Qt::AlignTop);
-    view->navigationLayout_->addSpacing(6);
+    this->navigationLayout_->setAlignment(Qt::AlignTop);
+    this->navigationLayout_->addSpacing(6);
 
-    view->setLayout(makeLayout<QHBoxLayout>({
-        view->contentScrollArea_,
-        new QSpacerItem(16, 1),
-        navigation,
-    }));
+    this->setLayout(makeLayout<QHBoxLayout>(
+        {scrollArea, new QSpacerItem(16, 1), navigation}));
 
-    QObject::connect(view->contentScrollArea_->verticalScrollBar(),
-                     &QScrollBar::valueChanged, view, [view] {
-                         view->updateNavigationHighlighting();
+    QObject::connect(scrollArea->verticalScrollBar(), &QScrollBar::valueChanged,
+                     this, [this] {
+                         this->updateNavigationHighlighting();
                      });
-
-    return view;
 }
 
-void GeneralPageView::addWidget(QWidget *widget, const QStringList &keywords)
+void GeneralPageView::addWidget(QWidget *widget, QStringList keywords)
 {
     this->contentLayout_->addWidget(widget);
-    if (!this->groups_.empty())
+    if (!keywords.isEmpty())
     {
         this->groups_.back().widgets.push_back({
             .element = widget,
             .keywords = keywords,
         });
     }
-}
-
-void GeneralPageView::registerWidget(QWidget *widget,
-                                     const QStringList &keywords,
-                                     QWidget *parentElement)
-{
-    if (!this->groups_.empty())
-    {
-        this->groups_.back().widgets.push_back({
-            .element = widget,
-            .keywords = keywords,
-            .parentElement = parentElement,
-        });
-    }
-}
-
-void GeneralPageView::pushWidget(QWidget *widget)
-{
-    this->contentLayout_->addWidget(widget);
 }
 
 void GeneralPageView::addLayout(QLayout *layout)
@@ -122,21 +79,14 @@ TitleLabel *GeneralPageView::addTitle(const QString &title)
     auto *label = new TitleLabel(title + ":");
     this->addWidget(label);
 
-    NavigationLabel *navLabel = nullptr;
-
     // navigation item
-    if (this->navigationLayout_ != nullptr)
-    {
-        navLabel = new NavigationLabel(title);
-        navLabel->setCursor(Qt::PointingHandCursor);
-        this->navigationLayout_->addWidget(navLabel);
+    auto *navLabel = new NavigationLabel(title);
+    navLabel->setCursor(Qt::PointingHandCursor);
+    this->navigationLayout_->addWidget(navLabel);
 
-        QObject::connect(
-            navLabel, &NavigationLabel::leftMouseUp, label, [this, label] {
-                this->contentScrollArea_->verticalScrollBar()->setValue(
-                    label->y());
-            });
-    }
+    QObject::connect(navLabel, &NavigationLabel::leftMouseUp, label, [=, this] {
+        this->contentScrollArea_->verticalScrollBar()->setValue(label->y());
+    });
 
     // groups
     this->groups_.push_back(Group{title, label, navLabel, nullptr, {}});
@@ -163,12 +113,6 @@ QCheckBox *GeneralPageView::addCheckbox(const QString &text,
                                         BoolSetting &setting, bool inverse,
                                         QString toolTipText)
 {
-    if (inverse)
-    {
-        qCWarning(chatterinoWidget)
-            << "use SettingWidget::inverseCheckbox instead";
-    }
-
     auto *check = new QCheckBox(text);
     this->addToolTip(*check, toolTipText);
 
@@ -188,6 +132,28 @@ QCheckBox *GeneralPageView::addCheckbox(const QString &text,
     this->addWidget(check);
 
     // groups
+    this->groups_.back().widgets.push_back({check, {text}});
+
+    return check;
+}
+
+QCheckBox *GeneralPageView::addCustomCheckbox(const QString &text,
+                                              const std::function<bool()> &load,
+                                              std::function<void(bool)> save,
+                                              const QString &toolTipText)
+{
+    auto *check = new QCheckBox(text);
+    this->addToolTip(*check, toolTipText);
+
+    check->setChecked(load());
+
+    QObject::connect(check, &QCheckBox::toggled, this,
+                     [save = std::move(save)](bool state) {
+                         save(state);
+                     });
+
+    this->addWidget(check);
+
     this->groups_.back().widgets.push_back({check, {text}});
 
     return check;
@@ -245,6 +211,43 @@ ComboBox *GeneralPageView::addDropdown(
     return combo;
 }
 
+ColorButton *GeneralPageView::addColorButton(
+    const QString &text, const QColor &color,
+    pajlada::Settings::Setting<QString> &setting, QString toolTipText)
+{
+    auto *colorButton = new ColorButton(color);
+    auto *layout = new QHBoxLayout();
+    auto *label = new QLabel(text + ":");
+
+    layout->addWidget(label);
+    layout->addStretch(1);
+    layout->addWidget(colorButton);
+
+    this->addToolTip(*label, toolTipText);
+    this->addLayout(layout);
+
+    QObject::connect(
+        colorButton, &ColorButton::clicked, [this, &setting, colorButton]() {
+            auto *dialog = new ColorPickerDialog(QColor(setting), this);
+            // colorButton & setting are never deleted and the signal is deleted
+            // once the dialog is closed
+            QObject::connect(dialog, &ColorPickerDialog::colorConfirmed, this,
+                             [&setting, colorButton](auto selected) {
+                                 if (selected.isValid())
+                                 {
+                                     setting = selected.name(QColor::HexArgb);
+                                     colorButton->setColor(selected);
+                                 }
+                             });
+            dialog->show();
+        });
+
+    this->groups_.back().widgets.push_back({label, {text}});
+    this->groups_.back().widgets.push_back({colorButton, {text}});
+
+    return colorButton;
+}
+
 QSpinBox *GeneralPageView::addIntInput(const QString &text, IntSetting &setting,
                                        int min, int max, int step,
                                        QString toolTipText)
@@ -286,9 +289,6 @@ QSpinBox *GeneralPageView::addIntInput(const QString &text, IntSetting &setting,
 
 void GeneralPageView::addNavigationSpacing()
 {
-    assert(this->navigationLayout_ != nullptr &&
-           "addNavigationSpacing used without navigation");
-
     this->navigationLayout_->addSpacing(24);
 }
 
@@ -341,17 +341,10 @@ bool GeneralPageView::filterElements(const QString &query)
             for (auto &&widget : group.widgets)
             {
                 widget.element->show();
-                if (widget.parentElement != nullptr)
-                {
-                    widget.parentElement->show();
-                }
             }
 
             group.title->show();
-            if (group.navigationLink != nullptr)
-            {
-                group.navigationLink->show();
-            }
+            group.navigationLink->show();
             any = true;
         }
         // check if any match
@@ -390,19 +383,11 @@ bool GeneralPageView::filterElements(const QString &query)
                     {
                         currentSubtitleVisible = true;
                         widget.element->show();
-                        if (widget.parentElement != nullptr)
-                        {
-                            widget.parentElement->show();
-                        }
                         groupAny = true;
                         break;
                     }
 
                     widget.element->hide();
-                    if (widget.parentElement != nullptr)
-                    {
-                        widget.parentElement->hide();
-                    }
                 }
             }
 
@@ -417,10 +402,7 @@ bool GeneralPageView::filterElements(const QString &query)
             }
 
             group.title->setVisible(groupAny);
-            if (group.navigationLink != nullptr)
-            {
-                group.navigationLink->setVisible(groupAny);
-            }
+            group.navigationLink->setVisible(groupAny);
             any |= groupAny;
         }
     }
@@ -430,11 +412,6 @@ bool GeneralPageView::filterElements(const QString &query)
 
 void GeneralPageView::updateNavigationHighlighting()
 {
-    if (this->navigationLayout_ == nullptr)
-    {
-        return;
-    }
-
     auto scrollY = this->contentScrollArea_->verticalScrollBar()->value();
     auto first = true;
 

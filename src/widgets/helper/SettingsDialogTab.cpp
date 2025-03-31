@@ -36,7 +36,7 @@ void SettingsDialogTab::setSelected(bool _selected)
     //    height: <checkbox-size>px;
 
     this->selected_ = _selected;
-    selectedChanged(selected_);
+    emit selectedChanged(selected_);
 }
 
 SettingsPage *SettingsDialogTab::page()

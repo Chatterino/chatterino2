@@ -18,7 +18,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "TimestampMedium",
+                        "style": "ChatMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -120,7 +120,6 @@
             "searchText": "Lucidfoxx gifted 12 months of a Tier 1 sub to OGprodigy!",
             "serverReceivedTime": "",
             "timeoutUser": "",
-            "userID": "",
             "usernameColor": "#ff000000"
         }
     ]

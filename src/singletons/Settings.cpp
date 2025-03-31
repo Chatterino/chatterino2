@@ -109,10 +109,7 @@ std::optional<QString> Settings::matchNickname(const QString &usernameText)
 
 void Settings::mute(const QString &channelName)
 {
-    if (!this->isMutedChannel(channelName))
-    {
-        this->mutedChannels.append(channelName);
-    }
+    mutedChannels.append(channelName);
 }
 
 void Settings::unmute(const QString &channelName)
@@ -137,7 +134,7 @@ bool Settings::toggleMutedChannel(const QString &channelName)
     }
     else
     {
-        this->mutedChannels.append(channelName);
+        mute(channelName);
         return true;
     }
 }
@@ -286,16 +283,6 @@ float Settings::getClampedUiScale() const
 void Settings::setClampedUiScale(float value)
 {
     this->uiScale.setValue(std::clamp(value, 0.2F, 10.F));
-}
-
-float Settings::getClampedOverlayScale() const
-{
-    return std::clamp(this->overlayScaleFactor.getValue(), 0.2F, 10.F);
-}
-
-void Settings::setClampedOverlayScale(float value)
-{
-    this->overlayScaleFactor.setValue(std::clamp(value, 0.2F, 10.F));
 }
 
 Settings &Settings::instance()

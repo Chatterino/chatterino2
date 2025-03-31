@@ -26,7 +26,6 @@
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QFontDialog>
-#include <QFormLayout>
 #include <QLabel>
 #include <QScrollArea>
 
@@ -45,11 +44,6 @@ const QString META_KEY = u"Windows"_s;
 #else
 const QString META_KEY = u"Meta"_s;
 #endif
-
-const QStringList ZOOM_LEVELS = {
-    "0.5x", "0.6x", "0.7x", "0.8x",  "0.9x",  "Default", "1.2x", "1.4x",
-    "1.6x", "1.8x", "2x",   "2.33x", "2.66x", "3x",      "3.5x", "4x",
-};
 
 void addKeyboardModifierSetting(GeneralPageView &layout, const QString &title,
                                 EnumSetting<Qt::KeyboardModifier> &setting)
@@ -96,7 +90,7 @@ GeneralPage::GeneralPage()
 {
     auto *y = new QVBoxLayout;
     auto *x = new QHBoxLayout;
-    auto *view = GeneralPageView::withNavigation(this);
+    auto *view = new GeneralPageView;
     this->view_ = view;
     x->addWidget(view);
     auto *z = new QFrame;
@@ -189,18 +183,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             return fuzzyToInt(args.value, 10);
         });
-    layout.addDropdown<int>(
-        "Font weight",
-        {"100", "200", "300", "400", "500", "600", "700", "800", "900"},
-        s.chatFontWeight,
-        [](auto val) {
-            return QString::number(val);
-        },
-        [](auto args) {
-            return fuzzyToInt(args.value, 400);
-        });
     layout.addDropdown<float>(
-        "Zoom", ZOOM_LEVELS, s.uiScale,
+        "Zoom",
+        {"0.5x", "0.6x", "0.7x", "0.8x", "0.9x", "Default", "1.2x", "1.4x",
+         "1.6x", "1.8x", "2x", "2.33x", "2.66x", "3x", "3.5x", "4x"},
+        s.uiScale,
         [](auto val) {
             if (val == 1)
             {
@@ -279,8 +266,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         false, "Choose which tabs are visible in the notebook");
 
-    SettingWidget::dropdown("Tab style", s.tabStyle)->addTo(layout);
-
     SettingWidget::inverseCheckbox("Show message reply context",
                                    s.hideReplyContext)
         ->setTooltip(
@@ -288,9 +273,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             "reply to a message regardless of this setting.")
         ->addTo(layout);
 
-    SettingWidget::checkbox("Show message reply button", s.showReplyButton)
-        ->setTooltip("Show a reply button next to every chat message")
-        ->addTo(layout);
+    layout.addCheckbox("Show message reply button", s.showReplyButton, false,
+                       "Show a reply button next to every chat message");
 
     auto removeTabSeq = getApp()->getHotkeys()->getDisplaySequence(
         HotkeyCategory::Window, "removeTab");
@@ -323,13 +307,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                            .arg(settingsSeq.toString(
                                QKeySequence::SequenceFormat::NativeText));
         }
-
-        SettingWidget::inverseCheckbox("Show preferences button" + shortcut,
-                                       s.hidePreferencesButton)
-            ->addTo(layout);
-
-        SettingWidget::inverseCheckbox("Show user button", s.hideUserButton)
-            ->addTo(layout);
+        layout.addCheckbox("Show preferences button" + shortcut,
+                           s.hidePreferencesButton, true);
+        layout.addCheckbox("Show user button", s.hideUserButton, true);
     }
     layout.addCheckbox("Mark tabs with live channels", s.showTabLive, false,
                        "Shows a red dot in the top right corner of a tab to "
@@ -482,34 +462,24 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         false);
 
-    SettingWidget::checkbox("Hide scrollbar thumb", s.hideScrollbarThumb)
-        ->setTooltip("Hiding the scrollbar thumb (the handle you can drag) "
-                     "will disable all mouse interaction in the scrollbar.")
-        ->addKeywords({"scroll bar"})
-        ->addTo(layout);
+    layout.addCheckbox(
+        "Hide scrollbar thumb", s.hideScrollbarThumb, false,
+        "Hiding the scrollbar thumb (the handle you can drag) will disable "
+        "all mouse interaction in the scrollbar.");
 
-    SettingWidget::checkbox("Hide scrollbar highlights",
-                            s.hideScrollbarHighlights)
-        ->addKeywords({"scroll bar"})
-        ->addTo(layout);
+    layout.addCheckbox("Hide scrollbar highlights", s.hideScrollbarHighlights,
+                       false);
 
     layout.addTitle("Messages");
-
-    SettingWidget::checkbox("Separate with lines", s.separateMessages)
-        ->setTooltip(
-            "Adds a line between each message to help better tell them apart.")
-        ->addTo(layout);
-
-    SettingWidget::checkbox("Alternate background color", s.alternateMessages)
-        ->setTooltip("Slightly change the background behind every other "
-                     "message to help better tell them apart.")
-        ->addTo(layout);
-
-    SettingWidget::checkbox("Hide deleted messages", s.hideModerated)
-        ->setTooltip(
-            "When enabled, messages deleted by moderators will be hidden.")
-        ->addTo(layout);
-
+    layout.addCheckbox(
+        "Separate with lines", s.separateMessages, false,
+        "Adds a line between each message to help better tell them apart.");
+    layout.addCheckbox("Alternate background color", s.alternateMessages, false,
+                       "Slightly change the background behind every other "
+                       "message to help better tell them apart.");
+    layout.addCheckbox("Hide deleted messages", s.hideModerated, false,
+                       "When enabled, messages deleted by moderators will "
+                       "be hidden.");
     layout.addDropdown<QString>(
         "Timestamp format",
         {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
@@ -567,8 +537,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             }
         },
         false);
-
-    SettingWidget::colorButton("Line color", s.lastMessageColor)->addTo(layout);
+    layout.addColorButton("Line color",
+                          QColor(getSettings()->lastMessageColor.getValue()),
+                          getSettings()->lastMessageColor);
 
     layout.addTitle("Emotes");
     layout.addCheckbox("Enable", s.enableEmoteImages);
@@ -734,13 +705,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox(
         "Hide moderation actions", s.streamerModeHideModActions, false,
         "Hide bans, timeouts, and automod messages from appearing in chat.");
-
-    SettingWidget::checkbox("Hide messages from restricted users",
-                            s.streamerModeHideRestrictedUsers)
-        ->setTooltip("Restricted users can be marked by you, your moderators, "
-                     "or Twitch's AutoMod")
-        ->addTo(layout);
-
     layout.addCheckbox(
         "Hide blocked terms", s.streamerModeHideBlockedTermText, false,
         "Hide blocked terms from showing up in places like AutoMod messages. "
@@ -896,26 +860,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         s.attachExtensionToAnyProcess, false,
         "Attempt to force the Chatterino Browser Extension to work in certain "
         "browsers that do not work automatically.\ne.g. Librewolf");
-
-    {
-        auto *note = new QLabel(
-            "A semicolon-separated list of Chrome or Firefox extension IDs"
-            "allowed to interact with Chatterino's browser integration "
-            "(requires restart).\n"
-            "Using multiple extension IDs from different browsers may cause "
-            "issues.");
-        note->setWordWrap(true);
-        note->setStyleSheet("color: #bbb");
-
-        layout.addWidget(note);
-        auto *extraIDs = this->createLineEdit(s.additionalExtensionIDs);
-        extraIDs->setPlaceholderText("Extension;IDs;separated;by;semicolons");
-
-        auto form = new QFormLayout();
-        form->addRow("Extra extension IDs:", extraIDs);
-
-        layout.addLayout(form);
-    }
 #endif
 
     layout.addTitle("AppData & Cache");
@@ -1086,35 +1030,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addTo(layout);
 
     layout.addSubtitle("Overlay");
-    layout.addDropdown<float>(
-        "Zoom factor", ZOOM_LEVELS, s.overlayScaleFactor,
-        [](auto val) {
-            if (val == 1)
-            {
-                return u"Default"_s;
-            }
-            return QString::number(val) + 'x';
-        },
-        [](const auto &args) {
-            return fuzzyToFloat(args.value, 1.F);
-        },
-        true,
-        "The final scale of the messages in the overlay is computed by "
-        "multiplying this zoom factor with the global zoom level.");
-
-    SettingWidget::intInput("Background opacity (0-255)",
-                            s.overlayBackgroundOpacity,
-                            {
-                                .min = 0,
-                                .max = 255,
-                                .singleStep = 1,
-                            })
-        ->setTooltip(
-            "Controls the opacity of the (possibly alternating) background "
-            "behind messages. The color is set through the current theme. 255 "
-            "corresponds to a fully opaque background.")
-        ->addTo(layout);
-
+    layout.addIntInput(
+        "Background opacity (0-255)", s.overlayBackgroundOpacity, 0, 255, 1,
+        "Controls the opacity of the (possibly alternating) background behind "
+        "messages. The color is set through the current theme. 255 corresponds "
+        "to a fully opaque background.");
     layout.addCheckbox("Enable Shadow", s.enableOverlayShadow, false,
                        "Enables a drop shadow on the overlay. This will use "
                        "more processing power.");
@@ -1122,10 +1042,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        1,
                        "Controls the opacity of the added drop shadow. 255 "
                        "corresponds to a fully opaque shadow.");
-
-    SettingWidget::colorButton("Shadow color", s.overlayShadowColor)
-        ->addTo(layout);
-
+    layout.addColorButton("Shadow color",
+                          QColor(getSettings()->overlayShadowColor.getValue()),
+                          getSettings()->overlayShadowColor);
     layout
         .addIntInput("Shadow radius", s.overlayShadowRadius, 0, 40, 1,
                      "Controls how far the shadow is spread (the blur "
@@ -1152,14 +1071,15 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                            s.openLinksIncognito);
     }
 
-    SettingWidget::customCheckbox(
+    layout.addCustomCheckbox(
         "Restart on crash (requires restart)",
-        getApp()->getCrashHandler()->shouldRecover(),
+        [] {
+            return getApp()->getCrashHandler()->shouldRecover();
+        },
         [](bool on) {
-            getApp()->getCrashHandler()->saveShouldRecover(on);
-        })
-        ->setTooltip("When possible, restart Chatterino if the program crashes")
-        ->addTo(layout);
+            return getApp()->getCrashHandler()->saveShouldRecover(on);
+        },
+        "When possible, restart Chatterino if the program crashes");
 
 #if defined(Q_OS_LINUX) && !defined(NO_QTKEYCHAIN)
     if (!getApp()->getPaths().isPortable())
@@ -1170,18 +1090,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     }
 #endif
 
-    SettingWidget::inverseCheckbox("Show moderation messages",
-                                   s.hideModerationActions)
-        ->setTooltip(
-            "Show messages for timeouts, bans, and other moderator actions.")
-        ->addTo(layout);
-
-    SettingWidget::inverseCheckbox("Show deletions of single messages",
-                                   s.hideDeletionActions)
-        ->setTooltip("Show when a single message is deleted.\ne.g. A message "
-                     "from TreuKS was deleted: abc")
-        ->addTo(layout);
-
+    layout.addCheckbox(
+        "Show moderation messages", s.hideModerationActions, true,
+        "Show messages for timeouts, bans, and other moderator actions.");
+    layout.addCheckbox("Show deletions of single messages",
+                       s.hideDeletionActions, true,
+                       "Show when a single message is deleted.\ne.g. A message "
+                       "from TreuKS was deleted: abc");
     layout.addCheckbox(
         "Colorize users without color set (gray names)", s.colorizeNicknames,
         false,
@@ -1357,10 +1272,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->setTooltip("Change this only if you're noticing issues "
                      "with sound playback on your system")
         ->addTo(layout);
-
-    layout.addCheckbox(
-        "Enable experimental Twitch EventSub support (requires restart)",
-        s.enableExperimentalEventSub);
 
     layout.addStretch();
 

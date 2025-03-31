@@ -14,7 +14,6 @@
 #include "messages/search/SubstringPredicate.hpp"
 #include "messages/search/SubtierPredicate.hpp"
 #include "singletons/Settings.hpp"
-#include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/splits/Split.hpp"
@@ -81,8 +80,6 @@ SearchPopup::SearchPopup(QWidget *parent, Split *split)
     }
     this->resize(400, 600);
     this->addShortcuts();
-
-    this->themeChangedEvent();
 }
 
 void SearchPopup::addShortcuts()
@@ -213,13 +210,6 @@ bool SearchPopup::eventFilter(QObject *object, QEvent *event)
         }
     }
     return false;
-}
-
-void SearchPopup::themeChangedEvent()
-{
-    BasePopup::themeChangedEvent();
-
-    this->setPalette(getTheme()->palette);
 }
 
 void SearchPopup::search()

@@ -67,7 +67,7 @@ private:
 
     bool eventFilter(QObject *obj, QEvent *event) override;
 
-private Q_SLOTS:
+private slots:
     void insertCompletion(const QString &completion);
 };
 

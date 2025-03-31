@@ -57,9 +57,6 @@ class ITwitchUsers;
 namespace pronouns {
     class Pronouns;
 }  // namespace pronouns
-namespace eventsub {
-    class IController;
-}  // namespace eventsub
 
 class IApplication
 {
@@ -112,7 +109,6 @@ public:
     virtual IStreamerMode *getStreamerMode() = 0;
     virtual ITwitchUsers *getTwitchUsers() = 0;
     virtual pronouns::Pronouns *getPronouns() = 0;
-    virtual eventsub::IController *getEventSub() = 0;
 };
 
 class Application : public IApplication
@@ -151,7 +147,6 @@ private:
     const std::unique_ptr<Logging> logging;
     std::unique_ptr<Emotes> emotes;
     std::unique_ptr<AccountController> accounts;
-    std::unique_ptr<eventsub::IController> eventSub;
     std::unique_ptr<HotkeyController> hotkeys;
     std::unique_ptr<WindowManager> windows;
     std::unique_ptr<Toasts> toasts;
@@ -226,7 +221,6 @@ public:
     SeventvEmotes *getSeventvEmotes() override;
     SeventvEventAPI *getSeventvEventAPI() override;
     pronouns::Pronouns *getPronouns() override;
-    eventsub::IController *getEventSub() override;
 
     ILinkResolver *getLinkResolver() override;
     IStreamerMode *getStreamerMode() override;

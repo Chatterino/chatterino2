@@ -55,19 +55,11 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
         if (timeoutStackStyle == TimeoutStackStyle::DontStackBeyondUserMessage)
         {
             if (s->loginName == message->timeoutUser &&
-                s->flags.hasNone(
-                    {MessageFlag::Disabled, MessageFlag::ModerationAction}))
+                s->flags.hasNone({MessageFlag::Disabled, MessageFlag::Timeout,
+                                  MessageFlag::Untimeout}))
             {
                 break;
             }
-        }
-
-        bool newIsShared = message->flags.has(MessageFlag::SharedMessage);
-        bool oldIsShared = s->flags.has(MessageFlag::SharedMessage);
-        if (newIsShared != oldIsShared ||
-            (newIsShared && message->channelName != s->channelName))
-        {
-            continue;
         }
 
         if (s->flags.has(MessageFlag::Timeout) &&
@@ -91,12 +83,10 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
             uint32_t count = s->count + 1;
 
             MessageBuilder replacement(timeoutMessage, message->timeoutUser,
-                                       message->loginName, message->channelName,
-                                       message->searchText, count,
-                                       message->serverReceivedTime);
+                                       message->loginName, message->searchText,
+                                       count, message->serverReceivedTime);
 
             replacement->timeoutUser = message->timeoutUser;
-            replacement->channelName = message->channelName;
             replacement->count = count;
             replacement->flags = message->flags;
 
@@ -114,8 +104,8 @@ void addOrReplaceChannelTimeout(const Buf &buffer, MessagePtr message,
         {
             auto &s = buffer[i];
             if (s->loginName == message->timeoutUser &&
-                s->flags.hasNone(
-                    {MessageFlag::ModerationAction, MessageFlag::Whisper}))
+                s->flags.hasNone({MessageFlag::Timeout, MessageFlag::Untimeout,
+                                  MessageFlag::Whisper}))
             {
                 // FOURTF: disabled for now
                 // PAJLADA: Shitty solution described in Message.hpp

@@ -3,14 +3,17 @@
 #include <pajlada/settings/setting.hpp>
 #include <QString>
 
+#include <cstdint>
+
 namespace chatterino {
+
+enum class Platform : uint8_t;
 
 enum class ToastReaction {
     OpenInBrowser = 0,
     OpenInPlayer = 1,
     OpenInStreamlink = 2,
-    DontOpen = 3,
-    OpenInCustomPlayer = 4,
+    DontOpen = 3
 };
 
 class Toasts final
@@ -19,7 +22,7 @@ public:
     ~Toasts();
 
     void sendChannelNotification(const QString &channelName,
-                                 const QString &channelTitle);
+                                 const QString &channelTitle, Platform p);
     static QString findStringFromReaction(const ToastReaction &reaction);
     static QString findStringFromReaction(
         const pajlada::Settings::Setting<int> &reaction);
@@ -30,12 +33,7 @@ private:
 #ifdef Q_OS_WIN
     void ensureInitialized();
     void sendWindowsNotification(const QString &channelName,
-                                 const QString &channelTitle);
-
-    bool initialized_ = false;
-#elif defined(CHATTERINO_WITH_LIBNOTIFY)
-    void ensureInitialized();
-    void sendLibnotify(const QString &channelName, const QString &channelTitle);
+                                 const QString &channelTitle, Platform p);
 
     bool initialized_ = false;
 #endif

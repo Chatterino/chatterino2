@@ -22,9 +22,9 @@ enum class MessageSinkTrait : uint8_t {
     /// added to the global mentions channel when encountered.
     AddMentionsToGlobalChannel = 1 << 0,
 
-    /// A channel-point redemption whose reward is not yet known should be
-    /// queued in the corresponding TwitchChannel (`addQueuedRedemption`) and
-    /// the message should be replaced later.
+    /// A channel-point redemption whose reward is not yet known should not be
+    /// added to this sink, but queued in the corresponding TwitchChannel
+    /// (`addQueuedRedemption`).
     RequiresKnownChannelPointReward = 1 << 1,
 };
 using MessageSinkTraits = FlagsEnum<MessageSinkTrait>;

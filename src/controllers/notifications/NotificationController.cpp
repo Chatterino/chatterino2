@@ -122,8 +122,8 @@ void NotificationController::notifyTwitchChannelLive(
     {
         if (Toasts::isEnabled())
         {
-            getApp()->getToasts()->sendChannelNotification(payload.channelName,
-                                                           payload.title);
+            getApp()->getToasts()->sendChannelNotification(
+                payload.channelName, payload.title, Platform::Twitch);
         }
         if (getSettings()->notificationPlaySound)
         {

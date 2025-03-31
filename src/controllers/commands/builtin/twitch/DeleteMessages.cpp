@@ -2,10 +2,12 @@
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
+#include "common/network/NetworkResult.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandContext.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 
@@ -30,7 +32,58 @@ QString deleteMessages(TwitchChannel *twitchChannel, const QString &messageID)
         return "";
     }
 
-    twitchChannel->deleteMessagesAs(messageID, user.get());
+    getHelix()->deleteChatMessages(
+        twitchChannel->roomId(), user->getUserId(), messageID,
+        []() {
+            // Success handling, we do nothing: IRC/pubsub-edge will dispatch the correct
+            // events to update state for us.
+        },
+        [twitchChannel, messageID](auto error, auto message) {
+            QString errorMessage = QString("Failed to delete chat messages - ");
+
+            switch (error)
+            {
+                case HelixDeleteChatMessagesError::UserMissingScope: {
+                    errorMessage +=
+                        "Missing required scope. Re-login with your "
+                        "account and try again.";
+                }
+                break;
+
+                case HelixDeleteChatMessagesError::UserNotAuthorized: {
+                    errorMessage +=
+                        "you don't have permission to perform that action.";
+                }
+                break;
+
+                case HelixDeleteChatMessagesError::MessageUnavailable: {
+                    // Override default message prefix to match with IRC message format
+                    errorMessage =
+                        QString("The message %1 does not exist, was deleted, "
+                                "or is too old to be deleted.")
+                            .arg(messageID);
+                }
+                break;
+
+                case HelixDeleteChatMessagesError::UserNotAuthenticated: {
+                    errorMessage += "you need to re-authenticate.";
+                }
+                break;
+
+                case HelixDeleteChatMessagesError::Forwarded: {
+                    errorMessage += message;
+                }
+                break;
+
+                case HelixDeleteChatMessagesError::Unknown:
+                default: {
+                    errorMessage += "An unknown error has occurred.";
+                }
+                break;
+            }
+
+            twitchChannel->addSystemMessage(errorMessage);
+        });
 
     return "";
 }
@@ -89,7 +142,7 @@ QString deleteOneMessage(const CommandContext &ctx)
         return "";
     }
 
-    auto msg = ctx.channel->findMessageByID(messageID);
+    auto msg = ctx.channel->findMessage(messageID);
     if (msg != nullptr)
     {
         if (msg->loginName == ctx.channel->getName() &&

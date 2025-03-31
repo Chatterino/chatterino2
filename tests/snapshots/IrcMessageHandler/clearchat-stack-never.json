@@ -18,7 +18,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "TimestampMedium",
+                        "style": "ChatMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -59,7 +59,7 @@
                     ]
                 }
             ],
-            "flags": "System|DoNotTriggerNotification|ClearChat|ModerationAction",
+            "flags": "System|DoNotTriggerNotification|ClearChat",
             "id": "",
             "localizedName": "",
             "loginName": "",
@@ -67,7 +67,6 @@
             "searchText": "Chat has been cleared by a moderator. ",
             "serverReceivedTime": "2025-01-08T20:44:28Z",
             "timeoutUser": "",
-            "userID": "",
             "usernameColor": "#ff000000"
         }
     ],

@@ -15,7 +15,7 @@ public:
     explicit SignalLabel(QWidget *parent = nullptr, Qt::WindowFlags f = {});
     ~SignalLabel() override = default;
 
-Q_SIGNALS:
+signals:
     void mouseDoubleClick(QMouseEvent *ev);
 
     void leftMouseDown();

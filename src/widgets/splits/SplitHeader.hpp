@@ -102,7 +102,7 @@ private:
     pajlada::Signals::SignalHolder channelConnections_;
     std::vector<boost::signals2::scoped_connection> bSignals_;
 
-public Q_SLOTS:
+public slots:
     void reloadChannelEmotes();
     void reloadSubscriberEmotes();
     void reconnect();

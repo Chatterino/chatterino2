@@ -11,8 +11,8 @@
 - [ ] Updated version code in `.CI/chatterino-installer.iss`  
        This can only be "whole versions", so if you're releasing `2.4.0-beta` you'll need to condense it to `2.4.0`
 
-- [ ] Update the changelog `## Unversioned` section to the new version `CHANGELOG.md`  
-       Make sure to leave the `## Unversioned` line unchanged for easier merges
+- [ ] Update the changelog `## Unreleased` section to the new version `CHANGELOG.md`  
+       Make sure to leave the `## Unreleased` line unchanged for easier merges
 
 - [ ] Ensure all GitHub API credentials from the `chatterino-ci` user are still valid
 
@@ -21,11 +21,10 @@
 - [ ] Tag the release
 - [ ] Manually run the [create-installer](https://github.com/Chatterino/chatterino2/actions/workflows/create-installer.yml) workflow.  
        This is only necessary if the tag was created after the CI in the main branch finished.
-- [ ] **Stable release only** If the winget releaser action doesn't work as expected, you can run this manually using [Komac](https://github.com/russellbanks/Komac), replacing `v2.5.2` with the current release:  
+- [ ] If the winget releaser action doesn't work as expected, you can run this manually using [Komac](https://github.com/russellbanks/Komac), replacing `v2.5.2` with the current release:  
        `komac update ChatterinoTeam.Chatterino --version 2.5.2 --urls https://github.com/Chatterino/chatterino2/releases/download/v2.5.2/Chatterino.Installer.exe`
-- [ ] Ensure changelog on website is up-to-date
 
 ## After the binaries have been uploaded to fourtf's bucket
 
-- [ ] **Stable release only** Re-run the Publish Homebrew Cask on Release action
+- [ ] Re-run the Publish Homebrew Cask on Release action
 - [ ] Update links in the Chatterino website to point to the new release

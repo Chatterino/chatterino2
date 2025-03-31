@@ -76,20 +76,6 @@ void Button::setPixmap(const QPixmap &_pixmap)
     this->update();
 }
 
-void Button::setSvgResource(const QString &resourcePath)
-{
-    if (resourcePath == this->svgResourcePath)
-    {
-        // Same resource path as before - nothing changed
-        return;
-    }
-
-    this->svgRenderer = new QSvgRenderer(resourcePath, this);
-    this->svgResourcePath = resourcePath;
-
-    this->update();
-}
-
 const QPixmap &Button::getPixmap() const
 {
     return this->pixmap_;
@@ -190,29 +176,7 @@ void Button::paintButton(QPainter &painter)
 {
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    if (this->svgRenderer != nullptr)
-    {
-        painter.setOpacity(this->getCurrentDimAmount());
-
-        auto rect = this->rect();
-
-        if (this->enableMargin_)
-        {
-            auto s = this->getMargin();
-            auto outSize = rect.size() - QSize{2 * s, 2 * s};
-            outSize = this->svgRenderer->defaultSize().scaled(
-                outSize, Qt::KeepAspectRatio);
-            auto margin = rect.size() - outSize;
-
-            rect = QRect{
-                QPoint{margin.width() / 2, margin.height() / 2},
-                outSize,
-            };
-        }
-
-        this->svgRenderer->render(&painter, rect);
-    }
-    else if (!this->pixmap_.isNull())
+    if (!this->pixmap_.isNull())
     {
         painter.setOpacity(this->getCurrentDimAmount());
 
@@ -221,14 +185,14 @@ void Button::paintButton(QPainter &painter)
         resizePixmap(this->resizedPixmap_, this->pixmap_, rect.size(),
                      this->devicePixelRatio());
 
-        if (this->enableMargin_)
-        {
-            auto s = this->getMargin();
-            rect.moveLeft(s);
-            rect.setRight(rect.right() - s - s);
-            rect.moveTop(s);
-            rect.setBottom(rect.bottom() - s - s);
-        }
+        int margin = this->height() < 22 * this->scale() ? 3 : 6;
+
+        int s = this->enableMargin_ ? int(margin * this->scale()) : 0;
+
+        rect.moveLeft(s);
+        rect.setRight(rect.right() - s - s);
+        rect.moveTop(s);
+        rect.setBottom(rect.bottom() - s - s);
 
         painter.drawPixmap(rect, this->resizedPixmap_);
 
@@ -326,7 +290,7 @@ void Button::mousePressEvent(QMouseEvent *event)
 
     this->mouseDown_ = true;
 
-    this->leftMousePress();
+    emit this->leftMousePress();
 
     if (this->menu_ && !this->menuVisible_)
     {
@@ -353,13 +317,13 @@ void Button::mouseReleaseEvent(QMouseEvent *event)
 
         if (isInside)
         {
-            leftClicked();
+            emit leftClicked();
         }
     }
 
     if (isInside)
     {
-        clicked(event->button());
+        emit clicked(event->button());
     }
 }
 
@@ -457,15 +421,6 @@ void Button::showMenu()
 
     this->menu_->popup(point);
     this->menuVisible_ = true;
-}
-
-int Button::getMargin() const
-{
-    assert(this->enableMargin_);
-
-    int baseMargin = this->height() < 22 * this->scale() ? 3 : 6;
-
-    return static_cast<int>(baseMargin * this->scale());
 }
 
 }  // namespace chatterino

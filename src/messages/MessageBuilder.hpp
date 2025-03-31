@@ -107,9 +107,8 @@ public:
     MessageBuilder(SystemMessageTag, const QString &text,
                    const QTime &time = QTime::currentTime());
     MessageBuilder(TimeoutMessageTag, const QString &timeoutUser,
-                   const QString &sourceUser, const QString &channel,
-                   const QString &systemMessageText, uint32_t times,
-                   const QDateTime &time);
+                   const QString &sourceUser, const QString &systemMessageText,
+                   int times, const QDateTime &time);
     MessageBuilder(TimeoutMessageTag, const QString &username,
                    const QString &durationInSeconds, bool multipleTimes,
                    const QDateTime &time);
@@ -172,12 +171,6 @@ public:
 
     void appendOrEmplaceText(const QString &text, MessageColor color);
     void appendOrEmplaceSystemTextAndUpdate(const QString &text,
-                                            QString &toUpdate);
-
-    // Helper method that emplaces some text stylized as system text
-    // and then appends that text to the QString parameter "toUpdate".
-    // Returns the TextElement that was emplaced.
-    TextElement *emplaceSystemTextAndUpdate(const QString &text,
                                             QString &toUpdate);
 
     static void triggerHighlights(const Channel *channel,
@@ -270,8 +263,6 @@ public:
                                             const QVariantMap &tags,
                                             const QTime &time);
 
-    static MessagePtrMut makeMissingScopesMessage(const QString &missingScopes);
-
     /// "Chat has been cleared by a moderator." or "{actor} cleared the chat."
     /// @param actor The user who cleared the chat (empty if unknown)
     /// @param count How many times this message has been received already
@@ -295,6 +286,12 @@ private:
     bool isEmpty() const;
     MessageElement &back();
     std::unique_ptr<MessageElement> releaseBack();
+
+    // Helper method that emplaces some text stylized as system text
+    // and then appends that text to the QString parameter "toUpdate".
+    // Returns the TextElement that was emplaced.
+    TextElement *emplaceSystemTextAndUpdate(const QString &text,
+                                            QString &toUpdate);
 
     void parse();
     void parseUsernameColor(const QVariantMap &tags, const QString &userID);

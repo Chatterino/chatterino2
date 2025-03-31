@@ -18,7 +18,6 @@ void TwitchUser::update(const HelixUser &user) const
     assert(this->id == user.id);
     this->name = user.login;
     this->displayName = user.displayName;
-    this->profilePictureUrl = user.profileImageUrl;
 }
 
 }  // namespace chatterino

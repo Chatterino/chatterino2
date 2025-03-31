@@ -1,6 +1,5 @@
 #include "util/WindowsHelper.hpp"
 
-#include "Application.hpp"
 #include "common/Literals.hpp"
 
 #include <QApplication>
@@ -65,12 +64,6 @@ bool isRegisteredForStartup()
 
 void setRegisteredForStartup(bool isRegistered)
 {
-    auto *app = tryGetApp();
-    if (app && app->isTest())
-    {
-        return;
-    }
-
     QSettings settings(RUN_KEY, QSettings::NativeFormat);
 
     if (isRegistered)

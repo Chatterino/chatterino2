@@ -199,9 +199,10 @@ void openStreamlinkForChannel(const QString &channel)
 
     QString channelURL = "twitch.tv/" + channel;
 
-    auto preferredQuality = getSettings()->preferredQuality.getEnum();
+    QString preferredQuality = getSettings()->preferredQuality.getValue();
+    preferredQuality = preferredQuality.toLower();
 
-    if (preferredQuality == StreamLinkPreferredQuality::Choose)
+    if (preferredQuality == "choose")
     {
         getStreamQualities(channelURL, [=](QStringList qualityOptions) {
             QualityPopup::showDialog(channelURL, qualityOptions);
@@ -217,22 +218,22 @@ void openStreamlinkForChannel(const QString &channel)
     // Streamlink qualities to exclude
     QString exclude;
 
-    if (preferredQuality == StreamLinkPreferredQuality::High)
+    if (preferredQuality == "high")
     {
         exclude = ">720p30";
         quality = "high,best";
     }
-    else if (preferredQuality == StreamLinkPreferredQuality::Medium)
+    else if (preferredQuality == "medium")
     {
         exclude = ">540p30";
         quality = "medium,best";
     }
-    else if (preferredQuality == StreamLinkPreferredQuality::Low)
+    else if (preferredQuality == "low")
     {
         exclude = ">360p30";
         quality = "low,best";
     }
-    else if (preferredQuality == StreamLinkPreferredQuality::AudioOnly)
+    else if (preferredQuality == "audio only")
     {
         quality = "audio,audio_only";
     }

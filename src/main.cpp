@@ -15,18 +15,11 @@
 #include "util/AttachToConsole.hpp"
 #include "util/IpcQueue.hpp"
 
-#ifdef Q_OS_MACOS
-#    include "util/MacOsHelpers.h"
-#endif
-
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QMessageBox>
 #include <QSslSocket>
 #include <QStringList>
-#ifdef Q_OS_WIN
-#    include <shobjidl_core.h>
-#endif
 
 #include <memory>
 
@@ -39,9 +32,6 @@ int main(int argc, char **argv)
     QCoreApplication::setApplicationName("chatterino");
     QCoreApplication::setApplicationVersion(CHATTERINO_VERSION);
     QCoreApplication::setOrganizationDomain("chatterino.com");
-#ifdef Q_OS_WIN
-    SetCurrentProcessExplicitAppUserModelID(L"ChatterinoTeam.Chatterino");
-#endif
 
     std::unique_ptr<Paths> paths;
 
@@ -83,9 +73,6 @@ int main(int argc, char **argv)
     // run in gui mode or browser extension host mode
     if (args.shouldRunBrowserExtensionHost)
     {
-#ifdef Q_OS_MACOS
-        ::chatterinoSetMacOsActivationPolicyProhibited();
-#endif
         runBrowserExtensionHost();
     }
     else if (args.printVersion)

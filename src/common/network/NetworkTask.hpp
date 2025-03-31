@@ -29,7 +29,7 @@ public:
     NetworkTask &operator=(NetworkTask &&) = delete;
 
     // NOLINTNEXTLINE(readability-redundant-access-specifiers)
-public Q_SLOTS:
+public slots:
     void run();
 
 private:
@@ -43,7 +43,7 @@ private:
     QTimer *timer_{};         // parent: this
 
     // NOLINTNEXTLINE(readability-redundant-access-specifiers)
-private Q_SLOTS:
+private slots:
     void timeout();
     void finished();
 };

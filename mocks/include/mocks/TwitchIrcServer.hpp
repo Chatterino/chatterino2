@@ -9,7 +9,6 @@
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "util/Twitch.hpp"
 
 #include <unordered_map>
 
@@ -46,19 +45,8 @@ public:
 
     ChannelPtr getChannelOrEmpty(const QString &dirtyChannelName) override
     {
-        QString query = cleanChannelName(dirtyChannelName);
-
-        auto it = this->mockChannels.find(query);
-        if (it == this->mockChannels.end())
-        {
-            return Channel::getEmpty();
-        }
-        auto chan = it->second.lock();
-        if (!chan)
-        {
-            return Channel::getEmpty();
-        }
-        return chan;
+        assert(false && "unimplemented getChannelOrEmpty in mock irc server");
+        return {};
     }
 
     void addFakeMessage(const QString &data) override

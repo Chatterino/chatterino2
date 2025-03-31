@@ -129,9 +129,6 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "expected-lite",
                        "https://github.com/martinmoene/expected-lite",
                        ":/licenses/expected-lite.txt");
-            addLicense(form.getElement(), "Howard Hinnant's date.h",
-                       "https://github.com/HowardHinnant/date",
-                       ":/licenses/howard-hinnant-date.txt");
         }
 
         // Attributions

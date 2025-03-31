@@ -48,9 +48,8 @@ QuickSwitcherPopup::QuickSwitcherPopup(Window *parent)
     , switcherModel_(this)
     , window(parent)
 {
-    assert(this->windowFlags().testFlag(Qt::Dialog));
-
-    this->windowDeactivateAction = WindowDeactivateAction::Delete;
+    this->setWindowFlag(Qt::Dialog);
+    this->setActionOnFocusLoss(BaseWindow::ActionOnFocusLoss::Delete);
     this->setMinimumSize(QuickSwitcherPopup::MINIMUM_SIZE);
 
     this->initWidgets();

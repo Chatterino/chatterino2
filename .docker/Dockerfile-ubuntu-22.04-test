@@ -1,0 +1,24 @@
+FROM chatterino-ubuntu-22.04-base
+
+ADD . /src
+
+RUN mkdir /src/build
+
+# cmake
+RUN cd /src/build && \
+        CXXFLAGS=-fno-sized-deallocation cmake \
+        -DCMAKE_PREFIX_PATH=/opt/qt515/lib/cmake \
+        -DUSE_PRECOMPILED_HEADERS=OFF \
+        -DBUILD_WITH_QTKEYCHAIN=OFF \
+        -DBUILD_TESTS=ON \
+        ..
+
+# build
+RUN cd /src/build && \
+        make -j8
+
+ENV QT_QPA_PLATFORM=minimal
+ENV QT_PLUGIN_PATH=/opt/qt515/plugins
+
+# test
+CMD /src/build/bin/chatterino-test

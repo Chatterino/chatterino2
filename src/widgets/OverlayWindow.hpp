@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/Channel.hpp"
-#include "widgets/BaseWindow.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/OverlayInteraction.hpp"
 
@@ -18,7 +17,7 @@ class QGraphicsDropShadowEffect;
 
 namespace chatterino {
 
-class OverlayWindow : public BaseWindow
+class OverlayWindow : public QWidget
 {
     Q_OBJECT
 public:
@@ -53,12 +52,10 @@ protected:
                      NativeResult *result) override;
 #endif
 
-    void addShortcuts() override;
-
-    float desiredScale() const override;
-
 private:
     void triggerFirstActivation();
+
+    void addShortcuts();
 
     void startInteraction();
     void startShortInteraction();
@@ -73,6 +70,7 @@ private:
 #endif
 
     IndirectChannel channel_;
+    pajlada::Signals::SignalHolder holder_;
 
     ChannelView channelView_;
     QGraphicsDropShadowEffect *dropShadow_;

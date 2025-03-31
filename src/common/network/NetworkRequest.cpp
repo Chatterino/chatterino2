@@ -215,12 +215,4 @@ NetworkRequest NetworkRequest::json(const QByteArray &payload) &&
         .header("Accept", "application/json");
 }
 
-#ifndef NDEBUG
-NetworkRequest NetworkRequest::ignoreSslErrors(bool ignore) &&
-{
-    this->data->ignoreSslErrors = ignore;
-    return std::move(*this);
-}
-#endif
-
 }  // namespace chatterino

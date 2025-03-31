@@ -1,26 +1,12 @@
 #pragma once
 
 #include "common/Atomic.hpp"
-#include "util/Expected.hpp"
 
 #include <QString>
 #include <QThread>
 
 #include <optional>
 #include <vector>
-
-namespace chatterino::nm::detail {
-
-enum class WriteManifestError : std::uint8_t {
-    FailedToCreateDirectory,
-    FailedToCreateFile,
-};
-
-nonstd::expected<void, WriteManifestError> writeManifestTo(
-    QString directory, const QString &nmDirectory, const QString &filename,
-    const QJsonDocument &json);
-
-}  // namespace chatterino::nm::detail
 
 namespace chatterino {
 
@@ -73,7 +59,7 @@ private:
 
     void syncChannels(const QJsonArray &twitchChannels);
 
-    ReceiverThread *thread;
+    ReceiverThread thread;
 
     /// This vector contains all channels that are open the user's browser.
     /// These channels are joined to be able to switch channels more quickly.

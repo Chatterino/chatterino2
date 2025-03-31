@@ -18,7 +18,6 @@
 #include "providers/pronouns/Pronouns.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
 #include "providers/seventv/SeventvEmotes.hpp"
-#include "providers/twitch/eventsub/Controller.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "singletons/ImageUploader.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
@@ -121,18 +120,6 @@ SeventvEventAPI *makeSeventvEventAPI(Settings &settings)
     return nullptr;
 }
 
-eventsub::IController *makeEventSubController(Settings &settings)
-{
-    bool enabled = settings.enableExperimentalEventSub;
-
-    if (enabled)
-    {
-        return new eventsub::Controller();
-    }
-
-    return new eventsub::DummyController();
-}
-
 const QString TWITCH_PUBSUB_URL = "wss://pubsub-edge.twitch.tv";
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
@@ -165,7 +152,6 @@ Application::Application(Settings &_settings, const Paths &paths,
     , logging(new Logging(_settings))
     , emotes(new Emotes)
     , accounts(new AccountController)
-    , eventSub(makeEventSubController(_settings))
     , hotkeys(new HotkeyController)
     , windows(new WindowManager(paths, _settings, *this->themes, *this->fonts))
     , toasts(new Toasts)
@@ -203,8 +189,6 @@ Application::Application(Settings &_settings, const Paths &paths,
 
 Application::~Application()
 {
-    this->eventSub->setQuitting();
-
     // we do this early to ensure getApp isn't used in any dtors
     INSTANCE = nullptr;
 }
@@ -504,6 +488,8 @@ Updates &Application::getUpdates()
 
 ITwitchIrcServer *Application::getTwitch()
 {
+    assertInGuiThread();
+
     return this->twitch.get();
 }
 
@@ -590,15 +576,9 @@ pronouns::Pronouns *Application::getPronouns()
     return this->pronouns.get();
 }
 
-eventsub::IController *Application::getEventSub()
-{
-    assert(this->eventSub);
-
-    return this->eventSub.get();
-}
-
 void Application::save()
 {
+    this->commands->save();
     this->hotkeys->save();
     this->windows->save();
 }
@@ -607,9 +587,11 @@ void Application::initNm(const Paths &paths)
 {
     (void)paths;
 
-#if defined QT_NO_DEBUG || defined CHATTERINO_DEBUG_NM
+#ifdef Q_OS_WIN
+#    if defined QT_NO_DEBUG || defined CHATTERINO_DEBUG_NM
     registerNmHost(paths);
     this->nmServer.start();
+#    endif
 #endif
 }
 

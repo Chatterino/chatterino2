@@ -18,7 +18,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "TimestampMedium",
+                        "style": "ChatMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -117,7 +117,6 @@
             "searchText": "TWW2 gifted a Tier 1 sub to Mr_Woodchuck!",
             "serverReceivedTime": "",
             "timeoutUser": "",
-            "userID": "",
             "usernameColor": "#ff000000"
         }
     ]

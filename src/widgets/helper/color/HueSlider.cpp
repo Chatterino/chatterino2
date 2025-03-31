@@ -158,7 +158,7 @@ void HueSlider::setHue(int hue)
     this->color_.getHsv(&h, &s, &v, &a);
     this->color_.setHsv(this->hue_, s, v, a);
 
-    this->colorChanged(this->color_);
+    emit this->colorChanged(this->color_);
     this->update();
 }
 

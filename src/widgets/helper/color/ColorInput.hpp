@@ -17,10 +17,10 @@ public:
 
     QColor color() const;
 
-Q_SIGNALS:
+signals:
     void colorChanged(QColor color);
 
-public Q_SLOTS:
+public slots:
     void setColor(QColor color);
 
 private:

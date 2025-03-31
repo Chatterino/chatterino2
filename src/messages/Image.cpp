@@ -245,11 +245,7 @@ void assignFrames(std::weak_ptr<Image> weak, QList<Frame> parsed)
             isPushQueued = true;
             postToThread([] {
                 isPushQueued = false;
-                auto *app = tryGetApp();
-                if (app != nullptr)
-                {
-                    app->getWindows()->forceLayoutChannelViews();
-                }
+                getApp()->getWindows()->forceLayoutChannelViews();
             });
         }
     };

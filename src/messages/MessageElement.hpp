@@ -340,15 +340,8 @@ private:
 class MentionElement : public TextElement
 {
 public:
-    explicit MentionElement(const QString &displayName, QString loginName_,
-                            MessageColor fallbackColor_,
-                            MessageColor userColor_);
-    /// Deprioritized ctor allowing us to pass through a potentially invalid userColor_
-    ///
-    /// If the userColor_ is invalid, we fall back to the fallbackColor_
-    template <typename = void>
-    explicit MentionElement(const QString &displayName, QString loginName_,
-                            MessageColor fallbackColor_, QColor userColor_);
+    MentionElement(const QString &displayName, QString loginName_,
+                   MessageColor fallbackColor_, MessageColor userColor_);
     ~MentionElement() override = default;
     MentionElement(const MentionElement &) = delete;
     MentionElement(MentionElement &&) = delete;
