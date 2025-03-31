@@ -319,33 +319,39 @@ void FfzEmotes::loadChannel(
                 }
             }
         })
-        .onError([channelID, channel, manualRefresh](const auto &result) {
-            auto shared = channel.lock();
-            if (!shared)
-            {
-                return;
-            }
-
-            if (result.status() == 404)
-            {
-                // User does not have any FFZ emotes
-                if (manualRefresh)
+        .onError(
+            [channelID, channel, manualRefresh, cacheHit](const auto &result) {
+                auto shared = channel.lock();
+                if (!shared)
                 {
-                    shared->addSystemMessage(CHANNEL_HAS_NO_EMOTES);
+                    return;
                 }
-            }
-            else
-            {
-                // TODO: Auto retry in case of a timeout, with a delay
-                auto errorString = result.formatError();
-                qCWarning(LOG) << "Error fetching FFZ emotes for channel"
-                               << channelID << ", error" << errorString;
-                shared->addSystemMessage(
-                    QStringLiteral("Failed to fetch FrankerFaceZ channel "
-                                   "emotes. (Error: %1)")
-                        .arg(errorString));
-            }
-        })
+
+                if (result.status() == 404)
+                {
+                    // User does not have any FFZ emotes
+                    if (manualRefresh)
+                    {
+                        shared->addSystemMessage(CHANNEL_HAS_NO_EMOTES);
+                    }
+                }
+                else
+                {
+                    // TODO: Auto retry in case of a timeout, with a delay
+                    auto errorString = result.formatError();
+                    qCWarning(LOG) << "Error fetching FFZ emotes for channel"
+                                   << channelID << ", error" << errorString;
+                    shared->addSystemMessage(
+                        QStringLiteral("Failed to fetch FrankerFaceZ channel "
+                                       "emotes. (Error: %1)")
+                            .arg(errorString));
+                    if (cacheHit)
+                    {
+                        shared->addSystemMessage(
+                            "Using cached FrankerFaceZ emotes as fallback.");
+                    }
+                }
+            })
         .execute();
 }
 
