@@ -20,14 +20,15 @@ option(USE_SYSTEM_QTKEYCHAIN "Use system QtKeychain library" OFF)
 option(BUILD_WITH_QTKEYCHAIN "Build Chatterino with support for your system key chain" ON)
 option(USE_SYSTEM_MINIAUDIO "Build Chatterino with your system miniaudio" OFF)
 option(BUILD_WITH_CRASHPAD "Build chatterino with crashpad" OFF)
-option(USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
+option(USE_PRECOMPILED_HEADERS "Use precompiled headers (Temporarily not supported on macOS)" ON)
 option(BUILD_WITH_QT6 "Build with Qt6" On)
+option(BUILD_WITH_LIBNOTIFY "Build with libnotify" ON)
 option(CHATTERINO_GENERATE_COVERAGE "Generate coverage files" OFF)
 # We don't use translations, and we don't want qtkeychain to build translations
 option(BUILD_TRANSLATIONS "" OFF)
 option(BUILD_SHARED_LIBS "" OFF)
 option(CHATTERINO_LTO "Enable LTO for all targets" OFF)
-option(CHATTERINO_PLUGINS "Enable ALPHA plugin support in Chatterino" OFF)
+option(CHATTERINO_PLUGINS "Enable ALPHA plugin support in Chatterino" ON)
 option(CHATTERINO_USE_GDI_FONTENGINE "Use the legacy GDI fontengine instead of the new DirectWrite one on Windows (Qt 6.8.0 and later)" ON)
 
 option(CHATTERINO_UPDATER "Enable update checks" ON)
@@ -41,10 +42,20 @@ if(BUILD_BENCHMARKS)
 endif()
 
 project(chatterino
-    VERSION 2.5.2
+    VERSION 2.5.3
     DESCRIPTION "Chat client for twitch.tv"
     HOMEPAGE_URL "https://chatterino.com/"
 )
+
+if(CHATTERINO_GENERATE_COVERAGE)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        add_compile_options(-fprofile-instr-generate -fcoverage-mapping)
+        add_link_options(-fprofile-instr-generate -fcoverage-mapping)
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+        add_compile_options(-coverage)
+        add_link_options(-coverage)
+    endif()
+endif()
 
 if(CHATTERINO_LTO)
     include(CheckIPOSupported)
@@ -57,6 +68,7 @@ endif()
 if (BUILD_WITH_QT6)
     set(MAJOR_QT_VERSION "6")
 else()
+    message(WARNING "Qt5 is not supported, continue building at your own risk")
     set(MAJOR_QT_VERSION "5")
 endif()
 
@@ -207,6 +219,7 @@ find_package(PajladaSignals REQUIRED)
 find_package(LRUCache REQUIRED)
 find_package(MagicEnum REQUIRED)
 find_package(Doxygen)
+find_package(BoostCertify REQUIRED)
 
 if (USE_SYSTEM_PAJLADA_SETTINGS)
     find_package(PajladaSettings REQUIRED)
@@ -228,6 +241,8 @@ endif()
 if (BUILD_WITH_CRASHPAD)
     add_subdirectory("${CMAKE_SOURCE_DIR}/tools/crash-handler")
 endif()
+
+add_subdirectory(lib/twitch-eventsub-ws)
 
 # Used to provide a date of build in the About page (for nightly builds). Getting the actual time of
 # compilation in CMake is a more involved, as documented in https://stackoverflow.com/q/24292898.

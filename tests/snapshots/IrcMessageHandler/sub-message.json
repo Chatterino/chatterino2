@@ -36,7 +36,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -181,6 +181,7 @@
             "searchText": "ronni  ronni: Great stream -- keep it up! ",
             "serverReceivedTime": "2017-10-05T23:36:12Z",
             "timeoutUser": "",
+            "userID": "1337",
             "usernameColor": "#ff008000"
         },
         {
@@ -200,7 +201,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -265,6 +266,7 @@
             "searchText": "ronni has subscribed for 6 months!",
             "serverReceivedTime": "",
             "timeoutUser": "",
+            "userID": "",
             "usernameColor": "#ff000000"
         }
     ]

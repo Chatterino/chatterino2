@@ -36,7 +36,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -162,6 +162,7 @@
             "searchText": "rickharrisoncoc  rickharrisoncoc: forsen please read my super chat. Please. ",
             "serverReceivedTime": "2023-06-28T16:43:54Z",
             "timeoutUser": "",
+            "userID": "518404689",
             "usernameColor": "#ffff69b4"
         },
         {
@@ -181,7 +182,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -230,6 +231,7 @@
             "searchText": "Level 2 Hype Chat (2m 30s) USD5.00",
             "serverReceivedTime": "",
             "timeoutUser": "",
+            "userID": "",
             "usernameColor": "#ff000000"
         }
     ]

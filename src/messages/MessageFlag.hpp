@@ -56,6 +56,15 @@ enum class MessageFlag : std::int64_t {
     AutoModBlockedTerm = (1LL << 38),
     /// The message is a full clear chat message (/clear)
     ClearChat = (1LL << 39),
+    /// The message is built from EventSub
+    EventSub = (1LL << 40),
+    /// The message is a moderation action.
+    /// Example messages that would count as moderation actions:
+    ///  - forsen has been banned
+    ///  - forsen deleted message from forsen
+    ///  - forsen added "blockedterm" as a blocked term
+    ///  - Your message is being checked by mods and has not been sent
+    ModerationAction = (1LL << 41),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 

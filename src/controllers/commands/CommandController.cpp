@@ -299,14 +299,17 @@ CommandController::CommandController(const Paths &paths)
     // Initialize setting manager for commands.json
     auto path = combinePath(paths.settingsDirectory, "commands.json");
     this->sm_ = std::make_shared<pajlada::Settings::SettingManager>();
+    this->sm_->saveMethod =
+        pajlada::Settings::SettingManager::SaveMethod::OnlySaveIfChanged;
     this->sm_->setPath(qPrintable(path));
     this->sm_->setBackupEnabled(true);
     this->sm_->setBackupSlots(9);
 
     // Delayed initialization of the setting storing all commands
     this->commandsSetting_.reset(
-        new pajlada::Settings::Setting<std::vector<Command>>("/commands",
-                                                             this->sm_));
+        new pajlada::Settings::Setting<std::vector<Command>>(
+            "/commands", pajlada::Settings::SettingOption::CompareBeforeSet,
+            this->sm_));
 
     // Update the setting when the vector of commands has been updated (most
     // likely from the settings dialog)

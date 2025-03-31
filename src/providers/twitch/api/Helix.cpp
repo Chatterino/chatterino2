@@ -1,5 +1,7 @@
 #include "providers/twitch/api/Helix.hpp"
 
+#include "Application.hpp"
+#include "common/Args.hpp"
 #include "common/Literals.hpp"
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
@@ -351,10 +353,10 @@ void Helix::getGameById(QString gameId,
         failureCallback);
 }
 
-void Helix::createClip(QString channelId,
-                       ResultCallback<HelixClip> successCallback,
-                       std::function<void(HelixClipError)> failureCallback,
-                       std::function<void()> finallyCallback)
+void Helix::createClip(
+    QString channelId, ResultCallback<HelixClip> successCallback,
+    std::function<void(HelixClipError, QString)> failureCallback,
+    std::function<void()> finallyCallback)
 {
     QUrlQuery urlQuery;
     urlQuery.addQueryItem("broadcaster_id", channelId);
@@ -367,7 +369,7 @@ void Helix::createClip(QString channelId,
 
             if (!data.isArray())
             {
-                failureCallback(HelixClipError::Unknown);
+                failureCallback(HelixClipError::Unknown, "No clip was created");
                 return;
             }
 
@@ -376,17 +378,45 @@ void Helix::createClip(QString channelId,
             successCallback(clip);
         })
         .onError([failureCallback](auto result) {
+            auto obj = result.parseJson();
+            auto message = obj.value("message").toString();
             switch (result.status().value_or(0))
             {
                 case 503: {
-                    // Channel has disabled clip-creation, or channel has made cliops only creatable by followers and the user is not a follower (or subscriber)
-                    failureCallback(HelixClipError::ClipsDisabled);
+                    // We should not necessarily handle this, so the error messaging will use `message` if it exists
+                    failureCallback(HelixClipError::ClipsUnavailable, message);
                 }
                 break;
 
                 case 401: {
                     // User does not have the required scope to be able to create clips, user must reauthenticate
-                    failureCallback(HelixClipError::UserNotAuthenticated);
+                    failureCallback(HelixClipError::UserNotAuthenticated,
+                                    message);
+                }
+                break;
+
+                case 403: {
+                    if (message.contains("restricted for this channel"))
+                    {
+                        failureCallback(HelixClipError::ClipsDisabled, message);
+                    }
+                    else if (message.contains("User does not have permissions"))
+                    {
+                        failureCallback(HelixClipError::ClipsRestricted,
+                                        message);
+                    }
+                    else if (message.contains("restricted for this category"))
+                    {
+                        failureCallback(HelixClipError::ClipsRestrictedCategory,
+                                        message);
+                    }
+                    else
+                    {
+                        qCDebug(chatterinoTwitch)
+                            << "Failed to create a clip: "
+                            << result.formatError() << result.getData();
+                        failureCallback(HelixClipError::Unknown, message);
+                    }
                 }
                 break;
 
@@ -394,7 +424,7 @@ void Helix::createClip(QString channelId,
                     qCDebug(chatterinoTwitch)
                         << "Failed to create a clip: " << result.formatError()
                         << result.getData();
-                    failureCallback(HelixClipError::Unknown);
+                    failureCallback(HelixClipError::Unknown, message);
                 }
                 break;
             }
@@ -3188,6 +3218,173 @@ void Helix::getFollowedChannel(
         .execute();
 }
 
+void Helix::createEventSubSubscription(
+    const eventsub::SubscriptionRequest &request, const QString &sessionID,
+    ResultCallback<HelixCreateEventSubSubscriptionResponse> successCallback,
+    FailureCallback<HelixCreateEventSubSubscriptionError, QString>
+        failureCallback)
+{
+    using Error = HelixCreateEventSubSubscriptionError;
+
+    QJsonObject condition;
+    for (const auto &[conditionKey, conditionValue] : request.conditions)
+    {
+        condition.insert(conditionKey, conditionValue);
+    }
+
+    QJsonObject body;
+    body.insert("type", request.subscriptionType);
+    body.insert("version", request.subscriptionVersion);
+    body.insert("condition", condition);
+
+    QJsonObject transport;
+    transport.insert("method", "websocket");
+    transport.insert("session_id", sessionID);
+
+    body.insert("transport", transport);
+
+    this->makePost("eventsub/subscriptions", {})
+        .json(body)
+        .onSuccess([successCallback](const auto &result) {
+            if (result.status() != 202)
+            {
+                qCWarning(chatterinoTwitchEventSub)
+                    << "Success result for creating eventsub subscription was "
+                    << result.formatError() << "but we expected it to be 202";
+            }
+
+            HelixCreateEventSubSubscriptionResponse response(
+                result.parseJson());
+
+            successCallback(response);
+        })
+        .onError([failureCallback](const NetworkResult &result) {
+            if (!result.status())
+            {
+                failureCallback(Error::Forwarded, result.formatError());
+                return;
+            }
+
+            const auto obj = result.parseJson();
+            auto message = obj["message"].toString();
+
+            switch (*result.status())
+            {
+                case 400: {
+                    if (message.startsWith(
+                            "websocket transport session does not exist",
+                            Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::NoSession, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::BadRequest, message);
+                    }
+                }
+                break;
+
+                case 401: {
+                    failureCallback(Error::Unauthorized, message);
+                }
+                break;
+
+                case 403: {
+                    failureCallback(Error::Forbidden, message);
+                }
+                break;
+                case 409: {
+                    failureCallback(Error::Conflict, message);
+                }
+                break;
+
+                case 429: {
+                    failureCallback(Error::Ratelimited, message);
+                }
+                break;
+
+                case 500: {
+                    if (message.isEmpty())
+                    {
+                        failureCallback(Error::Forwarded,
+                                        "Twitch internal server error");
+                    }
+                    else
+                    {
+                        failureCallback(Error::Forwarded, message);
+                    }
+                }
+                break;
+
+                default: {
+                    qCWarning(chatterinoTwitchEventSub)
+                        << "Helix Create EventSub Subscription, unhandled "
+                           "error data:"
+                        << result.formatError() << result.getData() << obj;
+                    failureCallback(Error::Forwarded, message);
+                }
+            }
+        })
+        .execute();
+}
+
+QDebug &operator<<(QDebug &dbg,
+                   const HelixCreateEventSubSubscriptionResponse &data)
+{
+    dbg << "HelixCreateEventSubSubscriptionResponse{ id:" << data.subscriptionID
+        << "status:" << data.subscriptionStatus
+        << "type:" << data.subscriptionType
+        << "version:" << data.subscriptionVersion
+        << "condition:" << data.subscriptionCondition
+        << "createdAt:" << data.subscriptionCreatedAt
+        << "sessionID:" << data.subscriptionSessionID
+        << "connectedAt:" << data.subscriptionConnectedAt
+        << "cost:" << data.subscriptionCost << "total:" << data.total
+        << "totalCost:" << data.totalCost
+        << "maxTotalCost:" << data.maxTotalCost << '}';
+    return dbg;
+}
+
+void Helix::deleteEventSubSubscription(const QString &subscriptionID,
+                                       ResultCallback<> successCallback,
+                                       FailureCallback<QString> failureCallback)
+{
+    QUrlQuery query;
+    query.addQueryItem("id", subscriptionID);
+
+    this->makeDelete("eventsub/subscriptions", query)
+        .onSuccess([successCallback](const auto &result) {
+            if (result.status() != 204)
+            {
+                qCWarning(chatterinoTwitchEventSub)
+                    << "Success result for deleting eventsub subscription was "
+                    << result.formatError() << "but we expected it to be 204";
+            }
+
+            successCallback();
+        })
+        .onError([failureCallback](const NetworkResult &result) {
+            if (!result.status())
+            {
+                failureCallback(result.formatError());
+                return;
+            }
+
+            const auto obj = result.parseJson();
+            auto message = obj["message"].toString();
+
+            if (message.isEmpty())
+            {
+                failureCallback("Twitch internal server error");
+            }
+            else
+            {
+                failureCallback(message);
+            }
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(const QString &url, const QUrlQuery &urlQuery,
                                   NetworkRequestType type)
 {
@@ -3207,7 +3404,16 @@ NetworkRequest Helix::makeRequest(const QString &url, const QUrlQuery &urlQuery,
         // return std::nullopt;
     }
 
-    const QString baseUrl("https://api.twitch.tv/helix/");
+    QString baseUrl("https://api.twitch.tv/helix/");
+
+#ifndef NDEBUG
+    bool ignoreSslErrors =
+        getApp()->getArgs().useLocalEventsub && url == "eventsub/subscriptions";
+    if (ignoreSslErrors)
+    {
+        baseUrl = "https://127.0.0.1:3012/";
+    }
+#endif
 
     QUrl fullUrl(baseUrl + url);
 
@@ -3217,7 +3423,11 @@ NetworkRequest Helix::makeRequest(const QString &url, const QUrlQuery &urlQuery,
         .timeout(5 * 1000)
         .header("Accept", "application/json")
         .header("Client-ID", this->clientId)
-        .header("Authorization", "Bearer " + this->oauthToken);
+        .header("Authorization", "Bearer " + this->oauthToken)
+#ifndef NDEBUG
+        .ignoreSslErrors(ignoreSslErrors)
+#endif
+        ;
 }
 
 NetworkRequest Helix::makeGet(const QString &url, const QUrlQuery &urlQuery)

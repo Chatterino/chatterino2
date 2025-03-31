@@ -512,7 +512,7 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
 
     QString targetID = tags.value("target-msg-id").toString();
 
-    auto msg = chan->findMessage(targetID);
+    auto msg = chan->findMessageByID(targetID);
     if (msg == nullptr)
     {
         return;
@@ -1010,7 +1010,6 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message,
                                      "callback since reward is not known:"
                                   << rewardId;
         chan->addQueuedRedemption(rewardId, originalContent, message);
-        return;
     }
     args.channelPointRewardId = rewardId;
 

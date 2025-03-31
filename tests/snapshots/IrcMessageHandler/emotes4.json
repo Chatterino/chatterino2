@@ -33,7 +33,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -149,6 +149,7 @@
             "searchText": "test  test: foo bar ",
             "serverReceivedTime": "2022-09-03T10:31:42Z",
             "timeoutUser": "",
+            "userID": "",
             "usernameColor": "#ff000000"
         }
     ]

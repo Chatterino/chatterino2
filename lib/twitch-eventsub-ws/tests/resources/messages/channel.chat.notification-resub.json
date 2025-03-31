@@ -1,0 +1,65 @@
+{
+  "metadata": {
+    "message_id": "333c1c6a-475f-4c7a-bb16-fe0ae443ac32",
+    "message_type": "notification",
+    "message_timestamp": "2024-05-14T12:31:47.995298776Z",
+    "subscription_type": "channel.chat.notification",
+    "subscription_version": "1"
+  },
+  "payload": {
+    "subscription": {
+      "id": "96f9a91e-f1e0-43af-82ac-a6e934771337",
+      "status": "enabled",
+      "type": "channel.chat.notification",
+      "version": "1",
+      "condition": {
+        "broadcaster_user_id": "165081337",
+        "user_id": "27620241"
+      },
+      "transport": {
+        "method": "websocket",
+        "session_id": "AgoQUlB8aB2SSsavWVfcs5ljnBIGY2Vs1337"
+      },
+      "created_at": "2023-11-20T16:41:22.999246448Z",
+      "cost": 0
+    },
+    "event": {
+      "broadcaster_user_id": "1337",
+      "broadcaster_user_login": "Cool_User",
+      "broadcaster_user_name": "cool_user",
+      "chatter_user_id": "5678",
+      "chatter_user_login": "someone1",
+      "chatter_user_name": "someone1",
+      "chatter_is_anonymous": false,
+      "color": "",
+      "badges": [{ "set_id": "subscriber", "id": "2", "info": "2" }],
+      "system_message": "someone1 subscribed at Tier 1. They've subscribed for 2 months!",
+      "message_id": "101ab672-fcde-4d71-8011-ac2859786cea",
+      "message": { "text": "", "fragments": [] },
+      "notice_type": "resub",
+      "sub": null,
+      "resub": {
+        "cumulative_months": 2,
+        "duration_months": 0,
+        "streak_months": null,
+        "sub_tier": "1000",
+        "is_prime": false,
+        "is_gift": true,
+        "gifter_is_anonymous": false,
+        "gifter_user_id": "1234",
+        "gifter_user_name": "justinfan1",
+        "gifter_user_login": "justinfan1"
+      },
+      "sub_gift": null,
+      "community_sub_gift": null,
+      "gift_paid_upgrade": null,
+      "prime_paid_upgrade": null,
+      "pay_it_forward": null,
+      "raid": null,
+      "unraid": null,
+      "announcement": null,
+      "bits_badge_tier": null,
+      "charity_donation": null
+    }
+  }
+}

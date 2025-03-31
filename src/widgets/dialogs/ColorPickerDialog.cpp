@@ -136,7 +136,7 @@ ColorPickerDialog::ColorPickerDialog(QColor color, QWidget *parent)
         new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
     QObject::connect(buttonBox, &QDialogButtonBox::accepted, this, [this] {
-        emit this->colorConfirmed(this->color());
+        this->colorConfirmed(this->color());
         this->close();
     });
     QObject::connect(buttonBox, &QDialogButtonBox::rejected, this,
@@ -156,7 +156,7 @@ void ColorPickerDialog::setColor(const QColor &color)
         return;
     }
     this->color_ = color;
-    emit this->colorChanged(color);
+    this->colorChanged(color);
 }
 
 }  // namespace chatterino

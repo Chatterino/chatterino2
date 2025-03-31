@@ -3,6 +3,7 @@ set(VERSION_PROJECT "${LIBRARY_PROJECT}-version")
 set(EXECUTABLE_PROJECT "${PROJECT_NAME}")
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x050F00)
+add_compile_definitions(QT_NO_KEYWORDS)
 
 # registers the native messageing host
 option(CHATTERINO_DEBUG_NATIVE_MESSAGES "Debug native messages" OFF)
@@ -427,6 +428,19 @@ set(SOURCE_FILES
         providers/twitch/TwitchUsers.cpp
         providers/twitch/TwitchUsers.hpp
 
+        providers/twitch/eventsub/Connection.cpp
+        providers/twitch/eventsub/Connection.hpp
+        providers/twitch/eventsub/Controller.cpp
+        providers/twitch/eventsub/Controller.hpp
+        providers/twitch/eventsub/MessageBuilder.cpp
+        providers/twitch/eventsub/MessageBuilder.hpp
+        providers/twitch/eventsub/MessageHandlers.cpp
+        providers/twitch/eventsub/MessageHandlers.hpp
+        providers/twitch/eventsub/SubscriptionHandle.cpp
+        providers/twitch/eventsub/SubscriptionHandle.hpp
+        providers/twitch/eventsub/SubscriptionRequest.cpp
+        providers/twitch/eventsub/SubscriptionRequest.hpp
+
         providers/twitch/pubsubmessages/AutoMod.cpp
         providers/twitch/pubsubmessages/AutoMod.hpp
         providers/twitch/pubsubmessages/Base.cpp
@@ -442,8 +456,6 @@ set(SOURCE_FILES
         providers/twitch/pubsubmessages/Message.hpp
         providers/twitch/pubsubmessages/Unlisten.cpp
         providers/twitch/pubsubmessages/Unlisten.hpp
-        providers/twitch/pubsubmessages/Whisper.cpp
-        providers/twitch/pubsubmessages/Whisper.hpp
 
         providers/twitch/api/Helix.cpp
         providers/twitch/api/Helix.hpp
@@ -489,6 +501,8 @@ set(SOURCE_FILES
         util/ChannelHelpers.hpp
         util/Clipboard.cpp
         util/Clipboard.hpp
+        util/CustomPlayer.cpp
+        util/CustomPlayer.hpp
         util/DebugCount.cpp
         util/DebugCount.hpp
         util/DisplayBadge.cpp
@@ -525,6 +539,8 @@ set(SOURCE_FILES
         util/RenameThread.hpp
         util/SampleData.cpp
         util/SampleData.hpp
+        util/SelfCheck.cpp
+        util/SelfCheck.hpp
         util/SharedPtrElementLess.hpp
         util/SignalListener.hpp
         util/StreamLink.cpp
@@ -533,6 +549,8 @@ set(SOURCE_FILES
         util/Twitch.cpp
         util/Twitch.hpp
         util/TypeName.hpp
+        util/UnixSignalHandler.cpp
+        util/UnixSignalHandler.hpp
         util/Variant.hpp
         util/VectorMessageSink.cpp
         util/VectorMessageSink.hpp
@@ -751,6 +769,8 @@ if (APPLE)
     set(MACOS_BUNDLE_ICON_FILE "${CMAKE_SOURCE_DIR}/resources/chatterino.icns")
     list(APPEND SOURCE_FILES "${MACOS_BUNDLE_ICON_FILE}")
     set_source_files_properties(${MACOS_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+
+    list(APPEND SOURCE_FILES util/MacOsHelpers.mm)
 endif ()
 
 # Generate source groups for use in IDEs
@@ -771,14 +791,34 @@ endif()
 
 if (CHATTERINO_GENERATE_COVERAGE)
     include(CodeCoverage)
-    append_coverage_compiler_flags_to_target(${LIBRARY_PROJECT})
+    if(NOT CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
+        append_coverage_compiler_flags_to_target(${LIBRARY_PROJECT})
+    endif()
     message(STATUS "project source dir: ${PROJECT_SOURCE_DIR}/src")
     setup_target_for_coverage_gcovr_html(
         NAME coverage
         EXECUTABLE ctest
         EXCLUDE "/usr/include/*"
-        EXCLUDE "build-*/*"
-        EXCLUDE "lib/*"
+        EXCLUDE "build*/*"
+        # EXCLUDE "lib/*"
+        EXCLUDE "lib/certify/*"
+        EXCLUDE "lib/expected-lite/*"
+        EXCLUDE "lib/googletest/*"
+        EXCLUDE "lib/libcommuni/*"
+        EXCLUDE "lib/lrucache/*"
+        EXCLUDE "lib/lua/*"
+        EXCLUDE "lib/magic_enum/*"
+        EXCLUDE "lib/miniaudio/*"
+        EXCLUDE "lib/qtkeychain/*"
+        EXCLUDE "lib/rapidjson/*"
+        EXCLUDE "lib/semver/*"
+        EXCLUDE "lib/serialize/*"
+        EXCLUDE "lib/settings/*"
+        EXCLUDE "lib/signals/*"
+        EXCLUDE "lib/sol2/*"
+        EXCLUDE "lib/websocketpp/*"
+        EXCLUDE "lib/WinToast/*"
+
         EXCLUDE "*/ui_*.h"
         EXCLUDE "*/moc_*.cpp"
         )
@@ -803,6 +843,8 @@ target_link_libraries(${LIBRARY_PROJECT}
         LRUCache
         MagicEnum
         $<$<BOOL:${WIN32}>:Wtsapi32>
+        twitch-eventsub-ws
+        BoostCertify
         )
 if (CHATTERINO_PLUGINS)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua sol2::sol2)
@@ -940,7 +982,7 @@ if (BUILD_APP)
     endif()
 endif ()
 
-if (USE_PRECOMPILED_HEADERS)
+if (USE_PRECOMPILED_HEADERS AND NOT APPLE)
     message(STATUS "Building with precompiled headers")
     target_precompile_headers(${LIBRARY_PROJECT} PRIVATE PrecompiledHeader.hpp)
 else ()
@@ -1049,6 +1091,13 @@ if (UNIX)
         # libdl is a requirement for miniaudio on Linux
         message(STATUS "Linking with CMake DL libs: '${CMAKE_DL_LIBS}'")
         target_link_libraries(${LIBRARY_PROJECT} PUBLIC ${CMAKE_DL_LIBS})
+    endif ()
+
+    if (NOT APPLE AND BUILD_WITH_LIBNOTIFY)
+        find_package(PkgConfig REQUIRED)
+        pkg_check_modules(LIBNOTIFY REQUIRED IMPORTED_TARGET libnotify)
+        target_link_libraries(${LIBRARY_PROJECT} PRIVATE PkgConfig::LIBNOTIFY)
+        target_compile_definitions(${LIBRARY_PROJECT} PUBLIC CHATTERINO_WITH_LIBNOTIFY)
     endif ()
 endif ()
 

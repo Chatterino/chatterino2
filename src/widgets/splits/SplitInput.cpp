@@ -165,10 +165,8 @@ void SplitInput::initLayout()
         textEditLength->setAlignment(Qt::AlignRight);
 
         box->addStretch(1);
-        box.emplace<EffectLabel>().assign(&this->ui_.emoteButton);
+        box.emplace<Button>().assign(&this->ui_.emoteButton);
     }
-
-    this->ui_.emoteButton->getLabel().setTextFormat(Qt::RichText);
 
     // ---- misc
 
@@ -235,6 +233,14 @@ void SplitInput::scaleChangedEvent(float scale)
     }
     this->ui_.textEdit->setFont(
         app->getFonts()->getFont(FontStyle::ChatMedium, scale));
+
+    QPalette placeholderPalette;
+    placeholderPalette.setColor(
+        QPalette::PlaceholderText,
+        this->theme->messages.textColors.chatPlaceholder);
+
+    this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
+    this->ui_.textEdit->setPalette(placeholderPalette);
     this->ui_.textEditLength->setFont(
         app->getFonts()->getFont(FontStyle::ChatMedium, scale));
     this->ui_.replyLabel->setFont(
@@ -258,8 +264,6 @@ void SplitInput::themeChangedEvent()
     this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
     this->ui_.textEdit->setPalette(placeholderPalette);
 
-    this->ui_.emoteButton->getLabel().setStyleSheet("color: #000");
-
     if (this->theme->isLightTheme())
     {
         this->ui_.replyLabel->setStyleSheet("color: #333");
@@ -281,13 +285,18 @@ void SplitInput::updateEmoteButton()
 {
     auto scale = this->scale();
 
-    auto text =
-        QStringLiteral("<img src=':/buttons/%1.svg' width='%2' height='%2' />")
-            .arg(this->theme->isLightTheme() ? "emoteDark" : "emote")
-            .arg(int(12 * scale));
+    if (this->theme->isLightTheme())
+    {
+        this->ui_.emoteButton->setSvgResource(":/buttons/emoteDark.svg");
+    }
+    else
+    {
+        this->ui_.emoteButton->setSvgResource(":/buttons/emote.svg");
+    }
 
-    this->ui_.emoteButton->getLabel().setText(text);
     this->ui_.emoteButton->setFixedHeight(int(18 * scale));
+    // Make button slightly wider so it's easier to click
+    this->ui_.emoteButton->setFixedWidth(int(24 * scale));
 }
 
 void SplitInput::updateCancelReplyButton()
@@ -364,36 +373,7 @@ QString SplitInput::handleSendMessage(const std::vector<QString> &arguments)
     auto *tc = dynamic_cast<TwitchChannel *>(c.get());
     if (!tc)
     {
-        // Reply to message
-        auto tc = dynamic_cast<TwitchChannel *>(c.get());
-        if (!tc)
-        {
-            // this should not fail
-            return "";
-        }
-
-        QString message = this->ui_.textEdit->toPlainText();
-
-        if (this->enableInlineReplying_)
-        {
-            // Remove @username prefix that is inserted when doing inline replies
-            message.remove(0, this->replyTarget_->displayName.length() +
-                                  1);  // remove "@username"
-
-            if (!message.isEmpty() && message.at(0) == ' ')
-            {
-                message.remove(0, 1);  // remove possible space
-            }
-        }
-
-        message = message.replace('\n', ' ');
-        QString sendMessage =
-            getApp()->getCommands()->execCommand(message, c, false);
-
-        // Reply within TwitchChannel
-        tc->sendReply(sendMessage, this->replyTarget_->id);
-
-        this->postMessageSend(message, arguments);
+        // this should not fail
         return "";
     }
 

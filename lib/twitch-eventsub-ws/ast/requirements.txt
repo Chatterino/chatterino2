@@ -1,0 +1,12 @@
+# parsing of header files
+clang==15.0.7
+
+# ensures formatting of generated files is consistent
+clang-format==16.0.6
+
+# used for generating the code
+Jinja2==3.1.6
+jinja2-workarounds==0.1.0
+
+# colors for logging
+colorama==0.4.6

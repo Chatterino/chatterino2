@@ -2,6 +2,7 @@
 
 #include "messages/Message.hpp"
 #include "widgets/BaseWidget.hpp"
+#include "widgets/helper/Button.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -151,7 +152,7 @@ protected:
         ResizingTextEdit *textEdit;
         QLabel *textEditLength;
         EffectLabel *sendButton;
-        EffectLabel *emoteButton;
+        Button *emoteButton;
     } ui_;
 
     MessagePtr replyTarget_ = nullptr;
@@ -168,7 +169,7 @@ protected:
     // set the height of the split input to 0 if we're supposed to be hidden instead
     bool hidden{false};
 
-private slots:
+private Q_SLOTS:
     void editTextChanged();
 
     friend class Split;

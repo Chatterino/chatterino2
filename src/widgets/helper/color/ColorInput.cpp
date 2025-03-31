@@ -82,7 +82,7 @@ ColorInput::ColorInput(QColor color, QWidget *parent)
     initComponent(this->green_, "Green:", [](auto &color, int value) {
         color.setGreen(value);
     });
-    initComponent(this->blue_, "Red:", [](auto &color, int value) {
+    initComponent(this->blue_, "Blue:", [](auto &color, int value) {
         color.setBlue(value);
     });
     initComponent(this->alpha_, "Alpha:", [](auto &color, int value) {
@@ -162,7 +162,7 @@ void ColorInput::emitUpdate()
 {
     this->updateComponents();
     // our components triggered this update, emit the new color
-    emit this->colorChanged(this->currentColor_);
+    this->colorChanged(this->currentColor_);
 }
 
 }  // namespace chatterino

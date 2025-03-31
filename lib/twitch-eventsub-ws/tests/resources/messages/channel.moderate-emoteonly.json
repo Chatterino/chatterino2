@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "message_id": "c5c679a1-f99d-4863-9f57-c434b10dc39d",
+    "message_type": "notification",
+    "message_timestamp": "2024-05-14T12:31:47.995298776Z",
+    "subscription_type": "channel.moderate",
+    "subscription_version": "2"
+  },
+  "payload": {
+    "subscription": {
+      "id": "7297f7eb-3bf5-461f-8ae6-7cd7781ebce3",
+      "status": "enabled",
+      "type": "channel.moderate",
+      "version": "2",
+      "cost": 0,
+      "condition": {
+        "broadcaster_user_id": "423374343",
+        "moderator_user_id": "423374343"
+      },
+      "transport": {
+        "method": "websocket",
+        "session_id": "AgoQUlB8aB2SSsavWVfcs5ljnBIGY2VsbC1j"
+      },
+      "created_at": "2024-02-23T21:12:33.771005262Z"
+    },
+    "event": {
+      "broadcaster_user_id": "423374343",
+      "broadcaster_user_login": "glowillig",
+      "broadcaster_user_name": "glowillig",
+      "moderator_user_id": "424596340",
+      "moderator_user_login": "quotrok",
+      "moderator_user_name": "quotrok",
+      "action": "emoteonly",
+      "followers": null,
+      "slow": null,
+      "vip": null,
+      "unvip": null,
+      "mod": null,
+      "unmod": null,
+      "ban": null,
+      "unban": null,
+      "warn": null,
+      "timeout": null,
+      "untimeout": null,
+      "raid": null,
+      "unraid": null,
+      "delete": null,
+      "automod_terms": null,
+      "unban_request": null,
+      "shared_chat_ban": null,
+      "shared_chat_unban": null,
+      "shared_chat_timeout": null,
+      "shared_chat_untimeout": null,
+      "shared_chat_delete": null
+    }
+  }
+}

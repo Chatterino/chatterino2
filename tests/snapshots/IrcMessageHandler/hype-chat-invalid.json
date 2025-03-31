@@ -36,7 +36,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -156,6 +156,7 @@
             "searchText": "snoopythebot  snoopythebot: -$5 ",
             "serverReceivedTime": "2022-09-30T02:46:14Z",
             "timeoutUser": "",
+            "userID": "136881249",
             "usernameColor": "#ff0000ff"
         }
     ]

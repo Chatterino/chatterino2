@@ -62,6 +62,16 @@ void stripChannelName(QString &channelName)
     }
 }
 
+QString cleanChannelName(const QString &dirtyChannelName)
+{
+    if (dirtyChannelName.startsWith('#'))
+    {
+        return dirtyChannelName.mid(1).toLower();
+    }
+
+    return dirtyChannelName.toLower();
+}
+
 std::pair<ParsedUserName, ParsedUserID> parseUserNameOrID(const QString &input)
 {
     if (input.startsWith("id:"))
