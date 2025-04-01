@@ -11,11 +11,10 @@
 #include <QLocale>
 #include <QLoggingCategory>
 #include <QRegularExpression>
+#include <QStringView>
 #include <QThreadPool>
 #include <QTimeZone>
 #include <QUuid>
-
-#include <functional>
 
 namespace {
 
@@ -334,7 +333,7 @@ void writeProviderEmotesCache(const QString &id, const QString &provider,
         {
             qCDebug(chatterinoCache)
                 << "Saved json response " << id << "." << provider;
-            responseCache.write(bytes);
+            responseCache.write(qCompress(bytes));
         }
     });
 }
@@ -347,8 +346,8 @@ bool readProviderEmotesCache(const QString &id, const QString &provider,
     if (responseCache.open(QIODevice::ReadOnly))
     {
         QJsonParseError parseError;
-        auto doc =
-            QJsonDocument::fromJson(responseCache.readAll(), &parseError);
+        auto doc = QJsonDocument::fromJson(qUncompress(responseCache.readAll()),
+                                           &parseError);
 
         if (parseError.error != QJsonParseError::NoError)
         {
