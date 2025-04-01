@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Add a setting to change the emote and badge thumbnail size. (#6126)
 - Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
 - Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
 
