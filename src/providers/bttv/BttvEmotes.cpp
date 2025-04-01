@@ -14,9 +14,8 @@
 #include "util/Helpers.hpp"
 
 #include <QJsonArray>
-#include <qloggingcategory.h>
-#include <qstringliteral.h>
-#include <qtconcurrentrun.h>
+#include <QLoggingCategory>
+#include <QStringLiteral>
 #include <QThread>
 
 namespace {
@@ -231,26 +230,23 @@ void BttvEmotes::loadEmotes()
         }
     });
 
-    std::ignore = QtConcurrent::run([this]() {
-        NetworkRequest(QString(globalEmoteApiUrl))
-            .timeout(30000)
-            .onSuccess([this](auto result) {
-                writeProviderEmotesCache("global", "bttv", result.getData());
-                auto emotes = this->global_.get();
-                auto pair = parseGlobalEmotes(result.parseJsonArray(), *emotes);
-                if (pair.first)
-                {
-                    this->setEmotes(
-                        std::make_shared<EmoteMap>(std::move(pair.second)));
-                }
-            })
-            .onError([](auto result) {
-                qCWarning(chatterinoBttv)
-                    << "Failed to fetch global BTTV emotes. "
-                    << result.formatError();
-            })
-            .execute();
-    });
+    NetworkRequest(QString(globalEmoteApiUrl))
+        .timeout(30000)
+        .onSuccess([this](auto result) {
+            writeProviderEmotesCache("global", "bttv", result.getData());
+            auto emotes = this->global_.get();
+            auto pair = parseGlobalEmotes(result.parseJsonArray(), *emotes);
+            if (pair.first)
+            {
+                this->setEmotes(
+                    std::make_shared<EmoteMap>(std::move(pair.second)));
+            }
+        })
+        .onError([](auto result) {
+            qCWarning(chatterinoBttv) << "Failed to fetch global BTTV emotes. "
+                                      << result.formatError();
+        })
+        .execute();
 }
 
 void BttvEmotes::setEmotes(std::shared_ptr<const EmoteMap> emotes)

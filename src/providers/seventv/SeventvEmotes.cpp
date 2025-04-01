@@ -14,12 +14,10 @@
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 
-#include <qjsonarray.h>
 #include <QJsonArray>
 #include <QJsonDocument>
-#include <qjsonobject.h>
-#include <qstringview.h>
-#include <qtconcurrentrun.h>
+#include <QJsonObject>
+#include <QStringView>
 #include <QThread>
 
 #include <array>
@@ -241,25 +239,23 @@ void SeventvEmotes::loadGlobalEmotes()
 
     qCDebug(chatterinoSeventv) << "Loading 7TV Global Emotes";
 
-    std::ignore = QtConcurrent::run([this]() {
-        getApp()->getSeventvAPI()->getEmoteSet(
-            u"global"_s,
-            [this](const auto &json) {
-                writeProviderEmotesCache("global", "seventv",
-                                         QJsonDocument(json).toJson());
-                QJsonArray parsedEmotes = json["emotes"].toArray();
+    getApp()->getSeventvAPI()->getEmoteSet(
+        u"global"_s,
+        [this](const auto &json) {
+            writeProviderEmotesCache("global", "seventv",
+                                     QJsonDocument(json).toJson());
+            QJsonArray parsedEmotes = json["emotes"].toArray();
 
-                auto emoteMap = parseEmotes(parsedEmotes, true);
-                qCDebug(chatterinoSeventv)
-                    << "Loaded" << emoteMap.size() << "7TV Global Emotes";
-                this->setGlobalEmotes(
-                    std::make_shared<EmoteMap>(std::move(emoteMap)));
-            },
-            [](const auto &result) {
-                qCWarning(chatterinoSeventv)
-                    << "Couldn't load 7TV global emotes" << result.getData();
-            });
-    });
+            auto emoteMap = parseEmotes(parsedEmotes, true);
+            qCDebug(chatterinoSeventv)
+                << "Loaded" << emoteMap.size() << "7TV Global Emotes";
+            this->setGlobalEmotes(
+                std::make_shared<EmoteMap>(std::move(emoteMap)));
+        },
+        [](const auto &result) {
+            qCWarning(chatterinoSeventv)
+                << "Couldn't load 7TV global emotes" << result.getData();
+        });
 }
 
 void SeventvEmotes::setGlobalEmotes(std::shared_ptr<const EmoteMap> emotes)

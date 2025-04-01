@@ -11,8 +11,6 @@
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 
-#include <qtconcurrentrun.h>
-
 namespace {
 
 using namespace chatterino;
@@ -247,23 +245,19 @@ void FfzEmotes::loadEmotes()
 
     QString url("https://api.frankerfacez.com/v1/set/global");
 
-    std::ignore = QtConcurrent::run([url, this]() {
-        NetworkRequest(url)
-
-            .timeout(30000)
-            .onSuccess([this](auto result) {
-                writeProviderEmotesCache("global", "ffz", result.getData());
-                auto parsedSet = parseGlobalEmotes(result.parseJson());
-                this->setEmotes(
-                    std::make_shared<EmoteMap>(std::move(parsedSet)));
-            })
-            .onError([](auto result) {
-                qCWarning(chatterinoFfzemotes)
-                    << "Failed to fetch global FFZ emotes. "
-                    << result.formatError();
-            })
-            .execute();
-    });
+    NetworkRequest(url)
+        .timeout(30000)
+        .onSuccess([this](auto result) {
+            writeProviderEmotesCache("global", "ffz", result.getData());
+            auto parsedSet = parseGlobalEmotes(result.parseJson());
+            this->setEmotes(std::make_shared<EmoteMap>(std::move(parsedSet)));
+        })
+        .onError([](auto result) {
+            qCWarning(chatterinoFfzemotes)
+                << "Failed to fetch global FFZ emotes. "
+                << result.formatError();
+        })
+        .execute();
 }
 
 void FfzEmotes::setEmotes(std::shared_ptr<const EmoteMap> emotes)
