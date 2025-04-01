@@ -107,9 +107,9 @@ void MessagePreferences::connectSettings(Settings *settings,
         },
         holder);
 
-    settings->fadeRecentMessages.connect(
+    settings->fadeMessageHistory.connect(
         [this](const auto &newValue) {
-            this->fadeRecentMessages = newValue;
+            this->fadeMessageHistory = newValue;
         },
         holder);
 }
