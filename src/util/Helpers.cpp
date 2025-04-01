@@ -7,11 +7,11 @@
 
 #include <QDateTime>
 #include <QDirIterator>
-#include <qjsonobject.h>
+#include <QJsonObject>
 #include <QLocale>
-#include <qloggingcategory.h>
+#include <QLoggingCategory>
 #include <QRegularExpression>
-#include <qtconcurrentrun.h>
+#include <QThreadPool>
 #include <QTimeZone>
 #include <QUuid>
 
@@ -30,7 +30,6 @@ const QRegularExpression ESCAPE_TAG_REGEX(
 }  // namespace
 
 namespace chatterino {
-using std::function;
 
 namespace helpers::detail {
 
@@ -327,7 +326,7 @@ QLocale getSystemLocale()
 void writeProviderEmotesCache(const QString &id, const QString &provider,
                               const QByteArray &bytes)
 {
-    std::ignore = QtConcurrent::run([bytes, id, provider]() {
+    QThreadPool::globalInstance()->start([bytes, id, provider]() {
         QFile responseCache(getApp()->getPaths().cacheDirectory() + "/" + id +
                             "." + provider);
 
@@ -341,7 +340,7 @@ void writeProviderEmotesCache(const QString &id, const QString &provider,
 }
 
 bool readProviderEmotesCache(const QString &id, const QString &provider,
-                             const function<void(QJsonDocument)> &callback)
+                             const std::function<void(QJsonDocument)> &callback)
 {
     QFile responseCache(getApp()->getPaths().cacheDirectory() + "/" + id + "." +
                         provider);
