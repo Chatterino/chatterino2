@@ -20,6 +20,8 @@ struct TooltipEntry {
     QString text;
     int customWidth = 0;
     int customHeight = 0;
+
+    void scaleImg(float scale);
 };
 
 enum class TooltipStyle { Vertical, Grid };

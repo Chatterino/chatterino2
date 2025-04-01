@@ -329,6 +329,7 @@ public:
     BoolSetting animateEmotes = {"/emotes/enableGifAnimations", true};
     BoolSetting enableZeroWidthEmotes = {"/emotes/enableZeroWidthEmotes", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
+    FloatSetting emoteTooltipScale = {"/emotes/tooltipScale", 3.f};
     BoolSetting showUnlistedSevenTVEmotes = {
         "/emotes/showUnlistedSevenTVEmotes", false};
     QStringSetting emojiSet = {"/emotes/emojiSet", "Twitter"};
