@@ -322,50 +322,6 @@ QLocale getSystemLocale()
     return QLocale::system();
 }
 
-void writeProviderEmotesCache(const QString &id, const QString &provider,
-                              const QByteArray &bytes)
-{
-    QThreadPool::globalInstance()->start([bytes, id, provider]() {
-        QFile responseCache(getApp()->getPaths().cacheDirectory() + "/" + id +
-                            "." + provider);
-
-        if (responseCache.open(QIODevice::WriteOnly))
-        {
-            qCDebug(chatterinoCache)
-                << "Saved json response " << id << "." << provider;
-            responseCache.write(qCompress(bytes));
-        }
-    });
-}
-
-bool readProviderEmotesCache(const QString &id, const QString &provider,
-                             const std::function<void(QJsonDocument)> &callback)
-{
-    QFile responseCache(getApp()->getPaths().cacheDirectory() + "/" + id + "." +
-                        provider);
-    if (responseCache.open(QIODevice::ReadOnly))
-    {
-        QJsonParseError parseError;
-        auto doc = QJsonDocument::fromJson(qUncompress(responseCache.readAll()),
-                                           &parseError);
-
-        if (parseError.error != QJsonParseError::NoError)
-        {
-            qCWarning(chatterinoCache)
-                << "Emote cache " << id << "." << provider
-                << " parsing failed: " << parseError.errorString();
-        }
-
-        qCDebug(chatterinoCache)
-            << "Loaded emote cache: " << id << "." << provider;
-        callback(doc);
-        return true;
-    }
-
-    // If the API call fails, we need to know if loading cached emotes was successful
-    return false;
-}
-
 QDateTime chronoToQDateTime(std::chrono::system_clock::time_point time)
 {
     auto msSinceEpoch =
@@ -434,6 +390,50 @@ void removeLastQS(QString &str)
 #else
     str.chop(1);
 #endif
+}
+
+void writeProviderEmotesCache(const QString &id, const QString &provider,
+                              const QByteArray &bytes)
+{
+    QThreadPool::globalInstance()->start([bytes, id, provider]() {
+        QFile responseCache(getApp()->getPaths().cacheDirectory() + "/" + id +
+                            "." + provider);
+
+        if (responseCache.open(QIODevice::WriteOnly))
+        {
+            qCDebug(chatterinoCache)
+                << "Saved json response " << id << "." << provider;
+            responseCache.write(qCompress(bytes));
+        }
+    });
+}
+
+bool readProviderEmotesCache(const QString &id, const QString &provider,
+                             const std::function<void(QJsonDocument)> &callback)
+{
+    QFile responseCache(getApp()->getPaths().cacheDirectory() + "/" + id + "." +
+                        provider);
+    if (responseCache.open(QIODevice::ReadOnly))
+    {
+        QJsonParseError parseError;
+        auto doc = QJsonDocument::fromJson(qUncompress(responseCache.readAll()),
+                                           &parseError);
+
+        if (parseError.error != QJsonParseError::NoError)
+        {
+            qCWarning(chatterinoCache)
+                << "Emote cache " << id << "." << provider
+                << " parsing failed: " << parseError.errorString();
+        }
+
+        qCDebug(chatterinoCache)
+            << "Loaded emote cache: " << id << "." << provider;
+        callback(doc);
+        return true;
+    }
+
+    // If the API call fails, we need to know if loading cached emotes was successful
+    return false;
 }
 
 }  // namespace chatterino

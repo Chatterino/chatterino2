@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QColor>
-#include <qjsondocument.h>
+#include <QJsonDocument>
 #include <QLocale>
 #include <QString>
 
