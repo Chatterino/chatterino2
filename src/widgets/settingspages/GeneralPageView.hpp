@@ -74,6 +74,8 @@ public:
 
 class ComboBox : public QComboBox
 {
+    Q_OBJECT
+
 protected:
     void wheelEvent(QWheelEvent *event) override
     {
@@ -83,6 +85,8 @@ protected:
 
 class SpinBox : public QSpinBox
 {
+    Q_OBJECT
+
 public:
     SpinBox(QWidget *parent = nullptr)
         : QSpinBox(parent)
