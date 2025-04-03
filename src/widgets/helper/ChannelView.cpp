@@ -1549,42 +1549,27 @@ void ChannelView::paintEvent(QPaintEvent *event)
     if (this->paused())
     {
         auto a = this->scale() * 20;
-        auto color = QColor(127, 127, 127, 255);
+        auto color = QColor(180, 180, 180, 255);
         auto brush = QBrush(color);
 
-        const auto widgetHeight = this->height();
-        const auto pausedY = widgetHeight - a - 5;
-        auto pausedX = 5;
-
-        painter.setPen(Qt::black);
-        painter.fillRect(QRectF(pausedX, pausedY, a / 4, a), brush);
-        painter.drawRect(QRectF(pausedX, pausedY, a / 4, a));
-
-        pausedX *= 3;
-        painter.fillRect(QRectF(pausedX, pausedY, a / 4, a), brush);
-        painter.drawRect(QRectF(pausedX, pausedY, a / 4, a));
+        const auto pausedY = a / 4;
+        const auto pausedX = 5;
 
         QFont font = painter.font();
         font.setPixelSize(a);
         painter.setFont(font);
 
-        const QString text = "Chat Paused";
+        const QString text = "Paused";
         const QFontMetrics metrics(font);
         const auto textWidth = metrics.horizontalAdvance(text);
-        const auto textX = pausedX + 10;
+        const auto textX = pausedX * 3 + 10;
 
-        for (int dx = -1; dx <= 1; ++dx)
-        {
-            for (int dy = -1; dy <= 1; ++dy)
-            {
-                if (dx != 0 || dy != 0)
-                {
-                    painter.drawText(
-                        QRectF(textX + dx, pausedY + dy, textWidth, a),
-                        Qt::AlignLeft | Qt::AlignVCenter, text);
-                }
-            }
-        }
+        painter.fillRect(
+            QRectF(0, 0, pausedX + textX + textWidth, a / 2 + a),
+            QBrush(QColor(0, 0, 0, 200), Qt::SolidPattern));
+
+        painter.fillRect(QRectF(pausedX, pausedY, a / 4, a), brush);
+        painter.fillRect(QRectF(pausedX * 3, pausedY, a / 4, a), brush);
 
         painter.setPen(color);
         painter.drawText(QRectF(textX, pausedY, textWidth, a),
