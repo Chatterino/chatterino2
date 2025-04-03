@@ -26,22 +26,25 @@ private:
 
 WebSocket::WebSocket() = default;
 
-void WebSocket::createUserType(sol::table &c2)
+void WebSocket::createUserType(sol::table &c2, Plugin *plugin)
 {
     c2.new_usertype<WebSocket>(
         "WebSocket",
-        sol::factories([](const QString &spec, sol::variadic_args args) {
+        sol::factories([plugin](const QString &spec, sol::variadic_args args) {
             QUrl url(spec);
             if (url.scheme() != "wss" && url.scheme() != "ws")
             {
                 throw std::runtime_error("Scheme must be wss:// or ws://");
             }
 
+            auto self = std::make_shared<WebSocket>();
+            self->plugin = plugin;
+
             WebSocketOptions opts{.url = url, .headers = {}};
             if (args.size() >= 1)
             {
                 sol::table luaOpts = args[0];
-                std::optional<sol::table> headers = luaOpts["headers"];
+                sol::optional<sol::table> headers = luaOpts["headers"];
                 if (headers)
                 {
                     for (const auto &[k, v] : *headers)
@@ -50,9 +53,24 @@ void WebSocket::createUserType(sol::table &c2)
                                                   v.as<std::string>());
                     }
                 }
+                sol::optional<sol::main_function> onText = luaOpts["on_text"];
+                sol::optional<sol::main_function> onBinary =
+                    luaOpts["on_binary"];
+                sol::optional<sol::main_function> onClose = luaOpts["on_close"];
+                if (onText)
+                {
+                    self->onText = std::move(*onText);
+                }
+                if (onBinary)
+                {
+                    self->onBinary = std::move(*onBinary);
+                }
+                if (onClose)
+                {
+                    self->onClose = std::move(*onClose);
+                }
             }
 
-            auto self = std::make_shared<WebSocket>();
             auto handle = getApp()->getPlugins()->webSocketPool().createSocket(
                 opts, std::make_unique<WebSocketListenerProxy>(self));
 
@@ -121,10 +139,7 @@ void WebSocketListenerProxy::onClose(std::unique_ptr<WebSocketListener> self)
             auto cb = std::move(strong->onClose);
             strong->onText.reset();
             strong->onBinary.reset();
-            if (cb)
-            {
-                cb();
-            }
+            loggedVoidCall(cb, u"WebSocket.on_close", strong->plugin);
         }
     });
 }
@@ -136,10 +151,8 @@ void WebSocketListenerProxy::onTextMessage(QByteArray data)
         auto strong = target.lock();
         if (strong)
         {
-            if (strong->onText)
-            {
-                strong->onText(data);
-            }
+            loggedVoidCall(strong->onText, u"WebSocket.on_text", strong->plugin,
+                           data);
         }
     });
 }
@@ -151,10 +164,8 @@ void WebSocketListenerProxy::onBinaryMessage(QByteArray data)
         auto strong = target.lock();
         if (strong)
         {
-            if (strong->onBinary)
-            {
-                strong->onBinary(data);
-            }
+            loggedVoidCall(strong->onBinary, u"WebSocket.on_binary",
+                           strong->plugin, data);
         }
     });
 }

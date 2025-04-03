@@ -228,7 +228,7 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
 
     if (plugin->hasNetworkPermission())
     {
-        lua::api::WebSocket::createUserType(c2);
+        lua::api::WebSocket::createUserType(c2, plugin);
     }
 
     sol::table io = g["io"];

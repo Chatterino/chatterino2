@@ -142,7 +142,12 @@ declare namespace c2 {
         new: (
             this: void,
             url: string,
-            options?: { headers?: Record<string, string> }
+            options?: {
+                headers?: Record<string, string>;
+                on_close?: () => void;
+                on_text?: (data: string) => void;
+                on_binary?: (data: string) => void;
+            }
         ) => WebSocket;
     }
     var WebSocket: WebSocketConstructor;

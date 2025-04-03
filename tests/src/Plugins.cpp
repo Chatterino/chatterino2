@@ -791,4 +791,24 @@ TEST_F(PluginTest, testWebSocketNoPerms)
     ASSERT_TRUE(res);
 }
 
+TEST_F(PluginTest, testApi)
+{
+    configure({PluginPermission{{{"type", "Network"}}}});
+
+    bool ok = lua->script(R"lua(
+        local t = function () end
+        local b = function () end
+        local c = function () end
+        local ws = c2.WebSocket.new("wss://127.0.0.1:9050/echo", { 
+            on_text = t,
+            on_binary = b,
+            on_close = c,
+        })
+
+        return ws.on_text == t and ws.on_binary == b and ws.on_close == c
+    )lua");
+
+    ASSERT_TRUE(ok);
+}
+
 #endif

@@ -526,6 +526,8 @@ void WebSocketConnectionHelper<Derived, Inner>::closeImpl()
             {
                 qCWarning(chatterinoWebsocket) << *this << "Failed to close"
                                                << QUtf8StringView(ec.message());
+                // make sure we cancel all operations
+                beast::get_lowest_layer(this->stream).close();
             }
             else
             {

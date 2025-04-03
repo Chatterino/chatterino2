@@ -1,10 +1,12 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/SolTypes.hpp"
 
+#    include "common/QLogging.hpp"
 #    include "controllers/plugins/PluginController.hpp"
 
 #    include <QObject>
 #    include <sol/thread.hpp>
+
 namespace chatterino::lua {
 
 Plugin *ThisPluginState::plugin()
@@ -20,6 +22,13 @@ Plugin *ThisPluginState::plugin()
     }
     this->plugptr_ = pl;
     return pl;
+}
+
+void logError(Plugin *plugin, QStringView context, const QString &msg)
+{
+    qCWarning(chatterinoLua).noquote()
+        << "[" + plugin->id + ":" + plugin->meta.name + "]" << context << "-"
+        << msg;
 }
 
 }  // namespace chatterino::lua

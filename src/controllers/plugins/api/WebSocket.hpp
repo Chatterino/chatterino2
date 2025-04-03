@@ -6,6 +6,10 @@
 #    include <sol/protected_function.hpp>
 #    include <sol/types.hpp>
 
+namespace chatterino {
+class Plugin;
+}  // namespace chatterino
+
 namespace chatterino::lua::api {
 
 /**
@@ -19,14 +23,14 @@ public:
      * connection is made immediately.
      *
      * @lua@param url string The URL to connect to. Must start with `wss://` or `ws://`.
-     * @lua@param options? { headers?: table<string, string> } Additional options for the connection.
+     * @lua@param options? { headers?: table<string, string>, on_close?: fun(), on_text?: fun(data: string), on_binary?: fun(data: string) } Additional options for the connection.
      * @lua@return c2.WebSocket
      * @lua@nodiscard
      * @exposed c2.WebSocket.new
      */
     WebSocket();
 
-    static void createUserType(sol::table &c2);
+    static void createUserType(sol::table &c2, Plugin *plugin);
 
     /**
      * Closes the socket.
@@ -63,6 +67,8 @@ private:
      */
     sol::main_function onBinary;
     WebSocketHandle handle;
+    // Note: this class lives inside the plugin -> this pointer will be valid.
+    Plugin *plugin = nullptr;
 
     friend class WebSocketListenerProxy;
 };
