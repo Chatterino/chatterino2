@@ -119,7 +119,7 @@ SettingWidget *SettingWidget::intInput(const QString &label,
 
     auto *lbl = new QLabel(label + ":");
 
-    auto *input = new QSpinBox;
+    auto *input = new SpinBox;
     if (params.min.has_value())
     {
         input->setMinimum(params.min.value());

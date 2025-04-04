@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
+- Bugfix: Fixed scrolling now working on inputs in the settings. (#6128)
 - Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
 - Dev: Pass `--force-openssl` when installing from CMake in Qt 6.8+. (#6129)
 
