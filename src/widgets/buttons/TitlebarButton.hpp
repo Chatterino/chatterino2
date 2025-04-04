@@ -1,27 +1,25 @@
 #pragma once
 
-#include "widgets/helper/Button.hpp"
+#include "widgets/buttons/DimButton.hpp"
 
 namespace chatterino {
 
-enum class TitleBarButtonStyle {
+enum class TitleBarButtonStyle : std::uint8_t {
     None = 0,
-    Minimize = 1,
-    Maximize = 2,
-    Unmaximize = 4,
-    Close = 8,
-    User = 16,
-    Settings = 32,
-    StreamerMode = 64,
+    Minimize = 1 << 0,
+    Maximize = 1 << 1,
+    Unmaximize = 1 << 2,
+    Close = 1 << 3,
+    Settings = 1 << 4,
 };
 
-class TitleBarButton : public Button
+class TitleBarButton : public DimButton
 {
 public:
-    TitleBarButton();
+    TitleBarButton(TitleBarButtonStyle style = {});
 
     TitleBarButtonStyle getButtonStyle() const;
-    void setButtonStyle(TitleBarButtonStyle style_);
+    void setButtonStyle(TitleBarButtonStyle style);
 
     /// Simulate a `mouseEnter` event.
     void ncEnter();
@@ -42,7 +40,9 @@ public:
     void ncMouseRelease(QPoint at);
 
 protected:
-    void paintEvent(QPaintEvent *) override;
+    void themeChangedEvent() override;
+
+    void paintContent(QPainter &painter) override;
 
 private:
     TitleBarButtonStyle style_{};

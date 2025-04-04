@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/helper/TitlebarButton.hpp"
+#include "widgets/buttons/TitlebarButton.hpp"
 
 #include <QPropertyAnimation>
 #include <QWidget>
