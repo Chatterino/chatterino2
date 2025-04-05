@@ -47,7 +47,7 @@ public:
                             const QString &channelId,
                             const QString &channelDisplayName,
                             std::function<void(EmoteMap &&)> callback,
-                            bool manualRefresh);
+                            bool manualRefresh, bool cacheHit);
 
     /**
      * Adds an emote to the `channelEmoteMap`.
