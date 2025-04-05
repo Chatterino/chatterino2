@@ -5,7 +5,6 @@
 
 #include <boost/asio/strand.hpp>
 
-
 namespace chatterino::ws::detail {
 
 WebSocketConnection::WebSocketConnection(
