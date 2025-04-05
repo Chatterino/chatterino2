@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
+- Bugfix: Make reply-cancel button less coarse-grained. (#6106)
 - Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
 - Dev: Pass `--force-openssl` when installing from CMake in Qt 6.8+. (#6129)
 
@@ -13,7 +14,6 @@
 - Bugfix: Fixed the channel name input not being focused when opening the select-channel dialog. (#6096)
 - Bugfix: Fixed inputs in dialogs not having a border around and padding in them. (#6098)
 - Bugfix: Don't set default binding for "Toggle local R9K" on macOS. Was <kbd>CTRL</kbd> + <kdb>H</kdb> before, which clashes with a system binding. (#5764)
-- Bugfix: Make reply-cancel button less coarse-grained. (#6106)
 - Bugfix: Don't add moderation buttons to your own Usercard. (#6107)
 - Dev: Temporarily disable precompiled header support for macOS. (#6104)
 
