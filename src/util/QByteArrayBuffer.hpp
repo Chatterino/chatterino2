@@ -64,7 +64,6 @@ struct QByteArrayBuffer {
         }
 
         constexpr ConstIterator operator--(int) noexcept
-
         {
             ConstIterator tmp = *this;
             --ptr;
@@ -92,7 +91,6 @@ struct QByteArrayBuffer {
 
     QByteArrayBuffer(QByteArray ba)
         : holder({std::move(ba)})
-
     {
     }
 
