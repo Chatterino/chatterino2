@@ -69,6 +69,10 @@ private:
 template <typename T, typename... Args>
 inline nonstd::expected_lite::expected<T, QString> tryCall(const auto &function,
                                                            Args &&...args)
+    requires(std::same_as<std::remove_cvref_t<decltype(function)>,
+                          sol::protected_function> ||
+             std::same_as<std::remove_cvref_t<decltype(function)>,
+                          sol::main_protected_function>)
 {
     sol::protected_function_result result =
         function(std::forward<Args>(args)...);
