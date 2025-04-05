@@ -9,6 +9,7 @@
 #    include "util/Helpers.hpp"
 #    include "util/LayoutCreator.hpp"
 #    include "util/RemoveScrollAreaBackground.hpp"
+#    include "widgets/PluginRepl.hpp"
 
 #    include <QCheckBox>
 #    include <QFormLayout>
@@ -231,6 +232,13 @@ void PluginsPage::rebuildContent()
         {
             reloadButton->setEnabled(false);
         }
+
+        auto *replButton = new QPushButton("Open REPL", this->dataFrame_);
+        QObject::connect(replButton, &QPushButton::clicked, [id]() {
+            auto *repl = new PluginRepl(id);
+            repl->show();
+        });
+        pluginEntry->addRow(replButton);
     }
 }
 

@@ -276,6 +276,8 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     }
     temp->dataDirectory().mkpath(".");
 
+    // make sure we capture log messages during load
+    this->onPluginLoaded_(temp);
     qCDebug(chatterinoLua) << "Running lua file:" << index;
     int err = luaL_dofile(l, index.absoluteFilePath().toStdString().c_str());
     if (err != 0)
@@ -426,6 +428,12 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
     }
 
     return {false, results};
+}
+
+boost::signals2::connection PluginController::onPluginLoaded(
+    const OnPluginLoaded::slot_type &slot)
+{
+    return this->onPluginLoaded_.connect(slot);
 }
 
 }  // namespace chatterino

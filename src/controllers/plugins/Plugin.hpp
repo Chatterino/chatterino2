@@ -7,6 +7,7 @@
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/PluginPermission.hpp"
 
+#    include <boost/signals2/signal.hpp>
 #    include <QDir>
 #    include <QString>
 #    include <QUrl>
@@ -21,6 +22,10 @@
 
 struct lua_State;
 class QTimer;
+
+namespace chatterino::lua::api {
+enum class LogLevel;
+}  // namespace chatterino::lua::api
 
 namespace chatterino {
 
@@ -65,6 +70,10 @@ struct PluginMeta {
 
 class Plugin
 {
+    using OnDestroyed = boost::signals2::signal<void()>;
+    using OnLog =
+        boost::signals2::signal<void(lua::api::LogLevel, const QString &)>;
+
 public:
     QString id;
     PluginMeta meta;
@@ -137,6 +146,14 @@ public:
     bool hasFSPermissionFor(bool write, const QString &path);
     bool hasHTTPPermissionFor(const QUrl &url);
 
+    boost::signals2::connection onDestroyed(const OnDestroyed::slot_type &slot);
+    boost::signals2::connection onLog(const OnLog::slot_type &slot);
+
+    void log(lua_State *L, lua::api::LogLevel level, QDebug stream,
+             const sol::variadic_args &args);
+
+    sol::state_view state();
+
     std::map<lua::api::EventType, sol::protected_function> callbacks;
 
     // In-flight HTTP Requests
@@ -153,6 +170,9 @@ private:
     std::unordered_map<QString, sol::protected_function> ownedCommands;
     std::vector<QTimer *> activeTimeouts;
     int lastTimerId = 0;
+
+    OnDestroyed onDestroyed_;
+    OnLog onLog_;
 
     friend class PluginController;
     friend class PluginControllerAccess;  // this is for tests
