@@ -505,6 +505,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                      "message to help better tell them apart.")
         ->addTo(layout);
 
+    SettingWidget::checkbox("Reduce opacity of message history",
+                            s.fadeMessageHistory)
+        ->setTooltip(
+            "Reduce opacity of messages that were posted before Chatterino "
+            "was started or while re-connection.")
+        ->addTo(layout);
+
     SettingWidget::checkbox("Hide deleted messages", s.hideModerated)
         ->setTooltip(
             "When enabled, messages deleted by moderators will be hidden.")
