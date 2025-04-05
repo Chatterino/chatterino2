@@ -2,6 +2,12 @@
 
 ## Unversioned
 
+- Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
+- Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
+- Dev: Pass `--force-openssl` when installing from CMake in Qt 6.8+. (#6129)
+
+## 2.5.3
+
 - Minor: Shared chat messages now use the source channel's profile picture to denote it's a shared chat message. (#5760)
 - Minor: Moved the "Delete message" menu option into a "Moderate" sub-menu. (#6100)
 - Bugfix: Fixed the channel name input not being focused when opening the select-channel dialog. (#6096)
