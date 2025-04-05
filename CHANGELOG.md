@@ -2,9 +2,9 @@
 
 ## Unversioned
 
+- Minor: Make paused chat indicator more visible. (#6123)
 - Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
 - Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
-- Minor: Make paused chat indicator more visible. (#6123)
 
 ## 2.5.3
 
