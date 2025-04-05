@@ -70,6 +70,7 @@ protected:
 
     std::deque<std::pair<bool, QByteArrayBuffer>> queuedMessages;
     bool isSending = false;
+    bool isClosing = false;
     int id = 0;
 
     boost::beast::flat_buffer readBuffer;

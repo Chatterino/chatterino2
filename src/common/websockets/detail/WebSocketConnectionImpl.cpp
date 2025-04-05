@@ -276,7 +276,18 @@ void WebSocketConnectionHelper<Derived, Inner>::trySend()
 template <typename Derived, typename Inner>
 void WebSocketConnectionHelper<Derived, Inner>::closeImpl()
 {
+    if (this->isClosing)
+    {
+        return;
+    }
+    this->isClosing = true;
+
     qCDebug(chatterinoWebsocket) << *this << "Closing...";
+
+    // cancel all pending operations
+    this->resolver.cancel();
+    beast::get_lowest_layer(this->stream).cancel();
+
     this->stream.async_close(
         beast::websocket::close_code::normal,
         [this, lifetime{this->shared_from_this()}](auto ec) {

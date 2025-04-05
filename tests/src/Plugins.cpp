@@ -791,7 +791,7 @@ TEST_F(PluginTest, testWebSocketNoPerms)
     ASSERT_TRUE(res);
 }
 
-TEST_F(PluginTest, testApi)
+TEST_F(PluginTest, testWebSocketApi)
 {
     configure({PluginPermission{{{"type", "Network"}}}});
 
