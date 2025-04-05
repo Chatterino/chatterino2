@@ -9,6 +9,7 @@
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "controllers/userdata/UserDataController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
@@ -27,6 +28,7 @@
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
+#include "widgets/dialogs/EditUserNotesDialog.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/InvisibleSizeGrip.hpp"
@@ -55,6 +57,7 @@ constexpr QStringView TEXT_UNAVAILABLE = u"(not available)";
 constexpr QStringView TEXT_PRONOUNS = u"Pronouns: %1";
 constexpr QStringView TEXT_UNSPECIFIED = u"(unspecified)";
 constexpr QStringView TEXT_LOADING = u"(loading...)";
+constexpr qsizetype NOTES_PREVIEW_LENGTH = 80;
 
 using namespace chatterino;
 
@@ -407,6 +410,9 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
             .assign(&this->ui_.ignoreHighlights);
         // visibility of this is updated in setData
 
+        auto notesAdd =
+            user.emplace<EffectLabel2>(this).assign(&this->ui_.notesAdd);
+        notesAdd->getLabel().setText("Add notes");
         auto usercard =
             user.emplace<EffectLabel2>(this).assign(&this->ui_.usercardLabel);
         usercard->getLabel().setText("Usercard");
@@ -484,6 +490,9 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
             unvip->setVisible(visibilityModButtons);
         });
     }
+
+    auto notesPreview = layout.emplace<Label>().assign(&ui_.notesPreview);
+    notesPreview->setVisible(false);
 
     auto lineMod = layout.emplace<Line>(false);
 
@@ -618,6 +627,15 @@ void UserInfoPopup::scaleChangedEvent(float /*scale*/)
     });
 }
 
+void UserInfoPopup::windowDeactivationEvent()
+{
+    if (this->editUserNotesDialog_.isNull() ||
+        !this->editUserNotesDialog_->isVisible())
+    {
+        BaseWindow::windowDeactivationEvent();
+    }
+}
+
 void UserInfoPopup::installEvents()
 {
     std::shared_ptr<bool> ignoreNext = std::make_shared<bool>(false);
@@ -742,6 +760,35 @@ void UserInfoPopup::installEvents()
                 }
             }
         });
+
+    // user notes
+    QObject::connect(
+        this->ui_.notesAdd, &EffectLabel2::clicked, [this]() mutable {
+            if (this->editUserNotesDialog_.isNull())
+            {
+                this->editUserNotesDialog_ = new EditUserNotesDialog(this);
+                // ignoring since it the dialog is only used in this instance
+                std::ignore = this->editUserNotesDialog_->onOk.connect(
+                    [userId = this->userId_](const QString &newNotes) {
+                        getApp()->getUserData()->setUserNotes(userId, newNotes);
+                    });
+            }
+
+            auto userData = getApp()->getUserData()->getUser(this->userId_);
+            auto initialNotes =
+                userData.has_value() ? userData->notes : QString();
+
+            this->editUserNotesDialog_->setNotes(initialNotes);
+            this->editUserNotesDialog_->updateWindowTitle(this->userName_);
+            this->editUserNotesDialog_->show();
+        });
+
+    // user data updated
+    this->userDataUpdatedConnection_ =
+        std::make_unique<pajlada::Signals::ScopedConnection>(
+            getApp()->getUserData()->userDataUpdated().connect([this]() {
+                this->updateNotes();
+            }));
 }
 
 void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
@@ -758,6 +805,7 @@ void UserInfoPopup::setData(const QString &name,
     if (isId)
     {
         this->userId_ = name.mid(idPrefix.size());
+        updateNotes();
         this->userName_ = "";
     }
     else
@@ -879,6 +927,7 @@ void UserInfoPopup::updateUserData()
         }
 
         this->userId_ = user.id;
+        this->updateNotes();
         this->avatarUrl_ = user.profileImageUrl;
 
         // copyable button for login name of users with a localized username
@@ -1081,6 +1130,31 @@ void UserInfoPopup::loadAvatar(const QUrl &url)
     });
 }
 
+void UserInfoPopup::updateNotes()
+{
+    static QRegularExpression onlySpaceRegex{"^\\s*$"};
+
+    auto userData = getApp()->getUserData()->getUser(this->userId_);
+    if (!userData.has_value() ||
+        onlySpaceRegex.match(userData->notes).hasMatch())
+    {
+        this->ui_.notesPreview->setText("");
+        this->ui_.notesPreview->setVisible(false);
+        return;
+    }
+
+    static QRegularExpression spaceRegex{"\\s+"};
+
+    auto previewText = "Notes: " + userData->notes.replace(spaceRegex, " ");
+    if (previewText.length() > NOTES_PREVIEW_LENGTH)
+    {
+        previewText = previewText.left(NOTES_PREVIEW_LENGTH - 3) + "...";
+    }
+
+    this->ui_.notesPreview->setText(previewText);
+    this->ui_.notesPreview->setVisible(true);
+}
+
 //
 // TimeoutWidget
 //
@@ -1141,42 +1215,6 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
                              [this, pair] {
                                  this->buttonClicked.invoke(pair);
                              });
-
-            //auto addTimeouts = [&](const QString &title_,
-            //                       const std::vector<std::pair<QString, int>> &items) {
-            //    auto vbox = layout.emplace<QVBoxLayout>().withoutMargin();
-            //    {
-            //        auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
-            //        title->addStretch(1);
-            //        auto label = title.emplace<Label>(title_);
-            //        label->setStyleSheet("color: #BBB");
-            //        label->setHasOffset(false);
-            //        title->addStretch(1);
-
-            //        auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
-            //        hbox->setSpacing(0);
-
-            //        for (const auto &item : items)
-            //        {
-            //            auto a = hbox.emplace<EffectLabel2>();
-            //            a->getLabel().setText(std::get<0>(item));
-
-            //            if (std::get<0>(item).length() > 1)
-            //            {
-            //                a->setScaleIndependantSize(buttonWidth2, buttonHeight);
-            //            }
-            //            else
-            //            {
-            //                a->setScaleIndependantSize(buttonWidth, buttonHeight);
-            //            }
-            //            a->setBorderColor(color1);
-
-            //            QObject::connect(a.getElement(), &EffectLabel2::leftClicked,
-            //                             [this, timeout = std::get<1>(item)] {
-            //                                 this->buttonClicked.invoke(std::make_pair(
-            //                                     Action::Timeout, timeout));
-            //                             });
-            //        }
         }
     };
 

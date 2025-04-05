@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added user notes to the user info dialog (when clicking a username). (#6122)
 - Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
 - Bugfix: Make reply-cancel button less coarse-grained. (#6106)
 - Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
