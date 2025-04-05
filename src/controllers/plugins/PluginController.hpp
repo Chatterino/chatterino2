@@ -2,9 +2,9 @@
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 
+#    include "common/websockets/WebSocketPool.hpp"
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/plugins/Plugin.hpp"
-#    include "singletons/WebSocketPool.hpp"
 
 #    include <QDir>
 #    include <QFileInfo>

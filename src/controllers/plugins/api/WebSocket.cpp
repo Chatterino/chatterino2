@@ -1,12 +1,12 @@
 #include "controllers/plugins/api/WebSocket.hpp"
 
-#include <utility>
-
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "Application.hpp"
 #    include "controllers/plugins/PluginController.hpp"
 #    include "controllers/plugins/SolTypes.hpp"  // IWYU pragma: keep
 #    include "util/PostToThread.hpp"
+
+#    include <utility>
 
 namespace chatterino::lua::api {
 

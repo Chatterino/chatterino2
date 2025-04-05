@@ -1,7 +1,7 @@
 #pragma once
 #ifdef CHATTERINO_HAVE_PLUGINS
 
-#    include "singletons/WebSocketPool.hpp"
+#    include "common/websockets/WebSocketPool.hpp"
 
 #    include <sol/protected_function.hpp>
 #    include <sol/types.hpp>

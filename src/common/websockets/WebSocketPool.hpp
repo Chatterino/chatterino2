@@ -5,10 +5,12 @@
 
 #include <memory>
 
-namespace chatterino {
-
-class WebSocketPoolPrivate;
+namespace chatterino::ws::detail {
+class WebSocketPoolImpl;
 class WebSocketConnection;
+}  // namespace chatterino::ws::detail
+
+namespace chatterino {
 
 /// A handle to a websocket connection.
 ///
@@ -21,7 +23,7 @@ class WebSocketHandle
 {
 public:
     WebSocketHandle() = default;
-    WebSocketHandle(std::weak_ptr<WebSocketConnection> conn);
+    WebSocketHandle(std::weak_ptr<ws::detail::WebSocketConnection> conn);
     ~WebSocketHandle();
 
     WebSocketHandle(const WebSocketHandle &) = delete;
@@ -34,7 +36,7 @@ public:
     void close();
 
 private:
-    std::weak_ptr<WebSocketConnection> conn;
+    std::weak_ptr<ws::detail::WebSocketConnection> conn;
 };
 
 struct WebSocketListener {
@@ -74,7 +76,7 @@ public:
         WebSocketOptions options, std::unique_ptr<WebSocketListener> listener);
 
 private:
-    std::unique_ptr<WebSocketPoolPrivate> data;
+    std::unique_ptr<ws::detail::WebSocketPoolImpl> impl;
 };
 
 }  // namespace chatterino

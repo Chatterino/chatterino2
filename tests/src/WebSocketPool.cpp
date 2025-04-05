@@ -1,4 +1,4 @@
-#include "singletons/WebSocketPool.hpp"
+#include "common/websockets/WebSocketPool.hpp"
 
 #include "mocks/BaseApplication.hpp"
 #include "Test.hpp"

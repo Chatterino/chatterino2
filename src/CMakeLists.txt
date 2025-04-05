@@ -57,6 +57,15 @@ set(SOURCE_FILES
         common/network/NetworkTask.cpp
         common/network/NetworkTask.hpp
 
+        common/websockets/WebSocketPool.cpp
+        common/websockets/WebSocketPool.hpp
+        common/websockets/detail/WebSocketConnection.cpp
+        common/websockets/detail/WebSocketConnection.hpp
+        common/websockets/detail/WebSocketConnectionImpl.cpp
+        common/websockets/detail/WebSocketConnectionImpl.hpp
+        common/websockets/detail/WebSocketPoolImpl.cpp
+        common/websockets/detail/WebSocketPoolImpl.hpp
+
         controllers/accounts/Account.cpp
         controllers/accounts/Account.hpp
         controllers/accounts/AccountController.cpp
@@ -490,8 +499,6 @@ set(SOURCE_FILES
         singletons/Updates.hpp
         singletons/WindowManager.cpp
         singletons/WindowManager.hpp
-        singletons/WebSocketPool.cpp
-        singletons/WebSocketPool.hpp
 
         singletons/helper/GifTimer.cpp
         singletons/helper/GifTimer.hpp
