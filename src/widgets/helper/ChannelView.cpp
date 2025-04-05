@@ -1566,11 +1566,15 @@ void ChannelView::paintEvent(QPaintEvent *event)
         const auto textWidth = metrics.horizontalAdvance(text);
         const auto textX = pausedX * 3 + 10 * scale;
 
-        painter.fillRect(QRectF(0, 0, pausedX + textX + textWidth, indicatorSize / 2 + indicatorSize),
+        painter.fillRect(QRectF(0, 0, pausedX + textX + textWidth,
+                                indicatorSize / 2 + indicatorSize),
                          QBrush(QColor(0, 0, 0, 200), Qt::SolidPattern));
 
-        painter.fillRect(QRectF(pausedX, pausedY, indicatorSize / 4, indicatorSize), brush);
-        painter.fillRect(QRectF(pausedX * 3, pausedY, indicatorSize / 4, indicatorSize), brush);
+        painter.fillRect(
+            QRectF(pausedX, pausedY, indicatorSize / 4, indicatorSize), brush);
+        painter.fillRect(
+            QRectF(pausedX * 3, pausedY, indicatorSize / 4, indicatorSize),
+            brush);
 
         painter.setPen(color);
         painter.drawText(QRectF(textX, pausedY, textWidth, indicatorSize),
