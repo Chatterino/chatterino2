@@ -9,32 +9,31 @@ namespace chatterino {
 // Taken from
 // https://stackoverflow.com/questions/21646467/how-to-execute-a-functor-or-a-lambda-in-a-given-thread-in-qt-gcd-style
 // Qt 5/4 - preferred, has least allocations
-template <typename F>
-static void postToThread(F &&fun, QObject *obj = QCoreApplication::instance())
+static void postToThread(auto &&f, QObject *obj = QCoreApplication::instance())
 {
     struct Event : public QEvent {
-        using Fun = typename std::decay<F>::type;
+        using Fun = typename std::decay_t<decltype(f)>;
         Fun fun;
-        Event(Fun &&fun)
+
+        Event(decltype(fun) f)
             : QEvent(QEvent::None)
-            , fun(std::move(fun))
+            , fun(std::forward<decltype(fun)>(f))
         {
         }
-        Event(const Fun &fun)
-            : QEvent(QEvent::None)
-            , fun(fun)
-        {
-        }
+        Event(const Event &) = delete;
+        Event(Event &&) = delete;
+        Event &operator=(const Event &) = delete;
+        Event &operator=(Event &&) = delete;
+
         ~Event() override
         {
             fun();
         }
     };
-    QCoreApplication::postEvent(obj, new Event(std::forward<F>(fun)));
+    QCoreApplication::postEvent(obj, new Event(std::forward<decltype(f)>(f)));
 }
 
-template <typename F>
-static void runInGuiThread(F &&fun)
+static void runInGuiThread(auto &&fun)
 {
     if (isGuiThread())
     {
@@ -42,17 +41,16 @@ static void runInGuiThread(F &&fun)
     }
     else
     {
-        postToThread(fun);
+        postToThread(std::forward<decltype(fun)>(fun));
     }
 }
 
-template <typename F>
-inline void postToGuiThread(F &&fun)
+inline void postToGuiThread(auto &&fun)
 {
     assert(!isGuiThread() &&
            "postToGuiThread must be called from a non-GUI thread");
 
-    postToThread(std::forward<F>(fun));
+    postToThread(std::forward<decltype(fun)>(fun));
 }
 
 }  // namespace chatterino

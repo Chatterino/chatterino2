@@ -67,8 +67,12 @@ private:
 /// `std::optional<T>` means nil|LuaEquiv<T> (or zero returns)
 /// A return type that doesn't match returns an error
 template <typename T, typename... Args>
-inline nonstd::expected_lite::expected<T, QString> tryCall(
-    const sol::protected_function &function, Args &&...args)
+inline nonstd::expected_lite::expected<T, QString> tryCall(const auto &function,
+                                                           Args &&...args)
+    requires(std::same_as<std::remove_cvref_t<decltype(function)>,
+                          sol::protected_function> ||
+             std::same_as<std::remove_cvref_t<decltype(function)>,
+                          sol::main_protected_function>)
 {
     sol::protected_function_result result =
         function(std::forward<Args>(args)...);
@@ -146,6 +150,27 @@ inline nonstd::expected_lite::expected<T, QString> tryCall(
         }
         // non other exceptions we let it explode
     }
+}
+
+void logError(Plugin *plugin, QStringView context, const QString &msg);
+
+template <typename T>
+bool hasValueOrLog(const nonstd::expected<T, QString> &res, QStringView context,
+                   Plugin *plugin)
+{
+    if (!res.has_value())
+    {
+        logError(plugin, context, res.error());
+        return false;
+    }
+    return true;
+}
+
+void loggedVoidCall(const auto &fn, QStringView context, Plugin *plugin,
+                    auto &&...args)
+{
+    auto res = tryCall<void>(fn, std::forward<decltype(args)>(args)...);
+    hasValueOrLog(res, context, plugin);
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
