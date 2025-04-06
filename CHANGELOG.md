@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Make paused chat indicator more visible, and fix its zoom behavior. (#6123)
 - Minor: Added WebSocket API for plugins. (#6076)
 - Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
 - Bugfix: Make reply-cancel button less coarse-grained. (#6106)
