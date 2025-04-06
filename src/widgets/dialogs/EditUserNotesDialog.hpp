@@ -20,7 +20,7 @@ public:
     pajlada::Signals::Signal<const QString &> onOk;
 
 private:
-    QTextEdit *textEdit_;
+    QTextEdit *textEdit_{};
 };
 
 }  // namespace chatterino
