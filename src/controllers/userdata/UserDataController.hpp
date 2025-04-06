@@ -63,7 +63,7 @@ private:
 
     std::shared_ptr<pajlada::Settings::SettingManager> sm;
     pajlada::Settings::Setting<std::unordered_map<QString, UserData>> setting;
-    pajlada::Signals::NoArgSignal updateDataUpdated_;
+    pajlada::Signals::NoArgSignal userDataUpdated_;
 };
 
 }  // namespace chatterino

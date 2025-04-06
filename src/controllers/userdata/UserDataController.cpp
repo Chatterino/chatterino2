@@ -110,7 +110,7 @@ void UserDataController::update(
     // unlock before invoking updated signal
     usersLock.unlock();
 
-    this->updateDataUpdated_.invoke();
+    this->userDataUpdated_.invoke();
 }
 
 void UserDataController::setUserNotes(const QString &userID,
@@ -131,7 +131,7 @@ void UserDataController::setUserNotes(const QString &userID,
 
 pajlada::Signals::NoArgSignal &UserDataController::userDataUpdated()
 {
-    return this->updateDataUpdated_;
+    return this->userDataUpdated_;
 }
 
 }  // namespace chatterino
