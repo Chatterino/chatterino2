@@ -6,6 +6,7 @@
 - Minor: Added WebSocket API for plugins. (#6076)
 - Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
 - Bugfix: Make reply-cancel button less coarse-grained. (#6106)
+- Bugfix: Fixed missing BetterTTV live updates of emotes. (#6132)
 - Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
 - Dev: Pass `--force-openssl` when installing from CMake in Qt 6.8+. (#6129)
 
