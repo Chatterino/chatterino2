@@ -654,12 +654,12 @@ void PluginRepl::setPlugin(Plugin *plugin)
         return;
     }
 
-    this->pluginDestroyConn = this->plugin->onDestroyed([this] {
+    this->pluginDestroyConn = this->plugin->onDestroyed.connect([this] {
         this->setPlugin(nullptr);
         this->log({}, u"Disconnected."_s);
     });
     this->pluginLogConn =
-        this->plugin->onLog([this](auto level, const auto &text) {
+        this->plugin->onLog.connect([this](auto level, const auto &text) {
             this->log(level, text);
         });
 

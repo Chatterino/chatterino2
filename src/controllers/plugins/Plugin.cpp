@@ -218,7 +218,7 @@ std::unordered_set<QString> Plugin::listRegisteredCommands()
 
 Plugin::~Plugin()
 {
-    this->onDestroyed_();
+    this->onDestroyed();
 
     for (auto *timer : this->activeTimeouts)
     {
@@ -295,17 +295,6 @@ bool Plugin::hasHTTPPermissionFor(const QUrl &url)
     });
 }
 
-boost::signals2::connection Plugin::onDestroyed(
-    const OnDestroyed::slot_type &slot)
-{
-    return this->onDestroyed_.connect(slot);
-}
-
-boost::signals2::connection Plugin::onLog(const OnLog::slot_type &slot)
-{
-    return this->onLog_.connect(slot);
-}
-
 void Plugin::log(lua_State *L, lua::api::LogLevel level, QDebug stream,
                  const sol::variadic_args &args)
 {
@@ -327,7 +316,7 @@ void Plugin::log(lua_State *L, lua::api::LogLevel level, QDebug stream,
         lua_pop(L, 1);
     }
 
-    this->onLog_(level, fullMessage);
+    this->onLog(level, fullMessage);
 }
 
 sol::state_view Plugin::state()
