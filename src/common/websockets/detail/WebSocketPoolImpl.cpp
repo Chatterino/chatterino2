@@ -23,8 +23,8 @@ WebSocketPoolImpl::WebSocketPoolImpl()
         ec);
     if (ec)
     {
-        qCWarning(chatterinoWebsocket)
-            << "Failed to set SSL context options" << ec.message();
+        qCWarning(chatterinoWebsocket) << "Failed to set SSL context options"
+                                       << QString::fromStdString(ec.message());
     }
 
 #ifdef CHATTERINO_WITH_TESTS
