@@ -5,6 +5,7 @@
 - Minor: Add an option for the reduced opacity of message history. (#6121)
 - Minor: Make paused chat indicator more visible, and fix its zoom behavior. (#6123)
 - Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
+- Bugfix: Fixed scrolling now working on inputs in the settings. (#6128)
 - Bugfix: Make reply-cancel button less coarse-grained. (#6106)
 - Bugfix: Fixed missing BetterTTV live updates of emotes. (#6132)
 - Bugfix: Handle <kbd>CMD</kbd> + <kbd>BACKSPACE</kbd> behavior explicitly in main chat dialog input for macOS. (#6111)
