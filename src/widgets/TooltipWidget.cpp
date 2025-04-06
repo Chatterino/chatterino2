@@ -30,6 +30,15 @@ inline constexpr T *tooltipParentFor(T *desiredParent)
 
 namespace chatterino {
 
+void TooltipEntry::scaleImg(float scale)
+{
+    if (this->image)
+    {
+        this->customWidth = this->image->width() * scale;
+        this->customHeight = this->image->height() * scale;
+    }
+}
+
 TooltipWidget::TooltipWidget(BaseWidget *parent)
     : BaseWindow({BaseWindow::TopMost, BaseWindow::DontFocus,
                   BaseWindow::DisableLayoutSave},

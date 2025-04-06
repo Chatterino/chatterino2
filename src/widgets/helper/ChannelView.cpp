@@ -2027,12 +2027,15 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 
             if (emoteElement)
             {
-                this->tooltipWidget_->setOne({
-                    showThumbnail
-                        ? emoteElement->getEmote()->images.getImage(3.0)
-                        : nullptr,
-                    element->getTooltip(),
-                });
+                auto scale = getSettings()->emoteTooltipScale.getValue();
+                TooltipEntry entry = {
+                    .image =
+                        showThumbnail
+                            ? emoteElement->getEmote()->images.getImage(scale)
+                            : nullptr,
+                    .text = element->getTooltip()};
+                entry.scaleImg(scale);
+                this->tooltipWidget_->setOne(entry);
             }
             else if (layeredEmoteElement)
             {
@@ -2063,18 +2066,28 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                         if (i == 0)
                         {
                             // First entry gets a large image and full description
-                            entries.push_back({showThumbnail
-                                                   ? emote->images.getImage(3.0)
-                                                   : nullptr,
-                                               emoteTooltips[i]});
+                            auto scale =
+                                getSettings()->emoteTooltipScale.getValue();
+                            TooltipEntry entry = {
+                                .image = showThumbnail
+                                             ? emote->images.getImage(scale)
+                                             : nullptr,
+                                .text = emoteTooltips[i]};
+                            entry.scaleImg(scale);
+                            entries.push_back(entry);
                         }
                         else
                         {
                             // Every other entry gets a small image and just the emote name
-                            entries.push_back({showThumbnail
-                                                   ? emote->images.getImage(1.0)
-                                                   : nullptr,
-                                               emote->name.string});
+                            auto scale =
+                                getSettings()->emoteTooltipScale.getValue() / 3;
+                            TooltipEntry entry = {
+                                .image = showThumbnail
+                                             ? emote->images.getImage(scale)
+                                             : nullptr,
+                                .text = emote->name.string};
+                            entry.scaleImg(scale);
+                            entries.push_back(entry);
                         }
                     }
 
@@ -2091,12 +2104,15 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             }
             else if (badgeElement)
             {
-                this->tooltipWidget_->setOne({
-                    showThumbnail
-                        ? badgeElement->getEmote()->images.getImage(3.0)
-                        : nullptr,
-                    element->getTooltip(),
-                });
+                auto scale = getSettings()->emoteTooltipScale.getValue();
+                TooltipEntry entry = {
+                    .image =
+                        showThumbnail
+                            ? badgeElement->getEmote()->images.getImage(scale)
+                            : nullptr,
+                    .text = element->getTooltip()};
+                entry.scaleImg(scale);
+                this->tooltipWidget_->setOne(entry);
             }
         }
         else
