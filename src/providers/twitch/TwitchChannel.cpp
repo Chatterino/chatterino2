@@ -1021,12 +1021,12 @@ void TwitchChannel::joinBttvChannel() const
     {
         const auto currentAccount =
             getApp()->getAccounts()->twitch.getCurrent();
-        QString userName;
+        QString userID;
         if (currentAccount && !currentAccount->isAnon())
         {
-            userName = currentAccount->getUserName();
+            userID = currentAccount->getUserId();
         }
-        getApp()->getBttvLiveUpdates()->joinChannel(this->roomId(), userName);
+        getApp()->getBttvLiveUpdates()->joinChannel(this->roomId(), userID);
     }
 }
 
