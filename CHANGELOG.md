@@ -2,7 +2,13 @@
 
 ## Unversioned
 
+- Minor: Make paused chat indicator more visible, and fix its zoom behavior. (#6123)
+- Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
+- Bugfix: Make reply-cancel button less coarse-grained. (#6106)
+- Bugfix: Fixed missing BetterTTV live updates of emotes. (#6132)
 - Bugfix: Handle <kbd>CMD</kbd> + <kbd>BACKSPACE</kbd> behavior explicitly in main chat dialog input for macOS. (#6111)
+- Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
+- Dev: Pass `--force-openssl` when installing from CMake in Qt 6.8+. (#6129)
 
 ## 2.5.3
 

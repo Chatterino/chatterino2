@@ -929,7 +929,18 @@ if (BUILD_APP)
         get_filename_component(QT_BIN_DIR ${QT_CORE_LOC} DIRECTORY)
 
         # This assumes the installed CRT is up-to-date (see .CI/deploy-crt.ps1)
-        set(WINDEPLOYQT_COMMAND_ARGV "${WINDEPLOYQT_PATH}" "$<TARGET_FILE:${EXECUTABLE_PROJECT}>" ${WINDEPLOYQT_MODE} --no-compiler-runtime --no-translations --no-opengl-sw)
+        set(WINDEPLOYQT_COMMAND_ARGV
+            "${WINDEPLOYQT_PATH}"
+            "$<TARGET_FILE:${EXECUTABLE_PROJECT}>"
+            ${WINDEPLOYQT_MODE}
+            --no-compiler-runtime
+            --no-translations
+            --no-opengl-sw
+        )
+        if (Qt6_VERSION VERSION_GREATER_EQUAL "6.8.0")
+            # windeployqt expects to find openssl in '/bin' but we deploy it in '/'.
+            list(APPEND WINDEPLOYQT_COMMAND_ARGV --force-openssl)
+        endif()
         string(REPLACE ";" " " WINDEPLOYQT_COMMAND "${WINDEPLOYQT_COMMAND_ARGV}")
 
         install(TARGETS ${EXECUTABLE_PROJECT} 

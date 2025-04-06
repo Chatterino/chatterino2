@@ -21,13 +21,13 @@ BttvLiveUpdates::~BttvLiveUpdates()
 }
 
 void BttvLiveUpdates::joinChannel(const QString &channelID,
-                                  const QString &userName)
+                                  const QString &userID)
 {
     if (this->joinedChannels_.insert(channelID).second)
     {
         this->subscribe({BttvLiveUpdateSubscriptionChannel{channelID}});
         this->subscribe({BttvLiveUpdateBroadcastMe{.twitchID = channelID,
-                                                   .userName = userName}});
+                                                   .userID = userID}});
     }
 }
 
