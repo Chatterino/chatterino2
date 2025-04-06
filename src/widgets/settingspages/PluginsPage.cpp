@@ -236,7 +236,9 @@ void PluginsPage::rebuildContent()
 #    ifdef NDEBUG
         bool userIsAuthor =
             std::ranges::any_of(plugin->meta.authors, [](const auto &name) {
-                return name == getApp()->getAccounts()->twitch.currentUsername;
+                return name.compare(
+                           getApp()->getAccounts()->twitch.currentUsername,
+                           Qt::CaseInsensitive) == 0;
             });
 
         if (userIsAuthor || getSettings()->pluginRepl.enableForAllPlugins)
