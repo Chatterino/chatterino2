@@ -182,6 +182,10 @@ template <typename Derived, typename Inner>
 void WebSocketConnectionHelper<Derived, Inner>::onWsHandshake(
     boost::system::error_code ec)
 {
+    if (!this->listener || this->isClosing)
+    {
+        return;
+    }
     if (ec)
     {
         this->fail(ec, u"WS handshake");
@@ -201,7 +205,7 @@ template <typename Derived, typename Inner>
 void WebSocketConnectionHelper<Derived, Inner>::onReadDone(
     boost::system::error_code ec, size_t bytesRead)
 {
-    if (!this->listener)
+    if (!this->listener || this->isClosing)
     {
         return;
     }

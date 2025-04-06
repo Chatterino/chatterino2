@@ -41,6 +41,7 @@ WebSocketPoolImpl::WebSocketPoolImpl()
 
     this->ioThread = std::make_unique<std::thread>([this] {
         this->ioc.run();
+        this->stoppedFlag.set();
     });
     renameThread(*this->ioThread, "WebSocketPool");
 }
@@ -60,10 +61,18 @@ WebSocketPoolImpl::~WebSocketPoolImpl()
     {
         return;
     }
-    if (this->ioThread->joinable())
+
+    // Note:
+    if (this->stoppedFlag.waitFor(std::chrono::milliseconds{1000}))
     {
         this->ioThread->join();
+        return;
     }
+
+    qCWarning(chatterinoWebsocket)
+        << "IO-Thread didn't finish after stopping, discard it";
+    // detach the thread so the destructor doesn't attempt any joining
+    this->ioThread->detach();
 }
 
 void WebSocketPoolImpl::removeConnection(WebSocketConnection *conn)
