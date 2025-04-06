@@ -112,9 +112,8 @@ void SplitInput::initLayout()
 
     replyHbox->addStretch(1);
 
-    auto replyCancelButton = replyHbox.emplace<EffectLabel>(nullptr, 4)
-                                 .assign(&this->ui_.cancelReplyButton);
-    replyCancelButton->getLabel().setTextFormat(Qt::RichText);
+    auto replyCancelButton =
+        replyHbox.emplace<Button>().assign(&this->ui_.cancelReplyButton);
 
     replyCancelButton->hide();
     replyLabel->hide();
@@ -303,13 +302,17 @@ void SplitInput::updateCancelReplyButton()
 {
     float scale = this->scale();
 
-    auto text =
-        QStringLiteral("<img src=':/buttons/%1.svg' width='%2' height='%2' />")
-            .arg(this->theme->isLightTheme() ? "cancelDark" : "cancel")
-            .arg(int(12 * scale));
-
-    this->ui_.cancelReplyButton->getLabel().setText(text);
+    if (this->theme->isLightTheme())
+    {
+        this->ui_.cancelReplyButton->setSvgResource(":/buttons/cancelDark.svg");
+    }
+    else
+    {
+        this->ui_.cancelReplyButton->setSvgResource(":/buttons/cancel.svg");
+    }
+    this->ui_.cancelReplyButton->setEnableMargin(false);
     this->ui_.cancelReplyButton->setFixedHeight(int(12 * scale));
+    this->ui_.cancelReplyButton->setFixedWidth(int(20 * scale));
 }
 
 void SplitInput::openEmotePopup()

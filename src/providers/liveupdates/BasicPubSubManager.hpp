@@ -336,13 +336,14 @@ private:
 
     WebsocketContextPtr onTLSInit(const websocketpp::connection_hdl & /*hdl*/)
     {
-        WebsocketContextPtr ctx(
-            new boost::asio::ssl::context(boost::asio::ssl::context::tlsv12));
+        WebsocketContextPtr ctx(new boost::asio::ssl::context(
+            boost::asio::ssl::context::tls_client));
 
         try
         {
             ctx->set_options(boost::asio::ssl::context::default_workarounds |
-                             boost::asio::ssl::context::no_sslv2 |
+                             boost::asio::ssl::context::no_tlsv1 |
+                             boost::asio::ssl::context::no_tlsv1_1 |
                              boost::asio::ssl::context::single_dh_use);
         }
         catch (const std::exception &e)
