@@ -46,4 +46,11 @@ void EditUserNotesDialog::updateWindowTitle(const QString &displayUsername)
     this->setWindowTitle("Editing notes for " + displayUsername);
 }
 
+void EditUserNotesDialog::showEvent(QShowEvent *event)
+{
+    this->textEdit_->setFocus(Qt::FocusReason::ActiveWindowFocusReason);
+
+    BasePopup::showEvent(event);
+}
+
 }  // namespace chatterino

@@ -19,6 +19,9 @@ public:
 
     pajlada::Signals::Signal<const QString &> onOk;
 
+protected:
+    void showEvent(QShowEvent *event) override;
+
 private:
     QTextEdit *textEdit_{};
 };
