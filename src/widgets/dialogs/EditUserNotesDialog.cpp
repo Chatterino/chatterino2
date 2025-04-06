@@ -2,6 +2,9 @@
 
 #include "util/LayoutCreator.hpp"
 
+#include <QDialogButtonBox>
+#include <QTextEdit>
+
 namespace chatterino {
 
 EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
