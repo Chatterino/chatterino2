@@ -14,7 +14,18 @@ WebSocketHandle WebSocketPool::createSocket(
 {
     if (!this->impl)
     {
-        this->impl = std::make_unique<ws::detail::WebSocketPoolImpl>();
+        try
+        {
+            this->impl = std::make_unique<ws::detail::WebSocketPoolImpl>();
+        }
+        catch (const boost::system::system_error &err)
+        {
+            // This will only happen if the SSL context failed to be constructed.
+            // The user likely runs an incompatible OpenSSL version.
+            qCWarning(chatterinoWebsocket)
+                << "Failed to create WebSocket implementation" << err.what();
+            return {{}};
+        }
     }
     if (this->impl->closing)
     {
