@@ -5,6 +5,7 @@
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/plugins/Plugin.hpp"
 
+#    include <boost/signals2/signal.hpp>
 #    include <QDir>
 #    include <QFileInfo>
 #    include <QJsonArray>
@@ -26,6 +27,8 @@ class Paths;
 
 class PluginController
 {
+    using OnPluginLoaded = boost::signals2::signal<void(Plugin *)>;
+
     const Paths &paths;
 
 public:
@@ -61,6 +64,9 @@ public:
         const QString &query, const QString &fullTextContent,
         int cursorPosition, bool isFirstWord) const;
 
+    boost::signals2::connection onPluginLoaded(
+        const OnPluginLoaded::slot_type &slot);
+
 private:
     void loadPlugins();
     void load(const QFileInfo &index, const QDir &pluginDir,
@@ -74,6 +80,8 @@ private:
     static void loadChatterinoLib(lua_State *l);
     bool tryLoadFromDir(const QDir &pluginDir);
     std::map<QString, std::unique_ptr<Plugin>> plugins_;
+
+    OnPluginLoaded onPluginLoaded_;
 
     // This is for tests, pay no attention
     friend class PluginControllerAccess;

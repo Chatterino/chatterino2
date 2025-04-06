@@ -647,6 +647,15 @@ public:
 
     BoolSetting showSendButton = {"/ui/showSendButton", false};
 
+    struct {
+        // this isn't shown in the UI
+        BoolSetting enableForAllPlugins = {"/ui/pluginRepl/enableForAllPlugins",
+                                           false};
+        QStringSetting fontFamily = {"/ui/pluginRepl/fontFamily", {}};
+        QStringSetting fontStyle = {"/ui/pluginRepl/fontStyle", "Regular"};
+        IntSetting fontSize = {"/ui/pluginRepl/fontSize", 10};
+    } pluginRepl;
+
     // Similarity
     BoolSetting similarityEnabled = {"/similarity/similarityEnabled", false};
     BoolSetting colorSimilarDisabled = {"/similarity/colorSimilarDisabled",

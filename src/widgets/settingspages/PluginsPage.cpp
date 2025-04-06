@@ -1,6 +1,5 @@
+#include "controllers/accounts/AccountController.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
-#    include "widgets/settingspages/PluginsPage.hpp"
-
 #    include "Application.hpp"
 #    include "common/Args.hpp"
 #    include "controllers/plugins/PluginController.hpp"
@@ -9,6 +8,8 @@
 #    include "util/Helpers.hpp"
 #    include "util/LayoutCreator.hpp"
 #    include "util/RemoveScrollAreaBackground.hpp"
+#    include "widgets/PluginRepl.hpp"
+#    include "widgets/settingspages/PluginsPage.hpp"
 
 #    include <QCheckBox>
 #    include <QFormLayout>
@@ -230,6 +231,25 @@ void PluginsPage::rebuildContent()
         if (getApp()->getArgs().safeMode)
         {
             reloadButton->setEnabled(false);
+        }
+
+#    ifdef NDEBUG
+        bool userIsAuthor =
+            std::ranges::any_of(plugin->meta.authors, [](const auto &name) {
+                return name.compare(
+                           getApp()->getAccounts()->twitch.currentUsername,
+                           Qt::CaseInsensitive) == 0;
+            });
+
+        if (userIsAuthor || getSettings()->pluginRepl.enableForAllPlugins)
+#    endif
+        {
+            auto *replButton = new QPushButton("Open REPL", this->dataFrame_);
+            QObject::connect(replButton, &QPushButton::clicked, [id]() {
+                auto *repl = new PluginRepl(id);
+                repl->show();
+            });
+            pluginEntry->addRow(replButton);
         }
     }
 }
