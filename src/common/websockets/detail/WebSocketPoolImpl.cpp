@@ -62,7 +62,7 @@ WebSocketPoolImpl::~WebSocketPoolImpl()
         return;
     }
 
-    // Note:
+    // Set a maximum timeout on the close operations on all clients.
     if (this->stoppedFlag.waitFor(std::chrono::milliseconds{1000}))
     {
         this->ioThread->join();
