@@ -337,7 +337,7 @@ private:
     WebsocketContextPtr onTLSInit(const websocketpp::connection_hdl & /*hdl*/)
     {
         WebsocketContextPtr ctx(
-            new boost::asio::ssl::context(boost::asio::ssl::context::tlsv13));
+            new boost::asio::ssl::context(boost::asio::ssl::context::tls_client));
 
         try
         {
