@@ -131,6 +131,18 @@ bool ResizingTextEdit::eventFilter(QObject *obj, QEvent *event)
 }
 void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 {
+#ifdef Q_OS_MACOS
+    if ((event->modifiers() == Qt::ControlModifier) &&
+        (event->key() == Qt::Key_Backspace))
+    {
+        QTextCursor cursor = this->textCursor();
+        cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
+        cursor.removeSelectedText();
+        this->setTextCursor(cursor);
+        return;
+    }
+#endif
+
     event->ignore();
 
     this->keyPressed.invoke(event);
