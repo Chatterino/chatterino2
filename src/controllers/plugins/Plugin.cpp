@@ -293,5 +293,12 @@ bool Plugin::hasHTTPPermissionFor(const QUrl &url)
     });
 }
 
+bool Plugin::hasNetworkPermission() const
+{
+    return std::ranges::any_of(this->meta.permissions, [](const auto &p) {
+        return p.type == PluginPermission::Type::Network;
+    });
+}
+
 }  // namespace chatterino
 #endif

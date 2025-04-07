@@ -7,7 +7,7 @@ on:
   merge_group:
 
 env:
-  TWITCH_PUBSUB_SERVER_TAG: v1.0.8
+  TWITCH_PUBSUB_SERVER_TAG: v1.0.11
   HTTPBOX_TAG: v0.2.1
   QT_QPA_PLATFORM: minimal
   CONAN_VERSION: 2.11.0
@@ -134,7 +134,7 @@ jobs:
         run: |
           ..\httpbox\httpbox.exe --port 9051 &
           cd ..\pubsub-server-test
-          .\server.exe 127.0.0.1:9050 &
+          ./server 127.0.0.1:9050 127.0.0.1:9052 &
           cd ..\build-test
           ctest --repeat until-pass:4 --output-on-failure
         working-directory: build-test
