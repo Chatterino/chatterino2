@@ -192,8 +192,7 @@ void WebSocketConnectionHelper<Derived, Inner>::onWsHandshake(
         return;
     }
 
-    qCDebug(chatterinoWebsocket)
-        << *this << "WS handshake done" << this->stream.is_open();
+    qCDebug(chatterinoWebsocket) << *this << "WS handshake done";
 
     this->trySend();
     this->stream.async_read(
@@ -208,7 +207,6 @@ void WebSocketConnectionHelper<Derived, Inner>::onReadDone(
 {
     if (!this->listener || this->isClosing)
     {
-        qCDebug(chatterinoWebsocket) << *this << "Stopping read.";
         return;
     }
     if (ec)
@@ -243,7 +241,6 @@ template <typename Derived, typename Inner>
 void WebSocketConnectionHelper<Derived, Inner>::onWriteDone(
     boost::system::error_code ec, size_t /*bytesWritten*/)
 {
-    qCDebug(chatterinoWebsocket) << *this << "Sent.";
     if (!this->queuedMessages.empty())
     {
         this->queuedMessages.pop_front();
@@ -269,10 +266,8 @@ void WebSocketConnectionHelper<Derived, Inner>::trySend()
     if (this->queuedMessages.empty() || this->isSending ||
         !this->stream.is_open())
     {
-        qCDebug(chatterinoWebsocket) << *this << "Waiting to send...";
         return;
     }
-    qCDebug(chatterinoWebsocket) << *this << "Sending...";
 
     this->isSending = true;
     this->stream.text(this->queuedMessages.front().first);
