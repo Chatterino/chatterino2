@@ -1,7 +1,5 @@
 #pragma once
 
-#include "util/OnceFlag.hpp"
-
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ssl/context.hpp>
 
@@ -37,8 +35,6 @@ public:
 
     bool closing = false;
     int nextID = 1;
-
-    OnceFlag stoppedFlag;
 };
 
 }  // namespace chatterino::ws::detail
