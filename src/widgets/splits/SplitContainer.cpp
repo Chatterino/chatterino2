@@ -643,14 +643,7 @@ void SplitContainer::paintEvent(QPaintEvent * /*event*/)
     }
     else
     {
-        if (getApp()->getThemes()->isLightTheme())
-        {
-            painter.fillRect(rect(), QColor("#999"));
-        }
-        else
-        {
-            painter.fillRect(rect(), QColor("#555"));
-        }
+        painter.fillRect(rect(), this->theme->splits.background);
     }
 
     for (DropRect &dropRect : this->dropRects_)
