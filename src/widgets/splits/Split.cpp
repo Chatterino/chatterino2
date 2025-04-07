@@ -310,7 +310,7 @@ Split::Split(QWidget *parent)
         });
 
     getSettings()->showEmptyInput.connect(
-        [this](const bool &showEmptyInput, auto) {
+        [this](const bool &showEmptyInput) {
             if (showEmptyInput)
             {
                 this->input_->show();
