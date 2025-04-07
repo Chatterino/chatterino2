@@ -24,7 +24,8 @@ namespace chatterino::eventsub::lib::payload::session_welcome {
 /// json_inner=session
 struct Payload {
     std::string id;
-    std::optional<std::string> reconnectURL;
+    std::optional<std::string> reconnectURL;     // null in welcome message
+    std::optional<int> keepaliveTimeoutSeconds;  // null in reconnect message
 };
 
 #include "twitch-eventsub-ws/payloads/session-welcome.inc"

@@ -136,6 +136,7 @@ public:
 
     bool hasFSPermissionFor(bool write, const QString &path);
     bool hasHTTPPermissionFor(const QUrl &url);
+    bool hasNetworkPermission() const;
 
     std::map<lua::api::EventType, sol::protected_function> callbacks;
 

@@ -3,6 +3,7 @@
 #include "common/Channel.hpp"
 #include "common/ChatterinoSetting.hpp"
 #include "common/enums/MessageOverflow.hpp"
+#include "common/Modes.hpp"
 #include "common/SignalVector.hpp"
 #include "controllers/filters/FilterRecord.hpp"
 #include "controllers/highlights/HighlightBadge.hpp"
@@ -91,6 +92,11 @@ enum StreamerModeSetting {
     DetectStreamingSoftware = 2,
 };
 
+enum class TabStyle : std::uint8_t {
+    Normal,
+    Compact,
+};
+
 /// Settings which are availlable for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
 class Settings
@@ -139,6 +145,8 @@ public:
         "/appearance/messages/messageOverflow", MessageOverflow::Highlight};
     BoolSetting separateMessages = {"/appearance/messages/separateMessages",
                                     false};
+    BoolSetting fadeMessageHistory = {"/appearance/messages/fadeMessageHistory",
+                                      true};
     BoolSetting hideModerated = {"/appearance/messages/hideModerated", false};
     BoolSetting hideModerationActions = {
         "/appearance/messages/hideModerationActions", false};
@@ -181,6 +189,10 @@ public:
     FloatSetting boldScale = {"/appearance/boldScale", 63};
     BoolSetting showTabCloseButton = {"/appearance/showTabCloseButton", true};
     BoolSetting showTabLive = {"/appearance/showTabLiveButton", true};
+    EnumStringSetting<TabStyle> tabStyle = {
+        "/appearance/tabStyle",
+        TabStyle::Normal,
+    };
     BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton",
                                          false};
     BoolSetting hideUserButton = {"/appearance/hideUserButton", false};
@@ -553,6 +565,12 @@ public:
         "/notifications/suppressInitialLive", false};
 
     BoolSetting notificationToast = {"/notifications/enableToast", false};
+    BoolSetting createShortcutForToasts = {
+        "/notifications/createShortcutForToasts",
+        (Modes::instance().isPortable || Modes::instance().isExternallyPackaged)
+            ? false
+            : true,
+    };
     IntSetting openFromToast = {"/notifications/openFromToast",
                                 static_cast<int>(ToastReaction::OpenInBrowser)};
 

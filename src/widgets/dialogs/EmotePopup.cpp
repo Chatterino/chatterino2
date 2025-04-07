@@ -16,6 +16,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "widgets/helper/ChannelView.hpp"
@@ -315,6 +316,8 @@ EmotePopup::EmotePopup(QWidget *parent)
             }
             this->reloadEmotes();
         });
+
+    this->themeChangedEvent();
 }
 
 void EmotePopup::addShortcuts()
@@ -658,6 +661,13 @@ void EmotePopup::moveEvent(QMoveEvent *event)
 {
     this->saveBounds();
     BasePopup::moveEvent(event);
+}
+
+void EmotePopup::themeChangedEvent()
+{
+    BasePopup::themeChangedEvent();
+
+    this->setPalette(getTheme()->palette);
 }
 
 void EmotePopup::closeEvent(QCloseEvent *event)

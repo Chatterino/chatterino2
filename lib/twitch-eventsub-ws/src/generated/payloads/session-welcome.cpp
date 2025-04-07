@@ -56,9 +56,29 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
         reconnectURL = std::move(treconnectURL.value());
     }
 
+    static_assert(
+        std::is_trivially_copyable_v<std::remove_reference_t<
+            decltype(std::declval<Payload>().keepaliveTimeoutSeconds)>>);
+    std::optional<int> keepaliveTimeoutSeconds = std::nullopt;
+    const auto *jvkeepaliveTimeoutSeconds =
+        root.if_contains("keepalive_timeout_seconds");
+    if (jvkeepaliveTimeoutSeconds != nullptr &&
+        !jvkeepaliveTimeoutSeconds->is_null())
+    {
+        auto tkeepaliveTimeoutSeconds =
+            boost::json::try_value_to<int>(*jvkeepaliveTimeoutSeconds);
+
+        if (tkeepaliveTimeoutSeconds.has_error())
+        {
+            return tkeepaliveTimeoutSeconds.error();
+        }
+        keepaliveTimeoutSeconds = tkeepaliveTimeoutSeconds.value();
+    }
+
     return Payload{
         .id = std::move(id.value()),
         .reconnectURL = std::move(reconnectURL),
+        .keepaliveTimeoutSeconds = keepaliveTimeoutSeconds,
     };
 }
 

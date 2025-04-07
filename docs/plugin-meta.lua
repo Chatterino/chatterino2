@@ -257,6 +257,39 @@ function c2.HTTPRequest.create(method, url) end
 
 -- End src/controllers/plugins/api/HTTPRequest.hpp
 
+-- Begin src/controllers/plugins/api/WebSocket.hpp
+
+---@class c2.WebSocket
+---@field on_close fun()|nil Handler called when the socket is closed.
+---@field on_text fun(data: string)|nil Handler called when the socket receives a text message.
+---@field on_binary fun(data: string)|nil Handler called when the socket receives a binary message.
+c2.WebSocket = {}
+
+--- Creates and connects to a WebSocket server. Upon calling this, a
+--- connection is made immediately.
+---
+---@param url string The URL to connect to. Must start with `wss://` or `ws://`.
+---@param options? { headers?: table<string, string>, on_close?: fun(), on_text?: fun(data: string), on_binary?: fun(data: string) } Additional options for the connection.
+---@return c2.WebSocket
+---@nodiscard
+function c2.WebSocket.new(url, options) end
+
+--- Closes the socket.
+---
+function c2.WebSocket:close() end
+
+--- Sends a text message on the socket.
+---
+---@param data string The text to send.
+function c2.WebSocket:send_text(data) end
+
+--- Sends a binary message on the socket.
+---
+---@param data string The binary data to send.
+function c2.WebSocket:send_binary(data) end
+
+-- End src/controllers/plugins/api/WebSocket.hpp
+
 -- Begin src/common/network/NetworkCommon.hpp
 
 ---@enum c2.HTTPMethod

@@ -279,6 +279,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         false, "Choose which tabs are visible in the notebook");
 
+    SettingWidget::dropdown("Tab style", s.tabStyle)->addTo(layout);
+
     SettingWidget::inverseCheckbox("Show message reply context",
                                    s.hideReplyContext)
         ->setTooltip(
@@ -501,6 +503,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     SettingWidget::checkbox("Alternate background color", s.alternateMessages)
         ->setTooltip("Slightly change the background behind every other "
                      "message to help better tell them apart.")
+        ->addTo(layout);
+
+    SettingWidget::checkbox("Reduce opacity of message history",
+                            s.fadeMessageHistory)
+        ->setTooltip(
+            "Reduce opacity of messages that were posted before Chatterino "
+            "was started or while re-connection.")
         ->addTo(layout);
 
     SettingWidget::checkbox("Hide deleted messages", s.hideModerated)
@@ -897,7 +906,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     {
         auto *note = new QLabel(
-            "A semicolon-separated list of Chrome or Firefox extension IDs"
+            "A semicolon-separated list of Chrome or Firefox extension IDs "
             "allowed to interact with Chatterino's browser integration "
             "(requires restart).\n"
             "Using multiple extension IDs from different browsers may cause "

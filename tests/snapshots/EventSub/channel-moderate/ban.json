@@ -55,7 +55,7 @@
                             "type": "None",
                             "value": ""
                         },
-                        "style": "ChatMedium",
+                        "style": "TimestampMedium",
                         "tooltip": "",
                         "trailingSpace": true,
                         "type": "TextElement",
@@ -141,7 +141,7 @@
                     ]
                 }
             ],
-            "flags": "System|Timeout|EventSub|ModerationAction",
+            "flags": "System|Timeout|PubSub|EventSub|ModerationAction",
             "id": "",
             "localizedName": "",
             "loginName": "nerixyz",

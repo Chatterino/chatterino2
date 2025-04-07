@@ -1013,7 +1013,7 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+    auto userID = boost::json::try_value_to<String>(*jvuserID);
 
     if (userID.has_error())
     {
@@ -1026,7 +1026,7 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+    auto userLogin = boost::json::try_value_to<String>(*jvuserLogin);
 
     if (userLogin.has_error())
     {
@@ -1039,7 +1039,7 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
         EVENTSUB_BAIL_HERE(error::Kind::FieldMissing);
     }
 
-    auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+    auto userName = boost::json::try_value_to<String>(*jvuserName);
 
     if (userName.has_error())
     {
@@ -1053,7 +1053,7 @@ boost::json::result_for<UnbanRequest, boost::json::value>::type tag_invoke(
     }
 
     auto moderatorMessage =
-        boost::json::try_value_to<std::string>(*jvmoderatorMessage);
+        boost::json::try_value_to<String>(*jvmoderatorMessage);
 
     if (moderatorMessage.has_error())
     {
