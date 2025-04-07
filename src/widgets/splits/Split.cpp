@@ -901,7 +901,7 @@ void Split::joinChannelInNewTab(ChannelPtr channel)
     auto &nb = getApp()->getWindows()->getMainWindow().getNotebook();
     SplitContainer *container = nb.addPage(true);
 
-    Split *split = new Split(container);
+    auto *split = new Split(container);
     split->setChannel(channel);
     container->insertSplit(split);
 }
@@ -1178,7 +1178,7 @@ void Split::popup()
     auto *app = getApp();
     Window &window = app->getWindows()->createWindow(WindowType::Popup);
 
-    Split *split = new Split(static_cast<SplitContainer *>(
+    auto *split = new Split(static_cast<SplitContainer *>(
         window.getNotebook().getOrAddSelectedPage()));
 
     split->setChannel(this->getIndirectChannel());
