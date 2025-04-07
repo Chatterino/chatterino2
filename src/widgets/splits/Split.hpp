@@ -137,7 +137,7 @@ private:
     /**
      * @brief Opens Twitch channel chat in a new Chatterino tab
      */
-    void joinChannelInNewTab(ChannelPtr channel);
+    void joinChannelInNewTab(const ChannelPtr &channel);
 
     /**
      * @brief Refresh moderation mode layouts/buttons

@@ -107,7 +107,7 @@ QString formatVIPListError(HelixListVIPsError error, const QString &message)
     return errorMessage;
 }
 
-QString formatModsError(HelixGetModeratorsError error, QString message)
+QString formatModsError(HelixGetModeratorsError error, const QString &message)
 {
     using Error = HelixGetModeratorsError;
 
@@ -143,7 +143,7 @@ QString formatModsError(HelixGetModeratorsError error, QString message)
     return errorMessage;
 }
 
-QString formatChattersError(HelixGetChattersError error, QString message)
+QString formatChattersError(HelixGetChattersError error, const QString &message)
 {
     using Error = HelixGetChattersError;
 
@@ -896,7 +896,7 @@ void Split::updateInputPlaceholder()
     this->input_->ui_.textEdit->setPlaceholderText(placeholderText);
 }
 
-void Split::joinChannelInNewTab(ChannelPtr channel)
+void Split::joinChannelInNewTab(const ChannelPtr &channel)
 {
     auto &nb = getApp()->getWindows()->getMainWindow().getNotebook();
     SplitContainer *container = nb.addPage(true);
