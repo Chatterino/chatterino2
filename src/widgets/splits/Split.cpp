@@ -1178,8 +1178,7 @@ void Split::popup()
     auto *app = getApp();
     Window &window = app->getWindows()->createWindow(WindowType::Popup);
 
-    auto *split = new Split(static_cast<SplitContainer *>(
-        window.getNotebook().getOrAddSelectedPage()));
+    auto *split = new Split(window.getNotebook().getOrAddSelectedPage());
 
     split->setChannel(this->getIndirectChannel());
     split->setModerationMode(this->getModerationMode());
