@@ -41,13 +41,27 @@ WebSocketPoolImpl::WebSocketPoolImpl()
 
     this->ioThread = std::make_unique<std::thread>([this] {
         this->ioc.run();
+        this->shutdownFlag.set();
     });
     renameThread(*this->ioThread, "WebSocketPool");
 }
 
 WebSocketPoolImpl::~WebSocketPoolImpl()
 {
+    assert(this->closing);
+    // After 10s, we stop and, through std::thread::~thread, std::terminate will
+    // be called.
+    this->tryShutdown(std::chrono::seconds{10});
+}
+
+bool WebSocketPoolImpl::tryShutdown(std::chrono::milliseconds timeout)
+{
     this->closing = true;
+    if (!this->ioThread || !this->ioThread->joinable())
+    {
+        return true;
+    }
+
     this->work.reset();
     {
         std::lock_guard g(this->connectionMutex);
@@ -56,15 +70,19 @@ WebSocketPoolImpl::~WebSocketPoolImpl()
             conn->close();
         }
     }
-    if (!this->ioThread)
+
+    if (!this->shutdownFlag.waitFor(timeout))
     {
-        return;
+        qCWarning(chatterinoWebsocket)
+            << "Failed to gracefully close all connections in time";
+        return false;
     }
 
     if (this->ioThread->joinable())
     {
         this->ioThread->join();
     }
+    return true;
 }
 
 void WebSocketPoolImpl::removeConnection(WebSocketConnection *conn)

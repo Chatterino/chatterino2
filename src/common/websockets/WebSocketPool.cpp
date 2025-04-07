@@ -7,7 +7,25 @@
 namespace chatterino {
 
 WebSocketPool::WebSocketPool() = default;
-WebSocketPool::~WebSocketPool() = default;
+WebSocketPool::~WebSocketPool()
+{
+    if (this->impl)
+    {
+        if (this->impl->tryShutdown(std::chrono::milliseconds{1000}))
+        {
+            qCDebug(chatterinoWebsocket) << "Closed gracefully.";
+        }
+        else
+        {
+            // Note: We can't detatch the IO-thread here but have to leak the
+            // pool, because the IO-thread still references the IO-context which
+            // is stored in the pool (otherwise we'd have a use-after-free).
+            qCWarning(chatterinoWebsocket)
+                << "Failed to shutdown within 1s, leaking";
+            this->impl.release();  // NOLINT
+        }
+    }
+}
 
 WebSocketHandle WebSocketPool::createSocket(
     WebSocketOptions options, std::unique_ptr<WebSocketListener> listener)
