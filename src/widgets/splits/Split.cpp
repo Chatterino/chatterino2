@@ -2,7 +2,6 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
-#include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -10,7 +9,6 @@
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
-#include "messages/MessageThread.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -20,11 +18,9 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/Clipboard.hpp"
 #include "util/CustomPlayer.hpp"
 #include "util/Helpers.hpp"
 #include "util/StreamLink.hpp"
-#include "widgets/dialogs/QualityPopup.hpp"
 #include "widgets/dialogs/SelectChannelDialog.hpp"
 #include "widgets/dialogs/SelectChannelFiltersDialog.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
@@ -44,7 +40,6 @@
 #include "widgets/Window.hpp"
 
 #include <QApplication>
-#include <QClipboard>
 #include <QDesktopServices>
 #include <QDockWidget>
 #include <QDrag>
