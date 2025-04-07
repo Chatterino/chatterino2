@@ -71,11 +71,14 @@ Window::Window(WindowType type, QWidget *parent)
             this->onAccountSelected();
         }));
     this->onAccountSelected();
-    this->setAttribute(Qt::WA_TranslucentBackground);
 
     if (type == WindowType::Main)
     {
         this->resize(int(600 * this->scale()), int(500 * this->scale()));
+        if (this->theme->window.background.alpha() != 255)
+        {
+            this->setAttribute(Qt::WA_TranslucentBackground);
+        }
     }
     else
     {
