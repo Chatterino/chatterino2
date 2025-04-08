@@ -611,7 +611,7 @@ void OverlayWindow::setInert(bool inert)
     }
 }
 
-void OverlayWindow::drawOutline(QPainter &)
+void OverlayWindow::drawOutline(QPainter & /* painter */)
 {
 }
 
