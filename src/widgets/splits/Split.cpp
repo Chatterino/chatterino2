@@ -1685,11 +1685,6 @@ void Split::drag()
     this->dragState_ = SplitDragState::Dragging;
 
     drag->exec(Qt::MoveAction);
-    qCWarning(chatterinoWidget)
-        << "DOGE: drag state after"
-        << static_cast<std::underlying_type_t<SplitDragState>>(
-               this->dragState_);
-    ;
 
     // drag->exec is a blocking action
     if (this->dragState_ != SplitDragState::Dropped)
