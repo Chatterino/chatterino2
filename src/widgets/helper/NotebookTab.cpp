@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/Common.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "singletons/Fonts.hpp"
@@ -1000,9 +1001,39 @@ void NotebookTab::dragEnterEvent(QDragEnterEvent *event)
         return;
     }
 
+    event->acceptProposedAction();
+
     if (this->notebook_->getAllowUserTabManagement())
     {
         this->notebook_->select(this->page);
+    }
+}
+
+void NotebookTab::dropEvent(QDropEvent *event)
+{
+    if (!event->mimeData()->hasFormat("chatterino/split"))
+    {
+        return;
+    }
+
+    if (!isDraggingSplit())
+    {
+        // Ensure dragging a split from a different Chatterino instance doesn't switch tabs around
+        return;
+    }
+
+    auto *draggedSplit = dynamic_cast<Split *>(event->source());
+    if (!draggedSplit)
+    {
+        qCDebug(chatterinoWidget)
+            << "Dropped something that wasn't a split onto a notebook button";
+        return;
+    }
+
+    if (auto *container = dynamic_cast<SplitContainer *>(this->page))
+    {
+        event->acceptProposedAction();
+        container->insertSplit(draggedSplit);
     }
 }
 
