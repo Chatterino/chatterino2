@@ -5,6 +5,7 @@
 - Minor: Add an option for the reduced opacity of message history. (#6121)
 - Minor: Make paused chat indicator more visible, and fix its zoom behavior. (#6123)
 - Minor: Added WebSocket API for plugins. (#6076)
+- Minor: Popup overlay now only draws an outline when being interacted with (#6140)
 - Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
 - Bugfix: Fixed scrolling now working on inputs in the settings. (#6128)
 - Bugfix: Make reply-cancel button less coarse-grained. (#6106)
