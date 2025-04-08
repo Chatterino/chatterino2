@@ -22,6 +22,7 @@
 #include <QJsonObject>
 #include <QMimeData>
 #include <QPainter>
+#include <QPainterPath>
 
 #include <algorithm>
 
