@@ -15,6 +15,14 @@
 
 namespace chatterino {
 
+enum class SplitDragState : int {
+    NotDragging = 0,
+    Dragging = 1,
+    Dropped = 2,
+
+    Default = NotDragging,
+};
+
 class ChannelView;
 class SplitHeader;
 class SplitInput;
@@ -77,6 +85,8 @@ public:
     void setContainer(SplitContainer *container);
 
     void setInputReply(const MessagePtr &reply);
+
+    void markAsDropped();
 
     // This is called on window focus lost
     void unpause();
@@ -160,6 +170,13 @@ private:
     ChannelView *const view_;
     SplitInput *const input_;
     SplitOverlay *const overlay_;
+
+    /* Store dragging state to accurately determine whether drop is successful
+     it's more reliable than just checking drag.exec() != Qt::IgnoreAction, for example
+
+     NOTE: the accepting site shall call markAsDropped() to notify that split is dropped
+    */
+    SplitDragState dragState_ = SplitDragState::Default;
 
     QPointer<OverlayWindow> overlayWindow_;
 

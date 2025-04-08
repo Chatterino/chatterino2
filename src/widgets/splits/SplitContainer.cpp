@@ -1570,6 +1570,7 @@ void SplitContainer::DropOverlay::dropEvent(QDropEvent *event)
             << "Dropped something that wasn't a split onto a split container";
         return;
     }
+    draggedSplit->markAsDropped();
 
     this->parent_->insertSplit(draggedSplit, {.position = *position});
     event->acceptProposedAction();
