@@ -7,6 +7,8 @@
 
 #include <QPainter>
 
+#include <utility>
+
 namespace {
 
 // number of columns in grid mode
@@ -30,13 +32,15 @@ inline constexpr T *tooltipParentFor(T *desiredParent)
 
 namespace chatterino {
 
-void TooltipEntry::scaleImg(float scale)
+TooltipEntry TooltipEntry::scaled(ImagePtr image, QString text, float scale)
 {
-    if (this->image)
+    TooltipEntry entry = {.image = std::move(image), .text = std::move(text)};
+    if (entry.image)
     {
-        this->customWidth = this->image->width() * scale;
-        this->customHeight = this->image->height() * scale;
+        entry.customWidth = entry.image->width() * scale;
+        entry.customHeight = entry.image->height() * scale;
     }
+    return entry;
 }
 
 TooltipWidget::TooltipWidget(BaseWidget *parent)
