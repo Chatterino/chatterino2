@@ -75,6 +75,12 @@ Window::Window(WindowType type, QWidget *parent)
     if (type == WindowType::Main)
     {
         this->resize(int(600 * this->scale()), int(500 * this->scale()));
+#ifdef Q_OS_LINUX
+        if (this->theme->window.background.alpha() != 255)
+        {
+            this->setAttribute(Qt::WA_TranslucentBackground);
+        }
+#endif
     }
     else
     {

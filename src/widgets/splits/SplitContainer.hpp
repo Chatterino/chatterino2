@@ -246,6 +246,7 @@ private:
     void selectSplitRecursive(Node *node, SplitDirection direction);
     void focusSplitRecursive(Node *node);
     void setPreferedTargetRecursive(Node *node);
+    void paintSplitBorder(Node *node, QPainter *painter);
 
     void addSplit(Split *split);
 
