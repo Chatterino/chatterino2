@@ -51,7 +51,7 @@ public:
         std::function<void(std::optional<EmotePtr>)> modBadgeCallback,
         std::function<void(std::optional<EmotePtr>)> vipBadgeCallback,
         std::function<void(FfzChannelBadgeMap &&)> channelBadgesCallback,
-        bool manualRefresh);
+        bool manualRefresh, bool cacheHit);
 
 private:
     Atomic<std::shared_ptr<const EmoteMap>> global_;
