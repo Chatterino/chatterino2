@@ -85,6 +85,11 @@ bool OverlayInteraction::isInteracting() const
 
 void OverlayInteraction::paintEvent(QPaintEvent * /*event*/)
 {
+    if (this->interactionProgress() <= 0.0)
+    {
+        return;
+    }
+
     QPainter painter(this);
     QColor highlightColor(
         255, 255, 255, std::max(int(255.0 * this->interactionProgress()), 50));
@@ -93,11 +98,6 @@ void OverlayInteraction::paintEvent(QPaintEvent * /*event*/)
     // outline
     auto bounds = this->rect();
     painter.drawRect(bounds);
-
-    if (this->interactionProgress() <= 0.0)
-    {
-        return;
-    }
 
     highlightColor.setAlpha(highlightColor.alpha() / 4);
     painter.setBrush(highlightColor);

@@ -611,4 +611,8 @@ void OverlayWindow::setInert(bool inert)
     }
 }
 
+void OverlayWindow::drawOutline(QPainter & /* painter */)
+{
+}
+
 }  // namespace chatterino
