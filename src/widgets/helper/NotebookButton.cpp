@@ -199,6 +199,8 @@ void NotebookButton::dropEvent(QDropEvent *event)
         return;
     }
 
+    draggedSplit->markAsDropped();
+
     event->acceptProposedAction();
 
     auto *page = new SplitContainer(notebook);

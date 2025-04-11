@@ -1682,13 +1682,18 @@ void Split::drag()
     mimeData->setData("chatterino/split", "xD");
     drag->setMimeData(mimeData);
 
+    this->dragState_ = SplitDragState::Dragging;
+
+    drag->exec(Qt::MoveAction);
+
     // drag->exec is a blocking action
-    if (drag->exec(Qt::MoveAction) == Qt::IgnoreAction)
+    if (this->dragState_ != SplitDragState::Dropped)
     {
         // The split wasn't dropped in a valid spot, return it to its original position
         container->insertSplit(this, {.position = originalLocation});
     }
 
+    this->dragState_ = SplitDragState::NotDragging;
     stopDraggingSplit();
 }
 
@@ -1732,4 +1737,9 @@ QDebug operator<<(QDebug dbg, const chatterino::Split *split)
     dbg.nospace() << "Split(nullptr)";
 
     return dbg;
+}
+
+void Split::markAsDropped()
+{
+    this->dragState_ = SplitDragState::Dropped;
 }
