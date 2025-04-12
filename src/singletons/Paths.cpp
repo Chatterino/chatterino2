@@ -39,7 +39,7 @@ QString Paths::cacheDirectory() const
     static const auto pathSetting = [] {
         QStringSetting cachePathSetting("/cache/path");
 
-        cachePathSetting.connect([](const auto &newPath, auto) {
+        cachePathSetting.connect([](const auto &newPath) {
             if (!newPath.isEmpty())
             {
                 QDir().mkpath(newPath);
@@ -57,6 +57,11 @@ QString Paths::cacheDirectory() const
     }
 
     return path;
+}
+
+QString Paths::cacheFilePath(const QString &fileName) const
+{
+    return combinePath(this->cacheDirectory(), fileName);
 }
 
 void Paths::initAppFilePathHash()
