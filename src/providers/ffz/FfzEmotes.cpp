@@ -238,7 +238,7 @@ void FfzEmotes::loadEmotes()
         return;
     }
 
-    readProviderEmotesCache("global", "ffz", [this](auto jsonDoc) {
+    readProviderEmotesCache("global", "frankerfacez", [this](auto jsonDoc) {
         auto parsedSet = parseGlobalEmotes(jsonDoc.object());
         this->setEmotes(std::make_shared<EmoteMap>(std::move(parsedSet)));
     });
@@ -248,7 +248,8 @@ void FfzEmotes::loadEmotes()
     NetworkRequest(url)
         .timeout(30000)
         .onSuccess([this](auto result) {
-            writeProviderEmotesCache("global", "ffz", result.getData());
+            writeProviderEmotesCache("global", "frankerfacez",
+                                     result.getData());
             auto parsedSet = parseGlobalEmotes(result.parseJson());
             this->setEmotes(std::make_shared<EmoteMap>(std::move(parsedSet)));
         })
@@ -283,7 +284,8 @@ void FfzEmotes::loadChannel(
                     vipBadgeCallback = std::move(vipBadgeCallback),
                     channelBadgesCallback = std::move(channelBadgesCallback),
                     channel, channelID, manualRefresh](const auto &result) {
-            writeProviderEmotesCache(channelID, "ffz", result.getData());
+            writeProviderEmotesCache(channelID, "frankerfacez",
+                                     result.getData());
             const auto json = result.parseJson();
 
             auto emoteMap = parseChannelEmotes(json);
