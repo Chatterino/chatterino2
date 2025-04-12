@@ -1562,7 +1562,7 @@ void Split::setFilters(const QList<QUuid> ids)
     this->header_->updateChannelText();
 }
 
-const QList<QUuid> Split::getFilters() const
+QList<QUuid> Split::getFilters() const
 {
     return this->view_->getFilterIds();
 }

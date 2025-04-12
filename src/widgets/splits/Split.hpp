@@ -57,7 +57,7 @@ public:
     void setChannel(IndirectChannel newChannel);
 
     void setFilters(const QList<QUuid> ids);
-    const QList<QUuid> getFilters() const;
+    QList<QUuid> getFilters() const;
 
     void setModerationMode(bool value);
     bool getModerationMode() const;
