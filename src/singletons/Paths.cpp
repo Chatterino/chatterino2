@@ -59,6 +59,11 @@ QString Paths::cacheDirectory() const
     return path;
 }
 
+QString Paths::cacheFilePath(const QString &fileName) const
+{
+    return combinePath(this->cacheDirectory(), fileName);
+}
+
 void Paths::initAppFilePathHash()
 {
     this->applicationFilePathHash =
