@@ -498,7 +498,7 @@ void Split::addShortcuts()
                         "focus direction Use \"up\", \"above\", \"down\", "
                         "\"below\", \"left\" or \"right\".";
              }
-             auto direction = arguments.at(0);
+             const auto &direction = arguments.at(0);
              if (direction == "up" || direction == "above")
              {
                  this->actionRequested.invoke(Action::SelectSplitAbove);
@@ -543,7 +543,7 @@ void Split::addShortcuts()
                      << "scrollPage hotkey called without arguments!";
                  return "scrollPage hotkey called without arguments!";
              }
-             auto direction = arguments.at(0);
+             const auto &direction = arguments.at(0);
 
              auto &scrollbar = this->getChannelView().getScrollBar();
              if (direction == "up")
@@ -620,7 +620,7 @@ void Split::addShortcuts()
              auto reloadSubscriber = true;
              if (!arguments.empty())
              {
-                 auto arg = arguments.at(0);
+                 const auto &arg = arguments.at(0);
                  if (arg == "channel")
                  {
                      reloadSubscriber = false;
@@ -654,7 +654,7 @@ void Split::addShortcuts()
              // 2 is toggle
              if (!arguments.empty())
              {
-                 auto arg = arguments.at(0);
+                 const auto &arg = arguments.at(0);
                  if (arg == "off")
                  {
                      mode = 0;
@@ -725,7 +725,7 @@ void Split::addShortcuts()
              // 2 is toggle
              if (!arguments.empty())
              {
-                 auto arg = arguments.at(0);
+                 const auto &arg = arguments.at(0);
                  if (arg == "off")
                  {
                      mode = 0;
@@ -809,7 +809,7 @@ void Split::addShortcuts()
              // 2 is toggle
              if (!arguments.empty())
              {
-                 auto arg = arguments.at(0);
+                 const auto &arg = arguments.at(0);
                  if (arg == "off")
                  {
                      mode = 0;
