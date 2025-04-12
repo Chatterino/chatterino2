@@ -11,6 +11,7 @@
 #include <QLocale>
 #include <QLoggingCategory>
 #include <QRegularExpression>
+#include <QStringBuilder>
 #include <QStringView>
 #include <QThreadPool>
 #include <QTimeZone>
@@ -396,8 +397,8 @@ void writeProviderEmotesCache(const QString &id, const QString &provider,
                               const QByteArray &bytes)
 {
     QThreadPool::globalInstance()->start([bytes, id, provider]() {
-        QFile responseCache(getApp()->getPaths().cacheDirectory() + "/" + id +
-                            "." + provider);
+        auto cacheKey = id % "." % provider;
+        QFile responseCache(getApp()->getPaths().cacheFilePath(cacheKey));
 
         if (responseCache.open(QIODevice::WriteOnly))
         {
@@ -411,8 +412,9 @@ void writeProviderEmotesCache(const QString &id, const QString &provider,
 bool readProviderEmotesCache(const QString &id, const QString &provider,
                              const std::function<void(QJsonDocument)> &callback)
 {
-    QFile responseCache(getApp()->getPaths().cacheDirectory() + "/" + id + "." +
-                        provider);
+    auto cacheKey = id % "." % provider;
+    QFile responseCache(getApp()->getPaths().cacheFilePath(cacheKey));
+
     if (responseCache.open(QIODevice::ReadOnly))
     {
         QJsonParseError parseError;
