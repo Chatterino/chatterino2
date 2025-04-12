@@ -221,7 +221,7 @@ void BttvEmotes::loadEmotes()
         return;
     }
 
-    readProviderEmotesCache("global", "bttv", [this](auto jsonDoc) {
+    readProviderEmotesCache("global", "betterttv", [this](auto jsonDoc) {
         auto emotes = this->global_.get();
         auto pair = parseGlobalEmotes(jsonDoc.array(), *emotes);
         if (pair.first)
@@ -233,7 +233,7 @@ void BttvEmotes::loadEmotes()
     NetworkRequest(QString(globalEmoteApiUrl))
         .timeout(30000)
         .onSuccess([this](auto result) {
-            writeProviderEmotesCache("global", "bttv", result.getData());
+            writeProviderEmotesCache("global", "betterttv", result.getData());
             auto emotes = this->global_.get();
             auto pair = parseGlobalEmotes(result.parseJsonArray(), *emotes);
             if (pair.first)
@@ -267,7 +267,7 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
             auto emotes =
                 parseChannelEmotes(result.parseJson(), channelDisplayName);
             bool hasEmotes = !emotes.empty();
-            writeProviderEmotesCache(channelId, "bttv", result.getData());
+            writeProviderEmotesCache(channelId, "betterttv", result.getData());
             callback(std::move(emotes));
 
             if (auto shared = channel.lock(); manualRefresh)

@@ -328,7 +328,7 @@ void TwitchChannel::refreshBTTVChannelEmotes(bool manualRefresh)
     }
 
     bool cacheHit = readProviderEmotesCache(
-        this->roomId(), "bttv",
+        this->roomId(), "betterttv",
         [this, weak = weakOf<Channel>(this)](auto jsonDoc) {
             if (auto shared = weak.lock())
             {
