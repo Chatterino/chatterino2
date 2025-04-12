@@ -12,6 +12,7 @@
 - Bugfix: Fixed missing BetterTTV live updates of emotes. (#6132)
 - Bugfix: Handle <kbd>CMD</kbd> + <kbd>BACKSPACE</kbd> behavior explicitly in main chat dialog input for macOS. (#6111)
 - Bugfix: Fixed a small typo in the settings page. (#6134)
+- Bugfix: Fixed some Twitch commands not getting tab-completed correctly. (#6143)
 - Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
 - Dev: Pass `--force-openssl` when installing from CMake in Qt 6.8+. (#6129)
 
