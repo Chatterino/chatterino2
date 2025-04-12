@@ -1093,11 +1093,7 @@ void Split::resizeEvent(QResizeEvent *event)
     this->overlay_->setGeometry(this->rect());
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 void Split::enterEvent(QEnterEvent * /*event*/)
-#else
-void Split::enterEvent(QEvent * /*event*/)
-#endif
 {
     this->isMouseOver_ = true;
 
