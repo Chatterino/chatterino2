@@ -10,6 +10,7 @@
 - Bugfix: Fixed scrolling now working on inputs in the settings. (#6128)
 - Bugfix: Make reply-cancel button less coarse-grained. (#6106)
 - Bugfix: Fixed missing BetterTTV live updates of emotes. (#6132)
+- Bugfix: Fixed message contents being cleared when using the close button for replies. (#6145)
 - Bugfix: Handle <kbd>CMD</kbd> + <kbd>BACKSPACE</kbd> behavior explicitly in main chat dialog input for macOS. (#6111)
 - Bugfix: Fixed a small typo in the settings page. (#6134)
 - Bugfix: Fixed some Twitch commands not getting tab-completed correctly. (#6143)
