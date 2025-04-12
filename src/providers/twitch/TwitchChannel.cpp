@@ -358,7 +358,7 @@ void TwitchChannel::refreshFFZChannelEmotes(bool manualRefresh)
     }
 
     bool cacheHit = readProviderEmotesCache(
-        this->roomId(), "frankerfacez", [this](auto jsonDoc) {
+        this->roomId(), "frankerfacez", [this](const auto &jsonDoc) {
             auto emoteMap = ffz::detail::parseChannelEmotes(jsonDoc.object());
             this->setFfzEmotes(std::make_shared<const EmoteMap>(emoteMap));
         });
