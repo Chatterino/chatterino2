@@ -221,7 +221,7 @@ void BttvEmotes::loadEmotes()
         return;
     }
 
-    readProviderEmotesCache("global", "betterttv", [this](auto jsonDoc) {
+    readProviderEmotesCache("global", "betterttv", [this](const auto &jsonDoc) {
         auto emotes = this->global_.get();
         auto pair = parseGlobalEmotes(jsonDoc.array(), *emotes);
         if (pair.first)
