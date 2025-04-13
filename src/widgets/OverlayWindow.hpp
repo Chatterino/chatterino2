@@ -34,6 +34,7 @@ public:
     bool isInert() const;
     void setInert(bool inert);
     void toggleInertia();
+    void drawOutline(QPainter &painter) override;
 
 protected:
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
