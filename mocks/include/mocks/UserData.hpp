@@ -27,21 +27,24 @@ public:
     void setUserColor(const QString &userID,
                       const QString &colorString) override
     {
-        auto it = this->userMap.find(userID);
-        if (it != this->userMap.end())
-        {
-            it->second.color = QColor(colorString);
-        }
-        else
-        {
-            this->userMap.emplace(userID, UserData{
-                                              .color = QColor(colorString),
-                                          });
-        }
+        this->userMap[userID].color = QColor(colorString);
+        this->userDataUpdated_.invoke();
+    }
+
+    void setUserNotes(const QString &userID, const QString &notes) override
+    {
+        this->userMap[userID].notes = notes;
+        this->userDataUpdated_.invoke();
+    }
+
+    pajlada::Signals::NoArgSignal &userDataUpdated() override
+    {
+        return this->userDataUpdated_;
     }
 
 private:
     std::unordered_map<QString, UserData> userMap;
+    pajlada::Signals::NoArgSignal userDataUpdated_;
 };
 
 }  // namespace chatterino::mock
