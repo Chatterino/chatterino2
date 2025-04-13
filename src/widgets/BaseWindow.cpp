@@ -484,6 +484,28 @@ bool BaseWindow::supportsCustomWindowFrame()
 #endif
 }
 
+void BaseWindow::windowDeactivationEvent()
+{
+    switch (this->windowDeactivateAction)
+    {
+        case WindowDeactivateAction::Delete:
+            this->deleteLater();
+            break;
+
+        case WindowDeactivateAction::Close:
+            this->close();
+            break;
+
+        case WindowDeactivateAction::Hide:
+            this->hide();
+            break;
+
+        case WindowDeactivateAction::Nothing:
+        default:
+            break;
+    }
+}
+
 void BaseWindow::themeChangedEvent()
 {
     if (this->hasCustomWindowFrame())
@@ -520,24 +542,7 @@ bool BaseWindow::event(QEvent *event)
 {
     if (event->type() == QEvent::WindowDeactivate)
     {
-        switch (this->windowDeactivateAction)
-        {
-            case WindowDeactivateAction::Delete:
-                this->deleteLater();
-                break;
-
-            case WindowDeactivateAction::Close:
-                this->close();
-                break;
-
-            case WindowDeactivateAction::Hide:
-                this->hide();
-                break;
-
-            case WindowDeactivateAction::Nothing:
-            default:
-                break;
-        }
+        this->windowDeactivationEvent();
     }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
@@ -974,14 +979,17 @@ void BaseWindow::scaleChangedEvent(float scale)
 void BaseWindow::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
+    this->drawOutline(painter);
+    this->drawCustomWindowFrame(painter);
+}
 
+void BaseWindow::drawOutline(QPainter &painter)
+{
     if (this->frameless_)
     {
         painter.setPen(QColor("#999"));
         painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
     }
-
-    this->drawCustomWindowFrame(painter);
 }
 
 float BaseWindow::desiredScale() const

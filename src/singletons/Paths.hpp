@@ -50,6 +50,11 @@ public:
 
     QString cacheDirectory() const;
 
+    /// Returns the full file path for a file in the cache directory
+    ///
+    /// e.g. cacheFilePath("foo") will return <cacheDirectory>/foo
+    QString cacheFilePath(const QString &fileName) const;
+
 private:
     void initAppFilePathHash();
     void initCheckPortable();

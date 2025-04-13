@@ -92,8 +92,53 @@ void handleModerateMessage(
         builder.emplaceSystemTextAndUpdate(action.reason.qt(), text);
     }
 
-    builder->messageText = text;
-    builder->searchText = text;
+    builder.setMessageAndSearchText(text);
+    builder->timeoutUser = action.userLogin.qt();
+
+    auto msg = builder.release();
+    runInGuiThread([chan, msg, time] {
+        chan->addOrReplaceTimeout(msg, time);
+    });
+}
+
+void handleModerateMessage(
+    TwitchChannel *chan, const QDateTime &time,
+    const lib::payload::channel_moderate::v2::Event &event,
+    const lib::payload::channel_moderate::v2::Ban &action)
+{
+    EventSubMessageBuilder builder(chan, time);
+    builder->loginName = event.moderatorUserLogin.qt();
+    // pretend we're pubsub
+    builder->flags.set(MessageFlag::PubSub, MessageFlag::Timeout,
+                       MessageFlag::ModerationAction);
+
+    QString text;
+    bool isShared = event.isFromSharedChat();
+
+    builder.appendUser(event.moderatorUserName, event.moderatorUserLogin, text);
+    builder.emplaceSystemTextAndUpdate("banned", text);
+    builder.appendUser(action.userName, action.userLogin, text, isShared);
+
+    if (isShared)
+    {
+        builder.emplaceSystemTextAndUpdate("in", text);
+        builder.appendUser(*event.sourceBroadcasterUserName,
+                           *event.sourceBroadcasterUserLogin, text, false);
+        builder->flags.set(MessageFlag::SharedMessage);
+        builder->channelName = event.sourceBroadcasterUserLogin->qt();
+    }
+
+    if (action.reason.view().empty())
+    {
+        builder.emplaceSystemTextAndUpdate(".", text);
+    }
+    else
+    {
+        builder.emplaceSystemTextAndUpdate(":", text);
+        builder.emplaceSystemTextAndUpdate(action.reason.qt(), text);
+    }
+
+    builder.setMessageAndSearchText(text);
     builder->timeoutUser = action.userLogin.qt();
 
     auto msg = builder.release();

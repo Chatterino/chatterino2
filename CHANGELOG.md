@@ -2,6 +2,40 @@
 
 ## Unversioned
 
+- Minor: Added user notes to the user info dialog (when clicking a username). (#6122)
+- Minor: Added cached emotes fallback when fetching from a provider fails. (#6125)
+- Minor: Add an option for the reduced opacity of message history. (#6121)
+- Minor: Make paused chat indicator more visible, and fix its zoom behavior. (#6123)
+- Minor: Added WebSocket API for plugins. (#6076)
+- Minor: Allow for themes to set transparent values for window background on Linux. (#6137)
+- Minor: Popup overlay now only draws an outline when being interacted with. (#6140)
+- Minor: Made filters searchable in the Settings dialog search bar. (#5890)
+- Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
+- Bugfix: Fixed scrolling now working on inputs in the settings. (#6128)
+- Bugfix: Make reply-cancel button less coarse-grained. (#6106)
+- Bugfix: Fixed missing BetterTTV live updates of emotes. (#6132)
+- Bugfix: Fixed message contents being cleared when using the close button for replies. (#6145)
+- Bugfix: Handle <kbd>CMD</kbd> + <kbd>BACKSPACE</kbd> behavior explicitly in main chat dialog input for macOS. (#6111)
+- Bugfix: Fixed a small typo in the settings page. (#6134)
+- Bugfix: Fixed an issue where Splits could get lost by dragging it onto your Recycle Bin. (#6147)
+- Bugfix: Fixed some Twitch commands not getting tab-completed correctly. (#6143)
+- Bugfix: Fixed shared chat badges displaying pixelated when Chatterino is scaled too much. (#6146)
+- Dev: Mini refactor of Split. (#6148)
+- Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
+- Dev: Pass `--force-openssl` when installing from CMake in Qt 6.8+. (#6129)
+
+## 2.5.3
+
+- Minor: Shared chat messages now use the source channel's profile picture to denote it's a shared chat message. (#5760)
+- Minor: Moved the "Delete message" menu option into a "Moderate" sub-menu. (#6100)
+- Bugfix: Fixed the channel name input not being focused when opening the select-channel dialog. (#6096)
+- Bugfix: Fixed inputs in dialogs not having a border around and padding in them. (#6098)
+- Bugfix: Don't set default binding for "Toggle local R9K" on macOS. Was <kbd>CTRL</kbd> + <kdb>H</kdb> before, which clashes with a system binding. (#5764)
+- Bugfix: Don't add moderation buttons to your own Usercard. (#6107)
+- Dev: Temporarily disable precompiled header support for macOS. (#6104)
+
+## 2.5.3-beta.1
+
 - Minor: Added an option to allow multiple user-selected extensions to interact with Chatterino. (#5997)
 - Minor: Add `Set highlight sounds` and `Open subscription page` split hotkeys. (#5856, #6030)
 - Minor: `/clear` messages are now stacked like timeouts. (#5806)
@@ -50,7 +84,7 @@
 - Bugfix: Fixed some windows not immediately closing. (#6054)
 - Bugfix: The emote button no longer looks crunchy. (#6080, #6085)
 - Dev: Subscriptions to PubSub channel points redemption topics now use no auth token, making it continue to work during PubSub shutdown. (#5947)
-- Dev: Add initial experimental EventSub support. (#5837, #5895, #5897, #5904, #5910, #5903, #5915, #5916, #5930, #5935, #5932, #5943, #5952, #5953, #5968, #5973, #5974, #5980, #5981, #5985, #5990, #5992, #5993, #5996, #5995, #6000, #6001, #6002, #6003, #6005, #6007, #6010, #6008, #6012, #6013, #6015, #6017, #6027, #6028, #6035, #6036, #6040, #6041, #6048, #6058, #6059, #6078, #6079, #6086)
+- Dev: Add initial experimental EventSub support. (#5837, #5895, #5897, #5904, #5910, #5903, #5915, #5916, #5930, #5935, #5932, #5943, #5952, #5953, #5968, #5973, #5974, #5980, #5981, #5985, #5990, #5992, #5993, #5996, #5995, #6000, #6001, #6002, #6003, #6005, #6007, #6010, #6008, #6012, #6013, #6015, #6017, #6027, #6028, #6035, #6036, #6040, #6041, #6048, #6058, #6059, #6078, #6079, #6086, #6092, #6093)
 - Dev: Remove unneeded platform specifier for toasts. (#5914)
 - Dev: Cleanly shutdown on `SIGINT`/`SIGTERM` on Linux & macOS. (#6053)
 - Dev: Highlight checks now use non-capturing groups for the boundaries. (#5784)
