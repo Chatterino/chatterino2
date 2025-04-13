@@ -1656,7 +1656,8 @@ void Split::drag()
     drag->setMimeData(mimeData);
 
     // drag->exec is a blocking action
-    if (drag->exec(Qt::MoveAction) == Qt::IgnoreAction)
+    auto dragRes = drag->exec(Qt::MoveAction);
+    if (dragRes != Qt::MoveAction || drag->target() == nullptr)
     {
         // The split wasn't dropped in a valid spot, return it to its original position
         container->insertSplit(this, {.position = originalLocation});
