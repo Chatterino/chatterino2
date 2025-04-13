@@ -21,6 +21,7 @@ public:
 
 protected:
     void showEvent(QShowEvent *event) override;
+    void themeChangedEvent() override;
 
 private:
     QTextEdit *textEdit_{};

@@ -1,5 +1,6 @@
 #include "EditUserNotesDialog.hpp"
 
+#include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 
 #include <QDialogButtonBox>
@@ -34,6 +35,8 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
         .connect(&QDialogButtonBox::rejected, this, [this] {
             this->close();
         });
+
+    this->themeChangedEvent();
 }
 
 void EditUserNotesDialog::setNotes(const QString &notes)
@@ -51,6 +54,28 @@ void EditUserNotesDialog::showEvent(QShowEvent *event)
     this->textEdit_->setFocus(Qt::FocusReason::ActiveWindowFocusReason);
 
     BasePopup::showEvent(event);
+}
+
+void EditUserNotesDialog::themeChangedEvent()
+{
+    if (!this->theme)
+    {
+        return;
+    }
+
+    auto palette = this->palette();
+
+    palette.setColor(QPalette::Window,
+                     this->theme->tabs.selected.backgrounds.regular);
+    palette.setColor(QPalette::Base, getTheme()->splits.background);
+    palette.setColor(QPalette::Text, getTheme()->window.text);
+
+    this->setPalette(palette);
+
+    if (this->textEdit_)
+    {
+        this->textEdit_->setPalette(palette);
+    }
 }
 
 }  // namespace chatterino
