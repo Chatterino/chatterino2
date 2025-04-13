@@ -11,10 +11,12 @@
 - Bugfix: Fixed scrolling now working on inputs in the settings. (#6128)
 - Bugfix: Make reply-cancel button less coarse-grained. (#6106)
 - Bugfix: Fixed missing BetterTTV live updates of emotes. (#6132)
+- Bugfix: Fixed message contents being cleared when using the close button for replies. (#6145)
 - Bugfix: Handle <kbd>CMD</kbd> + <kbd>BACKSPACE</kbd> behavior explicitly in main chat dialog input for macOS. (#6111)
 - Bugfix: Fixed a small typo in the settings page. (#6134)
 - Bugfix: Fixed some Twitch commands not getting tab-completed correctly. (#6143)
 - Bugfix: Fixed shared chat badges displaying pixelated when Chatterino is scaled too much. (#6146)
+- Dev: Mini refactor of Split. (#6148)
 - Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
 - Dev: Pass `--force-openssl` when installing from CMake in Qt 6.8+. (#6129)
 
