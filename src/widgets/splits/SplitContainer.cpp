@@ -22,6 +22,7 @@
 #include <QJsonObject>
 #include <QMimeData>
 #include <QPainter>
+#include <QPainterPath>
 
 #include <algorithm>
 
@@ -613,6 +614,29 @@ void SplitContainer::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
+void SplitContainer::paintSplitBorder(Node *node, QPainter *painter)
+{
+    switch (node->type_)
+    {
+        case Node::Type::Split: {
+            QRectF nodeRect = node->geometry_;
+            painter->setPen(this->theme->tabs.dividerLine);
+            QPainterPath p = QPainterPath();
+            p.addRect(nodeRect);
+            painter->strokePath(p, painter->pen());
+        }
+        break;
+        case Node::Type::VerticalContainer:
+        case Node::Type::HorizontalContainer: {
+            for (std::unique_ptr<Node> &child : node->children_)
+            {
+                paintSplitBorder(child.get(), painter);
+            }
+        }
+        break;
+    }
+}
+
 void SplitContainer::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
@@ -643,14 +667,7 @@ void SplitContainer::paintEvent(QPaintEvent * /*event*/)
     }
     else
     {
-        if (getApp()->getThemes()->isLightTheme())
-        {
-            painter.fillRect(rect(), QColor("#999"));
-        }
-        else
-        {
-            painter.fillRect(rect(), QColor("#555"));
-        }
+        this->paintSplitBorder(this->getBaseNode(), &painter);
     }
 
     for (DropRect &dropRect : this->dropRects_)
