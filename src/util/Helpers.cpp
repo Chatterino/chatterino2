@@ -1,12 +1,19 @@
 #include "util/Helpers.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
+#include "singletons/Paths.hpp"
 
 #include <QDateTime>
 #include <QDirIterator>
+#include <QJsonObject>
 #include <QLocale>
+#include <QLoggingCategory>
 #include <QRegularExpression>
+#include <QStringBuilder>
+#include <QStringView>
+#include <QThreadPool>
 #include <QTimeZone>
 #include <QUuid>
 
@@ -384,6 +391,79 @@ void removeLastQS(QString &str)
 #else
     str.chop(1);
 #endif
+}
+
+void writeProviderEmotesCache(const QString &id, const QString &provider,
+                              const QByteArray &bytes)
+{
+    QThreadPool::globalInstance()->start([bytes, id, provider]() {
+        auto cacheKey = id % "." % provider;
+        QFile responseCache(getApp()->getPaths().cacheFilePath(cacheKey));
+
+        if (responseCache.open(QIODevice::WriteOnly))
+        {
+            qCDebug(chatterinoCache)
+                << "Saved json response " << id << "." << provider;
+            responseCache.write(qCompress(bytes));
+        }
+    });
+}
+
+bool readProviderEmotesCache(const QString &id, const QString &provider,
+                             const std::function<void(QJsonDocument)> &callback)
+{
+    auto cacheKey = id % "." % provider;
+    QFile responseCache(getApp()->getPaths().cacheFilePath(cacheKey));
+
+    if (responseCache.open(QIODevice::ReadOnly))
+    {
+        QJsonParseError parseError;
+        auto doc = QJsonDocument::fromJson(qUncompress(responseCache.readAll()),
+                                           &parseError);
+
+        if (parseError.error != QJsonParseError::NoError)
+        {
+            qCWarning(chatterinoCache)
+                << "Emote cache " << id << "." << provider
+                << " parsing failed: " << parseError.errorString();
+        }
+
+        qCDebug(chatterinoCache)
+            << "Loaded emote cache: " << id << "." << provider;
+        callback(doc);
+        return true;
+    }
+
+    // If the API call fails, we need to know if loading cached emotes was successful
+    return false;
+}
+
+std::pair<QStringView, QStringView> splitOnce(QStringView haystack,
+                                              QStringView needle) noexcept
+{
+    auto idx = haystack.indexOf(needle);
+    if (idx < 0)
+    {
+        return {haystack, {}};
+    }
+    return {
+        haystack.sliced(0, idx),
+        haystack.sliced(idx + needle.size()),
+    };
+}
+
+std::pair<QStringView, QStringView> splitOnce(QStringView haystack,
+                                              QChar needle) noexcept
+{
+    auto idx = haystack.indexOf(needle);
+    if (idx < 0)
+    {
+        return {haystack, {}};
+    }
+    return {
+        haystack.sliced(0, idx),
+        haystack.sliced(idx + 1),
+    };
 }
 
 }  // namespace chatterino

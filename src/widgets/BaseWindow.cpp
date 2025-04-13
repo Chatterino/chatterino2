@@ -979,14 +979,17 @@ void BaseWindow::scaleChangedEvent(float scale)
 void BaseWindow::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
+    this->drawOutline(painter);
+    this->drawCustomWindowFrame(painter);
+}
 
+void BaseWindow::drawOutline(QPainter &painter)
+{
     if (this->frameless_)
     {
         painter.setPen(QColor("#999"));
         painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
     }
-
-    this->drawCustomWindowFrame(painter);
 }
 
 float BaseWindow::desiredScale() const

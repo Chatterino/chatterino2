@@ -1548,10 +1548,37 @@ void ChannelView::paintEvent(QPaintEvent *event)
     // draw paused sign
     if (this->paused())
     {
-        auto a = this->scale() * 20;
-        auto brush = QBrush(QColor(127, 127, 127, 255));
-        painter.fillRect(QRectF(5, a / 4, a / 4, a), brush);
-        painter.fillRect(QRectF(15, a / 4, a / 4, a), brush);
+        auto baseSize = 20;
+        auto scale = this->scale();
+        auto indicatorSize = baseSize * scale;
+        auto color = QColor(180, 180, 180, 255);
+        auto brush = QBrush(color);
+
+        const auto pausedY = indicatorSize / 4;
+        const auto pausedX = 5 * scale;
+
+        QFont font = painter.font();
+        font.setPixelSize(indicatorSize);
+        painter.setFont(font);
+
+        const QString text = "Paused";
+        const QFontMetrics metrics(font);
+        const auto textWidth = metrics.horizontalAdvance(text);
+        const auto textX = pausedX * 3 + 10 * scale;
+
+        painter.fillRect(QRectF(0, 0, pausedX + textX + textWidth,
+                                indicatorSize / 2 + indicatorSize),
+                         QBrush(QColor(0, 0, 0, 200), Qt::SolidPattern));
+
+        painter.fillRect(
+            QRectF(pausedX, pausedY, indicatorSize / 4, indicatorSize), brush);
+        painter.fillRect(
+            QRectF(pausedX * 3, pausedY, indicatorSize / 4, indicatorSize),
+            brush);
+
+        painter.setPen(color);
+        painter.drawText(QRectF(textX, pausedY, textWidth, indicatorSize),
+                         Qt::AlignLeft | Qt::AlignVCenter, text);
     }
 }
 

@@ -391,8 +391,10 @@ EmotePtr makeSharedChatBadge(const QString &sourceName,
 {
     if (!sourceProfileURL.isEmpty())
     {
-        QString modifiedUrl = sourceProfileURL;
-        modifiedUrl.replace("300x300", "28x28");
+        auto [urlBegin, urlEnd] = splitOnce(sourceProfileURL, u"300x300");
+        QString url28px = urlBegin % u"28x28" % urlEnd;
+        QString url70px = urlBegin % u"70x70" % urlEnd;
+        QString url150px = urlBegin % u"150x150" % urlEnd;
 
         auto badgeLink = [&] {
             if (sourceLogin.isEmpty())
@@ -405,9 +407,13 @@ EmotePtr makeSharedChatBadge(const QString &sourceName,
 
         return std::make_shared<Emote>(Emote{
             .name = EmoteName{},
-            .images = ImageSet{Image::fromUrl(
-                Url{modifiedUrl},
-                18.F / 28.F)},  // get as close to 18x18 as possible
+            .images =
+                ImageSet{
+                    // The images should be displayed like an 18x18 image
+                    Image::fromUrl({url28px}, 18.F / 28.F),
+                    Image::fromUrl({url70px}, 18.F / 70.F),
+                    Image::fromUrl({url150px}, 18.F / 150.F),
+                },
             .tooltip =
                 Tooltip{"Shared Message" +
                         (sourceName.isEmpty() ? "" : " from " + sourceName)},

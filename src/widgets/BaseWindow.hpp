@@ -122,6 +122,7 @@ protected:
     void scaleChangedEvent(float) override;
 
     void paintEvent(QPaintEvent *) override;
+    virtual void drawOutline(QPainter &);
 
     void changeEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
