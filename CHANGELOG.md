@@ -16,6 +16,7 @@
 - Bugfix: Fixed message contents being cleared when using the close button for replies. (#6145)
 - Bugfix: Handle <kbd>CMD</kbd> + <kbd>BACKSPACE</kbd> behavior explicitly in main chat dialog input for macOS. (#6111)
 - Bugfix: Fixed a small typo in the settings page. (#6134)
+- Bugfix: Fixed an issue where Splits could get lost by dragging it onto your Recycle Bin. (#6147)
 - Bugfix: Fixed some Twitch commands not getting tab-completed correctly. (#6143)
 - Bugfix: Fixed shared chat badges displaying pixelated when Chatterino is scaled too much. (#6146)
 - Dev: Mini refactor of Split. (#6148)
