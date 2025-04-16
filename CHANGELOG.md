@@ -23,6 +23,7 @@
 - Dev: Mini refactor of Split. (#6148)
 - Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
 - Dev: Pass `--force-openssl` when installing from CMake in Qt 6.8+. (#6129)
+- Dev: Fixed `<build-tool> clean` not working correctly with generated sources. (#6154)
 
 ## 2.5.3
 
