@@ -226,4 +226,14 @@ bool readProviderEmotesCache(
     const QString &id, const QString &provider,
     const std::function<void(QJsonDocument)> &callback);
 
+/// Splits `haystack` by `needle`. If `needle` doesn't occur in `haystack`,
+/// `{haystack, {}}` is returned.
+std::pair<QStringView, QStringView> splitOnce(QStringView haystack,
+                                              QStringView needle) noexcept;
+
+/// Splits `haystack` by `needle`. If `needle` doesn't occur in `haystack`,
+/// `{haystack, {}}` is returned.
+std::pair<QStringView, QStringView> splitOnce(QStringView haystack,
+                                              QChar needle) noexcept;
+
 }  // namespace chatterino

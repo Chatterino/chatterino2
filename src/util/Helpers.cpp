@@ -438,4 +438,32 @@ bool readProviderEmotesCache(const QString &id, const QString &provider,
     return false;
 }
 
+std::pair<QStringView, QStringView> splitOnce(QStringView haystack,
+                                              QStringView needle) noexcept
+{
+    auto idx = haystack.indexOf(needle);
+    if (idx < 0)
+    {
+        return {haystack, {}};
+    }
+    return {
+        haystack.sliced(0, idx),
+        haystack.sliced(idx + needle.size()),
+    };
+}
+
+std::pair<QStringView, QStringView> splitOnce(QStringView haystack,
+                                              QChar needle) noexcept
+{
+    auto idx = haystack.indexOf(needle);
+    if (idx < 0)
+    {
+        return {haystack, {}};
+    }
+    return {
+        haystack.sliced(0, idx),
+        haystack.sliced(idx + 1),
+    };
+}
+
 }  // namespace chatterino

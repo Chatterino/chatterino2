@@ -16,11 +16,13 @@ public:
     FiltersPage();
 
     void onShow() final;
+    bool filterElements(const QString &query) override;
 
 private:
     void tableCellClicked(const QModelIndex &clicked, EditableModelView *view);
 
     QStringListModel userListModel_;
+    EditableModelView *view_;
 };
 
 }  // namespace chatterino

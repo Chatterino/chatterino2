@@ -190,10 +190,10 @@ void SplitInput::initLayout()
         this->openEmotePopup();
     });
 
-    // clear input and remove reply target
+    // remove reply target
     QObject::connect(this->ui_.cancelReplyButton, &EffectLabel::leftClicked,
                      [this] {
-                         this->clearInput();
+                         this->setReply(nullptr);
                      });
 
     // Forward selection change signal
@@ -1146,53 +1146,64 @@ void SplitInput::setReply(MessagePtr target)
         this->ui_.textEdit->resetCompletion();
     }
 
-    assert(target != nullptr);
-    this->replyTarget_ = std::move(target);
-
-    if (this->enableInlineReplying_)
+    if (target != nullptr)
     {
-        this->ui_.replyMessage->setWidth(this->replyMessageWidth());
-        this->ui_.replyMessage->setMessage(this->replyTarget_);
+        this->replyTarget_ = std::move(target);
 
-        // add spacing between reply box and input box
-        this->ui_.vbox->setSpacing(this->marginForTheme());
-        if (!this->isHidden())
+        if (this->enableInlineReplying_)
         {
-            // update maximum height to give space for message
-            this->setMaximumHeight(this->scaledMaxHeight());
-        }
+            this->ui_.replyMessage->setWidth(this->replyMessageWidth());
+            this->ui_.replyMessage->setMessage(this->replyTarget_);
 
-        // Only enable reply label if inline replying
-        auto replyPrefix = "@" + this->replyTarget_->displayName;
-        auto plainText = this->ui_.textEdit->toPlainText().trimmed();
-
-        // This makes it so if plainText contains "@StreamerFan" and
-        // we are replying to "@Streamer" we don't just leave "Fan"
-        // in the text box
-        if (plainText.startsWith(replyPrefix))
-        {
-            if (plainText.length() > replyPrefix.length())
+            // add spacing between reply box and input box
+            this->ui_.vbox->setSpacing(this->marginForTheme());
+            if (!this->isHidden())
             {
-                if (plainText.at(replyPrefix.length()) == ',' ||
-                    plainText.at(replyPrefix.length()) == ' ')
+                // update maximum height to give space for message
+                this->setMaximumHeight(this->scaledMaxHeight());
+            }
+
+            // Only enable reply label if inline replying
+            auto replyPrefix = "@" + this->replyTarget_->displayName;
+            auto plainText = this->ui_.textEdit->toPlainText().trimmed();
+
+            // This makes it so if plainText contains "@StreamerFan" and
+            // we are replying to "@Streamer" we don't just leave "Fan"
+            // in the text box
+            if (plainText.startsWith(replyPrefix))
+            {
+                if (plainText.length() > replyPrefix.length())
                 {
-                    plainText.remove(0, replyPrefix.length() + 1);
+                    if (plainText.at(replyPrefix.length()) == ',' ||
+                        plainText.at(replyPrefix.length()) == ' ')
+                    {
+                        plainText.remove(0, replyPrefix.length() + 1);
+                    }
+                }
+                else
+                {
+                    plainText.remove(0, replyPrefix.length());
                 }
             }
-            else
+            if (!plainText.isEmpty() && !plainText.startsWith(' '))
             {
-                plainText.remove(0, replyPrefix.length());
+                replyPrefix.append(' ');
             }
+            this->ui_.textEdit->setPlainText(replyPrefix + plainText + " ");
+            this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+            this->ui_.textEdit->resetCompletion();
+            this->ui_.replyLabel->setText("Replying to @" +
+                                          this->replyTarget_->displayName);
         }
-        if (!plainText.isEmpty() && !plainText.startsWith(' '))
+    }
+    else
+    {
+        this->replyTarget_.reset();
+
+        if (this->enableInlineReplying_)
         {
-            replyPrefix.append(' ');
+            this->clearReplyTarget();
         }
-        this->ui_.textEdit->setPlainText(replyPrefix + plainText + " ");
-        this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
-        this->ui_.textEdit->resetCompletion();
-        this->ui_.replyLabel->setText("Replying to @" +
-                                      this->replyTarget_->displayName);
     }
 }
 
