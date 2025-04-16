@@ -170,6 +170,17 @@ void Connection::onChannelModerate(
     std::visit(
         [&](auto &&action) {
             using Action = std::remove_cvref_t<decltype(action)>;
+            static_assert(CanMakeModMessage<Action> ||
+                              CanHandleModMessage<Action> ||
+                              std::is_same_v<Action, std::string>,
+                          "All actions must be handled");
+
+            if constexpr (std::is_same_v<Action, std::string>)
+            {
+                qCWarning(LOG) << "Unhandled moderation action:"
+                               << QUtf8StringView(action);
+            }
+
             if constexpr (CanMakeModMessage<Action>)
             {
                 EventSubMessageBuilder builder(channel, now);
@@ -278,6 +289,9 @@ void Connection::onChannelSuspiciousUserMessage(
     if (payload.event.lowTrustStatus !=
         lib::suspicious_users::Status::Restricted)
     {
+        qCInfo(LOG) << "Ignoring low trust status message from user"
+                    << payload.event.userLogin.qt() << "because status is"
+                    << static_cast<std::uint8_t>(payload.event.lowTrustStatus);
         return;
     }
 

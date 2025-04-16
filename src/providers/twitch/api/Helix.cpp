@@ -3271,7 +3271,16 @@ void Helix::createEventSubSubscription(
             switch (*result.status())
             {
                 case 400: {
-                    failureCallback(Error::BadRequest, message);
+                    if (message.startsWith(
+                            "websocket transport session does not exist",
+                            Qt::CaseInsensitive))
+                    {
+                        failureCallback(Error::NoSession, message);
+                    }
+                    else
+                    {
+                        failureCallback(Error::BadRequest, message);
+                    }
                 }
                 break;
 

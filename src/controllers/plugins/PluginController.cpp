@@ -12,6 +12,7 @@
 #    include "controllers/plugins/api/HTTPResponse.hpp"
 #    include "controllers/plugins/api/IOWrapper.hpp"
 #    include "controllers/plugins/api/Message.hpp"
+#    include "controllers/plugins/api/WebSocket.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/SolTypes.hpp"
@@ -245,6 +246,11 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     c2["FontStyle"] = lua::createEnumTable<FontStyle>(lua);
     c2["MessageContext"] = lua::createEnumTable<MessageContext>(lua);
 
+    if (plugin->hasNetworkPermission())
+    {
+        lua::api::WebSocket::createUserType(c2, plugin);
+    }
+
     sol::table io = g["io"];
     io.set_function(
         "open", sol::overload(&lua::api::io_open, &lua::api::io_open_modeless));
@@ -446,6 +452,11 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
     }
 
     return {false, results};
+}
+
+WebSocketPool &PluginController::webSocketPool()
+{
+    return this->webSocketPool_;
 }
 
 }  // namespace chatterino
