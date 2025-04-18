@@ -1,16 +1,9 @@
 #include "providers/twitch/PubSubClient.hpp"
 
 #include "common/QLogging.hpp"
-#include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/PubSubHelpers.hpp"
 #include "providers/twitch/PubSubMessages.hpp"
-#include "singletons/Settings.hpp"
 #include "util/DebugCount.hpp"
-#include "util/Helpers.hpp"
-#include "util/RapidjsonHelpers.hpp"
-
-#include <exception>
-#include <thread>
 
 namespace chatterino {
 
