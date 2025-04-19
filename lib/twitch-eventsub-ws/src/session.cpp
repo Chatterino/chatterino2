@@ -18,13 +18,19 @@
 #include <memory>
 #include <unordered_map>
 
-#if __cpp_lib_format >= 201907L && !defined(__APPLE__)
-#    include <format>
-using std::format;
-#else
+#ifdef __APPLE__
 #    define FMT_HEADER_ONLY
 #    include "fmt/format.h"
 using fmt::format;
+#else
+#    if __cpp_lib_format >= 201907L
+#        include <format>
+using std::format;
+#    else
+#        define FMT_HEADER_ONLY
+#        include "fmt/format.h"
+using fmt::format;
+#    endif
 #endif
 
 namespace beast = boost::beast;
