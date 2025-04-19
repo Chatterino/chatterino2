@@ -21,15 +21,12 @@
 #ifdef __APPLE__
 #    define FMT_HEADER_ONLY
 #    include "fmt/format.h"
-using fmt::format;
 #else
 #    if __cpp_lib_format >= 201907L
 #        include <format>
-using std::format;
 #    else
 #        define FMT_HEADER_ONLY
 #        include "fmt/format.h"
-using fmt::format;
 #    endif
 #endif
 
@@ -38,6 +35,16 @@ namespace http = beast::http;
 namespace websocket = beast::websocket;
 
 namespace chatterino::eventsub::lib {
+
+#ifdef __APPLE__
+using fmt::format;
+#else
+#    if __cpp_lib_format >= 201907L
+using std::format;
+#    else
+using fmt::format;
+#    endif
+#endif
 
 // Subscription Type + Subscription Version
 using EventSubSubscription = std::pair<std::string, std::string>;
@@ -434,8 +441,8 @@ void Session::onClose(beast::error_code ec)
 
 void Session::fail(beast::error_code ec, std::string_view op)
 {
-    this->log->warn(
-        format("{}: {} ({})", op, ec.message(), ec.location().to_string()));
+    this->log->warn(chatterino::eventsub::lib::format(
+        "{}: {} ({})", op, ec.message(), ec.location().to_string()));
     if (!this->ws.is_open() && this->listener)
     {
         if (this->keepaliveTimer)
@@ -522,7 +529,8 @@ boost::system::error_code Session::onSessionWelcome(
     this->keepaliveTimeout =
         std::chrono::seconds{payload.keepaliveTimeoutSeconds.value_or(60)} * 2;
     assert(!this->keepaliveTimer);
-    this->log->debug(format("Keepalive: {}s", this->keepaliveTimeout.count()));
+    this->log->debug(chatterino::eventsub::lib::format(
+        "Keepalive: {}s", this->keepaliveTimeout.count()));
     this->checkKeepalive();
 
     return {};
@@ -589,8 +597,8 @@ void Session::checkKeepalive()
     this->keepaliveTimer->async_wait([this](boost::system::error_code ec) {
         if (ec)
         {
-            this->log->warn(
-                format("Keepalive timer cancelled: {}", ec.message()));
+            this->log->warn(chatterino::eventsub::lib::format(
+                "Keepalive timer cancelled: {}", ec.message()));
             return;
         }
         this->checkKeepalive();
