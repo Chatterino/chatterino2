@@ -13,16 +13,15 @@
 #    include <QString>
 #    include <sol/forward.hpp>
 
-#    include <algorithm>
 #    include <map>
 #    include <memory>
 #    include <utility>
-#    include <vector>
 
 struct lua_State;
 
 namespace chatterino {
 
+class Settings;
 class Paths;
 
 class PluginController

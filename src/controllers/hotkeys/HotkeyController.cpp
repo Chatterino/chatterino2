@@ -4,9 +4,12 @@
 #include "controllers/hotkeys/Hotkey.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyModel.hpp"
-#include "singletons/Settings.hpp"
+#include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
 
+#include <pajlada/settings.hpp>
+#include <QMessageBox>
 #include <QShortcut>
+#include <QWidget>
 
 namespace {
 

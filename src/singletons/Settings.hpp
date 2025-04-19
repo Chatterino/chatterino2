@@ -15,8 +15,8 @@
 #include "controllers/nicknames/Nickname.hpp"
 #include "controllers/sound/ISoundController.hpp"
 #include "singletons/Toasts.hpp"
-#include "util/RapidJsonSerializeQString.hpp"
-#include "widgets/Notebook.hpp"
+#include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
+#include "widgets/NotebookEnums.hpp"
 
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/settings/settinglistener.hpp>
