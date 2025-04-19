@@ -18,33 +18,28 @@
 #include <memory>
 #include <unordered_map>
 
-#ifdef __APPLE__
+#if __cpp_lib_format >= 201907L && !defined(__APPLE__)
+#    include <format>
+#else
 #    define FMT_HEADER_ONLY
 #    include "fmt/format.h"
-#else
-#    if __cpp_lib_format >= 201907L
-#        include <format>
-#    else
-#        define FMT_HEADER_ONLY
-#        include "fmt/format.h"
-#    endif
 #endif
+
+namespace c2fmt {
+
+#if __cpp_lib_format >= 201907L && !defined(__APPLE__)
+using std::format;
+#else
+using fmt::format;
+#endif
+
+}  // namespace c2fmt
 
 namespace beast = boost::beast;
 namespace http = beast::http;
 namespace websocket = beast::websocket;
 
 namespace chatterino::eventsub::lib {
-
-#ifdef __APPLE__
-using fmt::format;
-#else
-#    if __cpp_lib_format >= 201907L
-using std::format;
-#    else
-using fmt::format;
-#    endif
-#endif
 
 // Subscription Type + Subscription Version
 using EventSubSubscription = std::pair<std::string, std::string>;
@@ -441,8 +436,8 @@ void Session::onClose(beast::error_code ec)
 
 void Session::fail(beast::error_code ec, std::string_view op)
 {
-    this->log->warn(chatterino::eventsub::lib::format(
-        "{}: {} ({})", op, ec.message(), ec.location().to_string()));
+    this->log->warn(c2fmt::format("{}: {} ({})", op, ec.message(),
+                                  ec.location().to_string()));
     if (!this->ws.is_open() && this->listener)
     {
         if (this->keepaliveTimer)
@@ -529,8 +524,8 @@ boost::system::error_code Session::onSessionWelcome(
     this->keepaliveTimeout =
         std::chrono::seconds{payload.keepaliveTimeoutSeconds.value_or(60)} * 2;
     assert(!this->keepaliveTimer);
-    this->log->debug(chatterino::eventsub::lib::format(
-        "Keepalive: {}s", this->keepaliveTimeout.count()));
+    this->log->debug(
+        c2fmt::format("Keepalive: {}s", this->keepaliveTimeout.count()));
     this->checkKeepalive();
 
     return {};
@@ -597,8 +592,8 @@ void Session::checkKeepalive()
     this->keepaliveTimer->async_wait([this](boost::system::error_code ec) {
         if (ec)
         {
-            this->log->warn(chatterino::eventsub::lib::format(
-                "Keepalive timer cancelled: {}", ec.message()));
+            this->log->warn(
+                c2fmt::format("Keepalive timer cancelled: {}", ec.message()));
             return;
         }
         this->checkKeepalive();
