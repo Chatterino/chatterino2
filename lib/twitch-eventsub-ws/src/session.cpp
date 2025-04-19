@@ -15,9 +15,25 @@
 #include <boost/json.hpp>
 
 #include <chrono>
-#include <iostream>
 #include <memory>
 #include <unordered_map>
+
+#if __cpp_lib_format >= 201907L && !defined(__APPLE__)
+#    include <format>
+#else
+#    define FMT_HEADER_ONLY
+#    include "fmt/format.h"
+#endif
+
+namespace c2fmt {
+
+#if __cpp_lib_format >= 201907L && !defined(__APPLE__)
+using std::format;
+#else
+using fmt::format;
+#endif
+
+}  // namespace c2fmt
 
 namespace beast = boost::beast;
 namespace http = beast::http;
@@ -230,8 +246,10 @@ namespace {
 
 // Resolver and socket require an io_context
 Session::Session(boost::asio::io_context &ioc, boost::asio::ssl::context &ctx,
-                 std::unique_ptr<Listener> listener)
-    : resolver(boost::asio::make_strand(ioc))
+                 std::unique_ptr<Listener> listener,
+                 std::shared_ptr<Logger> log_)
+    : log(std::move(log_))
+    , resolver(boost::asio::make_strand(ioc))
     , ws(boost::asio::make_strand(ioc), ctx)
     , listener(std::move(listener))
 {
@@ -418,7 +436,8 @@ void Session::onClose(beast::error_code ec)
 
 void Session::fail(beast::error_code ec, std::string_view op)
 {
-    std::cerr << op << ": " << ec.message() << " (" << ec.location() << ")\n";
+    this->log->warn(c2fmt::format("{}: {} ({})", op, ec.message(),
+                                  ec.location().to_string()));
     if (!this->ws.is_open() && this->listener)
     {
         if (this->keepaliveTimer)
@@ -505,7 +524,8 @@ boost::system::error_code Session::onSessionWelcome(
     this->keepaliveTimeout =
         std::chrono::seconds{payload.keepaliveTimeoutSeconds.value_or(60)} * 2;
     assert(!this->keepaliveTimer);
-    std::cerr << "Keepalive: " << this->keepaliveTimeout.count() << 's';
+    this->log->debug(
+        c2fmt::format("Keepalive: {}s", this->keepaliveTimeout.count()));
     this->checkKeepalive();
 
     return {};
@@ -551,7 +571,7 @@ void Session::checkKeepalive()
 {
     if (!this->receivedMessage)
     {
-        std::cerr << "Keepalive timeout, closing\n";
+        this->log->debug("Keepalive timeout, closing");
         if (this->listener)
         {
             this->listener->onClose(std::move(this->listener), {});
@@ -572,7 +592,8 @@ void Session::checkKeepalive()
     this->keepaliveTimer->async_wait([this](boost::system::error_code ec) {
         if (ec)
         {
-            std::cerr << "Keepalive timer cancelled: " << ec.message() << '\n';
+            this->log->warn(
+                c2fmt::format("Keepalive timer cancelled: {}", ec.message()));
             return;
         }
         this->checkKeepalive();
