@@ -55,3 +55,6 @@
 [submodule "lib/twitch-eventsub-ws/lib/date"]
 	path = lib/twitch-eventsub-ws/lib/date
 	url = https://github.com/HowardHinnant/date.git
+[submodule "lib/twitch-eventsub-ws/lib/fmt"]
+	path = lib/twitch-eventsub-ws/lib/fmt
+	url = https://github.com/fmtlib/fmt

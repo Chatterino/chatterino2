@@ -48,14 +48,18 @@ public:
     {
     }
 
-    void debug(const QString &msg) override
+    void debug(std::string_view msg) override
     {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         qCDebug(this->loggingCategory).noquote() << msg;
+#endif
     }
 
-    void warn(const QString &msg) override
+    void warn(std::string_view msg) override
     {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         qCWarning(this->loggingCategory).noquote() << msg;
+#endif
     }
 
 private:

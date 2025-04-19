@@ -18,6 +18,15 @@
 #include <memory>
 #include <unordered_map>
 
+#if __cpp_lib_format >= 201907L
+#    include <format>
+using std::format;
+#else
+#    define FMT_HEADER_ONLY
+#    include "fmt/format.h"
+using fmt::format;
+#endif
+
 namespace beast = boost::beast;
 namespace http = beast::http;
 namespace websocket = beast::websocket;
@@ -419,10 +428,8 @@ void Session::onClose(beast::error_code ec)
 
 void Session::fail(beast::error_code ec, std::string_view op)
 {
-    this->log->warn(QString("%1: %2 (%3)")
-                        .arg(op)
-                        .arg(ec.message())
-                        .arg(ec.location().to_string()));
+    this->log->warn(
+        format("{}: {} ({})", op, ec.message(), ec.location().to_string()));
     if (!this->ws.is_open() && this->listener)
     {
         if (this->keepaliveTimer)
@@ -509,8 +516,7 @@ boost::system::error_code Session::onSessionWelcome(
     this->keepaliveTimeout =
         std::chrono::seconds{payload.keepaliveTimeoutSeconds.value_or(60)} * 2;
     assert(!this->keepaliveTimer);
-    this->log->debug(
-        QString("Keepalive: %1s").arg(this->keepaliveTimeout.count()));
+    this->log->debug(format("Keepalive: {}s", this->keepaliveTimeout.count()));
     this->checkKeepalive();
 
     return {};
@@ -578,7 +584,7 @@ void Session::checkKeepalive()
         if (ec)
         {
             this->log->warn(
-                QString("Keepalive timer cancelled: %1").arg(ec.message()));
+                format("Keepalive timer cancelled: {}", ec.message()));
             return;
         }
         this->checkKeepalive();
