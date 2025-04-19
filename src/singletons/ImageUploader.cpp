@@ -1,6 +1,7 @@
 #include "singletons/ImageUploader.hpp"
 
 #include "Application.hpp"
+#include "common/Channel.hpp"
 #include "common/Env.hpp"
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
