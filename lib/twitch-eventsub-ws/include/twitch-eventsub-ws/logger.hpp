@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string_view>
+#include <QString>
 
 namespace chatterino::eventsub::lib {
 
@@ -8,18 +8,18 @@ class Logger
 {
 public:
     virtual ~Logger() = default;
-    virtual void debug(std::string_view msg) = 0;
-    virtual void warn(std::string_view msg) = 0;
+    virtual void debug(const QString &msg) = 0;
+    virtual void warn(const QString &msg) = 0;
 };
 
 class NullLogger : public Logger
 {
 public:
-    void debug(std::string_view msg) override
+    void debug(const QString &msg) override
     {
     }
 
-    void warn(std::string_view msg) override
+    void warn(const QString &msg) override
     {
     }
 };

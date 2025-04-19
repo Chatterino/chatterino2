@@ -15,7 +15,6 @@
 #include <boost/json.hpp>
 
 #include <chrono>
-#include <format>
 #include <memory>
 #include <unordered_map>
 
@@ -420,8 +419,8 @@ void Session::onClose(beast::error_code ec)
 
 void Session::fail(beast::error_code ec, std::string_view op)
 {
-    this->log->warn(std::format("{}: {} ({})", op, ec.message(),
-                                ec.location().to_string()));
+    this->log->warn(QString("%1: %2 (%3)")
+                        .arg(op, ec.message(), ec.location().to_string()));
     if (!this->ws.is_open() && this->listener)
     {
         if (this->keepaliveTimer)
@@ -509,7 +508,7 @@ boost::system::error_code Session::onSessionWelcome(
         std::chrono::seconds{payload.keepaliveTimeoutSeconds.value_or(60)} * 2;
     assert(!this->keepaliveTimer);
     this->log->debug(
-        std::format("Keepalive: {}s", this->keepaliveTimeout.count()));
+        QString("Keepalive: %1s").arg(this->keepaliveTimeout.count()));
     this->checkKeepalive();
 
     return {};
@@ -577,7 +576,7 @@ void Session::checkKeepalive()
         if (ec)
         {
             this->log->warn(
-                std::format("Keepalive timer cancelled: {}", ec.message()));
+                QString("Keepalive timer cancelled: %1").arg(ec.message()));
             return;
         }
         this->checkKeepalive();
