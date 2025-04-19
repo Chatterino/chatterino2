@@ -1,13 +1,10 @@
 #pragma once
 
-#include "widgets/listview/GenericListModel.hpp"
-#include "widgets/splits/InputCompletionItem.hpp"
-
 #include <QStringList>
 
-#include <memory>
-#include <utility>
-#include <vector>
+namespace chatterino {
+class GenericListModel;
+}  // namespace chatterino
 
 namespace chatterino::completion {
 
