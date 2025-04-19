@@ -420,7 +420,9 @@ void Session::onClose(beast::error_code ec)
 void Session::fail(beast::error_code ec, std::string_view op)
 {
     this->log->warn(QString("%1: %2 (%3)")
-                        .arg(op, ec.message(), ec.location().to_string()));
+                        .arg(op)
+                        .arg(ec.message())
+                        .arg(ec.location().to_string()));
     if (!this->ws.is_open() && this->listener)
     {
         if (this->keepaliveTimer)
