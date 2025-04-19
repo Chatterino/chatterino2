@@ -12,4 +12,16 @@ public:
     virtual void warn(std::string_view msg) = 0;
 };
 
+class NullLogger : public Logger
+{
+public:
+    void debug(std::string_view msg) override
+    {
+    }
+
+    void warn(std::string_view msg) override
+    {
+    }
+};
+
 }  // namespace chatterino::eventsub::lib
