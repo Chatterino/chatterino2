@@ -610,7 +610,7 @@ void Application::initNm(const Paths &paths)
 
 #if defined QT_NO_DEBUG || defined CHATTERINO_DEBUG_NM
     registerNmHost(paths);
-    this->nmServer.start();
+    this->nmServer->start();
 #endif
 }
 
