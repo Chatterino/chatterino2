@@ -18,7 +18,8 @@
 #include <memory>
 #include <unordered_map>
 
-#if __cpp_lib_format >= 201907L
+#if __cpp_lib_format >= 201907L && \
+    !defined(_LIBCPP_AVAILABILITY_HAS_NO_TO_CHARS_FLOATING_POINT)
 #    include <format>
 using std::format;
 #else
