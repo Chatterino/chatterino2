@@ -906,7 +906,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     {
         auto *note = new QLabel(
-            "A semicolon-separated list of Chrome or Firefox extension IDs"
+            "A semicolon-separated list of Chrome or Firefox extension IDs "
             "allowed to interact with Chatterino's browser integration "
             "(requires restart).\n"
             "Using multiple extension IDs from different browsers may cause "
@@ -1368,6 +1368,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox(
         "Enable experimental Twitch EventSub support (requires restart)",
         s.enableExperimentalEventSub);
+
+    layout.addCheckbox("Disable renaming of tabs on double-click",
+                       s.disableTabRenamingOnClick);
 
     layout.addStretch();
 

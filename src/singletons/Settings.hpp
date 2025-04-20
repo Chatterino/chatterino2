@@ -104,7 +104,7 @@ class Settings
     static Settings *instance_;
     Settings *prevInstance_ = nullptr;
 
-    const bool disableSaving;
+    bool disableSaving;
 
 public:
     Settings(const Args &args, const QString &settingsDirectory);
@@ -119,6 +119,8 @@ public:
 
     void saveSnapshot();
     void restoreSnapshot();
+
+    void disableSave();
 
     FloatSetting uiScale = {"/appearance/uiScale2", 1};
     BoolSetting windowTopMost = {"/appearance/windowAlwaysOnTop", false};
@@ -323,6 +325,11 @@ public:
     BoolSetting autorun = {"/behaviour/autorun", false};
     BoolSetting mentionUsersWithComma = {"/behaviour/mentionUsersWithComma",
                                          true};
+
+    BoolSetting disableTabRenamingOnClick = {
+        "/behaviour/disableTabRenamingOnClick",
+        false,
+    };
 
     /// Emotes
     BoolSetting scaleEmotesByLineHeight = {"/emotes/scaleEmotesByLineHeight",

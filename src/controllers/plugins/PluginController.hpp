@@ -2,6 +2,7 @@
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 
+#    include "common/websockets/WebSocketPool.hpp"
 #    include "controllers/commands/CommandContext.hpp"
 #    include "controllers/plugins/Plugin.hpp"
 
@@ -27,8 +28,6 @@ class Paths;
 
 class PluginController
 {
-    using OnPluginLoaded = boost::signals2::signal<void(Plugin *)>;
-
     const Paths &paths;
 
 public:
@@ -64,8 +63,9 @@ public:
         const QString &query, const QString &fullTextContent,
         int cursorPosition, bool isFirstWord) const;
 
-    boost::signals2::connection onPluginLoaded(
-        const OnPluginLoaded::slot_type &slot);
+    WebSocketPool &webSocketPool();
+
+    boost::signals2::signal<void(Plugin *)> onPluginLoaded;
 
 private:
     void loadPlugins();
@@ -80,8 +80,7 @@ private:
     static void loadChatterinoLib(lua_State *l);
     bool tryLoadFromDir(const QDir &pluginDir);
     std::map<QString, std::unique_ptr<Plugin>> plugins_;
-
-    OnPluginLoaded onPluginLoaded_;
+    WebSocketPool webSocketPool_;
 
     // This is for tests, pay no attention
     friend class PluginControllerAccess;

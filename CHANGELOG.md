@@ -2,16 +2,35 @@
 
 ## Unversioned
 
-- Minor: Added interactive REPL for plugins. (#6120)
+- Minor: Added user notes to the user info dialog (when clicking a username). (#6122)
+- Minor: Added cached emotes fallback when fetching from a provider fails. (#6125)
 - Minor: Add an option for the reduced opacity of message history. (#6121)
 - Minor: Make paused chat indicator more visible, and fix its zoom behavior. (#6123)
+- Minor: Added WebSocket API for plugins. (#6076)
+- Minor: Added interactive REPL for plugins. (#6120)
+- Minor: Allow for themes to set transparent values for window background on Linux. (#6137)
+- Minor: Popup overlay now only draws an outline when being interacted with. (#6140)
+- Minor: Made filters searchable in the Settings dialog search bar. (#5890)
+- Minor: Updated emojis to Unicode 16.0. (#6155)
+- Minor: Allow disabling of double-click tab renaming through setting. (#6163)
 - Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
 - Bugfix: Fixed scrolling now working on inputs in the settings. (#6128)
 - Bugfix: Make reply-cancel button less coarse-grained. (#6106)
 - Bugfix: Fixed missing BetterTTV live updates of emotes. (#6132)
+- Bugfix: Fixed message contents being cleared when using the close button for replies. (#6145)
+- Bugfix: Fixed the emote popup erroneously logging messages to the `Other` directory. (#6165)
 - Bugfix: Handle <kbd>CMD</kbd> + <kbd>BACKSPACE</kbd> behavior explicitly in main chat dialog input for macOS. (#6111)
+- Bugfix: Fixed a small typo in the settings page. (#6134)
+- Bugfix: Fixed an issue where Splits could get lost by dragging it onto your Recycle Bin. (#6147)
+- Bugfix: Fixed some Twitch commands not getting tab-completed correctly. (#6143)
+- Bugfix: Fixed shared chat badges displaying pixelated when Chatterino is scaled too much. (#6146)
+- Bugfix: Fixed a crash that could occur when eventsub was enabled and Chatterino was attached to a conhost on Windows that was later gone. (#6161)
+- Dev: Mini refactor of Split. (#6148)
 - Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
 - Dev: Pass `--force-openssl` when installing from CMake in Qt 6.8+. (#6129)
+- Dev: Fixed `<build-tool> clean` not working correctly with generated sources. (#6154)
+- Dev: Removed authenticated PubSub implementation. (#6158)
+- Dev: Save settings in `aboutToQuit`. (#6159)
 
 ## 2.5.3
 

@@ -84,6 +84,7 @@ Zakary2841 | https://github.com/Zakary2841 | :/avatars/zakary2841.png
 MiguVT | https://github.com/MiguVT | :/avatars/miguvt.png
 jacob-thompson | https://github.com/jacob-thompson |
 Jujufrost | https://github.com/Jujufrost |
+occluder | https://github.com/occluder | :/avatars/occluder.png
 
 # If you are a contributor add yourself above this line
 

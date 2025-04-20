@@ -141,6 +141,7 @@ public:
 
     bool hasFSPermissionFor(bool write, const QString &path);
     bool hasHTTPPermissionFor(const QUrl &url);
+    bool hasNetworkPermission() const;
 
     void log(lua_State *L, lua::api::LogLevel level, QDebug stream,
              const sol::variadic_args &args);

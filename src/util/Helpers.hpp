@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QColor>
+#include <QJsonDocument>
 #include <QLocale>
 #include <QString>
 
@@ -217,5 +218,22 @@ void removeFirstQS(QString &str);
 ///
 /// @param str The Qt string we want to remove 1 character from
 void removeLastQS(QString &str);
+
+void writeProviderEmotesCache(const QString &id, const QString &provider,
+                              const QByteArray &bytes);
+
+bool readProviderEmotesCache(
+    const QString &id, const QString &provider,
+    const std::function<void(QJsonDocument)> &callback);
+
+/// Splits `haystack` by `needle`. If `needle` doesn't occur in `haystack`,
+/// `{haystack, {}}` is returned.
+std::pair<QStringView, QStringView> splitOnce(QStringView haystack,
+                                              QStringView needle) noexcept;
+
+/// Splits `haystack` by `needle`. If `needle` doesn't occur in `haystack`,
+/// `{haystack, {}}` is returned.
+std::pair<QStringView, QStringView> splitOnce(QStringView haystack,
+                                              QChar needle) noexcept;
 
 }  // namespace chatterino

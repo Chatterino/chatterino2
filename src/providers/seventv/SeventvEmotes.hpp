@@ -108,7 +108,7 @@ public:
     static void loadChannelEmotes(
         const std::weak_ptr<Channel> &channel, const QString &channelId,
         std::function<void(EmoteMap &&, ChannelInfo)> callback,
-        bool manualRefresh);
+        bool manualRefresh, bool cacheHit);
 
     /**
      * Adds an emote to the `map` if it's valid.

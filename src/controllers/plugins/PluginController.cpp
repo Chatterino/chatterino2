@@ -11,6 +11,7 @@
 #    include "controllers/plugins/api/HTTPRequest.hpp"
 #    include "controllers/plugins/api/HTTPResponse.hpp"
 #    include "controllers/plugins/api/IOWrapper.hpp"
+#    include "controllers/plugins/api/WebSocket.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/SolTypes.hpp"
@@ -225,6 +226,11 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     c2["EventType"] = lua::createEnumTable<lua::api::EventType>(lua);
     c2["LogLevel"] = lua::createEnumTable<lua::api::LogLevel>(lua);
 
+    if (plugin->hasNetworkPermission())
+    {
+        lua::api::WebSocket::createUserType(c2, plugin);
+    }
+
     sol::table io = g["io"];
     io.set_function(
         "open", sol::overload(&lua::api::io_open, &lua::api::io_open_modeless));
@@ -277,7 +283,7 @@ void PluginController::load(const QFileInfo &index, const QDir &pluginDir,
     temp->dataDirectory().mkpath(".");
 
     // make sure we capture log messages during load
-    this->onPluginLoaded_(temp);
+    this->onPluginLoaded(temp);
     qCDebug(chatterinoLua) << "Running lua file:" << index;
     int err = luaL_dofile(l, index.absoluteFilePath().toStdString().c_str());
     if (err != 0)
@@ -430,10 +436,9 @@ std::pair<bool, QStringList> PluginController::updateCustomCompletions(
     return {false, results};
 }
 
-boost::signals2::connection PluginController::onPluginLoaded(
-    const OnPluginLoaded::slot_type &slot)
+WebSocketPool &PluginController::webSocketPool()
 {
-    return this->onPluginLoaded_.connect(slot);
+    return this->webSocketPool_;
 }
 
 }  // namespace chatterino
