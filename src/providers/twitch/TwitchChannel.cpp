@@ -1510,12 +1510,8 @@ void TwitchChannel::refreshPubSub()
 
     auto currentAccount = getApp()->getAccounts()->twitch.getCurrent();
 
-    getApp()->getTwitchPubSub()->listenToChannelModerationActions(roomId);
     if (this->hasModRights())
     {
-        getApp()->getTwitchPubSub()->listenToAutomod(roomId);
-        getApp()->getTwitchPubSub()->listenToLowTrustUsers(roomId);
-
         this->eventSubChannelModerateHandle =
             getApp()->getEventSub()->subscribe(eventsub::SubscriptionRequest{
                 .subscriptionType = "channel.moderate",
