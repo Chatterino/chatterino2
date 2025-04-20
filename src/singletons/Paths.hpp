@@ -18,7 +18,7 @@ public:
     // Directory for settings files. Same as <appDataDirectory>/Settings
     QString settingsDirectory;
 
-    // Directory for message log files. Same as <appDataDirectory>/Misc
+    // Directory for message log files. Same as <appDataDirectory>/Logs
     QString messageLogDirectory;
 
     // Directory for miscellaneous files. Same as <appDataDirectory>/Misc
