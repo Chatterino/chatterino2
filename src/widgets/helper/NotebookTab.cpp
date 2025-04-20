@@ -958,8 +958,11 @@ void NotebookTab::mouseReleaseEvent(QMouseEvent *event)
 
 void NotebookTab::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton &&
-        this->notebook_->getAllowUserTabManagement())
+    const auto canRenameTab =
+        this->notebook_->getAllowUserTabManagement() &&
+        getSettings()->disableTabRenamingOnClick == false;
+
+    if (event->button() == Qt::LeftButton && canRenameTab)
     {
         this->showRenameDialog();
     }
