@@ -7,6 +7,7 @@
 
 #include <QBoxLayout>
 #include <QCheckBox>
+#include <QFontDialog>
 #include <QFormLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -225,6 +226,45 @@ SettingWidget *SettingWidget::lineEdit(const QString &label,
                      });
 
     widget->actionWidget = edit;
+    widget->label = lbl;
+
+    return widget;
+}
+
+SettingWidget *SettingWidget::fontButton(const QString &label,
+                                         QStringSetting &familySetting,
+                                         std::function<QFont()> currentFont,
+                                         std::function<void(QFont)> onChange)
+{
+    auto *widget = new SettingWidget(label);
+
+    auto *lbl = new QLabel(label + ":");
+
+    auto *button = new QPushButton(currentFont().family());
+
+    widget->hLayout->addWidget(lbl);
+    widget->hLayout->addStretch(1);
+    widget->hLayout->addWidget(button);
+
+    familySetting.connect(
+        [button, currentFont](const auto &) {
+            button->setText(currentFont().family());
+        },
+        widget->managedConnections);
+
+    QObject::connect(button, &QPushButton::clicked,
+                     [widget, currentFont{std::move(currentFont)},
+                      onChange{std::move(onChange)}]() {
+                         bool ok = false;
+                         auto font =
+                             QFontDialog::getFont(&ok, currentFont(), widget);
+                         if (ok)
+                         {
+                             onChange(font);
+                         }
+                     });
+
+    widget->actionWidget = button;
     widget->label = lbl;
 
     return widget;

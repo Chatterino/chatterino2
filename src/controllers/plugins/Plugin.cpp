@@ -218,7 +218,7 @@ std::unordered_set<QString> Plugin::listRegisteredCommands()
 
 Plugin::~Plugin()
 {
-    this->onDestroyed();
+    this->onUnloaded();
 
     for (auto *timer : this->activeTimeouts)
     {

@@ -10,6 +10,7 @@
 #    include "util/RemoveScrollAreaBackground.hpp"
 #    include "widgets/PluginRepl.hpp"
 #    include "widgets/settingspages/PluginsPage.hpp"
+#    include "widgets/settingspages/SettingWidget.hpp"
 
 #    include <QCheckBox>
 #    include <QFormLayout>
@@ -78,6 +79,17 @@ PluginsPage::PluginsPage()
                                    "Chatterino is in safe mode. You can still "
                                    "enable and disable them.");
             groupLayout->addRow(disabledLabel);
+        }
+
+        if (getSettings()->pluginRepl.enabled)
+        {
+            groupLayout->addRow(SettingWidget::fontButton(
+                "REPL font", getSettings()->pluginRepl.fontFamily,
+                &PluginRepl::currentFont, [](const QFont &font) {
+                    getSettings()->pluginRepl.fontFamily = font.family();
+                    getSettings()->pluginRepl.fontSize = font.pointSize();
+                    getSettings()->pluginRepl.fontStyle = font.styleName();
+                }));
         }
     }
 
@@ -233,16 +245,7 @@ void PluginsPage::rebuildContent()
             reloadButton->setEnabled(false);
         }
 
-#    ifdef NDEBUG
-        bool userIsAuthor =
-            std::ranges::any_of(plugin->meta.authors, [](const auto &name) {
-                return name.compare(
-                           getApp()->getAccounts()->twitch.currentUsername,
-                           Qt::CaseInsensitive) == 0;
-            });
-
-        if (userIsAuthor || getSettings()->pluginRepl.enableForAllPlugins)
-#    endif
+        if (getSettings()->pluginRepl.enabled)
         {
             auto *replButton = new QPushButton("Open REPL", this->dataFrame_);
             QObject::connect(replButton, &QPushButton::clicked, [id]() {

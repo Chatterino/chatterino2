@@ -656,11 +656,11 @@ public:
 
     struct {
         // this isn't shown in the UI
-        BoolSetting enableForAllPlugins = {"/ui/pluginRepl/enableForAllPlugins",
-                                           false};
-        QStringSetting fontFamily = {"/ui/pluginRepl/fontFamily", {}};
-        QStringSetting fontStyle = {"/ui/pluginRepl/fontStyle", "Regular"};
-        IntSetting fontSize = {"/ui/pluginRepl/fontSize", 10};
+        BoolSetting enabled = {"/plugins/repl/enabled", false};
+        // An empty string implies the default monospace font
+        QStringSetting fontFamily = {"/plugins/repl/fontFamily", {}};
+        QStringSetting fontStyle = {"/plugins/repl/fontStyle", "Regular"};
+        IntSetting fontSize = {"/plugins/repl/fontSize", 10};
     } pluginRepl;
 
     // Similarity

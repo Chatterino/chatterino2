@@ -27,6 +27,8 @@ class PluginRepl : public BaseWindow
 public:
     PluginRepl(QString id, QWidget *parent = nullptr);
 
+    static QFont currentFont();
+
 protected:
     void themeChangedEvent() override;
 
@@ -60,7 +62,6 @@ private:
     struct {
         QTextEdit *input = nullptr;
         QTextEdit *output = nullptr;
-        Button *changeFont = nullptr;
         Button *clear = nullptr;
         Button *reload = nullptr;
         Button *pin = nullptr;

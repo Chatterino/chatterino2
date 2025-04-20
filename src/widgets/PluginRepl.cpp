@@ -14,7 +14,6 @@
 
 #    include <QBoxLayout>
 #    include <QFontDatabase>
-#    include <QFontDialog>
 #    include <QScrollBar>
 #    include <QSplitter>
 #    include <QTextBlock>
@@ -354,22 +353,6 @@ PluginRepl::PluginRepl(QString id, QWidget *parent)
     // top row
     {
         auto *top = new QHBoxLayout;
-        this->ui.changeFont = new Button;
-        this->ui.changeFont->setScaleIndependantSize({18, 18});
-        this->ui.changeFont->setToolTip(u"Change Font..."_s);
-        QObject::connect(
-            this->ui.changeFont, &Button::leftClicked, this, [this] {
-                bool ok = false;
-                auto font = QFontDialog::getFont(&ok, this->font, this);
-                if (ok)
-                {
-                    getSettings()->pluginRepl.fontFamily = font.family();
-                    getSettings()->pluginRepl.fontStyle = font.styleName();
-                    getSettings()->pluginRepl.fontSize = font.pointSize();
-                    this->updateFont();
-                }
-            });
-
         this->ui.clear = new Button;
         this->ui.clear->setScaleIndependantSize({18, 18});
         this->ui.clear->setToolTip(u"Clear Output"_s);
@@ -402,7 +385,6 @@ PluginRepl::PluginRepl(QString id, QWidget *parent)
         });
 
         top->addStretch(1);
-        top->addWidget(this->ui.changeFont);
         top->addWidget(this->ui.clear);
         top->addWidget(this->ui.reload);
         top->addWidget(this->ui.pin);
@@ -429,7 +411,7 @@ PluginRepl::PluginRepl(QString id, QWidget *parent)
     this->ui.input->setFocus();
 
     this->pluginLoadedConn =
-        getApp()->getPlugins()->onPluginLoaded([this](Plugin *plug) {
+        getApp()->getPlugins()->onPluginLoaded.connect([this](Plugin *plug) {
             if (plug->id == this->id)
             {
                 this->setPlugin(plug);
@@ -451,7 +433,6 @@ void PluginRepl::themeChangedEvent()
         this->blockFormats.warning.setBackground(QColor(0xfffbd6));
         this->charFormats.error.setForeground(QColor(0xa4000f));
         this->blockFormats.error.setBackground(QColor(0xfdf2f5));
-        this->ui.changeFont->setSvgResource(u":/buttons/changeFontDark.svg"_s);
         this->ui.clear->setSvgResource(u":/buttons/cancelDark.svg"_s);
         this->ui.reload->setSvgResource(u":/buttons/reloadDark.svg"_s);
     }
@@ -462,7 +443,6 @@ void PluginRepl::themeChangedEvent()
         this->blockFormats.warning.setBackground(QColor(0x42381f));
         this->charFormats.error.setForeground(QColor(0xffb3d2));
         this->blockFormats.error.setBackground(QColor(0x4b2f36));
-        this->ui.changeFont->setSvgResource(u":/buttons/changeFontLight.svg"_s);
         this->ui.clear->setSvgResource(u":/buttons/cancel.svg"_s);
         this->ui.reload->setSvgResource(u":/buttons/reloadLight.svg"_s);
     }
@@ -508,11 +488,7 @@ void PluginRepl::tryRun(QString code)
         code.remove(0, nChars);
     }
 
-    if (code.startsWith(u"@ "))
-    {
-        code.remove(0, 2);
-    }
-    else if (!code.startsWith(u"return "))
+    if (!code.startsWith(u"return "))
     {
         code.prepend(u"return ");
         addedReturn = true;
@@ -654,34 +630,37 @@ void PluginRepl::setPlugin(Plugin *plugin)
         return;
     }
 
-    this->pluginDestroyConn = this->plugin->onDestroyed.connect([this] {
+    this->pluginDestroyConn = this->plugin->onUnloaded.connect([this] {
         this->setPlugin(nullptr);
-        this->log({}, u"Disconnected."_s);
+        this->log({}, u"Unloaded."_s);
     });
     this->pluginLogConn =
         this->plugin->onLog.connect([this](auto level, const auto &text) {
             this->log(level, text);
         });
 
-    this->log({}, u"Connected."_s);
+    this->log({}, u"Loaded."_s);
 }
 
-void PluginRepl::updateFont()
+QFont PluginRepl::currentFont()
 {
     auto family = getSettings()->pluginRepl.fontFamily.getValue();
     auto style = getSettings()->pluginRepl.fontStyle.getValue();
     auto fontSize = getSettings()->pluginRepl.fontSize.getValue();
     if (family.isEmpty())
     {
-        this->font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-        this->font.setStyleName(style);
-        this->font.setPointSize(fontSize);
-    }
-    else
-    {
-        this->font = QFontDatabase::font(family, style, fontSize);
+        auto font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+        font.setStyleName(style);
+        font.setPointSize(fontSize);
+        return font;
     }
 
+    return QFontDatabase::font(family, style, fontSize);
+}
+
+void PluginRepl::updateFont()
+{
+    this->font = PluginRepl::currentFont();
     this->ui.input->setFont(this->font);
     this->ui.output->setFont(this->font);
 }
