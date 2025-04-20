@@ -37,6 +37,8 @@ public:
      */
     enum class Type : std::uint8_t {
         /// This channel may not be backed by a real channel.
+        ///
+        /// Messages sent to this channel are not logged.
         None,
         /// Direct
         Direct,
