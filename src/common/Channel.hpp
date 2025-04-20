@@ -145,7 +145,7 @@ public:
 protected:
     virtual void onConnected();
     virtual void messageRemovedFromStart(const MessagePtr &msg);
-    QString platform_{"other"};
+    QString platform_;
 
 private:
     const QString name_;
