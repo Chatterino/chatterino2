@@ -35,16 +35,26 @@ public:
     /**
      * @exposeenum c2.ChannelType
      */
-    enum class Type {
+    enum class Type : std::uint8_t {
+        /// This channel may not be backed by a real channel.
         None,
+        /// Direct
         Direct,
+        /// Twitch
         Twitch,
+        /// TwitchWhispers
         TwitchWhispers,
+        /// TwitchWatching
         TwitchWatching,
+        /// TwitchMentions
         TwitchMentions,
+        /// TwitchLive
         TwitchLive,
+        /// TwitchAutomod
         TwitchAutomod,
+        /// TwitchEnd
         TwitchEnd,
+        /// Misc
         Misc,
     };
 
