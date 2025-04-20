@@ -85,13 +85,14 @@ public:
             },
             widget->managedConnections);
 
-        QObject::connect(combo, &QComboBox::currentTextChanged,
-                         [&setting](const auto &newText) {
-                             // The setter for EnumStringSetting does not check that this value is valid
-                             // Instead, it's up to the getters to make sure that the setting is legic - see the enum_cast above
-                             // You could also use the settings `getEnum` function
-                             setting = newText;
-                         });
+            QObject::connect(
+                combo, &QComboBox::currentTextChanged,
+                [&setting](const auto &newText) {
+                    // The setter for EnumStringSetting does not check that this value is valid
+                    // Instead, it's up to the getters to make sure that the setting is legic - see the enum_cast above
+                    // You could also use the settings `getEnum` function
+                    setting = newText;
+                });
 
         return widget;
     }
