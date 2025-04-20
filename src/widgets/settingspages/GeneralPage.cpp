@@ -1369,6 +1369,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Enable experimental Twitch EventSub support (requires restart)",
         s.enableExperimentalEventSub);
 
+    layout.addCheckbox(
+        "Disable renaming of tabs on double-click",
+        s.disableTabRenamingOnClick
+    );
+
     layout.addStretch();
 
     // invisible element for width
