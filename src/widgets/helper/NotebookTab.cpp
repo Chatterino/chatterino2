@@ -958,9 +958,8 @@ void NotebookTab::mouseReleaseEvent(QMouseEvent *event)
 
 void NotebookTab::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    const auto canRenameTab =
-        this->notebook_->getAllowUserTabManagement() &&
-        getSettings()->disableTabRenamingOnClick == false;
+    const auto canRenameTab = this->notebook_->getAllowUserTabManagement() &&
+                              getSettings()->disableTabRenamingOnClick == false;
 
     if (event->button() == Qt::LeftButton && canRenameTab)
     {
