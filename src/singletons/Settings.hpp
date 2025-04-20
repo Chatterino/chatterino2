@@ -326,6 +326,11 @@ public:
     BoolSetting mentionUsersWithComma = {"/behaviour/mentionUsersWithComma",
                                          true};
 
+    BoolSetting disableTabRenamingOnClick = {
+        "/behaviour/disableTabRenamingOnClick",
+        false,
+    };
+
     /// Emotes
     BoolSetting scaleEmotesByLineHeight = {"/emotes/scaleEmotesByLineHeight",
                                            false};
