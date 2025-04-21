@@ -1165,7 +1165,8 @@ void Notebook::mousePressEvent(QMouseEvent *event)
                 this->menu_ = new QMenu(this);
                 this->addNotebookActionsToMenu(this->menu_);
             }
-            this->menu_->popup(event->globalPos() + QPoint(0, 8));
+            this->menu_->popup(event->globalPosition().toPoint() +
+                               QPoint(0, 8));
         }
         break;
         default:;

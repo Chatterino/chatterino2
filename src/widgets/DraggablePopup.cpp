@@ -78,7 +78,7 @@ void DraggablePopup::mousePressEvent(QMouseEvent *event)
     {
         this->dragTimer_.start(std::chrono::milliseconds(17));
         this->startPosDrag_ = event->pos();
-        this->movingRelativePos = event->localPos();
+        this->movingRelativePos = event->position();
     }
 }
 
@@ -98,7 +98,7 @@ void DraggablePopup::mouseMoveEvent(QMouseEvent *event)
     if (this->isMoving_ || movePos.manhattanLength() > 10.0)
     {
         this->requestedDragPos_ =
-            (event->screenPos() - this->movingRelativePos).toPoint();
+            (event->globalPosition() - this->movingRelativePos).toPoint();
         this->isMoving_ = true;
     }
 }
