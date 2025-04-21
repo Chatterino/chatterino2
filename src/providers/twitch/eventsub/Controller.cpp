@@ -40,8 +40,35 @@ const auto &LOG = chatterinoTwitchEventSub;
 
 namespace chatterino::eventsub {
 
+class QLogProxy : public lib::Logger
+{
+public:
+    QLogProxy(const QLoggingCategory &loggingCategory_)
+        : loggingCategory(loggingCategory_)
+    {
+    }
+
+    void debug(std::string_view msg) override
+    {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        qCDebug(this->loggingCategory).noquote() << msg;
+#endif
+    }
+
+    void warn(std::string_view msg) override
+    {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        qCWarning(this->loggingCategory).noquote() << msg;
+#endif
+    }
+
+private:
+    const QLoggingCategory &loggingCategory;
+};
+
 Controller::Controller()
-    : userAgent(QStringLiteral("chatterino/%1 (%2)")
+    : logProxy(std::shared_ptr<lib::Logger>(new QLogProxy(LOG())))
+    , userAgent(QStringLiteral("chatterino/%1 (%2)")
                     .arg(Version::instance().version(),
                          Version::instance().commitHash())
                     .toUtf8()
@@ -456,7 +483,7 @@ void Controller::createConnection(std::string host, std::string port,
         }
 
         auto connection = std::make_shared<lib::Session>(
-            this->ioContext, sslContext, std::move(listener));
+            this->ioContext, sslContext, std::move(listener), this->logProxy);
 
         this->registerConnection(connection);
 

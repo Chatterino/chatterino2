@@ -280,12 +280,20 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
     chatterino::NetworkManager::init();
     updates.checkForUpdates();
 
+    QObject::connect(qApp, &QApplication::aboutToQuit, [] {
+        auto *app = dynamic_cast<Application *>(tryGetApp());
+        if (app)
+        {
+            app->save();
+        }
+
+        getSettings()->requestSave();
+        getSettings()->disableSave();
+    });
+
     Application app(settings, paths, args, updates);
     app.initialize(settings, paths);
     app.run();
-    app.save();
-
-    settings.requestSave();
 
     chatterino::NetworkManager::deinit();
 

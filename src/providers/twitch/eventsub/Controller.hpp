@@ -2,6 +2,7 @@
 
 #include "providers/twitch/eventsub/SubscriptionHandle.hpp"
 #include "providers/twitch/eventsub/SubscriptionRequest.hpp"
+#include "twitch-eventsub-ws/logger.hpp"
 #include "twitch-eventsub-ws/session.hpp"
 #include "util/ExponentialBackoff.hpp"
 #include "util/ThreadGuard.hpp"
@@ -90,6 +91,8 @@ private:
     void markRequestUnsubscribed(const SubscriptionRequest &request);
 
     void clearConnections();
+
+    std::shared_ptr<lib::Logger> logProxy;
 
     const std::string userAgent;
 

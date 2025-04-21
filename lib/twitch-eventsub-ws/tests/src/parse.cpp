@@ -153,11 +153,12 @@ TEST_P(TestHandleMessageP, Run)
 {
     auto buf = readToFlatBuffer(filePath(GetParam() + ".json"));
 
+    auto log = std::make_shared<NullLogger>();
     std::unique_ptr<Listener> listener = std::make_unique<NoOpListener>();
     boost::asio::io_context ioc;
     boost::asio::ssl::context ssl(
         boost::asio::ssl::context::method::tls_client);
-    auto sess = std::make_shared<Session>(ioc, ssl, std::move(listener));
+    auto sess = std::make_shared<Session>(ioc, ssl, std::move(listener), log);
     auto ec = sess->handleMessage(buf);
     ASSERT_FALSE(ec.failed())
         << ec.what() << ec.message() << ec.location().to_string();

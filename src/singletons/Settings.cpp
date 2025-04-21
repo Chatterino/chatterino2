@@ -278,6 +278,11 @@ void Settings::restoreSnapshot()
     }
 }
 
+void Settings::disableSave()
+{
+    this->disableSaving = true;
+}
+
 float Settings::getClampedUiScale() const
 {
     return std::clamp(this->uiScale.getValue(), 0.2F, 10.F);

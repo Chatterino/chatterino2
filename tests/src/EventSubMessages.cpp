@@ -304,13 +304,14 @@ TEST_P(TestEventSubMessagesP, Run)
         input = snapshot->input().toArray();
     }
 
+    auto log = std::make_shared<eventsub::lib::NullLogger>();
     std::unique_ptr<eventsub::lib::Listener> listener =
         std::make_unique<eventsub::Connection>();
     boost::asio::io_context ioc;
     boost::asio::ssl::context ssl(
         boost::asio::ssl::context::method::tls_client);
-    auto sess =
-        std::make_shared<eventsub::lib::Session>(ioc, ssl, std::move(listener));
+    auto sess = std::make_shared<eventsub::lib::Session>(
+        ioc, ssl, std::move(listener), log);
 
     for (const auto inputRef : input)
     {

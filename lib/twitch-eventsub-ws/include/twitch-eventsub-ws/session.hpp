@@ -1,5 +1,7 @@
 #pragma once
 
+#include "twitch-eventsub-ws/logger.hpp"
+
 #include <boost/asio.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/ssl.hpp>
@@ -23,7 +25,8 @@ public:
     // Resolver and socket require an io_context
     explicit Session(boost::asio::io_context &ioc,
                      boost::asio::ssl::context &ctx,
-                     std::unique_ptr<Listener> listener);
+                     std::unique_ptr<Listener> listener,
+                     std::shared_ptr<Logger> log_);
 
     // Start the asynchronous operation
     void run(std::string _host, std::string _port, std::string _path,
@@ -63,6 +66,7 @@ private:
 
     void checkKeepalive();
 
+    std::shared_ptr<Logger> log;
     boost::asio::ip::tcp::resolver resolver;
     boost::beast::websocket::stream<
         boost::beast::ssl_stream<boost::beast::tcp_stream>>
