@@ -594,9 +594,9 @@ void BaseWindow::mousePressEvent(QMouseEvent *event)
 #ifndef Q_OS_WIN
     if (this->flags_.has(FramelessDraggable))
     {
-        this->movingRelativePos = event->localPos();
+        this->movingRelativePos = event->position();
         if (auto *widget =
-                this->childAt(event->localPos().x(), event->localPos().y()))
+                this->childAt(event->position().x(), event->position().y()))
         {
             std::function<bool(QWidget *)> recursiveCheckMouseTracking;
             recursiveCheckMouseTracking = [&](QWidget *widget) {
