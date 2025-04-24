@@ -30,6 +30,7 @@
 - Dev: Fixed `<build-tool> clean` not working correctly with generated sources. (#6154)
 - Dev: Removed authenticated PubSub implementation. (#6158)
 - Dev: Save settings in `aboutToQuit`. (#6159)
+- Dev: Simplified string literals to be a re-export of Qt functions. (#6175)
 
 ## 2.5.3
 
