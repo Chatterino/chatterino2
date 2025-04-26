@@ -232,7 +232,7 @@ bool OverlayWindow::eventFilter(QObject * /*object*/, QEvent *event)
         case QEvent::MouseButtonPress: {
             auto *evt = dynamic_cast<QMouseEvent *>(event);
             this->moving_ = true;
-            this->moveOrigin_ = evt->globalPos();
+            this->moveOrigin_ = evt->globalPosition().toPoint();
             return true;
         }
         break;
@@ -249,9 +249,10 @@ bool OverlayWindow::eventFilter(QObject * /*object*/, QEvent *event)
             auto *evt = dynamic_cast<QMouseEvent *>(event);
             if (this->moving_)
             {
-                auto newPos = evt->globalPos() - this->moveOrigin_;
+                auto newPos =
+                    (evt->globalPosition() - this->moveOrigin_).toPoint();
                 this->move(newPos + this->pos());
-                this->moveOrigin_ = evt->globalPos();
+                this->moveOrigin_ = evt->globalPosition().toPoint();
                 return true;
             }
             if (this->interaction_.isInteracting())

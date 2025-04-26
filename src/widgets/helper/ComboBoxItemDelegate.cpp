@@ -19,7 +19,7 @@ QWidget *ComboBoxItemDelegate::createEditor(QWidget *parent,
 {
     QVariant data = index.data(Qt::UserRole + 1);
 
-    if (data.type() != QVariant::StringList)
+    if (data.metaType() != QMetaType::fromType<QStringList>())
     {
         return QStyledItemDelegate::createEditor(parent, option, index);
     }

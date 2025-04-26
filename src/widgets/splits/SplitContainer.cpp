@@ -1551,7 +1551,7 @@ void SplitContainer::DropOverlay::dragMoveEvent(QDragMoveEvent *event)
 {
     event->acceptProposedAction();
 
-    this->mouseOverPoint_ = event->pos();
+    this->mouseOverPoint_ = event->position().toPoint();
     this->update();
 }
 
@@ -1673,14 +1673,15 @@ void SplitContainer::ResizeHandle::mouseMoveEvent(QMouseEvent *event)
     QPoint bottomRight = this->parent->mapToGlobal(
         this->node->geometry_.bottomRight().toPoint());
 
-    int globalX = topLeft.x() > event->globalX()
+    auto globalPos = event->globalPosition().toPoint();
+    int globalX = topLeft.x() > globalPos.x()
                       ? topLeft.x()
-                      : (bottomRight.x() < event->globalX() ? bottomRight.x()
-                                                            : event->globalX());
-    int globalY = topLeft.y() > event->globalY()
+                      : (bottomRight.x() < globalPos.x() ? bottomRight.x()
+                                                         : globalPos.x());
+    int globalY = topLeft.y() > globalPos.y()
                       ? topLeft.y()
-                      : (bottomRight.y() < event->globalY() ? bottomRight.y()
-                                                            : event->globalY());
+                      : (bottomRight.y() < globalPos.y() ? bottomRight.y()
+                                                         : globalPos.y());
 
     QPoint mousePoint(globalX, globalY);
 
