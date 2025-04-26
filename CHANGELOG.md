@@ -31,6 +31,7 @@
 - Dev: Removed authenticated PubSub implementation. (#6158)
 - Dev: Save settings in `aboutToQuit`. (#6159)
 - Dev: Bumped deprecation cutoff to Qt 6.4.3. (#6169)
+- Dev: Simplified string literals to be a re-export of Qt functions. (#6175)
 
 ## 2.5.3
 
