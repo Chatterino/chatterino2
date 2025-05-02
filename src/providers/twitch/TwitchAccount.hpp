@@ -16,7 +16,6 @@
 #include <rapidjson/document.h>
 
 #include <functional>
-#include <mutex>
 #include <unordered_set>
 
 namespace chatterino {
