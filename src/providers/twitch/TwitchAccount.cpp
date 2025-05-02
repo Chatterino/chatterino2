@@ -193,7 +193,7 @@ void TwitchAccount::blockUserLocally(const QString &userID,
     blockedUser.name = userLogin;
     this->ignores_.insert(blockedUser);
     this->ignoresUserIds_.insert(blockedUser.id);
-    this->ignoresUserIds_.insert(blockedUser.name);
+    this->ignoresUserLogins_.insert(blockedUser.name);
 }
 
 const std::unordered_set<TwitchUser> &TwitchAccount::blocks() const
