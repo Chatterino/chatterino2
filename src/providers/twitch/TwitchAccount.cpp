@@ -252,7 +252,7 @@ void TwitchAccount::autoModAllow(const QString msgID, ChannelPtr channel)
                 // This would most likely happen if the service is down, or if the JSON payload returned has changed format
                 case HelixAutoModMessageError::Unknown:
                 default: {
-                    errorMessage += "an unknown error occured.";
+                    errorMessage += "an unknown error occurred.";
                 }
                 break;
             }
@@ -298,7 +298,7 @@ void TwitchAccount::autoModDeny(const QString msgID, ChannelPtr channel)
                 // This would most likely happen if the service is down, or if the JSON payload returned has changed format
                 case HelixAutoModMessageError::Unknown:
                 default: {
-                    errorMessage += "an unknown error occured.";
+                    errorMessage += "an unknown error occurred.";
                 }
                 break;
             }
