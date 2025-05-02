@@ -1,10 +1,8 @@
 #include "common/ChannelChatters.hpp"
 
-#include "Application.hpp"
 #include "common/Channel.hpp"
-#include "controllers/accounts/AccountController.hpp"
+#include "controllers/ignores/IgnoreController.hpp"
 #include "debug/AssertInGuiThread.hpp"
-#include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 
@@ -29,15 +27,16 @@ void ChannelChatters::addRecentChatter(const QString &user)
     chatters->addRecentChatter(user);
 }
 
-void ChannelChatters::addJoinedUser(const QString &user)
+void ChannelChatters::addJoinedUser(const QString &user, bool isMod,
+                                    bool isBroadcaster)
 {
     assertInGuiThread();
 
-    if (getApp()
-            ->getAccounts()
-            ->twitch.getCurrent()
-            ->blockedUserLogins()
-            .contains(user))
+    if (isIgnoredMessage(IgnoredMessageParameters{
+            .twitchUserLogin = user,
+            .isMod = isMod,
+            .isBroadcaster = isBroadcaster,
+        }))
     {
         return;
     }
@@ -64,15 +63,16 @@ void ChannelChatters::addJoinedUser(const QString &user)
     }
 }
 
-void ChannelChatters::addPartedUser(const QString &user)
+void ChannelChatters::addPartedUser(const QString &user, bool isMod,
+                                    bool isBroadcaster)
 {
     assertInGuiThread();
 
-    if (getApp()
-            ->getAccounts()
-            ->twitch.getCurrent()
-            ->blockedUserLogins()
-            .contains(user))
+    if (isIgnoredMessage(IgnoredMessageParameters{
+            .twitchUserLogin = user,
+            .isMod = isMod,
+            .isBroadcaster = isBroadcaster,
+        }))
     {
         return;
     }
