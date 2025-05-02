@@ -20,6 +20,7 @@
 - Bugfix: Fixed the emote popup erroneously logging messages to the `Other` directory. (#6165)
 - Bugfix: Handle <kbd>CMD</kbd> + <kbd>BACKSPACE</kbd> behavior explicitly in main chat dialog input for macOS. (#6111)
 - Bugfix: Fixed a small typo in the settings page. (#6134)
+- Bugfix: Fixed blocked users showing up in "Users joined:" and "Users parted:" messages. (#6181)
 - Bugfix: Fixed an issue where Splits could get lost by dragging it onto your Recycle Bin. (#6147)
 - Bugfix: Fixed some Twitch commands not getting tab-completed correctly. (#6143)
 - Bugfix: Fixed shared chat badges displaying pixelated when Chatterino is scaled too much. (#6146)
