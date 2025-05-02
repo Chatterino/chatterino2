@@ -2,7 +2,6 @@
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
-#include "common/Literals.hpp"
 #include "common/network/NetworkResult.hpp"  // IWYU pragma: keep
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -21,9 +20,9 @@
 #include <QStringBuilder>
 #include <QThread>
 
-namespace chatterino {
+using namespace Qt::Literals::StringLiterals;
 
-using namespace literals;
+namespace chatterino {
 
 TwitchAccount::TwitchAccount(const QString &username, const QString &oauthToken,
                              const QString &oauthClient, const QString &userID)
