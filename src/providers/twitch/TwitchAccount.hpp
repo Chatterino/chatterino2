@@ -13,7 +13,6 @@
 #include <QElapsedTimer>
 #include <QObject>
 #include <QString>
-#include <rapidjson/document.h>
 
 #include <functional>
 #include <unordered_set>
