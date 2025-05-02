@@ -20,7 +20,6 @@
 #include "util/CancellationToken.hpp"
 #include "util/Helpers.hpp"
 #include "util/QStringHash.hpp"  // IWYU pragma: keep
-#include "util/RapidjsonHelpers.hpp"
 
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <QStringBuilder>
