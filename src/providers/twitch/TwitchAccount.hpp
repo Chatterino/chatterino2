@@ -74,8 +74,8 @@ public:
     [[nodiscard]] const std::unordered_set<QString> &blockedUserLogins() const;
 
     // Automod actions
-    void autoModAllow(const QString msgID, ChannelPtr channel);
-    void autoModDeny(const QString msgID, ChannelPtr channel);
+    void autoModAllow(const QString &msgID, ChannelPtr channel);
+    void autoModDeny(const QString &msgID, ChannelPtr channel);
 
     void loadSeventvUserID();
 

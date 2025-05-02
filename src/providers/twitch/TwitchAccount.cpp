@@ -214,7 +214,7 @@ const std::unordered_set<QString> &TwitchAccount::blockedUserLogins() const
 }
 
 // AutoModActions
-void TwitchAccount::autoModAllow(const QString msgID, ChannelPtr channel)
+void TwitchAccount::autoModAllow(const QString &msgID, ChannelPtr channel)
 {
     getHelix()->manageAutoModMessages(
         this->getUserId(), msgID, "ALLOW",
@@ -260,7 +260,7 @@ void TwitchAccount::autoModAllow(const QString msgID, ChannelPtr channel)
         });
 }
 
-void TwitchAccount::autoModDeny(const QString msgID, ChannelPtr channel)
+void TwitchAccount::autoModDeny(const QString &msgID, ChannelPtr channel)
 {
     getHelix()->manageAutoModMessages(
         this->getUserId(), msgID, "DENY",
