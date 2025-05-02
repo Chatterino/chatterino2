@@ -2,23 +2,19 @@
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
-#include "common/Env.hpp"
 #include "common/Literals.hpp"
-#include "common/network/NetworkResult.hpp"
+#include "common/network/NetworkResult.hpp"  // IWYU pragma: keep
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/Emote.hpp"
-#include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "providers/IvrApi.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchUsers.hpp"
 #include "singletons/Emotes.hpp"
 #include "util/CancellationToken.hpp"
-#include "util/Helpers.hpp"
 #include "util/QStringHash.hpp"  // IWYU pragma: keep
 
 #include <boost/unordered/unordered_flat_map.hpp>

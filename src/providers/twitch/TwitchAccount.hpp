@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
 #include "common/UniqueAccess.hpp"
 #include "controllers/accounts/Account.hpp"
@@ -13,8 +14,11 @@
 #include <QElapsedTimer>
 #include <QObject>
 #include <QString>
+#include <QtContainerFwd>
 
 #include <functional>
+#include <memory>
+#include <optional>
 #include <unordered_set>
 
 namespace chatterino {
