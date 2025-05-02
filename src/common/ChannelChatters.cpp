@@ -1,8 +1,12 @@
 #include "common/ChannelChatters.hpp"
 
+#include "Application.hpp"
 #include "common/Channel.hpp"
+#include "controllers/accounts/AccountController.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 
 #include <QColor>
 
@@ -27,8 +31,18 @@ void ChannelChatters::addRecentChatter(const QString &user)
 
 void ChannelChatters::addJoinedUser(const QString &user)
 {
-    auto joinedUsers = this->joinedUsers_.access();
-    joinedUsers->append(user);
+    assertInGuiThread();
+
+    if (getApp()
+            ->getAccounts()
+            ->twitch.getCurrent()
+            ->blockedUserLogins()
+            .contains(user))
+    {
+        return;
+    }
+
+    this->joinedUsers_.access()->append(user);
 
     if (!this->joinedUsersMergeQueued_)
     {
@@ -52,8 +66,18 @@ void ChannelChatters::addJoinedUser(const QString &user)
 
 void ChannelChatters::addPartedUser(const QString &user)
 {
-    auto partedUsers = this->partedUsers_.access();
-    partedUsers->append(user);
+    assertInGuiThread();
+
+    if (getApp()
+            ->getAccounts()
+            ->twitch.getCurrent()
+            ->blockedUserLogins()
+            .contains(user))
+    {
+        return;
+    }
+
+    this->partedUsers_.access()->append(user);
 
     if (!this->partedUsersMergeQueued_)
     {
