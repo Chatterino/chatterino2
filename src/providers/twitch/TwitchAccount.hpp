@@ -7,9 +7,7 @@
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "providers/twitch/TwitchUser.hpp"
 #include "util/CancellationToken.hpp"
-#include "util/QStringHash.hpp"
 
-#include <boost/unordered/unordered_flat_map_fwd.hpp>
 #include <pajlada/signals.hpp>
 #include <QColor>
 #include <QElapsedTimer>
