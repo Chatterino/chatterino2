@@ -64,17 +64,18 @@ public:
     bool isAnon() const;
 
     void loadBlocks();
-    void blockUser(const QString &userId, const QObject *caller,
-                   std::function<void()> onSuccess,
+    void blockUser(const QString &userId, const QString &userLogin,
+                   const QObject *caller, std::function<void()> onSuccess,
                    std::function<void()> onFailure);
-    void unblockUser(const QString &userId, const QObject *caller,
-                     std::function<void()> onSuccess,
+    void unblockUser(const QString &userId, const QString &userLogin,
+                     const QObject *caller, std::function<void()> onSuccess,
                      std::function<void()> onFailure);
 
-    void blockUserLocally(const QString &userID);
+    void blockUserLocally(const QString &userID, const QString &userLogin);
 
     [[nodiscard]] const std::unordered_set<TwitchUser> &blocks() const;
     [[nodiscard]] const std::unordered_set<QString> &blockedUserIds() const;
+    [[nodiscard]] const std::unordered_set<QString> &blockedUserLogins() const;
 
     // Automod actions
     void autoModAllow(const QString msgID, ChannelPtr channel);
@@ -120,6 +121,7 @@ private:
     ScopedCancellationToken blockToken_;
     std::unordered_set<TwitchUser> ignores_;
     std::unordered_set<QString> ignoresUserIds_;
+    std::unordered_set<QString> ignoresUserLogins_;
 
     ScopedCancellationToken emoteToken_;
     UniqueAccess<std::shared_ptr<const TwitchEmoteSetMap>> emoteSets_;

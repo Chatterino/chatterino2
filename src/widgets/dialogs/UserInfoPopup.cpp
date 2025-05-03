@@ -661,7 +661,7 @@ void UserInfoPopup::installEvents()
                 this->ui_.block->setEnabled(false);
 
                 getApp()->getAccounts()->twitch.getCurrent()->unblockUser(
-                    this->userId_, this,
+                    this->userId_, this->userName_, this,
                     [this, reenableBlockCheckbox, currentUser] {
                         this->channel_->addSystemMessage(
                             QString("You successfully unblocked user %1")
@@ -702,7 +702,7 @@ void UserInfoPopup::installEvents()
                 }
 
                 getApp()->getAccounts()->twitch.getCurrent()->blockUser(
-                    this->userId_, this,
+                    this->userId_, this->userName_, this,
                     [this, reenableBlockCheckbox, currentUser] {
                         this->channel_->addSystemMessage(
                             QString("You successfully blocked user %1")
