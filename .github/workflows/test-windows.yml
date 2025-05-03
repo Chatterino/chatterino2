@@ -56,7 +56,7 @@ jobs:
 
       - name: Setup sccache
         # sccache v0.7.4
-        uses: hendrikmuhs/ccache-action@v1.2.16
+        uses: hendrikmuhs/ccache-action@v1.2.18
         with:
           variant: sccache
           # only save on the default (master) branch
