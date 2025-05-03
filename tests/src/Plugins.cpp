@@ -793,7 +793,7 @@ TEST_F(PluginTest, testWebSocketNoPerms)
     const char *shouldThrow = R"lua(
         return c2.WebSocket.new('wss://127.0.0.1:9050/echo')
     )lua";
-    EXPECT_ANY_THROW(shouldThrow);
+    EXPECT_ANY_THROW(lua->script(shouldThrow));
 }
 
 TEST_F(PluginTest, testWebSocketApi)
