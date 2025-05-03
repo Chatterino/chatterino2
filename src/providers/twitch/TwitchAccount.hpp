@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
 #include "common/UniqueAccess.hpp"
 #include "controllers/accounts/Account.hpp"
@@ -7,18 +8,17 @@
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "providers/twitch/TwitchUser.hpp"
 #include "util/CancellationToken.hpp"
-#include "util/QStringHash.hpp"
 
-#include <boost/unordered/unordered_flat_map_fwd.hpp>
 #include <pajlada/signals.hpp>
 #include <QColor>
 #include <QElapsedTimer>
 #include <QObject>
 #include <QString>
-#include <rapidjson/document.h>
+#include <QtContainerFwd>
 
 #include <functional>
-#include <mutex>
+#include <memory>
+#include <optional>
 #include <unordered_set>
 
 namespace chatterino {
@@ -78,8 +78,8 @@ public:
     [[nodiscard]] const std::unordered_set<QString> &blockedUserLogins() const;
 
     // Automod actions
-    void autoModAllow(const QString msgID, ChannelPtr channel);
-    void autoModDeny(const QString msgID, ChannelPtr channel);
+    void autoModAllow(const QString &msgID, ChannelPtr channel) const;
+    void autoModDeny(const QString &msgID, ChannelPtr channel) const;
 
     void loadSeventvUserID();
 
