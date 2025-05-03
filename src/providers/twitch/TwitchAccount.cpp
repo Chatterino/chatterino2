@@ -2,33 +2,27 @@
 
 #include "Application.hpp"
 #include "common/Channel.hpp"
-#include "common/Env.hpp"
-#include "common/Literals.hpp"
-#include "common/network/NetworkResult.hpp"
+#include "common/network/NetworkResult.hpp"  // IWYU pragma: keep
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/Emote.hpp"
-#include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "providers/IvrApi.hpp"
 #include "providers/seventv/SeventvAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchUsers.hpp"
 #include "singletons/Emotes.hpp"
 #include "util/CancellationToken.hpp"
-#include "util/Helpers.hpp"
-#include "util/QStringHash.hpp"
-#include "util/RapidjsonHelpers.hpp"
+#include "util/QStringHash.hpp"  // IWYU pragma: keep
 
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <QStringBuilder>
 #include <QThread>
 
-namespace chatterino {
+using namespace Qt::Literals::StringLiterals;
 
-using namespace literals;
+namespace chatterino {
 
 TwitchAccount::TwitchAccount(const QString &username, const QString &oauthToken,
                              const QString &oauthClient, const QString &userID)
@@ -215,7 +209,7 @@ const std::unordered_set<QString> &TwitchAccount::blockedUserLogins() const
 }
 
 // AutoModActions
-void TwitchAccount::autoModAllow(const QString msgID, ChannelPtr channel)
+void TwitchAccount::autoModAllow(const QString &msgID, ChannelPtr channel) const
 {
     getHelix()->manageAutoModMessages(
         this->getUserId(), msgID, "ALLOW",
@@ -252,7 +246,7 @@ void TwitchAccount::autoModAllow(const QString msgID, ChannelPtr channel)
                 // This would most likely happen if the service is down, or if the JSON payload returned has changed format
                 case HelixAutoModMessageError::Unknown:
                 default: {
-                    errorMessage += "an unknown error occured.";
+                    errorMessage += "an unknown error occurred.";
                 }
                 break;
             }
@@ -261,7 +255,7 @@ void TwitchAccount::autoModAllow(const QString msgID, ChannelPtr channel)
         });
 }
 
-void TwitchAccount::autoModDeny(const QString msgID, ChannelPtr channel)
+void TwitchAccount::autoModDeny(const QString &msgID, ChannelPtr channel) const
 {
     getHelix()->manageAutoModMessages(
         this->getUserId(), msgID, "DENY",
@@ -298,7 +292,7 @@ void TwitchAccount::autoModDeny(const QString msgID, ChannelPtr channel)
                 // This would most likely happen if the service is down, or if the JSON payload returned has changed format
                 case HelixAutoModMessageError::Unknown:
                 default: {
-                    errorMessage += "an unknown error occured.";
+                    errorMessage += "an unknown error occurred.";
                 }
                 break;
             }
