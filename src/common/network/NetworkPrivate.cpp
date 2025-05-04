@@ -134,7 +134,7 @@ void NetworkData::emitSuccess(NetworkResult &&result)
                     if (isAppAboutToStop())
                     {
                         qCInfo(chatterinoHTTP)
-                            << "Callback for" << url.toString()
+                            << "Success callback for" << url.toString()
                             << "skipped because we're about to quit";
                         return;
                     }
@@ -161,9 +161,18 @@ void NetworkData::emitError(NetworkResult &&result)
 
     runCallback(this->executeConcurrently,
                 [cb = std::move(this->onError), result = std::move(result),
-                 hasCaller = this->hasCaller, caller = this->caller]() {
+                 url = this->request.url(), hasCaller = this->hasCaller,
+                 caller = this->caller]() {
                     if (hasCaller && caller.isNull())
                     {
+                        return;
+                    }
+
+                    if (isAppAboutToStop())
+                    {
+                        qCInfo(chatterinoHTTP)
+                            << "Error callback for" << url.toString()
+                            << "skipped because we're about to quit";
                         return;
                     }
 
@@ -180,9 +189,17 @@ void NetworkData::emitFinally()
 
     runCallback(this->executeConcurrently,
                 [cb = std::move(this->finally), hasCaller = this->hasCaller,
-                 caller = this->caller]() {
+                 url = this->request.url(), caller = this->caller]() {
                     if (hasCaller && caller.isNull())
                     {
+                        return;
+                    }
+
+                    if (isAppAboutToStop())
+                    {
+                        qCInfo(chatterinoHTTP)
+                            << "Finally callback for" << url.toString()
+                            << "skipped because we're about to quit";
                         return;
                     }
 
