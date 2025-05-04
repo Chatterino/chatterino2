@@ -131,6 +131,14 @@ void NetworkData::emitSuccess(NetworkResult &&result)
                         return;
                     }
 
+                    if (isAppAboutToStop())
+                    {
+                        qCInfo(chatterinoHTTP)
+                            << "Callback for" << url.toString()
+                            << "skipped because we're about to quit";
+                        return;
+                    }
+
                     QElapsedTimer timer;
                     timer.start();
                     cb(result);

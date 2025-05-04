@@ -674,7 +674,7 @@ IApplication *tryGetApp()
 
 bool isAppAboutToStop()
 {
-    return STOPPED.load();
+    return ABOUT_TO_STOP.load();
 }
 
 }  // namespace chatterino
