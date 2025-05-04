@@ -20,6 +20,7 @@
 - Bugfix: Fixed message contents being cleared when using the close button for replies. (#6145)
 - Bugfix: Fixed the emote popup erroneously logging messages to the `Other` directory. (#6165)
 - Bugfix: Handle <kbd>CMD</kbd> + <kbd>BACKSPACE</kbd> behavior explicitly in main chat dialog input for macOS. (#6111)
+- Bugfix: Fixed an on-shutdown-crash that could occur when we didn't wait long enough for 7TV/BetterTTV live update connections to close. (#6197)
 - Bugfix: Fixed a small typo in the settings page. (#6134)
 - Bugfix: Fixed blocked users showing up in "Users joined:" and "Users parted:" messages. (#6181)
 - Bugfix: Fixed an issue where Splits could get lost by dragging it onto your Recycle Bin. (#6147)
