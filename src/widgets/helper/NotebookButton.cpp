@@ -1,5 +1,6 @@
 #include "widgets/helper/NotebookButton.hpp"
 
+#include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "singletons/Theme.hpp"
 #include "widgets/helper/Button.hpp"
@@ -213,11 +214,21 @@ void NotebookButton::dropEvent(QDropEvent *event)
 
 void NotebookButton::hideEvent(QHideEvent *)
 {
+    if (isAppAboutToQuit())
+    {
+        return;
+    }
+
     this->parent_->refresh();
 }
 
 void NotebookButton::showEvent(QShowEvent *)
 {
+    if (isAppAboutToQuit())
+    {
+        return;
+    }
+
     this->parent_->refresh();
 }
 
