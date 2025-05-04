@@ -20,8 +20,20 @@ namespace chatterino::eventsub::lib {
 
 class Listener
 {
+    bool quitting{};
+
 public:
     virtual ~Listener() = default;
+
+    void aboutToQuit()
+    {
+        this->quitting = true;
+    }
+
+    bool isQuitting() const
+    {
+        return this->quitting;
+    }
 
     virtual void onSessionWelcome(
         const messages::Metadata &metadata,

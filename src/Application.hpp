@@ -142,6 +142,7 @@ public:
 
     int run();
     void aboutToQuit();
+    void stop();
 
     friend void test();
 
@@ -245,5 +246,7 @@ IApplication *getApp();
 
 /// Might return `nullptr` if the app is being destroyed
 IApplication *tryGetApp();
+
+bool isAppAboutToStop();
 
 }  // namespace chatterino

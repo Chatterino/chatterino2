@@ -30,11 +30,13 @@ void LinkResolver::resolve(LinkInfo *info)
     info->setTooltip("Loading...");
     info->setState(State::Loading);
 
+    auto unshortLinks = getSettings()->unshortLinks.getValue();
+
     NetworkRequest(Env::get().linkResolverUrl.arg(QString::fromUtf8(
                        QUrl::toPercentEncoding(info->originalUrl(), {}, "/:"))))
         .caller(info)
         .timeout(30000)
-        .onSuccess([info](const NetworkResult &result) {
+        .onSuccess([info, unshortLinks](const NetworkResult &result) {
             const auto root = result.parseJson();
             QString response;
             QString url;
@@ -48,7 +50,7 @@ void LinkResolver::resolve(LinkInfo *info)
                     info->setThumbnail(
                         Image::fromUrl({root["thumbnail"].toString()}));
                 }
-                if (getSettings()->unshortLinks && root.contains("link"))
+                if (unshortLinks && root.contains("link"))
                 {
                     info->setResolvedUrl(root["link"].toString());
                 }

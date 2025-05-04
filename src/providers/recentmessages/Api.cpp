@@ -1,5 +1,6 @@
 #include "providers/recentmessages/Api.hpp"
 
+#include "Application.hpp"
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
@@ -35,6 +36,10 @@ void load(
     QTimer::singleShot(delayMs, [=] {
         NetworkRequest(url)
             .onSuccess([channelPtr, onLoaded](const auto &result) {
+                if (isAppAboutToStop())
+                {
+                    return;
+                }
                 auto shared = channelPtr.lock();
                 if (!shared)
                 {
