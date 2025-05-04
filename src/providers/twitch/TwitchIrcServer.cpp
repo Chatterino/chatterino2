@@ -272,6 +272,8 @@ void TwitchIrcServer::aboutToQuit()
     this->signalHolder.clear();
 
     this->channels.clear();
+
+    this->connections_.clear();
 }
 
 void TwitchIrcServer::initializeConnection(IrcConnection *connection,
