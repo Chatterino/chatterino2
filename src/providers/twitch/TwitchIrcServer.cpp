@@ -254,6 +254,11 @@ void TwitchIrcServer::initialize()
             auto reward = ChannelPointReward(data);
 
             postToThread([chan, reward] {
+                if (isAppAboutToStop())
+                {
+                    return;
+                }
+
                 if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
                 {
                     channel->addChannelPointReward(reward);
