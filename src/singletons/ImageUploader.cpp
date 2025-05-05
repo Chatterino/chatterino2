@@ -77,7 +77,7 @@ QString getLinkFromResponse(const NetworkResult &response, QString pattern)
 {
     QRegularExpression regExp("{(.+)}",
                               QRegularExpression::InvertedGreedinessOption);
-    auto match = regExp.matchView(pattern);
+    auto match = regExp.match(pattern);
 
     auto jsonRoot = response.parseJsonValue();
     while (match.hasMatch())
