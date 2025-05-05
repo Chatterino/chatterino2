@@ -63,6 +63,10 @@
 #include <QApplication>
 #include <QDesktopServices>
 
+#ifdef CHATTERINO_HAS_BACKWARD
+#    include <backward.hpp>
+#endif
+
 namespace {
 
 using namespace chatterino;
@@ -661,6 +665,25 @@ void Application::initNm(const Paths &paths)
 
 IApplication *getApp()
 {
+#ifdef CHATTERINO_HAS_BACKWARD
+#    ifndef NDEBUG
+    if (ABOUT_TO_STOP.load())
+    {
+        using namespace backward;
+        StackTrace st;
+        st.load_here(32);
+
+        TraceResolver tr;
+        tr.load_stacktrace(st);
+        auto trace = tr.resolve(st[3]);
+        qCWarning(chatterinoApp).noquote().nospace()
+            << "getApp used when we've started quitting: "
+            << trace.source.filename << ":" << trace.source.line << " "
+            << trace.object_function;
+    }
+#    endif
+#endif
+
     assert(INSTANCE != nullptr);
     assert(STOPPED.load() == false);
 

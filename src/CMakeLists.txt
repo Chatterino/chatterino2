@@ -855,6 +855,17 @@ if (CHATTERINO_PLUGINS)
     target_link_libraries(${LIBRARY_PROJECT} PUBLIC lua sol2::sol2)
 endif()
 
+if (Backward_FOUND)
+    target_link_libraries(${LIBRARY_PROJECT}
+        PUBLIC
+        Backward::Interface
+    )
+    target_compile_definitions(${LIBRARY_PROJECT}
+        PUBLIC
+        CHATTERINO_HAS_BACKWARD
+    )
+endif ()
+
 if (BUILD_WITH_QTKEYCHAIN)
     target_link_libraries(${LIBRARY_PROJECT}
             PUBLIC
