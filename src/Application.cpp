@@ -166,7 +166,8 @@ Application::Application(Settings &_settings, const Paths &paths,
     , accounts(new AccountController)
     , eventSub(makeEventSubController(_settings))
     , hotkeys(new HotkeyController)
-    , windows(new WindowManager(paths, _settings, *this->themes, *this->fonts))
+    , windows(new WindowManager(_args, paths, _settings, *this->themes,
+                                *this->fonts))
     , toasts(new Toasts)
     , imageUploader(new ImageUploader)
     , seventvAPI(new SeventvAPI)
