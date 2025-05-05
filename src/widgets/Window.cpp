@@ -354,7 +354,7 @@ void Window::addShortcuts()
          }},
         {"openAccountSelector",  // Open account selector
          [](std::vector<QString>) -> QString {
-             getApp()->getWindows()->showAccountSelectPopup({0,0});
+             getApp()->getWindows()->showAccountSelectPopup({0, 0});
              return "";
          }},
         {"newSplit",  // Create a new split
