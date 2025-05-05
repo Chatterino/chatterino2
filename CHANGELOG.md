@@ -12,7 +12,7 @@
 - Minor: Made filters searchable in the Settings dialog search bar. (#5890)
 - Minor: Updated emojis to Unicode 16.0. (#6155)
 - Minor: Allow disabling of double-click tab renaming through setting. (#6163, #6184)
-- Minor: Added hotkey Action for opening account selector.
+- Minor: Added hotkey Action for opening account selector. (#6192)
 - Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
 - Bugfix: Fixed scrolling now working on inputs in the settings. (#6128)
 - Bugfix: Make reply-cancel button less coarse-grained. (#6106)
