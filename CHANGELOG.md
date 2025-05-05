@@ -36,6 +36,7 @@
 - Dev: Updated GoogleTest to v1.17.0. (#6180)
 - Dev: Mini refactor of `TwitchAccount`. (#6182)
 - Dev: Simplified string literals to be a re-export of Qt functions. (#6175)
+- Dev: Fixed incorrect lua generation of `c2.HTTPRequest.create` for typescript plugins. (#6190)
 
 ## 2.5.3
 
