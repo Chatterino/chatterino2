@@ -285,8 +285,6 @@ Image::~Image()
 
     if (isAppAboutToStop())
     {
-        qInfo() << "app is about to stop, release the frames! let the "
-                   "operating system clean our mess up";
         if (this->frames_)
         {
             std::ignore = this->frames_.release();
