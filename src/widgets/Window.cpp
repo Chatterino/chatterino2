@@ -353,7 +353,7 @@ void Window::addShortcuts()
              return "";
          }},
         {"openAccountSelector",  // Open account selector
-         [](std::vector<QString>) -> QString {
+         [](const std::vector<QString>&) -> QString {
              getApp()->getWindows()->showAccountSelectPopup({0, 0});
              return "";
          }},
