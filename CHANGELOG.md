@@ -36,6 +36,7 @@
 - Dev: Added a `run-and-kill.sh` script to help debug crash-on-exit bugs. (#6188)
 - Dev: Updated GoogleTest to v1.17.0. (#6180)
 - Dev: Mini refactor of `TwitchAccount`. (#6182)
+- Dev: Refactored away some `getApp` usages in `WindowManager`. (#6194)
 - Dev: Simplified string literals to be a re-export of Qt functions. (#6175)
 
 ## 2.5.3
