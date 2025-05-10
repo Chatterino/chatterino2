@@ -18,7 +18,7 @@ OverlayInteraction::OverlayInteraction(OverlayWindow *parent)
     this->interactAnimation_.setEndValue(1.0);
 
     this->closeButton_.setButtonStyle(TitleBarButtonStyle::Close);
-    this->closeButton_.setScaleIndependantSize(46, 30);
+    this->closeButton_.setScaleIndependentSize(46, 30);
     this->closeButton_.hide();
     this->closeButton_.setCursor(Qt::PointingHandCursor);
 }
@@ -85,6 +85,11 @@ bool OverlayInteraction::isInteracting() const
 
 void OverlayInteraction::paintEvent(QPaintEvent * /*event*/)
 {
+    if (this->interactionProgress() <= 0.0)
+    {
+        return;
+    }
+
     QPainter painter(this);
     QColor highlightColor(
         255, 255, 255, std::max(int(255.0 * this->interactionProgress()), 50));
@@ -93,11 +98,6 @@ void OverlayInteraction::paintEvent(QPaintEvent * /*event*/)
     // outline
     auto bounds = this->rect();
     painter.drawRect(bounds);
-
-    if (this->interactionProgress() <= 0.0)
-    {
-        return;
-    }
 
     highlightColor.setAlpha(highlightColor.alpha() / 4);
     painter.setBrush(highlightColor);

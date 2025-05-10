@@ -11,6 +11,8 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Updates.hpp"
 #include "util/CombinePath.hpp"
+#include "util/SelfCheck.hpp"
+#include "util/UnixSignalHandler.hpp"
 #include "widgets/dialogs/LastRunCrashDialog.hpp"
 
 #include <QApplication>
@@ -170,6 +172,21 @@ namespace {
 
         signal(SIGSEGV, handleSignal);
 #endif
+
+#if defined(Q_OS_UNIX)
+        auto *sigintHandler = new UnixSignalHandler(SIGINT);
+        QObject::connect(sigintHandler, &UnixSignalHandler::signalFired, [] {
+            qCInfo(chatterinoApp)
+                << "Received SIGINT, request application quit";
+            QApplication::quit();
+        });
+        auto *sigtermHandler = new UnixSignalHandler(SIGTERM);
+        QObject::connect(sigtermHandler, &UnixSignalHandler::signalFired, [] {
+            qCInfo(chatterinoApp)
+                << "Received SIGTERM, request application quit";
+            QApplication::quit();
+        });
+#endif
     }
 
     // We delete cache files that haven't been modified in 14 days. This strategy may be
@@ -239,6 +256,8 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
     }
 #endif
 
+    selfcheck::checkWebp();
+
     updates.deleteOldFiles();
 
     // Clear the cache 1 minute after start.
@@ -259,12 +278,20 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
     chatterino::NetworkManager::init();
     updates.checkForUpdates();
 
+    QObject::connect(qApp, &QApplication::aboutToQuit, [] {
+        auto *app = dynamic_cast<Application *>(tryGetApp());
+        if (app)
+        {
+            app->save();
+        }
+
+        getSettings()->requestSave();
+        getSettings()->disableSave();
+    });
+
     Application app(settings, paths, args, updates);
     app.initialize(settings, paths);
     app.run();
-    app.save();
-
-    settings.requestSave();
 
     chatterino::NetworkManager::deinit();
 

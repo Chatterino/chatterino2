@@ -864,6 +864,7 @@ enum class HelixCreateEventSubSubscriptionError : std::uint8_t {
     Forbidden,
     Conflict,
     Ratelimited,
+    NoSession,
 
     // The error message is forwarded directly from the Twitch API
     Forwarded,

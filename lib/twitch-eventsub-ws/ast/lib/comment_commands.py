@@ -16,6 +16,10 @@ class CommentCommands:
     # If set, `name_transform` will do nothing
     name_change: Optional[str] = None
 
+    # Whether the enum constant should look for additional keys
+    # `name_transform` is not applied to these
+    extra_enum_constant_names: list[str] = []
+
     # Don't fail when an optional object exists and its data is bad
     dont_fail_on_deserialization: bool = False
 
@@ -25,10 +29,13 @@ class CommentCommands:
 
     inner_root: str = ""
 
+    default: Optional[str] = None
+
     def __init__(self, parent: Optional["CommentCommands"] = None) -> None:
         if parent is not None:
             self.name_transform = parent.name_transform
             self.name_change = parent.name_change
+            self.extra_enum_constant_names = parent.extra_enum_constant_names
             self.dont_fail_on_deserialization = parent.dont_fail_on_deserialization
             self.tag = parent.tag
             self.inner_root = parent.inner_root
@@ -50,6 +57,8 @@ class CommentCommands:
             match command:
                 case "json_rename":
                     self.name_change = value
+                case "json_extra_enum_constant_names":
+                    self.extra_enum_constant_names = [v.strip() for v in value.split(",")]
                 case "json_dont_fail_on_deserialization":
                     self.dont_fail_on_deserialization = bool(value.lower() == "true")
                 case "json_transform":
@@ -59,6 +68,8 @@ class CommentCommands:
                     pass
                 case "json_tag":
                     self.tag = value
+                case "default":
+                    self.default = value
                 case other:
                     log.warning(f"Unknown comment command found: {other} with value {value}")
 

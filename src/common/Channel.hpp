@@ -35,16 +35,28 @@ public:
     /**
      * @exposeenum c2.ChannelType
      */
-    enum class Type {
+    enum class Type : std::uint8_t {
+        /// This channel may not be backed by a real channel.
+        ///
+        /// Messages sent to this channel are not logged.
         None,
+        /// Direct
         Direct,
+        /// Twitch
         Twitch,
+        /// TwitchWhispers
         TwitchWhispers,
+        /// TwitchWatching
         TwitchWatching,
+        /// TwitchMentions
         TwitchMentions,
+        /// TwitchLive
         TwitchLive,
+        /// TwitchAutomod
         TwitchAutomod,
+        /// TwitchEnd
         TwitchEnd,
+        /// Misc
         Misc,
     };
 
@@ -99,13 +111,11 @@ public:
     void replaceMessage(size_t index, const MessagePtr &replacement);
     void replaceMessage(size_t hint, const MessagePtr &message,
                         const MessagePtr &replacement);
-    void disableMessage(QString messageID);
+    void disableMessage(const QString &messageID);
 
     /// Removes all messages from this channel and invokes #messagesCleared
     void clearMessages();
 
-    [[deprecated("Use findMessageByID instead")]] MessagePtr findMessage(
-        QString messageID);
     MessagePtr findMessageByID(QStringView messageID) final;
 
     bool hasMessages() const;
@@ -137,7 +147,7 @@ public:
 protected:
     virtual void onConnected();
     virtual void messageRemovedFromStart(const MessagePtr &msg);
-    QString platform_{"other"};
+    QString platform_;
 
 private:
     const QString name_;
@@ -166,7 +176,7 @@ public:
     ChannelPtr get() const;
     void reset(ChannelPtr channel);
     pajlada::Signals::NoArgSignal &getChannelChanged();
-    Channel::Type getType();
+    Channel::Type getType() const;
 
 private:
     std::shared_ptr<Data> data_;

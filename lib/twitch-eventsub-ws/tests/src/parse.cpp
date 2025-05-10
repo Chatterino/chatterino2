@@ -106,6 +106,41 @@ class NoOpListener : public chatterino::eventsub::lib::Listener
         const payload::channel_moderate::v2::Payload &payload) override
     {
     }
+
+    void onAutomodMessageHold(
+        const messages::Metadata &metadata,
+        const payload::automod_message_hold::v2::Payload &payload) override
+    {
+    }
+    void onAutomodMessageUpdate(
+        const messages::Metadata &metadata,
+        const payload::automod_message_update::v2::Payload &payload) override
+    {
+    }
+    void onChannelSuspiciousUserMessage(
+        const messages::Metadata &metadata,
+        const payload::channel_suspicious_user_message::v1::Payload &payload)
+        override
+    {
+    }
+    void onChannelSuspiciousUserUpdate(
+        const messages::Metadata &metadata,
+        const payload::channel_suspicious_user_update::v1::Payload &payload)
+        override
+    {
+    }
+    void onChannelChatUserMessageHold(
+        const messages::Metadata &metadata,
+        const payload::channel_chat_user_message_hold::v1::Payload &payload)
+        override
+    {
+    }
+    void onChannelChatUserMessageUpdate(
+        const messages::Metadata &metadata,
+        const payload::channel_chat_user_message_update::v1::Payload &payload)
+        override
+    {
+    }
 };
 
 }  // namespace
@@ -118,8 +153,13 @@ TEST_P(TestHandleMessageP, Run)
 {
     auto buf = readToFlatBuffer(filePath(GetParam() + ".json"));
 
+    auto log = std::make_shared<NullLogger>();
     std::unique_ptr<Listener> listener = std::make_unique<NoOpListener>();
-    auto ec = handleMessage(listener, buf);
+    boost::asio::io_context ioc;
+    boost::asio::ssl::context ssl(
+        boost::asio::ssl::context::method::tls_client);
+    auto sess = std::make_shared<Session>(ioc, ssl, std::move(listener), log);
+    auto ec = sess->handleMessage(buf);
     ASSERT_FALSE(ec.failed())
         << ec.what() << ec.message() << ec.location().to_string();
 }

@@ -1,6 +1,10 @@
 #include "util/Helpers.hpp"
 
+#include "mocks/BaseApplication.hpp"
 #include "Test.hpp"
+
+#include <QDateTime>
+#include <QTimeZone>
 
 #include <span>
 
@@ -555,4 +559,80 @@ TEST(Helpers, unescapeZeroWidthJoiner)
 
         EXPECT_EQ(actual, c.output);
     }
+}
+
+TEST(Helpers, chronoToQDateTime)
+{
+    mock::BaseApplication app;
+
+    auto epoch = chronoToQDateTime({});
+    ASSERT_EQ(epoch.timeZone(), QTimeZone::utc());
+    ASSERT_EQ(epoch.toMSecsSinceEpoch(), 0);
+
+    std::chrono::milliseconds somePointSinceEpoch{1740574189131};
+    auto qPointSinceEpoch = chronoToQDateTime(
+        std::chrono::system_clock::time_point{somePointSinceEpoch});
+    ASSERT_EQ(qPointSinceEpoch.timeZone(), QTimeZone::utc());
+    ASSERT_EQ(qPointSinceEpoch.toMSecsSinceEpoch(),
+              somePointSinceEpoch.count());
+    ASSERT_EQ(qPointSinceEpoch.toString(Qt::ISODateWithMs),
+              "2025-02-26T12:49:49.131Z");
+}
+
+TEST(Helpers, codepointSlice)
+{
+    ASSERT_EQ(codepointSlice(u"", 0, 0), u"");
+    ASSERT_EQ(codepointSlice(u"", 0, 1), u"");
+    ASSERT_EQ(codepointSlice(u"", 1, 1), u"");
+    ASSERT_EQ(codepointSlice(u"", -1, 1), u"");
+
+    ASSERT_EQ(codepointSlice(u"a", 0, 0), u"");
+    ASSERT_EQ(codepointSlice(u"a", 0, 1), u"a");
+    ASSERT_EQ(codepointSlice(u"a", 0, 2), u"");
+    ASSERT_EQ(codepointSlice(u"a", -1, 1), u"");
+
+    ASSERT_EQ(codepointSlice(u"abcd", 1, 3), u"bc");
+    ASSERT_EQ(codepointSlice(u"abcd", 0, 3), u"abc");
+    ASSERT_EQ(codepointSlice(u"abcd", 1, 4), u"bcd");
+    ASSERT_EQ(codepointSlice(u"abcd", 0, 4), u"abcd");
+    ASSERT_EQ(codepointSlice(u"abcd", 0, 5), u"");
+    ASSERT_EQ(codepointSlice(u"abcd", 5, 0), u"");
+
+    ASSERT_EQ(codepointSlice(u"🍩🍟🥚🍳🌮🍞🌭🥞🍳", 1, 3), u"🍟🥚");
+    ASSERT_EQ(codepointSlice(u"🍩🍟🥚🍳🌮🍞🌭🥞🍳", 0, 3), u"🍩🍟🥚");
+    ASSERT_EQ(codepointSlice(u"🍩🍟🥚🍳🌮🍞🌭🥞🍳", 0, 9),
+              u"🍩🍟🥚🍳🌮🍞🌭🥞🍳");
+    ASSERT_EQ(codepointSlice(u"🍩🍟🥚🍳🌮🍞🌭🥞🍳", 3, 9), u"🍳🌮🍞🌭🥞🍳");
+    ASSERT_EQ(codepointSlice(u"🍩🍟🥚🍳🌮🍞🌭🥞🍳", 3, 10), u"");
+    ASSERT_EQ(codepointSlice(u"🍩🍟🥚🍳🌮🍞🌭🥞🍳", 3, 8), u"🍳🌮🍞🌭🥞");
+    ASSERT_EQ(codepointSlice(u"🍩🍟🥚🍳🌮🍞🌭🥞🍳", 3, 7), u"🍳🌮🍞🌭");
+    ASSERT_EQ(codepointSlice(u"🍩🍟🥚🍳🌮🍞🌭🥞🍳", 3, 4), u"🍳");
+
+    ASSERT_EQ(codepointSlice(u"🍩🍟\xD83E\xDD5A", 0, 3), u"🍩🍟🥚");
+    ASSERT_EQ(codepointSlice(u"🍩🍟\xD83E\xDD5A", 0, 4), u"");
+    ASSERT_EQ(codepointSlice(u"🍩🍟\xD83E", 0, 3), u"🍩🍟\xD83E");
+    ASSERT_EQ(codepointSlice(u"🍩🍟\xD83E🥚", 0, 4), u"🍩🍟\xD83E🥚");
+}
+
+TEST(Helpers, splitOnce)
+{
+    auto pair = [](auto first, auto second) {
+        return std::pair{QStringView(first), QStringView(second)};
+    };
+
+    ASSERT_EQ(splitOnce(u"foo bar", u" "), pair(u"foo", u"bar"));
+    ASSERT_EQ(splitOnce(u"foo bar", u"oo"), pair(u"f", u" bar"));
+    ASSERT_EQ(splitOnce(u"foo bar", u"foo"), pair(u"", u" bar"));
+    ASSERT_EQ(splitOnce(u"foo bar", u"bar"), pair(u"foo ", u""));
+    ASSERT_EQ(splitOnce(u"foo bar", u"baz"), pair(u"foo bar", u""));
+    ASSERT_EQ(splitOnce(u"foo bar", u"bars"), pair(u"foo bar", u""));
+    ASSERT_EQ(splitOnce(u"foo bar", u""), pair(u"", u"foo bar"));
+    ASSERT_EQ(splitOnce(u"", u"foo"), pair(u"", u""));
+    ASSERT_EQ(splitOnce(u"", u""), pair(u"", u""));
+
+    ASSERT_EQ(splitOnce(u"foo bar", u' '), pair(u"foo", u"bar"));
+    ASSERT_EQ(splitOnce(u"foo bar", u'f'), pair(u"", u"oo bar"));
+    ASSERT_EQ(splitOnce(u"foo bar", u'r'), pair(u"foo ba", u""));
+    ASSERT_EQ(splitOnce(u"foo bar", u'z'), pair(u"foo bar", u""));
+    ASSERT_EQ(splitOnce(u"", u'z'), pair(u"", u""));
 }

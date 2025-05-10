@@ -6,15 +6,24 @@ generate_json_impls(
     HEADERS
         include/twitch-eventsub-ws/messages/metadata.hpp
 
+        include/twitch-eventsub-ws/payloads/automod-message-hold-v2.hpp
+        include/twitch-eventsub-ws/payloads/automod-message-update-v2.hpp
+        include/twitch-eventsub-ws/payloads/automod-message.hpp
         include/twitch-eventsub-ws/payloads/channel-ban-v1.hpp
         include/twitch-eventsub-ws/payloads/channel-chat-message-v1.hpp
         include/twitch-eventsub-ws/payloads/channel-chat-notification-v1.hpp
+        include/twitch-eventsub-ws/payloads/channel-chat-user-message-hold-v1.hpp
+        include/twitch-eventsub-ws/payloads/channel-chat-user-message-update-v1.hpp
         include/twitch-eventsub-ws/payloads/channel-moderate-v2.hpp
+        include/twitch-eventsub-ws/payloads/channel-suspicious-user-message-v1.hpp
+        include/twitch-eventsub-ws/payloads/channel-suspicious-user-update-v1.hpp
         include/twitch-eventsub-ws/payloads/channel-update-v1.hpp
         include/twitch-eventsub-ws/payloads/session-welcome.hpp
         include/twitch-eventsub-ws/payloads/stream-offline-v1.hpp
         include/twitch-eventsub-ws/payloads/stream-online-v1.hpp
+        include/twitch-eventsub-ws/payloads/structured-message.hpp
         include/twitch-eventsub-ws/payloads/subscription.hpp
+        include/twitch-eventsub-ws/payloads/suspicious-users.hpp
 )
 
 set(SOURCE_FILES
@@ -39,8 +48,13 @@ add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES})
 # Generate source groups for use in IDEs
 # source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${SOURCE_FILES})
 
-target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../include")
-
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
+        "${CMAKE_CURRENT_SOURCE_DIR}/../include"
+    PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/../lib/date/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../lib/fmt/include"
+)
 
 target_link_libraries(${PROJECT_NAME}
         PUBLIC

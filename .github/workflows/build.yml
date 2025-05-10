@@ -36,7 +36,6 @@ jobs:
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-20.04:latest
             qt-version: 6.7.2
             force-lto: false
-            plugins: true
             skip-artifact: false
             skip-crashpad: false
             build-appimage: false
@@ -45,7 +44,6 @@ jobs:
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-22.04:latest
             qt-version: 6.7.2
             force-lto: false
-            plugins: true
             skip-artifact: false
             skip-crashpad: false
             build-appimage: true
@@ -54,14 +52,12 @@ jobs:
             container: ghcr.io/chatterino/chatterino2-build-ubuntu-24.04:latest
             qt-version: 6.7.2
             force-lto: false
-            plugins: true
             skip-artifact: false
             skip-crashpad: false
             build-appimage: false
             build-deb: true
     env:
       C2_ENABLE_LTO: ${{ matrix.force-lto }}
-      C2_PLUGINS: ${{ matrix.plugins }}
       C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
 
     steps:
@@ -95,7 +91,6 @@ jobs:
             -DUSE_PRECOMPILED_HEADERS=OFF \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
             -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
-            -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
             -DCMAKE_PREFIX_PATH="$Qt6_DIR/lib/cmake" \
             -DCHATTERINO_STATIC_QT_BUILD=On \
             -DFORCE_JSON_GENERATION=${{matrix.os == 'ubuntu-24.04' && 'On' || 'Off'}} \
@@ -144,21 +139,18 @@ jobs:
           - os: macos-14
             qt-version: 6.7.1
             force-lto: false
-            plugins: true
             skip-artifact: false
             skip-crashpad: false
           # Windows
           - os: windows-latest
             qt-version: 6.7.1
             force-lto: false
-            plugins: true
             skip-artifact: false
             skip-crashpad: false
 
       fail-fast: false
     env:
       C2_ENABLE_LTO: ${{ matrix.force-lto }}
-      C2_PLUGINS: ${{ matrix.plugins }}
       C2_ENABLE_CRASHPAD: ${{ matrix.skip-crashpad == false }}
 
     steps:
@@ -169,7 +161,7 @@ jobs:
 
       - name: Install Qt6
         if: startsWith(matrix.qt-version, '6.')
-        uses: jurplel/install-qt-action@v4.1.1
+        uses: jurplel/install-qt-action@v4.2.1
         with:
           cache: true
           cache-key-prefix: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-v2
@@ -183,7 +175,7 @@ jobs:
 
       - name: Setup sccache (Windows)
         # sccache v0.7.4
-        uses: hendrikmuhs/ccache-action@v1.2.16
+        uses: hendrikmuhs/ccache-action@v1.2.18
         if: startsWith(matrix.os, 'windows')
         with:
           variant: sccache
@@ -239,7 +231,6 @@ jobs:
               -DUSE_PRECOMPILED_HEADERS=ON `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
-              -DCHATTERINO_PLUGINS="$Env:C2_PLUGINS" `
               -DFORCE_JSON_GENERATION=On `
               ..
           set cl=/MP
@@ -308,7 +299,6 @@ jobs:
               -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
               -DUSE_PRECOMPILED_HEADERS=OFF \
               -DCHATTERINO_LTO="$C2_ENABLE_LTO" \
-              -DCHATTERINO_PLUGINS="$C2_PLUGINS" \
               -DFORCE_JSON_GENERATION=Off \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"

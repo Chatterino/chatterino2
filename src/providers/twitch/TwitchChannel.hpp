@@ -509,6 +509,12 @@ private:
     std::vector<boost::signals2::scoped_connection> bSignals_;
 
     eventsub::SubscriptionHandle eventSubChannelModerateHandle;
+    eventsub::SubscriptionHandle eventSubAutomodMessageHoldHandle;
+    eventsub::SubscriptionHandle eventSubAutomodMessageUpdateHandle;
+    eventsub::SubscriptionHandle eventSubSuspiciousUserMessageHandle;
+    eventsub::SubscriptionHandle eventSubSuspiciousUserUpdateHandle;
+    eventsub::SubscriptionHandle eventSubChannelChatUserMessageHoldHandle;
+    eventsub::SubscriptionHandle eventSubChannelChatUserMessageUpdateHandle;
 
     friend class TwitchIrcServer;
     friend class MessageBuilder;

@@ -166,16 +166,24 @@ void MessageLayout::actuallyLayout(const MessageLayoutContext &ctx)
             continue;
         }
 
-        if (this->message_->flags.has(MessageFlag::Timeout) ||
-            this->message_->flags.has(MessageFlag::Untimeout))
+        if (this->message_->flags.has(MessageFlag::RestrictedMessage))
         {
-            // NOTE: This hides the message but it will make the message re-appear if moderation message hiding is no longer active, and the layout is re-laid-out.
-            // This is only the case for the moderation messages that don't get filtered during creation.
-            // We should decide which is the correct method & apply that everywhere
-            if (hideModerationActions ||
-                (getSettings()->streamerModeHideModActions &&
-                 getApp()->getStreamerMode()->isEnabled()))
+            if (getApp()->getStreamerMode()->shouldHideRestrictedUsers())
             {
+                // Message is being hidden because the source is a
+                // restricted user
+                continue;
+            }
+        }
+
+        if (this->message_->flags.has(MessageFlag::ModerationAction))
+        {
+            if (hideModerationActions ||
+                getApp()->getStreamerMode()->shouldHideModActions())
+            {
+                // Message is being hidden because we consider the message
+                // a moderation action (something a streamer is unlikely to
+                // want to share if they briefly show their chat on stream)
                 continue;
             }
         }
@@ -241,7 +249,8 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
                              ctx.messageColors.disabled);
     }
 
-    if (this->message_->flags.has(MessageFlag::RecentMessage))
+    if (this->message_->flags.has(MessageFlag::RecentMessage) &&
+        ctx.preferences.fadeMessageHistory)
     {
         ctx.painter.fillRect(0, ctx.y, pixmap->width(), pixmap->height(),
                              ctx.messageColors.disabled);
@@ -515,7 +524,8 @@ bool MessageLayout::isReplyable() const
 
     if (this->message_->flags.hasAny(
             {MessageFlag::System, MessageFlag::Subscription,
-             MessageFlag::Timeout, MessageFlag::Whisper}))
+             MessageFlag::Timeout, MessageFlag::Whisper,
+             MessageFlag::ModerationAction}))
     {
         return false;
     }

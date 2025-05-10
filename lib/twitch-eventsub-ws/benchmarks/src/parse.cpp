@@ -111,6 +111,58 @@ public:
         benchmark::DoNotOptimize(&metadata);
         benchmark::DoNotOptimize(&payload);
     }
+
+    void onAutomodMessageHold(
+        const messages::Metadata &metadata,
+        const payload::automod_message_hold::v2::Payload &payload) override
+    {
+        benchmark::DoNotOptimize(&metadata);
+        benchmark::DoNotOptimize(&payload);
+    }
+
+    void onAutomodMessageUpdate(
+        const messages::Metadata &metadata,
+        const payload::automod_message_update::v2::Payload &payload) override
+    {
+        benchmark::DoNotOptimize(&metadata);
+        benchmark::DoNotOptimize(&payload);
+    }
+
+    void onChannelSuspiciousUserMessage(
+        const messages::Metadata &metadata,
+        const payload::channel_suspicious_user_message::v1::Payload &payload)
+        override
+    {
+        benchmark::DoNotOptimize(&metadata);
+        benchmark::DoNotOptimize(&payload);
+    }
+
+    void onChannelSuspiciousUserUpdate(
+        const messages::Metadata &metadata,
+        const payload::channel_suspicious_user_update::v1::Payload &payload)
+        override
+    {
+        benchmark::DoNotOptimize(&metadata);
+        benchmark::DoNotOptimize(&payload);
+    }
+
+    void onChannelChatUserMessageHold(
+        const messages::Metadata &metadata,
+        const payload::channel_chat_user_message_hold::v1::Payload &payload)
+        override
+    {
+        benchmark::DoNotOptimize(&metadata);
+        benchmark::DoNotOptimize(&payload);
+    }
+
+    void onChannelChatUserMessageUpdate(
+        const messages::Metadata &metadata,
+        const payload::channel_chat_user_message_update::v1::Payload &payload)
+        override
+    {
+        benchmark::DoNotOptimize(&metadata);
+        benchmark::DoNotOptimize(&payload);
+    }
     // NOLINTEND(cppcoreguidelines-pro-type-const-cast)
 };
 
@@ -118,13 +170,18 @@ void BM_ParseAndHandleMessages(benchmark::State &state)
 {
     auto messages = readMessages();
 
+    auto log = std::make_shared<NullLogger>();
     std::unique_ptr<Listener> listener = std::make_unique<NoopListener>();
+    boost::asio::io_context ioc;
+    boost::asio::ssl::context ssl(
+        boost::asio::ssl::context::method::tls_client);
+    auto sess = std::make_shared<Session>(ioc, ssl, std::move(listener), log);
 
     for (auto _ : state)
     {
         for (const auto &msg : messages)
         {
-            boost::system::error_code ec = handleMessage(listener, msg);
+            boost::system::error_code ec = sess->handleMessage(msg);
             assert(!ec);
         }
     }

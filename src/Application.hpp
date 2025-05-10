@@ -151,6 +151,7 @@ private:
     const std::unique_ptr<Logging> logging;
     std::unique_ptr<Emotes> emotes;
     std::unique_ptr<AccountController> accounts;
+    std::unique_ptr<eventsub::IController> eventSub;
     std::unique_ptr<HotkeyController> hotkeys;
     std::unique_ptr<WindowManager> windows;
     std::unique_ptr<Toasts> toasts;
@@ -178,7 +179,6 @@ private:
     std::unique_ptr<IStreamerMode> streamerMode;
     std::unique_ptr<ITwitchUsers> twitchUsers;
     std::unique_ptr<pronouns::Pronouns> pronouns;
-    std::unique_ptr<eventsub::IController> eventSub;
 #ifdef CHATTERINO_HAVE_PLUGINS
     std::unique_ptr<PluginController> plugins;
 #endif

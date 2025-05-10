@@ -7,6 +7,7 @@
 #include "util/serialize/Container.hpp"
 
 #include <pajlada/settings.hpp>
+#include <pajlada/signals/signal.hpp>
 #include <QColor>
 #include <QString>
 
@@ -27,6 +28,9 @@ public:
 
     virtual void setUserColor(const QString &userID,
                               const QString &colorString) = 0;
+    virtual void setUserNotes(const QString &userID, const QString &notes) = 0;
+
+    virtual pajlada::Signals::NoArgSignal &userDataUpdated() = 0;
 };
 
 class UserDataController : public IUserDataController
@@ -42,8 +46,14 @@ public:
     void setUserColor(const QString &userID,
                       const QString &colorString) override;
 
+    // Update or insert extra data for the notes about a user
+    void setUserNotes(const QString &userID, const QString &notes) override;
+
+    pajlada::Signals::NoArgSignal &userDataUpdated() override;
+
 private:
-    void update(std::unordered_map<QString, UserData> &&newUsers);
+    void update(std::unordered_map<QString, UserData> &&newUsers,
+                std::unique_lock<std::shared_mutex> usersLock);
 
     std::unordered_map<QString, UserData> getUsers() const;
 
@@ -53,6 +63,7 @@ private:
 
     std::shared_ptr<pajlada::Settings::SettingManager> sm;
     pajlada::Settings::Setting<std::unordered_map<QString, UserData>> setting;
+    pajlada::Signals::NoArgSignal userDataUpdated_;
 };
 
 }  // namespace chatterino

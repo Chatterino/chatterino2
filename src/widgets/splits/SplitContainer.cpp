@@ -22,6 +22,7 @@
 #include <QJsonObject>
 #include <QMimeData>
 #include <QPainter>
+#include <QPainterPath>
 
 #include <algorithm>
 
@@ -613,6 +614,29 @@ void SplitContainer::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
+void SplitContainer::paintSplitBorder(Node *node, QPainter *painter)
+{
+    switch (node->type_)
+    {
+        case Node::Type::Split: {
+            QRectF nodeRect = node->geometry_;
+            painter->setPen(this->theme->tabs.dividerLine);
+            QPainterPath p = QPainterPath();
+            p.addRect(nodeRect);
+            painter->strokePath(p, painter->pen());
+        }
+        break;
+        case Node::Type::VerticalContainer:
+        case Node::Type::HorizontalContainer: {
+            for (std::unique_ptr<Node> &child : node->children_)
+            {
+                paintSplitBorder(child.get(), painter);
+            }
+        }
+        break;
+    }
+}
+
 void SplitContainer::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
@@ -643,14 +667,7 @@ void SplitContainer::paintEvent(QPaintEvent * /*event*/)
     }
     else
     {
-        if (getApp()->getThemes()->isLightTheme())
-        {
-            painter.fillRect(rect(), QColor("#999"));
-        }
-        else
-        {
-            painter.fillRect(rect(), QColor("#555"));
-        }
+        this->paintSplitBorder(this->getBaseNode(), &painter);
     }
 
     for (DropRect &dropRect : this->dropRects_)
@@ -1534,7 +1551,7 @@ void SplitContainer::DropOverlay::dragMoveEvent(QDragMoveEvent *event)
 {
     event->acceptProposedAction();
 
-    this->mouseOverPoint_ = event->pos();
+    this->mouseOverPoint_ = event->position().toPoint();
     this->update();
 }
 
@@ -1656,14 +1673,15 @@ void SplitContainer::ResizeHandle::mouseMoveEvent(QMouseEvent *event)
     QPoint bottomRight = this->parent->mapToGlobal(
         this->node->geometry_.bottomRight().toPoint());
 
-    int globalX = topLeft.x() > event->globalX()
+    auto globalPos = event->globalPosition().toPoint();
+    int globalX = topLeft.x() > globalPos.x()
                       ? topLeft.x()
-                      : (bottomRight.x() < event->globalX() ? bottomRight.x()
-                                                            : event->globalX());
-    int globalY = topLeft.y() > event->globalY()
+                      : (bottomRight.x() < globalPos.x() ? bottomRight.x()
+                                                         : globalPos.x());
+    int globalY = topLeft.y() > globalPos.y()
                       ? topLeft.y()
-                      : (bottomRight.y() < event->globalY() ? bottomRight.y()
-                                                            : event->globalY());
+                      : (bottomRight.y() < globalPos.y() ? bottomRight.y()
+                                                         : globalPos.y());
 
     QPoint mousePoint(globalX, globalY);
 

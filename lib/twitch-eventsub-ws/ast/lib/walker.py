@@ -36,6 +36,7 @@ class Walker:
                 for child in node.get_children():
                     self.handle_node(child, new_struct, None)
 
+                new_struct.validate()
                 self.structs.append(new_struct)
 
                 return True
@@ -82,6 +83,11 @@ class Walker:
                     self.walk(child)
                 self.namespace = self.namespace[:-1]
                 return True
+
+            case CursorKind.CXX_BASE_SPECIFIER:
+                assert struct
+                struct.base = node.type.spelling
+                return False
 
             case CursorKind.FUNCTION_DECL:
                 # Ignore function declarations

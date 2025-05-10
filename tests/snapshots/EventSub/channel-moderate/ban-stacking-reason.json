@@ -1,0 +1,365 @@
+{
+    "input": [
+        {
+            "__timestamp": "2025-02-22T17:53:49.800959069Z",
+            "action": "ban",
+            "automod_terms": null,
+            "ban": {
+                "reason": "my reason",
+                "user_id": "489584266",
+                "user_login": "uint128",
+                "user_name": "uint128"
+            },
+            "broadcaster_user_id": "11148817",
+            "broadcaster_user_login": "pajlada",
+            "broadcaster_user_name": "pajlada",
+            "delete": null,
+            "followers": null,
+            "mod": null,
+            "moderator_user_id": "129546453",
+            "moderator_user_login": "nerixyz",
+            "moderator_user_name": "nerixyz",
+            "raid": null,
+            "shared_chat_ban": null,
+            "shared_chat_delete": null,
+            "shared_chat_timeout": null,
+            "shared_chat_unban": null,
+            "shared_chat_untimeout": null,
+            "slow": null,
+            "source_broadcaster_user_id": null,
+            "source_broadcaster_user_login": null,
+            "source_broadcaster_user_name": null,
+            "timeout": null,
+            "unban": null,
+            "unban_request": null,
+            "unmod": null,
+            "unraid": null,
+            "untimeout": null,
+            "unvip": null,
+            "vip": null,
+            "warn": null
+        },
+        {
+            "__timestamp": "2025-02-22T17:53:50.800959069Z",
+            "action": "ban",
+            "automod_terms": null,
+            "ban": {
+                "reason": "my reason",
+                "user_id": "489584266",
+                "user_login": "uint128",
+                "user_name": "uint128"
+            },
+            "broadcaster_user_id": "11148817",
+            "broadcaster_user_login": "pajlada",
+            "broadcaster_user_name": "pajlada",
+            "delete": null,
+            "followers": null,
+            "mod": null,
+            "moderator_user_id": "129546453",
+            "moderator_user_login": "nerixyz",
+            "moderator_user_name": "nerixyz",
+            "raid": null,
+            "shared_chat_ban": null,
+            "shared_chat_delete": null,
+            "shared_chat_timeout": null,
+            "shared_chat_unban": null,
+            "shared_chat_untimeout": null,
+            "slow": null,
+            "source_broadcaster_user_id": null,
+            "source_broadcaster_user_login": null,
+            "source_broadcaster_user_name": null,
+            "timeout": null,
+            "unban": null,
+            "unban_request": null,
+            "unmod": null,
+            "unraid": null,
+            "untimeout": null,
+            "unvip": null,
+            "vip": null,
+            "warn": null
+        },
+        {
+            "__timestamp": "2025-02-22T17:54:50.800959069Z",
+            "action": "ban",
+            "automod_terms": null,
+            "ban": {
+                "reason": "my reason",
+                "user_id": "489584266",
+                "user_login": "uint128",
+                "user_name": "uint128"
+            },
+            "broadcaster_user_id": "11148817",
+            "broadcaster_user_login": "pajlada",
+            "broadcaster_user_name": "pajlada",
+            "delete": null,
+            "followers": null,
+            "mod": null,
+            "moderator_user_id": "129546453",
+            "moderator_user_login": "nerixyz",
+            "moderator_user_name": "nerixyz",
+            "raid": null,
+            "shared_chat_ban": null,
+            "shared_chat_delete": null,
+            "shared_chat_timeout": null,
+            "shared_chat_unban": null,
+            "shared_chat_untimeout": null,
+            "slow": null,
+            "source_broadcaster_user_id": null,
+            "source_broadcaster_user_login": null,
+            "source_broadcaster_user_name": null,
+            "timeout": null,
+            "unban": null,
+            "unban_request": null,
+            "unmod": null,
+            "unraid": null,
+            "untimeout": null,
+            "unvip": null,
+            "vip": null,
+            "warn": null
+        }
+    ],
+    "output": [
+        {
+            "badgeInfos": {
+            },
+            "badges": [
+            ],
+            "channelName": "",
+            "count": 2,
+            "displayName": "",
+            "elements": [
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "TimestampMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "17:53"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "17:53:50",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "nerixyz"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "nerixyz"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "banned"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "UserInfo",
+                        "value": "uint128"
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": false,
+                    "type": "TextElement",
+                    "words": [
+                        "uint128"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        ":",
+                        "my",
+                        "reason",
+                        "(2",
+                        "times)"
+                    ]
+                }
+            ],
+            "flags": "System|Timeout|PubSub|EventSub|ModerationAction",
+            "id": "",
+            "localizedName": "",
+            "loginName": "",
+            "messageText": "nerixyz banned uint128: my reason (2 times) ",
+            "searchText": "nerixyz banned uint128: my reason (2 times) ",
+            "serverReceivedTime": "2025-02-22T17:53:50Z",
+            "timeoutUser": "uint128",
+            "userID": "",
+            "usernameColor": "#ff000000"
+        },
+        {
+            "badgeInfos": {
+            },
+            "badges": [
+            ],
+            "channelName": "",
+            "count": 1,
+            "displayName": "",
+            "elements": [
+                {
+                    "element": {
+                        "color": "System",
+                        "flags": "Timestamp",
+                        "link": {
+                            "type": "None",
+                            "value": ""
+                        },
+                        "style": "TimestampMedium",
+                        "tooltip": "",
+                        "trailingSpace": true,
+                        "type": "TextElement",
+                        "words": [
+                            "17:54"
+                        ]
+                    },
+                    "flags": "Timestamp",
+                    "format": "",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "time": "17:54:50",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TimestampElement"
+                },
+                {
+                    "color": "Text",
+                    "fallbackColor": "System",
+                    "flags": "Text|Mention",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "MentionElement",
+                    "userColor": "System",
+                    "userLoginName": "nerixyz",
+                    "words": [
+                        "nerixyz"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "banned"
+                    ]
+                },
+                {
+                    "color": "Text",
+                    "fallbackColor": "System",
+                    "flags": "Text|Mention",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": false,
+                    "type": "MentionElement",
+                    "userColor": "System",
+                    "userLoginName": "uint128",
+                    "words": [
+                        "uint128"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        ":"
+                    ]
+                },
+                {
+                    "color": "System",
+                    "flags": "Text",
+                    "link": {
+                        "type": "None",
+                        "value": ""
+                    },
+                    "style": "ChatMedium",
+                    "tooltip": "",
+                    "trailingSpace": true,
+                    "type": "TextElement",
+                    "words": [
+                        "my",
+                        "reason"
+                    ]
+                }
+            ],
+            "flags": "System|Timeout|PubSub|EventSub|ModerationAction",
+            "id": "",
+            "localizedName": "",
+            "loginName": "nerixyz",
+            "messageText": "nerixyz banned uint128: my reason ",
+            "searchText": "nerixyz banned uint128: my reason ",
+            "serverReceivedTime": "2025-02-22T17:54:50Z",
+            "timeoutUser": "uint128",
+            "userID": "",
+            "usernameColor": "#ff000000"
+        }
+    ]
+}

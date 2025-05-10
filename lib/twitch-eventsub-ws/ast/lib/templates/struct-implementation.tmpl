@@ -1,5 +1,5 @@
 boost::json::result_for<{{struct.full_name}}, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<{{struct.full_name}}> /* tag */, const boost::json::value &{%- if struct.members|length -%}jvRoot{%- else -%}/* jvRoot */{%- endif -%})
+    boost::json::try_value_to_tag<{{struct.full_name}}> /* tag */, const boost::json::value &{%- if struct.members|length or struct.base -%}jvRoot{%- else -%}/* jvRoot */{%- endif -%})
 {
     {% if struct.inner_root %}
     if (!jvRoot.is_object())
@@ -24,6 +24,12 @@ boost::json::result_for<{{struct.full_name}}, boost::json::value>::type tag_invo
         EVENTSUB_BAIL_HERE(error::Kind::ExpectedObject);
     }
     const auto &root = jvRoot.get_object();
+    {% elif struct.base %}
+    auto base = boost::json::try_value_to<{{struct.base}}>(jvRoot);
+    if (base.has_error())
+    {
+        return base.error();
+    }
     {% endif %}
 
 {% for field in struct.members %}
@@ -56,6 +62,9 @@ boost::json::result_for<{{struct.full_name}}, boost::json::value>::type tag_invo
         {%- elif field.member_type == MemberType.VARIANT -%}
         {% include 'initializer-variant.tmpl' indent content %}
         {%- endif -%}
-{% endfor %}
+{% endfor -%}
+{%- if struct.base %}
+        std::move(*base)
+{% endif -%}
     };
 }

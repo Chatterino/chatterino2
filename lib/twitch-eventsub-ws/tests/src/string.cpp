@@ -1,11 +1,13 @@
 #include <gtest/gtest.h>
 #include <QString>
+#include <QStringBuilder>
 #include <twitch-eventsub-ws/string.hpp>
 
 #include <type_traits>
 
 namespace {
 
+constexpr const char *MINI = "mini";
 constexpr const char *LONGEST_SSO = "mylongstringyesitslongwo";
 constexpr const char *TOO_LONG = "mylongstringyesitslongwow";
 
@@ -566,4 +568,19 @@ TEST(String, Equals)
     ASSERT_TRUE(reallyLongQt == REALLY_LONG);
     ASSERT_TRUE(reallyLong == String(REALLY_LONG));
     ASSERT_TRUE(reallyLongQt == String(REALLY_LONG));
+}
+
+TEST(String, QStringBuilder)
+{
+    String s(MINI);
+
+    ASSERT_EQ("foo" % s.qt() % "bar", "foominibar");
+    ASSERT_EQ(u"foo" % s.qt() % "bar", "foominibar");
+    ASSERT_EQ("foo" % s.qt() % u"bar", "foominibar");
+    ASSERT_EQ(u"foo" % s.qt() % u"bar", "foominibar");
+
+    // the code below breaks on qt 6.4.3, but i think it's unrelated to our String stuff
+    // auto text2 = u"a" % s.qt() % u"b";
+    // QString messageText = text2;
+    // QString searchText = text2;
 }

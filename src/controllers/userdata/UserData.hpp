@@ -17,8 +17,12 @@ namespace chatterino {
 // Replacement fields should be optional, where none denotes that the field should not be updated for the user
 struct UserData {
     std::optional<QColor> color{std::nullopt};
+    QString notes;
 
-    // TODO: User note?
+    bool isEmpty() const
+    {
+        return !color.has_value() && notes.isEmpty();
+    }
 };
 
 }  // namespace chatterino
@@ -37,6 +41,11 @@ struct Serialize<chatterino::UserData> {
             const auto &color = *value.color;
             chatterino::rj::set(obj, "color",
                                 color.name().toUtf8().toStdString(), a);
+        }
+        if (!value.notes.isEmpty())
+        {
+            chatterino::rj::set(obj, "notes",
+                                value.notes.toUtf8().toStdString(), a);
         }
         return obj;
     }
@@ -63,6 +72,12 @@ struct Deserialize<chatterino::UserData> {
             {
                 user.color = color;
             }
+        }
+
+        QString notes;
+        if (chatterino::rj::getSafe(value, "notes", notes))
+        {
+            user.notes = notes;
         }
 
         return user;

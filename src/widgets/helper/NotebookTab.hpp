@@ -82,7 +82,7 @@ public:
     void moveAnimated(QPoint targetPos, bool animated = true);
 
     QRect getDesiredRect() const;
-    void hideTabXChanged();
+    void tabSizeChanged();
 
     void growWidth(int width);
     int normalTabWidth() const;
@@ -103,6 +103,7 @@ protected:
     void leaveEvent(QEvent *) override;
 
     void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
 
     void mouseMoveEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;

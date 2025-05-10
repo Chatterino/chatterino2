@@ -172,20 +172,18 @@ function(generate_json_impls)
 
     foreach(_header ${arg_HEADERS})
         # keep in sync with generate.py
-        string(REGEX REPLACE \.hpp$ .inc _def_path "${_header}")
         string(REGEX REPLACE \.hpp$ .cpp _source_path "${_header}")
         string(REGEX REPLACE \.hpp$ .timestamp _timestamp_path "${_header}")
         string(REGEX REPLACE include[/\\]twitch-eventsub-ws[/\\] src/generated/ _source_path "${_source_path}")
 
         cmake_path(ABSOLUTE_PATH _timestamp_path BASE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/eventsub-deps")
         cmake_path(ABSOLUTE_PATH _header BASE_DIRECTORY "${arg_BASE_DIRECTORY}")
-        cmake_path(ABSOLUTE_PATH _def_path BASE_DIRECTORY "${arg_BASE_DIRECTORY}")
         cmake_path(ABSOLUTE_PATH _source_path BASE_DIRECTORY "${arg_BASE_DIRECTORY}")
         list(APPEND _all_sources "${_source_path}")
 
         if(_generation_supported)
             add_custom_command(
-                OUTPUT "${_timestamp_path}" "${_source_path}" "${_def_path}"
+                OUTPUT "${_timestamp_path}" "${_source_path}"
                 DEPENDS ${_gen_deps} "${_header}"
                 COMMENT "Generating implementation for ${_header}"
                 COMMAND "${_python3_path}" "${_gen_script}" "${_header}" --includes "${_inc_dirs}" --timestamp "${_timestamp_path}"

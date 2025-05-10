@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List
+from typing import List, Optional
 
 import logging
 
@@ -20,6 +20,7 @@ class Enum:
         self.comment_commands = CommentCommands()
         self.inner_root: str = ""
         self.namespace = namespace
+        self.default: Optional[str] = None
 
     @property
     def full_name(self) -> str:
@@ -48,3 +49,4 @@ class Enum:
 
     def apply_comment_commands(self, comment_commands: CommentCommands) -> None:
         self.inner_root = comment_commands.inner_root
+        self.default = comment_commands.default

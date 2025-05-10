@@ -39,7 +39,6 @@
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
-#include "providers/twitch/PubSubActions.hpp"
 #include "providers/twitch/PubSubManager.hpp"
 #include "providers/twitch/PubSubMessages.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -165,8 +164,10 @@ Application::Application(Settings &_settings, const Paths &paths,
     , logging(new Logging(_settings))
     , emotes(new Emotes)
     , accounts(new AccountController)
+    , eventSub(makeEventSubController(_settings))
     , hotkeys(new HotkeyController)
-    , windows(new WindowManager(paths, _settings, *this->themes, *this->fonts))
+    , windows(new WindowManager(_args, paths, _settings, *this->themes,
+                                *this->fonts))
     , toasts(new Toasts)
     , imageUploader(new ImageUploader)
     , seventvAPI(new SeventvAPI)
@@ -193,7 +194,6 @@ Application::Application(Settings &_settings, const Paths &paths,
     , streamerMode(new StreamerMode)
     , twitchUsers(new TwitchUsers)
     , pronouns(new pronouns::Pronouns)
-    , eventSub(makeEventSubController(_settings))
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(new PluginController(paths))
 #endif
@@ -203,6 +203,8 @@ Application::Application(Settings &_settings, const Paths &paths,
 
 Application::~Application()
 {
+    this->eventSub->setQuitting();
+
     // we do this early to ensure getApp isn't used in any dtors
     INSTANCE = nullptr;
 }
@@ -590,7 +592,6 @@ pronouns::Pronouns *Application::getPronouns()
 
 eventsub::IController *Application::getEventSub()
 {
-    assertInGuiThread();
     assert(this->eventSub);
 
     return this->eventSub.get();
@@ -598,7 +599,6 @@ eventsub::IController *Application::getEventSub()
 
 void Application::save()
 {
-    this->commands->save();
     this->hotkeys->save();
     this->windows->save();
 }
@@ -607,11 +607,9 @@ void Application::initNm(const Paths &paths)
 {
     (void)paths;
 
-#ifdef Q_OS_WIN
-#    if defined QT_NO_DEBUG || defined CHATTERINO_DEBUG_NM
+#if defined QT_NO_DEBUG || defined CHATTERINO_DEBUG_NM
     registerNmHost(paths);
     this->nmServer.start();
-#    endif
 #endif
 }
 

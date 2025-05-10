@@ -2,9 +2,8 @@
 
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
-#include "util/LayoutCreator.hpp"
-#include "util/RemoveScrollAreaBackground.hpp"
 #include "util/StreamLink.hpp"
+#include "widgets/settingspages/SettingWidget.hpp"
 
 #include <QFormLayout>
 #include <QGroupBox>
@@ -13,31 +12,47 @@
 namespace chatterino {
 
 inline const QStringList STREAMLINK_QUALITY = {
-    "Choose", "Source", "High", "Medium", "Low", "Audio only"};
+    "Choose", "Source", "High", "Medium", "Low", "Audio only",
+};
 
 ExternalToolsPage::ExternalToolsPage()
+    : view(GeneralPageView::withoutNavigation(this))
 {
-    LayoutCreator<ExternalToolsPage> layoutCreator(this);
+    auto *y = new QVBoxLayout;
+    auto *x = new QHBoxLayout;
+    x->addWidget(this->view);
+    auto *z = new QFrame;
+    z->setLayout(x);
+    y->addWidget(z);
+    this->setLayout(y);
 
-    auto scroll = layoutCreator.emplace<QScrollArea>();
-    auto widget = scroll.emplaceScrollAreaWidget();
-    removeScrollAreaBackground(scroll.getElement(), widget.getElement());
+    this->initLayout(*view);
+}
 
-    auto layout = widget.setLayoutType<QVBoxLayout>();
+bool ExternalToolsPage::filterElements(const QString &query)
+{
+    if (this->view)
+    {
+        return this->view->filterElements(query) || query.isEmpty();
+    }
+
+    return false;
+}
+
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+void ExternalToolsPage::initLayout(GeneralPageView &layout)
+{
+    auto &s = *getSettings();
 
     {
-        auto group = layout.emplace<QGroupBox>("Streamlink");
-        auto groupLayout = group.setLayoutType<QFormLayout>();
-
-        auto *description = new QLabel(
-            "Streamlink is a command-line utility that pipes video streams "
-            "from various "
-            "services into a video player, such as VLC. Make sure to edit the "
-            "configuration file before you use it!");
-        description->setWordWrap(true);
-        description->setStyleSheet("color: #bbb");
-
-        auto *links = new QLabel(
+        auto *form = new QFormLayout;
+        layout.addTitle("Streamlink");
+        layout.addDescription("Streamlink is a command-line utility that pipes "
+                              "video streams from "
+                              "various services into a video player, such as "
+                              "VLC. Make sure to edit "
+                              "the configuration file before you use it!");
+        layout.addDescription(
             formatRichNamedLink("https://streamlink.github.io/", "Website") +
             " " +
             formatRichNamedLink(
@@ -46,115 +61,83 @@ ExternalToolsPage::ExternalToolsPage()
             " " +
             formatRichNamedLink("https://streamlink.github.io/cli.html#twitch",
                                 "Documentation"));
-        links->setTextFormat(Qt::RichText);
-        links->setTextInteractionFlags(Qt::TextBrowserInteraction |
-                                       Qt::LinksAccessibleByKeyboard |
-                                       Qt::LinksAccessibleByMouse);
-        links->setOpenExternalLinks(true);
 
-        groupLayout->setWidget(0, QFormLayout::SpanningRole, description);
-        groupLayout->setWidget(1, QFormLayout::SpanningRole, links);
+        SettingWidget::checkbox("Use custom path (Enable if using non-standard "
+                                "streamlink installation path)",
+                                s.streamlinkUseCustomPath)
+            ->addTo(layout);
 
-        auto *customPathCb =
-            this->createCheckBox("Use custom path (Enable if using "
-                                 "non-standard streamlink installation path)",
-                                 getSettings()->streamlinkUseCustomPath);
-        groupLayout->setWidget(2, QFormLayout::SpanningRole, customPathCb);
-
-        auto *note = new QLabel(
+        layout.addDescription(
             QStringLiteral(
                 "Chatterino expects the executable to be called \"%1\".")
                 .arg(STREAMLINK_BINARY_NAME));
-        note->setWordWrap(true);
-        note->setStyleSheet("color: #bbb");
-        groupLayout->setWidget(3, QFormLayout::SpanningRole, note);
 
-        auto *customPath = this->createLineEdit(getSettings()->streamlinkPath);
-        customPath->setPlaceholderText(
-            "Path to folder where Streamlink executable can be found");
-        groupLayout->addRow("Custom streamlink path:", customPath);
-        groupLayout->addRow(
-            "Preferred quality:",
-            this->createComboBox(STREAMLINK_QUALITY,
-                                 getSettings()->preferredQuality));
-        groupLayout->addRow(
-            "Additional options:",
-            this->createLineEdit(getSettings()->streamlinkOpts));
+        layout.addLayout(form);
 
-        getSettings()->streamlinkUseCustomPath.connect(
-            [=](const auto &value, auto) {
-                customPath->setEnabled(value);
-            },
-            this->managedConnections_);
+        SettingWidget::lineEdit(
+            "Custom streamlink path", s.streamlinkPath,
+            "Path to folder where Streamlink executable can be found")
+            ->conditionallyEnabledBy(s.streamlinkUseCustomPath)
+            ->addTo(layout, form);
+
+        SettingWidget::dropdown("Preferred quality", s.preferredQuality)
+            ->addTo(layout, form);
+
+        SettingWidget::lineEdit("Additional options", s.streamlinkOpts, "")
+            ->addTo(layout, form);
     }
-    layout->addSpacing(16);
 
     {
-        auto group = layout.emplace<QGroupBox>("Custom stream player");
-        auto groupLayout = group.setLayoutType<QFormLayout>();
+        layout.addTitle("Custom stream player");
+        layout.addDescription(
+            "You can open Twitch streams directly in any video player that has "
+            "built-in Twitch support and has own URI Scheme.\nE.g.: IINA for "
+            "macOS and Potplayer (with extension) for Windows.\n\nWith this "
+            "value set, you will get the option to \"Open in custom player\" "
+            "when right-clicking a channel header.");
 
-        auto *description = new QLabel(
-            "You can open Twitch streams directly in any video player that "
-            "has built-in Twitch support and has own URI Scheme.\nE.g.: "
-            "IINA for macOS and Potplayer (with extension) for "
-            "Windows.\n\nWith this value set, you will get the option to "
-            "\"Open in custom player\" when "
-            "right-clicking a channel header.");
-        description->setWordWrap(true);
-        description->setStyleSheet("color: #bbb");
-
-        groupLayout->setWidget(0, QFormLayout::SpanningRole, description);
-
-        auto *lineEdit = this->createLineEdit(getSettings()->customURIScheme);
-        lineEdit->setPlaceholderText("custom-player-scheme://");
-        groupLayout->addRow("Custom stream player URI Scheme:", lineEdit);
+        SettingWidget::lineEdit("Custom stream player URI Scheme",
+                                s.customURIScheme, "custom-player-scheme://")
+            ->addTo(layout);
     }
-    layout->addSpacing(16);
 
     {
-        auto group = layout.emplace<QGroupBox>("Image Uploader");
-        auto groupLayout = group.setLayoutType<QFormLayout>();
+        auto *form = new QFormLayout;
+        layout.addTitle("Image Uploader");
 
-        auto *description = new QLabel(
-            "You can set custom host for uploading images, like "
-            "imgur.com or s-ul.eu.<br>Check " +
+        layout.addDescription(
+            "You can set custom host for uploading images, like imgur.com or "
+            "s-ul.eu.<br>Check " +
             formatRichNamedLink("https://chatterino.com/help/image-uploader",
                                 "this guide") +
             " for help.");
-        description->setWordWrap(true);
-        description->setStyleSheet("color: #bbb");
-        description->setTextFormat(Qt::RichText);
-        description->setTextInteractionFlags(Qt::TextBrowserInteraction |
-                                             Qt::LinksAccessibleByKeyboard |
-                                             Qt::LinksAccessibleByMouse);
-        description->setOpenExternalLinks(true);
 
-        groupLayout->setWidget(0, QFormLayout::SpanningRole, description);
+        SettingWidget::checkbox("Enable image uploader", s.imageUploaderEnabled)
+            ->addTo(layout);
 
-        groupLayout->addRow(this->createCheckBox(
-            "Enable image uploader", getSettings()->imageUploaderEnabled));
-        groupLayout->addRow(
-            this->createCheckBox("Ask for confirmation when uploading an image",
-                                 getSettings()->askOnImageUpload));
+        SettingWidget::checkbox("Ask for confirmation when uploading an image",
+                                s.askOnImageUpload)
+            ->addTo(layout);
 
-        groupLayout->addRow(
-            "Request URL: ",
-            this->createLineEdit(getSettings()->imageUploaderUrl));
-        groupLayout->addRow(
-            "Form field: ",
-            this->createLineEdit(getSettings()->imageUploaderFormField));
-        groupLayout->addRow(
-            "Extra Headers: ",
-            this->createLineEdit(getSettings()->imageUploaderHeaders));
-        groupLayout->addRow(
-            "Image link: ",
-            this->createLineEdit(getSettings()->imageUploaderLink));
-        groupLayout->addRow(
-            "Deletion link: ",
-            this->createLineEdit(getSettings()->imageUploaderDeletionLink));
+        layout.addLayout(form);
+
+        SettingWidget::lineEdit("Request URL", s.imageUploaderUrl)
+            ->addTo(layout, form);
+
+        SettingWidget::lineEdit("Form field", s.imageUploaderFormField)
+            ->addTo(layout, form);
+
+        SettingWidget::lineEdit("Extra Headers", s.imageUploaderHeaders)
+            ->addTo(layout, form);
+
+        SettingWidget::lineEdit("Image link", s.imageUploaderLink)
+            ->addTo(layout, form);
+
+        SettingWidget::lineEdit("Deletion link", s.imageUploaderDeletionLink)
+            ->addTo(layout, form);
     }
 
-    layout->addStretch(1);
+    layout.addStretch();
 }
 
 }  // namespace chatterino

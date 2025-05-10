@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/Common.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/hotkeys/HotkeyCategory.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "singletons/Fonts.hpp"
@@ -54,6 +55,30 @@ namespace {
                 break;
         }
     }
+
+    float getCompactDivider(TabStyle tabStyle)
+    {
+        switch (tabStyle)
+        {
+            case TabStyle::Compact:
+                return 1.5;
+            case TabStyle::Normal:
+            default:
+                return 1.0;
+        }
+    }
+
+    float getCompactReducer(TabStyle tabStyle)
+    {
+        switch (tabStyle)
+        {
+            case TabStyle::Compact:
+                return 4.0;
+            case TabStyle::Normal:
+            default:
+                return 0.0;
+        }
+    }
 }  // namespace
 
 NotebookTab::NotebookTab(Notebook *notebook)
@@ -67,8 +92,15 @@ NotebookTab::NotebookTab(Notebook *notebook)
     this->positionChangedAnimation_.setEasingCurve(
         QEasingCurve(QEasingCurve::InCubic));
 
-    getSettings()->showTabCloseButton.connectSimple(
-        boost::bind(&NotebookTab::hideTabXChanged, this),
+    getSettings()->showTabCloseButton.connect(
+        [this] {
+            this->tabSizeChanged();
+        },
+        this->managedConnections_);
+    getSettings()->tabStyle.connect(
+        [this] {
+            this->tabSizeChanged();
+        },
         this->managedConnections_);
     getSettings()->showTabLive.connect(
         [this](auto, auto) {
@@ -84,24 +116,23 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
     // XXX: this doesn't update after changing hotkeys
 
-    this->menu_.addAction(
-        "Close Tab",
-        [this]() {
-            this->notebook_->removePage(this->page);
-        },
-        getApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Window,
-                                                   "removeTab"));
+    this->menu_.addAction("Close Tab",
+                          getApp()->getHotkeys()->getDisplaySequence(
+                              HotkeyCategory::Window, "removeTab"),
+                          [this]() {
+                              this->notebook_->removePage(this->page);
+                          });
 
     this->menu_.addAction(
         "Popup Tab",
+        getApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Window,
+                                                   "popup", {{"window"}}),
         [this]() {
             if (auto *container = dynamic_cast<SplitContainer *>(this->page))
             {
                 container->popup();
             }
-        },
-        getApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Window,
-                                                   "popup", {{"window"}}));
+        });
 
     this->menu_.addAction("Duplicate Tab", [this]() {
         this->notebook_->duplicatePage(this->page);
@@ -204,13 +235,16 @@ int NotebookTab::normalTabWidthForHeight(int height) const
     QFontMetrics metrics =
         getApp()->getFonts()->getFontMetrics(FontStyle::UiTabs, scale);
 
+    float compactDivider = getCompactDivider(getSettings()->tabStyle);
     if (this->hasXButton())
     {
-        width = (metrics.horizontalAdvance(this->getTitle()) + int(32 * scale));
+        width = (metrics.horizontalAdvance(this->getTitle()) +
+                 int(32 / compactDivider * scale));
     }
     else
     {
-        width = (metrics.horizontalAdvance(this->getTitle()) + int(16 * scale));
+        width = (metrics.horizontalAdvance(this->getTitle()) +
+                 int(16 / compactDivider * scale));
     }
 
     if (static_cast<float>(height) > 150 * scale)
@@ -608,7 +642,7 @@ QRect NotebookTab::getDesiredRect() const
     return QRect(this->positionAnimationDesiredPoint_, size());
 }
 
-void NotebookTab::hideTabXChanged()
+void NotebookTab::tabSizeChanged()
 {
     this->updateSize();
     this->update();
@@ -760,12 +794,15 @@ void NotebookTab::paintEvent(QPaintEvent *)
     // set the pen color
     painter.setPen(colors.text);
 
+    float compactDivider = getCompactDivider(getSettings()->tabStyle);
     // set area for text
-    int rectW = (!getSettings()->showTabCloseButton ? 0 : int(16 * scale));
+    int rectW =
+        (!getSettings()->showTabCloseButton ? 0
+                                            : int(16 * scale / compactDivider));
     QRect rect(0, 0, this->width() - rectW, height);
 
     // draw text
-    int offset = int(scale * 8);
+    int offset = int(scale * 4 / compactDivider);
     QRect textRect(offset, 0, this->width() - offset - offset, height);
     translateRectForLocation(textRect, this->tabLocation_,
                              this->selected_ ? -1 : -2);
@@ -870,7 +907,8 @@ void NotebookTab::mousePressEvent(QMouseEvent *event)
         switch (event->button())
         {
             case Qt::RightButton: {
-                this->menu_.popup(event->globalPos() + QPoint(0, 8));
+                this->menu_.popup(event->globalPosition().toPoint() +
+                                  QPoint(0, 8));
             }
             break;
             default:;
@@ -920,8 +958,10 @@ void NotebookTab::mouseReleaseEvent(QMouseEvent *event)
 
 void NotebookTab::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton &&
-        this->notebook_->getAllowUserTabManagement())
+    const auto canRenameTab = this->notebook_->getAllowUserTabManagement() &&
+                              getSettings()->disableTabRenamingOnClick == false;
+
+    if (event->button() == Qt::LeftButton && canRenameTab)
     {
         this->showRenameDialog();
     }
@@ -963,9 +1003,39 @@ void NotebookTab::dragEnterEvent(QDragEnterEvent *event)
         return;
     }
 
+    event->acceptProposedAction();
+
     if (this->notebook_->getAllowUserTabManagement())
     {
         this->notebook_->select(this->page);
+    }
+}
+
+void NotebookTab::dropEvent(QDropEvent *event)
+{
+    if (!event->mimeData()->hasFormat("chatterino/split"))
+    {
+        return;
+    }
+
+    if (!isDraggingSplit())
+    {
+        // Ensure dragging a split from a different Chatterino instance doesn't switch tabs around
+        return;
+    }
+
+    auto *draggedSplit = dynamic_cast<Split *>(event->source());
+    if (!draggedSplit)
+    {
+        qCDebug(chatterinoWidget)
+            << "Dropped something that wasn't a split onto a notebook button";
+        return;
+    }
+
+    if (auto *container = dynamic_cast<SplitContainer *>(this->page))
+    {
+        event->acceptProposedAction();
+        container->insertSplit(draggedSplit);
     }
 }
 
@@ -1044,7 +1114,8 @@ QRect NotebookTab::getXRect() const
                                ? (size / 3)   // slightly off true center
                                : (size / 2);  // true center
 
-    QRect xRect(rect.right() - static_cast<int>(20 * s),
+    float compactReducer = getCompactReducer(getSettings()->tabStyle);
+    QRect xRect(rect.right() - static_cast<int>((20 - compactReducer) * s),
                 rect.center().y() - centerAdjustment, size, size);
 
     if (this->selected_)

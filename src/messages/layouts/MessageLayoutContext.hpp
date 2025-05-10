@@ -55,6 +55,8 @@ struct MessagePreferences {
     bool alternateMessages{};
     bool separateMessages{};
 
+    bool fadeMessageHistory{};
+
     void connectSettings(Settings *settings,
                          pajlada::Signals::SignalHolder &holder);
 };
