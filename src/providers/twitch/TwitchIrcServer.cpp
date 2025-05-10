@@ -262,6 +262,11 @@ void TwitchIrcServer::initialize()
         });
 }
 
+void TwitchIrcServer::aboutToQuit()
+{
+    this->signalHolder.clear();
+}
+
 void TwitchIrcServer::initializeConnection(IrcConnection *connection,
                                            ConnectionType type)
 {

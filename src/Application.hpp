@@ -139,9 +139,9 @@ public:
 
     void initialize(Settings &settings, const Paths &paths);
     void load();
-    void save();
 
     int run();
+    void aboutToQuit();
 
     friend void test();
 
