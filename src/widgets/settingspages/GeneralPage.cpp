@@ -1379,7 +1379,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     // invisible element for width
     auto *inv = new BaseWidget(this);
-    //    inv->setScaleIndependantWidth(600);
+    //    inv->setScaleIndependentWidth(600);
     layout.addWidget(inv);
 }
 
