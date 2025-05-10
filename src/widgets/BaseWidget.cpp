@@ -118,7 +118,7 @@ void BaseWidget::setScaleIndependentSize(QSize size)
     }
 }
 
-void BaseWidget::setScaleIndependantWidth(int value)
+void BaseWidget::setScaleIndependentWidth(int value)
 {
     this->setScaleIndependentSize(
         QSize(value, this->scaleIndependantSize_.height()));

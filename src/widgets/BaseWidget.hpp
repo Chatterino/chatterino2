@@ -31,7 +31,7 @@ public:
     int scaleIndependentHeight() const;
     void setScaleIndependentSize(int width, int height);
     void setScaleIndependentSize(QSize);
-    void setScaleIndependantWidth(int value);
+    void setScaleIndependentWidth(int value);
     void setScaleIndependantHeight(int value);
 
 protected:

@@ -45,7 +45,7 @@ UpdateDialog::UpdateDialog()
                                       });
 
     this->setScaleIndependantHeight(150);
-    this->setScaleIndependantWidth(250);
+    this->setScaleIndependentWidth(250);
 }
 
 void UpdateDialog::updateStatusChanged(Updates::Status status)
