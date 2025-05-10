@@ -1221,7 +1221,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addTo(layout);
 
     layout.addCheckbox("Bold @usernames", s.boldUsernames, false,
-                       "Bold @mentions to make them more noticable.");
+                       "Bold @mentions to make them more noticeable.");
     layout.addCheckbox("Color @usernames", s.colorUsernames, false,
                        "If Chatterino has seen a user, highlight @mention's of "
                        "them with their Twitch color.");
