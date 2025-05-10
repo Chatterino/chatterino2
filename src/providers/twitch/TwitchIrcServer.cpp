@@ -841,37 +841,43 @@ void TwitchIrcServer::initEventAPIs(BttvLiveUpdates *bttvLiveUpdates,
             bttvLiveUpdates->signals_.emoteAdded, [&](const auto &data) {
                 auto chan = this->getChannelOrEmptyByID(data.channelID);
 
-                postToThread([chan, data] {
-                    if (auto *channel =
-                            dynamic_cast<TwitchChannel *>(chan.get()))
-                    {
-                        channel->addBttvEmote(data);
-                    }
-                });
+                postToThread(
+                    [chan, data] {
+                        if (auto *channel =
+                                dynamic_cast<TwitchChannel *>(chan.get()))
+                        {
+                            channel->addBttvEmote(data);
+                        }
+                    },
+                    this);
             });
         this->signalHolder.managedConnect(
             bttvLiveUpdates->signals_.emoteUpdated, [&](const auto &data) {
                 auto chan = this->getChannelOrEmptyByID(data.channelID);
 
-                postToThread([chan, data] {
-                    if (auto *channel =
-                            dynamic_cast<TwitchChannel *>(chan.get()))
-                    {
-                        channel->updateBttvEmote(data);
-                    }
-                });
+                postToThread(
+                    [chan, data] {
+                        if (auto *channel =
+                                dynamic_cast<TwitchChannel *>(chan.get()))
+                        {
+                            channel->updateBttvEmote(data);
+                        }
+                    },
+                    this);
             });
         this->signalHolder.managedConnect(
             bttvLiveUpdates->signals_.emoteRemoved, [&](const auto &data) {
                 auto chan = this->getChannelOrEmptyByID(data.channelID);
 
-                postToThread([chan, data] {
-                    if (auto *channel =
-                            dynamic_cast<TwitchChannel *>(chan.get()))
-                    {
-                        channel->removeBttvEmote(data);
-                    }
-                });
+                postToThread(
+                    [chan, data] {
+                        if (auto *channel =
+                                dynamic_cast<TwitchChannel *>(chan.get()))
+                        {
+                            channel->removeBttvEmote(data);
+                        }
+                    },
+                    this);
             });
 
         bttvLiveUpdates->start();
@@ -886,30 +892,36 @@ void TwitchIrcServer::initEventAPIs(BttvLiveUpdates *bttvLiveUpdates,
     {
         this->signalHolder.managedConnect(
             seventvEventAPI->signals_.emoteAdded, [this](const auto &data) {
-                postToThread([this, data] {
-                    this->forEachSeventvEmoteSet(data.emoteSetID,
-                                                 [data](TwitchChannel &chan) {
-                                                     chan.addSeventvEmote(data);
-                                                 });
-                });
+                postToThread(
+                    [this, data] {
+                        this->forEachSeventvEmoteSet(
+                            data.emoteSetID, [data](TwitchChannel &chan) {
+                                chan.addSeventvEmote(data);
+                            });
+                    },
+                    this);
             });
         this->signalHolder.managedConnect(
             seventvEventAPI->signals_.emoteUpdated, [this](const auto &data) {
-                postToThread([this, data] {
-                    this->forEachSeventvEmoteSet(
-                        data.emoteSetID, [data](TwitchChannel &chan) {
-                            chan.updateSeventvEmote(data);
-                        });
-                });
+                postToThread(
+                    [this, data] {
+                        this->forEachSeventvEmoteSet(
+                            data.emoteSetID, [data](TwitchChannel &chan) {
+                                chan.updateSeventvEmote(data);
+                            });
+                    },
+                    this);
             });
         this->signalHolder.managedConnect(
             seventvEventAPI->signals_.emoteRemoved, [this](const auto &data) {
-                postToThread([this, data] {
-                    this->forEachSeventvEmoteSet(
-                        data.emoteSetID, [data](TwitchChannel &chan) {
-                            chan.removeSeventvEmote(data);
-                        });
-                });
+                postToThread(
+                    [this, data] {
+                        this->forEachSeventvEmoteSet(
+                            data.emoteSetID, [data](TwitchChannel &chan) {
+                                chan.removeSeventvEmote(data);
+                            });
+                    },
+                    this);
             });
         this->signalHolder.managedConnect(
             seventvEventAPI->signals_.userUpdated, [this](const auto &data) {
