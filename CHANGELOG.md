@@ -13,6 +13,7 @@
 - Minor: Updated emojis to Unicode 16.0. (#6155)
 - Minor: Allow disabling of double-click tab renaming through setting. (#6163, #6184)
 - Minor: The JSON selector in the upload response can now query arrays using their indices like `foo.0`. (#6193)
+- Minor: Added hotkey Action for opening account selector. (#6192)
 - Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
 - Bugfix: Fixed scrolling now working on inputs in the settings. (#6128)
 - Bugfix: Make reply-cancel button less coarse-grained. (#6106)
@@ -36,7 +37,9 @@
 - Dev: Added a `run-and-kill.sh` script to help debug crash-on-exit bugs. (#6188)
 - Dev: Updated GoogleTest to v1.17.0. (#6180)
 - Dev: Mini refactor of `TwitchAccount`. (#6182)
+- Dev: Refactored away some `getApp` usages in `WindowManager`. (#6194)
 - Dev: Simplified string literals to be a re-export of Qt functions. (#6175)
+- Dev: Fixed incorrect lua generation of `c2.HTTPRequest.create` for typescript plugins. (#6190)
 
 ## 2.5.3
 
