@@ -545,7 +545,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             return fuzzyToInt(args.value, 0);
         });
-    layout.addSeperator();
+    layout.addSeparator();
     layout.addCheckbox("Draw a line below the most recent message before "
                        "switching applications.",
                        s.showLastMessageIndicator, false,
@@ -1082,7 +1082,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addKeywords({"seventv"})
         ->setTooltip("Badges for 7TV admins, developers, and supporters")
         ->addTo(layout);
-    layout.addSeperator();
+    layout.addSeparator();
     SettingWidget::checkbox("Use custom FrankerFaceZ moderator badges",
                             s.useCustomFfzModeratorBadges)
         ->addKeywords({"ffz"})
