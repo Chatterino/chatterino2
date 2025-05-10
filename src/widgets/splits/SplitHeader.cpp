@@ -282,7 +282,7 @@ void SplitHeader::initializeLayout()
     auto *layout = makeLayout<QHBoxLayout>({
         // space
         makeWidget<BaseWidget>([](auto w) {
-            w->setScaleIndependantSize(8, 4);
+            w->setScaleIndependentSize(8, 4);
         }),
         // title
         this->titleLabel_ = makeWidget<Label>([](auto w) {
@@ -293,7 +293,7 @@ void SplitHeader::initializeLayout()
         }),
         // space
         makeWidget<BaseWidget>([](auto w) {
-            w->setScaleIndependantSize(8, 4);
+            w->setScaleIndependentSize(8, 4);
         }),
         // mode
         this->modeButton_ = makeWidget<EffectLabel>([&](auto w) {
