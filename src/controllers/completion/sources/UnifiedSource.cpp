@@ -1,5 +1,7 @@
 #include "controllers/completion/sources/UnifiedSource.hpp"
 
+#include "widgets/listview/GenericListModel.hpp"
+
 namespace chatterino::completion {
 
 UnifiedSource::UnifiedSource(std::vector<std::unique_ptr<Source>> sources)

@@ -20,6 +20,7 @@
 #include <QGraphicsEffect>
 #include <QGridLayout>
 #include <QKeySequence>
+#include <QMessageBox>
 #include <QSizeGrip>
 
 #ifdef Q_OS_WIN

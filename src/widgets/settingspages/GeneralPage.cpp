@@ -28,6 +28,7 @@
 #include <QFontDialog>
 #include <QFormLayout>
 #include <QLabel>
+#include <QMessageBox>
 #include <QScrollArea>
 
 namespace {
