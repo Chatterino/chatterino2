@@ -88,7 +88,7 @@ void ChannelRef::add_system_message(QString text)
     this->strong()->addSystemMessage(text);
 }
 
-void ChannelRef::add_message(std::shared_ptr<Message> &msg,
+void ChannelRef::add_message(std::shared_ptr<Message> &message,
                              sol::variadic_args va)
 {
     MessageContext ctx = [&] {
@@ -111,7 +111,7 @@ void ChannelRef::add_message(std::shared_ptr<Message> &msg,
         return {};
     }();
 
-    this->strong()->addMessage(msg, ctx, overrideFlags);
+    this->strong()->addMessage(message, ctx, overrideFlags);
 }
 
 bool ChannelRef::is_twitch_channel()
