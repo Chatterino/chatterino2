@@ -121,7 +121,7 @@ Button *DraggablePopup::createPinButton()
 {
     this->pinButton_ = new Button(this);
     this->pinButton_->setPixmap(getTheme()->buttons.pin);
-    this->pinButton_->setScaleIndependantSize(18, 18);
+    this->pinButton_->setScaleIndependentSize(18, 18);
     this->pinButton_->setToolTip("Pin Window");
 
     QObject::connect(this->pinButton_, &Button::leftClicked, this,

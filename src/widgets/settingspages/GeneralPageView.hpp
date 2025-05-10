@@ -309,7 +309,7 @@ public:
 
     DescriptionLabel *addDescription(const QString &text);
 
-    void addSeperator();
+    void addSeparator();
     bool filterElements(const QString &query);
 
 protected:
