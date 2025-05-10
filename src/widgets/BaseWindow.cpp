@@ -676,7 +676,7 @@ TitleBarButton *BaseWindow::addTitleBarButton(const TitleBarButtonStyle &style,
                                               std::function<void()> onClicked)
 {
     TitleBarButton *button = new TitleBarButton;
-    button->setScaleIndependantSize(30, 30);
+    button->setScaleIndependentSize(30, 30);
 
     this->ui_.buttons.push_back(button);
     this->ui_.titlebarBox->insertWidget(1, button);
@@ -692,7 +692,7 @@ TitleBarButton *BaseWindow::addTitleBarButton(const TitleBarButtonStyle &style,
 EffectLabel *BaseWindow::addTitleBarLabel(std::function<void()> onClicked)
 {
     EffectLabel *button = new EffectLabel;
-    button->setScaleIndependantHeight(30);
+    button->setScaleIndependentHeight(30);
 
     this->ui_.buttons.push_back(button);
     this->ui_.titlebarBox->insertWidget(1, button);
