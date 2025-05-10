@@ -89,12 +89,12 @@ QSize BaseWidget::scaleIndependentSize() const
     return this->scaleIndependantSize_;
 }
 
-int BaseWidget::scaleIndependantWidth() const
+int BaseWidget::scaleIndependentWidth() const
 {
     return this->scaleIndependantSize_.width();
 }
 
-int BaseWidget::scaleIndependantHeight() const
+int BaseWidget::scaleIndependentHeight() const
 {
     return this->scaleIndependantSize_.height();
 }
