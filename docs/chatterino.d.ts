@@ -95,9 +95,10 @@ declare namespace c2 {
         set_header(name: string, value: string): void;
 
         execute(): void;
+    }
 
-        // might error
-        static create(method: HTTPMethod, url: string): HTTPRequest;
+    namespace HTTPRequest {
+        function create(method: HTTPMethod, url: string): HTTPRequest;
     }
 
     function log(level: LogLevel, ...data: any[]): void;
