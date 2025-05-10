@@ -238,6 +238,8 @@ if (CHATTERINO_PLUGINS)
     find_package(Sol2 REQUIRED)
 endif()
 
+find_package(Backward QUIET)
+
 if (BUILD_WITH_CRASHPAD)
     add_subdirectory("${CMAKE_SOURCE_DIR}/tools/crash-handler")
 endif()

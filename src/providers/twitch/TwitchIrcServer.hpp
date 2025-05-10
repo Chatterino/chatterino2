@@ -94,6 +94,8 @@ public:
 
     void initialize();
 
+    void aboutToQuit();
+
     void forEachChannelAndSpecialChannels(
         std::function<void(ChannelPtr)> func) override;
 

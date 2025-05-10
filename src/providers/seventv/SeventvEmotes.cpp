@@ -440,6 +440,11 @@ void SeventvEmotes::getEmoteSet(
     getApp()->getSeventvAPI()->getEmoteSet(
         emoteSetId,
         [callback = std::move(successCallback), emoteSetId](const auto &json) {
+            if (isAppAboutToStop())
+            {
+                return;
+            }
+
             auto parsedEmotes = json["emotes"].toArray();
 
             auto emoteMap = parseEmotes(parsedEmotes, false);

@@ -20,8 +20,24 @@ namespace chatterino::eventsub::lib {
 
 class Listener
 {
+    bool quitting{};
+
 public:
     virtual ~Listener() = default;
+
+    /// Call this when the application or the websocket controller is about to quit
+    ///
+    /// This tells some internal functions to not bother with certain tasks like reconnecting
+    void aboutToQuit()
+    {
+        this->quitting = true;
+    }
+
+    /// Returns true if the application or websocket controller is about to quit
+    bool isQuitting() const
+    {
+        return this->quitting;
+    }
 
     virtual void onSessionWelcome(
         const messages::Metadata &metadata,
