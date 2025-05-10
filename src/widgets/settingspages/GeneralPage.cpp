@@ -702,7 +702,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addTo(layout);
     SettingWidget::checkbox("Send activity to 7TV", s.sendSevenTVActivity)
         ->setTooltip("When enabled, Chatterino will signal an activity to 7TV "
-                     "when you send a chat mesage. This is used for badges, "
+                     "when you send a chat message. This is used for badges, "
                      "paints, and personal emotes. When disabled, no activity "
                      "is sent and others won't see your cosmetics.")
         ->addKeywords({"seventv"})
