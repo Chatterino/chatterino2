@@ -3,6 +3,7 @@
 #include <QMimeData>
 #include <QMutex>
 #include <QString>
+#include <QStringView>
 
 #include <memory>
 #include <queue>
@@ -13,6 +14,33 @@ class ResizingTextEdit;
 class Channel;
 class NetworkResult;
 using ChannelPtr = std::shared_ptr<Channel>;
+
+}  // namespace chatterino
+
+namespace chatterino::imageuploader::detail {
+
+/// Traverses the JSON value with a pattern where each key is separated by dots.
+///
+/// If the pattern doesn't match, an empty string is returned.
+///
+/// **Example**:
+///
+/// - JSON: `{"foo": {"bar": [1, "baz"]}}`
+/// - pattern: `foo.bar.1`
+/// - return value: `"baz"`
+QString getJSONValue(QJsonValue responseJson, QStringView jsonPattern);
+
+/// Interpolates `pattern` with the JSON response.
+/// **Example**:
+///
+/// - response: `{"foo": {"bar": [1, "baz", "qox"]}}`
+/// - pattern: `https://example.com/{foo.bar.1}.{foo.bar.2}`
+/// - return value: `"https://example.com/baz.qox"`
+QString getLinkFromResponse(const NetworkResult &response, QString pattern);
+
+}  // namespace chatterino::imageuploader::detail
+
+namespace chatterino {
 
 struct RawImageData {
     QByteArray data;
