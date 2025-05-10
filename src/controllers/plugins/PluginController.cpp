@@ -17,6 +17,7 @@
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/SolTypes.hpp"
 #    include "messages/MessageBuilder.hpp"
+#    include "messages/MessageElement.hpp"
 #    include "singletons/Paths.hpp"
 #    include "singletons/Settings.hpp"
 
@@ -230,20 +231,7 @@ void PluginController::initSol(sol::state_view &lua, Plugin *plugin)
     c2["LogLevel"] = lua::createEnumTable<lua::api::LogLevel>(lua);
     c2["MessageFlag"] =
         lua::createEnumTable<MessageFlag, MessageFlag::None>(lua);
-    c2["MessageElementFlag"] =
-        lua::createEnumTable<MessageElementFlag,                           //
-                             MessageElementFlag::None,                     //
-                             MessageElementFlag::TwitchEmote,              //
-                             MessageElementFlag::BttvEmote,                //
-                             MessageElementFlag::ChannelPointRewardImage,  //
-                             MessageElementFlag::FfzEmote,                 //
-                             MessageElementFlag::SevenTVEmote,             //
-                             MessageElementFlag::EmoteImages,              //
-                             MessageElementFlag::EmoteText,                //
-                             MessageElementFlag::Badges,                   //
-                             MessageElementFlag::EmojiAll,                 //
-                             MessageElementFlag::Default                   //
-                             >(lua);
+    c2["MessageElementFlag"] = lua::createEnumTable<MessageElementFlag>(lua);
     c2["FontStyle"] = lua::createEnumTable<FontStyle>(lua);
     c2["MessageContext"] = lua::createEnumTable<MessageContext>(lua);
 
