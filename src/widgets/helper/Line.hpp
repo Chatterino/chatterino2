@@ -19,7 +19,7 @@ public:
         }
         else
         {
-            this->setScaleIndependantHeight(8);
+            this->setScaleIndependentHeight(8);
         }
     }
 

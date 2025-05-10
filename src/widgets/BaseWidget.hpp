@@ -32,7 +32,7 @@ public:
     void setScaleIndependentSize(int width, int height);
     void setScaleIndependentSize(QSize);
     void setScaleIndependentWidth(int value);
-    void setScaleIndependantHeight(int value);
+    void setScaleIndependentHeight(int value);
 
 protected:
     void childEvent(QChildEvent *) override;
