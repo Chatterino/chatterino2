@@ -26,7 +26,7 @@ public:
     std::optional<float> overrideScale() const;
     void setOverrideScale(std::optional<float>);
 
-    QSize scaleIndependantSize() const;
+    QSize scaleIndependentSize() const;
     int scaleIndependantWidth() const;
     int scaleIndependantHeight() const;
     void setScaleIndependantSize(int width, int height);

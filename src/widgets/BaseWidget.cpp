@@ -70,7 +70,7 @@ void BaseWidget::setScale(float value)
     this->scaleChangedEvent(this->scale());
     this->scaleChanged.invoke(this->scale());
 
-    this->setScaleIndependantSize(this->scaleIndependantSize());
+    this->setScaleIndependantSize(this->scaleIndependentSize());
 }
 
 void BaseWidget::setOverrideScale(std::optional<float> value)
@@ -84,7 +84,7 @@ std::optional<float> BaseWidget::overrideScale() const
     return this->overrideScale_;
 }
 
-QSize BaseWidget::scaleIndependantSize() const
+QSize BaseWidget::scaleIndependentSize() const
 {
     return this->scaleIndependantSize_;
 }
