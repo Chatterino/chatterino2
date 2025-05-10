@@ -86,17 +86,17 @@ std::optional<float> BaseWidget::overrideScale() const
 
 QSize BaseWidget::scaleIndependentSize() const
 {
-    return this->scaleIndependantSize_;
+    return this->scaleIndependentSize_;
 }
 
 int BaseWidget::scaleIndependentWidth() const
 {
-    return this->scaleIndependantSize_.width();
+    return this->scaleIndependentSize_.width();
 }
 
 int BaseWidget::scaleIndependentHeight() const
 {
-    return this->scaleIndependantSize_.height();
+    return this->scaleIndependentSize_.height();
 }
 
 void BaseWidget::setScaleIndependentSize(int width, int height)
@@ -106,7 +106,7 @@ void BaseWidget::setScaleIndependentSize(int width, int height)
 
 void BaseWidget::setScaleIndependentSize(QSize size)
 {
-    this->scaleIndependantSize_ = size;
+    this->scaleIndependentSize_ = size;
 
     if (size.width() > 0)
     {
@@ -121,13 +121,13 @@ void BaseWidget::setScaleIndependentSize(QSize size)
 void BaseWidget::setScaleIndependentWidth(int value)
 {
     this->setScaleIndependentSize(
-        QSize(value, this->scaleIndependantSize_.height()));
+        QSize(value, this->scaleIndependentSize_.height()));
 }
 
 void BaseWidget::setScaleIndependentHeight(int value)
 {
     this->setScaleIndependentSize(
-        QSize(this->scaleIndependantSize_.width(), value));
+        QSize(this->scaleIndependentSize_.width(), value));
 }
 
 void BaseWidget::childEvent(QChildEvent *event)

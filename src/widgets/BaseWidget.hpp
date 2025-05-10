@@ -56,7 +56,7 @@ protected:
 private:
     float scale_{1.f};
     std::optional<float> overrideScale_;
-    QSize scaleIndependantSize_;
+    QSize scaleIndependentSize_;
 
     std::vector<BaseWidget *> widgets_;
 
