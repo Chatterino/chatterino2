@@ -610,7 +610,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Remove spaces between emotes",
                        s.removeSpacesBetweenEmotes, false,
                        "When enabled, adjacent emotes will no longer have an "
-                       "added space seperating them.");
+                       "added space separating them.");
     SettingWidget::checkbox("Show unlisted 7TV emotes",
                             s.showUnlistedSevenTVEmotes)
         ->addKeywords({"seventv"})
