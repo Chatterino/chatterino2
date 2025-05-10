@@ -233,8 +233,6 @@ public:
     ITwitchUsers *getTwitchUsers() override;
 
 private:
-    void initBttvLiveUpdates();
-    void initSeventvEventAPI();
     void initNm(const Paths &paths);
 
     NativeMessagingServer nmServer;
