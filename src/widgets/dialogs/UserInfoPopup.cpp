@@ -71,7 +71,7 @@ Label *addCopyableLabel(LayoutCreator<QHBoxLayout> box, const char *tooltip,
         button.assign(copyButton);
     }
     button->setPixmap(getApp()->getThemes()->buttons.copy);
-    button->setScaleIndependantSize(18, 18);
+    button->setScaleIndependentSize(18, 18);
     button->setDim(Button::Dim::Lots);
     button->setToolTip(tooltip);
     QObject::connect(
@@ -274,7 +274,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
         // avatar
         auto avatar =
             head.emplace<Button>(nullptr).assign(&this->ui_.avatarButton);
-        avatar->setScaleIndependantSize(100, 100);
+        avatar->setScaleIndependentSize(100, 100);
         avatar->setDim(Button::Dim::None);
         QObject::connect(
             avatar.getElement(), &Button::clicked,
@@ -418,16 +418,16 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, Split *split)
         usercard->getLabel().setText("Usercard");
         auto mod = user.emplace<Button>(this);
         mod->setPixmap(getResources().buttons.mod);
-        mod->setScaleIndependantSize(30, 30);
+        mod->setScaleIndependentSize(30, 30);
         auto unmod = user.emplace<Button>(this);
         unmod->setPixmap(getResources().buttons.unmod);
-        unmod->setScaleIndependantSize(30, 30);
+        unmod->setScaleIndependentSize(30, 30);
         auto vip = user.emplace<Button>(this);
         vip->setPixmap(getResources().buttons.vip);
-        vip->setScaleIndependantSize(30, 30);
+        vip->setScaleIndependentSize(30, 30);
         auto unvip = user.emplace<Button>(this);
         unvip->setPixmap(getResources().buttons.unvip);
-        unvip->setScaleIndependantSize(30, 30);
+        unvip->setScaleIndependentSize(30, 30);
 
         user->addStretch(1);
 
@@ -661,7 +661,7 @@ void UserInfoPopup::installEvents()
                 this->ui_.block->setEnabled(false);
 
                 getApp()->getAccounts()->twitch.getCurrent()->unblockUser(
-                    this->userId_, this,
+                    this->userId_, this->userName_, this,
                     [this, reenableBlockCheckbox, currentUser] {
                         this->channel_->addSystemMessage(
                             QString("You successfully unblocked user %1")
@@ -702,7 +702,7 @@ void UserInfoPopup::installEvents()
                 }
 
                 getApp()->getAccounts()->twitch.getCurrent()->blockUser(
-                    this->userId_, this,
+                    this->userId_, this->userName_, this,
                     [this, reenableBlockCheckbox, currentUser] {
                         this->channel_->addSystemMessage(
                             QString("You successfully blocked user %1")
@@ -1188,7 +1188,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
                                const QPixmap &pixmap) {
         auto button = addLayout(title).emplace<Button>(nullptr);
         button->setPixmap(pixmap);
-        button->setScaleIndependantSize(buttonHeight, buttonHeight);
+        button->setScaleIndependentSize(buttonHeight, buttonHeight);
         button->setBorderColor(QColor(255, 255, 255, 127));
 
         QObject::connect(
@@ -1205,7 +1205,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
             auto a = hbox.emplace<EffectLabel2>();
             a->getLabel().setText(QString::number(item.second) + item.first);
 
-            a->setScaleIndependantSize(buttonWidth, buttonHeight);
+            a->setScaleIndependentSize(buttonWidth, buttonHeight);
             a->setBorderColor(borderColor);
 
             const auto pair =

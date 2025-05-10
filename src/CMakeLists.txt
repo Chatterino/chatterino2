@@ -1,8 +1,8 @@
 set(LIBRARY_PROJECT "${PROJECT_NAME}-lib")
 set(VERSION_PROJECT "${LIBRARY_PROJECT}-version")
 set(EXECUTABLE_PROJECT "${PROJECT_NAME}")
-add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
-add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x050F00)
+add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x060403)
+add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x060403)
 add_compile_definitions(QT_NO_KEYWORDS)
 
 # registers the native messageing host
@@ -406,8 +406,6 @@ set(SOURCE_FILES
         providers/twitch/ChannelPointReward.hpp
         providers/twitch/IrcMessageHandler.cpp
         providers/twitch/IrcMessageHandler.hpp
-        providers/twitch/PubSubActions.cpp
-        providers/twitch/PubSubActions.hpp
         providers/twitch/PubSubClient.cpp
         providers/twitch/PubSubClient.hpp
         providers/twitch/PubSubClientOptions.hpp
@@ -454,18 +452,12 @@ set(SOURCE_FILES
         providers/twitch/eventsub/SubscriptionRequest.cpp
         providers/twitch/eventsub/SubscriptionRequest.hpp
 
-        providers/twitch/pubsubmessages/AutoMod.cpp
-        providers/twitch/pubsubmessages/AutoMod.hpp
         providers/twitch/pubsubmessages/Base.cpp
         providers/twitch/pubsubmessages/Base.hpp
         providers/twitch/pubsubmessages/ChannelPoints.cpp
         providers/twitch/pubsubmessages/ChannelPoints.hpp
-        providers/twitch/pubsubmessages/ChatModeratorAction.cpp
-        providers/twitch/pubsubmessages/ChatModeratorAction.hpp
         providers/twitch/pubsubmessages/Listen.cpp
         providers/twitch/pubsubmessages/Listen.hpp
-        providers/twitch/pubsubmessages/LowTrustUsers.cpp
-        providers/twitch/pubsubmessages/LowTrustUsers.hpp
         providers/twitch/pubsubmessages/Message.hpp
         providers/twitch/pubsubmessages/Unlisten.cpp
         providers/twitch/pubsubmessages/Unlisten.hpp

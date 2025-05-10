@@ -72,7 +72,7 @@ using SplitNode = SplitContainer::Node;
 void WindowManager::showSettingsDialog(QWidget *parent,
                                        SettingsDialogPreference preference)
 {
-    if (getApp()->getArgs().dontSaveSettings)
+    if (this->appArgs.dontSaveSettings)
     {
         QMessageBox::critical(parent, "Chatterino - Editing Settings Forbidden",
                               "Settings cannot be edited when running with\n"
@@ -103,9 +103,10 @@ void WindowManager::showAccountSelectPopup(QPoint point)
     w->setFocus();
 }
 
-WindowManager::WindowManager(const Paths &paths, Settings &settings,
-                             Theme &themes_, Fonts &fonts)
+WindowManager::WindowManager(const Args &appArgs_, const Paths &paths,
+                             Settings &settings, Theme &themes_, Fonts &fonts)
     : themes(themes_)
+    , appArgs(appArgs_)
     , windowLayoutFilePath(combinePath(paths.settingsDirectory,
                                        WindowManager::WINDOW_LAYOUT_FILENAME))
     , updateWordTypeMaskListener([this] {
@@ -411,16 +412,16 @@ void WindowManager::initialize()
     {
         WindowLayout windowLayout;
 
-        if (getApp()->getArgs().customChannelLayout)
+        if (this->appArgs.customChannelLayout)
         {
-            windowLayout = getApp()->getArgs().customChannelLayout.value();
+            windowLayout = this->appArgs.customChannelLayout.value();
         }
         else
         {
             windowLayout = this->loadWindowLayoutFromFile();
         }
 
-        auto desired = getApp()->getArgs().activateChannel;
+        auto desired = this->appArgs.activateChannel;
         if (desired)
         {
             windowLayout.activateOrAddChannel(desired->provider, desired->name);
@@ -431,7 +432,7 @@ void WindowManager::initialize()
         this->applyWindowLayout(windowLayout);
     }
 
-    if (getApp()->getArgs().isFramelessEmbed)
+    if (this->appArgs.isFramelessEmbed)
     {
         this->framelessEmbedWindow_.reset(new FramelessEmbedWindow);
         this->framelessEmbedWindow_->show();
@@ -444,7 +445,7 @@ void WindowManager::initialize()
         this->mainWindow_->getNotebook().addPage(true);
 
         // TODO: don't create main window if it's a frameless embed
-        if (getApp()->getArgs().isFramelessEmbed)
+        if (this->appArgs.isFramelessEmbed)
         {
             this->mainWindow_->hide();
         }
@@ -453,7 +454,7 @@ void WindowManager::initialize()
 
 void WindowManager::save()
 {
-    if (getApp()->getArgs().dontSaveSettings)
+    if (this->appArgs.dontSaveSettings)
     {
         return;
     }
@@ -817,7 +818,7 @@ WindowLayout WindowManager::loadWindowLayoutFromFile() const
 
 void WindowManager::applyWindowLayout(const WindowLayout &layout)
 {
-    if (getApp()->getArgs().dontLoadMainWindow)
+    if (this->appArgs.dontLoadMainWindow)
     {
         return;
     }

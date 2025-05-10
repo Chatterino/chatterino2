@@ -275,15 +275,15 @@ void Emojis::loadEmojiSet()
             };
             // clang-format on
 
-            // As of emoji-data v15.1.1, google is the only source missing no images.
+            // Both Twitter/Twemoji and Google have all images
             if (!emoji->capabilities.has(setCapability))
             {
-                emojiSetToUse = QStringLiteral("Google");
+                emojiSetToUse = QStringLiteral("Twitter");
             }
 
             QString code = emoji->unifiedCode.toLower();
             QString urlPrefix =
-                "https://pajbot.com/static/emoji-v2/img/google/64/";
+                "https://pajbot.com/static/emoji-v2/img/twitter/64/";
             auto it = emojiSets.find(emojiSetToUse);
             if (it != emojiSets.end())
             {
