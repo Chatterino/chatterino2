@@ -70,6 +70,8 @@ using namespace chatterino;
 const QString BTTV_LIVE_UPDATES_URL = "wss://sockets.betterttv.net/ws";
 const QString SEVENTV_EVENTAPI_URL = "wss://events.7tv.io/v3";
 
+std::atomic<bool> ABOUT_TO_QUIT{false};
+
 ISoundController *makeSoundController(Settings &settings)
 {
     SoundBackend soundBackend = settings.soundBackend;
@@ -596,6 +598,8 @@ eventsub::IController *Application::getEventSub()
 
 void Application::aboutToQuit()
 {
+    ABOUT_TO_QUIT.store(true);
+
     this->hotkeys->save();
     this->windows->save();
 }
@@ -620,6 +624,11 @@ IApplication *getApp()
 IApplication *tryGetApp()
 {
     return INSTANCE;
+}
+
+bool isAppAboutToQuit()
+{
+    return ABOUT_TO_QUIT.load();
 }
 
 }  // namespace chatterino

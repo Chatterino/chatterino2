@@ -282,10 +282,8 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
 
     QObject::connect(qApp, &QApplication::aboutToQuit, [] {
         auto *app = dynamic_cast<Application *>(tryGetApp());
-        if (app)
-        {
-            app->aboutToQuit();
-        }
+        assert(app != nullptr);
+        app->aboutToQuit();
 
         getSettings()->requestSave();
         getSettings()->disableSave();
