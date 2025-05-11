@@ -550,8 +550,8 @@ std::shared_ptr<Channel> TwitchIrcServer::getCustomChannel(
         return this->automodChannel;
     }
 
-    static auto getTimer = [](ChannelPtr channel, int msBetweenMessages,
-                              bool addInitialMessages) {
+    static auto getTimer = [this](ChannelPtr channel, int msBetweenMessages,
+                                  bool addInitialMessages) {
         if (addInitialMessages)
         {
             for (auto i = 0; i < 1000; i++)
@@ -561,7 +561,7 @@ std::shared_ptr<Channel> TwitchIrcServer::getCustomChannel(
         }
 
         auto *timer = new QTimer;
-        QObject::connect(timer, &QTimer::timeout, [channel] {
+        QObject::connect(timer, &QTimer::timeout, this, [channel] {
             channel->addSystemMessage(QTime::currentTime().toString());
         });
         timer->start(msBetweenMessages);
