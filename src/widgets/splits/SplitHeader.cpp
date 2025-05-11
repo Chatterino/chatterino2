@@ -848,6 +848,11 @@ void SplitHeader::updateChannelText()
                 NetworkRequest(url, NetworkRequestType::Get)
                     .caller(this)
                     .onSuccess([this](auto result) {
+                        if (isAppAboutToQuit())
+                        {
+                            return;
+                        }
+
                         // NOTE: We do not follow the redirects, so we need to make sure we only treat code 200 as a valid image
                         if (result.status() == 200)
                         {
