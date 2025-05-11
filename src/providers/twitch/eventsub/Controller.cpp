@@ -465,6 +465,8 @@ void Controller::createConnection(std::string host, std::string port,
                                   std::string path,
                                   std::unique_ptr<lib::Listener> listener)
 {
+    qCDebug(LOG) << "Create EventSub connection";
+
     try
     {
         boost::asio::ssl::context sslContext{
