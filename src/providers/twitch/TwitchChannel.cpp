@@ -1381,6 +1381,10 @@ void TwitchChannel::loadRecentMessages()
     recentmessages::load(
         this->getName(), weak,
         [weak](const auto &messages) {
+            if (isAppAboutToQuit())
+            {
+                return;
+            }
             auto shared = weak.lock();
             if (!shared)
             {
