@@ -341,7 +341,7 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
         qCDebug(LOG) << "Make helix request for" << request;
         getHelix()->createEventSubSubscription(
             request, listener->getSessionID(),
-            [this, request, connection,
+            [this, request,
              weakConnection{std::weak_ptr<lib::Session>(connection)}](
                 const auto &res) {
                 qCDebug(LOG) << "Subscription success" << request;
