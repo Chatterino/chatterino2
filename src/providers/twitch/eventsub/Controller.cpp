@@ -104,7 +104,10 @@ Controller::~Controller()
         connection->close();
     }
 
-    this->subscriptions.clear();
+    {
+        std::lock_guard lock(this->subscriptionsMutex);
+        this->subscriptions.clear();
+    }
 
     this->work.reset();
 
