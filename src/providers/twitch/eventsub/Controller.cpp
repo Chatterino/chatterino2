@@ -507,6 +507,12 @@ void Controller::registerConnection(std::weak_ptr<lib::Session> &&connection)
 
 void Controller::retrySubscription(const SubscriptionRequest &request)
 {
+    if (isAppAboutToQuit())
+    {
+        qCDebug(LOG) << "retrySubscription, but app is quitting" << request;
+        return;
+    }
+
     std::lock_guard lock(this->subscriptionsMutex);
 
     auto &subscription = this->subscriptions[request];
@@ -536,6 +542,14 @@ void Controller::retrySubscription(const SubscriptionRequest &request)
         std::make_unique<boost::asio::system_timer>(this->ioContext);
     retryTimer->expires_after(subscription.backoff.next() + jitter);
     retryTimer->async_wait([this, request](const auto &ec) {
+        if (isAppAboutToQuit())
+        {
+            qCDebug(LOG)
+                << "Retry was going to fire, but app is quitting so we won't."
+                << request;
+            return;
+        }
+
         if (!ec)
         {
             qCDebug(LOG) << "Firing retry" << request;
