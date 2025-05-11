@@ -287,6 +287,8 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
 
         getSettings()->requestSave();
         getSettings()->disableSave();
+
+        app->stop();
     });
 
     Application app(settings, paths, args, updates);

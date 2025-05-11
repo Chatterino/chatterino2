@@ -140,6 +140,7 @@ public:
     void initialize(Settings &settings, const Paths &paths);
     void load();
     void aboutToQuit();
+    void stop();
 
     int run();
 
@@ -148,7 +149,7 @@ public:
 private:
     std::unique_ptr<Theme> themes;
     std::unique_ptr<Fonts> fonts;
-    const std::unique_ptr<Logging> logging;
+    std::unique_ptr<Logging> logging;
     std::unique_ptr<Emotes> emotes;
     std::unique_ptr<AccountController> accounts;
     std::unique_ptr<eventsub::IController> eventSub;
