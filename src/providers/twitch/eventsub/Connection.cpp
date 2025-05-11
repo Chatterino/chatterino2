@@ -75,6 +75,11 @@ void Connection::onNotification(const lib::messages::Metadata &metadata,
 void Connection::onClose(std::unique_ptr<lib::Listener> self,
                          const std::optional<std::string> &reconnectURL)
 {
+    if (isAppAboutToQuit())
+    {
+        return;
+    }
+
     auto *app = tryGetApp();
     if (!app)
     {
