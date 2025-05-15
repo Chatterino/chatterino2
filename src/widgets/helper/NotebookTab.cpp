@@ -116,24 +116,23 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
     // XXX: this doesn't update after changing hotkeys
 
-    this->menu_.addAction(
-        "Close Tab",
-        [this]() {
-            this->notebook_->removePage(this->page);
-        },
-        getApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Window,
-                                                   "removeTab"));
+    this->menu_.addAction("Close Tab",
+                          getApp()->getHotkeys()->getDisplaySequence(
+                              HotkeyCategory::Window, "removeTab"),
+                          [this]() {
+                              this->notebook_->removePage(this->page);
+                          });
 
     this->menu_.addAction(
         "Popup Tab",
+        getApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Window,
+                                                   "popup", {{"window"}}),
         [this]() {
             if (auto *container = dynamic_cast<SplitContainer *>(this->page))
             {
                 container->popup();
             }
-        },
-        getApp()->getHotkeys()->getDisplaySequence(HotkeyCategory::Window,
-                                                   "popup", {{"window"}}));
+        });
 
     this->menu_.addAction("Duplicate Tab", [this]() {
         this->notebook_->duplicatePage(this->page);
@@ -908,7 +907,8 @@ void NotebookTab::mousePressEvent(QMouseEvent *event)
         switch (event->button())
         {
             case Qt::RightButton: {
-                this->menu_.popup(event->globalPos() + QPoint(0, 8));
+                this->menu_.popup(event->globalPosition().toPoint() +
+                                  QPoint(0, 8));
             }
             break;
             default:;
@@ -958,8 +958,10 @@ void NotebookTab::mouseReleaseEvent(QMouseEvent *event)
 
 void NotebookTab::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton &&
-        this->notebook_->getAllowUserTabManagement())
+    const auto canRenameTab = this->notebook_->getAllowUserTabManagement() &&
+                              getSettings()->disableTabRenamingOnClick == false;
+
+    if (event->button() == Qt::LeftButton && canRenameTab)
     {
         this->showRenameDialog();
     }

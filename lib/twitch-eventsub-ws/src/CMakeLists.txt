@@ -53,6 +53,7 @@ target_include_directories(${PROJECT_NAME}
         "${CMAKE_CURRENT_SOURCE_DIR}/../include"
     PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/../lib/date/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../lib/fmt/include"
 )
 
 target_link_libraries(${PROJECT_NAME}

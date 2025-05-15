@@ -594,9 +594,9 @@ void BaseWindow::mousePressEvent(QMouseEvent *event)
 #ifndef Q_OS_WIN
     if (this->flags_.has(FramelessDraggable))
     {
-        this->movingRelativePos = event->localPos();
-        if (auto *widget =
-                this->childAt(event->localPos().x(), event->localPos().y()))
+        this->movingRelativePos = event->position();
+        auto pos = event->position().toPoint();
+        if (auto *widget = this->childAt(pos.x(), pos.y()))
         {
             std::function<bool(QWidget *)> recursiveCheckMouseTracking;
             recursiveCheckMouseTracking = [&](QWidget *widget) {
@@ -646,7 +646,8 @@ void BaseWindow::mouseMoveEvent(QMouseEvent *event)
     {
         if (this->moving)
         {
-            const auto &newPos = event->screenPos() - this->movingRelativePos;
+            auto newPos =
+                (event->globalPosition() - this->movingRelativePos).toPoint();
             this->move(newPos.x(), newPos.y());
         }
     }
@@ -675,7 +676,7 @@ TitleBarButton *BaseWindow::addTitleBarButton(const TitleBarButtonStyle &style,
                                               std::function<void()> onClicked)
 {
     TitleBarButton *button = new TitleBarButton;
-    button->setScaleIndependantSize(30, 30);
+    button->setScaleIndependentSize(30, 30);
 
     this->ui_.buttons.push_back(button);
     this->ui_.titlebarBox->insertWidget(1, button);
@@ -691,7 +692,7 @@ TitleBarButton *BaseWindow::addTitleBarButton(const TitleBarButtonStyle &style,
 EffectLabel *BaseWindow::addTitleBarLabel(std::function<void()> onClicked)
 {
     EffectLabel *button = new EffectLabel;
-    button->setScaleIndependantHeight(30);
+    button->setScaleIndependentHeight(30);
 
     this->ui_.buttons.push_back(button);
     this->ui_.titlebarBox->insertWidget(1, button);

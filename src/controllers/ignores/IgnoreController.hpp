@@ -15,6 +15,7 @@ struct IgnoredMessageParameters {
     QString message;
 
     QString twitchUserID;
+    QString twitchUserLogin;
     bool isMod;
     bool isBroadcaster;
 };

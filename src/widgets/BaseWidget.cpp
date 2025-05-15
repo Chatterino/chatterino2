@@ -70,7 +70,7 @@ void BaseWidget::setScale(float value)
     this->scaleChangedEvent(this->scale());
     this->scaleChanged.invoke(this->scale());
 
-    this->setScaleIndependantSize(this->scaleIndependantSize());
+    this->setScaleIndependentSize(this->scaleIndependentSize());
 }
 
 void BaseWidget::setOverrideScale(std::optional<float> value)
@@ -84,29 +84,29 @@ std::optional<float> BaseWidget::overrideScale() const
     return this->overrideScale_;
 }
 
-QSize BaseWidget::scaleIndependantSize() const
+QSize BaseWidget::scaleIndependentSize() const
 {
-    return this->scaleIndependantSize_;
+    return this->scaleIndependentSize_;
 }
 
-int BaseWidget::scaleIndependantWidth() const
+int BaseWidget::scaleIndependentWidth() const
 {
-    return this->scaleIndependantSize_.width();
+    return this->scaleIndependentSize_.width();
 }
 
-int BaseWidget::scaleIndependantHeight() const
+int BaseWidget::scaleIndependentHeight() const
 {
-    return this->scaleIndependantSize_.height();
+    return this->scaleIndependentSize_.height();
 }
 
-void BaseWidget::setScaleIndependantSize(int width, int height)
+void BaseWidget::setScaleIndependentSize(int width, int height)
 {
-    this->setScaleIndependantSize(QSize(width, height));
+    this->setScaleIndependentSize(QSize(width, height));
 }
 
-void BaseWidget::setScaleIndependantSize(QSize size)
+void BaseWidget::setScaleIndependentSize(QSize size)
 {
-    this->scaleIndependantSize_ = size;
+    this->scaleIndependentSize_ = size;
 
     if (size.width() > 0)
     {
@@ -118,16 +118,16 @@ void BaseWidget::setScaleIndependantSize(QSize size)
     }
 }
 
-void BaseWidget::setScaleIndependantWidth(int value)
+void BaseWidget::setScaleIndependentWidth(int value)
 {
-    this->setScaleIndependantSize(
-        QSize(value, this->scaleIndependantSize_.height()));
+    this->setScaleIndependentSize(
+        QSize(value, this->scaleIndependentSize_.height()));
 }
 
-void BaseWidget::setScaleIndependantHeight(int value)
+void BaseWidget::setScaleIndependentHeight(int value)
 {
-    this->setScaleIndependantSize(
-        QSize(this->scaleIndependantSize_.width(), value));
+    this->setScaleIndependentSize(
+        QSize(this->scaleIndependentSize_.width(), value));
 }
 
 void BaseWidget::childEvent(QChildEvent *event)
