@@ -2,7 +2,6 @@
 
 #include "common/Args.hpp"
 #include "common/Channel.hpp"
-#include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/Command.hpp"
@@ -34,8 +33,6 @@
 #include "providers/bttv/BttvLiveUpdates.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
-#include "providers/seventv/eventapi/Dispatch.hpp"
-#include "providers/seventv/eventapi/Subscription.hpp"
 #include "providers/seventv/SeventvBadges.hpp"
 #include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
