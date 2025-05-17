@@ -2030,7 +2030,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                 auto scale = getSettings()->emoteTooltipScale.getValue();
                 this->tooltipWidget_->setOne(TooltipEntry::scaled(
                     showThumbnail
-                        ? emoteElement->getEmote()->images.getImage(scale)
+                        ? emoteElement->getEmote()->images.getImage(3.0)
                         : nullptr,
                     element->getTooltip(), scale));
             }
@@ -2066,7 +2066,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                             auto scale =
                                 getSettings()->emoteTooltipScale.getValue();
                             entries.push_back(TooltipEntry::scaled(
-                                showThumbnail ? emote->images.getImage(scale)
+                                showThumbnail ? emote->images.getImage(3.0)
                                               : nullptr,
                                 emoteTooltips[i], scale));
                         }
@@ -2074,9 +2074,9 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                         {
                             // Every other entry gets a small image and just the emote name
                             auto scale =
-                                getSettings()->emoteTooltipScale.getValue() / 3;
+                                getSettings()->emoteTooltipScale.getValue();
                             entries.push_back(TooltipEntry::scaled(
-                                showThumbnail ? emote->images.getImage(scale)
+                                showThumbnail ? emote->images.getImage(1.0)
                                               : nullptr,
                                 emote->name.string, scale));
                         }
@@ -2098,7 +2098,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                 auto scale = getSettings()->emoteTooltipScale.getValue();
                 this->tooltipWidget_->setOne(TooltipEntry::scaled(
                     showThumbnail
-                        ? badgeElement->getEmote()->images.getImage(scale)
+                        ? badgeElement->getEmote()->images.getImage(3.0)
                         : nullptr,
                     element->getTooltip(), scale));
             }
