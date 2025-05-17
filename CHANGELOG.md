@@ -28,6 +28,7 @@
 - Bugfix: Fixed an issue where Splits could get lost by dragging it onto your Recycle Bin. (#6147)
 - Bugfix: Fixed some Twitch commands not getting tab-completed correctly. (#6143)
 - Bugfix: Fixed shared chat badges displaying pixelated when Chatterino is scaled too much. (#6146)
+- Bugfix: Fixed a few crashes that could occur when Chatterino was shutting down, some related to network tasks still firing despite us shutting down. (#6187)
 - Bugfix: Fixed a crash that could occur when eventsub was enabled and Chatterino was attached to a conhost on Windows that was later gone. (#6161)
 - Bugfix: Fixed a crash that could occur an eventsub connection's keepalive timer would run after the connection was dead, causing the keepalive timer to use-itself-after-free. (#6204)
 - Bugfix: Fixed a crash that could occur when an image started loading mid app shutdown. (#6213)
