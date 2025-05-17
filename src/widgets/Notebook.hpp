@@ -170,6 +170,26 @@ protected:
 private:
     void performLayout(bool animate = false);
 
+    struct LayoutCtx {
+        int left = 0;
+        int right = 0;
+        int bottom = 0;
+        float scale = 0;
+        int tabHeight = 0;
+        int minimumTabAreaSpace = 0;
+        int addButtonWidth = 0;
+        int lineThickness = 0;
+        int tabSpacer = 0;
+
+        int buttonWidth = 0;
+        int buttonHeight = 0;
+
+        std::span<Item> items;
+    };
+
+    void performHorizontalLayout(const LayoutCtx &ctx, bool animated);
+    void performVerticalLayout(const LayoutCtx &ctx, bool animated);
+
     /**
      * @brief Show a popup informing the user of some big tab visibility changes
      **/
