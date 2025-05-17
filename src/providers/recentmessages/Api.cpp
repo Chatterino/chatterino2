@@ -41,10 +41,7 @@ void load(
 
         NetworkRequest(url)
             .onSuccess([channelPtr, onLoaded](const auto &result) {
-                if (isAppAboutToQuit())
-                {
-                    return;
-                }
+                assert(!isAppAboutToQuit());
 
                 auto shared = channelPtr.lock();
                 if (!shared)
@@ -65,10 +62,7 @@ void load(
                 postToThread(
                     [shared = std::move(shared), root = std::move(root),
                      messages = std::move(builtMessages), onLoaded]() mutable {
-                        if (isAppAboutToQuit())
-                        {
-                            return;
-                        }
+                        assert(!isAppAboutToQuit());
 
                         // Notify user about a possible gap in logs if it returned some messages
                         // but isn't currently joined to a channel
@@ -99,10 +93,7 @@ void load(
                 {
                     return;
                 }
-                if (isAppAboutToQuit())
-                {
-                    return;
-                }
+                assert(!isAppAboutToQuit());
 
                 qCDebug(LOG) << "Failed to load recent messages for"
                              << shared->getName();
