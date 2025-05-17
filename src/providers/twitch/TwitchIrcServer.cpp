@@ -837,8 +837,6 @@ void TwitchIrcServer::initEventAPIs(BttvLiveUpdates *bttvLiveUpdates,
 
     if (bttvLiveUpdates != nullptr)
     {
-        // We can safely ignore these signal connections since the twitch object will always
-        // be destroyed before the Application
         this->signalHolder.managedConnect(
             bttvLiveUpdates->signals_.emoteAdded, [&](const auto &data) {
                 auto chan = this->getChannelOrEmptyByID(data.channelID);
@@ -886,8 +884,6 @@ void TwitchIrcServer::initEventAPIs(BttvLiveUpdates *bttvLiveUpdates,
 
     if (seventvEventAPI != nullptr)
     {
-        // We can safely ignore these signal connections since the twitch object will always
-        // be destroyed before the Application
         this->signalHolder.managedConnect(
             seventvEventAPI->signals_.emoteAdded, [this](const auto &data) {
                 postToThread([this, data] {
