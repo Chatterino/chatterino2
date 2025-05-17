@@ -497,10 +497,7 @@ void Image::actuallyLoad()
                 return;
             }
 
-            if (isAppAboutToQuit())
-            {
-                return;
-            }
+            assert(!isAppAboutToQuit());
 
             QBuffer buffer;
             buffer.setData(result.getData());
