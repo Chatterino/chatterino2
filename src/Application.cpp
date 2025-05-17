@@ -70,6 +70,9 @@ using namespace chatterino;
 const QString BTTV_LIVE_UPDATES_URL = "wss://sockets.betterttv.net/ws";
 const QString SEVENTV_EVENTAPI_URL = "wss://events.7tv.io/v3";
 
+std::atomic<bool> STOPPED{false};
+std::atomic<bool> ABOUT_TO_QUIT{false};
+
 ISoundController *makeSoundController(Settings &settings)
 {
     SoundBackend soundBackend = settings.soundBackend;
@@ -200,8 +203,6 @@ Application::Application(Settings &_settings, const Paths &paths,
 
 Application::~Application()
 {
-    this->eventSub->setQuitting();
-
     // we do this early to ensure getApp isn't used in any dtors
     INSTANCE = nullptr;
 }
@@ -594,10 +595,58 @@ eventsub::IController *Application::getEventSub()
     return this->eventSub.get();
 }
 
-void Application::save()
+void Application::aboutToQuit()
 {
+    ABOUT_TO_QUIT.store(true);
+
+    this->eventSub->setQuitting();
+
+    this->twitch->aboutToQuit();
+
     this->hotkeys->save();
     this->windows->save();
+}
+
+void Application::stop()
+{
+#ifdef CHATTERINO_HAVE_PLUGINS
+    this->plugins.reset();
+#endif
+    this->pronouns.reset();
+    this->twitchUsers.reset();
+    this->streamerMode.reset();
+    this->linkResolver.reset();
+    this->seventvEventAPI.reset();
+    this->seventvEmotes.reset();
+    this->ffzEmotes.reset();
+    this->bttvLiveUpdates.reset();
+    this->bttvEmotes.reset();
+    this->chatterinoBadges.reset();
+    this->twitchBadges.reset();
+    this->twitchPubSub.reset();
+    this->twitchLiveController.reset();
+    this->sound.reset();
+    this->userData.reset();
+    this->seventvBadges.reset();
+    this->ffzBadges.reset();
+    this->twitch.reset();
+    this->highlights.reset();
+    this->notifications.reset();
+    this->commands.reset();
+    this->crashHandler.reset();
+    this->seventvAPI.reset();
+    this->imageUploader.reset();
+    this->toasts.reset();
+    this->windows.reset();
+    this->hotkeys.reset();
+    this->eventSub.reset();
+    this->accounts.reset();
+    this->emotes.reset();
+    this->logging.reset();
+    this->fonts.reset();
+    this->themes.reset();
+
+    STOPPED.store(true);
 }
 
 void Application::initNm(const Paths &paths)
@@ -613,6 +662,7 @@ void Application::initNm(const Paths &paths)
 IApplication *getApp()
 {
     assert(INSTANCE != nullptr);
+    assert(STOPPED.load() == false);
 
     return INSTANCE;
 }
@@ -620,6 +670,11 @@ IApplication *getApp()
 IApplication *tryGetApp()
 {
     return INSTANCE;
+}
+
+bool isAppAboutToQuit()
+{
+    return ABOUT_TO_QUIT.load();
 }
 
 }  // namespace chatterino

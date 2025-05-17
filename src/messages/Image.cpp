@@ -282,6 +282,15 @@ Image::~Image()
         return;
     }
 
+    if (isAppAboutToQuit())
+    {
+        if (this->frames_)
+        {
+            std::ignore = this->frames_.release();
+        }
+        return;
+    }
+
     // Ensure the destructor for our frames is called in the GUI thread
     // If the Image destructor is called outside of the GUI thread, move the
     // ownership of the frames to the GUI thread, otherwise the frames will be
@@ -487,6 +496,8 @@ void Image::actuallyLoad()
             {
                 return;
             }
+
+            assert(!isAppAboutToQuit());
 
             QBuffer buffer;
             buffer.setData(result.getData());
