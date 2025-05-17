@@ -601,6 +601,8 @@ void Application::aboutToQuit()
 
     this->eventSub->setQuitting();
 
+    this->twitch->aboutToQuit();
+
     this->hotkeys->save();
     this->windows->save();
 }
