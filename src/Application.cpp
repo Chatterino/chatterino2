@@ -594,7 +594,7 @@ eventsub::IController *Application::getEventSub()
     return this->eventSub.get();
 }
 
-void Application::save()
+void Application::aboutToQuit()
 {
     this->hotkeys->save();
     this->windows->save();

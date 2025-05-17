@@ -284,7 +284,7 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
         auto *app = dynamic_cast<Application *>(tryGetApp());
         if (app)
         {
-            app->save();
+            app->aboutToQuit();
         }
 
         getSettings()->requestSave();

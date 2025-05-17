@@ -139,7 +139,7 @@ public:
 
     void initialize(Settings &settings, const Paths &paths);
     void load();
-    void save();
+    void aboutToQuit();
 
     int run();
 
