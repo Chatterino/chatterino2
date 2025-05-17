@@ -39,6 +39,14 @@ Frames::Frames(QList<Frame> &&frames)
     : items_(std::move(frames))
 {
     assertInGuiThread();
+    auto *app = tryGetApp();
+    if (app == nullptr)
+    {
+        qCDebug(chatterinoImage)
+            << "Frames constructor called while app is shutting down";
+        return;
+    }
+
     DebugCount::increase("images");
     if (!this->empty())
     {
@@ -50,7 +58,7 @@ Frames::Frames(QList<Frame> &&frames)
         DebugCount::increase("animated images");
 
         this->gifTimerConnection_ =
-            getApp()->getEmotes()->getGIFTimer().signal.connect([this] {
+            app->getEmotes()->getGIFTimer().signal.connect([this] {
                 this->advance();
             });
 
@@ -67,8 +75,7 @@ Frames::Frames(QList<Frame> &&frames)
         else
         {
             this->durationOffset_ = std::min<int>(
-                int(getApp()->getEmotes()->getGIFTimer().position() %
-                    totalLength),
+                int(app->getEmotes()->getGIFTimer().position() % totalLength),
                 60000);
         }
         this->processOffset();
