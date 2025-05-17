@@ -10,6 +10,7 @@
 #include <QWidget>
 
 #include <functional>
+#include <span>
 
 namespace chatterino {
 
