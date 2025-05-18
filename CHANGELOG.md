@@ -42,6 +42,7 @@
 - Dev: Bumped deprecation cutoff to Qt 6.4.3. (#6169)
 - Dev: Use `QMetaObject::invokeMethod` to run code on a specific thread. (#6203)
 - Dev: Added a `run-and-kill.sh` script to help debug crash-on-exit bugs. (#6188)
+- Dev: Refactored the `TimeoutStackStyle` enum into its own file. (#6216)
 - Dev: Refactored event API initialization away from Application and into TwitchIrcServer. (#6198)
 - Dev: Updated GoogleTest to v1.17.0. (#6180)
 - Dev: Mini refactor of `TwitchAccount`. (#6182)
