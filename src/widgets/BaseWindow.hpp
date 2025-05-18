@@ -58,7 +58,7 @@ public:
     T *addTitleBarButton(std::function<void()> onClicked, auto &&...args)
     {
         auto *button = new T(std::forward<decltype(args)>(args)...);
-        button->setScaleIndependantSize(30, 30);
+        button->setScaleIndependentSize(30, 30);
         this->appendTitlebarButton(button);
 
         QObject::connect(button, &T::leftClicked, this, std::move(onClicked));
