@@ -10,6 +10,7 @@
 #include <QWidget>
 
 #include <functional>
+#include <span>
 
 namespace chatterino {
 
@@ -169,6 +170,26 @@ protected:
 
 private:
     void performLayout(bool animate = false);
+
+    struct LayoutContext {
+        int left = 0;
+        int right = 0;
+        int bottom = 0;
+        float scale = 0;
+        int tabHeight = 0;
+        int minimumTabAreaSpace = 0;
+        int addButtonWidth = 0;
+        int lineThickness = 0;
+        int tabSpacer = 0;
+
+        int buttonWidth = 0;
+        int buttonHeight = 0;
+
+        std::span<Item> items;
+    };
+
+    void performHorizontalLayout(const LayoutContext &ctx, bool animated);
+    void performVerticalLayout(const LayoutContext &ctx, bool animated);
 
     /**
      * @brief Show a popup informing the user of some big tab visibility changes
