@@ -19,10 +19,10 @@ set(SOURCE_FILES
 
         common/Args.cpp
         common/Args.hpp
-        common/Channel.cpp
-        common/Channel.hpp
         common/ChannelChatters.cpp
         common/ChannelChatters.hpp
+        common/Channel.cpp
+        common/Channel.hpp
         common/ChatterinoSetting.cpp
         common/ChatterinoSetting.hpp
         common/ChatterSet.cpp
@@ -38,6 +38,7 @@ set(SOURCE_FILES
         common/Modes.hpp
         common/QLogging.cpp
         common/QLogging.hpp
+        common/TimeoutStackStyle.hpp
         common/WindowDescriptors.cpp
         common/WindowDescriptors.hpp
 
