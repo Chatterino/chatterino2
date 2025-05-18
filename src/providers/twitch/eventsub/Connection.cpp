@@ -9,7 +9,7 @@
 #include "providers/twitch/eventsub/Controller.hpp"
 #include "providers/twitch/eventsub/MessageBuilder.hpp"
 #include "providers/twitch/eventsub/MessageHandlers.hpp"
-#include "providers/twitch/PubSubActions.hpp"
+#include "providers/twitch/TwitchBadge.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
@@ -75,6 +75,11 @@ void Connection::onNotification(const lib::messages::Metadata &metadata,
 void Connection::onClose(std::unique_ptr<lib::Listener> self,
                          const std::optional<std::string> &reconnectURL)
 {
+    if (isAppAboutToQuit())
+    {
+        return;
+    }
+
     auto *app = tryGetApp();
     if (!app)
     {

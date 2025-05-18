@@ -110,6 +110,8 @@ protected:
     WindowDeactivateAction windowDeactivateAction =
         WindowDeactivateAction::Nothing;
 
+    virtual void windowDeactivationEvent();
+
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     bool nativeEvent(const QByteArray &eventType, void *message,
                      qintptr *result) override;
@@ -120,6 +122,7 @@ protected:
     void scaleChangedEvent(float) override;
 
     void paintEvent(QPaintEvent *) override;
+    virtual void drawOutline(QPainter &);
 
     void changeEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;

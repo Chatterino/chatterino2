@@ -1,6 +1,6 @@
 /** @noSelfInFile */
 
-declare module c2 {
+declare namespace c2 {
     enum LogLevel {
         Debug,
         Info,
@@ -95,9 +95,10 @@ declare module c2 {
         set_header(name: string, value: string): void;
 
         execute(): void;
+    }
 
-        // might error
-        static create(method: HTTPMethod, url: string): HTTPRequest;
+    namespace HTTPRequest {
+        function create(method: HTTPMethod, url: string): HTTPRequest;
     }
 
     function log(level: LogLevel, ...data: any[]): void;
@@ -129,4 +130,26 @@ declare module c2 {
 
     function register_callback<T>(type: T, func: CbFunc<T>): void;
     function later(callback: () => void, msec: number): void;
+
+    interface WebSocket {
+        close(): void;
+        send_text(data: string): void;
+        send_binary(data: string): void;
+        on_close: null | (() => void);
+        on_text: null | ((data: string) => void);
+        on_binary: null | ((data: string) => void);
+    }
+    interface WebSocketConstructor {
+        new: (
+            this: void,
+            url: string,
+            options?: {
+                headers?: Record<string, string>;
+                on_close?: () => void;
+                on_text?: (data: string) => void;
+                on_binary?: (data: string) => void;
+            }
+        ) => WebSocket;
+    }
+    var WebSocket: WebSocketConstructor;
 }

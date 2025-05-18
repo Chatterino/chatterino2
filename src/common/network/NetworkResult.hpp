@@ -23,6 +23,13 @@ public:
     /// Parses the result as json and returns the root as an array.
     /// Returns empty object if parsing failed.
     QJsonArray parseJsonArray() const;
+
+    /// Parses the result as json and returns the root as a generic value.
+    /// Returns empty object if parsing failed.
+    ///
+    /// In Qt 6.9+, this will parse scalar values as well.
+    QJsonValue parseJsonValue() const;
+
     /// Parses the result as json and returns the document.
     rapidjson::Document parseRapidJson() const;
     const QByteArray &getData() const;

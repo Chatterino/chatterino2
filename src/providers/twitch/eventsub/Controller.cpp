@@ -40,8 +40,35 @@ const auto &LOG = chatterinoTwitchEventSub;
 
 namespace chatterino::eventsub {
 
+class QLogProxy : public lib::Logger
+{
+public:
+    QLogProxy(const QLoggingCategory &loggingCategory_)
+        : loggingCategory(loggingCategory_)
+    {
+    }
+
+    void debug(std::string_view msg) override
+    {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        qCDebug(this->loggingCategory).noquote() << msg;
+#endif
+    }
+
+    void warn(std::string_view msg) override
+    {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        qCWarning(this->loggingCategory).noquote() << msg;
+#endif
+    }
+
+private:
+    const QLoggingCategory &loggingCategory;
+};
+
 Controller::Controller()
-    : userAgent(QStringLiteral("chatterino/%1 (%2)")
+    : logProxy(std::shared_ptr<lib::Logger>(new QLogProxy(LOG())))
+    , userAgent(QStringLiteral("chatterino/%1 (%2)")
                     .arg(Version::instance().version(),
                          Version::instance().commitHash())
                     .toUtf8()
@@ -77,7 +104,10 @@ Controller::~Controller()
         connection->close();
     }
 
-    this->subscriptions.clear();
+    {
+        std::lock_guard lock(this->subscriptionsMutex);
+        this->subscriptions.clear();
+    }
 
     this->work.reset();
 
@@ -314,7 +344,7 @@ void Controller::subscribe(const SubscriptionRequest &request, bool isRetry)
         qCDebug(LOG) << "Make helix request for" << request;
         getHelix()->createEventSubSubscription(
             request, listener->getSessionID(),
-            [this, request, connection,
+            [this, request,
              weakConnection{std::weak_ptr<lib::Session>(connection)}](
                 const auto &res) {
                 qCDebug(LOG) << "Subscription success" << request;
@@ -438,6 +468,8 @@ void Controller::createConnection(std::string host, std::string port,
                                   std::string path,
                                   std::unique_ptr<lib::Listener> listener)
 {
+    qCDebug(LOG) << "Create EventSub connection";
+
     try
     {
         boost::asio::ssl::context sslContext{
@@ -456,7 +488,7 @@ void Controller::createConnection(std::string host, std::string port,
         }
 
         auto connection = std::make_shared<lib::Session>(
-            this->ioContext, sslContext, std::move(listener));
+            this->ioContext, sslContext, std::move(listener), this->logProxy);
 
         this->registerConnection(connection);
 
@@ -478,6 +510,12 @@ void Controller::registerConnection(std::weak_ptr<lib::Session> &&connection)
 
 void Controller::retrySubscription(const SubscriptionRequest &request)
 {
+    if (isAppAboutToQuit())
+    {
+        qCDebug(LOG) << "retrySubscription, but app is quitting" << request;
+        return;
+    }
+
     std::lock_guard lock(this->subscriptionsMutex);
 
     auto &subscription = this->subscriptions[request];
@@ -507,6 +545,14 @@ void Controller::retrySubscription(const SubscriptionRequest &request)
         std::make_unique<boost::asio::system_timer>(this->ioContext);
     retryTimer->expires_after(subscription.backoff.next() + jitter);
     retryTimer->async_wait([this, request](const auto &ec) {
+        if (isAppAboutToQuit())
+        {
+            qCDebug(LOG)
+                << "Retry was going to fire, but app is quitting so we won't."
+                << request;
+            return;
+        }
+
         if (!ec)
         {
             qCDebug(LOG) << "Firing retry" << request;
