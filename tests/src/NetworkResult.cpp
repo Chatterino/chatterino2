@@ -50,8 +50,9 @@ TEST(NetworkResult, Errors)
 
 TEST(NetworkResult, InvalidError)
 {
-    checkResult({static_cast<Error>(-1), {}, {}}, static_cast<Error>(-1),
-                std::nullopt, "unknown error (-1)");
+    checkResult({static_cast<Error>(1000000), {}, {}},
+                static_cast<Error>(1000000), std::nullopt,
+                "unknown error (1000000)");
     checkResult({static_cast<Error>(-1), 42, {}}, static_cast<Error>(-1), 42,
                 "unknown error (status: 42, error: -1)");
 }

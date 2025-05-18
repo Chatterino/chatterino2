@@ -1,5 +1,6 @@
 #include "widgets/buttons/NotebookButton.hpp"
 
+#include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "singletons/Theme.hpp"
 #include "widgets/Notebook.hpp"
@@ -143,9 +144,10 @@ void NotebookButton::dragEnterEvent(QDragEnterEvent *event)
 
     event->acceptProposedAction();
 
-    auto *e = new QMouseEvent(QMouseEvent::MouseButtonPress,
-                              QPointF(this->width() / 2, this->height() / 2),
-                              Qt::LeftButton, Qt::LeftButton, {});
+    auto *e =
+        new QMouseEvent(QMouseEvent::MouseButtonPress,
+                        QPointF(this->width() / 2, this->height() / 2),
+                        QCursor::pos(), Qt::LeftButton, Qt::LeftButton, {});
     Button::mousePressEvent(e);
     delete e;
 }
@@ -154,9 +156,10 @@ void NotebookButton::dragLeaveEvent(QDragLeaveEvent *)
 {
     this->update();
 
-    auto *e = new QMouseEvent(QMouseEvent::MouseButtonRelease,
-                              QPointF(this->width() / 2, this->height() / 2),
-                              Qt::LeftButton, Qt::LeftButton, {});
+    auto *e =
+        new QMouseEvent(QMouseEvent::MouseButtonRelease,
+                        QPointF(this->width() / 2, this->height() / 2),
+                        QCursor::pos(), Qt::LeftButton, Qt::LeftButton, {});
     Button::mouseReleaseEvent(e);
     delete e;
 }
@@ -191,11 +194,21 @@ void NotebookButton::dropEvent(QDropEvent *event)
 
 void NotebookButton::hideEvent(QHideEvent *)
 {
+    if (isAppAboutToQuit())
+    {
+        return;
+    }
+
     this->parent_->refresh();
 }
 
 void NotebookButton::showEvent(QShowEvent *)
 {
+    if (isAppAboutToQuit())
+    {
+        return;
+    }
+
     this->parent_->refresh();
 }
 

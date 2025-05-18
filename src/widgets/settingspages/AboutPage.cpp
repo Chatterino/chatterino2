@@ -133,6 +133,8 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "Howard Hinnant's date.h",
                        "https://github.com/HowardHinnant/date",
                        ":/licenses/howard-hinnant-date.txt");
+            addLicense(form.getElement(), "{fmt}", "https://fmt.dev",
+                       ":/licenses/fmtlib.txt");
         }
 
         // Attributions

@@ -33,7 +33,6 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/Filters.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/LinkParser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/InputCompletion.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/Literals.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/XDGDesktopFile.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/XDGHelper.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Selection.cpp
@@ -54,6 +53,9 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/OnceFlag.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/IncognitoBrowser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/EventSubMessages.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/WebSocketPool.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/NativeMessaging.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/ImageUploader.cpp
 
     ${CMAKE_CURRENT_LIST_DIR}/src/lib/Snapshot.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/lib/Snapshot.hpp

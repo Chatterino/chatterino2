@@ -1546,10 +1546,37 @@ void ChannelView::paintEvent(QPaintEvent *event)
     // draw paused sign
     if (this->paused())
     {
-        auto a = this->scale() * 20;
-        auto brush = QBrush(QColor(127, 127, 127, 255));
-        painter.fillRect(QRectF(5, a / 4, a / 4, a), brush);
-        painter.fillRect(QRectF(15, a / 4, a / 4, a), brush);
+        auto baseSize = 20;
+        auto scale = this->scale();
+        auto indicatorSize = baseSize * scale;
+        auto color = QColor(180, 180, 180, 255);
+        auto brush = QBrush(color);
+
+        const auto pausedY = indicatorSize / 4;
+        const auto pausedX = 5 * scale;
+
+        QFont font = painter.font();
+        font.setPixelSize(indicatorSize);
+        painter.setFont(font);
+
+        const QString text = "Paused";
+        const QFontMetrics metrics(font);
+        const auto textWidth = metrics.horizontalAdvance(text);
+        const auto textX = pausedX * 3 + 10 * scale;
+
+        painter.fillRect(QRectF(0, 0, pausedX + textX + textWidth,
+                                indicatorSize / 2 + indicatorSize),
+                         QBrush(QColor(0, 0, 0, 200), Qt::SolidPattern));
+
+        painter.fillRect(
+            QRectF(pausedX, pausedY, indicatorSize / 4, indicatorSize), brush);
+        painter.fillRect(
+            QRectF(pausedX * 3, pausedY, indicatorSize / 4, indicatorSize),
+            brush);
+
+        painter.setPen(color);
+        painter.drawText(QRectF(textX, pausedY, textWidth, indicatorSize),
+                         Qt::AlignLeft | Qt::AlignVCenter, text);
     }
 }
 
@@ -1927,7 +1954,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 
     if (this->isScrolling_)
     {
-        this->currentMousePosition_ = event->screenPos();
+        this->currentMousePosition_ = event->globalPosition();
     }
 
     // check for word underneath cursor
@@ -2085,8 +2112,9 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             }
         }
 
-        this->tooltipWidget_->moveTo(event->globalPos() + QPoint(16, 16),
-                                     widgets::BoundsChecking::CursorPosition);
+        this->tooltipWidget_->moveTo(
+            event->globalPosition().toPoint() + QPoint(16, 16),
+            widgets::BoundsChecking::CursorPosition);
         this->tooltipWidget_->setWordWrap(isLinkValid);
         this->tooltipWidget_->show();
     }
@@ -2141,7 +2169,7 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
                 this->disableScrolling();
             }
 
-            this->lastLeftPressPosition_ = event->screenPos();
+            this->lastLeftPressPosition_ = event->globalPosition();
             this->isLeftMouseDown_ = true;
 
             if (layout->flags.has(MessageLayoutFlag::Collapsed))
@@ -2166,7 +2194,7 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
                 this->disableScrolling();
             }
 
-            this->lastRightPressPosition_ = event->screenPos();
+            this->lastRightPressPosition_ = event->globalPosition();
             this->isRightMouseDown_ = true;
         }
         break;
@@ -2195,7 +2223,7 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
                 }
                 else if (this->scrollBar_->isVisible())
                 {
-                    this->enableScrolling(event->screenPos());
+                    this->enableScrolling(event->globalPosition());
                 }
             }
         }
@@ -2227,7 +2255,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             this->isDoubleClick_ = false;
             // Was actually not a wanted triple-click
             if (std::abs(distanceBetweenPoints(this->lastDoubleClickPosition_,
-                                               event->screenPos())) > 10.F)
+                                               event->globalPosition())) > 10.F)
             {
                 this->clickTimer_.stop();
                 return;
@@ -2238,7 +2266,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             this->isLeftMouseDown_ = false;
 
             if (std::abs(distanceBetweenPoints(this->lastLeftPressPosition_,
-                                               event->screenPos())) > 15.F)
+                                               event->globalPosition())) > 15.F)
             {
                 return;
             }
@@ -2246,7 +2274,8 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             // Triple-clicking a message selects the whole message
             if (foundElement && this->clickTimer_.isActive() &&
                 (std::abs(distanceBetweenPoints(this->lastDoubleClickPosition_,
-                                                event->screenPos())) < 10.F))
+                                                event->globalPosition())) <
+                 10.F))
             {
                 this->selectWholeMessage(layout.get(), messageIndex);
                 return;
@@ -2264,7 +2293,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             this->isRightMouseDown_ = false;
 
             if (std::abs(distanceBetweenPoints(this->lastRightPressPosition_,
-                                               event->screenPos())) > 15.F)
+                                               event->globalPosition())) > 15.F)
             {
                 return;
             }
@@ -2278,9 +2307,9 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     {
         if (this->isScrolling_ && this->scrollBar_->isVisible())
         {
-            if (event->screenPos() == this->lastMiddlePressPosition_)
+            if (event->globalPosition() == this->lastMiddlePressPosition_)
             {
-                this->enableScrolling(event->screenPos());
+                this->enableScrolling(event->globalPosition());
             }
             else
             {
@@ -2576,7 +2605,11 @@ void ChannelView::addMessageContextMenuItems(QMenu *menu,
     if (!layout->getMessage()->id.isEmpty() && twitchChannel &&
         twitchChannel->hasModRights())
     {
-        menu->addAction(
+        menu->addSeparator();
+        auto *moderateAction = menu->addAction("Mo&derate");
+        auto *moderateMenu = new QMenu(menu);
+        moderateAction->setMenu(moderateMenu);
+        moderateMenu->addAction(
             "&Delete message", [twitchChannel, id = layout->getMessage()->id] {
                 twitchChannel->deleteMessagesAs(
                     id, getApp()->getAccounts()->twitch.getCurrent().get());
@@ -2774,7 +2807,7 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
     }
 
     this->isDoubleClick_ = true;
-    this->lastDoubleClickPosition_ = event->screenPos();
+    this->lastDoubleClickPosition_ = event->globalPosition();
     this->clickTimer_.start();
 
     // message under cursor is collapsed

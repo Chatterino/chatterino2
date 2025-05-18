@@ -78,7 +78,7 @@ void DraggablePopup::mousePressEvent(QMouseEvent *event)
     {
         this->dragTimer_.start(std::chrono::milliseconds(17));
         this->startPosDrag_ = event->pos();
-        this->movingRelativePos = event->localPos();
+        this->movingRelativePos = event->position();
     }
 }
 
@@ -98,7 +98,7 @@ void DraggablePopup::mouseMoveEvent(QMouseEvent *event)
     if (this->isMoving_ || movePos.manhattanLength() > 10.0)
     {
         this->requestedDragPos_ =
-            (event->screenPos() - this->movingRelativePos).toPoint();
+            (event->globalPosition() - this->movingRelativePos).toPoint();
         this->isMoving_ = true;
     }
 }
@@ -121,7 +121,7 @@ Button *DraggablePopup::createPinButton()
 {
     this->pinButton_ = new PixmapButton(this);
     this->pinButton_->setPixmap(getTheme()->buttons.pin);
-    this->pinButton_->setScaleIndependantSize(18, 18);
+    this->pinButton_->setScaleIndependentSize(18, 18);
     this->pinButton_->setToolTip("Pin Window");
 
     QObject::connect(this->pinButton_, &Button::leftClicked, this,

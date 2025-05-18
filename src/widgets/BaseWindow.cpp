@@ -483,6 +483,28 @@ bool BaseWindow::supportsCustomWindowFrame()
 #endif
 }
 
+void BaseWindow::windowDeactivationEvent()
+{
+    switch (this->windowDeactivateAction)
+    {
+        case WindowDeactivateAction::Delete:
+            this->deleteLater();
+            break;
+
+        case WindowDeactivateAction::Close:
+            this->close();
+            break;
+
+        case WindowDeactivateAction::Hide:
+            this->hide();
+            break;
+
+        case WindowDeactivateAction::Nothing:
+        default:
+            break;
+    }
+}
+
 void BaseWindow::themeChangedEvent()
 {
     if (this->hasCustomWindowFrame())
@@ -519,24 +541,7 @@ bool BaseWindow::event(QEvent *event)
 {
     if (event->type() == QEvent::WindowDeactivate)
     {
-        switch (this->windowDeactivateAction)
-        {
-            case WindowDeactivateAction::Delete:
-                this->deleteLater();
-                break;
-
-            case WindowDeactivateAction::Close:
-                this->close();
-                break;
-
-            case WindowDeactivateAction::Hide:
-                this->hide();
-                break;
-
-            case WindowDeactivateAction::Nothing:
-            default:
-                break;
-        }
+        this->windowDeactivationEvent();
     }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
@@ -588,9 +593,9 @@ void BaseWindow::mousePressEvent(QMouseEvent *event)
 #ifndef Q_OS_WIN
     if (this->flags_.has(FramelessDraggable))
     {
-        this->movingRelativePos = event->localPos();
-        if (auto *widget =
-                this->childAt(event->localPos().x(), event->localPos().y()))
+        this->movingRelativePos = event->position();
+        auto pos = event->position().toPoint();
+        if (auto *widget = this->childAt(pos.x(), pos.y()))
         {
             std::function<bool(QWidget *)> recursiveCheckMouseTracking;
             recursiveCheckMouseTracking = [&](QWidget *widget) {
@@ -640,7 +645,8 @@ void BaseWindow::mouseMoveEvent(QMouseEvent *event)
     {
         if (this->moving)
         {
-            const auto &newPos = event->screenPos() - this->movingRelativePos;
+            auto newPos =
+                (event->globalPosition() - this->movingRelativePos).toPoint();
             this->move(newPos.x(), newPos.y());
         }
     }
@@ -674,7 +680,7 @@ void BaseWindow::appendTitlebarButton(Button *button)
 LabelButton *BaseWindow::addTitleBarLabel(std::function<void()> onClicked)
 {
     auto *button = new LabelButton;
-    button->setScaleIndependantHeight(30);
+    button->setScaleIndependentHeight(30);
 
     this->appendTitlebarButton(button);
 
@@ -960,14 +966,17 @@ void BaseWindow::scaleChangedEvent(float scale)
 void BaseWindow::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
+    this->drawOutline(painter);
+    this->drawCustomWindowFrame(painter);
+}
 
+void BaseWindow::drawOutline(QPainter &painter)
+{
     if (this->frameless_)
     {
         painter.setPen(QColor("#999"));
         painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
     }
-
-    this->drawCustomWindowFrame(painter);
 }
 
 float BaseWindow::desiredScale() const

@@ -146,7 +146,7 @@ protected:
         QHBoxLayout *replyHbox;
         MessageView *replyMessage;
         QLabel *replyLabel;
-        LabelButton *cancelReplyButton;
+        SvgButton *cancelReplyButton;
 
         // input widgets
         QWidget *inputWrapper;

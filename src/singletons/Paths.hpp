@@ -18,7 +18,7 @@ public:
     // Directory for settings files. Same as <appDataDirectory>/Settings
     QString settingsDirectory;
 
-    // Directory for message log files. Same as <appDataDirectory>/Misc
+    // Directory for message log files. Same as <appDataDirectory>/Logs
     QString messageLogDirectory;
 
     // Directory for miscellaneous files. Same as <appDataDirectory>/Misc
@@ -49,6 +49,11 @@ public:
         const;
 
     QString cacheDirectory() const;
+
+    /// Returns the full file path for a file in the cache directory
+    ///
+    /// e.g. cacheFilePath("foo") will return <cacheDirectory>/foo
+    QString cacheFilePath(const QString &fileName) const;
 
 private:
     void initAppFilePathHash();

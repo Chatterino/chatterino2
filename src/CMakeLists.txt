@@ -1,8 +1,8 @@
 set(LIBRARY_PROJECT "${PROJECT_NAME}-lib")
 set(VERSION_PROJECT "${LIBRARY_PROJECT}-version")
 set(EXECUTABLE_PROJECT "${PROJECT_NAME}")
-add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
-add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x050F00)
+add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x060403)
+add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x060403)
 add_compile_definitions(QT_NO_KEYWORDS)
 
 # registers the native messageing host
@@ -56,6 +56,15 @@ set(SOURCE_FILES
         common/network/NetworkResult.hpp
         common/network/NetworkTask.cpp
         common/network/NetworkTask.hpp
+
+        common/websockets/WebSocketPool.cpp
+        common/websockets/WebSocketPool.hpp
+        common/websockets/detail/WebSocketConnection.cpp
+        common/websockets/detail/WebSocketConnection.hpp
+        common/websockets/detail/WebSocketConnectionImpl.cpp
+        common/websockets/detail/WebSocketConnectionImpl.hpp
+        common/websockets/detail/WebSocketPoolImpl.cpp
+        common/websockets/detail/WebSocketPoolImpl.hpp
 
         controllers/accounts/Account.cpp
         controllers/accounts/Account.hpp
@@ -238,6 +247,8 @@ set(SOURCE_FILES
         controllers/plugins/api/HTTPResponse.hpp
         controllers/plugins/api/IOWrapper.cpp
         controllers/plugins/api/IOWrapper.hpp
+        controllers/plugins/api/WebSocket.cpp
+        controllers/plugins/api/WebSocket.hpp
         controllers/plugins/LuaAPI.cpp
         controllers/plugins/LuaAPI.hpp
         controllers/plugins/LuaUtilities.cpp
@@ -393,8 +404,6 @@ set(SOURCE_FILES
         providers/twitch/ChannelPointReward.hpp
         providers/twitch/IrcMessageHandler.cpp
         providers/twitch/IrcMessageHandler.hpp
-        providers/twitch/PubSubActions.cpp
-        providers/twitch/PubSubActions.hpp
         providers/twitch/PubSubClient.cpp
         providers/twitch/PubSubClient.hpp
         providers/twitch/PubSubClientOptions.hpp
@@ -441,18 +450,12 @@ set(SOURCE_FILES
         providers/twitch/eventsub/SubscriptionRequest.cpp
         providers/twitch/eventsub/SubscriptionRequest.hpp
 
-        providers/twitch/pubsubmessages/AutoMod.cpp
-        providers/twitch/pubsubmessages/AutoMod.hpp
         providers/twitch/pubsubmessages/Base.cpp
         providers/twitch/pubsubmessages/Base.hpp
         providers/twitch/pubsubmessages/ChannelPoints.cpp
         providers/twitch/pubsubmessages/ChannelPoints.hpp
-        providers/twitch/pubsubmessages/ChatModeratorAction.cpp
-        providers/twitch/pubsubmessages/ChatModeratorAction.hpp
         providers/twitch/pubsubmessages/Listen.cpp
         providers/twitch/pubsubmessages/Listen.hpp
-        providers/twitch/pubsubmessages/LowTrustUsers.cpp
-        providers/twitch/pubsubmessages/LowTrustUsers.hpp
         providers/twitch/pubsubmessages/Message.hpp
         providers/twitch/pubsubmessages/Unlisten.cpp
         providers/twitch/pubsubmessages/Unlisten.hpp
@@ -625,6 +628,8 @@ set(SOURCE_FILES
         widgets/dialogs/ColorPickerDialog.hpp
         widgets/dialogs/EditHotkeyDialog.cpp
         widgets/dialogs/EditHotkeyDialog.hpp
+        widgets/dialogs/EditUserNotesDialog.cpp
+        widgets/dialogs/EditUserNotesDialog.hpp
         widgets/dialogs/EmotePopup.cpp
         widgets/dialogs/EmotePopup.hpp
         widgets/dialogs/LastRunCrashDialog.cpp
@@ -936,7 +941,18 @@ if (BUILD_APP)
         get_filename_component(QT_BIN_DIR ${QT_CORE_LOC} DIRECTORY)
 
         # This assumes the installed CRT is up-to-date (see .CI/deploy-crt.ps1)
-        set(WINDEPLOYQT_COMMAND_ARGV "${WINDEPLOYQT_PATH}" "$<TARGET_FILE:${EXECUTABLE_PROJECT}>" ${WINDEPLOYQT_MODE} --no-compiler-runtime --no-translations --no-opengl-sw)
+        set(WINDEPLOYQT_COMMAND_ARGV
+            "${WINDEPLOYQT_PATH}"
+            "$<TARGET_FILE:${EXECUTABLE_PROJECT}>"
+            ${WINDEPLOYQT_MODE}
+            --no-compiler-runtime
+            --no-translations
+            --no-opengl-sw
+        )
+        if (Qt6_VERSION VERSION_GREATER_EQUAL "6.8.0")
+            # windeployqt expects to find openssl in '/bin' but we deploy it in '/'.
+            list(APPEND WINDEPLOYQT_COMMAND_ARGV --force-openssl)
+        endif()
         string(REPLACE ";" " " WINDEPLOYQT_COMMAND "${WINDEPLOYQT_COMMAND_ARGV}")
 
         install(TARGETS ${EXECUTABLE_PROJECT} 
@@ -989,7 +1005,7 @@ if (BUILD_APP)
     endif()
 endif ()
 
-if (USE_PRECOMPILED_HEADERS)
+if (USE_PRECOMPILED_HEADERS AND NOT APPLE)
     message(STATUS "Building with precompiled headers")
     target_precompile_headers(${LIBRARY_PROJECT} PRIVATE PrecompiledHeader.hpp)
 else ()
