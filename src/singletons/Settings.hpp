@@ -97,6 +97,13 @@ enum class TabStyle : std::uint8_t {
     Compact,
 };
 
+enum class EmoteTooltipScale : std::uint8_t {
+    Small,
+    Medium,
+    Large,
+    Huge,
+};
+
 /// Settings which are availlable for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
 class Settings
@@ -329,7 +336,8 @@ public:
     BoolSetting animateEmotes = {"/emotes/enableGifAnimations", true};
     BoolSetting enableZeroWidthEmotes = {"/emotes/enableZeroWidthEmotes", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
-    FloatSetting emoteTooltipScale = {"/emotes/tooltipScale", 3.f};
+    EnumStringSetting<EmoteTooltipScale> emoteTooltipScale = {
+        "/emotes/tooltipScale", EmoteTooltipScale::Medium};
     BoolSetting showUnlistedSevenTVEmotes = {
         "/emotes/showUnlistedSevenTVEmotes", false};
     QStringSetting emojiSet = {"/emotes/emojiSet", "Twitter"};
@@ -761,6 +769,27 @@ constexpr magic_enum::customize::customize_t
 
         case chatterino::StreamLinkPreferredQuality::AudioOnly:
             return "Audio only";
+
+        default:
+            return default_tag;
+    }
+}
+
+template <>
+constexpr magic_enum::customize::customize_t
+    magic_enum::customize::enum_name<chatterino::EmoteTooltipScale>(
+        chatterino::EmoteTooltipScale value) noexcept
+{
+    using chatterino::EmoteTooltipScale;
+    switch (value)
+    {
+        case chatterino::EmoteTooltipScale::Small:
+        case chatterino::EmoteTooltipScale::Large:
+        case chatterino::EmoteTooltipScale::Huge:
+            return default_tag;
+
+        case chatterino::EmoteTooltipScale::Medium:
+            return "Medium (default)";
 
         default:
             return default_tag;

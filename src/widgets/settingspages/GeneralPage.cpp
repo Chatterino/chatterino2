@@ -650,22 +650,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             return args.index;
         },
         false);
-    layout.addDropdown<float>(
-        "Thumbnail size on hover", {"0.5x", "Default", "1.5x", "2x"},
-        s.emoteTooltipScale,
-        [](auto val) {
-            if (val == 1)
-            {
-                return QString("Default");
-            }
-            else
-            {
-                return QString::number(val) + "x";
-            }
-        },
-        [](auto args) {
-            return fuzzyToFloat(args.value, 1.F);
-        });
+    SettingWidget::dropdown("Emote & badge thumbnail size on hover",
+                            s.emoteTooltipScale)
+        ->addTo(layout);
     layout.addDropdown("Emoji style",
                        {
                            "Twitter",
