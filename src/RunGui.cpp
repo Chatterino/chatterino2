@@ -23,6 +23,7 @@
 #include <QtConcurrent>
 
 #include <csignal>
+#include <cstdlib>
 #include <tuple>
 
 #ifdef USEWINSDK
@@ -162,7 +163,7 @@ namespace {
             proc.startDetached();
         }
 
-        _exit(signum);
+        std::_Exit(signum);
     }
 
     // We want to restart Chatterino when it crashes and the setting is set to
