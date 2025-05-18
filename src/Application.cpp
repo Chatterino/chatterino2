@@ -20,6 +20,7 @@
 #include "providers/twitch/eventsub/Controller.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "singletons/ImageUploader.hpp"
+#include "singletons/NativeMessaging.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/PluginController.hpp"
 #endif
@@ -197,6 +198,7 @@ Application::Application(Settings &_settings, const Paths &paths,
 #ifdef CHATTERINO_HAVE_PLUGINS
     , plugins(new PluginController(paths))
 #endif
+    , nmServer(new NativeMessagingServer())
     , updates(_updates)
 {
 }
@@ -655,7 +657,7 @@ void Application::initNm(const Paths &paths)
 
 #if defined QT_NO_DEBUG || defined CHATTERINO_DEBUG_NM
     registerNmHost(paths);
-    this->nmServer.start();
+    this->nmServer->start();
 #endif
 }
 
