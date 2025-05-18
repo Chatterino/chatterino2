@@ -721,7 +721,7 @@ void Notebook::performLayout(bool animated)
 
     const auto scale = this->scale();
     const auto tabHeight = int(NOTEBOOK_TAB_HEIGHT * scale);
-    const LayoutCtx ctx{
+    const LayoutContext ctx{
         .left = static_cast<int>(2 * this->scale()),
         .right = this->width(),
         .bottom = this->height(),
@@ -761,7 +761,7 @@ void Notebook::performLayout(bool animated)
     }
 }
 
-void Notebook::performHorizontalLayout(const LayoutCtx &ctx, bool animated)
+void Notebook::performHorizontalLayout(const LayoutContext &ctx, bool animated)
 {
     const auto isBottom = this->tabLocation_ == NotebookTabLocation::Bottom;
     const auto reverse = isBottom ? -1 : 1;
@@ -880,7 +880,7 @@ void Notebook::performHorizontalLayout(const LayoutCtx &ctx, bool animated)
     }
 }
 
-void Notebook::performVerticalLayout(const LayoutCtx &ctx, bool animated)
+void Notebook::performVerticalLayout(const LayoutContext &ctx, bool animated)
 {
     int x = 0;
     int y = 0;

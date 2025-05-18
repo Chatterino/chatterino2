@@ -171,7 +171,7 @@ protected:
 private:
     void performLayout(bool animate = false);
 
-    struct LayoutCtx {
+    struct LayoutContext {
         int left = 0;
         int right = 0;
         int bottom = 0;
@@ -188,8 +188,8 @@ private:
         std::span<Item> items;
     };
 
-    void performHorizontalLayout(const LayoutCtx &ctx, bool animated);
-    void performVerticalLayout(const LayoutCtx &ctx, bool animated);
+    void performHorizontalLayout(const LayoutContext &ctx, bool animated);
+    void performVerticalLayout(const LayoutContext &ctx, bool animated);
 
     /**
      * @brief Show a popup informing the user of some big tab visibility changes
