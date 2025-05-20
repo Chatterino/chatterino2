@@ -10,14 +10,12 @@ class NicknamesPage : public SettingsPage
 {
 public:
     NicknamesPage();
-
-private:
-    void importNicknames();
-    void exportNicknames();
     bool filterElements(const QString &query) override;
 
 private:
     EditableModelView *view_;
+    void importNicknames();
+    void exportNicknames();
 };
 
 }  // namespace chatterino
