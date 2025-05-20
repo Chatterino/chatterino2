@@ -42,6 +42,25 @@ QJsonArray NetworkResult::parseJsonArray() const
     return jsonDoc.array();
 }
 
+QJsonValue NetworkResult::parseJsonValue() const
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+    return QJsonValue::fromJson(this->data_);
+#else
+    QJsonDocument jsonDoc(QJsonDocument::fromJson(this->data_));
+    if (jsonDoc.isArray())
+    {
+        return jsonDoc.array();
+    }
+    if (jsonDoc.isObject())
+    {
+        return jsonDoc.object();
+    }
+
+    return {};  // undefined
+#endif
+}
+
 rapidjson::Document NetworkResult::parseRapidJson() const
 {
     rapidjson::Document ret(rapidjson::kObjectType);

@@ -352,6 +352,11 @@ void Window::addShortcuts()
              SettingsDialog::showDialog(this);
              return "";
          }},
+        {"openAccountSelector",  // Open account selector
+         [](const std::vector<QString> &) -> QString {
+             getApp()->getWindows()->showAccountSelectPopup({0, 0});
+             return "";
+         }},
         {"newSplit",  // Create a new split
          [this](std::vector<QString>) -> QString {
              this->notebook_->getOrAddSelectedPage()->appendNewSplit(true);

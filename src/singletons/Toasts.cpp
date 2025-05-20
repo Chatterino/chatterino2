@@ -262,7 +262,7 @@ public:
     {
     }
 
-    void toastActivated(const char *response) const override
+    void toastActivated(std::wstring response) const override
     {
     }
 

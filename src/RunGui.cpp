@@ -23,6 +23,7 @@
 #include <QtConcurrent>
 
 #include <csignal>
+#include <cstdlib>
 #include <tuple>
 
 #ifdef USEWINSDK
@@ -162,7 +163,7 @@ namespace {
             proc.startDetached();
         }
 
-        _exit(signum);
+        std::_Exit(signum);
     }
 
     // We want to restart Chatterino when it crashes and the setting is set to
@@ -282,13 +283,13 @@ void runGui(QApplication &a, const Paths &paths, Settings &settings,
 
     QObject::connect(qApp, &QApplication::aboutToQuit, [] {
         auto *app = dynamic_cast<Application *>(tryGetApp());
-        if (app)
-        {
-            app->save();
-        }
+        assert(app != nullptr);
+        app->aboutToQuit();
 
         getSettings()->requestSave();
         getSettings()->disableSave();
+
+        app->stop();
     });
 
     Application app(settings, paths, args, updates);

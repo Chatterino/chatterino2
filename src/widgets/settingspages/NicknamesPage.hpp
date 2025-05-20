@@ -4,6 +4,8 @@
 
 namespace chatterino {
 
+class EditableModelView;
+
 class NicknamesPage : public SettingsPage
 {
 public:
@@ -12,6 +14,10 @@ public:
 private:
     void importNicknames();
     void exportNicknames();
+    bool filterElements(const QString &query) override;
+
+private:
+    EditableModelView *view_;
 };
 
 }  // namespace chatterino

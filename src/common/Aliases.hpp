@@ -1,9 +1,10 @@
 #pragma once
 
 #include <boost/container_hash/hash_fwd.hpp>
-#include <QHash>
+#include <QHashFunctions>
 #include <QString>
 
+#include <cstddef>
 #include <functional>
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)

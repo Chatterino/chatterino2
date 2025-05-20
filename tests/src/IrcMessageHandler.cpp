@@ -469,7 +469,7 @@ public:
 
         this->mockApplication->getAccounts()
             ->twitch.getCurrent()
-            ->blockUserLocally(u"12345"_s);
+            ->blockUserLocally(u"12345"_s, u"blocked"_s);
 
         auto makeBadge = [](QStringView platform) {
             return std::make_shared<Emote>(Emote{

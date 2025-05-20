@@ -1,8 +1,10 @@
 #include "common/ChannelChatters.hpp"
 
 #include "common/Channel.hpp"
-#include "messages/Message.hpp"
+#include "controllers/ignores/IgnoreController.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 
 #include <QColor>
 
@@ -25,10 +27,21 @@ void ChannelChatters::addRecentChatter(const QString &user)
     chatters->addRecentChatter(user);
 }
 
-void ChannelChatters::addJoinedUser(const QString &user)
+void ChannelChatters::addJoinedUser(const QString &user, bool isMod,
+                                    bool isBroadcaster)
 {
-    auto joinedUsers = this->joinedUsers_.access();
-    joinedUsers->append(user);
+    assertInGuiThread();
+
+    if (isIgnoredMessage(IgnoredMessageParameters{
+            .twitchUserLogin = user,
+            .isMod = isMod,
+            .isBroadcaster = isBroadcaster,
+        }))
+    {
+        return;
+    }
+
+    this->joinedUsers_.access()->append(user);
 
     if (!this->joinedUsersMergeQueued_)
     {
@@ -50,10 +63,21 @@ void ChannelChatters::addJoinedUser(const QString &user)
     }
 }
 
-void ChannelChatters::addPartedUser(const QString &user)
+void ChannelChatters::addPartedUser(const QString &user, bool isMod,
+                                    bool isBroadcaster)
 {
-    auto partedUsers = this->partedUsers_.access();
-    partedUsers->append(user);
+    assertInGuiThread();
+
+    if (isIgnoredMessage(IgnoredMessageParameters{
+            .twitchUserLogin = user,
+            .isMod = isMod,
+            .isBroadcaster = isBroadcaster,
+        }))
+    {
+        return;
+    }
+
+    this->partedUsers_.access()->append(user);
 
     if (!this->partedUsersMergeQueued_)
     {

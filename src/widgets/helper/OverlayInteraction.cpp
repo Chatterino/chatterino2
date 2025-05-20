@@ -18,7 +18,7 @@ OverlayInteraction::OverlayInteraction(OverlayWindow *parent)
     this->interactAnimation_.setEndValue(1.0);
 
     this->closeButton_.setButtonStyle(TitleBarButtonStyle::Close);
-    this->closeButton_.setScaleIndependantSize(46, 30);
+    this->closeButton_.setScaleIndependentSize(46, 30);
     this->closeButton_.hide();
     this->closeButton_.setCursor(Qt::PointingHandCursor);
 }

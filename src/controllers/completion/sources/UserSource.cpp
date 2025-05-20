@@ -4,6 +4,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
+#include "widgets/splits/InputCompletionItem.hpp"
 
 namespace chatterino::completion {
 

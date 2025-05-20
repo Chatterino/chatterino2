@@ -31,6 +31,11 @@ void WebSocket::createUserType(sol::table &c2, Plugin *plugin)
     c2.new_usertype<WebSocket>(
         "WebSocket",
         sol::factories([plugin](const QString &spec, sol::variadic_args args) {
+            if (!plugin->hasNetworkPermission())
+            {
+                throw std::runtime_error(
+                    "Plugin does not have permission to use websockets");
+            }
             QUrl url(spec);
             if (url.scheme() != "wss" && url.scheme() != "ws")
             {

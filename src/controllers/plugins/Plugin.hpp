@@ -1,7 +1,6 @@
 #pragma once
 
 #ifdef CHATTERINO_HAVE_PLUGINS
-#    include "Application.hpp"
 #    include "controllers/plugins/api/EventType.hpp"
 #    include "controllers/plugins/api/HTTPRequest.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"

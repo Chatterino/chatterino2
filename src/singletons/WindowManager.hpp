@@ -14,6 +14,7 @@
 namespace chatterino {
 
 class Settings;
+class Args;
 class Paths;
 class Window;
 class ChannelView;
@@ -38,12 +39,13 @@ class FramelessEmbedWindow;
 class WindowManager final
 {
     Theme &themes;
+    const Args &appArgs;
 
 public:
     static const QString WINDOW_LAYOUT_FILENAME;
 
-    explicit WindowManager(const Paths &paths, Settings &settings,
-                           Theme &themes_, Fonts &fonts);
+    explicit WindowManager(const Args &appArgs_, const Paths &paths,
+                           Settings &settings, Theme &themes_, Fonts &fonts);
     ~WindowManager();
 
     WindowManager(const WindowManager &) = delete;

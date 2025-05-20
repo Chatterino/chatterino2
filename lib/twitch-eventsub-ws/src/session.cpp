@@ -589,15 +589,23 @@ void Session::checkKeepalive()
     this->keepaliveTimer =
         std::make_unique<boost::asio::system_timer>(this->ws.get_executor());
     this->keepaliveTimer->expires_after(this->keepaliveTimeout);
-    this->keepaliveTimer->async_wait([this](boost::system::error_code ec) {
-        if (ec)
-        {
-            this->log->warn(
-                c2fmt::format("Keepalive timer cancelled: {}", ec.message()));
-            return;
-        }
-        this->checkKeepalive();
-    });
+    this->keepaliveTimer->async_wait(
+        [weak{this->weak_from_this()}](boost::system::error_code ec) {
+            auto strong = weak.lock();
+            if (!strong)
+            {
+                // Session was destroyed
+                return;
+            }
+
+            if (ec)
+            {
+                strong->log->warn(c2fmt::format("Keepalive timer cancelled: {}",
+                                                ec.message()));
+                return;
+            }
+            strong->checkKeepalive();
+        });
 }
 
 }  // namespace chatterino::eventsub::lib

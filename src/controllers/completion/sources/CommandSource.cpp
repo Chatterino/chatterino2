@@ -5,6 +5,7 @@
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/completion/sources/Helpers.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
+#include "widgets/splits/InputCompletionItem.hpp"
 
 namespace chatterino::completion {
 

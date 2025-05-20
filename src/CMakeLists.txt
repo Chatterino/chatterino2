@@ -1,8 +1,8 @@
 set(LIBRARY_PROJECT "${PROJECT_NAME}-lib")
 set(VERSION_PROJECT "${LIBRARY_PROJECT}-version")
 set(EXECUTABLE_PROJECT "${PROJECT_NAME}")
-add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
-add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x050F00)
+add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x060403)
+add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x060403)
 add_compile_definitions(QT_NO_KEYWORDS)
 
 # registers the native messageing host
@@ -19,10 +19,10 @@ set(SOURCE_FILES
 
         common/Args.cpp
         common/Args.hpp
-        common/Channel.cpp
-        common/Channel.hpp
         common/ChannelChatters.cpp
         common/ChannelChatters.hpp
+        common/Channel.cpp
+        common/Channel.hpp
         common/ChatterinoSetting.cpp
         common/ChatterinoSetting.hpp
         common/ChatterSet.cpp
@@ -38,6 +38,7 @@ set(SOURCE_FILES
         common/Modes.hpp
         common/QLogging.cpp
         common/QLogging.hpp
+        common/TimeoutStackStyle.hpp
         common/WindowDescriptors.cpp
         common/WindowDescriptors.hpp
 

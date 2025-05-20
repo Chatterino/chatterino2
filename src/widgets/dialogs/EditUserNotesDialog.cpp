@@ -17,7 +17,7 @@ EditUserNotesDialog::EditUserNotesDialog(QWidget *parent)
           },
           parent)
 {
-    this->setScaleIndependantSize(500, 350);
+    this->setScaleIndependentSize(500, 350);
 
     auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
                       .setLayoutType<QVBoxLayout>();

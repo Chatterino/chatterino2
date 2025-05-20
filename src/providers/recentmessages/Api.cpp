@@ -1,5 +1,6 @@
 #include "providers/recentmessages/Api.hpp"
 
+#include "Application.hpp"
 #include "common/network/NetworkRequest.hpp"
 #include "common/network/NetworkResult.hpp"
 #include "common/QLogging.hpp"
@@ -33,8 +34,15 @@ void load(
 
     const long delayMs = jitter ? std::rand() % 100 : 0;
     QTimer::singleShot(delayMs, [=] {
+        if (isAppAboutToQuit())
+        {
+            return;
+        }
+
         NetworkRequest(url)
             .onSuccess([channelPtr, onLoaded](const auto &result) {
+                assert(!isAppAboutToQuit());
+
                 auto shared = channelPtr.lock();
                 if (!shared)
                 {
@@ -51,30 +59,33 @@ void load(
                 auto builtMessages =
                     buildRecentMessages(parsedMessages, shared.get());
 
-                postToThread([shared = std::move(shared),
-                              root = std::move(root),
-                              messages = std::move(builtMessages),
-                              onLoaded]() mutable {
-                    // Notify user about a possible gap in logs if it returned some messages
-                    // but isn't currently joined to a channel
-                    const auto errorCode = root.value("error_code").toString();
-                    if (!errorCode.isEmpty())
-                    {
-                        qCDebug(LOG)
-                            << QString("Got error from API: error_code=%1, "
-                                       "channel=%2")
-                                   .arg(errorCode, shared->getName());
-                        if (errorCode == "channel_not_joined" &&
-                            !messages.empty())
-                        {
-                            shared->addSystemMessage(
-                                "Message history service recovering, there may "
-                                "be gaps in the message history.");
-                        }
-                    }
+                postToThread(
+                    [shared = std::move(shared), root = std::move(root),
+                     messages = std::move(builtMessages), onLoaded]() mutable {
+                        assert(!isAppAboutToQuit());
 
-                    onLoaded(messages);
-                });
+                        // Notify user about a possible gap in logs if it returned some messages
+                        // but isn't currently joined to a channel
+                        const auto errorCode =
+                            root.value("error_code").toString();
+                        if (!errorCode.isEmpty())
+                        {
+                            qCDebug(LOG)
+                                << QString("Got error from API: error_code=%1, "
+                                           "channel=%2")
+                                       .arg(errorCode, shared->getName());
+                            if (errorCode == "channel_not_joined" &&
+                                !messages.empty())
+                            {
+                                shared->addSystemMessage(
+                                    "Message history service recovering, there "
+                                    "may "
+                                    "be gaps in the message history.");
+                            }
+                        }
+
+                        onLoaded(messages);
+                    });
             })
             .onError([channelPtr, onError](const NetworkResult &result) {
                 auto shared = channelPtr.lock();
@@ -82,6 +93,7 @@ void load(
                 {
                     return;
                 }
+                assert(!isAppAboutToQuit());
 
                 qCDebug(LOG) << "Failed to load recent messages for"
                              << shared->getName();

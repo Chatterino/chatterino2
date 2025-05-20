@@ -197,12 +197,11 @@ void EditHotkeyDialog::afterEdit()
     }
 
     auto firstKeyInt = this->ui_->keyComboEdit->keySequence()[0];
-    bool hasModifier = ((firstKeyInt & Qt::CTRL) == Qt::CTRL) ||
-                       ((firstKeyInt & Qt::ALT) == Qt::ALT) ||
-                       ((firstKeyInt & Qt::META) == Qt::META);
-    bool isKeyExcempt = ((firstKeyInt & Qt::Key_Escape) == Qt::Key_Escape) ||
-                        ((firstKeyInt & Qt::Key_Enter) == Qt::Key_Enter) ||
-                        ((firstKeyInt & Qt::Key_Return) == Qt::Key_Return);
+    bool hasModifier = firstKeyInt.keyboardModifiers().testAnyFlags(
+        Qt::ControlModifier | Qt::AltModifier | Qt::MetaModifier);
+    bool isKeyExcempt = firstKeyInt.key() == Qt::Key_Escape ||
+                        firstKeyInt.key() == Qt::Key_Enter ||
+                        firstKeyInt.key() == Qt::Key_Return;
 
     if (!isKeyExcempt && !hasModifier && !this->shownSingleKeyWarning)
     {

@@ -309,7 +309,7 @@ DescriptionLabel *GeneralPageView::addDescription(const QString &text)
     return label;
 }
 
-void GeneralPageView::addSeperator()
+void GeneralPageView::addSeparator()
 {
     this->addWidget(new Line(false));
 }

@@ -131,6 +131,14 @@ void NetworkData::emitSuccess(NetworkResult &&result)
                         return;
                     }
 
+                    if (isAppAboutToQuit())
+                    {
+                        qCDebug(chatterinoHTTP)
+                            << "Success callback for" << url.toString()
+                            << "skipped because we're about to quit";
+                        return;
+                    }
+
                     QElapsedTimer timer;
                     timer.start();
                     cb(result);
@@ -153,9 +161,18 @@ void NetworkData::emitError(NetworkResult &&result)
 
     runCallback(this->executeConcurrently,
                 [cb = std::move(this->onError), result = std::move(result),
-                 hasCaller = this->hasCaller, caller = this->caller]() {
+                 url = this->request.url(), hasCaller = this->hasCaller,
+                 caller = this->caller]() {
                     if (hasCaller && caller.isNull())
                     {
+                        return;
+                    }
+
+                    if (isAppAboutToQuit())
+                    {
+                        qCDebug(chatterinoHTTP)
+                            << "Error callback for" << url.toString()
+                            << "skipped because we're about to quit";
                         return;
                     }
 
@@ -172,9 +189,17 @@ void NetworkData::emitFinally()
 
     runCallback(this->executeConcurrently,
                 [cb = std::move(this->finally), hasCaller = this->hasCaller,
-                 caller = this->caller]() {
+                 url = this->request.url(), caller = this->caller]() {
                     if (hasCaller && caller.isNull())
                     {
+                        return;
+                    }
+
+                    if (isAppAboutToQuit())
+                    {
+                        qCDebug(chatterinoHTTP)
+                            << "Finally callback for" << url.toString()
+                            << "skipped because we're about to quit";
                         return;
                     }
 

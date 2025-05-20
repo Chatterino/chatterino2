@@ -11,8 +11,10 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
+#include "providers/bttv/BttvLiveUpdates.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/IrcConnection2.hpp"
+#include "providers/seventv/eventapi/Dispatch.hpp"  // IWYU pragma: keep
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/seventv/SeventvEventAPI.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -182,7 +184,7 @@ TwitchIrcServer::TwitchIrcServer()
                      &Communi::IrcConnection::connected, this, [this] {
                          this->onWriteConnected(this->writeConnection_.get());
                      });
-    this->connections_.managedConnect(
+    this->signalHolder.managedConnect(
         this->writeConnection_->connectionLost, [this](bool timeout) {
             qCDebug(chatterinoIrc)
                 << "Write connection reconnect requested. Timeout:" << timeout;
@@ -211,7 +213,7 @@ TwitchIrcServer::TwitchIrcServer()
                      &Communi::IrcConnection::disconnected, this, [this] {
                          this->onDisconnected();
                      });
-    this->connections_.managedConnect(
+    this->signalHolder.managedConnect(
         this->readConnection_->connectionLost, [this](bool timeout) {
             qCDebug(chatterinoIrc)
                 << "Read connection reconnect requested. Timeout:" << timeout;
@@ -224,7 +226,7 @@ TwitchIrcServer::TwitchIrcServer()
             }
             this->readConnection_->smartReconnect();
         });
-    this->connections_.managedConnect(this->readConnection_->heartbeat, [this] {
+    this->signalHolder.managedConnect(this->readConnection_->heartbeat, [this] {
         this->markChannelsConnected();
     });
 }
@@ -237,7 +239,7 @@ void TwitchIrcServer::initialize()
         });
     });
 
-    this->connections_.managedConnect(
+    this->signalHolder.managedConnect(
         getApp()->getTwitchPubSub()->pointReward.redeemed, [this](auto &data) {
             QString channelId = data.value("channel_id").toString();
             if (channelId.isEmpty())
@@ -252,12 +254,24 @@ void TwitchIrcServer::initialize()
             auto reward = ChannelPointReward(data);
 
             postToThread([chan, reward] {
+                if (isAppAboutToQuit())
+                {
+                    return;
+                }
+
                 if (auto *channel = dynamic_cast<TwitchChannel *>(chan.get()))
                 {
                     channel->addChannelPointReward(reward);
                 }
             });
         });
+}
+
+void TwitchIrcServer::aboutToQuit()
+{
+    this->signalHolder.clear();
+
+    this->channels.clear();
 }
 
 void TwitchIrcServer::initializeConnection(IrcConnection *connection,
@@ -548,8 +562,8 @@ std::shared_ptr<Channel> TwitchIrcServer::getCustomChannel(
         return this->automodChannel;
     }
 
-    static auto getTimer = [](ChannelPtr channel, int msBetweenMessages,
-                              bool addInitialMessages) {
+    static auto getTimer = [this](ChannelPtr channel, int msBetweenMessages,
+                                  bool addInitialMessages) {
         if (addInitialMessages)
         {
             for (auto i = 0; i < 1000; i++)
@@ -559,7 +573,7 @@ std::shared_ptr<Channel> TwitchIrcServer::getCustomChannel(
         }
 
         auto *timer = new QTimer;
-        QObject::connect(timer, &QTimer::timeout, [channel] {
+        QObject::connect(timer, &QTimer::timeout, this, [channel] {
             channel->addSystemMessage(QTime::currentTime().toString());
         });
         timer->start(msBetweenMessages);
@@ -828,6 +842,117 @@ void TwitchIrcServer::setLastUserThatWhisperedMe(const QString &user)
     this->lastUserThatWhisperedMe.set(user);
 }
 
+void TwitchIrcServer::initEventAPIs(BttvLiveUpdates *bttvLiveUpdates,
+                                    SeventvEventAPI *seventvEventAPI)
+{
+    assertInGuiThread();
+
+    if (bttvLiveUpdates != nullptr)
+    {
+        this->signalHolder.managedConnect(
+            bttvLiveUpdates->signals_.emoteAdded, [&](const auto &data) {
+                auto chan = this->getChannelOrEmptyByID(data.channelID);
+
+                postToThread(
+                    [chan, data] {
+                        if (auto *channel =
+                                dynamic_cast<TwitchChannel *>(chan.get()))
+                        {
+                            channel->addBttvEmote(data);
+                        }
+                    },
+                    this);
+            });
+        this->signalHolder.managedConnect(
+            bttvLiveUpdates->signals_.emoteUpdated, [&](const auto &data) {
+                auto chan = this->getChannelOrEmptyByID(data.channelID);
+
+                postToThread(
+                    [chan, data] {
+                        if (auto *channel =
+                                dynamic_cast<TwitchChannel *>(chan.get()))
+                        {
+                            channel->updateBttvEmote(data);
+                        }
+                    },
+                    this);
+            });
+        this->signalHolder.managedConnect(
+            bttvLiveUpdates->signals_.emoteRemoved, [&](const auto &data) {
+                auto chan = this->getChannelOrEmptyByID(data.channelID);
+
+                postToThread(
+                    [chan, data] {
+                        if (auto *channel =
+                                dynamic_cast<TwitchChannel *>(chan.get()))
+                        {
+                            channel->removeBttvEmote(data);
+                        }
+                    },
+                    this);
+            });
+
+        bttvLiveUpdates->start();
+    }
+    else
+    {
+        qCDebug(chatterinoBttv)
+            << "Skipping initialization of Live Updates as it's disabled";
+    }
+
+    if (seventvEventAPI != nullptr)
+    {
+        this->signalHolder.managedConnect(
+            seventvEventAPI->signals_.emoteAdded, [this](const auto &data) {
+                postToThread(
+                    [this, data] {
+                        this->forEachSeventvEmoteSet(
+                            data.emoteSetID, [data](TwitchChannel &chan) {
+                                chan.addSeventvEmote(data);
+                            });
+                    },
+                    this);
+            });
+        this->signalHolder.managedConnect(
+            seventvEventAPI->signals_.emoteUpdated, [this](const auto &data) {
+                postToThread(
+                    [this, data] {
+                        this->forEachSeventvEmoteSet(
+                            data.emoteSetID, [data](TwitchChannel &chan) {
+                                chan.updateSeventvEmote(data);
+                            });
+                    },
+                    this);
+            });
+        this->signalHolder.managedConnect(
+            seventvEventAPI->signals_.emoteRemoved, [this](const auto &data) {
+                postToThread(
+                    [this, data] {
+                        this->forEachSeventvEmoteSet(
+                            data.emoteSetID, [data](TwitchChannel &chan) {
+                                chan.removeSeventvEmote(data);
+                            });
+                    },
+                    this);
+            });
+        this->signalHolder.managedConnect(
+            seventvEventAPI->signals_.userUpdated, [this](const auto &data) {
+                // TODO: is it fine if this is called in non-gui-thread?
+                this->forEachSeventvUser(data.userID,
+                                         [data](TwitchChannel &chan) {
+                                             chan.updateSeventvUser(data);
+                                         });
+            });
+
+        seventvEventAPI->start();
+    }
+    else
+    {
+        qCDebug(chatterinoSeventvEventAPI)
+            << "Skipping initialization as the EventAPI is disabled";
+    }
+}
+
 void TwitchIrcServer::reloadAllBTTVChannelEmotes()
 {
     this->forEachChannel([](const auto &chan) {
@@ -1048,7 +1173,7 @@ ChannelPtr TwitchIrcServer::getOrAddChannel(const QString &dirtyChannelName)
     }
 
     this->channels.insert(channelName, chan);
-    this->connections_.managedConnect(chan->destroyed, [this, channelName] {
+    this->signalHolder.managedConnect(chan->destroyed, [this, channelName] {
         // fourtf: issues when the server itself is destroyed
 
         qCDebug(chatterinoIrc) << "[TwitchIrcServer::addChannel]" << channelName

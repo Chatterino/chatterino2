@@ -106,13 +106,13 @@ ChannelPointReward::ChannelPointReward(const QJsonObject &redemption)
     }
     else
     {
-        static const ImageSet defaultImage{
+        static const ImageSet *defaultImage = new ImageSet{
             Image::fromUrl({twitchChannelPointRewardUrl("1.png")}, 1, baseSize),
             Image::fromUrl({twitchChannelPointRewardUrl("2.png")}, 0.5,
                            baseSize * 2),
             Image::fromUrl({twitchChannelPointRewardUrl("4.png")}, 0.25,
                            baseSize * 4)};
-        this->image = defaultImage;
+        this->image = *defaultImage;
     }
 }
 

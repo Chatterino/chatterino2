@@ -32,6 +32,7 @@ NicknamesPage::NicknamesPage()
                 (new NicknamesModel(nullptr))
                     ->initialized(&getSettings()->nicknames))
             .getElement();
+    this->view_ = view;
 
     view->setTitles({"Username", "Nickname", "Enable regex", "Case-sensitive"});
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -160,6 +161,13 @@ void NicknamesPage::exportNicknames()
         QMessageBox::critical(this, tr("Error"),
                               tr("Failed to write to file."));
     }
+}
+
+bool NicknamesPage::filterElements(const QString &query)
+{
+    std::array fields{0, 1};
+
+    return this->view_->filterSearchResults(query, fields);
 }
 
 }  // namespace chatterino
