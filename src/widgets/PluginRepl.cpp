@@ -682,6 +682,20 @@ void PluginRepl::updateFont()
     this->font = PluginRepl::currentFont();
     this->ui.input->setFont(this->font);
     this->ui.output->setFont(this->font);
+
+    // Set the tab width to be at least 4 spaces.
+    //
+    // setTabStopDistance:
+    // > Do not set a value less than the horizontalAdvance() of the
+    // > QChar::VisualTabCharacter character, otherwise the tab-character will
+    // > be drawn incompletely.
+    QFontMetricsF metrics(this->font);
+    auto tabCharWidth = metrics.horizontalAdvance(QChar::VisualTabCharacter);
+    auto spaceWidth = metrics.horizontalAdvance(QChar::Space);
+    auto tabDistance = std::max(tabCharWidth, spaceWidth * 4.F);
+
+    this->ui.input->setTabStopDistance(tabDistance);
+    this->ui.output->setTabStopDistance(tabDistance);
 }
 
 void PluginRepl::updatePinned()
