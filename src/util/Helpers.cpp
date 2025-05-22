@@ -396,7 +396,14 @@ void removeLastQS(QString &str)
 void writeProviderEmotesCache(const QString &id, const QString &provider,
                               const QByteArray &bytes)
 {
-    QThreadPool::globalInstance()->start([bytes, id, provider]() {
+    auto *threadPool = QThreadPool::globalInstance();
+    if (threadPool == nullptr)
+    {
+        // Must be exiting - do nothing
+        return;
+    }
+
+    threadPool->start([bytes, id, provider]() {
         auto cacheKey = id % "." % provider;
         QFile responseCache(getApp()->getPaths().cacheFilePath(cacheKey));
 

@@ -10,6 +10,7 @@
 #include "widgets/helper/EditableModelView.hpp"
 
 #include <QHeaderView>
+#include <QMessageBox>
 #include <QTableView>
 
 namespace chatterino {
