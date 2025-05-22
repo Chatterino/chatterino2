@@ -15,7 +15,7 @@ void IconDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 {
     auto data = index.data(Qt::DecorationRole);
 
-    if (data.type() != QVariant::Pixmap)
+    if (data.metaType() != QMetaType::fromType<QPixmap>())
     {
         return QStyledItemDelegate::paint(painter, option, index);
     }

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "common/Channel.hpp"
 #include "common/ChatterinoSetting.hpp"
 #include "common/enums/MessageOverflow.hpp"
 #include "common/Modes.hpp"
 #include "common/SignalVector.hpp"
+#include "common/TimeoutStackStyle.hpp"
 #include "controllers/filters/FilterRecord.hpp"
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
@@ -15,8 +15,8 @@
 #include "controllers/nicknames/Nickname.hpp"
 #include "controllers/sound/ISoundController.hpp"
 #include "singletons/Toasts.hpp"
-#include "util/RapidJsonSerializeQString.hpp"
-#include "widgets/Notebook.hpp"
+#include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
+#include "widgets/NotebookEnums.hpp"
 
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/settings/settinglistener.hpp>

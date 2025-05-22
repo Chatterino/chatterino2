@@ -28,6 +28,7 @@
 #include <QFontDialog>
 #include <QFormLayout>
 #include <QLabel>
+#include <QMessageBox>
 #include <QScrollArea>
 
 namespace {
@@ -545,7 +546,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             return fuzzyToInt(args.value, 0);
         });
-    layout.addSeperator();
+    layout.addSeparator();
     layout.addCheckbox("Draw a line below the most recent message before "
                        "switching applications.",
                        s.showLastMessageIndicator, false,
@@ -610,7 +611,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Remove spaces between emotes",
                        s.removeSpacesBetweenEmotes, false,
                        "When enabled, adjacent emotes will no longer have an "
-                       "added space seperating them.");
+                       "added space separating them.");
     SettingWidget::checkbox("Show unlisted 7TV emotes",
                             s.showUnlistedSevenTVEmotes)
         ->addKeywords({"seventv"})
@@ -702,7 +703,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addTo(layout);
     SettingWidget::checkbox("Send activity to 7TV", s.sendSevenTVActivity)
         ->setTooltip("When enabled, Chatterino will signal an activity to 7TV "
-                     "when you send a chat mesage. This is used for badges, "
+                     "when you send a chat message. This is used for badges, "
                      "paints, and personal emotes. When disabled, no activity "
                      "is sent and others won't see your cosmetics.")
         ->addKeywords({"seventv"})
@@ -1082,7 +1083,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addKeywords({"seventv"})
         ->setTooltip("Badges for 7TV admins, developers, and supporters")
         ->addTo(layout);
-    layout.addSeperator();
+    layout.addSeparator();
     SettingWidget::checkbox("Use custom FrankerFaceZ moderator badges",
                             s.useCustomFfzModeratorBadges)
         ->addKeywords({"ffz"})
@@ -1221,7 +1222,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         ->addTo(layout);
 
     layout.addCheckbox("Bold @usernames", s.boldUsernames, false,
-                       "Bold @mentions to make them more noticable.");
+                       "Bold @mentions to make them more noticeable.");
     layout.addCheckbox("Color @usernames", s.colorUsernames, false,
                        "If Chatterino has seen a user, highlight @mention's of "
                        "them with their Twitch color.");
@@ -1369,14 +1370,17 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Enable experimental Twitch EventSub support (requires restart)",
         s.enableExperimentalEventSub);
 
-    layout.addCheckbox("Disable renaming of tabs on double-click",
-                       s.disableTabRenamingOnClick);
+    SettingWidget::checkbox("Disable renaming of tabs on double-click",
+                            s.disableTabRenamingOnClick)
+        ->setTooltip("Prevents the rename dialog from opening when a "
+                     "tab is double-clicked")
+        ->addTo(layout);
 
     layout.addStretch();
 
     // invisible element for width
     auto *inv = new BaseWidget(this);
-    //    inv->setScaleIndependantWidth(600);
+    //    inv->setScaleIndependentWidth(600);
     layout.addWidget(inv);
 }
 

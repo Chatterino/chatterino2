@@ -45,7 +45,7 @@ AccountSwitchPopup::AccountSwitchPopup(QWidget *parent)
 
     this->getLayoutContainer()->setLayout(vbox);
 
-    this->setScaleIndependantSize(200, 200);
+    this->setScaleIndependentSize(200, 200);
     this->themeChangedEvent();
 }
 
