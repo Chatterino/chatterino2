@@ -65,9 +65,11 @@ declare namespace c2 {
         is_broadcaster(): boolean;
         is_mod(): boolean;
         is_vip(): boolean;
+    }
 
-        static by_name(name: string): null | Channel;
-        static by_twitch_id(id: string): null | Channel;
+    namespace Channel {
+        function by_name(name: string): null | Channel;
+        function by_twitch_id(id: string): null | Channel;
     }
 
     enum HTTPMethod {
