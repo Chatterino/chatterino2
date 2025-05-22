@@ -54,7 +54,8 @@ protected:
     bool event(QEvent *e) override;
 
 private:
-    QString nextHistoryItem(qsizetype diff);
+    /// If the item wouldn't change, std::nullopt is returned
+    std::optional<QString> nextHistoryItem(qsizetype diff);
 
     QStringList history;
     qsizetype historyIdx = 0;
@@ -83,11 +84,16 @@ bool HistoricTextEdit::event(QEvent *event)
     {
         e->accept();
         auto cursor = this->textCursor();
-        if (!cursor.movePosition(QTextCursor::Up))
+        if (cursor.movePosition(QTextCursor::Up))
         {
-            if (!this->history.empty())
+            this->setTextCursor(cursor);
+        }
+        else
+        {
+            auto next = this->nextHistoryItem(-1);
+            if (next)
             {
-                this->setPlainText(this->nextHistoryItem(-1));
+                this->setPlainText(*std::move(next));
                 this->moveCursor(QTextCursor::End);
             }
         }
@@ -97,11 +103,16 @@ bool HistoricTextEdit::event(QEvent *event)
     {
         e->accept();
         auto cursor = this->textCursor();
-        if (!cursor.movePosition(QTextCursor::Down))
+        if (cursor.movePosition(QTextCursor::Down))
         {
-            if (!this->history.empty())
+            this->setTextCursor(cursor);
+        }
+        else
+        {
+            auto next = this->nextHistoryItem(1);
+            if (next)
             {
-                this->setPlainText(this->nextHistoryItem(1));
+                this->setPlainText(*std::move(next));
                 this->moveCursor(QTextCursor::End);
             }
         }
@@ -130,15 +141,22 @@ bool HistoricTextEdit::event(QEvent *event)
     return QTextEdit::event(event);
 }
 
-QString HistoricTextEdit::nextHistoryItem(qsizetype diff)
+std::optional<QString> HistoricTextEdit::nextHistoryItem(qsizetype diff)
 {
     if (this->history.empty())
     {
         return {};
     }
     bool wasUnfinishedInput = this->historyIdx >= this->history.size();
-    this->historyIdx =
+
+    auto nextIdx =
         std::clamp(this->historyIdx + diff, 0LL, this->history.size());
+    if (nextIdx == this->historyIdx)
+    {
+        return {};  // nothing changed
+    }
+    this->historyIdx = nextIdx;
+
     if (this->historyIdx >= this->history.size())
     {
         return this->lastUnfinishedInput;
