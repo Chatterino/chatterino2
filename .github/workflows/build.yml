@@ -143,7 +143,7 @@ jobs:
             skip-crashpad: false
           # Windows
           - os: windows-latest
-            qt-version: 6.7.1
+            qt-version: 6.9.0
             force-lto: false
             skip-artifact: false
             skip-crashpad: false
@@ -231,6 +231,7 @@ jobs:
               -DUSE_PRECOMPILED_HEADERS=ON `
               -DBUILD_WITH_CRASHPAD="$Env:C2_ENABLE_CRASHPAD" `
               -DCHATTERINO_LTO="$Env:C2_ENABLE_LTO" `
+              -DCHATTERINO_USE_GDI_FONTENGINE="Off" `
               -DFORCE_JSON_GENERATION=On `
               ..
           set cl=/MP
@@ -336,15 +337,15 @@ jobs:
 
       # Windows
       - uses: actions/download-artifact@v4
-        name: Windows Qt6.7.1
+        name: Windows Qt6.9.0
         with:
-          name: chatterino-windows-x86-64-Qt-6.7.1.zip
+          name: chatterino-windows-x86-64-Qt-6.9.0.zip
           path: release-artifacts/
 
       - uses: actions/download-artifact@v4
-        name: Windows Qt6.7.1 symbols
+        name: Windows Qt6.9.0 symbols
         with:
-          name: chatterino-windows-x86-64-Qt-6.7.1-symbols.pdb.7z
+          name: chatterino-windows-x86-64-Qt-6.9.0-symbols.pdb.7z
           path: release-artifacts/
 
       # Linux
