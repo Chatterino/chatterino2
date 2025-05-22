@@ -96,5 +96,6 @@ Ian321 | https://github.com/Ian321 |
 Yardanico | https://github.com/Yardanico |
 huti26 | https://github.com/huti26 |
 chrisduerr | https://github.com/chrisduerr |
+ynot01 | https://github.com/ynot01 | :/avatars/ynot01.png
 
 # Otherwise add yourself right above this one
