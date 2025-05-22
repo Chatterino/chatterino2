@@ -2,6 +2,7 @@
 
 #ifdef CHATTERINO_HAVE_PLUGINS
 
+#    include "Application.hpp"
 #    include "controllers/plugins/LuaAPI.hpp"
 #    include "controllers/plugins/LuaUtilities.hpp"
 #    include "controllers/plugins/Plugin.hpp"
@@ -354,14 +355,14 @@ PluginRepl::PluginRepl(QString id, QWidget *parent)
     {
         auto *top = new QHBoxLayout;
         this->ui.clear = new Button;
-        this->ui.clear->setScaleIndependantSize({18, 18});
+        this->ui.clear->setScaleIndependentSize({18, 18});
         this->ui.clear->setToolTip(u"Clear Output"_s);
         QObject::connect(this->ui.clear, &Button::leftClicked, this, [this] {
             this->ui.output->clear();
         });
 
         this->ui.reload = new Button;
-        this->ui.reload->setScaleIndependantSize({18, 18});
+        this->ui.reload->setScaleIndependentSize({18, 18});
         this->ui.reload->setToolTip(u"Reload"_s);
         QObject::connect(this->ui.reload, &Button::leftClicked, this, [this] {
             this->log({}, u"Reloading..."_s);
@@ -377,7 +378,7 @@ PluginRepl::PluginRepl(QString id, QWidget *parent)
         });
 
         this->ui.pin = new Button;
-        this->ui.pin->setScaleIndependantSize({18, 18});
+        this->ui.pin->setScaleIndependentSize({18, 18});
         this->ui.pin->setToolTip(u"Pin Window"_s);
         QObject::connect(this->ui.pin, &Button::leftClicked, this, [this] {
             this->isPinned = !this->isPinned;
