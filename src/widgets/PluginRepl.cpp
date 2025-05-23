@@ -383,6 +383,11 @@ PluginRepl::PluginRepl(QString id, QWidget *parent)
         this->ui.reload->setScaleIndependentSize({18, 18});
         this->ui.reload->setToolTip(u"Reload"_s);
         QObject::connect(this->ui.reload, &Button::leftClicked, this, [this] {
+            if (!this->plugin)
+            {
+                this->log(lua::api::LogLevel::Critical, "Plugin not loaded.");
+                return;
+            }
             this->log({}, u"Reloading..."_s);
             bool result = getApp()->getPlugins()->reload(this->id);
             if (result)
@@ -491,6 +496,7 @@ void PluginRepl::tryRun(QString code)
 {
     if (!this->plugin)
     {
+        this->log(lua::api::LogLevel::Critical, "Plugin not loaded.");
         return;
     }
 
