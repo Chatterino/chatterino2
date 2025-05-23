@@ -1,7 +1,9 @@
-#include "controllers/accounts/AccountController.hpp"
 #ifdef CHATTERINO_HAVE_PLUGINS
+#    include "widgets/settingspages/PluginsPage.hpp"
+
 #    include "Application.hpp"
 #    include "common/Args.hpp"
+#    include "controllers/accounts/AccountController.hpp"
 #    include "controllers/plugins/PluginController.hpp"
 #    include "singletons/Paths.hpp"
 #    include "singletons/Settings.hpp"
@@ -9,7 +11,6 @@
 #    include "util/LayoutCreator.hpp"
 #    include "util/RemoveScrollAreaBackground.hpp"
 #    include "widgets/PluginRepl.hpp"
-#    include "widgets/settingspages/PluginsPage.hpp"
 #    include "widgets/settingspages/SettingWidget.hpp"
 
 #    include <QCheckBox>
