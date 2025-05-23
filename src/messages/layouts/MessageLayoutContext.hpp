@@ -76,7 +76,7 @@ struct MessagePaintContext {
     const bool isMentions{};
 
     // y coordinate we're currently painting at
-    int y{};
+    qreal y{};
 
     // Index of the message that is currently being painted
     // This index refers to the snapshot being used in the painting

@@ -101,8 +101,8 @@ void Label::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    QFontMetrics metrics = getApp()->getFonts()->getFontMetrics(
-        this->getFontStyle(), this->scale());
+    auto metrics = getApp()->getFonts()->getFontMetrics(this->getFontStyle(),
+                                                        this->scale());
     painter.setFont(
         getApp()->getFonts()->getFont(this->getFontStyle(), this->scale()));
 
@@ -111,7 +111,7 @@ void Label::paintEvent(QPaintEvent *)
     // draw text
     QRect textRect(offset, 0, this->width() - offset - offset, this->height());
 
-    int width = metrics.horizontalAdvance(this->text_);
+    int width = static_cast<int>(metrics.horizontalAdvance(this->text_));
     Qt::Alignment alignment = !this->centered_ || width > textRect.width()
                                   ? Qt::AlignLeft | Qt::AlignVCenter
                                   : Qt::AlignCenter;
@@ -137,13 +137,13 @@ void Label::paintEvent(QPaintEvent *)
 
 void Label::updateSize()
 {
-    QFontMetrics metrics =
+    auto metrics =
         getApp()->getFonts()->getFontMetrics(this->fontStyle_, this->scale());
 
-    int width =
+    auto width =
         metrics.horizontalAdvance(this->text_) + (2 * this->getOffset());
-    int height = metrics.height();
-    this->preferedSize_ = QSize(width, height);
+    auto height = metrics.height();
+    this->preferedSize_ = QSizeF(width, height).toSize();
 
     this->updateGeometry();
 }

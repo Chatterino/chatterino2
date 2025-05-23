@@ -52,8 +52,8 @@ public:
     const Message *getMessage();
     const MessagePtr &getMessagePtr() const;
 
-    int getHeight() const;
-    int getWidth() const;
+    qreal getHeight() const;
+    qreal getWidth() const;
 
     MessageLayoutFlags flags;
 
@@ -70,7 +70,7 @@ public:
      *
      * If no element is found at the given point, this returns a null pointer
      */
-    const MessageLayoutElement *getElementAt(QPoint point) const;
+    const MessageLayoutElement *getElementAt(QPointF point) const;
 
     /**
      * @brief Returns the word bounds of the given element
@@ -84,7 +84,7 @@ public:
      * "abc "
      */
     std::pair<int, int> getWordBounds(
-        const MessageLayoutElement *hoveredElement, QPoint relativePos) const;
+        const MessageLayoutElement *hoveredElement, QPointF relativePos) const;
 
     /**
      * Get the index of the last character in this message's container
@@ -101,7 +101,7 @@ public:
     /**
      * Get the character index at the given position, in the context of selections
      */
-    size_t getSelectionIndex(QPoint position) const;
+    size_t getSelectionIndex(QPointF position) const;
     void addSelectionText(QString &str, uint32_t from = 0,
                           uint32_t to = UINT32_MAX,
                           CopyMode copymode = CopyMode::Everything);
@@ -116,7 +116,7 @@ private:
     void updateBuffer(QPixmap *buffer, const MessagePaintContext &ctx);
 
     // Create new buffer if required, returning the buffer
-    QPixmap *ensureBuffer(QPainter &painter, int width, bool clear);
+    QPixmap *ensureBuffer(QPainter &painter, qreal width, bool clear);
 
     // variables
     const MessagePtr message_;
@@ -124,7 +124,7 @@ private:
     std::unique_ptr<QPixmap> buffer_;
     bool bufferValid_ = false;
 
-    int height_ = 0;
+    qreal height_ = 0;
     int currentLayoutWidth_ = -1;
     int layoutState_ = -1;
     float scale_ = -1;
