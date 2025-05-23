@@ -3,7 +3,7 @@
 ## Unversioned
 
 - Minor: Added user notes to the user info dialog (when clicking a username). (#6122)
-- Minor: Added cached emotes fallback when fetching from a provider fails. (#6125)
+- Minor: Added cached emotes fallback when fetching from a provider fails. (#6125, #6229)
 - Minor: Add an option for the reduced opacity of message history. (#6121)
 - Minor: Make paused chat indicator more visible, and fix its zoom behavior. (#6123)
 - Minor: Added WebSocket API for plugins. (#6076, #6186)
