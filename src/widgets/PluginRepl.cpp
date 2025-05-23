@@ -641,6 +641,10 @@ void PluginRepl::tryUpdate()
     {
         return;
     }
+    if (!PluginController::isPluginEnabled(this->id))
+    {
+        return;
+    }
     this->setPlugin(it->second.get());
 }
 
