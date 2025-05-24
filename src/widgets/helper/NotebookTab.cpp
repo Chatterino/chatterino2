@@ -232,19 +232,19 @@ int NotebookTab::normalTabWidthForHeight(int height) const
     float scale = this->scale();
     int width = 0;
 
-    QFontMetrics metrics =
+    auto metrics =
         getApp()->getFonts()->getFontMetrics(FontStyle::UiTabs, scale);
 
     float compactDivider = getCompactDivider(getSettings()->tabStyle);
     if (this->hasXButton())
     {
-        width = (metrics.horizontalAdvance(this->getTitle()) +
-                 int(32 / compactDivider * scale));
+        width = static_cast<int>(metrics.horizontalAdvance(this->getTitle()) +
+                                 (32 / compactDivider * scale));
     }
     else
     {
-        width = (metrics.horizontalAdvance(this->getTitle()) +
-                 int(16 / compactDivider * scale));
+        width = static_cast<int>(metrics.horizontalAdvance(this->getTitle()) +
+                                 (16 / compactDivider * scale));
     }
 
     if (static_cast<float>(height) > 150 * scale)
@@ -679,8 +679,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
     float scale = this->scale();
 
     painter.setFont(app->getFonts()->getFont(FontStyle::UiTabs, scale));
-    QFontMetrics metrics =
-        app->getFonts()->getFontMetrics(FontStyle::UiTabs, scale);
+    auto metrics = app->getFonts()->getFontMetrics(FontStyle::UiTabs, scale);
 
     int height = int(scale * NOTEBOOK_TAB_HEIGHT);
 

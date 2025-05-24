@@ -3,7 +3,7 @@
 ## Unversioned
 
 - Minor: Added user notes to the user info dialog (when clicking a username). (#6122)
-- Minor: Added cached emotes fallback when fetching from a provider fails. (#6125)
+- Minor: Added cached emotes fallback when fetching from a provider fails. (#6125, #6229)
 - Minor: Add an option for the reduced opacity of message history. (#6121)
 - Minor: Make paused chat indicator more visible, and fix its zoom behavior. (#6123)
 - Minor: Added WebSocket API for plugins. (#6076, #6186)
@@ -34,6 +34,7 @@
 - Bugfix: Fixed a crash that could occur an eventsub connection's keepalive timer would run after the connection was dead, causing the keepalive timer to use-itself-after-free. (#6204)
 - Bugfix: Fixed a crash that could occur when an image started loading mid app shutdown. (#6213)
 - Bugfix: Fixed some minor typos. (#6196)
+- Bugfix: Fixed inconsistent spaces in messages when using fractional scaling. (#6231)
 - Dev: Mini refactor of Split. (#6148)
 - Dev: Conan will no longer generate a `CMakeUserPresets.json` file. (#6117)
 - Dev: Pass `--force-openssl` when installing from CMake in Qt 6.8+. (#6129)
@@ -50,7 +51,7 @@
 - Dev: Mini refactor of `TwitchAccount`. (#6182)
 - Dev: Refactored away some `getApp` usages in `WindowManager`. (#6194)
 - Dev: Simplified string literals to be a re-export of Qt functions. (#6175)
-- Dev: Fixed incorrect lua generation of `c2.HTTPRequest.create` for typescript plugins. (#6190)
+- Dev: Fixed incorrect lua generation of static methods for typescript plugins. (#6190, #6223)
 - Dev: Merged top/bottom and left/right notebook layouts. (#6215)
 
 ## 2.5.3

@@ -258,8 +258,8 @@ protected:
     void handleLinkClick(QMouseEvent *event, const Link &link,
                          MessageLayout *layout);
 
-    bool tryGetMessageAt(QPoint p, std::shared_ptr<MessageLayout> &message,
-                         QPoint &relativePos, int &index);
+    bool tryGetMessageAt(QPointF p, std::shared_ptr<MessageLayout> &message,
+                         QPointF &relativePos, int &index);
 
 private:
     struct InternalCtor {
