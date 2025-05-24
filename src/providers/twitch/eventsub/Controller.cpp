@@ -79,6 +79,11 @@ Controller::Controller()
     std::tie(this->eventSubHost, this->eventSubPort, this->eventSubPath) =
         getEventSubHost();
     this->thread = std::make_unique<std::thread>([this] {
+        // make sure we set in any case, even exceptions
+        auto guard = qScopeGuard([&] {
+            this->stoppedFlag.set();
+        });
+
         this->ioContext.run();
     });
     renameThread(*this->thread, "C2EventSub");
@@ -110,6 +115,12 @@ Controller::~Controller()
     }
 
     this->work.reset();
+
+    if (!this->stoppedFlag.waitFor(std::chrono::milliseconds(250)))
+    {
+        qCWarning(LOG) << "Force end";
+        return;
+    }
 
     if (this->thread->joinable())
     {
