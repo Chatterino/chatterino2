@@ -8,8 +8,9 @@
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
 #include "util/WindowsHelper.hpp"
-#include "widgets/helper/EffectLabel.hpp"
-#include "widgets/helper/TitlebarButtons.hpp"
+#include "widgets/buttons/LabelButton.hpp"
+#include "widgets/buttons/TitlebarButton.hpp"
+#include "widgets/buttons/TitlebarButtons.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/Window.hpp"
 
@@ -34,8 +35,6 @@
 #    include <QMargins>
 #    include <QOperatingSystemVersion>
 #endif
-
-#include "widgets/helper/TitlebarButton.hpp"
 
 namespace {
 
@@ -672,34 +671,21 @@ void BaseWindow::focusOutEvent(QFocusEvent *event)
     BaseWidget::focusOutEvent(event);
 }
 
-TitleBarButton *BaseWindow::addTitleBarButton(const TitleBarButtonStyle &style,
-                                              std::function<void()> onClicked)
+void BaseWindow::appendTitlebarButton(Button *button)
 {
-    TitleBarButton *button = new TitleBarButton;
-    button->setScaleIndependentSize(30, 30);
-
     this->ui_.buttons.push_back(button);
     this->ui_.titlebarBox->insertWidget(1, button);
-    button->setButtonStyle(style);
-
-    QObject::connect(button, &TitleBarButton::leftClicked, this, [onClicked] {
-        onClicked();
-    });
-
-    return button;
 }
 
-EffectLabel *BaseWindow::addTitleBarLabel(std::function<void()> onClicked)
+LabelButton *BaseWindow::addTitleBarLabel(std::function<void()> onClicked)
 {
-    EffectLabel *button = new EffectLabel;
+    auto *button = new LabelButton;
     button->setScaleIndependentHeight(30);
 
-    this->ui_.buttons.push_back(button);
-    this->ui_.titlebarBox->insertWidget(1, button);
+    this->appendTitlebarButton(button);
 
-    QObject::connect(button, &EffectLabel::leftClicked, this, [onClicked] {
-        onClicked();
-    });
+    QObject::connect(button, &LabelButton::leftClicked, this,
+                     std::move(onClicked));
 
     return button;
 }

@@ -1,9 +1,8 @@
-#include "widgets/helper/NotebookButton.hpp"
+#include "widgets/buttons/NotebookButton.hpp"
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "singletons/Theme.hpp"
-#include "widgets/helper/Button.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/DraggedSplit.hpp"
 #include "widgets/splits/Split.hpp"
@@ -41,14 +40,12 @@ void NotebookButton::themeChangedEvent()
     this->setMouseEffectColor(this->theme->tabs.regular.text);
 }
 
-void NotebookButton::paintEvent(QPaintEvent *event)
+void NotebookButton::paintContent(QPainter &painter)
 {
-    QPainter painter(this);
-
     QColor background;
     QColor foreground;
 
-    if (mouseDown_ || mouseOver_)
+    if (this->mouseDown() || this->mouseOver())
     {
         background = this->theme->tabs.regular.backgrounds.hover;
         foreground = this->theme->tabs.regular.text;
@@ -72,7 +69,7 @@ void NotebookButton::paintEvent(QPaintEvent *event)
                 {
                     tmp = this->theme->tabs.selected.line.regular;
                 }
-                else if (!this->mouseOver_)
+                else if (!this->mouseOver())
                 {
                     tmp.setAlpha(180);
                 }
@@ -136,22 +133,6 @@ void NotebookButton::paintEvent(QPaintEvent *event)
 
         default:;
     }
-
-    this->paintButton(painter);
-}
-
-void NotebookButton::mouseReleaseEvent(QMouseEvent *event)
-{
-    if (event->button() == Qt::LeftButton)
-    {
-        mouseDown_ = false;
-
-        update();
-
-        leftClicked();
-    }
-
-    Button::mouseReleaseEvent(event);
 }
 
 void NotebookButton::dragEnterEvent(QDragEnterEvent *event)
@@ -173,7 +154,6 @@ void NotebookButton::dragEnterEvent(QDragEnterEvent *event)
 
 void NotebookButton::dragLeaveEvent(QDragLeaveEvent *)
 {
-    this->mouseDown_ = true;
     this->update();
 
     auto *e =
