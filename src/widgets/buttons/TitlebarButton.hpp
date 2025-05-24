@@ -5,12 +5,12 @@
 namespace chatterino {
 
 enum class TitleBarButtonStyle : std::uint8_t {
-    None = 0,
-    Minimize = 1 << 0,
-    Maximize = 1 << 1,
-    Unmaximize = 1 << 2,
-    Close = 1 << 3,
-    Settings = 1 << 4,
+    None,
+    Minimize,
+    Maximize,
+    Unmaximize,
+    Close,
+    Settings,
 };
 
 class TitleBarButton : public DimButton

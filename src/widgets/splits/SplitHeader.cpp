@@ -324,7 +324,9 @@ void SplitHeader::initializeLayout()
 
                                 this->split_->setModerationMode(
                                     !moderationMode);
-                                w->setDim(DimButton::Dim(moderationMode));
+                                w->setDim(moderationMode
+                                              ? DimButton::Dim::Some
+                                              : DimButton::Dim::None);
                             }
                             break;
 

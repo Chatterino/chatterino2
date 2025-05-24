@@ -21,16 +21,6 @@ void LabelButton::setText(const QString &text)
     this->label_.setText(text);
 }
 
-void LabelButton::setPixmap(const QPixmap &pixmap)
-{
-    this->label_.setPixmap(pixmap);
-}
-
-void LabelButton::setMovie(QMovie *movie)
-{
-    this->label_.setMovie(movie);
-}
-
 QSize LabelButton::padding() const noexcept
 {
     return this->padding_;
@@ -47,7 +37,7 @@ void LabelButton::setPadding(QSize padding)
     this->updatePadding();
 }
 
-void LabelButton::setRichText()
+void LabelButton::enableRichText()
 {
     this->label_.setTextFormat(Qt::RichText);
 }

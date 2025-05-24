@@ -2,8 +2,6 @@
 
 #include "messages/Message.hpp"
 #include "widgets/BaseWidget.hpp"
-#include "widgets/buttons/LabelButton.hpp"
-#include "widgets/buttons/SvgButton.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>

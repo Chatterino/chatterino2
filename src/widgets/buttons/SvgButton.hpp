@@ -34,23 +34,12 @@ public:
 
     [[nodiscard]] SvgButton(Src source, BaseWidget *parent = nullptr,
                             QSize padding = {6, 3});
-    [[nodiscard]] SvgButton(const QString &unified,
-                            BaseWidget *parent = nullptr)
-        : SvgButton({.dark = unified, .light = unified}, parent)
-    {
-    }
 
     /// Returns the current source configuration.
     [[nodiscard]] Src source() const;
 
     /// Setter for #source()
     void setSource(Src source);
-
-    /// @brief Setter for #source()
-    ///
-    /// This will set the same source file for both light and dark theme,
-    /// effectively turning off automatic themeing.
-    void setSource(const QString &unified);
 
     /// @brief Returns the padding inside the button.
     ///
@@ -66,6 +55,7 @@ public:
 protected:
     void themeChangedEvent() override;
     void scaleChangedEvent(float scale) override;
+    void resizeEvent(QResizeEvent *e) override;
 
     void paintContent(QPainter &painter) override;
 

@@ -27,19 +27,6 @@ public:
     /// Supports Qt's HTML subset.
     void setText(const QString &text);
 
-    /// @brief Sets the label's pixmap to @a pixmap.
-    ///
-    /// Any previous content is cleared.
-    ///
-    /// Prefer using a `PixmapButton` or `SvgButton`.
-    void setPixmap(const QPixmap &pixmap);
-
-    /// @brief Sets the label contents to @a movie.
-    ///
-    /// Any previous content is cleared.
-    /// The label does NOT take ownership of the movie.
-    void setMovie(QMovie *movie);
-
     /// @brief Returns the padding inside the button.
     ///
     /// `width` is the padding applied horizontally (left and right).
@@ -52,7 +39,7 @@ public:
     void setPadding(QSize padding);
 
     /// Sets the label to display rich text (Qt's HTML subset)
-    void setRichText();
+    void enableRichText();
 
 protected:
     void paintContent(QPainter &painter) override;

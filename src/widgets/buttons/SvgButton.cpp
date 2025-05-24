@@ -53,6 +53,13 @@ void SvgButton::scaleChangedEvent(float scale)
     this->invalidateContent();
 }
 
+void SvgButton::resizeEvent(QResizeEvent *e)
+{
+    Button::resizeEvent(e);
+
+    this->invalidateContent();
+}
+
 void SvgButton::paintContent(QPainter &painter)
 {
     QSize actualPadding = this->scale() * this->padding_;
