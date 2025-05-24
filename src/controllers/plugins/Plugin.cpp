@@ -1,7 +1,7 @@
 #ifdef CHATTERINO_HAVE_PLUGINS
 #    include "controllers/plugins/Plugin.hpp"
 
-#    include "common/network/NetworkCommon.hpp"
+#    include "Application.hpp"
 #    include "common/QLogging.hpp"
 #    include "controllers/commands/CommandController.hpp"
 #    include "controllers/plugins/PluginPermission.hpp"

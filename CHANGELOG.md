@@ -3,7 +3,7 @@
 ## Unversioned
 
 - Minor: Added user notes to the user info dialog (when clicking a username). (#6122)
-- Minor: Added cached emotes fallback when fetching from a provider fails. (#6125)
+- Minor: Added cached emotes fallback when fetching from a provider fails. (#6125, #6229)
 - Minor: Add an option for the reduced opacity of message history. (#6121)
 - Minor: Make paused chat indicator more visible, and fix its zoom behavior. (#6123)
 - Minor: Added WebSocket API for plugins. (#6076, #6186)
@@ -42,12 +42,15 @@
 - Dev: Bumped deprecation cutoff to Qt 6.4.3. (#6169)
 - Dev: Use `QMetaObject::invokeMethod` to run code on a specific thread. (#6203)
 - Dev: Added a `run-and-kill.sh` script to help debug crash-on-exit bugs. (#6188)
+- Dev: Refactored the `TimeoutStackStyle` enum into its own file. (#6216)
+- Dev: Refactored `Notebook`-related enums into their own file. (#6220)
 - Dev: Refactored event API initialization away from Application and into TwitchIrcServer. (#6198)
 - Dev: Updated GoogleTest to v1.17.0. (#6180)
 - Dev: Mini refactor of `TwitchAccount`. (#6182)
 - Dev: Refactored away some `getApp` usages in `WindowManager`. (#6194)
 - Dev: Simplified string literals to be a re-export of Qt functions. (#6175)
 - Dev: Fixed incorrect lua generation of `c2.HTTPRequest.create` for typescript plugins. (#6190)
+- Dev: Merged top/bottom and left/right notebook layouts. (#6215)
 
 ## 2.5.3
 

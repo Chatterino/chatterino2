@@ -404,7 +404,7 @@ void writeProviderEmotesCache(const QString &id, const QString &provider,
     }
 
     threadPool->start([bytes, id, provider]() {
-        auto cacheKey = id % "." % provider;
+        QString cacheKey = id % "." % provider;
         QFile responseCache(getApp()->getPaths().cacheFilePath(cacheKey));
 
         if (responseCache.open(QIODevice::WriteOnly))
@@ -419,7 +419,7 @@ void writeProviderEmotesCache(const QString &id, const QString &provider,
 bool readProviderEmotesCache(const QString &id, const QString &provider,
                              const std::function<void(QJsonDocument)> &callback)
 {
-    auto cacheKey = id % "." % provider;
+    QString cacheKey = id % "." % provider;
     QFile responseCache(getApp()->getPaths().cacheFilePath(cacheKey));
 
     if (responseCache.open(QIODevice::ReadOnly))
