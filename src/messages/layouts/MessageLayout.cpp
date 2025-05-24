@@ -56,12 +56,12 @@ const MessagePtr &MessageLayout::getMessagePtr() const
 }
 
 // Height
-int MessageLayout::getHeight() const
+qreal MessageLayout::getHeight() const
 {
     return this->container_.getHeight();
 }
 
-int MessageLayout::getWidth() const
+qreal MessageLayout::getWidth() const
 {
     return this->container_.getWidth();
 }
@@ -113,7 +113,7 @@ bool MessageLayout::layout(const MessageLayoutContext &ctx,
         return false;
     }
 
-    int oldHeight = this->container_.getHeight();
+    qreal oldHeight = this->container_.getHeight();
     this->actuallyLayout(ctx);
     if (widthChanged || this->container_.getHeight() != oldHeight)
     {
@@ -236,7 +236,7 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
     }
 
     // draw on buffer
-    ctx.painter.drawPixmap(0, ctx.y, *pixmap);
+    ctx.painter.drawPixmap(QPointF{0, ctx.y}, *pixmap);
 
     // draw gif emotes
     result.hasAnimatedElements =
@@ -245,15 +245,27 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
     // draw disabled
     if (this->message_->flags.has(MessageFlag::Disabled))
     {
-        ctx.painter.fillRect(0, ctx.y, pixmap->width(), pixmap->height(),
-                             ctx.messageColors.disabled);
+        ctx.painter.fillRect(
+            QRectF{
+                0,
+                ctx.y,
+                static_cast<qreal>(pixmap->width()),
+                static_cast<qreal>(pixmap->height()),
+            },
+            ctx.messageColors.disabled);
     }
 
     if (this->message_->flags.has(MessageFlag::RecentMessage) &&
         ctx.preferences.fadeMessageHistory)
     {
-        ctx.painter.fillRect(0, ctx.y, pixmap->width(), pixmap->height(),
-                             ctx.messageColors.disabled);
+        ctx.painter.fillRect(
+            QRectF{
+                0,
+                ctx.y,
+                static_cast<qreal>(pixmap->width()),
+                static_cast<qreal>(pixmap->height()),
+            },
+            ctx.messageColors.disabled);
     }
 
     if (!ctx.isMentions &&
@@ -262,7 +274,12 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
         ctx.preferences.enableRedeemedHighlight)
     {
         ctx.painter.fillRect(
-            0, ctx.y, int(this->scale_ * 4), pixmap->height(),
+            QRectF{
+                0,
+                ctx.y,
+                this->scale_ * 4,
+                static_cast<qreal>(pixmap->height()),
+            },
             *ColorProvider::instance().color(ColorType::RedeemedHighlight));
     }
 
@@ -276,8 +293,14 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
     // draw message seperation line
     if (ctx.preferences.separateMessages)
     {
-        ctx.painter.fillRect(0, ctx.y, this->container_.getWidth() + 64, 1,
-                             ctx.messageColors.messageSeperator);
+        ctx.painter.fillRect(
+            QRectF{
+                0.0,
+                static_cast<qreal>(ctx.y),
+                this->container_.getWidth() + 64,
+                1.0,
+            },
+            ctx.messageColors.messageSeperator);
     }
 
     // draw last read message line
@@ -297,8 +320,14 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
 
         QBrush brush(color, ctx.preferences.lastMessagePattern);
 
-        ctx.painter.fillRect(0, ctx.y + this->container_.getHeight() - 1,
-                             pixmap->width(), 1, brush);
+        ctx.painter.fillRect(
+            QRectF{
+                0,
+                ctx.y + this->container_.getHeight() - 1,
+                static_cast<qreal>(pixmap->width()),
+                1,
+            },
+            brush);
     }
 
     this->bufferValid_ = true;
@@ -306,7 +335,7 @@ MessagePaintResult MessageLayout::paint(const MessagePaintContext &ctx)
     return result;
 }
 
-QPixmap *MessageLayout::ensureBuffer(QPainter &painter, int width, bool clear)
+QPixmap *MessageLayout::ensureBuffer(QPainter &painter, qreal width, bool clear)
 {
     if (this->buffer_ != nullptr)
     {
@@ -315,9 +344,9 @@ QPixmap *MessageLayout::ensureBuffer(QPainter &painter, int width, bool clear)
 
     // Create new buffer
     this->buffer_ = std::make_unique<QPixmap>(
-        int(width * painter.device()->devicePixelRatioF()),
-        int(this->container_.getHeight() *
-            painter.device()->devicePixelRatioF()));
+        static_cast<int>(width * painter.device()->devicePixelRatioF()),
+        static_cast<int>(this->container_.getHeight() *
+                         painter.device()->devicePixelRatioF()));
     this->buffer_->setDevicePixelRatio(painter.device()->devicePixelRatioF());
 
     if (clear)
@@ -469,14 +498,14 @@ void MessageLayout::deleteCache()
 // returns nullptr if none was found
 
 // fourtf: this should return a MessageLayoutItem
-const MessageLayoutElement *MessageLayout::getElementAt(QPoint point) const
+const MessageLayoutElement *MessageLayout::getElementAt(QPointF point) const
 {
     // go through all words and return the first one that contains the point.
     return this->container_.getElementAt(point);
 }
 
 std::pair<int, int> MessageLayout::getWordBounds(
-    const MessageLayoutElement *hoveredElement, QPoint relativePos) const
+    const MessageLayoutElement *hoveredElement, QPointF relativePos) const
 {
     // An element with wordId != -1 can be multiline, so we need to check all
     // elements in the container
@@ -504,7 +533,7 @@ size_t MessageLayout::getFirstMessageCharacterIndex() const
     return this->container_.getFirstMessageCharacterIndex();
 }
 
-size_t MessageLayout::getSelectionIndex(QPoint position) const
+size_t MessageLayout::getSelectionIndex(QPointF position) const
 {
     return this->container_.getSelectionIndex(position);
 }
