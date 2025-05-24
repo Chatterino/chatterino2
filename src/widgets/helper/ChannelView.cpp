@@ -279,6 +279,24 @@ qreal highlightEasingFunction(qreal progress)
     return 1.0 + pow((20.0 / 9.0) * (0.5 * progress - 0.5), 3.0);
 }
 
+float getTooltipScale(EmoteTooltipScale emoteTooltipScale)
+{
+    switch (emoteTooltipScale)
+    {
+        case EmoteTooltipScale::Small:
+            return 0.5F;
+        case EmoteTooltipScale::Medium:
+            return 1.0F;
+        case EmoteTooltipScale::Large:
+            return 1.5F;
+        case EmoteTooltipScale::Huge:
+            return 2.0F;
+
+        default:
+            return 1.0F;
+    }
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -2040,12 +2058,12 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 
             if (emoteElement)
             {
-                this->tooltipWidget_->setOne({
+                auto scale = getSettings()->emoteTooltipScale.getEnum();
+                this->tooltipWidget_->setOne(TooltipEntry::scaled(
                     showThumbnail
                         ? emoteElement->getEmote()->images.getImage(3.0)
                         : nullptr,
-                    element->getTooltip(),
-                });
+                    element->getTooltip(), getTooltipScale(scale)));
             }
             else if (layeredEmoteElement)
             {
@@ -2076,18 +2094,22 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                         if (i == 0)
                         {
                             // First entry gets a large image and full description
-                            entries.push_back({showThumbnail
-                                                   ? emote->images.getImage(3.0)
-                                                   : nullptr,
-                                               emoteTooltips[i]});
+                            auto scale =
+                                getSettings()->emoteTooltipScale.getEnum();
+                            entries.push_back(TooltipEntry::scaled(
+                                showThumbnail ? emote->images.getImage(3.0)
+                                              : nullptr,
+                                emoteTooltips[i], getTooltipScale(scale)));
                         }
                         else
                         {
                             // Every other entry gets a small image and just the emote name
-                            entries.push_back({showThumbnail
-                                                   ? emote->images.getImage(1.0)
-                                                   : nullptr,
-                                               emote->name.string});
+                            auto scale =
+                                getSettings()->emoteTooltipScale.getEnum();
+                            entries.push_back(TooltipEntry::scaled(
+                                showThumbnail ? emote->images.getImage(1.0)
+                                              : nullptr,
+                                emote->name.string, getTooltipScale(scale)));
                         }
                     }
 
@@ -2104,12 +2126,12 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             }
             else if (badgeElement)
             {
-                this->tooltipWidget_->setOne({
+                auto scale = getSettings()->emoteTooltipScale.getEnum();
+                this->tooltipWidget_->setOne(TooltipEntry::scaled(
                     showThumbnail
                         ? badgeElement->getEmote()->images.getImage(3.0)
                         : nullptr,
-                    element->getTooltip(),
-                });
+                    element->getTooltip(), getTooltipScale(scale)));
             }
         }
         else
