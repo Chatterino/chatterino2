@@ -471,7 +471,7 @@ Sends the request. This function returns nothing.
 
 ```lua
 local url = "http://localhost:8080/thing"
-local request = c2.HTTPRequest.create("Post", url)
+local request = c2.HTTPRequest.create(c2.HTTPMethod.Post, url)
 request:set_timeout(1000)
 request:set_payload("TEST!")
 request:set_header("X-Test", "Testing!")

@@ -484,6 +484,19 @@ int Image::height() const
     return static_cast<int>(this->expectedSize_.height() * this->scale_);
 }
 
+QSizeF Image::size() const
+{
+    assertInGuiThread();
+
+    if (auto pixmap = this->frames_->first())
+    {
+        return pixmap->size().toSizeF() * this->scale_;
+    }
+
+    // No frames loaded, use the expected size
+    return this->expectedSize_.toSizeF() * this->scale_;
+}
+
 void Image::actuallyLoad()
 {
     auto weak = weakOf(this);
