@@ -15,6 +15,7 @@
 #include "controllers/nicknames/Nickname.hpp"
 #include "controllers/sound/ISoundController.hpp"
 #include "singletons/Toasts.hpp"
+#include "util/QMagicEnumTagged.hpp"
 #include "util/RapidJsonSerializeQString.hpp"  // IWYU pragma: keep
 #include "widgets/NotebookEnums.hpp"
 
@@ -97,7 +98,7 @@ enum class TabStyle : std::uint8_t {
     Compact,
 };
 
-/// Settings which are availlable for reading and writing on the gui thread.
+/// Settings which are available for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
 class Settings
 {
@@ -772,5 +773,22 @@ constexpr magic_enum::customize::customize_t
 
         default:
             return default_tag;
+    }
+}
+
+template <>
+constexpr chatterino::qmagicenum::customize::customize_t
+    chatterino::qmagicenum::customize::enumTaggedData<
+        chatterino::TabStyle, chatterino::qmagicenum::tag::DisplayName>(
+        chatterino::TabStyle value) noexcept
+{
+    using chatterino::TabStyle;
+    switch (value)
+    {
+        case TabStyle::Normal:
+            return "Normal (default)";
+
+        default:
+            return {};
     }
 }
