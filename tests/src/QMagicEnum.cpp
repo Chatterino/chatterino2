@@ -3,11 +3,14 @@
 #include "common/FlagsEnum.hpp"
 #include "common/Literals.hpp"
 #include "Test.hpp"
+#include "util/QMagicEnumTagged.hpp"
 
 using namespace chatterino;
 using namespace literals;
 
 using qmagicenum::enumCast;
+using qmagicenum::enumDisplayName;
+using qmagicenum::enumDisplayNameString;
 using qmagicenum::enumFlagsName;
 using qmagicenum::enumName;
 using qmagicenum::enumNames;
@@ -100,6 +103,21 @@ constexpr magic_enum::customize::customize_t
 
         default:
             return default_tag;
+    }
+}
+
+template <>
+constexpr magic_enum::customize::customize_t
+    chatterino::qmagicenum::customize::enumTaggedData<
+        MyCustom, qmagicenum::tag::DisplayName>(MyCustom value) noexcept
+{
+    switch (value)
+    {
+        case MyCustom::First:
+            return "First (Display Name)";
+
+        default:
+            return magic_enum::customize::default_tag;
     }
 }
 
@@ -197,4 +215,37 @@ TEST(QMagicEnum, caseInsensitive)
     static_assert(checkInsensitive(MyFlag::Four, u"fOUR"));
     static_assert(checkInsensitive(MyCustom::Second, u"MySecond.*"));
     static_assert(checkInsensitive(OpenOne, u"openone"));
+}
+
+TEST(QMagicEnumTagged, displayName)
+{
+    // MyCustom has a display name specialization for First, but not for Default or Second
+    static_assert(eq(enumDisplayName<MyCustom::Default>(), u"Default"));
+    static_assert(eq(enumDisplayName(MyCustom::Default), u"Default"));
+    static_assert(eq(enumDisplayName(static_cast<MyCustom>(1)), u"Default"));
+    static_assert(
+        eq(enumDisplayName<MyCustom::First>(), u"First (Display Name)"));
+    static_assert(
+        eq(enumDisplayName(MyCustom::First), u"First (Display Name)"));
+    static_assert(
+        eq(enumDisplayName(static_cast<MyCustom>(4)), u"First (Display Name)"));
+    static_assert(eq(enumDisplayName<MyCustom::Second>(), u"mysecond.*"));
+    static_assert(eq(enumDisplayName(MyCustom::Second), u"mysecond.*"));
+    static_assert(eq(enumDisplayName(static_cast<MyCustom>(9)), u"mysecond.*"));
+
+    // MyFlag does not have a display name specialization
+    static_assert(eq(enumDisplayName<MyFlag::None>(), u"None"));
+    static_assert(eq(enumDisplayName<MyFlag::One>(), u"One"));
+    static_assert(eq(enumDisplayName<MyFlag::Two>(), u"Two"));
+    static_assert(eq(enumDisplayName<MyFlag::Four>(), u"Four"));
+}
+
+TEST(QMagicEnumTagged, enumDisplayNameString)
+{
+    ASSERT_EQ(enumDisplayNameString<MyCustom::First>(),
+              u"First (Display Name)");
+    ASSERT_EQ(enumDisplayNameString<MyCustom::Second>(), u"mysecond.*");
+
+    ASSERT_EQ(enumDisplayNameString(MyCustom::First), u"First (Display Name)");
+    ASSERT_EQ(enumDisplayNameString(MyCustom::Second), u"mysecond.*");
 }
