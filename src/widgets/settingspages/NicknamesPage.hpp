@@ -14,6 +14,8 @@ public:
 
 private:
     EditableModelView *view_;
+    void importNicknames();
+    void exportNicknames();
 };
 
 }  // namespace chatterino
