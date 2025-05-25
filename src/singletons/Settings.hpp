@@ -98,7 +98,7 @@ enum class TabStyle : std::uint8_t {
     Compact,
 };
 
-/// Settings which are availlable for reading and writing on the gui thread.
+/// Settings which are available for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
 class Settings
 {
