@@ -35,10 +35,10 @@
 #include "util/IncognitoBrowser.hpp"
 #include "util/QMagicEnum.hpp"
 #include "util/Twitch.hpp"
+#include "widgets/buttons/LabelButton.hpp"
 #include "widgets/dialogs/ReplyThreadPopup.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
-#include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/ScrollbarHighlight.hpp"
 #include "widgets/helper/SearchPopup.hpp"
 #include "widgets/Notebook.hpp"
@@ -372,19 +372,17 @@ ChannelView::ChannelView(InternalCtor /*tag*/, QWidget *parent, Split *split,
 
 void ChannelView::initializeLayout()
 {
-    this->goToBottom_ = new EffectLabel(this, 0);
+    this->goToBottom_ = new LabelButton("More messages below", this);
     this->goToBottom_->setStyleSheet(
         "background-color: rgba(0,0,0,0.66); color: #FFF;");
-    this->goToBottom_->getLabel().setText("More messages below");
     this->goToBottom_->setVisible(false);
 
-    QObject::connect(
-        this->goToBottom_, &EffectLabel::leftClicked, this, [this] {
-            QTimer::singleShot(180, this, [this] {
-                this->scrollBar_->scrollToBottom(
-                    getSettings()->enableSmoothScrollingNewMessages.getValue());
-            });
+    QObject::connect(this->goToBottom_, &Button::leftClicked, this, [this] {
+        QTimer::singleShot(180, this, [this] {
+            this->scrollBar_->scrollToBottom(
+                getSettings()->enableSmoothScrollingNewMessages.getValue());
         });
+    });
 }
 
 void ChannelView::initializeScrollbar()
@@ -624,7 +622,7 @@ void ChannelView::scaleChangedEvent(float scale)
                  std::max<float>(
                      0.01, this->logicalDpiX() * this->devicePixelRatioF());
 #endif
-        this->goToBottom_->getLabel().setFont(
+        this->goToBottom_->setFont(
             getApp()->getFonts()->getFont(FontStyle::UiMedium, factor));
     }
 }

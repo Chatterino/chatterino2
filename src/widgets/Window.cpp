@@ -17,16 +17,17 @@
 #include "singletons/Theme.hpp"
 #include "singletons/Updates.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/InitUpdateButton.hpp"
 #include "util/RapidJsonSerializeQSize.hpp"
 #include "widgets/AccountSwitchPopup.hpp"
+#include "widgets/buttons/InitUpdateButton.hpp"
+#include "widgets/buttons/LabelButton.hpp"
+#include "widgets/buttons/PixmapButton.hpp"
+#include "widgets/buttons/TitlebarButton.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/switcher/QuickSwitcherPopup.hpp"
 #include "widgets/dialogs/UpdateDialog.hpp"
 #include "widgets/dialogs/WelcomeDialog.hpp"
-#include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/NotebookTab.hpp"
-#include "widgets/helper/TitlebarButton.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/ClosedSplits.hpp"
 #include "widgets/splits/Split.hpp"
@@ -202,12 +203,14 @@ void Window::addCustomTitlebarButtons()
     }
 
     // settings
-    this->addTitleBarButton(TitleBarButtonStyle::Settings, [this] {
-        getApp()->getWindows()->showSettingsDialog(this);
-    });
+    this->addTitleBarButton<TitleBarButton>(
+        [this] {
+            getApp()->getWindows()->showSettingsDialog(this);
+        },
+        TitleBarButtonStyle::Settings);
 
     // updates
-    auto *update = this->addTitleBarButton(TitleBarButtonStyle::None, [] {});
+    auto *update = this->addTitleBarButton<PixmapButton>([] {});
 
     initUpdateButton(*update, this->signalHolder_);
 
@@ -221,7 +224,7 @@ void Window::addCustomTitlebarButtons()
 
     // streamer mode
     this->streamerModeTitlebarIcon_ =
-        this->addTitleBarButton(TitleBarButtonStyle::StreamerMode, [this] {
+        this->addTitleBarButton<PixmapButton>([this] {
             getApp()->getWindows()->showSettingsDialog(
                 this, SettingsDialogPreference::StreamerMode);
         });
@@ -796,11 +799,11 @@ void Window::onAccountSelected()
     {
         if (user->isAnon())
         {
-            this->userLabel_->getLabel().setText("anonymous");
+            this->userLabel_->setText("anonymous");
         }
         else
         {
-            this->userLabel_->getLabel().setText(user->getUserName());
+            this->userLabel_->setText(user->getUserName());
         }
     }
 }

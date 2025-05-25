@@ -9,6 +9,8 @@
 
 namespace chatterino {
 
+class PixmapButton;
+
 class DraggablePopup : public BaseWindow
 {
     Q_OBJECT
@@ -60,7 +62,7 @@ private:
     // dragTimer_ is called ~60 times per second once the user has initiated dragging
     QTimer dragTimer_;
 
-    Button *pinButton_ = nullptr;
+    PixmapButton *pinButton_ = nullptr;
     bool isPinned_ = false;
 };
 

@@ -6,6 +6,7 @@
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
 #include "widgets/BasePopup.hpp"
+#include "widgets/buttons/SignalLabel.hpp"
 #include "widgets/layout/FlowLayout.hpp"
 
 #include <QFile>
