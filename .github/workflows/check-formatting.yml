@@ -30,7 +30,7 @@ jobs:
         with:
           source: "./src ./tests/src ./benchmarks/src ./mocks/include"
           extensions: "hpp,cpp"
-          clangFormatVersion: 16
+          clangFormatVersion: 19
 
       - name: Check line-endings
         run: ./scripts/check-line-endings.sh

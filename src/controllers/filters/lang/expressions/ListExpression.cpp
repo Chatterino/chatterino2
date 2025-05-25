@@ -3,7 +3,7 @@
 namespace chatterino::filters {
 
 ListExpression::ListExpression(ExpressionList &&list)
-    : list_(std::move(list)){};
+    : list_(std::move(list)) {};
 
 QVariant ListExpression::execute(const ContextMap &context) const
 {
