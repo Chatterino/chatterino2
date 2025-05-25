@@ -53,6 +53,7 @@
 - Dev: Fixed incorrect lua generation of static methods for typescript plugins. (#6190, #6223)
 - Dev: Merged top/bottom and left/right notebook layouts. (#6215)
 - Dev: Refactored `Button` and friends. (#6102)
+- Dev: Bumped clang-format requirement to 19. (#6236)
 
 ## 2.5.3
 
