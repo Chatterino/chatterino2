@@ -54,6 +54,7 @@
 - Dev: Merged top/bottom and left/right notebook layouts. (#6215)
 - Dev: Refactored `Button` and friends. (#6102)
 - Dev: `OnceFlag`'s internal flag is now atomic. (#6237)
+- Dev: Bumped clang-format requirement to 19. (#6236)
 
 ## 2.5.3
 

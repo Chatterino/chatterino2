@@ -7,7 +7,7 @@ RegexExpression::RegexExpression(const QString &regex, bool caseInsensitive)
     , caseInsensitive_(caseInsensitive)
     , regex_(QRegularExpression(
           regex, caseInsensitive ? QRegularExpression::CaseInsensitiveOption
-                                 : QRegularExpression::NoPatternOption)){};
+                                 : QRegularExpression::NoPatternOption)) {};
 
 QVariant RegexExpression::execute(const ContextMap & /*context*/) const
 {
