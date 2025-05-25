@@ -54,10 +54,10 @@ class IStreamerMode;
 class ITwitchUsers;
 class NativeMessagingServer;
 namespace pronouns {
-    class Pronouns;
+class Pronouns;
 }  // namespace pronouns
 namespace eventsub {
-    class IController;
+class IController;
 }  // namespace eventsub
 
 class IApplication

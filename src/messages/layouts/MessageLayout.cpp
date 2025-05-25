@@ -23,15 +23,15 @@ namespace chatterino {
 
 namespace {
 
-    QColor blendColors(const QColor &base, const QColor &apply)
-    {
-        const qreal &alpha = apply.alphaF();
-        QColor result;
-        result.setRgbF(base.redF() * (1 - alpha) + apply.redF() * alpha,
-                       base.greenF() * (1 - alpha) + apply.greenF() * alpha,
-                       base.blueF() * (1 - alpha) + apply.blueF() * alpha);
-        return result;
-    }
+QColor blendColors(const QColor &base, const QColor &apply)
+{
+    const qreal &alpha = apply.alphaF();
+    QColor result;
+    result.setRgbF(base.redF() * (1 - alpha) + apply.redF() * alpha,
+                   base.greenF() * (1 - alpha) + apply.greenF() * alpha,
+                   base.blueF() * (1 - alpha) + apply.blueF() * alpha);
+    return result;
+}
 }  // namespace
 
 MessageLayout::MessageLayout(MessagePtr message)

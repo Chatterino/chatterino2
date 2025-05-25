@@ -105,11 +105,11 @@ private:
 namespace pajlada {
 
 namespace {
-    chatterino::HighlightPhrase constructError()
-    {
-        return chatterino::HighlightPhrase(QString(), false, false, false,
-                                           false, false, QString(), QColor());
-    }
+chatterino::HighlightPhrase constructError()
+{
+    return chatterino::HighlightPhrase(QString(), false, false, false, false,
+                                       false, QString(), QColor());
+}
 }  // namespace
 
 template <>
