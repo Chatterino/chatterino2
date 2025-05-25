@@ -63,35 +63,34 @@ using namespace literals;
 
 namespace {
 #if QT_VERSION < QT_VERSION_CHECK(6, 1, 0)
-    const QString MAGIC_MESSAGE_SUFFIX = QString((const char *)u8" \U000E0000");
+const QString MAGIC_MESSAGE_SUFFIX = QString((const char *)u8" \U000E0000");
 #else
-    const QString MAGIC_MESSAGE_SUFFIX = QString::fromUtf8(u8" \U000E0000");
+const QString MAGIC_MESSAGE_SUFFIX = QString::fromUtf8(u8" \U000E0000");
 #endif
-    constexpr int CLIP_CREATION_COOLDOWN = 5000;
-    const QString CLIPS_LINK("https://clips.twitch.tv/%1");
-    const QString CLIPS_FAILURE_CLIPS_UNAVAILABLE_TEXT(
-        "Failed to create a clip - clips are temporarily unavailable: %1");
-    const QString CLIPS_FAILURE_CLIPS_DISABLED_TEXT(
-        "Failed to create a clip - the streamer has clips disabled in their "
-        "channel.");
-    const QString CLIPS_FAILURE_CLIPS_RESTRICTED_TEXT(
-        "Failed to create a clip - the streamer has restricted clip creation "
-        "to subscribers, or followers of an unknown duration.");
-    const QString CLIPS_FAILURE_CLIPS_RESTRICTED_CATEGORY_TEXT(
-        "Failed to create a clip - the streamer has disabled clips while in "
-        "this category.");
-    const QString CLIPS_FAILURE_NOT_AUTHENTICATED_TEXT(
-        "Failed to create a clip - you need to re-authenticate.");
-    const QString CLIPS_FAILURE_UNKNOWN_ERROR_TEXT(
-        "Failed to create a clip: %1");
-    const QString LOGIN_PROMPT_TEXT("Click here to add your account again.");
-    const Link ACCOUNTS_LINK(Link::OpenAccountsPage, QString());
+constexpr int CLIP_CREATION_COOLDOWN = 5000;
+const QString CLIPS_LINK("https://clips.twitch.tv/%1");
+const QString CLIPS_FAILURE_CLIPS_UNAVAILABLE_TEXT(
+    "Failed to create a clip - clips are temporarily unavailable: %1");
+const QString CLIPS_FAILURE_CLIPS_DISABLED_TEXT(
+    "Failed to create a clip - the streamer has clips disabled in their "
+    "channel.");
+const QString CLIPS_FAILURE_CLIPS_RESTRICTED_TEXT(
+    "Failed to create a clip - the streamer has restricted clip creation "
+    "to subscribers, or followers of an unknown duration.");
+const QString CLIPS_FAILURE_CLIPS_RESTRICTED_CATEGORY_TEXT(
+    "Failed to create a clip - the streamer has disabled clips while in "
+    "this category.");
+const QString CLIPS_FAILURE_NOT_AUTHENTICATED_TEXT(
+    "Failed to create a clip - you need to re-authenticate.");
+const QString CLIPS_FAILURE_UNKNOWN_ERROR_TEXT("Failed to create a clip: %1");
+const QString LOGIN_PROMPT_TEXT("Click here to add your account again.");
+const Link ACCOUNTS_LINK(Link::OpenAccountsPage, QString());
 
-    // Maximum number of chatters to fetch when refreshing chatters
-    constexpr auto MAX_CHATTERS_TO_FETCH = 5000;
+// Maximum number of chatters to fetch when refreshing chatters
+constexpr auto MAX_CHATTERS_TO_FETCH = 5000;
 
-    // From Twitch docs - expected size for a badge (1x)
-    constexpr QSize BASE_BADGE_SIZE(18, 18);
+// From Twitch docs - expected size for a badge (1x)
+constexpr QSize BASE_BADGE_SIZE(18, 18);
 }  // namespace
 
 TwitchChannel::TwitchChannel(const QString &name)

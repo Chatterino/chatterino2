@@ -45,10 +45,10 @@ struct BttvLiveUpdateEmoteRemoveMessage;
 
 class SeventvEmotes;
 namespace seventv::eventapi {
-    struct EmoteAddDispatch;
-    struct EmoteUpdateDispatch;
-    struct EmoteRemoveDispatch;
-    struct UserConnectionUpdateDispatch;
+struct EmoteAddDispatch;
+struct EmoteUpdateDispatch;
+struct EmoteRemoveDispatch;
+struct UserConnectionUpdateDispatch;
 }  // namespace seventv::eventapi
 
 struct ChannelPointReward;

@@ -37,8 +37,8 @@ Atomic<std::optional<QString>> &nmIpcError();
 
 namespace nm::client {
 
-    void sendMessage(const QByteArray &array);
-    void writeToCout(const QByteArray &array);
+void sendMessage(const QByteArray &array);
+void writeToCout(const QByteArray &array);
 
 }  // namespace nm::client
 

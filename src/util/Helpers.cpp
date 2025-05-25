@@ -33,104 +33,104 @@ namespace chatterino {
 
 namespace helpers::detail {
 
-    SizeType skipSpace(QStringView view, SizeType startPos)
+SizeType skipSpace(QStringView view, SizeType startPos)
+{
+    while (startPos < view.length() && view.at(startPos).isSpace())
     {
-        while (startPos < view.length() && view.at(startPos).isSpace())
-        {
-            startPos++;
-        }
-        return startPos - 1;
+        startPos++;
     }
+    return startPos - 1;
+}
 
-    bool matchesIgnorePlural(QStringView word, const QString &expected)
+bool matchesIgnorePlural(QStringView word, const QString &expected)
+{
+    if (!word.startsWith(expected))
     {
-        if (!word.startsWith(expected))
-        {
-            return false;
-        }
-        if (word.length() == expected.length())
-        {
-            return true;
-        }
-        return word.length() == expected.length() + 1 &&
-               word.at(word.length() - 1).toLatin1() == 's';
+        return false;
     }
-
-    std::pair<uint64_t, bool> findUnitMultiplierToSec(QStringView view,
-                                                      SizeType &pos)
+    if (word.length() == expected.length())
     {
-        // Step 1. find end of unit
-        auto startIdx = pos;
-        auto endIdx = view.length();
-        for (; pos < view.length(); pos++)
-        {
-            auto c = view.at(pos);
-            if (c.isSpace() || c.isDigit())
-            {
-                endIdx = pos;
-                break;
-            }
-        }
-        pos--;
+        return true;
+    }
+    return word.length() == expected.length() + 1 &&
+           word.at(word.length() - 1).toLatin1() == 's';
+}
 
-        // TODO(QT6): use sliced (more readable)
-        auto unit = view.mid(startIdx, endIdx - startIdx);
-        if (unit.isEmpty())
+std::pair<uint64_t, bool> findUnitMultiplierToSec(QStringView view,
+                                                  SizeType &pos)
+{
+    // Step 1. find end of unit
+    auto startIdx = pos;
+    auto endIdx = view.length();
+    for (; pos < view.length(); pos++)
+    {
+        auto c = view.at(pos);
+        if (c.isSpace() || c.isDigit())
         {
-            return std::make_pair(0, false);
+            endIdx = pos;
+            break;
         }
+    }
+    pos--;
 
-        auto first = unit.at(0).toLatin1();
-        switch (first)
-        {
-            case 's': {
-                if (unit.length() == 1 ||
-                    matchesIgnorePlural(unit, QStringLiteral("second")))
-                {
-                    return std::make_pair(1, true);
-                }
-            }
-            break;
-            case 'm': {
-                if (unit.length() == 1 ||
-                    matchesIgnorePlural(unit, QStringLiteral("minute")))
-                {
-                    return std::make_pair(60, true);
-                }
-                if ((unit.length() == 2 && unit.at(1).toLatin1() == 'o') ||
-                    matchesIgnorePlural(unit, QStringLiteral("month")))
-                {
-                    return std::make_pair(60 * 60 * 24 * 30, true);
-                }
-            }
-            break;
-            case 'h': {
-                if (unit.length() == 1 ||
-                    matchesIgnorePlural(unit, QStringLiteral("hour")))
-                {
-                    return std::make_pair(60 * 60, true);
-                }
-            }
-            break;
-            case 'd': {
-                if (unit.length() == 1 ||
-                    matchesIgnorePlural(unit, QStringLiteral("day")))
-                {
-                    return std::make_pair(60 * 60 * 24, true);
-                }
-            }
-            break;
-            case 'w': {
-                if (unit.length() == 1 ||
-                    matchesIgnorePlural(unit, QStringLiteral("week")))
-                {
-                    return std::make_pair(60 * 60 * 24 * 7, true);
-                }
-            }
-            break;
-        }
+    // TODO(QT6): use sliced (more readable)
+    auto unit = view.mid(startIdx, endIdx - startIdx);
+    if (unit.isEmpty())
+    {
         return std::make_pair(0, false);
     }
+
+    auto first = unit.at(0).toLatin1();
+    switch (first)
+    {
+        case 's': {
+            if (unit.length() == 1 ||
+                matchesIgnorePlural(unit, QStringLiteral("second")))
+            {
+                return std::make_pair(1, true);
+            }
+        }
+        break;
+        case 'm': {
+            if (unit.length() == 1 ||
+                matchesIgnorePlural(unit, QStringLiteral("minute")))
+            {
+                return std::make_pair(60, true);
+            }
+            if ((unit.length() == 2 && unit.at(1).toLatin1() == 'o') ||
+                matchesIgnorePlural(unit, QStringLiteral("month")))
+            {
+                return std::make_pair(60 * 60 * 24 * 30, true);
+            }
+        }
+        break;
+        case 'h': {
+            if (unit.length() == 1 ||
+                matchesIgnorePlural(unit, QStringLiteral("hour")))
+            {
+                return std::make_pair(60 * 60, true);
+            }
+        }
+        break;
+        case 'd': {
+            if (unit.length() == 1 ||
+                matchesIgnorePlural(unit, QStringLiteral("day")))
+            {
+                return std::make_pair(60 * 60 * 24, true);
+            }
+        }
+        break;
+        case 'w': {
+            if (unit.length() == 1 ||
+                matchesIgnorePlural(unit, QStringLiteral("week")))
+            {
+                return std::make_pair(60 * 60 * 24 * 7, true);
+            }
+        }
+        break;
+    }
+    return std::make_pair(0, false);
+}
 
 }  // namespace helpers::detail
 using namespace helpers::detail;
