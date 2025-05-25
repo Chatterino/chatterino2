@@ -2,6 +2,8 @@
 
 #include "util/QMagicEnum.hpp"
 
+#include <optional>
+
 namespace chatterino::qmagicenum {
 
 namespace tag {
@@ -13,10 +15,12 @@ struct DisplayName {
 
 namespace customize {
 
+using customize_t = std::optional<std::string_view>;
+
 template <typename E, typename Tag>
-constexpr magic_enum::customize::customize_t enumTaggedData(E /*v*/) noexcept
+constexpr customize_t enumTaggedData(E /*v*/) noexcept
 {
-    return magic_enum::customize::default_tag;
+    return {};
 }
 
 }  // namespace customize
@@ -29,34 +33,17 @@ constexpr auto enumTaggedDataValue() noexcept
     [[maybe_unused]] constexpr auto custom =
         customize::enumTaggedData<E, Tag>(V);
 
-    static_assert(std::is_same_v<std::decay_t<decltype(custom)>,
-                                 magic_enum::customize::customize_t>,
-                  "qmagicenum::customize requires magic_enum::customize_t "
-                  "return value type.");
-
-    if constexpr (custom.first ==
-                  magic_enum::customize::detail::customize_tag::custom_tag)
+    if constexpr (custom.has_value())
     {
-        constexpr auto name = custom.second;
+        constexpr auto name = *custom;
         static_assert(!name.empty(),
                       "qmagicenum::customize must return a non-empty string.");
         return magic_enum::detail::static_str<name.size()>{name};
     }
-    else if constexpr (custom.first == magic_enum::customize::detail::
-                                           customize_tag::invalid_tag)
-    {
-        return magic_enum::detail::static_str<0>{};
-    }
-    else if constexpr (custom.first == magic_enum::customize::detail::
-                                           customize_tag::default_tag)
+    else
     {
         // Fallback to magic_enum::enum_name
         return magic_enum::detail::enum_name_v<E, V>;
-    }
-    else
-    {
-        static_assert(magic_enum::detail::always_false_v<E>,
-                      "qmagicenum::customize implementation invalid.");
     }
 }
 

@@ -777,7 +777,7 @@ constexpr magic_enum::customize::customize_t
 }
 
 template <>
-constexpr magic_enum::customize::customize_t
+constexpr chatterino::qmagicenum::customize::customize_t
     chatterino::qmagicenum::customize::enumTaggedData<
         chatterino::TabStyle, chatterino::qmagicenum::tag::DisplayName>(
         chatterino::TabStyle value) noexcept
@@ -789,6 +789,6 @@ constexpr magic_enum::customize::customize_t
             return "Normal (default)";
 
         default:
-            return magic_enum::customize::default_tag;
+            return {};
     }
 }

@@ -107,7 +107,7 @@ constexpr magic_enum::customize::customize_t
 }
 
 template <>
-constexpr magic_enum::customize::customize_t
+constexpr chatterino::qmagicenum::customize::customize_t
     chatterino::qmagicenum::customize::enumTaggedData<
         MyCustom, qmagicenum::tag::DisplayName>(MyCustom value) noexcept
 {
@@ -117,7 +117,7 @@ constexpr magic_enum::customize::customize_t
             return "First (Display Name)";
 
         default:
-            return magic_enum::customize::default_tag;
+            return {};
     }
 }
 
