@@ -20,9 +20,10 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutHelper.hpp"
+#include "widgets/buttons/LabelButton.hpp"
+#include "widgets/buttons/PixmapButton.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/CommonTexts.hpp"
-#include "widgets/helper/EffectLabel.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
@@ -296,13 +297,13 @@ void SplitHeader::initializeLayout()
             w->setScaleIndependentSize(8, 4);
         }),
         // mode
-        this->modeButton_ = makeWidget<EffectLabel>([&](auto w) {
+        this->modeButton_ = makeWidget<LabelButton>([&](auto w) {
             w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
             w->hide();
             w->setMenu(this->createChatModeMenu());
         }),
         // moderator
-        this->moderationButton_ = makeWidget<Button>([&](auto w) {
+        this->moderationButton_ = makeWidget<PixmapButton>([&](auto w) {
             QObject::connect(
                 w, &Button::clicked, this,
                 [this, w](Qt::MouseButton button) mutable {
@@ -323,7 +324,9 @@ void SplitHeader::initializeLayout()
 
                                 this->split_->setModerationMode(
                                     !moderationMode);
-                                w->setDim(Button::Dim(moderationMode));
+                                w->setDim(moderationMode
+                                              ? DimButton::Dim::Some
+                                              : DimButton::Dim::None);
                             }
                             break;
 
@@ -337,22 +340,22 @@ void SplitHeader::initializeLayout()
                 });
         }),
         // chatter list
-        this->chattersButton_ = makeWidget<Button>([&](auto w) {
+        this->chattersButton_ = makeWidget<PixmapButton>([&](auto w) {
             QObject::connect(w, &Button::leftClicked, this, [this]() {
                 this->split_->showChatterList();
             });
         }),
         // dropdown
-        this->dropdownButton_ = makeWidget<Button>([&](auto w) {
+        this->dropdownButton_ = makeWidget<PixmapButton>([&](auto w) {
             /// XXX: this never gets disconnected
             QObject::connect(w, &Button::leftMousePress, this, [this] {
                 this->dropdownButton_->setMenu(this->createMainMenu());
             });
         }),
         // add split
-        this->addButton_ = makeWidget<Button>([&](auto w) {
+        this->addButton_ = makeWidget<PixmapButton>([&](auto w) {
             w->setPixmap(getResources().buttons.addSplitDark);
-            w->setEnableMargin(false);
+            w->setMarginEnabled(false);
 
             QObject::connect(w, &Button::leftClicked, this, [this]() {
                 this->split_->addSibling();
@@ -725,7 +728,7 @@ void SplitHeader::updateRoomModes()
     if (auto *twitchChannel =
             dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
     {
-        this->modeButton_->setEnable(twitchChannel->hasModRights());
+        this->modeButton_->setEnabled(twitchChannel->hasModRights());
 
         QString text;
         {
@@ -746,7 +749,7 @@ void SplitHeader::updateRoomModes()
 
         if (!text.isEmpty())
         {
-            this->modeButton_->getLabel().setText(text);
+            this->modeButton_->setText(text);
             this->modeButton_->show();
         }
         else

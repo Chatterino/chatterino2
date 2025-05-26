@@ -8,7 +8,7 @@
 namespace chatterino {
 
 namespace completion {
-    class Source;
+class Source;
 }  // namespace completion
 
 /// @brief Represents the kind of completion occurring

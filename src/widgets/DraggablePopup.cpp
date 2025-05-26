@@ -2,7 +2,7 @@
 
 #include "singletons/Resources.hpp"
 #include "singletons/Theme.hpp"
-#include "widgets/helper/Button.hpp"
+#include "widgets/buttons/PixmapButton.hpp"
 
 #include <QMouseEvent>
 
@@ -13,23 +13,23 @@ namespace chatterino {
 namespace {
 
 #ifdef Q_OS_LINUX
-    FlagsEnum<BaseWindow::Flags> popupFlags{
-        BaseWindow::Dialog,
-        BaseWindow::EnableCustomFrame,
-    };
-    FlagsEnum<BaseWindow::Flags> popupFlagsCloseAutomatically{
-        BaseWindow::Dialog,
-        BaseWindow::EnableCustomFrame,
-    };
+FlagsEnum<BaseWindow::Flags> popupFlags{
+    BaseWindow::Dialog,
+    BaseWindow::EnableCustomFrame,
+};
+FlagsEnum<BaseWindow::Flags> popupFlagsCloseAutomatically{
+    BaseWindow::Dialog,
+    BaseWindow::EnableCustomFrame,
+};
 #else
-    FlagsEnum<BaseWindow::Flags> popupFlags{
-        BaseWindow::EnableCustomFrame,
-    };
-    FlagsEnum<BaseWindow::Flags> popupFlagsCloseAutomatically{
-        BaseWindow::EnableCustomFrame,
-        BaseWindow::Frameless,
-        BaseWindow::FramelessDraggable,
-    };
+FlagsEnum<BaseWindow::Flags> popupFlags{
+    BaseWindow::EnableCustomFrame,
+};
+FlagsEnum<BaseWindow::Flags> popupFlagsCloseAutomatically{
+    BaseWindow::EnableCustomFrame,
+    BaseWindow::Frameless,
+    BaseWindow::FramelessDraggable,
+};
 #endif
 
 }  // namespace
@@ -119,7 +119,7 @@ void DraggablePopup::togglePinned()
 }
 Button *DraggablePopup::createPinButton()
 {
-    this->pinButton_ = new Button(this);
+    this->pinButton_ = new PixmapButton(this);
     this->pinButton_->setPixmap(getTheme()->buttons.pin);
     this->pinButton_->setScaleIndependentSize(18, 18);
     this->pinButton_->setToolTip("Pin Window");

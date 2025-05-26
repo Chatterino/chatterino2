@@ -28,9 +28,9 @@ struct BasicPubSubConfig : public websocketpp::config::asio_tls_client {
 };
 
 namespace liveupdates {
-    using WebsocketClient = websocketpp::client<chatterino::BasicPubSubConfig>;
-    using WebsocketHandle = websocketpp::connection_hdl;
-    using WebsocketErrorCode = websocketpp::lib::error_code;
+using WebsocketClient = websocketpp::client<chatterino::BasicPubSubConfig>;
+using WebsocketHandle = websocketpp::connection_hdl;
+using WebsocketErrorCode = websocketpp::lib::error_code;
 }  // namespace liveupdates
 
 }  // namespace chatterino

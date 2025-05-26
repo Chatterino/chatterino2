@@ -1,12 +1,12 @@
-#include "util/InitUpdateButton.hpp"
+#include "widgets/buttons/InitUpdateButton.hpp"
 
 #include "Application.hpp"
+#include "widgets/buttons/PixmapButton.hpp"
 #include "widgets/dialogs/UpdateDialog.hpp"
-#include "widgets/helper/Button.hpp"
 
 namespace chatterino {
 
-void initUpdateButton(Button &button,
+void initUpdateButton(PixmapButton &button,
                       pajlada::Signals::SignalHolder &signalHolder)
 {
     button.hide();

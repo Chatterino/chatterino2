@@ -26,20 +26,20 @@ using namespace literals;
 
 namespace {
 
-    // Computes the bounding box for the given vector of images
-    QSizeF getBoundingBoxSize(const std::vector<ImagePtr> &images)
+// Computes the bounding box for the given vector of images
+QSizeF getBoundingBoxSize(const std::vector<ImagePtr> &images)
+{
+    qreal width = 0;
+    qreal height = 0;
+    for (const auto &img : images)
     {
-        qreal width = 0;
-        qreal height = 0;
-        for (const auto &img : images)
-        {
-            QSizeF s = img->size();
-            width = std::max(width, s.width());
-            height = std::max(height, s.height());
-        }
-
-        return {width, height};
+        QSizeF s = img->size();
+        width = std::max(width, s.width());
+        height = std::max(height, s.height());
     }
+
+    return {width, height};
+}
 
 }  // namespace
 

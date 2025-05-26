@@ -11,7 +11,7 @@ namespace chatterino {
 
 namespace {
 
-    const auto payload = "chatterino/" + CHATTERINO_VERSION;
+const auto payload = "chatterino/" + CHATTERINO_VERSION;
 
 }  // namespace
 

@@ -10,13 +10,13 @@
 namespace chatterino {
 
 namespace seventv::eventapi {
-    struct Dispatch;
-    struct EmoteAddDispatch;
-    struct EmoteUpdateDispatch;
-    struct EmoteRemoveDispatch;
-    struct UserConnectionUpdateDispatch;
-    struct CosmeticCreateDispatch;
-    struct EntitlementCreateDeleteDispatch;
+struct Dispatch;
+struct EmoteAddDispatch;
+struct EmoteUpdateDispatch;
+struct EmoteRemoveDispatch;
+struct UserConnectionUpdateDispatch;
+struct CosmeticCreateDispatch;
+struct EntitlementCreateDeleteDispatch;
 }  // namespace seventv::eventapi
 
 class SeventvBadges;

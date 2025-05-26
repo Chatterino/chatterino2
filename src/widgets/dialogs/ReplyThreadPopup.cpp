@@ -11,7 +11,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Settings.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/helper/Button.hpp"
+#include "widgets/buttons/Button.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/InvisibleSizeGrip.hpp"
 #include "widgets/Scrollbar.hpp"
