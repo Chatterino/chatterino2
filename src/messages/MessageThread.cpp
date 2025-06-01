@@ -40,7 +40,7 @@ void MessageThread::addToThread(const std::weak_ptr<const Message> &message)
 size_t MessageThread::liveCount() const
 {
     size_t count = 0;
-    for (auto reply : this->replies_)
+    for (const auto &reply : this->replies_)
     {
         if (!reply.expired())
         {
@@ -55,7 +55,7 @@ size_t MessageThread::liveCount(
     const std::shared_ptr<const Message> &exclude) const
 {
     size_t count = 0;
-    for (auto reply : this->replies_)
+    for (const auto &reply : this->replies_)
     {
         if (!reply.expired() && reply.lock() != exclude)
         {
