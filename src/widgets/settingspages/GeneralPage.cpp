@@ -954,7 +954,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         QString newPath = getApp()->getPaths().cacheDirectory();
 
         QString pathShortened = "Cache saved at <a href=\"file:///" + newPath +
-                                "\"><span style=\"color: white;\">" +
+                                R"("><span style="color: white;">)" +
                                 shortenString(newPath, 50) + "</span></a>";
         cachePathLabel->setText(pathShortened);
         cachePathLabel->setToolTip(newPath);
