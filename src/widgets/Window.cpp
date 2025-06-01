@@ -438,7 +438,7 @@ void Window::addShortcuts()
              }
              else
              {
-                 return "Invalid popup target. Use \"split\" or \"window\".";
+                 return R"(Invalid popup target. Use "split" or "window".)";
              }
              return "";
          }},

@@ -91,7 +91,7 @@ ModerationPage::ModerationPage()
 
                 QString pathShortened =
                     "Logs are saved at <a href=\"file:///" + pathOriginal +
-                    "\"><span style=\"color: white;\">" +
+                    R"("><span style="color: white;">)" +
                     shortenString(pathOriginal, 50) + "</span></a>";
 
                 logsPathLabel->setText(pathShortened);
