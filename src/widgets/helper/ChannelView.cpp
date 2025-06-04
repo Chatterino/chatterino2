@@ -3013,7 +3013,11 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         }
         break;
         case Link::ReplyToMessage: {
-            this->setInputReply(layout->getMessagePtr());
+            if (layout->getMessagePtr()->isReplyable() !=
+                Message::ReplyStatus::NotReplyable)
+            {
+                this->setInputReply(layout->getMessagePtr());
+            }
         }
         break;
         case Link::ViewThread: {
