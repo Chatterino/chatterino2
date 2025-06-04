@@ -15,7 +15,7 @@
 - Minor: The JSON selector in the upload response can now query arrays using their indices like `foo.0`. (#6193)
 - Minor: Made nicknames searchable in the Settings dialog search bar. (#5886)
 - Minor: Added hotkey Action for opening account selector. (#6192)
-- Minor: Automatic streamer mode detection now works from Flatpak. (#6249)
+- Minor: Automatic streamer mode detection now works from Flatpak. (#6250)
 - Bugfix: Don't create native messaging manifest file if browser directory doesn't exist. (#6116)
 - Bugfix: Fixed scrolling now working on inputs in the settings. (#6128)
 - Bugfix: Make reply-cancel button less coarse-grained. (#6106)
